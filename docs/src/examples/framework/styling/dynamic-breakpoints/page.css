@@ -1,0 +1,19 @@
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px;
+  padding: var(--spacing);
+  font-weight: var(--bold);
+  border: var(--border);
+  box-shadow: var(--raised-shadow);
+  border-radius: var(--border-radius);
+  font-size: var(--large);
+}
+
+.card:hover {
+  cursor: pointer;
+  background-color: var(--standard-5););
+  color: var(--primary-text-color);
+}

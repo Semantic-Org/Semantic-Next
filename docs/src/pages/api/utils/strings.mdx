@@ -260,4 +260,31 @@ console.log(tokenize("Hello World!")); // "hello-world"
 console.log(tokenize("User's Name_123")); // "users-name-123"
 ```
 
-These regular expression utilities provide helpful tools for working with strings and patterns in JavaScript, enhancing string manipulation capabilities and security in web applications.
+### escapeHTML
+
+```javascript
+function escapeHTML(string)
+```
+
+Escapes HTML special characters in a string.
+
+#### Parameters
+
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to escape |
+
+#### Returns
+
+A new string with HTML special characters escaped.
+
+#### Example
+
+```javascript
+import { escapeHTML } from '@semantic-ui/utils';
+
+const str = '<script>alert("XSS")</script>';
+console.log(escapeHTML(str)); // "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;"
+```
+
+These string utilities provide helpful tools for working with strings and text manipulation in JavaScript, enhancing string processing capabilities and security in web applications.

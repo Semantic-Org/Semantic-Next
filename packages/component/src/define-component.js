@@ -99,6 +99,9 @@ export const defineComponent = ({
         defaultSettings,
       });
 
+      static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
+
+
       defaultSettings = {};
 
       constructor() {
@@ -151,7 +154,7 @@ export const defineComponent = ({
           }
           // make this easier to access in dom
           this.component = this.template.instance;
-          this.dataContext = this.template.data;
+          this.dataContext = this.template.getDataContext();
         }
         super.willUpdate();
       }

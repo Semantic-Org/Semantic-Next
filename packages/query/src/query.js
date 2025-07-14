@@ -356,20 +356,20 @@ export class Query {
     if (isString(selector)) {
       if (this.options.pierceShadow) {
         // Use deep query to find targets across shadow boundaries
-        targets = Array.from(this).flatMap(el => 
-          this.querySelectorAllDeep(el, selector, false)
-        );
-      } else {
-        // Use standard query within each element
-        targets = Array.from(this).flatMap(el => 
-          Array.from(el.querySelectorAll(selector))
-        );
+        targets = Array.from(this).flatMap(el => this.querySelectorAllDeep(el, selector, false));
       }
-    } else if (selector instanceof Query) {
+      else {
+        // Use standard query within each element
+        targets = Array.from(this).flatMap(el => Array.from(el.querySelectorAll(selector)));
+      }
+    }
+    else if (selector instanceof Query) {
       targets = selector.get();
-    } else if (isDOM(selector)) {
+    }
+    else if (isDOM(selector)) {
       targets = [selector];
-    } else {
+    }
+    else {
       return false;
     }
 
@@ -383,7 +383,8 @@ export class Query {
         if (this.options.pierceShadow) {
           // Use deep containment check for Shadow DOM
           return this.containsDeep(el, target);
-        } else {
+        }
+        else {
           // Use native contains method
           return el.contains && el.contains(target);
         }
@@ -422,13 +423,14 @@ export class Query {
 
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
-    
+
     Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
         const matches = this.closestDeep(el, selector, { returnAll });
         if (returnAll) {
           allResults.push(...matches);
-        } else if (matches) {
+        }
+        else if (matches) {
           allResults.push(matches);
         }
       }
@@ -442,11 +444,13 @@ export class Query {
               allResults.push(match);
               // Continue from the parent of the match to find more ancestors
               current = match.parentElement;
-            } else {
+            }
+            else {
               break;
             }
           }
-        } else {
+        }
+        else {
           const match = el.closest(selector);
           if (match) {
             allResults.push(match);
@@ -472,12 +476,13 @@ export class Query {
     const domSelector = isDOM(selector);
     const stringSelector = isString(selector);
     const matches = [];
-    
+
     while (currentElement) {
       if ((domSelector && currentElement === selector) || (stringSelector && currentElement.matches(selector))) {
         if (returnAll) {
           matches.push(currentElement);
-        } else {
+        }
+        else {
           return currentElement;
         }
       }
@@ -491,7 +496,7 @@ export class Query {
         break;
       }
     }
-    
+
     return returnAll ? matches : undefined;
   }
 
@@ -653,32 +658,31 @@ export class Query {
     }
 
     const events = this.getEventArray(eventNames);
-    
+
     Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
       const shouldRemove = events.some(({ eventName, namespaces }) => {
         // Match event name (if specified)
         const eventMatches = !eventName || eventHandler.eventName === eventName;
-        
+
         // Match namespaces (if specified) - any overlap removes the handler
         let namespacesMatch = false;
         if (namespaces && namespaces.length) {
           if (eventHandler.namespaces && eventHandler.namespaces.length) {
             // Check if any target namespace exists in handler's namespaces
-            namespacesMatch = namespaces.some(targetNs => 
-              inArray(targetNs, eventHandler.namespaces)
-            );
+            namespacesMatch = namespaces.some(targetNs => inArray(targetNs, eventHandler.namespaces));
           }
-        } else {
+        }
+        else {
           // No namespaces specified in removal, matches any
           namespacesMatch = true;
         }
-        
+
         // Match handler (if specified)
-        const handlerMatches = !handler || 
-          handler?.eventListener === eventHandler.eventListener ||
-          eventHandler.eventListener === handler ||
-          eventHandler.handler === handler;
-        
+        const handlerMatches = !handler
+          || handler?.eventListener === eventHandler.eventListener
+          || eventHandler.eventListener === handler
+          || eventHandler.handler === handler;
+
         return eventMatches && namespacesMatch && handlerMatches;
       });
 
@@ -692,7 +696,7 @@ export class Query {
       }
       return true; // Keep this handler
     });
-    
+
     return this;
   }
 
@@ -786,9 +790,11 @@ export class Query {
         // Component has shadow DOM, query assigned slot nodes
         const slotSelector = name ? `slot[name="${name}"]` : 'slot:not([name])';
         const slot = el.shadowRoot.querySelector(slotSelector);
-        const nodes = slot.assignedNodes({ flatten: true });
-        if (nodes) {
-          return this.chain(nodes).html();
+        if (slot) {
+          const nodes = slot.assignedNodes({ flatten: true });
+          if (nodes) {
+            return this.chain(nodes).html();
+          }
         }
       }
       else {
@@ -976,16 +982,16 @@ export class Query {
       Object.entries(attribute).forEach(([attr, val]) => {
         this.each((el) => el.setAttribute(attr, val));
       });
+      return this;
     }
     else if (value !== undefined) {
       // Handle single attribute-value pair
-      this.each((el) => el.setAttribute(attribute, value));
+      return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
       const attributes = this.map((el) => el.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
-    return;
   }
 
   removeAttr(attributeName) {
@@ -1072,7 +1078,7 @@ export class Query {
     const defaultOptions = {
       includeMargin: false,
       includePadding: false,
-      includeBorder: false
+      includeBorder: false,
     };
 
     // If first argument is an object (settings), treat it as options for getter
@@ -1084,7 +1090,7 @@ export class Query {
     // Merge with defaults
     const { includeMargin, includePadding, includeBorder } = {
       ...defaultOptions,
-      ...options
+      ...options,
     };
 
     // Setter: ignore options, just set height
@@ -1104,10 +1110,10 @@ export class Query {
       if (el === Query.globalThisProxy) {
         return window.innerHeight;
       }
-      
+
       // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
       let height = el.offsetHeight; // content + padding + border (total height)
-      
+
       // Get computed style for all calculations
       const computedStyle = window.getComputedStyle(el);
       const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
@@ -1118,18 +1124,18 @@ export class Query {
       const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
 
       // Start with total height and subtract what we don't want
-      height -= (borderTop + borderBottom); // Remove border to get content + padding
-      
+      height -= borderTop + borderBottom; // Remove border to get content + padding
+
       if (!includePadding) {
-        height -= (paddingTop + paddingBottom); // Remove padding to get content only
+        height -= paddingTop + paddingBottom; // Remove padding to get content only
       }
-      
+
       if (includeBorder) {
-        height += (borderTop + borderBottom); // Add border back
+        height += borderTop + borderBottom; // Add border back
       }
-      
+
       if (includeMargin) {
-        height += (marginTop + marginBottom); // Add margin
+        height += marginTop + marginBottom; // Add margin
       }
 
       return height;
@@ -1139,11 +1145,10 @@ export class Query {
   }
 
   width(value, options) {
-
     const defaultOptions = {
       includeMargin: false,
       includePadding: false,
-      includeBorder: false
+      includeBorder: false,
     };
 
     // If first argument is an object (settings), treat it as options for getter
@@ -1155,7 +1160,7 @@ export class Query {
     // Get settings
     const { includeMargin, includePadding, includeBorder } = {
       ...defaultOptions,
-      ...options
+      ...options,
     };
 
     // Setter: ignore options, just set width
@@ -1175,10 +1180,10 @@ export class Query {
       if (el === Query.globalThisProxy) {
         return window.innerWidth;
       }
-      
+
       // box-sizing agnostic: measure actual rendered dimensions, not CSS interpretations
       let width = el.offsetWidth; // content + padding + border (total width)
-      
+
       // Get computed style for all calculations
       const computedStyle = window.getComputedStyle(el);
       const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
@@ -1189,18 +1194,18 @@ export class Query {
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
       // Start with total width and subtract what we don't want
-      width -= (borderLeft + borderRight); // Remove border to get content + padding
-      
+      width -= borderLeft + borderRight; // Remove border to get content + padding
+
       if (!includePadding) {
-        width -= (paddingLeft + paddingRight); // Remove padding to get content only
+        width -= paddingLeft + paddingRight; // Remove padding to get content only
       }
-      
+
       if (includeBorder) {
-        width += (borderLeft + borderRight); // Add border back
+        width += borderLeft + borderRight; // Add border back
       }
-      
+
       if (includeMargin) {
-        width += (marginLeft + marginRight); // Add margin
+        width += marginLeft + marginRight; // Add margin
       }
 
       return width;
@@ -1333,7 +1338,7 @@ export class Query {
 
   naturalWidth() {
     const widths = this.map((el) => {
-      const $clone = $(el).clone();
+      const $clone = this.chain(el.cloneNode(true));
       $clone
         .insertAfter(el)
         .css({
@@ -1351,7 +1356,7 @@ export class Query {
 
   naturalHeight() {
     const height = this.map((el) => {
-      const $clone = $(el).clone();
+      const $clone = this.chain(el).clone();
       $clone
         .insertAfter(el)
         .css({
@@ -1388,7 +1393,6 @@ export class Query {
   // this is the parent element where top/left and offsetTop/left will be relative
   containingParent({ calculate = true } = {}) {
     const parents = this.map((el) => {
-
       // return offset parent as reported by browser
       if (!calculate) {
         return el.offsetParent;
@@ -1416,7 +1420,7 @@ export class Query {
             return current;
           }
           // also creates positioning context
-          if(['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
+          if (['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
             return current;
           }
           // will change will trigger same context
@@ -1468,7 +1472,6 @@ export class Query {
   }
 
   data(key, value) {
-
     // Set data attribute
     if (value !== undefined) {
       return this.each(el => {

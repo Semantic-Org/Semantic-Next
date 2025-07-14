@@ -6,12 +6,9 @@ description: 'How to use reactivity inside of components'
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-This guide focuses primarily on reactivity in the context of components.
-
-> **Signals** Semantic UI uses a signals based approach for reactivity. This works by tracking references to signals and then running a flush which triggers those reactions after their values change. For more information see our dedicated section on [reactivity](/reactivity).
+This guide focuses primarily on reactivity in the context of components, if you want to learn about how reactivity works generally check out the [reactivity package guide](/reactivity).
 
 ## Sources of Reactivity
-
 
 ### Reactive Data
 
@@ -43,7 +40,7 @@ If you want to use or set a variable without triggering reactivity **either a va
 * Lifecycle Callbacks
 * Event & Keyboard Handlers
 
-> **Avoiding Reactivity** You can access reactive values with `peek` to avoid reactivity, and use `Reaction.nonreactive` to control the reactivity of a function.For more information see [controlling reactivity](/reactivity/controls).
+> **Avoiding Reactivity** You can access reactive values with `peek` to avoid reactivity, and use `Reaction.nonreactive` to control the reactivity of a function. For more information see [controlling reactivity](/reactivity/controls).
 
 
 ## Component Reactivity
@@ -54,10 +51,10 @@ Your component's `state` is the internal store of reactivity for your component.
 
 ```javascript
 const defaultState = {
-  counter: 0;
+  counter: 0
 }
 
-const onCreated = ({state, reaction}) {
+const onCreated = ({state, reaction}) => {
   reaction(() => {
     // counter will not update when the value changes below
     console.log(`Count: ${state.counter.get()}`);
@@ -79,10 +76,10 @@ Settings are **reactive inside a `reaction`**
 
 ```javascript
 const defaultSettings = {
-  counter: 0;
+  counter: 0
 }
 
-const onCreated = ({settings, reaction}) {
+const onCreated = ({settings, reaction}) => {
   reaction(() => {
     // counter will not update when the value changes below
     console.log(`Count: ${settings.counter}`);
@@ -92,7 +89,7 @@ const onCreated = ({settings, reaction}) {
 }
 ```
 
-However  **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
+However, **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
 ```html
 Counter is: {counter}
 ```
@@ -159,7 +156,7 @@ const createComponent = ({ findParent }) => {
 
 Template expressions are reactive by default but this might not always be ideal. Template reactivity can be removed by using the `nonreactive` helper
 
-> Learn more about controlling reactivity in the dedicated subsection for [controlling reactivity](reactivity/controls)
+> Learn more about controlling reactivity in the dedicated subsection for [controlling reactivity](/reactivity/controls)
 
 ```html
 <ul>

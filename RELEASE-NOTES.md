@@ -2,19 +2,27 @@
 
 This is a pre-release version and APIs will change quickly. Before `1.0` release all breaking changes will be `minor` releases and features `patch` releases.
 
-`Minor` releases will be released approximately every 2 weeks.
+`Minor` releases will occur approximately every 2 weeks.
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.13.0 - 07.14.2025
->>>>>>> 71436eee (Chore: Remove wip plugins)
 
+## CSS Tokens
+* **Colors** - Color variables like `red-0` -> `red-0` now automatically swap for dark mode. i.e. `red-0` = `red-100` in dark mode.
+* **Colors** - Added new invariant colors that do not change for dark mode, ie. `red-0-invariant` stays dark red.
 
 ### Reactivity
+* **Feature** - Added `signal.derive()` method for creating derived signals that transform a single signal's value. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
+* **Feature** - Added `Signal.computed()` static method for creating computed signals that combine multiple signals. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
 * **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
 * **Feature** - Added new `mutate` helper for mutating a value by a function
 * **Feature** - There is now `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
 * **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
+
+### Component
+* **Bug** - Fix issue where `delegatesFocus` was not working as expected
+* **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component are no longer `composed: true`
 
 ### Query
 * **Feature** - Added namespaced events to `on` and `off`
@@ -26,9 +34,10 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
 * **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
+* **Bug** - `dataContext()` now returns the entire data context including state
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
-
+* **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
 
 ### Docs
 * **Examples** - Improved console log styling for examples
@@ -36,6 +45,18 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ### Testing
 * **Improvement** - Vitest now runs without watch for `npm test`, vitest configs have been added for each package.
+
+### Utils
+* **Breaking** - `prettifyID` has been renamed to `prettifyHash` to better reflect its purpose of converting numeric hash values to alphanumeric strings
+* **Feature** - `prettifyHash` now supports `minLength` and `padChar` options for customizing output format
+* **Feature** - Added `getRandomSeed()` function that uses `crypto.getRandomValues` when available for cryptographically secure random seeds
+* **Feature** - `generateID` now accepts an optional seed parameter for reproducible ID generation
+* **Feature** - `hashCode` now uses the renamed `prettifyHash` internally when `prettify: true` option is set
+* **Feature** - `sortBy` now supports multi-key sorting by accepting an array of keys
+* **Enhancement** - `sortBy` now uses `localeCompare` with `numeric: true` for proper string sorting (e.g., "item10" comes after "item2")
+* **Enhancement** - `sortBy` comparator function now receives key index as fifth parameter for multi-key sorting
+* **Enhancement** - `generateID` now uses `crypto.getRandomValues` via `getRandomSeed()` for better randomness
+* **Bug** - `isBinary` now detects all types of typed arrays including Int8Array, Float32Array, BigInt64Array, etc.
 
 # Version 0.12.4-1
 * **Tailwind** - `@semantic-ui/tailwind` and `tailwindcss-iso` now have bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
@@ -46,7 +67,6 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Tailwind** - Added a plugin for using Tailwind inside Semantic UI components. This can be used alongside the css tokens provided by the css framework, or instead of it. This will scan your component javascript, html and css and attach only the tailwind styles used.
 
 > Note: the tailwind plugin code may be modified if `defineComponent` gets a formal 'Plugin API'. For now you will need to pass in the component to the plugin before defining the component.
-
 
 ```javascript
 import { TailwindPlugin } from '@semantic-ui/tailwind';

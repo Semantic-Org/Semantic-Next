@@ -35,6 +35,41 @@
       "exampleCode": "<ui-input search></ui-input>"
     }
   ],
+  "states": [
+    {
+      "name": "Hover",
+      "attribute": "hover",
+      "description": "be hovered"
+    },
+    {
+      "name": "Focus",
+      "attribute": "focused",
+      "description": "be focused by the keyboard"
+    },
+    {
+      "name": "Active",
+      "attribute": "active",
+      "description": "be activated"
+    },
+    {
+      "name": "Disabled",
+      "attribute": "disabled",
+      "includeAttributeClass": true,
+      "description": "have interactions disabled",
+      "options": [
+        {
+          "name": "Disabled",
+          "value": "disabled",
+          "description": "disable interactions"
+        },
+        {
+          "name": "Clickable Disabled",
+          "value": "clickable-disabled",
+          "description": "allow interactions but appear disabled"
+        }
+      ]
+    }
+  ],
   "variations": [
     {
       "name": "Fluid",

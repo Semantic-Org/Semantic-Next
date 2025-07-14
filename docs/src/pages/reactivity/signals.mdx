@@ -67,4 +67,24 @@ counter.increment(); // Equivalent to counter.set(counter.peek() + 1)
 console.log(counter.get()); // Output: 2
 ```
 
+## Creating Derived Signals
+
+Signals can be transformed and combined to create new reactive values:
+
+```javascript
+const items = new Signal(['apple', 'banana', 'cherry']);
+
+// Transform a single signal with derive()
+const itemCount = items.derive(arr => arr.length);
+
+// Combine multiple signals with computed()
+const shoppingList = Signal.computed(() => 
+  `You have ${itemCount.get()} items: ${items.get().join(', ')}`
+);
+
+console.log(shoppingList.get()); // "You have 3 items: apple, banana, cherry"
+```
+
+> **Learn More** For complete information about derived and computed signals, see the [Dependent Signals](/reactivity/dependent-signals) guide.
+
 > **Advanced Usage** For more configuration options, such as customizing equality checks or value cloning behavior, see the [Signal Options & Configuration](/reactivity/signal-options) guide.

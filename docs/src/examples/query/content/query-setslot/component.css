@@ -1,0 +1,32 @@
+:host {
+  display: block;
+}
+
+.container {
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+::slotted(h3) {
+  margin: 0;
+  padding: var(--padding);
+  background: var(--primary-color);
+  color: white;
+}
+
+.content {
+  padding: var(--padding);
+  background: var(--background);
+}
+
+::slotted(p) {
+  margin: 0;
+}
+
+::slotted(code) {
+  background: var(--standard-10);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}

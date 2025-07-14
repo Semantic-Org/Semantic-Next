@@ -1,0 +1,7 @@
+.counter {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  margin: var(--vertically-spaced);
+  padding: var(--compact-spacing);
+}

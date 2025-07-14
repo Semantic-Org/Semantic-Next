@@ -1,4 +1,3 @@
-import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
@@ -9,15 +8,6 @@ const componentPages = components.map(page => ({
   matchSubPaths: true,
 }));
 
-/* Examples pages are generated dynamically */
-const examples = await getCollection('examples');
-const examplePages = examples
-  .filter(doc => !doc?.data?.hidden)
-  .map(doc => ({
-    ...doc.data,
-    url: `/examples/${doc.slug}`,
-  }));
-
 /* Define sort order for example categories */
 const exampleCategorySortOrder = [
   'Framework',
@@ -25,6 +15,7 @@ const exampleCategorySortOrder = [
   'Templates',
   'Reactivity',
   'Query',
+  'Utils',
 ];
 
 /* Define sort order for subcategories within each category */
@@ -57,46 +48,77 @@ const subCategorySortOrder = {
   ],
   'Reactivity': [
     'Introduction',
-    'Variables',
+    'Signals',
+    'Reactions',
+    'Flushing',
+    'Settings',
     'Helpers',
     'Performance',
     'Controls',
     'Advanced',
   ],
   'Query': [
-    // Add subcategories as they appear
+    'Setup',
+    'Introduction',
+    'Components',
+    'Attributes',
+    'Content',
+    'CSS',
+    'Dimensions',
+    'DOM Manipulation',
+    'DOM Traversal',
+    'Events',
+    'Iterators',
+    'Logical Operators',
+    'Utilities',
   ],
+  'Utils': [
+    'Setup',
+    'Looping',
+    'Arrays',
+    'Objects',
+    'Types',
+    'Strings',
+    'Functions',
+    'Colors',
+    'Browser',
+    'Dates',
+    'Numbers',
+    'Crypto',
+    'Equality',
+    'Cloning',
+    'Errors',
+    'SSR',
+    'Regex',
+  ],
+};
+
+/* Standardized Icons across Subsections for Sidebar Menu */
+export const standardMenuIcons = {
+  'Guides': 'home',
+  'User Guide': 'home',
+  'Templates': 'table',
+  'Framework': 'package',
+  'Components': 'layers',
+  'UI Components': 'layers',
+  'Reactivity': 'cpu',
+  'Query': 'mouse pointer',
+  'Advanced Usage': 'server',
+  'API Reference': 'text file',
+  'Utils': 'tool',
 };
 
 /* Export subcategory sort order for use in navigation.js */
 export { subCategorySortOrder };
 
-/* Dynamically get all unique categories from examples */
-const getExampleCategories = () => {
-  const categories = [...new Set(examplePages.map(example => example.category).filter(Boolean))];
-
-  // Sort categories based on the predefined order using sortBy utility
-  const categoriesWithOrder = categories.map(category => ({
-    name: category,
-    sortIndex: exampleCategorySortOrder.indexOf(category),
-  }));
-
-  const sorted = sortBy(categoriesWithOrder, 'sortIndex');
-
-  return sorted.map(item => item.name);
-};
-
 /* Create dynamic menu entries for examples based on actual categories */
-const exampleCategoryMenus = getExampleCategories().map(category => {
-  // Find the first example in this category
-  const firstExample = examplePages.find(example => example.category === category);
-  const firstExampleUrl = firstExample ? firstExample.url : `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`;
-
+const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
+  const categoryID = category.toLowerCase().replace(/\s+/g, '-');
   return {
-    _id: `examples-${category.toLowerCase().replace(/\s+/g, '-')}`,
+    _id: `examples-${categoryID}`,
     name: category,
-    url: firstExampleUrl, // Link to first example
-    baseURL: `/examples/${category.toLowerCase().replace(/\s+/g, '-')}`, // Keep category path for URL matching
+    url: `/examples/${categoryID}`, // handled by navigation
+    baseURL: `/examples/${categoryID}`,
   };
 });
 
@@ -105,7 +127,6 @@ export const topbarDisplayMenu = [
   {
     /* This is the ids of the submenu in sidebar */
     _ids: ['framework', 'api'],
-
     name: 'Documentation',
     url: '/introduction',
   },
@@ -138,7 +159,7 @@ export const topbarDisplayMenu = [
 export const topbarMenu = [
   {
     _id: 'framework',
-    name: 'User Guide',
+    name: 'Guides',
     url: '/introduction',
   },
   {
@@ -157,12 +178,15 @@ export const topbarMenu = [
     url: '/learn/selection',
     baseURL: '/learn',
   },
-  ...exampleCategoryMenus, /*
+
+  ...exampleCategoryMenus,
+  /*
   {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
-  },*/
+  },
+  */
 ];
 
 /* UI Component Sidebar */
@@ -179,11 +203,7 @@ export const sidebarMenuUI = [
       {
         name: 'Frameworks Usage',
         url: '/usage/framework',
-      }, /*
-      {
-        name: 'Web Components',
-        url: '/usage/web-components'
-      },*/
+      },
     ],
   },
   {
@@ -192,13 +212,6 @@ export const sidebarMenuUI = [
     icon: 'layers',
     pages: componentPages,
   },
-  /*
-  {
-    name: 'Test',
-    url: '/test',
-    icon: 'code',
-  },
-  */
 ];
 
 /* Component Framework Sidebar */
@@ -257,10 +270,6 @@ export const sidebarMenuFramework = [
         name: 'Key Bindings',
         url: '/components/keys',
       },
-      {
-        name: 'Workarounds',
-        url: '/components/workarounds',
-      },
     ],
   },
   {
@@ -312,6 +321,11 @@ export const sidebarMenuFramework = [
         name: 'Signals',
         description: 'Reactive state primitive',
         url: '/reactivity/signals',
+      },
+      {
+        name: 'Dependent Signals',
+        description: 'Derived and computed signals',
+        url: '/reactivity/dependent-signals',
       },
       {
         name: 'Reactions',
@@ -379,8 +393,8 @@ export const sidebarMenuFramework = [
     icon: 'server',
     pages: [
       {
-        name: 'WC Workarounds',
-        url: '/advanced/workarounds',
+        name: 'Common Issues',
+        url: '/advanced/common-issues',
       },
       {
         name: 'Server Side Rendering',

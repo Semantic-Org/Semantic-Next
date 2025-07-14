@@ -1,0 +1,59 @@
+.container {
+  width: 300px;
+  overflow-x: scroll;
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  background: var(--background);
+}
+
+.content {
+  display: flex;
+  padding: var(--padding);
+  gap: 10px;
+}
+
+.item {
+  min-width: 100px;
+  height: 80px;
+  background: var(--accent-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius);
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  
+  button {
+    padding: 8px 16px;
+    border: 1px solid var(--standard-20);
+    border-radius: var(--border-radius);
+    background: var(--background);
+    cursor: pointer;
+    
+    &:hover {
+      background: var(--standard-5);
+    }
+  }
+}
+
+.measurements {
+  background: var(--standard-5);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  
+  p {
+    margin: 5px 0;
+    font-family: monospace;
+    
+    span {
+      font-weight: bold;
+      color: var(--accent-color);
+    }
+  }
+}

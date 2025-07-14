@@ -37,10 +37,4 @@ console.log(currentTime.get()); // Output: updated current date and time
 ```
 
 ### Example
-<PlaygroundExample id="now" direction="horizontal"></PlaygroundExample>
-
-### Notes
-
-- The `now()` method is particularly useful when you need to update a reactive date variable to the current time, such as for timestamps or when refreshing time-based data.
-- Remember that like all Signal modifications, using `now()` will trigger any reactive computations that depend on this variable.
-- The returned Date object represents the time at which `now()` was called, not when it's later accessed.
+<PlaygroundExample id="reactive-now" direction="horizontal"></PlaygroundExample>

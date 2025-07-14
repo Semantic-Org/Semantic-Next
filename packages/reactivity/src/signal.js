@@ -124,6 +124,48 @@ export class Signal {
     });
   }
 
+  // derive a new signal from this signal's value
+  derive(computeFn, options = {}) {
+    const derivedSignal = new Signal(undefined, options);
+
+    // check if signal has been garbage collected
+    // if it has we need to clean up reaction
+    const sourceRef = new WeakRef(this);
+
+    // Create reaction that updates the derived signal
+    const reaction = Reaction.create(() => {
+      const source = sourceRef.deref();
+      if (!source) {
+        reaction.stop(); // Auto-cleanup if source is gone
+        return;
+      }
+      const result = computeFn(source.get());
+      derivedSignal.set(result);
+    });
+
+    // Store reaction reference for potential cleanup
+    derivedSignal._derivedReaction = reaction;
+
+    return derivedSignal;
+  }
+
+  // static method for computing from multiple signals
+  static computed(computeFn, options = {}) {
+    const computedSignal = new Signal(undefined, options);
+
+    // Create reaction that updates the computed signal
+    // No WeakRef needed - computed signal and reaction have same lifecycle
+    const reaction = Reaction.create(() => {
+      const result = computeFn();
+      computedSignal.set(result);
+    });
+
+    // Store reaction reference for potential cleanup
+    computedSignal._computedReaction = reaction;
+
+    return computedSignal;
+  }
+
   peek() {
     return this.maybeClone(this.currentValue);
   }

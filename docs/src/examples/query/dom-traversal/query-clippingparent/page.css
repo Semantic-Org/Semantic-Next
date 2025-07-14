@@ -1,0 +1,23 @@
+.viewport {
+  height: 100px;
+  overflow: hidden;
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  
+  &.highlight {
+    border-color: var(--primary-30);
+    background-color: var(--primary-5);
+  }
+}
+
+.content {
+  height: 200px;
+  padding: var(--spacing);
+}
+
+.target {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  margin-top: 80px;
+}

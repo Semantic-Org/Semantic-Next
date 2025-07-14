@@ -1,0 +1,38 @@
+.container {
+  padding: 20px;
+  margin: 15px 0;
+  background: var(--standard-5);
+  border: 2px solid blue;
+  border-radius: var(--border-radius);
+}
+
+.section {
+  padding: 15px;
+  background: var(--standard-10);
+  border: 2px solid green;
+  border-radius: var(--border-radius);
+}
+
+.content {
+  padding: 10px;
+  background: var(--standard-15);
+  border: 2px solid orange;
+  border-radius: var(--border-radius);
+}
+
+.target {
+  padding: 5px 10px;
+  background: red;
+  color: white;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}

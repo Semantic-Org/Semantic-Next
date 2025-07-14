@@ -14,7 +14,15 @@ import {
   unique,
 } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
-import { sidebarMenuAPI, sidebarMenuFramework, sidebarMenuUI, topbarDisplayMenu, topbarMenu, subCategorySortOrder } from './menus.js';
+import {
+  sidebarMenuAPI,
+  sidebarMenuFramework,
+  sidebarMenuUI,
+  standardMenuIcons,
+  subCategorySortOrder,
+  topbarDisplayMenu,
+  topbarMenu,
+} from './menus.js';
 
 /* Used to sort lessons */
 import semverCompare from 'semver/functions/compare';
@@ -88,6 +96,7 @@ const createExampleMenu = () => {
     if (keys(subcategories).length) {
       // has subcategories
       each(subcategories, (examples, subcategory) => {
+        examples = sortBy(examples, ['sortIndex', 'title']);
         pages.push({
           name: subcategory,
           pages: examples.map(example => ({
@@ -114,37 +123,36 @@ const createExampleMenu = () => {
 };
 export const sidebarMenuExamples = createExampleMenu();
 
-
 /* Create filtered example menus for each category */
-const createFilteredExampleMenu = (categoryFilter) => {
+export const createFilteredExampleMenu = (categoryFilter) => {
   const categorySection = sidebarMenuExamples.find(section => section.name === categoryFilter);
   if (!categorySection || !categorySection.pages) {
     return [];
   }
-  
+
   // If the category has subcategories (pages with nested pages), return those subcategories as top-level sections
   if (categorySection.pages.length > 0 && categorySection.pages[0].pages) {
     const subcategories = categorySection.pages.map(subcategory => ({
       name: subcategory.name,
-      pages: subcategory.pages
+      pages: subcategory.pages,
     }));
-    
+
     // Sort subcategories based on predefined order
     const sortOrder = subCategorySortOrder[categoryFilter] || [];
     const subcategoriesWithOrder = subcategories.map(subcategory => ({
       ...subcategory,
-      sortIndex: sortOrder.indexOf(subcategory.name)
+      sortIndex: sortOrder.indexOf(subcategory.name),
     }));
-    
+
     const sorted = sortBy(subcategoriesWithOrder, 'sortIndex');
-    
+
     return sorted.map(({ sortIndex, ...subcategory }) => subcategory);
   }
-  
+
   // If no subcategories, return the pages directly as a single section
   return [{
     name: categorySection.name,
-    pages: categorySection.pages
+    pages: categorySection.pages,
   }];
 };
 
@@ -233,7 +241,7 @@ const isInSectionMenu = (sectionId, currentPath) => {
       const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
       return exampleSlug === categorySlug;
     })?.category;
-    
+
     if (categoryName) {
       menu = createFilteredExampleMenu(categoryName);
     }
@@ -286,13 +294,23 @@ export const getActiveSidebarSection = (currentPath) => {
   return activeSection;
 };
 
+/* Add standard icons based off nav menu in sidebar */
+export const addStandardIcons = (items) => {
+  return items.map(item => {
+    if (item.label) {
+      item.icon = standardMenuIcons[item.label];
+    }
+    return item;
+  });
+};
+
 /* Gets items for the top-level navigation in sidebar above sidebar items  */
 export const getSidebarNavMenu = (activeSection, currentPath) => {
   if (!activeSection) { return []; }
   currentPath = removeTrailingSlash(currentPath);
 
   if (activeSection._ids) {
-    const items = activeSection._ids
+    let items = activeSection._ids
       .map(id => {
         const section = firstMatch(topbarMenu, m => m._id === id);
         return section
@@ -305,8 +323,11 @@ export const getSidebarNavMenu = (activeSection, currentPath) => {
       })
       .filter(Boolean);
 
-    // Don't show UIMenu if there's only one item
-    return items.length <= 1 ? [] : items;
+    // Only show menu with more than one item
+    if (items.length > 1) {
+      items = addStandardIcons(items);
+      return items;
+    }
   }
 
   if (activeSection._id) {
@@ -352,9 +373,26 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
       const exampleSlug = example.category?.toLowerCase().replace(/\s+/g, '-');
       return exampleSlug === categorySlug;
     })?.category;
-    
+
     if (categoryName) {
       menu = createFilteredExampleMenu(categoryName);
+
+      // Update the URL in topbarMenu to point to the first example
+      const topbarItem = topbarMenu.find(item => item._id === topbarSection);
+      if (topbarItem && menu.length > 0) {
+        const firstSection = menu[0];
+        if (firstSection.pages && firstSection.pages.length > 0) {
+          const firstPage = firstSection.pages[0];
+          if (firstPage.pages && firstPage.pages.length > 0) {
+            // Has subcategories
+            topbarItem.url = firstPage.pages[0].url;
+          }
+          else {
+            // No subcategories
+            topbarItem.url = firstPage.url;
+          }
+        }
+      }
     }
   }
   else if (topbarSection === 'learn') {
@@ -386,9 +424,21 @@ export const getPageTraversalLinks = async ({ url = '' }) => {
   Gets Entire Site Menu Deeply Nested
 */
 export const getSiteMenu = async () => {
-  let menu = await getTopbarMenu({ includeURLS: false });
+  let menu = await getTopbarDisplayMenu({ includeURLS: false });
   await asyncEach(menu, async item => {
-    item.menu = await getSidebarMenu({ topbarSection: item._id });
+    let menu = [];
+    const ids = item._ids || [item._id];
+    await asyncEach(ids, async (id) => {
+      // get all urls that represent this topbar section
+      const menuGroup = await getSidebarMenu({
+        topbarSection: id,
+      });
+      menu = [
+        ...menu,
+        ...menuGroup,
+      ];
+    });
+    item.menu = menu;
   });
   return menu;
 };
@@ -458,13 +508,71 @@ export const getTopbarDisplayMenu = async ({ includeURLS = true } = {}) => {
   Gets In Page Menu
   showing links to each header
 */
-export const getRailMenu = (headings) => {
+export const getRailMenu = (headings, pageTitle = null) => {
   let menu = [];
   let menuGroup;
+
+  if (!headings.length) { return menu; }
 
   const headingLevels = unique(headings.map(heading => heading.depth)).sort();
   const lowestHeadingLevel = headingLevels[0];
 
+  // If first heading is H3+ and we have a page title, inject it as H2 parent
+  if (headings.length > 0 && headings[0].depth > 2 && pageTitle) {
+    // Find consecutive H3+ headings at the start
+    let consecutiveSubheadings = [];
+    let i = 0;
+    while (i < headings.length && headings[i].depth > 2) {
+      consecutiveSubheadings.push(headings[i]);
+      i++;
+    }
+
+    if (consecutiveSubheadings.length > 0) {
+      // Create parent group with page title for the initial subheadings
+      const pageGroup = {
+        id: 'page-title',
+        title: pageTitle,
+        items: consecutiveSubheadings.map(heading => ({
+          id: heading.slug,
+          title: heading.text,
+        })),
+      };
+      menu.push(pageGroup);
+
+      // Process remaining headings with original logic
+      const remainingHeadings = headings.slice(i);
+      if (remainingHeadings.length > 0) {
+        const remainingLevels = unique(remainingHeadings.map(h => h.depth)).sort();
+        const remainingLowestLevel = remainingLevels[0];
+
+        each(remainingHeadings, heading => {
+          if (heading.depth == remainingLowestLevel) {
+            if (menuGroup) {
+              menu.push(menuGroup);
+            }
+            menuGroup = {
+              id: heading.slug,
+              title: heading.text,
+              items: [],
+            };
+          }
+          else if (menuGroup && remainingLevels[1] && heading.depth == remainingLevels[1]) {
+            menuGroup.items.push({
+              id: heading.slug,
+              title: heading.text,
+            });
+          }
+        });
+        if (menuGroup) {
+          menu.push(menuGroup);
+        }
+      }
+
+      return menu.filter(Boolean);
+    }
+  }
+
+  // Original logic for when first heading is H2 or when no page title provided
   each(headings, heading => {
     // new grouping
     if (heading.depth == lowestHeadingLevel) {

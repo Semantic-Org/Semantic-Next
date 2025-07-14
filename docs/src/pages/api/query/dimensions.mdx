@@ -6,6 +6,8 @@ icon: maximize-2
 description: API reference for Query methods related to element dimensions and positioning
 ---
 
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
 The Dimension methods in Query provide tools for getting and setting various dimensional properties of elements, including their size, position, and scroll-related attributes.
 
 ## width
@@ -53,6 +55,9 @@ console.log(width);
 $('#myElement').width(200);
 ```
 
+### Example
+<PlaygroundExample id="query-width" direction="horizontal"></PlaygroundExample>
+
 ## height
 
 Gets or sets the height of elements.
@@ -97,6 +102,9 @@ console.log(height);
 // Set the height of an element
 $('#myElement').height(150);
 ```
+
+### Example
+<PlaygroundExample id="query-height" direction="horizontal"></PlaygroundExample>
 
 ## scrollTop
 
@@ -143,6 +151,9 @@ console.log(scrollPosition);
 $('.scrollable-div').scrollTop(100);
 ```
 
+### Example
+<PlaygroundExample id="query-scrolltop" direction="horizontal"></PlaygroundExample>
+
 ## scrollLeft
 
 Gets or sets the horizontal scroll position of elements.
@@ -187,6 +198,9 @@ console.log(scrollPosition);
 // Set the horizontal scroll position of an element
 $('.scrollable-div').scrollLeft(50);
 ```
+
+### Example
+<PlaygroundExample id="query-scrollleft" direction="horizontal"></PlaygroundExample>
 ## naturalWidth
 
 Gets the natural width of an element, including images and other HTML elements.
@@ -218,6 +232,9 @@ console.log(imageNaturalWidth);
 const tableNaturalWidth = $('table').naturalWidth();
 console.log(tableNaturalWidth);
 ```
+
+### Example
+<PlaygroundExample id="query-naturalwidth" direction="horizontal"></PlaygroundExample>
 ## naturalHeight
 
 Gets the natural height of an element, including images and other HTML elements.
@@ -247,6 +264,9 @@ console.log(imageNaturalHeight);
 const divNaturalHeight = $('div.content').naturalHeight();
 console.log(divNaturalHeight);
 ```
+
+### Example
+<PlaygroundExample id="query-naturalheight" direction="horizontal"></PlaygroundExample>
 
 ## clippingParent
 
@@ -295,6 +315,9 @@ $('.positioned-elements').each((el, index) => {
 ```
 
 > **Clipping Detection** Returns `document.documentElement` when no clipping parent is found. Useful for positioning tooltips, dropdowns, and other overlay elements.
+
+### Example
+<PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
 
 ## containingParent
 
@@ -372,3 +395,6 @@ const $transformContainer = $transformed.containingParent();
 const rect = $transformContainer[0].getBoundingClientRect();
 console.log('Transform container bounds:', rect);
 ```
+
+### Example
+<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>

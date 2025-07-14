@@ -1,0 +1,22 @@
+.item, .missing {
+  padding: 15px;
+  background: var(--standard-10);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+}

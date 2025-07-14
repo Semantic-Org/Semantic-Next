@@ -1,0 +1,29 @@
+.scrollbox {
+  height: 150px;
+  width: 100%;
+  overflow-y: auto;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: 15px 0;
+}
+
+.scrollcontent {
+  padding: 15px;
+  background: var(--standard-5);
+}
+
+.scrollcontent p {
+  margin: 10px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}

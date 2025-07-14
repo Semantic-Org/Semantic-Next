@@ -1,0 +1,27 @@
+.container {
+  padding: 20px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  cursor: pointer;
+  
+  .child {
+    margin: 10px 0;
+    padding: 10px;
+    background: var(--primary-20);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+  }
+}
+
+.output {
+  margin: 20px 0;
+  padding: 15px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-line;
+}

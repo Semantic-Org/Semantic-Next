@@ -1,0 +1,25 @@
+.target {
+  padding: 15px 20px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  font-size: 16px;
+  min-height: 40px;
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.output {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

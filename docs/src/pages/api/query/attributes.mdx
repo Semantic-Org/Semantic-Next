@@ -5,6 +5,7 @@ title: Query - Attributes
 icon: tag
 description: API reference for Query methods related to attribute manipulation
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Attribute methods in Query allow you to get, set, and remove attributes on DOM elements.
 
@@ -65,6 +66,9 @@ $('input').attr({
 });
 ```
 
+### Example
+<PlaygroundExample id="query-attr" direction="horizontal"></PlaygroundExample>
+
 ## removeAttr
 
 Removes an attribute from each element in the set of matched elements.
@@ -84,11 +88,14 @@ $('selector').removeAttr(attributeName)
 ### Returns
 [Query object](/query/basic#the-query-object) (for chaining).
 
-### Example
+### Usage
 ```javascript
 // Remove the 'disabled' attribute from all buttons
 $('button').removeAttr('disabled');
 ```
+
+### Example
+<PlaygroundExample id="query-removeattr" direction="horizontal"></PlaygroundExample>
 
 ## data
 
@@ -171,6 +178,9 @@ console.log(allData); // [{ id: "1", name: "Alice" }, { id: "2", name: "Bob" }]
 $('div').data('active', 'true');
 // Both divs now have data-active="true"
 ```
+
+### Example
+<PlaygroundExample id="query-data" direction="horizontal"></PlaygroundExample>
 
 ### Notes
 

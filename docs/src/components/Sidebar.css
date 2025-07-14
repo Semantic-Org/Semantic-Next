@@ -14,8 +14,28 @@
     }
   }
 
+  html.sidebar-collapsed sidebar,
+  sidebar.collapsed {
+    --sidebar-width: 50px;
+
+    > ui-menu {
+      transition: var(--transition);
+      margin: 46px 10px 0px;
+
+      &::part(item-icon) {
+        font-size: 18px;
+      }
+    }
+
+    ui-menu::part(item-label),
+    nav-menu,
+    .subheader {
+      display: none;
+    }
+  }
+
   sidebar {
-    position: static;
+    position: relative;
     display: flex;
     flex-direction: column;
     background: var(--sidebar-background);
@@ -26,11 +46,32 @@
     border-right: var(--very-subtle-border);
     scrollbar-width: thin;
     overflow: hidden;
+    transition: width 0.3s ease;
+
+    sidebar-toggle {
+      position: absolute;
+      right: 6px;
+      top: 5px;
+
+      &::part(overlay) {
+        background-color: #080B12;
+        box-shadow: 0px 0px 2px rgb(164 182 195 / 30%);
+      }
+    }
+
+    .subheader {
+      font-size: 10px;
+      margin: 20px 0px 0px 14px;
+      text-transform: uppercase;
+      color: var(--white-20);
+    }
 
     ui-menu {
       margin: 1rem 1rem 0rem;
+      --menu-vertical-text-align: left;
     }
     ui-menu::part(item) {
+      white-space: nowrap;
       --menu-item-active-background: #080b12;
       --menu-item-active-color: var(--primary-text-color);
       --menu-item-active-box-shadow: 0px 0px 2px rgb(40 160 255 / 31%);
@@ -38,22 +79,22 @@
     nav-menu {
       display: flex;
       flex-direction: column;
-      height: 100%;
-    }
-    nav-menu::part(search) {
-      margin: 0.5rem 1rem 0rem;
-    }
-    nav-menu::part(menu) {
-      scrollbar-width: thin;
-      display: block;
-      padding: 0rem 1rem;
-      flex-grow: 1;
-    }
-    nav-menu::part(menu) {
-      overflow-y: scroll;
-      border-top: var(--border);
-      margin-top: 1rem !important;
-      padding: 0.5rem 1rem;
+      height: 0px; /* confused on this but it works */
+
+
+      &::part(search) {
+        margin: 0.5rem 1rem 0rem;
+      }
+      &::part(menu) {
+        scrollbar-width: thin;
+        display: block;
+        padding: 0rem 1rem;
+        flex-grow: 1;
+        overflow-y: scroll;
+        border-top: var(--border);
+        margin-top: 1rem !important;
+        padding: 0.5rem 1rem;
+      }
     }
   }
 

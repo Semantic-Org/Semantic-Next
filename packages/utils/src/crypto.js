@@ -1,3 +1,5 @@
+import { isClient, isServer } from './ssr.js';
+
 /*-------------------
       Identity
 --------------------*/
@@ -9,15 +11,24 @@ export const tokenize = (str = '') => {
     .toLowerCase();
 };
 
-export const prettifyID = (num) => {
-  num = parseInt(num, 10);
-  if (num === 0) { return '0'; }
+export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {}) => {
+  numericHash = parseInt(numericHash, 10);
+  if (numericHash === 0) {
+    return minLength > 1 ? padChar.repeat(minLength - 1) + '0' : '0';
+  }
+
   let result = '';
   const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  while (num > 0) {
-    result = chars[num % chars.length] + result;
-    num = Math.floor(num / chars.length);
+  while (numericHash > 0) {
+    result = chars[numericHash % chars.length] + result;
+    numericHash = Math.floor(numericHash / chars.length);
   }
+
+  // Pad if needed
+  if (result.length < minLength) {
+    result = padChar.repeat(minLength - result.length) + result;
+  }
+
   return result;
 };
 
@@ -78,13 +89,25 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
   hash ^= hash >>> 13;
 
   if (prettify) {
-    return prettifyID(hash >>> 0);
+    return prettifyHash(hash >>> 0);
   }
 
   return hash >>> 0;
 }
 
-export const generateID = () => {
-  const num = Math.random() * 1000000000000000;
-  return prettifyID(num);
+export const getRandomSeed = () => {
+  if (crypto?.getRandomValues) {
+    // Browser crypto API
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    return array[0];
+  }
+  else {
+    // Fallback to Math.random for server or unsupported environments
+    return Math.random() * 0xFFFFFFFF;
+  }
+};
+
+export const generateID = (seed = getRandomSeed()) => {
+  return prettifyHash(seed);
 };

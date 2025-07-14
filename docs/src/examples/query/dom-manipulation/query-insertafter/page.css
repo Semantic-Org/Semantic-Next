@@ -1,0 +1,50 @@
+.container {
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  margin: 20px 0;
+  background: var(--background);
+}
+
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--primary-color);
+  color: white;
+  border-radius: var(--border-radius);
+  text-align: center;
+  
+  &.inserted {
+    background: var(--success-color);
+    animation: slideIn 0.3s ease-out;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  
+  button {
+    padding: 8px 16px;
+    border: 1px solid var(--standard-20);
+    border-radius: var(--border-radius);
+    background: var(--background);
+    cursor: pointer;
+    
+    &:hover {
+      background: var(--standard-5);
+    }
+  }
+}

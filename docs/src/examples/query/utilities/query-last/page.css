@@ -1,0 +1,24 @@
+.items {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.item {
+  padding: 15px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  
+  &.last {
+    background: var(--standard-15);
+    box-shadow: var(--subtle-shadow);
+  }
+}
+
+.result {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+}

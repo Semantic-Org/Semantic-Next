@@ -7,14 +7,14 @@ description: An overview of component features
 ## Creating UI Components
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic UI components are standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with an integrated authoring framework that simplifies common UI development tasks like managing state, rendering templates, handling events, and styling.
+Semantic UI components are standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with an integrated authoring framework. The framework simplifies common UI development tasks like managing state, rendering templates, handling events, and styling.
 
 > **Getting Started:** Before diving into the technical guides, consider the [interactive tutorial](/learn/selection) for a hands-on introduction to Semantic UI features.
 
 The component framework includes:
 
-*   **[Declarative Templating](/templates):** A reactive AST-based templating system for rendering component views using [expressions](/templates/expressions), [conditionals](/templates/conditionals), [loops](/templates/loops), [subtemplates](/templates/subtemplates), [snippets](/templates/snippets), and [helpers](/templates/helpers). Integrates with a [Signals-based reactivity system](/reactivity) for efficient DOM updates and supports component composition similar to other modern frameworks.
-*   **[Reactivity System](/reactivity):** A performant [Signals](/reactivity/variables)-based system for managing component [state](/components/state) and derived computations, including convenient [mutation helpers](/reactivity/mutation-helpers).
+*   **[Declarative Templating](/templates):** AST-based templating system for rendering component views using [expressions](/templates/expressions), [conditionals](/templates/conditionals), [loops](/templates/loops), [subtemplates](/templates/subtemplates), [snippets](/templates/snippets), and [helpers](/templates/helpers). Integrates with a [Signals-based reactivity system](/reactivity) for efficient DOM updates and supports component composition similar to other modern frameworks.
+*   **[Reactivity System](/reactivity):** [Signals](/reactivity/variables)-based system for managing component [state](/components/state) and derived computations, including convenient [mutation helpers](/reactivity/mutation-helpers).
 *   **[Scoped Styling](/components/styling):** An integrated system using CSS variables and layers, leveraging [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) encapsulation for reliable styling.
 *   **[DOM Querying](/query):** A chainable DOM querying library ([`@semantic-ui/query`](/query)) specifically designed to work effectively with [Shadow DOM](/query/shadow-dom) boundaries.
 *   **[Event Handling](/components/events):** A declarative system for binding event listeners within the component, including support for custom events and event delegation.
@@ -22,13 +22,13 @@ The component framework includes:
 *   **[Lifecycle Management](/components/lifecycle):** Enhanced lifecycle callbacks providing granular control during component initialization, rendering (client and server-side), and destruction.
 
 ### Minimal Example
-The following example demonstrates the basic structure for defining a component using [`defineComponent`](/components/create).
+The following example shows a complete component definition with state, template, and events using [`defineComponent`](/components/create).
 
 <PlaygroundExample id="minimal"></PlaygroundExample>
 
 ### Developer Experience
 
-Web components can be notoriously difficult to integrate using vanilla js. Semantic UI seeks to improve the experience working with web standards by providing all the modern tooling that developers expect to build things quickly, but **without a compilation step** or **developer magic**.
+Web components can be difficult to integrate using vanilla js. Semantic UI improves the experience working with web standards by providing modern tooling that developers expect, **without a compilation step** or build complexity.
 
 *   Reducing boilerplate for common tasks like [state management](/components/state) and [event handling](/components/events).
 *   Providing a consistent API across different features ([templating](/templates), [reactivity](/reactivity), [querying](/query)).
@@ -81,9 +81,7 @@ Components utilize an [integrated styling system](/components/styling) leveragin
 
 ```css
 
-/* expose theming variables for your component
-   inherited from design system
-*/
+/* theming variables inherited from design system */
 :host {
   --counter-padding: var(--padding);
   --counter-value-color: var(--primary-text-color);

@@ -1,0 +1,35 @@
+.items {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.item {
+  padding: 15px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  text-align: center;
+  transition: var(--transition);
+  
+  &.processed {
+    background: var(--standard-15);
+    box-shadow: var(--subtle-shadow);
+  }
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.output {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  white-space: pre-line;
+}

@@ -1,0 +1,25 @@
+.items {
+  margin: 15px 0;
+}
+
+.item {
+  padding: 10px;
+  margin: 5px 0;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  
+  &.remove {
+    background: var(--standard-15);
+    opacity: 0.7;
+  }
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+  
+  span {
+    font-weight: bold;
+  }
+}

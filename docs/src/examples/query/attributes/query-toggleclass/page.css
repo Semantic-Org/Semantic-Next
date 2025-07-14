@@ -1,0 +1,48 @@
+.box {
+  width: 200px;
+  height: 100px;
+  background: var(--standard-10);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  display: flex;
+  font-size: 16px;
+  color: var(--standard-60);
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  transition: var(--transition);
+  
+  &.primary {
+    background: var(--primary-color);
+    color: white;
+  }
+  
+  &.large {
+    width: 300px;
+    height: 150px;
+  }
+  
+  &.round {
+    border-radius: 50px;
+  }
+}
+
+.controls {
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
+}
+
+.status {
+  margin: 20px 0;
+  padding: 10px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  
+  .classes {
+    color: var(--primary-color);
+    font-weight: bold;
+  }
+}

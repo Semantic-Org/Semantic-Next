@@ -1,0 +1,18 @@
+.list {
+  display: flex;
+  gap: var(--compact-spacing);
+  margin: var(--vertically-spaced);
+}
+
+.item {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  
+  &.target {
+    background-color: var(--primary-5);
+    border-color: var(--primary-30);
+    font-weight: bold;
+  }
+}

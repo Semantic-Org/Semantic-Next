@@ -1,0 +1,43 @@
+.parent {
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  margin: 20px 0;
+  background: var(--background);
+}
+
+.child {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  
+  &.item {
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  &.special {
+    background: var(--warning-5);
+    color: var(--warning-color);
+    font-weight: bold;
+  }
+  
+  &.highlighted {
+    background: var(--primary-5);
+    color: var(--primary-color);
+    transform: scale(1.02);
+  }
+}
+
+.output {
+  background: var(--standard-5);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  margin: 20px 0;
+  
+  .count {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+}

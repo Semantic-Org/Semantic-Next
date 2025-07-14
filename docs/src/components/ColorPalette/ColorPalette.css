@@ -1,0 +1,144 @@
+:host {
+  --swatch-spacing: 5px;
+}
+
+.palette {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing);
+  container: component / inline-size;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing);
+  
+  h2 {
+    color: var(--header-color);
+    font-size: var(--h2);
+    margin: 0 0 var(--spacing) 0;
+  }
+  
+  p {
+    color: var(--muted-text-color);
+    margin: 0;
+  }
+}
+
+.group {
+  margin-bottom: var(--swatch-spacing);
+  
+  .name {
+    width: 90px; /* widest text */
+    color: var(--header-color);
+    text-transform: capitalize;
+    margin-right: 5px;
+    text-align: right;
+
+    @container (max-width: 600px)  {
+      grid-column: 6;
+      text-align: center;
+    }
+  }
+}
+
+.colors {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  align-items: center;
+  /*gap: 1rem;*/
+  gap: var(--swatch-spacing);
+  
+  @container (max-width: 600px) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  
+  @container (max-width: 400px) {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.swatch {
+  aspect-ratio: 1;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+  overflow: hidden;
+  padding: var(--compact-spacing);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.5s ease;
+  /*
+  box-shadow: 0px 0px 0px 1px inset var(--white-10);
+  background-image: var(--angled-gradient);
+  */
+  
+  &:hover {
+    z-index: 2;
+    transform: scale(1.1);
+    box-shadow: var(--floating-shadow);
+    border-color: var(--selected-border-color);
+  }
+  
+  &.copied {
+    transform: scale(1.05);
+  }
+
+  .shade {
+    font-weight: var(--bold);
+    font-size: var(--tiny);
+    text-align: center;
+    color: var(--overlay-color);
+  }
+
+  .info {
+    align-self: flex-end;
+    text-align: right;
+    color: var(--overlay-color);
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: var(--mini);
+
+    .value {
+      opacity: 0.8;
+      word-break: break-all;
+    }
+  }
+
+  .copy {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0px 0px -25px;
+    animation: copyPulse 0.3s ease-out;
+
+    &::part(label) {
+      background-color: var(--green);
+      color: var(--white);
+      box-shadow: var(--floating-shadow);
+    }
+  }
+}
+
+@keyframes copyPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Hide color info on small swatches */
+@container component (max-width: 400px) {
+  .shade {
+    display: none;
+  }
+}

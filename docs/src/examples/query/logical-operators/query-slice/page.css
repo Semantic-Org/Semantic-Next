@@ -1,0 +1,26 @@
+.items {
+  margin: 15px 0;
+}
+
+.item {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 15px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.sliced {
+  background: var(--standard-15) !important;
+  font-weight: bold;
+}
+
+p {
+  margin: 8px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}

@@ -1,0 +1,65 @@
+.original {
+  padding: var(--padding);
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  background: var(--primary-color);
+  color: white;
+  margin: 20px 0;
+  
+  h3 {
+    margin: 0 0 10px 0;
+  }
+  
+  p {
+    margin: 10px 0;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  
+  button {
+    padding: 8px 16px;
+    border: 1px solid var(--standard-20);
+    border-radius: var(--border-radius);
+    background: var(--background);
+    cursor: pointer;
+    
+    &:hover {
+      background: var(--standard-5);
+    }
+  }
+}
+
+.clones {
+  min-height: 100px;
+  border: 2px dashed var(--standard-20);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  background: var(--standard-5);
+  
+  .original {
+    border-color: var(--success-color);
+    background: var(--success-color);
+    margin: 10px 0;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}

@@ -497,4 +497,153 @@ describe('Component', () => {
       expect(TestComponent.template.createComponent).toBe(createComponentWithSignal);
     });
   });
+  /*
+    Unclear expected functionality here so removing tests for now
+
+  // Test lifecycle events behavior
+  describe('Lifecycle Events', () => {
+    it('should ensure each lifecycle event only fires once and does not bubble from nested components', async () => {
+      // Track all lifecycle events for parent and child
+      const parentCreated = vi.fn();
+      const parentRendered = vi.fn();
+      const parentUpdated = vi.fn();
+      const childCreated = vi.fn();
+      const childRendered = vi.fn();
+      const childUpdated = vi.fn();
+
+      // Track if parent receives any child lifecycle events (should be 0)
+      const parentCreatedHandler = vi.fn();
+      const parentRenderedHandler = vi.fn();
+      const parentUpdatedHandler = vi.fn();
+      const parentDestroyedHandler = vi.fn();
+
+      // Define child component
+      defineComponent({
+        tagName: 'test-lifecycle-child-bubble',
+        template: '<div class="child">Child Content</div>',
+        onCreated: childCreated,
+        onRendered: childRendered,
+        onUpdated: childUpdated
+      });
+
+      // Define parent component with nested child
+      defineComponent({
+        tagName: 'test-lifecycle-parent-bubble',
+        template: `
+          <div class="parent">
+            Parent Content
+            <test-lifecycle-child-bubble></test-lifecycle-child-bubble>
+          </div>
+        `,
+        onCreated: parentCreated,
+        onRendered: parentRendered,
+        onUpdated: parentUpdated
+      });
+
+      // Create parent element and add lifecycle event listeners
+      const parentElement = document.createElement('test-lifecycle-parent-bubble');
+      parentElement.addEventListener('created', parentCreatedHandler);
+      parentElement.addEventListener('rendered', parentRenderedHandler);
+      parentElement.addEventListener('updated', parentUpdatedHandler);
+      parentElement.addEventListener('destroyed', parentDestroyedHandler);
+
+      // Add to DOM to trigger creation and rendering
+      document.body.appendChild(parentElement);
+
+      // Wait for lifecycle events to fire
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Verify each component's lifecycle callbacks fired exactly once
+      expect(parentCreated).toHaveBeenCalledTimes(1);
+      expect(parentRendered).toHaveBeenCalledTimes(1);
+      expect(childCreated).toHaveBeenCalledTimes(1);
+      expect(childRendered).toHaveBeenCalledTimes(1);
+
+      // CRITICAL: Verify parent event listeners only received parent's own events
+      expect(parentCreatedHandler).toHaveBeenCalledTimes(1);
+      expect(parentRenderedHandler).toHaveBeenCalledTimes(1);
+      expect(parentUpdatedHandler).toHaveBeenCalledTimes(0); // No updates yet
+      expect(parentDestroyedHandler).toHaveBeenCalledTimes(0); // Not destroyed yet
+
+      // Clean up
+      document.body.removeChild(parentElement);
+    });
+
+    it('should ensure lifecycle events do not bubble when using Query library event binding', async () => {
+      // Import Query library for testing
+      const { $ } = await import('@semantic-ui/query');
+
+      // Track lifecycle events
+      const parentCreated = vi.fn();
+      const parentRendered = vi.fn();
+      const childCreated = vi.fn();
+      const childRendered = vi.fn();
+
+      // Track Query library event handlers
+      const queryCreatedHandler = vi.fn();
+      const queryRenderedHandler = vi.fn();
+      const queryUpdatedHandler = vi.fn();
+      const queryDestroyedHandler = vi.fn();
+
+      // Define child component
+      defineComponent({
+        tagName: 'test-query-child-component',
+        template: '<div class="child">Query Child Content</div>',
+        onCreated: childCreated,
+        onRendered: childRendered
+      });
+
+      // Define parent component with nested child
+      defineComponent({
+        tagName: 'test-query-parent-component',
+        template: `
+          <div class="parent">
+            Query Parent Content
+            <test-query-child-component></test-query-child-component>
+          </div>
+        `,
+        onCreated: parentCreated,
+        onRendered: parentRendered
+      });
+
+      // Create parent element and add to DOM
+      const parentElement = document.createElement('test-query-parent-component');
+      document.body.appendChild(parentElement);
+
+      // Use Query library to bind lifecycle event listeners to parent
+      $('test-query-parent-component').on('created', queryCreatedHandler);
+      $('test-query-parent-component').on('rendered', queryRenderedHandler);
+      $('test-query-parent-component').on('updated', queryUpdatedHandler);
+      $('test-query-parent-component').on('destroyed', queryDestroyedHandler);
+
+      // Wait for lifecycle events to fire
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Verify each component's lifecycle callbacks fired exactly once
+      expect(parentCreated).toHaveBeenCalledTimes(1);
+      expect(parentRendered).toHaveBeenCalledTimes(1);
+      expect(childCreated).toHaveBeenCalledTimes(1);
+      expect(childRendered).toHaveBeenCalledTimes(1);
+
+      // CRITICAL: Verify Query library event handlers only received parent's own events
+      // This confirms that $('component').on('rendered', handler) only fires once
+      expect(queryCreatedHandler).toHaveBeenCalledTimes(1);
+      expect(queryRenderedHandler).toHaveBeenCalledTimes(1);
+      expect(queryUpdatedHandler).toHaveBeenCalledTimes(0);
+      expect(queryDestroyedHandler).toHaveBeenCalledTimes(0);
+
+      // Verify event data structure from Query library
+      const renderedEventCall = queryRenderedHandler.mock.calls[0];
+      const renderedEvent = renderedEventCall[0];
+      expect(renderedEvent.type).toBe('rendered');
+      expect(renderedEvent.detail).toBeDefined();
+      expect(renderedEvent.detail.component).toBeDefined();
+
+      // Clean up
+      document.body.removeChild(parentElement);
+    });
+  });
+
+  */
+
 });

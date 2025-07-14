@@ -4,6 +4,10 @@
 
   layout {
     --rail-width: 0px;
+
+    rail.rail {
+      display: none;
+    }
   }
   topbar .logo .name {
     display: none;

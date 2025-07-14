@@ -1,0 +1,12 @@
+.status {
+  padding: var(--padding);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  transition: all 1s ease;
+
+  &.loaded {
+    background-color: var(--green-5);
+    color: var(--green-text-color);
+  }
+}

@@ -5,7 +5,7 @@ import { getRailMenu } from '@helpers/navigation.js';
 
 const { frontmatter } = Astro.props;
 
-const railMenu = getRailMenu(Astro.props.headings);
+const railMenu = getRailMenu(Astro.props.headings, frontmatter.title);
 const searchMeta = {
 	title: frontmatter.title,
 	description: frontmatter.description,

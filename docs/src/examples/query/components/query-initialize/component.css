@@ -1,0 +1,6 @@
+.greeting {
+  border: var(--border);
+  background-color: var(--standard-5);
+  margin: var(--vertically-spaced);
+  padding: var(--compact-spacing);
+}

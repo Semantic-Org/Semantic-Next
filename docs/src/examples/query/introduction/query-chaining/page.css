@@ -1,0 +1,17 @@
+.item {
+  padding: var(--compact-spacing);
+  background: var(--standard-5);
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  
+  &.bordered {
+    border: 3px solid var(--primary-30);
+    border-radius: var(--border-radius);
+  }
+  
+  &.padded {
+    padding: var(--spacing);
+    background-color: var(--primary-5);
+    color: var(--standard-80);
+  }
+}

@@ -138,3 +138,22 @@ export function joinWords(words: string[], options?: JoinWordsOptions): string;
  * ```
  */
 export function getArticle(word: string, options?: GetArticleOptions): string;
+
+/**
+ * Escapes HTML special characters in a string to prevent XSS attacks
+ * Escapes: & < > " '
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#escapehtml escapeHTML}
+ * @see {@link https://next.semantic-ui.com/examples/utils-escapehtml Example}
+ *
+ * @param string - The string to escape
+ * @returns The string with HTML special characters escaped
+ *
+ * @example
+ * ```ts
+ * escapeHTML('<script>alert("XSS")</script>')
+ * // returns '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
+ * escapeHTML('Price: $5 & "free" shipping')
+ * // returns 'Price: $5 &amp; &quot;free&quot; shipping'
+ * ```
+ */
+export function escapeHTML(string: string): string;
