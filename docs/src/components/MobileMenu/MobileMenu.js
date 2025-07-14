@@ -22,7 +22,6 @@ const defaultState = {
 
 const createComponent = ({ tpl, settings, $, state, flush, afterFlush, dispatchEvent }) => ({
   initialize() {
-    console.log(settings.menu);
     tpl.setMenusFromURL(settings.activeURL);
   },
 
