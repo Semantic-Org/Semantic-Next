@@ -49,31 +49,6 @@ console.log(`The active list item is at index ${index}`);
 ```
 
 
-## offsetParent
-
-Get the closest positioned ancestor element.
-
-> **Edge-Case Improvements** `offsetParent()` handles some [edge cases}(https://issues.chromium.org/issues/41131675) that prevent the naive use of `el.offsetParent`
-
-### Syntax
-```javascript
-$('selector').offsetParent(options)
-```
-
-### Parameters
-| Name    | Type   | Description                           |
-|---------|--------|---------------------------------------|
-| options | Object | Configuration options for the method  |
-
-### Returns
-[Query object](/api/query/basic#the-query-object) containing the offset parent element(s).
-
-### Usage
-```javascript
-const offsetParent = $('.child-element').offsetParent();
-console.log('Offset parent:', offsetParent.get(0));
-```
-
 ## Element Access Methods
 
 These methods provide access to individual elements in a Query collection.

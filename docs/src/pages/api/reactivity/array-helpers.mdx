@@ -36,7 +36,8 @@ fruits.push('orange', 'grape'); // ['apple', 'banana', 'orange', 'grape']
 ```
 
 ### Example
-<PlaygroundExample id="reactive-push" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="push" direction="horizontal"></PlaygroundExample>
+
 
 ## unshift
 
@@ -63,7 +64,8 @@ numbers.unshift(1, 2); // [1, 2, 3]
 ```
 
 ### Example
-<PlaygroundExample id="reactive-unshift" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="unshift" direction="horizontal"></PlaygroundExample>
+
 
 ## splice
 
@@ -92,7 +94,8 @@ colors.splice(1, 1, 'yellow'); // ['red', 'yellow', 'blue']
 ```
 
 ### Example
-<PlaygroundExample id="reactive-splice" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="splice" direction="horizontal"></PlaygroundExample>
+
 
 ## setIndex
 
@@ -120,7 +123,8 @@ items.setIndex(1, 'x'); // ['a', 'x', 'c']
 ```
 
 ### Example
-<PlaygroundExample id="reactive-set-index" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="set-index" direction="horizontal"></PlaygroundExample>
+
 
 ## removeIndex
 
@@ -147,7 +151,8 @@ letters.removeIndex(1); // ['a', 'c']
 ```
 
 ### Example
-<PlaygroundExample id="reactive-remove-index" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="remove-index" direction="horizontal"></PlaygroundExample>
+
 
 ## getIndex
 
@@ -173,6 +178,9 @@ const letters = new Signal(['a', 'b', 'c']);
 const secondLetter = letters.getIndex(1); // 'b'
 ```
 
+### Example
+<PlaygroundExample id="get-index" direction="horizontal"></PlaygroundExample>
+
 ## filter
 
 Filters the array to only include elements that pass the test provided by the callback function.
@@ -197,6 +205,9 @@ const numbers = new Signal([1, 2, 3, 4, 5]);
 numbers.filter(n => n % 2 === 0); // [2, 4]
 ```
 
+### Example
+<PlaygroundExample id="filter" direction="horizontal"></PlaygroundExample>
+
 ## map
 
 Transforms each element in the array using the provided mapping function.
@@ -220,3 +231,6 @@ import { Signal } from '@semantic-ui/reactivity';
 const numbers = new Signal([1, 2, 3]);
 numbers.map(n => n * 2); // [2, 4, 6]
 ```
+
+### Example
+<PlaygroundExample id="map" direction="horizontal"></PlaygroundExample>

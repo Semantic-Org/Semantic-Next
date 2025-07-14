@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(packages/templating/**)",
+      "Edit(packages/templating/src/**)",
+      "Edit(packages/templating/test/**)",
+      "Write(packages/templating/src/**)",
+      "Write(packages/templating/test/**)",
+      "MultiEdit(packages/templating/src/**)",
+      "MultiEdit(packages/templating/test/**)",
+      "Read(docs/src/pages/api/templating/**)",
+      "Read(docs/src/pages/templating/**)",
+      "Read(ai/packages/templating.md)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}

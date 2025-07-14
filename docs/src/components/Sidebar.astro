@@ -13,6 +13,7 @@ const canExpand = true;
 const currentPath = Astro.url.pathname;
 const activeSection = getActiveSidebarSection(currentPath);
 const items = getSidebarNavMenu(activeSection, currentPath);
+console.log(JSON.stringify(menu));
 ---
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>

@@ -2,25 +2,16 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    watch: false,
     browser: {
       enabled: true,
+      headless: true,
       provider: 'playwright',
       instances: [
         {
           browser: 'chromium',
         },
       ],
-    },
-    outdir: 'tests/',
-    reporter: ['default'],
-    coverage: {
-      enabled: true,
-      provider: 'istanbul',
-      include: [
-        'packages/**/src/**/*.js'
-      ],
-      reportsDirectory: './tests/coverage',
-      reportOnFailure: true
     },
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;

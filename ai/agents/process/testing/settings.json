@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(packages/*/test/**)",
+      "Edit(packages/*/test/**)",
+      "Write(packages/*/test/**)",
+      "MultiEdit(packages/*/test/**)",
+      "Read(src/components/*/test/**)",
+      "Edit(src/components/*/test/**)",
+      "Write(src/components/*/test/**)",
+      "MultiEdit(src/components/*/test/**)",
+      "Read(test/**)",
+      "Edit(test/**)",
+      "Write(test/**)",
+      "MultiEdit(test/**)",
+      "Bash(npm test)",
+      "Bash(npm run test)",
+      "Bash(npm run test:*)",
+      "Bash(vitest)",
+      "Bash(vitest:*)",
+      "Bash(jest)",
+      "Bash(jest:*)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}

@@ -19,7 +19,8 @@
   },
   "scripts": {
     "build": "wireit",
-    "test": "vitest"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "@semantic-ui/utils": "^0.12.4"

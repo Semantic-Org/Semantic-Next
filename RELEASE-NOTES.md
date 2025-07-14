@@ -4,6 +4,37 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.0
+
+
+
+### Reactivity
+* **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
+* **Feature** - Added new `mutate` helper for mutating a value by a function
+* **Feature** - There is now `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
+* **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
+
+### Query
+* **Feature** - Added namespaced events to `on` and `off`
+* **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
+* **Feature** - Added `.data()` for getting and setting html data
+* **Feature** - Added `.slice()` for returning a portion of the element collection
+* **Feature** - Added `closestAll()` for finding all ancestor elements matching a selector
+* **Feature** - Added `before()` and `after()` aliases for more intuitive content insertion
+* **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
+* **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
+* **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
+* **Bug** - `setting()` can now be used as a getter.
+* **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
+
+
+### Docs
+* **Examples** - Improved console log styling for examples
+* **Examples** - Added a large amount of Signal & Reactivity examples
+
+### Testing
+* **Improvement** - Vitest now runs without watch for `npm test`, vitest configs have been added for each package.
+
 # Version 0.12.4-1
 * **Tailwind** - `@semantic-ui/tailwind` and `tailwindcss-iso` now have bundled CDN version to avoid issues importing css files in browser via esm. Modified `tailwind` package to accomodate this change.
 * **Tailwind** - Removed bundled `wasm` files, these are now part of the generic `tailwindcss-iso` package.
