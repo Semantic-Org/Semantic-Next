@@ -2,10 +2,9 @@
 
 This is a pre-release version and APIs will change quickly. Before `1.0` release all breaking changes will be `minor` releases and features `patch` releases.
 
-`Minor` releases will be released approximately every 2 weeks.
+`Minor` releases will occur approximately every 2 weeks.
 
 Please note after `1.0` Semver will be followed using normal protocols.
-
 
 # Version 0.13.0 - 07.14.2025
 
@@ -67,6 +66,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Template** - `onThemeChanged` now looks for either `themechange` event from `html` or the class `dark` being toggled on `html` using mutation observers.
 * **Tailwind** - Added a plugin for using Tailwind inside Semantic UI components. This can be used alongside the css tokens provided by the css framework, or instead of it. This will scan your component javascript, html and css and attach only the tailwind styles used.
 
+> Note: the tailwind plugin code may be modified if `defineComponent` gets a formal 'Plugin API'. For now you will need to pass in the component to the plugin before defining the component.
 
 ```javascript
 import { TailwindPlugin } from '@semantic-ui/tailwind';
