@@ -34,7 +34,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
 * **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
-* **Bug** - `dataContext()` now returns the entire data context including state
+* **Improvement** - `trigger()` now triggers native event handler. Use `dispatchEvent` to avoid this behavior.
+* **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
+* **Bug** - `dataContext()` now returns the entire data context including state.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
