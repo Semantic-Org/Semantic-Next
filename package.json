@@ -112,6 +112,9 @@
   },
   "scripts": {
     "build": "wireit",
+    "build:ui": "wireit",
+    "build:ui-deps": "wireit",
+    "build:ui-components": "wireit",
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
@@ -143,6 +146,13 @@
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
       "dependencies": [
         "build:packages",
+        "build:ui-deps",
+        "build:ui-components"
+      ]
+    },
+    "build:ui": {
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
+      "dependencies": [
         "build:ui-deps",
         "build:ui-components"
       ]
