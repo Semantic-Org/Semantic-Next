@@ -21,6 +21,10 @@ export const buildUIComponents = async ({
     entryPoints: ['./src/components/**/index.js'],
     entryNames: '[dir]', // button.js,
     outbase: 'src/components',
+    filterEntries: (path) => {
+      // Exclude root-level src/components/index.js to avoid empty filename issue
+      return !path.endsWith('src/components/index.js');
+    }
   };
 
   if(includeESM) {
