@@ -16,10 +16,10 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./src/components/index.js",
+      "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./src/components/index.js"
+      "default": "./dist/semantic-ui.js"
     },
     "./css": {
       "import": "./src/css/all.css",
@@ -50,64 +50,64 @@
       "default": "./examples/index.js"
     },
     "./button": {
-      "import": "./src/components/button/index.js",
+      "import": "./dist/button.js",
       "browser": "./dist/cdn/button.min.js",
       "bundled": "./dist/bundled/button.min.js",
-      "default": "./src/components/button/index.js"
+      "default": "./dist/button.js"
     },
     "./card": {
-      "import": "./src/components/card/index.js",
+      "import": "./dist/card.js",
       "browser": "./dist/cdn/card.min.js",
       "bundled": "./dist/bundled/card.min.js",
-      "default": "./src/components/card/index.js"
+      "default": "./dist/card.js"
     },
     "./container": {
-      "import": "./src/components/container/index.js",
+      "import": "./dist/container.js",
       "browser": "./dist/cdn/container.min.js",
       "bundled": "./dist/bundled/container.min.js",
-      "default": "./src/components/container/index.js"
+      "default": "./dist/container.js"
     },
     "./icon": {
-      "import": "./src/components/icon/index.js",
+      "import": "./dist/icon.js",
       "browser": "./dist/cdn/icon.min.js",
       "bundled": "./dist/bundled/icon.min.js",
-      "default": "./src/components/icon/index.js"
+      "default": "./dist/icon.js"
     },
     "./input": {
-      "import": "./src/components/input/index.js",
+      "import": "./dist/input.js",
       "browser": "./dist/cdn/input.min.js",
       "bundled": "./dist/bundled/input.min.js",
-      "default": "./src/components/input/index.js"
+      "default": "./dist/input.js"
     },
     "./label": {
-      "import": "./src/components/label/index.js",
+      "import": "./dist/label.js",
       "browser": "./dist/cdn/label.min.js",
       "bundled": "./dist/bundled/label.min.js",
-      "default": "./src/components/label/index.js"
+      "default": "./dist/label.js"
     },
     "./menu": {
-      "import": "./src/components/menu/index.js",
+      "import": "./dist/menu.js",
       "browser": "./dist/cdn/menu.min.js",
       "bundled": "./dist/bundled/menu.min.js",
-      "default": "./src/components/menu/index.js"
+      "default": "./dist/menu.js"
     },
     "./modal": {
-      "import": "./src/components/modal/index.js",
+      "import": "./dist/modal.js",
       "browser": "./dist/cdn/modal.min.js",
       "bundled": "./dist/bundled/modal.min.js",
-      "default": "./src/components/modal/index.js"
+      "default": "./dist/modal.js"
     },
     "./rail": {
-      "import": "./src/components/rail/index.js",
+      "import": "./dist/rail.js",
       "browser": "./dist/cdn/rail.min.js",
       "bundled": "./dist/bundled/rail.min.js",
-      "default": "./src/components/rail/index.js"
+      "default": "./dist/rail.js"
     },
     "./segment": {
-      "import": "./src/components/segment/index.js",
+      "import": "./dist/segment.js",
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundled/segment.min.js",
-      "default": "./src/components/segment/index.js"
+      "default": "./dist/segment.js"
     }
   },
   "scripts": {

@@ -6,6 +6,18 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.3 - 07.16.2025
+
+* **Bug** - Fix issue with empty file `dist/.js` in npm package build.
+* **Improvement/Bug** - `@semanti-ui/core` was using raw text imports i.e.
+```javascript
+import template from './button.html?raw' assert { type: 'txt' };
+```
+
+These imports may not be processed downstream properly in Vite when using esmodules unless `optimize.excludeDeps` included `@semantic-ui/core`.
+
+We've now linked the ESM build to a build that inlines raw text imports to prevent issues with downstream builds.
+
 # Version 0.13.2 - 07.15.2025
 
 * **Bug** - Remove unused dependency `@semantic-ui/esbuild-log`
