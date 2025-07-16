@@ -38,12 +38,12 @@
       "default": "./src/css/tokens.css"
     },
     "./specs": {
-      "import": "./src/specs/specs.js",
-      "default": "./src/specs/specs.js"
+      "import": "./dist/specs.js",
+      "default": "./dist/specs.js"
     },
     "./component-specs": {
-      "import": "./src/specs/component-specs.js",
-      "default": "./src/specs/component-specs.js"
+      "import": "./dist/component-specs.js",
+      "default": "./dist/component-specs.js"
     },
     "./examples": {
       "import": "./examples/index.js",
@@ -115,6 +115,7 @@
     "build:ui": "wireit",
     "build:ui-deps": "wireit",
     "build:ui-components": "wireit",
+    "build:specs": "wireit",
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
@@ -147,14 +148,16 @@
       "dependencies": [
         "build:packages",
         "build:ui-deps",
-        "build:ui-components"
+        "build:ui-components",
+        "build:specs"
       ]
     },
     "build:ui": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
       "dependencies": [
         "build:ui-deps",
-        "build:ui-components"
+        "build:ui-components",
+        "build:specs"
       ]
     },
     "build:packages": {
@@ -183,6 +186,9 @@
     },
     "build:ui-components": {
       "command": "node ./internal-packages/scripts/src/build-ui-components.js"
+    },
+    "build:specs": {
+      "command": "node ./internal-packages/scripts/src/build-specs.js"
     },
     "build:ui-framework": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
