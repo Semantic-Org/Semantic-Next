@@ -1,7 +1,7 @@
 {
   "name": "@semantic-ui/esbuild-log",
   "description": "Simple logging plugin for esbuild",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "main": "src/log.js",

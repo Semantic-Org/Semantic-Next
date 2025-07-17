@@ -4,7 +4,7 @@
   "description": "A plugin for integrating Tailwind CSS with Semantic UI components.",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "sideEffects": false,
   "type": "module",
   "cdn": "./dist/bundle/tailwind.js",
@@ -41,12 +41,12 @@
     "tailwindcss": "^3.0.0 || ^4.0.0"
   },
   "dependencies": {
-    "@semantic-ui/component": "^0.13.2",
-    "@semantic-ui/utils": "^0.13.2",
+    "@semantic-ui/component": "^0.13.3",
+    "@semantic-ui/utils": "^0.13.3",
     "tailwindcss-iso": "^1.0.5"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.13.2",
+    "@semantic-ui/internal-scripts": "^0.13.3",
     "vitest": "^3.0.8"
   },
   "wireit": {
