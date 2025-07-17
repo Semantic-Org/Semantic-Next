@@ -1,6 +1,8 @@
 import { resolve, dirname } from 'path';
 import fs from 'fs/promises';
+
 import * as esbuild from 'esbuild';
+import glob from 'tiny-glob';
 
 import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 import { log as logPlugin } from '@semantic-ui/esbuild-log';
@@ -45,6 +47,7 @@ export const getESBuildConfig = async function({
   outdir = '', // custom outdir
   outfile = '', // custom out file,
   entryPoints = [], // custom entrypionts
+  filterEntries = null, // optional function to filter entry points
   plugins = [], // custom additional plugins
   sourcemap = true, // whether to include source maps
   onLoad = null, // callback function after build
@@ -113,7 +116,21 @@ export const getESBuildConfig = async function({
 
     // naive main entrypoint evaluation
     if(entryPoints.length) {
-      config.entryPoints = entryPoints;
+      // If filterEntries is provided and entryPoints contains glob patterns
+      if(filterEntries && entryPoints.some(ep => ep.includes('*'))) {
+        const resolvedEntries = [];
+        for(const pattern of entryPoints) {
+          if(pattern.includes('*')) {
+            const globEntries = await getEntryPoints(pattern, filterEntries);
+            resolvedEntries.push(...globEntries);
+          } else {
+            resolvedEntries.push(pattern);
+          }
+        }
+        config.entryPoints = resolvedEntries;
+      } else {
+        config.entryPoints = entryPoints;
+      }
     }
     else if(readEntrypoints) {
       const entry = packageFile.module || packageFile.main;
@@ -303,3 +320,16 @@ export const watch = async (...args) => {
     ...args
   });
 };
+
+/**
+ * Asynchronously resolves entry points from a glob pattern.
+ *
+ * @param {string} globPattern - The glob pattern to resolve.
+ * @param {function(string): boolean} [filter] - An optional function to filter the resolved paths.
+ * @returns {Promise<string[]>} A promise that resolves to an array of file paths.
+ */
+async function getEntryPoints(globPattern, filter = () => true) {
+  const pattern = globPattern.replace(/\\/g, '/');
+  const allEntries = await glob(pattern);
+  return allEntries.filter(filter);
+}
