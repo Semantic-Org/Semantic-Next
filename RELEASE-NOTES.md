@@ -6,15 +6,19 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.13.3 - 07.16.2025
+# Version 0.13.3 - 07.17.2025
 
-* **Bug** - Fix issue with empty file `dist/.js` in npm package build.
-* **Improvement/Bug** - `@semanti-ui/core` was using raw text imports i.e.
+* **Improvement/Bug** - Fix issue where some build tools could not parse raw text imports of dependencies. There is now a build step where esm endpoints now inline txt imports.
+
+
+For instance in `@semanti-ui/core` templates are included like
 ```javascript
 import template from './button.html?raw' assert { type: 'txt' };
 ```
-
 These imports may not be processed downstream properly in Vite when using esmodules unless `optimize.excludeDeps` included `@semantic-ui/core`.
+
+* **Change** - Removed `with { type: 'css' }` and ` with { type: 'html' }. Currently only `json` is supported officially and vite is not happy with unknown types <https://github.com/vitejs/vite/discussions/18534>
+* **Bug** - Fix issue with empty file `dist/.js` in npm package build.
 
 We've now linked the ESM build to a build that inlines raw text imports to prevent issues with downstream builds.
 
