@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 import { debounce } from '@semantic-ui/utils';
 
-import componentSpec from './specs/input-component.json' assert { type: 'json' };
-import template from './input.html?raw' assert { type: 'txt' };
-import css from './input-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/input-component.json' with { type: 'json' };
+import template from './input.html?raw';
+import css from './input-bundle.css?raw';
 
 const defaultState = {
   focused: false,

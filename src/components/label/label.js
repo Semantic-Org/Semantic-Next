@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/label-component.json' assert { type: 'json' };
-import template from './label.html?raw' assert { type: 'txt' };
-import css from './label-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/label-component.json' with { type: 'json' };
+import template from './label.html?raw';
+import css from './label-bundle.css?raw';
 
 const createComponent = ({ $ }) => ({});
 

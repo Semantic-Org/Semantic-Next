@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/segment-component.json' assert { type: 'json' };
-import template from './segment.html?raw' assert { type: 'txt' };
-import css from './segment-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/segment-component.json' with { type: 'json' };
+import template from './segment.html?raw';
+import css from './segment-bundle.css?raw';
 
 const createComponent = ({ $ }) => ({});
 
