@@ -22,7 +22,7 @@ export const fatal = (
 
   const throwError = () => {
     if (typeof globalThis.onError === 'function') {
-      global.onError(error);
+      globalThis.onError(error);
     }
     throw error;
   };
