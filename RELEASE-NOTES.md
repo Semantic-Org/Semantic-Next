@@ -8,6 +8,14 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.13.4 - xx.xx.xxxx
 
+### Component
+* **Enhancement** - Component navigation helpers (`findChild`, `findChildren`, `findParent`, `findTemplate`) now have comprehensive support for both web components and subtemplates using dual pattern traversal
+* **Enhancement** - `findChild` and `findChildren` now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal
+* **Bug** - Fixed `findTemplate` to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object
+
+### Testing
+* **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories (`screenshotFailures: false` in vitest configs)
+
 ### Utils
 * **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
 * **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
