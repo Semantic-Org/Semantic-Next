@@ -797,7 +797,14 @@ export const Template = class Template {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
-    return Template.getTemplates(templateName)[0];
+    const template = Template.getTemplates(templateName)[0];
+    if (!template) {
+      return undefined;
+    }
+    return {
+      ...template.instance,
+      ...template.data,
+    };
   }
   static findParentTemplate(template, templateName) {
     // this matches on DOM (common)
@@ -855,19 +862,26 @@ export const Template = class Template {
       return true;
     };
 
-    // First check DOM children (web components)
-    if (template.element) {
-      // Find custom elements and extract their components using the query helper
-      const childComponents = template.$$(':defined').component();
-      const components = Array.isArray(childComponents) ? childComponents : [childComponents].filter(Boolean);
-      components.forEach(component => {
-        if (isMatch(component)) {
-          result.push({
-            ...component,
-            ...component.dataContext,
-          });
+    // First check DOM children (web components) - cascade downward
+    if (template.element?.shadowRoot) {
+      const traverseChildren = (node) => {
+        if (node?.children) {
+          for (const child of node.children) {
+            if (child.component && isMatch(child.component)) {
+              result.push({
+                ...child.component,
+                ...child.dataContext,
+              });
+            }
+            // Recursively check nested children including their shadow roots
+            traverseChildren(child);
+            if (child.shadowRoot) {
+              traverseChildren(child.shadowRoot);
+            }
+          }
         }
-      });
+      };
+      traverseChildren(template.element.shadowRoot);
     }
 
     // Then check subtemplate children (recursive lookup for nested partials)
