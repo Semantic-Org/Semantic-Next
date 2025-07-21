@@ -14,12 +14,13 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Fixed `findTemplate` to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object
 
 ### Testing
-* **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories (`screenshotFailures: false` in vitest configs)
+* **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories
 
 ### Utils
 * **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
 * **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
 * **Breaking** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)` for consistency and enhanced functionality
+* **Bug** - Fixed `fatal` to look for `onError` on `globalThis`
 
 # Version 0.13.3 - 07.17.2025
 
