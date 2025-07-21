@@ -6,6 +6,13 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.4 - xx.xx.xxxx
+
+### Utils
+* **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
+* **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
+* **Breaking** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)` for consistency and enhanced functionality
+
 # Version 0.13.3 - 07.17.2025
 
 * **Improvement/Bug** - Fix issue where some build tools could not parse raw text imports of dependencies. There is now a build step where esm endpoints now inline txt imports.
