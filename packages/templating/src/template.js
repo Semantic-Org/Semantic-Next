@@ -811,9 +811,12 @@ export const Template = class Template {
       }
       return true;
     };
+    const getParent = (el) => {
+      return el?.parentNode || el?.host;
+    };
 
     if (!match) {
-      let parentNode = template.element?.parentNode;
+      let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
           match = {
@@ -822,7 +825,7 @@ export const Template = class Template {
           };
           break;
         }
-        parentNode = parentNode.parentNode;
+        parentNode = getParent(parentNode);
       }
     }
     // this matches on nested partials (less common)
@@ -841,21 +844,48 @@ export const Template = class Template {
 
   static findChildTemplates(template, templateName) {
     let result = [];
-    // recursive lookup
-    function search(template, templateName) {
-      if (!templateName || (template.templateName === templateName)) {
-        result.push({
-          ...template.instance,
-          ...template.data,
-        });
+    
+    const isMatch = (component) => {
+      if (!component?.templateName) {
+        return false;
       }
-      if (template._childTemplates) {
-        template._childTemplates.forEach((childTemplate) => {
-          search(childTemplate, templateName);
+      if (templateName && component?.templateName !== templateName) {
+        return false;
+      }
+      return true;
+    };
+
+    // First check DOM children (web components)
+    if (template.element) {
+      // Find custom elements and extract their components using the query helper
+      const childComponents = template.$$(':defined').component();
+      const components = Array.isArray(childComponents) ? childComponents : [childComponents].filter(Boolean);
+      components.forEach(component => {
+        if (isMatch(component)) {
+          result.push({
+            ...component,
+            ...component.dataContext,
+          });
+        }
+      });
+    }
+
+    // Then check subtemplate children (recursive lookup for nested partials)
+    function search(childTemplates, templateName) {
+      if (childTemplates) {
+        childTemplates.forEach((childTemplate) => {
+          if (!templateName || (childTemplate.templateName === templateName)) {
+            result.push({
+              ...childTemplate.instance,
+              ...childTemplate.data,
+            });
+          }
+          search(childTemplate._childTemplates, templateName);
         });
       }
     }
-    search(template, templateName);
+    // Only search child templates, not the template itself
+    search(template._childTemplates, templateName);
     return result;
   }
   static findChildTemplate(template, templateName) {
