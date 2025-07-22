@@ -1755,6 +1755,37 @@ describe('function utilities', () => {
         expect(func).toHaveBeenCalledTimes(1);
         expect(func).toHaveBeenCalledWith('arg4');
       });
+
+      it('should reset debounce state after maxWait execution', async () => {
+        const func = vi.fn((x) => `result-${x}`);
+        const debounced = debounce(func, 300, { maxWait: 500 });
+
+        // First sequence of calls
+        debounced('call1');
+        vi.advanceTimersByTime(100);
+        debounced('call2');
+        vi.advanceTimersByTime(100);
+        debounced('call3');
+        vi.advanceTimersByTime(100);
+        debounced('call4');
+        vi.advanceTimersByTime(200); // Total 500ms - maxWait forces execution
+
+        expect(func).toHaveBeenCalledTimes(1);
+        expect(func).toHaveBeenCalledWith('call4');
+        func.mockClear();
+
+        // Call after maxWait execution - should start fresh debounce cycle
+        vi.advanceTimersByTime(100); // 600ms total
+        debounced('call5');
+
+        // Should not execute immediately
+        expect(func).not.toHaveBeenCalled();
+
+        // Should execute after its own debounce period
+        vi.advanceTimersByTime(300);
+        expect(func).toHaveBeenCalledTimes(1);
+        expect(func).toHaveBeenCalledWith('call5');
+      });
     });
 
     describe('error handling', () => {

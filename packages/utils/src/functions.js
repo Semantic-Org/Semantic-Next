@@ -36,7 +36,6 @@ export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(arg
     return result;
   };
 };
-
 export const debounce = (func, wait, options = {}) => {
   const {
     rejectSkipped = false,
@@ -159,12 +158,25 @@ export const debounce = (func, wait, options = {}) => {
   };
 
   const trailingEdge = (time) => {
-    timeoutId = undefined;
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
+    if (maxTimeoutId !== undefined) {
+      clearTimeout(maxTimeoutId);
+      maxTimeoutId = undefined;
+    }
+
     leadingInvoked = false;
 
-    if (trailing && lastArgs) {
+    const args = lastArgs;
+    const ctx = lastThis;
+    lastArgs = undefined;
+    lastThis = undefined;
+
+    if (trailing && args) {
       try {
-        const res = invokeFunc(lastThis, lastArgs);
+        const res = invokeFunc(ctx, args);
         if (res && typeof res.then === 'function') {
           res.catch(() => {});
         }
@@ -177,7 +189,7 @@ export const debounce = (func, wait, options = {}) => {
 
     pendingPromises.forEach(({ resolve }) => resolve(result));
     pendingPromises = [];
-    lastArgs = lastThis = undefined;
+
     return result;
   };
 
