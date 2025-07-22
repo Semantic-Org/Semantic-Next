@@ -1,49 +1,30 @@
 import { debounce } from '@semantic-ui/utils';
 
-// Sync function example
-function logMessage(message) {
-  console.log(`Sync: ${message} at ${Date.now()}`);
-  return `logged: ${message}`;
+function search(query) {
+  console.log(`Searching: ${query}`);
+  return query;
 }
 
-// Async function example
-async function saveData(data) {
-  await new Promise(resolve => setTimeout(resolve, 50));
-  console.log(`Async: saved ${data}`);
-  return `saved: ${data}`;
-}
+// basic debouncing - only last call executes
+const debouncedSearch = debounce(search, 200);
+debouncedSearch('a');
+debouncedSearch('ab');
+debouncedSearch('abc'); // only this executes
 
-// Basic debouncing - only last call executes
-console.log('Basic debouncing:');
-const debouncedLog = debounce(logMessage, 100);
-debouncedLog('call 1');
-debouncedLog('call 2'); 
-debouncedLog('call 3'); // Only this executes
-
-// Async debouncing with promise sharing
-console.log('\nAsync debouncing (promise sharing):');
-const debouncedSave = debounce(saveData, 100);
-Promise.all([
-  debouncedSave('data1'),
-  debouncedSave('data2'),  
-  debouncedSave('data3') // Only this executes, all promises resolve to same result
-]).then(results => {
-  console.log('All results:', results); // All get 'saved: data3'
-});
-
-// Leading execution
+// leading edge - executes on both leading and trailing edges
 setTimeout(() => {
-  console.log('\nLeading execution:');
-  const leadingDebounce = debounce(logMessage, 200, { leading: true });
-  console.log('Immediate result:', leadingDebounce('immediate')); // Executes right away
-  leadingDebounce('ignored'); // Debounced
+  const leadingDebounce = debounce(search, 200, { leading: true });
+  leadingDebounce('first'); // executes immediately (leading)
+  leadingDebounce('second'); // executes after 200ms (trailing)
 }, 300);
 
-// MaxWait option
+// maxWait - forces execution after maximum time
 setTimeout(() => {
-  console.log('\nMaxWait forces execution:');
-  const maxWaitDebounce = debounce(logMessage, 50, { maxWait: 120 });
-  maxWaitDebounce('call1');
-  setTimeout(() => maxWaitDebounce('call2'), 30);
-  setTimeout(() => maxWaitDebounce('call3'), 60); // Forces execution at 120ms
+  const maxWaitDebounce = debounce(search, 300, { maxWait: 500 });
+  maxWaitDebounce('input1');
+  setTimeout(() => maxWaitDebounce('input2'), 100);
+  setTimeout(() => maxWaitDebounce('input3'), 200);
+  setTimeout(() => maxWaitDebounce('input4'), 400); // forces execution at 500ms
+  // input5 triggers a new debounce cycle after maxWait
+  setTimeout(() => maxWaitDebounce('input5'), 600); // executes 300ms later
 }, 600);
