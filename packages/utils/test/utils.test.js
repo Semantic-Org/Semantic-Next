@@ -1964,7 +1964,7 @@ describe('function utilities', () => {
 
       it('should handle async functions correctly', async () => {
         const asyncFunc = vi.fn(async (x) => {
-          // Use fake timers without real async delay
+          // Simulate an asynchronous function without introducing artificial delays
           return x * 2;
         });
         const throttled = throttle(asyncFunc, 100);
