@@ -19,6 +19,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ### Utils
 * **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
 * **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
+* **Feature** - Added `getIPAddress()` to retrieve local, public, or all IP addresses using WebRTC ICE gathering
 * **Breaking** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)` for consistency and enhanced functionality
 * **Bug** - Fixed `fatal` to look for `onError` on `globalThis`
 

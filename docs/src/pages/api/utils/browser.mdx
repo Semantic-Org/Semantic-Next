@@ -193,3 +193,51 @@ import { getJSON } from '@semantic-ui/utils';
 const data = await getJSON('https://example.com/data.json');
 console.log(data);
 ```
+
+### getIPAddress
+
+```javascript
+async function getIPAddress({ type = 'public', timeout = 5000, waitAfterLastIP = 50 } = {})
+```
+
+Retrieves the user's IP address using WebRTC ICE gathering.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| options | object | Optional configuration |
+
+##### Options
+
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| type    | string | 'public' | Type of IP to retrieve: 'local', 'public', or 'all' |
+| timeout | number | 5000    | Timeout in milliseconds |
+| waitAfterLastIP | number | 50 | Milliseconds to wait after last IP before resolving (for local/all types) |
+
+#### Returns
+
+A Promise that resolves to:
+- A single IP address string when `type` is 'public'
+- An array of IP address strings when `type` is 'local' or 'all'
+
+#### Example
+
+```javascript
+import { getIPAddress } from '@semantic-ui/utils';
+
+// Get public IP address (default)
+const publicIP = await getIPAddress();
+console.log('Public IP:', publicIP); // '203.0.113.45'
+
+// Get local IP addresses
+const localIPs = await getIPAddress({ type: 'local' });
+console.log('Local IPs:', localIPs); // ['192.168.1.100', '10.0.0.5']
+
+// Get all IP addresses  
+const allIPs = await getIPAddress({ type: 'all' });
+console.log('All IPs:', allIPs); // ['192.168.1.100', '10.0.0.5', '203.0.113.45']
+```
+
+> **Browser Support** This function requires WebRTC support and only works in browser environments. It uses STUN servers to detect public IP addresses.
