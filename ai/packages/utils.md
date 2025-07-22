@@ -346,7 +346,7 @@ const result = safeFunction(args); // Won't throw errors
 
 ### Clipboard and Navigation
 ```javascript
-import { copyText, openLink, getKeyFromEvent } from '@semantic-ui/utils';
+import { copyText, openLink, getKeyFromEvent, getIPAddress } from '@semantic-ui/utils';
 
 // Clipboard operations
 await copyText('Text to copy');     // Returns promise
@@ -361,6 +361,11 @@ document.addEventListener('keydown', (event) => {
     closeModal();
   }
 });
+
+// IP address detection
+const publicIP = await getIPAddress();                   // '203.0.113.45' (default)
+const localIPs = await getIPAddress({ type: 'local' });  // ['192.168.1.100', '10.0.0.5']
+const allIPs = await getIPAddress({ type: 'all' });      // ['192.168.1.100', '10.0.0.5', '203.0.113.45']
 ```
 
 ### Async Operations

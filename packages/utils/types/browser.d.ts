@@ -23,6 +23,18 @@ export interface OpenLinkOptions {
 export type FetchSettings = RequestInit;
 
 /**
+ * Options for getting IP address
+ */
+export interface GetIPAddressOptions {
+  /** Type of IP address to retrieve: 'local', 'public', or 'all' */
+  type?: 'local' | 'public' | 'all';
+  /** Timeout in milliseconds */
+  timeout?: number;
+  /** Milliseconds to wait after last IP before resolving (for local/all types) */
+  waitAfterLastIP?: number;
+}
+
+/**
  * Copies text to the clipboard using the clipboard API
  * @see {@link https://next.semantic-ui.com/api/utils/browser#copytext copyText}
  * @param text - The text to copy
@@ -74,3 +86,24 @@ export function getText(src: string, settings?: FetchSettings): Promise<string>;
  * @returns Promise resolving to the parsed JSON
  */
 export function getJSON<T = any>(src: string, settings?: FetchSettings): Promise<T>;
+
+/**
+ * Retrieves the user's IP address using WebRTC ICE gathering
+ * @see {@link https://next.semantic-ui.com/api/utils/browser#getipaddress getIPAddress}
+ * @see {@link https://next.semantic-ui.com/examples/utils-getipaddress Example}
+ *
+ * @param options - Configuration options for IP retrieval
+ * @returns Promise resolving to IP address(es). Returns a single string for 'public' type, or an array of strings for 'local'/'all' types
+ *
+ * @example
+ * ```ts
+ * // Get public IP address (default)
+ * const publicIP = await getIPAddress();
+ * console.log(publicIP); // '203.0.113.45'
+ *
+ * // Get local IP addresses
+ * const localIPs = await getIPAddress({ type: 'local' });
+ * console.log(localIPs); // ['192.168.1.100', '10.0.0.5']
+ * ```
+ */
+export function getIPAddress(options?: GetIPAddressOptions): Promise<string | string[]>;
