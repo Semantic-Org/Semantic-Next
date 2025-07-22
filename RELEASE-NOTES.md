@@ -23,6 +23,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Breaking** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)` for consistency and enhanced functionality
 * **Bug** - Fixed `fatal` to look for `onError` on `globalThis`
 
+### Documentation
+* **Examples** - Added missing examples for browser utilities: `copyText`, `openLink`, `getKeyFromEvent`, `idleCallback`, `getText`, and `getJSON`
+
 # Version 0.13.3 - 07.17.2025
 
 * **Improvement/Bug** - Fix issue where some build tools could not parse raw text imports of dependencies. There is now a build step where esm endpoints now inline txt imports.
