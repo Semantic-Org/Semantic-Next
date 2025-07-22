@@ -5,18 +5,18 @@ export default defineWorkspace([
     test: {
       include: [
         '**/test/unit/**/*.test.{ts,js}',
-        '**/test/*.test.{ts,js}'
+        '**/test/*.test.{ts,js}',
       ],
       name: 'node',
       environment: 'node',
-    }
+    },
   },
   {
     test: {
       include: ['**/test/dom/**/*.test.{ts,js}'],
       name: 'jsdom',
       environment: 'jsdom',
-    }
+    },
   },
   {
     test: {
@@ -27,12 +27,13 @@ export default defineWorkspace([
         enabled: true,
         provider: 'playwright',
         headless: true,
+        screenshotFailures: false,
         instances: [
           {
             browser: 'chromium',
           },
         ],
       },
-    }
+    },
   },
 ]);
