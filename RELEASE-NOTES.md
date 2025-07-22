@@ -6,6 +6,22 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.13.4 - xx.xx.xxxx
+
+### Component
+* **Enhancement** - Component navigation helpers (`findChild`, `findChildren`, `findParent`, `findTemplate`) now have comprehensive support for both web components and subtemplates using dual pattern traversal
+* **Enhancement** - `findChild` and `findChildren` now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal
+* **Bug** - Fixed `findTemplate` to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object
+
+### Testing
+* **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories
+
+### Utils
+* **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
+* **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
+* **Breaking** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)` for consistency and enhanced functionality
+* **Bug** - Fixed `fatal` to look for `onError` on `globalThis`
+
 # Version 0.13.3 - 07.17.2025
 
 * **Improvement/Bug** - Fix issue where some build tools could not parse raw text imports of dependencies. There is now a build step where esm endpoints now inline txt imports.

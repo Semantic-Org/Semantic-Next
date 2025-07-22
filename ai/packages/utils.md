@@ -292,7 +292,7 @@ const existingHex = oklchToHex('#ff5733');          // '#ff5733' (unchanged)
 
 ### Higher-Order Functions
 ```javascript
-import { memoize, debounce, wrapFunction } from '@semantic-ui/utils';
+import { memoize, debounce, throttle, wrapFunction } from '@semantic-ui/utils';
 
 // Memoization with custom hash function
 const expensiveFunction = memoize((a, b, c) => {
@@ -300,10 +300,42 @@ const expensiveFunction = memoize((a, b, c) => {
   return a * b * c;
 }, (a, b, c) => `${a}-${b}-${c}`);  // Custom hash function
 
-// Debouncing with options
-const debouncedSave = debounce((data) => {
-  saveToServer(data);
-}, 300, { immediate: true });       // Execute immediately on first call
+// Debouncing with async support and options
+const debouncedSave = debounce(async (data) => {
+  await saveToServer(data);
+  return 'saved';
+}, 300, { 
+  leading: true,      // Execute on first call
+  maxWait: 1000,      // Force execution after 1s max
+  abortController: controller
+});
+
+// All calls resolve to same result via promise sharing
+Promise.all([
+  debouncedSave('data1'),
+  debouncedSave('data2'),  // Only this executes
+  debouncedSave('data3')
+]).then(results => {
+  // All resolve to 'saved'
+});
+
+// Throttling for high-frequency events
+const throttledScroll = throttle(handleScroll, 100);     // Leading + trailing
+const throttledClick = throttle(handleClick, 1000, { 
+  leading: true, 
+  trailing: false 
+});
+
+// Rate limiting API calls
+const rateLimitedAPI = throttle(apiCall, 2000);
+rateLimitedAPI('/users');    // Executes immediately
+rateLimitedAPI('/posts');    // Queued for trailing
+rateLimitedAPI('/comments'); // Replaces previous trailing
+
+// Method usage
+debouncedSave.cancel();      // Cancel pending
+debouncedSave.flush();       // Execute immediately
+debouncedSave.pending();     // Check if scheduled
 
 // Safe function wrapping
 const safeFunction = wrapFunction(riskyFunction);
@@ -508,12 +540,19 @@ clone(deepData);           // Deep clone with cycle detection
 ```javascript
 // Utils with Reactivity
 import { Signal } from '@semantic-ui/reactivity';
-import { debounce, memoize } from '@semantic-ui/utils';
+import { debounce, throttle, memoize } from '@semantic-ui/utils';
 
 const searchQuery = new Signal('');
-const debouncedSearch = debounce((query) => {
-  performSearch(query);
-}, 300);
+const debouncedSearch = debounce(async (query) => {
+  const results = await performSearch(query);
+  return results;
+}, 300, { maxWait: 1000 });
+
+// Throttled reactive updates
+const scrollPosition = new Signal(0);
+const throttledScroll = throttle((position) => {
+  scrollPosition.value = position;
+}, 16); // ~60fps
 
 // Utils with Query
 import { $ } from '@semantic-ui/query';
@@ -531,7 +570,7 @@ import {
   get, set, extend,                 // Object manipulation
   isObject, isArray, isEmpty,       // Type checking
   formatDate, formatNumber,         // Formatting
-  debounce, memoize,               // Function utilities
+  debounce, throttle, memoize,     // Function utilities
   oklchToHex                       // Color conversion
 } from '@semantic-ui/utils';
 
