@@ -43,10 +43,9 @@ export const debounce = (func, wait, options = {}) => {
     leading = false,
     trailing = true,
     maxWait,
-    abortController
+    abortController,
   } = options;
 
-  // Validate options
   if (!leading && !trailing) {
     throw new Error('At least one of leading or trailing must be true');
   }
@@ -64,12 +63,18 @@ export const debounce = (func, wait, options = {}) => {
 
   const signal = abortController?.signal;
 
-  // Handle abort signal
+  const cleanupListener = () => {
+    if (signal) {
+      signal.removeEventListener('abort', handleAbort);
+    }
+  };
+
   const handleAbort = () => {
     cancel();
     const abortError = new DOMException('The operation was aborted', 'AbortError');
     pendingPromises.forEach(({ reject }) => reject(abortError));
     pendingPromises = [];
+    cleanupListener();
   };
 
   if (signal?.aborted) {
@@ -79,34 +84,40 @@ export const debounce = (func, wait, options = {}) => {
 
   const invokeFunc = (thisArg, args) => {
     lastInvokeTime = Date.now();
-    firstCallTime = undefined; // Reset for next debounce cycle
-    
+    firstCallTime = undefined;
+
     try {
       const funcResult = func.apply(thisArg, args);
-      
-      if (funcResult instanceof Promise) {
+
+      if (funcResult && typeof funcResult.then === 'function') {
         return funcResult.then(
           value => {
             result = value;
             pendingPromises.forEach(({ resolve }) => resolve(value));
             pendingPromises = [];
+            cleanupListener();
             return value;
           },
           error => {
             pendingPromises.forEach(({ reject }) => reject(error));
             pendingPromises = [];
+            cleanupListener();
             throw error;
-          }
+          },
         );
-      } else {
+      }
+      else {
         result = funcResult;
         pendingPromises.forEach(({ resolve }) => resolve(funcResult));
         pendingPromises = [];
+        cleanupListener();
         return funcResult;
       }
-    } catch (error) {
+    }
+    catch (error) {
       pendingPromises.forEach(({ reject }) => reject(error));
       pendingPromises = [];
+      cleanupListener();
       throw error;
     }
   };
@@ -116,10 +127,10 @@ export const debounce = (func, wait, options = {}) => {
     const timeSinceLastInvoke = time - lastInvokeTime;
     const timeSinceFirstCall = firstCallTime ? time - firstCallTime : 0;
 
-    return (lastCallTime === undefined || 
-            timeSinceLastCall >= wait ||
-            timeSinceLastCall < 0 || 
-            (maxWait !== undefined && timeSinceFirstCall >= maxWait));
+    return (lastCallTime === undefined
+      || timeSinceLastCall >= wait
+      || timeSinceLastCall < 0
+      || (maxWait !== undefined && timeSinceFirstCall >= maxWait));
   };
 
   const remainingWait = (time) => {
@@ -153,22 +164,17 @@ export const debounce = (func, wait, options = {}) => {
 
     if (trailing && lastArgs) {
       try {
-        const result = invokeFunc(lastThis, lastArgs);
-        // Handle async rejections
-        if (result instanceof Promise) {
-          result.catch(() => {
-            // Error already propagated to pending promises in invokeFunc
-            // This catch prevents unhandled promise rejection
-          });
+        const res = invokeFunc(lastThis, lastArgs);
+        if (res && typeof res.then === 'function') {
+          res.catch(() => {});
         }
-        return result;
-      } catch (error) {
-        // Error was already handled in invokeFunc
+        return res;
+      }
+      catch (error) {
         return;
       }
     }
-    
-    // Resolve any remaining promises with the last result
+
     pendingPromises.forEach(({ resolve }) => resolve(result));
     pendingPromises = [];
     lastArgs = lastThis = undefined;
@@ -204,17 +210,15 @@ export const debounce = (func, wait, options = {}) => {
   function debounced(...args) {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
-    
+
     lastArgs = args;
     lastThis = this;
     lastCallTime = time;
 
-    // Track first call time for maxWait
     if (firstCallTime === undefined) {
       firstCallTime = time;
     }
 
-    // Check if signal is aborted
     if (signal?.aborted) {
       const error = new DOMException('The operation was aborted', 'AbortError');
       return Promise.reject(error);
@@ -223,14 +227,12 @@ export const debounce = (func, wait, options = {}) => {
     if (isInvoking) {
       if (timeoutId === undefined) {
         const leadingResult = leadingEdge(this, args);
-        
-        // For leading edge sync functions, return the result directly
-        if (leading && !(leadingResult instanceof Promise)) {
+
+        if (leading && !(leadingResult && typeof leadingResult.then === 'function')) {
           return leadingResult;
         }
-        
-        // For leading edge async functions or non-leading, return/create promise
-        if (leadingResult instanceof Promise) {
+
+        if (leadingResult && typeof leadingResult.then === 'function') {
           return leadingResult;
         }
       }
@@ -238,8 +240,7 @@ export const debounce = (func, wait, options = {}) => {
 
     if (timeoutId === undefined && !isInvoking) {
       timeoutId = setTimeout(timerExpired, wait);
-      
-      // Set maxWait timer on first call if specified
+
       if (maxWait !== undefined && maxTimeoutId === undefined) {
         maxTimeoutId = setTimeout(() => {
           if (timeoutId !== undefined) {
@@ -248,49 +249,43 @@ export const debounce = (func, wait, options = {}) => {
           }
           maxTimeoutId = undefined;
           try {
-            const result = invokeFunc(lastThis, lastArgs);
-            // Handle async rejections
-            if (result instanceof Promise) {
-              result.catch(() => {
-                // Error already propagated to pending promises in invokeFunc
-                // This catch prevents unhandled promise rejection
-              });
+            const res = invokeFunc(lastThis, lastArgs);
+            if (res && typeof res.then === 'function') {
+              res.catch(() => {});
             }
-          } catch (error) {
-            // Sync errors already handled in invokeFunc
-            // This catch is for any other edge cases
           }
+          catch (error) {}
         }, maxWait);
       }
     }
 
-    // Return a promise for non-leading calls or when already pending
     return new Promise((resolve, reject) => {
       if (rejectSkipped && timeoutId !== undefined && !isInvoking && pendingPromises.length > 0) {
-        // Previous calls are being skipped by this new call
         const skippedPromises = [...pendingPromises];
-        pendingPromises = [{ resolve, reject }]; // This call will eventually execute
-        
-        // Reject all previous promises that were skipped
+        pendingPromises = [{ resolve, reject }];
+
         skippedPromises.forEach(({ reject: rejectPrevious, args: prevArgs }) => {
           rejectPrevious({
             code: 'DEBOUNCED',
             message: 'Call was skipped due to debounce',
-            replacedBy: prevArgs || args
+            replacedBy: prevArgs || args,
           });
         });
         return;
       }
-      
+
       pendingPromises.push({ resolve, reject, args });
     });
   }
 
   debounced.cancel = () => {
     cancel();
-    const abortError = new DOMException('The operation was aborted', 'AbortError');
-    pendingPromises.forEach(({ reject }) => reject(abortError));
+    const cancellationError = new Error('The operation was cancelled.');
+    cancellationError.code = 'CANCELLED';
+    pendingPromises.forEach(({ reject }) => reject(cancellationError));
     pendingPromises = [];
+    cleanupListener();
+    return Promise.resolve();
   };
 
   debounced.flush = flush;
@@ -304,10 +299,9 @@ export const throttle = (func, wait, options = {}) => {
     rejectSkipped = false,
     leading = true,
     trailing = true,
-    abortController
+    abortController,
   } = options;
 
-  // Validate options
   if (!leading && !trailing) {
     throw new Error('At least one of leading or trailing must be true');
   }
@@ -323,12 +317,18 @@ export const throttle = (func, wait, options = {}) => {
 
   const signal = abortController?.signal;
 
-  // Handle abort signal
+  const cleanupListener = () => {
+    if (signal) {
+      signal.removeEventListener('abort', handleAbort);
+    }
+  };
+
   const handleAbort = () => {
     cancel();
     const abortError = new DOMException('The operation was aborted', 'AbortError');
     pendingPromises.forEach(({ reject }) => reject(abortError));
     pendingPromises = [];
+    cleanupListener();
   };
 
   if (signal?.aborted) {
@@ -338,33 +338,39 @@ export const throttle = (func, wait, options = {}) => {
 
   const invokeFunc = (thisArg, args) => {
     lastInvokeTime = Date.now();
-    
+
     try {
       const funcResult = func.apply(thisArg, args);
-      
-      if (funcResult instanceof Promise) {
+
+      if (funcResult && typeof funcResult.then === 'function') {
         return funcResult.then(
           value => {
             result = value;
             pendingPromises.forEach(({ resolve }) => resolve(value));
             pendingPromises = [];
+            cleanupListener();
             return value;
           },
           error => {
             pendingPromises.forEach(({ reject }) => reject(error));
             pendingPromises = [];
+            cleanupListener();
             throw error;
-          }
+          },
         );
-      } else {
+      }
+      else {
         result = funcResult;
         pendingPromises.forEach(({ resolve }) => resolve(funcResult));
         pendingPromises = [];
+        cleanupListener();
         return funcResult;
       }
-    } catch (error) {
+    }
+    catch (error) {
       pendingPromises.forEach(({ reject }) => reject(error));
       pendingPromises = [];
+      cleanupListener();
       throw error;
     }
   };
@@ -373,9 +379,9 @@ export const throttle = (func, wait, options = {}) => {
     const timeSinceLastCall = time - lastCallTime;
     const timeSinceLastInvoke = time - lastInvokeTime;
 
-    return (lastCallTime === undefined || 
-            timeSinceLastInvoke >= wait ||
-            timeSinceLastCall < 0);
+    return (lastCallTime === undefined
+      || timeSinceLastInvoke >= wait
+      || timeSinceLastCall < 0);
   };
 
   const remainingWait = (time) => {
@@ -396,24 +402,20 @@ export const throttle = (func, wait, options = {}) => {
         timeoutId = undefined;
         trailingInvoked = false;
         try {
-          const result = invokeFunc(lastThis, lastArgs);
-          // Handle async rejections
-          if (result instanceof Promise) {
-            result.catch(() => {
-              // Error already propagated to pending promises in invokeFunc
-              // This catch prevents unhandled promise rejection
-            });
+          const res = invokeFunc(lastThis, lastArgs);
+          if (res && typeof res.then === 'function') {
+            res.catch(() => {});
           }
-          return result;
-        } catch (error) {
-          // Error was already handled in invokeFunc
+          return res;
+        }
+        catch (error) {
           return;
         }
       }
       timeoutId = setTimeout(timerExpired, remainingTime);
-    } else {
+    }
+    else {
       timeoutId = undefined;
-      // Resolve any remaining promises with the last result
       pendingPromises.forEach(({ resolve }) => resolve(result));
       pendingPromises = [];
     }
@@ -443,12 +445,11 @@ export const throttle = (func, wait, options = {}) => {
   function throttled(...args) {
     const time = Date.now();
     const isInvoking = shouldInvoke(time);
-    
+
     lastArgs = args;
     lastThis = this;
     lastCallTime = time;
 
-    // Check if signal is aborted
     if (signal?.aborted) {
       const error = new DOMException('The operation was aborted', 'AbortError');
       return Promise.reject(error);
@@ -457,49 +458,48 @@ export const throttle = (func, wait, options = {}) => {
     if (isInvoking) {
       if (timeoutId === undefined) {
         const leadingResult = leadingEdge(this, args);
-        
-        // Set up trailing timeout if needed
+
         if (trailing) {
           timeoutId = setTimeout(timerExpired, wait);
         }
-        
-        // For leading edge sync functions, return the result directly
-        if (leading && !(leadingResult instanceof Promise)) {
+
+        if (leading && !(leadingResult && typeof leadingResult.then === 'function')) {
           return leadingResult;
         }
-        
-        // For leading edge async functions, return the promise
-        if (leadingResult instanceof Promise) {
+
+        if (leadingResult && typeof leadingResult.then === 'function') {
           return leadingResult;
         }
       }
-    } else {
-      // Not invoking immediately, set up timeout if not already set
+    }
+    else {
       if (timeoutId === undefined && trailing) {
         timeoutId = setTimeout(timerExpired, remainingWait(time));
       }
     }
 
-    // Return a promise for non-leading calls or when already pending
     return new Promise((resolve, reject) => {
       if (rejectSkipped && !isInvoking) {
         reject({
           code: 'THROTTLED',
           message: 'Call was skipped due to throttle',
-          replacedBy: args
+          replacedBy: args,
         });
         return;
       }
-      
+
       pendingPromises.push({ resolve, reject });
     });
   }
 
   throttled.cancel = () => {
     cancel();
-    const abortError = new DOMException('The operation was aborted', 'AbortError');
-    pendingPromises.forEach(({ reject }) => reject(abortError));
+    const cancellationError = new Error('The operation was cancelled.');
+    cancellationError.code = 'CANCELLED';
+    pendingPromises.forEach(({ reject }) => reject(cancellationError));
     pendingPromises = [];
+    cleanupListener();
+    return Promise.resolve();
   };
 
   throttled.flush = flush;

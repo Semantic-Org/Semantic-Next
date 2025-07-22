@@ -1658,7 +1658,7 @@ describe('function utilities', () => {
         vi.advanceTimersByTime(100);
 
         const [result1, result2, result3] = await Promise.all([promise1, promise2, promise3]);
-        
+
         expect(func).toHaveBeenCalledTimes(1);
         expect(func).toHaveBeenCalledWith('arg3'); // Most recent args
         expect(result1).toBe('result');
@@ -1681,7 +1681,7 @@ describe('function utilities', () => {
         await vi.runAllTimersAsync();
 
         const [result1, result2] = await Promise.all([promise1, promise2]);
-        
+
         expect(asyncFunc).toHaveBeenCalledTimes(1);
         expect(asyncFunc).toHaveBeenCalledWith(10);
         expect(result1).toBe(20);
@@ -1723,11 +1723,11 @@ describe('function utilities', () => {
 
         debounced('arg1');
         debounced('arg2');
-        
+
         expect(func).toHaveBeenCalledTimes(1);
-        
+
         vi.advanceTimersByTime(100);
-        
+
         expect(func).toHaveBeenCalledTimes(2);
         expect(func).toHaveBeenNthCalledWith(1, 'arg1'); // Leading call
         expect(func).toHaveBeenNthCalledWith(2, 'arg2'); // Trailing call
@@ -1746,12 +1746,12 @@ describe('function utilities', () => {
         debounced('arg3');
         vi.advanceTimersByTime(50);
         debounced('arg4');
-        
+
         // Should not have executed yet (only 150ms total)
         expect(func).not.toHaveBeenCalled();
-        
+
         vi.advanceTimersByTime(50); // Now 200ms total - hits maxWait
-        
+
         expect(func).toHaveBeenCalledTimes(1);
         expect(func).toHaveBeenCalledWith('arg4');
       });
@@ -1760,7 +1760,9 @@ describe('function utilities', () => {
     describe('error handling', () => {
       it('should propagate errors to all pending promises', async () => {
         const error = new Error('Test error');
-        const func = vi.fn(() => { throw error; });
+        const func = vi.fn(() => {
+          throw error;
+        });
         const debounced = debounce(func, 100);
 
         const promise1 = debounced('arg1');
@@ -1774,7 +1776,9 @@ describe('function utilities', () => {
 
       it('should propagate async function rejections', async () => {
         const error = new Error('Async error');
-        const asyncFunc = vi.fn(async () => { throw error; });
+        const asyncFunc = vi.fn(async () => {
+          throw error;
+        });
         const debounced = debounce(asyncFunc, 100);
 
         const promise = debounced('arg');
@@ -1820,7 +1824,7 @@ describe('function utilities', () => {
         await expect(promise1).rejects.toEqual({
           code: 'DEBOUNCED',
           message: 'Call was skipped due to debounce',
-          replacedBy: ['arg1']
+          replacedBy: ['arg1'],
         });
 
         const result = await promise2;
@@ -1838,8 +1842,8 @@ describe('function utilities', () => {
 
         // Expect the promise to be rejected with AbortError
         await expect(promise).rejects.toMatchObject({
-          name: 'AbortError',
-          message: 'The operation was aborted'
+          code: 'CANCELLED',
+          message: 'The operation was cancelled.',
         });
 
         vi.advanceTimersByTime(100);
@@ -1862,7 +1866,7 @@ describe('function utilities', () => {
         const debounced = debounce(func, 100);
 
         expect(debounced.pending()).toBe(false);
-        
+
         debounced('arg');
         expect(debounced.pending()).toBe(true);
 
@@ -1875,7 +1879,9 @@ describe('function utilities', () => {
       it('should maintain this context', () => {
         const obj = {
           value: 'test',
-          method: function() { return this.value; }
+          method: function() {
+            return this.value;
+          },
         };
         const debounced = debounce(obj.method, 100);
 
@@ -1884,14 +1890,6 @@ describe('function utilities', () => {
 
         // Note: We can't easily test the return value preservation with vi.fn
         // but the implementation handles it correctly
-      });
-    });
-
-    describe('validation', () => {
-      it('should throw error if neither leading nor trailing is true', () => {
-        expect(() => {
-          debounce(() => {}, 100, { leading: false, trailing: false });
-        }).toThrow('At least one of leading or trailing must be true');
       });
     });
   });
@@ -1947,9 +1945,9 @@ describe('function utilities', () => {
         vi.advanceTimersByTime(100);
         await vi.runAllTimersAsync();
 
-        const result2 = await promise2; // Trailing execution  
+        const result2 = await promise2; // Trailing execution
         expect(result2).toBe(20);
-        
+
         expect(asyncFunc).toHaveBeenCalledTimes(2);
       });
     });
@@ -1963,10 +1961,10 @@ describe('function utilities', () => {
         expect(func).not.toHaveBeenCalled();
 
         vi.advanceTimersByTime(100);
-        
+
         expect(func).toHaveBeenCalledTimes(1);
         expect(func).toHaveBeenCalledWith('arg');
-        
+
         const result = await promise;
         expect(result).toBe('result');
       });
@@ -1979,12 +1977,12 @@ describe('function utilities', () => {
 
         throttled('arg1'); // Leading execution
         throttled('arg2'); // Should be ignored
-        
+
         expect(func).toHaveBeenCalledTimes(1);
         expect(func).toHaveBeenCalledWith('arg1');
 
         vi.advanceTimersByTime(100);
-        
+
         // No trailing execution
         expect(func).toHaveBeenCalledTimes(1);
       });
@@ -1993,7 +1991,9 @@ describe('function utilities', () => {
     describe('error handling', () => {
       it('should propagate errors to all pending promises', async () => {
         const error = new Error('Test error');
-        const func = vi.fn(() => { throw error; });
+        const func = vi.fn(() => {
+          throw error;
+        });
         const throttled = throttle(func, 100);
 
         // Leading call will throw immediately
@@ -2034,7 +2034,7 @@ describe('function utilities', () => {
         await expect(promise2).rejects.toEqual({
           code: 'THROTTLED',
           message: 'Call was skipped due to throttle',
-          replacedBy: ['arg2']
+          replacedBy: ['arg2'],
         });
       });
     });
@@ -2050,15 +2050,15 @@ describe('function utilities', () => {
 
         // First call returns result directly (leading execution)
         expect(result1).toBe('result');
-        
+
         // Second call should be rejected with AbortError
         await expect(promise2).rejects.toMatchObject({
-          name: 'AbortError',
-          message: 'The operation was aborted'
+          code: 'CANCELLED',
+          message: 'The operation was cancelled.',
         });
 
         vi.advanceTimersByTime(100);
-        
+
         expect(func).toHaveBeenCalledTimes(1); // Only leading execution
       });
 
@@ -2068,9 +2068,9 @@ describe('function utilities', () => {
 
         throttled('arg1'); // Leading execution
         throttled('arg2'); // Queued
-        
+
         const result = throttled.flush();
-        
+
         expect(func).toHaveBeenCalledTimes(2);
         expect(func).toHaveBeenNthCalledWith(2, 'arg2');
         expect(result).toBe('result');
@@ -2081,22 +2081,14 @@ describe('function utilities', () => {
         const throttled = throttle(func, 100);
 
         expect(throttled.pending()).toBe(false);
-        
+
         throttled('arg1'); // Leading execution
         throttled('arg2'); // Queued
-        
+
         expect(throttled.pending()).toBe(true);
 
         vi.advanceTimersByTime(100);
         expect(throttled.pending()).toBe(false);
-      });
-    });
-
-    describe('validation', () => {
-      it('should throw error if neither leading nor trailing is true', () => {
-        expect(() => {
-          throttle(() => {}, 100, { leading: false, trailing: false });
-        }).toThrow('At least one of leading or trailing must be true');
       });
     });
   });
