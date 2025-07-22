@@ -1,0 +1,23 @@
+<div class="user-card {activeIf isSelected}">
+  <div class="header">
+    <h3>{name}</h3>
+    <span class="role">{role}</span>
+  </div>
+  <div class="content">
+    {#if hasAvatar}
+      <img src="{avatarUrl}" alt="{name}" class="avatar">
+    {/if}
+    <div class="details">
+      <p>{bio}</p>
+      {#if isOnline}
+        <span class="status online">Online</span>
+      {else}
+        <span class="status offline">Offline</span>
+      {/if}
+    </div>
+  </div>
+  <div class="actions">
+    <ui-button class="primary">View Profile</ui-button>
+    <ui-button class="secondary {disabledIf not canMessage}">Message</ui-button>
+  </div>
+</div>
