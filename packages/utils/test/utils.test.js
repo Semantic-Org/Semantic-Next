@@ -1668,7 +1668,7 @@ describe('function utilities', () => {
 
       it('should handle async functions correctly', async () => {
         const asyncFunc = vi.fn(async (x) => {
-          // Use vi.advanceTimersToNextTimer instead of real delay with fake timers
+          // Use vi.advanceTimersByTime(100) and vi.runAllTimersAsync() to simulate delay with fake timers
           return x * 2;
         });
         const debounced = debounce(asyncFunc, 100);
