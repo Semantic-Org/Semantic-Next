@@ -138,34 +138,6 @@ openLink('https://example.com', { newWindow: true });
 openLink('https://example.com', { event: clickEvent });
 ```
 
-### getText
-
-```javascript
-async function getText(src)
-```
-
-Fetches text content from a URL.
-
-> **Component Usage** `getText` can be used to retrieve html and css for use in a web component on the client from a separate file without a compilation step.
-
-#### Parameters
-
-| Name | Type   | Description |
-|------|--------|-------------|
-| src  | string | The URL to fetch from |
-
-#### Returns
-
-A Promise that resolves with the text content.
-
-#### Example
-
-```javascript
-import { getText } from '@semantic-ui/utils';
-
-const content = await getText('https://example.com/content.txt');
-console.log(content);
-```
 
 ### getJSON
 

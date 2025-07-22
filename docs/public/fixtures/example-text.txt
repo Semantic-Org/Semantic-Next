@@ -1,0 +1,6 @@
+This is example text content for testing the getText utility.
+
+It includes multiple paragraphs to demonstrate how the getText function
+retrieves plain text from remote sources.
+
+This file serves as sample data for the documentation examples.

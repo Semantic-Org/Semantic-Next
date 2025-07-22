@@ -1,0 +1,5 @@
+.status {
+  margin-top: var(--compact-spacing);
+  color: var(--text-color);
+  opacity: 0.8;
+}
