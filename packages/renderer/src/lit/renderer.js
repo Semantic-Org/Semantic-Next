@@ -14,10 +14,10 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
+import { reactiveAsync } from './directives/reactive-async.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
-import { reactiveAsync } from './directives/reactive-async.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
@@ -347,7 +347,7 @@ export class LitRenderer {
     // Replace parenthetical groups with placeholders
     const processedExpr = expr.replace(LitRenderer.PARENS_REGEXP, match => {
       const placeholder = `__GROUP${groups.length}__`;
-      groups.push(match.slice(1,-1)); // remove parens ()
+      groups.push(match.slice(1, -1)); // remove parens ()
       return placeholder;
     });
 
@@ -356,7 +356,7 @@ export class LitRenderer {
     const getValue = (token) => {
       const match = token.match(/__GROUP(\d+)__/);
       return match ? groups[parseInt(match[1], 10)] : token;
-    }
+    };
     const parse = (tokens) => {
       const result = [];
       while (tokens.length > 0) {
@@ -368,7 +368,7 @@ export class LitRenderer {
           return result;
         }
         else {
-          result.push( getValue(token) );
+          result.push(getValue(token));
         }
       }
       return result;
@@ -392,12 +392,11 @@ export class LitRenderer {
       });
     }
     try {
-
       // Create a proxy handler that automatically resolves signals and functions
       // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with#creating_dynamic_namespaces_using_the_with_statement_and_a_proxy>
       const proxyHandler = {
         has(target, key) {
-          if(key in target) {
+          if (key in target) {
             return true;
           }
           return false;
@@ -414,23 +413,25 @@ export class LitRenderer {
             return new Proxy(value, {
               apply(targetFn, thisArg, args) {
                 return targetFn.apply(thisArg, args);
-              }
+              },
             });
           }
           return value;
-        }
+        },
       };
 
       // Create a proxy for the context
-      const proxiedContext = new Proxy({...context}, proxyHandler);
+      const proxiedContext = new Proxy({ ...context }, proxyHandler);
 
       // Use with statement to set the evaluation scope to our proxy
-      result = new Function('ctx', `
+      result = new Function(
+        'ctx',
+        `
         with (ctx) {
           return ${code};
         }
-      `)(proxiedContext);
-      result = new Function(...keys, `return ${code}`)(...values);
+      `,
+      )(proxiedContext);
     }
     catch (e) {
       // this token is not valid javascript
@@ -456,7 +457,7 @@ export class LitRenderer {
         // if we found a value and we are recursing we will need to return the function
         // to pass through arguments
         visited.delete(expression);
-        if(visited.size > 0) {
+        if (visited.size > 0) {
           return value;
         }
 
@@ -467,7 +468,7 @@ export class LitRenderer {
 
     // we will need to parse this expression by token
     let expressionArray;
-    if(!isArray(expression)) {
+    if (!isArray(expression)) {
       // wrap {} or [] in parens if used in lisp style like `getValue { foo: 'baz' }`
       expression = this.addParensToExpression(expression);
       expressionArray = this.getExpressionArray(expression);
