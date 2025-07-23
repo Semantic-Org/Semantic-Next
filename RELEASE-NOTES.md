@@ -6,6 +6,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.14.2 - 07.23.2025
+* **Bug** - Fix conditionals in HTML attributes not rendering correctly.
+* **Bug** - Fix reactive data expressions in properties and events being incorrectly stringified.
+
 # Version 0.14.1 - 7.22.2025
 * **Chore*** - Update all npm deps for project and docs.
 * **Bug** - Fix bug with {#html} blocks not rendering properly with ssr.
