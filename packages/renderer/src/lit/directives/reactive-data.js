@@ -1,6 +1,6 @@
 import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/utils';
@@ -77,20 +77,35 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
     }
 
-    // arrays and objects are serialized for use in web component attributes
-    // maybe should check part?
-    if (isArray(reactiveValue) || isObject(reactiveValue)) {
-      try {
-        reactiveValue = JSON.stringify(reactiveValue);
-      }
-      catch (e) {
-        // non serializable
-      }
+    return this.formatForPart(reactiveValue);
+  }
+
+  formatForPart(reactiveValue) {
+    switch (this.partInfo.type) {
+      case PartType.PROPERTY:
+      case PartType.EVENT:
+        return reactiveValue;
+
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+      default:
+        // Attributes need serialization for objects/arrays
+        if (isArray(reactiveValue) || isObject(reactiveValue)) {
+          try {
+            reactiveValue = JSON.stringify(reactiveValue);
+          }
+          catch (e) {
+            // non serializable - convert to string
+            reactiveValue = String(reactiveValue);
+          }
+        }
+
+        if (this.settings.unsafeHTML) {
+          reactiveValue = unsafeHTML(reactiveValue);
+        }
+
+        return reactiveValue;
     }
-    if (this.settings.unsafeHTML) {
-      reactiveValue = unsafeHTML(reactiveValue);
-    }
-    return reactiveValue;
   }
 
   disconnected() {
