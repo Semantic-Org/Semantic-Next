@@ -6,6 +6,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.14.1 - 7.22.2025
+* **Chore*** - Update all npm deps for project and docs.
+* **Bug** - Fix bug with {#html} blocks not rendering properly with ssr.
+
 # Version 0.14.0 - 07.22.2025
 
 ## Components
