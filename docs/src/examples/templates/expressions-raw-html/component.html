@@ -1,0 +1,31 @@
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Method HTML</td>
+      <td><code>{#html escapeHTML "{#html getNotification}"}</code></td>
+      <td>{#html getNotification}</td>
+    </tr>
+    <tr>
+      <td>Dynamic Badge</td>
+      <td><code>{#html escapeHTML "{#html getStatusBadge}"}</code></td>
+      <td>{#html getStatusBadge}</td>
+    </tr>
+    <tr>
+      <td>Instance SVG</td>
+      <td><code>{#html escapeHTML "{#html iconSVG}"}</code></td>
+      <td>{#html iconSVG}</td>
+    </tr>
+    <tr>
+      <td>Style Injection</td>
+      <td><code>{#html escapeHTML "<style>{#html getStyles}</style>"}</code></td>
+<td><style>{#html getStyles}</style><button class="themed-button">Themed Button</button></td>
+    </tr>
+  </tbody>
+</table>
