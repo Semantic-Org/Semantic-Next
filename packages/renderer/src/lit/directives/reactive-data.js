@@ -39,9 +39,6 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
       else {
         value = this.getReactiveValue();
-        if (this.settings.unsafeHTML) {
-          value = unsafeHTML(value);
-        }
       }
       return value;
     }
@@ -59,9 +56,6 @@ export class ReactiveDataDirective extends AsyncDirective {
         return;
       }
       value = this.getReactiveValue();
-      if (this.settings.unsafeHTML) {
-        value = unsafeHTML(value);
-      }
       if (!computation.firstRun) {
         this.setValue(value);
       }
@@ -92,6 +86,9 @@ export class ReactiveDataDirective extends AsyncDirective {
       catch (e) {
         // non serializable
       }
+    }
+    if (this.settings.unsafeHTML) {
+      reactiveValue = unsafeHTML(reactiveValue);
     }
     return reactiveValue;
   }
