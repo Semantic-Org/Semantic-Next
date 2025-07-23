@@ -1,0 +1,84 @@
+<h4>Simple Spaced Functions</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Two arguments</td>
+      <td><code>{#html "{formatName firstName lastName}"}</code></td>
+      <td>{formatName firstName lastName}</td>
+    </tr>
+    <tr>
+      <td>String concatenation</td>
+      <td><code>{#html "{concat firstName ' lives in ' city}"}</code></td>
+      <td>{concat firstName ' lives in ' city}</td>
+    </tr>
+    <tr>
+      <td>Number calculation</td>
+      <td><code>{#html "{multiply age 2}"}</code></td>
+      <td>{multiply age 2}</td>
+    </tr>
+    <tr>
+      <td>With object property</td>
+      <td><code>{#html "{getRole user 'Role: '}"}</code></td>
+      <td>{getRole user 'Role: '}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Nested Expressions</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nested function call</td>
+      <td><code>{#html "{concat 'Full name: ' (formatName firstName lastName)}"}</code></td>
+      <td>{concat 'Full name: ' (formatName firstName lastName)}</td>
+    </tr>
+    <tr>
+      <td>Multiple nesting levels</td>
+      <td><code>{#html "{concat 'Name: ' (formatName firstName (concat lastName '!'))}"}</code></td>
+      <td>{concat 'Name: ' (formatName firstName (concat lastName '!'))}</td>
+    </tr>
+    <tr>
+      <td>Array with separator</td>
+      <td><code>{#html "{concat 'Colors: ' (joinWith items ', ')}"}</code></td>
+      <td>{concat 'Colors: ' (joinWith items ', ')}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Object and Array Literals</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>{#html "{getRole {name: 'Charlie', role: 'user'} 'Type: '}"}</code></td>
+      <td>{getRole {name: 'Charlie', role: 'user'} 'Type: '}</td>
+    </tr>
+    <tr>
+      <td><code>{#html "{concat 'Coords: ' (joinWith ['X', 'Y', 'Z'] '-')}"}</code></td>
+      <td>{concat 'Coords: ' (joinWith ['X', 'Y', 'Z'] '-')}</td>
+    </tr>
+    <tr>
+      <td><code>{#html "{multiply (numbers.0) (numbers.1)}"}</code></td>
+      <td>{multiply (numbers.0) (numbers.1)}</td>
+    </tr>
+  </tbody>
+</table>

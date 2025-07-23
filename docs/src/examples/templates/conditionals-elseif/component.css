@@ -1,0 +1,40 @@
+.weather {
+  padding: 1rem;
+  border-radius: 4px;
+
+  &.hot {
+    background-color: var(--red-5);
+    
+    .text {
+      color: var(--red);
+    }
+  }
+
+  &.warm {
+    background-color: var(--orange-5);
+    
+    .text {
+      color: var(--orange);
+    }
+  }
+
+  &.cool {
+    background-color: var(--blue-5);
+    
+    .text {
+      color: var(--blue);
+    }
+  }
+
+  &.cold {
+    background-color: var(--standard-5);
+    
+    .text {
+      color: var(--standard-60);
+    }
+  }
+
+  .text {
+    font-weight: bold;
+  }
+}

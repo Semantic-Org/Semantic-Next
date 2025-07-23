@@ -1,0 +1,60 @@
+<h4>Mixing Lisp and JavaScript Syntax</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Inlined ternary</td>
+      <td><code>{#html "{concat firstName ' is ' (age >= 18 ? 'an adult' : 'a minor')}"}</code></td>
+      <td>{concat firstName ' is ' (age >= 18 ? 'an adult' : 'a minor')}</td>
+    </tr>
+    <tr>
+      <td>Nested function calls</td>
+      <td><code>{#html "{concat 'Experience Level: ' (yearsOfExperience > 5 ? 'Senior' : 'Junior')}"}</code></td>
+      <td>{concat 'Experience Level: ' (yearsOfExperience > 5 ? 'Senior' : 'Junior')}</td>
+    </tr>
+    <tr>
+      <td>Array helper usage</td>
+      <td><code>{#html "{concat 'Max Score: ' (getMax(scores)) ', Min: ' (Math.min(...scores))}"}</code></td>
+      <td>{concat 'Max Score: ' (getMax(scores)) ', Min: ' (Math.min(...scores))}</td>
+    </tr>
+    <tr>
+      <td>Inline object literal</td>
+      <td><code>{#html "{getStatus {name: firstName, active: (age >= 21)}}"}</code></td>
+      <td>{getStatus {name: firstName, active: (age >= 21)}}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Complex Expressions</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Description</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>JS method chaining</td>
+      <td><code>{#html "{items.filter(item => item.startsWith('B')).join(' and ')}"}</code></td>
+      <td>{items.filter(item => item.startsWith('B')).join(' and ')}</td>
+    </tr>
+    <tr>
+      <td>Complex calculation</td>
+      <td><code>{#html "Average Price: ${(prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2)}"}</code></td>
+      <td>Average Price: ${(prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td>Mixed with property access</td>
+      <td><code>{#html "{concat user.name ': ' (user.level === 'premium' ? 'Premium Member' : 'Standard Member')}"}</code></td>
+      <td>{concat user.name ': ' (user.level === 'premium' ? 'Premium Member' : 'Standard Member')}</td>
+    </tr>
+  </tbody>
+</table>

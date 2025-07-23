@@ -1,0 +1,34 @@
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Age</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alice</td>
+      <td>25</td>
+      <td>
+        {#if age >= 18}
+          {#if hasLicense}
+            {#if hasInsurance}
+              <ui-icon icon="check" colored="green"/>
+              Can drive
+            {else}
+              <ui-icon icon="alert triangle" colored="orange"/>
+              Needs insurance
+            {/if}
+          {else}
+            <ui-icon icon="x" colored="red"/>
+            No license
+          {/if}
+        {else}
+          <ui-icon icon="shield off"/>
+          Too young
+        {/if}
+      </td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,8 @@
+.status {
+  font-weight: bold;
+  color: var(--standard-40);
+
+  &.active {
+    color: var(--primary-text-color);
+  }
+}
