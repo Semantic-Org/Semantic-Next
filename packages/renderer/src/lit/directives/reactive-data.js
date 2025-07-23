@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { inArray, isServer, isArray, isObject, isClient } from '@semantic-ui/utils';
+import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
@@ -34,11 +34,14 @@ export class ReactiveDataDirective extends AsyncDirective {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
       let value;
-      if(isClient) {
+      if (isClient) {
         value = this.watchChanges();
       }
       else {
         value = this.getReactiveValue();
+        if (this.settings.unsafeHTML) {
+          value = unsafeHTML(value);
+        }
       }
       return value;
     }
