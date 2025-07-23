@@ -4,45 +4,32 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultState = {
-  firstName: 'Alice',
-  lastName: 'Smith',
-  age: 32,
-  city: 'Seattle',
-
-  numbers: [10, 25, 5, 30],
-  items: ['Red', 'Green', 'Blue', 'Yellow'],
-
-  user: {
-    name: 'Bob',
-    role: 'manager',
-    active: true,
+  items: [
+    { id: 1, name: 'Widget', active: true },
+    { id: 2, name: 'Gadget', active: false },
+    { id: 3, name: 'Doohickey', active: true },
+  ],
+  stats: {
+    total: 42,
+    active: 28,
+    pending: 14,
+    successCount: 28,
   },
-
-  scores: [88, 92, 76, 85],
+  status: 'success',
+  scores: [85, 92, 78, 95, 88],
+  user: {},
 };
 
 export default defineComponent({
-  tagName: 'template-expressions-javascript',
+  tagName: 'expression-examples',
   template,
   css,
   defaultState,
 
   createComponent() {
     return {
-      formatFullName(first, last) {
-        return `${first} ${last}`;
-      },
-
-      calculateAverage(numbers) {
-        return numbers.reduce((a, b) => a + b, 0) / numbers.length;
-      },
-
-      getTopScore(scores) {
-        return Math.max(...scores);
-      },
-
-      buildProfile(user, city) {
-        return `${user.name} (${user.role}) from ${city}`;
+      formatScore(score) {
+        return score >= 90 ? `${score} (excellent)` : `${score}`;
       },
     };
   },
