@@ -4,7 +4,7 @@
   "description": "Component specifications and definitions for UI components",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "sideEffects": false,
   "type": "module",
   "main": "src/index.js",
@@ -29,10 +29,10 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@semantic-ui/utils": "^0.14.0"
+    "@semantic-ui/utils": "^0.14.1"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.14.0",
+    "@semantic-ui/internal-scripts": "^0.14.1",
     "vitest": "^3.0.4"
   },
   "wireit": {
