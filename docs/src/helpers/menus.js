@@ -44,10 +44,11 @@ const subCategorySortOrder = {
     'Loops',
     'Expressions',
     'Expression Syntax',
-    'Subtemplates',
+    'Slots',
     'Snippets',
-    'Helpers',
+    'Subtemplates',
     'Async',
+    'Helpers',
   ],
   'Reactivity': [
     'Introduction',
