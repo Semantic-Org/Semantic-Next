@@ -53,7 +53,7 @@ const createComponent = ({ $, el, self, state, dispatchEvent, settings }) => ({
 
   setValueDebounced: debounce((value) => {
     self.setValue(value);
-  }, { delay: settings.debounceInterval }),
+  }, { wait: settings.debounceInterval }),
 });
 
 const events = {
