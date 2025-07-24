@@ -23,26 +23,15 @@ import {
   if you give have a line to breakpoint on
 */
 export const TemplateHelpers = {
+  // Logical helpers
   exists(a) {
     return !isEmpty(a);
   },
   isEmpty(a) {
     return isEmpty(a);
   },
-  stringify(a) {
-    return JSON.stringify(a);
-  },
-  count(a) {
-    return a?.length || 0;
-  },
   hasAny(a) {
     return a?.length > 0;
-  },
-  range(start, stop, step = 1) {
-    return range(start, stop, step);
-  },
-  concat(...args) {
-    return args.join('');
   },
   both(a, b) {
     return a && b;
@@ -50,68 +39,14 @@ export const TemplateHelpers = {
   either(a, b) {
     return a || b;
   },
-  join(array = [], delimiter = ' ', spaceAfter = false) {
-    if (array.length == 0) {
-      return;
-    }
-    const value = array.join(delimiter).trim();
-    return (spaceAfter)
-      ? `${value} `
-      : value;
-  },
-  classes(classes, spaceAfter = true) {
-    return TemplateHelpers.join(classes, ' ', true);
-  },
-  joinComma(array = [], oxford, quotes) {
-    return joinWords(array, {
-      separator: ', ',
-      lastSeparator: ' and ',
-      oxford: oxford,
-      quotes: quotes,
-    });
-  },
-  classIf(expr, trueClass = '', falseClass = '') {
-    let val = expr ? trueClass : falseClass;
-    return (val)
-      ? `${val} `
-      : '';
-  },
-  classMap(classObj) {
-    let classNames = [];
-    each(classObj, (condition, className) => {
-      if (condition) {
-        classNames.push(className);
-      }
-    });
-    return (classNames.length) ? `${classNames.join(' ')} ` : '';
-  },
   maybe(expr, trueExpr, falseExpr) {
     return expr ? trueExpr : falseExpr;
-  },
-  activeIf(expr) {
-    return TemplateHelpers.classIf(expr, 'active', '');
-  },
-  selectedIf(expr) {
-    return TemplateHelpers.classIf(expr, 'selected', '');
-  },
-  capitalize(text = '') {
-    return capitalize(text);
-  },
-  titleCase(text = '') {
-    return toTitleCase(text);
-  },
-  disabledIf(expr) {
-    return TemplateHelpers.classIf(expr, 'disabled', '');
-  },
-  checkedIf(expr) {
-    return TemplateHelpers.classIf(expr, 'checked', '');
-  },
-  maybePlural(value, plural = 's') {
-    return value == 1 ? '' : plural;
   },
   not(a) {
     return !a;
   },
+
+  // Comparison helpers
   is(a, b) {
     return a == b;
   },
@@ -139,32 +74,25 @@ export const TemplateHelpers = {
   lessThanEquals(a, b) {
     return a <= b;
   },
-  numberFromIndex(a) {
-    return a + 1;
+
+  // String helpers
+  concat(...args) {
+    return args.join('');
   },
-  formatDate(date = new Date(), format = 'L', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  capitalize(text = '') {
+    return capitalize(text);
   },
-  formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  titleCase(text = '') {
+    return toTitleCase(text);
   },
-  formatDateTimeSeconds(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
-    return formatDate(date, format, options);
+  stringify(a) {
+    return JSON.stringify(a);
   },
-  log(...args) {
-    console.log(...args);
-  },
-  debugger() {
-    debugger;
+  maybePlural(value, plural = 's') {
+    return value == 1 ? '' : plural;
   },
   tokenize(string = '') {
     return tokenize(string);
-  },
-  debugReactivity() {
-    Reaction.getSource();
-  },
-  arrayFromObject(obj) {
-    return arrayFromObject(obj);
   },
   escapeHTML(string) {
     return escapeHTML(string);
@@ -175,11 +103,88 @@ export const TemplateHelpers = {
   truncate(text, length, options) {
     return truncate(text, length, options);
   },
+  lowercase(text) {
+    return text?.toLowerCase?.() || text;
+  },
+  uppercase(text) {
+    return text?.toUpperCase?.() || text;
+  },
+
+  // CSS helpers
+  classIf(expr, trueClass = '', falseClass = '') {
+    let val = expr ? trueClass : falseClass;
+    return (val)
+      ? `${val} `
+      : '';
+  },
+  classMap(classObj) {
+    let classNames = [];
+    each(classObj, (condition, className) => {
+      if (condition) {
+        classNames.push(className);
+      }
+    });
+    return (classNames.length) ? `${classNames.join(' ')} ` : '';
+  },
+  activeIf(expr) {
+    return TemplateHelpers.classIf(expr, 'active', '');
+  },
+  selectedIf(expr) {
+    return TemplateHelpers.classIf(expr, 'selected', '');
+  },
+  disabledIf(expr) {
+    return TemplateHelpers.classIf(expr, 'disabled', '');
+  },
+  checkedIf(expr) {
+    return TemplateHelpers.classIf(expr, 'checked', '');
+  },
+
+  // Array & Object helpers
   first(array) {
     return first(array);
   },
   last(array) {
     return last(array);
+  },
+  count(a) {
+    return a?.length || 0;
+  },
+  join(array = [], delimiter = ' ', spaceAfter = false) {
+    if (array.length == 0) {
+      return;
+    }
+    const value = array.join(delimiter).trim();
+    return (spaceAfter)
+      ? `${value} `
+      : value;
+  },
+  classes(classes, spaceAfter = true) {
+    return TemplateHelpers.join(classes, ' ', true);
+  },
+  joinComma(array = [], oxford, quotes) {
+    return joinWords(array, {
+      separator: ', ',
+      lastSeparator: ' and ',
+      oxford: oxford,
+      quotes: quotes,
+    });
+  },
+  range(start, stop, step = 1) {
+    return range(start, stop, step);
+  },
+  arrayFromObject(obj) {
+    return arrayFromObject(obj);
+  },
+
+  // Date & Number helpers
+  formatDate(date = new Date(), format = 'L', options = { timezone: 'local' }) {
+    return formatDate(date, format, options);
+  },
+  formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {
+    return formatDate(date, format, options);
+  },
+  formatDateTimeSeconds(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
+    return formatDate(date, format, options);
   },
   roundNumber(number, precision) {
     return roundNumber(number, precision);
@@ -190,16 +195,24 @@ export const TemplateHelpers = {
   roundDecimal(number, precision) {
     return roundDecimal(number, precision);
   },
-  lowercase(text) {
-    return text?.toLowerCase?.() || text;
+  numberFromIndex(a) {
+    return a + 1;
   },
-  uppercase(text) {
-    return text?.toUpperCase?.() || text;
+
+  // Global
+  log(...args) {
+    console.log(...args);
+  },
+  debugger(...args) {
+    debugger;
+  },
+  debugReactivity() {
+    Reaction.getSource();
   },
   guard: (value) => {
     return Reaction.guard(wrapFunction(value));
   },
   nonreactive: (value) => {
-    return Reaction.nonReactive(wrapFunction(value));
+    return Reaction.nonreactive(wrapFunction(value));
   },
 };
