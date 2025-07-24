@@ -1,6 +1,7 @@
+import { TemplateHelpers } from '@semantic-ui/templating';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { adoptStylesheet } from '../../src/helpers/adopt-stylesheet.js';
-import { defineComponent, WebComponentBase } from '../../src/index.js';
+import { defineComponent, registerHelper, registerHelpers, WebComponentBase } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {
@@ -168,7 +169,7 @@ describe('Component', () => {
     it('should handle String property type correctly', () => {
       const strProp = WebComponentBase.getPropertySettings({
         name: 'testProp',
-        type: String
+        type: String,
       });
       expect(strProp.type).toBe(String);
       expect(strProp.attribute).toBe(true);
@@ -178,7 +179,7 @@ describe('Component', () => {
     it('should handle Boolean property type correctly', () => {
       const boolProp = WebComponentBase.getPropertySettings({
         name: 'testProp',
-        type: Boolean
+        type: Boolean,
       });
       expect(boolProp.type).toBe(Boolean);
       expect(boolProp.attribute).toBe(true);
@@ -201,7 +202,7 @@ describe('Component', () => {
     it('should handle Function property type correctly', () => {
       const funcProp = WebComponentBase.getPropertySettings({
         name: 'testProp',
-        type: Function
+        type: Function,
       });
       expect(funcProp.type).toBe(Function);
       expect(funcProp.attribute).toBe(false); // Functions can't be serialized to attributes
@@ -215,7 +216,7 @@ describe('Component', () => {
       const classProp = WebComponentBase.getPropertySettings({
         name: 'testProp',
         type: CustomClass,
-        propertyOnly: true
+        propertyOnly: true,
       });
       expect(classProp.attribute).toBe(false);
       expect(classProp.hasChanged).toBeDefined();
@@ -230,6 +231,62 @@ describe('Component', () => {
     it('should export adoptStylesheet function', () => {
       expect(adoptStylesheet).toBeDefined();
       expect(typeof adoptStylesheet).toBe('function');
+    });
+
+    it('should export registerHelper function', () => {
+      expect(registerHelper).toBeDefined();
+      expect(typeof registerHelper).toBe('function');
+    });
+
+    it('should export registerHelpers function', () => {
+      expect(registerHelpers).toBeDefined();
+      expect(typeof registerHelpers).toBe('function');
+    });
+
+    it('should register a single helper function', () => {
+      // Register a test helper
+      registerHelper('testHelper', (value) => `test-${value}`);
+
+      // Verify it was added to TemplateHelpers
+      expect(TemplateHelpers.testHelper).toBeDefined();
+      expect(typeof TemplateHelpers.testHelper).toBe('function');
+      expect(TemplateHelpers.testHelper('foo')).toBe('test-foo');
+    });
+
+    it('should register multiple helper functions', () => {
+      // Register multiple helpers
+      registerHelpers({
+        multiHelper1: (value) => `multi1-${value}`,
+        multiHelper2: (a, b) => a + b,
+        multiHelper3: () => 'static',
+      });
+
+      // Verify all were added
+      expect(TemplateHelpers.multiHelper1).toBeDefined();
+      expect(TemplateHelpers.multiHelper2).toBeDefined();
+      expect(TemplateHelpers.multiHelper3).toBeDefined();
+
+      // Test functionality
+      expect(TemplateHelpers.multiHelper1('test')).toBe('multi1-test');
+      expect(TemplateHelpers.multiHelper2(5, 3)).toBe(8);
+      expect(TemplateHelpers.multiHelper3()).toBe('static');
+    });
+
+    it('should make helpers available in component templates', () => {
+      // Register a helper
+      registerHelper('customFormatter', (value) => `formatted:${value}`);
+
+      // Define a component that uses the helper
+      const TestComponent = defineComponent({
+        tagName: 'test-custom-helper',
+        template: '<div>{customFormatter(value)}</div>',
+        defaultState: {
+          value: 'hello',
+        },
+      });
+
+      // Verify the component was created successfully
+      expect(TestComponent).toBeDefined();
     });
   });
 
@@ -670,20 +727,20 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             getParent() {
               return findParent('testParent');
-            }
-          })
+            },
+          }),
         });
 
         // Define parent component AFTER child
         defineComponent({
           tagName: 'nav-test-find-parent',
-          templateName: 'testParent', 
+          templateName: 'testParent',
           template: '<div class="parent"><nav-test-find-child></nav-test-find-child></div>',
           createComponent: ({ findChild }) => ({
             getChild() {
               return findChild('testChild');
-            }
-          })
+            },
+          }),
         });
 
         // Create parent element and add to DOM
@@ -693,20 +750,20 @@ describe('Component', () => {
 
         // Wait for components to be rendered and initialized
         await parentElement.updateComplete;
-        
+
         // Wait for child components to also be rendered
         const childElement = parentElement.querySelector('nav-test-find-child');
         if (childElement) {
           await childElement.updateComplete;
         }
-        
+
         await new Promise(resolve => setTimeout(resolve, 300));
 
         // Test that parent can find child
         const parentComponent = parentElement.component;
         expect(parentComponent).toBeDefined();
         expect(parentComponent.getChild).toBeDefined();
-        
+
         const childComponent = parentComponent.getChild();
         expect(childComponent).toBeDefined();
         expect(childComponent.templateName).toBe('testChild');
@@ -720,8 +777,8 @@ describe('Component', () => {
           createComponent: ({ findChild }) => ({
             findNonExistentChild() {
               return findChild('nonExistentChild');
-            }
-          })
+            },
+          }),
         });
 
         const parentElement = document.createElement('test-no-child-parent');
@@ -740,14 +797,14 @@ describe('Component', () => {
         const GrandChildComponent = defineComponent({
           tagName: 'test-grandchild',
           templateName: 'grandChild',
-          template: '<div class="grandchild">Grandchild Content</div>'
+          template: '<div class="grandchild">Grandchild Content</div>',
         });
 
         // Define child component with shadow DOM
         const ChildComponent = defineComponent({
           tagName: 'test-shadow-child',
           templateName: 'shadowChild',
-          template: '<div class="child"><test-grandchild></test-grandchild></div>'
+          template: '<div class="child"><test-grandchild></test-grandchild></div>',
         });
 
         // Define parent component
@@ -761,8 +818,8 @@ describe('Component', () => {
             },
             findGrandChild() {
               return findChild('grandChild');
-            }
-          })
+            },
+          }),
         });
 
         const parentElement = document.createElement('test-shadow-parent');
@@ -772,7 +829,7 @@ describe('Component', () => {
         await new Promise(resolve => setTimeout(resolve, 150));
 
         const parentComponent = parentElement.component;
-        
+
         // Should find direct child
         const directChild = parentComponent.findDirectChild();
         expect(directChild).toBeDefined();
@@ -791,7 +848,7 @@ describe('Component', () => {
         const ItemComponent = defineComponent({
           tagName: 'test-list-item',
           templateName: 'listItem',
-          template: '<div class="item">Item</div>'
+          template: '<div class="item">Item</div>',
         });
 
         // Define parent component with multiple children
@@ -811,8 +868,8 @@ describe('Component', () => {
             },
             getItemCount() {
               return this.getAllItems().length;
-            }
-          })
+            },
+          }),
         });
 
         const listElement = document.createElement('test-item-list');
@@ -823,7 +880,7 @@ describe('Component', () => {
 
         const listComponent = listElement.component;
         const items = listComponent.getAllItems();
-        
+
         expect(Array.isArray(items)).toBe(true);
         expect(items.length).toBe(3);
         items.forEach(item => {
@@ -839,8 +896,8 @@ describe('Component', () => {
           createComponent: ({ findChildren }) => ({
             findNonExistentChildren() {
               return findChildren('nonExistent');
-            }
-          })
+            },
+          }),
         });
 
         const parentElement = document.createElement('test-empty-parent');
@@ -851,7 +908,7 @@ describe('Component', () => {
 
         const parentComponent = parentElement.component;
         const result = parentComponent.findNonExistentChildren();
-        
+
         expect(Array.isArray(result)).toBe(true);
         expect(result.length).toBe(0);
       });
@@ -861,13 +918,13 @@ describe('Component', () => {
         const ButtonComponent = defineComponent({
           tagName: 'test-button-child',
           templateName: 'buttonChild',
-          template: '<button>Button</button>'
+          template: '<button>Button</button>',
         });
 
         const InputComponent = defineComponent({
           tagName: 'test-input-child',
           templateName: 'inputChild',
-          template: '<input type="text">'
+          template: '<input type="text">',
         });
 
         const FormComponent = defineComponent({
@@ -883,8 +940,8 @@ describe('Component', () => {
           createComponent: ({ findChildren }) => ({
             getAllChildren() {
               return findChildren(); // No templateName - should return all children
-            }
-          })
+            },
+          }),
         });
 
         const formElement = document.createElement('test-mixed-form');
@@ -895,10 +952,10 @@ describe('Component', () => {
 
         const formComponent = formElement.component;
         const allChildren = formComponent.getAllChildren();
-        
+
         expect(Array.isArray(allChildren)).toBe(true);
         expect(allChildren.length).toBe(3);
-        
+
         const childTypes = allChildren.map(child => child.templateName).sort();
         expect(childTypes).toEqual(['buttonChild', 'inputChild', 'inputChild']);
       });
@@ -914,8 +971,8 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             getParent() {
               return findParent('parentFinderParent');
-            }
-          })
+            },
+          }),
         });
 
         // Define parent component
@@ -924,8 +981,8 @@ describe('Component', () => {
           templateName: 'parentFinderParent',
           template: '<div class="parent"><test-parent-finder-child></test-parent-finder-child></div>',
           createComponent: () => ({
-            parentData: 'I am the parent'
-          })
+            parentData: 'I am the parent',
+          }),
         });
 
         const parentElement = document.createElement('test-parent-finder-parent');
@@ -939,15 +996,15 @@ describe('Component', () => {
         // Get the child component through shadow DOM
         const childElement = parentElement.shadowRoot?.querySelector('test-parent-finder-child');
         expect(childElement).toBeDefined();
-        
-        // Wait for child component to render  
+
+        // Wait for child component to render
         if (childElement) {
           await childElement.updateComplete;
         }
-        
+
         const childComponent = childElement.component;
         expect(childComponent).toBeDefined();
-        
+
         const foundParent = childComponent.getParent();
         expect(foundParent).toBeDefined();
         expect(foundParent.templateName).toBe('parentFinderParent');
@@ -963,14 +1020,14 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             findTopLevelParent() {
               return findParent('topLevelParent');
-            }
-          })
+            },
+          }),
         });
 
         const MiddleComponent = defineComponent({
           tagName: 'test-middle-component',
           templateName: 'middleComponent',
-          template: '<div class="middle"><test-deep-child></test-deep-child></div>'
+          template: '<div class="middle"><test-deep-child></test-deep-child></div>',
         });
 
         const TopLevelComponent = defineComponent({
@@ -978,8 +1035,8 @@ describe('Component', () => {
           templateName: 'topLevelParent',
           template: '<div class="top"><test-middle-component></test-middle-component></div>',
           createComponent: () => ({
-            topLevelData: 'I am the top level parent'
-          })
+            topLevelData: 'I am the top level parent',
+          }),
         });
 
         const topElement = document.createElement('test-top-level');
@@ -993,23 +1050,23 @@ describe('Component', () => {
         // Navigate to the deeply nested child through shadow DOM
         const middleElement = topElement.shadowRoot?.querySelector('test-middle-component');
         expect(middleElement).toBeDefined();
-        
+
         // Wait for middle component to render
         if (middleElement) {
           await middleElement.updateComplete;
         }
-        
+
         const deepChildElement = middleElement?.shadowRoot?.querySelector('test-deep-child');
         expect(deepChildElement).toBeDefined();
-        
+
         // Wait for deep child component to render
         if (deepChildElement) {
           await deepChildElement.updateComplete;
         }
-        
+
         const deepChildComponent = deepChildElement.component;
         expect(deepChildComponent).toBeDefined();
-        
+
         // The deep child should be able to find the top-level parent
         // This test validates the Shadow DOM traversal fix
         const topLevelParent = deepChildComponent.findTopLevelParent();
@@ -1026,8 +1083,8 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             lookForNonExistentParent() {
               return findParent('nonExistentParent');
-            }
-          })
+            },
+          }),
         });
 
         const orphanElement = document.createElement('test-orphan-component');
@@ -1050,8 +1107,8 @@ describe('Component', () => {
           templateName: 'templateA',
           template: '<div class="template-a">Template A</div>',
           createComponent: () => ({
-            componentType: 'A'
-          })
+            componentType: 'A',
+          }),
         });
 
         const ComponentB = defineComponent({
@@ -1062,14 +1119,14 @@ describe('Component', () => {
             componentType: 'B',
             findTemplateA() {
               return findTemplate('templateA');
-            }
-          })
+            },
+          }),
         });
 
         // Add both components to DOM
         const elementA = document.createElement('test-template-a');
         const elementB = document.createElement('test-template-b');
-        
+
         document.body.appendChild(elementA);
         document.body.appendChild(elementB);
         cleanupElements.push(elementA, elementB);
@@ -1082,7 +1139,7 @@ describe('Component', () => {
         // Component B should be able to find Component A via findTemplate
         const componentB = elementB.component;
         expect(componentB).toBeDefined();
-        
+
         const foundTemplateA = componentB.findTemplateA();
         expect(foundTemplateA).toBeDefined();
         expect(foundTemplateA.templateName).toBe('templateA');
@@ -1097,8 +1154,8 @@ describe('Component', () => {
           createComponent: ({ findTemplate }) => ({
             findNonExistentTemplate() {
               return findTemplate('nonExistentTemplate');
-            }
-          })
+            },
+          }),
         });
 
         const searcherElement = document.createElement('test-template-searcher');
@@ -1119,8 +1176,8 @@ describe('Component', () => {
           templateName: 'siblingComponent',
           template: '<div class="sibling">Sibling Component</div>',
           createComponent: () => ({
-            siblingData: 'sibling data'
-          })
+            siblingData: 'sibling data',
+          }),
         });
 
         const ContainerComponent = defineComponent({
@@ -1130,7 +1187,7 @@ describe('Component', () => {
             <div class="container">
               <test-nested-finder></test-nested-finder>
             </div>
-          `
+          `,
         });
 
         const NestedFinderComponent = defineComponent({
@@ -1140,14 +1197,14 @@ describe('Component', () => {
           createComponent: ({ findTemplate }) => ({
             findSibling() {
               return findTemplate('siblingComponent');
-            }
-          })
+            },
+          }),
         });
 
         // Add components to DOM - sibling and container are not parent-child related
         const siblingElement = document.createElement('test-sibling-component');
         const containerElement = document.createElement('test-container-component');
-        
+
         document.body.appendChild(siblingElement);
         document.body.appendChild(containerElement);
         cleanupElements.push(siblingElement, containerElement);
@@ -1160,15 +1217,15 @@ describe('Component', () => {
         // The nested component should be able to find the sibling component (in shadow DOM)
         const nestedElement = containerElement.shadowRoot?.querySelector('test-nested-finder');
         expect(nestedElement).toBeDefined();
-        
+
         // Wait for nested component to render
         if (nestedElement) {
           await nestedElement.updateComplete;
         }
-        
+
         const nestedComponent = nestedElement.component;
         expect(nestedComponent).toBeDefined();
-        
+
         const foundSibling = nestedComponent.findSibling();
         expect(foundSibling).toBeDefined();
         expect(foundSibling.templateName).toBe('siblingComponent');
@@ -1185,8 +1242,8 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             getParentData() {
               return findParent('parentWithSubs')?.parentData;
-            }
-          })
+            },
+          }),
         });
 
         // Define parent component that uses subtemplates
@@ -1201,7 +1258,7 @@ describe('Component', () => {
             </div>
           `,
           subTemplates: {
-            childSubtemplate
+            childSubtemplate,
           },
           createComponent: ({ findChild, findChildren }) => ({
             parentData: 'parent-data-value',
@@ -1210,8 +1267,8 @@ describe('Component', () => {
             },
             findAllChildren() {
               return findChildren('childSubtemplate');
-            }
-          })
+            },
+          }),
         });
 
         const parentElement = document.createElement('test-parent-with-subs');
@@ -1221,7 +1278,7 @@ describe('Component', () => {
         await new Promise(resolve => setTimeout(resolve, 150));
 
         const parentComponent = parentElement.component;
-        
+
         // Test findChild - should find first subtemplate child
         const firstChild = parentComponent.findFirstChild();
         expect(firstChild).toBeDefined();
@@ -1238,7 +1295,7 @@ describe('Component', () => {
       });
 
       it('should find parent from subtemplate using findParent', async () => {
-        // Define parent subtemplate (no tagName)  
+        // Define parent subtemplate (no tagName)
         const parentSubtemplate = defineComponent({
           templateName: 'parentSubtemplate',
           template: `
@@ -1257,19 +1314,19 @@ describe('Component', () => {
                 },
                 findSubtemplateParent() {
                   return findParent('parentSubtemplate');
-                }
-              })
-            })
+                },
+              }),
+            }),
           },
           createComponent: () => ({
-            subtemplateData: 'subtemplate-parent-data'
-          })
+            subtemplateData: 'subtemplate-parent-data',
+          }),
         });
 
         // Define container web component
         const ContainerComponent = defineComponent({
           tagName: 'test-subtemplate-container',
-          templateName: 'containerComponent', 
+          templateName: 'containerComponent',
           template: `
             <div class="container">
               <h2>Container</h2>
@@ -1277,11 +1334,11 @@ describe('Component', () => {
             </div>
           `,
           subTemplates: {
-            parentSubtemplate
+            parentSubtemplate,
           },
           createComponent: () => ({
-            containerData: 'container-data-value'
-          })
+            containerData: 'container-data-value',
+          }),
         });
 
         const containerElement = document.createElement('test-subtemplate-container');
@@ -1306,8 +1363,8 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             findMixedParent() {
               return findParent('mixedParent');
-            }
-          })
+            },
+          }),
         });
 
         // Define web component child (has tagName)
@@ -1318,8 +1375,8 @@ describe('Component', () => {
           createComponent: ({ findParent }) => ({
             findMixedParent() {
               return findParent('mixedParent');
-            }
-          })
+            },
+          }),
         });
 
         // Define parent that uses both subtemplates and web components
@@ -1334,7 +1391,7 @@ describe('Component', () => {
             </div>
           `,
           subTemplates: {
-            subChild: subChildTemplate
+            subChild: subChildTemplate,
           },
           createComponent: ({ findChild, findChildren }) => ({
             mixedData: 'mixed-parent-data',
@@ -1346,8 +1403,8 @@ describe('Component', () => {
             },
             findAllChildren() {
               return findChildren(); // Find all children regardless of type
-            }
-          })
+            },
+          }),
         });
 
         const mixedElement = document.createElement('test-mixed-parent');
@@ -1357,13 +1414,13 @@ describe('Component', () => {
         await new Promise(resolve => setTimeout(resolve, 150));
 
         const mixedComponent = mixedElement.component;
-        
+
         // Should find subtemplate child
         const subChild = mixedComponent.findSubChild();
         expect(subChild).toBeDefined();
         expect(subChild.templateName).toBe('subChild');
 
-        // Should find web component child  
+        // Should find web component child
         const webChild = mixedComponent.findWebChild();
         expect(webChild).toBeDefined();
         expect(webChild.templateName).toBe('webChild');
@@ -1373,7 +1430,7 @@ describe('Component', () => {
         expect(allChildren).toBeDefined();
         expect(Array.isArray(allChildren)).toBe(true);
         expect(allChildren.length).toBe(2);
-        
+
         const templateNames = allChildren.map(child => child.templateName).sort();
         expect(templateNames).toEqual(['subChild', 'webChild']);
       });
@@ -1390,10 +1447,10 @@ describe('Component', () => {
               return {
                 child: findChild('someChild'),
                 parent: findParent('someParent'),
-                template: findTemplate('someTemplate')
+                template: findTemplate('someTemplate'),
               };
-            }
-          })
+            },
+          }),
         });
 
         const unnamedElement = document.createElement('test-unnamed-component');
@@ -1404,7 +1461,7 @@ describe('Component', () => {
 
         const unnamedComponent = unnamedElement.component;
         expect(unnamedComponent).toBeDefined();
-        
+
         // Should not throw errors even without templateName
         const navigation = unnamedComponent.testNavigation();
         expect(navigation.child).toBeUndefined();
@@ -1420,8 +1477,8 @@ describe('Component', () => {
           createComponent: ({ findTemplate }) => ({
             findSelf() {
               return findTemplate('dynamicComponent');
-            }
-          })
+            },
+          }),
         });
 
         // Create and immediately test multiple components
@@ -1439,7 +1496,7 @@ describe('Component', () => {
         for (const element of elements) {
           const component = element.component;
           expect(component).toBeDefined();
-          
+
           const foundSelf = component.findSelf();
           expect(foundSelf).toBeDefined();
           expect(foundSelf.templateName).toBe('dynamicComponent');
@@ -1448,7 +1505,7 @@ describe('Component', () => {
         // Remove middle element and verify others still work
         document.body.removeChild(elements[1]);
         elements.splice(1, 1);
-        
+
         await new Promise(resolve => setTimeout(resolve, 50));
 
         // Remaining components should still function
@@ -1460,5 +1517,4 @@ describe('Component', () => {
       });
     });
   });
-
 });

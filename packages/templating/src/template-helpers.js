@@ -216,3 +216,13 @@ export const TemplateHelpers = {
     return Reaction.nonreactive(wrapFunction(value));
   },
 };
+
+// Register a single helper
+export const registerHelper = (name, fn) => {
+  TemplateHelpers[name] = fn;
+};
+
+// Register multiple helpers
+export const registerHelpers = (helpers) => {
+  Object.assign(TemplateHelpers, helpers);
+};
