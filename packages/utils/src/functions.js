@@ -1,5 +1,5 @@
 import { hashCode } from './crypto.js';
-import { isFunction } from './types.js';
+import { isFunction, isPlainObject } from './types.js';
 
 /*-------------------
       Functions
@@ -37,6 +37,12 @@ export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(arg
   };
 };
 export const debounce = (func, wait, options = {}) => {
+  // overload
+  if (isPlainObject(wait)) {
+    options = wait;
+    wait = options.wait ?? 0;
+  }
+
   const {
     rejectSkipped = false,
     leading = false,
@@ -307,6 +313,12 @@ export const debounce = (func, wait, options = {}) => {
 };
 
 export const throttle = (func, wait, options = {}) => {
+  // overload
+  if (isPlainObject(wait)) {
+    options = wait;
+    wait = options.wait ?? 0;
+  }
+
   const {
     rejectSkipped = false,
     leading = true,

@@ -1947,6 +1947,25 @@ describe('function utilities', () => {
         // but the implementation handles it correctly
       });
     });
+
+    describe('sync function arguments', () => {
+      it('should pass arguments to sync functions correctly', async () => {
+        const syncFunc = vi.fn((a, b, c) => {
+          return `${a}-${b}-${c}`;
+        });
+        const debounced = debounce(syncFunc, 100);
+
+        const promise = debounced('foo', 'bar', 'baz');
+
+        vi.advanceTimersByTime(100);
+
+        const result = await promise;
+
+        expect(syncFunc).toHaveBeenCalledTimes(1);
+        expect(syncFunc).toHaveBeenCalledWith('foo', 'bar', 'baz');
+        expect(result).toBe('foo-bar-baz');
+      });
+    });
   });
 
   describe('throttle', () => {
