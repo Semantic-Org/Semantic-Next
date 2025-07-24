@@ -4,12 +4,17 @@ import {
   capitalize,
   each,
   escapeHTML,
+  first,
   formatDate,
   isEmpty,
   joinWords,
+  last,
   range,
+  roundDecimal,
+  roundNumber,
   tokenize,
   toTitleCase,
+  truncate,
   wrapFunction,
 } from '@semantic-ui/utils';
 
@@ -26,6 +31,9 @@ export const TemplateHelpers = {
   },
   stringify(a) {
     return JSON.stringify(a);
+  },
+  count(a) {
+    return a?.length || 0;
   },
   hasAny(a) {
     return a?.length > 0;
@@ -143,9 +151,6 @@ export const TemplateHelpers = {
   formatDateTimeSeconds(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
     return formatDate(date, format, options);
   },
-  object({ obj }) {
-    return obj;
-  },
   log(...args) {
     console.log(...args);
   },
@@ -163,6 +168,27 @@ export const TemplateHelpers = {
   },
   escapeHTML(string) {
     return escapeHTML(string);
+  },
+  default(value, fallback) {
+    return value ?? fallback;
+  },
+  truncate(text, length, options) {
+    return truncate(text, length, options);
+  },
+  first(array) {
+    return first(array);
+  },
+  last(array) {
+    return last(array);
+  },
+  roundNumber(number, precision) {
+    return roundNumber(number, precision);
+  },
+  round(number, precision) {
+    return roundNumber(number, precision);
+  },
+  roundDecimal(number, precision) {
+    return roundDecimal(number, precision);
   },
   guard: (value) => {
     return Reaction.guard(wrapFunction(value));
