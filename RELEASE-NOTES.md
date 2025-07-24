@@ -8,6 +8,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.14.2 - 07.23.2025
 * **Feature** - Snippets can now be used before they are defined in templates.
+* **Bug** - Fixed bug where snippet data could be overwritten incorrectly when parent data changed
 * **Bug** - Fix conditionals in HTML attributes not rendering correctly.
 * **Bug** - Fix reactive data expressions in properties and events being incorrectly stringified.
 

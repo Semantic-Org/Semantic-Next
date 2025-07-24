@@ -34,7 +34,7 @@ export class LitRenderer {
     return hashCode({ ast });
   }
 
-  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG }) {
+  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = {}; // stores templates but garbage collectable
@@ -45,6 +45,7 @@ export class LitRenderer {
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
+    this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.id = LitRenderer.getID({ ast, data, isSVG });
   }
 
@@ -263,7 +264,7 @@ export class LitRenderer {
       : () => Reaction.nonreactive(() => getValue(expression));
   };
 
-  getPackedNodeData(node, data, { inheritParent = false } = {}) {
+  getPackedNodeData(node, data, { inheritsData = false } = {}) {
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
       // this is a data object like {> someTemplate data=getData }
@@ -286,7 +287,7 @@ export class LitRenderer {
 
     // only inherit parent data context if specified
     data = {
-      ...(inheritParent) ? this.data : {},
+      ...(inheritsData) ? data : {},
       ...packedStaticData,
       ...packedReactiveData,
     };
@@ -296,11 +297,17 @@ export class LitRenderer {
   evaluateSnippet(node, data = {}) {
     const snippetName = this.lookupExpressionValue(node.name, data);
     const snippet = this.snippets[snippetName];
+
+    // snippets default to inheriting parent data
+    // this simplifies most common use cases for organizing templates with snippiets
+    const inheritsData = true;
+
     if (!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
+    const snippetData = this.getPackedNodeData(node, data, { inheritsData });
     return this.renderContent({
+      inheritsData,
       ast: snippet.content,
       data: snippetData,
     });
@@ -650,15 +657,18 @@ export class LitRenderer {
   }
 
   setData(newData) {
-    this.updateData(newData);
-    this.updateSubtreeData(newData);
+    // current subtree can remove existing data if not present in new data
+    this.updateData(newData, { preserveExistingData: false });
+
+    // subtrees might have their own additive data. we dont want to remove this
+    this.updateSubtreeData(newData, { preserveExistingData: true });
   }
 
-  // yeah we're going there, weakrefs
   updateSubtreeData(newData) {
     each(this.renderTrees, (ref, contentID) => {
+      // use deref to allow mem cleanup of subtrees
       const tree = ref.deref();
-      if (tree) {
+      if (tree?.inheritsData) {
         tree.updateData(newData);
       }
     });
@@ -668,10 +678,14 @@ export class LitRenderer {
     Note this is important to preserve the object reference vs clobbering
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
-  updateData(newData) {
-    each(this.data, (value, name) => {
-      delete this.data[name];
-    });
+  updateData(newData, { preserveExistingData = true } = {}) {
+    // if specified remove all existing data before setting new data
+    if (!preserveExistingData) {
+      each(this.data, (value, name) => {
+        delete this.data[name];
+      });
+    }
+    // add new data
     each(newData, (value, name) => {
       if (this.data[name] !== value) {
         this.data[name] = value;
