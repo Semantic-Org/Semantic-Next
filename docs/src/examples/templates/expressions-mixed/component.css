@@ -34,7 +34,7 @@ table {
     padding: 7px 12px;
     border: var(--internal-border);
 
-    &:nth-child(1) {;
+    &:nth-child(1) {
       color: var(--standard-80);
       border-bottom: var(--internal-border);
       text-transform: uppercase;
