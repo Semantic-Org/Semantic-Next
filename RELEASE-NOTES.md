@@ -7,7 +7,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.14.4 - 07.24.2025
-* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias
+* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`
 * **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation
 
 # Version 0.14.3 - 07.24.2025

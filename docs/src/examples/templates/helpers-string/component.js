@@ -16,6 +16,8 @@ const defaultState = {
   displayName: null,
   longDescription:
     'This is a very long description that should be truncated to show only the first part of the text and then add ellipsis to indicate there is more content.',
+  email: 'John.Doe@Example.COM',
+  productCode: 'abc123xyz',
 };
 
 defineComponent({

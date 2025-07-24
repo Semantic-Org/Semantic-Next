@@ -177,3 +177,47 @@ Escapes HTML special characters in a string.
   {#html escapeHTML bioHTML}
 </p>
 ```
+
+### lowercase
+Converts text to lowercase.
+
+#### Template Syntax
+```sui
+{lowercase textToConvert}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to convert to lowercase |
+
+#### Returns
+`string` - The text converted to lowercase.
+
+#### Example
+```sui
+<p>Email: {lowercase userEmail}</p>
+<p>Username: {lowercase displayName}</p>
+```
+
+### uppercase
+Converts text to uppercase.
+
+#### Template Syntax
+```sui
+{uppercase textToConvert}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to convert to uppercase |
+
+#### Returns
+`string` - The text converted to uppercase.
+
+#### Example
+```sui
+<p>Code: {uppercase productCode}</p>
+<p>Status: {uppercase currentStatus}</p>
+```
