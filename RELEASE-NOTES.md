@@ -6,10 +6,15 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.14.3 - 07.24.2025
+* **Bug** - Fixed debounce/throttle parameter overload handling where `wait` parameter as object wasn't properly handled
+* **Chore** - Updated Vitest to v3.2.4 across all packages for consistency
+* **Chore** - Migrated from deprecated `workspace` configuration to modern `test.projects` in Vitest configs
+
 # Version 0.14.2 - 07.23.2025
 * **Feature** - Snippets can now be used before they are defined in templates.
 * **Bug** - Fixed bug where snippet data could be overwritten incorrectly when parent data changed
-* **Bug** - Fix conditionals in HTML attributes not rendering correctly.
+* **Feature** - Conditionals can now be used inlined in html attributes like `<div class="{#if condition}value{/if}"></div>`
 * **Bug** - Fix reactive data expressions in properties and events being incorrectly stringified.
 
 # Version 0.14.1 - 7.22.2025
