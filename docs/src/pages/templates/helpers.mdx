@@ -57,8 +57,6 @@ In this example `formatDate` is used to format the display of a date set in the 
 {formatDate currentTime 'h:mm:ss a'}
 ```
 
-<PlaygroundExample height="350" id="global-helpers" direction="horizontal"></PlaygroundExample>
-
 ## Helpers Functions
 
 ### Logical
@@ -379,9 +377,57 @@ Triggers debugger.
 {debugger}
 ```
 
-#### debugReactivity
+#### debugReactivity  
 Debugs reactivity.
 
 ```sui
 {debugReactivity}
 ```
+
+## Custom Helpers
+
+You can extend the template system by registering your own helper functions using `registerHelper` and `registerHelpers`.
+
+### Single Helper Registration
+
+```javascript
+import { registerHelper } from '@semantic-ui/templating';
+
+registerHelper('formatMoney', (amount, currency = 'USD') => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(amount);
+});
+```
+
+### Multiple Helper Registration
+
+```javascript
+import { registerHelpers } from '@semantic-ui/templating';
+
+registerHelpers({
+  initials: (name) => name.split(' ').map(n => n[0]).join('').toUpperCase(),
+  randomId: () => Math.random().toString(36).substr(2, 9),
+  timeAgo: (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  }
+});
+```
+
+### Using Custom Helpers
+
+Once registered, custom helpers work like built-in helpers:
+
+```sui
+<p>Price: {formatMoney 29.99}</p>
+<p>User: {initials 'John Smith'}</p>
+<p>ID: {randomId}</p>
+<p>Created: {timeAgo createdDate}</p>
+```
+
+<PlaygroundExample id="templates-helpers-custom" />

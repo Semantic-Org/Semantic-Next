@@ -7,12 +7,23 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.14.3 - 07.24.2025
+
+## Templates
 * **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`
+* **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
+
+## Utils
 * **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation
+
+## Reactivity
 * **Bug** - Fixed bug in `Reaction.getSource()` when breakpointed in a template helper.
-** *Change** `Reaction.getSource()` no longer returns the stack, this makes it more clear when invoking it from chrome console as the return will produce its own log.
+* **Change** - `Reaction.getSource()` no longer returns the stack, this makes it more clear when invoking it from chrome console as the return will produce its own log.
+
+## Components
 * **Bug** - Fixed `ui-input` `debounce` setting did not use the new obj signature from `0.14.0` causing it to fail.
 * **Bug** - Fixed debounce/throttle parameter overload handling where `wait` parameter as object wasn't properly handled
+
+## Infrastructure
 * **Chore** - Updated Vitest to v3.2.4 across all packages for consistency
 * **Chore** - Migrated from deprecated `workspace` configuration to modern `test.projects` in Vitest configs
 
