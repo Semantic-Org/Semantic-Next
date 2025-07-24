@@ -1,0 +1,10 @@
+{#each item in items}
+  <div class="item">
+    <h4>{item.name}</h4>
+    <p>{item.description}</p>
+  </div>
+{else}
+  <div class="empty">
+    <p>No items found. Add some items to get started!</p>
+  </div>
+{/each}
