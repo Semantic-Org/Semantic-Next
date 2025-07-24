@@ -6,6 +6,10 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.14.4 - 07.24.2025
+* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias
+* **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation
+
 # Version 0.14.3 - 07.24.2025
 * **Bug** - Fix `ui-input` `debounce` setting did not use the new obj signature from `0.14.0` causing it to fail.
 * **Bug** - Fixed debounce/throttle parameter overload handling where `wait` parameter as object wasn't properly handled
