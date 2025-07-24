@@ -190,6 +190,12 @@ export const TemplateHelpers = {
   roundDecimal(number, precision) {
     return roundDecimal(number, precision);
   },
+  lowercase(text) {
+    return text?.toLowerCase?.() || text;
+  },
+  uppercase(text) {
+    return text?.toUpperCase?.() || text;
+  },
   guard: (value) => {
     return Reaction.guard(wrapFunction(value));
   },
