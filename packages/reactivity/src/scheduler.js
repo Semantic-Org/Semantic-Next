@@ -40,13 +40,13 @@ export class Scheduler {
       return;
     }
     const { context, dependencies } = Scheduler.current;
-    let stack = context.stack || dependencies?.values().next()?.value.context.stack;
+    let stack = context.stack || dependencies?.values().next()?.value?.context?.stack;
     let message;
-    if(stack) {
-      if(context.message) {
+    if (stack) {
+      if (context.message) {
         message = context.message;
       }
-      else if(context.firstRun) {
+      else if (context.firstRun) {
         message = `First run of new reaction created at:`;
       }
       else if (context.value) {
@@ -57,7 +57,7 @@ export class Scheduler {
       }
       console.groupCollapsed('🔁 Reaction Triggered');
       console.log(message);
-      if(context.value) {
+      if (context.value) {
         console.log('Reactive value change was:', context.value);
       }
       console.log('Reaction was:', Scheduler.current);
@@ -70,6 +70,5 @@ export class Scheduler {
       console.error('Nothing found');
       console.log(Scheduler.current.context);
     }
-    return stack;
   }
 }
