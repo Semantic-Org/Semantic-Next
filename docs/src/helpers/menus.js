@@ -40,7 +40,10 @@ const subCategorySortOrder = {
     'SVG',
   ],
   'Templates': [
-    'Syntax',
+    'Conditionals',
+    'Loops',
+    'Expressions',
+    'Expression Syntax',
     'Subtemplates',
     'Snippets',
     'Helpers',

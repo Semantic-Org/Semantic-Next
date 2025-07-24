@@ -48,7 +48,7 @@ table {
       color: var(--standard-40);
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       max-width: 250px;
-      line-height: 1.48;
+
     }
 
     &:nth-child(3) {

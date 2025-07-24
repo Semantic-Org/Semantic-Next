@@ -11,10 +11,10 @@
   }
 
   &.warm {
-    background-color: var(--orange-5);
+    background-color: var(--yellow-5);
     
     .text {
-      color: var(--orange);
+      color: var(--yellow);
     }
   }
 
