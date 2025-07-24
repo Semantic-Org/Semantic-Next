@@ -125,22 +125,26 @@ console.log(memoizedCustomOperation({id: 2, a: 3, b: 4})); // Logs: Processing o
 
 ```javascript
 function debounce(func, wait, options)
+function debounce(func, options) // overload with options.wait
 ```
 
 Creates a debounced version of a function that delays execution until after wait milliseconds have elapsed since the last call. Supports both sync and async functions with comprehensive promise handling and AbortController integration.
 
 #### Parameters
 
-| Name    | Type     | Description |
-|---------|----------|-------------|
-| func    | function | The function to debounce |
-| wait    | number   | The number of milliseconds to delay |
-| options | object   | Optional configuration object |
+| Name    | Type           | Description |
+|---------|----------------|-------------|
+| func    | function       | The function to debounce |
+| wait    | number\|object | The number of milliseconds to delay, or options object |
+| options | object         | Optional configuration object (when wait is number) |
+
+> **Overload Support** You can pass options as the second parameter with `wait` specified inside: `debounce(func, { wait: 300, leading: true })`
 
 ##### Options
 
 | Name            | Type            | Default | Description |
 |-----------------|-----------------|---------|-------------|
+| wait            | number          | 0       | Milliseconds to delay (when using overload syntax) |
 | rejectSkipped   | boolean         | false   | Whether to reject skipped calls |
 | leading         | boolean         | false   | Execute on first call |
 | trailing        | boolean         | true    | Execute after wait period |
@@ -170,6 +174,13 @@ const searchFunction = debounce(search, 300, {
   maxWait: 1000   // Force execution after 1 second max
 });
 
+// Using overload syntax (options as second parameter)
+const searchFunctionAlt = debounce(search, {
+  wait: 300,
+  leading: true,
+  maxWait: 1000
+});
+
 // AbortController integration
 const controller = new AbortController();
 const abortableDebounce = debounce(apiCall, 500, { abortController: controller });
@@ -187,22 +198,26 @@ debouncedFunction.pending(); // Check if execution is scheduled
 
 ```javascript
 function throttle(func, wait, options)
+function throttle(func, options) // overload with options.wait
 ```
 
 Creates a throttled version of a function that only invokes the function at most once per every wait milliseconds. Supports both sync and async functions with comprehensive promise handling and AbortController integration.
 
 #### Parameters
 
-| Name    | Type     | Description |
-|---------|----------|-------------|
-| func    | function | The function to throttle |
-| wait    | number   | The number of milliseconds to throttle invocations to |
-| options | object   | Optional configuration object |
+| Name    | Type           | Description |
+|---------|----------------|-------------|
+| func    | function       | The function to throttle |
+| wait    | number\|object | The number of milliseconds to throttle invocations to, or options object |
+| options | object         | Optional configuration object (when wait is number) |
+
+> **Overload Support** You can pass options as the second parameter with `wait` specified inside: `throttle(func, { wait: 100, leading: false })`
 
 ##### Options
 
 | Name            | Type            | Default | Description |
 |-----------------|-----------------|---------|-------------|
+| wait            | number          | 0       | Milliseconds to throttle invocations to (when using overload syntax) |
 | rejectSkipped   | boolean         | false   | Whether to reject skipped calls |
 | leading         | boolean         | true    | Execute immediately on first call |
 | trailing        | boolean         | true    | Execute once more after wait period if calls occurred |
