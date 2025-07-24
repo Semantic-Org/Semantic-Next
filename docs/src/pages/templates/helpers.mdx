@@ -4,6 +4,7 @@ title: Template Helpers
 description: Using helpers for common template operations
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { UICards, UICard } from '@semantic-ui/core';
 
 
 ## Usage
@@ -57,332 +58,55 @@ In this example `formatDate` is used to format the display of a date set in the 
 {formatDate currentTime 'h:mm:ss a'}
 ```
 
-## Helpers Functions
+## Built-in Helpers
+
+Semantic UI provides dozens of built-in template helpers for common operations like formatting, logic, CSS classes, and more. For a complete reference of all available helpers, see the [Template Helpers API Documentation](/api/helpers).
+
+<UICards two stackable>
+  <UICard
+    header="Logical"
+    icon="help-circle"
+    href="/api/helpers/logical"
+    description="Boolean operations and conditional logic for template control flow"
+  ></UICard>
+  <UICard
+    header="String"
+    icon="type"
+    href="/api/helpers/strings"
+    description="Text formatting, transformation, and manipulation utilities"
+  ></UICard>
+  <UICard
+    header="CSS"
+    icon="edit"
+    href="/api/helpers/css"
+    description="Dynamic CSS class generation and conditional styling helpers"
+  ></UICard>
+  <UICard
+    header="Comparison"
+    icon="bar-chart"
+    href="/api/helpers/comparison"
+    description="Value comparison operations for equality, inequality, and ordering"
+  ></UICard>
+  <UICard
+    header="Arrays"
+    icon="list"
+    href="/api/helpers/arrays"
+    description="Array and object manipulation, iteration, and transformation utilities"
+  ></UICard>
+  <UICard
+    header="Dates"
+    icon="calendar"
+    href="/api/helpers/dates"
+    description="Date and time formatting with timezone and locale support"
+  ></UICard>
+  <UICard
+    header="Debug"
+    icon="alert-triangle"
+    href="/api/helpers/debug"
+    description="Development and debugging tools for template troubleshooting"
+  ></UICard>
+</UICards>
 
-### Logical
-
-#### exists
-Checks if a value is not empty.
-
-```sui
-{#if exists valueToCheck}
-  Value exists
-{/if}
-```
-
-#### isEmpty
-Checks if a value is empty.
-
-```sui
-{#if isEmpty collectionToCheck}
-  Collection is empty
-{/if}
-```
-
-#### hasAny
-Checks if an array has any elements.
-
-```sui
-{#if hasAny arrayToCheck}
-  Array has elements
-{/if}
-```
-
-#### both
-Checks if both a and b are truthy.
-
-```sui
-{#if both conditionA conditionB}
-  Both conditions are true
-{/if}
-```
-
-#### either
-Checks if either a or b is truthy.
-
-```sui
-{#if either conditionA conditionB}
-  At least one condition is true
-{/if}
-```
-
-#### maybe
-Returns trueExpr if expr is truthy, falseExpr otherwise.
-
-```sui
-{maybe condition 'True result' 'False result'}
-```
-
-
-### String
-
-#### stringify
-Converts a value to JSON string.
-
-```sui
-{stringify objectToStringify}
-```
-
-#### concat
-Concatenates all arguments.
-
-```sui
-{concat firstName ' ' lastName}
-```
-
-#### capitalize
-Capitalizes the first letter of text.
-
-```sui
-{capitalize textToCapitalize}
-```
-
-#### titleCase
-Converts text to title case.
-
-```sui
-{titleCase textToTitleCase}
-```
-
-#### tokenize
-Tokenizes a string.
-
-```sui
-{tokenize stringToTokenize}
-```
-
-### Array and Object
-
-#### join
-Joins array elements with a delimiter.
-
-```sui
-{join itemsArray ', ' true}
-```
-
-#### joinComma
-Joins array elements with commas.
-
-```sui
-{joinComma itemsArray true false}
-```
-
-#### arrayFromObject
-Converts an object to an array for use with `{#each}`
-
-```sui
-{arrayFromObject objectToConvert}
-```
-
-#### object
-Can be used to pass arbitary data as an object to other functions.
-
-```sui
-{object key=valueForKey}
-```
-
-### range
-Returns an array with range
-```sui
-{#each range 1 6}
-  {this}
-{/each}
-```
-
-### CSS
-
-#### classes
-Joins CSS classes, the second param `spaceAfter` adds a space after the final class name.
-
-```sui
-{classes classNamesArray true}
-```
-
-#### classIf
-Conditionally applies a CSS class.
-
-```sui
-{classIf isActive 'active' 'inactive'}
-```
-
-#### classMap
-Applies multiple CSS classes based on conditions.
-
-```sui
-{classMap (object active=isActive disabled=isDisabled)}
-```
-
-#### activeIf
-Adds 'active' class if expression is truthy.
-
-```sui
-{activeIf isCurrentPage}
-```
-
-#### selectedIf
-Adds 'selected' class if expression is truthy.
-
-```sui
-{selectedIf isOptionSelected}
-```
-
-#### disabledIf
-Adds 'disabled' class if expression is truthy.
-
-```sui
-{disabledIf isElementDisabled}
-```
-
-#### checkedIf
-Adds 'checked' class if expression is truthy.
-
-```sui
-{checkedIf isOptionChecked}
-```
-
-### Comparison
-
-
-#### not
-Checks negation (!)
-
-```sui
-{#if not someCondition}
-  Some condition is not true
-{/if}
-```
-
-#### is
-Checks equality (==).
-
-```sui
-{#if is valueA valueB}
-  Values are equal
-{/if}
-```
-
-#### notEqual
-Checks inequality (!=).
-
-```sui
-{#if notEqual valueA valueB}
-  Values are not equal
-{/if}
-```
-
-#### isEqual
-Checks strict equality (===).
-
-```sui
-{#if isEqual valueA valueB}
-  Values are strictly equal
-{/if}
-```
-
-#### isNotEqual
-Checks strict inequality (!==).
-
-```sui
-{#if isNotEqual valueA valueB}
-  Values are strictly not equal
-{/if}
-```
-
-#### greaterThan
-Checks if a > b.
-
-```sui
-{#if greaterThan numberA numberB}
-  A is greater than B
-{/if}
-```
-
-#### lessThan
-Checks if a < b.
-
-```sui
-{#if lessThan numberA numberB}
-  A is less than B
-{/if}
-```
-
-#### greaterThanEquals
-Checks if a is greater than or equal to b.
-
-```sui
-{#if greaterThanEquals numberA numberB}
-  A is greater than or equal to B
-{/if}
-```
-
-#### lessThanEquals
-Checks if a is less than or equal to b.
-
-```sui
-{#if lessThanEquals numberA numberB}
-  A is less than or equal to B
-{/if}
-```
-
-### Numeric and Date
-
-#### numberFromIndex
-Returns a + 1.
-
-```sui
-{numberFromIndex indexValue}
-```
-
-#### maybePlural
-Adds plural suffix if value is not 1.
-
-```sui
-{maybePlural itemCount 's'}
-```
-
-#### formatDate
-Formats a date.
-
-```sui
-{formatDate dateToFormat 'YYYY-MM-DD' (object timezone='UTC')}
-```
-
-#### formatDateTime
-Formats a date with time.
-
-```sui
-{formatDateTime dateTimeToFormat 'YYYY-MM-DD HH:mm' (object timezone='local')}
-```
-
-#### formatDateTimeSeconds
-Formats a date with time and seconds.
-
-```sui
-{formatDateTimeSeconds dateTimeToFormat 'YYYY-MM-DD HH:mm:ss' (object timezone='America/New_York')}
-```
-
-### Debug
-
-#### log
-Logs arguments to console.
-
-```sui
-{log 'Debug message' (object data=dataToLog)}
-```
-
-#### debugger
-Triggers debugger.
-
-```sui
-{debugger}
-```
-
-#### debugReactivity  
-Debugs reactivity.
-
-```sui
-{debugReactivity}
-```
 
 ## Custom Helpers
 

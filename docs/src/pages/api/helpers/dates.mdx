@@ -5,6 +5,7 @@ title: Date Helpers
 icon: calendar
 description: API reference for date formatting template helpers
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Date helpers provide utilities for formatting dates and times in templates.
 
@@ -127,3 +128,7 @@ formatDateTimeSeconds(date, 'YYYY-MM-DD hh:mm:ss A', \{ timezone: 'America/New_Y
 ```
 
 > **Note**: The 'local' timezone uses the timezone of the environment where the code is running. This is useful for displaying dates in the user's local time without needing to detect the timezone programmatically.
+
+## Examples
+
+<PlaygroundExample id="helpers-date" />

@@ -5,6 +5,7 @@ title: Logical Helpers
 icon: toggle-left
 description: API reference for logical template helpers
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Logical helpers provide utilities for conditional checks and logical operations in templates.
 
@@ -208,3 +209,7 @@ The original value if not null/undefined, otherwise the fallback value.
 
 #### Note
 Uses nullish coalescing (`??`) internally, so only null and undefined trigger the fallback. Other falsy values like `0`, `false`, or `''` will not use the fallback.
+
+## Examples
+
+<PlaygroundExample id="helpers-logical" />
