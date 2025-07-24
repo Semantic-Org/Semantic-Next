@@ -95,7 +95,7 @@ Converts text to title case.
 ```
 
 ### tokenize
-Tokenizes a string.
+Creates a URL-friendly token from a string.
 
 #### Template Syntax
 ```sui
@@ -108,13 +108,44 @@ Tokenizes a string.
 | string | string | The string to tokenize |
 
 #### Returns
-`string` - The tokenized string.
+`string` - A URL-friendly token (e.g., "hello-world").
 
 #### Example
 ```sui
 <div id="{tokenize sectionTitle}">
   <h3>{sectionTitle}</h3>
 </div>
+```
+
+### truncate
+Truncates text to a specified length with optional suffix.
+
+#### Template Syntax
+```sui
+{truncate textToTruncate maxLength}
+{truncate textToTruncate maxLength {suffix: '…', wordBoundary: false}}
+```
+
+#### Parameters
+| Name      | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| text      | string |         | The text to truncate |
+| length    | number |         | Maximum length of the output |
+| options   | object | {}      | Truncation options |
+
+#### Options
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| suffix       | string  | '...'   | Text to append when truncated |
+| wordBoundary | boolean | true    | Whether to truncate at word boundaries |
+
+#### Returns
+`string` - The truncated text with suffix if needed.
+
+#### Example
+```sui
+<p class="summary">{truncate article.content 150}</p>
+<p class="excerpt">{truncate description 50 {suffix: '…'}}</p>
 ```
 
 ### escapeHTML
