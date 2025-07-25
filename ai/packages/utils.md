@@ -237,7 +237,7 @@ toTitleCase('hello world');              // 'Hello World'
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, truncate } from '@semantic-ui/utils';
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -249,6 +249,29 @@ getArticle('banana');                               // 'a'
 
 // HTML escaping
 escapeHTML('<script>alert("xss")</script>');        // Safe HTML output
+```
+
+### Text Truncation
+```javascript
+import { truncate } from '@semantic-ui/utils';
+
+// Basic text truncation with Unicode support
+truncate('This is a long text that needs truncating', 20);     // 'This is a long text…'
+truncate('Short text', 20);                                    // 'Short text'
+
+// Word boundary handling
+truncate('This is a very long sentence', 15);                  // 'This is a very…'
+truncate('verylongtextwithoutspaces', 12);                     // 'verylongtext…'
+
+// Custom suffix and options
+truncate('Hello world', 8, { suffix: '...' });                // 'Hello...'
+truncate('Cut at exact length', 10, { wordBoundary: false });  // 'Cut at exa…'
+
+// Unicode and emoji support
+truncate('Hello 👋 World 🌍', 10);                           // 'Hello 👋…'
+
+// Locale-aware segmentation for international text
+truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こんにちは…'
 ```
 
 ## Color System (colors.js)
