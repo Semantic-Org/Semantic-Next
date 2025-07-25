@@ -1,10 +1,13 @@
-.test {
+.toggle {
   cursor: pointer;
   padding: 20px;
   border: var(--border);
   align-content: center;
   text-align: center;
+  transition: var(--transition);
+  margin: var(--vertically-spaced);
   &:hover {
+    box-shadow: 0px 0px 10px var(--standard-10);
     background-color: var(--primary-0);
   }
 }

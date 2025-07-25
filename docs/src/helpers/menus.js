@@ -44,6 +44,7 @@ const subCategorySortOrder = {
     'Loops',
     'Expressions',
     'Expression Syntax',
+    'Events',
     'Slots',
     'Snippets',
     'Subtemplates',
