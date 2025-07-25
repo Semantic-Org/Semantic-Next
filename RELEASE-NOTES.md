@@ -6,6 +6,37 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.15.0 - 07.24.2025
+
+## Major Features
+* **Features* - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
+* **Feature** - Added support for binding el properties from inside templates like `<input type="checkbox" .checked={checked}>`
+* **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
+
+## Templates
+* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`
+
+## Utils
+* **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation
+
+## Reactivity
+* **Bug** - Fixed bug in `Reaction.getSource()` when breakpointed in a template helper.
+* **Change** - `Reaction.getSource()` no longer returns the stack, this makes it more clear when invoking it from chrome console as the return will produce its own log.
+
+## Components
+* **Bug** - Fixed `ui-input` `debounce` setting did not use the new obj signature from `0.14.0` causing it to fail.
+* **Bug** - Fixed debounce/throttle parameter overload handling where `wait` parameter as object wasn't properly handled
+
+## Infrastructure
+* **Chore** - Updated Vitest to v3.2.4 across all packages for consistency
+* **Chore** - Migrated from deprecated `workspace` configuration to modern `test.projects` in Vitest configs
+
+# Version 0.14.2 - 07.23.2025
+* **Feature** - Snippets can now be used before they are defined in templates.
+* **Bug** - Fixed bug where snippet data could be overwritten incorrectly when parent data changed
+* **Feature** - Conditionals can now be used inlined in html attributes like `<div class="{#if condition}value{/if}"></div>`
+* **Bug** - Fix reactive data expressions in properties and events being incorrectly stringified.
+
 # Version 0.14.1 - 7.22.2025
 * **Chore*** - Update all npm deps for project and docs.
 * **Bug** - Fix bug with {#html} blocks not rendering properly with ssr.

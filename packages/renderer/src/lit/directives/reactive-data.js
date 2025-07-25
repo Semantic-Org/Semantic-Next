@@ -1,6 +1,6 @@
 import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/utils';
@@ -39,9 +39,6 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
       else {
         value = this.getReactiveValue();
-        if (this.settings.unsafeHTML) {
-          value = unsafeHTML(value);
-        }
       }
       return value;
     }
@@ -59,9 +56,6 @@ export class ReactiveDataDirective extends AsyncDirective {
         return;
       }
       value = this.getReactiveValue();
-      if (this.settings.unsafeHTML) {
-        value = unsafeHTML(value);
-      }
       if (!computation.firstRun) {
         this.setValue(value);
       }
@@ -73,7 +67,11 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   getReactiveValue() {
-    let reactiveValue = this.expression.value();
+    // if we are binding to an event we need the func handler
+    // and not the value returned
+    let reactiveValue = (this.partInfo.type == PartType.EVENT)
+      ? this.expression.literalValue()
+      : this.expression.value();
 
     // useful for things like <input checked="{{isChecked}}">
     // template compiler does this automatically for boolean attrs
@@ -83,17 +81,34 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
     }
 
-    // arrays and objects are serialized for use in web component attributes
-    // maybe should check part?
-    if (isArray(reactiveValue) || isObject(reactiveValue)) {
-      try {
-        reactiveValue = JSON.stringify(reactiveValue);
-      }
-      catch (e) {
-        // non serializable
-      }
+    return this.formatForPart(reactiveValue);
+  }
+
+  formatForPart(reactiveValue) {
+    switch (this.partInfo.type) {
+      case PartType.PROPERTY:
+        return reactiveValue;
+
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+      default:
+        // Attributes need serialization for objects/arrays
+        if (isArray(reactiveValue) || isObject(reactiveValue)) {
+          try {
+            reactiveValue = JSON.stringify(reactiveValue);
+          }
+          catch (e) {
+            // non serializable - convert to string
+            reactiveValue = String(reactiveValue);
+          }
+        }
+
+        if (this.settings.unsafeHTML) {
+          reactiveValue = unsafeHTML(reactiveValue);
+        }
+
+        return reactiveValue;
     }
-    return reactiveValue;
   }
 
   disconnected() {

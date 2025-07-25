@@ -11,6 +11,8 @@
  * Options for debounced functions
  */
 export interface DebounceOptions {
+  /** The number of milliseconds to delay (when using overload syntax) */
+  wait?: number;
   /** Whether to reject skipped calls (default: false) */
   rejectSkipped?: boolean;
   /** Execute on first call (default: false) */
@@ -27,6 +29,8 @@ export interface DebounceOptions {
  * Options for throttled functions
  */
 export interface ThrottleOptions {
+  /** The number of milliseconds to throttle invocations to (when using overload syntax) */
+  wait?: number;
   /** Whether to reject skipped calls (default: false) */
   rejectSkipped?: boolean;
   /** Execute immediately on first call (default: true) */
@@ -41,17 +45,21 @@ export interface ThrottleOptions {
  * Debounced function interface
  */
 export interface DebouncedFunction<T extends (...args: any[]) => any> {
-  (...args: Parameters<T>): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
+  (
+    ...args: Parameters<T>
+  ): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
   cancel(): void;
   flush(): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : ReturnType<T>;
   pending(): boolean;
 }
 
 /**
- * Throttled function interface  
+ * Throttled function interface
  */
 export interface ThrottledFunction<T extends (...args: any[]) => any> {
-  (...args: Parameters<T>): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
+  (
+    ...args: Parameters<T>
+  ): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : Promise<ReturnType<T>> | ReturnType<T>;
   cancel(): void;
   flush(): ReturnType<T> extends Promise<any> ? Promise<Awaited<ReturnType<T>>> : ReturnType<T>;
   pending(): boolean;
@@ -109,8 +117,8 @@ export function memoize<T extends (...args: any[]) => any>(
 ): T & { cache: Map<string | number, ReturnType<T>>; };
 
 /**
- * Creates a debounced version of a function that delays execution until after wait milliseconds 
- * have elapsed since the last time it was called. Supports both sync and async functions with 
+ * Creates a debounced version of a function that delays execution until after wait milliseconds
+ * have elapsed since the last time it was called. Supports both sync and async functions with
  * comprehensive promise handling and AbortController integration.
  * @see {@link https://next.semantic-ui.com/api/utils/functions#debounce debounce}
  * @see {@link https://next.semantic-ui.com/examples/utils-debounce Example}
@@ -125,18 +133,18 @@ export function memoize<T extends (...args: any[]) => any>(
  * // Basic usage
  * const debouncedSave = debounce(saveData, 1000);
  * debouncedSave(); // Executes after 1 second of inactivity
- * 
+ *
  * // With options
- * const debouncedSearch = debounce(search, 300, { 
+ * const debouncedSearch = debounce(search, 300, {
  *   leading: true,
- *   maxWait: 1000 
+ *   maxWait: 1000
  * });
- * 
+ *
  * // AbortController integration
  * const controller = new AbortController();
  * const debouncedFetch = debounce(fetchData, 500, { abortController: controller });
  * controller.abort(); // Cancels pending execution
- * 
+ *
  * // Promise handling
  * const results = await Promise.all([
  *   debouncedFunction(arg1),
@@ -148,14 +156,22 @@ export function memoize<T extends (...args: any[]) => any>(
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
-  options?: DebounceOptions
+  options?: DebounceOptions,
 ): DebouncedFunction<T>;
 
 /**
- * Creates a throttled version of a function that only invokes the function at most once per 
- * every wait milliseconds. Supports both sync and async functions with comprehensive promise 
+ * Creates a debounced version of a function (overload with options as second parameter)
+ */
+export function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  options: DebounceOptions & { wait: number; },
+): DebouncedFunction<T>;
+
+/**
+ * Creates a throttled version of a function that only invokes the function at most once per
+ * every wait milliseconds. Supports both sync and async functions with comprehensive promise
  * handling and AbortController integration.
- * @see {@link https://next.semantic-ui.com/api/utils/functions#throttle throttle}  
+ * @see {@link https://next.semantic-ui.com/api/utils/functions#throttle throttle}
  * @see {@link https://next.semantic-ui.com/examples/utils-throttle Example}
  *
  * @param func - The function to throttle
@@ -167,24 +183,24 @@ export function debounce<T extends (...args: any[]) => any>(
  * ```ts
  * // Basic usage with default leading and trailing execution
  * const throttledScroll = throttle(handleScroll, 100);
- * 
+ *
  * // Leading only (execute immediately, ignore subsequent calls)
- * const throttledClick = throttle(handleClick, 1000, { 
- *   leading: true, 
- *   trailing: false 
+ * const throttledClick = throttle(handleClick, 1000, {
+ *   leading: true,
+ *   trailing: false
  * });
- * 
+ *
  * // Trailing only (execute once after wait period)
- * const throttledResize = throttle(handleResize, 250, { 
- *   leading: false, 
- *   trailing: true 
+ * const throttledResize = throttle(handleResize, 250, {
+ *   leading: false,
+ *   trailing: true
  * });
- * 
+ *
  * // AbortController integration
  * const controller = new AbortController();
  * const throttledAPI = throttle(apiCall, 2000, { abortController: controller });
  * controller.abort(); // Cancels pending execution
- * 
+ *
  * // Methods
  * throttledFunction.cancel(); // Cancel pending execution
  * throttledFunction.flush();  // Execute immediately with latest args
@@ -194,5 +210,13 @@ export function debounce<T extends (...args: any[]) => any>(
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
   wait: number,
-  options?: ThrottleOptions
+  options?: ThrottleOptions,
+): ThrottledFunction<T>;
+
+/**
+ * Creates a throttled version of a function (overload with options as second parameter)
+ */
+export function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  options: ThrottleOptions & { wait: number; },
 ): ThrottledFunction<T>;

@@ -68,6 +68,7 @@ import {
   throttle,
   tokenize,
   toTitleCase,
+  truncate,
   unique,
   uniqueItems,
   values,
@@ -1947,6 +1948,25 @@ describe('function utilities', () => {
         // but the implementation handles it correctly
       });
     });
+
+    describe('sync function arguments', () => {
+      it('should pass arguments to sync functions correctly', async () => {
+        const syncFunc = vi.fn((a, b, c) => {
+          return `${a}-${b}-${c}`;
+        });
+        const debounced = debounce(syncFunc, 100);
+
+        const promise = debounced('foo', 'bar', 'baz');
+
+        vi.advanceTimersByTime(100);
+
+        const result = await promise;
+
+        expect(syncFunc).toHaveBeenCalledTimes(1);
+        expect(syncFunc).toHaveBeenCalledWith('foo', 'bar', 'baz');
+        expect(result).toBe('foo-bar-baz');
+      });
+    });
   });
 
   describe('throttle', () => {
@@ -2229,6 +2249,46 @@ describe('String Utilities', () => {
     it('should handle array with falsy values', () => {
       const words = ['apple', '', null, 'banana', undefined, 'cherry'];
       expect(joinWords(words)).toBe('apple, , , banana, , and cherry');
+    });
+  });
+
+  describe('truncate', () => {
+    it('should return original text if shorter than length', () => {
+      expect(truncate('short', 10)).toBe('short');
+    });
+
+    it('should return original text if exactly equal to length', () => {
+      expect(truncate('exactly10c', 10)).toBe('exactly10c');
+    });
+
+    it('should truncate text longer than length with default suffix', () => {
+      expect(truncate('This is a long text that should be truncated', 20)).toBe('This is a long...');
+    });
+
+    it('should truncate at word boundary by default', () => {
+      expect(truncate('This is a very long sentence', 15)).toBe('This is a...');
+    });
+
+    it('should disable word boundary when specified', () => {
+      expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a ve...');
+    });
+
+    it('should use custom suffix', () => {
+      expect(truncate('This is a long text', 15, { suffix: '…' })).toBe('This is a long…');
+    });
+
+    it('should handle empty or null text', () => {
+      expect(truncate('', 10)).toBe('');
+      expect(truncate(null, 10)).toBe(null);
+      expect(truncate(undefined, 10)).toBe(undefined);
+    });
+
+    it('should handle text with no spaces when word boundary is enabled', () => {
+      expect(truncate('verylongtextwithoutspaces', 15)).toBe('verylongtex...');
+    });
+
+    it('should account for suffix length in truncation', () => {
+      expect(truncate('This is a test', 10, { suffix: ' [more]' })).toBe('Thi [more]');
     });
   });
 });

@@ -1,0 +1,75 @@
+<h4>Basic JavaScript Expressions</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Arithmetic</td>
+      <td><code>{#html "{scores.length * 2}"}</code></td>
+      <td>{scores.length * 2}</td>
+    </tr>
+    <tr>
+      <td>Method calls</td>
+      <td><code>{#html "{items.find(i => i.active).name}"}</code></td>
+      <td>{items.find(i => i.active).name}</td>
+    </tr>
+    <tr>
+      <td>String interpolation</td>
+      <td><code>{#html "{`${items.length} of ${stats.total} items active`}"}</code></td>
+      <td>{`${items.length} of ${stats.total} items active`}</td>
+    </tr>
+    <tr>
+      <td>Ternary operator</td>
+      <td><code>{#html "{status === 'success' ? 'Success' : 'Failed'}"}</code></td>
+      <td>{status === 'success' ? 'Success' : 'Failed'}</td>
+    </tr>
+    <tr>
+      <td>Method calls</td>
+      <td><code>{#html "{formatScore(scores[0])}"}</code></td>
+      <td>{formatScore(scores[0])}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>Advanced Patterns</h4>
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Destructuring</td>
+      <td><code>{#html "{Object.entries(stats).map(([k,v]) => `${k}: ${v}`).join(', ')}"}</code></td>
+      <td>{Object.entries(stats).map(([k,v]) => `${k}: ${v}`).join(', ')}</td>
+    </tr>
+    <tr>
+      <td>Spread operator</td>
+      <td><code>{#html "{Math.max(...scores)}"}</code></td>
+      <td>{Math.max(...scores)}</td>
+    </tr>
+    <tr>
+      <td>Optional chaining</td>
+      <td><code>{#html "{user?.profile?.bio ?? 'No bio'}"}</code></td>
+      <td>{user?.profile?.bio ?? 'No bio'}</td>
+    </tr>
+    <tr>
+      <td>Dynamic properties</td>
+      <td><code>{#html "{stats[status + 'Count'] || 0}"}</code></td>
+      <td>{stats[status + 'Count'] || 0}</td>
+    </tr>
+    <tr>
+      <td>IIFE with variables</td>
+      <td><code>{#html "{(() => { const exp = Math.random() * 100; return Math.floor(exp) + ' (floored from ' + exp.toFixed(2) + ')'; })()}"}</code></td>
+      <td>{(() => { const exp = Math.random() * 100; return Math.floor(exp) + ' (floored from ' + exp.toFixed(2) + ')'; })()}</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,52 @@
+<h3>is</h3>
+{#if is status 'active'}
+  <p>
+    <ui-icon icon="check-circle" />
+    Status is <b>active</b>
+  </p>
+{else}
+  <p class="empty">Status is not active</p>
+{/if}
+
+<h3>greaterThan</h3>
+<p>
+  Age verification:
+  {#if greaterThan userAge requiredAge}
+    <b>eligible</b> ({userAge} > {requiredAge})
+  {else}
+    <span class="empty">not eligible</span>
+  {/if}
+</p>
+
+<h3>lessThan</h3>
+{#if lessThan level 5}
+  <p>
+    <ui-icon icon="trending-up" />
+    Level <b>{level}</b> - room to grow
+  </p>
+{else}
+  <p class="empty">Max level reached</p>
+{/if}
+
+<h3>greaterThanEquals</h3>
+<p>
+  Test result: 
+  {#if greaterThanEquals score passingScore}
+    <b>passed</b> ({score}/{passingScore})
+  {else}
+    <span class="empty">failed</span>
+  {/if}
+</p>
+
+<h3>lessThanEquals</h3>
+<p>Performance: {maybe (lessThanEquals score 90) 'Good' 'Excellent'}</p>
+
+<h3>isExactly</h3>
+{#if isExactly status 'active'}
+  <p>Status is <b>exactly</b> active</p>
+{/if}
+
+<h3>isNot</h3>
+{#if isNot level 1}
+  <p>Beyond beginner level</p>
+{/if}

@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.14.1",
-    "vitest": "^3.0.4"
+    "vitest": "^3.2.4"
   },
   "wireit": {
     "build": {

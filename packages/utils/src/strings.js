@@ -117,6 +117,25 @@ export const getArticle = (word, settings = {}) => {
     : finalArticle;
 };
 
+export const truncate = (text, length, options = {}) => {
+  const { suffix = '...', wordBoundary = true } = options;
+
+  if (!text || text.length <= length) {
+    return text;
+  }
+
+  let truncated = text.substring(0, length - suffix.length);
+
+  if (wordBoundary) {
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    if (lastSpaceIndex > 0) {
+      truncated = truncated.substring(0, lastSpaceIndex);
+    }
+  }
+
+  return truncated + suffix;
+};
+
 export const escapeHTML = (string) => {
   const htmlEscapes = {
     '&': '&amp',

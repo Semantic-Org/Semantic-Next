@@ -42,6 +42,43 @@ export interface TemplateHelpersType {
   escapeHTML(string: string): string;
   guard<T>(fn: () => T): T | undefined;
   nonreactive<T>(fn: () => T): T;
+  isNot(a: any, b: any): boolean;
+  first<T>(array: T[]): T | undefined;
+  last<T>(array: T[]): T | undefined;
+  count(a: any[] | undefined | null): number;
+  default<T>(value: T | undefined | null, fallback: T): T;
+  truncate(text: string, length: number, options?: any): string;
+  lowercase(text: any): string;
+  uppercase(text: any): string;
+  roundNumber(number: number, precision?: number): number;
+  round(number: number, precision?: number): number;
+  roundDecimal(number: number, precision?: number): number;
 }
 
 export const TemplateHelpers: TemplateHelpersType;
+
+/**
+ * Register a single template helper function
+ * @param name - The name of the helper function
+ * @param fn - The helper function to register
+ *
+ * @example
+ * ```ts
+ * registerHelper('formatMoney', (amount) => `$${amount.toFixed(2)}`);
+ * ```
+ */
+export function registerHelper(name: string, fn: (...args: any[]) => any): void;
+
+/**
+ * Register multiple template helper functions
+ * @param helpers - An object containing helper functions
+ *
+ * @example
+ * ```ts
+ * registerHelpers({
+ *   formatMoney: (amount) => `$${amount.toFixed(2)}`,
+ *   slugify: (text) => text.toLowerCase().replace(/\s+/g, '-')
+ * });
+ * ```
+ */
+export function registerHelpers(helpers: Record<string, (...args: any[]) => any>): void;

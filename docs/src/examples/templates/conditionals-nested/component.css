@@ -1,0 +1,31 @@
+table {
+  width: 100%;
+  background-color: var(--standard-5);
+  border: var(--border);
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 10px 12px;
+    text-align: left;
+    background-color: var(--standard-5);
+    color: var(--standard-90);
+    background-image: var(--subtle-gradient);
+    border-bottom: var(--internal-border);
+    border-left: var(--internal-border);
+  }
+
+  td {
+    font-size: 13px;
+    padding: 7px 12px;
+    border: var(--internal-border);
+
+    ui-icon {
+      font-size: 16px;
+      float: right;
+    }
+  }
+}

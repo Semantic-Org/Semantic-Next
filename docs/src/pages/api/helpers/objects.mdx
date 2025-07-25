@@ -38,27 +38,3 @@ Converts an object to an array for use with `{#each}`.
 </dl>
 ```
 
-### object
-Can be used to pass arbitrary data as an object to other functions.
-
-#### Template Syntax
-```sui
-{someFunction (object key=valueForKey)}
-```
-
-#### Parameters
-| Name | Type   | Description |
-|------|--------|-------------|
-| obj  | object | The object to create |
-
-#### Returns
-`object` - The created object.
-
-#### Example
-```sui
-<ui-dropdown options="{object
-  placeholder='Select a country'
-  selection=true
-  options=countries
-}"></ui-dropdown>
-```

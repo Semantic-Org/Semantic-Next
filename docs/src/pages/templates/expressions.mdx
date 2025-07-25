@@ -128,6 +128,11 @@ will output as
 
 If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
 
+Special attributes like `checked` will also behave this way meaning you can use `false` and `0` to remove the entire attribute value.
+
+> **Special Attributes** - The following attributes will reproduce this behavior
+`allowfullscreen` `async` `autofocus` `autoplay` `checked` `controls` `default` `defer` `disabled` `formnovalidate` `inert` `ismap` `itemscope` `loop` `multiple` `muted` `nomodule` `novalidate` `open` `playsinline` `readonly` `required` `reversed` `selected`.
+
 ```sui
 <input type="checkbox" checked={isChecked} />
 ```
@@ -160,4 +165,4 @@ const createComponent = ({ state }) => ({
 The following example shows various ways you can use expressions using both lisp-like syntax and javascript
 
 
-<PlaygroundExample id="expressions" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="expressions-kitchen-sink" direction="horizontal"></PlaygroundExample>

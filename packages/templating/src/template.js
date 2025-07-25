@@ -438,7 +438,7 @@ export const Template = class Template {
           const targetElement = this;
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
-          // convert "1" to 1
+          // dataset is always stringified for atts, we want this as native values
           const elData = mapObject({ ...targetElement?.dataset }, (stringValue) => {
             let value;
             try {
@@ -851,7 +851,7 @@ export const Template = class Template {
 
   static findChildTemplates(template, templateName) {
     let result = [];
-    
+
     const isMatch = (component) => {
       if (!component?.templateName) {
         return false;

@@ -1,0 +1,50 @@
+<table>
+  <thead>
+    <tr>
+      <th>Data Source</th>
+      <th>Expression</th>
+      <th>Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Instance Property</td>
+      <td><code>{#html "{version}"}</code></td>
+      <td>{version}</td>
+    </tr>
+    <tr>
+      <td>Instance Method</td>
+      <td><code>{#html "{getGreeting userName}"}</code></td>
+      <td>{getGreeting userName}</td>
+    </tr>
+    <tr>
+      <td>Settings</td>
+      <td><code>{#html "{userName}"}</code></td>
+      <td>{userName}</td>
+    </tr>
+    <tr>
+      <td>State</td>
+      <td><code>{#html "{counter}"}</code></td>
+      <td>{counter}</td>
+    </tr>
+    <tr>
+      <td>Global Helper</td>
+      <td><code>{#html "{formatDate currentTime 'h:mm a'}"}</code></td>
+      <td>{formatDate currentTime 'h:mm a'}</td>
+    </tr>
+    <tr>
+      <td>Combined</td>
+      <td><code>{#html "{concat userName ' has ' counter ' points at ' (formatDate currentTime 'h:mm a')}"}</code></td>
+      <td>{concat userName ' has ' counter ' points at ' (formatDate currentTime 'h:mm a')}</td>
+    </tr>
+    <tr>
+      <td>Snippet Data</td>
+      <td><code>{#html "{> userInfo name=userName score=counter}"}</code></td>
+      <td>{> userInfo name=userName score=counter}</td>
+    </tr>
+  </tbody>
+</table>
+
+{#snippet userInfo}
+  <strong>{name}</strong>: {score} pts
+{/snippet}
