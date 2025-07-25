@@ -118,22 +118,57 @@ export const getArticle = (word, settings = {}) => {
 };
 
 export const truncate = (text, length, options = {}) => {
-  const { suffix = '...', wordBoundary = true } = options;
+  const {
+    suffix = '…',
+    wordBoundary = true,
+    locale = 'en'
+  } = options;
 
-  if (!text || text.length <= length) {
+  if (!text) {
+    return '';
+  }
+
+  const chars = Array.from(text);
+  const suffixChars = Array.from(suffix);
+
+  if (chars.length <= length) {
     return text;
   }
 
-  let truncated = text.substring(0, length - suffix.length);
+  const cutoff = Math.max(0, length - suffixChars.length);
+
+  if (wordBoundary && typeof Intl?.Segmenter === 'function') {
+    const segmenter = new Intl.Segmenter(locale, { granularity: 'word' });
+    let count = 0;
+    let truncated = '';
+
+    for (const { segment } of segmenter.segment(text)) {
+      const segLen = Array.from(segment).length;
+      if (count + segLen > cutoff) break;
+
+      truncated += segment;
+      count += segLen;
+    }
+
+    if (!truncated) {
+      truncated = chars.slice(0, cutoff).join('');
+    }
+
+    return truncated.trimEnd() + suffix;
+  }
+
+  let truncated = chars.slice(0, cutoff).join('');
 
   if (wordBoundary) {
-    const lastSpaceIndex = truncated.lastIndexOf(' ');
-    if (lastSpaceIndex > 0) {
-      truncated = truncated.substring(0, lastSpaceIndex);
+    const boundaryChars = /[\s.,!?;:()-]/g;
+    const matches = [...truncated.matchAll(boundaryChars)];
+    if (matches.length > 0) {
+      // Backtrack to the last found boundary.
+      truncated = truncated.slice(0, matches[matches.length - 1].index);
     }
   }
 
-  return truncated + suffix;
+  return truncated.trimEnd() + suffix;
 };
 
 export const escapeHTML = (string) => {

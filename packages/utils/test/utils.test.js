@@ -2262,33 +2262,48 @@ describe('String Utilities', () => {
     });
 
     it('should truncate text longer than length with default suffix', () => {
-      expect(truncate('This is a long text that should be truncated', 20)).toBe('This is a long...');
+      expect(truncate('This is a long text that should be truncated', 20)).toBe('This is a long text…');
     });
 
     it('should truncate at word boundary by default', () => {
-      expect(truncate('This is a very long sentence', 15)).toBe('This is a...');
+      expect(truncate('This is a very long sentence', 15)).toBe('This is a very…');
     });
 
     it('should disable word boundary when specified', () => {
-      expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a ve...');
+      // Note: With a hard cut, the result is the same in this case.
+      expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a very…');
     });
 
-    it('should use custom suffix', () => {
-      expect(truncate('This is a long text', 15, { suffix: '…' })).toBe('This is a long…');
+    it('should use a custom suffix and trim trailing space', () => {
+      // CORRECTED: Expects 'This is [more]' (length 14), which honors the max length of 15.
+      // The trailing space after 'is' is correctly trimmed.
+      expect(truncate('This is a test string', 15, { suffix: ' [more]' })).toBe('This is [more]');
     });
 
     it('should handle empty or null text', () => {
       expect(truncate('', 10)).toBe('');
-      expect(truncate(null, 10)).toBe(null);
-      expect(truncate(undefined, 10)).toBe(undefined);
+      expect(truncate(null, 10)).toBe('');
+      expect(truncate(undefined, 10)).toBe('');
     });
 
     it('should handle text with no spaces when word boundary is enabled', () => {
-      expect(truncate('verylongtextwithoutspaces', 15)).toBe('verylongtex...');
+      // CORRECTED: Expects the longest possible string within the length limit.
+      // 'verylongtextwi…' has a length of 15.
+      expect(truncate('verylongtextwithoutspaces', 15)).toBe('verylongtextwi…');
     });
 
     it('should account for suffix length in truncation', () => {
+      // CORRECTED: Expects 'Thi [more]' (length 10), honoring the max length of 10.
       expect(truncate('This is a test', 10, { suffix: ' [more]' })).toBe('Thi [more]');
+    });
+
+    it('should properly truncate emoji and combined graphemes', () => {
+      expect(truncate('👍👍👍👍👍', 4)).toBe('👍👍👍…'); // Doesn’t split emoji
+    });
+
+    it('should respect locale-aware boundaries when using Intl.Segmenter', () => {
+      // Example: Japanese text (no spaces)
+      expect(truncate('これはとても長い文です', 8, { locale: 'ja' })).toBe('これはとても…');
     });
   });
 });
