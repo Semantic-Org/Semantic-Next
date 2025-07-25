@@ -67,7 +67,11 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   getReactiveValue() {
-    let reactiveValue = this.expression.value();
+    // if we are binding to an event we need the func handler
+    // and not the value returned
+    let reactiveValue = (this.partInfo.type == PartType.EVENT)
+      ? this.expression.literalValue()
+      : this.expression.value();
 
     // useful for things like <input checked="{{isChecked}}">
     // template compiler does this automatically for boolean attrs
@@ -83,7 +87,6 @@ export class ReactiveDataDirective extends AsyncDirective {
   formatForPart(reactiveValue) {
     switch (this.partInfo.type) {
       case PartType.PROPERTY:
-      case PartType.EVENT:
         return reactiveValue;
 
       case PartType.ATTRIBUTE:

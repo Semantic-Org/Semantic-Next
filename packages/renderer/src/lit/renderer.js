@@ -334,6 +334,7 @@ export class LitRenderer {
       if (asDirective) {
         const dataArguments = {
           expression,
+          literalValue: () => this.lookupTokenValue(expression, this.data),
           value: () => this.lookupExpressionValue(expression, this.data),
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
