@@ -36,7 +36,6 @@ table {
 
     &:nth-child(1) {
       color: var(--standard-80);
-      border-bottom: var(--internal-border);
       text-transform: uppercase;
       font-weight: bold;
       font-size: 10px;
@@ -46,8 +45,6 @@ table {
     }
 
     &:nth-child(2) {
-      background-color: var(--standard-5);
-      width: auto;
       color: var(--standard-40);
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       max-width: 250px;
@@ -57,28 +54,5 @@ table {
     &:nth-child(3) {
       white-space: nowrap;
     }
-  }
-}
-
-/* Special styling for tables without description column */
-table:last-child {
-  td:nth-child(1) {
-    color: var(--standard-40);
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    text-transform: none;
-    font-weight: normal;
-    font-size: 13px;
-    text-align: left;
-    white-space: normal;
-    width: auto;
-    max-width: 250px;
-
-  }
-
-  td:nth-child(2) {
-    white-space: nowrap;
-    background-color: transparent;
-    color: inherit;
-    font-family: inherit;
   }
 }
