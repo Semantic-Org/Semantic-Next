@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 import { get, inArray } from '@semantic-ui/utils';
 
-import componentSpec from './specs/button-component.json' assert { type: 'json' };
-import template from './button.html?raw' assert { type: 'txt' };
-import css from './button-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/button-component.json' with { type: 'json' };
+import template from './button.html?raw';
+import css from './button-bundle.css?raw';
 
 const createComponent = ({ el, self, settings, data, $ }) => ({
   isIconBefore() {

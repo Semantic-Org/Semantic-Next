@@ -424,9 +424,21 @@ export const getPageTraversalLinks = async ({ url = '' }) => {
   Gets Entire Site Menu Deeply Nested
 */
 export const getSiteMenu = async () => {
-  let menu = await getTopbarMenu({ includeURLS: false });
+  let menu = await getTopbarDisplayMenu({ includeURLS: false });
   await asyncEach(menu, async item => {
-    item.menu = await getSidebarMenu({ topbarSection: item._id });
+    let menu = [];
+    const ids = item._ids || [item._id];
+    await asyncEach(ids, async (id) => {
+      // get all urls that represent this topbar section
+      const menuGroup = await getSidebarMenu({
+        topbarSection: id,
+      });
+      menu = [
+        ...menu,
+        ...menuGroup,
+      ];
+    });
+    item.menu = menu;
   });
   return menu;
 };
@@ -500,7 +512,7 @@ export const getRailMenu = (headings, pageTitle = null) => {
   let menu = [];
   let menuGroup;
 
-  if (!headings.length) return menu;
+  if (!headings.length) { return menu; }
 
   const headingLevels = unique(headings.map(heading => heading.depth)).sort();
   const lowestHeadingLevel = headingLevels[0];
@@ -514,7 +526,7 @@ export const getRailMenu = (headings, pageTitle = null) => {
       consecutiveSubheadings.push(headings[i]);
       i++;
     }
-    
+
     if (consecutiveSubheadings.length > 0) {
       // Create parent group with page title for the initial subheadings
       const pageGroup = {
@@ -526,13 +538,13 @@ export const getRailMenu = (headings, pageTitle = null) => {
         })),
       };
       menu.push(pageGroup);
-      
+
       // Process remaining headings with original logic
       const remainingHeadings = headings.slice(i);
       if (remainingHeadings.length > 0) {
         const remainingLevels = unique(remainingHeadings.map(h => h.depth)).sort();
         const remainingLowestLevel = remainingLevels[0];
-        
+
         each(remainingHeadings, heading => {
           if (heading.depth == remainingLowestLevel) {
             if (menuGroup) {
@@ -555,7 +567,7 @@ export const getRailMenu = (headings, pageTitle = null) => {
           menu.push(menuGroup);
         }
       }
-      
+
       return menu.filter(Boolean);
     }
   }

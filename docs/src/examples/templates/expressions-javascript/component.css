@@ -1,0 +1,58 @@
+h4 {
+  font-size: 16px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--standard-15);
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+  background-color: var(--standard-5);
+  border: var(--border);
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 10px 12px;
+    text-align: left;
+    background-color: var(--primary-0);
+    color: var(--primary-80);
+    background-image: var(--subtle-gradient);
+    border-bottom: var(--internal-border);
+    border-left: var(--internal-border);
+
+    &:nth-child(1) {
+      text-align: right;
+    }
+  }
+
+  td {
+    font-size: 13px;
+    padding: 7px 12px;
+    border: var(--internal-border);
+
+    &:nth-child(1) {
+      color: var(--standard-80);
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 10px;
+      text-align: right;
+      white-space: nowrap;
+      width: 0px;
+    }
+
+    &:nth-child(2) {
+      color: var(--standard-40);
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      max-width: 250px;
+
+    }
+
+    &:nth-child(3) {
+      white-space: nowrap;
+    }
+  }
+}

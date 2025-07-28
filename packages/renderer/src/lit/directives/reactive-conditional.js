@@ -1,12 +1,13 @@
 import { Reaction } from '@semantic-ui/reactivity';
-import { each } from '@semantic-ui/utils';
-import { nothing, noChange } from 'lit';
+import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 export class ReactiveConditionalDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
+    this.partInfo = partInfo;
     this.reaction = null;
   }
 
@@ -16,56 +17,117 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     if (this.reaction) {
       this.reaction.stop();
     }
-    let html = nothing;
+    let content = nothing;
     let context = {
       message: `if/else statement: {#if ${conditional.expression}}`,
       conditional: conditional,
     };
-    this.reaction = Reaction.create((comp) => {
-      if (!this.isConnected) {
-        comp.stop();
-        return;
-      }
-      let matchIndex = -1;
-      if (conditional.condition()) {
-        html = conditional.content();
-        matchIndex = 1000; // special index for if condition
-      }
-      else if (conditional.branches?.length) {
-        // evaluate each elseif/else branch
-        each(conditional.branches, (branch, index) => {
-          if(matchIndex === -1) {
-            if (branch.type == 'elseif' && branch.condition()) {
-              matchIndex = index;
-              html = branch.content();
-            }
-            else if (branch.type == 'else') {
-              matchIndex = index;
-              html = branch.content();
-            }
-          }
-        });
-      }
-      else {
-        html = nothing;
-        delete this.matchIndex;
-      }
-      if (!html) {
-        html = nothing;
-        delete this.matchIndex;
-      }
-      if (!comp.firstRun && this.matchIndex !== matchIndex) {
-        this.matchIndex = matchIndex;
-        this.setValue(html);
-      }
-      return html;
-    }, { context });
-    /* Commented out until can resolve mobile menu
+
+    // Create a new reaction that watches for reactive changes on client
+    if (isClient) {
+      this.reaction = Reaction.create((comp) => {
+        if (!this.isConnected) {
+          comp.stop();
+          return;
+        }
+
+        const result = this.getBranch(conditional);
+        matchIndex = result.matchIndex;
+        content = result.content;
+
+        if (!comp.firstRun && this.matchIndex !== matchIndex) {
+          this.matchIndex = matchIndex;
+          this.setValue(content);
+        }
+        return content;
+      }, { context });
+    }
+    else {
+      const result = this.getBranch(conditional);
+      matchIndex = result.matchIndex;
+      content = result.content;
+    }
+
+    /* Experimental (not used currently *
     if(this.matchIndex == matchIndex) {
       return noChange;
+    } */
+
+    return this.formatForPart(content);
+  }
+
+  getBranch(conditional) {
+    let matchIndex = -1;
+    let content;
+    if (conditional.condition()) {
+      content = conditional.content();
+      matchIndex = 1000; // special index for if condition
     }
-    */
-    return html;
+    else if (conditional.branches?.length) {
+      // evaluate each elseif/else branch
+      each(conditional.branches, (branch, index) => {
+        if (matchIndex === -1) {
+          if (branch.type == 'elseif' && branch.condition()) {
+            matchIndex = index;
+            content = branch.content();
+          }
+          else if (branch.type == 'else') {
+            matchIndex = index;
+            content = branch.content();
+          }
+        }
+      });
+    }
+    else {
+      content = nothing;
+      delete this.matchIndex;
+    }
+    if (!content) {
+      content = nothing;
+    }
+    return { matchIndex, content };
+  }
+
+  formatForPart(content) {
+    switch (this.partInfo.type) {
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+        return this.serializeContent(content);
+
+      case PartType.CHILD:
+      case PartType.PROPERTY:
+      case PartType.EVENT:
+      case PartType.ELEMENT:
+      default:
+        // For element content, return as-is (TemplateResult objects are fine here)
+        return content;
+    }
+  }
+
+  serializeContent(content) {
+    // Handle lit's nothing value
+    if (content === nothing) {
+      return '';
+    }
+
+    if (content?.strings) {
+      console.log(content);
+      // For simple conditionals in attributes, just join the static strings
+      // This works for basic cases like {#if condition}text{/if}
+      return content.strings.join('');
+    }
+
+    // Handle arrays and objects like reactive-data does
+    if (isArray(content) || isObject(content)) {
+      try {
+        return JSON.stringify(content);
+      }
+      catch (e) {
+        return String(content);
+      }
+    }
+
+    return String(content);
   }
 
   disconnected() {

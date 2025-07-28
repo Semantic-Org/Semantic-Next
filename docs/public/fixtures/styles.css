@@ -1,0 +1,27 @@
+.card {
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  margin: 0.5rem;
+  background: white;
+  
+  &.active {
+    border: 1px solid #2185d0;
+  }
+}
+
+.header {
+  display: flex;
+  margin: 1rem 0;
+}
+
+.role {
+  background: #f8f9fa;
+  padding: 0.25rem 0.5rem;
+  font: 0.875rem;
+}
+
+.status {
+  &.online {
+    color: #21ba45;
+  }
+}

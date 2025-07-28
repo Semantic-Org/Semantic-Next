@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { isEqual, isString, mapObject } from '@semantic-ui/utils';
+import { isClient, isEqual, isString, mapObject } from '@semantic-ui/utils';
 import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
@@ -20,6 +20,22 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.subTemplates = subTemplates;
     this.data = data;
     this.ast = null;
+
+    // Create a new reaction that watches for reactive changes on client
+    if (isClient) {
+      this.watchChanges();
+    }
+
+    this.maybeCreateTemplate();
+
+    // this is an empty template
+    if (!this.template || this.template?.ast.length == 0) {
+      return nothing;
+    }
+    return this.renderTemplate();
+  }
+
+  watchChanges() {
     this.reaction = Reaction.create((reaction) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
@@ -29,6 +45,7 @@ export class RenderTemplateDirective extends AsyncDirective {
         reaction.stop();
         return;
       }
+
       // first run handled by main path
       if (reaction.firstRun) {
         return;
@@ -51,14 +68,6 @@ export class RenderTemplateDirective extends AsyncDirective {
       const html = this.renderTemplate(dataContext);
       this.setValue(html);
     });
-
-    this.maybeCreateTemplate();
-
-    // this is an empty template
-    if (!this.template || this.template?.ast.length == 0) {
-      return nothing;
-    }
-    return this.renderTemplate();
   }
 
   renderTemplate(dataContext) {

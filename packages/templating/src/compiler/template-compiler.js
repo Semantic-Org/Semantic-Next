@@ -208,12 +208,12 @@ class TemplateCompiler {
       */
       const setCurrentContent = (node, property = 'content') => {
         // initialize empty AST if not present
-        if(!node[property]) {
+        if (!node[property]) {
           node[property] = [];
         }
         contentStack.push({
           node,
-          property
+          property,
         });
       };
 
@@ -240,7 +240,7 @@ class TemplateCompiler {
 
       /* This adds the current node to the AST */
       const addToAST = (...nodes) => {
-        if(contentTarget == undefined) {
+        if (contentTarget == undefined) {
           contentTarget = [];
         }
         contentTarget.push(...nodes);
@@ -252,7 +252,6 @@ class TemplateCompiler {
         };
 
         switch (tag.type) {
-
           case 'IF': {
             newNode = {
               ...newNode,
@@ -419,7 +418,6 @@ class TemplateCompiler {
           }
 
           case 'ASYNC': {
-
             // support async expression with aliases or destructuring
             const { expression, as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
 
@@ -587,7 +585,6 @@ class TemplateCompiler {
   }
 
   static parseAsyncString(asyncString = '') {
-
     // support string like 'as foo' without leading space
     // tag content does will not match ' as ' split
     asyncString = asyncString.replace('as', ' as');
@@ -602,7 +599,7 @@ class TemplateCompiler {
       const destructuring = TemplateCompiler.parseDestructuring(asString);
       return {
         expression,
-        ...destructuring
+        ...destructuring,
       };
     }
 
@@ -612,7 +609,7 @@ class TemplateCompiler {
       expression,
       as: null,
       parts: null,
-      rest: null
+      rest: null,
     };
   }
 
@@ -728,9 +725,11 @@ class TemplateCompiler {
     return templateString;
   }
 
-  // joins neighboring html nodes into a single node
+  // joins neighboring html nodes into a single node and moves snippets to front
   static optimizeAST(ast) {
     const optimizedAST = [];
+    const snippets = [];
+    const otherNodes = [];
     let currentHtmlNode = null;
 
     const processNode = (node) => {
@@ -740,7 +739,7 @@ class TemplateCompiler {
         }
         else {
           currentHtmlNode = { ...node };
-          optimizedAST.push(currentHtmlNode);
+          otherNodes.push(currentHtmlNode);
         }
       }
       else {
@@ -754,13 +753,21 @@ class TemplateCompiler {
         if (node.else && node.else.content) {
           node.else.content = this.optimizeAST(node.else.content);
         }
-        optimizedAST.push(node);
+
+        // Separate snippets from other nodes
+        if (node.type === 'snippet') {
+          snippets.push(node);
+        }
+        else {
+          otherNodes.push(node);
+        }
       }
     };
 
     ast.forEach(processNode);
 
-    return optimizedAST;
+    // Return snippets first, then other nodes
+    return [...snippets, ...otherNodes];
   }
 }
 

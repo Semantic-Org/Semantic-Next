@@ -438,7 +438,7 @@ export const Template = class Template {
           const targetElement = this;
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
-          // convert "1" to 1
+          // dataset is always stringified for atts, we want this as native values
           const elData = mapObject({ ...targetElement?.dataset }, (stringValue) => {
             let value;
             try {
@@ -797,7 +797,14 @@ export const Template = class Template {
     return Template.renderedTemplates.get(templateName) || [];
   }
   static findTemplate(templateName) {
-    return Template.getTemplates(templateName)[0];
+    const template = Template.getTemplates(templateName)[0];
+    if (!template) {
+      return undefined;
+    }
+    return {
+      ...template.instance,
+      ...template.data,
+    };
   }
   static findParentTemplate(template, templateName) {
     // this matches on DOM (common)
@@ -811,9 +818,12 @@ export const Template = class Template {
       }
       return true;
     };
+    const getParent = (el) => {
+      return el?.parentNode || el?.host;
+    };
 
     if (!match) {
-      let parentNode = template.element?.parentNode;
+      let parentNode = getParent(template.element);
       while (parentNode) {
         if (isMatch(parentNode.component)) {
           match = {
@@ -822,7 +832,7 @@ export const Template = class Template {
           };
           break;
         }
-        parentNode = parentNode.parentNode;
+        parentNode = getParent(parentNode);
       }
     }
     // this matches on nested partials (less common)
@@ -841,21 +851,55 @@ export const Template = class Template {
 
   static findChildTemplates(template, templateName) {
     let result = [];
-    // recursive lookup
-    function search(template, templateName) {
-      if (!templateName || (template.templateName === templateName)) {
-        result.push({
-          ...template.instance,
-          ...template.data,
-        });
+
+    const isMatch = (component) => {
+      if (!component?.templateName) {
+        return false;
       }
-      if (template._childTemplates) {
-        template._childTemplates.forEach((childTemplate) => {
-          search(childTemplate, templateName);
+      if (templateName && component?.templateName !== templateName) {
+        return false;
+      }
+      return true;
+    };
+
+    // First check DOM children (web components) - cascade downward
+    if (template.element?.shadowRoot) {
+      const traverseChildren = (node) => {
+        if (node?.children) {
+          for (const child of node.children) {
+            if (child.component && isMatch(child.component)) {
+              result.push({
+                ...child.component,
+                ...child.dataContext,
+              });
+            }
+            // Recursively check nested children including their shadow roots
+            traverseChildren(child);
+            if (child.shadowRoot) {
+              traverseChildren(child.shadowRoot);
+            }
+          }
+        }
+      };
+      traverseChildren(template.element.shadowRoot);
+    }
+
+    // Then check subtemplate children (recursive lookup for nested partials)
+    function search(childTemplates, templateName) {
+      if (childTemplates) {
+        childTemplates.forEach((childTemplate) => {
+          if (!templateName || (childTemplate.templateName === templateName)) {
+            result.push({
+              ...childTemplate.instance,
+              ...childTemplate.data,
+            });
+          }
+          search(childTemplate._childTemplates, templateName);
         });
       }
     }
-    search(template, templateName);
+    // Only search child templates, not the template itself
+    search(template._childTemplates, templateName);
     return result;
   }
   static findChildTemplate(template, templateName) {

@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 import { noop } from '@semantic-ui/utils';
 
-import componentSpec from './specs/modal-component.json' assert { type: 'json' };
-import template from './modal.html?raw' assert { type: 'txt' };
-import css from './modal-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/modal-component.json' with { type: 'json' };
+import template from './modal.html?raw';
+import css from './modal-bundle.css?raw';
 
 const createComponent = ({ $, dispatchEvent }) => ({
   show(callback = noop) {

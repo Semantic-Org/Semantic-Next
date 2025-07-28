@@ -1,0 +1,14 @@
+<div class="weather {getWeatherClass temperature}">
+  Today's weather: 
+  <span class="text">
+    {#if temperature > 90}
+      Hot
+    {else if temperature > 70}
+      Warm
+    {else if temperature > 50}
+      Cool
+    {else}
+      Cold
+    {/if}
+  </span>
+</div>

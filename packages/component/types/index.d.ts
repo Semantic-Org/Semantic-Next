@@ -1,3 +1,4 @@
+export { registerHelper, registerHelpers } from '@semantic-ui/templating';
 export { getJSON, getText } from '@semantic-ui/utils';
 
 export { defineComponent, DefineComponentOptions, UIWebComponent } from './define-component';

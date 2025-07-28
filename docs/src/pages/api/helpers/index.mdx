@@ -30,6 +30,63 @@ Template helpers can be used directly from any template
 {formatDate myDate 'h:mm A'}
 ```
 
+## Custom Helpers
+
+You can extend the template system by registering your own helper functions.
+
+### registerHelper
+
+```javascript
+function registerHelper(name, fn)
+```
+
+Register a single template helper function.
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| name | string | The name of the helper function |
+| fn | function | The helper function to register |
+
+**Example**
+
+```javascript
+import { registerHelper } from '@semantic-ui/templating';
+
+registerHelper('formatMoney', (amount, currency = 'USD') => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(amount);
+});
+```
+
+### registerHelpers
+
+```javascript
+function registerHelpers(helpers)
+```
+
+Register multiple template helper functions at once.
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| helpers | object | An object containing helper functions |
+
+**Example**
+
+```javascript
+import { registerHelpers } from '@semantic-ui/templating';
+
+registerHelpers({
+  initials: (name) => name.split(' ').map(n => n[0]).join('').toUpperCase(),
+  randomId: () => Math.random().toString(36).substr(2, 9)
+});
+```
+
 ## Helper Categories
 
 <UICards two horizontal stackable>

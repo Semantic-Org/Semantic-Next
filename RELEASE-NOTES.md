@@ -2,9 +2,90 @@
 
 This is a pre-release version and APIs will change quickly. Before `1.0` release all breaking changes will be `minor` releases and features `patch` releases.
 
-`Minor` releases will be released approximately every 2 weeks.
+`Minor` releases will occur approximately every 2 weeks.
 
 Please note after `1.0` Semver will be followed using normal protocols.
+
+# Version 0.15.0 - 07.24.2025
+
+## Major Features
+* **Features* - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
+* **Feature** - Added support for binding el properties from inside templates like `<input type="checkbox" .checked={checked}>`
+* **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
+
+## Templates
+* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`
+
+## Utils
+* **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation
+
+## Reactivity
+* **Bug** - Fixed bug in `Reaction.getSource()` when breakpointed in a template helper.
+* **Change** - `Reaction.getSource()` no longer returns the stack, this makes it more clear when invoking it from chrome console as the return will produce its own log.
+
+## Components
+* **Bug** - Fixed `ui-input` `debounce` setting did not use the new obj signature from `0.14.0` causing it to fail.
+* **Bug** - Fixed debounce/throttle parameter overload handling where `wait` parameter as object wasn't properly handled
+
+## Infrastructure
+* **Chore** - Updated Vitest to v3.2.4 across all packages for consistency
+* **Chore** - Migrated from deprecated `workspace` configuration to modern `test.projects` in Vitest configs
+
+# Version 0.14.2 - 07.23.2025
+* **Feature** - Snippets can now be used before they are defined in templates.
+* **Bug** - Fixed bug where snippet data could be overwritten incorrectly when parent data changed
+* **Feature** - Conditionals can now be used inlined in html attributes like `<div class="{#if condition}value{/if}"></div>`
+* **Bug** - Fix reactive data expressions in properties and events being incorrectly stringified.
+
+# Version 0.14.1 - 7.22.2025
+* **Chore*** - Update all npm deps for project and docs.
+* **Bug** - Fix bug with {#html} blocks not rendering properly with ssr.
+
+# Version 0.14.0 - 07.22.2025
+
+## Components
+* **Enhancement** - Component navigation helpers (`findChild`, `findChildren`, `findParent`, `findTemplate`) now have comprehensive support for both web components and subtemplates using dual pattern traversal
+* **Enhancement** - `findChild` and `findChildren` now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal
+* **Bug** - Fixed `findTemplate` to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object
+
+## Templates
+* **Bug** - Fix error causing async blocks to stop working
+
+### Testing
+* **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories
+
+### Utils
+* **Breaking Change** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)`
+* **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`)
+* **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution
+* **Feature** - Added `getIPAddress()` to retrieve local, public, or all IP addresses using WebRTC ICE gathering
+* **Bug** - Fixed `fatal` to look for `onError` on `globalThis`
+
+### Documentation
+* **Examples** - Added missing examples for browser utilities: `copyText`, `openLink`, `getKeyFromEvent`, `idleCallback`, `getText`, and `getJSON`
+
+# Version 0.13.3 - 07.17.2025
+* **Improvement/Bug** - Fix issue where some build tools could not parse raw text imports of dependencies. There is now a build step where esm endpoints now inline txt imports.
+
+
+For instance in `@semanti-ui/core` templates are included like
+```javascript
+import template from './button.html?raw' assert { type: 'txt' };
+```
+These imports may not be processed downstream properly in Vite when using esmodules unless `optimize.excludeDeps` included `@semantic-ui/core`.
+
+* **Change** - Removed `with { type: 'css' }` and ` with { type: 'html' }. Currently only `json` is supported officially and vite is not happy with unknown types <https://github.com/vitejs/vite/discussions/18534>
+* **Bug** - Fix issue with empty file `dist/.js` in npm package build.
+
+We've now linked the ESM build to a build that inlines raw text imports to prevent issues with downstream builds.
+
+# Version 0.13.2 - 07.15.2025
+
+* **Bug** - Remove unused dependency `@semantic-ui/esbuild-log`
+
+# Version 0.13.1 - 07.14.2025
+
+* **Bug** - Fixed a bug with SSR in reactive directives like conditional/data. If a reaction was long-lived (for example an interval is set up in onCreated) the reaction would not properly get gced and could rerun on the server causing an ssr error like (TypeError: this._$Ct._$AI is not a function at ReactiveDataDirective.setValue)
 
 # Version 0.13.0 - 07.14.2025
 

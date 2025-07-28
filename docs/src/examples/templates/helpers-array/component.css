@@ -1,0 +1,38 @@
+h3 {
+  font-size: 16px;
+  padding-bottom: 4px;
+  border-bottom: var(--border);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin: 0.5rem 0;
+}
+
+b {
+  color: var(--primary-text-color);
+}
+
+.years {
+  display: flex;
+  gap: var(--compact-spacing);
+  
+  .year {
+    padding: var(--compact-spacing);
+    background: var(--standard-5);
+    border-radius: var(--border-radius);
+  }
+}
+
+.config {
+  display: flex;
+  flex-direction: column;
+  gap: var(--compact-spacing);
+  
+  .item {
+    padding: var(--compact-spacing);
+    background: var(--standard-5);
+    border-radius: var(--border-radius);
+  }
+}

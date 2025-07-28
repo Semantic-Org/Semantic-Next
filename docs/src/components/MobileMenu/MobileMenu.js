@@ -133,7 +133,7 @@ const createComponent = ({ tpl, settings, $, state, flush, afterFlush, dispatchE
     const el = $current.first().el();
     if (el) {
       const rect = el.getBoundingClientRect();
-      //console.log(rect);
+      // console.log(rect);
     }
   },
 

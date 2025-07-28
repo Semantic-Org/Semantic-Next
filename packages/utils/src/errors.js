@@ -21,8 +21,8 @@ export const fatal = (
   }
 
   const throwError = () => {
-    if (typeof global.onError === 'function') {
-      global.onError(error);
+    if (typeof globalThis.onError === 'function') {
+      globalThis.onError(error);
     }
     throw error;
   };

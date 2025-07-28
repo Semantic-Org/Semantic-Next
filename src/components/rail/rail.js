@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/rail-component.json' assert { type: 'json' };
-import template from './rail.html?raw' assert { type: 'txt' };
-import css from './rail-bundle.css?raw' assert { type: 'css' };
+import componentSpec from './specs/rail-component.json' with { type: 'json' };
+import template from './rail.html?raw';
+import css from './rail-bundle.css?raw';
 
 const createComponent = ({ $ }) => ({});
 

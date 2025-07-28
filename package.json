@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.13.0",
+  "version": "0.15.0",
   "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
@@ -16,10 +16,10 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./src/components/index.js",
+      "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./src/components/index.js"
+      "default": "./dist/semantic-ui.js"
     },
     "./css": {
       "import": "./src/css/all.css",
@@ -38,80 +38,84 @@
       "default": "./src/css/tokens.css"
     },
     "./specs": {
-      "import": "./src/specs/specs.js",
-      "default": "./src/specs/specs.js"
+      "import": "./dist/specs.js",
+      "default": "./dist/specs.js"
     },
     "./component-specs": {
-      "import": "./src/specs/component-specs.js",
-      "default": "./src/specs/component-specs.js"
+      "import": "./dist/component-specs.js",
+      "default": "./dist/component-specs.js"
     },
     "./examples": {
       "import": "./examples/index.js",
       "default": "./examples/index.js"
     },
     "./button": {
-      "import": "./src/components/button/index.js",
+      "import": "./dist/button.js",
       "browser": "./dist/cdn/button.min.js",
       "bundled": "./dist/bundled/button.min.js",
-      "default": "./src/components/button/index.js"
+      "default": "./dist/button.js"
     },
     "./card": {
-      "import": "./src/components/card/index.js",
+      "import": "./dist/card.js",
       "browser": "./dist/cdn/card.min.js",
       "bundled": "./dist/bundled/card.min.js",
-      "default": "./src/components/card/index.js"
+      "default": "./dist/card.js"
     },
     "./container": {
-      "import": "./src/components/container/index.js",
+      "import": "./dist/container.js",
       "browser": "./dist/cdn/container.min.js",
       "bundled": "./dist/bundled/container.min.js",
-      "default": "./src/components/container/index.js"
+      "default": "./dist/container.js"
     },
     "./icon": {
-      "import": "./src/components/icon/index.js",
+      "import": "./dist/icon.js",
       "browser": "./dist/cdn/icon.min.js",
       "bundled": "./dist/bundled/icon.min.js",
-      "default": "./src/components/icon/index.js"
+      "default": "./dist/icon.js"
     },
     "./input": {
-      "import": "./src/components/input/index.js",
+      "import": "./dist/input.js",
       "browser": "./dist/cdn/input.min.js",
       "bundled": "./dist/bundled/input.min.js",
-      "default": "./src/components/input/index.js"
+      "default": "./dist/input.js"
     },
     "./label": {
-      "import": "./src/components/label/index.js",
+      "import": "./dist/label.js",
       "browser": "./dist/cdn/label.min.js",
       "bundled": "./dist/bundled/label.min.js",
-      "default": "./src/components/label/index.js"
+      "default": "./dist/label.js"
     },
     "./menu": {
-      "import": "./src/components/menu/index.js",
+      "import": "./dist/menu.js",
       "browser": "./dist/cdn/menu.min.js",
       "bundled": "./dist/bundled/menu.min.js",
-      "default": "./src/components/menu/index.js"
+      "default": "./dist/menu.js"
     },
     "./modal": {
-      "import": "./src/components/modal/index.js",
+      "import": "./dist/modal.js",
       "browser": "./dist/cdn/modal.min.js",
       "bundled": "./dist/bundled/modal.min.js",
-      "default": "./src/components/modal/index.js"
+      "default": "./dist/modal.js"
     },
     "./rail": {
-      "import": "./src/components/rail/index.js",
+      "import": "./dist/rail.js",
       "browser": "./dist/cdn/rail.min.js",
       "bundled": "./dist/bundled/rail.min.js",
-      "default": "./src/components/rail/index.js"
+      "default": "./dist/rail.js"
     },
     "./segment": {
-      "import": "./src/components/segment/index.js",
+      "import": "./dist/segment.js",
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundled/segment.min.js",
-      "default": "./src/components/segment/index.js"
+      "default": "./dist/segment.js"
     }
   },
   "scripts": {
     "build": "wireit",
+    "build:ui": "wireit",
+    "build:ui-deps": "wireit",
+    "build:ui-components": "wireit",
+    "build:specs": "wireit",
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
@@ -144,7 +148,16 @@
       "dependencies": [
         "build:packages",
         "build:ui-deps",
-        "build:ui-components"
+        "build:ui-components",
+        "build:specs"
+      ]
+    },
+    "build:ui": {
+      "command": "node ./internal-packages/scripts/src/build-ui-framework.js",
+      "dependencies": [
+        "build:ui-deps",
+        "build:ui-components",
+        "build:specs"
       ]
     },
     "build:packages": {
@@ -174,6 +187,9 @@
     "build:ui-components": {
       "command": "node ./internal-packages/scripts/src/build-ui-components.js"
     },
+    "build:specs": {
+      "command": "node ./internal-packages/scripts/src/build-specs.js"
+    },
     "build:ui-framework": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
     },
@@ -201,32 +217,31 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.12.4",
-    "@semantic-ui/esbuild-log": "^0.12.4",
-    "@semantic-ui/specs": "^0.12.4"
+    "@semantic-ui/component": "^0.14.1",
+    "@semantic-ui/specs": "^0.14.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.0",
-    "@commitlint/config-conventional": "^19.8.0",
-    "@types/node": "^22.13.13",
-    "@typescript-eslint/eslint-plugin": "^8.27.0",
-    "@typescript-eslint/parser": "^8.27.0",
-    "@vitest/browser": "^3.0.9",
-    "@vitest/coverage-istanbul": "^3.0.9",
-    "@vitest/ui": "^3.0.9",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-istanbul": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "chalk": "^5.4.1",
-    "dprint": "^0.49.1",
-    "esbuild": "^0.25.1",
-    "glob": "^11.0.1",
-    "inquirer": "^12.5.0",
-    "jsdom": "^26.0.0",
-    "playwright": "^1.51.1",
-    "semver": "^7.7.1",
-    "simple-git-hooks": "^2.12.1",
+    "dprint": "^0.50.1",
+    "esbuild": "^0.25.8",
+    "glob": "^11.0.3",
+    "inquirer": "^12.8.2",
+    "jsdom": "^26.1.0",
+    "playwright": "^1.54.1",
+    "semver": "^7.7.2",
+    "simple-git-hooks": "^2.13.0",
     "underscore": "^1.13.7",
-    "vitest": "^3.0.9",
-    "wireit": "^0.14.11",
-    "ws": "^8.18.2"
+    "vitest": "^3.2.4",
+    "wireit": "^0.14.12",
+    "ws": "^8.18.3"
   },
   "ciDependencies": {
     "axios": "^1.6.8",
