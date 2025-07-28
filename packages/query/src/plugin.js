@@ -1,4 +1,4 @@
-import { capitalize, each, extend, isFunction, isString, mapObject, noop, wrapFunction, proxyObject } from '@semantic-ui/utils';
+import { capitalize, clone, each, extend, isFunction, isString, mapObject, noop, wrapFunction, proxyObject } from '@semantic-ui/utils';
 
 export class Plugin {
 
@@ -31,17 +31,17 @@ export class Plugin {
   } = {}) {
 
     // handle query instance
-    this.$ = $element.chain;
+    this.$ = $element.chain.bind($element);
     this.$element = $element,
     this.element = $element.el();
 
     // handle run-time settings
-    this.settings = settings;
+    this.settings = clone(settings);
     this.namespace = namespace;
 
     // allow html metadata to override settings like <div data-setting="new-setting">
     if(allowDataOverride) {
-      settings = this.addDataOverrides()
+      this.addDataOverrides()
     }
 
     // use abort controllers for lifecycle teardown
