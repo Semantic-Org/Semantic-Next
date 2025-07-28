@@ -92,6 +92,8 @@ export const registerPlugin = (plugin) => {
     $elements.each(function(element, index) {
 
       const $element = this;
+
+      // plugin is stored in namespace like el.plugin
       const instance = Plugin.getPluginInstance(element, namespace);
 
       // create plugin instance if not defined

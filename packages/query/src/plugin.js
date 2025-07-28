@@ -39,6 +39,7 @@ export class Plugin {
     this.settings = settings;
     this.namespace = namespace;
 
+    // allow html metadata to override settings like <div data-setting="new-setting">
     if(allowDataOverride) {
       settings = this.addDataOverrides()
     }
@@ -67,7 +68,6 @@ export class Plugin {
         this.settings[name] = elementData[name];
       }
     });
-    console.log('new settings are', this.settings);
   }
 
   reinitialize(settings) {
