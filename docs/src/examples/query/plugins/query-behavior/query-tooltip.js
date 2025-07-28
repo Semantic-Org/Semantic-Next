@@ -1,4 +1,6 @@
 import { registerPlugin } from '@semantic-ui/query';
+import { getText } from '@semantic-ui/utils';
+const css = await getText('./query-tooltip.css');
 
 const defaultSettings = {
   duration: 200,
@@ -10,11 +12,18 @@ const setup = () => {
   console.log('called once');
 };
 
-const createPlugin = ({ $el, settings }) => ({
+const createPlugin = ({ $, $el, settings, self }) => ({
+  createTooltip() {
+    return $('<div></div>')
+      .addClass('ui tooltip')
+  },
   show() {
-    console.log('showing', settings.title, settings.content);
+    const $tooltip = self.createTooltip();
+    console.log($tooltip);
+    //$el.insertAfter($tooltip);
   },
   hide() {
+    //$el.next('.tooltip').remove();
     console.log('hiding');
   }
 });
@@ -30,6 +39,7 @@ const events = {
 
 registerPlugin({
   name: 'tooltip',
+  css,
   defaultSettings,
   setup,
   events,

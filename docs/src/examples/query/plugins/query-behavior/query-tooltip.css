@@ -1,0 +1,13 @@
+.ui.tooltip {
+  padding: var(--padding);
+  color: var(--text-color);
+  box-shadow: var(--floating-shadow);
+
+  .title {
+    font-size: 18px;
+  }
+  .content {
+    padding: 1rem 0rem;
+    font-size: 14px;
+  }
+}

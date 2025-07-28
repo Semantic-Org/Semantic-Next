@@ -8,10 +8,14 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version x.x.x
 
+## Query
+* **Major Feature** - Added generalized plugin architecture for Query
+
 ## Utils
 * **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching
 * **Feature** - Added `extractCSS()` for extracting CSS rules matching selectors from various stylesheet sources with optional text output
 * **Feature** - Added `scopeStyles()` for scoping CSS rules with configurable :host replacement and root element handling
+* **Chore** - Restructured tests for utils package to be organized by category.
 
 # Version 0.15.0 - 07.24.2025
 
