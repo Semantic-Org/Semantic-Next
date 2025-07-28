@@ -1,12 +1,37 @@
 import { registerPlugin } from '@semantic-ui/query';
 
+const defaultSettings = {
+  duration: 200,
+  title: '',
+  content: '',
+}
+
+const setup = () => {
+  console.log('called once');
+};
+
+const createPlugin = ({ $el, settings }) => ({
+  show() {
+    console.log('showing', settings.title, settings.content);
+  },
+  hide() {
+    console.log('hiding');
+  }
+});
+
+const events = {
+  'mouseenter': ({ self, data }) => {
+    self.show({});
+  },
+  'mouseleave': ({ self, data }) => {
+    self.hide();
+  },
+};
+
 registerPlugin({
   name: 'tooltip',
-  defaultSettings: {
-    duration: 200,
-  },
-  createPlugin: (params) => {
-    console.log('params are', params.settings.duration);
-    return {};
-  },
+  defaultSettings,
+  setup,
+  events,
+  createPlugin,
 });
