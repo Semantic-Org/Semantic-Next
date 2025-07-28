@@ -10,13 +10,18 @@ import { inArray } from './arrays.js';
 
 export const adoptStylesheet = (css, adoptedElement, {
   hash = hashCode(css),
-  cacheStylesheet = false,
+  cacheStylesheet = true,
 } = {}) => {
   if (isServer) {
     return;
   }
   if (!adoptedElement) {
     adoptedElement = document;
+  }
+
+  // If adoptedElement doesn't support adoptedStyleSheets, get its root node
+  if (!adoptedElement?.adoptedStyleSheets && adoptedElement?.getRootNode) {
+    adoptedElement = adoptedElement.getRootNode();
   }
 
   if (!adoptedElement.cssHashes) {

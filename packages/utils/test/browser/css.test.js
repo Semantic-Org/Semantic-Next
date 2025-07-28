@@ -143,6 +143,35 @@ describe('CSS Utilities', () => {
     });
 
     describe('edge cases', () => {
+      it('should auto-detect root node when passed a regular element', () => {
+        const css = '.auto-root-test { color: purple; }';
+        
+        // Create a regular element inside the shadow root
+        const regularElement = document.createElement('span');
+        testElement.shadowRoot.appendChild(regularElement);
+        
+        // Pass the regular element - should auto-detect shadow root
+        adoptStylesheet(css, regularElement);
+        
+        // Should have been adopted to the shadow root, not the element
+        expect(testElement.shadowRoot.adoptedStyleSheets.length).toBe(1);
+        expect(testElement.shadowRoot.adoptedStyleSheets[0].cssRules[0].selectorText).toBe('.auto-root-test');
+      });
+
+      it('should use document as root when element has no shadow root', () => {
+        const css = '.document-fallback { font-weight: bold; }';
+        const regularDiv = document.createElement('div');
+        document.body.appendChild(regularDiv);
+        
+        const initialCount = document.adoptedStyleSheets.length;
+        adoptStylesheet(css, regularDiv);
+        
+        expect(document.adoptedStyleSheets.length).toBe(initialCount + 1);
+        
+        // Clean up
+        regularDiv.remove();
+      });
+
       it('should handle custom hash values', () => {
         const css = '.custom-hash { border: 1px solid black; }';
         const customHash = 'my-custom-hash';
