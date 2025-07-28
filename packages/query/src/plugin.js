@@ -1,4 +1,12 @@
-import { capitalize, clone, each, extend, isFunction, isString, mapObject, noop, wrapFunction, proxyObject } from '@semantic-ui/utils';
+import {
+  adoptStylesheet,
+  clone,
+  each,
+  extend,
+  isFunction,
+  mapObject,
+  noop
+} from '@semantic-ui/utils';
 
 export class Plugin {
 
@@ -16,6 +24,8 @@ export class Plugin {
     // $element to initialize
     $element,
 
+    css = '',
+
     // allow el data to be specified in data attributes
     allowDataOverride = true,
 
@@ -31,17 +41,21 @@ export class Plugin {
   } = {}) {
 
     // handle query instance
-    this.$ = $element.chain.bind($element);
-    this.$element = $element,
+    this.$ = (selector, options) => new $element.constructor(selector, options);
+    this.$element = $element;
     this.element = $element.el();
 
     // handle run-time settings
     this.settings = clone(settings);
     this.namespace = namespace;
 
+    if(css) {
+      this.adoptStylesheet(css);
+    }
+
     // allow html metadata to override settings like <div data-setting="new-setting">
     if(allowDataOverride) {
-      this.addDataOverrides()
+      this.addDataOverrides();
     }
 
     // use abort controllers for lifecycle teardown
@@ -59,6 +73,10 @@ export class Plugin {
     this.attachEvents(events);
 
     this.element[namespace] = this;
+  }
+
+  adoptStylesheet(css) {
+    adoptStylesheet(css, this.element, { cacheStylesheet: true });
   }
 
   addDataOverrides(element = this.element) {
@@ -228,6 +246,7 @@ export class Plugin {
     const args = [];
     if (!params) {
       params = {
+        $: plugin.$,
         el: plugin.element,
         $el: plugin.$(plugin.element),
         self: plugin,
