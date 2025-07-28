@@ -1,4 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import './query-tooltip.js';
 
-$('.box').tooltip();
+$('.box').tooltip({
+  title: 'Runtime Title'
+});

@@ -88,6 +88,7 @@ const subCategorySortOrder = {
     'Strings',
     'Functions',
     'Colors',
+    'CSS',
     'Browser',
     'Dates',
     'Numbers',

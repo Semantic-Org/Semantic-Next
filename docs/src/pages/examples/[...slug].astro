@@ -36,12 +36,12 @@ const allExampleFiles = await import.meta.glob(`../../examples/**`, {
 });
 
 const isFolder = example.exampleType == 'folder';
-
 let files = await getExampleFiles({
   contentID: getExampleID(example),
   allFiles: allExampleFiles,
   basePath: '../../examples/',
   includeFolder: isFolder,
+  additionalFiles: example.additionalFiles || example.additionalPageFiles || [],
   hideBoilerplate: example.fold !== false,
   includePlaygroundInjections: (example.exampleType !== 'page'),
   includeLog: example.exampleType == 'log',

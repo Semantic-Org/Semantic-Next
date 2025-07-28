@@ -2,9 +2,9 @@ import { registerPlugin } from '@semantic-ui/query';
 
 const defaultSettings = {
   duration: 200,
-  title: '',
-  content: '',
-}
+  title: 'Default Title',
+  content: 'Default Content'
+};
 
 const setup = () => {
   console.log('called once');
