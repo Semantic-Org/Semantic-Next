@@ -3,6 +3,7 @@ export * from './browser.js';
 export * from './cloning.js';
 export * from './colors.js';
 export * from './crypto.js';
+export * from './css.js';
 export * from './dates.js';
 export * from './equality.js';
 export * from './errors.js';

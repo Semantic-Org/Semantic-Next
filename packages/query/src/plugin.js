@@ -145,7 +145,6 @@ export class Plugin {
   }
 
   getElementData(element = this.element) {
-    console.log('element is', this.element);
     return mapObject({ ...element?.dataset }, (stringValue) => {
       let value;
       try {
@@ -246,12 +245,13 @@ export class Plugin {
         get classNames() {
           return plugin.classNames;
         },
-        settings: proxyObject({}, plugin.settings),
+        get settings() {
+          return plugin.settings;
+        },
         ...additionalParams,
       };
       args.push(params);
     }
-    console.log('call settings', plugin.settings);
     if (isFunction(func)) {
       return func.apply(plugin.element, args);
     }

@@ -1,12 +1,44 @@
-import { capitalize, isString, noop, wrapFunction } from '@semantic-ui/utils';
+import { pick, isString, noop, wrapFunction, adoptStylesheet } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
 // Register Plugin
 export const registerPlugin = (plugin) => {
-  let {
 
+  const pluginDefaults = {
+    name: undefined,
+    css: undefined,
+    // storage in el
+    namespace: plugin?.name,
+    // settings for plugin
+    defaultSettings: {},
+    // returns plugin instance
+    createPlugin: noop,
+    // event object
+    events: {},
+    // whether html data can override settings
+    allowDataOverride: true,
+    // one time setup callback
+    setup: noop,
+    // callbacks
+    onCreated: noop,
+    onMutated: noop,
+    onDestroyed: noop,
+    // standard object storage
+    selectors: {},
+    classNames: {},
+    errors: {},
+  };
+
+  plugin = {
+    ...pluginDefaults,
+    ...plugin
+  };
+
+  let {
     name,
+
+    css,
 
     namespace = name,
 
@@ -54,21 +86,18 @@ export const registerPlugin = (plugin) => {
   // Create abstraction around plugin initialization
   Query.prototype[name] = function(settings) {
 
-    const QueryInstance = this;
-
     // allow setup function
     if(!isSetup) {
       wrapFunction(plugin.setup)();
     }
 
-    // Retrieve the current defaults in case they are modified
-    const {
-      defaultSettings,
-      classNames,
-      errors,
-      selectors,
-      setup,
-    } = Query.prototype[name];
+    // At run time we need to check if defaults are changed from original registration
+    const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
+    const pluginDefaults = pick(Query.prototype[name], ...defaultValues);
+    const runtimePlugin = {
+      ...pluginDefaults,
+      ...plugin,
+    };
 
     // when this element is initialized we create run time settings
     // this looks at current default settings at time of init
