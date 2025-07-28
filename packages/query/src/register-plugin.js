@@ -1,11 +1,14 @@
-import { capitalize, isString, noop } from '@semantic-ui/utils';
+import { capitalize, isString, noop, wrapFunction } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
 // Register Plugin
 export const registerPlugin = (plugin) => {
-  const {
+  let {
+
     name,
+
+    namespace = name,
 
     // settings for plugin
     defaultSettings = {},
@@ -15,6 +18,12 @@ export const registerPlugin = (plugin) => {
 
     // event object
     events = {},
+
+    // whether html data can override settings
+    allowDataOverride = true,
+
+    // one time setup callback
+    setup = noop,
 
     // callbacks
     onCreated = noop,
@@ -27,12 +36,16 @@ export const registerPlugin = (plugin) => {
     errors = {},
   } = plugin;
 
+  let isSetup = false;
+
   if (!name) {
     throw new Error('Plugin must have a name');
   }
 
+  // may be called via side effects which should not throw an error
+  // when multiple components rely on same plugin
   if (Query.plugins.has(name)) {
-    throw new Error(`Plugin '${name}' already registered`);
+    return;
   }
 
   // Register this plugin
@@ -40,15 +53,26 @@ export const registerPlugin = (plugin) => {
 
   // Create abstraction around plugin initialization
   Query.prototype[name] = function(settings) {
+
+    const QueryInstance = this;
+
+    // allow setup function
+    if(!isSetup) {
+      wrapFunction(plugin.setup)();
+    }
+
     // Retrieve the current defaults in case they are modified
     const {
       defaultSettings,
       classNames,
       errors,
       selectors,
+      setup,
     } = Query.prototype[name];
 
-    settings = {
+    // when this element is initialized we create run time settings
+    // this looks at current default settings at time of init
+    const runtimeSettings = {
       ...defaultSettings,
       ...settings,
     };
@@ -65,22 +89,29 @@ export const registerPlugin = (plugin) => {
     // value to store return
     let returnedValue;
 
-    $elements.each((element, index) => {
-      const instance = element[plugin.namespace];
+    $elements.each(function(element, index) {
+
+      const $element = this;
+      const instance = Plugin.getPluginInstance(element, namespace);
 
       // create plugin instance if not defined
-      // it auto attaches to element
+      // this might even occur if a method is invoked
+      // if this method has no instance defined
       if (!instance) {
-        new Plugin({ element, ...plugin, settings });
+        const pluginInstance = new Plugin({
+          $element,
+          ...plugin,
+          settings: runtimeSettings
+        });
       }
 
       if (methodInvoked) {
+        returnedValue = instance.call(methodArguments);
       }
-      else {
-        // Initialize
-        if (instance !== undefined) {
-          instance.destroy();
-        }
+      else if(instance !== undefined) {
+        // if they are not calling a method and there are settings
+        // than they are attempting to reinitialize the plugin with new settings
+        instance.reinitialize(settings);
       }
     });
 
@@ -93,5 +124,7 @@ export const registerPlugin = (plugin) => {
   // This allows end-users to override the defaults
   Query.prototype[name].defaultSettings = defaultSettings;
   Query.prototype[name].classNames = classNames;
+  Query.prototype[name].selectors = selectors;
   Query.prototype[name].errors = errors;
+
 };

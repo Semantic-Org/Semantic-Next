@@ -4,7 +4,7 @@ const defaultSettings = {
   duration: 200,
 };
 
-const className = {
+const classNames = {
   animating: 'animating',
   disabled: 'disabled',
   hidden: 'hidden',
@@ -20,9 +20,18 @@ const error = {
   repeated: 'That animation is already occurring, cancelling repeated animation',
 };
 
-const createPlugin = ({ settings }) => ({});
+const onCreated = ({settings}) => {
+  console.log('initialized with', settings);
+};
 
-registerPlugin('transition', {
+const createPlugin = ({ settings }) => ({
+
+});
+
+export const TransitionPlugin = registerPlugin({
+  name: 'transition',
   defaultSettings,
+  classNames,
   createPlugin,
+  onCreated,
 });

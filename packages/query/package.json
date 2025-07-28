@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/query",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "title": "Semantic UI Query",
   "description": "DOM querying and manipulation library for Semantic UI",
   "author": "Jack Lukic <jack@semantic-ui.com>",
@@ -15,6 +15,10 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
+    },
+    "./plugins/transition": {
+      "import": "./src/plugins/transition.js",
+      "default": "./src/plugins/transition.js"
     }
   },
   "scripts": {
