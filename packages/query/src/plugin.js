@@ -1,9 +1,12 @@
 import {
   adoptStylesheet,
+  capitalize,
   clone,
   each,
   extend,
   isFunction,
+  isPlainObject,
+  isString,
   mapObject,
   noop
 } from '@semantic-ui/utils';
@@ -33,6 +36,9 @@ export class Plugin {
     onCreated = noop,
     onDestroyed = noop,
 
+    // custom invocation fallback
+    customInvocation = noop,
+
     // standard
     selectors = {},
     classNames = {},
@@ -48,6 +54,7 @@ export class Plugin {
     // handle run-time settings
     this.settings = clone(settings);
     this.namespace = namespace;
+    this.customInvocation = customInvocation;
 
     if(css) {
       this.adoptStylesheet(css);
@@ -76,6 +83,7 @@ export class Plugin {
   }
 
   adoptStylesheet(css) {
+    // cache stylesheet uses same constructed stylesheet across instances
     adoptStylesheet(css, this.element, { cacheStylesheet: true });
   }
 
@@ -238,6 +246,87 @@ export class Plugin {
         ...eventSettings
       }),
     );
+  }
+
+  // Lookup method or property using natural language patterns (internal helper)
+  // Modernized version of original SUI invoke algorithm
+  lookup(query) {
+    if (!query || !isString(query)) {
+      return undefined;
+    }
+
+    const queryParts = query.split(/[\. ]/);
+    const maxDepth = queryParts.length - 1;
+    let currentObject = this;
+    let found;
+
+    each(queryParts, (value, depth) => {
+      // Try camelCase conversion first (for multi-part names)
+      const camelCaseValue = (depth !== maxDepth)
+        ? value + capitalize(queryParts[depth + 1])
+        : queryParts;
+
+      if (isPlainObject(currentObject?.[camelCaseValue]) && (depth !== maxDepth)) {
+        currentObject = currentObject[camelCaseValue];
+      }
+      else if (currentObject?.[camelCaseValue] !== undefined) {
+        found = currentObject[camelCaseValue];
+        return false; // Break out of each
+      }
+      else if (isPlainObject(currentObject?.[value]) && (depth !== maxDepth)) {
+        currentObject = currentObject[value];
+      }
+      else if (currentObject?.[value] !== undefined) {
+        found = currentObject[value];
+        return false; // Break out of each
+      }
+      else {
+        return false; // Break out of each - not found
+      }
+    });
+
+    return found;
+  }
+
+  // invoke an internal method returned from createComponent
+  callPluginMethod(query, ...methodArgs) {
+    let found = this.lookup(query);
+    if (isFunction(found)) {
+      // Call method with plugin instance as context
+      return found.apply(this, methodArgs);
+    }
+    else if (found === undefined && this.customInvocation) {
+      // Fallback when method not found
+      found = this.call(this.customInvocation, {
+        additionalParams: {
+          methodName: query,
+          methodArgs
+        }
+      });
+    }
+    return found ?? undefined;
+  }
+
+  // Get or set individual setting
+  setting(name, value) {
+    if (value === undefined) {
+      // Getter - return current value
+      return this.settings[name];
+    }
+    // Setter - update value
+    this.settings[name] = value;
+    return this; // For chaining
+  }
+
+  // Update multiple settings at once
+  settings(newSettings) {
+    if (newSettings === undefined) {
+      // Getter - return all settings
+      return this.settings;
+    }
+    // Setter - merge new settings
+    extend(this.settings, newSettings);
+    return this; // For chaining
   }
 
   // calls callback if defined with consistent params and this context

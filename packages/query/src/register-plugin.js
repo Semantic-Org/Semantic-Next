@@ -1,4 +1,4 @@
-import { pick, isString, noop, wrapFunction, adoptStylesheet } from '@semantic-ui/utils';
+import { pick, isString, isArray, noop, wrapFunction, adoptStylesheet } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
@@ -109,10 +109,10 @@ export const registerPlugin = (plugin) => {
     // store reference to all elements
     const $elements = this;
 
-    // check if we're calling a method
-    let methodInvoked, methodArguments;
+    // check if we're calling a method (string as first param)
+    let methodName, methodArguments;
     if (isString(arguments[0])) {
-      [methodInvoked, ...methodArguments] = arguments;
+      [methodName, ...methodArguments] = arguments;
     }
 
     // value to store return
@@ -129,15 +129,30 @@ export const registerPlugin = (plugin) => {
       // this might even occur if a method is invoked
       // if this method has no instance defined
       if (!instance) {
-        const pluginInstance = new Plugin({
+        new Plugin({
           $element,
-          ...plugin,
+          ...runtimePlugin,
           settings: runtimeSettings
         });
       }
 
-      if (methodInvoked) {
-        returnedValue = instance.call(methodArguments);
+      if (methodName) {
+        const response = instance.callPluginMethod(methodName, ...methodArguments);
+
+        // Collect return values using original SUI pattern
+        if (isArray(returnedValue)) {
+          returnedValue.push(response);
+        }
+        else if (returnedValue !== undefined) {
+          // Only create array if values are different
+          if (returnedValue !== response) {
+            returnedValue = [returnedValue, response];
+          }
+          // If same value, keep the single value (don't create array)
+        }
+        else if (response !== undefined) {
+          returnedValue = response;
+        }
       }
       else if(instance !== undefined) {
         // if they are not calling a method and there are settings
@@ -145,6 +160,7 @@ export const registerPlugin = (plugin) => {
         instance.reinitialize(settings);
       }
     });
+
 
     return (returnedValue !== undefined)
       ? returnedValue
