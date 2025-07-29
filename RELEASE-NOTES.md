@@ -10,6 +10,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## Query
 * **Major Feature** - Added generalized plugin architecture for Query
+* **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
+* **Feature** - Added `appendTo()` method for appending elements as last child of target
+* **Feature** - Added `prependTo()` method for prepending elements as first child of target
 
 ## Utils
 * **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching
