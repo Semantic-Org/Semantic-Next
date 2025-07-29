@@ -24,9 +24,13 @@ export class Plugin {
     // event object
     events = {},
 
+    // setup() can create an initial plugin
+    initialPlugin = {},
+
     // $element to initialize
     $element,
 
+    // css to be added to page
     css = '',
 
     // allow el data to be specified in data attributes
@@ -44,6 +48,7 @@ export class Plugin {
     classNames = {},
     errors = {},
     settings = {},
+    templates = {},
   } = {}) {
 
     // handle query instance
@@ -55,6 +60,10 @@ export class Plugin {
     this.settings = clone(settings);
     this.namespace = namespace;
     this.customInvocation = customInvocation;
+
+    // handle shared state across plugins
+    this.initialPlugin = initialPlugin;
+    extend(this, initialPlugin);
 
     if(css) {
       this.adoptStylesheet(css);
@@ -315,7 +324,7 @@ export class Plugin {
     }
     // Setter - update value
     this.settings[name] = value;
-    return this; // For chaining
+    return this;
   }
 
   // Update multiple settings at once
@@ -326,7 +335,7 @@ export class Plugin {
     }
     // Setter - merge new settings
     extend(this.settings, newSettings);
-    return this; // For chaining
+    return this;
   }
 
   // calls callback if defined with consistent params and this context
@@ -373,5 +382,11 @@ export class Plugin {
 
   static getPluginInstance(element, namespace) {
     return element[namespace];
+  }
+
+  // this allows for a setup() function to return values shared across plugins
+  static callSetupMethod(setupMethod, { $elements, settings, templates } = {}) {
+    const $ = (selector, options) => new $elements.constructor(selector, options);
+    return setupMethod({ $, settings, $elements, templates });
   }
 }

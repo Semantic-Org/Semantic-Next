@@ -1,4 +1,4 @@
-import { pick, isString, isArray, noop, wrapFunction, adoptStylesheet } from '@semantic-ui/utils';
+import { pick, isString, isArray, noop, clone } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
@@ -28,44 +28,27 @@ export const registerPlugin = (plugin) => {
     selectors: {},
     classNames: {},
     errors: {},
+    templates: {},
   };
 
   plugin = {
     ...pluginDefaults,
     ...plugin
   };
+  // handle default namespace
+  if(!plugin.namespace) {
+    plugin.namespace = plugin.name;
+  }
 
+  // shorthand
   let {
+    namespace,
     name,
-
-    css,
-
-    namespace = name,
-
-    // settings for plugin
-    defaultSettings = {},
-
-    // returns plugin instance
-    createPlugin = noop,
-
-    // event object
-    events = {},
-
-    // whether html data can override settings
-    allowDataOverride = true,
-
-    // one time setup callback
-    setup = noop,
-
-    // callbacks
-    onCreated = noop,
-    onMutated = noop,
-    onDestroyed = noop,
-
-    // standard
-    selectors = {},
-    classNames = {},
-    errors = {},
+    defaultSettings,
+    selectors,
+    classNames,
+    errors,
+    templates,
   } = plugin;
 
   let isSetup = false;
@@ -83,18 +66,17 @@ export const registerPlugin = (plugin) => {
   // Register this plugin
   Query.plugins.set(name, plugin);
 
+  // setup() can setup a shared plugin that is preserved across calls
+  let sharedPlugin;
+
   // Create abstraction around plugin initialization
   Query.prototype[name] = function(settings) {
 
-    // allow setup function
-    if(!isSetup) {
-      wrapFunction(plugin.setup)();
-    }
 
     // At run time we need to check if defaults are changed from original registration
     const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
     const pluginDefaults = pick(Query.prototype[name], ...defaultValues);
-    const runtimePlugin = {
+    const runtimePluginConfig = {
       ...pluginDefaults,
       ...plugin,
     };
@@ -114,11 +96,16 @@ export const registerPlugin = (plugin) => {
     if (isString(arguments[0])) {
       [methodName, ...methodArguments] = arguments;
     }
-
     // value to store return
     let returnedValue;
 
     $elements.each(function(element, index) {
+
+      // handle setup function on first invocation
+      if(!isSetup) {
+        sharedPlugin = Plugin.callSetupMethod(plugin.setup, { $elements, settings, templates }) ?? {};
+        isSetup = true;
+      }
 
       const $element = this;
 
@@ -130,8 +117,10 @@ export const registerPlugin = (plugin) => {
       // if this method has no instance defined
       if (!instance) {
         new Plugin({
+          initialPlugin: sharedPlugin, // setup can pass through props in setup
           $element,
-          ...runtimePlugin,
+          self,
+          ...runtimePluginConfig,
           settings: runtimeSettings
         });
       }
@@ -166,6 +155,9 @@ export const registerPlugin = (plugin) => {
       ? returnedValue
       : $elements;
   };
+
+  // preserve shared plugin from setup()
+  Query.prototype[name].sharedPlugin = sharedPlugin;
 
   // Expose settings, class names and errors on the prototype
   // This allows end-users to override the defaults
