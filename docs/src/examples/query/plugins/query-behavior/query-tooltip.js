@@ -37,14 +37,13 @@ const createPlugin = ({ $, $el, el, settings, self }) => ({
     const tooltipHeight = self.$tooltip.get(0).offsetHeight;
     return {
       top: rect.top - tooltipHeight - 8,
-      left: rect.left + (rect.width / 2),
+      left: rect.left,
     };
   },
 
   updateTooltipPosition(position) {
     self.$tooltip.css({
-      ...position,
-      transform: 'translateX(-50%)'
+      ...position
     });
   },
 
@@ -58,7 +57,6 @@ const createPlugin = ({ $, $el, el, settings, self }) => ({
     self.updateTooltip();
 
     const position = self.getTooltipPosition();
-    console.log('position is', position);
     self.updateTooltipPosition(position);
     self.doShow();
   },
