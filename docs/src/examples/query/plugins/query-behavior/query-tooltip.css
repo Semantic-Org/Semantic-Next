@@ -1,13 +1,38 @@
+:root {
+  --tooltip-bg: var(--standard-solid-15);
+  --tooltip-color: var(--text-color);
+  --tooltip-border-radius: var(--border-radius);
+  --tooltip-font-size: var(--medium);
+  --tooltip-z-index: var(--page-layer-2);
+  --tooltip-transition: var(--transition);
+  --tooltip-box-shadow: var(--floating-shadow);
+  --tooltip-padding: 8px 12px;
+}
+
+
 .ui.tooltip {
-  padding: var(--padding);
-  color: var(--text-color);
-  box-shadow: var(--floating-shadow);
+  position: absolute;
+  z-index: 100;
+  background: var(--tooltip-bg);
+  color: var(--tooltip-color);
+  padding: var(--tooltip-padding);
+  border-radius: var(--tooltip-border-radius);
+  font-size: var(--tooltip-font-size);
+  transition: var(--tooltip-transition);
+  box-shadow: var(--tooltip-box-shadow);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+  }
 
   .title {
-    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 4px;
   }
+
   .content {
-    padding: 1rem 0rem;
-    font-size: 14px;
-  }
+    font-size: 14px
 }
