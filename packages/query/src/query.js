@@ -1272,41 +1272,51 @@ export class Query {
     const $content = this.chain(content);
     const insertElement = (el) => {
       if (target.insertAdjacentElement) {
-        target.insertAdjacentElement(position, el);
+        return target.insertAdjacentElement(position, el);
       }
       else {
         switch (position) {
           case 'beforebegin':
             target.parentNode?.insertBefore(el, target);
-            break;
+            return el;
           case 'afterbegin':
             target.insertBefore(el, target.firstChild);
-            break;
+            return el;
           case 'beforeend':
             target.appendChild(el);
-            break;
+            return el;
           case 'afterend':
             target.parentNode?.insertBefore(el, target.nextSibling);
-            break;
+            return el;
         }
       }
+      return el;
     };
-    $content.each(el => {
+
+    const insertedElements = $content.map(el => {
       if (el instanceof DocumentFragment) {
-        each(el.childNodes, insertElement);
+        return Array.from(el.childNodes).map(insertElement);
       }
       else {
-        insertElement(el);
+        return insertElement(el);
       }
-    });
+    }).flat();
+
+    return this.chain(insertedElements);
   }
 
-  prepend(...allContent) {
+  before(...allContent) {
     return this.each((el) => {
       each(allContent, content => {
-        this.insertContent(el, content, 'afterbegin');
+        this.insertContent(el, content, 'beforebegin');
       });
     });
+  }
+  insertBefore(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'beforebegin');
+    });
+    return this;
   }
 
   append(...allContent) {
@@ -1316,29 +1326,39 @@ export class Query {
       });
     });
   }
-
-  insertBefore(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'beforebegin');
+  appendTo(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'beforeend');
     });
+    return this;
   }
 
+  prepend(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterbegin');
+      });
+    });
+  }
+  prependTo(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'afterbegin');
+    });
+    return this;
+  }
+
+  after(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterend');
+      });
+    });
+  }
   insertAfter(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'afterend');
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'afterend');
     });
-  }
-
-  before(content) {
-    return this.each((el) => {
-      this.insertContent(el, content, 'beforebegin');
-    });
-  }
-
-  after(content) {
-    return this.each((el) => {
-      this.insertContent(el, content, 'afterend');
-    });
+    return this;
   }
 
   detach() {
@@ -1532,6 +1552,27 @@ export class Query {
     }
     const slicedElements = Array.from(this).slice(start, end);
     return this.chain(slicedElements);
+  }
+
+  add(selector) {
+    if (!selector) {
+      return this;
+    }
+
+    // Get current elements
+    const currentElements = this.get();
+
+    // Create new Query object with the selector using same options
+    const $newElements = new Query(selector, this.options);
+
+    // If no new elements found, return current instance
+    if ($newElements.length === 0) {
+      return this;
+    }
+
+    // Combine arrays and remove duplicates using Set
+    const combinedElements = Array.from(new Set([...currentElements, ...$newElements.get()]));
+    return this.chain(combinedElements);
   }
 
   // special helper for SUI components
