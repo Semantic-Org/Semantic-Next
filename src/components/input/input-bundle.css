@@ -15,6 +15,7 @@
     position: relative;
     font-style: normal;
     font-weight: var(--input-font-weight);
+    width: inherit;
     font-family: var(--input-font-family);
     line-height: var(--input-line-height);
     color: var(--input-text-color);
