@@ -1,4 +1,4 @@
-import { pick, isString, isArray, noop, clone } from '@semantic-ui/utils';
+import { pick, isString, isArray, noop, clone, deepExtend } from '@semantic-ui/utils';
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
@@ -83,10 +83,8 @@ export const registerPlugin = (plugin) => {
 
     // when this element is initialized we create run time settings
     // this looks at current default settings at time of init
-    const runtimeSettings = {
-      ...defaultSettings,
-      ...settings,
-    };
+    // use deepExtend to properly merge nested objects like selectors, classNames, etc.
+    const runtimeSettings = deepExtend({}, defaultSettings, settings);
 
     // store reference to all elements
     const $elements = this;
