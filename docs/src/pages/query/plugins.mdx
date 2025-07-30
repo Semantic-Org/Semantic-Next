@@ -323,6 +323,59 @@ registerPlugin({
 
 Events are automatically cleaned up when plugin instances are destroyed using an AbortController when your plugin is destroyed or you call `.plugin('destroy')`.
 
+### Mutations
+
+Watch for DOM changes using declarative mutation observers:
+
+```javascript
+registerPlugin({
+  name: 'dynamicList',
+  
+  mutations: {
+    'add .item': ({ $added }) => {
+      $added.addClass('new-item');
+    },
+    
+    'remove .item': ({ $removed }) => {
+      console.log('Items removed:', $removed.length);
+    }
+  }
+});
+```
+
+<PlaygroundExample id="query-plugin-mutations" />
+
+#### Mutation Types
+
+- `.item` - Watch for any .item elements added or removed
+- `add .item` - Only trigger when .item elements are added
+- `remove .item` - Only trigger when .item elements are removed  
+- `observe .container => .item` - Watch .container for .item changes
+- `attributes .element` - Watch for attribute changes on .element
+- `text .element` - Watch for text content changes in .element
+
+#### Using Configuration in Mutations
+
+Mutation strings support templating using configuration objects, just like events:
+
+```javascript
+registerPlugin({
+  selectors: {
+    listItem: '.dynamic-item'
+  },
+
+  mutations: {
+    'add {listItem}': ({ $added, self }) => {  // Uses selectors.listItem
+      self.initializeItems($added);
+    }
+  }
+});
+```
+
+#### Mutation Cleanup
+
+Mutation observers are automatically disconnected when plugin instances are destroyed.
+
 ### Custom Invocation
 
 The `customInvocation` callback handles method calls that don't match any defined plugin methods, enabling flexible string-based APIs:

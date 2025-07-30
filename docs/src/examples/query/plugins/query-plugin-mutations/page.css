@@ -1,7 +1,9 @@
 .box {
 
-  background: var(--standard-5) var(--angled-gradient);
+  background: var(--angled-gradient);
   border: var(--border);
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
 
   ul {
     margin: 1rem 0rem;
@@ -13,6 +15,6 @@
 }
 
 
-ui-button {
-  margin-top: 5px;
+ui-input {
+  width: 300px;
 }
