@@ -1,0 +1,18 @@
+.box {
+
+  background: var(--standard-5) var(--angled-gradient);
+  border: var(--border);
+
+  ul {
+    margin: 1rem 0rem;
+    li {
+      margin: 3px 0px;
+    }
+  }
+
+}
+
+
+ui-button {
+  margin-top: 5px;
+}

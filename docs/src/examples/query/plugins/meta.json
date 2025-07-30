@@ -1,0 +1,26 @@
+{
+  "query-plugin": {
+    "name": "Query Plugin",
+    "files": [
+      "./query-plugin/index.html",
+      "./query-plugin/index.js",
+      "./query-plugin/mask-input-plugin.js"
+    ]
+  },
+  "query-behavior": {
+    "name": "Query Behavior",
+    "files": [
+      "./query-behavior/index.html",
+      "./query-behavior/query-tooltip.js",
+      "./query-behavior/query-tooltip.css"
+    ]
+  },
+  "mutation-tester": {
+    "name": "Mutation Tester",
+    "files": [
+      "./mutation-tester/mutation-tester.html",
+      "./mutation-tester/mutation-tester.js",
+      "./mutation-tester/mutation-tester.css"
+    ]
+  }
+}

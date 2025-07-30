@@ -21,7 +21,7 @@ const templates = {
 const setup = ({ $, templates }) => {
   return {
     $tooltip: $(templates.tooltip).appendTo('body')
-  }
+  };
 };
 
 const createPlugin = ({ $, el, settings, self }) => ({
