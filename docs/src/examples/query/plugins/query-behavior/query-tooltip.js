@@ -3,9 +3,10 @@ import { getText } from '@semantic-ui/utils';
 const css = await getText('./query-tooltip.css');
 
 const defaultSettings = {
-  title: '',
-  content: 'Tooltip content',
-  position: 'top'
+  title: 'Default Title',
+  content: 'Default Content',
+  showDelay: 50,
+  hideDelay: 500,
 };
 
 const templates = {
@@ -23,12 +24,12 @@ const setup = ({ $, templates }) => {
   }
 };
 
-const createPlugin = ({ $, $el, el, settings, self }) => ({
+const createPlugin = ({ $, el, settings, self }) => ({
 
-  updateTooltip({ title, content } = settings) {
+  updateTooltip() {
     self.$tooltip
-      .find('.title').html(title).end()
-      .find('.content').html(content)
+      .find('.title').html(settings.title).end()
+      .find('.content').html(settings.content)
     ;
   },
 
@@ -85,17 +86,16 @@ const createPlugin = ({ $, $el, el, settings, self }) => ({
 
 
 const events = {
-  'global click document': ({ self, event }) => {
-    if (!$(event.target).closest('.ui.tooltip').exists()) {
-      $('.ui.tooltip').removeClass('visible');
-      setTimeout(() => $('.ui.tooltip').remove(), 200);
-    }
-  },
-  'mouseenter': ({ self, data }) => {
-    self.show();
-  },
-  'mouseleave': ({ self, data }) => {
+  'global click body': ({ self }) => {
     self.hide();
+  },
+  'mouseenter': ({ self, settings }) => {
+    clearTimeout(window.hideTimer);
+    window.showTimer = setTimeout(self.show, settings.showDelay);
+  },
+  'mouseleave': ({ self, settings }) => {
+    clearTimeout(window.showTimer);
+    window.hideTimer = setTimeout(self.hide, settings.hideDelay);
   },
 };
 
