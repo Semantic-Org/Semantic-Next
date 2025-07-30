@@ -134,13 +134,37 @@ hasProperty(data, 'user.profile.name');      // true
 
 ### Object Manipulation
 ```javascript
-import { extend, pick, filterObject, mapObject } from '@semantic-ui/utils';
+import { extend, deepExtend, pick, filterObject, mapObject } from '@semantic-ui/utils';
 
 const source = { a: 1, b: 2, c: 3, d: 4 };
 const target = { b: 10, e: 5 };
 
-// Merge objects
+// Shallow merge objects
 extend(target, source);                      // { a: 1, b: 2, c: 3, d: 4, e: 5 }
+
+// Deep merge objects with nested properties
+const config = {
+  api: { baseUrl: 'localhost', timeout: 5000 },
+  features: { darkMode: false }
+};
+const overrides = {
+  api: { timeout: 3000, retries: 3 },
+  features: { notifications: true }
+};
+
+deepExtend(config, overrides);
+// Result: {
+//   api: { baseUrl: 'localhost', timeout: 3000, retries: 3 },
+//   features: { darkMode: false, notifications: true }
+// }
+
+// Deep merge with custom class preservation
+const settings = {
+  template: new MyTemplate(),
+  data: { items: [1, 2, 3] }
+};
+deepExtend(settings, { data: { items: [4, 5] } }, { preserveNonCloneable: true });
+// Preserves MyTemplate instance, merges data.items array
 
 // Select properties
 pick(source, ['a', 'c']);                    // { a: 1, c: 3 }

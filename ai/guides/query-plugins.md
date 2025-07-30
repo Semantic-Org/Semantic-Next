@@ -65,16 +65,40 @@ import { registerPlugin } from '@semantic-ui/query';
 registerPlugin({
   name: 'pluginName',
   defaultSettings: {},
-  createPlugin: ({ $, el, settings, self }) => ({
-    // Plugin methods
+  
+  // Configuration objects for customization and i18n
+  selectors: {
+    trigger: '.plugin-trigger'
+  },
+  classNames: {
+    active: 'active'
+  },
+  errors: {
+    noTarget: 'No target found'
+  },
+  templates: {
+    content: '<div class="plugin-content"></div>'
+  },
+  
+  // CSS injection with constructed stylesheets
+  css: `
+    .plugin { /* styles */ }
+    .plugin.active { /* active styles */ }
+  `,
+  
+  createPlugin: ({ $, el, $el, self, settings, selectors, classNames, errors, templates }) => ({
+    // Plugin methods with access to configuration objects
   }),
+  
+  // Event templating with {key} syntax
   events: {
-    'eventName selector': ({ self, settings }) => {
-      // Event handlers
+    'click {trigger}': ({ $, el, $el, self, settings, selectors, classNames, errors, templates, event, target, value, data }) => {  // Uses selectors.trigger
+      // Event handlers with automatic selector interpolation
     }
   },
-  setup: ({ $, templates }) => {
-    // Shared initialization
+  
+  setup: ({ $, settings, $elements, templates }) => {
+    // Shared initialization returning properties for self
   }
 });
 ```
@@ -86,13 +110,22 @@ registerPlugin({
 - **Method Creation**: Automatically creates `$.prototype[name]` method
 - **Defaults Exposure**: Settings/selectors/errors exposed on `$.prototype[name]`
 
+#### Configuration System
+- **Object Types**: `selectors`, `classNames`, `errors`, `templates` for customization
+- **Deep Merging**: Runtime settings use `deepExtend()` to preserve nested object properties
+- **Global Override**: Users can modify `$.pluginName.selectors`, `$.pluginName.classNames` etc.
+- **Data Attributes**: HTML `data-*` attributes automatically override settings
+- **Event Templating**: `{key}` syntax in event strings references configuration objects
+
 #### Instance Management
 - **Namespace Storage**: Instance stored as `element[namespace]`
 - **Lifecycle Callbacks**: `onCreated`, `onDestroyed` hooks
-- **Settings Management**: Runtime settings merging and data attribute override
+- **Settings Management**: Deep merging prevents configuration object clobbering
+- **CSS Injection**: Automatic stylesheet adoption with constructed stylesheet caching
 
 #### Event System
 - **Declarative Binding**: Object literal event specification
+- **Selector Interpolation**: `{key}` placeholders replaced with configuration values at runtime (only works in event object keys)
 - **Event Parsing**: String-based event/selector parsing with delegation support
 - **Abort Controllers**: Automatic cleanup via AbortController pattern
 
@@ -144,8 +177,12 @@ The tooltip plugin demonstrates the full `registerPlugin()` architecture:
 | Settings persistence | ✗ None | ✓ Automatic |
 | Lifecycle hooks | ✗ None | ✓ Standard |
 | Method collection | ✗ Single method | ✓ Multi-method API |
-| CSS integration | ✗ Manual | ✓ Automatic |
+| CSS integration | ✗ Manual | ✓ Automatic injection |
 | Data override | ✗ Manual | ✓ Built-in |
+| Configuration objects | ✗ None | ✓ selectors/classNames/errors/templates |
+| Event templating | ✗ None | ✓ {key} interpolation |
+| Deep merging | ✗ N/A | ✓ Nested object preservation |
+| i18n support | ✗ Manual | ✓ Via errors/templates objects |
 
 ## Implementation Context
 
