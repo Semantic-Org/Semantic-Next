@@ -1,5 +1,6 @@
 :root {
-  --tooltip-bg: var(--standard-solid-15);
+  --tooltip-bg: var(--primary-5) var(--gradient);
+  --tooltip-border: var(--subtle-border);
   --tooltip-color: var(--text-color);
   --tooltip-border-radius: var(--border-radius);
   --tooltip-font-size: var(--medium);
@@ -16,6 +17,7 @@
   background: var(--tooltip-bg);
   color: var(--tooltip-color);
   padding: var(--tooltip-padding);
+  border: var(--tooltip-border);
   border-radius: var(--tooltip-border-radius);
   font-size: var(--tooltip-font-size);
   transition: var(--tooltip-transition);

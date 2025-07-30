@@ -8,39 +8,28 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 Query plugins extend the Query system with custom functionality. The system provides two approaches:
 
-- **[Simple Plugins](#simple-plugins)** - Add methods directly to [Query instances](/query/basics)
-- **[Complex Plugins](#complex-plugins)** - Create full behavioral systems with settings and events
-
-## Creating Plugins
-
-### Simple Plugins
+## Simple Plugins
 
 Simple plugins extend Query instances by adding methods to `Query.prototype` via `$.plugin`:
 
-```javascript
-import { $ } from '@semantic-ui/query';
-
-$.plugin.highlight = function(options = {}) {
-  return this.each((element) => {
-    // Plugin logic per element
-    element.style.backgroundColor = options.color || 'yellow';
-  });
-};
-
-// Now available on all Query instances
-$('.searchResults').highlight({ color: 'lightblue' });
-```
-
-The `$.plugin` object is an alias for `Query.prototype`. Methods added here become available on all Query instances with full access to [chaining](/query/chaining) and the Query API.
+The `$.plugin` object is an alias for `Query.prototype`. Methods added here become available on all Query instances with full access to [chaining](/query/chaining) and the Query API. Use simple plugins for utility methods that don't require state management or complex configuration.
 
 <PlaygroundExample id="query-plugin" />
 
-Use simple plugins for utility methods that don't require state management or complex configuration.
 
-### Complex Plugins
+## Complex Plugins
 
 Complex plugins use `registerPlugin()` for behaviors with settings, events, and state management. The `registerPlugin()` function accepts multiple configuration options for creating feature-rich plugins:
 
+
+Use complex plugins when building interactive components that need state management, configuration options, or complex event handling.
+
+<PlaygroundExample id="query-behavior" />
+> **Registration** Plugins should self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/plugins/transition'` makes the plugin available across your application.
+
+## Plugin Definition Parts
+
+The following is an example of initialization a new plugin with all available options:
 ```javascript
 import { registerPlugin } from '@semantic-ui/query';
 
@@ -48,7 +37,7 @@ registerPlugin({
   // Core configuration
   name: 'tooltip',
   defaultSettings: { showDelay: 0 },
-  
+
   // Configurable selectors and classes
   selectors: {
     trigger: '.tooltip-trigger',
@@ -58,14 +47,14 @@ registerPlugin({
     visible: 'visible',
     hidden: 'hidden'
   },
-  
+
   // Plugin methods
   createPlugin: ({ settings, self }) => ({
     show() { /* implementation */ },
     hide() { /* implementation */ },
     toggle() { /* implementation */ }
   }),
-  
+
   // Event handlers with templating support
   events: {
     'mouseenter {trigger}': ({ self }) => self.show(),
@@ -77,17 +66,6 @@ registerPlugin({
 $('ui-icon.help').tooltip({ showDelay: 200 });
 $('ui-icon.help').tooltip('show');
 ```
-
-
-## Plugin Types
-
-**Simple plugins** are for adding one utility method to Query (like jQuery plugins). Use them when you want to extend Query with DOM manipulation helpers that don't need configuration or event handling.
-
-**Complex plugins** are for creating full behaviors with settings and events (like classic Semantic UI modules). Use them when building interactive components that need state management, configuration options, or complex event handling.
-
-> **Registration** Plugins can self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/plugins/transition'` makes the plugin available across your application.
-
-## Creating Plugins
 
 ### Name
 
@@ -427,11 +405,6 @@ All callbacks receive consistent base parameters:
 | `$elements` | Query collection of elements (plural) |
 | `templates` | HTML templates object |
 
-## Complete Example
-
-This example demonstrates the three-tier settings precedence system: plugin defaults are overridden by settings objects, which are overridden by data attributes. This hierarchy gives users flexible control over plugin behavior.
-
-<PlaygroundExample id="query-behavior" />
 
 ## Plugin Usage
 
