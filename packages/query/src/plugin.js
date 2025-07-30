@@ -316,7 +316,15 @@ export class Plugin {
           }
         });
 
-        if($added.exists() || $removed.exists()) {
+        // Check if we should trigger based on keyword
+        const hasAdded = $added.exists();
+        const hasRemoved = $removed.exists();
+        const shouldTrigger = 
+          (keyword === 'add' && hasAdded) ||
+          (keyword === 'remove' && hasRemoved) ||
+          (keyword === 'standard' && (hasAdded || hasRemoved));
+
+        if(shouldTrigger) {
           // call handler
           const callbackArgs = this.getMutationCallbackArgs(mutations, { $added, $removed });
           this.call(handler, { additionalParams: callbackArgs });
@@ -334,6 +342,7 @@ export class Plugin {
     each(this.mutationObservers, (observer) => {
       observer.disconnect();
     });
+    this.mutationObservers = [];
   }
 
   parseMutationString(mutationString) {
@@ -362,7 +371,15 @@ export class Plugin {
     // handle different observers for diff types
     switch (keyword) {
       case 'observe':
-        observedElement = this.$element.find(selector);
+        // Handle fat arrow syntax: "observe .container => .item"
+        if (selector.includes('=>')) {
+          const [observeSelector, filterSelector] = selector.split('=>').map(s => s.trim());
+          observedElement = this.$element.find(observeSelector).el();
+          selector = filterSelector;
+        }
+        else {
+          observedElement = this.$element.find(selector).el();
+        }
         break;
       case 'attributes':
         observerOptions.attributes = true;
