@@ -1,6 +1,7 @@
 import {
   any,
   arrayFromObject,
+  deepExtend,
   extend,
   filterObject,
   get,
@@ -300,6 +301,195 @@ describe('Object Utilities', () => {
   describe('any', () => {
     it('should be an alias for some', () => {
       expect(any).toBe(some);
+    });
+  });
+
+  describe('deepExtend', () => {
+    it('should deeply merge objects', () => {
+      const target = { a: { b: 1, c: 2 }, d: 3 };
+      const source = { a: { b: 4, e: 5 }, f: 6 };
+      
+      const result = deepExtend(target, source);
+      
+      expect(result).toBe(target); // Should return target reference
+      expect(result).toEqual({
+        a: { b: 4, c: 2, e: 5 },
+        d: 3,
+        f: 6
+      });
+    });
+
+    it('should handle multiple sources', () => {
+      const target = { a: { x: 1 } };
+      const source1 = { a: { y: 2 }, b: 1 };
+      const source2 = { a: { z: 3 }, c: 2 };
+      
+      deepExtend(target, source1, source2);
+      
+      expect(target).toEqual({
+        a: { x: 1, y: 2, z: 3 },
+        b: 1,
+        c: 2
+      });
+    });
+
+    it('should clone non-plain objects', () => {
+      const date = new Date('2023-01-01');
+      const regex = /test/g;
+      const arr = [1, 2, { nested: true }];
+      
+      const target = {};
+      const source = { date, regex, arr };
+      
+      deepExtend(target, source);
+      
+      expect(target.date).toEqual(date);
+      expect(target.date).not.toBe(date); // Should be cloned
+      expect(target.regex).toEqual(regex);
+      expect(target.regex).not.toBe(regex); // Should be cloned
+      expect(target.arr).toEqual(arr);
+      expect(target.arr).not.toBe(arr); // Should be cloned
+      expect(target.arr[2]).not.toBe(arr[2]); // Deep clone
+    });
+
+    it('should preserve custom class instances when preserveNonCloneable is true', () => {
+      class CustomClass {
+        constructor(value) {
+          this.value = value;
+        }
+        getValue() {
+          return this.value;
+        }
+      }
+
+      const instance = new CustomClass(42);
+      const target = {};
+      const source = { custom: instance };
+      
+      deepExtend(target, source, { preserveNonCloneable: true });
+      
+      expect(target.custom).toBe(instance); // Same reference
+      expect(target.custom instanceof CustomClass).toBe(true);
+      expect(target.custom.getValue()).toBe(42);
+    });
+
+    it('should flatten custom class instances by default', () => {
+      class CustomClass {
+        constructor(value) {
+          this.value = value;
+        }
+        getValue() {
+          return this.value;
+        }
+      }
+
+      const instance = new CustomClass(42);
+      const target = {};
+      const source = { custom: instance };
+      
+      deepExtend(target, source);
+      
+      expect(target.custom).not.toBe(instance);
+      expect(target.custom instanceof CustomClass).toBe(false);
+      expect(target.custom.value).toBe(42);
+      expect(target.custom.getValue).toBeUndefined();
+    });
+
+    it('should skip __proto__ for security', () => {
+      const target = {};
+      const source = { __proto__: { malicious: true }, safe: 'value' };
+      
+      deepExtend(target, source);
+      
+      expect(target.safe).toBe('value');
+      expect(target.malicious).toBeUndefined();
+      // __proto__ should not have been copied as a property
+      expect(Object.hasOwnProperty.call(target, '__proto__')).toBe(false);
+    });
+
+    it('should prevent recursion', () => {
+      const target = { a: 1 };
+      const source = { b: 2 };
+      source.circular = target; // Create circular reference
+      
+      deepExtend(target, source);
+      
+      expect(target.a).toBe(1);
+      expect(target.b).toBe(2);
+      expect(target.circular).toBeUndefined(); // Should not add circular reference
+    });
+
+    it('should skip non-plain objects as sources', () => {
+      const target = { a: 1 };
+      const date = new Date();
+      const array = [1, 2, 3];
+      
+      deepExtend(target, date, array, null, undefined);
+      
+      expect(target).toEqual({ a: 1 }); // Should remain unchanged
+    });
+
+    it('should return target unchanged if target is not an object', () => {
+      expect(deepExtend(null, { a: 1 })).toBe(null);
+      expect(deepExtend(undefined, { a: 1 })).toBe(undefined);
+      expect(deepExtend(42, { a: 1 })).toBe(42);
+      expect(deepExtend('string', { a: 1 })).toBe('string');
+    });
+
+    it('should overwrite target properties when source has non-plain objects', () => {
+      const target = { a: { deep: 'value' } };
+      const source = { a: [1, 2, 3] };
+      
+      deepExtend(target, source);
+      
+      expect(target.a).toEqual([1, 2, 3]);
+      expect(target.a).not.toBe(source.a); // Should be cloned
+    });
+
+    it('should create new objects when target property is non-plain', () => {
+      const target = { a: [1, 2, 3] };
+      const source = { a: { b: 'value' } };
+      
+      deepExtend(target, source);
+      
+      expect(target.a).toEqual({ b: 'value' });
+    });
+
+    it('should handle deeply nested structures', () => {
+      const target = {
+        level1: {
+          level2: {
+            level3: {
+              value: 'original'
+            }
+          }
+        }
+      };
+      
+      const source = {
+        level1: {
+          level2: {
+            level3: {
+              newValue: 'added'
+            },
+            newLevel3: 'also added'
+          }
+        }
+      };
+      
+      deepExtend(target, source);
+      
+      expect(target).toEqual({
+        level1: {
+          level2: {
+            level3: {
+              value: 'original',
+              newValue: 'added'
+            },
+            newLevel3: 'also added'
+          }
+        }
+      });
     });
   });
 });

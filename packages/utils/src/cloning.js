@@ -1,3 +1,5 @@
+import { isClassInstance } from './types.js';
+
 /*-------------------
         Cloning
 --------------------*/
@@ -6,7 +8,9 @@
   Clone an object or array
 */
 // adapted from nanoclone <https://github.com/Kelin2025/nanoclone>
-export const clone = (src, seen = new Map()) => {
+export const clone = (src, options = {}) => {
+  const { preserveNonCloneable = false, seen = new Map() } = options;
+  
   if (!src || typeof src !== 'object') { return src; }
 
   if (seen.has(src)) { return seen.get(src); }
@@ -30,25 +34,37 @@ export const clone = (src, seen = new Map()) => {
     // Array
     copy = new Array(src.length);
     seen.set(src, copy);
-    for (let i = 0; i < src.length; i++) { copy[i] = clone(src[i], seen); }
+    for (let i = 0; i < src.length; i++) { 
+      copy[i] = clone(src[i], { ...options, seen }); 
+    }
   }
   else if (src instanceof Map) {
     // Map
     copy = new Map();
     seen.set(src, copy);
-    for (const [k, v] of src.entries()) { copy.set(k, clone(v, seen)); }
+    for (const [k, v] of src.entries()) { 
+      copy.set(k, clone(v, { ...options, seen })); 
+    }
   }
   else if (src instanceof Set) {
     // Set
     copy = new Set();
     seen.set(src, copy);
-    for (const v of src) { copy.add(clone(v, seen)); }
+    for (const v of src) { 
+      copy.add(clone(v, { ...options, seen })); 
+    }
   }
   else if (src instanceof Object) {
-    // Object
+    // Check if it's a custom class instance and preserve if requested
+    if (preserveNonCloneable && isClassInstance(src)) {
+      return src; // Return reference to original custom class instance
+    }
+    // Plain object
     copy = {};
     seen.set(src, copy);
-    for (const [k, v] of Object.entries(src)) { copy[k] = clone(v, seen); }
+    for (const [k, v] of Object.entries(src)) { 
+      copy[k] = clone(v, { ...options, seen }); 
+    }
   }
 
   return copy;

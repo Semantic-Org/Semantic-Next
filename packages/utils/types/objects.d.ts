@@ -93,6 +93,37 @@ export function extend<T extends object, S extends object[]>(
 ): T & UnionToIntersection<S[number]>;
 
 /**
+ * Options for deep extend operations
+ */
+export interface DeepExtendOptions {
+  /** Preserve custom class instances instead of flattening them to plain objects */
+  preserveNonCloneable?: boolean;
+}
+
+/**
+ * Deep extends an object with properties from additional sources
+ * Recursively merges nested plain objects and clones non-plain objects
+ * @see {@link https://next.semantic-ui.com/api/utils/objects#deepextend deepExtend}
+ * @see {@link https://next.semantic-ui.com/examples/utils-deepextend Example}
+ *
+ * @param obj - The target object to extend
+ * @param sources - Source objects to deep merge from
+ * @param options - Options controlling cloning behavior
+ * @returns The modified target object
+ *
+ * @example
+ * ```ts
+ * deepExtend({ a: { x: 1 } }, { a: { y: 2 } }) // returns { a: { x: 1, y: 2 } }
+ * deepExtend({}, { date: new Date() }) // clones the date object
+ * deepExtend({}, { custom: new MyClass() }, { preserveNonCloneable: true }) // preserves instance
+ * ```
+ */
+export function deepExtend<T extends object, S extends object[]>(
+  obj: T,
+  ...args: [...sources: S, options?: DeepExtendOptions] | S
+): T & UnionToIntersection<S[number]>;
+
+/**
  * Returns an object with only the specified properties
  * @see {@link https://next.semantic-ui.com/api/utils/objects#pick pick}
  *

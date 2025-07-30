@@ -85,4 +85,62 @@ describe('clone', () => {
     expect(clonedObject).not.toBe(originalObject);
     expect(clonedObject.circularRef).toBe(clonedObject);
   });
+
+  it('should flatten custom class instances by default', () => {
+    class CustomClass {
+      constructor(value) {
+        this.value = value;
+      }
+      getValue() {
+        return this.value;
+      }
+    }
+
+    const instance = new CustomClass(42);
+    const obj = { 
+      regular: { a: 1 },
+      custom: instance 
+    };
+
+    // Default behavior - should flatten custom classes to plain objects
+    const clonedDefault = clone(obj);
+    expect(clonedDefault.custom).not.toBe(instance);
+    expect(clonedDefault.custom instanceof CustomClass).toBe(false);
+    expect(clonedDefault.custom.value).toBe(42);
+    expect(clonedDefault.custom.getValue).toBeUndefined();
+
+    // Explicit false should behave the same
+    const clonedExplicitFalse = clone(obj, { preserveNonCloneable: false });
+    expect(clonedExplicitFalse.custom).not.toBe(instance);
+    expect(clonedExplicitFalse.custom instanceof CustomClass).toBe(false);
+    expect(clonedExplicitFalse.custom.value).toBe(42);
+    expect(clonedExplicitFalse.custom.getValue).toBeUndefined();
+  });
+
+  it('should preserve custom class instances when preserveNonCloneable is true', () => {
+    class CustomClass {
+      constructor(value) {
+        this.value = value;
+      }
+      getValue() {
+        return this.value;
+      }
+    }
+
+    const instance = new CustomClass(42);
+    const obj = { 
+      regular: { a: 1 },
+      custom: instance 
+    };
+
+    // With preserveNonCloneable: true - should preserve custom class instances
+    const clonedPreserved = clone(obj, { preserveNonCloneable: true });
+    expect(clonedPreserved.custom).toBe(instance); // Same reference
+    expect(clonedPreserved.custom instanceof CustomClass).toBe(true);
+    expect(clonedPreserved.custom.getValue()).toBe(42);
+    
+    // Regular objects should still be cloned
+    expect(clonedPreserved.regular).not.toBe(obj.regular);
+    expect(clonedPreserved.regular).toEqual({ a: 1 });
+  });
 });

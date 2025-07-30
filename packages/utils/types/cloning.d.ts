@@ -7,10 +7,10 @@
  * Options for deep cloning
  */
 export interface CloneOptions {
-  /** Properties to exclude from cloning */
-  exclude?: string[];
-  /** Custom cloning functions for specific types */
-  customClone?: Map<any, (value: any) => any>;
+  /** Preserve custom class instances instead of flattening them to plain objects */
+  preserveNonCloneable?: boolean;
+  /** Internal seen map for circular reference detection (do not use directly) */
+  seen?: Map<any, any>;
 }
 
 /**
@@ -27,11 +27,11 @@ export interface CloneOptions {
  * const obj = { a: [1, { b: 2 }] };
  * const cloned = clone(obj);
  *
- * // Custom cloning
- * const customClone = new Map([
- *   [Date, (d: Date) => new Date(d.getTime())]
- * ]);
- * const clonedWithCustom = clone(obj, { customClone });
+ * // Preserve custom class instances
+ * class MyClass { value = 42; }
+ * const instance = new MyClass();
+ * const preserved = clone({ custom: instance }, { preserveNonCloneable: true });
+ * // preserved.custom === instance (same reference)
  * ```
  */
 export function clone<T>(src: T, options?: CloneOptions): T;
