@@ -390,6 +390,10 @@ export const sidebarMenuFramework = [
         url: '/query/chaining',
       },
       {
+        name: 'Plugins',
+        url: '/query/plugins',
+      },
+      {
         name: 'Browser Usage',
         url: '/query/browser',
       },

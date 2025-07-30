@@ -1,0 +1,469 @@
+---
+layout: '@layouts/Guide.astro'
+title: "Query Plugins"
+icon: plug
+description: "Extend Query with custom functionality using simple plugins and complex behaviors"
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Query plugins extend the Query system with custom functionality. The system provides two approaches:
+
+- **[Simple Plugins](#simple-plugins)** - Add methods directly to [Query instances](/query/basics)
+- **[Complex Plugins](#complex-plugins)** - Create full behavioral systems with settings and events
+
+## Creating Plugins
+
+### Simple Plugins
+
+Simple plugins extend Query instances by adding methods to `Query.prototype` via `$.plugin`:
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$.plugin.highlight = function(options = {}) {
+  return this.each((element) => {
+    // Plugin logic per element
+    element.style.backgroundColor = options.color || 'yellow';
+  });
+};
+
+// Now available on all Query instances
+$('.searchResults').highlight({ color: 'lightblue' });
+```
+
+The `$.plugin` object is an alias for `Query.prototype`. Methods added here become available on all Query instances with full access to [chaining](/query/chaining) and the Query API.
+
+<PlaygroundExample id="query-plugin" />
+
+Use simple plugins for utility methods that don't require state management or complex configuration.
+
+### Complex Plugins
+
+Complex plugins use `registerPlugin()` for behaviors with settings, events, and state management. The `registerPlugin()` function accepts multiple configuration options for creating feature-rich plugins:
+
+```javascript
+import { registerPlugin } from '@semantic-ui/query';
+
+registerPlugin({
+  // Core configuration
+  name: 'tooltip',
+  defaultSettings: { showDelay: 0 },
+  
+  // Configurable selectors and classes
+  selectors: {
+    trigger: '.tooltip-trigger',
+    content: '.tooltip-content'
+  },
+  classNames: {
+    visible: 'visible',
+    hidden: 'hidden'
+  },
+  
+  // Plugin methods
+  createPlugin: ({ settings, self }) => ({
+    show() { /* implementation */ },
+    hide() { /* implementation */ },
+    toggle() { /* implementation */ }
+  }),
+  
+  // Event handlers with templating support
+  events: {
+    'mouseenter {trigger}': ({ self }) => self.show(),
+    'mouseleave': ({ self }) => self.hide()
+  }
+});
+
+// Usage
+$('ui-icon.help').tooltip({ showDelay: 200 });
+$('ui-icon.help').tooltip('show');
+```
+
+
+## Choosing Plugin Type
+
+**Simple plugins** are for adding one utility method to Query (like jQuery plugins). Use them when you want to extend Query with DOM manipulation helpers that don't need configuration or event handling.
+
+**Complex plugins** are for creating full behaviors with settings and events (like classic Semantic UI modules). Use them when building interactive components that need state management, configuration options, or complex event handling.
+
+> **Registration** Plugins can self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/plugins/transition'` makes the plugin available across your application.
+
+## Plugin Definition Parts
+
+### Name
+
+The `name` defines the plugin identifier and method name created on Query instances:
+
+```javascript
+registerPlugin({
+  name: 'tooltip'
+});
+
+// Creates method available on all Query instances
+$('ui-icon.help').tooltip();
+```
+
+### Default Settings
+
+Default settings establish the base configuration that gets inherited and merged with user-provided settings and data attributes:
+
+```javascript title="plugin.js"
+const defaultSettings = {
+  showDelay: 300,
+  trigger: 'hover'
+};
+```
+
+```javascript title="page.js" 
+$('ui-icon.help').tooltip({ showDelay: 100 });
+// Result: { showDelay: 100, trigger: 'hover' }
+```
+
+```html title="page.html"
+<ui-icon class="help" data-trigger="click"></ui-icon>
+<!-- Final result: { showDelay: 100, trigger: 'click' } -->
+```
+
+See [Plugin Usage](#plugin-usage) for runtime configuration and override examples.
+
+### Create Plugin  
+
+Returns an object with methods that become callable on plugin instances:
+
+```javascript
+const createPlugin = ({ settings, self }) => ({  
+  show() {
+    self.$tooltip.addClass('visible');
+    settings.onShow?.();
+  },
+  
+  hide() {
+    self.$tooltip.removeClass('visible');
+    settings.onHide?.();
+  },
+  
+  toggle() {
+    return self.isVisible() ? self.hide() : self.show();
+  },
+  
+  isVisible() {
+    return self.$tooltip.hasClass('visible');
+  }
+});
+```
+
+Call methods using string syntax:
+
+```javascript
+$('ui-icon.help').tooltip('show');
+$('ui-icon.help').tooltip('toggle state');  // Finds toggleState()
+$('ui-icon.help').tooltip('is visible');    // Finds isVisible()
+const visible = $('ui-icon.help').tooltip('get status'); // Finds getStatus() or get.status
+```
+
+For direct access, call plugin methods on DOM elements:
+
+```javascript
+const el = document.querySelector('ui-icon.help');
+el.tooltip.show();  // Direct method call, different coding style
+```
+
+> **Method Lookup** Supports natural language patterns: `'toggle state'` finds `toggleState()` or `toggle.state()`, trying camelCase conversion first, then dot notation traversal.
+
+### Setup
+
+Runs once during plugin registration and returns shared resources for all instances:
+
+```javascript
+const setup = ({ $, templates }) => ({
+  $overlay: $('<div class="tooltip-overlay">').appendTo('body'),
+  cache: new Map()
+});
+```
+
+Shared resources become properties on `self`, available in `createPlugin` and all plugin methods:
+
+```javascript  
+const createPlugin = ({ self }) => ({
+  show() {
+    // These properties came from setup() return value
+    self.$overlay.addClass('visible');
+    self.cache.set('lastShown', Date.now());
+  }
+});
+```
+
+> **Setup Connection** Whatever you return from `setup()` becomes properties on the `self` object, automatically available to all plugin instances and methods.
+
+> **Setup Arguments** Receives different parameters than other callbacks: `{ $, settings, $elements, templates }` - note the plural `$elements` since setup runs before individual instances are created.
+
+### Configuration Objects
+
+Plugins use configuration objects to define constants that can be overridden by users for customization and internationalization:
+
+```javascript
+registerPlugin({
+  name: 'tooltip',
+  
+  selectors: {
+    trigger: '.tooltip-trigger',
+    content: '.tooltip-content',
+    arrow: '.tooltip-arrow'
+  },
+  
+  classNames: {
+    visible: 'visible',
+    hidden: 'hidden',
+    loading: 'loading'
+  },
+  
+  errors: {
+    noTarget: 'No target element found',
+    invalidPosition: 'Invalid tooltip position specified',
+    initFailed: 'Tooltip initialization failed'
+  },
+  
+  templates: {
+    tooltip: '<div class="tooltip"><div class="tooltip-content"></div></div>',
+    arrow: '<div class="tooltip-arrow"></div>',
+    loading: '<div class="tooltip-loading">Loading...</div>'
+  }
+});
+```
+
+These objects are available in all plugin callbacks and can be used in event strings with templating:
+
+```javascript
+createPlugin: ({ self, templates, errors }) => ({
+  show() {
+    if (!self.$tooltip) {
+      self.$tooltip = $(templates.tooltip).appendTo('body');
+    }
+    self.$tooltip.addClass('visible');
+  }
+}),
+
+events: {
+  'click {trigger}': ({ self, errors }) => {
+    if (!self.hasTarget()) {
+      console.error(errors.noTarget);
+      return;
+    }
+    self.toggle();
+  }
+}
+```
+
+Users can override defaults for customization or localization:
+
+```javascript
+// Custom selectors and templates
+$('.my-tooltip').tooltip({
+  selectors: { trigger: '.custom-trigger' },
+  templates: { tooltip: '<div class="custom-tooltip"></div>' }
+});
+
+// Localized error messages and templates
+$.tooltip.errors.noTarget = 'Aucun élément cible trouvé';
+$.tooltip.templates.loading = '<div>Chargement...</div>';
+```
+
+### CSS
+
+Plugins can inject CSS styles automatically when they're registered. The `css` property accepts a string of CSS that gets added to the page as a constructed stylesheet:
+
+```javascript
+registerPlugin({
+  name: 'tooltip',
+  
+  css: `
+    /* other css */
+    .tooltip.visible { opacity: 1; }
+  `,
+  
+  createPlugin: ({ self, classNames }) => ({
+    show() {
+      self.$tooltip.addClass(classNames.visible);
+    }
+  })
+});
+```
+
+The CSS is cached and reused across plugin instances for performance. This means multiple tooltip elements will share the same stylesheet rather than duplicating styles.
+
+> **Constructed Stylesheets** Query uses the browser's Constructed Stylesheet API for efficient style injection. Styles are automatically scoped and cleaned up when no longer needed.
+
+### Events
+
+Declarative event handlers with automatic [delegation](/query/basics#event-delegation):
+
+> **Event Delegation** Event handlers are attached using delegation where the plugin listens for bubbled events. This means events will fire even if matching elements are added or removed after initialization.
+
+
+```javascript
+const events = {
+  'mouseenter': ({ self, settings }) => {
+    self.showTimer = setTimeout(self.show, settings.showDelay);
+  },
+  
+  'mouseleave': ({ self, settings }) => {
+    self.hideTimer = setTimeout(self.hide, settings.hideDelay);
+  },
+  
+  'click .close': ({ self }) => {
+    self.hide();
+  },
+  
+  'global scroll': ({ self }) => {
+    self.updatePosition();
+  }
+};
+```
+
+#### Event Types
+
+- `'click'` - Event on plugin element
+- `'click .selector'` - [Delegated event](/query/basics#event-delegation) within plugin element
+- `'bind focus input'` - Direct binding to subelements (for non-bubbling custom events)
+- `'global scroll'` - Global event on any element outside the plugin
+
+#### Event Cleanup
+
+Events are automatically cleaned up when plugin instances are destroyed using an AbortController when your plugin is destroyed or you call `.plugin('destroy')`.
+
+
+### Lifecycle Events
+
+Run code during plugin creation and destruction:
+
+```javascript
+registerPlugin({
+  onCreated: ({ el, settings }) => {
+    console.log('Plugin created on', el);
+  },
+  
+  onDestroyed: ({ el }) => {
+    console.log('Plugin destroyed on', el);
+    // Cleanup code here
+  }
+});
+```
+
+## Callback Arguments
+
+Plugin callbacks like `createPlugin`, `onCreated`, and event handlers receive destructurable parameters to access shared state, DOM elements, and plugin context.
+
+The `self` parameter is the plugin instance itself - it contains all methods returned from `createPlugin()` plus any shared resources from `setup()`. This allows methods to call each other and access shared state.
+
+All callbacks receive consistent base parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `$` | Query constructor function |
+| `el` | Raw DOM element the plugin is attached to |  
+| `$el` | Query wrapper for the plugin element |
+| `self` | Plugin instance with methods and shared resources |
+| `plugin` | Alias for `self` |
+| `namespace` | Plugin namespace (usually same as name) |
+| `data` | Element data attributes parsed as native values |
+| `selectors` | Plugin selector mappings |
+| `errors` | Plugin error message mappings |
+| `classNames` | Plugin CSS class mappings |
+| `settings` | Current plugin settings (merged defaults + user settings) |
+
+**Event handlers** receive all base parameters plus:
+
+| Parameter | Description |
+|-----------|-------------|
+| `event` | Event object |
+| `target` | Event target element |
+| `value` | Element value (from input, event.target, or event.detail) |
+| `data` | Combined element data attributes + event detail data |
+
+**Setup callback** receives different parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `$` | Query constructor function |
+| `settings` | Plugin default settings |
+| `$elements` | Query collection of elements (plural) |
+| `templates` | HTML templates object |
+
+## Complete Example
+
+This example demonstrates the three-tier settings precedence system: plugin defaults are overridden by settings objects, which are overridden by data attributes. This hierarchy gives users flexible control over plugin behavior.
+
+<PlaygroundExample id="query-behavior" />
+
+## Plugin Usage
+
+### Initialization
+
+```javascript
+// Initialize with defaults
+$('.behavior').behavior();
+
+// With custom settings  
+$('.behavior').behavior({
+  delay: 100,
+  trigger: 'hover'
+});
+```
+
+### Method Calls
+
+Call methods via Query with natural language support:
+
+```javascript
+$('ui-icon.help').tooltip('show');
+$('ui-icon.help').tooltip('toggle state');  // Finds toggleState()
+```
+
+Access plugin instances directly on DOM elements:
+
+```javascript
+const el = document.querySelector('ui-icon.help');
+el.tooltip.show();  // Direct method call
+```
+
+Bridge Query selection with direct method calls:
+
+```javascript
+$('ui-icon.help').el().tooltip.isVisible();  // Query → DOM → direct call
+```
+
+Query intelligently collects return values from multiple elements:
+
+```javascript
+const states = $('ui-icon.help').tooltip('is visible'); // [true, false, true]
+```
+
+### Runtime Settings Updates
+
+```javascript
+// Update settings after initialization (triggers re-initialization)
+$('ui-icon.help').tooltip({
+  showDelay: 200,
+  trigger: 'click'
+});
+```
+
+### Data Attribute Overrides
+
+HTML data attributes automatically override plugin and user settings:
+
+```html
+<!-- These override any JavaScript settings -->
+<ui-icon class="help" data-show-delay="500" data-trigger="focus"></ui-icon>
+<ui-icon class="help" data-complex-setting='{"enabled": true, "count": 3}'></ui-icon>
+```
+
+Attribute names use kebab-case and are automatically converted to camelCase settings.
+
+### Global Configuration
+
+```javascript
+// Modify defaults for all future instances
+$.tooltip.defaultSettings.showDelay = 100;
+```
+
+> **Return Values** Plugin methods can return values, and Query intelligently collects them - single values for one element, arrays for multiple elements, with automatic deduplication.
