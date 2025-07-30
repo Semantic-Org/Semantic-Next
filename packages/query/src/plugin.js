@@ -13,6 +13,9 @@ import {
 
 export class Plugin {
 
+  // Captures word characters inside curly braces: {title} -> "title"
+  static TEMPLATING_REGEX = /\{(\w+)\}/g;
+
   constructor({
     name,
 
@@ -60,6 +63,11 @@ export class Plugin {
     this.settings = clone(settings);
     this.namespace = namespace;
     this.customInvocation = customInvocation;
+
+    this.classNames = classNames;
+    this.selectors = selectors;
+    this.errors = errors;
+    this.templates = templates;
 
     // handle shared state across plugins
     this.initialPlugin = initialPlugin;
@@ -114,6 +122,11 @@ export class Plugin {
   }
 
   parseEventString(eventString) {
+    // Interpolate selectors and classNames using {key} syntax
+    eventString = eventString.replace(Plugin.TEMPLATING_REGEX, (match, key) => {
+      return this.selectors[key] || this.classNames[key] || match;
+    });
+
     // 'delegate eventType selector' - bind to an element using event delegation
     // 'global eventType selector' - attach event to an element on the page
     // 'bind selector' - bind to an element directly
@@ -355,6 +368,9 @@ export class Plugin {
         },
         get selectors() {
           return plugin.selectors;
+        },
+        get templates() {
+          return plugin.templates;
         },
         get errors() {
           return plugin.errors;
