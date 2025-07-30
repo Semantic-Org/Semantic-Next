@@ -97,6 +97,13 @@ export class Plugin {
     this.attachEvents(events);
 
     this.element[namespace] = this;
+
+    // allow initialize function as shorthand
+    if (isFunction(template.instance.initialize)) {
+      this.call(template.instance.initialize.bind(template));
+    }
+    this.call(this.onCreated);
+
   }
 
   adoptStylesheet(css) {
