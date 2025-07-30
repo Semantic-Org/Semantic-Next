@@ -79,7 +79,7 @@ $('ui-icon.help').tooltip('show');
 ```
 
 
-## Choosing Plugin Type
+## Plugin Types
 
 **Simple plugins** are for adding one utility method to Query (like jQuery plugins). Use them when you want to extend Query with DOM manipulation helpers that don't need configuration or event handling.
 
@@ -87,7 +87,7 @@ $('ui-icon.help').tooltip('show');
 
 > **Registration** Plugins can self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/plugins/transition'` makes the plugin available across your application.
 
-## Plugin Definition Parts
+## Creating Plugins
 
 ### Name
 
@@ -100,6 +100,15 @@ registerPlugin({
 
 // Creates method available on all Query instances
 $('ui-icon.help').tooltip();
+```
+
+The `namespace` controls where the plugin instance is stored on DOM elements (defaults to `name`):
+
+```javascript
+registerPlugin({
+  name: 'tooltip',
+  namespace: 'myTooltip'  // Stored as element.myTooltip instead of element.tooltip
+});
 ```
 
 ### Default Settings
@@ -203,29 +212,17 @@ Plugins use configuration objects to define constants that can be overridden by 
 ```javascript
 registerPlugin({
   name: 'tooltip',
-  
   selectors: {
-    trigger: '.tooltip-trigger',
-    content: '.tooltip-content',
-    arrow: '.tooltip-arrow'
+    trigger: '.tooltip-trigger'  // Configurable DOM selectors
   },
-  
   classNames: {
-    visible: 'visible',
-    hidden: 'hidden',
-    loading: 'loading'
+    visible: 'visible'  // Configurable CSS classes
   },
-  
   errors: {
-    noTarget: 'No target element found',
-    invalidPosition: 'Invalid tooltip position specified',
-    initFailed: 'Tooltip initialization failed'
+    noTarget: 'No target element found'  // Localizable error messages
   },
-  
   templates: {
-    tooltip: '<div class="tooltip"><div class="tooltip-content"></div></div>',
-    arrow: '<div class="tooltip-arrow"></div>',
-    loading: '<div class="tooltip-loading">Loading...</div>'
+    tooltip: '<div class="tooltip"></div>'  // Reusable HTML templates
   }
 });
 ```
@@ -326,10 +323,52 @@ const events = {
 - `'bind focus input'` - Direct binding to subelements (for non-bubbling custom events)
 - `'global scroll'` - Global event on any element outside the plugin
 
+#### Using Configuration in Events
+
+Event strings support templating using configuration objects. Use `{key}` syntax to reference selectors and classNames:
+
+```javascript
+registerPlugin({
+  selectors: {
+    trigger: '.tooltip-trigger'
+  },
+
+  events: {
+    'click {trigger}': ({ self }) => {  // Uses selectors.trigger
+      self.toggle();
+    }
+  }
+});
+```
+
 #### Event Cleanup
 
 Events are automatically cleaned up when plugin instances are destroyed using an AbortController when your plugin is destroyed or you call `.plugin('destroy')`.
 
+### Custom Invocation
+
+The `customInvocation` callback handles method calls that don't match any defined plugin methods, enabling flexible string-based APIs:
+
+```javascript
+registerPlugin({
+  name: 'transition',
+
+  createPlugin: ({ self }) => ({
+    performTransition(type, duration) { /* implementation */ }
+  }),
+
+  customInvocation: ({ methodName, methodArgs, self }) => {
+    // Route transition names to implementation
+    return self.performTransition(methodName, ...methodArgs);
+  }
+});
+
+// Usage
+$('.modal').transition('fade in', 500);      // Calls customInvocation
+$('.modal').transition('slide up', 300);     // Calls customInvocation
+```
+
+This enables Semantic UI-style APIs where string arguments can trigger different behaviors without requiring exact method name matches.
 
 ### Lifecycle Events
 
@@ -449,7 +488,16 @@ $('ui-icon.help').tooltip({
 
 ### Data Attribute Overrides
 
-HTML data attributes automatically override plugin and user settings:
+HTML data attributes automatically override plugin and user settings. This behavior can be controlled with `allowDataOverride`:
+
+```javascript
+registerPlugin({
+  name: 'tooltip',
+  allowDataOverride: false  // Prevents data-* attributes from overriding settings
+});
+```
+
+When enabled (default), HTML data attributes override settings:
 
 ```html
 <!-- These override any JavaScript settings -->
