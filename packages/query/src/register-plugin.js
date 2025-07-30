@@ -16,6 +16,8 @@ export const registerPlugin = (plugin) => {
     createPlugin: noop,
     // event object
     events: {},
+    // mutation observer object
+    mutations: {},
     // whether html data can override settings
     allowDataOverride: true,
     // one time setup callback

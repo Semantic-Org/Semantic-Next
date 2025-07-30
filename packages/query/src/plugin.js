@@ -4,9 +4,11 @@ import {
   clone,
   each,
   extend,
+  last,
   isFunction,
   isPlainObject,
   isString,
+  keys,
   mapObject,
   noop
 } from '@semantic-ui/utils';
@@ -26,6 +28,9 @@ export class Plugin {
 
     // event object
     events = {},
+
+    // mutation observer object
+    mutations = {},
 
     // setup() can create an initial plugin
     initialPlugin = {},
@@ -68,6 +73,7 @@ export class Plugin {
     this.selectors = selectors;
     this.errors = errors;
     this.templates = templates;
+    this.mutations = mutations;
 
     // handle shared state across plugins
     this.initialPlugin = initialPlugin;
@@ -96,11 +102,14 @@ export class Plugin {
     // attach events
     this.attachEvents(events);
 
+    // attach mutation observers
+    this.attachMutations(mutations);
+
     this.element[namespace] = this;
 
     // allow initialize function as shorthand
-    if (isFunction(template.instance.initialize)) {
-      this.call(template.instance.initialize.bind(template));
+    if (isFunction(instance.initialize)) {
+      this.call(instance.initialize.bind(template));
     }
     this.call(this.onCreated);
 
@@ -128,12 +137,23 @@ export class Plugin {
     this.element[namespace] = plugin;
   }
 
+  // simple template parsing ({foo}, { foo: 'baz" }) => baz
+  parseTemplate(templateString, data) {
+    return templateString.replaceAll(Plugin.TEMPLATING_REGEX, (match, key) => {
+      return data[key] || '';
+    });
+  }
+
   parseEventString(eventString) {
-    // Interpolate selectors and classNames using {key} syntax
-    eventString = eventString.replace(Plugin.TEMPLATING_REGEX, (match, key) => {
-      return this.selectors[key] || this.classNames[key] || match;
+
+    // allow simple templating
+    eventString = this.parseTemplate(eventString, {
+      ...this.selectors,
+      ...this.classNames,
+      ...this.settings,
     });
 
+    // allow keywords
     // 'delegate eventType selector' - bind to an element using event delegation
     // 'global eventType selector' - attach event to an element on the page
     // 'bind selector' - bind to an element directly
@@ -258,6 +278,127 @@ export class Plugin {
         }
       });
     });
+  }
+
+  attachMutations(mutations = this.mutations) {
+    if(!keys(this.mutations)) {
+      return;
+    }
+
+    const $ = this.$; // shorthand
+
+    // parse each mutation config for its observer config
+    const mutationConfigs = [];
+    each(mutations, (handler, mutationString) => {
+      const mutationConfig = this.parseMutationString(mutationString);
+      mutationConfigs.push({
+        handler,
+        ...mutationConfig
+      });
+    });
+
+    this.mutationObservers = [];
+    each(mutationConfigs, ({observedElement, observerOptions, keyword, selector, handler }) => {
+      const observer = new MutationObserver((mutations) => {
+
+        // determine if it matches
+        let $added = $();
+        let $removed = $();
+
+        each(mutations, (mutation) => {
+          const $matchingAdded = $(mutation.addedNodes).filter(selector);
+          const $matchingRemoved = $(mutation.removedNodes).filter(selector);
+          if($matchingAdded.exists()) {
+            $added = $added.add($matchingAdded);
+          }
+          if($matchingRemoved.exists()) {
+            $removed = $removed.add($matchingRemoved);
+          }
+        });
+
+        if($added.exists() || $removed.exists()) {
+          // call handler
+          const callbackArgs = this.getMutationCallbackArgs(mutations, { $added, $removed });
+          this.call(handler, { additionalParams: callbackArgs });
+        }
+
+      });
+
+      observer.observe(observedElement, observerOptions);
+      this.mutationObservers.push(observer);
+    });
+
+  }
+
+  removeMutations() {
+    each(this.mutationObservers, (observer) => {
+      observer.disconnect();
+    });
+  }
+
+  parseMutationString(mutationString) {
+    const keywords = ['observe', 'add', 'remove', 'attributes', 'text'];
+    const observerOptions = {
+      childList: true,
+      subtree: true,
+    };
+    // handle templating
+    const rawSelector = this.parseTemplate(mutationString, {
+      ...this.selectors,
+      ...this.classNames,
+      ...this.settings,
+    });
+
+    let keyword = 'standard';
+    let selector = rawSelector;
+    let observedElement = this.element;
+
+    each(keywords, (thisKeyword) => {
+      if (mutationString.startsWith(thisKeyword)) {
+        keyword = thisKeyword;
+        selector = rawSelector.replace(keyword, '').trim();
+      }
+    });
+    // handle different observers for diff types
+    switch (keyword) {
+      case 'observe':
+        observedElement = this.$element.find(selector);
+        break;
+      case 'attributes':
+        observerOptions.attributes = true;
+        observerOptions.attributeOldValue = true;
+        break;
+      case 'text':
+        observerOptions.characterData = true;
+        observerOptions.characterDataOldValue = true;
+        break;
+    }
+    return { observedElement, keyword, observerOptions, selector };
+  }
+
+  getMutationCallbackArgs(mutations, additionalData = {}) {
+
+    const args = {
+      ...additionalData,
+      mutations,
+      $target: this.$(mutations[0].target),
+      target: mutations[0].target,
+    };
+
+    // if multiple updates in same microtask we only need last one
+    const mutation = last(mutations);
+    switch (mutation.type) {
+      case 'attributes':
+        args.attributeName = mutation.attributeName;
+        args.newValue = mutation.target.getAttribute(mutation.attributeName);
+        args.oldValue = mutation.oldValue;
+        break;
+      case 'characterData':
+        args.newValue = mutation.target.textContent;
+        args.oldValue = mutation.oldValue;
+        break;
+    }
+    return args;
   }
 
   removeEvents() {
@@ -398,6 +539,7 @@ export class Plugin {
   }
 
   destroy() {
+    this.removeMutations();
     this.removeEvents();
     this.call(this.onDestroyed);
     delete this.element[this.namespace];

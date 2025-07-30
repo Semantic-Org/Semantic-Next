@@ -710,10 +710,7 @@ export class Query {
         el[eventName]();
         return;
       }
-      const event = new Event(eventName, { bubbles: true, cancelable: true });
-      if (eventSettings) {
-        Object.assign(event, eventSettings);
-      }
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, detail: eventSettings });
       el.dispatchEvent(event);
     });
   }
@@ -735,7 +732,7 @@ export class Query {
       ...eventSettings,
     };
     this.each(el => {
-      const event = new CustomEvent(eventName, eventOptions);
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, detail: eventSettings });
       el.dispatchEvent(event);
     });
     return this;
@@ -1327,8 +1324,12 @@ export class Query {
     });
   }
   appendTo(selector) {
-    this.chain(selector).each((el) => {
-      this.insertContent(el, this, 'beforeend');
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'beforeend');
     });
     return this;
   }
@@ -1341,8 +1342,12 @@ export class Query {
     });
   }
   prependTo(selector) {
-    this.chain(selector).each((el) => {
-      this.insertContent(el, this, 'afterbegin');
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'afterbegin');
     });
     return this;
   }
@@ -1355,8 +1360,12 @@ export class Query {
     });
   }
   insertAfter(selector) {
-    this.chain(selector).each((el) => {
-      this.insertContent(el, this, 'afterend');
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'afterend');
     });
     return this;
   }
