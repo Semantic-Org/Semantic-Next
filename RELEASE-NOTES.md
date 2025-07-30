@@ -15,9 +15,11 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `prependTo()` method for prepending elements as first child of target
 
 ## Utils
+* **Feature** - Added `deepExtend()` for deep merging objects with nested property combining, array/date cloning, and optional custom class preservation
 * **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching
 * **Feature** - Added `extractCSS()` for extracting CSS rules matching selectors from various stylesheet sources with optional text output
 * **Feature** - Added `scopeStyles()` for scoping CSS rules with configurable :host replacement and root element handling
+* **Enhancement** - Enhanced `clone()` function with `preserveNonCloneable` option to preserve custom class instances instead of flattening them
 * **Chore** - Restructured tests for utils package to be organized by category.
 
 # Version 0.15.0 - 07.24.2025
