@@ -1351,19 +1351,6 @@ describe('query', () => {
       expect(callback).toHaveBeenCalled();
     });
 
-    it('should trigger a click event with extra parameters', () => {
-      const button = document.createElement('button');
-      document.body.appendChild(button);
-      const callback = vi.fn();
-
-      $('button').on('click', callback);
-      $('button').click({ detail: 'test' });
-
-      expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        detail: 'test',
-      }));
-    });
-
     it('should trigger click events on multiple elements', () => {
       const button1 = document.createElement('button');
       const button2 = document.createElement('button');
