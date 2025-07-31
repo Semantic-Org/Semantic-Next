@@ -4,7 +4,7 @@ const defaultSettings = {
   watch: '.raw',
 };
 
-const createPlugin = ({ $, self }) => ({
+const createBehavior = ({ $, self }) => ({
   addMarkdown(element) {
     const $element = $(element);
     let html = self.convertToMarkdown( $element.text() );
@@ -29,6 +29,6 @@ const mutations = {
 registerBehavior({
   name: 'automarkdown',
   defaultSettings,
-  createPlugin,
+  createBehavior,
   mutations,
 });

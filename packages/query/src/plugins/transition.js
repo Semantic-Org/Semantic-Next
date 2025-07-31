@@ -27,7 +27,7 @@ const error = {
 const onCreated = ({settings}) => {
 };
 
-const createPlugin = ({ settings }) => ({
+const createBehavior = ({ settings }) => ({
 
 });
 
@@ -35,7 +35,7 @@ export const TransitionBehavior = registerBehavior({
   name: 'transition',
   defaultSettings,
   classNames,
-  createPlugin,
+  createBehavior,
   onCreated,
   classNames,
   css,

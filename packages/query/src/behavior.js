@@ -13,7 +13,7 @@ import {
   noop
 } from '@semantic-ui/utils';
 
-export class Plugin {
+export class Behavior {
 
   // Captures word characters inside curly braces: {title} -> "title"
   static TEMPLATING_REGEX = /\{(\w+)\}/g;
@@ -23,8 +23,8 @@ export class Plugin {
 
     namespace = name,
 
-    // returns plugin instance
-    createPlugin = noop,
+    // returns behavior instance
+    createBehavior = noop,
 
     // event object
     events = {},
@@ -32,8 +32,8 @@ export class Plugin {
     // mutation observer object
     mutations = {},
 
-    // setup() can create an initial plugin
-    initialPlugin = {},
+    // setup() can pass through part of instance
+    sharedBehavior = {},
 
     // $element to initialize
     $element,
@@ -75,9 +75,9 @@ export class Plugin {
     this.templates = templates;
     this.mutations = mutations;
 
-    // handle shared state across plugins
-    this.initialPlugin = initialPlugin;
-    extend(this, initialPlugin);
+    // handle shared state across behaviors
+    this.sharedBehavior = sharedBehavior;
+    extend(this, sharedBehavior);
 
     if(css) {
       this.adoptStylesheet(css);
@@ -92,8 +92,8 @@ export class Plugin {
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.controller = new AbortController();
 
-    // extend with methods from createPlugin
-    const instance = this.call(createPlugin) || {};
+    // extend with methods from createBehavior
+    const instance = this.call(createBehavior) || {};
     extend(this, instance);
 
     // attach to dom
@@ -133,13 +133,13 @@ export class Plugin {
     if (this.instance !== undefined) {
       this.instance.destroy();
     }
-    const plugin = new Plugin(settings);
-    this.element[namespace] = plugin;
+    const behavior = new Behavior(settings);
+    this.element[namespace] = behavior;
   }
 
   // simple template parsing ({foo}, { foo: 'baz" }) => baz
   parseTemplate(templateString, data) {
-    return templateString.replaceAll(Plugin.TEMPLATING_REGEX, (match, key) => {
+    return templateString.replaceAll(Behavior.TEMPLATING_REGEX, (match, key) => {
       return data[key] || '';
     });
   }
@@ -235,7 +235,7 @@ export class Plugin {
   attachEvents(events = this.events) {
     each(events, (userHandler, eventString) => {
       const subEvents = this.parseEventString(eventString);
-      const plugin = this;
+      const self = this;
       each(subEvents, (event) => {
         const { eventName, selector, eventType } = event;
         const eventHandler = function(event) {
@@ -244,9 +244,9 @@ export class Plugin {
           const boundEvent = userHandler.bind(targetElement);
           const eventData = event?.detail || {};
           // dataset is always stringified for atts, we want this as native values
-          const elData = plugin.getElementData(targetElement);
+          const elData = self.getElementData(targetElement);
           const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
-          plugin.call(boundEvent, {
+          self.call(boundEvent, {
             additionalData: {
               event: event,
               target: targetElement,
@@ -420,7 +420,7 @@ export class Plugin {
 
   removeEvents() {
     if (this.controller) {
-      this.controller.abort('Plugin destroyed');
+      this.controller.abort('behavior destroyed');
     }
   }
 
@@ -475,11 +475,11 @@ export class Plugin {
     return found;
   }
 
-  // invoke an internal method returned from createComponent
-  callPluginMethod(query, ...methodArgs) {
+  // invoke an internal method returned from createBehavior
+  callMethod(query, ...methodArgs) {
     let found = this.lookup(query);
     if (isFunction(found)) {
-      // Call method with plugin instance as context
+      // Call method with instance as context
       return found.apply(this, methodArgs);
     }
     else if (found === undefined && this.customInvocation) {
@@ -518,40 +518,40 @@ export class Plugin {
 
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalParams = {} } = {}) {
-    const plugin = this;
+    const self = this;
     const args = [];
     if (!params) {
       params = {
-        $: plugin.$,
-        el: plugin.element,
-        $el: plugin.$(plugin.element),
-        self: plugin,
-        plugin,
-        namespace: plugin.namespace,
+        $: self.$,
+        el: self.element,
+        $el: self.$(self.element),
+        self,
+        behavior: self,
+        namespace: self.namespace,
         get data() {
-          return plugin.getElementData(plugin.element);
+          return self.getElementData(self.element);
         },
         get selectors() {
-          return plugin.selectors;
+          return self.selectors;
         },
         get templates() {
-          return plugin.templates;
+          return self.templates;
         },
         get errors() {
-          return plugin.errors;
+          return self.errors;
         },
         get classNames() {
-          return plugin.classNames;
+          return self.classNames;
         },
         get settings() {
-          return plugin.settings;
+          return self.settings;
         },
         ...additionalParams,
       };
       args.push(params);
     }
     if (isFunction(func)) {
-      return func.apply(plugin.element, args);
+      return func.apply(self.element, args);
     }
   }
 
@@ -562,13 +562,13 @@ export class Plugin {
     delete this.element[this.namespace];
   }
 
-  static getPluginInstance(element, namespace) {
+  static getInstance(element, namespace) {
     return element[namespace];
   }
 
-  // this allows for a setup() function to return values shared across plugins
-  static callSetupMethod(setupMethod, { $elements, settings, templates } = {}) {
+  // this allows for a setup() function to return values shared across behaviors
+  static runSetup(setup, { $elements, settings, templates } = {}) {
     const $ = (selector, options) => new $elements.constructor(selector, options);
-    return setupMethod({ $, settings, $elements, templates });
+    return setup({ $, settings, $elements, templates });
   }
 }

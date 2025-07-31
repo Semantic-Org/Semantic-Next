@@ -1,19 +1,19 @@
-import { pick, isString, isArray, noop, clone, deepExtend } from '@semantic-ui/utils';
-import { Plugin } from './plugin.js';
+import { pick, isString, isArray, noop, deepExtend } from '@semantic-ui/utils';
+import { Behavior } from './behavior.js';
 import { Query } from './query.js';
 
 // Register Behavior
-export const registerBehavior = (plugin) => {
+export const registerBehavior = (behavior) => {
 
-  const pluginDefaults = {
+  const behaviorDefaults = {
     name: undefined,
     css: undefined,
     // storage in el
-    namespace: plugin?.name,
-    // settings for plugin
+    namespace: behavior?.name,
+    // settings for behavior
     defaultSettings: {},
-    // returns plugin instance
-    createPlugin: noop,
+    // returns behavior instance
+    createBehavior: noop,
     // event object
     events: {},
     // mutation observer object
@@ -33,13 +33,13 @@ export const registerBehavior = (plugin) => {
     templates: {},
   };
 
-  plugin = {
-    ...pluginDefaults,
-    ...plugin
+  behavior = {
+    ...behaviorDefaults,
+    ...behavior
   };
   // handle default namespace
-  if(!plugin.namespace) {
-    plugin.namespace = plugin.name;
+  if(!behavior.namespace) {
+    behavior.namespace = behavior.name;
   }
 
   // shorthand
@@ -51,36 +51,36 @@ export const registerBehavior = (plugin) => {
     classNames,
     errors,
     templates,
-  } = plugin;
+  } = behavior;
 
   let isSetup = false;
 
   if (!name) {
-    throw new Error('Plugin must have a name');
+    throw new Error('Behavior must have a name');
   }
 
   // may be called via side effects which should not throw an error
-  // when multiple components rely on same plugin
+  // when multiple components rely on same behavior
   if (Query.behaviors.has(name)) {
     return;
   }
 
   // Register this behavior
-  Query.behaviors.set(name, plugin);
+  Query.behaviors.set(name, behavior);
 
-  // setup() can setup a shared plugin that is preserved across calls
-  let sharedPlugin;
+  // setup() can setup a shared behavior that is preserved across calls
+  let sharedBehavior;
 
-  // Create abstraction around plugin initialization
+  // Create abstraction around behavior initialization
   Query.prototype[name] = function(settings) {
 
 
     // At run time we need to check if defaults are changed from original registration
     const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
-    const pluginDefaults = pick(Query.prototype[name], ...defaultValues);
-    const runtimePluginConfig = {
-      ...pluginDefaults,
-      ...plugin,
+    const behaviorDefaults = pick(Query.prototype[name], ...defaultValues);
+    const runtimeConfig = {
+      ...behaviorDefaults,
+      ...behavior,
     };
 
     // when this element is initialized we create run time settings
@@ -103,30 +103,30 @@ export const registerBehavior = (plugin) => {
 
       // handle setup function on first invocation
       if(!isSetup) {
-        sharedPlugin = Plugin.callSetupMethod(plugin.setup, { $elements, settings, templates }) ?? {};
+        sharedBehavior = Behavior.runSetup(behavior.setup, { $elements, settings, templates }) ?? {};
         isSetup = true;
       }
 
       const $element = this;
 
-      // plugin is stored in namespace like el.plugin
-      const instance = Plugin.getPluginInstance(element, namespace);
+      // behavior is stored in namespace like el.behavior
+      const instance = Behavior.getInstance(element, namespace);
 
-      // create plugin instance if not defined
+      // create behavior instance if not defined
       // this might even occur if a method is invoked
       // if this method has no instance defined
       if (!instance) {
-        new Plugin({
-          initialPlugin: sharedPlugin, // setup can pass through props in setup
+        new Behavior({
+          sharedBehavior, // setup can pass shared behavior across instances
           $element,
           self,
-          ...runtimePluginConfig,
+          ...runtimeConfig,
           settings: runtimeSettings
         });
       }
 
       if (methodName) {
-        const response = instance.callPluginMethod(methodName, ...methodArguments);
+        const response = instance.callMethod(methodName, ...methodArguments);
 
         // Collect return values using original SUI pattern
         if (isArray(returnedValue)) {
@@ -145,7 +145,7 @@ export const registerBehavior = (plugin) => {
       }
       else if(instance !== undefined) {
         // if they are not calling a method and there are settings
-        // than they are attempting to reinitialize the plugin with new settings
+        // than they are attempting to reinitialize the behavior with new settings
         instance.reinitialize(settings);
       }
     });
@@ -156,8 +156,8 @@ export const registerBehavior = (plugin) => {
       : $elements;
   };
 
-  // preserve shared plugin from setup()
-  Query.prototype[name].sharedPlugin = sharedPlugin;
+  // preserve shared behavior from setup()
+  Query.prototype[name].sharedBehavior = sharedBehavior;
 
   // Expose settings, class names and errors on the prototype
   // This allows end-users to override the defaults

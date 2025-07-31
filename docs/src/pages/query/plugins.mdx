@@ -49,7 +49,7 @@ registerBehavior({
   },
 
   // Plugin methods
-  createPlugin: ({ settings, self }) => ({
+  createBehavior: ({ settings, self }) => ({
     show() { /* implementation */ },
     hide() { /* implementation */ },
     toggle() { /* implementation */ }
@@ -117,7 +117,7 @@ See [Plugin Usage](#plugin-usage) for runtime configuration and override example
 Returns an object with methods that become callable on plugin instances:
 
 ```javascript
-const createPlugin = ({ settings, self }) => ({  
+const createBehavior = ({ settings, self }) => ({  
   show() {
     self.$tooltip.addClass('visible');
     settings.onShow?.();
@@ -167,10 +167,10 @@ const setup = ({ $, templates }) => ({
 });
 ```
 
-Shared resources become properties on `self`, available in `createPlugin` and all plugin methods:
+Shared resources become properties on `self`, available in `createBehavior` and all plugin methods:
 
 ```javascript  
-const createPlugin = ({ self }) => ({
+const createBehavior = ({ self }) => ({
   show() {
     // These properties came from setup() return value
     self.$overlay.addClass('visible');
@@ -208,7 +208,7 @@ registerBehavior({
 These objects are available in all plugin callbacks and can be used in event strings with templating:
 
 ```javascript
-createPlugin: ({ self, templates, errors }) => ({
+createBehavior: ({ self, templates, errors }) => ({
   show() {
     if (!self.$tooltip) {
       self.$tooltip = $(templates.tooltip).appendTo('body');
@@ -255,7 +255,7 @@ registerBehavior({
     .tooltip.visible { opacity: 1; }
   `,
   
-  createPlugin: ({ self, classNames }) => ({
+  createBehavior: ({ self, classNames }) => ({
     show() {
       self.$tooltip.addClass(classNames.visible);
     }
@@ -383,7 +383,7 @@ The `customInvocation` callback handles method calls that don't match any define
 registerBehavior({
   name: 'transition',
 
-  createPlugin: ({ self }) => ({
+  createBehavior: ({ self }) => ({
     performTransition(type, duration) { /* implementation */ }
   }),
 
@@ -419,9 +419,9 @@ registerBehavior({
 
 ## Callback Arguments
 
-Behavior callbacks like `createPlugin`, `onCreated`, and event handlers receive destructurable parameters to access shared state, DOM elements, and behavior context.
+Behavior callbacks like `createBehavior`, `onCreated`, and event handlers receive destructurable parameters to access shared state, DOM elements, and behavior context.
 
-The `self` parameter is the behavior instance itself - it contains all methods returned from `createPlugin()` plus any shared resources from `setup()`. This allows methods to call each other and access shared state.
+The `self` parameter is the behavior instance itself - it contains all methods returned from `createBehavior()` plus any shared resources from `setup()`. This allows methods to call each other and access shared state.
 
 All callbacks receive consistent base parameters:
 

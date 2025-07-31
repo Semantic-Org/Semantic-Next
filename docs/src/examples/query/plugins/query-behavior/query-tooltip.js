@@ -24,7 +24,7 @@ const setup = ({ $, templates }) => {
   };
 };
 
-const createPlugin = ({ $, el, settings, self }) => ({
+const createBehavior = ({ $, el, settings, self }) => ({
 
   updateTooltip() {
     self.$tooltip
@@ -106,5 +106,5 @@ registerBehavior({
   setup,
   events,
   templates,
-  createPlugin,
+  createBehavior,
 });
