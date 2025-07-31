@@ -710,7 +710,7 @@ export class Query {
         el[eventName]();
         return;
       }
-      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, detail: eventSettings });
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true, ...eventSettings });
       el.dispatchEvent(event);
     });
   }
@@ -732,7 +732,7 @@ export class Query {
       ...eventSettings,
     };
     this.each(el => {
-      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, detail: eventSettings });
+      const event = new CustomEvent(eventName, eventOptions);
       el.dispatchEvent(event);
     });
     return this;
