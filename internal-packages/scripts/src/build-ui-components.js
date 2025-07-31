@@ -17,12 +17,16 @@ export const buildUIComponents = async ({
   const sharedConfig = {
     watch,
     type: 'javascript',
-    entryPoints: ['./src/components/**/index.js'],
+    entryPoints: [
+      './src/components/**/index.js',
+      './src/primitives/**/index.js',
+      './src/behaviors/**/index.js'
+    ],
     entryNames: '[dir]', // button.js,
     outbase: 'src/components',
     filterEntries: (path) => {
-      // Exclude root-level src/components/index.js to avoid empty filename issue
-      return !path.endsWith('src/components/index.js');
+      // Exclude root-level src/index.js to avoid empty filename issue
+      return !path.endsWith('src/index.js');
     },
   };
 

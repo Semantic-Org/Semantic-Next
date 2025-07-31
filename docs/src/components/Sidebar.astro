@@ -1,10 +1,9 @@
 ---
 const { sidebarMenu, sidebarHeader, expandAll } = Astro.props;
 import './Sidebar.css';
-import NavMenu from '@components/NavMenu/NavMenu.js';
-import SidebarToggle from '@components/SidebarToggle/SidebarToggle.js';
+import { NavMenu, SidebarToggle } from '@semantic-ui/core';
 import { getSidebarMenu, getActiveSidebarSection, getSidebarNavMenu } from '@helpers/navigation.js';
-import { UIMenu } from '@semantic-ui/core'
+import { UIMenu } from '@semantic-ui/core';
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 

@@ -7,7 +7,7 @@ import { ReferenceModal } from './subtemplates/ReferenceModal.js';
 
 /* Components */
 import { CodePlayground } from '../CodePlayground/CodePlayground.js';
-import { NavMenu } from '../NavMenu/NavMenu.js';
+import { NavMenu } from '@semantic-ui/core';
 
 /* UI */
 import { UIButton } from '@semantic-ui/core';

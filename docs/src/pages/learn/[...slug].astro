@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { each, asyncEach, isEmpty, findIndex, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
 import { lessonPages, getLessonContent, getPreviousLesson, getNextLesson, getSidebarMenu } from '@helpers/navigation.js';
-import NavMenu from '@components/NavMenu/NavMenu.js';
+import { NavMenu } from '@semantic-ui/core';
 
 import Playground from '@layouts/Playground.astro';
 import LearnExample from '@components/LearnExample/LearnExample.js';

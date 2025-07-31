@@ -58,7 +58,7 @@ export const buildUIDeps = async ({
     bundle: true,
     log: { header: 'UI Components', text: 'CSS Bundle' },
     entryPoints: [
-      'src/components/**/css/*.css',
+      'src/primitives/**/css/*.css',
     ],
     entryNames: '[dir]/../[name]-bundle',
     outbase: 'src',
