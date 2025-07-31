@@ -303,16 +303,15 @@ const events = {
 
 #### Using Configuration in Events
 
-Event strings support templating using configuration objects. Use `{key}` syntax to reference selectors and classNames:
+Event strings support templating using configuration objects. Use `{key}` syntax to reference `selectors`, `classNames` and `settings`:
 
 ```javascript
 registerPlugin({
-  selectors: {
-    trigger: '.tooltip-trigger'
+  settings: {
+    trigger: '.tooltip-trigger',
   },
-
   events: {
-    'click {trigger}': ({ self }) => {  // Uses selectors.trigger
+    'click {trigger}': ({ self }) => {  // Uses settings.trigger (also works with class names and selectors)
       self.toggle();
     }
   }
