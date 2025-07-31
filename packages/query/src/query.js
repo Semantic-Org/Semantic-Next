@@ -41,10 +41,10 @@ export class Query {
   static eventHandlers = [];
 
   /*
-    We keep an array to store registered plugins
+    We keep a map to store registered behaviors
     This allows an end user to see available extensions
   */
-  static plugins = new Map();
+  static behaviors = new Map();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
@@ -700,25 +700,27 @@ export class Query {
     return this;
   }
 
-  trigger(eventName, eventParams) {
+  trigger(eventName, eventSettings) {
     return this.each(el => {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
-      const event = new Event(eventName, { bubbles: true, cancelable: true });
-      if (eventParams) {
-        Object.assign(event, eventParams);
+      // trigger native handler
+      if (isFunction(el[eventName])) {
+        el[eventName]();
+        return;
       }
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true, ...eventSettings });
       el.dispatchEvent(event);
     });
   }
 
   // shorthand for most common trigger() uses
-  click(eventParams) {
-    return this.trigger('click', eventParams);
+  click(eventSettings) {
+    return this.trigger('click', eventSettings);
   }
-  submit(eventParams) {
-    return this.trigger('submit', eventParams);
+  submit(eventSettings) {
+    return this.trigger('requestSubmit', eventSettings);
   }
 
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
@@ -1265,35 +1267,53 @@ export class Query {
 
   insertContent(target, content, position) {
     const $content = this.chain(content);
-    $content.each(el => {
+    const insertElement = (el) => {
       if (target.insertAdjacentElement) {
-        target.insertAdjacentElement(position, el);
+        return target.insertAdjacentElement(position, el);
       }
       else {
         switch (position) {
           case 'beforebegin':
             target.parentNode?.insertBefore(el, target);
-            break;
+            return el;
           case 'afterbegin':
             target.insertBefore(el, target.firstChild);
-            break;
+            return el;
           case 'beforeend':
             target.appendChild(el);
-            break;
+            return el;
           case 'afterend':
             target.parentNode?.insertBefore(el, target.nextSibling);
-            break;
+            return el;
         }
       }
-    });
+      return el;
+    };
+
+    const insertedElements = $content.map(el => {
+      if (el instanceof DocumentFragment) {
+        return Array.from(el.childNodes).map(insertElement);
+      }
+      else {
+        return insertElement(el);
+      }
+    }).flat();
+
+    return this.chain(insertedElements);
   }
 
-  prepend(...allContent) {
+  before(...allContent) {
     return this.each((el) => {
       each(allContent, content => {
-        this.insertContent(el, content, 'afterbegin');
+        this.insertContent(el, content, 'beforebegin');
       });
     });
+  }
+  insertBefore(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'beforebegin');
+    });
+    return this;
   }
 
   append(...allContent) {
@@ -1303,29 +1323,51 @@ export class Query {
       });
     });
   }
-
-  insertBefore(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'beforebegin');
+  appendTo(selector) {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'beforeend');
     });
+    return this;
   }
 
+  prepend(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterbegin');
+      });
+    });
+  }
+  prependTo(selector) {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'afterbegin');
+    });
+    return this;
+  }
+
+  after(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterend');
+      });
+    });
+  }
   insertAfter(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'afterend');
-    });
-  }
-
-  before(content) {
-    return this.each((el) => {
-      this.insertContent(el, content, 'beforebegin');
-    });
-  }
-
-  after(content) {
-    return this.each((el) => {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
       this.insertContent(el, content, 'afterend');
     });
+    return this;
   }
 
   detach() {
@@ -1449,6 +1491,7 @@ export class Query {
     document.addEventListener('DOMContentLoaded', () => {
       this.settings(settings);
     });
+    return this;
   }
 
   settings(settings) {
@@ -1518,6 +1561,27 @@ export class Query {
     }
     const slicedElements = Array.from(this).slice(start, end);
     return this.chain(slicedElements);
+  }
+
+  add(selector) {
+    if (!selector) {
+      return this;
+    }
+
+    // Get current elements
+    const currentElements = this.get();
+
+    // Create new Query object with the selector using same options
+    const $newElements = new Query(selector, this.options);
+
+    // If no new elements found, return current instance
+    if ($newElements.length === 0) {
+      return this;
+    }
+
+    // Combine arrays and remove duplicates using Set
+    const combinedElements = Array.from(new Set([...currentElements, ...$newElements.get()]));
+    return this.chain(combinedElements);
   }
 
   // special helper for SUI components

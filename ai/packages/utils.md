@@ -8,7 +8,7 @@ The `@semantic-ui/utils` package is a comprehensive standalone utility library p
 
 ## Package Structure
 
-The package is organized into **16 specialized modules**, each focused on a specific domain:
+The package is organized into **17 specialized modules**, each focused on a specific domain:
 
 ```
 @semantic-ui/utils
@@ -18,6 +18,7 @@ The package is organized into **16 specialized modules**, each focused on a spec
 ├── strings.js     ← String formatting and transformation (8+ functions)
 ├── functions.js   ← Function utilities and higher-order functions
 ├── colors.js      ← OKLCH to RGB/Hex color conversion
+├── css.js         ← CSS stylesheet adoption, extraction, and scoping
 ├── browser.js     ← Browser-specific operations and XHR
 ├── looping.js     ← Iteration utilities for objects and arrays
 ├── dates.js       ← Date formatting with internationalization
@@ -133,13 +134,37 @@ hasProperty(data, 'user.profile.name');      // true
 
 ### Object Manipulation
 ```javascript
-import { extend, pick, filterObject, mapObject } from '@semantic-ui/utils';
+import { extend, deepExtend, pick, filterObject, mapObject } from '@semantic-ui/utils';
 
 const source = { a: 1, b: 2, c: 3, d: 4 };
 const target = { b: 10, e: 5 };
 
-// Merge objects
+// Shallow merge objects
 extend(target, source);                      // { a: 1, b: 2, c: 3, d: 4, e: 5 }
+
+// Deep merge objects with nested properties
+const config = {
+  api: { baseUrl: 'localhost', timeout: 5000 },
+  features: { darkMode: false }
+};
+const overrides = {
+  api: { timeout: 3000, retries: 3 },
+  features: { notifications: true }
+};
+
+deepExtend(config, overrides);
+// Result: {
+//   api: { baseUrl: 'localhost', timeout: 3000, retries: 3 },
+//   features: { darkMode: false, notifications: true }
+// }
+
+// Deep merge with custom class preservation
+const settings = {
+  template: new MyTemplate(),
+  data: { items: [1, 2, 3] }
+};
+deepExtend(settings, { data: { items: [4, 5] } }, { preserveNonCloneable: true });
+// Preserves MyTemplate instance, merges data.items array
 
 // Select properties
 pick(source, ['a', 'c']);                    // { a: 1, c: 3 }
@@ -345,6 +370,46 @@ debouncedSave.pending();     // Check if scheduled
 // Safe function wrapping
 const safeFunction = wrapFunction(riskyFunction);
 const result = safeFunction(args); // Won't throw errors
+```
+
+## CSS Utilities (css.js)
+
+### Stylesheet Management
+```javascript
+import { adoptStylesheet, extractCSS, scopeStyles } from '@semantic-ui/utils';
+
+// Adopt CSS to document or shadow root with caching
+adoptStylesheet('.button { background: blue; color: white; }');
+
+// Adopt to shadow root with custom options
+const shadowRoot = element.attachShadow({ mode: 'open' });
+adoptStylesheet(css, shadowRoot, { cacheStylesheet: false });
+
+// Extract matching CSS rules
+const buttonCSS = extractCSS('.button', cssString, { returnText: true });
+const exactMatch = extractCSS('.btn', css, { exactMatch: true });
+
+// Extract from multiple sources
+const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
+```
+
+### CSS Scoping and Web Components
+```javascript
+import { scopeStyles } from '@semantic-ui/utils';
+
+// Basic scoping - prepends selector to all rules
+const scoped = scopeStyles('.button { color: red; }', '.my-component');
+// Result: .my-component .button { color: red; }
+
+// Web component CSS porting with :host replacement
+const hostCSS = ':host { display: block; } :host(.active) { background: blue; }';
+const ported = scopeStyles(hostCSS, '.widget', { replaceHost: true });
+// Result: .widget { display: block; } .widget.active { background: blue; }
+
+// Root element handling
+const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
+const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
+// Result: .app html { font-size: 16px; } .app body { margin: 0; }
 ```
 
 ## Browser Integration (browser.js)

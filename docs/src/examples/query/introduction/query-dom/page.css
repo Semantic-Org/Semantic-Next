@@ -5,6 +5,7 @@
   margin: var(--vertically-spaced);
 }
 
-ui-button {
-  margin: var(--vertically-spaced);
+.box:not(:empty) {
+  background-color: var(--green-0);
+  border: 1px solid var(--green-10);
 }

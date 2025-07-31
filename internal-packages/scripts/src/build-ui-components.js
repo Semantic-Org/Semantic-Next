@@ -1,6 +1,6 @@
-import { buildESM } from './build-esm.js';
 import { buildBundle } from './build-bundle.js';
 import { buildCDN } from './build-cdn.js';
+import { buildESM } from './build-esm.js';
 
 /*
   This exports each individual component from framework
@@ -12,7 +12,6 @@ export const buildUIComponents = async ({
   includeCDN = true,
   includeBundle = true,
 } = {}) => {
-
   const tasks = [];
 
   const sharedConfig = {
@@ -24,50 +23,46 @@ export const buildUIComponents = async ({
     filterEntries: (path) => {
       // Exclude root-level src/components/index.js to avoid empty filename issue
       return !path.endsWith('src/components/index.js');
-    }
+    },
   };
 
-  if(includeESM) {
+  if (includeESM) {
     tasks.push(
       buildESM({
         ...sharedConfig,
         outdir: 'dist',
         log: { header: 'UI Components', text: 'Build ESM' },
-      })
+      }),
     );
   }
 
-  if(includeBundle) {
+  if (includeBundle) {
     tasks.push(
       buildBundle({
         ...sharedConfig,
         outdir: 'dist/bundle',
         log: { header: 'UI Components', text: 'Build Bundle' },
-      })
+      }),
     );
   }
 
-  if(includeCDN) {
+  if (includeCDN) {
     tasks.push(
       buildCDN({
         ...sharedConfig,
         outdir: 'dist/cdn',
         log: { header: 'UI Components', text: 'Build CDN' },
-      })
+      }),
     );
   }
 
   await Promise.all(tasks);
-
 };
-
 
 // Wrapped for NPM wireit consumption
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async function() {
-
     const result = await buildUIComponents();
     process.exit();
-
   })();
 }

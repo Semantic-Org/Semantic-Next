@@ -696,6 +696,14 @@ export class Query {
   slice(start?: number, end?: number): Query;
 
   /**
+   * Creates a new Query collection combining the current elements with elements from the provided selector.
+   * @see https://next.semantic-ui.com/api/query/utilities#add
+   * @param selector - The selector, elements, or Query instance to add to the current collection.
+   * @returns A new Query instance containing the combined elements with duplicates removed.
+   */
+  add(selector: string | Element | Element[] | NodeList | HTMLCollection | Query): Query;
+
+  /**
    * Inserts content at a specified position relative to a target element.
    * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
@@ -739,6 +747,22 @@ export class Query {
    *  @returns A new query object of elements inserted.
    */
   insertAfter(selector: string | Node | NodeList | HTMLCollection | Query): Query;
+
+  /**
+   * Appends each element in the current set as the last child of the specified target(s).
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#appendTo
+   * @param selector - The target element(s) or selector.
+   * @returns A new query object of target elements.
+   */
+  appendTo(selector: string | Node | NodeList | HTMLCollection | Query): Query;
+
+  /**
+   * Prepends each element in the current set as the first child of the specified target(s).
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#prependTo
+   * @param selector - The target element(s) or selector.
+   * @returns A new query object of target elements.
+   */
+  prependTo(selector: string | Node | NodeList | HTMLCollection | Query): Query;
 
   /**
    * Inserts content before each element in the current set.

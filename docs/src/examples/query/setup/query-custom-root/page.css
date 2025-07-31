@@ -1,0 +1,23 @@
+.box, .circle {
+  background-color: var(--standard-20);
+  background-image: var(--angled-gradient);
+  margin: var(--margin);
+}
+
+.box {
+  width: 250px;
+  height: 250px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.circle {
+  width: 50px;
+  height: 50px;
+  border: var(--border);
+  border-radius: var(--circular-radius);
+}
+
+.red {
+  background-color: var(--red-10);
+}

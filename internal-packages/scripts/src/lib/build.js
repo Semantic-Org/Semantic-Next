@@ -1,15 +1,14 @@
-import { resolve, dirname } from 'path';
 import fs from 'fs/promises';
+import { dirname, resolve } from 'path';
 
 import * as esbuild from 'esbuild';
 import glob from 'tiny-glob';
 
-import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
-import { log as logPlugin } from '@semantic-ui/esbuild-log';
 import { callback as callbackPlugin } from '@semantic-ui/esbuild-callback';
+import { log as logPlugin } from '@semantic-ui/esbuild-log';
+import { resolveBareImports } from '@semantic-ui/esbuild-resolve-bare-imports';
 
-import { getBanner, JS_BUILD_CONFIG, CSS_BUILD_CONFIG, CDN_CONFIG } from './config.js';
-
+import { CDN_CONFIG, CSS_BUILD_CONFIG, getBanner, JS_BUILD_CONFIG } from './config.js';
 
 // resolve base dir relative to where script is run
 // this may be run from "npm run" so this is a common failure point
@@ -28,7 +27,6 @@ export const getFileSize = async (src) => {
   const size = (stats.size / 1024).toFixed(2);
   return `${size}KB`;
 };
-
 
 /*
   Provides base build config but without entrpoints / in & out dirs
@@ -69,21 +67,20 @@ export const getESBuildConfig = async function({
   },
   ...additionalConfig // allow any other config value to be passed through
 }) {
-
   let config = {};
 
   // default base config stored in config constants
-  if(type == 'javascript') {
+  if (type == 'javascript') {
     config = JS_BUILD_CONFIG;
   }
-  if(type == 'css') {
+  if (type == 'css') {
     config = CSS_BUILD_CONFIG;
   }
 
-  if(additionalConfig) {
+  if (additionalConfig) {
     config = {
       ...config,
-      ...additionalConfig
+      ...additionalConfig,
     };
   }
 
@@ -93,20 +90,19 @@ export const getESBuildConfig = async function({
     bundle,
     minify,
     metafile,
-    platform
+    platform,
   };
 
-  if((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
+  if ((cdn || readEntrypoints || addBanner || addLog || addOutfile) && !packageFile) {
     packageFile = await getPackageFile();
   }
 
   /* Configure several settings from package.json */
-  if(packageFile) {
-
+  if (packageFile) {
     // create banner from package info
-    if(addBanner) {
+    if (addBanner) {
       const banner = getBanner(packageFile);
-      if(type == 'css') {
+      if (type == 'css') {
         config.banner = { css: banner };
       }
       else {
@@ -115,57 +111,58 @@ export const getESBuildConfig = async function({
     }
 
     // naive main entrypoint evaluation
-    if(entryPoints.length) {
+    if (entryPoints.length) {
       // If filterEntries is provided and entryPoints contains glob patterns
-      if(filterEntries && entryPoints.some(ep => ep.includes('*'))) {
+      if (filterEntries && entryPoints.some(ep => ep.includes('*'))) {
         const resolvedEntries = [];
-        for(const pattern of entryPoints) {
-          if(pattern.includes('*')) {
+        for (const pattern of entryPoints) {
+          if (pattern.includes('*')) {
             const globEntries = await getEntryPoints(pattern, filterEntries);
             resolvedEntries.push(...globEntries);
-          } else {
+          }
+          else {
             resolvedEntries.push(pattern);
           }
         }
         config.entryPoints = resolvedEntries;
-      } else {
+      }
+      else {
         config.entryPoints = entryPoints;
       }
     }
-    else if(readEntrypoints) {
+    else if (readEntrypoints) {
       const entry = packageFile.module || packageFile.main;
       const entryPointPath = resolve(baseDir, entry);
       config.entryPoints = [entryPointPath];
     }
 
-    if(!log && addLog) {
+    if (!log && addLog) {
       let header = 'Build';
-      if(cdn) {
+      if (cdn) {
         header += ' CDN';
       }
-      else if(bundle) {
+      else if (bundle) {
         header += ' Bundled';
       }
-      if(minify) {
+      if (minify) {
         header += ' (Min)';
       }
       log = {
         header: header,
-        text: packageFile?.title || packageFile.name
+        text: packageFile?.title || packageFile.name,
       };
     }
 
     // automatically select outfile name
-    if(!outfile && addOutfile) {
-
+    if (!outfile && addOutfile) {
       // add folder path
-      if(bundle) {
+      if (bundle) {
         outfile += outfileDir.bundle;
       }
-      else if(cdn) {
+      else if (cdn) {
         outfile += outfileDir.cdn;
       }
-      else if(esm) {
+      else if (esm) {
         // For ESM builds, use standard directory but with esm indication
         outfile += outfileDir.standard;
       }
@@ -181,21 +178,21 @@ export const getESBuildConfig = async function({
         .toLowerCase(); // lowercase
 
       // add file extension
-      if(esm) {
+      if (esm) {
         // esm can be inferred skipping for now
         // outfile += '.esm';
       }
-      if(minify) {
+      if (minify) {
         outfile += '.min';
         config.outExtension = {
           '.js': '.min.js',
           '.css': '.min.css',
         };
       }
-      if(type == 'javascript') {
+      if (type == 'javascript') {
         outfile += '.js';
       }
-      else if(type == 'css') {
+      else if (type == 'css') {
         outfile += '.css';
       }
     }
@@ -204,29 +201,29 @@ export const getESBuildConfig = async function({
   config.plugins = plugins;
 
   // add plugins
-  if(log || cdn) {
-    if(log) {
-      config.plugins.push( logPlugin(log) );
+  if (log || cdn) {
+    if (log) {
+      config.plugins.push(logPlugin(log));
     }
-    if(cdn) {
+    if (cdn) {
       // this will resolve all bare module imports to a cdnized link
       // i.e. import { defineComponent } from 'https://link-to-cdn/@semantic-ui/component/';
       // this is used with import maps or direct browser usage
       config.bundle = true;
-      config.plugins.push( resolveBareImports({
+      config.plugins.push(resolveBareImports({
         packageJson: packageFile,
-        ...cdnConfig
-      }) );
+        ...cdnConfig,
+      }));
     }
-    if(onLoad || onComplete) {
+    if (onLoad || onComplete) {
       const callbackConfig = {};
-      if(onLoad) {
+      if (onLoad) {
         callbackConfig.onLoad = onLoad;
       }
-      if(onComplete) {
+      if (onComplete) {
         callbackConfig.onComplete = onComplete;
       }
-      config.plugins.push( callbackPlugin(callbackConfig) );
+      config.plugins.push(callbackPlugin(callbackConfig));
     }
   }
 
@@ -235,12 +232,12 @@ export const getESBuildConfig = async function({
   // in many cases this is functionally equivalent to the module src
   // i.e src/[entrypoint]
   // however it might have some use in specialized builds
-  if(esm) {
+  if (esm) {
     config.format = 'esm';
     config.bundle = true;
 
     // this will avoid bundling any dependencies
-    if(packageFile && (packageFile.dependencies || packageFile.peerDependencies)) {
+    if (packageFile && (packageFile.dependencies || packageFile.peerDependencies)) {
       const externalDeps = {
         ...packageFile.dependencies,
         ...packageFile.peerDependencies,
@@ -251,10 +248,10 @@ export const getESBuildConfig = async function({
   }
 
   // can only have outdir or outfile
-  if(outdir) {
+  if (outdir) {
     config.outdir = outdir;
   }
-  else if(outfile) {
+  else if (outfile) {
     config.outfile = outfile;
   }
 
@@ -276,10 +273,9 @@ export const build = async ({
     // watch has a different build endpoint
     const builder = watch
       ? esbuild.context
-      : esbuild.build
-    ;
+      : esbuild.build;
 
-    if(watch) {
+    if (watch) {
       const context = await builder(buildConfig);
       return context.watch();
     }
@@ -292,18 +288,18 @@ export const build = async ({
 
       // create metafile on esbuild stats
       // this can be used to analyze build at https://esbuild.github.io/analyze/
-      if(result.metafile) {
+      if (result.metafile) {
         const metafilePath = resolve(outdir, 'metafile.json');
         await fs.writeFile(metafilePath, JSON.stringify(result.metafile));
       }
 
       return {
-        success: true
+        success: true,
       };
     }
   }
-  catch(error) {
-    if(showLogs) {
+  catch (error) {
+    if (showLogs) {
       console.error('❌ Build failed:', error);
     }
     return {
@@ -317,7 +313,7 @@ export const build = async ({
 export const watch = async (...args) => {
   return await build({
     watch: true,
-    ...args
+    ...args,
   });
 };
 

@@ -1,0 +1,20 @@
+.box {
+
+  background: var(--angled-gradient);
+  border: var(--border);
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
+
+  ul {
+    margin: 1rem 0rem;
+    li {
+      margin: 3px 0px;
+    }
+  }
+
+}
+
+
+ui-input {
+  width: 300px;
+}

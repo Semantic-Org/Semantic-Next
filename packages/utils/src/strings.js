@@ -121,7 +121,7 @@ export const truncate = (text, length, options = {}) => {
   const {
     suffix = '…',
     wordBoundary = true,
-    locale = 'en'
+    locale = 'en',
   } = options;
 
   if (!text) {
@@ -144,7 +144,7 @@ export const truncate = (text, length, options = {}) => {
 
     for (const { segment } of segmenter.segment(text)) {
       const segLen = Array.from(segment).length;
-      if (count + segLen > cutoff) break;
+      if (count + segLen > cutoff) { break; }
 
       truncated += segment;
       count += segLen;

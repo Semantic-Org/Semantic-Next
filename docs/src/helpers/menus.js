@@ -65,6 +65,8 @@ const subCategorySortOrder = {
   'Query': [
     'Setup',
     'Introduction',
+    'Selectors',
+    'Extensions',
     'Components',
     'Attributes',
     'Content',
@@ -86,6 +88,7 @@ const subCategorySortOrder = {
     'Strings',
     'Functions',
     'Colors',
+    'CSS',
     'Browser',
     'Dates',
     'Numbers',
@@ -385,6 +388,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Chaining',
         url: '/query/chaining',
+      },
+      {
+        name: 'Plugins',
+        url: '/query/plugins',
       },
       {
         name: 'Browser Usage',

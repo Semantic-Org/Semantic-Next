@@ -1351,19 +1351,6 @@ describe('query', () => {
       expect(callback).toHaveBeenCalled();
     });
 
-    it('should trigger a click event with extra parameters', () => {
-      const button = document.createElement('button');
-      document.body.appendChild(button);
-      const callback = vi.fn();
-
-      $('button').on('click', callback);
-      $('button').click({ detail: 'test' });
-
-      expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-        detail: 'test',
-      }));
-    });
-
     it('should trigger click events on multiple elements', () => {
       const button1 = document.createElement('button');
       const button2 = document.createElement('button');
@@ -1900,6 +1887,13 @@ describe('query', () => {
         $('<p>Test</p>').insertBefore('#target');
         expect(document.body.innerHTML).toBe('<p>Test</p><div id="target"></div><div id="target2"></div>');
       });
+
+      it('should return original elements for chaining', () => {
+        const $result = $('<p>Test</p>').insertBefore('#target');
+        expect($result).toBeInstanceOf(Query);
+        expect($result[0].tagName).toBe('P');
+        expect($result[0].textContent).toBe('Test');
+      });
     });
 
     describe('insertAfter', () => {
@@ -1911,6 +1905,101 @@ describe('query', () => {
       it('should insert elements after each target element', () => {
         $('<p>Test</p>').insertAfter('div');
         expect(document.body.innerHTML).toBe('<div id="target"></div><p>Test</p><div id="target2"></div><p>Test</p>');
+      });
+
+      it('should return original elements for chaining', () => {
+        const $result = $('<p>Test</p>').insertAfter('#target');
+        expect($result).toBeInstanceOf(Query);
+        expect($result[0].tagName).toBe('P');
+        expect($result[0].textContent).toBe('Test');
+      });
+    });
+
+    describe('appendTo', () => {
+      it('should append elements as last child of target', () => {
+        $('<p>Test</p>').appendTo('#target');
+        expect(document.getElementById('target').innerHTML).toBe('<p>Test</p>');
+      });
+
+      it('should append elements to each target element', () => {
+        $('<span>Content</span>').appendTo('div');
+        expect(document.getElementById('target').innerHTML).toBe('<span>Content</span>');
+        expect(document.getElementById('target2').innerHTML).toBe('<span>Content</span>');
+      });
+
+      it('should return Query instance for chaining', () => {
+        const $result = $('<p>Test</p>').appendTo('#target');
+        expect($result).toBeInstanceOf(Query);
+        expect($result[0].tagName).toBe('P');
+        expect($result[0].textContent).toBe('Test');
+      });
+
+      it('should handle multiple elements being appended', () => {
+        $('<p>First</p><span>Second</span>').appendTo('#target');
+        expect(document.getElementById('target').innerHTML).toBe('<p>First</p><span>Second</span>');
+      });
+
+      it('should return valid DOM references after move', () => {
+        document.body.innerHTML = '<div id="container"></div><div class="item">Test Item</div>';
+        const $item = $('.item');
+        const originalEl = $item.el();
+        
+        const $result = $item.appendTo('#container');
+        
+        // Should be same object reference
+        expect($result).toBe($item);
+        expect($result.el()).toBe(originalEl);
+        
+        // Element should now be inside container
+        expect($result.parent().el().id).toBe('container');
+        expect($result.text()).toBe('Test Item');
+      });
+
+      it('should move newly created elements to DOM correctly', () => {
+        document.body.innerHTML = '<div id="container"></div>';
+        
+        const $newDiv = $('<div class="new">New Element</div>');
+        const originalEl = $newDiv.el();
+        
+        const $result = $newDiv.appendTo('#container');
+        
+        // Should return new Query object with inserted elements
+        expect($result).toBeInstanceOf(Query);
+        expect($result.el()).toBe(originalEl);
+        
+        // Element should now be findable in the DOM at its new location  
+        expect($('#container').find('.new').el()).toBe(originalEl);
+        expect($('#container').find('.new').text()).toBe('New Element');
+      });
+
+    });
+
+    describe('prependTo', () => {
+      it('should prepend elements as first child of target', () => {
+        $('#target').html('<div>Existing</div>');
+        $('<p>Test</p>').prependTo('#target');
+        expect(document.getElementById('target').innerHTML).toBe('<p>Test</p><div>Existing</div>');
+      });
+
+      it('should prepend elements to each target element', () => {
+        $('#target').html('<div>One</div>');
+        $('#target2').html('<div>Two</div>');
+        $('<span>Content</span>').prependTo('#target, #target2');
+        expect(document.getElementById('target').innerHTML).toBe('<span>Content</span><div>One</div>');
+        expect(document.getElementById('target2').innerHTML).toBe('<span>Content</span><div>Two</div>');
+      });
+
+      it('should return Query instance for chaining', () => {
+        const $result = $('<p>Test</p>').prependTo('#target');
+        expect($result).toBeInstanceOf(Query);
+        expect($result[0].tagName).toBe('P');
+        expect($result[0].textContent).toBe('Test');
+      });
+
+      it('should handle multiple elements being prepended', () => {
+        $('#target').html('<div>Existing</div>');
+        $('<p>First</p><span>Second</span>').prependTo('#target');
+        expect(document.getElementById('target').innerHTML).toBe('<span>Second</span><p>First</p><div>Existing</div>');
       });
     });
   });
@@ -2519,6 +2608,209 @@ describe('query', () => {
 
       expect($sliced.length).toBe(0);
       expect($sliced).toBeInstanceOf(Query);
+    });
+  });
+
+  describe('add', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should add elements from CSS selector', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      span1.className = 'extra';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(span1);
+
+      const $items = $('.item');
+      const $combined = $items.add('.extra');
+
+      expect($combined.length).toBe(3);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(div2);
+      expect($combined[2]).toBe(span1);
+    });
+
+    it('should add elements from DOM node', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      
+      div1.className = 'item';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $items = $('.item');
+      const $combined = $items.add(span1);
+
+      expect($combined.length).toBe(2);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(span1);
+    });
+
+    it('should add elements from array', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      const span2 = document.createElement('span');
+      
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const $items = $('.item');
+      const $combined = $items.add([span1, span2]);
+
+      expect($combined.length).toBe(3);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(span1);
+      expect($combined[2]).toBe(span2);
+    });
+
+    it('should add elements from Query instance', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      const span1 = document.createElement('span');
+      
+      div1.className = 'item';
+      span1.className = 'extra';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+      document.body.appendChild(span1);
+
+      const $items = $('.item');
+      const $extra = $('.extra');
+      const $combined = $items.add($extra);
+
+      expect($combined.length).toBe(2);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(span1);
+    });
+
+    it('should add elements from HTML string', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const $items = $('.item');
+      const $combined = $items.add('<span>New element</span>');
+
+      expect($combined.length).toBe(2);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1].tagName).toBe('SPAN');
+      expect($combined[1].textContent).toBe('New element');
+    });
+
+    it('should remove duplicates', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      
+      div1.className = 'item';
+      div2.className = 'item';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const $items = $('.item');
+      const $combined = $items.add('.item'); // Adding same elements
+
+      expect($combined.length).toBe(2); // Should not duplicate
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(div2);
+    });
+
+    it('should handle empty selectors', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const $items = $('.item');
+      
+      expect($items.add(null)).toBe($items);
+      expect($items.add(undefined)).toBe($items);
+      expect($items.add('')).toBe($items);
+    });
+
+    it('should handle non-matching selectors', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const $items = $('.item');
+      const $combined = $items.add('.nonexistent');
+
+      expect($combined).toBe($items); // Should return same instance
+      expect($combined.length).toBe(1);
+    });
+
+    it('should return Query instance for chaining', () => {
+      const div1 = document.createElement('div');
+      const span1 = document.createElement('span');
+      
+      div1.className = 'item';
+      span1.className = 'extra';
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(span1);
+
+      const $result = $('.item').add('.extra').addClass('combined');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result.length).toBe(2);
+      expect(div1.classList.contains('combined')).toBe(true);
+      expect(span1.classList.contains('combined')).toBe(true);
+    });
+
+    it('should work with empty initial collection', () => {
+      const span1 = document.createElement('span');
+      span1.className = 'extra';
+      document.body.appendChild(span1);
+
+      const $empty = $('.nonexistent');
+      const $combined = $empty.add('.extra');
+
+      expect($combined.length).toBe(1);
+      expect($combined[0]).toBe(span1);
+    });
+
+    it('should preserve options from original Query', () => {
+      const div1 = document.createElement('div');
+      div1.className = 'item';
+      document.body.appendChild(div1);
+
+      const customRoot = document.createElement('div');
+      const span1 = document.createElement('span');
+      span1.className = 'extra';
+      customRoot.appendChild(span1);
+
+      const $items = new Query('.item', { root: document });
+      const $combined = $items.add(new Query('.extra', { root: customRoot }));
+
+      expect($combined.length).toBe(2);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(span1);
+    });
+
+    it('should handle single element collections', () => {
+      const div1 = document.createElement('div');
+      const span1 = document.createElement('span');
+      
+      document.body.appendChild(div1);
+      document.body.appendChild(span1);
+
+      const $single = $(div1);
+      const $combined = $single.add(span1);
+
+      expect($combined.length).toBe(2);
+      expect($combined[0]).toBe(div1);
+      expect($combined[1]).toBe(span1);
     });
   });
 

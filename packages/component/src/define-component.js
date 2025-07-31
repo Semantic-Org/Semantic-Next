@@ -1,9 +1,8 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
+import { camelToKebab, each, isClient, isServer, kebabToCamel, noop, adoptStylesheet } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
-import { adoptStylesheet } from './helpers/adopt-stylesheet.js';
 import { WebComponentBase } from './web-component.js';
 
 export const defineComponent = ({

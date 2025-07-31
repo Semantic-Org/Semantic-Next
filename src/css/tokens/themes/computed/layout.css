@@ -50,17 +50,5 @@
   --solid-black-border: 1px solid var(--solid-black-border-color);
   --solid-white-border: 1px solid var(--solid-white-border-color);
 
-  /* --- Colored Border --- */
-  --red-border-color: var(--red-text-color);
-  --orange-border-color: var(--orange-text-color);
-  --yellow-border-color: var(--yellow-text-color);
-  --olive-border-color: var(--olive-text-color);
-  --green-border-color: var(--green-text-color);
-  --teal-border-color: var(--teal-text-color);
-  --blue-border-color: var(--blue-text-color);
-  --violet-border-color: var(--violet-text-color);
-  --purple-border-color: var(--purple-text-color);
-  --pink-border-color: var(--pink-text-color);
-  --brown-border-color: var(--brown-text-color);
 
 }

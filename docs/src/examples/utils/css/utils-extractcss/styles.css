@@ -1,0 +1,29 @@
+.button {
+  padding: var(--8px) var(--16px);
+  background: var(--standard-5);
+  border: 1px solid var(--standard-15);
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  
+  &:hover {
+    background: var(--standard-10);
+  }
+  
+  &.primary {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+  }
+}
+
+.card {
+  background: var(--standard-5);
+  border: 1px solid var(--standard-15);
+  border-radius: var(--border-radius);
+  
+  .header {
+    padding: var(--spacing);
+    border-bottom: 1px solid var(--standard-15);
+    font-weight: var(--bold);
+  }
+}

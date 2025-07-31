@@ -10,7 +10,7 @@ const defaultSettings = {
 
 const defaultState = {
   timezone: 'PST',
-  fruit: 'cherry'
+  fruit: 'cherry',
 };
 
 const createComponent = ({ settings, self }) => ({

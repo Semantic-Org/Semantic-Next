@@ -118,6 +118,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `get(index)` - Get element at index
 - `eq(index)` - Get new Query object with element at index
 - `first()`, `last()` - Get first/last element as new Query
+- `add(selector)` - Create new collection combining current elements with elements from selector
 
 ### DOM Traversal
 - `find(selector)` - Find descendants
@@ -132,6 +133,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `text()`, `text(content)` - Get/set textContent
 - `val()`, `val(value)` - Get/set form element values
 - `append(content)`, `prepend(content)` - Add content to elements
+- `appendTo(selector)`, `prependTo(selector)` - Insert elements as children of targets
 - `insertBefore(selector)`, `insertAfter(selector)` - Insert elements relative to targets
 - `before(content)`, `after(content)` - Insert content before/after elements (aliases)
 
@@ -315,6 +317,23 @@ form.settings({
   onSubmit: handleSubmit,
   validation: validationRules
 });
+
+// Combine multiple collections for batch operations
+const $headers = $('h1, h2, h3');
+const $content = $('p, div');
+const $all = $headers.add($content);
+
+// Apply styles to all combined elements
+$all.addClass('highlighted');
+
+// Build collections progressively
+let $collection = $('.initial-items');
+$collection = $collection.add('.more-items');
+$collection = $collection.add(document.getElementById('special-item'));
+
+// Works with empty collections
+const $empty = $('.nonexistent');
+const $real = $empty.add('.existing-elements'); // Returns only existing elements
 ```
 
 ## Event Handling Patterns
