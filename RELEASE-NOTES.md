@@ -6,13 +6,20 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version x.x.x
+# Version 0.16.0
+
+## Major Features
+* **Query** - Added generalized plugin architecture for Query.
 
 ## Query
-* **Major Feature** - Added generalized plugin architecture for Query
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
 * **Feature** - Added `appendTo()` method for appending elements as last child of target
 * **Feature** - Added `prependTo()` method for prepending elements as first child of target
+* **Feature** - You can now use `documentFragment` with content manipulation like `append()` `prepend()`
+* **Improvement** - `trigger()` now triggers native event handler. Use `dispatchEvent` to avoid this behavior.
+* **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
+* **Bug** - `dataContext()` now returns the entire data context including state.
+* **Bug** - Fixed `initialize` did not properly chain
 
 ## Utils
 * **Feature** - Added `deepExtend()` for deep merging objects with nested property combining, array/date cloning, and optional custom class preservation
@@ -122,7 +129,6 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means each component are no longer `composed: true`
 
 ### Query
-* **Feature** - You can now use `documentFragment` with content manipulation like `append()` `prepend()`
 * **Feature** - Added namespaced events to `on` and `off`
 * **Feature** - Added `clippingParent` to find closest ancestor which will clip the current element
 * **Feature** - Added `.data()` for getting and setting html data
@@ -132,13 +138,9 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support
 * **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors
 * **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
-* **Improvement** - `trigger()` now triggers native event handler. Use `dispatchEvent` to avoid this behavior.
-* **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
-* **Bug** - `dataContext()` now returns the entire data context including state.
 * **Bug** - `setting()` can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for willChange
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
-* **Bug** - Fixed `initialize` did not properly chain
 
 ### Docs
 * **Examples** - Improved console log styling for examples
