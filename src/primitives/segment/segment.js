@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/segment-component.json' with { type: 'json' };
+import componentSpec from './specs/segment-component.js';
 import template from './segment.html?raw';
 import css from './segment-bundle.css?raw';
 

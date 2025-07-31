@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { get, inArray } from '@semantic-ui/utils';
 
-import componentSpec from './specs/button-component.json' with { type: 'json' };
+import componentSpec from './specs/button-component.js';
 import template from './button.html?raw';
 import css from './button-bundle.css?raw';
 

@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { noop } from '@semantic-ui/utils';
 
-import componentSpec from './specs/modal-component.json' with { type: 'json' };
+import componentSpec from './specs/modal-component.js';
 import template from './modal.html?raw';
 import css from './modal-bundle.css?raw';
 
