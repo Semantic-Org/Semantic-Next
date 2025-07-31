@@ -112,17 +112,18 @@ export const registerBehavior = (behavior) => {
       // behavior is stored in namespace like el.behavior
       const instance = Behavior.getInstance(element, namespace);
 
+      const behaviorConfig = {
+        sharedBehavior, // setup can pass shared behavior across instances
+        $element,
+        ...runtimeConfig,
+        settings: runtimeSettings
+      };
+
       // create behavior instance if not defined
       // this might even occur if a method is invoked
       // if this method has no instance defined
       if (!instance) {
-        new Behavior({
-          sharedBehavior, // setup can pass shared behavior across instances
-          $element,
-          self,
-          ...runtimeConfig,
-          settings: runtimeSettings
-        });
+        new Behavior(behaviorConfig);
       }
 
       if (methodName) {
@@ -146,7 +147,7 @@ export const registerBehavior = (behavior) => {
       else if(instance !== undefined) {
         // if they are not calling a method and there are settings
         // than they are attempting to reinitialize the behavior with new settings
-        instance.reinitialize(settings);
+        instance.reinitialize(behaviorConfig);
       }
     });
 

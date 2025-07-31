@@ -96,6 +96,11 @@ export class Behavior {
     const instance = this.call(createBehavior) || {};
     extend(this, instance);
 
+    // destroy existing instance if exists
+    if(this.element[namespace]?.destroy) {
+      this.element[namespace]?.destroy();
+    }
+
     // attach to dom
     this.element[namespace] = this;
 
@@ -105,11 +110,9 @@ export class Behavior {
     // attach mutation observers
     this.attachMutations(mutations);
 
-    this.element[namespace] = this;
-
     // allow initialize function as shorthand
     if (isFunction(instance.initialize)) {
-      this.call(instance.initialize.bind(template));
+      this.call(instance.initialize.bind(this));
     }
     this.call(this.onCreated);
 
@@ -134,7 +137,7 @@ export class Behavior {
       this.instance.destroy();
     }
     const behavior = new Behavior(settings);
-    this.element[namespace] = behavior;
+    this.element[this.namespace] = behavior;
   }
 
   // simple template parsing ({foo}, { foo: 'baz" }) => baz
