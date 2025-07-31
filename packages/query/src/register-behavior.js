@@ -2,8 +2,8 @@ import { pick, isString, isArray, noop, clone, deepExtend } from '@semantic-ui/u
 import { Plugin } from './plugin.js';
 import { Query } from './query.js';
 
-// Register Plugin
-export const registerPlugin = (plugin) => {
+// Register Behavior
+export const registerBehavior = (plugin) => {
 
   const pluginDefaults = {
     name: undefined,
@@ -61,12 +61,12 @@ export const registerPlugin = (plugin) => {
 
   // may be called via side effects which should not throw an error
   // when multiple components rely on same plugin
-  if (Query.plugins.has(name)) {
+  if (Query.behaviors.has(name)) {
     return;
   }
 
-  // Register this plugin
-  Query.plugins.set(name, plugin);
+  // Register this behavior
+  Query.behaviors.set(name, plugin);
 
   // setup() can setup a shared plugin that is preserved across calls
   let sharedPlugin;

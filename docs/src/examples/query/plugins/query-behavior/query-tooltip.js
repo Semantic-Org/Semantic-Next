@@ -1,4 +1,4 @@
-import { registerPlugin } from '@semantic-ui/query';
+import { registerBehavior } from '@semantic-ui/query';
 import { getText } from '@semantic-ui/utils';
 const css = await getText('./query-tooltip.css');
 
@@ -99,7 +99,7 @@ const events = {
   },
 };
 
-registerPlugin({
+registerBehavior({
   name: 'tooltip',
   css,
   defaultSettings,

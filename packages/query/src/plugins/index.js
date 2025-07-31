@@ -1,1 +1,1 @@
-export { TransitionPlugin } from './transition.js';
+export { TransitionBehavior } from './transition.js';

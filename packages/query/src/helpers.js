@@ -53,7 +53,7 @@ const restoreGlobals = function(settings) {
 // Bind Query to a different alias than $
 export const useAlias = () => $;
 
-// Expose prototype for plugins
+// Expose prototype for plugins (simple method extensions)
 $$.fn =
   $.fn =
   $$.plugin =

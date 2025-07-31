@@ -41,10 +41,10 @@ export class Query {
   static eventHandlers = [];
 
   /*
-    We keep an array to store registered plugins
+    We keep a map to store registered behaviors
     This allows an end user to see available extensions
   */
-  static plugins = new Map();
+  static behaviors = new Map();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];

@@ -1,39 +1,39 @@
 ---
 layout: '@layouts/Guide.astro'
-title: "Query Plugins"
+title: "Query Extensions"
 icon: plug
-description: "Extend Query with custom functionality using simple plugins and complex behaviors"
+description: "Extend Query with custom functionality using plugins and behaviors"
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Query plugins extend the Query system with custom functionality. The system provides two approaches:
+Query can be extended with custom functionality using two approaches:
 
-## Simple Plugins
+## Query Plugins
 
-Simple plugins extend Query instances by adding methods to `Query.prototype` via `$.plugin`:
+Query plugins extend Query instances by adding methods to `Query.prototype` via `$.plugin`:
 
-The `$.plugin` object is an alias for `Query.prototype`. Methods added here become available on all Query instances with full access to [chaining](/query/chaining) and the Query API. Use simple plugins for utility methods that don't require state management or complex configuration.
+The `$.plugin` object is an alias for `Query.prototype`. Methods added here become available on all Query instances with full access to [chaining](/query/chaining) and the Query API. Use plugins for utility methods that don't require state management or complex configuration.
 
 <PlaygroundExample id="query-plugin" />
 
 
-## Complex Plugins
+## Query Behaviors
 
-Complex plugins use `registerPlugin()` for behaviors with settings, events, and state management. The `registerPlugin()` function accepts multiple configuration options for creating feature-rich plugins:
+Query behaviors use `registerBehavior()` for interactive patterns with settings, events, and state management. The `registerBehavior()` function accepts multiple configuration options for creating feature-rich behaviors:
 
 
-Use complex plugins when building interactive components that need state management, configuration options, or complex event handling.
+Use behaviors when building interactive components that need state management, configuration options, or complex event handling.
 
 <PlaygroundExample id="query-behavior" />
-> **Registration** Plugins should self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/plugins/transition'` makes the plugin available across your application.
+> **Registration** Behaviors should self-register through side-effect imports, enabling modular architecture where `import '@semantic-ui/query/behaviors/transition'` makes the behavior available across your application.
 
-## Plugin Definition Parts
+## Behavior Definition Parts
 
-The following is an example of initialization a new plugin with all available options:
+The following is an example of initialization a new behavior with all available options:
 ```javascript
-import { registerPlugin } from '@semantic-ui/query';
+import { registerBehavior } from '@semantic-ui/query';
 
-registerPlugin({
+registerBehavior({
   // Core configuration
   name: 'tooltip',
   defaultSettings: { showDelay: 0 },
@@ -72,7 +72,7 @@ $('ui-icon.help').tooltip('show');
 The `name` defines the plugin identifier and method name created on Query instances:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'tooltip'
 });
 
@@ -83,7 +83,7 @@ $('ui-icon.help').tooltip();
 The `namespace` controls where the plugin instance is stored on DOM elements (defaults to `name`):
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'tooltip',
   namespace: 'myTooltip'  // Stored as element.myTooltip instead of element.tooltip
 });
@@ -188,7 +188,7 @@ const createPlugin = ({ self }) => ({
 Plugins use configuration objects to define constants that can be overridden by users for customization and internationalization:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'tooltip',
   selectors: {
     trigger: '.tooltip-trigger'  // Configurable DOM selectors
@@ -244,10 +244,10 @@ $.tooltip.templates.loading = '<div>Chargement...</div>';
 
 ### CSS
 
-Plugins can inject CSS styles automatically when they're registered. The `css` property accepts a string of CSS that gets added to the page as a constructed stylesheet:
+Behaviors can inject CSS styles automatically when they're registered. The `css` property accepts a string of CSS that gets added to the page as a constructed stylesheet:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'tooltip',
   
   css: `
@@ -263,7 +263,7 @@ registerPlugin({
 });
 ```
 
-The CSS is cached and reused across plugin instances for performance. This means multiple tooltip elements will share the same stylesheet rather than duplicating styles.
+The CSS is cached and reused across behavior instances for performance. This means multiple tooltip elements will share the same stylesheet rather than duplicating styles.
 
 > **Constructed Stylesheets** Query uses the browser's Constructed Stylesheet API for efficient style injection. Styles are automatically scoped and cleaned up when no longer needed.
 
@@ -271,7 +271,7 @@ The CSS is cached and reused across plugin instances for performance. This means
 
 Declarative event handlers with automatic [delegation](/query/basics#event-delegation):
 
-> **Event Delegation** Event handlers are attached using delegation where the plugin listens for bubbled events. This means events will fire even if matching elements are added or removed after initialization.
+> **Event Delegation** Event handlers are attached using delegation where the behavior listens for bubbled events. This means events will fire even if matching elements are added or removed after initialization.
 
 
 ```javascript
@@ -296,17 +296,17 @@ const events = {
 
 #### Event Types
 
-- `'click'` - Event on plugin element
-- `'click .selector'` - [Delegated event](/query/basics#event-delegation) within plugin element
+- `'click'` - Event on behavior element
+- `'click .selector'` - [Delegated event](/query/basics#event-delegation) within behavior element
 - `'bind focus input'` - Direct binding to subelements (for non-bubbling custom events)
-- `'global scroll'` - Global event on any element outside the plugin
+- `'global scroll'` - Global event on any element outside the behavior
 
 #### Using Configuration in Events
 
 Event strings support templating using configuration objects. Use `{key}` syntax to reference `selectors`, `classNames` and `settings`:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   settings: {
     trigger: '.tooltip-trigger',
   },
@@ -320,14 +320,14 @@ registerPlugin({
 
 #### Event Cleanup
 
-Events are automatically cleaned up when plugin instances are destroyed using an AbortController when your plugin is destroyed or you call `.plugin('destroy')`.
+Events are automatically cleaned up when behavior instances are destroyed using an AbortController when your behavior is destroyed or you call `.behaviorName('destroy')`.
 
 ### Mutations
 
 Watch for DOM changes using declarative mutation observers:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'dynamicList',
   
   mutations: {
@@ -342,7 +342,7 @@ registerPlugin({
 });
 ```
 
-<PlaygroundExample id="query-plugin-mutations" />
+<PlaygroundExample id="query-behavior-mutations" />
 
 #### Mutation Types
 
@@ -358,7 +358,7 @@ registerPlugin({
 Mutation strings support templating using configuration objects, just like events:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   selectors: {
     listItem: '.dynamic-item'
   },
@@ -373,14 +373,14 @@ registerPlugin({
 
 #### Mutation Cleanup
 
-Mutation observers are automatically disconnected when plugin instances are destroyed.
+Mutation observers are automatically disconnected when behavior instances are destroyed.
 
 ### Custom Invocation
 
-The `customInvocation` callback handles method calls that don't match any defined plugin methods, enabling flexible string-based APIs:
+The `customInvocation` callback handles method calls that don't match any defined behavior methods, enabling flexible string-based APIs:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'transition',
 
   createPlugin: ({ self }) => ({
@@ -402,16 +402,16 @@ This enables Semantic UI-style APIs where string arguments can trigger different
 
 ### Lifecycle Events
 
-Run code during plugin creation and destruction:
+Run code during behavior creation and destruction:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   onCreated: ({ el, settings }) => {
-    console.log('Plugin created on', el);
+    console.log('Behavior created on', el);
   },
   
   onDestroyed: ({ el }) => {
-    console.log('Plugin destroyed on', el);
+    console.log('Behavior destroyed on', el);
     // Cleanup code here
   }
 });
@@ -419,25 +419,25 @@ registerPlugin({
 
 ## Callback Arguments
 
-Plugin callbacks like `createPlugin`, `onCreated`, and event handlers receive destructurable parameters to access shared state, DOM elements, and plugin context.
+Behavior callbacks like `createPlugin`, `onCreated`, and event handlers receive destructurable parameters to access shared state, DOM elements, and behavior context.
 
-The `self` parameter is the plugin instance itself - it contains all methods returned from `createPlugin()` plus any shared resources from `setup()`. This allows methods to call each other and access shared state.
+The `self` parameter is the behavior instance itself - it contains all methods returned from `createPlugin()` plus any shared resources from `setup()`. This allows methods to call each other and access shared state.
 
 All callbacks receive consistent base parameters:
 
 | Parameter | Description |
 |-----------|-------------|
 | `$` | Query constructor function |
-| `el` | Raw DOM element the plugin is attached to |  
-| `$el` | Query wrapper for the plugin element |
-| `self` | Plugin instance with methods and shared resources |
+| `el` | Raw DOM element the behavior is attached to |  
+| `$el` | Query wrapper for the behavior element |
+| `self` | Behavior instance with methods and shared resources |
 | `plugin` | Alias for `self` |
-| `namespace` | Plugin namespace (usually same as name) |
+| `namespace` | Behavior namespace (usually same as name) |
 | `data` | Element data attributes parsed as native values |
-| `selectors` | Plugin selector mappings |
-| `errors` | Plugin error message mappings |
-| `classNames` | Plugin CSS class mappings |
-| `settings` | Current plugin settings (merged defaults + user settings) |
+| `selectors` | Behavior selector mappings |
+| `errors` | Behavior error message mappings |
+| `classNames` | Behavior CSS class mappings |
+| `settings` | Current behavior settings (merged defaults + user settings) |
 
 **Event handlers** receive all base parameters plus:
 
@@ -453,12 +453,12 @@ All callbacks receive consistent base parameters:
 | Parameter | Description |
 |-----------|-------------|
 | `$` | Query constructor function |
-| `settings` | Plugin default settings |
+| `settings` | Behavior default settings |
 | `$elements` | Query collection of elements (plural) |
 | `templates` | HTML templates object |
 
 
-## Plugin Usage
+## Behavior Usage
 
 ### Initialization
 
@@ -482,7 +482,7 @@ $('ui-icon.help').tooltip('show');
 $('ui-icon.help').tooltip('toggle state');  // Finds toggleState()
 ```
 
-Access plugin instances directly on DOM elements:
+Access behavior instances directly on DOM elements:
 
 ```javascript
 const el = document.querySelector('ui-icon.help');
@@ -513,10 +513,10 @@ $('ui-icon.help').tooltip({
 
 ### Data Attribute Overrides
 
-HTML data attributes automatically override plugin and user settings. This behavior can be controlled with `allowDataOverride`:
+HTML data attributes automatically override behavior and user settings. This can be controlled with `allowDataOverride`:
 
 ```javascript
-registerPlugin({
+registerBehavior({
   name: 'tooltip',
   allowDataOverride: false  // Prevents data-* attributes from overriding settings
 });
@@ -539,4 +539,4 @@ Attribute names use kebab-case and are automatically converted to camelCase sett
 $.tooltip.defaultSettings.showDelay = 100;
 ```
 
-> **Return Values** Plugin methods can return values, and Query intelligently collects them - single values for one element, arrays for multiple elements, with automatic deduplication.
+> **Return Values** Behavior methods can return values, and Query intelligently collects them - single values for one element, arrays for multiple elements, with automatic deduplication.

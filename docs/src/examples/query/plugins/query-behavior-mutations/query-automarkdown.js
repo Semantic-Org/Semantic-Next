@@ -1,4 +1,4 @@
-import { registerPlugin } from '@semantic-ui/query';
+import { registerBehavior } from '@semantic-ui/query';
 
 const defaultSettings = {
   watch: '.raw',
@@ -26,7 +26,7 @@ const mutations = {
   },
 };
 
-registerPlugin({
+registerBehavior({
   name: 'automarkdown',
   defaultSettings,
   createPlugin,

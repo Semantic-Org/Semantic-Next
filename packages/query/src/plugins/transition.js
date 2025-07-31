@@ -1,4 +1,4 @@
-import { registerPlugin } from '@semantic-ui/query';
+import { registerBehavior } from '@semantic-ui/query';
 import css from 'transition.css?raw';
 
 const defaultSettings = {
@@ -31,7 +31,7 @@ const createPlugin = ({ settings }) => ({
 
 });
 
-export const TransitionPlugin = registerPlugin({
+export const TransitionBehavior = registerBehavior({
   name: 'transition',
   defaultSettings,
   classNames,
