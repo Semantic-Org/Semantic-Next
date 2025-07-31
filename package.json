@@ -5,8 +5,8 @@
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/components/index.js",
-  "module": "src/components/index.js",
+  "main": "src/index.js",
+  "module": "src/index.js",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -220,6 +220,9 @@
     "@semantic-ui/component": "^0.14.1",
     "@semantic-ui/specs": "^0.14.1"
   },
+  "peerDependencies": {
+    "@pagefind/modular-ui": "^1.3.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
@@ -255,6 +258,5 @@
     "examples/*",
     "ai/mcp/*"
   ],
-  "simple-git-hooks": {
-  }
+  "simple-git-hooks": {}
 }

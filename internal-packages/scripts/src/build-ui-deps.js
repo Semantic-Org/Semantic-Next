@@ -58,7 +58,7 @@ export const buildUIDeps = async ({
     bundle: true,
     log: { header: 'UI Components', text: 'CSS Bundle' },
     entryPoints: [
-      'src/components/**/css/*.css',
+      'src/primitives/**/css/*.css',
     ],
     entryNames: '[dir]/../[name]-bundle',
     outbase: 'src',
@@ -73,7 +73,7 @@ export const buildUIDeps = async ({
   // we unfortunately have to use external glob
   // because built in glob does not support negation
   // and we dont want our writes to trigger rerun
-  const allFiles = await glob('src/components/**/specs/*.json');
+  const allFiles = await glob('src/primitives/**/specs/*.json');
   const entryPoints = allFiles.filter(path => !path.includes('component.json'));
 
   // Process spec files directly without esbuild
@@ -106,9 +106,42 @@ export const buildUIDeps = async ({
     return { success: true };
   })();
 
+  // Generate JS exports from component specs (after component specs are created)
+  const generateJSExports = createComponentSpecs.then(async () => {
+
+    // Find all component JSON specs
+    const componentSpecFiles = await glob('src/primitives/*/specs/*-component.json');
+
+    let count = 0;
+
+    for (const jsonFile of componentSpecFiles) {
+      try {
+        // Read the JSON spec
+        const jsonContent = readFileSync(jsonFile, 'utf-8');
+        const spec = JSON.parse(jsonContent);
+
+        // Generate the JS export content
+        const jsContent = `// Auto-generated from ${jsonFile.split('/').pop()}\nexport default ${JSON.stringify(spec, null, 2)};\n`;
+
+        // Create the .js file path (same location, different extension)
+        const jsFile = jsonFile.replace('.json', '.js');
+
+        // Write the JS file
+        writeFileSync(jsFile, jsContent);
+        count++;
+      }
+      catch (error) {
+        console.error(`Error processing ${jsonFile}:`, error.message);
+      }
+    }
+
+    console.log(`Generated ${count} JS spec files`);
+  });
+
   return await Promise.all([
     cssComponentBundle,
-    createComponentSpecs
+    createComponentSpecs,
+    generateJSExports
   ]);
 
 };
