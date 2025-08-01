@@ -56,13 +56,13 @@ The mask-input plugin demonstrates this pattern:
 ## Complex Plugins: Behavior Registration
 
 ### Definition
-Complex plugins use `registerPlugin()` to create full behavioral systems with lifecycle management, settings, events, and state.
+Complex plugins use `registerBehavior()` to create full behavioral systems with lifecycle management, settings, events, and state.
 
 ### Implementation Pattern
 ```javascript
-import { registerPlugin } from '@semantic-ui/query';
+import { registerBehavior } from '@semantic-ui/query';
 
-registerPlugin({
+registerBehavior({
   name: 'pluginName',
   defaultSettings: {},
   
@@ -142,7 +142,7 @@ registerPlugin({
 - Multi-method APIs with shared context
 
 ### Example Analysis
-The tooltip plugin demonstrates the full `registerPlugin()` architecture:
+The tooltip plugin demonstrates the full `registerBehavior()` architecture:
 - CSS integration with automatic adoption
 - Shared state via `setup()` function
 - Declarative event handling with delegation
@@ -154,7 +154,7 @@ The tooltip plugin demonstrates the full `registerPlugin()` architecture:
 ### Architecture Abstractions
 
 #### Already Abstracted from Classic SUI
-1. **Plugin Registration**: Unified `registerPlugin()` vs manual `$.fn.module` creation
+1. **Plugin Registration**: Unified `registerBehavior()` vs manual `$.fn.module` creation
 2. **Instance Storage**: Automatic `element[namespace]` vs manual data storage
 3. **Settings Management**: Built-in merging, data override, global defaults
 4. **Event Handling**: Declarative events object vs manual binding
