@@ -249,7 +249,7 @@
   "ciDependencies": {
     "axios": "^1.6.8",
     "decompress": "^4.2.1",
-    "glob": "^10.3.10"
+    "glob": "^11.0.3"
   },
   "workspaces": [
     "internal-packages/*",
@@ -258,5 +258,7 @@
     "examples/*",
     "ai/mcp/*"
   ],
-  "simple-git-hooks": {}
+  "simple-git-hooks": {
+    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
+  }
 }
