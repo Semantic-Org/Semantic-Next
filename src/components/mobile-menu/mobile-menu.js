@@ -4,7 +4,7 @@ import css from './mobile-menu.css?raw';
 import template from './mobile-menu.html?raw';
 
 import { UIIcon } from '../../primitives/index.js';
-import { NavMenu } from '../NavMenu/NavMenu.js';
+import { NavMenu } from '../nav-menu/nav-menu.js';
 
 const defaultSettings = {
   menu: [],

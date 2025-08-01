@@ -1,1 +1,1 @@
-export { SidebarMenu } from './SidebarMenu.js';
+export { ThemeSwitcher } from './theme-switcher.js';

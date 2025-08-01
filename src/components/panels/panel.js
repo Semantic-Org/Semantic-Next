@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { isClient, sum } from '@semantic-ui/utils';
 
-import css from './Panel.css?raw';
-import template from './Panel.html?raw';
+import css from './panel.css?raw';
+import template from './panel.html?raw';
 
 const defaultSettings = {
   direction: 'vertical',

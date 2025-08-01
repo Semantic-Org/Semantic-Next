@@ -1,1 +1,1 @@
-export { InpageMenu } from './InpageMenu.js';
+export { InPageMenu } from './inpage-menu.js';
