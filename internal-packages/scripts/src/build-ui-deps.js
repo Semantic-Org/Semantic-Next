@@ -54,7 +54,8 @@ export const buildUIDeps = async ({
   const allFiles = await glob('src/primitives/**/specs/*.json');
   const entryPoints = allFiles.filter(path => !path.endsWith('-component.json'));
 
-  const createComponentSpecs = asyncEach(entryPoints, async (entryPath) => {
+  const createComponentSpecs = async () => {
+    await asyncEach(entryPoints, async (entryPath) => {
     try {
       const contents = readFileSync(entryPath, 'utf8');
       const spec = JSON.parse(contents);
@@ -75,11 +76,12 @@ export const buildUIDeps = async ({
     catch(e) {
       // Silently skip malformed JSON files
     }
-  });
+    });
+  };
 
   // Convert raw spec JSON to JS modules to avoid ESM JSON import compatibility issues
   const generateJSExportsFromSpecs = async () => {
-    await createComponentSpecs;
+    await createComponentSpecs();
 
     // Only process raw spec files (not component specs, which are generated directly above)
     const rawSpecFiles = await glob('src/primitives/*/specs/*.json');
@@ -103,7 +105,7 @@ export const buildUIDeps = async ({
 
   return await Promise.all([
     cssComponentBundle,
-    createComponentSpecs,
+    createComponentSpecs(),
     generateJSExports
   ]);
 

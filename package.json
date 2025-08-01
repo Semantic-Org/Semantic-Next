@@ -16,10 +16,10 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./dist/semantic-ui.js",
+      "import": "./src/index.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./dist/semantic-ui.js"
+      "default": "./src/index.js"
     },
     "./css": {
       "import": "./src/css/all.css",
@@ -38,76 +38,76 @@
       "default": "./src/css/tokens.css"
     },
     "./specs": {
-      "import": "./dist/specs.js",
-      "default": "./dist/specs.js"
+      "import": "./src/specs/specs.js",
+      "default": "./src/specs/specs.js"
     },
     "./component-specs": {
-      "import": "./dist/component-specs.js",
-      "default": "./dist/component-specs.js"
+      "import": "./src/specs/component-specs.js",
+      "default": "./src/specs/component-specs.js"
     },
     "./examples": {
       "import": "./examples/index.js",
       "default": "./examples/index.js"
     },
     "./button": {
-      "import": "./dist/button.js",
+      "import": "./src/primitives/button/index.js",
       "browser": "./dist/cdn/button.min.js",
-      "bundled": "./dist/bundled/button.min.js",
-      "default": "./dist/button.js"
+      "bundled": "./dist/bundle/button.min.js",
+      "default": "./src/primitives/button/index.js"
     },
     "./card": {
-      "import": "./dist/card.js",
+      "import": "./src/primitives/card/index.js",
       "browser": "./dist/cdn/card.min.js",
-      "bundled": "./dist/bundled/card.min.js",
-      "default": "./dist/card.js"
+      "bundled": "./dist/bundle/card.min.js",
+      "default": "./src/primitives/card/index.js"
     },
     "./container": {
-      "import": "./dist/container.js",
+      "import": "./src/primitives/container/index.js",
       "browser": "./dist/cdn/container.min.js",
-      "bundled": "./dist/bundled/container.min.js",
-      "default": "./dist/container.js"
+      "bundled": "./dist/bundle/container.min.js",
+      "default": "./src/primitives/container/index.js"
     },
     "./icon": {
-      "import": "./dist/icon.js",
+      "import": "./src/primitives/icon/index.js",
       "browser": "./dist/cdn/icon.min.js",
-      "bundled": "./dist/bundled/icon.min.js",
-      "default": "./dist/icon.js"
+      "bundled": "./dist/bundle/icon.min.js",
+      "default": "./src/primitives/icon/index.js"
     },
     "./input": {
-      "import": "./dist/input.js",
+      "import": "./src/primitives/input/index.js",
       "browser": "./dist/cdn/input.min.js",
-      "bundled": "./dist/bundled/input.min.js",
-      "default": "./dist/input.js"
+      "bundled": "./dist/bundle/input.min.js",
+      "default": "./src/primitives/input/index.js"
     },
     "./label": {
-      "import": "./dist/label.js",
+      "import": "./src/primitives/label/index.js",
       "browser": "./dist/cdn/label.min.js",
-      "bundled": "./dist/bundled/label.min.js",
-      "default": "./dist/label.js"
+      "bundled": "./dist/bundle/label.min.js",
+      "default": "./src/primitives/label/index.js"
     },
     "./menu": {
-      "import": "./dist/menu.js",
+      "import": "./src/primitives/menu/index.js",
       "browser": "./dist/cdn/menu.min.js",
-      "bundled": "./dist/bundled/menu.min.js",
-      "default": "./dist/menu.js"
+      "bundled": "./dist/bundle/menu.min.js",
+      "default": "./src/primitives/menu/index.js"
     },
     "./modal": {
-      "import": "./dist/modal.js",
+      "import": "./src/primitives/modal/index.js",
       "browser": "./dist/cdn/modal.min.js",
-      "bundled": "./dist/bundled/modal.min.js",
-      "default": "./dist/modal.js"
+      "bundled": "./dist/bundle/modal.min.js",
+      "default": "./src/primitives/modal/index.js"
     },
     "./rail": {
-      "import": "./dist/rail.js",
+      "import": "./src/primitives/rail/index.js",
       "browser": "./dist/cdn/rail.min.js",
-      "bundled": "./dist/bundled/rail.min.js",
-      "default": "./dist/rail.js"
+      "bundled": "./dist/bundle/rail.min.js",
+      "default": "./src/primitives/rail/index.js"
     },
     "./segment": {
-      "import": "./dist/segment.js",
+      "import": "./src/primitives/segment/index.js",
       "browser": "./dist/cdn/segment.min.js",
-      "bundled": "./dist/bundled/segment.min.js",
-      "default": "./dist/segment.js"
+      "bundled": "./dist/bundle/segment.min.js",
+      "default": "./src/primitives/segment/index.js"
     }
   },
   "scripts": {

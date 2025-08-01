@@ -14,28 +14,58 @@ export const buildUIComponents = async ({
 } = {}) => {
   const tasks = [];
 
-  const sharedConfig = {
+  // Build primitives (former components)
+  const primitivesConfig = {
     watch,
     type: 'javascript',
-    entryPoints: [
-      './src/components/**/index.js',
-      './src/primitives/**/index.js',
-      './src/behaviors/**/index.js'
-    ],
+    entryPoints: ['./src/primitives/**/index.js'],
     entryNames: '[dir]', // button.js,
+    outbase: 'src/primitives',
+    filterEntries: (path) => {
+      return !path.endsWith('src/primitives/index.js');
+    }
+  };
+
+  // Build new components  
+  const componentsConfig = {
+    watch,
+    type: 'javascript',
+    entryPoints: ['./src/components/**/index.js'],
+    entryNames: '[dir]', // mobile-menu.js,
     outbase: 'src/components',
     filterEntries: (path) => {
-      // Exclude root-level src/index.js to avoid empty filename issue
-      return !path.endsWith('src/index.js');
-    },
+      return !path.endsWith('src/components/index.js');
+    }
+  };
+
+  // Build behaviors if they exist
+  const behaviorsConfig = {
+    watch,
+    type: 'javascript',
+    entryPoints: ['./src/behaviors/**/index.js'],
+    entryNames: '[dir]', // behavior-name.js,
+    outbase: 'src/behaviors',
+    filterEntries: (path) => {
+      return !path.endsWith('src/behaviors/index.js');
+    }
   };
 
   if (includeESM) {
     tasks.push(
       buildESM({
-        ...sharedConfig,
+        ...primitivesConfig,
+        outdir: 'dist',
+        log: { header: 'UI Primitives', text: 'Build ESM' },
+      }),
+      buildESM({
+        ...componentsConfig,
         outdir: 'dist',
         log: { header: 'UI Components', text: 'Build ESM' },
+      }),
+      buildESM({
+        ...behaviorsConfig,
+        outdir: 'dist',
+        log: { header: 'UI Behaviors', text: 'Build ESM' },
       }),
     );
   }
@@ -43,9 +73,19 @@ export const buildUIComponents = async ({
   if (includeBundle) {
     tasks.push(
       buildBundle({
-        ...sharedConfig,
+        ...primitivesConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'UI Primitives', text: 'Build Bundle' },
+      }),
+      buildBundle({
+        ...componentsConfig,
         outdir: 'dist/bundle',
         log: { header: 'UI Components', text: 'Build Bundle' },
+      }),
+      buildBundle({
+        ...behaviorsConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'UI Behaviors', text: 'Build Bundle' },
       }),
     );
   }
@@ -53,9 +93,19 @@ export const buildUIComponents = async ({
   if (includeCDN) {
     tasks.push(
       buildCDN({
-        ...sharedConfig,
+        ...primitivesConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'UI Primitives', text: 'Build CDN' },
+      }),
+      buildCDN({
+        ...componentsConfig,
         outdir: 'dist/cdn',
         log: { header: 'UI Components', text: 'Build CDN' },
+      }),
+      buildCDN({
+        ...behaviorsConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'UI Behaviors', text: 'Build CDN' },
       }),
     );
   }
