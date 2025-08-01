@@ -1,4 +1,4 @@
-import LabelSpec from './specs/label.json';
-import LabelComponentSpec from './specs/label-component.json';
+import LabelSpec from './specs/label.js';
+import LabelComponentSpec from './specs/label-component.js';
 
 export { LabelSpec, LabelComponentSpec };

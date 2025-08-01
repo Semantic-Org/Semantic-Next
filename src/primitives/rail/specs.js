@@ -1,4 +1,4 @@
-import RailSpec from './specs/rail.json';
-import RailComponentSpec from './specs/rail-component.json';
+import RailSpec from './specs/rail.js';
+import RailComponentSpec from './specs/rail-component.js';
 
 export { RailSpec, RailComponentSpec };
