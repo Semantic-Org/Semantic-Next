@@ -6,30 +6,21 @@ import { writeFileSync, readFileSync } from 'fs';
 import glob from 'tiny-glob';
 import { each, asyncEach } from '@semantic-ui/utils';
 
+
 /*
-  Transforms raw component specs into web component specs
-  that defineComponent uses for attribute/setting validation
+  Generate component spec JS directly without intermediate JSON file
 */
-export const writeComponentSpec = async ({
-  spec,
-  path,
-  plural = false,
-  specSettings = {}
-} = {}) => {
+const generateComponentSpecJS = async (spec, plural = false, specSettings = {}) => {
   const readerSettings = {
     plural,
     ...specSettings
   };
   const reader = new SpecReader(spec, readerSettings);
   const componentSpec = reader.getWebComponentSpec();
-  const json = JSON.stringify(componentSpec, null, 2);
-  let result;
-  try {
-    result = writeFileSync(path, json);
-  } catch (err) {
-    console.log(err);
-  }
-  return result;
+  const filename = plural
+    ? `${spec?.pluralTagName?.replace('ui-', '')}-component.js`
+    : 'component.js';
+  return `// Auto-generated from ${spec?.tagName?.replace('ui-', '') || 'spec'}.json\nexport default ${JSON.stringify(componentSpec, null, 2)};\n`;
 };
 
 
@@ -67,18 +58,18 @@ export const buildUIDeps = async ({
     try {
       const contents = readFileSync(entryPath, 'utf8');
       const spec = JSON.parse(contents);
-      await writeComponentSpec({
-        spec,
-        path: entryPath.replace('.json', '-component.json')
-      });
+
+      // Generate component spec JS directly
+      const componentSpecJS = await generateComponentSpecJS(spec, false);
+      const componentJSPath = entryPath.replace('.json', '-component.js');
+      writeFileSync(componentJSPath, componentSpecJS);
+
+      // Generate plural variant if supported
       if(spec?.supportsPlural) {
+        const pluralComponentSpecJS = await generateComponentSpecJS(spec, true);
         const pluralName = spec?.pluralTagName.replace('ui-', '');
-        const pluralPath = resolve(dirname(entryPath), `${pluralName}-component.json`);
-        await writeComponentSpec({
-          spec,
-          plural: true,
-          path: pluralPath
-        });
+        const pluralJSPath = resolve(dirname(entryPath), `${pluralName}-component.js`);
+        writeFileSync(pluralJSPath, pluralComponentSpecJS);
       }
     }
     catch(e) {
@@ -86,14 +77,15 @@ export const buildUIDeps = async ({
     }
   });
 
-  // Convert JSON to JS modules to avoid ESM JSON import compatibility issues
-  // when using "import 'foo.json' with { type: "json" };" with bundlers
+  // Convert raw spec JSON to JS modules to avoid ESM JSON import compatibility issues
   const generateJSExportsFromSpecs = async () => {
     await createComponentSpecs;
 
-    const jsonSpecFiles = await glob('src/primitives/*/specs/*.json');
+    // Only process raw spec files (not component specs, which are generated directly above)
+    const rawSpecFiles = await glob('src/primitives/*/specs/*.json');
+    const filteredRawSpecs = rawSpecFiles.filter(path => !path.endsWith('-component.json'));
 
-    each(jsonSpecFiles, (jsonFile) => {
+    each(filteredRawSpecs, (jsonFile) => {
       try {
         const jsonContent = readFileSync(jsonFile, 'utf-8');
         const spec = JSON.parse(jsonContent);
