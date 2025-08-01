@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '../../primitives/index.js';
 import { any, clone, isArray, isFunction, openLink } from '@semantic-ui/utils';
-import css from './NavMenu.css?raw';
-import template from './NavMenu.html?raw';
+import css from './nav-menu.css?raw';
+import template from './nav-menu.html?raw';
 
 const defaultSettings = {
   menu: [], // menus to display

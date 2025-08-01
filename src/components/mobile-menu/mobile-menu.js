@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each, noop } from '@semantic-ui/utils';
-import css from './MobileMenu.css?raw';
-import template from './MobileMenu.html?raw';
+import css from './mobile-menu.css?raw';
+import template from './mobile-menu.html?raw';
 
 import { UIIcon } from '../../primitives/index.js';
 import { NavMenu } from '../NavMenu/NavMenu.js';

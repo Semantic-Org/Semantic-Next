@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '../../primitives/index.js';
 import {} from '@semantic-ui/utils';
-import css from './SidebarToggle.css?raw';
-import template from './SidebarToggle.html?raw';
+import css from './sidebar-toggle.css?raw';
+import template from './sidebar-toggle.html?raw';
 
 const defaultSettings = {
   collapsed: false,

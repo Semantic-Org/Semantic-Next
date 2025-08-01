@@ -4,8 +4,8 @@ import { any, each, first, flatten, inArray, isServer, last, noop } from '@seman
 import { UIIcon } from '../../primitives/index.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import css from './InPageMenu.css?raw';
-import template from './InPageMenu.html?raw';
+import css from './inpage-menu.css?raw';
+import template from './inpage-menu.html?raw';
 
 const defaultSettings = {
   showHeader: false,

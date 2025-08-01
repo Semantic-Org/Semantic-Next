@@ -2,8 +2,8 @@ import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '../../primitives/index.js';
 import { Signal } from '@semantic-ui/reactivity';
 import { any, first, isArray, isFunction } from '@semantic-ui/utils';
-import css from './TopbarMenu.css?raw';
-import template from './TopbarMenu.html?raw';
+import css from './topbar-menu.css?raw';
+import template from './topbar-menu.html?raw';
 
 const defaultSettings = {
   menu: [],

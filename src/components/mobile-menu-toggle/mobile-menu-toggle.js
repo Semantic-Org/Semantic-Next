@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '../../primitives/index.js';
-import css from './MobileMenuToggle.css?raw';
-import template from './MobileMenuToggle.html?raw';
+import css from './mobile-menuToggle.css?raw';
+import template from './mobile-menuToggle.html?raw';
 
 const createComponent = function({ $, isServer, attachEvent, tpl }) {
   return {

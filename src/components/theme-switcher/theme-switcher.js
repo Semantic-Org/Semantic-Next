@@ -2,8 +2,8 @@ import { UIIcon } from '../../primitives/index.js';
 
 import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';
-import css from './ThemeSwitcher.css?raw';
-import template from './ThemeSwitcher.html?raw';
+import css from './theme-switcher.css?raw';
+import template from './theme-switcher.html?raw';
 
 const defaultSettings = {
   defaultTheme: 'light',

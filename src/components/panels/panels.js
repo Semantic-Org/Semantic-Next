@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 import { each, inArray, isNumber, isString, memoize, roundNumber, sum } from '@semantic-ui/utils';
 
-import css from './Panels.css?raw';
-import template from './Panels.html?raw';
+import css from './panels.css?raw';
+import template from './panels.html?raw';
 
 const defaultSettings = {
   direction: 'vertical',
