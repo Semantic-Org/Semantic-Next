@@ -108,6 +108,14 @@
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundle/segment.min.js",
       "default": "./src/primitives/segment/index.js"
+    },
+    "./behaviors": {
+      "import": "./src/behaviors/index.js",
+      "default": "./src/behaviors/index.js"
+    },
+    "./behaviors/transition": {
+      "import": "./src/behaviors/transition/transition.js",
+      "default": "./src/behaviors/transition/transition.js"
     }
   },
   "scripts": {
@@ -218,6 +226,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "@semantic-ui/component": "^0.15.0",
+    "@semantic-ui/query": "^0.15.0",
     "@semantic-ui/specs": "^0.15.0"
   },
   "peerDependencies": {
