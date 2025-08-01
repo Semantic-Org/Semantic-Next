@@ -1,0 +1,116 @@
+/* Semantic UI Transition Behavior */
+
+/* Base transition classes */
+.transition {
+  animation-fill-mode: both;
+  animation-duration: 300ms;
+  animation-timing-function: ease-out;
+}
+
+.transition.animating {
+  /* Prevent interaction during animation */
+  pointer-events: none;
+}
+
+/* Hidden/Visible base states */
+.transition.hidden {
+  display: none !important;
+}
+
+/* Visible state - used to detect current visibility */
+.transition.visible {
+  display: block;
+}
+
+/* Fade Animation using @starting-style */
+.transition.fade {
+  transition: opacity 300ms ease-out;
+}
+
+.transition.fade.in {
+  opacity: 1;
+}
+
+.transition.fade.out {
+  opacity: 0;
+}
+
+@starting-style {
+  .transition.fade.in {
+    opacity: 0;
+  }
+}
+
+/* Fade Up/Down Animation using @keyframes */
+@keyframes fadeUpIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUpOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes fadeDownIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeDownOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Apply animations */
+.transition.fade.up.in.animating {
+  animation-name: fadeUpIn;
+}
+
+.transition.fade.up.out.animating {
+  animation-name: fadeUpOut;
+}
+
+.transition.fade.down.in.animating {
+  animation-name: fadeDownIn;
+}
+
+.transition.fade.down.out.animating {
+  animation-name: fadeDownOut;
+}
+
+/* Static states after animation */
+.transition.fade.up.in:not(.animating),
+.transition.fade.down.in:not(.animating) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.transition.fade.up.out:not(.animating),
+.transition.fade.down.out:not(.animating) {
+  opacity: 0;
+}
