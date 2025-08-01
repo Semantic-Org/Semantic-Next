@@ -4,17 +4,16 @@ import {
   clone,
   each,
   extend,
-  last,
   isFunction,
   isPlainObject,
   isString,
   keys,
+  last,
   mapObject,
-  noop
+  noop,
 } from '@semantic-ui/utils';
 
 export class Behavior {
-
   // Captures word characters inside curly braces: {title} -> "title"
   static TEMPLATING_REGEX = /\{(\w+)\}/g;
 
@@ -58,7 +57,6 @@ export class Behavior {
     settings = {},
     templates = {},
   } = {}) {
-
     // handle query instance
     this.$ = (selector, options) => new $element.constructor(selector, options);
     this.$element = $element;
@@ -79,12 +77,12 @@ export class Behavior {
     this.sharedBehavior = sharedBehavior;
     extend(this, sharedBehavior);
 
-    if(css) {
+    if (css) {
       this.adoptStylesheet(css);
     }
 
     // allow html metadata to override settings like <div data-setting="new-setting">
-    if(allowDataOverride) {
+    if (allowDataOverride) {
       this.addDataOverrides();
     }
 
@@ -97,7 +95,7 @@ export class Behavior {
     extend(this, instance);
 
     // destroy existing instance if exists
-    if(this.element[namespace]?.destroy) {
+    if (this.element[namespace]?.destroy) {
       this.element[namespace]?.destroy();
     }
 
@@ -115,7 +113,6 @@ export class Behavior {
       this.call(instance.initialize.bind(this));
     }
     this.call(this.onCreated);
-
   }
 
   adoptStylesheet(css) {
@@ -126,7 +123,7 @@ export class Behavior {
   addDataOverrides(element = this.element) {
     const elementData = this.getElementData();
     each(this.settings, (value, name) => {
-      if(elementData[name]) {
+      if (elementData[name]) {
         this.settings[name] = elementData[name];
       }
     });
@@ -148,7 +145,6 @@ export class Behavior {
   }
 
   parseEventString(eventString) {
-
     // allow simple templating
     eventString = this.parseTemplate(eventString, {
       ...this.selectors,
@@ -266,7 +262,7 @@ export class Behavior {
 
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in
-        if(!selector) {
+        if (!selector) {
           this.$element.on(eventName, eventHandler, eventSettings);
         }
         else if (eventType == 'global') {
@@ -284,7 +280,7 @@ export class Behavior {
   }
 
   attachMutations(mutations = this.mutations) {
-    if(!keys(this.mutations)) {
+    if (!keys(this.mutations)) {
       return;
     }
 
@@ -296,14 +292,13 @@ export class Behavior {
       const mutationConfig = this.parseMutationString(mutationString);
       mutationConfigs.push({
         handler,
-        ...mutationConfig
+        ...mutationConfig,
       });
     });
 
     this.mutationObservers = [];
-    each(mutationConfigs, ({observedElement, observerOptions, keyword, selector, handler }) => {
+    each(mutationConfigs, ({ observedElement, observerOptions, keyword, selector, handler }) => {
       const observer = new MutationObserver((mutations) => {
-
         // determine if it matches
         let $added = $();
         let $removed = $();
@@ -311,10 +306,10 @@ export class Behavior {
         each(mutations, (mutation) => {
           const $matchingAdded = $(mutation.addedNodes).filter(selector);
           const $matchingRemoved = $(mutation.removedNodes).filter(selector);
-          if($matchingAdded.exists()) {
+          if ($matchingAdded.exists()) {
             $added = $added.add($matchingAdded);
           }
-          if($matchingRemoved.exists()) {
+          if ($matchingRemoved.exists()) {
             $removed = $removed.add($matchingRemoved);
           }
         });
@@ -322,23 +317,20 @@ export class Behavior {
         // Check if we should trigger based on keyword
         const hasAdded = $added.exists();
         const hasRemoved = $removed.exists();
-        const shouldTrigger = 
-          (keyword === 'add' && hasAdded) ||
-          (keyword === 'remove' && hasRemoved) ||
-          (keyword === 'standard' && (hasAdded || hasRemoved));
+        const shouldTrigger = (keyword === 'add' && hasAdded)
+          || (keyword === 'remove' && hasRemoved)
+          || (keyword === 'standard' && (hasAdded || hasRemoved));
 
-        if(shouldTrigger) {
+        if (shouldTrigger) {
           // call handler
           const callbackArgs = this.getMutationCallbackArgs(mutations, { $added, $removed });
           this.call(handler, { additionalParams: callbackArgs });
         }
-
       });
 
       observer.observe(observedElement, observerOptions);
       this.mutationObservers.push(observer);
     });
-
   }
 
   removeMutations() {
@@ -397,7 +389,6 @@ export class Behavior {
   }
 
   getMutationCallbackArgs(mutations, additionalData = {}) {
-
     const args = {
       ...additionalData,
       mutations,
@@ -433,7 +424,7 @@ export class Behavior {
         detail,
         bubbles: true,
         cancelable: true,
-        ...eventSettings
+        ...eventSettings,
       }),
     );
   }
@@ -490,8 +481,8 @@ export class Behavior {
       found = this.call(this.customInvocation, {
         additionalParams: {
           methodName: query,
-          methodArgs
-        }
+          methodArgs,
+        },
       });
     }
     return found ?? undefined;
@@ -570,8 +561,10 @@ export class Behavior {
   }
 
   // this allows for a setup() function to return values shared across behaviors
-  static runSetup(setup, { $elements, settings, templates } = {}) {
+  static runSetup(setup = function() {}, { $elements, settings, templates } = {}) {
     const $ = (selector, options) => new $elements.constructor(selector, options);
-    return setup({ $, settings, $elements, templates });
+    const setupValue = setup({ $, settings, $elements, templates });
+    console.log(setupValue);
+    return setupValue;
   }
 }

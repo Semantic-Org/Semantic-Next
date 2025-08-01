@@ -1,10 +1,9 @@
-import { pick, isString, isArray, noop, deepExtend } from '@semantic-ui/utils';
+import { deepExtend, isArray, isString, noop, pick } from '@semantic-ui/utils';
 import { Behavior } from './behavior.js';
 import { Query } from './query.js';
 
 // Register Behavior
 export const registerBehavior = (behavior) => {
-
   const behaviorDefaults = {
     name: undefined,
     css: undefined,
@@ -13,7 +12,7 @@ export const registerBehavior = (behavior) => {
     // settings for behavior
     defaultSettings: {},
     // returns behavior instance
-    createBehavior: noop,
+    createBehavior: function() {},
     // event object
     events: {},
     // mutation observer object
@@ -21,7 +20,7 @@ export const registerBehavior = (behavior) => {
     // whether html data can override settings
     allowDataOverride: true,
     // one time setup callback
-    setup: noop,
+    setup: function() {},
     // callbacks
     onCreated: noop,
     onMutated: noop,
@@ -35,10 +34,10 @@ export const registerBehavior = (behavior) => {
 
   behavior = {
     ...behaviorDefaults,
-    ...behavior
+    ...behavior,
   };
   // handle default namespace
-  if(!behavior.namespace) {
+  if (!behavior.namespace) {
     behavior.namespace = behavior.name;
   }
 
@@ -73,8 +72,6 @@ export const registerBehavior = (behavior) => {
 
   // Create abstraction around behavior initialization
   Query.prototype[name] = function(settings) {
-
-
     // At run time we need to check if defaults are changed from original registration
     const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
     const behaviorDefaults = pick(Query.prototype[name], ...defaultValues);
@@ -100,9 +97,8 @@ export const registerBehavior = (behavior) => {
     let returnedValue;
 
     $elements.each(function(element, index) {
-
       // handle setup function on first invocation
-      if(!isSetup) {
+      if (!isSetup) {
         sharedBehavior = Behavior.runSetup(behavior.setup, { $elements, settings, templates }) ?? {};
         isSetup = true;
       }
@@ -110,20 +106,20 @@ export const registerBehavior = (behavior) => {
       const $element = this;
 
       // behavior is stored in namespace like el.behavior
-      const instance = Behavior.getInstance(element, namespace);
+      let instance = Behavior.getInstance(element, namespace);
 
       const behaviorConfig = {
         sharedBehavior, // setup can pass shared behavior across instances
         $element,
         ...runtimeConfig,
-        settings: runtimeSettings
+        settings: runtimeSettings,
       };
 
       // create behavior instance if not defined
       // this might even occur if a method is invoked
       // if this method has no instance defined
       if (!instance) {
-        new Behavior(behaviorConfig);
+        instance = new Behavior(behaviorConfig);
       }
 
       if (methodName) {
@@ -144,13 +140,12 @@ export const registerBehavior = (behavior) => {
           returnedValue = response;
         }
       }
-      else if(instance !== undefined) {
+      else if (instance !== undefined) {
         // if they are not calling a method and there are settings
         // than they are attempting to reinitialize the behavior with new settings
         instance.reinitialize(behaviorConfig);
       }
     });
-
 
     return (returnedValue !== undefined)
       ? returnedValue
@@ -166,5 +161,4 @@ export const registerBehavior = (behavior) => {
   Query.prototype[name].classNames = classNames;
   Query.prototype[name].selectors = selectors;
   Query.prototype[name].errors = errors;
-
 };
