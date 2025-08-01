@@ -1,4 +1,4 @@
-// Auto-generated from container-component.json
+// Auto-generated from container.json
 export default {
   "tagName": "ui-container"
 };

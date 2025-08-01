@@ -1,4 +1,4 @@
-// Auto-generated from buttons-component.json
+// Auto-generated from button.json
 export default {
   "tagName": "ui-buttons",
   "types": [

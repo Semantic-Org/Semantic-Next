@@ -1,4 +1,4 @@
-// Auto-generated from cards-component.json
+// Auto-generated from card.json
 export default {
   "tagName": "ui-cards",
   "variations": [

@@ -1,4 +1,4 @@
-// Auto-generated from segment-component.json
+// Auto-generated from menu.json
 export default {
   "tagName": "ui-menu",
   "types": [

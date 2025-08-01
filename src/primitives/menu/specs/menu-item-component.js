@@ -1,4 +1,4 @@
-// Auto-generated from menu-item-component.json
+// Auto-generated from menu-item.json
 export default {
   "tagName": "menu-item",
   "content": [

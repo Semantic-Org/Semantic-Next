@@ -1,4 +1,4 @@
-// Auto-generated from label-component.json
+// Auto-generated from label.json
 export default {
   "tagName": "ui-label",
   "types": [

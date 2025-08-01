@@ -1,4 +1,4 @@
-// Auto-generated from icons-component.json
+// Auto-generated from icon.json
 export default {
   "tagName": "ui-icons"
 };

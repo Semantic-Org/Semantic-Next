@@ -1,4 +1,4 @@
-// Auto-generated from menu-component.json
+// Auto-generated from menu.json
 export default {
   "tagName": "ui-menu",
   "content": [
