@@ -1,7 +1,7 @@
 {
   "name": "@semantic-ui/esbuild-resolve-bare-imports",
   "description": "ESBuild plugin to resolve bare module imports to CDN URLs",
-  "version": "0.14.1",
+  "version": "0.15.0",
   "author": "Jack Lukic <jack@semantic-ui.com>",
   "license": "MIT",
   "main": "src/index.js",

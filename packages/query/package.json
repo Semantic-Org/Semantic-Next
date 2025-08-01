@@ -34,10 +34,10 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@semantic-ui/utils": "^0.14.1"
+    "@semantic-ui/utils": "^0.15.0"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.14.1",
+    "@semantic-ui/internal-scripts": "^0.15.0",
     "vitest": "^3.2.4"
   },
   "wireit": {
