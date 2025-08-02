@@ -15,7 +15,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
 * **Feature** - Added `appendTo()` method for appending elements as last child of target
 * **Feature** - Added `prependTo()` method for prepending elements as first child of target
+* **Feature** - Added `isVisible()` method for checking if ALL elements have layout dimensions using modern `getBoundingClientRect()` API, with optional opacity checking
 * **Feature** - You can now use `documentFragment` with content manipulation like `append()` `prepend()`
+* **Improvement** - `clippingParent()` now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`
 * **Improvement** - `trigger()` now triggers native event handler. Use `dispatchEvent` to avoid this behavior.
 * **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
 * **Bug** - `dataContext()` now returns the entire data context including state.
