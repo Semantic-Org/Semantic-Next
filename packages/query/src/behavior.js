@@ -563,8 +563,6 @@ export class Behavior {
   // this allows for a setup() function to return values shared across behaviors
   static runSetup(setup = function() {}, { $elements, settings, templates } = {}) {
     const $ = (selector, options) => new $elements.constructor(selector, options);
-    const setupValue = setup({ $, settings, $elements, templates });
-    console.log(setupValue);
-    return setupValue;
+    return setup({ $, settings, $elements, templates });
   }
 }
