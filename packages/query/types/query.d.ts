@@ -238,7 +238,7 @@ export class Query {
    * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns A new Query instance containing the closest ancestor elements.
    */
-  closest(selector: string | Element, options?: { returnAll?: boolean }): Query;
+  closest(selector: string | Element, options?: { returnAll?: boolean; }): Query;
 
   /**
    * Gets all ancestor elements that match the selector, traversing up the entire DOM tree.
@@ -257,7 +257,11 @@ export class Query {
    * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns The closest ancestor element, all matching ancestors, or `undefined` if not found.
    */
-  closestDeep(element: Element, selector: string | Element, options?: { returnAll?: boolean }): Element | Element[] | undefined;
+  closestDeep(
+    element: Element,
+    selector: string | Element,
+    options?: { returnAll?: boolean; },
+  ): Element | Element[] | undefined;
 
   /**
    * Attaches a handler to be executed when the DOM is fully loaded.
@@ -830,6 +834,15 @@ export class Query {
    * @returns `true` if the set contains elements, `false` otherwise.
    */
   exists(): boolean;
+
+  /**
+   * Checks if ALL elements in the current set are visible (have layout dimensions).
+   * @see https://next.semantic-ui.com/api/query/logical-operators#isvisible
+   * @param options - Configuration options for visibility checking.
+   * @param options.includeOpacity - Whether to also check that opacity > 0. Defaults to false.
+   * @returns `boolean` - true if ALL elements are visible, false if ANY element is not visible, `undefined` for empty selection.
+   */
+  isVisible(options?: { includeOpacity?: boolean; }): boolean | undefined;
 
   /**
    * Adds properties to element on DOMContentLoaded

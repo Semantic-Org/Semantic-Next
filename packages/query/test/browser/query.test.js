@@ -1,4 +1,4 @@
-import { $, $$ } from '@semantic-ui/query';
+import { $, $$, Query } from '@semantic-ui/query';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('query', () => {
@@ -39,7 +39,6 @@ describe('query', () => {
       expect(customElement.getDivText()).toBe('passed in text');
     });
   });
-
 
   describe('window and globalThisProxy', () => {
     beforeEach(() => {
@@ -240,13 +239,13 @@ describe('query', () => {
       it('should handle multiple slotted elements', () => {
         // Create and setup test component with multiple slotted elements
         const component = document.createElement('test-slot-basic');
-        
+
         const item1 = document.createElement('p');
         item1.textContent = 'Item 1';
-        
+
         const item2 = document.createElement('p');
         item2.textContent = 'Item 2';
-        
+
         component.appendChild(item1);
         component.appendChild(item2);
         document.body.appendChild(component);
@@ -312,7 +311,7 @@ describe('query', () => {
         // Get the slot element directly
         const headerSlot = component.shadowRoot.querySelector('slot[name="header"]');
         expect(headerSlot).not.toBeNull();
-        
+
         // Set content for the header slot via the component
         $(component).setSlot('header', '<strong>Set Via Component</strong>');
 
@@ -716,6 +715,118 @@ describe('query', () => {
       expect($clippingParent.length).toBe(1);
       expect($clippingParent[0]).toBe(document.getElementById('inner'));
     });
+
+    it('should find clipping parent with contain: paint', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: paint;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: layout', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: layout;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: size', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: size;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: strict', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: strict;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with clip-path', () => {
+      document.body.innerHTML = `
+        <div id="container" style="clip-path: circle(50%);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with mask', () => {
+      document.body.innerHTML = `
+        <div id="container" style="mask: url(#mask);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with mask-image', () => {
+      document.body.innerHTML = `
+        <div id="container" style="mask-image: linear-gradient(black, transparent);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should not consider contain: style as clipping', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: style;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.documentElement);
+    });
   });
 
   describe('containingParent', () => {
@@ -890,69 +1001,74 @@ describe('query', () => {
     describe('width and height with options', () => {
       it('should get content-only dimensions by default', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width();
         const height = $('div').height();
-        
+
         expect(width).toBe(200);
         expect(height).toBe(100);
       });
 
       it('should get dimensions including padding with includePadding option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true });
         const height = $('div').height({ includePadding: true });
-        
+
         expect(width).toBe(220); // 200 + 20 padding
         expect(height).toBe(120); // 100 + 20 padding
       });
 
       it('should get dimensions including border with includeBorder option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true, includeBorder: true });
         const height = $('div').height({ includePadding: true, includeBorder: true });
-        
+
         expect(width).toBe(230); // 200 + 20 padding + 10 border
         expect(height).toBe(130); // 100 + 20 padding + 10 border
       });
 
       it('should get dimensions including margin with includeMargin option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true, includeBorder: true, includeMargin: true });
         const height = $('div').height({ includePadding: true, includeBorder: true, includeMargin: true });
-        
+
         expect(width).toBe(270); // 200 + 20 padding + 10 border + 40 margin
         expect(height).toBe(170); // 100 + 20 padding + 10 border + 40 margin
       });
 
       it('should work with border-box sizing', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: border-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: border-box;';
         document.body.appendChild(div);
 
         // With border-box, width: 200px means total width including padding and border
         // So content width should be 200 - 20 padding - 10 border = 170px
         const contentWidth = $('div').width();
         const contentHeight = $('div').height();
-        
+
         expect(contentWidth).toBe(170); // 200 - 20 padding - 10 border
-        expect(contentHeight).toBe(70);  // 100 - 20 padding - 10 border
+        expect(contentHeight).toBe(70); // 100 - 20 padding - 10 border
 
         const totalWidth = $('div').width({ includePadding: true, includeBorder: true });
         const totalHeight = $('div').height({ includePadding: true, includeBorder: true });
-        
-        expect(totalWidth).toBe(200);  // Total including padding and border
+
+        expect(totalWidth).toBe(200); // Total including padding and border
         expect(totalHeight).toBe(100); // Total including padding and border
       });
 
@@ -968,7 +1084,7 @@ describe('query', () => {
 
         const widths = $('.test').width();
         const heights = $('.test').height();
-        
+
         expect(widths).toEqual([200, 300]);
         expect(heights).toEqual([100, 150]);
       });
@@ -977,13 +1093,14 @@ describe('query', () => {
     describe('innerWidth and innerHeight', () => {
       it('should return content + padding dimensions', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').innerWidth();
         const height = $('div').innerHeight();
-        
-        expect(width).toBe(220);  // 200 content + 20 padding
+
+        expect(width).toBe(220); // 200 content + 20 padding
         expect(height).toBe(120); // 100 content + 20 padding
       });
     });
@@ -991,26 +1108,293 @@ describe('query', () => {
     describe('outerWidth and outerHeight', () => {
       it('should return content + padding + border dimensions by default', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').outerWidth();
         const height = $('div').outerHeight();
-        
-        expect(width).toBe(230);  // 200 content + 20 padding + 10 border
+
+        expect(width).toBe(230); // 200 content + 20 padding + 10 border
         expect(height).toBe(130); // 100 content + 20 padding + 10 border
       });
 
       it('should include margin when specified', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').outerWidth({ includeMargin: true });
         const height = $('div').outerHeight({ includeMargin: true });
-        
-        expect(width).toBe(270);  // 200 content + 20 padding + 10 border + 40 margin
+
+        expect(width).toBe(270); // 200 content + 20 padding + 10 border + 40 margin
         expect(height).toBe(170); // 100 content + 20 padding + 10 border + 40 margin
+      });
+    });
+
+    describe('isVisible', () => {
+      beforeEach(() => {
+        document.body.innerHTML = '';
+      });
+
+      describe('basic functionality', () => {
+        it('should return true for visible elements', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(true);
+        });
+
+        it('should return false for display:none elements', () => {
+          const div = document.createElement('div');
+          div.style.display = 'none';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(false);
+        });
+
+        it('should return false for visibility:hidden elements', () => {
+          const div = document.createElement('div');
+          div.style.visibility = 'hidden';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(false);
+        });
+
+        it('should return false for zero-width elements', () => {
+          const div = document.createElement('div');
+          div.style.width = '0px';
+          div.style.height = '100px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(false);
+        });
+
+        it('should return false for zero-height elements', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '0px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(false);
+        });
+      });
+
+      describe('opacity handling', () => {
+        it('should return true for opacity:0 elements by default', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          div.style.opacity = '0';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(true);
+        });
+
+        it('should return false for opacity:0 elements when includeOpacity is true', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          div.style.opacity = '0';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible({ includeOpacity: true });
+          expect(result).toBe(false);
+        });
+
+        it('should return true for opacity:0.5 elements when includeOpacity is true', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          div.style.opacity = '0.5';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible({ includeOpacity: true });
+          expect(result).toBe(true);
+        });
+
+        it('should return false for opacity:0 with no dimensions when includeOpacity is true', () => {
+          const div = document.createElement('div');
+          div.style.width = '0px';
+          div.style.height = '0px';
+          div.style.opacity = '0';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible({ includeOpacity: true });
+          expect(result).toBe(false);
+        });
+      });
+
+      describe('single vs multiple elements', () => {
+        it('should return boolean for single element', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(typeof result).toBe('boolean');
+          expect(result).toBe(true);
+        });
+
+        it('should return false for multiple elements with different visibility (AND logic)', () => {
+          const div1 = document.createElement('div');
+          div1.style.width = '100px';
+          div1.style.height = '100px';
+          div1.className = 'test';
+          const div2 = document.createElement('div');
+          div2.style.display = 'none';
+          div2.className = 'test';
+          document.body.appendChild(div1);
+          document.body.appendChild(div2);
+
+          const result = $('.test').isVisible();
+          expect(typeof result).toBe('boolean');
+          expect(result).toBe(false); // false because not ALL are visible
+        });
+
+        it('should return single boolean for multiple elements with same visibility', () => {
+          const div1 = document.createElement('div');
+          div1.style.width = '100px';
+          div1.style.height = '100px';
+          div1.className = 'test';
+          const div2 = document.createElement('div');
+          div2.style.width = '50px';
+          div2.style.height = '50px';
+          div2.className = 'test';
+          document.body.appendChild(div1);
+          document.body.appendChild(div2);
+
+          const result = $('.test').isVisible();
+          expect(typeof result).toBe('boolean');
+          expect(result).toBe(true);
+        });
+
+        it('should return single false for multiple hidden elements', () => {
+          const div1 = document.createElement('div');
+          div1.style.display = 'none';
+          div1.className = 'test';
+          const div2 = document.createElement('div');
+          div2.style.visibility = 'hidden';
+          div2.className = 'test';
+          document.body.appendChild(div1);
+          document.body.appendChild(div2);
+
+          const result = $('.test').isVisible();
+          expect(typeof result).toBe('boolean');
+          expect(result).toBe(false);
+        });
+
+        it('should handle mixed visibility states with AND logic', () => {
+          const div1 = document.createElement('div');
+          div1.style.width = '100px';
+          div1.style.height = '100px';
+          div1.className = 'test';
+
+          const div2 = document.createElement('div');
+          div2.style.opacity = '0';
+          div2.style.width = '100px';
+          div2.style.height = '100px';
+          div2.className = 'test';
+
+          const div3 = document.createElement('div');
+          div3.style.display = 'none';
+          div3.className = 'test';
+
+          document.body.appendChild(div1);
+          document.body.appendChild(div2);
+          document.body.appendChild(div3);
+
+          // Without opacity check: div1=true, div2=true, div3=false → false (not all true)
+          const result = $('.test').isVisible();
+          expect(result).toBe(false);
+
+          // With opacity check: div1=true, div2=false, div3=false → false (not all true)
+          const resultWithOpacity = $('.test').isVisible({ includeOpacity: true });
+          expect(resultWithOpacity).toBe(false);
+        });
+      });
+
+      describe('empty selection handling', () => {
+        it('should return undefined for empty selection', () => {
+          const result = $('.nonexistent').isVisible();
+          expect(result).toBeUndefined();
+        });
+
+        it('should return undefined for empty selection with includeOpacity', () => {
+          const result = $('.nonexistent').isVisible({ includeOpacity: true });
+          expect(result).toBeUndefined();
+        });
+      });
+
+      describe('edge cases', () => {
+        it('should handle elements with fractional dimensions', () => {
+          const div = document.createElement('div');
+          div.style.width = '0.1px';
+          div.style.height = '0.1px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).toBe(true);
+        });
+
+        it('should handle elements with very small opacity', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          div.style.opacity = '0.001';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible({ includeOpacity: true });
+          expect(result).toBe(true);
+        });
+
+        it('should handle elements with inherited styles', () => {
+          const parent = document.createElement('div');
+          parent.style.opacity = '0.5';
+          const child = document.createElement('div');
+          child.style.width = '100px';
+          child.style.height = '100px';
+          child.className = 'child';
+          parent.appendChild(child);
+          document.body.appendChild(parent);
+
+          const result = $('.child').isVisible({ includeOpacity: true });
+          expect(result).toBe(true);
+        });
+      });
+
+      describe('return value consistency', () => {
+        it('should not return Query instance', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          document.body.appendChild(div);
+
+          const result = $('div').isVisible();
+          expect(result).not.toBeInstanceOf(Query);
+        });
+
+        it('should handle includeOpacity parameter consistently', () => {
+          const div = document.createElement('div');
+          div.style.width = '100px';
+          div.style.height = '100px';
+          div.style.opacity = '0';
+          document.body.appendChild(div);
+
+          expect($('div').isVisible()).toBe(true);
+          expect($('div').isVisible({ includeOpacity: false })).toBe(true);
+          expect($('div').isVisible({ includeOpacity: true })).toBe(false);
+        });
       });
     });
   });
