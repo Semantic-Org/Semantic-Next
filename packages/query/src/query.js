@@ -1266,6 +1266,12 @@ export class Query {
   }
 
   insertContent(target, content, position) {
+    // Handle string content (text or HTML)
+    if (isString(content)) {
+      target.insertAdjacentHTML(position, content);
+      return;
+    }
+
     const $content = this.chain(content);
     const insertElement = (el) => {
       if (target.insertAdjacentElement) {
@@ -1421,7 +1427,29 @@ export class Query {
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
+
+          // Check overflow
           if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return current;
+          }
+
+          // Check contain property (layout, paint, size, strict)
+          const contain = style.contain;
+          if (
+            contain
+            && (contain.includes('paint') || contain.includes('layout') || contain.includes('size')
+              || contain.includes('strict'))
+          ) {
+            return current;
+          }
+
+          // Check clip-path
+          if (style.clipPath && style.clipPath !== 'none') {
+            return current;
+          }
+
+          // Check mask/mask-image
+          if ((style.mask && style.mask !== 'none') || (style.maskImage && style.maskImage !== 'none')) {
             return current;
           }
         }
@@ -1484,6 +1512,29 @@ export class Query {
   }
   exists() {
     return this.length > 0;
+  }
+
+  isVisible(options = {}) {
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    const { includeOpacity = false } = options;
+
+    // Return true only if ALL elements are visible
+    return this.map(el => {
+      const rect = el.getBoundingClientRect();
+      const hasDimensions = rect.width > 0 && rect.height > 0;
+
+      if (!hasDimensions) { return false; }
+
+      if (includeOpacity) {
+        const style = window.getComputedStyle(el);
+        return parseFloat(style.opacity) > 0;
+      }
+
+      return true;
+    }).every(result => result === true);
   }
 
   // adds properties to an element after dom loads
