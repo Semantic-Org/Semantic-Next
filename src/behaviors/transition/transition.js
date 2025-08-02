@@ -1,4 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
+import { each, inArray } from '@semantic-ui/utils';
 
 import css from './transition.css?raw';
 
@@ -33,7 +34,12 @@ const errors = {
 };
 
 const createBehavior = ({ $, el, $el, self, settings, classNames, errors }) => ({
-  // Semantic helpers
+  // support syntax $('foo').transition('fade in', 200);
+  handleCustomInvocation(methodName) {
+    settings.animation = methodName;
+    self.animate(methodName);
+  },
+
   isVisible() {
     // Check multiple indicators of visibility
     const hasHiddenClass = $el.hasClass(classNames.hidden);
@@ -87,7 +93,7 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, errors }) => (
     const animation = [];
     let direction = null;
 
-    parts.forEach(part => {
+    each(parts, part => {
       if (part === classNames.inward || part === classNames.outward) {
         direction = part;
       }
@@ -201,13 +207,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, errors }) => (
 
   reset() {
     // Remove all animation classes
-    $el.removeClass(classNames.animating);
-    $el.removeClass(classNames.inward);
-    $el.removeClass(classNames.outward);
+    $el.removeClass([classNames.animating, classNames.inward, classNames.outward].join(' '));
 
     // Remove specific animation classes
-    const animationClasses = ['fade', 'up', 'down'];
-    animationClasses.forEach(cls => $el.removeClass(cls));
+    $el.removeClass(['fade', 'up', 'down'].join(' '));
 
     // Abort any pending animations
     if (self.abortController) {
@@ -236,23 +239,6 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, errors }) => (
   stop() {
     self.reset();
     $el.removeClass(classNames.transition);
-  },
-
-  // Method not found, but they passed a string - assume it's an animation
-  handleCustomInvocation(methodName) {
-    // This allows $('.element').transition('fade in') syntax
-    // Only update settings.animation if it's actually an animation, not a method name
-    const knownMethods = ['show', 'hide', 'toggle', 'stop', 'reset'];
-
-    if (!knownMethods.includes(methodName)) {
-      // It's an animation string, update settings and animate
-      settings.animation = methodName;
-      self.animate(methodName);
-    }
-    else {
-      // This shouldn't happen since registerBehavior should have found the method
-      console.warn(`Method ${methodName} exists but wasn't called properly`);
-    }
   },
 });
 
