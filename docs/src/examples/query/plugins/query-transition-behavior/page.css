@@ -1,0 +1,13 @@
+.box {
+  background: var(--primary-0) var(--angled-gradient);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  align-content: center;
+  text-align: center;
+  font-size: var(--large);
+  font-weight: var(--bold);
+  margin: var(--vertically-spaced);
+}

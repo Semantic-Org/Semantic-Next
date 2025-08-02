@@ -1,0 +1,46 @@
+---
+title: 'Transition Behavior'
+id: 'query-transition-behavior'
+category: 'Query'
+subcategory: 'Plugins / Behaviors'
+exampleType: 'component'
+description: 'Smooth animations for showing and hiding elements using @starting-style and CSS animations'
+tags: ['query', 'plugin', 'behavior', 'animation', 'transition']
+tip: 'Click the buttons to see different animation types. The plugin auto-detects visibility state from the DOM.'
+shortTitle: 'Transition'
+---
+
+The transition behavior provides a modern replacement for classic Semantic UI transitions, using web standards like `@starting-style` and CSS animations.
+
+## Features
+
+- **Two animation types**: `fade` (using @starting-style) and `fade up` (using @keyframes)
+- **Auto-direction detection**: Automatically determines `in` or `out` based on DOM visibility
+- **Natural syntax**: Use `$('.element').transition('fade in')` for intuitive animation control
+- **Unified callbacks**: Same callback system works for both animation types
+- **Modern cleanup**: Uses AbortController for proper event cleanup
+
+## Usage
+
+```javascript
+import '@semantic-ui/core/behaviors/transition';
+
+// Direct animation syntax
+$('.box').transition('fade in');
+$('.box').transition('fade up out');
+
+// Auto-detect direction
+$('.box').transition('fade'); // Shows if hidden, hides if visible
+
+// Method syntax
+$('.box').transition('show');
+$('.box').transition('hide');
+$('.box').transition('toggle');
+
+// With settings
+$('.box').transition({
+  animation: 'fade up',
+  duration: 500,
+  onComplete: () => console.log('Done!')
+});
+```

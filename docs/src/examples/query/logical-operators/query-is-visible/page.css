@@ -1,0 +1,18 @@
+.box {
+  padding: var(--padding);
+  margin: var(--margin) 0;
+  background: var(--blue-10);
+  border: 2px solid var(--blue-30);
+}
+
+ui-button {
+  margin: 5px;
+}
+
+.log {
+  margin: var(--margin) 0;
+  padding: var(--padding);
+  background: var(--standard-5);
+  font-family: monospace;
+  border-radius: var(--border-radius);
+}
