@@ -84,6 +84,27 @@ const onThemeChanged = ({darkMode}) => {
 
 Inside each [lifecycle callback](/components/lifecycle#callback-arguments), you can check the `darkMode` flag to determine if a dark mode theme is applied. This can be used to run different javascript for a dark mode theme.
 
+#### Triggering Dark Mode
+
+Dark mode will be set to `true` if `<html class="dark"></html>` is set to true for the element.
+
+```html
+<!-- Triggers Dark Mode !-->
+<html class="dark">
+```
+
+Dark mode can also be used selectively on light mode pages (and vice versa) using the css flag `--dark-mode`
+```css
+/* dark mode css tokens will apply and dark mode will trigger on component */
+some-element {
+  --dark-mode: true;
+}
+```
+
+#### Changing Behaviors for Dark Mode
+
+If dark mode is detected you can modify behaviors inside your component using the [lifecycle callback argument](/components/lifecycle#callback-arguments) `darkMode`.
+
 ```javascript
 const onCreated = ({darkMode}) => {
   if(darkMode) {
