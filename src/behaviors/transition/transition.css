@@ -1,116 +1,426 @@
-/* Semantic UI Transition Behavior */
+/*******************************
+          Animation System
+*******************************/
 
-/* Base transition classes */
-.transition {
-  animation-fill-mode: both;
-  animation-duration: 300ms;
-  animation-timing-function: ease-out;
+/*******************************
+         CSS Variables
+*******************************/
+
+:root {
+  /* Duration Tokens */
+  --duration-quick: 100ms;      /* Tooltips, micro-interactions */
+  --duration-short: 150ms;      /* Standard/default for most UI */
+  --duration-medium: 250ms;     /* Emphasis animations, modals */
+  --duration-long: 350ms;       /* Complex sequences */
+
+  /* Easing Functions */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);    /* Material You standard */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);          /* Exit animations */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);         /* Enter animations */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);    /* State changes */
+  --ease-linear: linear;                           /* Continuous animations */
+
+  /* Animation Intervals */
+  --transition-item-delay: 50ms;        /* Delay between items */
 }
 
-.transition.animating {
-  /* Prevent interaction during animation */
-  pointer-events: none;
-}
+/*******************************
+        Fade Animations
+*******************************/
 
-/* Hidden/Visible base states */
-.transition.hidden {
-  display: none !important;
-}
+/* Fade In/Out */
+.fade {
+  &.in {
+    @starting-style {
+      opacity: 0;
+    }
+    opacity: 1;
+    transition: opacity var(--duration-medium) var(--ease-out);
+  }
 
-/* Visible state - used to detect current visibility */
-.transition.visible {
-  display: block;
-}
-
-/* Fade Animation using @starting-style */
-.transition.fade {
-  transition: opacity 300ms ease-out;
-}
-
-.transition.fade.in {
-  opacity: 1;
-}
-
-.transition.fade.out {
-  opacity: 0;
-}
-
-@starting-style {
-  .transition.fade.in {
-    opacity: 0;
+  &.out {
+    animation: fade-out var(--duration-short) var(--ease-in) forwards;
   }
 }
 
-/* Fade Up/Down Animation using @keyframes */
-@keyframes fadeUpIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+
+/* Fade Up - Content Appearing From Below */
+.fade-up {
+  &.in {
+    @starting-style {
+      opacity: 0;
+      transform: translateY(8px);
+    }
     opacity: 1;
     transform: translateY(0);
+    transition:
+      opacity var(--duration-medium) var(--ease-out),
+      transform var(--duration-medium) var(--ease-out);
+  }
+
+  &.out {
+    animation: fade-up-out var(--duration-short) var(--ease-in) forwards;
   }
 }
 
-@keyframes fadeUpOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes fade-up-out {
   to {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-8px);
   }
 }
 
-@keyframes fadeDownIn {
-  from {
+/*******************************
+    Cross Fade (Tab Navigation)
+*******************************/
+
+/* Cross Fade - Content Replacement */
+.crossfade {
+  &.in {
+    animation: cross-fade-in var(--duration-medium) var(--ease-out) forwards;
+  }
+
+  &.out {
+    animation: cross-fade-out var(--duration-medium) var(--ease-in) forwards;
+  }
+}
+
+@keyframes cross-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cross-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/*******************************
+        Scale Animations
+*******************************/
+
+/* Scale - Modal/Popover */
+.scale {
+  &.in {
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--duration-medium) var(--ease-standard),
+      transform var(--duration-medium) var(--ease-standard);
+  }
+
+  &.out {
+    animation: scale-out var(--duration-short) var(--ease-in) forwards;
+  }
+}
+
+@keyframes scale-out {
+  to {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: scale(0.9);
+  }
+}
+
+/* Vertical Scale - Dropdown */
+.vertical-scale {
+  &.in {
+    @starting-style {
+      opacity: 0;
+      transform: scaleY(0);
+    }
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top;
+    transition:
+      opacity var(--duration-short) var(--ease-out),
+      transform var(--duration-short) var(--ease-out);
+  }
+
+  &.out {
+    transform-origin: top;
+    animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
+  }
+}
+
+@keyframes scale-vertical-out {
+  to {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+}
+
+/* Directional Scale - Tooltips */
+.scale-top,
+.scale-bottom,
+.scale-left,
+.scale-right {
+  &.in {
+    @starting-style {
+      opacity: 0;
+      transform: scale(0);
+    }
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity var(--duration-quick) var(--ease-out),
+      transform var(--duration-quick) var(--ease-out);
+  }
+}
+
+.scale-top.in { transform-origin: center bottom; }
+.scale-bottom.in { transform-origin: center top; }
+.scale-left.in { transform-origin: right center; }
+.scale-right.in { transform-origin: left center; }
+
+/*******************************
+        Slide Animations
+*******************************/
+
+/* Slide Left */
+.slide-left {
+  &.in {
+    @starting-style {
+      transform: translateX(-100%);
+    }
+    transform: translateX(0);
+    transition: transform var(--duration-medium) var(--ease-out);
+  }
+
+  &.out {
+    animation: slide-left-out var(--duration-medium) var(--ease-in) forwards;
+  }
+}
+
+@keyframes slide-left-out {
+  to { transform: translateX(-100%); }
+}
+
+/* Slide Right */
+.slide-right {
+  &.in {
+    @starting-style {
+      transform: translateX(100%);
+    }
+    transform: translateX(0);
+    transition: transform var(--duration-medium) var(--ease-out);
+  }
+
+  &.out {
+    animation: slide-right-out var(--duration-medium) var(--ease-in) forwards;
+  }
+}
+
+@keyframes slide-right-out {
+  to { transform: translateX(100%); }
+}
+
+/* Slide Up */
+.slide-up {
+  &.in {
+    @starting-style {
+      transform: translateY(100%);
+    }
+    transform: translateY(0);
+    transition: transform var(--duration-medium) var(--ease-out);
+  }
+
+  &.out {
+    animation: slide-up-out var(--duration-medium) var(--ease-in) forwards;
+  }
+}
+
+@keyframes slide-up-out {
+  to { transform: translateY(-100%); }
+}
+
+/* Slide Down */
+.slide-down {
+  &.in {
+    @starting-style {
+      transform: translateY(-100%);
+    }
+    transform: translateY(0);
+    transition: transform var(--duration-medium) var(--ease-out);
+  }
+
+  &.out {
+    animation: slide-down-out var(--duration-medium) var(--ease-in) forwards;
+  }
+}
+
+@keyframes slide-down-out {
+  to { transform: translateY(100%); }
+}
+
+/*******************************
+       Height Animations
+*******************************/
+
+/* Expand - Accordion */
+.expand {
+  overflow: hidden;
+  height: 0;
+  transition: height var(--duration-medium) var(--ease-out);
+
+  &.in {
+    height: var(--height);
+  }
+
+  &.out {
+    height: 0;
+    transition-timing-function: var(--ease-in);
+  }
+}
+
+/*******************************
+        Special Uses
+*******************************/
+
+/* Horizontal Flip - Card */
+.flip.horizontal {
+  &.in {
+    animation: flip-horizontal-in var(--duration-medium) var(--ease-in-out);
+  }
+}
+
+@keyframes flip-horizontal-in {
+  from {
+    transform: rotateY(-180deg);
+    opacity: 0;
   }
   to {
+    transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+/* Bounce - Badge */
+.bounce {
+  &.in {
+    animation: bounce-in var(--duration-medium) var(--ease-out);
+  }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Draw - SVG Checkmark */
+.draw {
+  &.in {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw-in var(--duration-medium) var(--ease-out) forwards;
+  }
+}
+
+@keyframes draw-in {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Toggle - Switch */
+.toggle {
+  &.on {
+    transform: translateX(100%);
+    transition: transform var(--duration-short) var(--ease-in-out);
+  }
+
+  &.off {
+    transform: translateX(0);
+    transition: transform var(--duration-short) var(--ease-in-out);
+  }
+}
+
+/* Stagger - List Items */
+.stagger {
+  &.in {
+    @starting-style {
+      opacity: 0;
+      transform: translateY(8px);
+    }
     opacity: 1;
     transform: translateY(0);
+    transition:
+      opacity var(--duration-short) var(--ease-out),
+      transform var(--duration-short) var(--ease-out);
+    transition-delay: calc(var(--index, 0) * var(--transition-item-delay));
   }
 }
 
-@keyframes fadeDownOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
+/*******************************
+      Continuous Animations
+*******************************/
+
+/* Spin - Loading */
+.spin {
+  animation: spin 1s var(--ease-linear) infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Shake - Error State */
+.shake {
+  animation: shake var(--duration-medium) var(--ease-in-out);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+/* Glow - Highlight */
+.glow {
+  animation: glow 2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes glow {
+  0% { background-color: rgba(230, 199, 56, 0); }
+  30% { background-color: rgba(230, 199, 56, 0.5); }
+  100% { background-color: rgba(230, 199, 56, 0); }
+}
+
+/* Shimmer - Skeleton Loader */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    animation: shimmer 1.5s var(--ease-linear) infinite;
   }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
 }
 
-/* Apply animations */
-.transition.fade.up.in.animating {
-  animation-name: fadeUpIn;
+@keyframes shimmer {
+  to { transform: translateX(100%); }
 }
 
-.transition.fade.up.out.animating {
-  animation-name: fadeUpOut;
+/* Progress - Progress Bar */
+.progress {
+  transform: translateX(-100%);
+  animation: progress var(--duration-long) var(--ease-linear) forwards;
 }
 
-.transition.fade.down.in.animating {
-  animation-name: fadeDownIn;
-}
-
-.transition.fade.down.out.animating {
-  animation-name: fadeDownOut;
-}
-
-/* Static states after animation */
-.transition.fade.up.in:not(.animating),
-.transition.fade.down.in:not(.animating) {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.transition.fade.up.out:not(.animating),
-.transition.fade.down.out:not(.animating) {
-  opacity: 0;
+@keyframes progress {
+  to { transform: translateX(0); }
 }
