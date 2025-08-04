@@ -1,71 +1,65 @@
-/*******************************
+/*
+*******************************
           Animation System
-*******************************/
+*******************************
+*/
 
 /*******************************
          CSS Variables
 *******************************/
-
 :root {
   /* Duration Tokens */
-  --duration-quick: 100ms;      /* Tooltips, micro-interactions */
-  --duration-short: 150ms;      /* Standard/default for most UI */
-  --duration-medium: 250ms;     /* Emphasis animations, modals */
-  --duration-long: 350ms;       /* Complex sequences */
+  --motion-scale-factor: 1;
+  --duration-quick: calc(100ms * var(--motion-scale-factor));      /* Tooltips, micro-interactions */
+  --duration-short: calc(150ms * var(--motion-scale-factor));      /* Standard/default for most UI */
+  --duration-medium: calc(250ms * var(--motion-scale-factor));     /* Emphasis animations, modals */
+  --duration-long: calc(350ms * var(--motion-scale-factor));       /* Complex sequences */
 
   /* Easing Functions */
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);    /* Material You standard */
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);          /* Exit animations */
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);         /* Enter animations */
-  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);    /* State changes */
-  --ease-linear: linear;                           /* Continuous animations */
+  --ease-standard: cubic-bezier(0.3, 0.07, 0.3, 1);   /* Smoother out, slight overshoot */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);              /* Exit animations */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);             /* Enter animations */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);        /* State changes */
+  --ease-snappy: cubic-bezier(0.35, 0, 0.65, 1);      /* For microinteractions */
+  --ease-linear: linear;                              /* Continuous animations */
 
   /* Animation Intervals */
   --transition-item-delay: 50ms;        /* Delay between items */
 }
 
 /*******************************
+      Accessibility Support
+*******************************/
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-scale-factor: 0.1;
+  }
+}
+
+/*******************************
         Fade Animations
 *******************************/
-
 /* Fade In/Out */
-.fade {
-  &.in {
-    @starting-style {
-      opacity: 0;
-    }
-    opacity: 1;
-    transition: opacity var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: fade-out var(--duration-short) var(--ease-in) forwards;
-  }
+.fade.in {
+  opacity: 1;
+  transition: opacity var(--duration-medium) var(--ease-out);
 }
-
-@keyframes fade-out {
-  to { opacity: 0; }
+.fade.out {
+  animation: fade-out var(--duration-short) var(--ease-in) forwards;
 }
+@keyframes fade-out { to { opacity: 0; } }
 
 /* Fade Up - Content Appearing From Below */
-.fade-up {
-  &.in {
-    @starting-style {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity var(--duration-medium) var(--ease-out),
-      transform var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: fade-up-out var(--duration-short) var(--ease-in) forwards;
-  }
+.fade-up.in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-medium) var(--ease-out),
+    transform var(--duration-medium) var(--ease-out);
 }
-
+.fade-up.out {
+  animation: fade-up-out var(--duration-short) var(--ease-in) forwards;
+}
 @keyframes fade-up-out {
   to {
     opacity: 0;
@@ -76,104 +70,72 @@
 /*******************************
     Cross Fade (Tab Navigation)
 *******************************/
-
 /* Cross Fade - Content Replacement */
-.crossfade {
-  &.in {
-    animation: cross-fade-in var(--duration-medium) var(--ease-out) forwards;
-  }
-
-  &.out {
-    animation: cross-fade-out var(--duration-medium) var(--ease-in) forwards;
-  }
+.crossfade.in {
+  animation: cross-fade-in var(--duration-medium) var(--ease-out) forwards;
 }
-
-@keyframes cross-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.crossfade.out {
+  animation: cross-fade-out var(--duration-medium) var(--ease-in) forwards;
 }
-
-@keyframes cross-fade-out {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
+@keyframes cross-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes cross-fade-out { from { opacity: 1; } to { opacity: 0; } }
 
 /*******************************
         Scale Animations
 *******************************/
-
 /* Scale - Modal/Popover */
-.scale {
-  &.in {
-    @starting-style {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity var(--duration-medium) var(--ease-standard),
-      transform var(--duration-medium) var(--ease-standard);
-  }
-
-  &.out {
-    animation: scale-out var(--duration-short) var(--ease-in) forwards;
-  }
+.scale.in {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--duration-medium) var(--ease-standard),
+    transform var(--duration-medium) var(--ease-standard),
+    box-shadow var(--duration-medium) var(--ease-standard);
 }
-
+.scale.out {
+  animation: scale-out var(--duration-short) var(--ease-in) forwards;
+}
 @keyframes scale-out {
   to {
     opacity: 0;
     transform: scale(0.9);
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
   }
 }
 
 /* Vertical Scale - Dropdown */
-.vertical-scale {
-  &.in {
-    @starting-style {
-      opacity: 0;
-      transform: scaleY(0);
-    }
-    opacity: 1;
-    transform: scaleY(1);
-    transform-origin: top;
-    transition:
-      opacity var(--duration-short) var(--ease-out),
-      transform var(--duration-short) var(--ease-out);
-  }
-
-  &.out {
-    transform-origin: top;
-    animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
-  }
+.vertical-scale.in {
+  opacity: 1;
+  transform: scaleY(1);
+  transform-origin: top;
+  transition:
+    opacity var(--duration-short) var(--ease-out),
+    transform var(--duration-short) var(--ease-out),
+    box-shadow var(--duration-short) var(--ease-out);
 }
-
+.vertical-scale.out {
+  transform-origin: top;
+  animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
+}
 @keyframes scale-vertical-out {
   to {
     opacity: 0;
     transform: scaleY(0);
+    box-shadow: 0 0 0 0 rgba(0,0,0,0);
   }
 }
 
-/* Directional Scale - Tooltips */
-.scale-top,
-.scale-bottom,
-.scale-left,
-.scale-right {
-  &.in {
-    @starting-style {
-      opacity: 0;
-      transform: scale(0);
-    }
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity var(--duration-quick) var(--ease-out),
-      transform var(--duration-quick) var(--ease-out);
-  }
+/*******************************
+    Directional Scale - Tooltips
+*******************************/
+.scale-top.in, .scale-bottom.in, .scale-left.in, .scale-right.in {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--duration-quick) var(--ease-snappy),
+    transform var(--duration-quick) var(--ease-snappy),
+    box-shadow var(--duration-quick) var(--ease-snappy);
 }
-
 .scale-top.in { transform-origin: center bottom; }
 .scale-bottom.in { transform-origin: center top; }
 .scale-left.in { transform-origin: right center; }
@@ -182,114 +144,80 @@
 /*******************************
         Slide Animations
 *******************************/
-
 /* Slide Left */
-.slide-left {
-  &.in {
-    @starting-style {
-      transform: translateX(-100%);
-    }
-    transform: translateX(0);
-    transition: transform var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: slide-left-out var(--duration-medium) var(--ease-in) forwards;
-  }
+.slide-left.in {
+  transform: translateX(0);
+  transition:
+    transform var(--duration-medium) var(--ease-out),
+    box-shadow var(--duration-medium) var(--ease-out);
 }
-
-@keyframes slide-left-out {
-  to { transform: translateX(-100%); }
+.slide-left.out {
+  animation: slide-left-out var(--duration-medium) var(--ease-in) forwards;
 }
+@keyframes slide-left-out { to { transform: translateX(-100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
 /* Slide Right */
-.slide-right {
-  &.in {
-    @starting-style {
-      transform: translateX(100%);
-    }
-    transform: translateX(0);
-    transition: transform var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: slide-right-out var(--duration-medium) var(--ease-in) forwards;
-  }
+.slide-right.in {
+  transform: translateX(0);
+  transition:
+    transform var(--duration-medium) var(--ease-out),
+    box-shadow var(--duration-medium) var(--ease-out);
 }
-
-@keyframes slide-right-out {
-  to { transform: translateX(100%); }
+.slide-right.out {
+  animation: slide-right-out var(--duration-medium) var(--ease-in) forwards;
 }
+@keyframes slide-right-out { to { transform: translateX(100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
 /* Slide Up */
-.slide-up {
-  &.in {
-    @starting-style {
-      transform: translateY(100%);
-    }
-    transform: translateY(0);
-    transition: transform var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: slide-up-out var(--duration-medium) var(--ease-in) forwards;
-  }
+.slide-up.in {
+  transform: translateY(0);
+  transition:
+    transform var(--duration-medium) var(--ease-out),
+    box-shadow var(--duration-medium) var(--ease-out);
 }
-
-@keyframes slide-up-out {
-  to { transform: translateY(-100%); }
+.slide-up.out {
+  animation: slide-up-out var(--duration-medium) var(--ease-in) forwards;
 }
+@keyframes slide-up-out { to { transform: translateY(-100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
 /* Slide Down */
-.slide-down {
-  &.in {
-    @starting-style {
-      transform: translateY(-100%);
-    }
-    transform: translateY(0);
-    transition: transform var(--duration-medium) var(--ease-out);
-  }
-
-  &.out {
-    animation: slide-down-out var(--duration-medium) var(--ease-in) forwards;
-  }
+.slide-down.in {
+  transform: translateY(0);
+  transition:
+    transform var(--duration-medium) var(--ease-out),
+    box-shadow var(--duration-medium) var(--ease-out);
 }
-
-@keyframes slide-down-out {
-  to { transform: translateY(100%); }
+.slide-down.out {
+  animation: slide-down-out var(--duration-medium) var(--ease-in) forwards;
 }
+@keyframes slide-down-out { to { transform: translateY(100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
 /*******************************
        Height Animations
 *******************************/
-
 /* Expand - Accordion */
 .expand {
   overflow: hidden;
   height: 0;
-  transition: height var(--duration-medium) var(--ease-out);
-
-  &.in {
-    height: var(--height);
-  }
-
-  &.out {
-    height: 0;
-    transition-timing-function: var(--ease-in);
-  }
+  transition:
+    height var(--duration-medium) var(--ease-out),
+    box-shadow var(--duration-medium) var(--ease-out);
+}
+.expand.in {
+  height: var(--height);
+}
+.expand.out {
+  height: 0;
+  transition-timing-function: var(--ease-in);
 }
 
 /*******************************
         Special Uses
 *******************************/
-
 /* Horizontal Flip - Card */
-.flip.horizontal {
-  &.in {
-    animation: flip-horizontal-in var(--duration-medium) var(--ease-in-out);
-  }
+.flip.horizontal.in {
+  animation: flip-horizontal-in var(--duration-medium) var(--ease-in-out);
 }
-
 @keyframes flip-horizontal-in {
   from {
     transform: rotateY(-180deg);
@@ -302,12 +230,9 @@
 }
 
 /* Bounce - Badge */
-.bounce {
-  &.in {
-    animation: bounce-in var(--duration-medium) var(--ease-out);
-  }
+.bounce.in {
+  animation: bounce-in var(--duration-medium) var(--ease-out);
 }
-
 @keyframes bounce-in {
   0% { transform: scale(0); }
   50% { transform: scale(1.1); }
@@ -315,65 +240,46 @@
 }
 
 /* Draw - SVG Checkmark */
-.draw {
-  &.in {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: draw-in var(--duration-medium) var(--ease-out) forwards;
-  }
+.draw.in {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-in var(--duration-medium) var(--ease-out) forwards;
 }
-
-@keyframes draw-in {
-  to { stroke-dashoffset: 0; }
-}
+@keyframes draw-in { to { stroke-dashoffset: 0; } }
 
 /* Toggle - Switch */
-.toggle {
-  &.on {
-    transform: translateX(100%);
-    transition: transform var(--duration-short) var(--ease-in-out);
-  }
-
-  &.off {
-    transform: translateX(0);
-    transition: transform var(--duration-short) var(--ease-in-out);
-  }
+.toggle.on {
+  transform: translateX(100%);
+  transition: transform var(--duration-short) var(--ease-in-out);
+}
+.toggle.off {
+  transform: translateX(0);
+  transition: transform var(--duration-short) var(--ease-in-out);
 }
 
 /* Stagger - List Items */
-.stagger {
-  &.in {
-    @starting-style {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity var(--duration-short) var(--ease-out),
-      transform var(--duration-short) var(--ease-out);
-    transition-delay: calc(var(--index, 0) * var(--transition-item-delay));
-  }
+.stagger.in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-short) var(--ease-out),
+    transform var(--duration-short) var(--ease-out);
+  transition-delay: calc(var(--index, 0) * var(--transition-item-delay));
 }
 
 /*******************************
       Continuous Animations
 *******************************/
-
 /* Spin - Loading */
 .spin {
   animation: spin 1s var(--ease-linear) infinite;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Shake - Error State */
 .shake {
   animation: shake var(--duration-medium) var(--ease-in-out);
 }
-
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
@@ -384,7 +290,6 @@
 .glow {
   animation: glow 2s cubic-bezier(0.19, 1, 0.22, 1);
 }
-
 @keyframes glow {
   0% { background-color: rgba(230, 199, 56, 0); }
   30% { background-color: rgba(230, 199, 56, 0.5); }
@@ -395,32 +300,20 @@
 .shimmer {
   position: relative;
   overflow: hidden;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.2),
-      transparent
-    );
-    animation: shimmer 1.5s var(--ease-linear) infinite;
-  }
 }
-
-@keyframes shimmer {
-  to { transform: translateX(100%); }
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 1.5s var(--ease-linear) infinite;
 }
+@keyframes shimmer { to { transform: translateX(100%); } }
 
 /* Progress - Progress Bar */
 .progress {
   transform: translateX(-100%);
   animation: progress var(--duration-long) var(--ease-linear) forwards;
 }
-
-@keyframes progress {
-  to { transform: translateX(0); }
-}
+@keyframes progress { to { transform: translateX(0); } }
