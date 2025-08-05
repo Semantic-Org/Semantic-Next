@@ -1,9 +1,8 @@
-import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { isClient } from '@semantic-ui/utils';
+import { isClient, wrapFunction } from '@semantic-ui/utils';
 
 export class ReactiveRerenderDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -23,12 +22,12 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       this.watchChanges(condition);
     }
 
-    return this.renderCurrentState(condition);
+    return condition.content();
   }
 
   watchChanges(condition) {
     const context = {
-      message: `rerender block: {#${condition.keyOnly ? 'guard' : 'rerender'} ${condition.expression}}`,
+      message: `rerender block: {#${condition.key ? 'guard' : 'rerender'} ${condition.keyString || condition.expressionString}}`,
       rerender: condition,
     };
 
@@ -40,24 +39,27 @@ export class ReactiveRerenderDirective extends AsyncDirective {
 
       // this guards against the return value of a reactive expression the "key"
       // {#guard expression} -> key=expression
-      // {#rerender key=expression} -> key=expressin
-      if (condition.key) {
-        Reaction.guard(condition.key);
-      }
-      // {#rerender expression} - naively add a reactive context to this reaction
-      if(condition.expression) {
-        condition.expression();
+      // {#rerender key=expression} -> key=expressin`
+      if (condition.keyString) {
+        Reaction.guard(() => this.getValue(condition.key()));
       }
 
-      // Rerender on reactive changes (after first run)
-      if (!computation.firstRun) {
+      // {#rerender expression} - naively add a reactive context to this reaction
+      if(condition.expressionString) {
+        this.getValue(condition.expression());
+      }
+
+      if(!computation.firstRun) {
         this.setValue(condition.content());
       }
+
     }, { context });
   }
 
-  renderCurrentState(condition) {
-    return condition.content();
+  // to make sure signal triggers reactivity
+  // we want to call accessor from our reaction
+  getValue(expression) {
+    return wrapFunction(expression)();
   }
 
   disconnected() {

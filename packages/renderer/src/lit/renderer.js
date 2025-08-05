@@ -167,10 +167,10 @@ export class LitRenderer {
   evaluateRerender(node, data) {
     const directiveMap = (value, key) => {
       if (key == 'expression') {
-        return () => this.evaluateExpression(value, data);
+        return () => this.lookupTokenValue(value, data);
       }
       if (key == 'key') {
-        return () => this.evaluateExpression(value, data);
+        return () => this.lookupTokenValue(value, data);
       }
       if (key == 'content') {
         return () => this.renderContent({ ast: value, data });
@@ -178,8 +178,9 @@ export class LitRenderer {
       return value;
     };
     
-    // Store original expression for debugging
-    node.expression = node.expression;
+    // Store original expressions for debugging
+    node.expressionString = node.expression;
+    node.keyString = node.key;
     
     let rerenderArguments = mapObject(node, directiveMap);
     return reactiveRerender(rerenderArguments);
