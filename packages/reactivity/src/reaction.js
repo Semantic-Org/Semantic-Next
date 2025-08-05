@@ -125,7 +125,7 @@ export class Reaction {
       if (!comp.firstRun && !equalCheck(newValue, value)) {
         dep.changed();
       }
-      value = clone(newValue);
+      value = newValue;
     });
     comp.run();
     return newValue;
