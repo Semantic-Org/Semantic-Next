@@ -104,6 +104,30 @@ Represents a loop structure for iterating over arrays or objects, with optional 
 }
 ```
 
+### Rerender
+
+Represents a rerender or guard block that controls when template sections re-evaluate.
+
+#### Example (rerender block)
+```javascript
+{
+  type: 'rerender',
+  expression: 'userId',
+  key: null,
+  content: [/* nested AST nodes */]
+}
+```
+
+#### Example (guard block)
+```javascript
+{
+  type: 'rerender',
+  expression: null,
+  key: 'getUserStatus',
+  content: [/* nested AST nodes */]
+}
+```
+
 ### Template
 
 Represents a nested template or partial.
