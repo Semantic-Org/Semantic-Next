@@ -15,12 +15,16 @@ class TemplateCompiler {
     ELSE: '^{OPEN}\\s*else\\s*',
     EACH: '^{OPEN}\\s*#each\\s+',
     SNIPPET: '^{OPEN}\\s*#snippet\\s+',
+    RERENDER: '^{OPEN}\\s*#rerender\\s+',
+    GUARD: '^{OPEN}\\s*#guard\\s+',
     ASYNC: '^{OPEN}\\s*#(async)\\s+',
     ASYNC_LOADING: '^{OPEN}\\s*(before|loading)(\\s+|(?={CLOSE}))',
     ASYNC_ERROR: '^{OPEN}\\s*(error|catch)(\\s+|(?={CLOSE}))',
     CLOSE_IF: '^{OPEN}\\s*\\/(if)\\s*',
     CLOSE_EACH: '^{OPEN}\\s*\\/(each)\\s*',
     CLOSE_SNIPPET: '^{OPEN}\\s*\\/(snippet)\\s*',
+    CLOSE_RERENDER: '^{OPEN}\\s*\\/rerender\\s*',
+    CLOSE_GUARD: '^{OPEN}\\s*\\/guard\\s*',
     CLOSE_ASYNC: '^{OPEN}\\s*\\/(async)\\s*',
     SLOT: '^{OPEN}>\\s*slot\\s*',
     TEMPLATE: '^{OPEN}>\\s*',
@@ -69,7 +73,7 @@ class TemplateCompiler {
   };
 
   static preprocessRegExp = {
-    WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
+    WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
   };
 
   static templateRegExp = {
@@ -470,6 +474,33 @@ class TemplateCompiler {
             break;
           }
 
+          case 'GUARD':
+          case 'RERENDER': {
+            const isGuard = tag.type === 'GUARD';
+            
+            // Parse key attribute if present (for hybrid syntax)
+            const { expression, key } = this.parseRerenderExpression(tag.content);
+            
+            newNode = {
+              ...newNode,
+              type: 'rerender',
+              // For guard blocks, the expression goes in 'key' and 'expression' is null
+              expression: isGuard ? null : expression,
+              key: isGuard ? expression : key,
+              content: []
+            };
+            
+            setCurrentContent(newNode);
+            addToAST(newNode);
+            break;
+          }
+
+          case 'CLOSE_GUARD':
+          case 'CLOSE_RERENDER': {
+            returnToLastContent();
+            break;
+          }
+
           case 'CLOSE_ASYNC': {
             returnToLastContent();
             break;
@@ -526,6 +557,17 @@ class TemplateCompiler {
       return Number(expression);
     }
     return expression;
+  }
+
+  parseRerenderExpression(content) {
+    // Parse "expression key=keyExpr" syntax
+    const keyMatch = content.match(/\s+key=(.+)$/);
+    if (keyMatch) {
+      const expression = content.replace(/\s+key=.+$/, '').trim();
+      const key = keyMatch[1].trim();
+      return { expression, key };
+    }
+    return { expression: content.trim(), key: null };
   }
 
   /* Parses the various syntax for embedding subtemplates */

@@ -1,0 +1,18 @@
+<h2>Rerender</h2>
+<p>Timestamp updates when userId changes</p>
+{#rerender userId}
+  <p>User: {userName} (ID: {userId})</p>
+  <p>Timestamp: {getTimestamp}</p>
+  <p>API Endpoint: /api/users/{userId}</p>
+{/rerender}
+<ui-button @click={changeUser}>Change User</ui-button>
+
+<h2>Guard</h2>
+<p>Timestamp only updates when status changes</p>
+{#guard getUserStatus}
+  <p>Status: {getUserStatus}</p>
+  <p>Timestamp: {getTimestamp}</p>
+{/guard}
+<p>Current User Type: {userType}</p>
+<ui-button @click={changeUser}>Change User</ui-button>
+<ui-button @click={changeUserType}>Change User Type</ui-button>

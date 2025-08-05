@@ -49,6 +49,7 @@ const subCategorySortOrder = {
     'Snippets',
     'Subtemplates',
     'Async',
+    'Reactivity',
     'Helpers',
   ],
   'Reactivity': [
@@ -312,6 +313,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Snippets',
         url: '/templates/snippets',
+      },
+      {
+        name: 'Reactivity',
+        url: '/templates/reactivity',
       },
       {
         name: 'Helpers',

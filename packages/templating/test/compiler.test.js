@@ -1744,6 +1744,236 @@ describe('TemplateCompiler', () => {
     });
   });
 
+  describe('rerender and guard blocks', () => {
+    describe('Basic rerender blocks', () => {
+      it('should compile {#rerender expression}', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#rerender userId}
+            <div>User: {getUserDisplayName}</div>
+          {/rerender}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: 'userId',
+            key: null,
+            content: [
+              { type: 'html', html: '\n            <div>User: ' },
+              { type: 'expression', value: 'getUserDisplayName' },
+              { type: 'html', html: '</div>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should compile {#rerender expression} with complex expression', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#rerender userId + theme}
+            <div>Content that depends on userId and theme</div>
+          {/rerender}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: 'userId + theme',
+            key: null,
+            content: [
+              { type: 'html', html: '\n            <div>Content that depends on userId and theme</div>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+    });
+
+    describe('Guard blocks', () => {
+      it('should compile {#guard expression}', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#guard getUserHash}
+            <expensive-user-dashboard ></expensive-user-dashboard>
+          {/guard}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: null,
+            key: 'getUserHash',
+            content: [
+              { type: 'html', html: '\n            <expensive-user-dashboard ></expensive-user-dashboard>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should compile {#guard expression} with complex key expression', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#guard getComputedKey userId permissions}
+            <complex-component ></complex-component>
+          {/guard}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: null,
+            key: 'getComputedKey userId permissions',
+            content: [
+              { type: 'html', html: '\n            <complex-component ></complex-component>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+    });
+
+    describe('Hybrid rerender with key', () => {
+      it('should compile {#rerender expression key=keyExpression}', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#rerender userId key=getAccessLevel}
+            <permission-sensitive-content ></permission-sensitive-content>
+          {/rerender}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: 'userId',
+            key: 'getAccessLevel',
+            content: [
+              { type: 'html', html: '\n            <permission-sensitive-content ></permission-sensitive-content>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should compile {#rerender expression key=keyExpression} with complex expressions', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#rerender state.userId + state.theme key=getCacheKey state}
+            <div>Complex content</div>
+          {/rerender}
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: 'state.userId + state.theme',
+            key: 'getCacheKey state',
+            content: [
+              { type: 'html', html: '\n            <div>Complex content</div>\n          ' }
+            ]
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+    });
+
+    describe('Nested content', () => {
+      it('should handle nested expressions within rerender blocks', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          {#rerender userId}
+            <div>
+              <p>User: {getUserDisplayName}</p>
+              <p>API: {apiEndpoint}</p>
+              {#if hasPermission}
+                <button>Admin</button>
+              {/if}
+            </div>
+          {/rerender}
+        `;
+        const ast = compiler.compile(template);
+        expect(ast[0].type).toBe('rerender');
+        expect(ast[0].expression).toBe('userId');
+        expect(ast[0].content).toHaveLength(7); // html, expr, html, expr, html, if, html
+      });
+    });
+
+    describe('Edge cases', () => {
+      it('should handle empty rerender blocks', () => {
+        const compiler = new TemplateCompiler();
+        const template = `{#rerender userId}{/rerender}`;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          {
+            type: 'rerender',
+            expression: 'userId',
+            key: null,
+            content: []
+          }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should handle guard blocks with spaces', () => {
+        const compiler = new TemplateCompiler();
+        const template = `{#guard   getUserKey   }<div>Content</div>{/guard}`;
+        const ast = compiler.compile(template);
+        expect(ast[0].expression).toBe(null);
+        expect(ast[0].key).toBe('getUserKey');
+      });
+    });
+  });
+
+  describe('preprocessing', () => {
+    describe('web component self-closing tags', () => {
+      it('should handle single-hyphen web components', () => {
+        const compiler = new TemplateCompiler();
+        const template = '<ui-button />';
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          { type: 'html', html: '<ui-button ></ui-button>' }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should handle multiple-hyphen web components', () => {
+        const compiler = new TemplateCompiler();
+        const template = '<expensive-user-dashboard-component />';
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          { type: 'html', html: '<expensive-user-dashboard-component ></expensive-user-dashboard-component>' }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should handle web components with attributes', () => {
+        const compiler = new TemplateCompiler();
+        const template = '<ui-icon icon="home" size="large" />';
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          { type: 'html', html: '<ui-icon icon="home" size="large" ></ui-icon>' }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+
+      it('should handle multiple web components in template', () => {
+        const compiler = new TemplateCompiler();
+        const template = `
+          <ui-header />
+          <main-content-area />
+          <ui-footer />
+        `;
+        const ast = compiler.compile(template);
+        const expectedAST = [
+          { type: 'html', html: '<ui-header ></ui-header>\n          <main-content-area ></main-content-area>\n          <ui-footer ></ui-footer>' }
+        ];
+        expect(ast).toEqual(expectedAST);
+      });
+    });
+  });
+
   describe('error conditions', () => {
     it('should throw an error when an else included outside an if', () => {
       const compiler = new TemplateCompiler();
