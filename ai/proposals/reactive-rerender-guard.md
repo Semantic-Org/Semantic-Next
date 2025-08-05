@@ -419,8 +419,6 @@ describe('Rerender Template Compilation', () => {
 ```javascript
 describe('Rerender Performance', () => {
   test('guard prevents unnecessary rerenders')
-  test('memory cleanup after many rerenders')
-  test('expression evaluation efficiency')
 })
 ```
 
@@ -484,10 +482,3 @@ Potential additions without breaking changes:
 - All syntax examples in this proposal work correctly
 - Follows EXACT patterns from existing directives
 - No deviation from specified behavior
-- Maintains backward compatibility
-
-**FAILURE MODES TO AVOID:**
-- Do not add `+` syntax or compiler magic
-- Do not try to "make non-reactive data reactive"  
-- Do not deviate from established directive patterns
-- Do not modify data context lookup behavior
