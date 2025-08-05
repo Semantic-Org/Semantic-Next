@@ -1896,7 +1896,7 @@ describe('TemplateCompiler', () => {
         const ast = compiler.compile(template);
         expect(ast[0].type).toBe('rerender');
         expect(ast[0].expression).toBe('userId');
-        expect(ast[0].content).toHaveLength(7); // html, p, expr, html, expr, html, if, html
+        expect(ast[0].content).toHaveLength(7); // html, expr, html, expr, html, if, html
       });
     });
 
