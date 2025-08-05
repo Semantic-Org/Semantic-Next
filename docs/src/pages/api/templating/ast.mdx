@@ -128,6 +128,53 @@ Represents a rerender or guard block that controls when template sections re-eva
 }
 ```
 
+### Async
+
+Represents an async block that handles asynchronous operations with loading, success, and error states.
+
+#### Example (basic async)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchData',
+  content: [/* nested AST nodes for success state */]
+}
+```
+
+#### Example (with alias)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchUsers',
+  as: 'users',
+  content: [/* nested AST nodes for success state */]
+}
+```
+
+#### Example (with loading and error states)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchData',
+  as: 'data',
+  content: [/* nested AST nodes for success state */],
+  loadingContent: [/* nested AST nodes for loading state */],
+  errorContent: [/* nested AST nodes for error state */],
+  errorAs: 'error'
+}
+```
+
+#### Example (with destructuring)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchUser',
+  parts: ['name', 'email'],
+  rest: 'rest',
+  content: [/* nested AST nodes */]
+}
+```
+
 ### Template
 
 Represents a nested template or partial.
