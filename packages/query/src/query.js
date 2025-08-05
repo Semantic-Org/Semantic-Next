@@ -36,9 +36,12 @@ export class Query {
   });
 
   /*
-    We keep an array of event handlers for teardown
+    We clean up event handlers in two cases
+    1) element is removed from dom
+    2) reference to handler is removed from dom
   */
-  static eventHandlers = [];
+  static eventRegistry = new WeakMap();   // Key: Element, Value: Set<HandlerObject>
+  static handlerRegistry = new WeakMap(); // Key: HandlerObject, Value: Element
 
   /*
     We keep a map to store registered behaviors
@@ -554,6 +557,15 @@ export class Query {
 
     const events = this.getEventArray(eventNames);
 
+    // we store a reference using a set of weakmaps
+    // this allows us to properly gc handlers but still remove them properly
+    const addToRegistry = ({el, eventHandler}) => {
+      const elementHandlers = Query.eventRegistry.get(el) || new Set();
+      elementHandlers.add(eventHandler);
+      Query.eventRegistry.set(el, elementHandlers); // for $('div').off();
+      Query.handlerRegistry.set(eventHandler, el); // for $('div').off(handler);
+    };
+
     events.forEach(({ eventName, namespaces }) => {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
@@ -602,13 +614,10 @@ export class Query {
           abort: (reason) => abortController.abort(reason),
         };
         eventHandlers.push(eventHandler);
+        addToRegistry({el, eventHandler});
       });
     });
 
-    if (!Query.eventHandlers) {
-      Query.eventHandlers = [];
-    }
-    Query.eventHandlers.push(...eventHandlers);
 
     if (options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
@@ -644,61 +653,73 @@ export class Query {
       : this.on(eventName, wrappedHandler, options);
   }
 
+
   off(eventNames, handler) {
-    if (!eventNames) {
-      // Remove all events (existing behavior)
-      Query.eventHandlers.forEach(eventHandler => {
-        const el = (this.isGlobal) ? globalThis : eventHandler.el;
-        if (el.removeEventListener) {
-          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
+
+    if(isFunction(eventNames)) {
+      handler = eventNames;
+    }
+
+    // actually handle removing an event handler
+    const removeHandler = (handler) => {
+
+      if(!handler.abort) {
+        console.log(handler);
+      }
+      // use abort signal to remove from element
+      handler.abort();
+
+      // remove from handler registry
+      Query.handlerRegistry.delete(handler);
+      const elementHandlers = Query.eventRegistry.get(handler.el);
+
+      // remove from el registry
+      if(elementHandlers) {
+        elementHandlers?.delete(handler?.el);
+        if (elementHandlers.size === 0) {
+          Query.eventRegistry.delete(domEL);
         }
-      });
-      Query.eventHandlers = [];
+      }
+
+    };
+
+    // Scenario 1: Remove handler by passing handler function
+    if (handler) {
+      removeHandler(handler);
       return this;
     }
 
-    const events = this.getEventArray(eventNames);
+    // Scenario 2: Remove by name or namespace
+    const events = eventNames
+      ? this.getEventArray(eventNames)
+      : [{ eventName: null, namespaces: null }];
 
-    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
-      const shouldRemove = events.some(({ eventName, namespaces }) => {
-        // Match event name (if specified)
-        const eventMatches = !eventName || eventHandler.eventName === eventName;
+    this.each(el => {
+      const domEL = (el === Query.globalThisProxy) ? globalThis : el;
+      const elementHandlers = Query.eventRegistry.get(domEL);
 
-        // Match namespaces (if specified) - any overlap removes the handler
-        let namespacesMatch = false;
-        if (namespaces && namespaces.length) {
-          if (eventHandler.namespaces && eventHandler.namespaces.length) {
-            // Check if any target namespace exists in handler's namespaces
-            namespacesMatch = namespaces.some(targetNs => inArray(targetNs, eventHandler.namespaces));
-          }
-        }
-        else {
-          // No namespaces specified in removal, matches any
-          namespacesMatch = true;
-        }
-
-        // Match handler (if specified)
-        const handlerMatches = !handler
-          || handler?.eventListener === eventHandler.eventListener
-          || eventHandler.eventListener === handler
-          || eventHandler.handler === handler;
-
-        return eventMatches && namespacesMatch && handlerMatches;
-      });
-
-      if (shouldRemove) {
-        // Remove the actual event listener
-        const el = (this.isGlobal) ? globalThis : eventHandler.el;
-        if (el.removeEventListener) {
-          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
-        }
-        return false; // Filter out this handler
+      // nothing to remove
+      if (!elementHandlers) {
+        return;
       }
-      return true; // Keep this handler
+
+      elementHandlers.forEach(eventHandler => {
+        // Check if this handler should be removed based on event/namespace match.
+        const shouldRemove = events.some(({ eventName, namespaces }) => {
+          const eventMatches = !eventName || eventHandler.eventName === eventName;
+          const sameNamespace = !namespaces || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
+          return eventMatches && sameNamespace;
+        });
+
+        if (shouldRemove) {
+          removeHandler(eventHandler);
+        }
+      });
     });
 
     return this;
   }
+
 
   trigger(eventName, eventSettings) {
     return this.each(el => {
