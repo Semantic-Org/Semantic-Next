@@ -156,6 +156,14 @@ export class LitRenderer {
   }
 
   /*
+    The rerender directive rerenders a block of content everytime
+    a reactive context value is changed
+  */
+  evaluateRerender(node, data) {
+    // implementation
+  }
+
+  /*
     The async directive takes an async expression and content blocks.
     It needs to return reactive values from renderer.
   */

@@ -15,6 +15,7 @@ class TemplateCompiler {
     ELSE: '^{OPEN}\\s*else\\s*',
     EACH: '^{OPEN}\\s*#each\\s+',
     SNIPPET: '^{OPEN}\\s*#snippet\\s+',
+    RERENDER: '^{OPEN}\\s*(rerender)(\\s+|(?={CLOSE}))',
     ASYNC: '^{OPEN}\\s*#(async)\\s+',
     ASYNC_LOADING: '^{OPEN}\\s*(before|loading)(\\s+|(?={CLOSE}))',
     ASYNC_ERROR: '^{OPEN}\\s*(error|catch)(\\s+|(?={CLOSE}))',
@@ -415,6 +416,10 @@ class TemplateCompiler {
             returnToLastContent();
             returnToLastCondition(); // Pop from condition stack
             break;
+          }
+
+          case 'EXPRESSION': {
+
           }
 
           case 'ASYNC': {
