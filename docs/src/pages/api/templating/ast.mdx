@@ -104,6 +104,77 @@ Represents a loop structure for iterating over arrays or objects, with optional 
 }
 ```
 
+### Rerender
+
+Represents a rerender or guard block that controls when template sections re-evaluate.
+
+#### Example (rerender block)
+```javascript
+{
+  type: 'rerender',
+  expression: 'userId',
+  key: null,
+  content: [/* nested AST nodes */]
+}
+```
+
+#### Example (guard block)
+```javascript
+{
+  type: 'rerender',
+  expression: null,
+  key: 'getUserStatus',
+  content: [/* nested AST nodes */]
+}
+```
+
+### Async
+
+Represents an async block that handles asynchronous operations with loading, success, and error states.
+
+#### Example (basic async)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchData',
+  content: [/* nested AST nodes for success state */]
+}
+```
+
+#### Example (with alias)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchUsers',
+  as: 'users',
+  content: [/* nested AST nodes for success state */]
+}
+```
+
+#### Example (with loading and error states)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchData',
+  as: 'data',
+  content: [/* nested AST nodes for success state */],
+  loadingContent: [/* nested AST nodes for loading state */],
+  errorContent: [/* nested AST nodes for error state */],
+  errorAs: 'error'
+}
+```
+
+#### Example (with destructuring)
+```javascript
+{
+  type: 'async',
+  expression: 'fetchUser',
+  parts: ['name', 'email'],
+  rest: 'rest',
+  content: [/* nested AST nodes */]
+}
+```
+
 ### Template
 
 Represents a nested template or partial.
