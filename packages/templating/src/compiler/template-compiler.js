@@ -15,13 +15,14 @@ class TemplateCompiler {
     ELSE: '^{OPEN}\\s*else\\s*',
     EACH: '^{OPEN}\\s*#each\\s+',
     SNIPPET: '^{OPEN}\\s*#snippet\\s+',
-    RERENDER: '^{OPEN}\\s*(rerender)(\\s+|(?={CLOSE}))',
+    RERENDER: '^{OPEN}\\s*#(rerender|guard)\\s+',
     ASYNC: '^{OPEN}\\s*#(async)\\s+',
     ASYNC_LOADING: '^{OPEN}\\s*(before|loading)(\\s+|(?={CLOSE}))',
     ASYNC_ERROR: '^{OPEN}\\s*(error|catch)(\\s+|(?={CLOSE}))',
     CLOSE_IF: '^{OPEN}\\s*\\/(if)\\s*',
     CLOSE_EACH: '^{OPEN}\\s*\\/(each)\\s*',
     CLOSE_SNIPPET: '^{OPEN}\\s*\\/(snippet)\\s*',
+    CLOSE_RERENDER: '^{OPEN}\\s*\\/(rerender|guard)\\s*',
     CLOSE_ASYNC: '^{OPEN}\\s*\\/(async)\\s*',
     SLOT: '^{OPEN}>\\s*slot\\s*',
     TEMPLATE: '^{OPEN}>\\s*',
@@ -475,6 +476,31 @@ class TemplateCompiler {
             break;
           }
 
+          case 'RERENDER': {
+            const isGuard = tag.content.includes('guard');
+            
+            // Parse key attribute if present (for hybrid syntax)
+            const { expression, key } = this.parseRerenderExpression(tag.content);
+            
+            newNode = {
+              ...newNode,
+              type: 'rerender',
+              expression: expression,
+              key: key, // Optional key expression
+              keyOnly: isGuard, // Flag for guard-only behavior
+              content: []
+            };
+            
+            setCurrentContent(newNode);
+            addToAST(newNode);
+            break;
+          }
+
+          case 'CLOSE_RERENDER': {
+            returnToLastContent();
+            break;
+          }
+
           case 'CLOSE_ASYNC': {
             returnToLastContent();
             break;
@@ -531,6 +557,17 @@ class TemplateCompiler {
       return Number(expression);
     }
     return expression;
+  }
+
+  parseRerenderExpression(content) {
+    // Parse "expression key=keyExpr" syntax
+    const keyMatch = content.match(/\s+key=(.+)$/);
+    if (keyMatch) {
+      const expression = content.replace(/\s+key=.+$/, '').trim();
+      const key = keyMatch[1].trim();
+      return { expression, key };
+    }
+    return { expression: content.trim(), key: null };
   }
 
   /* Parses the various syntax for embedding subtemplates */

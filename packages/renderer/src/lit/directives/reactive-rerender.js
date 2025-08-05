@@ -3,13 +3,12 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { each, isClient, isPlainObject, isPromise } from '@semantic-ui/utils';
+import { isClient } from '@semantic-ui/utils';
 
 export class ReactiveRerenderDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
-    this.error = null;
   }
 
   render(condition) {
@@ -19,20 +18,18 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       this.reaction = null;
     }
 
-    // Create a new reaction that watches for reactive changes on client
+    // Create new reaction on client
     if (isClient) {
       this.watchChanges(condition);
     }
 
-    // Return initial render
     return this.renderCurrentState(condition);
   }
 
   watchChanges(condition) {
-    // pass through context for debugging
-    let context = {
-      message: `rerender block: {#rerender ${condition.expression}}`,
-      async: condition,
+    const context = {
+      message: `rerender block: {#${condition.keyOnly ? 'guard' : 'rerender'} ${condition.expression}}`,
+      rerender: condition,
     };
 
     this.reaction = Reaction.create((computation) => {
@@ -41,14 +38,26 @@ export class ReactiveRerenderDirective extends AsyncDirective {
         return;
       }
 
-      // Evaluate the expression to get the promise or value
-      const expressionResult = condition.expression();
+      // this guards against the return value of a reactive expression the "key"
+      // {#guard expression} -> key=expression
+      // {#rerender key=expression} -> key=expressin
+      if (condition.key) {
+        Reaction.guard(condition.key);
+      }
+      // {#rerender expression} - naively add a reactive context to this reaction
+      if(condition.expression) {
+        condition.expression();
+      }
 
-      // Rerender on any reactive change.
+      // Rerender on reactive changes (after first run)
       if (!computation.firstRun) {
-        this.setValue(expression.content());
+        this.setValue(condition.content());
       }
     }, { context });
+  }
+
+  renderCurrentState(condition) {
+    return condition.content();
   }
 
   disconnected() {
@@ -59,8 +68,8 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // The reaction will be recreated in the next render
+    // Reaction will be recreated in next render
   }
 }
 
-export const reactiveAsync = directive(ReactiveRerenderDirective);
+export const reactiveRerender = directive(ReactiveRerenderDirective);
