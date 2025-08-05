@@ -25,6 +25,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
 * **Bug** - Fix issue where auto-self closing custom elements in templates only worked with one `-` i.e. `<foo-bar/>` not `<foo-baz-bar/>`
 
+## Reaction
+* **Perf** - Removed unnessary `clone` in `guard`
+
 ## Utils
 * **Feature** - Added `deepExtend()` for deep merging objects with nested property combining, array/date cloning, and optional custom class preservation
 * **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching
