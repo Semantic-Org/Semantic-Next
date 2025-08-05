@@ -37,6 +37,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
 
 ## Templates
+* **Feature** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
 * **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`
 
 ## Utils
