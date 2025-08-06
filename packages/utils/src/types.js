@@ -75,7 +75,7 @@ export const isNode = (el) => {
 
 export const isEmpty = (x) => {
   // we are using 'nullish' as empty
-  if (x == null || x === undefined) {
+  if (x == null) {
     return true;
   }
   if (isArray(x) || isString(x)) {
@@ -84,7 +84,7 @@ export const isEmpty = (x) => {
   let result = true;
   each(x, (value) => {
     // and again nullish is empty
-    if (value != null && value !== undefined) {
+    if (value != null) {
       result = false;
       return false;
     }
