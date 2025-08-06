@@ -44,7 +44,7 @@ export const isBinary = (x) => {
 };
 
 export const isFunction = (x) => {
-  return typeof x == 'function' || false;
+  return typeof x == 'function';
 };
 
 export const isPromise = (x) => {
@@ -72,18 +72,20 @@ export const isNode = (el) => {
 };
 
 export const isEmpty = (x) => {
-  // we want nullish here
+  // we are using 'nullish' as empty
   if (x == null) {
     return true;
   }
   if (isArray(x) || isString(x)) {
     return x.length === 0;
   }
-  for (let key in x) {
-    if (x[key]) {
+  each(x, (value) => {
+    // and again nullish is empty
+    if (value != null) {
+      result = false;
       return false;
     }
-  }
+  });
   return true;
 };
 
