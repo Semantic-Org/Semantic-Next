@@ -1,4 +1,4 @@
-import { isArray, isFunction, isObject } from './types.js';
+import { isArray, isIterable, isFunction, isObject } from './types.js';
 
 /*-------------------
       Looping
@@ -11,23 +11,43 @@ export const each = (obj, func, context) => {
     return obj;
   }
   const iteratee = context ? func.bind(context) : func;
-  if (isObject(obj) || isFunction(obj)) {
-    if (obj.length !== undefined && typeof obj.length === 'number') {
-      obj = Array.from(obj);
-    }
-  }
-  if (isArray(obj)) {
-    for (let i = 0; i < obj.length; ++i) {
-      if (iteratee(obj[i], i, obj) === false) {
-        break;
+
+  if (isIterable(obj)) {
+    // Set and Map
+    let i = 0;
+    if (obj instanceof Map) {
+      for (const [key, value] of obj) {
+        if (iteratee(value, key, obj) === false) break;
+      }
+    } else {
+      for (const value of obj) {
+        if (iteratee(value, i++, obj) === false) break;
       }
     }
+    return obj;
   }
   else {
-    const keys = Object.keys(obj);
-    for (let key of keys) {
-      if (iteratee(obj[key], key, obj) === false) {
-        break;
+    // Convert to an array if array-like
+    if (isObject(obj) || isFunction(obj)) {
+      if (obj.length !== undefined && typeof obj.length === 'number') {
+        obj = Array.from(obj);
+      }
+    }
+    if (isArray(obj)) {
+      // array case
+      for (let i = 0; i < obj.length; ++i) {
+        if (iteratee(obj[i], i, obj) === false) {
+          break;
+        }
+      }
+    }
+    else {
+      // obj literal case
+      const keys = Object.keys(obj);
+      for (let key of keys) {
+        if (iteratee(obj[key], key, obj) === false) {
+          break;
+        }
       }
     }
   }
