@@ -48,7 +48,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.15.0 - 07.24.2025
 
 ## Major Features
-* **Features* - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
+* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
 * **Feature** - Added support for binding el properties from inside templates like `<input type="checkbox" .checked={checked}>`
 * **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
 
