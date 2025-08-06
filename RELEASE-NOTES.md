@@ -9,7 +9,13 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.16.0 xx.xx.2025
 
 ## Major Features
-* **Query** - Added generalized plugin architecture for Query.
+* **Query** - Added generalized plugin architecture for Query along with examples in docs.
+* **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON -> JS exports. ESM will now directly use `src` without translation!
+* **UI** - Refactored exports massively, now `primitives`, `components`. Primitives include JSON specs and are essential building blocks like `modal`, `button`. Components have more complex functionality and include primitives.
+* **UI** - Added many new components like `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`. These are not documented yet.
+
+## Specs
+* **UI** - Added JS exports for specs
 
 ## Query
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
