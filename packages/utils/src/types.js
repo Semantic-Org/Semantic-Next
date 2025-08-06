@@ -91,6 +91,14 @@ export const isIterable = x => {
   return isFunction(x?.[Symbol.iterator]);
 };
 
+export const isMap = x => {
+  return x instanceof Map;
+};
+
+export const isSet = x => {
+  return x instanceof Set;
+};
+
 export const isClassInstance = (obj) => {
   if (obj === null || typeof obj !== 'object') {
     return false;

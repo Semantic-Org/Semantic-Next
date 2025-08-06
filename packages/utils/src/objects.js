@@ -1,5 +1,5 @@
 import { noop } from './functions.js';
-import { each } from './looping.js';
+import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isObject, isPlainObject } from './types.js';
 import { clone } from './cloning.js';
