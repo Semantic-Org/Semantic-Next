@@ -87,6 +87,10 @@ export const isEmpty = (x) => {
   return true;
 };
 
+export const isIterable = x => {
+  return isFunction(x?.[Symbol.iterator]);
+};
+
 export const isClassInstance = (obj) => {
   if (obj === null || typeof obj !== 'object') {
     return false;
