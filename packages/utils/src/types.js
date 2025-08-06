@@ -1,3 +1,5 @@
+import { each } from './loops.js';
+
 /*-------------------
         Types
 --------------------*/
@@ -73,20 +75,21 @@ export const isNode = (el) => {
 
 export const isEmpty = (x) => {
   // we are using 'nullish' as empty
-  if (x == null) {
+  if (x == null || x === undefined) {
     return true;
   }
   if (isArray(x) || isString(x)) {
     return x.length === 0;
   }
+  let result = true;
   each(x, (value) => {
     // and again nullish is empty
-    if (value != null) {
+    if (value != null && value !== undefined) {
       result = false;
       return false;
     }
   });
-  return true;
+  return result;
 };
 
 export const isIterable = x => {
