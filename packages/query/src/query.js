@@ -2,6 +2,7 @@ import {
   camelToKebab,
   each,
   findIndex,
+  firstMatch,
   get,
   inArray,
   isArray,
@@ -661,35 +662,40 @@ export class Query {
     }
 
     // actually handle removing an event handler
-    const removeHandler = (handler) => {
+    const removeHandler = (handler, el = handler?.el) => {
 
-      if(!handler.abort) {
-        console.log(handler);
+      const elementHandlers = Query.eventRegistry.get(el);
+
+      // this is an exact handler to match
+      if(isFunction(handler) && el) {
+        const handlerFunc = handler;
+        handler = firstMatch(elementHandlers, thisHandler => thisHandler.handler === handlerFunc);
       }
+
       // use abort signal to remove from element
       handler.abort();
 
       // remove from handler registry
       Query.handlerRegistry.delete(handler);
-      const elementHandlers = Query.eventRegistry.get(handler.el);
 
       // remove from el registry
       if(elementHandlers) {
-        elementHandlers?.delete(handler?.el);
+        elementHandlers?.delete(handler);
         if (elementHandlers.size === 0) {
-          Query.eventRegistry.delete(domEL);
+          Query.eventRegistry.delete(el);
         }
       }
 
     };
 
-    // Scenario 1: Remove handler by passing handler function
-    if (handler) {
+    // Scenario 1: Remove handler by passing handler object
+    // i.e. { handler, abort } // etc
+    if (isPlainObject(handler)) {
       removeHandler(handler);
       return this;
     }
 
-    // Scenario 2: Remove by name or namespace
+    // Scenario 2: Remove by name or namespace or initial handler function
     const events = eventNames
       ? this.getEventArray(eventNames)
       : [{ eventName: null, namespaces: null }];
@@ -708,11 +714,14 @@ export class Query {
         const shouldRemove = events.some(({ eventName, namespaces }) => {
           const eventMatches = !eventName || eventHandler.eventName === eventName;
           const sameNamespace = !namespaces || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
-          return eventMatches && sameNamespace;
+          const handlerMatches = !handler 
+            || eventHandler.handler === handler 
+            || eventHandler === handler;
+          return eventMatches && sameNamespace && handlerMatches;
         });
 
         if (shouldRemove) {
-          removeHandler(eventHandler);
+          removeHandler(eventHandler, el);
         }
       });
     });
