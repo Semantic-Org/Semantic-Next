@@ -7,7 +7,7 @@ export * from './dates';
 export * from './equality';
 export * from './errors';
 export * from './functions';
-export * from './looping';
+export * from './loops';
 export * from './numbers';
 export * from './objects';
 export * from './regexp';
