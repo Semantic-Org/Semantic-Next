@@ -223,10 +223,6 @@ export class Query {
     return this;
   }
 
-  removeAllEvents() {
-    Query.eventHandlers = [];
-  }
-
   find(selector) {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
@@ -714,8 +710,8 @@ export class Query {
         const shouldRemove = events.some(({ eventName, namespaces }) => {
           const eventMatches = !eventName || eventHandler.eventName === eventName;
           const sameNamespace = !namespaces || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
-          const handlerMatches = !handler 
-            || eventHandler.handler === handler 
+          const handlerMatches = !handler
+            || eventHandler.handler === handler
             || eventHandler === handler;
           return eventMatches && sameNamespace && handlerMatches;
         });
