@@ -410,3 +410,69 @@ console.log(isClassInstance(myInstance)); // true
 console.log(isClassInstance({})); // false
 console.log(isClassInstance(new Date())); // false
 ```
+
+### isSet
+
+```javascript
+function isSet(x)
+```
+
+Checks if the given value is a Set instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is a Set, false otherwise.
+
+#### Example
+
+```javascript
+import { isSet } from '@semantic-ui/utils';
+
+console.log(isSet(new Set())); // true
+console.log(isSet(new Set([1, 2, 3]))); // true
+console.log(isSet([])); // false
+console.log(isSet(new Map())); // false
+```
+
+> **Type Safety** Use `isSet()` before calling Set-specific methods like `add()`, `has()`, or `delete()` to ensure type safety in your code.
+
+### isMap
+
+```javascript
+function isMap(x)
+```
+
+Checks if the given value is a Map instance.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is a Map, false otherwise.
+
+#### Example
+
+```javascript
+import { isMap } from '@semantic-ui/utils';
+
+console.log(isMap(new Map())); // true
+console.log(isMap(new Map([['a', 1]]))); // true
+console.log(isMap({})); // false
+console.log(isMap(new Set())); // false
+
+// Distinguish from objects with Map-like methods
+const mapLike = { set: () => {}, get: () => {}, size: 0 };
+console.log(isMap(mapLike)); // false
+```
+
+> **Instance Checking** `isMap()` uses `instanceof Map` to distinguish real Map instances from plain objects that might have similar method names.

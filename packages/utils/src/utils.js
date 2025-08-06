@@ -7,7 +7,7 @@ export * from './dates.js';
 export * from './equality.js';
 export * from './errors.js';
 export * from './functions.js';
-export * from './looping.js';
+export * from './loops.js';
 export * from './numbers.js';
 export * from './objects.js';
 export * from './regexp.js';

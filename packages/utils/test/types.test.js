@@ -5,10 +5,12 @@ import {
   isClassInstance,
   isEmpty,
   isFunction,
+  isMap,
   isNumber,
   isObject,
   isPlainObject,
   isPromise,
+  isSet,
   isString,
 } from '@semantic-ui/utils';
 
@@ -155,6 +157,92 @@ describe('Type Checking Utilities', () => {
       expect(isClassInstance(() => {})).toBe(false);
       function testFunction() {}
       expect(isClassInstance(testFunction)).toBe(false);
+    });
+  });
+
+  describe('isSet', () => {
+    it('should return true for Set instances', () => {
+      expect(isSet(new Set())).toBe(true);
+      expect(isSet(new Set([1, 2, 3]))).toBe(true);
+      expect(isSet(new Set(['a', 'b', 'c']))).toBe(true);
+    });
+
+    it('should return false for non-Set values', () => {
+      expect(isSet([])).toBe(false);
+      expect(isSet({})).toBe(false);
+      expect(isSet(new Map())).toBe(false);
+      expect(isSet(new Array())).toBe(false);
+      expect(isSet('set')).toBe(false);
+      expect(isSet(123)).toBe(false);
+      expect(isSet(null)).toBe(false);
+      expect(isSet(undefined)).toBe(false);
+      expect(isSet(true)).toBe(false);
+      expect(isSet(() => {})).toBe(false);
+      expect(isSet(new Date())).toBe(false);
+      expect(isSet(new RegExp())).toBe(false);
+    });
+
+    it('should return true for empty Set', () => {
+      const emptySet = new Set();
+      expect(isSet(emptySet)).toBe(true);
+      expect(emptySet.size).toBe(0);
+    });
+
+    it('should return true for Set with mixed types', () => {
+      const mixedSet = new Set([1, 'two', { three: 3 }, null, undefined]);
+      expect(isSet(mixedSet)).toBe(true);
+    });
+  });
+
+  describe('isMap', () => {
+    it('should return true for Map instances', () => {
+      expect(isMap(new Map())).toBe(true);
+      expect(isMap(new Map([['a', 1], ['b', 2]]))).toBe(true);
+      expect(isMap(new Map([[1, 'one'], [2, 'two']]))).toBe(true);
+    });
+
+    it('should return false for non-Map values', () => {
+      expect(isMap([])).toBe(false);
+      expect(isMap({})).toBe(false);
+      expect(isMap(new Set())).toBe(false);
+      expect(isMap(new Array())).toBe(false);
+      expect(isMap('map')).toBe(false);
+      expect(isMap(123)).toBe(false);
+      expect(isMap(null)).toBe(false);
+      expect(isMap(undefined)).toBe(false);
+      expect(isMap(true)).toBe(false);
+      expect(isMap(() => {})).toBe(false);
+      expect(isMap(new Date())).toBe(false);
+      expect(isMap(new RegExp())).toBe(false);
+    });
+
+    it('should return true for empty Map', () => {
+      const emptyMap = new Map();
+      expect(isMap(emptyMap)).toBe(true);
+      expect(emptyMap.size).toBe(0);
+    });
+
+    it('should return true for Map with mixed key/value types', () => {
+      const mixedMap = new Map([
+        [1, 'number key'],
+        ['str', 'string key'],
+        [{ obj: true }, 'object key'],
+        [null, 'null key'],
+        [undefined, 'undefined key']
+      ]);
+      expect(isMap(mixedMap)).toBe(true);
+    });
+
+    it('should distinguish Map from similar objects', () => {
+      const objectWithMapMethods = {
+        set: () => {},
+        get: () => {},
+        has: () => {},
+        delete: () => {},
+        size: 0
+      };
+      expect(isMap(objectWithMapMethods)).toBe(false);
+      expect(isMap(new Map())).toBe(true);
     });
   });
 });

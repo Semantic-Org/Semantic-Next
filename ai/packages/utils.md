@@ -210,7 +210,7 @@ const reactive = proxyObject(source, {
 ```javascript
 import { 
   isObject, isArray, isString, isNumber, isFunction, isBoolean,
-  isEmpty, isPlainObject
+  isEmpty, isPlainObject, isSet, isMap
 } from '@semantic-ui/utils';
 
 // Standard type checking
@@ -221,11 +221,29 @@ isNumber(42);                    // true
 isFunction(() => {});            // true
 isBoolean(true);                 // true
 
+// Collection type checking
+isSet(new Set([1, 2, 3]));       // true
+isSet([1, 2, 3]);                // false
+isMap(new Map([['a', 1]]));      // true
+isMap({ a: 1 });                 // false
+
 // Special cases
 isEmpty('');                     // true
 isEmpty([]);                     // true
 isEmpty({});                     // true
 isPlainObject({});               // true (excludes class instances)
+
+// Type-safe collection operations
+function processCollection(data) {
+  if (isSet(data)) {
+    return `Set with ${data.size} unique items`;
+  } else if (isMap(data)) {
+    return `Map with ${data.size} key-value pairs`;
+  } else if (isArray(data)) {
+    return `Array with ${data.length} elements`;
+  }
+  return 'Unknown collection type';
+}
 ```
 
 ### Advanced Type Checks
@@ -549,17 +567,51 @@ fatal('Critical system error', { exit: true });
 ```javascript
 import { each, asyncEach, asyncMap } from '@semantic-ui/utils';
 
-// Enhanced array iteration
+// Array iteration
 each([1, 2, 3], (value, index) => {
   console.log(`Item ${index}: ${value}`);
 });
 
-// Async iterations
-await asyncEach([1, 2, 3], async (value) => {
+// Object iteration
+each({ a: 1, b: 2 }, (value, key) => {
+  console.log(`${key}: ${value}`);
+});
+
+// Set iteration (index is 0-based counter)
+each(new Set(['apple', 'banana']), (value, index) => {
+  console.log(`Set item ${index}: ${value}`);
+});
+
+// Map iteration (preserves key types)
+each(new Map([['key1', 'val1'], [2, 'val2']]), (value, key) => {
+  console.log(`${key}: ${value}`);  // key1: val1, 2: val2
+});
+
+// Breaking iteration early
+each([1, 2, 3, 4], (value) => {
+  if (value === 3) return false;  // stops iteration
+});
+
+// Async iterations with Set/Map support
+await asyncEach(new Set([1, 2, 3]), async (value) => {
   await processAsync(value);
 });
 
-const results = await asyncMap([1, 2, 3], async (x) => x * 2);
+await asyncEach(new Map([['a', 1], ['b', 2]]), async (value, key) => {
+  await updateEntry(key, value);
+});
+
+// Async mapping - arrays return arrays
+const results = await asyncMap([1, 2, 3], async (x) => x * 2);      // [2, 4, 6]
+
+// Async Set mapping - returns array
+const setResults = await asyncMap(new Set([1, 2, 3]), async (x) => x * 2); // [2, 4, 6]
+
+// Async Map mapping - returns new Map with same keys
+const mapResults = await asyncMap(
+  new Map([['a', 1], ['b', 2]]), 
+  async (value, key) => value * 10
+);                                                                   // Map([['a', 10], ['b', 20]])
 ```
 
 ## RegExp Utilities (regexp.js)

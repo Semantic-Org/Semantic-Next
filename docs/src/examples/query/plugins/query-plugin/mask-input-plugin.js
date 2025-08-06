@@ -4,11 +4,14 @@ import { $ } from '@semantic-ui/query';
 $.plugin.maskInput = function({ type = 'alphanumeric' } = {}) {
   this.on('keydown', (event) => {
     const presets = {
-      alpha: /[a-z]/,
+      alpha: /[a-zA-Z]/,
       numeric: /[0-9]/,
-      alphanumeric: /[a-z0-9]/,
+      alphanumeric: /[a-zA-Z0-9]/,
     };
-
+    // allow all special keys
+    if (event.key.length > 1) {
+      return;
+    }
     const regex = type instanceof RegExp
       ? type
       : presets[type];

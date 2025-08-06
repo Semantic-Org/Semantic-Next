@@ -1,6 +1,6 @@
 import { hashCode } from './crypto.js';
 import { isServer } from './ssr.js';
-import { each } from './looping.js';
+import { each } from './loops.js';
 import { isString, isArray } from './types.js';
 import { inArray } from './arrays.js';
 

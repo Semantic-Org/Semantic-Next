@@ -1,3 +1,5 @@
+import { each } from './loops.js';
+
 /*-------------------
         Types
 --------------------*/
@@ -44,7 +46,7 @@ export const isBinary = (x) => {
 };
 
 export const isFunction = (x) => {
-  return typeof x == 'function' || false;
+  return typeof x == 'function';
 };
 
 export const isPromise = (x) => {
@@ -72,19 +74,34 @@ export const isNode = (el) => {
 };
 
 export const isEmpty = (x) => {
-  // we want nullish here
+  // we are using 'nullish' as empty
   if (x == null) {
     return true;
   }
   if (isArray(x) || isString(x)) {
     return x.length === 0;
   }
-  for (let key in x) {
-    if (x[key]) {
+  let result = true;
+  each(x, (value) => {
+    // and again nullish is empty
+    if (value != null) {
+      result = false;
       return false;
     }
-  }
-  return true;
+  });
+  return result;
+};
+
+export const isIterable = x => {
+  return isFunction(x?.[Symbol.iterator]);
+};
+
+export const isMap = x => {
+  return x instanceof Map;
+};
+
+export const isSet = x => {
+  return x instanceof Set;
 };
 
 export const isClassInstance = (obj) => {
