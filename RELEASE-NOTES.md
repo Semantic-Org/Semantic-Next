@@ -6,10 +6,16 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.16.0
+# Version 0.16.0 xx.xx.2025
 
 ## Major Features
-* **Query** - Added generalized plugin architecture for Query.
+* **Query** - Added generalized plugin architecture for Query along with examples in docs.
+* **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON -> JS exports. ESM will now directly use `src` without translation!
+* **UI** - Refactored exports massively, now `primitives`, `components`. Primitives include JSON specs and are essential building blocks like `modal`, `button`. Components have more complex functionality and include primitives.
+* **UI** - Added many new components like `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`. These are not documented yet.
+
+## Specs
+* **UI** - Added JS exports for specs
 
 ## Query
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
@@ -35,13 +41,16 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching
 * **Feature** - Added `extractCSS()` for extracting CSS rules matching selectors from various stylesheet sources with optional text output
 * **Feature** - Added `scopeStyles()` for scoping CSS rules with configurable :host replacement and root element handling
+* **Feature** - Added Set and Map support to `each()`, `asyncEach()`, and `asyncMap()` functions for iterating over ES6 collections
+* **Feature** - Added `isSet()` and `isMap()` type checking helpers for ES6 collection validation
 * **Enhancement** - Enhanced `clone()` function with `preserveNonCloneable` option to preserve custom class instances instead of flattening them
-* **Chore** - Restructured tests for utils package to be organized by category.
+* **Enhancement** - Modify `isEmpty` to handle Set, Map, and other iterables. Assume all nullish keys means empty.
+* **Chore** - Restructured tests for utils package to be organized by category. Renamed iterators to loops.
 
 # Version 0.15.0 - 07.24.2025
 
 ## Major Features
-* **Features* - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
+* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`
 * **Feature** - Added support for binding el properties from inside templates like `<input type="checkbox" .checked={checked}>`
 * **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers
 
