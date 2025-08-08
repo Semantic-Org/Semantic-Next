@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/renderer",
-  "version": "0.14.1",
+  "version": "0.16.0",
   "title": "Semantic UI Renderer",
   "description": "High-performance template rendering system with reactive directives",
   "author": "Jack Lukic",
@@ -31,12 +31,12 @@
     "lit": "^3.0.0"
   },
   "dependencies": {
-    "@semantic-ui/reactivity": "^0.14.1",
-    "@semantic-ui/templating": "^0.14.1",
-    "@semantic-ui/utils": "^0.14.1"
+    "@semantic-ui/reactivity": "^0.16.0",
+    "@semantic-ui/templating": "^0.16.0",
+    "@semantic-ui/utils": "^0.16.0"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.14.1",
+    "@semantic-ui/internal-scripts": "^0.16.0",
     "vitest": "^3.2.4"
   },
   "wireit": {
