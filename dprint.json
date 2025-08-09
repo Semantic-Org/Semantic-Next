@@ -42,7 +42,7 @@
     "LICENSE.md",
     "docs/public",
     "README.md",
-    "**/*-component.js",
+    "**/*component.js",
     "**/*.html",
     "**/*.json",
     "**/*.md",
