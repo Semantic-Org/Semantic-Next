@@ -43,6 +43,7 @@
     "docs/public",
     "README.md",
     "**/*.html",
+    "**/*.json",
     "**/*.md",
     "**/node_modules",
     "**/*-lock.json"
