@@ -522,8 +522,12 @@ export class Behavior {
         self,
         behavior: self,
         namespace: self.namespace,
+        cache: self.$.plugin[self.namespace],
         get data() {
           return self.getElementData(self.element);
+        },
+        set data(name) {
+          self.element.dataset[name] = value;
         },
         get selectors() {
           return self.selectors;
