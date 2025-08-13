@@ -14,9 +14,15 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);        /* State changes */
   --ease-snappy: cubic-bezier(0.35, 0, 0.65, 1);      /* For microinteractions */
   --ease-linear: linear;                              /* Continuous animations */
+  --ease-glow: cubic-bezier(0.19, 1, 0.22, 1);        /* Gentle, organic lighting effects */
 
   /* Animation Intervals */
   --transition-item-delay: 50ms;        /* Delay between items */
+
+  /* Continuous Animation Durations */
+  --duration-spin: 1s;                  /* Standard rotation speed */
+  --duration-glow: 2s;                  /* Gentle lighting effects */
+  --duration-shimmer: 1.5s;             /* Wave/shimmer effects */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -27,6 +33,7 @@
 
 .transition {
 
+  transition-behavior: allow-discrete;
 
   /* Some animations use transitions, for these animations assume reasonable defaults */
   @starting-style {
@@ -58,7 +65,11 @@
   /*--------------
        Fade Up
   ---------------*/
-  .fade-up {
+  &.fade-up {
+    @starting-style {
+      transform: translateY(8px);
+    }
+
     &.in {
       opacity: 1;
       transform: translateY(0);
@@ -80,13 +91,13 @@
   /*--------------
      Cross Fade
   ---------------*/
-
-
-  .cross-fade.in {
-    animation: cross-fade-in var(--duration-medium) var(--ease-out) forwards;
-  }
-  .cross-fade.out {
-    animation: cross-fade-out var(--duration-medium) var(--ease-in) forwards;
+  &.cross-fade {
+    &.in {
+      animation: cross-fade-in var(--duration-medium) var(--ease-out) forwards;
+    }
+    &.out {
+      animation: cross-fade-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes cross-fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes cross-fade-out { from { opacity: 1; } to { opacity: 0; } }
@@ -96,17 +107,21 @@
             Scale
   **************************/
 
-  /* Scale  */
-  .scale.in {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity var(--duration-medium) var(--ease-standard),
-      transform var(--duration-medium) var(--ease-standard),
-      box-shadow var(--duration-medium) var(--ease-standard);
-  }
-  .scale.out {
-    animation: scale-out var(--duration-short) var(--ease-in) forwards;
+  /*--------------
+       Scale
+  ---------------*/
+  &.scale {
+    &.in {
+      opacity: 1;
+      transform: scale(1);
+      transition:
+        opacity var(--duration-medium) var(--ease-standard),
+        transform var(--duration-medium) var(--ease-standard),
+        box-shadow var(--duration-medium) var(--ease-standard);
+    }
+    &.out {
+      animation: scale-out var(--duration-short) var(--ease-in) forwards;
+    }
   }
   @keyframes scale-out {
     to {
@@ -116,21 +131,27 @@
     }
   }
 
-  /*--------------
-       Vertical
-  ---------------*/
-  .vertical-scale.in {
-    opacity: 1;
-    transform: scaleY(1);
-    transform-origin: top;
-    transition:
-      opacity var(--duration-short) var(--ease-out),
-      transform var(--duration-short) var(--ease-out),
-      box-shadow var(--duration-short) var(--ease-out);
-  }
-  .vertical-scale.out {
-    transform-origin: top;
-    animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
+    /*--------------
+         Vertical
+    ---------------*/
+  &.vertical-scale {
+    @starting-style {
+      transform: scaleY(0);
+    }
+
+    &.in {
+      opacity: 1;
+      transform: scaleY(1);
+      transform-origin: top;
+      transition:
+        opacity var(--duration-short) var(--ease-out),
+        transform var(--duration-short) var(--ease-out),
+        box-shadow var(--duration-short) var(--ease-out);
+    }
+    &.out {
+      transform-origin: top;
+      animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
+    }
   }
   @keyframes scale-vertical-out {
     to {
@@ -143,18 +164,41 @@
   /*--------------
      Directional
   ---------------*/
-  .scale-top.in, .scale-bottom.in, .scale-left.in, .scale-right.in {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity var(--duration-quick) var(--ease-snappy),
-      transform var(--duration-quick) var(--ease-snappy),
-      box-shadow var(--duration-quick) var(--ease-snappy);
+  &.scale-top, &.scale-bottom, &.scale-left, &.scale-right {
+    &.in {
+      opacity: 1;
+      transform: scale(1);
+      transition:
+        opacity var(--duration-quick) var(--ease-snappy),
+        transform var(--duration-quick) var(--ease-snappy),
+        box-shadow var(--duration-quick) var(--ease-snappy);
+    }
+    &.out {
+      animation: scale-directional-out var(--duration-quick) var(--ease-in) forwards;
+    }
   }
-  .scale-top.in { transform-origin: center bottom; }
-  .scale-bottom.in { transform-origin: center top; }
-  .scale-left.in { transform-origin: right center; }
-  .scale-right.in { transform-origin: left center; }
+  &.scale-top {
+    &.in { transform-origin: center bottom; }
+    &.out { transform-origin: center bottom; }
+  }
+  &.scale-bottom {
+    &.in { transform-origin: center top; }
+    &.out { transform-origin: center top; }
+  }
+  &.scale-left {
+    &.in { transform-origin: right center; }
+    &.out { transform-origin: right center; }
+  }
+  &.scale-right {
+    &.in { transform-origin: left center; }
+    &.out { transform-origin: left center; }
+  }
+  @keyframes scale-directional-out {
+    to {
+      opacity: 0;
+      transform: scale(0);
+    }
+  }
 
   /*******************************
              Slide
@@ -163,92 +207,104 @@
   /*--------------
      Slide Left
   ---------------*/
-  .slide-left.in {
-    transform: translateX(0);
-    transition:
-      transform var(--duration-medium) var(--ease-out),
-      box-shadow var(--duration-medium) var(--ease-out);
-  }
-  .slide-left.out {
-    animation: slide-left-out var(--duration-medium) var(--ease-in) forwards;
+  &.slide-left {
+    @starting-style {
+      opacity: 1;
+      transform: translateX(100%);
+    }
+
+    &.in {
+      transform: translateX(0);
+      transition:
+        transform var(--duration-medium) var(--ease-out),
+        box-shadow var(--duration-medium) var(--ease-out);
+    }
+    &.out {
+      animation: slide-left-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes slide-left-out { to { transform: translateX(-100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
   /*--------------
      Slide Right
   ---------------*/
-  .slide-right.in {
-    transform: translateX(0);
-    transition:
-      transform var(--duration-medium) var(--ease-out),
-      box-shadow var(--duration-medium) var(--ease-out);
-  }
-  .slide-right.out {
-    animation: slide-right-out var(--duration-medium) var(--ease-in) forwards;
+  &.slide-right {
+    @starting-style {
+      opacity: 1;
+      transform: translateX(-100%);
+    }
+
+    &.in {
+      transform: translateX(0);
+      transition:
+        transform var(--duration-medium) var(--ease-out),
+        box-shadow var(--duration-medium) var(--ease-out);
+    }
+    &.out {
+      animation: slide-right-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes slide-right-out { to { transform: translateX(100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
   /*--------------
       Slide Up
   ---------------*/
-  .slide-up.in {
-    transform: translateY(0);
-    transition:
-      transform var(--duration-medium) var(--ease-out),
-      box-shadow var(--duration-medium) var(--ease-out);
-  }
-  .slide-up.out {
-    animation: slide-up-out var(--duration-medium) var(--ease-in) forwards;
+  &.slide-up {
+    @starting-style {
+      opacity: 1;
+      transform: translateY(100%);
+    }
+
+    &.in {
+      transform: translateY(0);
+      transition:
+        transform var(--duration-medium) var(--ease-out),
+        box-shadow var(--duration-medium) var(--ease-out);
+    }
+    &.out {
+      animation: slide-up-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes slide-up-out { to { transform: translateY(-100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
   /*--------------
      Slide Down
   ---------------*/
-  .slide-down.in {
-    transform: translateY(0);
-    transition:
-      transform var(--duration-medium) var(--ease-out),
-      box-shadow var(--duration-medium) var(--ease-out);
-  }
-  .slide-down.out {
-    animation: slide-down-out var(--duration-medium) var(--ease-in) forwards;
+  &.slide-down {
+    @starting-style {
+      opacity: 1;
+      transform: translateY(-100%);
+    }
+
+    &.in {
+      transform: translateY(0);
+      transition:
+        transform var(--duration-medium) var(--ease-out),
+        box-shadow var(--duration-medium) var(--ease-out);
+    }
+    &.out {
+      animation: slide-down-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes slide-down-out { to { transform: translateY(100%); box-shadow: 0 0 0 0 rgba(0,0,0,0); } }
 
-  /*******************************
-         Height Animations
-  *******************************/
-
-  /*--------------
-       Expand
-  ---------------*/
-  .expand {
-    overflow: hidden;
-    height: 0;
-    transition:
-      height var(--duration-medium) var(--ease-out),
-      box-shadow var(--duration-medium) var(--ease-out);
-  }
-  .expand.in {
-    height: var(--height);
-  }
-  .expand.out {
-    height: 0;
-    transition-timing-function: var(--ease-in);
-  }
 
   /*******************************
           Special Uses
   *******************************/
 
   /*--------------
-  Horizontal Flip
+       Flip
   ---------------*/
-  .flip.horizontal.in {
-    animation: flip-horizontal-in var(--duration-medium) var(--ease-in-out);
+  &.flip, &.horizontal-flip {
+    &.in {
+      animation: flip-in var(--duration-medium) var(--ease-in-out);
+    }
+    &.out {
+      animation: flip-out var(--duration-medium) var(--ease-in-out) forwards;
+    }
   }
-  @keyframes flip-horizontal-in {
+  @keyframes flip-in {
     from {
       transform: rotateY(-180deg);
       opacity: 0;
@@ -258,52 +314,162 @@
       opacity: 1;
     }
   }
+  @keyframes flip-out {
+    from {
+      transform: rotateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: rotateY(180deg);
+      opacity: 0;
+    }
+  }
+
+  /*--------------
+    Vertical Flip
+  ---------------*/
+  &.vertical-flip {
+    &.in {
+      animation: flip-vertical-in var(--duration-medium) var(--ease-in-out);
+    }
+    &.out {
+      animation: flip-vertical-out var(--duration-medium) var(--ease-in-out) forwards;
+    }
+  }
+  @keyframes flip-vertical-in {
+    from {
+      transform: rotateX(-180deg);
+      opacity: 0;
+    }
+    to {
+      transform: rotateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes flip-vertical-out {
+    from {
+      transform: rotateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: rotateX(180deg);
+      opacity: 0;
+    }
+  }
 
   /*--------------
        Bounce
   ---------------*/
-  .bounce.in {
-    animation: bounce-in var(--duration-medium) var(--ease-out);
+
+  &.bounce {
+    &.in {
+      animation: bounce-in var(--duration-medium) var(--ease-out);
+    }
+    &.out {
+      animation: bounce-out var(--duration-short) var(--ease-in) forwards;
+    }
   }
   @keyframes bounce-in {
     0% { transform: scale(0); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
+  @keyframes bounce-out {
+    to {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+  }
 
   /*--------------
         Draw
   ---------------*/
-  .draw.in {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: draw-in var(--duration-medium) var(--ease-out) forwards;
+
+  &.draw {
+    &.in {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw-in var(--duration-medium) var(--ease-out) forwards;
+    }
+    &.out {
+      stroke-dasharray: 1;
+      animation: draw-out var(--duration-medium) var(--ease-in) forwards;
+    }
   }
   @keyframes draw-in { to { stroke-dashoffset: 0; } }
+  @keyframes draw-out {
+    from { stroke-dashoffset: 0; }
+    to { stroke-dashoffset: 1; }
+  }
 
   /*--------------
        Toggle
   ---------------*/
-  .toggle.on {
-    transform: translateX(100%);
-    transition: transform var(--duration-short) var(--ease-in-out);
+
+  &.toggle {
+    &.on {
+      transform: translateX(100%);
+      transition: transform var(--duration-short) var(--ease-in-out);
+    }
+    &.off {
+      transform: translateX(0);
+      transition: transform var(--duration-short) var(--ease-in-out);
+    }
   }
-  .toggle.off {
-    transform: translateX(0);
-    transition: transform var(--duration-short) var(--ease-in-out);
+
+  /*******************************
+       Requires Special Setup
+  *******************************/
+
+  /*--------------
+       Expand
+  ---------------*/
+
+  /* This relies on --height being defined */
+  &.expand {
+    overflow: hidden;
+    height: 0;
+    transition:
+      height var(--duration-medium) var(--ease-out),
+      box-shadow var(--duration-medium) var(--ease-out);
+
+    &.in {
+      height: var(--height);
+    }
+    &.out {
+      height: 0;
+      transition-timing-function: var(--ease-in);
+    }
   }
 
   /*--------------
        Stagger
   ---------------*/
-  .stagger.in {
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity var(--duration-short) var(--ease-out),
-      transform var(--duration-short) var(--ease-out);
-    transition-delay: calc(var(--index, 0) * var(--transition-item-delay));
+
+  /* This requires --index to be defined for each element */
+  &.stagger {
+    @starting-style {
+      transform: translateY(10px);
+    }
+
+    &.in {
+      opacity: 1;
+      transform: translateY(0);
+      transition:
+        opacity var(--duration-short) var(--ease-out),
+        transform var(--duration-short) var(--ease-out);
+      transition-delay: calc(var(--index, 0) * var(--transition-item-delay));
+    }
+    &.out {
+      opacity: 0;
+      transform: translateY(-10px);
+      transition:
+        opacity var(--duration-short) var(--ease-in),
+        transform var(--duration-short) var(--ease-in);
+      transition-delay: calc((var(--total-items, 1) - var(--index, 0) - 1) * var(--transition-item-delay));
+    }
   }
+
 
   /*******************************
         Continuous Animations
@@ -312,15 +478,15 @@
   /*--------------
         Spin
   ---------------*/
-  .spin {
-    animation: spin 1s var(--ease-linear) infinite;
+  &.spin {
+    animation: spin var(--duration-spin) var(--ease-linear) infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /*--------------
         Shake
   ---------------*/
-  .shake {
+  &.shake {
     animation: shake var(--duration-medium) var(--ease-in-out);
   }
   @keyframes shake {
@@ -332,8 +498,9 @@
   /*--------------
         Glow
   ---------------*/
-  .glow {
-    animation: glow 2s cubic-bezier(0.19, 1, 0.22, 1);
+
+  &.glow {
+    animation: glow var(--duration-glow) var(--ease-glow);
   }
   @keyframes glow {
     0% { background-color: rgba(230, 199, 56, 0); }
@@ -344,24 +511,26 @@
   /*--------------
        Shimmer
   ---------------*/
-  .shimmer {
+
+  &.shimmer {
     position: relative;
     overflow: hidden;
-  }
-  .shimmer::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    animation: shimmer 1.5s var(--ease-linear) infinite;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      animation: shimmer var(--duration-shimmer) var(--ease-linear) infinite;
+    }
   }
   @keyframes shimmer { to { transform: translateX(100%); } }
 
   /*--------------
       Progress
   ---------------*/
-  .progress {
+  &.progress {
     transform: translateX(-100%);
     animation: progress var(--duration-long) var(--ease-linear) forwards;
   }

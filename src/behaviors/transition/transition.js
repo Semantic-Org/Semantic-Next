@@ -5,7 +5,7 @@ import css from './transition.css?raw';
 
 const defaultSettings = {
   animation: 'fade',
-  duration: 300,
+  duration: 'auto',
   onComplete: () => {},
   onStart: () => {},
   onShow: () => {},
@@ -34,40 +34,71 @@ const errors = {
 const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors }) => ({
   animate(overrideSettings) {
     // shadow global settings with override settings baked in
-    const settings = {
+    const animateSettings = {
       ...settings,
       ...overrideSettings,
     };
 
     // handle case of already animating
     if (self.isAnimating()) {
-      if (settings.queue) {
+      if (animateSettings.queue) {
         self.queue(settings);
       }
-      if (!settings.allowRepeats) {
+      if (!animateSettings.allowRepeats) {
         return;
       }
       return;
     }
 
     const animation = self.findCSSAnimation();
+    console.log('animation is', animation);
   },
 
   // look in css defs for a valid animation matching name
   // determine if its a transition (in/out)
   findCSSAnimation(transitionName) {
     // fast path
-    const cachedAnimation = self.getCachedAnimation();
+    const cachedAnimation = self.getCachedAnimation(transitionName);
     if (cachedAnimation) {
       return cachedAnimation;
     }
+
     const current = {
       tag: $el.prop('tagName'),
       class: $el.attr('class'),
     };
+
     // add appropriate classes then check if computedStyle animationName
     // we can do this to determine if the animation exists
-    const $clone = $('<' + current.tag + ' />').addClass(current.class).insertAfter(el);
+    const $clone = $('<' + current.tag + ' />').addClass(current.class);
+
+    // add to DOM to probe rules
+    $clone
+      .addClass(transitionName)
+      .addClass(classNames.transition)
+      .addClass(classNames.animating)
+      .insertAfter(el);
+
+    // Check base state animations
+    const baseAnimations = $clone.el().getAnimations();
+
+    // Add directional class and check if CSS transitions start
+    $clone.addClass(classNames.inward);
+    const inAnimations = $clone.el().getAnimations();
+    const activeTransitions = inAnimations.filter(anim => anim instanceof CSSTransition);
+
+    const animation = {
+      exists: baseAnimations.length > 0 || activeTransitions.length > 0,
+      directional: activeTransitions.length > 0,
+    };
+
+    // cleanup
+    $clone.remove();
+
+    // cache result
+    self.setCachedAnimation(transitionName, animation);
+
+    return animation;
   },
 
   prepareAnimation() {
@@ -88,13 +119,13 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
   },
 
   setCachedAnimation(name, exists) {
-    if (!cache.exists) {
-      cache.exists = {};
+    if (!cache.animationExists) {
+      cache.animationExists = {};
     }
     cache.animationExists[name] = name;
   },
   getCachedAnimation(name) {
-    return cache.animationExists[name];
+    return cache?.animationExists[name];
   },
 
   isAnimating() {
@@ -112,10 +143,26 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 });
 
 // Handle string invocations like .transition('fade in')
+// transition is overloaded to handle a simpler invocation pattern
+
 const customInvocation = ({ self, methodName, methodArgs }) => {
-  // handle
-  // .transition(name, duration, callback)
-  // .transition(name, callback)
+  const [durationOrCallback, callback] = methodArgs;
+  let settings = { animation: methodName };
+
+  // .transition(animationName, callback)
+  if (typeof durationOrCallback === 'function') {
+    settings.onComplete = durationOrCallback;
+  }
+  // .transition(animationName, duration, callback)
+  else if (durationOrCallback !== undefined) {
+    settings.duration = durationOrCallback;
+    if (typeof callback === 'function') {
+      settings.onComplete = callback;
+    }
+  }
+
+  // call animate with constructed settings
+  return self.animate(settings);
 };
 
 export const Transition = registerBehavior({
