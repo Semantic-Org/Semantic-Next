@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, inArray } from '@semantic-ui/utils';
+import { each } from '@semantic-ui/utils';
 
 import css from './transition.css?raw';
 
@@ -27,227 +27,95 @@ const classNames = {
 };
 
 const errors = {
-  noAnimation: 'Element is no longer attached to DOM. Unable to animate.',
+  noAnimation: 'Could not find an animation with that name.',
   repeated: 'Animation is already occurring, cancelling repeated animation',
-  method: 'The method you called is not defined',
-  unsupported: 'This animation is not yet supported',
 };
 
-const createBehavior = ({ $, el, $el, self, settings, classNames, errors }) => ({
-  // support syntax $('foo').transition('fade in', 200);
-  handleCustomInvocation(methodName) {
-    settings.animation = methodName;
-    self.animate(methodName);
-  },
+const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors }) => ({
+  animate(overrideSettings) {
+    // shadow global settings with override settings baked in
+    const settings = {
+      ...settings,
+      ...overrideSettings,
+    };
 
-  isVisible() {
-    // Check multiple indicators of visibility
-    const hasHiddenClass = $el.hasClass(classNames.hidden);
-    const hasVisibleClass = $el.hasClass(classNames.visible);
-    const computedStyles = $el.computedStyle();
-    const isDisplayNone = computedStyles.display === 'none';
-    const computedOpacity = parseFloat(computedStyles.opacity);
-    const isVisibilityHidden = computedStyles.visibility === 'hidden';
-
-    // Element is hidden if it has hidden class, display none, or visibility hidden
-    if (hasHiddenClass || isDisplayNone || isVisibilityHidden) {
-      return false;
+    // handle case of already animating
+    if (self.isAnimating()) {
+      if (settings.queue) {
+        self.queue(settings);
+      }
+      if (!settings.allowRepeats) {
+        return;
+      }
+      return;
     }
 
-    // Element is visible if it has visible class or opacity > 0
-    if (hasVisibleClass || computedOpacity > 0) {
-      return true;
-    }
-
-    // Check if element has dimensions (like jQuery :visible)
-    const rect = el.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0;
+    const animation = self.findCSSAnimation();
   },
 
-  isHidden() {
-    return !self.isVisible();
+  // look in css defs for a valid animation matching name
+  // determine if its a transition (in/out)
+  findCSSAnimation(transitionName) {
+    // fast path
+    const cachedAnimation = self.getCachedAnimation();
+    if (cachedAnimation) {
+      return cachedAnimation;
+    }
+    const current = {
+      tag: $el.prop('tagName'),
+      class: $el.attr('class'),
+    };
+    // add appropriate classes then check if computedStyle animationName
+    // we can do this to determine if the animation exists
+    const $clone = $('<' + current.tag + ' />').addClass(current.class).insertAfter(el);
+  },
+
+  prepareAnimation() {
+  },
+
+  startAnimation() {
+  },
+
+  endAnimation() {
+  },
+
+  queue(settings) {
+  },
+
+  hide() {
+  },
+  removeAnimation() {
+  },
+
+  setCachedAnimation(name, exists) {
+    if (!cache.exists) {
+      cache.exists = {};
+    }
+    cache.animationExists[name] = name;
+  },
+  getCachedAnimation(name) {
+    return cache.animationExists[name];
   },
 
   isAnimating() {
     return $el.hasClass(classNames.animating);
   },
-
-  isInward(direction) {
-    return direction === classNames.inward;
+  isInward() {
+    return $el.hasClass(classNames.inward);
   },
-
-  isOutward(direction) {
-    return direction === classNames.outward;
+  isOutward() {
+    return $el.hasClass(classNames.outward);
   },
-
-  shouldUseAnimation(animation) {
-    return animation.includes('fade up') || animation.includes('fade down');
-  },
-
-  getAnimationEvent(animation) {
-    return self.shouldUseAnimation(animation) ? 'animationend' : 'transitionend';
-  },
-
-  parseAnimation(animationString) {
-    const parts = animationString.split(' ');
-    const animation = [];
-    let direction = null;
-
-    each(parts, part => {
-      if (part === classNames.inward || part === classNames.outward) {
-        direction = part;
-      }
-      else {
-        animation.push(part);
-      }
-    });
-
-    // Auto-detect direction based on current visibility if not specified
-    if (!direction) {
-      direction = self.isVisible() ? classNames.outward : classNames.inward;
-    }
-
-    return {
-      animation: animation.join(' '),
-      direction,
-      isInward: self.isInward(direction),
-      isOutward: self.isOutward(direction),
-    };
-  },
-
-  getAnimationEventType() {
-    return self.getAnimationEvent(settings.animation);
-  },
-
-  animate(animationString) {
-    // Parse animation string
-    const { animation, direction, isInward, isOutward } = self.parseAnimation(animationString || settings.animation);
-
-    // Check if already animating
-    if (self.isAnimating() && !settings.allowRepeats) {
-      console.error(errors.repeated);
-      return;
-    }
-
-    // Clear any existing animation classes
-    self.reset();
-
-    // Add base transition class
-    $el.addClass(classNames.transition);
-
-    // Force reflow to ensure starting styles are applied
-    el.offsetHeight;
-
-    // Set up animation end handler
-    const animationEvent = self.getAnimationEventType();
-    const handleComplete = () => {
-      self.complete(isInward);
-    };
-
-    // Add fail-safe timer
-    let failSafeTimer;
-    if (settings.useFailSafe) {
-      failSafeTimer = setTimeout(() => {
-        handleComplete();
-      }, settings.duration + settings.failSafeDelay);
-    }
-
-    // Set up event handler with cleanup
-    const abortController = new AbortController();
-    $el.one(animationEvent, () => {
-      clearTimeout(failSafeTimer);
-      handleComplete();
-    }, { signal: abortController.signal });
-
-    // Store abort controller for cleanup
-    self.abortController = abortController;
-
-    // Add animation classes
-    requestAnimationFrame(() => {
-      $el.addClass(classNames.animating);
-      $el.addClass(animation);
-      $el.addClass(direction);
-
-      // Call start callback
-      settings.onStart.call(el);
-
-      // Remove hidden class if showing
-      if (isInward) {
-        $el.removeClass(classNames.hidden);
-        $el.addClass(classNames.visible);
-      }
-    });
-  },
-
-  complete(wasInward) {
-    // Remove animating class
-    $el.removeClass(classNames.animating);
-
-    // Handle visibility
-    if (wasInward) {
-      $el.addClass(classNames.visible);
-      $el.removeClass(classNames.hidden);
-      settings.onShow.call(el);
-    }
-    else {
-      $el.addClass(classNames.hidden);
-      $el.removeClass(classNames.visible);
-      settings.onHide.call(el);
-    }
-
-    // Call complete callback
-    settings.onComplete.call(el);
-
-    // Clean up abort controller
-    if (self.abortController) {
-      self.abortController.abort();
-      self.abortController = null;
-    }
-  },
-
-  reset() {
-    // Remove all animation classes
-    $el.removeClass([classNames.animating, classNames.inward, classNames.outward].join(' '));
-
-    // Remove specific animation classes
-    $el.removeClass(['fade', 'up', 'down'].join(' '));
-
-    // Abort any pending animations
-    if (self.abortController) {
-      self.abortController.abort();
-      self.abortController = null;
-    }
-  },
-
-  show() {
-    self.animate(`${settings.animation} ${classNames.inward}`);
-  },
-
-  hide() {
-    self.animate(`${settings.animation} ${classNames.outward}`);
-  },
-
-  toggle() {
-    if (self.isVisible()) {
-      self.hide();
-    }
-    else {
-      self.show();
-    }
-  },
-
-  stop() {
-    self.reset();
-    $el.removeClass(classNames.transition);
+  isLooping() {
+    return $el.hasClass(classNames.looping);
   },
 });
 
 // Handle string invocations like .transition('fade in')
-const customInvocation = ({ $el, methodName, methodArgs }) => {
-  const instance = $el.el()?.transition;
-  if (instance && instance.handleCustomInvocation) {
-    return instance.handleCustomInvocation(methodName, ...methodArgs);
-  }
+const customInvocation = ({ self, methodName, methodArgs }) => {
+  // handle
+  // .transition(name, duration, callback)
+  // .transition(name, callback)
 };
 
 export const Transition = registerBehavior({
