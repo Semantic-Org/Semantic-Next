@@ -40,6 +40,9 @@ export class Behavior {
     // css to be added to page
     css = '',
 
+    // query instance attaching to (used to access namespace)
+    Query,
+
     // allow el data to be specified in data attributes
     allowDataOverride = true,
 
@@ -57,8 +60,10 @@ export class Behavior {
     settings = {},
     templates = {},
   } = {}) {
-    // handle query instance
+    // we can recreate query from the constructor if not passed
     this.$ = (selector, options) => new $element.constructor(selector, options);
+    this.Query = Query;
+
     this.$element = $element;
     this.element = $element.el();
 
@@ -522,12 +527,16 @@ export class Behavior {
         self,
         behavior: self,
         namespace: self.namespace,
-        cache: self.$.plugin[self.namespace],
+        get cache() {
+          let cache = self.Query.prototype[self.namespace].cache;
+          if (!cache) {
+            self.Query.prototype[self.namespace].cache = {};
+            return {};
+          }
+          return cache;
+        },
         get data() {
           return self.getElementData(self.element);
-        },
-        set data(name) {
-          self.element.dataset[name] = value;
         },
         get selectors() {
           return self.selectors;

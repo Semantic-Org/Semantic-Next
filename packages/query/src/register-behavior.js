@@ -111,6 +111,7 @@ export const registerBehavior = (behavior) => {
       const behaviorConfig = {
         sharedBehavior, // setup can pass shared behavior across instances
         $element,
+        Query,
         ...runtimeConfig,
         settings: runtimeSettings,
       };
