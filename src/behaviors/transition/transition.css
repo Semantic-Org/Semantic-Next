@@ -34,14 +34,14 @@
 /* Base transition class for shared properties */
 .transition {
   transition-behavior: allow-discrete;
-
+  backface-visibility: hidden;
 
   .hidden {
     display: none;
   }
 
   .visible {
-
+    display: block;
   }
 
 }
@@ -62,12 +62,15 @@
   opacity: 0;
 
   &.in {
-    opacity: 1;
-    transition: opacity var(--duration-medium) var(--ease-out);
+    animation: fade-in var(--duration-medium) var(--ease-out) forwards;
   }
   &.out {
     animation: fade-out var(--duration-short) var(--ease-in) forwards;
   }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @keyframes fade-out { 
   from { opacity: 1; } 
@@ -88,14 +91,20 @@
   }
 
   &.in {
-    opacity: 1;
-    transform: translateY(0);
-    transition:
-      opacity var(--duration-medium) var(--ease-out),
-      transform var(--duration-medium) var(--ease-out);
+    animation: fade-up-in var(--duration-medium) var(--ease-out) forwards;
   }
   &.out {
     animation: fade-up-out var(--duration-short) var(--ease-in) forwards;
+  }
+}
+@keyframes fade-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 @keyframes fade-up-out {
@@ -179,28 +188,35 @@
   }
 
   &.in {
+    animation: scale-vertical-in var(--duration-short) var(--ease-out) forwards;
+  }
+  &.out {
+    animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
+  }
+}
+@keyframes scale-vertical-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+    transform-origin: top;
+  }
+  to {
     opacity: 1;
     transform: scaleY(1);
     transform-origin: top;
-    transition:
-      opacity var(--duration-short) var(--ease-out),
-      transform var(--duration-short) var(--ease-out),
-      box-shadow var(--duration-short) var(--ease-out);
-  }
-  &.out {
-    transform-origin: top;
-    animation: scale-vertical-out var(--duration-short) var(--ease-in) forwards;
   }
 }
 @keyframes scale-vertical-out {
   from {
     opacity: 1;
     transform: scaleY(1);
+    transform-origin: top;
     box-shadow: inherit;
   }
   to {
     opacity: 0;
     transform: scaleY(0);
+    transform-origin: top;
     box-shadow: 0 0 0 0 rgba(0,0,0,0);
   }
 }
@@ -219,43 +235,144 @@
     opacity: 0;
     transform: scale(0.8);
   }
+}
 
+.transition.scale-top {
   &.in {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity var(--duration-quick) var(--ease-snappy),
-      transform var(--duration-quick) var(--ease-snappy),
-      box-shadow var(--duration-quick) var(--ease-snappy);
+    transform-origin: center bottom;
+    animation: scale-top-in var(--duration-quick) var(--ease-snappy) forwards;
   }
   &.out {
-    animation: scale-directional-out var(--duration-quick) var(--ease-in) forwards;
+    transform-origin: center bottom;
+    animation: scale-top-out var(--duration-quick) var(--ease-in) forwards;
   }
 }
-.transition.scale-top {
-  &.in { transform-origin: center bottom; }
-  &.out { transform-origin: center bottom; }
-}
 .transition.scale-bottom {
-  &.in { transform-origin: center top; }
-  &.out { transform-origin: center top; }
+  &.in {
+    transform-origin: center top;
+    animation: scale-bottom-in var(--duration-quick) var(--ease-snappy) forwards;
+  }
+  &.out {
+    transform-origin: center top;
+    animation: scale-bottom-out var(--duration-quick) var(--ease-in) forwards;
+  }
 }
 .transition.scale-left {
-  &.in { transform-origin: right center; }
-  &.out { transform-origin: right center; }
+  &.in {
+    transform-origin: right center;
+    animation: scale-left-in var(--duration-quick) var(--ease-snappy) forwards;
+  }
+  &.out {
+    transform-origin: right center;
+    animation: scale-left-out var(--duration-quick) var(--ease-in) forwards;
+  }
 }
 .transition.scale-right {
-  &.in { transform-origin: left center; }
-  &.out { transform-origin: left center; }
+  &.in {
+    transform-origin: left center;
+    animation: scale-right-in var(--duration-quick) var(--ease-snappy) forwards;
+  }
+  &.out {
+    transform-origin: left center;
+    animation: scale-right-out var(--duration-quick) var(--ease-in) forwards;
+  }
 }
-@keyframes scale-directional-out {
+
+@keyframes scale-top-out {
   from {
     opacity: 1;
     transform: scale(1);
+    transform-origin: center bottom;
   }
   to {
     opacity: 0;
     transform: scale(0);
+    transform-origin: center bottom;
+  }
+}
+@keyframes scale-bottom-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: center top;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+    transform-origin: center top;
+  }
+}
+@keyframes scale-left-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: right center;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+    transform-origin: right center;
+  }
+}
+@keyframes scale-right-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: left center;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0);
+    transform-origin: left center;
+  }
+}
+
+@keyframes scale-top-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: center bottom;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: center bottom;
+  }
+}
+@keyframes scale-bottom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: center top;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: center top;
+  }
+}
+@keyframes scale-left-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: right center;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: right center;
+  }
+}
+@keyframes scale-right-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+    transform-origin: left center;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    transform-origin: left center;
   }
 }
 
@@ -380,8 +497,8 @@
      Flip
 ---------------*/
 
-&.flip.transition,
-&.horizontal-flip.transition {
+.flip.transition,
+.horizontal-flip.transition {
   &.in {
     animation: flip-in var(--duration-medium) var(--ease-in-out);
   }
@@ -414,7 +531,7 @@
   Vertical Flip
 ---------------*/
 
-&.vertical-flip.transition {
+.vertical-flip.transition {
   &.in {
     animation: flip-vertical-in var(--duration-medium) var(--ease-in-out);
   }
@@ -447,7 +564,7 @@
       Draw
 ---------------*/
 
-&.draw.transition {
+.draw.transition {
   &.in {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
@@ -472,12 +589,16 @@
 ---------------*/
 
 .toggle.transition {
+  transform: translateX(0%);
+  @starting-style {
+    transform: translateX(0%);
+  }
   &.on {
     transform: translateX(100%);
     transition: transform var(--duration-short) var(--ease-in-out);
   }
   &.off {
-    transform: translateX(0);
+    transform: translateX(0%);
     transition: transform var(--duration-short) var(--ease-in-out);
   }
 }
