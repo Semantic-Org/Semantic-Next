@@ -162,6 +162,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `scrollTop(value)`, `scrollLeft(value)` - Get/set scroll position
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
+- `naturalDisplay()` - Get natural display value (ignoring display: none)
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
