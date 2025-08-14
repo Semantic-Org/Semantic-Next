@@ -1,36 +1,33 @@
 .container {
-  border: 2px solid var(--standard-20);
+  border: var(--border);
   border-radius: var(--border-radius);
-  margin: var(--spacing) 0;
-  background: var(--component-background);
-  padding: var(--spacing);
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
 }
 
 .element {
-  margin: var(--compact-spacing) 0;
-  padding: var(--spacing);
+  margin: var(--compact-padding) 0;
+  padding: var(--padding);
   border-radius: var(--border-radius);
   font-size: var(--medium);
+  color: var(--text-color);
+  align-items: center;
+  justify-content: center;
   
   &.block {
     background: var(--blue-5);
-    color: var(--white);
     display: block;
   }
   
   &.inline {
     background: var(--green-5);
-    color: var(--white);
-    display: inline-block;
     width: 200px;
+    display: inline-block;
   }
   
   &.flex {
     background: var(--red-5);
-    color: var(--white);
     display: flex;
-    align-items: center;
-    justify-content: center;
   }
   
   &.hidden {
