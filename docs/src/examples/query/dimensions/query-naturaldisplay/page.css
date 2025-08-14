@@ -1,0 +1,76 @@
+.container {
+  border: 2px solid var(--standard-20);
+  border-radius: var(--border-radius);
+  margin: var(--spacing) 0;
+  background: var(--component-background);
+  padding: var(--spacing);
+}
+
+.element {
+  margin: var(--compact-spacing) 0;
+  padding: var(--spacing);
+  border-radius: var(--border-radius);
+  font-size: var(--medium);
+  
+  &.block {
+    background: var(--blue-5);
+    color: var(--white);
+    display: block;
+  }
+  
+  &.inline {
+    background: var(--green-5);
+    color: var(--white);
+    display: inline-block;
+    width: 200px;
+  }
+  
+  &.flex {
+    background: var(--red-5);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  &.hidden {
+    display: none;
+  }
+}
+
+.measurements {
+  background: var(--standard-5);
+  padding: var(--spacing);
+  border-radius: var(--border-radius);
+  margin: var(--spacing) 0;
+  
+  p {
+    margin: var(--4px) 0;
+    font-family: monospace;
+    
+    span {
+      font-weight: var(--bold);
+      color: var(--blue-60);
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing);
+  
+  button {
+    padding: var(--spacing);
+    border: 1px solid var(--standard-20);
+    border-radius: var(--border-radius);
+    background: var(--component-background);
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: var(--medium);
+    transition: var(--transition);
+    
+    &:hover {
+      background: var(--standard-5);
+    }
+  }
+}
