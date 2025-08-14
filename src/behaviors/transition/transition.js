@@ -14,6 +14,7 @@ const defaultSettings = {
   queue: true,
   useFailSafe: true,
   failSafeDelay: 100,
+  useCSS: false, // if true, use CSS classes; if false, use JavaScript animations with cached keyframes
 };
 
 const classNames = {
@@ -50,15 +51,15 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
       return;
     }
 
-    const animation = self.findCSSAnimation();
+    const animation = self.findCSSAnimation(animateSettings.animation);
     console.log('animation is', animation);
   },
 
   // look in css defs for a valid animation matching name
   // determine if its a transition (in/out)
-  findCSSAnimation(transitionName) {
+  findCSSAnimation(animationName) {
     // fast path
-    const cachedAnimation = self.getCachedAnimation(transitionName);
+    const cachedAnimation = self.getCachedAnimation(animationName);
     if (cachedAnimation) {
       return cachedAnimation;
     }
@@ -74,29 +75,41 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
     // add to DOM to probe rules
     $clone
-      .addClass(transitionName)
+      .addClass(animationName)
       .addClass(classNames.transition)
       .addClass(classNames.animating)
       .insertAfter(el);
 
     // Check base state animations
-    const baseAnimations = $clone.el().getAnimations();
+    const baseKeyframes = self.extractAnimationKeyframes($clone);
 
     // Add directional class and check if CSS transitions start
     $clone.addClass(classNames.inward);
-    const inAnimations = $clone.el().getAnimations();
-    const activeTransitions = inAnimations.filter(anim => anim instanceof CSSTransition);
+    const inKeyframes = self.extractAnimationKeyframes($clone, 'in');
+
+    // Check outward animations
+    $clone.removeClass(classNames.inward).addClass(classNames.outward);
+    const outKeyframes = self.extractAnimationKeyframes($clone, 'out');
+
+    const hasDirectionalAnimations = inKeyframes.length > 0 || outKeyframes.length > 0;
+    const hasBaseAnimations = baseKeyframes.length > 0;
 
     const animation = {
-      exists: baseAnimations.length > 0 || activeTransitions.length > 0,
-      directional: activeTransitions.length > 0,
+      exists: hasBaseAnimations || hasDirectionalAnimations,
+      directional: hasDirectionalAnimations,
+      keyframes: {
+        base: baseKeyframes,
+        in: inKeyframes,
+        out: outKeyframes,
+      },
     };
+    console.log(animation);
 
     // cleanup
     $clone.remove();
 
     // cache result
-    self.setCachedAnimation(transitionName, animation);
+    self.setCachedAnimation(animationName, animation);
 
     return animation;
   },
@@ -118,14 +131,49 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
   removeAnimation() {
   },
 
-  setCachedAnimation(name, exists) {
+  // set cached keyframes and animation data
+  setCachedAnimation(name, animation) {
     if (!cache.animationExists) {
       cache.animationExists = {};
     }
-    cache.animationExists[name] = name;
+    cache.animationExists[name] = animation;
   },
+
+  // retrieve cached keyframes and animation data
   getCachedAnimation(name) {
-    return cache?.animationExists[name];
+    return cache?.animationExists?.[name];
+  },
+
+  extractAnimationKeyframes($element, direction = null) {
+    const animations = $element.el().getAnimations();
+
+    // extract keyframe data (it might be an animation or transition)
+    const keyframes = animations.map(anim => {
+      if (anim instanceof CSSAnimation) {
+        return {
+          type: 'animation',
+          direction,
+          keyframes: anim.effect.getKeyframes(),
+          timing: anim.effect.getTiming(),
+          animationName: anim.animationName,
+        };
+      }
+      else if (anim instanceof CSSTransition) {
+        return {
+          type: 'transition',
+          direction,
+          keyframes: anim.effect.getKeyframes(),
+          timing: anim.effect.getTiming(),
+          propertyName: anim.transitionProperty,
+        };
+      }
+      return null;
+    }).filter(Boolean);
+
+    // Cancel animations for cleanup
+    each(animations, (animation) => animation.cancel());
+
+    return keyframes;
   },
 
   isAnimating() {
