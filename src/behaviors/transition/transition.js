@@ -104,24 +104,23 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     $clone
       .addClass(animationName)
       .addClass(classNames.transition)
-      .addClass(classNames.animating)
       .insertAfter(el);
 
     // Check base state animations
-    animations.standard = self.extractAnimations($clone)[0];
+    animations.standard = self.extractAnimations($clone);
 
     // Add directional class and check if CSS transitions start
     $clone.addClass(classNames.inward);
-    animations.in = self.extractAnimations($clone, 'in')[0];
+    animations.in = self.extractAnimations($clone, 'in');
 
     // Check outward animations
     $clone.removeClass(classNames.inward).addClass(classNames.outward);
-    animations.out = self.extractAnimations($clone, 'out')[0];
+    animations.out = self.extractAnimations($clone, 'out');
 
     const animation = {
       name: animationName,
-      exists: !isEmpty(animations),
-      directional: (animations.in || animations.out),
+      exists: !!(animations.in?.length || animations.out?.length || animations.standard?.length),
+      directional: !!(animations.in?.length || animations.out?.length),
       animations,
     };
 
@@ -166,7 +165,7 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
   extractAnimations($element, direction = null) {
     const animations = $element.el().getAnimations();
-
+    console.log($element, animations);
     // extract keyframe data (it might be an animation or transition)
     const keyframes = animations.map(anim => {
       if (anim instanceof CSSAnimation) {
@@ -197,6 +196,11 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
   },
 
   determineAnimationType(animationName, animation) {
+    // this animation has no in/out
+    if (!animation.directional) {
+      return 'standard';
+    }
+
     // Check if animation name explicitly contains direction
     if (animationName.includes(` ${classNames.inward}`)) {
       return 'in';
@@ -221,10 +225,10 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
       return;
     }
 
-    // find animation for this particular direction
-    animation = animation.animations[direction] ?? animation.animations.standard;
+    // find animations for this particular direction (array of animations)
+    const animationsToPlay = animation.animations[direction] ?? animation.animations.standard;
 
-    if (!animation) {
+    if (!animationsToPlay || animationsToPlay.length === 0) {
       return;
     }
 
@@ -233,22 +237,34 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
     settings.onStart.call(el);
 
-    // Create and start animations
-    const options = {
-      ...animation.timing,
-      fill: 'both', // Maintain final state
-    };
+    // Create and start multiple animations (one per CSS property)
+    const activeAnimations = animationsToPlay.map(animData => {
+      const options = {
+        ...animData.timing,
+        fill: 'none',
+      };
 
-    // Override duration if specified in settings
-    if (settings.duration !== 'auto') {
-      options.duration = settings.duration;
+      // Override duration if specified in settings
+      if (settings.duration !== 'auto') {
+        options.duration = settings.duration;
+      }
+
+      const activeAnimation = el.animate(animData.keyframes, options);
+      self.currentAnimations.push(activeAnimation);
+      return activeAnimation;
+    });
+
+    // Wait for all animations to complete (handle cancellation gracefully)
+    try {
+      await Promise.all(activeAnimations.map(anim => anim.finished));
     }
-
-    const activeAnimation = el.animate(animation.keyframes, options);
-    self.currentAnimations.push(activeAnimation);
-
-    // Handle completion
-    await activeAnimation.finished;
+    catch (error) {
+      // Animation was cancelled
+      if (error.name !== 'AbortError') {
+        throw error; // Re-throw unexpected errors
+      }
+      return; // Exit early if animations were cancelled
+    }
 
     // Set final display state based on direction
     self.setFinalDisplayState(direction);
@@ -265,23 +281,21 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
   setInitialDisplayState(direction) {
     if (direction === 'in') {
-      // Show: remove hidden class, add visible class, set natural display type BEFORE animation
-      $el.removeClass(classNames.hidden);
-      $el.addClass(classNames.visible);
       const displayType = $el.naturalDisplay();
-      $el.css('display', displayType);
+      $el
+        .removeClass(classNames.hidden)
+        .addClass(classNames.visible)
+        .css('display', displayType);
     }
-    // For 'out' direction, element should already be visible, no change needed
   },
 
   setFinalDisplayState(direction) {
     if (direction === 'out') {
-      // Hide: remove visible class, set display none inline, add hidden class AFTER animation
-      $el.removeClass(classNames.visible);
-      $el.css('display', 'none'); // Force display none inline since we're not using CSS classes for styling
-      $el.addClass(classNames.hidden);
+      $el
+        .removeClass(classNames.visible)
+        .css('display', 'none')
+        .addClass(classNames.hidden);
     }
-    // For 'in' direction, element should stay visible, no change needed
   },
 
   cleanupAnimations() {
