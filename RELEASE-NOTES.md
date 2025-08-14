@@ -28,6 +28,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
 * **Bug** - `dataContext()` now returns the entire data context including state.
 * **Bug** - Fixed `initialize` did not properly chain
+* **Bug** - Fixed `addClass` `toggleClass` and `removeClass` to not error on `undefined`.
 
 ## Templates
 * **Feature** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change

@@ -764,22 +764,31 @@ export class Query {
   }
 
   addClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToAdd = classNames.split(' ');
     return this.each((el) => el.classList.add(...classesToAdd));
   }
 
-  hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
-  }
-
   removeClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToRemove = classNames.split(' ');
     return this.each((el) => el.classList.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToToggle = classNames.split(' ');
     return this.each((el) => el.classList.toggle(...classesToToggle));
+  }
+
+  hasClass(className) {
+    return Array.from(this).some((el) => el.classList.contains(className));
   }
 
   html(newHTML) {
