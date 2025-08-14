@@ -1,24 +1,32 @@
 import { $ } from '@semantic-ui/query';
 
-$('ui-button.toggle-visibility').on('click', () => {
-  $('.element').toggleClass('hidden');
-});
-
-$('ui-button.check').on('click', updateMeasurements);
-
-// Initial measurements
-updateMeasurements();
+$('ui-button')
+  .filter('.toggle')
+  .on('click', toggleVisibility).end()
+  .filter('.check')
+  .on('click', updateMeasurements);
 
 function updateMeasurements() {
   // Get natural display values for each element
-  const blockDisplay = $('.block').naturalDisplay();
-  const inlineDisplay = $('.inline').naturalDisplay();
-  const hiddenDisplay = $('.hidden').naturalDisplay();
-  const flexDisplay = $('.flex').naturalDisplay();
+  const blockDisplay = $('.block.element').naturalDisplay();
+  const inlineDisplay = $('.inline.element').naturalDisplay();
+  const flexDisplay = $('.flex.element').naturalDisplay();
 
   // Display measurements - show what naturalDisplay() returns
-  $('.block-display').text(blockDisplay || 'undefined');
-  $('.inline-display').text(inlineDisplay || 'undefined');
-  $('.hidden-display').text(hiddenDisplay || 'undefined');
-  $('.flex-display').text(flexDisplay || 'undefined');
+  $('.display')
+    .filter('.block').text(blockDisplay).end()
+    .filter('.inline').text(inlineDisplay).end()
+    .filter('.flex').text(flexDisplay).end();
 }
+
+function clearMeasurements() {
+  $('.display').text('Click to display measurements');
+}
+
+function toggleVisibility() {
+  clearMeasurements();
+  $('.element').toggleClass('hidden');
+}
+
+// Initial measurements
+updateMeasurements();
