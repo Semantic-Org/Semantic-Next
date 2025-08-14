@@ -1450,6 +1450,57 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
+  naturalDisplay() {
+    const displays = this.map((el) => {
+      // If already visible, return current display
+      const current = getComputedStyle(el).display;
+      if (current !== 'none') { return current; }
+
+      const matchingRules = [];
+
+      // Calculate CSS specificity (simplified)
+      const calculateSpecificity = (selector) => {
+        // Remove quoted strings to avoid counting selectors inside quotes
+        const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
+        const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
+        const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
+        const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
+        const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
+        const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
+        return ids + classes + attrs + pseudoClasses + elements;
+      };
+
+      // Parse all stylesheets for matching rules
+      for (const sheet of document.styleSheets) {
+        try {
+          for (const rule of sheet.cssRules) {
+            if (
+              rule.style?.display
+              && rule.style.display !== 'none' // IGNORE ALL none rules
+              && el.matches(rule.selectorText)
+            ) {
+              matchingRules.push({
+                display: rule.style.display,
+                specificity: calculateSpecificity(rule.selectorText),
+                sourceOrder: matchingRules.length,
+              });
+            }
+          }
+        }
+        catch (e) {
+          // Cross-origin stylesheets - ignore
+        }
+      }
+
+      // Sort by specificity, then source order
+      matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+
+      // Return the highest precedence non-none display value
+      return matchingRules[0]?.display || 'block';
+    });
+    return displays.length > 1 ? displays : displays[0];
+  }
+
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
