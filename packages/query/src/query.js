@@ -1470,22 +1470,33 @@ export class Query {
         return ids + classes + attrs + pseudoClasses + elements;
       };
 
+      // Helper to recursively parse CSS rules (handles nesting)
+      const parseRules = (rules) => {
+        for (const rule of rules) {
+          // Handle regular style rules
+          if (
+            rule.style?.display
+            && rule.style.display !== 'none' // IGNORE ALL none rules
+            && rule.selectorText
+            && el.matches(rule.selectorText)
+          ) {
+            matchingRules.push({
+              display: rule.style.display,
+              specificity: calculateSpecificity(rule.selectorText),
+              sourceOrder: matchingRules.length,
+            });
+          }
+          // Recursively handle nested rules (CSS nesting)
+          if (rule.cssRules && rule.cssRules.length > 0) {
+            parseRules(rule.cssRules);
+          }
+        }
+      };
+
       // Parse all stylesheets for matching rules
       for (const sheet of document.styleSheets) {
         try {
-          for (const rule of sheet.cssRules) {
-            if (
-              rule.style?.display
-              && rule.style.display !== 'none' // IGNORE ALL none rules
-              && el.matches(rule.selectorText)
-            ) {
-              matchingRules.push({
-                display: rule.style.display,
-                specificity: calculateSpecificity(rule.selectorText),
-                sourceOrder: matchingRules.length,
-              });
-            }
-          }
+          parseRules(sheet.cssRules);
         }
         catch (e) {
           // Cross-origin stylesheets - ignore
@@ -1494,7 +1505,7 @@ export class Query {
 
       // Sort by specificity, then source order
       matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
-
+      console.log(matchingRules);
       // Return the highest precedence non-none display value
       return matchingRules[0]?.display || 'block';
     });

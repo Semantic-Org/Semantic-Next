@@ -806,6 +806,13 @@ export class Query {
   naturalHeight(): number | number[];
 
   /**
+   * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#naturalDisplay
+   * @returns For single element: the natural display value. For multiple elements: array of natural display values. Returns undefined for empty selection.
+   */
+  naturalDisplay(): string | string[] | undefined;
+
+  /**
    * Gets the clipping parent (overflow container) of each element in the current set.
    * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
    * @returns A new Query instance containing the clipping parent elements.
