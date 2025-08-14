@@ -692,8 +692,7 @@ export class Query {
       : [{ eventName: null, namespaces: null }];
 
     this.each(el => {
-      const domEL = (el === Query.globalThisProxy) ? globalThis : el;
-      const elementHandlers = Query.eventRegistry.get(domEL);
+      const elementHandlers = Query.eventRegistry.get(el);
 
       // nothing to remove
       if (!elementHandlers) {
@@ -1505,9 +1504,61 @@ export class Query {
 
       // Sort by specificity, then source order
       matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
-      console.log(matchingRules);
-      // Return the highest precedence non-none display value
-      return matchingRules[0]?.display || 'block';
+
+      // If we have matching rules, return the highest precedence value
+      if (matchingRules.length > 0) {
+        return matchingRules[0].display;
+      }
+
+      // No CSS rules found - use element's natural display value
+      const naturalDisplay = {
+        inline: [
+          'a',
+          'abbr',
+          'b',
+          'bdi',
+          'bdo',
+          'br',
+          'cite',
+          'code',
+          'dfn',
+          'em',
+          'i',
+          'kbd',
+          'mark',
+          'q',
+          'ruby',
+          'samp',
+          'small',
+          'span',
+          'strong',
+          'sub',
+          'sup',
+          'time',
+          'u',
+          'var',
+          'wbr',
+        ],
+        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+        'table': ['table'],
+        'table-row': ['tr'],
+        'table-cell': ['td', 'th'],
+        'table-header-group': ['thead'],
+        'table-row-group': ['tbody'],
+        'table-footer-group': ['tfoot'],
+        'table-caption': ['caption'],
+        'table-column': ['col'],
+        'table-column-group': ['colgroup'],
+        'list-item': ['li'],
+      };
+
+      const tagName = el.tagName.toLowerCase();
+      for (const [display, tags] of Object.entries(naturalDisplay)) {
+        if (tags.includes(tagName)) {
+          return display;
+        }
+      }
+      return 'block'; // Default for most elements
     });
     return displays.length > 1 ? displays : displays[0];
   }
