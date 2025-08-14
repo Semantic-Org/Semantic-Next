@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each } from '@semantic-ui/utils';
+import { each, isEmpty } from '@semantic-ui/utils';
 
 import css from './transition.css?raw';
 
@@ -47,6 +47,9 @@ const errors = {
 };
 
 const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors }) => ({
+  // track currently running JavaScript animations
+  currentAnimations: [],
+
   animate(overrideSettings) {
     // shadow global settings with override settings baked in
     const animateSettings = {
@@ -67,6 +70,15 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
     const animation = self.findCSSAnimation(animateSettings.animation);
     console.log('animation is', animation);
+
+    if (animateSettings.useJavascript) {
+      const direction = self.determineAnimationType(animateSettings.animation, animation);
+      console.log('doing animation', direction, animation);
+      self.playAnimation(animation, direction, animateSettings);
+    }
+    else {
+      // TODO: CSS class approach
+    }
   },
 
   // look in css defs for a valid animation matching name
@@ -86,6 +98,7 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     // add appropriate classes then check if computedStyle animationName
     // we can do this to determine if the animation exists
     const $clone = $('<' + current.tag + ' />').addClass(current.class);
+    const animations = {};
 
     // add to DOM to probe rules
     $clone
@@ -95,29 +108,22 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
       .insertAfter(el);
 
     // Check base state animations
-    const baseKeyframes = self.extractAnimationKeyframes($clone);
+    animations.standard = self.extractAnimations($clone)[0];
 
     // Add directional class and check if CSS transitions start
     $clone.addClass(classNames.inward);
-    const inKeyframes = self.extractAnimationKeyframes($clone, 'in');
+    animations.in = self.extractAnimations($clone, 'in')[0];
 
     // Check outward animations
     $clone.removeClass(classNames.inward).addClass(classNames.outward);
-    const outKeyframes = self.extractAnimationKeyframes($clone, 'out');
-
-    const hasDirectionalAnimations = inKeyframes.length > 0 || outKeyframes.length > 0;
-    const hasBaseAnimations = baseKeyframes.length > 0;
+    animations.out = self.extractAnimations($clone, 'out')[0];
 
     const animation = {
-      exists: hasBaseAnimations || hasDirectionalAnimations,
-      directional: hasDirectionalAnimations,
-      keyframes: {
-        base: baseKeyframes,
-        in: inKeyframes,
-        out: outKeyframes,
-      },
+      name: animationName,
+      exists: !isEmpty(animations),
+      directional: (animations.in || animations.out),
+      animations,
     };
-    console.log(animation);
 
     // cleanup
     $clone.remove();
@@ -158,7 +164,7 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     return cache?.animationExists?.[name];
   },
 
-  extractAnimationKeyframes($element, direction = null) {
+  extractAnimations($element, direction = null) {
     const animations = $element.el().getAnimations();
 
     // extract keyframe data (it might be an animation or transition)
@@ -188,6 +194,103 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     each(animations, (animation) => animation.cancel());
 
     return keyframes;
+  },
+
+  determineAnimationType(animationName, animation) {
+    // Check if animation name explicitly contains direction
+    if (animationName.includes(` ${classNames.inward}`)) {
+      return 'in';
+    }
+    if (animationName.includes(` ${classNames.outward}`)) {
+      return 'out';
+    }
+
+    // Determine based on current visibility using Query.js isVisible()
+    const isCurrentlyVisible = $el.isVisible({
+      includeOpacity: true,
+    });
+    return isCurrentlyVisible ? classNames.outward : classNames.inward;
+  },
+
+  async playAnimation(animation, direction, settings) {
+    // Clean up any existing animations first
+    self.cleanupAnimations();
+
+    if (!animation || !animation.exists) {
+      console.warn('No animation data available for', settings.animation);
+      return;
+    }
+
+    // find animation for this particular direction
+    animation = animation.animations[direction] ?? animation.animations.standard;
+
+    if (!animation) {
+      return;
+    }
+
+    // Set display state BEFORE animation starts so it's visible
+    self.setInitialDisplayState(direction);
+
+    settings.onStart.call(el);
+
+    // Create and start animations
+    const options = {
+      ...animation.timing,
+      fill: 'both', // Maintain final state
+    };
+
+    // Override duration if specified in settings
+    if (settings.duration !== 'auto') {
+      options.duration = settings.duration;
+    }
+
+    const activeAnimation = el.animate(animation.keyframes, options);
+    self.currentAnimations.push(activeAnimation);
+
+    // Handle completion
+    await activeAnimation.finished;
+
+    // Set final display state based on direction
+    self.setFinalDisplayState(direction);
+
+    // Handle show/hide callbacks based on direction
+    if (direction === 'in') {
+      settings.onShow.call(el);
+    }
+    else if (direction === 'out') {
+      settings.onHide.call(el);
+    }
+    settings.onComplete.call(el);
+  },
+
+  setInitialDisplayState(direction) {
+    if (direction === 'in') {
+      // Show: remove hidden class, add visible class, set natural display type BEFORE animation
+      $el.removeClass(classNames.hidden);
+      $el.addClass(classNames.visible);
+      const displayType = $el.naturalDisplay();
+      $el.css('display', displayType);
+    }
+    // For 'out' direction, element should already be visible, no change needed
+  },
+
+  setFinalDisplayState(direction) {
+    if (direction === 'out') {
+      // Hide: remove visible class, set display none inline, add hidden class AFTER animation
+      $el.removeClass(classNames.visible);
+      $el.css('display', 'none'); // Force display none inline since we're not using CSS classes for styling
+      $el.addClass(classNames.hidden);
+    }
+    // For 'in' direction, element should stay visible, no change needed
+  },
+
+  cleanupAnimations() {
+    self.currentAnimations.forEach(animation => {
+      if (animation.playState !== 'finished') {
+        animation.cancel();
+      }
+    });
+    self.currentAnimations = [];
   },
 
   isAnimating() {
