@@ -4,17 +4,31 @@ import { each } from '@semantic-ui/utils';
 import css from './transition.css?raw';
 
 const defaultSettings = {
+  // css animation to use
   animation: 'fade',
+
+  // duration to use 'auto' will default to the value set in css
   duration: 'auto',
+
+  // callbacks
   onComplete: () => {},
   onStart: () => {},
   onShow: () => {},
   onHide: () => {},
+
+  // whether directional animations can occur twice in same direction
   allowRepeats: false,
+
+  // queue will queue directional transitions after previous transition on same element
+  // i.e. .transition('fade').transition('fade')
   queue: true,
+
+  // failsafe makes sure animation is cleaned up even if event doesnt fire
   useFailSafe: true,
   failSafeDelay: 100,
-  useCSS: false, // if true, use CSS classes; if false, use JavaScript animations with cached keyframes
+
+  // whether to use javascript to animate instead of class names
+  useJavascript: true,
 };
 
 const classNames = {
