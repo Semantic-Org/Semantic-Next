@@ -238,7 +238,7 @@ dialog.sticky {
   nav-menu {
     padding-top: 1rem;
 
-    &::part(title) {
+    &::part(item-title) {
       background: var(--mobile-menu-background-color);
       position: sticky;
       top: 0;
