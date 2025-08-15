@@ -7,12 +7,6 @@ $('ui-button').on('click', () => {
   const duration = $('.duration').val() || 'auto';
   const interval = $('.interval').val();
 
-  console.log({
-    animation,
-    direction,
-    duration,
-    interval,
-  });
   $('.box').transition({
     animation,
     direction,
