@@ -146,6 +146,8 @@ export class Behavior {
     if (this.instance !== undefined) {
       this.instance.destroy();
     }
+    // css does not need to be added on reinit
+    delete settings.css;
     const behavior = new Behavior(settings);
     this.element[this.namespace] = behavior;
   }

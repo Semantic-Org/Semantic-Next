@@ -1458,7 +1458,6 @@ export class Query {
 
   naturalDisplay() {
     const displays = this.map((el) => {
-      console.log('hi');
       // Create cache key from current stylesheet state + inline styles
       const stylesheetData = Array.from(document.styleSheets).map(sheet => {
         try {
