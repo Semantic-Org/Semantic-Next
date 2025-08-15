@@ -5,6 +5,6 @@
   max-width: 100%;
 
   input {
-    width: auto; /* this is necessary for flex */
+    width: 100%; /* this is necessary for flex */
   }
 }
