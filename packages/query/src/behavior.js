@@ -53,6 +53,10 @@ export class Behavior {
     // custom invocation fallback
     customInvocation = noop,
 
+    // element index information
+    elementIndex = 0,
+    totalElements = 1,
+
     // standard
     selectors = {},
     classNames = {},
@@ -71,6 +75,10 @@ export class Behavior {
     this.settings = clone(settings);
     this.namespace = namespace;
     this.customInvocation = customInvocation;
+
+    // store element index information
+    this.elementIndex = elementIndex;
+    this.totalElements = totalElements;
 
     this.classNames = classNames;
     this.selectors = selectors;
@@ -527,6 +535,13 @@ export class Behavior {
         self,
         behavior: self,
         namespace: self.namespace,
+
+        // element index information
+        index: self.elementIndex,
+        total: self.totalElements,
+        isFirst: self.elementIndex === 0,
+        isLast: self.elementIndex === self.totalElements - 1,
+
         get cache() {
           let cache = self.Query.prototype[self.namespace].cache;
           if (!cache) {

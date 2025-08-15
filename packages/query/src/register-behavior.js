@@ -1,4 +1,4 @@
-import { deepExtend, isArray, isDevelopment, isString, noop, pick } from '@semantic-ui/utils';
+import { deepExtend, filterObject, isArray, isDevelopment, isString, noop, pick } from '@semantic-ui/utils';
 import { Behavior } from './behavior.js';
 import { Query } from './query.js';
 
@@ -80,7 +80,11 @@ export const registerBehavior = (behavior) => {
 
   // Create abstraction around behavior initialization
   Query.prototype[name] = function(settings) {
-    // At run time we need to check if defaults are changed from original registration
+    // ignore undefined settings
+    settings = filterObject(settings, (value) => value !== undefined);
+
+    // At run time we need to check if defaults are changed by user
+    // this can occur if $.plugin.defaultSettings is modified
     const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
     const behaviorDefaults = pick(Query.prototype[name], ...defaultValues);
     const runtimeConfig = {
@@ -115,6 +119,7 @@ export const registerBehavior = (behavior) => {
 
       // behavior is stored in namespace like el.behavior
       let instance = Behavior.getInstance(element, namespace);
+      let existingInstance = !!instance;
 
       const behaviorConfig = {
         sharedBehavior, // setup can pass shared behavior across instances
@@ -122,6 +127,9 @@ export const registerBehavior = (behavior) => {
         Query,
         ...runtimeConfig,
         settings: runtimeSettings,
+        // pass element index information
+        elementIndex: index,
+        totalElements: $elements.length,
       };
 
       // create behavior instance if not defined
@@ -149,7 +157,7 @@ export const registerBehavior = (behavior) => {
           returnedValue = response;
         }
       }
-      else if (instance !== undefined) {
+      else if (existingInstance) {
         // if they are not calling a method and there are settings
         // than they are attempting to reinitialize the behavior with new settings
         instance.reinitialize(behaviorConfig);
