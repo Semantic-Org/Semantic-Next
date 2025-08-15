@@ -1,6 +1,15 @@
-import { deepExtend, isArray, isString, noop, pick } from '@semantic-ui/utils';
+import { deepExtend, isArray, isDevelopment, isString, noop, pick } from '@semantic-ui/utils';
 import { Behavior } from './behavior.js';
 import { Query } from './query.js';
+
+// Store on Query for global access
+Query.development = isDevelopment;
+
+// Global settings
+Query.settings = {
+  logLevel: Query.development ? 'info' : 'silent',
+  performance: false,
+};
 
 // Register Behavior
 export const registerBehavior = (behavior) => {
