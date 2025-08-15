@@ -27,7 +27,7 @@ The package is organized into **17 specialized modules**, each focused on a spec
 ├── equality.js    ← Deep equality comparison
 ├── cloning.js     ← Deep cloning of objects and arrays
 ├── errors.js      ← Error handling and async error throwing
-├── ssr.js         ← Server-side rendering detection
+├── environment.js  ← Environment detection (server/client/dev/CI)
 └── regexp.js      ← Regular expression and HTML escaping
 ```
 
@@ -248,7 +248,7 @@ function processCollection(data) {
 
 ### Advanced Type Checks
 ```javascript
-import { isDOM, isNode, isClassInstance, isPromise, isClient, isServer } from '@semantic-ui/utils';
+import { isDOM, isNode, isClassInstance, isPromise, isClient, isServer, isDevelopment, isCI } from '@semantic-ui/utils';
 
 // DOM-related checks
 isDOM(document.body);            // true
@@ -263,6 +263,8 @@ isPromise(fetch('/api'));        // true
 // Environment detection
 isClient();                      // true in browser
 isServer();                      // true in Node.js/server environment
+isDevelopment();                 // true in development environments
+isCI();                          // true in CI/CD pipelines
 ```
 
 ## String Utilities (strings.js)
