@@ -1,4 +1,4 @@
-import { isClient, isServer } from './ssr.js';
+import { isClient, isServer } from './environment.js';
 
 /*-------------------
       Identity

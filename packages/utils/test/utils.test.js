@@ -31,8 +31,10 @@ import {
   isArguments,
   isArray,
   isBinary,
+  isCI,
   isClassInstance,
   isClient,
+  isDevelopment,
   isEmpty,
   isEqual,
   isFunction,
@@ -333,6 +335,19 @@ describe('Browser Utilities', () => {
   describe('isClient', () => {
     it('should return false if window is undefined', () => {
       expect(isClient).toBe(false);
+    });
+  });
+
+  describe('isDevelopment', () => {
+    it('should return true when NODE_ENV includes test', () => {
+      // Since NODE_ENV=test is treated as development in our implementation
+      expect(isDevelopment).toBe(true);
+    });
+  });
+
+  describe('isCI', () => {
+    it('should return false when no CI environment variables are set', () => {
+      expect(isCI).toBe(false);
     });
   });
 });

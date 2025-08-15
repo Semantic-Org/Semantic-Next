@@ -1,7 +1,7 @@
 import { inArray } from './arrays.js';
 import { hashCode } from './crypto.js';
+import { isServer } from './environment.js';
 import { each } from './loops.js';
-import { isServer } from './ssr.js';
 import { isArray, isString } from './types.js';
 
 /*-------------------

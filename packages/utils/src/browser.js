@@ -1,4 +1,4 @@
-import { isClient } from './ssr.js';
+import { isClient } from './environment.js';
 
 /*-------------------
        Browser
