@@ -23,7 +23,6 @@ export const registerBehavior = (behavior) => {
     setup: function() {},
     // callbacks
     onCreated: noop,
-    onMutated: noop,
     onDestroyed: noop,
     // standard object storage
     selectors: {},
