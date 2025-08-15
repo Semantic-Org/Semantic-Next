@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, isEmpty } from '@semantic-ui/utils';
+import { each, noop } from '@semantic-ui/utils';
 
 import css from './transition.css?raw';
 
@@ -9,6 +9,12 @@ const defaultSettings = {
 
   // duration to use 'auto' will default to the value set in css
   duration: 'auto',
+
+  // delay between animations when animating a group of elements
+  interval: 200,
+
+  // direction of animation when animating groups (forward for in, reverse for out)
+  groupDirection: 'auto',
 
   // callbacks
   onComplete: () => {},
@@ -46,39 +52,67 @@ const errors = {
   repeated: 'Animation is already occurring, cancelling repeated animation',
 };
 
-const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors }) => ({
+const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors, index, total }) => ({
   // track currently running JavaScript animations
   currentAnimations: [],
 
-  animate(overrideSettings) {
-    // shadow global settings with override settings baked in
-    const animateSettings = {
+  initialize() {
+    this.animate();
+  },
+
+  // animate can override at runtime with different duration, animation or callback
+  animate(runtimeSettings) {
+    const animationSettings = {
       ...settings,
-      ...overrideSettings,
+      ...runtimeSettings,
     };
 
     // handle case of already animating
     if (self.isAnimating()) {
-      if (animateSettings.queue) {
+      if (animationSettings.queue) {
         self.queue(settings);
       }
-      if (!animateSettings.allowRepeats) {
+      if (!animationSettings.allowRepeats) {
         return;
       }
       return;
     }
 
-    const animation = self.findCSSAnimation(animateSettings.animation);
-    console.log('animation is', animation);
+    // determine canonical animations from css, this is cached between runs
+    const cssAnimations = self.findCSSAnimation(animationSettings.animation);
 
-    if (animateSettings.useJavascript) {
-      const direction = self.determineAnimationType(animateSettings.animation, animation);
-      console.log('doing animation', direction, animation);
-      self.playAnimation(animation, direction, animateSettings);
+    // determine which direction this animation is occuring if the animation is directional
+    let direction;
+    if (cssAnimations.directional) {
+      direction = self.determineDirection(animationSettings.animation);
+    }
+
+    if (animationSettings.useJavascript) {
+      if (total > 0) {
+        self.playGroupAnimation(cssAnimations, direction, animationSettings);
+      }
+      else {
+        self.performAnimation(cssAnimations, direction, animationSettings);
+      }
     }
     else {
       // TODO: CSS class approach
     }
+  },
+
+  playGroupAnimation(cssAnimations, direction, animationSettings) {
+    let groupDirection = (settings.groupDirection == 'auto')
+      ? (direction == 'in')
+        ? 'forward'
+        : 'reverse'
+      : settings.groupDirection;
+
+    const delay = (groupDirection == 'forward')
+      ? index * settings.interval
+      : (total - index) * settings.interval;
+    setTimeout(() => {
+      self.performAnimation(cssAnimations, direction, animationSettings);
+    }, delay);
   },
 
   // look in css defs for a valid animation matching name
@@ -116,7 +150,6 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     // Check outward animations
     $clone.removeClass(classNames.inward).addClass(classNames.outward);
     animations.out = self.extractAnimations($clone, 'out');
-
     const animation = {
       name: animationName,
       exists: !!(animations.in?.length || animations.out?.length || animations.standard?.length),
@@ -133,21 +166,10 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     return animation;
   },
 
-  prepareAnimation() {
-  },
-
-  startAnimation() {
-  },
-
-  endAnimation() {
-  },
-
   queue(settings) {
   },
 
   hide() {
-  },
-  removeAnimation() {
   },
 
   // set cached keyframes and animation data
@@ -165,7 +187,6 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
 
   extractAnimations($element, direction = null) {
     const animations = $element.el().getAnimations();
-    console.log($element, animations);
     // extract keyframe data (it might be an animation or transition)
     const keyframes = animations.map(anim => {
       if (anim instanceof CSSAnimation) {
@@ -195,13 +216,8 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     return keyframes;
   },
 
-  determineAnimationType(animationName, animation) {
-    // this animation has no in/out
-    if (!animation.directional) {
-      return 'standard';
-    }
-
-    // Check if animation name explicitly contains direction
+  determineDirection(animationName) {
+    // if user specifies a direction respect it i.e. "fade in"
     if (animationName.includes(` ${classNames.inward}`)) {
       return 'in';
     }
@@ -209,30 +225,31 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
       return 'out';
     }
 
-    // Determine based on current visibility using Query.js isVisible()
+    // if no direction is specified determine based off dom visibility
     const isCurrentlyVisible = $el.isVisible({
       includeOpacity: true,
     });
-    return isCurrentlyVisible ? classNames.outward : classNames.inward;
+    return isCurrentlyVisible ? 'out' : 'in';
   },
 
-  async playAnimation(animation, direction, settings) {
-    // Clean up any existing animations first
+  // takes a set of css animations and then performs them using web animation API
+  async performAnimation(cssAnimations, direction, { duration, callback = noop } = {}) {
+    // end other animations for this element
     self.cleanupAnimations();
 
-    if (!animation || !animation.exists) {
-      console.warn('No animation data available for', settings.animation);
+    if (!cssAnimations || !cssAnimations.exists) {
+      console.warn('No animation data available for', cssAnimations.name);
       return;
     }
 
     // find animations for this particular direction (array of animations)
-    const animationsToPlay = animation.animations[direction] ?? animation.animations.standard;
+    const animationsToPlay = cssAnimations.animations[direction] ?? cssAnimations.animations.standard;
 
     if (!animationsToPlay || animationsToPlay.length === 0) {
       return;
     }
 
-    // Set display state BEFORE animation starts so it's visible
+    // make element visible
     self.setInitialDisplayState(direction);
 
     settings.onStart.call(el);
@@ -244,9 +261,10 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
         fill: 'none',
       };
 
-      // Override duration if specified in settings
-      if (settings.duration !== 'auto') {
-        options.duration = settings.duration;
+      // Allow specific duration to be specified in js
+      // If not specified it will use one from css
+      if (duration !== 'auto') {
+        options.duration = duration;
       }
 
       const activeAnimation = el.animate(animData.keyframes, options);
@@ -276,7 +294,8 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     else if (direction === 'out') {
       settings.onHide.call(el);
     }
-    settings.onComplete.call(el);
+    // can use callback or await this function
+    callback.call(el);
   },
 
   setInitialDisplayState(direction) {
