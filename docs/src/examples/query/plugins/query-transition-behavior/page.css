@@ -1,3 +1,28 @@
+.group {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  padding: 1rem;
+  border: var(--border);
+  background-color: var(--standard-5);
+
+  select {
+    border: var(--border);
+    background-color: var(--standard-10);
+    color: var(--text-color);
+    border-radius: var(--border-radius);
+    padding: 3px 8px;
+
+    option {
+      color: var(--inverted-80);
+    }
+  }
+  ui-input {
+    width: 100%;
+  }
+}
+
+
 .box {
   background: var(--primary-0) var(--angled-gradient);
   border: var(--border);

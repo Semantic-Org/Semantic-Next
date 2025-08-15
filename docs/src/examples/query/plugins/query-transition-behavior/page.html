@@ -1,32 +1,45 @@
-<select>
-  <option value="bounce">Bounce</option>
-  <option value="fade">Fade</option>
-  <option value="fade-up">Fade Up</option>
-  <option value="cross-fade">Cross Fade</option>
-  <option value="scale" default>Scale</option>
-  <option value="vertical-scale">Vertical Scale</option>
-  <option value="scale-top">Scale Top</option>
-  <option value="scale-bottom">Scale Bottom</option>
-  <option value="scale-left">Scale Left</option>
-  <option value="scale-right">Scale Right</option>
-  <option value="slide-left">Slide Left</option>
-  <option value="slide-right">Slide Right</option>
-  <option value="slide-up">Slide Up</option>
-  <option value="slide-down">Slide Down</option>
-  <option value="flip">Flip</option>
-  <option value="horizontal-flip">Horizontal Flip</option>
-  <option value="vertical-flip">Vertical Flip</option>
-  <option value="draw">Draw</option>
-  <option value="toggle">Toggle</option>
-  <option value="expand">Expand</option>
-  <option value="stagger">Stagger</option>
-  <option value="spin">Spin</option>
-  <option value="shake">Shake</option>
-  <option value="glow">Glow</option>
-  <option value="shimmer">Shimmer</option>
-  <option value="progress">Progress</option>
-</select>
+<div class="group">
+  <ui-button primary>Transition</ui-button>
+  <select class="animation">
+    <option value="bounce">Bounce</option>
+    <option value="fade">Fade</option>
+    <option value="fade-up">Fade Up</option>
+    <option value="cross-fade">Cross Fade</option>
+    <option value="scale" default>Scale</option>
+    <option value="vertical-scale">Vertical Scale</option>
+    <option value="scale-top">Scale Top</option>
+    <option value="scale-bottom">Scale Bottom</option>
+    <option value="scale-left">Scale Left</option>
+    <option value="scale-right">Scale Right</option>
+    <option value="slide-left">Slide Left</option>
+    <option value="slide-right">Slide Right</option>
+    <option value="slide-up">Slide Up</option>
+    <option value="slide-down">Slide Down</option>
+    <option value="flip">Flip</option>
+    <option value="horizontal-flip">Horizontal Flip</option>
+    <option value="vertical-flip">Vertical Flip</option>
+    <option value="draw">Draw</option>
+    <option value="toggle">Toggle</option>
+    <option value="expand">Expand</option>
+    <option value="stagger">Stagger</option>
+    <option value="spin">Spin</option>
+    <option value="shake">Shake</option>
+    <option value="glow">Glow</option>
+    <option value="shimmer">Shimmer</option>
+    <option value="progress">Progress</option>
+  </select>
+  <ui-input fluid class="duration" placeholder='duration'></ui-input>
+  <ui-input fluid class="interval" placeholder="interval"></ui-input>
+  <select class="direction">
+    <option value="auto">Auto</option>
+    <option value="forward">Forward</option>
+    <option value="reverse">Reverse</option>
+  </select>
+</div>
 <br>
-<ui-button>Toggle Visibility</ui-button>
 <br>
-<div class="box" style="display: none;">Box</div>
+<div class="group">
+  <div class="box">Box</div>
+  <div class="box">Box</div>
+  <div class="box">Box</div>
+</div>
