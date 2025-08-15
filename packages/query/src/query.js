@@ -4,6 +4,7 @@ import {
   findIndex,
   firstMatch,
   get,
+  hashCode,
   inArray,
   isArray,
   isClient,
@@ -49,6 +50,12 @@ export class Query {
     This allows an end user to see available extensions
   */
   static behaviors = new Map();
+
+  /*
+    Cache for naturalDisplay() results per element
+    Key: element, Value: { rulesHash, displayValue }
+  */
+  static elementDisplayCache = new WeakMap();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
@@ -1451,9 +1458,36 @@ export class Query {
 
   naturalDisplay() {
     const displays = this.map((el) => {
+      console.log('hi');
+      // Create cache key from current stylesheet state + inline styles
+      const stylesheetData = Array.from(document.styleSheets).map(sheet => {
+        try {
+          return { href: sheet.href, title: sheet.title, disabled: sheet.disabled };
+        }
+        catch (e) {
+          // Cross-origin stylesheet - can't access properties safely
+          return { crossOrigin: true, index: Array.from(document.styleSheets).indexOf(sheet) };
+        }
+      });
+
+      // Include inline display style in cache key since it overrides everything
+      const inlineDisplay = el.style.display;
+      const cacheKey = { stylesheetData, inlineDisplay };
+      const rulesHash = hashCode(cacheKey);
+
+      // Check cache for this element
+      const cached = Query.elementDisplayCache.get(el);
+      if (cached && cached.rulesHash === rulesHash) {
+        return cached.displayValue;
+      }
+
       // If already visible, return current display
       const current = getComputedStyle(el).display;
-      if (current !== 'none') { return current; }
+      if (current !== 'none') {
+        // Cache visible elements too
+        Query.elementDisplayCache.set(el, { rulesHash, displayValue: current });
+        return current;
+      }
 
       const matchingRules = [];
 
@@ -1505,60 +1539,69 @@ export class Query {
       // Sort by specificity, then source order
       matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
 
+      let displayValue;
+
       // If we have matching rules, return the highest precedence value
       if (matchingRules.length > 0) {
-        return matchingRules[0].display;
+        displayValue = matchingRules[0].display;
       }
+      else {
+        // No CSS rules found - use element's natural display value
+        const naturalDisplay = {
+          inline: [
+            'a',
+            'abbr',
+            'b',
+            'bdi',
+            'bdo',
+            'br',
+            'cite',
+            'code',
+            'dfn',
+            'em',
+            'i',
+            'kbd',
+            'mark',
+            'q',
+            'ruby',
+            'samp',
+            'small',
+            'span',
+            'strong',
+            'sub',
+            'sup',
+            'time',
+            'u',
+            'var',
+            'wbr',
+          ],
+          'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+          'table': ['table'],
+          'table-row': ['tr'],
+          'table-cell': ['td', 'th'],
+          'table-header-group': ['thead'],
+          'table-row-group': ['tbody'],
+          'table-footer-group': ['tfoot'],
+          'table-caption': ['caption'],
+          'table-column': ['col'],
+          'table-column-group': ['colgroup'],
+          'list-item': ['li'],
+        };
 
-      // No CSS rules found - use element's natural display value
-      const naturalDisplay = {
-        inline: [
-          'a',
-          'abbr',
-          'b',
-          'bdi',
-          'bdo',
-          'br',
-          'cite',
-          'code',
-          'dfn',
-          'em',
-          'i',
-          'kbd',
-          'mark',
-          'q',
-          'ruby',
-          'samp',
-          'small',
-          'span',
-          'strong',
-          'sub',
-          'sup',
-          'time',
-          'u',
-          'var',
-          'wbr',
-        ],
-        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
-        'table': ['table'],
-        'table-row': ['tr'],
-        'table-cell': ['td', 'th'],
-        'table-header-group': ['thead'],
-        'table-row-group': ['tbody'],
-        'table-footer-group': ['tfoot'],
-        'table-caption': ['caption'],
-        'table-column': ['col'],
-        'table-column-group': ['colgroup'],
-        'list-item': ['li'],
-      };
-
-      const tagName = el.tagName.toLowerCase();
-      for (const [display, tags] of Object.entries(naturalDisplay)) {
-        if (tags.includes(tagName)) {
-          return display;
+        const tagName = el.tagName.toLowerCase();
+        for (const [display, tags] of Object.entries(naturalDisplay)) {
+          if (tags.includes(tagName)) {
+            displayValue = display;
+            break;
+          }
         }
+        displayValue = displayValue || 'block'; // Default for most elements
       }
-      return 'block'; // Default for most elements
+
+      // Cache the result
+      Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+
+      return displayValue;
     });
     return displays.length > 1 ? displays : displays[0];
   }
