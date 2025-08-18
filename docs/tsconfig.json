@@ -11,6 +11,7 @@
     "noEmit": true,
     "isolatedModules": true,
     "esModuleInterop": true,
+    "noImplicitAny ": false,
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "types": ["astro/client"],
