@@ -46,7 +46,7 @@ const errors = {
   repeated: 'Animation is already occurring, cancelling repeated animation',
 };
 
-const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors }) => ({
+const createBehavior = ({ $, el, cache, $el, self, settings, classNames }) => ({
   // track currently running JavaScript animations
   currentAnimations: [],
 
@@ -69,11 +69,9 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors 
     }
 
     const animation = self.findCSSAnimation(animateSettings.animation);
-    console.log('animation is', animation);
 
     if (animateSettings.useJavascript) {
       const direction = self.determineAnimationType(animateSettings.animation, animation);
-      console.log('doing animation', direction, animation);
       self.playAnimation(animation, direction, animateSettings);
     }
     else {
