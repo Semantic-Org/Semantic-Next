@@ -257,6 +257,8 @@ const createBehavior = (
       return;
     }
 
+    // pass through animation id for easier debugging / inspection of animations
+    // i.e. "fade in" , "fade out", "bounce"
     const animationID = (direction)
       ? `${cssAnimations.name} ${direction}`
       : `${cssAnimation}`;
