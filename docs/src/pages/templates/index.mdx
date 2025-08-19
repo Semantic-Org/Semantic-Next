@@ -8,7 +8,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## Overview
 
-Semantic UI templates provide a declarative syntax for generating the HTML structure of your [Web Components](/introduction). They integrate features like [looping](/templates/loops), [conditionals](/templates/conditionals), [expressions](/templates/expressions), and access to a component's [data context](/components/rendering#data-context) to simplify rendering dynamic views.
+Semantic UI templates compile to an Abstract Syntax Tree (AST) for efficient rendering and targeted DOM updates. The declarative syntax handles [async operations](/templates/async), [loops](/templates/loops), [conditionals](/templates/conditionals), and [reactive expressions](/templates/expressions) with automatic dependency tracking.
 
 ## Writing Templates
 
@@ -28,38 +28,25 @@ Welcome, { getFirstName }
 Welcome, {{ getFirstName }}
 ```
 
-#### Expressions
+#### Expression Styles
 
-Expressions can use Lisp style spaced expressions or javascript style expressions. You can also include any inlined javascript.
+Expressions support both Lisp-style (semantic) and JavaScript syntax, even mixed in the same template:
 
-```sui title="Lisp Simple"
+```sui title="Semantic (Lisp-style)"
 { formatDate date 'h:mm a' timezone }
+{ titleCase concat firstName ' ' lastName }
 ```
 
-```sui title="Javascript"
-{ formatDate(date, 'h:mm a') }
+```sui title="JavaScript"
+{ formatDate(date, 'h:mm a', timezone) }
+{ users.filter(u => u.active).length }
 ```
 
-```sui title="Lisp Nested"
-{ formatDate date, 'h:mm a' (getTimezone user) }
+```sui title="Mixed Styles"
+{ formatDate (date + offset) 'h:mm a' {locale: 'en-US'} }
 ```
 
-```sui title="Javascript Nested"
-{ formatDate(date, 'h:mm a', getTimezone(user)) }
-```
-```sui title="Lisp Evaluated"
-{ formatDate date, ('h:mm + 'a') (getTimezone user) }
-```
-
-```sui title="Javascript Evaluated"
-{ formatDate(date, 'h:mm + 'a', getTimezone(user)) }
-```
-
-### Compiles to AST
-
-Semantic UI templates compile to an Abstract Syntax Tree (AST). This AST is used to efficiently render the component's [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) and perform targeted updates only when underlying [reactive data sources](/reactivity) change.
-
-> See the [Templates & Data Context](/components/rendering) guide for details on how templates integrate with component data.
+> Templates compile once per component type and reuse the AST across instances. See [Templates & Data Context](/components/rendering) for integration details.
 
 ## Binding Data
 
@@ -75,31 +62,25 @@ When using the component framework these will come from sources in your componen
 
 ### [Expressions](/templates/expressions)
 
-Allow values to be output and functions executed from the template's [data context](/components/rendering#data-context).
+Evaluate against the template's [data context](/components/rendering#data-context). Expressions are reactive - they re-evaluate when signals change.
 
-#### Value Output
 ```sui
 {name}
+{users.0.email}
+{formatDate createdAt 'MMM DD'}
+{#html sanitizedContent}
 ```
 
-#### Function Calls
+#### Attribute Expressions
+
+With quotes: always renders as string
 ```sui
-{someMethod argumentOne argumentTwo}
+<input type="number" value="{count}">
 ```
 
-#### Complex Nested Expressions
+Without quotes: removes attribute when falsy
 ```sui
-{formatDateTime someDate 'YYYY-MM-DD HH:mm' (object timezone='local')}
-```
-
-#### Nested expressions
-```sui
-{formatDate (getDate now) 'h:mm a'}
-```
-
-#### HTML Output
-```sui
-{#html someHTML}
+<button disabled={isLoading}>Submit</button>
 ```
 
 ### [Conditionals](/templates/conditionals)
@@ -117,109 +98,191 @@ Control flow using `#if`, `#else if`, and `#else`.
 
 ### [Loops](/templates/loops)
 
-Iterate over collections using `#each`.
+Three iteration syntaxes with automatic `index`/`key` variables:
+
+Direct context
 ```sui
-{#each row in someCollection}
-  {row.name}
+{#each users}
+  {name} ({index})
 {/each}
 ```
 
-With inner data context
+Named iterator (each...in)
 ```sui
-{#each someCollection}
+{#each user in users}
+  {user.name} ({index})
+{/each}
+```
+
+Alternate syntax (each...as)
+```sui
+{#each users as user, idx}
+  {user.name} ({idx})
+{/each}
+```
+
+Object iteration
+```sui
+{#each value, key in settings}
+  {key}: {value}
+{/each}
+```
+
+Empty state
+```sui
+{#each items}
   {name}
-{/each}
-```
-
-With array index
-```sui
-{#each someCollection}
-  {index}
-{/each}
-```
-
-With else
-```sui
-{#each someCollection}
-  {index}
 {else}
-  No value
+  No items
 {/each}
+```
+
+### [Async Operations](/templates/async)
+
+Handle promises directly in templates with automatic reactive re-execution:
+
+```sui
+{#async fetchUser userId as user}
+  <h3>{user.name}</h3>
+{loading}
+  <div class="spinner">Loading...</div>
+{error as e}
+  <p>Failed: {e.message}</p>
+{/async}
+```
+
+Reactive dependencies (`userId` above) trigger automatic refetch.
+
+### [Reactivity Control](/templates/reactivity)
+
+Fine-tune when template sections update:
+
+Force re-evaluation including non-reactive content
+```sui
+{#rerender userId}
+  <p>User: {userName}</p>
+  <p>Timestamp: {getTimestamp}</p>
+{/rerender}
+```
+
+Only re-render when computed value changes
+```sui
+{#guard getUserStatus}
+  <div class="status-{getUserStatus}">
+    {expensiveComputation}
+  </div>
+{/guard}
 ```
 
 ### [Slots](/templates/slots)
 
 Define areas for external content injection.
 
-Default Slot
+Default slot
 ```sui
 {>slot}
 ```
-Named Slot
+
+Named slot
 ```sui
-{>slot icon}
+{>slot header}
 ```
 
 ### [Global Helpers](/templates/helpers)
 
-Access built-in utility functions for common tasks like formatting or logic.
+Built-in utilities for formatting, logic, and CSS classes:
+
 ```sui
-{stringify someObject}
-{formatDate someDate}
-{log 'Hello World'}
+{formatDate createdAt 'MMM DD, YYYY'}
+{capitalize title}
+{classIf isActive 'active' 'inactive'}
+{hasAny items}
+```
+
+#### Custom Helpers
+
+Extend the template system:
+
+```javascript
+import { registerHelper } from '@semantic-ui/templating';
+
+registerHelper('timeAgo', (date) => {
+  const seconds = Math.floor((Date.now() - date) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  return `${Math.floor(seconds / 3600)}h ago`;
+});
 ```
 
 ### [Subtemplates](/templates/subtemplates)
 
-Compose components by rendering other component templates.
+Compose components and enable template-as-settings patterns:
 
-Named Templates
+Simple subtemplate
 ```sui
-{> exampleSubtemplate}
+{> userCard user}
 ```
-Dynamic Template Support
+
+With data object
+```sui
+{> userCard name=user.name role='admin'}
+```
+
+Dynamic template selection
 ```sui
 {>template
   name=getTemplateName
-  data={
-    afternoon: 'Biking',
-    evening: getEveningActivity,
-  }
+  data={user: currentUser}
 }
 ```
 
-Reactive Data Controls
+Separate reactive/non-reactive data
 ```sui
 {>template
-  name=getTemplateName
-  reactiveData={
-    morning: morningActivity,
-  }
-  data={
-    afternoon: 'Biking',
-    evening: eveningActivity,
-  }
+  name='userProfile'
+  reactiveData={status: userStatus}  // Re-renders on change
+  data={theme: 'dark'}                // Static data
 }
+```
+
+#### Template as Settings
+
+Let consumers provide custom templates:
+
+```javascript
+// Consumer specifies template
+$('ui-table').settings({
+  rowTemplate: myCustomRowTemplate
+});
 ```
 
 ### [Snippets](/templates/snippets)
 
-Define and reuse inline template fragments within the same file.
+Inline reusable fragments - like subtemplates but defined in the same file:
 
 ```sui
-{#snippet fullName}
-  {#if both firstName lastName}
-    {firstName} {lastName}
-  {else}
-    {lastName}
-  {/if}
+{#snippet userRow}
+  <tr>
+    <td>{name}</td>
+    <td>{role}</td>
+    <td>{formatDate joinDate 'MMM YYYY'}</td>
+  </tr>
 {/snippet}
+```
 
-{#if isLoggedOut}
-  Login, {>fullName}
-{else if hasName}
-  Login, {>fullName}
-{else}
-  Login
-{/if}
+Use multiple times with different data
+```sui
+{#each admins}
+  {>userRow}
+{/each}
+
+{#each members}
+  {>userRow}
+{/each}
+```
+
+Snippets inherit parent data context but can receive additional data:
+
+```sui
+{>userRow extraClass='highlight'}
 ```
