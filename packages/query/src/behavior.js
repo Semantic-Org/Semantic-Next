@@ -437,9 +437,19 @@ export class Behavior {
     }
   }
 
-  dispatchEvent(eventName, detail = {}, eventSettings = {}, element = this.element) {
+  dispatchEvent(
+    eventName,
+    detail = {},
+    eventSettings = {},
+    { element = this.element, namespace = this.namespace } = {},
+  ) {
+    // Auto-namespace if not already namespaced
+    const namespacedEvent = eventName.includes(':')
+      ? eventName
+      : `${namespace}:${eventName}`;
+
     element.dispatchEvent(
-      new CustomEvent(eventName, {
+      new CustomEvent(namespacedEvent, {
         detail,
         bubbles: true,
         cancelable: true,
@@ -449,9 +459,14 @@ export class Behavior {
   }
 
   // dispatch an event across entire group
-  dispatchGroupEvent(eventName, detail = {}, eventSettings = {}) {
-    return this.$elements.get().map(element => {
-      this.dispatchEvent(eventName, detail, eventSettings, element);
+  dispatchGroupEvent(
+    eventName,
+    detail = {},
+    eventSettings = {},
+    { $elements = this.$elements, namespace = this.namespace } = {},
+  ) {
+    return $elements.get().map(element => {
+      this.dispatchEvent(eventName, detail, eventSettings, { element, namespace });
     });
   }
 

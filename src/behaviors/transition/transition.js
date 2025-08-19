@@ -83,17 +83,6 @@ const createBehavior = (
       ...runtimeSettings,
     };
 
-    // handle case of already animating
-    // handle animation queuing
-    if (self.isAnimating()) {
-      if (settings.queue) {
-        await self.animationsFinished();
-      }
-      else {
-        self.stop();
-      }
-    }
-
     // determine canonical animations from css, this is cached between runs
     const cssAnimations = self.findCSSAnimation(animationSettings.animation);
 
@@ -123,7 +112,6 @@ const createBehavior = (
       dispatchGroupEvent('transitionGroupStarted', {
         groupOrder,
       });
-      console.log('group animation started');
     }
     if (self.isLastInGroup(direction)) {
       dispatchGroupEvent('transitionGroupEnded', {
@@ -250,6 +238,17 @@ const createBehavior = (
       return;
     }
 
+    // handle case of already animating
+    // handle animation queuing
+    if (self.isAnimating()) {
+      if (settings.queue) {
+        await $(el).afterEvent('transition:end');
+      }
+      else {
+        self.stop();
+      }
+    }
+
     // find animations for this particular direction (array of animations)
     const animationsToPlay = cssAnimations.animations[direction] ?? cssAnimations.animations.standard;
 
@@ -283,9 +282,9 @@ const createBehavior = (
       return el.animate(animData.keyframes, options);
     });
 
-    dispatchEvent('transitionScheduled', { cssAnimations: cssAnimations, animations: activeAnimations });
+    dispatchEvent('scheduled', { cssAnimations: cssAnimations, animations: activeAnimations });
     await self.animationsStarted(activeAnimations);
-    dispatchEvent('transitionStarted', { cssAnimations: cssAnimations, animations: activeAnimations });
+    dispatchEvent('started', { cssAnimations: cssAnimations, animations: activeAnimations });
 
     // make element visible
     self.setInitialDisplayState(direction);
@@ -300,16 +299,16 @@ const createBehavior = (
 
     // Handle show/hide callbacks based on direction
     if (direction === 'in') {
-      dispatchEvent('transitionVisible', { cssAnimations: cssAnimations, animations: activeAnimations });
+      dispatchEvent('visible', { cssAnimations: cssAnimations, animations: activeAnimations });
       settings.onShow.call(el);
     }
     else if (direction === 'out') {
-      dispatchEvent('transitionHidden', { cssAnimations: cssAnimations, animations: activeAnimations });
+      dispatchEvent('hidden', { cssAnimations: cssAnimations, animations: activeAnimations });
       settings.onHide.call(el);
     }
 
     // can use callback, event or await this function
-    dispatchEvent('transitionEnded', { cssAnimations: cssAnimations, animations: activeAnimations });
+    dispatchEvent('end', { cssAnimations: cssAnimations, animations: activeAnimations });
     callback.call(el);
   },
 
