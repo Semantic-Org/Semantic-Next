@@ -1,5 +1,3 @@
-import { isClient, isServer } from './environment.js';
-
 /*-------------------
       Identity
 --------------------*/
