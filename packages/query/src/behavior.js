@@ -37,6 +37,9 @@ export class Behavior {
     // $element to initialize
     $element,
 
+    // $elements in group
+    $elements,
+
     // css to be added to page
     css = '',
 
@@ -69,6 +72,7 @@ export class Behavior {
     this.Query = Query;
 
     this.$element = $element;
+    this.$elements = $elements;
     this.element = $element.el();
 
     // handle run-time settings
@@ -433,8 +437,8 @@ export class Behavior {
     }
   }
 
-  dispatchEvent(eventName, detail = {}, eventSettings = {}) {
-    this.element.dispatchEvent(
+  dispatchEvent(eventName, detail = {}, eventSettings = {}, element = this.element) {
+    element.dispatchEvent(
       new CustomEvent(eventName, {
         detail,
         bubbles: true,
@@ -442,6 +446,13 @@ export class Behavior {
         ...eventSettings,
       }),
     );
+  }
+
+  // dispatch an event across entire group
+  dispatchGroupEvent(eventName, detail = {}, eventSettings = {}) {
+    return this.$elements.get().map(element => {
+      this.dispatchEvent(eventName, detail, eventSettings, element);
+    });
   }
 
   // Lookup method or property using natural language patterns (internal helper)
@@ -537,6 +548,8 @@ export class Behavior {
         self,
         behavior: self,
         namespace: self.namespace,
+        dispatchEvent: self.dispatchEvent.bind(this),
+        dispatchGroupEvent: self.dispatchGroupEvent.bind(this),
 
         // element index information
         index: self.elementIndex,
