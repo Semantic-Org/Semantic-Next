@@ -5,7 +5,7 @@ import css from './transition.css?raw';
 
 const defaultSettings = {
   // css animation to use
-  animation: 'fade',
+  animation: '',
 
   // duration to use 'auto' will default to the value set in css
   duration: 'auto',
@@ -57,7 +57,9 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
   currentAnimations: [],
 
   initialize() {
-    this.animate();
+    if (settings.animation) {
+      this.animate();
+    }
   },
 
   // animate can override at runtime with different duration, animation or callback
@@ -89,18 +91,15 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
 
     if (animationSettings.useJavascript) {
       if (total > 0) {
-        self.playGroupAnimation(cssAnimations, direction, animationSettings);
+        self.performGroupAnimation(cssAnimations, direction, animationSettings);
       }
       else {
         self.performAnimation(cssAnimations, direction, animationSettings);
       }
     }
-    else {
-      // TODO: CSS class approach
-    }
   },
 
-  playGroupAnimation(cssAnimations, direction, animationSettings) {
+  performGroupAnimation(cssAnimations, direction, animationSettings) {
     let groupDirection = (settings.groupDirection == 'auto')
       ? (direction == 'in')
         ? 'forward'
