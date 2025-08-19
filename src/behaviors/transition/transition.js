@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, noop } from '@semantic-ui/utils';
+import { any, each, inArray, noop } from '@semantic-ui/utils';
 
 import css from './transition.css?raw';
 
@@ -14,7 +14,7 @@ const defaultSettings = {
   interval: 200,
 
   // direction of animation when animating groups (forward for in, reverse for out)
-  groupDirection: 'auto',
+  groupOrder: 'auto',
 
   // callbacks
   onComplete: () => {},
@@ -32,9 +32,6 @@ const defaultSettings = {
   // failsafe makes sure animation is cleaned up even if event doesnt fire
   useFailSafe: true,
   failSafeDelay: 100,
-
-  // whether to use javascript to animate instead of class names
-  useJavascript: true,
 };
 
 const classNames = {
@@ -52,7 +49,24 @@ const errors = {
   repeated: 'Animation is already occurring, cancelling repeated animation',
 };
 
-const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors, index, total }) => ({
+const createBehavior = (
+  {
+    $,
+    dispatchEvent,
+    dispatchGroupEvent,
+    el,
+    cache,
+    $el,
+    self,
+    settings,
+    classNames,
+    errors,
+    index,
+    isFirst,
+    isLast,
+    total,
+  },
+) => ({
   // track currently running JavaScript animations
   currentAnimations: [],
 
@@ -63,21 +77,21 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
   },
 
   // animate can override at runtime with different duration, animation or callback
-  animate(runtimeSettings) {
+  async animate(runtimeSettings) {
     const animationSettings = {
       ...settings,
       ...runtimeSettings,
     };
 
     // handle case of already animating
+    // handle animation queuing
     if (self.isAnimating()) {
-      if (animationSettings.queue) {
-        self.queue(settings);
+      if (settings.queue) {
+        await self.animationsFinished();
       }
-      if (!animationSettings.allowRepeats) {
-        return;
+      else {
+        self.stop();
       }
-      return;
     }
 
     // determine canonical animations from css, this is cached between runs
@@ -88,30 +102,34 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
     if (cssAnimations.directional) {
       direction = self.determineDirection(animationSettings.animation);
     }
-
-    if (animationSettings.useJavascript) {
-      if (total > 0) {
-        self.performGroupAnimation(cssAnimations, direction, animationSettings);
-      }
-      else {
-        self.performAnimation(cssAnimations, direction, animationSettings);
-      }
+    if (total > 0) {
+      await self.performGroupAnimation(cssAnimations, direction, animationSettings);
+    }
+    else {
+      await self.performAnimation(cssAnimations, direction, animationSettings);
     }
   },
 
-  performGroupAnimation(cssAnimations, direction, animationSettings) {
-    let groupDirection = (settings.groupDirection == 'auto')
-      ? (direction == 'in')
-        ? 'forward'
-        : 'reverse'
-      : settings.groupDirection;
+  async performGroupAnimation(cssAnimations, direction, animationSettings) {
+    let groupOrder = self.getGroupOrder(direction);
 
-    const delay = (groupDirection == 'forward')
+    const delay = (groupOrder == 'forward')
       ? index * settings.interval
       : (total - index) * settings.interval;
-    setTimeout(() => {
-      self.performAnimation(cssAnimations, direction, animationSettings);
-    }, delay);
+
+    animationSettings.delay = delay;
+    await self.performAnimation(cssAnimations, direction, animationSettings);
+    if (self.isFirstInGroup(direction)) {
+      dispatchGroupEvent('transitionGroupStarted', {
+        groupOrder,
+      });
+      console.log('group animation started');
+    }
+    if (self.isLastInGroup(direction)) {
+      dispatchGroupEvent('transitionGroupEnded', {
+        groupOrder,
+      });
+    }
   },
 
   // look in css defs for a valid animation matching name
@@ -163,12 +181,6 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
     self.setCachedAnimation(animationName, animation);
 
     return animation;
-  },
-
-  queue(settings) {
-  },
-
-  hide() {
   },
 
   // set cached keyframes and animation data
@@ -232,10 +244,7 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
   },
 
   // takes a set of css animations and then performs them using web animation API
-  async performAnimation(cssAnimations, direction, { duration, callback = noop } = {}) {
-    // end other animations for this element
-    self.cleanupAnimations();
-
+  async performAnimation(cssAnimations, direction, { duration, callback = noop, delay } = {}) {
     if (!cssAnimations || !cssAnimations.exists) {
       console.warn('No animation data available for', cssAnimations.name);
       return;
@@ -248,52 +257,57 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
       return;
     }
 
-    // make element visible
-    self.setInitialDisplayState(direction);
-
-    settings.onStart.call(el);
+    const animationID = (direction)
+      ? `${cssAnimations.name} ${direction}`
+      : `${cssAnimation}`;
 
     // Create and start multiple animations (one per CSS property)
     const activeAnimations = animationsToPlay.map(animData => {
       const options = {
         ...animData.timing,
+        id: animationID,
         fill: 'none',
       };
+
+      if (delay >= 0) {
+        options.delay = delay;
+      }
 
       // Allow specific duration to be specified in js
       // If not specified it will use one from css
       if (duration !== 'auto') {
         options.duration = duration;
       }
-
-      const activeAnimation = el.animate(animData.keyframes, options);
-      self.currentAnimations.push(activeAnimation);
-      return activeAnimation;
+      return el.animate(animData.keyframes, options);
     });
 
+    dispatchEvent('transitionScheduled', { cssAnimations: cssAnimations, animations: activeAnimations });
+    await self.animationsStarted(activeAnimations);
+    dispatchEvent('transitionStarted', { cssAnimations: cssAnimations, animations: activeAnimations });
+
+    // make element visible
+    self.setInitialDisplayState(direction);
+
+    settings.onStart.call(el);
+
     // Wait for all animations to complete (handle cancellation gracefully)
-    try {
-      await Promise.all(activeAnimations.map(anim => anim.finished));
-    }
-    catch (error) {
-      // Animation was cancelled
-      if (error.name !== 'AbortError') {
-        throw error; // Re-throw unexpected errors
-      }
-      return; // Exit early if animations were cancelled
-    }
+    await self.animationsFinished(activeAnimations);
 
     // Set final display state based on direction
     self.setFinalDisplayState(direction);
 
     // Handle show/hide callbacks based on direction
     if (direction === 'in') {
+      dispatchEvent('transitionVisible', { cssAnimations: cssAnimations, animations: activeAnimations });
       settings.onShow.call(el);
     }
     else if (direction === 'out') {
+      dispatchEvent('transitionHidden', { cssAnimations: cssAnimations, animations: activeAnimations });
       settings.onHide.call(el);
     }
-    // can use callback or await this function
+
+    // can use callback, event or await this function
+    dispatchEvent('transitionEnded', { cssAnimations: cssAnimations, animations: activeAnimations });
     callback.call(el);
   },
 
@@ -316,26 +330,119 @@ const createBehavior = ({ $, el, cache, $el, self, settings, classNames, errors,
     }
   },
 
-  cleanupAnimations() {
-    self.currentAnimations.forEach(animation => {
-      if (animation.playState !== 'finished') {
-        animation.cancel();
-      }
+  stop() {
+    each(self.currentAnimations(), (animation) => {
+      animation.cancel();
     });
-    self.currentAnimations = [];
+  },
+
+  async animationsReady(animations = el.getAnimations()) {
+    try {
+      await Promise.all(animations.map(animation => animation.ready));
+    }
+    catch (error) {
+      // Animation was cancelled
+      if (error.name !== 'AbortError') {
+        throw error; // Re-throw unexpected errors
+      }
+      return; // Exit early if animations were cancelled
+    }
+  },
+  async animationsStarted(animations = el.getAnimations()) {
+    try {
+      await Promise.all(animations.map(animation => self.animationStarted(animation)));
+    }
+    catch (error) {
+      if (error.name !== 'AbortError') {
+        throw error; // Re-throw unexpected errors
+      }
+      return; // Exit early if animations were cancelled
+    }
+  },
+
+  // There are many idiosyncracies about how to determine actual animation start
+  // when using the delay option. The only solve that seems to be stable
+  // is using getTiming() and polling in a RaF
+  async animationStarted(animation) {
+    await animation.ready;
+
+    const timing = animation.effect.getTiming();
+    const delay = timing.delay || 0;
+
+    if (delay === 0) {
+      return;
+    }
+    return new Promise((resolve) => {
+      const startTime = animation.startTime;
+
+      function check() {
+        // Use timeline.currentTime for a cheaper check
+        const elapsed = animation.timeline.currentTime - startTime;
+        if (elapsed >= delay) {
+          resolve();
+        }
+        else {
+          requestAnimationFrame(check);
+        }
+      }
+      requestAnimationFrame(check);
+    });
+  },
+  async animationsFinished(animations = el.getAnimations()) {
+    try {
+      await Promise.all(animations.map(animation => animation.finished));
+    }
+    catch (error) {
+      // Animation was cancelled
+      if (error.name !== 'AbortError') {
+        throw error; // Re-throw unexpected errors
+      }
+      return; // Exit early if animations were cancelled
+    }
+  },
+  currentAnimations() {
+    return el.getAnimations().filter((animation) => inArray(animation.playState, ['running', 'playing']));
+  },
+
+  getGroupOrder(direction) {
+    return (settings.groupOrder == 'auto')
+      ? (direction == 'in')
+        ? 'forward'
+        : 'reverse'
+      : settings.groupOrder;
   },
 
   isAnimating() {
-    return $el.hasClass(classNames.animating);
+    return self.currentAnimations().length > 0;
   },
   isInward() {
-    return $el.hasClass(classNames.inward);
+    return any(self.currentAnimations(), (animation) => animation?.id.includes('in'));
   },
   isOutward() {
-    return $el.hasClass(classNames.outward);
+    return any(self.currentAnimations(), (animation) => animation?.id.includes('out'));
   },
   isLooping() {
-    return $el.hasClass(classNames.looping);
+    return any(self.currentAnimations(), (animation) => animation?.id.includes('loop'));
+  },
+  isFirstInGroup(direction) {
+    const order = self.getGroupOrder(direction);
+    if (order == 'forward' && isFirst) {
+      return true;
+    }
+    if (order == 'reverse' && isLast) {
+      return true;
+    }
+    return false;
+  },
+  isLastInGroup(direction) {
+    const order = self.getGroupOrder(direction);
+    if (order == 'forward' && isLast) {
+      return true;
+    }
+    if (order == 'reverse' && isFirst) {
+      return true;
+    }
+    return false;
   },
 });
 
