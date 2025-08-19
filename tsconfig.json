@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "noImplicitThis": false,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@semantic-ui/*": ["packages/*/src", "packages/*/types"]
+    },
+    "typeRoots": ["packages/*/types", "node_modules/@types"]
+  },
+  "include": [
+    "src/**/*",
+    "packages/*/src/**/*",
+    "packages/*/types/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/test/**/*",
+    "**/*.test.js",
+    "**/*.spec.js"
+  ]
+}
