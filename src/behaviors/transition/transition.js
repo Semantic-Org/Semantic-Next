@@ -271,7 +271,7 @@ const createBehavior = (
     // i.e. "fade in" , "fade out", "bounce"
     const animationID = (direction)
       ? `${cssAnimations.name} ${direction}`
-      : `${cssAnimation}`;
+      : `${cssAnimations.name}`;
 
     debug('Starting animation', animationID);
 
