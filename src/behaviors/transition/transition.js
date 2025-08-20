@@ -22,16 +22,9 @@ const defaultSettings = {
   onShow: () => {},
   onHide: () => {},
 
-  // whether directional animations can occur twice in same direction
-  allowRepeats: false,
-
   // queue will queue directional transitions after previous transition on same element
   // i.e. .transition('fade').transition('fade')
   queue: true,
-
-  // failsafe makes sure animation is cleaned up even if event doesnt fire
-  useFailSafe: true,
-  failSafeDelay: 100,
 };
 
 const classNames = {
