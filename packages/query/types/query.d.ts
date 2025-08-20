@@ -96,6 +96,21 @@ export class Query {
    * An array of event handlers for teardown purposes.
    */
   static eventHandlers: EventHandler[];
+  /**
+   * Map of registered behaviors
+   */
+  static behaviors: Map<string, any>;
+  /**
+   * Development mode flag
+   */
+  static development?: boolean;
+  /**
+   * Global settings for Query
+   */
+  static settings?: {
+    logLevel?: string;
+    performance?: boolean;
+  };
 
   /** The original selector used to create the Query instance. */
   selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy;
