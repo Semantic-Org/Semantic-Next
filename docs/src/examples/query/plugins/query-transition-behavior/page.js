@@ -4,8 +4,16 @@ import { $ } from '@semantic-ui/query';
 $('ui-button').on('click', () => {
   const animation = $('.animation').val();
   const groupOrder = $('.direction').val();
-  const duration = $('.duration').val() || 'auto';
-  const interval = $('.interval').val();
+
+  let duration = $('.duration').val() || 'auto';
+  let interval = $('.interval').val();
+
+  if (duration !== 'auto') {
+    duration = Number(duration);
+  }
+  if (interval) {
+    interval = Number(interval);
+  }
 
   $('.box').transition({
     animation,
