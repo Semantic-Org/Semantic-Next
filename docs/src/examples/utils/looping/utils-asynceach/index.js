@@ -33,7 +33,7 @@ console.log('--- Async Map iteration ---');
 const myMap = new Map([
   ['name', 'John'],
   ['age', 30],
-  ['city', 'New York']
+  ['city', 'New York'],
 ]);
 await asyncEach(myMap, async (value, key) => {
   await delay(75);

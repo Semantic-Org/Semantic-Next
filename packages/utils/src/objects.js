@@ -1,8 +1,8 @@
+import { clone } from './cloning.js';
 import { noop } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
 import { isArray, isObject, isPlainObject } from './types.js';
-import { clone } from './cloning.js';
 
 /*-------------------
        Objects
@@ -94,7 +94,7 @@ export const deepExtend = (target, ...args) => {
         return;
       }
 
-      // If target property doesn't exist or isn't a plain object, 
+      // If target property doesn't exist or isn't a plain object,
       // create new object and deep extend
       if (!isPlainObject(src)) {
         target[key] = deepExtend({}, val, options);
@@ -112,7 +112,7 @@ export const deepExtend = (target, ...args) => {
 export const pick = (obj, ...keys) => {
   let copy = {};
   each(keys, function(key) {
-    if (obj[key] !== undefined) {
+    if (obj?.[key] !== undefined) {
       copy[key] = obj[key];
     }
   });

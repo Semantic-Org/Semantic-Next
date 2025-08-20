@@ -1,8 +1,4 @@
-import {
-  asyncEach,
-  asyncMap,
-  each,
-} from '@semantic-ui/utils';
+import { asyncEach, asyncMap, each } from '@semantic-ui/utils';
 
 import { describe, expect, it, vi } from 'vitest';
 
@@ -337,7 +333,7 @@ describe('iterators', () => {
           return {
             ...value,
             id: key,
-            isAdult: value.age >= 18
+            isAdult: value.age >= 18,
           };
         });
         expect(result.get('user1')).toEqual({ age: 25, id: 'user1', isAdult: true });

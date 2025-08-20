@@ -1,0 +1,73 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
+  "vcs": { "enabled": false, "clientKind": "git", "useIgnoreFile": false },
+  "files": { "ignoreUnknown": false },
+  "formatter": { "enabled": false, "indentStyle": "space" },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": false,
+      "complexity": {
+        "noAdjacentSpacesInRegex": "off",
+        "noCommaOperator": "warn",
+        "noExtraBooleanCast": "warn",
+        "noUselessLoneBlockStatements": "warn",
+        "noUselessUndefinedInitialization": "off",
+        "noVoid": "off",
+        "useLiteralKeys": "off"
+      },
+      "correctness": {
+        "noConstantCondition": "warn",
+        "noUnusedFunctionParameters": "off",
+        "noGlobalObjectCalls": "off",
+        "noInnerDeclarations": "off",
+        "noInvalidUseBeforeDeclaration": "warn",
+        "noUndeclaredVariables": "off",
+        "noUnreachable": "error",
+        "noUnusedVariables": "warn",
+        "useIsNan": "off",
+        "useParseIntRadix": "error",
+        "useValidTypeof": "off"
+      },
+      "security": { "noGlobalEval": "error" },
+      "style": {
+        "noNestedTernary": "off",
+        "noYodaExpression": "error",
+        "useArrayLiterals": "off",
+        "useBlockStatements": "warn",
+        "useCollapsedElseIf": "off",
+        "useConsistentBuiltinInstantiation": "warn",
+        "useDefaultSwitchClause": "off",
+        "useShorthandAssign": "off",
+        "useSingleVarDeclarator": "off"
+      },
+      "suspicious": {
+        "noAlert": "warn",
+        "noCatchAssign": "off",
+        "noConsole": "off",
+        "noControlCharactersInRegex": "off",
+        "noDebugger": "off",
+        "noDoubleEquals": "off",
+        "noDuplicateObjectKeys": "error",
+        "noEmptyBlockStatements": "warn",
+        "noFallthroughSwitchClause": "off",
+        "noFunctionAssign": "off",
+        "noIrregularWhitespace": "warn",
+        "noLabelVar": "error",
+        "noOctalEscape": "off",
+        "noRedeclare": "warn",
+        "noSelfCompare": "warn",
+        "noShadowRestrictedNames": "off",
+        "noSparseArray": "warn",
+        "noVar": "warn",
+        "noWith": "off",
+        "useGuardForIn": "off"
+      }
+    }
+  },
+  "javascript": { "formatter": { "quoteStyle": "single" }, "globals": ["_"] },
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  }
+}

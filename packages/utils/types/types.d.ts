@@ -106,7 +106,7 @@ export function isClassInstance(obj: unknown): boolean;
  * @see {@link https://next.semantic-ui.com/api/utils/types#isset isSet}
  * @param x - The value to check
  * @returns True if the value is a Set, false otherwise
- * 
+ *
  * @example
  * ```typescript
  * isSet(new Set([1, 2, 3]));     // true
@@ -122,7 +122,7 @@ export function isSet(x: unknown): x is Set<any>;
  * @see {@link https://next.semantic-ui.com/api/utils/types#ismap isMap}
  * @param x - The value to check
  * @returns True if the value is a Map, false otherwise
- * 
+ *
  * @example
  * ```typescript
  * isMap(new Map([['a', 1]]));    // true

@@ -60,4 +60,18 @@ $$.fn =
   $.plugin =
     Query.prototype;
 
+// Expose logging configuration directly
+const logLevel = {
+  get: () => Query.logLevel,
+  set: (value) => Query.logLevel = value,
+};
+const logPerformance = {
+  get: () => Query.logPerformance,
+  set: (value) => Query.logPerformance = value,
+};
+Object.defineProperty($, 'logLevel', logLevel);
+Object.defineProperty($$, 'logLevel', logLevel);
+Object.defineProperty($, 'logPerformance', logPerformance);
+Object.defineProperty($$, 'logPerformance', logPerformance);
+
 export { $, $$, exportGlobals, restoreGlobals };

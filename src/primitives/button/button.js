@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 import { get, inArray } from '@semantic-ui/utils';
 
-import componentSpec from './specs/button-component.js';
-import template from './button.html?raw';
 import css from './button-bundle.css?raw';
+import template from './button.html?raw';
+import componentSpec from './specs/button-component.js';
 
 const createComponent = ({ el, self, settings, data, $ }) => ({
   isIconBefore() {
@@ -21,9 +21,9 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
   },
   performAction() {
     const formActions = ['submit', 'reset'];
-    if(inArray(settings.type, formActions)) {
+    if (inArray(settings.type, formActions)) {
       const form = self.getForm();
-      if(form) {
+      if (form) {
         $(form).trigger(settings.type);
       }
     }
@@ -45,7 +45,7 @@ const events = {
   },
   'click .button'({ event, self, $ }) {
     self.performAction();
-    $(this).blur();
+    // $(this).blur();
   },
   'keydown .button'({ event, self, $ }) {
     let $button = $(this);

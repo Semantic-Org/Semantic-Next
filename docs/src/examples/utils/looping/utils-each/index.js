@@ -28,7 +28,7 @@ console.log('--- Map iteration ---');
 const myMap = new Map([
   ['name', 'John'],
   ['age', 30],
-  ['city', 'New York']
+  ['city', 'New York'],
 ]);
 each(myMap, (value, key) => {
   console.log(`${key}: ${value}`);

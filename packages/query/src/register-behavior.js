@@ -1,10 +1,9 @@
-import { pick, isString, isArray, noop, deepExtend } from '@semantic-ui/utils';
+import { deepExtend, filterObject, isArray, isString, noop, pick } from '@semantic-ui/utils';
 import { Behavior } from './behavior.js';
 import { Query } from './query.js';
 
 // Register Behavior
 export const registerBehavior = (behavior) => {
-
   const behaviorDefaults = {
     name: undefined,
     css: undefined,
@@ -13,7 +12,7 @@ export const registerBehavior = (behavior) => {
     // settings for behavior
     defaultSettings: {},
     // returns behavior instance
-    createBehavior: noop,
+    createBehavior: function() {},
     // event object
     events: {},
     // mutation observer object
@@ -21,10 +20,9 @@ export const registerBehavior = (behavior) => {
     // whether html data can override settings
     allowDataOverride: true,
     // one time setup callback
-    setup: noop,
+    setup: function() {},
     // callbacks
     onCreated: noop,
-    onMutated: noop,
     onDestroyed: noop,
     // standard object storage
     selectors: {},
@@ -35,10 +33,10 @@ export const registerBehavior = (behavior) => {
 
   behavior = {
     ...behaviorDefaults,
-    ...behavior
+    ...behavior,
   };
   // handle default namespace
-  if(!behavior.namespace) {
+  if (!behavior.namespace) {
     behavior.namespace = behavior.name;
   }
 
@@ -73,20 +71,27 @@ export const registerBehavior = (behavior) => {
 
   // Create abstraction around behavior initialization
   Query.prototype[name] = function(settings) {
+    // ignore undefined settings
+    settings = filterObject(settings, (value) => value !== undefined);
 
-
-    // At run time we need to check if defaults are changed from original registration
-    const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
+    // At run time we need to check if defaults are changed by user
+    // this can occur if $.plugin.defaultSettings is modified
+    const defaultValues = ['classNames', 'errors', 'selectors', 'logLevel', 'logPerformance'];
+    const globalDefaults = pick(Query, ...defaultValues);
     const behaviorDefaults = pick(Query.prototype[name], ...defaultValues);
+    const settingsDefaults = pick(settings, ...defaultValues);
+
+    // store runtime config for Behavior
     const runtimeConfig = {
+      ...globalDefaults,
       ...behaviorDefaults,
+      ...settingsDefaults,
       ...behavior,
     };
 
-    // when this element is initialized we create run time settings
-    // this looks at current default settings at time of init
-    // use deepExtend to properly merge nested objects like selectors, classNames, etc.
-    const runtimeSettings = deepExtend({}, defaultSettings, settings);
+
+    // determine run time settings for behavior
+    const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
 
     // store reference to all elements
     const $elements = this;
@@ -99,31 +104,36 @@ export const registerBehavior = (behavior) => {
     // value to store return
     let returnedValue;
 
-    $elements.each(function(element, index) {
-
+    $elements.each(function(element, elementIndex) {
       // handle setup function on first invocation
-      if(!isSetup) {
+      if (!isSetup) {
         sharedBehavior = Behavior.runSetup(behavior.setup, { $elements, settings, templates }) ?? {};
         isSetup = true;
       }
 
       const $element = this;
+      const totalElements = $elements.count();
 
       // behavior is stored in namespace like el.behavior
-      const instance = Behavior.getInstance(element, namespace);
+      let instance = Behavior.getInstance(element, namespace);
+      let existingInstance = !!instance;
 
       const behaviorConfig = {
         sharedBehavior, // setup can pass shared behavior across instances
         $element,
+        $elements,
+        Query,
+        elementIndex,
+        totalElements,
         ...runtimeConfig,
-        settings: runtimeSettings
+        settings: runtimeSettings,
       };
 
       // create behavior instance if not defined
       // this might even occur if a method is invoked
       // if this method has no instance defined
       if (!instance) {
-        new Behavior(behaviorConfig);
+        instance = new Behavior(behaviorConfig);
       }
 
       if (methodName) {
@@ -144,13 +154,12 @@ export const registerBehavior = (behavior) => {
           returnedValue = response;
         }
       }
-      else if(instance !== undefined) {
+      else if (existingInstance) {
         // if they are not calling a method and there are settings
         // than they are attempting to reinitialize the behavior with new settings
         instance.reinitialize(behaviorConfig);
       }
     });
-
 
     return (returnedValue !== undefined)
       ? returnedValue
@@ -166,5 +175,4 @@ export const registerBehavior = (behavior) => {
   Query.prototype[name].classNames = classNames;
   Query.prototype[name].selectors = selectors;
   Query.prototype[name].errors = errors;
-
 };

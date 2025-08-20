@@ -301,7 +301,7 @@ const events = {
 - `'bind focus input'` - Direct binding to subelements (for non-bubbling custom events)
 - `'global scroll'` - Global event on any element outside the behavior
 
-#### Using Configuration in Events
+#### Templated Event Binding
 
 Event strings support templating using configuration objects. Use `{key}` syntax to reference `selectors`, `classNames` and `settings`:
 
@@ -321,6 +321,7 @@ registerBehavior({
 #### Event Cleanup
 
 Events are automatically cleaned up when behavior instances are destroyed using an AbortController when your behavior is destroyed or you call `.behaviorName('destroy')`.
+
 
 ### Mutations
 
@@ -342,7 +343,31 @@ registerBehavior({
 });
 ```
 
+
+
+#### Templated Mutations
+
+Mutation strings support templating using configuration objects. Use `{key}` syntax to reference `selectors`, `classNames` and `settings`:
+
+```javascript
+registerBehavior({
+  settings: {
+    mutatingElement: 'li', // watch for li changes
+  },
+  mutations: {
+    '{mutatingElement}': ({ self }) => {
+      // do something
+    }
+  }
+});
+```
+
+#### Example
+
+This example uses a templated mutation observer to watch for new list items and add markdown formatting.
+
 <PlaygroundExample id="query-behavior-mutations" />
+
 
 #### Mutation Types
 

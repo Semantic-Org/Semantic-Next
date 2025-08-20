@@ -1,5 +1,5 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { camelToKebab, each, isClient, isServer, kebabToCamel, noop, adoptStylesheet } from '@semantic-ui/utils';
+import { adoptStylesheet, camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
@@ -14,7 +14,7 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  createComponent = noop,
+  createComponent = function() {},
   events = {}, // event bindings
   keys = {}, // key bindings
 
@@ -55,7 +55,6 @@ export const defineComponent = ({
   if (pageCSS) {
     adoptStylesheet(pageCSS);
   }
-
 
   /*
     Create Component Returns Either a Template or WebComponent
@@ -99,7 +98,6 @@ export const defineComponent = ({
       });
 
       static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
-
 
       defaultSettings = {};
 

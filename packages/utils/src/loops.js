@@ -1,4 +1,4 @@
-import { isArray, isIterable, isFunction, isObject, isPlainObject, isMap, isSet, isNumber } from './types.js';
+import { isArray, isFunction, isIterable, isMap, isNumber, isObject, isPlainObject, isSet } from './types.js';
 
 /*-------------------
       Looping
@@ -39,7 +39,7 @@ export const each = (obj, func, context) => {
   // Maps - native iteration preserves insertion order
   if (isMap(obj)) {
     for (const [key, value] of obj) {
-      if (iteratee(value, key, obj) === false) break;
+      if (iteratee(value, key, obj) === false) { break; }
     }
     return obj;
   }
@@ -48,7 +48,7 @@ export const each = (obj, func, context) => {
   if (isIterable(obj)) {
     let i = 0;
     for (const value of obj) {
-      if (iteratee(value, i++, obj) === false) break;
+      if (iteratee(value, i++, obj) === false) { break; }
     }
     return obj;
   }
@@ -61,7 +61,8 @@ export const each = (obj, func, context) => {
         break;
       }
     }
-  } else {
+  }
+  else {
     // Non-plain objects: class instances, functions - Object.keys() for enumerable only
     const keys = Object.keys(obj);
     for (let i = 0; i < keys.length; ++i) {
@@ -106,7 +107,7 @@ export const asyncEach = async (obj, func, context) => {
   // Maps
   if (isMap(obj)) {
     for (const [key, value] of obj) {
-      if (await iteratee(value, key, obj) === false) break;
+      if (await iteratee(value, key, obj) === false) { break; }
     }
     return obj;
   }
@@ -115,7 +116,7 @@ export const asyncEach = async (obj, func, context) => {
   if (isIterable(obj)) {
     let i = 0;
     for (const value of obj) {
-      if (await iteratee(value, i++, obj) === false) break;
+      if (await iteratee(value, i++, obj) === false) { break; }
     }
     return obj;
   }
@@ -128,7 +129,8 @@ export const asyncEach = async (obj, func, context) => {
         break;
       }
     }
-  } else {
+  }
+  else {
     // Non-plain objects: class instances, functions - Object.keys() for enumerable only
     const keys = Object.keys(obj);
     for (let i = 0; i < keys.length; ++i) {

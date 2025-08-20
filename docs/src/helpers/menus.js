@@ -93,11 +93,11 @@ const subCategorySortOrder = {
     'Browser',
     'Dates',
     'Numbers',
+    'Environment',
     'Crypto',
     'Equality',
     'Cloning',
     'Errors',
-    'SSR',
     'Regex',
   ],
 };
@@ -620,6 +620,10 @@ export const sidebarMenuAPI = [
         url: '/api/utils/dates',
       },
       {
+        name: 'Environment',
+        url: '/api/utils/environment',
+      },
+      {
         name: 'Equality',
         url: '/api/utils/equality',
       },
@@ -650,10 +654,6 @@ export const sidebarMenuAPI = [
       {
         name: 'Regular Expressions',
         url: '/api/utils/regex',
-      },
-      {
-        name: 'SSR',
-        url: '/api/utils/ssr',
       },
       {
         name: 'Strings',

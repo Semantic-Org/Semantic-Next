@@ -1,8 +1,8 @@
-import { hashCode } from './crypto.js';
-import { isServer } from './ssr.js';
-import { each } from './loops.js';
-import { isString, isArray } from './types.js';
 import { inArray } from './arrays.js';
+import { hashCode } from './crypto.js';
+import { isServer } from './environment.js';
+import { each } from './loops.js';
+import { isArray, isString } from './types.js';
 
 /*-------------------
          CSS
@@ -66,7 +66,7 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
   selector = selector.toLowerCase();
 
   const matchesSelector = (ruleSelector) => {
-    if (!ruleSelector) return false;
+    if (!ruleSelector) { return false; }
     const lowercased = ruleSelector.toLowerCase();
     return exactMatch ? lowercased === selector : lowercased.includes(selector);
   };
@@ -80,7 +80,7 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
     const tempSheet = new CSSStyleSheet();
     tempSheet.replaceSync(source);
     styleSheets = [tempSheet];
-  } 
+  }
   else if (source?.cssRules) {
     // Single stylesheet
     styleSheets = [source];
@@ -120,7 +120,7 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
     }
   });
 
-  return returnText 
+  return returnText
     ? Array.from(newStyleSheet.cssRules).map(rule => rule.cssText).join('\n')
     : newStyleSheet;
 };
@@ -131,7 +131,7 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
   const scopeRule = (rule, scopeSelector) => {
     if (rule.type === CSSRule.STYLE_RULE) {
       let selectorText = rule.selectorText;
-      
+
       // Handle :host replacement
       if (replaceHost && selectorText.includes(':host')) {
         selectorText = selectorText
@@ -139,12 +139,12 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
           .replace(/:host/g, scopeSelector); // :host -> .scope
         return `${selectorText} { ${rule.style.cssText} }`;
       }
-      
+
       // Handle html/body - append scope instead of prepend
       if (appendToRootElements && inArray(selectorText.toLowerCase(), ['html', 'body'])) {
         return `${selectorText} ${scopeSelector} { ${rule.style.cssText} }`;
       }
-      
+
       // Default: prepend scope
       return `${scopeSelector} ${selectorText} { ${rule.style.cssText} }`;
     }
@@ -153,7 +153,9 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
       each(rule.cssRules, (innerRule) => {
         scopedInnerRules.push(scopeRule(innerRule, scopeSelector));
       });
-      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${scopedInnerRules.join(' ')} }`;
+      return `@${rule.type === CSSRule.MEDIA_RULE ? 'media' : 'supports'} ${rule.conditionText || ''} { ${
+        scopedInnerRules.join(' ')
+      } }`;
     }
     else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || rule.type == 0 && rule.cssRules) {
       let scopedInnerRules = [];

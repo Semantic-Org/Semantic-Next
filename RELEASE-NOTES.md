@@ -8,6 +8,8 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.16.0 xx.xx.2025
 
+### Utils
+
 ## Major Features
 * **Query** - Added generalized plugin architecture for Query along with examples in docs.
 * **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON -> JS exports. ESM will now directly use `src` without translation!
@@ -15,17 +17,22 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **UI** - Added many new components like `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`. These are not documented yet.
 
 ## Specs
-* **UI** - Added JS exports for specs
+* **UI** - Added JS object exports for ui specs
 
 ## Query
+* **Feature** - Added `onNext()` method for promise-based event waiting, enabling modern async/await patterns with automatic cleanup and optional timeout support
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
 * **Feature** - Added `appendTo()` method for appending elements as last child of target
 * **Feature** - Added `prependTo()` method for prepending elements as first child of target
+* **Feature** - Added `isVisible()` method for checking if ALL elements have layout dimensions using modern `getBoundingClientRect()` API, with optional opacity checking
+* **Feature** - Added `naturalDisplay()` for getting the natural display value of elements (ignoring display: none rules)
 * **Feature** - You can now use `documentFragment` with content manipulation like `append()` `prepend()`
+* **Improvement** - `clippingParent()` now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`
 * **Improvement** - `trigger()` now triggers native event handler. Use `dispatchEvent` to avoid this behavior.
 * **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
 * **Bug** - `dataContext()` now returns the entire data context including state.
 * **Bug** - Fixed `initialize` did not properly chain
+* **Bug** - Fixed `addClass` `toggleClass` and `removeClass` to not error on `undefined`.
 
 ## Templates
 * **Feature** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
@@ -41,9 +48,12 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added `scopeStyles()` for scoping CSS rules with configurable :host replacement and root element handling
 * **Feature** - Added Set and Map support to `each()`, `asyncEach()`, and `asyncMap()` functions for iterating over ES6 collections
 * **Feature** - Added `isSet()` and `isMap()` type checking helpers for ES6 collection validation
+* **Feature** - Added `isDevelopment` constant for comprehensive development environment detection across Node.js, Vite, Vercel, Netlify, cloud dev environments (Codespaces, GitPod), Nuxt, and React Native
+* **Feature** - Added `isCI` constant for detecting CI/CD environments including GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis, and many other platforms
 * **Enhancement** - Enhanced `clone()` function with `preserveNonCloneable` option to preserve custom class instances instead of flattening them
 * **Enhancement** - Modify `isEmpty` to handle Set, Map, and other iterables. Assume all nullish keys means empty.
 * **Chore** - Restructured tests for utils package to be organized by category. Renamed iterators to loops.
+* **Breaking** - Renamed `ssr.js` module to `environment.js` to better reflect its expanded scope beyond just server-side rendering detection
 
 # Version 0.15.0 - 07.24.2025
 

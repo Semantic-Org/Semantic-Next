@@ -4,9 +4,11 @@ import {
   findIndex,
   firstMatch,
   get,
+  hashCode,
   inArray,
   isArray,
   isClient,
+  isDevelopment,
   isDOM,
   isFunction,
   isObject,
@@ -36,12 +38,18 @@ export class Query {
     },
   });
 
+  static isDevelopment = isDevelopment;
+
+  static logLevel = isDevelopment ? 'debug' : 'silent';
+
+  static logPerformance = false;
+
   /*
     We clean up event handlers in two cases
     1) element is removed from dom
     2) reference to handler is removed from dom
   */
-  static eventRegistry = new WeakMap();   // Key: Element, Value: Set<HandlerObject>
+  static eventRegistry = new WeakMap(); // Key: Element, Value: Set<HandlerObject>
   static handlerRegistry = new WeakMap(); // Key: HandlerObject, Value: Element
 
   /*
@@ -49,6 +57,12 @@ export class Query {
     This allows an end user to see available extensions
   */
   static behaviors = new Map();
+
+  /*
+    Cache for naturalDisplay() results per element
+    Key: element, Value: { rulesHash, displayValue }
+  */
+  static elementDisplayCache = new WeakMap();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
@@ -541,14 +555,17 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
@@ -556,7 +573,7 @@ export class Query {
 
     // we store a reference using a set of weakmaps
     // this allows us to properly gc handlers but still remove them properly
-    const addToRegistry = ({el, eventHandler}) => {
+    const registerEvent = ({ el, eventHandler }) => {
       const elementHandlers = Query.eventRegistry.get(el) || new Set();
       elementHandlers.add(eventHandler);
       Query.eventRegistry.set(el, elementHandlers); // for $('div').off();
@@ -611,10 +628,9 @@ export class Query {
           abort: (reason) => abortController.abort(reason),
         };
         eventHandlers.push(eventHandler);
-        addToRegistry({el, eventHandler});
+        registerEvent({ el, eventHandler });
       });
     });
-
 
     if (options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
@@ -626,14 +642,17 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
@@ -650,20 +669,60 @@ export class Query {
       : this.on(eventName, wrappedHandler, options);
   }
 
+  onNext(eventName, targetSelectorOrOptions, options) {
+    return new Promise((resolve, reject) => {
+      let targetSelector;
+
+      // Handle parameter overloading
+      if (isString(targetSelectorOrOptions)) {
+        targetSelector = targetSelectorOrOptions;
+      }
+      else if (isObject(targetSelectorOrOptions)) {
+        options = targetSelectorOrOptions;
+      }
+
+      // Extract timeout if specified
+      const timeout = options?.timeout;
+      let timeoutId;
+
+      // Set up timeout if specified
+      if (timeout) {
+        timeoutId = setTimeout(() => {
+          // Clean up event listener
+          this.off(eventName, handler);
+          reject(new Error(`Event '${eventName}' timeout after ${timeout}ms`));
+        }, timeout);
+      }
+
+      // Event handler that resolves the promise
+      const handler = (event) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        resolve(event);
+      };
+
+      // Use one() to automatically remove after first trigger
+      if (targetSelector) {
+        this.one(eventName, targetSelector, handler, options);
+      }
+      else {
+        this.one(eventName, handler, options);
+      }
+    });
+  }
 
   off(eventNames, handler) {
-
-    if(isFunction(eventNames)) {
+    if (isFunction(eventNames)) {
       handler = eventNames;
     }
 
     // actually handle removing an event handler
     const removeHandler = (handler, el = handler?.el) => {
-
       const elementHandlers = Query.eventRegistry.get(el);
 
       // this is an exact handler to match
-      if(isFunction(handler) && el) {
+      if (isFunction(handler) && el) {
         const handlerFunc = handler;
         handler = firstMatch(elementHandlers, thisHandler => thisHandler.handler === handlerFunc);
       }
@@ -675,13 +734,12 @@ export class Query {
       Query.handlerRegistry.delete(handler);
 
       // remove from el registry
-      if(elementHandlers) {
+      if (elementHandlers) {
         elementHandlers?.delete(handler);
         if (elementHandlers.size === 0) {
           Query.eventRegistry.delete(el);
         }
       }
-
     };
 
     // Scenario 1: Remove handler by passing handler object
@@ -697,8 +755,7 @@ export class Query {
       : [{ eventName: null, namespaces: null }];
 
     this.each(el => {
-      const domEL = (el === Query.globalThisProxy) ? globalThis : el;
-      const elementHandlers = Query.eventRegistry.get(domEL);
+      const elementHandlers = Query.eventRegistry.get(el);
 
       // nothing to remove
       if (!elementHandlers) {
@@ -709,7 +766,8 @@ export class Query {
         // Check if this handler should be removed based on event/namespace match.
         const shouldRemove = events.some(({ eventName, namespaces }) => {
           const eventMatches = !eventName || eventHandler.eventName === eventName;
-          const sameNamespace = !namespaces || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
+          const sameNamespace = !namespaces
+            || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
           const handlerMatches = !handler
             || eventHandler.handler === handler
             || eventHandler === handler;
@@ -724,7 +782,6 @@ export class Query {
 
     return this;
   }
-
 
   trigger(eventName, eventSettings) {
     return this.each(el => {
@@ -769,22 +826,31 @@ export class Query {
   }
 
   addClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToAdd = classNames.split(' ');
     return this.each((el) => el.classList.add(...classesToAdd));
   }
 
-  hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
-  }
-
   removeClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToRemove = classNames.split(' ');
     return this.each((el) => el.classList.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
+    if (!classNames) {
+      return this;
+    }
     const classesToToggle = classNames.split(' ');
     return this.each((el) => el.classList.toggle(...classesToToggle));
+  }
+
+  hasClass(className) {
+    return Array.from(this).some((el) => el.classList.contains(className));
   }
 
   html(newHTML) {
@@ -1292,6 +1358,12 @@ export class Query {
   }
 
   insertContent(target, content, position) {
+    // Handle string content (text or HTML)
+    if (isString(content)) {
+      target.insertAdjacentHTML(position, content);
+      return;
+    }
+
     const $content = this.chain(content);
     const insertElement = (el) => {
       if (target.insertAdjacentElement) {
@@ -1440,6 +1512,155 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
+  naturalDisplay() {
+    const displays = this.map((el) => {
+      // Create cache key from current stylesheet state + inline styles
+      const stylesheetData = Array.from(document.styleSheets).map(sheet => {
+        try {
+          return { href: sheet.href, title: sheet.title, disabled: sheet.disabled };
+        }
+        catch (e) {
+          // Cross-origin stylesheet - can't access properties safely
+          return { crossOrigin: true, index: Array.from(document.styleSheets).indexOf(sheet) };
+        }
+      });
+
+      // Include inline display style in cache key since it overrides everything
+      const inlineDisplay = el.style.display;
+      const cacheKey = { stylesheetData, inlineDisplay };
+      const rulesHash = hashCode(cacheKey);
+
+      // Check cache for this element
+      const cached = Query.elementDisplayCache.get(el);
+      if (cached && cached.rulesHash === rulesHash) {
+        return cached.displayValue;
+      }
+
+      // If already visible, return current display
+      const current = getComputedStyle(el).display;
+      if (current !== 'none') {
+        // Cache visible elements too
+        Query.elementDisplayCache.set(el, { rulesHash, displayValue: current });
+        return current;
+      }
+
+      const matchingRules = [];
+
+      // Calculate CSS specificity (simplified)
+      const calculateSpecificity = (selector) => {
+        // Remove quoted strings to avoid counting selectors inside quotes
+        const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
+        const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
+        const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
+        const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
+        const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
+        const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
+        return ids + classes + attrs + pseudoClasses + elements;
+      };
+
+      // Helper to recursively parse CSS rules (handles nesting)
+      const parseRules = (rules) => {
+        for (const rule of rules) {
+          // Handle regular style rules
+          if (
+            rule.style?.display
+            && rule.style.display !== 'none' // IGNORE ALL none rules
+            && rule.selectorText
+            && el.matches(rule.selectorText)
+          ) {
+            matchingRules.push({
+              display: rule.style.display,
+              specificity: calculateSpecificity(rule.selectorText),
+              sourceOrder: matchingRules.length,
+            });
+          }
+          // Recursively handle nested rules (CSS nesting)
+          if (rule.cssRules && rule.cssRules.length > 0) {
+            parseRules(rule.cssRules);
+          }
+        }
+      };
+
+      // Parse all stylesheets for matching rules
+      for (const sheet of document.styleSheets) {
+        try {
+          parseRules(sheet.cssRules);
+        }
+        catch (e) {
+          // Cross-origin stylesheets - ignore
+        }
+      }
+
+      // Sort by specificity, then source order
+      matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+
+      let displayValue;
+
+      // If we have matching rules, return the highest precedence value
+      if (matchingRules.length > 0) {
+        displayValue = matchingRules[0].display;
+      }
+      else {
+        // No CSS rules found - use element's natural display value
+        const naturalDisplay = {
+          inline: [
+            'a',
+            'abbr',
+            'b',
+            'bdi',
+            'bdo',
+            'br',
+            'cite',
+            'code',
+            'dfn',
+            'em',
+            'i',
+            'kbd',
+            'mark',
+            'q',
+            'ruby',
+            'samp',
+            'small',
+            'span',
+            'strong',
+            'sub',
+            'sup',
+            'time',
+            'u',
+            'var',
+            'wbr',
+          ],
+          'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+          'table': ['table'],
+          'table-row': ['tr'],
+          'table-cell': ['td', 'th'],
+          'table-header-group': ['thead'],
+          'table-row-group': ['tbody'],
+          'table-footer-group': ['tfoot'],
+          'table-caption': ['caption'],
+          'table-column': ['col'],
+          'table-column-group': ['colgroup'],
+          'list-item': ['li'],
+        };
+
+        const tagName = el.tagName.toLowerCase();
+        for (const [display, tags] of Object.entries(naturalDisplay)) {
+          if (tags.includes(tagName)) {
+            displayValue = display;
+            break;
+          }
+        }
+        displayValue = displayValue || 'block'; // Default for most elements
+      }
+
+      // Cache the result
+      Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+
+      return displayValue;
+    });
+    return displays.length > 1 ? displays : displays[0];
+  }
+
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
@@ -1447,7 +1668,29 @@ export class Query {
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
+
+          // Check overflow
           if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            return current;
+          }
+
+          // Check contain property (layout, paint, size, strict)
+          const contain = style.contain;
+          if (
+            contain
+            && (contain.includes('paint') || contain.includes('layout') || contain.includes('size')
+              || contain.includes('strict'))
+          ) {
+            return current;
+          }
+
+          // Check clip-path
+          if (style.clipPath && style.clipPath !== 'none') {
+            return current;
+          }
+
+          // Check mask/mask-image
+          if ((style.mask && style.mask !== 'none') || (style.maskImage && style.maskImage !== 'none')) {
             return current;
           }
         }
@@ -1510,6 +1753,29 @@ export class Query {
   }
   exists() {
     return this.length > 0;
+  }
+
+  isVisible(options = {}) {
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    const { includeOpacity = false } = options;
+
+    // Return true only if ALL elements are visible
+    return this.map(el => {
+      const rect = el.getBoundingClientRect();
+      const hasDimensions = rect.width > 0 && rect.height > 0;
+
+      if (!hasDimensions) { return false; }
+
+      if (includeOpacity) {
+        const style = window.getComputedStyle(el);
+        return parseFloat(style.opacity) > 0;
+      }
+
+      return true;
+    }).every(result => result === true);
   }
 
   // adds properties to an element after dom loads

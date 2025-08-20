@@ -4,17 +4,18 @@ import {
   clone,
   each,
   extend,
-  last,
+  isClassInstance,
   isFunction,
   isPlainObject,
   isString,
   keys,
+  last,
   mapObject,
-  noop
+  noop,
+  toTitleCase,
 } from '@semantic-ui/utils';
 
 export class Behavior {
-
   // Captures word characters inside curly braces: {title} -> "title"
   static TEMPLATING_REGEX = /\{(\w+)\}/g;
 
@@ -38,8 +39,14 @@ export class Behavior {
     // $element to initialize
     $element,
 
+    // $elements in group
+    $elements,
+
     // css to be added to page
     css = '',
+
+    // query instance attaching to (used to access namespace)
+    Query,
 
     // allow el data to be specified in data attributes
     allowDataOverride = true,
@@ -51,17 +58,27 @@ export class Behavior {
     // custom invocation fallback
     customInvocation = noop,
 
-    // standard
+    // element index information
+    elementIndex = 0,
+    totalElements = 1,
+
+    // logging
+    logPerformance = false,
+    logLevel = 'debug',
+
+    // standard aliases
     selectors = {},
     classNames = {},
     errors = {},
     settings = {},
     templates = {},
   } = {}) {
-
-    // handle query instance
+    // we can recreate query from the constructor if not passed
     this.$ = (selector, options) => new $element.constructor(selector, options);
+    this.Query = Query;
+
     this.$element = $element;
+    this.$elements = $elements;
     this.element = $element.el();
 
     // handle run-time settings
@@ -69,22 +86,32 @@ export class Behavior {
     this.namespace = namespace;
     this.customInvocation = customInvocation;
 
+    this.onCreated = onCreated;
+    this.onDestroyed = onDestroyed;
+
+    // store element index information
+    this.elementIndex = elementIndex;
+    this.totalElements = totalElements;
+
     this.classNames = classNames;
     this.selectors = selectors;
     this.errors = errors;
     this.templates = templates;
     this.mutations = mutations;
 
+    this.logLevel = logLevel;
+    this.logPerformance = logPerformance;
+
     // handle shared state across behaviors
     this.sharedBehavior = sharedBehavior;
     extend(this, sharedBehavior);
 
-    if(css) {
+    if (css) {
       this.adoptStylesheet(css);
     }
 
     // allow html metadata to override settings like <div data-setting="new-setting">
-    if(allowDataOverride) {
+    if (allowDataOverride) {
       this.addDataOverrides();
     }
 
@@ -94,10 +121,11 @@ export class Behavior {
 
     // extend with methods from createBehavior
     const instance = this.call(createBehavior) || {};
+    this.instance = instance;
     extend(this, instance);
 
     // destroy existing instance if exists
-    if(this.element[namespace]?.destroy) {
+    if (this.element[namespace]?.destroy) {
       this.element[namespace]?.destroy();
     }
 
@@ -115,7 +143,6 @@ export class Behavior {
       this.call(instance.initialize.bind(this));
     }
     this.call(this.onCreated);
-
   }
 
   adoptStylesheet(css) {
@@ -126,16 +153,16 @@ export class Behavior {
   addDataOverrides(element = this.element) {
     const elementData = this.getElementData();
     each(this.settings, (value, name) => {
-      if(elementData[name]) {
+      if (elementData[name]) {
         this.settings[name] = elementData[name];
       }
     });
   }
 
   reinitialize(settings) {
-    if (this.instance !== undefined) {
-      this.instance.destroy();
-    }
+    this.destroy();
+    // css does not need to be added on reinit
+    delete settings.css;
     const behavior = new Behavior(settings);
     this.element[this.namespace] = behavior;
   }
@@ -148,7 +175,6 @@ export class Behavior {
   }
 
   parseEventString(eventString) {
-
     // allow simple templating
     eventString = this.parseTemplate(eventString, {
       ...this.selectors,
@@ -161,7 +187,7 @@ export class Behavior {
     // 'global eventType selector' - attach event to an element on the page
     // 'bind selector' - bind to an element directly
     let eventType = 'delegate';
-    let keywords = ['global', 'bind'];
+    const keywords = ['global', 'bind'];
     each(keywords, (keyword) => {
       if (eventString.startsWith(keyword)) {
         eventString = eventString.replace(keyword, '');
@@ -266,7 +292,7 @@ export class Behavior {
 
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in
-        if(!selector) {
+        if (!selector) {
           this.$element.on(eventName, eventHandler, eventSettings);
         }
         else if (eventType == 'global') {
@@ -284,7 +310,7 @@ export class Behavior {
   }
 
   attachMutations(mutations = this.mutations) {
-    if(!keys(this.mutations)) {
+    if (!keys(this.mutations)) {
       return;
     }
 
@@ -296,14 +322,13 @@ export class Behavior {
       const mutationConfig = this.parseMutationString(mutationString);
       mutationConfigs.push({
         handler,
-        ...mutationConfig
+        ...mutationConfig,
       });
     });
 
     this.mutationObservers = [];
-    each(mutationConfigs, ({observedElement, observerOptions, keyword, selector, handler }) => {
+    each(mutationConfigs, ({ observedElement, observerOptions, keyword, selector, handler }) => {
       const observer = new MutationObserver((mutations) => {
-
         // determine if it matches
         let $added = $();
         let $removed = $();
@@ -311,10 +336,10 @@ export class Behavior {
         each(mutations, (mutation) => {
           const $matchingAdded = $(mutation.addedNodes).filter(selector);
           const $matchingRemoved = $(mutation.removedNodes).filter(selector);
-          if($matchingAdded.exists()) {
+          if ($matchingAdded.exists()) {
             $added = $added.add($matchingAdded);
           }
-          if($matchingRemoved.exists()) {
+          if ($matchingRemoved.exists()) {
             $removed = $removed.add($matchingRemoved);
           }
         });
@@ -322,23 +347,20 @@ export class Behavior {
         // Check if we should trigger based on keyword
         const hasAdded = $added.exists();
         const hasRemoved = $removed.exists();
-        const shouldTrigger = 
-          (keyword === 'add' && hasAdded) ||
-          (keyword === 'remove' && hasRemoved) ||
-          (keyword === 'standard' && (hasAdded || hasRemoved));
+        const shouldTrigger = (keyword === 'add' && hasAdded)
+          || (keyword === 'remove' && hasRemoved)
+          || (keyword === 'standard' && (hasAdded || hasRemoved));
 
-        if(shouldTrigger) {
+        if (shouldTrigger) {
           // call handler
           const callbackArgs = this.getMutationCallbackArgs(mutations, { $added, $removed });
           this.call(handler, { additionalParams: callbackArgs });
         }
-
       });
 
       observer.observe(observedElement, observerOptions);
       this.mutationObservers.push(observer);
     });
-
   }
 
   removeMutations() {
@@ -397,7 +419,6 @@ export class Behavior {
   }
 
   getMutationCallbackArgs(mutations, additionalData = {}) {
-
     const args = {
       ...additionalData,
       mutations,
@@ -427,19 +448,40 @@ export class Behavior {
     }
   }
 
-  dispatchEvent(eventName, detail = {}, eventSettings = {}) {
-    this.element.dispatchEvent(
-      new CustomEvent(eventName, {
+  dispatchEvent(
+    eventName,
+    detail = {},
+    eventSettings = {},
+    { element = this.element, namespace = this.namespace } = {},
+  ) {
+    // Auto-namespace if not already namespaced
+    const namespacedEvent = eventName.includes(':')
+      ? eventName
+      : `${namespace}:${eventName}`;
+
+    element.dispatchEvent(
+      new CustomEvent(namespacedEvent, {
         detail,
         bubbles: true,
         cancelable: true,
-        ...eventSettings
+        ...eventSettings,
       }),
     );
   }
 
+  // dispatch an event across entire group
+  dispatchGroupEvent(
+    eventName,
+    detail = {},
+    eventSettings = {},
+    { $elements = this.$elements, namespace = this.namespace } = {},
+  ) {
+    return $elements.get().forEach(element => {
+      this.dispatchEvent(eventName, detail, eventSettings, { element, namespace });
+    });
+  }
+
   // Lookup method or property using natural language patterns (internal helper)
-  // Modernized version of original SUI invoke algorithm
   lookup(query) {
     if (!query || !isString(query)) {
       return undefined;
@@ -481,20 +523,66 @@ export class Behavior {
   // invoke an internal method returned from createBehavior
   callMethod(query, ...methodArgs) {
     let found = this.lookup(query);
+    let self = this.getSelf();
     if (isFunction(found)) {
       // Call method with instance as context
-      return found.apply(this, methodArgs);
+      return found.apply(self, methodArgs);
     }
     else if (found === undefined && this.customInvocation) {
       // Fallback when method not found
       found = this.call(this.customInvocation, {
         additionalParams: {
           methodName: query,
-          methodArgs
-        }
+          methodArgs,
+        },
       });
     }
     return found ?? undefined;
+  }
+
+  // Helper method for log level checking
+  canLog(requiredLevel) {
+    const levels = ['silent', 'error', 'warn', 'info', 'debug'];
+    const currentLevel = levels.indexOf(this.logLevel || 'silent');
+    const required = levels.indexOf(requiredLevel);
+    return currentLevel >= required;
+  }
+
+  outputLog(level, consoleMethod, color, message, data) {
+    if (!this.canLog(level)) { return; }
+    const args = [
+      `%c${toTitleCase(this.namespace)}%c ${message}`,
+      `color: ${color}; font-weight: bold;`,
+      'color: inherit;',
+    ];
+    if (data !== undefined) {
+      args.push(data);
+    }
+    // args.push(this.element);
+    console[consoleMethod](...args);
+  }
+
+  log(message, data) {
+    this.outputLog('info', 'log', '#0066cc', message, data);
+  }
+
+  debug(message, data) {
+    this.outputLog('debug', 'debug', '#666', message, data);
+  }
+
+  warn(message, data) {
+    this.outputLog('warn', 'warn', '#ff9800', message, data);
+  }
+
+  error(message, data) {
+    this.outputLog('error', 'error', '#f44336', message, data);
+
+    // Optional: dispatch error event for handling
+    this.dispatchEvent('behavior:error', {
+      message,
+      namespace: this.namespace,
+      data,
+    });
   }
 
   // Get or set individual setting
@@ -519,8 +607,44 @@ export class Behavior {
     return this;
   }
 
+  getSelf() {
+    // always show for now for testing
+    if (!this.logPerformance) {
+      return this;
+    }
+    return new Proxy(this, {
+      get(target, prop) {
+        // dont proxy internals
+        const skipProxy = ['constructor'];
+        if (skipProxy.includes(prop) || prop.startsWith('_')) {
+          return target[prop];
+        }
+        // dont proxy class instances
+        if (isClassInstance(target[prop])) {
+          return target[prop];
+        }
+        // dont proxy non-functions
+        if (!isFunction(target[prop])) {
+          return target[prop];
+        }
+        // wrap regular methods in performance tracking
+        return (...args) => {
+          const markName = `${target.namespace}:${prop}-start`;
+          performance.mark(markName);
+          const result = target[prop].apply(target, args);
+          const measureName = `${target.namespace}:${prop}`;
+          const endMarkName = `${target.namespace}:${prop}-end`;
+          performance.mark(endMarkName);
+          performance.measure(measureName, markName, endMarkName);
+          return result;
+        };
+      },
+    });
+  }
+
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalParams = {} } = {}) {
+    const selfProxy = this.getSelf();
     const self = this;
     const args = [];
     if (!params) {
@@ -528,9 +652,32 @@ export class Behavior {
         $: self.$,
         el: self.element,
         $el: self.$(self.element),
-        self,
-        behavior: self,
+        self: selfProxy,
+        behavior: selfProxy,
         namespace: self.namespace,
+        dispatchEvent: self.dispatchEvent.bind(this),
+        dispatchGroupEvent: self.dispatchGroupEvent.bind(this),
+
+        // Add logging functions
+        log: self.log.bind(self),
+        debug: self.debug.bind(self),
+        warn: self.warn.bind(self),
+        error: self.error.bind(self),
+
+        // element index information
+        index: self.elementIndex,
+        total: self.totalElements,
+        isFirst: self.elementIndex === 0,
+        isLast: self.elementIndex === self.totalElements - 1,
+
+        get cache() {
+          let cache = self.Query.prototype[self.namespace].cache;
+          if (!cache) {
+            self.Query.prototype[self.namespace].cache = {};
+            return {};
+          }
+          return cache;
+        },
         get data() {
           return self.getElementData(self.element);
         },
@@ -570,7 +717,7 @@ export class Behavior {
   }
 
   // this allows for a setup() function to return values shared across behaviors
-  static runSetup(setup, { $elements, settings, templates } = {}) {
+  static runSetup(setup = function(args) {}, { $elements, settings, templates } = {}) {
     const $ = (selector, options) => new $elements.constructor(selector, options);
     return setup({ $, settings, $elements, templates });
   }

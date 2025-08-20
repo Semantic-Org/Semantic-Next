@@ -108,6 +108,14 @@
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundle/segment.min.js",
       "default": "./src/primitives/segment/index.js"
+    },
+    "./behaviors": {
+      "import": "./src/behaviors/index.js",
+      "default": "./src/behaviors/index.js"
+    },
+    "./behaviors/transition": {
+      "import": "./src/behaviors/transition/transition.js",
+      "default": "./src/behaviors/transition/transition.js"
     }
   },
   "scripts": {
@@ -218,6 +226,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "@semantic-ui/component": "^0.16.0",
+    "@semantic-ui/query": "^0.16.0",
     "@semantic-ui/specs": "^0.16.0"
   },
   "peerDependencies": {
@@ -226,17 +235,17 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
-    "@types/node": "^24.1.0",
-    "@typescript-eslint/eslint-plugin": "^8.38.0",
-    "@typescript-eslint/parser": "^8.38.0",
+    "@types/node": "^24.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-istanbul": "^3.2.4",
     "@vitest/ui": "^3.2.4",
-    "chalk": "^5.4.1",
+    "chalk": "^5.6.0",
     "dprint": "^0.50.1",
-    "esbuild": "^0.25.8",
+    "esbuild": "^0.25.9",
     "glob": "^11.0.3",
-    "inquirer": "^12.9.0",
+    "inquirer": "^12.9.3",
     "jsdom": "^26.1.0",
     "playwright": "^1.54.2",
     "semver": "^7.7.2",

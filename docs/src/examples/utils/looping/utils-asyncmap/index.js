@@ -30,14 +30,14 @@ console.log('--- Map mapping (returns new Map) ---');
 const myMap = new Map([
   ['user1', { name: 'John', score: 85 }],
   ['user2', { name: 'Jane', score: 92 }],
-  ['user3', { name: 'Bob', score: 78 }]
+  ['user3', { name: 'Bob', score: 78 }],
 ]);
 const mapResult = await asyncMap(myMap, async (user, userId) => {
   await delay(30);
   return {
     ...user,
     id: userId,
-    grade: user.score >= 90 ? 'A' : user.score >= 80 ? 'B' : 'C'
+    grade: user.score >= 90 ? 'A' : user.score >= 80 ? 'B' : 'C',
   };
 });
 console.log('Map result:');

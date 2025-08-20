@@ -396,11 +396,11 @@ describe('query', () => {
       const div2 = document.createElement('div');
       const div3 = document.createElement('div');
       const span = document.createElement('span');
-      
+
       div1.classList.add('container');
       div2.classList.add('container');
       div3.classList.add('container');
-      
+
       // Nested structure: div1 > div2 > div3 > span
       div3.appendChild(span);
       div2.appendChild(div3);
@@ -409,7 +409,7 @@ describe('query', () => {
 
       const $span = $('span');
       const $allContainers = $span.closestAll('.container');
-      
+
       expect($allContainers.length).toBe(3);
       expect($allContainers.get()).toContain(div1);
       expect($allContainers.get()).toContain(div2);
@@ -424,7 +424,7 @@ describe('query', () => {
 
       const $span = $('span');
       const $ancestors = $span.closestAll('.nonexistent');
-      
+
       expect($ancestors.length).toBe(0);
     });
 
@@ -433,10 +433,10 @@ describe('query', () => {
       const container2 = document.createElement('div');
       const span1 = document.createElement('span');
       const span2 = document.createElement('span');
-      
+
       container1.classList.add('container');
       container2.classList.add('container');
-      
+
       container1.appendChild(span1);
       container2.appendChild(span2);
       document.body.appendChild(container1);
@@ -444,7 +444,7 @@ describe('query', () => {
 
       const $spans = $('span');
       const $containers = $spans.closestAll('.container');
-      
+
       expect($containers.length).toBe(2);
       expect($containers.get()).toContain(container1);
       expect($containers.get()).toContain(container2);
@@ -454,16 +454,16 @@ describe('query', () => {
       const sharedContainer = document.createElement('div');
       const span1 = document.createElement('span');
       const span2 = document.createElement('span');
-      
+
       sharedContainer.classList.add('container');
-      
+
       sharedContainer.appendChild(span1);
       sharedContainer.appendChild(span2);
       document.body.appendChild(sharedContainer);
 
       const $spans = $('span');
       const $containers = $spans.closestAll('.container');
-      
+
       expect($containers.length).toBe(1);
       expect($containers.get(0)).toBe(sharedContainer);
     });
@@ -472,17 +472,17 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const span = document.createElement('span');
-      
+
       div1.classList.add('container');
       div2.classList.add('container');
-      
+
       div2.appendChild(span);
       div1.appendChild(div2);
       document.body.appendChild(div1);
 
       const $span = $('span', { pierceShadow: true });
       const $containers = $span.closestAll('.container');
-      
+
       expect($containers.length).toBe(2);
       expect($containers.get()).toContain(div1);
       expect($containers.get()).toContain(div2);
@@ -1096,10 +1096,10 @@ describe('query', () => {
 
         $('div').on('click.test', clickCallback);
         $('div').on('mouseup.test', mouseupCallback);
-        
+
         div.click();
         div.dispatchEvent(new Event('mouseup'));
-        
+
         expect(clickCallback).toHaveBeenCalledTimes(1);
         expect(mouseupCallback).toHaveBeenCalledTimes(1);
       });
@@ -1126,10 +1126,10 @@ describe('query', () => {
 
         $('div').on('click.test1', callback1);
         $('div').on('click.test2', callback2);
-        
+
         $('div').off('click.test1');
         div.click();
-        
+
         expect(callback1).not.toHaveBeenCalled();
         expect(callback2).toHaveBeenCalledTimes(1);
       });
@@ -1144,11 +1144,11 @@ describe('query', () => {
         $('div').on('click.test', clickCallback);
         $('div').on('mouseup.test', mouseupCallback);
         $('div').on('click.other', otherCallback);
-        
+
         $('div').off('.test');
         div.click();
         div.dispatchEvent(new Event('mouseup'));
-        
+
         expect(clickCallback).not.toHaveBeenCalled();
         expect(mouseupCallback).not.toHaveBeenCalled();
         expect(otherCallback).toHaveBeenCalledTimes(1);
@@ -1162,10 +1162,10 @@ describe('query', () => {
 
         $('div').on('click.test', callback1);
         $('div').on('click.test', callback2);
-        
+
         $('div').off('click.test', callback1);
         div.click();
-        
+
         expect(callback1).not.toHaveBeenCalled();
         expect(callback2).toHaveBeenCalledTimes(1);
       });
@@ -1180,10 +1180,10 @@ describe('query', () => {
 
         $('div').on('click.test', 'span', callback1);
         $('div').on('click.other', 'span', callback2);
-        
+
         $('div').off('click.test');
         span.click();
-        
+
         expect(callback1).not.toHaveBeenCalled();
         expect(callback2).toHaveBeenCalledTimes(1);
       });
@@ -1198,11 +1198,11 @@ describe('query', () => {
         $('div').on('click.test1', callback1);
         $('div').on('click.test2', callback2);
         $('div').on('mouseup.test1', callback3);
-        
+
         $('div').off('.test1');
         div.click();
         div.dispatchEvent(new Event('mouseup'));
-        
+
         expect(callback1).not.toHaveBeenCalled();
         expect(callback2).toHaveBeenCalledTimes(1);
         expect(callback3).not.toHaveBeenCalled();
@@ -1216,10 +1216,10 @@ describe('query', () => {
 
         $('div').on('click.test', namespacedCallback);
         $('div').on('click', normalCallback);
-        
+
         $('div').off('click.test');
         div.click();
-        
+
         expect(namespacedCallback).not.toHaveBeenCalled();
         expect(normalCallback).toHaveBeenCalledTimes(1);
       });
@@ -1236,16 +1236,16 @@ describe('query', () => {
         $('div').on('click.foo', callback2);
         $('div').on('mouseup.foo', callback3);
         $('div').on('click', callback4);
-        
+
         // Remove only .foo namespace
         $('div').off('.foo');
-        
+
         div.click();
         div.dispatchEvent(new Event('mouseup'));
-        
-        expect(callback1).not.toHaveBeenCalled();   // 'foo.bar' contains 'foo', so should be removed
-        expect(callback2).not.toHaveBeenCalled();   // 'foo' matches
-        expect(callback3).not.toHaveBeenCalled();   // 'foo' matches
+
+        expect(callback1).not.toHaveBeenCalled(); // 'foo.bar' contains 'foo', so should be removed
+        expect(callback2).not.toHaveBeenCalled(); // 'foo' matches
+        expect(callback3).not.toHaveBeenCalled(); // 'foo' matches
         expect(callback4).toHaveBeenCalledTimes(1); // no namespace
       });
     });
@@ -1259,7 +1259,7 @@ describe('query', () => {
         $('div').on('click.', callback); // Empty namespace
         $('div').off('click.');
         div.click();
-        
+
         expect(callback).not.toHaveBeenCalled();
       });
 
@@ -1271,7 +1271,7 @@ describe('query', () => {
         $('div').on('click.foo.bar', callback); // Multiple dots - all part of namespace
         div.click();
         expect(callback).toHaveBeenCalledTimes(1);
-        
+
         $('div').off('click.foo.bar');
         div.click();
         expect(callback).toHaveBeenCalledTimes(1); // Should not be called again
@@ -1285,11 +1285,11 @@ describe('query', () => {
 
         $('div').on('click.test mouseup.test', callback1);
         $('div').on('click.other', callback2);
-        
+
         $('div').off('.test');
         div.click();
         div.dispatchEvent(new Event('mouseup'));
-        
+
         expect(callback1).not.toHaveBeenCalled();
         expect(callback2).toHaveBeenCalledTimes(1);
       });
@@ -1942,13 +1942,13 @@ describe('query', () => {
         document.body.innerHTML = '<div id="container"></div><div class="item">Test Item</div>';
         const $item = $('.item');
         const originalEl = $item.el();
-        
+
         const $result = $item.appendTo('#container');
-        
+
         // Should be same object reference
         expect($result).toBe($item);
         expect($result.el()).toBe(originalEl);
-        
+
         // Element should now be inside container
         expect($result.parent().el().id).toBe('container');
         expect($result.text()).toBe('Test Item');
@@ -1956,21 +1956,20 @@ describe('query', () => {
 
       it('should move newly created elements to DOM correctly', () => {
         document.body.innerHTML = '<div id="container"></div>';
-        
+
         const $newDiv = $('<div class="new">New Element</div>');
         const originalEl = $newDiv.el();
-        
+
         const $result = $newDiv.appendTo('#container');
-        
+
         // Should return new Query object with inserted elements
         expect($result).toBeInstanceOf(Query);
         expect($result.el()).toBe(originalEl);
-        
-        // Element should now be findable in the DOM at its new location  
+
+        // Element should now be findable in the DOM at its new location
         expect($('#container').find('.new').el()).toBe(originalEl);
         expect($('#container').find('.new').text()).toBe('New Element');
       });
-
     });
 
     describe('prependTo', () => {
@@ -2120,10 +2119,10 @@ describe('query', () => {
         document.body.appendChild(div);
 
         const $result = $('div').height(150);
-        
+
         expect($result).toBeInstanceOf(Query);
         expect(div.style.height).toBe('150px');
-        
+
         document.body.removeChild(div);
       });
 
@@ -2132,9 +2131,9 @@ describe('query', () => {
         document.body.appendChild(div);
 
         $('div').height('200px');
-        
+
         expect(div.style.height).toBe('200px');
-        
+
         document.body.removeChild(div);
       });
     });
@@ -2149,10 +2148,10 @@ describe('query', () => {
         document.body.appendChild(div);
 
         const $result = $('div').width(300);
-        
+
         expect($result).toBeInstanceOf(Query);
         expect(div.style.width).toBe('300px');
-        
+
         document.body.removeChild(div);
       });
 
@@ -2161,9 +2160,9 @@ describe('query', () => {
         document.body.appendChild(div);
 
         $('div').width('250px');
-        
+
         expect(div.style.width).toBe('250px');
-        
+
         document.body.removeChild(div);
       });
     });
@@ -2225,7 +2224,7 @@ describe('query', () => {
     it('should set and get data attributes', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      
+
       $('div').data('test', 'value');
       expect($('div').data('test')).toBe('value');
       expect(div.dataset.test).toBe('value');
@@ -2236,7 +2235,7 @@ describe('query', () => {
       div.dataset.foo = 'bar';
       div.dataset.baz = 'qux';
       document.body.appendChild(div);
-      
+
       const data = $('div').data();
       expect(data).toEqual({ foo: 'bar', baz: 'qux' });
     });
@@ -2244,7 +2243,7 @@ describe('query', () => {
     it('should return undefined for non-existent data attribute', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      
+
       expect($('div').data('nonexistent')).toBe(undefined);
     });
 
@@ -2258,7 +2257,7 @@ describe('query', () => {
       const div2 = document.createElement('div');
       document.body.appendChild(div1);
       document.body.appendChild(div2);
-      
+
       $('div').data('test', 'value');
       expect(div1.dataset.test).toBe('value');
       expect(div2.dataset.test).toBe('value');
@@ -2268,7 +2267,7 @@ describe('query', () => {
       const div = document.createElement('div');
       div.dataset.test = 'value';
       document.body.appendChild(div);
-      
+
       expect($('div').data('test')).toBe('value');
     });
 
@@ -2279,7 +2278,7 @@ describe('query', () => {
       div2.dataset.test = 'value2';
       document.body.appendChild(div1);
       document.body.appendChild(div2);
-      
+
       expect($('div').data('test')).toEqual(['value1', 'value2']);
     });
 
@@ -2288,7 +2287,7 @@ describe('query', () => {
       div.dataset.foo = 'bar';
       div.dataset.baz = 'qux';
       document.body.appendChild(div);
-      
+
       expect($('div').data()).toEqual({ foo: 'bar', baz: 'qux' });
     });
 
@@ -2301,11 +2300,11 @@ describe('query', () => {
       div2.dataset.test = 'value2';
       document.body.appendChild(div1);
       document.body.appendChild(div2);
-      
+
       const result = $('div').data();
       expect(result).toEqual([
         { foo: 'bar1', baz: 'qux1' },
-        { foo: 'bar2', test: 'value2' }
+        { foo: 'bar2', test: 'value2' },
       ]);
     });
 
@@ -2314,10 +2313,10 @@ describe('query', () => {
       // Remove dataset to simulate older browsers or non-HTML elements
       Object.defineProperty(div, 'dataset', { value: null });
       document.body.appendChild(div);
-      
+
       expect($('div').data()).toEqual({});
       expect($('div').data('test')).toBe(undefined);
-      
+
       // Setting should not throw
       expect(() => $('div').data('test', 'value')).not.toThrow();
     });
@@ -2325,7 +2324,7 @@ describe('query', () => {
     it('should return the Query instance when setting data', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      
+
       const result = $('div').data('test', 'value');
       expect(result).toBeInstanceOf(Query);
       expect(result[0]).toBe(div);
@@ -2346,7 +2345,7 @@ describe('query', () => {
       const $div = $('div');
       const $span = $div.find('span');
       const $back = $span.end();
-      
+
       expect($back[0]).toBe(div);
       expect($back.length).toBe(1);
     });
@@ -2357,7 +2356,7 @@ describe('query', () => {
 
       const $div = $('div');
       const $same = $div.end();
-      
+
       expect($same).toBe($div);
     });
 
@@ -2367,7 +2366,7 @@ describe('query', () => {
       const li1 = document.createElement('li');
       const li2 = document.createElement('li');
       const span = document.createElement('span');
-      
+
       div.appendChild(ul);
       ul.appendChild(li1);
       ul.appendChild(li2);
@@ -2378,25 +2377,25 @@ describe('query', () => {
         .find('ul')
         .find('li')
         .find('span')
-        .end()     // back to li
-        .end()     // back to ul
-        .end();    // back to div
-      
+        .end() // back to li
+        .end() // back to ul
+        .end(); // back to div
+
       expect(result[0]).toBe(div);
     });
 
     it('should work with multiple chain traversal methods in between', () => {
       const div = document.createElement('div');
       div.classList.add('container');
-      
+
       const p1 = document.createElement('p');
       p1.classList.add('paragraph');
       p1.textContent = 'First paragraph';
-      
+
       const p2 = document.createElement('p');
       p2.classList.add('paragraph');
       p2.textContent = 'Second paragraph';
-      
+
       div.appendChild(p1);
       div.appendChild(p2);
       document.body.appendChild(div);
@@ -2407,7 +2406,7 @@ describe('query', () => {
         .addClass('highlighted')
         .css('color', 'blue')
         .end();
-      
+
       expect($filtered[0]).toBe(div);
     });
 
@@ -2415,25 +2414,25 @@ describe('query', () => {
       // Create elements as in the documentation example
       const card = document.createElement('div');
       card.classList.add('card');
-      
+
       const title = document.createElement('div');
       title.classList.add('title');
-      
+
       const content = document.createElement('div');
       content.classList.add('content');
-      
+
       card.appendChild(title);
       card.appendChild(content);
       document.body.appendChild(card);
 
       // Create the example chain from the docs
       $('.card')
-        .addClass('highlighted')         // Add class to cards
-        .find('.title')                  // Switch to titles within cards
-        .css('font-weight', 'bold')      // Bold the titles
-        .end()                           // Go back to the card selection
-        .find('.content')                // Now find content within cards
-        .html('<p>New content</p>');     // Change the HTML
+        .addClass('highlighted') // Add class to cards
+        .find('.title') // Switch to titles within cards
+        .css('font-weight', 'bold') // Bold the titles
+        .end() // Go back to the card selection
+        .find('.content') // Now find content within cards
+        .html('<p>New content</p>'); // Change the HTML
 
       // Verify the operations worked as expected
       expect(card.classList.contains('highlighted')).toBe(true);
@@ -2444,13 +2443,13 @@ describe('query', () => {
     it('should handle complex nested chains with multiple end() calls', () => {
       const outer = document.createElement('div');
       outer.classList.add('outer');
-      
+
       const middle = document.createElement('div');
       middle.classList.add('middle');
-      
+
       const inner = document.createElement('div');
       inner.classList.add('inner');
-      
+
       outer.appendChild(middle);
       middle.appendChild(inner);
       document.body.appendChild(outer);
@@ -2460,10 +2459,10 @@ describe('query', () => {
         .addClass('middle-class')
         .find('.inner')
         .addClass('inner-class')
-        .end()   // Back to middle
-        .end()   // Back to outer
+        .end() // Back to middle
+        .end() // Back to outer
         .addClass('outer-modified');
-      
+
       expect(outer.classList.contains('outer-modified')).toBe(true);
       expect(middle.classList.contains('middle-class')).toBe(true);
       expect(inner.classList.contains('inner-class')).toBe(true);
@@ -2481,12 +2480,12 @@ describe('query', () => {
       const div2 = document.createElement('div');
       const div3 = document.createElement('div');
       const div4 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
       div3.className = 'item';
       div4.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
       document.body.appendChild(div3);
@@ -2504,11 +2503,11 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const div3 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
       div3.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
       document.body.appendChild(div3);
@@ -2525,11 +2524,11 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const div3 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
       div3.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
       document.body.appendChild(div3);
@@ -2565,10 +2564,10 @@ describe('query', () => {
     it('should return Query instance for chaining', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
 
@@ -2595,10 +2594,10 @@ describe('query', () => {
     it('should handle zero slice', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
 
@@ -2619,11 +2618,11 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const span1 = document.createElement('span');
-      
+
       div1.className = 'item';
       div2.className = 'item';
       span1.className = 'extra';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
       document.body.appendChild(span1);
@@ -2641,7 +2640,7 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const span1 = document.createElement('span');
-      
+
       div1.className = 'item';
       document.body.appendChild(div1);
       document.body.appendChild(div2);
@@ -2659,7 +2658,7 @@ describe('query', () => {
       const div2 = document.createElement('div');
       const span1 = document.createElement('span');
       const span2 = document.createElement('span');
-      
+
       div1.className = 'item';
       document.body.appendChild(div1);
 
@@ -2676,10 +2675,10 @@ describe('query', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
       const span1 = document.createElement('span');
-      
+
       div1.className = 'item';
       span1.className = 'extra';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
       document.body.appendChild(span1);
@@ -2710,10 +2709,10 @@ describe('query', () => {
     it('should remove duplicates', () => {
       const div1 = document.createElement('div');
       const div2 = document.createElement('div');
-      
+
       div1.className = 'item';
       div2.className = 'item';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(div2);
 
@@ -2731,7 +2730,7 @@ describe('query', () => {
       document.body.appendChild(div1);
 
       const $items = $('.item');
-      
+
       expect($items.add(null)).toBe($items);
       expect($items.add(undefined)).toBe($items);
       expect($items.add('')).toBe($items);
@@ -2752,10 +2751,10 @@ describe('query', () => {
     it('should return Query instance for chaining', () => {
       const div1 = document.createElement('div');
       const span1 = document.createElement('span');
-      
+
       div1.className = 'item';
       span1.className = 'extra';
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(span1);
 
@@ -2800,7 +2799,7 @@ describe('query', () => {
     it('should handle single element collections', () => {
       const div1 = document.createElement('div');
       const span1 = document.createElement('span');
-      
+
       document.body.appendChild(div1);
       document.body.appendChild(span1);
 
@@ -3081,7 +3080,7 @@ describe('query', () => {
         const container = document.createElement('div');
         const target = document.createElement('span');
         target.className = 'target';
-        
+
         // Create many sibling elements
         for (let i = 0; i < 100; i++) {
           const sibling = document.createElement('div');
@@ -3093,7 +3092,7 @@ describe('query', () => {
         const startTime = performance.now();
         const result = $('div').eq(0).contains('.target');
         const endTime = performance.now();
-        
+
         expect(result).toBe(true);
         expect(endTime - startTime).toBeLessThan(50); // Should complete quickly
       });

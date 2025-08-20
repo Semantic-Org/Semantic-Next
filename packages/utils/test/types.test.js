@@ -17,8 +17,6 @@ import {
 import { describe, expect, it } from 'vitest';
 
 describe('Type Checking Utilities', () => {
-
-
   describe('isEmpty', () => {
     it('should return true for null or undefined', () => {
       expect(isEmpty(null)).toBe(true);
@@ -228,7 +226,7 @@ describe('Type Checking Utilities', () => {
         ['str', 'string key'],
         [{ obj: true }, 'object key'],
         [null, 'null key'],
-        [undefined, 'undefined key']
+        [undefined, 'undefined key'],
       ]);
       expect(isMap(mixedMap)).toBe(true);
     });
@@ -239,7 +237,7 @@ describe('Type Checking Utilities', () => {
         get: () => {},
         has: () => {},
         delete: () => {},
-        size: 0
+        size: 0,
       };
       expect(isMap(objectWithMapMethods)).toBe(false);
       expect(isMap(new Map())).toBe(true);

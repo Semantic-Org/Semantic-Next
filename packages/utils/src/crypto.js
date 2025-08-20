@@ -1,5 +1,3 @@
-import { isClient, isServer } from './ssr.js';
-
 /*-------------------
       Identity
 --------------------*/
