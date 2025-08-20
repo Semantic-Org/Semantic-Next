@@ -6,7 +6,7 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.16.0 xx.xx.2025
+# Version 0.16.0 08.20.2025
 
 ## Major UI Updates
 * **UI** - Added many new components `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`.
