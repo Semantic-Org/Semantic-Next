@@ -80,6 +80,9 @@ export class Behavior {
     this.namespace = namespace;
     this.customInvocation = customInvocation;
 
+    this.onCreated = onCreated;
+    this.onDestroyed = onDestroyed;
+
     // store element index information
     this.elementIndex = elementIndex;
     this.totalElements = totalElements;
@@ -147,9 +150,7 @@ export class Behavior {
   }
 
   reinitialize(settings) {
-    if (this.instance !== undefined) {
-      this.instance.destroy();
-    }
+    this.destroy();
     // css does not need to be added on reinit
     delete settings.css;
     const behavior = new Behavior(settings);
