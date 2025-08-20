@@ -117,7 +117,7 @@ const createBehavior = (
 
     const delay = (groupOrder == 'forward')
       ? index * settings.interval
-      : (total - index) * settings.interval;
+      : (total - (index + 1)) * settings.interval;
     animationSettings.delay = delay;
     await self.performAnimation(cssAnimations, direction, animationSettings);
 
