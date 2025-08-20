@@ -320,7 +320,7 @@ await $('selector').onNext(eventName, { timeout: 5000 })
 | options.timeout | number | Timeout in milliseconds (throws error if event doesn't fire) |
 
 ### Returns
-**Promise<Event>** - Resolves with the event object when the event fires.
+**Promise** - Resolves with the event object when the event fires.
 
 ### Usage
 
@@ -355,10 +355,10 @@ try {
 async function animateSequence() {
   $('.element').addClass('fade-in');
   await $('.element').onNext('animationend');
-  
-  $('.element').addClass('slide-up');  
+
+  $('.element').addClass('slide-up');
   await $('.element').onNext('animationend');
-  
+
   console.log('Animation sequence complete!');
 }
 ```
