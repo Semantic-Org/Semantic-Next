@@ -61,9 +61,6 @@ const createBehavior = (
     total,
   },
 ) => ({
-  // track currently running JavaScript animations
-  currentAnimations: [],
-
   initialize() {
     if (settings.animation) {
       this.animate();
