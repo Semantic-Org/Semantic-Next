@@ -529,6 +529,48 @@ export class Behavior {
     return found ?? undefined;
   }
 
+  // Helper method for log level checking
+  canLog(requiredLevel) {
+    const levels = ['silent', 'error', 'warn', 'info', 'debug'];
+    const currentLevel = levels.indexOf(this.settings.logLevel || 'silent');
+    const required = levels.indexOf(requiredLevel);
+    return currentLevel >= required;
+  }
+
+  outputLog(level, consoleMethod, color, message, data) {
+    if (!this.canLog(level)) { return; }
+
+    const args = [`%c[${this.namespace}]%c ${message}`, `color: ${color}; font-weight: bold;`, 'color: inherit;'];
+    if (data !== undefined) {
+      args.push(data);
+    }
+
+    console[consoleMethod](...args);
+  }
+
+  log(message, data) {
+    this.outputLog('info', 'log', '#0066cc', message, data);
+  }
+
+  debug(message, data) {
+    this.outputLog('debug', 'debug', '#666', message, data);
+  }
+
+  warn(message, data) {
+    this.outputLog('warn', 'warn', '#ff9800', message, data);
+  }
+
+  error(message, data) {
+    this.outputLog('error', 'error', '#f44336', message, data);
+
+    // Optional: dispatch error event for handling
+    this.dispatchEvent('behavior:error', {
+      message,
+      namespace: this.namespace,
+      data,
+    });
+  }
+
   // Get or set individual setting
   setting(name, value) {
     if (value === undefined) {
@@ -565,6 +607,12 @@ export class Behavior {
         namespace: self.namespace,
         dispatchEvent: self.dispatchEvent.bind(this),
         dispatchGroupEvent: self.dispatchGroupEvent.bind(this),
+
+        // Add logging functions
+        log: self.log.bind(self),
+        debug: self.debug.bind(self),
+        warn: self.warn.bind(self),
+        error: self.error.bind(self),
 
         // element index information
         index: self.elementIndex,

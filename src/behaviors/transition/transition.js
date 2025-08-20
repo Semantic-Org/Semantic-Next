@@ -59,6 +59,9 @@ const createBehavior = (
     isFirst,
     isLast,
     total,
+    log,
+    warn,
+    error,
   },
 ) => ({
   initialize() {
@@ -74,16 +77,20 @@ const createBehavior = (
       ...runtimeSettings,
     };
 
+    log('Starting animation', { animation: animationSettings.animation });
+
     // handle case of already animating
     // handle animation queuing
     if (self.isAnimating()) {
       if (settings.queue) {
+        log('Animation already running, queuing');
         const eventName = (el.animatingGroup)
           ? 'transition:groupEnd'
           : 'transition:end';
         await $(el).onNext(eventName);
       }
       else {
+        warn('Animation already running, stopping previous');
         self.stop();
       }
     }
@@ -250,7 +257,7 @@ const createBehavior = (
   // takes a set of css animations and then performs them using web animation API
   async performAnimation(cssAnimations, direction, { duration, callback = noop, delay } = {}) {
     if (!cssAnimations || !cssAnimations.exists) {
-      console.warn('No animation data available for', cssAnimations.name);
+      warn('No animation data available for', cssAnimations.name);
       return;
     }
 
