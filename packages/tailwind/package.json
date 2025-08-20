@@ -38,7 +38,7 @@
     "LICENSE"
   ],
   "peerDependencies": {
-    "tailwindcss": "^3.0.0 || ^4.0.0"
+    "tailwindcss": "^4.1.9"
   },
   "dependencies": {
     "@semantic-ui/component": "^0.16.0",
