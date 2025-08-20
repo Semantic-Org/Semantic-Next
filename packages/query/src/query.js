@@ -548,14 +548,17 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
@@ -563,7 +566,7 @@ export class Query {
 
     // we store a reference using a set of weakmaps
     // this allows us to properly gc handlers but still remove them properly
-    const addToRegistry = ({ el, eventHandler }) => {
+    const registerEvent = ({ el, eventHandler }) => {
       const elementHandlers = Query.eventRegistry.get(el) || new Set();
       elementHandlers.add(eventHandler);
       Query.eventRegistry.set(el, elementHandlers); // for $('div').off();
@@ -618,7 +621,7 @@ export class Query {
           abort: (reason) => abortController.abort(reason),
         };
         eventHandlers.push(eventHandler);
-        addToRegistry({ el, eventHandler });
+        registerEvent({ el, eventHandler });
       });
     });
 
@@ -632,14 +635,17 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
@@ -654,6 +660,49 @@ export class Query {
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
       : this.on(eventName, wrappedHandler, options);
+  }
+
+  onNext(eventName, targetSelectorOrOptions, options) {
+    return new Promise((resolve, reject) => {
+      let targetSelector;
+
+      // Handle parameter overloading
+      if (isString(targetSelectorOrOptions)) {
+        targetSelector = targetSelectorOrOptions;
+      }
+      else if (isObject(targetSelectorOrOptions)) {
+        options = targetSelectorOrOptions;
+      }
+
+      // Extract timeout if specified
+      const timeout = options?.timeout;
+      let timeoutId;
+
+      // Set up timeout if specified
+      if (timeout) {
+        timeoutId = setTimeout(() => {
+          // Clean up event listener
+          this.off(eventName, handler);
+          reject(new Error(`Event '${eventName}' timeout after ${timeout}ms`));
+        }, timeout);
+      }
+
+      // Event handler that resolves the promise
+      const handler = (event) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        resolve(event);
+      };
+
+      // Use one() to automatically remove after first trigger
+      if (targetSelector) {
+        this.one(eventName, targetSelector, handler, options);
+      }
+      else {
+        this.one(eventName, handler, options);
+      }
+    });
   }
 
   off(eventNames, handler) {

@@ -471,7 +471,6 @@ export class Behavior {
   }
 
   // Lookup method or property using natural language patterns (internal helper)
-  // Modernized version of original SUI invoke algorithm
   lookup(query) {
     if (!query || !isString(query)) {
       return undefined;
