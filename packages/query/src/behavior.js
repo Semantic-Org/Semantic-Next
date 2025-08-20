@@ -177,7 +177,7 @@ export class Behavior {
     // 'global eventType selector' - attach event to an element on the page
     // 'bind selector' - bind to an element directly
     let eventType = 'delegate';
-    let keywords = ['global', 'bind'];
+    const keywords = ['global', 'bind'];
     each(keywords, (keyword) => {
       if (eventString.startsWith(keyword)) {
         eventString = eventString.replace(keyword, '');
@@ -466,7 +466,7 @@ export class Behavior {
     eventSettings = {},
     { $elements = this.$elements, namespace = this.namespace } = {},
   ) {
-    return $elements.get().map(element => {
+    return $elements.get().forEach(element => {
       this.dispatchEvent(eventName, detail, eventSettings, { element, namespace });
     });
   }
@@ -619,7 +619,7 @@ export class Behavior {
   }
 
   // this allows for a setup() function to return values shared across behaviors
-  static runSetup(setup = function() {}, { $elements, settings, templates } = {}) {
+  static runSetup(setup = function(args) {}, { $elements, settings, templates } = {}) {
     const $ = (selector, options) => new $elements.constructor(selector, options);
     return setup({ $, settings, $elements, templates });
   }

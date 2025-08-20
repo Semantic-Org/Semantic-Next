@@ -653,7 +653,7 @@ export const getIndexHTMLBefore = function({ files = {}, includeLog } = {}) {
     return html;
   };
 
-  return `<!DOCTYPE html><html>
+  return `<!DOCTYPE html>
   <head>
 ${hideCode({ text: headLibraryJS, isHTML: true })} ${getScriptCode()}  </head>
   <body>

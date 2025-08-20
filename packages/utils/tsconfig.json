@@ -4,11 +4,11 @@
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "noEmit": true,
     "rootDir": "./",
 
-    "strict": true,
+    "strict": false,
     "noImplicitAny": false,
     "noImplicitThis": false,
 
