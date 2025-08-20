@@ -8,15 +8,18 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.16.0 xx.xx.2025
 
-### Utils
+## Major UI Updates
+* **UI** - Added many new components `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`.
+* **UI** - Refactored exports into two groups `primitives` and `components`
+** **Primitives** include JSON specs and are essential building blocks like `modal`, `button`.
+** **Components** have more complex functionality and are built with primitives like `global-search` or `theme-switcher`.
 
 ## Major Features
 * **Query** - Added generalized plugin architecture for Query along with examples in docs.
-* **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON -> JS exports. ESM will now directly use `src` without translation!
-* **UI** - Refactored exports massively, now `primitives`, `components`. Primitives include JSON specs and are essential building blocks like `modal`, `button`. Components have more complex functionality and include primitives.
-* **UI** - Added many new components like `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`. These are not documented yet.
+* **Templates** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
 
 ## Specs
+* **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON -> JS exports. ESM will now directly use `src` without translation!
 * **UI** - Added JS object exports for ui specs
 
 ## Query
@@ -35,7 +38,6 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Fixed `addClass` `toggleClass` and `removeClass` to not error on `undefined`.
 
 ## Templates
-* **Feature** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
 * **Bug** - Fix issue where auto-self closing custom elements in templates only worked with one `-` i.e. `<foo-bar/>` not `<foo-baz-bar/>`
 
 ## Reaction
