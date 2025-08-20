@@ -342,6 +342,24 @@ export class Query {
   one(eventNames: string, handler: EventListener, options?: AddEventListenerOptions): this;
 
   /**
+   * Returns a Promise that resolves when the next occurrence of the specified event fires on the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @param eventNames - A space-separated string of event names.
+   * @param options - Optional configuration including timeout.
+   * @returns A Promise that resolves with the event object.
+   */
+  onNext(eventNames: string, options?: { timeout?: number; }): Promise<Event>;
+  /**
+   * Returns a Promise that resolves when the next occurrence of the specified event fires on a delegated target within the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param options - Optional configuration including timeout.
+   * @returns A Promise that resolves with the event object.
+   */
+  onNext(eventNames: string, targetSelector: string, options?: { timeout?: number; }): Promise<Event>;
+
+  /**
    * Removes event listeners from each element in the current set.
    * @see https://next.semantic-ui.com/api/query/events#off
    * @param eventNames - A space-separated string of event names, or undefined to remove all events

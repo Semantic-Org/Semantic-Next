@@ -155,6 +155,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `trigger(event, data)` - Trigger events
 - `dispatchEvent(event, data, settings)` - Dispatch custom events
 - `one(event, handler)` - One-time event listener
+- `onNext(event, options)` - Promise-based event waiting
 
 ### Dimensions and Positioning
 - `width(value)`, `height(value)` - Get/set dimensions
@@ -380,6 +381,56 @@ $('document').on('keydown', function(event) {
     $('.modal').component().close();
   }
 });
+```
+
+### Promise-based Event Handling
+
+```javascript
+// Modern async/await event handling
+async function handleUserFlow() {
+  // Wait for user to click start button
+  await $('.start-button').onNext('click');
+  console.log('User started the process');
+  
+  // Wait for form submission
+  await $('#form').onNext('submit');
+  console.log('Form submitted');
+  
+  // Wait for animation to complete
+  await $('.success-message').onNext('animationend');
+  console.log('Success animation finished');
+}
+
+// Component event waiting
+async function waitForModalClose() {
+  try {
+    await $('.modal').onNext('modal:closed', { timeout: 5000 });
+    console.log('Modal closed successfully');
+  } catch (error) {
+    console.log('Modal did not close within timeout');
+  }
+}
+
+// Event delegation with promises
+async function waitForDynamicContent() {
+  // Wait for click on dynamically added elements
+  const event = await $('#container').onNext('click', '.dynamic-item');
+  console.log('Dynamic item clicked:', event.target);
+}
+
+// Transition and animation coordination
+async function animateSequence() {
+  $('.element').addClass('fade-in');
+  await $('.element').onNext('animationend');
+  
+  $('.element').addClass('slide-up');  
+  await $('.element').onNext('animationend');
+  
+  $('.element').addClass('bounce');
+  await $('.element').onNext('animationend');
+  
+  console.log('Animation sequence complete!');
+}
 ```
 
 ## Chaining and Utility Methods

@@ -20,6 +20,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **UI** - Added JS object exports for ui specs
 
 ## Query
+* **Feature** - Added `onNext()` method for promise-based event waiting, enabling modern async/await patterns with automatic cleanup and optional timeout support
 * **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication
 * **Feature** - Added `appendTo()` method for appending elements as last child of target
 * **Feature** - Added `prependTo()` method for prepending elements as first child of target
