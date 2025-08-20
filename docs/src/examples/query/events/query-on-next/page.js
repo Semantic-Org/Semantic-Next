@@ -7,7 +7,8 @@ const addLog = (text) => {
 $('.click').on('click', async function() {
   addLog('Clicked');
 
-  // async style .one()
+  // will always run once after reentry into button
   await $(this).onNext('mouseleave');
-  addLog('Left');
+  await $(this).onNext('mouseenter');
+  addLog('You re-entered the button');
 });
