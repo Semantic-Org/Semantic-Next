@@ -89,7 +89,6 @@ export const registerBehavior = (behavior) => {
       ...behavior,
     };
 
-    console.log('log performance', runtimeConfig.logPerformance);
 
     // determine run time settings for behavior
     const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
