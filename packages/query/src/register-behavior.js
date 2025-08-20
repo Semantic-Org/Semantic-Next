@@ -1,15 +1,6 @@
-import { deepExtend, filterObject, isArray, isDevelopment, isString, noop, pick } from '@semantic-ui/utils';
+import { deepExtend, filterObject, isArray, isString, noop, pick } from '@semantic-ui/utils';
 import { Behavior } from './behavior.js';
 import { Query } from './query.js';
-
-// Store on Query for global access
-Query.development = isDevelopment;
-
-// Global settings
-Query.settings = {
-  logLevel: Query.development ? 'info' : 'silent',
-  performance: false,
-};
 
 // Register Behavior
 export const registerBehavior = (behavior) => {
@@ -85,17 +76,23 @@ export const registerBehavior = (behavior) => {
 
     // At run time we need to check if defaults are changed by user
     // this can occur if $.plugin.defaultSettings is modified
-    const defaultValues = ['defaultSettings', 'classNames', 'errors', 'selector'];
+    const defaultValues = ['classNames', 'errors', 'selectors', 'logLevel', 'logPerformance'];
+    const globalDefaults = pick(Query, ...defaultValues);
     const behaviorDefaults = pick(Query.prototype[name], ...defaultValues);
+    const settingsDefaults = pick(settings, ...defaultValues);
+
+    // store runtime config for Behavior
     const runtimeConfig = {
+      ...globalDefaults,
       ...behaviorDefaults,
+      ...settingsDefaults,
       ...behavior,
     };
 
-    // when this element is initialized we create run time settings
-    // this looks at current default settings at time of init
-    // use deepExtend to properly merge nested objects like selectors, classNames, etc.
-    const runtimeSettings = deepExtend({}, defaultSettings, settings);
+    console.log('log performance', runtimeConfig.logPerformance);
+
+    // determine run time settings for behavior
+    const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
 
     // store reference to all elements
     const $elements = this;
@@ -108,7 +105,7 @@ export const registerBehavior = (behavior) => {
     // value to store return
     let returnedValue;
 
-    $elements.each(function(element, index) {
+    $elements.each(function(element, elementIndex) {
       // handle setup function on first invocation
       if (!isSetup) {
         sharedBehavior = Behavior.runSetup(behavior.setup, { $elements, settings, templates }) ?? {};
@@ -116,6 +113,7 @@ export const registerBehavior = (behavior) => {
       }
 
       const $element = this;
+      const totalElements = $elements.count();
 
       // behavior is stored in namespace like el.behavior
       let instance = Behavior.getInstance(element, namespace);
@@ -126,11 +124,10 @@ export const registerBehavior = (behavior) => {
         $element,
         $elements,
         Query,
+        elementIndex,
+        totalElements,
         ...runtimeConfig,
         settings: runtimeSettings,
-        // pass element index information
-        elementIndex: index,
-        totalElements: $elements.length,
       };
 
       // create behavior instance if not defined

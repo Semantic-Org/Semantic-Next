@@ -4,6 +4,7 @@ import {
   clone,
   each,
   extend,
+  isClassInstance,
   isFunction,
   isPlainObject,
   isString,
@@ -11,6 +12,7 @@ import {
   last,
   mapObject,
   noop,
+  toTitleCase,
 } from '@semantic-ui/utils';
 
 export class Behavior {
@@ -60,7 +62,11 @@ export class Behavior {
     elementIndex = 0,
     totalElements = 1,
 
-    // standard
+    // logging
+    logPerformance = false,
+    logLevel = 'debug',
+
+    // standard aliases
     selectors = {},
     classNames = {},
     errors = {},
@@ -93,6 +99,9 @@ export class Behavior {
     this.templates = templates;
     this.mutations = mutations;
 
+    this.logLevel = logLevel;
+    this.logPerformance = logPerformance;
+
     // handle shared state across behaviors
     this.sharedBehavior = sharedBehavior;
     extend(this, sharedBehavior);
@@ -112,6 +121,7 @@ export class Behavior {
 
     // extend with methods from createBehavior
     const instance = this.call(createBehavior) || {};
+    this.instance = instance;
     extend(this, instance);
 
     // destroy existing instance if exists
@@ -513,9 +523,10 @@ export class Behavior {
   // invoke an internal method returned from createBehavior
   callMethod(query, ...methodArgs) {
     let found = this.lookup(query);
+    let self = this.getSelf();
     if (isFunction(found)) {
       // Call method with instance as context
-      return found.apply(this, methodArgs);
+      return found.apply(self, methodArgs);
     }
     else if (found === undefined && this.customInvocation) {
       // Fallback when method not found
@@ -532,19 +543,22 @@ export class Behavior {
   // Helper method for log level checking
   canLog(requiredLevel) {
     const levels = ['silent', 'error', 'warn', 'info', 'debug'];
-    const currentLevel = levels.indexOf(this.settings.logLevel || 'silent');
+    const currentLevel = levels.indexOf(this.logLevel || 'silent');
     const required = levels.indexOf(requiredLevel);
     return currentLevel >= required;
   }
 
   outputLog(level, consoleMethod, color, message, data) {
     if (!this.canLog(level)) { return; }
-
-    const args = [`%c[${this.namespace}]%c ${message}`, `color: ${color}; font-weight: bold;`, 'color: inherit;'];
+    const args = [
+      `%c${toTitleCase(this.namespace)}%c ${message}`,
+      `color: ${color}; font-weight: bold;`,
+      'color: inherit;',
+    ];
     if (data !== undefined) {
       args.push(data);
     }
-
+    // args.push(this.element);
     console[consoleMethod](...args);
   }
 
@@ -593,8 +607,44 @@ export class Behavior {
     return this;
   }
 
+  getSelf() {
+    // always show for now for testing
+    if (!this.logPerformance) {
+      return this;
+    }
+    return new Proxy(this, {
+      get(target, prop) {
+        // dont proxy internals
+        const skipProxy = ['constructor'];
+        if (skipProxy.includes(prop) || prop.startsWith('_')) {
+          return target[prop];
+        }
+        // dont proxy class instances
+        if (isClassInstance(target[prop])) {
+          return target[prop];
+        }
+        // dont proxy non-functions
+        if (!isFunction(target[prop])) {
+          return target[prop];
+        }
+        // wrap regular methods in performance tracking
+        return (...args) => {
+          const markName = `${target.namespace}:${prop}-start`;
+          performance.mark(markName);
+          const result = target[prop].apply(target, args);
+          const measureName = `${target.namespace}:${prop}`;
+          const endMarkName = `${target.namespace}:${prop}-end`;
+          performance.mark(endMarkName);
+          performance.measure(measureName, markName, endMarkName);
+          return result;
+        };
+      },
+    });
+  }
+
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalParams = {} } = {}) {
+    const selfProxy = this.getSelf();
     const self = this;
     const args = [];
     if (!params) {
@@ -602,8 +652,8 @@ export class Behavior {
         $: self.$,
         el: self.element,
         $el: self.$(self.element),
-        self,
-        behavior: self,
+        self: selfProxy,
+        behavior: selfProxy,
         namespace: self.namespace,
         dispatchEvent: self.dispatchEvent.bind(this),
         dispatchGroupEvent: self.dispatchGroupEvent.bind(this),

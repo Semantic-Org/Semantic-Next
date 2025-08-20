@@ -8,6 +8,7 @@ import {
   inArray,
   isArray,
   isClient,
+  isDevelopment,
   isDOM,
   isFunction,
   isObject,
@@ -36,6 +37,12 @@ export class Query {
       return true;
     },
   });
+
+  static isDevelopment = isDevelopment;
+
+  static logLevel = isDevelopment ? 'debug' : 'silent';
+
+  static logPerformance = false;
 
   /*
     We clean up event handlers in two cases
