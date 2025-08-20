@@ -63,7 +63,7 @@ export const isDevelopment = (() => {
   }
 
   // Check global __DEV__ flag (React Native, some bundlers)
-  if (typeof __DEV__ !== undefined) {
+  if (typeof __DEV__ !== 'undefined') {
     return true;
   }
 
