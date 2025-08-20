@@ -60,6 +60,7 @@ const createBehavior = (
     isLast,
     total,
     log,
+    debug,
     warn,
     error,
   },
@@ -77,13 +78,11 @@ const createBehavior = (
       ...runtimeSettings,
     };
 
-    log('Starting animation', { animation: animationSettings.animation });
-
     // handle case of already animating
     // handle animation queuing
     if (self.isAnimating()) {
       if (settings.queue) {
-        log('Animation already running, queuing');
+        debug('Animation already running, queuing');
         const eventName = (el.animatingGroup)
           ? 'transition:groupEnd'
           : 'transition:end';
@@ -273,6 +272,8 @@ const createBehavior = (
     const animationID = (direction)
       ? `${cssAnimations.name} ${direction}`
       : `${cssAnimation}`;
+
+    debug('Starting animation', animationID);
 
     // Create and start multiple animations (one per CSS property)
     const activeAnimations = animationsToPlay.map(animData => {
