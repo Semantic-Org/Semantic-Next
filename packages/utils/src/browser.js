@@ -51,7 +51,7 @@ export const getKeyFromEvent = (event) => {
 
 /* Wrapper for requestIdleCallback which does not have safari support */
 export const idleCallback = (callback) => {
-  if (isClient && window.requestIdleCallback) {
+  if (isClient && window.requestIdleCallback !== undefined) {
     requestIdleCallback(callback);
   }
   else {
