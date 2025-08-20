@@ -58,6 +58,7 @@ const createBehavior = (
     cache,
     $el,
     self,
+    data,
     settings,
     classNames,
     errors,
@@ -83,6 +84,20 @@ const createBehavior = (
       ...runtimeSettings,
     };
 
+    // handle case of already animating
+    // handle animation queuing
+    if (self.isAnimating()) {
+      if (settings.queue) {
+        const eventName = (el.animatingGroup)
+          ? 'transition:groupEnd'
+          : 'transition:end';
+        await $(el).onNext(eventName);
+      }
+      else {
+        self.stop();
+      }
+    }
+
     // determine canonical animations from css, this is cached between runs
     const cssAnimations = self.findCSSAnimation(animationSettings.animation);
 
@@ -102,22 +117,33 @@ const createBehavior = (
   async performGroupAnimation(cssAnimations, direction, animationSettings) {
     let groupOrder = self.getGroupOrder(direction);
 
+    self.startGroupAnimation(direction, groupOrder);
+
     const delay = (groupOrder == 'forward')
       ? index * settings.interval
       : (total - index) * settings.interval;
-
     animationSettings.delay = delay;
     await self.performAnimation(cssAnimations, direction, animationSettings);
+
+    self.endGroupAnimation(direction, groupOrder);
+  },
+
+  startGroupAnimation(direction, groupOrder) {
+    el.animatingGroup = true;
     if (self.isFirstInGroup(direction)) {
-      dispatchGroupEvent('transitionGroupStarted', {
+      dispatchGroupEvent('groupStart', {
         groupOrder,
       });
     }
+  },
+
+  endGroupAnimation(direction, groupOrder) {
     if (self.isLastInGroup(direction)) {
-      dispatchGroupEvent('transitionGroupEnded', {
+      dispatchGroupEvent('groupEnd', {
         groupOrder,
       });
     }
+    el.animatingGroup = false;
   },
 
   // look in css defs for a valid animation matching name
@@ -238,17 +264,6 @@ const createBehavior = (
       return;
     }
 
-    // handle case of already animating
-    // handle animation queuing
-    if (self.isAnimating()) {
-      if (settings.queue) {
-        await $(el).afterEvent('transition:end');
-      }
-      else {
-        self.stop();
-      }
-    }
-
     // find animations for this particular direction (array of animations)
     const animationsToPlay = cssAnimations.animations[direction] ?? cssAnimations.animations.standard;
 
@@ -283,6 +298,8 @@ const createBehavior = (
     });
 
     dispatchEvent('scheduled', { cssAnimations: cssAnimations, animations: activeAnimations });
+
+    // wait for animation to actually begin (if there is a delay this might not be immediate)
     await self.animationsStarted(activeAnimations);
     dispatchEvent('started', { cssAnimations: cssAnimations, animations: activeAnimations });
 
@@ -293,7 +310,6 @@ const createBehavior = (
 
     // Wait for all animations to complete (handle cancellation gracefully)
     await self.animationsFinished(activeAnimations);
-
     // Set final display state based on direction
     self.setFinalDisplayState(direction);
 
