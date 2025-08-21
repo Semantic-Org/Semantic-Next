@@ -8,13 +8,17 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 # Version 0.16.0 08.20.2025
 
-## Major UI Updates
-* **UI** - Added many new components `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`.
-* **UI** - Refactored exports into two groups `primitives` and `components`
-** **Primitives** include JSON specs and are essential building blocks like `modal`, `button`.
-** **Components** have more complex functionality and are built with primitives like `global-search` or `theme-switcher`.
+## UI changes
 
+`semantic-ui/core` is now organized into three groups `primitives` and `components` and `behaviors`
+  
+* **Primitives** include JSON specs and are essential building blocks like `modal`, `button`.
+* **Components** are built with primitives and have more complex functionality, for example `global-search` or `theme-switcher`.
+* **Behaviors** do not export web components but provide behaviors like `transition` or `position`
+  
 ## Major Features
+* **UI** - Added many new components `global-search` `inpage-menu` `mobile-menu-toggle` `mobile-menu` `panels` `theme-switcher`.
+* **Behaviors** - Added new `transition` behavior that uses the web animation API to animate elements.
 * **Query** - Added generalized plugin architecture for Query along with examples in docs.
 * **Templates** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change
 
