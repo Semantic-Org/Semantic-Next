@@ -14,6 +14,8 @@ export interface ASTNode {
   attribute?: string; // Added from StringScanner.getContext()
   booleanAttribute?: boolean; // Added from StringScanner.getContext()
   insideTag?: boolean;
+  expression?: string; // For rerender blocks
+  key?: string; // For guard blocks and rerender key
 }
 
 export interface TemplateInfo {

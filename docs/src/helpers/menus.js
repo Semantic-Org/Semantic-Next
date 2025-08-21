@@ -49,6 +49,7 @@ const subCategorySortOrder = {
     'Snippets',
     'Subtemplates',
     'Async',
+    'Reactivity',
     'Helpers',
   ],
   'Reactivity': [
@@ -65,6 +66,8 @@ const subCategorySortOrder = {
   'Query': [
     'Setup',
     'Introduction',
+    'Selectors',
+    'Plugins / Behaviors',
     'Components',
     'Attributes',
     'Content',
@@ -86,14 +89,15 @@ const subCategorySortOrder = {
     'Strings',
     'Functions',
     'Colors',
+    'CSS',
     'Browser',
     'Dates',
     'Numbers',
+    'Environment',
     'Crypto',
     'Equality',
     'Cloning',
     'Errors',
-    'SSR',
     'Regex',
   ],
 };
@@ -311,6 +315,10 @@ export const sidebarMenuFramework = [
         url: '/templates/snippets',
       },
       {
+        name: 'Reactivity',
+        url: '/templates/reactivity',
+      },
+      {
         name: 'Helpers',
         url: '/templates/helpers',
       },
@@ -385,6 +393,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Chaining',
         url: '/query/chaining',
+      },
+      {
+        name: 'Plugins',
+        url: '/query/plugins',
       },
       {
         name: 'Browser Usage',
@@ -608,6 +620,10 @@ export const sidebarMenuAPI = [
         url: '/api/utils/dates',
       },
       {
+        name: 'Environment',
+        url: '/api/utils/environment',
+      },
+      {
         name: 'Equality',
         url: '/api/utils/equality',
       },
@@ -638,10 +654,6 @@ export const sidebarMenuAPI = [
       {
         name: 'Regular Expressions',
         url: '/api/utils/regex',
-      },
-      {
-        name: 'SSR',
-        url: '/api/utils/ssr',
       },
       {
         name: 'Strings',

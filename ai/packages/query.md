@@ -118,6 +118,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `get(index)` - Get element at index
 - `eq(index)` - Get new Query object with element at index
 - `first()`, `last()` - Get first/last element as new Query
+- `add(selector)` - Create new collection combining current elements with elements from selector
 
 ### DOM Traversal
 - `find(selector)` - Find descendants
@@ -132,6 +133,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `text()`, `text(content)` - Get/set textContent
 - `val()`, `val(value)` - Get/set form element values
 - `append(content)`, `prepend(content)` - Add content to elements
+- `appendTo(selector)`, `prependTo(selector)` - Insert elements as children of targets
 - `insertBefore(selector)`, `insertAfter(selector)` - Insert elements relative to targets
 - `before(content)`, `after(content)` - Insert content before/after elements (aliases)
 
@@ -153,6 +155,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `trigger(event, data)` - Trigger events
 - `dispatchEvent(event, data, settings)` - Dispatch custom events
 - `one(event, handler)` - One-time event listener
+- `onNext(event, options)` - Promise-based event waiting
 
 ### Dimensions and Positioning
 - `width(value)`, `height(value)` - Get/set dimensions
@@ -160,6 +163,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `scrollTop(value)`, `scrollLeft(value)` - Get/set scroll position
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
+- `naturalDisplay()` - Get natural display value (ignoring display: none)
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
@@ -315,6 +319,23 @@ form.settings({
   onSubmit: handleSubmit,
   validation: validationRules
 });
+
+// Combine multiple collections for batch operations
+const $headers = $('h1, h2, h3');
+const $content = $('p, div');
+const $all = $headers.add($content);
+
+// Apply styles to all combined elements
+$all.addClass('highlighted');
+
+// Build collections progressively
+let $collection = $('.initial-items');
+$collection = $collection.add('.more-items');
+$collection = $collection.add(document.getElementById('special-item'));
+
+// Works with empty collections
+const $empty = $('.nonexistent');
+const $real = $empty.add('.existing-elements'); // Returns only existing elements
 ```
 
 ## Event Handling Patterns
@@ -360,6 +381,56 @@ $('document').on('keydown', function(event) {
     $('.modal').component().close();
   }
 });
+```
+
+### Promise-based Event Handling
+
+```javascript
+// Modern async/await event handling
+async function handleUserFlow() {
+  // Wait for user to click start button
+  await $('.start-button').onNext('click');
+  console.log('User started the process');
+  
+  // Wait for form submission
+  await $('#form').onNext('submit');
+  console.log('Form submitted');
+  
+  // Wait for animation to complete
+  await $('.success-message').onNext('animationend');
+  console.log('Success animation finished');
+}
+
+// Component event waiting
+async function waitForModalClose() {
+  try {
+    await $('.modal').onNext('modal:closed', { timeout: 5000 });
+    console.log('Modal closed successfully');
+  } catch (error) {
+    console.log('Modal did not close within timeout');
+  }
+}
+
+// Event delegation with promises
+async function waitForDynamicContent() {
+  // Wait for click on dynamically added elements
+  const event = await $('#container').onNext('click', '.dynamic-item');
+  console.log('Dynamic item clicked:', event.target);
+}
+
+// Transition and animation coordination
+async function animateSequence() {
+  $('.element').addClass('fade-in');
+  await $('.element').onNext('animationend');
+  
+  $('.element').addClass('slide-up');  
+  await $('.element').onNext('animationend');
+  
+  $('.element').addClass('bounce');
+  await $('.element').onNext('animationend');
+  
+  console.log('Animation sequence complete!');
+}
 ```
 
 ## Chaining and Utility Methods

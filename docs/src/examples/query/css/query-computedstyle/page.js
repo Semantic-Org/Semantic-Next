@@ -1,6 +1,6 @@
 import { $ } from '@semantic-ui/query';
 
+const backgroundColor = $('.container').computedStyle('background-color');
+
 // Get computed style values (as they actually appear)
-$('.fontsize').text($('.child').computedStyle('font-size'));
-$('.display').text($('.child').computedStyle('display'));
-$('.margin').text($('.child').computedStyle('margin-top'));
+$('.output').text(`Background is ${backgroundColor}`);

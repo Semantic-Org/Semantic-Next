@@ -4,10 +4,8 @@ let { showThemeSwitcher } = Astro.props;
 import { Image } from 'astro:assets';
 
 import logoImage from '@images/logo.png';
-import MobileMenuToggle from '@components/MobileMenuToggle/MobileMenuToggle.js';
-import GlobalSearch from '@components/GlobalSearch/GlobalSearch.js';
-import TopbarMenu from '@components/TopbarMenu/TopbarMenu.js';
-import ThemeSwitcher from '@components/ThemeSwitcher/ThemeSwitcher.js';
+
+import { MobileMenuToggle, GlobalSearch, TopbarMenu, ThemeSwitcher } from '@semantic-ui/core';
 
 import { getTopbarDisplayMenu, removeTrailingSlash } from '@helpers/navigation.js';
 

@@ -153,6 +153,55 @@ const result = extend(obj1, obj2, obj3);
 console.log(result); // { a: 1, b: 2, c: 3, d: 4 }
 ```
 
+### deepExtend
+
+```javascript
+function deepExtend(obj, ...sources, options)
+```
+
+Deep extends an object with properties from other sources, recursively merging nested plain objects and cloning non-plain objects.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| obj     | object | The target object to extend |
+| sources | ...object | One or more source objects to merge from |
+| options | object | Optional configuration object |
+
+##### Options
+
+| Name               | Type    | Default | Description |
+|--------------------|---------|---------|-------------|
+| preserveNonCloneable | boolean | false   | Preserve custom class instances instead of flattening them |
+
+#### Returns
+
+The modified target object with deep merged properties.
+
+#### Example
+
+```javascript
+import { deepExtend } from '@semantic-ui/utils';
+
+const target = { 
+  user: { name: 'Alice', age: 30 },
+  settings: { theme: 'light' }
+};
+
+const source = { 
+  user: { role: 'admin' },
+  settings: { notifications: true }
+};
+
+deepExtend(target, source);
+console.log(target); 
+// { 
+//   user: { name: 'Alice', age: 30, role: 'admin' },
+//   settings: { theme: 'light', notifications: true }
+// }
+```
+
 ### pick
 
 ```javascript

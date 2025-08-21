@@ -155,6 +155,31 @@ Control flow using `#if`, `#else if`, and `#else`:
 {/each}
 ```
 
+### Rerender and Guard Blocks
+
+Control when and how template sections re-evaluate in response to reactive changes.
+
+```html
+<!-- Rerender block - forces complete re-evaluation when userId changes -->
+{#rerender userId}
+  <p>User: {userName}</p>
+  <p>Timestamp: {getTimestamp}</p>
+{/rerender}
+
+<!-- Guard block - only re-renders when getUserStatus result changes -->
+{#guard getUserStatus}
+  <div class="status-{getUserStatus}">
+    <p>Status: {getUserStatus}</p>
+    <p>Expensive computation here...</p>
+  </div>
+{/guard}
+```
+
+**Key differences:**
+- **Rerender blocks** force re-evaluation of all content, including non-reactive expressions
+- **Guard blocks** use `Reaction.guard()` to only update when computed values actually change
+- Both create AST nodes with `type: 'rerender'` but different `expression`/`key` properties
+
 ### Subtemplates (Partials)
 
 ```html

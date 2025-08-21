@@ -63,7 +63,16 @@ export default defineConfig({
     },
     optimizeDeps: {
       force: true,
-      exclude: ['playground-elements', 'tailwindcss-iso'],
+      exclude: [
+        'playground-elements',
+        'tailwindcss-iso',
+        '@semantic-ui/core',
+        '@semantic-ui/query',
+        '@semantic-ui/component',
+        '@semantic-ui/utils',
+        '@semantic-ui/reactivity',
+        '@semantic-ui/templating',
+      ],
     },
   },
 

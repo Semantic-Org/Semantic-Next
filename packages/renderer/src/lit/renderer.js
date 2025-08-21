@@ -18,6 +18,7 @@ import { reactiveAsync } from './directives/reactive-async.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
+import { reactiveRerender } from './directives/reactive-rerender.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
@@ -107,6 +108,10 @@ export class LitRenderer {
           this.addValue(this.evaluateAsync(node, data));
           break;
 
+        case 'rerender':
+          this.addValue(this.evaluateRerender(node, data));
+          break;
+
         case 'template':
           this.addValue(this.evaluateTemplate(node, data));
           break;
@@ -153,6 +158,32 @@ export class LitRenderer {
     node.expression = node.condition; // store original expression for debugging
     let conditionalArguments = mapObject(node, directiveMap);
     return reactiveConditional(conditionalArguments);
+  }
+
+  /*
+    The rerender directive rerenders a block of content everytime
+    a reactive context value is changed
+  */
+  evaluateRerender(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == 'expression') {
+        return () => this.lookupTokenValue(value, data);
+      }
+      if (key == 'key') {
+        return () => this.lookupTokenValue(value, data);
+      }
+      if (key == 'content') {
+        return () => this.renderContent({ ast: value, data });
+      }
+      return value;
+    };
+    
+    // Store original expressions for debugging
+    node.expressionString = node.expression;
+    node.keyString = node.key;
+    
+    let rerenderArguments = mapObject(node, directiveMap);
+    return reactiveRerender(rerenderArguments);
   }
 
   /*

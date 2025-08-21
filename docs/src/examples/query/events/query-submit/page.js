@@ -1,10 +1,10 @@
 import { $ } from '@semantic-ui/query';
 
-$('.form').on('submit', function(e) {
-  e.preventDefault();
+$('form').on('submit', function(event) {
+  event.preventDefault();
   $('.status').text('Form submitted!').addClass('success');
 });
 
-setTimeout(() => {
-  $('.form').submit();
-}, 2000);
+$('ui-button.submit').on('click', () => {
+  $('form').submit();
+});

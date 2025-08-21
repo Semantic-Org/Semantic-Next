@@ -8,7 +8,7 @@ The `@semantic-ui/utils` package is a comprehensive standalone utility library p
 
 ## Package Structure
 
-The package is organized into **16 specialized modules**, each focused on a specific domain:
+The package is organized into **17 specialized modules**, each focused on a specific domain:
 
 ```
 @semantic-ui/utils
@@ -18,6 +18,7 @@ The package is organized into **16 specialized modules**, each focused on a spec
 ├── strings.js     ← String formatting and transformation (8+ functions)
 ├── functions.js   ← Function utilities and higher-order functions
 ├── colors.js      ← OKLCH to RGB/Hex color conversion
+├── css.js         ← CSS stylesheet adoption, extraction, and scoping
 ├── browser.js     ← Browser-specific operations and XHR
 ├── looping.js     ← Iteration utilities for objects and arrays
 ├── dates.js       ← Date formatting with internationalization
@@ -26,7 +27,7 @@ The package is organized into **16 specialized modules**, each focused on a spec
 ├── equality.js    ← Deep equality comparison
 ├── cloning.js     ← Deep cloning of objects and arrays
 ├── errors.js      ← Error handling and async error throwing
-├── ssr.js         ← Server-side rendering detection
+├── environment.js  ← Environment detection (server/client/dev/CI)
 └── regexp.js      ← Regular expression and HTML escaping
 ```
 
@@ -133,13 +134,37 @@ hasProperty(data, 'user.profile.name');      // true
 
 ### Object Manipulation
 ```javascript
-import { extend, pick, filterObject, mapObject } from '@semantic-ui/utils';
+import { extend, deepExtend, pick, filterObject, mapObject } from '@semantic-ui/utils';
 
 const source = { a: 1, b: 2, c: 3, d: 4 };
 const target = { b: 10, e: 5 };
 
-// Merge objects
+// Shallow merge objects
 extend(target, source);                      // { a: 1, b: 2, c: 3, d: 4, e: 5 }
+
+// Deep merge objects with nested properties
+const config = {
+  api: { baseUrl: 'localhost', timeout: 5000 },
+  features: { darkMode: false }
+};
+const overrides = {
+  api: { timeout: 3000, retries: 3 },
+  features: { notifications: true }
+};
+
+deepExtend(config, overrides);
+// Result: {
+//   api: { baseUrl: 'localhost', timeout: 3000, retries: 3 },
+//   features: { darkMode: false, notifications: true }
+// }
+
+// Deep merge with custom class preservation
+const settings = {
+  template: new MyTemplate(),
+  data: { items: [1, 2, 3] }
+};
+deepExtend(settings, { data: { items: [4, 5] } }, { preserveNonCloneable: true });
+// Preserves MyTemplate instance, merges data.items array
 
 // Select properties
 pick(source, ['a', 'c']);                    // { a: 1, c: 3 }
@@ -185,7 +210,7 @@ const reactive = proxyObject(source, {
 ```javascript
 import { 
   isObject, isArray, isString, isNumber, isFunction, isBoolean,
-  isEmpty, isPlainObject
+  isEmpty, isPlainObject, isSet, isMap
 } from '@semantic-ui/utils';
 
 // Standard type checking
@@ -196,16 +221,34 @@ isNumber(42);                    // true
 isFunction(() => {});            // true
 isBoolean(true);                 // true
 
+// Collection type checking
+isSet(new Set([1, 2, 3]));       // true
+isSet([1, 2, 3]);                // false
+isMap(new Map([['a', 1]]));      // true
+isMap({ a: 1 });                 // false
+
 // Special cases
 isEmpty('');                     // true
 isEmpty([]);                     // true
 isEmpty({});                     // true
 isPlainObject({});               // true (excludes class instances)
+
+// Type-safe collection operations
+function processCollection(data) {
+  if (isSet(data)) {
+    return `Set with ${data.size} unique items`;
+  } else if (isMap(data)) {
+    return `Map with ${data.size} key-value pairs`;
+  } else if (isArray(data)) {
+    return `Array with ${data.length} elements`;
+  }
+  return 'Unknown collection type';
+}
 ```
 
 ### Advanced Type Checks
 ```javascript
-import { isDOM, isNode, isClassInstance, isPromise, isClient, isServer } from '@semantic-ui/utils';
+import { isDOM, isNode, isClassInstance, isPromise, isClient, isServer, isDevelopment, isCI } from '@semantic-ui/utils';
 
 // DOM-related checks
 isDOM(document.body);            // true
@@ -220,6 +263,8 @@ isPromise(fetch('/api'));        // true
 // Environment detection
 isClient();                      // true in browser
 isServer();                      // true in Node.js/server environment
+isDevelopment();                 // true in development environments
+isCI();                          // true in CI/CD pipelines
 ```
 
 ## String Utilities (strings.js)
@@ -345,6 +390,46 @@ debouncedSave.pending();     // Check if scheduled
 // Safe function wrapping
 const safeFunction = wrapFunction(riskyFunction);
 const result = safeFunction(args); // Won't throw errors
+```
+
+## CSS Utilities (css.js)
+
+### Stylesheet Management
+```javascript
+import { adoptStylesheet, extractCSS, scopeStyles } from '@semantic-ui/utils';
+
+// Adopt CSS to document or shadow root with caching
+adoptStylesheet('.button { background: blue; color: white; }');
+
+// Adopt to shadow root with custom options
+const shadowRoot = element.attachShadow({ mode: 'open' });
+adoptStylesheet(css, shadowRoot, { cacheStylesheet: false });
+
+// Extract matching CSS rules
+const buttonCSS = extractCSS('.button', cssString, { returnText: true });
+const exactMatch = extractCSS('.btn', css, { exactMatch: true });
+
+// Extract from multiple sources
+const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
+```
+
+### CSS Scoping and Web Components
+```javascript
+import { scopeStyles } from '@semantic-ui/utils';
+
+// Basic scoping - prepends selector to all rules
+const scoped = scopeStyles('.button { color: red; }', '.my-component');
+// Result: .my-component .button { color: red; }
+
+// Web component CSS porting with :host replacement
+const hostCSS = ':host { display: block; } :host(.active) { background: blue; }';
+const ported = scopeStyles(hostCSS, '.widget', { replaceHost: true });
+// Result: .widget { display: block; } .widget.active { background: blue; }
+
+// Root element handling
+const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
+const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
+// Result: .app html { font-size: 16px; } .app body { margin: 0; }
 ```
 
 ## Browser Integration (browser.js)
@@ -484,17 +569,51 @@ fatal('Critical system error', { exit: true });
 ```javascript
 import { each, asyncEach, asyncMap } from '@semantic-ui/utils';
 
-// Enhanced array iteration
+// Array iteration
 each([1, 2, 3], (value, index) => {
   console.log(`Item ${index}: ${value}`);
 });
 
-// Async iterations
-await asyncEach([1, 2, 3], async (value) => {
+// Object iteration
+each({ a: 1, b: 2 }, (value, key) => {
+  console.log(`${key}: ${value}`);
+});
+
+// Set iteration (index is 0-based counter)
+each(new Set(['apple', 'banana']), (value, index) => {
+  console.log(`Set item ${index}: ${value}`);
+});
+
+// Map iteration (preserves key types)
+each(new Map([['key1', 'val1'], [2, 'val2']]), (value, key) => {
+  console.log(`${key}: ${value}`);  // key1: val1, 2: val2
+});
+
+// Breaking iteration early
+each([1, 2, 3, 4], (value) => {
+  if (value === 3) return false;  // stops iteration
+});
+
+// Async iterations with Set/Map support
+await asyncEach(new Set([1, 2, 3]), async (value) => {
   await processAsync(value);
 });
 
-const results = await asyncMap([1, 2, 3], async (x) => x * 2);
+await asyncEach(new Map([['a', 1], ['b', 2]]), async (value, key) => {
+  await updateEntry(key, value);
+});
+
+// Async mapping - arrays return arrays
+const results = await asyncMap([1, 2, 3], async (x) => x * 2);      // [2, 4, 6]
+
+// Async Set mapping - returns array
+const setResults = await asyncMap(new Set([1, 2, 3]), async (x) => x * 2); // [2, 4, 6]
+
+// Async Map mapping - returns new Map with same keys
+const mapResults = await asyncMap(
+  new Map([['a', 1], ['b', 2]]), 
+  async (value, key) => value * 10
+);                                                                   // Map([['a', 10], ['b', 20]])
 ```
 
 ## RegExp Utilities (regexp.js)

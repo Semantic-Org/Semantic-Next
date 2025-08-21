@@ -1,17 +1,9 @@
 .container {
-  font-size: 18px;
-  padding: 20px;
-  margin: 15px 0;
-  background: var(--standard-5);
-  border: var(--border);
-  border-radius: var(--border-radius);
-}
-
-.child {
-  /* inherits font-size from parent */
-  padding: 10px;
-  margin-top: 15px;
-  background: var(--standard-10);
+  font-size: var(--large);
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  background: var(--blue-10);
+  border: 1px solid var(--blue-30);
   border-radius: var(--border-radius);
 }
 

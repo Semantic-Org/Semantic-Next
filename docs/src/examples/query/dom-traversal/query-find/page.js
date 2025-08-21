@@ -1,8 +1,10 @@
 import { $ } from '@semantic-ui/query';
 
+const $sections = $('.section');
+
 // Find specific elements within container
-const foundParagraphs = $('.container').find('.text');
-const foundNotes = $('.container').find('.note');
+const foundParagraphs = $sections.find('.text');
+const foundNotes = $sections.find('.note');
 
 // Count and highlight found elements
 $('.found').text(foundParagraphs.count());

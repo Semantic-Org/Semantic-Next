@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "noEmit": true,
     "declaration": true,
     "declarationDir": "./types",
     "esModuleInterop": true,
-    "moduleResolution": "nodenext",
-    "module": "NodeNext",
+    "moduleResolution": "bundler",
+    "module": "ESNext",
     "target": "es2020",
     "lib": ["es2020", "dom"],
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "noImplicitThis": false
+    "noImplicitThis": false,
+    "suppressImplicitAnyIndexErrors": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

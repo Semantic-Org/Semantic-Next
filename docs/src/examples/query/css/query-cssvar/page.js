@@ -1,10 +1,7 @@
 import { $ } from '@semantic-ui/query';
 
-// Get CSS variable values
-$('.themecolor').text($('.themed').cssVar('theme-color'));
-$('.spacing').text($('.themed').cssVar('spacing'));
-$('.rootvar').text($(':root').cssVar('standard-5'));
+// Set CSS variable to a value
+$('.themed').cssVar('primary-color', 'green');
 
-// Set CSS variables
-$('.themed').cssVar('theme-color', 'purple');
-$('.themed').cssVar('spacing', '30px');
+// Set css variable to another variable
+// $('.themed').cssVar('primary-color', 'var(--teal)');

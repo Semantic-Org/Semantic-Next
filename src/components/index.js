@@ -1,14 +1,9 @@
-/* Structural */
-export { UIContainer } from './container/index.js';
-export { UIRail } from './rail/index.js';
-
-/* Primitives */
-export { UIButton, UIButtons } from './button/index.js';
-export { UICard, UICards } from './card/index.js';
-export { UIIcon } from './icon/index.js';
-export { UIInput } from './input/index.js';
-export { UILabel } from './label/index.js';
-export { MenuItem, UIMenu } from './menu/index.js';
-export { UISegment } from './segment/index.js';
-
-export { UIModal } from './modal/index.js';
+export { GlobalSearch } from './global-search/index.js';
+export { InPageMenu } from './inpage-menu/index.js';
+export { MobileMenu } from './mobile-menu/index.js';
+export { MobileMenuToggle } from './mobile-menu-toggle/index.js';
+export { NavMenu } from './nav-menu/index.js';
+export { Panel, Panels } from './panels/index.js';
+export { SidebarToggle } from './sidebar-toggle/index.js';
+export { ThemeSwitcher } from './theme-switcher/index.js';
+export { TopbarMenu } from './topbar-menu/index.js';

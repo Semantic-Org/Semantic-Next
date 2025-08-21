@@ -8,7 +8,6 @@ import { buildESM } from './build-esm.js';
 export const buildSpecs = async ({
   watch = false,
 } = {}) => {
-
   const config = {
     watch,
     type: 'javascript',
@@ -20,16 +19,12 @@ export const buildSpecs = async ({
   };
 
   await buildESM(config);
-
 };
-
 
 // Wrapped for NPM wireit consumption
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async function() {
-
     const result = await buildSpecs();
     process.exit();
-
   })();
 }

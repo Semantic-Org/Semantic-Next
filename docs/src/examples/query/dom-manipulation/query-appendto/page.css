@@ -1,0 +1,50 @@
+.source {
+  padding: 15px;
+  margin: 15px 0;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.targets {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.container {
+  flex: 1;
+  padding: 15px;
+  background: var(--standard-10);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  position: relative;
+}
+
+.container::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: var(--standard-10);
+  padding: 0 5px;
+  font-size: 0.8em;
+  color: var(--text);
+}
+
+.item {
+  margin: 5px 0;
+  padding: 8px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+}
+
+.new-item {
+  margin: 5px 0;
+  padding: 8px;
+  background: var(--blue-5);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  color: var(--blue);
+}

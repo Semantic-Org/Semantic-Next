@@ -96,6 +96,21 @@ export class Query {
    * An array of event handlers for teardown purposes.
    */
   static eventHandlers: EventHandler[];
+  /**
+   * Map of registered behaviors
+   */
+  static behaviors: Map<string, any>;
+  /**
+   * Development mode flag
+   */
+  static development?: boolean;
+  /**
+   * Global settings for Query
+   */
+  static settings?: {
+    logLevel?: string;
+    performance?: boolean;
+  };
 
   /** The original selector used to create the Query instance. */
   selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy;
@@ -238,7 +253,7 @@ export class Query {
    * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns A new Query instance containing the closest ancestor elements.
    */
-  closest(selector: string | Element, options?: { returnAll?: boolean }): Query;
+  closest(selector: string | Element, options?: { returnAll?: boolean; }): Query;
 
   /**
    * Gets all ancestor elements that match the selector, traversing up the entire DOM tree.
@@ -257,7 +272,11 @@ export class Query {
    * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
    * @returns The closest ancestor element, all matching ancestors, or `undefined` if not found.
    */
-  closestDeep(element: Element, selector: string | Element, options?: { returnAll?: boolean }): Element | Element[] | undefined;
+  closestDeep(
+    element: Element,
+    selector: string | Element,
+    options?: { returnAll?: boolean; },
+  ): Element | Element[] | undefined;
 
   /**
    * Attaches a handler to be executed when the DOM is fully loaded.
@@ -336,6 +355,24 @@ export class Query {
    * @returns The Query instance for chaining.
    */
   one(eventNames: string, handler: EventListener, options?: AddEventListenerOptions): this;
+
+  /**
+   * Returns a Promise that resolves when the next occurrence of the specified event fires on the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @param eventNames - A space-separated string of event names.
+   * @param options - Optional configuration including timeout.
+   * @returns A Promise that resolves with the event object.
+   */
+  onNext(eventNames: string, options?: { timeout?: number; }): Promise<Event>;
+  /**
+   * Returns a Promise that resolves when the next occurrence of the specified event fires on a delegated target within the first element in the current set.
+   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param options - Optional configuration including timeout.
+   * @returns A Promise that resolves with the event object.
+   */
+  onNext(eventNames: string, targetSelector: string, options?: { timeout?: number; }): Promise<Event>;
 
   /**
    * Removes event listeners from each element in the current set.
@@ -696,6 +733,14 @@ export class Query {
   slice(start?: number, end?: number): Query;
 
   /**
+   * Creates a new Query collection combining the current elements with elements from the provided selector.
+   * @see https://next.semantic-ui.com/api/query/utilities#add
+   * @param selector - The selector, elements, or Query instance to add to the current collection.
+   * @returns A new Query instance containing the combined elements with duplicates removed.
+   */
+  add(selector: string | Element | Element[] | NodeList | HTMLCollection | Query): Query;
+
+  /**
    * Inserts content at a specified position relative to a target element.
    * @see https://next.semantic-ui.com/api/query/internal#insertcontent
    * @param target - The target element.
@@ -741,6 +786,22 @@ export class Query {
   insertAfter(selector: string | Node | NodeList | HTMLCollection | Query): Query;
 
   /**
+   * Appends each element in the current set as the last child of the specified target(s).
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#appendTo
+   * @param selector - The target element(s) or selector.
+   * @returns A new query object of target elements.
+   */
+  appendTo(selector: string | Node | NodeList | HTMLCollection | Query): Query;
+
+  /**
+   * Prepends each element in the current set as the first child of the specified target(s).
+   * @see https://next.semantic-ui.com/api/query/dom-manipulation#prependTo
+   * @param selector - The target element(s) or selector.
+   * @returns A new query object of target elements.
+   */
+  prependTo(selector: string | Node | NodeList | HTMLCollection | Query): Query;
+
+  /**
    * Inserts content before each element in the current set.
    * @see https://next.semantic-ui.com/api/query/dom-manipulation#before
    * @param content - The content to insert before each element.
@@ -778,6 +839,13 @@ export class Query {
   naturalHeight(): number | number[];
 
   /**
+   * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/dimensions#naturalDisplay
+   * @returns For single element: the natural display value. For multiple elements: array of natural display values. Returns undefined for empty selection.
+   */
+  naturalDisplay(): string | string[] | undefined;
+
+  /**
    * Gets the clipping parent (overflow container) of each element in the current set.
    * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
    * @returns A new Query instance containing the clipping parent elements.
@@ -806,6 +874,15 @@ export class Query {
    * @returns `true` if the set contains elements, `false` otherwise.
    */
   exists(): boolean;
+
+  /**
+   * Checks if ALL elements in the current set are visible (have layout dimensions).
+   * @see https://next.semantic-ui.com/api/query/logical-operators#isvisible
+   * @param options - Configuration options for visibility checking.
+   * @param options.includeOpacity - Whether to also check that opacity > 0. Defaults to false.
+   * @returns `boolean` - true if ALL elements are visible, false if ANY element is not visible, `undefined` for empty selection.
+   */
+  isVisible(options?: { includeOpacity?: boolean; }): boolean | undefined;
 
   /**
    * Adds properties to element on DOMContentLoaded

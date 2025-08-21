@@ -277,6 +277,56 @@ $recentPosts.addClass('recent');
 ### Example
 <PlaygroundExample id="query-slice" direction="horizontal"></PlaygroundExample>
 
+## add
+
+Creates a new Query collection combining the current elements with elements from the provided selector.
+
+### Syntax
+```javascript
+$('selector').add(selector)
+```
+
+### Parameters
+| Name     | Type                                                          | Description                                         |
+|----------|---------------------------------------------------------------|-----------------------------------------------------|
+| selector | string, Element, Element[], NodeList, HTMLCollection, Query  | The selector or elements to add to the collection  |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) containing the combined elements with duplicates removed.
+
+### Usage
+
+#### Combine Different Element Types
+```javascript
+// Combine headers and paragraphs into one collection
+const $content = $('h1, h2, h3').add('p');
+$content.addClass('styled-content');
+```
+
+#### Add Specific Elements
+```javascript
+// Add a specific element to an existing collection
+const $items = $('.list-item');
+const $withSpecial = $items.add(document.getElementById('special-item'));
+```
+
+#### Progressive Collection Building
+```javascript
+// Build collections step by step
+let $collection = $('.initial');
+$collection = $collection.add('.more-items');
+$collection = $collection.add('.final-items');
+```
+
+### Notes
+- Duplicates are automatically removed
+- Returns the original instance if no new elements are found
+- Preserves the original Query instance's options (root, pierceShadow)
+- Perfect for applying operations to elements from multiple selectors
+
+### Example
+<PlaygroundExample id="query-add" direction="horizontal"></PlaygroundExample>
+
 ## exists
 
 Checks if there are any elements in the current Query object.
