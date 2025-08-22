@@ -3,9 +3,7 @@ import { $ } from '@semantic-ui/query';
 import './query-automarkdown.js';
 
 // Initialize plugin
-$('ul').automarkdown({
-  watch: 'li'
-});
+$('ul').automarkdown();
 
 // Add markdown content
 $('.add').on('click', () => {
