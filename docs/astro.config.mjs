@@ -88,6 +88,7 @@ export default defineConfig({
     mdx({}),
     starlight({
       title: 'Semantic UI',
+      disable404Route: true,
     }),
   ],
   // adapter: vercel()
