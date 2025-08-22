@@ -39,9 +39,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added [`appendTo()`](https://next.semantic-ui.com/api/query/dom-manipulation#appendto) method for appending elements as last child of target.
 * **Feature** - Added [`prependTo()`](https://next.semantic-ui.com/api/query/dom-manipulation#prependto) method for prepending elements as first child of target.
 * **Feature** - Added [`isVisible()`](https://next.semantic-ui.com/api/query/logical-operators#isvisible) method for checking if ALL elements have layout dimensions using modern `getBoundingClientRect()` API, with optional opacity checking.
-* **Feature** - Added [`naturalDisplay()`](https://next.semantic-ui.com/api/query/css#naturaldisplay) for getting the natural display value of elements (ignoring display: none rules).
+* **Feature** - Added [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) for getting the natural display value of elements (ignoring display: none rules).
 * **Feature** - You can now use `documentFragment` with content manipulation like [`append()`](https://next.semantic-ui.com/api/query/dom-manipulation#append) and [`prepend()`](https://next.semantic-ui.com/api/query/dom-manipulation#prepend).
-* **Improvement** - [`clippingParent()`](https://next.semantic-ui.com/api/query/dom-traversal#clippingparent) now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`.
+* **Improvement** - [`clippingParent()`](https://next.semantic-ui.com/api/query/dimensions#clippingparent) now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`.
 * **Improvement** - [`trigger()`](https://next.semantic-ui.com/api/query/events#trigger) now triggers native event handlers. Use [`dispatchEvent`](https://next.semantic-ui.com/api/query/events#dispatchevent) to avoid this behavior.
 * **Improvement** - [`.submit()`](https://next.semantic-ui.com/api/query/events#submit) now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
 * **Bug** - [`dataContext()`](https://next.semantic-ui.com/api/query/components#datacontext) now returns the entire data context including state.
@@ -169,14 +169,14 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 
 ### Query
 * **Feature** - Added namespaced events to [`on`](https://next.semantic-ui.com/api/query/events#on) and [`off`](https://next.semantic-ui.com/api/query/events#off).
-* **Feature** - Added [`clippingParent`](https://next.semantic-ui.com/api/query/dom-traversal#clippingparent) to find closest ancestor that will clip the current element. See [example](https://next.semantic-ui.com/examples/query-clippingparent).
+* **Feature** - Added [`clippingParent`](https://next.semantic-ui.com/api/query/dimensions#clippingparent) to find closest ancestor that will clip the current element. See [example](https://next.semantic-ui.com/examples/query-clippingparent).
 * **Feature** - Added [`.data()`](https://next.semantic-ui.com/api/query/attributes#data) for getting and setting HTML data. See [example](https://next.semantic-ui.com/examples/query-data).
 * **Feature** - Added [`.slice()`](https://next.semantic-ui.com/api/query/iterators#slice) for returning a portion of the element collection. See [example](https://next.semantic-ui.com/examples/query-slice).
 * **Feature** - Added [`closestAll()`](https://next.semantic-ui.com/api/query/dom-traversal#closestall) for finding all ancestor elements matching a selector.
 * **Feature** - Added [`before()`](https://next.semantic-ui.com/api/query/dom-manipulation#before) and [`after()`](https://next.semantic-ui.com/api/query/dom-manipulation#after) aliases for more intuitive content insertion.
 * **Feature** - Added [`contains()`](https://next.semantic-ui.com/api/query/dom-traversal#contains) method for checking if elements contain a specific selector with [Shadow DOM](https://next.semantic-ui.com/query/shadow-dom) support. See [example](https://next.semantic-ui.com/examples/query-contains).
 * **Enhancement** - Enhanced [`closest()`](https://next.semantic-ui.com/api/query/dom-traversal#closest) with `returnAll` option to optionally return all matching ancestors.
-* **Improvement** - `offsetParent` has been renamed to [`containingParent`](https://next.semantic-ui.com/api/query/dom-traversal#containingparent) and now includes many other possible containing parent checks like `will-change` and `filter`.
+* **Improvement** - `offsetParent` has been renamed to [`containingParent`](https://next.semantic-ui.com/api/query/dimensions#containingparent) and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Bug** - [`setting()`](https://next.semantic-ui.com/api/query/components#setting) can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for `willChange`.
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
