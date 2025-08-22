@@ -34,19 +34,19 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **UI** - Added JS object exports for UI specs.
 
 ## Query
-* **Feature** - Added `onNext()` method for promise-based event waiting, enabling modern async/await patterns with automatic cleanup and optional timeout support.
-* **Feature** - Added `add()` method for combining multiple element collections with automatic deduplication.
-* **Feature** - Added `appendTo()` method for appending elements as last child of target.
-* **Feature** - Added `prependTo()` method for prepending elements as first child of target.
-* **Feature** - Added `isVisible()` method for checking if ALL elements have layout dimensions using modern `getBoundingClientRect()` API, with optional opacity checking.
-* **Feature** - Added `naturalDisplay()` for getting the natural display value of elements (ignoring display: none rules).
-* **Feature** - You can now use `documentFragment` with content manipulation like `append()` and `prepend()`.
-* **Improvement** - `clippingParent()` now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`.
-* **Improvement** - `trigger()` now triggers native event handlers. Use `dispatchEvent` to avoid this behavior.
-* **Improvement** - `.submit()` now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
-* **Bug** - `dataContext()` now returns the entire data context including state.
+* **Feature** - Added [`onNext()`](https://next.semantic-ui.com/api/query/events#onnext) method for promise-based event waiting, enabling modern async/await patterns with automatic cleanup and optional timeout support. See [example](https://next.semantic-ui.com/examples/query-onnext).
+* **Feature** - Added [`add()`](https://next.semantic-ui.com/api/query/utilities#add) method for combining multiple element collections with automatic deduplication. See [example](https://next.semantic-ui.com/examples/query-add).
+* **Feature** - Added [`appendTo()`](https://next.semantic-ui.com/api/query/dom-manipulation#appendto) method for appending elements as last child of target.
+* **Feature** - Added [`prependTo()`](https://next.semantic-ui.com/api/query/dom-manipulation#prependto) method for prepending elements as first child of target.
+* **Feature** - Added [`isVisible()`](https://next.semantic-ui.com/api/query/logical-operators#isvisible) method for checking if ALL elements have layout dimensions using modern `getBoundingClientRect()` API, with optional opacity checking.
+* **Feature** - Added [`naturalDisplay()`](https://next.semantic-ui.com/api/query/css#naturaldisplay) for getting the natural display value of elements (ignoring display: none rules).
+* **Feature** - You can now use `documentFragment` with content manipulation like [`append()`](https://next.semantic-ui.com/api/query/dom-manipulation#append) and [`prepend()`](https://next.semantic-ui.com/api/query/dom-manipulation#prepend).
+* **Improvement** - [`clippingParent()`](https://next.semantic-ui.com/api/query/dom-traversal#clippingparent) now correctly detects all CSS properties that create clipping contexts including `contain` (paint/layout/size/strict), `clip-path`, and `mask`/`mask-image` in addition to `overflow`.
+* **Improvement** - [`trigger()`](https://next.semantic-ui.com/api/query/events#trigger) now triggers native event handlers. Use [`dispatchEvent`](https://next.semantic-ui.com/api/query/events#dispatchevent) to avoid this behavior.
+* **Improvement** - [`.submit()`](https://next.semantic-ui.com/api/query/events#submit) now uses `requestSubmit` so that it can trigger native event handlers and be cancelable.
+* **Bug** - [`dataContext()`](https://next.semantic-ui.com/api/query/components#datacontext) now returns the entire data context including state.
 * **Bug** - Fixed `initialize` not properly chaining.
-* **Bug** - Fixed `addClass`, `toggleClass`, and `removeClass` to not error on `undefined`.
+* **Bug** - Fixed [`addClass`](https://next.semantic-ui.com/api/query/css#addclass), [`toggleClass`](https://next.semantic-ui.com/api/query/css#toggleclass), and [`removeClass`](https://next.semantic-ui.com/api/query/css#removeclass) to not error on `undefined`.
 
 ## Templates
 * **Bug** - Fixed issue where auto-self-closing custom elements in templates only worked with one `-` (i.e., `<foo-bar/>` but not `<foo-baz-bar/>`).
@@ -55,31 +55,31 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Perf** - Removed unnecessary `clone` in `guard`.
 
 ## Utils
-* **Feature** - Added `deepExtend()` for deep merging objects with nested property combining, array/date cloning, and optional custom class preservation.
-* **Feature** - Added `adoptStylesheet()` for adopting CSS stylesheets to documents or shadow roots with intelligent caching.
-* **Feature** - Added `extractCSS()` for extracting CSS rules matching selectors from various stylesheet sources with optional text output.
-* **Feature** - Added `scopeStyles()` for scoping CSS rules with configurable :host replacement and root element handling.
-* **Feature** - Added Set and Map support to `each()`, `asyncEach()`, and `asyncMap()` functions for iterating over ES6 collections.
-* **Feature** - Added `isSet()` and `isMap()` type checking helpers for ES6 collection validation.
-* **Feature** - Added `isDevelopment` constant for comprehensive development environment detection across Node.js, Vite, Vercel, Netlify, cloud dev environments (Codespaces, GitPod), Nuxt, and React Native.
-* **Feature** - Added `isCI` constant for detecting CI/CD environments including GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis, and many other platforms.
-* **Enhancement** - Enhanced `clone()` function with `preserveNonCloneable` option to preserve custom class instances instead of flattening them.
-* **Enhancement** - Modified `isEmpty` to handle Set, Map, and other iterables. Assumes all nullish keys mean empty.
+* **Feature** - Added [`deepExtend()`](https://next.semantic-ui.com/api/utils/objects#deepextend) for deep merging objects with nested property combining, array/date cloning, and optional custom class preservation.
+* **Feature** - Added [`adoptStylesheet()`](https://next.semantic-ui.com/api/utils/css#adoptstylesheet) for adopting CSS stylesheets to documents or shadow roots with intelligent caching.
+* **Feature** - Added [`extractCSS()`](https://next.semantic-ui.com/api/utils/css#extractcss) for extracting CSS rules matching selectors from various stylesheet sources with optional text output.
+* **Feature** - Added [`scopeStyles()`](https://next.semantic-ui.com/api/utils/css#scopestyles) for scoping CSS rules with configurable :host replacement and root element handling.
+* **Feature** - Added Set and Map support to [`each()`](https://next.semantic-ui.com/api/utils/looping#each), [`asyncEach()`](https://next.semantic-ui.com/api/utils/looping#asynceach), and [`asyncMap()`](https://next.semantic-ui.com/api/utils/looping#asyncmap) functions for iterating over ES6 collections.
+* **Feature** - Added [`isSet()`](https://next.semantic-ui.com/api/utils/types#isset) and [`isMap()`](https://next.semantic-ui.com/api/utils/types#ismap) type checking helpers for ES6 collection validation.
+* **Feature** - Added [`isDevelopment`](https://next.semantic-ui.com/api/utils/environment#isdevelopment) constant for comprehensive development environment detection across Node.js, Vite, Vercel, Netlify, cloud dev environments (Codespaces, GitPod), Nuxt, and React Native.
+* **Feature** - Added [`isCI`](https://next.semantic-ui.com/api/utils/environment#isci) constant for detecting CI/CD environments including GitHub Actions, GitLab CI, Jenkins, CircleCI, Travis, and many other platforms.
+* **Enhancement** - Enhanced [`clone()`](https://next.semantic-ui.com/api/utils/cloning#clone) function with `preserveNonCloneable` option to preserve custom class instances instead of flattening them.
+* **Enhancement** - Modified [`isEmpty`](https://next.semantic-ui.com/api/utils/types#isempty) to handle Set, Map, and other iterables. Assumes all nullish keys mean empty.
 * **Chore** - Restructured tests for utils package to be organized by category. Renamed iterators to loops.
 * **Breaking** - Renamed `ssr.js` module to `environment.js` to better reflect its expanded scope beyond just server-side rendering detection.
 
 # Version 0.15.0 - 07.24.2025
 
 ## Major Features
-* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`.
-* **Feature** - Added support for binding element properties from inside templates like `<input type="checkbox" .checked={checked}>`.
-* **Feature** - Added `registerHelper()` and `registerHelpers()` functions for registering custom template helpers.
+* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`. See [template expressions guide](https://next.semantic-ui.com/templates/expressions).
+* **Feature** - Added support for binding element properties from inside templates like `<input type="checkbox" .checked={checked}>`. See [template expressions guide](https://next.semantic-ui.com/templates/expressions).
+* **Feature** - Added [`registerHelper()`](https://next.semantic-ui.com/api/templating/template#registerhelper) and [`registerHelpers()`](https://next.semantic-ui.com/api/templating/template#registerhelpers) functions for registering custom template helpers.
 
 ## Templates
-* **Feature** - Added template helpers: `default`, `truncate`, `first`, `last`, `roundNumber`, `roundDecimal` with `round` alias, `lowercase`, `uppercase`.
+* **Feature** - Added template helpers: [`default`](https://next.semantic-ui.com/api/helpers/comparison#default), [`truncate`](https://next.semantic-ui.com/api/helpers/strings#truncate), [`first`](https://next.semantic-ui.com/api/helpers/arrays#first), [`last`](https://next.semantic-ui.com/api/helpers/arrays#last), [`roundNumber`](https://next.semantic-ui.com/api/helpers/numeric#roundnumber), [`roundDecimal`](https://next.semantic-ui.com/api/helpers/numeric#rounddecimal) with `round` alias, [`lowercase`](https://next.semantic-ui.com/api/helpers/strings#lowercase), [`uppercase`](https://next.semantic-ui.com/api/helpers/strings#uppercase).
 
 ## Utils
-* **Feature** - Added `truncate` utility function to utils package for word-boundary aware text truncation.
+* **Feature** - Added [`truncate`](https://next.semantic-ui.com/api/utils/strings#truncate) utility function to utils package for word-boundary aware text truncation. See [example](https://next.semantic-ui.com/examples/utils-truncate).
 
 ## Reactivity
 * **Bug** - Fixed bug in `Reaction.getSource()` when breakpointed in a template helper.
@@ -106,9 +106,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.14.0 - 07.22.2025
 
 ## Components
-* **Enhancement** - Component navigation helpers (`findChild`, `findChildren`, `findParent`, `findTemplate`) now have comprehensive support for both web components and subtemplates using dual pattern traversal.
-* **Enhancement** - `findChild` and `findChildren` now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal.
-* **Bug** - Fixed `findTemplate` to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object.
+* **Enhancement** - Component navigation helpers ([`findChild`](https://next.semantic-ui.com/api/component/utilities#findchild), [`findChildren`](https://next.semantic-ui.com/api/component/utilities#findchildren), [`findParent`](https://next.semantic-ui.com/api/component/utilities#findparent), [`findTemplate`](https://next.semantic-ui.com/api/component/utilities#findtemplate)) now have comprehensive support for both web components and subtemplates using dual pattern traversal.
+* **Enhancement** - [`findChild`](https://next.semantic-ui.com/api/component/utilities#findchild) and [`findChildren`](https://next.semantic-ui.com/api/component/utilities#findchildren) now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal.
+* **Bug** - Fixed [`findTemplate`](https://next.semantic-ui.com/api/component/utilities#findtemplate) to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object.
 
 ## Templates
 * **Bug** - Fixed error causing async blocks to stop working.
@@ -117,11 +117,11 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Improvement** - Disabled screenshot capture on test failures across all packages to prevent unwanted screenshot directories.
 
 ### Utils
-* **Breaking Change** - `debounce` function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)`.
-* **Feature** - Enhanced `debounce` function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`).
-* **Feature** - Added new `throttle` function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution.
-* **Feature** - Added `getIPAddress()` to retrieve local, public, or all IP addresses using WebRTC ICE gathering.
-* **Bug** - Fixed `fatal` to look for `onError` on `globalThis`.
+* **Breaking Change** - [`debounce`](https://next.semantic-ui.com/api/utils/functions#debounce) function signature changed from `debounce(fn, options)` to `debounce(func, wait, options)`.
+* **Feature** - Enhanced [`debounce`](https://next.semantic-ui.com/api/utils/functions#debounce) function with full async support, promise sharing, AbortController integration, and new options (`leading`, `trailing`, `maxWait`, `rejectSkipped`). See [example](https://next.semantic-ui.com/examples/utils-debounce).
+* **Feature** - Added new [`throttle`](https://next.semantic-ui.com/api/utils/functions#throttle) function with async support, promise sharing, AbortController integration, and configurable leading/trailing execution. See [example](https://next.semantic-ui.com/examples/utils-throttle).
+* **Feature** - Added [`getIPAddress()`](https://next.semantic-ui.com/api/utils/browser#getipaddress) to retrieve local, public, or all IP addresses using WebRTC ICE gathering. See [example](https://next.semantic-ui.com/examples/utils-getipaddress).
+* **Bug** - Fixed [`fatal`](https://next.semantic-ui.com/api/utils/errors#fatal) to look for `onError` on `globalThis`.
 
 ### Documentation
 * **Examples** - Added missing examples for browser utilities: `copyText`, `openLink`, `getKeyFromEvent`, `idleCallback`, `getText`, and `getJSON`.
@@ -156,11 +156,11 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Colors** - Added new invariant colors that do not change for dark mode (i.e., `red-0-invariant` stays dark red).
 
 ### Reactivity
-* **Feature** - Added `signal.derive()` method for creating derived signals that transform a single signal's value. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
-* **Feature** - Added `Signal.computed()` static method for creating computed signals that combine multiple signals. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals).
-* **Feature** - Signals can now use `addContext` to add metadata when setting a value. This is very useful for determining what caused a reaction. See [the new example](https://next.semantic-ui.com/examples/context).
-* **Feature** - Added new `mutate` helper for mutating a value by a function.
-* **Feature** - Added `getItem(id)` and `getItemIndex(id)` as separate mutation helpers.
+* **Feature** - Added [`signal.derive()`](https://next.semantic-ui.com/api/reactivity/signal#derive) method for creating derived signals that transform a single signal's value. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals) and [example](https://next.semantic-ui.com/examples/reactive-derived).
+* **Feature** - Added [`Signal.computed()`](https://next.semantic-ui.com/api/reactivity/signal#computed) static method for creating computed signals that combine multiple signals. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals) and [example](https://next.semantic-ui.com/examples/reactive-computed).
+* **Feature** - Signals can now use [`addContext`](https://next.semantic-ui.com/api/reactivity/signal#addcontext) to add metadata when setting a value. This is very useful for determining what caused a reaction. See [example](https://next.semantic-ui.com/examples/context).
+* **Feature** - Added new [`mutate`](https://next.semantic-ui.com/api/reactivity/helpers#mutate) helper for mutating a value by a function. See [example](https://next.semantic-ui.com/examples/reactive-mutate).
+* **Feature** - Added [`getItem(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitem) and [`getItemIndex(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitemindex) as separate mutation helpers.
 * **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
 
 ### Component
@@ -168,16 +168,16 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means components are no longer `composed: true`.
 
 ### Query
-* **Feature** - Added namespaced events to `on` and `off`.
-* **Feature** - Added `clippingParent` to find closest ancestor that will clip the current element.
-* **Feature** - Added `.data()` for getting and setting HTML data.
-* **Feature** - Added `.slice()` for returning a portion of the element collection.
-* **Feature** - Added `closestAll()` for finding all ancestor elements matching a selector.
-* **Feature** - Added `before()` and `after()` aliases for more intuitive content insertion.
-* **Feature** - Added `contains()` method for checking if elements contain a specific selector with Shadow DOM support.
-* **Enhancement** - Enhanced `closest()` with `returnAll` option to optionally return all matching ancestors.
-* **Improvement** - `offsetParent` has been renamed to `containingParent` and now includes many other possible containing parent checks like `will-change` and `filter`.
-* **Bug** - `setting()` can now be used as a getter.
+* **Feature** - Added namespaced events to [`on`](https://next.semantic-ui.com/api/query/events#on) and [`off`](https://next.semantic-ui.com/api/query/events#off).
+* **Feature** - Added [`clippingParent`](https://next.semantic-ui.com/api/query/dom-traversal#clippingparent) to find closest ancestor that will clip the current element. See [example](https://next.semantic-ui.com/examples/query-clippingparent).
+* **Feature** - Added [`.data()`](https://next.semantic-ui.com/api/query/attributes#data) for getting and setting HTML data. See [example](https://next.semantic-ui.com/examples/query-data).
+* **Feature** - Added [`.slice()`](https://next.semantic-ui.com/api/query/iterators#slice) for returning a portion of the element collection. See [example](https://next.semantic-ui.com/examples/query-slice).
+* **Feature** - Added [`closestAll()`](https://next.semantic-ui.com/api/query/dom-traversal#closestall) for finding all ancestor elements matching a selector.
+* **Feature** - Added [`before()`](https://next.semantic-ui.com/api/query/dom-manipulation#before) and [`after()`](https://next.semantic-ui.com/api/query/dom-manipulation#after) aliases for more intuitive content insertion.
+* **Feature** - Added [`contains()`](https://next.semantic-ui.com/api/query/dom-traversal#contains) method for checking if elements contain a specific selector with Shadow DOM support. See [example](https://next.semantic-ui.com/examples/query-contains).
+* **Enhancement** - Enhanced [`closest()`](https://next.semantic-ui.com/api/query/dom-traversal#closest) with `returnAll` option to optionally return all matching ancestors.
+* **Improvement** - `offsetParent` has been renamed to [`containingParent`](https://next.semantic-ui.com/api/query/dom-traversal#containingparent) and now includes many other possible containing parent checks like `will-change` and `filter`.
+* **Bug** - [`setting()`](https://next.semantic-ui.com/api/query/components#setting) can now be used as a getter.
 * **Bug** - Fixed `offsetParent` to correctly return offset parent for `willChange`.
 * **Bug** - Fixed bug where `useAlias()` was not working as intended to alias Query.
 
@@ -189,16 +189,16 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Improvement** - Vitest now runs without watch for `npm test`; Vitest configs have been added for each package.
 
 ### Utils
-* **Breaking** - `prettifyID` has been renamed to `prettifyHash` to better reflect its purpose of converting numeric hash values to alphanumeric strings.
-* **Feature** - `prettifyHash` now supports `minLength` and `padChar` options for customizing output format.
-* **Feature** - Added `getRandomSeed()` function that uses `crypto.getRandomValues` when available for cryptographically secure random seeds.
-* **Feature** - `generateID` now accepts an optional seed parameter for reproducible ID generation.
-* **Feature** - `hashCode` now uses the renamed `prettifyHash` internally when `prettify: true` option is set.
-* **Feature** - `sortBy` now supports multi-key sorting by accepting an array of keys.
-* **Enhancement** - `sortBy` now uses `localeCompare` with `numeric: true` for proper string sorting (e.g., "item10" comes after "item2").
-* **Enhancement** - `sortBy` comparator function now receives key index as fifth parameter for multi-key sorting.
-* **Enhancement** - `generateID` now uses `crypto.getRandomValues` via `getRandomSeed()` for better randomness.
-* **Bug** - `isBinary` now detects all types of typed arrays including Int8Array, Float32Array, BigInt64Array, etc.
+* **Breaking** - `prettifyID` has been renamed to [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) to better reflect its purpose of converting numeric hash values to alphanumeric strings.
+* **Feature** - [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) now supports `minLength` and `padChar` options for customizing output format. See [example](https://next.semantic-ui.com/examples/utils-prettifyhash).
+* **Feature** - Added [`getRandomSeed()`](https://next.semantic-ui.com/api/utils/crypto#getrandomseed) function that uses `crypto.getRandomValues` when available for cryptographically secure random seeds. See [example](https://next.semantic-ui.com/examples/utils-getrandomseed).
+* **Feature** - [`generateID`](https://next.semantic-ui.com/api/utils/crypto#generateid) now accepts an optional seed parameter for reproducible ID generation. See [example](https://next.semantic-ui.com/examples/utils-generateid).
+* **Feature** - [`hashCode`](https://next.semantic-ui.com/api/utils/crypto#hashcode) now uses the renamed [`prettifyHash`](https://next.semantic-ui.com/api/utils/crypto#prettifyhash) internally when `prettify: true` option is set. See [example](https://next.semantic-ui.com/examples/utils-hashcode).
+* **Feature** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) now supports multi-key sorting by accepting an array of keys. See [example](https://next.semantic-ui.com/examples/utils-sortby).
+* **Enhancement** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) now uses `localeCompare` with `numeric: true` for proper string sorting (e.g., "item10" comes after "item2").
+* **Enhancement** - [`sortBy`](https://next.semantic-ui.com/api/utils/arrays#sortby) comparator function now receives key index as fifth parameter for multi-key sorting.
+* **Enhancement** - [`generateID`](https://next.semantic-ui.com/api/utils/crypto#generateid) now uses `crypto.getRandomValues` via [`getRandomSeed()`](https://next.semantic-ui.com/api/utils/crypto#getrandomseed) for better randomness.
+* **Bug** - [`isBinary`](https://next.semantic-ui.com/api/utils/types#isbinary) now detects all types of typed arrays including Int8Array, Float32Array, BigInt64Array, etc.
 
 # Version 0.12.4-1
 * **Tailwind** - `@semantic-ui/tailwind` and `tailwindcss-iso` now have bundled CDN version to avoid issues importing CSS files in browser via ESM. Modified `tailwind` package to accommodate this change.
