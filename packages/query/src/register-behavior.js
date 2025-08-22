@@ -70,7 +70,7 @@ export const registerBehavior = (behavior) => {
   let sharedBehavior;
 
   // Create abstraction around behavior initialization
-  Query.prototype[name] = function(settings) {
+  Query.prototype[name] = function(settings = {}) {
     // ignore undefined settings
     settings = filterObject(settings, (value) => value !== undefined);
 
@@ -88,7 +88,6 @@ export const registerBehavior = (behavior) => {
       ...settingsDefaults,
       ...behavior,
     };
-
 
     // determine run time settings for behavior
     const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
