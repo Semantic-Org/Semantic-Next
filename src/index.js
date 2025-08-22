@@ -1,3 +1,3 @@
-export * from './behaviors';
-export * from './components';
-export * from './primitives';
+export * from './behaviors/index.js';
+export * from './components/index.js';
+export * from './primitives/index.js';

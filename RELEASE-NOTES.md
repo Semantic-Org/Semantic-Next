@@ -6,12 +6,12 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.16.1 - 08.21.2025
+# Version 0.16.1-2 - 08.21.2025
 
 ## Core
 
 Bug
-**Build** - Reverted `@semantic-ui/core` to use dist version for esm. this is because Rollup will not parse `?raw` css links (rollup is used on jsdelivr to power the playground)
+**Build** - Reverted `@semantic-ui/core` to use dist version for esm. this is because Rollup will not parse `?raw` css links (rollup is used on jsdelivr to power the playground).
 
 # Version 0.16.0 - 08.20.2025
 
