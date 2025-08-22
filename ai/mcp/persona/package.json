@@ -1,6 +1,6 @@
 {
   "name": "semantic-ui-persona-mcp",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "type": "module",
   "description": "MCP server for Semantic UI specialized agents",
   "main": "server.js",

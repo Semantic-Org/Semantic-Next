@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/utils",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "title": "Semantic UI Utils",
   "description": "Utility functions for arrays, objects, strings, type checking and more",
   "author": "Jack Lukic",
@@ -24,7 +24,7 @@
     "test:watch": "vitest --watch"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.16.1",
+    "@semantic-ui/internal-scripts": "^0.16.2",
     "vitest": "^3.2.4"
   },
   "files": [
