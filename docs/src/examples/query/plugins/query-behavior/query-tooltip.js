@@ -14,37 +14,35 @@ const templates = {
   <div class="ui tooltip">
     <div class="title"></div>
     <div class="content"></div>
-  </div>`
+  </div>`,
 };
 
 // Create shared tooltip across all three boxes
 const setup = ({ $, templates }) => {
   return {
-    $tooltip: $(templates.tooltip).appendTo('body')
+    $tooltip: $(templates.tooltip).appendTo('body'),
   };
 };
 
 const createBehavior = ({ $, el, settings, self }) => ({
-
   updateTooltip() {
     self.$tooltip
       .find('.title').html(settings.title).end()
-      .find('.content').html(settings.content)
-    ;
+      .find('.content').html(settings.content);
   },
 
   getTooltipPosition() {
     const rect = el.getBoundingClientRect();
     const tooltipHeight = self.$tooltip.get(0).offsetHeight;
     return {
-      top: rect.top - tooltipHeight - 8,
-      left: rect.left,
+      top: `${rect.top - tooltipHeight - 8}px`,
+      left: `${rect.left}px`,
     };
   },
 
   updateTooltipPosition(position) {
     self.$tooltip.css({
-      ...position
+      ...position,
     });
   },
 
@@ -83,7 +81,6 @@ const createBehavior = ({ $, el, settings, self }) => ({
     }
   },
 });
-
 
 const events = {
   'global click body': ({ self }) => {

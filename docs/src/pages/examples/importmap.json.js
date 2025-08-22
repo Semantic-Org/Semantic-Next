@@ -43,7 +43,7 @@ for (const pkg of importPackages) {
   try {
     // use jsdelivr
     if (isStaticBuild) {
-      let url = `${packageBase}/${pkg}/`;
+      let url = `${packageBase}/${pkg}@latest/`;
       if (packageBase.includes('jsdelivr')) {
         url += '+esm';
       }
