@@ -17,7 +17,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## UI Changes
 
-`semantic-ui/core` is now organized into three groups: `primitives`, `components`, and `behaviors`
+`semantic-ui/core` is now organized into three groups: [`primitives`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/primitives), [`components`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/components), and [`behaviors`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/behaviors)
   
 * **Primitives** include JSON specs and are essential building blocks like `modal` and `button`.
 * **Components** are built with primitives and have more complex functionality, for example, `global-search` or `theme-switcher`.
@@ -25,9 +25,9 @@ Please note after `1.0` Semver will be followed using normal protocols.
   
 ## Major Features
 * **UI** - Added many new components: `global-search`, `inpage-menu`, `mobile-menu-toggle`, `mobile-menu`, `panels`, `theme-switcher`.
-* **Behaviors** - Added new `transition` behavior that uses the Web Animations API to animate elements.
-* **Query** - Added generalized plugin architecture for Query along with examples in docs.
-* **Templates** - Added rerender and guard blocks for controlling template reactivity: `{#rerender expression}` forces complete re-evaluation, `{#guard expression}` only updates when computed values change.
+* **Behaviors** - Added new `transition` behavior that uses the Web Animations API to animate elements. See [example](https://next.semantic-ui.com/examples/query-transition-behavior).
+* **Query** - Added generalized plugin architecture for Query along with examples in docs. See [Query plugins guide](https://next.semantic-ui.com/query/plugins).
+* **Templates** - Added [rerender and guard blocks](https://next.semantic-ui.com/templates/reactivity#rerender-blocks) for controlling template reactivity: [`{#rerender expression}`](https://next.semantic-ui.com/templates/reactivity#rerender-blocks) forces complete re-evaluation, [`{#guard expression}`](https://next.semantic-ui.com/templates/reactivity#guard-blocks) only updates when computed values change.
 
 ## Specs
 * **UI** - Refactored exports to use JSON imports. Added new internal build step of JSON → JS exports. ESM will now directly use `src` without translation!
@@ -107,7 +107,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## Components
 * **Enhancement** - Component navigation helpers ([`findChild`](https://next.semantic-ui.com/api/component/utilities#findchild), [`findChildren`](https://next.semantic-ui.com/api/component/utilities#findchildren), [`findParent`](https://next.semantic-ui.com/api/component/utilities#findparent), [`findTemplate`](https://next.semantic-ui.com/api/component/utilities#findtemplate)) now have comprehensive support for both web components and subtemplates using dual pattern traversal.
-* **Enhancement** - [`findChild`](https://next.semantic-ui.com/api/component/utilities#findchild) and [`findChildren`](https://next.semantic-ui.com/api/component/utilities#findchildren) now properly find nested web components across shadow DOM boundaries using deep shadow DOM traversal.
+* **Enhancement** - [`findChild`](https://next.semantic-ui.com/api/component/utilities#findchild) and [`findChildren`](https://next.semantic-ui.com/api/component/utilities#findchildren) now properly find nested web components across [shadow DOM](https://next.semantic-ui.com/query/shadow-dom) boundaries using deep shadow DOM traversal.
 * **Bug** - Fixed [`findTemplate`](https://next.semantic-ui.com/api/component/utilities#findtemplate) to return consistent merged component data format (containing both instance and data properties) matching other navigation helpers instead of raw Template object.
 
 ## Templates
@@ -160,12 +160,12 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Feature** - Added [`Signal.computed()`](https://next.semantic-ui.com/api/reactivity/signal#computed) static method for creating computed signals that combine multiple signals. See [Dependent Signals guide](https://next.semantic-ui.com/reactivity/dependent-signals) and [example](https://next.semantic-ui.com/examples/reactive-computed).
 * **Feature** - Signals can now use [`addContext`](https://next.semantic-ui.com/api/reactivity/signal#addcontext) to add metadata when setting a value. This is very useful for determining what caused a reaction. See [example](https://next.semantic-ui.com/examples/context).
 * **Feature** - Added new [`mutate`](https://next.semantic-ui.com/api/reactivity/helpers#mutate) helper for mutating a value by a function. See [example](https://next.semantic-ui.com/examples/reactive-mutate).
-* **Feature** - Added [`getItem(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitem) and [`getItemIndex(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitemindex) as separate mutation helpers.
-* **Bug** - Fixed issue where mutation helpers were incompatible with `allowClone: false`. They can now be used together.
+* **Feature** - Added [`getItem(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitem) and [`getItemIndex(id)`](https://next.semantic-ui.com/api/reactivity/collection-helpers#getitemindex) as separate [mutation helpers](https://next.semantic-ui.com/reactivity/mutation-helpers).
+* **Bug** - Fixed issue where [mutation helpers](https://next.semantic-ui.com/reactivity/mutation-helpers) were incompatible with `allowClone: false`. They can now be used together.
 
 ### Component
 * **Bug** - Fixed issue where `delegatesFocus` was not working as expected.
-* **Bug** - Component lifecycle events like `rendered` now do not `bubble`. This means components are no longer `composed: true`.
+* **Bug** - [Component lifecycle](https://next.semantic-ui.com/components/lifecycle) events like `rendered` now do not `bubble`. This means components are no longer `composed: true`.
 
 ### Query
 * **Feature** - Added namespaced events to [`on`](https://next.semantic-ui.com/api/query/events#on) and [`off`](https://next.semantic-ui.com/api/query/events#off).
@@ -174,7 +174,7 @@ We've now linked the ESM build to a build that inlines raw text imports to preve
 * **Feature** - Added [`.slice()`](https://next.semantic-ui.com/api/query/iterators#slice) for returning a portion of the element collection. See [example](https://next.semantic-ui.com/examples/query-slice).
 * **Feature** - Added [`closestAll()`](https://next.semantic-ui.com/api/query/dom-traversal#closestall) for finding all ancestor elements matching a selector.
 * **Feature** - Added [`before()`](https://next.semantic-ui.com/api/query/dom-manipulation#before) and [`after()`](https://next.semantic-ui.com/api/query/dom-manipulation#after) aliases for more intuitive content insertion.
-* **Feature** - Added [`contains()`](https://next.semantic-ui.com/api/query/dom-traversal#contains) method for checking if elements contain a specific selector with Shadow DOM support. See [example](https://next.semantic-ui.com/examples/query-contains).
+* **Feature** - Added [`contains()`](https://next.semantic-ui.com/api/query/dom-traversal#contains) method for checking if elements contain a specific selector with [Shadow DOM](https://next.semantic-ui.com/query/shadow-dom) support. See [example](https://next.semantic-ui.com/examples/query-contains).
 * **Enhancement** - Enhanced [`closest()`](https://next.semantic-ui.com/api/query/dom-traversal#closest) with `returnAll` option to optionally return all matching ancestors.
 * **Improvement** - `offsetParent` has been renamed to [`containingParent`](https://next.semantic-ui.com/api/query/dom-traversal#containingparent) and now includes many other possible containing parent checks like `will-change` and `filter`.
 * **Bug** - [`setting()`](https://next.semantic-ui.com/api/query/components#setting) can now be used as a getter.
