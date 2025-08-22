@@ -71,7 +71,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.15.0 - 07.24.2025
 
 ## Major Features
-* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`. See [template expressions guide](https://next.semantic-ui.com/templates/expressions).
+* **Feature** - Added support for binding events from inside templates using `@` handlers like `<div @click={doSomething}></div>`. See [component event guide](https://next.semantic-ui.com/components/events#inside-templates).
 * **Feature** - Added support for binding element properties from inside templates like `<input type="checkbox" .checked={checked}>`. See [template expressions guide](https://next.semantic-ui.com/templates/expressions).
 * **Feature** - Added [`registerHelper()`](https://next.semantic-ui.com/api/templating/template#registerhelper) and [`registerHelpers()`](https://next.semantic-ui.com/api/templating/template#registerhelpers) functions for registering custom template helpers.
 
@@ -299,7 +299,7 @@ Some paths have shifted
 * Template Helpers - Added `isNot` helper
 
 ## Bug
-* Fix `value` / `val` in Query would not set value of custom elements because of too strict html element type checking.
+* Fix [`value`](https://next.semantic-ui.com/api/query/content#value) / [`val`](https://next.semantic-ui.com/api/query/content#value) in Query would not set value of custom elements because of too strict html element type checking.
 
 # Version 0.10.9
 

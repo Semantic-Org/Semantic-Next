@@ -10,7 +10,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 import lifecycleImage from '@images/lifecycle-diagram.png';
 
 
-## Binding Event Handlers
+## Inside Component
 
 Semantic components can include events by passing in an object mapping events to event handlers when creating your component. Events take the form of `eventName selector`, for instance `click .submit`.
 
@@ -76,6 +76,18 @@ const events = {
 };
 ```
 
+## Inside Templates
+
+### @Event Handler
+
+You can bind events directly from inside templates using `@event` syntax. You can specify the handler using an [expression](/templates/expressions) that points to any function, like a setting, or template method.
+
+```sui
+<div @click={doSomething}></div>
+```
+
+<PlaygroundExample id="template-event-handlers" direction="horizontal"></PlaygroundExample>
+
 
 ## Special Event Bindings
 
@@ -95,17 +107,12 @@ const events = {
 };
 ```
 
-## Binding From Templates
-
-You can also bind events directly from inside templates if you prefer this syntax.
-
-<PlaygroundExample id="template-event-handlers" direction="horizontal"></PlaygroundExample>
 
 
 
 ### Deep Events
 
-You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's shadow DOM or slotted content which a person using your component might include.
+You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's [shadow DOM](/query/shadow-dom) or [slotted content](/templates/slots) which a person using your component might include.
 
 > **Deep Usage** By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
 
