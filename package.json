@@ -1,12 +1,12 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "./dist/semantic-ui.js",
+  "module": "./dist/semantic-ui.js",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -16,10 +16,10 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "./src/index.js",
+      "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "./src/index.js"
+      "default": "./dist/semantic-ui.js"
     },
     "./css": {
       "import": "./src/css/all.css",
