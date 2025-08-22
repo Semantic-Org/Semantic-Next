@@ -20,7 +20,7 @@ const defaultSettings = {
   },
 };
 
-const createComponent = ({ el, self, state, isServer, signal, findParent, settings, dispatchEvent, $ }) => ({
+const createComponent = ({ el, self, state, isServer, signal, findParent, settings, dispatchEvent, $, $$ }) => ({
   resizing: signal(false),
   initialized: signal(false),
 
