@@ -2,13 +2,17 @@
   --box-size: 100px;
 }
 
+body {
+  height: 2000px; /* simulate scrolling */
+}
+
 .box {
   background: var(--primary-0) var(--angled-gradient);
   border: var(--border);
   box-shadow: var(--shadow);
   width: var(--box-size);
   height: var(--box-size);
-  margin: var(--vertically-spaced);
+  margin: 100px 0px;
 }
 
 .popup {
