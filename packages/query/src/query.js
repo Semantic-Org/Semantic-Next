@@ -829,7 +829,7 @@ export class Query {
     if (!classNames) {
       return this;
     }
-    const classesToAdd = classNames.split(' ');
+    const classesToAdd = classNames.trim().split(' ');
     return this.each((el) => el.classList.add(...classesToAdd));
   }
 
@@ -837,7 +837,7 @@ export class Query {
     if (!classNames) {
       return this;
     }
-    const classesToRemove = classNames.split(' ');
+    const classesToRemove = classNames.trim().split(' ');
     return this.each((el) => el.classList.remove(...classesToRemove));
   }
 
@@ -845,7 +845,7 @@ export class Query {
     if (!classNames) {
       return this;
     }
-    const classesToToggle = classNames.split(' ');
+    const classesToToggle = classNames.trim().split(' ');
     return this.each((el) => el.classList.toggle(...classesToToggle));
   }
 
