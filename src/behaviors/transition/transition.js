@@ -95,7 +95,8 @@ const createBehavior = (
     }
 
     // determine canonical animations from css, this is cached between runs
-    const cssAnimations = self.findCSSAnimation(animationSettings.animation);
+    const baseAnimation = self.getBaseAnimation(animationSettings.animation);
+    const cssAnimations = self.findCSSAnimation(baseAnimation);
 
     // determine which direction this animation is occuring if the animation is directional
     let direction;
@@ -108,6 +109,10 @@ const createBehavior = (
     else {
       await self.performAnimation(cssAnimations, direction, animationSettings);
     }
+  },
+
+  getBaseAnimation(animationName) {
+    return animationName.replace(/in|out/, '').trim();
   },
 
   async performGroupAnimation(cssAnimations, direction, animationSettings) {
@@ -165,6 +170,8 @@ const createBehavior = (
     $clone
       .addClass(animationName)
       .addClass(classNames.transition)
+      .addClass(classNames.visible)
+      .removeAttr('style')
       .insertAfter(el);
 
     // Check base state animations
