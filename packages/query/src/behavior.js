@@ -146,8 +146,8 @@ export class Behavior {
   }
 
   adoptStylesheet(css) {
-    // cache stylesheet uses same constructed stylesheet across instances
-    adoptStylesheet(css, this.element, { cacheStylesheet: true });
+    // uses same constructed stylesheet across instances but needs to be in this elements root
+    adoptStylesheet(css, this.element);
   }
 
   addDataOverrides(element = this.element) {
@@ -653,6 +653,7 @@ export class Behavior {
         el: self.element,
         $el: self.$(self.element),
         self: selfProxy,
+        abortSignal: this.controller,
         behavior: selfProxy,
         namespace: self.namespace,
         dispatchEvent: self.dispatchEvent.bind(this),
