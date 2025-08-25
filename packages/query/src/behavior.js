@@ -82,7 +82,7 @@ export class Behavior {
     this.element = $element.el();
 
     // handle run-time settings
-    this.settings = clone(settings);
+    this.settings = settings;
     this.namespace = namespace;
     this.customInvocation = customInvocation;
 
