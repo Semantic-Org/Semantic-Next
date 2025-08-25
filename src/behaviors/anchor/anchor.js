@@ -5,42 +5,25 @@ import css from './anchor.css?raw';
 
 const defaultSettings = {
   to: '',
-  position: 'bottom',
+  position: '',
   offset: 0,
-  distanceAway: '1em',
-  allowOverlap: true,
-  alwaysShow: true,
+  distance: '1em',
+  allowOverlap: true, // allow element to be placed inside bounds of anchored element as last resort
+  alwaysShow: false, // always show element regardless of whether it fits
   anchorName: 'anchor-{count}',
   prefer: 'auto',
   detectPosition: true,
+  moveElement: true,
 };
 
 const classNames = {
   anchored: 'anchored',
 };
 
-const events = {
-  'global resize window': function({ self }) {
-    self.checkPositionChange();
-  },
-  'global scroll window': function({ self }) {
-    self.checkPositionChange();
-  },
-};
-
-const mutations = {
-  'attributes': function({ self, attributeName }) {
-    if (attributeName === 'style' && self.settings.detectPosition) {
-      self.checkPositionChange();
-    }
-  },
-};
-
 const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debug }) => ({
   anchorName: null,
   lastPosition: null,
   resizeObserver: null,
-  positionCheckTimeout: null,
 
   positionMap: {
     top: 'block-start',
@@ -55,6 +38,53 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     if (settings.detectPosition) {
       self.setupPositionMonitoring();
     }
+    if (settings.moveElement) {
+      self.maybeMoveElement();
+    }
+  },
+
+  refresh() {
+    self.updatePositionAttribute();
+  },
+
+  maybeMoveElement() {
+    const $anchor = self.getAnchor();
+    const anchorParent = $anchor.containingParent().el();
+    const elParent = $el.containingParent().el();
+
+    // if we are already in a good position do nothing
+    if (anchorParent === elParent || $anchor.closest(elParent).exists()) {
+      return;
+    }
+
+    // Move element and warn
+    const targetParent = anchorParent || document.body;
+    warn(`Moving anchored element to compatible positioning context`, {
+      from: elParent,
+      to: targetParent,
+    });
+    self.moveElement(targetParent);
+  },
+
+  getBestPosition() {
+    const anchorEl = self.getAnchor().el();
+    const anchorRect = anchorEl.getBoundingClientRect();
+    const $clip = self.getAnchor().clippingParent();
+    const clipRect = $clip.el().getBoundingClientRect();
+
+    const space = {
+      top: anchorRect.top - clipRect.top,
+      bottom: clipRect.bottom - anchorRect.bottom,
+      left: anchorRect.left - clipRect.left,
+      right: clipRect.right - anchorRect.right,
+    };
+
+    const max = Math.max(...Object.values(space));
+    return Object.keys(space).find(key => space[key] === max);
+  },
+
+  moveElement(containingEl) {
+    $el.detach().appendTo(containingEl);
   },
 
   setAnchor() {
@@ -95,11 +125,17 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     return `--${anchorName}`;
   },
 
-  getDistanceAway() {
-    if (isNumber(settings.distanceAway)) {
-      return `${settings.distanceAway}px`;
+  getDistance() {
+    if (isNumber(settings.distance)) {
+      return `${settings.distance}px`;
     }
-    return settings.distanceAway;
+    return settings.distance;
+  },
+  getOffset() {
+    if (isNumber(settings.offset)) {
+      return `${settings.offset}px`;
+    }
+    return settings.offset || '0px';
   },
 
   detectAppliedPosition() {
@@ -191,31 +227,25 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   },
 
   setupPositionMonitoring() {
-    if (window.ResizeObserver) {
-      self.resizeObserver = new ResizeObserver(() => {
-        self.checkPositionChange();
-      });
-
-      const el = $el.el();
-      const anchorEl = self.getAnchor().el();
-
-      self.resizeObserver.observe(el);
-      if (anchorEl) {
-        self.resizeObserver.observe(anchorEl);
-      }
+    if (!window.ResizeObserver) {
+      return;
     }
-
+    self.resizeObserver = new ResizeObserver(self.checkPositionChange);
+    const el = $el.el();
+    const anchorEl = self.getAnchor().el();
+    self.resizeObserver.observe(el);
+    if (anchorEl) {
+      self.resizeObserver.observe(anchorEl);
+    }
     // Initial check after render
-    requestAnimationFrame(() => {
-      self.updatePositionAttribute();
-    });
+    requestAnimationFrame(self.updatePositionAttribute);
   },
 
   getPositionTry() {
     if (settings.prefer === 'auto') {
       const sizePreference = inArray(settings.position, ['left', 'right'])
-        ? 'most-width'
-        : 'most-height';
+        ? 'most-height'
+        : 'most-width';
       const flips = 'flip-block, flip-inline, flip-block flip-inline';
       const overlap = settings.allowOverlap ? ', center' : '';
       return `${sizePreference} ${flips}${overlap}`;
@@ -231,33 +261,52 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
       'position-visibility': self.getPositionVisibility(),
     };
 
-    const distanceAway = self.getDistanceAway();
+    const distance = self.getDistance();
+    const offset = self.getOffset();
+
+    // Apply distance away on primary axis
     if (settings.position.includes('top') || settings.position.includes('bottom')) {
-      cssProps['margin-block'] = distanceAway;
+      if (distance !== '0px') {
+        cssProps['margin-block'] = distance;
+      }
+      // Apply offset on minor axis using margin
+      if (offset !== '0px') {
+        cssProps['margin-inline-start'] = offset;
+      }
     }
-    else {
-      cssProps['margin-inline'] = distanceAway;
+    else if (settings.position.includes('left') || settings.position.includes('right')) {
+      if (distance !== '0px') {
+        cssProps['margin-inline'] = distance;
+      }
+      // Apply offset on minor axis using margin
+      if (offset !== '0px') {
+        cssProps['margin-block-start'] = offset;
+      }
     }
 
     if (settings.prefer) {
       cssProps['position-try'] = self.getPositionTry();
     }
 
-    $el.css(cssProps);
-    $el.addClass(classNames.anchored);
+    $el
+      .css(cssProps)
+      .addClass(classNames.anchored);
   },
 
   detach() {
-    $el.css({
-      'position-anchor': null,
-      'position-area': null,
-      'position-try': null,
-      'position-visibility': null,
-      'margin-block': null,
-      'margin-inline': null,
-    });
-    $el.removeClass(classNames.anchored);
-    $el.removeAttr('data-position');
+    $el
+      .css({
+        'position-anchor': null,
+        'position-area': null,
+        'position-try': null,
+        'position-visibility': null,
+        'margin-block': null,
+        'margin-inline': null,
+        'margin-block-start': null,
+        'margin-inline-start': null,
+      })
+      .removeClass(classNames.anchored)
+      .removeAttr('data-position');
   },
   checkPositionChange() {
     if (self.frameRequest) {
@@ -274,10 +323,24 @@ const onDestroyed = ({ self }) => {
   if (self.resizeObserver) {
     self.resizeObserver.disconnect();
   }
-  if (self.positionCheckTimeout) {
-    clearTimeout(self.positionCheckTimeout);
-  }
   self.detach();
+};
+
+const events = {
+  'global resize window': function({ self }) {
+    self.checkPositionChange();
+  },
+  'global scroll window': function({ self }) {
+    self.checkPositionChange();
+  },
+};
+
+const mutations = {
+  'attributes': function({ self, attributeName }) {
+    if (attributeName === 'style' && self.settings.detectPosition) {
+      self.checkPositionChange();
+    }
+  },
 };
 
 export const Anchor = registerBehavior({

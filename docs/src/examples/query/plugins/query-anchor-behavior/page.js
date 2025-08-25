@@ -1,15 +1,16 @@
-import { Anchor } from '@semantic-ui/core';
+import { Anchor, Transition } from '@semantic-ui/core';
 import { $ } from '@semantic-ui/query';
 
 $('.popup').anchor({
-  to: $('.box').el(),
-  position: 'bottom',
+  to: '.box',
+  offset: 0,
+  position: 'top right',
 });
 
 $('.box')
   .on('mouseenter', function() {
-    $('.popup').css('display', 'block');
+    $('.popup').transition('scale top in');
   })
   .on('mouseleave', function() {
-    $('.popup').css('display', '');
+    $('.popup').transition('scale top out');
   });
