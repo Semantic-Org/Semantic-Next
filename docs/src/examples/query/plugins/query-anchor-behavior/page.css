@@ -1,0 +1,23 @@
+:root {
+  --box-size: 100px;
+}
+
+.box {
+  background: var(--primary-0) var(--angled-gradient);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  width: var(--box-size);
+  height: var(--box-size);
+  margin: var(--vertically-spaced);
+}
+
+.popup {
+  display: none;
+  max-width: max-content;
+  background: var(--angled-gradient);
+  padding: var(--padding);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  border: var(--border);
+  box-shadow: var(--floating-shadow);
+}
