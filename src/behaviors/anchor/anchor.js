@@ -21,7 +21,7 @@ const classNames = {
   anchored: 'anchored',
 };
 
-const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debug }) => ({
+const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debug, warn }) => ({
   anchorName: null,
   lastPosition: null,
   resizeObserver: null,
