@@ -673,7 +673,6 @@ export class Behavior {
 
         get cache() {
           let cache = self.Query.prototype[self.namespace].cache;
-          console.log('accessing cache', self.Query.prototype[self.namespace]);
           if (!cache) {
             cache = self.Query.prototype[self.namespace].cache = {};
           }
