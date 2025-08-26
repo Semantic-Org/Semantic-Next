@@ -25,3 +25,14 @@ body {
   border: var(--border);
   box-shadow: var(--floating-shadow);
 }
+
+.scroll {
+  margin: 100px;
+  border: var(--border);
+  height: 300px;
+  overflow: auto;
+
+  .box {
+    margin: 100px 0px 800px;
+  }
+}
