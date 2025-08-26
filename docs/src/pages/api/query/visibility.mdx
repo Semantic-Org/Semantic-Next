@@ -177,7 +177,7 @@ console.log(displays); // ['block', 'inline', 'table'] - tag-based lookup
 
 Checks if elements are visible by examining layout dimensions and visibility properties.
 
-> **Modern Detection**: Uses `getBoundingClientRect()` for accurate layout dimensions and `getComputedStyle()` for opacity and visibility calculations.
+> **Note** Checking element visibility requires multiple DOM APIs: `getBoundingClientRect()` for layout dimensions, `getComputedStyle()` for visibility properties, and optional opacity checks. This method combines these checks with proper edge case handling.
 
 ### Syntax
 
@@ -228,6 +228,8 @@ const hasLayout = $('.element').isVisible({ includeVisibility: false });
 
 Get the element that clips (crops) each element's visual bounds based on overflow properties.
 
+> **Note** Positioned elements can be clipped by ancestors with `overflow`, `clip-path`, `mask`, or `contain` properties. This method traverses the DOM to find the nearest clipping ancestor, useful for positioning tooltips and overlays.
+
 ### Syntax
 
 ```javascript
@@ -255,7 +257,7 @@ const $content = $('.overflow-content');
 const $scrollContainer = $content.clippingParent();
 ```
 
-> **Clipping Detection**: Returns `document.documentElement` when no clipping parent is found. Useful for positioning tooltips, dropdowns, and other overlay elements.
+> **Clipping Detection**: Returns `document.documentElement` when no clipping parent is found.
 
 ### Example
 <PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
@@ -264,7 +266,7 @@ const $scrollContainer = $content.clippingParent();
 
 Get the element that establishes the positioning context for each element (where `offsetTop`/`offsetLeft` are relative to).
 
-> **Modern Positioning**: Unlike `offsetParent`, this correctly handles `transform`, `will-change`, `filter` and other CSS properties that create new positioning contexts.
+> **Note** This method finds the actual containing block that coordinates like `top` and `left` are relative to when positioning elements. The native `offsetParent` property predates modern CSS and doesn't account for stacking contexts created by `transform`, `will-change`, `filter`, `perspective`, and `contain`.
 
 ### Syntax
 
@@ -290,12 +292,9 @@ A new [Query object](/api/query/basic#the-query-object) containing the containin
 const $absoluteEl = $('.absolute-positioned');
 const $container = $absoluteEl.containingParent();
 
-// Position element relative to its containing parent
-const containerRect = $container[0].getBoundingClientRect();
-$absoluteEl.css({
-  top: containerRect.height / 2,
-  left: containerRect.width / 2
-});
+// Position element relative to containing parent
+const rect = $container[0].getBoundingClientRect();
+$absoluteEl.css({ top: rect.height / 2, left: rect.width / 2 });
 
 // Use legacy offsetParent behavior
 const $offsetParent = $element.containingParent({ calculate: false });
