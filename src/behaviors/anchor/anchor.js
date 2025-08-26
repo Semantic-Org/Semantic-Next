@@ -14,6 +14,7 @@ const defaultSettings = {
   prefer: 'auto',
   detectPosition: true,
   moveElement: true,
+  containToScroll: true, // make clipping containers act as boundaries for position-try
 };
 
 const classNames = {
@@ -24,6 +25,7 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   anchorName: null,
   lastPosition: null,
   resizeObserver: null,
+  $clippingParent: null,
 
   positionMap: {
     top: 'block-start',
@@ -34,6 +36,9 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
 
   initialize() {
     self.setAnchor();
+    if (settings.containToScroll) {
+      self.setupClippingBoundary();
+    }
     self.attach();
     if (settings.detectPosition) {
       self.setupPositionMonitoring();
@@ -45,6 +50,29 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
 
   refresh() {
     self.updatePositionAttribute();
+  },
+
+  setupClippingBoundary() {
+    const $anchor = self.getAnchor();
+    const $clippingParent = $anchor.clippingParent();
+    const $containingParent = $anchor.containingParent();
+
+    // If something clips but isn't a containing block, make it one
+    if ($clippingParent.el() !== $containingParent.el()) {
+      self.$clippingParent = $clippingParent;
+
+      // Simple ref counting with data attributes
+      let refCount = parseInt($clippingParent.data('anchorRefCount') || 0);
+
+      if (refCount === 0) {
+        // First one - store original and modify
+        $clippingParent.data('originalPosition', $clippingParent.css('position'));
+        $clippingParent.css('position', 'relative');
+        debug('Made clipping parent a containing block', $clippingParent.el());
+      }
+
+      $clippingParent.data('anchorRefCount', refCount + 1);
+    }
   },
 
   maybeMoveElement() {
@@ -117,6 +145,7 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   },
 
   getNextAnchorName() {
+    console.log(cache.count);
     if (!cache.count) {
       cache.count = 0;
     }
@@ -323,6 +352,23 @@ const onDestroyed = ({ self }) => {
   if (self.resizeObserver) {
     self.resizeObserver.disconnect();
   }
+
+  // Restore original position if we modified clipping parent
+  if (self.$clippingParent) {
+    let refCount = parseInt(self.$clippingParent.data('anchorRefCount') || 0);
+    refCount--;
+
+    if (refCount === 0) {
+      // Last one - restore and clean up
+      const originalPosition = self.$clippingParent.data('originalPosition');
+      self.$clippingParent.css('position', originalPosition || null);
+      self.$clippingParent.removeAttr('data-original-position data-anchor-ref-count');
+    }
+    else {
+      self.$clippingParent.data('anchorRefCount', refCount);
+    }
+  }
+
   self.detach();
 };
 
