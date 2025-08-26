@@ -18,7 +18,7 @@ body {
 .popup {
   display: none;
   max-width: max-content;
-  background: var(--angled-gradient);
+  background: var(--inverted-100);
   padding: var(--padding);
   color: var(--text-color);
   border-radius: var(--border-radius);
