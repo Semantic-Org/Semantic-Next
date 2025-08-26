@@ -57,13 +57,13 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     const $clippingParent = $anchor.clippingParent();
     const $containingParent = $anchor.containingParent();
 
-    // If something clips but isn't a containing block, make it one
+    // anchor spec does not include all things that can clip as relevent to anchor positioning
+    // the most common oversight is overflow: auto not causing clipping.
     if ($clippingParent.el() !== $containingParent.el()) {
       self.$clippingParent = $clippingParent;
 
-      // Simple ref counting with data attributes
-      let refCount = parseInt($clippingParent.data('anchorRefCount') || 0);
-
+      // multiple anchors might be modifying same clipping parent
+      let refCount = parseInt($clippingParent.data('anchorRefCount') || 0, 10);
       if (refCount === 0) {
         // First one - store original and modify
         $clippingParent.data('originalPosition', $clippingParent.css('position'));
@@ -94,6 +94,7 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     self.moveElement(targetParent);
   },
 
+  /* not implemented currently, conceptually relevent for position: 'auto' */
   getBestPosition() {
     const anchorEl = self.getAnchor().el();
     const anchorRect = anchorEl.getBoundingClientRect();
@@ -145,7 +146,6 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   },
 
   getNextAnchorName() {
-    console.log(cache.count);
     if (!cache.count) {
       cache.count = 0;
     }
