@@ -1512,10 +1512,11 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
-  naturalDisplay() {
-    const displays = this.map((el) => {
-      // Create cache key from current stylesheet state + inline styles
-      const stylesheetData = Array.from(document.styleSheets).map(sheet => {
+  naturalDisplay({ calculate = true } = {}) {
+    // store style hash across map
+    let styleHash;
+    if (calculate) {
+      styleHash = Array.from(document.styleSheets).map(sheet => {
         try {
           return { href: sheet.href, title: sheet.title, disabled: sheet.disabled };
         }
@@ -1524,137 +1525,160 @@ export class Query {
           return { crossOrigin: true, index: Array.from(document.styleSheets).indexOf(sheet) };
         }
       });
+    }
 
-      // Include inline display style in cache key since it overrides everything
-      const inlineDisplay = el.style.display;
-      const cacheKey = { stylesheetData, inlineDisplay };
-      const rulesHash = hashCode(cacheKey);
-
-      // Check cache for this element
-      const cached = Query.elementDisplayCache.get(el);
-      if (cached && cached.rulesHash === rulesHash) {
-        return cached.displayValue;
+    const displays = this.map((el, index) => {
+      // FAST PATH: if an inline style is applied return this
+      let inlineDisplay = el.style.display;
+      if (inlineDisplay && inlineDisplay !== 'none') {
+        return inlineDisplay;
       }
 
-      // If already visible, return current display
-      const current = getComputedStyle(el).display;
-      if (current !== 'none') {
-        // Cache visible elements too
-        Query.elementDisplayCache.set(el, { rulesHash, displayValue: current });
-        return current;
-      }
+      let cacheKey;
+      let rulesHash;
 
-      const matchingRules = [];
+      // CALCULATED PATH: check stylesheets for highest specificity display state
+      if (calculate) {
+        // Include inline display style in cache key since it overrides everything
+        cacheKey = { styleHash, inlineDisplay };
+        rulesHash = hashCode(cacheKey);
 
-      // Calculate CSS specificity (simplified)
-      const calculateSpecificity = (selector) => {
-        // Remove quoted strings to avoid counting selectors inside quotes
-        const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
-        const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
-        const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
-        const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
-        const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
-        const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
-        return ids + classes + attrs + pseudoClasses + elements;
-      };
-
-      // Helper to recursively parse CSS rules (handles nesting)
-      const parseRules = (rules) => {
-        for (const rule of rules) {
-          // Handle regular style rules
-          if (
-            rule.style?.display
-            && rule.style.display !== 'none' // IGNORE ALL none rules
-            && rule.selectorText
-            && el.matches(rule.selectorText)
-          ) {
-            matchingRules.push({
-              display: rule.style.display,
-              specificity: calculateSpecificity(rule.selectorText),
-              sourceOrder: matchingRules.length,
-            });
-          }
-          // Recursively handle nested rules (CSS nesting)
-          if (rule.cssRules && rule.cssRules.length > 0) {
-            parseRules(rule.cssRules);
-          }
+        // FAST PATH: Skip stylesheet check, if rules are same
+        const cached = Query.elementDisplayCache.get(el);
+        if (cached && cached.rulesHash === rulesHash) {
+          return cached.displayValue;
         }
-      };
 
-      // Parse all stylesheets for matching rules
-      for (const sheet of document.styleSheets) {
-        try {
-          parseRules(sheet.cssRules);
+        // MEDIUM PATH: If already visible, return current display
+        const computedDisplay = getComputedStyle(el).display;
+        if (computedDisplay !== 'none') {
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue: computedDisplay });
+          return computedDisplay;
         }
-        catch (e) {
-          // Cross-origin stylesheets - ignore
-        }
-      }
 
-      // Sort by specificity, then source order
-      matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+        // SLOW PATH: Start parsing rules to determine display type
+        const matchingRules = [];
 
-      let displayValue;
-
-      // If we have matching rules, return the highest precedence value
-      if (matchingRules.length > 0) {
-        displayValue = matchingRules[0].display;
-      }
-      else {
-        // No CSS rules found - use element's natural display value
-        const naturalDisplay = {
-          inline: [
-            'a',
-            'abbr',
-            'b',
-            'bdi',
-            'bdo',
-            'br',
-            'cite',
-            'code',
-            'dfn',
-            'em',
-            'i',
-            'kbd',
-            'mark',
-            'q',
-            'ruby',
-            'samp',
-            'small',
-            'span',
-            'strong',
-            'sub',
-            'sup',
-            'time',
-            'u',
-            'var',
-            'wbr',
-          ],
-          'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
-          'table': ['table'],
-          'table-row': ['tr'],
-          'table-cell': ['td', 'th'],
-          'table-header-group': ['thead'],
-          'table-row-group': ['tbody'],
-          'table-footer-group': ['tfoot'],
-          'table-caption': ['caption'],
-          'table-column': ['col'],
-          'table-column-group': ['colgroup'],
-          'list-item': ['li'],
+        // Calculate CSS specificity (simplified)
+        const calculateSpecificity = (selector) => {
+          // Remove quoted strings to avoid counting selectors inside quotes
+          const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
+          const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
+          const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
+          const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
+          const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
+          const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
+          return ids + classes + attrs + pseudoClasses + elements;
         };
 
-        const tagName = el.tagName.toLowerCase();
-        for (const [display, tags] of Object.entries(naturalDisplay)) {
-          if (tags.includes(tagName)) {
-            displayValue = display;
-            break;
+        // Helper to recursively parse CSS rules (handles nesting)
+        const parseRules = (rules, parentSelector = '') => {
+          for (const rule of rules) {
+            // Handle regular style rules
+            if (
+              rule.style?.display
+              && rule.style.display !== 'none' // IGNORE ALL none rules
+              && rule.selectorText
+            ) {
+              // Resolve nested selector by replacing & with parent
+              let resolvedSelector = rule.selectorText;
+              if (parentSelector && resolvedSelector.includes('&')) {
+                resolvedSelector = resolvedSelector.replace(/&/g, parentSelector);
+              }
+
+              if (el.matches(resolvedSelector)) {
+                matchingRules.push({
+                  display: rule.style.display,
+                  specificity: calculateSpecificity(resolvedSelector),
+                  sourceOrder: matchingRules.length,
+                });
+              }
+            }
+            // Recursively handle nested rules (CSS nesting)
+            if (rule.cssRules && rule.cssRules.length > 0) {
+              const nestedParent = parentSelector || rule.selectorText;
+              parseRules(rule.cssRules, nestedParent);
+            }
+          }
+        };
+
+        // Parse all stylesheets for matching rules
+        for (const sheet of document.styleSheets) {
+          try {
+            parseRules(sheet.cssRules);
+          }
+          catch (e) {
+            // Cross-origin stylesheets - ignore
           }
         }
-        displayValue = displayValue || 'block'; // Default for most elements
+
+        // Sort by specificity, then source order
+        matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+
+        // If we have matching rules, return the highest precedence value
+        if (matchingRules.length > 0) {
+          const displayValue = matchingRules[0].display;
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+          return displayValue;
+        }
       }
 
-      // Cache the result
-      Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+      // BACKUP Path: Use natural display type for browsers based off a lookup table
+      const naturalDisplay = {
+        inline: [
+          'a',
+          'abbr',
+          'b',
+          'bdi',
+          'bdo',
+          'br',
+          'cite',
+          'code',
+          'dfn',
+          'em',
+          'i',
+          'kbd',
+          'mark',
+          'q',
+          'ruby',
+          'samp',
+          'small',
+          'span',
+          'strong',
+          'sub',
+          'sup',
+          'time',
+          'u',
+          'var',
+          'wbr',
+        ],
+        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+        'table': ['table'],
+        'table-row': ['tr'],
+        'table-cell': ['td', 'th'],
+        'table-header-group': ['thead'],
+        'table-row-group': ['tbody'],
+        'table-footer-group': ['tfoot'],
+        'table-caption': ['caption'],
+        'table-column': ['col'],
+        'table-column-group': ['colgroup'],
+        'list-item': ['li'],
+      };
+
+      const tagName = el.tagName.toLowerCase();
+      let displayValue;
+      for (const [display, tags] of Object.entries(naturalDisplay)) {
+        if (tags.includes(tagName)) {
+          displayValue = display;
+          break;
+        }
+      }
+      displayValue = displayValue || 'block'; // Default for most elements
+
+      // Cache the result if we are calculating
+      if (calculate) {
+        Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+      }
 
       return displayValue;
     });
@@ -1755,13 +1779,10 @@ export class Query {
     return this.length > 0;
   }
 
-  isVisible(options = {}) {
+  isVisible({ includeOpacity = false, includeVisibility = true } = {}) {
     if (this.length === 0) {
       return undefined;
     }
-
-    const { includeOpacity = false } = options;
-
     // Return true only if ALL elements are visible
     return this.map(el => {
       const rect = el.getBoundingClientRect();
@@ -1769,8 +1790,16 @@ export class Query {
 
       if (!hasDimensions) { return false; }
 
+      const style = window.getComputedStyle(el);
+
+      // Check intentional hiding methods
+      if (includeVisibility) {
+        if (style.visibility === 'hidden') { return false; }
+        if (style.contentVisibility === 'hidden') { return false; }
+      }
+
+      // Check optional hiding mechanisms
       if (includeOpacity) {
-        const style = window.getComputedStyle(el);
         return parseFloat(style.opacity) > 0;
       }
 
@@ -1874,6 +1903,30 @@ export class Query {
     // Combine arrays and remove duplicates using Set
     const combinedElements = Array.from(new Set([...currentElements, ...$newElements.get()]));
     return this.chain(combinedElements);
+  }
+
+  show({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const naturalDisplayValue = this.naturalDisplay({ calculate });
+      el.style.display = naturalDisplayValue || '';
+    });
+  }
+
+  hide() {
+    return this.css('display', 'none');
+  }
+
+  toggle({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const isHidden = getComputedStyle(el).display === 'none';
+      if (isHidden) {
+        const naturalDisplayValue = this.naturalDisplay({ calculate });
+        el.style.display = naturalDisplayValue || '';
+      }
+      else {
+        el.style.display = 'none';
+      }
+    });
   }
 
   // special helper for SUI components
