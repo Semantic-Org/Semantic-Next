@@ -1,5 +1,5 @@
 :root {
-  --box-size: 100px;
+  --box-size: 150px;
 }
 
 body {
@@ -24,15 +24,18 @@ body {
   border-radius: var(--border-radius);
   border: var(--border);
   box-shadow: var(--floating-shadow);
+  text-align: center;
 }
 
 .scroll {
   margin: 100px;
   border: var(--border);
   height: 300px;
+  width: 300px;
   overflow: auto;
 
   .box {
-    margin: 100px 0px 800px;
+    /* Test occlusion */
+    margin: 100px 200px 800px 200px;
   }
 }
