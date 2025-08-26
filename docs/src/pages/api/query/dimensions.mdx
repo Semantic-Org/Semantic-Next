@@ -8,7 +8,7 @@ description: API reference for Query methods related to element dimensions and p
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The Dimension methods in Query provide tools for getting and setting various dimensional properties of elements, including their size, position, and scroll-related attributes.
+Get and set element dimensions, scroll positions, and natural sizes.
 
 ## width
 
@@ -42,16 +42,11 @@ $('selector').width(value)
 
 ### Usage
 
-#### Get Width
 ```javascript
-// Get the width of an element
+// Get width
 const width = $('#myElement').width();
-console.log(width);
-```
 
-#### Set Width
-```javascript
-// Set the width of an element
+// Set width
 $('#myElement').width(200);
 ```
 
@@ -90,16 +85,11 @@ $('selector').height(value)
 
 ### Usage
 
-#### Get Height
 ```javascript
-// Get the height of an element
+// Get height
 const height = $('#myElement').height();
-console.log(height);
-```
 
-#### Set Height
-```javascript
-// Set the height of an element
+// Set height
 $('#myElement').height(150);
 ```
 
@@ -138,16 +128,11 @@ $('selector').scrollTop(value)
 
 ### Usage
 
-#### Get Scroll Position
 ```javascript
-// Get the vertical scroll position of an element
+// Get scroll position
 const scrollPosition = $('.scrollable-div').scrollTop();
-console.log(scrollPosition);
-```
 
-#### Set Scroll Position
-```javascript
-// Set the vertical scroll position of an element
+// Set scroll position
 $('.scrollable-div').scrollTop(100);
 ```
 
@@ -186,26 +171,22 @@ $('selector').scrollLeft(value)
 
 ### Usage
 
-#### Get Scroll Position
 ```javascript
-// Get the horizontal scroll position of an element
+// Get scroll position
 const scrollPosition = $('.scrollable-div').scrollLeft();
-console.log(scrollPosition);
-```
 
-#### Set Scroll Position
-```javascript
-// Set the horizontal scroll position of an element
+// Set scroll position
 $('.scrollable-div').scrollLeft(50);
 ```
 
 ### Example
 <PlaygroundExample id="query-scrollleft" direction="horizontal"></PlaygroundExample>
+
 ## naturalWidth
 
 Gets the natural width of an element, including images and other HTML elements.
 
-> **Natural Width** - This method works by creating a clone of the element, positioning it off-screen, and measuring its dimensions. While this approach allows for accurate measurements of complex elements like tables, it can cause a reflow in the document. Use judiciously, especially in performance-critical situations.
+> **Performance Note**: Creates an off-screen clone to measure dimensions. Can cause reflow - use sparingly in performance-critical code.
 
 ### Syntax
 
@@ -222,15 +203,12 @@ $('selector').naturalWidth()
 
 ### Usage
 
-#### Get Natural Width
 ```javascript
-// Get the natural width of an image
-const imageNaturalWidth = $('img').naturalWidth();
-console.log(imageNaturalWidth);
+// Get natural width of image
+const imageWidth = $('img').naturalWidth();
 
-// Get the natural width of a table
-const tableNaturalWidth = $('table').naturalWidth();
-console.log(tableNaturalWidth);
+// Get natural width of table
+const tableWidth = $('table').naturalWidth();
 ```
 
 ### Example
@@ -254,224 +232,13 @@ $('selector').naturalHeight()
 
 ### Usage
 
-#### Get Natural Height
 ```javascript
-// Get the natural height of an image
-const imageNaturalHeight = $('img').naturalHeight();
-console.log(imageNaturalHeight);
+// Get natural height of image
+const imageHeight = $('img').naturalHeight();
 
-// Get the natural height of a div with content
-const divNaturalHeight = $('div.content').naturalHeight();
-console.log(divNaturalHeight);
+// Get natural height of div
+const divHeight = $('div.content').naturalHeight();
 ```
 
 ### Example
 <PlaygroundExample id="query-naturalheight" direction="horizontal"></PlaygroundExample>
-
-## naturalDisplay
-
-Gets the natural display value for elements (the display value that would be used if `display: none` was not applied).
-
-> **Natural Display** - This method analyzes CSS rules and calculates specificity to determine what display value would be applied to an element if all `display: none` rules were ignored. This is useful for restoring elements to their original display state when showing them after they were hidden.
-
-### Syntax
-
-#### Get
-```javascript
-$('selector').naturalDisplay()
-```
-
-### Returns
-
-#### Get
-- **Single Element** - The natural display value as a string (e.g., 'block', 'inline', 'flex').
-- **Multiple Elements** - An array of natural display values, one for each matched element.
-- **Empty Selection** - `undefined`
-
-### Usage
-
-#### Get Natural Display Value
-```javascript
-// Get the natural display value of a hidden element
-const hiddenDiv = $('<div class="hidden-element" style="display: none;">').appendTo(document.body);
-const naturalDisplay = hiddenDiv.naturalDisplay();
-console.log(naturalDisplay); // 'block' (default for div elements)
-
-// Restore element to its natural display state
-hiddenDiv.css('display', naturalDisplay);
-```
-
-#### Working with CSS Rules
-```javascript
-// Element with CSS rules that define display
-// CSS: .flex-container { display: flex; } .hidden { display: none; }
-const element = $('.flex-container.hidden');
-const naturalDisplay = element.naturalDisplay();
-console.log(naturalDisplay); // 'flex' (ignores 'none', finds highest specificity non-none rule)
-
-// Show element with its natural display
-element.css('display', naturalDisplay);
-```
-
-#### Multiple Elements
-```javascript
-// Get natural display values for multiple elements
-const elements = $('.various-hidden-elements');
-const displays = elements.naturalDisplay();
-console.log(displays); // ['block', 'inline', 'flex', ...]
-
-// Restore all elements to their natural display states
-elements.each((el, index) => {
-  $(el).css('display', displays[index]);
-});
-```
-
-#### Handling Elements Without CSS Rules
-```javascript
-// Elements without specific CSS display rules default to 'block'
-const dynamicElement = $('<span>').appendTo(document.body);
-const display = dynamicElement.naturalDisplay();
-console.log(display); // 'block' (default fallback)
-```
-
-### Example
-<PlaygroundExample id="query-naturaldisplay" direction="horizontal"></PlaygroundExample>
-
-### Notes
-
-- Ignores all CSS rules with `display: none` when calculating the natural display value
-- Uses CSS specificity calculations to determine the highest priority non-none display value
-- Returns `'block'` as the default if no CSS rules are found or all rules specify `display: none`
-- Handles cross-origin stylesheet errors gracefully
-- Particularly useful for show/hide functionality where you need to restore the original display state
-
-## clippingParent
-
-Get the element that clips (crops) each element's visual bounds based on overflow properties.
-
-### Syntax
-```javascript
-$('selector').clippingParent()
-```
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the clipping parent elements.
-
-### Usage
-
-#### Basic Clipping Detection
-```javascript
-// Find what element clips a positioned element
-const $tooltip = $('.tooltip');
-const $clipper = $tooltip.clippingParent();
-
-// Check if element is clipped by its container
-if ($clipper[0] !== document.documentElement) {
-  console.log('Element is clipped by:', $clipper[0]);
-}
-```
-
-#### Working with Scroll Containers
-```javascript
-// Find the scrollable container that clips content
-const $content = $('.overflow-content');
-const $scrollContainer = $content.clippingParent();
-
-// Adjust positioning to avoid clipping
-$scrollContainer.css('overflow', 'visible');
-```
-
-#### Multiple Elements
-```javascript
-// Get clipping parents for multiple elements
-$('.positioned-elements').each((el, index) => {
-  const $el = $(el);
-  const $clipper = $el.clippingParent();
-  console.log(`Element ${index} is clipped by:`, $clipper[0]);
-});
-```
-
-> **Clipping Detection** Returns `document.documentElement` when no clipping parent is found. Useful for positioning tooltips, dropdowns, and other overlay elements.
-
-### Example
-<PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
-
-## containingParent
-
-Get the element that establishes the positioning context for each element (where `offsetTop`/`offsetLeft` are relative to).
-
-> **Why not `offsetParent`?** `offsetParent` will often return an element that is **different** than the value `offsetTop` and `offsetLeft` are relative to. This is because values like `transform`, `will-change`, `filter` can all create new positioning contexts.
-
-
-### Syntax
-
-#### Calculate Modern Positioning Context
-```javascript
-$('selector').containingParent()
-$('selector').containingParent({ calculate: true })
-```
-
-#### Use Browser's offsetParent
-```javascript
-$('selector').containingParent({ calculate: false })
-```
-
-### Parameters
-| Name      | Type    | Description                                                      |
-|-----------|---------|------------------------------------------------------------------|
-| calculate | boolean | Whether to calculate containing parent using modern CSS properties (default: true) |
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the containing parent elements.
-
-### Usage
-
-#### Modern Positioning Context Detection
-```javascript
-// Find the actual positioning context (includes transform, filter, etc.)
-const $absoluteEl = $('.absolute-positioned');
-const $container = $absoluteEl.containingParent();
-
-// Position element relative to its containing parent
-const containerRect = $container[0].getBoundingClientRect();
-$absoluteEl.css({
-  top: containerRect.height / 2,
-  left: containerRect.width / 2
-});
-```
-
-#### Browser's Native offsetParent
-```javascript
-// Get browser's reported offsetParent (legacy behavior)
-const $element = $('.positioned-element');
-const $offsetParent = $element.containingParent({ calculate: false });
-
-if ($offsetParent[0]) {
-  console.log('Browser offsetParent:', $offsetParent[0]);
-}
-```
-
-#### Fixed Position Elements
-```javascript
-// Fixed elements have no containing parent
-const $fixed = $('.fixed-positioned');
-const $container = $fixed.containingParent();
-
-if ($container[0] === undefined) {
-  console.log('Fixed element has no containing parent');
-}
-```
-
-#### Transform and Filter Detection
-```javascript
-// Elements with transforms create new positioning contexts
-const $transformed = $('.transformed-element');
-const $transformContainer = $transformed.containingParent();
-
-// Useful for accurately calculating positions
-const rect = $transformContainer[0].getBoundingClientRect();
-console.log('Transform container bounds:', rect);
-```
-
-### Example
-<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
