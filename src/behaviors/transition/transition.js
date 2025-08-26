@@ -112,7 +112,7 @@ const createBehavior = (
   },
 
   getBaseAnimation(animationName) {
-    return animationName.replace(/in|out/, '').trim();
+    return animationName.replace(/\b(in|out)\b/g, '').trim();
   },
 
   async performGroupAnimation(cssAnimations, direction, animationSettings) {
