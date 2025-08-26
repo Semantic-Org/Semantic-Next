@@ -13,8 +13,7 @@
     "strict": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "noImplicitThis": false,
-    "suppressImplicitAnyIndexErrors": true
+    "noImplicitThis": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

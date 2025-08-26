@@ -841,9 +841,11 @@ export class Query {
   /**
    * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.
    * @see https://next.semantic-ui.com/api/query/dimensions#naturalDisplay
+   * @param options - Configuration options for natural display calculation.
+   * @param options.calculate - Whether to analyze stylesheets for accurate calculation. When false, uses tag-based lookup only. Defaults to true.
    * @returns For single element: the natural display value. For multiple elements: array of natural display values. Returns undefined for empty selection.
    */
-  naturalDisplay(): string | string[] | undefined;
+  naturalDisplay(options?: { calculate?: boolean; }): string | string[] | undefined;
 
   /**
    * Gets the clipping parent (overflow container) of each element in the current set.
@@ -880,9 +882,10 @@ export class Query {
    * @see https://next.semantic-ui.com/api/query/logical-operators#isvisible
    * @param options - Configuration options for visibility checking.
    * @param options.includeOpacity - Whether to also check that opacity > 0. Defaults to false.
+   * @param options.includeVisibility - Whether to check for visibility: hidden and content-visibility: hidden. Defaults to true.
    * @returns `boolean` - true if ALL elements are visible, false if ANY element is not visible, `undefined` for empty selection.
    */
-  isVisible(options?: { includeOpacity?: boolean; }): boolean | undefined;
+  isVisible(options?: { includeOpacity?: boolean; includeVisibility?: boolean; }): boolean | undefined;
 
   /**
    * Adds properties to element on DOMContentLoaded
@@ -970,6 +973,31 @@ export class Query {
    * @returns The outer height of the first element.
    */
   outerHeight(includeMargin?: boolean): number;
+
+  /**
+   * Shows hidden elements by setting their display to the natural display value.
+   * @see https://next.semantic-ui.com/api/query/visibility#show
+   * @param options - Configuration options for showing elements.
+   * @param options.calculate - Whether to analyze stylesheets for accurate display calculation. When false, uses tag-based lookup only. Defaults to true.
+   * @returns The Query instance for chaining.
+   */
+  show(options?: { calculate?: boolean; }): this;
+
+  /**
+   * Hides elements by setting their display to 'none'.
+   * @see https://next.semantic-ui.com/api/query/visibility#hide
+   * @returns The Query instance for chaining.
+   */
+  hide(): this;
+
+  /**
+   * Toggles the visibility of elements by checking their current display state and either showing or hiding them.
+   * @see https://next.semantic-ui.com/api/query/visibility#toggle
+   * @param options - Configuration options for toggling elements.
+   * @param options.calculate - Whether to analyze stylesheets for accurate display calculation when showing elements. When false, uses tag-based lookup only. Defaults to true.
+   * @returns The Query instance for chaining.
+   */
+  toggle(options?: { calculate?: boolean; }): this;
 
   /**
    * Checks if any element in the current set contains the specified target.
