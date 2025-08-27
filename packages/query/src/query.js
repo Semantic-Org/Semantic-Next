@@ -1780,7 +1780,7 @@ export class Query {
   }
 
   containingParent() {
-    const parents = this.map(el => el.offsetParent);
+    const parents = this.map(el => el.offsetParent || document.documentElement);
     return this.chain(parents);
   }
 
@@ -2226,7 +2226,7 @@ export class Query {
     }
 
     const $viewport = (viewport)
-      ? $(viewport)
+      ? this.chain(viewport)
       : undefined;
 
     // Check if ALL elements in the collection meet the viewport criteria
@@ -2235,6 +2235,9 @@ export class Query {
       let $elViewport;
       if (!$viewport?.length) {
         $elViewport = this.chain(el).clippingParent();
+      }
+      else {
+        $elViewport = $viewport;
       }
       // document element should use window
       if ($elViewport.is(document.documentElement)) {
