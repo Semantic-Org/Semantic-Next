@@ -1734,11 +1734,6 @@ export class Query {
         return el.offsetParent;
       }
 
-      // fixed elements have no offset parent
-      if (window.getComputedStyle(el).position === 'fixed') {
-        return undefined;
-      }
-
       let current = el.parentNode;
       while (current) {
         if (current instanceof Element) {
@@ -1938,158 +1933,322 @@ export class Query {
     return this.length === 1 ? rects[0] : rects;
   }
 
-  pagePosition(settings = {}) {
-    return this.containerPosition({
-      container: document.documentElement,
-      ...settings,
-    });
-  }
-
-  containerPosition({
-    container,
-    top,
-    left,
-    includeMargin = false,
-    includePadding = false,
-    includeBorder = false,
-    includeScrollOffset = true,
-    round = false,
-  } = {}) {
-    const coords = (top !== undefined || left !== undefined) ? { top, left } : null;
-
-    // Getter/Setter
+  dimensions() {
     if (this.length === 0) {
       return undefined;
     }
-
-    // Query container once outside the map
-    let $container;
-    let containerElement;
-    if (container) {
-      $container = this.chain(container);
-      containerElement = $container.el();
-      // if user specifies a container not in DOM dont return coords.
-      // this would be confusing
-      if (!containerElement) {
-        return undefined;
-      }
-    }
-
     const results = this.map(el => {
-      const elementRect = el.getBoundingClientRect();
-
-      // if no provided
-      if (!containerElement) {
-        $container = this.chain(el).containingParent();
-        containerElement = $container.el();
+      // Handle window/global object special case
+      if (el === Query.globalThisProxy) {
+        const boxValues = { top: 0, right: 0, bottom: 0, left: 0 };
+        return {
+          top: 0,
+          left: 0,
+          right: window.innerWidth,
+          bottom: window.innerHeight,
+          pageTop: window.scrollY,
+          pageLeft: window.scrollX,
+          width: window.innerWidth,
+          innerWidth: window.innerWidth,
+          outerWidth: window.innerWidth,
+          marginWidth: window.innerWidth,
+          height: window.innerHeight,
+          innerHeight: window.innerHeight,
+          outerHeight: window.innerHeight,
+          marginHeight: window.innerHeight,
+          scrollTop: window.scrollY,
+          scrollLeft: window.scrollX,
+          scrollHeight: document.documentElement.scrollHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          box: { padding: boxValues, border: boxValues, margin: boxValues },
+        };
       }
 
-      const containerRect = containerElement.getBoundingClientRect();
-      let calculatedTop = elementRect.top - containerRect.top;
-      let calculatedLeft = elementRect.left - containerRect.left;
+      const rect = el.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(el);
 
-      // Get computed styles once if needed
-      let elementStyle, containerStyle;
-      if (includeMargin) {
-        elementStyle = window.getComputedStyle(el);
-      }
-      if (includePadding || includeBorder) {
-        containerStyle = window.getComputedStyle(containerElement);
-      }
+      // --- Position Properties ---
+      const top = rect.top;
+      const left = rect.left;
+      const pageTop = top + window.scrollY;
+      const pageLeft = left + window.scrollX;
 
-      // Track all offset adjustments
-      let marginTopOffset = 0, marginLeftOffset = 0;
-      let paddingTopOffset = 0, paddingLeftOffset = 0;
-      let borderTopOffset = 0, borderLeftOffset = 0;
-      let scrollTopOffset = 0, scrollLeftOffset = 0;
+      // --- Box Model Values ---
+      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
 
-      // Include element margin if requested
-      if (includeMargin) {
-        marginTopOffset = parseFloat(elementStyle.marginTop) || 0;
-        marginLeftOffset = parseFloat(elementStyle.marginLeft) || 0;
-        calculatedTop -= marginTopOffset;
-        calculatedLeft -= marginLeftOffset;
-      }
+      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
 
-      // Include container padding if requested
-      if (includePadding) {
-        paddingTopOffset = parseFloat(containerStyle.paddingTop) || 0;
-        paddingLeftOffset = parseFloat(containerStyle.paddingLeft) || 0;
-        calculatedTop -= paddingTopOffset;
-        calculatedLeft -= paddingLeftOffset;
-      }
+      const marginTop = parseFloat(computedStyle.marginTop) || 0;
+      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
+      const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
-      // Include container border if requested
-      if (includeBorder) {
-        borderTopOffset = parseFloat(containerStyle.borderTopWidth) || 0;
-        borderLeftOffset = parseFloat(containerStyle.borderLeftWidth) || 0;
-        calculatedTop -= borderTopOffset;
-        calculatedLeft -= borderLeftOffset;
-      }
+      // --- Width Properties ---
+      const outerWidth = el.offsetWidth;
+      const innerWidth = outerWidth - borderLeft - borderRight;
+      const width = innerWidth - paddingLeft - paddingRight;
+      const marginWidth = outerWidth + marginLeft + marginRight;
 
-      // Include container scroll offset if requested
-      if (includeScrollOffset) {
-        scrollTopOffset = $container.scrollTop() || 0;
-        scrollLeftOffset = $container.scrollLeft() || 0;
-        calculatedTop += scrollTopOffset;
-        calculatedLeft += scrollLeftOffset;
-      }
+      // --- Height Properties ---
+      const outerHeight = el.offsetHeight;
+      const innerHeight = outerHeight - borderTop - borderBottom;
+      const height = innerHeight - paddingTop - paddingBottom;
+      const marginHeight = outerHeight + marginTop + marginBottom;
 
-      // Apply rounding if requested
-      if (round) {
-        calculatedTop = Math.round(calculatedTop);
-        calculatedLeft = Math.round(calculatedLeft);
-      }
-
-      // Setter logic: Calculate required CSS values
-      if (coords) {
-        // Set CSS values
-        if (coords.top !== undefined) {
-          if (isNumber(coords.top)) {
-            // For numbers, apply offset calculations
-            let requiredTop = coords.top;
-            requiredTop += marginTopOffset;
-            requiredTop += paddingTopOffset;
-            requiredTop += borderTopOffset;
-            requiredTop -= scrollTopOffset;
-            requiredTop += containerRect.top - elementRect.top;
-            el.style.top = `${requiredTop}px`;
-          }
-          else {
-            // For strings, use as-is
-            el.style.top = coords.top;
-          }
-        }
-
-        if (coords.left !== undefined) {
-          if (isNumber(coords.left)) {
-            // For numbers, apply offset calculations
-            let requiredLeft = coords.left;
-            requiredLeft += marginLeftOffset;
-            requiredLeft += paddingLeftOffset;
-            requiredLeft += borderLeftOffset;
-            requiredLeft -= scrollLeftOffset;
-            requiredLeft += containerRect.left - elementRect.left;
-            el.style.left = `${requiredLeft}px`;
-          }
-          else {
-            // For strings, use as-is
-            el.style.left = coords.left;
-          }
-        }
-
-        return null; // Setter returns nothing for individual elements
-      }
-
-      // Getter logic: Return calculated position
-      return { top: calculatedTop, left: calculatedLeft };
+      return {
+        // Position
+        top,
+        left,
+        right: rect.right,
+        bottom: rect.bottom,
+        pageTop,
+        pageLeft,
+        // Width
+        width,
+        innerWidth,
+        outerWidth,
+        marginWidth,
+        // Height
+        height,
+        innerHeight,
+        outerHeight,
+        marginHeight,
+        // Scroll
+        scrollTop: el.scrollTop,
+        scrollLeft: el.scrollLeft,
+        scrollHeight: el.scrollHeight,
+        scrollWidth: el.scrollWidth,
+        // Box Model Details
+        box: {
+          padding: { top: paddingTop, right: paddingRight, bottom: paddingBottom, left: paddingLeft },
+          border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
+          margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
+        },
+      };
     });
 
-    // Return this for chaining if setter, or positions if getter
-    if (coords) {
+    return this.length === 1 ? results[0] : results;
+  }
+
+  collidesWith(selector) {
+    if (this.length === 0 || !selector) {
+      return false;
+    }
+
+    const $targets = this.chain(selector);
+    if ($targets.length === 0) {
+      return false;
+    }
+
+    const sourceRects = this.map(el => el.getBoundingClientRect());
+    const targetRects = $targets.map(el => el.getBoundingClientRect());
+
+    // Check if any source rectangle collides with any target rectangle
+    return sourceRects.some(sourceRect => {
+      return targetRects.some(targetRect => {
+        // Standard AABB (Axis-Aligned Bounding Box) collision detection
+        return (
+          sourceRect.left < targetRect.right
+          && sourceRect.right > targetRect.left
+          && sourceRect.top < targetRect.bottom
+          && sourceRect.bottom > targetRect.top
+        );
+      });
+    });
+  }
+
+  pagePosition({ precision = 'pixel' } = {}) {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const results = this.map(el => {
+      const rect = el.getBoundingClientRect();
+      const round = val => (precision === 'pixel' ? Math.round(val) : val);
+
+      // Page position is simply the viewport position plus the current scroll offset
+      const top = rect.top + window.scrollY;
+      const left = rect.left + window.scrollX;
+
+      return {
+        top: round(top),
+        left: round(left),
+      };
+    });
+    return this.length === 1 ? results[0] : results;
+  }
+
+  position({
+    relativeTo,
+    top,
+    left,
+    precision = 'pixel',
+    type,
+  } = {}) {
+    // Determine if the function is being used as a setter.
+    const isSetter = (isNumber(top) || isNumber(left));
+
+    // avoid querySelector inside map
+    let relativeEl = (relativeTo)
+      ? this.chain(relativeTo).el()
+      : undefined;
+
+    // fail clearly if relative el does not exist
+    if (relativeTo && !relativeEl) {
+      return (isSetter)
+        ? this
+        : undefined;
+    }
+
+    if (!isSetter) {
+      // getter
+      const results = this.map(el => {
+        const $el = this.chain(el);
+        const elRect = el.getBoundingClientRect();
+        const round = val => (precision === 'pixel' ? Math.round(val) : val);
+
+        // 1. Global (Viewport) Coordinates
+        const globalCoords = {
+          top: round(elRect.top),
+          left: round(elRect.left),
+        };
+        if (type === 'global') {
+          return globalCoords;
+        }
+
+        // 2. Local (containingParent) Coordinates
+        const containingParent = $el.containingParent().el();
+        let localCoords = { ...globalCoords }; // Fallback if no parent
+        if (containingParent) {
+          const parentRect = containingParent.getBoundingClientRect();
+          localCoords = {
+            top: round(elRect.top - parentRect.top),
+            left: round(elRect.left - parentRect.left),
+          };
+        }
+        if (type === 'local') {
+          return localCoords;
+        }
+
+        // 3. Relative Coordinates
+        let relativeCoords = null;
+        if (relativeEl) {
+          const relativeRect = relativeEl.getBoundingClientRect();
+          relativeCoords = {
+            top: round(elRect.top - relativeRect.top),
+            left: round(elRect.left - relativeRect.left),
+          };
+          if (type === 'relative') {
+            return relativeCoords;
+          }
+        }
+
+        // Return all coordinates if no specific type was requested
+        const result = {
+          global: globalCoords,
+          local: localCoords,
+        };
+        if (relativeCoords) {
+          result.relative = relativeCoords;
+        }
+        return result;
+      });
+
+      // Return a single object if the collection has only one element.
+      return this.length === 1 ? results[0] : results;
+    }
+    else {
+      // setter
+      this.each(function(el) {
+        const $el = this;
+        const referenceEl = relativeEl
+          ? relativeEl
+          : $el.containingParent().el();
+        if (!referenceEl) {
+          return;
+        }
+        const referenceRect = referenceEl.getBoundingClientRect();
+        const offsetParent = el.offsetParent; // Native offsetParent is still needed for style calculation
+        if (!offsetParent) {
+          return;
+        }
+        const offsetParentRect = offsetParent.getBoundingClientRect();
+        const parentStyle = window.getComputedStyle(offsetParent);
+
+        const targetTop = referenceRect.top + (top || 0);
+        const targetLeft = referenceRect.left + (left || 0);
+
+        const parentBorderTop = parseFloat(parentStyle.borderTopWidth) || 0;
+        const parentBorderLeft = parseFloat(parentStyle.borderLeftWidth) || 0;
+
+        const newStyleTop = targetTop - offsetParentRect.top - parentBorderTop;
+        const newStyleLeft = targetLeft - offsetParentRect.left - parentBorderLeft;
+
+        if (isNumber(top)) {
+          el.style.top = `${newStyleTop}px`;
+        }
+        if (isNumber(left)) {
+          el.style.left = `${newStyleLeft}px`;
+        }
+      });
       return this;
     }
-    return this.length === 1 ? results[0] : results;
+  }
+
+  isInViewport({ threshold = 0, fully = false } = {}) {
+    if (this.length === 0) {
+      return false;
+    }
+
+    // Check if ALL elements in the collection meet the viewport criteria
+    return this.map(el => {
+      const rect = el.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+      // If fully is true, it overrides the threshold
+      if (fully) {
+        return (
+          rect.top >= 0
+          && rect.left >= 0
+          && rect.bottom <= viewportHeight
+          && rect.right <= viewportWidth
+        );
+      }
+
+      if (threshold > 0) {
+        // Calculate the area of intersection
+        const intersectionLeft = Math.max(0, rect.left);
+        const intersectionTop = Math.max(0, rect.top);
+        const intersectionRight = Math.min(viewportWidth, rect.right);
+        const intersectionBottom = Math.min(viewportHeight, rect.bottom);
+
+        const intersectionWidth = intersectionRight - intersectionLeft;
+        const intersectionHeight = intersectionBottom - intersectionTop;
+
+        if (intersectionWidth <= 0 || intersectionHeight <= 0) {
+          return false;
+        }
+
+        const intersectionArea = intersectionWidth * intersectionHeight;
+        const elementArea = rect.width * rect.height;
+
+        return (intersectionArea / elementArea) >= threshold;
+      }
+
+      // Default behavior: check if any part of the element is visible
+      return (
+        rect.top < viewportHeight
+        && rect.bottom > 0
+        && rect.left < viewportWidth
+        && rect.right > 0
+      );
+    }).every(result => result === true);
   }
 
   // special helper for SUI components
