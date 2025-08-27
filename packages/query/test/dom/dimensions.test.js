@@ -1,4 +1,4 @@
-import { $ } from '@semantic-ui/query';
+import { $, Query } from '@semantic-ui/query';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('Query Dimensions', () => {
