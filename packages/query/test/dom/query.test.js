@@ -353,6 +353,15 @@ describe('query', () => {
       const $span = $('span').closest('.test2');
       expect($span.length).toBe(0);
     });
+
+    it('closest should return the closest parent when passed a DOM element', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+      const $span = $('span').closest(div);
+      expect($span[0]).toBe(div);
+    });
   });
 
   describe('closestDeep', () => {

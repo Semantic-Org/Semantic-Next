@@ -438,7 +438,16 @@ export class Query {
 
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
-
+    const closest = (el, selector) => {
+      if (isDOM(selector) && selector?.contains) {
+        if (selector.contains(el)) {
+          return selector;
+        }
+      }
+      else {
+        return el.closest(selector);
+      }
+    };
     Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
         const matches = this.closestDeep(el, selector, { returnAll });
@@ -454,7 +463,7 @@ export class Query {
           // Walk up DOM tree using native closest() efficiently
           let current = el.parentElement;
           while (current) {
-            const match = current.closest(selector);
+            const match = closest(current, selector);
             if (match) {
               allResults.push(match);
               // Continue from the parent of the match to find more ancestors
@@ -466,7 +475,7 @@ export class Query {
           }
         }
         else {
-          const match = el.closest(selector);
+          const match = closest(el, selector);
           if (match) {
             allResults.push(match);
           }

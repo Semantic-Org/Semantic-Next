@@ -37,6 +37,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Enhancement** - [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) now accepts `calculate` parameter to control whether to analyze stylesheets (default: true) or use tag-based lookup only.
 * **Enhancement** - [`isVisible()`](https://next.semantic-ui.com/api/query/logical-operators#isvisible) now checks for `visibility: hidden` and `content-visibility: hidden` by default, with new `includeVisibility` parameter for control.
 * **Enhancement** - [`containingParent()`](https://next.semantic-ui.com/api/query/visibility#containingparent) now provides simple `offsetParent` wrapper functionality alongside the new `positioningParent()` method.
+* **Enhancement** - [`closest()`](https://next.semantic-ui.com/api/query/dom-traversal#closest) now supports passing DOM elements directly as the selector parameter, checking containment using the element's `contains()` method.
 * **Bug** - Fixed CSS nesting parsing in [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) to properly resolve nested selectors with `&` parent references (e.g., `& .grid-container`).
 * **Bug** - Fixed [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method to return `undefined` for empty selections instead of empty array when used as getter.
 
