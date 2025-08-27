@@ -39,6 +39,15 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Bug** - Fixed CSS nesting parsing in [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) to properly resolve nested selectors with `&` parent references (e.g., `& .grid-container`).
 * **Bug** - Fixed [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method to return `undefined` for empty selections instead of empty array when used as getter.
 
+## Bugs
+* **Query Plugins** - Fixed issue where using non clonables as settings like query collections, or custom classes wouldn't work as expected. This was related to the default behavior of deepExtend and clone (see breaking changes).
+
+## Features
+* **Utils** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
+
+## Breaking Changes
+* **Utils** - `deepExtend` now preserves non clonables by default. This is to prevent very common scenarios where extend is used with custom classes or dom elements where the original reference should be maintained. Note this still can be overwritten using `deepExtend(obj1, obj2, { preserveNonCloneable: false });`
+
 # Version 0.16.1-2 - 08.21.2025
 
 ## Core
@@ -51,7 +60,6 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ## UI Changes
 
 `semantic-ui/core` is now organized into three groups: [`primitives`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/primitives), [`components`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/components), and [`behaviors`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/behaviors)
-
 * **Primitives** include JSON specs and are essential building blocks like `modal` and `button`.
 * **Components** are built with primitives and have more complex functionality, for example, `global-search` or `theme-switcher`.
 * **Behaviors** do not export web components but provide behaviors like `transition` or `position`.
