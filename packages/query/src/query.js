@@ -1727,43 +1727,60 @@ export class Query {
   }
 
   // this is the parent element where top/left and offsetTop/left will be relative
-  containingParent({ calculate = true } = {}) {
+  // supports both fixed and absolute elements
+  positioningParent({ calculate = true } = {}) {
     const parents = this.map((el) => {
-      // return offset parent as reported by browser
+      const reportedParent = el.offsetParent || document.documentElement;
+
       if (!calculate) {
-        return el.offsetParent;
+        return reportedParent;
+      }
+
+      const isFixed = window.getComputedStyle(el).position === 'fixed';
+      if (!isFixed) {
+        return reportedParent;
       }
 
       let current = el.parentNode;
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
-          // transformed elements create new positioning context
-          if (style.position !== 'static') {
+
+          // Check all properties that create containing blocks
+          if (style.transform !== 'none') { return current; }
+          if (style.perspective !== 'none') { return current; }
+          if (style.filter !== 'none') { return current; }
+          if (style.backdropFilter !== 'none') { return current; }
+          if (style.transformStyle === 'preserve-3d') { return current; }
+
+          // Check contain
+          const contain = style.contain;
+          if (contain && (contain.includes('paint') || contain.includes('layout'))) {
             return current;
           }
-          // filter creates new positioning context
-          if (style.filter !== 'none') {
+
+          // Check container-type
+          if (style.containerType && style.containerType !== 'normal') {
             return current;
           }
-          // transformed elements create new positioning context
-          if (style.transform !== 'none') {
-            return current;
-          }
-          // also creates positioning context
-          if (['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
-            return current;
-          }
-          // will change will trigger same context
-          // <https://issues.chromium.org/issues/41131675>
-          if (['filter', 'contain', 'transform'].includes(style.willChange)) {
-            return current;
+
+          // Check will-change
+          if (style.willChange && style.willChange !== 'auto') {
+            const values = style.willChange.split(',').map(v => v.trim());
+            if (values.some(v => ['filter', 'transform', 'perspective', 'backdrop-filter'].includes(v))) {
+              return current;
+            }
           }
         }
         current = current.parentNode;
       }
-      return document.body;
+      return document.documentElement;
     });
+    return this.chain(parents);
+  }
+
+  containingParent() {
+    const parents = this.map(el => el.offsetParent);
     return this.chain(parents);
   }
 
@@ -2107,6 +2124,9 @@ export class Query {
 
     if (!isSetter) {
       // getter
+      if (this.length === 0) {
+        return undefined;
+      }
       const results = this.map(el => {
         const $el = this.chain(el);
         const elRect = el.getBoundingClientRect();
@@ -2121,11 +2141,11 @@ export class Query {
           return globalCoords;
         }
 
-        // 2. Local (containingParent) Coordinates
-        const containingParent = $el.containingParent().el();
+        // 2. Local (positioningParent) Coordinates
+        const positioningParent = $el.positioningParent().el();
         let localCoords = { ...globalCoords }; // Fallback if no parent
-        if (containingParent) {
-          const parentRect = containingParent.getBoundingClientRect();
+        if (positioningParent) {
+          const parentRect = positioningParent.getBoundingClientRect();
           localCoords = {
             top: round(elRect.top - parentRect.top),
             left: round(elRect.left - parentRect.left),
@@ -2200,33 +2220,66 @@ export class Query {
     }
   }
 
-  isInViewport({ threshold = 0, fully = false } = {}) {
+  isInViewport({ threshold = 0, fully = false, viewport } = {}) {
     if (this.length === 0) {
       return false;
     }
 
+    const $viewport = (viewport)
+      ? $(viewport)
+      : undefined;
+
     // Check if ALL elements in the collection meet the viewport criteria
     return this.map(el => {
+      let viewportRect;
+      let $elViewport;
+      if (!$viewport?.length) {
+        $elViewport = this.chain(el).clippingParent();
+      }
+      // document element should use window
+      if ($elViewport.is(document.documentElement)) {
+        viewportRect = {
+          top: 0,
+          left: 0,
+          right: window.innerWidth || document.documentElement.clientWidth,
+          bottom: window.innerHeight || document.documentElement.clientHeight,
+        };
+      }
+      else {
+        viewportRect = $elViewport.bounds();
+      }
+
       const rect = el.getBoundingClientRect();
-      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+
+      const viewportHeight = viewportRect.bottom - viewportRect.top;
+      const viewportWidth = viewportRect.right - viewportRect.left;
+
+      // Convert element rect to be relative to viewport
+      const relativeRect = {
+        top: rect.top - viewportRect.top,
+        left: rect.left - viewportRect.left,
+        bottom: rect.bottom - viewportRect.top,
+        right: rect.right - viewportRect.left,
+        width: rect.width,
+        height: rect.height,
+      };
 
       // If fully is true, it overrides the threshold
       if (fully) {
         return (
-          rect.top >= 0
-          && rect.left >= 0
-          && rect.bottom <= viewportHeight
-          && rect.right <= viewportWidth
+          relativeRect.top >= 0
+          && relativeRect.left >= 0
+          && relativeRect.bottom <= viewportHeight
+          && relativeRect.right <= viewportWidth
         );
       }
 
       if (threshold > 0) {
         // Calculate the area of intersection
-        const intersectionLeft = Math.max(0, rect.left);
-        const intersectionTop = Math.max(0, rect.top);
-        const intersectionRight = Math.min(viewportWidth, rect.right);
-        const intersectionBottom = Math.min(viewportHeight, rect.bottom);
+        const intersectionLeft = Math.max(0, relativeRect.left);
+        const intersectionTop = Math.max(0, relativeRect.top);
+        const intersectionRight = Math.min(viewportWidth, relativeRect.right);
+        const intersectionBottom = Math.min(viewportHeight, relativeRect.bottom);
 
         const intersectionWidth = intersectionRight - intersectionLeft;
         const intersectionHeight = intersectionBottom - intersectionTop;
@@ -2236,17 +2289,17 @@ export class Query {
         }
 
         const intersectionArea = intersectionWidth * intersectionHeight;
-        const elementArea = rect.width * rect.height;
+        const elementArea = relativeRect.width * relativeRect.height;
 
         return (intersectionArea / elementArea) >= threshold;
       }
 
       // Default behavior: check if any part of the element is visible
       return (
-        rect.top < viewportHeight
-        && rect.bottom > 0
-        && rect.left < viewportWidth
-        && rect.right > 0
+        relativeRect.top < viewportHeight
+        && relativeRect.bottom > 0
+        && relativeRect.left < viewportWidth
+        && relativeRect.right > 0
       );
     }).every(result => result === true);
   }

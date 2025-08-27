@@ -904,7 +904,7 @@ describe('query', () => {
       expect($containingParent[0]).toBe(document.getElementById('willchange'));
     });
 
-    it('should return undefined for fixed position elements', () => {
+    it('should return containing parent for fixed', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="fixed" style="position: fixed;">Fixed element</div>
@@ -915,7 +915,7 @@ describe('query', () => {
       const $containingParent = $fixed.containingParent();
 
       expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(undefined);
+      expect($containingParent[0]).toBe(document.body);
     });
 
     it('should return document.body when no containing parent found', () => {
