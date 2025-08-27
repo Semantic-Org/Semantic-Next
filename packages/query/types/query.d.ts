@@ -1092,9 +1092,10 @@ export class Query {
    * @param options - Configuration options.
    * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
    * @param options.fully - Whether element must be fully within viewport. Overrides threshold. Defaults to false.
+   * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
    * @returns true if ALL elements meet criteria, false otherwise.
    */
-  isInViewport(options?: { threshold?: number; fully?: boolean; }): boolean;
+  isInViewport(options?: { threshold?: number; fully?: boolean; viewport?: Element | Query; }): boolean;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.
