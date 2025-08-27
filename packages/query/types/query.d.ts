@@ -855,13 +855,20 @@ export class Query {
   clippingParent(): Query;
 
   /**
-   * Gets the containing parent (positioning context) of each element in the current set, optionally calculating it accurately
-   * by considering transform, filter, and other properties that create new positioning contexts.
-   * @see https://next.semantic-ui.com/api/query/dimensions#containingparent
-   * @param options.calculate - Whether to calculate containing parent taking modern CSS properties into account.
-   * @returns A new Query instance containing the containing parent elements.
+   * Gets the simple containing parent (offsetParent) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/visibility#containingparent
+   * @returns A new Query instance containing the offset parent elements.
    */
-  containingParent(options?: { calculate?: boolean; }): Query;
+  containingParent(): Query;
+
+  /**
+   * Gets the positioning parent (positioning context) of each element in the current set, accurately calculating
+   * it by considering transform, filter, and other modern CSS properties that create new positioning contexts.
+   * @see https://next.semantic-ui.com/api/query/visibility#positioningparent
+   * @param options.calculate - Whether to calculate positioning parent taking modern CSS properties into account. Defaults to true.
+   * @returns A new Query instance containing the positioning parent elements.
+   */
+  positioningParent(options?: { calculate?: boolean; }): Query;
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
@@ -973,6 +980,121 @@ export class Query {
    * @returns The outer height of the first element.
    */
   outerHeight(includeMargin?: boolean): number;
+
+  /**
+   * Gets or sets the position of elements.
+   * @see https://next.semantic-ui.com/api/query/dimensions#position
+   */
+  // Setter overload
+  position(options: { top?: number; left?: number; relativeTo?: string | Element | Query; }): this;
+  // Getter with all coordinates
+  position(options?: {
+    relativeTo?: string | Element | Query;
+    precision?: 'pixel' | 'subpixel';
+    type?: never;
+  }):
+    | {
+      global: { top: number; left: number; };
+      local: { top: number; left: number; };
+      relative?: { top: number; left: number; };
+    }
+    | Array<{
+      global: { top: number; left: number; };
+      local: { top: number; left: number; };
+      relative?: { top: number; left: number; };
+    }>
+    | undefined;
+  // Getter with specific type
+  position(options: {
+    type: 'global' | 'local';
+    precision?: 'pixel' | 'subpixel';
+  }): { top: number; left: number; } | Array<{ top: number; left: number; }> | undefined;
+  // Getter with relative type
+  position(options: {
+    type: 'relative';
+    relativeTo: string | Element | Query;
+    precision?: 'pixel' | 'subpixel';
+  }): { top: number; left: number; } | Array<{ top: number; left: number; }> | undefined;
+
+  /**
+   * Gets the position relative to the document (viewport position + scroll offset).
+   * @see https://next.semantic-ui.com/api/query/dimensions#pageposition
+   * @param options - Configuration options.
+   * @param options.precision - Whether to round to pixel values. Defaults to 'pixel'.
+   * @returns Position object with top and left, array for multiple elements, or undefined for empty selection.
+   */
+  pagePosition(options?: { precision?: 'pixel' | 'subpixel'; }):
+    | { top: number; left: number; }
+    | Array<{ top: number; left: number; }>
+    | undefined;
+
+  /**
+   * Gets comprehensive dimension information for elements.
+   * @see https://next.semantic-ui.com/api/query/dimensions#dimensions
+   * @returns Dimension object for single element, array for multiple, or undefined for empty selection.
+   */
+  dimensions():
+    | {
+      top: number;
+      left: number;
+      right: number;
+      bottom: number;
+      pageTop: number;
+      pageLeft: number;
+      width: number;
+      innerWidth: number;
+      outerWidth: number;
+      marginWidth: number;
+      height: number;
+      innerHeight: number;
+      outerHeight: number;
+      marginHeight: number;
+      scrollTop: number;
+      scrollLeft: number;
+      scrollHeight: number;
+      scrollWidth: number;
+      box: {
+        padding: { top: number; right: number; bottom: number; left: number; };
+        border: { top: number; right: number; bottom: number; left: number; };
+        margin: { top: number; right: number; bottom: number; left: number; };
+      };
+    }
+    | Array<{
+      top: number;
+      left: number;
+      right: number;
+      bottom: number;
+      pageTop: number;
+      pageLeft: number;
+      width: number;
+      innerWidth: number;
+      outerWidth: number;
+      marginWidth: number;
+      height: number;
+      innerHeight: number;
+      outerHeight: number;
+      marginHeight: number;
+      scrollTop: number;
+      scrollLeft: number;
+      scrollHeight: number;
+      scrollWidth: number;
+      box: {
+        padding: { top: number; right: number; bottom: number; left: number; };
+        border: { top: number; right: number; bottom: number; left: number; };
+        margin: { top: number; right: number; bottom: number; left: number; };
+      };
+    }>
+    | undefined;
+
+  /**
+   * Checks if ALL elements in the selection are within the viewport.
+   * @see https://next.semantic-ui.com/api/query/visibility#isinviewport
+   * @param options - Configuration options.
+   * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
+   * @param options.fully - Whether element must be fully within viewport. Overrides threshold. Defaults to false.
+   * @returns true if ALL elements meet criteria, false otherwise.
+   */
+  isInViewport(options?: { threshold?: number; fully?: boolean; }): boolean;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.

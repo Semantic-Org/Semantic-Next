@@ -42,364 +42,117 @@ describe('Query Dimensions', () => {
     });
   });
 
-  describe('pagePosition()', () => {
-    it('gets position relative to document for single element', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute; top: 100px; left: 200px;"></div>';
+  // Note: position(), pagePosition(), dimensions() and isInViewport() tests
+  // have been moved to /test/browser/dimensions.test.js because they rely on
+  // accurate getBoundingClientRect() and scroll behavior which work better
+  // in a real browser environment via Playwright
 
-      const position = $('#test').pagePosition();
-
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('gets positions for multiple elements', () => {
+  describe('position() - basic structure tests only', () => {
+    // Most position() tests moved to browser tests for accurate measurements
+    it('returns correct structure for position() getter', () => {
       document.body.innerHTML = `
-        <div class="test" style="position: absolute; top: 100px; left: 200px;"></div>
-        <div class="test" style="position: absolute; top: 150px; left: 250px;"></div>
+        <div id="container" style="position: relative;">
+          <div id="child" style="position: absolute;"></div>
+        </div>
       `;
 
-      const positions = $('.test').pagePosition();
+      const position = $('#child').position();
 
-      expect(Array.isArray(positions)).toBe(true);
-      expect(positions).toHaveLength(2);
-      expect(positions[0]).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-      expect(positions[1]).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
+      // Just verify structure, not actual values
+      expect(position).toHaveProperty('global');
+      expect(position).toHaveProperty('local');
+      expect(position.global).toHaveProperty('top');
+      expect(position.global).toHaveProperty('left');
+      expect(position.local).toHaveProperty('top');
+      expect(position.local).toHaveProperty('left');
+    });
+
+    it('adds relative property when relativeTo is specified', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="position: relative;">
+          <div id="child" style="position: absolute;"></div>
+        </div>
+      `;
+
+      const position = $('#child').position({ relativeTo: '#outer' });
+
+      expect(position).toHaveProperty('global');
+      expect(position).toHaveProperty('local');
+      expect(position).toHaveProperty('relative');
+      expect(position.relative).toHaveProperty('top');
+      expect(position.relative).toHaveProperty('left');
     });
 
     it('returns undefined for empty selection', () => {
-      const position = $('.nonexistent').pagePosition();
+      const position = $('.nonexistent').position();
       expect(position).toBeUndefined();
     });
 
-    it('sets position via top and left coordinates', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute;"></div>';
-      const $element = $('#test');
+    it('returns undefined when specified relativeTo element not found', () => {
+      document.body.innerHTML = '<div id="test" style="position: absolute; top: 100px; left: 200px;"></div>';
 
-      const result = $element.pagePosition({ top: 100, left: 200 });
+      const position = $('#test').position({ relativeTo: '.nonexistent' });
 
-      // Should return Query instance for chaining
-      expect(result).toBe($element);
-
-      // Should set CSS properties
-      const element = $element[0];
-      expect(element.style.top).toBe('100px');
-      expect(element.style.left).toBe('200px');
+      expect(position).toBeUndefined();
     });
 
-    it('sets only top when left not provided', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute;"></div>';
-      const $element = $('#test');
-
-      $element.pagePosition({ top: 100 });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('100px');
-      expect(element.style.left).toBe('');
-    });
-
-    it('sets only left when top not provided', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute;"></div>';
-      const $element = $('#test');
-
-      $element.pagePosition({ left: 200 });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('');
-      expect(element.style.left).toBe('200px');
-    });
-
-    it('sets position for multiple elements', () => {
+    it('returns Query instance when used as setter', () => {
       document.body.innerHTML = `
-        <div class="test" style="position: absolute;"></div>
-        <div class="test" style="position: absolute;"></div>
+        <div id="container" style="position: relative;">
+          <div id="child" style="position: absolute;"></div>
+        </div>
       `;
+      const $element = $('#child');
 
-      $('.test').pagePosition({ top: 50, left: 75 });
+      // Numeric values trigger setter
+      const result = $element.position({ top: 50, left: 100 });
 
-      const elements = document.querySelectorAll('.test');
-      expect(elements[0].style.top).toBe('50px');
-      expect(elements[0].style.left).toBe('75px');
-      expect(elements[1].style.top).toBe('50px');
-      expect(elements[1].style.left).toBe('75px');
-    });
-
-    it('handles string values without adding px', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute;"></div>';
-      const $element = $('#test');
-
-      $element.pagePosition({ top: '10%', left: 'auto' });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('10%');
-      expect(element.style.left).toBe('auto');
-    });
-
-    it('handles mixed number and string values', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute;"></div>';
-      const $element = $('#test');
-
-      $element.pagePosition({ top: 100, left: 'calc(50% - 25px)' });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('100px');
-      expect(element.style.left).toBe('calc(50% - 25px)');
+      expect(result).toBe($element); // Returns Query for chaining
     });
   });
 
-  describe('containerPosition()', () => {
-    it('gets position relative to containingParent by default', () => {
-      document.body.innerHTML = `
-        <div id="container" style="position: relative; top: 50px; left: 100px;">
-          <div id="child" style="position: absolute; top: 25px; left: 30px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
+  describe('positioningParent()', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
     });
 
-    it('gets position relative to specified container', () => {
-      document.body.innerHTML = `
-        <div id="outer" style="position: relative; top: 10px; left: 20px;">
-          <div id="inner" style="position: relative; top: 30px; left: 40px;">
-            <div id="child" style="position: absolute; top: 15px; left: 25px;"></div>
-          </div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition({ container: '#outer' });
-
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('returns undefined for empty selection', () => {
-      const position = $('.nonexistent').containerPosition();
-      expect(position).toBeUndefined();
-    });
-
-    it('returns undefined when specified container not found', () => {
-      document.body.innerHTML = '<div id="test" style="position: absolute; top: 100px; left: 200px;"></div>';
-
-      const position = $('#test').containerPosition({ container: '.nonexistent' });
-
-      expect(position).toBeUndefined();
-    });
-
-    it('sets position relative to containingParent', () => {
-      document.body.innerHTML = `
-        <div id="container" style="position: relative;">
-          <div id="child" style="position: absolute;"></div>
-        </div>
-      `;
-      const $element = $('#child');
-
-      const result = $element.containerPosition({ top: 50, left: 100 });
-
-      // Should return Query instance for chaining
-      expect(result).toBe($element);
-
-      // Should set CSS properties
-      const element = $element[0];
-      expect(element.style.top).toBe('50px');
-      expect(element.style.left).toBe('100px');
-    });
-
-    it('sets position relative to specified container', () => {
-      document.body.innerHTML = `
-        <div id="container" style="position: relative;">
-          <div id="child" style="position: absolute;"></div>
-        </div>
-      `;
-      const $element = $('#child');
-
-      const result = $element.containerPosition({ container: '#container', top: 25, left: 50 });
-
-      // Should return Query instance for chaining
-      expect(result).toBe($element);
-
-      // Should set CSS properties
-      const element = $element[0];
-      expect(element.style.top).toBe('25px');
-      expect(element.style.left).toBe('50px');
-    });
-
-    it('handles Query object as container parameter', () => {
+    it('returns a Query instance', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="child" style="position: absolute;"></div>
         </div>
       `;
 
-      const $container = $('#container');
-      const position = $('#child').containerPosition($container);
-
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
+      const result = $('#child').positioningParent();
+      expect(result).toBeInstanceOf(Query);
     });
 
-    it('handles DOM element as container parameter', () => {
+    it('returns offsetParent when calculate is false', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="child" style="position: absolute;"></div>
         </div>
       `;
 
-      const containerElement = document.getElementById('container');
-      const position = $('#child').containerPosition(containerElement);
+      const result = $('#child').positioningParent({ calculate: false });
+      expect(result).toBeInstanceOf(Query);
+    });
+  });
 
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
+  describe('containingParent()', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
     });
 
-    it('gets positions for multiple elements', () => {
-      document.body.innerHTML = `
-        <div id="container" style="position: relative;">
-          <div class="child" style="position: absolute; top: 10px; left: 20px;"></div>
-          <div class="child" style="position: absolute; top: 30px; left: 40px;"></div>
-        </div>
-      `;
-
-      const positions = $('.child').containerPosition({ container: '#container' });
-
-      expect(Array.isArray(positions)).toBe(true);
-      expect(positions).toHaveLength(2);
-      expect(positions[0]).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-      expect(positions[1]).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('works with transform-based containing parent', () => {
-      document.body.innerHTML = `
-        <div id="transformed" style="transform: translateZ(0); position: relative; top: 50px; left: 100px;">
-          <div id="child" style="position: absolute; top: 20px; left: 30px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      // Should measure relative to #transformed, not document
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('works with filter-based containing parent', () => {
-      document.body.innerHTML = `
-        <div id="filtered" style="filter: blur(0px); position: relative; top: 25px; left: 50px;">
-          <div id="child" style="position: absolute; top: 15px; left: 25px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      // Should measure relative to #filtered
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('works with will-change containing parent', () => {
-      document.body.innerHTML = `
-        <div id="willchange" style="will-change: transform; position: relative; top: 75px; left: 150px;">
-          <div id="child" style="position: absolute; top: 10px; left: 20px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      // Should measure relative to #willchange
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('works with contain-based containing parent', () => {
-      document.body.innerHTML = `
-        <div id="contained" style="contain: layout; position: relative; top: 40px; left: 80px;">
-          <div id="child" style="position: absolute; top: 12px; left: 18px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      // Should measure relative to #contained
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('works with perspective-based containing parent', () => {
-      document.body.innerHTML = `
-        <div id="perspective" style="perspective: 1000px; position: relative; top: 60px; left: 120px;">
-          <div id="child" style="position: absolute; top: 8px; left: 16px;"></div>
-        </div>
-      `;
-
-      const position = $('#child').containerPosition();
-
-      // Should measure relative to #perspective
-      expect(position).toEqual({
-        top: expect.any(Number),
-        left: expect.any(Number),
-      });
-    });
-
-    it('handles string values in setter without adding px', () => {
+    it('returns a Query instance with offsetParent', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="child" style="position: absolute;"></div>
         </div>
       `;
-      const $element = $('#child');
 
-      $element.containerPosition({ top: '10%', left: 'auto' });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('10%');
-      expect(element.style.left).toBe('auto');
-    });
-
-    it('handles mixed number and string values in setter', () => {
-      document.body.innerHTML = `
-        <div id="container" style="position: relative;">
-          <div id="child" style="position: absolute;"></div>
-        </div>
-      `;
-      const $element = $('#child');
-
-      $element.containerPosition({ top: 50, left: 'calc(100% - 20px)' });
-
-      const element = $element[0];
-      expect(element.style.top).toBe('50px');
-      expect(element.style.left).toBe('calc(100% - 20px)');
+      const result = $('#child').containingParent();
+      expect(result).toBeInstanceOf(Query);
     });
   });
 });
