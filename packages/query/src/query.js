@@ -1624,7 +1624,7 @@ export class Query {
         }
       }
 
-      // BACKUP Path: Use natural display type for browsers based off a lookup table
+      // BACKUP Path: Use natural display type for browsers based on a lookup table
       const naturalDisplay = {
         inline: [
           'a',
