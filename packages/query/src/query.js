@@ -11,6 +11,7 @@ import {
   isDevelopment,
   isDOM,
   isFunction,
+  isNumber,
   isObject,
   isPlainObject,
   isString,
@@ -1927,6 +1928,168 @@ export class Query {
         el.style.display = 'none';
       }
     });
+  }
+
+  bounds() {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const rects = this.map(el => el.getBoundingClientRect());
+    return this.length === 1 ? rects[0] : rects;
+  }
+
+  pagePosition(settings = {}) {
+    return this.containerPosition({
+      container: document.documentElement,
+      ...settings,
+    });
+  }
+
+  containerPosition({
+    container,
+    top,
+    left,
+    includeMargin = false,
+    includePadding = false,
+    includeBorder = false,
+    includeScrollOffset = true,
+    round = false,
+  } = {}) {
+    const coords = (top !== undefined || left !== undefined) ? { top, left } : null;
+
+    // Getter/Setter
+    if (this.length === 0) {
+      return undefined;
+    }
+
+    // Query container once outside the map
+    let $container;
+    let containerElement;
+    if (container) {
+      $container = this.chain(container);
+      containerElement = $container.el();
+      // if user specifies a container not in DOM dont return coords.
+      // this would be confusing
+      if (!containerElement) {
+        return undefined;
+      }
+    }
+
+    const results = this.map(el => {
+      const elementRect = el.getBoundingClientRect();
+
+      // if no provided
+      if (!containerElement) {
+        $container = this.chain(el).containingParent();
+        containerElement = $container.el();
+      }
+
+      const containerRect = containerElement.getBoundingClientRect();
+      let calculatedTop = elementRect.top - containerRect.top;
+      let calculatedLeft = elementRect.left - containerRect.left;
+
+      // Get computed styles once if needed
+      let elementStyle, containerStyle;
+      if (includeMargin) {
+        elementStyle = window.getComputedStyle(el);
+      }
+      if (includePadding || includeBorder) {
+        containerStyle = window.getComputedStyle(containerElement);
+      }
+
+      // Track all offset adjustments
+      let marginTopOffset = 0, marginLeftOffset = 0;
+      let paddingTopOffset = 0, paddingLeftOffset = 0;
+      let borderTopOffset = 0, borderLeftOffset = 0;
+      let scrollTopOffset = 0, scrollLeftOffset = 0;
+
+      // Include element margin if requested
+      if (includeMargin) {
+        marginTopOffset = parseFloat(elementStyle.marginTop) || 0;
+        marginLeftOffset = parseFloat(elementStyle.marginLeft) || 0;
+        calculatedTop -= marginTopOffset;
+        calculatedLeft -= marginLeftOffset;
+      }
+
+      // Include container padding if requested
+      if (includePadding) {
+        paddingTopOffset = parseFloat(containerStyle.paddingTop) || 0;
+        paddingLeftOffset = parseFloat(containerStyle.paddingLeft) || 0;
+        calculatedTop -= paddingTopOffset;
+        calculatedLeft -= paddingLeftOffset;
+      }
+
+      // Include container border if requested
+      if (includeBorder) {
+        borderTopOffset = parseFloat(containerStyle.borderTopWidth) || 0;
+        borderLeftOffset = parseFloat(containerStyle.borderLeftWidth) || 0;
+        calculatedTop -= borderTopOffset;
+        calculatedLeft -= borderLeftOffset;
+      }
+
+      // Include container scroll offset if requested
+      if (includeScrollOffset) {
+        scrollTopOffset = $container.scrollTop() || 0;
+        scrollLeftOffset = $container.scrollLeft() || 0;
+        calculatedTop += scrollTopOffset;
+        calculatedLeft += scrollLeftOffset;
+      }
+
+      // Apply rounding if requested
+      if (round) {
+        calculatedTop = Math.round(calculatedTop);
+        calculatedLeft = Math.round(calculatedLeft);
+      }
+
+      // Setter logic: Calculate required CSS values
+      if (coords) {
+        // Set CSS values
+        if (coords.top !== undefined) {
+          if (isNumber(coords.top)) {
+            // For numbers, apply offset calculations
+            let requiredTop = coords.top;
+            requiredTop += marginTopOffset;
+            requiredTop += paddingTopOffset;
+            requiredTop += borderTopOffset;
+            requiredTop -= scrollTopOffset;
+            requiredTop += containerRect.top - elementRect.top;
+            el.style.top = `${requiredTop}px`;
+          }
+          else {
+            // For strings, use as-is
+            el.style.top = coords.top;
+          }
+        }
+
+        if (coords.left !== undefined) {
+          if (isNumber(coords.left)) {
+            // For numbers, apply offset calculations
+            let requiredLeft = coords.left;
+            requiredLeft += marginLeftOffset;
+            requiredLeft += paddingLeftOffset;
+            requiredLeft += borderLeftOffset;
+            requiredLeft -= scrollLeftOffset;
+            requiredLeft += containerRect.left - elementRect.left;
+            el.style.left = `${requiredLeft}px`;
+          }
+          else {
+            // For strings, use as-is
+            el.style.left = coords.left;
+          }
+        }
+
+        return null; // Setter returns nothing for individual elements
+      }
+
+      // Getter logic: Return calculated position
+      return { top: calculatedTop, left: calculatedLeft };
+    });
+
+    // Return this for chaining if setter, or positions if getter
+    if (coords) {
+      return this;
+    }
+    return this.length === 1 ? results[0] : results;
   }
 
   // special helper for SUI components
