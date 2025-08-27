@@ -551,5 +551,67 @@ describe('query', () => {
         `<div id="top" style="position: absolute; top: -51px; left: 10px; width: 50px; height: 50px;"></div>`;
       expect($('#top').isInViewport()).toBe(false);
     });
+
+    it('uses clipping parent as default viewport', () => {
+      document.body.innerHTML = `
+        <div id="container" style="width: 200px; height: 100px; overflow: auto; position: relative;">
+          <div id="content" style="height: 300px;">
+            <div id="test" style="position: absolute; top: 150px; left: 10px; width: 50px; height: 50px;"></div>
+          </div>
+        </div>
+      `;
+
+      // Element is outside the clipping parent's viewport
+      const container = document.getElementById('container');
+      container.scrollTop = 0;
+      expect($('#test').isInViewport()).toBe(false);
+
+      // Scroll to make element visible within clipping parent
+      container.scrollTop = 100;
+      expect($('#test').isInViewport()).toBe(true);
+    });
+
+    it('accepts custom viewport element', () => {
+      document.body.innerHTML = `
+        <div id="viewport" style="position: absolute; top: 0; left: 0; width: 100px; height: 100px;">
+        </div>
+        <div id="test" style="position: absolute; top: 50px; left: 50px; width: 50px; height: 50px;"></div>
+      `;
+
+      // Element overlaps with custom viewport
+      expect($('#test').isInViewport({ viewport: '#viewport' })).toBe(true);
+
+      // Move element outside custom viewport
+      document.getElementById('test').style.top = '150px';
+      expect($('#test').isInViewport({ viewport: '#viewport' })).toBe(false);
+    });
+
+    it('accepts custom viewport as Query object', () => {
+      document.body.innerHTML = `
+        <div id="viewport" style="position: absolute; top: 0; left: 0; width: 100px; height: 100px;">
+        </div>
+        <div id="test" style="position: absolute; top: 50px; left: 50px; width: 50px; height: 50px;"></div>
+      `;
+
+      const $viewport = $('#viewport');
+      expect($('#test').isInViewport({ viewport: $viewport })).toBe(true);
+
+      // Move element outside custom viewport
+      document.getElementById('test').style.top = '150px';
+      expect($('#test').isInViewport({ viewport: $viewport })).toBe(false);
+    });
+
+    it('falls back to browser viewport when no clipping parent exists', () => {
+      document.body.innerHTML = `
+        <div id="test" style="position: absolute; top: 10px; left: 10px; width: 50px; height: 50px;"></div>
+      `;
+
+      // Element is within browser viewport (no clipping parent)
+      expect($('#test').isInViewport()).toBe(true);
+
+      // Move element outside browser viewport
+      document.getElementById('test').style.top = '-100px';
+      expect($('#test').isInViewport()).toBe(false);
+    });
   });
 });

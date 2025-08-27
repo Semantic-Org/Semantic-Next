@@ -904,7 +904,7 @@ describe('query', () => {
       expect($containingParent[0]).toBe(document.getElementById('willchange'));
     });
 
-    it('should return containing parent for fixed', () => {
+    it('should return documentElement for fixed elements (null offsetParent fallback)', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="fixed" style="position: fixed;">Fixed element</div>
@@ -914,8 +914,9 @@ describe('query', () => {
       const $fixed = $('#fixed');
       const $containingParent = $fixed.containingParent();
 
+      // Fixed elements have null offsetParent, so should fallback to documentElement
       expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.body);
+      expect($containingParent[0]).toBe(document.documentElement);
     });
 
     it('should return document.body when no containing parent found', () => {
