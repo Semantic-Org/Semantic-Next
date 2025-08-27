@@ -1544,7 +1544,7 @@ export class Query {
         cacheKey = { styleHash, inlineDisplay };
         rulesHash = hashCode(cacheKey);
 
-        // FAST PATH: Skip stylesheet check, if rules are same
+        // FAST PATH: Skip stylesheet check if the rules are the same
         const cached = Query.elementDisplayCache.get(el);
         if (cached && cached.rulesHash === rulesHash) {
           return cached.displayValue;
