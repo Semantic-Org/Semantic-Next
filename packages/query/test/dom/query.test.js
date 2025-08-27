@@ -2331,6 +2331,116 @@ describe('query', () => {
     });
   });
 
+  describe('removeData', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should remove a single data attribute', () => {
+      const div = document.createElement('div');
+      div.dataset.test = 'value';
+      div.dataset.keep = 'keepValue';
+      document.body.appendChild(div);
+
+      $('div').removeData('test');
+      expect(div.dataset.test).toBe(undefined);
+      expect(div.dataset.keep).toBe('keepValue');
+    });
+
+    it('should remove multiple data attributes from space-separated string', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      div.dataset.keep = 'keepValue';
+      document.body.appendChild(div);
+
+      $('div').removeData('foo baz');
+      expect(div.dataset.foo).toBe(undefined);
+      expect(div.dataset.baz).toBe(undefined);
+      expect(div.dataset.keep).toBe('keepValue');
+    });
+
+    it('should remove multiple data attributes from array', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      div.dataset.keep = 'keepValue';
+      document.body.appendChild(div);
+
+      $('div').removeData(['foo', 'baz']);
+      expect(div.dataset.foo).toBe(undefined);
+      expect(div.dataset.baz).toBe(undefined);
+      expect(div.dataset.keep).toBe('keepValue');
+    });
+
+    it('should remove data attributes from multiple elements', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div1.dataset.test = 'value1';
+      div2.dataset.test = 'value2';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      $('div').removeData('test');
+      expect(div1.dataset.test).toBe(undefined);
+      expect(div2.dataset.test).toBe(undefined);
+    });
+
+    it('should return Query instance for chaining', () => {
+      const div = document.createElement('div');
+      div.dataset.test = 'value';
+      document.body.appendChild(div);
+
+      const result = $('div').removeData('test');
+      expect(result).toBeInstanceOf(Query);
+      expect(result[0]).toBe(div);
+    });
+
+    it('should handle empty selection gracefully', () => {
+      const result = $('.nonexistent').removeData('test');
+      expect(result).toBeInstanceOf(Query);
+      expect(result.length).toBe(0);
+    });
+
+    it('should handle non-existent keys gracefully', () => {
+      const div = document.createElement('div');
+      div.dataset.keep = 'keepValue';
+      document.body.appendChild(div);
+
+      $('div').removeData('nonexistent');
+      expect(div.dataset.keep).toBe('keepValue');
+    });
+
+    it('should handle multiple spaces in space-separated string', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      div.dataset.test = 'value';
+      document.body.appendChild(div);
+
+      $('div').removeData('foo  baz   test');
+      expect(div.dataset.foo).toBe(undefined);
+      expect(div.dataset.baz).toBe(undefined);
+      expect(div.dataset.test).toBe(undefined);
+    });
+
+    it('should support method chaining', () => {
+      const div = document.createElement('div');
+      div.dataset.foo = 'bar';
+      div.dataset.baz = 'qux';
+      document.body.appendChild(div);
+
+      $('div')
+        .removeData('foo')
+        .data('newKey', 'newValue')
+        .removeData('baz');
+
+      expect(div.dataset.foo).toBe(undefined);
+      expect(div.dataset.baz).toBe(undefined);
+      expect(div.dataset.newKey).toBe('newValue');
+    });
+  });
+
   describe('end', () => {
     beforeEach(() => {
       document.body.innerHTML = '';

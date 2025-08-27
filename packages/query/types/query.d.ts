@@ -945,6 +945,14 @@ export class Query {
   data(): PlainObject<string> | PlainObject<string>[] | undefined;
 
   /**
+   * Removes data attributes from elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/attributes#removedata
+   * @param keys - A space-separated string or array of data attribute keys to remove.
+   * @returns The Query instance for chaining.
+   */
+  removeData(keys: string | string[]): this;
+
+  /**
    * Gets the data context (if any) associated with the *first* element in the current set.
    * @see https://next.semantic-ui.com/api/query/components#datacontext
    * @returns The data context, or undefined.

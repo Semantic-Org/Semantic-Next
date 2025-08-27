@@ -141,6 +141,8 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `attr(name)`, `attr(name, value)` - Get/set attributes
 - `removeAttr(name)` - Remove attributes
 - `prop(name)`, `prop(name, value)` - Get/set properties
+- `data()`, `data(key)`, `data(key, value)` - Get/set data attributes
+- `removeData(keys)` - Remove data attributes (supports space-separated strings or arrays)
 
 ### CSS and Styling
 - `css(property)`, `css(property, value)` - Get/set CSS properties

@@ -33,20 +33,12 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Feature** - Added [`show()`](https://next.semantic-ui.com/api/query/visibility#show) method for showing hidden elements with optional `calculate` parameter to determine natural display values.
 * **Feature** - Added [`hide()`](https://next.semantic-ui.com/api/query/visibility#hide) method for hiding elements by setting display to 'none'.
 * **Feature** - Added [`toggle()`](https://next.semantic-ui.com/api/query/visibility#toggle) method for toggling element visibility with optional `calculate` parameter.
+* **Feature** - Added [`removeData()`](https://next.semantic-ui.com/api/query/attributes#removedata) method for removing data attributes from elements. Supports space-separated strings or arrays for removing multiple attributes at once.
 * **Enhancement** - [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) now accepts `calculate` parameter to control whether to analyze stylesheets (default: true) or use tag-based lookup only.
 * **Enhancement** - [`isVisible()`](https://next.semantic-ui.com/api/query/logical-operators#isvisible) now checks for `visibility: hidden` and `content-visibility: hidden` by default, with new `includeVisibility` parameter for control.
 * **Enhancement** - [`containingParent()`](https://next.semantic-ui.com/api/query/visibility#containingparent) now provides simple `offsetParent` wrapper functionality alongside the new `positioningParent()` method.
 * **Bug** - Fixed CSS nesting parsing in [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) to properly resolve nested selectors with `&` parent references (e.g., `& .grid-container`).
 * **Bug** - Fixed [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method to return `undefined` for empty selections instead of empty array when used as getter.
-
-## Bugs
-* **Query Plugins** - Fixed issue where using non clonables as settings like query collections, or custom classes wouldn't work as expected. This was related to the default behavior of deepExtend and clone (see breaking changes).
-
-## Features
-* **Utils** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
-
-## Breaking Changes
-* **Utils** - `deepExtend` now preserves non clonables by default. This is to prevent very common scenarios where extend is used with custom classes or dom elements where the original reference should be maintained. Note this still can be overwritten using `deepExtend(obj1, obj2, { preserveNonCloneable: false });`
 
 # Version 0.16.1-2 - 08.21.2025
 

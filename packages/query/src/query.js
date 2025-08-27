@@ -1889,6 +1889,15 @@ export class Query {
       : allData;
   }
 
+  removeData(keys) {
+    keys = isString(keys)
+      ? keys.split(/\s+/)
+      : keys;
+    return this.each((el) => {
+      each(keys, (key) => delete el.dataset[key]);
+    });
+  }
+
   slice(start, end) {
     if (this.length === 0) {
       return this;
