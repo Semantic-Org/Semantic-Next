@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { inArray, isNumber } from '@semantic-ui/utils';
+import { each, inArray, isNumber, keys } from '@semantic-ui/utils';
 
 import css from './anchor.css?raw';
 
@@ -7,13 +7,14 @@ const defaultSettings = {
   to: '',
   position: '',
   offset: 0,
-  distance: '1em',
+  distance: 14,
   allowOverlap: true, // allow element to be placed inside bounds of anchored element as last resort
   alwaysShow: false, // always show element regardless of whether it fits
   anchorName: 'anchor-{count}',
   prefer: 'auto',
   detectPosition: true,
   moveElement: true,
+  arrow: true,
   containToScroll: true, // make clipping containers act as boundaries for position-try
 };
 
@@ -27,11 +28,25 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   resizeObserver: null,
   $clippingParent: null,
 
-  positionMap: {
-    top: 'block-start',
-    bottom: 'block-end',
-    left: 'inline-start',
-    right: 'inline-end',
+  positionConfig: {
+    'top': 'block-start',
+    'top left': 'block-start inline-start',
+    'top right': 'block-start inline-end',
+    'top center': 'block-start inline-center',
+    'bottom': 'block-end',
+    'bottom left': 'block-end inline-start',
+    'bottom right': 'block-end inline-end',
+    'bottom center': 'block-end inline-center',
+    'left': 'inline-start',
+    'left top': 'inline-start block-start',
+    'left bottom': 'inline-start block-end',
+    'left center': 'inline-start block-center',
+    'right': 'inline-end',
+    'right top': 'inline-end block-start',
+    'right bottom': 'inline-end block-end',
+    'right center': 'inline-end block-center',
+    'center': 'center',
+    'hidden': null,
   },
 
   initialize() {
@@ -40,8 +55,11 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
       self.setupClippingBoundary();
     }
     self.attach();
-    if (settings.detectPosition) {
+    if (settings.arrow || settings.detectPosition) {
       self.setupPositionMonitoring();
+    }
+    if (settings.arrow) {
+      $el.attr('data-arrow', '');
     }
     if (settings.moveElement) {
       self.maybeMoveElement();
@@ -145,9 +163,45 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     return $(settings.to);
   },
 
+  getPositions() {
+    return keys(self.positionConfig);
+  },
+
+  getPositionConfig(position = settings.position) {
+    return self.positionConfig[position];
+  },
+
+  parsePositionLogical(position = settings.position) {
+    const cssLogical = self.getPositionConfig(position);
+    if (!cssLogical) { return null; }
+
+    const parts = cssLogical.split(' ');
+    const majorAxis = parts[0]; // 'block-start', 'block-end', 'inline-start', 'inline-end', 'center'
+    const minorAxis = parts[1]; // 'inline-start', 'inline-end', 'block-start', 'block-end', undefined
+
+    return {
+      majorAxis: majorAxis.startsWith('block') ? 'block' : majorAxis.startsWith('inline') ? 'inline' : null,
+      majorAlign: majorAxis.split('-')[1], // 'start', 'end', 'center'
+      minorAxis: minorAxis ? (minorAxis.startsWith('block') ? 'block' : 'inline') : null,
+      minorAlign: minorAxis ? minorAxis.split('-')[1] : 'center', // 'start', 'end', 'center'
+      cssLogical: cssLogical,
+    };
+  },
+
   getPositionArea() {
+    const cssLogical = self.getPositionConfig();
+    if (cssLogical) {
+      return cssLogical;
+    }
+    // Fallback to original mapping logic if not in config
     const words = settings.position.split(' ');
-    const mapped = words.map(word => self.positionMap[word] || word);
+    const positionMap = {
+      top: 'block-start',
+      bottom: 'block-end',
+      left: 'inline-start',
+      right: 'inline-end',
+    };
+    const mapped = words.map(word => positionMap[word] || word);
     return mapped.join(' ');
   },
 
@@ -171,10 +225,62 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     return settings.distance;
   },
   getOffset() {
-    if (isNumber(settings.offset)) {
-      return `${settings.offset}px`;
+    let offset = settings.offset;
+    if (settings.arrow) {
+      const arrowDistance = self.getArrowDistance();
+      offset -= arrowDistance;
     }
-    return settings.offset || '0px';
+    if (isNumber(offset)) {
+      return `${offset}px`;
+    }
+    return offset || '0px';
+  },
+
+  getArrowDistance() {
+    if (!settings.arrow) { return 0; }
+
+    const parsed = self.parsePositionLogical();
+    if (!parsed) { return 0; }
+
+    const isCentered = parsed.minorAlign === 'center';
+
+    if (isCentered) {
+      // Centered arrows (top, bottom, left, right) - no offset
+      return 0;
+    }
+
+    // Corner arrows - get base distance and apply directional adjustment
+    const baseDistance = parseFloat($el.cssVar('arrow-distance-corner')) || 26; // 1em + 10px fallback
+
+    // Apply directional adjustment based on minor axis alignment
+    if (parsed.minorAlign === 'start') {
+      // For 'start' alignments - arrow is on start side, offset negatively
+      return -baseDistance;
+    }
+    else if (parsed.minorAlign === 'end') {
+      // For 'end' alignments - arrow is on end side, offset positively
+      return baseDistance;
+    }
+
+    return 0; // Fallback
+  },
+
+  getDistancePx() {
+    // Convert distance setting to pixels for calculations
+    if (isNumber(settings.distance)) {
+      return settings.distance;
+    }
+    // For now, assume non-numeric distances are 14px (could enhance later)
+    return 14;
+  },
+
+  getOffsetPx() {
+    // Convert offset setting to pixels for calculations
+    let offset = settings.offset;
+    if (settings.arrow) {
+      offset -= 14; // Same adjustment as getOffset()
+    }
+    return isNumber(offset) ? offset : 0;
   },
 
   detectAppliedPosition() {
@@ -194,53 +300,60 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
       return 'hidden';
     }
 
-    const tolerance = 2;
+    // Popup corners
+    const popupCorners = [
+      [rect.left, rect.top], // top-left
+      [rect.right, rect.top], // top-right
+      [rect.left, rect.bottom], // bottom-left
+      [rect.right, rect.bottom], // bottom-right
+    ];
 
-    // Determine vertical position
-    let vertical = null;
-    const centerY = rect.top + rect.height / 2;
-    const anchorCenterY = anchorRect.top + anchorRect.height / 2;
+    // Anchor reference points (excluding center - handle as special case)
+    const anchorPoints = {
+      'top': [anchorRect.left + anchorRect.width / 2, anchorRect.top],
+      'top left': [anchorRect.left, anchorRect.top],
+      'top center': [anchorRect.left + anchorRect.width / 2, anchorRect.top],
+      'top right': [anchorRect.right, anchorRect.top],
+      'bottom': [anchorRect.left + anchorRect.width / 2, anchorRect.bottom],
+      'bottom left': [anchorRect.left, anchorRect.bottom],
+      'bottom center': [anchorRect.left + anchorRect.width / 2, anchorRect.bottom],
+      'bottom right': [anchorRect.right, anchorRect.bottom],
+      'left': [anchorRect.left, anchorRect.top + anchorRect.height / 2],
+      'left top': [anchorRect.left, anchorRect.top],
+      'left center': [anchorRect.left, anchorRect.top + anchorRect.height / 2],
+      'left bottom': [anchorRect.left, anchorRect.bottom],
+      'right': [anchorRect.right, anchorRect.top + anchorRect.height / 2],
+      'right top': [anchorRect.right, anchorRect.top],
+      'right center': [anchorRect.right, anchorRect.top + anchorRect.height / 2],
+      'right bottom': [anchorRect.right, anchorRect.bottom],
+    };
 
-    if (rect.bottom <= anchorRect.top + tolerance) {
-      vertical = 'top';
-    }
-    else if (rect.top >= anchorRect.bottom - tolerance) {
-      vertical = 'bottom';
-    }
-    else if (Math.abs(centerY - anchorCenterY) < tolerance) {
-      vertical = 'center';
-    }
+    // Check for center first - when popup is fully contained within anchor
+    const allCornersInside = popupCorners.every(([x, y]) =>
+      x >= anchorRect.left && x <= anchorRect.right
+      && y >= anchorRect.top && y <= anchorRect.bottom
+    );
 
-    // Determine horizontal position
-    let horizontal = null;
-    const centerX = rect.left + rect.width / 2;
-    const anchorCenterX = anchorRect.left + anchorRect.width / 2;
-
-    if (rect.right <= anchorRect.left + tolerance) {
-      horizontal = 'left';
-    }
-    else if (rect.left >= anchorRect.right - tolerance) {
-      horizontal = 'right';
-    }
-    else if (Math.abs(centerX - anchorCenterX) < tolerance) {
-      horizontal = 'center';
-    }
-
-    // Format position string
-    if (vertical === 'center' && horizontal === 'center') {
+    if (allCornersInside) {
       return 'center';
     }
-    else if (vertical === 'center') {
-      return horizontal;
-    }
-    else if (horizontal === 'center') {
-      return vertical;
-    }
-    else if (vertical && horizontal) {
-      return `${vertical} ${horizontal}`;
+
+    let minDistance = Infinity;
+    let closestPosition = null;
+
+    for (const [position, anchorPoint] of Object.entries(anchorPoints)) {
+      // Find closest popup corner to this anchor point
+      const distanceToAnchorPoint = Math.min(
+        ...popupCorners.map(corner => Math.hypot(corner[0] - anchorPoint[0], corner[1] - anchorPoint[1])),
+      );
+
+      if (distanceToAnchorPoint < minDistance) {
+        minDistance = distanceToAnchorPoint;
+        closestPosition = position;
+      }
     }
 
-    return null;
+    return closestPosition;
   },
 
   updatePositionAttribute() {
@@ -298,6 +411,8 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
       'position-anchor': self.anchorName,
       'position-area': self.getPositionArea(),
       'position-visibility': self.getPositionVisibility(),
+      'margin-block-start': '',
+      'margin-inline-start': '',
     };
 
     const distance = self.getDistance();
@@ -330,6 +445,8 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     $el
       .css(cssProps)
       .addClass(classNames.anchored);
+
+    self.updatePositionAttribute();
   },
 
   detach() {

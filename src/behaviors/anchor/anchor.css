@@ -6,6 +6,8 @@
   --arrow-border-width: var(--border-width, 1px);
   --arrow-box-shadow: 1px 1px 2px 0 oklch(0 0 0 / 4%);
 
+  /* this is read by javascript to determine offset */
+  --arrow-distance-corner: calc(var(--arrow-offset) + var(--arrow-size));
 
   --arrow-border-darkened: color-mix(
     in oklch,
@@ -33,9 +35,16 @@
     box-shadow: var(--arrow-box-shadow);
   }
 
+  &[data-position^="center"] {
+    margin-inline-start: 0 !important;
+    margin-block-start: 0 !important;
+  }
+
   &[data-position^="hidden"]::before,
   &[data-position^="center"]::before {
     display: none;
+    margin-inline-start: 0 !important;
+    margin-block-start: 0 !important;
   }
 
   /* Top positions - need bottom-right borders */
