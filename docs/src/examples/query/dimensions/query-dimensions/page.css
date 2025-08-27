@@ -1,0 +1,62 @@
+.container {
+  position: relative;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--standard-1);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.box {
+  position: relative;
+  width: 150px;
+  height: 100px;
+  padding: 20px;
+  margin: 15px;
+  background: var(--blue-5);
+  border: 5px solid var(--blue-30);
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 100px;
+  overflow: auto;
+}
+
+.box.resized {
+  width: 200px;
+  height: 140px;
+  padding: 30px;
+  margin: 20px;
+  line-height: 140px;
+}
+
+.box.has-content {
+  line-height: 1.4;
+  padding-top: 10px;
+}
+
+.extra-content {
+  display: none;
+}
+
+.box.has-content .extra-content {
+  display: block;
+  white-space: pre-line;
+}
+
+h3 {
+  margin: 15px 0 5px 0;
+  font-size: 14px;
+  color: var(--standard-70);
+}
+
+p {
+  margin: 3px 0;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+p span {
+  font-weight: bold;
+  color: var(--blue-60);
+}

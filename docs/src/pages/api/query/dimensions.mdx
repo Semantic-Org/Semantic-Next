@@ -242,3 +242,181 @@ const divHeight = $('div.content').naturalHeight();
 
 ### Example
 <PlaygroundExample id="query-naturalheight" direction="horizontal"></PlaygroundExample>
+
+## position
+
+Gets or sets element position coordinates with flexible reference systems.
+
+### Syntax
+
+#### Get Position (All Coordinates)
+```javascript
+$('selector').position()
+$('selector').position({ relativeTo: container, precision: 'pixel' })
+```
+
+#### Get Position (Specific Type)
+```javascript
+$('selector').position({ type: 'global' })
+$('selector').position({ type: 'local' })
+$('selector').position({ type: 'relative', relativeTo: container })
+```
+
+#### Set Position
+```javascript
+$('selector').position({ top: 100, left: 200 })
+$('selector').position({ top: 50, left: 75, relativeTo: container })
+```
+
+### Parameters
+| Name       | Type                    | Description                                          |
+|------------|-------------------------|------------------------------------------------------|
+| relativeTo | string/Element/Query    | Element to measure relative to (for getter/setter)  |
+| top        | number                  | Top position to set (triggers setter)               |
+| left       | number                  | Left position to set (triggers setter)              |
+| precision  | 'pixel'\|'subpixel'     | Rounding precision for coordinates. Defaults to 'pixel' |
+| type       | 'global'\|'local'\|'relative' | Specific coordinate system to return           |
+
+### Returns
+
+#### Get Position (Default)
+Returns an object with multiple coordinate systems:
+- **Single Element** - `{ global: {top, left}, local: {top, left}, relative?: {top, left} }`
+- **Multiple Elements** - Array of position objects
+
+#### Get Position (With Type)
+- **Single Element** - `{ top: number, left: number }`
+- **Multiple Elements** - Array of coordinate objects
+
+#### Set Position
+[Query object](/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+```javascript
+// Get all position coordinates
+const pos = $('#element').position();
+console.log(pos.global.top, pos.local.left);
+
+// Get only viewport coordinates
+const viewport = $('#element').position({ type: 'global' });
+
+// Get position relative to container
+const relative = $('#element').position({ 
+  type: 'relative', 
+  relativeTo: '#container' 
+});
+
+// Set position relative to containing parent
+$('#element').position({ top: 100, left: 200 });
+
+// Set position relative to specific element
+$('#element').position({ 
+  top: 50, 
+  left: 75, 
+  relativeTo: '#reference' 
+});
+```
+
+### Coordinate Systems
+
+- **Global**: Position relative to viewport (window)
+- **Local**: Position relative to containing parent (positioned ancestor)
+- **Relative**: Position relative to specified element
+
+### Example
+<PlaygroundExample id="query-position" direction="horizontal"></PlaygroundExample>
+
+## pagePosition
+
+Gets element position relative to the document (viewport position + scroll offset).
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').pagePosition()
+$('selector').pagePosition({ precision: 'subpixel' })
+```
+
+### Parameters
+| Name      | Type                | Description                                      |
+|-----------|---------------------|--------------------------------------------------|
+| precision | 'pixel'\|'subpixel' | Rounding precision. Defaults to 'pixel'         |
+
+### Returns
+
+#### Get
+- **Single Element** - `{ top: number, left: number }`
+- **Multiple Elements** - Array of position objects
+- **Empty Selection** - `undefined`
+
+### Usage
+
+```javascript
+// Get page position
+const pos = $('#element').pagePosition();
+console.log(`Element is at ${pos.top}px from document top`);
+
+// Get subpixel precision
+const precisePos = $('#element').pagePosition({ precision: 'subpixel' });
+```
+
+### Example
+<PlaygroundExample id="query-pageposition" direction="horizontal"></PlaygroundExample>
+
+## dimensions
+
+Gets comprehensive dimension information for elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').dimensions()
+```
+
+### Returns
+
+#### Get
+Returns a detailed dimensions object:
+- **Single Element** - Dimension object with all measurements
+- **Multiple Elements** - Array of dimension objects  
+- **Empty Selection** - `undefined`
+
+#### Dimension Object Properties
+| Property      | Description                                    |
+|---------------|------------------------------------------------|
+| top, left     | Position relative to viewport                  |
+| right, bottom | Right and bottom edges relative to viewport    |
+| pageTop, pageLeft | Position relative to document              |
+| width         | Content width                                  |
+| innerWidth    | Content + padding width                        |
+| outerWidth    | Content + padding + border width               |
+| marginWidth   | Content + padding + border + margin width      |
+| height        | Content height                                 |
+| innerHeight   | Content + padding height                       |
+| outerHeight   | Content + padding + border height              |
+| marginHeight  | Content + padding + border + margin height     |
+| scrollTop, scrollLeft | Current scroll position                |
+| scrollHeight, scrollWidth | Total scrollable dimensions        |
+| box           | Detailed box model measurements                |
+
+### Usage
+
+```javascript
+// Get all dimensions
+const dims = $('#element').dimensions();
+console.log(`Element size: ${dims.width}x${dims.height}`);
+console.log(`With padding: ${dims.innerWidth}x${dims.innerHeight}`);
+console.log(`With border: ${dims.outerWidth}x${dims.outerHeight}`);
+console.log(`Page position: ${dims.pageTop}, ${dims.pageLeft}`);
+
+// Access box model details
+console.log(`Padding: ${dims.box.padding.top}px`);
+console.log(`Border: ${dims.box.border.left}px`);
+console.log(`Margin: ${dims.box.margin.bottom}px`);
+```
+
+### Example
+<PlaygroundExample id="query-dimensions" direction="horizontal"></PlaygroundExample>

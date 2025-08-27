@@ -264,41 +264,146 @@ const $scrollContainer = $content.clippingParent();
 
 ## containingParent
 
-Get the element that establishes the positioning context for each element (where `offsetTop`/`offsetLeft` are relative to).
+Get the simple containing parent (offsetParent) for each element.
 
-> **Note** This method finds the actual containing block that coordinates like `top` and `left` are relative to when positioning elements. The native `offsetParent` property predates modern CSS and doesn't account for stacking contexts created by `transform`, `will-change`, `filter`, `perspective`, and `contain`.
+> **Simple Access** This is a direct wrapper around the native `offsetParent` property for quick access to basic positioning context.
 
 ### Syntax
 
 ```javascript
 $('selector').containingParent()
-$('selector').containingParent(options)
+```
+
+### Returns
+
+A new [Query object](/api/query/basic#the-query-object) containing the offset parent elements.
+
+### Usage
+
+```javascript
+// Quick access to offsetParent
+const $offsetParent = $('#element').containingParent();
+
+// For simple positioning calculations
+const $element = $('#positioned-element');
+const $parent = $element.containingParent();
+console.log('Positioned relative to:', $parent[0]);
+```
+
+### Example
+<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
+
+## positioningParent
+
+Get the accurate positioning context for each element, considering modern CSS properties that create containing blocks.
+
+> **Accurate Positioning** This method finds the actual element that coordinates like `top` and `left` are relative to when positioning elements. Unlike `offsetParent`, it accounts for stacking contexts created by `transform`, `will-change`, `filter`, `perspective`, `contain`, and other modern CSS properties.
+
+### Syntax
+
+```javascript
+$('selector').positioningParent()
+$('selector').positioningParent(options)
 ```
 
 ### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| calculate | boolean | Calculate containing parent using modern CSS properties. When `false`, uses browser's `offsetParent`. Defaults to `true`. |
+| calculate | boolean | Calculate positioning parent using modern CSS properties. When `false`, uses browser's `offsetParent`. Defaults to `true`. |
 
 ### Returns
 
-A new [Query object](/api/query/basic#the-query-object) containing the containing parent elements.
+A new [Query object](/api/query/basic#the-query-object) containing the positioning parent elements.
 
 ### Usage
 
 ```javascript
-// Find actual positioning context (includes transform, filter, etc.)
+// Find accurate positioning context (recommended for positioning)
 const $absoluteEl = $('.absolute-positioned');
-const $container = $absoluteEl.containingParent();
+const $positioningParent = $absoluteEl.positioningParent();
 
-// Position element relative to containing parent
-const rect = $container[0].getBoundingClientRect();
+// Position element relative to its true positioning context
+const rect = $positioningParent[0].getBoundingClientRect();
 $absoluteEl.css({ top: rect.height / 2, left: rect.width / 2 });
 
-// Use legacy offsetParent behavior
-const $offsetParent = $element.containingParent({ calculate: false });
+// Handle fixed positioning with transforms
+const $fixedEl = $('.fixed-positioned');
+const $context = $fixedEl.positioningParent(); // Finds transform/filter ancestors
+
+// Fallback to simple offsetParent behavior
+const $offsetParent = $element.positioningParent({ calculate: false });
 ```
 
+### Positioning Context Detection
+
+This method detects elements that create containing blocks through:
+- `position: relative/absolute/fixed`
+- `transform` (any value except `none`)
+- `filter` (any value except `none`) 
+- `perspective` (any value except `none`)
+- `contain: paint/layout`
+- `will-change: transform/filter/perspective`
+- Container queries (`container-type`)
+
 ### Example
-<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="query-positioningparent" direction="horizontal"></PlaygroundExample>
+
+## isInViewport
+
+Checks if all elements in the selection are within the viewport bounds.
+
+> **Note** This method checks viewport visibility, not element visibility. Hidden elements (`display: none`, `visibility: hidden`) will still return `true` if their calculated position would be within viewport bounds.
+
+### Syntax
+
+```javascript
+$('selector').isInViewport()
+$('selector').isInViewport(options)
+```
+
+### Parameters
+
+| Name      | Type    | Description |
+|-----------|---------|-------------|
+| threshold | number  | Minimum percentage (0-1) of element that must be visible. Defaults to `0` (any part visible). |
+| fully     | boolean | Whether element must be fully within viewport. Overrides threshold. Defaults to `false`. |
+
+### Returns
+
+`boolean` - `true` if **ALL** elements meet the visibility criteria, `false` if **ANY** element doesn't meet criteria.
+
+### Usage
+
+```javascript
+// Check if any part is in viewport
+if ($('#element').isInViewport()) {
+  console.log('Element is at least partially visible');
+}
+
+// Check if element is fully in viewport
+if ($('#element').isInViewport({ fully: true })) {
+  console.log('Element is completely visible');
+}
+
+// Check if at least 50% is visible
+if ($('#element').isInViewport({ threshold: 0.5 })) {
+  console.log('At least half the element is visible');
+}
+
+// Check multiple elements (all must meet criteria)
+if ($('.items').isInViewport()) {
+  console.log('All items are at least partially visible');
+}
+```
+
+### Behavior
+
+- Returns `false` for empty selections
+- For multiple elements, **ALL** must meet criteria to return `true`
+- Threshold is based on element area intersection with viewport
+- `fully: true` overrides any threshold setting
+- Uses current scroll position and viewport dimensions
+
+### Example
+<PlaygroundExample id="query-is-in-viewport" direction="horizontal"></PlaygroundExample>

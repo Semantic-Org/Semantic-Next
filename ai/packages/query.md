@@ -161,17 +161,23 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `width(value)`, `height(value)` - Get/set dimensions
 - `scrollWidth(value)`, `scrollHeight(value)` - Get/set scroll dimensions
 - `scrollTop(value)`, `scrollLeft(value)` - Get/set scroll position
+- `position(options)` - Get/set position with global, local, and relative coordinates
+- `pagePosition(options)` - Get document-relative position (viewport + scroll)
+- `dimensions()` - Get comprehensive dimension info (position, size, box model)
+- `bounds()` - Get DOMRect bounding box information
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
 - `naturalDisplay(options)` - Get natural display value (ignoring display: none)
 - `clippingParent()` - Get element that clips visual bounds
-- `containingParent(options)` - Get positioning context parent
+- `containingParent()` - Get simple containing parent (offsetParent)
+- `positioningParent(options)` - Get accurate positioning context parent
 
 ### Visibility and Display
 - `show(options)` - Show hidden elements using natural display value
 - `hide()` - Hide elements by setting display: none
 - `toggle(options)` - Toggle visibility state
 - `isVisible(options)` - Check if elements are visible (with opacity/visibility checks)
+- `isInViewport(options)` - Check if elements are within viewport bounds
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
@@ -795,5 +801,152 @@ function integrateWithLibrary() {
 5. **Visibility Control**: Use `show()`/`hide()`/`toggle()` with proper display calculation over direct CSS manipulation
 6. **Scope Limiting**: Limit query scope for better performance
 7. **Global Management**: Manage global namespace conflicts appropriately
+
+## Advanced Positioning and Layout Patterns
+
+### Modern Position Calculations
+
+```javascript
+// Get all coordinate systems at once
+const pos = $('#tooltip').position();
+console.log('Viewport:', pos.global);  // Relative to viewport
+console.log('Container:', pos.local);  // Relative to positioned parent
+
+// Get position relative to specific element
+const relativePos = $('#child').position({ 
+  relativeTo: '#reference',
+  precision: 'subpixel' 
+});
+
+// Position element relative to another
+$('#popup').position({
+  relativeTo: $('#trigger'),
+  top: 10,     // 10px below trigger
+  left: 0      // Aligned to left edge
+});
+
+// Get document position (handles scrolling)
+const pagePos = $('#element').pagePosition();
+console.log(`Element is ${pagePos.top}px from document top`);
+```
+
+### Comprehensive Layout Analysis
+
+```javascript
+// Get all dimension information
+const dims = $('#complex-element').dimensions();
+
+// Access everything you need for calculations
+console.log('Content size:', dims.width, 'x', dims.height);
+console.log('With padding:', dims.innerWidth, 'x', dims.innerHeight);
+console.log('Full size:', dims.outerWidth, 'x', dims.outerHeight);
+console.log('Including margins:', dims.marginWidth, 'x', dims.marginHeight);
+
+// Position information
+console.log('Viewport position:', dims.top, dims.left);
+console.log('Document position:', dims.pageTop, dims.pageLeft);
+
+// Box model details
+console.log('Padding:', dims.box.padding);
+console.log('Border:', dims.box.border);  
+console.log('Margin:', dims.box.margin);
+
+// Scroll state
+console.log('Scroll position:', dims.scrollTop, dims.scrollLeft);
+console.log('Scrollable area:', dims.scrollWidth, dims.scrollHeight);
+```
+
+### Viewport-Aware UI
+
+```javascript
+// Lazy loading with viewport detection
+function setupLazyLoading() {
+  $('.lazy-image').each((img) => {
+    if ($(img).isInViewport({ threshold: 0.1 })) {
+      img.src = img.dataset.src;
+      img.classList.remove('lazy-image');
+    }
+  });
+}
+
+// Scroll-triggered animations
+$(window).on('scroll', () => {
+  $('.animate-on-scroll').each((element) => {
+    if ($(element).isInViewport({ threshold: 0.5 })) {
+      element.classList.add('animated');
+    }
+  });
+});
+
+// Check if all elements are visible
+if ($('.critical-elements').isInViewport({ fully: true })) {
+  console.log('All critical elements are fully visible');
+}
+
+// Progressive reveal based on viewport percentage
+$('.reveal-items').each((item) => {
+  const $item = $(item);
+  if ($item.isInViewport({ threshold: 0.25 })) {
+    $item.addClass('fade-in');
+  }
+});
+```
+
+### Dynamic Positioning
+
+```javascript
+// Smart tooltip positioning with accurate positioning context
+function positionTooltip($tooltip, $trigger) {
+  const triggerPos = $trigger.position({ type: 'global' });
+  const triggerDims = $trigger.dimensions();
+  const tooltipDims = $tooltip.dimensions();
+  
+  // Find the actual positioning context for the tooltip
+  const $positioningContext = $tooltip.positioningParent();
+  
+  // Calculate best position to keep tooltip in viewport
+  let top = triggerPos.top + triggerDims.height + 5;
+  let left = triggerPos.left;
+  
+  // Adjust if tooltip would go off-screen
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  if (left + tooltipDims.width > viewportWidth) {
+    left = triggerPos.left + triggerDims.width - tooltipDims.width;
+  }
+  
+  if (top + tooltipDims.height > viewportHeight) {
+    top = triggerPos.top - tooltipDims.height - 5;
+  }
+  
+  $tooltip.css({ top: `${top}px`, left: `${left}px` });
+}
+
+// Relative positioning for connected elements
+$('#draggable').on('drag', (event) => {
+  // Position connected indicator relative to draggable
+  $('#indicator').position({
+    relativeTo: '#draggable',
+    top: -30,
+    left: 10
+  });
+});
+
+// Center element relative to container
+function centerInContainer($element, $container) {
+  const containerDims = $container.dimensions();
+  const elementDims = $element.dimensions();
+  
+  // Use accurate positioning context for calculations
+  const $positioningParent = $element.positioningParent();
+  
+  $element.position({
+    relativeTo: $container,
+    top: (containerDims.height - elementDims.height) / 2,
+    left: (containerDims.width - elementDims.width) / 2
+  });
+}
+```
 
 This query system provides a modern, component-aware approach to DOM manipulation while maintaining familiar jQuery-like syntax and patterns.
