@@ -1,0 +1,26 @@
+.container {
+  margin: 10px;
+  padding: 50px;
+  border: var(--border);
+
+  &.inner {
+    position: relative;
+  }
+}
+.box {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  height: 0px;
+  padding: 20px;
+  background: var(--angled-gradient);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+
+p {
+  margin: 8px 0;
+}
+
