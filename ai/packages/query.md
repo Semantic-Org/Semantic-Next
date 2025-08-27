@@ -177,7 +177,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `hide()` - Hide elements by setting display: none
 - `toggle(options)` - Toggle visibility state
 - `isVisible(options)` - Check if elements are visible (with opacity/visibility checks)
-- `isInViewport(options)` - Check if elements are within viewport bounds
+- `isInViewport(options)` - Check if elements are within viewport bounds (defaults to clipping parent)
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
@@ -859,7 +859,7 @@ console.log('Scrollable area:', dims.scrollWidth, dims.scrollHeight);
 ### Viewport-Aware UI
 
 ```javascript
-// Lazy loading with viewport detection
+// Lazy loading with viewport detection (uses clipping parent by default)
 function setupLazyLoading() {
   $('.lazy-image').each((img) => {
     if ($(img).isInViewport({ threshold: 0.1 })) {
@@ -869,24 +869,26 @@ function setupLazyLoading() {
   });
 }
 
-// Scroll-triggered animations
-$(window).on('scroll', () => {
+// Scroll-triggered animations within specific container
+$('#content-area').on('scroll', () => {
   $('.animate-on-scroll').each((element) => {
+    // Check visibility within the scrolling content area
     if ($(element).isInViewport({ threshold: 0.5 })) {
       element.classList.add('animated');
     }
   });
 });
 
-// Check if all elements are visible
-if ($('.critical-elements').isInViewport({ fully: true })) {
-  console.log('All critical elements are fully visible');
+// Check visibility within custom viewport (modal, sidebar, etc.)
+if ($('.modal-content').isInViewport({ fully: true, viewport: $('#modal') })) {
+  console.log('Modal content is fully visible within modal viewport');
 }
 
-// Progressive reveal based on viewport percentage
+// Progressive reveal based on browser viewport
 $('.reveal-items').each((item) => {
   const $item = $(item);
-  if ($item.isInViewport({ threshold: 0.25 })) {
+  // Explicitly use browser viewport instead of clipping parent
+  if ($item.isInViewport({ threshold: 0.25, viewport: document.documentElement })) {
     $item.addClass('fade-in');
   }
 });
