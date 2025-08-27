@@ -353,7 +353,7 @@ This method detects elements that create containing blocks through:
 
 Checks if all elements in the selection are within the viewport bounds.
 
-> **Note** This method checks viewport visibility, not element visibility. Hidden elements (`display: none`, `visibility: hidden`) will still return `true` if their calculated position would be within viewport bounds.
+> **Note** By default, this method checks visibility within the clipping parent (scrollable container). If no clipping parent exists, it falls back to the browser viewport. You can also specify a custom viewport element.
 
 ### Syntax
 
@@ -368,6 +368,7 @@ $('selector').isInViewport(options)
 |-----------|---------|-------------|
 | threshold | number  | Minimum percentage (0-1) of element that must be visible. Defaults to `0` (any part visible). |
 | fully     | boolean | Whether element must be fully within viewport. Overrides threshold. Defaults to `false`. |
+| viewport  | Element\|Query | The viewport element to check against. Defaults to clipping parent, falls back to browser viewport. |
 
 ### Returns
 
@@ -376,19 +377,24 @@ $('selector').isInViewport(options)
 ### Usage
 
 ```javascript
-// Check if any part is in viewport
+// Check if any part is visible in clipping parent (default)
 if ($('#element').isInViewport()) {
-  console.log('Element is at least partially visible');
+  console.log('Element is at least partially visible in container');
 }
 
-// Check if element is fully in viewport
+// Check if element is fully within clipping parent
 if ($('#element').isInViewport({ fully: true })) {
-  console.log('Element is completely visible');
+  console.log('Element is completely visible in container');
 }
 
 // Check if at least 50% is visible
 if ($('#element').isInViewport({ threshold: 0.5 })) {
   console.log('At least half the element is visible');
+}
+
+// Check against specific viewport element
+if ($('#tooltip').isInViewport({ viewport: $('#modal') })) {
+  console.log('Tooltip is visible within modal bounds');
 }
 
 // Check multiple elements (all must meet criteria)
@@ -401,9 +407,11 @@ if ($('.items').isInViewport()) {
 
 - Returns `false` for empty selections
 - For multiple elements, **ALL** must meet criteria to return `true`
+- Defaults to checking visibility within clipping parent (scrollable container)
+- Falls back to browser viewport if no clipping parent exists
 - Threshold is based on element area intersection with viewport
 - `fully: true` overrides any threshold setting
-- Uses current scroll position and viewport dimensions
+- Custom viewport can be specified via `viewport` parameter
 
 ### Example
 <PlaygroundExample id="query-is-in-viewport" direction="horizontal"></PlaygroundExample>
