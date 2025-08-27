@@ -6,6 +6,29 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.17.0 - xx.xx.xxxx
+
+## Breaking Changes
+* **Query** - Renamed `containingParent` to `positioningParent` and added support for values that can cause `position: fixed` to be relative to different coordinate systems. `containingParent` is still available but will always return the `offsetParent` of an element. This is faster but MAY NOT always be the proper parent for positioning.
+
+## CSS Tokens
+* **Feature** - Added colored borders like `--red-border`, `--blue-border` etc.
+
+## Query
+* **Feature** - Added [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method that replaces `containerPosition()` with enhanced API supporting multiple coordinate systems (global, local, relative) and proper empty selection handling.
+* **Feature** - Added [`pagePosition()`](https://next.semantic-ui.com/api/query/dimensions#pageposition) method for getting/setting element position relative to the document.
+* **Feature** - Added [`dimensions()`](https://next.semantic-ui.com/api/query/dimensions#dimensions) method returning comprehensive dimension information including content, padding, border, margin, and scroll dimensions.
+* **Feature** - Added [`isInViewport()`](https://next.semantic-ui.com/api/query/visibility#isinviewport) method for detecting viewport intersection with optional threshold and fully visible options.
+* **Feature** - Added [`positioningParent()`](https://next.semantic-ui.com/api/query/visibility#positioningparent) method that correctly identifies positioning contexts for both absolute and fixed elements, including modern CSS properties like transform, filter, perspective, contain, and will-change.
+* **Feature** - Added [`show()`](https://next.semantic-ui.com/api/query/visibility#show) method for showing hidden elements with optional `calculate` parameter to determine natural display values.
+* **Feature** - Added [`hide()`](https://next.semantic-ui.com/api/query/visibility#hide) method for hiding elements by setting display to 'none'.
+* **Feature** - Added [`toggle()`](https://next.semantic-ui.com/api/query/visibility#toggle) method for toggling element visibility with optional `calculate` parameter.
+* **Enhancement** - [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) now accepts `calculate` parameter to control whether to analyze stylesheets (default: true) or use tag-based lookup only.
+* **Enhancement** - [`isVisible()`](https://next.semantic-ui.com/api/query/logical-operators#isvisible) now checks for `visibility: hidden` and `content-visibility: hidden` by default, with new `includeVisibility` parameter for control.
+* **Enhancement** - [`containingParent()`](https://next.semantic-ui.com/api/query/visibility#containingparent) now provides simple `offsetParent` wrapper functionality alongside the new `positioningParent()` method.
+* **Bug** - Fixed CSS nesting parsing in [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) to properly resolve nested selectors with `&` parent references (e.g., `& .grid-container`).
+* **Bug** - Fixed [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method to return `undefined` for empty selections instead of empty array when used as getter.
+
 # Version 0.16.1-2 - 08.21.2025
 
 ## Core
@@ -18,7 +41,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 ## UI Changes
 
 `semantic-ui/core` is now organized into three groups: [`primitives`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/primitives), [`components`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/components), and [`behaviors`](https://github.com/Semantic-Org/Semantic-Next/tree/main/src/behaviors)
-  
+
 * **Primitives** include JSON specs and are essential building blocks like `modal` and `button`.
 * **Components** are built with primitives and have more complex functionality, for example, `global-search` or `theme-switcher`.
 * **Behaviors** do not export web components but provide behaviors like `transition` or `position`.

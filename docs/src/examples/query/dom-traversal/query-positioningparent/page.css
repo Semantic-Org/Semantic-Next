@@ -1,0 +1,47 @@
+.container {
+  padding: var(--padding);
+  margin: var(--margin) 0;
+  border: 2px solid var(--standard-30);
+  background: var(--standard-5);
+  position: relative;
+  height: 150px;
+}
+
+.box {
+  padding: var(--padding);
+  margin: var(--margin);
+  border: 2px solid var(--blue-30);
+  background: var(--blue-5);
+  height: 100px;
+}
+
+.target {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: var(--padding);
+  background: var(--green-10);
+  border: 2px solid var(--green-30);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.fixed-target {
+  position: fixed;
+  top: 100px;
+  right: 40px;
+  padding: var(--padding);
+  background: var(--orange-10);
+  border: 2px solid var(--orange-30);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+ui-button {
+  margin: 5px;
+}
+
+.highlight {
+  outline: 3px solid var(--red-40);
+  outline-offset: -3px;
+}

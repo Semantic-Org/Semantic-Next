@@ -1,0 +1,24 @@
+<p>Check viewport visibility with threshold and fully options</p>
+
+<div class="scroll-container" id="scroll-area">
+  <div class="spacer">Scroll down to see elements...</div>
+  
+  <div class="test-element" data-name="Element 1">Element 1</div>
+  <div class="spacer">Scroll more...</div>
+  
+  <div class="test-element" data-name="Element 2">Element 2</div>
+  <div class="spacer">Keep scrolling...</div>
+  
+  <div class="test-element" data-name="Element 3">Element 3</div>
+  <div class="spacer bottom">End of content</div>
+</div>
+
+<ui-button id="check-viewport">Check Viewport</ui-button>
+<ui-button id="check-threshold">Check 50% Threshold</ui-button>
+<ui-button id="check-fully">Check Fully Visible</ui-button>
+<ui-button id="scroll-to-middle">Scroll to Middle</ui-button>
+
+<div class="output">
+  <h3>Viewport Status</h3>
+  <pre id="viewport-info"></pre>
+</div>

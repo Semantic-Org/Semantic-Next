@@ -161,9 +161,23 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `width(value)`, `height(value)` - Get/set dimensions
 - `scrollWidth(value)`, `scrollHeight(value)` - Get/set scroll dimensions
 - `scrollTop(value)`, `scrollLeft(value)` - Get/set scroll position
+- `position(options)` - Get/set position with global, local, and relative coordinates
+- `pagePosition(options)` - Get document-relative position (viewport + scroll)
+- `dimensions()` - Get comprehensive dimension info (position, size, box model)
+- `bounds()` - Get DOMRect bounding box information
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
-- `naturalDisplay()` - Get natural display value (ignoring display: none)
+- `naturalDisplay(options)` - Get natural display value (ignoring display: none)
+- `clippingParent()` - Get element that clips visual bounds
+- `containingParent()` - Get simple containing parent (offsetParent)
+- `positioningParent(options)` - Get accurate positioning context parent
+
+### Visibility and Display
+- `show(options)` - Show hidden elements using natural display value
+- `hide()` - Hide elements by setting display: none
+- `toggle(options)` - Toggle visibility state
+- `isVisible(options)` - Check if elements are visible (with opacity/visibility checks)
+- `isInViewport(options)` - Check if elements are within viewport bounds (defaults to clipping parent)
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
@@ -558,6 +572,174 @@ const allButtons = $$('.button');             // Slower, but finds all buttons
 const dropdownOptions = $$('ui-dropdown .option'); // More targeted
 ```
 
+## Visibility Control Patterns
+
+### Advanced Show/Hide Operations
+
+The Query system provides sophisticated visibility control methods that go beyond basic display toggling. These methods integrate with CSS analysis and modern visibility properties.
+
+```javascript
+// Basic show/hide operations
+$('.hidden-elements').show();        // Shows elements using natural display value
+$('.visible-elements').hide();       // Hides elements with display: none
+$('.toggle-elements').toggle();      // Toggles based on current state
+
+// Performance-optimized operations (skip stylesheet analysis)
+$('.many-elements').show({ calculate: false });    // Uses tag-based lookup
+$('.toggle-items').toggle({ calculate: false });   // Faster for simple cases
+```
+
+### Natural Display Calculation
+
+The `naturalDisplay()` method analyzes CSS rules to determine the proper display value for elements:
+
+```javascript
+// Full CSS analysis (default behavior)
+$('.hidden-flex-container').naturalDisplay();     // 'flex' (from CSS rules)
+$('.hidden-table-row').naturalDisplay();          // 'table-row' (from CSS rules)
+
+// Tag-based lookup for performance
+$('div').naturalDisplay({ calculate: false });    // 'block' (tag default)
+$('span').naturalDisplay({ calculate: false });   // 'inline' (tag default)
+$('table').naturalDisplay({ calculate: false });  // 'table' (tag default)
+```
+
+### Advanced Visibility Detection
+
+The enhanced `isVisible()` method checks multiple visibility factors:
+
+```javascript
+// Basic visibility (layout dimensions only)
+$('.elements').isVisible();                        // Checks display and dimensions
+
+// Include opacity in visibility check
+$('.fade-elements').isVisible({ includeOpacity: true });    // Also checks opacity > 0
+
+// Skip modern visibility properties
+$('.legacy-check').isVisible({ includeVisibility: false }); // Skip visibility/content-visibility
+
+// Comprehensive visibility check
+$('.complete-check').isVisible({ 
+  includeOpacity: true,     // Check opacity > 0
+  includeVisibility: true   // Check visibility: hidden and content-visibility: hidden
+});
+```
+
+### Component Visibility Patterns
+
+Working with component visibility in the context of Shadow DOM:
+
+```javascript
+// Show/hide components themselves
+$$('ui-modal').hide();                    // Hide modal components
+$$('ui-dropdown.disabled').show();       // Show disabled dropdowns
+
+// Show/hide elements within components
+$$('ui-form .error-message').show();     // Show error messages inside forms
+$$('ui-table .loading-indicator').hide(); // Hide loading states
+
+// Toggle component states
+$$('ui-sidebar').toggle();               // Toggle sidebar visibility
+$$('ui-tooltip.auto-hide').toggle({ calculate: false }); // Fast toggle
+```
+
+### Animation Integration Patterns
+
+Coordinate visibility changes with CSS animations:
+
+```javascript
+async function fadeInElement() {
+  const $element = $('.fade-target');
+  
+  // Show element but make it transparent first
+  $element.css('opacity', '0').show();
+  
+  // Trigger fade-in animation
+  $element.addClass('fade-in');
+  
+  // Wait for animation to complete
+  await $element.onNext('animationend');
+  console.log('Fade-in complete');
+}
+
+async function slideToggle() {
+  const $panel = $('.slide-panel');
+  const isVisible = $panel.isVisible();
+  
+  if (isVisible) {
+    $panel.addClass('slide-out');
+    await $panel.onNext('animationend');
+    $panel.hide().removeClass('slide-out');
+  } else {
+    $panel.show().addClass('slide-in');
+    await $panel.onNext('animationend');
+    $panel.removeClass('slide-in');
+  }
+}
+```
+
+### Performance Considerations for Visibility
+
+```javascript
+// Cache visibility state for multiple operations
+const $elements = $('.dynamic-content');
+const isVisible = $elements.isVisible();
+
+if (Array.isArray(isVisible)) {
+  // Mixed visibility states - handle individually
+  $elements.each((el, index) => {
+    if (!isVisible[index]) {
+      $(el).show({ calculate: false }); // Fast show for hidden elements
+    }
+  });
+} else if (!isVisible) {
+  // All hidden - batch show operation
+  $elements.show(); // Full calculation for proper display values
+}
+
+// Efficient toggle patterns
+function toggleWithCache() {
+  const $toggles = $('.toggle-items');
+  const states = $toggles.isVisible();
+  
+  $toggles.each((el, index) => {
+    const $el = $(el);
+    if (Array.isArray(states) ? states[index] : states) {
+      $el.hide(); // Fast hide
+    } else {
+      $el.show({ calculate: false }); // Fast show with basic display
+    }
+  });
+}
+```
+
+### Debugging Visibility Issues
+
+Use visibility methods to diagnose display problems:
+
+```javascript
+function debugVisibility(selector) {
+  const $elements = $(selector);
+  
+  console.log('=== Visibility Debug ===');
+  console.log('Elements found:', $elements.length);
+  
+  $elements.each((el, index) => {
+    const $el = $(el);
+    console.log(`Element ${index}:`);
+    console.log('  - isVisible():', $el.isVisible());
+    console.log('  - isVisible(opacity):', $el.isVisible({ includeOpacity: true }));
+    console.log('  - naturalDisplay():', $el.naturalDisplay());
+    console.log('  - computedStyle(display):', $el.computedStyle('display'));
+    console.log('  - computedStyle(opacity):', $el.computedStyle('opacity'));
+    console.log('  - computedStyle(visibility):', $el.computedStyle('visibility'));
+  });
+}
+
+// Usage
+debugVisibility('.problematic-elements');
+```
+
 ## Integration Patterns
 
 ### With Semantic UI Components
@@ -605,9 +787,10 @@ function integrateWithLibrary() {
 2. **Cross-Shadow DOM Queries**: Use `$$` to find elements inside web components
 3. **Event Delegation**: Handle events on dynamic content with proper delegation
 4. **DOM Manipulation**: Create, modify, and manage DOM content
-5. **Form Handling**: Manage form elements and validation
-6. **Animation Integration**: Coordinate with CSS transitions and animations
-7. **Component Communication**: Access component methods and state
+5. **Visibility Control**: Show, hide, and toggle elements with proper display calculation
+6. **Form Handling**: Manage form elements and validation
+7. **Animation Integration**: Coordinate with CSS transitions and animations
+8. **Component Communication**: Access component methods and state
 
 ## Key Principles
 
@@ -615,7 +798,157 @@ function integrateWithLibrary() {
 2. **Component Integration**: Use component-specific methods for web component interaction
 3. **Event Delegation**: Use delegation for dynamic content and better performance
 4. **Method Chaining**: Leverage chaining for concise and readable code
-5. **Scope Limiting**: Limit query scope for better performance
-6. **Global Management**: Manage global namespace conflicts appropriately
+5. **Visibility Control**: Use `show()`/`hide()`/`toggle()` with proper display calculation over direct CSS manipulation
+6. **Scope Limiting**: Limit query scope for better performance
+7. **Global Management**: Manage global namespace conflicts appropriately
+
+## Advanced Positioning and Layout Patterns
+
+### Modern Position Calculations
+
+```javascript
+// Get all coordinate systems at once
+const pos = $('#tooltip').position();
+console.log('Viewport:', pos.global);  // Relative to viewport
+console.log('Container:', pos.local);  // Relative to positioned parent
+
+// Get position relative to specific element
+const relativePos = $('#child').position({ 
+  relativeTo: '#reference',
+  precision: 'subpixel' 
+});
+
+// Position element relative to another
+$('#popup').position({
+  relativeTo: $('#trigger'),
+  top: 10,     // 10px below trigger
+  left: 0      // Aligned to left edge
+});
+
+// Get document position (handles scrolling)
+const pagePos = $('#element').pagePosition();
+console.log(`Element is ${pagePos.top}px from document top`);
+```
+
+### Comprehensive Layout Analysis
+
+```javascript
+// Get all dimension information
+const dims = $('#complex-element').dimensions();
+
+// Access everything you need for calculations
+console.log('Content size:', dims.width, 'x', dims.height);
+console.log('With padding:', dims.innerWidth, 'x', dims.innerHeight);
+console.log('Full size:', dims.outerWidth, 'x', dims.outerHeight);
+console.log('Including margins:', dims.marginWidth, 'x', dims.marginHeight);
+
+// Position information
+console.log('Viewport position:', dims.top, dims.left);
+console.log('Document position:', dims.pageTop, dims.pageLeft);
+
+// Box model details
+console.log('Padding:', dims.box.padding);
+console.log('Border:', dims.box.border);  
+console.log('Margin:', dims.box.margin);
+
+// Scroll state
+console.log('Scroll position:', dims.scrollTop, dims.scrollLeft);
+console.log('Scrollable area:', dims.scrollWidth, dims.scrollHeight);
+```
+
+### Viewport-Aware UI
+
+```javascript
+// Lazy loading with viewport detection (uses clipping parent by default)
+function setupLazyLoading() {
+  $('.lazy-image').each((img) => {
+    if ($(img).isInViewport({ threshold: 0.1 })) {
+      img.src = img.dataset.src;
+      img.classList.remove('lazy-image');
+    }
+  });
+}
+
+// Scroll-triggered animations within specific container
+$('#content-area').on('scroll', () => {
+  $('.animate-on-scroll').each((element) => {
+    // Check visibility within the scrolling content area
+    if ($(element).isInViewport({ threshold: 0.5 })) {
+      element.classList.add('animated');
+    }
+  });
+});
+
+// Check visibility within custom viewport (modal, sidebar, etc.)
+if ($('.modal-content').isInViewport({ fully: true, viewport: $('#modal') })) {
+  console.log('Modal content is fully visible within modal viewport');
+}
+
+// Progressive reveal based on browser viewport
+$('.reveal-items').each((item) => {
+  const $item = $(item);
+  // Explicitly use browser viewport instead of clipping parent
+  if ($item.isInViewport({ threshold: 0.25, viewport: document.documentElement })) {
+    $item.addClass('fade-in');
+  }
+});
+```
+
+### Dynamic Positioning
+
+```javascript
+// Smart tooltip positioning with accurate positioning context
+function positionTooltip($tooltip, $trigger) {
+  const triggerPos = $trigger.position({ type: 'global' });
+  const triggerDims = $trigger.dimensions();
+  const tooltipDims = $tooltip.dimensions();
+  
+  // Find the actual positioning context for the tooltip
+  const $positioningContext = $tooltip.positioningParent();
+  
+  // Calculate best position to keep tooltip in viewport
+  let top = triggerPos.top + triggerDims.height + 5;
+  let left = triggerPos.left;
+  
+  // Adjust if tooltip would go off-screen
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  if (left + tooltipDims.width > viewportWidth) {
+    left = triggerPos.left + triggerDims.width - tooltipDims.width;
+  }
+  
+  if (top + tooltipDims.height > viewportHeight) {
+    top = triggerPos.top - tooltipDims.height - 5;
+  }
+  
+  $tooltip.css({ top: `${top}px`, left: `${left}px` });
+}
+
+// Relative positioning for connected elements
+$('#draggable').on('drag', (event) => {
+  // Position connected indicator relative to draggable
+  $('#indicator').position({
+    relativeTo: '#draggable',
+    top: -30,
+    left: 10
+  });
+});
+
+// Center element relative to container
+function centerInContainer($element, $container) {
+  const containerDims = $container.dimensions();
+  const elementDims = $element.dimensions();
+  
+  // Use accurate positioning context for calculations
+  const $positioningParent = $element.positioningParent();
+  
+  $element.position({
+    relativeTo: $container,
+    top: (containerDims.height - elementDims.height) / 2,
+    left: (containerDims.width - elementDims.width) / 2
+  });
+}
+```
 
 This query system provides a modern, component-aware approach to DOM manipulation while maintaining familiar jQuery-like syntax and patterns.

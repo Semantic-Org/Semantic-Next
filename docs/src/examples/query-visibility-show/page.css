@@ -1,0 +1,80 @@
+.elements {
+  padding: 15px;
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  
+  .block {
+    padding: 10px;
+    background: var(--blue-background-color);
+    color: var(--blue-text-color);
+    border: var(--blue-border);
+    border-radius: var(--border-radius);
+  }
+  
+  .inline {
+    padding: 8px 12px;
+    background: var(--green-background-color);
+    color: var(--green-text-color);
+    border: var(--green-border);
+    border-radius: var(--border-radius);
+    align-self: flex-start;
+  }
+  
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    
+    td {
+      padding: 10px;
+      background: var(--red-background-color);
+      color: var(--red-text-color);
+      border: var(--red-border);
+      border-radius: var(--border-radius);
+    }
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px;
+    background: var(--purple-background-color);
+    color: var(--purple-text-color);
+    border: var(--purple-border);
+    border-radius: var(--border-radius);
+    
+    span {
+      background: var(--orange-background-color);
+      color: var(--orange-text-color);
+      border: var(--orange-border);
+      padding: 8px;
+      text-align: center;
+      border-radius: var(--border-radius);
+    }
+  }
+  
+  .hidden {
+    display: none;
+  }
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.status {
+  padding: 10px;
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+  font-family: monospace;
+  
+  .count {
+    font-weight: bold;
+  }
+}

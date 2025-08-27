@@ -1,0 +1,38 @@
+.container {
+  position: relative;
+  margin: 20px 0;
+  padding: 30px;
+  background: var(--standard-1);
+  border: var(--border);
+  border-radius: var(--border-radius);
+}
+
+.box {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  padding: 15px;
+  margin: 10px;
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 80px;
+}
+
+.box.resized {
+  width: 180px;
+  height: 120px;
+  line-height: 120px;
+}
+
+
+p {
+  margin: 5px 0;
+  font-family: monospace;
+}
+
+p span {
+  font-weight: bold;
+}
