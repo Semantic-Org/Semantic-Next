@@ -56,10 +56,17 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     const $anchor = self.getAnchor();
     const $clippingParent = $anchor.clippingParent();
     const $containingParent = $anchor.containingParent();
+    const clippingEl = $clippingParent.el();
+    const containingEl = $containingParent.el();
 
     // anchor spec does not include all things that can clip as relevent to anchor positioning
     // the most common oversight is overflow: auto not causing clipping.
-    if ($clippingParent.el() !== $containingParent.el()) {
+    if (containingEl !== clippingEl) {
+      // no need to update positioning context
+      if ($clippingParent.is('body, html')) {
+        return;
+      }
+
       self.$clippingParent = $clippingParent;
 
       // multiple anchors might be modifying same clipping parent
@@ -81,6 +88,9 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
     const elParent = $el.containingParent().el();
 
     // if we are already in a good position do nothing
+    if (!elParent) {
+      return;
+    }
     if (anchorParent === elParent || $anchor.closest(elParent).exists()) {
       return;
     }
@@ -355,14 +365,14 @@ const onDestroyed = ({ self }) => {
 
   // Restore original position if we modified clipping parent
   if (self.$clippingParent) {
-    let refCount = parseInt(self.$clippingParent.data('anchorRefCount') || 0);
+    let refCount = self.$clippingParent.data('anchorRefCount', 10) || 0;
     refCount--;
 
     if (refCount === 0) {
       // Last one - restore and clean up
       const originalPosition = self.$clippingParent.data('originalPosition');
       self.$clippingParent.css('position', originalPosition || null);
-      self.$clippingParent.removeAttr('data-original-position data-anchor-ref-count');
+      self.$clippingParent.removeData(['originalPosition', 'anchorRefCount']);
     }
     else {
       self.$clippingParent.data('anchorRefCount', refCount);
