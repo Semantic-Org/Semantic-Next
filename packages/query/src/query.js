@@ -2065,7 +2065,7 @@ export class Query {
           border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
           margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
         },
-        rect,
+        bounds: rect,
       };
     });
 

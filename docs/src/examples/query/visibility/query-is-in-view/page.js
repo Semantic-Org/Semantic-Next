@@ -15,7 +15,7 @@ function checkViewportStatus(options = {}) {
   $('.test-element').each((element) => {
     const $element = $(element);
     const name = $element.attr('data-name');
-    const isVisible = $element.isInViewport(options);
+    const isVisible = $element.isInView(options);
 
     info += `${name}: ${isVisible ? '✓ VISIBLE IN CONTAINER' : '✗ NOT VISIBLE IN CONTAINER'}\n`;
 
