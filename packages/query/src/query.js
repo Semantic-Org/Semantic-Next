@@ -2071,31 +2071,133 @@ export class Query {
     return this.length === 1 ? results[0] : results;
   }
 
-  collidesWith(selector) {
-    if (this.length === 0 || !selector) {
-      return false;
+  intersects(target, {
+    sides = 'all',
+    threshold = 0,
+    fully = false,
+    returnDetails = false,
+  } = {}) {
+    if (this.length === 0 || !target) {
+      return returnDetails ? null : false;
     }
 
-    const $targets = this.chain(selector);
+    const $targets = this.chain(target);
     if ($targets.length === 0) {
-      return false;
+      return returnDetails ? null : false;
     }
 
-    const sourceRects = this.map(el => el.getBoundingClientRect());
-    const targetRects = $targets.map(el => el.getBoundingClientRect());
+    const defaultDetails = {
+      intersects: false,
+      top: false,
+      bottom: false,
+      left: false,
+      right: false,
+      ratio: 0,
+      rect: null,
+    };
 
-    // Check if any source rectangle collides with any target rectangle
-    return sourceRects.some(sourceRect => {
-      return targetRects.some(targetRect => {
-        // Standard AABB (Axis-Aligned Bounding Box) collision detection
-        return (
-          sourceRect.left < targetRect.right
-          && sourceRect.right > targetRect.left
-          && sourceRect.top < targetRect.bottom
-          && sourceRect.bottom > targetRect.top
+    // Process sides parameter once
+    const checkSides = isArray(sides) ? sides : (sides === 'all' ? ['top', 'bottom', 'left', 'right'] : [sides]);
+
+    // Check intersections using position relative to target
+    const results = this.map(sourceEl => {
+      const $source = this.chain(sourceEl);
+      const sourceDims = $source.dimensions();
+
+      return $targets.map(targetEl => {
+        const $target = this.chain(targetEl);
+        const targetDims = $target.dimensions();
+
+        // Default return details object
+        let details = {
+          ...defaultDetails,
+        };
+
+        // Get source position relative to target
+        const { relative } = $source.position({ relativeTo: targetEl });
+        const { top, left } = relative;
+        const sourceRight = left + sourceDims.width;
+        const sourceBottom = top + sourceDims.height;
+
+        // Simple bounds check for intersection
+        const intersects = (
+          left < targetDims.width
+          && sourceRight > 0
+          && top < targetDims.height
+          && sourceBottom > 0
         );
+
+        if (intersects) {
+          // Calculate intersection rectangle and ratio
+          const sourceArea = sourceDims.width * sourceDims.height;
+          const intersectionLeft = Math.max(left, 0);
+          const intersectionTop = Math.max(top, 0);
+          const intersectionRight = Math.min(sourceRight, targetDims.width);
+          const intersectionBottom = Math.min(sourceBottom, targetDims.height);
+          const intersectionWidth = intersectionRight - intersectionLeft;
+          const intersectionHeight = intersectionBottom - intersectionTop;
+          const intersectionArea = intersectionWidth * intersectionHeight;
+          const ratio = sourceArea > 0 ? intersectionArea / sourceArea : 0;
+
+          // Update details with intersection data
+          details = {
+            ...details,
+            intersects: true,
+            ratio,
+            rect: {
+              left: intersectionLeft,
+              top: intersectionTop,
+              right: intersectionRight,
+              bottom: intersectionBottom,
+              width: intersectionWidth,
+              height: intersectionHeight,
+            },
+            top: top >= 0 && top < targetDims.height,
+            bottom: sourceBottom > 0 && sourceBottom <= targetDims.height,
+            left: left >= 0 && left < targetDims.width,
+            right: sourceRight > 0 && sourceRight <= targetDims.width,
+          };
+
+          // Check if fully contained
+          if (fully) {
+            const isFullyContained = (
+              left >= 0
+              && sourceRight <= targetDims.width
+              && top >= 0
+              && sourceBottom <= targetDims.height
+            );
+            if (!isFullyContained) {
+              details.intersects = false;
+            }
+          }
+
+          // Check threshold
+          if (threshold > 0 && ratio < threshold) {
+            details.intersects = false;
+          }
+
+          // Check specific sides if requested
+          if (sides !== 'all') {
+            const matchesSides = checkSides.some(side => details[side]);
+            if (!matchesSides) {
+              details.intersects = false;
+            }
+          }
+        }
+
+        return returnDetails ? details : details.intersects;
       });
-    });
+    }).flat();
+
+    if (returnDetails) {
+      // return as array or obj depending on el length
+      return (this.length == 1)
+        ? results[0]
+        : results;
+    }
+
+    // For boolean results, return true if any intersection found
+    return results.some(r => r === true);
   }
 
   pagePosition({ precision = 'pixel' } = {}) {
@@ -2164,9 +2266,10 @@ export class Query {
         let localCoords = { ...globalCoords }; // Fallback if no parent
         if (positioningParent) {
           const parentRect = positioningParent.getBoundingClientRect();
+          // Add scroll offsets to get position in positioning context's content space
           localCoords = {
-            top: round(elRect.top - parentRect.top),
-            left: round(elRect.left - parentRect.left),
+            top: round(elRect.top - parentRect.top + (positioningParent.scrollTop || 0)),
+            left: round(elRect.left - parentRect.left + (positioningParent.scrollLeft || 0)),
           };
         }
         if (type === 'local') {
@@ -2177,10 +2280,12 @@ export class Query {
         let relativeCoords = null;
         if (relativeEl) {
           const relativeRect = relativeEl.getBoundingClientRect();
+
           relativeCoords = {
             top: round(elRect.top - relativeRect.top),
             left: round(elRect.left - relativeRect.left),
           };
+
           if (type === 'relative') {
             return relativeCoords;
           }
@@ -2238,90 +2343,36 @@ export class Query {
     }
   }
 
-  isInViewport({ threshold = 0, fully = false, viewport } = {}) {
+  isInView({ threshold = 0, fully = false, viewport } = {}) {
     if (this.length === 0) {
       return false;
     }
 
-    const $viewport = (viewport)
-      ? this.chain(viewport)
-      : undefined;
+    // Determine the viewport/container to check against
+    let $viewport;
+    if (viewport) {
+      $viewport = this.chain(viewport);
+    }
+    else {
+      // Use clipping parent as default viewport
+      $viewport = this.clippingParent();
+    }
 
-    // Check if ALL elements in the collection meet the viewport criteria
+    // If no viewport found, use document element
+    if (!$viewport.length) {
+      $viewport = this.chain(document.documentElement);
+    }
+
+    // Check if ALL elements in the collection are in view
+    // We check each element individually against the viewport
     return this.map(el => {
-      let viewportRect;
-      let $elViewport;
-      if (!$viewport?.length) {
-        $elViewport = this.chain(el).clippingParent();
-      }
-      else {
-        $elViewport = $viewport;
-      }
-      // document element should use window
-      if ($elViewport.is(document.documentElement)) {
-        viewportRect = {
-          top: 0,
-          left: 0,
-          right: window.innerWidth || document.documentElement.clientWidth,
-          bottom: window.innerHeight || document.documentElement.clientHeight,
-        };
-      }
-      else {
-        viewportRect = $elViewport.bounds();
-      }
+      const $el = this.chain(el);
 
-      const rect = el.getBoundingClientRect();
-
-      const viewportHeight = viewportRect.bottom - viewportRect.top;
-      const viewportWidth = viewportRect.right - viewportRect.left;
-
-      // Convert element rect to be relative to viewport
-      const relativeRect = {
-        top: rect.top - viewportRect.top,
-        left: rect.left - viewportRect.left,
-        bottom: rect.bottom - viewportRect.top,
-        right: rect.right - viewportRect.left,
-        width: rect.width,
-        height: rect.height,
-      };
-
-      // If fully is true, it overrides the threshold
-      if (fully) {
-        return (
-          relativeRect.top >= 0
-          && relativeRect.left >= 0
-          && relativeRect.bottom <= viewportHeight
-          && relativeRect.right <= viewportWidth
-        );
-      }
-
-      if (threshold > 0) {
-        // Calculate the area of intersection
-        const intersectionLeft = Math.max(0, relativeRect.left);
-        const intersectionTop = Math.max(0, relativeRect.top);
-        const intersectionRight = Math.min(viewportWidth, relativeRect.right);
-        const intersectionBottom = Math.min(viewportHeight, relativeRect.bottom);
-
-        const intersectionWidth = intersectionRight - intersectionLeft;
-        const intersectionHeight = intersectionBottom - intersectionTop;
-
-        if (intersectionWidth <= 0 || intersectionHeight <= 0) {
-          return false;
-        }
-
-        const intersectionArea = intersectionWidth * intersectionHeight;
-        const elementArea = relativeRect.width * relativeRect.height;
-
-        return (intersectionArea / elementArea) >= threshold;
-      }
-
-      // Default behavior: check if any part of the element is visible
-      return (
-        relativeRect.top < viewportHeight
-        && relativeRect.bottom > 0
-        && relativeRect.left < viewportWidth
-        && relativeRect.right > 0
-      );
+      // Use intersects method with appropriate options
+      return $el.intersects($viewport, {
+        threshold,
+        fully,
+      });
     }).every(result => result === true);
   }
 
