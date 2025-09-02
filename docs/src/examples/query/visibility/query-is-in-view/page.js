@@ -1,68 +1,83 @@
 import { $ } from '@semantic-ui/query';
 
-function checkViewportStatus(options = {}) {
-  let info = 'CLIPPING PARENT VISIBILITY CHECK';
+// Drag functionality
+let isDragging = false;
+let $dragged = null;
+let offset = { top: 0, left: 0 };
 
-  if (options.threshold !== undefined) {
-    info += ` (${Math.round(options.threshold * 100)}% threshold)`;
-  }
-  if (options.fully) {
-    info += ' (fully visible only)';
-  }
+// handle drag and drop start
+$('.box').on('mousedown', function(event) {
+  event.preventDefault();
+  isDragging = true;
+  $dragged = $(this);
+  const bounds = $dragged.bounds();
+  offset = {
+    top: event.clientY - bounds.top,
+    left: event.clientX - bounds.left,
+  };
+  moveElementToMouse(event);
+});
 
-  info += ':\n\n';
-
-  $('.test-element').each((element) => {
-    const $element = $(element);
-    const name = $element.attr('data-name');
-    const isVisible = $element.isInView(options);
-
-    info += `${name}: ${isVisible ? '✓ VISIBLE IN CONTAINER' : '✗ NOT VISIBLE IN CONTAINER'}\n`;
-
-    // Visual feedback
-    $element.removeClass('in-viewport partially-visible');
-    if (isVisible) {
-      $element.addClass('in-viewport');
+// handle drag & drop
+$(document)
+  .on('pointermove', function(event) {
+    if (isDragging && $dragged) {
+      moveElementToMouse(event);
     }
-    else if ($element.isInView()) {
-      $element.addClass('partially-visible');
-    }
+  })
+  .on('pointerup', function() {
+    isDragging = false;
+    $dragged = null;
   });
 
-  // Check all elements together
-  const allVisible = $('.test-element').isInView(options);
-  info += `\nAll elements visible in container: ${allVisible ? '✓ YES' : '✗ NO'}`;
+// handle scroll
+$('.container').on('scroll', checkVisibility);
 
-  $('#viewport-info').text(info);
+function moveElementToMouse(event) {
+  const container = $('.container').dimensions();
+  $dragged.position({
+    relativeTo: '.container',
+    top: event.clientY - container.top + container.scrollTop - offset.top,
+    left: event.clientX - container.left + container.scrollLeft - offset.left,
+  });
+  checkVisibility();
 }
 
-// Event handlers using Query
-$('#check-viewport').on('click', () => {
-  checkViewportStatus();
-});
-
-$('#check-threshold').on('click', () => {
-  checkViewportStatus({ threshold: 0.5 });
-});
-
-$('#check-fully').on('click', () => {
-  checkViewportStatus({ fully: true });
-});
-
-$('#scroll-to-middle').on('click', () => {
-  const container = $('#scroll-area').el();
-  const scrollHeight = container.scrollHeight;
-  const clientHeight = container.clientHeight;
-  container.scrollTop = (scrollHeight - clientHeight) / 2;
-
-  // Check after scroll
-  setTimeout(() => checkViewportStatus(), 100);
-});
-
-// Check on scroll
-$('#scroll-area').on('scroll', () => {
-  checkViewportStatus();
-});
-
 // Initial check
-checkViewportStatus();
+requestAnimationFrame(() => checkVisibility());
+
+function checkVisibility() {
+  const $box = $('.draggable');
+  const $container = $('.container');
+
+  // Check visibility with different thresholds
+  const basicCheck = $box.isInView({ viewport: $container });
+  const halfVisible = $box.isInView({ viewport: $container, threshold: 0.5 });
+  const fullyVisible = $box.isInView({ viewport: $container, fully: true });
+
+  const containerDims = $container.dimensions();
+
+  const info = `VISIBILITY STATUS:
+
+In View: ${basicCheck ? '✓ YES' : '✗ NO'}
+50% Visible: ${halfVisible ? '✓ YES' : '✗ NO'}
+Fully Visible: ${fullyVisible ? '✓ YES' : '✗ NO'}
+
+Container Scroll:
+  Top: ${containerDims.scrollTop}px
+  Left: ${containerDims.scrollLeft}px`;
+
+  $('.output pre').text(info);
+
+  // Update visual state
+  $box.removeClass('in-view partially-in-view out-of-view');
+  if (fullyVisible) {
+    $box.addClass('in-view');
+  }
+  else if (basicCheck) {
+    $box.addClass('partially-in-view');
+  }
+  else {
+    $box.addClass('out-of-view');
+  }
+}

@@ -42,7 +42,7 @@ function moveElementToMouse(event) {
 }
 
 // Initial check
-checkIntersection();
+requestAnimationFrame(() => checkIntersection());
 
 function checkIntersection() {
   const result = $('.source').intersects('.target', {
