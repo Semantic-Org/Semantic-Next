@@ -24,13 +24,13 @@ function checkViewportStatus(options = {}) {
     if (isVisible) {
       $element.addClass('in-viewport');
     }
-    else if ($element.isInViewport()) {
+    else if ($element.isInView()) {
       $element.addClass('partially-visible');
     }
   });
 
   // Check all elements together
-  const allVisible = $('.test-element').isInViewport(options);
+  const allVisible = $('.test-element').isInView(options);
   info += `\nAll elements visible in container: ${allVisible ? '✓ YES' : '✗ NO'}`;
 
   $('#viewport-info').text(info);

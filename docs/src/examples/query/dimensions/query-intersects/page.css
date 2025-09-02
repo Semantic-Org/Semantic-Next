@@ -6,16 +6,26 @@
   margin: 50px;
   border-radius: var(--border-radius);
   overflow: auto;
+
+  /* force scroll */
+  .filler {
+    width: 500px;
+    height: 500px;
+  }
 }
 
 .box {
   position: absolute;
   padding: 15px;
+  text-align: center;
+  align-content: center;
   border-radius: var(--border-radius);
   text-align: center;
   font-weight: bold;
   cursor: pointer;
   user-select: none;
+  transition: var(--transition);
+  transition-property: border, background;
 
   &.source {
     width: 100px;
@@ -35,11 +45,25 @@
     background: var(--orange-background-color);
     border: var(--orange-border);
     color: var(--orange-text-color);
+
+  }
+
+  &.overlap {
+    opacity: 0;
+    background: var(--red-background-color);
+    padding: 0px;
+    border: var(--red-border);
+    color: var(--red-text-color);
+    z-index: 2;
+    font-size: 7px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &.intersecting {
     background: var(--green-background-color);
-    border-color: var(--green-30);
+    border-color: var(--green-border);
     color: var(--green-text-color);
   }
 }
