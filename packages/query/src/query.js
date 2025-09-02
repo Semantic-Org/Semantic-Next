@@ -2065,6 +2065,7 @@ export class Query {
           border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
           margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
         },
+        rect,
       };
     });
 
@@ -2138,7 +2139,6 @@ export class Query {
           const intersectionHeight = intersectionBottom - intersectionTop;
           const intersectionArea = intersectionWidth * intersectionHeight;
           const ratio = sourceArea > 0 ? intersectionArea / sourceArea : 0;
-
           // Update details with intersection data
           details = {
             ...details,
