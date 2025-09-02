@@ -2002,13 +2002,13 @@ export class Query {
       const rect = el.getBoundingClientRect();
       const computedStyle = window.getComputedStyle(el);
 
-      // --- Position Properties ---
+      // Position Properties
       const top = rect.top;
       const left = rect.left;
       const pageTop = top + window.scrollY;
       const pageLeft = left + window.scrollX;
 
-      // --- Box Model Values ---
+      // Box Model Values
       const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
       const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
       const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
@@ -2024,13 +2024,13 @@ export class Query {
       const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
-      // --- Width Properties ---
+      // Width Properties
       const outerWidth = el.offsetWidth;
       const innerWidth = outerWidth - borderLeft - borderRight;
       const width = innerWidth - paddingLeft - paddingRight;
       const marginWidth = outerWidth + marginLeft + marginRight;
 
-      // --- Height Properties ---
+      // Height Properties
       const outerHeight = el.offsetHeight;
       const innerHeight = outerHeight - borderTop - borderBottom;
       const height = innerHeight - paddingTop - paddingBottom;
@@ -2117,24 +2117,24 @@ export class Query {
         // Get source position relative to target
         const { relative } = $source.position({ relativeTo: targetEl });
         const { top, left } = relative;
-        const sourceRight = left + sourceDims.width;
-        const sourceBottom = top + sourceDims.height;
+        const sourceRight = left + sourceDims.outerWidth;
+        const sourceBottom = top + sourceDims.outerHeight;
 
         // Simple bounds check for intersection
         const intersects = (
-          left < targetDims.width
+          left < targetDims.outerWidth
           && sourceRight > 0
-          && top < targetDims.height
+          && top < targetDims.outerHeight
           && sourceBottom > 0
         );
 
         if (intersects) {
           // Calculate intersection rectangle and ratio
-          const sourceArea = sourceDims.width * sourceDims.height;
+          const sourceArea = sourceDims.outerWidth * sourceDims.outerHeight;
           const intersectionLeft = Math.max(left, 0);
           const intersectionTop = Math.max(top, 0);
-          const intersectionRight = Math.min(sourceRight, targetDims.width);
-          const intersectionBottom = Math.min(sourceBottom, targetDims.height);
+          const intersectionRight = Math.min(sourceRight, targetDims.outerWidth);
+          const intersectionBottom = Math.min(sourceBottom, targetDims.outerHeight);
           const intersectionWidth = intersectionRight - intersectionLeft;
           const intersectionHeight = intersectionBottom - intersectionTop;
           const intersectionArea = intersectionWidth * intersectionHeight;
@@ -2152,19 +2152,19 @@ export class Query {
               width: intersectionWidth,
               height: intersectionHeight,
             },
-            top: top >= 0 && top < targetDims.height,
-            bottom: sourceBottom > 0 && sourceBottom <= targetDims.height,
-            left: left >= 0 && left < targetDims.width,
-            right: sourceRight > 0 && sourceRight <= targetDims.width,
+            top: top >= 0 && top < targetDims.outerHeight,
+            bottom: sourceBottom > 0 && sourceBottom <= targetDims.outerHeight,
+            left: left >= 0 && left < targetDims.outerWidth,
+            right: sourceRight > 0 && sourceRight <= targetDims.outerWidth,
           };
 
           // Check if fully contained
           if (fully) {
             const isFullyContained = (
               left >= 0
-              && sourceRight <= targetDims.width
+              && sourceRight <= targetDims.outerWidth
               && top >= 0
-              && sourceBottom <= targetDims.height
+              && sourceBottom <= targetDims.outerHeight
             );
             if (!isFullyContained) {
               details.intersects = false;
