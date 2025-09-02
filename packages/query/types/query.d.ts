@@ -1066,6 +1066,7 @@ export class Query {
         border: { top: number; right: number; bottom: number; left: number; };
         margin: { top: number; right: number; bottom: number; left: number; };
       };
+      bounds: DOMRect;
     }
     | Array<{
       top: number;
@@ -1091,19 +1092,95 @@ export class Query {
         border: { top: number; right: number; bottom: number; left: number; };
         margin: { top: number; right: number; bottom: number; left: number; };
       };
+      bounds: DOMRect;
     }>
     | undefined;
 
   /**
+   * Checks if elements in the collection intersect with a target element or elements.
+   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @param target - The target element(s) to check intersection with. Can be a selector string, DOM element, or Query object.
+   * @param options - Configuration options for intersection detection.
+   * @returns Boolean indicating intersection, or detailed intersection data if returnDetails is true.
+   */
+  intersects(
+    target: string | Element | Query,
+    options?: {
+      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
+      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+      /** Minimum intersection ratio (0-1). Defaults to 0. */
+      threshold?: number;
+      /** Whether source must be fully contained in target. Defaults to false. */
+      fully?: boolean;
+      /** Whether to return detailed intersection data. Defaults to false. */
+      returnDetails?: false;
+    },
+  ): boolean;
+
+  /**
+   * Checks if elements in the collection intersect with a target element or elements, returning detailed information.
+   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @param target - The target element(s) to check intersection with.
+   * @param options - Configuration options with returnDetails set to true.
+   * @returns Detailed intersection data object or array of objects.
+   */
+  intersects(
+    target: string | Element | Query,
+    options: {
+      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
+      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+      /** Minimum intersection ratio (0-1). Defaults to 0. */
+      threshold?: number;
+      /** Whether source must be fully contained in target. Defaults to false. */
+      fully?: boolean;
+      /** Must be true to get detailed intersection data. */
+      returnDetails: true;
+    },
+  ):
+    | {
+      intersects: boolean;
+      top: boolean;
+      bottom: boolean;
+      left: boolean;
+      right: boolean;
+      ratio: number;
+      rect: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        width: number;
+        height: number;
+      } | null;
+    }
+    | Array<{
+      intersects: boolean;
+      top: boolean;
+      bottom: boolean;
+      left: boolean;
+      right: boolean;
+      ratio: number;
+      rect: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        width: number;
+        height: number;
+      } | null;
+    }>
+    | null;
+
+  /**
    * Checks if ALL elements in the selection are within the viewport.
-   * @see https://next.semantic-ui.com/api/query/visibility#isinviewport
+   * @see https://next.semantic-ui.com/api/query/visibility#isinview
    * @param options - Configuration options.
    * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
-   * @param options.fully - Whether element must be fully within viewport. Overrides threshold. Defaults to false.
+   * @param options.fully - Whether element must be fully within viewport. Defaults to false.
    * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
    * @returns true if ALL elements meet criteria, false otherwise.
    */
-  isInViewport(options?: { threshold?: number; fully?: boolean; viewport?: Element | Query; }): boolean;
+  isInView(options?: { threshold?: number; fully?: boolean; viewport?: Element | Query; }): boolean;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.

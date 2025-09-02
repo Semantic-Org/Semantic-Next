@@ -367,40 +367,38 @@ const precisePos = $('#element').pagePosition({ precision: 'subpixel' });
 
 ## dimensions
 
-Gets comprehensive dimension information for elements.
+Gets dimension information for elements.
 
 ### Syntax
 
-#### Get
 ```javascript
 $('selector').dimensions()
 ```
 
 ### Returns
 
-#### Get
-Returns a detailed dimensions object:
-- **Single Element** - Dimension object with all measurements
+- **Single Element** - Dimension object
 - **Multiple Elements** - Array of dimension objects  
 - **Empty Selection** - `undefined`
 
-#### Dimension Object Properties
-| Property      | Description                                    |
-|---------------|------------------------------------------------|
-| top, left     | Position relative to viewport                  |
-| right, bottom | Right and bottom edges relative to viewport    |
-| pageTop, pageLeft | Position relative to document              |
-| width         | Content width                                  |
-| innerWidth    | Content + padding width                        |
-| outerWidth    | Content + padding + border width               |
-| marginWidth   | Content + padding + border + margin width      |
-| height        | Content height                                 |
-| innerHeight   | Content + padding height                       |
-| outerHeight   | Content + padding + border height              |
-| marginHeight  | Content + padding + border + margin height     |
-| scrollTop, scrollLeft | Current scroll position                |
-| scrollHeight, scrollWidth | Total scrollable dimensions        |
-| box           | Detailed box model measurements                |
+#### Properties
+| Property      | Description                             |
+|---------------|-----------------------------------------|
+| top, left     | Viewport position                       |
+| right, bottom | Viewport edges                          |
+| pageTop, pageLeft | Document position                   |
+| width         | Content width                           |
+| innerWidth    | Content + padding                       |
+| outerWidth    | Content + padding + border              |
+| marginWidth   | Content + padding + border + margin     |
+| height        | Content height                          |
+| innerHeight   | Content + padding                       |
+| outerHeight   | Content + padding + border              |
+| marginHeight  | Content + padding + border + margin     |
+| scrollTop, scrollLeft | Scroll position                  |
+| scrollHeight, scrollWidth | Scrollable dimensions        |
+| box           | Box model details                       |
+| bounds        | DOMRect bounding box                    |
 
 ### Usage
 
@@ -420,3 +418,92 @@ console.log(`Margin: ${dims.box.margin.bottom}px`);
 
 ### Example
 <PlaygroundExample id="query-dimensions" direction="horizontal"></PlaygroundExample>
+
+## intersects
+
+Checks if elements intersect with a target.
+
+### Syntax
+
+```javascript
+$('selector').intersects(target)
+$('selector').intersects(target, options)
+```
+
+### Parameters
+| Name    | Type                   | Description            |
+|---------|------------------------|------------------------|
+| target  | string/Element/Query   | Target element(s)      |
+| options | object                 | Options (optional)     |
+
+#### Options
+| Name          | Type         | Description                                                         | Default |
+|---------------|--------------|---------------------------------------------------------------------|---------|
+| sides         | string/array | Which sides must intersect ('all', 'top', 'bottom', 'left', 'right') | 'all'  |
+| threshold     | number       | Minimum intersection ratio (0-1)                                   | 0       |
+| fully         | boolean      | Source must be fully contained                                     | false   |
+| returnDetails | boolean      | Return detailed intersection data                                  | false   |
+
+### Returns
+
+- **Basic** - `true` if intersects, `false` otherwise
+- **With returnDetails** - Details object (single element) or array (multiple elements)
+
+#### Details Object
+| Property   | Type    | Description                          |
+|------------|---------|--------------------------------------|
+| intersects | boolean | Elements intersect                   |
+| top        | boolean | Top edge within target               |
+| bottom     | boolean | Bottom edge within target            |
+| left       | boolean | Left edge within target              |
+| right      | boolean | Right edge within target             |
+| ratio      | number  | Intersection/source area ratio       |
+| rect       | object  | Intersection rectangle (or null)     |
+
+### Usage
+
+```javascript
+// Check intersection
+if ($('#trigger').intersects('#popup')) {
+  console.log('Overlapping');
+}
+
+// Multiple targets
+if ($('.item').intersects('.dropzone')) {
+  console.log('Over dropzone');
+}
+
+// 50% overlap required
+$('#draggable').intersects('#target', { threshold: 0.5 });
+
+// Must be fully contained
+$('#child').intersects('#container', { fully: true });
+
+// Check specific sides
+$('#element').intersects('#boundary', { sides: 'top' });
+$('#element').intersects('#boundary', { sides: ['left', 'right'] });
+
+// Get detailed data
+const details = $('#source').intersects('#target', { returnDetails: true });
+if (details.intersects) {
+  console.log(`Overlap: ${details.ratio * 100}%`);
+  console.log(`Area: ${details.rect.width * details.rect.height}px²`);
+}
+
+// Multiple elements
+$('.item').intersects('#container', { returnDetails: true })
+  .forEach((details, i) => {
+    if (details.intersects) {
+      console.log(`Item ${i}: ${details.ratio * 100}%`);
+    }
+  });
+```
+
+### Notes
+- Uses `outerWidth` and `outerHeight` for box-model accuracy
+- Coordinates relative to target element
+- `fully` overrides `threshold` when true
+- With `sides`, at least one specified side must intersect
+
+### Example
+<PlaygroundExample id="query-intersects" direction="horizontal"></PlaygroundExample>

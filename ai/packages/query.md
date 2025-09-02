@@ -167,6 +167,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `pagePosition(options)` - Get document-relative position (viewport + scroll)
 - `dimensions()` - Get comprehensive dimension info (position, size, box model)
 - `bounds()` - Get DOMRect bounding box information
+- `intersects(target, options)` - Check if elements intersect with target (with threshold, sides, details)
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
 - `naturalDisplay(options)` - Get natural display value (ignoring display: none)
@@ -179,7 +180,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `hide()` - Hide elements by setting display: none
 - `toggle(options)` - Toggle visibility state
 - `isVisible(options)` - Check if elements are visible (with opacity/visibility checks)
-- `isInViewport(options)` - Check if elements are within viewport bounds (defaults to clipping parent)
+- `isInView(options)` - Check if elements are within viewport bounds (defaults to clipping parent)
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings

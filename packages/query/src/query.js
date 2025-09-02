@@ -1996,6 +1996,16 @@ export class Query {
           scrollHeight: document.documentElement.scrollHeight,
           scrollWidth: document.documentElement.scrollWidth,
           box: { padding: boxValues, border: boxValues, margin: boxValues },
+          bounds: {
+            top: 0,
+            left: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            x: 0,
+            y: 0,
+          },
         };
       }
 
