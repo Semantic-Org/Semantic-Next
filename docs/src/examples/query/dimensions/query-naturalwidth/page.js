@@ -1,11 +1,17 @@
 import { $ } from '@semantic-ui/query';
 
 // Get dimensions
-const constrainedWidth = $('.element').width();
-const naturalWidth = $('.element').naturalWidth();
-const difference = naturalWidth - constrainedWidth;
+const getDimensions = () => {
+  // naturalWidth() returns unconstrained width
+  const naturalWidth = $('.element').naturalWidth();
+  $('.natural-width').text(naturalWidth);
 
-// Display measurements
-$('.constrained-width').text(constrainedWidth);
-$('.natural-width').text(naturalWidth);
-$('.difference').text(difference);
+  // Compare with actual constrained width
+  const constrainedWidth = $('.element').width();
+  const overflow = naturalWidth - constrainedWidth;
+
+  $('.constrained-width').text(constrainedWidth);
+  $('.overflow').text(overflow);
+};
+
+requestAnimationFrame(getDimensions);

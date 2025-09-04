@@ -2,30 +2,34 @@
   position: relative;
   height: 200px;
   margin: 20px 0;
-  background: var(--standard-1);
+  background: var(--standard-10);
   border: var(--border);
   border-radius: var(--border-radius);
 }
 
 .box {
   position: absolute;
-  width: 80px;
+  width: 180px;
   height: 60px;
   padding: 10px;
-  background: var(--standard-5);
+  top: 10px;
+  left: 10px;
+  background: var(--standard-10);
   border: var(--border);
   border-radius: var(--border-radius);
-  transition: all 0.3s ease;
   text-align: center;
-  line-height: 60px;
+  align-content: center;
 }
 
 
 p {
   margin: 8px 0;
   font-family: monospace;
-}
-
-p span {
-  font-weight: bold;
+  span {
+    font-weight: bold;
+  }
+  b {
+    font-weight: bold;
+    color: var(--primary-text-color);
+  }
 }

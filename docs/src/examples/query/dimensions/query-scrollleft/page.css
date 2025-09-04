@@ -55,5 +55,9 @@
       font-weight: bold;
       color: var(--accent-color);
     }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
   }
 }

@@ -10,7 +10,7 @@
   padding: var(--padding);
   border-radius: var(--border-radius);
   font-size: var(--medium);
-  color: var(--text-color);
+  color: var(--primary-text-color);
   align-items: center;
   justify-content: center;
   
@@ -49,6 +49,10 @@
       font-weight: var(--bold);
       color: var(--blue-60);
     }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
   }
 }
 
@@ -61,7 +65,7 @@
     border: 1px solid var(--standard-20);
     border-radius: var(--border-radius);
     background: var(--component-background);
-    color: var(--text-color);
+    color: var(--primary-text-color);
     cursor: pointer;
     font-size: var(--medium);
     transition: var(--transition);

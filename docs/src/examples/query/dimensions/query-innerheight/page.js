@@ -1,16 +1,18 @@
 import { $ } from '@semantic-ui/query';
 
-$(document).ready(() => {
+// Get dimensions
+const getDimensions = () => {
   const box = $('.box');
 
-  // Get dimensions
-  const height = box.height();
+  // innerHeight() includes content height plus padding
   const innerHeight = box.innerHeight();
-  const difference = innerHeight - height;
-
-  // Display measurements
-  $('.height').text(height);
   $('.inner-height').text(innerHeight);
-  $('.difference').text(difference);
-  debugger;
-});
+
+  // Calculate the components
+  const height = box.height();
+  const padding = innerHeight - height;
+  $('.height').text(height);
+  $('.padding').text(padding);
+};
+
+requestAnimationFrame(getDimensions);

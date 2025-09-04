@@ -7,7 +7,7 @@ let $dragged = null;
 let offset = { top: 0, left: 0 };
 
 // handle drag and drop start
-$('.box').on('mousedown', function(event) {
+$('.box').on('pointerdown', function(event) {
   event.preventDefault();
   isDragging = true;
   $dragged = $(this);
