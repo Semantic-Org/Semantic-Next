@@ -1488,14 +1488,25 @@ export class Query {
 
   naturalWidth() {
     const widths = this.map((el) => {
-      const $clone = this.chain(el.cloneNode(true));
+      const $clone = this.chain(el).clone();
       $clone
         .insertAfter(el)
         .css({
           position: 'absolute',
+          left: '0px',
+          top: '0px',
           display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
+          transform: 'translate(-200vw, -200vh)',
+          pointerEvents: 'none',
+          width: 'auto',
+          visibility: 'hidden',
+          isolation: 'isolate',
+          contain: 'layout paint style',
+          maxWidth: 'none',
+          boxSizing: 'content-box',
+          padding: '0px',
+          margin: '0px',
+          border: '0px',
         });
       const naturalWidth = $clone.width();
       $clone.remove();
@@ -1511,9 +1522,20 @@ export class Query {
         .insertAfter(el)
         .css({
           position: 'absolute',
+          left: '0px',
+          top: '0px',
           display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
+          transform: 'translate(-200vw, -200vh)',
+          pointerEvents: 'none',
+          height: 'auto',
+          visibility: 'hidden',
+          isolation: 'isolate',
+          contain: 'layout paint style',
+          maxWidth: 'none',
+          boxSizing: 'content-box',
+          padding: '0px',
+          margin: '0px',
+          border: '0px',
         });
       const naturalHeight = $clone.height();
       $clone.remove();
