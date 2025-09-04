@@ -1486,28 +1486,32 @@ export class Query {
     });
   }
 
-  naturalWidth() {
+  naturalWidth({ preserveMaxWidth = true } = {}) {
     const widths = this.map((el) => {
       const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        width: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxWidth: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxWidth) {
+        css.maxWidth = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          left: '0px',
-          top: '0px',
-          display: 'block',
-          transform: 'translate(-200vw, -200vh)',
-          pointerEvents: 'none',
-          width: 'auto',
-          visibility: 'hidden',
-          isolation: 'isolate',
-          contain: 'layout paint style',
-          maxWidth: 'none',
-          boxSizing: 'content-box',
-          padding: '0px',
-          margin: '0px',
-          border: '0px',
-        });
+        .css(css);
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -1515,28 +1519,32 @@ export class Query {
     return widths.length > 1 ? widths : widths[0];
   }
 
-  naturalHeight() {
+  naturalHeight({ preserveMaxHeight = true } = {}) {
     const height = this.map((el) => {
       const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        height: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxHeight: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxHeight) {
+        css.maxHeight = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          left: '0px',
-          top: '0px',
-          display: 'block',
-          transform: 'translate(-200vw, -200vh)',
-          pointerEvents: 'none',
-          height: 'auto',
-          visibility: 'hidden',
-          isolation: 'isolate',
-          contain: 'layout paint style',
-          maxWidth: 'none',
-          boxSizing: 'content-box',
-          padding: '0px',
-          margin: '0px',
-          border: '0px',
-        });
+        .css(css);
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -2232,24 +2240,11 @@ export class Query {
     return results.some(r => r === true);
   }
 
-  pagePosition({ precision = 'pixel' } = {}) {
-    if (this.length === 0) {
-      return undefined;
-    }
-    const results = this.map(el => {
-      const rect = el.getBoundingClientRect();
-      const round = val => (precision === 'pixel' ? Math.round(val) : val);
-
-      // Page position is simply the viewport position plus the current scroll offset
-      const top = rect.top + window.scrollY;
-      const left = rect.left + window.scrollX;
-
-      return {
-        top: round(top),
-        left: round(left),
-      };
+  pagePosition(settings) {
+    return this.position({
+      ...settings,
+      type: 'global',
     });
-    return this.length === 1 ? results[0] : results;
   }
 
   position({
@@ -2263,86 +2258,72 @@ export class Query {
     const isSetter = (isNumber(top) || isNumber(left));
 
     // avoid querySelector inside map
-    let relativeEl = (relativeTo)
-      ? this.chain(relativeTo).el()
+    let $relative = (relativeTo)
+      ? this.chain(relativeTo)
       : undefined;
 
     // fail clearly if relative el does not exist
-    if (relativeTo && !relativeEl) {
+    if (relativeTo && !$relative.exists()) {
       return (isSetter)
         ? this
         : undefined;
     }
 
-    if (!isSetter) {
-      // getter
-      if (this.length === 0) {
-        return undefined;
-      }
-      const results = this.map(el => {
-        const $el = this.chain(el);
-        const elRect = el.getBoundingClientRect();
-        const round = val => (precision === 'pixel' ? Math.round(val) : val);
-
-        // 1. Global (Viewport) Coordinates
-        const globalCoords = {
-          top: round(elRect.top),
-          left: round(elRect.left),
-        };
-        if (type === 'global') {
-          return globalCoords;
-        }
-
-        // 2. Local (positioningParent) Coordinates
-        const positioningParent = $el.positioningParent().el();
-        let localCoords = { ...globalCoords }; // Fallback if no parent
-        if (positioningParent) {
-          const parentRect = positioningParent.getBoundingClientRect();
-          // Add scroll offsets to get position in positioning context's content space
-          localCoords = {
-            top: round(elRect.top - parentRect.top + (positioningParent.scrollTop || 0)),
-            left: round(elRect.left - parentRect.left + (positioningParent.scrollLeft || 0)),
-          };
-        }
-        if (type === 'local') {
-          return localCoords;
-        }
-
-        // 3. Relative Coordinates
-        let relativeCoords = null;
-        if (relativeEl) {
-          const relativeRect = relativeEl.getBoundingClientRect();
-
-          relativeCoords = {
-            top: round(elRect.top - relativeRect.top),
-            left: round(elRect.left - relativeRect.left),
-          };
-
-          if (type === 'relative') {
-            return relativeCoords;
-          }
-        }
-
-        // Return all coordinates if no specific type was requested
-        const result = {
-          global: globalCoords,
-          local: localCoords,
-        };
-        if (relativeCoords) {
-          result.relative = relativeCoords;
-        }
-        return result;
-      });
-
-      // Return a single object if the collection has only one element.
-      return this.length === 1 ? results[0] : results;
+    // getter
+    if (this.length === 0) {
+      return undefined;
     }
-    else {
-      // setter
-      this.each(function(el) {
+    const results = this.map(el => {
+      const $el = this.chain(el);
+      const elRect = $el.bounds();
+      const round = val => (precision === 'pixel' ? Math.round(val) : val);
+
+      // 1. Global (Viewport) Coordinates
+      const globalCoords = {
+        top: round(elRect.top) + window.scrollY,
+        left: round(elRect.left) + window.scrollX,
+      };
+      if (!isSetter && type === 'global') {
+        return globalCoords;
+      }
+
+      // 2. Local (positioningParent) Coordinates
+      const $parent = $el.positioningParent();
+      const parentRect = $parent.bounds();
+      const localCoords = {
+        top: round(elRect.top - parentRect.top + $parent.scrollTop()),
+        left: round(elRect.left - parentRect.left + $parent.scrollLeft()),
+      };
+      if (!isSetter && type === 'local') {
+        return localCoords;
+      }
+
+      // 3. Relative Coordinates
+      let relativeCoords = null;
+      if (relativeTo) {
+        const relativeRect = $relative.bounds();
+        relativeCoords = {
+          top: round(elRect.top - relativeRect.top),
+          left: round(elRect.left - relativeRect.left),
+        };
+        if (!isSetter && type === 'relative') {
+          return relativeCoords;
+        }
+      }
+
+      // join together all results
+      const result = {
+        global: globalCoords,
+        local: localCoords,
+      };
+      if (relativeCoords) {
+        result.relative = relativeCoords;
+      }
+
+      if (isSetter) {
         const $el = this;
-        const referenceEl = relativeEl
-          ? relativeEl
+        const referenceEl = relativeTo
+          ? $relative.el()
           : $el.containingParent().el();
         if (!referenceEl) {
           return;
@@ -2370,9 +2351,16 @@ export class Query {
         if (isNumber(left)) {
           el.style.left = `${newStyleLeft}px`;
         }
-      });
+      }
+      return result;
+    });
+
+    if (isSetter) {
       return this;
     }
+
+    // Return a single object if the collection has only one element.
+    return this.length === 1 ? results[0] : results;
   }
 
   isInView({ threshold = 0, fully = false, viewport } = {}) {
