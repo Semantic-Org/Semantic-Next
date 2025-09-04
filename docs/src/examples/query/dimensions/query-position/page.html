@@ -4,10 +4,14 @@
   </div>
 </div>
 
-<p>Position relative to inner: <span class="inner position"></span></p>
-<p>Position relative to outer: <span class="outer position"></span></p>
-<p>Position relative to global: <span class="global position"></span></p>
+<div class="measurements">
+  <p>Local Position: <span class="local top">-</span><b>px</b>, left: <span class="local left">-</span><b>px</b></p>
+  <div class="parts">
+    <p>Outer: top: <span class="outer top">-</span><b>px</b>, left: <span class="outer left">-</span><b>px</b></p>
+    <p>Global: top: <span class="global top">-</span><b>px</b>, left: <span class="global left">-</span><b>px</b></p>
+  </div>
+</div>
 
-<ui-button class="move inner">Move to inner (50, 50)</ui-button>
-<ui-button class="move outer">Move to outer (50, 50)</ui-button>
-<ui-button class="move global">Move to global (50, 50)</ui-button>
+<ui-button class="move inner">Move to inner (30, 30)</ui-button>
+<ui-button class="move outer">Move to outer (30, 30)</ui-button>
+<ui-button class="move global">Move to global (30, 30)</ui-button>
