@@ -1298,14 +1298,12 @@ export class Query {
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
       // Start with total width and subtract what we don't want
-      width -= borderLeft + borderRight; // Remove border to get content + padding
+      if (!includeBorder) {
+        width -= borderLeft + borderRight; // Remove border to get content + padding
+      }
 
       if (!includePadding) {
         width -= paddingLeft + paddingRight; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        width += borderLeft + borderRight; // Add border back
       }
 
       if (includeMargin) {
@@ -1319,11 +1317,11 @@ export class Query {
   }
 
   innerWidth() {
-    return this.width({ includePadding: true });
+    return this.width({ includePadding: true, includeBorder: false });
   }
 
   innerHeight() {
-    return this.height({ includePadding: true });
+    return this.height({ includePadding: true, includeBorder: false });
   }
 
   outerWidth({ includeMargin = false } = {}) {
@@ -1994,7 +1992,12 @@ export class Query {
     if (this.length === 0) {
       return undefined;
     }
-    const rects = this.map(el => el.getBoundingClientRect());
+    const rects = this.map(el => {
+      if (el === Query.globalThisProxy) {
+        return document.documentElement.getBoundingClientRect();
+      }
+      return el.getBoundingClientRect();
+    });
     return this.length === 1 ? rects[0] : rects;
   }
 
@@ -2039,16 +2042,18 @@ export class Query {
         };
       }
 
-      const rect = el.getBoundingClientRect();
-      const computedStyle = window.getComputedStyle(el);
+      const $el = this.chain(el);
 
       // Position Properties
+      const rect = $el.bounds();
       const top = rect.top;
       const left = rect.left;
+
       const pageTop = top + window.scrollY;
       const pageLeft = left + window.scrollX;
 
       // Box Model Values
+      const computedStyle = window.getComputedStyle(el);
       const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
       const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
       const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
@@ -2075,7 +2080,6 @@ export class Query {
       const innerHeight = outerHeight - borderTop - borderBottom;
       const height = innerHeight - paddingTop - paddingBottom;
       const marginHeight = outerHeight + marginTop + marginBottom;
-
       return {
         // Position
         top,
@@ -2322,28 +2326,32 @@ export class Query {
 
       if (isSetter) {
         const $el = this;
-        const referenceEl = relativeTo
-          ? $relative.el()
-          : $el.containingParent().el();
-        if (!referenceEl) {
-          return;
-        }
-        const referenceRect = referenceEl.getBoundingClientRect();
-        const offsetParent = el.offsetParent; // Native offsetParent is still needed for style calculation
-        if (!offsetParent) {
-          return;
-        }
-        const offsetParentRect = offsetParent.getBoundingClientRect();
-        const parentStyle = window.getComputedStyle(offsetParent);
 
+        // get the positioning context of element
+        const $parent = $el.positioningParent();
+        const parentRect = $parent.dimensions();
+
+        // get what we are setting to
+        let $reference;
+        if (type == 'global') {
+          $reference = this.chain(window);
+        }
+        else if (type == 'local') {
+          $reference = parent;
+        }
+        else if ($relative) {
+          $reference = $relative;
+        }
+        else {
+          $reference = $parent;
+        }
+        const referenceRect = $reference.dimensions();
+
+        // calculate new position
         const targetTop = referenceRect.top + (top || 0);
         const targetLeft = referenceRect.left + (left || 0);
-
-        const parentBorderTop = parseFloat(parentStyle.borderTopWidth) || 0;
-        const parentBorderLeft = parseFloat(parentStyle.borderLeftWidth) || 0;
-
-        const newStyleTop = targetTop - offsetParentRect.top - parentBorderTop;
-        const newStyleLeft = targetLeft - offsetParentRect.left - parentBorderLeft;
+        const newStyleTop = targetTop - parentRect.top - parentRect.box.border.top;
+        const newStyleLeft = targetLeft - parentRect.left - parentRect.box.border.left;
 
         if (isNumber(top)) {
           el.style.top = `${newStyleTop}px`;
