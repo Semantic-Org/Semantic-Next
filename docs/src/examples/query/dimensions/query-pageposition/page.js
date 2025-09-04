@@ -6,7 +6,7 @@ function updatePosition() {
 }
 
 // Show initial position
-updatePosition();
+requestAnimationFrame(updatePosition);
 
 // Move box to specific coordinates
 $('.move').on('click', () => {

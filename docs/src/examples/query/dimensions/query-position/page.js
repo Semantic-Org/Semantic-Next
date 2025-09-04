@@ -19,6 +19,7 @@ $('.move')
     });
     updatePositions();
   })
+  .end()
   .filter('.global')
   .on('click', () => {
     $('.box').position({
