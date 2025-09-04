@@ -2279,24 +2279,24 @@ export class Query {
     }
     const results = this.map(el => {
       const $el = this.chain(el);
-      const elRect = $el.bounds();
+      const elRect = $el.dimensions();
+      const $parent = $el.positioningParent();
+      const parentRect = $parent.dimensions();
       const round = val => (precision === 'pixel' ? Math.round(val) : val);
 
       // 1. Global (Viewport) Coordinates
       const globalCoords = {
-        top: round(elRect.top) + window.scrollY,
-        left: round(elRect.left) + window.scrollX,
+        top: round(elRect.top) - parentRect.box.border.left + window.scrollY,
+        left: round(elRect.left) - parentRect.box.border.top + window.scrollX,
       };
       if (!isSetter && type === 'global') {
         return globalCoords;
       }
 
       // 2. Local (positioningParent) Coordinates
-      const $parent = $el.positioningParent();
-      const parentRect = $parent.bounds();
       const localCoords = {
-        top: round(elRect.top - parentRect.top + $parent.scrollTop()),
-        left: round(elRect.left - parentRect.left + $parent.scrollLeft()),
+        top: round(elRect.top - parentRect.top - parentRect.box.border.left + $parent.scrollTop()),
+        left: round(elRect.left - parentRect.left - parentRect.box.border.top + $parent.scrollLeft()),
       };
       if (!isSetter && type === 'local') {
         return localCoords;
@@ -2305,10 +2305,10 @@ export class Query {
       // 3. Relative Coordinates
       let relativeCoords = null;
       if (relativeTo) {
-        const relativeRect = $relative.bounds();
+        const relativeRect = $relative.dimensions();
         relativeCoords = {
-          top: round(elRect.top - relativeRect.top),
-          left: round(elRect.left - relativeRect.left),
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
         };
         if (!isSetter && type === 'relative') {
           return relativeCoords;
@@ -2325,12 +2325,6 @@ export class Query {
       }
 
       if (isSetter) {
-        const $el = this;
-
-        // get the positioning context of element
-        const $parent = $el.positioningParent();
-        const parentRect = $parent.dimensions();
-
         // get what we are setting to
         let $reference;
         if (type == 'global') {
@@ -2350,8 +2344,8 @@ export class Query {
         // calculate new position
         const targetTop = referenceRect.top + (top || 0);
         const targetLeft = referenceRect.left + (left || 0);
-        const newStyleTop = targetTop - parentRect.top - parentRect.box.border.top;
-        const newStyleLeft = targetLeft - parentRect.left - parentRect.box.border.left;
+        const newStyleTop = targetTop - parentRect.top;
+        const newStyleLeft = targetLeft - parentRect.left;
 
         if (isNumber(top)) {
           el.style.top = `${newStyleTop}px`;
