@@ -1,8 +1,11 @@
 import { $ } from '@semantic-ui/query';
 
 function updatePosition() {
+  // pagePosition() returns position relative to document including scroll
   const pos = $('.box').pagePosition();
-  $('.position').text(`top: ${Math.round(pos.top)}px, left: ${Math.round(pos.left)}px`);
+
+  $('.page-top').text(Math.round(pos.top));
+  $('.page-left').text(Math.round(pos.left));
 }
 
 // Show initial position

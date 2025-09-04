@@ -1,9 +1,9 @@
 .container {
   position: relative;
   height: 200px;
-  margin: 20px 0;
-  background: var(--standard-10);
-  border: var(--border);
+  margin: var(--vertically-spaced) 0;
+  background: var(--angled-gradient) var(--yellow-background-color);
+  border: 2px solid var(--yellow-border-color);
   border-radius: var(--border-radius);
 }
 
@@ -11,24 +11,45 @@
   position: absolute;
   width: 180px;
   height: 60px;
-  padding: 10px;
+  padding: var(--padding);
   top: 10px;
   left: 10px;
-  background: var(--standard-10);
+  background: var(--angled-gradient) var(--blue-background-color);
+  border: 2px solid var(--blue-border-color);
   border-radius: var(--border-radius);
   text-align: center;
   align-content: center;
+  font-weight: bold;
+  color: var(--blue-text-color);
 }
 
+.measurements {
+  margin: var(--vertically-spaced);
+  background: var(--standard-5);
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  font-size: var(--large);
 
-p {
-  margin: 8px 0;
-  font-family: monospace;
-  span {
-    font-weight: bold;
+  .parts {
+    font-size: var(--medium);
+    margin-top: var(--margin);
+    color: var(--standard-40);
+    border-top: var(--border);
+    padding-top: var(--padding);
   }
-  b {
-    font-weight: bold;
-    color: var(--primary-text-color);
+
+  p {
+    margin: 3px 0;
+    font-family: Monospace;
+    span {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
   }
 }
