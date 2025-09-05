@@ -1816,7 +1816,7 @@ export class Query {
     return this.chain(parents);
   }
 
-  containingParent() {
+  offsetParent() {
     const parents = this.map(el => el.offsetParent || document.documentElement);
     return this.chain(parents);
   }

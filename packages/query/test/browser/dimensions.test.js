@@ -78,7 +78,7 @@ describe('query', () => {
       expect(position).toBeUndefined();
     });
 
-    it('sets position relative to containingParent by default', async () => {
+    it('sets position relative to offsetParent by default', async () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative; width: 500px; height: 500px;">
           <div id="child" style="position: absolute; width: 50px; height: 50px;"></div>

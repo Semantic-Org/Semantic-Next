@@ -262,16 +262,16 @@ const $scrollContainer = $content.clippingParent();
 ### Example
 <PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
 
-## containingParent
+## offsetParent
 
-Get the simple containing parent (offsetParent) for each element.
+Get the `offsetParent` of an element as reported by the Dom.
 
-> **Simple Access** This is a direct wrapper around the native `offsetParent` property for quick access to basic positioning context.
+> **Simple Access** This is a direct wrapper around the native `offsetParent` property this may not always be the positioning parent for fixed position elements.
 
 ### Syntax
 
 ```javascript
-$('selector').containingParent()
+$('selector').offsetParent()
 ```
 
 ### Returns
@@ -282,11 +282,11 @@ A new [Query object](/api/query/basic#the-query-object) containing the offset pa
 
 ```javascript
 // Quick access to offsetParent
-const $offsetParent = $('#element').containingParent();
+const $offsetParent = $('#element').offsetParent();
 
 // For simple positioning calculations
 const $element = $('#positioned-element');
-const $parent = $element.containingParent();
+const $parent = $element.offsetParent();
 console.log('Positioned relative to:', $parent[0]);
 ```
 

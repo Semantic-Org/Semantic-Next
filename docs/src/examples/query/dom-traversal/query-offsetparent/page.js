@@ -15,7 +15,7 @@ $('.toggle-transform').on('click', () => {
   const currentTransform = $box.css('transform');
   if (currentTransform === 'none') {
     $box.css('transform', 'scale(1)');
-    log('Box transform set to: scale(1) - Now box is the containing parent!');
+    log('Box transform set to: scale(1) - Now box is the offset parent!');
   }
   else {
     $box.css('transform', 'none');
@@ -33,7 +33,7 @@ $('.toggle-filter').on('click', () => {
   const currentFilter = $box.css('filter');
   if (currentFilter === 'none') {
     $box.css('filter', 'brightness(1)');
-    log('Box filter set to: brightness(1) - Now box is the containing parent!');
+    log('Box filter set to: brightness(1) - Now box is the offset parent!');
   }
   else {
     $box.css('filter', 'none');
@@ -46,23 +46,23 @@ $('.toggle-filter').on('click', () => {
   }, 10);
 });
 
-// Find containing parent
+// Find offset parent
 $('.find').on('click', () => {
   $('.highlight').removeClass('highlight');
 
-  const $containingParent = $('.target').containingParent();
-  $containingParent.addClass('highlight');
+  const $offsetParent = $('.target').offsetParent();
+  $offsetParent.addClass('highlight');
 
-  if ($containingParent.is('.container')) {
+  if ($offsetParent.is('.container')) {
     log('Containing parent: .container (as expected)');
   }
-  else if ($containingParent.is('.box')) {
+  else if ($offsetParent.is('.box')) {
     log('Containing parent: .box (due to transform/filter!)');
   }
 
   // Compare with browser's offsetParent
-  const $offsetParent = $('.target').containingParent({ calculate: false });
-  if (!$offsetParent.is($containingParent)) {
+  const $offsetParent = $('.target').offsetParent({ calculate: false });
+  if (!$offsetParent.is($offsetParent)) {
     $log.append('<br>Note: Browser offsetParent is different!');
   }
 });

@@ -829,7 +829,7 @@ describe('query', () => {
     });
   });
 
-  describe('containingParent', () => {
+  describe('offsetParent', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -842,10 +842,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('container'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('container'));
     });
 
     it('should find containing parent with transform', () => {
@@ -856,10 +856,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('transformed'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('transformed'));
     });
 
     it('should find containing parent with filter', () => {
@@ -870,10 +870,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('filtered'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('filtered'));
     });
 
     it('should find containing parent with contain property', () => {
@@ -884,10 +884,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('contained'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('contained'));
     });
 
     it('should find containing parent with will-change', () => {
@@ -898,10 +898,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('willchange'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('willchange'));
     });
 
     it('should return documentElement for fixed elements (null offsetParent fallback)', () => {
@@ -912,11 +912,11 @@ describe('query', () => {
       `;
 
       const $fixed = $('#fixed');
-      const $containingParent = $fixed.containingParent();
+      const $offsetParent = $fixed.offsetParent();
 
       // Fixed elements have null offsetParent, so should fallback to documentElement
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.documentElement);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.documentElement);
     });
 
     it('should return document.body when no containing parent found', () => {
@@ -929,10 +929,10 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.body);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.body);
     });
 
     it('should use browser offsetParent when calculate is false', () => {
@@ -943,10 +943,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent({ calculate: false });
+      const $offsetParent = $child.offsetParent({ calculate: false });
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('child').offsetParent);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('child').offsetParent);
     });
 
     it('should handle multiple elements', () => {
@@ -960,18 +960,18 @@ describe('query', () => {
       `;
 
       const $items = $('.item');
-      const $containingParents = $items.containingParent();
+      const $offsetParents = $items.offsetParent();
 
-      expect($containingParents.length).toBe(2);
-      expect($containingParents[0]).toBe(document.getElementById('container1'));
-      expect($containingParents[1]).toBe(document.getElementById('container2'));
+      expect($offsetParents.length).toBe(2);
+      expect($offsetParents[0]).toBe(document.getElementById('container1'));
+      expect($offsetParents[1]).toBe(document.getElementById('container2'));
     });
 
     it('should handle empty selection', () => {
       const $empty = $('.nonexistent');
-      const $containingParent = $empty.containingParent();
+      const $offsetParent = $empty.offsetParent();
 
-      expect($containingParent.length).toBe(0);
+      expect($offsetParent.length).toBe(0);
     });
 
     it('should find nearest containing parent in nested contexts', () => {
@@ -986,11 +986,11 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
       // Should find the immediate containing parent (inner), not the outer one
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('inner'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('inner'));
     });
   });
 

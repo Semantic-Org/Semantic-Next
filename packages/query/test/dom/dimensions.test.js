@@ -139,7 +139,7 @@ describe('Query Dimensions', () => {
     });
   });
 
-  describe('containingParent()', () => {
+  describe('offsetParent()', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -151,7 +151,7 @@ describe('Query Dimensions', () => {
         </div>
       `;
 
-      const result = $('#child').containingParent();
+      const result = $('#child').offsetParent();
       expect(result).toBeInstanceOf(Query);
     });
   });
