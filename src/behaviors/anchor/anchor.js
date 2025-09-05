@@ -4,50 +4,18 @@ import { each, inArray, isNumber, keys } from '@semantic-ui/utils';
 import css from './anchor.css?raw';
 
 const defaultSettings = {
-  // element should be placed relative to this
   to: '',
-
-  // position to place element
   position: '',
-
-  // strategy when choosing a fallback position
-  // adjacent-  check adjacenct first
-  // opposite - check opposite first
-  // [`position1', 'position2'] - only use specific fallback positions
-  fallbackStrategy: 'adjacent',
-
-  // X X X
-  // X X X
-  // X X X
-  positions: [
-    'top left',
-    'top',
-    'top right', // TOP SIDE
-    'right top',
-    'right',
-    'right bottom', // RIGHT SIDE
-    'bottom right',
-    'bottom',
-    'bottom left', // BOTTOM SIDE
-    'left bottom',
-    'left',
-    'left top', // LEFT SIDE
-    'center', // INSIDE
-  ],
-
-  // whether to add a pointing arrow
-  arrow: true,
-
-  offset: 0, // distance offset from calculated position
-  distance: 14, // distance away from pointing to
-
-  allowCenter: true, // allow element to be placed inside bounds of anchored element as last resort
+  offset: 0,
+  distance: 14,
+  allowOverlap: true, // allow element to be placed inside bounds of anchored element as last resort
   alwaysShow: false, // always show element regardless of whether it fits
-  anchorName: 'anchor-{count}', // name of anchor
-
-  observeChanges: true, // whether to observe changes and move element if it no longer fits
-  moveElement: true, // whether to move element to same offsetParent
-  containToScroll: true, // whether to contain element to its scroll container
+  anchorName: 'anchor-{count}',
+  prefer: 'auto',
+  detectPosition: true,
+  moveElement: true,
+  arrow: true,
+  containToScroll: true, // make clipping containers act as boundaries for position-try
 };
 
 const classNames = {
@@ -56,13 +24,29 @@ const classNames = {
 
 const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debug, warn }) => ({
   anchorName: null,
+  lastPosition: null,
+  resizeObserver: null,
   $clippingParent: null,
 
-  opposites: {
-    top: 'bottom',
-    bottom: 'top',
-    left: 'right',
-    right: 'left',
+  // when specifying anchor positioning values preserving RTL
+  positionConfig: {
+    'top': 'block-start',
+    'top left': 'block-start inline-start',
+    'top right': 'block-start inline-end',
+    'top center': 'block-start center',
+    'bottom': 'block-end',
+    'bottom left': 'block-end inline-start',
+    'bottom right': 'block-end inline-end',
+    'bottom center': 'block-end center',
+    'left': 'inline-start',
+    'left top': 'inline-start block-start',
+    'left bottom': 'inline-start block-end',
+    'left center': 'inline-start block-center',
+    'right': 'inline-end',
+    'right top': 'inline-end block-start',
+    'right bottom': 'inline-end block-end',
+    'right center': 'inline-end block-center',
+    'center': 'center',
   },
 
   initialize() {
@@ -71,6 +55,12 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
       self.setupClippingBoundary();
     }
     self.attach();
+    if (settings.arrow || settings.detectPosition) {
+      self.setupPositionMonitoring();
+    }
+    if (settings.arrow) {
+      $el.attr('data-arrow', '');
+    }
     if (settings.moveElement) {
       self.maybeMoveElement();
     }
@@ -83,9 +73,9 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
   setupClippingBoundary() {
     const $anchor = self.getAnchor();
     const $clippingParent = $anchor.clippingParent();
-    const $containingParent = $anchor.containingParent();
+    const $offsetParent = $anchor.offsetParent();
     const clippingEl = $clippingParent.el();
-    const containingEl = $containingParent.el();
+    const containingEl = $offsetParent.el();
 
     // anchor spec does not include all things that can clip as relevent to anchor positioning
     // the most common oversight is overflow: auto not causing clipping.
@@ -112,8 +102,8 @@ const createBehavior = ({ $, $el, self, cache, settings, classNames, error, debu
 
   maybeMoveElement() {
     const $anchor = self.getAnchor();
-    const anchorParent = $anchor.containingParent().el();
-    const elParent = $el.containingParent().el();
+    const anchorParent = $anchor.offsetParent().el();
+    const elParent = $el.offsetParent().el();
 
     // if we are already in a good position do nothing
     if (!elParent) {
