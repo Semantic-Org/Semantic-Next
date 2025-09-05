@@ -89,8 +89,6 @@ export const registerBehavior = (behavior) => {
       ...behavior,
     };
 
-    // determine run time settings for behavior (we preserve non cloneables like custom classes and dom els)
-    const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
     // store reference to all elements
     const $elements = this;
 
@@ -108,6 +106,9 @@ export const registerBehavior = (behavior) => {
         sharedBehavior = Behavior.runSetup(behavior.setup, { $elements, settings, templates }) ?? {};
         isSetup = true;
       }
+
+      // determine run time settings for behavior (we preserve non cloneables like custom classes and dom els)
+      const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
 
       const $element = this;
       const totalElements = $elements.count();

@@ -150,6 +150,7 @@ export class Behavior {
     adoptStylesheet(css, this.element);
   }
 
+  // allows data attributes to override setting values
   addDataOverrides(element = this.element) {
     const elementData = this.getElementData();
     each(this.settings, (value, name) => {
@@ -298,7 +299,7 @@ export class Behavior {
         else if (eventType == 'global') {
           this.$(selector).on(eventName, eventHandler, eventSettings);
         }
-        else if (eventType == 'delegate' && selector) {
+        else if (eventType == 'bind' && selector) {
           this.$(this.element).find(selector).on(eventName, eventHandler, eventSettings);
         }
         else {
@@ -644,8 +645,10 @@ export class Behavior {
 
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalParams = {} } = {}) {
+    // this is used to do performance tracking on internal methods
     const selfProxy = this.getSelf();
     const self = this;
+
     const args = [];
     if (!params) {
       params = {

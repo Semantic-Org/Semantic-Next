@@ -856,10 +856,10 @@ export class Query {
 
   /**
    * Gets the simple containing parent (offsetParent) of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/visibility#containingparent
+   * @see https://next.semantic-ui.com/api/query/visibility#offsetparent
    * @returns A new Query instance containing the offset parent elements.
    */
-  containingParent(): Query;
+  offsetParent(): Query;
 
   /**
    * Gets the positioning parent (positioning context) of each element in the current set, accurately calculating
