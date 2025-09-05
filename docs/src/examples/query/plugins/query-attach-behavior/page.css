@@ -1,0 +1,41 @@
+:root {
+  --box-size: 50vw;
+  --box-size-min: 200px;
+
+  --square-size: 10vw;
+  --square-size-min: 50px;
+
+  --square-margin: max(var(--square-size), var(--square-size-min)) auto;
+
+}
+
+.box {
+  position: relative;
+  margin: var(--square-margin);
+  background: var(--blue-0);
+  background-image: var(--angled-gradient);
+  border: var(--blue-border);
+  box-shadow: var(--shadow);
+  width: var(--box-size);
+  height: var(--box-size);
+  min-width: var(--box-size-min);
+  min-height: var(--box-size-min);
+}
+
+.square {
+  background-color: var(--red-5);
+  border: var(--red-border);
+  background-image: var(--angled-gradient);
+  width: var(--square-size);
+  height: var(--square-size);
+  min-width: var(--square-size-min);
+  min-height: var(--square-size-min);
+  position: absolute;
+  font-size: 9px;
+  padding: 5px;
+  font-weight: bold;
+  color: var(--red-text-color);
+  box-shadow: var(--shadow);
+  text-align: center;
+  align-content: center;
+}
