@@ -16,26 +16,6 @@ const defaultSettings = {
   // [`position1', 'position2'] - only use specific fallback positions
   fallbackStrategy: 'adjacent',
 
-  // X X X
-  // X X X
-  // X X X
-  // list of positions permitted to try
-  positions: [
-    'top left',
-    'top',
-    'top right', // TOP SIDE
-    'right top',
-    'right',
-    'right bottom', // RIGHT SIDE
-    'bottom right',
-    'bottom',
-    'bottom left', // BOTTOM SIDE
-    'left bottom',
-    'left',
-    'left top', // LEFT SIDE
-    'center', // INSIDE
-  ],
-
   // whether to add a pointing arrow
   arrow: true,
 
@@ -54,64 +34,83 @@ const defaultSettings = {
 const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, debug, index, warn }) => ({
   anchorName: null,
 
+  // X X X
+  // X X X
+  // X X X
+  // list of positions permitted to try
+  allPositions: [
+    'top left',
+    'top',
+    'top right', // TOP SIDE
+    'right top',
+    'right',
+    'right bottom', // RIGHT SIDE
+    'bottom right',
+    'bottom',
+    'bottom left', // BOTTOM SIDE
+    'left bottom',
+    'left',
+    'left top', // LEFT SIDE
+  ],
+
+  // map of starting position to fallbacks using index of 'allPositions'
+  // to make this less confusing it is 1-indexed.
+
+  /*      1 | 2 | 3
+         -----------
+     12 |           | 4
+        |           |
+     11 |           | 5
+        |           |
+     10 |           | 6
+         -----------
+          9 | 8 | 7
+  */
+  adjacentFallbacks: {
+    'top left': [2, 3, 12, 4, 11, 5, 10, 6, 9, 8, 7],
+    'top': [1, 3, 11, 5, 12, 4, 10, 6, 8, 9, 7],
+    'top right': [2, 1, 4, 12, 5, 11, 6, 10, 7, 8, 9],
+    'right top': [5, 6, 3, 7, 2, 8, 1, 9, 12, 11, 10],
+    'right': [4, 6, 2, 8, 3, 7, 1, 9, 11, 12, 10],
+    'right bottom': [5, 4, 7, 3, 8, 2, 9, 1, 10, 11, 12],
+    'bottom right': [8, 9, 6, 10, 5, 11, 4, 12, 3, 2, 1],
+    'bottom': [7, 9, 5, 11, 6, 10, 4, 12, 2, 3, 1],
+    'bottom left': [8, 7, 10, 6, 11, 5, 12, 4, 1, 2, 3],
+    'left bottom': [11, 12, 9, 1, 8, 2, 7, 3, 6, 4, 4],
+    'left': [10, 12, 8, 2, 9, 1, 7, 3, 5, 4, 6],
+    'left top': [11, 10, 1, 9, 2, 8, 3, 7, 4, 5, 6],
+  },
+  oppositeFallbacks: {
+    'top left': [9, 2, 8, 3, 7, 12, 4, 11, 5, 10, 6],
+    'top': [8, 1, 9, 3, 7, 11, 5, 12, 4, 10, 6],
+    'top right': [7, 2, 8, 1, 9, 4, 12, 5, 11, 6, 10],
+    'right top': [12, 5, 11, 6, 10, 3, 7, 2, 8, 1, 9],
+    'right': [11, 4, 12, 6, 10, 2, 8, 3, 7, 1, 9],
+    'right bottom': [10, 5, 11, 4, 12, 7, 3, 8, 2, 9, 1],
+    'bottom right': [3, 8, 2, 9, 1, 6, 10, 5, 11, 4, 12],
+    'bottom': [2, 7, 3, 9, 1, 5, 11, 6, 10, 4, 12],
+    'bottom left': [1, 8, 2, 7, 3, 10, 6, 11, 5, 12, 4],
+    'left bottom': [6, 11, 5, 12, 4, 9, 1, 8, 2, 7, 3],
+    'left': [5, 10, 6, 12, 4, 2, 8, 9, 1, 7, 3],
+    'left top': [4, 11, 5, 10, 6, 1, 9, 2, 8, 3, 7],
+  },
+
+  // mapping of position name to css using shorthand
+  // see <decodeCSSShorthand>
   positionMapping: {
-    'top left': {
-      'inset-block-end': 'anchor(top)',
-      'inset-inline-start': 'anchor(left)',
-    },
-    'top': {
-      'inset-block-end': 'anchor(top)',
-      'inset-inline-start': 'anchor(center)',
-      'translate': '-50% 0',
-    },
-    'top right': {
-      'inset-block-end': 'anchor(top)',
-      'inset-inline-end': 'anchor(right)',
-    },
-    'right bottom': {
-      'inset-inline-start': 'anchor(right)',
-      'inset-block-end': 'anchor(bottom)',
-    },
-    'right': {
-      'inset-inline-start': 'anchor(right)',
-      'inset-block-start': 'anchor(center)',
-      'translate': '0 -50%',
-    },
-    'right top': {
-      'inset-inline-start': 'anchor(right)',
-      'inset-block-start': 'anchor(top)',
-    },
-    'bottom right': {
-      'inset-block-start': 'anchor(bottom)',
-      'inset-inline-end': 'anchor(right)',
-    },
-    'bottom': {
-      'inset-block-start': 'anchor(bottom)',
-      'inset-inline-start': 'anchor(center)',
-      'translate': '-50% 0',
-    },
-    'bottom left': {
-      'inset-block-start': 'anchor(bottom)',
-      'inset-inline-start': 'anchor(left)',
-    },
-    'left bottom': {
-      'inset-inline-end': 'anchor(left)',
-      'inset-block-end': 'anchor(bottom)',
-    },
-    'left': {
-      'inset-inline-end': 'anchor(left)',
-      'inset-block-start': 'anchor(center)',
-      'translate': '0 -50%',
-    },
-    'left top': {
-      'inset-inline-end': 'anchor(left)',
-      'inset-block-start': 'anchor(top)',
-    },
-    'center': {
-      'inset-block-start': 'anchor(center)',
-      'inset-inline-start': 'anchor(center)',
-      'translate': '-50% -50%',
-    },
+    'top left': { ibe: 't', iis: 'l' },
+    'top': { ibe: 't', iis: 'c', tr: 'ox' },
+    'top right': { ibe: 't', iie: 'r' },
+    'right top': { iis: 'r', ibs: 't' },
+    'right': { iis: 'r', ibs: 'c', tr: 'oy' },
+    'right bottom': { iis: 'r', ibe: 'b' },
+    'bottom right': { ibs: 'b', iie: 'r' },
+    'bottom': { ibs: 'b', iis: 'c', tr: 'ox' },
+    'bottom left': { ibs: 'b', iis: 'l' },
+    'left bottom': { iie: 'l', ibe: 'b' },
+    'left': { iie: 'l', ibs: 'c', tr: 'oy' },
+    'left top': { iie: 'l', ibs: 't' },
+    'center': { ibs: 'c', iis: 'c', tr: 'o' },
   },
 
   initialize() {
@@ -139,7 +138,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   },
 
   getPositioningCSS(position = settings.position) {
-    const positionCSS = self.positionMapping[position] || {};
+    const positionCSS = self.getDecodedPositionCSS(position);
     const positionReset = {
       'inset-block-start': null,
       'inset-block-end': null,
@@ -151,6 +150,33 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
       ...positionReset,
       ...positionCSS,
     };
+  },
+
+  // save some filesize on string literals
+  getDecodedPositionCSS(position) {
+    const shorthands = {
+      ibs: 'inset-block-start',
+      ibe: 'inset-block-end',
+      iis: 'inset-inline-start',
+      iie: 'inset-inline-end',
+      t: 'anchor(top)',
+      l: 'anchor(left)',
+      b: 'anchor(bottom)',
+      r: 'anchor(right)',
+      c: 'anchor(center)',
+      tr: 'translate',
+      ox: '-50% 0', // offset x
+      oy: '0 -50%', // offset y
+      o: '-50% -50%', // offset
+    };
+    let css = self.positionMapping[position] || {};
+    let outputCSS = {};
+    each(css, (thisValue, thisProp) => {
+      const prop = shorthands[thisProp] || thisProp;
+      const value = shorthands[thisValue] || thisValue;
+      outputCSS[prop] = value;
+    });
+    return outputCSS;
   },
 
   setAnchorName() {
@@ -176,25 +202,12 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     }
   },
 
+  // fallback order is implemented as a lookup table
+  // as the algorithm can get fairly complex for 'adjacent' / 'opposite'
   getFallbackOrder() {
     if (settings.fallbackStrategy) {
       return settings.fallbackStrategy;
     }
-    const positions = position.split(' ');
-    const verticalPosition = positions[0];
-    const horizontalPosition = positions[1] || 'center';
-    const opposite = {
-      top: 'bottom',
-      bottom: 'top',
-      left: 'right',
-      right: 'left',
-    };
-    const adjacent = {
-      left: 'center',
-      center: 'right',
-      right: 'left',
-    };
-    // get positions sorted by respected strategy
   },
 
   getNextPosition(position = settings.position) {
