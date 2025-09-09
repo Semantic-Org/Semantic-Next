@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, inArray, isArray, isNumber, keys } from '@semantic-ui/utils';
+import { each, isArray, isNumber, range } from '@semantic-ui/utils';
 
 import css from './attach.css?raw';
 
@@ -15,6 +15,9 @@ const defaultSettings = {
   // opposite - check opposite first
   // [`position1', 'position2'] - only use specific fallback positions
   fallbackStrategy: 'adjacent',
+
+  // position element here as a last resort even if no positions fit
+  lastResort: 'center',
 
   // whether to add a pointing arrow
   arrow: true,
@@ -32,13 +35,10 @@ const defaultSettings = {
 };
 
 const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, debug, index, warn }) => ({
-  anchorName: null,
+  anchorName: null, // current anchor name
 
-  // X X X
-  // X X X
-  // X X X
-  // list of positions permitted to try
-  allPositions: [
+  // available positions to try
+  positions: [
     'top left',
     'top',
     'top right', // TOP SIDE
@@ -53,7 +53,10 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     'left top', // LEFT SIDE
   ],
 
-  // map of starting position to fallbacks using index of 'allPositions'
+  // current position
+  position: null,
+
+  // map of starting position to fallbacks using index of 'positions'
   // to make this less confusing it is 1-indexed.
 
   /*      1 | 2 | 3
@@ -66,6 +69,8 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
          -----------
           9 | 8 | 7
   */
+
+  // strategy prefering adjacent side before others
   adjacentFallbacks: {
     'top left': [2, 3, 12, 4, 11, 5, 10, 6, 9, 8, 7],
     'top': [1, 3, 11, 5, 12, 4, 10, 6, 8, 9, 7],
@@ -76,10 +81,11 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     'bottom right': [8, 9, 6, 10, 5, 11, 4, 12, 3, 2, 1],
     'bottom': [7, 9, 5, 11, 6, 10, 4, 12, 2, 3, 1],
     'bottom left': [8, 7, 10, 6, 11, 5, 12, 4, 1, 2, 3],
-    'left bottom': [11, 12, 9, 1, 8, 2, 7, 3, 6, 4, 4],
+    'left bottom': [11, 12, 9, 1, 8, 2, 7, 3, 6, 5, 4],
     'left': [10, 12, 8, 2, 9, 1, 7, 3, 5, 4, 6],
     'left top': [11, 10, 1, 9, 2, 8, 3, 7, 4, 5, 6],
   },
+  // strategy preferring mirrored opposite side before others
   oppositeFallbacks: {
     'top left': [9, 2, 8, 3, 7, 12, 4, 11, 5, 10, 6],
     'top': [8, 1, 9, 3, 7, 11, 5, 12, 4, 10, 6],
@@ -197,26 +203,116 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   setPosition(position = settings.position) {
     const positioningCSS = self.getPositioningCSS(position);
     $el.css(positioningCSS);
-    if (!$el.isInView({ fully: true })) {
-      console.log('out of view', self.getNextPosition(position), position);
+  },
+
+  testPosition(position = setting.position) {
+    self.setPosition(position);
+    self.maybeReposition(position);
+  },
+
+  reposition() {
+    // current repositioning
+    if (self.fallbackPositions?.length) {
+      debug('Already searching');
+      return;
     }
+    self.testPosition(settings.position);
+  },
+
+  // check if position is in view
+  maybeReposition(currentPosition = settings.position) {
+    const inView = $el.isInView({ fully: true });
+    if (!inView) {
+      debug('Position not in view', currentPosition);
+      // try next fallback position unless none left (null)
+      const nextPosition = self.getNextPosition(currentPosition);
+      if (nextPosition !== null) {
+        debug('Setting next position to', nextPosition);
+        self.testPosition(nextPosition);
+      }
+      else {
+        if (settings.lastResort) {
+          self.setPosition(settings.lastResort);
+        }
+        else {
+          error('No positions fit viewport');
+        }
+        debug('no positions left to test');
+      }
+      return false;
+    }
+    else if (self.position !== currentPosition) {
+      self.setResolvedPosition(currentPosition);
+      return true;
+    }
+    else {
+      debug('Current position still in view', currentPosition);
+      self.endFallbackSearch();
+      return false;
+    }
+  },
+
+  // set final position after finding one in view
+  setResolvedPosition(resolvedPosition) {
+    self.endFallbackSearch();
+    $el.attr('data-position', resolvedPosition);
+    self.position = resolvedPosition;
+    debug('Found position in view', resolvedPosition);
+    self.setPosition(resolvedPosition);
   },
 
   // fallback order is implemented as a lookup table
   // as the algorithm can get fairly complex for 'adjacent' / 'opposite'
-  getFallbackOrder() {
-    if (settings.fallbackStrategy) {
+  getFallbackOrder(position) {
+    const allPositions = range(1, self.positions.length + 1);
+    if (isArray(settings.fallbackStrategy)) {
       return settings.fallbackStrategy;
+    }
+    if (settings.fallbackStrategy == 'adjacent') {
+      return self.adjacentFallbacks[position] || allPositions;
+    }
+    if (settings.fallbackStrategy == 'opposite') {
+      return self.oppositeFallbacks[position] || allPositions;
+    }
+    return allPositions;
+  },
+
+  // gets the next fallback position from a starting position
+  getNextPosition(currentPosition = settings.position) {
+    if (self.fallbacksTested === undefined) {
+      debug('Starting search from', currentPosition);
+      self.startFallbackSearch(currentPosition);
+    }
+    if (self.fallbacksTested > 15 || self.fallbackPositions?.length > 0) {
+      const nextPosition = self.fallbackPositions.shift();
+      self.fallbacksTested++;
+      if (isNumber(nextPosition)) {
+        const index = nextPosition - 1; // positions are 1-indexed
+        debug('Next position is', nextPosition, self.positions[index]);
+        return self.positions[index] || null;
+      }
+      // if its a string its just the position name (user specified)
+      return nextPosition;
+    }
+    else {
+      // failure conditions no fallback positions left
+      self.endFallbackSearch();
+      return null;
     }
   },
 
-  getNextPosition(position = settings.position) {
-    // we make a copy of fallback order on self
-    self.tryingPositions = true;
-    self.availablePositions = self.getFallbackOrder();
-    // we read from avaiable positions removing it if it doesnt fit
+  startFallbackSearch(startingPosition) {
+    self.fallbacksTested = 0;
+    // clone array
+    const positions = self.getFallbackOrder(startingPosition);
+    self.fallbackPositions = [
+      ...positions,
+    ];
+  },
 
-    // when we've reached the end of the array no positions are left
+  endFallbackSearch() {
+    delete self.fallbacksTested;
+    delete self.fallbackPositions;
   },
 
   maybeMoveElement() {
@@ -247,14 +343,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
       'position-anchor': self.anchorName,
     };
     $el.css(attachCSS);
-    self.setPosition();
-  },
-
-  refresh() {
-  },
-
-  reposition() {
-    self.setPosition();
+    self.testPosition(settings.position);
   },
 });
 
@@ -262,7 +351,10 @@ const onDestroyed = ({ self }) => {
 };
 
 const events = {
-  'global resize window, global scroll window'({ self, data, settings }) {
+  'global resize window'({ self, data, settings }) {
+    requestAnimationFrame(self.reposition);
+  },
+  'global scroll window'({ self, data, settings }) {
     requestAnimationFrame(self.reposition);
   },
 };
