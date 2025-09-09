@@ -329,6 +329,9 @@ export class Query {
   }
 
   is(selector) {
+    if (this.length == 0) {
+      return false;
+    }
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
@@ -1343,13 +1346,27 @@ export class Query {
   }
 
   scrollLeft(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollLeft', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('body')) {
+      if (value !== undefined) {
+        window.scroll(value, scrollY);
+        return this;
+      }
+      return window.scrollX;
+    }
+    return this.prop('scrollLeft', value);
   }
 
   scrollTop(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollTop', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('body')) {
+      if (value !== undefined) {
+        window.scroll(window.scrollX, value);
+        return this;
+      }
+      return window.scrollY;
+    }
+    return this.prop('scrollTop', value);
   }
 
   clone() {
@@ -1728,7 +1745,7 @@ export class Query {
     const parents = this.map((el) => {
       let current = el.parentNode;
       while (current) {
-        if (current instanceof Element) {
+        if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
 
           // Check overflow
@@ -2099,8 +2116,8 @@ export class Query {
         outerHeight,
         marginHeight,
         // Scroll
-        scrollTop: el.scrollTop,
-        scrollLeft: el.scrollLeft,
+        scrollTop: el.scrollY || el.scrollTop,
+        scrollLeft: el.scrollX || el.scrollLeft,
         scrollHeight: el.scrollHeight,
         scrollWidth: el.scrollWidth,
         // Box Model Details
@@ -2228,7 +2245,6 @@ export class Query {
             }
           }
         }
-
         return returnDetails ? details : details.intersects;
       });
     }).flat();
@@ -2307,8 +2323,8 @@ export class Query {
       if (relativeTo) {
         const relativeRect = $relative.dimensions();
         relativeCoords = {
-          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left),
-          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left - relativeRect.scrollTop),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left - relativeRect.scrollLeft),
         };
         if (!isSetter && type === 'relative') {
           return relativeCoords;
