@@ -13,6 +13,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## Bugs
 * **Query Plugins** - Fixed issue where using non clonables as settings like query collections, or custom classes wouldn't work as expected. This was related to the default behavior of deepExtend and clone (see breaking changes).
+* **Query** - Fixed bug in `is` where it would return true for non-existent selectors
 
 ## Features
 * **Utils** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
