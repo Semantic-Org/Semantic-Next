@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, isArray, isNumber, range, throttle } from '@semantic-ui/utils';
+import { each, inArray, isArray, isNumber, isString, range, throttle } from '@semantic-ui/utils';
 
 import css from './attach.css?raw';
 
@@ -23,7 +23,7 @@ const defaultSettings = {
   arrow: true,
 
   offset: 0, // distance offset from calculated position
-  distance: 14, // distance away from pointing to
+  distance: 0, // distance away from pointing to
 
   alwaysShow: false, // always show element regardless of whether it fits
   anchorName: 'anchor-{count}', // name of anchor
@@ -36,27 +36,11 @@ const defaultSettings = {
   // throttle delays for performance optimization
   scrollThrottle: 100, // milliseconds to throttle scroll repositioning
   resizeThrottle: 50, // milliseconds to throttle resize repositioning
+  throttleSettings: { leading: true, trailing: true },
 };
 
 const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, debug, index, warn }) => ({
   anchorName: null, // current anchor name
-
-  // Throttled repositioning methods
-  onScroll: throttle(
-    function() {
-      self.reposition();
-    },
-    settings.scrollThrottle,
-    { leading: true, trailing: true },
-  ),
-
-  onResize: throttle(
-    function() {
-      self.reposition();
-    },
-    settings.resizeThrottle,
-    { leading: true, trailing: true },
-  ),
 
   // available positions to try
   positions: [
@@ -140,6 +124,10 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     'center': { ibs: 'c', iis: 'c', tr: 'o' },
   },
 
+  // Throttled repositioning methods
+  onScroll: throttle(() => self.reposition(), settings.scrollThrottle, settings.throttleSettings),
+  onResize: throttle(() => self.reposition(), settings.resizeThrottle, settings.throttleSettings),
+
   initialize() {
     if (!settings.to) {
       error('No element specified to attach to');
@@ -196,14 +184,55 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
       oy: '0 -50%', // offset y
       o: '-50% -50%', // offset
     };
+
     let css = self.positionMapping[position] || {};
     let outputCSS = {};
+
+    // Skip distance/offset for center position
+    const isCenter = position === 'center';
+
+    // Determine primary axis from first word of position
+    const firstWord = position.split(' ')[0];
+    const verticalSide = inArray(firstWord, ['top', 'bottom']);
+    const primaryAxisAnchors = verticalSide ? ['t', 'b'] : ['l', 'r'];
+    const secondaryAxisAnchors = verticalSide ? ['l', 'r'] : ['t', 'b'];
+
     each(css, (thisValue, thisProp) => {
       const prop = shorthands[thisProp] || thisProp;
-      const value = shorthands[thisValue] || thisValue;
+      let value = shorthands[thisValue] || thisValue;
+
+      // Add distance/offset calc() when applicable
+      if (!isCenter) {
+        const distance = self.normalizeUnit(settings.distance);
+        const offset = self.normalizeUnit(settings.offset);
+        console.log(distance, offset);
+        // Add distance to primary axis anchors, offset to secondary axis anchors
+        if (inArray(thisValue, primaryAxisAnchors) && distance !== null) {
+          value = `calc(${value} + ${distance})`;
+        }
+        else if (inArray(thisValue, secondaryAxisAnchors) && offset !== null) {
+          value = `calc(${value} + ${offset})`;
+        }
+        // Handle center anchors for offset on secondary axis
+        else if (thisValue === 'c' && offset !== null) {
+          value = `calc(${value} + ${offset})`;
+        }
+      }
+
       outputCSS[prop] = value;
     });
     return outputCSS;
+  },
+
+  // Helper to normalize units (assume px for numbers)
+  normalizeUnit(value) {
+    if (!value || value === 0 || (isString(value) && value.startsWith('0'))) {
+      return null;
+    }
+    if (isNumber(value)) {
+      return `${value}px`;
+    }
+    return value;
   },
 
   setAnchorName() {
