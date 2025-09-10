@@ -443,6 +443,7 @@ $('selector').intersects(target, options)
 | threshold     | number       | Minimum intersection ratio (0-1)                                   | 0       |
 | fully         | boolean      | Source must be fully contained                                     | false   |
 | returnDetails | boolean      | Return detailed intersection data                                  | false   |
+| all           | boolean      | Whether all elements must intersect (true) or any element (false) | false   |
 
 ### Returns
 
@@ -450,15 +451,16 @@ $('selector').intersects(target, options)
 - **With returnDetails** - Details object (single element) or array (multiple elements)
 
 #### Details Object
-| Property   | Type    | Description                          |
-|------------|---------|--------------------------------------|
-| intersects | boolean | Elements intersect                   |
-| top        | boolean | Top edge within target               |
-| bottom     | boolean | Bottom edge within target            |
-| left       | boolean | Left edge within target              |
-| right      | boolean | Right edge within target             |
-| ratio      | number  | Intersection/source area ratio       |
-| rect       | object  | Intersection rectangle (or null)     |
+| Property        | Type    | Description                          |
+|-----------------|---------|--------------------------------------|
+| intersects      | boolean | Elements intersect                   |
+| top             | boolean | Top edge within target               |
+| bottom          | boolean | Bottom edge within target            |
+| left            | boolean | Left edge within target              |
+| right           | boolean | Right edge within target             |
+| ratio           | number  | Intersection/source area ratio       |
+| rect            | object  | Intersection rectangle (or null)     |
+| elementPosition | object  | Element position relative to target  |
 
 ### Usage
 
@@ -488,13 +490,24 @@ const details = $('#source').intersects('#target', { returnDetails: true });
 if (details.intersects) {
   console.log(`Overlap: ${details.ratio * 100}%`);
   console.log(`Area: ${details.rect.width * details.rect.height}px²`);
+  console.log(`Element position relative to target:`, details.elementPosition);
 }
 
-// Multiple elements
+// Require ALL elements to intersect
+if ($('.items').intersects('#container', { all: true })) {
+  console.log('All items are within container');
+}
+
+// Multiple elements with position analysis
 $('.item').intersects('#container', { returnDetails: true })
   .forEach((details, i) => {
     if (details.intersects) {
-      console.log(`Item ${i}: ${details.ratio * 100}%`);
+      console.log(`Item ${i}: ${details.ratio * 100}% overlap`);
+      
+      // Use elementPosition for obstruction analysis
+      const pos = details.elementPosition;
+      if (pos.top < 0) console.log(`Item ${i} extends above container`);
+      if (pos.bottom > targetDims.outerHeight) console.log(`Item ${i} extends below container`);
     }
   });
 ```
@@ -504,6 +517,8 @@ $('.item').intersects('#container', { returnDetails: true })
 - Coordinates relative to target element
 - `fully` overrides `threshold` when true
 - With `sides`, at least one specified side must intersect
+- By default, returns `true` if **ANY** element intersects (use `all: true` to require all elements)
+- `elementPosition` provides element bounds relative to target for advanced positioning analysis
 
 ### Example
 <PlaygroundExample id="query-intersects" direction="horizontal"></PlaygroundExample>
