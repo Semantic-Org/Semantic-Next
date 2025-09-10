@@ -306,11 +306,11 @@ const createBehavior = (
 
     // wait for animation to actually begin (if there is a delay this might not be immediate)
     await self.animationsStarted(activeAnimations);
-    dispatchEvent('started', { cssAnimations: cssAnimations, animations: activeAnimations });
 
-    // make element visible
+    // make element visible AFTER animation is queued to begin (otherwise flash of final vis state)
     self.setInitialDisplayState(direction);
 
+    dispatchEvent('started', { cssAnimations: cssAnimations, animations: activeAnimations });
     settings.onStart.call(el);
 
     // Wait for all animations to complete (handle cancellation gracefully)

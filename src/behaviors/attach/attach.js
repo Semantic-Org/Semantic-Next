@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, isArray, isNumber, range } from '@semantic-ui/utils';
+import { each, isArray, isNumber, range, throttle } from '@semantic-ui/utils';
 
 import css from './attach.css?raw';
 
@@ -32,10 +32,31 @@ const defaultSettings = {
 
   observeChanges: true, // whether to observe changes and move element if it no longer fits
   containToScroll: true, // whether to contain element to its scroll container
+
+  // throttle delays for performance optimization
+  scrollThrottle: 100, // milliseconds to throttle scroll repositioning
+  resizeThrottle: 50, // milliseconds to throttle resize repositioning
 };
 
 const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, debug, index, warn }) => ({
   anchorName: null, // current anchor name
+
+  // Throttled repositioning methods
+  onScroll: throttle(
+    function() {
+      self.reposition();
+    },
+    settings.scrollThrottle,
+    { leading: true, trailing: true },
+  ),
+
+  onResize: throttle(
+    function() {
+      self.reposition();
+    },
+    settings.resizeThrottle,
+    { leading: true, trailing: true },
+  ),
 
   // available positions to try
   positions: [
@@ -200,12 +221,22 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     self.anchorName = anchorName;
   },
 
+  isHidden() {
+    return $el.computedStyle('display') === 'none';
+  },
+
   setPosition(position = settings.position) {
+    if (self.isHidden()) {
+      return;
+    }
     const positioningCSS = self.getPositioningCSS(position);
     $el.css(positioningCSS);
   },
 
   testPosition(position = setting.position) {
+    if (self.isHidden()) {
+      return;
+    }
     self.setPosition(position);
     self.maybeReposition(position);
   },
@@ -317,11 +348,11 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
 
   maybeMoveElement() {
     const $anchor = self.getAnchor();
-    const $anchorParent = $anchor.positioningParent();
-    const $elParent = $el.positioningParent();
+    const anchorParent = $anchor.positioningParent().el();
+    const elParent = $el.positioningParent().el();
 
     // same positioning context
-    if ($anchorParent.is($elParent)) {
+    if (anchorParent == elParent) {
       return;
     }
 
@@ -331,7 +362,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
       from: elParent,
       to: targetParent,
     });
-    $el.detach().appendTo(containingEl);
+    $el.detach().appendTo(targetParent);
   },
 
   attach() {
@@ -348,14 +379,19 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
 });
 
 const onDestroyed = ({ self }) => {
+  self.onScroll?.cancel();
+  self.onResize?.cancel();
 };
 
 const events = {
-  'global resize window'({ self, data, settings }) {
-    requestAnimationFrame(self.reposition);
+  'global resize window'({ self }) {
+    self.onResize();
   },
-  'global scroll window'({ self, data, settings }) {
-    requestAnimationFrame(self.reposition);
+  'global scroll window'({ self }) {
+    self.onScroll();
+  },
+  'transition:started'({ self }) {
+    self.reposition();
   },
 };
 
