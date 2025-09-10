@@ -1,20 +1,21 @@
-[data-position][data-arrow] {
+:where([data-position][data-arrow]) {
 
   --arrow-size: 10px;
   --arrow-offset: 1em;
-  --arrow-bg: var(--inverted-100, inherit);
+  --arrow-background: inherit;
   --arrow-border-width: var(--border-width, 1px);
   --arrow-box-shadow: 1px 1px 2px 0 oklch(0 0 0 / 4%);
 
   /* this is read by javascript to determine offset */
   --arrow-distance-corner: calc(var(--arrow-offset) + var(--arrow-size));
 
-  --arrow-border-darkened: color-mix(
+
+  --arrow-border-base: inherit;
+  --arrow-border-color: color-mix(
     in oklch,
-    var(--border-color),
+    var(--arrow-border-base),
     var(--standard-100) 5%
   );
-  --arrow-border-color: var(--arrow-border-darkened, var(--border-color));
 
   position: relative;
 
@@ -23,10 +24,9 @@
     position: absolute;
     width: var(--arrow-size);
     height: var(--arrow-size);
-    background: var(--arrow-bg);
+    background: var(--arrow-background);
     background-image: inherit;
     transform: rotate(45deg);
-    z-index: 1;
 
     /* Clear all borders first */
     border: 0;
@@ -61,12 +61,12 @@
 
   &[data-position="top left"]::before {
     bottom: calc(var(--arrow-size) / -2);
-    right: var(--arrow-offset);
+    left: var(--arrow-offset);
   }
 
   &[data-position="top right"]::before {
     bottom: calc(var(--arrow-size) / -2);
-    left: var(--arrow-offset);
+    right: var(--arrow-offset);
   }
 
   /* Bottom positions - need top-left borders */
@@ -81,31 +81,57 @@
     margin-left: calc(var(--arrow-size) / -2);
   }
 
-  &[data-position="bottom left"]::before {
+  &[data-position="bottom right"]::before {
     top: calc(var(--arrow-size) / -2);
     right: var(--arrow-offset);
   }
 
-  &[data-position="bottom right"]::before {
+  &[data-position="bottom left"]::before {
     top: calc(var(--arrow-size) / -2);
     left: var(--arrow-offset);
   }
 
-  /* Left position - need top-right borders */
-  &[data-position="left"]::before {
-    border-top-width: var(--arrow-border-width);
-    border-right-width: var(--arrow-border-width);
+  /* Right positions - need bottom-left borders (pointing left) */
+  &[data-position^="right"]::before {
+    border-bottom-width: var(--arrow-border-width);
+    border-left-width: var(--arrow-border-width);
+  }
+
+  &[data-position="right"]::before {
     left: calc(var(--arrow-size) / -2);
     top: 50%;
     margin-top: calc(var(--arrow-size) / -2);
   }
 
-  /* Right position - need bottom-left borders */
-  &[data-position="right"]::before {
-    border-bottom-width: var(--arrow-border-width);
-    border-left-width: var(--arrow-border-width);
+  &[data-position="right top"]::before {
+    left: calc(var(--arrow-size) / -2);
+    top: var(--arrow-offset);
+  }
+
+  &[data-position="right bottom"]::before {
+    left: calc(var(--arrow-size) / -2);
+    bottom: var(--arrow-offset);
+  }
+
+  /* Left positions - need top-right borders (pointing right) */
+  &[data-position^="left"]::before {
+    border-top-width: var(--arrow-border-width);
+    border-right-width: var(--arrow-border-width);
+  }
+
+  &[data-position="left"]::before {
     right: calc(var(--arrow-size) / -2);
     top: 50%;
     margin-top: calc(var(--arrow-size) / -2);
+  }
+
+  &[data-position="left top"]::before {
+    right: calc(var(--arrow-size) / -2);
+    top: var(--arrow-offset);
+  }
+
+  &[data-position="left bottom"]::before {
+    right: calc(var(--arrow-size) / -2);
+    bottom: var(--arrow-offset);
   }
 }

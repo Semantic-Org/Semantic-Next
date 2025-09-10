@@ -24,6 +24,7 @@ const defaultSettings = {
 
   offset: 0, // distance offset from calculated position
   distance: 0, // distance away from pointing to
+  applyOffsetToCenter: false, // whether to apply offset to center positions
 
   alwaysShow: false, // always show element regardless of whether it fits
   anchorName: 'anchor-{count}', // name of anchor
@@ -34,8 +35,8 @@ const defaultSettings = {
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
-  scrollThrottle: 100, // milliseconds to throttle scroll repositioning
-  resizeThrottle: 50, // milliseconds to throttle resize repositioning
+  scrollThrottle: 0, // milliseconds to throttle scroll repositioning
+  resizeThrottle: 0, // milliseconds to throttle resize repositioning
   throttleSettings: { leading: true, trailing: true },
 };
 
@@ -125,8 +126,8 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   },
 
   // Throttled repositioning methods
-  onScroll: throttle(() => self.reposition(), settings.scrollThrottle, settings.throttleSettings),
-  onResize: throttle(() => self.reposition(), settings.resizeThrottle, settings.throttleSettings),
+  onScroll: () => requestAnimationFrame(() => self.reposition()),
+  onResize: () => requestAnimationFrame(() => self.reposition()),
 
   initialize() {
     if (!settings.to) {
@@ -203,9 +204,17 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
 
       // Add distance/offset calc() when applicable
       if (!isCenter) {
-        const distance = self.normalizeUnit(settings.distance);
+        let distance = self.normalizeUnit(settings.distance);
         const offset = self.normalizeUnit(settings.offset);
-        console.log(distance, offset);
+
+        // Add arrow size to distance when arrow is enabled
+        if (settings.arrow && distance !== null) {
+          distance = `calc(${distance} + var(--arrow-size, 10px))`;
+        }
+        else if (settings.arrow && distance === null) {
+          distance = 'var(--arrow-size, 10px)';
+        }
+
         // Add distance to primary axis anchors, offset to secondary axis anchors
         if (inArray(thisValue, primaryAxisAnchors) && distance !== null) {
           value = `calc(${value} + ${distance})`;
@@ -213,8 +222,8 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
         else if (inArray(thisValue, secondaryAxisAnchors) && offset !== null) {
           value = `calc(${value} + ${offset})`;
         }
-        // Handle center anchors for offset on secondary axis
-        else if (thisValue === 'c' && offset !== null) {
+        // Handle center anchors for offset on secondary axis (if enabled)
+        else if (thisValue === 'c' && offset !== null && settings.applyOffsetToCenter) {
           value = `calc(${value} + ${offset})`;
         }
       }
@@ -316,6 +325,9 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   setResolvedPosition(resolvedPosition) {
     self.endFallbackSearch();
     $el.attr('data-position', resolvedPosition);
+    if (settings.arrow) {
+      $el.attr('data-arrow', '');
+    }
     self.position = resolvedPosition;
     debug('Found position in view', resolvedPosition);
     self.setPosition(resolvedPosition);
