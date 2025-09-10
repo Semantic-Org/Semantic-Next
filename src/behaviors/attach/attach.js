@@ -35,8 +35,8 @@ const defaultSettings = {
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
-  scrollThrottle: 0, // milliseconds to throttle scroll repositioning
-  resizeThrottle: 0, // milliseconds to throttle resize repositioning
+  scrollThrottle: 15, // milliseconds to throttle scroll repositioning
+  resizeThrottle: 50, // milliseconds to throttle resize repositioning
   throttleSettings: { leading: true, trailing: true },
 };
 
@@ -126,8 +126,13 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   },
 
   // Throttled repositioning methods
-  onScroll: () => requestAnimationFrame(() => self.reposition()),
-  onResize: () => requestAnimationFrame(() => self.reposition()),
+  onScroll: (settings.scrollThrottle > 0)
+    ? throttle(() => requestAnimationFrame(self.reposition), settings.scrollThrottle, settings.throttleSettings)
+    : requestAnimationFrame(self.reposition),
+
+  onResize: (settings.resizeThrottle > 0)
+    ? throttle(() => requestAnimationFrame(self.reposition), settings.resizeThrottle, settings.throttleSettings)
+    : requestAnimationFrame(self.reposition),
 
   initialize() {
     if (!settings.to) {
