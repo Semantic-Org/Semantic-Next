@@ -2138,6 +2138,7 @@ export class Query {
     threshold = 0,
     fully = false,
     returnDetails = false,
+    all = false,
   } = {}) {
     if (this.length === 0 || !target) {
       return returnDetails ? null : false;
@@ -2170,16 +2171,23 @@ export class Query {
         const $target = this.chain(targetEl);
         const targetDims = $target.dimensions();
 
-        // Default return details object
-        let details = {
-          ...defaultDetails,
-        };
-
         // Get source position relative to target
         const { relative } = $source.position({ relativeTo: targetEl });
         const { top, left } = relative;
         const sourceRight = left + sourceDims.outerWidth;
         const sourceBottom = top + sourceDims.outerHeight;
+
+        // Default return details object
+        let details = {
+          ...defaultDetails,
+          // Add element position relative to target for obstruction analysis
+          elementPosition: {
+            top,
+            left,
+            bottom: sourceBottom,
+            right: sourceRight,
+          },
+        };
 
         // Simple bounds check for intersection
         const intersects = (
@@ -2217,6 +2225,13 @@ export class Query {
             bottom: sourceBottom > 0 && sourceBottom <= targetDims.outerHeight,
             left: left >= 0 && left < targetDims.outerWidth,
             right: sourceRight > 0 && sourceRight <= targetDims.outerWidth,
+            // Add element position relative to target for obstruction analysis
+            elementPosition: {
+              top,
+              left,
+              bottom: sourceBottom,
+              right: sourceRight,
+            },
           };
 
           // Check if fully contained
@@ -2256,8 +2271,8 @@ export class Query {
         : results;
     }
 
-    // For boolean results, return true if any intersection found
-    return results.some(r => r === true);
+    // For boolean results, check all elements or any element based on all parameter
+    return all ? results.every(r => r === true) : results.some(r => r === true);
   }
 
   pagePosition(settings) {
@@ -2381,11 +2396,7 @@ export class Query {
     return this.length === 1 ? results[0] : results;
   }
 
-  isInView({ threshold = 0, fully = false, viewport } = {}) {
-    if (this.length === 0) {
-      return false;
-    }
-
+  isInView({ viewport, ...intersectionOptions } = {}) {
     // Determine the viewport/container to check against
     let $viewport;
     if (viewport) {
@@ -2401,17 +2412,8 @@ export class Query {
       $viewport = this.chain(document.documentElement);
     }
 
-    // Check if ALL elements in the collection are in view
-    // We check each element individually against the viewport
-    return this.map(el => {
-      const $el = this.chain(el);
-
-      // Use intersects method with appropriate options
-      return $el.intersects($viewport, {
-        threshold,
-        fully,
-      });
-    }).every(result => result === true);
+    // Use intersects method directly on the full collection
+    return this.intersects($viewport, intersectionOptions);
   }
 
   // special helper for SUI components

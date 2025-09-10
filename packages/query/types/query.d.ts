@@ -1114,6 +1114,8 @@ export class Query {
       fully?: boolean;
       /** Whether to return detailed intersection data. Defaults to false. */
       returnDetails?: false;
+      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
+      all?: boolean;
     },
   ): boolean;
 
@@ -1135,6 +1137,8 @@ export class Query {
       fully?: boolean;
       /** Must be true to get detailed intersection data. */
       returnDetails: true;
+      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
+      all?: boolean;
     },
   ):
     | {
@@ -1152,6 +1156,12 @@ export class Query {
         width: number;
         height: number;
       } | null;
+      elementPosition: {
+        top: number;
+        left: number;
+        bottom: number;
+        right: number;
+      };
     }
     | Array<{
       intersects: boolean;
@@ -1168,19 +1178,35 @@ export class Query {
         width: number;
         height: number;
       } | null;
+      elementPosition: {
+        top: number;
+        left: number;
+        bottom: number;
+        right: number;
+      };
     }>
     | null;
 
   /**
-   * Checks if ALL elements in the selection are within the viewport.
+   * Checks if elements in the selection are within the viewport.
    * @see https://next.semantic-ui.com/api/query/visibility#isinview
    * @param options - Configuration options.
    * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
    * @param options.fully - Whether element must be fully within viewport. Defaults to false.
    * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
-   * @returns true if ALL elements meet criteria, false otherwise.
+   * @param options.sides - Which sides must intersect ('all' or specific sides). Defaults to 'all'.
+   * @param options.returnDetails - Whether to return detailed intersection data. Defaults to false.
+   * @param options.all - Whether all elements must be in view (true) or any element (false). Defaults to false.
+   * @returns Boolean indicating if elements are in view, or detailed intersection data if returnDetails is true.
    */
-  isInView(options?: { threshold?: number; fully?: boolean; viewport?: Element | Query; }): boolean;
+  isInView(options?: {
+    threshold?: number;
+    fully?: boolean;
+    viewport?: string | Element | Query;
+    sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+    returnDetails?: boolean;
+    all?: boolean;
+  }): boolean;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.
