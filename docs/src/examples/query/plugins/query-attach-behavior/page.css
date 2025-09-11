@@ -5,7 +5,7 @@
   --square-size: 10vw;
   --square-size-min: 50px;
 
-  --square-margin: max(var(--square-size), var(--square-size-min)) auto;
+  --square-margin: 300px auto;
 
 }
 
@@ -20,12 +20,12 @@
   height: var(--box-size);
   min-width: var(--box-size-min);
   min-height: var(--box-size-min);
+
 }
 
 .square {
   background-color: var(--red-5);
   border: var(--red-border);
-  background-image: var(--angled-gradient);
   width: var(--square-size);
   height: var(--square-size);
   min-width: var(--square-size-min);
@@ -38,4 +38,9 @@
   box-shadow: var(--shadow);
   text-align: center;
   align-content: center;
+
+  /* Make arrow match the square */
+  --arrow-border-base: var(--red-border-color);
+  --arrow-background: var(--red-5);
+
 }
