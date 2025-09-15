@@ -1743,33 +1743,35 @@ export class Query {
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
+      const emptyValues = ['', 'none'];
+
+      // Check if element uses CSS anchor positioning
+      const style = window.getComputedStyle(el);
+      const hasAnchor = style.positionAnchor && style.positionAnchor !== 'none';
+      const isPositioned = inArray(style.position, ['absolute', 'fixed']);
+      const isAnchored = hasAnchor && isPositioned;
+      const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
+
       let current = el.parentNode;
       while (current) {
         if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
 
-          // Check overflow
-          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+          // Check overflow (skip for anchored elements - they escape)
+          if (!isAnchored && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
             return current;
           }
 
-          // Check contain property (layout, paint, size, strict)
-          const contain = style.contain;
-          if (
-            contain
-            && (contain.includes('paint') || contain.includes('layout') || contain.includes('size')
-              || contain.includes('strict'))
-          ) {
+          // Check contain property (different rules for anchored vs non-anchored)
+          if (style.contain && containRegex.test(style.contain)) {
             return current;
           }
 
-          // Check clip-path
-          if (style.clipPath && style.clipPath !== 'none') {
+          // Shared checks (always clip both anchored and non-anchored)
+          if (!inArray(style.clipPath, emptyValues)) {
             return current;
           }
-
-          // Check mask/mask-image
-          if ((style.mask && style.mask !== 'none') || (style.maskImage && style.maskImage !== 'none')) {
+          if (!inArray(style.mask, emptyValues) || !inArray(style.maskImage, emptyValues)) {
             return current;
           }
         }
@@ -1831,6 +1833,41 @@ export class Query {
       return document.documentElement;
     });
     return this.chain(parents);
+  }
+
+  // this is the nearest element that creates a scroll container
+  scrollParent({ all = false } = {}) {
+    const results = this.map((el) => {
+      const scrollParents = [];
+      let current = el.parentNode;
+
+      while (current && current !== document.body) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+
+          // Check if element creates a scroll container
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            if (all) {
+              scrollParents.push(current);
+            }
+            else {
+              return current;
+            }
+          }
+        }
+        current = current.parentNode;
+      }
+
+      // documentElement is the final scroll container
+      const fallback = window;
+      if (all) {
+        scrollParents.push(fallback);
+        return scrollParents;
+      }
+      return fallback;
+    });
+
+    return all ? this.chain(results.flat()) : this.chain(results);
   }
 
   offsetParent() {
@@ -2338,8 +2375,8 @@ export class Query {
       if (relativeTo) {
         const relativeRect = $relative.dimensions();
         relativeCoords = {
-          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left - relativeRect.scrollTop),
-          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left - relativeRect.scrollLeft),
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
         };
         if (!isSetter && type === 'relative') {
           return relativeCoords;
