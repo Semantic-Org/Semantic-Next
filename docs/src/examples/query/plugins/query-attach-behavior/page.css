@@ -1,17 +1,29 @@
 :root {
   --box-size: 50vw;
   --box-size-min: 200px;
+  --box-margin: 300px auto;
 
   --square-size: 10vw;
   --square-size-min: 50px;
 
-  --square-margin: 300px auto;
+}
 
+html {
+  height: 2000px;
+}
+
+.scroll {
+  overflow: auto;
+  border: var(--border);
+  background-color: var(--green-bg);
+  padding: 100px;
+  margin: 100px 0px;
+  height: 400px;
 }
 
 .box {
   position: relative;
-  margin: var(--square-margin);
+  margin: var(--box-margin);
   background: var(--blue-0);
   background-image: var(--angled-gradient);
   border: var(--blue-border);
