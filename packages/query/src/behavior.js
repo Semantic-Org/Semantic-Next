@@ -450,6 +450,15 @@ export class Behavior {
     }
   }
 
+  // attaches an external event handler making sure to remove the event when the component is destroyed
+  attachEvent(selector, eventName, eventHandler, { onSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+    return this.$(selector, document, querySettings).on(eventName, eventHandler, {
+      abortController: this.controller,
+      returnHandler: true,
+      ...onSettings,
+    });
+  }
+
   dispatchEvent(
     eventName,
     detail = {},
@@ -660,6 +669,7 @@ export class Behavior {
         abortSignal: this.controller,
         behavior: selfProxy,
         namespace: self.namespace,
+        attachEvent: self.attachEvent.bind(this),
         dispatchEvent: self.dispatchEvent.bind(this),
         dispatchGroupEvent: self.dispatchGroupEvent.bind(this),
 
