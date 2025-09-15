@@ -1,5 +1,5 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, inArray, isArray, isNumber, isString, range, throttle } from '@semantic-ui/utils';
+import { each, inArray, isArray, isNumber, isString, range, throttle, wrapFunction } from '@semantic-ui/utils';
 
 import css from './attach.css?raw';
 
@@ -16,8 +16,8 @@ const defaultSettings = {
   // [`position1', 'position2'] - only use specific fallback positions
   fallbackStrategy: 'adjacent',
 
-  // position element here as a last resort even if no positions fit
-  lastResort: 'center',
+  // position element here as a last resort even if no positions fit ie. "center"
+  lastResort: '',
 
   // whether to add a pointing arrow
   arrow: true,
@@ -26,7 +26,6 @@ const defaultSettings = {
   distance: 0, // distance away from pointing to
   applyOffsetToCenter: false, // whether to apply offset to center positions
 
-  alwaysShow: false, // always show element regardless of whether it fits
   anchorName: 'anchor-{count}', // name of anchor
 
   moveElement: true, // whether to move element to same positioning context
@@ -35,12 +34,12 @@ const defaultSettings = {
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
-  scrollThrottle: 15, // milliseconds to throttle scroll repositioning
-  resizeThrottle: 50, // milliseconds to throttle resize repositioning
-  throttleSettings: { leading: true, trailing: true },
+  scrollThrottle: 150, // milliseconds to throttle scroll repositioning
+  resizeThrottle: 300, // milliseconds to throttle resize repositioning
+  throttleSettings: { leading: false, trailing: true },
 };
 
-const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, debug, index, warn }) => ({
+const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classNames, error, debug, index, warn }) => ({
   anchorName: null, // current anchor name
 
   // available positions to try
@@ -107,7 +106,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     'left top': [4, 11, 5, 10, 6, 1, 9, 2, 8, 3, 7],
   },
 
-  // mapping of position name to css using shorthand
+  // mapping of position name to css using shorthand to reduce min filesize
   // see <decodeCSSShorthand>
   positionMapping: {
     'top left': { ibe: 't', iis: 'l' },
@@ -133,17 +132,6 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
   onResize: (settings.resizeThrottle > 0)
     ? throttle(() => requestAnimationFrame(self.reposition), settings.resizeThrottle, settings.throttleSettings)
     : requestAnimationFrame(self.reposition),
-
-  initialize() {
-    if (!settings.to) {
-      error('No element specified to attach to');
-      return;
-    }
-    if (settings.moveElement) {
-      self.maybeMoveElement();
-    }
-    self.attach();
-  },
 
   getNextAnchorName() {
     if (!cache.count) {
@@ -276,7 +264,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     $el.css(positioningCSS);
   },
 
-  testPosition(position = setting.position) {
+  testPosition(position = settings.position) {
     if (self.isHidden()) {
       return;
     }
@@ -295,9 +283,15 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
 
   // check if position is in view
   maybeReposition(currentPosition = settings.position) {
-    const inView = $el.isInView({ fully: true });
-    if (!inView) {
-      debug('Position not in view', currentPosition);
+    const view = $el.isInView({
+      fully: true,
+      returnDetails: true,
+      viewport: (settings.containToScroll)
+        ? $el.scrollParent()
+        : $el.clippingParent(),
+    });
+    if (!view.intersects) {
+      debug('Position not in view', currentPosition, view);
       // try next fallback position unless none left (null)
       const nextPosition = self.getNextPosition(currentPosition);
       if (nextPosition !== null) {
@@ -320,7 +314,7 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
       return true;
     }
     else {
-      debug('Current position still in view', currentPosition);
+      debug('Current position still in view', currentPosition, view);
       self.endFallbackSearch();
       return false;
     }
@@ -422,19 +416,55 @@ const createBehavior = ({ $, $el, el, self, cache, settings, classNames, error, 
     $el.css(attachCSS);
     self.testPosition(settings.position);
   },
+
+  bindObservers() {
+    const viewport = settings.containToScroll
+      ? $el.scrollParent()
+      : $el.clippingParent();
+
+    console.log(viewport.el());
+    self.observer = new IntersectionObserver(
+      self.onIntersectionChange,
+      {
+        root: viewport.el(),
+        threshold: [0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1.0],
+        rootMargin: '50px',
+      },
+    );
+
+    self.observer.observe(el);
+  },
+
+  onIntersectionChange(entries) {
+    const entry = entries[0];
+    console.log(entries);
+    if (!entry.isIntersecting) {
+      self.reposition();
+    }
+  },
 });
 
+const onCreated = ({ self, settings }) => {
+  if (!settings.to) {
+    error('No element specified to attach to');
+    return;
+  }
+  if (settings.moveElement) {
+    self.maybeMoveElement();
+  }
+  self.attach();
+  self.bindObservers();
+};
+
 const onDestroyed = ({ self }) => {
-  self.onScroll?.cancel();
-  self.onResize?.cancel();
+  // self.observer?.disconnect();
+  wrapFunction(self.onScroll?.cancel)();
+  wrapFunction(self.onResize?.cancel)();
 };
 
 const events = {
   'global resize window'({ self }) {
     self.onResize();
-  },
-  'global scroll window'({ self }) {
-    self.onScroll();
   },
   'transition:started'({ self }) {
     self.reposition();
@@ -448,8 +478,9 @@ export const Attach = registerBehavior({
   namespace: 'attach',
   defaultSettings,
   events,
+  css,
   mutations,
   createBehavior,
+  onCreated,
   onDestroyed,
-  css,
 });
