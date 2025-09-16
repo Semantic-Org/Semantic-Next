@@ -1,5 +1,15 @@
 import { registerBehavior } from '@semantic-ui/query';
-import { each, inArray, isArray, isNumber, isString, range, throttle, wrapFunction } from '@semantic-ui/utils';
+import {
+  each,
+  idleCallback,
+  inArray,
+  isArray,
+  isNumber,
+  isString,
+  range,
+  throttle,
+  wrapFunction,
+} from '@semantic-ui/utils';
 
 import css from './attach.css?raw';
 
@@ -34,12 +44,12 @@ const defaultSettings = {
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
-  scrollThrottle: 150, // milliseconds to throttle scroll repositioning
+  scrollThrottle: 15, // milliseconds to throttle scroll repositioning
   resizeThrottle: 300, // milliseconds to throttle resize repositioning
   throttleSettings: { leading: false, trailing: true },
 };
 
-const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classNames, error, debug, index, warn }) => ({
+const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error, debug, warn }) => ({
   anchorName: null, // current anchor name
 
   // available positions to try
@@ -59,7 +69,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
   ],
 
   // current position
-  position: null,
+  position: undefined,
 
   // map of starting position to fallbacks using index of 'positions'
   // to make this less confusing it is 1-indexed.
@@ -126,12 +136,18 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
 
   // Throttled repositioning methods
   onScroll: (settings.scrollThrottle > 0)
-    ? throttle(() => requestAnimationFrame(self.reposition), settings.scrollThrottle, settings.throttleSettings)
-    : requestAnimationFrame(self.reposition),
+    ? throttle(
+      () => {
+        idleCallback(self.reposition);
+      },
+      settings.scrollThrottle,
+      settings.throttleSettings,
+    )
+    : idleCallback(self.reposition),
 
   onResize: (settings.resizeThrottle > 0)
-    ? throttle(() => requestAnimationFrame(self.reposition), settings.resizeThrottle, settings.throttleSettings)
-    : requestAnimationFrame(self.reposition),
+    ? throttle(() => idleCallback(self.reposition), settings.resizeThrottle, settings.throttleSettings)
+    : idleCallback(self.reposition),
 
   getNextAnchorName() {
     if (!cache.count) {
@@ -179,8 +195,8 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
       o: '-50% -50%', // offset
     };
 
-    let css = self.positionMapping[position] || {};
-    let outputCSS = {};
+    const css = self.positionMapping[position] || {};
+    const outputCSS = {};
 
     // Skip distance/offset for center position
     const isCenter = position === 'center';
@@ -256,8 +272,8 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     return $el.computedStyle('display') === 'none';
   },
 
-  setPosition(position = settings.position) {
-    if (self.isHidden()) {
+  setPositioningCSS(position = settings.position) {
+    if (self.isHidden() || position === 'hidden') {
       return;
     }
     const positioningCSS = self.getPositioningCSS(position);
@@ -268,27 +284,40 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     if (self.isHidden()) {
       return;
     }
-    self.setPosition(position);
+    self.setPositioningCSS(position);
     self.maybeReposition(position);
+  },
+
+  isCurrentlyPositioning() {
+    return self.fallbackPositions?.length;
   },
 
   reposition() {
     // current repositioning
-    if (self.fallbackPositions?.length) {
+    if (self.isCurrentlyPositioning()) {
       debug('Already searching');
       return;
     }
+    if (self.currentPositionInView()) {
+      return;
+    }
+    // but begin from current position if defined
     self.testPosition(settings.position);
   },
 
+  currentPositionInView() {
+    return self.position && self.maybeReposition(self.position) === false;
+  },
+
   // check if position is in view
-  maybeReposition(currentPosition = settings.position) {
+  maybeReposition(currentPosition = self.position) {
+    const $viewport = (settings.containToScroll)
+      ? $el.scrollParent()
+      : $el.clippingParent();
     const view = $el.isInView({
       fully: true,
       returnDetails: true,
-      viewport: (settings.containToScroll)
-        ? $el.scrollParent()
-        : $el.clippingParent(),
+      viewport: $viewport,
     });
     if (!view.intersects) {
       debug('Position not in view', currentPosition, view);
@@ -300,14 +329,15 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
       }
       else {
         if (settings.lastResort) {
-          self.setPosition(settings.lastResort);
+          self.setResolvedPosition(settings.lastResort);
         }
         else {
-          error('No positions fit viewport');
+          warn('No positions fit viewport');
         }
         debug('no positions left to test');
+        self.endFallbackSearch();
       }
-      return false;
+      return true;
     }
     else if (self.position !== currentPosition) {
       self.setResolvedPosition(currentPosition);
@@ -329,7 +359,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     }
     self.position = resolvedPosition;
     debug('Found position in view', resolvedPosition);
-    self.setPosition(resolvedPosition);
+    self.setPositioningCSS(resolvedPosition);
   },
 
   // fallback order is implemented as a lookup table
@@ -339,10 +369,10 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     if (isArray(settings.fallbackStrategy)) {
       return settings.fallbackStrategy;
     }
-    if (settings.fallbackStrategy == 'adjacent') {
+    if (settings.fallbackStrategy === 'adjacent') {
       return self.adjacentFallbacks[position] || allPositions;
     }
-    if (settings.fallbackStrategy == 'opposite') {
+    if (settings.fallbackStrategy === 'opposite') {
       return self.oppositeFallbacks[position] || allPositions;
     }
     return allPositions;
@@ -359,7 +389,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
       self.fallbacksTested++;
       if (isNumber(nextPosition)) {
         const index = nextPosition - 1; // positions are 1-indexed
-        debug('Next position is', nextPosition, self.positions[index]);
+        debug('Next position is', self.positions[nextPosition]);
         return self.positions[index] || null;
       }
       // if its a string its just the position name (user specified)
@@ -372,10 +402,26 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     }
   },
 
-  startFallbackSearch(startingPosition) {
+  startFallbackSearch(startingPosition, currentPosition) {
+    const rotateToFront = (arr, value) => {
+      const index = arr.indexOf(value);
+      if (index === -1) {
+        return arr;
+      }
+      return [...arr.slice(index), ...arr.slice(0, index)];
+    };
     self.fallbacksTested = 0;
+    let positions = self.getFallbackOrder(startingPosition);
+
+    // if we specify current position we want to process array but starting with current position
+    // this makes sure if its still in view we use the current position
+    if (currentPosition) {
+      const positionNumber = self.positions.indexOf(currentPosition);
+      if (inArray(positionNumber, positions)) {
+        positions = rotateToFront(positions, positionNumber);
+      }
+    }
     // clone array
-    const positions = self.getFallbackOrder(startingPosition);
     self.fallbackPositions = [
       ...positions,
     ];
@@ -392,7 +438,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     const elParent = $el.positioningParent().el();
 
     // same positioning context
-    if (anchorParent == elParent) {
+    if (anchorParent === elParent) {
       return;
     }
 
@@ -409,7 +455,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     if (!self.anchorName) {
       self.setAnchorName();
     }
-    let attachCSS = {
+    const attachCSS = {
       'position': 'absolute',
       'position-anchor': self.anchorName,
     };
@@ -417,12 +463,16 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
     self.testPosition(settings.position);
   },
 
+  bindScroll() {
+    const $scrolls = $el.scrollParent({ all: true });
+    attachEvent($scrolls, 'scroll', self.onScroll);
+  },
+
   bindObservers() {
     const viewport = settings.containToScroll
       ? $el.scrollParent()
       : $el.clippingParent();
 
-    console.log(viewport.el());
     self.observer = new IntersectionObserver(
       self.onIntersectionChange,
       {
@@ -431,16 +481,8 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, classN
         rootMargin: '50px',
       },
     );
-
+    el.offsetHeight;
     self.observer.observe(el);
-  },
-
-  onIntersectionChange(entries) {
-    const entry = entries[0];
-    console.log(entries);
-    if (!entry.isIntersecting) {
-      self.reposition();
-    }
   },
 });
 
@@ -453,7 +495,7 @@ const onCreated = ({ self, settings }) => {
     self.maybeMoveElement();
   }
   self.attach();
-  self.bindObservers();
+  self.bindScroll();
 };
 
 const onDestroyed = ({ self }) => {

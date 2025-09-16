@@ -36,7 +36,8 @@
   }
 
   &[data-position^="hidden"] {
-    display: none !important;
+    pointer-events: none;
+    opacity: 0;
   }
 
   &[data-position^="center"] {
