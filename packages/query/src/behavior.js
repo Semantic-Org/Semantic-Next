@@ -331,10 +331,24 @@ export class Behavior {
     this.mutationObservers = [];
     each(mutationConfigs, ({ observedElement, observerOptions, keyword, selector, handler }) => {
       const observer = new MutationObserver((mutations) => {
+        if (keyword == 'attributes') {
+          const attributeMutations = mutations.filter(mutation => mutation.type == 'attributes');
+          each(attributeMutations, (mutation) => {
+            const callbackArgs = this.getMutationCallbackArgs([mutation]);
+            this.call(handler, { additionalParams: callbackArgs });
+          });
+          return;
+        }
+        if (keyword == 'text') {
+          const textMutations = mutations.filter(mutation => mutation.type == 'characterData');
+          each(textMutations, (mutation) => {
+            const callbackArgs = this.getMutationCallbackArgs([mutation]);
+            this.call(handler, { additionalParams: callbackArgs });
+          });
+        }
         // determine if it matches
         let $added = $();
         let $removed = $();
-
         each(mutations, (mutation) => {
           const $matchingAdded = $(mutation.addedNodes).filter(selector);
           const $matchingRemoved = $(mutation.removedNodes).filter(selector);
@@ -346,9 +360,6 @@ export class Behavior {
           }
         });
 
-        // Check if we should trigger based on keyword
-        const hasAdded = $added.exists();
-        const hasRemoved = $removed.exists();
         const shouldTrigger = (keyword === 'add' && hasAdded)
           || (keyword === 'remove' && hasRemoved)
           || (keyword === 'standard' && (hasAdded || hasRemoved));
@@ -359,7 +370,6 @@ export class Behavior {
           this.call(handler, { additionalParams: callbackArgs });
         }
       });
-
       observer.observe(observedElement, observerOptions);
       this.mutationObservers.push(observer);
     });
@@ -374,7 +384,7 @@ export class Behavior {
 
   parseMutationString(mutationString) {
     const keywords = ['observe', 'add', 'remove', 'attributes', 'text'];
-    const observerOptions = {
+    let observerOptions = {
       childList: true,
       subtree: true,
     };
@@ -409,12 +419,16 @@ export class Behavior {
         }
         break;
       case 'attributes':
-        observerOptions.attributes = true;
-        observerOptions.attributeOldValue = true;
+        observerOptions = {
+          attributes: true,
+          attributeOldValue: true,
+        };
         break;
       case 'text':
-        observerOptions.characterData = true;
-        observerOptions.characterDataOldValue = true;
+        observerOptions = {
+          characterData: true,
+          characterDataOldValue: true,
+        };
         break;
     }
     return { observedElement, keyword, observerOptions, selector };
@@ -433,11 +447,11 @@ export class Behavior {
     switch (mutation.type) {
       case 'attributes':
         args.attributeName = mutation.attributeName;
-        args.newValue = mutation.target.getAttribute(mutation.attributeName);
+        args.attributeValue = mutation.target.getAttribute(mutation.attributeName);
         args.oldValue = mutation.oldValue;
         break;
       case 'characterData':
-        args.newValue = mutation.target.textContent;
+        args.textContent = mutation.target.textContent;
         args.oldValue = mutation.oldValue;
         break;
     }
