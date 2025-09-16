@@ -1777,7 +1777,7 @@ export class Query {
         }
         current = current.parentNode;
       }
-      return document.documentElement;
+      return window;
     });
     return this.chain(parents);
   }
