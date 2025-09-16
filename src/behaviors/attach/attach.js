@@ -40,7 +40,7 @@ const defaultSettings = {
 
   moveElement: true, // whether to move element to same positioning context
 
-  observeChanges: true, // whether to observe changes and move element if it no longer fits
+  observeChanges: true, // whether to observe attribute changes
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
@@ -273,7 +273,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
   },
 
   setPositioningCSS(position = settings.position) {
-    if (self.isHidden() || position === 'hidden') {
+    if (self.isHidden()) {
       return;
     }
     const positioningCSS = self.getPositioningCSS(position);
@@ -282,7 +282,11 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
 
   testPosition(position = settings.position) {
     if (self.isHidden()) {
+      self.hidden = true;
       return;
+    }
+    else {
+      self.hidden = false;
     }
     self.setPositioningCSS(position);
     self.maybeReposition(position);
@@ -513,7 +517,14 @@ const events = {
   },
 };
 
-const mutations = {};
+const mutations = {
+  'attributes'({ attributeName, attributeValue, settings, self }) {
+    if (!settings.observeChanges === true || !attributeName === 'style' || !attributeValue.includes('display')) {
+      return;
+    }
+    self.reposition();
+  },
+};
 
 export const Attach = registerBehavior({
   name: 'attach',
