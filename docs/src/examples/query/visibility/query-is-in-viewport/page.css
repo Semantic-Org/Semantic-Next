@@ -1,0 +1,82 @@
+.scroll-container {
+  height: 300px;
+  overflow-y: auto;
+  padding: var(--padding);
+  background: var(--standard-1);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin: var(--margin) 0;
+}
+
+.test-element {
+  width: 200px;
+  height: 100px;
+  background: var(--blue-10);
+  border: 2px solid var(--blue-30);
+  color: var(--blue-70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.test-element.in-viewport {
+  background: var(--green-10);
+  border-color: var(--green-30);
+  color: var(--green-70);
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px var(--green-20);
+}
+
+.test-element.partially-visible {
+  background: var(--orange-10);
+  border-color: var(--orange-30);
+  color: var(--orange-70);
+}
+
+.spacer {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--standard-50);
+  font-style: italic;
+}
+
+.spacer.bottom {
+  height: 100px;
+}
+
+ui-button {
+  margin: 5px;
+}
+
+.output {
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  margin: var(--margin) 0;
+}
+
+.output h3 {
+  margin-top: 0;
+  color: var(--standard-70);
+}
+
+#viewport-info {
+  background: var(--standard-0);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  border: var(--border);
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  max-height: 200px;
+  overflow-y: auto;
+}

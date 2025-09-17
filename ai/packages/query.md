@@ -167,21 +167,31 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `pagePosition(options)` - Get document-relative position (viewport + scroll)
 - `dimensions()` - Get comprehensive dimension info (position, size, box model)
 - `bounds()` - Get DOMRect bounding box information
+<<<<<<< HEAD
 - `intersects(target, options)` - Check if elements intersect with target (with threshold, sides, details, all)
+=======
+>>>>>>> next
 - `offsetParent(options)` - Get offset parent for positioning
 - `naturalWidth()`, `naturalHeight()` - Get natural dimensions
 - `naturalDisplay(options)` - Get natural display value (ignoring display: none)
 - `clippingParent()` - Get element that clips visual bounds
 - `containingParent()` - Get simple containing parent (offsetParent)
 - `positioningParent(options)` - Get accurate positioning context parent
+<<<<<<< HEAD
 - `scrollParent(options)` - Get nearest scrollable container or all scroll parents in hierarchy
+=======
+>>>>>>> next
 
 ### Visibility and Display
 - `show(options)` - Show hidden elements using natural display value
 - `hide()` - Hide elements by setting display: none
 - `toggle(options)` - Toggle visibility state
 - `isVisible(options)` - Check if elements are visible (with opacity/visibility checks)
+<<<<<<< HEAD
 - `isInView(options)` - Check if elements are within viewport bounds (inherits all intersects options)
+=======
+- `isInViewport(options)` - Check if elements are within viewport bounds (defaults to clipping parent)
+>>>>>>> next
 
 ### Component Integration (Semantic UI specific)
 - `settings(newSettings)` - Configure component settings
@@ -866,7 +876,11 @@ console.log('Scrollable area:', dims.scrollWidth, dims.scrollHeight);
 // Lazy loading with viewport detection (uses clipping parent by default)
 function setupLazyLoading() {
   $('.lazy-image').each((img) => {
+<<<<<<< HEAD
     if ($(img).isInView({ threshold: 0.1 })) {
+=======
+    if ($(img).isInViewport({ threshold: 0.1 })) {
+>>>>>>> next
       img.src = img.dataset.src;
       img.classList.remove('lazy-image');
     }
@@ -877,14 +891,22 @@ function setupLazyLoading() {
 $('#content-area').on('scroll', () => {
   $('.animate-on-scroll').each((element) => {
     // Check visibility within the scrolling content area
+<<<<<<< HEAD
     if ($(element).isInView({ threshold: 0.5 })) {
+=======
+    if ($(element).isInViewport({ threshold: 0.5 })) {
+>>>>>>> next
       element.classList.add('animated');
     }
   });
 });
 
 // Check visibility within custom viewport (modal, sidebar, etc.)
+<<<<<<< HEAD
 if ($('.modal-content').isInView({ fully: true, viewport: $('#modal') })) {
+=======
+if ($('.modal-content').isInViewport({ fully: true, viewport: $('#modal') })) {
+>>>>>>> next
   console.log('Modal content is fully visible within modal viewport');
 }
 
@@ -892,6 +914,7 @@ if ($('.modal-content').isInView({ fully: true, viewport: $('#modal') })) {
 $('.reveal-items').each((item) => {
   const $item = $(item);
   // Explicitly use browser viewport instead of clipping parent
+<<<<<<< HEAD
   if ($item.isInView({ threshold: 0.25, viewport: document.documentElement })) {
     $item.addClass('fade-in');
   }
@@ -919,6 +942,12 @@ if ($('.draggable-items').intersects('.drop-zone', { all: true, threshold: 0.8 }
   console.log('All items are mostly within drop zone');
   $('.drop-zone').addClass('ready-for-drop');
 }
+=======
+  if ($item.isInViewport({ threshold: 0.25, viewport: document.documentElement })) {
+    $item.addClass('fade-in');
+  }
+});
+>>>>>>> next
 ```
 
 ### Dynamic Positioning
@@ -952,6 +981,7 @@ function positionTooltip($tooltip, $trigger) {
   $tooltip.css({ top: `${top}px`, left: `${left}px` });
 }
 
+<<<<<<< HEAD
 // Position tooltip within scrollable container
 function positionTooltipInScroller($tooltip, $trigger) {
   const $scrollContainer = $trigger.scrollParent();
@@ -986,6 +1016,8 @@ function setupScrollAwareTooltip($trigger, $tooltip) {
   });
 }
 
+=======
+>>>>>>> next
 // Relative positioning for connected elements
 $('#draggable').on('drag', (event) => {
   // Position connected indicator relative to draggable

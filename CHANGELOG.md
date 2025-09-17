@@ -9,16 +9,7 @@ Please note after `1.0` Semver will be followed using normal protocols.
 # Version 0.17.0 - xx.xx.xxxx
 
 ## Major Features
-* **Anchor/Positioning** - Added new `anchor` behavior that allows you to position elements relative to other elements using `css anchor`
-
-## Bugs
-* **Query Plugins** - Fixed issue where using non clonables as settings like query collections, or custom classes wouldn't work as expected. This was related to the default behavior of deepExtend and clone (see breaking changes).
-* **Query** - Fixed bug in `is` where it would return true for non-existent selectors
-
-## Features
-* **Utils** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
-* **Utils** - Added `log()` function for flexible logging with formatting, namespacing, timestamps, and JSON output support
-* **Utils** - Renamed `errors.js` module to `debug.js` to better reflect its logging and debugging capabilities
+* **Attach** - Added new `attach` behavior that allows you to position elements relative to other elements using `css anchor` positioning.
 
 ## Breaking Changes
 * **Utils** - `deepExtend` now preserves non clonables by default. This is to prevent very common scenarios where extend is used with custom classes or dom elements where the original reference should be maintained. Note this still can be overwritten using `deepExtend(obj1, obj2, { preserveNonCloneable: false });`
@@ -44,6 +35,13 @@ Please note after `1.0` Semver will be followed using normal protocols.
 * **Enhancement** - [`closest()`](https://next.semantic-ui.com/api/query/dom-traversal#closest) now supports passing DOM elements directly as the selector parameter, checking containment using the element's `contains()` method.
 * **Bug** - Fixed CSS nesting parsing in [`naturalDisplay()`](https://next.semantic-ui.com/api/query/dimensions#naturaldisplay) to properly resolve nested selectors with `&` parent references (e.g., `& .grid-container`).
 * **Bug** - Fixed [`position()`](https://next.semantic-ui.com/api/query/dimensions#position) method to return `undefined` for empty selections instead of empty array when used as getter.
+* **Bug** - Fixed issue where using non clonables as settings like query collections, or custom classes wouldn't work as expected. This was related to the default behavior of deepExtend and clone (see breaking changes).
+* **Bug** - Fixed bug in `is` where it would return true for non-existent selectors
+
+## Utils
+* **Feature** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
+* **Feature** - Added `log()` function for flexible logging with formatting, namespacing, timestamps, and JSON output support
+* **Feature** - Renamed `errors.js` module to `debug.js` to better reflect its logging and debugging capabilities
 
 # Version 0.16.1-2 - 08.21.2025
 
