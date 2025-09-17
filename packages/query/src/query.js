@@ -843,7 +843,7 @@ export class Query {
       return this;
     }
     const classesToAdd = classNames.trim().split(' ');
-    return this.each((el) => el.classList.add(...classesToAdd));
+    return this.each((el) => el?.classList?.add(...classesToAdd));
   }
 
   removeClass(classNames) {
@@ -851,7 +851,7 @@ export class Query {
       return this;
     }
     const classesToRemove = classNames.trim().split(' ');
-    return this.each((el) => el.classList.remove(...classesToRemove));
+    return this.each((el) => el?.classList?.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
@@ -859,11 +859,11 @@ export class Query {
       return this;
     }
     const classesToToggle = classNames.trim().split(' ');
-    return this.each((el) => el.classList.toggle(...classesToToggle));
+    return this.each((el) => el?.classList.toggle(...classesToToggle));
   }
 
   hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
+    return Array.from(this).some((el) => el?.classList.contains(className));
   }
 
   html(newHTML) {
@@ -1096,7 +1096,7 @@ export class Query {
       return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = this.map((el) => el.getAttribute(attribute));
+      const attributes = this.map((el) => el?.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
   }
@@ -1347,7 +1347,7 @@ export class Query {
 
   scrollLeft(value) {
     // special case <body> for window scroll
-    if (this.isGlobal || this.isBrowser || this.is('body')) {
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
       if (value !== undefined) {
         window.scroll(value, scrollY);
         return this;
@@ -1359,7 +1359,7 @@ export class Query {
 
   scrollTop(value) {
     // special case <body> for window scroll
-    if (this.isGlobal || this.isBrowser || this.is('body')) {
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
       if (value !== undefined) {
         window.scroll(window.scrollX, value);
         return this;
@@ -1777,7 +1777,7 @@ export class Query {
         }
         current = current.parentNode;
       }
-      return window;
+      return document.documentElement;
     });
     return this.chain(parents);
   }

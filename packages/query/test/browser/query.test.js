@@ -669,7 +669,7 @@ describe('query', () => {
       const $clippingParent = $target.clippingParent();
 
       expect($clippingParent.length).toBe(1);
-      expect($clippingParent[0]).toBe(window);
+      expect($clippingParent[0]).toBe(document.documentElement);
     });
 
     it('should handle multiple elements', () => {
@@ -825,7 +825,7 @@ describe('query', () => {
       const $clippingParent = $child.clippingParent();
 
       expect($clippingParent.length).toBe(1);
-      expect($clippingParent[0]).toBe(window);
+      expect($clippingParent[0]).toBe(document.documentElement);
     });
   });
 
