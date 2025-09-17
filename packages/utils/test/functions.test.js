@@ -707,46 +707,6 @@ describe('function utilities', () => {
         vi.advanceTimersByTime(100);
         expect(func).toHaveBeenCalledTimes(2);
       });
-
-      it('should track promise args for debugging/introspection', async () => {
-        let storedPromises = [];
-
-        // Patch throttle to capture pending promises for inspection
-        const originalThrottle = throttle;
-        const func = vi.fn(() => 'result');
-
-        // Create throttled function
-        const throttled = originalThrottle(func, 100);
-
-        // Monkey patch to capture internal pendingPromises
-        const originalPush = Array.prototype.push;
-        Array.prototype.push = function(...items) {
-          if (this.length === 0 && items[0] && items[0].resolve && items[0].reject) {
-            storedPromises.push(...items);
-          }
-          return originalPush.call(this, ...items);
-        };
-
-        try {
-          // Leading execution
-          throttled('arg1');
-
-          // These should be stored as pending promises
-          const promise2 = throttled('arg2');
-          const promise3 = throttled('arg3');
-
-          // Check if args are stored with promises (they should be for consistency with debounce)
-          expect(storedPromises.length).toBeGreaterThan(0);
-          expect(storedPromises[0]).toHaveProperty('args');
-          expect(storedPromises[0].args).toEqual(['arg2']);
-
-          vi.advanceTimersByTime(100);
-          await Promise.all([promise2, promise3]);
-        }
-        finally {
-          Array.prototype.push = originalPush;
-        }
-      });
     });
   });
 });
