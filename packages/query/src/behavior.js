@@ -10,6 +10,7 @@ import {
   isString,
   keys,
   last,
+  log,
   mapObject,
   noop,
   toTitleCase,
@@ -573,41 +574,31 @@ export class Behavior {
     return currentLevel >= required;
   }
 
-  outputLog(level, consoleMethod, color, message, data) {
-    if (!this.canLog(level)) { return; }
-    const args = [
-      `%c${toTitleCase(this.namespace)}%c ${message}`,
-      `color: ${color}; font-weight: bold;`,
-      'color: inherit;',
-    ];
-    if (data !== undefined) {
-      args.push(data);
+  outputLog(message, level, additionalSettings = {}) {
+    if (!this.canLog(level)) {
+      return;
     }
-    // args.push(this.element);
-    console[consoleMethod](...args);
-  }
-
-  log(message, data) {
-    this.outputLog('info', 'log', '#0066cc', message, data);
-  }
-
-  debug(message, data) {
-    this.outputLog('debug', 'debug', '#666', message, data);
-  }
-
-  warn(message, data) {
-    this.outputLog('warn', 'warn', '#ff9800', message, data);
-  }
-
-  error(message, data) {
-    this.outputLog('error', 'error', '#f44336', message, data);
-
-    // Optional: dispatch error event for handling
-    this.dispatchEvent('behavior:error', {
-      message,
+    const logSettings = {
       namespace: this.namespace,
-      data,
-    });
+      ...additionalSettings,
+    };
+    log(message, level, logSettings);
+  }
+
+  log(message, ...data) {
+    this.outputLog(message, 'log', { data });
+  }
+
+  debug(message, ...data) {
+    this.outputLog(message, 'debug', { data });
+  }
+
+  warn(message, ...data) {
+    this.outputLog(message, 'warn', { data });
+  }
+
+  error(message, ...data) {
+    this.outputLog(message, 'error', { data });
   }
 
   // Get or set individual setting
