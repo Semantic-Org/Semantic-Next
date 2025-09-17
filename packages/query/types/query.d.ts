@@ -871,6 +871,14 @@ export class Query {
   positioningParent(options?: { calculate?: boolean; }): Query;
 
   /**
+   * Gets the scroll parent (nearest scrollable container) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/visibility#scrollparent
+   * @param options.all - Whether to return all scroll parents in the hierarchy. When false, returns only the nearest scroll parent. Defaults to false.
+   * @returns A new Query instance containing the scroll parent element(s).
+   */
+  scrollParent(options?: { all?: boolean; }): Query;
+
+  /**
    * Gets the number of elements in the current set.  Alias for `length`.
    * @see https://next.semantic-ui.com/api/query/size-and-position#count
    * @returns The number of elements.

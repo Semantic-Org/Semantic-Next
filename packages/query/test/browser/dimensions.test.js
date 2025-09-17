@@ -516,7 +516,7 @@ describe('query', () => {
         <div class="test" style="position: absolute; top: -200px; left: 10px; width: 50px; height: 50px;"></div>
       `;
 
-      const result = $('.test').isInView();
+      const result = $('.test').isInView({ all: true });
       expect(result).toBe(false); // One element is out of viewport
     });
 
