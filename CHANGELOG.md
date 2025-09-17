@@ -17,6 +17,8 @@ Please note after `1.0` Semver will be followed using normal protocols.
 
 ## Features
 * **Utils** - Clone now has a new setting `preserveDOM` which will not clone DOM nodes if present. This can be useful in scenarios where you want to clone an object with references to the live DOM you want to maintain
+* **Utils** - Added `log()` function for flexible logging with formatting, namespacing, timestamps, and JSON output support
+* **Utils** - Renamed `errors.js` module to `debug.js` to better reflect its logging and debugging capabilities
 
 ## Breaking Changes
 * **Utils** - `deepExtend` now preserves non clonables by default. This is to prevent very common scenarios where extend is used with custom classes or dom elements where the original reference should be maintained. Note this still can be overwritten using `deepExtend(obj1, obj2, { preserveNonCloneable: false });`

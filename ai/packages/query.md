@@ -174,6 +174,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `clippingParent()` - Get element that clips visual bounds
 - `containingParent()` - Get simple containing parent (offsetParent)
 - `positioningParent(options)` - Get accurate positioning context parent
+- `scrollParent(options)` - Get nearest scrollable container or all scroll parents in hierarchy
 
 ### Visibility and Display
 - `show(options)` - Show hidden elements using natural display value
@@ -949,6 +950,40 @@ function positionTooltip($tooltip, $trigger) {
   }
   
   $tooltip.css({ top: `${top}px`, left: `${left}px` });
+}
+
+// Position tooltip within scrollable container
+function positionTooltipInScroller($tooltip, $trigger) {
+  const $scrollContainer = $trigger.scrollParent();
+
+  if ($scrollContainer[0] !== window) {
+    // Element is within a scrollable container
+    const scrollBounds = $scrollContainer.bounds();
+    const triggerPos = $trigger.position({ relativeTo: $scrollContainer });
+
+    // Position tooltip within scroll container bounds
+    $tooltip.css({
+      position: 'absolute',
+      top: triggerPos.top + $trigger.height() + 5,
+      left: Math.min(triggerPos.left, scrollBounds.width - $tooltip.width())
+    });
+
+    // Append to scroll container to inherit scrolling
+    $scrollContainer.append($tooltip);
+  } else {
+    // Use viewport positioning
+    positionTooltip($tooltip, $trigger);
+  }
+}
+
+// Handle scroll events on appropriate containers
+function setupScrollAwareTooltip($trigger, $tooltip) {
+  const $allScrollers = $trigger.scrollParent({ all: true });
+
+  $allScrollers.on('scroll', () => {
+    // Hide tooltip when any parent scrolls
+    $tooltip.hide();
+  });
 }
 
 // Relative positioning for connected elements
