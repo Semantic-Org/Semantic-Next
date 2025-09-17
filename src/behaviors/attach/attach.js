@@ -1,5 +1,6 @@
 import { registerBehavior } from '@semantic-ui/query';
 import {
+  debounce,
   each,
   idleCallback,
   inArray,
@@ -7,7 +8,6 @@ import {
   isNumber,
   isString,
   range,
-  throttle,
   wrapFunction,
 } from '@semantic-ui/utils';
 
@@ -36,6 +36,8 @@ const defaultSettings = {
   distance: 0, // distance away from pointing to
   applyOffsetToCenter: false, // whether to apply offset to center positions
 
+  preferOriginal: true, // whether to always prefer original position (this has performance implications)
+
   anchorName: 'anchor-{count}', // name of anchor
 
   moveElement: true, // whether to move element to same positioning context
@@ -44,8 +46,8 @@ const defaultSettings = {
   containToScroll: true, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
-  scrollThrottle: 15, // milliseconds to throttle scroll repositioning
-  resizeThrottle: 300, // milliseconds to throttle resize repositioning
+  scrollThrottle: (1000 / 60), // target 60fps
+  resizeThrottle: (1000 / 60), // target 60fps
   throttleSettings: { leading: false, trailing: true },
 };
 
@@ -136,7 +138,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
 
   // Throttled repositioning methods
   onScroll: (settings.scrollThrottle > 0)
-    ? throttle(
+    ? debounce(
       () => {
         idleCallback(self.reposition);
       },
@@ -146,7 +148,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
     : idleCallback(self.reposition),
 
   onResize: (settings.resizeThrottle > 0)
-    ? throttle(() => idleCallback(self.reposition), settings.resizeThrottle, settings.throttleSettings)
+    ? debounce(() => idleCallback(self.reposition), settings.resizeThrottle, settings.throttleSettings)
     : idleCallback(self.reposition),
 
   getNextAnchorName() {
@@ -289,7 +291,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       self.hidden = false;
     }
     self.setPositioningCSS(position);
-    self.maybeReposition(position);
+    self.checkInView(position);
   },
 
   isCurrentlyPositioning() {
@@ -302,19 +304,28 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       debug('Already searching');
       return;
     }
-    if (self.currentPositionInView()) {
+    if (self.isOriginalPosition()) {
+      if (self.currentPositionInView()) {
+        return;
+      }
+    }
+    else if (!settings.preferOriginal && self.currentPositionInView()) {
       return;
     }
     // test first position
     self.testPosition(settings.position);
   },
 
+  isOriginalPosition() {
+    return self.position === settings.position;
+  },
+
   currentPositionInView() {
-    return self.position && self.maybeReposition(self.position) === false;
+    return self.position && self.checkInView(self.position) === false;
   },
 
   // check if position is in view
-  maybeReposition(currentPosition = self.position) {
+  checkInView(currentPosition = self.position) {
     const $viewport = (settings.containToScroll)
       ? $el.scrollParent()
       : $el.clippingParent();
