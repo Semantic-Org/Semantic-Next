@@ -291,7 +291,7 @@ console.log('Positioned relative to:', $parent[0]);
 ```
 
 ### Example
-<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="query-offsetparent" direction="horizontal"></PlaygroundExample>
 
 ## positioningParent
 
@@ -348,6 +348,80 @@ This method detects elements that create containing blocks through:
 
 ### Example
 <PlaygroundExample id="query-positioningparent" direction="horizontal"></PlaygroundExample>
+
+## scrollParent
+
+Get the nearest scrollable container for each element, useful for positioning overlays and handling scroll events.
+
+> **Scroll Container Detection** This method traverses the DOM to find the nearest ancestor with `overflow` properties that create scrollable containers. Returns `window` when no scrollable ancestor is found, representing the root scroll container.
+
+### Syntax
+
+```javascript
+$('selector').scrollParent()
+$('selector').scrollParent(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| all | boolean | Return all scroll parents in the hierarchy instead of just the nearest one. Defaults to `false`. |
+
+### Returns
+
+A new [Query object](/api/query/basic#the-query-object) containing the scroll parent element(s).
+
+### Usage
+
+```javascript
+// Find nearest scrollable container
+const $tooltip = $('.tooltip');
+const $scrollContainer = $tooltip.scrollParent();
+
+// Position tooltip within scrollable bounds
+if ($scrollContainer[0] !== window) {
+  console.log('Element is scrolled by:', $scrollContainer[0]);
+}
+
+// Get all scroll containers in the hierarchy
+const $allScrollers = $('.deep-content').scrollParent({ all: true });
+$allScrollers.each(container => {
+  console.log('Scroll container:', container);
+});
+
+// Handle scroll events on the appropriate container
+const $element = $('.sticky-element');
+const $scroller = $element.scrollParent();
+$scroller.on('scroll', () => {
+  // Update sticky element position
+});
+```
+
+### Scroll Container Detection
+
+This method detects scrollable containers through:
+- `overflow: hidden/scroll/auto`
+- `overflow-x: hidden/scroll/auto`
+- `overflow-y: hidden/scroll/auto`
+
+Returns `window` when no scrollable ancestor is found (elements scroll with the viewport).
+
+### Behavior with `all: true`
+
+When `all: true` is specified:
+- Returns all scroll containers from nearest to farthest
+- Always includes `window` as the final scroll container
+- Flattens results from multiple elements into a single array
+
+```javascript
+// Multiple elements with nested scroll containers
+$('.items').scrollParent({ all: true });
+// Returns: [inner-scroller, outer-scroller, window, other-scroller, window]
+```
+
+### Example
+<PlaygroundExample id="query-scrollparent" direction="horizontal"></PlaygroundExample>
 
 ## isInView
 
