@@ -49,7 +49,7 @@ const defaultSettings = {
   throttleSettings: { leading: false, trailing: true },
 };
 
-const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error, debug, warn }) => ({
+const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispatchEvent, error, debug, warn }) => ({
   anchorName: null, // current anchor name
 
   // available positions to try
@@ -305,7 +305,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
     if (self.currentPositionInView()) {
       return;
     }
-    // but begin from current position if defined
+    // test first position
     self.testPosition(settings.position);
   },
 
@@ -323,6 +323,10 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
       returnDetails: true,
       viewport: $viewport,
     });
+    const eventData = {
+      view,
+      viewport: $viewport,
+    };
     if (!view.intersects) {
       debug('Position not in view', currentPosition, view);
       // try next fallback position unless none left (null)
@@ -333,7 +337,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
       }
       else {
         if (settings.lastResort) {
-          self.setResolvedPosition(settings.lastResort);
+          self.setResolvedPosition(settings.lastResort, eventData);
         }
         else {
           warn('No positions fit viewport');
@@ -344,7 +348,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
       return true;
     }
     else if (self.position !== currentPosition) {
-      self.setResolvedPosition(currentPosition);
+      self.setResolvedPosition(currentPosition, eventData);
       return true;
     }
     else {
@@ -355,15 +359,24 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, error,
   },
 
   // set final position after finding one in view
-  setResolvedPosition(resolvedPosition) {
-    self.endFallbackSearch();
+  setResolvedPosition(resolvedPosition, additionalData = {}) {
+    debug('Found position in view', resolvedPosition);
     $el.attr('data-position', resolvedPosition);
     if (settings.arrow) {
       $el.attr('data-arrow', '');
     }
     self.position = resolvedPosition;
-    debug('Found position in view', resolvedPosition);
     self.setPositioningCSS(resolvedPosition);
+
+    const eventData = {
+      position: resolvedPosition,
+      isFallback: resolvedPosition !== settings.position,
+      fallbackPositions: self.fallbackPositions,
+      positionsTested: self.positionsTested,
+      ...additionalData,
+    };
+    dispatchEvent('positioned', eventData);
+    self.endFallbackSearch();
   },
 
   // fallback order is implemented as a lookup table
