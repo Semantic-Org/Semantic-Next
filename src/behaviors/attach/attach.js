@@ -21,7 +21,7 @@ const defaultSettings = {
   position: '',
 
   // strategy when choosing a fallback position
-  // adjacent-  check adjacenct first
+  // adjacent-  check adjacent first
   // opposite - check opposite first
   // [`position1', 'position2'] - only use specific fallback positions
   fallbackStrategy: 'adjacent',
