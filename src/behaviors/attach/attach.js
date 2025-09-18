@@ -417,7 +417,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       self.fallbacksTested++;
       if (isNumber(nextPosition)) {
         const index = nextPosition - 1; // positions are 1-indexed
-        debug('Next position is', self.positions[nextPosition]);
+        debug('Next position is', self.positions[index]);
         return self.positions[index] || null;
       }
       // if its a string its just the position name (user specified)
