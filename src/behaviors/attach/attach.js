@@ -544,7 +544,7 @@ const events = {
 const mutations = {
   'attributes'({ attributeName, attributeValue = '', settings, self }) {
     if (settings.observeChanges) {
-      // only obverve changes that cause layout changes
+      // only observe changes that cause layout changes
       const styleChanged = attributeName == 'style';
       const displayChanged = attributeValue.includes('display');
       if (styleChanged && displayChanged) {
