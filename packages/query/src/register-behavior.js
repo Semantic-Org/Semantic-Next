@@ -107,7 +107,7 @@ export const registerBehavior = (behavior) => {
         isSetup = true;
       }
 
-      // determine run time settings for behavior (we preserve non cloneables like custom classes and dom els)
+      // determine run time settings for behavior (we preserve non clonables like custom classes and dom elements)
       const runtimeSettings = deepExtend({}, Query.prototype[name].defaultSettings, settings);
 
       const $element = this;
