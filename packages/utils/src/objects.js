@@ -67,7 +67,7 @@ export const deepExtend = (target, ...args) => {
   const lastArg = args[args.length - 1];
   const defaultOptions = { preserveNonCloneable: true, preserveDOM: true };
   const hasOptions = keys(defaultOptions).some(key => lastArg?.[key] !== undefined);
-  const options = hasOptions ? lastArg : defaultOptions;
+  const options = hasOptions ? { ...defaultOptions, ...lastArg } : defaultOptions;
   const sources = hasOptions ? args.slice(0, -1) : args;
 
   each(sources, (source) => {
