@@ -412,7 +412,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       debug('Starting search from', currentPosition);
       self.startFallbackSearch(currentPosition);
     }
-    if (self.fallbacksTested > 15 || self.fallbackPositions?.length > 0) {
+    if (self.fallbacksTested < 15 && self.fallbackPositions?.length > 0) {
       const nextPosition = self.fallbackPositions.shift();
       self.fallbacksTested++;
       if (isNumber(nextPosition)) {
