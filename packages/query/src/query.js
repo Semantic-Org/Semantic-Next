@@ -2375,7 +2375,7 @@ export class Query {
       if (relativeTo) {
         const relativeRect = $relative.dimensions();
         relativeCoords = {
-          top: round(elRect.top - relativeRect.top - relativeRect.box.border.left),
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.top),
           left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
         };
         if (!isSetter && type === 'relative') {
