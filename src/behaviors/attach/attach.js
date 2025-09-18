@@ -545,7 +545,7 @@ const mutations = {
   'attributes'({ attributeName, attributeValue = '', settings, self }) {
     if (settings.observeChanges) {
       // only observe changes that cause layout changes
-      const styleChanged = attributeName == 'style';
+      const styleChanged = attributeName === 'style';
       const displayChanged = attributeValue.includes('display');
       if (styleChanged && displayChanged) {
         self.reposition();
