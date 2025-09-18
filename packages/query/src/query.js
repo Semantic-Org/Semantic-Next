@@ -2200,7 +2200,7 @@ export class Query {
     const checkSides = isArray(sides) ? sides : (sides === 'all' ? ['top', 'bottom', 'left', 'right'] : [sides]);
 
     // Check intersections using position relative to target
-    const results = this.map(sourceEl => {
+    const results = Array.from(this).flatMap(sourceEl => {
       const $source = this.chain(sourceEl);
       const sourceDims = $source.dimensions();
 
@@ -2299,7 +2299,7 @@ export class Query {
         }
         return returnDetails ? details : details.intersects;
       });
-    }).flat();
+    });
 
     if (returnDetails) {
       // return as array or obj depending on el length
@@ -2330,7 +2330,7 @@ export class Query {
     const isSetter = (isNumber(top) || isNumber(left));
 
     // avoid querySelector inside map
-    let $relative = (relativeTo)
+    const $relative = (relativeTo)
       ? this.chain(relativeTo)
       : undefined;
 
@@ -2395,10 +2395,10 @@ export class Query {
       if (isSetter) {
         // get what we are setting to
         let $reference;
-        if (type == 'global') {
+        if (type === 'global') {
           $reference = this.chain(window);
         }
-        else if (type == 'local') {
+        else if (type === 'local') {
           $reference = parent;
         }
         else if ($relative) {
