@@ -2354,8 +2354,8 @@ export class Query {
 
       // 1. Global (Viewport) Coordinates
       const globalCoords = {
-        top: round(elRect.top) - parentRect.box.border.left + window.scrollY,
-        left: round(elRect.left) - parentRect.box.border.top + window.scrollX,
+        top: round(elRect.top) - parentRect.box.border.top + window.scrollY,
+        left: round(elRect.left) - parentRect.box.border.left + window.scrollX,
       };
       if (!isSetter && type === 'global') {
         return globalCoords;
