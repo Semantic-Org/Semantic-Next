@@ -1,29 +1,59 @@
 .box {
-  width: 200px;
-  height: 100px;
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-5);
-  border: var(--border);
+  width: 300px;
+  height: 200px;
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  background: var(--angled-gradient) var(--yellow-background-color);
+  color: var(--yellow-text-color);
+  border: 2px solid var(--yellow-border-color);
   border-radius: var(--border-radius);
+  text-align: center;
+  align-content: center;
+  font-weight: bold;
+  font-size: var(--large);
   transition: width 0.3s ease;
 }
 
 .another {
   width: 150px;
   height: 80px;
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-10);
-  border: var(--border);
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  background: var(--angled-gradient) var(--yellow-background-color);
+  color: var(--yellow-text-color);
+  border: 2px solid var(--yellow-border-color);
   border-radius: var(--border-radius);
-}
-
-p {
-  margin: 8px 0;
-  font-family: monospace;
-}
-
-p span {
+  text-align: center;
+  align-content: center;
   font-weight: bold;
+}
+
+.measurements {
+  background: var(--standard-5);
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  font-size: var(--large);
+
+  .parts {
+    font-size: var(--medium);
+    margin-top: var(--margin);
+    color: var(--standard-40);
+    border-top: var(--border);
+    padding-top: var(--padding);
+  }
+  
+  p {
+    margin: 3px 0;
+    font-family: Monospace;
+    span {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
+  }
 }

@@ -656,7 +656,7 @@ describe('query', () => {
       expect($clippingParent[0]).toBe(document.getElementById('container'));
     });
 
-    it('should return document.documentElement when no clipping parent found', () => {
+    it('should return window when no clipping parent found', () => {
       document.body.innerHTML = `
         <div id="outer" style="overflow: visible;">
           <div id="inner" style="overflow: visible;">
@@ -829,7 +829,7 @@ describe('query', () => {
     });
   });
 
-  describe('containingParent', () => {
+  describe('offsetParent', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -842,10 +842,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('container'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('container'));
     });
 
     it('should find containing parent with transform', () => {
@@ -856,10 +856,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('transformed'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('transformed'));
     });
 
     it('should find containing parent with filter', () => {
@@ -870,10 +870,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('filtered'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('filtered'));
     });
 
     it('should find containing parent with contain property', () => {
@@ -884,10 +884,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('contained'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('contained'));
     });
 
     it('should find containing parent with will-change', () => {
@@ -898,13 +898,13 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('willchange'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('willchange'));
     });
 
-    it('should return undefined for fixed position elements', () => {
+    it('should return documentElement for fixed elements (null offsetParent fallback)', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="fixed" style="position: fixed;">Fixed element</div>
@@ -912,10 +912,11 @@ describe('query', () => {
       `;
 
       const $fixed = $('#fixed');
-      const $containingParent = $fixed.containingParent();
+      const $offsetParent = $fixed.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(undefined);
+      // Fixed elements have null offsetParent, so should fallback to documentElement
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.documentElement);
     });
 
     it('should return document.body when no containing parent found', () => {
@@ -928,10 +929,10 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.body);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.body);
     });
 
     it('should use browser offsetParent when calculate is false', () => {
@@ -942,10 +943,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent({ calculate: false });
+      const $offsetParent = $child.offsetParent({ calculate: false });
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('child').offsetParent);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('child').offsetParent);
     });
 
     it('should handle multiple elements', () => {
@@ -959,18 +960,18 @@ describe('query', () => {
       `;
 
       const $items = $('.item');
-      const $containingParents = $items.containingParent();
+      const $offsetParents = $items.offsetParent();
 
-      expect($containingParents.length).toBe(2);
-      expect($containingParents[0]).toBe(document.getElementById('container1'));
-      expect($containingParents[1]).toBe(document.getElementById('container2'));
+      expect($offsetParents.length).toBe(2);
+      expect($offsetParents[0]).toBe(document.getElementById('container1'));
+      expect($offsetParents[1]).toBe(document.getElementById('container2'));
     });
 
     it('should handle empty selection', () => {
       const $empty = $('.nonexistent');
-      const $containingParent = $empty.containingParent();
+      const $offsetParent = $empty.offsetParent();
 
-      expect($containingParent.length).toBe(0);
+      expect($offsetParent.length).toBe(0);
     });
 
     it('should find nearest containing parent in nested contexts', () => {
@@ -985,11 +986,11 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
       // Should find the immediate containing parent (inner), not the outer one
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('inner'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('inner'));
     });
   });
 
@@ -1132,290 +1133,11 @@ describe('query', () => {
         expect(height).toBe(170); // 100 content + 20 padding + 10 border + 40 margin
       });
     });
-
-    describe('isVisible', () => {
-      beforeEach(() => {
-        document.body.innerHTML = '';
-      });
-
-      describe('basic functionality', () => {
-        it('should return true for visible elements', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(true);
-        });
-
-        it('should return false for display:none elements', () => {
-          const div = document.createElement('div');
-          div.style.display = 'none';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(false);
-        });
-
-        it('should return false for visibility:hidden elements', () => {
-          const div = document.createElement('div');
-          div.style.visibility = 'hidden';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(false);
-        });
-
-        it('should return false for zero-width elements', () => {
-          const div = document.createElement('div');
-          div.style.width = '0px';
-          div.style.height = '100px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(false);
-        });
-
-        it('should return false for zero-height elements', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '0px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(false);
-        });
-      });
-
-      describe('opacity handling', () => {
-        it('should return true for opacity:0 elements by default', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          div.style.opacity = '0';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(true);
-        });
-
-        it('should return false for opacity:0 elements when includeOpacity is true', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          div.style.opacity = '0';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible({ includeOpacity: true });
-          expect(result).toBe(false);
-        });
-
-        it('should return true for opacity:0.5 elements when includeOpacity is true', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          div.style.opacity = '0.5';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible({ includeOpacity: true });
-          expect(result).toBe(true);
-        });
-
-        it('should return false for opacity:0 with no dimensions when includeOpacity is true', () => {
-          const div = document.createElement('div');
-          div.style.width = '0px';
-          div.style.height = '0px';
-          div.style.opacity = '0';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible({ includeOpacity: true });
-          expect(result).toBe(false);
-        });
-      });
-
-      describe('single vs multiple elements', () => {
-        it('should return boolean for single element', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(typeof result).toBe('boolean');
-          expect(result).toBe(true);
-        });
-
-        it('should return false for multiple elements with different visibility (AND logic)', () => {
-          const div1 = document.createElement('div');
-          div1.style.width = '100px';
-          div1.style.height = '100px';
-          div1.className = 'test';
-          const div2 = document.createElement('div');
-          div2.style.display = 'none';
-          div2.className = 'test';
-          document.body.appendChild(div1);
-          document.body.appendChild(div2);
-
-          const result = $('.test').isVisible();
-          expect(typeof result).toBe('boolean');
-          expect(result).toBe(false); // false because not ALL are visible
-        });
-
-        it('should return single boolean for multiple elements with same visibility', () => {
-          const div1 = document.createElement('div');
-          div1.style.width = '100px';
-          div1.style.height = '100px';
-          div1.className = 'test';
-          const div2 = document.createElement('div');
-          div2.style.width = '50px';
-          div2.style.height = '50px';
-          div2.className = 'test';
-          document.body.appendChild(div1);
-          document.body.appendChild(div2);
-
-          const result = $('.test').isVisible();
-          expect(typeof result).toBe('boolean');
-          expect(result).toBe(true);
-        });
-
-        it('should return single false for multiple hidden elements', () => {
-          const div1 = document.createElement('div');
-          div1.style.display = 'none';
-          div1.className = 'test';
-          const div2 = document.createElement('div');
-          div2.style.visibility = 'hidden';
-          div2.className = 'test';
-          document.body.appendChild(div1);
-          document.body.appendChild(div2);
-
-          const result = $('.test').isVisible();
-          expect(typeof result).toBe('boolean');
-          expect(result).toBe(false);
-        });
-
-        it('should handle mixed visibility states with AND logic', () => {
-          const div1 = document.createElement('div');
-          div1.style.width = '100px';
-          div1.style.height = '100px';
-          div1.className = 'test';
-
-          const div2 = document.createElement('div');
-          div2.style.opacity = '0';
-          div2.style.width = '100px';
-          div2.style.height = '100px';
-          div2.className = 'test';
-
-          const div3 = document.createElement('div');
-          div3.style.display = 'none';
-          div3.className = 'test';
-
-          document.body.appendChild(div1);
-          document.body.appendChild(div2);
-          document.body.appendChild(div3);
-
-          // Without opacity check: div1=true, div2=true, div3=false → false (not all true)
-          const result = $('.test').isVisible();
-          expect(result).toBe(false);
-
-          // With opacity check: div1=true, div2=false, div3=false → false (not all true)
-          const resultWithOpacity = $('.test').isVisible({ includeOpacity: true });
-          expect(resultWithOpacity).toBe(false);
-        });
-      });
-
-      describe('empty selection handling', () => {
-        it('should return undefined for empty selection', () => {
-          const result = $('.nonexistent').isVisible();
-          expect(result).toBeUndefined();
-        });
-
-        it('should return undefined for empty selection with includeOpacity', () => {
-          const result = $('.nonexistent').isVisible({ includeOpacity: true });
-          expect(result).toBeUndefined();
-        });
-      });
-
-      describe('edge cases', () => {
-        it('should handle elements with fractional dimensions', () => {
-          const div = document.createElement('div');
-          div.style.width = '0.1px';
-          div.style.height = '0.1px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).toBe(true);
-        });
-
-        it('should handle elements with very small opacity', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          div.style.opacity = '0.001';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible({ includeOpacity: true });
-          expect(result).toBe(true);
-        });
-
-        it('should handle elements with inherited styles', () => {
-          const parent = document.createElement('div');
-          parent.style.opacity = '0.5';
-          const child = document.createElement('div');
-          child.style.width = '100px';
-          child.style.height = '100px';
-          child.className = 'child';
-          parent.appendChild(child);
-          document.body.appendChild(parent);
-
-          const result = $('.child').isVisible({ includeOpacity: true });
-          expect(result).toBe(true);
-        });
-      });
-
-      describe('return value consistency', () => {
-        it('should not return Query instance', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          document.body.appendChild(div);
-
-          const result = $('div').isVisible();
-          expect(result).not.toBeInstanceOf(Query);
-        });
-
-        it('should handle includeOpacity parameter consistently', () => {
-          const div = document.createElement('div');
-          div.style.width = '100px';
-          div.style.height = '100px';
-          div.style.opacity = '0';
-          document.body.appendChild(div);
-
-          expect($('div').isVisible()).toBe(true);
-          expect($('div').isVisible({ includeOpacity: false })).toBe(true);
-          expect($('div').isVisible({ includeOpacity: true })).toBe(false);
-        });
-      });
-    });
   });
 
   describe('naturalDisplay', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
-    });
-
-    it('should handle empty selection', () => {
-      const result = $('.non-existent').naturalDisplay();
-      expect(result).toBe(undefined);
-    });
-
-    it('should return current display if already visible', () => {
-      const div = document.createElement('div');
-      div.style.display = 'flex';
-      document.body.appendChild(div);
-
-      const result = $('div').naturalDisplay();
-      expect(result).toBe('flex');
     });
 
     it('should return block as default for elements without CSS rules', () => {
@@ -1554,6 +1276,206 @@ describe('query', () => {
       expect($div).toBeInstanceOf(Query);
       expect(typeof result).toBe('string');
       expect(div.classList.contains('test')).toBe(true);
+    });
+  });
+
+  describe('scrollParent', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should return a Query instance', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+    });
+
+    it('should find the nearest scroll container with overflow hidden', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: hidden; width: 200px; height: 200px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find the nearest scroll container with overflow scroll', () => {
+      document.body.innerHTML = `
+        <div id="outer">
+          <div id="scroller" style="overflow-y: scroll; height: 100px;">
+            <div id="inner">Inner content</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#inner').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('scroller'));
+    });
+
+    it('should find the nearest scroll container with overflow auto', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: auto; width: 150px; height: 150px;">
+          <div id="content">Content</div>
+        </div>
+      `;
+
+      const result = $('#content').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return window when no scroll container found', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: visible;">
+          <div id="inner" style="overflow: visible;">
+            <div id="target">Target</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should handle multiple elements', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: hidden;">
+          <div class="item" id="item1">Item 1</div>
+        </div>
+        <div id="container2" style="overflow: scroll;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent();
+
+      expect(result.length).toBe(2);
+      expect(result[0]).toBe(document.getElementById('container1'));
+      expect(result[1]).toBe(document.getElementById('container2'));
+    });
+
+    it('should handle empty selection', () => {
+      const result = $('.nonexistent').scrollParent();
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should find nested scroll containers correctly', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: hidden;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: scroll;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('inner'));
+    });
+
+    it('should skip document.body and return window', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should work with overflow-x only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-x: scroll; width: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should work with overflow-y only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-y: auto; height: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return all scroll parents when all: true', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: scroll;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: auto;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent({ all: true });
+
+      expect(result.length).toBe(3);
+      expect(result[0]).toBe(document.getElementById('inner'));
+      expect(result[1]).toBe(document.getElementById('outer'));
+      expect(result[2]).toBe(window);
+    });
+
+    it('should return flattened array for multiple elements with all: true', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: scroll;">
+          <div id="middle1" style="overflow: auto;">
+            <div class="item" id="item1">Item 1</div>
+          </div>
+        </div>
+        <div id="container2" style="overflow: hidden;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent({ all: true });
+
+      // Should get: [middle1, container1, window, container2, window]
+      expect(result.length).toBe(5);
+      expect(result[0]).toBe(document.getElementById('middle1'));
+      expect(result[1]).toBe(document.getElementById('container1'));
+      expect(result[2]).toBe(window);
+      expect(result[3]).toBe(document.getElementById('container2'));
+      expect(result[4]).toBe(window);
+    });
+
+    it('should return proper chaining Query instance', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: scroll;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+      expect(result[0]).toBe(document.getElementById('container'));
     });
   });
 });

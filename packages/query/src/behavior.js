@@ -10,6 +10,7 @@ import {
   isString,
   keys,
   last,
+  log,
   mapObject,
   noop,
   toTitleCase,
@@ -82,7 +83,7 @@ export class Behavior {
     this.element = $element.el();
 
     // handle run-time settings
-    this.settings = clone(settings);
+    this.settings = settings;
     this.namespace = namespace;
     this.customInvocation = customInvocation;
 
@@ -146,10 +147,11 @@ export class Behavior {
   }
 
   adoptStylesheet(css) {
-    // cache stylesheet uses same constructed stylesheet across instances
-    adoptStylesheet(css, this.element, { cacheStylesheet: true });
+    // uses same constructed stylesheet across instances but needs to be in this elements root
+    adoptStylesheet(css, this.element);
   }
 
+  // allows data attributes to override setting values
   addDataOverrides(element = this.element) {
     const elementData = this.getElementData();
     each(this.settings, (value, name) => {
@@ -288,7 +290,8 @@ export class Behavior {
           });
         };
 
-        const eventSettings = { abortController: this.controller };
+        const domEventSettings = {};
+        const eventSettings = { abortController: this.controller, eventSettings: domEventSettings };
 
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in
@@ -298,7 +301,7 @@ export class Behavior {
         else if (eventType == 'global') {
           this.$(selector).on(eventName, eventHandler, eventSettings);
         }
-        else if (eventType == 'delegate' && selector) {
+        else if (eventType == 'bind' && selector) {
           this.$(this.element).find(selector).on(eventName, eventHandler, eventSettings);
         }
         else {
@@ -329,10 +332,24 @@ export class Behavior {
     this.mutationObservers = [];
     each(mutationConfigs, ({ observedElement, observerOptions, keyword, selector, handler }) => {
       const observer = new MutationObserver((mutations) => {
+        if (keyword == 'attributes') {
+          const attributeMutations = mutations.filter(mutation => mutation.type == 'attributes');
+          each(attributeMutations, (mutation) => {
+            const callbackArgs = this.getMutationCallbackArgs([mutation]);
+            this.call(handler, { additionalParams: callbackArgs });
+          });
+          return;
+        }
+        if (keyword == 'text') {
+          const textMutations = mutations.filter(mutation => mutation.type == 'characterData');
+          each(textMutations, (mutation) => {
+            const callbackArgs = this.getMutationCallbackArgs([mutation]);
+            this.call(handler, { additionalParams: callbackArgs });
+          });
+        }
         // determine if it matches
         let $added = $();
         let $removed = $();
-
         each(mutations, (mutation) => {
           const $matchingAdded = $(mutation.addedNodes).filter(selector);
           const $matchingRemoved = $(mutation.removedNodes).filter(selector);
@@ -344,9 +361,6 @@ export class Behavior {
           }
         });
 
-        // Check if we should trigger based on keyword
-        const hasAdded = $added.exists();
-        const hasRemoved = $removed.exists();
         const shouldTrigger = (keyword === 'add' && hasAdded)
           || (keyword === 'remove' && hasRemoved)
           || (keyword === 'standard' && (hasAdded || hasRemoved));
@@ -357,7 +371,6 @@ export class Behavior {
           this.call(handler, { additionalParams: callbackArgs });
         }
       });
-
       observer.observe(observedElement, observerOptions);
       this.mutationObservers.push(observer);
     });
@@ -372,7 +385,7 @@ export class Behavior {
 
   parseMutationString(mutationString) {
     const keywords = ['observe', 'add', 'remove', 'attributes', 'text'];
-    const observerOptions = {
+    let observerOptions = {
       childList: true,
       subtree: true,
     };
@@ -407,12 +420,16 @@ export class Behavior {
         }
         break;
       case 'attributes':
-        observerOptions.attributes = true;
-        observerOptions.attributeOldValue = true;
+        observerOptions = {
+          attributes: true,
+          attributeOldValue: true,
+        };
         break;
       case 'text':
-        observerOptions.characterData = true;
-        observerOptions.characterDataOldValue = true;
+        observerOptions = {
+          characterData: true,
+          characterDataOldValue: true,
+        };
         break;
     }
     return { observedElement, keyword, observerOptions, selector };
@@ -431,11 +448,11 @@ export class Behavior {
     switch (mutation.type) {
       case 'attributes':
         args.attributeName = mutation.attributeName;
-        args.newValue = mutation.target.getAttribute(mutation.attributeName);
+        args.attributeValue = mutation.target.getAttribute(mutation.attributeName);
         args.oldValue = mutation.oldValue;
         break;
       case 'characterData':
-        args.newValue = mutation.target.textContent;
+        args.textContent = mutation.target.textContent;
         args.oldValue = mutation.oldValue;
         break;
     }
@@ -446,6 +463,15 @@ export class Behavior {
     if (this.controller) {
       this.controller.abort('behavior destroyed');
     }
+  }
+
+  // attaches an external event handler making sure to remove the event when the component is destroyed
+  attachEvent(selector, eventName, eventHandler, { onSettings = {}, querySettings = { pierceShadow: true } } = {}) {
+    return this.$(selector, document, querySettings).on(eventName, eventHandler, {
+      abortController: this.controller,
+      returnHandler: true,
+      ...onSettings,
+    });
   }
 
   dispatchEvent(
@@ -548,41 +574,31 @@ export class Behavior {
     return currentLevel >= required;
   }
 
-  outputLog(level, consoleMethod, color, message, data) {
-    if (!this.canLog(level)) { return; }
-    const args = [
-      `%c${toTitleCase(this.namespace)}%c ${message}`,
-      `color: ${color}; font-weight: bold;`,
-      'color: inherit;',
-    ];
-    if (data !== undefined) {
-      args.push(data);
+  outputLog(message, level, additionalSettings = {}) {
+    if (!this.canLog(level)) {
+      return;
     }
-    // args.push(this.element);
-    console[consoleMethod](...args);
-  }
-
-  log(message, data) {
-    this.outputLog('info', 'log', '#0066cc', message, data);
-  }
-
-  debug(message, data) {
-    this.outputLog('debug', 'debug', '#666', message, data);
-  }
-
-  warn(message, data) {
-    this.outputLog('warn', 'warn', '#ff9800', message, data);
-  }
-
-  error(message, data) {
-    this.outputLog('error', 'error', '#f44336', message, data);
-
-    // Optional: dispatch error event for handling
-    this.dispatchEvent('behavior:error', {
-      message,
+    const logSettings = {
       namespace: this.namespace,
-      data,
-    });
+      ...additionalSettings,
+    };
+    log(message, level, logSettings);
+  }
+
+  log(message, ...data) {
+    this.outputLog(message, 'log', { data });
+  }
+
+  debug(message, ...data) {
+    this.outputLog(message, 'debug', { data });
+  }
+
+  warn(message, ...data) {
+    this.outputLog(message, 'warn', { data });
+  }
+
+  error(message, ...data) {
+    this.outputLog(message, 'error', { data });
   }
 
   // Get or set individual setting
@@ -644,8 +660,10 @@ export class Behavior {
 
   // calls callback if defined with consistent params and this context
   call(func, { params, additionalParams = {} } = {}) {
+    // this is used to do performance tracking on internal methods
     const selfProxy = this.getSelf();
     const self = this;
+
     const args = [];
     if (!params) {
       params = {
@@ -653,8 +671,10 @@ export class Behavior {
         el: self.element,
         $el: self.$(self.element),
         self: selfProxy,
+        abortSignal: this.controller,
         behavior: selfProxy,
         namespace: self.namespace,
+        attachEvent: self.attachEvent.bind(this),
         dispatchEvent: self.dispatchEvent.bind(this),
         dispatchGroupEvent: self.dispatchGroupEvent.bind(this),
 
@@ -673,8 +693,7 @@ export class Behavior {
         get cache() {
           let cache = self.Query.prototype[self.namespace].cache;
           if (!cache) {
-            self.Query.prototype[self.namespace].cache = {};
-            return {};
+            cache = self.Query.prototype[self.namespace].cache = {};
           }
           return cache;
         },

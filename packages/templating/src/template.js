@@ -463,8 +463,8 @@ export const Template = class Template {
             },
           });
         };
-
-        const eventSettings = { abortController: this.eventController };
+        const domEventSettings = {};
+        const eventSettings = { abortController: this.eventController, eventSettings: domEventSettings };
 
         // allow user to bind to global selectors if they opt in using the 'global' keyword
         // also allow events to be directly bound when opted in

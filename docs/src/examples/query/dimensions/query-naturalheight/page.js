@@ -1,11 +1,17 @@
 import { $ } from '@semantic-ui/query';
 
 // Get dimensions
-const constrainedHeight = $('.element').height();
-const naturalHeight = $('.element').naturalHeight();
-const difference = naturalHeight - constrainedHeight;
+const getDimensions = () => {
+  // naturalHeight() returns unconstrained height
+  const naturalHeight = $('.element').naturalHeight();
+  $('.natural-height').text(naturalHeight);
 
-// Display measurements
-$('.constrained-height').text(constrainedHeight);
-$('.natural-height').text(naturalHeight);
-$('.difference').text(difference);
+  // Compare with actual constrained height
+  const constrainedHeight = $('.element').height();
+  const overflow = naturalHeight - constrainedHeight;
+
+  $('.constrained-height').text(constrainedHeight);
+  $('.overflow').text(overflow);
+};
+
+requestAnimationFrame(getDimensions);

@@ -11,6 +11,7 @@ import {
   isDevelopment,
   isDOM,
   isFunction,
+  isNumber,
   isObject,
   isPlainObject,
   isString,
@@ -328,6 +329,9 @@ export class Query {
   }
 
   is(selector) {
+    if (this.length == 0) {
+      return false;
+    }
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
@@ -437,7 +441,16 @@ export class Query {
 
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
-
+    const closest = (el, selector) => {
+      if (isDOM(selector) && selector?.contains) {
+        if (selector.contains(el)) {
+          return selector;
+        }
+      }
+      else {
+        return el.closest(selector);
+      }
+    };
     Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
         const matches = this.closestDeep(el, selector, { returnAll });
@@ -453,7 +466,7 @@ export class Query {
           // Walk up DOM tree using native closest() efficiently
           let current = el.parentElement;
           while (current) {
-            const match = current.closest(selector);
+            const match = closest(current, selector);
             if (match) {
               allResults.push(match);
               // Continue from the parent of the match to find more ancestors
@@ -465,7 +478,7 @@ export class Query {
           }
         }
         else {
-          const match = el.closest(selector);
+          const match = closest(el, selector);
           if (match) {
             allResults.push(match);
           }
@@ -829,28 +842,28 @@ export class Query {
     if (!classNames) {
       return this;
     }
-    const classesToAdd = classNames.split(' ');
-    return this.each((el) => el.classList.add(...classesToAdd));
+    const classesToAdd = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.add(...classesToAdd));
   }
 
   removeClass(classNames) {
     if (!classNames) {
       return this;
     }
-    const classesToRemove = classNames.split(' ');
-    return this.each((el) => el.classList.remove(...classesToRemove));
+    const classesToRemove = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
     if (!classNames) {
       return this;
     }
-    const classesToToggle = classNames.split(' ');
-    return this.each((el) => el.classList.toggle(...classesToToggle));
+    const classesToToggle = classNames.trim().split(' ');
+    return this.each((el) => el?.classList.toggle(...classesToToggle));
   }
 
   hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
+    return Array.from(this).some((el) => el?.classList.contains(className));
   }
 
   html(newHTML) {
@@ -1083,7 +1096,7 @@ export class Query {
       return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = this.map((el) => el.getAttribute(attribute));
+      const attributes = this.map((el) => el?.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
   }
@@ -1288,14 +1301,12 @@ export class Query {
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
       // Start with total width and subtract what we don't want
-      width -= borderLeft + borderRight; // Remove border to get content + padding
+      if (!includeBorder) {
+        width -= borderLeft + borderRight; // Remove border to get content + padding
+      }
 
       if (!includePadding) {
         width -= paddingLeft + paddingRight; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        width += borderLeft + borderRight; // Add border back
       }
 
       if (includeMargin) {
@@ -1309,11 +1320,11 @@ export class Query {
   }
 
   innerWidth() {
-    return this.width({ includePadding: true });
+    return this.width({ includePadding: true, includeBorder: false });
   }
 
   innerHeight() {
-    return this.height({ includePadding: true });
+    return this.height({ includePadding: true, includeBorder: false });
   }
 
   outerWidth({ includeMargin = false } = {}) {
@@ -1335,13 +1346,27 @@ export class Query {
   }
 
   scrollLeft(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollLeft', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(value, window.scrollY);
+        return this;
+      }
+      return window.scrollX;
+    }
+    return this.prop('scrollLeft', value);
   }
 
   scrollTop(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollTop', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(window.scrollX, value);
+        return this;
+      }
+      return window.scrollY;
+    }
+    return this.prop('scrollTop', value);
   }
 
   clone() {
@@ -1476,17 +1501,32 @@ export class Query {
     });
   }
 
-  naturalWidth() {
+  naturalWidth({ preserveMaxWidth = true } = {}) {
     const widths = this.map((el) => {
-      const $clone = this.chain(el.cloneNode(true));
+      const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        width: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxWidth: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxWidth) {
+        css.maxWidth = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -1494,17 +1534,32 @@ export class Query {
     return widths.length > 1 ? widths : widths[0];
   }
 
-  naturalHeight() {
+  naturalHeight({ preserveMaxHeight = true } = {}) {
     const height = this.map((el) => {
       const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        height: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxHeight: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxHeight) {
+        css.maxHeight = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -1512,10 +1567,11 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
-  naturalDisplay() {
-    const displays = this.map((el) => {
-      // Create cache key from current stylesheet state + inline styles
-      const stylesheetData = Array.from(document.styleSheets).map(sheet => {
+  naturalDisplay({ calculate = true } = {}) {
+    // store style hash across map
+    let styleHash;
+    if (calculate) {
+      styleHash = Array.from(document.styleSheets).map(sheet => {
         try {
           return { href: sheet.href, title: sheet.title, disabled: sheet.disabled };
         }
@@ -1524,137 +1580,160 @@ export class Query {
           return { crossOrigin: true, index: Array.from(document.styleSheets).indexOf(sheet) };
         }
       });
+    }
 
-      // Include inline display style in cache key since it overrides everything
-      const inlineDisplay = el.style.display;
-      const cacheKey = { stylesheetData, inlineDisplay };
-      const rulesHash = hashCode(cacheKey);
-
-      // Check cache for this element
-      const cached = Query.elementDisplayCache.get(el);
-      if (cached && cached.rulesHash === rulesHash) {
-        return cached.displayValue;
+    const displays = this.map((el, index) => {
+      // FAST PATH: if an inline style is applied return this
+      let inlineDisplay = el.style.display;
+      if (inlineDisplay && inlineDisplay !== 'none') {
+        return inlineDisplay;
       }
 
-      // If already visible, return current display
-      const current = getComputedStyle(el).display;
-      if (current !== 'none') {
-        // Cache visible elements too
-        Query.elementDisplayCache.set(el, { rulesHash, displayValue: current });
-        return current;
-      }
+      let cacheKey;
+      let rulesHash;
 
-      const matchingRules = [];
+      // CALCULATED PATH: check stylesheets for highest specificity display state
+      if (calculate) {
+        // Include inline display style in cache key since it overrides everything
+        cacheKey = { styleHash, inlineDisplay };
+        rulesHash = hashCode(cacheKey);
 
-      // Calculate CSS specificity (simplified)
-      const calculateSpecificity = (selector) => {
-        // Remove quoted strings to avoid counting selectors inside quotes
-        const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
-        const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
-        const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
-        const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
-        const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
-        const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
-        return ids + classes + attrs + pseudoClasses + elements;
-      };
-
-      // Helper to recursively parse CSS rules (handles nesting)
-      const parseRules = (rules) => {
-        for (const rule of rules) {
-          // Handle regular style rules
-          if (
-            rule.style?.display
-            && rule.style.display !== 'none' // IGNORE ALL none rules
-            && rule.selectorText
-            && el.matches(rule.selectorText)
-          ) {
-            matchingRules.push({
-              display: rule.style.display,
-              specificity: calculateSpecificity(rule.selectorText),
-              sourceOrder: matchingRules.length,
-            });
-          }
-          // Recursively handle nested rules (CSS nesting)
-          if (rule.cssRules && rule.cssRules.length > 0) {
-            parseRules(rule.cssRules);
-          }
+        // FAST PATH: Skip stylesheet check if the rules are the same
+        const cached = Query.elementDisplayCache.get(el);
+        if (cached && cached.rulesHash === rulesHash) {
+          return cached.displayValue;
         }
-      };
 
-      // Parse all stylesheets for matching rules
-      for (const sheet of document.styleSheets) {
-        try {
-          parseRules(sheet.cssRules);
+        // MEDIUM PATH: If already visible, return current display
+        const computedDisplay = getComputedStyle(el).display;
+        if (computedDisplay !== 'none') {
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue: computedDisplay });
+          return computedDisplay;
         }
-        catch (e) {
-          // Cross-origin stylesheets - ignore
-        }
-      }
 
-      // Sort by specificity, then source order
-      matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+        // SLOW PATH: Start parsing rules to determine display type
+        const matchingRules = [];
 
-      let displayValue;
-
-      // If we have matching rules, return the highest precedence value
-      if (matchingRules.length > 0) {
-        displayValue = matchingRules[0].display;
-      }
-      else {
-        // No CSS rules found - use element's natural display value
-        const naturalDisplay = {
-          inline: [
-            'a',
-            'abbr',
-            'b',
-            'bdi',
-            'bdo',
-            'br',
-            'cite',
-            'code',
-            'dfn',
-            'em',
-            'i',
-            'kbd',
-            'mark',
-            'q',
-            'ruby',
-            'samp',
-            'small',
-            'span',
-            'strong',
-            'sub',
-            'sup',
-            'time',
-            'u',
-            'var',
-            'wbr',
-          ],
-          'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
-          'table': ['table'],
-          'table-row': ['tr'],
-          'table-cell': ['td', 'th'],
-          'table-header-group': ['thead'],
-          'table-row-group': ['tbody'],
-          'table-footer-group': ['tfoot'],
-          'table-caption': ['caption'],
-          'table-column': ['col'],
-          'table-column-group': ['colgroup'],
-          'list-item': ['li'],
+        // Calculate CSS specificity (simplified)
+        const calculateSpecificity = (selector) => {
+          // Remove quoted strings to avoid counting selectors inside quotes
+          const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
+          const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
+          const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
+          const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
+          const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
+          const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
+          return ids + classes + attrs + pseudoClasses + elements;
         };
 
-        const tagName = el.tagName.toLowerCase();
-        for (const [display, tags] of Object.entries(naturalDisplay)) {
-          if (tags.includes(tagName)) {
-            displayValue = display;
-            break;
+        // Helper to recursively parse CSS rules (handles nesting)
+        const parseRules = (rules, parentSelector = '') => {
+          for (const rule of rules) {
+            // Handle regular style rules
+            if (
+              rule.style?.display
+              && rule.style.display !== 'none' // IGNORE ALL none rules
+              && rule.selectorText
+            ) {
+              // Resolve nested selector by replacing & with parent
+              let resolvedSelector = rule.selectorText;
+              if (parentSelector && resolvedSelector.includes('&')) {
+                resolvedSelector = resolvedSelector.replace(/&/g, parentSelector);
+              }
+
+              if (el.matches(resolvedSelector)) {
+                matchingRules.push({
+                  display: rule.style.display,
+                  specificity: calculateSpecificity(resolvedSelector),
+                  sourceOrder: matchingRules.length,
+                });
+              }
+            }
+            // Recursively handle nested rules (CSS nesting)
+            if (rule.cssRules && rule.cssRules.length > 0) {
+              const nestedParent = parentSelector || rule.selectorText;
+              parseRules(rule.cssRules, nestedParent);
+            }
+          }
+        };
+
+        // Parse all stylesheets for matching rules
+        for (const sheet of document.styleSheets) {
+          try {
+            parseRules(sheet.cssRules);
+          }
+          catch (e) {
+            // Cross-origin stylesheets - ignore
           }
         }
-        displayValue = displayValue || 'block'; // Default for most elements
+
+        // Sort by specificity, then source order
+        matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+
+        // If we have matching rules, return the highest precedence value
+        if (matchingRules.length > 0) {
+          const displayValue = matchingRules[0].display;
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+          return displayValue;
+        }
       }
 
-      // Cache the result
-      Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+      // BACKUP Path: Use natural display type for browsers based on a lookup table
+      const naturalDisplay = {
+        inline: [
+          'a',
+          'abbr',
+          'b',
+          'bdi',
+          'bdo',
+          'br',
+          'cite',
+          'code',
+          'dfn',
+          'em',
+          'i',
+          'kbd',
+          'mark',
+          'q',
+          'ruby',
+          'samp',
+          'small',
+          'span',
+          'strong',
+          'sub',
+          'sup',
+          'time',
+          'u',
+          'var',
+          'wbr',
+        ],
+        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+        'table': ['table'],
+        'table-row': ['tr'],
+        'table-cell': ['td', 'th'],
+        'table-header-group': ['thead'],
+        'table-row-group': ['tbody'],
+        'table-footer-group': ['tfoot'],
+        'table-caption': ['caption'],
+        'table-column': ['col'],
+        'table-column-group': ['colgroup'],
+        'list-item': ['li'],
+      };
+
+      const tagName = el.tagName.toLowerCase();
+      let displayValue;
+      for (const [display, tags] of Object.entries(naturalDisplay)) {
+        if (tags.includes(tagName)) {
+          displayValue = display;
+          break;
+        }
+      }
+      displayValue = displayValue || 'block'; // Default for most elements
+
+      // Cache the result if we are calculating
+      if (calculate) {
+        Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+      }
 
       return displayValue;
     });
@@ -1664,33 +1743,35 @@ export class Query {
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
+      const emptyValues = ['', 'none'];
+
+      // Check if element uses CSS anchor positioning
+      const style = window.getComputedStyle(el);
+      const hasAnchor = style.positionAnchor && !inArray(style.positionAnchor, ['none', 'auto']);
+      const isPositioned = inArray(style.position, ['absolute', 'fixed']);
+      const isAnchored = hasAnchor && isPositioned;
+      const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
+
       let current = el.parentNode;
       while (current) {
-        if (current instanceof Element) {
+        if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
 
-          // Check overflow
-          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+          // Check overflow (skip for anchored elements - they escape)
+          if (!isAnchored && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
             return current;
           }
 
-          // Check contain property (layout, paint, size, strict)
-          const contain = style.contain;
-          if (
-            contain
-            && (contain.includes('paint') || contain.includes('layout') || contain.includes('size')
-              || contain.includes('strict'))
-          ) {
+          // Check contain property (different rules for anchored vs non-anchored)
+          if (style.contain && containRegex.test(style.contain)) {
             return current;
           }
 
-          // Check clip-path
-          if (style.clipPath && style.clipPath !== 'none') {
+          // Shared checks (always clip both anchored and non-anchored)
+          if (!inArray(style.clipPath, emptyValues)) {
             return current;
           }
-
-          // Check mask/mask-image
-          if ((style.mask && style.mask !== 'none') || (style.maskImage && style.maskImage !== 'none')) {
+          if (!inArray(style.mask, emptyValues) || !inArray(style.maskImage, emptyValues)) {
             return current;
           }
         }
@@ -1702,48 +1783,95 @@ export class Query {
   }
 
   // this is the parent element where top/left and offsetTop/left will be relative
-  containingParent({ calculate = true } = {}) {
+  // supports both fixed and absolute elements
+  positioningParent({ calculate = true } = {}) {
     const parents = this.map((el) => {
-      // return offset parent as reported by browser
+      const reportedParent = el.offsetParent || document.documentElement;
+
       if (!calculate) {
-        return el.offsetParent;
+        return reportedParent;
       }
 
-      // fixed elements have no offset parent
-      if (window.getComputedStyle(el).position === 'fixed') {
-        return undefined;
+      const isFixed = window.getComputedStyle(el).position === 'fixed';
+      if (!isFixed) {
+        return reportedParent;
       }
 
       let current = el.parentNode;
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
-          // transformed elements create new positioning context
-          if (style.position !== 'static') {
+
+          // Check all properties that create containing blocks
+          if (style.transform !== 'none') { return current; }
+          if (style.perspective !== 'none') { return current; }
+          if (style.filter !== 'none') { return current; }
+          if (style.backdropFilter !== 'none') { return current; }
+          if (style.transformStyle === 'preserve-3d') { return current; }
+
+          // Check contain
+          const contain = style.contain;
+          if (contain && (contain.includes('paint') || contain.includes('layout'))) {
             return current;
           }
-          // filter creates new positioning context
-          if (style.filter !== 'none') {
+
+          // Check container-type
+          if (style.containerType && style.containerType !== 'normal') {
             return current;
           }
-          // transformed elements create new positioning context
-          if (style.transform !== 'none') {
-            return current;
-          }
-          // also creates positioning context
-          if (['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
-            return current;
-          }
-          // will change will trigger same context
-          // <https://issues.chromium.org/issues/41131675>
-          if (['filter', 'contain', 'transform'].includes(style.willChange)) {
-            return current;
+
+          // Check will-change
+          if (style.willChange && style.willChange !== 'auto') {
+            const values = style.willChange.split(',').map(v => v.trim());
+            if (values.some(v => ['filter', 'transform', 'perspective', 'backdrop-filter'].includes(v))) {
+              return current;
+            }
           }
         }
         current = current.parentNode;
       }
-      return document.body;
+      return document.documentElement;
     });
+    return this.chain(parents);
+  }
+
+  // this is the nearest element that creates a scroll container
+  scrollParent({ all = false } = {}) {
+    const results = this.map((el) => {
+      const scrollParents = [];
+      let current = el.parentNode;
+
+      while (current && current !== document.body) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+
+          // Check if element creates a scroll container
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            if (all) {
+              scrollParents.push(current);
+            }
+            else {
+              return current;
+            }
+          }
+        }
+        current = current.parentNode;
+      }
+
+      // documentElement is the final scroll container
+      const fallback = window;
+      if (all) {
+        scrollParents.push(fallback);
+        return scrollParents;
+      }
+      return fallback;
+    });
+
+    return all ? this.chain(results.flat()) : this.chain(results);
+  }
+
+  offsetParent() {
+    const parents = this.map(el => el.offsetParent || document.documentElement);
     return this.chain(parents);
   }
 
@@ -1755,13 +1883,10 @@ export class Query {
     return this.length > 0;
   }
 
-  isVisible(options = {}) {
+  isVisible({ includeOpacity = false, includeVisibility = true } = {}) {
     if (this.length === 0) {
       return undefined;
     }
-
-    const { includeOpacity = false } = options;
-
     // Return true only if ALL elements are visible
     return this.map(el => {
       const rect = el.getBoundingClientRect();
@@ -1769,8 +1894,16 @@ export class Query {
 
       if (!hasDimensions) { return false; }
 
+      const style = window.getComputedStyle(el);
+
+      // Check intentional hiding methods
+      if (includeVisibility) {
+        if (style.visibility === 'hidden') { return false; }
+        if (style.contentVisibility === 'hidden') { return false; }
+      }
+
+      // Check optional hiding mechanisms
       if (includeOpacity) {
-        const style = window.getComputedStyle(el);
         return parseFloat(style.opacity) > 0;
       }
 
@@ -1847,6 +1980,15 @@ export class Query {
       : allData;
   }
 
+  removeData(keys) {
+    keys = isString(keys)
+      ? keys.split(/\s+/)
+      : keys;
+    return this.each((el) => {
+      each(keys, (key) => delete el.dataset[key]);
+    });
+  }
+
   slice(start, end) {
     if (this.length === 0) {
       return this;
@@ -1874,6 +2016,441 @@ export class Query {
     // Combine arrays and remove duplicates using Set
     const combinedElements = Array.from(new Set([...currentElements, ...$newElements.get()]));
     return this.chain(combinedElements);
+  }
+
+  show({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const naturalDisplayValue = this.naturalDisplay({ calculate });
+      el.style.display = naturalDisplayValue || '';
+    });
+  }
+
+  hide() {
+    return this.css('display', 'none');
+  }
+
+  toggle({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const isHidden = getComputedStyle(el).display === 'none';
+      if (isHidden) {
+        const naturalDisplayValue = this.naturalDisplay({ calculate });
+        el.style.display = naturalDisplayValue || '';
+      }
+      else {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  bounds() {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const rects = this.map(el => {
+      if (el === Query.globalThisProxy) {
+        return document.documentElement.getBoundingClientRect();
+      }
+      return el.getBoundingClientRect();
+    });
+    return this.length === 1 ? rects[0] : rects;
+  }
+
+  dimensions() {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const results = this.map(el => {
+      // Handle window/global object special case
+      if (el === Query.globalThisProxy) {
+        const boxValues = { top: 0, right: 0, bottom: 0, left: 0 };
+        return {
+          top: 0,
+          left: 0,
+          right: window.innerWidth,
+          bottom: window.innerHeight,
+          pageTop: window.scrollY,
+          pageLeft: window.scrollX,
+          width: window.innerWidth,
+          innerWidth: window.innerWidth,
+          outerWidth: window.innerWidth,
+          marginWidth: window.innerWidth,
+          height: window.innerHeight,
+          innerHeight: window.innerHeight,
+          outerHeight: window.innerHeight,
+          marginHeight: window.innerHeight,
+          scrollTop: window.scrollY,
+          scrollLeft: window.scrollX,
+          scrollHeight: document.documentElement.scrollHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          box: { padding: boxValues, border: boxValues, margin: boxValues },
+          bounds: {
+            top: 0,
+            left: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            x: 0,
+            y: 0,
+          },
+        };
+      }
+
+      const $el = this.chain(el);
+
+      // Position Properties
+      const rect = $el.bounds();
+      const top = rect.top;
+      const left = rect.left;
+
+      const pageTop = top + window.scrollY;
+      const pageLeft = left + window.scrollX;
+
+      // Box Model Values
+      const computedStyle = window.getComputedStyle(el);
+      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+
+      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+
+      const marginTop = parseFloat(computedStyle.marginTop) || 0;
+      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
+      const marginRight = parseFloat(computedStyle.marginRight) || 0;
+
+      // Width Properties
+      const outerWidth = el.offsetWidth;
+      const innerWidth = outerWidth - borderLeft - borderRight;
+      const width = innerWidth - paddingLeft - paddingRight;
+      const marginWidth = outerWidth + marginLeft + marginRight;
+
+      // Height Properties
+      const outerHeight = el.offsetHeight;
+      const innerHeight = outerHeight - borderTop - borderBottom;
+      const height = innerHeight - paddingTop - paddingBottom;
+      const marginHeight = outerHeight + marginTop + marginBottom;
+      return {
+        // Position
+        top,
+        left,
+        right: rect.right,
+        bottom: rect.bottom,
+        pageTop,
+        pageLeft,
+        // Width
+        width,
+        innerWidth,
+        outerWidth,
+        marginWidth,
+        // Height
+        height,
+        innerHeight,
+        outerHeight,
+        marginHeight,
+        // Scroll
+        scrollTop: el.scrollY || el.scrollTop,
+        scrollLeft: el.scrollX || el.scrollLeft,
+        scrollHeight: el.scrollHeight,
+        scrollWidth: el.scrollWidth,
+        // Box Model Details
+        box: {
+          padding: { top: paddingTop, right: paddingRight, bottom: paddingBottom, left: paddingLeft },
+          border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
+          margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
+        },
+        bounds: rect,
+      };
+    });
+
+    return this.length === 1 ? results[0] : results;
+  }
+
+  intersects(target, {
+    sides = 'all',
+    threshold = 0,
+    fully = false,
+    returnDetails = false,
+    all = false,
+  } = {}) {
+    if (this.length === 0 || !target) {
+      return returnDetails ? null : false;
+    }
+
+    const $targets = this.chain(target);
+    if ($targets.length === 0) {
+      return returnDetails ? null : false;
+    }
+
+    const defaultDetails = {
+      intersects: false,
+      top: false,
+      bottom: false,
+      left: false,
+      right: false,
+      ratio: 0,
+      rect: null,
+    };
+
+    // Process sides parameter once
+    const checkSides = isArray(sides) ? sides : (sides === 'all' ? ['top', 'bottom', 'left', 'right'] : [sides]);
+
+    // Check intersections using position relative to target
+    const results = Array.from(this).flatMap(sourceEl => {
+      const $source = this.chain(sourceEl);
+      const sourceDims = $source.dimensions();
+
+      return $targets.map(targetEl => {
+        const $target = this.chain(targetEl);
+        const targetDims = $target.dimensions();
+
+        // Get source position relative to target
+        const { relative } = $source.position({ relativeTo: targetEl });
+        const { top, left } = relative;
+        const sourceRight = left + sourceDims.outerWidth;
+        const sourceBottom = top + sourceDims.outerHeight;
+
+        // Default return details object
+        let details = {
+          ...defaultDetails,
+          // Add element position relative to target for obstruction analysis
+          elementPosition: {
+            top,
+            left,
+            bottom: sourceBottom,
+            right: sourceRight,
+          },
+        };
+
+        // Simple bounds check for intersection
+        const intersects = (
+          left < targetDims.outerWidth
+          && sourceRight > 0
+          && top < targetDims.outerHeight
+          && sourceBottom > 0
+        );
+
+        if (intersects) {
+          // Calculate intersection rectangle and ratio
+          const sourceArea = sourceDims.outerWidth * sourceDims.outerHeight;
+          const intersectionLeft = Math.max(left, 0);
+          const intersectionTop = Math.max(top, 0);
+          const intersectionRight = Math.min(sourceRight, targetDims.outerWidth);
+          const intersectionBottom = Math.min(sourceBottom, targetDims.outerHeight);
+          const intersectionWidth = intersectionRight - intersectionLeft;
+          const intersectionHeight = intersectionBottom - intersectionTop;
+          const intersectionArea = intersectionWidth * intersectionHeight;
+          const ratio = sourceArea > 0 ? intersectionArea / sourceArea : 0;
+          // Update details with intersection data
+          details = {
+            ...details,
+            intersects: true,
+            ratio,
+            rect: {
+              left: intersectionLeft,
+              top: intersectionTop,
+              right: intersectionRight,
+              bottom: intersectionBottom,
+              width: intersectionWidth,
+              height: intersectionHeight,
+            },
+            top: top >= 0 && top < targetDims.outerHeight,
+            bottom: sourceBottom > 0 && sourceBottom <= targetDims.outerHeight,
+            left: left >= 0 && left < targetDims.outerWidth,
+            right: sourceRight > 0 && sourceRight <= targetDims.outerWidth,
+            // Add element position relative to target for obstruction analysis
+            elementPosition: {
+              top,
+              left,
+              bottom: sourceBottom,
+              right: sourceRight,
+            },
+          };
+
+          // Check if fully contained
+          if (fully) {
+            const isFullyContained = (
+              left >= 0
+              && sourceRight <= targetDims.outerWidth
+              && top >= 0
+              && sourceBottom <= targetDims.outerHeight
+            );
+            if (!isFullyContained) {
+              details.intersects = false;
+            }
+          }
+
+          // Check threshold
+          if (threshold > 0 && ratio < threshold) {
+            details.intersects = false;
+          }
+
+          // Check specific sides if requested
+          if (sides !== 'all') {
+            const matchesSides = checkSides.some(side => details[side]);
+            if (!matchesSides) {
+              details.intersects = false;
+            }
+          }
+        }
+        return returnDetails ? details : details.intersects;
+      });
+    });
+
+    if (returnDetails) {
+      // return as array or obj depending on el length
+      return (this.length == 1)
+        ? results[0]
+        : results;
+    }
+
+    // For boolean results, check all elements or any element based on all parameter
+    return all ? results.every(r => r === true) : results.some(r => r === true);
+  }
+
+  pagePosition(settings) {
+    return this.position({
+      ...settings,
+      type: 'global',
+    });
+  }
+
+  position({
+    relativeTo,
+    top,
+    left,
+    precision = 'pixel',
+    type,
+  } = {}) {
+    // Determine if the function is being used as a setter.
+    const isSetter = (isNumber(top) || isNumber(left));
+
+    // avoid querySelector inside map
+    const $relative = (relativeTo)
+      ? this.chain(relativeTo)
+      : undefined;
+
+    // fail clearly if relative el does not exist
+    if (relativeTo && !$relative.exists()) {
+      return (isSetter)
+        ? this
+        : undefined;
+    }
+
+    // getter
+    if (this.length === 0) {
+      return undefined;
+    }
+    const results = this.map(el => {
+      const $el = this.chain(el);
+      const elRect = $el.dimensions();
+      const $positioningParent = $el.positioningParent();
+      const parentRect = $positioningParent.dimensions();
+      const round = val => (precision === 'pixel' ? Math.round(val) : val);
+
+      // 1. Global (Viewport) Coordinates
+      const globalCoords = {
+        top: round(elRect.top) - parentRect.box.border.top + window.scrollY,
+        left: round(elRect.left) - parentRect.box.border.left + window.scrollX,
+      };
+      if (!isSetter && type === 'global') {
+        return globalCoords;
+      }
+
+      // 2. Local (positioningParent) Coordinates
+      const localCoords = {
+        top: round(elRect.top - parentRect.top - parentRect.box.border.top + $positioningParent.scrollTop()),
+        left: round(elRect.left - parentRect.left - parentRect.box.border.left + $positioningParent.scrollLeft()),
+      };
+      if (!isSetter && type === 'local') {
+        return localCoords;
+      }
+
+      // 3. Relative Coordinates
+      let relativeCoords = null;
+      if (relativeTo) {
+        const relativeRect = $relative.dimensions();
+        relativeCoords = {
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.top),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
+        };
+        if (!isSetter && type === 'relative') {
+          return relativeCoords;
+        }
+      }
+
+      // join together all results
+      const result = {
+        global: globalCoords,
+        local: localCoords,
+      };
+      if (relativeCoords) {
+        result.relative = relativeCoords;
+      }
+
+      if (isSetter) {
+        // get what we are setting to
+        let $reference;
+        if (type === 'global') {
+          $reference = this.chain(window);
+        }
+        else if (type === 'local') {
+          $reference = $positioningParent;
+        }
+        else if ($relative) {
+          $reference = $relative;
+        }
+        else {
+          $reference = $positioningParent;
+        }
+        const referenceRect = $reference.dimensions();
+
+        // calculate new position
+        const targetTop = referenceRect.top + (top || 0);
+        const targetLeft = referenceRect.left + (left || 0);
+        const newStyleTop = targetTop - parentRect.top;
+        const newStyleLeft = targetLeft - parentRect.left;
+
+        if (isNumber(top)) {
+          el.style.top = `${newStyleTop}px`;
+        }
+        if (isNumber(left)) {
+          el.style.left = `${newStyleLeft}px`;
+        }
+      }
+      return result;
+    });
+
+    if (isSetter) {
+      return this;
+    }
+
+    // Return a single object if the collection has only one element.
+    return this.length === 1 ? results[0] : results;
+  }
+
+  isInView({ viewport, ...intersectionOptions } = {}) {
+    // Determine the viewport/container to check against
+    let $viewport;
+    if (viewport) {
+      $viewport = this.chain(viewport);
+    }
+    else {
+      // Use clipping parent as default viewport
+      $viewport = this.clippingParent();
+    }
+
+    // If no viewport found, use document element
+    if (!$viewport.length) {
+      $viewport = this.chain(document.documentElement);
+    }
+
+    // Use intersects method directly on the full collection
+    return this.intersects($viewport, intersectionOptions);
   }
 
   // special helper for SUI components

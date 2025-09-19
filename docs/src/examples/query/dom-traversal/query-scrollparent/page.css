@@ -1,0 +1,79 @@
+.container {
+  padding: var(--padding);
+  margin: var(--vertically-spaced);
+  border: var(--border);
+  background: var(--standard-5);
+  border-radius: var(--border-radius);
+
+  /* Shared property: anything with 'scroll' gets overflow behavior */
+  .scroll {
+    overflow: auto;
+    padding: var(--padding);
+    margin: var(--spacing);
+    border-radius: var(--border-radius);
+
+    &.outer {
+      height: 200px;
+      border: var(--blue-border);
+      background: var(--blue-background-color);
+    }
+
+    &.inner {
+      height: 150px;
+      border: var(--green-border);
+      background: var(--green-background-color);
+
+      .target {
+        padding: var(--padding);
+        background: var(--orange-background-color);
+        border: var(--orange-border);
+        border-radius: var(--border-radius);
+        margin: var(--vertically-spaced);
+        font-weight: var(--bold);
+      }
+
+      .content {
+        padding: var(--padding);
+        background: var(--standard-10);
+        border-radius: var(--border-radius);
+        height: 300px;
+        margin: var(--vertically-spaced);
+      }
+    }
+  }
+}
+
+ui-button {
+  margin: var(--spacing);
+}
+
+.output {
+  margin: var(--vertically-spaced);
+  padding: var(--padding);
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+
+  h3 {
+    margin: 0 0 var(--spacing) 0;
+    color: var(--header-color);
+  }
+}
+
+.log {
+  background: var(--standard-10);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  border: var(--border);
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  min-height: 100px;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.highlight {
+  outline: 3px solid var(--red-border-color);
+  outline-offset: -3px;
+}

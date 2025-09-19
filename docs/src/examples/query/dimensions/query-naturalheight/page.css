@@ -1,16 +1,16 @@
 .container {
   height: 100px;
   overflow: hidden;
-  border: 2px solid var(--standard-20);
+  border: 2px solid var(--yellow-border-color);
   border-radius: var(--border-radius);
-  margin: 20px 0;
-  background: var(--background);
+  margin: var(--vertically-spaced);
+  background: var(--angled-gradient) var(--yellow-background-color);
 }
 
 .element {
   padding: var(--padding);
-  background: var(--success-color);
-  color: white;
+  background: var(--standard-10);
+  color: var(--yellow-text-color);
   font-size: 14px;
   line-height: 1.4;
   
@@ -21,16 +21,30 @@
 
 .measurements {
   background: var(--standard-5);
+  border: var(--border);
   padding: var(--padding);
   border-radius: var(--border-radius);
+  font-weight: bold;
+  font-size: var(--large);
+
+  .parts {
+    font-size: var(--medium);
+    margin-top: var(--margin);
+    color: var(--standard-40);
+    border-top: var(--border);
+    padding-top: var(--padding);
+  }
   
   p {
-    margin: 5px 0;
-    font-family: monospace;
-    
+    margin: 3px 0;
+    font-family: Monospace;
     span {
       font-weight: bold;
-      color: var(--success-color);
+      color: var(--primary-text-color);
+    }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
     }
   }
 }

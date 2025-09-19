@@ -26,7 +26,7 @@ The package is organized into **17 specialized modules**, each focused on a spec
 ├── crypto.js      ← Hashing and ID generation
 ├── equality.js    ← Deep equality comparison
 ├── cloning.js     ← Deep cloning of objects and arrays
-├── errors.js      ← Error handling and async error throwing
+├── debug.js       ← Logging, debugging, and error handling
 ├── environment.js  ← Environment detection (server/client/dev/CI)
 └── regexp.js      ← Regular expression and HTML escaping
 ```
@@ -553,14 +553,39 @@ cloned.b.c = 99;
 console.log(obj1.b.c);                             // 2 (original unchanged)
 ```
 
-## Error Handling (errors.js)
+## Debug Utilities (debug.js)
 
-### Error Management
+### Logging and Error Management
 ```javascript
-import { fatal } from '@semantic-ui/utils';
+import { log, fatal } from '@semantic-ui/utils';
 
-// Fatal error handling with custom messages
-fatal('Critical system error', { exit: true });
+// Flexible logging with levels and formatting
+log('Application started', 'info');                     // Basic info log
+log('User action', 'debug', {                           // Debug with namespace
+  namespace: 'UserService',
+  data: [{ action: 'login', userId: 123 }]
+});
+
+// JSON format for structured logging
+log('API response', 'info', {                           // Structured output
+  format: 'json',
+  namespace: 'ApiClient',
+  timestamp: true,
+  data: [{ status: 200, endpoint: '/api/users' }]
+});
+
+// Custom styling and colors
+log('Important notice', 'warn', {                       // Custom title styling
+  title: 'SYSTEM',
+  titleColor: '#FF6B35',
+  timestamp: true
+});
+
+// Fatal error handling with metadata
+fatal('Critical system error', {                        // Async error throwing
+  errorType: TypeError,
+  metadata: { code: 'SYS_ERROR' }
+});
 ```
 
 ## Iteration Utilities (looping.js)

@@ -187,3 +187,74 @@ $('div').data('active', 'true');
 - Data attribute keys are automatically converted from camelCase to kebab-case in the HTML (e.g., `userId` becomes `data-user-id`)
 - When retrieving data, kebab-case attribute names are converted back to camelCase object keys
 - Data attributes are always stored and retrieved as strings
+
+## removeData
+
+Removes data attributes from elements in the current set. This method provides a convenient way to remove one or more data attributes at once.
+
+### Syntax
+
+```javascript
+$('selector').removeData(keys)
+```
+
+### Parameters
+| Name | Type              | Description                                                        |
+|------|-------------------|---------------------------------------------------------------------|
+| keys | string \| string[] | A space-separated string or array of data attribute keys to remove |
+
+### Returns
+[Query object](/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Remove a Single Data Attribute
+```javascript
+// HTML: <div data-user-id="123" data-role="admin"></div>
+$('div').removeData('userId');
+// Results in: <div data-role="admin"></div>
+```
+
+#### Remove Multiple Data Attributes (Space-Separated)
+```javascript
+// HTML: <div data-user-id="123" data-role="admin" data-theme="dark"></div>
+$('div').removeData('userId role');
+// Results in: <div data-theme="dark"></div>
+```
+
+#### Remove Multiple Data Attributes (Array)
+```javascript
+// HTML: <div data-user-id="123" data-role="admin" data-theme="dark"></div>
+$('div').removeData(['userId', 'role']);
+// Results in: <div data-theme="dark"></div>
+```
+
+#### Working with Multiple Elements
+```javascript
+// HTML:
+// <div data-temp="hot" data-status="active"></div>
+// <div data-temp="cold" data-status="inactive"></div>
+
+// Remove data attributes from all matched elements
+$('div').removeData('temp');
+// Both divs now have only data-status attribute
+```
+
+#### Method Chaining
+```javascript
+// Chain multiple operations
+$('div')
+  .data('newKey', 'newValue')
+  .removeData('oldKey')
+  .addClass('updated');
+```
+
+### Example
+<PlaygroundExample id="query-removedata" direction="horizontal"></PlaygroundExample>
+
+### Notes
+
+- Keys are automatically converted from camelCase to kebab-case (e.g., `userId` targets `data-user-id`)
+- Space-separated strings allow removing multiple attributes in a single call
+- Non-existent keys are silently ignored
+- The method returns the Query instance for chaining

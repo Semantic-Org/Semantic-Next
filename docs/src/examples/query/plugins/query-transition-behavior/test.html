@@ -29,15 +29,5 @@
   <div class="test-box transition hidden">Test Box</div>
   
   <button id="test">Run Transition</button>
-
-  <script type="module">
-    import { $ } from '@semantic-ui/query';
-    import '@semantic-ui/core/behaviors/transition';
-    
-    $('#test').on('click', () => {
-      // This should auto-detect visibility and toggle
-      $('.test-box').transition('fade');
-    });
-  </script>
 </body>
 </html>

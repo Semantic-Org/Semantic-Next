@@ -68,11 +68,13 @@ const subCategorySortOrder = {
     'Introduction',
     'Selectors',
     'Plugins / Behaviors',
+    'Standard Plugins',
     'Components',
     'Attributes',
     'Content',
     'CSS',
     'Dimensions',
+    'Visibility',
     'DOM Manipulation',
     'DOM Traversal',
     'Events',
@@ -557,8 +559,12 @@ export const sidebarMenuAPI = [
         url: '/api/query/css',
       },
       {
-        name: 'Size & Dimensions',
+        name: 'Dimensions & Size',
         url: '/api/query/dimensions',
+      },
+      {
+        name: 'Display & Visibility',
+        url: '/api/query/visibility',
       },
       {
         name: 'DOM Manipulation',

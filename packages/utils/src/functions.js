@@ -1,5 +1,5 @@
 import { hashCode } from './crypto.js';
-import { isFunction, isPlainObject } from './types.js';
+import { isFunction, isPlainObject, isPromise } from './types.js';
 
 /*-------------------
       Functions
@@ -94,7 +94,7 @@ export const debounce = (func, wait, options = {}) => {
     try {
       const funcResult = func.apply(thisArg, args);
 
-      if (funcResult && typeof funcResult.then === 'function') {
+      if (funcResult && isPromise(funcResult)) {
         return funcResult.then(
           value => {
             result = value;
@@ -183,7 +183,7 @@ export const debounce = (func, wait, options = {}) => {
     if (trailing && args) {
       try {
         const res = invokeFunc(ctx, args);
-        if (res && typeof res.then === 'function') {
+        if (res && isPromise(res)) {
           res.catch(() => {});
         }
         return res;
@@ -245,12 +245,10 @@ export const debounce = (func, wait, options = {}) => {
     if (isInvoking) {
       if (timeoutId === undefined) {
         const leadingResult = leadingEdge(this, args);
-
-        if (leading && !(leadingResult && typeof leadingResult.then === 'function')) {
+        if (leading && !(leadingResult && isPromise(leadingResult))) {
           return leadingResult;
         }
-
-        if (leadingResult && typeof leadingResult.then === 'function') {
+        if (leadingResult && isPromise(leadingResult)) {
           return leadingResult;
         }
       }
@@ -268,7 +266,7 @@ export const debounce = (func, wait, options = {}) => {
           maxTimeoutId = undefined;
           try {
             const res = invokeFunc(lastThis, lastArgs);
-            if (res && typeof res.then === 'function') {
+            if (res && isPromise(res)) {
               res.catch(() => {});
             }
           }
@@ -366,7 +364,7 @@ export const throttle = (func, wait, options = {}) => {
     try {
       const funcResult = func.apply(thisArg, args);
 
-      if (funcResult && typeof funcResult.then === 'function') {
+      if (funcResult && isPromise(funcResult)) {
         return funcResult.then(
           value => {
             result = value;
@@ -427,7 +425,7 @@ export const throttle = (func, wait, options = {}) => {
         trailingInvoked = false;
         try {
           const res = invokeFunc(lastThis, lastArgs);
-          if (res && typeof res.then === 'function') {
+          if (res && isPromise(res)) {
             res.catch(() => {});
           }
           return res;
@@ -487,11 +485,11 @@ export const throttle = (func, wait, options = {}) => {
           timeoutId = setTimeout(timerExpired, wait);
         }
 
-        if (leading && !(leadingResult && typeof leadingResult.then === 'function')) {
+        if (leading && !(leadingResult && isPromise(leadingResult))) {
           return leadingResult;
         }
 
-        if (leadingResult && typeof leadingResult.then === 'function') {
+        if (leadingResult && isPromise(leadingResult)) {
           return leadingResult;
         }
       }

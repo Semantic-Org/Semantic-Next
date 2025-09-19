@@ -3,9 +3,9 @@
   /* Duration Tokens */
   --motion-scale-factor: 1;
   --duration-quick: calc(100ms * var(--motion-scale-factor));      /* Tooltips, micro-interactions */
-  --duration-short: calc(150ms * var(--motion-scale-factor));      /* Standard/default for most UI */
-  --duration-medium: calc(250ms * var(--motion-scale-factor));     /* Emphasis animations, modals */
-  --duration-long: calc(350ms * var(--motion-scale-factor));       /* Complex sequences */
+  --duration-short: calc(130ms * var(--motion-scale-factor));      /* Standard/default for most UI */
+  --duration-medium: calc(180ms * var(--motion-scale-factor));     /* Emphasis animations, modals */
+  --duration-long: calc(250ms * var(--motion-scale-factor));       /* Complex sequences */
 
   /* Easing Functions */
   --ease-standard: cubic-bezier(0.3, 0.07, 0.3, 1);   /* Smoother out, slight overshoot */
@@ -36,12 +36,13 @@
   transition-behavior: allow-discrete;
   backface-visibility: hidden;
 
-  .hidden {
+  &.hidden {
     display: none;
   }
 
-  .visible {
-    display: block;
+  &.visible {
+    display: block !important;
+    opacity: 1 !important;
   }
 
 }

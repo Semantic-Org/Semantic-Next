@@ -4,7 +4,6 @@ import { UIIcon, UIInput, UIModal } from '../../primitives/index.js';
 import css from './global-search.css?raw';
 import template from './global-search.html?raw';
 
-
 const defaultSettings = {
   baseURL: '/',
   bundlePath: '/pagefind/',
@@ -50,7 +49,7 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
   async calculateLoadSearch() {
     reaction(async (reaction) => {
       try {
-        const { Instance } = await import(/* @vite-ignore */ '@pagefind/modular-ui');
+        const { Instance } = await import(/* @preserve @vite-ignore */ '@pagefind/modular-ui');
         this.search = new Instance({
           bundlePath: settings.bundlePath,
         });
@@ -63,7 +62,8 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
         this.search.on('results', (rawResults) => {
           state.rawResults.set(rawResults);
         });
-      } catch (error) {
+      }
+      catch (error) {
         console.warn('GlobalSearch: @pagefind/modular-ui not available. Search functionality disabled.', error);
         state.searchEnabled.set(false);
       }

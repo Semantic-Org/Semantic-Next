@@ -1,10 +1,4 @@
-import {
-  debounce,
-  memoize,
-  noop,
-  throttle,
-  wrapFunction,
-} from '@semantic-ui/utils';
+import { debounce, memoize, noop, throttle, wrapFunction } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -642,6 +636,76 @@ describe('function utilities', () => {
 
         vi.advanceTimersByTime(100);
         expect(throttled.pending()).toBe(false);
+      });
+    });
+
+    describe('bug detection tests', () => {
+      it('should not execute trailing edge multiple times (double timer bug)', async () => {
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100);
+
+        // Leading execution
+        throttled('arg1');
+        expect(func).toHaveBeenCalledTimes(1);
+
+        // Subsequent call queued for trailing
+        throttled('arg2');
+        expect(func).toHaveBeenCalledTimes(1);
+
+        // Advance to trigger trailing edge
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(2);
+
+        // Advance more time to check for extra executions
+        vi.advanceTimersByTime(50);
+        expect(func).toHaveBeenCalledTimes(2); // Should still be 2, not 3+
+
+        // Final check - no additional executions
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(2);
+      });
+
+      it('should track args properly in rejectSkipped mode', async () => {
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100, { rejectSkipped: true });
+
+        const result1 = throttled('arg1'); // Leading execution
+        expect(result1).toBe('result');
+
+        const promise2 = throttled('arg2'); // Should be rejected with correct args
+        await expect(promise2).rejects.toEqual({
+          code: 'THROTTLED',
+          message: 'Call was skipped due to throttle',
+          replacedBy: ['arg2'],
+        });
+      });
+
+      it('should handle rapid successive calls without negative timeouts', async () => {
+        const func = vi.fn(() => 'result');
+        const throttled = throttle(func, 100);
+
+        // Leading execution
+        const result1 = throttled('call1');
+        expect(result1).toBe('result');
+
+        // Rapid successive calls
+        vi.advanceTimersByTime(10);
+        throttled('call2');
+
+        vi.advanceTimersByTime(10);
+        throttled('call3');
+
+        vi.advanceTimersByTime(10);
+        throttled('call4');
+
+        // Should execute trailing edge exactly once after remaining time
+        vi.advanceTimersByTime(70); // Total 100ms
+        expect(func).toHaveBeenCalledTimes(2);
+        expect(func).toHaveBeenNthCalledWith(2, 'call4');
+
+        // No additional executions
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(2);
       });
     });
   });
