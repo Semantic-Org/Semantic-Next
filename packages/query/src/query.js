@@ -1349,7 +1349,7 @@ export class Query {
     // special case <body> for window scroll
     if (this.isGlobal || this.isBrowser || this.is('html, body')) {
       if (value !== undefined) {
-        window.scroll(value, scrollY);
+        window.scroll(value, window.scrollY);
         return this;
       }
       return window.scrollX;
