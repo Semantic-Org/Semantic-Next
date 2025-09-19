@@ -18,8 +18,6 @@ export const log = (
   {
     namespace = '',
     data = undefined,
-    group = false,
-    collapsed = true,
     timestamp = false,
     format = 'standard',
     consoleMethod = null,
@@ -42,7 +40,7 @@ export const log = (
   }
 
   // Format message based on options
-  let logArgs = [];
+  const logArgs = [];
   let logFormat = '';
 
   // JSON output
@@ -52,7 +50,7 @@ export const log = (
       level,
       namespace,
       message,
-      data,
+      ...(data?.length) ? { data } : {},
     });
     return;
   }
