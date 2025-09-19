@@ -495,23 +495,6 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
     const $scrolls = $el.scrollParent({ all: true });
     attachEvent($scrolls, 'scroll', self.onScroll);
   },
-
-  bindObservers() {
-    const viewport = settings.containToScroll
-      ? $el.scrollParent()
-      : $el.clippingParent();
-
-    self.observer = new IntersectionObserver(
-      self.onIntersectionChange,
-      {
-        root: viewport.el(),
-        threshold: [0, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 1.0],
-        rootMargin: '50px',
-      },
-    );
-    el.offsetHeight;
-    self.observer.observe(el);
-  },
 });
 
 const onCreated = ({ self, settings }) => {
@@ -527,7 +510,6 @@ const onCreated = ({ self, settings }) => {
 };
 
 const onDestroyed = ({ self }) => {
-  // self.observer?.disconnect();
   wrapFunction(self.onScroll?.cancel)();
   wrapFunction(self.onResize?.cancel)();
 };
