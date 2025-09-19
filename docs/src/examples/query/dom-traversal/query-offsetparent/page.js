@@ -51,6 +51,7 @@ $('.find').on('click', () => {
   $('.highlight').removeClass('highlight');
 
   const $offsetParent = $('.target').offsetParent();
+  console.log($offsetParent.el());
   $offsetParent.addClass('highlight');
 
   if ($offsetParent.is('.container')) {
@@ -60,9 +61,9 @@ $('.find').on('click', () => {
     log('Containing parent: .box (due to transform/filter!)');
   }
 
-  // Compare with browser's offsetParent
-  const $offsetParent = $('.target').offsetParent({ calculate: false });
-  if (!$offsetParent.is($offsetParent)) {
+  // Compare with positioning parent (which will handle filter);
+  const $positioningParent = $('.target').positioningParent();
+  if (!$offsetParent.is($positioningParent)) {
     $log.append('<br>Note: Browser offsetParent is different!');
   }
 });
