@@ -6,7 +6,13 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
-# Version 0.17.0 - xx.xx.xxxx
+# Version 0.17.0 - 09.19.2025
+
+## Author's Notes
+
+One of the largest steps to writing all the missing UI components necessary to ship SUI is solidifying key libraries like `transition` and `attach` which are used to handle the internal guts of the library. This release ships `attach` which uses `css anchors` to handle element positioning and is a big step towards that goal.
+
+This took a bit longer than expected as the original draft of `attach` used css anchors for positioning exclusively with `position-area`. This is faster than doing it in javascript but has the monumental downside that fallback positions are not reported in any meaningful way that can be observed with javascript. This means if a fallback position is used by the browser the only way to determine which one is used is by observing the element itself and calculating the position. This made things like automatic `arrow` nearly impossible. The plugin was then rewritten using a hybrid approach `anchor` for the actual `top/left/bottom/right` values, but javascript for positioning. This gives us the best of both worlds and more control of how fallback positions are used.
 
 ## Major Features
 * **Attach** - Added new `attach` behavior that allows you to position elements relative to other elements using `css anchor` positioning.

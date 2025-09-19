@@ -1,12 +1,12 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.16.2",
+  "version": "0.17.0",
   "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
   "author": "Jack Lukic <jack@semantic-ui.com>",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "./dist/semantic-ui.js",
+  "module": "./dist/semantic-ui.js",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -16,10 +16,10 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "import": "src/index.js",
+      "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
-      "default": "src/index.js"
+      "default": "./dist/semantic-ui.js"
     },
     "./css": {
       "import": "./src/css/all.css",
@@ -225,9 +225,9 @@
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.16.2",
-    "@semantic-ui/query": "^0.16.2",
-    "@semantic-ui/specs": "^0.16.2"
+    "@semantic-ui/component": "^0.17.0",
+    "@semantic-ui/query": "^0.17.0",
+    "@semantic-ui/specs": "^0.17.0"
   },
   "peerDependencies": {
     "@pagefind/modular-ui": "^1.3.0"
