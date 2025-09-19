@@ -2348,8 +2348,8 @@ export class Query {
     const results = this.map(el => {
       const $el = this.chain(el);
       const elRect = $el.dimensions();
-      const $parent = $el.positioningParent();
-      const parentRect = $parent.dimensions();
+      const $positioningParent = $el.positioningParent();
+      const parentRect = $positioningParent.dimensions();
       const round = val => (precision === 'pixel' ? Math.round(val) : val);
 
       // 1. Global (Viewport) Coordinates
@@ -2399,13 +2399,13 @@ export class Query {
           $reference = this.chain(window);
         }
         else if (type === 'local') {
-          $reference = parent;
+          $reference = $positioningParent;
         }
         else if ($relative) {
           $reference = $relative;
         }
         else {
-          $reference = $parent;
+          $reference = $positioningParent;
         }
         const referenceRect = $reference.dimensions();
 
