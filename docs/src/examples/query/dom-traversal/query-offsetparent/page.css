@@ -1,29 +1,38 @@
-.container {
+
+table,
+.target,
+.container,
+.box {
   padding: var(--padding);
-  margin: var(--margin) 0;
-  border: 2px solid var(--standard-30);
-  background: var(--standard-5);
+  border: 2px solid var(--border-color);
+  width: 100%;
+  min-height: 150px;
+  box-sizing: var(--box-sizing);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.container {
   position: relative;
-  height: 150px;
 }
 
 .box {
-  padding: var(--padding);
-  margin: var(--margin);
-  border: 2px solid var(--blue-30);
-  background: var(--blue-5);
-  height: 100px;
+  border-color: var(--blue-border-color);
+  background: var(--blue-background-color);
+}
+
+table {
+  border-color: var(--red-border-color);
+  background: var(--red-background-color);
 }
 
 .target {
-  position: fixed;
-  top: 20px;
-  left: 20px;
+  position: static;
+  top: 14px;
+  left: 14px;
   padding: var(--padding);
-  background: var(--green-10);
-  border: 2px solid var(--green-30);
-  font-size: 12px;
-  font-family: monospace;
+  border-color: var(--orange-border-color);
+  background: var(--orange-background-color);
 }
 
 ui-button {
@@ -39,6 +48,6 @@ ui-button {
 }
 
 .highlight {
-  outline: 3px solid var(--red-40);
+  outline: 3px solid var(--red-border-color);
   outline-offset: -3px;
 }
