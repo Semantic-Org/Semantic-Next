@@ -27,3 +27,7 @@ p {
 p span {
   font-weight: bold;
 }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }

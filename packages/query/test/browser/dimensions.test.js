@@ -78,7 +78,7 @@ describe('query', () => {
       expect(position).toBeUndefined();
     });
 
-    it('sets position relative to containingParent by default', async () => {
+    it('sets position relative to offsetParent by default', async () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative; width: 500px; height: 500px;">
           <div id="child" style="position: absolute; width: 50px; height: 50px;"></div>
@@ -457,7 +457,7 @@ describe('query', () => {
     });
   });
 
-  describe('isInViewport()', () => {
+  describe('isInView()', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
       window.scrollTo(0, 0);
@@ -467,7 +467,7 @@ describe('query', () => {
       document.body.innerHTML =
         '<div id="test" style="position: fixed; top: 10px; left: 10px; width: 50px; height: 50px;"></div>';
 
-      const result = $('#test').isInViewport();
+      const result = $('#test').isInView();
       expect(result).toBe(true);
     });
 
@@ -475,7 +475,7 @@ describe('query', () => {
       document.body.innerHTML =
         '<div id="test" style="position: absolute; top: -200px; left: 10px; width: 50px; height: 50px;"></div>';
 
-      const result = $('#test').isInViewport();
+      const result = $('#test').isInView();
       expect(result).toBe(false);
     });
 
@@ -485,7 +485,7 @@ describe('query', () => {
         viewportHeight - 25
       }px; left: 10px; width: 50px; height: 50px;"></div>`;
 
-      const result = $('#test').isInViewport();
+      const result = $('#test').isInView();
       expect(result).toBe(true);
     });
 
@@ -495,7 +495,7 @@ describe('query', () => {
         viewportHeight - 25
       }px; left: 10px; width: 50px; height: 50px;"></div>`;
 
-      const result = $('#test').isInViewport({ fully: true });
+      const result = $('#test').isInView({ fully: true });
       expect(result).toBe(false);
     });
 
@@ -506,8 +506,8 @@ describe('query', () => {
         viewportHeight - 25
       }px; left: 10px; width: 50px; height: 50px;"></div>`;
 
-      expect($('#test').isInViewport({ threshold: 0.3 })).toBe(true); // 30% threshold
-      expect($('#test').isInViewport({ threshold: 0.7 })).toBe(false); // 70% threshold
+      expect($('#test').isInView({ threshold: 0.3 })).toBe(true); // 30% threshold
+      expect($('#test').isInView({ threshold: 0.7 })).toBe(false); // 70% threshold
     });
 
     it('returns true only if ALL elements meet criteria for multiple elements', () => {
@@ -516,12 +516,12 @@ describe('query', () => {
         <div class="test" style="position: absolute; top: -200px; left: 10px; width: 50px; height: 50px;"></div>
       `;
 
-      const result = $('.test').isInViewport();
+      const result = $('.test').isInView({ all: true });
       expect(result).toBe(false); // One element is out of viewport
     });
 
     it('returns false for empty selection', () => {
-      const result = $('.nonexistent').isInViewport();
+      const result = $('.nonexistent').isInView();
       expect(result).toBe(false);
     });
 
@@ -533,23 +533,23 @@ describe('query', () => {
       document.body.innerHTML = `<div id="right" style="position: absolute; top: 10px; left: ${
         viewportWidth - 1
       }px; width: 50px; height: 50px;"></div>`;
-      expect($('#right').isInViewport()).toBe(true);
+      expect($('#right').isInView()).toBe(true);
 
       // Element just touching bottom edge
       document.body.innerHTML = `<div id="bottom" style="position: absolute; top: ${
         viewportHeight - 1
       }px; left: 10px; width: 50px; height: 50px;"></div>`;
-      expect($('#bottom').isInViewport()).toBe(true);
+      expect($('#bottom').isInView()).toBe(true);
 
       // Element just outside left edge
       document.body.innerHTML =
         `<div id="left" style="position: absolute; top: 10px; left: -51px; width: 50px; height: 50px;"></div>`;
-      expect($('#left').isInViewport()).toBe(false);
+      expect($('#left').isInView()).toBe(false);
 
       // Element just outside top edge
       document.body.innerHTML =
         `<div id="top" style="position: absolute; top: -51px; left: 10px; width: 50px; height: 50px;"></div>`;
-      expect($('#top').isInViewport()).toBe(false);
+      expect($('#top').isInView()).toBe(false);
     });
 
     it('uses clipping parent as default viewport', () => {
@@ -564,11 +564,11 @@ describe('query', () => {
       // Element is outside the clipping parent's viewport
       const container = document.getElementById('container');
       container.scrollTop = 0;
-      expect($('#test').isInViewport()).toBe(false);
+      expect($('#test').isInView()).toBe(false);
 
       // Scroll to make element visible within clipping parent
       container.scrollTop = 100;
-      expect($('#test').isInViewport()).toBe(true);
+      expect($('#test').isInView()).toBe(true);
     });
 
     it('accepts custom viewport element', () => {
@@ -579,11 +579,11 @@ describe('query', () => {
       `;
 
       // Element overlaps with custom viewport
-      expect($('#test').isInViewport({ viewport: '#viewport' })).toBe(true);
+      expect($('#test').isInView({ viewport: '#viewport' })).toBe(true);
 
       // Move element outside custom viewport
       document.getElementById('test').style.top = '150px';
-      expect($('#test').isInViewport({ viewport: '#viewport' })).toBe(false);
+      expect($('#test').isInView({ viewport: '#viewport' })).toBe(false);
     });
 
     it('accepts custom viewport as Query object', () => {
@@ -594,11 +594,11 @@ describe('query', () => {
       `;
 
       const $viewport = $('#viewport');
-      expect($('#test').isInViewport({ viewport: $viewport })).toBe(true);
+      expect($('#test').isInView({ viewport: $viewport })).toBe(true);
 
       // Move element outside custom viewport
       document.getElementById('test').style.top = '150px';
-      expect($('#test').isInViewport({ viewport: $viewport })).toBe(false);
+      expect($('#test').isInView({ viewport: $viewport })).toBe(false);
     });
 
     it('falls back to browser viewport when no clipping parent exists', () => {
@@ -607,11 +607,11 @@ describe('query', () => {
       `;
 
       // Element is within browser viewport (no clipping parent)
-      expect($('#test').isInViewport()).toBe(true);
+      expect($('#test').isInView()).toBe(true);
 
       // Move element outside browser viewport
       document.getElementById('test').style.top = '-100px';
-      expect($('#test').isInViewport()).toBe(false);
+      expect($('#test').isInView()).toBe(false);
     });
   });
 });

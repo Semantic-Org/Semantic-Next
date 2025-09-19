@@ -1,0 +1,53 @@
+
+table,
+.target,
+.container,
+.box {
+  padding: var(--padding);
+  border: 2px solid var(--border-color);
+  width: 100%;
+  min-height: 150px;
+  box-sizing: var(--box-sizing);
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.container {
+  position: relative;
+}
+
+.box {
+  border-color: var(--blue-border-color);
+  background: var(--blue-background-color);
+}
+
+table {
+  border-color: var(--red-border-color);
+  background: var(--red-background-color);
+}
+
+.target {
+  position: static;
+  top: 14px;
+  left: 14px;
+  padding: var(--padding);
+  border-color: var(--orange-border-color);
+  background: var(--orange-background-color);
+}
+
+ui-button {
+  margin: 5px;
+}
+
+.log {
+  margin: var(--margin) 0;
+  padding: var(--padding);
+  background: var(--standard-5);
+  font-family: monospace;
+  border-radius: var(--border-radius);
+}
+
+.highlight {
+  outline: 3px solid var(--red-border-color);
+  outline-offset: -3px;
+}

@@ -40,8 +40,8 @@ $('.find').on('click', () => {
   const $clippingParent = $('.target').clippingParent();
   $clippingParent.addClass('highlight');
 
-  if ($clippingParent.is('body')) {
-    log('Clipping parent: <body>');
+  if ($clippingParent.is('html')) {
+    log('Clipping parent: html');
   }
   else {
     const className = $clippingParent.attr('class').replace(' highlight', '');

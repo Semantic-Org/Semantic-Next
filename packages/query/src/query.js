@@ -329,6 +329,9 @@ export class Query {
   }
 
   is(selector) {
+    if (this.length == 0) {
+      return false;
+    }
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
@@ -438,7 +441,16 @@ export class Query {
 
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
-
+    const closest = (el, selector) => {
+      if (isDOM(selector) && selector?.contains) {
+        if (selector.contains(el)) {
+          return selector;
+        }
+      }
+      else {
+        return el.closest(selector);
+      }
+    };
     Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
         const matches = this.closestDeep(el, selector, { returnAll });
@@ -454,7 +466,7 @@ export class Query {
           // Walk up DOM tree using native closest() efficiently
           let current = el.parentElement;
           while (current) {
-            const match = current.closest(selector);
+            const match = closest(current, selector);
             if (match) {
               allResults.push(match);
               // Continue from the parent of the match to find more ancestors
@@ -466,7 +478,7 @@ export class Query {
           }
         }
         else {
-          const match = el.closest(selector);
+          const match = closest(el, selector);
           if (match) {
             allResults.push(match);
           }
@@ -830,28 +842,28 @@ export class Query {
     if (!classNames) {
       return this;
     }
-    const classesToAdd = classNames.split(' ');
-    return this.each((el) => el.classList.add(...classesToAdd));
+    const classesToAdd = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.add(...classesToAdd));
   }
 
   removeClass(classNames) {
     if (!classNames) {
       return this;
     }
-    const classesToRemove = classNames.split(' ');
-    return this.each((el) => el.classList.remove(...classesToRemove));
+    const classesToRemove = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
     if (!classNames) {
       return this;
     }
-    const classesToToggle = classNames.split(' ');
-    return this.each((el) => el.classList.toggle(...classesToToggle));
+    const classesToToggle = classNames.trim().split(' ');
+    return this.each((el) => el?.classList.toggle(...classesToToggle));
   }
 
   hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
+    return Array.from(this).some((el) => el?.classList.contains(className));
   }
 
   html(newHTML) {
@@ -1084,7 +1096,7 @@ export class Query {
       return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = this.map((el) => el.getAttribute(attribute));
+      const attributes = this.map((el) => el?.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
   }
@@ -1289,14 +1301,12 @@ export class Query {
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
       // Start with total width and subtract what we don't want
-      width -= borderLeft + borderRight; // Remove border to get content + padding
+      if (!includeBorder) {
+        width -= borderLeft + borderRight; // Remove border to get content + padding
+      }
 
       if (!includePadding) {
         width -= paddingLeft + paddingRight; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        width += borderLeft + borderRight; // Add border back
       }
 
       if (includeMargin) {
@@ -1310,11 +1320,11 @@ export class Query {
   }
 
   innerWidth() {
-    return this.width({ includePadding: true });
+    return this.width({ includePadding: true, includeBorder: false });
   }
 
   innerHeight() {
-    return this.height({ includePadding: true });
+    return this.height({ includePadding: true, includeBorder: false });
   }
 
   outerWidth({ includeMargin = false } = {}) {
@@ -1336,13 +1346,27 @@ export class Query {
   }
 
   scrollLeft(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollLeft', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(value, scrollY);
+        return this;
+      }
+      return window.scrollX;
+    }
+    return this.prop('scrollLeft', value);
   }
 
   scrollTop(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollTop', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(window.scrollX, value);
+        return this;
+      }
+      return window.scrollY;
+    }
+    return this.prop('scrollTop', value);
   }
 
   clone() {
@@ -1477,17 +1501,32 @@ export class Query {
     });
   }
 
-  naturalWidth() {
+  naturalWidth({ preserveMaxWidth = true } = {}) {
     const widths = this.map((el) => {
-      const $clone = this.chain(el.cloneNode(true));
+      const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        width: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxWidth: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxWidth) {
+        css.maxWidth = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -1495,17 +1534,32 @@ export class Query {
     return widths.length > 1 ? widths : widths[0];
   }
 
-  naturalHeight() {
+  naturalHeight({ preserveMaxHeight = true } = {}) {
     const height = this.map((el) => {
       const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        height: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxHeight: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxHeight) {
+        css.maxHeight = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -1689,33 +1743,35 @@ export class Query {
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
+      const emptyValues = ['', 'none'];
+
+      // Check if element uses CSS anchor positioning
+      const style = window.getComputedStyle(el);
+      const hasAnchor = style.positionAnchor && !inArray(style.positionAnchor, ['none', 'auto']);
+      const isPositioned = inArray(style.position, ['absolute', 'fixed']);
+      const isAnchored = hasAnchor && isPositioned;
+      const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
+
       let current = el.parentNode;
       while (current) {
-        if (current instanceof Element) {
+        if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
 
-          // Check overflow
-          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+          // Check overflow (skip for anchored elements - they escape)
+          if (!isAnchored && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
             return current;
           }
 
-          // Check contain property (layout, paint, size, strict)
-          const contain = style.contain;
-          if (
-            contain
-            && (contain.includes('paint') || contain.includes('layout') || contain.includes('size')
-              || contain.includes('strict'))
-          ) {
+          // Check contain property (different rules for anchored vs non-anchored)
+          if (style.contain && containRegex.test(style.contain)) {
             return current;
           }
 
-          // Check clip-path
-          if (style.clipPath && style.clipPath !== 'none') {
+          // Shared checks (always clip both anchored and non-anchored)
+          if (!inArray(style.clipPath, emptyValues)) {
             return current;
           }
-
-          // Check mask/mask-image
-          if ((style.mask && style.mask !== 'none') || (style.maskImage && style.maskImage !== 'none')) {
+          if (!inArray(style.mask, emptyValues) || !inArray(style.maskImage, emptyValues)) {
             return current;
           }
         }
@@ -1779,7 +1835,42 @@ export class Query {
     return this.chain(parents);
   }
 
-  containingParent() {
+  // this is the nearest element that creates a scroll container
+  scrollParent({ all = false } = {}) {
+    const results = this.map((el) => {
+      const scrollParents = [];
+      let current = el.parentNode;
+
+      while (current && current !== document.body) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+
+          // Check if element creates a scroll container
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            if (all) {
+              scrollParents.push(current);
+            }
+            else {
+              return current;
+            }
+          }
+        }
+        current = current.parentNode;
+      }
+
+      // documentElement is the final scroll container
+      const fallback = window;
+      if (all) {
+        scrollParents.push(fallback);
+        return scrollParents;
+      }
+      return fallback;
+    });
+
+    return all ? this.chain(results.flat()) : this.chain(results);
+  }
+
+  offsetParent() {
     const parents = this.map(el => el.offsetParent || document.documentElement);
     return this.chain(parents);
   }
@@ -1889,6 +1980,15 @@ export class Query {
       : allData;
   }
 
+  removeData(keys) {
+    keys = isString(keys)
+      ? keys.split(/\s+/)
+      : keys;
+    return this.each((el) => {
+      each(keys, (key) => delete el.dataset[key]);
+    });
+  }
+
   slice(start, end) {
     if (this.length === 0) {
       return this;
@@ -1946,7 +2046,12 @@ export class Query {
     if (this.length === 0) {
       return undefined;
     }
-    const rects = this.map(el => el.getBoundingClientRect());
+    const rects = this.map(el => {
+      if (el === Query.globalThisProxy) {
+        return document.documentElement.getBoundingClientRect();
+      }
+      return el.getBoundingClientRect();
+    });
     return this.length === 1 ? rects[0] : rects;
   }
 
@@ -1978,19 +2083,31 @@ export class Query {
           scrollHeight: document.documentElement.scrollHeight,
           scrollWidth: document.documentElement.scrollWidth,
           box: { padding: boxValues, border: boxValues, margin: boxValues },
+          bounds: {
+            top: 0,
+            left: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            x: 0,
+            y: 0,
+          },
         };
       }
 
-      const rect = el.getBoundingClientRect();
-      const computedStyle = window.getComputedStyle(el);
+      const $el = this.chain(el);
 
-      // --- Position Properties ---
+      // Position Properties
+      const rect = $el.bounds();
       const top = rect.top;
       const left = rect.left;
+
       const pageTop = top + window.scrollY;
       const pageLeft = left + window.scrollX;
 
-      // --- Box Model Values ---
+      // Box Model Values
+      const computedStyle = window.getComputedStyle(el);
       const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
       const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
       const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
@@ -2006,18 +2123,17 @@ export class Query {
       const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
-      // --- Width Properties ---
+      // Width Properties
       const outerWidth = el.offsetWidth;
       const innerWidth = outerWidth - borderLeft - borderRight;
       const width = innerWidth - paddingLeft - paddingRight;
       const marginWidth = outerWidth + marginLeft + marginRight;
 
-      // --- Height Properties ---
+      // Height Properties
       const outerHeight = el.offsetHeight;
       const innerHeight = outerHeight - borderTop - borderBottom;
       const height = innerHeight - paddingTop - paddingBottom;
       const marginHeight = outerHeight + marginTop + marginBottom;
-
       return {
         // Position
         top,
@@ -2037,8 +2153,8 @@ export class Query {
         outerHeight,
         marginHeight,
         // Scroll
-        scrollTop: el.scrollTop,
-        scrollLeft: el.scrollLeft,
+        scrollTop: el.scrollY || el.scrollTop,
+        scrollLeft: el.scrollX || el.scrollLeft,
         scrollHeight: el.scrollHeight,
         scrollWidth: el.scrollWidth,
         // Box Model Details
@@ -2047,57 +2163,160 @@ export class Query {
           border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
           margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
         },
+        bounds: rect,
       };
     });
 
     return this.length === 1 ? results[0] : results;
   }
 
-  collidesWith(selector) {
-    if (this.length === 0 || !selector) {
-      return false;
+  intersects(target, {
+    sides = 'all',
+    threshold = 0,
+    fully = false,
+    returnDetails = false,
+    all = false,
+  } = {}) {
+    if (this.length === 0 || !target) {
+      return returnDetails ? null : false;
     }
 
-    const $targets = this.chain(selector);
+    const $targets = this.chain(target);
     if ($targets.length === 0) {
-      return false;
+      return returnDetails ? null : false;
     }
 
-    const sourceRects = this.map(el => el.getBoundingClientRect());
-    const targetRects = $targets.map(el => el.getBoundingClientRect());
+    const defaultDetails = {
+      intersects: false,
+      top: false,
+      bottom: false,
+      left: false,
+      right: false,
+      ratio: 0,
+      rect: null,
+    };
 
-    // Check if any source rectangle collides with any target rectangle
-    return sourceRects.some(sourceRect => {
-      return targetRects.some(targetRect => {
-        // Standard AABB (Axis-Aligned Bounding Box) collision detection
-        return (
-          sourceRect.left < targetRect.right
-          && sourceRect.right > targetRect.left
-          && sourceRect.top < targetRect.bottom
-          && sourceRect.bottom > targetRect.top
+    // Process sides parameter once
+    const checkSides = isArray(sides) ? sides : (sides === 'all' ? ['top', 'bottom', 'left', 'right'] : [sides]);
+
+    // Check intersections using position relative to target
+    const results = Array.from(this).flatMap(sourceEl => {
+      const $source = this.chain(sourceEl);
+      const sourceDims = $source.dimensions();
+
+      return $targets.map(targetEl => {
+        const $target = this.chain(targetEl);
+        const targetDims = $target.dimensions();
+
+        // Get source position relative to target
+        const { relative } = $source.position({ relativeTo: targetEl });
+        const { top, left } = relative;
+        const sourceRight = left + sourceDims.outerWidth;
+        const sourceBottom = top + sourceDims.outerHeight;
+
+        // Default return details object
+        let details = {
+          ...defaultDetails,
+          // Add element position relative to target for obstruction analysis
+          elementPosition: {
+            top,
+            left,
+            bottom: sourceBottom,
+            right: sourceRight,
+          },
+        };
+
+        // Simple bounds check for intersection
+        const intersects = (
+          left < targetDims.outerWidth
+          && sourceRight > 0
+          && top < targetDims.outerHeight
+          && sourceBottom > 0
         );
+
+        if (intersects) {
+          // Calculate intersection rectangle and ratio
+          const sourceArea = sourceDims.outerWidth * sourceDims.outerHeight;
+          const intersectionLeft = Math.max(left, 0);
+          const intersectionTop = Math.max(top, 0);
+          const intersectionRight = Math.min(sourceRight, targetDims.outerWidth);
+          const intersectionBottom = Math.min(sourceBottom, targetDims.outerHeight);
+          const intersectionWidth = intersectionRight - intersectionLeft;
+          const intersectionHeight = intersectionBottom - intersectionTop;
+          const intersectionArea = intersectionWidth * intersectionHeight;
+          const ratio = sourceArea > 0 ? intersectionArea / sourceArea : 0;
+          // Update details with intersection data
+          details = {
+            ...details,
+            intersects: true,
+            ratio,
+            rect: {
+              left: intersectionLeft,
+              top: intersectionTop,
+              right: intersectionRight,
+              bottom: intersectionBottom,
+              width: intersectionWidth,
+              height: intersectionHeight,
+            },
+            top: top >= 0 && top < targetDims.outerHeight,
+            bottom: sourceBottom > 0 && sourceBottom <= targetDims.outerHeight,
+            left: left >= 0 && left < targetDims.outerWidth,
+            right: sourceRight > 0 && sourceRight <= targetDims.outerWidth,
+            // Add element position relative to target for obstruction analysis
+            elementPosition: {
+              top,
+              left,
+              bottom: sourceBottom,
+              right: sourceRight,
+            },
+          };
+
+          // Check if fully contained
+          if (fully) {
+            const isFullyContained = (
+              left >= 0
+              && sourceRight <= targetDims.outerWidth
+              && top >= 0
+              && sourceBottom <= targetDims.outerHeight
+            );
+            if (!isFullyContained) {
+              details.intersects = false;
+            }
+          }
+
+          // Check threshold
+          if (threshold > 0 && ratio < threshold) {
+            details.intersects = false;
+          }
+
+          // Check specific sides if requested
+          if (sides !== 'all') {
+            const matchesSides = checkSides.some(side => details[side]);
+            if (!matchesSides) {
+              details.intersects = false;
+            }
+          }
+        }
+        return returnDetails ? details : details.intersects;
       });
     });
+
+    if (returnDetails) {
+      // return as array or obj depending on el length
+      return (this.length == 1)
+        ? results[0]
+        : results;
+    }
+
+    // For boolean results, check all elements or any element based on all parameter
+    return all ? results.every(r => r === true) : results.some(r => r === true);
   }
 
-  pagePosition({ precision = 'pixel' } = {}) {
-    if (this.length === 0) {
-      return undefined;
-    }
-    const results = this.map(el => {
-      const rect = el.getBoundingClientRect();
-      const round = val => (precision === 'pixel' ? Math.round(val) : val);
-
-      // Page position is simply the viewport position plus the current scroll offset
-      const top = rect.top + window.scrollY;
-      const left = rect.left + window.scrollX;
-
-      return {
-        top: round(top),
-        left: round(left),
-      };
+  pagePosition(settings) {
+    return this.position({
+      ...settings,
+      type: 'global',
     });
-    return this.length === 1 ? results[0] : results;
   }
 
   position({
@@ -2111,103 +2330,90 @@ export class Query {
     const isSetter = (isNumber(top) || isNumber(left));
 
     // avoid querySelector inside map
-    let relativeEl = (relativeTo)
-      ? this.chain(relativeTo).el()
+    const $relative = (relativeTo)
+      ? this.chain(relativeTo)
       : undefined;
 
     // fail clearly if relative el does not exist
-    if (relativeTo && !relativeEl) {
+    if (relativeTo && !$relative.exists()) {
       return (isSetter)
         ? this
         : undefined;
     }
 
-    if (!isSetter) {
-      // getter
-      if (this.length === 0) {
-        return undefined;
-      }
-      const results = this.map(el => {
-        const $el = this.chain(el);
-        const elRect = el.getBoundingClientRect();
-        const round = val => (precision === 'pixel' ? Math.round(val) : val);
-
-        // 1. Global (Viewport) Coordinates
-        const globalCoords = {
-          top: round(elRect.top),
-          left: round(elRect.left),
-        };
-        if (type === 'global') {
-          return globalCoords;
-        }
-
-        // 2. Local (positioningParent) Coordinates
-        const positioningParent = $el.positioningParent().el();
-        let localCoords = { ...globalCoords }; // Fallback if no parent
-        if (positioningParent) {
-          const parentRect = positioningParent.getBoundingClientRect();
-          localCoords = {
-            top: round(elRect.top - parentRect.top),
-            left: round(elRect.left - parentRect.left),
-          };
-        }
-        if (type === 'local') {
-          return localCoords;
-        }
-
-        // 3. Relative Coordinates
-        let relativeCoords = null;
-        if (relativeEl) {
-          const relativeRect = relativeEl.getBoundingClientRect();
-          relativeCoords = {
-            top: round(elRect.top - relativeRect.top),
-            left: round(elRect.left - relativeRect.left),
-          };
-          if (type === 'relative') {
-            return relativeCoords;
-          }
-        }
-
-        // Return all coordinates if no specific type was requested
-        const result = {
-          global: globalCoords,
-          local: localCoords,
-        };
-        if (relativeCoords) {
-          result.relative = relativeCoords;
-        }
-        return result;
-      });
-
-      // Return a single object if the collection has only one element.
-      return this.length === 1 ? results[0] : results;
+    // getter
+    if (this.length === 0) {
+      return undefined;
     }
-    else {
-      // setter
-      this.each(function(el) {
-        const $el = this;
-        const referenceEl = relativeEl
-          ? relativeEl
-          : $el.containingParent().el();
-        if (!referenceEl) {
-          return;
-        }
-        const referenceRect = referenceEl.getBoundingClientRect();
-        const offsetParent = el.offsetParent; // Native offsetParent is still needed for style calculation
-        if (!offsetParent) {
-          return;
-        }
-        const offsetParentRect = offsetParent.getBoundingClientRect();
-        const parentStyle = window.getComputedStyle(offsetParent);
+    const results = this.map(el => {
+      const $el = this.chain(el);
+      const elRect = $el.dimensions();
+      const $positioningParent = $el.positioningParent();
+      const parentRect = $positioningParent.dimensions();
+      const round = val => (precision === 'pixel' ? Math.round(val) : val);
 
+      // 1. Global (Viewport) Coordinates
+      const globalCoords = {
+        top: round(elRect.top) - parentRect.box.border.top + window.scrollY,
+        left: round(elRect.left) - parentRect.box.border.left + window.scrollX,
+      };
+      if (!isSetter && type === 'global') {
+        return globalCoords;
+      }
+
+      // 2. Local (positioningParent) Coordinates
+      const localCoords = {
+        top: round(elRect.top - parentRect.top - parentRect.box.border.top + $positioningParent.scrollTop()),
+        left: round(elRect.left - parentRect.left - parentRect.box.border.left + $positioningParent.scrollLeft()),
+      };
+      if (!isSetter && type === 'local') {
+        return localCoords;
+      }
+
+      // 3. Relative Coordinates
+      let relativeCoords = null;
+      if (relativeTo) {
+        const relativeRect = $relative.dimensions();
+        relativeCoords = {
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.top),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
+        };
+        if (!isSetter && type === 'relative') {
+          return relativeCoords;
+        }
+      }
+
+      // join together all results
+      const result = {
+        global: globalCoords,
+        local: localCoords,
+      };
+      if (relativeCoords) {
+        result.relative = relativeCoords;
+      }
+
+      if (isSetter) {
+        // get what we are setting to
+        let $reference;
+        if (type === 'global') {
+          $reference = this.chain(window);
+        }
+        else if (type === 'local') {
+          $reference = $positioningParent;
+        }
+        else if ($relative) {
+          $reference = $relative;
+        }
+        else {
+          $reference = $positioningParent;
+        }
+        const referenceRect = $reference.dimensions();
+
+        // calculate new position
         const targetTop = referenceRect.top + (top || 0);
         const targetLeft = referenceRect.left + (left || 0);
-
-        const parentBorderTop = parseFloat(parentStyle.borderTopWidth) || 0;
-        const parentBorderLeft = parseFloat(parentStyle.borderLeftWidth) || 0;
-
-        const newStyleTop = targetTop - offsetParentRect.top - parentBorderTop;
-        const newStyleLeft = targetLeft - offsetParentRect.left - parentBorderLeft;
+        const newStyleTop = targetTop - parentRect.top;
+        const newStyleLeft = targetLeft - parentRect.left;
 
         if (isNumber(top)) {
           el.style.top = `${newStyleTop}px`;
@@ -2215,96 +2421,36 @@ export class Query {
         if (isNumber(left)) {
           el.style.left = `${newStyleLeft}px`;
         }
-      });
+      }
+      return result;
+    });
+
+    if (isSetter) {
       return this;
     }
+
+    // Return a single object if the collection has only one element.
+    return this.length === 1 ? results[0] : results;
   }
 
-  isInViewport({ threshold = 0, fully = false, viewport } = {}) {
-    if (this.length === 0) {
-      return false;
+  isInView({ viewport, ...intersectionOptions } = {}) {
+    // Determine the viewport/container to check against
+    let $viewport;
+    if (viewport) {
+      $viewport = this.chain(viewport);
+    }
+    else {
+      // Use clipping parent as default viewport
+      $viewport = this.clippingParent();
     }
 
-    const $viewport = (viewport)
-      ? this.chain(viewport)
-      : undefined;
+    // If no viewport found, use document element
+    if (!$viewport.length) {
+      $viewport = this.chain(document.documentElement);
+    }
 
-    // Check if ALL elements in the collection meet the viewport criteria
-    return this.map(el => {
-      let viewportRect;
-      let $elViewport;
-      if (!$viewport?.length) {
-        $elViewport = this.chain(el).clippingParent();
-      }
-      else {
-        $elViewport = $viewport;
-      }
-      // document element should use window
-      if ($elViewport.is(document.documentElement)) {
-        viewportRect = {
-          top: 0,
-          left: 0,
-          right: window.innerWidth || document.documentElement.clientWidth,
-          bottom: window.innerHeight || document.documentElement.clientHeight,
-        };
-      }
-      else {
-        viewportRect = $elViewport.bounds();
-      }
-
-      const rect = el.getBoundingClientRect();
-
-      const viewportHeight = viewportRect.bottom - viewportRect.top;
-      const viewportWidth = viewportRect.right - viewportRect.left;
-
-      // Convert element rect to be relative to viewport
-      const relativeRect = {
-        top: rect.top - viewportRect.top,
-        left: rect.left - viewportRect.left,
-        bottom: rect.bottom - viewportRect.top,
-        right: rect.right - viewportRect.left,
-        width: rect.width,
-        height: rect.height,
-      };
-
-      // If fully is true, it overrides the threshold
-      if (fully) {
-        return (
-          relativeRect.top >= 0
-          && relativeRect.left >= 0
-          && relativeRect.bottom <= viewportHeight
-          && relativeRect.right <= viewportWidth
-        );
-      }
-
-      if (threshold > 0) {
-        // Calculate the area of intersection
-        const intersectionLeft = Math.max(0, relativeRect.left);
-        const intersectionTop = Math.max(0, relativeRect.top);
-        const intersectionRight = Math.min(viewportWidth, relativeRect.right);
-        const intersectionBottom = Math.min(viewportHeight, relativeRect.bottom);
-
-        const intersectionWidth = intersectionRight - intersectionLeft;
-        const intersectionHeight = intersectionBottom - intersectionTop;
-
-        if (intersectionWidth <= 0 || intersectionHeight <= 0) {
-          return false;
-        }
-
-        const intersectionArea = intersectionWidth * intersectionHeight;
-        const elementArea = relativeRect.width * relativeRect.height;
-
-        return (intersectionArea / elementArea) >= threshold;
-      }
-
-      // Default behavior: check if any part of the element is visible
-      return (
-        relativeRect.top < viewportHeight
-        && relativeRect.bottom > 0
-        && relativeRect.left < viewportWidth
-        && relativeRect.right > 0
-      );
-    }).every(result => result === true);
+    // Use intersects method directly on the full collection
+    return this.intersects($viewport, intersectionOptions);
   }
 
   // special helper for SUI components

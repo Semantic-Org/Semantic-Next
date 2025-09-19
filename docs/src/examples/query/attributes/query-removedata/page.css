@@ -1,0 +1,49 @@
+.user {
+  position: relative;
+  background: var(--standard-5);
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  margin: var(--vertically-spaced);
+  font-weight: bold;
+
+  &::after {
+    content: 'ID: ' attr(data-id);
+    background-color: var(--blue);
+    color: white;
+    position: absolute;
+    top: 0;
+    right: 0;
+    text-align: right;
+    padding: 3px 8px;
+    font-size: 0.9em;
+    border-radius: 0 var(--border-radius) 0 var(--border-radius);
+  }
+}
+
+.output {
+  margin: var(--vertically-spaced);
+  
+  .current-data {
+    margin-bottom: var(--space-small);
+    
+    pre {
+      background: var(--standard-3);
+      padding: var(--padding);
+      border-radius: var(--border-radius);
+      margin-top: var(--space-small);
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+  }
+  
+  .removed {
+    color: var(--red);
+    font-weight: bold;
+    min-height: 1.5em;
+  }
+}
+
+ui-button {
+  margin-right: var(--space-small);
+}

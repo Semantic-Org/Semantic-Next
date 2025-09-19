@@ -60,3 +60,7 @@ p span {
   font-weight: bold;
   color: var(--blue-60);
 }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }

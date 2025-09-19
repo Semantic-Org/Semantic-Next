@@ -262,16 +262,16 @@ const $scrollContainer = $content.clippingParent();
 ### Example
 <PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
 
-## containingParent
+## offsetParent
 
-Get the simple containing parent (offsetParent) for each element.
+Get the `offsetParent` of an element as reported by the Dom.
 
-> **Simple Access** This is a direct wrapper around the native `offsetParent` property for quick access to basic positioning context.
+> **Simple Access** This is a direct wrapper around the native `offsetParent` property this may not always be the positioning parent for fixed position elements.
 
 ### Syntax
 
 ```javascript
-$('selector').containingParent()
+$('selector').offsetParent()
 ```
 
 ### Returns
@@ -282,16 +282,16 @@ A new [Query object](/api/query/basic#the-query-object) containing the offset pa
 
 ```javascript
 // Quick access to offsetParent
-const $offsetParent = $('#element').containingParent();
+const $offsetParent = $('#element').offsetParent();
 
 // For simple positioning calculations
 const $element = $('#positioned-element');
-const $parent = $element.containingParent();
+const $parent = $element.offsetParent();
 console.log('Positioned relative to:', $parent[0]);
 ```
 
 ### Example
-<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="query-offsetparent" direction="horizontal"></PlaygroundExample>
 
 ## positioningParent
 
@@ -349,69 +349,156 @@ This method detects elements that create containing blocks through:
 ### Example
 <PlaygroundExample id="query-positioningparent" direction="horizontal"></PlaygroundExample>
 
-## isInViewport
+## scrollParent
 
-Checks if all elements in the selection are within the viewport bounds.
+Get the nearest scrollable container for each element, useful for positioning overlays and handling scroll events.
 
-> **Note** By default, this method checks visibility within the clipping parent (scrollable container). If no clipping parent exists, it falls back to the browser viewport. You can also specify a custom viewport element.
+> **Scroll Container Detection** This method traverses the DOM to find the nearest ancestor with `overflow` properties that create scrollable containers. Returns `window` when no scrollable ancestor is found, representing the root scroll container.
 
 ### Syntax
 
 ```javascript
-$('selector').isInViewport()
-$('selector').isInViewport(options)
+$('selector').scrollParent()
+$('selector').scrollParent(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| all | boolean | Return all scroll parents in the hierarchy instead of just the nearest one. Defaults to `false`. |
+
+### Returns
+
+A new [Query object](/api/query/basic#the-query-object) containing the scroll parent element(s).
+
+### Usage
+
+```javascript
+// Find nearest scrollable container
+const $tooltip = $('.tooltip');
+const $scrollContainer = $tooltip.scrollParent();
+
+// Position tooltip within scrollable bounds
+if ($scrollContainer[0] !== window) {
+  console.log('Element is scrolled by:', $scrollContainer[0]);
+}
+
+// Get all scroll containers in the hierarchy
+const $allScrollers = $('.deep-content').scrollParent({ all: true });
+$allScrollers.each(container => {
+  console.log('Scroll container:', container);
+});
+
+// Handle scroll events on the appropriate container
+const $element = $('.sticky-element');
+const $scroller = $element.scrollParent();
+$scroller.on('scroll', () => {
+  // Update sticky element position
+});
+```
+
+### Scroll Container Detection
+
+This method detects scrollable containers through:
+- `overflow: hidden/scroll/auto`
+- `overflow-x: hidden/scroll/auto`
+- `overflow-y: hidden/scroll/auto`
+
+Returns `window` when no scrollable ancestor is found (elements scroll with the viewport).
+
+### Behavior with `all: true`
+
+When `all: true` is specified:
+- Returns all scroll containers from nearest to farthest
+- Always includes `window` as the final scroll container
+- Flattens results from multiple elements into a single array
+
+```javascript
+// Multiple elements with nested scroll containers
+$('.items').scrollParent({ all: true });
+// Returns: [inner-scroller, outer-scroller, window, other-scroller, window]
+```
+
+### Example
+<PlaygroundExample id="query-scrollparent" direction="horizontal"></PlaygroundExample>
+
+## isInView
+
+Checks if elements are within the viewport bounds. This method leverages the `intersects()` method internally, inheriting all its configuration options.
+
+### Syntax
+
+```javascript
+$('selector').isInView()
+$('selector').isInView(options)
 ```
 
 ### Parameters
 
 | Name      | Type    | Description |
 |-----------|---------|-------------|
-| threshold | number  | Minimum percentage (0-1) of element that must be visible. Defaults to `0` (any part visible). |
-| fully     | boolean | Whether element must be fully within viewport. Overrides threshold. Defaults to `false`. |
-| viewport  | Element\|Query | The viewport element to check against. Defaults to clipping parent, falls back to browser viewport. |
+| threshold | number  | Minimum percentage (0-1) visible. Defaults to `0`. |
+| fully     | boolean | Element must be fully within viewport. Defaults to `false`. |
+| viewport  | string\|Element\|Query | Viewport element to check against. Defaults to clipping parent. |
+| sides     | string\|Array | Which sides must intersect ('all' or specific sides). Defaults to `'all'`. |
+| returnDetails | boolean | Whether to return detailed intersection data. Defaults to `false`. |
+| all       | boolean | Whether all elements must be in view (true) or any element (false). Defaults to `false`. |
 
 ### Returns
 
-`boolean` - `true` if **ALL** elements meet the visibility criteria, `false` if **ANY** element doesn't meet criteria.
+`boolean` - `true` if criteria are met, `false` otherwise. When `returnDetails: true`, returns detailed intersection data instead.
 
 ### Usage
 
 ```javascript
 // Check if any part is visible in clipping parent (default)
-if ($('#element').isInViewport()) {
+if ($('#element').isInView()) {
   console.log('Element is at least partially visible in container');
 }
 
 // Check if element is fully within clipping parent
-if ($('#element').isInViewport({ fully: true })) {
+if ($('#element').isInView({ fully: true })) {
   console.log('Element is completely visible in container');
 }
 
 // Check if at least 50% is visible
-if ($('#element').isInViewport({ threshold: 0.5 })) {
+if ($('#element').isInView({ threshold: 0.5 })) {
   console.log('At least half the element is visible');
 }
 
 // Check against specific viewport element
-if ($('#tooltip').isInViewport({ viewport: $('#modal') })) {
+if ($('#tooltip').isInView({ viewport: '#modal' })) {
   console.log('Tooltip is visible within modal bounds');
 }
 
-// Check multiple elements (all must meet criteria)
-if ($('.items').isInViewport()) {
+// Check only specific sides
+if ($('#element').isInView({ sides: ['top', 'bottom'] })) {
+  console.log('Element intersects top or bottom of viewport');
+}
+
+// Check that ALL elements in selection are visible
+if ($('.items').isInView({ all: true })) {
   console.log('All items are at least partially visible');
 }
+
+// Get detailed intersection information
+const details = $('#element').isInView({ returnDetails: true });
+console.log('Intersection ratio:', details.ratio);
+console.log('Intersection rect:', details.rect);
 ```
 
 ### Behavior
 
-- Returns `false` for empty selections
-- For multiple elements, **ALL** must meet criteria to return `true`
+- Returns `false` for empty selections (or `null` when `returnDetails: true`)
+- By default, returns `true` if **ANY** element meets criteria (use `all: true` to require all elements)
 - Defaults to checking visibility within clipping parent (scrollable container)
 - Falls back to browser viewport if no clipping parent exists
 - Threshold is based on element area intersection with viewport
 - `fully: true` overrides any threshold setting
 - Custom viewport can be specified via `viewport` parameter
+- Inherits all configuration options from the `intersects()` method
+- When `returnDetails: true`, returns detailed intersection data instead of boolean
 
 ### Example
-<PlaygroundExample id="query-is-in-viewport" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="query-is-in-view" direction="horizontal"></PlaygroundExample>

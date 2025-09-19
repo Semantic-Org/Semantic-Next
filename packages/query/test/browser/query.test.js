@@ -656,7 +656,7 @@ describe('query', () => {
       expect($clippingParent[0]).toBe(document.getElementById('container'));
     });
 
-    it('should return document.documentElement when no clipping parent found', () => {
+    it('should return window when no clipping parent found', () => {
       document.body.innerHTML = `
         <div id="outer" style="overflow: visible;">
           <div id="inner" style="overflow: visible;">
@@ -829,7 +829,7 @@ describe('query', () => {
     });
   });
 
-  describe('containingParent', () => {
+  describe('offsetParent', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -842,10 +842,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('container'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('container'));
     });
 
     it('should find containing parent with transform', () => {
@@ -856,10 +856,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('transformed'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('transformed'));
     });
 
     it('should find containing parent with filter', () => {
@@ -870,10 +870,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('filtered'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('filtered'));
     });
 
     it('should find containing parent with contain property', () => {
@@ -884,10 +884,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('contained'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('contained'));
     });
 
     it('should find containing parent with will-change', () => {
@@ -898,10 +898,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('willchange'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('willchange'));
     });
 
     it('should return documentElement for fixed elements (null offsetParent fallback)', () => {
@@ -912,11 +912,11 @@ describe('query', () => {
       `;
 
       const $fixed = $('#fixed');
-      const $containingParent = $fixed.containingParent();
+      const $offsetParent = $fixed.offsetParent();
 
       // Fixed elements have null offsetParent, so should fallback to documentElement
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.documentElement);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.documentElement);
     });
 
     it('should return document.body when no containing parent found', () => {
@@ -929,10 +929,10 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.body);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.body);
     });
 
     it('should use browser offsetParent when calculate is false', () => {
@@ -943,10 +943,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent({ calculate: false });
+      const $offsetParent = $child.offsetParent({ calculate: false });
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('child').offsetParent);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('child').offsetParent);
     });
 
     it('should handle multiple elements', () => {
@@ -960,18 +960,18 @@ describe('query', () => {
       `;
 
       const $items = $('.item');
-      const $containingParents = $items.containingParent();
+      const $offsetParents = $items.offsetParent();
 
-      expect($containingParents.length).toBe(2);
-      expect($containingParents[0]).toBe(document.getElementById('container1'));
-      expect($containingParents[1]).toBe(document.getElementById('container2'));
+      expect($offsetParents.length).toBe(2);
+      expect($offsetParents[0]).toBe(document.getElementById('container1'));
+      expect($offsetParents[1]).toBe(document.getElementById('container2'));
     });
 
     it('should handle empty selection', () => {
       const $empty = $('.nonexistent');
-      const $containingParent = $empty.containingParent();
+      const $offsetParent = $empty.offsetParent();
 
-      expect($containingParent.length).toBe(0);
+      expect($offsetParent.length).toBe(0);
     });
 
     it('should find nearest containing parent in nested contexts', () => {
@@ -986,11 +986,11 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
       // Should find the immediate containing parent (inner), not the outer one
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('inner'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('inner'));
     });
   });
 
@@ -1276,6 +1276,206 @@ describe('query', () => {
       expect($div).toBeInstanceOf(Query);
       expect(typeof result).toBe('string');
       expect(div.classList.contains('test')).toBe(true);
+    });
+  });
+
+  describe('scrollParent', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should return a Query instance', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+    });
+
+    it('should find the nearest scroll container with overflow hidden', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: hidden; width: 200px; height: 200px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find the nearest scroll container with overflow scroll', () => {
+      document.body.innerHTML = `
+        <div id="outer">
+          <div id="scroller" style="overflow-y: scroll; height: 100px;">
+            <div id="inner">Inner content</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#inner').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('scroller'));
+    });
+
+    it('should find the nearest scroll container with overflow auto', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: auto; width: 150px; height: 150px;">
+          <div id="content">Content</div>
+        </div>
+      `;
+
+      const result = $('#content').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return window when no scroll container found', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: visible;">
+          <div id="inner" style="overflow: visible;">
+            <div id="target">Target</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should handle multiple elements', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: hidden;">
+          <div class="item" id="item1">Item 1</div>
+        </div>
+        <div id="container2" style="overflow: scroll;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent();
+
+      expect(result.length).toBe(2);
+      expect(result[0]).toBe(document.getElementById('container1'));
+      expect(result[1]).toBe(document.getElementById('container2'));
+    });
+
+    it('should handle empty selection', () => {
+      const result = $('.nonexistent').scrollParent();
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should find nested scroll containers correctly', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: hidden;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: scroll;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('inner'));
+    });
+
+    it('should skip document.body and return window', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should work with overflow-x only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-x: scroll; width: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should work with overflow-y only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-y: auto; height: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return all scroll parents when all: true', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: scroll;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: auto;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent({ all: true });
+
+      expect(result.length).toBe(3);
+      expect(result[0]).toBe(document.getElementById('inner'));
+      expect(result[1]).toBe(document.getElementById('outer'));
+      expect(result[2]).toBe(window);
+    });
+
+    it('should return flattened array for multiple elements with all: true', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: scroll;">
+          <div id="middle1" style="overflow: auto;">
+            <div class="item" id="item1">Item 1</div>
+          </div>
+        </div>
+        <div id="container2" style="overflow: hidden;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent({ all: true });
+
+      // Should get: [middle1, container1, window, container2, window]
+      expect(result.length).toBe(5);
+      expect(result[0]).toBe(document.getElementById('middle1'));
+      expect(result[1]).toBe(document.getElementById('container1'));
+      expect(result[2]).toBe(window);
+      expect(result[3]).toBe(document.getElementById('container2'));
+      expect(result[4]).toBe(window);
+    });
+
+    it('should return proper chaining Query instance', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: scroll;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+      expect(result[0]).toBe(document.getElementById('container'));
     });
   });
 });

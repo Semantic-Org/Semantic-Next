@@ -856,10 +856,10 @@ export class Query {
 
   /**
    * Gets the simple containing parent (offsetParent) of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/visibility#containingparent
+   * @see https://next.semantic-ui.com/api/query/visibility#offsetparent
    * @returns A new Query instance containing the offset parent elements.
    */
-  containingParent(): Query;
+  offsetParent(): Query;
 
   /**
    * Gets the positioning parent (positioning context) of each element in the current set, accurately calculating
@@ -869,6 +869,14 @@ export class Query {
    * @returns A new Query instance containing the positioning parent elements.
    */
   positioningParent(options?: { calculate?: boolean; }): Query;
+
+  /**
+   * Gets the scroll parent (nearest scrollable container) of each element in the current set.
+   * @see https://next.semantic-ui.com/api/query/visibility#scrollparent
+   * @param options.all - Whether to return all scroll parents in the hierarchy. When false, returns only the nearest scroll parent. Defaults to false.
+   * @returns A new Query instance containing the scroll parent element(s).
+   */
+  scrollParent(options?: { all?: boolean; }): Query;
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
@@ -943,6 +951,14 @@ export class Query {
    * @returns An object of data attributes from the first element, or an array of objects from all elements.
    */
   data(): PlainObject<string> | PlainObject<string>[] | undefined;
+
+  /**
+   * Removes data attributes from elements in the current set.
+   * @see https://next.semantic-ui.com/api/query/attributes#removedata
+   * @param keys - A space-separated string or array of data attribute keys to remove.
+   * @returns The Query instance for chaining.
+   */
+  removeData(keys: string | string[]): this;
 
   /**
    * Gets the data context (if any) associated with the *first* element in the current set.
@@ -1058,6 +1074,7 @@ export class Query {
         border: { top: number; right: number; bottom: number; left: number; };
         margin: { top: number; right: number; bottom: number; left: number; };
       };
+      bounds: DOMRect;
     }
     | Array<{
       top: number;
@@ -1083,19 +1100,121 @@ export class Query {
         border: { top: number; right: number; bottom: number; left: number; };
         margin: { top: number; right: number; bottom: number; left: number; };
       };
+      bounds: DOMRect;
     }>
     | undefined;
 
   /**
-   * Checks if ALL elements in the selection are within the viewport.
-   * @see https://next.semantic-ui.com/api/query/visibility#isinviewport
+   * Checks if elements in the collection intersect with a target element or elements.
+   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @param target - The target element(s) to check intersection with. Can be a selector string, DOM element, or Query object.
+   * @param options - Configuration options for intersection detection.
+   * @returns Boolean indicating intersection, or detailed intersection data if returnDetails is true.
+   */
+  intersects(
+    target: string | Element | Query,
+    options?: {
+      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
+      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+      /** Minimum intersection ratio (0-1). Defaults to 0. */
+      threshold?: number;
+      /** Whether source must be fully contained in target. Defaults to false. */
+      fully?: boolean;
+      /** Whether to return detailed intersection data. Defaults to false. */
+      returnDetails?: false;
+      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
+      all?: boolean;
+    },
+  ): boolean;
+
+  /**
+   * Checks if elements in the collection intersect with a target element or elements, returning detailed information.
+   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @param target - The target element(s) to check intersection with.
+   * @param options - Configuration options with returnDetails set to true.
+   * @returns Detailed intersection data object or array of objects.
+   */
+  intersects(
+    target: string | Element | Query,
+    options: {
+      /** Which sides must intersect ('all' or specific sides). Defaults to 'all'. */
+      sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+      /** Minimum intersection ratio (0-1). Defaults to 0. */
+      threshold?: number;
+      /** Whether source must be fully contained in target. Defaults to false. */
+      fully?: boolean;
+      /** Must be true to get detailed intersection data. */
+      returnDetails: true;
+      /** Whether all elements must intersect (true) or any element (false). Defaults to false. */
+      all?: boolean;
+    },
+  ):
+    | {
+      intersects: boolean;
+      top: boolean;
+      bottom: boolean;
+      left: boolean;
+      right: boolean;
+      ratio: number;
+      rect: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        width: number;
+        height: number;
+      } | null;
+      elementPosition: {
+        top: number;
+        left: number;
+        bottom: number;
+        right: number;
+      };
+    }
+    | Array<{
+      intersects: boolean;
+      top: boolean;
+      bottom: boolean;
+      left: boolean;
+      right: boolean;
+      ratio: number;
+      rect: {
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        width: number;
+        height: number;
+      } | null;
+      elementPosition: {
+        top: number;
+        left: number;
+        bottom: number;
+        right: number;
+      };
+    }>
+    | null;
+
+  /**
+   * Checks if elements in the selection are within the viewport.
+   * @see https://next.semantic-ui.com/api/query/visibility#isinview
    * @param options - Configuration options.
    * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
-   * @param options.fully - Whether element must be fully within viewport. Overrides threshold. Defaults to false.
+   * @param options.fully - Whether element must be fully within viewport. Defaults to false.
    * @param options.viewport - The viewport element to check against. Defaults to clipping parent if not specified.
-   * @returns true if ALL elements meet criteria, false otherwise.
+   * @param options.sides - Which sides must intersect ('all' or specific sides). Defaults to 'all'.
+   * @param options.returnDetails - Whether to return detailed intersection data. Defaults to false.
+   * @param options.all - Whether all elements must be in view (true) or any element (false). Defaults to false.
+   * @returns Boolean indicating if elements are in view, or detailed intersection data if returnDetails is true.
    */
-  isInViewport(options?: { threshold?: number; fully?: boolean; viewport?: Element | Query; }): boolean;
+  isInView(options?: {
+    threshold?: number;
+    fully?: boolean;
+    viewport?: string | Element | Query;
+    sides?: 'all' | 'top' | 'bottom' | 'left' | 'right' | Array<'top' | 'bottom' | 'left' | 'right'>;
+    returnDetails?: boolean;
+    all?: boolean;
+  }): boolean;
 
   /**
    * Shows hidden elements by setting their display to the natural display value.

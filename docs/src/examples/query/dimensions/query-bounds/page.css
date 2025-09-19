@@ -9,7 +9,7 @@
 
 .box {
   position: relative;
-  width: 120px;
+  width: 150px;
   height: 80px;
   padding: 15px;
   margin: 10px;
@@ -19,12 +19,13 @@
   transition: all 0.3s ease;
   text-align: center;
   line-height: 80px;
-}
 
-.box.resized {
-  width: 180px;
-  height: 120px;
-  line-height: 120px;
+  &.resized {
+    width: 280px;
+    height: 120px;
+    line-height: 120px;
+  }
+
 }
 
 
@@ -36,3 +37,7 @@ p {
 p span {
   font-weight: bold;
 }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }

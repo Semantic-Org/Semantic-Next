@@ -5,8 +5,8 @@ $('.move')
   .filter('.inner')
   .on('click', () => {
     $('.box').position({
-      top: 50,
-      left: 50,
+      top: 30,
+      left: 30,
     });
     updatePositions();
   }).end()
@@ -14,18 +14,34 @@ $('.move')
   .on('click', () => {
     $('.box').position({
       relativeTo: '.outer.container',
-      top: 50,
-      left: 50,
+      top: 30,
+      left: 30,
+    });
+    updatePositions();
+  })
+  .end()
+  .filter('.global')
+  .on('click', () => {
+    $('.box').position({
+      type: 'global',
+      top: 30,
+      left: 30,
     });
     updatePositions();
   });
 
 function updatePositions() {
-  const { relative, local } = $('.box').position({ relativeTo: '.outer.container', round: true });
+  // position() returns coordinate information in multiple coordinate systems
+  const position = $('.box').position({ relativeTo: '.outer.container', round: true });
 
-  $('.inner.position').text(`top: ${local.top}px, left: ${local.left}px`);
-  $('.outer.position').text(`top: ${relative.top}px, left: ${relative.left}px`);
+  // Show breakdown of coordinate systems
+  $('.local.top').text(position.local.top);
+  $('.local.left').text(position.local.left);
+  $('.outer.top').text(position.relative.top);
+  $('.outer.left').text(position.relative.left);
+  $('.global.top').text(position.global.top);
+  $('.global.left').text(position.global.left);
 }
 
 // Show initial positions
-updatePositions();
+requestAnimationFrame(updatePositions);

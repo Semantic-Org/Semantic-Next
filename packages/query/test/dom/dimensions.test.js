@@ -42,7 +42,7 @@ describe('Query Dimensions', () => {
     });
   });
 
-  // Note: position(), pagePosition(), dimensions() and isInViewport() tests
+  // Note: position(), pagePosition(), dimensions() and isInView() tests
   // have been moved to /test/browser/dimensions.test.js because they rely on
   // accurate getBoundingClientRect() and scroll behavior which work better
   // in a real browser environment via Playwright
@@ -139,7 +139,7 @@ describe('Query Dimensions', () => {
     });
   });
 
-  describe('containingParent()', () => {
+  describe('offsetParent()', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -151,7 +151,7 @@ describe('Query Dimensions', () => {
         </div>
       `;
 
-      const result = $('#child').containingParent();
+      const result = $('#child').offsetParent();
       expect(result).toBeInstanceOf(Query);
     });
   });
