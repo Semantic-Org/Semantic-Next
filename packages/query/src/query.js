@@ -2363,8 +2363,8 @@ export class Query {
 
       // 2. Local (positioningParent) Coordinates
       const localCoords = {
-        top: round(elRect.top - parentRect.top - parentRect.box.border.top + $parent.scrollTop()),
-        left: round(elRect.left - parentRect.left - parentRect.box.border.left + $parent.scrollLeft()),
+        top: round(elRect.top - parentRect.top - parentRect.box.border.top + $positioningParent.scrollTop()),
+        left: round(elRect.left - parentRect.left - parentRect.box.border.left + $positioningParent.scrollLeft()),
       };
       if (!isSetter && type === 'local') {
         return localCoords;
