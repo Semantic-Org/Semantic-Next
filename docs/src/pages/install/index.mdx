@@ -1,7 +1,7 @@
 ---
 layout: '@layouts/Guide.astro'
 icon: code
-title: Usage
+title: Install Guide
 description: Learn how to setup Semantic UI
 ---
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -9,26 +9,18 @@ import { Code } from '@astrojs/starlight/components';
 
 export const version = PACKAGE_VERSION;
 
-export const cdnCssCode = `<head>
-   <link href="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/semantic-ui.css" rel="stylesheet" />
-</head>`;
-export const cdnButtonCode = `<head>
-  <script src="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/cdn/button.js"></script>
-</head>`;
-export const cdnFullCode = `<head>
-  <script src="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/cdn/semantic-ui.js"></script>
-</head>`;
+export const cdnCssCode = `<link href="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/semantic-ui.css">`;
+export const cdnButtonCode = `<script src="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/cdn/button.js"></script>`;
+export const cdnFullCode = `<script src="https://cdn.semantic-ui.com/@semantic-ui/core/${version}/dist/cdn/semantic-ui.js"></script>`;
 
-Semantic UI's first party component framework includes many of the common UI components that are essential building blocks of a website. These can be used inside your own custom components to build [more complex components](/examples/card-search) or simply anywhere you use html.
+> **Not Convinced Yet** - Read our [project guide](/) to learn about why Semantic UI makes scaling UI better for your team.
 
-> **Note on Technical Preview** Semantic UI is currently under heavy active development. The [component framework](/components) will be  **fully available Q2 2025**, and subsequently UI components will be **completed throughout 2025 and 2026**. It is recommended if you are looking to use Semantic UI primarily as a UI framework to check back later in 2025 for additional components.
-
-## Set up Guide
+## Install Steps
 
 <Tabs>
   <TabItem label="Javascript">
 
-  1. **Install the package** using a package manager:
+  1. **Install the package**
 
       <Tabs>
         <TabItem label="NPM">
@@ -48,13 +40,13 @@ Semantic UI's first party component framework includes many of the common UI com
         </TabItem>
       </Tabs>
 
-  2.  **Import the global CSS** to define design tokens required by components
+  2.  **Import Global CSS Tokens**
 
       ```javascript
       import '@semantic-ui/core/css';
       ```
 
-  3.  **Import Specific UI Components** - CSS is automatically included in each component's Shadow DOM
+  3.  **Import Components**
 
       *Option 1* - Import the components you would like to use.
 
@@ -62,18 +54,13 @@ Semantic UI's first party component framework includes many of the common UI com
       import { UIButton } from '@semantic-ui/core';
       ```
 
-      Or use the export condition without importing the component.
-      ```javascript
-      import '@semantic-ui/core/button';
-      ```
-
-      *Import All* - Import the entire framework to access every component.
+      *Option 2* - Import the entire framework to access every component.
 
       ```javascript
       import '@semantic-ui/core';
       ```
 
-  4. **Use UI components** wherever you write html:
+  4. **Use UI Components**
 
       ```html
       <ui-button primary>Click me</ui-button>
@@ -83,22 +70,13 @@ Semantic UI's first party component framework includes many of the common UI com
   <TabItem label="Browser">
 
 
-  2.  **Import the global CSS** for global css design tokens.
+  1.  **Import Global CSS Tokens from CDN**
 
       <Code code={cdnCssCode} lang="html" />
 
-  3a.  **Import the UI Components** - Components do not need additional css
+  2.  **Import the UI Components from CDN**
 
-      *Option 1* - Import only the components you would like to use.
-
-      <Code code={cdnButtonCode} lang="html" />
-
-      *Option 2* - Import the entire framework to access every component.
-
-      <Code code={cdnFullCode} lang="html" />
-  3a.  **Import All UI Components** - CSS is automatically included in each component's Shadow DOM
-
-      *Option 1* - Import only the components you would like to use.
+      *Option 1* - Import the components you would like to use.
 
       <Code code={cdnButtonCode} lang="html" />
 
@@ -106,7 +84,7 @@ Semantic UI's first party component framework includes many of the common UI com
 
       <Code code={cdnFullCode} lang="html" />
 
-  4. **Use UI components** wherever you write html:
+  3. **Use UI components**
 
       ```html
       <ui-button primary>Click me</ui-button>

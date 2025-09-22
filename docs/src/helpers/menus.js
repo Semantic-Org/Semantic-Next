@@ -126,6 +126,7 @@ export const standardMenuIcons = {
   'Start Here': 'zap',
   'Install': 'zap',
   'Getting Started': 'zap',
+  'Quick Start': 'zap',
   'Install & Setup': 'zap',
   'Tokens': 'droplet',
   'CSS Tokens': 'droplet',
@@ -171,7 +172,7 @@ export const topbarDisplayMenu = [
     /* This is the ids of the submenu in sidebar */
     _ids: ['framework', 'api'],
     name: 'API Docs',
-    url: '/introduction',
+    url: '/components',
   },
   {
     _id: 'learn',
@@ -198,7 +199,7 @@ export const topbarMenu = [
   // UI Framework
   {
     _id: 'install',
-    name: 'Install & Setup',
+    name: 'Quick Start',
     url: '/install',
   },
   {
@@ -225,7 +226,7 @@ export const topbarMenu = [
   {
     _id: 'framework',
     name: 'Authoring Guides',
-    url: '/introduction',
+    url: '/components',
   },
   {
     _id: 'api',
@@ -253,9 +254,60 @@ export const topbarMenu = [
 /* Setup & Install Sidebar */
 export const sidebarMenuInstall = [
   {
+    name: 'What is SUI',
+    url: '/introduction',
+    icon: 'zap',
+  },
+  {
     name: 'Installation',
     url: '/install',
-    icon: 'open book',
+    icon: 'code',
+  },
+  {
+    name: 'Frameworks',
+    url: '/frameworks',
+    icon: 'box',
+    pages: [
+      {
+        name: 'Vanilla JS',
+        url: '/install/frameworks/vanilla',
+      },
+      {
+        name: 'React',
+        url: '/install/frameworks/react',
+      },
+      {
+        name: 'Vue',
+        url: '/install/frameworks/vue',
+      },
+      {
+        name: 'Angular',
+        url: '/install/frameworks/angular',
+      },
+      {
+        name: 'Svelte',
+        url: '/install/frameworks/svelte',
+      },
+    ],
+  },
+  {
+    name: 'Usage',
+    url: '/usage',
+    icon: 'box',
+    pages: [
+      {
+        name: 'Primitives',
+        url: '/usage/primitives',
+      },
+      {
+        name: 'Components',
+        url: '/usage/components',
+      },
+      {
+        name: 'Behaviors',
+        url: '/usage/behaviors',
+      },
+    ],
   },
 ];
 
@@ -300,11 +352,6 @@ export const sidebarMenuBehaviors = [
 
 /* Component Framework Sidebar */
 export const sidebarMenuFramework = [
-  {
-    name: 'Introduction',
-    url: '/introduction',
-    icon: 'open book',
-  },
   {
     name: 'Components',
     url: '/components',
