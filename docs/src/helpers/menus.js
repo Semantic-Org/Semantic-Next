@@ -1,21 +1,22 @@
+import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
-const primitives = await getCollection('primitives');
+const primitives = sortBy(await getCollection('primitives'), 'slug');
 export const primitivePages = primitives.map(page => ({
   name: page.data.title,
   url: `/ui/primitives/${page.slug}`,
   matchSubPaths: true,
 }));
 
-const components = await getCollection('components');
+const components = sortBy(await getCollection('components'), 'slug');
 export const componentPages = components.map(page => ({
   name: page.data.title,
   url: `/ui/components/${page.slug}`,
   matchSubPaths: true,
 }));
 
-const behaviors = await getCollection('behaviors');
+const behaviors = sortBy(await getCollection('behaviors'), 'slug');
 export const behaviorPages = behaviors.map(page => ({
   name: page.data.title,
   url: `/ui/behaviors/${page.slug}`,

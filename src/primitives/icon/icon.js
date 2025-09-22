@@ -1,8 +1,8 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/icon-component.js';
-import template from './icon.html?raw';
 import css from './icon-bundle.css?raw';
+import template from './icon.html?raw';
+import componentSpec from './specs/icon-component.js';
 
 // nothing yet
 const createComponent = ({ self, $ }) => ({});

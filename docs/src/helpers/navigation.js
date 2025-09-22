@@ -370,26 +370,26 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
   });
 
   // If section is part of a group (like Documentation), get the appropriate menu
-  if (topbarSection === 'ui') {
-    menu = sidebarMenuUI;
+  if (topbarSection === 'primitives') {
+    menu = sidebarMenuPrimitives;
+  }
+  else if (topbarSection === 'css') {
+    menu = sidebarMenuCSS;
+  }
+  else if (topbarSection === 'components') {
+    menu = sidebarMenuComponents;
+  }
+  else if (topbarSection === 'behaviors') {
+    menu = sidebarMenuBehaviors;
+  }
+  else if (topbarSection === 'install') {
+    menu = sidebarMenuInstall;
   }
   else if (topbarSection === 'framework') {
     menu = sidebarMenuFramework;
   }
   else if (topbarSection === 'api') {
     menu = sidebarMenuAPI;
-  }
-  else if (topbarSection === 'css') {
-    menu = sidebarMenuCSS;
-  }
-  else if (topbarSection === 'primitives') {
-    menu = sidebarMenuPrimitives;
-  }
-  else if (topbarSection === 'components') {
-    menu = sidebarMenuComponents;
-  }
-  else if (topbarSection === 'install') {
-    menu = sidebarMenuInstall;
   }
   else if (topbarSection === 'examples') {
     menu = sidebarMenuExamples;

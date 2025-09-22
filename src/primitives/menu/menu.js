@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/menu-component.js';
-import template from './menu.html?raw';
 import css from './menu-bundle.css?raw';
 import pageCSS from './menu-page.css?raw';
+import template from './menu.html?raw';
+import componentSpec from './specs/menu-component.js';
 
 const createComponent = ({ settings, self, $, dispatchEvent }) => ({
   setValue(value) {

@@ -6,6 +6,11 @@ This is a pre-release version and APIs will change quickly. Before `1.0` release
 
 Please note after `1.0` Semver will be followed using normal protocols.
 
+# Version 0.18.0 - xx.xx.xxxx
+
+## Utils
+* **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
+
 # Version 0.17.0 - 09.19.2025
 
 ## Author's Notes
