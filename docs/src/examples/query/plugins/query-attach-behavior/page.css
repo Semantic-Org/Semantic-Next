@@ -1,0 +1,59 @@
+:root {
+  --box-size: 50vw;
+  --box-size-min: 200px;
+  --box-margin: 300px auto;
+
+  --square-size: 10vw;
+  --square-size-min: 50px;
+
+}
+
+html {
+  height: 2000px;
+}
+
+.scroll {
+  overflow: auto;
+  border: var(--border);
+  background-color: var(--green-bg);
+  padding: 100px;
+  margin: 100px 0px;
+  height: 400px;
+}
+
+.box {
+  position: relative;
+  margin: var(--box-margin);
+  background: var(--blue-0);
+  background-image: var(--angled-gradient);
+  border: var(--blue-border);
+  box-shadow: var(--shadow);
+  width: var(--box-size);
+  height: var(--box-size);
+  min-width: var(--box-size-min);
+  min-height: var(--box-size-min);
+
+}
+
+.square {
+  background-color: var(--inverted-100);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  width: var(--square-size);
+  height: var(--square-size);
+  min-width: var(--square-size-min);
+  min-height: var(--square-size-min);
+  position: absolute;
+  font-size: 9px;
+  padding: 5px;
+  font-weight: bold;
+  color: var(--text-color);
+  box-shadow: var(--shadow);
+  text-align: center;
+  align-content: center;
+
+  /* Make arrow match the square */
+  --arrow-border-base: var(--border-color);
+  --arrow-background: var(--inverted-100);
+
+}

@@ -1,0 +1,111 @@
+// Auto-generated from input.json
+export default {
+  "tagName": "ui-input",
+  "content": [
+    "placeholder",
+    "icon",
+    "label"
+  ],
+  "contentAttributes": [
+    "placeholder",
+    "icon",
+    "label"
+  ],
+  "types": [
+    "search"
+  ],
+  "variations": [
+    "fluid",
+    "size"
+  ],
+  "states": [
+    "hover",
+    "focused",
+    "active",
+    "disabled"
+  ],
+  "settings": [
+    "name",
+    "type",
+    "debounced",
+    "debounce-interval",
+    "clearable",
+    "value"
+  ],
+  "attributes": [
+    "placeholder",
+    "icon",
+    "label",
+    "search",
+    "hover",
+    "focused",
+    "active",
+    "disabled",
+    "fluid",
+    "size",
+    "name",
+    "type",
+    "debounced",
+    "debounce-interval",
+    "clearable",
+    "value"
+  ],
+  "optionAttributes": {
+    "disabled": "disabled",
+    "clickable-disabled": "disabled",
+    "mini": "size",
+    "tiny": "size",
+    "small": "size",
+    "medium": "size",
+    "large": "size",
+    "big": "size",
+    "huge": "size",
+    "massive": "size"
+  },
+  "propertyTypes": {
+    "placeholder": "string",
+    "icon": "string",
+    "label": "string",
+    "search": "boolean",
+    "hover": "boolean",
+    "focused": "boolean",
+    "active": "boolean",
+    "disabled": "string",
+    "fluid": "boolean",
+    "size": "string",
+    "name": "string",
+    "type": "string",
+    "debounced": "boolean",
+    "clearable": "string",
+    "value": "string"
+  },
+  "allowedValues": {
+    "disabled": [
+      "disabled",
+      "clickable-disabled"
+    ],
+    "size": [
+      "mini",
+      "tiny",
+      "small",
+      "medium",
+      "large",
+      "big",
+      "huge",
+      "massive"
+    ]
+  },
+  "attributeClasses": [
+    "icon",
+    "label",
+    "disabled"
+  ],
+  "defaultValues": {
+    "name": "",
+    "type": "text",
+    "debounced": false,
+    "debounce-interval": 150,
+    "clearable": "",
+    "value": ""
+  }
+};

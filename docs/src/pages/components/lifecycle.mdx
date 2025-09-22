@@ -28,13 +28,13 @@ For a more detailed description of how callbacks are fired refer to the [callbac
 
 ### createComponent
 
-`createComponent` is used to defined the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
+`createComponent` is used to define the component instance at runtime. Each web component will have its own instance which will include its own state and settings.
 
 For more information see the dedicated section for [component instances](/components/instances).
 
 #### Initialize
 
-If you include a method called `initialize` in your returned instance it will be called immediately allowing you to set up initial state for the component, for instance adding any reactive calcuations or dynamically defined variables.
+If you include a method called `initialize` in your returned instance it will be called immediately allowing you to set up initial state for the component, for instance adding any reactive calculations or dynamically defined variables.
 
 ### onCreated
 
@@ -85,8 +85,8 @@ Each callback receives a destructurable set of arguments that can be used to int
 These are accessible from all lifecycle callbacks, as well as inside event listeners and keybindings.
 
 ```javascript
-const onCreated = ({isServer, darkMode, self}) {
-  if(!isServer && isDarkMode) {
+const onCreated = ({isServer, darkMode, self}) => {
+  if(!isServer && darkMode) {
     self.setDarkMode();
   }
 };
@@ -153,7 +153,7 @@ Event handlers also have access to a few additional arguments
 | repeatedKey       | whether the key is held down                     |
 
 
-Lifecycle events provide two helpers `isClient` and `iServer` which can be used to handle
+Lifecycle events provide two helpers `isClient` and `isServer` which can be used to handle server vs client rendering.
 
 ## DOM Lifecycle Events
 
@@ -161,9 +161,9 @@ Each component will also emit a DOM event when a lifecycle event fires. This can
 
 | event         | when fired                                              |
 |-------------------|--------------------------------------------------|
-| created|  Callback after your component instance is initialized but before it is attached to the DOM
-| rendered |  Callback first time your component is rendered
-| destroyed |  Callback after your component is removed from the DOM
+| created | Callback after your component instance is initialized but before it is attached to the DOM |
+| rendered | Callback first time your component is rendered |
+| destroyed | Callback after your component is removed from the DOM |
 
 These can be listened to from other components in the same way as other DOM or custom events.
 

@@ -28,6 +28,18 @@ export interface GetArticleOptions {
 }
 
 /**
+ * Options for truncating text
+ */
+export interface TruncateOptions {
+  /** Text to append when truncated (default: "…") */
+  suffix?: string;
+  /** Whether to truncate at word boundaries (default: true) */
+  wordBoundary?: boolean;
+  /** Locale for word segmentation when using Intl.Segmenter (default: "en") */
+  locale?: string;
+}
+
+/**
  * Converts a kebab-case string to camelCase
  * Useful for converting HTML attributes to JavaScript property names
  * @see {@link https://next.semantic-ui.com/api/utils/strings#kebabtocamel kebabToCamel}
@@ -138,6 +150,31 @@ export function joinWords(words: string[], options?: JoinWordsOptions): string;
  * ```
  */
 export function getArticle(word: string, options?: GetArticleOptions): string;
+
+/**
+ * Truncates text to a specified length with Unicode-aware word boundary handling
+ * Uses Intl.Segmenter for locale-aware word segmentation when available
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#truncate truncate}
+ * @see {@link https://next.semantic-ui.com/examples/utils-truncate Example}
+ *
+ * @param text - The text to truncate (null/undefined returns empty string)
+ * @param length - Maximum length of the output
+ * @param options - Truncation options
+ * @returns The truncated text with suffix if needed, or original text if shorter than length
+ *
+ * @example
+ * ```ts
+ * truncate('This is a long text that needs truncating', 20)
+ * // returns 'This is a long text…'
+ * truncate('Short text', 20)
+ * // returns 'Short text'
+ * truncate('Hello 👋 World 🌍', 10)
+ * // returns 'Hello 👋…'
+ * truncate('こんにちは世界', 8, { locale: 'ja' })
+ * // returns 'こんにちは…'
+ * ```
+ */
+export function truncate(text: string | null | undefined, length: number, options?: TruncateOptions): string;
 
 /**
  * Escapes HTML special characters in a string to prevent XSS attacks

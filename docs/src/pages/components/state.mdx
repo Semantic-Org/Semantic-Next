@@ -13,7 +13,7 @@ Component state represents the dynamic, internal data managed within a component
 
 Unlike [settings](/components/settings), which act as the external configuration API, state is private to the component instance.
 
-Semantic UI uses its [Signals-based reactivity system](/reactivity) to manage state.
+Semantic UI uses its [Signals reactivity system](/reactivity) to manage state.
 
 > For a deeper understanding of reactivity concepts, see the [Reactivity Guide](/reactivity).
 
@@ -65,14 +65,14 @@ const createComponent = ({state}) => ({
 
 ### Accessing in Templates
 
-Within a component's [template](/templates), state signals can be accessed directly by their property name from the [data context](/components/rendering#data-context). You do not need to use `.value` or `.get()` here.
+Within a component's [template](/templates), state signals can be accessed directly by their property name from the [data context](/components/rendering#data-context).
 
-> As an added convenience state values in templates can be accessed by name directly without using `.value` or `.get()`
+> State values in templates can be accessed by name directly without using `.value` or `.get()`
 
 ```sui
 {state.selectedItem} <!-- Wrong !-->
 {selectedItem.get} <!--- Wrong !-->
-{selectedItem} <!--- Right !-- >
+{selectedItem} <!-- Right -->
 ```
 
 For instance for the following state configuration
@@ -133,7 +133,7 @@ defineComponent({
 
 ### Basic Updates & Helpers
 
-Update a state signal's value using its `.set()` method, by assigning to its `.value` property, or by using convenient built-in [mutation helpers](/reactivity/mutation-helpers) (like `.increment()`, `.toggle()`, `.now()`, etc.) where available.
+Update a state signal's value using its `.set()` method, by assigning to its `.value` property, or by using built-in [mutation helpers](/reactivity/mutation-helpers) (like `.increment()`, `.toggle()`, `.now()`, etc.) where available.
 
 ```js
 const onButtonClick = ({state}) => {
@@ -171,7 +171,7 @@ const createComponent = ({$, state, afterFlush}) => ({
 
 State signals wrapping arrays or objects provide built-in [mutation helpers](/reactivity/mutation-helpers) (like `.push()`, `.removeIndex()`, `.setProperty()`) that simplify common update operations while automatically handling reactivity.
 
-> See the [Mutation Helpers](/reactivity/mutation-helpers) guide and the [Reactivity API Reference](/api/reactivity) (specifically collection and array helpers) for more details.
+> See [Mutation Helpers](/reactivity/mutation-helpers) for details.
 
 ```js
 const createComponent = ({state}) => ({
@@ -221,7 +221,7 @@ State management is often closely tied to the [component lifecycle](/components/
 *   Setting up reactive effects (using `reaction`) that respond to state changes within `createComponent` or `onCreated`.
 *   Cleaning up resources (e.g., timers, subscriptions stored in state) in `onDestroyed`.
 
-> See the [Reactive Computations](/reactivity/computations) guide for more information on creating reactive effects.
+> See [Reactions](/reactivity/reactions) for creating reactive effects.
 
 ```js
 // Initialize state after component rendering

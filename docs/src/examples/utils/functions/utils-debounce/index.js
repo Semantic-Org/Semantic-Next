@@ -1,30 +1,30 @@
 import { debounce } from '@semantic-ui/utils';
 
-// simple function to debounce
 function search(query) {
-  console.log(`Searching for: ${query}`);
+  console.log(`Searching: ${query}`);
+  return query;
 }
 
-// basic debouncing with just delay
-const debouncedSearch = debounce(search, 300);
-
-console.log('Rapid calls (only last will execute):');
+// basic debouncing - only last call executes
+const debouncedSearch = debounce(search, 200);
 debouncedSearch('a');
-debouncedSearch('ap');
-debouncedSearch('app');
-debouncedSearch('apple');
+debouncedSearch('ab');
+debouncedSearch('abc'); // only this executes
 
-// with immediate execution
-const immediateSearch = debounce(search, { delay: 300, immediate: true });
-
+// leading edge - executes on both leading and trailing edges
 setTimeout(() => {
-  console.log('\nWith immediate execution:');
-  immediateSearch('immediate query');
-  immediateSearch('will be ignored');
-}, 1000);
+  const leadingDebounce = debounce(search, 200, { leading: true });
+  leadingDebounce('first'); // executes immediately (leading)
+  leadingDebounce('second'); // executes after 200ms (trailing)
+}, 300);
 
-// cancel functionality
-const cancelableSearch = debounce(search, 500);
-cancelableSearch('will be canceled');
-cancelableSearch.cancel();
-console.log('Search was canceled');
+// maxWait - forces execution after maximum time
+setTimeout(() => {
+  const maxWaitDebounce = debounce(search, 300, { maxWait: 500 });
+  maxWaitDebounce('input1');
+  setTimeout(() => maxWaitDebounce('input2'), 100);
+  setTimeout(() => maxWaitDebounce('input3'), 200);
+  setTimeout(() => maxWaitDebounce('input4'), 400); // forces execution at 500ms
+  // input5 triggers a new debounce cycle after maxWait
+  setTimeout(() => maxWaitDebounce('input5'), 600); // executes 300ms later
+}, 600);

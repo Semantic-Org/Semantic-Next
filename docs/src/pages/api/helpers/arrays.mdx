@@ -5,10 +5,74 @@ title: Array Helpers
 icon: list
 description: API reference for array manipulation template helpers
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Array helpers provide utilities for working with arrays in templates.
 
 ## Functions
+
+### count
+Gets the length of an array or array-like object.
+
+#### Template Syntax
+```sui
+{count itemsArray}
+```
+
+#### Parameters
+| Name  | Type  | Description |
+|-------|-------|-------------|
+| array | array | The array to count |
+
+#### Returns
+`number` - The length of the array, or 0 if null/undefined.
+
+#### Example
+```sui
+<p>You have {count notifications} notifications</p>
+```
+
+### first
+Gets the first element of an array.
+
+#### Template Syntax
+```sui
+{first itemsArray}
+```
+
+#### Parameters
+| Name  | Type  | Description |
+|-------|-------|-------------|
+| array | array | The array to get the first element from |
+
+#### Returns
+`any` - The first element of the array, or undefined if empty.
+
+#### Example
+```sui
+<p>Primary category: <b>{first categories}</b></p>
+```
+
+### last
+Gets the last element of an array.
+
+#### Template Syntax
+```sui
+{last itemsArray}
+```
+
+#### Parameters
+| Name  | Type  | Description |
+|-------|-------|-------------|
+| array | array | The array to get the last element from |
+
+#### Returns
+`any` - The last element of the array, or undefined if empty.
+
+#### Example
+```sui
+<p>Most recent item: <b>{last recentItems}</b></p>
+```
 
 ### join
 Joins array elements with a delimiter.
@@ -84,3 +148,7 @@ Returns an array with a range of numbers.
   {/each}
 </select>
 ```
+
+## Examples
+
+<PlaygroundExample id="helpers-array" />

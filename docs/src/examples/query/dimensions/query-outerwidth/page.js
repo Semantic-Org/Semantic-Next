@@ -1,13 +1,19 @@
 import { $ } from '@semantic-ui/query';
 
 // Get dimensions
-const width = $('.box').width();
-const innerWidth = $('.box').innerWidth();
-const outerWidth = $('.box').outerWidth();
-const borderWidth = outerWidth - innerWidth;
+const getDimensions = () => {
+  // outerWidth() includes content, padding, and border
+  const outerWidth = $('.box').outerWidth();
+  $('.outer-width').text(outerWidth);
 
-// Display measurements
-$('.width').text(width);
-$('.inner-width').text(innerWidth);
-$('.outer-width').text(outerWidth);
-$('.border-width').text(borderWidth);
+  // Show the breakdown
+  const width = $('.box').width();
+  const innerWidth = $('.box').innerWidth();
+  const borderWidth = outerWidth - innerWidth;
+
+  $('.width').text(width);
+  $('.inner-width').text(innerWidth);
+  $('.border-width').text(borderWidth);
+};
+
+requestAnimationFrame(getDimensions);

@@ -1,0 +1,51 @@
+.boxes, .shapes {
+  margin: 15px 0;
+  padding: 10px;
+  border: var(--border);
+  border-radius: var(--border-radius);
+  background-image: var(--subtle-angled-gradient)
+}
+
+.box {
+  display: inline-block;
+  margin: 5px;
+  padding: 10px 15px;
+  background-image: var(--subtle-gradient);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+
+  &.red {
+    background-color: var(--red-background-color);
+    border: 1px solid var(--red-border-color);
+    color: var(--red-text-color);
+  }
+
+  &.blue {
+    background-color: var(--blue-background-color);
+    border: 1px solid var(--blue-border-color);
+    color: var(--blue-text-color);
+  }
+
+  &.green {
+    background-color: var(--green-background-color);
+    border: 1px solid var(--green-border-color);
+    color: var(--green-text-color);
+  }
+  &.purple {
+    background-color: var(--purple-background-color);
+    border: 1px solid var(--purple-border-color);
+    color: var(--purple-text-color);
+  }
+
+  &.highlighted {
+    border-color: var(--yellow-border-color);
+    color: var(--yellow-text-color);
+  }
+}
+
+
+.highlighted {
+  transform: scale(1.05);
+  box-shadow: var(--floating-shadow);
+  transition: all 0.2s ease;
+}

@@ -7,8 +7,7 @@ import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 import '@semantic-ui/core/button';
 
-import '../Panels/Panels.js';
-import '../Panels/Panel.js';
+import { Panel, Panels } from '@semantic-ui/core';
 
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';

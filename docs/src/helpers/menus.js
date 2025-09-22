@@ -40,11 +40,17 @@ const subCategorySortOrder = {
     'SVG',
   ],
   'Templates': [
-    'Syntax',
-    'Subtemplates',
+    'Conditionals',
+    'Loops',
+    'Expressions',
+    'Expression Syntax',
+    'Events',
+    'Slots',
     'Snippets',
-    'Helpers',
+    'Subtemplates',
     'Async',
+    'Reactivity',
+    'Helpers',
   ],
   'Reactivity': [
     'Introduction',
@@ -60,11 +66,15 @@ const subCategorySortOrder = {
   'Query': [
     'Setup',
     'Introduction',
+    'Selectors',
+    'Plugins / Behaviors',
+    'Standard Plugins',
     'Components',
     'Attributes',
     'Content',
     'CSS',
     'Dimensions',
+    'Visibility',
     'DOM Manipulation',
     'DOM Traversal',
     'Events',
@@ -81,29 +91,38 @@ const subCategorySortOrder = {
     'Strings',
     'Functions',
     'Colors',
+    'CSS',
     'Browser',
     'Dates',
     'Numbers',
+    'Environment',
     'Crypto',
     'Equality',
     'Cloning',
     'Errors',
-    'SSR',
     'Regex',
   ],
 };
 
 /* Standardized Icons across Subsections for Sidebar Menu */
 export const standardMenuIcons = {
+  'Authoring Guides': 'book',
   'Guides': 'book',
-  'Usage': 'code',
+  'Start Here': 'zap',
+  'Install': 'zap',
+  'Getting Started': 'zap',
+  'Install & Setup': 'zap',
+  'Tokens': 'droplet',
   'CSS Tokens': 'droplet',
   'User Guide': 'home',
   'Templates': 'table',
   'Framework': 'package',
   'Primitives': 'layers',
+  'UI Primitives': 'layers',
   'Components': 'package',
-  'UI Components': 'layers',
+  'UI Components': 'package',
+  'Behaviors': 'cpu',
+  'UI Behaviors': 'cpu',
   'Reactivity': 'cpu',
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
@@ -128,16 +147,16 @@ const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
 /* Topbar Menu */
 export const topbarDisplayMenu = [
   {
-    /* This is the ids of the submenu in sidebar */
-    _ids: ['framework', 'api'],
-    name: 'Documentation',
-    url: '/introduction',
-  },
-  {
     _id: 'ui',
-    _ids: ['css', 'primitives', 'components', 'usage'],
+    _ids: ['install', 'css', 'primitives', 'components', 'behaviors'],
     name: 'UI Framework',
     url: '/css',
+  },
+  {
+    /* This is the ids of the submenu in sidebar */
+    _ids: ['framework', 'api'],
+    name: 'API Docs',
+    url: '/introduction',
   },
   {
     _id: 'learn',
@@ -163,7 +182,7 @@ export const topbarDisplayMenu = [
 export const topbarMenu = [
   {
     _id: 'framework',
-    name: 'Guides',
+    name: 'Authoring Guides',
     url: '/introduction',
   },
   {
@@ -179,16 +198,21 @@ export const topbarMenu = [
   {
     _id: 'primitives',
     name: 'Primitives',
-    url: '/primitives',
+    url: '/ui/primitives',
   },
   {
     _id: 'components',
     name: 'Components',
-    url: '/ui-components',
+    url: '/ui/components',
   },
   {
-    _id: 'usage',
-    name: 'Usage',
+    _id: 'behaviors',
+    name: 'Behaviors',
+    url: '/ui/behaviors',
+  },
+  {
+    _id: 'install',
+    name: 'Install & Setup',
     url: '/usage',
   },
   {
@@ -197,15 +221,18 @@ export const topbarMenu = [
     url: '/learn/selection',
     baseURL: '/learn',
   },
-  ...exampleCategoryMenus, /*
+
+  ...exampleCategoryMenus,
+  /*
   {
     _id: 'playground',
     name: 'Playground',
     url: '/playground',
-  },*/
+  },
+  */
 ];
 
-/* UI Component Sidebar */
+/* CSS Token Sidebar */
 export const sidebarMenuCSS = [
   {
     name: 'CSS Tokens',
@@ -214,21 +241,31 @@ export const sidebarMenuCSS = [
   },
 ];
 
-/* UI Component Sidebar */
+/* Primitive Sidebar */
 export const sidebarMenuPrimitives = [
   {
-    name: 'UI Primitives',
+    name: 'Primitives',
     url: '/primitives',
     icon: 'layers',
     pages: componentPages,
   },
 ];
 
-/* UI Component Sidebar */
+/* Component Sidebar */
 export const sidebarMenuComponents = [
   {
-    name: 'UI Components',
+    name: 'Components',
     url: '/ui-components',
+    icon: 'package',
+    pages: [],
+  },
+];
+
+/* Behavior Sidebar */
+export const sidebarMenuBehaviors = [
+  {
+    name: 'Behaviors',
+    url: '/behaviors',
     icon: 'package',
     pages: [],
   },
@@ -249,6 +286,12 @@ export const sidebarMenuUsage = [
         url: '/usage/framework',
       },
     ],
+  },
+  {
+    name: 'UI Primitives',
+    url: '/ui',
+    icon: 'layers',
+    pages: componentPages,
   },
 ];
 
@@ -344,6 +387,10 @@ export const sidebarMenuFramework = [
         url: '/templates/snippets',
       },
       {
+        name: 'Reactivity',
+        url: '/templates/reactivity',
+      },
+      {
         name: 'Helpers',
         url: '/templates/helpers',
       },
@@ -418,6 +465,10 @@ export const sidebarMenuFramework = [
       {
         name: 'Chaining',
         url: '/query/chaining',
+      },
+      {
+        name: 'Plugins',
+        url: '/query/plugins',
       },
       {
         name: 'Browser Usage',
@@ -578,8 +629,12 @@ export const sidebarMenuAPI = [
         url: '/api/query/css',
       },
       {
-        name: 'Size & Dimensions',
+        name: 'Dimensions & Size',
         url: '/api/query/dimensions',
+      },
+      {
+        name: 'Display & Visibility',
+        url: '/api/query/visibility',
       },
       {
         name: 'DOM Manipulation',
@@ -641,6 +696,10 @@ export const sidebarMenuAPI = [
         url: '/api/utils/dates',
       },
       {
+        name: 'Environment',
+        url: '/api/utils/environment',
+      },
+      {
         name: 'Equality',
         url: '/api/utils/equality',
       },
@@ -671,10 +730,6 @@ export const sidebarMenuAPI = [
       {
         name: 'Regular Expressions',
         url: '/api/utils/regex',
-      },
-      {
-        name: 'SSR',
-        url: '/api/utils/ssr',
       },
       {
         name: 'Strings',

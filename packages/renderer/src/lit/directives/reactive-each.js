@@ -6,7 +6,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { Reaction } from '@semantic-ui/reactivity';
 import { isEmpty } from '@semantic-ui/utils';
 
-import { arrayFromObject, isArray, isPlainObject, isString } from '@semantic-ui/utils';
+import { arrayFromObject, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
 
 export class ReactiveEachDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -27,8 +27,8 @@ export class ReactiveEachDirective extends AsyncDirective {
 
     // pass through context for debugging
     let context;
-    if(eachCondition.node) {
-      let {as, over} = eachCondition.node;
+    if (eachCondition.node) {
+      let { as, over } = eachCondition.node;
       context = {
         message: `reactive each: {#each ${as} in ${over}}`,
         each: eachCondition.node,
@@ -36,19 +36,23 @@ export class ReactiveEachDirective extends AsyncDirective {
     }
 
     // Create a new reaction
-    this.reaction = Reaction.create((computation) => {
-      if (!this.isConnected) {
-        computation.stop();
-        return;
-      }
-      this.items = this.getItems(this.eachCondition);
-      if (!computation.firstRun) {
-        const rendered = this.renderItems();
-        this.setValue(rendered);
-      }
-    }, { context });
+    let html = this.renderItems();
 
-    return this.renderItems();
+    if (isClient) {
+      this.reaction = Reaction.create((computation) => {
+        if (!this.isConnected) {
+          computation.stop();
+          return;
+        }
+        this.items = this.getItems(this.eachCondition);
+        if (!computation.firstRun) {
+          html = this.renderItems();
+          this.setValue(html);
+        }
+      }, { context });
+    }
+
+    return html;
   }
 
   renderItems() {

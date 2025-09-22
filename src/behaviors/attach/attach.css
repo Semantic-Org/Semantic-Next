@@ -1,0 +1,142 @@
+:where([data-position][data-arrow]) {
+
+  --arrow-size: 10px;
+  --arrow-offset: 1em;
+  --arrow-background: inherit;
+  --arrow-border-width: var(--border-width, 1px);
+  --arrow-box-shadow: 1px 1px 2px 0 oklch(0 0 0 / 4%);
+
+  /* this is read by javascript to determine offset */
+  --arrow-distance-corner: calc(var(--arrow-offset) + var(--arrow-size));
+
+
+  --arrow-border-base: inherit;
+  --arrow-border-color: color-mix(
+    in oklch,
+    var(--arrow-border-base),
+    var(--standard-100) 5%
+  );
+
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    width: var(--arrow-size);
+    height: var(--arrow-size);
+    background: var(--arrow-background);
+    background-image: inherit;
+    transform: rotate(45deg);
+
+    /* Clear all borders first */
+    border: 0;
+    border-style: solid;
+    border-color: var(--arrow-border-color);
+    box-shadow: var(--arrow-box-shadow);
+  }
+
+  &[data-position^="hidden"] {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  &[data-position^="center"] {
+    margin-inline-start: 0 !important;
+    margin-block-start: 0 !important;
+  }
+
+  &[data-position^="hidden"]::before,
+  &[data-position^="center"]::before {
+    display: none;
+    margin-inline-start: 0 !important;
+    margin-block-start: 0 !important;
+  }
+
+  /* Top positions - need bottom-right borders */
+  &[data-position^="top"]::before {
+    border-right-width: var(--arrow-border-width);
+    border-bottom-width: var(--arrow-border-width);
+  }
+
+  &[data-position="top"]::before {
+    bottom: calc(var(--arrow-size) / -2);
+    left: 50%;
+    margin-left: calc(var(--arrow-size) / -2);
+  }
+
+  &[data-position="top left"]::before {
+    bottom: calc(var(--arrow-size) / -2);
+    left: var(--arrow-offset);
+  }
+
+  &[data-position="top right"]::before {
+    bottom: calc(var(--arrow-size) / -2);
+    right: var(--arrow-offset);
+  }
+
+  /* Bottom positions - need top-left borders */
+  &[data-position^="bottom"]::before {
+    border-left-width: var(--arrow-border-width);
+    border-top-width: var(--arrow-border-width);
+  }
+
+  &[data-position="bottom"]::before {
+    top: calc(var(--arrow-size) / -2);
+    left: 50%;
+    margin-left: calc(var(--arrow-size) / -2);
+  }
+
+  &[data-position="bottom right"]::before {
+    top: calc(var(--arrow-size) / -2);
+    right: var(--arrow-offset);
+  }
+
+  &[data-position="bottom left"]::before {
+    top: calc(var(--arrow-size) / -2);
+    left: var(--arrow-offset);
+  }
+
+  /* Right positions - need bottom-left borders (pointing left) */
+  &[data-position^="right"]::before {
+    border-bottom-width: var(--arrow-border-width);
+    border-left-width: var(--arrow-border-width);
+  }
+
+  &[data-position="right"]::before {
+    left: calc(var(--arrow-size) / -2);
+    top: 50%;
+    margin-top: calc(var(--arrow-size) / -2);
+  }
+
+  &[data-position="right top"]::before {
+    left: calc(var(--arrow-size) / -2);
+    top: var(--arrow-offset);
+  }
+
+  &[data-position="right bottom"]::before {
+    left: calc(var(--arrow-size) / -2);
+    bottom: var(--arrow-offset);
+  }
+
+  /* Left positions - need top-right borders (pointing right) */
+  &[data-position^="left"]::before {
+    border-top-width: var(--arrow-border-width);
+    border-right-width: var(--arrow-border-width);
+  }
+
+  &[data-position="left"]::before {
+    right: calc(var(--arrow-size) / -2);
+    top: 50%;
+    margin-top: calc(var(--arrow-size) / -2);
+  }
+
+  &[data-position="left top"]::before {
+    right: calc(var(--arrow-size) / -2);
+    top: var(--arrow-offset);
+  }
+
+  &[data-position="left bottom"]::before {
+    right: calc(var(--arrow-size) / -2);
+    bottom: var(--arrow-offset);
+  }
+}

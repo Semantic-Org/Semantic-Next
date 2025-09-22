@@ -1,0 +1,37 @@
+
+h4 {
+  font-size: 16px;
+  padding-bottom: 4px;
+  border-bottom: var(--border);
+}
+
+table {
+
+  background-color: var(--standard-5);
+  border: var(--solid-border);
+  border-collapse: collapse;
+
+  th {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 10px 12px;
+    text-align: left;
+    color: var(--primary-80);
+    background-image: var(--very-subtle-gradient);
+    box-shadow: var(--subtle-bottom-lip-shadow);
+    border-bottom: var(--internal-border);
+  }
+
+  td {
+    font-size: 13px;
+    padding: 7px 12px;
+
+    &:first-child {
+      color: var(--standard-40);
+    }
+  }
+  td + td {
+    border-left: var(--solid-border);
+  }
+}

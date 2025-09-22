@@ -1,0 +1,28 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "role": "Developer"
+    },
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "role": "Designer"
+    },
+    {
+      "id": 3,
+      "name": "Carol Davis",
+      "role": "Manager"
+    }
+  ],
+  "config": {
+    "theme": "light",
+    "version": "2.0.1",
+    "features": {
+      "darkMode": true,
+      "notifications": false
+    }
+  },
+  "message": "This is example JSON data for testing the getJSON utility"
+}

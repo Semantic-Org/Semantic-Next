@@ -3,7 +3,7 @@ import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { isPromise, isPlainObject, each } from '@semantic-ui/utils';
+import { each, isClient, isPlainObject, isPromise } from '@semantic-ui/utils';
 
 export class ReactiveAsyncDirective extends AsyncDirective {
   constructor(partInfo) {
@@ -21,13 +21,22 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       this.reaction = null;
     }
 
+    // Create a new reaction that watches for reactive changes on client
+    if (isClient) {
+      this.watchChanges(asyncCondition);
+    }
+
+    // Return initial render
+    return this.renderCurrentState(asyncCondition);
+  }
+
+  watchChanges(asyncCondition) {
     // pass through context for debugging
     let context = {
       message: `async block: {#async ${asyncCondition.expression}}`,
       async: asyncCondition,
     };
 
-    // Create a new reaction
     this.reaction = Reaction.create((computation) => {
       if (!this.isConnected) {
         computation.stop();
@@ -46,9 +55,6 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         this.setValue(rendered);
       }
     }, { context });
-
-    // Return initial render
-    return this.renderCurrentState(asyncCondition);
   }
 
   handleExpressionResult(result, asyncCondition) {
@@ -96,7 +102,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       case 'error':
         if (asyncCondition.errorContent) {
           // Create data context with error
-          const errorData = asyncCondition.errorAs 
+          const errorData = asyncCondition.errorAs
             ? { [asyncCondition.errorAs]: this.error }
             : { this: this.error };
 
@@ -128,7 +134,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     // Handle {#async expression as { prop1, prop2, ...rest }}
     if (asyncCondition.parts && isPlainObject(value)) {
       const data = {};
-      
+
       // Extract specified properties
       each(asyncCondition.parts, (prop) => {
         if (prop in value) {

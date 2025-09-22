@@ -53,6 +53,7 @@ export const getExampleFiles = async ({
   includeError = true, // whether to intercept and display js errors,
   includeLog = false, // whether to include script to intercept console logs,
   includePlaygroundInjections = false, // whether to inject values to make repl work
+  additionalFiles = [], // additional files to include
   useTypescript = false, // convert js files to ts files
   emptyIfAllGenerated = false, // if all files are generated return an empty object
   includeImportMap = true, // whether to map imports to node_modules
@@ -114,6 +115,14 @@ export const getExampleFiles = async ({
           contentType: 'text/javascript',
           content: fileText,
         };
+      }
+      else if (inArray(fileName, additionalFiles)) {
+        const fileContent = await file();
+        exampleFiles[fileName] = {
+          contentType: getContentType(fileName),
+          content: fileContent.default,
+        };
+        return;
       }
       else if (includeFolder) {
         const fileContent = await file();

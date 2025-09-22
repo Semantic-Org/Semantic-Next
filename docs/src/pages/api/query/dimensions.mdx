@@ -8,7 +8,7 @@ description: API reference for Query methods related to element dimensions and p
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The Dimension methods in Query provide tools for getting and setting various dimensional properties of elements, including their size, position, and scroll-related attributes.
+Get and set element dimensions, scroll positions, and natural sizes.
 
 ## width
 
@@ -42,16 +42,11 @@ $('selector').width(value)
 
 ### Usage
 
-#### Get Width
 ```javascript
-// Get the width of an element
+// Get width
 const width = $('#myElement').width();
-console.log(width);
-```
 
-#### Set Width
-```javascript
-// Set the width of an element
+// Set width
 $('#myElement').width(200);
 ```
 
@@ -90,16 +85,11 @@ $('selector').height(value)
 
 ### Usage
 
-#### Get Height
 ```javascript
-// Get the height of an element
+// Get height
 const height = $('#myElement').height();
-console.log(height);
-```
 
-#### Set Height
-```javascript
-// Set the height of an element
+// Set height
 $('#myElement').height(150);
 ```
 
@@ -138,16 +128,11 @@ $('selector').scrollTop(value)
 
 ### Usage
 
-#### Get Scroll Position
 ```javascript
-// Get the vertical scroll position of an element
+// Get scroll position
 const scrollPosition = $('.scrollable-div').scrollTop();
-console.log(scrollPosition);
-```
 
-#### Set Scroll Position
-```javascript
-// Set the vertical scroll position of an element
+// Set scroll position
 $('.scrollable-div').scrollTop(100);
 ```
 
@@ -186,26 +171,22 @@ $('selector').scrollLeft(value)
 
 ### Usage
 
-#### Get Scroll Position
 ```javascript
-// Get the horizontal scroll position of an element
+// Get scroll position
 const scrollPosition = $('.scrollable-div').scrollLeft();
-console.log(scrollPosition);
-```
 
-#### Set Scroll Position
-```javascript
-// Set the horizontal scroll position of an element
+// Set scroll position
 $('.scrollable-div').scrollLeft(50);
 ```
 
 ### Example
 <PlaygroundExample id="query-scrollleft" direction="horizontal"></PlaygroundExample>
+
 ## naturalWidth
 
 Gets the natural width of an element, including images and other HTML elements.
 
-> **Natural Width** - This method works by creating a clone of the element, positioning it off-screen, and measuring its dimensions. While this approach allows for accurate measurements of complex elements like tables, it can cause a reflow in the document. Use judiciously, especially in performance-critical situations.
+> **Performance Note**: Creates an off-screen clone to measure dimensions. Can cause reflow - use sparingly in performance-critical code.
 
 ### Syntax
 
@@ -222,15 +203,12 @@ $('selector').naturalWidth()
 
 ### Usage
 
-#### Get Natural Width
 ```javascript
-// Get the natural width of an image
-const imageNaturalWidth = $('img').naturalWidth();
-console.log(imageNaturalWidth);
+// Get natural width of image
+const imageWidth = $('img').naturalWidth();
 
-// Get the natural width of a table
-const tableNaturalWidth = $('table').naturalWidth();
-console.log(tableNaturalWidth);
+// Get natural width of table
+const tableWidth = $('table').naturalWidth();
 ```
 
 ### Example
@@ -254,147 +232,293 @@ $('selector').naturalHeight()
 
 ### Usage
 
-#### Get Natural Height
 ```javascript
-// Get the natural height of an image
-const imageNaturalHeight = $('img').naturalHeight();
-console.log(imageNaturalHeight);
+// Get natural height of image
+const imageHeight = $('img').naturalHeight();
 
-// Get the natural height of a div with content
-const divNaturalHeight = $('div.content').naturalHeight();
-console.log(divNaturalHeight);
+// Get natural height of div
+const divHeight = $('div.content').naturalHeight();
 ```
 
 ### Example
 <PlaygroundExample id="query-naturalheight" direction="horizontal"></PlaygroundExample>
 
-## clippingParent
+## position
 
-Get the element that clips (crops) each element's visual bounds based on overflow properties.
-
-### Syntax
-```javascript
-$('selector').clippingParent()
-```
-
-### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the clipping parent elements.
-
-### Usage
-
-#### Basic Clipping Detection
-```javascript
-// Find what element clips a positioned element
-const $tooltip = $('.tooltip');
-const $clipper = $tooltip.clippingParent();
-
-// Check if element is clipped by its container
-if ($clipper[0] !== document.documentElement) {
-  console.log('Element is clipped by:', $clipper[0]);
-}
-```
-
-#### Working with Scroll Containers
-```javascript
-// Find the scrollable container that clips content
-const $content = $('.overflow-content');
-const $scrollContainer = $content.clippingParent();
-
-// Adjust positioning to avoid clipping
-$scrollContainer.css('overflow', 'visible');
-```
-
-#### Multiple Elements
-```javascript
-// Get clipping parents for multiple elements
-$('.positioned-elements').each((el, index) => {
-  const $el = $(el);
-  const $clipper = $el.clippingParent();
-  console.log(`Element ${index} is clipped by:`, $clipper[0]);
-});
-```
-
-> **Clipping Detection** Returns `document.documentElement` when no clipping parent is found. Useful for positioning tooltips, dropdowns, and other overlay elements.
-
-### Example
-<PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
-
-## containingParent
-
-Get the element that establishes the positioning context for each element (where `offsetTop`/`offsetLeft` are relative to).
-
-> **Why not `offsetParent`?** `offsetParent` will often return an element that is **different** than the value `offsetTop` and `offsetLeft` are relative to. This is because values like `transform`, `will-change`, `filter` can all create new positioning contexts.
-
+Gets or sets element position coordinates with flexible reference systems.
 
 ### Syntax
 
-#### Calculate Modern Positioning Context
+#### Get Position (All Coordinates)
 ```javascript
-$('selector').containingParent()
-$('selector').containingParent({ calculate: true })
+$('selector').position()
+$('selector').position({ relativeTo: container, precision: 'pixel' })
 ```
 
-#### Use Browser's offsetParent
+#### Get Position (Specific Type)
 ```javascript
-$('selector').containingParent({ calculate: false })
+$('selector').position({ type: 'global' })
+$('selector').position({ type: 'local' })
+$('selector').position({ type: 'relative', relativeTo: container })
+```
+
+#### Set Position
+```javascript
+$('selector').position({ top: 100, left: 200 })
+$('selector').position({ top: 50, left: 75, relativeTo: container })
 ```
 
 ### Parameters
-| Name      | Type    | Description                                                      |
-|-----------|---------|------------------------------------------------------------------|
-| calculate | boolean | Whether to calculate containing parent using modern CSS properties (default: true) |
+| Name       | Type                    | Description                                          |
+|------------|-------------------------|------------------------------------------------------|
+| relativeTo | string/Element/Query    | Element to measure relative to (for getter/setter)  |
+| top        | number                  | Top position to set (triggers setter)               |
+| left       | number                  | Left position to set (triggers setter)              |
+| precision  | 'pixel'\|'subpixel'     | Rounding precision for coordinates. Defaults to 'pixel' |
+| type       | 'global'\|'local'\|'relative' | Specific coordinate system to return           |
 
 ### Returns
-A new [Query object](/api/query/basic#the-query-object) containing the containing parent elements.
+
+#### Get Position (Default)
+Returns an object with multiple coordinate systems:
+- **Single Element** - `{ global: {top, left}, local: {top, left}, relative?: {top, left} }`
+- **Multiple Elements** - Array of position objects
+
+#### Get Position (With Type)
+- **Single Element** - `{ top: number, left: number }`
+- **Multiple Elements** - Array of coordinate objects
+
+#### Set Position
+[Query object](/api/query/basic#the-query-object) (for chaining).
 
 ### Usage
 
-#### Modern Positioning Context Detection
 ```javascript
-// Find the actual positioning context (includes transform, filter, etc.)
-const $absoluteEl = $('.absolute-positioned');
-const $container = $absoluteEl.containingParent();
+// Get all position coordinates
+const pos = $('#element').position();
+console.log(pos.global.top, pos.local.left);
 
-// Position element relative to its containing parent
-const containerRect = $container[0].getBoundingClientRect();
-$absoluteEl.css({
-  top: containerRect.height / 2,
-  left: containerRect.width / 2
+// Get only viewport coordinates
+const viewport = $('#element').position({ type: 'global' });
+
+// Get position relative to container
+const relative = $('#element').position({ 
+  type: 'relative', 
+  relativeTo: '#container' 
+});
+
+// Set position relative to containing parent
+$('#element').position({ top: 100, left: 200 });
+
+// Set position relative to specific element
+$('#element').position({ 
+  top: 50, 
+  left: 75, 
+  relativeTo: '#reference' 
 });
 ```
 
-#### Browser's Native offsetParent
-```javascript
-// Get browser's reported offsetParent (legacy behavior)
-const $element = $('.positioned-element');
-const $offsetParent = $element.containingParent({ calculate: false });
+### Coordinate Systems
 
-if ($offsetParent[0]) {
-  console.log('Browser offsetParent:', $offsetParent[0]);
-}
+- **Global**: Position relative to viewport (window)
+- **Local**: Position relative to containing parent (positioned ancestor)
+- **Relative**: Position relative to specified element
+
+### Example
+<PlaygroundExample id="query-position" direction="horizontal"></PlaygroundExample>
+
+## pagePosition
+
+Gets element position relative to the document (viewport position + scroll offset).
+
+### Syntax
+
+#### Get
+```javascript
+$('selector').pagePosition()
+$('selector').pagePosition({ precision: 'subpixel' })
 ```
 
-#### Fixed Position Elements
+### Parameters
+| Name      | Type                | Description                                      |
+|-----------|---------------------|--------------------------------------------------|
+| precision | 'pixel'\|'subpixel' | Rounding precision. Defaults to 'pixel'         |
+
+### Returns
+
+#### Get
+- **Single Element** - `{ top: number, left: number }`
+- **Multiple Elements** - Array of position objects
+- **Empty Selection** - `undefined`
+
+### Usage
+
 ```javascript
-// Fixed elements have no containing parent
-const $fixed = $('.fixed-positioned');
-const $container = $fixed.containingParent();
+// Get page position
+const pos = $('#element').pagePosition();
+console.log(`Element is at ${pos.top}px from document top`);
 
-if ($container[0] === undefined) {
-  console.log('Fixed element has no containing parent');
-}
-```
-
-#### Transform and Filter Detection
-```javascript
-// Elements with transforms create new positioning contexts
-const $transformed = $('.transformed-element');
-const $transformContainer = $transformed.containingParent();
-
-// Useful for accurately calculating positions
-const rect = $transformContainer[0].getBoundingClientRect();
-console.log('Transform container bounds:', rect);
+// Get subpixel precision
+const precisePos = $('#element').pagePosition({ precision: 'subpixel' });
 ```
 
 ### Example
-<PlaygroundExample id="query-containingparent" direction="horizontal"></PlaygroundExample>
+<PlaygroundExample id="query-pageposition" direction="horizontal"></PlaygroundExample>
+
+## dimensions
+
+Gets dimension information for elements.
+
+### Syntax
+
+```javascript
+$('selector').dimensions()
+```
+
+### Returns
+
+- **Single Element** - Dimension object
+- **Multiple Elements** - Array of dimension objects  
+- **Empty Selection** - `undefined`
+
+#### Properties
+| Property      | Description                             |
+|---------------|-----------------------------------------|
+| top, left     | Viewport position                       |
+| right, bottom | Viewport edges                          |
+| pageTop, pageLeft | Document position                   |
+| width         | Content width                           |
+| innerWidth    | Content + padding                       |
+| outerWidth    | Content + padding + border              |
+| marginWidth   | Content + padding + border + margin     |
+| height        | Content height                          |
+| innerHeight   | Content + padding                       |
+| outerHeight   | Content + padding + border              |
+| marginHeight  | Content + padding + border + margin     |
+| scrollTop, scrollLeft | Scroll position                  |
+| scrollHeight, scrollWidth | Scrollable dimensions        |
+| box           | Box model details                       |
+| bounds        | DOMRect bounding box                    |
+
+### Usage
+
+```javascript
+// Get all dimensions
+const dims = $('#element').dimensions();
+console.log(`Element size: ${dims.width}x${dims.height}`);
+console.log(`With padding: ${dims.innerWidth}x${dims.innerHeight}`);
+console.log(`With border: ${dims.outerWidth}x${dims.outerHeight}`);
+console.log(`Page position: ${dims.pageTop}, ${dims.pageLeft}`);
+
+// Access box model details
+console.log(`Padding: ${dims.box.padding.top}px`);
+console.log(`Border: ${dims.box.border.left}px`);
+console.log(`Margin: ${dims.box.margin.bottom}px`);
+```
+
+### Example
+<PlaygroundExample id="query-dimensions" direction="horizontal"></PlaygroundExample>
+
+## intersects
+
+Checks if elements intersect with a target.
+
+### Syntax
+
+```javascript
+$('selector').intersects(target)
+$('selector').intersects(target, options)
+```
+
+### Parameters
+| Name    | Type                   | Description            |
+|---------|------------------------|------------------------|
+| target  | string/Element/Query   | Target element(s)      |
+| options | object                 | Options (optional)     |
+
+#### Options
+| Name          | Type         | Description                                                         | Default |
+|---------------|--------------|---------------------------------------------------------------------|---------|
+| sides         | string/array | Which sides must intersect ('all', 'top', 'bottom', 'left', 'right') | 'all'  |
+| threshold     | number       | Minimum intersection ratio (0-1)                                   | 0       |
+| fully         | boolean      | Source must be fully contained                                     | false   |
+| returnDetails | boolean      | Return detailed intersection data                                  | false   |
+| all           | boolean      | Whether all elements must intersect (true) or any element (false) | false   |
+
+### Returns
+
+- **Basic** - `true` if intersects, `false` otherwise
+- **With returnDetails** - Details object (single element) or array (multiple elements)
+
+#### Details Object
+| Property        | Type    | Description                          |
+|-----------------|---------|--------------------------------------|
+| intersects      | boolean | Elements intersect                   |
+| top             | boolean | Top edge within target               |
+| bottom          | boolean | Bottom edge within target            |
+| left            | boolean | Left edge within target              |
+| right           | boolean | Right edge within target             |
+| ratio           | number  | Intersection/source area ratio       |
+| rect            | object  | Intersection rectangle (or null)     |
+| elementPosition | object  | Element position relative to target  |
+
+### Usage
+
+```javascript
+// Check intersection
+if ($('#trigger').intersects('#popup')) {
+  console.log('Overlapping');
+}
+
+// Multiple targets
+if ($('.item').intersects('.dropzone')) {
+  console.log('Over dropzone');
+}
+
+// 50% overlap required
+$('#draggable').intersects('#target', { threshold: 0.5 });
+
+// Must be fully contained
+$('#child').intersects('#container', { fully: true });
+
+// Check specific sides
+$('#element').intersects('#boundary', { sides: 'top' });
+$('#element').intersects('#boundary', { sides: ['left', 'right'] });
+
+// Get detailed data
+const details = $('#source').intersects('#target', { returnDetails: true });
+if (details.intersects) {
+  console.log(`Overlap: ${details.ratio * 100}%`);
+  console.log(`Area: ${details.rect.width * details.rect.height}px²`);
+  console.log(`Element position relative to target:`, details.elementPosition);
+}
+
+// Require ALL elements to intersect
+if ($('.items').intersects('#container', { all: true })) {
+  console.log('All items are within container');
+}
+
+// Multiple elements with position analysis
+$('.item').intersects('#container', { returnDetails: true })
+  .forEach((details, i) => {
+    if (details.intersects) {
+      console.log(`Item ${i}: ${details.ratio * 100}% overlap`);
+      
+      // Use elementPosition for obstruction analysis
+      const pos = details.elementPosition;
+      if (pos.top < 0) console.log(`Item ${i} extends above container`);
+      if (pos.bottom > targetDims.outerHeight) console.log(`Item ${i} extends below container`);
+    }
+  });
+```
+
+### Notes
+- Uses `outerWidth` and `outerHeight` for box-model accuracy
+- Coordinates relative to target element
+- `fully` overrides `threshold` when true
+- With `sides`, at least one specified side must intersect
+- By default, returns `true` if **ANY** element intersects (use `all: true` to require all elements)
+- `elementPosition` provides element bounds relative to target for advanced positioning analysis
+
+### Example
+<PlaygroundExample id="query-intersects" direction="horizontal"></PlaygroundExample>

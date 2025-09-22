@@ -100,3 +100,35 @@ export function isEmpty(x: unknown): boolean;
  * @param obj - The value to check
  */
 export function isClassInstance(obj: unknown): boolean;
+
+/**
+ * Checks if the value is a Set instance
+ * @see {@link https://next.semantic-ui.com/api/utils/types#isset isSet}
+ * @param x - The value to check
+ * @returns True if the value is a Set, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isSet(new Set([1, 2, 3]));     // true
+ * isSet(new Set());              // true
+ * isSet([]);                     // false
+ * isSet(new Map());              // false
+ * ```
+ */
+export function isSet(x: unknown): x is Set<any>;
+
+/**
+ * Checks if the value is a Map instance
+ * @see {@link https://next.semantic-ui.com/api/utils/types#ismap isMap}
+ * @param x - The value to check
+ * @returns True if the value is a Map, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isMap(new Map([['a', 1]]));    // true
+ * isMap(new Map());              // true
+ * isMap({});                     // false
+ * isMap(new Set());              // false
+ * ```
+ */
+export function isMap(x: unknown): x is Map<any, any>;

@@ -220,6 +220,80 @@ $$('<footer>Last updated: Today</footer>').insertAfter($$('user-profile').find('
 ### Example
 <PlaygroundExample id="query-insertafter" direction="horizontal"></PlaygroundExample>
 
+## appendTo
+
+Insert every element in the set of matched elements as the last child of the target.
+
+### Syntax
+```javascript
+$('selector').appendTo(target)
+```
+
+### Parameters
+| Name   | Type   | Description                                        |
+|--------|--------|----------------------------------------------------|
+| target | string | A selector, element, or Query object to which the content will be appended |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) of the target elements (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Create a new paragraph and append it to a specific div
+$('<p>New content</p>').appendTo('#container');
+
+// Move existing elements to the end of another container
+$('.item').appendTo('.destination');
+```
+
+#### Shadow DOM
+```javascript
+// Append a new action button to the user profile
+$$('<button>Edit Profile</button>').appendTo($$('user-profile').find('.actions'));
+```
+
+### Example
+<PlaygroundExample id="query-appendto" direction="horizontal"></PlaygroundExample>
+
+## prependTo
+
+Insert every element in the set of matched elements as the first child of the target.
+
+### Syntax
+```javascript
+$('selector').prependTo(target)
+```
+
+### Parameters
+| Name   | Type   | Description                                        |
+|--------|--------|----------------------------------------------------|
+| target | string | A selector, element, or Query object to which the content will be prepended |
+
+### Returns
+[Query object](/api/query/basic#the-query-object) of the target elements (for chaining).
+
+### Usage
+
+#### Standard
+```javascript
+// Create a new heading and prepend it to a section
+$('<h2>Section Title</h2>').prependTo('section');
+
+// Move existing elements to the beginning of another container
+$('.priority-item').prependTo('.container');
+```
+
+#### Shadow DOM
+```javascript
+// Prepend a status indicator to the user profile header
+$$('<span class="status online">●</span>').prependTo($$('user-profile').find('.header'));
+```
+
+### Example
+<PlaygroundExample id="query-prependto" direction="horizontal"></PlaygroundExample>
+
 > **Aliases** The `before(content)` and `after(content)` methods are available as more intuitive aliases for inserting content before and after the current selection.
 
 ## detach

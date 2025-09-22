@@ -6,12 +6,12 @@ description: Defining your components behavior and exposed properties
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The `createComponent` callback can be used when [creating a component](/components/create) to define the behaviors of your component so that they can be accessed in various other locations that might need to reference or invoke them.
+The `createComponent` callback defines the behaviors of your component when [creating a component](/components/create). These behaviors can be accessed from various locations that might need to reference or invoke them.
 
 For instance you might need to invoke a behavior from:
 
-* **Outside Component**
-  * Inside your [component](#from-other-components) and its [subtemplates](#findparent)
+* **From Other Components**
+  * From parent/child components using [findParent/findChild](#from-other-components)
   * Externally using [the DOM](#from-dom)
 
 * **Inside Component**
@@ -24,7 +24,7 @@ For instance you might need to invoke a behavior from:
 
 ### Create Component
 
-The `createComponent` callback is used to define your component instance including methods that define your components behavior.
+The `createComponent` callback defines your component instance and its methods.
 
 ```javascript
 const defaultState = { counter: 0 };
@@ -43,7 +43,7 @@ const createComponent = ({self, state, settings}) => ({
 });
 ```
 
-You you can access other data like `settings`, `state`, as well as the DOM using `$` and `$$` from inside your component instance, allowing you to manipulate data from the DOM, access sources of reactivity, and settings passed through to your component.
+You can access other data like [`settings`](/components/settings), [`state`](/components/state), as well as the DOM using [`$` and `$$`](/query) from inside your component instance, allowing you to manipulate data from the DOM, access sources of [reactivity](/components/reactivity), and settings passed through to your component.
 
 For more information see [component lifecycle](/components/lifecycle#callback-arguments).
 
@@ -55,17 +55,17 @@ For more information see [component lifecycle](/components/lifecycle#callback-ar
 
 Component instances are passed through to all other callbacks as `self` allowing you to reference methods and values directly from [events](/components/events), [key bindings](/components/keys), and [lifecycle callbacks](/components/lifecycle).
 
-##### Lifecycle
+#### Lifecycle
 ```javascript
 
-const onRendered(({ self, isClient }) => {
+const onRendered = ({ self, isClient }) => {
   if(isClient) {
     self.draw();
   }
 });
 ```
 
-##### Keybindings
+#### Keybindings
 ```javascript
 const keys = {
   'f'({ self }) {
@@ -115,7 +115,7 @@ const events = {
 
 Your template's [data context](/components/rendering#data-context) can be used to access values from your component instance directly.
 
-##### Templates
+#### Templates
 ```html
 <p>Your name is {getName}</p>
 ```
@@ -133,7 +133,7 @@ Component instances can be directly accessed from other components to access pro
 
 ### findParent
 
-The most common scenario will require you to access some functionality on a parent template instance from a [sub template](templates/subtemplates) or a nested web component.
+The most common scenario will require you to access some functionality on a parent template instance from a [sub template](/templates/subtemplates) or a nested web component.
 
 The `findParent` helper can be used in this scenario, allowing you to walk up the render tree looking for a component matching the specified name.
 
@@ -178,14 +178,14 @@ const createComponent = ({ findTemplate }) => {
 
 You can access your template instance directly from the DOM to modify its internal state, or access values.
 
-Each copy of your component will have a separate instance which will store its values and is accessible directly from the dom as `el.component`
+Each component instance stores its values and is accessible from the DOM as `el.component`.
 
-You can use Query's `getComponent()` helper to easily access a component instance
+You can use Query's [`component()`](/api/query/components#component) helper to easily access a component instance
 
 With Query
 ```javascript
 import { $ } from '@semantic-ui/query';
-const counter = $('ui-counter').getComponent();
+const counter = $('ui-counter').component();
 counter.setCounter(2);
 ```
 
@@ -195,7 +195,7 @@ const { component } = document.querySelector('ui-counter');
 component.setCounter(2);
 ```
 
-> **Storage in the DOM** Your template instance is stored as `el.self` i.e. `el.self.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
+> **Storage in the DOM** Your template instance is stored as `el.component` i.e. `el.component.getName()` instead of directly as properties on your web component element i.e `el.getName()`. This is to isolate it from unrelated code, making it easier to inspect, clone and disambiguate from the many internal DOM properties which are not under your control.
 
 
 ### DOM Access Example

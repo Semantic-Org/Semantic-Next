@@ -1,4 +1,4 @@
-import { $, $$ } from '@semantic-ui/query';
+import { $, $$, Query } from '@semantic-ui/query';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('query', () => {
@@ -39,7 +39,6 @@ describe('query', () => {
       expect(customElement.getDivText()).toBe('passed in text');
     });
   });
-
 
   describe('window and globalThisProxy', () => {
     beforeEach(() => {
@@ -240,13 +239,13 @@ describe('query', () => {
       it('should handle multiple slotted elements', () => {
         // Create and setup test component with multiple slotted elements
         const component = document.createElement('test-slot-basic');
-        
+
         const item1 = document.createElement('p');
         item1.textContent = 'Item 1';
-        
+
         const item2 = document.createElement('p');
         item2.textContent = 'Item 2';
-        
+
         component.appendChild(item1);
         component.appendChild(item2);
         document.body.appendChild(component);
@@ -312,7 +311,7 @@ describe('query', () => {
         // Get the slot element directly
         const headerSlot = component.shadowRoot.querySelector('slot[name="header"]');
         expect(headerSlot).not.toBeNull();
-        
+
         // Set content for the header slot via the component
         $(component).setSlot('header', '<strong>Set Via Component</strong>');
 
@@ -657,7 +656,7 @@ describe('query', () => {
       expect($clippingParent[0]).toBe(document.getElementById('container'));
     });
 
-    it('should return document.documentElement when no clipping parent found', () => {
+    it('should return window when no clipping parent found', () => {
       document.body.innerHTML = `
         <div id="outer" style="overflow: visible;">
           <div id="inner" style="overflow: visible;">
@@ -716,9 +715,121 @@ describe('query', () => {
       expect($clippingParent.length).toBe(1);
       expect($clippingParent[0]).toBe(document.getElementById('inner'));
     });
+
+    it('should find clipping parent with contain: paint', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: paint;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: layout', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: layout;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: size', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: size;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with contain: strict', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: strict;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with clip-path', () => {
+      document.body.innerHTML = `
+        <div id="container" style="clip-path: circle(50%);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with mask', () => {
+      document.body.innerHTML = `
+        <div id="container" style="mask: url(#mask);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find clipping parent with mask-image', () => {
+      document.body.innerHTML = `
+        <div id="container" style="mask-image: linear-gradient(black, transparent);">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should not consider contain: style as clipping', () => {
+      document.body.innerHTML = `
+        <div id="container" style="contain: style;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const $child = $('#child');
+      const $clippingParent = $child.clippingParent();
+
+      expect($clippingParent.length).toBe(1);
+      expect($clippingParent[0]).toBe(document.documentElement);
+    });
   });
 
-  describe('containingParent', () => {
+  describe('offsetParent', () => {
     beforeEach(() => {
       document.body.innerHTML = '';
     });
@@ -731,10 +842,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('container'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('container'));
     });
 
     it('should find containing parent with transform', () => {
@@ -745,10 +856,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('transformed'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('transformed'));
     });
 
     it('should find containing parent with filter', () => {
@@ -759,10 +870,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('filtered'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('filtered'));
     });
 
     it('should find containing parent with contain property', () => {
@@ -773,10 +884,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('contained'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('contained'));
     });
 
     it('should find containing parent with will-change', () => {
@@ -787,13 +898,13 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent();
+      const $offsetParent = $child.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('willchange'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('willchange'));
     });
 
-    it('should return undefined for fixed position elements', () => {
+    it('should return documentElement for fixed elements (null offsetParent fallback)', () => {
       document.body.innerHTML = `
         <div id="container" style="position: relative;">
           <div id="fixed" style="position: fixed;">Fixed element</div>
@@ -801,10 +912,11 @@ describe('query', () => {
       `;
 
       const $fixed = $('#fixed');
-      const $containingParent = $fixed.containingParent();
+      const $offsetParent = $fixed.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(undefined);
+      // Fixed elements have null offsetParent, so should fallback to documentElement
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.documentElement);
     });
 
     it('should return document.body when no containing parent found', () => {
@@ -817,10 +929,10 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.body);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.body);
     });
 
     it('should use browser offsetParent when calculate is false', () => {
@@ -831,10 +943,10 @@ describe('query', () => {
       `;
 
       const $child = $('#child');
-      const $containingParent = $child.containingParent({ calculate: false });
+      const $offsetParent = $child.offsetParent({ calculate: false });
 
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('child').offsetParent);
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('child').offsetParent);
     });
 
     it('should handle multiple elements', () => {
@@ -848,18 +960,18 @@ describe('query', () => {
       `;
 
       const $items = $('.item');
-      const $containingParents = $items.containingParent();
+      const $offsetParents = $items.offsetParent();
 
-      expect($containingParents.length).toBe(2);
-      expect($containingParents[0]).toBe(document.getElementById('container1'));
-      expect($containingParents[1]).toBe(document.getElementById('container2'));
+      expect($offsetParents.length).toBe(2);
+      expect($offsetParents[0]).toBe(document.getElementById('container1'));
+      expect($offsetParents[1]).toBe(document.getElementById('container2'));
     });
 
     it('should handle empty selection', () => {
       const $empty = $('.nonexistent');
-      const $containingParent = $empty.containingParent();
+      const $offsetParent = $empty.offsetParent();
 
-      expect($containingParent.length).toBe(0);
+      expect($offsetParent.length).toBe(0);
     });
 
     it('should find nearest containing parent in nested contexts', () => {
@@ -874,11 +986,11 @@ describe('query', () => {
       `;
 
       const $target = $('#target');
-      const $containingParent = $target.containingParent();
+      const $offsetParent = $target.offsetParent();
 
       // Should find the immediate containing parent (inner), not the outer one
-      expect($containingParent.length).toBe(1);
-      expect($containingParent[0]).toBe(document.getElementById('inner'));
+      expect($offsetParent.length).toBe(1);
+      expect($offsetParent[0]).toBe(document.getElementById('inner'));
     });
   });
 
@@ -890,69 +1002,74 @@ describe('query', () => {
     describe('width and height with options', () => {
       it('should get content-only dimensions by default', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width();
         const height = $('div').height();
-        
+
         expect(width).toBe(200);
         expect(height).toBe(100);
       });
 
       it('should get dimensions including padding with includePadding option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true });
         const height = $('div').height({ includePadding: true });
-        
+
         expect(width).toBe(220); // 200 + 20 padding
         expect(height).toBe(120); // 100 + 20 padding
       });
 
       it('should get dimensions including border with includeBorder option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true, includeBorder: true });
         const height = $('div').height({ includePadding: true, includeBorder: true });
-        
+
         expect(width).toBe(230); // 200 + 20 padding + 10 border
         expect(height).toBe(130); // 100 + 20 padding + 10 border
       });
 
       it('should get dimensions including margin with includeMargin option', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').width({ includePadding: true, includeBorder: true, includeMargin: true });
         const height = $('div').height({ includePadding: true, includeBorder: true, includeMargin: true });
-        
+
         expect(width).toBe(270); // 200 + 20 padding + 10 border + 40 margin
         expect(height).toBe(170); // 100 + 20 padding + 10 border + 40 margin
       });
 
       it('should work with border-box sizing', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: border-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: border-box;';
         document.body.appendChild(div);
 
         // With border-box, width: 200px means total width including padding and border
         // So content width should be 200 - 20 padding - 10 border = 170px
         const contentWidth = $('div').width();
         const contentHeight = $('div').height();
-        
+
         expect(contentWidth).toBe(170); // 200 - 20 padding - 10 border
-        expect(contentHeight).toBe(70);  // 100 - 20 padding - 10 border
+        expect(contentHeight).toBe(70); // 100 - 20 padding - 10 border
 
         const totalWidth = $('div').width({ includePadding: true, includeBorder: true });
         const totalHeight = $('div').height({ includePadding: true, includeBorder: true });
-        
-        expect(totalWidth).toBe(200);  // Total including padding and border
+
+        expect(totalWidth).toBe(200); // Total including padding and border
         expect(totalHeight).toBe(100); // Total including padding and border
       });
 
@@ -968,7 +1085,7 @@ describe('query', () => {
 
         const widths = $('.test').width();
         const heights = $('.test').height();
-        
+
         expect(widths).toEqual([200, 300]);
         expect(heights).toEqual([100, 150]);
       });
@@ -977,13 +1094,14 @@ describe('query', () => {
     describe('innerWidth and innerHeight', () => {
       it('should return content + padding dimensions', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').innerWidth();
         const height = $('div').innerHeight();
-        
-        expect(width).toBe(220);  // 200 content + 20 padding
+
+        expect(width).toBe(220); // 200 content + 20 padding
         expect(height).toBe(120); // 100 content + 20 padding
       });
     });
@@ -991,27 +1109,373 @@ describe('query', () => {
     describe('outerWidth and outerHeight', () => {
       it('should return content + padding + border dimensions by default', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').outerWidth();
         const height = $('div').outerHeight();
-        
-        expect(width).toBe(230);  // 200 content + 20 padding + 10 border
+
+        expect(width).toBe(230); // 200 content + 20 padding + 10 border
         expect(height).toBe(130); // 100 content + 20 padding + 10 border
       });
 
       it('should include margin when specified', () => {
         const div = document.createElement('div');
-        div.style.cssText = 'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        div.style.cssText =
+          'width: 200px; height: 100px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
         document.body.appendChild(div);
 
         const width = $('div').outerWidth({ includeMargin: true });
         const height = $('div').outerHeight({ includeMargin: true });
-        
-        expect(width).toBe(270);  // 200 content + 20 padding + 10 border + 40 margin
+
+        expect(width).toBe(270); // 200 content + 20 padding + 10 border + 40 margin
         expect(height).toBe(170); // 100 content + 20 padding + 10 border + 40 margin
       });
+    });
+  });
+
+  describe('naturalDisplay', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should return block as default for elements without CSS rules', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const result = $('div').naturalDisplay();
+      expect(result).toBe('block');
+    });
+
+    it('should return array for multiple elements', () => {
+      const div1 = document.createElement('div');
+      const div2 = document.createElement('div');
+      div1.style.display = 'inline';
+      div2.style.display = 'none';
+      document.body.appendChild(div1);
+      document.body.appendChild(div2);
+
+      const results = $('div').naturalDisplay();
+      expect(Array.isArray(results)).toBe(true);
+      expect(results).toHaveLength(2);
+      expect(results[0]).toBe('inline');
+      expect(results[1]).toBe('block'); // Should ignore 'none' and find natural display
+    });
+
+    it('should return single value for one element', () => {
+      const span = document.createElement('span');
+      document.body.appendChild(span);
+
+      const result = $('span').naturalDisplay();
+      expect(typeof result).toBe('string');
+      expect(result).toBe('inline'); // Default for span when no CSS rules found
+    });
+
+    it('should ignore display: none rules and find highest specificity non-none rule', () => {
+      // Create a style element with CSS rules
+      const style = document.createElement('style');
+      style.textContent = `
+        .test-element { display: none; }
+        .visible-element { display: inline-block; }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'test-element visible-element';
+      div.style.display = 'none';
+      document.body.appendChild(div);
+
+      const result = $('div').naturalDisplay();
+      expect(result).toBe('inline-block');
+
+      // Cleanup
+      document.head.removeChild(style);
+    });
+
+    it('should handle elements with higher specificity rules', () => {
+      // Create a style element with different specificity rules
+      const style = document.createElement('style');
+      style.textContent = `
+        div { display: inline; }
+        .specific { display: flex; }
+        #very-specific { display: grid; }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.id = 'very-specific';
+      div.className = 'specific';
+      div.style.display = 'none';
+      document.body.appendChild(div);
+
+      const result = $('div').naturalDisplay();
+      expect(result).toBe('grid'); // Highest specificity wins
+
+      // Cleanup
+      document.head.removeChild(style);
+    });
+
+    it('should handle nested CSS rules', () => {
+      // Create a style element with nested CSS rules
+      const style = document.createElement('style');
+      style.textContent = `
+        .container {
+          display: block;
+          
+          .element {
+            display: flex;
+            
+            &.hidden {
+              display: none;
+            }
+            
+            &.inline {
+              display: inline-block;
+            }
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
+      const div = document.createElement('div');
+      div.className = 'container';
+      document.body.appendChild(div);
+
+      const element = document.createElement('div');
+      element.className = 'element hidden inline';
+      div.appendChild(element);
+
+      const result = $('.element').naturalDisplay();
+      // Should find 'inline-block' as it has higher specificity than 'flex'
+      // and ignore 'none'
+      expect(result).toBe('inline-block');
+
+      // Cleanup
+      document.head.removeChild(style);
+    });
+
+    it('should handle cross-origin stylesheet errors gracefully', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // This should not throw an error even if there are cross-origin issues
+      expect(() => {
+        const result = $('div').naturalDisplay();
+        expect(typeof result).toBe('string');
+      }).not.toThrow();
+    });
+
+    it('should work with chaining', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const $div = $('div').addClass('test');
+      const result = $div.naturalDisplay();
+
+      expect($div).toBeInstanceOf(Query);
+      expect(typeof result).toBe('string');
+      expect(div.classList.contains('test')).toBe(true);
+    });
+  });
+
+  describe('scrollParent', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should return a Query instance', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+    });
+
+    it('should find the nearest scroll container with overflow hidden', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: hidden; width: 200px; height: 200px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should find the nearest scroll container with overflow scroll', () => {
+      document.body.innerHTML = `
+        <div id="outer">
+          <div id="scroller" style="overflow-y: scroll; height: 100px;">
+            <div id="inner">Inner content</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#inner').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('scroller'));
+    });
+
+    it('should find the nearest scroll container with overflow auto', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: auto; width: 150px; height: 150px;">
+          <div id="content">Content</div>
+        </div>
+      `;
+
+      const result = $('#content').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return window when no scroll container found', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: visible;">
+          <div id="inner" style="overflow: visible;">
+            <div id="target">Target</div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should handle multiple elements', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: hidden;">
+          <div class="item" id="item1">Item 1</div>
+        </div>
+        <div id="container2" style="overflow: scroll;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent();
+
+      expect(result.length).toBe(2);
+      expect(result[0]).toBe(document.getElementById('container1'));
+      expect(result[1]).toBe(document.getElementById('container2'));
+    });
+
+    it('should handle empty selection', () => {
+      const result = $('.nonexistent').scrollParent();
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should find nested scroll containers correctly', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: hidden;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: scroll;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('inner'));
+    });
+
+    it('should skip document.body and return window', () => {
+      document.body.innerHTML = '<div id="child">Child element</div>';
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(window);
+    });
+
+    it('should work with overflow-x only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-x: scroll; width: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should work with overflow-y only', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow-y: auto; height: 100px;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result.length).toBe(1);
+      expect(result[0]).toBe(document.getElementById('container'));
+    });
+
+    it('should return all scroll parents when all: true', () => {
+      document.body.innerHTML = `
+        <div id="outer" style="overflow: scroll;">
+          <div id="middle" style="overflow: visible;">
+            <div id="inner" style="overflow: auto;">
+              <div id="target">Target</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const result = $('#target').scrollParent({ all: true });
+
+      expect(result.length).toBe(3);
+      expect(result[0]).toBe(document.getElementById('inner'));
+      expect(result[1]).toBe(document.getElementById('outer'));
+      expect(result[2]).toBe(window);
+    });
+
+    it('should return flattened array for multiple elements with all: true', () => {
+      document.body.innerHTML = `
+        <div id="container1" style="overflow: scroll;">
+          <div id="middle1" style="overflow: auto;">
+            <div class="item" id="item1">Item 1</div>
+          </div>
+        </div>
+        <div id="container2" style="overflow: hidden;">
+          <div class="item" id="item2">Item 2</div>
+        </div>
+      `;
+
+      const result = $('.item').scrollParent({ all: true });
+
+      // Should get: [middle1, container1, window, container2, window]
+      expect(result.length).toBe(5);
+      expect(result[0]).toBe(document.getElementById('middle1'));
+      expect(result[1]).toBe(document.getElementById('container1'));
+      expect(result[2]).toBe(window);
+      expect(result[3]).toBe(document.getElementById('container2'));
+      expect(result[4]).toBe(window);
+    });
+
+    it('should return proper chaining Query instance', () => {
+      document.body.innerHTML = `
+        <div id="container" style="overflow: scroll;">
+          <div id="child">Child element</div>
+        </div>
+      `;
+
+      const result = $('#child').scrollParent();
+
+      expect(result).toBeInstanceOf(Query);
+      expect(result[0]).toBe(document.getElementById('container'));
     });
   });
 });

@@ -1,11 +1,17 @@
 import { $ } from '@semantic-ui/query';
 
 // Get dimensions
-const visibleWidth = $('.container').width();
-const scrollWidth = $('.container').scrollWidth();
-const hiddenContent = scrollWidth - visibleWidth;
+const getDimensions = () => {
+  // scrollWidth() returns total content width including hidden overflow
+  const scrollWidth = $('.container').scrollWidth();
+  $('.scroll-width').text(scrollWidth);
 
-// Display measurements
-$('.visible-width').text(visibleWidth);
-$('.scroll-width').text(scrollWidth);
-$('.hidden-content').text(hiddenContent);
+  // Compare with visible width
+  const visibleWidth = $('.container').width();
+  const hiddenContent = scrollWidth - visibleWidth;
+
+  $('.visible-width').text(visibleWidth);
+  $('.hidden-content').text(hiddenContent);
+};
+
+requestAnimationFrame(getDimensions);

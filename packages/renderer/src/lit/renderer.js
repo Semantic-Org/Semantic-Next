@@ -14,10 +14,11 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
+import { reactiveAsync } from './directives/reactive-async.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';
 import { reactiveData } from './directives/reactive-data.js';
 import { reactiveEach } from './directives/reactive-each.js';
-import { reactiveAsync } from './directives/reactive-async.js';
+import { reactiveRerender } from './directives/reactive-rerender.js';
 import { renderTemplate } from './directives/render-template.js';
 
 export class LitRenderer {
@@ -34,7 +35,7 @@ export class LitRenderer {
     return hashCode({ ast });
   }
 
-  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG }) {
+  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true }) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = {}; // stores templates but garbage collectable
@@ -45,6 +46,7 @@ export class LitRenderer {
     this.snippets = snippets || {};
     this.helpers = helpers || {};
     this.isSVG = isSVG;
+    this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.id = LitRenderer.getID({ ast, data, isSVG });
   }
 
@@ -106,6 +108,10 @@ export class LitRenderer {
           this.addValue(this.evaluateAsync(node, data));
           break;
 
+        case 'rerender':
+          this.addValue(this.evaluateRerender(node, data));
+          break;
+
         case 'template':
           this.addValue(this.evaluateTemplate(node, data));
           break;
@@ -152,6 +158,32 @@ export class LitRenderer {
     node.expression = node.condition; // store original expression for debugging
     let conditionalArguments = mapObject(node, directiveMap);
     return reactiveConditional(conditionalArguments);
+  }
+
+  /*
+    The rerender directive rerenders a block of content everytime
+    a reactive context value is changed
+  */
+  evaluateRerender(node, data) {
+    const directiveMap = (value, key) => {
+      if (key == 'expression') {
+        return () => this.lookupTokenValue(value, data);
+      }
+      if (key == 'key') {
+        return () => this.lookupTokenValue(value, data);
+      }
+      if (key == 'content') {
+        return () => this.renderContent({ ast: value, data });
+      }
+      return value;
+    };
+
+    // Store original expressions for debugging
+    node.expressionString = node.expression;
+    node.keyString = node.key;
+
+    let rerenderArguments = mapObject(node, directiveMap);
+    return reactiveRerender(rerenderArguments);
   }
 
   /*
@@ -263,7 +295,7 @@ export class LitRenderer {
       : () => Reaction.nonreactive(() => getValue(expression));
   };
 
-  getPackedNodeData(node, data, { inheritParent = false } = {}) {
+  getPackedNodeData(node, data, { inheritsData = false } = {}) {
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
       // this is a data object like {> someTemplate data=getData }
@@ -286,7 +318,7 @@ export class LitRenderer {
 
     // only inherit parent data context if specified
     data = {
-      ...(inheritParent) ? this.data : {},
+      ...(inheritsData) ? data : {},
       ...packedStaticData,
       ...packedReactiveData,
     };
@@ -296,11 +328,17 @@ export class LitRenderer {
   evaluateSnippet(node, data = {}) {
     const snippetName = this.lookupExpressionValue(node.name, data);
     const snippet = this.snippets[snippetName];
+
+    // snippets default to inheriting parent data
+    // this simplifies most common use cases for organizing templates with snippiets
+    const inheritsData = true;
+
     if (!snippet) {
       fatal(`Snippet "${snippetName}" not found`);
     }
-    const snippetData = this.getPackedNodeData(node, data, { inheritParent: true });
+    const snippetData = this.getPackedNodeData(node, data, { inheritsData });
     return this.renderContent({
+      inheritsData,
       ast: snippet.content,
       data: snippetData,
     });
@@ -327,6 +365,7 @@ export class LitRenderer {
       if (asDirective) {
         const dataArguments = {
           expression,
+          literalValue: () => this.lookupTokenValue(expression, this.data),
           value: () => this.lookupExpressionValue(expression, this.data),
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
@@ -347,7 +386,7 @@ export class LitRenderer {
     // Replace parenthetical groups with placeholders
     const processedExpr = expr.replace(LitRenderer.PARENS_REGEXP, match => {
       const placeholder = `__GROUP${groups.length}__`;
-      groups.push(match.slice(1,-1)); // remove parens ()
+      groups.push(match.slice(1, -1)); // remove parens ()
       return placeholder;
     });
 
@@ -356,7 +395,7 @@ export class LitRenderer {
     const getValue = (token) => {
       const match = token.match(/__GROUP(\d+)__/);
       return match ? groups[parseInt(match[1], 10)] : token;
-    }
+    };
     const parse = (tokens) => {
       const result = [];
       while (tokens.length > 0) {
@@ -368,7 +407,7 @@ export class LitRenderer {
           return result;
         }
         else {
-          result.push( getValue(token) );
+          result.push(getValue(token));
         }
       }
       return result;
@@ -392,12 +431,11 @@ export class LitRenderer {
       });
     }
     try {
-
       // Create a proxy handler that automatically resolves signals and functions
       // <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/with#creating_dynamic_namespaces_using_the_with_statement_and_a_proxy>
       const proxyHandler = {
         has(target, key) {
-          if(key in target) {
+          if (key in target) {
             return true;
           }
           return false;
@@ -414,23 +452,25 @@ export class LitRenderer {
             return new Proxy(value, {
               apply(targetFn, thisArg, args) {
                 return targetFn.apply(thisArg, args);
-              }
+              },
             });
           }
           return value;
-        }
+        },
       };
 
       // Create a proxy for the context
-      const proxiedContext = new Proxy({...context}, proxyHandler);
+      const proxiedContext = new Proxy({ ...context }, proxyHandler);
 
       // Use with statement to set the evaluation scope to our proxy
-      result = new Function('ctx', `
+      result = new Function(
+        'ctx',
+        `
         with (ctx) {
           return ${code};
         }
-      `)(proxiedContext);
-      result = new Function(...keys, `return ${code}`)(...values);
+      `,
+      )(proxiedContext);
     }
     catch (e) {
       // this token is not valid javascript
@@ -456,7 +496,7 @@ export class LitRenderer {
         // if we found a value and we are recursing we will need to return the function
         // to pass through arguments
         visited.delete(expression);
-        if(visited.size > 0) {
+        if (visited.size > 0) {
           return value;
         }
 
@@ -467,7 +507,7 @@ export class LitRenderer {
 
     // we will need to parse this expression by token
     let expressionArray;
-    if(!isArray(expression)) {
+    if (!isArray(expression)) {
       // wrap {} or [] in parens if used in lisp style like `getValue { foo: 'baz' }`
       expression = this.addParensToExpression(expression);
       expressionArray = this.getExpressionArray(expression);
@@ -649,15 +689,18 @@ export class LitRenderer {
   }
 
   setData(newData) {
-    this.updateData(newData);
-    this.updateSubtreeData(newData);
+    // current subtree can remove existing data if not present in new data
+    this.updateData(newData, { preserveExistingData: false });
+
+    // subtrees might have their own additive data. we dont want to remove this
+    this.updateSubtreeData(newData, { preserveExistingData: true });
   }
 
-  // yeah we're going there, weakrefs
   updateSubtreeData(newData) {
     each(this.renderTrees, (ref, contentID) => {
+      // use deref to allow mem cleanup of subtrees
       const tree = ref.deref();
-      if (tree) {
+      if (tree?.inheritsData) {
         tree.updateData(newData);
       }
     });
@@ -667,10 +710,14 @@ export class LitRenderer {
     Note this is important to preserve the object reference vs clobbering
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
-  updateData(newData) {
-    each(this.data, (value, name) => {
-      delete this.data[name];
-    });
+  updateData(newData, { preserveExistingData = true } = {}) {
+    // if specified remove all existing data before setting new data
+    if (!preserveExistingData) {
+      each(this.data, (value, name) => {
+        delete this.data[name];
+      });
+    }
+    // add new data
     each(newData, (value, name) => {
       if (this.data[name] !== value) {
         this.data[name] = value;

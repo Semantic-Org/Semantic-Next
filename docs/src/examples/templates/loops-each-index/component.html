@@ -1,0 +1,13 @@
+<h2>Default index variable</h2>
+<ul>
+{#each fruit in fruits}
+  <li>{index + 1}: {fruit.name} - {fruit.taste}</li>
+{/each}
+</ul>
+
+<h2>Custom index variable</h2>
+<ul>
+{#each fruit, idx in fruits}
+  <li>{idx + 1}: {fruit.name} - {fruit.taste}</li>
+{/each}
+</ul>

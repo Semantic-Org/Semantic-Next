@@ -5,6 +5,7 @@ title: Logical Helpers
 icon: toggle-left
 description: API reference for logical template helpers
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 Logical helpers provide utilities for conditional checks and logical operations in templates.
 
@@ -182,3 +183,33 @@ The value of `trueExpr` if `expr` is truthy, `falseExpr` otherwise.
 ```sui
 <p>The light is {maybe isOn 'on' 'off'}.</p>
 ```
+
+### default
+Returns the fallback value if the first value is null or undefined, otherwise returns the first value.
+
+#### Template Syntax
+```sui
+{default valueToCheck fallbackValue}
+```
+
+#### Parameters
+| Name     | Type | Description |
+|----------|------|-------------|
+| value    | any  | The value to check |
+| fallback | any  | The fallback value to use if value is null/undefined |
+
+#### Returns
+The original value if not null/undefined, otherwise the fallback value.
+
+#### Example
+```sui
+<p>Welcome, {default user.name 'Guest'}!</p>
+<p>Items per page: {default settings.pageSize 10}</p>
+```
+
+#### Note
+Uses nullish coalescing (`??`) internally, so only null and undefined trigger the fallback. Other falsy values like `0`, `false`, or `''` will not use the fallback.
+
+## Examples
+
+<PlaygroundExample id="helpers-logical" />

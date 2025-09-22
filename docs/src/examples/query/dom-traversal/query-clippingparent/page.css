@@ -1,23 +1,42 @@
-.viewport {
-  height: 100px;
-  overflow: hidden;
-  border: var(--border);
-  margin: var(--vertically-spaced);
-  
-  &.highlight {
-    border-color: var(--primary-30);
-    background-color: var(--primary-5);
-  }
+.container {
+  padding: var(--padding);
+  margin: var(--margin) 0;
+  border: 2px solid var(--standard-30);
+  background: var(--standard-5);
 }
 
-.content {
-  height: 200px;
-  padding: var(--spacing);
+.box {
+  padding: var(--padding);
+  margin: var(--margin) 0;
+  border: 2px solid var(--blue-30);
+  background: var(--blue-5);
+  height: 100px;
+  position: relative;
 }
 
 .target {
-  padding: var(--compact-spacing);
+  padding: var(--padding);
+  background: var(--green-10);
+  border: 2px solid var(--green-30);
+  position: absolute;
+  top: 80px;
+  left: 20px;
+  width: 200px;
+}
+
+ui-button {
+  margin: 5px;
+}
+
+.log {
+  margin: var(--margin) 0;
+  padding: var(--padding);
   background: var(--standard-5);
+  font-family: monospace;
   border-radius: var(--border-radius);
-  margin-top: 80px;
+}
+
+.highlight {
+  outline: 3px solid var(--red-40);
+  outline-offset: -3px;
 }

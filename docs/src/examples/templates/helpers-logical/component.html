@@ -1,0 +1,63 @@
+<h3>exists</h3>
+{#if exists username}
+  <p>
+    <ui-icon icon="user" /> 
+    Username: <b>{username}</b>
+  </p>
+{/if}
+
+{#if exists email}
+  <p>
+    <ui-icon icon="mail" /> 
+    Email: <b>{email}</b>
+  </p>
+{else}
+  <p class="empty">
+    <ui-icon icon="x-circle" /> 
+    No email provided
+  </p>
+{/if}
+
+<h3>hasAny</h3>
+{#if hasAny notifications}
+  <p>
+    You have 
+    <b>
+      <ui-icon icon="bell" />
+      {notifications.length} notifications
+    </b>
+  </p>
+{else}
+  <p class="empty">No notifications</p>
+{/if}
+
+<h3>both</h3>
+<p>
+  Logged in as
+  {#if both isLoggedIn isModerator}
+    <b>moderator</b>
+  {else}
+    standard user
+  {/if}
+</p>
+
+<h3>either</h3>
+{#if either isAdmin isModerator}
+  <p>Has <b>special privileges</b></p>
+{else}
+  <p>Regular user</p>
+{/if}
+
+<h3>maybe</h3>
+<p>User: <b>{maybe (exists username) 'Logged in' 'Guest'}</b></p>
+<p>Access: <b>{maybe (either isAdmin isModerator) 'Admin Panel' 'User Dashboard'}</b></p>
+
+<h3>isEmpty</h3>
+{#if isEmpty email}
+  <p class="empty">Email field is empty</p>
+{/if}
+
+<h3>not</h3>
+{#if not isAdmin}
+  <p>User is <b>not</b> an admin</p>
+{/if}

@@ -1,0 +1,20 @@
+<h3>formatDate</h3>
+<p>
+  <ui-icon icon="calendar" />
+  Created: <b>{formatDate createdAt 'YYYY-MM-DD'}</b>
+</p>
+
+<h3>formatDateTime</h3>
+<p>
+  <ui-icon icon="clock" />
+  Last login: <b>{formatDateTime lastLogin 'MMM DD, YYYY HH:mm'}</b>
+</p>
+
+<h3>formatDateTimeSeconds</h3>
+<p>Precise timestamp: <b>{formatDateTimeSeconds lastLogin 'YYYY-MM-DD HH:mm:ss'}</b></p>
+
+<h3>roundNumber</h3>
+<p>Average score: <b>{roundNumber averageScore 1}</b></p>
+
+<h3>roundDecimal</h3>
+<p>Precise average: <b>{roundDecimal averageScore 2}</b></p>

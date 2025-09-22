@@ -299,11 +299,48 @@ Each agent should have a clear perspective they argue from, creating productive 
 ### 4. **Tool-Enabled Discovery**
 Design contexts that teach agents HOW to find information using available tools, not just WHAT information they need.
 
-### 5. **Domain Boundary Clarity**
+### 5. **AI-Procedural Instruction Design**
+Write instructions for AI agents, not humans. Use algorithmic decision trees rather than cautionary narratives.
+
+### 6. **Domain Boundary Clarity**
 Clear separation between what this agent handles versus what other agents handle prevents overlap and confusion.
 
-### 6. **Quality-Focused Success Criteria**
+### 7. **Quality-Focused Success Criteria**
 Measurable criteria enable other agents to evaluate this agent's work and provide meaningful feedback.
+
+## AI-Procedural Instruction Design Patterns
+
+### ✅ Effective AI Instructions
+```markdown
+**FORMAT**: [Action] + [Target Audience] + [Cognitive Approach] + [Output Format]
+
+**INSTEAD OF** (Human-oriented):
+"Be careful not to remove technical terminology - previous agents made mistakes"
+
+**USE** (AI-procedural):
+"IF removing adverbs describing implementation → QUERY user for confirmation"
+
+**PATTERN TEMPLATE**:
+- **IF** [condition] → **THEN** [action]
+- **PROCEDURE**: [step-by-step process]
+- **PATTERN**: [generalizable rule]
+- **CHECK**: [validation step]
+```
+
+### ✅ Decision Tree Format
+```markdown
+### Validation Protocol
+1. **SCAN** content for [specific pattern]
+2. **IF** pattern detected → **HALT** and flag for review
+3. **IF** uncertain → **PRESERVE** original and note concern
+4. **VERIFY** final output maintains [specific requirement]
+```
+
+### ❌ Avoid Human-Emotional Language
+- "Be careful" → Use "VERIFY"
+- "Previous agents learned" → Use "PROCEDURE"
+- "It's important to" → Use "MUST" or "REQUIRED"
+- "Try to avoid" → Use "IF X → DO Y"
 
 ## Common Anti-Patterns to Avoid
 

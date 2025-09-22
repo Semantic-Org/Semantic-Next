@@ -2,7 +2,7 @@
 layout: '@layouts/Guide.astro'
 title: Events
 icon: grid
-description: Usings events with components
+description: Using events with components
 ---
 import { Image } from 'astro:assets';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -10,7 +10,7 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 import lifecycleImage from '@images/lifecycle-diagram.png';
 
 
-## Binding Event Handlers
+## Inside Component
 
 Semantic components can include events by passing in an object mapping events to event handlers when creating your component. Events take the form of `eventName selector`, for instance `click .submit`.
 
@@ -69,12 +69,24 @@ For example if you have a component called `ui-button` this would fire when the 
 const events = {
   'mouseover'({state}) => {
     state.hovered.set(true);
-  }
+  },
   'mouseout'({state}) => {
     state.hovered.set(false);
   }
 };
 ```
+
+## Inside Templates
+
+### @Event Handler
+
+You can bind events directly from inside templates using `@event` syntax. You can specify the handler using an [expression](/templates/expressions) that points to any function, like a setting, or template method.
+
+```sui
+<div @click={doSomething}></div>
+```
+
+<PlaygroundExample id="template-event-handlers" direction="horizontal"></PlaygroundExample>
 
 
 ## Special Event Bindings
@@ -95,9 +107,12 @@ const events = {
 };
 ```
 
+
+
+
 ### Deep Events
 
-You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's shadow DOM or slotted content which a person using your component might include.
+You can use the `deep` keyword to attach events to nested web components or slotted content. This can let you target parts of the component's [shadow DOM](/query/shadow-dom) or [slotted content](/templates/slots) which a person using your component might include.
 
 > **Deep Usage** By default selectors will only match the DOM of your component's template. This will prevent the handler from firing if the user slots content which also matches your selectors.
 
@@ -165,7 +180,7 @@ HTML metadata can be added using data attributes and will be available directly 
 
 ```javascript
 const events = {
-  'click .increment'({self, data]}) {
+  'click .increment'({self, data}) {
     self.increment(data.amount);
   }
 };
@@ -177,7 +192,7 @@ Any custom event metadata will also be available in the `data` attribute.
 
 Another component creates an event
 ```javascript
-const createComponent = ({dispatchEvent}) {
+const createComponent = ({dispatchEvent}) => {
   startResize() {
     dispatchEvent('resizeStart', {
       startPosition: currentPosition,
@@ -210,7 +225,7 @@ In some scenarios you may want to manually bind and unbind events that are part 
 
 You can use `attachEvent` which is passed to all component callbacks to attach events dynamically where you may not know the selector until the component is created
 
-> All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortSignals`.
+> All events attached with `attachEvent` will automatically be removed when the component is destroyed using `abortController`.
 
 ```javascript
 const onCreated = ({attachEvent, settings, isClient}) => {
@@ -250,7 +265,7 @@ const createComponent = ({dispatchEvent}) => {
 ```
 
 
-> **Callbacks versus events** Although you can use callback functions in [component settings](/component/settings) to alert of internal changes in a component, it is a better pattern to only use callbacks in settings if you need the function to return a value as dispatched events cannot achieve this.
+> **Callbacks versus events** Although you can use callback functions in [component settings](/components/settings) to alert of internal changes in a component, it is a better pattern to only use callbacks in settings if you need the function to return a value as dispatched events cannot achieve this.
 
 ```javascript
 const defaultSettings = {
@@ -299,7 +314,7 @@ el.addEventListener('itemactive', (event) => {
 ## Built In Events
 
 ### Lifecycle Events
-You can listen to any [components lifecycle events](/components/lifecycle) with event listeners similar to Components all emit lifecycle events as native DOM events that can be used to respond to the lifecycle of subcomponents.
+You can listen to any [components lifecycle events](/components/lifecycle) with event listeners. Components all emit lifecycle events as native DOM events that can be used to respond to the lifecycle of subcomponents.
 
 The custom event will also include a reference to the component which you can use to invoke behaviors on that component.
 

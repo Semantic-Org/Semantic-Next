@@ -2,12 +2,16 @@ import {
   camelToKebab,
   each,
   findIndex,
+  firstMatch,
   get,
+  hashCode,
   inArray,
   isArray,
   isClient,
+  isDevelopment,
   isDOM,
   isFunction,
+  isNumber,
   isObject,
   isPlainObject,
   isString,
@@ -35,16 +39,31 @@ export class Query {
     },
   });
 
-  /*
-    We keep an array of event handlers for teardown
-  */
-  static eventHandlers = [];
+  static isDevelopment = isDevelopment;
+
+  static logLevel = isDevelopment ? 'debug' : 'silent';
+
+  static logPerformance = false;
 
   /*
-    We keep an array to store registered plugins
+    We clean up event handlers in two cases
+    1) element is removed from dom
+    2) reference to handler is removed from dom
+  */
+  static eventRegistry = new WeakMap(); // Key: Element, Value: Set<HandlerObject>
+  static handlerRegistry = new WeakMap(); // Key: HandlerObject, Value: Element
+
+  /*
+    We keep a map to store registered behaviors
     This allows an end user to see available extensions
   */
-  static plugins = new Map();
+  static behaviors = new Map();
+
+  /*
+    Cache for naturalDisplay() results per element
+    Key: element, Value: { rulesHash, displayValue }
+  */
+  static elementDisplayCache = new WeakMap();
 
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
@@ -219,10 +238,6 @@ export class Query {
     return this;
   }
 
-  removeAllEvents() {
-    Query.eventHandlers = [];
-  }
-
   find(selector) {
     const elements = Array.from(this).flatMap((el) => {
       if (this.options.pierceShadow) {
@@ -314,6 +329,9 @@ export class Query {
   }
 
   is(selector) {
+    if (this.length == 0) {
+      return false;
+    }
     const filteredElements = Array.from(this).filter((el) => {
       if (typeof selector === 'string') {
         return el.matches && el.matches(selector);
@@ -423,7 +441,16 @@ export class Query {
 
   closest(selector, { returnAll = false } = {}) {
     const allResults = [];
-
+    const closest = (el, selector) => {
+      if (isDOM(selector) && selector?.contains) {
+        if (selector.contains(el)) {
+          return selector;
+        }
+      }
+      else {
+        return el.closest(selector);
+      }
+    };
     Array.from(this).forEach((el) => {
       if (this.options.pierceShadow) {
         const matches = this.closestDeep(el, selector, { returnAll });
@@ -439,7 +466,7 @@ export class Query {
           // Walk up DOM tree using native closest() efficiently
           let current = el.parentElement;
           while (current) {
-            const match = current.closest(selector);
+            const match = closest(current, selector);
             if (match) {
               allResults.push(match);
               // Continue from the parent of the match to find more ancestors
@@ -451,7 +478,7 @@ export class Query {
           }
         }
         else {
-          const match = el.closest(selector);
+          const match = closest(el, selector);
           if (match) {
             allResults.push(match);
           }
@@ -541,18 +568,30 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
     const events = this.getEventArray(eventNames);
+
+    // we store a reference using a set of weakmaps
+    // this allows us to properly gc handlers but still remove them properly
+    const registerEvent = ({ el, eventHandler }) => {
+      const elementHandlers = Query.eventRegistry.get(el) || new Set();
+      elementHandlers.add(eventHandler);
+      Query.eventRegistry.set(el, elementHandlers); // for $('div').off();
+      Query.handlerRegistry.set(eventHandler, el); // for $('div').off(handler);
+    };
 
     events.forEach(({ eventName, namespaces }) => {
       const abortController = options?.abortController || new AbortController();
@@ -602,13 +641,9 @@ export class Query {
           abort: (reason) => abortController.abort(reason),
         };
         eventHandlers.push(eventHandler);
+        registerEvent({ el, eventHandler });
       });
     });
-
-    if (!Query.eventHandlers) {
-      Query.eventHandlers = [];
-    }
-    Query.eventHandlers.push(...eventHandlers);
 
     if (options?.returnHandler) {
       return eventHandlers.length == 1 ? eventHandlers[0] : eventHandlers;
@@ -620,14 +655,17 @@ export class Query {
     let handler;
     let targetSelector;
     if (isObject(handlerOrOptions)) {
+      // event with options  $('foo').one('click', fn, options);
       options = handlerOrOptions;
       handler = targetSelectorOrHandler;
     }
     else if (isString(targetSelectorOrHandler)) {
+      // event delegation $('foo').one('click', '.baz', fn);
       targetSelector = targetSelectorOrHandler;
       handler = handlerOrOptions;
     }
     else if (isFunction(targetSelectorOrHandler)) {
+      // event handler $('foo').one('click', fn);
       handler = targetSelectorOrHandler;
     }
 
@@ -644,81 +682,141 @@ export class Query {
       : this.on(eventName, wrappedHandler, options);
   }
 
-  off(eventNames, handler) {
-    if (!eventNames) {
-      // Remove all events (existing behavior)
-      Query.eventHandlers.forEach(eventHandler => {
-        const el = (this.isGlobal) ? globalThis : eventHandler.el;
-        if (el.removeEventListener) {
-          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
+  onNext(eventName, targetSelectorOrOptions, options) {
+    return new Promise((resolve, reject) => {
+      let targetSelector;
+
+      // Handle parameter overloading
+      if (isString(targetSelectorOrOptions)) {
+        targetSelector = targetSelectorOrOptions;
+      }
+      else if (isObject(targetSelectorOrOptions)) {
+        options = targetSelectorOrOptions;
+      }
+
+      // Extract timeout if specified
+      const timeout = options?.timeout;
+      let timeoutId;
+
+      // Set up timeout if specified
+      if (timeout) {
+        timeoutId = setTimeout(() => {
+          // Clean up event listener
+          this.off(eventName, handler);
+          reject(new Error(`Event '${eventName}' timeout after ${timeout}ms`));
+        }, timeout);
+      }
+
+      // Event handler that resolves the promise
+      const handler = (event) => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
         }
-      });
-      Query.eventHandlers = [];
+        resolve(event);
+      };
+
+      // Use one() to automatically remove after first trigger
+      if (targetSelector) {
+        this.one(eventName, targetSelector, handler, options);
+      }
+      else {
+        this.one(eventName, handler, options);
+      }
+    });
+  }
+
+  off(eventNames, handler) {
+    if (isFunction(eventNames)) {
+      handler = eventNames;
+    }
+
+    // actually handle removing an event handler
+    const removeHandler = (handler, el = handler?.el) => {
+      const elementHandlers = Query.eventRegistry.get(el);
+
+      // this is an exact handler to match
+      if (isFunction(handler) && el) {
+        const handlerFunc = handler;
+        handler = firstMatch(elementHandlers, thisHandler => thisHandler.handler === handlerFunc);
+      }
+
+      // use abort signal to remove from element
+      handler.abort();
+
+      // remove from handler registry
+      Query.handlerRegistry.delete(handler);
+
+      // remove from el registry
+      if (elementHandlers) {
+        elementHandlers?.delete(handler);
+        if (elementHandlers.size === 0) {
+          Query.eventRegistry.delete(el);
+        }
+      }
+    };
+
+    // Scenario 1: Remove handler by passing handler object
+    // i.e. { handler, abort } // etc
+    if (isPlainObject(handler)) {
+      removeHandler(handler);
       return this;
     }
 
-    const events = this.getEventArray(eventNames);
+    // Scenario 2: Remove by name or namespace or initial handler function
+    const events = eventNames
+      ? this.getEventArray(eventNames)
+      : [{ eventName: null, namespaces: null }];
 
-    Query.eventHandlers = Query.eventHandlers.filter((eventHandler) => {
-      const shouldRemove = events.some(({ eventName, namespaces }) => {
-        // Match event name (if specified)
-        const eventMatches = !eventName || eventHandler.eventName === eventName;
+    this.each(el => {
+      const elementHandlers = Query.eventRegistry.get(el);
 
-        // Match namespaces (if specified) - any overlap removes the handler
-        let namespacesMatch = false;
-        if (namespaces && namespaces.length) {
-          if (eventHandler.namespaces && eventHandler.namespaces.length) {
-            // Check if any target namespace exists in handler's namespaces
-            namespacesMatch = namespaces.some(targetNs => inArray(targetNs, eventHandler.namespaces));
-          }
-        }
-        else {
-          // No namespaces specified in removal, matches any
-          namespacesMatch = true;
-        }
-
-        // Match handler (if specified)
-        const handlerMatches = !handler
-          || handler?.eventListener === eventHandler.eventListener
-          || eventHandler.eventListener === handler
-          || eventHandler.handler === handler;
-
-        return eventMatches && namespacesMatch && handlerMatches;
-      });
-
-      if (shouldRemove) {
-        // Remove the actual event listener
-        const el = (this.isGlobal) ? globalThis : eventHandler.el;
-        if (el.removeEventListener) {
-          el.removeEventListener(eventHandler.eventName, eventHandler.eventListener);
-        }
-        return false; // Filter out this handler
+      // nothing to remove
+      if (!elementHandlers) {
+        return;
       }
-      return true; // Keep this handler
+
+      elementHandlers.forEach(eventHandler => {
+        // Check if this handler should be removed based on event/namespace match.
+        const shouldRemove = events.some(({ eventName, namespaces }) => {
+          const eventMatches = !eventName || eventHandler.eventName === eventName;
+          const sameNamespace = !namespaces
+            || (eventHandler.namespaces && namespaces.every(ns => eventHandler.namespaces.includes(ns)));
+          const handlerMatches = !handler
+            || eventHandler.handler === handler
+            || eventHandler === handler;
+          return eventMatches && sameNamespace && handlerMatches;
+        });
+
+        if (shouldRemove) {
+          removeHandler(eventHandler, el);
+        }
+      });
     });
 
     return this;
   }
 
-  trigger(eventName, eventParams) {
+  trigger(eventName, eventSettings) {
     return this.each(el => {
       if (typeof el.dispatchEvent !== 'function') {
         return;
       }
-      const event = new Event(eventName, { bubbles: true, cancelable: true });
-      if (eventParams) {
-        Object.assign(event, eventParams);
+      // trigger native handler
+      if (isFunction(el[eventName])) {
+        el[eventName]();
+        return;
       }
+      const event = new CustomEvent(eventName, { bubbles: true, cancelable: true, composed: true, ...eventSettings });
       el.dispatchEvent(event);
     });
   }
 
   // shorthand for most common trigger() uses
-  click(eventParams) {
-    return this.trigger('click', eventParams);
+  click(eventSettings) {
+    return this.trigger('click', eventSettings);
   }
-  submit(eventParams) {
-    return this.trigger('submit', eventParams);
+  submit(eventSettings) {
+    return this.trigger('requestSubmit', eventSettings);
   }
 
   dispatchEvent(eventName, eventData = {}, eventSettings = {}) {
@@ -741,22 +839,31 @@ export class Query {
   }
 
   addClass(classNames) {
-    const classesToAdd = classNames.split(' ');
-    return this.each((el) => el.classList.add(...classesToAdd));
-  }
-
-  hasClass(className) {
-    return Array.from(this).some((el) => el.classList.contains(className));
+    if (!classNames) {
+      return this;
+    }
+    const classesToAdd = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.add(...classesToAdd));
   }
 
   removeClass(classNames) {
-    const classesToRemove = classNames.split(' ');
-    return this.each((el) => el.classList.remove(...classesToRemove));
+    if (!classNames) {
+      return this;
+    }
+    const classesToRemove = classNames.trim().split(' ');
+    return this.each((el) => el?.classList?.remove(...classesToRemove));
   }
 
   toggleClass(classNames) {
-    const classesToToggle = classNames.split(' ');
-    return this.each((el) => el.classList.toggle(...classesToToggle));
+    if (!classNames) {
+      return this;
+    }
+    const classesToToggle = classNames.trim().split(' ');
+    return this.each((el) => el?.classList.toggle(...classesToToggle));
+  }
+
+  hasClass(className) {
+    return Array.from(this).some((el) => el?.classList.contains(className));
   }
 
   html(newHTML) {
@@ -989,7 +1096,7 @@ export class Query {
       return this.each((el) => el.setAttribute(attribute, value));
     }
     else if (this.length) {
-      const attributes = this.map((el) => el.getAttribute(attribute));
+      const attributes = this.map((el) => el?.getAttribute(attribute));
       return attributes.length > 1 ? attributes : attributes[0];
     }
   }
@@ -1194,14 +1301,12 @@ export class Query {
       const marginRight = parseFloat(computedStyle.marginRight) || 0;
 
       // Start with total width and subtract what we don't want
-      width -= borderLeft + borderRight; // Remove border to get content + padding
+      if (!includeBorder) {
+        width -= borderLeft + borderRight; // Remove border to get content + padding
+      }
 
       if (!includePadding) {
         width -= paddingLeft + paddingRight; // Remove padding to get content only
-      }
-
-      if (includeBorder) {
-        width += borderLeft + borderRight; // Add border back
       }
 
       if (includeMargin) {
@@ -1215,11 +1320,11 @@ export class Query {
   }
 
   innerWidth() {
-    return this.width({ includePadding: true });
+    return this.width({ includePadding: true, includeBorder: false });
   }
 
   innerHeight() {
-    return this.height({ includePadding: true });
+    return this.height({ includePadding: true, includeBorder: false });
   }
 
   outerWidth({ includeMargin = false } = {}) {
@@ -1241,13 +1346,27 @@ export class Query {
   }
 
   scrollLeft(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollLeft', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(value, window.scrollY);
+        return this;
+      }
+      return window.scrollX;
+    }
+    return this.prop('scrollLeft', value);
   }
 
   scrollTop(value) {
-    const el = (this.isGlobal && this.isBrowser) ? this.chain(document.documentElement) : this;
-    return el.prop('scrollTop', value);
+    // special case <body> for window scroll
+    if (this.isGlobal || this.isBrowser || this.is('html, body')) {
+      if (value !== undefined) {
+        window.scroll(window.scrollX, value);
+        return this;
+      }
+      return window.scrollY;
+    }
+    return this.prop('scrollTop', value);
   }
 
   clone() {
@@ -1264,36 +1383,60 @@ export class Query {
   }
 
   insertContent(target, content, position) {
+    // Handle string content (text or HTML)
+    if (isString(content)) {
+      target.insertAdjacentHTML(position, content);
+      return;
+    }
+
     const $content = this.chain(content);
-    $content.each(el => {
+    const insertElement = (el) => {
       if (target.insertAdjacentElement) {
-        target.insertAdjacentElement(position, el);
+        return target.insertAdjacentElement(position, el);
       }
       else {
         switch (position) {
           case 'beforebegin':
             target.parentNode?.insertBefore(el, target);
-            break;
+            return el;
           case 'afterbegin':
             target.insertBefore(el, target.firstChild);
-            break;
+            return el;
           case 'beforeend':
             target.appendChild(el);
-            break;
+            return el;
           case 'afterend':
             target.parentNode?.insertBefore(el, target.nextSibling);
-            break;
+            return el;
         }
       }
-    });
+      return el;
+    };
+
+    const insertedElements = $content.map(el => {
+      if (el instanceof DocumentFragment) {
+        return Array.from(el.childNodes).map(insertElement);
+      }
+      else {
+        return insertElement(el);
+      }
+    }).flat();
+
+    return this.chain(insertedElements);
   }
 
-  prepend(...allContent) {
+  before(...allContent) {
     return this.each((el) => {
       each(allContent, content => {
-        this.insertContent(el, content, 'afterbegin');
+        this.insertContent(el, content, 'beforebegin');
       });
     });
+  }
+  insertBefore(selector) {
+    this.chain(selector).each((el) => {
+      this.insertContent(el, this, 'beforebegin');
+    });
+    return this;
   }
 
   append(...allContent) {
@@ -1303,29 +1446,51 @@ export class Query {
       });
     });
   }
-
-  insertBefore(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'beforebegin');
+  appendTo(selector) {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'beforeend');
     });
+    return this;
   }
 
+  prepend(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterbegin');
+      });
+    });
+  }
+  prependTo(selector) {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
+      this.insertContent(el, content, 'afterbegin');
+    });
+    return this;
+  }
+
+  after(...allContent) {
+    return this.each((el) => {
+      each(allContent, content => {
+        this.insertContent(el, content, 'afterend');
+      });
+    });
+  }
   insertAfter(selector) {
-    return this.chain(selector).each((el) => {
-      this.insertContent(el, this.selector, 'afterend');
-    });
-  }
-
-  before(content) {
-    return this.each((el) => {
-      this.insertContent(el, content, 'beforebegin');
-    });
-  }
-
-  after(content) {
-    return this.each((el) => {
+    const $targets = this.chain(selector);
+    const numTargets = $targets.length;
+    $targets.each((el, index) => {
+      const isLast = index === numTargets - 1;
+      const content = isLast ? this : this.clone();
       this.insertContent(el, content, 'afterend');
     });
+    return this;
   }
 
   detach() {
@@ -1336,17 +1501,32 @@ export class Query {
     });
   }
 
-  naturalWidth() {
+  naturalWidth({ preserveMaxWidth = true } = {}) {
     const widths = this.map((el) => {
-      const $clone = this.chain(el.cloneNode(true));
+      const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        width: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxWidth: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxWidth) {
+        css.maxWidth = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalWidth = $clone.width();
       $clone.remove();
       return naturalWidth;
@@ -1354,17 +1534,32 @@ export class Query {
     return widths.length > 1 ? widths : widths[0];
   }
 
-  naturalHeight() {
+  naturalHeight({ preserveMaxHeight = true } = {}) {
     const height = this.map((el) => {
       const $clone = this.chain(el).clone();
+      const css = {
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        display: 'block',
+        transform: 'translate(-200vw, -200vh)',
+        pointerEvents: 'none',
+        height: 'auto',
+        visibility: 'hidden',
+        isolation: 'isolate',
+        contain: 'layout paint style',
+        maxHeight: 'none',
+        boxSizing: 'content-box',
+        padding: '0px',
+        margin: '0px',
+        border: '0px',
+      };
+      if (!preserveMaxHeight) {
+        css.maxHeight = 'none';
+      }
       $clone
         .insertAfter(el)
-        .css({
-          position: 'absolute',
-          display: 'block',
-          transform: 'translate(-9999px, -9999px)',
-          zIndex: '-1',
-        });
+        .css(css);
       const naturalHeight = $clone.height();
       $clone.remove();
       return naturalHeight;
@@ -1372,14 +1567,211 @@ export class Query {
     return height.length > 1 ? height : height[0];
   }
 
+  naturalDisplay({ calculate = true } = {}) {
+    // store style hash across map
+    let styleHash;
+    if (calculate) {
+      styleHash = Array.from(document.styleSheets).map(sheet => {
+        try {
+          return { href: sheet.href, title: sheet.title, disabled: sheet.disabled };
+        }
+        catch (e) {
+          // Cross-origin stylesheet - can't access properties safely
+          return { crossOrigin: true, index: Array.from(document.styleSheets).indexOf(sheet) };
+        }
+      });
+    }
+
+    const displays = this.map((el, index) => {
+      // FAST PATH: if an inline style is applied return this
+      let inlineDisplay = el.style.display;
+      if (inlineDisplay && inlineDisplay !== 'none') {
+        return inlineDisplay;
+      }
+
+      let cacheKey;
+      let rulesHash;
+
+      // CALCULATED PATH: check stylesheets for highest specificity display state
+      if (calculate) {
+        // Include inline display style in cache key since it overrides everything
+        cacheKey = { styleHash, inlineDisplay };
+        rulesHash = hashCode(cacheKey);
+
+        // FAST PATH: Skip stylesheet check if the rules are the same
+        const cached = Query.elementDisplayCache.get(el);
+        if (cached && cached.rulesHash === rulesHash) {
+          return cached.displayValue;
+        }
+
+        // MEDIUM PATH: If already visible, return current display
+        const computedDisplay = getComputedStyle(el).display;
+        if (computedDisplay !== 'none') {
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue: computedDisplay });
+          return computedDisplay;
+        }
+
+        // SLOW PATH: Start parsing rules to determine display type
+        const matchingRules = [];
+
+        // Calculate CSS specificity (simplified)
+        const calculateSpecificity = (selector) => {
+          // Remove quoted strings to avoid counting selectors inside quotes
+          const cleaned = selector.replace(/"[^"]*"/g, '').replace(/'[^']*'/g, '');
+          const ids = (cleaned.match(/#[\w-]+/g) || []).length * 100;
+          const classes = (cleaned.match(/\.[\w-]+/g) || []).length * 10;
+          const attrs = (cleaned.match(/\[[^\]]+\]/g) || []).length * 10;
+          const pseudoClasses = (cleaned.match(/:[\w-]+/g) || []).length * 10;
+          const elements = (cleaned.match(/\b[a-z][\w-]*/gi) || []).length * 1;
+          return ids + classes + attrs + pseudoClasses + elements;
+        };
+
+        // Helper to recursively parse CSS rules (handles nesting)
+        const parseRules = (rules, parentSelector = '') => {
+          for (const rule of rules) {
+            // Handle regular style rules
+            if (
+              rule.style?.display
+              && rule.style.display !== 'none' // IGNORE ALL none rules
+              && rule.selectorText
+            ) {
+              // Resolve nested selector by replacing & with parent
+              let resolvedSelector = rule.selectorText;
+              if (parentSelector && resolvedSelector.includes('&')) {
+                resolvedSelector = resolvedSelector.replace(/&/g, parentSelector);
+              }
+
+              if (el.matches(resolvedSelector)) {
+                matchingRules.push({
+                  display: rule.style.display,
+                  specificity: calculateSpecificity(resolvedSelector),
+                  sourceOrder: matchingRules.length,
+                });
+              }
+            }
+            // Recursively handle nested rules (CSS nesting)
+            if (rule.cssRules && rule.cssRules.length > 0) {
+              const nestedParent = parentSelector || rule.selectorText;
+              parseRules(rule.cssRules, nestedParent);
+            }
+          }
+        };
+
+        // Parse all stylesheets for matching rules
+        for (const sheet of document.styleSheets) {
+          try {
+            parseRules(sheet.cssRules);
+          }
+          catch (e) {
+            // Cross-origin stylesheets - ignore
+          }
+        }
+
+        // Sort by specificity, then source order
+        matchingRules.sort((a, b) => b.specificity - a.specificity || b.sourceOrder - a.sourceOrder);
+
+        // If we have matching rules, return the highest precedence value
+        if (matchingRules.length > 0) {
+          const displayValue = matchingRules[0].display;
+          Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+          return displayValue;
+        }
+      }
+
+      // BACKUP Path: Use natural display type for browsers based on a lookup table
+      const naturalDisplay = {
+        inline: [
+          'a',
+          'abbr',
+          'b',
+          'bdi',
+          'bdo',
+          'br',
+          'cite',
+          'code',
+          'dfn',
+          'em',
+          'i',
+          'kbd',
+          'mark',
+          'q',
+          'ruby',
+          'samp',
+          'small',
+          'span',
+          'strong',
+          'sub',
+          'sup',
+          'time',
+          'u',
+          'var',
+          'wbr',
+        ],
+        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
+        'table': ['table'],
+        'table-row': ['tr'],
+        'table-cell': ['td', 'th'],
+        'table-header-group': ['thead'],
+        'table-row-group': ['tbody'],
+        'table-footer-group': ['tfoot'],
+        'table-caption': ['caption'],
+        'table-column': ['col'],
+        'table-column-group': ['colgroup'],
+        'list-item': ['li'],
+      };
+
+      const tagName = el.tagName.toLowerCase();
+      let displayValue;
+      for (const [display, tags] of Object.entries(naturalDisplay)) {
+        if (tags.includes(tagName)) {
+          displayValue = display;
+          break;
+        }
+      }
+      displayValue = displayValue || 'block'; // Default for most elements
+
+      // Cache the result if we are calculating
+      if (calculate) {
+        Query.elementDisplayCache.set(el, { rulesHash, displayValue });
+      }
+
+      return displayValue;
+    });
+    return displays.length > 1 ? displays : displays[0];
+  }
+
   // this is the element that clips current element
   clippingParent() {
     const parents = this.map((el) => {
+      const emptyValues = ['', 'none'];
+
+      // Check if element uses CSS anchor positioning
+      const style = window.getComputedStyle(el);
+      const hasAnchor = style.positionAnchor && !inArray(style.positionAnchor, ['none', 'auto']);
+      const isPositioned = inArray(style.position, ['absolute', 'fixed']);
+      const isAnchored = hasAnchor && isPositioned;
+      const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
+
       let current = el.parentNode;
       while (current) {
-        if (current instanceof Element) {
+        if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
-          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+
+          // Check overflow (skip for anchored elements - they escape)
+          if (!isAnchored && (style.overflowX !== 'visible' || style.overflowY !== 'visible')) {
+            return current;
+          }
+
+          // Check contain property (different rules for anchored vs non-anchored)
+          if (style.contain && containRegex.test(style.contain)) {
+            return current;
+          }
+
+          // Shared checks (always clip both anchored and non-anchored)
+          if (!inArray(style.clipPath, emptyValues)) {
+            return current;
+          }
+          if (!inArray(style.mask, emptyValues) || !inArray(style.maskImage, emptyValues)) {
             return current;
           }
         }
@@ -1391,48 +1783,95 @@ export class Query {
   }
 
   // this is the parent element where top/left and offsetTop/left will be relative
-  containingParent({ calculate = true } = {}) {
+  // supports both fixed and absolute elements
+  positioningParent({ calculate = true } = {}) {
     const parents = this.map((el) => {
-      // return offset parent as reported by browser
+      const reportedParent = el.offsetParent || document.documentElement;
+
       if (!calculate) {
-        return el.offsetParent;
+        return reportedParent;
       }
 
-      // fixed elements have no offset parent
-      if (window.getComputedStyle(el).position === 'fixed') {
-        return undefined;
+      const isFixed = window.getComputedStyle(el).position === 'fixed';
+      if (!isFixed) {
+        return reportedParent;
       }
 
       let current = el.parentNode;
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
-          // transformed elements create new positioning context
-          if (style.position !== 'static') {
+
+          // Check all properties that create containing blocks
+          if (style.transform !== 'none') { return current; }
+          if (style.perspective !== 'none') { return current; }
+          if (style.filter !== 'none') { return current; }
+          if (style.backdropFilter !== 'none') { return current; }
+          if (style.transformStyle === 'preserve-3d') { return current; }
+
+          // Check contain
+          const contain = style.contain;
+          if (contain && (contain.includes('paint') || contain.includes('layout'))) {
             return current;
           }
-          // filter creates new positioning context
-          if (style.filter !== 'none') {
+
+          // Check container-type
+          if (style.containerType && style.containerType !== 'normal') {
             return current;
           }
-          // transformed elements create new positioning context
-          if (style.transform !== 'none') {
-            return current;
-          }
-          // also creates positioning context
-          if (['layout', 'paint', 'strict', 'content'].includes(style.contain)) {
-            return current;
-          }
-          // will change will trigger same context
-          // <https://issues.chromium.org/issues/41131675>
-          if (['filter', 'contain', 'transform'].includes(style.willChange)) {
-            return current;
+
+          // Check will-change
+          if (style.willChange && style.willChange !== 'auto') {
+            const values = style.willChange.split(',').map(v => v.trim());
+            if (values.some(v => ['filter', 'transform', 'perspective', 'backdrop-filter'].includes(v))) {
+              return current;
+            }
           }
         }
         current = current.parentNode;
       }
-      return document.body;
+      return document.documentElement;
     });
+    return this.chain(parents);
+  }
+
+  // this is the nearest element that creates a scroll container
+  scrollParent({ all = false } = {}) {
+    const results = this.map((el) => {
+      const scrollParents = [];
+      let current = el.parentNode;
+
+      while (current && current !== document.body) {
+        if (current instanceof Element) {
+          const style = window.getComputedStyle(current);
+
+          // Check if element creates a scroll container
+          if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+            if (all) {
+              scrollParents.push(current);
+            }
+            else {
+              return current;
+            }
+          }
+        }
+        current = current.parentNode;
+      }
+
+      // documentElement is the final scroll container
+      const fallback = window;
+      if (all) {
+        scrollParents.push(fallback);
+        return scrollParents;
+      }
+      return fallback;
+    });
+
+    return all ? this.chain(results.flat()) : this.chain(results);
+  }
+
+  offsetParent() {
+    const parents = this.map(el => el.offsetParent || document.documentElement);
     return this.chain(parents);
   }
 
@@ -1444,11 +1883,40 @@ export class Query {
     return this.length > 0;
   }
 
+  isVisible({ includeOpacity = false, includeVisibility = true } = {}) {
+    if (this.length === 0) {
+      return undefined;
+    }
+    // Return true only if ALL elements are visible
+    return this.map(el => {
+      const rect = el.getBoundingClientRect();
+      const hasDimensions = rect.width > 0 && rect.height > 0;
+
+      if (!hasDimensions) { return false; }
+
+      const style = window.getComputedStyle(el);
+
+      // Check intentional hiding methods
+      if (includeVisibility) {
+        if (style.visibility === 'hidden') { return false; }
+        if (style.contentVisibility === 'hidden') { return false; }
+      }
+
+      // Check optional hiding mechanisms
+      if (includeOpacity) {
+        return parseFloat(style.opacity) > 0;
+      }
+
+      return true;
+    }).every(result => result === true);
+  }
+
   // adds properties to an element after dom loads
   initialize(settings) {
     document.addEventListener('DOMContentLoaded', () => {
       this.settings(settings);
     });
+    return this;
   }
 
   settings(settings) {
@@ -1512,12 +1980,477 @@ export class Query {
       : allData;
   }
 
+  removeData(keys) {
+    keys = isString(keys)
+      ? keys.split(/\s+/)
+      : keys;
+    return this.each((el) => {
+      each(keys, (key) => delete el.dataset[key]);
+    });
+  }
+
   slice(start, end) {
     if (this.length === 0) {
       return this;
     }
     const slicedElements = Array.from(this).slice(start, end);
     return this.chain(slicedElements);
+  }
+
+  add(selector) {
+    if (!selector) {
+      return this;
+    }
+
+    // Get current elements
+    const currentElements = this.get();
+
+    // Create new Query object with the selector using same options
+    const $newElements = new Query(selector, this.options);
+
+    // If no new elements found, return current instance
+    if ($newElements.length === 0) {
+      return this;
+    }
+
+    // Combine arrays and remove duplicates using Set
+    const combinedElements = Array.from(new Set([...currentElements, ...$newElements.get()]));
+    return this.chain(combinedElements);
+  }
+
+  show({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const naturalDisplayValue = this.naturalDisplay({ calculate });
+      el.style.display = naturalDisplayValue || '';
+    });
+  }
+
+  hide() {
+    return this.css('display', 'none');
+  }
+
+  toggle({ calculate = true } = {}) {
+    return this.each(function(el) {
+      const isHidden = getComputedStyle(el).display === 'none';
+      if (isHidden) {
+        const naturalDisplayValue = this.naturalDisplay({ calculate });
+        el.style.display = naturalDisplayValue || '';
+      }
+      else {
+        el.style.display = 'none';
+      }
+    });
+  }
+
+  bounds() {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const rects = this.map(el => {
+      if (el === Query.globalThisProxy) {
+        return document.documentElement.getBoundingClientRect();
+      }
+      return el.getBoundingClientRect();
+    });
+    return this.length === 1 ? rects[0] : rects;
+  }
+
+  dimensions() {
+    if (this.length === 0) {
+      return undefined;
+    }
+    const results = this.map(el => {
+      // Handle window/global object special case
+      if (el === Query.globalThisProxy) {
+        const boxValues = { top: 0, right: 0, bottom: 0, left: 0 };
+        return {
+          top: 0,
+          left: 0,
+          right: window.innerWidth,
+          bottom: window.innerHeight,
+          pageTop: window.scrollY,
+          pageLeft: window.scrollX,
+          width: window.innerWidth,
+          innerWidth: window.innerWidth,
+          outerWidth: window.innerWidth,
+          marginWidth: window.innerWidth,
+          height: window.innerHeight,
+          innerHeight: window.innerHeight,
+          outerHeight: window.innerHeight,
+          marginHeight: window.innerHeight,
+          scrollTop: window.scrollY,
+          scrollLeft: window.scrollX,
+          scrollHeight: document.documentElement.scrollHeight,
+          scrollWidth: document.documentElement.scrollWidth,
+          box: { padding: boxValues, border: boxValues, margin: boxValues },
+          bounds: {
+            top: 0,
+            left: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight,
+            x: 0,
+            y: 0,
+          },
+        };
+      }
+
+      const $el = this.chain(el);
+
+      // Position Properties
+      const rect = $el.bounds();
+      const top = rect.top;
+      const left = rect.left;
+
+      const pageTop = top + window.scrollY;
+      const pageLeft = left + window.scrollX;
+
+      // Box Model Values
+      const computedStyle = window.getComputedStyle(el);
+      const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+      const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+      const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+      const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+
+      const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+      const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+      const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+      const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+
+      const marginTop = parseFloat(computedStyle.marginTop) || 0;
+      const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
+      const marginLeft = parseFloat(computedStyle.marginLeft) || 0;
+      const marginRight = parseFloat(computedStyle.marginRight) || 0;
+
+      // Width Properties
+      const outerWidth = el.offsetWidth;
+      const innerWidth = outerWidth - borderLeft - borderRight;
+      const width = innerWidth - paddingLeft - paddingRight;
+      const marginWidth = outerWidth + marginLeft + marginRight;
+
+      // Height Properties
+      const outerHeight = el.offsetHeight;
+      const innerHeight = outerHeight - borderTop - borderBottom;
+      const height = innerHeight - paddingTop - paddingBottom;
+      const marginHeight = outerHeight + marginTop + marginBottom;
+      return {
+        // Position
+        top,
+        left,
+        right: rect.right,
+        bottom: rect.bottom,
+        pageTop,
+        pageLeft,
+        // Width
+        width,
+        innerWidth,
+        outerWidth,
+        marginWidth,
+        // Height
+        height,
+        innerHeight,
+        outerHeight,
+        marginHeight,
+        // Scroll
+        scrollTop: el.scrollY || el.scrollTop,
+        scrollLeft: el.scrollX || el.scrollLeft,
+        scrollHeight: el.scrollHeight,
+        scrollWidth: el.scrollWidth,
+        // Box Model Details
+        box: {
+          padding: { top: paddingTop, right: paddingRight, bottom: paddingBottom, left: paddingLeft },
+          border: { top: borderTop, right: borderRight, bottom: borderBottom, left: borderLeft },
+          margin: { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft },
+        },
+        bounds: rect,
+      };
+    });
+
+    return this.length === 1 ? results[0] : results;
+  }
+
+  intersects(target, {
+    sides = 'all',
+    threshold = 0,
+    fully = false,
+    returnDetails = false,
+    all = false,
+  } = {}) {
+    if (this.length === 0 || !target) {
+      return returnDetails ? null : false;
+    }
+
+    const $targets = this.chain(target);
+    if ($targets.length === 0) {
+      return returnDetails ? null : false;
+    }
+
+    const defaultDetails = {
+      intersects: false,
+      top: false,
+      bottom: false,
+      left: false,
+      right: false,
+      ratio: 0,
+      rect: null,
+    };
+
+    // Process sides parameter once
+    const checkSides = isArray(sides) ? sides : (sides === 'all' ? ['top', 'bottom', 'left', 'right'] : [sides]);
+
+    // Check intersections using position relative to target
+    const results = Array.from(this).flatMap(sourceEl => {
+      const $source = this.chain(sourceEl);
+      const sourceDims = $source.dimensions();
+
+      return $targets.map(targetEl => {
+        const $target = this.chain(targetEl);
+        const targetDims = $target.dimensions();
+
+        // Get source position relative to target
+        const { relative } = $source.position({ relativeTo: targetEl });
+        const { top, left } = relative;
+        const sourceRight = left + sourceDims.outerWidth;
+        const sourceBottom = top + sourceDims.outerHeight;
+
+        // Default return details object
+        let details = {
+          ...defaultDetails,
+          // Add element position relative to target for obstruction analysis
+          elementPosition: {
+            top,
+            left,
+            bottom: sourceBottom,
+            right: sourceRight,
+          },
+        };
+
+        // Simple bounds check for intersection
+        const intersects = (
+          left < targetDims.outerWidth
+          && sourceRight > 0
+          && top < targetDims.outerHeight
+          && sourceBottom > 0
+        );
+
+        if (intersects) {
+          // Calculate intersection rectangle and ratio
+          const sourceArea = sourceDims.outerWidth * sourceDims.outerHeight;
+          const intersectionLeft = Math.max(left, 0);
+          const intersectionTop = Math.max(top, 0);
+          const intersectionRight = Math.min(sourceRight, targetDims.outerWidth);
+          const intersectionBottom = Math.min(sourceBottom, targetDims.outerHeight);
+          const intersectionWidth = intersectionRight - intersectionLeft;
+          const intersectionHeight = intersectionBottom - intersectionTop;
+          const intersectionArea = intersectionWidth * intersectionHeight;
+          const ratio = sourceArea > 0 ? intersectionArea / sourceArea : 0;
+          // Update details with intersection data
+          details = {
+            ...details,
+            intersects: true,
+            ratio,
+            rect: {
+              left: intersectionLeft,
+              top: intersectionTop,
+              right: intersectionRight,
+              bottom: intersectionBottom,
+              width: intersectionWidth,
+              height: intersectionHeight,
+            },
+            top: top >= 0 && top < targetDims.outerHeight,
+            bottom: sourceBottom > 0 && sourceBottom <= targetDims.outerHeight,
+            left: left >= 0 && left < targetDims.outerWidth,
+            right: sourceRight > 0 && sourceRight <= targetDims.outerWidth,
+            // Add element position relative to target for obstruction analysis
+            elementPosition: {
+              top,
+              left,
+              bottom: sourceBottom,
+              right: sourceRight,
+            },
+          };
+
+          // Check if fully contained
+          if (fully) {
+            const isFullyContained = (
+              left >= 0
+              && sourceRight <= targetDims.outerWidth
+              && top >= 0
+              && sourceBottom <= targetDims.outerHeight
+            );
+            if (!isFullyContained) {
+              details.intersects = false;
+            }
+          }
+
+          // Check threshold
+          if (threshold > 0 && ratio < threshold) {
+            details.intersects = false;
+          }
+
+          // Check specific sides if requested
+          if (sides !== 'all') {
+            const matchesSides = checkSides.some(side => details[side]);
+            if (!matchesSides) {
+              details.intersects = false;
+            }
+          }
+        }
+        return returnDetails ? details : details.intersects;
+      });
+    });
+
+    if (returnDetails) {
+      // return as array or obj depending on el length
+      return (this.length == 1)
+        ? results[0]
+        : results;
+    }
+
+    // For boolean results, check all elements or any element based on all parameter
+    return all ? results.every(r => r === true) : results.some(r => r === true);
+  }
+
+  pagePosition(settings) {
+    return this.position({
+      ...settings,
+      type: 'global',
+    });
+  }
+
+  position({
+    relativeTo,
+    top,
+    left,
+    precision = 'pixel',
+    type,
+  } = {}) {
+    // Determine if the function is being used as a setter.
+    const isSetter = (isNumber(top) || isNumber(left));
+
+    // avoid querySelector inside map
+    const $relative = (relativeTo)
+      ? this.chain(relativeTo)
+      : undefined;
+
+    // fail clearly if relative el does not exist
+    if (relativeTo && !$relative.exists()) {
+      return (isSetter)
+        ? this
+        : undefined;
+    }
+
+    // getter
+    if (this.length === 0) {
+      return undefined;
+    }
+    const results = this.map(el => {
+      const $el = this.chain(el);
+      const elRect = $el.dimensions();
+      const $positioningParent = $el.positioningParent();
+      const parentRect = $positioningParent.dimensions();
+      const round = val => (precision === 'pixel' ? Math.round(val) : val);
+
+      // 1. Global (Viewport) Coordinates
+      const globalCoords = {
+        top: round(elRect.top) - parentRect.box.border.top + window.scrollY,
+        left: round(elRect.left) - parentRect.box.border.left + window.scrollX,
+      };
+      if (!isSetter && type === 'global') {
+        return globalCoords;
+      }
+
+      // 2. Local (positioningParent) Coordinates
+      const localCoords = {
+        top: round(elRect.top - parentRect.top - parentRect.box.border.top + $positioningParent.scrollTop()),
+        left: round(elRect.left - parentRect.left - parentRect.box.border.left + $positioningParent.scrollLeft()),
+      };
+      if (!isSetter && type === 'local') {
+        return localCoords;
+      }
+
+      // 3. Relative Coordinates
+      let relativeCoords = null;
+      if (relativeTo) {
+        const relativeRect = $relative.dimensions();
+        relativeCoords = {
+          top: round(elRect.top - relativeRect.top - relativeRect.box.border.top),
+          left: round(elRect.left - relativeRect.left - relativeRect.box.border.left),
+        };
+        if (!isSetter && type === 'relative') {
+          return relativeCoords;
+        }
+      }
+
+      // join together all results
+      const result = {
+        global: globalCoords,
+        local: localCoords,
+      };
+      if (relativeCoords) {
+        result.relative = relativeCoords;
+      }
+
+      if (isSetter) {
+        // get what we are setting to
+        let $reference;
+        if (type === 'global') {
+          $reference = this.chain(window);
+        }
+        else if (type === 'local') {
+          $reference = $positioningParent;
+        }
+        else if ($relative) {
+          $reference = $relative;
+        }
+        else {
+          $reference = $positioningParent;
+        }
+        const referenceRect = $reference.dimensions();
+
+        // calculate new position
+        const targetTop = referenceRect.top + (top || 0);
+        const targetLeft = referenceRect.left + (left || 0);
+        const newStyleTop = targetTop - parentRect.top;
+        const newStyleLeft = targetLeft - parentRect.left;
+
+        if (isNumber(top)) {
+          el.style.top = `${newStyleTop}px`;
+        }
+        if (isNumber(left)) {
+          el.style.left = `${newStyleLeft}px`;
+        }
+      }
+      return result;
+    });
+
+    if (isSetter) {
+      return this;
+    }
+
+    // Return a single object if the collection has only one element.
+    return this.length === 1 ? results[0] : results;
+  }
+
+  isInView({ viewport, ...intersectionOptions } = {}) {
+    // Determine the viewport/container to check against
+    let $viewport;
+    if (viewport) {
+      $viewport = this.chain(viewport);
+    }
+    else {
+      // Use clipping parent as default viewport
+      $viewport = this.clippingParent();
+    }
+
+    // If no viewport found, use document element
+    if (!$viewport.length) {
+      $viewport = this.chain(document.documentElement);
+    }
+
+    // Use intersects method directly on the full collection
+    return this.intersects($viewport, intersectionOptions);
   }
 
   // special helper for SUI components

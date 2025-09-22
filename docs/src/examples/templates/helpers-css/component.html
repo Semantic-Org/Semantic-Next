@@ -1,0 +1,32 @@
+<h3>classIf</h3>
+<div class="{classIf isActive 'active' 'inactive'}item">
+  Status: <b>{isActive ? 'Active' : 'Inactive'}</b>
+</div>
+
+<h3>activeIf</h3>
+<div class="{activeIf currentPage === 'home'}tab">
+  <ui-icon icon="home" />
+  Home
+</div>
+
+<h3>selectedIf</h3>
+<div class="{selectedIf isSelected}option">
+  <ui-icon icon="check" />
+  Option A
+</div>
+
+<h3>classMap</h3>
+<div class="{classMap getStatusClasses} statuses">
+  <p>Form status with multiple classes</p>
+</div>
+
+<h3>disabledIf</h3>
+<button class="{disabledIf isLoading}">
+  Submit Form
+</button>
+
+<h3>checkedIf</h3>
+<div class="{checkedIf isSelected}checkbox">
+  <ui-icon icon="check" />
+  Remember me
+</div>

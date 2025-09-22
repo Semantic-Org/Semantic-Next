@@ -1,13 +1,13 @@
 import { defineComponent } from '@semantic-ui/component';
-import { inArray, isEqual, isEmpty, openLink, pick, getJSON } from '@semantic-ui/utils';
+import { getJSON, inArray, isEmpty, isEqual, openLink, pick } from '@semantic-ui/utils';
 
 /* Sub Components */
 import { HintModal } from './subtemplates/HintModal.js';
 import { ReferenceModal } from './subtemplates/ReferenceModal.js';
 
 /* Components */
+import { NavMenu } from '@semantic-ui/core';
 import { CodePlayground } from '../CodePlayground/CodePlayground.js';
-import { NavMenu } from '../NavMenu/NavMenu.js';
 
 /* UI */
 import { UIButton } from '@semantic-ui/core';
@@ -148,9 +148,9 @@ const createComponent = ({ $, $$, el, data, self, state, reaction, isRendered, s
   },
   setFiles(files) {
     state.currentFiles.set(files);
-    if(isRendered()) {
+    if (isRendered()) {
       const playground = $('code-playground').component();
-      if(playground) {
+      if (playground) {
         playground.setFiles(files);
       }
     }
@@ -161,15 +161,15 @@ const createComponent = ({ $, $$, el, data, self, state, reaction, isRendered, s
   },
   updateState(newLesson) {
     window.history.pushState(newLesson, `${newLesson.lesson.title} - Semantic UI`, newLesson.lesson.url);
-  }
+  },
 });
 
-const onCreated = ({self}) => {
+const onCreated = ({ self }) => {
   self.setStartingState();
 };
 
 const events = {
-  'global popstate window'({self, event}) {
+  'global popstate window'({ self, event }) {
     const lesson = event.state;
     self.changeLesson(lesson);
   },
@@ -199,17 +199,17 @@ const events = {
   'change ui-menu.mobile'({ state, data }) {
     state.mobileView.set(data.value);
   },
-  async 'click .previous'({event, self, settings}) {
+  async 'click .previous'({ event, self, settings }) {
     event.preventDefault();
     const lessonURL = self.getLessonURL(settings.previousLesson.id);
-    const newLesson = await getJSON(lessonURL)
+    const newLesson = await getJSON(lessonURL);
     self.changeLesson(newLesson);
     self.updateState(newLesson);
   },
-  async 'click .next'({event, self, settings}) {
+  async 'click .next'({ event, self, settings }) {
     event.preventDefault();
     const lessonURL = self.getLessonURL(settings.nextLesson.id);
-    const newLesson = await getJSON(lessonURL)
+    const newLesson = await getJSON(lessonURL);
     self.changeLesson(newLesson);
     self.updateState(newLesson);
   },

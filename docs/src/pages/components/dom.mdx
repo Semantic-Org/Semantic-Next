@@ -6,7 +6,7 @@ description: 'Querying the DOM from your components'
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Semantic provides a standalone library called [Query](/query) designed from the ground up to work with the Shadow DOM for accessing the DOM, built with modern ECMAScript and browser standards, and tightly coupled into the component framework.
+Semantic provides a standalone library called [Query](/query) designed to work with the Shadow DOM for accessing the DOM. It's built with modern ECMAScript and browser standards, and tightly coupled into the component framework.
 
 ### Use of Query
 
@@ -34,7 +34,7 @@ $('body')
 ;
 ```
 
-> This section covers only the specific integration of Query inside of components, for a full explaination of the library check out the [Query documentation](/query).
+> This section covers only the specific integration of Query inside of components, for a full explanation of the library check out the [Query documentation](/query).
 
 ## Using Query in Components
 
@@ -80,7 +80,7 @@ A common use case is having component functionality that requires accessing some
 
 ```javascript
 const createComponent = ({el, $}) => ({
-  startRezize(value) {
+  startResize(value) {
     $('.body').css('cursor', 'resize');
   },
   endResize() {
@@ -148,16 +148,16 @@ You can use Query as a standalone library outside of your components, for more i
 
 Query provides a few special methods that can be used to manipulate your components from the page.
 
-### getComponent
+### component
 
-Query provides a helper `getComponent` which can be used to access your components instance from anywhere in the DOM.
+Query provides a helper `component` which can be used to access your components instance from anywhere in the DOM.
 
-This can be used to trigger functionality defined on your component from anywhere in your page. This
+This can be used to trigger functionality defined on your component from anywhere in your page.
 
 ```javascript
 // somewhere in your custom codebase
 const selectMenuIndex = (index) => {
-  const menu = $('ui-menu').getComponent();
+  const menu = $('ui-menu').component();
   if(menu) {
     menu.selectIndex(index);
   }
@@ -166,7 +166,7 @@ const selectMenuIndex = (index) => {
 
 ### settings
 
-You can use `settings` to initialize a component **after it is included in the page** with settings programatically. This can be particularly useful for components that can be initialized with functions.
+You can use `settings` to initialize a component **after it is included in the page** with settings programmatically. This can be particularly useful for components that can be initialized with functions.
 
 
 ```javascript

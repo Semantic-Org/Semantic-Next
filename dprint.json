@@ -42,7 +42,9 @@
     "LICENSE.md",
     "docs/public",
     "README.md",
+    "**/*component.js",
     "**/*.html",
+    "**/*.json",
     "**/*.md",
     "**/node_modules",
     "**/*-lock.json"

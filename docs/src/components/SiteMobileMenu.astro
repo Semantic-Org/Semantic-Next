@@ -1,7 +1,6 @@
 ---
-import MobileMenu from '@components/MobileMenu/MobileMenu.js';
+import { MobileMenu, NavMenu } from '@semantic-ui/core';
 import { getSiteMenu } from '@helpers/navigation.js';
-import NavMenu from '@components/NavMenu/NavMenu.js';
 const siteMenu = await getSiteMenu();
 const activeURL = Astro.url.pathname;
 ---

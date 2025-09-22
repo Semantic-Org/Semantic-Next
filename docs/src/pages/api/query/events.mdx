@@ -290,6 +290,86 @@ $('button').one('click', function(event) {
 ### Example
 <PlaygroundExample id="query-one" direction="horizontal"></PlaygroundExample>
 
+## onNext
+
+Returns a Promise that resolves when the next occurrence of the specified event fires. This provides a modern async/await alternative to callback-based event handling.
+
+### Syntax
+
+#### Wait for Event
+```javascript
+await $('selector').onNext(eventName)
+```
+
+#### Wait for Event with Delegation
+```javascript
+await $('selector').onNext(eventName, targetSelector)
+```
+
+#### Wait for Event with Timeout
+```javascript
+await $('selector').onNext(eventName, { timeout: 5000 })
+```
+
+### Parameters
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | One or more space-separated event types |
+| targetSelector | string | Optional CSS selector for event delegation |
+| options | object | Optional configuration object |
+| options.timeout | number | Timeout in milliseconds (throws error if event doesn't fire) |
+
+### Returns
+**Promise** - Resolves with the event object when the event fires.
+
+### Usage
+
+#### Basic Event Waiting
+```javascript
+// Wait for a button click
+await $('.button').onNext('click');
+console.log('Button was clicked!');
+
+// Wait for multiple possible events (first one wins)
+await $('.element').onNext('animationend, transitionend');
+```
+
+#### Event Delegation
+```javascript
+// Wait for click on dynamically added elements
+await $('#container').onNext('click', '.dynamic-button');
+```
+
+#### With Timeout
+```javascript
+try {
+  await $('.modal').onNext('modal:closed', { timeout: 5000 });
+  console.log('Modal closed within 5 seconds');
+} catch (error) {
+  console.log('Modal did not close within 5 seconds');
+}
+```
+
+#### Async/Await Patterns
+```javascript
+async function animateSequence() {
+  $('.element').addClass('fade-in');
+  await $('.element').onNext('animationend');
+
+  $('.element').addClass('slide-up');
+  await $('.element').onNext('animationend');
+
+  console.log('Animation sequence complete!');
+}
+```
+
+### Notes
+- The promise resolves with the native Event object
+- Event listeners are automatically cleaned up after the event fires
+- Supports the same event delegation as `one()`
+- If timeout is specified and exceeded, the promise rejects with an error
+- For comma-separated events, resolves when the first event fires
+
 ## trigger
 
 Executes all handlers attached to the matched elements for the given event type.

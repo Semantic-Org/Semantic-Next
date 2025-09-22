@@ -1,0 +1,9 @@
+.box {
+  background: var(--gradient);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin: var(--spacing);
+}

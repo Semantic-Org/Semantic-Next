@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "declaration": true,
+    "declarationDir": "./types",
+    "esModuleInterop": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "target": "es2020",
+    "lib": ["es2020", "dom"],
+    "strict": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

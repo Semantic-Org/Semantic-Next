@@ -54,3 +54,70 @@ Adds a plural suffix if the value is not 1.
 ```sui
 <p>You have {itemCount} item{maybePlural itemCount} in your cart.</p>
 ```
+
+### roundNumber
+Rounds a number to a specified number of decimal places.
+
+#### Template Syntax
+```sui
+{roundNumber numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number.
+
+#### Example
+```sui
+<p>Average score: {roundNumber score 1}</p>
+<p>Price: ${roundNumber price 2}</p>
+```
+
+### round
+Alias for `roundNumber`. Rounds a number to a specified number of decimal places.
+
+#### Template Syntax
+```sui
+{round numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number.
+
+#### Example
+```sui
+<p>Temperature: {round temperature 1}°C</p>
+```
+
+### roundDecimal
+Rounds a number to a specified number of decimal places using decimal rounding.
+
+#### Template Syntax
+```sui
+{roundDecimal numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number using decimal rounding.
+
+#### Example
+```sui
+<p>Precise measurement: {roundDecimal measurement 3}mm</p>
+```

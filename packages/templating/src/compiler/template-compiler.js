@@ -15,12 +15,16 @@ class TemplateCompiler {
     ELSE: '^{OPEN}\\s*else\\s*',
     EACH: '^{OPEN}\\s*#each\\s+',
     SNIPPET: '^{OPEN}\\s*#snippet\\s+',
+    RERENDER: '^{OPEN}\\s*#rerender\\s+',
+    GUARD: '^{OPEN}\\s*#guard\\s+',
     ASYNC: '^{OPEN}\\s*#(async)\\s+',
     ASYNC_LOADING: '^{OPEN}\\s*(before|loading)(\\s+|(?={CLOSE}))',
     ASYNC_ERROR: '^{OPEN}\\s*(error|catch)(\\s+|(?={CLOSE}))',
     CLOSE_IF: '^{OPEN}\\s*\\/(if)\\s*',
     CLOSE_EACH: '^{OPEN}\\s*\\/(each)\\s*',
     CLOSE_SNIPPET: '^{OPEN}\\s*\\/(snippet)\\s*',
+    CLOSE_RERENDER: '^{OPEN}\\s*\\/rerender\\s*',
+    CLOSE_GUARD: '^{OPEN}\\s*\\/guard\\s*',
     CLOSE_ASYNC: '^{OPEN}\\s*\\/(async)\\s*',
     SLOT: '^{OPEN}>\\s*slot\\s*',
     TEMPLATE: '^{OPEN}>\\s*',
@@ -69,7 +73,7 @@ class TemplateCompiler {
   };
 
   static preprocessRegExp = {
-    WEB_COMPONENT_SELF_CLOSING: /<(\w+-\w+)([^>]*)\/>/g,
+    WEB_COMPONENT_SELF_CLOSING: /<(\w+(?:-\w+)+)([^>]*)\/>/g,
   };
 
   static templateRegExp = {
@@ -208,12 +212,12 @@ class TemplateCompiler {
       */
       const setCurrentContent = (node, property = 'content') => {
         // initialize empty AST if not present
-        if(!node[property]) {
+        if (!node[property]) {
           node[property] = [];
         }
         contentStack.push({
           node,
-          property
+          property,
         });
       };
 
@@ -240,7 +244,7 @@ class TemplateCompiler {
 
       /* This adds the current node to the AST */
       const addToAST = (...nodes) => {
-        if(contentTarget == undefined) {
+        if (contentTarget == undefined) {
           contentTarget = [];
         }
         contentTarget.push(...nodes);
@@ -252,7 +256,6 @@ class TemplateCompiler {
         };
 
         switch (tag.type) {
-
           case 'IF': {
             newNode = {
               ...newNode,
@@ -419,7 +422,6 @@ class TemplateCompiler {
           }
 
           case 'ASYNC': {
-
             // support async expression with aliases or destructuring
             const { expression, as, parts, rest } = TemplateCompiler.parseAsyncString(tag.content);
 
@@ -469,6 +471,33 @@ class TemplateCompiler {
             currentContentNode.errorAs = as;
             returnToLastContent();
             setContentTarget('errorContent');
+            break;
+          }
+
+          case 'GUARD':
+          case 'RERENDER': {
+            const isGuard = tag.type === 'GUARD';
+
+            // Parse key attribute if present (for hybrid syntax)
+            const { expression, key } = this.parseRerenderExpression(tag.content);
+
+            newNode = {
+              ...newNode,
+              type: 'rerender',
+              // For guard blocks, the expression goes in 'key' and 'expression' is null
+              expression: isGuard ? null : expression,
+              key: isGuard ? expression : key,
+              content: [],
+            };
+
+            setCurrentContent(newNode);
+            addToAST(newNode);
+            break;
+          }
+
+          case 'CLOSE_GUARD':
+          case 'CLOSE_RERENDER': {
+            returnToLastContent();
             break;
           }
 
@@ -530,6 +559,17 @@ class TemplateCompiler {
     return expression;
   }
 
+  parseRerenderExpression(content) {
+    // Parse "expression key=keyExpr" syntax
+    const keyMatch = content.match(/\s+key=(.+)$/);
+    if (keyMatch) {
+      const expression = content.replace(/\s+key=.+$/, '').trim();
+      const key = keyMatch[1].trim();
+      return { expression, key };
+    }
+    return { expression: content.trim(), key: null };
+  }
+
   /* Parses the various syntax for embedding subtemplates */
   parseTemplateString(expression = '') {
     // quicker to compile regexp once
@@ -587,7 +627,6 @@ class TemplateCompiler {
   }
 
   static parseAsyncString(asyncString = '') {
-
     // support string like 'as foo' without leading space
     // tag content does will not match ' as ' split
     asyncString = asyncString.replace('as', ' as');
@@ -602,7 +641,7 @@ class TemplateCompiler {
       const destructuring = TemplateCompiler.parseDestructuring(asString);
       return {
         expression,
-        ...destructuring
+        ...destructuring,
       };
     }
 
@@ -612,7 +651,7 @@ class TemplateCompiler {
       expression,
       as: null,
       parts: null,
-      rest: null
+      rest: null,
     };
   }
 
@@ -728,9 +767,11 @@ class TemplateCompiler {
     return templateString;
   }
 
-  // joins neighboring html nodes into a single node
+  // joins neighboring html nodes into a single node and moves snippets to front
   static optimizeAST(ast) {
     const optimizedAST = [];
+    const snippets = [];
+    const otherNodes = [];
     let currentHtmlNode = null;
 
     const processNode = (node) => {
@@ -740,7 +781,7 @@ class TemplateCompiler {
         }
         else {
           currentHtmlNode = { ...node };
-          optimizedAST.push(currentHtmlNode);
+          otherNodes.push(currentHtmlNode);
         }
       }
       else {
@@ -754,13 +795,21 @@ class TemplateCompiler {
         if (node.else && node.else.content) {
           node.else.content = this.optimizeAST(node.else.content);
         }
-        optimizedAST.push(node);
+
+        // Separate snippets from other nodes
+        if (node.type === 'snippet') {
+          snippets.push(node);
+        }
+        else {
+          otherNodes.push(node);
+        }
       }
     };
 
     ast.forEach(processNode);
 
-    return optimizedAST;
+    // Return snippets first, then other nodes
+    return [...snippets, ...otherNodes];
   }
 }
 

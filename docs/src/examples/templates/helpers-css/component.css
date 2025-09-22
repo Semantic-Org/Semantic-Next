@@ -1,0 +1,104 @@
+h3 {
+  font-size: 16px;
+  padding-bottom: 4px;
+  border-bottom: var(--border);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin: 0.5rem 0;
+}
+
+b {
+  color: var(--primary-text-color);
+}
+
+.item {
+  padding: var(--compact-spacing) var(--spacing);
+  border: 1px solid var(--standard-15);
+  border-radius: var(--border-radius);
+  
+  &.active {
+    background: var(--standard-5);
+    border-color: var(--primary-color);
+  }
+  
+  &.inactive {
+    background: var(--standard-2);
+    color: var(--standard-60);
+  }
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--compact-spacing);
+  padding: var(--compact-spacing) var(--spacing);
+  color: var(--standard-60);
+  border-bottom: 2px solid transparent;
+  transition: var(--transition);
+  
+  &.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+  }
+}
+
+.option {
+  padding: var(--compact-spacing) var(--spacing);
+  border: 1px solid var(--standard-15);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: var(--compact-spacing);
+  
+  &.selected {
+    background: var(--standard-5);
+    border-color: var(--primary-color);
+  }
+}
+
+.statuses {
+  padding: var(--spacing);
+  border: 1px solid var(--standard-15);
+  border-radius: var(--border-radius);
+  
+  &.error {
+    border-color: var(--red);
+    background: var(--standard-2);
+  }
+  
+  &.loading {
+    opacity: var(--dimmed-opacity);
+  }
+  
+  &.disabled {
+    color: var(--standard-40);
+    pointer-events: none;
+  }
+}
+
+button {
+  padding: var(--compact-spacing) var(--spacing);
+  background: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius);
+  
+  &.disabled {
+    opacity: var(--dimmed-opacity);
+    cursor: not-allowed;
+  }
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--compact-spacing);
+  padding: var(--compact-spacing);
+  
+  &.checked {
+    color: var(--primary-color);
+  }
+}

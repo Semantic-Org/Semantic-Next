@@ -1,32 +1,14 @@
-.container {
-  padding: 15px;
-  margin: 15px 0;
-  background: var(--standard-5);
-  border: var(--border);
-  border-radius: var(--border-radius);
-}
-
 .section {
-  margin: 10px 0;
-  padding: 10px;
-  background: var(--standard-10);
-  border-radius: var(--border-radius);
-  
-  h3 {
-    margin: 0 0 10px 0;
+  border: var(--border);
+  padding: var(--padding);
+
+  .text {
+    line-height: 1.6;
   }
-}
-
-.found-element {
-  background: var(--standard-15) !important;
-  font-weight: bold;
-}
-
-p {
-  margin: 8px 0;
-  font-family: monospace;
-  
-  span {
+  .note {
+    border-left: 2px solid var(--blue-10);
+    padding-left: 1em;
     font-weight: bold;
+    color: var(--blue-text-color);
   }
 }

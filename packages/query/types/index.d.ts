@@ -1,3 +1,4 @@
+import { Behavior, BehaviorConfig } from './behavior';
 import { CSSOptions, EventHandler, EventOptions, Query, QueryOptions } from './query';
 
 /**
@@ -50,4 +51,17 @@ declare function useAlias(
   args?: QueryOptions,
 ): Query;
 
-export { $, $$, CSSOptions, EventHandler, EventOptions, exportGlobals, Query, QueryOptions, restoreGlobals, useAlias };
+export {
+  $,
+  $$,
+  Behavior,
+  BehaviorConfig,
+  CSSOptions,
+  EventHandler,
+  EventOptions,
+  exportGlobals,
+  Query,
+  QueryOptions,
+  restoreGlobals,
+  useAlias,
+};

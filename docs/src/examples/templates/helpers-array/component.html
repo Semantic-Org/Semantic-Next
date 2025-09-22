@@ -1,0 +1,25 @@
+<h3>count</h3>
+<p>Available colors: <b>{count colors}</b></p>
+
+<h3>first</h3>
+<p>Primary color: <b>{first colors}</b></p>
+
+<h3>last</h3>
+<p>Final color: <b>{last colors}</b></p>
+
+<h3>join</h3>
+<p>Colors: <b>{join colors ', '}</b></p>
+
+<h3>joinComma</h3>
+<p>We sell {joinComma categories true true}.</p>
+
+<h3>range</h3>
+<p>Years:</p>
+<div class="years">
+  {#each year in range 2020 2024}
+    <span class="year">{year}</span>
+  {/each}
+</div>
+
+<h3>arrayFromObject</h3>
+<p>Settings count: {count arrayFromObject userData}</p>

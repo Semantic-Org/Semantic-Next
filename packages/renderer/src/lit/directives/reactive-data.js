@@ -1,9 +1,9 @@
 import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
-import { directive } from 'lit/directive.js';
+import { directive, PartType } from 'lit/directive.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { inArray, isArray, isObject } from '@semantic-ui/utils';
+import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/utils';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
@@ -26,7 +26,6 @@ export class ReactiveDataDirective extends AsyncDirective {
 
     // Create a new reaction to rerun the computation function if reactive data updates
     // that dont trigger rerender occur
-
     if (this.reaction) {
       // if reaction already set up just return value for rerender
       return this.getReactiveValue();
@@ -35,32 +34,44 @@ export class ReactiveDataDirective extends AsyncDirective {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
       let value;
-
-      const context = {
-        message: `expression: {${expression.expression}}`,
-        expression: expression.expression,
-      };
-
-      this.reaction = Reaction.create((computation) => {
-        if (!this.isConnected) {
-          computation.stop();
-          return;
-        }
+      if (isClient) {
+        value = this.watchChanges();
+      }
+      else {
         value = this.getReactiveValue();
-        if (this.settings.unsafeHTML) {
-          value = unsafeHTML(value);
-        }
-        if (!computation.firstRun) {
-          this.setValue(value);
-        }
-      }, { context });
-
+      }
       return value;
     }
   }
 
+  watchChanges() {
+    const context = {
+      message: `expression: {${this.expression.expression}}`,
+      expression: this.expression.expression,
+    };
+    let value;
+    this.reaction = Reaction.create((computation) => {
+      if (!this.isConnected) {
+        computation.stop();
+        return;
+      }
+      value = this.getReactiveValue();
+      if (!computation.firstRun) {
+        this.setValue(value);
+      }
+    }, { context });
+
+    // this returns the value for perf
+    // otherwise we calculate twice on first run
+    return value;
+  }
+
   getReactiveValue() {
-    let reactiveValue = this.expression.value();
+    // if we are binding to an event we need the func handler
+    // and not the value returned
+    let reactiveValue = (this.partInfo.type == PartType.EVENT)
+      ? this.expression.literalValue()
+      : this.expression.value();
 
     // useful for things like <input checked="{{isChecked}}">
     // template compiler does this automatically for boolean attrs
@@ -70,17 +81,34 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
     }
 
-    // arrays and objects are serialized for use in web component attributes
-    // maybe should check part?
-    if (isArray(reactiveValue) || isObject(reactiveValue)) {
-      try {
-        reactiveValue = JSON.stringify(reactiveValue);
-      }
-      catch (e) {
-        // non serializable
-      }
+    return this.formatForPart(reactiveValue);
+  }
+
+  formatForPart(reactiveValue) {
+    switch (this.partInfo.type) {
+      case PartType.PROPERTY:
+        return reactiveValue;
+
+      case PartType.ATTRIBUTE:
+      case PartType.BOOLEAN_ATTRIBUTE:
+      default:
+        // Attributes need serialization for objects/arrays
+        if (isArray(reactiveValue) || isObject(reactiveValue)) {
+          try {
+            reactiveValue = JSON.stringify(reactiveValue);
+          }
+          catch (e) {
+            // non serializable - convert to string
+            reactiveValue = String(reactiveValue);
+          }
+        }
+
+        if (this.settings.unsafeHTML) {
+          reactiveValue = unsafeHTML(reactiveValue);
+        }
+
+        return reactiveValue;
     }
-    return reactiveValue;
   }
 
   disconnected() {

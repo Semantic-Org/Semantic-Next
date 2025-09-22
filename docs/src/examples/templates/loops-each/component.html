@@ -1,0 +1,27 @@
+<h2>Basic each with array from state</h2>
+<ul>
+{#each numbers}
+  <li>{this}</li>
+{/each}
+</ul>
+
+<h2>Each with inline array</h2>
+<ul>
+{#each [1, 2, 3]}
+  <li>{this}</li>
+{/each}
+</ul>
+
+<h2>Each with mixed expressions</h2>
+<ul>
+{#each [getFirst, getSecond, 3]}
+  <li>{this}</li>
+{/each}
+</ul>
+
+<h2>Each with objects (direct property access)</h2>
+<ul>
+{#each people}
+  <li>{name} - {age}</li>
+{/each}
+</ul>

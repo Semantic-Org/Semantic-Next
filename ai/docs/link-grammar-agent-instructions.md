@@ -12,31 +12,106 @@
 *   **Documentation Location:** Primarily within the `docs/src/pages/` directory.
 *   **Link Structure:** Internal links typically point to other `.mdx` files within `docs/src/pages/` or specific headers within those files (e.g., `/components/button#usage`). Header slugs are auto-generated from markdown headers (e.g., `## My Header` becomes `#my-header`).
 
-## 3. Permitted Tasks (Strictly Limited)
+## 3. Critical Pre-Work: Discovery Phase
 
-This agent is **ONLY** permitted to perform the following three tasks:
+**BEFORE** making any edits, you **MUST** complete this discovery process:
+
+### 3.1 Map Available Documentation
+```bash
+# Get complete file listing to understand available targets
+find /home/jack/semantic/next/docs/src/pages -name "*.mdx" -type f | sort
+```
+
+### 3.2 Understand Link Context Strategy
+Ask yourself for EVERY potential link:
+- **"What is the user trying to accomplish when they encounter this term?"**
+- **"Are they learning about the concept (guide) or looking up specific technical details (API)?"**
+- **"What level of specificity does this context require?"**
+
+Example Context Analysis:
+- `css` in "component uses css for styling" → Link to conceptual guide `/components/styling`
+- `css` in "the css parameter accepts..." → Link to specific section `/components/styling#component-css`
+- `defineComponent` in code example → Link to API docs `/api/component/define-component`
+- `state` when explaining concepts → Link to guide `/components/state`
+- `state.counter.get()` method reference → Check for API docs with specific method
+
+## 4. Link Discovery & Validation Process
+
+### 4.1 Finding Link Targets (Required Tools Usage)
+
+For each potential link, use this systematic approach:
+
+#### Step 1: Broad Discovery
+```bash
+# Find files related to your keyword
+find /home/jack/semantic/next/docs/src/pages -name "*[keyword]*" -type f
+# Alternative: use Glob tool with pattern like "**/[keyword]*"
+```
+
+#### Step 2: Content-Based Search
+```bash
+# Search for the concept within files using Grep tool
+# Look for: function names, section headers, detailed explanations
+grep -r "your-keyword" /home/jack/semantic/next/docs/src/pages/
+```
+
+#### Step 3: Section Header Discovery
+For specific subsections within a page:
+```bash
+# Find all headers in a specific file
+grep -n "^#" /path/to/target/file.mdx
+```
+
+#### Step 4: API Documentation Check
+Always check both locations:
+- `/docs/src/pages/[concept]/` - Conceptual guides
+- `/docs/src/pages/api/[area]/` - Technical API references
+
+### 4.2 Context-Driven Link Selection
+
+**Guide vs API Decision Tree:**
+1. **Is this explaining HOW to use something?** → Guide page
+2. **Is this referencing a specific method/property/parameter?** → API page  
+3. **Is this in a list of configuration options?** → Link to specific subsection
+4. **Is this a code value being mentioned in explanatory text?** → API reference
+
+**Subsection Linking Strategy:**
+- When text mentions a specific aspect, always check for dedicated subsections
+- Examples: `pageCSS` → `/components/styling#page-css`, `onCreated` → `/components/lifecycle#oncreated`
+- **Never assume** - always verify the header exists using grep or Read tool
+
+## 5. Permitted Tasks (Strictly Limited)
+
+This agent is **ONLY** permitted to perform the following tasks:
 
 1.  **Add Internal Links to EXISTING Words:**
     *   Identify existing words or phrases within the documentation text that refer to concepts, components, APIs, or features documented elsewhere.
     *   Add markdown links (`[existing text](/path/to/page#optional-header)`) around these *existing words*.
     *   **Constraint:** NEVER add new words or change the phrasing to accommodate a link. The link must wrap text already present.
-    *   **Target Selection:**
-        *   Link to the relevant *guide* page (e.g., `/reactivity/variables`) when the context discusses the concept or usage.
-        *   Link to the relevant *API* page (e.g., `/components/button/api#properties`) when the context refers to specific properties, methods, events, etc., that would be detailed in an API reference.
-    *   Consult `docs/src/helpers/menus.js` or explore the `docs/src/pages/` directory structure to find appropriate link targets if unsure.
+    *   **NEVER modify existing links** unless they are demonstrably broken.
 
 2.  **Correct Spelling and Egregious Grammar:**
     *   Identify and correct clear spelling mistakes.
     *   Identify and fix obvious, significant grammatical errors that make the text nonsensical (e.g., missing verbs, incomplete sentences, incoherent phrasing).
-    *   **Constraint:** DO NOT rephrase sentences for style, clarity, or conciseness. Only fix objective errors in spelling and basic sentence structure. Minor stylistic preferences or awkward phrasing should be ignored.
+    *   **Constraint:** DO NOT rephrase sentences for style, clarity, or conciseness. Only fix objective errors in spelling and basic sentence structure.
 
 3.  **Verify Existing Internal Links (Optional - Only if explicitly requested):**
     *   **Trigger:** Only perform this task when specifically asked by the user.
     *   **Action:** Check if existing internal markdown links (`[text](/path/...)`) point to valid files and, if applicable, valid headers within those files.
-    *   **Method:** Requires reading file structure (`list_files`) and potentially file content (`read_file`) to confirm the existence of target paths and headers.
-    *   **Reporting:** Report any broken or incorrect links found. Do not attempt to fix them unless the correct target is obvious and requires only a minor path correction.
 
-## 4. Core Principles & Constraints
+## 6. Link Quality Standards
+
+### 6.1 Semantic Correctness
+- **Component-specific concepts** should link to `/components/[topic]` when discussing component usage
+- **General library features** should link to root-level guides like `/reactivity/`, `/templates/`, `/query/`
+- **Technical references** should link to `/api/[area]/[specific-item]`
+
+### 6.2 Specificity Requirements  
+- **Always prefer specific subsections** when the context warrants it
+- Use tools to verify header slugs exist before linking to them
+- Example: Don't link to `/components/styling` when `/components/styling#page-css` is more appropriate
+
+## 7. Core Principles & Constraints
 
 *   **Minimal Intervention:** Make the fewest changes possible to achieve the permitted tasks.
 *   **No Rewriting:** Absolutely no rephrasing, restructuring, or content generation.
@@ -44,9 +119,59 @@ This agent is **ONLY** permitted to perform the following three tasks:
 *   **Focus:** Links, spelling, major grammar errors only.
 *   **No Code Editing:** NEVER modify content within markdown code blocks (``` ```) or inline code formatting (` `` `). Do not fix syntax errors, change variable names, alter any code content, or "correct" syntax that appears wrong but may be valid alternative syntax - only edit plain text outside of code blocks. Code examples may use different valid syntax patterns that should not be changed.
 *   **No Code Links:** NEVER add links within code blocks or inline code. Links should only wrap plain text.
+*   **Verification Required:** Use Read, Grep, or Bash tools to confirm every link target exists before adding it.
 
-## 5. Important Notes
+## 8. General Linking Strategy
 
-*   Be mindful of the distinction between linking to conceptual guides vs. specific API documentation.
-*   Link verification (Task 3) can be resource-intensive and should be used judiciously upon user request.
-*   When in doubt about a correction or link target, ask for clarification rather than making a potentially incorrect change.
+### 8.1 Conceptual vs Technical References
+**Conceptual explanations** (how-to, guides, overviews):
+- Link to `/[domain]/` for broad concepts (e.g., `/reactivity/`, `/templates/`, `/components/`)
+- Link to `/[domain]/[specific-topic]` for focused topics
+
+**Technical references** (methods, properties, parameters):
+- Always check `/api/[area]/` first for dedicated API documentation
+- Use subsection links for specific parameters or methods when available
+
+### 8.2 Documentation Architecture Pattern
+This codebase follows a consistent pattern:
+- **`/[topic]/`** - User guides and conceptual explanations
+- **`/[package]/[topic]`** - Package-specific guides (e.g., `/components/[topic]`, `/reactivity/[topic]`, `/templates/[topic]`)
+- **`/api/[area]/[item]`** - Technical API references
+
+**Package Priority Guidelines:**
+- **Components package** is the primary integration point that uses all other packages
+- **Always prefer component-specific guides** when linking from component contexts
+- Example: Link to `/components/reactivity` (reactivity as used in components) rather than `/reactivity/` (general reactivity concepts) when discussing component usage
+
+### 8.3 Context-Driven Linking Examples
+**Configuration/Parameter contexts:**
+- Check if parameter has dedicated guide page: `/[package]/[parameter-name]`
+- Check if parameter has API documentation: `/api/[area]/[item]#[parameter]`
+- Check if parameter has specific subsection: `/[guide-page]#[parameter-section]`
+
+**Method/Function contexts:**
+- Search for API documentation first: `/api/[area]/[function-name]`
+- Look for subsection links: `/[guide]#[method-name]`
+
+**Feature mentions:**
+- **In component contexts:** Prefer `/components/[feature]` over `/[feature]/` when both exist
+- **In general contexts:** Use `/[feature]/` for standalone feature discussion
+- **Technical details:** Always check `/api/[area]/[item]` first
+
+**Cross-package References:**
+- When discussing how components use other packages, link to component-specific guides
+- When discussing standalone package features, link to the package's own guides
+- Example: "component state" → `/components/state`, "signals in general" → `/reactivity/signals`
+
+## 9. Error Prevention
+
+### 9.1 Before Every Link Addition
+1. **Verify target exists** using file system tools
+2. **Confirm section headers** using grep if linking to subsections  
+3. **Check existing links** in the current file - don't duplicate or conflict
+4. **Consider user intent** - what would be most helpful for someone reading this text?
+
+### 9.2 When in Doubt
+- Ask for clarification rather than guessing
+- Prefer broader, confirmed targets over specific, unverified ones
+- Leave text unlinked rather than link incorrectly

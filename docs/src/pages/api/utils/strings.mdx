@@ -231,6 +231,60 @@ console.log(getArticle('banana')); // 'a'
 console.log(getArticle('hour', { capitalize: true })); // 'An'
 ```
 
+### truncate
+
+```javascript
+function truncate(text, length, options = {})
+```
+
+Truncates text to a specified length with intelligent word boundary handling and Unicode support.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| text    | string | The text to truncate |
+| length  | number | Maximum length of the output |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name         | Type    | Default | Description |
+|--------------|---------|---------|-------------|
+| suffix       | string  | '…'     | Text to append when truncated |
+| wordBoundary | boolean | true    | Whether to truncate at word boundaries |
+| locale       | string  | 'en'    | Locale for word segmentation |
+
+#### Returns
+
+The truncated text with suffix if needed, or original text if shorter than length.
+
+#### Example
+
+```javascript
+import { truncate } from '@semantic-ui/utils';
+
+// Basic usage
+console.log(truncate('This is a long text that needs truncating', 20));
+// 'This is a long text…'
+
+// Disable word boundary
+console.log(truncate('This is a long sentence', 15, { wordBoundary: false }));
+// 'This is a very…'
+
+// Custom suffix
+console.log(truncate('This is a test', 10, { suffix: ' [more]' }));
+// 'This [more]'
+
+// Handles emojis correctly
+console.log(truncate('Hello 👋 World 🌍', 10));
+// 'Hello 👋…'
+
+// Locale-aware segmentation
+console.log(truncate('こんにちは世界です', 8, { locale: 'ja' }));
+// 'こんにちは…'
+```
+
 These string utilities provide a robust set of tools for working with strings in JavaScript, enhancing productivity and code readability. The notes highlight some of the unique aspects and potential limitations of certain functions.
 
 ### tokenize

@@ -24,23 +24,23 @@ let newVersion = mainPackageJson.version;
 
 // Async function to publish a package
 async function publishPackage(dir, isDryRun) {
-  
   const packageJsonPath = join(dir, 'package.json');
   if (!existsSync(packageJsonPath)) {
     return;
   }
-  
+
   const packageJson = loadJsonFile(packageJsonPath);
   if (packageJson.private) {
     console.log(`Skipping private package: ${packageJson.name}`);
     return;
   }
-  
+
   try {
     console.log(`Publishing package: ${packageJson.name} from ${dir}...`);
     if (isDryRun) {
       console.log(`[DRY RUN] Would publish: ${packageJson.name}`);
-    } else {
+    }
+    else {
       await execAsync('npm publish', { cwd: dir });
       console.log(`Successfully published: ${packageJson.name}`);
     }
@@ -53,7 +53,6 @@ async function publishPackage(dir, isDryRun) {
 // Read all workspaces - private packages will be filtered out during publishing
 const workspaceGlobs = mainPackageJson.workspaces;
 (async () => {
-
   // publishing packages
   console.log(`\n=== PUBLISH PHASE ===`);
   console.log(`Processing packages for publication...`);
@@ -68,13 +67,13 @@ const workspaceGlobs = mainPackageJson.workspaces;
   console.log('All packages have been processed.');
 
   console.log(`Updated versions of all packages to ${newVersion}`);
-  
+
   if (dryRun) {
     console.log('[DRY RUN] Would update package-lock.json, commit changes, and create tag');
     console.log('[DRY RUN] No git operations performed');
     return;
   }
-  
+
   // Update the root package-lock.json to reflect updated sub-package versions.
   console.log('Updating root package-lock.json...');
   await execAsync('npm install', { cwd: process.cwd() });
@@ -96,19 +95,19 @@ const workspaceGlobs = mainPackageJson.workspaces;
       console.log('Pushing changes...');
       await execAsync('git push');
 
-      // Tag the new version
-      console.log('Tagging new version...');
-      await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
-      await execAsync('git push --tags');
-
-      console.log('Committed and pushed version updates and created a new tag.');
+      console.log('Committed and pushed version updates.');
     }
     else {
       console.log('No changes to commit.');
     }
+
+    // Always tag the new version after successful publish
+    console.log('Tagging new version...');
+    await execAsync(`git tag -a v${newVersion} -m "Release version ${newVersion}"`);
+    await execAsync('git push --tags');
+    console.log('Created and pushed tag for version ' + newVersion);
   }
   catch (error) {
     console.error(`Failed to commit and push changes: ${error.message}`);
   }
-
 })();

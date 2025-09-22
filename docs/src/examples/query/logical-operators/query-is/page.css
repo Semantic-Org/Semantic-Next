@@ -1,0 +1,10 @@
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: var(--standard-10);
+  cursor: pointer;
+  
+  &.special {
+    border-right: 4px solid var(--purple-50);
+  }
+}

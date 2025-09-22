@@ -53,6 +53,48 @@ html,
   --grey-header-color: var(--grey-80);
   --slate-header-color: var(--slate-80);
 
+  --red-background-color: var(--red-0);
+  --olive-background-color: var(--olive-0);
+  --green-background-color: var(--green-0);
+  --yellow-background-color: var(--yellow-0);
+  --blue-background-color: var(--blue-0);
+  --teal-background-color: var(--teal-0);
+  --pink-background-color: var(--pink-0);
+  --violet-background-color: var(--violet-0);
+  --purple-background-color: var(--purple-0);
+  --orange-background-color: var(--orange-0);
+  --brown-background-color: var(--brown-0);
+  --grey-background-color: var(--grey-0);
+  --slate-background-color: var(--slate-0);
+
+  --red-border-color: var(--red-30);
+  --olive-border-color: var(--olive-30);
+  --green-border-color: var(--green-30);
+  --yellow-border-color: var(--yellow-30);
+  --blue-border-color: var(--blue-30);
+  --teal-border-color: var(--teal-30);
+  --pink-border-color: var(--pink-30);
+  --violet-border-color: var(--violet-30);
+  --purple-border-color: var(--purple-30);
+  --orange-border-color: var(--orange-30);
+  --brown-border-color: var(--brown-30);
+  --grey-border-color: var(--grey-30);
+  --slate-border-color: var(--slate-30);
+
+  --red-border: 1px solid var(--red-30);
+  --olive-border: 1px solid var(--olive-30);
+  --green-border: 1px solid var(--green-30);
+  --yellow-border: 1px solid var(--yellow-30);
+  --blue-border: 1px solid var(--blue-30);
+  --teal-border: 1px solid var(--teal-30);
+  --pink-border: 1px solid var(--pink-30);
+  --violet-border: 1px solid var(--violet-30);
+  --purple-border: 1px solid var(--purple-30);
+  --orange-border: 1px solid var(--orange-30);
+  --brown-border: 1px solid var(--brown-30);
+  --grey-border: 1px solid var(--grey-30);
+  --slate-border: 1px solid var(--slate-30);
+
 
   /* -------------------
       Color Palette

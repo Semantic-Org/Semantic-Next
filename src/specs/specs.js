@@ -1,11 +1,31 @@
 /* entry point for specs */
-export { ButtonSpec } from '../components/button/specs.js';
-export { CardSpec } from '../components/card/specs.js';
-export { ContainerSpec } from '../components/container/specs.js';
-export { IconSpec } from '../components/icon/specs.js';
-export { InputSpec } from '../components/input/specs.js';
-export { LabelSpec } from '../components/label/specs.js';
-export { MenuSpec, MenuItemSpec } from '../components/menu/specs.js';
-export { ModalSpec } from '../components/modal/specs.js';
-export { RailSpec } from '../components/rail/specs.js';
-export { SegmentSpec } from '../components/segment/specs.js';
+
+// Button
+export { ButtonComponentSpec, ButtonsComponentSpec, ButtonSpec } from '../primitives/button/specs.js';
+
+// Card
+export { CardComponentSpec, CardsComponentSpec, CardSpec } from '../primitives/card/specs.js';
+
+// Container
+export { ContainerComponentSpec, ContainerSpec } from '../primitives/container/specs.js';
+
+// Icon
+export { IconComponentSpec, IconsComponentSpec, IconSpec } from '../primitives/icon/specs.js';
+
+// Input
+export { InputComponentSpec, InputSpec } from '../primitives/input/specs.js';
+
+// Label
+export { LabelComponentSpec, LabelSpec } from '../primitives/label/specs.js';
+
+// Menu
+export { MenuComponentSpec, MenuItemComponentSpec, MenuItemSpec, MenuSpec } from '../primitives/menu/specs.js';
+
+// Modal
+export { ModalComponentSpec, ModalSpec } from '../primitives/modal/specs.js';
+
+// Rail
+export { RailComponentSpec, RailSpec } from '../primitives/rail/specs.js';
+
+// Segment
+export { SegmentComponentSpec, SegmentSpec } from '../primitives/segment/specs.js';

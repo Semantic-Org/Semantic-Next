@@ -1,0 +1,71 @@
+:root {
+  --grid-background: radial-gradient(circle, var(--standard-10) 1px, rgba(0, 0, 0, 0) 1px);
+}
+
+body {
+  background-size: 10px 10px;
+  background-image: var(--grid-background);
+  background-clip: padding-box;
+  background-position: -4px -4px;
+  padding: 50px;
+}
+
+.container {
+  padding: 50px;
+  border: 3px solid var(--yellow-border-color);
+  background-color: var(--yellow-background-color);
+  background-size: 10px 10px;
+  background-image: var(--grid-background);
+  background-clip: padding-box;
+  background-position: -4px -4px;
+
+  &.inner {
+    background-color: var(--purple-background-color);
+    position: relative;
+    border: 3px solid var(--purple-border-color);
+    height: 100px;
+  }
+}
+
+.box {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  height: 0px;
+  padding: 20px;
+  background: var(--angled-gradient) var(--blue-background-color);
+  border: 3px solid var(--blue-border-color);
+  border-radius: var(--border-radius);
+}
+
+.measurements {
+  background: var(--standard-solid-5);
+  border: var(--border);
+  padding: var(--padding);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  font-size: var(--large);
+  margin: var(--vertically-spaced);
+
+  .parts {
+    font-size: var(--medium);
+    margin-top: var(--margin);
+    color: var(--standard-40);
+    border-top: var(--border);
+    padding-top: var(--padding);
+  }
+
+  p {
+    margin: 3px 0;
+    font-family: Monospace;
+    span {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
+    b {
+      font-weight: bold;
+      color: var(--primary-text-color);
+    }
+  }
+}

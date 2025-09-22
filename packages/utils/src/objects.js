@@ -1,7 +1,8 @@
+import { clone } from './cloning.js';
 import { noop } from './functions.js';
-import { each } from './looping.js';
+import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
-import { isArray, isObject } from './types.js';
+import { isArray, isObject, isPlainObject } from './types.js';
 
 /*-------------------
        Objects
@@ -57,10 +58,62 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
+export const deepExtend = (target, ...args) => {
+  if (!isObject(target)) {
+    return target;
+  }
+
+  // Check if last argument is options object
+  const lastArg = args[args.length - 1];
+  const defaultOptions = { preserveNonCloneable: true, preserveDOM: true };
+  const hasOptions = keys(defaultOptions).some(key => lastArg?.[key] !== undefined);
+  const options = hasOptions ? { ...defaultOptions, ...lastArg } : defaultOptions;
+  const sources = hasOptions ? args.slice(0, -1) : args;
+
+  each(sources, (source) => {
+    // Skip if source is not a plain object
+    if (!isPlainObject(source)) {
+      return;
+    }
+
+    each(source, (val, key) => {
+      // Skip __proto__ for security
+      if (key === '__proto__') {
+        return;
+      }
+
+      const src = target[key];
+
+      // Recursion prevention
+      if (val === target) {
+        return;
+      }
+
+      // If new value isn't a plain object, clone and assign
+      if (!isPlainObject(val)) {
+        target[key] = clone(val, options);
+        return;
+      }
+
+      // If target property doesn't exist or isn't a plain object,
+      // create new object and deep extend
+      if (!isPlainObject(src)) {
+        target[key] = deepExtend({}, val, options);
+        return;
+      }
+
+      // Both are plain objects, extend recursively
+      deepExtend(src, val, options);
+    });
+  });
+
+  return target;
+};
+
 export const pick = (obj, ...keys) => {
   let copy = {};
   each(keys, function(key) {
-    if (obj[key] !== undefined) {
+    if (obj?.[key] !== undefined) {
       copy[key] = obj[key];
     }
   });
