@@ -1,10 +1,24 @@
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
-const components = await getCollection('components');
-const componentPages = components.map(page => ({
+const primitives = await getCollection('primitives');
+export const primitivePages = primitives.map(page => ({
   name: page.data.title,
-  url: `/ui/${page.slug}`,
+  url: `/ui/primitives/${page.slug}`,
+  matchSubPaths: true,
+}));
+
+const components = await getCollection('components');
+export const componentPages = components.map(page => ({
+  name: page.data.title,
+  url: `/ui/components/${page.slug}`,
+  matchSubPaths: true,
+}));
+
+const behaviors = await getCollection('behaviors');
+export const behaviorPages = behaviors.map(page => ({
+  name: page.data.title,
+  url: `/ui/behaviors/${page.slug}`,
   matchSubPaths: true,
 }));
 
@@ -150,7 +164,7 @@ export const topbarDisplayMenu = [
     _id: 'ui',
     _ids: ['install', 'css', 'primitives', 'components', 'behaviors'],
     name: 'UI Framework',
-    url: '/css',
+    url: '/install',
   },
   {
     /* This is the ids of the submenu in sidebar */
@@ -180,15 +194,11 @@ export const topbarDisplayMenu = [
 
 /* These are all site sections topbar and sidebar together  */
 export const topbarMenu = [
+  // UI Framework
   {
-    _id: 'framework',
-    name: 'Authoring Guides',
-    url: '/introduction',
-  },
-  {
-    _id: 'api',
-    name: 'API Reference',
-    url: '/api',
+    _id: 'install',
+    name: 'Install & Setup',
+    url: '/install',
   },
   {
     _id: 'css',
@@ -210,18 +220,25 @@ export const topbarMenu = [
     name: 'Behaviors',
     url: '/ui/behaviors',
   },
+  // API Docs
   {
-    _id: 'install',
-    name: 'Install & Setup',
-    url: '/usage',
+    _id: 'framework',
+    name: 'Authoring Guides',
+    url: '/introduction',
   },
+  {
+    _id: 'api',
+    name: 'API Reference',
+    url: '/api',
+  },
+  // Learn
   {
     _id: 'learn',
     name: 'Learn',
     url: '/learn/selection',
     baseURL: '/learn',
   },
-
+  // Examples
   ...exampleCategoryMenus,
   /*
   {
@@ -230,6 +247,15 @@ export const topbarMenu = [
     url: '/playground',
   },
   */
+];
+
+/* Setup & Install Sidebar */
+export const sidebarMenuInstall = [
+  {
+    name: 'Installation',
+    url: '/install',
+    icon: 'open book',
+  },
 ];
 
 /* CSS Token Sidebar */
@@ -245,9 +271,9 @@ export const sidebarMenuCSS = [
 export const sidebarMenuPrimitives = [
   {
     name: 'Primitives',
-    url: '/primitives',
+    url: '/ui/primitives',
     icon: 'layers',
-    pages: componentPages,
+    pages: primitivePages,
   },
 ];
 
@@ -257,7 +283,7 @@ export const sidebarMenuComponents = [
     name: 'Components',
     url: '/ui-components',
     icon: 'package',
-    pages: [],
+    pages: componentPages,
   },
 ];
 
@@ -267,31 +293,7 @@ export const sidebarMenuBehaviors = [
     name: 'Behaviors',
     url: '/behaviors',
     icon: 'package',
-    pages: [],
-  },
-];
-
-export const sidebarMenuUsage = [
-  {
-    name: 'Installation',
-    url: '/usage',
-    icon: 'open book',
-    pages: [
-      {
-        name: 'HTML Usage',
-        url: '/usage/html',
-      },
-      {
-        name: 'Frameworks Usage',
-        url: '/usage/framework',
-      },
-    ],
-  },
-  {
-    name: 'UI Primitives',
-    url: '/ui',
-    icon: 'layers',
-    pages: componentPages,
+    pages: behaviorPages,
   },
 ];
 

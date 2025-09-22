@@ -43,9 +43,9 @@ const searchMeta = {
   tab: toTitleCase(displayedTab)
 };
 
-const menu = data.tabs.map(tab => ({
+const menu = (data.tabs || []).map(tab => ({
   text: toTitleCase(tab),
-  url: `/primitives/${entry.slug}/${tab}`,
+  url: `/ui/${entry.slug}/${tab}`,
 }));
 
 let railMenu = [];
@@ -53,24 +53,3 @@ if(definitionDisplayed) {
   railMenu = componentSpec.getDefinitionMenu();
 }
 ---
-<Definition
-  title={data.title}
-  description={data.description}
-  searchMeta={searchMeta}
-  menu={menu}
-  railMenu={railMenu}
-  id={data.id}
->
-  {definitionDisplayed && (
-    <SpecDefinition
-      definition={definition}
-      componentName={componentName}
-      name={data.title}
-      spec={spec}
-      plural={plural}
-    />
-  )}
-  {displayedTab === 'spec' && (
-    <p>Spec goes here</p>
-  )}
-</Definition>

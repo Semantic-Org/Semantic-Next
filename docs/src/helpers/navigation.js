@@ -16,12 +16,12 @@ import {
 import { getCollection } from 'astro:content';
 import {
   sidebarMenuAPI,
+  sidebarMenuBehaviors,
   sidebarMenuComponents,
   sidebarMenuCSS,
   sidebarMenuFramework,
+  sidebarMenuInstall,
   sidebarMenuPrimitives,
-  sidebarMenuUI,
-  sidebarMenuUsage,
   standardMenuIcons,
   subCategorySortOrder,
   topbarDisplayMenu,
@@ -225,14 +225,8 @@ export const getActiveTopbarSection = async (activeURL = '') => {
 /* Helper to check if a URL belongs to a section's menu */
 const isInSectionMenu = (sectionId, currentPath) => {
   let menu = [];
-  if (sectionId === 'ui') {
-    menu = sidebarMenuUI;
-  }
-  else if (sectionId === 'framework') {
-    menu = sidebarMenuFramework;
-  }
-  else if (sectionId === 'api') {
-    menu = sidebarMenuAPI;
+  if (sectionId === 'install') {
+    menu = sidebarMenuInstall;
   }
   else if (sectionId === 'css') {
     menu = sidebarMenuCSS;
@@ -243,8 +237,17 @@ const isInSectionMenu = (sectionId, currentPath) => {
   else if (sectionId === 'components') {
     menu = sidebarMenuComponents;
   }
-  else if (sectionId === 'usage') {
-    menu = sidebarMenuUsage;
+  else if (sectionId === 'behaviors') {
+    menu = sidebarMenuBehaviors;
+  }
+  else if (sectionId === 'framework') {
+    menu = sidebarMenuFramework;
+  }
+  else if (sectionId === 'api') {
+    menu = sidebarMenuAPI;
+  }
+  else if (sectionId === 'learn') {
+    menu = sidebarMenuLearn;
   }
   else if (sectionId === 'examples') {
     menu = sidebarMenuExamples;
@@ -261,9 +264,6 @@ const isInSectionMenu = (sectionId, currentPath) => {
     if (categoryName) {
       menu = createFilteredExampleMenu(categoryName);
     }
-  }
-  else if (sectionId === 'learn') {
-    menu = sidebarMenuLearn;
   }
 
   // Check if current path matches any URL in the menu or its nested pages
@@ -388,8 +388,8 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
   else if (topbarSection === 'components') {
     menu = sidebarMenuComponents;
   }
-  else if (topbarSection === 'usage') {
-    menu = sidebarMenuUsage;
+  else if (topbarSection === 'install') {
+    menu = sidebarMenuInstall;
   }
   else if (topbarSection === 'examples') {
     menu = sidebarMenuExamples;
