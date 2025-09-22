@@ -83,12 +83,26 @@ export const remove = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
-  const index = findIndex(array, callback);
-  if (index > -1) {
-    array.splice(index, 1);
-    return true;
+
+  let writeIndex = 0;
+  const originalLength = array.length;
+
+  // Single pass: keep non-matching elements
+  for (let readIndex = 0; readIndex < originalLength; readIndex++) {
+    if (!callback(array[readIndex], readIndex, array)) {
+      // Only write if we need to shift
+      if (writeIndex !== readIndex) {
+        array[writeIndex] = array[readIndex];
+      }
+      writeIndex++;
+    }
   }
-  return false;
+
+  // Truncate the array to remove extra elements
+  const removedCount = originalLength - writeIndex;
+  array.length = writeIndex;
+
+  return removedCount;
 };
 
 export const inArray = (value, array = []) => {
@@ -103,7 +117,7 @@ export const range = (start, stop, step = 1) => {
   const length = stop - start;
   return Array(length)
     .fill(undefined)
-    .map((x, index) => {
+    .map((_, index) => {
       return index * step + start;
     });
 };
@@ -129,7 +143,7 @@ export const some = (collection, predicate) => {
 };
 export const any = some;
 
-export const sortBy = function(arr = [], key, comparator) {
+export const sortBy = (arr = [], key, comparator) => {
   const keys = Array.isArray(key) ? key : [key];
 
   const compare = (a, b) => {
@@ -182,7 +196,7 @@ export const sortBy = function(arr = [], key, comparator) {
   return arr.slice().sort(compare);
 };
 
-export const groupBy = function(array = [], property) {
+export const groupBy = (array = [], property) => {
   return array.reduce((result, obj) => {
     const key = get(obj, property);
     if (key !== undefined) {
@@ -200,7 +214,7 @@ export const moveItem = (array = [], callbackOrValue, index) => {
     ? callbackOrValue
     : (val) => isEqual(val, callbackOrValue);
 
-  let sourceIndex = findIndex(array, callback);
+  const sourceIndex = findIndex(array, callback);
   if (sourceIndex === -1) {
     return array;
   }
