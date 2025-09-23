@@ -121,15 +121,21 @@ const subCategorySortOrder = {
 
 /* Standardized Icons across Subsections for Sidebar Menu */
 export const standardMenuIcons = {
+  'User Guide': 'book',
+  'Authoring Guide': 'book',
   'Authoring Guides': 'book',
   'Guides': 'book',
   'Start Here': 'zap',
   'Install': 'zap',
   'Getting Started': 'zap',
+  'Introduction': 'zap',
   'Quick Start': 'zap',
   'Install & Setup': 'zap',
   'Tokens': 'droplet',
+  'Styling': 'droplet',
   'CSS Tokens': 'droplet',
+  'CSS Framework': 'droplet',
+  'CSS Theming': 'droplet',
   'User Guide': 'home',
   'Templates': 'table',
   'Framework': 'package',
@@ -143,6 +149,7 @@ export const standardMenuIcons = {
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
   'API Reference': 'code',
+  'Reference Docs': 'code',
   'Utils': 'tool',
 };
 
@@ -166,13 +173,13 @@ export const topbarDisplayMenu = [
     _id: 'ui',
     _ids: ['install', 'css', 'primitives', 'components', 'behaviors'],
     name: 'UI Framework',
-    url: '/install',
+    url: '/why-semantic',
   },
   {
     /* This is the ids of the submenu in sidebar */
     _ids: ['framework', 'api'],
-    name: 'API Docs',
-    url: '/components',
+    name: 'Docs',
+    url: '/docs',
   },
   {
     _id: 'learn',
@@ -199,12 +206,12 @@ export const topbarMenu = [
   // UI Framework
   {
     _id: 'install',
-    name: 'Quick Start',
+    name: 'Start Here',
     url: '/install',
   },
   {
     _id: 'css',
-    name: 'CSS Tokens',
+    name: 'Styling',
     url: '/css',
   },
   {
@@ -225,8 +232,8 @@ export const topbarMenu = [
   // API Docs
   {
     _id: 'framework',
-    name: 'Authoring Guides',
-    url: '/components',
+    name: 'User Guide',
+    url: '/docs',
   },
   {
     _id: 'api',
@@ -254,14 +261,19 @@ export const topbarMenu = [
 /* Setup & Install Sidebar */
 export const sidebarMenuInstall = [
   {
-    name: 'What is SUI',
-    url: '/introduction',
+    name: 'Why Semantic UI?',
+    url: '/why-semantic',
     icon: 'zap',
   },
   {
     name: 'Installation',
     url: '/install',
     icon: 'code',
+  },
+  {
+    name: "What's New?",
+    icon: 'radio',
+    url: '/whats-new',
   },
   {
     name: 'Frameworks',
@@ -291,21 +303,36 @@ export const sidebarMenuInstall = [
     ],
   },
   {
-    name: 'Usage',
+    name: 'Basic Guides',
     url: '/usage',
-    icon: 'box',
+    icon: 'book',
     pages: [
       {
-        name: 'Primitives',
+        name: 'Using UI Components',
         url: '/usage/primitives',
       },
       {
-        name: 'Components',
-        url: '/usage/components',
+        name: 'Theming',
+        url: '/usage/theming',
       },
       {
-        name: 'Behaviors',
-        url: '/usage/behaviors',
+        name: 'Creating UI Components',
+        url: '/usage/components',
+      },
+    ],
+  },
+  {
+    name: 'Philosophy',
+    url: '/install',
+    icon: 'message-circle',
+    pages: [
+      {
+        name: 'Natural Language',
+        url: '/about/natural-language',
+      },
+      {
+        name: 'About the Project',
+        url: '/about/project',
       },
     ],
   },
@@ -314,9 +341,71 @@ export const sidebarMenuInstall = [
 /* CSS Token Sidebar */
 export const sidebarMenuCSS = [
   {
+    name: 'Theming Cheatsheet',
+    url: '/css/cheatsheet',
+    icon: 'book',
+  },
+  {
     name: 'CSS Tokens',
-    url: '/css',
+    url: '/css/tokens',
     icon: 'droplet',
+    pages: [
+      {
+        name: 'Colors',
+        url: '/css/tokens/colors',
+      },
+      {
+        name: 'Text',
+        url: '/css/tokens/text',
+      },
+      {
+        name: 'Spacing',
+        url: '/css/tokens/spacing',
+      },
+      {
+        name: 'Sizes',
+        url: '/css/tokens/sizes',
+      },
+      {
+        name: 'Gradients',
+        url: '/css/tokens/gradients',
+      },
+      {
+        name: 'Shadows',
+        url: '/css/tokens/shadows',
+      },
+    ],
+  },
+  {
+    name: 'Core Concepts',
+    url: '/css/concepts',
+    icon: 'droplet',
+    pages: [
+      {
+        name: 'Basic Theming',
+        url: '/css/concepts/theming',
+      },
+      {
+        name: 'Dark Mode',
+        url: '/css/concepts/dark-mode',
+      },
+      {
+        name: 'Styling Web Components',
+        url: '/css/concepts/components',
+      },
+      {
+        name: 'Responsive Patterns',
+        url: '/css/concepts/responsive',
+      },
+      {
+        name: 'Style Inheritance',
+        url: '/css/concepts/style',
+      },
+      {
+        name: 'Dynamic Sizing',
+        url: '/css/concepts/sizes',
+      },
+    ],
   },
 ];
 
@@ -352,6 +441,11 @@ export const sidebarMenuBehaviors = [
 
 /* Component Framework Sidebar */
 export const sidebarMenuFramework = [
+  {
+    name: 'Overview',
+    url: '/docs',
+    icon: 'open book',
+  },
   {
     name: 'Components',
     url: '/components',

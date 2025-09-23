@@ -296,8 +296,8 @@ const createComponent = (
   },
 
   canShowPageFiles() {
-    let pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
-    if (pageFiles.length == 0) {
+    const pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
+    if (pageFiles.length === 0) {
       return false;
     }
     if (pageFiles.every(file => file.generated)) {
@@ -312,7 +312,7 @@ const createComponent = (
   getNaturalPanelSize(panel, { direction, minimized }) {
     const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
     const $sizer = $$(panel).find('.CodeMirror-sizer');
-    if (direction == 'horizontal') {
+    if (direction === 'horizontal') {
       const $menu = $$(panel).find('ui-menu .menu').first();
       const extraSpacing = 5; // rounding
       const scrollbarWidth = $scrollbar.width() ? 17 : 0;
@@ -352,7 +352,7 @@ const createComponent = (
   },
   getPanelSize(file) {
     let size = get(settings.panelSizes, file.filename);
-    if (size == 'natural' && !file.content) {
+    if (size === 'natural' && !file.content) {
       size = 'grow';
     }
     return size;
@@ -363,7 +363,7 @@ const createComponent = (
       tabs: state.layout.get() == 'tabs',
     };
     // defer to preference unless its tablet
-    if (state.displayMode.value == 'tablet') {
+    if (state.displayMode.value === 'tablet') {
       classes.vertical = true;
     }
     else {
@@ -372,7 +372,7 @@ const createComponent = (
     return classes;
   },
   getTabDirection() {
-    if (state.displayMode.value == 'tablet') {
+    if (state.displayMode.value === 'tablet') {
       return 'vertical';
     }
     if (settings.inline) {
@@ -382,7 +382,7 @@ const createComponent = (
   },
   // when inline or on mobile or stacked we want only one menu
   shouldCombineMenus() {
-    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
+    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value === 'mobile';
   },
   getProjectFiles() {
     return self.getFileArray({ files: state.projectFiles.get() });
@@ -399,10 +399,10 @@ const createComponent = (
     // if we have only 'page' files this becomes the 'main' menu
     // and the right pane is just the iframe preview
     if (filter && self.onlyPageFiles(fileArray)) {
-      if (filter == 'main') {
+      if (filter === 'main') {
         return fileArray.filter(file => self.isPageFile(file.filename));
       }
-      else if (filter == 'page') {
+      else if (filter === 'page') {
         return [];
       }
     }
@@ -589,7 +589,7 @@ const createComponent = (
     let panelHeight = menuHeight + codeHeight + offset;
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 50);
-    $('ui-panels').first().css('height', `${panelHeight}px`);
+    $('ui-panels').first().css('height', `${panelHeight + 15}px`);
   },
 
   updateCurrentFiles(currentFilesArray = []) {

@@ -11,7 +11,7 @@
         <ui-button
           class="toggle-menu"
           icon="menu"
-          transparent compact inverted
+          transparent compact
           icon-only
         ></ui-button>
         <div class="location">
@@ -24,12 +24,13 @@
           </span>
         </div>
         <div class="actions">
-          <ui-button href={previousLesson.url} icon="left arrow" transparent compact inverted disabled={not hasPreviousLesson} icon-only></ui-button>
-          <ui-button href={nextLesson.url} icon="right arrow" transparent compact inverted disabled={not hasNextLesson} icon-only></ui-button>
+          <ui-button href={previousLesson.url} icon="left arrow" transparent compact disabled={not hasPreviousLesson} icon-only></ui-button>
+          <ui-button href={nextLesson.url} icon="right arrow" transparent compact disabled={not hasNextLesson} icon-only></ui-button>
         </div>
       </div>
       <div class="menu">
         <nav-menu
+          dark
           menu={menu}
           activeURL={activeURL}
           expandAll=true
@@ -43,13 +44,13 @@
       <div class="actions segment">
         <div class="left">
           {#if hasAny lesson.references}
-            <ui-button transparent inverted icon="book" class="references">
+            <ui-button transparent icon="book" class="references">
               Resources
               <label>{lesson.references.length}</label>
             </ui-button>
           {/if}
           {#if exists files}
-            <ui-button button transparent icon="table" inverted class="layout">
+            <ui-button button transparent icon="table" class="layout">
               Layout
               <label>{titleCase layout}</label>
             </ui-button>
@@ -57,7 +58,7 @@
         </div>
         <div class="right">
           {#if lesson.hint}
-            <ui-button transparent inverted class="hint">Hint</ui-button>
+            <ui-button transparent class="hint">Hint</ui-button>
           {/if}
           {#if exists solutionFiles}
             <ui-button icon="check" class="solve">Solve</ui-button>
