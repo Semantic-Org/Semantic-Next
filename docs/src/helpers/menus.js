@@ -207,7 +207,7 @@ export const topbarMenu = [
   {
     _id: 'install',
     name: 'Start Here',
-    url: '/install',
+    url: '/why-semantic',
   },
   {
     _id: 'css',
@@ -340,11 +340,6 @@ export const sidebarMenuInstall = [
 
 /* CSS Token Sidebar */
 export const sidebarMenuCSS = [
-  {
-    name: 'Theming Cheatsheet',
-    url: '/css/cheatsheet',
-    icon: 'book',
-  },
   {
     name: 'CSS Tokens',
     url: '/css/tokens',
