@@ -12,7 +12,7 @@
 }
 
 :host {
-  --panel-handle-height: 20px;
+  --panel-handle-height: 14px;
   --panel-divider-width: 1px;
 
   --panel-label-font-weight: var(--bold);
