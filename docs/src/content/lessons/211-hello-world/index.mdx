@@ -19,15 +19,15 @@ This lesson introduces your first UI component. We'll create a simple time displ
 
 ## Key Concepts
 
-1. **Component Definition**: The [`defineComponent`](/components/create#defining-components) function creates a web component with a specified tag name.
+1. **Component Definition**: The [`defineComponent`](/docs/guides/components/create#defining-components) function creates a web component with a specified tag name.
 
-2. **Template**: The template contains HTML with [expressions](/templates/expressions) in curly braces `{}` that display reactive data.
+2. **Template**: The template contains HTML with [expressions](/docs/guides/templates/expressions) in curly braces `{}` that display reactive data.
 
-3. **State**: The [`defaultState`](/components/state#declaring-state) object defines reactive properties that automatically update the UI when changed.
+3. **State**: The [`defaultState`](/docs/guides/components/state#declaring-state) object defines reactive properties that automatically update the UI when changed.
 
-4. **Lifecycle**: The [`onCreated`](/components/lifecycle) function runs when the component is initialized
+4. **Lifecycle**: The [`onCreated`](/docs/guides/components/lifecycle) function runs when the component is initialized
 
-5. **Reactivity**: Using [`state.time.now()`](/api/reactivity/date-helpers#now) updates the time and automatically refreshes the display.
+5. **Reactivity**: Using [`state.time.now()`](/docs/api/reactivity/date-helpers#now) updates the time and automatically refreshes the display.
 
 ## Understanding the Code
 
@@ -35,8 +35,8 @@ Looking at [component.js](#component.js), notice how:
 
 - We use `defineComponent` to create a new web component with html tag `tagName`
 - `defaultState` specifies our internal state, in this example we track `time`
-- The template uses an expression [`{formatDate time "h:mm:ss a"}`](/templates/expressions#expression-syntax) to display formatted time with the time from `state`
-- We use [`css variables`](/components/styling) in our component styling to inherit from our page theme.
+- The template uses an expression [`{formatDate time "h:mm:ss a"}`](/docs/guides/templates/expressions#expression-syntax) to display formatted time with the time from `state`
+- We use [`css variables`](/docs/guides/components/styling) in our component styling to inherit from our page theme.
 - `onCreated` sets up a timer that updates every second
 
 ## Using the Component

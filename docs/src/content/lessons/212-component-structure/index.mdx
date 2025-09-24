@@ -29,9 +29,9 @@ This separation makes your code more maintainable and allows for better tooling 
 
 ## Loading Templates and Styles
 
-The [`getText`](/components/create#organizing-code) function loads external files at build time as shown in [component.js](#component.js). Although in practice with a [build tool like Vite](https://vite.dev) you can import the files directly using `import` statements.
+The [`getText`](/docs/guides/components/create#organizing-code) function loads external files at build time as shown in [component.js](#component.js). Although in practice with a [build tool like Vite](https://vite.dev) you can import the files directly using `import` statements.
 
-- We import both [`defineComponent`](/components/create#defining-components) and `getText`
+- We import both [`defineComponent`](/docs/guides/components/create#defining-components) and `getText`
 - External files are loaded with `await getText('./filename')`
 - The loaded content is passed to the component definition
 
@@ -39,7 +39,7 @@ The [`getText`](/components/create#organizing-code) function loads external file
 
 The [component.html](#component.html) file contains our markup with expressions:
 
-- User data is accessed with [expressions](/templates/expressions) like `{user.name}`
+- User data is accessed with [expressions](/docs/guides/templates/expressions) like `{user.name}`
 - Attributes can contain expressions: `src="{user.avatar}"`
 - The template is completely separate from the JavaScript logic
 
@@ -47,8 +47,8 @@ The [component.html](#component.html) file contains our markup with expressions:
 
 In [component.css](#component.css), we define styles that are scoped to our component:
 
-- All your CSS is scoped via [Shadow DOM](/components/styling#css) to your component, so you can use simple selectors (like `.profile`, `.name`) without needing prefixes.
-- [CSS variables](/components/styling#using-css-variables) like `var(--standard-5)` enable theming
+- All your CSS is scoped via [Shadow DOM](/docs/guides/components/styling#css) to your component, so you can use simple selectors (like `.profile`, `.name`) without needing prefixes.
+- [CSS variables](/docs/guides/components/styling#using-css-variables) like `var(--standard-5)` enable theming
 - Remember styles are encapsulated so use them however you want.
 
 ## Try It Yourself

@@ -179,7 +179,7 @@ export const topbarDisplayMenu = [
     /* This is the ids of the submenu in sidebar */
     _ids: ['framework', 'api'],
     name: 'Docs',
-    url: '/docs',
+    url: '/docs/guides',
   },
   {
     _id: 'learn',
@@ -233,12 +233,12 @@ export const topbarMenu = [
   {
     _id: 'framework',
     name: 'User Guides',
-    url: '/docs',
+    url: '/docs/guides',
   },
   {
     _id: 'api',
     name: 'API References',
-    url: '/api',
+    url: '/docs/api',
   },
   // Learn
   {
@@ -443,195 +443,195 @@ export const sidebarMenuBehaviors = [
 export const sidebarMenuFramework = [
   {
     name: 'Overview',
-    url: '/docs',
+    url: '/docs/guides',
     icon: 'open book',
   },
   {
     name: 'Components',
-    url: '/components',
+    url: '/docs/guides/components',
     icon: 'package',
     pages: [
       {
         name: 'Creating',
-        url: '/components/create',
+        url: '/docs/guides/components/create',
       },
       {
         name: 'Functionality',
-        url: '/components/instances',
+        url: '/docs/guides/components/instances',
       },
       {
         name: 'Lifecycle',
-        url: '/components/lifecycle',
+        url: '/docs/guides/components/lifecycle',
       },
       {
         name: 'Templates & Data',
-        url: '/components/rendering',
+        url: '/docs/guides/components/rendering',
       },
       {
         name: 'Settings',
-        url: '/components/settings',
+        url: '/docs/guides/components/settings',
       },
       {
         name: 'State',
-        url: '/components/state',
+        url: '/docs/guides/components/state',
       },
       {
         name: 'Events',
-        url: '/components/events',
+        url: '/docs/guides/components/events',
       },
       {
         name: 'Reactivity',
-        url: '/components/reactivity',
+        url: '/docs/guides/components/reactivity',
       },
       {
         name: 'DOM',
-        url: '/components/dom',
+        url: '/docs/guides/components/dom',
       },
       {
         name: 'Styling',
-        url: '/components/styling',
+        url: '/docs/guides/components/styling',
       },
       {
         name: 'Key Bindings',
-        url: '/components/keys',
+        url: '/docs/guides/components/keys',
       },
     ],
   },
   {
     name: 'Templates',
-    url: '/templates',
+    url: '/docs/guides/templates',
     icon: 'table',
     pages: [
       {
         name: 'Expressions',
-        url: '/templates/expressions',
+        url: '/docs/guides/templates/expressions',
       },
       {
         name: 'Conditionals',
-        url: '/templates/conditionals',
+        url: '/docs/guides/templates/conditionals',
       },
       {
         name: 'Loops',
-        url: '/templates/loops',
+        url: '/docs/guides/templates/loops',
       },
       {
         name: 'Async',
-        url: '/templates/async',
+        url: '/docs/guides/templates/async',
       },
       {
         name: 'Slots',
-        url: '/templates/slots',
+        url: '/docs/guides/templates/slots',
       },
       {
         name: 'Subtemplates',
-        url: '/templates/subtemplates',
+        url: '/docs/guides/templates/subtemplates',
       },
       {
         name: 'Snippets',
-        url: '/templates/snippets',
+        url: '/docs/guides/templates/snippets',
       },
       {
         name: 'Reactivity',
-        url: '/templates/reactivity',
+        url: '/docs/guides/templates/reactivity',
       },
       {
         name: 'Helpers',
-        url: '/templates/helpers',
+        url: '/docs/guides/templates/helpers',
       },
     ],
   },
   {
     name: 'Reactivity',
     description: 'Signals',
-    url: '/reactivity',
+    url: '/docs/guides/reactivity',
     icon: 'cpu',
     pages: [
       {
         name: 'Signals',
         description: 'Reactive state primitive',
-        url: '/reactivity/signals',
+        url: '/docs/guides/reactivity/signals',
       },
       {
         name: 'Dependent Signals',
         description: 'Derived and computed signals',
-        url: '/reactivity/dependent-signals',
+        url: '/docs/guides/reactivity/dependent-signals',
       },
       {
         name: 'Reactions',
         description: 'Reactive computations',
-        url: '/reactivity/reactions',
+        url: '/docs/guides/reactivity/reactions',
       },
       {
         name: 'Mutations',
-        url: '/reactivity/mutation-helpers',
+        url: '/docs/guides/reactivity/mutation-helpers',
       },
       {
         name: 'Flushing',
-        url: '/reactivity/flush',
+        url: '/docs/guides/reactivity/flush',
       },
       {
         name: 'Reactive Controls',
-        url: '/reactivity/controls',
+        url: '/docs/guides/reactivity/controls',
       },
       {
         name: 'Performance',
-        url: '/reactivity/performance',
+        url: '/docs/guides/reactivity/performance',
       },
       {
         name: 'Debugging',
-        url: '/reactivity/debugging',
+        url: '/docs/guides/reactivity/debugging',
       },
       {
         name: 'Advanced Options',
         description: 'Equality & Cloning',
-        url: '/reactivity/signal-options',
+        url: '/docs/guides/reactivity/signal-options',
       },
     ],
   },
   {
     name: 'Query',
     description: 'DOM Helpers',
-    url: '/query',
+    url: '/docs/guides/query',
     icon: 'mouse-pointer',
     pages: [
       {
         name: 'Basics',
-        url: '/query/basics',
+        url: '/docs/guides/query/basics',
       },
       {
         name: 'Shadow DOM',
-        url: '/query/shadow-dom',
+        url: '/docs/guides/query/shadow-dom',
       },
       {
         name: 'Components',
-        url: '/query/components',
+        url: '/docs/guides/query/components',
       },
       {
         name: 'Chaining',
-        url: '/query/chaining',
+        url: '/docs/guides/query/chaining',
       },
       {
         name: 'Plugins',
-        url: '/query/plugins',
+        url: '/docs/guides/query/plugins',
       },
       {
         name: 'Browser Usage',
-        url: '/query/browser',
+        url: '/docs/guides/query/browser',
       },
     ],
   },
   {
     name: 'Advanced Usage',
-    url: '/advanced',
+    url: '/docs/guides/advanced',
     icon: 'server',
     pages: [
       {
         name: 'Common Issues',
-        url: '/advanced/common-issues',
+        url: '/docs/guides/advanced/common-issues',
       },
       {
         name: 'Server Side Rendering',
-        url: '/advanced/ssr',
+        url: '/docs/guides/advanced/ssr',
       },
     ],
   },
@@ -640,282 +640,282 @@ export const sidebarMenuFramework = [
 export const sidebarMenuAPI = [
   {
     name: 'Components',
-    url: '/api/component',
+    url: '/docs/api/component',
     icon: 'package',
     pages: [
       {
         name: 'Define Component',
-        url: '/api/component/define-component',
+        url: '/docs/api/component/define-component',
       },
       {
         name: 'Utility Functions',
-        url: '/api/component/utilities',
+        url: '/docs/api/component/utilities',
       },
       {
         name: 'Base Class',
-        url: '/api/component/web-component-base',
+        url: '/docs/api/component/web-component-base',
       },
     ],
   },
   {
     name: 'Template Helpers',
-    url: '/api/helpers',
+    url: '/docs/api/helpers',
     icon: 'book-open',
     pages: [
       {
         name: 'Arrays',
-        url: '/api/helpers/arrays',
+        url: '/docs/api/helpers/arrays',
       },
       {
         name: 'Comparison',
-        url: '/api/helpers/comparison',
+        url: '/docs/api/helpers/comparison',
       },
       {
         name: 'CSS',
-        url: '/api/helpers/css',
+        url: '/docs/api/helpers/css',
       },
       {
         name: 'Dates',
-        url: '/api/helpers/dates',
+        url: '/docs/api/helpers/dates',
       },
       {
         name: 'Debug',
-        url: '/api/helpers/debug',
+        url: '/docs/api/helpers/debug',
       },
       {
         name: 'Logical Operators',
-        url: '/api/helpers/logical',
+        url: '/docs/api/helpers/logical',
       },
       {
         name: 'Numeric',
-        url: '/api/helpers/numeric',
+        url: '/docs/api/helpers/numeric',
       },
       {
         name: 'Objects',
-        url: '/api/helpers/objects',
+        url: '/docs/api/helpers/objects',
       },
       {
         name: 'Reactivity',
-        url: '/api/helpers/reactivity',
+        url: '/docs/api/helpers/reactivity',
       },
       {
         name: 'Strings',
-        url: '/api/helpers/strings',
+        url: '/docs/api/helpers/strings',
       },
     ],
   },
   {
     name: 'Reactivity',
-    url: '/api/reactivity',
+    url: '/docs/api/reactivity',
     icon: 'cpu',
     pages: [
       {
         name: 'Signal',
-        url: '/api/reactivity/signal',
+        url: '/docs/api/reactivity/signal',
       },
       {
         name: 'Reaction',
-        url: '/api/reactivity/reaction',
+        url: '/docs/api/reactivity/reaction',
       },
       {
         name: 'Scheduler',
-        url: '/api/reactivity/scheduler',
+        url: '/docs/api/reactivity/scheduler',
       },
       {
         name: 'Dependency',
-        url: '/api/reactivity/dependency',
+        url: '/docs/api/reactivity/dependency',
       },
       {
         name: 'Number Helpers',
-        url: '/api/reactivity/number-helpers',
+        url: '/docs/api/reactivity/number-helpers',
       },
       {
         name: 'Boolean Helpers',
-        url: '/api/reactivity/boolean-helpers',
+        url: '/docs/api/reactivity/boolean-helpers',
       },
       {
         name: 'Array Helpers',
-        url: '/api/reactivity/array-helpers',
+        url: '/docs/api/reactivity/array-helpers',
       },
       {
         name: 'Collection Helpers',
-        url: '/api/reactivity/collection-helpers',
+        url: '/docs/api/reactivity/collection-helpers',
       },
       {
         name: 'Date Helpers',
-        url: '/api/reactivity/date-helpers',
+        url: '/docs/api/reactivity/date-helpers',
       },
     ],
   },
   {
     name: 'Query',
-    url: '/api/query',
+    url: '/docs/api/query',
     icon: 'mouse-pointer',
     pages: [
       {
         name: 'Basic Usage',
-        url: '/api/query/basic',
+        url: '/docs/api/query/basic',
       },
       {
         name: 'Attributes',
-        url: '/api/query/attributes',
+        url: '/docs/api/query/attributes',
       },
       {
         name: 'Components',
-        url: '/api/query/components',
+        url: '/docs/api/query/components',
       },
       {
         name: 'Content',
-        url: '/api/query/content',
+        url: '/docs/api/query/content',
       },
       {
         name: 'CSS',
-        url: '/api/query/css',
+        url: '/docs/api/query/css',
       },
       {
         name: 'Dimensions & Size',
-        url: '/api/query/dimensions',
+        url: '/docs/api/query/dimensions',
       },
       {
         name: 'Display & Visibility',
-        url: '/api/query/visibility',
+        url: '/docs/api/query/visibility',
       },
       {
         name: 'DOM Manipulation',
-        url: '/api/query/dom-manipulation',
+        url: '/docs/api/query/dom-manipulation',
       },
       {
         name: 'DOM Traversal',
-        url: '/api/query/dom-traversal',
+        url: '/docs/api/query/dom-traversal',
       },
       {
         name: 'Events',
-        url: '/api/query/events',
+        url: '/docs/api/query/events',
       },
       {
         name: 'Iterators',
-        url: '/api/query/iterators',
+        url: '/docs/api/query/iterators',
       },
       {
         name: 'Logical Operators',
-        url: '/api/query/logical-operators',
+        url: '/docs/api/query/logical-operators',
       },
       {
         name: 'Utilities',
-        url: '/api/query/utilities',
+        url: '/docs/api/query/utilities',
       },
       {
         name: 'Internal',
-        url: '/api/query/internal',
+        url: '/docs/api/query/internal',
       },
     ],
   },
   {
     name: 'Utils',
-    url: '/api/utils',
+    url: '/docs/api/utils',
     icon: 'tool',
     pages: [
       {
         name: 'Arrays',
-        url: '/api/utils/arrays',
+        url: '/docs/api/utils/arrays',
       },
       {
         name: 'Browser',
-        url: '/api/utils/browser',
+        url: '/docs/api/utils/browser',
       },
       {
         name: 'Cloning',
-        url: '/api/utils/cloning',
+        url: '/docs/api/utils/cloning',
       },
       {
         name: 'Colors',
-        url: '/api/utils/colors',
+        url: '/docs/api/utils/colors',
       },
       {
         name: 'Crypto',
-        url: '/api/utils/crypto',
+        url: '/docs/api/utils/crypto',
       },
       {
         name: 'Dates',
-        url: '/api/utils/dates',
+        url: '/docs/api/utils/dates',
       },
       {
         name: 'Environment',
-        url: '/api/utils/environment',
+        url: '/docs/api/utils/environment',
       },
       {
         name: 'Equality',
-        url: '/api/utils/equality',
+        url: '/docs/api/utils/equality',
       },
       {
         name: 'Errors',
-        url: '/api/utils/errors',
+        url: '/docs/api/utils/errors',
       },
       {
         name: 'Functions',
-        url: '/api/utils/functions',
+        url: '/docs/api/utils/functions',
       },
       {
         name: 'Looping',
-        url: '/api/utils/looping',
+        url: '/docs/api/utils/looping',
       },
       {
         name: 'Numbers',
-        url: '/api/utils/numbers',
+        url: '/docs/api/utils/numbers',
       },
       {
         name: 'Objects',
-        url: '/api/utils/objects',
+        url: '/docs/api/utils/objects',
       },
       {
         name: 'Types',
-        url: '/api/utils/types',
+        url: '/docs/api/utils/types',
       },
       {
         name: 'Regular Expressions',
-        url: '/api/utils/regex',
+        url: '/docs/api/utils/regex',
       },
       {
         name: 'Strings',
-        url: '/api/utils/strings',
+        url: '/docs/api/utils/strings',
       },
     ],
   },
   {
     name: 'Template Compiler',
-    url: '/api/templating',
+    url: '/docs/api/templating',
     icon: 'table',
     pages: [
       {
         name: 'Template Compiler',
-        url: '/api/templating/template-compiler',
+        url: '/docs/api/templating/template-compiler',
       },
       {
         name: 'Abstract Syntax Tree (AST)',
-        url: '/api/templating/ast',
+        url: '/docs/api/templating/ast',
       },
       {
         name: 'Template',
-        url: '/api/templating/template',
+        url: '/docs/api/templating/template',
       },
       {
         name: 'String Scanner',
-        url: '/api/templating/string-scanner',
+        url: '/docs/api/templating/string-scanner',
       },
     ],
   },
   {
     name: 'Renderer',
-    url: '/api/renderer',
+    url: '/docs/api/renderer',
     icon: 'edit-3',
     pages: [
       {
         name: 'Lit Renderer',
-        url: '/api/renderer/lit-renderer',
+        url: '/docs/api/renderer/lit-renderer',
       },
       {
         name: 'Lit Directives',
-        url: '/api/renderer/lit-directives',
+        url: '/docs/api/renderer/lit-directives',
       },
     ],
   },

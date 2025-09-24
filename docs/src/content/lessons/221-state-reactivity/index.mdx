@@ -19,31 +19,31 @@ Reactivity is the heart of Semantic UI components. This lesson introduces you to
 
 ## Understanding State
 
-The [`defaultState`](/components/state#declaring-state) object defines your component's reactive properties. When these values change, your template automatically updates to reflect the new data.
+The [`defaultState`](/docs/guides/components/state#declaring-state) object defines your component's reactive properties. When these values change, your template automatically updates to reflect the new data.
 
 ## Reactive Properties
 
 Looking at [component.js](#component.js), you'll notice:
 
 - `defaultState` initializes a counter and toggle property
-- We use [`.set()`](/components/state#updating-state) to update values in event handlers
-- We use [`.get()`](/components/state#accessing-state) to access values in JavaScript code
+- We use [`.set()`](/docs/guides/components/state#updating-state) to update values in event handlers
+- We use [`.get()`](/docs/guides/components/state#accessing-state) to access values in JavaScript code
 - The template updates automatically when state changes
 
 ## State Operators
 
 The framework provides special methods for common state operations:
 
-- [`.increment()`](/api/reactivity/number-helpers#increment) and [`.decrement()`](/api/reactivity/number-helpers#decrement) for numbers
-- [`.toggle()`](/api/reactivity/boolean-helpers#toggle) for booleans
-- [`.now()`](/api/reactivity/date-helpers#now) for dates (updates to current time)
-- Array methods like [`.push()`](/api/reactivity/array-helpers#push), [`.removeIndex()`](/api/reactivity/array-helpers#removeindex), [`.setIndex()`](/api/reactivity/array-helpers#setindex)
+- [`.increment()`](/docs/api/reactivity/number-helpers#increment) and [`.decrement()`](/docs/api/reactivity/number-helpers#decrement) for numbers
+- [`.toggle()`](/docs/api/reactivity/boolean-helpers#toggle) for booleans
+- [`.now()`](/docs/api/reactivity/date-helpers#now) for dates (updates to current time)
+- Array methods like [`.push()`](/docs/api/reactivity/array-helpers#push), [`.removeIndex()`](/docs/api/reactivity/array-helpers#removeindex), [`.setIndex()`](/docs/api/reactivity/array-helpers#setindex)
 
 ## Template Access
 
 In the [component.html](#component.html) template:
 
-- State is accessed [directly without using `.get()`](/components/state#in-templates): `{count}`
+- State is accessed [directly without using `.get()`](/docs/guides/components/state#in-templates): `{count}`
 - The UI automatically updates when state changes
 - Methods can be called from templates: `{isEven(count)}`
 

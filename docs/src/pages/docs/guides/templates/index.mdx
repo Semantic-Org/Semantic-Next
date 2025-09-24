@@ -1,0 +1,288 @@
+---
+layout: '@layouts/Guide.astro'
+title: Templating
+description: Using template features in Semantic UI
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+
+## Overview
+
+Semantic UI templates compile to an Abstract Syntax Tree (AST) for efficient rendering and targeted DOM updates. The declarative syntax handles [async operations](/docs/guides/templates/async), [loops](/docs/guides/templates/loops), [conditionals](/docs/guides/templates/conditionals), and [reactive expressions](/docs/guides/templates/expressions) with automatic dependency tracking.
+
+## Writing Templates
+
+### Flexible Syntax
+
+Template syntax is designed to be adaptable to your team's preferences and to help components feel more natural across codebases of different languages.
+
+#### Brackets
+
+Bracket syntax supports either single or double bracket as long as it is consistent across the file.
+
+```sui title="Single Bracket"
+Welcome, { getFirstName }
+```
+
+```sui title="Double Bracket"
+Welcome, {{ getFirstName }}
+```
+
+#### Expression Styles
+
+Expressions support both Lisp-style (semantic) and JavaScript syntax, even mixed in the same template:
+
+```sui title="Semantic (Lisp-style)"
+{ formatDate date 'h:mm a' timezone }
+{ titleCase concat firstName ' ' lastName }
+```
+
+```sui title="JavaScript"
+{ formatDate(date, 'h:mm a', timezone) }
+{ users.filter(u => u.active).length }
+```
+
+```sui title="Mixed Styles"
+{ formatDate (date + offset) 'h:mm a' {locale: 'en-US'} }
+```
+
+> Templates compile once per component type and reuse the AST across instances. See [Templates & Data Context](/docs/guides/components/rendering) for integration details.
+
+## Binding Data
+
+Templates are bound to a [data context](/docs/guides/components/rendering) which is used for evaluating expressions.
+
+You can think of the data context as "all the variables defined in the scope of your template".
+
+When using the component framework these will come from sources in your component like their [settings](/docs/guides/components/settings), and [internal state](/docs/guides/components/state).
+
+<PlaygroundExample id="advanced-color-picker" height="480"></PlaygroundExample>
+
+## Template Features
+
+### [Expressions](/docs/guides/templates/expressions)
+
+Evaluate against the template's [data context](/docs/guides/components/rendering#data-context). Expressions are reactive - they re-evaluate when signals change.
+
+```sui
+{name}
+{users.0.email}
+{formatDate createdAt 'MMM DD'}
+{#html sanitizedContent}
+```
+
+#### Attribute Expressions
+
+With quotes: always renders as string
+```sui
+<input type="number" value="{count}">
+```
+
+Without quotes: removes attribute when falsy
+```sui
+<button disabled={isLoading}>Submit</button>
+```
+
+### [Conditionals](/docs/guides/templates/conditionals)
+
+Control flow using `#if`, `#else if`, and `#else`.
+```sui
+{#if isColor 'red'}
+  Red
+{else if isColor 'blue'}
+  Blue
+{else}
+  Another color
+{/if}
+```
+
+### [Loops](/docs/guides/templates/loops)
+
+Three iteration syntaxes with automatic `index`/`key` variables:
+
+Direct context
+```sui
+{#each users}
+  {name} ({index})
+{/each}
+```
+
+Named iterator (each...in)
+```sui
+{#each user in users}
+  {user.name} ({index})
+{/each}
+```
+
+Alternate syntax (each...as)
+```sui
+{#each users as user, idx}
+  {user.name} ({idx})
+{/each}
+```
+
+Object iteration
+```sui
+{#each value, key in settings}
+  {key}: {value}
+{/each}
+```
+
+Empty state
+```sui
+{#each items}
+  {name}
+{else}
+  No items
+{/each}
+```
+
+### [Async Operations](/docs/guides/templates/async)
+
+Handle promises directly in templates with automatic reactive re-execution:
+
+```sui
+{#async fetchUser userId as user}
+  <h3>{user.name}</h3>
+{loading}
+  <div class="spinner">Loading...</div>
+{error as e}
+  <p>Failed: {e.message}</p>
+{/async}
+```
+
+Reactive dependencies (`userId` above) trigger automatic refetch.
+
+### [Reactivity Control](/docs/guides/templates/reactivity)
+
+Fine-tune when template sections update:
+
+Force re-evaluation including non-reactive content
+```sui
+{#rerender userId}
+  <p>User: {userName}</p>
+  <p>Timestamp: {getTimestamp}</p>
+{/rerender}
+```
+
+Only re-render when computed value changes
+```sui
+{#guard getUserStatus}
+  <div class="status-{getUserStatus}">
+    {expensiveComputation}
+  </div>
+{/guard}
+```
+
+### [Slots](/docs/guides/templates/slots)
+
+Define areas for external content injection.
+
+Default slot
+```sui
+{>slot}
+```
+
+Named slot
+```sui
+{>slot header}
+```
+
+### [Global Helpers](/docs/guides/templates/helpers)
+
+Built-in utilities for formatting, logic, and CSS classes:
+
+```sui
+{formatDate createdAt 'MMM DD, YYYY'}
+{capitalize title}
+{classIf isActive 'active' 'inactive'}
+{hasAny items}
+```
+
+#### Custom Helpers
+
+Extend the template system:
+
+```javascript
+import { registerHelper } from '@semantic-ui/templating';
+
+registerHelper('timeAgo', (date) => {
+  const seconds = Math.floor((Date.now() - date) / 1000);
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  return `${Math.floor(seconds / 3600)}h ago`;
+});
+```
+
+### [Subtemplates](/docs/guides/templates/subtemplates)
+
+Compose components and enable template-as-settings patterns:
+
+Simple subtemplate
+```sui
+{> userCard user}
+```
+
+With data object
+```sui
+{> userCard name=user.name role='admin'}
+```
+
+Dynamic template selection
+```sui
+{>template
+  name=getTemplateName
+  data={user: currentUser}
+}
+```
+
+Separate reactive/non-reactive data
+```sui
+{>template
+  name='userProfile'
+  reactiveData={status: userStatus}  // Re-renders on change
+  data={theme: 'dark'}                // Static data
+}
+```
+
+#### Template as Settings
+
+Let consumers provide custom templates:
+
+```javascript
+// Consumer specifies template
+$('ui-table').settings({
+  rowTemplate: myCustomRowTemplate
+});
+```
+
+### [Snippets](/docs/guides/templates/snippets)
+
+Inline reusable fragments - like subtemplates but defined in the same file:
+
+```sui
+{#snippet userRow}
+  <tr>
+    <td>{name}</td>
+    <td>{role}</td>
+    <td>{formatDate joinDate 'MMM YYYY'}</td>
+  </tr>
+{/snippet}
+```
+
+Use multiple times with different data
+```sui
+{#each admins}
+  {>userRow}
+{/each}
+
+{#each members}
+  {>userRow}
+{/each}
+```
+
+Snippets inherit parent data context but can receive additional data:
+
+```sui
+{>userRow extraClass='highlight'}
+```

@@ -1,0 +1,62 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Utils
+icon: package
+description: A comprehensive collection of utility functions for Semantic UI
+---
+
+Semantic UI includes this standalone library to avoid external dependencies and to allow for performant and opinionated uses of common utils like `clone` and `isEqual` as well as some particular use cases for web components.
+
+
+## Installation
+
+
+The utils library is a standalone package that can be used without any other dependencies.
+
+```bash
+npm install @semantic-ui/utils
+```
+
+## Usage
+
+Utilities can be used by importing them in your project.
+
+```javascript
+import { isArray, capitalize, clone, adoptStylesheet } from '@semantic-ui/utils';
+
+const myArray = [1, 2, 3];
+console.log(isArray(myArray)); // true
+
+const myString = "hello world";
+console.log(capitalize(myString)); // "Hello world"
+
+const myObject = { a: 1, b: { c: 2 } };
+const clonedObject = clone(myObject);
+console.log(clonedObject); // { a: 1, b: { c: 2 } }
+
+// Adopt CSS to document
+adoptStylesheet('.button { background: blue; color: white; }');
+```
+
+## Utility Categories
+
+The Utils library is organized into several categories:
+
+- **[Arrays](/docs/api/utils/arrays)**: Utilities for working with arrays.
+- **[Browser](/docs/api/utils/browser)**: Utilities for handling functionality on the client.
+- **[Cloning](/docs/api/utils/cloning)**: Deep cloning utilities.
+- **[Colors](/docs/api/utils/colors)**: Utilities for color manipulation and conversion.
+- **[Crypto](/docs/api/utils/crypto)**: Cryptographic helpers like hashing functions.
+- **[CSS](/docs/api/utils/css)**: Utilities for stylesheet adoption, extraction, and scoping.
+- **[Dates](/docs/api/utils/dates)**: Helpers for handling date formats.
+- **[Equality](/docs/api/utils/equality)**: Helpers for comparing equality.
+- **[Errors](/docs/api/utils/errors)**: Error handling and creation utilities.
+- **[Functions](/docs/api/utils/functions)**: Helpers for manipulating functions.
+- **[Looping](/docs/api/utils/looping)**: Iteration utilities for arrays and objects.
+- **[Numbers](/docs/api/utils/numbers)**: Helpers for manipulating numbers
+- **[Objects](/docs/api/utils/objects)**: Helpers for object manipulation and traversal.
+- **[Regular Expressions](/docs/api/utils/regex)**: Helpers for working with regular expressions.
+- **[Environment](/docs/api/utils/environment)**: Environment detection utilities (server/client/dev/CI).
+- **[Strings](/docs/api/utils/strings)**: String formatting and manipulation functions.
+- **[Types](/docs/api/utils/types)**: Functions for checking and manipulating data types.
