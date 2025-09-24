@@ -1,6 +1,8 @@
 body {
   --dark-mode: true;
 
+  --topbar-border-bottom: none;
+
   ui-card {
     --card-padding: 1.5rem 2rem;
     --card-description-line-height: 1.6;
@@ -82,8 +84,8 @@ body {
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
+        /*background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);*/
         pointer-events: none;
       }
 
@@ -304,12 +306,12 @@ body {
 }
 
 @keyframes masthead {
-   0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 0% 475px;
-  }
+ 0% {
+  background-position: 0% 0%;
+}
+100% {
+  background-position: 0% 475px;
+}
 }
 
 

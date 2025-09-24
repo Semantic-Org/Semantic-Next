@@ -261,6 +261,11 @@ export const topbarMenu = [
 /* Setup & Install Sidebar */
 export const sidebarMenuInstall = [
   {
+    name: 'Project Overview',
+    url: '/framework',
+    icon: 'book open',
+  },
+  {
     name: 'Why Semantic UI?',
     url: '/why-semantic',
     icon: 'zap',
