@@ -121,12 +121,12 @@ const subCategorySortOrder = {
 
 /* Standardized Icons across Subsections for Sidebar Menu */
 export const standardMenuIcons = {
-  'User Guide': 'book',
+  'User Guides': 'book',
   'Authoring Guide': 'book',
   'Authoring Guides': 'book',
   'Guides': 'book',
   'Start Here': 'zap',
-  'Install': 'zap',
+  'start': 'zap',
   'Getting Started': 'zap',
   'Introduction': 'zap',
   'Quick Start': 'zap',
@@ -136,7 +136,7 @@ export const standardMenuIcons = {
   'CSS Tokens': 'droplet',
   'CSS Framework': 'droplet',
   'CSS Theming': 'droplet',
-  'User Guide': 'home',
+  'User Guides': 'home',
   'Templates': 'table',
   'Framework': 'package',
   'Primitives': 'layers',
@@ -148,7 +148,7 @@ export const standardMenuIcons = {
   'Reactivity': 'cpu',
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
-  'API Reference': 'code',
+  'API References': 'code',
   'Reference Docs': 'code',
   'Utils': 'tool',
 };
@@ -171,9 +171,9 @@ const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
 export const topbarDisplayMenu = [
   {
     _id: 'ui',
-    _ids: ['install', 'css', 'primitives', 'components', 'behaviors'],
+    _ids: ['start', 'css', 'primitives', 'components', 'behaviors'],
     name: 'UI Framework',
-    url: '/why-semantic',
+    url: '/overview',
   },
   {
     /* This is the ids of the submenu in sidebar */
@@ -205,9 +205,9 @@ export const topbarDisplayMenu = [
 export const topbarMenu = [
   // UI Framework
   {
-    _id: 'install',
+    _id: 'start',
     name: 'Start Here',
-    url: '/why-semantic',
+    url: '/overview',
   },
   {
     _id: 'css',
@@ -232,12 +232,12 @@ export const topbarMenu = [
   // API Docs
   {
     _id: 'framework',
-    name: 'User Guide',
+    name: 'User Guides',
     url: '/docs',
   },
   {
     _id: 'api',
-    name: 'API Reference',
+    name: 'API References',
     url: '/api',
   },
   // Learn
@@ -259,10 +259,10 @@ export const topbarMenu = [
 ];
 
 /* Setup & Install Sidebar */
-export const sidebarMenuInstall = [
+export const sidebarMenuStart = [
   {
-    name: 'Project Overview',
-    url: '/framework',
+    name: 'Overview',
+    url: '/overview',
     icon: 'book open',
   },
   {
@@ -281,29 +281,29 @@ export const sidebarMenuInstall = [
     url: '/whats-new',
   },
   {
-    name: 'Frameworks',
-    url: '/frameworks',
+    name: 'Integrations',
+    url: '/integrations',
     icon: 'box',
     pages: [
       {
         name: 'Vanilla JS',
-        url: '/install/frameworks/vanilla',
+        url: '/install/integrations/vanilla',
       },
       {
         name: 'React',
-        url: '/install/frameworks/react',
+        url: '/install/integrations/react',
       },
       {
         name: 'Vue',
-        url: '/install/frameworks/vue',
+        url: '/install/integrations/vue',
       },
       {
         name: 'Angular',
-        url: '/install/frameworks/angular',
+        url: '/install/integrations/angular',
       },
       {
         name: 'Svelte',
-        url: '/install/frameworks/svelte',
+        url: '/install/integrations/svelte',
       },
     ],
   },

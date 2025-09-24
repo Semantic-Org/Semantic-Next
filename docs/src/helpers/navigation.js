@@ -20,8 +20,8 @@ import {
   sidebarMenuComponents,
   sidebarMenuCSS,
   sidebarMenuFramework,
-  sidebarMenuInstall,
   sidebarMenuPrimitives,
+  sidebarMenuStart,
   standardMenuIcons,
   subCategorySortOrder,
   topbarDisplayMenu,
@@ -225,8 +225,8 @@ export const getActiveTopbarSection = async (activeURL = '') => {
 /* Helper to check if a URL belongs to a section's menu */
 const isInSectionMenu = (sectionId, currentPath) => {
   let menu = [];
-  if (sectionId === 'install') {
-    menu = sidebarMenuInstall;
+  if (sectionId === 'start') {
+    menu = sidebarMenuStart;
   }
   else if (sectionId === 'css') {
     menu = sidebarMenuCSS;
@@ -382,8 +382,8 @@ export const getSidebarMenu = async ({ url, topbarSection }) => {
   else if (topbarSection === 'behaviors') {
     menu = sidebarMenuBehaviors;
   }
-  else if (topbarSection === 'install') {
-    menu = sidebarMenuInstall;
+  else if (topbarSection === 'start') {
+    menu = sidebarMenuStart;
   }
   else if (topbarSection === 'framework') {
     menu = sidebarMenuFramework;
