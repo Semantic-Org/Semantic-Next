@@ -125,6 +125,7 @@ export const standardMenuIcons = {
   'Authoring Guide': 'book',
   'Authoring Guides': 'book',
   'Guides': 'book',
+  'User Guides': 'book',
   'Start Here': 'zap',
   'start': 'zap',
   'Getting Started': 'zap',
@@ -136,7 +137,6 @@ export const standardMenuIcons = {
   'CSS Tokens': 'droplet',
   'CSS Framework': 'droplet',
   'CSS Theming': 'droplet',
-  'User Guides': 'home',
   'Templates': 'table',
   'Framework': 'package',
   'Primitives': 'layers',
@@ -173,7 +173,7 @@ export const topbarDisplayMenu = [
     _id: 'ui',
     _ids: ['start', 'css', 'primitives', 'components', 'behaviors'],
     name: 'UI Framework',
-    url: '/overview',
+    url: '/ui/start',
   },
   {
     /* This is the ids of the submenu in sidebar */
@@ -207,12 +207,12 @@ export const topbarMenu = [
   {
     _id: 'start',
     name: 'Start Here',
-    url: '/overview',
+    url: '/ui/start',
   },
   {
     _id: 'css',
     name: 'Styling',
-    url: '/css',
+    url: '/ui/css',
   },
   {
     _id: 'primitives',
@@ -262,82 +262,83 @@ export const topbarMenu = [
 export const sidebarMenuStart = [
   {
     name: 'Overview',
-    url: '/overview',
+    url: '/ui/start',
     icon: 'book open',
   },
   {
     name: 'Why Semantic UI?',
-    url: '/why-semantic',
+    url: '/ui/start/why-semantic',
     icon: 'zap',
   },
   {
     name: 'Installation',
-    url: '/install',
+    url: '/ui/start/install',
     icon: 'code',
   },
   {
     name: "What's New?",
     icon: 'radio',
-    url: '/whats-new',
+    url: '/ui/start/whats-new',
+    description: '0.12.0',
   },
   {
     name: 'Integrations',
-    url: '/integrations',
+    url: '/ui/start/integrations',
     icon: 'box',
     pages: [
       {
         name: 'Vanilla JS',
-        url: '/install/integrations/vanilla',
+        url: '/ui/start/integrations/vanilla',
       },
       {
         name: 'React',
-        url: '/install/integrations/react',
+        url: '/ui/start/integrations/react',
       },
       {
         name: 'Vue',
-        url: '/install/integrations/vue',
+        url: '/ui/start/integrations/vue',
       },
       {
         name: 'Angular',
-        url: '/install/integrations/angular',
+        url: '/ui/start/integrations/angular',
       },
       {
         name: 'Svelte',
-        url: '/install/integrations/svelte',
+        url: '/ui/start/integrations/svelte',
       },
     ],
   },
   {
     name: 'Basic Guides',
-    url: '/usage',
+    url: '/ui/start/guides',
     icon: 'book',
     pages: [
       {
         name: 'Using UI Components',
-        url: '/usage/primitives',
+        url: '/ui/start/guides/primitives',
       },
       {
         name: 'Theming',
-        url: '/usage/theming',
+        url: '/ui/start/guides/theming',
       },
       {
         name: 'Creating UI Components',
-        url: '/usage/components',
+        url: '/ui/start/guides/components',
       },
     ],
   },
   {
     name: 'Philosophy',
-    url: '/install',
+    url: '/ui/start/philosophy',
     icon: 'message-circle',
     pages: [
       {
         name: 'Natural Language',
-        url: '/about/natural-language',
+        url: '/ui/start/philosophy/natural-language',
       },
       {
         name: 'About the Project',
-        url: '/about/project',
+        url: '/ui/start/philosophy/project',
       },
     ],
   },
@@ -347,63 +348,63 @@ export const sidebarMenuStart = [
 export const sidebarMenuCSS = [
   {
     name: 'CSS Tokens',
-    url: '/css/tokens',
+    url: '/ui/css/tokens',
     icon: 'droplet',
     pages: [
       {
         name: 'Colors',
-        url: '/css/tokens/colors',
+        url: '/ui/css/tokens/colors',
       },
       {
         name: 'Text',
-        url: '/css/tokens/text',
+        url: '/ui/css/tokens/text',
       },
       {
         name: 'Spacing',
-        url: '/css/tokens/spacing',
+        url: '/ui/css/tokens/spacing',
       },
       {
         name: 'Sizes',
-        url: '/css/tokens/sizes',
+        url: '/ui/css/tokens/sizes',
       },
       {
         name: 'Gradients',
-        url: '/css/tokens/gradients',
+        url: '/ui/css/tokens/gradients',
       },
       {
         name: 'Shadows',
-        url: '/css/tokens/shadows',
+        url: '/ui/css/tokens/shadows',
       },
     ],
   },
   {
     name: 'Core Concepts',
-    url: '/css/concepts',
+    url: '/ui/css/concepts',
     icon: 'droplet',
     pages: [
       {
         name: 'Basic Theming',
-        url: '/css/concepts/theming',
+        url: '/ui/css/concepts/theming',
       },
       {
         name: 'Dark Mode',
-        url: '/css/concepts/dark-mode',
+        url: '/ui/css/concepts/dark-mode',
       },
       {
         name: 'Styling Web Components',
-        url: '/css/concepts/components',
+        url: '/ui/css/concepts/components',
       },
       {
         name: 'Responsive Patterns',
-        url: '/css/concepts/responsive',
+        url: '/ui/css/concepts/responsive',
       },
       {
         name: 'Style Inheritance',
-        url: '/css/concepts/style',
+        url: '/ui/css/concepts/style',
       },
       {
         name: 'Dynamic Sizing',
-        url: '/css/concepts/sizes',
+        url: '/ui/css/concepts/sizes',
       },
     ],
   },
@@ -423,7 +424,7 @@ export const sidebarMenuPrimitives = [
 export const sidebarMenuComponents = [
   {
     name: 'Components',
-    url: '/ui-components',
+    url: '/ui/components',
     icon: 'package',
     pages: componentPages,
   },
@@ -433,7 +434,7 @@ export const sidebarMenuComponents = [
 export const sidebarMenuBehaviors = [
   {
     name: 'Behaviors',
-    url: '/behaviors',
+    url: '/ui/behaviors',
     icon: 'package',
     pages: behaviorPages,
   },
