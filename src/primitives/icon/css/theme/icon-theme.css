@@ -21,3 +21,4 @@
 
 /* Overrides */
 @import url('./overrides/feather-icons.css') layer(icon.theme.overrides.feather);
+@import url('./overrides/dev-icons.css') layer(icon.theme.overrides.dev);

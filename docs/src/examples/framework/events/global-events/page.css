@@ -1,5 +1,6 @@
 body {
   cursor: pointer;
+  height: 100%;
 }
 ui-clicker {
   user-select: none;

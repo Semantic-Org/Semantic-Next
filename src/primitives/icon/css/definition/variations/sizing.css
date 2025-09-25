@@ -16,7 +16,7 @@
 }
 .icons .icon,
 .icon {
-  /* inherit */
+  font-size: var(--icon-medium);
 }
 .large.icons .icon,
 .large.icon {

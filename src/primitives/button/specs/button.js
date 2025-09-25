@@ -421,7 +421,7 @@ export default {
       'usageLevel': 2,
       'description': 'appear transparent',
       'exampleCode':
-        '<div class="transparent segments">\n  <div class="light segment">\n    <ui-button transparent>Transparent</ui-button>\n  </div>\n  <div class="dark segment">\n    <ui-button inverted transparent>Transparent</ui-button>\n  </div>\n</div>',
+        '<div class="transparent segments">\n  <div class="standard segment">\n    <ui-button transparent>Transparent</ui-button>\n  </div>\n  <div class="inverted segment">\n    <ui-button inverted transparent>Transparent</ui-button>\n  </div>\n</div>',
     },
     {
       'name': 'Floated',

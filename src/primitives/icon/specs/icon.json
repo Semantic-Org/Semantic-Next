@@ -292,7 +292,21 @@
         "zap",
         "zap-off",
         "zoom-in",
-        "zoom-out"
+        "zoom-out",
+        "js",
+        "react",
+        "astro",
+        "vue",
+        "react",
+        "svelte",
+        "angular",
+        "next",
+        "astro-mark",
+        "vue-mark",
+        "react-mark",
+        "svelte-mark",
+        "angular-mark",
+        "next-mark"
       ]
     }
   ],
