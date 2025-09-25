@@ -169,6 +169,10 @@ export const defineComponent = ({
         super.disconnectedCallback();
         if (this.template) {
           this.template.onDestroyed(); // destroy instance
+          // Clear references for gc
+          delete this.template;
+          delete this.component;
+          delete this.dataContext;
         }
         litTemplate.onDestroyed(); // destroy prototype
       }

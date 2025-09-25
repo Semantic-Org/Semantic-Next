@@ -791,7 +791,7 @@ export const Template = class Template {
     }
     let templates = Template.renderedTemplates.get(template.templateName) || [];
     remove(templates, (thisTemplate) => thisTemplate.id == template.id);
-    Template.renderedTemplates.set(templates);
+    Template.renderedTemplates.set(template.templateName, templates);
   }
   static getTemplates(templateName) {
     return Template.renderedTemplates.get(templateName) || [];
