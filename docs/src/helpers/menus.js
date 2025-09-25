@@ -209,26 +209,31 @@ export const topbarMenu = [
   {
     _id: 'start',
     name: 'Start Here',
+    icon: 'zap',
     url: '/ui/start',
   },
   {
     _id: 'css',
     name: 'Styling',
+    icon: 'droplet',
     url: '/ui/css',
   },
   {
     _id: 'primitives',
     name: 'Primitives',
+    icon: 'layers',
     url: '/ui/primitives',
   },
   {
     _id: 'components',
     name: 'Components',
+    icon: 'package',
     url: '/ui/components',
   },
   {
     _id: 'behaviors',
     name: 'Behaviors',
+    icon: 'cpu',
     url: '/ui/behaviors',
   },
   // API Docs
@@ -263,12 +268,12 @@ export const topbarMenu = [
 /* Setup & Install Sidebar */
 export const sidebarMenuStart = [
   {
-    name: 'Overview',
+    name: 'Introduction',
     url: '/ui/start',
     icon: 'book open',
   },
   {
-    name: 'Why Semantic UI?',
+    name: 'Why Semantic?',
     url: '/ui/start/why-semantic',
     icon: 'zap',
   },
@@ -284,48 +289,56 @@ export const sidebarMenuStart = [
     description: '0.12.0',
   },
   {
-    name: 'Integrations',
-    url: '/ui/start/integrations',
-    icon: 'box',
-    pages: [
-      {
-        name: 'Vanilla JS',
-        url: '/ui/start/integrations/vanilla',
-      },
-      {
-        name: 'React',
-        url: '/ui/start/integrations/react',
-      },
-      {
-        name: 'Vue',
-        url: '/ui/start/integrations/vue',
-      },
-      {
-        name: 'Angular',
-        url: '/ui/start/integrations/angular',
-      },
-      {
-        name: 'Svelte',
-        url: '/ui/start/integrations/svelte',
-      },
-    ],
-  },
-  {
-    name: 'Basic Guides',
+    name: 'Getting Started',
     url: '/ui/start/guides',
     icon: 'book',
     pages: [
       {
-        name: 'Using UI Components',
-        url: '/ui/start/guides/primitives',
+        name: 'Using UI',
+        url: '/ui/start/guides/using-ui',
+      },
+      {
+        name: 'Creating UI',
+        url: '/ui/start/guides/creating-ui',
       },
       {
         name: 'Theming',
         url: '/ui/start/guides/theming',
       },
+    ],
+  },
+  {
+    name: 'Ecosystems',
+    url: '/ui/start/ecosystems',
+    icon: 'box',
+    pages: [
       {
-        name: 'Creating UI Components',
-        url: '/ui/start/guides/components',
+        name: 'Vanilla JS',
+        url: '/ui/start/ecosystems/vanilla',
+      },
+      {
+        name: 'React',
+        url: '/ui/start/ecosystems/react',
+      },
+      {
+        name: 'Svelte',
+        url: '/ui/start/ecosystems/svelte',
+      },
+      {
+        name: 'Vue',
+        url: '/ui/start/ecosystems/vue',
+      },
+      {
+        name: 'Angular',
+        url: '/ui/start/ecosystems/angular',
+      },
+      {
+        name: 'Astro',
+        url: '/ui/start/ecosystems/astro',
+      },
+      {
+        name: 'Next',
+        url: '/ui/start/ecosystems/next',
       },
     ],
   },
@@ -380,9 +393,9 @@ export const sidebarMenuCSS = [
     ],
   },
   {
-    name: 'Core Concepts',
+    name: 'Styling Guide',
     url: '/ui/css/concepts',
-    icon: 'droplet',
+    icon: 'book',
     pages: [
       {
         name: 'Basic Theming',

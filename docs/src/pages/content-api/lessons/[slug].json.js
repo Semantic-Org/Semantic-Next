@@ -1,19 +1,18 @@
 import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
+import { getFolder } from '@helpers/loading.js';
 import { asyncMap, asyncEach, isEmpty } from '@semantic-ui/utils';
 import { getCollection, render } from 'astro:content';
 import { markdown } from '@astropub/md'
-
-/* Get associated example */
-const allLessonFiles = await import.meta.glob(`../../../content/lessons/**`, {
-  query: '?raw',
-});
 
 export async function getStaticPaths() {
   const lessons = await getCollection('lessons');
 
   const paths = await asyncMap(lessons, async (lessonDoc) => {
     const lesson = getLessonContent(lessonDoc);
+
+    /* Get associated example files for this specific lesson */
+    const allLessonFiles = await getFolder(lesson.id, '../../../content/lessons/');
     // can either be an example or a problem/solution set
     const fileFolders = ['problem', 'example'];
     let files;

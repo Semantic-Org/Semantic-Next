@@ -3,12 +3,11 @@ import { getExampleFiles, getExampleID } from '@helpers/playground.js';
 import { asyncMap, each, mapObject } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
-const allExampleFiles = await import.meta.glob(`../../../examples/**`, {
-  query: '?raw',
-});
-const examples = await getCollection('examples');
-
 export async function GET(settings) {
+  const allExampleFiles = await import.meta.glob(`../../../examples/**`, {
+    query: '?raw',
+  });
+  const examples = await getCollection('examples', ({ data }) => !data.hidden);
   let text = '';
   const removeComments = (text) => {
     text = text.replaceAll('<!-- playground-hide -->   ', '');

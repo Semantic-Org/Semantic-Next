@@ -313,7 +313,7 @@ export const getActiveSidebarSection = (currentPath) => {
 /* Add standard icons based off nav menu in sidebar */
 export const addStandardIcons = (items) => {
   return items.map(item => {
-    if (item.label) {
+    if (item.label && !item.icon) {
       item.icon = standardMenuIcons[item.label];
     }
     return item;
@@ -333,6 +333,7 @@ export const getSidebarNavMenu = (activeSection, currentPath) => {
           ? {
             label: section.name,
             href: section.url,
+            icon: section.icon,
             active: currentPath.startsWith(section.url) || isInSectionMenu(section._id, currentPath),
           }
           : null;
