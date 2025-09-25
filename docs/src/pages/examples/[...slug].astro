@@ -8,6 +8,7 @@ import {
   getSandboxURL,
   getPanelIndexes,
 } from '@helpers/playground.js';
+import { getFolder } from '@helpers/loading.js';
 import Playground from '@layouts/Playground.astro';
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 import Sidebar from '@components/Sidebar.astro';
@@ -31,10 +32,7 @@ const { entry } = Astro.props;
 const sandboxURL = getSandboxURL();
 const example = entry.data;
 const exampleID = example.id || tokenize(example.title);
-const allExampleFiles = await import.meta.glob(`../../examples/**`, {
-  query: '?raw',
-});
-
+const allExampleFiles = await getFolder(exampleID, '../../examples/');
 const isFolder = example.exampleType == 'folder';
 let files = await getExampleFiles({
   contentID: getExampleID(example),

@@ -124,6 +124,7 @@ export const standardMenuIcons = {
   'User Guides': 'book',
   'Authoring Guide': 'book',
   'Authoring Guides': 'book',
+  'Guide': 'book',
   'Guides': 'book',
   'User Guides': 'book',
   'Start Here': 'zap',
@@ -149,6 +150,7 @@ export const standardMenuIcons = {
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
   'API References': 'code',
+  'API Reference': 'code',
   'Reference Docs': 'code',
   'Utils': 'tool',
 };
@@ -232,12 +234,12 @@ export const topbarMenu = [
   // API Docs
   {
     _id: 'framework',
-    name: 'User Guides',
+    name: 'Guide',
     url: '/docs/guides',
   },
   {
     _id: 'api',
-    name: 'API References',
+    name: 'API Reference',
     url: '/docs/api',
   },
   // Learn
