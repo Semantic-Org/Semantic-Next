@@ -323,6 +323,19 @@
           p:last-child {
             margin-bottom: 0rem;
           }
+          & > ul,
+          & > ul li,
+          & section > p,
+          & > p {
+            line-height: 1.66;
+          }
+          & > ul li {
+            margin-bottom: 2px;
+
+            &:last-child {
+              margin-bottom: 0rem;
+            }
+          }
         }
 
         table {
