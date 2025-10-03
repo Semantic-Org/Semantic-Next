@@ -36,7 +36,7 @@
     --topbar-menu-item-active-color: var(--white-100);
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
-    --topbar-border-bottom: 1px solid #15181a;
+    --topbar-border-bottom: 1px solid var(--standard-5);
 
   }
 

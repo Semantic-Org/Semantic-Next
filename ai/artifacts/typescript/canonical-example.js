@@ -1,9 +1,9 @@
 /**
  * CANONICAL JAVASCRIPT EXAMPLE - CHECKBOX COMPONENT
- * 
+ *
  * This is based on the actual checkbox component from the Semantic UI codebase
  * at docs/src/examples/component/checkbox/component.js
- * 
+ *
  * This shows the EXACT JavaScript pattern that needs TypeScript inference support.
  * The challenge: make `self.methodName()` calls fully typed when extracted.
  */
@@ -46,13 +46,13 @@ defineComponent({
   template,
   css,
   defaultSettings,
-  
+
   createComponent: ({ self, state, settings }) => ({
     // Inline version - does TypeScript inference work here?
     someMethod() {
       // If we had self.method() calls here, would they be typed?
       return settings.checked;
-    }
+    },
   }),
 });
 
@@ -74,25 +74,25 @@ const checkbox = document.querySelector('ui-checkbox');
 const instance = checkbox.component; // this is what is returned from define component
 
 // These method calls should have full TypeScript autocomplete and type safety:
-instance.toggle();           // Should be known method
-instance.setChecked(true);   // Should accept boolean parameter
-instance.check();            // Should be known method
+instance.toggle(); // Should be known method
+instance.setChecked(true); // Should accept boolean parameter
+instance.check(); // Should be known method
 const isChecked = instance.isChecked(); // Should return boolean
 
 /**
  * THE TYPESCRIPT CHALLENGE SUMMARY:
- * 
+ *
  * When `createComponent` is extracted (as shown above), TypeScript needs to infer:
- * 
+ *
  * 1. `self.toggle()` - should know this method exists
  * 2. `self.setChecked()` - should know this method exists and takes a boolean
- * 3. `self.updateVisualState()` - should know this method exists  
+ * 3. `self.updateVisualState()` - should know this method exists
  * 4. `state.isChecked.get()` - should know this is a Signal<boolean>
  * 5. `settings.checked` - should know this is a boolean
  * 6. `settings.onChange` - should know this is a function or null
- * 
+ *
  * All while preserving the elegant destructuring pattern:
  * `({ self, state, settings }) => ({ ... })`
- * 
+ *
  * This is the EXACT pattern used throughout the Semantic UI codebase.
  */

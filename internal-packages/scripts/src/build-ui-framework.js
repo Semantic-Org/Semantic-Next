@@ -1,7 +1,6 @@
-import { buildESM } from './build-esm.js';
 import { buildBundle } from './build-bundle.js';
 import { buildCDN } from './build-cdn.js';
-
+import { buildESM } from './build-esm.js';
 
 /*
   This exports all components together as a framework
@@ -13,9 +12,7 @@ export const buildUIFramework = async ({
   includeCDN = true,
   includeBundle = true,
 } = {}) => {
-
   const tasks = [];
-
 
   /*
     Exports JS Bundle
@@ -27,33 +24,33 @@ export const buildUIFramework = async ({
     type: 'javascript',
   };
 
-  if(includeESM) {
+  if (includeESM) {
     tasks.push(
       buildESM({
         ...jsConfig,
         outdir: 'dist',
         log: { header: 'Framework JS', text: 'Build ESM' },
-      })
+      }),
     );
   }
 
-  if(includeBundle) {
+  if (includeBundle) {
     tasks.push(
       buildBundle({
         ...jsConfig,
         outdir: 'dist/bundle',
         log: { header: 'Framework JS', text: 'Build Bundle' },
-      })
+      }),
     );
   }
 
-  if(includeCDN) {
+  if (includeCDN) {
     tasks.push(
       buildCDN({
         ...jsConfig,
         outdir: 'dist/cdn',
         log: { header: 'Framework JS', text: 'Build CDN' },
-      })
+      }),
     );
   }
 
@@ -70,38 +67,37 @@ export const buildUIFramework = async ({
     entryNames: 'semantic-ui',
   };
 
-  if(includeESM) {
+  if (includeESM) {
     tasks.push(
       buildESM({
         ...cssConfig,
         outdir: 'dist',
         log: { header: 'Framework CSS', text: 'Build ESM' },
-      })
+      }),
     );
   }
 
-  if(includeBundle) {
+  if (includeBundle) {
     tasks.push(
       buildBundle({
         ...cssConfig,
         outdir: 'dist/bundle',
         log: { header: 'Framework CSS', text: 'Build Bundle' },
-      })
+      }),
     );
   }
 
-  if(includeCDN) {
+  if (includeCDN) {
     tasks.push(
       buildCDN({
         ...cssConfig,
         outdir: 'dist/cdn',
         log: { header: 'Framework CSS', text: 'Build CDN' },
-      })
+      }),
     );
   }
 
   await Promise.all(tasks);
-
 };
 
 // Wrapped for NPM wireit consumption

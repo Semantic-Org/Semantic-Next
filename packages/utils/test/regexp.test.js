@@ -1,7 +1,4 @@
-import {
-  escapeHTML,
-  escapeRegExp,
-} from '@semantic-ui/utils';
+import { escapeHTML, escapeRegExp } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

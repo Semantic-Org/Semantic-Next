@@ -9,7 +9,7 @@ export interface AdoptStylesheetOptions {
 }
 
 /**
- * Options for scopeStyles function  
+ * Options for scopeStyles function
  */
 export interface ScopeStylesOptions {
   /** Replace :host selectors with the scope selector instead of prepending (default: false) */
@@ -36,9 +36,9 @@ export interface ScopeStylesOptions {
  * ```
  */
 export function adoptStylesheet(
-  css: string, 
-  adoptedElement?: Document | ShadowRoot, 
-  options?: AdoptStylesheetOptions
+  css: string,
+  adoptedElement?: Document | ShadowRoot,
+  options?: AdoptStylesheetOptions,
 ): void;
 
 /**
@@ -72,8 +72,10 @@ export interface ExtractCSSOptions {
  */
 export function extractCSS(
   selector: string,
-  source?: string | Document | CSSStyleSheet | CSSStyleSheet[] | { styleSheets: StyleSheetList } | { adoptedStyleSheets: CSSStyleSheet[] },
-  options?: ExtractCSSOptions
+  source?: string | Document | CSSStyleSheet | CSSStyleSheet[] | { styleSheets: StyleSheetList; } | {
+    adoptedStyleSheets: CSSStyleSheet[];
+  },
+  options?: ExtractCSSOptions,
 ): CSSStyleSheet | string;
 
 /**
@@ -96,5 +98,5 @@ export function extractCSS(
 export function scopeStyles(
   css: string,
   scopeSelector?: string,
-  options?: ScopeStylesOptions
+  options?: ScopeStylesOptions,
 ): string;

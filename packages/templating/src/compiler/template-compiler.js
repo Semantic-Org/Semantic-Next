@@ -477,19 +477,19 @@ class TemplateCompiler {
           case 'GUARD':
           case 'RERENDER': {
             const isGuard = tag.type === 'GUARD';
-            
+
             // Parse key attribute if present (for hybrid syntax)
             const { expression, key } = this.parseRerenderExpression(tag.content);
-            
+
             newNode = {
               ...newNode,
               type: 'rerender',
               // For guard blocks, the expression goes in 'key' and 'expression' is null
               expression: isGuard ? null : expression,
               key: isGuard ? expression : key,
-              content: []
+              content: [],
             };
-            
+
             setCurrentContent(newNode);
             addToAST(newNode);
             break;

@@ -1,0 +1,37 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: cpu
+title: Reactivity with Signals
+description: Learn how Semantic UI uses signals to produce reactivity
+---
+
+Semantic UI includes various helpers to make it easy to manipulate data like arrays, records (arrays of objects), counters, toggles, and streamline data manipulation.
+
+* **[Number Helpers](/docs/api/reactivity/number-helpers)**
+  - [`increment(amount)`](/docs/api/reactivity/number-helpers#increment)
+  - [`decrement(amount)`](/docs/api/reactivity/number-helpers#decrement)
+
+* **[Boolean Helpers](/docs/api/reactivity/boolean-helpers)**
+  - [`toggle()`](/docs/api/reactivity/boolean-helpers#toggle) for toggling between `false` and `true`
+
+* **[Array Helpers](/docs/api/reactivity/array-helpers)**
+  - [`push()`](/docs/api/reactivity/array-helpers#push)
+  - [`unshift()`](/docs/api/reactivity/array-helpers#unshift)
+  - [`splice()`](/docs/api/reactivity/array-helpers#splice)
+  - [`setIndex(index, value)`](/docs/api/reactivity/array-helpers#setindex)
+  - [`removeIndex(index)`](/docs/api/reactivity/array-helpers#removeindex)
+  - [`setArrayProperty(indexOrProp, property, value)`](/docs/api/reactivity/array-helpers#setarrayproperty)
+
+* **[Collection Helpers](/docs/api/reactivity/collection-helpers)** (Array of Objects)
+  - [`setProperty(id, property, value)`](/docs/api/reactivity/collection-helpers#setproperty)
+  - [`replaceItem(item, id)`](/docs/api/reactivity/collection-helpers#replaceitem)
+  - [`removeItem(id)`](/docs/api/reactivity/collection-helpers#removeitem)
+  - [`getIndex(id)`](/docs/api/reactivity/collection-helpers#getindex)
+  - [`getID(index)`](/docs/api/reactivity/collection-helpers#getid)
+  - [`hasID(index)`](/docs/api/reactivity/collection-helpers#hasid)
+
+* **[Date Helpers](/docs/api/reactivity/date-helpers)**
+  - [`now()`](/docs/api/reactivity/date-helpers#now) for setting to current time
+
+These helpers provide convenient ways to manipulate reactive data structures and streamline common operations in your reactive computations.

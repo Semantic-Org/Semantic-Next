@@ -1492,7 +1492,7 @@ describe('TemplateCompiler', () => {
 
   describe.each([
     { syntax: 'single', open: '{', close: '}' },
-    { syntax: 'double', open: '{{', close: '}}' }
+    { syntax: 'double', open: '{{', close: '}}' },
   ])('async blocks ($syntax brackets)', ({ syntax, open, close }) => {
     it('should compile basic async block with expression only', () => {
       const compiler = new TemplateCompiler();
@@ -1673,15 +1673,13 @@ describe('TemplateCompiler', () => {
 
       // Check loading content
       expect(ast[0].loadingContent.length).toBeGreaterThan(0);
-      expect(ast[0].loadingContent.some(node =>
-        node.type === 'html' && node.html.includes('Loading users')
-      )).toBe(true);
+      expect(ast[0].loadingContent.some(node => node.type === 'html' && node.html.includes('Loading users'))).toBe(
+        true,
+      );
 
       // Check error content
       expect(ast[0].errorContent.length).toBeGreaterThan(0);
-      expect(ast[0].errorContent.some(node =>
-        node.type === 'expression' && node.value === 'e.message'
-      )).toBe(true);
+      expect(ast[0].errorContent.some(node => node.type === 'expression' && node.value === 'e.message')).toBe(true);
     });
 
     it('should compile nested async blocks', () => {
@@ -1762,9 +1760,9 @@ describe('TemplateCompiler', () => {
             content: [
               { type: 'html', html: '\n            <div>User: ' },
               { type: 'expression', value: 'getUserDisplayName' },
-              { type: 'html', html: '</div>\n          ' }
-            ]
-          }
+              { type: 'html', html: '</div>\n          ' },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1783,9 +1781,9 @@ describe('TemplateCompiler', () => {
             expression: 'userId + theme',
             key: null,
             content: [
-              { type: 'html', html: '\n            <div>Content that depends on userId and theme</div>\n          ' }
-            ]
-          }
+              { type: 'html', html: '\n            <div>Content that depends on userId and theme</div>\n          ' },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1806,9 +1804,12 @@ describe('TemplateCompiler', () => {
             expression: null,
             key: 'getUserHash',
             content: [
-              { type: 'html', html: '\n            <expensive-user-dashboard ></expensive-user-dashboard>\n          ' }
-            ]
-          }
+              {
+                type: 'html',
+                html: '\n            <expensive-user-dashboard ></expensive-user-dashboard>\n          ',
+              },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1827,9 +1828,9 @@ describe('TemplateCompiler', () => {
             expression: null,
             key: 'getComputedKey userId permissions',
             content: [
-              { type: 'html', html: '\n            <complex-component ></complex-component>\n          ' }
-            ]
-          }
+              { type: 'html', html: '\n            <complex-component ></complex-component>\n          ' },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1850,9 +1851,12 @@ describe('TemplateCompiler', () => {
             expression: 'userId',
             key: 'getAccessLevel',
             content: [
-              { type: 'html', html: '\n            <permission-sensitive-content ></permission-sensitive-content>\n          ' }
-            ]
-          }
+              {
+                type: 'html',
+                html: '\n            <permission-sensitive-content ></permission-sensitive-content>\n          ',
+              },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1871,9 +1875,9 @@ describe('TemplateCompiler', () => {
             expression: 'state.userId + state.theme',
             key: 'getCacheKey state',
             content: [
-              { type: 'html', html: '\n            <div>Complex content</div>\n          ' }
-            ]
-          }
+              { type: 'html', html: '\n            <div>Complex content</div>\n          ' },
+            ],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1910,8 +1914,8 @@ describe('TemplateCompiler', () => {
             type: 'rerender',
             expression: 'userId',
             key: null,
-            content: []
-          }
+            content: [],
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1933,7 +1937,7 @@ describe('TemplateCompiler', () => {
         const template = '<ui-button />';
         const ast = compiler.compile(template);
         const expectedAST = [
-          { type: 'html', html: '<ui-button ></ui-button>' }
+          { type: 'html', html: '<ui-button ></ui-button>' },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1943,7 +1947,7 @@ describe('TemplateCompiler', () => {
         const template = '<expensive-user-dashboard-component />';
         const ast = compiler.compile(template);
         const expectedAST = [
-          { type: 'html', html: '<expensive-user-dashboard-component ></expensive-user-dashboard-component>' }
+          { type: 'html', html: '<expensive-user-dashboard-component ></expensive-user-dashboard-component>' },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1953,7 +1957,7 @@ describe('TemplateCompiler', () => {
         const template = '<ui-icon icon="home" size="large" />';
         const ast = compiler.compile(template);
         const expectedAST = [
-          { type: 'html', html: '<ui-icon icon="home" size="large" ></ui-icon>' }
+          { type: 'html', html: '<ui-icon icon="home" size="large" ></ui-icon>' },
         ];
         expect(ast).toEqual(expectedAST);
       });
@@ -1967,7 +1971,11 @@ describe('TemplateCompiler', () => {
         `;
         const ast = compiler.compile(template);
         const expectedAST = [
-          { type: 'html', html: '<ui-header ></ui-header>\n          <main-content-area ></main-content-area>\n          <ui-footer ></ui-footer>' }
+          {
+            type: 'html',
+            html:
+              '<ui-header ></ui-header>\n          <main-content-area ></main-content-area>\n          <ui-footer ></ui-footer>',
+          },
         ];
         expect(ast).toEqual(expectedAST);
       });

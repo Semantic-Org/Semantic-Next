@@ -15,5 +15,4 @@ $(fiveEl).text('✅ NodeList');
 
 // Other query instances
 const $sixEl = $('.sixth');
-$( $sixEl ).text('✅ Query Collection');
-
+$($sixEl).text('✅ Query Collection');

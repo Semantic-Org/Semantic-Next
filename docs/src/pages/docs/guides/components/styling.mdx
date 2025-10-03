@@ -1,0 +1,199 @@
+---
+layout: '@layouts/Guide.astro'
+title: CSS & Styling
+icon: package
+description: Creating a new component
+---
+
+## CSS
+
+Components defined with `defineComponent` can include `css` that applies only to the component or `pageCSS` that should apply globally to the page.
+
+
+### Component CSS
+
+`css` defines CSS that will be attached to your web component. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
+
+`css` is scoped to the component and will not affect nested web components or the page.
+
+```javascript
+const css = `
+  .counter {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1em;
+    border-radius: 4px;
+  }
+`;
+```
+> **Shadow DOM** Web component use a special system of encapsulation called the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) which allows the web component to render in isolation from other parts of the page. This means that component CSS will not affect the rest of your app and your components will not inherit styles from the page besides [css variables](#using-css-variables).
+
+
+### Page CSS
+
+Page CSS is CSS scoped to the page. This can be used to assign styles globally when your component is defined.
+
+This is useful to apply styles to your component based on where it is rendered, or work around the necessary limitations of scoped css.
+
+> *Layout Shift* - Be cautious using page css to define rules as they will not be present during server side rendering and can cause layout shifts until your component is defined.
+
+```javascript
+const pageCSS = `
+  body.dark my-component {
+    color: #FFFFFF;
+  }
+`;
+```
+
+
+## Theming
+
+
+### Global Variables
+
+If you include `@semantic-ui/core` in your project you will have access to a variety of global variables which can be used to handle common styling primitives like `--border` `--padding`, `--primary-color`
+ and other values that can be used as a basis of your design system.
+
+```javascript
+const css = `
+  .counter {
+    border: var(--border);
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+  }
+`;
+```
+
+## Light / Dark Mode
+
+### onThemeChanged Callback
+
+When defining your component with `defineComponent` you can include a special callback that fires when the global theme changes for a page. This can be used to rerun javascript when the user selects a new theme.
+
+```javascript
+const onThemeChanged = ({darkMode}) => {
+  if(darkMode) {
+    // dark mode
+  }
+  else {
+    // light mode
+  }
+};
+```
+
+### Dark Mode Flag
+
+Inside each [lifecycle callback](/docs/guides/components/lifecycle#callback-arguments), you can check the `darkMode` flag to determine if a dark mode theme is applied. This can be used to run different javascript for a dark mode theme.
+
+#### Triggering Dark Mode
+
+Dark mode will be set to `true` if `<html class="dark"></html>` is set to true for the element.
+
+```html
+<!-- Triggers Dark Mode !-->
+<html class="dark">
+```
+
+Dark mode can also be used selectively on light mode pages (and vice versa) using the css flag `--dark-mode`
+```css
+/* dark mode css tokens will apply and dark mode will trigger on component */
+some-element {
+  --dark-mode: true;
+}
+```
+
+#### Changing Behaviors for Dark Mode
+
+If dark mode is detected you can modify behaviors inside your component using the [lifecycle callback argument](/docs/guides/components/lifecycle#callback-arguments) `darkMode`.
+
+```javascript
+const onCreated = ({darkMode}) => {
+  if(darkMode) {
+    // do something
+  }
+};
+```
+
+### Triggering Theme Callback
+
+To cause `onThemeChanged` to fire on your components you will need to dispatch a `themechange` event from the page.
+
+You can use the `theme-switcher` component to implement a standard 'dark-mode' theme switcher button, or manually dispatch this event from a custom component.
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+$('html').dispatchEvent('themechange', {
+  theme: 'dark',
+  darkMode: true
+});
+```
+
+## Using CSS Variables
+
+
+### Adding CSS Variables
+
+The easiest way to expose some styling as being modifiable from outside your component is to define variables in the `:root` scope inside your component.
+
+```css
+
+:root {
+  --component-padding: var(--padding);
+}
+```
+
+### Modifying from Page
+
+This can then be modified from outside the component by adjusting the values for a particular instance of your component
+
+```html
+<my-component class="special-case"></my-component>
+```
+```css
+my-component.special-case {
+  --component-padding: 2rem;
+}
+```
+
+### Modifying for Subcomponents
+
+It can also be useful for a component to modify variables of other components nested inside.
+
+For instance imagine your component includes a primary `ui-button`, but you would like to force the primary color to be `green` inside your component.
+
+You can do this from inside your component's css by adjusting the css variables.
+
+```html
+{#if canSave}
+  <ui-button primary>Save</ui-button>
+{/if}
+```
+```css
+ui-button {
+  --button-primary-color: var(--green);
+}
+```
+
+## Using CSS Parts
+
+Web components also include an additional new standard for exposing [css parts](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) of your component to be styleable.
+
+Unlike css variables which only expose particular css values as being modifiable, using a [`part`](https://developer.mozilla.org/en-US/docs/Web/CSS/::part) will allow **any CSS property to be adjusted**.
+
+This will allow you to apply arbitrary css not present in the original component.
+
+### Parts Example
+
+For instance your `counter` component might include a `part` to expose the value of the counter.
+```html
+<div class="counter" part="counter">{counter}</div>
+```
+
+This can be adjusted directly from the page
+```css
+ui-counter::part(counter) {
+  color: var(--red);
+  font-size: var(--large);
+}
+```
+

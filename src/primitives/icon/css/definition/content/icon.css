@@ -1,5 +1,7 @@
 :host {
   display: inline-block;
+  content-visibility: auto;
+  contain-intrinsic-size: 1em;
   height: 1em;
   font-style: normal;
   font-weight: normal;
@@ -18,7 +20,8 @@
   background-color: currentColor;
   mask-image: linear-gradient(transparent, transparent);
   mask-repeat: no-repeat;
-  mask-size: 100% 100%;
+  mask-size: auto 100%;
+  background-size: auto 100%;
   backface-visibility: hidden;
   fill: currentColor;
   speak: none;
@@ -311,3 +314,18 @@
 .icon.zap { mask-image: var(--icon-zap-svg); }
 .icon.zoom-in { mask-image: var(--icon-zoom-in-svg); }
 .icon.zoom-out { mask-image: var(--icon-zoom-out-svg); }
+
+.icon.js { background-color: transparent; mask-image: none; background-image: var(--icon-js-svg); }
+.icon.react { background-color: transparent; mask-image: none; background-image: var(--icon-react-svg); }
+.icon.astro { background-color: transparent; mask-image: none; background-image: var(--icon-astro-svg); }
+.icon.vue { background-color: transparent; mask-image: none; background-image: var(--icon-vue-svg); }
+.icon.react { background-color: transparent; mask-image: none; background-image: var(--icon-react-svg); }
+.icon.svelte { background-color: transparent; mask-image: none; background-image: var(--icon-svelte-svg); }
+.icon.angular { background-color: transparent; mask-image: none; background-image: var(--icon-angular-svg); }
+.icon.next { background-color: transparent; mask-image: none; background-image: var(--icon-next-svg); }
+.icon.astro-mark { background-color: transparent; mask-image: none; background-image: var(--icon-astro-mark-svg); }
+.icon.vue-mark { background-color: transparent; mask-image: none; background-image: var(--icon-vue-mark-svg); }
+.icon.react-mark { background-color: transparent; mask-image: none; background-image: var(--icon-react-mark-svg); }
+.icon.svelte-mark { background-color: transparent; mask-image: none; background-image: var(--icon-svelte-mark-svg); }
+.icon.angular-mark { background-color: transparent; mask-image: none; background-image: var(--icon-angular-mark-svg); }
+.icon.next-mark { background-color: transparent; mask-image: none; background-image: var(--icon-next-mark-svg); }

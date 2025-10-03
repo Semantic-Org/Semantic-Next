@@ -1,11 +1,4 @@
-
-import {
-  generateID,
-  getRandomSeed,
-  hashCode,
-  prettifyHash,
-  tokenize,
-} from '@semantic-ui/utils';
+import { generateID, getRandomSeed, hashCode, prettifyHash, tokenize } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

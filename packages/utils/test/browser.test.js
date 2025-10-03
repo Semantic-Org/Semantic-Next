@@ -1,14 +1,8 @@
-import {
-  getIPAddress,
-  getKeyFromEvent,
-  isClient,
-  isServer,
-} from '@semantic-ui/utils';
+import { getIPAddress, getKeyFromEvent, isClient, isServer } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
 describe('Browser Utilities', () => {
-
   describe('getKeyFromEvent', () => {
     it('should return an empty string if the event.key is not defined', () => {
       const event = { ctrlKey: true };

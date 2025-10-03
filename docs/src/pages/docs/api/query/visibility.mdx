@@ -1,0 +1,504 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Visibility
+icon: eye-off
+description: API reference for Query methods related to element visibility control
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Control element visibility with automatic display value restoration.
+
+## show
+
+Shows hidden elements by restoring their natural display value.
+
+> **CSS Analysis**: By default, `show()` parses stylesheets and calculates CSS specificity to determine the natural display value. This handles elements with CSS-defined display properties that tag-based lookups miss. Set `calculate: false` for faster execution when you know elements use standard tag defaults.
+
+### Syntax
+
+```javascript
+$('selector').show()
+$('selector').show(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| calculate | boolean | Analyze stylesheets for accurate display calculation. When `false`, uses tag-based lookup. Defaults to `true`. |
+
+### Returns
+
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+```javascript
+// Show hidden elements
+$('.hidden').show();
+
+// Elements get their natural display value
+$('div').show(); // display: block
+$('span').show(); // display: inline
+$('table').show(); // display: table
+
+// Fast mode - uses tag-based lookup
+$('.many-elements').show({ calculate: false });
+```
+
+### Example
+<PlaygroundExample id="query-visibility-show" direction="horizontal"></PlaygroundExample>
+
+
+## hide
+
+Hides elements by setting their display to 'none'.
+
+### Syntax
+
+```javascript
+$('selector').hide()
+```
+
+### Returns
+
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+```javascript
+// Hide visible elements
+$('.visible').hide();
+
+// Hide multiple elements
+$('div, span').hide();
+
+// Chain with other methods
+$('.item')
+  .hide()
+  .addClass('hidden')
+  .attr('aria-hidden', 'true');
+```
+
+### Example
+<PlaygroundExample id="query-visibility-hide" direction="horizontal"></PlaygroundExample>
+
+
+## toggle
+
+Toggles element visibility by checking their current display state and either showing or hiding them.
+
+### Syntax
+
+```javascript
+$('selector').toggle()
+$('selector').toggle(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| calculate | boolean | Analyze stylesheets for accurate display calculation when showing elements. When `false`, uses tag-based lookup. Defaults to `true`. |
+
+### Returns
+
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+```javascript
+// Toggle visibility of elements
+$('.item').toggle();
+
+// Fast mode
+$('.item').toggle({ calculate: false });
+
+// Interactive toggle on click
+$('.toggle-button').on('click', function() {
+  $('.content').toggle();
+});
+
+```
+
+### Example
+<PlaygroundExample id="query-visibility-toggle" direction="horizontal"></PlaygroundExample>
+
+
+## naturalDisplay
+
+Gets the natural display value for elements (ignoring `display: none` rules).
+
+> **CSS Specificity Analysis**: Parses stylesheets and calculates specificity to determine the display value that would apply if all `display: none` rules were ignored. Essential for proper element restoration.
+
+### Syntax
+
+```javascript
+$('selector').naturalDisplay()
+$('selector').naturalDisplay(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| calculate | boolean | Analyze stylesheets for accurate calculation. When `false`, uses tag-based lookup. Defaults to `true`. |
+
+### Returns
+
+- **Single Element** - The natural display value as a string (e.g., 'block', 'inline', 'flex').
+- **Multiple Elements** - An array of natural display values, one for each matched element.
+- **Empty Selection** - `undefined`
+
+### Usage
+
+```javascript
+// Get natural display value of hidden element
+const hiddenDiv = $('.hidden-element');
+const naturalDisplay = hiddenDiv.naturalDisplay();
+console.log(naturalDisplay); // 'block'
+
+// Element with CSS rules: .flex-container { display: flex; }
+const element = $('.flex-container.hidden');
+const display = element.naturalDisplay();
+console.log(display); // 'flex' (ignores 'none', finds highest specificity)
+
+// Fast mode for simple cases
+const displays = $('.elements').naturalDisplay({ calculate: false });
+console.log(displays); // ['block', 'inline', 'table'] - tag-based lookup
+```
+
+### Example
+<PlaygroundExample id="query-naturaldisplay" direction="horizontal"></PlaygroundExample>
+
+## isVisible
+
+Checks if elements are visible by examining layout dimensions and visibility properties.
+
+> **Note** Checking element visibility requires multiple DOM APIs: `getBoundingClientRect()` for layout dimensions, `getComputedStyle()` for visibility properties, and optional opacity checks. This method combines these checks with proper edge case handling.
+
+### Syntax
+
+```javascript
+$('selector').isVisible()
+$('selector').isVisible(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| includeOpacity | boolean | Also check that opacity > 0. Defaults to `false`. |
+| includeVisibility | boolean | Check for `visibility: hidden` and `content-visibility: hidden`. Defaults to `true`. |
+
+### Returns
+
+`boolean` - `true` if **ALL** elements are visible, `false` if **ANY** element is not visible, or `undefined` for empty selection.
+
+### Usage
+
+```javascript
+// Check if element has layout dimensions
+if ($('#element').isVisible()) {
+  console.log('Element is rendered');
+}
+
+// Check visual visibility including opacity
+if ($('.fade-element').isVisible({ includeOpacity: true })) {
+  console.log('Element is visually perceivable');
+}
+
+// Skip visibility property checks
+const hasLayout = $('.element').isVisible({ includeVisibility: false });
+```
+
+### Behavior
+
+- `display: none` → `false`
+- `visibility: hidden` → `false` (default)
+- `opacity: 0` → `true` (unless `includeOpacity: true`)
+- `width: 0; height: 0` → `false`
+
+### Example
+<PlaygroundExample id="query-is-visible" direction="horizontal"></PlaygroundExample>
+
+## clippingParent
+
+Get the element that clips (crops) each element's visual bounds based on overflow properties.
+
+> **Note** Positioned elements can be clipped by ancestors with `overflow`, `clip-path`, `mask`, or `contain` properties. This method traverses the DOM to find the nearest clipping ancestor, useful for positioning tooltips and overlays.
+
+### Syntax
+
+```javascript
+$('selector').clippingParent()
+```
+
+### Returns
+
+A new [Query object](/docs/api/query/basic#the-query-object) containing the clipping parent elements.
+
+### Usage
+
+```javascript
+// Find what element clips a positioned element
+const $tooltip = $('.tooltip');
+const $clipper = $tooltip.clippingParent();
+
+// Check if element is clipped by its container
+if ($clipper[0] !== document.documentElement) {
+  console.log('Element is clipped by:', $clipper[0]);
+}
+
+// Find scrollable container that clips content
+const $content = $('.overflow-content');
+const $scrollContainer = $content.clippingParent();
+```
+
+> **Clipping Detection**: Returns `document.documentElement` when no clipping parent is found.
+
+### Example
+<PlaygroundExample id="query-clippingparent" direction="horizontal"></PlaygroundExample>
+
+## offsetParent
+
+Get the `offsetParent` of an element as reported by the Dom.
+
+> **Simple Access** This is a direct wrapper around the native `offsetParent` property this may not always be the positioning parent for fixed position elements.
+
+### Syntax
+
+```javascript
+$('selector').offsetParent()
+```
+
+### Returns
+
+A new [Query object](/docs/api/query/basic#the-query-object) containing the offset parent elements.
+
+### Usage
+
+```javascript
+// Quick access to offsetParent
+const $offsetParent = $('#element').offsetParent();
+
+// For simple positioning calculations
+const $element = $('#positioned-element');
+const $parent = $element.offsetParent();
+console.log('Positioned relative to:', $parent[0]);
+```
+
+### Example
+<PlaygroundExample id="query-offsetparent" direction="horizontal"></PlaygroundExample>
+
+## positioningParent
+
+Get the accurate positioning context for each element, considering modern CSS properties that create containing blocks.
+
+> **Accurate Positioning** This method finds the actual element that coordinates like `top` and `left` are relative to when positioning elements. Unlike `offsetParent`, it accounts for stacking contexts created by `transform`, `will-change`, `filter`, `perspective`, `contain`, and other modern CSS properties.
+
+### Syntax
+
+```javascript
+$('selector').positioningParent()
+$('selector').positioningParent(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| calculate | boolean | Calculate positioning parent using modern CSS properties. When `false`, uses browser's `offsetParent`. Defaults to `true`. |
+
+### Returns
+
+A new [Query object](/docs/api/query/basic#the-query-object) containing the positioning parent elements.
+
+### Usage
+
+```javascript
+// Find accurate positioning context (recommended for positioning)
+const $absoluteEl = $('.absolute-positioned');
+const $positioningParent = $absoluteEl.positioningParent();
+
+// Position element relative to its true positioning context
+const rect = $positioningParent[0].getBoundingClientRect();
+$absoluteEl.css({ top: rect.height / 2, left: rect.width / 2 });
+
+// Handle fixed positioning with transforms
+const $fixedEl = $('.fixed-positioned');
+const $context = $fixedEl.positioningParent(); // Finds transform/filter ancestors
+
+// Fallback to simple offsetParent behavior
+const $offsetParent = $element.positioningParent({ calculate: false });
+```
+
+### Positioning Context Detection
+
+This method detects elements that create containing blocks through:
+- `position: relative/absolute/fixed`
+- `transform` (any value except `none`)
+- `filter` (any value except `none`) 
+- `perspective` (any value except `none`)
+- `contain: paint/layout`
+- `will-change: transform/filter/perspective`
+- Container queries (`container-type`)
+
+### Example
+<PlaygroundExample id="query-positioningparent" direction="horizontal"></PlaygroundExample>
+
+## scrollParent
+
+Get the nearest scrollable container for each element, useful for positioning overlays and handling scroll events.
+
+> **Scroll Container Detection** This method traverses the DOM to find the nearest ancestor with `overflow` properties that create scrollable containers. Returns `window` when no scrollable ancestor is found, representing the root scroll container.
+
+### Syntax
+
+```javascript
+$('selector').scrollParent()
+$('selector').scrollParent(options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| all | boolean | Return all scroll parents in the hierarchy instead of just the nearest one. Defaults to `false`. |
+
+### Returns
+
+A new [Query object](/docs/api/query/basic#the-query-object) containing the scroll parent element(s).
+
+### Usage
+
+```javascript
+// Find nearest scrollable container
+const $tooltip = $('.tooltip');
+const $scrollContainer = $tooltip.scrollParent();
+
+// Position tooltip within scrollable bounds
+if ($scrollContainer[0] !== window) {
+  console.log('Element is scrolled by:', $scrollContainer[0]);
+}
+
+// Get all scroll containers in the hierarchy
+const $allScrollers = $('.deep-content').scrollParent({ all: true });
+$allScrollers.each(container => {
+  console.log('Scroll container:', container);
+});
+
+// Handle scroll events on the appropriate container
+const $element = $('.sticky-element');
+const $scroller = $element.scrollParent();
+$scroller.on('scroll', () => {
+  // Update sticky element position
+});
+```
+
+### Scroll Container Detection
+
+This method detects scrollable containers through:
+- `overflow: hidden/scroll/auto`
+- `overflow-x: hidden/scroll/auto`
+- `overflow-y: hidden/scroll/auto`
+
+Returns `window` when no scrollable ancestor is found (elements scroll with the viewport).
+
+### Behavior with `all: true`
+
+When `all: true` is specified:
+- Returns all scroll containers from nearest to farthest
+- Always includes `window` as the final scroll container
+- Flattens results from multiple elements into a single array
+
+```javascript
+// Multiple elements with nested scroll containers
+$('.items').scrollParent({ all: true });
+// Returns: [inner-scroller, outer-scroller, window, other-scroller, window]
+```
+
+### Example
+<PlaygroundExample id="query-scrollparent" direction="horizontal"></PlaygroundExample>
+
+## isInView
+
+Checks if elements are within the viewport bounds. This method leverages the `intersects()` method internally, inheriting all its configuration options.
+
+### Syntax
+
+```javascript
+$('selector').isInView()
+$('selector').isInView(options)
+```
+
+### Parameters
+
+| Name      | Type    | Description |
+|-----------|---------|-------------|
+| threshold | number  | Minimum percentage (0-1) visible. Defaults to `0`. |
+| fully     | boolean | Element must be fully within viewport. Defaults to `false`. |
+| viewport  | string\|Element\|Query | Viewport element to check against. Defaults to clipping parent. |
+| sides     | string\|Array | Which sides must intersect ('all' or specific sides). Defaults to `'all'`. |
+| returnDetails | boolean | Whether to return detailed intersection data. Defaults to `false`. |
+| all       | boolean | Whether all elements must be in view (true) or any element (false). Defaults to `false`. |
+
+### Returns
+
+`boolean` - `true` if criteria are met, `false` otherwise. When `returnDetails: true`, returns detailed intersection data instead.
+
+### Usage
+
+```javascript
+// Check if any part is visible in clipping parent (default)
+if ($('#element').isInView()) {
+  console.log('Element is at least partially visible in container');
+}
+
+// Check if element is fully within clipping parent
+if ($('#element').isInView({ fully: true })) {
+  console.log('Element is completely visible in container');
+}
+
+// Check if at least 50% is visible
+if ($('#element').isInView({ threshold: 0.5 })) {
+  console.log('At least half the element is visible');
+}
+
+// Check against specific viewport element
+if ($('#tooltip').isInView({ viewport: '#modal' })) {
+  console.log('Tooltip is visible within modal bounds');
+}
+
+// Check only specific sides
+if ($('#element').isInView({ sides: ['top', 'bottom'] })) {
+  console.log('Element intersects top or bottom of viewport');
+}
+
+// Check that ALL elements in selection are visible
+if ($('.items').isInView({ all: true })) {
+  console.log('All items are at least partially visible');
+}
+
+// Get detailed intersection information
+const details = $('#element').isInView({ returnDetails: true });
+console.log('Intersection ratio:', details.ratio);
+console.log('Intersection rect:', details.rect);
+```
+
+### Behavior
+
+- Returns `false` for empty selections (or `null` when `returnDetails: true`)
+- By default, returns `true` if **ANY** element meets criteria (use `all: true` to require all elements)
+- Defaults to checking visibility within clipping parent (scrollable container)
+- Falls back to browser viewport if no clipping parent exists
+- Threshold is based on element area intersection with viewport
+- `fully: true` overrides any threshold setting
+- Custom viewport can be specified via `viewport` parameter
+- Inherits all configuration options from the `intersects()` method
+- When `returnDetails: true`, returns detailed intersection data instead of boolean
+
+### Example
+<PlaygroundExample id="query-is-in-view" direction="horizontal"></PlaygroundExample>

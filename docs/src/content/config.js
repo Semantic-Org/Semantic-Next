@@ -1,16 +1,44 @@
 import { defineCollection, z } from 'astro:content';
 
-const componentsCollection = defineCollection({
+/* UI Primitives */
+const primitivesCollection = defineCollection({
   type: 'content',
   schema: z.object({
-    id: z.string(),
     title: z.string(),
+    id: z.optional(z.string()),
     tabs: z.string().array(),
     specName: z.string(),
     description: z.string(),
     tags: z.array(z.string()),
   }),
 });
+
+/* UI Components */
+const componentsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    id: z.optional(z.string()),
+    tabs: z.string().array(),
+    specName: z.optional(z.string()),
+    description: z.string(),
+    tags: z.array(z.string()),
+  }),
+});
+
+/* UI Behaviors */
+const behaviorsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    id: z.optional(z.string()),
+    tabs: z.string().array(),
+    description: z.string(),
+    tags: z.array(z.string()),
+  }),
+});
+
+/* Examples */
 const examplesCollection = defineCollection({
   type: 'content',
   schema: z.object({
@@ -32,11 +60,11 @@ const examplesCollection = defineCollection({
   }),
 });
 
+/* Lessons */
 const resourceSchema = z.object({
   title: z.string(),
   link: z.string(),
 });
-
 const lessonCollection = defineCollection({
   type: 'content',
   schema: z.object({
@@ -56,7 +84,9 @@ const lessonCollection = defineCollection({
 });
 
 export const collections = {
+  primitives: primitivesCollection,
   components: componentsCollection,
+  behaviors: behaviorsCollection,
   examples: examplesCollection,
   lessons: lessonCollection,
 };

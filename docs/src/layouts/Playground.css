@@ -86,11 +86,12 @@
       --nav-menu-content-icon-indent-distance: 7px;
       --nav-menu-sub-content-indent-distance: 0px;
       --nav-menu-menu-item-font-size: 12px;
-      --nav-menu-menu-item-spacing: 6px;
+      --nav-menu-menu-item-spacing: 5px;
       --nav-menu-sub-title-font-size: 10px;
       --nav-menu-sub-title-padding: 7px 0px 4px;
       --nav-menu-selected-vertical-padding: 0px;
       --nav-menu-selected-horizontal-padding: 6px;
+      --nav-menu-content-space-after: 1em;
 
       &::part(search) {
         margin: 0.75rem 1rem -0.25rem;
@@ -105,10 +106,25 @@
         z-index: 2;
       }
       &::part(content) {
-        padding-left: 9px;
-        border-left: 1px solid var(--white-10);
-        padding-top: 4px;
-        white-space: nowrap;
+        border-left: var(--internal-border);
+        margin-left: 0rem;
+        padding-left: 0.75rem;
+        margin-top: -0.35rem;
+        padding-top: 0.35rem;
+      }
+      &::part(description) {
+        color: oklch(0.75 0.11 92.17);
+        font-size: 10px;
+      }
+      &::part(menu) {
+        scrollbar-width: thin;
+        display: block;
+        padding: 0rem 1rem;
+        flex-grow: 1;
+        overflow-y: scroll;
+        border-top: var(--border);
+        margin-top: 1rem !important;
+        padding: 0.5rem 1rem;
       }
     }
 

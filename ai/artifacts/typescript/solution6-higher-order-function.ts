@@ -11,33 +11,33 @@
 // A single generic function that takes a factory.
 // The key change: The caller will provide `TMethods` explicitly.
 function createFactory<TMethods extends Record<string, () => void>>(
-    factory: (this: TMethods) => TMethods
+  factory: (this: TMethods) => TMethods,
 ): () => TMethods {
-    return () => {
-        const instance = {} as TMethods;
-        const impl = factory.call(instance);
-        return Object.assign(instance, impl);
-    };
+  return () => {
+    const instance = {} as TMethods;
+    const impl = factory.call(instance);
+    return Object.assign(instance, impl);
+  };
 }
 
 // Define the component's interface upfront.
 // This is the explicit type information we are providing.
 interface MyComponentMethods {
-    foo(): void;
-    bar(): void;
+  foo(): void;
+  bar(): void;
 }
 
 // Use the factory, but pass the interface as an explicit generic argument.
 const createInstance = createFactory<MyComponentMethods>(function() {
-    // `this` is now correctly and strictly typed as MyComponentMethods.
-    return {
-        foo() {
-            console.log('foo');
-        },
-        bar() {
-            this.foo();
-        },
-    };
+  // `this` is now correctly and strictly typed as MyComponentMethods.
+  return {
+    foo() {
+      console.log('foo');
+    },
+    bar() {
+      this.foo();
+    },
+  };
 });
 
 // Create an instance and test its type.

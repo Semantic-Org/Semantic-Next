@@ -31,7 +31,7 @@ const createComponent = ({ self, $, reaction, signal, state }) => ({
     state.time.increment();
     // schedule next tick in 1 frame (144fps)
     const frame = 1000 / 144;
-    setTimeout(self.tick, frame);
+    self.timer = setTimeout(self.tick, frame);
   },
 
   createBalls(count) {
@@ -138,12 +138,17 @@ const events = {
   },
 };
 
+const onDestroyed = ({ self }) => {
+  clearTimouet(self.timer);
+};
+
 export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
   createComponent,
   onRendered,
+  onDestroyed,
   events,
   defaultState,
 });

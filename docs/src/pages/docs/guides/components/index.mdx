@@ -1,0 +1,163 @@
+---
+layout: '@layouts/Guide.astro'
+title: Components
+icon: package
+description: An overview of component features
+---
+## Creating UI Components
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Semantic UI components are standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) built with an integrated authoring framework. The framework simplifies common UI development tasks like managing state, rendering templates, handling events, and styling.
+
+> **Getting Started:** Before diving into the technical guides, consider the [interactive tutorial](/learn/selection) for a hands-on introduction to Semantic UI features.
+
+The component framework includes:
+
+*   **[Declarative Templating](/docs/guides/templates):** AST-based templating system for rendering component views using [expressions](/docs/guides/templates/expressions), [conditionals](/docs/guides/templates/conditionals), [loops](/docs/guides/templates/loops), [subtemplates](/docs/guides/templates/subtemplates), [snippets](/docs/guides/templates/snippets), and [helpers](/docs/guides/templates/helpers). Integrates with a [Signals-based reactivity system](/docs/guides/reactivity) for efficient DOM updates and supports component composition similar to other modern frameworks.
+*   **[Reactivity System](/docs/guides/reactivity):** [Signals](/docs/guides/reactivity/variables)-based system for managing component [state](/docs/guides/components/state) and derived computations, including convenient [mutation helpers](/docs/guides/reactivity/mutation-helpers).
+*   **[Scoped Styling](/docs/guides/components/styling):** An integrated system using CSS variables and layers, leveraging [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM) encapsulation for reliable styling.
+*   **[DOM Querying](/docs/guides/query):** A chainable DOM querying library ([`@semantic-ui/query`](/docs/guides/query)) specifically designed to work effectively with [Shadow DOM](/docs/guides/query/shadow-dom) boundaries.
+*   **[Event Handling](/docs/guides/components/events):** A declarative system for binding event listeners within the component, including support for custom events and event delegation.
+*   **[Key Bindings](/docs/guides/components/keys):** A declarative format for defining keyboard shortcuts scoped to your component, supporting sequences and combinations.
+*   **[Lifecycle Management](/docs/guides/components/lifecycle):** Enhanced lifecycle callbacks providing granular control during component initialization, rendering (client and server-side), and destruction.
+
+### Minimal Example
+The following example shows a complete component definition with state, template, and events using [`defineComponent`](/docs/guides/components/create).
+
+<PlaygroundExample id="minimal"></PlaygroundExample>
+
+### Developer Experience
+
+Web components can be difficult to integrate using vanilla js. Semantic UI improves the experience working with web standards by providing modern tooling that developers expect, **without a compilation step** or build complexity.
+
+*   Reducing boilerplate for common tasks like [state management](/docs/guides/components/state) and [event handling](/docs/guides/components/events).
+*   Providing a consistent API across different features ([templating](/docs/guides/templates), [reactivity](/docs/guides/reactivity), [querying](/docs/guides/query)).
+*   Simplifying interaction with the [Shadow DOM](/docs/guides/query/shadow-dom) through the tailored [query library](/docs/guides/query).
+*   Offering declarative approaches for features like [key bindings](/docs/guides/components/keys) and [templating logic](/docs/guides/templates).
+
+Components defined using [`defineComponent`](/docs/guides/components/create) can be registered with a `tagName` for direct use in HTML or exported without a `tagName` for use as [subtemplates](/docs/guides/templates/subtemplates) within other components.
+
+> **Framework Integration:** As standard [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components), elements created with Semantic UI can be used directly within applications built with <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">React</a>, <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue</a>, <a href="https://angular.io/" target="_blank" rel="noopener noreferrer">Angular</a>, or any other framework that supports custom elements. They render natively in the browser without requiring framework-specific compilation.
+
+## Key Features
+
+### Use In Any Framework
+
+Components are defined using [`defineComponent`](/docs/guides/components/create), which registers a standard custom element (if `tagName` is provided) usable natively in the browser or within other frameworks.
+
+```javascript
+defineComponent({
+  tagName: 'my-component',
+  template: '...',
+  css: '...',
+  defaultState: { ... },
+  settings: { ... },
+  createComponent: () => ({ ... }),
+  onCreated: () => { ... },
+  onRendered: () => { ... },
+  onDestroyed: () => { ... },
+});
+```
+### Declarative Templating
+
+Components use a [built-in templating system](/docs/guides/templates) that supports [expressions](/docs/guides/templates/expressions), [slots](/docs/guides/templates/slots), [conditionals](/docs/guides/templates/conditionals), [snippets](/docs/guides/templates/snippets), [loops](/docs/guides/templates/loops), and more for rendering views from component data.
+
+```sui
+{#each user in users}
+  <div class="user">
+    {#if user}
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    {else}
+      <p>No info provided.</p>
+    {/if}
+  </div>
+{/each}
+```
+
+### Integrated Styling
+
+Components utilize an [integrated styling system](/docs/guides/components/styling) leveraging CSS layers and variables, with style encapsulation provided by the [Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+
+```css
+
+/* theming variables inherited from design system */
+:host {
+  --counter-padding: var(--padding);
+  --counter-value-color: var(--primary-text-color);
+}
+.counter {
+  padding: var(--counter-padding);
+
+  .value {
+    color: var(--counter-color);
+  }
+}
+```
+
+### Events
+
+Components include built-in [event management](/docs/guides/components/events) using a declarative syntax, simplifying the process of handling user interactions and dispatching custom events.
+
+```javascript
+const createComponent = ({state, dispatchEvent}) => ({
+  increment(amount) {
+
+    // update internal counter
+    state.counter.increment(amount);
+
+    // dispatches a dom event 'increment' from this web component
+    dispatchEvent('increment', {
+      counter: state.counter.value,
+      amount
+    });
+  },
+  decrement(amount) {
+    // update internal counter
+    state.counter.decrement(amount);
+
+    // dispatches a dom event 'decrement' from this web component
+    dispatchEvent('decrement', {
+      counter: state.counter.value,
+      amount
+    });
+  }
+});
+```
+
+Listen to [internal events](/events#binding-event-handlers) and trigger component functionality.
+
+```javascript
+const events = {
+  'click .increment': ({ self }) => self.increment(),
+  'click .decrement': ({ self }) => self.decrement(),
+};
+```
+
+Or listen to [external dispatched events](/docs/guides/components/events#custom-event-data) from other components.
+```javascript
+const events = {
+  // listen to the increment, decrement event from another component
+  'increment ui-counter, decrement ui-counter': ({ self }) => self.logValue(),
+};
+```
+
+Or bind [global events](/docs/guides/components/events#global-events) tied to your components lifecycle.
+```javascript
+// listen to global hashchange, teardown when component is destroyed
+const events = {
+  'global hashchange window': ({ self }) => self.updateSomething(),
+};
+```
+
+### Keybindings
+
+Bind [key bindings](/docs/guides/components/keys) scoped to your component that include key combinations or sequences.
+```javascript
+const keys = {
+  'up': ({ self }) => self.decrement(),
+  'down': ({ self }) => self.increment(),
+  'shift + up': ({ self }) => self.decrement(10),
+  'shift + down': ({ self }) => self.increment(10),
+};
+```

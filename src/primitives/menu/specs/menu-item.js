@@ -1,68 +1,68 @@
 // Auto-generated from menu-item.json
 export default {
-  "uiType": "element",
-  "name": "Menu Item",
-  "description": "A menu item displays an individual selection in a menu",
-  "parentTag": "ui-menu",
-  "tagName": "menu-item",
-  "exportName": "UIMenuItem",
-  "content": [
+  'uiType': 'element',
+  'name': 'Menu Item',
+  'description': 'A menu item displays an individual selection in a menu',
+  'parentTag': 'ui-menu',
+  'tagName': 'menu-item',
+  'exportName': 'UIMenuItem',
+  'content': [
     {
-      "name": "Icon",
-      "includeAttributeClass": true,
-      "attribute": "icon",
-      "couplesWith": [
-        "ui-icon"
+      'name': 'Icon',
+      'includeAttributeClass': true,
+      'attribute': 'icon',
+      'couplesWith': [
+        'ui-icon',
       ],
-      "slot": "icon",
-      "description": "include an icon",
-      "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"
+      'slot': 'icon',
+      'description': 'include an icon',
+      'exampleCode': '<menu-item icon="home">Home</menu-item>',
     },
     {
-      "name": "label",
-      "type": "string",
-      "attribute": "label",
-      "description": "can specify a text label"
+      'name': 'label',
+      'type': 'string',
+      'attribute': 'label',
+      'description': 'can specify a text label',
     },
     {
-      "name": "badge",
-      "type": "string",
-      "attribute": "badge",
-      "description": "can specify a badge to appear next to text"
+      'name': 'badge',
+      'type': 'string',
+      'attribute': 'badge',
+      'description': 'can specify a badge to appear next to text',
     },
     {
-      "name": "Href",
-      "type": "string",
-      "attribute": "href",
-      "description": "can specify a link"
+      'name': 'Href',
+      'type': 'string',
+      'attribute': 'href',
+      'description': 'can specify a link',
     },
     {
-      "name": "Value",
-      "type": "string",
-      "attribute": "value",
-      "description": "can specify a value"
-    }
+      'name': 'Value',
+      'type': 'string',
+      'attribute': 'value',
+      'description': 'can specify a value',
+    },
   ],
-  "states": [
+  'states': [
     {
-      "name": "Hover",
-      "attribute": "hover",
-      "description": "hovered"
+      'name': 'Hover',
+      'attribute': 'hover',
+      'description': 'hovered',
     },
     {
-      "name": "Focus",
-      "attribute": "focused",
-      "description": "focused by the keyboard"
+      'name': 'Focus',
+      'attribute': 'focused',
+      'description': 'focused by the keyboard',
     },
     {
-      "name": "Active",
-      "attribute": "active",
-      "description": "activated"
+      'name': 'Active',
+      'attribute': 'active',
+      'description': 'activated',
     },
     {
-      "name": "Disabled",
-      "attribute": "disabled",
-      "description": "disable interactions"
-    }
-  ]
+      'name': 'Disabled',
+      'attribute': 'disabled',
+      'description': 'disable interactions',
+    },
+  ],
 };

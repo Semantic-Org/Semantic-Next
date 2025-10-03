@@ -27,7 +27,9 @@ export class ReactiveRerenderDirective extends AsyncDirective {
 
   watchChanges(condition) {
     const context = {
-      message: `rerender block: {#${condition.key ? 'guard' : 'rerender'} ${condition.keyString || condition.expressionString}}`,
+      message: `rerender block: {#${condition.key ? 'guard' : 'rerender'} ${
+        condition.keyString || condition.expressionString
+      }}`,
       rerender: condition,
     };
 
@@ -45,14 +47,13 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       }
 
       // {#rerender expression} - naively add a reactive context to this reaction
-      if(condition.expressionString) {
+      if (condition.expressionString) {
         this.getValue(condition.expression());
       }
 
-      if(!computation.firstRun) {
+      if (!computation.firstRun) {
         this.setValue(condition.content());
       }
-
     }, { context });
   }
 

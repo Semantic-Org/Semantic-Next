@@ -1,0 +1,215 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Browser Utilities
+icon: globe
+description: API reference for browser-specific utility functions
+---
+
+The Browser utilities provide functions for common tasks in browser environments, such as copying text, handling keyboard events, and fetching text content.
+
+## Functions
+
+### copyText
+
+```javascript
+function copyText(text)
+```
+
+Copies the provided text to the clipboard.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| text | string | The text to copy to the clipboard |
+
+#### Example
+
+```javascript
+import { copyText } from '@semantic-ui/utils';
+
+copyText('Hello, world!');
+console.log('Text copied to clipboard');
+```
+
+> **Browser Support** This function uses the modern `navigator.clipboard.writeText` API. Ensure compatibility with your target browsers or provide a fallback for older browsers.
+
+### getKeyFromEvent
+
+```javascript
+function getKeyFromEvent(event)
+```
+
+Extracts a standardized key representation from a keyboard event.
+
+#### Parameters
+
+| Name  | Type        | Description |
+|-------|-------------|-------------|
+| event | KeyboardEvent | The keyboard event object |
+
+#### Returns
+
+A string representing the key pressed, including any modifier keys (e.g., "ctrl+a").
+
+#### Example
+
+```javascript
+import { getKeyFromEvent } from '@semantic-ui/utils';
+
+document.addEventListener('keydown', (event) => {
+  const key = getKeyFromEvent(event);
+  console.log(`Key pressed: ${key}`);
+});
+```
+
+> **Modifier Keys** This function handles modifier keys (Ctrl, Alt, Shift, Meta) and combines them with the pressed key. It also normalizes some key names for consistency.
+
+### getText
+
+```javascript
+async function getText(src)
+```
+
+Fetches text content from a given URL.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| src  | string | The URL to fetch the text from |
+
+#### Returns
+
+A Promise that resolves with the fetched text content.
+
+#### Example
+
+```javascript
+import { defineComponent } from '@semantic-ui/core';
+import { getText } from '@semantic-ui/utils';
+
+const template = await getText('/templates/component.html');
+const css = await getText('/templates/component.css');
+
+defineComponent({
+  template,
+  css
+});
+```
+
+> **Usage Note** This can be used on the server to load static assets like [templates](/templating) or [css](/docs/guides/components/styling)
+### openLink
+
+```javascript
+function openLink(url, { newWindow = false, target, event } = {})
+```
+
+Opens a URL, optionally in a new window.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| url  | string | The URL to open |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| newWindow | boolean | false   | Whether to open in a new window |
+| target    | string  | null    | Target attribute for the link |
+| event     | Event   | null    | Event object to prevent default behavior |
+
+#### Example
+
+```javascript
+import { openLink } from '@semantic-ui/utils';
+
+// Open in current window
+openLink('https://example.com');
+
+// Open in new window
+openLink('https://example.com', { newWindow: true });
+
+// Prevent default event behavior
+openLink('https://example.com', { event: clickEvent });
+```
+
+
+### getJSON
+
+```javascript
+async function getJSON(src)
+```
+
+Fetches and parses JSON content from a URL.
+
+#### Parameters
+
+| Name | Type   | Description |
+|------|--------|-------------|
+| src  | string | The URL to fetch from |
+
+#### Returns
+
+A Promise that resolves with the parsed JSON content.
+
+#### Example
+
+```javascript
+import { getJSON } from '@semantic-ui/utils';
+
+const data = await getJSON('https://example.com/data.json');
+console.log(data);
+```
+
+### getIPAddress
+
+```javascript
+async function getIPAddress({ type = 'public', timeout = 5000, waitAfterLastIP = 50 } = {})
+```
+
+Retrieves the user's IP address using WebRTC ICE gathering.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| options | object | Optional configuration |
+
+##### Options
+
+| Name    | Type   | Default | Description |
+|---------|--------|---------|-------------|
+| type    | string | 'public' | Type of IP to retrieve: 'local', 'public', or 'all' |
+| timeout | number | 5000    | Timeout in milliseconds |
+| waitAfterLastIP | number | 50 | Milliseconds to wait after last IP before resolving (for local/all types) |
+
+#### Returns
+
+A Promise that resolves to:
+- A single IP address string when `type` is 'public'
+- An array of IP address strings when `type` is 'local' or 'all'
+
+#### Example
+
+```javascript
+import { getIPAddress } from '@semantic-ui/utils';
+
+// Get public IP address (default)
+const publicIP = await getIPAddress();
+console.log('Public IP:', publicIP); // '203.0.113.45'
+
+// Get local IP addresses
+const localIPs = await getIPAddress({ type: 'local' });
+console.log('Local IPs:', localIPs); // ['192.168.1.100', '10.0.0.5']
+
+// Get all IP addresses  
+const allIPs = await getIPAddress({ type: 'all' });
+console.log('All IPs:', allIPs); // ['192.168.1.100', '10.0.0.5', '203.0.113.45']
+```
+
+> **Browser Support** This function requires WebRTC support and only works in browser environments. It uses STUN servers to detect public IP addresses.

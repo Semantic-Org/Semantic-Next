@@ -3,6 +3,7 @@ import Homepage from '../layouts/Homepage.astro';
 import { Code } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { CurrentTime } from '@components/CurrentTime.js'
+import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
 
 const code1=`
 <ui-buttons large>
@@ -41,15 +42,15 @@ const code2=`
   <aboveFold>
     <canvas id="gradient"></canvas>
     <content>
-      <ui-container>
+      <UIContainer>
         <img src="/images/api-banner-image.png" class="image">
         <div class="text">
           <h1>A Next-Gen UI Framework Built To Scale</h1>
           <p>Create truly <b>portable in house design systems</b> that work everywhere usings <b>web standards</b>, <b>signals-based reactivity</b>, and <b>zero abstraction cost</b>. </p>
-          <ui-button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</ui-button>
-          <ui-button secondary href="/components">View Docs</ui-button>
+          <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
+          <UIButton secondary href="/overview">View Docs</UIButton>
         </div>
-      </ui-container>
+      </UIContainer>
     </content>
   </aboveFold>
   <script>
@@ -72,8 +73,8 @@ const code2=`
   </script>
   <ribbons>
     <ribbon class="proof">
-      <ui-container>
-        <ui-cards three spaced stackable>
+      <UIContainer>
+        <UICards three spaced stackable>
           <ui-card>
             <ui-icon layers></ui-icon>
             <div class="header">Future Tech Included</div>
@@ -95,7 +96,7 @@ const code2=`
               Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.
             </div>
           </ui-card>
-        </ui-cards>
+        </UICards>
         <!-- <div class="cards">
          <div class="card">
            <ui-icon layers></ui-icon>
@@ -113,10 +114,10 @@ const code2=`
            <p>Hit the ground running with robust UI primitives, then author custom UI with a component framework designed for developer experience.</p>
          </div>
         </div> -->
-      </ui-container>
+      </UIContainer>
     </ribbon>
     <ribbon class="tour">
-      <ui-container>
+      <UIContainer>
         <div class="right">
           <div class="container">
             <div class="segment">
@@ -229,15 +230,15 @@ const code2=`
             </ul>
           </div>
         </div>
-      </ui-container>
+      </UIContainer>
     </ribbon>
     <ribbon>
-      <ui-container>
+      <UIContainer>
         <h3 class="ui header">
           Try It Out
         </h3>
         <PlaygroundExample height="500" id="card-search"></PlaygroundExample>
-      </ui-container>
+      </UIContainer>
     </ribbon>
   </ribbons>
   <footer>

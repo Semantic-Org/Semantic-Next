@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { getExampleFiles, getExampleID, getSandboxURL } from '@helpers/playground.js';
+import { getFolder } from '@helpers/loading.js';
 
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
@@ -13,9 +14,7 @@ if(!matchingExamples[0]) {
 }
 const example = matchingExamples[0].data;
 const exampleType = example.exampleType;
-const allExampleFiles = await import.meta.glob(`../../examples/**`, {
-  query: '?raw',
-});
+const allExampleFiles = await getFolder(getExampleID(example), '../../examples/');
 let files = await getExampleFiles({
   contentID: getExampleID(example),
   allFiles: allExampleFiles,

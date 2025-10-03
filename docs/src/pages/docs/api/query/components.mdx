@@ -1,0 +1,183 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Component Interaction
+icon: box
+description: API reference for interacting with Semantic UI components externally
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Semantic UI components provide several methods for interacting with component instances from outside the component itself. These methods are particularly useful for initializing, configuring, and accessing component functionality programmatically.
+
+> **Important Note** Please be sure to read the [component documentation](/docs/guides/components) for more information on the usage of these helpers.
+
+## component
+
+Retrieves the [component instance](/docs/guides/components/create#instance) from a web component.
+
+### Syntax
+```javascript
+$('selector').component()
+```
+
+### Returns
+The component instance if found, otherwise `undefined`.
+
+### Usage
+```javascript
+const menu = $('ui-menu').component();
+if (menu) {
+  menu.selectIndex(2);
+}
+```
+
+### Example
+<PlaygroundExample id="query-component" direction="horizontal"></PlaygroundExample>
+
+> **Access Component Methods** `component()` allows you to access methods and properties defined in the component's [`createComponent`](/docs/guides/components/create#definition-parts) function.
+
+## settings
+
+Initializes or updates [a component's settings](/docs/guides/components/rendering#settings) programmatically.
+
+### Syntax
+```javascript
+$('selector').settings(settingsObject)
+```
+
+> **Passing Functions** `settings()` is particularly useful for passing data to your component that cannot be stringified into an attribute, or that is easier to retreive from javascript.
+
+### Parameters
+| Name           | Type   | Description                           |
+|----------------|--------|---------------------------------------|
+| settingsObject | Object | An object containing setting key-value pairs |
+
+### Returns
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('ui-panel').settings({
+  getNaturalSize: (panel, { direction, minimized }) => {
+    // Custom logic for determining panel size
+    return { width: 300, height: 200 };
+  }
+});
+```
+
+### Example
+<PlaygroundExample id="query-settings" direction="horizontal"></PlaygroundExample>
+
+## setting
+
+Updates a single setting on a component programmatically.
+
+### Syntax
+```javascript
+$('selector').setting(settingName, value)
+```
+
+### Parameters
+| Name        | Type   | Description                    |
+|-------------|--------|--------------------------------|
+| settingName | string | The name of the setting to set |
+| value       | any    | The value to set              |
+
+### Returns
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```javascript
+$('ui-panel').setting('direction', 'horizontal');
+```
+
+### Example
+<PlaygroundExample id="query-setting" direction="horizontal"></PlaygroundExample>
+
+> **Single Setting Update** `setting()` provides a convenient way to update a single component setting without having to pass an entire settings object.
+
+## initialize
+
+Initializes a component with settings, typically used before the component is rendered in the DOM.
+
+### Syntax
+```javascript
+$('selector').initialize(settingsObject)
+```
+
+> **Using Initialize** Initialize helps in scenarios where you would like to pass in settings before the component is rendered and can help facilitate load-order issues for some front end architectures.
+
+### Parameters
+| Name           | Type   | Description                           |
+|----------------|--------|---------------------------------------|
+| settingsObject | Object | An object containing setting key-value pairs |
+
+### Returns
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+```html
+<script>
+$('ui-panel').initialize({
+  direction: 'vertical',
+  minSize: 100,
+  maxSize: 500
+});
+</script>
+<ui-panel></ui-panel>
+```
+
+### Example
+<PlaygroundExample id="query-initialize" direction="horizontal"></PlaygroundExample>
+
+> **Early Initialization** `initialize()` allows you to set up component settings even before the component is rendered, which can be useful in single-page applications or when working with dynamically loaded content.
+
+While both `settings()` and `initialize()` are used to configure components, they have different use cases:
+
+- `settings()` is typically used after a component is already rendered in the DOM, allowing you to update its configuration dynamically.
+- `initialize()` is used to set up initial configurations, often before the component is fully rendered. It's particularly useful in scenarios where you need to set up components that haven't been added to the DOM yet.
+
+```javascript
+// Get the component instance
+const circle = $('circle-expand').component();
+
+// Use a component method
+circle.increaseWidth();
+
+// Update settings
+$('circle-expand').settings({
+  delta: 100 // Change the increment/decrement amount
+});
+
+// Initialize a new component before it's rendered
+$('circle-expand').initialize({
+  width: 300,
+  height: 300
+});
+```
+
+## dataContext
+
+Retrieves the data context associated with a component. The data context is useful for accessing component-specific data that may be set during initialization or runtime.
+
+### Syntax
+```javascript
+$('selector').dataContext()
+```
+
+### Returns
+The data context object if found, otherwise `undefined`.
+
+### Usage
+```javascript
+const context = $('ui-list-item').dataContext();
+if (context) {
+  console.log('Item data:', context);
+}
+```
+
+### Example
+<PlaygroundExample id="query-datacontext" direction="horizontal"></PlaygroundExample>
+
+> **Component Data** `dataContext()` provides access to component-specific data that may be used for rendering or internal component state management.

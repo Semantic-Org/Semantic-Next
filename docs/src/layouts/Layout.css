@@ -86,9 +86,14 @@
 
       ui-card {
         text-align: left;
-        width: 50%;
+        min-width: 300px;
 
-        flex-grow: 1;
+        &::part(card) {
+          padding: 1rem 2rem;
+          border-radius: var(--circular-radius);
+        }
+
+        flex-grow: 0;
         .label {
           color: var(--primary-text-color);
           font-weight: bold;
@@ -104,10 +109,14 @@
       }
 
       [previous] {
-        text-align: left;
+        text-align: center;
+        flex-grow: 0;
+        margin-right: auto;
       }
       [next]{
-        text-align: right;
+        text-align: center;
+        flex-grow: 0;
+        margin-left: auto;
       }
     }
 
@@ -313,6 +322,19 @@
           }
           p:last-child {
             margin-bottom: 0rem;
+          }
+          & > ul,
+          & > ul li,
+          & section > p,
+          & > p {
+            line-height: 1.66;
+          }
+          & > ul li {
+            margin-bottom: 2px;
+
+            &:last-child {
+              margin-bottom: 0rem;
+            }
           }
         }
 

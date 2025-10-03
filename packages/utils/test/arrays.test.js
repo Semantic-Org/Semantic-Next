@@ -20,10 +20,9 @@ import {
   where,
 } from '@semantic-ui/utils';
 
-import { describe, expect, it, } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('Array Utilities', () => {
-
   describe('unique', () => {
     it('should remove duplicates', () => {
       const arr = [1, 2, 2, 3, 4, 4, 5];
@@ -75,7 +74,6 @@ describe('Array Utilities', () => {
     });
   });
 
-
   describe('flatten', () => {
     it('should flatten a nested array', () => {
       const nested = [1, [2, [3, [4]], 5]];
@@ -123,6 +121,85 @@ describe('Array Utilities', () => {
       arr = [1, 2, 3, 4];
       remove(arr, 2);
       expect(arr).toEqual([1, 3, 4]);
+    });
+
+    it('should remove ALL matching instances', () => {
+      let arr = [1, 2, 2, 3, 2, 4];
+      const count = remove(arr, 2);
+      expect(arr).toEqual([1, 3, 4]);
+      expect(count).toBe(3);
+    });
+
+    it('should return 0 when no matches found', () => {
+      let arr = [1, 2, 3];
+      const count = remove(arr, 5);
+      expect(arr).toEqual([1, 2, 3]);
+      expect(count).toBe(0);
+    });
+
+    it('should work with callback for multiple matches', () => {
+      let arr = [1, 2, 3, 4, 5, 6];
+      const count = remove(arr, x => x % 2 === 0);
+      expect(arr).toEqual([1, 3, 5]);
+      expect(count).toBe(3);
+    });
+
+    it('should handle complex objects with deep equality', () => {
+      let arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 1, name: 'John' },
+        { id: 3, name: 'Bob' },
+        { id: 1, name: 'John' },
+      ];
+      const count = remove(arr, { id: 1, name: 'John' });
+      expect(arr).toEqual([
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' },
+      ]);
+      expect(count).toBe(3);
+    });
+
+    it('should preserve element order', () => {
+      let arr = ['a', 'b', 'c', 'b', 'd', 'b', 'e'];
+      remove(arr, 'b');
+      expect(arr).toEqual(['a', 'c', 'd', 'e']);
+    });
+
+    it('should handle empty arrays', () => {
+      let arr = [];
+      const count = remove(arr, 1);
+      expect(arr).toEqual([]);
+      expect(count).toBe(0);
+    });
+
+    it('should remove all elements if all match', () => {
+      let arr = [2, 2, 2, 2];
+      const count = remove(arr, 2);
+      expect(arr).toEqual([]);
+      expect(count).toBe(4);
+    });
+
+    it('should work with callback that uses index', () => {
+      let arr = ['a', 'b', 'c', 'd', 'e'];
+      const count = remove(arr, (val, index) => index % 2 === 0);
+      expect(arr).toEqual(['b', 'd']);
+      expect(count).toBe(3);
+    });
+
+    it('should maintain backward compatibility with truthy/falsy return', () => {
+      let arr1 = [1, 2, 3];
+      let arr2 = [1, 2, 3];
+
+      // Should return truthy (count > 0) when items removed
+      const result1 = remove(arr1, 2);
+      expect(result1).toBeTruthy();
+      expect(result1).toBe(1);
+
+      // Should return falsy (0) when no items removed
+      const result2 = remove(arr2, 5);
+      expect(result2).toBeFalsy();
+      expect(result2).toBe(0);
     });
   });
 
@@ -621,6 +698,4 @@ describe('Array Utilities', () => {
       expect(groupBy(array, 'city')).toEqual(expected);
     });
   });
-
-
 });

@@ -1,17 +1,17 @@
 import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
 import { getExampleFiles, getExampleID } from '@helpers/playground.js';
+import { getFolder } from '@helpers/loading.js';
 import { asyncMap, each, mapObject } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
-const examples = await getCollection('examples');
-const allExampleFiles = await import.meta.glob(`../../../examples/**`, {
-  query: '?raw',
-});
+const examples = await getCollection('examples', ({ data }) => !data.hidden);
 
 export async function getStaticPaths() {
   const paths = await asyncMap(examples, async (example) => {
+    const contentID = getExampleID(example);
+    const allExampleFiles = await getFolder(contentID, '../../../examples/');
     let files = await getExampleFiles({
-      contentID: getExampleID(example),
+      contentID: contentID,
       allFiles: allExampleFiles,
       basePath: '../../../examples/',
       includeFolder: example.exampleType == 'folder',

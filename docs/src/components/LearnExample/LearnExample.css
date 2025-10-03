@@ -90,8 +90,11 @@
       }
 
       nav-menu {
-        --nav-menu-content-indent-distance: 0rem;
+        --nav-menu-content-indent-distance: 5px;
         --nav-menu-sub-title-active-color: var(--white-10);
+        --nav-menu-sub-title-font-size: 12px;
+        --nav-menu-content-space-after: 1rem;
+        --nav-menu-title-padding: 0rem 0rem 1rem;
       }
     }
 
@@ -198,7 +201,7 @@
       display: inline-block;
       font-size: 10px;
       background-color: var(--standard-10);
-      color: #FFFFFF;
+      color: var(--standard-100);
       vertical-align: text-top;
       border-radius: var(--border-radius);
       padding: 3px;

@@ -1,6 +1,6 @@
 import { TemplateHelpers } from '@semantic-ui/templating';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { adoptStylesheet } from '@semantic-ui/utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, registerHelper, registerHelpers, WebComponentBase } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM

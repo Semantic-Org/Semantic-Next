@@ -1,11 +1,4 @@
-import {
-  camelToKebab,
-  capitalizeWords,
-  joinWords,
-  kebabToCamel,
-  toTitleCase,
-  truncate,
-} from '@semantic-ui/utils';
+import { camelToKebab, capitalizeWords, joinWords, kebabToCamel, toTitleCase, truncate } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

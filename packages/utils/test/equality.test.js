@@ -1,6 +1,4 @@
-import {
-  isEqual,
-} from '@semantic-ui/utils';
+import { isEqual } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

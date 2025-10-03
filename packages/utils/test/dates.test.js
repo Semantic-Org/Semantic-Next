@@ -1,6 +1,4 @@
-import {
-  formatDate,
-} from '@semantic-ui/utils';
+import { formatDate } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

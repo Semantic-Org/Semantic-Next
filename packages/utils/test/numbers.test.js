@@ -1,7 +1,4 @@
-import {
-  roundNumber,
-  sum,
-} from '@semantic-ui/utils';
+import { roundNumber, sum } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

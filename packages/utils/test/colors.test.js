@@ -1,7 +1,4 @@
-import {
-  oklchToHex,
-  oklchToRgb,
-} from '@semantic-ui/utils';
+import { oklchToHex, oklchToRgb } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 

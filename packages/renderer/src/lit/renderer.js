@@ -177,11 +177,11 @@ export class LitRenderer {
       }
       return value;
     };
-    
+
     // Store original expressions for debugging
     node.expressionString = node.expression;
     node.keyString = node.key;
-    
+
     let rerenderArguments = mapObject(node, directiveMap);
     return reactiveRerender(rerenderArguments);
   }

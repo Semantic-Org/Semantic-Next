@@ -23,10 +23,10 @@ export const buildUIComponents = async ({
     outbase: 'src/primitives',
     filterEntries: (path) => {
       return !path.endsWith('src/primitives/index.js');
-    }
+    },
   };
 
-  // Build new components  
+  // Build new components
   const componentsConfig = {
     watch,
     type: 'javascript',
@@ -35,7 +35,7 @@ export const buildUIComponents = async ({
     outbase: 'src/components',
     filterEntries: (path) => {
       return !path.endsWith('src/components/index.js');
-    }
+    },
   };
 
   // Build behaviors if they exist
@@ -47,7 +47,7 @@ export const buildUIComponents = async ({
     outbase: 'src/behaviors',
     filterEntries: (path) => {
       return !path.endsWith('src/behaviors/index.js');
-    }
+    },
   };
 
   if (includeESM) {

@@ -1,11 +1,10 @@
+import { SpecReader } from '@semantic-ui/specs';
+import { asyncEach, each } from '@semantic-ui/utils';
+import { readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
+import glob from 'tiny-glob';
 import { build } from './lib/build.js';
 import { INTERNAL_CSS_BANNER } from './lib/config.js';
-import { SpecReader } from '@semantic-ui/specs';
-import { writeFileSync, readFileSync } from 'fs';
-import glob from 'tiny-glob';
-import { each, asyncEach } from '@semantic-ui/utils';
-
 
 /*
   Generate component spec JS directly without intermediate JSON file
@@ -13,16 +12,17 @@ import { each, asyncEach } from '@semantic-ui/utils';
 const generateComponentSpecJS = async (spec, plural = false, specSettings = {}) => {
   const readerSettings = {
     plural,
-    ...specSettings
+    ...specSettings,
   };
   const reader = new SpecReader(spec, readerSettings);
   const componentSpec = reader.getWebComponentSpec();
   const filename = plural
     ? `${spec?.pluralTagName?.replace('ui-', '')}-component.js`
     : 'component.js';
-  return `// Auto-generated from ${spec?.tagName?.replace('ui-', '') || 'spec'}.json\nexport default ${JSON.stringify(componentSpec, null, 2)};\n`;
+  return `// Auto-generated from ${spec?.tagName?.replace('ui-', '') || 'spec'}.json\nexport default ${
+    JSON.stringify(componentSpec, null, 2)
+  };\n`;
 };
-
 
 /*
   We need to flatten css imported by the web components
@@ -31,7 +31,6 @@ const generateComponentSpecJS = async (spec, plural = false, specSettings = {}) 
 export const buildUIDeps = async ({
   watch = false,
 } = {}) => {
-
   const cssComponentBundle = build({
     banner: { css: INTERNAL_CSS_BANNER },
     type: 'css',
@@ -56,26 +55,26 @@ export const buildUIDeps = async ({
 
   const createComponentSpecs = async () => {
     await asyncEach(entryPoints, async (entryPath) => {
-    try {
-      const contents = readFileSync(entryPath, 'utf8');
-      const spec = JSON.parse(contents);
+      try {
+        const contents = readFileSync(entryPath, 'utf8');
+        const spec = JSON.parse(contents);
 
-      // Generate component spec JS directly
-      const componentSpecJS = await generateComponentSpecJS(spec, false);
-      const componentJSPath = entryPath.replace('.json', '-component.js');
-      writeFileSync(componentJSPath, componentSpecJS);
+        // Generate component spec JS directly
+        const componentSpecJS = await generateComponentSpecJS(spec, false);
+        const componentJSPath = entryPath.replace('.json', '-component.js');
+        writeFileSync(componentJSPath, componentSpecJS);
 
-      // Generate plural variant if supported
-      if(spec?.supportsPlural) {
-        const pluralComponentSpecJS = await generateComponentSpecJS(spec, true);
-        const pluralName = spec?.pluralTagName.replace('ui-', '');
-        const pluralJSPath = resolve(dirname(entryPath), `${pluralName}-component.js`);
-        writeFileSync(pluralJSPath, pluralComponentSpecJS);
+        // Generate plural variant if supported
+        if (spec?.supportsPlural) {
+          const pluralComponentSpecJS = await generateComponentSpecJS(spec, true);
+          const pluralName = spec?.pluralTagName.replace('ui-', '');
+          const pluralJSPath = resolve(dirname(entryPath), `${pluralName}-component.js`);
+          writeFileSync(pluralJSPath, pluralComponentSpecJS);
+        }
       }
-    }
-    catch(e) {
-      // Silently skip malformed JSON files
-    }
+      catch (e) {
+        // Silently skip malformed JSON files
+      }
     });
   };
 
@@ -91,7 +90,9 @@ export const buildUIDeps = async ({
       try {
         const jsonContent = readFileSync(jsonFile, 'utf-8');
         const spec = JSON.parse(jsonContent);
-        const jsContent = `// Auto-generated from ${jsonFile.split('/').pop()}\nexport default ${JSON.stringify(spec, null, 2)};\n`;
+        const jsContent = `// Auto-generated from ${jsonFile.split('/').pop()}\nexport default ${
+          JSON.stringify(spec, null, 2)
+        };\n`;
         const jsFile = jsonFile.replace('.json', '.js');
         writeFileSync(jsFile, jsContent);
       }
@@ -106,11 +107,9 @@ export const buildUIDeps = async ({
   return await Promise.all([
     cssComponentBundle,
     createComponentSpecs(),
-    generateJSExports
+    generateJSExports,
   ]);
-
 };
-
 
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {

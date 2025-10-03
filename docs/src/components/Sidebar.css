@@ -82,14 +82,22 @@
       height: 0px; /* confused on this but it works */
       --nav-menu-title-font-size: 13px;
       --nav-menu-item-font-size: 12px;
+      --nav-menu-content-space-after: 1em;
+      --nav-menu-item-spacing: 5px;
 
       &::part(search) {
         margin: 0.5rem 1rem 0rem;
       }
       &::part(content) {
         border-left: var(--internal-border);
-        margin-left: 0.5rem;
-        padding-left: 1rem;
+        margin-left: 0.55rem;
+        padding-left: 0.75rem;
+        margin-top: -0.35rem;
+        padding-top: 0.35rem;
+      }
+      &::part(description) {
+        color: oklch(0.75 0.11 92.17);
+        font-size: 10px;
       }
       &::part(menu) {
         scrollbar-width: thin;

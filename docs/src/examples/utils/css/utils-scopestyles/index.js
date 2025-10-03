@@ -1,4 +1,4 @@
-import { scopeStyles, getText } from '@semantic-ui/utils';
+import { getText, scopeStyles } from '@semantic-ui/utils';
 
 const css = await getText('styles.css');
 

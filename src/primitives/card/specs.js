@@ -1,5 +1,5 @@
-import CardSpec from './specs/card.js';
 import CardComponentSpec from './specs/card-component.js';
+import CardSpec from './specs/card.js';
 import CardsComponentSpec from './specs/cards-component.js';
 
-export { CardSpec, CardComponentSpec, CardsComponentSpec };
+export { CardComponentSpec, CardsComponentSpec, CardSpec };

@@ -1,0 +1,385 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Content
+icon: file-text
+description: API reference for Query methods related to element content
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Content methods in Query allow you to manipulate content accessing form data, text and html.
+
+## Value
+Gets or sets the value of form elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('input').value();
+```
+
+#### Set
+
+```javascript
+$('input').val(newValue)
+```
+
+| Name      | Type   | Description        |
+|-----------|--------|--------------------|
+| newValue  | any    | The new value to set |
+
+
+
+### Alias
+`value` is also available as `val`
+
+```javascript
+$('input').val(); // identical;
+```
+
+### Returns
+
+#### Get
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+#### Set
+The value of the first element in the set.
+
+### Usage
+
+
+#### Geting a Value
+```javascript
+// Get the value of an input
+const inputValue = $('input').val();
+console.log(inputValue);
+```
+
+#### Setting a Value
+```javascript
+// Set the value of an input
+$('input').val('New value');
+```
+
+### Example
+<PlaygroundExample id="query-value" direction="horizontal"></PlaygroundExample>
+
+## Text
+Gets or sets the text content of elements.
+
+### Syntax
+
+#### Get
+```javascript
+$('p').text()
+```
+
+#### Set
+```javascript
+$('p').text(newText)
+```
+
+| Name    | Type   | Description              |
+|---------|--------|--------------------------|
+| newText | string | The new text content to set |
+
+### Returns
+
+#### Get
+The combined text content of all elements in the set.
+
+#### Set
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting Text
+```javascript
+// Get the text of an element
+const buttonText = $('button').text();
+console.log(buttonText);
+```
+
+#### Setting Text
+```javascript
+// Set the text of an element
+$('button').text('Click me!');
+```
+
+### Example
+<PlaygroundExample id="query-text" direction="horizontal"></PlaygroundExample>
+
+## HTML
+
+### Syntax
+
+#### Get
+```javascript
+$('.container').html()
+```
+
+#### Set
+```javascript
+$('.container').html(newHtml)
+```
+
+| Name    | Type   | Description              |
+|---------|--------|--------------------------|
+| newHtml | string | The new HTML content to set |
+
+### Returns
+
+#### Get
+The HTML content of the first element in the set.
+
+#### Set
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting HTML
+```javascript
+// Get the HTML content
+const containerHtml = $('.container').html();
+console.log(containerHtml);
+```
+
+#### Setting HTML
+```javascript
+// Set the HTML content
+$('.container').html('<p>New content</p>');
+```
+
+### Example
+<PlaygroundExample id="query-html" direction="horizontal"></PlaygroundExample>
+
+## Outer HTML
+
+> **Difference from HTML** Outerhtml returns the element including its own tag
+
+### Syntax
+
+#### Get
+```javascript
+$('.element').outerHTML()
+```
+
+#### Set
+```javascript
+$('.element').outerHTML(newHtml)
+```
+
+| Name    | Type   | Description                    |
+|---------|--------|--------------------------------|
+| newHtml | string | The new outer HTML content to set |
+
+### Returns
+
+#### Get
+
+- **Single Element** - The outer html of that element.
+- **Multiple Elements** - An array of outer html , one for each matched element.
+
+
+#### Set
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Getting Outer HTML
+```javascript
+// Get the outer HTML
+const elementOuterHtml = $('.element').outerHTML();
+console.log(elementOuterHtml);
+```
+
+#### Setting Outer HTML
+```javascript
+// Set the outer HTML
+$('.element').outerHTML('<div class="new-element">Replaced content</div>');
+```
+
+### Example
+<PlaygroundExample id="query-outerhtml" direction="horizontal"></PlaygroundExample>
+
+
+## Text Node
+
+> **Versus text()** `text` will return text content recursively of nested nodes while `textNode` will only return the text content of the selected node, in some cases this distinction can be essential.
+
+### Syntax
+
+#### Get
+```javascript
+$('p').textNode()
+```
+
+### Returns
+
+#### Get
+The combined text content of immediate text node children.
+
+### Usage
+
+#### Getting Text Node Content
+```javascript
+// Get only the immediate text content, ignoring nested elements
+const immediateText = $('p').textNode();
+console.log(immediateText);
+```
+
+### Example
+<PlaygroundExample id="query-textnode" direction="horizontal"></PlaygroundExample>
+
+## Slot Methods
+
+Query provides two methods for working with slots in Web Components: `getSlot` and `setSlot`. These methods work on both slot elements and web component elements.
+
+### getSlot
+
+The `getSlot` method gets the content of slots in Web Components.
+
+#### Syntax
+
+##### Get All Slotted Content
+```javascript
+// From a component (default slot)
+$(webComponent).getSlot()
+
+// From a slot element
+$(slot).getSlot()
+```
+
+##### Get Content for a Named Slot
+```javascript
+$(webComponent).getSlot(slotName)
+```
+
+| Name      | Type   | Description                    |
+|-----------|--------|--------------------------------|
+| slotName  | string | The name of the slot to access |
+
+#### Returns
+The combined HTML content of all elements assigned to the slot(s).
+
+#### Usage
+
+##### Getting All Slotted Content
+```javascript
+// Get all slotted content from a web component's default slot
+const myComponent = document.createElement('my-component');
+// ... add some slotted content ...
+const allSlottedContent = $(myComponent).getSlot();
+```
+
+##### Getting Content for a Specific Slot
+```javascript
+// Get content for just the "header" slot
+const headerContent = $(myComponent).getSlot('header');
+```
+
+##### Working with Slot Elements Directly
+```javascript
+// Get the content of a slot element
+const slotContent = $(element.shadowRoot).find('slot[name="header"]').getSlot();
+```
+
+### Example
+<PlaygroundExample id="query-getslot" direction="horizontal"></PlaygroundExample>
+
+### setSlot
+
+The `setSlot` method sets the content of slots in Web Components.
+
+#### Syntax
+
+##### Set Content for Default Slot
+```javascript
+$(webComponent).setSlot(content)
+```
+
+| Name       | Type                | Description                      |
+|------------|---------------------|----------------------------------|
+| content    | string or Element   | The content to add to the default slot |
+
+##### Set Content for Named Slot
+```javascript
+$(webComponent).setSlot(slotName, content)
+```
+
+| Name      | Type                | Description                      |
+|-----------|---------------------|----------------------------------|
+| slotName  | string              | The name of the slot to add content to |
+| content   | string or Element   | The content to add to the named slot |
+
+#### Returns
+[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+
+#### Usage
+
+##### Setting Content for Default Slot
+```javascript
+// Set content for the default (unnamed) slot
+$(myComponent).setSlot('<p>Default content</p>');
+```
+
+##### Setting Content for Named Slot
+```javascript
+// Set content for a named slot
+$(myComponent).setSlot('header', '<h1>Header content</h1>');
+```
+
+##### Working with Slot Elements Directly
+```javascript
+// Set content for a slot element (adds to parent component)
+$(element.shadowRoot).find('slot').setSlot('<div>New content</div>');
+```
+
+### Example
+<PlaygroundExample id="query-setslot" direction="horizontal"></PlaygroundExample>
+
+### Complete Component Example
+```javascript
+class MyComponent extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `
+      <div>
+        <slot name="header">Default Header</slot>
+        <slot>Default Content</slot>
+      </div>
+    `;
+  }
+  
+  // Helper to set default content if none provided
+  setDefaultSlot(slotName, content) {
+    // Check if slot is empty
+    if (slotName) {
+      if (!this.querySelector(`[slot="${slotName}"]`)) {
+        $(this).setSlot(slotName, content);
+      }
+    } else {
+      if (!this.querySelector(':not([slot])')) {
+        $(this).setSlot(content);
+      }
+    }
+  }
+}
+
+customElements.define('my-component', MyComponent);
+
+// Usage
+const component = document.createElement('my-component');
+document.body.appendChild(component);
+
+// Set header slot content
+$(component).setSlot('header', '<h1>My Header</h1>');
+
+// Set default slot content
+$(component).setSlot('<p>Main content</p>');
+
+// Get all slotted content
+console.log($(component).getSlot());
+```

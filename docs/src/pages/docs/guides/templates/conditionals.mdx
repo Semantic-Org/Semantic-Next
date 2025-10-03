@@ -1,0 +1,70 @@
+---
+layout: '@layouts/Guide.astro'
+title: Conditionals
+description: Using conditional statements inside templates
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+
+### Control Structures
+
+Templates support common control structures like `if`, `elseif` and `else` to handle branching paths in your template.
+
+```sui
+{#if isEven number}
+  Even
+{else if isZero number}
+  Zero
+{else}
+  Odd
+{/if}
+```
+
+### Conditional Syntax
+
+[Expressions](/docs/guides/templates/expressions) support both lisp-like and javascript syntax wherever expressions are used including in conditionals.
+
+```sui
+{#if isEqual(a, b) }
+  A is B
+{else if isEqual a c}
+  A is C
+{/if}
+```
+
+### Conditional Helpers
+
+[Template helpers](/docs/guides/templates/helpers) can be used to make your templates easier to read and to provide common utilities like checking if a value is empty.
+
+> For a full list of comparators view the [dedicated section on comparison helpers](/docs/api/helpers/comparison)
+
+
+##### With Helpers
+```sui
+{#if is valueA valueB}
+  Values are equal
+{/if}
+```
+
+```sui
+{#if not isEven number}
+  Odd
+{else}
+  Even
+{/if}
+```
+
+##### No Helpers
+
+```sui
+{#if valueA == valueB}
+  Values are equal
+{/if}
+```
+```sui
+{#if !isEven(number)}
+  Odd
+{else}
+  Even
+{/if}
+```
