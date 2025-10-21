@@ -58,6 +58,6 @@
   -------------------- */
 
   --paragraph-margin: 0em 0em 1em;
-  --paragraph-line-height: var(--line-height);
+  --paragraph-line-height: calc(26 / 14);
 
 }
