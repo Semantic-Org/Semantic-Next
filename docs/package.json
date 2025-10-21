@@ -25,6 +25,7 @@
     "shiki": "^3.9.2"
   },
   "devDependencies": {
-    "@astropub/md": "^1.0.0"
+    "@astropub/md": "^1.0.0",
+    "unist-util-visit": "^5.0.0"
   }
 }

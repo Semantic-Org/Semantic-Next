@@ -226,7 +226,7 @@
         & > ul li,
         & section > p,
         & > p {
-          line-height: 1.66;
+          line-height: var(--paragraph-line-height);
         }
         & > ul li {
           margin-bottom: 0.5rem
@@ -296,18 +296,24 @@
           margin: var(--vertically-spaced);
         }
 
+        p:first-child {
+          margin-top: 0rem;
+        }
+        p:last-child {
+          margin-bottom: 0rem;
+        }
+
         blockquote {
           padding: var(--padding);
-          background-image: var(--angled-gradient);
+          background-image: var(--subtle-gradient);
           font-style: italic;
-          border: var(--black-100);
           background-clip: padding-box;
           display: flex;
           flex-direction: row;
           border-radius: var(--border-radius);
           margin: var(--vertically-padded);
           flex-direction: row;
-          border: var(--very-subtle-border);
+          border: var(--border);
           border-left: 2px solid var(--primary-text-color);
 
           p code {
@@ -317,17 +323,11 @@
             color: var(--standard-60) !important;
             line-height: 1.8;
           }
-          p:first-child {
-            margin-top: 0rem;
-          }
-          p:last-child {
-            margin-bottom: 0rem;
-          }
           & > ul,
           & > ul li,
           & section > p,
           & > p {
-            line-height: 1.66;
+            line-height: var(--paragraph-line-height);
           }
           & > ul li {
             margin-bottom: 2px;
