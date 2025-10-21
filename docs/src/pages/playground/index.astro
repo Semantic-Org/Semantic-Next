@@ -1,19 +1,19 @@
 ---
   import { readPlaygroundLink } from '@helpers/link-encoder.js';
 
-  //export const prerender = false;
+  export const prerender = false;
 
   import Playground from '@layouts/Playground.astro';
   import { getSandboxURL, getEmptyProjectFiles } from '@helpers/playground.js';
   import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
   const link = readPlaygroundLink(Astro.url.search) || {};
-  const emptyFiles = getEmptyProjectFiles({withInjections: true, withStubs: true});
+  const emptyFiles = getEmptyProjectFiles({withInjections: false, withStubs: false});
   const files = {
-    ...emptyFiles,
     ...link?.files,
   };
   const sandboxURL = getSandboxURL();
+  console.log(files);
 ---
 <style>
   :root {

@@ -31,7 +31,7 @@ export const foldCode = ({ text = '', isHTML = false, removeLines = true } = {})
   }
   return html;
 };
-const indentLines = (str, spaces = 2) => {
+export const indentLines = (str, spaces = 2) => {
   const indent = ' '.repeat(spaces);
   return str.split('\n').map(line => `${indent}${line}`).join('\n');
 };

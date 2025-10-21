@@ -289,6 +289,11 @@ export const sidebarMenuStart = [
     description: '0.12.0',
   },
   {
+    name: 'Roadmap',
+    icon: 'calendar',
+    url: '/ui/roadmap',
+  },
+  {
     name: 'Getting Started',
     url: '/ui/start/guides',
     icon: 'book',
