@@ -24,9 +24,6 @@ import { LitElement } from 'lit';
 class WebComponentBase extends LitElement {
   static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: false };
 
-  // for use with light dom rendering
-  static scopedStyleSheet = null;
-
   constructor() {
     super();
     this.renderCallbacks = [];
@@ -76,7 +73,14 @@ class WebComponentBase extends LitElement {
       // this handles syntax where allowed value is used as attribute
       // <ui-button primary> -> emphasis="primary"
       each(componentSpec.optionAttributes, (attributeValues, attributeName) => {
+
         const propertyName = kebabToCamel(attributeName);
+
+        // in some cases the value is the same as the category i.e. positive="positive"
+        if(properties[propertyName]) {
+          return;
+        }
+
         properties[propertyName] = { type: String, noAccessor: true, alias: true, attribute: attributeName };
       });
     }
@@ -109,13 +113,16 @@ class WebComponentBase extends LitElement {
         };
       }
     });
+
     // accessors can break certain special dom attrs
+    // DISABLED FOR NOW
     const specialAttrs = ['value', 'checked'];
     each(specialAttrs, (attr) => {
       if (properties[attr]) {
         // properties[attr].noAccessor = true;
       }
     });
+    //console.log(properties);
     return properties;
   }
 
@@ -298,6 +305,11 @@ class WebComponentBase extends LitElement {
           // it receives the class "primary"
           classes.push(value);
         }
+        else if (value === true && inArray(property, allowedValues)) {
+          // this is identity like positive="true"
+          classes.push(property);
+        }
+
 
         // components can opt-in to including the attribute if it has a value set
         // for instance "icon" if it has an icon set
@@ -317,7 +329,7 @@ class WebComponentBase extends LitElement {
   isDarkMode() {
     return (isServer)
       ? undefined
-      : $(this).cssVar('dark-mode') == 'true' || $('html').hasClass('dark');
+      : $('html').hasClass('dark') || $(this).cssVar('dark-mode') == 'true';
   }
 
   /*******************************

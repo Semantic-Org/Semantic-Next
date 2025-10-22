@@ -203,7 +203,8 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
       }
     }
   }
-  else if (properties && attributeValue !== undefined && attribute.includes('-')) {
+
+  if (properties && attributeValue !== undefined && attribute.includes('-')) {
     /* This handles the case of multiword properties like `useAccordion`
        maps to <ui-menu use-accordion> or <ui-menu useaccordion>
        the kebab case is just an alias which will update the base setting
