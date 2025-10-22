@@ -150,11 +150,11 @@
     --menu-item-background: var(--menu-item-background-color) var(--menu-item-background-image);
     --menu-item-margin: 0;
     --menu-item-line-height: 1;
-    --menu-item-font-weight: var(--normal);
+    --menu-item-font-weight: var(--bold);
     --menu-item-padding: var(--7px) var(--6px);
     --menu-item-border: none;
     --menu-item-border-radius: none;
-    --menu-item-color: var(--standard-60);
+    --menu-item-color: var(--standard-20);
     --menu-item-text-align: inherit;
     --menu-item-box-shadow: none;
     --menu-item-text-decoration: none;
