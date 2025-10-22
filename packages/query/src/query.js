@@ -1059,14 +1059,13 @@ export class Query {
       // Getting a value
       if (elements?.length) {
         const styles = elements.map((el) => {
-          const inlineStyle = el.style[property];
           if (settings.includeComputed) {
             // return computed style if requested
             return window.getComputedStyle(el).getPropertyValue(property); // Return computed style if allowed
           }
-          if (inlineStyle) {
+          if (el?.style && el.style[property]) {
             // Return inline style if present
-            return inlineStyle;
+            return l.style[property];
           }
           return undefined; // If includeComputed is false, return undefined
         });
