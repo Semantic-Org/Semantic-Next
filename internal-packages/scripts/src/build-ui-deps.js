@@ -38,7 +38,7 @@ export const buildUIDeps = async ({
     addBanner: false,
     metafile: false,
     sourcemap: false,
-    watch: watch,
+    watch,
     bundle: true,
     log: { header: 'UI Components', text: 'CSS Bundle' },
     entryPoints: [
