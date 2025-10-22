@@ -19,7 +19,7 @@
 
 code-example {
   display: block;
-  margin: 2rem -1rem;
+  margin: 4rem -1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   transition: box-shadow 0.3s ease;
@@ -33,6 +33,10 @@ code-example {
   }
   ui-button {
     margin-bottom: 5px;
+  }
+
+  &:first-of-type {
+    margin-top: 2rem;
   }
 }
 code-example::part(header) {

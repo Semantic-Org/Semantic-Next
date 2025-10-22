@@ -1,6 +1,7 @@
 :host {
   --header-color: '';
   --header-font-size: 16px;
+  --header-font-weight: bold;
   --example-margin: 1rem 0rem;
   --example-bg: url(/images/bg2.jpg);
   display: block;
@@ -62,6 +63,7 @@ a.link:hover {
 .title {
   margin: 0rem 0rem 0.5rem;
   color: var(--header-color);
+  font-weight: var(--header-font-weight);
   font-size: var(--header-font-size);
 
   .top {
@@ -83,7 +85,7 @@ a.link:hover {
 }
 
 p.description {
-  margin: 0.15rem 0rem 1rem;
+  margin: 0rem 0rem 1rem;
   font-size: 14px;
   color: var(--standard-40);
   font-weight: normal;

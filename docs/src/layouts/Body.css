@@ -37,11 +37,11 @@
 
   :root {
     --page-background: #FEFEFF;
-    --primary-text-color: #73B9E1;
     --panel-color: var(--ui-background);
   }
-  html.dark {
+  html.dark, [dark] {
     --page-background: #000000;
+    --primary-text-color: #73B9E1;
     --text-color: rgba(255, 255, 255, 0.83);
     --panel-color: var(--ui-background);
   }
