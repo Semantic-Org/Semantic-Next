@@ -7,7 +7,11 @@
 .red.button {
   --button-text-color: var(--button-red-text-color);
   --button-text-shadow: var(--button-red-text-shadow);
-  --button-background: var(--button-red) var(--button-colored-background-image);
+  --button-background-color: var(--button-red);
+  --button-outline-border-color: var(--button-red);
+  --button-outline-text-color: var(--button-red);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .red.buttons,
@@ -48,7 +52,11 @@
 .orange.button {
   --button-text-color: var(--button-orange-text-color);
   --button-text-shadow: var(--button-orange-text-shadow);
-  --button-background: var(--button-orange) var(--button-colored-background-image);
+  --button-background-color: var(--button-orange);
+  --button-outline-border-color: var(--button-orange);
+  --button-outline-text-color: var(--button-orange);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .orange.buttons,
@@ -88,7 +96,11 @@
 .yellow.button {
   --button-text-color: var(--button-yellow-text-color);
   --button-text-shadow: var(--button-yellow-text-shadow);
-  --button-background: var(--button-yellow) var(--button-colored-background-image);
+  --button-background-color: var(--button-yellow);
+  --button-outline-border-color: var(--button-yellow);
+  --button-outline-text-color: var(--button-yellow);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .yellow.buttons,
@@ -130,7 +142,11 @@
 .olive.button {
   --button-text-color: var(--button-olive-text-color);
   --button-text-shadow: var(--button-olive-text-shadow);
-  --button-background: var(--button-olive) var(--button-colored-background-image);
+  --button-background-color: var(--button-olive);
+  --button-outline-border-color: var(--button-olive);
+  --button-outline-text-color: var(--button-olive);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .olive.buttons,
@@ -170,7 +186,11 @@
 .green.button {
   --button-text-color: var(--button-green-text-color);
   --button-text-shadow: var(--button-green-text-shadow);
-  --button-background: var(--button-green) var(--button-colored-background-image);
+  --button-background-color: var(--button-green);
+  --button-outline-border-color: var(--button-green);
+  --button-outline-text-color: var(--button-green);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .green.buttons,
@@ -210,7 +230,11 @@
 .teal.button {
   --button-text-color: var(--button-teal-text-color);
   --button-text-shadow: var(--button-teal-text-shadow);
-  --button-background: var(--button-teal) var(--button-colored-background-image);
+  --button-background-color: var(--button-teal);
+  --button-outline-border-color: var(--button-teal);
+  --button-outline-text-color: var(--button-teal);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .teal.buttons,
@@ -250,7 +274,11 @@
 .blue.button {
   --button-text-color: var(--button-blue-text-color);
   --button-text-shadow: var(--button-blue-text-shadow);
-  --button-background: var(--button-blue) var(--button-colored-background-image);
+  --button-background-color: var(--button-blue);
+  --button-outline-border-color: var(--button-blue);
+  --button-outline-text-color: var(--button-blue);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .blue.buttons,
@@ -291,7 +319,11 @@
 .violet.button {
   --button-text-color: var(--button-violet-text-color);
   --button-text-shadow: var(--button-violet-text-shadow);
-  --button-background: var(--button-violet) var(--button-colored-background-image);
+  --button-background-color: var(--button-violet);
+  --button-outline-border-color: var(--button-violet);
+  --button-outline-text-color: var(--button-violet);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .violet.buttons,
@@ -332,7 +364,11 @@
 .purple.button {
   --button-text-color: var(--button-purple-text-color);
   --button-text-shadow: var(--button-purple-text-shadow);
-  --button-background: var(--button-purple) var(--button-colored-background-image);
+  --button-background-color: var(--button-purple);
+  --button-outline-border-color: var(--button-purple);
+  --button-outline-text-color: var(--button-purple);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .purple.buttons,
@@ -372,7 +408,11 @@
 .pink.button {
   --button-text-color: var(--button-pink-text-color);
   --button-text-shadow: var(--button-pink-text-shadow);
-  --button-background: var(--button-pink) var(--button-colored-background-image);
+  --button-background-color: var(--button-pink);
+  --button-outline-border-color: var(--button-pink);
+  --button-outline-text-color: var(--button-pink);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .pink.buttons,
@@ -412,7 +452,11 @@
 .brown.button {
   --button-text-color: var(--button-brown-text-color);
   --button-text-shadow: var(--button-brown-text-shadow);
-  --button-background: var(--button-brown) var(--button-colored-background-image);
+  --button-background-color: var(--button-brown);
+  --button-outline-border-color: var(--button-brown);
+  --button-outline-text-color: var(--button-brown);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .brown.buttons,
@@ -452,7 +496,11 @@
 .grey.button {
   --button-text-color: var(--button-grey-text-color);
   --button-text-shadow: var(--button-grey-text-shadow);
-  --button-background: var(--button-grey) var(--button-colored-background-image);
+  --button-background-color: var(--button-grey);
+  --button-outline-border-color: var(--button-grey);
+  --button-outline-text-color: var(--button-grey);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .grey.buttons,
@@ -492,7 +540,11 @@
 .black.button {
   --button-text-color: var(--button-black-text-color);
   --button-text-shadow: var(--button-black-text-shadow);
-  --button-background: var(--button-black) var(--button-colored-background-image);
+  --button-background-color: var(--button-black);
+  --button-outline-border-color: var(--button-black);
+  --button-outline-text-color: var(--button-black);
+  --button-background-image: var(--button-colored-background-image);
+  --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
 }
 .black.buttons,

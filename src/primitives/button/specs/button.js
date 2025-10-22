@@ -27,6 +27,7 @@ export default {
       'attribute': 'emphasis',
       'description': 'be emphasized in a layout',
       'usageLevel': 1,
+      'includeAttributeClass': true,
       'separateExamples': true,
       'options': [
         {
@@ -42,6 +43,30 @@ export default {
           'description':
             'This button should appear to be emphasized as a secondary option that should appear after other options',
           'exampleCode': '<ui-button secondary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>',
+        },
+      ],
+    },
+    {
+      'name': 'Styled',
+      'attribute': 'styled',
+      'description': 'be styled to fit into a layout',
+      'usageLevel': 1,
+      'separateExamples': false,
+      'options': [
+        {
+          'name': 'Solid',
+          'value': 'solid',
+          'description': 'This button uses a solid color',
+        },
+        {
+          'name': 'Outline',
+          'value': 'outline',
+          'description': 'This button uses a no background',
+        },
+        {
+          'name': 'Ghost',
+          'value': 'ghost',
+          'description': 'This button only shows its styling when hovered',
         },
       ],
     },
@@ -163,24 +188,6 @@ export default {
       ],
     },
     {
-      'name': 'Basic',
-      'attribute': 'basic',
-      'description': 'be de-emphasized in a layout',
-      'usageLevel': 2,
-      'options': [
-        {
-          'name': 'Basic',
-          'value': 'basic',
-          'description': 'appear slightly less pronounced',
-        },
-        {
-          'name': 'Very Basic',
-          'value': 'very-basic',
-          'description': 'appear much less pronounced',
-        },
-      ],
-    },
-    {
       'name': 'Type',
       'attribute': 'type',
       'description': 'be a standard html button type',
@@ -207,6 +214,7 @@ export default {
     {
       'name': 'Colored',
       'attribute': 'color',
+      'includeAttributeClass': true,
       'description': 'be colored',
       'usageLevel': 3,
       'options': [
@@ -343,9 +351,7 @@ export default {
       'options': [
         {
           'name': 'Positive',
-          'value': [
-            'positive',
-          ],
+          'value': 'positive',
           'description': 'be positive',
         },
         {
@@ -363,9 +369,7 @@ export default {
       'options': [
         {
           'name': 'Warning',
-          'value': [
-            'warning',
-          ],
+          'value': 'warning',
           'description': 'be dangerous',
         },
         {
@@ -383,9 +387,7 @@ export default {
       'options': [
         {
           'name': 'Negative',
-          'value': [
-            'negative',
-          ],
+          'value': 'negative',
           'description': 'be negative',
         },
         {
@@ -403,9 +405,7 @@ export default {
       'options': [
         {
           'name': 'Info',
-          'value': [
-            'info',
-          ],
+          'value': 'info',
           'description': 'appear dangerous',
         },
         {
@@ -497,12 +497,6 @@ export default {
         },
       ],
     },
-    {
-      'name': 'Inverted',
-      'description': 'be formatted to appear on dark backgrounds',
-      'usageLevel': 2,
-      'attribute': 'inverted',
-    },
   ],
   'settings': [
     {
@@ -589,11 +583,11 @@ export default {
     },
   ],
   'pluralSharedVariations': [
-    'inverted',
     'size',
     'floated',
     'compact',
     'color',
+    'styled',
     'attached',
   ],
 };

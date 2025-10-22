@@ -16,6 +16,7 @@
 @import url('./states/loading.css') layer(button.definition.states.loading);
 
 /* Types */
+@import url('./types/styled.css') layer(button.definition.types.styled);
 @import url('./types/animated.css') layer(button.definition.types.animated);
 @import url('./types/emphasis.css') layer(button.definition.types.emphasis);
 @import url('./types/icon.css') layer(button.definition.types.icon);
@@ -25,7 +26,6 @@
 @import url('./types/toggle.css') layer(button.definition.types.toggle);
 
 /* Variations */
-@import url('./variations/basic.css') layer(button.definition.variations.basic);
 @import url('./variations/attached.css') layer(button.definition.variations.attached);
 @import url('./variations/circular.css') layer(button.definition.variations.circular);
 @import url('./variations/colored.css') layer(button.definition.variations.colored);

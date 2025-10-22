@@ -296,8 +296,6 @@ export default {
         'zoom-out',
         'js',
         'react',
-        'js',
-        'react',
         'astro',
         'vue',
         'react',

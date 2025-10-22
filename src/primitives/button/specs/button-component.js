@@ -9,12 +9,12 @@ export default {
   ],
   "types": [
     "emphasis",
+    "styled",
     "toggle",
     "animated"
   ],
   "variations": [
     "attached",
-    "basic",
     "type",
     "circular",
     "color",
@@ -27,8 +27,7 @@ export default {
     "transparent",
     "floated",
     "fluid",
-    "size",
-    "inverted"
+    "size"
   ],
   "states": [
     "hover",
@@ -45,6 +44,7 @@ export default {
   "attributes": [
     "icon",
     "emphasis",
+    "styled",
     "toggle",
     "animated",
     "hover",
@@ -53,7 +53,6 @@ export default {
     "disabled",
     "loading",
     "attached",
-    "basic",
     "type",
     "circular",
     "color",
@@ -67,7 +66,6 @@ export default {
     "floated",
     "fluid",
     "size",
-    "inverted",
     "icon-only",
     "icon-after",
     "href"
@@ -75,6 +73,9 @@ export default {
   "optionAttributes": {
     "primary": "emphasis",
     "secondary": "emphasis",
+    "solid": "styled",
+    "outline": "styled",
+    "ghost": "styled",
     "horizontal-animated": "animated",
     "vertical-animated": "animated",
     "fade-animated": "animated",
@@ -85,8 +86,6 @@ export default {
     "bottom-attached": "attached",
     "left-attached": "attached",
     "right-attached": "attached",
-    "basic": "basic",
-    "very-basic": "basic",
     "submit": "type",
     "reset": "type",
     "red": "color",
@@ -131,6 +130,7 @@ export default {
   "propertyTypes": {
     "icon": "string",
     "emphasis": "string",
+    "styled": "string",
     "toggle": "boolean",
     "animated": "string",
     "hover": "boolean",
@@ -139,7 +139,6 @@ export default {
     "disabled": "string",
     "loading": "boolean",
     "attached": "string",
-    "basic": "string",
     "type": "string",
     "circular": "boolean",
     "color": "string",
@@ -153,7 +152,6 @@ export default {
     "floated": "string",
     "fluid": "boolean",
     "size": "string",
-    "inverted": "boolean",
     "icon-only": "boolean",
     "icon-after": "boolean",
     "href": "string"
@@ -162,6 +160,11 @@ export default {
     "emphasis": [
       "primary",
       "secondary"
+    ],
+    "styled": [
+      "solid",
+      "outline",
+      "ghost"
     ],
     "animated": [
       "horizontal-animated",
@@ -178,10 +181,6 @@ export default {
       "bottom-attached",
       "left-attached",
       "right-attached"
-    ],
-    "basic": [
-      "basic",
-      "very-basic"
     ],
     "type": [
       "submit",
@@ -246,9 +245,11 @@ export default {
   },
   "attributeClasses": [
     "icon",
+    "emphasis",
     "animated",
     "disabled",
     "attached",
+    "color",
     "social"
   ],
   "defaultValues": {
@@ -257,11 +258,11 @@ export default {
     "href": ""
   },
   "inheritedPluralVariations": [
-    "inverted",
     "size",
     "floated",
     "compact",
     "color",
+    "styled",
     "attached"
   ]
 };

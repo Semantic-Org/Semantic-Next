@@ -23,7 +23,7 @@
   --button-font-family: var(--page-font);
   --button-font-weight: var(--bold);
   --button-text-color: var(--black-80);
-  --button-inverted-text-color: var(--white-80);
+  --button-inverted-text-color: var(--white-90);
   --button-text-shadow: none;
   --button-inverted-text-shadow: var(--button-text-shadow);
 

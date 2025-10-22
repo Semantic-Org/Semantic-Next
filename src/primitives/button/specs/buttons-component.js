@@ -10,7 +10,6 @@ export default {
     "compact",
     "floated",
     "size",
-    "inverted",
     "separate",
     "equal-width"
   ],
@@ -20,7 +19,6 @@ export default {
     "compact",
     "floated",
     "size",
-    "inverted",
     "vertical",
     "separate",
     "equal-width"
@@ -68,7 +66,6 @@ export default {
     "compact": "string",
     "floated": "string",
     "size": "string",
-    "inverted": "boolean",
     "vertical": "boolean",
     "separate": "boolean",
     "equal-width": "string"
@@ -123,14 +120,15 @@ export default {
     ]
   },
   "attributeClasses": [
-    "attached"
+    "attached",
+    "color"
   ],
   "inheritedPluralVariations": [
-    "inverted",
     "size",
     "floated",
     "compact",
     "color",
+    "styled",
     "attached"
   ]
 };

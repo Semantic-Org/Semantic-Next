@@ -1,0 +1,129 @@
+.solid.buttons .button,
+.solid.button {
+  box-shadow: none;
+  background-image: none;
+  color: var(--button-solid-text-color);
+
+  /* No shading on colored buttons */
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  &:not(:is(.color, .emphasis)) {
+
+    background-color: var(--standard-10);
+    text-shadow: none;
+
+    &.focus,
+    &:focus-visible,
+    &.hover,
+    &:hover {
+      background-color: var(--button-solid-background-hover);
+      color: var(--standard-80);
+    }
+
+    &.pressed,
+    &:active {
+      background-color: var(--button-solid-background-pressed);
+      color: var(--standard-90);
+    }
+
+    .active {
+      background-color: var(--button-solid-background-active);
+      color: var(--standard-80);
+    }
+  }
+
+}
+
+.outline.buttons .button,
+.outline.button {
+  background: none;
+  outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
+  outline-offset: var(--button-outline-border-offset);
+  color: var(--button-outline-text-color);
+  text-shadow: none;
+
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  &:not(:is(.color, .emphasis)) {
+    &.focus,
+    &:focus-visible,
+    &.hover,
+    &:hover {
+      background: var(--standard-15);
+      color: var(--standard-80);
+    }
+
+    &.pressed,
+    &:active {
+      background: var(--standard-20);
+    }
+
+    .active {
+      background: var(--standard-20);
+    }
+  }
+
+}
+
+.ghost.buttons .button,
+.ghost.button {
+  box-shadow: none;
+
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  &:not(:is(:hover, .hover, :active, .pressed, .active)) {
+    background: none;
+  }
+
+  &:not(:is(.color, .emphasis)) {
+    background: none;
+    color: var(--text-color);
+
+    &.focus,
+    &:focus-visible,
+    &.hover,
+    &:hover {
+      background: var(--button-ghost-background-hover);
+      color: var(--standard-80);
+    }
+
+    &.pressed,
+    &:active {
+      background: var(--button-ghost-background-pressed);
+      color: var(--standard-90);
+    }
+
+    .active {
+      background: var(--button-ghost-background-active);
+      color: var(--standard-80);
+    }
+  }
+
+}

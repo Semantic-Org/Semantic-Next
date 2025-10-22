@@ -12,6 +12,7 @@
 @import url('./plural/buttons-variables.css') layer(button.theme.plural);
 
 /* Types */
+@import url('./types/styled-variables.css') layer(button.theme.types.style);
 @import url('./types/emphasis-variables.css') layer(button.theme.types.emphasis);
 @import url('./types/icon-variables.css') layer(button.theme.types.icon);
 @import url('./types/labeled-variables.css') layer(button.theme.types.labeled);
@@ -30,7 +31,6 @@
 
 /* Variations */
 @import url('./variations/attached-variables.css') layer(button.theme.variations.attached);
-@import url('./variations/basic-variables.css') layer(button.theme.variations.basic);
 @import url('./variations/circular-variables.css') layer(button.theme.variations.circular);
 @import url('./variations/colored-variables.css') layer(button.theme.variations.colored);
 @import url('./variations/compact-variables.css') layer(button.theme.variations.compact);
