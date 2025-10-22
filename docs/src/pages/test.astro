@@ -1,0 +1,20 @@
+---
+import Layout from '@layouts/Layout.astro';
+import '../css/layers.css';
+import '../css/fonts.css';
+import Body from '../layouts/Body.astro';
+import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
+
+---
+<style>
+  body {
+    padding: 2rem;
+  }
+</style>
+<Body>
+  <UIButton primary icon-after icon="right-chevron" client:load>Test Button</UIButton>
+  <UIButton client:load vertical-animated>
+    <span slot="visible">Hover Me</span>
+    <span slot="hidden">Hidden</span>
+  </UIButton>
+</Body>
