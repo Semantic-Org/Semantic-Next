@@ -1,6 +1,29 @@
 .input,
-.button {
+.textarea {
+  padding: var(--8px);
+  border: var(--border);
+  border-radius: var(--border-radius);
   margin-right: var(--8px);
+  margin-bottom: var(--8px);
+
+  &[disabled] {
+    opacity: 0.5;
+    background: var(--standard-15);
+  }
+
+  &[required] {
+    border: var(--red-border);
+  }
+
+  &[readonly] {
+    background: var(--standard-10);
+  }
+}
+
+.textarea {
+  min-width: 200px;
+  min-height: 60px;
+  resize: vertical;
 }
 
 .controls {

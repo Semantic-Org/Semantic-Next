@@ -2,7 +2,7 @@ import { $ } from '@semantic-ui/query';
 
 const $output = $('.output pre');
 const $input = $('.input');
-const $button = $('.button');
+const $textarea = $('.textarea');
 
 // Display current attributes
 const showAttributes = () => {
@@ -10,18 +10,18 @@ const showAttributes = () => {
     .map(attr => `${attr.name}="${attr.value}"`)
     .join('\n  ');
 
-  const buttonAttrs = Array.from($button[0].attributes)
+  const textareaAttrs = Array.from($textarea[0].attributes)
     .map(attr => `${attr.name}="${attr.value}"`)
     .join('\n  ');
 
-  $output.text(`<ui-input\n  ${inputAttrs}>\n\n<ui-button\n  ${buttonAttrs}>`);
+  $output.text(`<input\n  ${inputAttrs}>\n\n<textarea\n  ${textareaAttrs}>`);
 };
 
 // Add single attribute
 $('.single').on('click', () => {
   // Add disabled attribute (empty string value)
   $input.addAttr('disabled');
-  $button.addAttr('disabled');
+  $textarea.addAttr('disabled');
 
   showAttributes();
 });
@@ -30,7 +30,7 @@ $('.single').on('click', () => {
 $('.multiple').on('click', () => {
   // Add array of boolean attributes
   $input.addAttr(['disabled', 'readonly', 'required']);
-  $button.addAttr(['disabled', 'aria-pressed']);
+  $textarea.addAttr(['disabled', 'readonly', 'required']);
 
   showAttributes();
 });
@@ -38,7 +38,7 @@ $('.multiple').on('click', () => {
 // Reset attributes
 $('.reset').on('click', () => {
   $input.removeAttr('disabled').removeAttr('readonly').removeAttr('required');
-  $button.removeAttr('disabled').removeAttr('aria-pressed');
+  $textarea.removeAttr('disabled').removeAttr('readonly').removeAttr('required');
 
   showAttributes();
 });
