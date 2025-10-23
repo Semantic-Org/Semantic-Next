@@ -11,6 +11,9 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Component
+* **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
+
 ### Query
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
 
@@ -18,6 +21,7 @@ xx.xx.xxxx
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
 ### UI
+* **Image** - Add new component for images
 * **Button** - Fixed issues with `positive`, `negative` and `icon-after` not working as expected
 * **Button** - Added `solid`, `outline` and `ghost` variations
 * **Menu** - `menu-item` now uses `value` attr. Menu will now automatically select items when values are present.
