@@ -11,8 +11,16 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Query
+* **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
+
 ### Utils
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
+
+### UI
+* **Button** - Fixed issues with `positive`, `negative` and `icon-after` not working as expected
+* **Button** - Added `solid`, `outline` and `ghost` variations
+* **Menu** - `menu-item` now uses `value` attr. Menu will now automatically select items when values are present.
 
 ## 0.17.0
 
