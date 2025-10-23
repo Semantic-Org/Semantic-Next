@@ -5,10 +5,11 @@ import pageCSS from './menu-page.css?raw';
 import template from './menu.html?raw';
 import componentSpec from './specs/menu-component.js';
 
-const createComponent = ({ settings, self, $, dispatchEvent }) => ({
+const createComponent = ({ settings, self, $$, el, dispatchEvent }) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', { value });
+    self.selectValue(value);
   },
 
   getValue(item) {
@@ -25,8 +26,17 @@ const createComponent = ({ settings, self, $, dispatchEvent }) => ({
     return false;
   },
 
+  selectValue(value) {
+    const $items = $$(el).find('menu-item');
+    const $item = $items.filter(`[value="${value}"]`).first();
+    if ($item.exists()) {
+      $items.removeAttr('active');
+      $item.attr('active', '');
+    }
+  },
+
   selectIndex(eq) {
-    const value = $('menu-item').eq(eq).attr('data-value');
+    const value = $$('menu-item').eq(eq).attr('value');
     if (value !== undefined) {
       self.setValue(value);
     }
@@ -40,8 +50,10 @@ const onRendered = function({ $ }) {
 };
 
 const events = {
-  'click menu-item'({ self, data }) {
-    self.setValue(data.value);
+  'deep click menu-item'({ self, value }) {
+    if (value !== undefined) {
+      self.setValue(value);
+    }
   },
 };
 

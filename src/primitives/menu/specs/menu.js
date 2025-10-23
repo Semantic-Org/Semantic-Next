@@ -75,6 +75,6 @@ export default {
     }
   ],
   "examples": {
-    "defaultContent": "\n  <menu-item active>One</menu-item>\n  <menu-item>Two</menu-item>\n  <menu-item>Three</menu-item>\n"
+    "defaultContent": "\n  <menu-item active value=\"one\">One</menu-item>\n  <menu-item value=\"two\">Two</menu-item>\n  <menu-item value=\"three\">Three</menu-item>\n"
   }
 };
