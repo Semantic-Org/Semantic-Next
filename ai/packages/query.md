@@ -140,6 +140,7 @@ The Query class provides a comprehensive set of methods organized into logical c
 ### Attribute/Property Management
 - `attr(name)`, `attr(name, value)` - Get/set attributes
 - `removeAttr(name)` - Remove attributes
+- `addAttr(attributes)` - Add one or more attributes with empty string values (for boolean attributes)
 - `prop(name)`, `prop(name, value)` - Get/set properties
 - `data()`, `data(key)`, `data(key, value)` - Get/set data attributes
 - `removeData(keys)` - Remove data attributes (supports space-separated strings or arrays)
@@ -504,6 +505,11 @@ $('.container').html('<p>New content</p>');
 // HTML data attributes via attr()
 $('.item').attr('data-id', '123');
 const itemId = $('.item').attr('data-id');
+
+// Boolean attributes with addAttr (web component patterns)
+$('ui-button').addAttr('disabled');              // Single boolean attribute
+$('ui-input').addAttr(['required', 'readonly']); // Multiple boolean attributes
+$('ui-modal').addAttr(['open', 'modal', 'centered']); // Custom component attributes
 
 // Form values
 $('input[name="email"]').val('user@example.com');

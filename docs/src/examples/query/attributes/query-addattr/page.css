@@ -1,0 +1,25 @@
+.input,
+.button {
+  margin-right: var(--8px);
+}
+
+.controls {
+  margin: var(--16px) 0;
+  display: flex;
+  gap: var(--8px);
+}
+
+.output {
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--12px);
+  margin-top: var(--16px);
+
+  pre {
+    margin: 0;
+    font-family: monospace;
+    font-size: var(--small);
+    color: var(--standard-70);
+  }
+}

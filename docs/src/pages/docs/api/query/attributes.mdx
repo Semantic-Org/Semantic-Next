@@ -97,6 +97,93 @@ $('button').removeAttr('disabled');
 ### Example
 <PlaygroundExample id="query-removeattr" direction="horizontal"></PlaygroundExample>
 
+## addAttr
+
+Adds one or more attributes with empty string values to elements. This is a shorthand for setting boolean attributes like `disabled`, `readonly`, `required`, etc., which is equivalent to calling `attr(attribute, '')`.
+
+### Syntax
+
+#### Add Single Attribute
+```javascript
+$('selector').addAttr(attributeName)
+```
+
+#### Add Multiple Attributes
+```javascript
+$('selector').addAttr([attribute1, attribute2, ...])
+```
+
+### Parameters
+| Name       | Type              | Description                                          |
+|------------|-------------------|------------------------------------------------------|
+| attributes | string \| string[] | A single attribute name or array of attribute names |
+
+### Returns
+[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
+
+### Usage
+
+#### Add a Single Boolean Attribute
+```javascript
+// Add the 'disabled' attribute to all inputs
+$('input').addAttr('disabled');
+// Equivalent to: $('input').attr('disabled', '')
+```
+
+#### Add Multiple Boolean Attributes
+```javascript
+// Add multiple attributes at once
+$('input').addAttr(['disabled', 'readonly', 'required']);
+// Each attribute is set with an empty string value
+```
+
+#### Working with Form Elements
+```javascript
+// Disable form elements
+$('button').addAttr('disabled');
+$('input').addAttr(['readonly', 'required']);
+$('select').addAttr('disabled');
+```
+
+#### Working with ARIA Attributes
+```javascript
+// Add ARIA attributes for accessibility
+$('.modal').addAttr(['aria-hidden', 'aria-modal']);
+$('.loading').addAttr('aria-busy');
+```
+
+#### Method Chaining
+```javascript
+// Chain multiple operations
+$('input')
+  .addAttr('required')
+  .addClass('form-control')
+  .attr('placeholder', 'Required field');
+```
+
+#### Comparison with attr()
+```javascript
+// These are equivalent:
+$('input').addAttr('disabled');
+$('input').attr('disabled', '');
+
+// For multiple attributes:
+$('input').addAttr(['disabled', 'readonly']);
+// is equivalent to:
+$('input').attr('disabled', '').attr('readonly', '');
+```
+
+### Example
+<PlaygroundExample id="query-addattr" direction="horizontal"></PlaygroundExample>
+
+### Notes
+
+- `addAttr` is specifically designed for boolean attributes that only need to be present (with empty string values)
+- For attributes that require specific values, use `attr()` instead
+- Common boolean attributes include: `disabled`, `readonly`, `required`, `checked`, `selected`, `hidden`, `autofocus`, `multiple`
+- The method works with any attribute name - it simply sets the value to an empty string
+- To remove these attributes, use `removeAttr()`
+
 ## data
 
 Gets or sets data attributes on elements. Data attributes are HTML attributes that start with `data-` and are commonly used to store custom data.

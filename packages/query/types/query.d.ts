@@ -580,6 +580,15 @@ export class Query {
   removeAttr(attributeName: string): this;
 
   /**
+   * Adds one or more attributes with empty string values to each element.
+   * Useful for boolean attributes like disabled, readonly, required, etc.
+   * @see https://next.semantic-ui.com/api/query/attributes#addAttr
+   * @param attributes - A single attribute name or array of attribute names to add.
+   * @returns The Query instance for chaining.
+   */
+  addAttr(attributes: string | string[]): this;
+
+  /**
    * Returns the first element in the current set.
    * @see https://next.semantic-ui.com/api/query/utilities#el
    * @returns The first element, or `undefined` if the set is empty.

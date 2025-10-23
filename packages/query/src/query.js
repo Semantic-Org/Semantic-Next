@@ -1104,6 +1104,17 @@ export class Query {
     return this.each((el) => el.removeAttribute(attributeName));
   }
 
+  addAttr(attributes) {
+    // Handle array of attributes
+    if (isArray(attributes)) {
+      return this.each((el) => {
+        attributes.forEach(attr => el.setAttribute(attr, ''));
+      });
+    }
+    // Handle single attribute
+    return this.each((el) => el.setAttribute(attributes, ''));
+  }
+
   el() {
     return this.get(0);
   }

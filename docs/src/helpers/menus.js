@@ -5,6 +5,7 @@ import { getCollection } from 'astro:content';
 const primitives = sortBy(await getCollection('primitives'), 'slug');
 export const primitivePages = primitives.map(page => ({
   name: page.data.title,
+  description: page.data.description,
   url: `/ui/primitives/${page.slug}`,
   matchSubPaths: true,
 }));

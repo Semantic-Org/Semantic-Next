@@ -1766,6 +1766,121 @@ describe('query', () => {
     });
   });
 
+  describe('addAttr', () => {
+    it('should add a single boolean attribute', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      $('input').addAttr('disabled');
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should add multiple boolean attributes from array', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      $('input').addAttr(['disabled', 'readonly', 'required']);
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.getAttribute('readonly')).toBe('');
+      expect(input.getAttribute('required')).toBe('');
+      expect(input.disabled).toBe(true);
+      expect(input.readOnly).toBe(true);
+      expect(input.required).toBe(true);
+    });
+
+    it('should add attributes to multiple elements', () => {
+      const input1 = document.createElement('input');
+      const input2 = document.createElement('input');
+      document.body.appendChild(input1);
+      document.body.appendChild(input2);
+
+      $('input').addAttr('disabled');
+
+      expect(input1.getAttribute('disabled')).toBe('');
+      expect(input2.getAttribute('disabled')).toBe('');
+      expect(input1.disabled).toBe(true);
+      expect(input2.disabled).toBe(true);
+    });
+
+    it('should add multiple attributes to multiple elements', () => {
+      const button1 = document.createElement('button');
+      const button2 = document.createElement('button');
+      document.body.appendChild(button1);
+      document.body.appendChild(button2);
+
+      $('button').addAttr(['disabled', 'aria-hidden']);
+
+      expect(button1.getAttribute('disabled')).toBe('');
+      expect(button1.getAttribute('aria-hidden')).toBe('');
+      expect(button2.getAttribute('disabled')).toBe('');
+      expect(button2.getAttribute('aria-hidden')).toBe('');
+    });
+
+    it('should return Query instance for chaining', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const $result = $('div').addAttr('hidden');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result[0]).toBe(div);
+    });
+
+    it('should support chaining with other methods', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      $('input')
+        .addAttr('disabled')
+        .addClass('form-control')
+        .attr('placeholder', 'Enter text');
+
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.className).toBe('form-control');
+      expect(input.getAttribute('placeholder')).toBe('Enter text');
+    });
+
+    it('should add any attribute as empty string (not just boolean)', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      $('div').addAttr('data-custom');
+
+      expect(div.getAttribute('data-custom')).toBe('');
+    });
+
+    it('should handle empty selection gracefully', () => {
+      const $result = $('.non-existent').addAttr('disabled');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result.length).toBe(0);
+    });
+
+    it('should work with custom elements', () => {
+      const custom = document.createElement('my-component');
+      document.body.appendChild(custom);
+
+      $('my-component').addAttr(['loading', 'active']);
+
+      expect(custom.getAttribute('loading')).toBe('');
+      expect(custom.getAttribute('active')).toBe('');
+    });
+
+    it('should be equivalent to attr(attribute, "") for single attribute', () => {
+      const input1 = document.createElement('input');
+      const input2 = document.createElement('input');
+      input1.id = 'input1';
+      input2.id = 'input2';
+      document.body.appendChild(input1);
+      document.body.appendChild(input2);
+
+      $('#input1').addAttr('disabled');
+      $('#input2').attr('disabled', '');
+
+      expect(input1.getAttribute('disabled')).toBe(input2.getAttribute('disabled'));
+      expect(input1.disabled).toBe(input2.disabled);
+    });
+  });
+
   describe('each', () => {
     it('each should iterate over each element passing index', () => {
       const div = document.createElement('div');

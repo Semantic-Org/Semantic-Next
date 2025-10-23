@@ -116,7 +116,6 @@
       align-items: center;
 
       ui-button::part(button) {
-        background-color: var(--playground-button-background-color);
         margin: -5px -5px -5px 10px;
       }
 
