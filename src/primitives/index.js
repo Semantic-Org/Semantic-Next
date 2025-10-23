@@ -6,9 +6,9 @@ export { UIRail } from './rail/index.js';
 export { UIButton, UIButtons } from './button/index.js';
 export { UICard, UICards } from './card/index.js';
 export { UIIcon } from './icon/index.js';
+export { UIImage } from './image/index.js';
 export { UIInput } from './input/index.js';
 export { UILabel } from './label/index.js';
 export { MenuItem, UIMenu } from './menu/index.js';
-export { UISegment } from './segment/index.js';
-
 export { UIModal } from './modal/index.js';
+export { UISegment } from './segment/index.js';
