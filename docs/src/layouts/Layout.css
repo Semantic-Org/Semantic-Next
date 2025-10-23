@@ -85,23 +85,32 @@
       }
 
       ui-card {
+
         text-align: left;
-        min-width: 300px;
+
+        &[next] {
+          text-align: right;
+        }
 
         &::part(card) {
-          padding: 1rem 2rem;
-          border-radius: var(--circular-radius);
+          padding: 1rem 3rem;
+          border-radius: 10px;
         }
 
         flex-grow: 0;
         .label {
           color: var(--primary-text-color);
           font-weight: bold;
-          font-size: var(--large);
+          font-size: var(--mini);
           transition: var(--transition);
+
+          ui-icon {
+            width: auto;
+            margin: 0;
+          }
         }
         .header {
-          color: var(--standard-60);
+          color: var(--standard-100);
           font-size: var(--huge);
           font-weight: var(--bold);
           transition: var(--transition);
