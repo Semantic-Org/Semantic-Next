@@ -1065,7 +1065,7 @@ export class Query {
           }
           if (el?.style && el.style[property]) {
             // Return inline style if present
-            return l.style[property];
+            return el.style[property];
           }
           return undefined; // If includeComputed is false, return undefined
         });
