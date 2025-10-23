@@ -115,7 +115,9 @@
 @layer button.definition.states.pressed {
   @media (pointer: fine) {
     .button:active,
-    .active.button:active {
+    .button.pressed,
+    .active.button:active,
+    .active.button.pressed {
       background-color: var(--button-pressed-background-color);
       background-image: var(--button-pressed-background-image);
       color: var(--button-pressed-color);

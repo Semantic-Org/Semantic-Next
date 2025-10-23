@@ -5,7 +5,6 @@ export default {
   "description": "A card displays segmented content in a manner similar to a playing card.",
   "tagName": "ui-card",
   "exportName": "UICard",
-  "examples": {},
   "content": [
     {
       "name": "Icon",

@@ -46,7 +46,7 @@ export default {
     },
     {
       "name": "Focus",
-      "attribute": "focused",
+      "attribute": "focus",
       "description": "be focused by the keyboard"
     },
     {

@@ -113,8 +113,13 @@ export default {
       "description": "be hovered"
     },
     {
+      "name": "Pressed",
+      "attribute": "pressed",
+      "description": "be pressed by a pointer"
+    },
+    {
       "name": "Focus",
-      "attribute": "focused",
+      "attribute": "focus",
       "description": "be focused by the keyboard"
     },
     {

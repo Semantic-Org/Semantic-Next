@@ -4,30 +4,40 @@ import css from './image-bundle.css?raw';
 import template from './image.html?raw';
 import componentSpec from './specs/image-component.js';
 
+const defaultState = {
+  darkMode: false,
+};
+
 // no functionality
-const createComponent = ({ darkMode, settings }) => ({
+const createComponent = ({ state, settings, darkMode, data }) => ({
+  initialize() {
+    console.log(state);
+    state.darkMode.set(darkMode);
+  },
   getSrc() {
+    const darkMode = state.darkMode.get();
     if (darkMode && settings.darkSrc) {
       return settings.darkSrc;
     }
-    if (lightMode && settings.lightSrc) {
+    if (!darkMode && settings.lightSrc) {
       return settings.darkSrc;
     }
     return settings.src;
   },
 });
 
-const onThemeChanged = ({ self }) => {
-  console.log('theme changed');
+const onThemeChanged = ({ state, darkMode }) => {
+  state.darkMode.set(darkMode);
 };
 
-const UIContainer = defineComponent({
+const UIImage = defineComponent({
   tagName: 'ui-image',
   componentSpec,
   template,
   css,
-  onThemeChanged,
+  defaultState,
   createComponent,
+  onThemeChanged,
 });
 
-export { UIContainer };
+export { UIImage };

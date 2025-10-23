@@ -20,7 +20,7 @@ export default {
   ],
   "states": [
     "hover",
-    "focused",
+    "focus",
     "active",
     "disabled"
   ],
@@ -38,7 +38,7 @@ export default {
     "label",
     "search",
     "hover",
-    "focused",
+    "focus",
     "active",
     "disabled",
     "fluid",
@@ -68,7 +68,7 @@ export default {
     "label": "string",
     "search": "boolean",
     "hover": "boolean",
-    "focused": "boolean",
+    "focus": "boolean",
     "active": "boolean",
     "disabled": "string",
     "fluid": "boolean",
