@@ -46,6 +46,7 @@
 .outline.buttons .button,
 .outline.button {
   background: none;
+  box-shadow: none;
   outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
   outline-offset: var(--button-outline-border-offset);
   color: var(--button-outline-text-color);
