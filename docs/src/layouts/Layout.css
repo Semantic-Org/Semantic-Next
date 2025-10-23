@@ -55,6 +55,11 @@
     box-shadow: 1px 0px 1px 0 rgb(0 0 0 / 8%);
   }
 
+  ui-cards ui-card .image {
+    margin-top: 1rem;
+    display: block;
+  }
+
 
   layout rail.ui.rail {
     width: var(--rail-width);

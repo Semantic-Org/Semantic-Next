@@ -10,8 +10,8 @@ const primitivesCollection = defineCollection({
     specName: z.string(),
     description: z.string(),
     tags: z.array(z.string()),
-    imageUrl: z.optional(z.string()),
-    darkImageUrl: z.optional(z.string()),
+    imageSrc: z.optional(z.string()),
+    darkImageSrc: z.optional(z.string()),
   }),
 });
 
@@ -25,8 +25,8 @@ const componentsCollection = defineCollection({
     specName: z.optional(z.string()),
     description: z.string(),
     tags: z.array(z.string()),
-    imageUrl: z.optional(z.string()),
-    darkImageUrl: z.optional(z.string()),
+    imageSrc: z.optional(z.string()),
+    darkImageSrc: z.optional(z.string()),
   }),
 });
 
@@ -39,8 +39,8 @@ const behaviorsCollection = defineCollection({
     tabs: z.string().array(),
     description: z.string(),
     tags: z.array(z.string()),
-    imageUrl: z.optional(z.string()),
-    darkImageUrl: z.optional(z.string()),
+    imageSrc: z.optional(z.string()),
+    darkImageSrc: z.optional(z.string()),
   }),
 });
 

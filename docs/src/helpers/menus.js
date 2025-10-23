@@ -6,6 +6,8 @@ const primitives = sortBy(await getCollection('primitives'), 'slug');
 export const primitivePages = primitives.map(page => ({
   name: page.data.title,
   description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
   url: `/ui/primitives/${page.slug}`,
   matchSubPaths: true,
 }));
@@ -13,6 +15,9 @@ export const primitivePages = primitives.map(page => ({
 const components = sortBy(await getCollection('components'), 'slug');
 export const componentPages = components.map(page => ({
   name: page.data.title,
+  description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
   url: `/ui/components/${page.slug}`,
   matchSubPaths: true,
 }));
@@ -20,6 +25,9 @@ export const componentPages = components.map(page => ({
 const behaviors = sortBy(await getCollection('behaviors'), 'slug');
 export const behaviorPages = behaviors.map(page => ({
   name: page.data.title,
+  description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
   url: `/ui/behaviors/${page.slug}`,
   matchSubPaths: true,
 }));
