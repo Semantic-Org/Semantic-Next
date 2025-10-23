@@ -11,7 +11,6 @@ const defaultState = {
 // no functionality
 const createComponent = ({ state, settings, darkMode, data }) => ({
   initialize() {
-    console.log(state);
     state.darkMode.set(darkMode);
   },
   getSrc() {

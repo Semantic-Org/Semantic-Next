@@ -58,6 +58,7 @@
   ui-cards ui-card .image {
     margin-top: 1rem;
     display: block;
+    height: 100px;
   }
 
 
