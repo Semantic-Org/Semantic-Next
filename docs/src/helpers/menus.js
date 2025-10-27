@@ -525,6 +525,10 @@ export const sidebarMenuFramework = [
         name: 'Key Bindings',
         url: '/docs/guides/components/keys',
       },
+      {
+        name: 'Specs',
+        url: '/docs/guides/components/specs',
+      },
     ],
   },
   {
