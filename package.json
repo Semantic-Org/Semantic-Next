@@ -67,6 +67,12 @@
       "bundled": "./dist/bundle/container.min.js",
       "default": "./src/primitives/container/index.js"
     },
+    "./image": {
+      "import": "./src/primitives/image/index.js",
+      "browser": "./dist/cdn/image.min.js",
+      "bundled": "./dist/bundle/image.min.js",
+      "default": "./src/primitives/image/index.js"
+    },
     "./icon": {
       "import": "./src/primitives/icon/index.js",
       "browser": "./dist/cdn/icon.min.js",
