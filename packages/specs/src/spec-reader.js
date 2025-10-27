@@ -5,6 +5,7 @@ import {
   filterObject,
   flatten,
   get,
+  getArticle,
   inArray,
   isArray,
   isEmpty,
@@ -35,6 +36,33 @@ export class SpecReader {
     this.plural = plural;
     this.dialect = dialect;
     this.componentSpec = null;
+  }
+
+  /*
+    Formats a description with the proper article and component name
+    For singular: "A button can {description}." or "An icon can {description}."
+    For plural: "Button group can {description}."
+    If description already ends with period, don't add another
+  */
+  formatDescription(description, { plural = this.plural } = {}) {
+    if (!description) {
+      return '';
+    }
+
+    const spec = this.spec;
+    const componentName = plural
+      ? (spec.pluralName || 'Components')
+      : (spec.name || 'Component');
+
+    // Determine if we need an article
+    const prefix = plural
+      ? componentName
+      : `${getArticle(componentName, { capitalize: true })} ${componentName.toLowerCase()}`;
+
+    // Check if description already ends with period
+    const needsPeriod = !description.endsWith('.');
+
+    return `${prefix} can ${description}${needsPeriod ? '.' : ''}`;
   }
 
   /*
@@ -88,32 +116,123 @@ export class SpecReader {
     // standard example
     const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
+    const componentTitle = plural ? (spec.pluralName || spec.name) : spec.name;
     definition.types.push({
-      title: spec.name,
+      title: componentTitle,
       description: '',
       examples: [
         {
           showCode: false,
-          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent }),
-          components: [this.getComponentParts(defaultModifiers, { html: defaultContent })],
+          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent, plural }),
+          components: [this.getComponentParts(defaultModifiers, { html: defaultContent, plural })],
         },
       ],
     });
 
-    // returns specs in the same sequence 'types', 'content', 'states', 'variations'
-    const parts = this.getOrderedParts({ plural });
-    each(parts, (partName) => {
-      each(spec[partName], part => {
-        if (!isMinimumUsageLevel(part)) {
-          return;
-        }
-        const examples = this.getCodeExamples(part, {
-          defaultAttributes: spec?.examples?.defaultAttributes,
-          defaultContent: defaultContent,
+    if (plural) {
+      // For plural components, we need to handle types, content, and variations specially
+
+      // Process pluralContent (instead of regular content)
+      if (spec.pluralContent) {
+        each(spec.pluralContent, part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+            isPlural: true,
+          });
+          definition.content.push(examples);
         });
-        definition[partName].push(examples);
+      }
+
+      // Process pluralOnlyTypes FIRST
+      if (spec.pluralOnlyTypes) {
+        each(spec.pluralOnlyTypes, part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+            isPlural: true,
+          });
+          definition.types.push(examples);
+        });
+      }
+
+      // Then process shared types (filtered by pluralSharedTypes)
+      const sharedTypes = spec.pluralSharedTypes || [];
+      if (spec.types && sharedTypes.length > 0) {
+        const filteredTypes = spec.types.filter(type => {
+          const attributeName = this.getAttributeName(type);
+          return inArray(attributeName, sharedTypes);
+        });
+        each(filteredTypes, part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+            isPlural: true,
+          });
+          definition.types.push(examples);
+        });
+      }
+
+      // Process pluralOnlyVariations FIRST
+      if (spec.pluralOnlyVariations) {
+        each(spec.pluralOnlyVariations, part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+            isPlural: true,
+          });
+          definition.variations.push(examples);
+        });
+      }
+
+      // Then process shared variations (filtered by pluralSharedVariations)
+      const sharedVariations = spec.pluralSharedVariations || [];
+      if (spec.variations && sharedVariations.length > 0) {
+        const filteredVariations = spec.variations.filter(variation => {
+          const attributeName = this.getAttributeName(variation);
+          return inArray(attributeName, sharedVariations);
+        });
+        each(filteredVariations, part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+            isPlural: true,
+          });
+          definition.variations.push(examples);
+        });
+      }
+    }
+    else {
+      // Regular (singular) processing
+      const parts = this.getOrderedParts({ plural });
+      each(parts, (partName) => {
+        each(spec[partName], part => {
+          if (!isMinimumUsageLevel(part)) {
+            return;
+          }
+          const examples = this.getCodeExamples(part, {
+            defaultAttributes: spec?.examples?.defaultAttributes,
+            defaultContent: defaultContent,
+          });
+          definition[partName].push(examples);
+        });
       });
-    });
+    }
 
     return definition;
   }
@@ -123,7 +242,7 @@ export class SpecReader {
   */
   getOrderedParts({ plural } = {}) {
     if (plural) {
-      return ['types', 'variations'];
+      return ['types', 'content', 'variations'];
     }
     return ['types', 'content', 'states', 'variations', 'settings'];
   }
@@ -143,14 +262,28 @@ export class SpecReader {
     Gets the definition menu for a component for use with an inpage menu
   */
   getDefinitionMenu({ IDSuffix = '-example', plural = false, minUsageLevel } = {}) {
-    const orderedDefinition = this.getOrderedExamples({ plural, minUsageLevel });
-    let menu = orderedDefinition.map(part => ({
-      title: part.title,
-      items: part.examples.map((example) => ({
-        id: tokenize(`${example.title}${IDSuffix}`),
-        title: example.title,
-      })),
-    }));
+    // Use getDefinition to ensure we get the correctly filtered content for plural
+    const definition = this.getDefinition({ plural, minUsageLevel });
+
+    // Build menu from the definition structure
+    const menu = [];
+
+    // Add sections in the order they appear
+    const orderedParts = this.getOrderedParts({ plural });
+
+    orderedParts.forEach(partName => {
+      const items = definition[partName];
+      if (items && items.length > 0) {
+        menu.push({
+          title: toTitleCase(partName),
+          items: items.map((example) => ({
+            id: tokenize(`${example.title}${IDSuffix}`),
+            title: example.title,
+          })),
+        });
+      }
+    });
+
     return menu;
   }
 
@@ -213,7 +346,7 @@ export class SpecReader {
     };
   }
 
-  getCodeExamples(part, { defaultAttributes, defaultContent } = {}) {
+  getCodeExamples(part, { defaultAttributes, defaultContent, isPlural = false } = {}) {
     let examples = [];
     let attribute = this.getAttributeName(part);
 
@@ -231,9 +364,15 @@ export class SpecReader {
       let examplesToJoin = [];
       each(part.options, (option, index) => {
         let code, componentParts;
-        if (option.exampleCode) {
+
+        // Check for plural-specific example code if in plural mode
+        const hasCustomExample = isPlural && option.pluralExampleCode
+          ? option.pluralExampleCode
+          : option.exampleCode;
+
+        if (hasCustomExample) {
           // an example was provided in the spec for us
-          code = option.exampleCode;
+          code = hasCustomExample;
           componentParts = this.getComponentPartsFromHTML(code);
         }
         else {
@@ -252,8 +391,8 @@ export class SpecReader {
           if (defaultAttributes) {
             modifiers = `${modifiers} ${defaultAttributes}`;
           }
-          code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
-          componentParts = this.getComponentParts(modifiers, { html: defaultContent });
+          code = this.getCodeFromModifiers(modifiers, { html: defaultContent, plural: isPlural });
+          componentParts = this.getComponentParts(modifiers, { html: defaultContent, plural: isPlural });
         }
         const example = {
           code,
@@ -280,13 +419,19 @@ export class SpecReader {
       if (defaultAttributes) {
         modifiers = `${modifiers} ${defaultAttributes}`;
       }
-      if (part.exampleCode) {
-        code = part.exampleCode;
+
+      // Check for plural-specific example code if in plural mode
+      const hasCustomExample = isPlural && part.pluralExampleCode
+        ? part.pluralExampleCode
+        : part.exampleCode;
+
+      if (hasCustomExample) {
+        code = hasCustomExample;
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
-        code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
-        componentParts = this.getComponentParts(modifiers, { html: defaultContent });
+        code = this.getCodeFromModifiers(modifiers, { html: defaultContent, plural: isPlural });
+        componentParts = this.getComponentParts(modifiers, { html: defaultContent, plural: isPlural });
       }
       const example = {
         code,
@@ -297,7 +442,7 @@ export class SpecReader {
 
     return {
       title: part.name,
-      description: part.description,
+      description: this.formatDescription(part.description, { plural: isPlural }),
       examples: examples,
     };
   }
