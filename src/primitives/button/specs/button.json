@@ -29,13 +29,13 @@
         {
           "name": "Primary",
           "value": "primary",
-          "description": "This button should appear to be emphasized as the first action that should be taken over other options",
+          "description": "be emphasized as the first action that should be taken",
           "exampleCode": "<ui-button primary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>"
         },
         {
           "name": "Secondary",
           "value": "secondary",
-          "description": "This button should appear to be emphasized as a secondary option that should appear after other options",
+          "description": "be emphasized as a secondary option",
           "exampleCode": "<ui-button secondary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>"
         }
       ]
@@ -50,17 +50,17 @@
         {
           "name": "Solid",
           "value": "solid",
-          "description": "This button uses a solid color"
+          "description": "use a solid color"
         },
         {
           "name": "Outline",
           "value": "outline",
-          "description": "This button uses a no background"
+          "description": "use no background"
         },
         {
           "name": "Ghost",
           "value": "ghost",
-          "description": "This button only shows its styling when hovered"
+          "description": "only show styling when hovered"
         }
       ]
     },
@@ -81,19 +81,19 @@
         {
           "name": "Animated",
           "value": ["horizontal-animated"],
-          "description": "formatted to animate hidden content horizontally",
+          "description": "animate hidden content horizontally",
           "exampleCode": "<ui-button animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         },
         {
           "name": "Vertical Animated",
           "value": "vertical-animated",
-          "description": "formatted to animate hidden content vertically",
+          "description": "animate hidden content vertically",
           "exampleCode": "<ui-button vertical-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         },
         {
           "name": "Fade Animated",
           "value": ["fade-animated"],
-          "description": "formatted to fade in hidden content",
+          "description": "fade in hidden content",
           "exampleCode": "<ui-button fade-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
         }
       ]
@@ -521,15 +521,16 @@
       "name": "Or",
       "attribute": "or",
       "slot": "or",
-      "description": "A button group can be formatted to show a conditional choice"
+      "description": "show a conditional choice",
+      "exampleCode": "<ui-buttons>\n  <ui-button>Cancel</ui-button>\n  <div slot=\"or\">Or</div>\n  <ui-button primary>Save</ui-button>\n</ui-buttons>"
     }
   ],
-  "pluralSharedTypes": [],
+  "pluralSharedTypes": ["styled", "icon"],
   "pluralOnlyTypes": [
     {
-      "name": "vertical",
+      "name": "Vertical",
       "attribute": "vertical",
-      "description": "A button group can be formatted to show buttons in a vertical stack",
+      "description": "be arranged vertically",
       "usageLevel": 3
     }
   ],
@@ -537,38 +538,43 @@
     {
       "name": "Separate",
       "attribute": "separate",
-      "description": "A button group can appear with their buttons separated"
+      "description": "have separated items"
     },
     {
       "name": "Equal Width",
       "attribute": "equal-width",
-      "description": "A button group can be formatted to have the same width for each button",
+      "description": "have the same width for each button",
       "usageLevel": 3,
       "options": [
         {
           "name": "Two",
           "value": "two",
-          "description": "A button group can have two items evenly split"
+          "description": "have two items evenly split",
+          "exampleCode": "<ui-buttons equal-width=\"two\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n</ui-buttons>"
         },
         {
           "name": "Three",
           "value": "three",
-          "description": "A button group can have three items evenly split"
+          "description": "have three items evenly split",
+          "exampleCode": "<ui-buttons equal-width=\"three\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n</ui-buttons>"
         },
         {
           "name": "Four",
           "value": "four",
-          "description": "A button group can have four items evenly split"
+          "description": "have four items evenly split",
+          "exampleCode": "<ui-buttons equal-width=\"four\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n</ui-buttons>"
         },
         {
           "name": "Five",
           "value": "five",
-          "description": "A button group can have five items evenly split"
+          "description": "have five items evenly split",
+          "exampleCode": "<ui-buttons equal-width=\"five\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n  <ui-button>Five</ui-button>\n</ui-buttons>"
         },
         {
           "name": "Six",
           "value": "six",
-          "description": "A button group can have six items evenly split"
+          "description": "have six items evenly split",
+          "exampleCode": "<ui-buttons equal-width=\"six\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n  <ui-button>Five</ui-button>\n  <ui-button>Six</ui-button>\n</ui-buttons>"
         }
       ]
     }

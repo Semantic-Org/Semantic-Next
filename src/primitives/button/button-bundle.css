@@ -67,6 +67,9 @@
 
 /* src/primitives/button/css/definition/plural/buttons.css */
 @layer button.definition.plural {
+  :host {
+    display: inline-flex;
+  }
   .buttons {
     display: inline-flex;
     flex-direction: row;

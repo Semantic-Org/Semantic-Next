@@ -2,6 +2,10 @@
             Groups
 *******************************/
 
+:host {
+  display: inline-flex;
+}
+
 .buttons {
   display: inline-flex;
   flex-direction: row;

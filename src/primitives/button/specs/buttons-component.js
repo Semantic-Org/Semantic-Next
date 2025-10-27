@@ -2,6 +2,7 @@
 export default {
   "tagName": "ui-buttons",
   "types": [
+    "styled",
     "vertical"
   ],
   "variations": [
@@ -14,6 +15,7 @@ export default {
     "equal-width"
   ],
   "attributes": [
+    "styled",
     "attached",
     "color",
     "compact",
@@ -24,6 +26,9 @@ export default {
     "equal-width"
   ],
   "optionAttributes": {
+    "solid": "styled",
+    "outline": "styled",
+    "ghost": "styled",
     "top-attached": "attached",
     "attached": "attached",
     "bottom-attached": "attached",
@@ -61,6 +66,7 @@ export default {
     "six": "equal-width"
   },
   "propertyTypes": {
+    "styled": "string",
     "attached": "string",
     "color": "string",
     "compact": "string",
@@ -71,6 +77,11 @@ export default {
     "equal-width": "string"
   },
   "allowedValues": {
+    "styled": [
+      "solid",
+      "outline",
+      "ghost"
+    ],
     "attached": [
       "top-attached",
       "attached",
