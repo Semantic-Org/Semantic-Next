@@ -3,6 +3,7 @@ import { Reaction, Signal } from '@semantic-ui/reactivity';
 import {
   any,
   capitalize,
+  debounce,
   each,
   extend,
   fatal,
@@ -188,9 +189,13 @@ export const Template = class Template {
     this.onUpdated = () => {
       this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
     };
-    this.onThemeChanged = (...args) => {
+
+    // onThemeChange can call both from mutation observers and dispatched events
+    // this handles if both occur at same time
+    this.onThemeChanged = debounce((...args) => {
       this.call(this.onThemeChangedCallback, ...args);
-    };
+    }, 10);
+
     this.onDestroyed = () => {
       Template.removeTemplate(this);
       this.rendered = false;
@@ -686,6 +691,7 @@ export const Template = class Template {
         isRendered: () => this.rendered,
         isServer: Template.isServer,
         isClient: !Template.isServer,
+        rerender: () => this.element.requestUpdate(),
 
         dispatchEvent: this.dispatchEvent.bind(this),
         attachEvent: this.attachEvent.bind(this),
