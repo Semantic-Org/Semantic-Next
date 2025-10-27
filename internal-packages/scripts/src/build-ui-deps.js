@@ -1,3 +1,4 @@
+import { callback as callbackPlugin } from '@semantic-ui/esbuild-callback';
 import { SpecReader } from '@semantic-ui/specs';
 import { asyncEach, each } from '@semantic-ui/utils';
 import { readFileSync, writeFileSync } from 'fs';
@@ -104,16 +105,60 @@ export const buildUIDeps = async ({
 
   const generateJSExports = generateJSExportsFromSpecs();
 
+  // Set up a separate esbuild watcher for JSON spec files
+  let specWatcher;
+  if (watch) {
+    // Get all spec files to watch
+    const specsPattern = 'src/primitives/**/specs/*.json';
+    const watchedFiles = await glob(specsPattern);
+    const specFiles = watchedFiles.filter(path => !path.endsWith('-component.json'));
+
+    // Use esbuild to watch the JSON files by treating them as entry points
+    // with a plugin that rebuilds our spec JS files
+    if (specFiles.length > 0) {
+      specWatcher = build({
+        watch,
+        write: false, // Don't write output, just watch
+        logLevel: 'silent', // Suppress esbuild's own logs
+        entryPoints: specFiles,
+        outdir: '.temp-watch', // Required by esbuild when multiple entry points
+        plugins: [
+          callbackPlugin({
+            onComplete: async (result, { isRebuild }) => {
+              if (!isRebuild) {
+                console.log(`[UI Deps] Watching ${specFiles.length} spec files for changes...`);
+              }
+              else {
+                console.log(`[UI Deps] Spec files changed, rebuilding...`);
+                try {
+                  await createComponentSpecs();
+                  await generateJSExportsFromSpecs();
+                  console.log(`[UI Deps] Spec files rebuilt successfully`);
+                }
+                catch (error) {
+                  console.error(`[UI Deps] Error rebuilding specs:`, error.message);
+                }
+              }
+            },
+          }),
+        ],
+      });
+    }
+  }
+
   return await Promise.all([
     cssComponentBundle,
     createComponentSpecs(),
     generateJSExports,
-  ]);
+    specWatcher,
+  ].filter(Boolean));
 };
 
 // Handle direct execution of this script
 if (import.meta.url === `file://${process.argv[1]}`) {
   (async function() {
-    await buildUIDeps();
+    // Check for --watch flag in command line arguments
+    const watch = process.argv.includes('--watch');
+    await buildUIDeps({ watch });
   })();
 }

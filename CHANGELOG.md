@@ -20,6 +20,10 @@ xx.xx.xxxx
 ### Utils
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
+### Build
+* **Enhancement** - Added file watching for JSON spec files in `build:ui-deps`. The build now automatically regenerates component JS files when spec JSON files are modified, using esbuild's native watch mechanism.
+* **Bug** - Fixed `isRebuild` flag in esbuild-callback plugin being inverted (was returning `true` for first build, `false` for rebuilds).
+
 ### UI
 * **Image** - Add new component for images
 * **Button** - Fixed issues with `positive`, `negative` and `icon-after` not working as expected
