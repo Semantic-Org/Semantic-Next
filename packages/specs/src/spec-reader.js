@@ -5,9 +5,9 @@ import {
   filterObject,
   flatten,
   get,
-  isEmpty,
   inArray,
   isArray,
+  isEmpty,
   isString,
   mapObject,
   noop,
@@ -76,7 +76,7 @@ export class SpecReader {
       settings: [],
     };
 
-    // user can specify only portions of definition appears of a certain usage level
+    // allow user to filter definition by only parts with a specific min usage level
     const isMinimumUsageLevel = (part) => {
       if (!minUsageLevel) {
         return true;
@@ -101,7 +101,7 @@ export class SpecReader {
     });
 
     // returns specs in the same sequence 'types', 'content', 'states', 'variations'
-    const parts = this.getOrderedParts();
+    const parts = this.getOrderedParts({ plural });
     each(parts, (partName) => {
       each(spec[partName], part => {
         if (!isMinimumUsageLevel(part)) {
@@ -121,7 +121,10 @@ export class SpecReader {
   /*
     Returns the sequencing for a spec when displaying in a structured way
   */
-  getOrderedParts() {
+  getOrderedParts({ plural } = {}) {
+    if (plural) {
+      return ['types', 'variations'];
+    }
     return ['types', 'content', 'states', 'variations', 'settings'];
   }
 
@@ -512,7 +515,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType({spec, section, allowedValues});
+        const propertyType = this.getPropertyType({ spec, section, allowedValues });
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -550,7 +553,6 @@ export class SpecReader {
           componentSpec.attributeClasses.push(propertyName);
         }
       });
-
     };
 
     // Only process necessary parts of the spec
@@ -643,7 +645,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType({spec, section, allowedValues});
+        const propertyType = this.getPropertyType({ spec, section, allowedValues });
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -722,7 +724,7 @@ export class SpecReader {
     }
   }
 
-  getPropertyType({spec, section, allowedValues = [], withPrototype = false} = {}) {
+  getPropertyType({ spec, section, allowedValues = [], withPrototype = false } = {}) {
     let types = {
       string: 'string',
       boolean: 'boolean',
@@ -733,7 +735,7 @@ export class SpecReader {
     /*
       If we want to allow component spec to be JSON we cant store prototypes
     */
-    if(withPrototype) {
+    if (withPrototype) {
       types = {
         string: String,
         number: Number,
