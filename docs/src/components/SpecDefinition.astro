@@ -9,12 +9,6 @@ const { spec, plural, definition, name, componentName } = Astro.props;
 
 const sections = ['types', 'content', 'states', 'variations'];
 const article = getArticle(name, { capitalize: true });
-const getDescription = (text) => {
-  return (text)
-    ? `<em>${article} ${name.toLowerCase()} can</em> ${text}.`
-    : `${article} ${name.toLowerCase()}.`
-  ;
-};
 const getSandboxLink = function(code) {
   return getCodePlaygroundLink(code);
 };
@@ -30,7 +24,7 @@ const getSandboxLink = function(code) {
               <>
                 <CodeExample client:load
                   title={(index == 0) ? type.title : undefined }
-                  description={getDescription(type.description)}
+                  description={type.description}
                   code={example.code}
                   sandboxLink={getCodePlaygroundLink(example.code)}
                   showCode={example.showCode}

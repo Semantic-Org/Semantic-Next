@@ -1,18 +1,164 @@
 ---
 layout: '@layouts/Guide.astro'
-title: Authoring Component Specs
-shortTitle: Component Specs
+title: Specs
 icon: file-text
-description: Define component APIs through declarative JSON specifications
+description: Machine-readable API definitions for components
 ---
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Component specs are declarative JSON contracts that define what a component can do - its attributes, variations, states, and behaviors. When used with `defineComponent`, specs automatically configure web component properties, enable all three HTML dialects, validate attributes, and generate documentation. Without a spec, components must manually define all properties and only support verbose syntax.
+export const components = { blockquote: Blockquote };
 
-## Core Concepts
+Component specs are declarative JSON contracts that define a component's API in a machine-readable format. All primitives in `@semantic-ui/core` use specs, but they're optional for custom components.
 
-### Spec Structure
+## What Specs Enable
 
-Every spec requires these fields
+Without specs, components must manually handle attribute mapping and only the verbose dialect works:
+
+```javascript
+// Without spec - manual attribute handling, limited dialect support
+defineComponent({
+  tagName: 'ui-button',
+  defaultSettings: {
+    primary: false,
+    secondary: false,
+    size: 'medium',
+    // Must manually define every setting
+  },
+  createComponent: ({ settings }) => ({
+    // Must manually handle attribute mapping
+    isPrimary() {
+      return settings.primary === 'true' || settings.primary === true;
+    }
+  }),
+  // Only verbose syntax works: <ui-button primary="true">
+});
+```
+
+With a spec, attribute mapping and dialect support are automatic:
+
+```javascript
+// With spec - automatic attribute mapping, all dialects work
+import componentSpec from './specs/button-component.js';
+
+defineComponent({
+  tagName: 'ui-button',
+  componentSpec,  // Handles all attribute mapping automatically
+  template,
+  css,
+  // All three dialects work:
+  // <ui-button primary>            (standard)
+  // <ui-button primary="true">     (verbose)
+  // <ui-button class="ui primary"> (classic)
+});
+```
+
+> [!info] Why Specs Help with AI
+> When AI assistants help you code, they need to know what's valid. Without specs, AI guesses - often suggesting invalid combinations like `primary secondary` on the same button. With specs, AI knows exactly which attributes exist, which combine, and which are mutually exclusive.
+
+## When to Use a Spec
+
+### Use Specs When
+
+You want AI assistants to understand your components, need machine-readable API definitions for a design system, or want automatic support for all three HTML dialects. Specs are also essential for plural components that share variations and for enabling tooling like linters or documentation generators.
+
+### Skip Specs When
+
+You're building one-off internal components, prototyping with a rapidly evolving API, or creating simple components where the overhead isn't justified. If you don't need machine readability or dialect support, a spec may be unnecessary.
+
+
+## Using Specs at Runtime
+
+The `@semantic-ui/specs` package provides a `SpecReader` class that can load and process JSON specs at runtime.
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import { defineComponent } from '@semantic-ui/component';
+
+// Load your spec at runtime
+const specReader = new SpecReader();
+const buttonSpec = await specReader.read('./specs/button.json');
+
+// Get the processed component spec
+const componentSpec = specReader.getWebComponentSpec();
+
+// Use it with defineComponent
+export const UIButton = defineComponent({
+  tagName: 'ui-button',
+  componentSpec,  // Spec configures entire API
+  template,
+  css,
+  createComponent: ({ self, settings }) => ({
+    performAction() {
+      // Component logic here
+    }
+  })
+});
+```
+
+The spec automatically provides property definitions with correct types, support for all three HTML dialects, bidirectional attribute mapping, default values, validation, and CSS class generation.
+
+> [!warning]
+> Specs are required to support all three dialects. Without a spec, only the verbose dialect works.
+
+## Build-Time Integration
+
+Runtime loading parses JSON on every page load. For production, process specs at build time to eliminate this overhead:
+
+```javascript
+// build-specs.js
+import { SpecReader } from '@semantic-ui/specs';
+import fs from 'fs/promises';
+import path from 'path';
+
+async function buildSpecs() {
+  const specReader = new SpecReader();
+  const specsDir = './src/specs';
+  const outputDir = './src/generated';
+
+  // Read all JSON specs
+  const files = await fs.readdir(specsDir);
+  const specFiles = files.filter(f => f.endsWith('.json'));
+
+  for (const file of specFiles) {
+    // Load and process spec
+    const spec = await specReader.read(path.join(specsDir, file));
+    const componentSpec = specReader.getWebComponentSpec();
+
+    // Write generated JavaScript module
+    const outputFile = file.replace('.json', '-component.js');
+    const output = `export default ${JSON.stringify(componentSpec, null, 2)};`;
+
+    await fs.writeFile(
+      path.join(outputDir, outputFile),
+      output
+    );
+  }
+}
+
+buildSpecs();
+```
+
+Then import the generated specs directly:
+
+```javascript
+import { defineComponent } from '@semantic-ui/component';
+import buttonSpec from './generated/button-component.js';
+
+export const UIButton = defineComponent({
+  tagName: 'ui-button',
+  componentSpec: buttonSpec,
+  // ... implementation
+});
+```
+
+This approach provides better performance by avoiding runtime JSON parsing, enables build-time validation, and allows tree-shaking of unused spec data.
+
+> [!info]
+> This is the approach Semantic UI uses internally for `@semantic-ui/core` components, ensuring optimal performance and validation.
+
+## Spec Format
+
+A minimal spec looks like this:
 
 ```json
 {
@@ -20,16 +166,29 @@ Every spec requires these fields
   "name": "Button",
   "description": "A button indicates a possible user action",
   "tagName": "ui-button",
-  "exportName": "UIButton"
+  "exportName": "UIButton",
+  "variations": [
+    {
+      "name": "Primary",
+      "attribute": "primary",
+      "description": "be emphasized"
+    }
+  ]
 }
 ```
 
+### Required Fields
+
+Every spec must define these core properties:
+- `uiType` - Always "element" for components
+- `name` - Display name for documentation
+- `description` - What the component does
+- `tagName` - HTML tag name (must include hyphen)
+- `exportName` - JavaScript export name
+
 ### Types vs Variations
 
-The key distinction in Semantic UI specs
-
-- **Types**: Mutually exclusive behaviors (pick one)
-- **Variations**: Stackable visual modifications (combine many)
+Types are mutually exclusive behaviors (pick one), while variations are stackable visual modifications (combine many).
 
 ```html
 <!-- Types: Can only be primary OR secondary -->
@@ -207,7 +366,8 @@ Support component collections
 }
 ```
 
-Only share obvious visual variations (size, color). Not behavioral types (submit, reset).
+> [!info]
+> Only share obvious visual variations (size, color). Not behavioral types (submit, reset).
 
 ## Writing Guidelines
 
@@ -245,11 +405,7 @@ Indicate feature commonality (1-5)
 }
 ```
 
-- **1**: Essential features
-- **2**: Common features
-- **3**: Advanced features
-- **4**: Specialized features
-- **5**: Rare features
+1 = Essential, 2 = Common, 3 = Advanced, 4 = Specialized, 5 = Rare
 
 ### Example Configuration
 
@@ -307,54 +463,7 @@ Provide defaults for documentation
 ]
 ```
 
-## Integration
-
-### Using Specs with Components
-
-Specs integrate directly with `defineComponent` to automatically configure web components
-
-```javascript
-import { defineComponent } from '@semantic-ui/component';
-import alertSpec from './specs/alert-component.js';
-
-export const UIAlert = defineComponent({
-  tagName: 'ui-alert',
-  componentSpec: alertSpec,  // Spec configures entire API
-
-  // Only provide implementation
-  template: `<div class="{ui} alert">{message}</div>`,
-  css: `.alert { ... }`,
-  createComponent: ({ self }) => ({
-    dismiss() {
-      self.dispatchEvent('dismiss');
-    }
-  })
-});
-```
-
-The spec automatically provides
-- Property definitions with correct types
-- Support for all three dialects (standard, verbose, classic)
-- Bidirectional attribute mapping via `optionAttributes`
-- Default values for all settings
-- Value validation against allowed options
-- CSS class generation from attributes
-
-**Important**: Specs are REQUIRED to support all three dialects. Without a spec, only the verbose dialect works.
-
-### Build Process
-
-After creating or modifying a spec
-
-```bash
-npm run build:ui-deps
-```
-
-This generates
-- Component runtime metadata (`*-component.js`)
-- Documentation structure
-
-### Quick Reference
+## Quick Reference
 
 | Section | Purpose | Mutually Exclusive |
 |---------|---------|-------------------|

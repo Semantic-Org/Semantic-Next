@@ -54,6 +54,7 @@ Most components need additional configuration options for `defineComponent`:
 ```javascript
 // for examples of each config option see below
 defineComponent({
+  componentSpec, // optional spec for automatic property configuration
   createComponent, // function that returns component methods and props stored in DOM
   template, // component template
   css, // scoped css
@@ -78,6 +79,7 @@ defineComponent({
 * **[Settings](/docs/guides/components/settings)** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
 * **[Lifecycle Events](/docs/guides/components/lifecycle)** - Actions that should occur `onCreated`, `onRendered` and `onDestroyed` for your component
 * **[Keybindings](/docs/guides/components/keys)** - `keys` defines keyboard events associated with your component
+* **[Component Spec](/docs/guides/components/specs)** - An optional JSON specification that automatically configures component properties, enables all three HTML dialects (standard, verbose, classic), and provides machine-readable API definitions for tooling and AI assistance.
 
 > **Destructured Params** - Semantic callbacks provide a variety of parameters that are returned from functions called inside the component. For more information see [callback arguments](/docs/guides/components/lifecycle#callback-arguments)
 
