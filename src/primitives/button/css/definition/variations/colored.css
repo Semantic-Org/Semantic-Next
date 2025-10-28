@@ -3,7 +3,7 @@
 --------------------*/
 
 /*--- Red ---*/
-.red.buttons,
+.red.buttons :slotted(ui-button),
 .red.button {
   --button-text-color: var(--button-red-text-color);
   --button-text-shadow: var(--button-red-text-shadow);
@@ -13,38 +13,24 @@
   --button-background-image: var(--button-colored-background-image);
   --button-background: var(--button-background-color) var(--button-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.red.buttons,
-.red.button:hover {
+
   --button-hover-color: var(--button-red-text-color);
   --button-hover-text-shadow: var(--button-red-text-shadow);
   --button-hover-background-color: var(--button-red-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.red.buttons,
-.red.button:focus {
+
   --button-focus-background-color: var(--button-red-focus);
   --button-focus-color: var(--button-red-text-color);
   --button-focus-text-shadow: var(--button-red-text-shadow);
-}
-.red.buttons,
-.red.button.pressed,
-.red.button:active {
+
   --button-pressed-background-color: var(--button-red-pressed);
   --button-pressed-color: var(--button-red-text-color);
   --button-pressed-text-shadow: var(--button-red-text-shadow);
-}
-.red.buttons .active.button,
-.red.buttons .active.button.pressed,
-.red.buttons .active.button:active,
-.red.active.button,
-.red.button .active.button.pressed,
-.red.button .active.button:active {
-  background-color: var(--button-red-active);
-  color: var(--button-red-text-color);
-  text-shadow: var(--button-red-text-shadow);
-}
 
+  --button-active-background-color: var(--button-red-pressed);
+  --button-active-color: var(--button-red-text-color);
+  --button-active-text-shadow: var(--button-red-text-shadow);
+}
 
 /*--- Orange ---*/
 

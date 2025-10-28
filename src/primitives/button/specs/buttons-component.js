@@ -132,7 +132,8 @@ export default {
   },
   "attributeClasses": [
     "attached",
-    "color"
+    "color",
+    "equal-width"
   ],
   "inheritedPluralVariations": [
     "size",

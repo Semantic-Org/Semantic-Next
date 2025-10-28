@@ -9,16 +9,17 @@
   margin: 0em;
   border-radius: 0em;
   box-shadow: var(--button-attached-box-shadow);
-}
 
-.attached.button:active {
-  box-shadow: var(--button-attached-pressed-box-shadow);
+  &:active {
+    box-shadow: var(--button-attached-pressed-box-shadow);
+  }
 }
 
 /* Top / Bottom */
 .top-attached.button {
   border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;
 }
+
 .bottom-attached.button {
   border-radius: 0em 0em var(--button-border-radius) var(--button-border-radius);
 }
@@ -28,10 +29,10 @@
   display: inline-block;
   border-left: none;
   text-align: right;
-
   padding-right: var(--button-attached-horizontal-padding);
   border-radius: var(--button-border-radius) 0em 0em var(--button-border-radius);
 }
+
 .right-attached.button {
   display: inline-block;
   text-align: left;
@@ -48,38 +49,36 @@
   z-index: var(--button-attached-z-index);
   margin-left: var(--button-attached-offset);
   margin-right: var(--button-attached-offset);
-}
-.attached.buttons .button {
-  margin: 0em;
-}
-.attached.buttons .button:first-child {
-  border-radius: 0em;
-}
-.attached.buttons .button:last-child {
-  border-radius: 0em;
+
+  & .button {
+    margin: 0em;
+
+    &:first-child {
+      border-radius: 0em;
+    }
+
+    &:last-child {
+      border-radius: 0em;
+    }
+  }
 }
 
 /* Top / Bottom */
 .top-attached.buttons {
   margin-bottom: var(--button-attached-offset);
   border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;
-}
-.top-attached.buttons .button:first-child {
-  border-radius: var(--button-border-radius) 0em 0em 0em;
-}
-.top-attached.buttons .button:last-child {
-  border-radius: 0em var(--button-border-radius) 0em 0em;
-}
-
-.top-attached.buttons {
   margin-top: var(--button-attached-offset);
   border-radius: 0em 0em var(--button-border-radius) var(--button-border-radius);
-}
-.top-attached.buttons .button:first-child {
-  border-radius: 0em 0em 0em var(--button-border-radius);
-}
-.top-attached.buttons .button:last-child {
-  border-radius: 0em 0em var(--button-border-radius) 0em;
+
+  & .button:first-child {
+    border-radius: var(--button-border-radius) 0em 0em 0em;
+    border-radius: 0em 0em 0em var(--button-border-radius);
+  }
+
+  & .button:last-child {
+    border-radius: 0em var(--button-border-radius) 0em 0em;
+    border-radius: 0em 0em var(--button-border-radius) 0em;
+  }
 }
 
 /* Left / Right */
@@ -88,14 +87,16 @@
   margin-right: 0em;
   margin-left: var(--button-attached-offset);
   border-radius: 0em var(--button-border-radius) var(--button-border-radius) 0em;
-}
-.left-attached.buttons .button:first-child {
-  margin-left: var(--button-attached-offset);
-  border-radius: 0em var(--button-border-radius) 0em 0em;
-}
-.left-attached.buttons .button:last-child {
-  margin-left: var(--button-attached-offset);
-  border-radius: 0em 0em var(--button-border-radius) 0em;
+
+  & .button:first-child {
+    margin-left: var(--button-attached-offset);
+    border-radius: 0em var(--button-border-radius) 0em 0em;
+  }
+
+  & .button:last-child {
+    margin-left: var(--button-attached-offset);
+    border-radius: 0em 0em var(--button-border-radius) 0em;
+  }
 }
 
 .right-attached.buttons {
@@ -103,12 +104,14 @@
   margin-left: 0em;
   margin-right: var(--button-attached-offset);
   border-radius: var(--button-border-radius) 0em 0em var(--button-border-radius);
-}
-.right-attached.buttons .button:first-child {
-  margin-left: var(--button-attached-offset);
-  border-radius: var(--button-border-radius) 0em 0em 0em;
-}
-.right-attached.buttons .button:last-child {
-  margin-left: var(--button-attached-offset);
-  border-radius: 0em 0em 0em var(--button-border-radius);
+
+  & .button:first-child {
+    margin-left: var(--button-attached-offset);
+    border-radius: var(--button-border-radius) 0em 0em 0em;
+  }
+
+  & .button:last-child {
+    margin-left: var(--button-attached-offset);
+    border-radius: 0em 0em 0em var(--button-border-radius);
+  }
 }

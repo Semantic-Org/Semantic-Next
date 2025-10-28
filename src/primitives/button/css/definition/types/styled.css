@@ -1,4 +1,8 @@
-.solid.buttons .button,
+/*-------------------
+       Solid
+--------------------*/
+
+/* Singular button styling */
 .solid.button {
   box-shadow: none;
   background-image: none;
@@ -17,12 +21,9 @@
   --button-secondary-background-image: none;
 
   &:not(:is(.color, .emphasis)) {
-
     background-color: var(--standard-10);
     text-shadow: none;
 
-    &.focus,
-    &:focus-visible,
     &.hover,
     &:hover {
       background-color: var(--button-solid-background-hover);
@@ -40,10 +41,38 @@
       color: var(--standard-80);
     }
   }
-
 }
 
-.outline.buttons .button,
+/* Plural buttons - override CSS variables for child components */
+.solid.buttons {
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-box-shadow: none;
+    --button-background-image: none;
+    --button-text-color: var(--button-solid-text-color);
+
+    /* Remove shading for colored variants */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
+    --button-secondary-box-shadow: none;
+
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+
+    /* Default solid background/text for non-emphasized buttons */
+    --button-background: var(--standard-10);
+    --button-text-shadow: none;
+  }
+}
+
+/*-------------------
+      Outline
+--------------------*/
+
+/* Singular button styling */
 .outline.button {
   background: none;
   box-shadow: none;
@@ -64,8 +93,6 @@
   --button-secondary-background-image: none;
 
   &:not(:is(.color, .emphasis)) {
-    &.focus,
-    &:focus-visible,
     &.hover,
     &:hover {
       background: var(--standard-15);
@@ -81,10 +108,40 @@
       background: var(--standard-20);
     }
   }
-
 }
 
-.ghost.buttons .button,
+/* Plural buttons - override CSS variables for child components */
+.outline.buttons {
+
+  border: var(--border);
+
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-background: none;
+    --button-box-shadow: none;
+    --button-outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
+    --button-outline-offset: var(--button-outline-border-offset);
+    --button-text-color: var(--button-outline-text-color);
+    --button-text-shadow: none;
+
+    /* Remove shading for colored variants */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
+    --button-secondary-box-shadow: none;
+
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+  }
+}
+
+/*-------------------
+       Ghost
+--------------------*/
+
+/* Singular button styling */
 .ghost.button {
   box-shadow: none;
 
@@ -107,8 +164,6 @@
     background: none;
     color: var(--text-color);
 
-    &.focus,
-    &:focus-visible,
     &.hover,
     &:hover {
       background: var(--button-ghost-background-hover);
@@ -126,5 +181,30 @@
       color: var(--standard-80);
     }
   }
+}
 
+/* Plural buttons - override CSS variables for child components */
+.ghost.buttons {
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-box-shadow: none;
+    --button-background: none;
+    --button-text-color: var(--text-color);
+
+    /* Remove shading for all variants */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
+    --button-secondary-box-shadow: none;
+
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+
+    /* Ghost hover/active states */
+    --button-background-hover: var(--button-ghost-background-hover);
+    --button-background-pressed: var(--button-ghost-background-pressed);
+    --button-background-active: var(--button-ghost-background-active);
+  }
 }

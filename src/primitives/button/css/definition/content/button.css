@@ -2,12 +2,14 @@
   user-select: none;
   font-size: 1rem;
 }
+
 *, :after, :before {
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none; /* disable selection/Copy of UIWebView */
   -webkit-touch-callout: none;
 }
+
 .button {
   cursor: pointer;
   display: inline-block;
@@ -33,4 +35,5 @@
   will-change: var(--button-will-change);
   -webkit-tap-highlight-color: var(--button-tap-color);
   outline: var(--button-border);
+  width: var(--button-width);
 }

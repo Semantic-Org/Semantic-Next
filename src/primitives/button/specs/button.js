@@ -554,6 +554,7 @@ export default {
       "name": "Equal Width",
       "attribute": "equal-width",
       "description": "have the same width for each button",
+      "includeAttributeClass": true,
       "usageLevel": 3,
       "options": [
         {

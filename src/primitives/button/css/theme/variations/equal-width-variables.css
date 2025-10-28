@@ -1,0 +1,8 @@
+/*-------------------
+  Equal Width Theme
+--------------------*/
+
+:host {
+  /* No specific theme variables needed for equal width */
+  /* Grid handles the layout automatically */
+}

@@ -5,12 +5,12 @@
 .icon-only.buttons .button,
 .icon-only.button {
   padding: var(--button-vertical-padding);
-}
-.icon-only.buttons .button > ui-icon,
-.icon-only.button > ui-icon {
-  opacity: 1;
-  margin: 0em;
-  vertical-align: top;
+
+  & > ui-icon {
+    opacity: 1;
+    margin: 0em;
+    vertical-align: top;
+  }
 }
 
 /*--------------

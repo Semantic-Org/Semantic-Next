@@ -5,22 +5,25 @@
   background-color: var(--button-transparent-background-color);
   color: var(--button-transparent-text-color);
   box-shadow: var(--button-transparent-box-shadow) !important;
-}
-.transparent.button:hover {
-  background-image: var(--button-transparent-hover-background-image);
-  background-color: var(--button-transparent-hover-background-color);
-  color: var(--button-transparent-hover-text-color);
-  box-shadow: var(--button-transparent-hover-box-shadow) !important;
-}
-.transparent.button:active {
-  background-image: var(--button-transparent-pressed-background-image);
-  background-color: var(--button-transparent-pressed-background-color);
-  color: var(--button-transparent-pressed-text-color);
-  box-shadow: var(--button-transparent-pressed-box-shadow) !important;
-}
-.transparent.button.active {
-  background-image: var(--button-transparent-active-background-image);
-  background-color: var(--button-transparent-active-background-color);
-  color: var(--button-transparent-active-text-color) !important;
-  box-shadow: var(--button-transparent-active-box-shadow) !important;
+
+  &:hover {
+    background-image: var(--button-transparent-hover-background-image);
+    background-color: var(--button-transparent-hover-background-color);
+    color: var(--button-transparent-hover-text-color);
+    box-shadow: var(--button-transparent-hover-box-shadow) !important;
+  }
+
+  &:active {
+    background-image: var(--button-transparent-pressed-background-image);
+    background-color: var(--button-transparent-pressed-background-color);
+    color: var(--button-transparent-pressed-text-color);
+    box-shadow: var(--button-transparent-pressed-box-shadow) !important;
+  }
+
+  &.active {
+    background-image: var(--button-transparent-active-background-image);
+    background-color: var(--button-transparent-active-background-color);
+    color: var(--button-transparent-active-text-color) !important;
+    box-shadow: var(--button-transparent-active-box-shadow) !important;
+  }
 }

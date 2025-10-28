@@ -1,0 +1,7 @@
+/*-------------------
+   Separate Theme
+--------------------*/
+
+:host {
+  --button-separate-spacing: var(--4px);
+}

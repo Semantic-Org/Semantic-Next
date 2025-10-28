@@ -11,6 +11,7 @@
   --button-background: var(--button-background-color) var(--button-background-image);
 
   --button-line-height: 1em;
+  --button-width: auto;
 
   /* button same height as input globally */
   --button-vertical-padding: var(--input-vertical-padding);

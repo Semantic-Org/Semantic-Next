@@ -2,10 +2,13 @@
     Button Icon
 --------------------*/
 
-.button ui-icon {
-  vertical-align: top;
-  opacity: var(--button-icon-opacity);
-}
-.button ui-icon:only-child {
-  margin: 0rem;
+.button {
+  ui-icon {
+    vertical-align: top;
+    opacity: var(--button-icon-opacity);
+
+    &:only-child {
+      margin: 0rem;
+    }
+  }
 }

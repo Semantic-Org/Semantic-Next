@@ -30,12 +30,14 @@
 @import url('./variations/circular.css') layer(button.definition.variations.circular);
 @import url('./variations/colored.css') layer(button.definition.variations.colored);
 @import url('./variations/compact.css') layer(button.definition.variations.compact);
+@import url('./variations/equal-width.css') layer(button.definition.variations.equal-width);
 @import url('./variations/floated.css') layer(button.definition.variations.floated);
 @import url('./variations/fluid.css') layer(button.definition.variations.fluid);
 @import url('./variations/negative.css') layer(button.definition.variations.negative);
 @import url('./variations/positive.css') layer(button.definition.variations.positive);
 @import url('./variations/warning.css') layer(button.definition.variations.warning);
 @import url('./variations/info.css') layer(button.definition.variations.info);
+@import url('./variations/separate.css') layer(button.definition.variations.separate);
 @import url('./variations/sizing.css') layer(button.definition.variations.sizing);
 @import url('./variations/social.css') layer(button.definition.variations.social);
 @import url('./variations/vertical.css') layer(button.definition.variations.vertical);

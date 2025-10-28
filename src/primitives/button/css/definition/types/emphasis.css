@@ -2,7 +2,6 @@
      Primary
 ---------------*/
 
-
 /*--- Standard ---*/
 .primary.buttons .button,
 .primary.button {
@@ -10,49 +9,54 @@
   color: var(--button-primary-text-color);
   text-shadow: var(--button-primary-text-shadow);
   background-image: var(--button-primary-background-image);
+
+  &:hover {
+    background-color: var(--button-primary-color-hover);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-hover-box-shadow);
+  }
+
+  &:focus {
+    background-color: var(--button-primary-color-focus);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-focus-box-shadow);
+  }
+
+  &.pressed,
+  &:active {
+    background-color: var(--button-primary-color-down);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-pressed-box-shadow);
+  }
+
+  &.active {
+    background-color: var(--button-primary-color-active);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
+
+    &:active {
+      background-color: var(--button-primary-color-active);
+      color: var(--button-primary-text-color);
+      text-shadow: var(--button-primary-text-shadow);
+      box-shadow: var(--button-active-box-shadow);
+    }
+  }
 }
+
 .primary.button {
   box-shadow: var(--button-primary-box-shadow);
+
+  .active.button:active {
+    background-color: var(--button-primary-color-active);
+    color: var(--button-primary-text-color);
+    text-shadow: var(--button-primary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
+  }
 }
-
-
-/* States */
-.primary.buttons .button:hover,
-.primary.button:hover {
-  background-color: var(--button-primary-color-hover);
-  color: var(--button-primary-text-color);
-  text-shadow: var(--button-primary-text-shadow);
-  box-shadow: var(--button-hover-box-shadow);
-}
-
-.primary.buttons .button:focus,
-.primary.button:focus {
-  background-color: var(--button-primary-color-focus);
-  color: var(--button-primary-text-color);
-  text-shadow: var(--button-primary-text-shadow);
-  box-shadow: var(--button-focus-box-shadow);
-}
-
-.primary.buttons .button.pressed,
-.primary.buttons .button:active,
-.primary.button.pressed,
-.primary.button:active {
-  background-color: var(--button-primary-color-down);
-  color: var(--button-primary-text-color);
-  text-shadow: var(--button-primary-text-shadow);
-  box-shadow: var(--button-pressed-box-shadow);
-}
-
-.primary.buttons .active.button,
-.primary.buttons .active.button:active,
-.primary.active.button,
-.primary.button .active.button:active {
-  background-color: var(--button-primary-color-active);
-  color: var(--button-primary-text-color);
-  text-shadow: var(--button-primary-text-shadow);
-  box-shadow: var(--button-active-box-shadow);
-}
-
 
 /*-------------------
       Secondary
@@ -65,39 +69,51 @@
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
   background-image: var(--button-colored-background-image);
+
+  &:hover {
+    background-color: var(--button-secondary-color-hover);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-hover-box-shadow);
+  }
+
+  &:focus {
+    background-color: var(--button-secondary-color-focus);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-focus-box-shadow);
+  }
+
+  &.pressed,
+  &:active {
+    background-color: var(--button-secondary-color-down);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-pressed-box-shadow);
+  }
+
+  &.active {
+    background-color: var(--button-secondary-color-active);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
+
+    &:active {
+      background-color: var(--button-secondary-color-active);
+      color: var(--button-secondary-text-color);
+      text-shadow: var(--button-secondary-text-shadow);
+      box-shadow: var(--button-active-box-shadow);
+    }
+  }
 }
+
 .secondary.button {
   box-shadow: var(--button-colored-box-shadow);
-}
-.secondary.buttons .button:hover,
-.secondary.button:hover {
-  background-color: var(--button-secondary-color-hover);
-  color: var(--button-secondary-text-color);
-  text-shadow: var(--button-secondary-text-shadow);
-  box-shadow: var(--button-hover-box-shadow);
-}
-.secondary.buttons .button:focus,
-.secondary.button:focus {
-  background-color: var(--button-secondary-color-focus);
-  color: var(--button-secondary-text-color);
-  text-shadow: var(--button-secondary-text-shadow);
-  box-shadow: var(--button-focus-box-shadow);
-}
-.secondary.buttons .button:active,
-.secondary.buttons .button.pressed,
-.secondary.button.pressed,
-.secondary.button:active {
-  background-color: var(--button-secondary-color-down);
-  color: var(--button-secondary-text-color);
-  text-shadow: var(--button-secondary-text-shadow);
-  box-shadow: var(--button-pressed-box-shadow);
-}
-.secondary.buttons .active.button,
-.secondary.buttons .active.button:active,
-.secondary.active.button,
-.secondary.button .active.button:active {
-  background-color: var(--button-secondary-color-active);
-  color: var(--button-secondary-text-color);
-  text-shadow: var(--button-secondary-text-shadow);
-  box-shadow: var(--button-active-box-shadow);
+
+  .active.button:active {
+    background-color: var(--button-secondary-color-active);
+    color: var(--button-secondary-text-color);
+    text-shadow: var(--button-secondary-text-shadow);
+    box-shadow: var(--button-active-box-shadow);
+  }
 }
