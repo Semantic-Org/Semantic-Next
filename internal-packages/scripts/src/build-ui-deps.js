@@ -125,18 +125,13 @@ export const buildUIDeps = async ({
         plugins: [
           callbackPlugin({
             onComplete: async (result, { isRebuild }) => {
-              if (!isRebuild) {
-                console.log(`[UI Deps] Watching ${specFiles.length} spec files for changes...`);
-              }
-              else {
-                console.log(`[UI Deps] Spec files changed, rebuilding...`);
+              if (isRebuild) {
                 try {
                   await createComponentSpecs();
                   await generateJSExportsFromSpecs();
-                  console.log(`[UI Deps] Spec files rebuilt successfully`);
                 }
                 catch (error) {
-                  console.error(`[UI Deps] Error rebuilding specs:`, error.message);
+                  // nothing
                 }
               }
             },
