@@ -17,11 +17,11 @@
 
 /* Top / Bottom */
 .top-attached.button {
-  border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;
+  border-radius: var(--button-attached-top);
 }
 
 .bottom-attached.button {
-  border-radius: 0em 0em var(--button-border-radius) var(--button-border-radius);
+  border-radius: var(--button-attached-bottom);
 }
 
 /* Left / Right */
@@ -30,88 +30,140 @@
   border-left: none;
   text-align: right;
   padding-right: var(--button-attached-horizontal-padding);
-  border-radius: var(--button-border-radius) 0em 0em var(--button-border-radius);
+  border-radius: var(--button-attached-left);
 }
 
 .right-attached.button {
   display: inline-block;
   text-align: left;
   padding-left: var(--button-attached-horizontal-padding);
-  border-radius: 0em var(--button-border-radius) var(--button-border-radius) 0em;
+  border-radius: var(--button-attached-right);
 }
 
-/* Plural */
+/*-------------------
+    Plural Attached
+--------------------*/
+
+/* Base Attached */
 .attached.buttons {
   position: relative;
   display: flex;
-  border-radius: 0em;
   width: auto;
   z-index: var(--button-attached-z-index);
   margin-left: var(--button-attached-offset);
   margin-right: var(--button-attached-offset);
 
-  & .button {
-    margin: 0em;
-
-    &:first-child {
-      border-radius: 0em;
-    }
-
-    &:last-child {
-      border-radius: 0em;
-    }
+  ::slotted(ui-button) {
+    --button-border-radius: var(--button-group-attached-none);
+    margin: 0;
   }
 }
 
-/* Top / Bottom */
+/* Top Attached */
 .top-attached.buttons {
   margin-bottom: var(--button-attached-offset);
-  border-radius: var(--button-border-radius) var(--button-border-radius) 0em 0em;
-  margin-top: var(--button-attached-offset);
-  border-radius: 0em 0em var(--button-border-radius) var(--button-border-radius);
+  border-radius: var(--button-group-attached-top);
 
-  & .button:first-child {
-    border-radius: var(--button-border-radius) 0em 0em 0em;
-    border-radius: 0em 0em 0em var(--button-border-radius);
+  /* First button gets top-left radius */
+  ::slotted(ui-button:first-child) {
+    --button-border-radius: var(--button-group-attached-top-left);
   }
 
-  & .button:last-child {
-    border-radius: 0em var(--button-border-radius) 0em 0em;
-    border-radius: 0em 0em var(--button-border-radius) 0em;
+  /* Last button gets top-right radius */
+  ::slotted(ui-button:last-child) {
+    --button-border-radius: var(--button-group-attached-top-right);
+  }
+
+  /* Single button gets both top corners */
+  ::slotted(ui-button:only-child) {
+    --button-border-radius: var(--button-group-attached-top);
   }
 }
 
-/* Left / Right */
+/* Bottom Attached */
+.bottom-attached.buttons {
+  margin-top: var(--button-attached-offset);
+  border-radius: var(--button-group-attached-bottom);
+
+  /* First button gets bottom-left radius */
+  ::slotted(ui-button:first-child) {
+    --button-border-radius: var(--button-group-attached-bottom-left);
+  }
+
+  /* Last button gets bottom-right radius */
+  ::slotted(ui-button:last-child) {
+    --button-border-radius: var(--button-group-attached-bottom-right);
+  }
+
+  /* Single button gets both bottom corners */
+  ::slotted(ui-button:only-child) {
+    --button-border-radius: var(--button-group-attached-bottom);
+  }
+}
+
+/* Left Attached */
 .left-attached.buttons {
-  display: inline-flex;
   margin-right: 0em;
   margin-left: var(--button-attached-offset);
-  border-radius: 0em var(--button-border-radius) var(--button-border-radius) 0em;
 
-  & .button:first-child {
-    margin-left: var(--button-attached-offset);
-    border-radius: 0em var(--button-border-radius) 0em 0em;
+  /* First button gets left corners rounded */
+  ::slotted(ui-button:first-child) {
+    --button-border-radius: var(--button-group-attached-left);
   }
 
-  & .button:last-child {
-    margin-left: var(--button-attached-offset);
-    border-radius: 0em 0em var(--button-border-radius) 0em;
+  /* Middle and last buttons have no radius (attached to right) */
+  ::slotted(ui-button:not(:first-child)) {
+    --button-border-radius: var(--button-group-attached-none);
+  }
+
+  /* Single button gets left corners only */
+  ::slotted(ui-button:only-child) {
+    --button-border-radius: var(--button-group-attached-left);
   }
 }
 
+/* Right Attached */
 .right-attached.buttons {
-  display: inline-flex;
   margin-left: 0em;
   margin-right: var(--button-attached-offset);
-  border-radius: var(--button-border-radius) 0em 0em var(--button-border-radius);
 
-  & .button:first-child {
-    margin-left: var(--button-attached-offset);
-    border-radius: var(--button-border-radius) 0em 0em 0em;
+  /* First and middle buttons have no radius (attached to left) */
+  ::slotted(ui-button:not(:last-child)) {
+    --button-border-radius: var(--button-group-attached-none);
   }
 
-  & .button:last-child {
-    margin-left: var(--button-attached-offset);
-    border-radius: 0em 0em 0em var(--button-border-radius);
+  /* Last button gets right corners rounded */
+  ::slotted(ui-button:last-child) {
+    --button-border-radius: var(--button-group-attached-right);
+  }
+
+  /* Single button gets right corners only */
+  ::slotted(ui-button:only-child) {
+    --button-border-radius: var(--button-group-attached-right);
+  }
+}
+
+/* Vertical Attached Buttons */
+.vertical.attached.buttons {
+  flex-direction: column;
+
+  ::slotted(ui-button) {
+    --button-border-radius: var(--button-group-attached-none);
+    width: 100%;
+  }
+
+  /* First button in vertical group */
+  ::slotted(ui-button:first-child) {
+    --button-border-radius: var(--button-group-attached-top);
+  }
+
+  /* Last button in vertical group */
+  ::slotted(ui-button:last-child) {
+    --button-border-radius: var(--button-group-attached-bottom);
+  }
+
+  /* Single button maintains full radius */
+  ::slotted(ui-button:only-child) {
+    --button-border-radius: var(--button-group-attached-all);
   }
 }

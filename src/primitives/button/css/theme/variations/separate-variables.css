@@ -3,5 +3,5 @@
 --------------------*/
 
 :host {
-  --button-separate-spacing: var(--4px);
+  --button-separate-spacing: var(--5px);
 }

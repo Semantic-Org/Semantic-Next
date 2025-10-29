@@ -124,16 +124,21 @@
     --button-text-color: var(--button-outline-text-color);
     --button-text-shadow: none;
 
-    /* Remove shading for colored variants */
+    /* Remove shading */
+    --button-hover-background-image: none;
     --button-hover-box-shadow: none;
+
+    --button-pressed-background-image: none;
     --button-pressed-box-shadow: none;
-    --button-colored-box-shadow: none;
-    --button-primary-box-shadow: none;
-    --button-secondary-box-shadow: none;
 
     --button-colored-background-image: none;
+    --button-colored-box-shadow: none;
+
     --button-primary-background-image: none;
+    --button-primary-box-shadow: none;
+
     --button-secondary-background-image: none;
+    --button-secondary-box-shadow: none;
   }
 }
 
@@ -141,7 +146,7 @@
        Ghost
 --------------------*/
 
-/* Singular button styling */
+/* Singular */
 .ghost.button {
   box-shadow: none;
 
@@ -183,28 +188,35 @@
   }
 }
 
-/* Plural buttons - override CSS variables for child components */
+/* Plural */
 .ghost.buttons {
+
   ::slotted(ui-button) {
     /* Override internal button variables */
     --button-box-shadow: none;
     --button-background: none;
     --button-text-color: var(--text-color);
 
-    /* Remove shading for all variants */
-    --button-hover-box-shadow: none;
-    --button-pressed-box-shadow: none;
-    --button-colored-box-shadow: none;
-    --button-primary-box-shadow: none;
-    --button-secondary-box-shadow: none;
-
-    --button-colored-background-image: none;
-    --button-primary-background-image: none;
-    --button-secondary-background-image: none;
-
     /* Ghost hover/active states */
     --button-background-hover: var(--button-ghost-background-hover);
     --button-background-pressed: var(--button-ghost-background-pressed);
     --button-background-active: var(--button-ghost-background-active);
+
+    /* Remove shading */
+    --button-hover-background-image: none;
+    --button-hover-box-shadow: none;
+
+    --button-pressed-background-image: none;
+    --button-pressed-box-shadow: none;
+
+    --button-colored-background-image: none;
+    --button-colored-box-shadow: none;
+
+    --button-primary-background-image: none;
+    --button-primary-box-shadow: none;
+
+    --button-secondary-background-image: none;
+    --button-secondary-box-shadow: none;
+
   }
 }

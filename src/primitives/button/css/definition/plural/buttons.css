@@ -5,6 +5,7 @@
 
 .buttons {
   display: inline-flex;
+  flex-wrap: nowrap;
   flex-direction: row;
   vertical-align: baseline;
   border-radius: var(--button-border-radius);
