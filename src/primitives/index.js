@@ -11,4 +11,4 @@ export { UIInput } from './input/index.js';
 export { UILabel } from './label/index.js';
 export { MenuItem, UIMenu } from './menu/index.js';
 export { UIModal } from './modal/index.js';
-export { UISegment } from './segment/index.js';
+export { UISegment, UISegments } from './segment/index.js';
