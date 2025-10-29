@@ -31,6 +31,9 @@ code-example {
   &.highlight {
     box-shadow: -3px 0px 0px var(--warning-text-color);
   }
+  ui-buttons {
+    margin-bottom: 5px;
+  }
   ui-buttons ui-button {
     margin-bottom: 0px;
   }

@@ -11,6 +11,8 @@ import {
   MenuItem,
   UIInput,
   UIRail,
+  UISegment,
+  UISegments,
 } from '@semantic-ui/core';
 import { $ } from '@semantic-ui/query';
 
@@ -21,6 +23,16 @@ const { name, attributes } = Astro.props;
   <UIButton {...attributes} client:load>
     <slot />
   </UIButton>
+)}
+{name === 'UISegment' && (
+  <UISegment {...attributes} client:load>
+    <slot />
+  </UISegment>
+)}
+{name === 'UISegments' && (
+  <UISegments {...attributes} client:load>
+    <slot />
+  </UISegments>
 )}
 {name === 'UIButtons' && (
   <UIButtons {...attributes} client:load>
