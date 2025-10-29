@@ -13,6 +13,11 @@ A component spec is a declarative JSON contract that defines everything about a 
 3. **Imperative Descriptions**: Use imperative mood without the noun ("be emphasized" not "button can be emphasized")
 4. **Progressive Disclosure**: Use usage levels 1-5 to indicate feature commonality
 5. **Dual Content Patterns**: Support both attribute and slot patterns when content can work either way
+6. **Title Case Names**: All `name` fields must use Title Case (e.g., "Primary", "Top Attached", "Very Padded")
+
+## Critical Rules
+
+⚠️ **NEVER add fields to the spec JSON that are not explicitly documented in this guide.** Only use the exact fields shown in the examples and field reference below. Do not invent new fields like `valueAttribute`, `defaultState`, `required`, or any other fields that seem logical but aren't documented here. The spec system has a precise schema - follow it exactly.
 
 ## Complete Spec Structure
 
@@ -21,7 +26,7 @@ A component spec is a declarative JSON contract that defines everything about a 
   // SECTION 1: Core Metadata (Required)
   "uiType": "element",
   "name": "ComponentName",
-  "description": "A component that does something specific",
+  "description": "A component that does something specific",  // Main description can include noun
   "tagName": "ui-component-name",
   "exportName": "UIComponentName",
 
@@ -65,15 +70,27 @@ Always required, follows strict naming conventions:
 {
   "uiType": "element",  // Always "element" for now (legacy field)
   "name": "Button",     // PascalCase singular name
-  "description": "A button indicates a possible user action",  // One-line purpose
+  "description": "A button indicates a possible user action",  // One-line purpose (main description can include noun)
   "tagName": "ui-button",  // Always ui-[kebab-case-name]
   "exportName": "UIButton"  // Always UI[PascalName]
 }
 ```
 
+**⚠️ NAME FIELD CONVENTION**: All `name` fields throughout the spec MUST use Title Case:
+- ✅ "Primary", "Secondary", "Loading", "Top Attached"
+- ❌ "primary", "secondary", "loading", "top attached"
+- For multi-word names: ✅ "Very Padded", "Left Floated", "Equal Width"
+- Component names: ✅ "Button", "Modal", "Dropdown"
+
 ### Content Section
 
 Defines slots, content areas, and attributes that control component content:
+
+**Important**: All feature descriptions (content, types, states, variations) should use imperative mood WITHOUT the component noun. For example:
+- ✅ "be emphasized"
+- ❌ "A button can be emphasized"
+- ✅ "include an icon"
+- ❌ "A button can include an icon"
 
 ```json
 "content": [
@@ -83,7 +100,7 @@ Defines slots, content areas, and attributes that control component content:
     "slot": "icon",  // Optional: slot name if slottable
     "includeAttributeClass": true,  // Add attribute as CSS class
     "couplesWith": ["ui-icon"],  // Components this works with
-    "description": "include an icon",  // Imperative mood
+    "description": "include an icon",  // Imperative mood, no noun
     "usageLevel": 1,  // 1-5 (1=essential, 5=rare)
     "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>"
   },
@@ -104,6 +121,10 @@ Defines slots, content areas, and attributes that control component content:
 ### Types Section
 
 Mutually EXCLUSIVE behavioral variations (component can only be ONE type):
+
+**⚠️ Value Format Rule**: Semantic UI supports two-way attribute lookup where `<ui-segment very-padded>` equals `<ui-segment padded="very-padded">`. Therefore, option values must be the full hyphenated form:
+- ✅ `"value": "very-padded"`
+- ❌ `"value": "very"`
 
 ```json
 "types": [
@@ -216,6 +237,8 @@ Runtime states that change over time during component lifecycle:
 ### Variations Section
 
 Mutually INCLUSIVE visual/layout modifications (can stack multiple):
+
+**⚠️ Value Format Rule**: Same as Types - option values must be the full hyphenated form (e.g., `"very-compact"` not `"very"`).
 
 ```json
 "variations": [
@@ -550,6 +573,68 @@ Use these patterns for consistent descriptions:
 
 ## Field Requirements
 
+### Valid Fields Only
+
+**IMPORTANT**: Only use fields that are explicitly shown in this guide. The complete list of valid fields for each section is:
+
+**Core Metadata**: `uiType`, `name`, `description`, `tagName`, `exportName`, `examples`
+
+**Feature Sections** (content/types/states/variations):
+- `name`, `attribute`, `description`, `usageLevel`
+- `includeAttributeClass` (optional boolean - see explanation below)
+- `options` (array for multi-value features)
+- `exampleCode` (optional)
+- `couplesWith` (content only)
+- `slot` (content only)
+- `separateExamples` (types/variations only)
+
+**Settings Section**: `name`, `type`, `attribute`, `defaultValue`, `description`
+
+**Events Section**: `name`, `description`, `arguments`
+
+**Plural Support**: `supportsPlural`, `pluralName`, `pluralTagName`, `pluralExportName`, `pluralDescription`, `pluralContent`, `pluralSharedTypes`, `pluralSharedVariations`, `pluralSharedStates`, `pluralOnlyTypes`, `pluralOnlyVariations`
+
+**Do NOT add**: Fields like `valueAttribute`, `required`, `defaultState`, `validation`, or any other fields not listed above.
+
+### Understanding includeAttributeClass
+
+⚠️ **ONLY use `includeAttributeClass` on features WITH options.** Boolean attributes (no options) automatically add their attribute name as a class.
+
+**How boolean attributes work (NO includeAttributeClass needed):**
+- `<ui-segment raised>` → automatically adds `.raised` class
+- `<ui-segment circular>` → automatically adds `.circular` class
+
+**How options work:**
+- WITHOUT `includeAttributeClass`: Only adds the value → `.red`, `.blue`
+- WITH `includeAttributeClass`: Adds both attribute AND value → `.colored.red`, `.colored.blue`
+
+**When to use includeAttributeClass:**
+- ✅ Feature has `options` array AND options share common CSS rules
+- ✅ You want to write `.colored { /* shared styles */ }` plus `.red { /* specific */ }`
+- ✅ The variation group has unified styling patterns
+
+**When to omit includeAttributeClass:**
+- ❌ Boolean attribute (no options) - it's automatic
+- ❌ Options are completely independent with no shared styles
+- ❌ You only need individual option classes (`.red`, `.blue`)
+
+**Example:**
+```css
+/* Boolean (no includeAttributeClass needed) */
+.raised { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+/* Options WITH includeAttributeClass: true */
+.colored {
+  /* Shared rules for ALL colored variations */
+  border-width: 2px;
+  font-weight: bold;
+}
+.red { background: red; }
+.blue { background: blue; }
+
+/* HTML: <ui-segment colored="red"> → class="colored red segment" */
+```
+
 ### Always Include (Machines)
 - Explicit `value` fields even when matching lowercase name
 - Empty arrays for unused sections (not null/undefined)
@@ -569,14 +654,17 @@ Before completing a spec, verify:
 
 1. ✓ All required fields present
 2. ✓ Naming conventions followed (tagName: ui-*, exportName: UI*)
-3. ✓ Types are mutually exclusive options
-4. ✓ Variations are stackable attributes
-5. ✓ States represent temporal changes
-6. ✓ Descriptions use imperative mood
-7. ✓ Usage levels assigned (1-5)
-8. ✓ Plural sections only share obvious visual variations
-9. ✓ Example content provided for documentation
-10. ✓ Events include all dispatched CustomEvents
+3. ✓ **All `name` fields use Title Case** (e.g., "Primary", "Top Attached", "Very Padded")
+4. ✓ Types are mutually exclusive options
+5. ✓ Variations are stackable attributes
+6. ✓ States represent temporal changes
+7. ✓ Descriptions use imperative mood without the noun
+8. ✓ Usage levels assigned (1-5)
+9. ✓ `includeAttributeClass` ONLY on features with options (never on boolean attributes)
+10. ✓ Option values use full hyphenated form (e.g., "very-padded" not "very")
+11. ✓ Plural sections only share obvious visual variations
+12. ✓ Example content provided for documentation
+13. ✓ Events include all dispatched CustomEvents
 
 ## Common Patterns
 

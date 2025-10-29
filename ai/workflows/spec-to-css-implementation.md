@@ -1,12 +1,49 @@
 # Spec to CSS Implementation Workflow
 
 **Purpose**: Implement CSS for component features defined in specs
+**Target Audience**: LLMs with empty context windows implementing CSS without visual access
 **Prerequisite**: Component spec JSON exists with the feature defined
 **Related Guides**:
 - `/ai/packages/specs.md` - Understanding spec structure
-- `/ai/workflows/author-component-spec.md - Adding new content to a spec or writing a new spec
+- `/ai/workflows/author-component-spec.md` - Adding new content to a spec or writing a new spec
 - `/ai/guides/css-token-guide.md` - Design token usage and verification
 - `/ai/guides/css-token-architecture.md` - Token system architecture
+- `/ai/foundations/mental-model.md` - Shadow DOM and component architecture
+
+## Critical Architecture: Shadow DOM Boundaries
+
+**Understanding this FIRST is essential for correct CSS implementation.**
+
+### Component Structure
+```
+Light DOM (Page)
+├── <ui-button> (web component element)
+│   └── Shadow DOM (button's isolated scope)
+│       ├── button-bundle.css (loaded here)
+│       ├── <div class="button">...</div> (template content)
+│       └── <slot> (projected content)
+│
+└── <ui-buttons> (plural web component)
+    └── Shadow DOM (buttons' isolated scope)
+        ├── button-bundle.css (SAME bundle loaded here too)
+        ├── <div class="buttons">...</div>
+        └── <slot> → <ui-button>...</ui-button> (slotted children)
+```
+
+### Key Rules
+1. **CSS cannot penetrate shadow boundaries** - `.buttons .button` won't work across components
+2. **CSS variables inherit through shadow boundaries** - This is how plural affects children
+3. **One bundle serves both components** - `button-bundle.css` loaded in both shadow DOMs
+4. **All CSS files live in one location** - `/src/primitives/button/css/` for both singular and plural
+
+### The {ui} Pattern
+
+The `{ui}` template variable is populated by the component system from spec attributes:
+- Boolean attributes add their name as class: `<ui-button primary>` → `class="primary button"`
+- Enum attributes add their value as class: `<ui-button size="large">` → `class="large button"`
+- Multiple attributes combine: `<ui-button primary large>` → `class="primary large button"`
+
+**IMPORTANT**: Your CSS selectors like `.primary.button` target these spec-generated classes. If the spec doesn't have `includeAttributeClass: true`, the class won't be added!
 
 ## Locating Component Specs
 
@@ -64,73 +101,33 @@ Is the feature in the spec?
 - Clear hierarchical structure
 - Modern CSS best practices
 
-## Critical: Understanding Component Structure & Shadow DOM
+## Pre-Implementation Checks
 
-**MANDATORY FIRST STEP**: Before writing any CSS, understand the component's DOM structure:
+### Step 1: Verify Spec Configuration
 
-### Important: Spec Requirements for CSS Class Selectors
-
-If your CSS uses class selectors like `.equal-width.buttons` or `.primary.button`, the spec MUST have `includeAttributeClass: true` for that attribute:
+**Critical**: If your CSS will use class selectors like `.primary.button`, the spec MUST have `includeAttributeClass: true`:
 
 ```json
 {
-  "name": "Equal Width",
-  "attribute": "equal-width",
-  "includeAttributeClass": true,  // ← REQUIRED for .equal-width CSS selector
-  "options": [...]
+  "attribute": "primary",
+  "includeAttributeClass": true  // ← REQUIRED for .primary CSS selector
 }
 ```
 
-**Without `includeAttributeClass: true`:**
-- The attribute exists on the element: `<ui-buttons equal-width="three">`
-- But NO class is added to `{ui}` template variable
-- Your `.equal-width` CSS selectors won't match anything
+Without this, the class won't be added to `{ui}` and your selectors won't match.
 
-**Always check the spec** to ensure `includeAttributeClass` is present when implementing CSS that uses class selectors for attributes.
+### Step 2: Read Component HTML Template
 
-### Step 1: Review Component HTML Template
-Read the component's `.html` file to understand:
-- What elements exist in the shadow DOM
-- What slots are available
-- What classes are used on elements
-- How `{ui}` populates (component adds spec attributes as classes)
+Check `/src/primitives/[component]/[component].html` to understand:
+- What elements exist (`.button`, `.icon`, etc.)
+- What slots are available (`<slot name="content">`)
+- Template snippets (`{> header}` vs `{>slot header}`)
 
-Example: `/src/primitives/button/button.html`
-```html
-<div class="{ui}button">  <!-- {ui} adds spec-based classes like "primary large" -->
-  {> content}              <!-- Template snippets -->
-</div>
-```
+### Step 3: Understand Template Patterns
 
-### Step 2: Understand Shadow DOM Implications
-
-**Your CSS is applied INSIDE the component's shadow DOM:**
-- You CAN target: Elements within the template (`.button`, `.header`)
-- You CAN target: Slotted content with `::slotted(selector)`
-- You CANNOT target: Internal elements of child web components
-
-**For plural components styling child components:**
-```css
-/* WRONG - Can't penetrate child's shadow DOM */
-.mini.buttons .button { font-size: small; }
-
-/* RIGHT - Use CSS variables that inherit through shadow DOM */
-.mini.buttons {
-  --button-medium: var(--button-mini);  /* Child component uses this variable */
-}
-```
-
-### Step 3: Identify Targeting Strategy
-
-**Singular component (e.g., ui-button):**
-- Target elements in its template directly: `.button`, `.icon`
-- Use `:host` for the component element itself
-- Use `::slotted()` for user-provided content
-
-**Plural component (e.g., ui-buttons):**
-- Can target direct children: `.buttons > ui-button`
-- MUST use CSS variables to affect child component internals
-- Variables penetrate shadow boundaries, selectors do not
+- `{> snippetName}` = Template snippet → Target with `.snippetName`
+- `{>slot name}` = Slot → Target with `::slotted()`
+- `{ui}` = Spec-generated classes → Target with `.primary.button` etc.
 
 ## CSS Implementation Process & Component Integration
 
@@ -201,44 +198,23 @@ For ANY feature implementation:
 **For plural components affecting children:**
 ```css
 .variations.buttons {
-  /* Strategy 1: If child has --var: inherit; in its theme */
-  --button-medium: var(--button-mini);  /* Works because child uses inherit */
-
-  /* Strategy 2: Override child's shadow root variables directly */
+  /* Override child's CSS variables at its shadow root */
   ::slotted(ui-button) {
-    --button-different-var: value;  /* Overrides var at child's shadow root */
+    --button-medium: var(--button-mini);  /* Forces value at child's shadow root */
+    --button-padding: var(--4px);         /* Child will use these values */
   }
 }
 ```
+
+**Finding which variables to use**:
+1. Check child's theme files: `button/css/theme/`
+2. Check child's definition files: `button/css/definition/`
+3. Look for variables being used like `var(--button-medium)`
+4. Override those same variables in your plural CSS
 
 #### Step 3: Write Semantic CSS
 
-**Structure your CSS with clear sections:**
-```css
-/*-------------------
-    Feature Name
---------------------*/
-
-/* Base styles with nested modifiers */
-.feature.element {
-  property: var(--component-variable);
-
-  /* State modifications */
-  &:hover {
-    property: var(--component-hover-variable);
-  }
-
-  /* Nested elements */
-  .child {
-    property: value;
-  }
-
-  /* Attribute variations */
-  &[disabled] {
-    opacity: 0.5;
-  }
-}
-```
+**Structure your CSS with clear sections** - see Comment Formatting Guidelines below.
 
 #### Step 4: Use Appropriate Values
 
@@ -257,6 +233,146 @@ Does it need to scale with size variations?
 - CSS only affects elements within the component's template
 - External styles cannot penetrate into the component
 - Component styles cannot leak out
+
+## CSS Comment Formatting Guidelines
+
+### Main Section Headers
+
+Use the dashed box pattern for major sections within a file:
+
+```css
+/*-------------------
+       Sizing
+--------------------*/
+.mini.button { }
+.small.button { }
+.large.button { }
+
+/*-------------------
+     Emphasis
+--------------------*/
+.primary.button { }
+.secondary.button { }
+```
+
+### Subsection Headers
+
+Use simple comments for subsections or specific states:
+
+```css
+/*-------------------
+     Emphasis
+--------------------*/
+
+/* Primary */
+.primary.button {
+  background: var(--button-primary-background);
+}
+
+/* Secondary */
+.secondary.button {
+  background: var(--button-secondary-background);
+}
+
+/* Plural Sizing */
+.mini.buttons {
+  --button-medium: var(--button-mini);
+}
+```
+
+### What NOT to Comment
+
+**Avoid explanatory comments** unless they would appear in professional open source libraries:
+
+```css
+/* ❌ BAD - Obvious explanation */
+.button {
+  /* This makes the button blue */
+  background: blue;
+  /* This adds spacing inside the button */
+  padding: 10px;
+}
+
+/* ✅ GOOD - Only structural comments */
+.button {
+  background: var(--button-background);
+  padding: var(--button-padding);
+}
+```
+
+### When to Add Technical Comments
+
+Only add technical comments for:
+- Non-obvious browser workarounds
+- Performance optimizations
+- Critical implementation notes
+
+```css
+/* ✅ GOOD - Technical necessity */
+.attached.buttons {
+  /* Prevents double borders between buttons */
+  ::slotted(ui-button:not(:first-child)) {
+    margin-left: -1px;
+  }
+}
+
+/* ✅ GOOD - Browser workaround */
+.button {
+  /* Safari requires explicit z-index for stacking context */
+  position: relative;
+  z-index: 0;
+}
+```
+
+### File Structure Example
+
+```css
+/*-------------------
+       Fluid
+--------------------*/
+.fluid.button {
+  width: 100%;
+  display: block;
+}
+
+/*-------------------
+      Attached
+--------------------*/
+
+/* Singular */
+.attached.button {
+  margin: 0;
+  border-radius: 0;
+}
+
+/* Plural */
+.attached.buttons {
+  display: inline-flex;
+
+  ::slotted(ui-button:first-child) {
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
+
+  ::slotted(ui-button:last-child) {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  }
+}
+
+/*-------------------
+   Vertical Attached
+--------------------*/
+.attached.vertical.buttons {
+  flex-direction: column;
+}
+```
+
+### Summary
+
+- **Main headers**: Dashed boxes for primary features
+- **Subheaders**: Simple comments for variants/states
+- **No tutorials**: Don't explain what CSS properties do
+- **Technical only**: Comment only when necessary for implementation understanding
+- **Clean code**: Let the code structure and naming be self-documenting
 
 ## Workflow A: Content Implementation
 
@@ -363,17 +479,17 @@ Location: `/css/definition/types/[attribute-name].css`
 
 **Example with options (emphasis type):**
 ```css
-/*--------------
-    Primary
----------------*/
+/*-------------------
+     Emphasis
+--------------------*/
+
+/* Primary */
 .primary.button {
   background-color: var(--button-primary-color);
   color: var(--button-primary-text-color);
 }
 
-/*--------------
-   Secondary
----------------*/
+/* Secondary */
 .secondary.button {
   background-color: var(--button-secondary-color);
   color: var(--button-secondary-text-color);
@@ -382,10 +498,9 @@ Location: `/css/definition/types/[attribute-name].css`
 
 **For pluralOnlyTypes:**
 ```css
-/*--------------
-    Vertical
-    (Plural)
----------------*/
+/*-------------------
+     Vertical
+--------------------*/
 .vertical.buttons {
   flex-direction: column;
 
@@ -423,7 +538,8 @@ Location: `/css/definition/variations/[attribute-name].css`
 /*-------------------
        Sizing
 --------------------*/
-/* Singular component - direct styling */
+
+/* Singular */
 .mini.button {
   font-size: var(--button-mini);
 }
@@ -434,14 +550,15 @@ Location: `/css/definition/variations/[attribute-name].css`
   font-size: var(--button-large);
 }
 
-/* Plural component - CSS variable strategies using nesting */
+/* Plural */
 .mini.buttons {
-  /* Strategy 1: Works IF child defines --button-medium: inherit; */
-  --button-medium: var(--button-mini);
-
-  /* Strategy 2: Direct override at child's shadow root */
   ::slotted(ui-button) {
-    --button-medium: var(--button-mini);  /* Forces value at child level */
+    --button-medium: var(--button-mini);
+  }
+}
+.small.buttons {
+  ::slotted(ui-button) {
+    --button-medium: var(--button-small);
   }
 }
 ```
@@ -459,19 +576,59 @@ Location: `/css/definition/variations/[attribute-name].css`
 --------------------*/
 .separate.buttons {
   box-shadow: none;
+}
 
-  ::slotted(ui-button) {
-    margin-right: var(--button-separate-spacing);
+.separate.buttons ::slotted(ui-button) {
+  margin-right: var(--button-separate-spacing);
+}
 
-    &:is(:last-child) {
-      margin-right: 0;
-    }
-  }
+.separate.buttons ::slotted(ui-button:last-child) {
+  margin-right: 0;
 }
 ```
 
 ### Step 3: Update Barrel Files
 Follow same pattern with `variations` section
+
+## Variation Stacking Checklist
+
+**Variations are mutually inclusive** - they can be combined. After implementing a variation, run through this checklist:
+
+### Step 1: Identify Potential Interference
+Look at other variations in the spec and ask:
+- Do any affect the same CSS properties I just used?
+- Would combining them create visual conflicts?
+
+Examples:
+- `fluid` (width: 100%) + `inline` (display: inline-block) = conflict
+- `attached` (margin: 0) + `separate` (margin: spacing) = conflict
+- `vertical` (flex-direction) + horizontal spacing = needs adjustment
+
+### Step 2: Evaluate Common Usage
+For each potential conflict, ask:
+- Is this combination likely to be used?
+- Does the combination make semantic sense?
+
+Examples:
+- `vertical separate` buttons = **common** (stacked with spacing)
+- `fluid attached` buttons = **common** (full-width connected group)
+- `inline fluid` = **uncommon/nonsensical** (inline can't be full width)
+
+### Step 3: Add Resolution Rules (If Needed)
+Only for common, sensible combinations that conflict:
+
+```css
+/* In the variation file */
+.separate.vertical.buttons {
+  ::slotted(ui-button) {
+    --button-horizontal-margin: 0;  /* Override horizontal */
+    --button-vertical-margin: var(--button-separate-spacing);  /* Apply vertical */
+  }
+}
+```
+
+### Step 4: Skip Nonsensical Combinations
+Don't write defensive CSS for illogical combinations. Let CSS cascade handle it naturally.
 
 ## Critical Implementation Details
 
@@ -505,6 +662,29 @@ After creating files, update BOTH:
 
 **ALWAYS verify tokens exist** - Read `/ai/guides/css-token-guide.md` for verification workflow
 
+**Critical: Variable Scope in Theme Files**
+
+When defining CSS variables in theme files, only reference variables that exist in the current scope:
+
+```css
+/* ❌ WRONG - References variable from another file */
+:host {
+  --button-group-attached-top: var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0 0;
+  /* ERROR: --button-group-button-border-radius is defined elsewhere, not available here */
+}
+
+/* ✅ CORRECT - References globally available token */
+:host {
+  --button-group-attached-top: var(--border-radius) var(--border-radius) 0 0;
+  /* Works: --border-radius is a global token from /src/css/tokens/ */
+}
+```
+
+**Rule**: In theme files, you can only reference:
+1. Variables defined in the same `:host` block
+2. Global tokens from `/src/css/tokens/`
+3. Nothing else - variables from other files are not in scope
+
 **Decision framework:**
 - **Use `var(--Npx)` tokens**: When value should scale with `font-size`
   - Padding inside buttons that should scale with text
@@ -524,32 +704,43 @@ After creating files, update BOTH:
 - **Create component variables**: In theme files for component-specific values
   - Define in theme `-variables.css` files
   - Reference in definition CSS files
+  - **Ask before creating new variables** - almost always unnecessary
+
+### File Discovery Process
+
+**To check if CSS already exists:**
+```bash
+# You know the folder structure from spec section
+# For a variation named "separate":
+ls /src/primitives/button/css/variations/separate.css
+
+# If it exists but is in wrong folder (e.g., types/):
+mv /src/primitives/button/css/types/separate.css /src/primitives/button/css/variations/
+# Update barrel file imports accordingly
+```
+
+### Decision Process for CSS Values
+
+**When you need a value:**
+1. Check if existing token works: `/src/css/tokens/`
+2. Check if component already has a variable for it
+3. If variation-specific, define in variation's theme file
+4. **Almost never create new global or component base variables**
+
+### Import Format in Barrel Files
+
+Always match existing patterns:
+```css
+@import url('./content/label.css') layer(button.definition.content.label);
+```
 
 ### Plural Component Patterns - Critical Process
 
-**FUNDAMENTAL LIMITATIONS:**
+**FUNDAMENTAL LIMITATION: `::slotted()` cannot chain with `::part()`**
 
-#### 1. `::slotted()` cannot chain with `::part()`
 ```css
 /* ❌ INVALID CSS - This will NOT work */
 .separate.buttons ::slotted(ui-button)::part(button) { }
-```
-
-#### 2. Cannot nest selectors inside `::slotted()` with nested CSS
-```css
-/* ❌ WRONG - Nesting breaks ::slotted() */
-.separate.buttons {
-  ::slotted(ui-button) {
-    &:is(:last-child) { }  /* This WILL NOT work */
-    &:hover { }            /* This WILL NOT work */
-  }
-}
-
-/* ✅ CORRECT - Complete selector in ::slotted() */
-.separate.buttons {
-  ::slotted(ui-button:is(:last-child)) { }
-  ::slotted(ui-button:hover) { }
-}
 ```
 
 This means you CANNOT directly style elements inside slotted components' shadow DOM. You MUST use CSS variables instead.
@@ -590,57 +781,110 @@ Can you achieve the effect by styling the plural container only?
 ```
 
 ### Step 4: Find Available CSS Variables
-When you need to style inside child components:
 
-1. **Check the child's theme file** for variables it uses:
+**Think through the cascade** to find variables:
+
+1. **Identify the cascade path for your component:**
+   - Singular button: `content/button.css` → your variation
+   - Plural buttons: `plural/buttons.css` → your variation
+
+2. **Check those specific files for variables:**
    ```bash
-   # Look for CSS variables in the child component
-   grep -r "--button" src/primitives/button/css/theme/
+   # Check the relevant theme files in cascade order
+   cat src/primitives/button/css/theme/content/button-variables.css
+   cat src/primitives/button/css/theme/plural/buttons-variables.css
    ```
 
-2. **Look for `inherit` usage** - Variables using inherit can be set on parent:
+3. **Look for variables being used in definition files:**
+   ```bash
+   # See what variables are actually consumed
+   grep "var(--button" src/primitives/button/css/definition/content/button.css
+   ```
+
+4. **Override those variables in your CSS:**
+   - Most variables DO NOT use `inherit` - just override directly
+   - Set them on `::slotted(ui-button)` to force values at child's root
+
+### Critical Pattern: Variable Preservation in Plural Components
+
+**Before implementing any plural variation, understand this fundamental pattern:**
+
+When plural components modify child variables (like resetting `--button-border-radius: 0` to connect buttons), they destroy access to the original value. But variations often need that original value to selectively restore it (like attached buttons needing selective corners).
+
+**The preservation pattern solves this:**
+
+1. **Plural theme preserves the original** before any modifications:
    ```css
-   /* In button's theme file */
-   --button-medium: inherit;  /* Can be overridden by parent */
+   /* In /css/theme/plural/buttons-variables.css */
+   --button-group-button-border-radius: var(--border-radius);  /* Preserve original */
    ```
 
-3. **Common variable patterns** to look for:
-   - `--[component]-[property]` (e.g., `--button-border-radius`)
-   - `--[component]-[size]` (e.g., `--button-medium`)
-   - `--[component]-[state]-[property]` (e.g., `--button-hover-background`)
+2. **Plural definition modifies the actual variable**:
+   ```css
+   /* In /css/definition/plural/buttons.css */
+   .buttons ::slotted(ui-button) {
+     --button-border-radius: 0;  /* Reset for connected appearance */
+   }
+   ```
+
+3. **Variations reference the PRESERVED copy**:
+   ```css
+   /* In /css/theme/variations/attached-variables.css */
+   /* ✅ CORRECT - Uses preserved value */
+   --button-group-attached-top: var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0 0;
+
+   /* ❌ WRONG - Would get 0 because plural already reset it */
+   --button-group-attached-top: var(--button-border-radius) var(--button-border-radius) 0 0;
+   ```
+
+**Decision process when implementing plural variations:**
+```
+Need to use a child variable that plural modifies?
+├── Check if preserved copy exists (e.g., --button-group-button-border-radius)
+│   ├── YES → Use the preserved copy in your theme variables
+│   └── NO → Cannot implement correctly - this is an architectural issue
+└── Apply your variation by setting the ACTUAL variable (--button-border-radius)
+```
+
+**Common preserved variables you'll encounter:**
+- `--button-group-button-border-radius` preserves `--button-border-radius`
+- Similar patterns exist for spacing, sizing, and other modified properties
+- Look in plural theme files to find these preservation variables
+
+**Key insight**: The plural component must "photograph" original values before modifying them. Your variations work from these photographs, not from the modified reality.
 
 ### Step 5: Implement Using CSS Variables
 
 **Pattern for plural variations affecting children:**
 
 ```css
-/* Variation modifies container and children with nesting */
+/* Variation modifies container and children */
 .separate.buttons {
   box-shadow: none;  /* Remove group styling */
+}
 
-  /* Use ::slotted() to set variables on child components */
-  ::slotted(ui-button) {
-    /* These variables cascade into child's shadow DOM */
-    --button-horizontal-margin: var(--button-separate-spacing);
-    --button-border-radius: var(--border-radius);
+/* Set variables and properties on slotted children */
+.separate.buttons ::slotted(ui-button) {
+  /* These variables cascade into child's shadow DOM */
+  --button-horizontal-margin: var(--button-separate-spacing);
+  --button-border-radius: var(--border-radius);
 
-    /* Can also set layout properties on the element itself */
-    margin-right: var(--button-separate-spacing);
+  /* Can also set layout properties on the element itself */
+  margin-right: var(--button-separate-spacing);
+}
 
-    /* Handle last-child, first-child, etc. */
-    &:is(:last-child) {
-      margin-right: 0;
-    }
-  }
+/* Handle pseudo-classes with complete selectors */
+.separate.buttons ::slotted(ui-button:last-child) {
+  margin-right: 0;
 }
 ```
 
-### Step 6: Test Variable Inheritance
-Verify that your variables are actually being used:
+### Step 6: Verify Variable Usage
+Ensure your variables will be consumed correctly:
 
-1. **Inspect in browser** - Check if variables are applied
-2. **Check child's CSS** - Ensure it uses `var(--button-property)`
-3. **If not working** - Child might not use that variable, find alternatives
+1. **Check child's definition files** - Confirm it uses `var(--button-property)`
+2. **Verify variable names match exactly** - CSS variables are case-sensitive
+3. **If child doesn't use that variable** - Find alternative variables it does use
 
 ## Common Patterns for Plural Variations
 
@@ -692,14 +936,37 @@ Verify that your variables are actually being used:
 }
 ```
 
+### Pattern 5: Applying Preserved Variables
+```css
+/* When using the preservation pattern, always set the actual variable */
+.attached.buttons {
+  ::slotted(ui-button) {
+    /* ✅ CORRECT - Set the variable the component actually uses */
+    --button-border-radius: var(--button-group-attached-none);
+  }
+}
+
+.top-attached.buttons {
+  ::slotted(ui-button:first-child) {
+    /* ✅ CORRECT - Apply to the working variable */
+    --button-border-radius: var(--button-group-attached-top-left);
+
+    /* ❌ WRONG - Don't set the preservation variable */
+    --button-group-button-border-radius: var(--button-group-attached-top-left);
+  }
+}
+```
+
+**Key Rule**: Preservation variables (like `--button-group-button-border-radius`) are for DEFINING your variation values. The actual component variable (like `--button-border-radius`) is what you SET on children.
+
 ## Troubleshooting Plural Variations
 
 ### Problem: Styles aren't applying to child components
 
 **Diagnosis Steps:**
 1. **Check shadow DOM boundaries** - Remember you can't penetrate shadow DOM with selectors
-2. **Verify ::slotted() syntax** - Must use `:is()` for pseudo-classes
-3. **Inspect CSS variables** - Are they defined and used in child?
+2. **Verify ::slotted() syntax** - Must use complete selectors, not nested
+3. **Verify variable names** - Check child's CSS files for exact variable usage
 4. **Check specificity** - Other styles might be overriding
 
 ### Problem: Variables aren't inheriting
@@ -714,21 +981,22 @@ Verify that your variables are actually being used:
 ```bash
 # Step 1: Check what variables the child actually uses
 grep "--button" src/primitives/button/css/definition/
+grep "--button" src/primitives/button/css/theme/
 ```
 
 ```css
-/* Step 2: Try setting variable directly on ::slotted() */
+/* Step 2: Verify your variable is being set correctly */
 .variation.buttons {
   ::slotted(ui-button) {
-    --button-property: value !important;  /* Test with !important */
+    /* Ensure you're setting the right variable */
+    --button-property: value;  /* The actual variable used by child */
   }
 }
 
-/* Step 3: Check browser DevTools
-   - Inspect the ui-button element
-   - Look at computed styles
-   - Check CSS variables tab
-   - Verify inheritance chain */
+/* Step 3: Check cascade order
+   - Verify no other rules override your variable
+   - Check specificity of selectors
+   - Ensure variation CSS loads after base CSS */
 ```
 
 ### Problem: Can't style specific parts of child
@@ -781,13 +1049,6 @@ grep "--button" src/primitives/button/css/definition/
    - Update imports in barrel files
    - Fix layer names to match new location
 3. Never duplicate CSS - always move existing
-
-### The {ui} Class Pattern
-
-The `{ui}` template variable is populated by the component system:
-- Boolean attributes add their name as class
-- Enum attributes add their value as class
-- Example: `<ui-button primary large>` → `class="primary large button"`
 
 ### Component vs Element Selectors
 
@@ -842,16 +1103,19 @@ The agent cannot visually verify styling - this requires human evaluation of:
 
 1. **Creating new tokens without verifying** - Always check `/src/css/tokens/` first
 2. **Using `.button` to target child components** - They're `ui-button` web components
-3. **Forgetting theme variables file** - Always create, even if empty
+3. **Forgetting theme variables file** - Always create, even if empty with `:host { }`
 4. **Not updating barrel files** - Both definition and theme need imports
-5. **Ignoring existing CSS** - Always search first, move if needed
-6. **Wrong folder for pluralOnly** - They still follow spec section (types/variations)
-7. **Missing option variations** - All options go in ONE file, not separate files
-8. **Using wrong selectors for content** - Use triple pattern for flexibility
+5. **Ignoring existing CSS** - Always check expected location first, move if found elsewhere
+6. **Wrong folder for pluralOnly** - Still goes in `/src/primitives/button/css/`, same location
+7. **Missing option variations** - All options go in ONE file named after the attribute
+8. **Using wrong selectors for content** - Check if template uses `{> name}` or `{>slot name}`
 9. **Not using nested CSS** - All component CSS must use nested syntax
-10. **Flat selectors in plural components** - Use nesting to show relationships clearly
+10. **Expecting ::slotted() nesting** - Must use complete selectors like `::slotted(ui-button:last-child)`
 11. **Missing `includeAttributeClass` in spec** - Required for `.attribute-name` CSS selectors
-12. **Nesting inside `::slotted()`** - Cannot split selector, must be complete in parentheses
+12. **Creating unnecessary variables** - Almost always use existing tokens or variables
+13. **Using out-of-scope variables in theme definitions** - Theme files can only reference variables in the same `:host` block or global tokens
+14. **Setting preservation variables instead of actual variables** - Apply to `--button-border-radius`, not `--button-group-button-border-radius`
+15. **Not checking for preserved variables** - When plural modifies a variable, look for its preserved copy before implementing variations
 
 ## Quick Reference: Spec Section to CSS Folder
 
@@ -865,6 +1129,37 @@ The agent cannot visually verify styling - this requires human evaluation of:
 | `pluralOnlyVariations[]` | `/css/definition/variations/` | `separate.css` |
 | `settings[]` | No CSS files | Component behavior only |
 
+## Summary: Key Decisions for LLM Implementation
+
+### File Organization
+- **All files** go in `/src/primitives/[component]/css/`
+- **One bundle** serves both singular and plural components
+- **File names** match spec attribute exactly
+- **Theme files** always created, even if empty: `:host { /* No variables */ }`
+
+### Shadow DOM Strategy
+- **Singular CSS** targets elements inside component's shadow DOM
+- **Plural CSS** uses variables to affect child components
+- **Variables inherit**, selectors don't penetrate shadow boundaries
+- **::slotted()** requires complete selectors, no nesting
+
+### Variable Discovery
+- **Think cascade**: Check files in order they're applied
+- **Look in theme/definition** folders for existing variables
+- **Override directly** - rarely need `inherit`
+- **Ask before creating** new variables
+
+### Variation Stacking
+- **Check for conflicts** with other variations
+- **Handle common combinations** only
+- **Let cascade handle** nonsensical combinations
+- **Place rules** in the primary variation's file
+
+### Import Pattern
+```css
+@import url('./[section]/[file].css') layer([component].definition.[section].[attribute]);
+```
+
 ---
 
 **For additional context on specific patterns**, consult:
@@ -872,3 +1167,4 @@ The agent cannot visually verify styling - this requires human evaluation of:
 - `/ai/packages/specs.md` - Spec structure and processing
 - `/ai/guides/component-generation-instructions.md` - Component architecture
 - `/ai/guides/css-token-architecture.md` - Token system deep dive
+- `/ai/foundations/mental-model.md` - Shadow DOM architecture details
