@@ -1,0 +1,12 @@
+.segment {
+  position: relative;
+  background: var(--segment-background);
+  box-shadow: var(--segment-box-shadow);
+  margin: var(--segment-margin);
+  padding: var(--segment-padding);
+  border-radius: var(--segment-border-radius);
+  border: var(--segment-border);
+  border-top: var(--segment-top-border);
+  border-left: var(--segment-left-border);
+  color: var(--segment-text-color);
+}

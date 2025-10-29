@@ -5,19 +5,553 @@
 **/
 
 /* src/primitives/segment/css/definition/content/segment.css */
-@layer segment.definition {
-  @layer segment.definition.content.segment;
+@layer segment.definition.content.segment {
+  .segment {
+    position: relative;
+    background: var(--segment-background);
+    box-shadow: var(--segment-box-shadow);
+    margin: var(--segment-margin);
+    padding: var(--segment-padding);
+    border-radius: var(--segment-border-radius);
+    border: var(--segment-border);
+    border-top: var(--segment-top-border);
+    border-left: var(--segment-left-border);
+    color: var(--segment-text-color);
+  }
 }
 
-/* src/primitives/segment/css/definition/variations/aligned.css */
-@layer segment.definition {
-  @layer segment.definition.variations.aligned;
+/* src/primitives/segment/css/definition/plural/segments.css */
+@layer segment.definition.plural.segments {
+  .segments {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: var(--segment-grouped-margin);
+    border: var(--segment-grouped-border);
+    box-shadow: var(--segment-grouped-box-shadow);
+    border-radius: var(--segment-grouped-border-radius);
+  }
+  .segments ::slotted(ui-segment) {
+    --segment-border-radius: 0;
+    --segment-margin: 0;
+    --segment-box-shadow: none;
+    --segment-border: none;
+    --segment-top-border: var(--segment-grouped-segment-divider);
+  }
+  .segments ::slotted(ui-segment:first-child) {
+    --segment-top-border: none;
+    --segment-border-radius: var(--segment-grouped-border-radius) var(--segment-grouped-border-radius) 0 0;
+  }
+  .segments ::slotted(ui-segment:last-child) {
+    --segment-border-radius: 0 0 var(--segment-grouped-border-radius) var(--segment-grouped-border-radius);
+  }
+  .segments ::slotted(ui-segment:only-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius);
+  }
+}
+
+/* src/primitives/segment/css/definition/types/raised.css */
+@layer segment.definition.types.raised {
+  .raised.segment,
+  .raised.segments {
+    box-shadow: var(--segment-raised-box-shadow);
+  }
+}
+
+/* src/primitives/segment/css/definition/types/stacked.css */
+@layer segment.definition.types.stacked {
+  .stacked.segments::before,
+  .stacked.segments::after,
+  .stacked.segment::before,
+  .stacked.segment::after {
+    content: "";
+    position: absolute;
+    bottom: calc(-1 * var(--segment-stacked-height) / 2);
+    left: 0%;
+    border-top: 1px solid var(--border-color);
+    background: var(--segment-stacked-page-background);
+    width: 100%;
+    height: var(--segment-stacked-height);
+    visibility: visible;
+  }
+  .stacked.segments::before,
+  .stacked.segment::before {
+    display: none;
+  }
+  .stacked.segment {
+    padding-bottom: var(--segment-stacked-padding);
+  }
+  .tall.stacked.segments::before,
+  .tall.stacked.segment::before {
+    display: block;
+    bottom: 0px;
+  }
+}
+
+/* src/primitives/segment/css/definition/types/piled.css */
+@layer segment.definition.types.piled {
+  .piled.segments,
+  .piled.segment {
+    margin: var(--segment-piled-margin) 0em;
+    box-shadow: var(--segment-piled-box-shadow);
+    z-index: var(--segment-piled-z-index);
+  }
+  .piled.segments::before,
+  .piled.segments::after,
+  .piled.segment::before,
+  .piled.segment::after {
+    background-color: var(--inverted-100);
+    visibility: visible;
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0px;
+    position: absolute;
+    width: 100%;
+    border: var(--segment-piled-border);
+    box-shadow: var(--segment-piled-box-shadow);
+  }
+  .piled.segments::before,
+  .piled.segment::before {
+    transform: rotate(calc(-1 * var(--segment-piled-degrees)));
+    top: 0;
+    z-index: -2;
+  }
+  .piled.segments::after,
+  .piled.segment::after {
+    transform: rotate(var(--segment-piled-degrees));
+    top: 0;
+    z-index: -1;
+  }
+  .piled.segment:first-child {
+    margin-top: 0em;
+  }
+  .piled.segment:last-child {
+    margin-bottom: 0em;
+  }
+}
+
+/* src/primitives/segment/css/definition/types/vertical.css */
+@layer segment.definition.types.vertical {
+  .vertical.segment {
+    border: none;
+    border-top: var(--segment-border);
+  }
+}
+
+/* src/primitives/segment/css/definition/states/loading.css */
+@layer segment.definition.states.loading {
+  .loading.segment {
+    position: relative;
+    cursor: default;
+    pointer-events: none;
+    text-shadow: none !important;
+    color: transparent !important;
+    transition: all 0s linear;
+  }
+  .loading.segment::before {
+    position: absolute;
+    content: "";
+    top: 0%;
+    left: 0%;
+    background: var(--segment-loader-dimmer-color);
+    width: 100%;
+    height: 100%;
+    border-radius: var(--segment-border-radius);
+    z-index: var(--segment-loader-dimmer-z-index);
+  }
+  .loading.segment::after {
+    position: absolute;
+    content: "";
+    top: 50%;
+    left: 50%;
+    margin: calc(-1 * var(--segment-loader-size) / 2) 0 0 calc(-1 * var(--segment-loader-size) / 2);
+    width: var(--segment-loader-size);
+    height: var(--segment-loader-size);
+    animation: segment-spin var(--duration) linear;
+    animation-iteration-count: infinite;
+    border-radius: var(--circular-radius);
+    border-color: var(--standard-60) var(--standard-40) var(--standard-40) var(--standard-40);
+    border-style: solid;
+    border-width: 0.2em;
+    box-shadow: 0px 0px 0px 1px transparent;
+    visibility: visible;
+    z-index: var(--segment-loader-line-z-index);
+  }
+  @keyframes segment-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/* src/primitives/segment/css/definition/states/disabled.css */
+@layer segment.definition.states.disabled {
+  .disabled.segment {
+    opacity: var(--segment-disabled-opacity);
+    color: var(--disabled-text-color);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/basic.css */
+@layer segment.definition.variations.basic {
+  .basic.segment {
+    background: var(--segment-basic-background);
+    box-shadow: var(--segment-basic-box-shadow);
+    border: var(--segment-basic-border);
+    border-radius: var(--segment-basic-border-radius);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/padded.css */
+@layer segment.definition.variations.padded {
+  .segment.padded {
+    padding: var(--segment-padded-padding);
+  }
+  .segment.very-padded {
+    padding: var(--segment-very-padded-padding);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/attached.css */
+@layer segment.definition.variations.attached {
+  .attached.segment {
+    position: relative;
+    display: block;
+    margin: 0;
+    border-radius: 0;
+  }
+  .top-attached.segment {
+    margin-bottom: var(--segment-attached-offset);
+    border-radius: var(--segment-attached-top);
+  }
+  .bottom-attached.segment {
+    margin-top: var(--segment-attached-offset);
+    border-radius: var(--segment-attached-bottom);
+    box-shadow: var(--segment-attached-box-shadow);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/emphasis.css */
+@layer segment.definition.variations.emphasis {
+  .segment.secondary {
+    background: var(--segment-secondary-background);
+    color: var(--segment-secondary-color);
+  }
+  .segment.tertiary {
+    background: var(--segment-tertiary-background);
+    color: var(--segment-tertiary-color);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/compact.css */
+@layer segment.definition.variations.compact {
+  .compact.segment {
+    display: var(--segment-compact-display);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/colored.css */
+@layer segment.definition.variations.colored {
+  .segment {
+    - &.pink {
+      background-color: var(--pink-background-color);
+      border-color: var(--pink-border);
+      color: var(--pink-text-color);
+    }
+  }
+  .segment.red {
+    background-color: var(--red-background-color);
+    border-color: var(--red-border);
+    color: var(--red-text-color);
+  }
+  .segment.orange {
+    background-color: var(--orange-background-color);
+    border-color: var(--orange-border);
+    color: var(--orange-text-color);
+  }
+  .segment.yellow {
+    background-color: var(--yellow-background-color);
+    border-color: var(--yellow-border);
+    color: var(--yellow-text-color);
+  }
+  .segment.olive {
+    background-color: var(--olive-background-color);
+    border-color: var(--olive-border);
+    color: var(--olive-text-color);
+  }
+  .segment.green {
+    background-color: var(--green-background-color);
+    border-color: var(--green-border);
+    color: var(--green-text-color);
+  }
+  .segment.teal {
+    background-color: var(--teal-background-color);
+    border-color: var(--teal-border);
+    color: var(--teal-text-color);
+  }
+  .segment.blue {
+    background-color: var(--blue-background-color);
+    border-color: var(--blue-border);
+    color: var(--blue-text-color);
+  }
+  .segment.violet {
+    background-color: var(--violet-background-color);
+    border-color: var(--violet-border);
+    color: var(--violet-text-color);
+  }
+  .segment.purple {
+    background-color: var(--purple-background-color);
+    border-color: var(--purple-border);
+    color: var(--purple-text-color);
+  }
+  .segment.brown {
+    background-color: var(--brown-background-color);
+    border-color: var(--brown-border);
+    color: var(--brown-text-color);
+  }
+  .segment.grey {
+    background-color: var(--grey-background-color);
+    border-color: var(--grey-border);
+    color: var(--grey-text-color);
+  }
+  .segment.black {
+    background-color: var(--black-background-color);
+    border-color: var(--black-border);
+    color: var(--black-text-color);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/circular.css */
+@layer segment.definition.variations.circular {
+  .circular.segment {
+    border-radius: var(--segment-circular-border-radius);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/clearing.css */
+@layer segment.definition.variations.clearing {
+  .clearing.segment::after {
+    content: "";
+    display: block;
+    clear: both;
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/floated.css */
+@layer segment.definition.variations.floated {
+  .segment.left-floated {
+    float: left;
+    margin-right: var(--segment-floated-distance);
+  }
+  .segment.right-floated {
+    float: right;
+    margin-left: var(--segment-floated-distance);
+  }
+}
+
+/* src/primitives/segment/css/definition/variations/text-align.css */
+@layer segment.definition.variations.text-align {
+  .segment.left-aligned {
+    text-align: left;
+  }
+  .segment.center-aligned {
+    text-align: center;
+  }
+  .segment.right-aligned {
+    text-align: right;
+  }
+}
+
+/* src/primitives/segment/css/definition/plural-types/horizontal.css */
+@layer segment.definition.plural-types.horizontal {
+  .horizontal.segments {
+    flex-direction: row;
+  }
+  .horizontal.segments ::slotted(ui-segment) {
+    --segment-top-border: none;
+    flex: 1 1 auto;
+  }
+  .horizontal.segments ::slotted(ui-segment:not(:first-child)) {
+    --segment-left-border: var(--segments-horizontal-divider);
+  }
+  .horizontal.segments ::slotted(ui-segment:first-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius) 0 0 var(--segment-grouped-border-radius);
+  }
+  .horizontal.segments ::slotted(ui-segment:last-child) {
+    --segment-border-radius: 0 var(--segment-grouped-border-radius) var(--segment-grouped-border-radius) 0;
+  }
+  .horizontal.segments ::slotted(ui-segment:only-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius);
+  }
 }
 
 /* src/primitives/segment/css/definition/segment-definition.css */
-@layer segment.definition;
+
+/* src/primitives/segment/css/theme/content/segment-variables.css */
+@layer segment.theme.content.segment {
+  :host {
+    --segment-margin: var(--spacing) 0;
+    --segment-padding: var(--relative-medium);
+    --segment-background: var(--inverted-100);
+    --segment-border: var(--border);
+    --segment-top-border: var(--border);
+    --segment-left-border: var(--border);
+    --segment-border-radius: var(--border-radius);
+    --segment-text-color: inherit;
+    --segment-box-shadow: var(--subtle-shadow);
+  }
+}
+
+/* src/primitives/segment/css/theme/plural/segments-variables.css */
+@layer segment.theme.plural.segments {
+  :host {
+    --segment-grouped-margin: var(--segment-margin);
+    --segment-grouped-border: var(--segment-border);
+    --segment-grouped-box-shadow: var(--segment-box-shadow);
+    --segment-grouped-border-radius: var(--border-radius);
+    --segment-grouped-segment-divider: var(--border);
+  }
+}
+
+/* src/primitives/segment/css/theme/types/raised-variables.css */
+@layer segment.theme.types.raised {
+  :host {
+    --segment-raised-box-shadow: var(--floating-shadow);
+  }
+}
+
+/* src/primitives/segment/css/theme/types/stacked-variables.css */
+@layer segment.theme.types.stacked {
+  :host {
+    --segment-stacked-height: var(--6px);
+    --segment-stacked-page-background: var(--standard-5);
+    --segment-stacked-padding: calc(var(--segment-padding) + 0.4em);
+    --segment-tall-stacked-padding: calc(var(--segment-padding) + 0.8em);
+  }
+}
+
+/* src/primitives/segment/css/theme/types/piled-variables.css */
+@layer segment.theme.types.piled {
+  :host {
+    --segment-piled-z-index: auto;
+    --segment-piled-margin: 3em;
+    --segment-piled-degrees: 1.2deg;
+    --segment-piled-border: var(--segment-border);
+    --segment-piled-box-shadow: "";
+  }
+}
+
+/* src/primitives/segment/css/theme/types/vertical-variables.css */
+@layer segment.theme.types.vertical {
+  :host {
+  }
+}
+
+/* src/primitives/segment/css/theme/states/loading-variables.css */
+@layer segment.theme.states.loading {
+  :host {
+    --segment-loader-dimmer-color: rgba(255, 255, 255, 0.8);
+    --segment-loader-dimmer-z-index: 100;
+    --segment-loader-size: 3em;
+    --segment-loader-line-z-index: 101;
+  }
+}
+
+/* src/primitives/segment/css/theme/states/disabled-variables.css */
+@layer segment.theme.states.disabled {
+  :host {
+    --segment-disabled-opacity: var(--disabled-opacity);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/basic-variables.css */
+@layer segment.theme.variations.basic {
+  :host {
+    --segment-basic-background: none transparent;
+    --segment-basic-border: none;
+    --segment-basic-box-shadow: none;
+    --segment-basic-border-radius: 0px;
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/padded-variables.css */
+@layer segment.theme.variations.padded {
+  :host {
+    --segment-padded-padding: var(--relative-large);
+    --segment-very-padded-padding: var(--relative-huge);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/attached-variables.css */
+@layer segment.theme.variations.attached {
+  :host {
+    --segment-attached-offset: -1px;
+    --segment-attached-box-shadow: var(--subtle-shadow);
+    --segment-attached-top: var(--segment-border-radius) var(--segment-border-radius) 0 0;
+    --segment-attached-bottom: 0 0 var(--segment-border-radius) var(--segment-border-radius);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/emphasis-variables.css */
+@layer segment.theme.variations.emphasis {
+  :host {
+    --segment-secondary-background: var(--inverted-solid-95);
+    --segment-secondary-color: var(--standard-60);
+    --segment-tertiary-background: var(--inverted-solid-90);
+    --segment-tertiary-color: var(--standard-50);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/compact-variables.css */
+@layer segment.theme.variations.compact {
+  :host {
+    --segment-compact-display: table;
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/colored-variables.css */
+@layer segment.theme.variations.colored {
+  :host {
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/circular-variables.css */
+@layer segment.theme.variations.circular {
+  :host {
+    --segment-circular-border-radius: var(--circular-radius);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/clearing-variables.css */
+@layer segment.theme.variations.clearing {
+  :host {
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/floated-variables.css */
+@layer segment.theme.variations.floated {
+  :host {
+    --segment-floated-distance: var(--spacing);
+  }
+}
+
+/* src/primitives/segment/css/theme/variations/text-align-variables.css */
+@layer segment.theme.variations.text-align {
+  :host {
+  }
+}
+
+/* src/primitives/segment/css/theme/plural-types/horizontal-variables.css */
+@layer segment.theme.plural-types.horizontal {
+  :host {
+    --segments-horizontal-divider: var(--border);
+  }
+}
 
 /* src/primitives/segment/css/theme/segment-theme.css */
-@layer segment.theme;
 
 /* src/primitives/segment/css/segment.css */

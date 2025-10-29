@@ -1,0 +1,9 @@
+.segment {
+  &.padded {
+    padding: var(--segment-padded-padding);
+  }
+
+  &.very-padded {
+    padding: var(--segment-very-padded-padding);
+  }
+}

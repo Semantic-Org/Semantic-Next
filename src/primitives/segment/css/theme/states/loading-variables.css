@@ -1,0 +1,6 @@
+:host {
+  --segment-loader-dimmer-color: rgba(255, 255, 255, 0.8);
+  --segment-loader-dimmer-z-index: 100;
+  --segment-loader-size: 3em;
+  --segment-loader-line-z-index: 101;
+}

@@ -1,0 +1,6 @@
+.basic.segment {
+  background: var(--segment-basic-background);
+  box-shadow: var(--segment-basic-box-shadow);
+  border: var(--segment-basic-border);
+  border-radius: var(--segment-basic-border-radius);
+}

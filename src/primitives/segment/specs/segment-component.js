@@ -1,13 +1,136 @@
-// Auto-generated from menu.json
+// Auto-generated from segment.json
 export default {
-  "tagName": "ui-menu",
+  "tagName": "ui-segment",
   "types": [
-    "placeholder"
+    "emphasis",
+    "raised",
+    "stacked",
+    "piled",
+    "vertical"
+  ],
+  "variations": [
+    "attached",
+    "padded",
+    "compact",
+    "color",
+    "circular",
+    "clearing",
+    "floated",
+    "text-align",
+    "basic"
+  ],
+  "states": [
+    "disabled",
+    "loading"
   ],
   "attributes": [
-    "placeholder"
+    "emphasis",
+    "raised",
+    "stacked",
+    "piled",
+    "vertical",
+    "disabled",
+    "loading",
+    "attached",
+    "padded",
+    "compact",
+    "color",
+    "circular",
+    "clearing",
+    "floated",
+    "text-align",
+    "basic"
   ],
+  "optionAttributes": {
+    "secondary": "emphasis",
+    "tertiary": "emphasis",
+    "top-attached": "attached",
+    "attached": "attached",
+    "bottom-attached": "attached",
+    "padded": "padded",
+    "very-padded": "padded",
+    "red": "color",
+    "orange": "color",
+    "yellow": "color",
+    "olive": "color",
+    "green": "color",
+    "teal": "color",
+    "blue": "color",
+    "violet": "color",
+    "purple": "color",
+    "pink": "color",
+    "brown": "color",
+    "grey": "color",
+    "black": "color",
+    "left-floated": "floated",
+    "right-floated": "floated",
+    "left-aligned": "text-align",
+    "center-aligned": "text-align",
+    "right-aligned": "text-align"
+  },
   "propertyTypes": {
-    "placeholder": "boolean"
-  }
+    "emphasis": "string",
+    "raised": "boolean",
+    "stacked": "boolean",
+    "piled": "boolean",
+    "vertical": "boolean",
+    "disabled": "boolean",
+    "loading": "boolean",
+    "attached": "string",
+    "padded": "string",
+    "compact": "boolean",
+    "color": "string",
+    "circular": "boolean",
+    "clearing": "boolean",
+    "floated": "string",
+    "text-align": "string",
+    "basic": "boolean"
+  },
+  "allowedValues": {
+    "emphasis": [
+      "secondary",
+      "tertiary"
+    ],
+    "attached": [
+      "top-attached",
+      "attached",
+      "bottom-attached"
+    ],
+    "padded": [
+      "padded",
+      "very-padded"
+    ],
+    "color": [
+      "red",
+      "orange",
+      "yellow",
+      "olive",
+      "green",
+      "teal",
+      "blue",
+      "violet",
+      "purple",
+      "pink",
+      "brown",
+      "grey",
+      "black"
+    ],
+    "floated": [
+      "left-floated",
+      "right-floated"
+    ],
+    "text-align": [
+      "left-aligned",
+      "center-aligned",
+      "right-aligned"
+    ]
+  },
+  "attributeClasses": [
+    "attached",
+    "color"
+  ],
+  "inheritedPluralVariations": [
+    "compact",
+    "basic"
+  ]
 };

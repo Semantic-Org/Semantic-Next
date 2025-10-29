@@ -1,13 +1,32 @@
-/*******************************
-            Button
-*******************************/
+/* Content */
+@import url('./content/segment-variables.css') layer(segment.theme.content.segment);
 
-/* Content
-@import url('./content/segment-variables.css') layer(content.segment);
-*/
+/* Plural */
+@import url('./plural/segments-variables.css') layer(segment.theme.plural.segments);
 
 /* Types */
+@import url('./types/raised-variables.css') layer(segment.theme.types.raised);
+@import url('./types/stacked-variables.css') layer(segment.theme.types.stacked);
+@import url('./types/piled-variables.css') layer(segment.theme.types.piled);
+@import url('./types/vertical-variables.css') layer(segment.theme.types.vertical);
+
+/* States */
+@import url('./states/loading-variables.css') layer(segment.theme.states.loading);
+@import url('./states/disabled-variables.css') layer(segment.theme.states.disabled);
 
 /* Variations */
+@import url('./variations/basic-variables.css') layer(segment.theme.variations.basic);
+@import url('./variations/padded-variables.css') layer(segment.theme.variations.padded);
+@import url('./variations/attached-variables.css') layer(segment.theme.variations.attached);
+@import url('./variations/emphasis-variables.css') layer(segment.theme.variations.emphasis);
+@import url('./variations/compact-variables.css') layer(segment.theme.variations.compact);
+@import url('./variations/colored-variables.css') layer(segment.theme.variations.colored);
+@import url('./variations/circular-variables.css') layer(segment.theme.variations.circular);
+@import url('./variations/clearing-variables.css') layer(segment.theme.variations.clearing);
+@import url('./variations/floated-variables.css') layer(segment.theme.variations.floated);
+@import url('./variations/text-align-variables.css') layer(segment.theme.variations.text-align);
+
+/* Plural Types */
+@import url('./plural-types/horizontal-variables.css') layer(segment.theme.plural-types.horizontal);
 
 

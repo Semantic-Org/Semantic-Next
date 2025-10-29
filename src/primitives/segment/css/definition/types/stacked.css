@@ -1,0 +1,29 @@
+.stacked.segments,
+.stacked.segment {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: calc(-1 * var(--segment-stacked-height) / 2);
+    left: 0%;
+    border-top: 1px solid var(--border-color);
+    background: var(--segment-stacked-page-background);
+    width: 100%;
+    height: var(--segment-stacked-height);
+    visibility: visible;
+  }
+
+  &::before {
+    display: none;
+  }
+}
+
+.stacked.segment {
+  padding-bottom: var(--segment-stacked-padding);
+}
+
+.tall.stacked.segments::before,
+.tall.stacked.segment::before {
+  display: block;
+  bottom: 0px;
+}

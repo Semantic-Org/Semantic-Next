@@ -1,0 +1,42 @@
+.piled.segments,
+.piled.segment {
+  margin: var(--segment-piled-margin) 0em;
+  box-shadow: var(--segment-piled-box-shadow);
+  z-index: var(--segment-piled-z-index);
+
+  &::before,
+  &::after {
+    background-color: var(--inverted-100);
+    visibility: visible;
+    content: '';
+    display: block;
+    height: 100%;
+    left: 0px;
+    position: absolute;
+    width: 100%;
+    border: var(--segment-piled-border);
+    box-shadow: var(--segment-piled-box-shadow);
+  }
+
+  &::before {
+    transform: rotate(calc(-1 * var(--segment-piled-degrees)));
+    top: 0;
+    z-index: -2;
+  }
+
+  &::after {
+    transform: rotate(var(--segment-piled-degrees));
+    top: 0;
+    z-index: -1;
+  }
+}
+
+.piled.segment {
+  &:first-child {
+    margin-top: 0em;
+  }
+
+  &:last-child {
+    margin-bottom: 0em;
+  }
+}

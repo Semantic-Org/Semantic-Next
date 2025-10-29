@@ -1,0 +1,6 @@
+:host {
+  --segment-stacked-height: var(--6px);
+  --segment-stacked-page-background: var(--standard-5);
+  --segment-stacked-padding: calc(var(--segment-padding) + 0.4em);
+  --segment-tall-stacked-padding: calc(var(--segment-padding) + 0.8em);
+}

@@ -1,0 +1,24 @@
+.horizontal.segments {
+  flex-direction: row;
+
+  ::slotted(ui-segment) {
+    --segment-top-border: none;
+    flex: 1 1 auto;
+  }
+
+  ::slotted(ui-segment:not(:first-child)) {
+    --segment-left-border: var(--segments-horizontal-divider);
+  }
+
+  ::slotted(ui-segment:first-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius) 0 0 var(--segment-grouped-border-radius);
+  }
+
+  ::slotted(ui-segment:last-child) {
+    --segment-border-radius: 0 var(--segment-grouped-border-radius) var(--segment-grouped-border-radius) 0;
+  }
+
+  ::slotted(ui-segment:only-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius);
+  }
+}

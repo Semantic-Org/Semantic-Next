@@ -1,0 +1,11 @@
+:host {
+  --segment-margin: var(--spacing) 0;
+  --segment-padding: var(--relative-medium);
+  --segment-background: var(--inverted-100);
+  --segment-border: var(--border);
+  --segment-top-border: var(--border); /* vertical divider */
+  --segment-left-border: var(--border); /* horizontal divider */
+  --segment-border-radius: var(--border-radius);
+  --segment-text-color: inherit;
+  --segment-box-shadow: var(--subtle-shadow);
+}

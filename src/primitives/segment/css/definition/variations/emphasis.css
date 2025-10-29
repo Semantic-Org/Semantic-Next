@@ -1,0 +1,11 @@
+.segment {
+  &.secondary {
+    background: var(--segment-secondary-background);
+    color: var(--segment-secondary-color);
+  }
+
+  &.tertiary {
+    background: var(--segment-tertiary-background);
+    color: var(--segment-tertiary-color);
+  }
+}

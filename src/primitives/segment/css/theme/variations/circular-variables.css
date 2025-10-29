@@ -1,0 +1,3 @@
+:host {
+  --segment-circular-border-radius: var(--circular-radius);
+}

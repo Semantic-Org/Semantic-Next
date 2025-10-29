@@ -1,0 +1,7 @@
+:host {
+  --segment-attached-offset: -1px;
+  --segment-attached-box-shadow: var(--subtle-shadow);
+
+  --segment-attached-top: var(--segment-border-radius) var(--segment-border-radius) 0 0;
+  --segment-attached-bottom: 0 0 var(--segment-border-radius) var(--segment-border-radius);
+}
