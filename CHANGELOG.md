@@ -26,7 +26,7 @@ xx.xx.xxxx
 
 ### UI
 * **Image** - Add new component for images
-* **Segment** - Added new component for segment
+* **Segment** - Add new component for creating groupings of related content
 * **Button** - Fixed issues with `positive`, `negative` and `icon-after` not working as expected
 * **Button** - Added `solid`, `outline` and `ghost` variations
 * **Menu** - `menu-item` now uses `value` attr. Menu will now automatically select items when values are present.
