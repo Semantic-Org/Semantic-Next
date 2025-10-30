@@ -96,9 +96,14 @@ describe('prettifyHash', () => {
 ```
 
 ### Verification
-Run: `npm run test`
+
+1. Run tests: `npm test`
+2. Check coverage: `npm run test:coverage`
+3. Iterate on tests until all reasonable new lines are covered
 
 ## Step 3: Types
+
+> **See Also:** [TypeScript Types Guide](/ai/guides/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
 
 ### Type Definition Location
 `/packages/utils/types/[module].d.ts`

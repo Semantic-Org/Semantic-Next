@@ -237,6 +237,117 @@ npm run ci:test:browser  # Browser tests only
 
 ---
 
+## Test Coverage
+
+### Running Coverage
+
+When writing tests, **always run coverage** to ensure new code is adequately tested:
+
+```bash
+# From package directory
+npm run test:coverage
+
+# Or run specific test file with coverage
+npm run test:coverage -- arrays
+```
+
+### Coverage Requirements
+
+**When adding or modifying code:**
+1. Write initial tests for the feature
+2. Run `npm run test:coverage` to check coverage
+3. Iterate on tests until all **reasonable lines** are covered
+4. Verify coverage report shows new lines are tested
+
+### What to Cover
+
+**✅ Should be tested:**
+- Public API methods and functions
+- Conditional logic (if/else branches)
+- Error handling paths
+- Edge cases and boundary conditions
+- Return value variations based on input
+- State changes and side effects
+
+**❌ Don't need to test:**
+- Simple getters/setters that just pass through values
+- Trivial one-line utilities with no logic
+- Auto-generated code
+- Type definitions
+- Import/export statements
+
+### Interpreting Coverage Reports
+
+Coverage reports show four metrics:
+- **Statements** - Individual statements executed
+- **Branches** - Conditional branches (if/else) taken
+- **Functions** - Functions called
+- **Lines** - Lines of code executed
+
+**Focus on:**
+- **Lines** - Aim for 100% of new lines (that are reasonable to test)
+- **Branches** - Ensure both true/false paths tested for conditionals
+
+**Example coverage output:**
+```
+----------------------|---------|----------|---------|---------|
+File                  | % Stmts | % Branch | % Funcs | % Lines |
+----------------------|---------|----------|---------|---------|
+All files             |   92.5  |   88.2   |   95.0  |   92.8  |
+ arrays.js            |  100.0  |  100.0   |  100.0  |  100.0  |  ← Good!
+ objects.js           |   85.7  |   75.0   |   90.0  |   86.2  |  ← Check untested branches
+----------------------|---------|----------|---------|---------|
+```
+
+### Coverage Workflow
+
+**Step-by-step process:**
+
+1. **Implement feature** in source file
+2. **Write initial tests** covering main functionality
+3. **Run coverage:**
+   ```bash
+   npm run test:coverage
+   ```
+4. **Review uncovered lines** in the output
+5. **Add tests** for uncovered lines (if reasonable to test)
+6. **Re-run coverage** to verify
+7. **Repeat steps 4-6** until satisfied
+
+### Example Iteration
+
+```javascript
+// Initial test - basic functionality
+it('should remove duplicates', () => {
+  expect(unique([1, 2, 2, 3])).toEqual([1, 2, 3]);
+});
+
+// Run coverage → shows edge cases not covered
+// Add test for empty array
+it('should handle empty arrays', () => {
+  expect(unique([])).toEqual([]);
+});
+
+// Add test for single element
+it('should handle single element', () => {
+  expect(unique([1])).toEqual([1]);
+});
+
+// Run coverage → now shows 100% coverage
+```
+
+### When Coverage Isn't 100%
+
+**It's acceptable to have uncovered lines when:**
+- Testing requires complex mocking that's not worth the effort
+- Code handles environmental issues (file system, network)
+- Defensive code for "should never happen" scenarios
+- Browser-specific APIs not available in test environment
+
+**If the reason isn't obvious, explain to the user in the chat why certain lines aren't covered.**
+
+---
+
 ## Writing Tests
 
 ### File Naming Conventions
@@ -542,7 +653,15 @@ The project uses Vitest with three test environments:
 **Running tests (always scope to your work):**
 - Package: `cd packages/<name> && npm test` ← PREFERRED
 - Filter: `npm test -- <filter>` ← PREFERRED
+- Coverage: `cd packages/<name> && npm run test:coverage` ← USE when writing tests
 - Global: `npm test` ← AVOID unless explicitly requested
+
+**Coverage workflow:**
+1. Write tests
+2. Run `npm run test:coverage`
+3. Review uncovered lines
+4. Add tests for uncovered reasonable lines
+5. Repeat until satisfied
 
 **Common imports:**
 ```javascript

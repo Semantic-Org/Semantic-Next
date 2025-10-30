@@ -78,6 +78,11 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 **Start with:** [Testing Guide](/ai/guides/testing.md)
 **Contains:** Test types (unit/DOM/browser), file organization, running tests, writing patterns
 
+### TypeScript Types & JSDoc
+**Need to:** Add type definitions, write JSDoc comments, understand DX requirements
+**Start with:** [TypeScript Types Guide](/ai/guides/typescript-types.md)
+**Contains:** JSDoc patterns, type organization, documentation links, examples
+
 ### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens
 **Start with:** [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md) • [CSS Tokens](/ai/guides/styling/tokens/token-usage.md)
@@ -169,6 +174,7 @@ Context for debugging and finding solutions:
 | **guides/components/generation.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
 | **guides/components/patterns.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
 | **guides/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
+| **guides/typescript-types.md** | TypeScript & JSDoc | All levels | Guidelines + Examples |
 | **quick-reference.md** | API Lookup | All levels | Reference |
 | **packages/reactivity.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
 | **packages/query.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
@@ -209,6 +215,12 @@ Write or run tests?
 ├── Choose test type → guides/testing.md (Test Types)
 ├── Write tests → guides/testing.md (Writing Tests)
 └── Package-specific patterns → guides/testing.md (Package-Specific Patterns)
+
+Add TypeScript types?
+├── JSDoc patterns → guides/typescript-types.md (JSDoc Requirements)
+├── Type organization → guides/typescript-types.md (Type File Organization)
+├── Function types → guides/typescript-types.md (Type Patterns)
+└── Examples & best practices → guides/typescript-types.md (Common Scenarios)
 
 Style components?
 ├── Basic CSS patterns → guides/html.md + guides/styling/css-guide.md

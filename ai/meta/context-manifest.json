@@ -47,7 +47,15 @@
       "category": "specialized",
       "tags": ["testing", "vitest", "quality-assurance"],
       "dependsOn": ["foundation/mental-model", "foundation/codebase-navigation"],
-      "approxTokens": 4200
+      "approxTokens": 6000
+    },
+    {
+      "id": "guides/typescript-types",
+      "path": "ai/guides/typescript-types.md",
+      "category": "specialized",
+      "tags": ["typescript", "jsdoc", "types", "dx"],
+      "dependsOn": ["foundation/codebase-navigation"],
+      "approxTokens": 7000
     },
     {
       "id": "styling/html",

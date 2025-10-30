@@ -276,6 +276,7 @@ Update `RELEASE-NOTES.md`:
 - [ ] Renderer evaluates syntax and produces correct output
 - [ ] Directive handles all modes/options properly
 - [ ] Compiler tests cover all syntax variations
+- [ ] Coverage verified with `npm run test:coverage` - all reasonable lines covered
 - [ ] TypeScript types updated (if applicable)
 - [ ] User guide documentation added/updated in `/docs/src/pages/templates/`
   - [ ] Decision made: new document or update existing?

@@ -128,11 +128,19 @@ describe('methodName', () => {
 ### Essential Test Cases
 1. **Basic getter/setter functionality**
 2. **Single element behavior**
-3. **Multiple element behavior** 
+3. **Multiple element behavior**
 4. **Empty selection handling**
 5. **Edge cases** (missing properties, null values, etc.)
 6. **Chaining** (setters return Query instance)
 7. **Type consistency** (what gets returned vs what gets set)
+
+### Coverage Verification
+After writing tests, verify coverage:
+```bash
+cd packages/query
+npm run test:coverage
+```
+Iterate on tests until all reasonable new lines are covered.
 
 ### Test Patterns
 ```javascript
@@ -155,6 +163,8 @@ expect($result[0]).toBe(/* original element */);
 ```
 
 ## Step 3: TypeScript Definitions
+
+> **See Also:** [TypeScript Types Guide](/ai/guides/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
 
 ### Location
 Add type definitions to `/packages/query/types/query.d.ts`
@@ -340,6 +350,7 @@ Add entry following the existing pattern:
 
 - [ ] Method implemented in `query.js` using semantic-ui utils
 - [ ] Comprehensive tests added covering all usage patterns
+- [ ] Coverage verified with `npm run test:coverage` - all reasonable lines covered
 - [ ] TypeScript definitions added with proper overloads
 - [ ] Documentation added to appropriate category file
 - [ ] AI guide updated with method reference and examples
