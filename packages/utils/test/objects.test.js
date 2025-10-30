@@ -14,6 +14,7 @@ import {
   reverseKeys,
   some,
   values,
+  weightedObjectSearch,
 } from '@semantic-ui/utils';
 
 import { describe, expect, it, vi } from 'vitest';
@@ -281,6 +282,111 @@ describe('Object Utilities', () => {
       const obj = { a: [1, 2], b: [2, 3], c: 1 };
       const reversed = reverseKeys(obj);
       expect(reversed).toEqual({ '1': ['a', 'c'], '2': ['a', 'b'], '3': 'b' });
+    });
+  });
+
+  describe('weightedObjectSearch', () => {
+    const testData = [
+      { name: 'Apple iPhone', category: 'phone', tags: ['mobile', 'apple'] },
+      { name: 'Samsung Galaxy', category: 'phone', tags: ['mobile', 'android'] },
+      { name: 'iPad Pro', category: 'tablet', tags: ['tablet', 'apple'] },
+      { name: 'MacBook Air', category: 'laptop', tags: ['laptop', 'apple'] },
+    ];
+
+    it('should return all objects when query is empty', () => {
+      const result = weightedObjectSearch('', testData, {
+        propertiesToMatch: ['name', 'category'],
+      });
+      expect(result).toEqual(testData);
+    });
+
+    it('should filter objects based on query match', () => {
+      const result = weightedObjectSearch('apple', testData, {
+        propertiesToMatch: ['name', 'category', 'tags'],
+      });
+      expect(result.length).toBe(3);
+      expect(result.some(item => item.name === 'Apple iPhone')).toBe(true);
+      expect(result.some(item => item.name === 'iPad Pro')).toBe(true);
+      expect(result.some(item => item.name === 'MacBook Air')).toBe(true);
+    });
+
+    it('should sort results by relevance (weight)', () => {
+      const result = weightedObjectSearch('apple', testData, {
+        propertiesToMatch: ['name', 'category', 'tags'],
+      });
+      expect(result[0].name).toBe('Apple iPhone');
+    });
+
+    it('should handle queries with multiple words when matchAllWords is true', () => {
+      const multiData = [
+        { name: 'Apple laptop', category: 'computer' },
+        { name: 'Samsung laptop', category: 'computer' },
+        { name: 'Apple tablet', category: 'tablet' },
+      ];
+      const result = weightedObjectSearch('Apple laptop', multiData, {
+        propertiesToMatch: ['name', 'category'],
+        matchAllWords: true,
+      });
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0].name).toBe('Apple laptop');
+    });
+
+    it('should return matches with details when returnMatches is true', () => {
+      const result = weightedObjectSearch('apple', testData, {
+        propertiesToMatch: ['name', 'tags'],
+        returnMatches: true,
+      });
+      expect(result[0].matches).toBeDefined();
+      expect(Array.isArray(result[0].matches)).toBe(true);
+    });
+
+    it('should handle single word match with case insensitivity', () => {
+      const result = weightedObjectSearch('IPHONE', testData, {
+        propertiesToMatch: ['name'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Apple iPhone');
+    });
+
+    it('should find items with ANY word when matchAllWords is false', () => {
+      const freshData = [
+        { name: 'Apple iPhone' },
+        { name: 'Samsung Galaxy' },
+      ];
+      const result = weightedObjectSearch('apple samsung', freshData, {
+        propertiesToMatch: ['name'],
+        matchAllWords: false,
+      });
+      expect(result.length).toBe(2);
+      expect(result.some(r => r.name === 'Apple iPhone')).toBe(true);
+      expect(result.some(r => r.name === 'Samsung Galaxy')).toBe(true);
+    });
+
+    it('should handle special regex characters in query', () => {
+      const specialData = [
+        { name: 'Test (special)', category: 'test' },
+        { name: 'Normal item', category: 'test' },
+      ];
+      const result = weightedObjectSearch('special', specialData, {
+        propertiesToMatch: ['name'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Test (special)');
+    });
+
+    it('should handle trimmed queries', () => {
+      const result = weightedObjectSearch('  iPhone  ', testData, {
+        propertiesToMatch: ['name'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Apple iPhone');
+    });
+
+    it('should return empty array when no matches found', () => {
+      const result = weightedObjectSearch('nonexistent', testData, {
+        propertiesToMatch: ['name', 'category'],
+      });
+      expect(result).toEqual([]);
     });
   });
 
