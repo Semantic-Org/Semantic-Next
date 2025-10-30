@@ -661,7 +661,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 1. Read: /packages/tailwind/README.md                    # Plugin overview
 2. Read: /packages/tailwind/AGENTS.md                    # Implementation details
 3. Read: /packages/tailwind/node_modules/tailwindcss-iso/README.md  # WASM engine
-4. Read: /ai/guides/component-generation-instructions.md#tailwind-css-integration
+4. Read: /ai/guides/components/generation.md#tailwind-css-integration
 5. Grep: pattern="TailwindPlugin" include="*.js" path="/docs/src/examples/"
 ```
 

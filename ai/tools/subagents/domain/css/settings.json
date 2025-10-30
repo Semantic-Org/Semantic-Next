@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(src/components/**)",
+      "Edit(src/components/**)",
+      "Write(src/components/**)",
+      "MultiEdit(src/components/**)",
+      "Read(docs/src/examples/**)",
+      "Edit(docs/src/examples/**)",
+      "Write(docs/src/examples/**)",
+      "MultiEdit(docs/src/examples/**)",
+      "Read(docs/src/pages/components/**)",
+      "Read(docs/src/pages/api/component/**)",
+      "Read(ai/guides/html.md)",
+      "Read(ai/guides/styling/css-guide.md)",
+      "Read(ai/foundations/mental-model.md)",
+      "Read(packages/*/src/**/*.css)",
+      "Edit(packages/*/src/**/*.css)",
+      "Write(packages/*/src/**/*.css)",
+      "MultiEdit(packages/*/src/**/*.css)"
+    ],
+    "deny": [],
+    "additionalDirectories": [],
+    "defaultMode": "default"
+  }
+}

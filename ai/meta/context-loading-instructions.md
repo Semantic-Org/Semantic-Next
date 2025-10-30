@@ -2,7 +2,7 @@
 
 > **For:** AI agents working with Semantic UI documentation  
 > **Purpose:** Optimize documentation usage for AI-specific workflows  
-> **Back to:** [Documentation Hub](../00-START-HERE.md)
+> **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---
 
@@ -44,11 +44,11 @@ Level 1: Foundation
 └── Decision: What type of task?
 
 Level 2: Task-Specific
-├── Component Creation → component-generation-instructions.md
-├── Implementation Patterns → patterns-cookbook.md  
+├── Component Creation → components/generation.md
+├── Implementation Patterns → components/patterns.md
 ├── API Reference → quick-reference.md
 ├── Codebase Navigation → codebase-navigation-guide.md
-└── Specialized Packages → specialized/ documents
+└── Standalone Packages → packages/ API documentation
 
 Level 3: Implementation
 ├── Grep: Find relevant examples
@@ -72,20 +72,20 @@ Level 4: Verification & Refinement
 ## Task-Based Context Loading
 
 ### Component Creation Tasks
-**Context:** [`guides/component-generation-instructions.md`](../guides/component-generation-instructions.md)  
-**Supplementary:** [`foundations/quick-reference.md`](../foundations/quick-reference.md) for API syntax
+**Context:** [`guides/component-generation-instructions.md`](/ai/guides/components/generation.md)
+**Supplementary:** [`foundations/quick-reference.md`](/ai/foundations/quick-reference.md) for API syntax
 
 ### Architecture Understanding
-**Context:** [`foundations/mental-model.md`](../foundations/mental-model.md)  
-**Supplementary:** [`guides/patterns-cookbook.md`](../guides/patterns-cookbook.md) for implementation
+**Context:** [`foundations/mental-model.md`](/ai/foundations/mental-model.md)
+**Supplementary:** [`guides/patterns-cookbook.md`](/ai/guides/components/patterns.md) for implementation
 
 ### Debugging/Problem Solving
-**Context:** [`foundations/codebase-navigation-guide.md`](../foundations/codebase-navigation-guide.md)  
+**Context:** [`foundations/codebase-navigation-guide.md`](/ai/foundations/codebase-navigation-guide.md)
 **Supplementary:** Source code files as identified
 
 ### Advanced Implementation
-**Context:** [`guides/patterns-cookbook.md`](../guides/patterns-cookbook.md)  
-**Supplementary:** [`specialized/`](../specialized/) documents for specific packages
+**Context:** [`guides/patterns-cookbook.md`](/ai/guides/components/patterns.md)
+**Supplementary:** [`packages/`](/ai/packages/) API documentation for specific packages
 
 ---
 
@@ -93,8 +93,10 @@ Level 4: Verification & Refinement
 
 ### Document Types
 - **`foundations/`** - Core concepts, no prerequisites
-- **`guides/`** - Implementation-focused, may require foundation knowledge  
-- **`specialized/`** - Standalone packages, framework-independent
+- **`guides/`** - Implementation-focused, may require foundation knowledge
+- **`packages/`** - Standalone package API documentation, framework-independent
+- **`documentation/`** - Documentation authoring and writing guidelines
+- **`workflows/`** - Step-by-step processes for specific tasks
 - **`meta/`** - Documentation about documentation
 
 ### Cross-Reference Navigation
@@ -107,7 +109,9 @@ Level 4: Verification & Refinement
 2. **Syntax lookup** → foundations/quick-reference.md
 3. **Implementation patterns** → guides/ documents
 4. **Code location** → foundations/codebase-navigation-guide.md
-5. **Standalone usage** → specialized/ documents
+5. **Standalone package usage** → packages/ API documentation
+6. **Step-by-step processes** → workflows/ task-specific procedures
+7. **Documentation quality** → documentation/writing/ style guides
 
 ---
 
@@ -148,4 +152,3 @@ Level 4: Verification & Refinement
 ---
 
 **Last Updated:** Initial organizational structure complete  
-**Next Review:** After observing AI agent usage patterns with new structure

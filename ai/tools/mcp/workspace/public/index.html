@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workspace - MCP Debugging Environment</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .status-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .status-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 120px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+        }
+        .status-connected { background: #28a745; }
+        .status-disconnected { background: #dc3545; }
+        .status-pending { background: #ffc107; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .component-link {
+            display: block;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border-left: 4px solid #667eea;
+        }
+        .component-link:hover {
+            background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            transform: translateX(4px);
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e9ecef;
+        }
+        .mcp-tools {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+        .mcp-tools h3 {
+            margin-top: 0;
+            color: white;
+        }
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .tool-item {
+            background: rgba(255,255,255,0.1);
+            padding: 0.75rem;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+        .demo-component {
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            background: #f8f9fa;
+        }
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="connection-status" id="connection-status">
+        🔌 Connecting to MCP...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🧪 AI Workspace</h1>
+            <p>MCP-Enabled Web Component Debugging Environment</p>
+        </div>
+
+        <div class="status-indicators">
+            <div class="status-card">
+                <div class="status-indicator status-pending" id="ws-status"></div>
+                <div>WebSocket</div>
+                <small id="ws-text">Connecting...</small>
+            </div>
+            <div class="status-card">
+                <div class="status-indicator status-pending" id="debug-status"></div>
+                <div>Debug Bridge</div>
+                <small id="debug-text">Initializing...</small>
+            </div>
+            <div class="status-card">
+                <div class="status-indicator status-pending" id="component-status"></div>
+                <div>Components</div>
+                <small id="component-text">Scanning...</small>
+            </div>
+        </div>
+
+        <div class="mcp-tools">
+            <h3>🛠️ Available MCP Tools</h3>
+            <p>AI agents can use these tools to inspect and debug web components:</p>
+            <div class="tool-list">
+                <div class="tool-item">
+                    <strong>inspect_component</strong><br>
+                    <small>Deep component analysis</small>
+                </div>
+                <div class="tool-item">
+                    <strong>execute_in_component</strong><br>
+                    <small>Run code in component context</small>
+                </div>
+                <div class="tool-item">
+                    <strong>monitor_events</strong><br>
+                    <small>Real-time event streaming</small>
+                </div>
+                <div class="tool-item">
+                    <strong>query_shadow_dom</strong><br>
+                    <small>Shadow DOM querying</small>
+                </div>
+                <div class="tool-item">
+                    <strong>get_computed_styles</strong><br>
+                    <small>CSS inspection</small>
+                </div>
+                <div class="tool-item">
+                    <strong>list_components</strong><br>
+                    <small>Component discovery</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-component">
+            <h3>🎯 Live Test Component</h3>
+            <p>Interact with this component while an AI agent debugs it in real-time:</p>
+            <test-component id="demo-test" theme="default">
+                <p>🎪 This is slotted content inside the test component!</p>
+            </test-component>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🚀 Quick Start</h3>
+                <ol>
+                    <li>Create components in <span class="code">components/my-component/</span></li>
+                    <li>Use MCP tools to inspect and debug</li>
+                    <li>Test with real-time event monitoring</li>
+                    <li>Iterate based on debugging insights</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>🧩 Component Tools</h3>
+                <div class="component-list">
+                    <a href="/public/component.html" class="component-link">
+                        📝 Component Tester
+                    </a>
+                    <a href="/public/component.html?name=test-component" class="component-link">
+                        🧪 Test Component Demo
+                    </a>
+                    <a href="/public/component.html?name=example" class="component-link">
+                        🎯 Example Component
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Debug Features</h3>
+                <ul>
+                    <li>🔍 Shadow DOM inspection</li>
+                    <li>⚡ Real-time event monitoring</li>
+                    <li>🎨 CSS computed styles analysis</li>
+                    <li>🧠 Component state introspection</li>
+                    <li>💾 DOM mutation tracking</li>
+                    <li>🎯 Code execution in component context</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>📚 Documentation</h3>
+                <p>Access comprehensive component development guides:</p>
+                <ul>
+                    <li><a href="/mcp-tools.js" target="_blank">MCP Tools Reference</a></li>
+                    <li><a href="/ai/guides/components/generation.md" target="_blank">Component Guide</a></li>
+                    <li><a href="/ai/packages/query.md" target="_blank">Query System</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h3>🔍 Discovered Components</h3>
+            <div id="components-list">
+                <p>Scanning for components...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/components/test-component/component.js"></script>
+    <script type="module">
+        // Status management
+        function updateStatus(type, status, text) {
+            const indicator = document.getElementById(`${type}-status`);
+            const textEl = document.getElementById(`${type}-text`);
+            
+            indicator.className = `status-indicator status-${status}`;
+            if (textEl) textEl.textContent = text;
+        }
+
+        function updateConnectionStatus(text, color = '#666') {
+            const status = document.getElementById('connection-status');
+            status.textContent = text;
+            status.style.color = color;
+        }
+
+        // Component discovery
+        async function loadComponentsList() {
+            try {
+                const response = await fetch('/components/');
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a[href]');
+                
+                const components = Array.from(links)
+                    .map(link => link.getAttribute('href'))
+                    .filter(href => href && href !== '../' && href.endsWith('/'))
+                    .map(href => href.replace('/', ''));
+
+                const container = document.getElementById('components-list');
+                if (components.length > 0) {
+                    container.innerHTML = components.map(name => 
+                        `<a href="/public/component.html?name=${name}" class="component-link">
+                            🧩 ${name} - <small>Test this component</small>
+                        </a>`
+                    ).join('');
+                    updateStatus('component', 'connected', `${components.length} found`);
+                } else {
+                    container.innerHTML = '<p>No components found. Create your first component!</p>';
+                    updateStatus('component', 'disconnected', 'None found');
+                }
+            } catch (error) {
+                document.getElementById('components-list').innerHTML = 
+                    '<p>Could not load components list.</p>';
+                updateStatus('component', 'disconnected', 'Error loading');
+            }
+        }
+
+        // Debug bridge monitoring
+        function checkDebugBridge() {
+            if (window.__debugBridge) {
+                updateStatus('debug', 'connected', 'Ready');
+                
+                // Monitor WebSocket connection
+                const checkWS = () => {
+                    if (window.__debugBridge.ws) {
+                        const ws = window.__debugBridge.ws;
+                        switch (ws.readyState) {
+                            case WebSocket.CONNECTING:
+                                updateStatus('ws', 'pending', 'Connecting...');
+                                updateConnectionStatus('🔌 Connecting to MCP...', '#ffc107');
+                                break;
+                            case WebSocket.OPEN:
+                                updateStatus('ws', 'connected', 'Connected');
+                                updateConnectionStatus('✅ MCP Connected', '#28a745');
+                                break;
+                            case WebSocket.CLOSING:
+                            case WebSocket.CLOSED:
+                                updateStatus('ws', 'disconnected', 'Disconnected');
+                                updateConnectionStatus('❌ MCP Disconnected', '#dc3545');
+                                break;
+                        }
+                    } else {
+                        updateStatus('ws', 'pending', 'Initializing...');
+                    }
+                };
+                
+                setInterval(checkWS, 1000);
+                checkWS();
+            } else {
+                updateStatus('debug', 'pending', 'Loading...');
+                setTimeout(checkDebugBridge, 500);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 AI Workspace initializing...');
+            loadComponentsList();
+            checkDebugBridge();
+            
+            // Listen for component events
+            document.addEventListener('counter-changed', (e) => {
+                console.log('📊 Counter changed:', e.detail);
+            });
+            
+            document.addEventListener('section-toggled', (e) => {
+                console.log('📖 Section toggled:', e.detail);
+            });
+        });
+    </script>
+</body>
+</html>

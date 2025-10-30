@@ -2,8 +2,8 @@
 
 > **For:** AI agents seeking deep architectural understanding  
 > **Prerequisites:** None - foundational document  
-> **Related:** [Component Guide](../guides/component-generation-instructions.md) • [Patterns Cookbook](../guides/patterns-cookbook.md) • [Quick Reference](../foundations/quick-reference.md)  
-> **Back to:** [Documentation Hub](../00-START-HERE.md)
+> **Related:** [Component Guide](/ai/guides/components/generation.md) • [Patterns Cookbook](/ai/guides/components/patterns.md) • [Quick Reference](/ai/foundations/quick-reference.md)  
+> **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---
 

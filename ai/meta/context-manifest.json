@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "documents": [
+    {
+      "id": "foundation/start-here",
+      "path": "ai/00-START-HERE.md",
+      "category": "foundation",
+      "tags": ["routing", "navigation", "context-loading"],
+      "recommendedOrder": 1,
+      "approxTokens": 3600
+    },
+    {
+      "id": "foundation/mental-model",
+      "path": "ai/foundations/mental-model.md",
+      "category": "foundation",
+      "tags": ["architecture", "reactivity", "design-philosophy"],
+      "recommendedOrder": 2,
+      "approxTokens": 6000
+    },
+    {
+      "id": "foundation/codebase-navigation",
+      "path": "ai/foundations/codebase-navigation-guide.md",
+      "category": "foundation",
+      "tags": ["discovery", "search-patterns", "filesystem"],
+      "recommendedOrder": 3,
+      "approxTokens": 6200
+    },
+    {
+      "id": "components/generation",
+      "path": "ai/guides/components/generation.md",
+      "category": "specialized",
+      "tags": ["components", "implementation", "patterns"],
+      "dependsOn": ["foundation/start-here", "foundation/mental-model"],
+      "approxTokens": 4800
+    },
+    {
+      "id": "components/patterns",
+      "path": "ai/guides/components/patterns.md",
+      "category": "specialized",
+      "tags": ["components", "best-practices", "communication"],
+      "dependsOn": ["components/generation"],
+      "approxTokens": 8100
+    },
+    {
+      "id": "styling/html",
+      "path": "ai/guides/html.md",
+      "category": "specialized",
+      "tags": ["markup", "semantics", "templating"],
+      "dependsOn": ["foundation/mental-model"],
+      "approxTokens": 3500
+    },
+    {
+      "id": "styling/css",
+      "path": "ai/guides/styling/css-guide.md",
+      "category": "specialized",
+      "tags": ["css", "architecture", "responsive"],
+      "dependsOn": ["styling/html"],
+      "approxTokens": 4200
+    },
+    {
+      "id": "styling/token-usage",
+      "path": "ai/guides/styling/tokens/token-usage.md",
+      "category": "specialized",
+      "tags": ["design-tokens", "theming"],
+      "dependsOn": ["styling/css"],
+      "approxTokens": 3600
+    },
+    {
+      "id": "styling/token-architecture",
+      "path": "ai/guides/styling/tokens/architecture.md",
+      "category": "reference",
+      "tags": ["design-tokens", "architecture"],
+      "dependsOn": ["styling/token-usage"],
+      "approxTokens": 3200
+    },
+    {
+      "id": "docs/example-authoring",
+      "path": "ai/documentation/authoring/example-authoring.md",
+      "category": "specialized",
+      "tags": ["documentation", "examples", "playground"],
+      "dependsOn": ["foundation/start-here"],
+      "approxTokens": 14600
+    },
+    {
+      "id": "docs/page-writing",
+      "path": "ai/documentation/writing/page-writing.md",
+      "category": "reference",
+      "tags": ["documentation", "style-guide"],
+      "dependsOn": ["docs/example-authoring"],
+      "approxTokens": 3200
+    },
+    {
+      "id": "docs/slop-identification",
+      "path": "ai/documentation/writing/slop-identification.md",
+      "category": "reference",
+      "tags": ["documentation", "editing"],
+      "approxTokens": 3600
+    },
+    {
+      "id": "packages/reactivity",
+      "path": "ai/packages/reactivity.md",
+      "category": "package",
+      "tags": ["reactivity", "signals", "standalone"],
+      "dependsOn": ["foundation/mental-model"],
+      "approxTokens": 5200
+    },
+    {
+      "id": "packages/query",
+      "path": "ai/packages/query.md",
+      "category": "package",
+      "tags": ["dom", "shadow-dom", "query"],
+      "dependsOn": ["foundation/codebase-navigation"],
+      "approxTokens": 4500
+    },
+    {
+      "id": "packages/utils",
+      "path": "ai/packages/utils.md",
+      "category": "package",
+      "tags": ["utilities", "helpers"],
+      "approxTokens": 4000
+    },
+    {
+      "id": "packages/templating",
+      "path": "ai/packages/templating.md",
+      "category": "package",
+      "tags": ["templates", "compiler"],
+      "dependsOn": ["styling/html"],
+      "approxTokens": 4300
+    },
+    {
+      "id": "packages/specs",
+      "path": "ai/packages/specs.md",
+      "category": "package",
+      "tags": ["specifications", "components"],
+      "approxTokens": 2800
+    },
+    {
+      "id": "workflows/components/spec-to-css",
+      "path": "ai/workflows/components/spec-to-css-implementation.md",
+      "category": "workflow",
+      "tags": ["css", "implementation", "specs"],
+      "dependsOn": ["styling/css", "styling/token-usage"],
+      "approxTokens": 8400
+    },
+    {
+      "id": "workflows/utils/add-util-function",
+      "path": "ai/workflows/utils/add-util-function.md",
+      "category": "workflow",
+      "tags": ["utils", "implementation", "documentation"],
+      "dependsOn": ["packages/utils", "docs/example-authoring"],
+      "approxTokens": 3600
+    }
+  ]
+}

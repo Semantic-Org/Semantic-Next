@@ -16,19 +16,19 @@ Semantic UI is a modern web component framework built on web standards with sign
 ## Quick Task Resolution
 
 ### 🚀 **Building Components**
-**Need to:** Create, modify, or understand components for any application  
-**Start with:** [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md)  
+**Need to:** Create, modify, or understand components for any application
+**Start with:** [Component Generation Guide](/ai/guides/components/generation.md)
 **Contains:** Framework usage patterns, component architecture, implementation best practices
 
 ### 📚 **Creating Documentation Examples**
-**Need to:** Add examples to the documentation system  
-**Start with:** [`docs/example-creation-guide.md`](./docs/example-creation-guide.md)  
+**Need to:** Add examples to the documentation system
+**Start with:** [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md)
 **Contains:** Metadata system, playground behavior, file organization, step-by-step workflows
 
-### 📦 **Creating Package Examples**
-**Need to:** Demonstrate package APIs (reactivity, utils, query)  
-**Start with:** [`docs/package-example-guide.md`](./docs/package-example-guide.md)  
-**Contains:** Package demo patterns, console logging, API demonstrations
+### 📦 **Package API Documentation**
+**Need to:** Understand package APIs (reactivity, utils, query, templating, specs)
+**Start with:** [Packages Directory](/ai/packages/)
+**Contains:** Complete API reference for all standalone packages
 
 ### 🧠 **Understanding Architecture** 
 **Need to:** Grasp framework concepts, mental models, design decisions  
@@ -46,29 +46,45 @@ Semantic UI is a modern web component framework built on web standards with sign
 **Contains:** Complete API reference, decision flowcharts, common recipes
 
 ### 🎯 **Implementation Patterns**
-**Need to:** Best practices, common patterns, advanced techniques  
-**Start with:** [`guides/patterns-cookbook.md`](./guides/patterns-cookbook.md)  
+**Need to:** Best practices, common patterns, advanced techniques
+**Start with:** [Component Patterns Cookbook](/ai/guides/components/patterns.md)
 **Contains:** Communication patterns, state management, event handling, performance
 
 ### 🎨 **HTML & CSS Guidelines**
-**Need to:** Writing templates, styling components, design tokens  
-**Start with:** [`guides/html-css-style-guide.md`](./guides/html-css-style-guide.md)  
+**Need to:** Writing templates, styling components, design tokens
+**Start with:** [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md) • [CSS Tokens](/ai/guides/styling/tokens/token-usage.md)
 **Contains:** Template patterns, CSS architecture, design token usage
 
 ### 🔄 **Reactivity System** (Standalone Library)
-**Need to:** Understand signals, reactions, dependency tracking  
-**Start with:** [`specialized/reactivity-system-guide.md`](./specialized/reactivity-system-guide.md)  
+**Need to:** Understand signals, reactions, dependency tracking
+**Start with:** [Reactivity Package](/ai/packages/reactivity.md)
 **Contains:** Signal API, Reaction API, standalone usage, performance optimization
 
 ### 🔍 **DOM Querying & Manipulation** (Standalone Library)
-**Need to:** Query DOM, handle Shadow DOM, configure components  
-**Start with:** [`specialized/query-system-guide.md`](./specialized/query-system-guide.md)  
+**Need to:** Query DOM, handle Shadow DOM, configure components
+**Start with:** [Query Package](/ai/packages/query.md)
 **Contains:** $ vs $$ usage, component configuration, event handling
 
 ### 🛠️ **Utility Functions** (Standalone Library)
-**Need to:** Array processing, object manipulation, type checking, formatting  
-**Start with:** [`specialized/utils-package-guide.md`](./specialized/utils-package-guide.md)  
+**Need to:** Array processing, object manipulation, type checking, formatting
+**Start with:** [Utils Package](/ai/packages/utils.md)
 **Contains:** Complete utility library reference, performance patterns
+
+### 🧭 **Workflow Decision Tree**
+Choose the workflow that matches your task:
+
+- **Need a new or updated component spec?** → [`/ai/workflows/components/author-component-spec.md`](/ai/workflows/components/author-component-spec.md)
+- **Implement CSS from an approved spec?** → [`/ai/workflows/components/spec-to-css-implementation.md`](/ai/workflows/components/spec-to-css-implementation.md)
+- **Add or enhance a package utility function?** → [`/ai/workflows/utils/add-util-function.md`](/ai/workflows/utils/add-util-function.md)
+- **Create or refine documentation examples?** → [`/ai/workflows/documentation/refine-example-documentation-copy.md`](/ai/workflows/documentation/refine-example-documentation-copy.md)
+- **Introduce new template syntax?** → [`/ai/workflows/templates/add-template-syntax.md`](/ai/workflows/templates/add-template-syntax.md)
+- **Add Query package methods?** → [`/ai/workflows/add-query-method.mdx`](/ai/workflows/add-query-method.mdx)
+- **Publish a new AI context guide?** → [`/ai/workflows/meta/add-ai-context.md`](/ai/workflows/meta/add-ai-context.md)
+
+### 🔄 **Following Workflows**
+**Need to:** Step-by-step processes for specific tasks
+**Start with:** [Workflows Directory](/ai/workflows/)
+**Contains:** Component authoring, CSS implementation, template syntax addition, agent creation, documentation refinement, utility function addition
 
 ---
 
@@ -76,37 +92,39 @@ Semantic UI is a modern web component framework built on web standards with sign
 
 ### **Framework Newcomer Context**
 Essential context for understanding Semantic UI architecture and patterns:
-1. [`foundations/mental-model.md`](./foundations/mental-model.md) - Core concepts and philosophy
-2. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Component creation patterns
-3. [`foundations/quick-reference.md`](./foundations/quick-reference.md) - API reference
+1. [Mental Model](/ai/foundations/mental-model.md) - Core concepts and philosophy
+2. [Component Generation Guide](/ai/guides/components/generation.md) - Component creation patterns
+3. [Quick Reference](/ai/foundations/quick-reference.md) - API reference
 
 ### **Component Development Context**
 Context for building components for any application:
-1. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Framework usage and architecture patterns
-2. [`guides/patterns-cookbook.md`](./guides/patterns-cookbook.md) - Communication and state patterns
-3. [`guides/html-css-style-guide.md`](./guides/html-css-style-guide.md) - Styling conventions
+1. [Component Generation Guide](/ai/guides/components/generation.md) - Framework usage and architecture patterns
+2. [Component Patterns Cookbook](/ai/guides/components/patterns.md) - Communication and state patterns
+3. [HTML Guide](/ai/guides/html.md) + [CSS Guide](/ai/guides/styling/css-guide.md) - Markup and styling conventions
 4. **Tailwind Integration**:
-   - [`../packages/tailwind/README.md`](../packages/tailwind/README.md) - Plugin overview
-   - [`../packages/tailwind/AGENTS.md`](../packages/tailwind/AGENTS.md) - Technical implementation
+   - [../packages/tailwind/README.md](../packages/tailwind/README.md) - Plugin overview
+   - [../packages/tailwind/AGENTS.md](../packages/tailwind/AGENTS.md) - Technical implementation
 
 ### **Documentation Creation Context**
 Context for creating examples and documentation:
-1. [`docs/example-creation-guide.md`](./docs/example-creation-guide.md) - Complete example metadata system and docs requirements
-2. [`docs/package-example-guide.md`](./docs/package-example-guide.md) - Package API demonstrations
-3. [`guides/component-generation-instructions.md`](./guides/component-generation-instructions.md) - Component implementation patterns
+1. [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md) - Complete example metadata system and docs requirements
+2. [Package Documentation](/ai/packages/) - Package API demonstrations and references
+3. [Component Generation Guide](/ai/guides/components/generation.md) - Component implementation patterns
 
 ### **Advanced Architecture Context**
 Context for complex implementation and debugging:
-1. [`foundations/mental-model.md`](./foundations/mental-model.md) - Deep architectural understanding
-2. [`guides/patterns-cookbook.md`](./guides/patterns-cookbook.md) - Advanced patterns and anti-patterns
-3. [`specialized/reactivity-system-guide.md`](./specialized/reactivity-system-guide.md) - Reactive programming
-4. [`specialized/query-system-guide.md`](./specialized/query-system-guide.md) - DOM manipulation
+1. [Mental Model](/ai/foundations/mental-model.md) - Deep architectural understanding
+2. [Component Patterns Cookbook](/ai/guides/components/patterns.md) - Advanced patterns and anti-patterns
+3. [Reactivity Package](/ai/packages/reactivity.md) - Reactive programming
+4. [Query Package](/ai/packages/query.md) - DOM manipulation
 
 ### **Standalone Package Context**
 Context for using individual packages outside the framework:
-1. [`specialized/reactivity-system-guide.md`](./specialized/reactivity-system-guide.md) - Independent reactive state
-2. [`specialized/query-system-guide.md`](./specialized/query-system-guide.md) - Shadow DOM-aware querying
-3. [`specialized/utils-package-guide.md`](./specialized/utils-package-guide.md) - Utility functions
+1. [Reactivity Package](/ai/packages/reactivity.md) - Independent reactive state
+2. [Query Package](/ai/packages/query.md) - Shadow DOM-aware querying
+3. [Utils Package](/ai/packages/utils.md) - Utility functions
+4. [Templating Package](/ai/packages/templating.md) - Template system
+5. [Specs Package](/ai/packages/specs.md) - Component specifications
 
 ### **Problem Solving Context**
 Context for debugging and finding solutions:
@@ -120,13 +138,14 @@ Context for debugging and finding solutions:
 | Document | Focus | Audience | Content Type |
 |----------|--------|----------|--------------|
 | **mental-model.md** | Architecture & Concepts | All levels | Conceptual |
-| **component-generation-instructions.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
-| **patterns-cookbook.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
+| **guides/components/generation.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
+| **guides/components/patterns.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
 | **quick-reference.md** | API Lookup | All levels | Reference |
-| **reactivity-system-guide.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
-| **query-system-guide.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
-| **html-css-style-guide.md** | Styling & Templates | All levels | Guidelines + Examples |
-| **utils-package-guide.md** | Utility Functions | All levels | Reference |
+| **packages/reactivity.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
+| **packages/query.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
+| **guides/html.md** | HTML & Templates | All levels | Guidelines + Examples |
+| **guides/styling/css-guide.md** | CSS Architecture | All levels | Guidelines + Examples |
+| **packages/utils.md** | Utility Functions | All levels | Reference |
 | **codebase-navigation-guide.md** | Finding Information | All levels | Navigation Guide |
 
 ---
@@ -137,34 +156,34 @@ Context for debugging and finding solutions:
 
 ```
 Create a new component?
-├── Simple component → component-generation-instructions.md
-├── Complex interactions → patterns-cookbook.md (Component Communication)
-└── Custom styling → html-css-style-guide.md
+├── Simple component → guides/components/generation.md
+├── Complex interactions → guides/components/patterns.md (Component Communication)
+└── Custom styling → guides/html.md + guides/styling/css-guide.md
 
 Understand an error or behavior?
-├── Find where code is located → codebase-navigation-guide.md
-├── Understand the concept → mental-model.md
-└── Look up API syntax → quick-reference.md
+├── Find where code is located → foundations/codebase-navigation-guide.md
+├── Understand the concept → foundations/mental-model.md
+└── Look up API syntax → foundations/quick-reference.md
 
 Handle component communication?
-├── Parent-child coordination → patterns-cookbook.md (Communication Patterns)
-├── Event handling → component-generation-instructions.md (Events)
-└── State sharing → mental-model.md (Component Tree Navigation)
+├── Parent-child coordination → guides/components/patterns.md (Communication Patterns)
+├── Event handling → guides/components/generation.md (Events)
+└── State sharing → foundations/mental-model.md (Component Tree Navigation)
 
 Work with reactivity?
-├── Basic state management → component-generation-instructions.md (State)
-├── Advanced reactive patterns → reactivity-system-guide.md
-└── Performance optimization → patterns-cookbook.md (Performance)
+├── Basic state management → guides/components/generation.md (State)
+├── Advanced reactive patterns → packages/reactivity.md
+└── Performance optimization → guides/components/patterns.md (Performance)
 
 Style components?
-├── Basic CSS patterns → html-css-style-guide.md
-├── Design token usage → html-css-style-guide.md (CSS Custom Properties)
-└── Component-specific styling → component-generation-instructions.md (CSS)
+├── Basic CSS patterns → guides/html.md + guides/styling/css-guide.md
+├── Design token usage → guides/styling/tokens/token-usage.md
+└── Component-specific styling → guides/components/generation.md (CSS)
 
 Query and manipulate DOM?
-├── Basic querying → query-system-guide.md (Basic Operations)
-├── Shadow DOM traversal → query-system-guide.md (Deep Querying)
-└── Component configuration → query-system-guide.md (Component Methods)
+├── Basic querying → packages/query.md (Basic Operations)
+├── Shadow DOM traversal → packages/query.md (Deep Querying)
+└── Component configuration → packages/query.md (Component Methods)
 ```
 
 ---
@@ -183,26 +202,94 @@ Query and manipulate DOM?
 4. **Architecture** - Concepts and mental models
 
 ### **Common Workflows**
-- **Unknown Error:** codebase-navigation-guide.md → Find implementation → mental-model.md for context
-- **New Feature:** mental-model.md → component-generation-instructions.md → patterns-cookbook.md
-- **Code Review:** patterns-cookbook.md → html-css-style-guide.md → quick-reference.md
+- **Unknown Error:** foundations/codebase-navigation-guide.md → Find implementation → foundations/mental-model.md for context
+- **New Feature:** foundations/mental-model.md → guides/components/generation.md → guides/components/patterns.md
+- **Code Review:** guides/components/patterns.md → guides/styling/css-guide.md → foundations/quick-reference.md
 
 ### **Search Strategy**
-- Use codebase-navigation-guide.md for file locations
-- Use quick-reference.md for API signatures
-- Use patterns-cookbook.md for implementation examples
-- Use mental-model.md for "why" questions
+- Use foundations/codebase-navigation-guide.md for file locations
+- Use foundations/quick-reference.md for API signatures
+- Use guides/components/patterns.md for implementation examples
+- Use foundations/mental-model.md for "why" questions
 
 ---
 
 ## External References
 
 - **Live Examples:** `/docs/src/examples/` (canonical component examples)
-- **API Documentation:** `/docs/src/pages/api/` (complete API reference)  
+- **API Documentation:** `/docs/src/pages/api/` (complete API reference)
 - **Source Code:** `/packages/` (framework implementation)
 - **Component Library:** `/src/components/` (design system components)
 
 ---
 
-**Last Updated:** Framework architecture documentation complete and current  
+## Complete AI Documentation Structure
+
+For exploratory browsing, here's the complete directory taxonomy:
+
+```
+ai/
+├── 00-START-HERE.md           ← You are here - main navigation hub
+├── foundations/               ← Core concepts (no prerequisites)
+│   ├── mental-model.md        ← Architecture and philosophy
+│   ├── quick-reference.md     ← API syntax lookup
+│   └── codebase-navigation-guide.md  ← Finding files and code
+├── guides/                    ← Implementation guides
+│   ├── components/            ← Component development
+│   │   ├── generation.md      ← Creating components
+│   │   └── patterns.md        ← Best practices and patterns
+│   ├── styling/               ← CSS and design
+│   │   ├── css-guide.md       ← CSS architecture
+│   │   └── tokens/            ← Design token system
+│   │       ├── architecture.md    ← Token system design
+│   │       ├── token-usage.md     ← How to use tokens
+│   │       └── token-reference.md ← Token lookup table
+│   ├── html.md                ← HTML and template patterns
+│   ├── primitives.md          ← UI primitive usage
+│   └── query-behaviors.md     ← Query library behaviors
+├── packages/                  ← Standalone package documentation
+│   ├── reactivity.md          ← Signals and reactions
+│   ├── query.md               ← DOM querying
+│   ├── utils.md               ← Utility functions
+│   ├── templating.md          ← Template system
+│   └── specs.md               ← Component specifications
+├── documentation/             ← Documentation guidelines
+│   ├── authoring/             ← Creating documentation
+│   │   └── example-authoring.md  ← Example creation guide
+│   └── writing/               ← Content quality
+│       ├── page-writing.md        ← Page writing guidelines
+│       ├── evaluation-persona.md  ← Review standards
+│       ├── good-examples.md       ← Quality examples
+│       ├── slop-identification.md ← AI-generated content detection
+│       ├── link-grammar.md        ← Link and grammar rules
+│       └── rewrite-instructions.md← Content improvement guide
+├── workflows/                 ← Step-by-step processes
+│   ├── agents/                ← Agent workflows
+│   │   └── create-subagent-context.md  ← Subagent creation
+│   ├── components/            ← Component workflows
+│   │   ├── author-component-spec.md    ← Spec authoring
+│   │   └── spec-to-css-implementation.md ← CSS implementation
+│   ├── documentation/         ← Documentation workflows
+│   │   └── refine-example-documentation-copy.md ← Doc refinement
+│   ├── templates/             ← Template workflows
+│   │   └── add-template-syntax.md      ← Adding syntax
+│   └── utils/                 ← Utility workflows
+│       └── add-util-function.md        ← Function addition
+├── tools/                     ← Development tools
+│   ├── subagents/             ← Agent coordination system
+│   │   ├── orchestrator.md        ← Orchestrator agent
+│   │   ├── domain/                ← Domain-specific agents
+│   │   ├── process/               ← Process-specific agents
+│   │   └── [agent specs...]       ← Agent specifications
+│   ├── scripts/               ← Automation scripts
+│   │   └── update-markdown-links.sh  ← Link update utility
+│   └── mcp/                   ← Model Context Protocol integrations
+└── meta/                      ← Meta-documentation
+    ├── context-loading-instructions.md  ← How to use this system
+    └── agent-guestbook.md     ← Agent learning and continuity
+```
+
+---
+
+**Last Updated:** Framework architecture documentation complete and current
 **Maintenance:** Update this file when adding new documentation or changing structure
