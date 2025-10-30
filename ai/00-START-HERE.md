@@ -13,6 +13,18 @@ Semantic UI is a modern web component framework built on web standards with sign
 
 ---
 
+## Task Routing - REQUIRED FIRST STEP
+
+**BEFORE proceeding with any task:**
+
+1. Read `/ai/meta/workflows-manifest.json` to check if your task matches an existing workflow
+2. If a workflow matches, read that workflow file and follow it exactly
+3. If no workflow matches, proceed to "Quick Task Resolution" below
+
+Workflows contain required steps (testing, types, exports, documentation) that are easy to miss without following the complete process.
+
+---
+
 ## Quick Task Resolution
 
 ### 🚀 **Building Components**

@@ -1,18 +1,19 @@
 # Semantic UI - Agent Instructions
 
-All tasks in this workspace involve the Semantic UI web component framework.
+**FIRST ACTION REQUIRED:** Before taking any action, complete these steps in order:
+
+1. Read `ai/00-START-HERE.md`
+2. Read `ai/foundations/mental-model.md`
+3. Read `ai/foundations/codebase-navigation-guide.md`
+4. Read `ai/meta/workflows-manifest.json`
+5. Read any workflow files that could relate to your task (when uncertain, read it)
+6. If a workflow precisely matches your task, follow it before consulting package guides
+
+DO NOT write code, edit files, run commands, or implement solutions until all steps above are complete. These files provide framework patterns, task routing, and navigation required for all work.
 
 ---
 
-## Foundation (Load First)
-
-Every session requires these files:
-
-1. `ai/00-START-HERE.md`
-2. `ai/foundations/mental-model.md`
-3. `ai/foundations/codebase-navigation-guide.md`
-
-These provide framework philosophy, task routing, and search patterns.
+All tasks in this workspace involve the Semantic UI web component framework.
 
 ---
 
