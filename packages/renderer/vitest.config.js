@@ -4,6 +4,12 @@ export default defineConfig({
   test: {
     watch: false,
     reporter: ['default'],
+    coverage: {
+      enabled: false, // Enable with --coverage flag
+      provider: 'istanbul',
+      reporter: ['text'],
+      include: ['src/**/*.js'],
+    },
     onConsoleLog(log) {
       if (log.includes('Lit is in dev mode.')) { return false; }
     },
