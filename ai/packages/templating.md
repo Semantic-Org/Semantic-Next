@@ -59,7 +59,7 @@ Expressions support both Lisp-style spaced expressions and JavaScript-style expr
 
 ### Basic Expressions
 
-Expressions are evaluated against the template's [data context](/components/rendering#data-context) and are reactive, automatically updating when underlying values change.
+Expressions are evaluated against the template's [data context](../../docs/src/pages/docs/guides/components/rendering.mdx) and are reactive, automatically updating when underlying values change.
 
 ```html
 <!-- Value output -->

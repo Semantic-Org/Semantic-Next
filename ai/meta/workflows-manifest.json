@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "workflows": [
+    {
+      "id": "components/author-spec",
+      "title": "Author Component Spec",
+      "path": "ai/workflows/components/author-component-spec.md",
+      "description": "Create or update component JSON specs prior to implementation.",
+      "tags": ["components", "specs", "authoring"],
+      "prerequisites": ["foundation/start-here", "foundation/mental-model", "components/generation"],
+      "outputs": ["spec-json"]
+    },
+    {
+      "id": "components/spec-to-css",
+      "title": "Implement Specified Component CSS",
+      "path": "ai/workflows/components/spec-to-css-implementation.md",
+      "description": "Translate an approved component spec into scoped Shadow DOM CSS.",
+      "tags": ["components", "styling", "implementation"],
+      "prerequisites": ["components/author-spec", "styling/html", "styling/css", "styling/token-usage"],
+      "outputs": ["component-css"]
+    },
+    {
+      "id": "documentation/refine-example-copy",
+      "title": "Refine Example Documentation Copy",
+      "path": "ai/workflows/documentation/refine-example-documentation-copy.md",
+      "description": "Polish example descriptions, tips, and metadata for docs.",
+      "tags": ["documentation", "examples"],
+      "prerequisites": ["foundation/start-here", "docs/example-authoring", "docs/page-writing"],
+      "outputs": ["updated-example-docs"]
+    },
+    {
+      "id": "templates/add-syntax",
+      "title": "Add Template Syntax",
+      "path": "ai/workflows/templates/add-template-syntax.md",
+      "description": "Extend the templating language with new syntax, tests, and docs.",
+      "tags": ["templates", "compiler", "advanced"],
+      "prerequisites": ["foundation/mental-model", "styling/html", "packages/templating"],
+      "outputs": ["templating-implementation", "docs-update"]
+    },
+    {
+      "id": "utils/add-function",
+      "title": "Add Utility Function",
+      "path": "ai/workflows/utils/add-util-function.md",
+      "description": "Implement, test, and document a new @semantic-ui/utils helper.",
+      "tags": ["utils", "implementation", "documentation"],
+      "prerequisites": ["foundation/start-here", "packages/utils", "docs/example-authoring"],
+      "outputs": ["utils-src", "tests", "types", "examples", "docs"]
+    },
+    {
+      "id": "query/add-method",
+      "title": "Add Query Method",
+      "path": "ai/workflows/add-query-method.mdx",
+      "description": "Introduce a new method to the Query package following established patterns.",
+      "tags": ["query", "dom", "implementation"],
+      "prerequisites": ["foundation/start-here", "packages/query"],
+      "outputs": ["query-src", "tests", "docs"]
+    },
+    {
+      "id": "meta/add-ai-context",
+      "title": "Add AI Context Documentation",
+      "path": "ai/workflows/meta/add-ai-context.md",
+      "description": "Publish new AI-facing guides and register them in manifests and routing docs.",
+      "tags": ["meta", "documentation", "context"],
+      "prerequisites": ["foundation/start-here", "foundation/mental-model", "foundation/codebase-navigation"],
+      "outputs": ["ai-context-doc", "manifest-update"]
+    }
+  ]
+}
