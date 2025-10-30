@@ -1,9 +1,10 @@
 # Query Plugins and Behaviors - Canonical Guide
 
-> **For:** AI agents implementing Query extensions, plugins, and behaviors  
-> **Purpose:** Complete technical specification for Query extension architecture  
-> **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) • [Query Package](/ai/packages/query.md)  
-> **Related:** [Implementation](../../packages/query/src/register-behavior.js) • [Behavior Class](../../packages/query/src/behavior.js)
+> **For:** AI agents implementing Query extensions, plugins, and behaviors
+> **Purpose:** Complete technical specification for Query extension architecture
+> **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) • [Query Package](/ai/packages/query.md)
+> **Related:** [Implementation](/packages/query/src/register-behavior.js) • [Behavior Class](/packages/query/src/behavior.js)
+> **Last Updated:** 2025-10-30
 
 ---
 

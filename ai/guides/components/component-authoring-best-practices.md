@@ -1,8 +1,8 @@
-# Semantic UI Patterns Cookbook
+# Component Authoring Best Practices
 
-> **For:** AI agents implementing complex component patterns and best practices  
-> **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) and [Component Generation](./generation.md)  
-> **Related:** [Quick Reference](/ai/foundations/quick-reference.md) • [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md)  
+> **For:** AI agents implementing complex component patterns and best practices
+> **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) and [Component Generation](./creating-components.md)
+> **Related:** [Quick Reference](/ai/foundations/quick-reference.md) • [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---
@@ -31,24 +31,24 @@ The framework provides three distinct patterns for communication. Choosing the c
 ```
 How do your components need to relate to each other?
 
-├── A child needs to notify its parent or the outside world of a change?
-│   └── **Use Event-Driven Notifications with `dispatchEvent`**
-│       ├── **Why?** It's the most decoupled, reusable, and standards-compliant pattern.
-│       │   The child makes no assumptions about its parent.
-│       ├── **Example:** A button component dispatching a `click` or a field dispatching `valueChange`.
-│       └── **Key Feature:** The framework's `dispatchEvent` helper creates events that bubble by default.
+├── A child needs to notify its parent or the outside world?
+│   └── **PRIMARY: Use Event-Driven Notifications with `dispatchEvent`**
+│       ├── **Why?** Decoupled, reusable, standards-compliant. Child makes no assumptions.
+│       ├── **Example:** Panel dispatches 'resizeStart', accordion-panel dispatches 'toggle'
+│       └── **Pattern from:** src/components/panels/panel.js (events for notifications)
 
-├── An external script or parent needs to command a child component?
+├── An external script needs to command a component?
 │   └── **Use Direct API Access with `$('selector').component()`**
-│       ├── **Why?** It provides imperative control over a child's public API from *outside* the parent component.
-│       ├── **Example:** A page script calling `modal.open()` or a form calling `field.validate()`.
-│       └── **Key Feature:** `el.component` stores a direct reference to the instance created by `createComponent`.
+│       ├── **Why?** Imperative control from outside the component
+│       ├── **Example:** Page script calling `modal.open()` or `form.validate()`
+│       └── **Pattern:** External control, not parent-child communication
 
-├── You are building a tightly-coupled system and need to communicate *internally*?
-│   └── **Use Hierarchical Traversal with `findParent()` / `findChildren()`**
-│       ├── **Why?** For co-dependent components, direct state access is more efficient than a complex web of events and props.
-│       ├── **Example:** A `todo-list` managing the state of its `todo-item` children directly.
-│       └── **Key Feature:** This is a specialized tool for building component *systems*, not for general communication.
+├── Parent-child system where parent coordinates multiple children?
+│   └── **Use Hybrid: Events (primary) + findParent (secondary)**
+│       ├── **Events for notifications:** Child tells parent something happened
+│       ├── **findParent for actions:** Child asks parent to run multi-child coordination
+│       ├── **Example:** Panel minimize → parent redistributes space across ALL panels
+│       └── **Why hybrid:** Parent has algorithm to coordinate multiple children, not just one
 ```
 
 ### 1. Child → Parent Notification Pattern (`dispatchEvent`)
@@ -121,39 +121,82 @@ $counters.each(component => {
 });
 ```
 
-### 3. Hierarchical Traversal Pattern (`findParent` / `findChildren`)
+### 3. Parent-Child Coordination Pattern (Events + findParent Hybrid)
 
-**Use when**: Building a **tightly-coupled system** where child components are fundamentally dependent on a parent's state and are not intended to be used separately. This is for **internal** communication within such a system.
+**Use when**: Building a **tightly-coupled system** like panels/tabs/accordions where parent manages children.
+
+**PRIMARY: Use events for notifications** (child → parent)
+**SECONDARY: Use findParent for actions** (child needs parent to do something complex)
 
 ```javascript
-// Parent (todo-list) exposes a reactive signal directly on its instance
-const createComponent = ({ signal }) => ({
-  todos: signal([
-    { _id: 'a', text: 'Learn framework', completed: true },
-    { _id: 'b', text: 'Write docs', completed: false }
-  ])
-});
+// Pattern from src/components/panels/panel.js + panels.js
 
-// Child (todo-item) directly accesses and mutates the parent's signal
-const createComponent = ({ findParent, data }) => ({
-  // data.todo is the specific todo object for this instance
-  toggleCompleted() {
-    const parent = findParent('todo-list');
-    // Directly find and modify the specific item in the parent's shared state
-    parent.todos.setProperty(data.todo._id, 'completed', !data.todo.completed);
+// Child (ui-panel) - PRIMARILY dispatches events
+const createComponent = ({ dispatchEvent, findParent, el, settings }) => ({
+  startResize(event) {
+    self.resizing.set(true);
+
+    // ✅ PRIMARY: Event for notification
+    dispatchEvent('resizeStart', {
+      initialSize: self.getCurrentFlex(),
+      direction: settings.direction,
+      startPosition: self.getPointerPosition(event),
+    });
+  },
+
+  endResize() {
+    // ✅ PRIMARY: Event for notification
+    dispatchEvent('resizeEnd', {
+      initialSize: self.initialSize,
+      finalSize: self.getCurrentFlex(),
+    });
+  },
+
+  minimize() {
+    settings.minimized = true;
+
+    // ✅ SECONDARY: Call parent method for complex operation
+    const panels = findParent('uiPanels');
+    const index = panels.getPanelIndex(el);
+    panels.setPanelMinimized(index);  // Parent handles resize algorithm
   }
 });
 
-// Parent controlling its children internally
-const createComponent = ({ self, findChildren }) => ({
-  markAllComplete() {
-    const children = findChildren('todo-item');
-    children.forEach(childInstance => {
-      childInstance.markAsCompleted();
-    });
+// Parent (ui-panels) - listens to events, exposes methods for complex operations
+const events = {
+  // ✅ PRIMARY: Listen to child events
+  'resizeStart ui-panel'({ self, event, data }) {
+    if (inArray(event.target, self.panels)) {
+      self.setGroupCalculations();
+      self.setDragStartCalculations(event.target, data);
+    }
+  },
+
+  'resizeEnd ui-panel'({ self, event, data }) {
+    if (inArray(event.target, self.panels)) {
+      self.removeDragStartCalculations();
+      self.saveLayout();
+    }
+  }
+};
+
+const createComponent = ({ self }) => ({
+  panels: [],
+
+  // ✅ SECONDARY: Public method for complex operations
+  setPanelMinimized(index) {
+    let naturalSize = self.getNaturalPanelSize(index);
+    // Complex: resize algorithm, constraints, coordination
+    self.changePanelSize(index, relativeSize, { manualResize: true });
+    self.saveLayout();
   }
 });
 ```
+
+**Decision tree**:
+- Child notifies parent something happened → `dispatchEvent` ✅
+- Parent needs complex multi-panel coordination → child calls parent method ✅
+- Child just needs parent data → `findParent` for read-only access ✅
 
 ### Bi-directional Communication Pattern (Combined Approach)
 
@@ -761,47 +804,111 @@ const createComponent = ({ state, reaction, afterFlush }) => ({
 
 ## Performance Patterns
 
-### Component Props for Non-Reactive Data
+### Production Pattern: Lifecycle-Managed Resources
 
-Use component props instead of state for data that doesn't need reactivity:
+The framework auto-cleans its own APIs. You only clean up native browser APIs.
 
 ```javascript
-const createComponent = ({ state, settings, self }) => ({
-  // ✅ Component props - non-reactive, performance optimized
-  apiEndpoint: settings.apiUrl,           // Snapshot of setting
-  validationRules: getValidationRules(),  // Cached calculation
-  debounceTimer: null,                    // Mutable non-reactive
-  constants: { MAX_RETRIES: 3 },          // Static values
-  retryCount: 0,                          // Non-reactive counter
+// From src/components/inpage-menu/inpage-menu.js
 
-  // Methods can access props directly
-  makeApiCall() {
-    fetch(self.apiEndpoint)               // No signal overhead
-      .then(data => state.data.set(data)); // Update reactive state only when needed
+// ✅ Auto-cleanup (framework APIs)
+createComponent: ({ attachEvent, reaction }) => ({
+  initialize() {
+    // Framework cleans up automatically
+    attachEvent(window, 'hashchange', self.onHashChange);
+    attachEvent(scrollElement, 'scroll', self.onScroll, { passive: true });
+
+    reaction(() => {
+      const theme = state.theme.get();
+      updateTheme(theme);
+    });  // Auto-disposed on component destroy
+  }
+})
+
+// ❌ Manual cleanup required (native browser APIs)
+createComponent: ({ self }) => ({
+  observer: null,  // Component prop
+
+  bindIntersectionObserver() {
+    self.observer = new IntersectionObserver(self.onIntersection);
+    sections.forEach(s => self.observer.observe(s));
+  }
+})
+
+onDestroyed: ({ self }) => {
+  // Must clean up native APIs
+  if (self.observer) {
+    self.observer.disconnect();
+  }
+}
+```
+
+### Production Pattern: Race Condition Prevention
+
+Use component props (non-reactive flags) to prevent race conditions.
+
+```javascript
+// From src/components/inpage-menu/inpage-menu.js
+
+createComponent: ({ self }) => ({
+  isScrolling: false,  // Component prop (non-reactive flag)
+  isActivating: false, // Component prop (non-reactive flag)
+
+  scrollToPosition(position) {
+    self.isScrolling = true;  // Set flag
+    scrollContext.scrollTo({ top: position, behavior: 'smooth' });
+
+    $(scrollContext).one('scrollend', () => {
+      requestIdleCallback(() => {
+        self.isScrolling = false;  // Clear flag
+      });
+    });
   },
 
-  debouncedUpdate(value) {
-    clearTimeout(self.debounceTimer);     // Direct prop access
-    self.debounceTimer = setTimeout(() => {
-      state.value.set(value);             // Reactive only when necessary
-    }, 300);
+  onIntersection(entries) {
+    // Only update when NOT scrolling (prevents race)
+    if (!self.isScrolling && newVisibleItems.length) {
+      self.setActiveItem(newVisibleItems[0]);
+    }
+  }
+})
+```
+
+**Why component props**: Non-reactive flags don't trigger re-renders. Just gate logic.
+
+### Component Props for Non-Reactive Data
+
+Use component props for caching and non-reactive tracking:
+
+```javascript
+// From src/components/panels/panels.js
+
+const createComponent = ({ state, settings, self }) => ({
+  // ✅ Component props - non-reactive, performance optimized
+  panels: [],                           // Track child elements
+  renderedPanels: [],                   // Initialization tracking
+  cache: {                              // Computation cache
+    groupSize: undefined,
+    groupScrollOffset: undefined,
+  },
+
+  setGroupCalculations() {
+    self.cache.groupSize = self.getGroupSize();
+    self.cache.groupScrollOffset = self.getGroupScrollOffset();
+  },
+
+  removeGroupCalculations() {
+    delete self.cache.groupSize;
+    delete self.cache.groupScrollOffset;
   }
 });
 ```
 
 **Performance benefits**:
-- No signal creation overhead for static data
+- No signal overhead for non-reactive data
 - Direct property access (faster than `.get()/.set()`)
-- Reduced memory usage for non-reactive data
-- Template access without signal dependency tracking
-
-**Use component props for**:
-- API endpoints and URLs
-- Cached expensive calculations
-- Timers and intervals
-- Static configurations and constants
-- Non-reactive counters and flags
-- Utility functions and references
+- Reduced memory usage
+- Use for: tracking, flags, caches, timers, static config
 
 ### Lazy Loading Pattern
 

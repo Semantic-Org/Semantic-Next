@@ -49,7 +49,7 @@
     {
       "id": "query/add-method",
       "title": "Add Query Method",
-      "path": "ai/workflows/add-query-method.mdx",
+      "path": "ai/workflows/query/add-query-method.md",
       "description": "Introduce a new method to the Query package following established patterns.",
       "tags": ["query", "dom", "implementation"],
       "prerequisites": ["foundation/start-here", "packages/query"],

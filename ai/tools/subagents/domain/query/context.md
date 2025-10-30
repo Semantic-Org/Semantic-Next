@@ -35,7 +35,7 @@
 ### Query-Specific Context
 1. **Domain Expertise**
    - `ai/packages/query.md` - Query system deep dive and patterns
-   - `ai/workflows/add-query-method.mdx` - Method implementation workflow (6 steps)
+   - `ai/workflows/query/add-query-method.md` - Method implementation workflow (6 steps)
    - `ai/foundations/quick-reference.md` - API syntax and patterns
 
 2. **Canonical Documentation (Read these for existing patterns)**
@@ -50,7 +50,7 @@
    - `ai/packages/utils.md` - Available utilities reference
 
 4. **Quality Standards**
-   - `ai/guides/patterns-cookbook.md` - Framework patterns and anti-patterns
+   - `ai/guides/component-authoring-best-practices.md` - Framework patterns and anti-patterns
    - `ai/foundations/codebase-navigation-guide.md` - Finding relevant code
 
 ## Query Package Philosophy

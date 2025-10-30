@@ -1,8 +1,8 @@
 # Semantic UI Mental Model
 
-> **For:** AI agents seeking deep architectural understanding  
-> **Prerequisites:** None - foundational document  
-> **Related:** [Component Guide](/ai/guides/components/generation.md) • [Patterns Cookbook](/ai/guides/components/patterns.md) • [Quick Reference](/ai/foundations/quick-reference.md)  
+> **For:** AI agents seeking deep architectural understanding
+> **Prerequisites:** None - foundational document
+> **Related:** [Component Guide](/ai/guides/components/generation.md) • [Best Practices](/ai/guides/components/component-authoring-best-practices.md) • [Quick Reference](/ai/foundations/quick-reference.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---
@@ -297,6 +297,29 @@ Component Data Context:
 ```
 
 **Mental Model**: The data context provides direct access to all component data without needing getter methods. Templates automatically handle reactivity for state and settings.
+
+### Template Expression Proxy System
+
+Templates use a proxy system (see `packages/renderer/src/lit/renderer.js:434-460`) that automatically:
+
+1. **Unwraps signals**: `{count}` → `state.count.get()` (automatic)
+2. **Calls zero-argument functions**: `{getTitle}` → `getTitle()` (automatic)
+3. **Binds method context**: `{user.getName}` → bound to `user` object (automatic)
+
+**Component vs Template Syntax**:
+```javascript
+// In component logic (explicit)
+const value = state.count.get();     // Must call .get()
+state.count.set(5);                   // Must call .set()
+const title = getTitle();             // Must call function
+
+// In templates (automatic via proxy)
+{count}                               // Proxy calls .get()
+{getTitle}                            // Proxy calls function
+{user.getName}                        // Proxy binds context and calls
+```
+
+**Why this split**: Component logic needs explicit control over reactivity. Templates optimize for readability.
 
 ### Settings Reactivity Implementation
 

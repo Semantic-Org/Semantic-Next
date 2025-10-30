@@ -1,5 +1,7 @@
 # Adding a New Query Method
 
+> **Last Updated:** 2025-10-30
+
 This workflow outlines the complete process for implementing a new method on the Query class, based on lessons learned from adding the `data()` method.
 
 ## Overview

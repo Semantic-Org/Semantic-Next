@@ -45,7 +45,7 @@ Level 1: Foundation
 
 Level 2: Task-Specific
 ├── Component Creation → components/generation.md
-├── Implementation Patterns → components/patterns.md
+├── Implementation Patterns → components/component-authoring-best-practices.md
 ├── API Reference → quick-reference.md
 ├── Codebase Navigation → codebase-navigation-guide.md
 └── Standalone Packages → packages/ API documentation
@@ -77,14 +77,14 @@ Level 4: Verification & Refinement
 
 ### Architecture Understanding
 **Context:** [`foundations/mental-model.md`](/ai/foundations/mental-model.md)
-**Supplementary:** [`guides/patterns-cookbook.md`](/ai/guides/components/patterns.md) for implementation
+**Supplementary:** [`guides/component-authoring-best-practices.md`](/ai/guides/components/component-authoring-best-practices.md) for implementation
 
 ### Debugging/Problem Solving
 **Context:** [`foundations/codebase-navigation-guide.md`](/ai/foundations/codebase-navigation-guide.md)
 **Supplementary:** Source code files as identified
 
 ### Advanced Implementation
-**Context:** [`guides/patterns-cookbook.md`](/ai/guides/components/patterns.md)
+**Context:** [`guides/component-authoring-best-practices.md`](/ai/guides/components/component-authoring-best-practices.md)
 **Supplementary:** [`packages/`](/ai/packages/) API documentation for specific packages
 
 ---

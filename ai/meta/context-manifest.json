@@ -26,67 +26,83 @@
       "approxTokens": 6200
     },
     {
-      "id": "components/generation",
-      "path": "ai/guides/components/generation.md",
+      "id": "foundation/quick-reference",
+      "path": "ai/foundations/quick-reference.md",
+      "category": "foundation",
+      "tags": ["api-reference", "syntax", "quick-lookup"],
+      "recommendedOrder": 4,
+      "approxTokens": 12000
+    },
+    {
+      "id": "components/creating-components",
+      "path": "ai/guides/components/creating-components.md",
       "category": "specialized",
       "tags": ["components", "implementation", "patterns"],
       "dependsOn": ["foundation/start-here", "foundation/mental-model"],
       "approxTokens": 4800
     },
     {
-      "id": "components/patterns",
-      "path": "ai/guides/components/patterns.md",
+      "id": "components/best-practices",
+      "path": "ai/guides/components/component-authoring-best-practices.md",
       "category": "specialized",
       "tags": ["components", "best-practices", "communication"],
-      "dependsOn": ["components/generation"],
+      "dependsOn": ["components/creating-components"],
       "approxTokens": 8100
     },
     {
-      "id": "guides/testing",
-      "path": "ai/guides/testing.md",
+      "id": "development/testing",
+      "path": "ai/guides/development/testing.md",
       "category": "specialized",
       "tags": ["testing", "vitest", "quality-assurance"],
       "dependsOn": ["foundation/mental-model", "foundation/codebase-navigation"],
       "approxTokens": 6000
     },
     {
-      "id": "guides/typescript-types",
-      "path": "ai/guides/typescript-types.md",
+      "id": "development/typescript-types",
+      "path": "ai/guides/development/typescript-types.md",
       "category": "specialized",
       "tags": ["typescript", "jsdoc", "types", "dx"],
       "dependsOn": ["foundation/codebase-navigation"],
       "approxTokens": 7000
     },
     {
-      "id": "styling/html",
-      "path": "ai/guides/html.md",
+      "id": "html/style-guide",
+      "path": "ai/guides/html/style-guide.md",
       "category": "specialized",
       "tags": ["markup", "semantics", "templating"],
       "dependsOn": ["foundation/mental-model"],
       "approxTokens": 3500
     },
     {
-      "id": "styling/css",
-      "path": "ai/guides/styling/css-guide.md",
+      "id": "html/using-ui-primitives",
+      "path": "ai/guides/html/using-ui-primitives.md",
+      "category": "specialized",
+      "tags": ["primitives", "composition", "components"],
+      "dependsOn": ["html/style-guide"],
+      "approxTokens": 4500
+    },
+    {
+      "id": "css/guide",
+      "path": "ai/guides/css/css-guide.md",
       "category": "specialized",
       "tags": ["css", "architecture", "responsive"],
-      "dependsOn": ["styling/html"],
+      "dependsOn": ["html/style-guide"],
       "approxTokens": 4200
     },
     {
-      "id": "styling/token-usage",
-      "path": "ai/guides/styling/tokens/token-usage.md",
+      "id": "css/token-usage",
+      "path": "ai/guides/css/tokens/token-usage.md",
       "category": "specialized",
       "tags": ["design-tokens", "theming"],
-      "dependsOn": ["styling/css"],
+      "dependsOn": ["css/guide"],
       "approxTokens": 3600
     },
     {
-      "id": "styling/token-architecture",
-      "path": "ai/guides/styling/tokens/architecture.md",
+      "id": "css/token-architecture",
+      "path": "ai/guides/css/tokens/architecture.md",
       "category": "reference",
       "tags": ["design-tokens", "architecture"],
-      "dependsOn": ["styling/token-usage"],
+      "dependsOn": ["css/token-usage"],
       "approxTokens": 3200
     },
     {
@@ -149,6 +165,14 @@
       "category": "package",
       "tags": ["specifications", "components"],
       "approxTokens": 2800
+    },
+    {
+      "id": "query/plugins-and-behaviors",
+      "path": "ai/guides/query/plugins-and-behaviors.md",
+      "category": "specialized",
+      "tags": ["query", "plugins", "behaviors", "extensions"],
+      "dependsOn": ["packages/query", "foundation/mental-model"],
+      "approxTokens": 7500
     },
     {
       "id": "workflows/components/spec-to-css",

@@ -36,7 +36,7 @@
 ### Types-Specific Context
 1. **Domain Expertise**
    - `ai/foundations/quick-reference.md` - API patterns to type
-   - `ai/guides/patterns-cookbook.md` - Framework patterns and their type implications
+   - `ai/guides/component-authoring-best-practices.md` - Framework patterns and their type implications
 
 2. **Existing Type Patterns (Read based on package)**
    - `packages/component/types/` - Component typing patterns

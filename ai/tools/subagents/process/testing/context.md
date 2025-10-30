@@ -36,7 +36,7 @@
 ### Testing-Specific Context
 1. **Domain Expertise**
    - `ai/foundations/codebase-navigation-guide.md` - Finding test files and patterns
-   - `ai/guides/patterns-cookbook.md` - Testing patterns and anti-patterns
+   - `ai/guides/component-authoring-best-practices.md` - Testing patterns and anti-patterns
    - `ai/foundations/quick-reference.md` - API syntax for test scenarios
 
 2. **Package-Specific Test Patterns (Read based on domain)**

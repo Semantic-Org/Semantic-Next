@@ -53,7 +53,7 @@
    - `ai/packages/reactivity.md` - Reactive system integration
 
 4. **Quality Standards**
-   - `ai/guides/patterns-cookbook.md` - Framework patterns and anti-patterns
+   - `ai/guides/component-authoring-best-practices.md` - Framework patterns and anti-patterns
    - `ai/foundations/codebase-navigation-guide.md` - Finding relevant code
 
 ## Component Package Philosophy

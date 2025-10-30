@@ -274,6 +274,45 @@ createSettingsProxy() {
 
 ## Template Syntax Reference
 
+### Template Expression Mechanics
+
+Templates automatically unwrap signals and call functions through a proxy system:
+
+```javascript
+// Component code (explicit)
+state.count.get()        // Must call .get()
+state.count.set(5)       // Must call .set()
+getTitle()              // Must call function
+
+// Template code (automatic via proxy)
+{count}                 // Proxy calls .get() automatically
+{getTitle}              // Proxy calls function automatically
+{user.getName}          // Proxy binds context and calls function
+```
+
+**Anti-patterns in templates:**
+```html
+<!-- ❌ DON'T call .get() in templates -->
+{state.count.get()}     <!-- Breaks reactivity tracking -->
+
+<!-- ✅ DO let proxy handle it -->
+{count}                 <!-- Correct -->
+```
+
+**Event binding** can be done inline in templates or in the events object:
+```html
+<!-- Inline binding with @event syntax -->
+<button @click={increment}>Increment</button>
+<div @mouseover={handleHover}>Hover me</div>
+```
+
+```javascript
+// Or in events object with delegation
+const events = {
+  'click .increment': ({ state }) => state.count.increment()
+};
+```
+
 ### Basic Expressions
 
 ```html

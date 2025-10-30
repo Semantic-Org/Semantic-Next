@@ -3,16 +3,17 @@
 > **For:** AI agents building Semantic UI components for any application
 > **Prerequisites:** Basic understanding of web components and JavaScript
 > **Scope:** Framework usage patterns, component architecture, implementation best practices
-> **Related:** [Mental Model](/ai/foundations/mental-model.md) • [Patterns Cookbook](./patterns.md) • [API Reference](/ai/foundations/quick-reference.md)
+> **Related:** [Mental Model](/ai/foundations/mental-model.md) • [Best Practices](./component-authoring-best-practices.md) • [API Reference](/ai/foundations/quick-reference.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
+> **Last Updated:** 2025-10-30
 
 ---
 
-## 🚨 **CRITICAL: Read This Before Building Components**
+## **CRITICAL: Read This Before Building Components**
 
 This guide covers building Semantic UI components for **any application** - whether for your own projects, libraries, or documentation examples.
 
-### **📋 Are You Creating a Documentation Example?**
+### **Are You Creating a Documentation Example?**
 
 **If you were asked to create an "example component" or "component example":**
 - **STOP** - You likely need the **[Example Authoring Guide](/ai/documentation/authoring/example-authoring.md)** instead
@@ -27,42 +28,42 @@ This guide covers building Semantic UI components for **any application** - whet
 
 **MANDATORY READING BEFORE COMPONENT DEVELOPMENT:**
 
-1. **HTML Patterns**: [`../guides/html-guide.md`](/ai/guides/html.md) - Semantic markup and class naming conventions
-2. **CSS Architecture**: [`../guides/css-guide.md`](/ai/guides/styling/css-guide.md) - CSS nesting, responsive design, and architecture patterns  
-3. **Design Tokens**: [`../guides/css-token-guide.md`](/ai/guides/styling/tokens/token-usage.md) - Token system and verification workflow
-4. **Primitive Usage**: [`../guides/primitive-usage-guide.md`](/ai/guides/primitives.md) - Using existing primitives and composition patterns
-5. **Method References**: [`../foundations/mental-model.md`](/ai/foundations/mental-model.md) - Critical `self.methodName()` patterns
-6. **Component Communication**: [`../guides/patterns-cookbook.md`](./patterns.md) - Detailed guide to communication patterns
+1. **HTML Patterns**: [HTML Style Guide](/ai/guides/html/style-guide.md) - Semantic markup and class naming conventions
+2. **CSS Architecture**: [CSS Guide](/ai/guides/css/css-guide.md) - CSS nesting, responsive design, and architecture patterns
+3. **Design Tokens**: [Token Usage](/ai/guides/css/tokens/token-usage.md) - Token system and verification workflow
+4. **Primitive Usage**: [Using UI Primitives](/ai/guides/html/using-ui-primitives.md) - Using existing primitives and composition patterns
+5. **Method References**: [Mental Model](/ai/foundations/mental-model.md) - Critical `self.methodName()` patterns
+6. **Component Communication**: [Best Practices](./component-authoring-best-practices.md) - Detailed guide to communication patterns
 
-**⚠️ Common Mistakes**:
+**Common Mistakes**:
 - Using prefixed class names like `.size-large` instead of `.large`
 - Using `this.method()` instead of `self.method()`
 - Using hardcoded CSS values instead of design tokens like `var(--large)`
 - Not prefixing query variables with `$` (use `const $div = $('div')`)
 - Creating components without proper file organization
 - **Accessing internal component state directly** instead of using public API methods
-- **🚨 CRITICAL: Using HTML elements instead of first-party UI components** (see First-Party Components section below)
+- **CRITICAL: Using HTML elements instead of first-party UI components** (see First-Party Components section below)
 
 ---
 
-## 📚 **Complete Reference Sources**
+## **Complete Reference Sources**
 
 For comprehensive information beyond this guide:
 
-- **🏗️ HTML Patterns**: [`../guides/html-guide.md`](/ai/guides/html.md) - Semantic markup and class naming conventions
-- **🎨 CSS Architecture**: [`../guides/css-guide.md`](/ai/guides/styling/css-guide.md) - CSS nesting, responsive design, and architecture patterns
-- **🎯 Design Tokens**: [`../guides/css-token-guide.md`](/ai/guides/styling/tokens/token-usage.md) - Token system and verification workflow  
-- **🧩 Primitive Usage**: [`../guides/primitive-usage-guide.md`](/ai/guides/primitives.md) - Using existing primitives and composition patterns
-- **🧠 Mental Model & Architecture**: [`../foundations/mental-model.md`](/ai/foundations/mental-model.md) - Core concepts, method references, component communication
-- **📖 Patterns & Recipes**: [`../guides/patterns-cookbook.md`](./patterns.md) - Detailed implementation patterns and communication
-- **⚡ Quick API Reference**: [`../foundations/quick-reference.md`](/ai/foundations/quick-reference.md) - Complete API syntax and options
-- **🗺️ Codebase Navigation**: [`../foundations/codebase-navigation-guide.md`](/ai/foundations/codebase-navigation-guide.md) - Finding documentation and examples
+- **HTML Patterns**: [HTML Style Guide](/ai/guides/html/style-guide.md) - Semantic markup and class naming conventions
+- **CSS Architecture**: [CSS Guide](/ai/guides/css/css-guide.md) - CSS nesting, responsive design, and architecture patterns
+- **Design Tokens**: [Token Usage](/ai/guides/css/tokens/token-usage.md) - Token system and verification workflow
+- **Primitive Usage**: [Using UI Primitives](/ai/guides/html/using-ui-primitives.md) - Using existing primitives and composition patterns
+- **Mental Model & Architecture**: [Mental Model](/ai/foundations/mental-model.md) - Core concepts, method references, component communication
+- **Patterns & Recipes**: [Best Practices](./component-authoring-best-practices.md) - Detailed implementation patterns and communication
+- **Quick API Reference**: [Quick Reference](/ai/foundations/quick-reference.md) - Complete API syntax and options
+- **Codebase Navigation**: [Codebase Navigation](/ai/foundations/codebase-navigation-guide.md) - Finding documentation and examples
 
 **Rule**: When you need information beyond basic component creation, consult these canonical sources rather than guessing or duplicating information.
 
 ## Tailwind CSS Integration
 
-**⚠️ IMPORTANT**: Use Tailwind CSS **only when explicitly requested**. Default to design tokens and semantic class patterns.
+**IMPORTANT**: Use Tailwind CSS **only when explicitly requested**. Default to design tokens and semantic class patterns.
 
 ### Using the Tailwind Plugin
 
@@ -113,12 +114,12 @@ export const MyButton = defineComponent(definition);
 /* Tailwind utilities in template */
 ```
 
-**📚 Implementation Details:**
+**Implementation Details:**
 - Plugin architecture: `../../packages/tailwind/AGENTS.md`
 - WASM compilation: `../../packages/tailwind/node_modules/tailwindcss-iso/README.md`
 - Browser engine: `../../packages/tailwind/node_modules/tailwindcss-iso/AGENTS.md` (if available)
 
-## 🚨 **CRITICAL: Use First-Party UI Components**
+## **CRITICAL: Use First-Party UI Components**
 
 ### **ALWAYS Use Available Components from `/src/components/`**
 
@@ -400,14 +401,14 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
 {/each}
 ```
 
-> **📚 For complete template syntax**: See `/ai/semantic-ui-quick-reference.md` → Template Syntax Reference
+> **For complete template syntax**: See `/ai/semantic-ui-quick-reference.md` → Template Syntax Reference
 
-## CSS Guidelines ⚠️ **CRITICAL PATTERNS**
+## CSS Guidelines **CRITICAL PATTERNS**
 
-**🚨 MANDATORY**: Read the canonical CSS guides for complete patterns:
-- [`../guides/html-guide.md`](/ai/guides/html.md) - Semantic markup and class naming
-- [`../guides/css-guide.md`](/ai/guides/styling/css-guide.md) - CSS architecture and responsive design
-- [`../guides/css-token-guide.md`](/ai/guides/styling/tokens/token-usage.md) - Design token system and verification
+**MANDATORY**: Read the canonical CSS guides for complete patterns:
+- [HTML Style Guide](/ai/guides/html/style-guide.md) - Semantic markup and class naming
+- [CSS Guide](/ai/guides/css/css-guide.md) - CSS architecture and responsive design
+- [Token Usage](/ai/guides/css/tokens/token-usage.md) - Design token system and verification
 
 ### Essential Class Naming Rules
 
@@ -590,7 +591,7 @@ afterFlush(() => {
 });
 ```
 
-> **📚 For complete reactivity patterns**: See `/ai/semantic-ui-patterns-cookbook.md` → Reactivity Patterns
+> **For complete reactivity patterns**: See `/ai/semantic-ui-component-authoring-best-practices.md` → Reactivity Patterns
 
 ## Component Communication Patterns
 
@@ -646,11 +647,11 @@ const createComponent = ({ findParent, data }) => ({
   }
 });
 ```
-> **📚 For a detailed decision guide and more examples**: See [`../guides/patterns-cookbook.md`](./patterns.md) → Component Communication Patterns
+> **For a detailed decision guide and more examples**: See [Best Practices](./component-authoring-best-practices.md) → Component Communication Patterns
 
-## ⚠️ **CRITICAL Method Reference Pattern**
+## **CRITICAL Method Reference Pattern**
 
-**🚨 MANDATORY**: Always use `self.methodName()` when calling component methods from within other methods:
+**MANDATORY**: Always use `self.methodName()` when calling component methods from within other methods:
 
 ```javascript
 const createComponent = ({ self, state, settings }) => ({
@@ -676,9 +677,9 @@ const createComponent = ({ self, state, settings }) => ({
 });
 ```
 
-**Why `self.` is required**: The component methods are bound to the `self` object, not `this`. See [`../foundations/mental-model.md`](/ai/foundations/mental-model.md) for complete explanation.
+**Why `self.` is required**: The component methods are bound to the `self` object, not `this`. See [Mental Model](/ai/foundations/mental-model.md) for complete explanation.
 
-## ⚠️ **CRITICAL HTML Attribute Naming**
+## **CRITICAL HTML Attribute Naming**
 
 **HTML attributes don't automatically convert to camelCase - they remain lowercase:**
 
@@ -741,9 +742,9 @@ const events = {
 };
 ```
 
-### Query Strategies ⚠️ **CRITICAL NAMING CONVENTION**
+### Query Strategies **CRITICAL NAMING CONVENTION**
 
-**🚨 MANDATORY**: All variables holding query results MUST be prefixed with `$`
+**MANDATORY**: All variables holding query results MUST be prefixed with `$`
 
 ```javascript
 const createComponent = ({ $, $$ }) => ({
@@ -779,10 +780,10 @@ const createComponent = ({ $, $$ }) => ({
 - Prevents confusion between DOM elements and regular data
 - Follows established convention for query-based variables
 
-### Component Encapsulation & DOM Access ⚠️ **CRITICAL PATTERNS**
+### Component Encapsulation & DOM Access **CRITICAL PATTERNS**
 
 #### **Public API Design**
-**🚨 MANDATORY**: Components must expose public API methods and hide internal state
+**MANDATORY**: Components must expose public API methods and hide internal state
 
 ```javascript
 const createComponent = ({ self, state, settings }) => ({
@@ -808,7 +809,7 @@ const createComponent = ({ self, state, settings }) => ({
 #### **DOM Querying & Component Access**
 **For imperative DOM updates or access to component instances from page scope, see [Query Package](/ai/packages/query.md) - Complete Query API reference**
 
-**🚨 MANDATORY Query Variable Naming**: All variables holding query results MUST be prefixed with `$`:
+**MANDATORY Query Variable Naming**: All variables holding query results MUST be prefixed with `$`:
 ```javascript
 // ✅ CORRECT
 const $button = $('.button');
@@ -820,7 +821,7 @@ const button = $('.button');                 // Missing $ prefix
 ```
 
 #### **UI Component Preference**
-**🚨 MANDATORY**: Use existing UI components instead of regular HTML elements
+**MANDATORY**: Use existing UI components instead of regular HTML elements
 
 ```html
 <!-- ✅ CORRECT: Use framework UI components -->
@@ -863,19 +864,19 @@ $('data-table').settings({
 });
 ```
 
-> **📚 For comprehensive patterns**: See `/ai/semantic-ui-patterns-cookbook.md`
+> **For comprehensive patterns**: See `/ai/semantic-ui-component-authoring-best-practices.md`
 
-## Important Notes ⚠️ **REVIEW BEFORE CODING**
+## Important Notes **REVIEW BEFORE CODING**
 
 ### Critical Reminders
 
-**🚨 Method References**: Always use `self.methodName()` when calling component methods from within other methods (NOT `this.methodName()`)
+**Method References**: Always use `self.methodName()` when calling component methods from within other methods (NOT `this.methodName()`)
 
-**🚨 CSS Class Names**: Use semantic class names like `.large`, `.primary` (NOT `.size-large`, `.theme-primary`)
+**CSS Class Names**: Use semantic class names like `.large`, `.primary` (NOT `.size-large`, `.theme-primary`)
 
-**🚨 Design Tokens**: Use `var(--large)`, `var(--primary-color)` instead of hardcoded values like `16px`, `#007bff`
+**Design Tokens**: Use `var(--large)`, `var(--primary-color)` instead of hardcoded values like `16px`, `#007bff`
 
-**🚨 HTML Attributes**: Use lowercase `showlabel="false"` in HTML (NOT `showLabel="false"`)
+**HTML Attributes**: Use lowercase `showlabel="false"` in HTML (NOT `showLabel="false"`)
 
 ### Framework Behavior
 
@@ -1133,11 +1134,11 @@ When implementing a new component, consider:
 
 Refer to these examples for practical implementations of the patterns described in these instructions.
 
-## 📖 **Creating Documentation Examples**
+## **Creating Documentation Examples**
 
 To showcase your components in the Semantic UI documentation system:
 
-- **📋 Example Authoring Guide**: [Documentation Authoring](/ai/documentation/authoring/example-authoring.md) - Creating examples and documentation content
+- **Example Authoring Guide**: [Documentation Authoring](/ai/documentation/authoring/example-authoring.md) - Creating examples and documentation content
 - **📦 Package Examples**: Refer to [Documentation Authoring](/ai/documentation/authoring/example-authoring.md) for package-specific example creation
 
 The documentation system has specific requirements for file structure, metadata, and organization that are separate from general component development.

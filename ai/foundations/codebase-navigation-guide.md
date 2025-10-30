@@ -729,7 +729,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 
 #### **"Why is [pattern] recommended?"**
 ```bash
-1. Read: /ai/semantic-ui-patterns-cookbook.md
+1. Read: /ai/semantic-ui-component-authoring-best-practices.md
 2. Grep: pattern="{pattern}" include="*.mdx" path="/docs/src/pages/"
 3. Read: /docs/src/examples/ # See canonical usage
 ```
@@ -763,7 +763,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 → `/docs/src/pages/api/` (CANONICAL) or `/ai/semantic-ui-quick-reference.md`
 
 ### **Need code patterns?** 
-→ `/ai/semantic-ui-patterns-cookbook.md`
+→ `/ai/semantic-ui-component-authoring-best-practices.md`
 
 ### **Need implementation details?** 
 → `/packages/{package}/src/`

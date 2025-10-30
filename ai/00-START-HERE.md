@@ -70,8 +70,9 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 
 ### Implementation Patterns
 **Need to:** Best practices, common patterns, advanced techniques
-**Start with:** [Component Patterns Cookbook](/ai/guides/components/patterns.md)
-**Contains:** Communication patterns, state management, event handling, performance
+**Start with:** [Component Authoring Best Practices](/ai/guides/components/component-authoring-best-practices.md)
+**Look at:** `/src/components/` (panels, global-search, nav-menu, inpage-menu, mobile-menu)
+**Contains:** Communication patterns, state management, event handling, performance, production examples
 
 ### Testing & Quality Assurance
 **Need to:** Write tests, understand test organization, choose test types
@@ -111,7 +112,7 @@ Choose the workflow that matches your task:
 - **Add or enhance a package utility function?** → [`/ai/workflows/utils/add-util-function.md`](/ai/workflows/utils/add-util-function.md)
 - **Create or refine documentation examples?** → [`/ai/workflows/documentation/refine-example-documentation-copy.md`](/ai/workflows/documentation/refine-example-documentation-copy.md)
 - **Introduce new template syntax?** → [`/ai/workflows/templates/add-template-syntax.md`](/ai/workflows/templates/add-template-syntax.md)
-- **Add Query package methods?** → [`/ai/workflows/add-query-method.mdx`](/ai/workflows/add-query-method.mdx)
+- **Add Query package methods?** → [`/ai/workflows/query/add-query-method.md`](/ai/workflows/query/add-query-method.md)
 - **Publish a new AI context guide?** → [`/ai/workflows/meta/add-ai-context.md`](/ai/workflows/meta/add-ai-context.md)
 
 ### Following Workflows
@@ -132,7 +133,7 @@ Essential context for understanding Semantic UI architecture and patterns:
 ### **Component Development Context**
 Context for building components for any application:
 1. [Component Generation Guide](/ai/guides/components/generation.md) - Framework usage and architecture patterns
-2. [Component Patterns Cookbook](/ai/guides/components/patterns.md) - Communication and state patterns
+2. [Component Patterns Cookbook](/ai/guides/components/component-authoring-best-practices.md) - Communication and state patterns
 3. [HTML Guide](/ai/guides/html.md) + [CSS Guide](/ai/guides/styling/css-guide.md) - Markup and styling conventions
 4. **Tailwind Integration**:
    - [../packages/tailwind/README.md](../packages/tailwind/README.md) - Plugin overview
@@ -147,7 +148,7 @@ Context for creating examples and documentation:
 ### **Advanced Architecture Context**
 Context for complex implementation and debugging:
 1. [Mental Model](/ai/foundations/mental-model.md) - Deep architectural understanding
-2. [Component Patterns Cookbook](/ai/guides/components/patterns.md) - Advanced patterns and anti-patterns
+2. [Component Patterns Cookbook](/ai/guides/components/component-authoring-best-practices.md) - Advanced patterns and anti-patterns
 3. [Reactivity Package](/ai/packages/reactivity.md) - Reactive programming
 4. [Query Package](/ai/packages/query.md) - DOM manipulation
 
@@ -171,15 +172,16 @@ Context for debugging and finding solutions:
 | Document | Focus | Audience | Content Type |
 |----------|--------|----------|--------------|
 | **mental-model.md** | Architecture & Concepts | All levels | Conceptual |
-| **guides/components/generation.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
-| **guides/components/patterns.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
-| **guides/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
-| **guides/typescript-types.md** | TypeScript & JSDoc | All levels | Guidelines + Examples |
+| **guides/components/creating-components.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
+| **guides/components/component-authoring-best-practices.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
+| **guides/development/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
+| **guides/development/typescript-types.md** | TypeScript & JSDoc | All levels | Guidelines + Examples |
 | **quick-reference.md** | API Lookup | All levels | Reference |
 | **packages/reactivity.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
 | **packages/query.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
-| **guides/html.md** | HTML & Templates | All levels | Guidelines + Examples |
-| **guides/styling/css-guide.md** | CSS Architecture | All levels | Guidelines + Examples |
+| **guides/html/style-guide.md** | HTML & Templates | All levels | Guidelines + Examples |
+| **guides/html/using-ui-primitives.md** | UI Primitives | All levels | Guidelines + Examples |
+| **guides/css/css-guide.md** | CSS Architecture | All levels | Guidelines + Examples |
 | **packages/utils.md** | Utility Functions | All levels | Reference |
 | **codebase-navigation-guide.md** | Finding Information | All levels | Navigation Guide |
 
@@ -192,7 +194,7 @@ Context for debugging and finding solutions:
 ```
 Create a new component?
 ├── Simple component → guides/components/generation.md
-├── Complex interactions → guides/components/patterns.md (Component Communication)
+├── Complex interactions → guides/components/component-authoring-best-practices.md (Component Communication)
 └── Custom styling → guides/html.md + guides/styling/css-guide.md
 
 Understand an error or behavior?
@@ -201,14 +203,14 @@ Understand an error or behavior?
 └── Look up API syntax → foundations/quick-reference.md
 
 Handle component communication?
-├── Parent-child coordination → guides/components/patterns.md (Communication Patterns)
+├── Parent-child coordination → guides/components/component-authoring-best-practices.md (Communication Patterns)
 ├── Event handling → guides/components/generation.md (Events)
 └── State sharing → foundations/mental-model.md (Component Tree Navigation)
 
 Work with reactivity?
 ├── Basic state management → guides/components/generation.md (State)
 ├── Advanced reactive patterns → packages/reactivity.md
-└── Performance optimization → guides/components/patterns.md (Performance)
+└── Performance optimization → guides/components/component-authoring-best-practices.md (Performance)
 
 Write or run tests?
 ├── Test organization → guides/testing.md (Test Organization)
@@ -250,13 +252,13 @@ Query and manipulate DOM?
 
 ### **Common Workflows**
 - **Unknown Error:** foundations/codebase-navigation-guide.md → Find implementation → foundations/mental-model.md for context
-- **New Feature:** foundations/mental-model.md → guides/components/generation.md → guides/components/patterns.md
-- **Code Review:** guides/components/patterns.md → guides/styling/css-guide.md → foundations/quick-reference.md
+- **New Feature:** foundations/mental-model.md → guides/components/generation.md → guides/components/component-authoring-best-practices.md
+- **Code Review:** guides/components/component-authoring-best-practices.md → guides/styling/css-guide.md → foundations/quick-reference.md
 
 ### **Search Strategy**
 - Use foundations/codebase-navigation-guide.md for file locations
 - Use foundations/quick-reference.md for API signatures
-- Use guides/components/patterns.md for implementation examples
+- Use guides/components/component-authoring-best-practices.md for implementation examples
 - Use foundations/mental-model.md for "why" questions
 
 ---
@@ -283,17 +285,22 @@ ai/
 │   └── codebase-navigation-guide.md  ← Finding files and code
 ├── guides/                    ← Implementation guides
 │   ├── components/            ← Component development
-│   │   ├── generation.md      ← Creating components
-│   │   └── patterns.md        ← Best practices and patterns
-│   ├── styling/               ← CSS and design
+│   │   ├── creating-components.md ← Creating components
+│   │   └── component-authoring-best-practices.md        ← Best practices and patterns
+│   ├── css/                   ← CSS and design
 │   │   ├── css-guide.md       ← CSS architecture
 │   │   └── tokens/            ← Design token system
 │   │       ├── architecture.md    ← Token system design
 │   │       ├── token-usage.md     ← How to use tokens
 │   │       └── token-reference.md ← Token lookup table
-│   ├── html.md                ← HTML and template patterns
-│   ├── primitives.md          ← UI primitive usage
-│   └── query-behaviors.md     ← Query library behaviors
+│   ├── html/                  ← HTML and templates
+│   │   ├── style-guide.md     ← Semantic markup patterns
+│   │   └── using-ui-primitives.md ← UI primitive composition
+│   ├── query/                 ← Query library guides
+│   │   └── plugins-and-behaviors.md  ← Plugins & behaviors
+│   └── development/           ← Development practices
+│       ├── testing.md         ← Testing & QA
+│       └── typescript-types.md ← TypeScript & JSDoc
 ├── packages/                  ← Standalone package documentation
 │   ├── reactivity.md          ← Signals and reactions
 │   ├── query.md               ← DOM querying

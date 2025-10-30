@@ -24,11 +24,12 @@
    - Specialized guide: `ai/guides/...` (subfolders like `guides/reactivity/foo.md` are encouraged when they reflect the structure)  
    - Documentation support: `ai/documentation/...`  
    - Packages/workflows: follow existing directory structure or add a sensible subfolder when introducing new families (`ai/workflows/<domain>/`).
-2. **Structure for LLM consumption**  
-   - Use heading hierarchy (H1 title, H2 sections).  
-   - Favor bullet sequences, command snippets, and decision trees.  
-   - Avoid narrative/marketing prose; focus on actionable instructions.  
+2. **Structure for LLM consumption**
+   - Use heading hierarchy (H1 title, H2 sections).
+   - Favor bullet sequences, command snippets, and decision trees.
+   - Avoid narrative/marketing prose; focus on actionable instructions.
    - Provide cross references to canonical docs using `/ai/...` paths; whenever material overlaps with an existing guide, link to that location instead of restating it.
+   - **IMPORTANT**: Include a **Last Updated** field at the top of the file (e.g., `> Last Updated: 2025-10-30`). Always update this field when modifying file contents.
 3. **Embed canonical references** where relevant (examples, source directories, API docs).
 
 ## 3. Register in the Manifest

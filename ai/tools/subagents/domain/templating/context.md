@@ -59,7 +59,7 @@
 5. **Template Integration Context**
    - `ai/guides/components/generation.md` - How templates integrate with components
    - `ai/foundations/quick-reference.md` - Template syntax quick reference
-   - `ai/guides/patterns-cookbook.md` - Template patterns and anti-patterns
+   - `ai/guides/component-authoring-best-practices.md` - Template patterns and anti-patterns
 
 ## Template Authoring Philosophy
 
