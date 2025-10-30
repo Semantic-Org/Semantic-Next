@@ -2,7 +2,7 @@
 
 > **For:** AI agents writing or modifying tests
 > **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) • [Codebase Navigation](/ai/foundations/codebase-navigation-guide.md)
-> **Related:** [Component Generation](/ai/guides/components/generation.md) • [Package APIs](/ai/packages/)
+> **Related:** [Component Generation](/ai/guides/components/creating-components.md) • [Package APIs](/ai/packages/)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

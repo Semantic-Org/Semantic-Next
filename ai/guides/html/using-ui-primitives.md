@@ -363,7 +363,7 @@ handleAsyncOperation = async () => {
 ## Cross-References
 
 **Related guides:**
-- **HTML structure**: See `ai/guides/html.md` for semantic markup patterns
+- **HTML structure**: See `ai/guides/html/style-guide.md` for semantic markup patterns
 - **CSS architecture**: See `ai/guides/styling/css-guide.md` for styling and nesting patterns  
 - **Design tokens**: See `ai/guides/styling/tokens/token-usage.md` for token usage and verification
 

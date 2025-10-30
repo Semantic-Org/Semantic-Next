@@ -78,7 +78,7 @@ tools/
 # Update all references from old directory structure
 ./ai/tools/scripts/update-markdown-links.sh \
   'ai/guides/component-generation-instructions.md' \
-  'ai/guides/components/generation.md' \
+  'ai/guides/components/creating-components.md' \
   --dry-run
 
 # Example 3: Fixing broken links

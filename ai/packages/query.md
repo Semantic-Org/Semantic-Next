@@ -3,7 +3,7 @@
 > **For:** AI agents working with DOM querying and manipulation in Semantic UI  
 > **Purpose:** Comprehensive reference for the Query package and component debugging  
 > **Prerequisites:** Basic understanding of DOM and Shadow DOM concepts  
-> **Related:** [Mental Model](/ai/foundations/mental-model.md) • [Component Guide](/ai/guides/components/generation.md) • [Quick Reference](/ai/foundations/quick-reference.md)  
+> **Related:** [Mental Model](/ai/foundations/mental-model.md) • [Component Guide](/ai/guides/components/creating-components.md) • [Quick Reference](/ai/foundations/quick-reference.md)  
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

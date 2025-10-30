@@ -40,7 +40,7 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 
 ### Building Components
 **Need to:** Create, modify, or understand components for any application
-**Start with:** [Component Generation Guide](/ai/guides/components/generation.md)
+**Start with:** [Component Generation Guide](/ai/guides/components/creating-components.md)
 **Contains:** Framework usage patterns, component architecture, implementation best practices
 
 ### Creating Documentation Examples
@@ -76,17 +76,17 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 
 ### Testing & Quality Assurance
 **Need to:** Write tests, understand test organization, choose test types
-**Start with:** [Testing Guide](/ai/guides/testing.md)
+**Start with:** [Testing Guide](/ai/guides/development/testing.md)
 **Contains:** Test types (unit/DOM/browser), file organization, running tests, writing patterns
 
 ### TypeScript Types & JSDoc
 **Need to:** Add type definitions, write JSDoc comments, understand DX requirements
-**Start with:** [TypeScript Types Guide](/ai/guides/typescript-types.md)
+**Start with:** [TypeScript Types Guide](/ai/guides/development/typescript-types.md)
 **Contains:** JSDoc patterns, type organization, documentation links, examples
 
 ### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens
-**Start with:** [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md) • [CSS Tokens](/ai/guides/styling/tokens/token-usage.md)
+**Start with:** [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md) • [CSS Tokens](/ai/guides/css/tokens/token-usage.md)
 **Contains:** Template patterns, CSS architecture, design token usage
 
 ### Reactivity System (Standalone Library)
@@ -127,14 +127,14 @@ Choose the workflow that matches your task:
 ### **Framework Newcomer Context**
 Essential context for understanding Semantic UI architecture and patterns:
 1. [Mental Model](/ai/foundations/mental-model.md) - Core concepts and philosophy
-2. [Component Generation Guide](/ai/guides/components/generation.md) - Component creation patterns
+2. [Component Generation Guide](/ai/guides/components/creating-components.md) - Component creation patterns
 3. [Quick Reference](/ai/foundations/quick-reference.md) - API reference
 
 ### **Component Development Context**
 Context for building components for any application:
-1. [Component Generation Guide](/ai/guides/components/generation.md) - Framework usage and architecture patterns
+1. [Component Generation Guide](/ai/guides/components/creating-components.md) - Framework usage and architecture patterns
 2. [Component Patterns Cookbook](/ai/guides/components/component-authoring-best-practices.md) - Communication and state patterns
-3. [HTML Guide](/ai/guides/html.md) + [CSS Guide](/ai/guides/styling/css-guide.md) - Markup and styling conventions
+3. [HTML Guide](/ai/guides/html/style-guide.md) + [CSS Guide](/ai/guides/css/css-guide.md) - Markup and styling conventions
 4. **Tailwind Integration**:
    - [../packages/tailwind/README.md](../packages/tailwind/README.md) - Plugin overview
    - [../packages/tailwind/AGENTS.md](../packages/tailwind/AGENTS.md) - Technical implementation
@@ -143,7 +143,7 @@ Context for building components for any application:
 Context for creating examples and documentation:
 1. [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md) - Complete example metadata system and docs requirements
 2. [Package Documentation](/ai/packages/) - Package API demonstrations and references
-3. [Component Generation Guide](/ai/guides/components/generation.md) - Component implementation patterns
+3. [Component Generation Guide](/ai/guides/components/creating-components.md) - Component implementation patterns
 
 ### **Advanced Architecture Context**
 Context for complex implementation and debugging:
@@ -174,14 +174,14 @@ Context for debugging and finding solutions:
 | **mental-model.md** | Architecture & Concepts | All levels | Conceptual |
 | **guides/components/creating-components.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
 | **guides/components/component-authoring-best-practices.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
-| **guides/development/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
-| **guides/development/typescript-types.md** | TypeScript & JSDoc | All levels | Guidelines + Examples |
+| **/ai/guides/development/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
+| **/ai/guides/development/typescript-types.md** | TypeScript & JSDoc | All levels | Guidelines + Examples |
 | **quick-reference.md** | API Lookup | All levels | Reference |
 | **packages/reactivity.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
 | **packages/query.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
 | **guides/html/style-guide.md** | HTML & Templates | All levels | Guidelines + Examples |
 | **guides/html/using-ui-primitives.md** | UI Primitives | All levels | Guidelines + Examples |
-| **guides/css/css-guide.md** | CSS Architecture | All levels | Guidelines + Examples |
+| **/ai/guides/css/css-guide.md** | CSS Architecture | All levels | Guidelines + Examples |
 | **packages/utils.md** | Utility Functions | All levels | Reference |
 | **codebase-navigation-guide.md** | Finding Information | All levels | Navigation Guide |
 
@@ -193,9 +193,9 @@ Context for debugging and finding solutions:
 
 ```
 Create a new component?
-├── Simple component → guides/components/generation.md
+├── Simple component → guides/components/creating-components.md
 ├── Complex interactions → guides/components/component-authoring-best-practices.md (Component Communication)
-└── Custom styling → guides/html.md + guides/styling/css-guide.md
+└── Custom styling → guides/html/style-guide.md + guides/styling/css-guide.md
 
 Understand an error or behavior?
 ├── Find where code is located → foundations/codebase-navigation-guide.md
@@ -204,19 +204,19 @@ Understand an error or behavior?
 
 Handle component communication?
 ├── Parent-child coordination → guides/components/component-authoring-best-practices.md (Communication Patterns)
-├── Event handling → guides/components/generation.md (Events)
+├── Event handling → guides/components/creating-components.md (Events)
 └── State sharing → foundations/mental-model.md (Component Tree Navigation)
 
 Work with reactivity?
-├── Basic state management → guides/components/generation.md (State)
+├── Basic state management → guides/components/creating-components.md (State)
 ├── Advanced reactive patterns → packages/reactivity.md
 └── Performance optimization → guides/components/component-authoring-best-practices.md (Performance)
 
 Write or run tests?
-├── Test organization → guides/testing.md (Test Organization)
-├── Choose test type → guides/testing.md (Test Types)
-├── Write tests → guides/testing.md (Writing Tests)
-└── Package-specific patterns → guides/testing.md (Package-Specific Patterns)
+├── Test organization → guides//ai/guides/development/testing.md (Test Organization)
+├── Choose test type → guides//ai/guides/development/testing.md (Test Types)
+├── Write tests → guides//ai/guides/development/testing.md (Writing Tests)
+└── Package-specific patterns → guides//ai/guides/development/testing.md (Package-Specific Patterns)
 
 Add TypeScript types?
 ├── JSDoc patterns → guides/typescript-types.md (JSDoc Requirements)
@@ -225,9 +225,9 @@ Add TypeScript types?
 └── Examples & best practices → guides/typescript-types.md (Common Scenarios)
 
 Style components?
-├── Basic CSS patterns → guides/html.md + guides/styling/css-guide.md
+├── Basic CSS patterns → guides/html/style-guide.md + guides/styling/css-guide.md
 ├── Design token usage → guides/styling/tokens/token-usage.md
-└── Component-specific styling → guides/components/generation.md (CSS)
+└── Component-specific styling → guides/components/creating-components.md (CSS)
 
 Query and manipulate DOM?
 ├── Basic querying → packages/query.md (Basic Operations)
@@ -252,7 +252,7 @@ Query and manipulate DOM?
 
 ### **Common Workflows**
 - **Unknown Error:** foundations/codebase-navigation-guide.md → Find implementation → foundations/mental-model.md for context
-- **New Feature:** foundations/mental-model.md → guides/components/generation.md → guides/components/component-authoring-best-practices.md
+- **New Feature:** foundations/mental-model.md → guides/components/creating-components.md → guides/components/component-authoring-best-practices.md
 - **Code Review:** guides/components/component-authoring-best-practices.md → guides/styling/css-guide.md → foundations/quick-reference.md
 
 ### **Search Strategy**
@@ -299,7 +299,7 @@ ai/
 │   ├── query/                 ← Query library guides
 │   │   └── plugins-and-behaviors.md  ← Plugins & behaviors
 │   └── development/           ← Development practices
-│       ├── testing.md         ← Testing & QA
+│       ├── /ai/guides/development/testing.md         ← Testing & QA
 │       └── typescript-types.md ← TypeScript & JSDoc
 ├── packages/                  ← Standalone package documentation
 │   ├── reactivity.md          ← Signals and reactions

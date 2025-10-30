@@ -34,7 +34,7 @@ Add your method to `/packages/query/src/query.js`
 ### Key Conventions
 
 #### Use Semantic UI Utils
-Query uses utilities from `@semantic-ui/utils`. Use existing imported helpers from the import statement at the top of `query.js`, or import additional ones as needed. See the comprehensive [Utils Package Guide](../packages/utils.md) for all available utilities.
+Query uses utilities from `@semantic-ui/utils`. Use existing imported helpers from the import statement at the top of `query.js`, or import additional ones as needed. See the comprehensive [Utils Package Guide](/ai/packages/utils.md) for all available utilities.
 
 #### Method Placement
 - Add new methods before the comment `// special helper for SUI components`
@@ -105,7 +105,7 @@ methodName(param1, param2) {
 
 ## Step 2: Testing
 
-> **See Also:** [Testing Guide](/ai/guides/testing.md) for help choosing between unit, DOM, and browser tests.
+> **See Also:** [Testing Guide](/ai/guides/development/testing.md) for help choosing between unit, DOM, and browser tests.
 
 ### Location
 Add tests to `/packages/query/test/dom/query.test.js` for standard DOM operations.
@@ -166,7 +166,7 @@ expect($result[0]).toBe(/* original element */);
 
 ## Step 3: TypeScript Definitions
 
-> **See Also:** [TypeScript Types Guide](/ai/guides/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
+> **See Also:** [TypeScript Types Guide](/ai/guides/development/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
 
 ### Location
 Add type definitions to `/packages/query/types/query.d.ts`

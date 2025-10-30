@@ -1165,6 +1165,6 @@ The agent cannot visually verify styling - this requires human evaluation of:
 **For additional context on specific patterns**, consult:
 - `/ai/guides/styling/tokens/token-usage.md` - Token system and usage
 - `/ai/packages/specs.md` - Spec structure and processing
-- `/ai/guides/components/generation.md` - Component architecture
+- `/ai/guides/components/creating-components.md` - Component architecture
 - `/ai/guides/styling/tokens/architecture.md` - Token system deep dive
 - `/ai/foundations/mental-model.md` - Shadow DOM architecture details

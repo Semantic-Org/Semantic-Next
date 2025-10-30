@@ -325,7 +325,7 @@ await tools.mutation_history({
 ## 📚 Documentation References
 
 - **MCP Tools Schema**: `/mcp-tools.js`
-- **Component Guide**: `/ai/guides/components/generation.md`
+- **Component Guide**: `/ai/guides/components/creating-components.md`
 - **Query System**: `/ai/packages/query.md`
 - **Mental Model**: `/ai/foundations/mental-model.md`
 

@@ -58,7 +58,7 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 
 ## Step 2: Testing
 
-> **See Also:** [Testing Guide](/ai/guides/testing.md) for comprehensive guidance on test types, organization, and patterns.
+> **See Also:** [Testing Guide](/ai/guides/development/testing.md) for comprehensive guidance on test types, organization, and patterns.
 
 ### Test Location
 `/packages/utils/test/utils.test.js`
@@ -103,7 +103,7 @@ describe('prettifyHash', () => {
 
 ## Step 3: Types
 
-> **See Also:** [TypeScript Types Guide](/ai/guides/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
+> **See Also:** [TypeScript Types Guide](/ai/guides/development/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
 
 ### Type Definition Location
 `/packages/utils/types/[module].d.ts`

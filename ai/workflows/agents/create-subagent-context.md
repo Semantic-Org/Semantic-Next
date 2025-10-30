@@ -181,7 +181,7 @@ Task({
 ✅ CORRECT: "Study docs/src/examples/component/minimal/ for basic patterns"
 
 ❌ WRONG: Repeat information from other guides  
-✅ CORRECT: "Use ai/guides/html.md and ai/guides/styling/css-guide.md for markup and styling conventions"
+✅ CORRECT: "Use ai/guides/html/style-guide.md and ai/guides/styling/css-guide.md for markup and styling conventions"
 ```
 
 ### 4.3 Tool Integration Instructions

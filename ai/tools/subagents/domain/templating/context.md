@@ -33,7 +33,7 @@
 
 2. **Template System Architecture**
    - `ai/packages/templating.md` - Complete templating system reference and patterns
-   - `ai/guides/html.md` - HTML structure conventions and semantic composition
+   - `ai/guides/html/style-guide.md` - HTML structure conventions and semantic composition
    - `ai/guides/styling/css-guide.md` - Styling integration patterns and CSS architecture
 
 3. **Canonical Template Examples (BEST SOURCE for real patterns)**
@@ -57,7 +57,7 @@
    - `docs/src/content/lessons/{lesson-number}/example/component.html` - Progressive examples
 
 5. **Template Integration Context**
-   - `ai/guides/components/generation.md` - How templates integrate with components
+   - `ai/guides/components/creating-components.md` - How templates integrate with components
    - `ai/foundations/quick-reference.md` - Template syntax quick reference
    - `ai/guides/component-authoring-best-practices.md` - Template patterns and anti-patterns
 

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * Fix broken markdown links in ai/ directory
+ * Check and fix broken markdown links in ai/ directory
  *
  * Usage:
- *   node fix-markdown-links.js                    # Dry run (reports only)
- *   node fix-markdown-links.js --fix              # Auto-fix links
- *   node fix-markdown-links.js --threshold 0.8    # Custom threshold (default 0.85)
- *   node fix-markdown-links.js --fix --verbose    # Fix with detailed output
+ *   node check-markdown-links.js                    # Dry run (reports only)
+ *   node check-markdown-links.js --fix              # Auto-fix links
+ *   node check-markdown-links.js --threshold 0.8    # Custom threshold (default 0.85)
+ *   node check-markdown-links.js --fix --verbose    # Fix with detailed output
  */
 
 import fs from 'fs';
@@ -78,6 +78,9 @@ function similarity(str1, str2) {
   return (longer.length - distance) / longer.length;
 }
 
+// Directories to skip when scanning for markdown files
+const SKIP_DIRS = ['node_modules', 'artifacts'];
+
 /**
  * Find all markdown files in directory recursively
  */
@@ -88,8 +91,8 @@ function findMarkdownFiles(dir, files = []) {
     const fullPath = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
-      // Skip node_modules, .git, etc.
-      if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
+      // Skip hidden directories and excluded directories
+      if (!entry.name.startsWith('.') && SKIP_DIRS.indexOf(entry.name) === -1) {
         findMarkdownFiles(fullPath, files);
       }
     }
@@ -306,7 +309,13 @@ function processFile(filePath, fileIndex) {
     const match = findBestMatch(resolvedPath, fileIndex);
 
     if (match.score >= THRESHOLD) {
-      const newPath = path.relative(path.dirname(filePath), match.path);
+      // Use absolute paths - /ai/ for ai/ directory, relative for others
+      let newPath = path.relative(AI_DIR, match.path);
+
+      // If path is within ai/ directory and not already absolute, add /ai/ prefix
+      if (!newPath.startsWith('/') && !newPath.startsWith('..')) {
+        newPath = '/ai/' + newPath;
+      }
 
       // Replace the link in content
       const oldLink = link.fullMatch;

@@ -2,7 +2,7 @@
 
 > **For:** AI agents implementing complex component patterns and best practices
 > **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) and [Component Generation](./creating-components.md)
-> **Related:** [Quick Reference](/ai/foundations/quick-reference.md) • [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md)
+> **Related:** [Quick Reference](/ai/foundations/quick-reference.md) • [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

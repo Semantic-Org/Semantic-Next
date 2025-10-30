@@ -300,7 +300,7 @@ src/css/tokens/
 ## Cross-References
 
 **Related guides:**
-- **HTML structure**: See `ai/guides/html.md` for semantic markup patterns
+- **HTML structure**: See `ai/guides/html/style-guide.md` for semantic markup patterns
 - **CSS architecture**: See `ai/guides/styling/css-guide.md` for nesting and responsive design
 - **Primitive usage**: See `ai/guides/primitives.md` for using existing primitives
 

@@ -2,7 +2,7 @@
 
 > **For:** AI agents adding or modifying TypeScript type definitions
 > **Prerequisites:** [Mental Model](/ai/foundations/mental-model.md) • [Codebase Navigation](/ai/foundations/codebase-navigation-guide.md)
-> **Related:** [Testing Guide](/ai/guides/testing.md) • [Package APIs](/ai/packages/)
+> **Related:** [Testing Guide](/ai/guides/development/testing.md) • [Package APIs](/ai/packages/)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

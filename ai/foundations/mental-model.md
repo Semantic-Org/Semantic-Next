@@ -2,7 +2,7 @@
 
 > **For:** AI agents seeking deep architectural understanding
 > **Prerequisites:** None - foundational document
-> **Related:** [Component Guide](/ai/guides/components/generation.md) • [Best Practices](/ai/guides/components/component-authoring-best-practices.md) • [Quick Reference](/ai/foundations/quick-reference.md)
+> **Related:** [Component Guide](/ai/guides/components/creating-components.md) • [Best Practices](/ai/guides/components/component-authoring-best-practices.md) • [Quick Reference](/ai/foundations/quick-reference.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

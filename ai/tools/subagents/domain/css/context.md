@@ -24,7 +24,7 @@
 
 ### CSS-Specific Context (MANDATORY)
 **Read these canonical guides before any CSS work:**
-1. **`ai/guides/html.md`** - Semantic markup patterns and class naming
+1. **`ai/guides/html/style-guide.md`** - Semantic markup patterns and class naming
 2. **`ai/guides/styling/css-guide.md`** - CSS architecture, nesting, and responsive design
 3. **`ai/guides/styling/tokens/token-usage.md`** - Design token system and verification workflow
 4. **`ai/guides/primitives.md`** - Using existing primitives and composition patterns
@@ -77,7 +77,7 @@ Refer to `ai/guides/styling/css-guide.md` for detailed patterns:
   - **Response**: "Container queries and CSS variables are testable. Set container size and custom properties programmatically"
 
 - **Types Agent**: "CSS classes aren't type-safe"
-  - **Response**: "Semantic class names provide self-documenting patterns per `ai/guides/html.md`"
+  - **Response**: "Semantic class names provide self-documenting patterns per `ai/guides/html/style-guide.md`"
 
 ### Challenge Implementation Approaches
 - **Hardcoded Values**: "Why not use fixed colors/sizes?"
@@ -87,7 +87,7 @@ Refer to `ai/guides/styling/css-guide.md` for detailed patterns:
   - **Response**: "Media queries respond to viewport, not component context. Use container queries for true component responsiveness"
 
 - **ID Selectors**: "IDs are more specific"
-  - **Response**: "IDs prevent reusability. Use semantic classes as outlined in `ai/guides/html.md`"
+  - **Response**: "IDs prevent reusability. Use semantic classes as outlined in `ai/guides/html/style-guide.md`"
 
 ## Success Criteria
 
@@ -102,7 +102,7 @@ Refer to `ai/guides/styling/css-guide.md` for detailed patterns:
 - [ ] Theme overrides use container style queries sparingly
 
 ### Architecture Quality
-- [ ] Follows patterns from `ai/guides/html.md`
+- [ ] Follows patterns from `ai/guides/html/style-guide.md`
 - [ ] Container queries used for responsive behavior
 - [ ] Semantic class naming conventions followed
 - [ ] Proper definition/theme layer separation
@@ -136,7 +136,7 @@ When providing CSS implementations, include architecture context:
 
 **Before any CSS work:**
 1. Read `ai/guides/styling/css-guide.md` for complete CSS rules and patterns
-2. Check `ai/guides/html.md` for conventions and anti-patterns
+2. Check `ai/guides/html/style-guide.md` for conventions and anti-patterns
 3. Examine `src/css/tokens/` to understand available design tokens
 4. Study existing component CSS in `src/components/` for patterns
 5. Reference dynamic breakpoint examples in `docs/src/examples/`

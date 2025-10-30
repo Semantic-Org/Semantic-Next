@@ -72,7 +72,7 @@ Level 4: Verification & Refinement
 ## Task-Based Context Loading
 
 ### Component Creation Tasks
-**Context:** [`guides/component-generation-instructions.md`](/ai/guides/components/generation.md)
+**Context:** [`guides/component-generation-instructions.md`](/ai/guides/components/creating-components.md)
 **Supplementary:** [`foundations/quick-reference.md`](/ai/foundations/quick-reference.md) for API syntax
 
 ### Architecture Understanding

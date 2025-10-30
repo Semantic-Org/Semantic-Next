@@ -351,7 +351,7 @@ my-component {
 ## Cross-References
 
 **Related guides:**
-- **HTML structure**: See `ai/guides/html.md` for semantic markup patterns
+- **HTML structure**: See `ai/guides/html/style-guide.md` for semantic markup patterns
 - **Design tokens**: See `ai/guides/styling/tokens/token-usage.md` for token usage and verification
 - **Primitive usage**: See `ai/guides/primitives.md` for using existing primitives
 

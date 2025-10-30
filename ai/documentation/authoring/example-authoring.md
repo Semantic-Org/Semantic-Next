@@ -3,7 +3,7 @@
 > **For:** AI agents working with the Semantic UI documentation example system
 > **Prerequisites:** Understanding of Semantic UI architecture and documentation structure
 > **Scope:** Complete reference for example creation, metadata, organization, and navigation
-> **Related:** [Component Development Guide](/ai/guides/components/generation.md) • [HTML Guide](/ai/guides/html.md) • [CSS Token Guide](/ai/guides/styling/tokens/token-usage.md) • [Documentation Hub](/ai/00-START-HERE.md)
+> **Related:** [Component Development Guide](/ai/guides/components/creating-components.md) • [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Token Guide](/ai/guides/css/tokens/token-usage.md) • [Documentation Hub](/ai/00-START-HERE.md)
 
 ---
 
@@ -593,7 +593,7 @@ else {
 #### Step 1: Plan Component
 - Use TodoWrite tool for multi-step component creation
 - **MANDATORY**: Read `/ai/guides/css-token-list.md` for complete design token reference
-- **MANDATORY**: Read `/ai/guides/html.md` for semantic HTML patterns
+- **MANDATORY**: Read `/ai/guides/html/style-guide.md` for semantic HTML patterns
 - **MANDATORY**: Read `/ai/guides/styling/tokens/token-usage.md` for design token usage patterns
 - **MANDATORY**: Read relevant package guide in `/ai/packages/` if using specific packages
 - **MANDATORY**: Read 1-3 existing examples with highest similarity to requested example for style patterns
@@ -649,12 +649,12 @@ tip: 'Use design tokens for consistent styling'
 
 #### Step 4: Implement Component Files
 - **component.js**: Use `defineComponent`, `self.method()` references, `$` prefixed queries
-- **component.html**: Follow `/ai/guides/html.md` - semantic classes, natural hierarchy
+- **component.html**: Follow `/ai/guides/html/style-guide.md` - semantic classes, natural hierarchy
 - **component.css**: Follow `/ai/guides/styling/tokens/token-usage.md` - 100% design tokens, CSS nesting
 
 #### Step 5: Page File Standards
 - **page.css**: **MANDATORY** - Use only design tokens per `/ai/guides/styling/tokens/token-usage.md`
-- **page.html**: **MANDATORY** - Follow `/ai/guides/html.md` semantic patterns
+- **page.html**: **MANDATORY** - Follow `/ai/guides/html/style-guide.md` semantic patterns
 - **page.js**: Prefix query variables with `$` (`const $button = $('#btn')`)
 
 ### **Package Example Workflow**
@@ -956,7 +956,7 @@ See the [Query .width() example](query-width) for basic usage patterns.
 #### **Code Quality Requirements**
 - **Professional standards**: Production-quality code that developers can trust
 - **Design token usage**: Use only `var(--token-name)` - never hardcoded values
-- **Semantic HTML**: Follow `/ai/guides/html.md` patterns exactly
+- **Semantic HTML**: Follow `/ai/guides/html/style-guide.md` patterns exactly
 - **Query prefixing**: All DOM queries must use `$` prefix (`const $element = $('.selector')`)
 
 #### **Educational Requirements**
@@ -1252,7 +1252,7 @@ tip: # Leave empty rather than stating the obvious
 ### **Quality Checklist**
 
 #### **Before Creating Any Example**
-1. ✅ Read `/ai/guides/html.md` for HTML patterns
+1. ✅ Read `/ai/guides/html/style-guide.md` for HTML patterns
 2. ✅ Read `/ai/guides/styling/tokens/token-usage.md` for CSS token usage
 3. ✅ Read relevant `/ai/packages/` guide for package-specific patterns
 4. ✅ **Read 1-3 existing examples with highest similarity to requested example**
