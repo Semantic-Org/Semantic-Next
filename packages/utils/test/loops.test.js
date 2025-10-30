@@ -234,6 +234,75 @@ describe('iterators', () => {
         expect(keys).toEqual(['z', 'a', 'm']);
       });
     });
+
+    describe('Array-like objects', () => {
+      it('should iterate over array-like objects with numeric indices', async () => {
+        // Create a non-plain array-like object
+        function ArrayLike() {
+          this[0] = 'a';
+          this[1] = 'b';
+          this[2] = 'c';
+          this.length = 3;
+        }
+        const arrayLike = new ArrayLike();
+        const values = [];
+        await asyncEach(arrayLike, async (value, index) => {
+          values.push({ value, index });
+        });
+        expect(values).toEqual([
+          { value: 'a', index: 0 },
+          { value: 'b', index: 1 },
+          { value: 'c', index: 2 },
+        ]);
+      });
+
+      it('should break early on array-like objects', async () => {
+        function ArrayLike() {
+          this[0] = 1;
+          this[1] = 2;
+          this[2] = 3;
+          this.length = 3;
+        }
+        const arrayLike = new ArrayLike();
+        const spy = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+        await asyncEach(arrayLike, spy);
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    describe('Non-plain objects', () => {
+      it('should iterate over class instances using Object.keys', async () => {
+        class MyClass {
+          constructor() {
+            this.a = 1;
+            this.b = 2;
+          }
+        }
+        const instance = new MyClass();
+        const values = [];
+        await asyncEach(instance, async (value, key) => {
+          values.push({ key, value });
+        });
+        expect(values).toEqual([
+          { key: 'a', value: 1 },
+          { key: 'b', value: 2 },
+        ]);
+      });
+
+      it('should break early on non-plain objects', async () => {
+        class MyClass {
+          constructor() {
+            this.a = 1;
+            this.b = 2;
+            this.c = 3;
+          }
+        }
+        const instance = new MyClass();
+        const spy = vi.fn().mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+        await asyncEach(instance, spy);
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
+    });
   });
 
   describe('asyncMap', () => {
@@ -338,6 +407,53 @@ describe('iterators', () => {
         });
         expect(result.get('user1')).toEqual({ age: 25, id: 'user1', isAdult: true });
         expect(result.get('user2')).toEqual({ age: 30, id: 'user2', isAdult: true });
+      });
+    });
+
+    describe('Array-like objects', () => {
+      it('should map array-like objects to an array', async () => {
+        function ArrayLike() {
+          this[0] = 1;
+          this[1] = 2;
+          this[2] = 3;
+          this.length = 3;
+        }
+        const arrayLike = new ArrayLike();
+        const result = await asyncMap(arrayLike, async (value) => value * 2);
+        expect(result).toEqual([2, 4, 6]);
+        expect(Array.isArray(result)).toBe(true);
+      });
+
+      it('should handle empty array-like objects', async () => {
+        function ArrayLike() {
+          this.length = 0;
+        }
+        const arrayLike = new ArrayLike();
+        const result = await asyncMap(arrayLike, async (value) => value);
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('Non-plain objects', () => {
+      it('should map class instances to an object', async () => {
+        class MyClass {
+          constructor() {
+            this.a = 1;
+            this.b = 2;
+          }
+        }
+        const instance = new MyClass();
+        const result = await asyncMap(instance, async (value) => value * 10);
+        expect(result).toEqual({ a: 10, b: 20 });
+        expect(Array.isArray(result)).toBe(false);
+      });
+
+      it('should preserve object structure for non-plain objects', async () => {
+        const obj = Object.create({ inherited: 'value' });
+        obj.own = 'property';
+        const result = await asyncMap(obj, async (value) => value.toUpperCase());
+        expect(result).toEqual({ own: 'PROPERTY' });
+        expect(result.inherited).toBeUndefined(); // inherited properties not included
       });
     });
   });

@@ -1,4 +1,12 @@
-import { camelToKebab, capitalizeWords, joinWords, kebabToCamel, toTitleCase, truncate } from '@semantic-ui/utils';
+import {
+  camelToKebab,
+  capitalizeWords,
+  getArticle,
+  joinWords,
+  kebabToCamel,
+  toTitleCase,
+  truncate,
+} from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -17,6 +25,12 @@ describe('String Utilities', () => {
 
   it('should convert a string to title case', () => {
     expect(toTitleCase('a simple test')).toBe('A Simple Test');
+  });
+
+  it('should handle stopwords in title case (not capitalize stopwords except first word)', () => {
+    expect(toTitleCase('the quick brown fox')).toBe('The Quick Brown Fox');
+    expect(toTitleCase('a tale of two cities')).toBe('A Tale of Two Cities');
+    expect(toTitleCase('the lord of the rings')).toBe('The Lord of the Rings');
   });
 
   describe('joinWords', () => {
@@ -85,6 +99,42 @@ describe('String Utilities', () => {
     });
   });
 
+  describe('getArticle', () => {
+    it('should return "an" for words starting with vowels', () => {
+      expect(getArticle('apple')).toBe('an');
+      expect(getArticle('elephant')).toBe('an');
+      expect(getArticle('igloo')).toBe('an');
+      expect(getArticle('orange')).toBe('an');
+      expect(getArticle('umbrella')).toBe('an');
+    });
+
+    it('should return "a" for words starting with consonants', () => {
+      expect(getArticle('banana')).toBe('a');
+      expect(getArticle('cat')).toBe('a');
+      expect(getArticle('dog')).toBe('a');
+    });
+
+    it('should capitalize the article when capitalize option is true', () => {
+      expect(getArticle('apple', { capitalize: true })).toBe('An');
+      expect(getArticle('banana', { capitalize: true })).toBe('A');
+    });
+
+    it('should include the word when includeWord option is true', () => {
+      expect(getArticle('apple', { includeWord: true })).toBe('an apple');
+      expect(getArticle('banana', { includeWord: true })).toBe('a banana');
+    });
+
+    it('should combine capitalize and includeWord options', () => {
+      expect(getArticle('apple', { capitalize: true, includeWord: true })).toBe('An apple');
+      expect(getArticle('banana', { capitalize: true, includeWord: true })).toBe('A banana');
+    });
+
+    it('should handle uppercase words', () => {
+      expect(getArticle('APPLE')).toBe('an');
+      expect(getArticle('BANANA')).toBe('a');
+    });
+  });
+
   describe('truncate', () => {
     it('should return original text if shorter than length', () => {
       expect(truncate('short', 10)).toBe('short');
@@ -105,6 +155,13 @@ describe('String Utilities', () => {
     it('should disable word boundary when specified', () => {
       // Note: With a hard cut, the result is the same in this case.
       expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a very…');
+    });
+
+    it('should truncate at punctuation boundaries (comma, period, etc)', () => {
+      expect(truncate('Hello, world. How are you?', 15)).toBe('Hello, world.…');
+      expect(truncate('First-second-third-fourth', 15)).toBe('First-second-…');
+      expect(truncate('Test (with parentheses)', 15)).toBe('Test (with…');
+      expect(truncate('One; two: three!', 12)).toBe('One; two:…');
     });
 
     it('should use a custom suffix and trim trailing space', () => {

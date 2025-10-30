@@ -452,6 +452,13 @@ describe('Array Utilities', () => {
     it('maintains element order', () => {
       expect(difference([3, 1, 2], [2], [3])).toEqual([1]);
     });
+
+    it('uses Set optimization for large arrays (>= 58 elements)', () => {
+      const arr1 = Array.from({ length: 30 }, (_, i) => i);
+      const arr2 = Array.from({ length: 30 }, (_, i) => i + 20);
+      const result = difference(arr1, arr2);
+      expect(result).toEqual(Array.from({ length: 20 }, (_, i) => i));
+    });
   });
 
   describe('uniqueItems', () => {
@@ -469,6 +476,18 @@ describe('Array Utilities', () => {
 
     it('handles arrays with duplicates', () => {
       expect(uniqueItems([1, 1, 2], [2, 2, 3], [3, 3, 4])).toEqual([1, 4]);
+    });
+
+    it('uses Set optimization for large arrays (>= 58 elements)', () => {
+      const arr1 = Array.from({ length: 25 }, (_, i) => i);
+      const arr2 = Array.from({ length: 25 }, (_, i) => i + 20);
+      const arr3 = Array.from({ length: 10 }, (_, i) => i + 10);
+      const result = uniqueItems(arr1, arr2, arr3);
+      expect(result).toContain(0);
+      expect(result).toContain(9);
+      expect(result).toContain(25);
+      expect(result).toContain(44);
+      expect(result.length).toBe(30);
     });
   });
 

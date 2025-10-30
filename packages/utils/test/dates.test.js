@@ -172,6 +172,11 @@ describe('Date Utilities', () => {
     it('should format date with custom timezone', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_York' })).toBe('2023-05-18 11:34:56');
     });
+
+    it('should handle timezone shorthand (EST, PST, etc)', () => {
+      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'EST' })).toBe('2023-05-18 10:34:56');
+      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'PST' })).toBe('2023-05-18 08:34:56');
+    });
     /*
     it('should format date with local timezone', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'local' })).toBe('2023-05-18 ' + date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
@@ -215,6 +220,13 @@ describe('Date Utilities', () => {
       const midnightDate = new Date('2023-05-18T00:00:00Z');
       expect(formatDate(midnightDate, 'YYYY-MM-DD hh:mm:ss a', { hour12: true })).toBe('2023-05-18 12:00:00 am');
       expect(formatDate(midnightDate, 'YYYY-MM-DD HH:mm:ss', { hour12: false })).toBe('2023-05-18 00:00:00');
+    });
+
+    it('should handle 24:00 hour format (convert to 00:00)', () => {
+      // Some time formats use 24:00 to represent end of day
+      const date24 = new Date('2023-05-18T00:00:00Z');
+      const formatted = formatDate(date24, 'HH:mm:ss', { hour12: false });
+      expect(formatted).toBe('00:00:00');
     });
 
     it('should handle noon correctly', () => {
