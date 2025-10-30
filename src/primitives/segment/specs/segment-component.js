@@ -3,10 +3,10 @@ export default {
   "tagName": "ui-segment",
   "types": [
     "emphasis",
+    "vertical",
     "raised",
     "stacked",
-    "piled",
-    "vertical"
+    "piled"
   ],
   "variations": [
     "attached",
@@ -25,10 +25,10 @@ export default {
   ],
   "attributes": [
     "emphasis",
+    "vertical",
     "raised",
     "stacked",
     "piled",
-    "vertical",
     "disabled",
     "loading",
     "attached",
@@ -42,6 +42,7 @@ export default {
     "basic"
   ],
   "optionAttributes": {
+    "primary": "emphasis",
     "secondary": "emphasis",
     "tertiary": "emphasis",
     "top-attached": "attached",
@@ -70,10 +71,10 @@ export default {
   },
   "propertyTypes": {
     "emphasis": "string",
+    "vertical": "boolean",
     "raised": "boolean",
     "stacked": "boolean",
     "piled": "boolean",
-    "vertical": "boolean",
     "disabled": "boolean",
     "loading": "boolean",
     "attached": "string",
@@ -88,6 +89,7 @@ export default {
   },
   "allowedValues": {
     "emphasis": [
+      "primary",
       "secondary",
       "tertiary"
     ],
@@ -126,6 +128,7 @@ export default {
     ]
   },
   "attributeClasses": [
+    "emphasis",
     "attached",
     "color"
   ],

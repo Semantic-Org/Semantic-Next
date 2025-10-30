@@ -9,8 +9,14 @@
     {
       "name": "Emphasis",
       "attribute": "emphasis",
+      "includeAttributeClass": true,
       "description": "be formatted to call attention to itself",
       "options": [
+        {
+          "name": "Primary",
+          "value": "primary",
+          "description": "have primary emphasis"
+        },
         {
           "name": "Secondary",
           "value": "secondary",
@@ -47,7 +53,7 @@
       "attribute": "piled",
       "description": "be formatted to look like a pile of pages",
       "usageLevel": 5
-    },
+    }
   ],
   "states": [
     {

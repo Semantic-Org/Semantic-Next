@@ -237,6 +237,13 @@
 
 /* src/primitives/segment/css/definition/variations/emphasis.css */
 @layer segment.definition.variations.emphasis {
+  .segment.emphasis {
+    box-shadow: var(--inset-shadow);
+  }
+  .segment.primary {
+    background: var(--segment-primary-background);
+    color: var(--segment-primary-color);
+  }
   .segment.secondary {
     background: var(--segment-secondary-background);
     color: var(--segment-secondary-color);
@@ -256,13 +263,6 @@
 
 /* src/primitives/segment/css/definition/variations/colored.css */
 @layer segment.definition.variations.colored {
-  .segment {
-    - &.pink {
-      background-color: var(--pink-background-color);
-      border-color: var(--pink-border);
-      color: var(--pink-text-color);
-    }
-  }
   .segment.red {
     background-color: var(--red-background-color);
     border-color: var(--red-border);
@@ -307,6 +307,11 @@
     background-color: var(--purple-background-color);
     border-color: var(--purple-border);
     color: var(--purple-text-color);
+  }
+  .segment.pink {
+    background-color: var(--pink-background-color);
+    border-color: var(--pink-border);
+    color: var(--pink-text-color);
   }
   .segment.brown {
     background-color: var(--brown-background-color);
@@ -499,6 +504,8 @@
 /* src/primitives/segment/css/theme/variations/emphasis-variables.css */
 @layer segment.theme.variations.emphasis {
   :host {
+    --segment-primary-background: var(--ui-emphasis);
+    --segment-primary-color: var(--text-color);
     --segment-secondary-background: var(--inverted-solid-95);
     --segment-secondary-color: var(--standard-60);
     --segment-tertiary-background: var(--inverted-solid-90);

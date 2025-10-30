@@ -10,8 +10,14 @@ export default {
     {
       "name": "Emphasis",
       "attribute": "emphasis",
+      "includeAttributeClass": true,
       "description": "be formatted to call attention to itself",
       "options": [
+        {
+          "name": "Primary",
+          "value": "primary",
+          "description": "have primary emphasis"
+        },
         {
           "name": "Secondary",
           "value": "secondary",
@@ -26,28 +32,28 @@ export default {
       "usageLevel": 2
     },
     {
+      "name": "Vertical",
+      "attribute": "vertical",
+      "description": "format content to be aligned as part of a vertical group",
+      "usageLevel": 2
+    },
+    {
       "name": "Raised",
       "attribute": "raised",
       "description": "be formatted to raise above the page",
-      "usageLevel": 2
+      "usageLevel": 3
     },
     {
       "name": "Stacked",
       "attribute": "stacked",
       "description": "be formatted to show it contains multiple pages",
-      "usageLevel": 2
+      "usageLevel": 5
     },
     {
       "name": "Piled",
       "attribute": "piled",
       "description": "be formatted to look like a pile of pages",
-      "usageLevel": 3
-    },
-    {
-      "name": "Vertical",
-      "attribute": "vertical",
-      "description": "format content to be aligned as part of a vertical group",
-      "usageLevel": 2
+      "usageLevel": 5
     }
   ],
   "states": [

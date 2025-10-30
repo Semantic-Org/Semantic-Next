@@ -51,7 +51,7 @@
     background-color: var(--purple-background-color);
     border-color: var(--purple-border);
     color: var(--purple-text-color);
-  }-
+  }
 
   &.pink {
     background-color: var(--pink-background-color);
