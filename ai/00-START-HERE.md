@@ -25,64 +25,75 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 
 ---
 
+## Task Assurance Loop
+
+1. Confirm the user request, required workflows, and prerequisite context.
+2. Load the canonical references (documentation, examples, source) relevant to the task.
+3. Outline a lightweight plan when the work spans multiple steps or files.
+4. Implement only what the request covers, following established Semantic UI patterns.
+5. Verify the result against canonical sources, required tests, or workflows and reconcile with the original ask.
+6. Surface unresolved questions or dependencies immediately so the requester can confirm next steps.
+
+---
+
 ## Quick Task Resolution
 
-### 🚀 **Building Components**
+### Building Components
 **Need to:** Create, modify, or understand components for any application
 **Start with:** [Component Generation Guide](/ai/guides/components/generation.md)
 **Contains:** Framework usage patterns, component architecture, implementation best practices
 
-### 📚 **Creating Documentation Examples**
+### Creating Documentation Examples
 **Need to:** Add examples to the documentation system
 **Start with:** [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md)
 **Contains:** Metadata system, playground behavior, file organization, step-by-step workflows
 
-### 📦 **Package API Documentation**
+### Package API Documentation
 **Need to:** Understand package APIs (reactivity, utils, query, templating, specs)
 **Start with:** [Packages Directory](/ai/packages/)
 **Contains:** Complete API reference for all standalone packages
 
-### 🧠 **Understanding Architecture** 
+### Understanding Architecture
 **Need to:** Grasp framework concepts, mental models, design decisions  
 **Start with:** [`foundations/mental-model.md`](./foundations/mental-model.md)  
 **Contains:** Core philosophy, component lifecycle, reactivity system, Shadow DOM
 
-### 🔍 **Finding Code & Documentation**
+### Finding Code & Documentation
 **Need to:** Locate files, APIs, examples in the codebase  
 **Start with:** [`foundations/codebase-navigation-guide.md`](./foundations/codebase-navigation-guide.md)  
 **Contains:** File structure, search strategies, tool usage, canonical sources
 
-### ⚡ **API Reference & Syntax**
+### API Reference & Syntax
 **Need to:** Quick lookup of method signatures, event syntax, template syntax  
 **Start with:** [`foundations/quick-reference.md`](./foundations/quick-reference.md)  
 **Contains:** Complete API reference, decision flowcharts, common recipes
 
-### 🎯 **Implementation Patterns**
+### Implementation Patterns
 **Need to:** Best practices, common patterns, advanced techniques
 **Start with:** [Component Patterns Cookbook](/ai/guides/components/patterns.md)
 **Contains:** Communication patterns, state management, event handling, performance
 
-### 🎨 **HTML & CSS Guidelines**
+### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens
 **Start with:** [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md) • [CSS Tokens](/ai/guides/styling/tokens/token-usage.md)
 **Contains:** Template patterns, CSS architecture, design token usage
 
-### 🔄 **Reactivity System** (Standalone Library)
+### Reactivity System (Standalone Library)
 **Need to:** Understand signals, reactions, dependency tracking
 **Start with:** [Reactivity Package](/ai/packages/reactivity.md)
 **Contains:** Signal API, Reaction API, standalone usage, performance optimization
 
-### 🔍 **DOM Querying & Manipulation** (Standalone Library)
+### DOM Querying & Manipulation (Standalone Library)
 **Need to:** Query DOM, handle Shadow DOM, configure components
 **Start with:** [Query Package](/ai/packages/query.md)
 **Contains:** $ vs $$ usage, component configuration, event handling
 
-### 🛠️ **Utility Functions** (Standalone Library)
+### Utility Functions (Standalone Library)
 **Need to:** Array processing, object manipulation, type checking, formatting
 **Start with:** [Utils Package](/ai/packages/utils.md)
 **Contains:** Complete utility library reference, performance patterns
 
-### 🧭 **Workflow Decision Tree**
+### Workflow Decision Tree
 Choose the workflow that matches your task:
 
 - **Need a new or updated component spec?** → [`/ai/workflows/components/author-component-spec.md`](/ai/workflows/components/author-component-spec.md)
@@ -93,7 +104,7 @@ Choose the workflow that matches your task:
 - **Add Query package methods?** → [`/ai/workflows/add-query-method.mdx`](/ai/workflows/add-query-method.mdx)
 - **Publish a new AI context guide?** → [`/ai/workflows/meta/add-ai-context.md`](/ai/workflows/meta/add-ai-context.md)
 
-### 🔄 **Following Workflows**
+### Following Workflows
 **Need to:** Step-by-step processes for specific tasks
 **Start with:** [Workflows Directory](/ai/workflows/)
 **Contains:** Component authoring, CSS implementation, template syntax addition, agent creation, documentation refinement, utility function addition

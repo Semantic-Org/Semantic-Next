@@ -16,7 +16,7 @@
 
 ## Quick Location Reference
 
-### 🏠 **Root Structure**
+### Root Structure
 ```
 /project-root-dir/
 ├── ai/                     ← AI context documentation (YOU ARE HERE)
@@ -28,7 +28,7 @@
 └── scripts/                ← Build and utility scripts
 ```
 
-### 📚 **Documentation Hub**: `/docs/`
+### Documentation Hub: `/docs/`
 ```
 docs/
 ├── src/pages/              ← All documentation content
@@ -39,10 +39,10 @@ docs/
 │   ├── query/              ← Query library guides
 │   └── *.mdx               ← Top-level guides
 ├── src/examples/           ← **CANONICAL** examples (hand-written best practices)
-└── src/helpers/menus.js    ← **🚨 CRITICAL** Documentation menu structure (MUST MODIFY for new pages)
+└── src/helpers/menus.js    ← **CRITICAL** Documentation menu structure (MUST MODIFY for new pages)
 ```
 
-### 🔧 **Core Framework**: `/packages/`
+### Core Framework: `/packages/`
 ```
 packages/
 ├── component/              ← Web component framework
@@ -59,9 +59,9 @@ packages/
 
 ## Documentation Reading Order
 
-> **🚨 CRITICAL FOR AI AGENTS**: Documentation should be read in menu order as defined in `/docs/src/helpers/menus.js`. This order represents the proper learning progression that builds context incrementally. Reading docs out of order will result in missing foundational concepts needed to understand advanced topics. **To add new documentation pages, you MUST modify the menu structure in this file.**
+> **CRITICAL FOR AI AGENTS**: Documentation should be read in menu order as defined in `/docs/src/helpers/menus.js`. This order represents the proper learning progression that builds context incrementally. Reading docs out of order will result in missing foundational concepts needed to understand advanced topics. **To add new documentation pages, you MUST modify the menu structure in this file.**
 
-### 📖 **Framework Documentation** (`sidebarMenuFramework`)
+### Framework Documentation (`sidebarMenuFramework`)
 
 #### **1. Introduction**
 - `/introduction` - Start here for overview and getting started
@@ -74,7 +74,7 @@ packages/
 - `/components/rendering` - Templates & Data Context
 - `/components/settings` - Component configuration
 - `/components/state` - Component state management
-- `/components/events` - **⭐ ESSENTIAL** Event handling patterns
+- `/components/events` - **ESSENTIAL** Event handling patterns
 - `/components/reactivity` - Reactivity in components
 - `/components/dom` - DOM manipulation and querying
 - `/components/styling` - Component styling approaches
@@ -82,12 +82,12 @@ packages/
 
 #### **3. Templates** (Template system)
 - `/templates` - Template overview and syntax
-- `/templates/expressions` - **⭐ ESSENTIAL** Expression syntax and evaluation
+- `/templates/expressions` - **ESSENTIAL** Expression syntax and evaluation
 - `/templates/conditionals` - If/else logic in templates
-- `/templates/loops` - **⭐ ESSENTIAL** Each loops and iteration
+- `/templates/loops` - **ESSENTIAL** Each loops and iteration
 - `/templates/slots` - Content projection
 - `/templates/subtemplates` - Component composition
-- `/templates/snippets` - **⭐ ESSENTIAL** Inline template fragments
+- `/templates/snippets` - **ESSENTIAL** Inline template fragments
 - `/templates/helpers` - Global template helpers
 
 #### **4. Reactivity** (Signals system)
@@ -104,12 +104,12 @@ packages/
 #### **5. Query** (DOM helpers)
 - `/query` - Query library overview
 - `/query/basics` - Basic DOM querying
-- `/query/shadow-dom` - **⭐ ESSENTIAL** Shadow DOM traversal
-- `/query/components` - **⭐ ESSENTIAL** Component configuration (.settings, .initialize, .component)
+- `/query/shadow-dom` - **ESSENTIAL** Shadow DOM traversal
+- `/query/components` - **ESSENTIAL** Component configuration (.settings, .initialize, .component)
 - `/query/chaining` - Method chaining patterns
 - `/query/browser` - Browser usage patterns
 
-### 📋 **API Reference** (`sidebarMenuAPI`)
+### API Reference (`sidebarMenuAPI`)
 
 > **CANONICAL LOCATION**: All API documentation is at `/docs/src/pages/api/` organized by package and grouped by function.
 
@@ -144,7 +144,7 @@ packages/
 #### **4. Query** (`/api/query/`)
 - `/api/query/basic` - Basic querying methods
 - `/api/query/attributes` - Attribute manipulation
-- `/api/query/components` - **⭐ ESSENTIAL** Component methods (.settings, .initialize, etc.)
+- `/api/query/components` - **ESSENTIAL** Component methods (.settings, .initialize, etc.)
 - `/api/query/content` - Content manipulation
 - `/api/query/css` - CSS manipulation
 - `/api/query/dimensions` - Size and positioning
@@ -232,7 +232,7 @@ pattern="*.css" path="/src/css/tokens/"
 
 ## Tool Usage Strategies
 
-### 🎯 **When to Use Each Tool**
+### When to Use Each Tool
 
 #### **Use `Read` tool when:**
 - You know the exact file path
@@ -257,7 +257,13 @@ pattern="*.css" path="/src/css/tokens/"
 - Uncertain about exact location
 - Researching broad topics
 
-### 🔍 **Efficient Search Patterns**
+### Validation Workflow
+
+- Confirm you've retrieved the canonical documentation, examples, and source before editing.
+- Map each required change to the files you just discovered so nothing is missed.
+- After implementation, revisit the same references to verify behaviour and note any remaining gaps for handoff.
+
+### Efficient Search Patterns
 
 #### **For API Information:**
 ```bash
@@ -289,7 +295,7 @@ Grep: pattern="{feature}" include="*.test.js" path="/packages/{packageName}/test
 
 ## Documentation Locations
 
-### 📖 **User-Facing Documentation**: `/docs/src/pages/`
+### User-Facing Documentation: `/docs/src/pages/`
 
 #### **Top-Level Guides**
 - `introduction.mdx` - Getting started, overview
@@ -303,7 +309,7 @@ Grep: pattern="{feature}" include="*.test.js" path="/packages/{packageName}/test
 - `state.mdx` - Component state management
 - `settings.mdx` - Component configuration
 - `reactivity.mdx` - Reactivity in components
-- `events.mdx` - **⭐ ESSENTIAL** Event handling patterns
+- `events.mdx` - **ESSENTIAL** Event handling patterns
 - `keys.mdx` - Keyboard bindings
 - `lifecycle.mdx` - Component lifecycle hooks
 - `styling.mdx` - Component styling approaches
@@ -311,10 +317,10 @@ Grep: pattern="{feature}" include="*.test.js" path="/packages/{packageName}/test
 
 #### **Template System** (`/docs/src/pages/templates/`)
 - `index.mdx` - Template overview and syntax
-- `expressions.mdx` - **⭐ ESSENTIAL** Expression syntax and evaluation
+- `expressions.mdx` - **ESSENTIAL** Expression syntax and evaluation
 - `conditionals.mdx` - If/else logic in templates
-- `loops.mdx` - **⭐ ESSENTIAL** Each loops and iteration
-- `snippets.mdx` - **⭐ ESSENTIAL** Inline template fragments
+- `loops.mdx` - **ESSENTIAL** Each loops and iteration
+- `snippets.mdx` - **ESSENTIAL** Inline template fragments
 - `subtemplates.mdx` - Component composition
 - `slots.mdx` - Content projection
 - `helpers.mdx` - Global template helpers
@@ -331,8 +337,8 @@ Grep: pattern="{feature}" include="*.test.js" path="/packages/{packageName}/test
 #### **Query Library** (`/docs/src/pages/query/`)
 - `index.mdx` - Query library overview
 - `basics.mdx` - Basic DOM querying
-- `shadow-dom.mdx` - **⭐ ESSENTIAL** Shadow DOM traversal
-- `components.mdx` - **⭐ ESSENTIAL** Component configuration (.settings, .initialize, .component)
+- `shadow-dom.mdx` - **ESSENTIAL** Shadow DOM traversal
+- `components.mdx` - **ESSENTIAL** Component configuration (.settings, .initialize, .component)
 - `chaining.mdx` - Method chaining patterns
 
 #### **API Reference** (`/docs/src/pages/api/`)
@@ -348,7 +354,7 @@ api/
 └── utils/                  ← Utility functions
 ```
 
-### 🎯 **Finding Documentation**
+### Finding Documentation
 
 #### **By Topic:**
 ```bash
@@ -381,7 +387,7 @@ Grep: pattern="Template.*settings|settings.*Template" include="*.mdx" path="/doc
 
 ## Source Code Locations
 
-### 🔧 **Core Implementation**: `/packages/`
+### Core Implementation: `/packages/`
 
 #### **Component System** (`/packages/component/`)
 ```
@@ -414,7 +420,7 @@ templating/
 │   ├── template.js            ← Template class and lifecycle
 │   ├── template-helpers.js    ← Global helpers
 │   ├── compiler/
-│   │   ├── template-compiler.js  ← **⭐ ESSENTIAL** AST compilation
+│   │   ├── template-compiler.js  ← **ESSENTIAL** AST compilation
 │   │   └── string-scanner.js     ← Template parsing
 │   └── index.js              ← Package exports
 └── test/                     ← Template tests
@@ -424,13 +430,13 @@ templating/
 ```
 query/
 ├── src/
-│   ├── query.js              ← **⭐ ESSENTIAL** Main query implementation
+│   ├── query.js              ← **ESSENTIAL** Main query implementation
 │   ├── node-wrapper.js      ← DOM node utilities
 │   └── index.js             ← Package exports
 └── test/                    ← Query tests
 ```
 
-### 🔍 **Finding Implementation**
+### Finding Implementation
 
 #### **By Feature:**
 ```bash
@@ -469,7 +475,7 @@ Grep: pattern="findParent|findChild" include="*.js" path="/packages/"
 
 ### 🌟 **Canonical Examples**: `/docs/src/examples/`
 
-#### **⭐ ESSENTIAL Examples** (Hand-written best practices)
+#### **ESSENTIAL Examples** (Hand-written best practices)
 ```
 examples/
 ├── todo-list/                 ← **BEST** Parent-child communication
@@ -499,12 +505,12 @@ examples/
 └── loops/                    ← Template iteration
 ```
 
-#### **⚠️ AI-Generated Example** (Use with caution)
+#### **WARNING: AI-Generated Example** (Use with caution)
 ```
 examples/component/dropdown/   ← Contains potential anti-patterns
 ```
 
-### 🔍 **Finding Examples**
+### Finding Examples
 
 #### **By Pattern:**
 ```bash
@@ -541,7 +547,7 @@ Grep: pattern="#each|#if|>template" include="*.html" path="/docs/src/examples/"
 
 ## Configuration & Build Files
 
-### ⚙️ **Project Configuration**
+### Project Configuration
 ```
 Root Level:
 ├── package.json               ← Main package configuration
@@ -561,7 +567,7 @@ Documentation:
 └── docs/tsconfig.json        ← TypeScript config
 ```
 
-### 🔍 **Finding Configuration**
+### Finding Configuration
 
 #### **Build Process:**
 ```bash
@@ -593,7 +599,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 
 ## Search Strategies by Topic
 
-### 🎯 **Component Creation**
+### Component Creation
 ```bash
 1. Read: /docs/src/pages/components/create.mdx
 2. Read: /docs/src/pages/api/component/define-component.mdx
@@ -602,7 +608,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Read: /docs/src/examples/component/minimal/
 ```
 
-### 🎯 **Event Handling**
+### Event Handling
 ```bash
 1. Read: /docs/src/pages/components/events.mdx  # ESSENTIAL
 2. Read: /docs/src/pages/api/query/events.mdx
@@ -611,7 +617,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Read: /docs/src/examples/component/events/
 ```
 
-### 🎯 **Template Syntax**
+### Template Syntax
 ```bash
 1. Read: /docs/src/pages/templates/expressions.mdx
 2. Read: /docs/src/pages/templates/loops.mdx
@@ -620,7 +626,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Grep: pattern="#each|#if|{>" include="*.html" path="/docs/src/examples/"
 ```
 
-### 🎯 **Reactivity System**
+### Reactivity System
 ```bash
 1. Read: /docs/src/pages/reactivity/index.mdx
 2. Read: /docs/src/pages/api/reactivity/signal.mdx
@@ -629,7 +635,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Read: /docs/src/examples/reactivity/
 ```
 
-### 🎯 **Component Configuration**
+### Component Configuration
 ```bash
 1. Read: /docs/src/pages/query/components.mdx  # ESSENTIAL
 2. Read: /docs/src/pages/api/query/components.mdx
@@ -638,7 +644,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Read: /docs/src/examples/component/templates/advanced-subtemplates/
 ```
 
-### 🎯 **Parent-Child Communication**
+### Parent-Child Communication
 ```bash
 1. Read: /docs/src/examples/todo-list/         # BEST example
 2. Grep: pattern="findParent|findChild" include="*.js" path="/docs/src/examples/"
@@ -647,7 +653,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Read: /docs/src/pages/components/events.mdx # For event patterns
 ```
 
-### 🎯 **Performance & Debugging**
+### Performance & Debugging
 ```bash
 1. Read: /docs/src/pages/reactivity/performance.mdx
 2. Read: /docs/src/pages/reactivity/debugging.mdx
@@ -656,7 +662,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 5. Grep: pattern="afterFlush|Reaction\.nonreactive" include="*.js" path="/packages/"
 ```
 
-### 🎯 **Tailwind Integration**
+### Tailwind Integration
 ```bash
 1. Read: /packages/tailwind/README.md                    # Plugin overview
 2. Read: /packages/tailwind/AGENTS.md                    # Implementation details
@@ -669,7 +675,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 
 ## Common Investigation Patterns
 
-### 🕵️ **"How do I..." Questions**
+### "How do I..." Questions
 
 #### **"How do I create a component?"**
 ```bash
@@ -695,7 +701,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 4. Grep: pattern="template.*:" include="*.js" path="/docs/src/examples/"
 ```
 
-### 🕵️ **"Where is..." Questions**
+### "Where is..." Questions
 
 #### **"Where is [specific feature] implemented?"**
 ```bash
@@ -711,7 +717,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 2. Task: "Find examples of {pattern} in the docs/src/examples directory"
 ```
 
-### 🕵️ **"Why does..." Questions**
+### "Why does..." Questions
 
 #### **"Why does [behavior] happen?"**
 ```bash
@@ -728,7 +734,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 3. Read: /docs/src/examples/ # See canonical usage
 ```
 
-### 🕵️ **"What's the difference..." Questions**
+### "What's the difference..." Questions
 
 #### **"What's the difference between State and Settings?"**
 ```bash
@@ -748,7 +754,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 
 ---
 
-## 🎯 **Quick Reference for Common Needs**
+## Quick Reference for Common Needs
 
 ### **Need to understand concepts?** 
 → `/ai/semantic-ui-mental-model.md`

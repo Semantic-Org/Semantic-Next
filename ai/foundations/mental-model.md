@@ -708,6 +708,7 @@ This allows components to work in environments with varying JavaScript support l
 8. **Progressive Enhancement**: Components work at multiple levels of JavaScript support.
 9. **Design System Integration**: CSS custom properties enable consistent theming.
 10. **Framework Agnostic**: Components integrate with any framework supporting custom elements.
+11. **Canonical Grounding**: Always cross-check work with the documented source, canonical examples, and specs before handing off.
 
 Understanding these mental models enables effective use of Semantic UI and helps explain the "why" behind its design decisions.
 
