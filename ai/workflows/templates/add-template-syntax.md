@@ -102,6 +102,8 @@ Create directive in `/packages/renderer/src/lit/directives/`
 
 ## Step 2: Testing
 
+> **See Also:** [Testing Guide](/ai/guides/testing.md) for testing patterns and conventions.
+
 ### 2.1 Compiler Tests
 Add tests to `/packages/templating/test/compiler.test.js`
 

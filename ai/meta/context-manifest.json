@@ -42,6 +42,14 @@
       "approxTokens": 8100
     },
     {
+      "id": "guides/testing",
+      "path": "ai/guides/testing.md",
+      "category": "specialized",
+      "tags": ["testing", "vitest", "quality-assurance"],
+      "dependsOn": ["foundation/mental-model", "foundation/codebase-navigation"],
+      "approxTokens": 4200
+    },
+    {
       "id": "styling/html",
       "path": "ai/guides/html.md",
       "category": "specialized",

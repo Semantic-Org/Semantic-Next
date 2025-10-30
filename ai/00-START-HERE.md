@@ -73,6 +73,11 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 **Start with:** [Component Patterns Cookbook](/ai/guides/components/patterns.md)
 **Contains:** Communication patterns, state management, event handling, performance
 
+### Testing & Quality Assurance
+**Need to:** Write tests, understand test organization, choose test types
+**Start with:** [Testing Guide](/ai/guides/testing.md)
+**Contains:** Test types (unit/DOM/browser), file organization, running tests, writing patterns
+
 ### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens
 **Start with:** [HTML Guide](/ai/guides/html.md) • [CSS Guide](/ai/guides/styling/css-guide.md) • [CSS Tokens](/ai/guides/styling/tokens/token-usage.md)
@@ -163,6 +168,7 @@ Context for debugging and finding solutions:
 | **mental-model.md** | Architecture & Concepts | All levels | Conceptual |
 | **guides/components/generation.md** | Component Creation | Beginners to Intermediate | Tutorial + Reference |
 | **guides/components/patterns.md** | Best Practices | Intermediate to Advanced | Patterns + Examples |
+| **guides/testing.md** | Testing & QA | All levels | Guidelines + Patterns |
 | **quick-reference.md** | API Lookup | All levels | Reference |
 | **packages/reactivity.md** | Signals & Reactions | Intermediate | Tutorial + Reference |
 | **packages/query.md** | DOM Manipulation | Intermediate | Tutorial + Reference |
@@ -197,6 +203,12 @@ Work with reactivity?
 ├── Basic state management → guides/components/generation.md (State)
 ├── Advanced reactive patterns → packages/reactivity.md
 └── Performance optimization → guides/components/patterns.md (Performance)
+
+Write or run tests?
+├── Test organization → guides/testing.md (Test Organization)
+├── Choose test type → guides/testing.md (Test Types)
+├── Write tests → guides/testing.md (Writing Tests)
+└── Package-specific patterns → guides/testing.md (Package-Specific Patterns)
 
 Style components?
 ├── Basic CSS patterns → guides/html.md + guides/styling/css-guide.md

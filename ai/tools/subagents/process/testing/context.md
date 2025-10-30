@@ -14,7 +14,7 @@
 - ONLY test the specific feature/method requested
 - Add tests to existing test files or create appropriately named test files
 - Use established testing patterns from the target package
-- Run tests to verify implementation works correctly
+- Run tests SCOPED to the specific package or feature being tested (never run all tests globally)
 - Return structured JSON output per output-spec.md
 
 ## Core Responsibilities

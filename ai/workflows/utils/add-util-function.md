@@ -58,6 +58,8 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 
 ## Step 2: Testing
 
+> **See Also:** [Testing Guide](/ai/guides/testing.md) for comprehensive guidance on test types, organization, and patterns.
+
 ### Test Location
 `/packages/utils/test/utils.test.js`
 
