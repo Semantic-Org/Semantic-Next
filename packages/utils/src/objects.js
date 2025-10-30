@@ -367,7 +367,7 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
 
   if (words.length > 1) {
     each(words, (word) => {
-      wordRegexes.push(new RegExp(`(\W|^)${word}(\W|$)`, 'i'));
+      wordRegexes.push(new RegExp(`(\\W|^)${word}(\\W|$)`, 'i'));
     });
   }
 
