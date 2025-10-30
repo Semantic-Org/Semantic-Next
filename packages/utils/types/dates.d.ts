@@ -1,6 +1,6 @@
 /**
  * Date manipulation and formatting utilities
- * @see {@link https://next.semantic-ui.com/api/utils/dates Date Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/dates Date Utilities Documentation}
  */
 
 type DatePreset = 'LT' | 'LTS' | 'L' | 'l' | 'LL' | 'll' | 'LLL' | 'lll' | 'LLLL' | 'llll';

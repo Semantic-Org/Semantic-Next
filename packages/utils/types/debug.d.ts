@@ -1,6 +1,6 @@
 /**
  * Debug utilities including logging and error handling
- * @see {@link https://next.semantic-ui.com/api/utils/debug Debug Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug Debug Utilities Documentation}
  */
 
 /**
@@ -74,7 +74,7 @@ export interface LogOptions {
  * Flexible logging utility with formatting, namespacing, and multiple output options.
  * Supports colored output, timestamps, structured JSON format, and configurable titles.
  *
- * @see {@link https://next.semantic-ui.com/api/utils/debug#log log}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#log log}
  * @see {@link https://next.semantic-ui.com/examples/utils-log Example}
  *
  * @param message - The message to log

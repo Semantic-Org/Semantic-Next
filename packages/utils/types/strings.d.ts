@@ -1,6 +1,6 @@
 /**
  * String manipulation and formatting utilities
- * @see {@link https://next.semantic-ui.com/api/utils/strings String Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings String Utilities Documentation}
  */
 
 /**
@@ -42,7 +42,7 @@ export interface TruncateOptions {
 /**
  * Converts a kebab-case string to camelCase
  * Useful for converting HTML attributes to JavaScript property names
- * @see {@link https://next.semantic-ui.com/api/utils/strings#kebabtocamel kebabToCamel}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#kebabtocamel kebabToCamel}
  *
  * @param str - The kebab-case string to convert
  * @returns The camelCase version of the string
@@ -58,7 +58,7 @@ export function kebabToCamel(str?: string): string;
 /**
  * Converts a camelCase string to kebab-case
  * Useful for converting JavaScript property names to HTML attributes
- * @see {@link https://next.semantic-ui.com/api/utils/strings#cameltokebab camelToKebab}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#cameltokebab camelToKebab}
  *
  * @param str - The camelCase string to convert
  * @returns The kebab-case version of the string
@@ -73,7 +73,7 @@ export function camelToKebab(str?: string): string;
 
 /**
  * Capitalizes the first letter of a string
- * @see {@link https://next.semantic-ui.com/api/utils/strings#capitalize capitalize}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#capitalize capitalize}
  *
  * @param str - The string to capitalize
  * @returns The string with its first letter capitalized
@@ -88,7 +88,7 @@ export function capitalize(str?: string): string;
 
 /**
  * Capitalizes the first letter of each word in a string
- * @see {@link https://next.semantic-ui.com/api/utils/strings#capitalizewords capitalizeWords}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#capitalizewords capitalizeWords}
  *
  * @param str - The string to capitalize
  * @returns The string with the first letter of each word capitalized
@@ -104,7 +104,7 @@ export function capitalizeWords(str?: string): string;
 /**
  * Converts a string to title case, following common English title capitalization rules
  * Handles stop words (a, an, the, etc.) appropriately
- * @see {@link https://next.semantic-ui.com/api/utils/strings#totitlecase toTitleCase}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#totitlecase toTitleCase}
  *
  * @param str - The string to convert to title case
  * @returns The string in title case
@@ -120,7 +120,7 @@ export function toTitleCase(str?: string): string;
 /**
  * Joins an array of words into a grammatically correct sentence
  * Supports Oxford comma and custom separators
- * @see {@link https://next.semantic-ui.com/api/utils/strings#joinwords joinWords}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#joinwords joinWords}
  *
  * @param words - Array of words to join
  * @param options - Configuration options for joining words
@@ -136,7 +136,7 @@ export function joinWords(words: string[], options?: JoinWordsOptions): string;
 
 /**
  * Gets the appropriate indefinite article (a/an) for a word
- * @see {@link https://next.semantic-ui.com/api/utils/strings#getarticle getArticle}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#getarticle getArticle}
  *
  * @param word - The word to get the article for
  * @param options - Configuration options
@@ -154,7 +154,7 @@ export function getArticle(word: string, options?: GetArticleOptions): string;
 /**
  * Truncates text to a specified length with Unicode-aware word boundary handling
  * Uses Intl.Segmenter for locale-aware word segmentation when available
- * @see {@link https://next.semantic-ui.com/api/utils/strings#truncate truncate}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#truncate truncate}
  * @see {@link https://next.semantic-ui.com/examples/utils-truncate Example}
  *
  * @param text - The text to truncate (null/undefined returns empty string)
@@ -179,7 +179,7 @@ export function truncate(text: string | null | undefined, length: number, option
 /**
  * Escapes HTML special characters in a string to prevent XSS attacks
  * Escapes: & < > " '
- * @see {@link https://next.semantic-ui.com/api/utils/strings#escapehtml escapeHTML}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#escapehtml escapeHTML}
  * @see {@link https://next.semantic-ui.com/examples/utils-escapehtml Example}
  *
  * @param string - The string to escape

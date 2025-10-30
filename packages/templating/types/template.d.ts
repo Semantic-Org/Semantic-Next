@@ -66,8 +66,8 @@ export interface RenderedTemplate {
  * like event handling and reactivity. They are automatically provided as arguments to lifecycle
  * callbacks (onCreated, onRendered, onUpdated, onDestroyed) and event handlers.
  *
- * @see https://next.semantic-ui.com/guide#standard-arguments
- * @see https://next.semantic-ui.com/components/lifecycle
+ * @see https://next.semantic-ui.com/docs/guides#standard-arguments
+ * @see https://next.semantic-ui.com/docs/guides/components/lifecycle
  *
  * @template TState - Type of the component's reactive state variables
  * @template TSettings - Type of the component's configuration settings
@@ -96,7 +96,7 @@ export interface CallParams<
    *
    * Provides access to instance methods and properties defined in the component.
    *
-   * @see https://next.semantic-ui.com/components/rendering#component-instance
+   * @see https://next.semantic-ui.com/docs/guides/components/rendering#component-instance
    */
   tpl: TComponentInstance;
 
@@ -127,7 +127,7 @@ export interface CallParams<
    * @example
    * $('.button').addClass('active');
    *
-   * @see https://next.semantic-ui.com/components/dom#querying-elements
+   * @see https://next.semantic-ui.com/docs/guides/components/dom#querying-elements
    */
   $: (
     selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
@@ -146,7 +146,7 @@ export interface CallParams<
    * @example
    * $$('ui-icon .icon').attr('class');
    *
-   * @see https://next.semantic-ui.com/components/dom#piercing-shadow-dom
+   * @see https://next.semantic-ui.com/docs/guides/components/dom#piercing-shadow-dom
    */
   $$: (
     selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
@@ -165,7 +165,7 @@ export interface CallParams<
    *   console.log('State changed:', state.count.get());
    * });
    *
-   * @see https://next.semantic-ui.com/reactivity#reactions
+   * @see https://next.semantic-ui.com/docs/guides/reactivity#reactions
    * @see {@link Template.reaction}
    */
   reaction: Template['reaction'];
@@ -185,7 +185,7 @@ export interface CallParams<
    * count.set(5); // Set value to 5
    * count.value = 5; // set value to 5
    *
-   * @see https://next.semantic-ui.com/reactivity#signals
+   * @see https://next.semantic-ui.com/docs/guides/reactivity#signals
    * @see {@link Template.signal}
    */
   signal: Template['signal'];
@@ -203,7 +203,7 @@ export interface CallParams<
    *   // DOM is now updated
    * });
    *
-   * @see https://next.semantic-ui.com/reactivity#batching-and-flushing
+   * @see https://next.semantic-ui.com/docs/guides/reactivity#batching-and-flushing
    */
   afterFlush: (callback: () => void) => void;
 
@@ -218,7 +218,7 @@ export interface CallParams<
    * @example
    * const value = nonreactive(() => state.get.count());
    *
-   * @see https://next.semantic-ui.com/reactivity#nonreactive
+   * @see https://next.semantic-ui.com/docs/guides/reactivity#nonreactive
    */
   nonreactive: <T>(fn: () => T) => T;
 
@@ -232,7 +232,7 @@ export interface CallParams<
    * flush();
    * someFunc(); // dom is updated before someFunc
    *
-   * @see https://next.semantic-ui.com/reactivity#batching-and-flushing
+   * @see https://next.semantic-ui.com/docs/guides/reactivity#batching-and-flushing
    */
   flush: () => void;
 
@@ -242,7 +242,7 @@ export interface CallParams<
    * Contains all data available to the template for rendering, including
    * properties passed to the component.
    *
-   * @see https://next.semantic-ui.com/components/rendering
+   * @see https://next.semantic-ui.com/docs/guides/components/rendering
    */
   data: DataContext;
 
@@ -256,7 +256,7 @@ export interface CallParams<
    * // Access a setting
    * const color = settings.color || 'default';
    *
-   * @see https://next.semantic-ui.com/components/settings
+   * @see https://next.semantic-ui.com/docs/guides/components/settings
    */
   settings: TSettings & TProperties;
 
@@ -272,7 +272,7 @@ export interface CallParams<
    * // Update state value
    * state.count(count + 1);
    *
-   * @see https://next.semantic-ui.com/components/state
+   * @see https://next.semantic-ui.com/docs/guides/components/state
    */
   state: TState;
 
@@ -285,7 +285,7 @@ export interface CallParams<
    * if (isRendered()) {
    *   // Safe to access DOM
    * }
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   isRendered: () => boolean;
 
@@ -298,7 +298,7 @@ export interface CallParams<
    * if (isServer) {
    *   // Skip client-only operations
    * }
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   isServer: boolean;
 
@@ -311,7 +311,7 @@ export interface CallParams<
    * if (isClient) {
    *   // Perform browser-only operations
    * }
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   isClient: boolean;
 
@@ -327,7 +327,7 @@ export interface CallParams<
    * @example
    * dispatchEvent('change', { value: state.value() });
    *
-   * @see https://next.semantic-ui.com/components/events#dispatching-events
+   * @see https://next.semantic-ui.com/docs/guides/components/events#dispatching-events
    * @see {@link Template.dispatchEvent}
    */
   dispatchEvent: Template['dispatchEvent'];
@@ -346,7 +346,7 @@ export interface CallParams<
    * @example
    * attachEvent('.button', 'click', (e) => console.log('Button clicked'));
    *
-   * @see https://next.semantic-ui.com/components/events#attaching-events
+   * @see https://next.semantic-ui.com/docs/guides/components/events#attaching-events
    * @see {@link Template.attachEvent}
    */
   attachEvent: Template['attachEvent'];
@@ -362,7 +362,7 @@ export interface CallParams<
    * @example
    * bindKey('Ctrl+Enter', (e) => submitForm());
    *
-   * @see https://next.semantic-ui.com/components/keys
+   * @see https://next.semantic-ui.com/docs/guides/components/keys
    * @see {@link Template.bindKey}
    */
   bindKey: Template['bindKey'];
@@ -375,7 +375,7 @@ export interface CallParams<
    * @example
    * unbindKey('Ctrl+Enter');
    *
-   * @see https://next.semantic-ui.com/components/keys
+   * @see https://next.semantic-ui.com/docs/guides/components/keys
    * @see {@link Template.unbindKey}
    */
   unbindKey: Template['unbindKey'];
@@ -412,7 +412,7 @@ export interface CallParams<
    * The name of the current template.
    *
    * Useful for debugging and finding templates.
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   templateName: string;
 
@@ -420,7 +420,7 @@ export interface CallParams<
    * A Map containing all rendered templates on the page.
    *
    * Useful for accessing other components on the page.
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   templates: Map<string, Template[]>;
 
@@ -432,7 +432,7 @@ export interface CallParams<
    *
    * @example
    * const navTemplate = findTemplate('navigation');
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   findTemplate: (templateName: string) => Template | undefined;
 
@@ -444,7 +444,7 @@ export interface CallParams<
    *
    * @example
    * const parentForm = findParent('form');
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   findParent: (templateName: string) => RenderedTemplate | undefined;
 
@@ -456,7 +456,7 @@ export interface CallParams<
    *
    * @example
    * const childInput = findChild('input');
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   findChild: (templateName: string) => RenderedTemplate | undefined;
 
@@ -468,7 +468,7 @@ export interface CallParams<
    *
    * @example
    * const allItems = findChildren('list-item');
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   findChildren: (templateName: string) => RenderedTemplate[];
 
@@ -480,7 +480,7 @@ export interface CallParams<
    * @example
    * const bgColor = darkMode ? '#333' : '#fff';
    *
-   * @see https://next.semantic-ui.com/theming
+   * @see https://next.semantic-ui.com/ui/start/guides/theming
    */
   darkMode: boolean;
 }

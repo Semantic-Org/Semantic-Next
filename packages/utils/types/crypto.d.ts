@@ -1,11 +1,11 @@
 /**
  * Cryptographic utility functions
- * @see {@link https://next.semantic-ui.com/api/utils/crypto Crypto Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto Crypto Utilities Documentation}
  */
 
 /**
  * Converts a string to a URL-friendly token
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#tokenize tokenize}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#tokenize tokenize}
  *
  * @param str - The input string
  * @returns The tokenized string
@@ -36,7 +36,7 @@ interface PrettifyHashOptions {
 
 /**
  * Converts a numeric hash value to a prettified alphanumeric string using base-36 encoding
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#prettifyhash prettifyHash}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#prettifyhash prettifyHash}
  * @see {@link https://next.semantic-ui.com/examples/utils-prettifyhash Example}
  *
  * @param numericHash - The numeric hash value to convert
@@ -70,7 +70,7 @@ interface HashCodeOptions {
 
 /**
  * Creates a unique ID (hash code) from a string using an adapted UMASH algorithm
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#hashcode hashCode}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#hashcode hashCode}
  * @see {@link https://next.semantic-ui.com/examples/utils-hashcode Example}
  *
  * @param input - The input string or object. Objects are stringified using JSON.stringify. null and undefined become ""
@@ -89,7 +89,7 @@ export function hashCode(input: string | object | null | undefined, options?: Ha
 
 /**
  * Generates a cryptographically secure random seed value
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#getrandomseed getRandomSeed}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#getrandomseed getRandomSeed}
  * @see {@link https://next.semantic-ui.com/examples/utils-getrandomseed Example}
  *
  * @returns A random 32-bit unsigned integer. Uses crypto.getRandomValues when available, falls back to Math.random
@@ -104,7 +104,7 @@ export function getRandomSeed(): number;
 
 /**
  * Generates a prettified ID using a random or custom seed
- * @see {@link https://next.semantic-ui.com/api/utils/crypto#generateid generateID}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#generateid generateID}
  * @see {@link https://next.semantic-ui.com/examples/utils-generateid Example}
  *
  * @param seed - Optional seed value. If not provided, uses getRandomSeed()

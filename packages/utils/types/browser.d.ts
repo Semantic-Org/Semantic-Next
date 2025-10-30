@@ -1,6 +1,6 @@
 /**
  * Browser-specific utility functions
- * @see {@link https://next.semantic-ui.com/api/utils/browser Browser Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser Browser Utilities Documentation}
  */
 
 /**
@@ -36,14 +36,14 @@ export interface GetIPAddressOptions {
 
 /**
  * Copies text to the clipboard using the clipboard API
- * @see {@link https://next.semantic-ui.com/api/utils/browser#copytext copyText}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#copytext copyText}
  * @param text - The text to copy
  */
 export function copyText(text: string): void;
 
 /**
  * Opens a URL with configurable options
- * @see {@link https://next.semantic-ui.com/api/utils/browser#openlink openLink}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#openlink openLink}
  * @param url - The URL to open
  * @param options - Configuration options for opening the URL
  */
@@ -52,7 +52,7 @@ export function openLink(url: string, options?: OpenLinkOptions): void;
 /**
  * Extracts a standardized key string from a keyboard event
  * Handles modifiers (ctrl, alt, shift, meta) and special keys
- * @see {@link https://next.semantic-ui.com/api/utils/browser#getkeyfromEvent getKeyFromEvent}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getkeyfromEvent getKeyFromEvent}
  *
  * @param event - The keyboard event
  * @returns A standardized key string (e.g. "ctrl+a", "shift+enter")
@@ -71,7 +71,7 @@ export function getKeyFromEvent(event: KeyboardEvent): string;
 
 /**
  * Fetches text content from a URL
- * @see {@link https://next.semantic-ui.com/api/utils/browser#gettext getText}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#gettext getText}
  * @param src - The URL to fetch from
  * @param settings - Optional fetch settings
  * @returns Promise resolving to the text content
@@ -80,7 +80,7 @@ export function getText(src: string, settings?: FetchSettings): Promise<string>;
 
 /**
  * Fetches and parses JSON from a URL
- * @see {@link https://next.semantic-ui.com/api/utils/browser#getjson getJSON}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getjson getJSON}
  * @param src - The URL to fetch from
  * @param settings - Optional fetch settings
  * @returns Promise resolving to the parsed JSON
@@ -89,7 +89,7 @@ export function getJSON<T = any>(src: string, settings?: FetchSettings): Promise
 
 /**
  * Retrieves the user's IP address using WebRTC ICE gathering
- * @see {@link https://next.semantic-ui.com/api/utils/browser#getipaddress getIPAddress}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#getipaddress getIPAddress}
  * @see {@link https://next.semantic-ui.com/examples/utils-getipaddress Example}
  *
  * @param options - Configuration options for IP retrieval

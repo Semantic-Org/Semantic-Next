@@ -1,6 +1,6 @@
 /**
  * Object and array cloning utilities
- * @see {@link https://next.semantic-ui.com/api/utils/cloning Cloning Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning Cloning Utilities Documentation}
  */
 
 /**
@@ -16,7 +16,7 @@ export interface CloneOptions {
 /**
  * Creates a deep clone of a value
  * Handles arrays, objects, dates, maps, sets, and primitive types
- * @see {@link https://next.semantic-ui.com/api/utils/cloning#clone clone}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning#clone clone}
  *
  * @param src - Value to clone
  * @param options - Cloning options
