@@ -1,3 +1,9 @@
+/**
+ * Template helpers are utilities available in all templates for common operations
+ * like formatting, comparisons, and data manipulation.
+ * @see {@link https://next.semantic-ui.com/docs/guides/templates/helpers Template Helpers Guide}
+ * @see {@link https://next.semantic-ui.com/docs/api/helpers Helpers API Reference}
+ */
 export interface TemplateHelpersType {
   exists(a: any): boolean;
   isEmpty(a: any): boolean;
@@ -59,6 +65,8 @@ export const TemplateHelpers: TemplateHelpersType;
 
 /**
  * Register a single template helper function
+ * @see {@link https://next.semantic-ui.com/docs/guides/templates/helpers#custom-helpers Custom Helpers}
+ *
  * @param name - The name of the helper function
  * @param fn - The helper function to register
  *
@@ -71,6 +79,8 @@ export function registerHelper(name: string, fn: (...args: any[]) => any): void;
 
 /**
  * Register multiple template helper functions
+ * @see {@link https://next.semantic-ui.com/docs/guides/templates/helpers#custom-helpers Custom Helpers}
+ *
  * @param helpers - An object containing helper functions
  *
  * @example

@@ -3,6 +3,7 @@
 /**
  * A string scanner class that provides methods for scanning and manipulating strings.
  * Adapted from BlazeJS Scanner.
+ * @see {@link https://next.semantic-ui.com/docs/api/templating/string-scanner StringScanner API Reference}
  */
 export class StringScanner {
   /**

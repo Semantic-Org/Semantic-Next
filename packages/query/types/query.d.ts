@@ -85,6 +85,8 @@ export interface DimensionOptions {
 /**
  * A minimal toolkit for querying and performing modifications
  * across DOM nodes based off a selector.
+ * @see {@link https://next.semantic-ui.com/docs/api/query Query API Reference}
+ * @see {@link https://next.semantic-ui.com/docs/guides/query Query Guide}
  */
 export class Query {
   /**
