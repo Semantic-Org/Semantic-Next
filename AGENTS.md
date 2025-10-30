@@ -1,72 +1,49 @@
-# Semantic UI - Agentic Coding Instructions
+# Semantic UI - Agent Instructions
 
-This file provides Agentic Code-specific guidance for working with the Semantic UI web component framework. It acts as an intelligent entry point to the comprehensive AI context system located in `/ai/`.
-
----
-
-## **MANDATORY PRE-FLIGHT CONTEXT**
-
-The following files **MUST** be loaded and synthesized by the agent at the beginning of *every* session, without exception. This is a non-negotiable prerequisite for all other tasks.
-
-1.  **`ai/meta/context-loading-instructions.md`**: Agent operational protocol
-2.  **`ai/00-START-HERE.md`**: Task routing and document discovery
-3.  **`ai/foundations/mental-model.md`**: Core concepts and terminology  
-4.  **`ai/foundations/codebase-navigation-guide.md`**: Search patterns and file locations
-
-Failure to load these foundational documents will lead to process violations, inaccurate responses, and hallucinated code.
-
-**BYPASSING THIS STEP IS NOT A VALID OPTIMIZATION.**
+All tasks in this workspace involve the Semantic UI web component framework.
 
 ---
 
-## **MANDATORY PROCESS VERBALIZATION**
+## Foundation (Load First)
 
-Before proceeding with your response, you **MUST** state to the user:
+Every session requires these files:
 
-- "Task: [description] → Context-loading Level [X] → START-HERE routing: [section/strategy]"
-- "Required context loaded: [preflight + task-specific documents]" 
-- "Tool strategy: [search approach from navigation guide]"
+1. `ai/00-START-HERE.md`
+2. `ai/foundations/mental-model.md`
+3. `ai/foundations/codebase-navigation-guide.md`
 
-This forces compliance with the existing 4-layer methodology and prevents agents from skipping the established framework.
-
----
-
-## Critical Self-Correction Questions
-
-Before starting any task, ask yourself:
-* Am I about to generate code based only on the foundational `mental-model.md`?
-* Does this task involve a specific implementation domain (components, styling, docs)?
-* If yes, an answer without the corresponding specialized guide is likely to be a **HIGH-CONFIDENCE HALLUCINATION**. I must load the specific guide first.
+These provide framework philosophy, task routing, and search patterns.
 
 ---
 
-## Agent Task Execution Checklist
+## Task-Specific Guides
 
-1.  **Task Type Identified:** What is the user's core request? (e.g., Component implementation)
-2.  **Context-Loading Level:** What level (0-4) from `context-loading-instructions.md` does this task require?
-3.  **START-HERE Routing:** Which section/strategy does `00-START-HERE.md` specify for this task type?
-4.  **Context Loaded:** Have I loaded the mandatory preflight documents AND the task-specific documents per routing?
-5.  **Tool Strategy:** What search patterns from `codebase-navigation-guide.md` apply to this task?
-
-Agents must follow this complete sequence rather than skipping to implementation based on perceived task simplicity.
+START-HERE.md contains routing logic for all task types. Follow its decision trees to load the appropriate specialized guide.
+For workflow-specific routing, reference `ai/meta/workflows-manifest.json`.
+For a machine-readable directory of all context files, use `ai/meta/context-manifest.json`.
 
 ---
 
-## Workflow Guidance
+## Doing Excellent Work
 
-### When to Use TodoWrite Tool
-- Multi-step component creation
-- Complex debugging across multiple files  
-- Feature implementation requiring coordination
-- Code review with multiple checks
+You have access to comprehensive documentation, canonical examples, and source code. Use them:
 
-### Workflow Priorities
-1. **Plan Task**: Use TodoWrite tool for multi-step work
-2. **Load Context**: Follow the 4-layer methodology completely
-3. **Explore Systematically**: Use navigation guide search patterns
-4. **Implement**: Write code, verifying all API and template syntax against specialized guides
-5. **Validate**: Run lint/typecheck commands if available
-6. **Mark Complete**: Update TodoWrite with progress
+* **Guides** (`ai/guides/`) document framework-specific patterns and APIs
+* **Examples** (`/docs/src/examples/`) are canonical - they demonstrate the correct way
+* **Source code** (`/packages/`) is authoritative when documentation is unclear
+* **Verification** against these sources produces higher quality implementations
+
+For complex work, plan first. For unfamiliar patterns, check examples before implementing.
+
+---
+
+## Work Process
+
+1. Load foundation + specialized guide
+2. Plan complex tasks before implementing
+3. Implement following framework patterns
+4. Verify against examples and source code
+5. Track progress for multi-step work
 
 ---
 
@@ -85,7 +62,7 @@ The guestbook captures institutional memory about what works, what doesn't, and 
 ### Taking on the Orchestrator Role
 
 When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
-- **`ai/agents/orchestrator.md`** - Full orchestrator coordination procedures
+- **`ai/tools/subagents/orchestrator.md`** - Full orchestrator coordination procedures
 
 ---
 
