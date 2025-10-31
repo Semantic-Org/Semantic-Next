@@ -3,6 +3,7 @@ import {
   UIButton,
   UIButtons,
   UICard,
+  UICards,
   UIContainer,
   UIIcon,
   UIInput,
@@ -43,6 +44,11 @@ const { name, attributes } = Astro.props;
   <UICard {...attributes} client:load>
     <slot />
   </UICard>
+)}
+{name === 'UICards' && (
+  <UICards {...attributes} client:load>
+    <slot />
+  </UICards>
 )}
 
 {name === 'UIContainer' && (

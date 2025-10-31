@@ -4,6 +4,7 @@
   "description": "A card displays segmented content in a manner similar to a playing card.",
   "tagName": "ui-card",
   "exportName": "UICard",
+  "exampleCode": "<ui-card image=\"/images/avatar/jenny.jpg\">\n  <div slot=\"header\">Jenny Hess</div>\n  <div slot=\"subheader\">Product Designer</div>\n  <div slot=\"description\">Jenny has strong opinions about button padding and the perfect shade of blue.</div>\n</ui-card>",
   "content": [
     {
       "name": "Icon",
