@@ -185,3 +185,21 @@ export const escapeHTML = (string) => {
     ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
     : string;
 };
+
+export const reverseString = (str = '', options = {}) => {
+  if (!str) {
+    return '';
+  }
+
+  const { locale = 'en' } = options;
+
+  // Use Intl.Segmenter for proper grapheme cluster handling (flags, skin tones, etc.)
+  if (typeof Intl?.Segmenter === 'function') {
+    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+    const segments = Array.from(segmenter.segment(str), s => s.segment);
+    return segments.reverse().join('');
+  }
+
+  // Fallback to Array.from for older environments (handles basic emojis)
+  return Array.from(str).reverse().join('');
+};

@@ -282,7 +282,7 @@ toTitleCase('hello world');              // 'Hello World'
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, truncate } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, truncate, reverseString } from '@semantic-ui/utils';
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -294,6 +294,11 @@ getArticle('banana');                               // 'a'
 
 // HTML escaping
 escapeHTML('<script>alert("xss")</script>');        // Safe HTML output
+
+// String reversal with Unicode support
+reverseString('hello');                             // 'olleh'
+reverseString('Hello 👋');                          // '👋 olleH'
+reverseString('🇺🇸🇬🇧');                             // '🇬🇧🇺🇸' (preserves flag emojis)
 ```
 
 ### Text Truncation

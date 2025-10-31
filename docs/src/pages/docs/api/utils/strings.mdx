@@ -341,4 +341,47 @@ const str = '<script>alert("XSS")</script>';
 console.log(escapeHTML(str)); // "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;"
 ```
 
+### reverseString
+
+```javascript
+function reverseString(str = '', options = {})
+```
+
+Reverses a string while properly handling Unicode grapheme clusters including emojis, flags, skin tones, and combined characters.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| str     | string | The string to reverse |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name   | Type   | Default | Description |
+|--------|--------|---------|-------------|
+| locale | string | 'en'    | Locale for grapheme segmentation |
+
+#### Returns
+
+The reversed string with grapheme clusters preserved.
+
+#### Example
+
+```javascript
+import { reverseString } from '@semantic-ui/utils';
+
+// Basic usage
+console.log(reverseString('hello')); // 'olleh'
+console.log(reverseString('hello world')); // 'dlrow olleh'
+
+// Handles emojis correctly
+console.log(reverseString('Hello 👋')); // '👋 olleH'
+console.log(reverseString('🎉🎊🎈')); // '🎈🎊🎉'
+
+// Preserves complex grapheme clusters
+console.log(reverseString('🇺🇸🇬🇧')); // '🇬🇧🇺🇸' (flag emojis)
+console.log(reverseString('Hello 👋🏽')); // '👋🏽 olleH' (emoji with skin tone)
+```
+
 These string utilities provide helpful tools for working with strings and text manipulation in JavaScript, enhancing string processing capabilities and security in web applications.

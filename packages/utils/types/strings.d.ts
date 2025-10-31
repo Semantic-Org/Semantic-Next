@@ -40,6 +40,14 @@ export interface TruncateOptions {
 }
 
 /**
+ * Options for reversing strings
+ */
+export interface ReverseStringOptions {
+  /** Locale for grapheme segmentation when using Intl.Segmenter (default: "en") */
+  locale?: string;
+}
+
+/**
  * Converts a kebab-case string to camelCase
  * Useful for converting HTML attributes to JavaScript property names
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#kebabtocamel kebabToCamel}
@@ -194,3 +202,23 @@ export function truncate(text: string | null | undefined, length: number, option
  * ```
  */
 export function escapeHTML(string: string): string;
+
+/**
+ * Reverses a string while properly handling Unicode grapheme clusters
+ * Uses Intl.Segmenter for correct handling of emojis, flag sequences, skin tones, and combined characters
+ * @see {@link https://next.semantic-ui.com/api/utils/strings#reversestring reverseString}
+ * @see {@link https://next.semantic-ui.com/examples/utils-reversestring Example}
+ *
+ * @param str - The string to reverse (null/undefined/empty returns empty string)
+ * @param options - Reversal options
+ * @returns The reversed string with grapheme clusters preserved
+ *
+ * @example
+ * ```ts
+ * reverseString('hello') // returns 'olleh'
+ * reverseString('Hello 👋') // returns '👋 olleH'
+ * reverseString('🇺🇸🇬🇧') // returns '🇬🇧🇺🇸' (preserves flag emojis)
+ * reverseString('café') // returns 'éfac' (preserves combined diacritics)
+ * ```
+ */
+export function reverseString(str?: string, options?: ReverseStringOptions): string;

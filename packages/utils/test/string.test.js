@@ -4,6 +4,7 @@ import {
   getArticle,
   joinWords,
   kebabToCamel,
+  reverseString,
   toTitleCase,
   truncate,
 } from '@semantic-ui/utils';
@@ -188,12 +189,80 @@ describe('String Utilities', () => {
     });
 
     it('should properly truncate emoji and combined graphemes', () => {
-      expect(truncate('👍👍👍👍👍', 4)).toBe('👍👍👍…'); // Doesn’t split emoji
+      expect(truncate('👍👍👍👍👍', 4)).toBe('👍👍👍…'); // Doesn't split emoji
     });
 
     it('should respect locale-aware boundaries when using Intl.Segmenter', () => {
       // Example: Japanese text (no spaces)
       expect(truncate('これはとても長い文です', 8, { locale: 'ja' })).toBe('これはとても…');
+    });
+  });
+
+  describe('reverseString', () => {
+    it('should reverse a simple string', () => {
+      expect(reverseString('hello')).toBe('olleh');
+      expect(reverseString('world')).toBe('dlrow');
+    });
+
+    it('should reverse a string with spaces', () => {
+      expect(reverseString('hello world')).toBe('dlrow olleh');
+    });
+
+    it('should handle empty strings', () => {
+      expect(reverseString('')).toBe('');
+      expect(reverseString()).toBe('');
+    });
+
+    it('should handle single character strings', () => {
+      expect(reverseString('a')).toBe('a');
+      expect(reverseString('X')).toBe('X');
+    });
+
+    it('should properly handle Unicode characters and emojis', () => {
+      expect(reverseString('Hello 👋')).toBe('👋 olleH');
+      expect(reverseString('🎉🎊🎈')).toBe('🎈🎊🎉');
+    });
+
+    it('should handle complex grapheme clusters with Intl.Segmenter', () => {
+      // Emoji with skin tone modifier
+      expect(reverseString('Hello 👋🏽')).toBe('👋🏽 olleH');
+
+      // Flag emojis (regional indicator symbols)
+      expect(reverseString('🇺🇸🇬🇧')).toBe('🇬🇧🇺🇸');
+
+      // Combined diacritics
+      expect(reverseString('café')).toBe('éfac');
+
+      // Zero-width joiner sequences (family emoji)
+      expect(reverseString('AB👨‍👩‍👧CD')).toBe('DC👨‍👩‍👧BA');
+    });
+
+    it('should handle numbers in strings', () => {
+      expect(reverseString('12345')).toBe('54321');
+      expect(reverseString('abc123')).toBe('321cba');
+    });
+
+    it('should handle special characters', () => {
+      expect(reverseString('a!b@c#')).toBe('#c@b!a');
+      expect(reverseString('test-string_123')).toBe('321_gnirts-tset');
+    });
+
+    it('should handle palindromes correctly', () => {
+      expect(reverseString('racecar')).toBe('racecar');
+      expect(reverseString('noon')).toBe('noon');
+    });
+
+    it('should handle strings with only spaces', () => {
+      expect(reverseString('   ')).toBe('   ');
+    });
+
+    it('should handle mixed case strings', () => {
+      expect(reverseString('HeLLo WoRLd')).toBe('dLRoW oLLeH');
+    });
+
+    it('should respect locale option for international text', () => {
+      // Japanese text
+      expect(reverseString('こんにちは', { locale: 'ja' })).toBe('はちにんこ');
     });
   });
 });
