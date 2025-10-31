@@ -113,9 +113,26 @@ export class SpecReader {
     };
     const spec = this.spec;
 
-    // standard example
-    const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
+    // Check for plural-specific example code if in plural mode
+    const customExampleCode = plural && spec.pluralExampleCode
+      ? spec.pluralExampleCode
+      : spec.exampleCode;
+
+    const defaultContent = (plural && spec?.examples?.defaultPluralContent)
+      ? spec?.examples?.defaultPluralContent
+      : spec?.examples?.defaultContent;
     const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
+
+    let code, componentParts;
+    if (customExampleCode) {
+      // default custom example code provided
+      code = customExampleCode;
+      componentParts = this.getComponentPartsFromHTML(code);
+    }
+    else {
+      code = this.getCodeFromModifiers(defaultModifiers, { html: defaultContent, plural });
+      componentParts = this.getComponentPartsFromHTML(code);
+    }
     const componentTitle = plural ? (spec.pluralName || spec.name) : spec.name;
     definition.types.push({
       title: componentTitle,
@@ -123,15 +140,13 @@ export class SpecReader {
       examples: [
         {
           showCode: false,
-          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent, plural }),
-          components: [this.getComponentParts(defaultModifiers, { html: defaultContent, plural })],
+          code,
+          components: [componentParts],
         },
       ],
     });
 
     if (plural) {
-      // For plural components, we need to handle types, content, and variations specially
-
       // Process pluralContent (instead of regular content)
       if (spec.pluralContent) {
         each(spec.pluralContent, part => {
@@ -366,13 +381,13 @@ export class SpecReader {
         let code, componentParts;
 
         // Check for plural-specific example code if in plural mode
-        const hasCustomExample = isPlural && option.pluralExampleCode
+        const customExampleCode = isPlural && option.pluralExampleCode
           ? option.pluralExampleCode
           : option.exampleCode;
 
-        if (hasCustomExample) {
+        if (customExampleCode) {
           // an example was provided in the spec for us
-          code = hasCustomExample;
+          code = customExampleCode;
           componentParts = this.getComponentPartsFromHTML(code);
         }
         else {
@@ -421,12 +436,12 @@ export class SpecReader {
       }
 
       // Check for plural-specific example code if in plural mode
-      const hasCustomExample = isPlural && part.pluralExampleCode
+      const customExampleCode = isPlural && part.pluralExampleCode
         ? part.pluralExampleCode
         : part.exampleCode;
 
-      if (hasCustomExample) {
-        code = hasCustomExample;
+      if (customExampleCode) {
+        code = customExampleCode;
         componentParts = this.getComponentPartsFromHTML(code);
       }
       else {
