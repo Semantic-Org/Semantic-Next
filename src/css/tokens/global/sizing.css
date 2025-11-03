@@ -1,0 +1,32 @@
+/*******************************
+             Sizing
+*******************************/
+
+:root {
+
+  /* -------------------
+       Base Font Size
+  -------------------- */
+
+  /* Controls rem calculation */
+  --font-size: 14px;
+
+  /* -------------------
+        Size Scale
+  -------------------- */
+
+  /* Base size values (unitless for calculations) */
+  --size-3xs-base: 10;
+  --size-2xs-base: 11;
+  --size-xs-base: 12;
+  --size-s-base: 13;
+  --size-m-base: 14;
+  --size-l-base: 16;
+  --size-xl-base: 18;
+  --size-2xl-base: 20;
+  --size-3xl-base: 24;
+
+  /* Base em size for calculations */
+  --em-size: var(--size-m-base);
+
+}
