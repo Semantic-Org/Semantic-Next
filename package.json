@@ -67,6 +67,12 @@
       "bundled": "./dist/bundle/container.min.js",
       "default": "./src/primitives/container/index.js"
     },
+    "./divider": {
+      "import": "./src/primitives/divider/index.js",
+      "browser": "./dist/cdn/divider.min.js",
+      "bundled": "./dist/bundle/divider.min.js",
+      "default": "./src/primitives/divider/index.js"
+    },
     "./image": {
       "import": "./src/primitives/image/index.js",
       "browser": "./dist/cdn/image.min.js",
@@ -114,6 +120,12 @@
       "browser": "./dist/cdn/segment.min.js",
       "bundled": "./dist/bundle/segment.min.js",
       "default": "./src/primitives/segment/index.js"
+    },
+    "./table": {
+      "import": "./src/primitives/table/index.js",
+      "browser": "./dist/cdn/table.min.js",
+      "bundled": "./dist/bundle/table.min.js",
+      "default": "./src/primitives/table/index.js"
     },
     "./behaviors": {
       "import": "./src/behaviors/index.js",

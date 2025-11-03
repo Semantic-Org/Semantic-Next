@@ -1,5 +1,7 @@
 /* Global Tokens */
 @import url('./tokens/global/constants.css') layer(tokens.global.constants);
+@import url('./tokens/global/sizing.css') layer(tokens.global.sizing);
+@import url('./tokens/global/spacing.css') layer(tokens.global.spacing);
 @import url('./tokens/global/typography.css') layer(tokens.global.typography);
 @import url('./tokens/global/layout.css') layer(tokens.global.layout);
 @import url('./tokens/global/interaction.css') layer(tokens.global.interaction);
