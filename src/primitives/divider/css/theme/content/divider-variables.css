@@ -1,0 +1,10 @@
+/*******************************
+         Divider Variables
+*******************************/
+
+:host {
+  /* Base divider */
+  --divider-margin: 1rem 0;
+  --divider-width: 1px;
+  --divider-color: var(--border-color);
+}

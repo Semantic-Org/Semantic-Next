@@ -1,0 +1,10 @@
+/*******************************
+          Icon Content
+*******************************/
+
+.divider {
+  .icon {
+    padding: var(--divider-icon-padding);
+    font-size: var(--divider-icon-size);
+  }
+}

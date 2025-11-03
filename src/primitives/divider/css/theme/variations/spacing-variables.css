@@ -1,0 +1,15 @@
+/*******************************
+     Spacing Variation Variables
+*******************************/
+
+:host {
+  /* Spacing scale - using global tokens */
+  --divider-spacing-mini: var(--spacing-mini);
+  --divider-spacing-tiny: var(--spacing-tiny);
+  --divider-spacing-small: var(--spacing-small);
+  --divider-spacing-medium: var(--spacing-medium);
+  --divider-spacing-large: var(--spacing-large);
+  --divider-spacing-big: var(--spacing-big);
+  --divider-spacing-huge: var(--spacing-huge);
+  --divider-spacing-massive: var(--spacing-massive);
+}

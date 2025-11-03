@@ -1,0 +1,13 @@
+/* Content */
+@import url('./content/divider.css') layer(divider.definition.content.divider);
+@import url('./content/text.css') layer(divider.definition.content.text);
+@import url('./content/icon.css') layer(divider.definition.content.icon);
+
+/* States */
+/* Example: @import url('./states/state.css') layer(divider.definition.states.state); */
+
+/* Types */
+@import url('./types/horizontal.css') layer(divider.definition.types.horizontal);
+
+/* Variations */
+@import url('./variations/spacing.css') layer(divider.definition.variations.spacing);
