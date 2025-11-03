@@ -10,17 +10,41 @@ The Semantic UI design token system provides a sophisticated, theme-aware founda
 ## Token Directory Structure
 
 ```
-src/css/tokens/
-├── global/           # Base token definitions
-│   ├── colors.css    # Color scales and base colors
-│   ├── visual.css    # Typography, spacing, effects
-│   └── interaction.css # Transitions, animations
-├── computed/         # Calculated and derived tokens
-│   ├── global.css    # Computed global tokens
-│   └── themes.css    # Theme-aware computed values
-└── themes/           # Theme-specific mappings
-    ├── light.css     # Light theme definitions
-    └── dark.css      # Dark theme definitions
+src/css/
+├── tokens.css        # Main orchestrator file
+└── tokens/
+    ├── global/       # Base token definitions
+    │   ├── constants.css     # Core constants
+    │   ├── typography.css    # Base typography
+    │   ├── layout.css       # Layout fundamentals
+    │   ├── interaction.css  # Animations, transitions
+    │   ├── visual.css       # Effects, spacing
+    │   └── brands.css       # Brand colors
+    ├── computed/     # Theme-agnostic calculated values
+    │   ├── typography.css    # Type scales
+    │   ├── em-sizing.css    # Em-based spacing
+    │   ├── layout.css       # Layout calculations
+    │   ├── colors.css       # Color computations
+    │   └── interaction.css  # Interaction values
+    └── themes/       # Theme-specific values
+        ├── light/    # Light theme base
+        │   ├── base.css         # Theme flags
+        │   ├── colors.css       # Color scales
+        │   └── interaction.css  # Interactions
+        ├── dark/     # Dark theme base
+        │   ├── base.css         # Theme flags
+        │   ├── colors.css       # Color scales
+        │   ├── interaction.css  # Interactions
+        │   └── effects.css      # Dark effects
+        └── computed/ # Theme-aware computed
+            ├── base.css         # Standard/inverted
+            ├── colors.css       # Color tokens
+            ├── typography.css   # Type tokens
+            ├── brand.css        # Brand colors
+            ├── layout.css       # Layout tokens
+            ├── effects.css      # Visual effects
+            ├── messages.css     # Message colors
+            └── interaction.css  # Interactions
 ```
 
 ## Token Verification Workflow
@@ -55,22 +79,25 @@ src/css/tokens/
 --green-0, --green-5, --green-10, ... --green-95, --green-100
 ```
 
-### Theme-Invariant Colors
+### Theme-Aware Colors
 
-**Use standard/inverted tokens for automatic theme adaptation:**
+**The `--standard-*` and `--inverted-*` tokens automatically adapt between themes:**
 
 ```css
-/* ✅ Theme-adaptive backgrounds */
+/* ✅ Automatic theme adaptation */
 .card {
-  background: var(--standard-5);     /* Light: light gray, Dark: dark gray */
+  background: var(--standard-5);     /* Light: 5% black, Dark: 5% white */
   border: 1px solid var(--standard-15);
 }
 
-.inverted-card {
-  background: var(--inverted-5);     /* Opposite of standard */
+/* Inverted provides the opposite color */
+.inverted-section {
+  background: var(--inverted-5);     /* Light: 5% white, Dark: 5% black */
   color: var(--inverted-90);
 }
 ```
+
+> **Important**: These tokens use OKLCH color space and sophisticated remapping. For complete understanding of the theme system, see `ai/guides/css/theming.md`
 
 ### Semantic Color Tokens
 
@@ -184,41 +211,52 @@ src/css/tokens/
 
 ## Theme Integration
 
-### Light/Dark Mode Detection
+### Automatic Theme Adaptation
 
-**Use container style queries for theme-specific overrides:**
+Most styling should use theme-aware tokens that automatically adapt:
 
 ```css
-/* Component adapts to theme automatically via tokens */
+/* Component automatically adapts to current theme */
 .component {
-  background: var(--standard-5);     /* Auto-adapts */
-  color: var(--text-color);          /* Auto-adapts */
+  background: var(--standard-5);     /* Adapts: light gray ↔ dark gray */
+  color: var(--text-color);          /* Adapts: dark text ↔ light text */
+  border: 1px solid var(--standard-15);
 }
+```
 
-/* Override when tokens can't express the difference */
+### Theme-Specific Overrides
+
+**Only use container style queries for effects that can't be expressed with tokens:**
+
+```css
 @container style(--dark-mode: true) {
-  .component {
-    filter: brightness(1.1);
-    backdrop-filter: blur(4px);
+  .glass-panel {
+    /* Dark mode needs more blur for visibility */
+    backdrop-filter: blur(8px) brightness(1.1);
   }
 }
 
 @container style(--light-mode: true) {
-  .component {
+  .glass-panel {
+    /* Light mode uses subtle shadows */
     box-shadow: inset 0 0 10px var(--standard-10);
   }
 }
 ```
 
-### Theme Variables
+### Available Theme Variables
 
 ```css
-/* Available theme detection variables */
---dark-mode: true       /* Set when dark theme active */
---light-mode: true      /* Set when light theme active */
---dark-mode-factor: 0|1 /* Numeric for calculations */
---light-mode-factor: 1|0 /* Inverse of dark-mode-factor */
+/* Boolean flags */
+--dark-mode: true/false
+--light-mode: true/false
+
+/* Numeric factors for calculations */
+--dark-mode-factor: 1 (in dark) or 0 (in light)
+--light-mode-factor: 1 (in light) or 0 (in dark)
 ```
+
+> **For complete theming documentation**: See `ai/guides/css/theming.md` for how the theme system works, including the standard/inverted swap mechanism, color scale inversions, and OKLCH color computations.
 
 ## Custom Property Guidelines
 
@@ -315,10 +353,15 @@ src/css/tokens/
 
 ### Common Token Files to Check
 
-- **Colors**: `src/css/tokens/global/colors.css`
-- **Spacing/Typography**: `src/css/tokens/global/visual.css`
-- **Effects/Transitions**: `src/css/tokens/global/interaction.css`
-- **Theme mappings**: `src/css/tokens/themes/light.css`
+- **Base constants**: `src/css/tokens/global/constants.css`
+- **Typography base**: `src/css/tokens/global/typography.css`
+- **Spacing/Effects**: `src/css/tokens/global/visual.css`
+- **Animations/Transitions**: `src/css/tokens/global/interaction.css`
+- **Brand colors**: `src/css/tokens/global/brands.css`
+- **Em-based sizing**: `src/css/tokens/computed/em-sizing.css`
+- **Theme flags**: `src/css/tokens/themes/light/base.css`, `src/css/tokens/themes/dark/base.css`
+- **Standard/Inverted tokens**: `src/css/tokens/themes/computed/base.css`
+- **Theme color scales**: `src/css/tokens/themes/computed/colors.css`
 
 ## Best Practices Summary
 

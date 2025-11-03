@@ -2,22 +2,31 @@
   "schemaVersion": 1,
   "workflows": [
     {
-      "id": "components/author-spec",
-      "title": "Author Component Spec",
-      "path": "ai/workflows/components/author-component-spec.md",
-      "description": "Create or update component JSON specs prior to implementation.",
-      "tags": ["components", "specs", "authoring"],
-      "prerequisites": ["foundation/start-here", "foundation/mental-model", "components/generation"],
+      "id": "components/scaffold-primitive",
+      "title": "Scaffold New Primitive",
+      "path": "ai/workflows/components/scaffold-primitive.md",
+      "description": "Create the complete file structure for a new UI primitive with stub spec and minimal implementation.",
+      "tags": ["primitives", "scaffolding", "specs"],
+      "prerequisites": ["foundation/start-here", "foundation/mental-model", "packages/specs"],
+      "outputs": ["primitive-structure", "spec-stub"]
+    },
+    {
+      "id": "components/define-primitive-spec",
+      "title": "Define Primitive Spec",
+      "path": "ai/workflows/components/define-primitive-spec.md",
+      "description": "Create or update primitive JSON specs that define component API and behavior.",
+      "tags": ["primitives", "specs", "authoring"],
+      "prerequisites": ["foundation/start-here", "foundation/mental-model", "packages/specs"],
       "outputs": ["spec-json"]
     },
     {
-      "id": "components/spec-to-css",
-      "title": "Implement Specified Component CSS",
-      "path": "ai/workflows/components/spec-to-css-implementation.md",
-      "description": "Translate an approved component spec into scoped Shadow DOM CSS.",
-      "tags": ["components", "styling", "implementation"],
-      "prerequisites": ["components/author-spec", "styling/html", "styling/css", "styling/token-usage"],
-      "outputs": ["component-css"]
+      "id": "components/implement-primitive-css",
+      "title": "Implement Primitive CSS",
+      "path": "ai/workflows/components/implement-primitive-css.md",
+      "description": "Translate an approved primitive spec into scoped Shadow DOM CSS implementation.",
+      "tags": ["primitives", "styling", "implementation"],
+      "prerequisites": ["components/define-primitive-spec", "styling/html", "styling/css", "styling/token-usage"],
+      "outputs": ["primitive-css"]
     },
     {
       "id": "documentation/refine-example-copy",

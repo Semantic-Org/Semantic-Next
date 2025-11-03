@@ -1,10 +1,10 @@
-# Component Spec Authoring Workflow
+# Define Primitive Spec
 
-**Purpose**: Guide AI agents to author complete, valid component spec JSON files for Semantic UI components
+**Purpose**: Guide AI agents to author complete, valid primitive spec JSON files for Semantic UI primitives
 
 ## Overview
 
-A component spec is a declarative JSON contract that defines everything about a component: its API, behaviors, variations, and documentation. This spec drives component generation, TypeScript definitions, and documentation - it is the single source of truth.
+A primitive spec is a declarative JSON contract that defines everything about a UI primitive: its API, behaviors, variations, and documentation. This spec drives primitive generation, TypeScript definitions, and documentation - it is the single source of truth.
 
 ## Core Principles
 
@@ -511,7 +511,7 @@ Default content for documentation:
 "examples": {
   // Default attributes to apply in all examples
   "defaultAttributes": {
-    "icon": "check-circle"  // For icon, always show with a glyph
+    "icon": "check-circle"  // Icons always need a glyph to display
   },
 
   // Default inner content for examples
@@ -524,7 +524,7 @@ Default content for documentation:
 
 ## Usage Levels Guide
 
-Assign appropriate usage levels for progressive disclosure:
+Assign `usageLevel` (1-5) to indicate feature commonality:
 
 1. **Level 1 - Essential**: Core features users need immediately
    - Primary types (emphasis)
@@ -545,9 +545,22 @@ Assign appropriate usage levels for progressive disclosure:
    - Complex compound behaviors
    - Platform-specific features
 
-5. **Level 5 - Expert**: Rarely used
+5. **Level 5 - Rare**: Rarely used
    - Experimental features
    - Legacy support options
+
+```json
+{
+  "name": "Size",
+  "usageLevel": 1,  // Essential feature
+  "description": "vary in size"
+}
+
+{
+  "name": "Animated",
+  "usageLevel": 3,  // Advanced feature
+  "description": "animate to show hidden content"
+}
 
 ## Description Templates
 
@@ -666,7 +679,51 @@ Before completing a spec, verify:
 12. ✓ Example content provided for documentation
 13. ✓ Events include all dispatched CustomEvents
 
+## Quick Reference
+
+| Section | Purpose | Mutually Exclusive |
+|---------|---------|------------------|
+| `types` | Core behaviors | Yes |
+| `variations` | Visual modifications | No |
+| `states` | Runtime changes | No |
+| `settings` | Configuration | No |
+| `content` | Slots/attributes | No |
+| `events` | Custom events | No |
+
 ## Common Patterns
+
+### Standard Sizes
+```json
+"options": [
+  {"name": "Mini", "value": "mini", "description": "appear extremely small"},
+  {"name": "Tiny", "value": "tiny", "description": "appear very small"},
+  {"name": "Small", "value": "small", "description": "appear small"},
+  {"name": "Medium", "value": "medium", "description": "appear normal sized"},
+  {"name": "Large", "value": "large", "description": "appear larger than normal"},
+  {"name": "Big", "value": "big", "description": "appear much larger than normal"},
+  {"name": "Huge", "value": "huge", "description": "appear very much larger than normal"},
+  {"name": "Massive", "value": "massive", "description": "appear extremely larger than normal"}
+]
+```
+
+### Standard Colors
+```json
+"options": [
+  {"name": "Red", "value": "red", "description": "be red"},
+  {"name": "Orange", "value": "orange", "description": "be orange"},
+  {"name": "Yellow", "value": "yellow", "description": "be yellow"},
+  {"name": "Olive", "value": "olive", "description": "be olive"},
+  {"name": "Green", "value": "green", "description": "be green"},
+  {"name": "Teal", "value": "teal", "description": "be teal"},
+  {"name": "Blue", "value": "blue", "description": "be blue"},
+  {"name": "Violet", "value": "violet", "description": "be violet"},
+  {"name": "Purple", "value": "purple", "description": "be purple"},
+  {"name": "Pink", "value": "pink", "description": "be pink"},
+  {"name": "Brown", "value": "brown", "description": "be brown"},
+  {"name": "Grey", "value": "grey", "description": "be grey"},
+  {"name": "Black", "value": "black", "description": "be black"}
+]
+```
 
 ### Form Components
 ```json

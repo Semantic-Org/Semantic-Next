@@ -30,26 +30,6 @@
   --header-top-margin: 2rem;
   --header-bottom-margin: 1rem;
 
-  /* -------------------
-          Sizes
-  -------------------- */
-
-  /*
-    For em sizes to resolve to exact pixels you will need to adjust the scaling values below
-    to be whole numbers that are above/below the base em size.
-
-    For instance you might reset medium to "13" and small to "12"
-  */
-  --em-size: var(--medium-size-px);
-
-  --mini-size-px: 11;
-  --tiny-size-px: 12;
-  --small-size-px: 13;
-  --medium-size-px: 14;
-  --large-size-px: 16;
-  --big-size-px: 18;
-  --huge-size-px: 20;
-  --massive-size-px: 24;
 
   --line-height: calc(20 / 14);
 

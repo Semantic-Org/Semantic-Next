@@ -106,6 +106,14 @@
       "approxTokens": 3200
     },
     {
+      "id": "css/theming",
+      "path": "ai/guides/css/theming.md",
+      "category": "specialized",
+      "tags": ["theming", "dark-mode", "light-mode", "css"],
+      "dependsOn": ["css/guide", "css/token-usage"],
+      "approxTokens": 8500
+    },
+    {
       "id": "docs/example-authoring",
       "path": "ai/documentation/authoring/example-authoring.md",
       "category": "specialized",
@@ -175,8 +183,24 @@
       "approxTokens": 7500
     },
     {
-      "id": "workflows/components/spec-to-css",
-      "path": "ai/workflows/components/spec-to-css-implementation.md",
+      "id": "workflows/components/scaffold-primitive",
+      "path": "ai/workflows/components/scaffold-primitive.md",
+      "category": "workflow",
+      "tags": ["primitives", "scaffolding", "specs"],
+      "dependsOn": ["foundation/mental-model", "packages/specs"],
+      "approxTokens": 4500
+    },
+    {
+      "id": "workflows/components/define-primitive-spec",
+      "path": "ai/workflows/components/define-primitive-spec.md",
+      "category": "workflow",
+      "tags": ["specs", "authoring", "primitives"],
+      "dependsOn": ["foundation/mental-model", "packages/specs"],
+      "approxTokens": 8000
+    },
+    {
+      "id": "workflows/components/implement-primitive-css",
+      "path": "ai/workflows/components/implement-primitive-css.md",
       "category": "workflow",
       "tags": ["css", "implementation", "specs"],
       "dependsOn": ["styling/css", "styling/token-usage"],

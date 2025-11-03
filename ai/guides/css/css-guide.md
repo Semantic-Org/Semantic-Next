@@ -205,39 +205,42 @@ Write minimal, maintainable CSS that leverages the design token system and mirro
 
 ## Theme Handling
 
-### Theme-Adaptive Styling
+### Automatic Theme Adaptation
 
-**Use design tokens that automatically adapt to light/dark themes:**
+Semantic UI uses a sophisticated theme system where CSS variables automatically adapt between light and dark modes. Components should be written once using theme-aware tokens.
+
+**Key Concept**: The `--standard-*` and `--inverted-*` tokens automatically swap their underlying colors between themes:
 
 ```css
 .component {
-  background: var(--standard-5);     /* Adapts automatically */
-  color: var(--text-color);          /* Theme-aware text */
+  /* These adapt automatically between themes */
+  background: var(--standard-5);     /* Light: light gray, Dark: dark gray */
+  color: var(--standard-90);          /* Light: near black, Dark: near white */
   border: 1px solid var(--standard-15);
 }
 ```
 
 ### Theme-Specific Overrides
 
-**When tokens can't express theme differences, use container style queries:**
+**Only use container style queries when automatic tokens can't express the visual difference:**
 
 ```css
-.component {
-  filter: blur(2px);
-}
+.glass-effect {
+  /* Base styling uses theme-aware tokens */
+  background: var(--standard-5);
 
-@container style(--dark-mode: true) {
-  .component {
-    filter: blur(4px) brightness(1.2);
+  /* Visual effects that need different parameters per theme */
+  @container style(--dark-mode: true) {
+    backdrop-filter: blur(8px) brightness(1.1);
   }
-}
 
-@container style(--light-mode: true) {
-  .component {
+  @container style(--light-mode: true) {
     box-shadow: inset 0 0 10px var(--standard-10);
   }
 }
 ```
+
+> **For complete theming details**: See `ai/guides/css/theming.md` for the canonical guide on how the theme system works, including color scale inversions, OKLCH color space usage, and advanced patterns.
 
 ## Animation and Transitions
 

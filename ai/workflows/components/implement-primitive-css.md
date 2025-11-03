@@ -1,11 +1,11 @@
-# Spec to CSS Implementation Workflow
+# Implement Primitive CSS
 
-**Purpose**: Implement CSS for component features defined in specs
+**Purpose**: Implement CSS for primitive features defined in specs
 **Target Audience**: LLMs with empty context windows implementing CSS without visual access
-**Prerequisite**: Component spec JSON exists with the feature defined
+**Prerequisite**: Primitive spec JSON exists with the feature defined
 **Related Guides**:
 - `/ai/packages/specs.md` - Understanding spec structure
-- `/ai/workflows/author-component-spec.md` - Adding new content to a spec or writing a new spec
+- `/ai/workflows/components/define-primitive-spec.md` - Adding new content to a spec or writing a new spec
 - `/ai/guides/styling/tokens/token-usage.md` - Design token usage and verification
 - `/ai/guides/styling/tokens/architecture.md` - Token system architecture
 - `/ai/foundations/mental-model.md` - Shadow DOM and component architecture
@@ -86,6 +86,92 @@ Is the feature in the spec?
 ```
 
 ## Core Principles
+
+### Content vs Context Separation
+
+**Purpose**: The file separation creates clear CSS layers where you can immediately understand what rules affect each part of the component definition.
+
+**Content Files** (`content/*.css`):
+- Style the intrinsic properties of elements themselves
+- Answer: "What does this element look like?"
+- Examples: Text weight, icon size, padding around content
+- Test: If removing a type/variation would break the element's basic appearance, it belongs in content
+
+**Type/Variation Files** (`types/*.css`, `variations/*.css`):
+- Style contextual layouts and behaviors
+- Answer: "How do elements arrange/behave in this mode?"
+- Examples: Flexbox layouts, element positioning, conditional display
+- Test: If it only changes arrangement or behavior, it belongs in types/variations
+
+### Template Control Philosophy
+
+**When you control the HTML template, leverage it**:
+- Prefer real HTML elements over CSS pseudo-elements (`:before`, `:after`)
+- Pseudo-elements are workarounds for when you can't modify markup
+- Real elements are more maintainable, debuggable, and flexible
+- Example: Use `<div class="line">` instead of `::before` for divider lines
+
+### Token Usage Decision Tree
+
+**ALWAYS ask the user when uncertain about token selection**:
+
+```
+Need a CSS value?
+├── Is there an existing system token that fits?
+│   ├── YES → Use it (e.g., var(--border-color), var(--text-color))
+│   ├── NO → Ask user: "What token should I use for [purpose]?"
+│   └── UNCERTAIN → Ask user: "Should I use var(--token-a) or var(--token-b) for [purpose]?"
+└── Component-specific value needed?
+    ├── YES → Create variable in theme file (rare)
+    └── NO → Never create redundant aliases
+```
+
+**Example interaction**:
+```
+AI: "For the divider line color, should I use var(--border-color) or var(--subtle-border-color)?"
+User: "Use var(--border-color)"
+```
+
+### Computed Classes vs Spec Attributes
+
+**Clear distinction**:
+- **`{ui}` placeholder**: Automatically adds classes from spec attributes
+  - Examples: `vertical`, `hidden`, `spacing="large"` → `.vertical`, `.hidden`, `.large`
+  - Never manually add these in component methods
+
+- **Component methods**: For logic-based or computed classes
+  - Examples: Content triggers layout, state determines appearance
+  - Use `classMap` with methods like `getDividerClasses()`
+
+### File Responsibility Principle
+
+**Each file has ONE clear responsibility**:
+
+```css
+/* ✅ GOOD: text.css - Only styles text element */
+.divider {
+  .text {
+    font-weight: var(--divider-text-font-weight);
+    text-transform: var(--divider-text-transform);
+  }
+}
+
+/* ❌ BAD: text.css - Mixing layout concerns */
+.divider {
+  &.horizontal {
+    display: flex;  /* This belongs in types/horizontal.css */
+  }
+
+  .text {
+    font-weight: bold;
+  }
+}
+```
+
+**Benefits**:
+- Clear debugging: Know exactly which file affects what
+- Clean overrides: Layers cascade predictably
+- Easy maintenance: Changes are localized
 
 ### Spec-Driven Development
 **The spec is the source of truth**. Always:

@@ -4,22 +4,41 @@
 
 ### Directory Structure
 ```
-src/css/tokens/
-├── tokens.css                    # Cascade orchestrator
-├── computed/                     # Theme-agnostic computed values
-│   ├── spacing.css              # Derived from base units
-│   ├── typography.css           # Calculated type scales
-│   └── ...                      # Other universal computations
-└── themes/                      # Theme-aware values
-    ├── light/                   # Light theme base values
-    │   ├── colors.css          # Base scales and definitions
-    │   └── ...                 # Other light-specific values
-    ├── dark/                    # Dark theme overrides
-    │   ├── colors.css          # Scale inversions
-    │   └── ...                 # Other dark-specific values
-    └── computed/                # Theme-aware computed values
-        ├── colors.css          # Theme-dependent color tokens
-        └── ...                 # Other theme-dependent computations
+src/css/
+├── tokens.css                    # Main cascade orchestrator
+└── tokens/
+    ├── global/                   # Base token definitions
+    │   ├── constants.css        # Core constants
+    │   ├── typography.css       # Typography base values
+    │   ├── layout.css          # Layout base values
+    │   ├── interaction.css     # Animation/transition values
+    │   ├── visual.css          # Visual effects, spacing
+    │   └── brands.css          # Brand color definitions
+    ├── computed/                 # Theme-agnostic computed values
+    │   ├── typography.css       # Calculated type scales
+    │   ├── em-sizing.css       # Em-based spacing tokens
+    │   ├── layout.css          # Layout calculations
+    │   ├── colors.css          # Color calculations
+    │   └── interaction.css     # Computed interactions
+    └── themes/                   # Theme-aware values
+        ├── light/                # Light theme base values
+        │   ├── base.css         # Theme flags and swaps
+        │   ├── colors.css       # Light color scales
+        │   └── interaction.css  # Light interactions
+        ├── dark/                 # Dark theme overrides
+        │   ├── base.css         # Theme flags and swaps
+        │   ├── colors.css       # Dark color scales
+        │   ├── interaction.css  # Dark interactions
+        │   └── effects.css      # Dark-specific effects
+        └── computed/             # Theme-aware computed values
+            ├── base.css         # Standard/inverted tokens
+            ├── colors.css       # Theme-dependent colors
+            ├── typography.css   # Theme typography
+            ├── brand.css        # Brand color variations
+            ├── layout.css       # Theme layouts
+            ├── effects.css      # Theme effects
+            ├── messages.css     # Message type colors
+            └── interaction.css  # Theme interactions
 ```
 
 ## Two Computation Contexts
@@ -62,25 +81,36 @@ Values that depend on theme-specific base values.
 --overlay-backdrop: rgb(0 0 0 / var(--opacity-backdrop));
 ```
 
+> **For complete theming details**: See `ai/guides/css/theming.md` for how the standard/inverted swapping and color scale inversions work.
+
 ## CSS Layer Architecture
 
 ### Critical Import Order (tokens.css)
 ```css
-/* 1. Theme-agnostic computed values */
-@import url('./tokens/computed/spacing.css') layer(tokens.computed.spacing);
+/* 1. Global base tokens */
+@import url('./tokens/global/constants.css') layer(tokens.global.constants);
+@import url('./tokens/global/typography.css') layer(tokens.global.typography);
+@import url('./tokens/global/layout.css') layer(tokens.global.layout);
+@import url('./tokens/global/visual.css') layer(tokens.global.visual);
+
+/* 2. Theme-agnostic computed values */
 @import url('./tokens/computed/typography.css') layer(tokens.computed.typography);
+@import url('./tokens/computed/em-sizing.css') layer(tokens.computed.emSizing);
+@import url('./tokens/computed/layout.css') layer(tokens.computed.layout);
+@import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
 
-/* 2. Theme base values */
+/* 3. Light theme base values */
+@import url('./tokens/themes/light/base.css') layer(tokens.themes.light.base);
 @import url('./tokens/themes/light/colors.css') layer(tokens.themes.light.colors);
-@import url('./tokens/themes/light/opacity.css') layer(tokens.themes.light.opacity);
 
-/* 3. Theme overrides */
+/* 4. Dark theme overrides */
+@import url('./tokens/themes/dark/base.css') layer(tokens.themes.dark.base);
 @import url('./tokens/themes/dark/colors.css') layer(tokens.themes.dark.colors);
-@import url('./tokens/themes/dark/opacity.css') layer(tokens.themes.dark.opacity);
 
-/* 4. Theme-aware computed values (MUST be last) */
+/* 5. Theme-aware computed values (MUST be last) */
+@import url('./tokens/themes/computed/base.css') layer(tokens.themes.computed.base);
 @import url('./tokens/themes/computed/colors.css') layer(tokens.themes.computed.colors);
-@import url('./tokens/themes/computed/surfaces.css') layer(tokens.themes.computed.surfaces);
+@import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
 ```
 
 **RULE:** Theme-aware computed MUST come after all theme definitions.
@@ -140,23 +170,37 @@ Base value → Invariant token → Consumer (ignores theme)
 
 ## Token Categories by Computation Type
 
-### Theme-Agnostic Computed
-- Spacing scales
-- Typography scales
-- Grid systems
-- Aspect ratios
-- Z-index scales
-- Animation durations
-- Mathematical constants
+### Global Base Tokens (`tokens/global/`)
+- Constants and core values
+- Base typography settings
+- Layout fundamentals
+- Interaction timing
+- Visual effect bases
+- Brand color definitions
 
-### Theme-Aware Computed
-- Color palettes
-- Opacity scales
-- Shadow intensities
-- Border styles
-- Surface treatments
-- Contrast ratios
-- Emphasis levels
+### Theme-Agnostic Computed (`tokens/computed/`)
+- Typography scales
+- Em-based sizing (`--2px`, `--4px`, etc.)
+- Layout calculations
+- Color manipulations (non-theme-dependent)
+- Interaction computations
+
+### Theme-Specific Base (`tokens/themes/{light,dark}/`)
+- Theme flags (`--dark-mode`, `--light-mode`)
+- Color scale multipliers
+- Lightness/chroma values
+- Theme-specific interactions
+- Visual effects overrides
+
+### Theme-Aware Computed (`tokens/themes/computed/`)
+- Standard/inverted color tokens
+- Semantic color scales (red-5, blue-10, etc.)
+- Typography with theme awareness
+- Brand color variations
+- Layout with theme adaptations
+- Visual effects (shadows, borders)
+- Message type colors (error, warning, success)
+- Theme-dependent interactions
 
 ## Architectural Principles
 

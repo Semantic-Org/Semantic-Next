@@ -408,6 +408,7 @@ Templates have a flattened data context with automatic reactivity. Key patterns:
 **MANDATORY**: Read the canonical CSS guides for complete patterns:
 - [HTML Style Guide](/ai/guides/html/style-guide.md) - Semantic markup and class naming
 - [CSS Guide](/ai/guides/css/css-guide.md) - CSS architecture and responsive design
+- [Theming](/ai/guides/css/theming.md) - Light/dark mode theme system and automatic adaptation
 - [Token Usage](/ai/guides/css/tokens/token-usage.md) - Design token system and verification
 
 ### Essential Class Naming Rules

@@ -16,34 +16,60 @@
   /* Size of page font */
   --font-size: calc(var(--em-size) * 1px);
 
-  --mini-ratio: calc(var(--mini-size-px) / var(--em-size));
-  --tiny-ratio: calc(var(--tiny-size-px) / var(--em-size));
-  --small-ratio: calc(var(--small-size-px) / var(--em-size));
-  --medium-ratio: calc(var(--medium-size-px) / var(--em-size));
-  --large-ratio: calc(var(--large-size-px) / var(--em-size));
-  --big-ratio: calc(var(--big-size-px) / var(--em-size));
-  --huge-ratio: calc(var(--huge-size-px) / var(--em-size));
-  --massive-ratio: calc(var(--massive-size-px) / var(--em-size));
+  /* Primary rem sizes (default - most commonly used) */
+  --size-3xs: calc((var(--size-3xs-base) / var(--em-size)) * 1rem);
+  --size-2xs: calc((var(--size-2xs-base) / var(--em-size)) * 1rem);
+  --size-xs: calc((var(--size-xs-base) / var(--em-size)) * 1rem);
+  --size-s: calc((var(--size-s-base) / var(--em-size)) * 1rem);
+  --size-m: calc((var(--size-m-base) / var(--em-size)) * 1rem);
+  --size-l: calc((var(--size-l-base) / var(--em-size)) * 1rem);
+  --size-xl: calc((var(--size-xl-base) / var(--em-size)) * 1rem);
+  --size-2xl: calc((var(--size-2xl-base) / var(--em-size)) * 1rem);
+  --size-3xl: calc((var(--size-3xl-base) / var(--em-size)) * 1rem);
 
-  /* rem (relative to html/body tag) */
-  --mini: calc(var(--mini-ratio) * 1rem);
-  --tiny: calc(var(--tiny-ratio) * 1rem);
-  --small: calc(var(--small-ratio) * 1rem);
-  --medium: calc(var(--medium-ratio) * 1rem);
-  --large: calc(var(--large-ratio) * 1rem);
-  --big: calc(var(--big-ratio) * 1rem);
-  --huge: calc(var(--huge-ratio) * 1rem);
-  --massive: calc(var(--massive-ratio) * 1rem);
+  /* Em sizes (relative to current font-size) */
+  --size-3xs-em: calc((var(--size-3xs-base) / var(--em-size)) * 1em);
+  --size-2xs-em: calc((var(--size-2xs-base) / var(--em-size)) * 1em);
+  --size-xs-em: calc((var(--size-xs-base) / var(--em-size)) * 1em);
+  --size-s-em: calc((var(--size-s-base) / var(--em-size)) * 1em);
+  --size-m-em: calc((var(--size-m-base) / var(--em-size)) * 1em);
+  --size-l-em: calc((var(--size-l-base) / var(--em-size)) * 1em);
+  --size-xl-em: calc((var(--size-xl-base) / var(--em-size)) * 1em);
+  --size-2xl-em: calc((var(--size-2xl-base) / var(--em-size)) * 1em);
+  --size-3xl-em: calc((var(--size-3xl-base) / var(--em-size)) * 1em);
 
-  /* em (relative to container) */
-  --relative-mini: calc(var(--mini-ratio) * 1em);
-  --relative-tiny: calc(var(--tiny-ratio) * 1em);
-  --relative-small: calc(var(--small-ratio) * 1em);
-  --relative-medium: calc(var(--medium-ratio) * 1em);
-  --relative-large: calc(var(--large-ratio) * 1em);
-  --relative-big: calc(var(--big-ratio) * 1em);
-  --relative-huge: calc(var(--huge-ratio) * 1em);
-  --relative-massive: calc(var(--massive-ratio) * 1em);
+  /* Natural language aliases (rem) */
+  --micro: var(--size-3xs);
+  --mini: var(--size-2xs);
+  --tiny: var(--size-xs);
+  --small: var(--size-s);
+  --medium: var(--size-m);
+  --large: var(--size-l);
+  --big: var(--size-xl);
+  --huge: var(--size-2xl);
+  --massive: var(--size-3xl);
+
+  /* Short aliases (rem) */
+  --3xs: var(--size-3xs);
+  --2xs: var(--size-2xs);
+  --xs: var(--size-xs);
+  --s: var(--size-s);
+  --m: var(--size-m);
+  --l: var(--size-l);
+  --xl: var(--size-xl);
+  --2xl: var(--size-2xl);
+  --3xl: var(--size-3xl);
+
+  /* Legacy relative aliases (em) - kept for backwards compatibility */
+  --relative-micro: var(--size-3xs-em);
+  --relative-mini: var(--size-2xs-em);
+  --relative-tiny: var(--size-xs-em);
+  --relative-small: var(--size-s-em);
+  --relative-medium: var(--size-m-em);
+  --relative-large: var(--size-l-em);
+  --relative-big: var(--size-xl-em);
+  --relative-huge: var(--size-2xl-em);
+  --relative-massive: var(--size-3xl-em);
 
   /* -------------------
     Exact Pixel Values

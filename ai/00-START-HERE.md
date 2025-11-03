@@ -85,9 +85,9 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 **Contains:** JSDoc patterns, type organization, documentation links, examples
 
 ### HTML & CSS Guidelines
-**Need to:** Writing templates, styling components, design tokens
-**Start with:** [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md) • [CSS Tokens](/ai/guides/css/tokens/token-usage.md)
-**Contains:** Template patterns, CSS architecture, design token usage
+**Need to:** Writing templates, styling components, design tokens, theming
+**Start with:** [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md) • [Theming](/ai/guides/css/theming.md) • [CSS Tokens](/ai/guides/css/tokens/token-usage.md)
+**Contains:** Template patterns, CSS architecture, theme system, design token usage
 
 ### Reactivity System (Standalone Library)
 **Need to:** Understand signals, reactions, dependency tracking
@@ -107,8 +107,9 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 ### Workflow Decision Tree
 Choose the workflow that matches your task:
 
-- **Need a new or updated component spec?** → [`/ai/workflows/components/author-component-spec.md`](/ai/workflows/components/author-component-spec.md)
-- **Implement CSS from an approved spec?** → [`/ai/workflows/components/spec-to-css-implementation.md`](/ai/workflows/components/spec-to-css-implementation.md)
+- **Need to scaffold a new UI primitive?** → [`/ai/workflows/components/scaffold-primitive.md`](/ai/workflows/components/scaffold-primitive.md)
+- **Need a new or updated component spec?** → [`/ai/workflows/components/define-primitive-spec.md`](/ai/workflows/components/define-primitive-spec.md)
+- **Implement CSS from an approved spec?** → [`/ai/workflows/components/implement-primitive-css.md`](/ai/workflows/components/implement-primitive-css.md)
 - **Add or enhance a package utility function?** → [`/ai/workflows/utils/add-util-function.md`](/ai/workflows/utils/add-util-function.md)
 - **Create or refine documentation examples?** → [`/ai/workflows/documentation/refine-example-documentation-copy.md`](/ai/workflows/documentation/refine-example-documentation-copy.md)
 - **Introduce new template syntax?** → [`/ai/workflows/templates/add-template-syntax.md`](/ai/workflows/templates/add-template-syntax.md)
@@ -118,7 +119,7 @@ Choose the workflow that matches your task:
 ### Following Workflows
 **Need to:** Step-by-step processes for specific tasks
 **Start with:** [Workflows Directory](/ai/workflows/)
-**Contains:** Component authoring, CSS implementation, template syntax addition, agent creation, documentation refinement, utility function addition
+**Contains:** Primitive scaffolding, component authoring, CSS implementation, template syntax addition, agent creation, documentation refinement, utility function addition
 
 ---
 
@@ -321,8 +322,9 @@ ai/
 │   ├── agents/                ← Agent workflows
 │   │   └── create-subagent-context.md  ← Subagent creation
 │   ├── components/            ← Component workflows
-│   │   ├── author-component-spec.md    ← Spec authoring
-│   │   └── spec-to-css-implementation.md ← CSS implementation
+│   │   ├── scaffold-primitive.md       ← Scaffold UI primitive
+│   │   ├── define-primitive-spec.md    ← Spec authoring
+│   │   └── implement-primitive-css.md  ← CSS implementation
 │   ├── documentation/         ← Documentation workflows
 │   │   └── refine-example-documentation-copy.md ← Doc refinement
 │   ├── templates/             ← Template workflows
