@@ -16,6 +16,20 @@ const createComponent = ({ self, settings }) => ({
       // (spec attributes like vertical, hidden are handled by {ui})
     };
   },
+
+  getOrientation() {
+    return settings.vertical ? 'vertical' : 'horizontal';
+  },
+
+  getAriaProp(propName) {
+    const hasContent = self.hasContent();
+    const lookup = {
+      'role': (hasContent) ? 'separator' : false,
+      'aria-orientation': (hasContent) ? self.getOrientation() : false,
+      'aria-hidden': (hasContent) ? false : 'true',
+    };
+    return lookup[propName] || false;
+  },
 });
 
 const UIDivider = defineComponent({

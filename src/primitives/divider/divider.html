@@ -1,4 +1,4 @@
-<div class="{ui}divider {classMap getDividerClasses}">
+<div class="{ui}divider {classMap getDividerClasses}" role={getAriaProp 'role'} aria-orientation={getAriaProp 'aria-orientation'} aria-hidden={getAriaProp 'aria-hidden'}>
   {#if hasContent}
     <div class="line"></div>
     {#if text}

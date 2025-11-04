@@ -22,6 +22,13 @@ export default {
       "description": "include a centered icon",
       "usageLevel": 2,
       "exampleCode": "<ui-divider icon=\"tag\"></ui-divider>"
+    },
+    {
+      "name": "Image",
+      "attribute": "image",
+      "description": "include an image",
+      "usageLevel": 3,
+      "exampleCode": "<ui-divider image=\"/images/avatar/small/jenny.jpg\" text=\"Jenny\"></ui-divider>"
     }
   ],
   "types": [

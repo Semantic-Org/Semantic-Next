@@ -3,11 +3,13 @@ export default {
   "tagName": "ui-divider",
   "content": [
     "text",
-    "icon"
+    "icon",
+    "image"
   ],
   "contentAttributes": [
     "text",
-    "icon"
+    "icon",
+    "image"
   ],
   "types": [
     "vertical",
@@ -25,6 +27,7 @@ export default {
   "attributes": [
     "text",
     "icon",
+    "image",
     "vertical",
     "styled",
     "spacing",
@@ -69,6 +72,7 @@ export default {
   "propertyTypes": {
     "text": "string",
     "icon": "string",
+    "image": "string",
     "vertical": "boolean",
     "styled": "string",
     "spacing": "string",
