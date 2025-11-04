@@ -1,9 +1,9 @@
 [x] - Table
-[ ] - Button
-[ ] - Popup
-[ ] - Message
-[ ] - Segment
-[ ] - Card
+[x] - Button
+[x] - Popup
+[x] - Message
+[x] - Segment
+[x] - Card
 [ ] - Label / Badge
 [ ] - Image
 [ ] - Container

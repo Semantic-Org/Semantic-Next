@@ -83,6 +83,31 @@ Expressions are evaluated against the template's [data context](../../docs/src/p
 {#html someHTML}  <!-- Use with caution - potential XSS risk -->
 ```
 
+#### Boolean Attributes
+
+**CRITICAL**: When using expressions in HTML attributes, the presence/absence of quotes determines behavior:
+
+```html
+<!-- Quoted attributes - Always outputs as string -->
+<a data-number="{getZero}"></a>
+<!-- Result: <a data-number="0"></a> -->
+
+<!-- Unquoted attributes - Attribute removed if falsey -->
+<input type="checkbox" checked={isChecked} />
+<!-- If isChecked == true: <input type="checkbox" checked /> -->
+<!-- If isChecked == false: <input type="checkbox" /> -->
+
+<!-- Conditional attributes using ternary -->
+<div role={hasContent ? 'separator' : false} aria-hidden={hasContent ? false : 'true'}>
+<!-- If hasContent == true: <div role="separator"> -->
+<!-- If hasContent == false: <div aria-hidden="true"> -->
+```
+
+**Special Boolean Attributes** (entire attribute removed if falsey):
+`allowfullscreen`, `async`, `autofocus`, `autoplay`, `checked`, `controls`, `default`, `defer`, `disabled`, `formnovalidate`, `inert`, `ismap`, `itemscope`, `loop`, `multiple`, `muted`, `nomodule`, `novalidate`, `open`, `playsinline`, `readonly`, `required`, `reversed`, `selected`
+
+**Use Case**: Conditional ARIA attributes, optional HTML boolean attributes, dynamic attribute presence.
+
 #### Expression Evaluation
 Expressions are evaluated right to left with variables being read from the component's data context:
 
