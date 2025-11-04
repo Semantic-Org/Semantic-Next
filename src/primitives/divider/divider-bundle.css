@@ -119,6 +119,7 @@
 /* src/primitives/divider/css/theme/variations/spacing-variables.css */
 @layer divider.theme.variations.spacing {
   :host {
+    --divider-spacing-micro: var(--spacing-micro);
     --divider-spacing-mini: var(--spacing-mini);
     --divider-spacing-tiny: var(--spacing-tiny);
     --divider-spacing-small: var(--spacing-small);

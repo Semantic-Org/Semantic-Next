@@ -44,6 +44,16 @@ export default {
           "description": "use a solid line"
         },
         {
+          "name": "Dashed",
+          "value": "dashed",
+          "description": "use a dashed line"
+        },
+        {
+          "name": "Dotted",
+          "value": "dotted",
+          "description": "use a dotted line"
+        },
+        {
           "name": "Fade",
           "value": "fade",
           "description": "fade from transparent at edges"
@@ -112,6 +122,85 @@ export default {
         }
       ],
       "exampleCode": "<ui-divider large></ui-divider>"
+    },
+    {
+      "name": "Raised",
+      "attribute": "raised",
+      "description": "add depth with a dual-line effect",
+      "usageLevel": 3,
+      "exampleCode": "<ui-divider raised></ui-divider>"
+    },
+    {
+      "name": "Align",
+      "attribute": "align",
+      "description": "align text or icon position",
+      "usageLevel": 3,
+      "options": [
+        {
+          "name": "Start",
+          "value": "start",
+          "description": "align to the start (left/top)"
+        },
+        {
+          "name": "Center",
+          "value": "center",
+          "description": "align to the center (default)"
+        },
+        {
+          "name": "End",
+          "value": "end",
+          "description": "align to the end (right/bottom)"
+        }
+      ],
+      "exampleCode": "<ui-divider text=\"Section\" align=\"start\"></ui-divider>"
+    },
+    {
+      "name": "Thickness",
+      "attribute": "thickness",
+      "description": "control line thickness",
+      "usageLevel": 4,
+      "options": [
+        {
+          "name": "Thin",
+          "value": "thin",
+          "description": "appear with a thin line"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "appear with normal thickness"
+        },
+        {
+          "name": "Thick",
+          "value": "thick",
+          "description": "appear with a thick line"
+        }
+      ],
+      "exampleCode": "<ui-divider thickness=\"thick\"></ui-divider>"
+    },
+    {
+      "name": "Inset",
+      "attribute": "inset",
+      "description": "indent from the start edge",
+      "usageLevel": 4,
+      "options": [
+        {
+          "name": "Small",
+          "value": "small",
+          "description": "inset a small amount"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "inset a medium amount"
+        },
+        {
+          "name": "Large",
+          "value": "large",
+          "description": "inset a large amount"
+        }
+      ],
+      "exampleCode": "<ui-divider inset=\"medium\"></ui-divider>"
     },
     {
       "name": "Hidden",

@@ -4,6 +4,7 @@
 
 :host {
   /* Spacing scale - using global tokens */
+  --divider-spacing-micro: var(--spacing-micro);
   --divider-spacing-mini: var(--spacing-mini);
   --divider-spacing-tiny: var(--spacing-tiny);
   --divider-spacing-small: var(--spacing-small);

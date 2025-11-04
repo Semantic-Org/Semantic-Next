@@ -15,6 +15,10 @@ export default {
   ],
   "variations": [
     "spacing",
+    "raised",
+    "align",
+    "thickness",
+    "inset",
     "hidden",
     "clearing"
   ],
@@ -24,22 +28,43 @@ export default {
     "vertical",
     "styled",
     "spacing",
+    "raised",
+    "align",
+    "thickness",
+    "inset",
     "hidden",
     "clearing"
   ],
   "optionAttributes": {
     "solid": "styled",
+    "dashed": "styled",
+    "dotted": "styled",
     "fade": "styled",
     "soft": "styled",
     "double": "styled",
     "mini": "spacing",
     "tiny": "spacing",
-    "small": "spacing",
-    "medium": "spacing",
-    "large": "spacing",
+    "small": [
+      "spacing",
+      "inset"
+    ],
+    "medium": [
+      "spacing",
+      "thickness",
+      "inset"
+    ],
+    "large": [
+      "spacing",
+      "inset"
+    ],
     "big": "spacing",
     "huge": "spacing",
-    "massive": "spacing"
+    "massive": "spacing",
+    "start": "align",
+    "center": "align",
+    "end": "align",
+    "thin": "thickness",
+    "thick": "thickness"
   },
   "propertyTypes": {
     "text": "string",
@@ -47,12 +72,18 @@ export default {
     "vertical": "boolean",
     "styled": "string",
     "spacing": "string",
+    "raised": "boolean",
+    "align": "string",
+    "thickness": "string",
+    "inset": "string",
     "hidden": "boolean",
     "clearing": "boolean"
   },
   "allowedValues": {
     "styled": [
       "solid",
+      "dashed",
+      "dotted",
       "fade",
       "soft",
       "double"
@@ -66,6 +97,21 @@ export default {
       "big",
       "huge",
       "massive"
+    ],
+    "align": [
+      "start",
+      "center",
+      "end"
+    ],
+    "thickness": [
+      "thin",
+      "medium",
+      "thick"
+    ],
+    "inset": [
+      "small",
+      "medium",
+      "large"
     ]
   }
 };
