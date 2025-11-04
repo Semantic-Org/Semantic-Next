@@ -19,9 +19,24 @@ This workflow guides the process of analyzing classic Semantic UI components and
 
 **Key Principle**: The original CSS is inspiration, not truth. We're building for the modern web platform.
 
-## Phase 1: Research & Collection
+## Phase 1: Setup & Research
 
-### Step 1: Locate Component Documentation
+### Step 1: Scaffold Component Structure
+
+Create the basic component structure:
+1. Follow `scaffold-primitive.md` workflow
+2. Creates file structure and stubs
+3. Updates barrel files
+
+### Step 2: Research Modern Patterns
+
+Understand the current landscape:
+1. **Run pattern research**: Follow `research-component-patterns.md` workflow
+   - Creates comprehensive report in `ai/research/[component]/`
+   - Documents patterns across all major frameworks
+   - Provides usage levels (1-5) based on adoption
+
+### Step 3: Locate Classic Component Documentation
 
 Classic Semantic UI components are documented at predictable URLs based on their type:
 - Elements: `https://semantic-ui.com/elements/[name].html`
@@ -30,9 +45,9 @@ Classic Semantic UI components are documented at predictable URLs based on their
 - Modules: `https://semantic-ui.com/modules/[name].html`
 - Behaviors: `https://semantic-ui.com/behaviors/[name].html`
 
-### Step 2: Collect Canonical Examples
+### Step 4: Collect Canonical Examples
 
-Create `/ai/artifacts/[component]/` directory and fetch:
+Store in `/ai/research/[component]/` directory:
 
 1. **Documentation Examples** (`original-html.md`):
    - All types with their HTML structure
@@ -443,13 +458,16 @@ When porting, look for opportunities to:
 Store research materials for reference:
 
 ```
-/ai/artifacts/[component]/
-├── original-html.md          # All examples from docs
-├── original-definition.less  # Source LESS
-├── original-variables.less   # Source variables
-├── feature-analysis.md       # Enumerated features
+/ai/research/[component]/
+├── pattern-research.md       # Modern pattern analysis (if completed)
+├── url-verification.md       # URL tracking from research
+├── original-html.md          # All examples from classic docs
+├── original-definition.less  # Source LESS from classic
+├── original-variables.less   # Source variables from classic
+├── feature-analysis.md       # Enumerated features analysis
 ├── migration-decisions.md    # What to include/exclude
-└── implementation-notes.md   # Lessons learned
+├── spec-decisions.md         # Decisions from research evaluation
+└── implementation-notes.md   # Lessons learned during implementation
 ```
 
 ## Common Pitfalls
