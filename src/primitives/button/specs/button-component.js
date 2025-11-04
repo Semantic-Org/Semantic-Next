@@ -2,10 +2,14 @@
 export default {
   "tagName": "ui-button",
   "content": [
-    "icon"
+    "icon",
+    "image",
+    "badge"
   ],
   "contentAttributes": [
-    "icon"
+    "icon",
+    "image",
+    "badge"
   ],
   "types": [
     "emphasis",
@@ -44,6 +48,8 @@ export default {
   ],
   "attributes": [
     "icon",
+    "image",
+    "badge",
     "emphasis",
     "styled",
     "toggle",
@@ -76,8 +82,10 @@ export default {
     "primary": "emphasis",
     "secondary": "emphasis",
     "solid": "styled",
+    "soft": "styled",
     "outline": "styled",
     "ghost": "styled",
+    "link": "styled",
     "horizontal-animated": "animated",
     "vertical-animated": "animated",
     "fade-animated": "animated",
@@ -131,6 +139,8 @@ export default {
   },
   "propertyTypes": {
     "icon": "string",
+    "image": "string",
+    "badge": "string",
     "emphasis": "string",
     "styled": "string",
     "toggle": "boolean",
@@ -166,8 +176,10 @@ export default {
     ],
     "styled": [
       "solid",
+      "soft",
       "outline",
-      "ghost"
+      "ghost",
+      "link"
     ],
     "animated": [
       "horizontal-animated",

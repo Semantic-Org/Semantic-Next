@@ -18,6 +18,20 @@ export default {
       ],
       "description": "include an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>"
+    },
+    {
+      "name": "Image",
+      "attribute": "image",
+      "description": "include an image",
+      "usageLevel": 2,
+      "exampleCode": "<ui-button image=\"/images/avatar/small/jenny.jpg\">Jenny</ui-button>"
+    },
+    {
+      "name": "Badge",
+      "attribute": "badge",
+      "description": "display a notification badge",
+      "usageLevel": 3,
+      "exampleCode": "<ui-button badge=\"5\">Messages</ui-button>"
     }
   ],
   "types": [
@@ -56,6 +70,11 @@ export default {
           "description": "use a solid color"
         },
         {
+          "name": "Soft",
+          "value": "soft",
+          "description": "use a subtle background tint"
+        },
+        {
           "name": "Outline",
           "value": "outline",
           "description": "use no background"
@@ -64,6 +83,11 @@ export default {
           "name": "Ghost",
           "value": "ghost",
           "description": "only show styling when hovered"
+        },
+        {
+          "name": "Link",
+          "value": "link",
+          "description": "appear as an underlined link"
         }
       ]
     },

@@ -27,8 +27,10 @@ export default {
   ],
   "optionAttributes": {
     "solid": "styled",
+    "soft": "styled",
     "outline": "styled",
     "ghost": "styled",
+    "link": "styled",
     "top-attached": "attached",
     "attached": "attached",
     "bottom-attached": "attached",
@@ -79,8 +81,10 @@ export default {
   "allowedValues": {
     "styled": [
       "solid",
+      "soft",
       "outline",
-      "ghost"
+      "ghost",
+      "link"
     ],
     "attached": [
       "top-attached",
