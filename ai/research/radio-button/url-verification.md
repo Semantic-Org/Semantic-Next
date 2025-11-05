@@ -21,8 +21,12 @@ Total URLs found: 14
 | Vuetify | https://vuetifyjs.com/en/components/radio-buttons | Pending | - |
 
 ## Verification Results
-[Will be updated as URLs are researched]
-- ✅ Working: 0
-- ⚠️ Redirected: 0
+Research completed: 2025-11-05
+- ✅ Working: 13
+- ⚠️ Redirected: 1 (Angular Material redirects to material.angular.dev)
 - ❌ 404/Broken: 0
 - ⏭️ Skipped (duplicate): 0
+
+## Research Status
+All 14 framework research reports completed successfully.
+Aggregate pattern research report created at: ai/research/radio-button/pattern-research.md

@@ -26,14 +26,14 @@
 [x] - Accordion
 [x] - Modal
 [x] - Progress Bar
-[ ] - Rating
+[x] - Rating
 [ ] - Search
 [ ] - Toast / Snackbar
 [ ] - Tooltip
 [ ] - Alert / Notification
-[ ] - Switch / Toggle
+[x] - Switch / Toggle
 [ ] - Textarea
-[ ] - Radio Button / Radio Group
+[x] - Radio Button / Radio Group
 [ ] - Avatar
 [ ] - Drawer / Offcanvas / Sheet
 [ ] - Pagination
@@ -57,7 +57,7 @@
 [ ] - Stack (Layout)
 [ ] - Flex (Layout)
 [ ] - Box (Layout)
-[ ] - Form Field
+[x] - Form Field
 [x] - Number Input
 [x] - Password Input
 [x] - Color Picker
