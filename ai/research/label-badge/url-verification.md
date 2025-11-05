@@ -16,35 +16,38 @@ Date: 2025-11-04
 
 | Framework | Component | URL | Status | Notes |
 |-----------|-----------|-----|--------|-------|
-| Ant Design | Badge | https://ant.design/components/badge | Pending | Notification counter |
-| Chakra UI | Badge | https://chakra-ui.com/docs/components/badge | Pending | Status indicator |
-| HeroUI | Badge | https://www.heroui.com/docs/components/badge | Pending | - |
-| Mantine | Badge | https://mantine.dev/core/badge/ | Pending | - |
-| MUI | Badge | https://mui.com/material-ui/react-badge/ | Pending | Notification badge |
-| Nuxt UI | Badge | https://ui.nuxt.com/components/badge | Pending | - |
-| PrimeReact | Badge | https://www.primefaces.org/primereact-v8/badge/ | Pending | May need latest docs |
-| Radix UI | Badge | https://www.radix-ui.com/themes/docs/components/badge | Pending | - |
-| ShadCN | Badge | https://ui.shadcn.com/docs/components/badge | Pending | - |
+| Ant Design | Badge | https://ant.design/components/badge | ✅ Working | Research complete 2025-11-04 |
+| Chakra UI | Badge | https://chakra-ui.com/docs/components/badge | ✅ Working | Research complete 2025-11-04, v2 & v3 |
+| HeroUI | Badge | https://www.heroui.com/docs/components/badge | ✅ Working | Research complete 2025-11-04 |
+| Mantine | Badge | https://mantine.dev/core/badge/ | ✅ Working | Research complete 2025-11-04 |
+| MUI | Badge | https://mui.com/material-ui/react-badge/ | ✅ Working | Research complete 2025-11-04 |
+| Nuxt UI | Badge | https://ui.nuxt.com/components/badge | ✅ Working | Research complete 2025-11-04 |
+| PrimeReact | Badge | https://www.primefaces.org/primereact-v8/badge/ | ✅ Working | Research complete 2025-11-04 |
+| Radix UI | Badge | https://www.radix-ui.com/themes/docs/components/badge | ✅ Working | Research complete 2025-11-04 |
+| ShadCN | Badge | https://ui.shadcn.com/docs/components/badge | ✅ Working | Research complete 2025-11-04 |
 
 ### Tag/Chip Components (6 frameworks)
 
 | Framework | Component | URL | Status | Notes |
 |-----------|-----------|-----|--------|-------|
-| Ant Design | Tag | https://ant.design/components/tag | Pending | Labeling element |
-| Chakra UI | Tag | https://chakra-ui.com/docs/components/tag | Pending | - |
-| HeroUI | Chip | https://www.heroui.com/docs/components/chip | Pending | Called "Chip" |
-| Mantine | Chip | https://mantine.dev/core/chip/ | Pending | Called "Chip" |
-| PrimeReact | Tag | https://www.primefaces.org/primereact-v8/tag/ | Pending | May need latest docs |
-| ShadCN | Badge | https://ui.shadcn.com/docs/components/badge | Pending | Uses Badge for tags |
+| Ant Design | Tag | https://ant.design/components/tag | ✅ Working | Research complete 2025-11-04 (combined with Badge) |
+| Chakra UI | Tag | https://chakra-ui.com/docs/components/tag | ✅ Working | Research complete 2025-11-04, v2 & v3 |
+| HeroUI | Chip | https://www.heroui.com/docs/components/chip | ✅ Working | Research complete 2025-11-04 |
+| Mantine | Chip | https://mantine.dev/core/chip/ | ✅ Working | Research complete 2025-11-04 |
+| PrimeReact | Tag | https://www.primefaces.org/primereact-v8/tag/ | ✅ Working | Research complete 2025-11-04 |
+| ShadCN | Badge | https://ui.shadcn.com/docs/components/badge | ✅ Working | Uses Badge for tags - research complete 2025-11-04 |
 
 ### Semantic UI Classic Label (Reference)
 
 | Framework | Component | URL | Status | Notes |
 |-----------|-----------|-----|--------|-------|
-| Semantic UI Classic | Label | https://semantic-ui.com/elements/label.html | Pending | Reference implementation |
+| Semantic UI Classic | Label | https://semantic-ui.com/elements/label.html | ✅ Working | Reference implementation - Research complete 2025-11-04 |
 
 ## Verification Results
-- ✅ Working: 0
+- ✅ Working: 16 (all research targets complete)
+  - Badge components: 9 frameworks
+  - Tag/Chip components: 6 frameworks
+  - Reference: Semantic UI Classic Label
 - ⚠️ Redirected: 0
 - ❌ 404/Broken: 0
 - ⏭️ Skipped: 0
