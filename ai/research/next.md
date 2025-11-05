@@ -17,15 +17,15 @@
 [x] - Grid
 [x] - List
 [x] - Tab
-[ ] - Header
-[ ] - Icon
-[ ] - Input
-[ ] - Rail / Offscreen
-[ ] - Step
-[ ] - Menu
-[ ] - Accordion
-[ ] - Modal
-[ ] - Progress Bar
+[x] - Header
+[x] - Icon
+[x] - Input
+[x] - Rail / Offscreen
+[x] - Step
+[x] - Menu
+[x] - Accordion
+[x] - Modal
+[x] - Progress Bar
 [ ] - Rating
 [ ] - Search
 [ ] - Toast / Snackbar
@@ -58,21 +58,21 @@
 [ ] - Flex (Layout)
 [ ] - Box (Layout)
 [ ] - Form Field
-[ ] - Number Input
-[ ] - Password Input
-[ ] - Color Picker
-[ ] - Heading
-[ ] - Space (Layout)
-[ ] - Scroll Area
-[ ] - Command Palette
-[ ] - Context Menu
-[ ] - Portal
-[ ] - Center (Layout)
-[ ] - Menubar
-[ ] - Result
-[ ] - Kbd (Keyboard Key)
-[ ] - Aspect Ratio
-[ ] - Chart
+[x] - Number Input
+[x] - Password Input
+[x] - Color Picker
+[x] - Heading
+[x] - Space (Layout)
+[x] - Scroll Area
+[x] - Command Palette
+[x] - Context Menu
+[x] - Portal
+[x] - Center (Layout)
+[x] - Menubar
+[x] - Result
+[x] - Kbd (Keyboard Key)
+[x] - Aspect Ratio
+[x] - Chart
 [x] - Transfer / Transfer List
 [x] - QR Code
 [x] - Navigation Menu
