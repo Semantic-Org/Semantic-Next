@@ -50,7 +50,7 @@ const menu = (data.tabs || []).map(tab => ({
 
 let railMenu = [];
 if(definitionDisplayed) {
-  railMenu = componentSpec.getDefinitionMenu();
+  railMenu = componentSpec.getDefinitionMenu({ plural });
 }
 ---
 <Definition
