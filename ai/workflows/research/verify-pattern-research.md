@@ -184,10 +184,38 @@ When a subagent reports only 1-3 errors, this is a **potential AI failure mode**
 - Methodology clarification: Should we count frameworks that mention patterns vs demonstrate them?
 - Disputed findings: When subagents strongly disagree (e.g., 0 errors vs 4 errors)
 
-Use the AskUserQuestion tool to present each disputed claim with:
+**If using AskUserQuestion tool (Claude Code):**
+
+Present each disputed claim using the tool with:
 - Your assessment of the evidence
-- Clear options for resolution
-- Implications of each choice
+- 2-3 clear options for resolution (e.g., "Yes, it's an error" vs "No, it's acceptable")
+- Description explaining implications of each choice
+
+Example:
+```
+AskUserQuestion:
+Q: "Should ShadCN be included in max-width constraint pattern (line 73)?"
+Options:
+  A) No - 2/4 only (Pattern should only count native prop support)
+  B) Yes - keep 3/4 (ShadCN supports it via Tailwind classes, that counts)
+```
+
+**If AskUserQuestion unavailable (other agents):**
+
+Present each claim clearly and ask for A/B/C response:
+```
+**Claim: Line 73 - Max-width constraint count**
+
+Current: 3/4 (75%) | Chakra UI, Mantine, ShadCN
+Evidence: Only Chakra (maxW) and Mantine (maw) have native props.
+         ShadCN only supports via className with Tailwind.
+
+Should ShadCN be included?
+A) No - 2/4 only (count native props only)
+B) Yes - keep 3/4 (CSS-only counts as support)
+
+Your choice (A or B)?
+```
 
 **Examples of invalid claims to watch for:**
 - "Framework X supports Y" based on a single ambiguous line

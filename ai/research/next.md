@@ -50,8 +50,8 @@
 [ ] - Calendar / Date Picker
 [ ] - Autocomplete / Combobox
 [ ] - Tree / Tree View
-[ ] - Empty State
-[+] - File Upload
+[+] - Empty State
+[x] - File Upload
 [x] - Code
 [x] - Stepper / Wizard
 [x] - Stack (Layout)
