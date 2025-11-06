@@ -29,32 +29,32 @@
 [x] - Rating
 [x] - Search
 [x] - Toast / Snackbar
-[+] - Tooltip
-[ ] - Alert / Notification
+[x] - Tooltip
+[x] - Alert / Notification
 [x] - Switch / Toggle
-[ ] - Textarea
+[x] - Textarea
 [x] - Radio Button / Radio Group
 [x] - Avatar
-[+] - Drawer / Offcanvas / Sheet
-[ ] - Pagination
-[ ] - Form
+[x] - Drawer / Offcanvas / Sheet
+[x] - Pagination
+[+] - Form
 [x] - Chip / Tag / Pill
-[ ] - Link
-[ ] - Select
+[+] - Link
+[x] - Select
 [ ] - Navbar / App Bar
 [ ] - Slider (Range Input)
-[ ] - Popover / Hover Card
-[ ] - Text / Typography
+[x] - Popover / Hover Card
+[+] - Text / Typography
 [ ] - Timeline
 [ ] - Carousel
 [ ] - Calendar / Date Picker
 [ ] - Autocomplete / Combobox
 [ ] - Tree / Tree View
 [ ] - Empty State
-[ ] - File Upload
-[ ] - Code
-[ ] - Stepper / Wizard
-[ ] - Stack (Layout)
+[+] - File Upload
+[x] - Code
+[x] - Stepper / Wizard
+[x] - Stack (Layout)
 [x] - Flex (Layout)
 [x] - Box (Layout)
 [x] - Form Field

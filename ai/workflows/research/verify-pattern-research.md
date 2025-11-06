@@ -26,21 +26,48 @@ This workflow uses subagents to systematically verify consolidated pattern resea
 
 ### Step 1: Initial Configuration
 
-**Ask the user:**
+**Ask the user for workflow configuration:**
+
+Use the **AskUserQuestion** tool if available (Claude Code), otherwise present options as A/B/C and ask for response.
+
+**Questions to ask:**
 
 1. **How many subagents to use for verification?**
-   - Single subagent: Sequential, thorough verification
-   - Multiple subagents (2-3): Parallel verification with cross-checking
+   - **Option A**: Single subagent (Sequential, thorough verification)
+   - **Option B**: Multiple subagents 2-3 (Parallel verification with consensus validation)
    - Recommendation: Start with 1, use multiple for large research files
 
 2. **Verification mode:**
-   - **Single pass**: Run verification once and report findings
-   - **Check until clean**: Iterate until a subagent reports zero errors
-   - **Maximum rounds**: Specify max iterations (e.g., "max 3 rounds")
+   - **Option A**: Single pass (Run verification once and report findings)
+   - **Option B**: Check until clean (Iterate until a subagent reports zero errors)
+   - **Option C**: Maximum rounds (Specify limit, e.g., "max 3 rounds")
 
 3. **Pattern scope** (optional):
    - All patterns (default)
    - Specific sections only (e.g., "only Content Patterns and Type Patterns")
+
+**If using AskUserQuestion tool (Claude Code):**
+```
+AskUserQuestion with 2 questions:
+Q1: "How many subagents should I use for verification?"
+Q2: "Which verification mode should I use?"
+```
+
+**If AskUserQuestion unavailable (other agents):**
+```
+Please configure the verification workflow:
+
+1. How many subagents?
+   A) 1 subagent (thorough, sequential)
+   B) 2-3 subagents (parallel, consensus validation)
+
+2. Verification mode?
+   A) Single pass
+   B) Check until clean
+   C) Max rounds (specify number)
+
+Please respond with your choices (e.g., "1A, 2B" or "B, single pass")
+```
 
 ---
 
@@ -110,16 +137,28 @@ Provide:
 
 #### Parallel Subagent Mode
 
-Deploy 2-3 subagents simultaneously, each verifying different sections:
+Deploy 2-3 subagents simultaneously, **each verifying the ENTIRE document independently**:
 
-**Subagent A**: Content Patterns, Type Patterns, State Patterns
-**Subagent B**: Variation Patterns (alignment, sizing, styling)
-**Subagent C**: Special Features, Framework Comparison, Feature Matrix
+**IMPORTANT**: Each subagent reviews ALL sections of the document. This is NOT about dividing work - it's about **consensus validation**. Multiple independent reviews of the same content help catch errors that a single agent might miss and validate findings through agreement.
 
-After all subagents complete, **cross-check their findings**:
-- Compare error reports for consistency
-- If subagents contradict each other, manually verify the claim
-- Merge unique errors from all subagents
+**Subagent A**: Reviews entire document, all sections
+**Subagent B**: Reviews entire document, all sections (independent from A)
+**Subagent C**: Reviews entire document, all sections (independent from A & B)
+
+Each subagent uses the same prompt and verifies:
+- Framework count accuracy
+- All X/N counts and percentages
+- Framework attributions for each pattern
+- Missing patterns from individual files
+- Code example accuracy
+- Internal consistency
+
+After all subagents complete, **cross-check their findings for consensus**:
+- Compare error reports: Do multiple agents identify the same errors?
+- **Consensus errors** (2+ agents agree): Likely valid, priority for correction
+- **Unique errors** (only 1 agent found): Requires careful validation
+- **Contradictions** (agents disagree): Manual validation required with user input
+- **Zero errors vs many errors**: Investigate discrepancy carefully
 
 ---
 
@@ -137,6 +176,18 @@ When a subagent reports only 1-3 errors, this is a **potential AI failure mode**
 2. **Verify the claim** independently
 3. **Check for contradictory evidence** in other parts of the file
 4. **Consider the pattern's intent** (e.g., "via CSS" vs explicit prop)
+5. **For ambiguous classification decisions**: Use AskUserQuestion tool to involve user in judgment calls
+
+**When to involve the user:**
+- Classification ambiguity: Is "supports via CSS" the same as "native prop support"?
+- Philosophy questions: Is Radix UI "Tailwind integrated" or just "styling-agnostic"?
+- Methodology clarification: Should we count frameworks that mention patterns vs demonstrate them?
+- Disputed findings: When subagents strongly disagree (e.g., 0 errors vs 4 errors)
+
+Use the AskUserQuestion tool to present each disputed claim with:
+- Your assessment of the evidence
+- Clear options for resolution
+- Implications of each choice
 
 **Examples of invalid claims to watch for:**
 - "Framework X supports Y" based on a single ambiguous line
@@ -233,6 +284,21 @@ Provide comprehensive summary:
 
 ---
 
+### Step 8: Finalize Documentation and Meta-Files
+
+This final step ensures that the work is discoverable and that project-wide tracking files are up-to-date.
+
+1.  **Update `pattern-research.md` review date:**
+    - Every `pattern-research.md` must include a `> Last Reviewed: YYYY-MM-DD (by Agent)` line directly under the existing metadata block.
+    - Add the field if missing or refresh the date (ISO format) whenever you touch the document so downstream agents know when the research was last validated.
+
+2.  **Update the shared checklist (`ai/artifacts/eo-list.md`):**
+    - This single file is the source of truth for pattern research status and E&O verification.
+    - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off.
+    - Include the latest “Last Reviewed” metadata so teammates can see when the doc was last validated.
+
+---
+
 ## Decision Tree
 
 ```
@@ -247,14 +313,14 @@ Single or Multiple?
 Receive subagent report(s)
   ↓
 Error count?
-  ├─ 0 errors → Report success → END
+  ├─ 0 errors → Report success → Finalize Docs → END
   ├─ 1-3 errors → VALIDATE CAREFULLY (manual checks)
   └─ 4+ errors → Validate all
   ↓
 Apply verified corrections
   ↓
 Check mode?
-  ├─ Single pass → Generate report → END
+  ├─ Single pass → Generate report → Finalize Docs → END
   └─ Check until clean → Re-verify → Loop to "Receive report"
 ```
 
@@ -304,7 +370,9 @@ Check mode?
 
 ---
 
-## Example Session
+## Example Sessions
+
+### Example 1: Single Subagent with Iterations
 
 ```markdown
 User: "Please verify ai/research/modal/pattern-research.md for E&O"
@@ -313,7 +381,7 @@ Agent: I'll verify the modal pattern research. Let me ask:
 
 1. How many subagents should I use?
    - 1 (thorough, sequential)
-   - 2-3 (faster, parallel)
+   - 2-3 (parallel, consensus validation)
 
 2. Verification mode?
    - Single pass (report findings once)
@@ -358,6 +426,61 @@ Agent: Round 3 complete. Found 0 errors ✅
 Total: 15 errors corrected across 3 rounds
 Accuracy improved: 85% → 99%
 Status: Ready for use
+```
+
+### Example 2: Parallel Subagents with User Validation
+
+```markdown
+User: "Please verify ai/research/aspect-ratio/pattern-research.md for E&O"
+
+Agent: I'll verify the aspect-ratio pattern research. Let me ask:
+
+1. How many subagents? 1 or 2-3?
+2. Verification mode?
+
+User: "Use 2-3 subagents, single pass"
+
+Agent: Understood. I'll deploy 3 independent subagents, each reviewing the ENTIRE document.
+This provides consensus validation - if multiple agents find the same errors, we can be
+confident they're real issues.
+
+[Deploys 3 subagents in parallel with identical prompts...]
+
+Agent: All 3 subagents completed. Comparing findings:
+- Agent A: Found 4 errors (lines 46, 73, 66, 38)
+- Agent B: Found 0 errors (claimed 100% accuracy)
+- Agent C: Found 1 error (line 35)
+
+Significant disagreement detected. Let me validate each disputed claim against source files
+and discuss ambiguous cases with you.
+
+**Claim 1: Line 46 - "Native (1)" notation unclear**
+[Presents evidence and asks user for decision...]
+
+User confirms: "Yes, it's an error"
+
+**Claim 2: Line 73 - Max-width constraint should exclude ShadCN**
+[Presents evidence about native props vs CSS-only...]
+
+User confirms: "No - 2/4 only. Pattern should only count native prop support."
+
+[Continues through all 5 disputed claims with user validation...]
+
+Agent: User confirmed all 5 errors. Applying corrections:
+1. Line 46: Native (1) → Native
+2. Line 73: 3/4 → 2/4 (removed ShadCN)
+3. Line 66: 2/4 → 1/4 (removed Radix UI)
+4. Line 38: 2/4 → 4/4 (added All frameworks)
+5. Line 35: 3/4 → 4/4 (added ShadCN)
+
+[Applies all corrections...]
+
+Total: 5 errors found and corrected
+Accuracy: 98.6%
+Status: ✅ Ready for use
+
+Key insight: Parallel mode revealed inconsistency between agents (0 vs 4 errors),
+prompting deeper validation and user involvement for classification decisions.
 ```
 
 ---

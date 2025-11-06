@@ -1,6 +1,7 @@
 # Component Pattern Research: Aspect Ratio
 
 > Last Modified: 2025-11-05
+> Last Reviewed: 2025-11-06 (by Agent - E&O verification)
 
 ## Research Summary
 - Frameworks surveyed: 4
@@ -31,10 +32,10 @@ Note: Aspect Ratio is a specialized layout utility not universally provided acro
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
 | Image content | Images maintaining aspect ratio | 4/4 (100%) | **Level 1: Universal** | All | Composed |
-| Video embeds | YouTube/Vimeo iframe embedding | 3/4 (75%) | **Level 2: Common** | Chakra UI, Mantine, Radix UI | Composed |
+| Video embeds | YouTube/Vimeo iframe embedding | 4/4 (100%) | **Level 1: Universal** | All | Composed |
 | Map embeds | Google Maps iframe embedding | 2/4 (50%) | **Level 3: Frequent** | Chakra UI, Mantine | Composed |
 | Custom content | Any child content type supported | 4/4 (100%) | **Level 1: Universal** | All | Composed |
-| Text content | Text or React elements as children | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | Composed |
+| Text content | Text or React elements as children | 4/4 (100%) | **Level 1: Universal** | All | Composed |
 
 ### API Patterns
 
@@ -42,7 +43,7 @@ Note: Aspect Ratio is a specialized layout utility not universally provided acro
 |---------|-------------|------------|-------------|------------|--------------|
 | Ratio prop | Numeric ratio value (e.g., 16/9) | 4/4 (100%) | **Level 1: Universal** | All | Native |
 | Mathematical expression | Division syntax (16/9, 1080/720) | 4/4 (100%) | **Level 1: Universal** | All | Native |
-| Default ratio | Fallback when ratio not specified | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | Native (1) |
+| Default ratio | Fallback when ratio not specified | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | Native |
 | Preset ratio tokens | Named ratio values (square, wide, etc.) | 1/4 (25%) | **Level 4: Occasional** | Chakra UI (v3) | Native |
 | Responsive ratios | Different ratios per breakpoint | 1/4 (25%) | **Level 4: Occasional** | Chakra UI | Native |
 
@@ -62,14 +63,14 @@ Note: Aspect Ratio is a specialized layout utility not universally provided acro
 | Unstyled/headless | No default styling | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | Native |
 | CSS class support | className prop for custom styles | 4/4 (100%) | **Level 1: Universal** | All | Native |
 | Style props system | Framework-specific style utilities | 2/4 (50%) | **Level 3: Frequent** | Chakra UI, Mantine | Native |
-| Tailwind integration | Direct Tailwind class usage | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | CSS-only |
+| Tailwind integration | Direct Tailwind class usage | 1/4 (25%) | **Level 4: Occasional** | ShadCN | CSS-only |
 | Object-fit control | Control how content fills ratio | 4/4 (100%) | **Level 1: Universal** | All | CSS-only (on children) |
 
 ### Constraint Patterns
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
-| Max-width constraint | Limit maximum container width | 3/4 (75%) | **Level 2: Common** | Chakra UI, Mantine, ShadCN | Native/CSS-only |
+| Max-width constraint | Limit maximum container width | 2/4 (50%) | **Level 3: Frequent** | Chakra UI, Mantine | Native |
 | Width control | Explicit width setting | 2/4 (50%) | **Level 3: Frequent** | Chakra UI, Mantine | Native |
 | Margin/spacing | Built-in spacing utilities | 2/4 (50%) | **Level 3: Frequent** | Chakra UI, Mantine | Native |
 | Flex integration | Behavior in flex containers | 1/4 (25%) | **Level 4: Occasional** | Mantine | Native |
@@ -101,6 +102,23 @@ All frameworks demonstrate these common aspect ratios:
 - **21/9** (2.333...): Ultrawide, cinema
 - **3/2** (1.5): Classic photography
 - **1.618/1**: Golden ratio (Chakra UI v3)
+
+## Feature Comparison Matrix
+
+| Feature                 | Chakra UI | Mantine | Radix UI | Shadcn | Notes                               |
+|-------------------------|:---------:|:-------:|:--------:|:------:|-------------------------------------|
+| **Core**                |           |         |          |        |                                     |
+| `<AspectRatio>` Component | ✅        | ✅      | ✅       | ✅     | Universal component name            |
+| `ratio` Prop            | ✅        | ✅      | ✅       | ✅     | Universal support for numeric ratio |
+| **Composition**         |           |         |          |        |                                     |
+| `asChild` Prop          | ❌        | ❌      | ✅       | ✅     | Headless framework feature          |
+| **Sizing & Constraints**  |           |         |          |        |                                     |
+| `max-width` Prop        | ✅        | ✅      | ❌       | ❌     | `maxW` (Chakra), `maw` (Mantine)    |
+| `width` Prop            | ✅        | ✅      | ❌       | ❌     | `w` (Chakra), `w` (Mantine)         |
+| Spacing Props (`m`, `p`)  | ✅        | ✅      | ❌       | ❌     | Part of style system integration    |
+| **Styling**             |           |         |          |        |                                     |
+| Style Prop System       | ✅        | ✅      | ❌       | ❌     | Chakra & Mantine specific           |
+| Unstyled / Headless     | ❌        | ❌      | ✅       | ✅     | Radix & Shadcn philosophy           |
 
 ### Architectural Approaches
 
