@@ -4,9 +4,19 @@
 > Purpose: Persistent instructions for the 29-component research marathon
 
 ## Current Status
-Researching 29 components from `/ai/research/next.md`. After each component completes:
-1. Mark it with [x] in next.md
-2. Continue to next unmarked component
+Researching components from `/ai/research/next.md`.
+
+**Multi-Agent Coordination:**
+- `[ ]` = Not started (available for research)
+- `[+]` = In progress (claimed by an agent)
+- `[x]` = Complete (research finished)
+
+**Workflow:**
+1. Find a component marked `[ ]` (skip any marked `[+]` or `[x]`)
+2. Change `[ ]` to `[+]` to claim it (signals to other agents you're working on it)
+3. Complete all research for that component
+4. Change `[+]` to `[x]` when finished
+5. Continue to next `[ ]` component
 
 ## Process for Each Component
 

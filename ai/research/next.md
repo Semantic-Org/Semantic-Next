@@ -27,18 +27,18 @@
 [x] - Modal
 [x] - Progress Bar
 [x] - Rating
-[ ] - Search
-[ ] - Toast / Snackbar
-[ ] - Tooltip
+[x] - Search
+[x] - Toast / Snackbar
+[+] - Tooltip
 [ ] - Alert / Notification
 [x] - Switch / Toggle
 [ ] - Textarea
 [x] - Radio Button / Radio Group
-[ ] - Avatar
-[ ] - Drawer / Offcanvas / Sheet
+[x] - Avatar
+[+] - Drawer / Offcanvas / Sheet
 [ ] - Pagination
 [ ] - Form
-[ ] - Chip / Tag / Pill
+[x] - Chip / Tag / Pill
 [ ] - Link
 [ ] - Select
 [ ] - Navbar / App Bar
@@ -55,8 +55,8 @@
 [ ] - Code
 [ ] - Stepper / Wizard
 [ ] - Stack (Layout)
-[ ] - Flex (Layout)
-[ ] - Box (Layout)
+[x] - Flex (Layout)
+[x] - Box (Layout)
 [x] - Form Field
 [x] - Number Input
 [x] - Password Input

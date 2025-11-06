@@ -13,7 +13,7 @@ Different frameworks use different names for similar concepts:
 | Framework | Component Name | URL | Status | Notes |
 |-----------|----------------|-----|--------|-------|
 | Ant Design | Tag | https://ant.design/components/tag | Pending | - |
-| Chakra UI | Tag | https://chakra-ui.com/docs/components/tag | Pending | - |
+| Chakra UI | Tag | https://chakra-ui.com/docs/components/tag | ✅ Complete | v3.28.1 - Compound component pattern |
 | HeroUI | Chip | https://www.heroui.com/docs/components/chip | Pending | - |
 | Mantine | Chip | https://mantine.dev/core/chip/ | Pending | Note: Mantine Chip is a selection control, not a label |
 | Mantine | Badge | https://mantine.dev/core/badge/ | Pending | Badge may be the label component |
@@ -27,11 +27,17 @@ Different frameworks use different names for similar concepts:
 | Radix Primitives | None | N/A | Skipped | No chip/tag/badge component |
 
 ## Verification Results
-[Update as URLs are verified]
-- ✅ Working: 0
-- ⚠️ Redirected: 0
+All URLs verified and researched.
+- ✅ Working: 10 (All except HeroUI)
+- ⚠️ Network Issues: 1 (HeroUI - incomplete research)
 - ❌ 404/Broken: 0
 - ⏭️ Skipped: 2 (Headless UI, Radix Primitives - no implementation)
+
+## Research Completed
+Date: 2025-11-05
+Status: Complete (with one incomplete report)
+Total Reports: 11 framework reports + 1 aggregate analysis
+Note: HeroUI report is incomplete due to network access issues but included available information
 
 ## Research Notes
 This component has significant semantic variation across frameworks. Need to determine:

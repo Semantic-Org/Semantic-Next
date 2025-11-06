@@ -26,6 +26,34 @@ Update status as you progress through each phase for clear progress tracking.
 
 ### 1. Identify Component and Sources
 
+**Multi-Agent Coordination:**
+
+When multiple agents are working on the component research list simultaneously:
+
+1. **Check next.md for available components:**
+   ```bash
+   # Look for components marked [ ] (not started)
+   # Skip components marked [+] (in progress by another agent)
+   # Skip components marked [x] (completed)
+   ```
+
+2. **Claim a component before starting:**
+   ```bash
+   # Change [ ] to [+] to signal you're working on it
+   # Example: [ ] - Drawer → [+] - Drawer
+   ```
+
+3. **Mark complete when finished:**
+   ```bash
+   # Change [+] to [x] when all research is done
+   # Example: [+] - Drawer → [x] - Drawer
+   ```
+
+**Status Markers:**
+- `[ ]` - Not started (available for research)
+- `[+]` - In progress (claimed by an agent)
+- `[x]` - Complete (research finished)
+
 **First, check for existing resources:**
 ```bash
 # Check if research directory already exists
