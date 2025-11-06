@@ -17,20 +17,18 @@ export const Portal = registerBehavior({
     context: 'auto',
   },
 
-  // Stores the element's original location for cleanup.
-  initialState: {
-    $originalParent: null,
-    $context: null,
-    isPortaled: false,
-  },
-
   // --- Lifecycle Hooks ---
 
   // This is the "Progressive Enhancement" step. The element
   // renders inline (SSR-friendly), and we *then* portal it
   // on the client after it's created.
   onCreated({ self, $el }) {
-    self.state.$originalParent = $el.parent();
+    // Store instance state directly on `self`
+    self.$originalParent = $el.parent();
+    self.$context = null;
+    self.isPortaled = false;
+
+    // Perform the initial portal
     self.portal();
   },
 
@@ -56,7 +54,7 @@ export const Portal = registerBehavior({
   },
 
   // --- Behavior API ---
-  createBehavior: ({ self, $el, $, state, settings, log }) => ({
+  createBehavior: ({ self, $el, $, settings, log }) => ({
     portal(newSettings) {
       const config = { ...settings, ...newSettings };
       let $context;
@@ -74,27 +72,27 @@ export const Portal = registerBehavior({
       }
 
       // Avoid moving if already in the correct context
-      if (state.isPortaled && state.$context.el() === $context.el()) {
+      if (self.isPortaled && self.$context.el() === $context.el()) {
         return;
       }
 
       // If portaled elsewhere, restore first before moving
-      if (state.isPortaled) {
+      if (self.isPortaled) {
         self.restore();
       }
 
       $el.detach().appendTo($context);
 
-      state.isPortaled = true;
-      state.$context = $context;
+      self.isPortaled = true;
+      self.$context = $context;
     },
 
     restore() {
-      if (!state.isPortaled) {
+      if (!self.isPortaled) {
         return;
       }
 
-      const { $originalParent } = state;
+      const { $originalParent } = self;
       if ($originalParent?.exists()) {
         $el.detach().appendTo($originalParent);
       }
@@ -104,8 +102,8 @@ export const Portal = registerBehavior({
         log.warn('Original parent not found, element detached.');
       }
 
-      state.isPortaled = false;
-      state.$context = null;
+      self.isPortaled = false;
+      self.$context = null;
     },
   }),
 });
