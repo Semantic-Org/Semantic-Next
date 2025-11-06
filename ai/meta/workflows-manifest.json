@@ -72,6 +72,15 @@
       "tags": ["meta", "documentation", "context"],
       "prerequisites": ["foundation/start-here", "foundation/mental-model", "foundation/codebase-navigation"],
       "outputs": ["ai-context-doc", "manifest-update"]
+    },
+    {
+      "id": "research/verify-pattern-research",
+      "title": "Verify Pattern Research E&O",
+      "path": "ai/workflows/research/verify-pattern-research.md",
+      "description": "Systematically verify pattern research meta-analysis documents for errors and omissions using subagents.",
+      "tags": ["research", "quality-assurance", "verification", "subagents"],
+      "prerequisites": ["foundation/start-here", "guides/research/pattern-research-integration"],
+      "outputs": ["verified-pattern-research", "corrections-applied"]
     }
   ]
 }

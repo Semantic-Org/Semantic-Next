@@ -34,7 +34,7 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 | **Solid Line Style** | Default solid border rendering | 11/11 (100%) | Level 1 | All frameworks |
 | **Dashed Line Style** | Dashed border pattern | 8/11 (73%) | Level 2 | Ant Design, Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS), Chakra UI, MUI (via CSS) |
 | **Dotted Line Style** | Dotted border pattern | 6/11 (55%) | Level 3 | Ant Design, Semantic UI (via CSS), Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS) |
-| **Semantic `<hr>` Rendering** | Uses semantic `<hr>` element for horizontal dividers | 6/11 (55%) | Level 3 | ShadCN, Chakra UI, MUI, Radix UI, NextUI, Vuetify |
+| **Semantic `<hr>` Rendering** | Uses semantic `<hr>` element for horizontal dividers | 5/11 (45%) | Level 3 | ShadCN, Chakra UI, MUI, NextUI, Vuetify |
 | **ARIA Separator Role** | Explicit `role="separator"` with proper aria attributes | 8/11 (73%) | Level 2 | ShadCN, Chakra UI, PrimeReact, Nuxt UI (Separator), Radix UI, NextUI, MUI, Vuetify |
 
 ### State Patterns
@@ -72,7 +72,7 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| **Color Customization** | Theme-based or explicit color control | 5/11 (45%) | Level 3 | Ant Design (via theme), MUI (via theme), Mantine (via theme), Nuxt UI (color prop), Vuetify (color prop) |
+| **Color Customization** | Theme-based or explicit color control | 4/11 (36%) | Level 4 | Ant Design (via theme), MUI (via theme), Nuxt UI (color prop), Vuetify (color prop) |
 | **Opacity/Transparency** | Lighter/subtle divider variants | 2/11 (18%) | Level 5 | Semantic UI (`fitted`, `hidden`), MUI (theme-based) |
 | **Inverted Colors** | Reversed color scheme for dark backgrounds | 1/11 (9%) | Level 5 | Semantic UI (`inverted`) |
 | **Plain/Simple Text Style** | Removes bold or heavy text styling from labels | 2/11 (18%) | Level 5 | Ant Design (`plain` prop), PrimeReact (via className) |
@@ -244,10 +244,10 @@ interface DividerProps {
 | **Icons** | ✗ | ✗ | ✓ | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ |
 | **Dashed** | CSS | CSS | ✓ | ✓ | CSS | ✓ | ✓ | CSS | ✓ | CSS | CSS |
 | **Dotted** | CSS | CSS | ✓ | CSS | CSS | ✓ | ✓ | CSS | ✓ | CSS | CSS |
-| **Thickness** | CSS | CSS | ✗ | CSS | CSS | ✗ | CSS | ✓ | ✓ | ✓ | CSS |
+| **Thickness** | CSS | CSS | ✗ | CSS | CSS | ✗ | CSS | ✓ | ✓ | CSS | CSS |
 | **Color** | CSS | CSS | Theme | Theme | Theme | Theme | CSS | ✓ | ✓ | Theme | CSS |
 | **Align Content** | - | - | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | ✓ | - |
-| **Inset/Margin** | CSS | CSS | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | CSS | CSS | CSS |
+| **Inset/Margin** | CSS | CSS | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | CSS | CSS | ✓ |
 | **Decorative** | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✓ |
 | **FlexItem** | ✗ | ✗ | ✗ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 
