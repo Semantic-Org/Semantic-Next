@@ -19,8 +19,8 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| **Text/Label Content** | Divider with embedded text label positioned within the line | 7/11 (64%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via examples) |
-| **Icon Support** | Icons embedded in or adjacent to divider | 4/11 (36%) | Level 4 | Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator) |
+| **Text/Label Content** | Divider with embedded text label positioned within the line | 8/11 (73%) | Level 2 | Ant Design, Semantic UI, MUI, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via examples), Chakra UI (via composition) |
+| **Icon Support** | Icons embedded in or adjacent to divider | 5/11 (45%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator) |
 | **Avatar Support** | Avatar/image display within divider | 1/11 (9%) | Level 5 | Nuxt UI (Separator only) |
 | **Interactive Content** | Buttons or interactive elements within divider | 1/11 (9%) | Level 5 | PrimeReact |
 | **No Content (Visual Only)** | Pure line separator with no embedded content | 11/11 (100%) | Level 1 | All frameworks |
@@ -32,8 +32,8 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 | **Horizontal Orientation** | Default horizontal divider spanning container width | 11/11 (100%) | Level 1 | All frameworks |
 | **Vertical Orientation** | Vertical divider for inline content separation | 11/11 (100%) | Level 1 | All frameworks (all support via `orientation` or `vertical` prop) |
 | **Solid Line Style** | Default solid border rendering | 11/11 (100%) | Level 1 | All frameworks |
-| **Dashed Line Style** | Dashed border pattern | 7/11 (64%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS) |
-| **Dotted Line Style** | Dotted border pattern | 5/11 (45%) | Level 3 | Ant Design, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS) |
+| **Dashed Line Style** | Dashed border pattern | 8/11 (73%) | Level 2 | Ant Design, Semantic UI, Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS), Chakra UI, MUI (via CSS) |
+| **Dotted Line Style** | Dotted border pattern | 6/11 (55%) | Level 3 | Ant Design, Semantic UI (via CSS), Mantine, PrimeReact, Nuxt UI (Separator), NextUI (via CSS) |
 | **Semantic `<hr>` Rendering** | Uses semantic `<hr>` element for horizontal dividers | 6/11 (55%) | Level 3 | ShadCN, Chakra UI, MUI, Radix UI, NextUI, Vuetify |
 | **ARIA Separator Role** | Explicit `role="separator"` with proper aria attributes | 8/11 (73%) | Level 2 | ShadCN, Chakra UI, PrimeReact, Nuxt UI (Separator), Radix UI, NextUI, MUI, Vuetify |
 
@@ -54,16 +54,16 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 | **Center Alignment** | Center-aligned text/content (default for most) | 7/11 (64%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, MUI, Nuxt UI (Separator), NextUI |
 | **Start/Left Alignment** | Left-aligned (LTR) or start-aligned (i18n) content | 7/11 (64%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, MUI, Nuxt UI (Separator), NextUI |
 | **End/Right Alignment** | Right-aligned (LTR) or end-aligned (i18n) content | 7/11 (64%) | Level 3 | Ant Design, Semantic UI, Mantine, PrimeReact, MUI, Nuxt UI (Separator), NextUI |
-| **Top Alignment (Vertical)** | Content positioned at top of vertical divider | 2/11 (18%) | Level 5 | PrimeReact, Nuxt UI (Separator) |
-| **Bottom Alignment (Vertical)** | Content positioned at bottom of vertical divider | 2/11 (18%) | Level 5 | PrimeReact, Nuxt UI (Separator) |
+| **Top Alignment (Vertical)** | Content positioned at top of vertical divider | 1/11 (9%) | Level 5 | PrimeReact |
+| **Bottom Alignment (Vertical)** | Content positioned at bottom of vertical divider | 1/11 (9%) | Level 5 | PrimeReact |
 
 #### Sizing & Spacing
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| **Thickness Control** | Explicit prop for border/line thickness | 3/11 (27%) | Level 4 | Vuetify, Nuxt UI (Separator), NextUI (via size) |
-| **Predefined Size System** | Size scales (xs/sm/md/lg/xl) | 2/11 (18%) | Level 5 | Mantine, Nuxt UI (Separator) |
-| **Margin Control** | Props or utilities for spacing around divider | 4/11 (36%) | Level 4 | Mantine (`my` prop), Semantic UI (`section`, `fitted`), Vuetify (`inset`), NextUI (className) |
+| **Thickness Control** | Explicit prop for border/line thickness | 2/11 (18%) | Level 5 | Vuetify, Nuxt UI (Separator) |
+| **Predefined Size System** | Size scales (xs/sm/md/lg/xl or numeric) | 3/11 (27%) | Level 4 | Mantine, Nuxt UI (Separator), Radix UI |
+| **Margin Control** | Props or utilities for spacing around divider | 5/11 (45%) | Level 3 | Mantine (`my` prop), Semantic UI (`section`, `fitted`), Vuetify (`inset`), NextUI (className), Radix UI (`my` prop) |
 | **Full-Width (Default)** | Spans full container width | 11/11 (100%) | Level 1 | All frameworks |
 | **Inset/Offset Positioning** | Indented divider for list alignment | 3/11 (27%) | Level 4 | Semantic UI, MUI (`inset` variant), Vuetify (`inset` prop) |
 | **Middle/Contained Width** | Reduced width with margin on sides | 2/11 (18%) | Level 5 | MUI (`middle` variant), Semantic UI (via `section`) |
@@ -155,7 +155,7 @@ The Divider/Separator component is universally conceptualized as a **visual and/
 - **Both**: Chakra UI, Nuxt UI, NextUI offer both components (often with different feature sets)
 
 **Prop Naming Patterns**:
-- **Orientation**: `orientation` prop (9/11) vs `vertical` boolean (2/11: Vuetify, legacy patterns)
+- **Orientation**: `orientation` prop (7/11: Chakra UI, HeroUI/NextUI, Mantine, MUI, Nuxt UI, Radix UI, ShadCN) vs other approaches (4/11: Ant Design uses `type`, PrimeReact uses `layout`, Vuetify uses `vertical` boolean, Semantic UI uses classes)
 - **Line Style**: `variant` (3/11: Ant Design, Mantine, Nuxt UI), `type` (2/11: Ant Design, PrimeReact), or style props
 - **Content Position**: `align` (PrimeReact), `textAlign` (MUI), `labelPosition` (Mantine), `orientation` (Ant Design)
 
@@ -241,7 +241,7 @@ interface DividerProps {
 | **Horizontal** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Vertical** | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | **Text/Label** | ✗ | ✗ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✗ |
-| **Icons** | ✗ | ✗ | ✗ | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ |
+| **Icons** | ✗ | ✗ | ✓ | ✓ | ✗ | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ |
 | **Dashed** | CSS | CSS | ✓ | ✓ | CSS | ✓ | ✓ | CSS | ✓ | CSS | CSS |
 | **Dotted** | CSS | CSS | ✓ | CSS | CSS | ✓ | ✓ | CSS | ✓ | CSS | CSS |
 | **Thickness** | CSS | CSS | ✗ | CSS | CSS | ✗ | CSS | ✓ | ✓ | ✓ | CSS |
