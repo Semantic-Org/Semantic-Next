@@ -4,7 +4,6 @@ coverage/
 playwright_report/
 dev/examples/
 dev/ui/
-html/
 docs/dist/
 dist/
 tests/results/
