@@ -17,10 +17,10 @@ The Modal/Dialog component is a **universal UI pattern** found across all major 
 
 | Pattern | Prevalence | Frameworks Supporting | Notes |
 |---------|------------|----------------------|-------|
-| "Modal" naming | 78% (7/9) | Ant, HeroUI, Mantine, Nuxt, Semantic, Chakra v2, PrimeReact | Most common term |
+| "Modal" naming | 67% (6/9) | Ant, HeroUI, Mantine, Nuxt, Semantic, Chakra v2 | Most common term |
 | "Dialog" naming | 44% (4/9) | MUI, Vuetify, Chakra v3, PrimeReact | Alternative naming |
 | Dual naming (Modal + Dialog) | 22% (2/9) | MUI, PrimeReact | Both low-level and high-level variants |
-| Compound component structure | 78% (7/9) | Chakra, HeroUI, Mantine, MUI, Nuxt, Vuetify, PrimeReact | Separate header/body/footer components |
+| Compound component structure | 44% (4/9) | Chakra, HeroUI, Mantine, MUI | Separate header/body/footer components |
 | Simple wrapper structure | 22% (2/9) | Ant, Semantic | Single container with content |
 
 **Naming Across Frameworks:**
@@ -40,7 +40,7 @@ The Modal/Dialog component is a **universal UI pattern** found across all major 
 
 | Pattern | Prevalence | Frameworks Supporting | Notes |
 |---------|------------|----------------------|-------|
-| Boolean visibility prop | 100% (9/9) | All | open, visible, isOpen, v-model |
+| Boolean visibility prop | 89% (8/9) | All except Semantic | open, visible, isOpen, v-model |
 | onChange/onClose callback | 100% (9/9) | All | Handle close events |
 | Controlled state | 100% (9/9) | All | Parent controls visibility |
 | Uncontrolled/default state | 44% (4/9) | Ant, Chakra, Mantine, Nuxt | defaultOpen, defaultValue |
@@ -94,7 +94,7 @@ $('.ui.modal').modal('show');
 |---------|------------|----------------------|-------|
 | Default/standard modal | 100% (9/9) | All | Basic modal with backdrop |
 | Centered modal | 100% (9/9) | All | Vertically & horizontally centered |
-| Fullscreen modal | 89% (8/9) | All except Semantic | Takes full viewport |
+| Fullscreen modal | 100% (9/9) | All | Takes full viewport |
 | Basic/minimal variant | 33% (3/9) | Semantic, Mantine, Chakra | Reduced styling |
 | Modal vs modeless | 22% (2/9) | PrimeReact, Semantic | With or without backdrop |
 | Backdrop blur effect | 33% (3/9) | HeroUI, Mantine, Chakra | Blurred background |
@@ -141,7 +141,7 @@ $('.ui.modal').modal('show');
 | Corner positioning | 22% (2/9) | PrimeReact, Semantic | Top-left, top-right, etc. |
 | Edge positioning | 44% (4/9) | Chakra, MUI, Vuetify, PrimeReact | Left, right, top, bottom |
 | Draggable | 44% (4/9) | Ant, HeroUI, Semantic, PrimeReact | User can reposition |
-| Resizable | 22% (2/9) | Semantic, PrimeReact | User can resize |
+| Resizable | 11% (1/9) | PrimeReact | User can resize |
 
 **Positioning Examples:**
 
@@ -486,10 +486,10 @@ All frameworks automatically apply:
 | Keep mounted | 67% (6/9) | Ant, MUI, Semantic, Vuetify, PrimeReact, Mantine | Stay in DOM when closed |
 | Portal rendering | 89% (8/9) | All except Semantic | Render to document.body |
 | z-index management | 100% (9/9) | All | Auto z-index stacking |
-| Maximizable | 22% (2/9) | Semantic, Vuetify | Expand to fullscreen |
-| Minimizable | 11% (1/9) | Semantic | Collapse to title bar |
+| Maximizable | 11% (1/9) | PrimeReact | Expand to fullscreen dynamically |
+| Minimizable | 11% (1/9) | PrimeReact | Collapse to title bar |
 | Draggable header | 44% (4/9) | Ant, HeroUI, Semantic, PrimeReact | Drag by header |
-| Resizable | 22% (2/9) | Semantic, PrimeReact | User resize edges |
+| Resizable | 11% (1/9) | PrimeReact | User resize edges |
 | Multiple instances | 78% (7/9) | All except Ant, Semantic | Multiple modals open |
 | Modal queue/stack | 33% (3/9) | Mantine, Vuetify, PrimeReact | Sequential modal display |
 
