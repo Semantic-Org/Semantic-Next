@@ -351,6 +351,96 @@ File Upload is a form input component that enables users to select and upload fi
 - Heavier component footprint
 - Faster implementation for standard cases
 
+## Sophisticated Design Patterns
+
+### Chakra UI - File Transformation Pipeline
+
+**What it does**: Provides a `transformFiles` async function that processes files immediately after selection but before they're added to the accepted list. This allows operations like image compression, format conversion, or metadata extraction to happen transparently during file selection without requiring separate API calls or manual processing steps.
+
+```javascript
+const transformFiles = async (files: File[]) => {
+  return Promise.all(
+    files.map(async (file) => {
+      if (file.type.startsWith('image/')) {
+        const compressed = await compressImage(file);
+        return new File([compressed], file.name, { type: 'image/webp' });
+      }
+      return file;
+    })
+  );
+};
+
+<FileUpload.Root accept="image/*" transformFiles={transformFiles}>
+```
+
+**Why it's sophisticated**: Most file upload components treat file selection as passive - files are selected and then upload logic handles them. Chakra's pattern recognizes that File Upload is unique in needing to modify files *during selection* rather than after. This solves real-world problems where you need optimized files before they ever reach the server, but you want the transformation transparent to the user. The async nature means long-running operations (compression, validation calls) don't block the UI.
+
+**Evidence of design maturity**:
+- Transformation happens at the right lifecycle moment (selection, before list display)
+- Errors in transformation can be caught and handled gracefully (showing original file if compression fails)
+- Transformed files maintain original filename and metadata, just with modified content
+- Enables complex workflows (image compression, PDF generation, format normalization) without duplicating upload logic
+
+### Ant Design - LIST_IGNORE Pattern (Graceful Partial Failure Handling)
+
+**What it does**: The `beforeUpload` validation hook can return `Upload.LIST_IGNORE` to exclude a file from the list without blocking the upload flow. This enables showing users exactly which files are problematic while still accepting valid files from the same batch selection, rather than all-or-nothing validation.
+
+```javascript
+const beforeUpload = (file) => {
+  const isValid = file.size < 5 * 1024 * 1024;
+
+  if (!isValid) {
+    message.error(`${file.name} exceeds 5MB limit`);
+    return Upload.LIST_IGNORE;  // Exclude from list, don't block
+  }
+
+  return true;  // Include in list
+};
+
+<Upload beforeUpload={beforeUpload} multiple>
+  <Button>Upload Files</Button>
+</Upload>
+```
+
+**Why it's sophisticated**: Most form validation is binary - accept or reject. But File Upload handles *collections* where partial failures are meaningful and common. When a user selects 10 files but 3 are too large, the naive approach rejects all 10 or shows unclear errors for the batch. Ant's pattern recognizes that File Upload needs granular failure handling: show feedback for invalid files (via message) while silently excluding them, letting the upload flow complete with only valid files. This creates a UX where users understand exactly what went wrong without feeling blocked.
+
+**Evidence of design maturity**:
+- Distinguishes between validation failure (file is bad) and upload failure (network issue)
+- LIST_IGNORE is an explicit return value, not a silent behavior, making developer intent clear
+- Works with mixed file types/sizes in single selection (real-world scenario)
+- Paired with message feedback, creates clear communication without interrupting flow
+- Enables batch operations where not all files succeed but work continues
+
+### PrimeReact - Dual Mode System (Complexity-Adaptive Architecture)
+
+**What it does**: A single `mode` prop switches between two fundamentally different UI architectures: `basic` (minimal single-button trigger) and `advanced` (full drag-drop interface with file list, progress, and action buttons). Both modes share identical upload logic, validation, and API contracts, just differing in visual presentation and interaction density.
+
+```javascript
+// Simple use case - single file selection
+<FileUpload mode="basic" name="avatar" url="/api/upload" auto />
+
+// Complex use case - multiple files with feedback
+<FileUpload
+  mode="advanced"
+  name="documents"
+  url="/api/upload"
+  multiple
+  accept=".pdf,.doc"
+  itemTemplate={customTemplate}
+/>
+```
+
+**Why it's sophisticated**: File Upload is unique among form components in needing to span a vast UX spectrum. A user uploading a single avatar needs minimal UI (button + preview). A user uploading documents for processing needs rich interactions (drag-drop, file list, progress, removal). Rather than creating two separate components or forcing one UI on all use cases, the pattern recognizes that the *upload logic is identical* - only the presentation changes. This solves the real problem: supporting both simple and complex scenarios without API duplication or component bloat. The shared validation, event system, and upload mechanism mean developers can start simple and add complexity without rewriting.
+
+**Evidence of design maturity**:
+- Both modes expose identical event handlers (onUpload, onError, onValidationFail)
+- Template system works in both modes, allowing gradual UI enhancement
+- Props like `maxFileSize` and `accept` apply identically across modes
+- Switching between modes doesn't require component replacement, just prop change
+- Acknowledges that upload complexity is use-case-dependent, not component-inherent
+
+---
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence, a robust File Upload implementation should include:

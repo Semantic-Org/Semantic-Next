@@ -261,6 +261,41 @@ Drawer/Sidebar/Slideover components solve the fundamental problem of **providing
 - aria-describedby (63%)
 - Destroy on close (63%)
 
+## Sophisticated Design Patterns
+
+### Ant Design - Push Distance Control for Nested Content
+
+**What it does**: The `push` prop allows configurable control over how far page content shifts when a drawer opens. Instead of fixed push behavior, developers can specify exact distances (e.g., `push={{ distance: 180 }}`), enabling fine-tuned layout compensation for nested drawers and stacked overlays without CSS workarounds.
+
+**Why it's sophisticated**: This solves the problem of overlapping content in drawer-heavy applications. When multiple drawers stack, each can independently control how much it pushes underlying content, preventing layout thrashing and visual conflicts. Most frameworks either push a fixed amount or don't push at all—Ant Design's parameterized approach handles complex overlay scenarios elegantly.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Supports both boolean (`true`/`false`) and configuration object syntax, allowing toggle between overlay and push modes without prop restructuring
+- **Real-world usage**: Essential for enterprise dashboards with filter panels, detail sidebars, and nested workflows where content repositioning must be predictable across deep component hierarchies
+- **Design restraint**: Defaults to `{ distance: 180 }` (Material Design standard), avoiding unnecessary API surface while allowing override for specialized layouts
+
+### Mantine - Drawer.Stack for Multi-Drawer Coordination
+
+**What it does**: Mantine's `<Drawer.Stack>` wrapper component automatically manages z-index layering, focus trapping, and keyboard behavior across multiple open drawers. The innermost drawer closes first on Escape key press, and focus management coordinates across all nested instances without manual wiring.
+
+**Why it's sophisticated**: Managing multiple concurrent drawers requires coordinated state across several concerns: stacking order, focus containment, escape key routing, and overlay layering. Drawer.Stack encapsulates this complexity into a composable container, eliminating the need for manual z-index calculations, focus managers, and event delegation logic that developers would otherwise hardcode.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Properly handles rapid open/close cycles, prevents focus escapes through the stack, and routes Escape keystrokes to the correct drawer based on visual depth
+- **Real-world usage**: Common in applications supporting parallel workflows (e.g., master-detail with quick-actions drawer, or multi-step forms with sub-forms in drawers)
+- **Design restraint**: Drawer.Stack doesn't force specific layouts or composition patterns—it's a transparent orchestrator that works with any drawer content, children, or nesting depth
+
+### Vuetify - Rail Mode with Expand-on-Hover
+
+**What it does**: The `rail` prop transforms a drawer into a compact icon-only sidebar, and the `expand-on-hover` prop makes it expand to full width on mouse hover. Combined, this creates a collapsible persistent navigation that saves space while remaining instantly accessible—icons stay visible, text labels appear only on interaction.
+
+**Why it's sophisticated**: This pattern solves a UX tension in navigation design: how to maximize content space while keeping navigation always accessible. Rather than hiding the drawer entirely (modal) or consuming permanent space (permanent), rail mode provides a middle ground. The hover expansion requires careful event handling to prevent jitter from rapid hover state changes and coordinate text reveal timing with width animations.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Manages hover state across nested content without false triggers, coordinates CSS transitions with JavaScript state to prevent flashing or layout shifts during expand/collapse cycles
+- **Real-world usage**: Ubiquitous in modern dashboards and content-heavy applications (Slack, Discord, VS Code all use similar patterns). Required for responsive designs that adapt between mobile (hidden), tablet (rail mode), and desktop (permanent full-width)
+- **Design restraint**: No custom configuration needed—`rail` and `expand-on-hover` work independently or together, allowing progressive enhancement without API bloat. Rail width has sensible defaults but is configurable when needed
+
 ## Implementation Notes
 
 ### Placement Implementation

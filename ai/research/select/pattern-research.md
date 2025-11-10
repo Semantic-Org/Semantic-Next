@@ -654,6 +654,83 @@ All implementations must include:
 
 ---
 
+## Sophisticated Design Patterns
+
+### Ant Design - labelInValue Mode
+
+**What it does**: Instead of returning just the selected value, `labelInValue` returns an object containing both value and label: `{ value: 'lucy', label: 'Lucy' }`. This eliminates the need to maintain a separate lookup table to map values back to their display text after selection.
+
+```typescript
+<Select
+  labelInValue
+  defaultValue={{ value: 'lucy', label: 'Lucy' }}
+  onChange={(selected) => {
+    console.log(selected); // { value: 'lucy', label: 'Lucy' }
+  }}
+  options={options}
+/>
+```
+
+**Why it's sophisticated**: This pattern solves a non-obvious problem in data handling: preventing the lookup overhead when you need both the value and label. Most developers reach for this pattern only after struggling with the common scenario of having a user ID selected but needing the user name for display or submission.
+
+**Evidence of design maturity**:
+- Reduces boilerplate in form submission where both value and display text are needed
+- Demonstrates understanding that selection context often requires more than just a value
+- Enables offline-first applications where lookup tables may not be available
+- Used extensively in real-world production code where data efficiency matters
+
+### Mantine - autoSelectOnBlur Pattern
+
+**What it does**: The `autoSelectOnBlur` prop automatically commits the currently highlighted option when the Select loses focus (e.g., when tabbing away). This bridges the keyboard-only workflow where users type to filter, then move to the next field without explicitly selecting.
+
+```jsx
+<Select
+  searchable
+  autoSelectOnBlur
+  placeholder="Type and tab away"
+  data={['React', 'Angular', 'Vue', 'Svelte']}
+/>
+```
+
+**Why it's sophisticated**: This pattern reveals deep thinking about keyboard-first interaction patterns. Developers recognize that requiring an explicit Enter key press after finding what you want creates friction in rapid data entry workflows. The pattern acknowledges that blur (focus leaving) is a natural commit point.
+
+**Evidence of design maturity**:
+- Addresses the gap between type-ahead search and form submission in single interaction
+- Demonstrates understanding of real-world data entry workflows
+- Only 9% adoption (Mantine only) shows this is advanced pattern thinking
+- Solves the problem without requiring developer intervention in event handling
+- Respects keyboard-first accessibility paradigm while improving UX
+
+### Headless UI - ListboxSelectedOption Component
+
+**What it does**: The `ListboxSelectedOption` component automatically mirrors the selected option's content in the button without manual mapping or conditional rendering. Define your option content once, and it automatically appears in both the closed button and open list.
+
+```jsx
+<Listbox value={selected} onChange={setSelected}>
+  <ListboxButton>
+    <ListboxSelectedOption placeholder="Select a person..." />
+  </ListboxButton>
+  <ListboxOptions anchor="bottom">
+    {people.map((person) => (
+      <ListboxOption key={person.id} value={person}>
+        {person.name}
+      </ListboxOption>
+    ))}
+  </ListboxOptions>
+</Listbox>
+```
+
+**Why it's sophisticated**: This pattern eliminates a subtle but pervasive problem in Select implementations: the need to duplicate option rendering logic for both the dropdown list and the selected display. Developers typically resort to manual value-to-display mapping, storing separate label properties, or useState workarounds. ListboxSelectedOption recognizes the semantic relationship between "what you can select" and "what displays when selected."
+
+**Evidence of design maturity**:
+- Reduces boilerplate in the 80% common case while allowing escape hatch for 20% complex cases
+- Demonstrates understanding of React rendering patterns and component composition
+- Prevents visual inconsistency between option content and selected display
+- Works seamlessly with rich content (icons, descriptions, custom layouts)
+- Unique solution not found in other frameworks, showing original design thinking
+
+---
+
 ## Summary
 
 The Select/Dropdown/Listbox component is one of the most complex and feature-rich UI primitives, with significant variation in implementation philosophy across frameworks. Key findings:

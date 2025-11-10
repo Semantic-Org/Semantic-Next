@@ -345,6 +345,38 @@ All frameworks converge on viewing the carousel as fundamentally a **space-savin
 - Accessibility handled by underlying Embla library
 - Generally solid but less explicitly documented
 
+## Sophisticated Design Patterns
+
+### PrimeReact - Conditional ARIA Live Regions
+
+**What it does**: PrimeReact dynamically adjusts its ARIA `live` attribute based on whether autoplay is active. When autoplay is enabled, it sets `aria-live="off"` to prevent screen readers from announcing every automatic slide transition. When in manual mode, it uses `aria-live="polite"` to announce user-initiated changes.
+
+**Why it's sophisticated**: This solves a non-obvious accessibility problem that only emerges through real screen reader testing. Imagine being a blind user trying to read page content while a carousel announces "Slide 2 of 5... Slide 3 of 5..." every 3 seconds. It's the audio equivalent of a popup appearing while you're trying to read. Most developers would assume "more announcements = more accessible," but PrimeReact recognized that good accessibility sometimes means knowing when to be quiet. The pattern shows deep understanding that screen reader users need different feedback for user-initiated vs automatic actions.
+
+**Evidence of design maturity**:
+- Requires actual screen reader user testing to discover this pain point
+- Shows restraint - resisting the urge to announce everything
+- Demonstrates understanding of different interaction modes (manual vs automatic)
+- Solves a problem that sighted developers rarely consider
+- Indicates engagement with accessibility community feedback
+
+This pattern is carousel-specific because carousels uniquely combine both automatic and manual progression modes, requiring different accessibility strategies for each.
+
+### Ant Design - Four-Way Dot Positioning
+
+**What it does**: Ant Design's `dotPosition` prop uniquely allows positioning pagination dots on all four sides of the carousel (top, bottom, left, right). When set to left or right, the dots automatically orient vertically. This is the only carousel implementation surveyed that provides built-in vertical dot positioning.
+
+**Why it's sophisticated**: This addresses specific design system needs that emerge in real-world applications. Consider a carousel in a right-hand sidebar where bottom dots would be cut off, or a full-width hero carousel where side dots provide better visual balance. Most frameworks only support top/bottom positioning (if any choice at all), forcing developers to override CSS or restructure layouts. Ant Design anticipated these layout constraints and provided a complete solution. The automatic orientation switch (horizontal dots for top/bottom, vertical for left/right) shows attention to visual logic.
+
+**Evidence of design maturity**:
+- Solves real layout constraint problems in production applications
+- Automatic orientation switching shows thoughtful interaction design
+- Only framework to provide this level of positioning control
+- Addresses edge cases like RTL layouts and constrained spaces
+- Indicates feedback from enterprise users with diverse layout needs
+
+This is carousel-specific because pagination dots are a carousel UI pattern, and the four-way positioning addresses unique carousel layout challenges in complex applications.
+
 ## Recommendations for Semantic UI
 
 Based on this research, the following patterns show strong ecosystem consensus and should be prioritized:

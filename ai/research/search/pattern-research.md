@@ -270,6 +270,91 @@ Across all frameworks, the search/autocomplete component serves a universal purp
 - **Customizable**: All allow custom filter logic
 - **Server-side**: User implements via callbacks for large datasets
 
+## Sophisticated Design Patterns
+
+### Ant Design - Backfill with Keyboard Navigation
+
+**What it does**: The `backfill` prop automatically fills the input field with an option's value while the user navigates with arrow keys, before confirming the selection with Enter. This provides real-time visual feedback during keyboard exploration, reducing the mental load of remembering what each option contains.
+
+```jsx
+<AutoComplete
+  backfill={true}
+  options={options}
+  onSearch={handleSearch}
+/>
+// User presses ↓ → input fills with "Option 1" (not yet selected)
+// User presses ↓ → input fills with "Option 2" (not yet selected)
+// User presses Enter → "Option 2" becomes final selection
+```
+
+**Why it's sophisticated**: This pattern solves a component-specific UX problem: keyboard navigation in autocomplete creates a "preview" UX for exploration without committing to a selection. Other components (Select, Dropdown) don't need this because users navigate through options without changing the input. Search components specifically benefit because:
+- Users can "preview" suggestions before committing
+- Reduces keystroke uncertainty ("what was in Option 5 again?")
+- Works only in search/autocomplete context where input text is editable
+
+**Evidence of design maturity**:
+- Resolves edge case in keyboard-heavy workflows where exploring options is common
+- Separates navigation state (preview) from selection state (committed)
+- Not a generic "set value" feature—specific to the interaction pattern of filtered suggestions
+
+### MUI - Dual State Management (value vs inputValue)
+
+**What it does**: The Autocomplete maintains two completely independent state values—`value` (the selected option) and `inputValue` (the text displayed in the input field). They can diverge and must be controlled separately via `onChange` and `onInputChange` callbacks. This enables sophisticated scenarios where selected value and typed text need different logic.
+
+```jsx
+const [value, setValue] = useState(null);           // Selected option
+const [inputValue, setInputValue] = useState("");   // Typed text
+
+<Autocomplete
+  value={value}                    // Currently selected
+  onChange={(e, newVal) => setValue(newVal)}
+  inputValue={inputValue}          // What user is typing
+  onInputChange={(e, newInput) => setInputValue(newInput)}
+/>
+```
+
+**Why it's sophisticated**: This pattern solves a component-specific problem where selection and input text represent orthogonal concerns:
+- User can clear input text without clearing selection (for re-filtering same selected item)
+- Input text can be custom (freeSolo) while value remains from predefined options
+- Different field-level validation: input might need format validation, value needs existence validation
+- Only search/autocomplete components encounter this because they're the only components where the displayed text (input) can legitimately differ from the selected value
+
+**Evidence of design maturity**:
+- Requires deep understanding of the mental model (not obvious from first glance)
+- Prevents common bugs where developers assume one state controls both concerns
+- Enables patterns like "search for something, select from results, clear search, keep selection visible"
+- Backward compatible—simpler use cases can ignore the distinction
+
+### HeroUI - Dynamic Collections with Virtualization Awareness
+
+**What it does**: The `defaultItems` prop combined with `isVirtualized` enables efficient filtering of massive datasets (10,000+ items) where the component automatically calculates which items are visible and only renders them. The `itemHeight` parameter allows the virtualization engine to know exactly how tall each item is, enabling scroll-position calculations.
+
+```jsx
+const items = generateItems(10000); // Large dataset
+
+<Autocomplete
+  defaultItems={items}        // Auto-filters as user types
+  isVirtualized={true}        // Only render visible items
+  itemHeight={32}             // Height of each item
+  maxListboxHeight={256}      // Max dropdown height
+/>
+// User types "foo" → filters to ~50 matches
+// Component renders only ~8 visible items, not all 50
+// Scroll position stays correct despite DOM items changing
+```
+
+**Why it's sophisticated**: This pattern solves a component-specific performance problem where filtering creates a paradox:
+- Users need real-time filtering feedback (suggesting many items to filter)
+- But rendering thousands of options kills performance
+- Virtualization requires knowing item height—a property that only exists on list-rendering components
+- Only search/autocomplete components experience this trade-off because they're the primary interface for exploring large pre-loaded datasets without API calls
+
+**Evidence of design maturity**:
+- Combines two complex systems (filtering + virtualization) seamlessly
+- Requires no manual performance tuning from developers (works "automatically")
+- Virtualization is transparent—filtering behavior remains the same whether 100 or 10,000 items
+- Considers real-world usage (supports disallowEmptySelection to prevent edge cases with large lists)
+
 ## Raw Data References
 
 Individual framework research reports available at:

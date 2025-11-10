@@ -273,6 +273,41 @@ All frameworks support locale-aware formatting, but approaches vary:
 - **Unique**: Three button layouts (stacked, horizontal, vertical)
 - **Best for**: Enterprise applications with diverse layout requirements
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Real-Time Character Validation
+
+**What it does**: The `isValidCharacter` prop validates each keystroke before it's committed to the input, preventing invalid characters from ever appearing in the field. Example: `isValidCharacter={(char) => /[0-9.-]/.test(char)}` allows numeric, decimal point, and minus characters while blocking letters and symbols in real-time.
+
+**Why it's sophisticated**: Most form controls perform validation after the fact (on blur or submit). Number Input is unique because it must validate during typing since only a specific character set is valid. This prevents user frustration of typed characters being rejected or stripped out, creating a seamless experience where the input field only ever contains valid characters.
+
+**Evidence of design maturity**:
+- Validates at the character level rather than the full value, enabling fine-grained control over what can be typed
+- Prevents invalid state from ever being visible to users, eliminating the need for post-typing error messages for character validation
+- Works seamlessly with localization needs where different locales use different decimal separators and grouping characters
+
+### Mantine - Proportional Hold Acceleration
+
+**What it does**: The `stepHoldInterval` prop accepts a function (not just a fixed number) that calculates acceleration based on hold duration. Example: `stepHoldInterval={(t) => Math.max(1000 / t ** 2, 25)}` creates exponential acceleration where holding the stepper button causes rapid increments that accelerate smoothly over time.
+
+**Why it's sophisticated**: The naive approach is a fixed interval, but this creates poor UX: either increment is too slow (many clicks needed) or too fast (hard to land on target value). A proportional function solves the classic "press and hold" problem elegantly—users get responsive initial feedback (slow at first) that naturally accelerates, matching human expectation of physical controls. This is specific to stepper interaction patterns.
+
+**Evidence of design maturity**:
+- Recognizes that hold-to-repeat needs variable speed based on hold duration, not constant speed
+- Provides bounds checking (`Math.max(..., 25)`) to prevent overwhelming update rates that would break the UI
+- Allows developers to define acceleration curves that match their specific domain (financial, measurements, etc.)
+
+### Ant Design - Keyboard Modifier Step Multipliers
+
+**What it does**: Intelligent modifier keys multiply the step amount during both arrow key and mouse wheel input: Ctrl/Cmd decreases to 0.1x step, and Shift increases to 10x step. When `step={1}`, holding Ctrl gives 0.1 increments while Shift gives 10 increments, allowing users to switch between fine and coarse adjustments without lifting their hands.
+
+**Why it's sophisticated**: Number Input is unique among form controls in requiring both fine-grained (decimal precision) and coarse-grained (large range) adjustments. Modifier keys solve this elegantly without cluttering the UI with additional buttons or controls. This pattern recognizes that power users need speed while casual users need precision, and keyboard modifiers provide context-dependent behavior that experts expect from numeric tools.
+
+**Evidence of design maturity**:
+- Uses established keyboard conventions (Ctrl for fine-tuning, Shift for magnification) familiar to users of professional tools like spreadsheets, DAWs, and video editors
+- Works consistently across both keyboard arrows and mouse wheel, providing redundant pathways to the same functionality
+- Avoids exposing three separate step values (fine, normal, coarse); instead derives them mathematically from a single step value
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence, a robust Number Input implementation should include:

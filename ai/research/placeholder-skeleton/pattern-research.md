@@ -987,6 +987,81 @@ Finest-grained line length control.
 
 ---
 
+## Sophisticated Design Patterns
+
+### Ant Design - Per-Row Width Array Configuration
+
+**What it does**: Paragraph skeletons accept a `width` array prop that independently controls each line's width. Instead of all lines being 100%, you can specify `width={['100%', '90%', '80%', '70%', '60%']}` to create a natural paragraph shape where each line progressively gets shorter, mimicking how actual text paragraphs appear.
+
+```jsx
+<Skeleton
+  paragraph={{
+    rows: 5,
+    width: ['100%', '90%', '80%', '70%', '60%']
+  }}
+/>
+```
+
+**Why it's sophisticated**: This solves the non-obvious problem of "how do you make a skeleton that looks like actual paragraph text?" Without this feature, developers must manually create and position multiple skeleton components with individual width props. This pattern recognizes that text doesn't fill to the edge—it naturally ends mid-line, and a good skeleton should reflect this reality to feel authentic. It's the difference between a clearly-fake placeholder and one that mirrors actual content structure.
+
+**Evidence of design maturity**:
+- Recognizes edge case: most skeletons use 100% width, but paragraphs need variation per line
+- Flexible type system: accepts number (pixels), string (CSS units), or array for per-row control
+- Reduces boilerplate: one array prop eliminates need for multiple component instances
+- Backwards compatible: falsy array still works, simple cases don't require the feature
+
+---
+
+### Mantine - Dual-Mode Operation with Visible Prop
+
+**What it does**: A single Skeleton component operates in two fundamentally different modes. Without children, it renders a simple placeholder element. With children + `visible` prop, it wraps actual content and shows/hides a loading overlay based on the boolean `visible` flag. This eliminates the need for conditional rendering in consuming code.
+
+```jsx
+// Standalone mode - pure placeholder
+<Skeleton height={50} circle />
+
+// Wrapper mode - overlay on content
+<Skeleton visible={loading}>
+  <div>Actual content</div>
+</Skeleton>
+```
+
+**Why it's sophisticated**: This pattern recognizes that skeleton loading has two distinct mental models: "show a placeholder while loading" vs. "show my content with a loading overlay on top." Rather than forcing developers to choose at component creation time, Mantine lets a single component adapt. The `visible` prop naming is semantically clearer than `isLoading={true}` - it directly answers "is the skeleton visible?" This reduces cognitive load and makes the API more intuitive.
+
+**Evidence of design maturity**:
+- Unified API: one component handles two separate patterns
+- Semantic clarity: `visible` prop maps directly to user intent ("show skeleton" or "show content")
+- Layout preservation: wrapper mode prevents layout shift by maintaining content space
+- Sensible defaults: with children, `visible={true}` shows loading; without children, it's always visible
+
+---
+
+### Ant Design - Compound Component Pattern with Shape-Specific Sub-Components
+
+**What it does**: Rather than a single component with dozens of props, Ant Design provides a main `<Skeleton>` component with shape-specific sub-components: `Skeleton.Avatar`, `Skeleton.Button`, `Skeleton.Input`, `Skeleton.Image`, and `Skeleton.Node`. Each sub-component knows its domain-specific defaults (avatar shapes, button sizes, input heights) without requiring configuration.
+
+```jsx
+// Main component for common patterns
+<Skeleton avatar paragraph={{ rows: 3 }} />
+
+// Sub-components for domain-specific needs
+<Skeleton.Avatar shape="circle" size={64} />
+<Skeleton.Button shape="round" block />
+<Skeleton.Input size="large" />
+<Skeleton.Image style={{ width: 200, height: 200 }} />
+<Skeleton.Node active>Custom content</Skeleton.Node>
+```
+
+**Why it's sophisticated**: This pattern solves "how do you provide sensible defaults for different UI element types without prop explosion?" By creating specialized sub-components, Ant Design encapsulates domain knowledge. A button skeleton knows it should be roughly button-height by default. An avatar skeleton knows circles and specific size tiers. This compounds problem-solving: each sub-component becomes a mini-domain expert, and the API remains intuitive because developers don't need to remember obscure prop combinations.
+
+**Evidence of design maturity**:
+- Namespace clarity: `Skeleton.Avatar` is immediately clear about purpose, no prop confusion
+- Domain expertise: Each sub-component has sensible defaults for its specific context
+- Composability: Sub-components can be mixed with the main component for complex layouts
+- Extensibility: New shape types can be added as sub-components without breaking existing API
+
+---
+
 ## Recommendations for Semantic UI Next
 
 ### 1. Component Architecture

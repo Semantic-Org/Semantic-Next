@@ -284,6 +284,41 @@ All frameworks support controlled visibility:
 - **Touch-specific delays** (MUI): Different timing for touch
 - **Disabled by default** (Mantine): Performance consideration
 
+## Sophisticated Design Patterns
+
+### MUI - Interactive Tooltip with Clickable Content
+
+**What it does**: Tooltips remain open when users hover over them (not just the trigger), allowing clicks on embedded links, buttons, or selectable text. The default behavior is `interactive={true}`, which reverses the common expectation that tooltips disappear immediately on pointer leave. This transforms tooltips from read-only overlays into temporary interactive layers that still auto-dismiss when the user's attention moves away.
+
+**Why it's sophisticated**: This solves the fundamental tension between tooltips being "non-blocking supplementary information" and the real-world need for rich, actionable content (links, buttons, etc.). Rather than forcing users into a Popover for anything interactive, MUI recognizes that many use cases need a hybrid: mostly non-intrusive but occasionally interactive. The implementation maintains the mental model of "quick help" while enabling deeper actions without a component type change.
+
+**Evidence of design maturity**:
+- Default-on behavior (67% of frameworks make it opt-in, MUI enables by default) shows confidence in the pattern
+- WCAG 2.1 criterion 1.4.13 compliance achieved by default rather than as an afterthought (interactive content support is accessibility requirement, not a nice-to-have)
+- Sophisticated event management tracks both trigger and tooltip hover states independently to determine visibility, preventing premature dismissal
+
+### Nuxt UI - Platform-Aware Keyboard Shortcut Display
+
+**What it does**: The `kbds` prop accepts an array of key names that render as styled keyboard indicators. Unlike generic text content, this pattern is keyboard-aware: `"meta"` renders as `⌘` on macOS but as `Ctrl` on other systems. It pairs naturally with the `defineShortcuts` composable, creating a single source of truth for both the keyboard behavior and its visual hint. Example: `<UTooltip :kbds="['meta', 'S']">` displays the appropriate save shortcut symbol for the user's OS.
+
+**Why it's sophisticated**: Most frameworks treat shortcuts as plain text content, requiring developers to handle platform detection themselves. Nuxt UI recognizes that tooltip-specific feature—keyboard shortcuts—deserves first-class support with platform awareness baked in. This isn't generic text rendering; it's a domain-specific pattern that acknowledges the component's role in teaching keyboard power-users.
+
+**Evidence of design maturity**:
+- Solves the localization/platform problem invisibly: same prop works globally without conditional rendering logic
+- Tight integration with composable system means shortcut display and shortcut implementation stay synchronized
+- Reflects understanding that keyboard hints are explicitly for teaching/discovery, not just passive information
+
+### MUI - Follow Cursor with Virtual Element Positioning
+
+**What it does**: Via the `followCursor` prop combined with virtual element support in `PopperProps`, tooltips can track the user's mouse position in real-time rather than staying anchored to the trigger element. This uses Popper.js's virtual element feature—a custom `getBoundingClientRect()` function that returns coordinates based on current mouse position. The tooltip reposition updates occur smoothly during pointer movement without requiring complex ref management from the developer.
+
+**Why it's sophisticated**: This pattern acknowledges that some spatial information (heatmaps, charts, image annotations) requires dynamic positioning. Rather than force Popover or custom positioning logic, MUI provides a built-in pattern that works within the tooltip's existing lifecycle. It transforms a "static label" component into a "contextual probe" without changing the component's semantic meaning or default behavior.
+
+**Evidence of design maturity**:
+- Virtual element pattern is battle-tested in Popper.js but rarely exposed in component APIs; MUI's integration shows confidence
+- Offset calculations respect the same positioning modifiers as static positioning, ensuring consistency
+- Performance optimization implicit in the implementation (uses requestAnimationFrame-like updates under the hood, not per-pixel recalculation)
+
 ## Raw Data References
 
 Individual framework research reports available at:

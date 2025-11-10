@@ -287,6 +287,45 @@ Code is an inline typography component that displays short code snippets, techni
 | Highlighting | No | Maybe | No | No |
 | Use case | Technical terms | Examples | Shortcuts | Formatted text |
 
+## Sophisticated Design Patterns
+
+### Mantine - Dual-Mode Display via Element Switching
+
+**What it does**: Mantine's Code component switches between `<code>` (inline) and `<pre>` (block) elements based on the `block` prop, allowing a single component to handle both inline code references and multi-line code blocks with preserved whitespace. This eliminates the need for separate inline and block components while maintaining semantic HTML in both modes.
+
+**Why it's sophisticated**: This pattern solves the non-obvious problem of how to preserve text formatting (whitespace, line breaks) in block mode while keeping inline mode lightweight and simple. The challenge is that `<pre>` elements require different styling (overflow handling, scroll behavior) and user expectations than inline `<code>` elements, yet a single component API hides this complexity from developers.
+
+**Evidence of design maturity**:
+- Respects semantic HTML boundaries: Uses `<code>` for inline (browser default monospace handling) and `<pre>` for block (preserves formatting)
+- Graceful complexity hiding: Developers set `block={true}` without needing to understand the underlying element swap
+- Supports CSS variable integration: The `color` prop works consistently across both modes, even though `<pre>` typically has different styling needs than inline elements
+- Acknowledges but doesn't over-engineer: Component stays simple (3 props) rather than adding separate props for scroll behavior, overflow, or other block-specific concerns
+
+### HeroUI - Size-Based Visual Hierarchy for Technical Content
+
+**What it does**: HeroUI's Code component provides explicit size variants (sm/md/lg) that create visual hierarchy specifically for inline code references within prose. Unlike most frameworks that rely on inherited font sizing, Code offers dedicated sizing that maintains readability at different emphasis levels while preserving the inline flow of text.
+
+**Why it's sophisticated**: This pattern addresses the non-obvious challenge that code references have different semantic importance in documentation—some are incidental (API response fields) while others are critical (required parameters, function names). Most frameworks solve this through manual styling, but HeroUI recognizes that developers need a quick, consistent way to signal importance without breaking inline text flow or requiring custom CSS.
+
+**Evidence of design maturity**:
+- Purpose-built for inline context: Unlike `size` props in other components that often change layout (buttons expand, chips grow), Code's size variants maintain inline flow while changing visual weight
+- Complements semantic colors: Works alongside the 6-color system to provide dual-axis emphasis (importance via size, meaning via color)
+- Respects monospace constraints: Sizing accounts for monospace fonts which have less character variation than proportional fonts, avoiding awkward spacing changes
+- Minimal but complete: Only 3 sizes (sm/md/lg) rather than many variants, recognizing that too many options reduces clarity in technical documentation
+
+### Chakra UI - Polymorphic Rendering with Full Style Props System
+
+**What it does**: Chakra's Code component integrates the `as` prop (polymorphic rendering) with the complete style props system, allowing developers to render Code as any HTML element (not just `<code>`) while maintaining access to all typography, spacing, and color style props. This enables use cases like rendering as `<span>`, `<div>`, or custom components while preserving theme integration and design token access.
+
+**Why it's sophisticated**: This pattern solves the non-obvious problem that "inline code" is a use case, not an HTML element type. Some developers may need code styling on elements other than `<code>` for accessibility (using `<span>` with aria-label) or layout (flowing into flex containers with specific spacing needs). Rather than creating separate components, Chakra provides the flexibility to adapt the component to these edge cases while keeping the common case simple.
+
+**Evidence of design maturity**:
+- Maintains semantic defaults: `as` defaults to `<code>`, encouraging semantic HTML while allowing exceptions
+- Respects TypeScript safety: The `as` prop works with type-safe components, catching invalid element combinations
+- Consistent with framework philosophy: This polymorphic approach extends across all Chakra components, creating predictable developer experience
+- Avoids "button soup" pattern: Unlike some frameworks that create multiple component variants, Chakra achieves flexibility through composition rather than component multiplication
+- Style props provide override escape hatch: Developers can use `fontSize`, `px`, `py`, `borderRadius` etc. for one-off customizations without custom CSS or theme changes
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence, a robust Code implementation should include:

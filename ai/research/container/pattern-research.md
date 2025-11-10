@@ -1,9 +1,12 @@
 # Container Component - Aggregate Pattern Research
 
+> Version: 1.0.1
+> Last Modified: 2025-11-04
+> Last Reviewed: 2025-11-10 (by Codex)
+
 **Research Date**: 2025-11-04
 **Frameworks Analyzed**: 4
-**Total Individual Reports**: 4  
-> Last Reviewed: 2025-11-10 (by Agent)
+**Total Individual Reports**: 4
 
 ---
 
@@ -985,6 +988,89 @@ No patterns in this tier.
 
 ---
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Responsive Padding Scaling
+
+**What it does**: Container automatically scales its horizontal padding based on viewport size, increasing from 16px on mobile to 24px on tablet and 32px on desktop. This creates proportional spacing that adapts to content width, preventing narrow gutters on wide screens and excessive padding on mobile.
+
+```jsx
+// v3 default responsive padding
+<Container>
+  {/* Automatically applies */}
+  {/* base: padding-inline 1rem (16px) */}
+  {/* tablet: padding-inline 1.5rem (24px) */}
+  {/* desktop: padding-inline 2rem (32px) */}
+</Container>
+```
+
+**Why it's sophisticated**: This solves a non-obvious layout problem - static gutters feel too large on wide screens but adequate on mobile, while this approach maintains visual balance across all viewport sizes without manual breakpoint management. It recognizes that content width and appropriate margin spacing have a proportional relationship.
+
+**Evidence of design maturity**:
+- Solves "gutter ratio problem" where static padding doesn't scale with content width
+- Implemented using CSS custom properties for runtime flexibility (not compile-time)
+- Adopted as v3 standard after recognizing v2's fixed padding limitation
+- Enables consistent visual hierarchy across breakpoints without per-breakpoint configuration
+
+---
+
+### Mantine - Grid Strategy with Content Breakout
+
+**What it does**: Container offers a grid-based layout strategy that enables child elements to "break out" to full viewport width while maintaining other content within container bounds. Nested `data-container` elements within breakout sections re-align to the container's width, enabling magazine-style layouts with full-bleed visuals and aligned text.
+
+```jsx
+<Container strategy="grid" size="lg">
+  <article>Standard content within 1024px</article>
+
+  {/* Element breaks out to full width */}
+  <div data-breakout>
+    <img src="full-width.jpg" style={{ width: '100%' }} />
+  </div>
+
+  {/* Full-width section with nested aligned content */}
+  <div data-breakout style={{ backgroundColor: '#f0f0f0' }}>
+    <div data-container>
+      <h3>Text realigns with main container</h3>
+    </div>
+  </div>
+</Container>
+```
+
+**Why it's sophisticated**: This solves a complex editorial design problem that most frameworks ignore - how to maintain content rhythm while allowing full-width visual variety. It's a sophisticated composition pattern requiring container-aware understanding of grid column structure, gutter calculations, and nested scope management. The `data-container` nesting mechanism shows deep thinking about layout composability.
+
+**Evidence of design maturity**:
+- Solves real-world editorial layout challenge (blog posts with hero images, full-width quotes, etc.)
+- Dual strategy system (block vs. grid) shows thoughtful API design for complexity
+- `data-breakout` and `data-container` attributes provide declarative control without prop explosion
+- Enables magazine-style layouts previously requiring complex custom CSS or external libraries
+
+---
+
+### Semantic UI Classic/Chakra UI - Character-Based Sizing for Typography
+
+**What it does**: Container defaults to or offers a character-based maximum width (60ch in Chakra v2, ~65ch in Semantic UI's text container) rather than pixel values. This constrains content width to 50-75 characters per line, which typography research shows is optimal for reading comprehension and eye movement comfort.
+
+```jsx
+// Chakra UI v2 default
+<Container> {/* maxWidth: 60ch by default */}
+
+// Chakra UI v3 option
+<Container maxW="60ch">Optimal reading width</Container>
+
+// Semantic UI Classic
+<div class="ui text container">Optimized for readability</div>
+```
+
+**Why it's sophisticated**: This demonstrates understanding that layout constraints aren't just about screen size but about content quality. It recognizes that character count, not pixels or viewport width, determines readability. This is a content-first rather than device-first approach to responsive design, showing maturity in understanding how reading physics affects layout decisions.
+
+**Evidence of design maturity**:
+- Explicitly references typography research (50-75 character optimal range) in design decisions
+- Chakra v2 made this the *default* behavior, treating readability as primary concern
+- Semantic UI Classic preserved this as dedicated variant, showing long-term value recognition
+- Demonstrates awareness that `ch` units solve mobile readability without breakpoints (narrow screens naturally use fewer characters)
+
+---
+
 ## Recommendations for Semantic UI Implementation
 
 ### Component Structure
@@ -1536,3 +1622,15 @@ This approach positions Semantic UI container as:
 - **Comprehensive**: Broader feature set than minimal frameworks
 - **Familiar**: Preserves Semantic UI Classic patterns users expect
 - **Innovative**: Grid breakout pattern (if implemented) is unique differentiator
+
+---
+
+## Version History
+
+### Version 1.0.1 (2025-11-10) - E&O Verification Pass
+**Agent**: Codex
+
+No corrections needed. Reviewed all framework usage reports (Chakra UI, Mantine, MUI, Semantic UI Classic); existing max-width, padding, and philosophy notes accurately reflect source docs. Evidence: cross-checked `ai/research/container/{chakra-ui,mantine,mui,semantic-ui-classic}/usage-patterns.md` against aggregate report. (85% confidence)
+
+### Version 1.0.0 (2025-11-04) - Initial Research
+- 4 frameworks surveyed (Chakra UI, Mantine, MUI, Semantic UI Classic)

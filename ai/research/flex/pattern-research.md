@@ -263,6 +263,82 @@ The industry shows movement toward:
 - Want minimal API surface
 - Simpler mental model preferred
 
+## Sophisticated Design Patterns
+
+### Ant Design - Context-aware Alignment Defaults
+
+**What it does**: Flex automatically adjusts default cross-axis alignment based on layout direction. When horizontal (default), it defaults to `align: start` (flex items align to the top). When vertical (`vertical={true}`), it defaults to `align: stretch` (flex items fill container width). This allows developers to skip alignment props in simple cases without losing expected behavior.
+
+```jsx
+<Flex>                    // Horizontal: align defaults to 'start'
+  <Button>Left-aligned</Button>
+  <Button>Items</Button>
+</Flex>
+
+<Flex vertical>           // Vertical: align defaults to 'stretch'
+  <Button>Full width</Button>
+  <Button>Buttons</Button>
+</Flex>
+```
+
+**Why it's sophisticated**: This solves a non-obvious UX problem: new developers expect different default alignments for horizontal vs vertical layouts (left-aligned horizontal lists vs full-width vertical stacks), yet CSS flexbox uses the same default (`flex-start`/`stretch`) for both. By making defaults context-aware, Ant Design eliminates the need for explicit align props in 90% of common use cases while maintaining CSS semantics.
+
+**Evidence of design maturity**:
+- Reduces boilerplate: Most layouts work without explicit align prop since defaults match developer intuition
+- Handles the gap between CSS semantics and developer mental models without breaking either
+- Documented in RFC (PR #44362) as intentional design decision, not accident
+
+---
+
+### Chakra UI & Mantine - Separate Row/Column Gap Control
+
+**What it does**: Flex provides independent control of spacing on different axes via `rowGap` and `columnGap` props (in addition to unified `gap`). This enables precise spacing control in wrapping layouts where horizontal and vertical spacing needs differ.
+
+```jsx
+// Chakra UI
+<Flex wrap="wrap" rowGap={6} columnGap={4}>
+  {cards.map(card => <Card key={card.id} />)}
+</Flex>
+
+// Mantine
+<Flex wrap="wrap" rowGap="xl" columnGap="md">
+  {items.map(item => <Item key={item.id} />)}
+</Flex>
+```
+
+**Why it's sophisticated**: This addresses a real layout problem: when items wrap, developers often want different spacing between rows (more breathing room) and between columns (tighter for alignment). CSS gap applies uniformly. Without separate axis control, developers either compromise on spacing or resort to margin hacks on wrapping children. This pattern is specific to Flex because it's the only component that needs to handle both wrapping behavior AND independent axis spacing.
+
+**Evidence of design maturity**:
+- Solves a genuine CSS limitation without requiring CSS preprocessor tricks
+- Used in real-world card grids and form layouts where row/column spacing naturally differs
+- Maintains compatibility with single `gap` prop (progressive enhancement)
+
+---
+
+### Ant Design - Flexible Gap Array Format
+
+**What it does**: Gap accepts array format `gap={[horizontal, vertical]}` for quick configuration of different spacing per axis without naming separate props. Mix theme presets with numbers: `gap={[16, 'large']}`.
+
+```jsx
+// Quick two-axis gap configuration
+<Flex gap={[16, 24]} wrap="wrap">
+  {items.map(item => <Item key={item.id} />)}
+</Flex>
+
+// Mix theme tokens with raw values
+<Flex gap={[8, 'large']} wrap="wrap">
+  {items.map(item => <Item key={item.id} />)}
+</Flex>
+```
+
+**Why it's sophisticated**: This is a dense, ergonomic syntax that solves gap configuration without introducing new prop names. The array `[h, v]` format is more concise than `rowGap/columnGap` props while being more discoverable than relying on prop naming conventions. It's subtle API design that rewards exploratory usage.
+
+**Evidence of design maturity**:
+- Non-obvious but intuitive once discovered (array conventions exist in CSS grid)
+- Allows mixing theme tokens and numeric values in same property
+- Minimal bundle impact despite powerful functionality
+- RFC discussion (PR #44070) shows intentional consideration of alternative syntaxes
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence, a robust Flex implementation should include:

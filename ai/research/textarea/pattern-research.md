@@ -562,6 +562,77 @@ All frameworks integrate with their respective theme systems:
 - MUI: Hidden measurement textarea accessibility warning
 - PrimeReact: Accessibility docs "under development"
 
+## Sophisticated Design Patterns
+
+### Ant Design - Emoji-Aware Character Counting Strategy
+
+**What it does**: Distinguishes between visual characters and byte-encoded characters for accurate counting. Uses `Intl.Segmenter` to count emojis and complex Unicode as single characters rather than multiple bytes. This prevents misleading character counts when users include emoji, multi-byte scripts, or combining marks.
+
+```jsx
+<TextArea
+  count={{
+    show: true,
+    max: 100,
+    strategy: (txt) => [...new Intl.Segmenter().segment(txt)].length
+  }}
+/>
+```
+
+**Why it's sophisticated**: Textarea character limits are traditionally broken in international contexts. This pattern solves the non-obvious problem that emoji and diacritics count incorrectly when using native character counting. The component provides hooks for custom strategies rather than solving it monolithically, allowing app-specific counting logic.
+
+**Evidence of design maturity**:
+- Recognizes that "character" is culturally relative (emoji as 1 unit vs. 4 bytes)
+- Separates concerns: `maxLength` for hard browser limits, `count.strategy` for display-only logic
+- Provides `exceedFormatter` for custom messaging when limits exceeded, not just blocking input
+- Added in v5.10.0+ as a learned improvement from real-world usage
+
+### HeroUI - Height Change Callback with Measurement Caching
+
+**What it does**: Exposes `onHeightChange` callback that fires whenever auto-resize recalculates height, and optionally caches previous measurements via `cacheMeasurements` prop. This enables parent components to react to textarea growth (adjust nearby layouts, show/hide elements, trigger analytics) and improves performance by reusing known dimensions.
+
+```jsx
+<Textarea
+  onHeightChange={(height, meta) => {
+    console.log('Height changed to:', height);
+    updateLayoutFor(height);
+  }}
+  cacheMeasurements={true}
+  minRows={3}
+  maxRows={8}
+/>
+```
+
+**Why it's sophisticated**: Most components treat height as internal state. This pattern exposes it as a public interface, acknowledging that textarea auto-resize is a layout-affecting event that parent components need to know about. The caching optimization recognizes that repeated height recalculations for same content are wasteful in editing scenarios.
+
+**Evidence of design maturity**:
+- Recognizes textarea's unique impact on page layout (unlike single-line inputs)
+- Measurement caching addresses performance edge case without bloating the normal API
+- Callback provides both height and metadata, enabling context-aware parent responses
+- Only framework (1/7) to expose this optimization, suggesting sophisticated real-world constraints
+
+### Mantine - Sidebar Sections for Multi-Line Layout Context
+
+**What it does**: Extends textarea with `leftSection` and `rightSection` props inherited from Input, enabling icons, buttons, or custom elements to appear alongside multi-line content. Includes `leftSectionPointerEvents` control to toggle whether left/right sections can be interacted with while typing.
+
+```jsx
+<Textarea
+  label="Notes"
+  placeholder="Enter notes"
+  leftSection={<IconNote size={16} />}
+  leftSectionPointerEvents="none"
+  rightSection={<CharCount>{count}/500</CharCount>}
+  rows={4}
+/>
+```
+
+**Why it's sophisticated**: Single-line inputs and multi-line textareas have fundamentally different layout problems. For textareas, side content must account for variable height and maintain visual alignment across growth. The `pointerEvents` control solves the non-obvious problem that passive icons can accidentally block selections during drag operations in multi-row scenarios.
+
+**Evidence of design maturity**:
+- Acknowledges layout differences between single and multi-line inputs (not generic)
+- Provides `leftSectionPointerEvents` control that shows understanding of interaction model edge cases
+- Documentation explicitly notes "positioning may not be ideal" (honest about constraints)
+- Supports custom `leftSectionWidth` / `rightSectionWidth` for flexible section sizing
+
 ## Raw Data References
 
 Individual framework research reports available at:

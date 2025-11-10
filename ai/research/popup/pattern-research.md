@@ -711,6 +711,87 @@ sui-popover[data-trigger="hover"] { }
 
 **Legend**: ✅ Supported | ❌ Not supported | ⚠️ Partial/limited support
 
+## Sophisticated Design Patterns
+
+### Headless UI - PopoverGroup Multi-Popover Coordination
+
+**What it does**: The `PopoverGroup` component manages multiple related popovers (typically in navigation bars) with sophisticated keyboard navigation. When tabbing between `PopoverButton` elements within a group, the popovers remain open rather than closing, enabling seamless keyboard navigation across a menu structure without requiring multiple open/close interactions.
+
+```jsx
+<PopoverGroup className="flex gap-4">
+  <Popover>
+    <PopoverButton>Solutions</PopoverButton>
+    <PopoverPanel anchor="bottom">{/* content */}</PopoverPanel>
+  </Popover>
+  <Popover>
+    <PopoverButton>Products</PopoverButton>
+    <PopoverPanel anchor="bottom">{/* content */}</PopoverPanel>
+  </Popover>
+  {/* Tabbing between buttons keeps panels open */}
+</PopoverGroup>
+```
+
+**Why it's sophisticated**: This solves a real UX problem that most popover implementations ignore—how to enable efficient keyboard navigation across multiple related popovers. Rather than closing on tab (standard behavior), the group maintains context, allowing users to arrow through related content without losing visual connection. This is fundamentally different from individual popover behavior and requires component-aware coordination.
+
+**Evidence of design maturity**:
+- Demonstrates understanding of actual navigation workflows where users expect to browse multiple related options sequentially
+- Solves tab management complexity at the component level rather than forcing consumers to implement custom logic
+- The feature is completely useless in other components (buttons, menus, dropdowns don't have this coordination need)
+
+### Nuxt UI - Dual Mode Architecture (Click/Hover Auto-Switch)
+
+**What it does**: A single `UPopover` component intelligently switches between click mode and hover mode via a `mode` prop. In hover mode, the component automatically delegates to Reka UI's HoverCard component with configurable delays (`open-delay`, `close-delay`). This eliminates the need to maintain two separate components while providing specialized behavior for each interaction pattern.
+
+```vue
+<!-- Click mode (default) -->
+<UPopover>
+  <UButton label="Open" />
+  <template #content>Content</template>
+</UPopover>
+
+<!-- Hover mode with timing -->
+<UPopover mode="hover" :open-delay="500" :close-delay="300">
+  <UButton label="Hover me" />
+  <template #content>Content</template>
+</UPopover>
+```
+
+**Why it's sophisticated**: Most frameworks maintain separate Popover and HoverCard (or Tooltip) components because they have fundamentally different interaction semantics and underlying implementations. Nuxt UI's approach of unifying them under a mode flag requires careful architectural thinking to abstract the differences while maintaining both components' specialized behaviors. This is a component-specific design choice that reflects sophisticated understanding of the interaction patterns—hover and click have different timing, dismiss behaviors, and visual feedback requirements.
+
+**Evidence of design maturity**:
+- Simplifies the mental model for consumers (single component vs learning multiple related components)
+- Maintains full fidelity of each mode's interaction semantics despite abstraction
+- The delegation to HoverCard preserves specialized hover-card behaviors (delays, hover state tracking) that wouldn't exist in click-only popovers
+- Pattern is completely component-specific: buttons don't need mode switching, menus don't benefit from automatic hover delegation
+
+### Chakra UI - PopoverAnchor Separation Pattern
+
+**What it does**: The `PopoverAnchor` component decouples the element that triggers position calculation (anchor) from the element that opens/closes the popover (trigger). This enables sophisticated edit-in-place UI patterns where a form or content input field anchors the popover while a separate button controls open/close state.
+
+```jsx
+<Popover isOpen={isEditing} onOpen={setIsEditing.on} closeOnBlur={false}>
+  <HStack>
+    <PopoverAnchor>
+      <Input value={color} isDisabled={!isEditing} />
+    </PopoverAnchor>
+    <PopoverTrigger>
+      <Button>{isEditing ? 'Save' : 'Edit'}</Button>
+    </PopoverTrigger>
+  </HStack>
+  <PopoverContent>
+    {/* Color picker positioned next to Input, triggered by Button */}
+  </PopoverContent>
+</Popover>
+```
+
+**Why it's sophisticated**: This solves a genuinely hard UX problem in floating UI components—the anchor element and trigger element often need to be visually separate. Most implementations conflate these, forcing consumers into awkward patterns where the trigger must contain or be adjacent to the anchor. Chakra's solution requires understanding the distinct responsibilities of positioning vs interaction, which is not obvious and not needed in simpler components.
+
+**Evidence of design maturity**:
+- Enables real-world UI patterns (inline editing, edit-in-place forms) that are nearly impossible with other architectures
+- Requires sophisticated positioning calculations to decouple trigger from anchor location
+- The pattern demonstrates restraint—it's an optional feature, not forced on all users; most popovers don't need it
+- Completely component-specific: only popovers have this problem; dialogs and menus don't benefit from anchor separation
+
 ## Conclusion
 
 The Popup/Popover component has reached consensus on core patterns across the industry:

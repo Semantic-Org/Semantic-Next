@@ -1211,6 +1211,133 @@ All patterns at 33% adoption technically fall into "Moderate" tier, but these ar
 
 ---
 
+## Sophisticated Design Patterns
+
+This section identifies design patterns that are deeply thoughtful about component-specific problems - not general framework features that could apply to any component.
+
+### Semantic UI Classic - Horizontal Orientation as Layout Escape Hatch
+
+**What it does**: Provides an alternate layout mode where value and label sit side-by-side instead of stacked. This creates a compact display pattern useful for inline metrics, header statistics, and mixed content layouts where vertical stacking wastes space.
+
+```html
+<!-- Horizontal layout -->
+<div class="ui horizontal statistic">
+  <div class="value">2,204</div>
+  <div class="label">Views</div>
+</div>
+
+<!-- Horizontal group -->
+<div class="ui horizontal statistics">
+  <div class="statistic">
+    <div class="value">2,204</div>
+    <div class="label">Views</div>
+  </div>
+  <div class="statistic">
+    <div class="value">3,322</div>
+    <div class="label">Downloads</div>
+  </div>
+</div>
+```
+
+**Why it's sophisticated**: Horizontal orientation solves a real layout problem - statistics are traditionally presented as large vertical cards, but many real-world contexts need compact inline metrics (next to text, in headers, in compact dashboards). The elegant solution is source-order independence: same HTML structure, CSS modifier determines flow direction.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Label positioning (above/below) is independent of orientation - you can have horizontal with label on top or bottom by source order alone
+- **Real-world usage**: Used for embedded statistics in long-form content, header metric displays, and sidebar analytics
+- **Design restraint**: Doesn't add a prop; leverages existing class-based composition pattern - horizontal is a modifier like "red" or "small"
+
+**Validation test**: If we removed Statistic, would horizontal orientation still exist in other components? No - this is a display paradigm specific to statistics where the primary value needs equal visual weight as the label context. Lists, tables, and other data components don't have this "value + label prominence balance" problem.
+
+---
+
+### Chakra UI v3 - Explicit Value Unit Component
+
+**What it does**: Provides `Stat.ValueUnit` as a dedicated component for displaying units alongside numeric values. This separates the value from its unit, enabling CSS to style them independently and providing semantic clarity about what's unit vs. what's value.
+
+```jsx
+import { Stat } from "@chakra-ui/react"
+
+<Stat.Root>
+  <Stat.Label>Response Time</Stat.Label>
+  <Stat.ValueText>
+    45
+    <Stat.ValueUnit>ms</Stat.ValueUnit>
+  </Stat.ValueText>
+</Stat.Root>
+
+<!-- Can be styled independently -->
+<style>{`
+  Stat.ValueUnit {
+    font-size: 0.7em;  /* Smaller than value */
+    font-weight: normal;  /* Less bold than value */
+    margin-left: 0.25em;  /* Spacing */
+  }
+`}</style>
+```
+
+**Why it's sophisticated**: The problem this solves is typography hierarchy + semantic precision. Values and units have different visual weights but are semantically related. Without explicit separation, you end up with string concatenation ("45ms") which is rigid - CSS can't style the unit differently. This pattern recognizes that units have specific typographic needs: they should be smaller, lighter weight, and visually subordinate to the main value.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Unit component works with any number format (simple numeric, FormatNumber component, custom expressions) without special configuration
+- **Real-world usage**: Essential for scientific notation (µm, MHz), time units (ms, sec, min), data units (KB, MB, GB), rate units (/sec, /min)
+- **Design restraint**: Doesn't require formatter configuration or special props - just a wrapping component that lets CSS handle typography
+
+**Validation test**: If we removed Statistic, would explicit unit components exist elsewhere? Partially - some components might use units, but Statistic is unique because units are so integral to its semantic meaning. Every metric type (time, data, rate, ratio) has default units that need visual distinction. No other component has this pattern of "value always paired with unit that needs different styling."
+
+---
+
+### Ant Design - Custom Formatter as Escape Hatch for Domain-Specific Representation
+
+**What it does**: Provides a `formatter` function prop that transforms the value before display, enabling representation of non-standard formats: time durations from seconds, number abbreviations (1234567 → "1.2M"), percentages from decimals, or any domain-specific representation.
+
+```jsx
+import { Statistic } from 'antd';
+
+// Time duration formatting
+<Statistic
+  title="Average Session"
+  value={3665}
+  formatter={(value) => {
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  }}
+/>
+
+// Large number abbreviation
+<Statistic
+  title="Total Views"
+  value={1234567}
+  formatter={(value) => {
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+    return value;
+  }}
+/>
+
+// Complex: percentage calculation display
+<Statistic
+  title="Completion Rate"
+  value={245}
+  formatter={(value) => {
+    const total = 300;
+    const percentage = (value / total * 100).toFixed(1);
+    return `${value}/${total} (${percentage}%)`;
+  }}
+/>
+```
+
+**Why it's sophisticated**: This pattern reveals deep thinking about a core statistic use case: sometimes the value in your database doesn't match how users think about the metric. A duration is stored as seconds (3665) but needs display as "1h 1m". A large count is stored as absolute number but needs display as "1.2M". The formatter acknowledges that statistics often require transformation logic - not just formatting, but semantic re-representation. This is more flexible than props-based solutions (precision, separators) because it handles transformations that don't map to simple configuration.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Formatter receives raw value and can return any ReactNode (string, number, JSX), enabling composition of prefix + formatted value + suffix patterns
+- **Real-world usage**: Time duration formatting (session length, countdown timers), number abbreviation (social media counts), percentage calculations (progress, conversion rates), custom units (engineering notation)
+- **Design restraint**: Provides single function prop rather than explosion of formatting configuration - design philosophy that acknowledges "we can't predict all formatting needs"
+
+**Validation test**: If we removed Statistic, would custom formatters as escape hatches exist elsewhere? Yes, in many components - but for Statistic, it's uniquely important because the whole purpose is making a number prominent, and prominence requires correct representation. Other components display many pieces of data; Statistic displays one metric that must be formatted correctly to communicate meaning. The formatter isn't optional complexity - it's essential to the component's core value proposition.
+
+---
+
 ## Recommendations for Semantic UI Implementation
 
 ### Component Structure

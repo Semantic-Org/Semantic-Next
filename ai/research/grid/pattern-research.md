@@ -393,6 +393,43 @@ Some frameworks (Semantic) offer both component and utility approaches.
 - Not inherently semantic
 - Developers should add appropriate semantic elements inside grid items
 
+## Sophisticated Design Patterns
+
+### Semantic UI - Doubling Pattern
+
+**What it does**: Automatically increases column width (typically doubling) at smaller breakpoints while maintaining the same number of columns in the markup. Instead of stacking to full width on mobile (like `stackable`), `.doubling` intelligently widens existing columns, reducing their count implicitly. For example, a 4-column desktop grid becomes 2-column on tablet and 1-column on mobile without changing the HTML structure.
+
+**Why it's sophisticated**: This solves a nuanced responsive design problem: some layouts benefit more from proportional resizing than complete stacking. It demonstrates deep thinking about mobile-first optimization without sacrificing layout flexibility. The pattern avoids the binary choice between "preserve layout structure" and "completely reflow", instead using intelligent proportion adjustment.
+
+**Evidence of design maturity**:
+- Handles edge cases where asymmetric content benefits from partial stacking rather than full-width wrapping
+- Combines with other responsive patterns (device-specific widths) for fine-grained control
+- Reflects understanding that mobile layouts don't always need to stack completely—sometimes rows of 2 on tablet or 3 on mobile are more appropriate than single-column
+
+### Semantic UI - Negative Margins with Padded Override Strategy
+
+**What it does**: The grid uses negative margins by default to align the first and last columns flush with container edges, eliminating extra whitespace that would normally exist due to gutter padding. The `.padded` class reverses this behavior, preserving gutters on all edges including the container boundary.
+
+**Why it's sophisticated**: This reveals a sophisticated understanding of the trade-off between layout consistency and content alignment. Negative margins are a power tool that can create subtle layout bugs if not understood. By making it the default but providing explicit override through a semantic modifier, the design acknowledges that different use cases have conflicting needs: some layouts want edge-to-edge content alignment (grids inside containers), others want consistent spacing everywhere (grids with content that should have breathing room).
+
+**Evidence of design maturity**:
+- Documented requirement for explicit `.row` elements in `.celled` and `.divided` grids demonstrates understanding of how CSS selectors and layout engines interact
+- Two complementary modifier patterns (`.padded`, `.relaxed`) show progression of thinking about spacing customization
+- The negative margin approach itself is an advanced CSS technique, not a beginner-level choice
+
+### Chakra UI - Template Areas with Auto-Flow Hybrid Pattern
+
+**What it does**: Combines semantic grid regions (template areas) with CSS Grid's auto-placement algorithm. Developers define named layout regions (header, nav, main, footer) for semantic clarity, but can also let items auto-flow into gaps using `autoFlow="dense"` or positional rules, enabling both explicit structural semantics and automatic layout flexibility in the same grid.
+
+**Why it's sophisticated**: This solves a paradox in layout design: developers want semantic, maintainable code (template areas are more readable than `colStart="4"`) but also want the flexibility of automatic placement for dynamic content. The pattern demonstrates understanding that pure explicit layout (all items positioned manually) becomes unmaintainable at scale, while pure auto-flow loses semantic clarity. The hybrid approach acknowledges both needs.
+
+**Evidence of design maturity**:
+- Recognizes that semantic layout declarations (template areas) and algorithmic placement (auto-flow) serve different purposes but can coexist
+- The auto-flow="dense" option specifically handles packing efficiency, showing consideration for real-world asymmetric content patterns
+- Integrates with Chakra's responsive value system, allowing template areas to change shape across breakpoints—this is non-trivial coordination between two complex features
+
+---
+
 ## Migration Considerations
 
 **Bootstrap → Modern Framework:**

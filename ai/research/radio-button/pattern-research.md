@@ -525,6 +525,95 @@ Patterns with low adoption or implementation issues:
 5. **Orientation affects behavior only**: Users expect visual layout changes too
 6. **String-only values**: Support integers and objects for flexibility
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Dual State Change API (User vs Programmatic)
+
+**What it does:** Semantic UI Classic distinguishes between user-triggered state changes (which fire callbacks) and programmatic updates (which do not). Methods like `check()` and `set checked` provide explicit control over whether callbacks execute when state changes. For radio groups specifically, user clicks on a radio trigger `onChange`/`onChecked` callbacks, while direct method calls with `set checked` skip callbacks entirely.
+
+```javascript
+// With callbacks (user interaction)
+$('.ui.radio.checkbox').checkbox('check')    // Fires onChange, onChecked
+
+// Without callbacks (programmatic update)
+$('.ui.radio.checkbox').checkbox('set checked')    // No callbacks
+```
+
+**Why it's sophisticated:** This pattern solves the non-obvious problem of **callback loop prevention in master-detail radio patterns**. When a radio group controls dependent UI elements (showing/hiding sections based on selected option), updating the radio programmatically (`set checked`) avoids triggering the onChange callback, which would otherwise create cascading updates. Meanwhile, child elements can use `onChange` callbacks to safely update parent state without infinite loops. This demonstrates deep understanding of radio-specific state coordination challenges that arise when one radio selection controls other components.
+
+**Evidence of design maturity:**
+- Explicitly documented distinction between two API categories in the jQuery interface (`check` vs `set checked`)
+- Before/after callback pattern (`beforeChecked`, `beforeUnchecked`) allows validation with cancellation via return false
+- Prevents real-world master-detail pattern (radio selection controls visibility of form sections) without external state management
+- Applied consistently across all state types (checked, unchecked, enabled, disabled)
+
+---
+
+### Mantine - Radio.Card + Radio.Indicator Compound Pattern
+
+**What it does:** Mantine provides three specialized components: `Radio` (standard), `Radio.Card` (interactive card-style selection), and `Radio.Indicator` (visual-only display). The Indicator is explicitly non-semantic and cannot be focused or keyboard-selected, preventing common accessibility mistakes where developers put visual elements in interactive positions. Each serves a distinct purpose within the same Radio.Group.
+
+```tsx
+// Standard Radio - interactive, accessible
+<Radio.Group value={selected} onChange={setSelected}>
+  <Radio value="react" label="React" />
+</Radio.Group>
+
+// Card-style - interactive, supports rich layouts
+<Radio.Card value="package1">
+  <Group wrap="nowrap" align="flex-start">
+    <Radio.Indicator />  {/* Visual marker inside card */}
+    <div>
+      <Text>@mantine/core</Text>
+      <Text size="sm" c="dimmed">Core components library</Text>
+    </div>
+  </Group>
+</Radio.Card>
+
+// Indicator only - visual display, non-interactive
+<Radio.Indicator checked />  {/* For display in custom layouts */}
+```
+
+**Why it's sophisticated:** This pattern elegantly resolves the non-obvious tension between **rich radio interfaces and accessibility safety**. Developers often want to create card-based radio selections with custom layouts (icon + title + description), but making the entire card clickable while maintaining proper semantic meaning is challenging. Mantine's approach provides `Radio.Card` for this use case (fully accessible button-like component), while `Radio.Indicator` exists explicitly for visual-only contexts (like indicators in trees or complex layouts) where interactivity is not intended. This prevents the common mistake of building inaccessible visual elements in interactive positions.
+
+**Evidence of design maturity:**
+- Explicit documentation that `Radio.Indicator` cannot be focused and is "visual-only"
+- `Radio.Card` maintains full keyboard interaction and role="radio" semantics despite custom layout
+- Compounds work seamlessly within the same `Radio.Group`, allowing mixed usage patterns
+- TypeScript types prevent misuse (Indicator cannot receive onChange, interactive props)
+- Solves the real-world pattern of rich option selection (package selection, card-based surveys)
+
+---
+
+### Radix Primitives - forceMount Indicator with Data Attributes for Animations
+
+**What it does:** Radix's `RadioGroup.Indicator` component uses conditional rendering by default—the indicator only appears in the DOM when checked, unless `forceMount={true}` is specified. Combined with data attributes (`data-state="checked"` / `data-state="unchecked"`), this allows developers to choose between DOM efficiency (conditional rendering) and animation flexibility (keeping the element in DOM for exit animations).
+
+```jsx
+// Default: Indicator conditionally rendered (efficient)
+<RadioGroup.Item value="option1">
+  <RadioGroup.Indicator />  {/* Not in DOM when unchecked */}
+</RadioGroup.Item>
+
+// With animations: Force mount for exit transitions
+<RadioGroup.Item value="option1">
+  <RadioGroup.Indicator forceMount>
+    <div style={{ opacity: checked ? 1 : 0 }}>✓</div>  {/* Always in DOM */}
+  </RadioGroup.Indicator>
+</RadioGroup.Item>
+```
+
+**Why it's sophisticated:** This pattern elegantly resolves the non-obvious tension between **performance and animation requirements** specific to radio groups. In radio groups where only one item is checked at a time, conditionally rendering the checked indicator (removing it from DOM when unchecked) is efficient but breaks CSS exit animations—developers cannot animate an element that's being removed from the DOM. Radix's `forceMount` escape hatch keeps the element in DOM but hidden, enabling smooth transitions without sacrificing default performance. The pattern teaches developers about React rendering lifecycle and CSS animations simultaneously, and is particularly important for radio groups where visual state changes are frequent.
+
+**Evidence of design maturity:**
+- Data attributes (`[data-state]`) work consistently regardless of mount state, enabling CSS-based styling that works in both modes
+- Documentation explicitly covers the animation use case with practical examples
+- forceMount naming clearly indicates "mount even when not visible"
+- Works seamlessly with popular animation libraries (Framer Motion, React Spring) for coordinated group transitions
+- Demonstrates understanding that radio-specific patterns (one-at-a-time selection) have different animation requirements than other components
+
+---
+
 ## Recommendations for Semantic UI Next
 
 ### Core Features (Must-Have)

@@ -224,6 +224,70 @@ Across all frameworks, the rating component serves a universal purpose: **captur
 - PrimeReact: No fractional support
 - Semantic UI: No fractional support
 
+## Sophisticated Design Patterns
+
+### Semantic UI - Programmatic State Control API
+
+**What it does**: Provides explicit JavaScript methods (`set rating`, `get rating`, `clear rating`, `enable`, `disable`) for full programmatic control of the rating component, separate from the component initialization settings. This jQuery module pattern enables external systems to manipulate rating state without direct value binding.
+
+```javascript
+$('#myRating').rating('set rating', 4);
+const current = $('#myRating').rating('get rating');
+$('#myRating').rating('clear rating');
+```
+
+**Why it's sophisticated**: Solves the problem of imperative control in a jQuery-first architecture. Rather than forcing a value-in/value-out pattern, it allows consumer code to command the component directly. This is particularly valuable in complex layouts where rating components are instantiated dynamically or controlled by distant UI elements.
+
+**Evidence of design maturity**:
+- Handles edge case of querying state without side effects (`get rating` is read-only)
+- Distinguishes between `disable` (read-only display) and `clear rating` (state reset) operations
+- The `fireOnInit` setting acknowledges that initialization callbacks can pollute change tracking
+- Dual initialization methods (metadata attributes + JS settings) allows progressive enhancement
+
+### MUI - Separate Hover State Callback with Icon Container Customization
+
+**What it does**: Decouples hover preview state from value commitment through a separate `onChangeActive` callback distinct from `onChange`. Paired with `IconContainerComponent` for per-value icon customization, enabling advanced UX patterns like rating-aware emoji faces or quality-level specific icons.
+
+```jsx
+<Rating
+  value={value}
+  onChange={(e, newValue) => setValue(newValue)}
+  onChangeActive={(e, newHover) => setHover(newHover)}
+  IconContainerComponent={({ value }) => customIcons[value].icon}
+/>
+```
+
+**Why it's sophisticated**: Solves the non-obvious problem of decoupling interaction preview from state change. Users need visual feedback during exploration before commitment, but this shouldn't trigger data updates or validation. The icon container pattern further enables semantic icons that change meaning based on rating level (satisfaction faces, quality tiers) rather than just visual variants.
+
+**Evidence of design maturity**:
+- `onChangeActive` receives -1 when hover ends, allowing clean state management
+- `IconContainerComponent` receives value parameter, enabling per-level customization without callback hell
+- `highlightSelectedOnly` mode provides alternative interaction style (radio button vs cumulative)
+- Precision is flexible (0.5, 0.25, 0.1 or any decimal) rather than hardcoded options
+
+### Mantine - Function-Based Dynamic Symbol Generation
+
+**What it does**: Accepts function-based props (`emptySymbol` and `fullSymbol` that receive the current rating value) enabling different symbols for each rating level. Combined with `highlightSelectedOnly`, this creates semantic rating systems where the icon itself communicates the rating meaning (e.g., emoji progression from sad to happy).
+
+```jsx
+const getSymbol = (value) => ({
+  1: '😢', 2: '😕', 3: '😊', 4: '😃', 5: '🤩'
+})[value];
+
+<Rating
+  emptySymbol={(value) => getSymbol(value)}
+  fullSymbol={(value) => getSymbol(value)}
+/>
+```
+
+**Why it's sophisticated**: Most components treat icons as static variants (star, heart) or require wrapper components. Mantine's function-based approach solves the problem of creating semantic rating systems where the visual representation changes meaning per level. This is particularly valuable for mood tracking, satisfaction surveys, or quality assessments where the icon itself communicates the interpretation.
+
+**Evidence of design maturity**:
+- Function receives value parameter enabling value-aware rendering without external mapping
+- Works seamlessly with `fractions={2|3|4}` for fractional precision without icon confusion
+- Default built-in clearable behavior (click selected to clear) is intuitive without explicit prop
+- The `highlightSelectedOnly` mode works perfectly with semantic icons to avoid intermediate state confusion
+
 ## Raw Data References
 
 Individual framework research reports available at:

@@ -330,6 +330,74 @@ QR Code components serve as specialized utility components for encoding data int
 - Consider external library integration vs native implementation
 - Low ecosystem consensus on need
 
+## Sophisticated Design Patterns
+
+### Ant Design - Error Correction Level Strategy
+
+**What it does**: Exposes four granular error correction levels (L: 7%, M: 15%, Q: 25%, H: 30%) that allow developers to explicitly choose how much QR code data can be recovered if damaged. This is particularly important when embedding logos, as higher error correction handles larger overlays while maintaining scannability.
+
+```jsx
+<QRCode value="https://ant.design" errorLevel="Q" icon={logoUrl} />
+```
+
+**Why it's sophisticated**: The non-obvious problem this solves is the tension between visual design (logos and large content) and scanning reliability. A logo covering 25% of the QR code requires Q-level error correction (25% recovery) to remain scannable. Without exposing these levels, developers might embed logos that make codes unreadable, or avoid logos altogether. This API surfaces a deep QR encoding trade-off.
+
+**Evidence of design maturity**:
+- Explicit percentage documentation (7%, 15%, 25%, 30%) helps developers make informed choices based on their use case (pure data vs data+branding)
+- Correlation with logo support: When error correction is available, logo embedding is first-class, not an afterthought—this shows the component was designed with branded QR workflows in mind
+- Default to M-level (15%) balances most scenarios; doesn't force developers to understand encoding theory unless they need advanced customization
+
+### Ant Design - Status Workflow System
+
+**What it does**: Manages four distinct QR code states (active, expired, loading, scanned) that reflect real-world scanning workflows, with custom rendering support (v5.20.0+) to display workflow context without modifying core component structure.
+
+```jsx
+<QRCode
+  value="https://ant.design"
+  status={status}
+  statusRender={() => (
+    <Space direction="vertical">
+      <span>{status === 'scanned' ? 'Code scanned successfully' : 'Waiting...'}</span>
+      <Button>Verify Scan</Button>
+    </Space>
+  )}
+/>
+```
+
+**Why it's sophisticated**: The non-obvious problem this solves is that QR codes aren't fire-and-forget—they exist in temporal workflows where expiration, loading states, and confirmation matter. A payment QR code might expire after 5 minutes; an authentication code needs visual feedback when scanned. Rather than forcing developers to build status UI separately, this pattern integrates status into the component's mental model, acknowledging QR codes are workflow tools, not just visual artifacts.
+
+**Evidence of design maturity**:
+- Four-state model (active/expired/loading/scanned) matches real payment/authentication workflows exactly, showing research into actual QR usage
+- Custom rendering callback (v5.20.0 enhancement) allows workflows to display arbitrary content while maintaining component benefits—design restraint that avoids premature configuration
+- Correlation pattern: Status management always pairs with download capability, suggesting component designers recognized QR codes need archival features in workflow contexts
+
+### Chakra UI - Dual CSS Variable System
+
+**What it does**: Provides independent CSS custom properties (`--qr-code-size` for code dimensions and `--qr-code-overlay-size` for logo scaling) enabling responsive QR codes where logos scale proportionally without modifying code size, and overlays can be sized relative to code dimensions.
+
+```jsx
+<Box
+  style={{
+    "--qr-code-size": "200px",
+    "--qr-code-overlay-size": "50px"
+  }}
+>
+  <QrCode.Root value="data">
+    <QrCode.Frame position="relative">
+      <QrCode.Pattern />
+      <Image w="var(--qr-code-overlay-size)" h="var(--qr-code-overlay-size)" />
+    </QrCode.Frame>
+  </QrCode.Root>
+</Box>
+```
+
+**Why it's sophisticated**: The non-obvious problem is that responsive QR codes require proportional scaling—a logo that's 25% of code size at mobile should remain 25% at desktop, not fixed pixels. Most responsive approaches require recalculating logo size whenever code size changes. This dual-variable system allows CSS cascade to manage both proportionally through media queries, eliminating JavaScript-based responsive logic and component re-renders.
+
+**Evidence of design maturity**:
+- Two-variable approach (not one) shows the designer understood that code size and overlay size are independent concerns that need different control points
+- CSS variable foundation (vs props) reflects modern responsive design patterns—layout decisions belong in CSS, not component props
+- Default values (120px, implicit overlay size) show restraint: the component doesn't assume overlays exist, but the system is ready for them
+
 ## Raw Data
 
 Individual framework reports:

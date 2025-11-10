@@ -386,6 +386,74 @@ import { ScrollArea } from '@mantine/core'
 - **Audience**: Developers needing simple custom scrollbars
 - **Distribution**: npm package with PrimeReact suite
 
+## Sophisticated Design Patterns
+
+### Mantine - ScrollArea.Autosize Composition
+
+**What it does**: A compound component that automatically enables scrolling only when content exceeds a specified maximum dimension (height or width). The scrollable container grows with content until the max constraint is reached, then activates scroll behavior. It includes an `onOverflowChange` callback to detect when content exceeds constraints.
+
+```tsx
+<ScrollArea.Autosize mah={300} onOverflowChange={(hasOverflow) => console.log(hasOverflow)}>
+  {/* Content - grows with layout, scrolls when mah exceeded */}
+</ScrollArea.Autosize>
+```
+
+**Why it's sophisticated**: Most scroll containers require explicit height/width properties, creating a coupling between layout and scrolling capability. ScrollArea.Autosize decouples these concerns by making scrolling activation data-driven. This solves a real-world problem: popovers, autocomplete dropdowns, and modals need to grow with content until they hit viewport limits, then scroll. Without this pattern, developers must manage height calculations and scroll visibility manually.
+
+**Evidence of design maturity**:
+- Solves the "autocomplete scrolling" problem elegantly by composing with TextInput and Popover, handling variable-length result lists
+- The `onOverflowChange` callback enables UI patterns that respond to content overflow (showing icons, adjusting spacing, etc.)
+- Tight integration with Mantine's `max-height` and `max-width` token system rather than requiring pixel values
+
+---
+
+### Mantine - Offset Scrollbars System
+
+**What it does**: The `offsetScrollbars` prop prevents content from being hidden under overlay scrollbars by adding intelligent padding. It supports directional control (`"x"`, `"y"`, `"xy"`) and conditional application (`"present"` only when scrollbars are actually visible).
+
+```tsx
+// Add padding only when scrollbars appear, prevents layout shift
+<ScrollArea offsetScrollbars="present">
+  {/* Content remains visible, scrollbar doesn't overlap */}
+</ScrollArea>
+
+// Offset specific directions
+<ScrollArea offsetScrollbars="x">  {/* Only horizontal offset */}
+```
+
+**Why it's sophisticated**: This pattern addresses a subtle but pervasive UX problem: overlay scrollbars shift content layout when they appear (creating jarring visual resets). The `"present"` value is particularly clever—it only adds padding when scrollbars are actually needed, avoiding unnecessary layout inflation. This demonstrates thoughtful handling of edge cases that affect user experience.
+
+**Evidence of design maturity**:
+- The three options (`"x"`, `"y"`, `"xy"`) reflect understanding of different overflow scenarios
+- The `"present"` option shows restraint—the component could force always offsetting (simpler) but instead uses conditional logic
+- Prevents the "content jumps when scrollbars appear" problem that frustrates users in data tables and modals
+
+---
+
+### Radix UI - Responsive Prop System with Breakpoints
+
+**What it does**: Scroll Area props like `size` and `radius` accept responsive values through the `Responsive<>` type, automatically adapting scrollbar dimensions across viewport breakpoints. Mobile devices get compact scrollbars (size "1"), while desktop gets prominent ones (size "3").
+
+```tsx
+<ScrollArea
+  size={{ initial: "1", sm: "2", md: "3" }}
+  radius={{ initial: "none", md: "medium" }}
+  scrollbars="vertical"
+>
+  {/* Scrollbar size adapts based on viewport */}
+</ScrollArea>
+```
+
+**Why it's sophisticated**: This pattern recognizes that scrollbar sizing is not static across devices—touch targets need to be larger on mobile, while desktop users prefer compact scrollbars. Rather than requiring developers to manually implement media queries or render different components, this pushes responsive logic into the component API itself. It's component-specific because it applies Radix Themes' responsive system *specifically to scrollbar dimensions*, not general layout.
+
+**Evidence of design maturity**:
+- Integration with Radix Themes' `Responsive<>` type wrapper shows architectural coherence
+- Recognizes the WCAG 44×44px touch target requirement and adapts scrollbar size accordingly
+- Avoids the anti-pattern of fixed scrollbar sizes that work poorly on mobile
+- Responsive sizing for scrollbar radius (full pill-shape on mobile for easier targeting) shows attention to interaction UX
+
+---
+
 ## Use Case Consensus
 
 All frameworks emphasize these primary use cases:

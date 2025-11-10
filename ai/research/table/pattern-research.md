@@ -138,6 +138,76 @@ Most frameworks acknowledge this distinction explicitly (MUI → DataGrid, Manti
 - Export functionality
 - State persistence
 
+## Sophisticated Design Patterns
+
+### HeroUI - Automatic Row Height Detection for Virtualization
+
+**What it does**: HeroUI's `isVirtualized` prop with automatic row height calculation enables virtual scrolling without requiring developers to specify exact row heights. The component measures actual rendered row heights and adjusts the virtual scroller accordingly, handling variable content heights automatically.
+
+```jsx
+<Table
+  isVirtualized
+  maxTableHeight={600}  // Only needs max container height
+  // No rowHeight required - automatically calculated
+>
+```
+
+**Why it's sophisticated**: Virtual scrolling typically requires fixed row heights or complex measurement logic. Most developers struggle with variable-height content in virtual lists (e.g., wrapped text, dynamic content). HeroUI's implementation handles the measurement complexity internally, making virtualization accessible for real-world tables where content height varies. This prevents the common pitfall of clipped content or excessive whitespace in virtualized tables.
+
+**Evidence of design maturity**:
+- Solves a specific performance problem (large datasets) without forcing uniform row heights
+- Built on battle-tested @tanstack/react-virtual but abstracts away the complexity
+- Provides sensible defaults (40px) while allowing override when heights are known
+
+### Ant Design - Preserve Selected Rows Across Data Changes
+
+**What it does**: The `preserveSelectedRowKeys` prop maintains row selection state when the underlying data changes, refreshes, or gets paginated. It intelligently matches rows by their keys rather than array position, preserving user selections even when data order changes or new rows are added.
+
+```jsx
+<Table
+  rowSelection={{
+    preserveSelectedRowKeys: true,
+    selectedRowKeys: [1, 2, 3],
+    // Selection persists through dataSource updates
+  }}
+/>
+```
+
+**Why it's sophisticated**: This addresses a non-obvious UX problem where users lose their selections when data refreshes (polling, real-time updates, pagination). Most developers would implement this incorrectly by comparing object references or array indices. Ant Design's implementation uses key-based reconciliation, similar to React's rendering optimization, ensuring selections persist correctly even when the data structure changes completely.
+
+**Evidence of design maturity**:
+- Emerged from real-world applications with live data updates
+- Prevents frustrating user experience of losing work during background refreshes
+- The opt-in nature shows understanding that not all use cases need this overhead
+
+### Ant Design - Responsive Column System with Breakpoint Arrays
+
+**What it does**: The `responsive` array on column definitions declaratively controls column visibility across breakpoints. Unlike media queries, it uses an additive model where columns specify which breakpoints they appear at, making the configuration more intuitive and maintainable.
+
+```jsx
+const columns = [
+  {
+    title: 'Name',
+    responsive: ['xs', 'sm', 'md', 'lg', 'xl'], // Shows on all screens
+  },
+  {
+    title: 'Details',
+    responsive: ['md', 'lg', 'xl'], // Hidden on mobile
+  },
+  {
+    title: 'Actions',
+    responsive: ['lg', 'xl'], // Only on desktop
+  }
+];
+```
+
+**Why it's sophisticated**: Rather than using CSS media queries that hide content (accessibility issues) or complex JavaScript calculations, this pattern makes responsive tables a first-class API concern. The array syntax naturally communicates "show at these sizes" rather than requiring mental translation of min/max-width calculations. It also ensures proper ARIA attributes and keyboard navigation adapt with the visible columns.
+
+**Evidence of design maturity**:
+- Addresses the complex problem of tables on mobile without removing semantic structure
+- The breakpoint array pattern is more maintainable than cascading media queries
+- Integrates with other table features (sorting, filtering) automatically
+
 ## Framework Philosophy Insights
 
 1. **Separation of Concerns**: Most frameworks separate presentation from data management

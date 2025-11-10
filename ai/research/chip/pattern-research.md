@@ -1,6 +1,8 @@
 # Component Pattern Research: Chip / Tag / Badge / Pill
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 11 (with 13 distinct component implementations)
@@ -419,6 +421,41 @@ ai/research/chip/shadcn/usage-patterns.md (Badge component)
 | Radix Themes | Badge | Single | 4 variants, theme integration, high contrast |
 | ShadCN | Badge | Single | Copy-paste, CVA, minimal, Tailwind-first |
 
+## Sophisticated Design Patterns
+
+### MUI - Keyboard-Triggered Deletion
+
+**What it does**: When a Chip component has the `onDelete` prop set, users can dismiss the chip using Backspace or Delete keys while focused, and Escape to blur the chip. The `deleteIcon` prop allows customization of the icon, giving developers fine-grained control over the removal affordance.
+
+**Why it's sophisticated**: Most frameworks implement removable patterns only through mouse clicks. The keyboard shortcut support addresses a non-obvious problem: power users working with dynamically generated chip lists (like tag editors or filter builders) expect form-like keyboard interactions. This bridges the gap between the chip's visual affordance as a "pseudo-form-input" and actual form behavior.
+
+**Evidence of design maturity**:
+- Keyboard accessibility extends beyond screen readers to power-user efficiency (Backspace for deletion mirrors native field behavior)
+- The `deleteIcon` customization prop shows thoughtful handling of visual consistency across design systems
+- Escape key support for blur demonstrates understanding of modal interaction patterns and focus management
+
+### Mantine - Selection Group Coordination with Deselectable Radio Pattern
+
+**What it does**: The `Chip.Group` component manages coordinated selection state across multiple chips with two modes: single selection (radio-like, `multiple={false}`) and multiple selection (checkbox-like, `multiple={true}`). The deselectable radio pattern allows toggling selection off by clicking a selected chip again, implemented via custom `onClick` handlers that compare current value to detect same-value clicks.
+
+**Why it's sophisticated**: Standard form controls (radio/checkbox) don't support "deselectable radio" behavior natively—selecting an option commits the state. The chip pattern uniquely benefits from deselection because chips are inline, space-efficient UI elements where removing a selection without replacing it is a legitimate UX flow. This solves the non-obvious problem of "how do users clear a filter choice in an inline interface without modal dialog or separate button."
+
+**Evidence of design maturity**:
+- The documented deselectable radio example (lines 195-224 of mantine-chip/usage-patterns.md) shows anticipation of real-world UX needs
+- Built-in support for both controlled and uncontrolled state (`value`/`defaultValue`) on the Group component demonstrates understanding of different integration contexts
+- The component is built on semantic HTML `<input>` elements, ensuring accessibility isn't sacrificed for advanced UX patterns
+
+### Ant Design - Controlled CheckableTag Atomicity
+
+**What it does**: The `Tag.CheckableTag` subcomponent is an absolutely controlled component with no uncontrolled mode—it requires `checked` and `onChange` props. Developers must manage selection state explicitly, providing a single source of truth that prevents state desynchronization in complex tag arrays. The `icon` prop (added in v5.27.0) allows semantic icons to represent selection meaning independent of visual state.
+
+**Why it's sophisticated**: Most interactive components offer both controlled and uncontrolled modes for developer convenience. Forcing controlled-only state for CheckableTag solves a subtle problem: in dynamic tag scenarios (like adding/removing tags from a list), uncontrolled chips create opportunities for stale UI states when items are added or removed while a chip is rendered. This enforces architectural discipline that prevents hard-to-debug synchronization bugs.
+
+**Evidence of design maturity**:
+- The version annotation (v5.27.0) for icon support shows incremental refinement based on real-world feedback
+- The dual-component philosophy (`Tag` for display, `CheckableTag` for selection) demonstrates architectural clarity about component semantics
+- Requiring controlled state forces consumers to think through state management early, preventing later refactoring costs
+
 ## Key Insights for Implementation
 
 ### Universal Requirements
@@ -535,3 +572,18 @@ For Semantic UI or similar frameworks:
 7. **Enable Customization**: Visual variants and theming hooks
 
 The lack of consensus is both a challenge and an opportunity - frameworks can differentiate through thoughtful naming, clear use-case guidance, and innovative feature combinations not yet widely adopted.
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Close/remove button prevalence:** Limited to 4 frameworks shipping native dismiss controls (HeroUI, Ant Design, MUI, PrimeReact Chip with `onClose`/`removable` props). Mantine badge relies on manual sections and Nuxt UI/Chakra badge components lack native close props. Evidence: `ai/research/chip/mantine-badge/usage-patterns.md:30-34,323`, `ai/research/chip/nuxt-ui/usage-patterns.md:30-55`, `ai/research/chip/heroui/usage-patterns.md:32-66`, `ai/research/chip/ant-design/usage-patterns.md:40-110`, `ai/research/chip/mui/usage-patterns.md:20-200`. (85% confidence)
+
+**Color semantics:** Treated as effectively universal. Every framework except PrimeReact Chip documents semantic/variant color props. Evidence: framework documentation review. (85% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 11 frameworks surveyed
+- 13 distinct component implementations analyzed

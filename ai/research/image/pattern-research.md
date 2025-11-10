@@ -758,6 +758,87 @@ Only **Chakra UI** provides dedicated SSR component (`Img`).
 
 ---
 
+## Sophisticated Design Patterns
+
+### Ant Design - Dual-Source Progressive Loading
+
+**What it does**: Display a small thumbnail immediately while loading a full-resolution image for preview. When the user clicks to preview, they get the full-resolution version instead. This pattern separates display (thumbnail) from interaction (full resolution), allowing bandwidth-efficient initial loads while ensuring quality on-demand.
+
+```jsx
+<Image
+  src="thumbnail-300x300.jpg"  // Display: small, fast loading
+  width={200}
+  preview={{
+    src: "full-4000x4000.jpg"   // Preview: high-quality on demand
+  }}
+/>
+```
+
+**Why it's sophisticated**: This solves a real-world constraint - displaying many product/gallery images quickly while ensuring preview quality. Most frameworks treat image src as singular. Ant Design recognizes that display context (thumbnail) differs from interaction context (preview zoom), requiring different resolution strategies. This is non-obvious because it challenges the assumption that one image source serves all purposes.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Handles network variations - slow initial load still provides thumbnail, preview loads independently
+- **Real-world usage**: E-commerce product galleries, where 100+ items load quickly but need zoom capability
+- **Design restraint**: Only one extra src property (not a complex fallback chain) - keeps API simple while solving the problem
+
+---
+
+### Chakra UI - Dual Fallback System (Image + Component)
+
+**What it does**: When an image fails to load, fallback to either another image URL OR a custom React component. This moves beyond simple placeholder images to allow rich error states with custom UI.
+
+```jsx
+// Fallback to another image
+<Image
+  src="broken.jpg"
+  fallbackSrc="placeholder.jpg"
+/>
+
+// Fallback to custom component
+<Image
+  src="broken.jpg"
+  fallback={
+    <Box bg="gray.200" h="200px" display="flex" alignItems="center">
+      <Text>Image unavailable</Text>
+    </Box>
+  }
+/>
+```
+
+**Why it's sophisticated**: Most frameworks offer one fallback pattern (image URL or skeleton). Chakra recognizes that different failure scenarios need different responses: loading states need skeleton, errors need explanation/action. By supporting both image and component fallbacks, it enables progressive error communication - show a placeholder during load, show helpful UI on error.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Distinguishes between "loading" (show skeleton) and "error" (show custom UI) - different scenarios, different solutions
+- **Real-world usage**: Forms with user-uploaded images, product catalogs with mixed content availability
+- **Design restraint**: Offers both options (via separate props) without forcing complex configuration - choose what fits your use case
+
+---
+
+### HeroUI - Skeleton + Zoom Wrapper Coordination
+
+**What it does**: Manage skeleton loading animation AND zoom-on-hover simultaneously without conflict. When image loads, skeleton fades out while image fades in, then zoom becomes available. The wrapper handles timing, opacity transitions, and zoom overflow prevention as a coordinated system.
+
+```jsx
+<Image
+  src="image.jpg"
+  isZoomed={true}          // Enable zoom on hover
+  disableSkeleton={false}  // Show skeleton during load
+  width={300}
+  height={200}
+/>
+// Behavior: Skeleton shows → Image loads → Skeleton fades out →
+// Image fades in → Zoom interaction enabled
+```
+
+**Why it's sophisticated**: Combining skeleton animation with hover zoom creates complex timing: skeleton must complete fade-out before zoom interaction, zoom container prevents scaled content from overflowing, opacity transitions must smooth the skeleton-to-image transition. This is non-obvious because it requires understanding interaction timing - the skeleton isn't just visual feedback, it's a state that must complete before enabling interactive states.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Skeleton disables on `removeWrapper={true}` - acknowledges that wrapper structure enables this feature, doesn't hide that dependency
+- **Real-world usage**: Image galleries where loading feedback AND interaction polish both matter (e.g., product photos, portfolio)
+- **Design restraint**: Single boolean flags (`isZoomed`, `disableSkeleton`) rather than complex timing configuration - library handles timing internally
+
+---
+
 ## Recommendations for Semantic UI Implementation
 
 ### Component Structure Decision

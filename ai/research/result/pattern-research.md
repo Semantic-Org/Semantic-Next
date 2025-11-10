@@ -277,6 +277,72 @@ Frameworks without dedicated Result components typically use:
 - **Custom layouts** - Composing primitives (Card + Icon + Text + Buttons)
 - **Empty states** - For no-data scenarios (different use case)
 
+## Sophisticated Design Patterns
+
+### Ant Design - Predefined HTTP Error Illustrations
+
+**What it does**: The Result component includes static property access to pre-built visual assets for common HTTP error scenarios:
+```jsx
+<Result
+  status="404"
+  title="404"
+  subTitle="Sorry, the page you visited does not exist."
+/>
+// Automatically renders Result.PRESENTED_IMAGE_404 illustration
+```
+
+**Why it's sophisticated**: HTTP error handling is uniquely Result's problem domain. While Alert components communicate warnings generically, Result recognizes that 404/403/500 errors require dedicated visual communication at the page level. By embedding illustrations directly in the component (not requiring external image imports or custom assets), Ant Design reduces friction for the most common error page use cases.
+
+**Evidence of design maturity**:
+- Recognizes that dedicated screen real estate (Result's domain) should have pre-built visual solutions for common failure modes
+- HTTP error codes (403, 404, 500) are treated as first-class status types alongside operational outcomes (success, error, warning)
+- Static property pattern (`Result.PRESENTED_IMAGE_*`) elegantly decouples illustration access from the component's own rendering
+
+### Ant Design - Task-Completion Action Guidance Pattern
+
+**What it does**: The `extra` prop is explicitly designed to hold action buttons that guide users toward next steps after viewing the result:
+```jsx
+<Result
+  status="success"
+  title="Payment Processed"
+  subTitle="Order confirmed"
+  extra={[
+    <Button type="primary">Go to Orders</Button>,
+    <Button>Continue Shopping</Button>
+  ]}
+/>
+```
+
+**Why it's sophisticated**: This pattern solves a non-obvious problem specific to Result's role in post-operation feedback. Most components are content containers; Result is a decision point. The `extra` prop naming (not `actions` or `buttons`) reflects this: it provides the "operating area" for what users do next. The component's design philosophy actively constrains developers—documenting that limiting actions to 2 items maximum prevents cognitive overload—showing restraint about what Result should do.
+
+**Evidence of design maturity**:
+- Dedicated prop name (`extra` not `actions`) signals semantic intent: this is the "operating area" for completing a workflow
+- Documentation recommendation against excessive buttons shows design thinking about real-world usage, not just technical capability
+- Composition pattern (buttons in `extra`, additional content in `children`) creates clear separation between "what happened" and "what's next"
+
+### Ant Design - Flexible ReactNode Content Model with Status-Driven Styling
+
+**What it does**: All content areas (title, subTitle, extra, children) accept ReactNode, automatically colored and styled based on status prop without requiring manual style coordination:
+```jsx
+<Result
+  status="warning"
+  title={<div>⚠️ Critical: <strong>Database connection timeout</strong></div>}
+  subTitle={<>Last attempt: <code>{lastAttemptTime}</code></>}
+>
+  <ul>
+    <li>Status codes indicate retry eligibility</li>
+  </ul>
+</Result>
+// Icon color, text color, and visual hierarchy all coordinated by status prop
+```
+
+**Why it's sophisticated**: While composability is common, Result's implementation solves a subtle coordination problem. In error feedback, developers need consistency between visual status indication and content complexity. By accepting ReactNode everywhere while maintaining status-driven theming, Result ensures that complex layouts (which are common in error states) don't accidentally contradict their status indicator.
+
+**Evidence of design maturity**:
+- Status-based color scheme automatically applies across all areas, eliminating manual color coordination
+- ReactNode support goes beyond text: allows icons, formatted text, lists in title/subtitle without breaking styling
+- CSS-only customization layer explicitly documents what cannot be composed (size, layout variations), showing clear boundaries of the component's responsibilities
+
 ## Raw Data
 
 - [Ant Design](./ant-design/usage-patterns.md)

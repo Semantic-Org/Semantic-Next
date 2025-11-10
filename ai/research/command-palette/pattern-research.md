@@ -1,6 +1,8 @@
 # Component Pattern Research: Command Palette
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 2
@@ -431,6 +433,107 @@ Both frameworks emphasize these primary use cases:
 ### Dialog Integration
 - **ShadCN**: CommandDialog wrapper component with Radix Dialog
 - **Nuxt UI**: Built-in open/close state, integrates with defineShortcuts() composable
+
+---
+
+## Sophisticated Design Patterns
+
+### ShadCN - Custom Filter Function with Ranking
+
+**What it does**: Accepts a custom `filter` function prop that overrides default text matching with a custom ranking algorithm. The function receives `(value, search, keywords?)` and returns a numeric score (0 to hide, 1 to show). This enables advanced search implementations like fuzzy matching, phonetic matching, or weighted field matching without forking the component.
+
+```typescript
+const customFilter = (value: string, search: string, keywords?: string[]) => {
+  const extendValue = value + " " + keywords?.join(" ")
+  // Custom scoring: 1 = visible, 0 = hidden
+  return extendValue.toLowerCase().includes(search.toLowerCase()) ? 1 : 0
+}
+
+<Command filter={customFilter}>
+  {/* Items are filtered based on custom ranking */}
+</Command>
+```
+
+**Why it's sophisticated**: Command Palette search is fundamentally different from other components because *relevance ranking is intrinsic to the UX*. Users don't just want "find any match" - they want "show the most relevant match first." The filter function abstraction solves this without hardcoding a specific algorithm, allowing teams to implement their own ranking (e.g., prioritizing recently-used commands, matching exact words before partial matches, or considering command frequency).
+
+**Evidence of design maturity**:
+- Supports unlimited custom ranking algorithms without component modification
+- Includes optional `keywords` parameter for secondary search terms beyond visible text
+- `shouldFilter={false}` escape hatch available for fully manual filtering scenarios
+- Design acknowledges that "one ranking algorithm fits all" is insufficient for real-world applications
+
+---
+
+### ShadCN - Loop Navigation for Keyboard-First Interaction
+
+**What it does**: The `loop` prop on the Command component makes arrow key navigation wrap around (last item → first item, first item → last item). When users press the down arrow on the last command, focus jumps to the first command. Pressing up on the first command jumps to the last.
+
+```typescript
+<Command loop>
+  <CommandInput placeholder="Type a command..." />
+  <CommandList>
+    <CommandGroup>
+      <CommandItem>First Item</CommandItem>
+      {/* ... more items ... */}
+      <CommandItem>Last Item</CommandItem>
+    </CommandGroup>
+  </CommandList>
+</Command>
+```
+
+**Why it's sophisticated**: Command palettes are designed for *uninterrupted keyboard navigation* - users expect to stay in flow while exploring options. Without loop navigation, users hit an invisible wall at the end of the list and must press Home/End or reverse direction. Loop navigation creates an infinite carousel effect that aligns with muscle memory from similar tools (VS Code, Slack). This is unique to command-palette UX; dropdowns and menus don't typically need this pattern because they serve different interaction models.
+
+**Evidence of design maturity**:
+- Opt-in via boolean prop (not forced, respecting different preference models)
+- Respects filtering results (loops within filtered set, not the entire list)
+- Works seamlessly with keyboard shortcuts display (CommandShortcut is visual-only, navigation is separate)
+- Acknowledges that different teams have different UX preferences
+
+---
+
+### Nuxt UI - Hierarchical Navigation with Unlimited Nesting Depth
+
+**What it does**: Items can have a `children` array containing sub-items, enabling unlimited levels of nested navigation. Selecting an item with children navigates into that submenu. The `back` prop adds a back button that returns to the previous level. This creates a drill-down interface (e.g., "Settings" → "Preferences" → "Keyboard" → "Shortcuts") without flattening the entire command structure.
+
+```vue
+const groups = ref([
+  {
+    label: 'Settings',
+    items: [
+      {
+        label: 'Preferences',
+        children: [
+          { label: 'General' },
+          { label: 'Appearance' },
+          { label: 'Keyboard' }
+        ]
+      }
+    ]
+  }
+])
+
+<UCommandPalette :groups="groups" back />
+```
+
+**Why it's sophisticated**: Traditional command palettes are flat - all commands visible in a single list. Hierarchical navigation solves the *organizational complexity problem* that emerges with hundreds of commands. By grouping related commands into submenus, the palette remains navigable without overwhelming users with a massive flat list. The back button completes the pattern by enabling return navigation, creating a proper hierarchy instead of a dead-end drill-down. This organizational pattern is unique to command palettes; form selects, dropdowns, and autocompletes don't typically need to scale to hundreds of options in deep hierarchies.
+
+**Evidence of design maturity**:
+- Supports unlimited nesting depth (not capped at 2-3 levels)
+- Back button appears contextually (when inside a submenu)
+- Search functionality works across the entire hierarchy (fuzzy search finds items at any depth)
+- Preserves breadcrumb-style mental model (users always know "where" they are in the hierarchy)
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Close on select behavior:** Removed from universal pattern list and reclassified as unsupported (0/2). Neither Nuxt UI nor ShadCN auto-dismiss the palette when an item is selected. Nuxt UI exposes manual `close`/`back` button props and emits `@update:open` but keeps palette open until parent closes it. ShadCN's Command/Dialog example only toggles `open` when trigger shortcut runs. Evidence: `ai/research/command-palette/nuxt-ui/usage-patterns.md:26-110,367-417`, `ai/research/command-palette/shadcn/usage-patterns.md:198-244`. (80% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 2 frameworks surveyed (ShadCN, Nuxt UI)
 
 ## Raw Data
 

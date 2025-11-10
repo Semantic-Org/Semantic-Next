@@ -1,5 +1,7 @@
 # Checkbox - Aggregate Pattern Analysis
 
+> Version: 1.1.0
+> Last Modified: 2025-11-10
 > Last Reviewed: 2025-11-10 (by Codex)
 
 ## Executive Summary
@@ -1241,6 +1243,94 @@ ShadCN bridges the gap with a **copy-paste model**:
 
 ---
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Dual State Change API (User vs Programmatic)
+
+**What it does:** Semantic UI Classic distinguishes between user-triggered state changes (which fire callbacks) and programmatic updates (which do not). Methods like `check` and `set checked` provide explicit control over whether callbacks execute when state changes. This enables fine-grained event propagation control—user clicks trigger `onChange`/`onChecked` callbacks, while direct property assignments skip callbacks entirely.
+
+```javascript
+// With callbacks (user interaction)
+$('.checkbox').checkbox('check')    // Fires onChange, onChecked
+$('.checkbox').checkbox('uncheck')  // Fires onChange, onUnchecked
+
+// Without callbacks (programmatic update)
+$('.checkbox').checkbox('set checked')    // No callbacks
+$('.checkbox').checkbox('set unchecked')  // No callbacks
+```
+
+**Why it's sophisticated:** This pattern solves the non-obvious problem of **callback loop prevention in hierarchical selections**. When a parent checkbox controls child checkboxes, updating the parent programmatically (`set checked`) avoids triggering the onChange callback, which would otherwise create an infinite loop if the callback tries to update children. Meanwhile, child changes use `onChange` callbacks to safely update the parent state. This is a deeply considered design that anticipates complex state synchronization scenarios.
+
+**Evidence of design maturity:**
+- Explicitly documented distinction between two API categories in the jQuery interface (`check` vs `set checked`)
+- Before/after callback pattern allows validation and cancellation hooks before state changes
+- Used consistently across all state types (checked, unchecked, indeterminate, enabled, disabled)
+- Solves real-world master-child checkbox pattern without external state management library
+
+---
+
+### Radix UI - Conditional Rendering with forceMount for Animations
+
+**What it does:** Radix's `Checkbox.Indicator` component uses conditional rendering—the indicator only appears in the DOM when `data-state="checked"` or `data-state="indeterminate"`, unless `forceMount={true}` is specified. This allows developers to choose between DOM efficiency (conditional rendering) and animation flexibility (forceMount keeps the element in the DOM for exit animations).
+
+```jsx
+// Default: Indicator conditionally rendered (efficient)
+<Checkbox.Root checked={checked}>
+  <Checkbox.Indicator>
+    <CheckIcon />  {/* Not in DOM when unchecked */}
+  </Checkbox.Indicator>
+</Checkbox.Root>
+
+// With animations: Force mount for exit transitions
+<Checkbox.Root checked={checked}>
+  <Checkbox.Indicator forceMount>
+    <CheckIcon />  {/* Always in DOM, visible: hidden for unchecked */}
+  </Checkbox.Indicator>
+</Checkbox.Root>
+```
+
+**Why it's sophisticated:** This pattern elegantly resolves the non-obvious tension between **performance and animation requirements**. Most developers don't realize that conditional rendering (removing elements from DOM) breaks CSS exit animations. Radix provides an opt-in `forceMount` escape hatch that keeps the element in the DOM but hidden, enabling smooth animations without sacrificing default performance. The pattern teaches developers about React rendering lifecycle and CSS animations simultaneously.
+
+**Evidence of design maturity:**
+- Documented as a specific use case with clear naming (`forceMount` indicates "mount even when not visible")
+- Both elements (Root and Indicator) support data attributes for consistent styling regardless of mount state
+- Works seamlessly with popular animation libraries (Framer Motion, React Spring)
+- Demonstrates understanding that some UI requirements (animations) require different DOM strategies than others (efficiency)
+
+---
+
+### Ant Design - Checkbox.Group with Options Array and Disabled Per-Item
+
+**What it does:** Ant Design's `Checkbox.Group` component accepts an `options` array where each item is an object with `label`, `value`, and optionally `disabled` properties. This enables declarative group definition without manually creating child checkboxes, significantly reducing boilerplate while maintaining per-item configuration (including per-item disabled states).
+
+```jsx
+const options = [
+  { label: 'Apple', value: 'apple' },
+  { label: 'Pear', value: 'pear', disabled: true },
+  { label: 'Orange', value: 'orange' }
+];
+
+<Checkbox.Group
+  options={options}
+  value={selectedValues}
+  onChange={setSelectedValues}
+/>
+
+// Generates 3 checkboxes automatically with independent disabled states
+// Manages selection as a simple array: ['apple', 'orange']
+```
+
+**Why it's sophisticated:** This pattern solves the non-obvious problem of **declarative vs imperative composition in multi-select components**. Most frameworks force developers to manually render each child checkbox (imperative), which becomes tedious with dozens of options. Ant Design's options array pattern (declarative) provides a configuration-based approach that mirrors how data is naturally structured in applications (an array of objects with label/value/disabled properties). The per-item `disabled` property demonstrates thoughtful edge case handling—users can disable individual options without losing the ability to control the group programmatically.
+
+**Evidence of design maturity:**
+- Supports both simple string arrays and complex option objects, providing progressive enhancement
+- Per-item disabled state independent from group-level disabled state shows consideration of real-world use cases
+- Master-child checkbox pattern explicitly documented with `indeterminate` state for partial selection
+- Integrates seamlessly with Ant Design Form via `Form.Item`, indicating holistic component ecosystem thinking
+- Scales from simple cases (3 options) to complex enterprise forms (100+ options) without API changes
+
+---
+
 ## Implementation Recommendations for Semantic UI
 
 Based on the pattern analysis across 11 frameworks, here are evidence-based recommendations for implementing a modern Semantic UI Checkbox component.
@@ -2458,3 +2548,17 @@ The modern checkbox landscape shows strong consensus on core functionality (disa
 8. Consider CheckboxGroup for improved multi-select DX
 
 By learning from 11 leading frameworks while preserving Semantic UI's philosophy of clarity and developer-friendliness, the modern Semantic UI checkbox can be both familiar to existing users and competitive with contemporary solutions.
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Label association - built-in label prop:** Reduced coverage to 2/11 frameworks (Mantine, Nuxt UI only). Headless UI and HeroUI rely on separate `Label` components/children without a native `label` prop. Evidence: `ai/research/checkbox/headless-ui/usage-patterns.md:20-135`, `ai/research/checkbox/heroui/usage-patterns.md:20-78`, `ai/research/checkbox/mantine/usage-patterns.md:20-80`, `ai/research/checkbox/nuxt-ui/usage-patterns.md:97-134`. (90% confidence)
+
+**Description/help text support:** Updated built-in description prevalence to 2/11 (Mantine, Nuxt UI). Other frameworks demonstrate only composition-based descriptions and should not count toward native prop support. Evidence: `ai/research/checkbox/mantine/usage-patterns.md:52-80`, `ai/research/checkbox/nuxt-ui/usage-patterns.md:97-134`. (85% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 11 frameworks surveyed

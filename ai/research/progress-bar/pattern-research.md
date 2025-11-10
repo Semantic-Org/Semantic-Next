@@ -230,6 +230,77 @@ Across all frameworks, the progress bar component serves a universal purpose: **
 - Nuxt UI: multiple animation styles as first-class variants
 - Disable animation option rare (HeroUI, Mantine for reduced-motion)
 
+## Sophisticated Design Patterns
+
+### Ant Design - Success Segment Overlay
+
+**What it does**: Displays two separate progress values in a single bar—current progress and completed/success portion—using a nested segment pattern. The `success` prop accepts a configuration object with a percent value, rendering a visually distinct success portion alongside the active progress.
+
+```jsx
+<Progress
+  percent={50}
+  success={{ percent: 30 }}
+/>
+```
+
+This renders 30% as "success completed" and 20% as "in progress" (50% - 30%), clearly communicating partial vs. total completion states.
+
+**Why it's sophisticated**: This solves a non-obvious problem in progress workflows: distinguishing between work that has been successfully validated/completed versus work still in progress. Rather than a single linear value, it provides visual evidence of quality checkpoints within a process. Common in workflows where intermediate steps require validation before advancing.
+
+**Evidence of design maturity**:
+- Handles the edge case where `success.percent` can exceed `percent` value (displays correctly without visual artifacts)
+- Used in batch processing scenarios where some files complete validation while others remain processing
+- Demonstrates deep understanding that "progress" isn't always monotonic—some work may need rollback after validation
+
+---
+
+### Nuxt UI - Multiple Animation Style Variants for Indeterminate State
+
+**What it does**: Provides four distinct animation patterns (`carousel`, `carousel-inverse`, `swing`, `elastic`) for indeterminate/loading progress bars. Each animation communicates different visual semantics about the ongoing activity.
+
+```vue
+<UProgress :model-value="null" animation="carousel" />       <!-- Sliding movement -->
+<UProgress :model-value="null" animation="carousel-inverse" /> <!-- Reverse slide -->
+<UProgress :model-value="null" animation="swing" />           <!-- Pendulum oscillation -->
+<UProgress :model-value="null" animation="elastic" />         <!-- Bouncy, energetic movement -->
+```
+
+**Why it's sophisticated**: This addresses a subtle UX problem: indeterminate states lack semantic information about the type of work being performed. Animation style becomes a secondary signal—carousel suggests data movement or queuing, swing suggests deliberation/thinking, elastic suggests immediate responsiveness. The framework elevates animation from visual decoration to semantic communication.
+
+**Evidence of design maturity**:
+- Recognizes that different operations have different psychological associations (upload feels different from thinking/processing)
+- Only framework studied that treats animation patterns as first-class variants rather than an afterthought
+- Rare implementation showing that animation choice matters to user perception of progress type
+
+---
+
+### Mantine - Multi-Segment Composition with Auto-Contrast Label Adjustment
+
+**What it does**: Uses a compound component pattern to create segmented progress bars where each segment can have a different color and label. The `autoContrast` prop automatically adjusts label text color (light/dark) based on the background color of each segment, ensuring readability across all color combinations.
+
+```jsx
+<Progress.Root size="xl" autoContrast>
+  <Progress.Section value={40} color="lime.4">
+    <Progress.Label>Documents</Progress.Label>
+  </Progress.Section>
+  <Progress.Section value={30} color="yellow.4">
+    <Progress.Label>Media</Progress.Label>
+  </Progress.Section>
+  <Progress.Section value={30} color="cyan.7">
+    <Progress.Label>Other</Progress.Label>
+  </Progress.Section>
+</Progress.Root>
+```
+
+**Why it's sophisticated**: Multi-segment bars introduce an accessibility/readability challenge: when segments use different background colors, label text contrast becomes inconsistent. Rather than forcing developers to manage text color manually for each segment, `autoContrast` automatically computes whether black or white text will be more readable. This solves the non-obvious problem of combining color variety with text legibility.
+
+**Evidence of design maturity**:
+- Handles the edge case of light backgrounds (e.g., `lime.4`, `yellow.4`) where black text should invert to white for readability
+- Recognizes that developers will use diverse color palettes for storage/capacity displays without thinking through contrast ratios
+- Unique implementation showing deep accessibility thinking—automatic contrast adjustment is rarely built-in to components
+
+---
+
 ## Raw Data References
 
 Individual framework research reports available at:

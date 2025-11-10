@@ -309,6 +309,55 @@ interface DividerProps {
 - **Level 4 (Occasional)**: 20-39% prevalence (3-4 frameworks)
 - **Level 5 (Rare)**: <20% prevalence (1-2 frameworks)
 
+## Sophisticated Design Patterns
+
+### MUI - FlexItem Mode for Vertical Dividers
+
+**What it does**: MUI provides a `flexItem` boolean prop specifically for vertical dividers used within flex containers. When enabled, it adjusts the divider's display properties to `align-self: stretch` and modifies its height calculation to properly span the flex container's cross-axis without causing layout overflow issues.
+
+```jsx
+<Box sx={{ display: 'flex' }}>
+  <FormatBoldIcon />
+  <Divider orientation="vertical" flexItem />
+  <FormatItalicIcon />
+</Box>
+```
+
+**Why it's sophisticated**: This addresses a non-obvious CSS edge case where vertical dividers in flex containers can either collapse to zero height or overflow their container depending on the flex properties. Most developers would struggle with custom CSS to fix this, but MUI recognized this common pain point through user testing and provided a declarative solution. The prop name itself (`flexItem`) clearly communicates its purpose rather than exposing implementation details.
+
+**Evidence of design maturity**:
+- Solves a specific layout edge case that only appears in flex contexts
+- The API design shows restraint - it's a boolean flag rather than exposing multiple flex-related properties
+- Documentation explicitly guides when to use it, showing understanding of real-world usage patterns
+
+### Ant Design - Orientation Margin with RTL Intelligence
+
+**What it does**: The `orientationMargin` prop provides pixel-precise control over the spacing between divider text and the line edges. Combined with the `start/end` orientation values (v5.24.0+), this creates an internationalization-aware text positioning system that automatically adjusts for right-to-left languages.
+
+```jsx
+<Divider orientation="start" orientationMargin={50}>
+  Section Title
+</Divider>
+```
+
+**Why it's sophisticated**: Rather than forcing developers to override CSS or use arbitrary padding values, this provides semantic control over a specific visual detail that matters in professional typography. The evolution from `left/right` to `start/end` shows learning from international deployments where text direction affects visual hierarchy. The margin value applies intelligently based on text direction, maintaining consistent visual weight regardless of language.
+
+**Evidence of design maturity**:
+- Addresses typography concerns discovered through production use in international applications
+- The API evolved (v5.24.0) based on real-world RTL requirements, not theoretical planning
+- Separates logical positioning (start/end) from visual spacing (margin), showing deep understanding of internationalization
+
+### Semantic UI - Context-Aware Responsive Behavior
+
+**What it does**: Semantic UI's dividers automatically convert from vertical to horizontal orientation when used within stackable grid containers at mobile breakpoints. This happens without any additional configuration - the divider detects its container context and adjusts accordingly.
+
+**Why it's sophisticated**: This pattern recognizes that vertical dividers often separate columns in desktop layouts, but those same columns stack vertically on mobile devices where a vertical divider would be nonsensical. Instead of requiring developers to manually handle this with media queries or conditional rendering, the component intelligently adapts based on its semantic context within the layout system.
+
+**Evidence of design maturity**:
+- Prevents a common responsive design mistake where vertical dividers become invisible or misaligned on mobile
+- Shows understanding that dividers aren't isolated components but part of a larger layout system
+- The automatic behavior prevents visual bugs without requiring explicit configuration
+
 ## Recommendations for Implementation
 
 Based on this research, a modern divider component should prioritize:

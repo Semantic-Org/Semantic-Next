@@ -1,7 +1,8 @@
 # Component Pattern Research: Context Menu
 
-> Last Modified: 2025-11-05  
-> Last Reviewed: 2025-11-10 (by Agent)
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 4
@@ -351,6 +352,90 @@ All frameworks emphasize these primary use cases:
 5. **List item operations** - Add, remove, reorder
 6. **Canvas/drawing tools** - Object manipulation
 7. **IDE/code editor** - Refactor, navigate, format
+
+---
+
+## Sophisticated Design Patterns
+
+### Radix UI - Origin-Aware Transform Animations
+
+**What it does**: Radix UI exposes a CSS variable `--radix-context-menu-content-transform-origin` that dynamically reflects where the menu appears relative to the trigger. This allows animations to originate from the cursor position rather than a fixed corner, creating directional visual feedback that matches user intent.
+
+```css
+.ContextMenuContent {
+  transform-origin: var(--radix-context-menu-content-transform-origin);
+  animation-name: scaleInFromOrigin;
+}
+```
+
+**Why it's sophisticated**: Context menus appear at unpredictable locations based on cursor position and viewport constraints. Most libraries animate from a fixed point (top-left), creating visual discontinuity. By exposing the actual transform origin, Radix allows animations to flow naturally from where the user clicked, enhancing perceived responsiveness and visual coherence.
+
+**Evidence of design maturity**:
+- Reveals data-driven positioning through CSS variables (not just for styling)
+- Acknowledges the perceptual problem of disconnected animation origins
+- Supports unlimited animation possibilities while staying headless (no opinionated animation)
+
+---
+
+### PrimeReact - Programmatic Show with Context Binding
+
+**What it does**: PrimeReact's `show(event)` method accepts the right-click event and uses its coordinates to position the menu, while allowing the application to independently bind context data through state management. This decouples the menu positioning from item data.
+
+```jsx
+const onRightClick = (event, user) => {
+  setSelectedUser(user);      // Bind context data
+  cm.current.show(event);      // Position menu at click location
+};
+```
+
+**Why it's sophisticated**: Context menus must simultaneously (1) position at cursor coordinates and (2) know what data they're acting upon. Most solutions couple these concerns, but PrimeReact separates them: the event provides positioning, while state provides context. This pattern enables multi-selection scenarios, async data loading, and complex filtering of available actions based on current context.
+
+**Evidence of design maturity**:
+- Solves the two-concern problem with minimal API surface
+- Supports data updates before menu appearance (pre-fetch, filter actions)
+- Enables ref-based imperative control alongside event-driven flows
+
+---
+
+### Nuxt UI - Grouped Items with Automatic Visual Separation
+
+**What it does**: Nuxt UI implements grouped menu items via nested arrays: `[[item1, item2], [item3, item4]]` automatically renders visual separators between groups without explicit separator components. This combines semantic grouping with visual presentation.
+
+```vue
+const items = [
+  [
+    { label: 'New File' },
+    { label: 'New Folder' }
+  ],
+  [
+    { label: 'Cut' },
+    { label: 'Copy' }
+  ]
+]
+```
+
+**Why it's sophisticated**: Context menus often organize actions into semantic groups (file operations, editing operations, view options). Requiring explicit separators for each group boundary creates boilerplate and makes grouping intent implicit (buried in separator positions). By treating groups as a first-class concept with automatic rendering, Nuxt UI makes structure explicit and reduces cognitive load during implementation.
+
+**Evidence of design maturity**:
+- Recognizes grouping as semantic intent, not just visual styling
+- Eliminates separator boilerplate while maintaining flexibility
+- Supports both automatic separators and manual control via `type: 'separator'`
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Keyboard shortcut display:** Adjusted to 2 frameworks with dedicated shortcut display APIs (ShadCN via `ContextMenuShortcut`, Nuxt UI via `kbds`). Radix UI lacks shortcut helper components. Evidence: Radix file lacks shortcut helpers; ShadCN and Nuxt UI document them. (90% confidence)
+
+**Link item support:** Updated prevalence: PrimeReact `model` items accept `url` and Nuxt UI supports `type:'link'`. Evidence: framework usage documentation. (90% confidence)
+
+**Label components:** ShadCN, Radix UI (`Label`), and Nuxt UI (`type:'label'`) ship label components for menu sections. Evidence: framework usage documentation. (90% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 4 frameworks surveyed (ShadCN, Nuxt UI, Radix UI, PrimeReact)
 
 ## Raw Data
 

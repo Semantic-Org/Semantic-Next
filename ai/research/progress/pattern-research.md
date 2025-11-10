@@ -278,6 +278,47 @@ Dedicated RingProgress component separate from linear Progress. Specialized circ
 - **6+ sizes** (3 frameworks): Nuxt (8 sizes), Mantine, ShadCN
 - **Pattern**: 4-5 size options most common
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Template Variable Auto-Computation
+
+**What it does**: Progress component automatically calculates and injects dynamic values (`{percent}`, `{value}`, `{total}`, `{left}`) into label templates without requiring JavaScript formatting functions. A label template like `<div class="label">{percent}% Complete</div>` automatically replaces `{percent}` with the current percentage value.
+
+**Why it's sophisticated**: This pattern solves the real-world problem of reducing JavaScript boilerplate for text formatting. Most frameworks require callback functions (React's `format` prop, etc.), but Semantic UI Classic eliminates this need through compile-time template variable replacement. It demonstrates deep thinking about reducing API surface area while maintaining full customization.
+
+**Evidence of design maturity**:
+- Automatically calculates five different template variables (`{percent}`, `{value}`, `{total}`, `{left}`, and implicit progress state)
+- Handles the edge case where total/remaining values might not exist (gracefully omits them)
+- Works in any HTML context without JavaScript intervention - perfect for progressive enhancement
+- Reduces component complexity from "format function + label wrapper" to "text with variables"
+
+### Mantine - Compositional Multi-Section Architecture
+
+**What it does**: Progress component provides a compound component API (`Progress.Root`, `Progress.Section`, `Progress.Label`) that enables breaking a single progress bar into multiple colored segments with individual labels. Each section independently specifies its value and color, and they automatically calculate proportional widths to fill 100% of the container.
+
+**Why it's sophisticated**: This pattern addresses the specific problem of showing complex progress states like storage usage breakdown (documents 35%, photos 28%, other 15%) or password strength with multiple requirement bars. The composition pattern isn't just about modularity - it requires sophisticated internal coordination to ensure sections sum to 100% without overflow, handle label positioning across segments, and maintain accessibility across compound boundaries.
+
+**Evidence of design maturity**:
+- Handles proportional width calculation: section values auto-calculate as percentages of total container
+- Labels intelligently position themselves within narrow segments without overflow
+- Supports vertical orientation - requires rethinking label placement and size relationships
+- Integrates with theming system for automatic color contrast adjustment (`autoContrast` prop)
+- Accessibility properly scoped to compound structure with shared ARIA context
+- Common use case (password strength meter with conditional coloring) shows real-world adoption
+
+### Ant Design - Type-Variant Semantics with Positional Control
+
+**What it does**: Progress component provides three semantically distinct type variants (line, circle, dashboard) with specialized positioning controls. The circle and dashboard types support `gapDegree` (arc gap angle in degrees) and `gapPosition` (top/right/bottom/left) props that enable precise control over where the arc gap appears, transforming a full circle into a 75% dashboard arc or any custom arc configuration.
+
+**Why it's sophisticated**: This pattern demonstrates non-obvious thinking about progress visualization. While most frameworks offer "circle" as a binary variant, Ant Design recognizes that circular progress has multiple sub-use cases (full circle for spinners, 75% arcs for dashboards, custom arcs for specialized UX). The gap control is mathematically elegant - instead of separate components for each variant, parametric gap configuration enables infinite customization through two simple properties.
+
+**Evidence of design maturity**:
+- Gap system handles the edge case of inverted arcs (gap at bottom vs top) without separate props
+- Degree-based positioning is framework-agnostic (works in SVG/Canvas contexts)
+- Reduces component explosion (no separate DashboardProgress, CircleProgress, ArcProgress) through parametric design
+- Status prop with automatic icon rendering shows attention to feedback completeness
+- Indeterminate state via property omission (not separate boolean) reduces prop combinations
+
 ## Raw Data
 
 Individual framework reports:

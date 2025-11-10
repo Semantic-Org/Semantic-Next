@@ -1,6 +1,7 @@
 # Component Pattern Research: Center (Layout)
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
 > Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
@@ -342,6 +343,74 @@ Both frameworks support accessible color combinations through theme systems.
 | **Polymorphism** | Via `as` prop (Box) | Via `component` prop |
 | **Prop Count** | ~80+ (Box inheritance) | ~10-15 core props |
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Axis-Granular Absolute Centering
+
+**What it does**: The `AbsoluteCenter` component provides an `axis` prop that allows developers to center content on only the horizontal axis, only the vertical axis, or both axes simultaneously. This is useful for overlays, watermarks, and positioned content where you might want centered text over an image (centered vertically) while allowing it to respond to natural horizontal text flow.
+
+```jsx
+<AbsoluteCenter axis="vertical">     {/* Only vertical centering */}
+<AbsoluteCenter axis="horizontal">   {/* Only horizontal centering */}
+<AbsoluteCenter axis="both">         {/* Both axes (default) */}
+```
+
+**Why it's sophisticated**: Centering is typically an "all-or-nothing" operation in CSS. The axis prop recognizes that absolute positioning often requires asymmetrical centering—you want to center a watermark vertically but not disrupt its horizontal text flow, or center an overlay label only vertically on an image. This solves a non-obvious problem that emerges in real UI work.
+
+**Evidence of design maturity**:
+- Addresses the edge case where developers use `position: absolute` with transforms (expensive) when they only need centering on one axis
+- Acknowledges that watermarks, overlays, and positioned labels have different centering needs than block-level content
+- Shows restraint by not over-complicating the base Center component—the variant is isolated to AbsoluteCenter where it's actually needed
+
+---
+
+### Chakra UI - Size-Prop Consolidation for Geometric Shapes
+
+**What it does**: The `Square` and `Circle` components replace the common pattern of `width={size} height={size}` with a single `size` prop. Circle additionally auto-applies `borderRadius="full"` without requiring explicit configuration.
+
+```jsx
+// Without optimization
+<Box w="40px" h="40px" borderRadius="full" />
+
+// With Square/Circle
+<Circle size="40px" />
+```
+
+**Why it's sophisticated**: This appears simple but solves a subtle cognitive load problem. Icons, avatars, and badges are ubiquitous in UI, and they require geometric certainty (square and circular shapes). Developers would otherwise need to remember two nearly-identical dimension props and repeat width=height boilerplate. The Square/Circle pattern eliminates this friction point while communicating intent—"I want a square" is clearer than "I want equal width and height."
+
+**Evidence of design maturity**:
+- Recognizes that equal dimensions and circular shapes are not general-purpose patterns but specific to Center's common use cases (icons, avatars, badges)
+- The Circle variant auto-applies `borderRadius="full"`, preventing the mistake of creating a 40px square with a 50% radius that doesn't produce a perfect circle due to padding/border
+- Variants don't inherit from a "GeometricContainer" base—they're specific to Center, avoiding unnecessary abstraction
+
+---
+
+### Mantine - Inline Prop for Text-Flow Centering
+
+**What it does**: The `inline` prop on Mantine's Center changes the component from a block-level centering container to an inline element that centers its content while remaining in the text flow. This is distinct from polymorphic usage and addresses a specific centering scenario.
+
+```tsx
+// Block-level (default)
+<Center h={100} bg="gray">
+  <Icon />
+</Center>
+
+// Inline (stays in text flow)
+<Center inline>
+  <IconArrowLeft />
+  <Box ml={5}>Back to website</Box>
+</Center>
+```
+
+**Why it's sophisticated**: The `inline` prop solves a rarely-discussed but real problem: centering content within inline context (like within a link or inline text). Most developers either sacrifice centering (use `display: inline` and accept misalignment) or sacrifice text flow (use `display: flex` and break the line). The inline prop allows both simultaneously by using `display: inline-flex` with the appropriate centering directives. This requires understanding the subtle CSS difference between block-level and inline-level formatting contexts.
+
+**Evidence of design maturity**:
+- Mantine's implementation shows deep CSS knowledge—`inline-flex` is not commonly exposed as a high-level prop because developers often don't distinguish between inline and block contexts
+- The prop name is simple ("inline") but the underlying behavior handles vertical alignment in inline contexts, which is non-obvious
+- Documentation provides a practical example (icon + text in a link) that demonstrates real-world necessity, not theoretical use
+
+---
+
 ## Limited Ecosystem Observation
 
 Only 2 frameworks provide dedicated Center components out of the surveyed frameworks. Center utilities are specialized layout helpers that:
@@ -351,6 +420,18 @@ Only 2 frameworks provide dedicated Center components out of the surveyed framew
 - Are considered convenience utilities
 
 Many frameworks expect developers to use standard flexbox CSS or more general layout components rather than dedicated centering primitives.
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Polymorphic element support:** Updated prevalence to 2/2 (100%). Clarified that Chakra UI exposes `as` prop (inherited from Box) while Mantine uses `component` prop. Both frameworks offer native polymorphism for semantic element overrides. Evidence: `ai/research/center/chakra-ui/usage-patterns.md:470-478`, `ai/research/center/mantine/usage-patterns.md:52-80`. (90% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 2 frameworks surveyed (Chakra UI, Mantine)
 
 ## Raw Data
 

@@ -620,6 +620,43 @@ Tabs components solve the fundamental problem of **organizing related content in
 - $.tab() API → component props
 - Remote loading → fetch in useEffect/onMounted
 
+## Sophisticated Design Patterns
+
+### Ant Design - Dual-Purpose Type System
+
+**What it does**: Ant Design's `type` prop serves dual purposes: it defines both visual appearance (line, card, button) and behavioral capabilities (editable-card enables add/remove operations). A single `type="card"` with `closable` and `onEdit` callback transforms a display component into an interactive editor, eliminating the need for separate management logic.
+
+**Why it's sophisticated**: Most frameworks separate visual variants from behavioral modes. Ant Design collapses this distinction by making the card type a semantic carrier of intent—when you choose card type, you're not just changing style, you're signaling that these tabs are mutable. This reduces API surface area while increasing discoverability.
+
+**Evidence of design maturity**:
+- Handles the edge case where the last tab is removed (must select another tab programmatically)
+- The `onEdit` callback receives both `targetKey` and `action` parameters, allowing branching logic for add vs. remove in a single function
+- Size variants (large/small) persist across type changes, showing thoughtful composition of concerns
+
+### Radix UI - Activation Mode Duality
+
+**What it does**: Radix exposes `activationMode` as a first-class property with two distinct modes: `"automatic"` (arrow keys activate immediately, like browser tabs) and `"manual"` (arrow keys focus only, Space/Enter activates, like form controls). This isn't just styling—it's a fundamental interaction pattern shift that changes keyboard semantics entirely.
+
+**Why it's sophisticated**: This pattern addresses a UX ambiguity that most frameworks leave unresolved. When keyboard focus moves via arrow keys, should the tab automatically display? This depends on context—fast navigation favors automatic, forms with validation favor manual. Radix makes this explicit and toggleable, delegating the UX decision to developers rather than enforcing one pattern.
+
+**Evidence of design maturity**:
+- Both modes are fully ARIA-compliant, with the spec supporting both patterns through different use cases
+- The `forceMount` prop on Content works with both activation modes without requiring different APIs
+- Keyboard behavior changes (Home/End still work in both modes), showing consistent treatment of special keys across modes
+
+### Semantic UI Classic - Hierarchical Scoping with Context
+
+**What it does**: Semantic UI's `context` parameter enables the Tab module to scope activation to a specific DOM subtree. When `$('#group1 .menu .item').tab({ context: '#group1' })` executes, clicking tabs in group1 only affects tab visibility within group1, leaving other tab groups unaffected. This pattern scales to arbitrary nesting depth through the `maxDepth: 25` setting.
+
+**Why it's sophisticated**: This solves a real problem in complex UIs where multiple independent tab groups exist on the same page. Other frameworks force developers to manage this through state isolation (separate state for each group). Semantic UI inverts the problem: the component itself respects DOM structure as the source of truth, eliminating entire classes of state bugs.
+
+**Evidence of design maturity**:
+- The `deactivate: 'siblings'` default respects the semantic meaning of "tab group" (siblings in the menu)
+- Nested tabs (via `data-tab="parent/child"`) work with the same context mechanism, avoiding special cases for nesting
+- Cache management (`cache read`, `cache write`) is transparent but hookable, allowing performance tuning without breaking the scoping model
+
+---
+
 ## Framework Recommendations
 
 **For Maximum Flexibility:**

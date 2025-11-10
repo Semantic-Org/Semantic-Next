@@ -1,6 +1,8 @@
 # Component Pattern Research: Chart
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 3
@@ -253,6 +255,96 @@ Only 3 frameworks provide Chart components out of the broader ecosystem. Charts 
 
 Many frameworks expect developers to integrate chart libraries directly rather than providing wrapper components.
 
+## Sophisticated Design Patterns
+
+### Mantine - Per-Series Curve Type Configuration
+
+**What it does**: Individual chart series can specify their own curve types (monotone, linear, bump, stepAfter) independent of the chart-wide default. This enables mixing different line smoothing styles within a single chart: one series can use smooth monotone curves while another uses sharp linear segments on the exact same visualization.
+
+**Why it's sophisticated**: Charts must balance mathematical continuity with visual hierarchy. Allowing per-series curve type specification solves the problem where different data types have different interpolation requirements (financial data often needs linear precision, while trends benefit from smooth curves). Most frameworks force uniform curve types across all series or lack this configuration entirely, missing an important design consideration.
+
+**Evidence of design maturity**:
+- Handles edge cases where mixed data semantics require different interpolation approaches
+- Fallback pattern: series without explicit curveType inherit chart-wide default, preventing brittle configurations
+- Demonstrates restraint: kept at series level rather than per-data-point, balancing flexibility with maintainability
+
+Example from Mantine usage patterns:
+```jsx
+<LineChart
+  series={[
+    { name: 'Series 1', color: 'blue.6', curveType: 'monotone' },
+    { name: 'Series 2', color: 'red.6', curveType: 'linear' },
+    { name: 'Series 3', color: 'green.6' } // Falls back to default
+  ]}
+  curveType="stepAfter"
+/>
+```
+
+---
+
+### PrimeReact - Legend Click Toggle with Dataset Visibility Management
+
+**What it does**: Clicking legend items triggers `chart.toggleDataVisibility(datasetIndex, datasetIndex)`, dynamically hiding or showing entire data series in the chart. The legend maintains visual state (opacity/disabled appearance) matching the chart's actual visibility state, and the Chart.js instance re-renders automatically.
+
+**Why it's sophisticated**: Data exploration requires selective visibility without data loss. This pattern decouples legend UI interaction from chart data state through Chart.js's instance API, enabling users to focus on specific series while keeping others loaded in memory. It's non-trivial because legend interaction must stay synchronized with both the underlying data structure and visual rendering, and most frameworks either prevent legend interaction or require manual state management.
+
+**Evidence of design maturity**:
+- Manages bidirectional state: legend visual state reflects chart visibility, and chart visibility reflects data structure
+- Works with Chart.js plugins and lifecycle hooks, showing integration thoughtfulness
+- Handles edge cases: toggling last series, re-toggling to show, performance with many series
+- Real-world validation: explicitly mentioned in version history as corrected based on actual framework capability (v1.1.0 update noted legend interaction available only via Chart.js wrapper)
+
+Example from PrimeReact usage patterns:
+```javascript
+const legendOptions = {
+  plugins: {
+    legend: {
+      onClick: (e, legendItem, legend) => {
+        const chart = legend.chart;
+        const datasetIndex = legendItem.datasetIndex;
+        chart.toggleDataVisibility(datasetIndex, datasetIndex);
+      }
+    }
+  }
+};
+```
+
+---
+
+### ShadCN - ChartConfig Pattern for Type-Safe Data Key Mapping
+
+**What it does**: A centralized `ChartConfig` object maps data property keys to display labels and CSS variable colors, enforced with TypeScript `satisfies ChartConfig`. This single source of truth eliminates label duplication and ensures color consistency: changing `chartConfig.revenue = { label: 'Revenue', color: 'var(--chart-1)' }` automatically updates legends, tooltips, and all series references.
+
+**Why it's sophisticated**: Charts face a unique problem: data keys (internal property names like 'revenueQ1') must map to human-readable labels while colors coordinate across disparate UI elements (legend, bars, tooltip indicators). Most frameworks require repeating labels in legends and tooltips, creating consistency risks. This pattern achieves type-safe synchronization without introducing another abstraction layer, showing deep thinking about the specific pain point of chart configuration.
+
+**Evidence of design maturity**:
+- Separates configuration from rendering logic: config defined once, referenced throughout
+- TypeScript support prevents silent misconfigurations (`satisfies ChartConfig` validates at compile time)
+- CSS variable approach defers color values to design system tokens, not hardcoded in config
+- Handles dark mode elegantly: `color: 'hsl(var(--chart-1) / 0.9)'` with automatic variable switching per theme
+- Real-world scalability: demonstrated in multiple chart types (bar, line, area, pie) without modification
+
+Example from ShadCN usage patterns:
+```typescript
+const chartConfig = {
+  desktop: {
+    label: 'Desktop',
+    color: 'hsl(var(--chart-1))',
+  },
+  mobile: {
+    label: 'Mobile',
+    color: 'hsl(var(--chart-2))',
+  },
+} satisfies ChartConfig
+
+// Single config source:
+<Bar dataKey="desktop" fill="var(--color-desktop)" />
+<ChartLegend content={<ChartLegendContent />} /> {/* auto-pulls labels & colors */}
+<ChartTooltip content={<ChartTooltipContent />} /> {/* auto-pulls labels & colors */}
+```
+
+---
+
 ## Accessibility Considerations
 
 ### Common Patterns
@@ -288,6 +380,20 @@ Many frameworks expect developers to integrate chart libraries directly rather t
 - Include descriptive labels and legends
 - Ensure sufficient color contrast
 - Support keyboard navigation
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Labels array prevalence:** Updated to reflect that only PrimeReact explicitly exposes `labels` arrays; Mantine and ShadCN rely on object-array datasets without separate labels. Evidence: `ai/research/chart/mantine/usage-patterns.md`, `ai/research/chart/shadcn/usage-patterns.md`, `ai/research/chart/primereact/usage-patterns.md:720-780`. (90% confidence)
+
+**Legend interaction:** Corrected to note that click-to-toggle legend functionality is available only via Chart.js wrapper in PrimeReact (`legend.onClick` → `toggleDataVisibility`). Evidence: `ai/research/chart/primereact/usage-patterns.md:720-780`. (90% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 3 frameworks surveyed (Mantine, PrimeReact, ShadCN)
 
 ## Raw Data
 

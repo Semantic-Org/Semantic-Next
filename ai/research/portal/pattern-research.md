@@ -297,6 +297,78 @@ const element = document.getElementById('portal-root');
 - **Audience**: Rapid prototyping
 - **Integration**: Transparent to users
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Disabled/Inline Mode Fallback
+
+**What it does**: The `disabled` prop renders portaled content inline instead of to document.body, allowing a single Portal component to switch between portal and non-portal behavior without remounting. This enables responsive design patterns where overlay behavior depends on viewport size or other conditions.
+
+```jsx
+<Portal disabled={isMobileOrSmallViewport}>
+  <div>Dynamically portaled or inline</div>
+</Portal>
+```
+
+**Why it's sophisticated**: Portal components traditionally require either being present (portal to body) or absent (not mounted). Chakra UI solves the problem of needing the same component tree to sometimes portal and sometimes not port—critical for responsive overlays that might be inline dropdowns on mobile but floating modals on desktop. This avoids component tree restructuring based on responsive conditions.
+
+**Evidence of design maturity**:
+- Enables responsive portal behavior without conditional component rendering patterns
+- SSR-aware (renders inline during server rendering automatically, solving hydration challenges)
+- Maintains event bubbling and context access regardless of portal mode—React tree semantics preserved even when DOM position changes
+
+---
+
+### Mantine - Target Node Reuse Optimization
+
+**What it does**: The `reuseTargetNode` prop consolidates multiple Portal instances into a single DOM container instead of creating separate portal divs for each instance. Multiple portals with this flag enabled share one target element appended to document.body.
+
+```jsx
+<Portal reuseTargetNode>
+  <Tooltip>Tooltip 1</Tooltip>
+</Portal>
+<Portal reuseTargetNode>
+  <Tooltip>Tooltip 2</Tooltip>
+</Portal>
+// Renders to same DOM node, not separate portal containers
+```
+
+**Why it's sophisticated**: It solves an often-overlooked problem: applications with many simultaneous portals (tooltips, popovers, notifications) create N portal container divs in the DOM. This optimization reduces DOM noise and improves performance by sharing a single container. Most frameworks ignore this; Mantine makes it explicit and available.
+
+**Evidence of design maturity**:
+- Recognizes that portal container proliferation is a real performance concern in production apps
+- Provides explicit opt-in rather than auto-reuse (maintaining predictability for developers)
+- Works across all portal instances in the app—demonstrates awareness of application-level, not just component-level, concerns
+
+---
+
+### Radix UI / Frameworks - React Tree Preservation Across Portal Boundary
+
+**What it does**: Portal preserves React component tree semantics despite DOM repositioning. Events bubble through the React tree (not DOM tree), context providers remain accessible, and component lifecycle treats the portal as transparent—all features that would be impossible with naive DOM-only porting.
+
+```jsx
+<div onClick={handleParentClick}>
+  <Portal>
+    <button>Click me</button>
+    {/* onClick bubbles to parent div via React tree, NOT DOM */}
+  </Portal>
+</div>
+
+<ThemeProvider>
+  <Portal>
+    <StyledComponent /> {/* Accesses theme context normally */}
+  </Portal>
+</ThemeProvider>
+```
+
+**Why it's sophisticated**: This is the fundamental reason Portal exists as a React component rather than just calling `ReactDOM.createPortal` directly. Maintaining React semantics while breaking DOM hierarchy requires careful handling of context providers, event systems, and component relationships—it's non-obvious that this "just works."
+
+**Evidence of design maturity**:
+- Solves the problem that DOM tree and React tree divergence creates confusion about "where events go" and "how context flows"
+- All frameworks implement this consistently, suggesting it's a solved, well-understood problem
+- Developers can treat portal content as logically "inside" its parent component despite physical DOM position elsewhere
+
+---
+
 ## Use Case Consensus
 
 All frameworks emphasize these primary use cases:

@@ -116,6 +116,47 @@ Transfer components provide dual-list interfaces for moving items between availa
 
 Only 3 frameworks provide Transfer components - considered specialized functionality.
 
+## Sophisticated Design Patterns
+
+### Ant Design - Dual-State Feedback Loop (Selection vs. Transfer Separation)
+
+**What it does**: Separates item selection (checkbox toggling) from item transfer (button actions). Users first select items, then deliberately move them via buttons. This creates a two-stage workflow where selected items are visually marked but not transferred until the user explicitly clicks the transfer button. Selection persists across lists, allowing users to select from both left and right lists independently before any transfer occurs.
+
+**Why it's sophisticated**: Transfer components must balance the tension between "what's selected" and "what moves." Most components collapse this into a single action, but Ant Design's explicit separation enables sophisticated workflows. It allows users to build up selections across both lists before committing to a transfer, and selection state can be cleared independently from transfer state. This prevents accidental transfers and creates clear intent signals—a non-obvious problem that many transfer interfaces get wrong.
+
+**Evidence of design maturity**:
+- Selective callback system (onChange vs. onSelectChange) shows deep understanding that selection and transfer are distinct operations with different lifecycles
+- Ability to programmatically control selectedKeys independently of targetKeys creates powerful composition patterns for validation, confirmation dialogs, and multi-step workflows
+- The scroll event handler (onScroll) was added specifically to support lazy-loading patterns, indicating the framework anticipated advanced use cases beyond basic transfers
+
+---
+
+### PrimeReact - Touch-Aware Multi-Select with Platform Adaptation
+
+**What it does**: The metaKeySelection property automatically disables itself on touch devices, allowing users to select multiple items without holding Ctrl/Cmd on mobile. The same prop, on desktop, enforces the meta key requirement. The framework detects the device type at runtime and adjusts the interaction paradigm without requiring developers to write conditional logic.
+
+**Why it's sophisticated**: Transfer components typically ignore the fundamental input model differences between touch and keyboard-mouse interfaces. Touch devices have no "meta key" concept, yet many transfer implementations force users to use a key that doesn't exist on their device. PrimeReact's solution is non-obvious: instead of creating separate components or forcing developers to detect devices, it modifies its own behavior. This requires the component to understand device capabilities and adjust its API expectations accordingly—a cross-cutting concern that few components address.
+
+**Evidence of design maturity**:
+- The feature ships as a simple prop but requires sophisticated runtime detection logic under the hood
+- Event payload structure (onMoveToTarget, onMoveToSource) designed to work identically whether items came from touch selection or keyboard selection
+- Filter system works across both interaction models, indicating the entire component was architected with multi-device support from the ground up
+
+---
+
+### Ant Design - Granular One-Way Transfer Mode with Directional Control
+
+**What it does**: The oneWay prop restricts transfers to left→right only, removing the left-pointing button. This creates a wizard-like workflow where items flow in one direction. Combined with the separate render prop for custom item templates and the disabled item mechanism, it enables scenarios where users can only advance items through stages but not move them backward—useful for progressive disclosure workflows or state-machine-like interfaces.
+
+**Why it's sophisticated**: Most transfer components assume bidirectional movement is the baseline use case. The one-way mode solves a non-obvious problem: enforcing progression workflows where moving backward is either forbidden or creates validation issues. It requires the component to understand that transfer direction isn't just a UI affordance—it's a semantic constraint that affects validation, state management, and workflow intent. The fact that disabled items, render functions, and one-way mode all work together suggests the component was designed with state-machine-like workflows in mind from the beginning.
+
+**Evidence of design maturity**:
+- Works seamlessly with custom rendering and disabled items, suggesting the component anticipated combining multiple constraint types
+- Operations prop allows custom button labels, enabling "Next Step" / "Complete" language instead of generic directional arrows
+- Form integration (Form.Item wrapper pattern) suggests the component understood one-way mode would be used in multi-step form submissions
+
+---
+
 ## Raw Data
 
 - [Ant Design](./ant-design/usage-patterns.md)

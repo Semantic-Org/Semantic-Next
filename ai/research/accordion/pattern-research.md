@@ -705,6 +705,98 @@ Across frameworks, these components are frequently mentioned alongside Accordion
 
 ---
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Dynamic Content Loading with Lifecycle Callbacks
+
+**What it does**: Implements AJAX-driven lazy content loading tied to accordion lifecycle events. When a panel opens, content is fetched from a server endpoint and cached. This solves the problem of loading heavy content only when needed, reducing initial page load while maintaining responsiveness. The pattern uses data attributes to store URLs and tracks load state to prevent duplicate requests.
+
+```javascript
+$('.ui.accordion').accordion({
+  onOpen: function(currentIndex) {
+    const $content = $('.accordion .content').eq(currentIndex);
+    const url = $content.data('content-url');
+
+    // Only load once, check for loading indicator
+    if (url && $content.find('i.loading').length) {
+      $.get(url, function(html) {
+        $content.html(html);  // Replace loading state with content
+      });
+    }
+  }
+});
+```
+
+**Why it's sophisticated**: This pattern solves a non-obvious problem: accordions with dynamic content need intelligent caching to avoid network thrashing. The solution elegantly uses DOM state (presence of loading indicator) as a cache check rather than external state management. Most frameworks don't expose lifecycle hooks deep enough to implement this pattern—it requires intimate knowledge of when panels actually finish expanding.
+
+**Evidence of design maturity**:
+- Handles the edge case of duplicate requests by checking DOM state before fetching
+- Uses delegated events automatically, so dynamically added panels work without re-initialization
+- Tracks load completion in markup itself (removing the loading spinner signals "already loaded")
+- Backward compatible with static content (panels without data-url attributes work unchanged)
+
+---
+
+### Chakra UI - Compound Component Indicator Composition with Separate Animation Control
+
+**What it does**: Separates the expand indicator (chevron) into its own component (`Accordion.ItemIndicator`) so it can be composed and styled independently from the trigger. This enables advanced patterns like custom animations, conditional rendering, or integrating with external animation libraries. Unlike simple components that bundle the indicator with the trigger, this separation allows fine-grained control over visual feedback.
+
+```jsx
+<Accordion.ItemTrigger
+  _expanded={{
+    '& .accordion-indicator': {
+      transform: 'rotate(180deg)',
+    }
+  }}
+>
+  <Span flex="1">Item with custom animation</Span>
+  <Accordion.ItemIndicator className="accordion-indicator" />
+</Accordion.ItemTrigger>
+```
+
+**Why it's sophisticated**: This pattern addresses the tension between consistency and customization. By making the indicator a composable sub-component, Chakra provides a clear extension point for teams that want non-standard animations, conditional visibility, or complex interactions without having to fork the component or override styles. The `_expanded` prop provides context-aware styling—the indicator knows its parent's expansion state through CSS selector composition rather than prop drilling.
+
+**Evidence of design maturity**:
+- Resists the temptation to bundle everything into one component; each piece has a clear responsibility
+- Supports both simple use cases (no indicator customization) and complex ones (animated icon libraries)
+- Works with any animation library or approach via CSS selector targeting
+- The separation discovers edge cases: teams can now create accessible custom indicators that weren't possible before
+
+---
+
+### Mantine - Semantic Heading Order Control for Accessibility at Scale
+
+**What it does**: Provides an `order` prop that automatically wraps accordion control text in semantic heading tags (h2–h6). This solves a critical but often-overlooked accessibility problem: accordions frequently break document heading hierarchies. Instead of forcing manual heading nesting or requiring developers to understand ARIA labeling, Mantine makes heading structure a first-class configuration option that applies consistently across the entire accordion.
+
+```jsx
+// Wrapped in h2 tags for consistent document outline
+<Accordion order={2}>
+  <Accordion.Item value="item-1">
+    <Accordion.Control>Section Title</Accordion.Control>
+    <Accordion.Panel>Content</Accordion.Panel>
+  </Accordion.Item>
+</Accordion>
+
+// Wrapped in h3 tags for nested context
+<Accordion order={3}>
+  <Accordion.Item value="item-1">
+    <Accordion.Control>Subsection Title</Accordion.Control>
+    <Accordion.Panel>Content</Accordion.Panel>
+  </Accordion.Item>
+</Accordion>
+```
+
+**Why it's sophisticated**: Most frameworks handle ARIA attributes (aria-expanded, aria-controls) which satisfy automated accessibility checkers, but they miss the semantic HTML requirement that document outlines be meaningful. This pattern shows mature thinking: it recognizes that accessibility isn't just about ARIA compliance, it's about semantic correctness. By making heading order configurable, Mantine acknowledges that the same accordion component serves different contexts—sometimes as a top-level navigation structure, sometimes as nested detail sections.
+
+**Evidence of design maturity**:
+- Solves the "accordion in accordion" problem without requiring manual h2/h3 nesting at every level
+- Provides structured flexibility: developers choose the starting heading level, framework ensures consistency
+- Works automatically across all items without additional configuration per item
+- Respects progressive enhancement: developers who don't set `order` still get functional accordions, just with less semantic structure
+- Addresses a gap that ARIA-only solutions miss: semantic heading order creates proper document outline for screen reader users and search engines
+
+---
+
 ## Conclusion
 
 The Accordion component is a **universal pattern** with exceptional consistency across all major frameworks. Key findings:

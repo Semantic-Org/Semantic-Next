@@ -362,6 +362,62 @@ Both frameworks emphasize spacing utility patterns:
 - **Ant Design**: v5.x with extensive evolution (classNames/styles in v5.6.0+, Compact in v4.24.0+)
 - **Mantine**: v8.3.6 with consistent API
 
+## Sophisticated Design Patterns
+
+### Ant Design - Asymmetric Spacing via Array Notation
+
+**What it does**: Space accepts `size={[horizontal, vertical]}` array format to apply different spacing values on the main and cross axes simultaneously. For example, `size={[8, 16]}` creates 8px horizontal spacing and 16px vertical spacing in the same component instance.
+
+**Why it's sophisticated**: This solves a real layout problem that appears simple but is difficult to handle otherwise. Most spacing solutions force you to choose: either consistent spacing in one direction, or nest multiple components. The array approach allows fine-grained control over both axes simultaneously without additional wrapping, making it essential for designs where horizontal and vertical rhythm differ.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Works correctly with `wrap={true}`, maintaining proper spacing on both wrapped lines and within lines
+- **Real-world usage**: Essential for responsive button groups and tag layouts where compact horizontal spacing is needed but generous vertical spacing prevents visual crowding
+- **Design restraint**: Doesn't expose every flexbox property; instead intentionally limits to exactly two dimensions (horizontal/vertical), preventing misuse
+
+---
+
+### Ant Design - Space.Compact with Collapsed Borders
+
+**What it does**: Space.Compact is a sub-component that renders form elements (Input, Select, Button) with visually collapsed borders so they appear as a single connected unit. For example:
+```jsx
+<Space.Compact>
+  <Input style={{ width: '20%' }} defaultValue="0571" />
+  <Input style={{ width: '30%' }} defaultValue="26888888" />
+</Space.Compact>
+```
+Results in inputs that appear as a single component with no border separation.
+
+**Why it's sophisticated**: This pattern requires understanding how form components render borders and managing the interaction between spacing layout and visual border collapse. It's not a simple spacing utility—it's a specialized layout pattern that solves the "connected input groups" problem by combining spacing control with CSS border suppression on adjacent elements.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Includes `direction` prop (horizontal/vertical) to handle both linear input groups and vertical form stacks; `block` mode ensures full-width behavior without layout shift
+- **Real-world usage**: Ubiquitous in real applications for date pickers (country code + phone number), search with filter, and other compound input patterns
+- **Design restraint**: Deliberately scoped to form elements only; doesn't attempt to collapse borders on arbitrary components, preventing misuse and unintended visual effects
+
+---
+
+### Ant Design - Split/Divider Injection Pattern
+
+**What it does**: Space accepts a `split` prop that automatically renders a specified element (typically Divider) between each child without manually adding dividers to the children array. Example:
+```jsx
+<Space split={<Divider type="vertical" />}>
+  <Link>Home</Link>
+  <Link>About</Link>
+  <Link>Contact</Link>
+</Space>
+```
+Automatically renders dividers between items without cluttering the children array.
+
+**Why it's sophisticated**: This pattern solves a meta-problem about component composition: how to add visual separators without either (1) requiring users to manually interleave elements, or (2) using CSS nth-child selectors that are fragile. By making the divider a prop, Space takes responsibility for placement logic, reducing boilerplate and making the intent explicit in the JSX.
+
+**Evidence of design maturity**:
+- **Edge case handling**: Correctly handles edge cases like not rendering a divider after the last child or before the first child; works with both horizontal and vertical layouts by automatically selecting the correct divider orientation
+- **Real-world usage**: Standard pattern for navigation links, breadcrumb separators, and action button lists where visual separation improves scannability
+- **Design restraint**: Accepts any ReactNode (not just Divider), but the pattern implicitly assumes the split element is a visual separator, preventing confusion about when to use this vs. wrapping children
+
+---
+
 ## Raw Data
 
 - [Ant Design](./ant-design/usage-patterns.md)

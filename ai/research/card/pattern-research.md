@@ -1,6 +1,8 @@
 # Component Pattern Research: Card
 
-> Last Modified: 2025-11-04
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 10
@@ -476,6 +478,43 @@ Framework-specific innovations:
 - Video support (10%)
 - Background image (10%)
 
+## Sophisticated Design Patterns
+
+### Ant Design - Semantic Sub-Components (Card.Meta & Card.Grid)
+
+**What it does**: Card.Meta encapsulates the common pattern of avatar + title + description in a single semantic sub-component. Card.Grid provides position-aware grid sections within cards, where each cell can have independent hover behavior and flexible width control. Together they solve the problem of "how to structure common metadata patterns and internal layouts within cards without forcing boilerplate composition."
+
+**Why it's sophisticated**: Most frameworks leave developers to compose these patterns manually. Ant Design recognized that metadata (especially user profiles, article previews, product cards) follows a predictable structure and created Card.Meta as a reusable sub-component. Card.Grid is non-obvious because it doesn't require the card owner to understand CSS grid—it automatically handles spacing, borders, and hover states for grid cells.
+
+**Evidence of design maturity**:
+- Card.Meta automatically sizes and aligns avatar, title, and description with zero configuration
+- Card.Grid cells can toggle `hoverable` per-cell, enabling selective interactivity for matrix layouts without duplicating hover logic
+- Documentation shows these sub-components work independently: Card.Meta can be used without Grid, Grid without Meta, yet compose seamlessly together
+
+### Mantine - Position-Aware Section Margins (Card.Section with inheritPadding)
+
+**What it does**: Card.Section automatically calculates and applies negative margins based on its position in the card hierarchy. A first-child section gets top/left/right negative margins for full-bleed headers, last-child gets bottom/left/right, and middle children only get left/right. The `inheritPadding` prop allows sections to adopt the Card's padding without repeating it, solving the problem of "how to create full-width sections inside a padded container."
+
+**Why it's sophisticated**: This is a subtle but powerful solution to a real layout problem. Without it, developers must manually calculate negative margins, track child position, and manage padding inheritance—error-prone in responsive designs. Mantine's approach is non-obvious because it relies on React's ability to map direct children and automatically determine position context.
+
+**Evidence of design maturity**:
+- Documentation explicitly documents the composition constraint (no fragments allowed) and why it exists—showing acknowledgment of the implementation trade-offs
+- Automatically adjusts borders to the section's position (top section border-top only, bottom section border-bottom only) without extra props
+- The pattern scales to arbitrary numbers of sections without behavioral changes
+
+### MUI - Dual-Mode CardMedia (Image vs Background Rendering)
+
+**What it does**: CardMedia offers two rendering modes: as an actual media element (img, video, audio via `component` prop) or as a div with background-image CSS. This solves the component-specific problem of "how to handle diverse media types and lazy-loading strategies while maintaining consistent card media styling." The `height` requirement is explicit and enforced.
+
+**Why it's sophisticated**: Most card implementations treat media as a simple image slot. MUI recognized that "media" means different things—sometimes you need lazy-loaded background images for better performance, sometimes you need actual img tags for SEO, sometimes video. Rather than creating separate components, the dual-mode approach with `component` prop provides flexibility while maintaining single API. The explicit height requirement prevents common "invisible media" bugs where developers forget to size their media.
+
+**Evidence of design maturity**:
+- Performance consideration: background-image mode enables lazy loading of decorative images, while img mode is used when media is content
+- The height requirement is enforced and documented as mandatory, preventing a common category of bugs
+- Pair of props (`image` for background-image URL, `component` for element type) is minimal and composable
+
+---
+
 ## API Design Recommendations
 
 ### For Web Component Implementation (Semantic UI Next)
@@ -709,3 +748,21 @@ Individual framework reports available at:
 **Frameworks**: Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact, Radix UI, Semantic UI Classic, ShadCN
 **Pattern Count**: 85+ unique patterns identified
 **Total Lines Analyzed**: 4,545 lines across 10 framework reports
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Elevation/shadow support:** Aligned prevalence with per-framework capabilities. PrimeReact lacks native elevation props. Evidence: cross-referenced `ai/research/card/primereact/usage-patterns.md` against other framework docs. (90% confidence)
+
+**Loading state support:** Corrected to reflect that only Ant Design documents a native loading prop. Other frameworks require manual loading state implementation. Evidence: `ai/research/card/ant-design/usage-patterns.md`. (90% confidence)
+
+**Size variant presets:** Updated to reflect that predefined size options exist only in Ant Design, Chakra UI, and Radix UI. Evidence: `ai/research/card/mantine/usage-patterns.md`, `ai/research/card/semantic-ui-classic/usage-patterns.md`. (90% confidence)
+
+### Version 1.0.0 (2025-11-04) - Initial Research
+- 10 frameworks surveyed
+- 85+ unique patterns identified
+- 4,545 lines analyzed across framework reports

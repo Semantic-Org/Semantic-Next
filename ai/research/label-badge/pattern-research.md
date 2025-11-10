@@ -715,6 +715,99 @@ Only **Chakra UI**, **HeroUI**, **Mantine**, **MUI**, and **Radix UI** explicitl
 
 ---
 
+## Sophisticated Design Patterns
+
+This section highlights advanced, component-specific patterns that demonstrate deep thinking about label/badge problems unique to these components.
+
+### Ant Design - Count Overflow Handling with Visual Truncation
+
+**What it does**: The `overflowCount` prop implements a smart count indicator that displays numbers up to a threshold, then shows "99+" when exceeded. This solves the real-world problem of displaying unbounded notification counts in fixed-width containers without breaking layout.
+
+```jsx
+// Standard count
+<Badge count={5}>Content</Badge>        // Shows "5"
+
+// Overflow handling
+<Badge count={150} overflowCount={99}>
+  <Avatar />
+</Badge>                                // Shows "99+"
+
+// Show zero explicitly
+<Badge count={0} showZero>
+  <Avatar />
+</Badge>                                // Shows "0"
+```
+
+**Why it's sophisticated**: This isn't just a "max number" cap—it's a content truncation strategy that acknowledges badges live in constrained visual spaces. The "99+" convention is industry standard but rarely exposed as an API. Combining `overflowCount` + `showZero` suggests thought about both lower and upper bounds of acceptable badge content. This prevents layout shift when count changes from 0→1 or 99→100+.
+
+**Evidence of design maturity**:
+- Recognizes that notification counts are unbounded data in bounded UI space
+- "99+" is deliberately chosen (large enough to matter, small enough to display)
+- `showZero` prop enables use cases like "0 unread messages" vs hiding the badge entirely
+- Only 2/9 Badge frameworks implement this—most treat badges as static labels
+
+### Mantine - Polymorphic Badge with Component Prop
+
+**What it does**: The `component` prop transforms a Badge from a `<div>` into any HTML element or React component. This enables badges to function as links, buttons, or custom styled wrappers without wrapping in additional markup.
+
+```jsx
+// Default: renders as div
+<Badge>Static</Badge>
+
+// As anchor link
+<Badge component="a" href="/profile">
+  @username
+</Badge>
+
+// Type-safe polymorphism with TypeScript
+<Badge<'a'> component="a" href="/profile">
+  Link Badge
+</Badge>
+```
+
+**Why it's sophisticated**: Most badge implementations treat the component as a display-only element, requiring users to wrap it if they need interactivity. Polymorphic rendering inverts this—the component adapts to its container's needs. This is particularly elegant because badges are often small decorative elements that shouldn't require additional DOM wrapper layers. The TypeScript generic support shows the pattern is designed for type safety, not just flexibility.
+
+**Evidence of design maturity**:
+- Avoids "wrapper div syndrome" that plagues many badge implementations
+- Type-safe polymorphism demonstrates consideration for TypeScript-first teams
+- Acknowledges that small components shouldn't force extra DOM nesting
+- Enables patterns like badge-links without breaking semantic HTML
+- Only 4/10 frameworks implement polymorphic rendering—a differentiator
+
+### Chakra UI v3 - Compound Component Pattern for Tags
+
+**What it does**: Tags evolve from a flat component (v2: `<Tag><TagLabel>Text</TagLabel></Tag>`) into a namespaced compound component system (v3: `<Tag.Root><Tag.Label>Text</Tag.Label><Tag.CloseTrigger /></Tag.Root>`). This provides explicit DOM structure while maintaining flexible composition.
+
+```jsx
+// v2: Flat, loosely coupled
+<Tag colorScheme="blue">
+  <TagLeftIcon as={Icon} />
+  <TagLabel>Settings</TagLabel>
+  <TagCloseButton />
+</Tag>
+
+// v3: Compound, explicit structure
+<Tag.Root colorPalette="blue">
+  <Tag.StartElement><Icon /></Tag.StartElement>
+  <Tag.Label>Settings</Tag.Label>
+  <Tag.EndElement>
+    <Tag.CloseTrigger />
+  </Tag.EndElement>
+</Tag.Root>
+```
+
+**Why it's sophisticated**: This architectural shift represents a maturity transition. Flat components are easier to learn but harder to extend (what slot does the icon go in? where's the close button supposed to attach?). Compound components solve this by making the DOM structure explicit without requiring configuration props. The v3 migration shows intentional API evolution—not just feature addition, but structural improvement based on real-world usage patterns.
+
+**Evidence of design maturity**:
+- Recognizes that tags have optional content (icons, close buttons) that need positioned slots
+- Compound structure makes it clear what elements are available without reading docs
+- Clear semantic boundaries (StartElement vs EndElement vs Label)
+- Breaking change in v2→v3 suggests this was worth the migration cost
+- Enables TypeScript discriminated unions for safer component usage
+- Pattern now adopted across modern frameworks (Radix UI, HeadlessUI)
+
+---
+
 ## Recommendations for Semantic UI Implementation
 
 ### Component Structure Decision

@@ -1,6 +1,7 @@
 # Component Pattern Research: Breadcrumb
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
 > Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
@@ -334,6 +335,49 @@ Frameworks use different mechanisms for router integration:
 - **Radix UI Foundation**: Accessibility and composition patterns
 - **BreadcrumbEllipsis**: Dedicated collapse component
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Automatic ARIA State Conversion
+
+**What it does**: When an item is marked as current page (v2: `isCurrentPage` prop, v3: `<Breadcrumb.CurrentLink>` component), the component automatically converts the DOM element from an interactive anchor tag to a non-interactive span and applies `aria-current="page"`. Additionally, separator elements automatically receive `role="presentation"` to hide them from screen readers while keeping them visible to sighted users.
+
+**Why it's sophisticated**: This pattern solves a non-obvious accessibility problem—that breadcrumb current pages should not be keyboard-focusable but still need screen reader indication. Rather than requiring developers to manually manage ARIA attributes and element structure, the component handles this as part of its architectural contract. The component becomes "accessibility-aware" by inspecting its own configuration and automatically adjusting both DOM semantics and ARIA labels accordingly.
+
+**Evidence of design maturity**:
+- Handles edge case of preventing keyboard focus on non-interactive current pages (accessibility best practice)
+- Separators are explicitly hidden from screen readers using role="presentation" rather than aria-hidden, which is the correct semantic choice
+- Pattern is consistent across both v2 (props-based) and v3 (composition-based) APIs despite architectural redesign, showing thoughtful migration design
+
+---
+
+### Ant Design - itemRender Function for Router-Agnostic Integration
+
+**What it does**: The breadcrumb component accepts an `itemRender(route, params, routes, paths)` callback function that receives all routing context information without assuming a specific router library. Developers can then check if they're rendering the last item and return either a span (non-clickable) or a Link component for earlier items. This single pattern works with React Router, Next.js, Reach Router, or any custom routing solution.
+
+**Why it's sophisticated**: Rather than building in tight coupling to specific router libraries (like `as={Link}` or `component={RouterLink}`), the itemRender pattern inverts control—it gives the breadcrumb component the job of computing "what type of item should this be rendered as" based on its position in the hierarchy, and delegates the actual rendering to the consumer. This is sophisticated because it handles a meta-problem: not just "how do I integrate with routers" but "how do I write a component that doesn't care which router you use."
+
+**Evidence of design maturity**:
+- The function signature provides exactly the routing context needed (routes array, current params, computed paths) without over-coupling to any framework's router API
+- The pattern handles the current-page logic (last item is span, others are clickable) as part of the render decision, not as separate state
+- Works across multiple React routing libraries without requiring different props or configuration—a truly universal pattern
+- Modern v5.3.0+ maintains backward compatibility while also introducing an items array API, showing thoughtful evolution
+
+---
+
+### HeroUI - renderEllipsis Function for Collapse Customization
+
+**What it does**: When breadcrumbs collapse due to `maxItems` constraint, the component calls an optional `renderEllipsis({items, ellipsisIcon, separator})` function with the hidden breadcrumb items and UI building blocks. Rather than forcing developers to use a predefined ellipsis component, HeroUI provides the data (which items are hidden) and the visual elements (ellipsis icon, separator) as inputs, allowing developers to compose custom UI like a dropdown menu, tooltip, or popup.
+
+**Why it's sophisticated**: This pattern solves the "how do I show hidden breadcrumbs" problem in a way that respects the principle of composition over configuration. Instead of props like `expandText` or `ellipsisMode`, developers get a callback with all necessary context to build exactly what they need. It's sophisticated because it recognizes that breadcrumb overflow is not just a visual problem but a content problem—hidden breadcrumbs need custom interaction patterns depending on the application's navigation model.
+
+**Evidence of design maturity**:
+- Provides both data (items array with hidden breadcrumbs) and UI primitives (ellipsisIcon, separator) so developers have full flexibility
+- The function receives the structured data needed for dropdown menus (href, children, etc.) rather than just raw item count
+- Pattern respects component composition principles—the breadcrumb is responsible for breadcrumb logic (what's hidden), the application is responsible for presentation (dropdown, tooltip, etc.)
+- Responsive behavior (`maxItems`, `itemsBeforeCollapse`, `itemsAfterCollapse`) automatically triggers the callback without requiring JavaScript event listeners, showing efficient reactivity design
+
+---
+
 ## Recommendations for Implementation
 
 ### Core Features (Must Have)
@@ -385,6 +429,21 @@ Based on Level 4-5 patterns (<40% adoption):
    - `<Breadcrumb.CurrentLink>` component (Chakra v3 pattern)
    - `<BreadcrumbPage>` component (ShadCN pattern)
    - OR `isCurrent` prop (HeroUI pattern)
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Responsive behavior prevalence:** Corrected to 4/9 (44%) frameworks, limited to Chakra UI, HeroUI, MUI, ShadCN. Nuxt UI docs show only CSS layout responsiveness without max-items/ellipsis support for automatic collapse. Evidence: `ai/research/breadcrumb/nuxt-ui/usage-patterns.md:50-56`. Updated narrative and correlation sections to match. (85% confidence)
+
+**Current-page component naming:** Clarified that Chakra v3 exposes `Breadcrumb.CurrentLink` (not `BreadcrumbPage`), while ShadCN provides `BreadcrumbPage`. Updated API recommendations accordingly to prevent misattribution in naming guidance. Evidence: `ai/research/breadcrumb/chakra-ui/usage-patterns.md:43-45,268-276`, `ai/research/breadcrumb/shadcn/usage-patterns.md:1-150`. (90% confidence)
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 9 frameworks surveyed
+- 28 unique patterns identified
 
 ## Raw Data
 

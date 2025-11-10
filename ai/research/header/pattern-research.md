@@ -225,6 +225,47 @@ position: sticky; top: 0;
 - Logical tab order
 - Focus trap in mobile menus
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Dual-Context Header System
+
+**What it does**: Headers that adapt between two independent sizing contexts: fixed page hierarchy (h1-h5 scale relative to document base) and flexible content headers (sizes relative to surrounding text context). A single component type with two completely different mental models, enabling headers to work simultaneously as document outline anchors and context-relative emphasis elements without requiring different DOM structures.
+
+**Why it's sophisticated**: This solves a fundamental problem exclusive to headers—the need to establish page hierarchy while simultaneously providing flexible scaling for use within any content container. Most frameworks force a choice: either structured hierarchy (with fixed semantic meaning) OR flexible sizing (sacrificing semantic meaning). Semantic UI's dual context approach allows both simultaneously. The implementation requires careful CSS design with two distinct sizing systems (absolute `rem` units for page headers, relative `em` units for content headers) that can coexist seamlessly.
+
+**Evidence of design maturity**:
+- Handles the edge case of maintaining semantic meaning (h1-h5) while supporting relative sizing (em-based scaling)
+- Icon headers add a third pattern for visual-first content that requires special positioning and layout of both icon and text
+- Sub-headers as contextual second-line metadata (timestamps, authors, status) enable rich information architecture without structural complexity
+- Combinable modifiers (large + dividing + icon) demonstrate careful API design that prevents combinatorial explosion while enabling complex real-world patterns
+
+### Mantine - Layout-Coordinated Offset System
+
+**What it does**: Headers don't exist independently—they're part of AppShell's coordinated layout system. The `offset` property creates two distinct spatial patterns: traditional (content below header) and overlay (content behind header). Configuration is declarative at the parent AppShell level, not imperative on the Header component itself, enabling dynamic layout changes without imperative DOM manipulation. Responsive heights per breakpoint cascade from AppShell configuration, automatically adjusting content spacing as header height changes.
+
+**Why it's sophisticated**: This solves a non-obvious header-specific problem: the layout system must stay synchronized with header height changes across responsive breakpoints without duplicating configuration or causing layout shifts. Mantine's solution inverts the typical component ownership—the Header doesn't configure itself; the AppShell coordinator manages all spatial relationships. This prevents the common bug pattern where responsive header heights cause content layout breaks. The two offset modes (traditional vs overlay) enable fundamentally different interaction patterns (hide-on-scroll, full-bleed content) from a single component, requiring deep understanding of how fixed positioning interacts with scrollable content.
+
+**Evidence of design maturity**:
+- Automatic z-index stacking prevents modal/drawer layering bugs without developer intervention
+- Border control via `withBorder` prop enables seamless header transitions (removing border when gradient/color continues) or visual separation when needed
+- Integration with `useHeadroom` hook for scroll-aware hiding demonstrates understanding that modern headers need reactive scroll behavior without imposing it
+- Dynamic height awareness (content must flex when header height changes per breakpoint) prevents a class of responsive design bugs
+
+### MUI - Material Design Elevation System with Scroll-Aware Reactivity
+
+**What it does**: Headers use Material Design's elevation system (shadow depth 0-24) to establish visual hierarchy independently of z-index concerns. The `useScrollTrigger` hook enables scroll-aware elevation changes and conditional hiding without manual scroll event listeners. Toolbar as a distinct component enables flexible layout patterns (multi-row, dense mode, custom spacing) that adapt content density based on the header's role. Position prop supports five distinct positioning modes (static, fixed, sticky, relative, absolute) enabling headers to work in fundamentally different layout contexts.
+
+**Why it's sophisticated**: This solves multiple header-specific problems that only exist in application contexts: (1) visual hierarchy through elevation without hardcoded z-index values creates themeable, composable solutions; (2) scroll-dependent behavior (hiding on scroll, elevating for depth cues) requires efficient scroll event handling that Material Design abstracts through hooks; (3) Toolbar separation enables layout flexibility that a monolithic component can't achieve. The elevation system is non-obvious—it's not just shadow; it's a complete visual language where shadow depth communicates container hierarchy, stacking context, and interaction state.
+
+**Evidence of design maturity**:
+- Material Design elevation scale (0-24) demonstrates understanding that shadows communicate layering semantics, not just aesthetics
+- `useScrollTrigger` hook provides efficient scroll-dependent styling without scroll event performance penalties or imperative DOM manipulation
+- Toolbar's `variant="dense"` (48px) vs regular (64px) vs custom heights enable responsive content density changes without separate component instances
+- Integration with Drawer component through positioning and z-index coordination shows header maturity within larger layout systems
+- Color theming (`enableColorOnDark`) handles the specific problem of header visibility in dark mode contexts
+
+---
+
 ## Framework Recommendations
 
 **For Application Navigation:**

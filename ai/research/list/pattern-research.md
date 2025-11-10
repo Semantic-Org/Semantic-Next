@@ -460,6 +460,86 @@ List components across frameworks solve the fundamental problem of **displaying 
 - Listbox is form control, List is display
 - Cannot directly swap without reconsidering purpose
 
+## Sophisticated Design Patterns
+
+### MUI - Secondary Action Pattern
+
+**What it does**: The `secondaryAction` prop positions interactive elements (buttons, checkboxes, icons) on the right edge of list items without displacing primary content. The component automatically manages spacing, alignment, and touch targets. When present, secondary actions align vertically centered regardless of item height variation.
+
+```jsx
+<ListItem
+  secondaryAction={
+    <IconButton edge="end" onClick={handleDelete}>
+      <DeleteIcon />
+    </IconButton>
+  }
+>
+  <ListItemText primary="Item with delete button on right" />
+</ListItem>
+```
+
+**Why it's sophisticated**: This solves a non-obvious problem: "How do you add action buttons that don't compete with primary content space?" Most frameworks require composition and flexbox management to achieve this. MUI elevated it to a first-class pattern, recognizing that secondary actions on the right are so common in Lists that they warrant dedicated API surface. This shows deep understanding of real-world List patterns.
+
+**Evidence of design maturity**:
+- Handles edge cases like varying item heights and button sizes automatically
+- Works seamlessly with ListItemAvatar, ListItemIcon, and ListItemText simultaneously
+- Touch-friendly with proper spacing for mobile devices (48px minimum)
+- Distinguishes between structural composition and interaction positioning concerns
+
+### Ant Design - ItemLayout Toggle Pattern
+
+**What it does**: The `itemLayout` prop switches between "horizontal" (compact metadata-focused with avatar/title/description side-by-side) and "vertical" (content-rich with metadata below). A single `itemLayout` change reconfigures the entire list structure without requiring data model changes or component restructuring.
+
+```jsx
+// Compact mode - metadata emphasis
+<List itemLayout="horizontal">
+  <List.Item>
+    <List.Item.Meta avatar={<Avatar />} title="..." description="..." />
+  </List.Item>
+</List>
+
+// Rich content mode - content emphasis
+<List itemLayout="vertical">
+  <List.Item>
+    <h4>Title</h4>
+    <p>Long form content here</p>
+  </List.Item>
+</List>
+```
+
+**Why it's sophisticated**: This solves a constraint-specific problem that only Lists face: "How do you support both dense metadata listings AND rich content displays with the same component API?" Most frameworks lock you into one layout paradigm. The `itemLayout` toggle handles the profound restructuring of internal spacing, text treatment, and content flow with a single boolean-like prop. It demonstrates awareness that presentation mode changes require cascading style adjustments.
+
+**Evidence of design maturity**:
+- Automatically adjusts ListItemMeta sub-component behavior based on parent itemLayout
+- Works with pagination and virtualization regardless of layout mode
+- Integrates with grid prop for responsive layouts in vertical mode
+- Respects that horizontal and vertical require different visual hierarchies (avatar position, text emphasis)
+
+### PrimeReact OrderList - Dual Interaction Model
+
+**What it does**: OrderList simultaneously supports two complementary reordering mechanisms - traditional control buttons (Move Top/Up/Down/Bottom) AND drag-drop - both active at the same time. Users can choose their preferred modality; the component gracefully coexists both without conflicts or modal switching.
+
+```jsx
+<OrderList
+  dataKey="id"
+  value={items}
+  onChange={(e) => setItems(e.value)}
+  itemTemplate={itemTemplate}
+  dragdrop={true}           // Enable drag-drop
+  showSourceControls={true} // Keep buttons visible simultaneously
+/>
+```
+
+**Why it's sophisticated**: This reveals deep understanding of interaction accessibility: "How do you support modern, intuitive drag-drop while maintaining keyboard/assistive technology compatibility?" Rather than choosing one modality, OrderList keeps both active. Buttons serve keyboard users and screen readers; drag-drop serves mouse/touch users. The non-obvious insight is that these two interfaces don't conflict—they coexist peacefully because they tap into different user affordances.
+
+**Evidence of design maturity**:
+- Drag-drop doesn't disable or hide button controls; they reinforce each other
+- State model (`onChange` with reordered array) works identically whether user dragged or clicked buttons
+- Both interactions update the same visual representation—no mode switching or confusion
+- Respects that "best interface for reordering" isn't singular; acknowledges user diversity (motor abilities, input device, screen reader dependency)
+
+---
+
 ## Framework Recommendations
 
 **For Rich Data Display:**

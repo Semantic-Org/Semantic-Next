@@ -253,6 +253,41 @@ Based on Level 5 unique implementations:
 - Dynamic slot naming for per-item customization
 - Granular size control (9+ sizes)
 
+## Sophisticated Design Patterns
+
+### MUI - Opposite Content Architecture
+
+**What it does**: The `TimelineOppositeContent` component provides dedicated API for displaying supplementary content (timestamps, labels, metadata) on the opposite side of the main timeline narrative. When using `align="alternate"`, content automatically positions on alternating sides, with opposite content using the inverse side from main content.
+
+**Why it's sophisticated**: Timeline is unique among components in needing parallel content areas—one for primary narrative, one for supporting information. Most UI components display content in a single flow, but timelines inherently have two visual channels. This pattern solves the "where does metadata go?" problem without requiring users to manually manage alternating flex-row reversals or complex CSS grid layouts. It's the only major framework that gave this a first-class API.
+
+**Evidence of design maturity**:
+- Handles the non-obvious edge case: when timeline is not in alternate mode, opposite content still needs sensible positioning (typically uses text-secondary color to deemphasize)
+- Leverages MUI's theme system—`color="textSecondary"` on opposite content integrates with global palette, not hardcoded values
+- The composition model (separate `TimelineOppositeContent` component) prevents the common beginner mistake of trying to force multiple content into a single slot
+
+### Ant Design - Pending State with Ghost Nodes
+
+**What it does**: Native `pending` prop (boolean or ReactNode) creates a "ghost" timeline node at the end indicating ongoing/incomplete status. Customizable `pendingDot` allows rendering a loading indicator (like `<Spin />`) specifically in this ghost node, communicating "this process isn't finished yet."
+
+**Why it's sophisticated**: Timelines are fundamentally about progression through states. Other components don't need to explicitly communicate "incomplete workflow" because they're not about sequences. Ant Design identified that most timeline use cases need to answer "what's the current status?" and baked this into the component rather than leaving it to composition. The `pendingDot` customization prevents a common pattern gap: pending state without a visual indicator of what's being waited for.
+
+**Evidence of design maturity**:
+- Distinguishes between pending *content* (descriptive text) and pending *indicator* (visual marker)—many frameworks conflate these
+- Works with both legacy children API and modern items array API, showing thoughtful backward compatibility for evolving patterns
+- The `pending` prop accepts boolean, string, or ReactNode, enabling progressive enhancement from simple "in progress" to "in progress with context"
+
+### Nuxt UI - Dynamic Slot Architecture
+
+**What it does**: Each timeline item can define a `slot` property that generates four derived slot names: `#{{ item.slot }}-indicator`, `#{{ item.slot }}-date`, `#{{ item.slot }}-title`, `#{{ item.slot }}-description`. This enables per-item content customization without creating separate Timeline instances or complex conditional rendering logic.
+
+**Why it's sophisticated**: Timeline is the rare component where you might want different presentation rules for different items in the same list (e.g., "highlight important milestones differently"). Most lists use a single template for all items, but timelines often need per-item narrative customization. The dynamic slot architecture avoids two poor alternatives: (1) complex v-if chains inside a single slot, or (2) rendering multiple separate Timeline components. It's a pattern that could theoretically apply to other repeating components, but timelines are the primary use case because their narrative importance varies by item.
+
+**Evidence of design maturity**:
+- The pattern leverages Vue's slot scoping capabilities (`#{{ item.slot }}-title="{ item }"`) to pass context without requiring computed properties for every customization
+- Per-item `ui` property for Tailwind overrides shows awareness that visual customization and slot content customization are often paired concerns
+- Balanced complexity: the feature is optional—basic use requires no knowledge of dynamic slots, but power users have the escape hatch
+
 ## Pattern Decision Framework
 
 When implementing Timeline for Semantic UI:

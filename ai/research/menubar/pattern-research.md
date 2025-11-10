@@ -312,6 +312,46 @@ const items = [{
 <Menubar model={items} />
 ```
 
+## Sophisticated Design Patterns
+
+### Radix UI - Portal-Driven Collision Detection with CSS Variable Injection
+
+**What it does**: Content renders via Portal component into document.body to bypass CSS containment issues. The collision detection engine monitors viewport proximity and automatically repositions the menu (side, align, sticky behavior). Six CSS custom properties expose layout data (`--radix-menubar-content-transform-origin`, trigger dimensions, available space) for direction-aware animations that respond to actual positioning decisions.
+
+**Why it's sophisticated**: Menu positioning in complex layered UIs is non-trivial—CSS containment, z-index stacking contexts, and nested scrollable containers can trap dropdown content. Radix's approach decouples positioning from component hierarchy (Portal escape hatch) while exposing computed layout through CSS variables. This allows animations to know which direction the menu opened without JavaScript-side animation logic.
+
+**Evidence of design maturity**:
+- Collision detection with per-side padding configuration (`collisionPadding`) and axis-specific constraints (`sticky: 'partial' | 'always'`)
+- `hideWhenDetached` prop prevents orphaned UI when trigger becomes occluded—catches an edge case most frameworks miss
+- `arrowPadding` manages arrow connector visibility independent of content padding, showing separation of concerns
+- Transform origin variable enables CSS animations that scale/rotate relative to actual menu opening direction, preventing animation direction mismatches
+
+### PrimeReact - Mobile Menu Toggle Abstraction with Responsive Model
+
+**What it does**: Menubar automatically detects viewport and converts to hamburger menu button on mobile breakpoints without separate component logic. The model-based architecture (`MenuItem[] model`) stays identical across desktop and mobile—only rendering changes. Button customization via `buttonProps` allows mobile-specific configurations (icon, styling, aria attributes).
+
+**Why it's sophisticated**: Most components require separate mobile/desktop variants or custom responsive wrappers. PrimeReact's abstraction means the same menu data structure powers both desktop horizontal menubar and mobile hamburger menu, reducing implementation complexity. The responsive breakpoint logic is encapsulated—developers declare structure once and get responsive behavior automatically.
+
+**Evidence of design maturity**:
+- `menuIcon` prop overrides default hamburger icon, indicating theming support thought through to mobile edge cases
+- `buttonProps` separately configurable from menu items themselves, showing recognition that mobile trigger button and menu items need independent customization
+- Mobile menu state (`aria-expanded`, `aria-controls`) properly managed, confirming accessibility maturity in responsive context
+- The `start` and `end` content areas work identically on mobile and desktop, avoiding content area reimplementation
+
+### ShadCN/Radix UI - MenubarShortcut with Inset Spacing Pattern
+
+**What it does**: ShadCN introduces `MenubarShortcut` component and `inset` prop for visual hierarchy. Shortcuts display right-aligned with muted styling (gray text). The `inset` prop adds left indentation to items without visible bullets or checkmarks, creating visual nesting without structural nesting—useful for secondary commands or nested actions that shouldn't be submenus.
+
+**Why it's sophisticated**: Keyboard shortcut display is UX critical but organizationally complex—shortcuts need semantic meaning (they're not regular content) while visually integrating with items. The dedicated component separates shortcut styling from item content. The `inset` prop solves a nuanced problem: how to show logical hierarchy (command grouping) without creating actual submenus that change interaction patterns. This prevents "submenu explosion" in complex applications.
+
+**Evidence of design maturity**:
+- `MenubarShortcut` forces semantic separation—developers can't accidentally apply shortcut styling to arbitrary content
+- `inset` prop works without `checked` or visual indicators, allowing visual grouping without state semantics
+- Right-aligned shortcut positioning respects RTL layouts (inherited from Radix) while maintaining visual hierarchy
+- Used consistently across examples for File/Edit/View patterns, showing production validation in canonical examples
+
+---
+
 ## Accessibility Considerations
 
 ### Common Patterns Across Frameworks

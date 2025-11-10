@@ -195,6 +195,81 @@ All frameworks provide password input functionality with varying naming approach
 - Controlled-only approach
 - FloatLabel integration
 
+## Sophisticated Design Patterns
+
+### Ant Design - Auto-Clear Security Mechanism
+
+**What it does**: Uses an internal `useRemovePasswordTimeout` hook that automatically clears the password value when the user toggles visibility to the hidden state. The mechanism works transparently without configuration—when a user clicks the eye icon to hide the password, the component internally clears the value from memory.
+
+```jsx
+<Input.Password
+  visibilityToggle={{
+    visible: passwordVisible,
+    onVisibleChange: setPasswordVisible,
+  }}
+/>
+// When visible changes from true to false, value is automatically cleared
+```
+
+**Why it's sophisticated**: This solves a subtle but real security concern that most developers never think about: password values remaining in JavaScript memory after being hidden. It represents a mindful decision about the security/usability tradeoff—the component chooses the secure path by default, assuming users who hide the password want it cleared rather than persisted.
+
+**Evidence of design maturity**:
+- Prevents accidental password exposure through memory inspection or debugging
+- Works invisibly without requiring developer intervention (no opt-in flag needed)
+- Balances UX (users don't need to manually clear) with security (value is purged automatically)
+- Demonstrates consideration of real-world threat models beyond typical UI concerns
+
+### PrimeReact - Built-in Strength Meter with Zero Configuration
+
+**What it does**: The component includes an automatic strength calculation algorithm that evaluates password complexity and displays a popup indicator (weak/medium/strong) as users type. The strength meter appears by default and can be disabled with `feedback={false}`. The popup includes customizable labels for internationalization and optional header/footer templates for extended requirements.
+
+```jsx
+<Password
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  promptLabel="Choose a password"
+  weakLabel="Too weak"
+  mediumLabel="Decent"
+  strongLabel="Strong"
+  header={<div>Password Requirements</div>}
+/>
+```
+
+**Why it's sophisticated**: This inverts the typical framework pattern where strength validation is left to developers. By making strength feedback the default behavior, PrimeReact solves the problem that most password forms need validation feedback—the component eliminates the "empty form validation" problem by providing sensible defaults. The popup overlay design keeps feedback contextually near the input without disrupting form layout.
+
+**Evidence of design maturity**:
+- Three-tier strength system (weak/medium/strong) reflects UX research on user comprehension
+- Popup-based feedback prevents layout jank and responsive design issues
+- Automatic strength detection removes need for developers to implement their own algorithms
+- Template customization (header/footer) shows restraint—provides defaults but allows brands to customize without forcing component replacement
+
+### Mantine - Synchronized Visibility Across Multiple Inputs
+
+**What it does**: Enables multiple password inputs to share visibility state through controlled mode. By passing the same `visible` and `onVisibilityChange` props to multiple `PasswordInput` components, toggling one input's visibility toggle affects all of them simultaneously. This pattern is essential for password confirmation scenarios where users expect both fields to reveal/hide together.
+
+```jsx
+const [visible, setVisible] = useState(false);
+
+<PasswordInput
+  label="Password"
+  visible={visible}
+  onVisibilityChange={setVisible}
+/>
+<PasswordInput
+  label="Confirm Password"
+  visible={visible}
+  onVisibilityChange={setVisible}
+/>
+```
+
+**Why it's sophisticated**: This solves a non-obvious UX problem specific to password fields—the cognitive load of managing two separate visibility states when users are trying to confirm their password entry. The solution recognizes that password confirmation scenarios are a distinct use case that deserves special support without requiring custom abstraction layers.
+
+**Evidence of design maturity**:
+- Recognizes password/confirm password as a distinct interaction pattern (separate from general input reuse)
+- Maintains flexibility through controlled props (developers aren't forced into this pattern)
+- Works seamlessly with uncontrolled mode for single-input scenarios (no breaking changes to simple cases)
+- Design restraint: provides the capability without making it mandatory or opaque
+
 ## Implementation Notes
 
 ### Installation

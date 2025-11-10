@@ -866,6 +866,92 @@ Across frameworks, these components are frequently mentioned alongside Modal/Dia
 
 ---
 
+## Sophisticated Design Patterns
+
+### PrimeReact - Drag & Resize with Constraint Boundaries
+
+**What it does**: Modals can be dragged by the header and resized from edges/corners while maintaining position constraints. The framework automatically manages drag boundaries using `minX`, `minY`, `minWidth`, and `minHeight` props, preventing modals from being dragged completely off-screen or resized below usable dimensions.
+
+```jsx
+<Dialog
+  header="Draggable & Resizable"
+  visible={visible}
+  draggable={true}
+  resizable={true}
+  position="top-left"
+  minX={0}
+  minY={0}
+  minWidth={150}
+  minHeight={150}
+  onDragEnd={(e) => console.log('New position:', e)}
+  onResizeEnd={() => console.log('Resize completed')}
+  onHide={() => setVisible(false)}
+>
+  Drag by header, resize from edges
+</Dialog>
+```
+
+**Why it's sophisticated**: This solves a non-obvious UX problem—draggable modals without constraints can disappear off-screen or become too small to interact with. Rather than forcing developers to calculate boundaries manually, PrimeReact exposes fine-grained position constraints. This pattern shows deep thinking about desktop-application-like interactions while maintaining usability guardrails.
+
+**Evidence of design maturity**:
+- Automatic boundary calculations prevent common UX failures (completely off-screen modals, unsized content)
+- Separate event callbacks (`onDragEnd`, `onResizeEnd`) allow different handling for drag vs. resize completion
+- Works seamlessly with responsive breakpoints while maintaining drag constraints across screen sizes
+
+---
+
+### Mantine - Modal.Stack for Z-Index & Focus Management of Concurrent Modals
+
+**What it does**: Mantine provides a dedicated `useModalsStack` hook that manages multiple concurrent modals with automatic z-index layering, focus trapping per modal, and staggered escape-key handling (only the topmost modal closes on ESC). This eliminates manual z-index management and focus coordination bugs common when nesting multiple modals.
+
+```jsx
+const stack = useModalsStack(['confirmDelete', 'selectReplacement']);
+
+<Button onClick={() => stack.open('confirmDelete')}>Delete</Button>
+
+<Modal opened={stack.state('confirmDelete')} onClose={() => stack.close('confirmDelete')} title="Confirm">
+  <Button onClick={() => stack.open('selectReplacement')}>Choose Alternative</Button>
+</Modal>
+
+<Modal opened={stack.state('selectReplacement')} onClose={() => stack.close('selectReplacement')} title="Select">
+  {/* Properly layered above first modal, focus trapped, ESC only closes this one */}
+</Modal>
+```
+
+**Why it's sophisticated**: Multiple overlapping modals are a complexity nightmare—managing focus traps, z-index layering, and keyboard escape-key behavior without a framework solution leads to bugs like focus escaping to the background, incorrect stacking order, or both modals closing on a single ESC press. Mantine's stack abstraction recognizes this is modal-specific complexity that deserves a dedicated solution.
+
+**Evidence of design maturity**:
+- State-based API (`stack.state()`) instead of manual `opened` props eliminates prop drilling
+- Automatic z-index prevents common layering bugs (developers shouldn't hand-manage this for interactive overlays)
+- Escape-key behavior is aware of modal hierarchy—only topmost modal closes, allowing safe nesting without user confusion
+
+---
+
+### Chakra UI v3 - Dialog.Positioner with Placement-Based Compound Architecture
+
+**What it does**: Chakra v3 separates positioning logic into an explicit `Dialog.Positioner` component that understands modal-specific placement semantics. The component supports 8 placement options (center, top, bottom, left, right, top-left, top-right, bottom-left, bottom-right) that adjust both the modal's position AND its internal layout (e.g., content orientation and scroll direction).
+
+```jsx
+<Dialog.Root open={open} onOpenChange={(e) => setOpen(e.open)} placement="bottom-right">
+  <Dialog.Backdrop />
+  <Dialog.Positioner>
+    <Dialog.Content>
+      {/* Automatically positioned in bottom-right corner */}
+      {/* Scroll behavior adapts to prevent cutoff at screen edges */}
+    </Dialog.Content>
+  </Dialog.Positioner>
+</Dialog.Root>
+```
+
+**Why it's sophisticated**: Generic overlay components (Popovers, Dropdowns) don't need 8 positional variants because they're small and floating. Modals, however, are large, intentional UI elements that often need edge-aware positioning—a dialog in the top-right corner has different scroll and content-flow needs than a centered modal. By embedding positioning awareness into the compound architecture, Chakra avoids the anti-pattern of "position prop that doesn't affect layout."
+
+**Evidence of design maturity**:
+- Explicit `Dialog.Positioner` component avoids hidden positioning side-effects that developers must discover through trial-and-error
+- 8 positions cover real-world modal placement needs (edge-aligned sheets, corner notifications) without being overwhelming
+- Compound pattern prevents prop-explosion—positioning logic is co-located with content structure rather than scattered across 15 different props
+
+---
+
 ## Conclusion
 
 The Modal/Dialog component is a **universal pattern** with strong consistency across all major frameworks. Key findings:

@@ -383,6 +383,41 @@ Form Field is a structural wrapper or coordination system that groups form input
 - **Unique**: FloatLabel animation, no unified FormField component
 - **Best for**: Custom form experiences, animated label requirements, controlled-only applications
 
+## Sophisticated Design Patterns
+
+### Mantine - Input Wrapper Element Reordering
+
+**What it does**: The `inputWrapperOrder` prop allows developers to reorder the visual structure of form field elements (label, description, input, error) without modifying the wrapper component itself. Instead of creating multiple wrapper variants, a single array prop controls rendering order: `inputWrapperOrder={['description', 'label', 'input', 'error']}`.
+
+**Why it's sophisticated**: This solves a non-obvious problem: form field layout varies across design systems and use cases (some want description above label, others below; error positioning differs). Rather than hardcoding order or creating variant components, a reorderable array provides infinite flexibility while keeping the component simple. This prevents component bloat while remaining accessible.
+
+**Evidence of design maturity**:
+- Elegant constraint-based solution: Only four elements exist, but infinite permutations possible without multiplying component complexity
+- Accessibility preserved: Element reordering is visual only; ARIA associations remain valid regardless of DOM order
+- Performance consideration: No conditional rendering overhead—order defined once at render time, not re-evaluated
+
+### Ant Design - Field Dependencies for Cross-Field Validation
+
+**What it does**: Form fields can declare dependencies on other fields via the `dependencies` prop, automatically triggering re-validation when upstream fields change. The validation function receives `getFieldValue()` to access dependent field values: `dependencies={['password']}` with validator accessing `getFieldValue('password')`.
+
+**Why it's sophisticated**: Cross-field validation (confirming passwords match, ensuring end-date > start-date) requires coordinating multiple fields, but direct field-to-field coupling creates tight binding. The dependency system decouples validation logic from field registration—validators run reactively without manual subscription setup. This prevents validation desynchronization bugs while keeping code declarative.
+
+**Evidence of design maturity**:
+- Reactive dependency tracking: Changes to upstream fields automatically trigger dependent field re-validation without manual wiring
+- Validation function power: `getFieldValue()` allows complex multi-field logic without reading state directly
+- Enterprise-grade edge case handling: Handles nested field dependencies, conditional validation chains, and prevents validation loops through smart re-evaluation
+
+### Nuxt UI - Standard Schema Interface for Validation Library Abstraction
+
+**What it does**: Instead of coupling FormField to a specific validation library (Zod, Yup, Valibot), Nuxt UI implements the Standard Schema interface—a lightweight abstraction that works with any validation library implementing the same interface. Forms validate against schemas without importing specific library types: `<UForm :schema="zSchema">` works identically with Zod, Yup, or Valibot.
+
+**Why it's sophisticated**: Validation library choice is a framework-level decision that shouldn't force downstream components to lock in. The Standard Schema interface inverts this: the component defines what it needs from a schema (validate function, type info), and any library implementing that interface works. This solves the non-obvious problem of supporting multiple validation philosophies without bundling them all.
+
+**Evidence of design maturity**:
+- Zero bundled validation library: FormField weights remain minimal; developers install their preferred validator separately
+- Type inference preservation: Despite abstraction, TypeScript generics still infer correct types from any compatible schema
+- Real-world validation diversity: Supporting Zod, Valibot, Yup, Joi, Regle, Superstruct demonstrates the abstraction works across different validation paradigms (schema-based, pipe-based, DSL-based)
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence and architectural insights, a robust Form Field implementation should consider:

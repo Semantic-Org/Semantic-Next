@@ -286,6 +286,98 @@ import { Kbd } from '@heroui/react'
 <Kbd keys={["command", "shift"]}>N</Kbd>
 ```
 
+## Sophisticated Design Patterns
+
+### Nuxt UI - Platform-Aware Meta Key Rendering
+
+**What it does**: The `value="meta"` prop automatically renders the correct modifier key symbol based on the user's operating system—displaying ⌘ on macOS and Ctrl on Windows/Linux. This eliminates the need for application-level platform detection and conditional rendering when documenting cross-platform keyboard shortcuts.
+
+```vue
+<!-- Automatically adapts to user's platform -->
+<UKbd value="meta" />  <!-- Shows ⌘ on macOS, Ctrl on others -->
+
+<!-- Used in typical shortcut patterns -->
+<div class="flex gap-1">
+  <UKbd value="meta" />
+  <span>+</span>
+  <UKbd>K</UKbd>
+</div>
+```
+
+**Why it's sophisticated**: Most frameworks require developers to manually detect the operating system and render different content accordingly. Nuxt UI encapsulates this logic at the component level, treating platform awareness as a first-class concern. The value "meta" is a domain-specific abstraction that acknowledges the real-world fact that keyboard documentation spans multiple platforms with different visual conventions. This pattern addresses a subtle but pervasive problem in cross-platform UI: reducing cognitive load for developers and preventing mistakes in platform-specific keyboard documentation.
+
+**Evidence of design maturity**:
+- Recognizes that keyboard documentation is inherently cross-platform and builds this into the component's vocabulary
+- The abstraction is discoverable (a developer reading `value="meta"` immediately understands its purpose without consulting documentation)
+- Reduces boilerplate: developers write one line instead of conditional platform detection logic scattered throughout their codebase
+- Demonstrates understanding that some component concerns (platform specificity) benefit from being expressed declaratively rather than imperatively
+
+---
+
+### ShadCN - Semantic Key Grouping Container
+
+**What it does**: The `KbdGroup` component provides an explicit semantic container for grouping multiple keyboard keys, enabling developers to represent keyboard shortcuts as composable units while preserving semantic meaning. This pattern allows flexible separator support (text, symbols, or custom elements) while maintaining a clear, intentional structure for multi-key combinations.
+
+```jsx
+// Explicit grouping with semantic intent
+<KbdGroup>
+  <Kbd>Ctrl</Kbd>
+  <Kbd>B</Kbd>
+</KbdGroup>
+
+// Flexible separators
+<KbdGroup>
+  <Kbd>Ctrl</Kbd>
+  <span>+</span>
+  <Kbd>B</Kbd>
+</KbdGroup>
+
+// Platform-aware symbols
+<KbdGroup>
+  <Kbd>⌘</Kbd>
+  <Kbd>⇧</Kbd>
+  <Kbd>K</Kbd>
+</KbdGroup>
+```
+
+**Why it's sophisticated**: Most frameworks require developers to compose keyboard shortcuts using generic containers (divs with flex layout) or plain text separators ("+"). ShadCN recognizes that keyboard combinations are conceptually distinct entities deserving their own component abstraction. The KbdGroup pattern encapsulates the layout and semantic intent of "a group of keys that together form a shortcut." This approach surfaces an important design insight: grouping isn't just a visual concern, it's a semantic one. Developers using KbdGroup communicate their intent more clearly, and future maintainers understand that a set of Kbd elements belong together as a logical unit.
+
+**Evidence of design maturity**:
+- Provides a distinct component for a distinct concept (single key vs. key combination), rather than forcing developers to infer intent from layout
+- Enables flexible separator patterns while maintaining structural consistency
+- Creates an extension point for future features (e.g., conflict detection, visual validation of keyboard combos)
+- Demonstrates recognition that composition alone isn't sufficient; explicit grouping semantics matter for clarity and maintainability
+
+---
+
+### HeroUI - Slot-Based Styling Architecture
+
+**What it does**: Components expose multiple named styling slots (`base`, `abbr`, `content`) that can be independently styled via the `classNames` prop, enabling fine-grained visual control over distinct parts of the keyboard key representation without requiring CSS overrides or breaking encapsulation.
+
+```jsx
+// Fine-grained styling control via slots
+<Kbd
+  keys={["command"]}
+  classNames={{
+    base: "custom-container-style",      // Overall wrapping element
+    abbr: "custom-key-badge-style",      // Individual key styling
+    content: "custom-text-style"         // Main content area
+  }}
+>
+  K
+</Kbd>
+```
+
+**Why it's sophisticated**: Traditional approaches force developers to either accept the component's default styling or override styles at the CSS level (brittle, global scope risk) or use className props for the entire component (monolithic, all-or-nothing customization). HeroUI's slot system recognizes that keyboard keys have multiple distinct visual parts—the container, the individual key badges, and the text content—and assigns each its own customization point. This pattern is non-obvious because it requires thinking about component internals as a first-class API concern, not an implementation detail. It demonstrates sophisticated thinking about the tension between encapsulation and customization: slots provide controlled leakage that improves DX without sacrificing predictability.
+
+**Evidence of design maturity**:
+- Names slots semantically (abbr for "abbreviation" suggesting keyboard-specific understanding), showing intent beyond generic "left/right/center"
+- Allows granular styling control without exposing the component's DOM structure to CSS selectors
+- Provides TypeScript-safe customization (classNames is a typed Partial<Record>), preventing invalid slot names
+- Demonstrates understanding that visual components need to balance framework integrity with real-world customization pressure
+
+---
+
 ## Accessibility Considerations
 
 ### Common Patterns Across Frameworks

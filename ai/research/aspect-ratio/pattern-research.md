@@ -284,6 +284,63 @@ Different ratios at different breakpoints:
 </AspectRatio>
 ```
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Responsive Aspect Ratios
+
+**What it does**: Allows different aspect ratios at different viewport breakpoints using `ResponsiveValue<number>`. This enables a single component to enforce 1:1 on mobile and 16:9 on desktop, adapting dimensional constraints as the layout evolves.
+
+```jsx
+<AspectRatio ratio={{ base: 1, md: 16/9, lg: 21/9 }}>
+  {/* Content scales from square → widescreen → ultrawide */}
+</AspectRatio>
+```
+
+**Why it's sophisticated**: Most components treat aspect ratio as a static constraint, but responsive ratios solve the real-world problem of content that needs different proportions on different devices. A thumbnail might be square on mobile but 16:9 on desktop. This requires maintaining proportional relationships across multiple breakpoints simultaneously.
+
+**Evidence of design maturity**:
+- Solves breakpoint-aware dimensional shifting without layout thrashing
+- Integrates with Chakra's ResponsiveValue system for consistency across all style props
+- Prevents forced aspect ratio distortion when layouts fundamentally change shape at different viewport sizes
+
+### Mantine - Flex Container Awareness
+
+**What it does**: Explicitly documents and handles the edge case where aspect ratio containers break in flex contexts. Provides the `flex` prop to control flex sizing behavior, ensuring aspect ratio enforcement works correctly even when the parent uses `display: flex`.
+
+```jsx
+<div style={{ display: 'flex' }}>
+  <AspectRatio ratio={1} flex="0 0 100px">
+    <Image src="..." alt="Avatar" />
+  </AspectRatio>
+</div>
+```
+
+**Why it's sophisticated**: Aspect ratio containers use percentage-based dimensions or padding tricks, which interact poorly with flex containers. Many developers encounter layouts breaking when they nest an aspect ratio inside a flex parent. By documenting this edge case and providing a dedicated solution, Mantine shows awareness of real layout composition problems that other frameworks leave as "undefined behavior."
+
+**Evidence of design maturity**:
+- Identifies and explicitly documents a layout composition edge case others don't mention
+- Provides concrete API (`flex` prop) to handle the constraint—not just documentation warnings
+- Recognizes that aspect ratio isn't independent of parent layout context, requiring contextual behavior
+
+### Radix UI - asChild Composition Pattern
+
+**What it does**: The `asChild` prop merges aspect ratio enforcement onto a custom child element instead of creating a wrapper div. This enables seamless composition where the aspect ratio becomes part of an existing element rather than adding an extra DOM layer.
+
+```jsx
+<AspectRatio.Root ratio={16 / 9} asChild>
+  <div className="custom-video-container">
+    <iframe src="..." />
+  </div>
+</AspectRatio.Root>
+```
+
+**Why it's sophisticated**: Aspect ratio inherently requires a container, but that container can become semantic overhead. The `asChild` pattern solves DOM bloat by allowing aspect ratio enforcement to merge with existing semantic elements. This is sophisticated because it recognizes that aspect ratio is a constraint behavior, not a visual component, enabling it to compose invisibly into component hierarchies.
+
+**Evidence of design maturity**:
+- Eliminates wrapper div overhead while maintaining strict separation of concerns
+- Enables composition with custom containers without component nesting complexity
+- Demonstrates that layout utilities can be behavior-based rather than element-based, reducing DOM serialization overhead
+
 ## Accessibility Considerations
 
 ### Common Patterns Across Frameworks

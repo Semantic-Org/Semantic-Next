@@ -1197,6 +1197,107 @@ breakpoints: {
 
 **Note**: Levels marked with * are based on subset analysis (5 HoverCard implementations, not all 11 frameworks)
 
+## Sophisticated Design Patterns
+
+### Mantine - Overlay Backdrop with Conditional Blur Dismissal
+
+**What it does**: Enables modal-like interaction patterns by rendering a semi-transparent backdrop behind the popover with optional blur effects on the underlying page content. Configured via `withOverlay` prop and `overlayProps` for fine-grained control of opacity, blur amount, and z-index stacking.
+
+```tsx
+<Popover
+  withOverlay
+  overlayProps={{
+    zIndex: 10000,
+    blur: '8px',
+    opacity: 0.6
+  }}
+  zIndex={10001}
+>
+  <Popover.Target>
+    <Button>Open with overlay</Button>
+  </Popover.Target>
+  <Popover.Dropdown>
+    <Text>Content with blurred backdrop</Text>
+  </Popover.Dropdown>
+</Popover>
+```
+
+**Why it's sophisticated**: Most popover implementations treat overlays as binary (present/absent), but this pattern recognizes that blur strength and opacity are independent concerns that developers need to tune for visual hierarchy and visual feedback. The blur effect is particularly non-obvious—it improves perceived focus on the popover without fully darkening the page, creating a subtle dimming effect that works well for medium-prominence interactions.
+
+**Evidence of design maturity**:
+- Separates z-index control (`zIndex` on popover itself vs `overlayProps.zIndex` on backdrop) showing deep thought about stacking contexts
+- Blur radius is independently configurable from opacity, acknowledging that different designs need different visual treatments
+- Optional overlay (not forced when modal) shows component understands use cases where focus should be on the popover but backdrop isn't needed
+- This pattern appears in enterprise design systems (Material Design, Chakra UI) but rarely in simpler popovers, indicating it solves real design problems
+
+---
+
+### Headless UI - PopoverGroup Coordination for Navigation Context
+
+**What it does**: Provides a dedicated `PopoverGroup` component that coordinates multiple popovers in header/navigation contexts. When tabbing between grouped popovers, panels remain open instead of closing, enabling seamless keyboard navigation across a series of related dropdown menus without repeated open/close cycles.
+
+```jsx
+<PopoverGroup className="flex gap-4">
+  <Popover>
+    <PopoverButton>Solutions</PopoverButton>
+    <PopoverPanel anchor="bottom">
+      <a href="/analytics">Analytics</a>
+      <a href="/engagement">Engagement</a>
+    </PopoverPanel>
+  </Popover>
+
+  <Popover>
+    <PopoverButton>Products</PopoverButton>
+    <PopoverPanel anchor="bottom">
+      <a href="/product-1">Product 1</a>
+      <a href="/product-2">Product 2</a>
+    </PopoverPanel>
+  </Popover>
+
+  {/* Tabbing between buttons keeps panels open automatically */}
+</PopoverGroup>
+```
+
+**Why it's sophisticated**: Navigation menus represent a specific interaction pattern where users often jump between related dropdowns without expecting them to close. This requires coordination at the component group level—each popover needs awareness of its siblings' state. Most popover libraries require manual state management for this pattern; Headless UI recognizes it as a distinct use case deserving a dedicated component.
+
+**Evidence of design maturity**:
+- Solves the "nested dropdown navigation" problem that appears in virtually every website's header but is rarely addressed explicitly by component libraries
+- The component name `PopoverGroup` is domain-specific vocabulary from web UX (contrasted with generic "coordination" or "manager" naming)
+- This pattern evolved from decades of desktop UI conventions (menu bars) applied to web, showing recognition of cross-platform design patterns
+- Keyboard behavior (Tab keeps panel open; Escape closes) requires careful event interception that's non-trivial to implement correctly
+
+---
+
+### Radix UI - Anchor Override for Non-Trigger Positioning
+
+**What it does**: Provides a separate `Popover.Anchor` component that allows positioning popover content relative to a different element than the trigger. Enables use cases where the visual anchor point should differ from the interactive trigger, such as floating content anchored to a highlighted text span while the trigger is a separate button.
+
+```jsx
+<Popover.Root modal={true}>
+  <Popover.Trigger>
+    <Button>Show details</Button>
+  </Popover.Trigger>
+
+  <Popover.Anchor asChild>
+    <span className="highlight">Important text</span>
+  </Popover.Anchor>
+
+  <Popover.Content>
+    {/* Content positions relative to the highlighted span, not the button */}
+  </Popover.Content>
+</Popover.Root>
+```
+
+**Why it's sophisticated**: Most popover implementations assume positioning should follow the trigger element. This pattern recognizes that triggering and positioning are orthogonal concerns—you might want to trigger from one element (a button for accessibility and interactivity) but position relative to another (semantic content that deserves visual connection). This is particularly useful for educational popovers that explain inline content.
+
+**Evidence of design maturity**:
+- Requires careful separation of concerns in the component architecture (Trigger vs Anchor as distinct sub-components)
+- The use of `asChild` pattern (render-as polymorphism) shows advanced compositional thinking—allowing developers to apply the anchor role to any element
+- This pattern addresses edge cases that only emerge in complex applications: annotating inline content, positioning relative to selection, contextual help systems
+- Radix UI is used in accessibility-first frameworks (ARIA APG patterns) where this distinction matters for semantic accuracy
+
+---
+
 ## Critical Decision Points for Semantic UI
 
 ### Decision 1: Single Component vs Separate Components

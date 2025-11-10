@@ -278,6 +278,50 @@ ai/research/switch/shadcn/usage-patterns.md
 | Radix Themes | Opinionated | Current | Controlled/Uncontrolled | Monolithic |
 | ShadCN | Copy-Paste | Radix 1.2.6 | Controlled/Uncontrolled | Compound |
 
+## Sophisticated Design Patterns
+
+### Ant Design - Internal Track Content Rendering
+
+**What it does**: Allows display of text or icons **inside the switch track itself** rather than only external labels. Uses `checkedChildren` and `unCheckedChildren` props to render different content for each state. Particularly effective for dark mode toggles (sun/moon icons) or binary choices ("ON"/"OFF" text).
+
+**Why it's sophisticated**: Most components relegate all secondary content to external labels. Ant Design recognized that for binary toggles, embedding state-specific context **within the component boundary** eliminates the need for separate label components while providing instant visual clarity. This solves the problem of ambiguous binary UI—users don't need external text to understand what "checked" means when "ON"/"OFF" or "☀️"/"🌙" is visible inside the control itself.
+
+**Evidence of design maturity**:
+- Supports both text (`checkedChildren="开"`) and JSX icons (`<CheckOutlined />`) in the same API surface
+- Implementation handles text clipping gracefully when content exceeds track width across three size variants
+- Pattern is referenced in 2/11 frameworks (Ant Design, Mantine) as a best practice, suggesting careful consideration rather than accidental feature
+- Used in production apps for dark mode toggles (a canonical use case)
+
+---
+
+### Chakra UI v3 + Mantine - Thumb Icon Composition (State-Specific Visual Feedback)
+
+**What it does**: Allows icons or indicators to be placed **inside the moving thumb** that change based on the switch state. Chakra UI implements this via `<Switch.ThumbIndicator>` composition, while Mantine provides a `thumbIcon` prop. The icon moves with the thumb, creating visual continuity that mirrors the state change.
+
+**Why it's sophisticated**: This pattern solves a non-obvious UX problem—communicating state change through motion. Unlike static icons in the track, thumb icons create a visual narrative: the thumb moves AND its content changes, providing dual feedback that reinforces the toggle action. It's the difference between seeing "the switch moved" and "understanding what the switch became." This is particularly valuable in accessibility contexts where animated state changes need to be reinforced with semantic content.
+
+**Evidence of design maturity**:
+- Implemented independently in 4 frameworks (Chakra UI v3, HeroUI, Mantine, Nuxt UI) with identical conceptual approach despite different APIs
+- Mantine's example shows dynamic icons (`checked ? <IconCheck /> : <IconX />`) proving the pattern handles reactive content
+- Common use case in 7/11 frameworks (64% adoption) demonstrates this solves a real UX need
+- Requires careful consideration of icon sizing and color contrast to maintain readability during motion
+
+---
+
+### Mantine - Switch.Group (Multi-Switch Coordination)
+
+**What it does**: `Switch.Group` component manages multiple related switches as a unit, maintaining a shared array of checked values, providing unified error display, description text, and validation styling. Switches within the group contribute their individual states to a single `onChange` handler that returns the entire collection.
+
+**Why it's sophisticated**: While most frameworks treat switches as isolated controls, Mantine identified that in forms, switches often appear in related sets (e.g., "Which frameworks have you used?"). Rather than forcing developers to manually coordinate switch state arrays, `Switch.Group` abstracts the common pattern—each switch has a `value` prop, the group manages the array, and a single `onChange` handler receives the updated collection. This is similar to RadioGroup/CheckboxGroup patterns but adapted for switches specifically, showing deep understanding of real-world form design.
+
+**Evidence of design maturity**:
+- Only 1/11 frameworks implement this (Mantine), suggesting it's not obvious—it required field-specific insight
+- Supports advanced form patterns: shared validation messages, required indicators, descriptions at group level
+- Composed using Mantine's existing Switch primitive, demonstrating how good primitives enable sophisticated patterns
+- The pattern mirrors established forms conventions (RadioGroup, CheckboxGroup) but fills a gap that only exists for switches in multi-choice scenarios
+
+---
+
 ## Key Insights for Implementation
 
 ### Universal Requirements

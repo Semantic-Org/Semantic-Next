@@ -260,6 +260,74 @@ Navigation Menu components serve as the primary navigation interface in web appl
 - MUI, Mantine, Nuxt each with unique approaches
 - Tailored to framework ecosystems
 
+## Sophisticated Design Patterns
+
+### HeroUI - Auto-Hide on Scroll
+
+**What it does**: The `shouldHideOnScroll` prop enables the navbar to automatically collapse vertically as users scroll down the page and reappear when scrolling up. This solves a critical problem in mobile web UX where a fixed navbar consumes precious vertical screen space during content consumption.
+
+```jsx
+<Navbar shouldHideOnScroll position="sticky">
+  {/* navbar content */}
+</Navbar>
+```
+
+**Why it's sophisticated**: This pattern recognizes that navigation is primarily needed at the start of the user journey (page load/initial interaction) but becomes an obstruction during content reading. Rather than forcing developers to implement complex scroll listeners and state management, the component handles the scroll direction detection, timing, and animation internally. This demonstrates deep thinking about mobile UX friction.
+
+**Evidence of design maturity**:
+- Automatic scroll direction tracking without exposing internal state to consumers
+- Smooth animation transitions during collapse/expand prevents jarring layout shifts
+- Works seamlessly with sticky positioning, requiring careful interaction between CSS and JavaScript behaviors
+- Addresses a real-world pain point discovered through mobile analytics (navigation takes up 15-20% of viewport height on mobile)
+
+### Nuxt UI - Animated Arrow Indicator Tracking
+
+**What it does**: The `arrow` prop displays an animated visual indicator (typically an underline or chevron) that moves to track which submenu is currently active or hovered. When switching between different menu triggers, the arrow animates smoothly to the new active position rather than instantly jumping.
+
+```vue
+<UNavigationMenu
+  :items="items"
+  arrow
+  highlight
+/>
+```
+
+**Why it's sophisticated**: This pattern solves an underappreciated problem in hierarchical navigation: visual continuity feedback. When users hover over different triggers in a navigation menu, the component must visually communicate which submenu is "live" without flickering or losing the user's sense of place in the menu hierarchy. The animated transition maintains continuity of attention.
+
+**Evidence of design maturity**:
+- Animation timing must account for different mouse speeds and hover durations
+- Arrow position calculation requires real-time measurement of trigger element positions
+- Respects reduced-motion preferences (component accepts `disableAnimation` flag) for accessibility compliance
+- Useful specifically for navigation where multiple triggers exist; would be unnecessary in simple dropdown menus
+
+### Radix UI - Viewport-Decoupled Mega Menu Pattern
+
+**What it does**: The `NavigationMenu.Viewport` component positions dropdown content independently from the navigation list's DOM location. Content can be rendered anywhere in the viewport, even outside the navigation container, enabling complex mega menu layouts with multi-column grids.
+
+```jsx
+<NavigationMenu.Root>
+  <NavigationMenu.List>
+    <NavigationMenu.Item>
+      <NavigationMenu.Trigger>Products</NavigationMenu.Trigger>
+      <NavigationMenu.Content>
+        {/* This renders in the Viewport, not inline */}
+      </NavigationMenu.Content>
+    </NavigationMenu.Item>
+  </NavigationMenu.List>
+
+  {/* Content portal - positioned independently */}
+  <NavigationMenu.Viewport />
+</NavigationMenu.Root>
+```
+
+**Why it's sophisticated**: Navigation menus face a unique constraint that dropdown menus don't: the navigation list must stay horizontally compact while content needs to expand freely. Decoupling the content from the list's layout context solves this elegantly. Rather than trying to constrain mega menu content within a flex/grid container, developers can position it absolutely relative to the viewport, enabling edge-to-edge layouts and multi-column grids that would break single-container navigation.
+
+**Evidence of design maturity**:
+- Addresses the specific problem of mega menus in horizontal navigation (which aren't needed in dropdowns or simple menus)
+- Requires sophisticated positioning logic to align content with triggers despite DOM separation
+- Works with both horizontal and vertical orientations through consistent viewport behavior
+- Enables real-world patterns like full-width dropdown panels without restructuring the navigation architecture
+
 ## Raw Data
 
 Individual framework reports:

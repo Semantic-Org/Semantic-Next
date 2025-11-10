@@ -1279,6 +1279,115 @@ ui-menu-radio-item[data-checked] { }
 
 ---
 
+## Sophisticated Design Patterns
+
+### Radix UI - Data-Driven Collision Positioning with CSS Custom Properties
+
+**What it does**: Radix UI exposes runtime collision detection data through `data-*` attributes (`data-side`, `data-align`, `data-state`) and CSS custom properties (`--radix-dropdown-menu-content-transform-origin`, `--radix-dropdown-menu-trigger-width`). This allows developers to create animations and layouts that respond to actual dropdown position after collision handling, enabling animation origins and transforms that flip dynamically based on available viewport space.
+
+```css
+.dropdown-content {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+  animation: scaleIn 0.2s ease-out;
+}
+
+.dropdown-content[data-side="top"] {
+  animation: slideUp 0.2s ease-out;
+}
+
+.dropdown-content[data-side="bottom"] {
+  animation: slideDown 0.2s ease-out;
+}
+```
+
+**Why it's sophisticated**: This solves the non-obvious problem that animations need to know the *actual* position after collision avoidance. A dropdown positioned via `side="bottom"` might flip to `top` when near viewport edges. Hard-coded animations would feel wrong. By exposing the computed side/align values at render time, developers can create fluid, context-aware animations that appear natural regardless of position. This requires collision detection to complete before render, making it a performance-aware pattern.
+
+**Evidence of design maturity**:
+- Explicit separation of positioning logic from styling (CSS custom properties manage animation origins)
+- Runtime state exposure via data attributes enables CSS-only responsive styling
+- Performance consideration: Uses synchronous positioning calculation so CSS variables are available immediately
+
+---
+
+### Chakra UI v3 - Value-Based Item Routing with Navigate Callbacks
+
+**What it does**: Chakra UI v3's Menu component requires a `value` prop on each `Menu.Item` and provides a `navigate` callback on `Menu.Root` that receives both the selected value and the DOM node. This enables sophisticated routing and state management patterns without needing item-level click handlers.
+
+```jsx
+<Menu.Root
+  navigate={({ value, node }) => {
+    // Route based on value
+    if (value === 'profile') router.push('/profile');
+    else if (value === 'logout') handleLogout();
+
+    // Or access DOM node for advanced patterns
+    console.log(node.dataset.userId);
+  }}
+>
+  <Menu.Trigger asChild><Button>Account</Button></Menu.Trigger>
+  <Menu.Positioner>
+    <Menu.Content>
+      <Menu.Item value="profile" data-user-id="123">Profile</Menu.Item>
+      <Menu.Item value="logout">Logout</Menu.Item>
+    </Menu.Content>
+  </Menu.Positioner>
+</Menu.Root>
+```
+
+**Why it's sophisticated**: This centralizes item handling in a single callback rather than scattered `onSelect` handlers per item. This is non-obvious because most components assume click handlers live on individual items. By moving the handler to the root with value-based routing, it enables: (1) type-safe item routing if combined with TypeScript const assertions, (2) easier analysis of all possible menu outcomes in one place, (3) framework-aware patterns (Next.js router integration), and (4) reduced event handler proliferation. The `node` parameter allows access to data attributes for complex scenarios.
+
+**Evidence of design maturity**:
+- Enforces explicit item identification (required `value`) preventing accidental handler omission
+- Single routing function simplifies code analysis and testing
+- Designed to integrate with modern router patterns (Next.js, React Router, etc.)
+
+---
+
+### Ant Design - Composable Trigger Modes with Cursor-Aware Context Menu Positioning
+
+**What it does**: Ant Design's Dropdown supports combining multiple trigger modes—`trigger={['click', 'hover', 'contextMenu']}`—where each trigger can be individually enabled or disabled. Notably, when `contextMenu` is included, the menu positions itself at the cursor location rather than relative to the trigger element, creating a true context menu experience.
+
+```jsx
+// Multi-trigger with different behaviors
+<Dropdown
+  menu={{ items }}
+  trigger={['click', 'hover']}
+>
+  <Button>Click or hover to open</Button>
+</Dropdown>
+
+// Context menu variant - positions at cursor
+<Dropdown
+  menu={{ items }}
+  trigger={['contextMenu']}
+  placement="bottomLeft"  // Ignored for contextMenu, cursor position used instead
+>
+  <div style={{ height: 200, border: '1px solid #ccc' }}>
+    Right-click anywhere
+  </div>
+</Dropdown>
+
+// Selective trigger disabling per action
+const [triggers, setTriggers] = useState(['click', 'hover']);
+<Dropdown
+  menu={{ items, onClick: ({ key }) => {
+    if (key === 'edit') setTriggers(['click']); // Disable hover after edit
+  } }}
+  trigger={triggers}
+>
+  <Button>Smart triggers</Button>
+</Dropdown>
+```
+
+**Why it's sophisticated**: This pattern recognizes that different interaction contexts need different trigger modes. Combining triggers is non-obvious—most frameworks offer one or the other. The contextMenu mode then applies different positioning logic (cursor-relative instead of trigger-relative), which internally branches the positioning algorithm. This is sophisticated because: (1) it requires dual positioning strategies in one component, (2) contextMenu positioning follows browser conventions (respects cursor), (3) trigger array composition enables dynamic trigger mode switching based on application state, and (4) it preserves the `placement` prop for hover/click while ignoring it for contextMenu, showing thoughtful API design.
+
+**Evidence of design maturity**:
+- Conditional positioning logic based on trigger mode (cursor-aware for contextMenu)
+- Supports dynamic trigger switching via state without component recreation
+- Framework conventions followed (cursor positioning for context menus matches native browser behavior)
+
+---
+
 ## Research Metadata
 
 - **Total frameworks analyzed**: 11

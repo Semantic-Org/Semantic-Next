@@ -304,6 +304,86 @@ Stack is a one-dimensional layout component that provides a convenient wrapper f
 - Need to mix different flex behaviors
 - Building complex responsive layouts
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Divider Integration with Directional Awareness
+
+**What it does**: The `divider` prop accepts a React element that is automatically inserted between each child element, with automatic positioning and direction-aware orientation. For VStack, dividers render horizontally; for HStack, dividers render vertically. The spacing system automatically accounts for divider elements without requiring manual gap adjustments.
+
+```jsx
+<VStack
+  divider={<StackDivider borderColor="gray.200" />}
+  spacing={4}
+  align="stretch"
+>
+  <Box>Item One</Box>
+  <Box>Item Two</Box>
+</VStack>
+// Divider renders as horizontal line between items
+```
+
+**Why it's sophisticated**: This pattern solves a non-obvious problem—dividers need to respect both layout direction AND spacing calculations. A naive implementation would add dividers as children, breaking spacing calculations. Stack's approach clones dividers and inserts them at render time, automatically orienting them perpendicular to the stack direction without requiring the developer to think about it.
+
+**Evidence of design maturity**:
+- Automatically orients dividers perpendicular to stack direction (horizontal dividers in vertical stacks, vertical dividers in horizontal stacks)
+- Dividers don't disrupt spacing calculations between actual content children
+- Dividers don't render before first child or after last child (edge case handling)
+- Works with responsive direction changes (divider orientation adapts automatically)
+
+---
+
+### MUI - useFlexGap Flag for Browser Compatibility Strategy
+
+**What it does**: The `useFlexGap` boolean flag switches Stack's spacing implementation from margin-based (default, broader browser support) to CSS gap-based (modern, cleaner approach). When `false` (default), Stack uses margin on children to create spacing. When `true`, it uses CSS gap property, which is more semantically correct but requires modern browser support.
+
+```jsx
+// Default: Uses margin-based spacing (IE compatible)
+<Stack spacing={2}>
+  <Item>Item 1</Item>
+  <Item>Item 2</Item>
+</Stack>
+
+// Modern: Uses CSS gap property
+<Stack spacing={2} useFlexGap={true}>
+  <Item>Item 1</Item>
+  <Item>Item 2</Item>
+</Stack>
+```
+
+**Why it's sophisticated**: This pattern acknowledges a real-world constraint—the CSS gap property on flex containers has incomplete browser support (no IE 11). Rather than forcing one approach, Stack provides the choice, letting developers opt into the cleaner modern implementation when their browser matrix allows it. The implementation details (which spacing mechanism to use) are hidden from the developer's perspective; they just set `spacing={2}` and let the flag determine how it's applied.
+
+**Evidence of design maturity**:
+- Acknowledges real browser compatibility constraints without abandoning modern CSS
+- Provides explicit opt-in rather than magic detection (developer controls the choice)
+- Both implementations produce identical visual results (transparent to component consumer)
+- Documented trade-off: modern cleaner CSS vs. broader browser support
+- Implementation can be deprecated as browser support improves
+
+---
+
+### Chakra UI - shouldWrapChildren Pattern for Inline-Block Spacing Edge Cases
+
+**What it does**: The `shouldWrapChildren` boolean prop wraps each child element in a Box with `display: inline-block`. This solves a specific spacing issue where certain content types (text, inline elements) don't respond to flexbox spacing in expected ways. When enabled, each child gets consistent block-level spacing treatment.
+
+```jsx
+<HStack spacing={3} shouldWrapChildren>
+  <Text>Text item 1</Text>
+  <Text>Text item 2</Text>
+  <Text>Text item 3</Text>
+</HStack>
+// Each Text is wrapped in Box with display: inline-block
+// Ensures consistent spacing behavior
+```
+
+**Why it's sophisticated**: This pattern identifies and solves a subtle but real problem—not all content types behave identically under flexbox spacing. Inline elements like text don't respond the same way as block elements. Rather than requiring developers to understand flexbox edge cases and wrap items manually, Stack provides an opt-in mechanism that "normalizes" children to block-level behavior. This is non-obvious because the problem manifests inconsistently depending on content type.
+
+**Evidence of design maturity**:
+- Identifies a real edge case in CSS flexbox spacing behavior (inline vs block elements)
+- Provides opt-in solution without adding wrapper markup in common cases (performance-conscious)
+- Named clearly to indicate what it does (`shouldWrap` not `fix` or `normalize`)
+- Acknowledges performance implications (documented gotcha: performance impact with large lists)
+- Only enabled when developer explicitly requests it
+
 ## Recommendations for Implementation
 
 Based on pattern prevalence, a robust Stack implementation should include:

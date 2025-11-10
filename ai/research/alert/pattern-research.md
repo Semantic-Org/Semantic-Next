@@ -555,6 +555,58 @@ All frameworks integrate with their respective theme systems:
 - **Nuxt UI**: app.config.ts, oklch colors, global defaults
 - **PrimeReact**: Extensive theme variants (Bootstrap, Material, Tailwind, etc.)
 
+## Sophisticated Design Patterns
+
+### Ant Design - Pause-on-Hover with Progress Bar
+
+**What it does**: Notifications display an animated progress bar that counts down to auto-dismiss, and hovering the notification pauses both the timer and the progress animation. This provides users visual feedback about when the notification will disappear while giving them control to prevent loss of information.
+
+**Why it's sophisticated**: This solves a fundamental UX problem unique to auto-dismissing notifications: users can't easily tell how much time remains before content disappears, and they can't afford to miss time-critical information. The dual affordance (progress bar + pause-on-hover) elegantly lets users read at their own pace without requiring modal dialogs.
+
+**Evidence of design maturity**:
+- Handles the edge case where users need more time to read complex notification content
+- Progress bar is not just visual decoration—it's paired with pause-on-hover to make it interactive
+- Only Ant Design implements this (1/7 frameworks), suggesting it's a deliberate choice rather than accidental
+
+### Mantine - Update by ID Pattern for In-Flight Notifications
+
+**What it does**: Notifications can be referenced by a unique ID and updated after display without removing/re-creating them. This allows transforming a loading notification into a success notification by calling `notifications.update(id, { newProps })` instead of clearing and showing a new one.
+
+**Why it's sophisticated**: This directly addresses async workflows (file uploads, API calls, multi-step processes) where you show a loading state first, then update to success/error. Without this pattern, you'd need to destroy the old notification and show a new one—causing visual disruption and potential queue management issues. The pattern treats notifications as mutable entities tracked by ID.
+
+**Evidence of design maturity**:
+- Common async pattern (upload, form submission) is explicitly anticipated in the API surface
+- `notifications.update()` is a first-class method, not a workaround
+- Works in conjunction with queue management and limit controls, suggesting integrated design
+- Only Mantine exposes this (1/7 frameworks, in their notifications package), showing it's intentional
+
+### Ant Design - Error Boundary Variant (Alert.ErrorBoundary)
+
+**What it does**: A specialized Alert component (`Alert.ErrorBoundary`) wraps child components and automatically catches React rendering errors, displaying them in an alert format with customizable error message and stack display.
+
+**Why it's sophisticated**: This solves the architectural problem of preventing white-screen-of-death errors by catching errors at a specific boundary and gracefully degrading to show the error in the UI. It's not just error handling—it's error *presentation* integrated into the component system itself.
+
+**Evidence of design maturity**:
+- Specialized variant suggests deep consideration of error scenarios beyond typical messaging
+- Customizable error message/stack display props show anticipation of different error detail needs
+- Bridges React's Error Boundary pattern with Alert component's visual presentation
+- Only Ant Design provides this (1/7 frameworks), indicating unique architectural thinking
+
+### Chakra UI v3 - Ark UI Powered Dot Notation with Anatomic Composition
+
+**What it does**: Alert components use dot notation (`Alert.Root`, `Alert.Indicator`, `Alert.Content`, `Alert.Title`, `Alert.Description`) powered by Ark UI's state machines, where each sub-component has a well-defined role in the anatomic structure. The composition is not arbitrary—it matches a formal specification of what makes an alert.
+
+**Why it's sophisticated**: This pattern separates concerns at a granular level: the root manages state and ARIA attributes, indicator handles visual status cues, content provides layout for text, title/description define semantic roles. Each sub-component is independently composable yet strongly typed for its position in the hierarchy. It's not just named parts—it's *anatomically correct* composition.
+
+**Evidence of design maturity**:
+- Built on Ark UI (headless state machine library), not just React conventions
+- Each part has a specific semantic role (indicator ≠ content ≠ title)
+- v3 added `Alert.Content` wrapper explicitly to improve composition—showing iteration based on real usage
+- Ark UI provides "perfect parity" across React/Vue/Solid/Svelte, indicating the pattern is framework-agnostic
+- Migration from v2 (flat composition) to v3 (dot notation) shows deliberate architectural improvement
+
+---
+
 ## Raw Data References
 
 Individual framework research reports available at:

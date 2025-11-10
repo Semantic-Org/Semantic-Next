@@ -1,79 +1,79 @@
-[x] - Divider / Separator
-[x] - Table
-[x] - Button
-[x] - Popup
-[x] - Message
-[x] - Segment
-[x] - Card
-[x] - Label / Badge
-[x] - Image
-[x] - Container
-[x] - Statistic
-[x] - Placeholder / Skeleton
-[x] - Loader
-[x] - Checkbox
-[x] - Dropdown
-[x] - Breadcrumb
-[x] - Grid
-[x] - List
-[x] - Tab
-[x] - Header
-[x] - Icon
-[x] - Input
-[x] - Rail / Offscreen
-[x] - Step
-[x] - Menu
 [x] - Accordion
-[x] - Modal
-[x] - Progress Bar
-[x] - Rating
-[x] - Search
-[x] - Toast / Snackbar
-[x] - Tooltip
 [x] - Alert / Notification
-[x] - Switch / Toggle
-[x] - Textarea
-[x] - Radio Button / Radio Group
-[x] - Avatar
-[x] - Drawer / Offcanvas / Sheet
-[x] - Pagination
-[x] - Form
-[x] - Chip / Tag / Pill
-[x] - Link
-[x] - Select
-[x] - Navbar / App Bar
-[x] - Slider (Range Input)
-[x] - Popover / Hover Card
-[x] - Text / Typography
-[x] - Timeline
-[x] - Carousel
-[x] - Calendar / Date Picker
+[x] - Aspect Ratio
 [x] - Autocomplete / Combobox
-[x] - Tree / Tree View
+[x] - Avatar
+[x] - Box (Layout)
+[x] - Breadcrumb
+[x] - Button
+[x] - Calendar / Date Picker
+[x] - Card
+[x] - Carousel
+[x] - Center (Layout)
+[x] - Chart
+[x] - Checkbox
+[x] - Chip / Tag / Pill
+[x] - Code
+[x] - Color Picker
+[x] - Command Palette
+[x] - Container
+[x] - Context Menu
+[x] - Divider / Separator
+[x] - Drawer / Offcanvas / Sheet
+[x] - Dropdown
 [x] - Empty State
 [x] - File Upload
-[x] - Code
-[x] - Stepper / Wizard
-[x] - Stack (Layout)
 [x] - Flex (Layout)
-[x] - Box (Layout)
+[x] - Form
 [x] - Form Field
-[x] - Number Input
-[x] - Password Input
-[x] - Color Picker
+[x] - Grid
+[x] - Header
 [x] - Heading
-[x] - Space (Layout)
-[x] - Scroll Area
-[x] - Command Palette
-[x] - Context Menu
-[x] - Portal
-[x] - Center (Layout)
-[x] - Menubar
-[x] - Result
+[x] - Icon
+[x] - Image
+[x] - Input
 [x] - Kbd (Keyboard Key)
-[x] - Aspect Ratio
-[x] - Chart
-[x] - Transfer / Transfer List
-[x] - QR Code
+[x] - Label / Badge
+[x] - Link
+[x] - List
+[x] - Loader
+[x] - Menu
+[x] - Menubar
+[x] - Message
+[x] - Modal
+[x] - Navbar / App Bar
 [x] - Navigation Menu
+[x] - Number Input
+[x] - Pagination
+[x] - Password Input
+[x] - Placeholder / Skeleton
+[x] - Popover / Hover Card
+[x] - Popup
+[x] - Portal
 [x] - Progress
+[x] - Progress Bar
+[x] - QR Code
+[x] - Radio Button / Radio Group
+[x] - Rail / Offscreen
+[x] - Rating
+[x] - Result
+[x] - Scroll Area
+[x] - Search
+[x] - Segment
+[x] - Select
+[x] - Slider (Range Input)
+[x] - Space (Layout)
+[x] - Stack (Layout)
+[x] - Statistic
+[x] - Step
+[x] - Stepper / Wizard
+[x] - Switch / Toggle
+[x] - Tab
+[x] - Table
+[x] - Text / Typography
+[x] - Textarea
+[x] - Timeline
+[x] - Toast / Snackbar
+[x] - Tooltip
+[x] - Transfer / Transfer List
+[x] - Tree / Tree View

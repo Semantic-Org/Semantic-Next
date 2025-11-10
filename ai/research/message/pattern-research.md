@@ -518,6 +518,106 @@ Ant Design's imperative API naturally supports **duration-based auto-dismiss**, 
 6. **Attachment**: Attached to adjacent elements (Semantic UI)
 7. **Floating**: Elevated above content (Semantic UI)
 
+## Sophisticated Design Patterns
+
+### Nuxt UI - Avatar-Based Personalization
+
+**What it does**: Instead of a static icon, the Message component supports a reactive `avatar` prop that can render three types of personalized indicators: image URLs (for profile pictures), icon identifiers, or text initials. This enables personalized notifications where the message source is visually identified, useful for messaging systems, user notifications, or activity feeds.
+
+```vue
+<!-- Avatar from image URL -->
+<UAlert
+  :avatar="{ src: 'https://github.com/user.png' }"
+  title="New message from Sarah"
+  description="Check out the latest updates."
+/>
+
+<!-- Avatar with text initials -->
+<UAlert
+  :avatar="{ text: 'JD' }"
+  title="Note from John Doe"
+  description="This is a personalized message."
+/>
+```
+
+**Why it's sophisticated**: This pattern solves the non-obvious problem of identifying the message source in applications like messaging, activity logs, or team collaboration tools. It's not just adding an icon—it's a three-mode abstraction (image/icon/text) that requires thoughtful rendering logic to handle fallbacks, sizing, and styling consistency. Most frameworks treat alerts as purely informational without considering personalization, making this a unique design insight.
+
+**Evidence of design maturity**:
+- Supports three distinct avatar types (image src, icon reference, text initials) with automatic rendering and fallback handling
+- Integrates seamlessly with Nuxt's icon resolution system and maintains consistent sizing/alignment with title/description
+- Demonstrates restraint by offering this as an alternative to icons rather than an additional prop, keeping the API clean while expanding use cases
+
+---
+
+### Semantic UI Classic - Icon Message Content Wrapper Pattern
+
+**What it does**: Icon messages require a specific internal structure where the icon and content are separated into distinct flex containers: `<i class="icon">` followed by `<div class="content">` containing headers and paragraphs. This structured layout pattern ensures proper alignment and spacing when combining icons with variable-length content.
+
+```html
+<!-- Icon Message with structured layout -->
+<div class="ui icon message">
+  <i class="inbox icon"></i>
+  <div class="content">
+    <div class="header">Have you heard about our mailing list?</div>
+    <p>Get the best news in your e-mail every day.</p>
+  </div>
+</div>
+
+<!-- Loading state variant -->
+<div class="ui icon message">
+  <i class="notched circle loading icon"></i>
+  <div class="content">
+    <div class="header">Just one second</div>
+    <p>We're fetching that content for you.</p>
+  </div>
+</div>
+```
+
+**Why it's sophisticated**: This pattern solves the non-trivial problem of aligning icons (often with animations) alongside variable-height text content. The required content wrapper isn't arbitrary—it enables flexbox to properly distribute space and maintain baseline alignment even when text wraps or headers are absent. Most modern frameworks use automatic composition (slots or sub-components) but this CSS-class pattern requires developers to understand the structural dependency for correct rendering.
+
+**Evidence of design maturity**:
+- The content wrapper is essential, not optional—omitting it breaks the flexbox layout, forcing developers to learn the pattern
+- Supports animated icons (e.g., "notched circle loading") within the same structure, demonstrating foresight about loading states
+- Enables both icon+text and icon+header+text combinations through standard semantic HTML (headers, paragraphs), not custom slots
+
+---
+
+### Nuxt UI - Orientation Control for Dynamic Layout
+
+**What it does**: The `orientation` prop enables switching between `horizontal` (default) and `vertical` layouts, changing how title, description, icon/avatar, and action buttons are positioned. This allows a single component to adapt its content flow based on available space or semantic grouping needs.
+
+```vue
+<!-- Horizontal layout (default) - icon and text side-by-side -->
+<UAlert
+  orientation="horizontal"
+  icon="i-lucide-info"
+  title="Heads up!"
+  description="Important information on one line"
+/>
+
+<!-- Vertical layout - icon above, text below, actions at bottom -->
+<UAlert
+  orientation="vertical"
+  icon="i-lucide-alert-triangle"
+  color="warning"
+  :actions="[
+    { label: 'Review', variant: 'solid' },
+    { label: 'Dismiss', variant: 'ghost' }
+  ]"
+  title="Action required"
+  description="This content arrangement emphasizes actions."
+/>
+```
+
+**Why it's sophisticated**: This pattern elegantly solves the responsive design problem without requiring media queries or container-specific CSS. By exposing orientation as a component prop, it enables parent components to choose layout based on context (sidebar vs. main content area) rather than screen size. This is non-obvious because most alert implementations have fixed layouts; adding explicit orientation control recognizes that layout suitability depends on content location, not just viewport size.
+
+**Evidence of design maturity**:
+- Changes flex direction, which affects how icons, titles, descriptions, and actions flow—a seemingly simple prop with substantial layout implications
+- Maintains visual hierarchy and spacing consistency across both orientations without requiring developers to manage layout states
+- Pairs naturally with actions array prop, showing foresight that vertical layout is more action-friendly than horizontal
+
+---
+
 ## API Design Recommendations
 
 ### For Semantic UI Next (Web Components)

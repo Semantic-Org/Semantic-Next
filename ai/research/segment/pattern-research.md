@@ -614,6 +614,85 @@ Framework-specific innovations to evaluate:
 - 🔍 Color variants (Semantic UI pattern - status colors)
 - 🔍 Emphasis levels (Semantic UI pattern - hierarchy)
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Attached Segments System
+
+**What it does**: Segments can be seamlessly connected to adjacent segments or other components (headers, messages) by removing internal borders and aligning edges. Multiple segments in "attached" mode (top, middle, bottom) form a cohesive visual unit. Example: a header with an attached segment below creates a borderless connection.
+
+```html
+<h3 class="ui top attached header">
+  User Profile
+</h3>
+<div class="ui attached segment">
+  <p>Profile content seamlessly connects to header</p>
+</div>
+<div class="ui bottom attached segment">
+  <p>Footer content with clean attachment</p>
+</div>
+```
+
+**Why it's sophisticated**: This pattern solves a real design problem - how to visually group related elements without creating redundant borders. The implementation requires understanding z-index layering, border removal logic, and the semantic meaning of "attachment relationships." Most other frameworks ignore this problem entirely or solve it through layout utilities rather than component-level design.
+
+**Evidence of design maturity**:
+- Edge case handling: Works correctly when attached to headers, messages, forms, and other segments
+- Real-world usage: Common pattern in form containers, content sections, and dashboard layouts
+- Design restraint: Doesn't add visual weight - achieves grouping through border subtraction rather than addition
+
+### Semantic UI Classic - Stacked and Piled Visual Effects
+
+**What it does**: Segments can render with layered, depth-based visual effects. The "stacked" variant shows segments as if placed on top of each other with visible layer edges. The "piled" variant creates an offset stack effect using negative z-index positioning, simulating a pile of pages. Both effects are purely visual and can be combined with other variations.
+
+```html
+<!-- Stacked shows layer edges -->
+<div class="ui stacked segment">
+  <p>Appears as stacked pages</p>
+</div>
+
+<!-- Piled shows offset stack -->
+<div class="ui piled segment">
+  <p>Appears as a pile of pages</p>
+</div>
+```
+
+**Why it's sophisticated**: This pattern represents a non-obvious design solution to creating visual depth without semantic meaning. While modern frameworks use elevation/shadow systems, the piled effect uses z-index and offset positioning to create a specific visual metaphor (pages in a pile). The implementation requires careful management of pseudo-elements, negative margins, and z-index layering to achieve the effect without breaking the component's layout flow.
+
+**Evidence of design maturity**:
+- Edge case handling: Maintains proper stacking context when nested, works with all other variations
+- Real-world usage: Creates distinctive visual style for cards, widgets, and emphasized containers
+- Design restraint: Limited to just two variants - avoids over-extending the concept while providing enough variation for impact
+
+### PrimeReact Panel - Collapsible Container with Template-Based Header Customization
+
+**What it does**: Panel combines a basic container with optional collapsible functionality, enabling content progressive disclosure. The unique aspect is the `headerTemplate` prop which receives a callback with helpful options (collapsed state, toggle function, icon state), allowing custom header layouts while maintaining built-in toggle behavior. This differs from simple props - it's a render function pattern.
+
+```jsx
+const headerTemplate = (options) => (
+  <div className={options.className}>
+    <Avatar image="..." size="normal" />
+    <span className={options.titleClassName}>Amy Elsner</span>
+    <Badge value="3" className="ml-auto" />
+    <button
+      className={options.togglerClassName}
+      onClick={options.onTogglerClick}
+    >
+      <span className={options.collapsed ? 'pi-chevron-down' : 'pi-chevron-up'} />
+    </button>
+  </div>
+);
+
+<Panel headerTemplate={headerTemplate} toggleable>
+  <p>Content here</p>
+</Panel>
+```
+
+**Why it's sophisticated**: This pattern solves the non-obvious problem of "how do you let consumers customize a header while maintaining a functional toggle button inside it?" The solution - passing a render function with helpful options including the toggle callback - is more elegant than requiring consumers to manage toggle state separately. It shows deep thinking about component composition and user needs.
+
+**Evidence of design maturity**:
+- Edge case handling: Templates receive all necessary context (toggle state, classNames, click handlers), preventing common mistakes like losing toggle functionality
+- Real-world usage: Supports complex headers with avatars, badges, icons, and buttons while maintaining toggle functionality
+- Design restraint: Doesn't expose every internal element as a prop - instead provides a template function pattern that's powerful without being overwhelming
+
 ## Testing Checklist
 
 ### Visual Tests

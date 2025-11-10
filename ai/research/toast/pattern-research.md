@@ -294,6 +294,74 @@ Across all frameworks, the toast/snackbar/notification component serves a univer
 - **Single active position** (6/7): One position per app instance
 - **Multiple simultaneous** (1/7): PrimeReact supports multiple ref instances
 
+## Sophisticated Design Patterns
+
+### Chakra UI (v3) - Pause/Resume Timer Control
+
+**What it does**: Chakra v3 provides `toaster.pause(id)` and `toaster.resume(id)` methods that allow programmatic control over the auto-dismiss countdown timer. This decouples timer management from browser hover events, giving applications direct control over when toasts should dismiss. A common use case: pause timer when a user begins interacting with a toast's action button.
+
+```typescript
+const toastId = toaster.create({ title: 'Processing', duration: 10000 })
+toaster.pause(toastId)  // Pause the countdown
+toaster.resume(toastId) // Resume the countdown
+```
+
+**Why it's sophisticated**: This solves a non-obvious UX problem: users might need uninterrupted time with a toast without relying on hover detection (which fails on touch devices or when focus moves away). The pause/resume pattern decouples the user's interaction intent from the technical mechanism of timeout control, enabling flexible dismissal strategies for different input types and accessibility needs.
+
+**Evidence of design maturity**:
+- Handles the edge case of touch devices where "hover" doesn't exist
+- Works across focus changes (user can interact with other page elements while toast is paused)
+- Allows applications to implement custom interaction patterns without fighting the framework
+- Part of Chakra's evolution to give developers fine-grained programmatic control (v2 lacked this)
+
+### Nuxt UI - Hover-to-Expand Stacking (Sonner-inspired)
+
+**What it does**: Nuxt UI implements a space-saving stacking pattern where multiple toasts collapse into a single visible card showing only the most recent notification. Hovering expands the stack to reveal all queued toasts. This is controlled via the `expand` prop on `UToaster`. When collapsed, only the top toast is visible; hovering reveals the full stack vertically.
+
+```vue
+<UToaster :expand="true" :max="10" />
+
+<!-- Multiple toasts appear as one collapsed card, expanding on hover -->
+<!-- Hovering also pauses all auto-dismiss timers in the stack -->
+```
+
+**Why it's sophisticated**: This solves the fundamental problem of notification overflow without losing information. Most frameworks simply stack all toasts (eating screen real estate) or discard excess toasts. The expand-on-hover pattern provides "progressive disclosure"—users see what they need (latest notification) and can expand to see history without permanently occupying space. This requires special animation and interaction handling that's unique to the toast context.
+
+**Evidence of design maturity**:
+- Pauses all timers when stack is expanded (giving users time to read expanded notifications)
+- Collapses stack after hover ends (returning to space-efficient state)
+- Preserves notification history in collapsed state without displaying all visually
+- Inspired by production-proven Sonner library, not a first-draft idea
+- Requires coordination between hover detection, animation timing, and timer management
+
+### HeroUI - Key-Based Programmatic Toast Control with Promise Integration
+
+**What it does**: HeroUI's `addToast()` returns a unique string key that enables subsequent imperative control and promise-driven state transitions. A single toast can be identified, updated, or dismissed using this key. Combined with promise support, a toast can automatically transition from loading → success/error based on promise resolution without creating multiple toast instances.
+
+```jsx
+// Create and identify
+const toastKey = addToast({
+  title: 'Processing...',
+  promise: apiCall(),
+  timeout: Infinity
+})
+
+// Later: close specific toast
+closeToast(toastKey)
+
+// Or batch close all
+closeAll()
+```
+
+**Why it's sophisticated**: This pattern solves two non-obvious problems simultaneously: (1) identifying individual toasts among many for targeted control, and (2) maintaining toast identity across state transitions. The promise integration means a single toast can represent an entire async operation lifecycle (loading spinner → success checkmark) without requiring the application to track state changes or create/destroy multiple toast instances. This is non-trivial because it requires the framework to map promise state transitions to visual updates while preserving the toast's DOM position and key reference.
+
+**Evidence of design maturity**:
+- Solves the "floating promises" problem (toasts created but never tracked for cleanup)
+- Key-based control enables sophisticated patterns like "dismiss all errors" or "limit toasts per operation type"
+- Promise pattern eliminates boilerplate for common async operation feedback (loading → success)
+- Each toast maintains stable identity across state changes (not recreated on update)
+- Enables queue management (provider can enforce maxVisibleToasts, queueing excess by key)
+
 ## Raw Data References
 
 Individual framework research reports available at:

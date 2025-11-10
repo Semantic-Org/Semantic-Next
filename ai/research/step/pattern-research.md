@@ -444,6 +444,41 @@ useEffect(() => {
 | Vuetify | Vue Material | Editable mode, rich features | Accessibility issues, v2/v3 differences |
 | PrimeReact | React apps | MenuItem integration, themes | Horizontal only, always controlled |
 
+## Sophisticated Design Patterns
+
+### MUI - Progressive Content Rendering with Conditional Unmounting
+
+**What it does**: MUI's `StepContent` component intelligently manages step content lifecycle through the `slotProps={{ transition: { unmountOnExit } }}` prop. By default, inactive step content is unmounted from the DOM for memory efficiency, but can be preserved for stateful content. This pattern elegantly solves the problem of maintaining step state across navigation without forcing developers to lift all state to the parent.
+
+**Why it's sophisticated**: This pattern recognizes that stepper steps often need to maintain internal state (form inputs, expanded panels, scroll position) across back-and-forth navigation. Rather than forcing developers to build external state management for every step's internal data, MUI provides an opt-in mechanism to preserve the DOM. The toggle between `unmountOnExit: true` (default, performant) and `false` (stateful) requires understanding the performance/state trade-off—a non-obvious decision that shows deep thinking about real-world usage.
+
+**Evidence of design maturity**:
+- Handles the memoization problem: Inactive steps use `React.memo()` internally to prevent unnecessary re-renders
+- Recognizes async data patterns: Developers often need step content to persist during API calls or validation flows
+- Provides escape hatch: `slotProps={{ transition: { unmountOnExit: false } }}` is clearly documented as a performance consideration, not a default
+
+### Mantine - Stepper.Completed Compound Component Pattern
+
+**What it does**: Mantine introduces a special `Stepper.Completed` compound component that renders only when all steps are finished (when `active >= steps.length`). This component provides a dedicated, semantic space for post-completion content like success messages, next actions, or summary screens. The pattern treats completion as a first-class state, not just an edge case in the parent's conditional rendering.
+
+**Why it's sophisticated**: Most frameworks handle completion through parent-level conditionals (`if (activeStep === steps.length)`), which is error-prone and mixes concerns. Mantine's approach recognizes that completion is a distinct phase of the stepper lifecycle that deserves its own component surface. This creates better separation of concerns: each `Stepper.Step` handles its phase, and `Stepper.Completed` handles the final phase. The pattern prevents common bugs like forgetting to render completion content or accidentally showing incomplete step content.
+
+**Evidence of design maturity**:
+- Treats completion as a built-in concept, not a hack: Developers don't need to maintain their own `completed` state
+- Preserves step navigation context: Users can click "Back" from completion state to revisit steps, which is more intuitive than traditional wizards
+- Clear state machine semantics: The component structure maps directly to sequential phases (Step 1 → Step 2 → Step 3 → Completed)
+
+### Ant Design - Responsive Orientation with Dynamic Direction Switching
+
+**What it does**: Ant Design's Steps component includes a `responsive` prop (default: `true`) that automatically switches from horizontal to vertical orientation when the viewport width drops below 532px. This isn't just CSS media queries—the component actively monitors window size and updates the `direction` prop dynamically, with smooth transitions. Combined with `progressDot` and `labelPlacement` props, this creates a single component that adapts its entire visual structure based on context.
+
+**Why it's sophisticated**: Most stepper implementations treat orientation as a static decision: choose horizontal or vertical once, commit to it. But stepper workflows in wizards often appear in different contexts (modal, sidebar, full-page)—horizontal works for desktops but fails on mobile where it creates overwhelming horizontal scroll. Ant Design's approach recognizes that a single component instance might need to adapt its layout over the component's lifetime, not just at render time. The implementation requires responsive boundary awareness (532px breakpoint), which is empirically determined for readability, not arbitrary.
+
+**Evidence of design maturity**:
+- Handles real-world constraints: The 532px breakpoint is clearly chosen to ensure readable step labels, not a magic number
+- Maintains visual state across transitions: Step progress (current step, completed steps) persists across orientation changes
+- Provides granular control: `responsive` can be disabled for cases where horizontal-only is intentional (e.g., narrow wizard embedded in layout)
+
 ## Accessibility
 
 ### WCAG Compliance

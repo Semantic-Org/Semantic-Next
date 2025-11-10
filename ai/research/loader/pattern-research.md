@@ -718,6 +718,45 @@ function useDelayedLoading(isLoading, delay = 300) {
 
 ---
 
+## Sophisticated Design Patterns
+
+This section highlights component-specific patterns that solve unique Loader/Spinner design challenges. Unlike framework-wide architectural choices, these patterns are innovations within the loading indicator domain itself.
+
+### Ant Design - Smart Delay Mechanism
+
+**What it does:** The `delay` prop (milliseconds) prevents visual flashing for operations that complete quickly. When delay is set, the spinner only appears if the operation exceeds the specified threshold. Once shown, the spinner remains visible until completion regardless of operation duration.
+
+**Why it's sophisticated:** This solves a subtle but important UX problem—brief loading flashes (< 300ms) are more distracting than no indicator at all. Rather than forcing developers to implement debouncing logic in their components, Ant Design bakes the delay directly into the component API. The implementation includes sophisticated state management: start timer on load, cancel if completes before delay, show spinner and lock until completion if delay is exceeded.
+
+**Evidence of design maturity:**
+- Rare feature: Only 1/9 frameworks implement this, despite being a well-known UX pattern
+- Real-world validation: Documented default of 200-500ms aligns with usability research on perceived performance
+- Composition-aware: Works seamlessly with wrapped content, controlling overlay appearance without affecting children visibility
+
+### Radix UI - Dimension-Preserving Loading State
+
+**What it does:** The `loading` prop hides children but preserves their layout dimensions via invisible placeholder. This prevents the layout shift that occurs when content disappears and is replaced with a spinner—a common cause of janky transitions in modern web apps.
+
+**Why it's sophisticated:** Most implementations create jarring layout shifts because spinners are typically centered and take minimal space, while content varies. Radix solves this by rendering children as invisible (display: none or visibility: hidden with dimensions preserved) so the layout remains stable. This requires careful CSS engineering and understanding of how containing blocks interact with layout algorithms.
+
+**Evidence of design maturity:**
+- Unique solution: Only Radix implements this (11% of frameworks)
+- Non-obvious insight: Acknowledges that layout stability matters for perceived quality, beyond just showing/hiding content
+- Accessibility consideration: Automatically disables interactive elements within preserved dimensions, preventing user confusion
+
+### Mantine - loaderProps Pattern for Consistent Customization
+
+**What it does:** Components that use loaders (Button, LoadingOverlay, ActionIcon, Dropzone) accept a `loaderProps` object that passes all Loader customization props through to the internal loader. This creates a unified API for customizing loaders across multiple components without duplicating prop definitions or requiring wrapper components.
+
+**Why it's sophisticated:** This pattern inverts typical prop sprawl. Rather than Button accepting `loaderType`, `loaderColor`, `loaderSize` separately, or forcing developers to replace the entire loader with a custom component, the `loaderProps` pattern delegates all loader customization to the Loader's native API. It requires careful documentation and understanding of composition patterns to implement effectively across a component ecosystem.
+
+**Evidence of design maturity:**
+- Scalable architecture: Works across 4+ components (Button, LoadingOverlay, ActionIcon, Dropzone) with same mental model
+- Composability: Enables feature creep without breaking existing APIs—new Loader props automatically work everywhere
+- Framework consistency: Demonstrates deep architectural thinking about how components relate (Loader is a dependency, not just a visual element)
+
+---
+
 ## Implementation Recommendations for Semantic UI
 
 Based on the aggregate pattern analysis, here are recommendations for the Semantic UI web component implementation, organized by priority level.

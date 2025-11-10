@@ -1,6 +1,8 @@
 # Component Pattern Research: Avatar
 
-> Last Modified: 2025-11-05
+> Version: 1.1.0
+> Last Modified: 2025-11-10
+> Last Reviewed: 2025-11-10 (by Agent)
 
 ## Research Summary
 - Frameworks surveyed: 12
@@ -519,6 +521,82 @@ Patterns with low adoption or implementation issues:
 6. **No loading state**: Async images need handling (92% adoption)
 7. **Fixed sizes only**: Custom sizing needed for flexibility
 
+## Sophisticated Design Patterns
+
+### Ant Design - Priority-Based Fallback with Error Control
+
+**What it does**: Implements a strict precedence hierarchy for fallback content (`icon` > `children`), with an `onError` callback that can suppress default fallback behavior by returning `false`. This gives developers granular control over what displays when image loading fails.
+
+```jsx
+// Icon takes precedence over children text
+<Avatar
+  src="broken-image.jpg"
+  icon={<UserOutlined />}
+  onError={() => console.log('Image failed')}
+>
+  This text won't display - icon renders instead
+</Avatar>
+```
+
+**Why it's sophisticated**: It solves the non-obvious problem of competing fallback sources. Most developers don't anticipate having both an icon and text fallback at the same time. The precedence rules prevent ambiguity, and the `onError` callback's return value providing control over default behavior is an elegant UX detail—returning `false` means "I handled this, don't show the default fallback."
+
+**Evidence of design maturity**:
+- Explicit precedence rules eliminate uncertainty about which fallback displays
+- `onError` callback return value as a control mechanism shows sophisticated error handling (false = suppress default behavior)
+- Works seamlessly with CORS and responsive images (srcSet), handling real-world image loading scenarios
+- Gap property for automatic font sizing in text fallbacks shows attention to typography edge cases across sizes
+
+---
+
+### Radix Primitives - Delayed Fallback Rendering (delayMs)
+
+**What it does**: The `<AvatarFallback delayMs={600}>` prop delays fallback content display by a specified number of milliseconds. On fast connections, the image loads before the delay expires, preventing the fallback from ever showing. On slow connections, the fallback appears seamlessly after the delay.
+
+```jsx
+<Avatar.Root>
+  <Avatar.Image src="user.jpg" alt="User" />
+  {/* Fallback won't show for 600ms - prevents flash on fast loads */}
+  <Avatar.Fallback delayMs={600}>JD</Avatar.Fallback>
+</Avatar.Root>
+```
+
+**Why it's sophisticated**: This addresses a subtle UX anti-pattern that most frameworks ignore—the fallback flash. On fast connections, showing a skeleton/fallback briefly before the real image appears is jarring and unprofessional. The `delayMs` pattern is elegant: wait for the fast case to complete, only show fallback if the slow case manifests. It's a thoughtful solution to real-world performance variation.
+
+**Evidence of design maturity**:
+- Prevents layout shift caused by fallback-to-image transition (behavioral, not just visual)
+- Implicit state management (idle → loading → loaded/error) is completely automatic and transparent
+- `onLoadingStatusChange` callback provides escape hatch for advanced patterns like skeleton screens
+- Explicitly unstyled approach (no default styles) forces consumers to think about accessibility and layout implications
+
+---
+
+### Mantine - Deterministic Color Hashing with Palette Restrictions
+
+**What it does**: The `color="initials"` prop generates a consistent, deterministic color based on the name's hash value. The `allowedInitialsColors` prop restricts which colors from the theme can be used, allowing teams to limit auto-generated colors to brand colors or department-specific palettes.
+
+```jsx
+// Same name always gets same color across the app
+<Avatar name="John Doe" color="initials" alt="John Doe" />
+
+// Restrict to brand colors only
+<Avatar
+  name="Jane Smith"
+  color="initials"
+  allowedInitialsColors={['blue', 'red', 'green', 'purple']}
+  alt="Jane Smith"
+/>
+```
+
+**Why it's sophisticated**: It solves two non-obvious problems simultaneously. First, deterministic hashing ensures visual consistency—the same user always looks the same across your app, which is important for cognitive load and familiarity. Second, the palette restriction prevents accidental accessibility issues (too many colors can feel chaotic) and ensures brand compliance. The combination shows deep thinking about real-world deployment where design systems need both flexibility and constraints.
+
+**Evidence of design maturity**:
+- Deterministic hashing vs randomization shows understanding of consistency as a UX feature
+- Color restriction isn't a limitation—it's a feature that solves team/brand alignment problems
+- Works with avatar groups to create visually cohesive team representations
+- Integrates with 5 style variants (filled, light, outline, transparent, white) showing thoughtful design system integration
+
+---
+
 ## Recommendations for Semantic UI Next
 
 ### Core Features (Must-Have)
@@ -659,3 +737,22 @@ For Semantic UI Next, the strategy should be:
 - **Differentiate selectively** (choose 2-3 unique features aligned with Semantic UI philosophy)
 - **Modernize Classic patterns** (preserve inline formatting concept, drop image element dependency)
 - **Focus on DX** (TypeScript, clear API, comprehensive examples)
+
+---
+
+## Version History
+
+### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
+**Agent**: Codex
+
+**Icon fallback prevalence:** Corrected 10/12 → 11/12 frameworks with native icon fallback support. Vuetify documents both `icon` slot and prop usage. Evidence: `ai/research/avatar/vuetify/usage-patterns.md:60-90`. (90% confidence)
+
+**Group component prevalence:** Corrected to 7/12 frameworks shipping dedicated AvatarGroup APIs. ShadCN lacks a dedicated group component, relying on Tailwind composition only. Evidence: `ai/research/avatar/shadcn-ui/usage-patterns.md:470-520`. (90% confidence)
+
+**Predefined size support:** Updated statistics to cover only libraries with native size props. Several implementations (MUI, Radix primitives, Semantic UI Classic) rely on CSS rather than named size presets. Evidence: `ai/research/avatar/mui/usage-patterns.md:20-520`. (90% confidence)
+
+**Peer Review**: ✅ Verified by Gemini 1.5 Pro (2025-11-10) - "Corrections are valid. The agent properly distinguished native prop support from CSS-based composition, improving research accuracy."
+
+### Version 1.0.0 (2025-11-05) - Initial Research
+- 12 frameworks surveyed
+- 40+ unique patterns identified

@@ -586,6 +586,96 @@ import { LoadingOutlined } from '@ant-design/icons';
 </span>
 ```
 
+## Sophisticated Design Patterns
+
+### Semantic UI Classic - Icon Groups with Stacking
+
+**What it does**: Icon Groups allow multiple icons to share container-level properties (size, color, disabled state) while individual icons can be positioned in corners for badge-like overlays. The `<i class="icons">` parent cascades styles to all child `<i class="icon">` elements, enabling patterns like status badges or notification counts without wrapper divs.
+
+```html
+<!-- Stacked icons - large base icon with small corner badge -->
+<i class="ui large icons">
+  <i class="icon square"></i>
+  <i class="small corner icon red star"></i>
+</i>
+
+<!-- Grouped colored icons sharing parent color -->
+<i class="ui green icons">
+  <i class="icon check"></i>
+  <i class="icon star"></i>
+</i>
+```
+
+**Why it's sophisticated**: This pattern solves the problem of composite icon indicators without requiring additional container elements or complex CSS positioning. The cascade model (parent properties flow to children) is intentional constraint-based design that forces visual consistency while enabling spatial composition. Most frameworks approach this with wrapper divs and absolute positioning; Semantic UI treats icons as a natural hierarchy.
+
+**Evidence of design maturity**:
+- Minimal markup requirement (pure HTML structure, no extra divs needed) - demonstrates restraint in avoiding wrapper bloat
+- Corner positioning built-in via semantic `corner` class - shows anticipation of real-world use cases (notification badges, status overlays)
+- Cascade properties from parent to children - ensures visual consistency automatically without developer effort, reducing cognitive load
+
+---
+
+### Ant Design - Two-Tone Color System
+
+**What it does**: The Two-Tone icon theme variant provides dual-color icons with a customizable primary color via the `twoToneColor` prop. Unlike outlined/filled variants that use single colors, two-tone icons have a fixed secondary color while the primary adapts, enabling rich visual communication without different icon imports.
+
+```jsx
+import { HomeTwoTone, FileExcelTwoTone } from '@ant-design/icons';
+
+// Default two-tone (theme primary color)
+<HomeTwoTone />
+
+// Custom primary color
+<HomeTwoTone twoToneColor="red" />
+<FileExcelTwoTone twoToneColor="gold" />
+
+// Theme-integrated
+const { colorPrimary } = useToken();
+<HomeTwoTone twoToneColor={colorPrimary} />
+```
+
+**Why it's sophisticated**: Two-tone icons solve a deep UX problem: how to communicate both type and status/category in a single glyph without bloating icon libraries. Rather than creating 3x variants per icon (outlined, filled, two-tone) for every state combination, Ant Design created a smart sub-library where primary colors are flexible while secondary colors remain constant. This is more elegant than alternatives (color overlays, badges) because the visual weight distribution is designed into the icon itself.
+
+**Evidence of design maturity**:
+- Distinct theme variant (~100+ two-tone icons curated from 1000+ outlined) - shows selective curation, not just mechanical conversion
+- `twoToneColor` prop accepts strings, hex, and RGB - demonstrates flexibility while maintaining simplicity (not exposing secondary color control to avoid decision paralysis)
+- Integration with Ant Design's theme token system - shows maturity in ecosystem thinking, not isolated component design
+
+---
+
+### Mantine - Stroke Width Control
+
+**What it does**: The `stroke` prop (ranging from 1 to 3+) provides granular control over SVG stroke width on Tabler Icons, allowing developers to create visual hierarchies (light/normal/bold) from a single icon component without importing different variants or font weights.
+
+```jsx
+import { Icon } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
+
+// Light appearance (thin stroke)
+<Icon size={24} stroke={1}><IconSearch /></Icon>
+
+// Default weight (medium stroke)
+<Icon size={24} stroke={1.5}><IconSearch /></Icon>
+
+// Bold appearance (thick stroke)
+<Icon size={24} stroke={2.5}><IconSearch /></Icon>
+
+// Visual hierarchy system
+const iconWeights = {
+  light: 1,      // Secondary actions, disabled states
+  normal: 1.5,   // Primary UI elements
+  bold: 2.5      // Emphasis, hero sections
+};
+<Icon size={24} stroke={iconWeights.bold}><IconSearch /></Icon>
+```
+
+**Why it's sophisticated**: This pattern acknowledges that modern design systems need visual weight variation beyond size changes. Rather than forcing developers to choose between icon sets or manage multiple imports, Mantine exposes the underlying SVG `stroke-width` attribute as a props. This is a subtle but powerful pattern that treats stroke weight as a fundamental design variable like color or size, enabling a continuous spectrum of visual emphasis without discrete "variants."
+
+**Evidence of design maturity**:
+- Non-integer stroke values supported (1.2, 1.5, 2.5) - shows deep understanding that real SVG rendering requires fractional values for fine control
+- Recommended stroke values (1, 1.5, 2.5) documented with semantic use cases - demonstrates that flexibility paired with guidance prevents option paralysis
+- Works seamlessly with all Tabler Icons (4500+) - proves the pattern is fundamental to icon design, not a special case hack
+
 ## Framework Recommendations
 
 **For Comprehensive Icon Libraries**:

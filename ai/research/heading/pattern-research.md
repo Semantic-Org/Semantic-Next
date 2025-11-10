@@ -225,6 +225,47 @@ import { Heading } from '@chakra-ui/react'
 - **Audience**: Traditional web development, jQuery apps
 - **Responsive**: CSS media queries in framework
 
+## Sophisticated Design Patterns
+
+### Chakra UI - Separation of Visual vs Semantic Meaning
+
+**What it does**: The `as` prop (semantic HTML tag: h1-h6) is completely independent from the `size` prop (visual appearance: sm-7xl). This allows developers to maintain proper document structure for accessibility while having full visual control. For example, `<Heading as="h2" size="4xl">` renders an h2 tag visually styled as a massive heading, or conversely `<Heading as="h1" size="md">` renders an h1 semantically but with compact visual sizing.
+
+**Why it's sophisticated**: The non-obvious insight is that document hierarchy (semantic meaning) and visual hierarchy (design appearance) are fundamentally different concerns. Developers intuitively assume they should match, but this breaks accessibility: forcing visual size to match semantic level prevents proper document structure. This pattern solves that problem elegantly by decoupling them entirely. If we removed Heading from Chakra, other components wouldn't need this separation because Text, Box, and other components don't carry semantic meaning beyond their HTML tag.
+
+**Evidence of design maturity**:
+- Automatic responsive sizing arrays (e.g., `size="4xl"` becomes `fontSize={["6xl", null, "7xl"]}`) show constraint thinking—developers shouldn't have to manually manage breakpoints for size consistency
+- Design token integration in v3 (`colorPalette` prop) demonstrates that separation extends beyond size/semantic to full theming systems
+- This pattern enables proper WCAG compliance: one h1 per page is semantic requirement, but visual size can vary by context
+
+---
+
+### Semantic UI Classic - Dual Sizing Philosophy (rem vs em)
+
+**What it does**: Headers implement two distinct sizing systems based on their semantic role. Page headers (h1-h5) use rem-based fixed sizing that maintains consistent visual hierarchy across the entire document. Content headers (Huge/Large/Medium/Small/Tiny) use em-based contextual sizing that automatically scales relative to their container's font-size. This allows the same "Large" content header to adapt whether it's inside a sidebar (smaller container) or main article (larger container).
+
+**Why it's sophisticated**: The non-obvious problem is that a single sizing strategy fails both use cases. Fixed rem-based sizing creates visual consistency but can't adapt to context (a "Large" header in a small card looks wrong). Context-relative em sizing is flexible but inconsistent across pages. The solution—maintaining separate sizing strategies—elegantly serves both patterns. If we removed Heading, other components wouldn't need this distinction because they don't carry both semantic hierarchical responsibility AND contextual composition responsibility simultaneously.
+
+**Evidence of design maturity**:
+- Distinct class namespaces (`h1-h5` vs `huge/large/medium/small/tiny`) prevent developer confusion and accidental mixing of philosophies
+- Em-unit choice for content headers shows deep understanding of CSS cascade: sizing inherits font-size from parent, enabling intelligent adaptation
+- Pure CSS implementation (no JavaScript override needed) demonstrates the pattern is fundamental to the component's design, not a workaround
+
+---
+
+### Semantic UI Classic - Icon Header Content Wrapper Pattern
+
+**What it does**: Icon headers require a structured composition with three elements: an icon (or image), a content wrapper div, and optional sub-headers nested inside. The pattern is: `<header><i class="icon"></i><div class="content">Text<div class="sub header">...</div></div></header>`. Without the content wrapper, icons misalign with multi-line text; the wrapper provides the flex container that keeps them vertically centered.
+
+**Why it's sophisticated**: The non-obvious problem is vertical alignment and spacing when icons sit adjacent to variable-height text. Native HTML doesn't solve this elegantly (baseline vs center alignment conflicts, no semantic grouping). The content wrapper solves this through CSS flex layout while simultaneously enabling sub-headers to nest semantically within the content. If we removed Heading, other components wouldn't need this pattern because they either don't support icons (Text), abstract icons completely (Button), or use different composition models (Card).
+
+**Evidence of design maturity**:
+- Sub header placement inside the content wrapper (not parallel) demonstrates understanding that hierarchy should reflect visual grouping: the sub-header logically belongs to the main content, not the icon
+- Support for both `<i class="icon">` and `<img>` tags shows the pattern is flexible enough for multiple asset types without increasing complexity
+- CSS-only implementation (no JavaScript for alignment) shows the solution is structural, not a behavioral hack
+
+---
+
 ## Use Case Consensus
 
 Both frameworks emphasize these heading use cases:
