@@ -37,20 +37,20 @@
 [x] - Avatar
 [x] - Drawer / Offcanvas / Sheet
 [x] - Pagination
-[+] - Form
+[x] - Form
 [x] - Chip / Tag / Pill
-[+] - Link
+[x] - Link
 [x] - Select
-[ ] - Navbar / App Bar
-[ ] - Slider (Range Input)
+[x] - Navbar / App Bar
+[x] - Slider (Range Input)
 [x] - Popover / Hover Card
-[+] - Text / Typography
-[ ] - Timeline
-[ ] - Carousel
-[ ] - Calendar / Date Picker
-[ ] - Autocomplete / Combobox
-[ ] - Tree / Tree View
-[+] - Empty State
+[x] - Text / Typography
+[x] - Timeline
+[x] - Carousel
+[x] - Calendar / Date Picker
+[x] - Autocomplete / Combobox
+[x] - Tree / Tree View
+[x] - Empty State
 [x] - File Upload
 [x] - Code
 [x] - Stepper / Wizard

@@ -1,7 +1,7 @@
 # Pattern Research E&O Verification Workflow
 
-> Last Updated: 2025-11-06
-> Version: 1.0
+> Last Updated: 2025-11-10
+> Version: 1.1
 
 **Purpose**: Systematically verify pattern research meta-analysis documents for errors and omissions (E&O)
 **Target**: Agents performing quality assurance on consolidated cross-framework research
@@ -115,6 +115,7 @@ Please respond with your choices (e.g., "1A, 2B" or "B, single pass")
    - Pattern prevalence calculations
    - Code example accuracy
    - Internal consistency checks
+   - **Unique Innovations validation**: Component-level vs framework-level features
 
 ---
 
@@ -141,6 +142,26 @@ against individual framework research files.
 4. Missing patterns from individual files
 5. Code example accuracy
 6. Internal consistency
+7. **Unique Innovations section** - Component-level vs framework-level features
+
+**CRITICAL: Unique Innovations Validation**
+
+The "Unique Innovations" section must only contain features that are unique to THIS SPECIFIC COMPONENT'S implementation, NOT framework-wide architectural choices.
+
+**Invalid entries (framework-level):**
+- Styling philosophies that apply to all components (e.g., "Material Design variants", "Tailwind integration")
+- Framework-wide state management patterns (e.g., "Context-first architecture", "Zero dependencies")
+- General design system requirements (e.g., "Copy-to-project approach")
+- Packaging or bundling decisions that affect all components
+- Framework-wide APIs that happen to be used by this component
+
+**Valid entries (component-level):**
+- Component-specific APIs (e.g., "Form.List" for dynamic field arrays)
+- Unique architectural patterns for THIS component (e.g., "Field-level re-rendering" in Form)
+- Component-specific integrations (e.g., "Form.Provider" for multi-form coordination)
+- Features that only exist in this component's implementation
+
+**Validation test:** If we removed this component from the framework, would this feature still exist in other components? If YES, it's framework-level and should be removed from Unique Innovations.
 
 **CRITICAL - Your Deliverable:**
 
@@ -174,6 +195,7 @@ Each subagent uses the same prompt and verifies:
 - Missing patterns from individual files
 - Code example accuracy
 - Internal consistency
+- **Unique Innovations section**: Component-level vs framework-level features (see detailed criteria in Single Subagent Mode)
 
 After all subagents complete, **cross-check their findings for consensus**:
 - Compare error reports: Do multiple agents identify the same errors?
@@ -338,17 +360,38 @@ Provide comprehensive summary:
 
 This final step ensures that the work is discoverable and that project-wide tracking files are up-to-date.
 
-1.  **Update `pattern-research.md` review date:**
-    - Every `pattern-research.md` must include a `> Last Reviewed: YYYY-MM-DD (by Agent)` line directly under the existing metadata block.
-    - Add the field if missing or refresh the date (ISO format) whenever you touch the document so downstream agents know when the research was last validated.
+1.  **Update `pattern-research.md` version and metadata:**
+    - Increment the version number (Major.Minor.Patch):
+      - **Major (X.0.0)**: Complete re-research, methodology change, framework set change
+      - **Minor (1.X.0)**: E&O corrections, pattern additions/removals, data fixes
+      - **Patch (1.1.X)**: Typos, formatting, clarifications (no data changes)
+    - Update `> Last Modified: YYYY-MM-DD` in the header metadata block
+    - Add `> Last Reviewed: YYYY-MM-DD (by Agent)` if this was a verification pass without changes
 
-2.  **Update the shared checklist (`ai/artifacts/eo-list.md`):**
-    - This single file is the source of truth for pattern research status and E&O verification.
-    - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off.
-    - Include the latest “Last Reviewed” metadata so teammates can see when the doc was last validated.
-3.  **Log the editorial decision (`ai/research/<component>/eo-review-log.md`):**
-    - Append a table row capturing the date, section/scope touched, change type, concise summary, and rationale with an estimated confidence level.
-    - Keep the log evidence-focused—cite the relevant usage-pattern files or other canonical sources that drove the correction so future agents can audit the decision trail quickly.
+2.  **Add Version History entry to `pattern-research.md`:**
+    - Append a new entry to the "Version History" section at the bottom of the file
+    - If no Version History section exists, create it before the "Raw Data" section
+    - Entry format:
+      ```markdown
+      ### Version X.Y.Z (YYYY-MM-DD) - E&O Verification Round N
+      **Agent**: [Your agent name/ID]
+      **Changes**:
+      - [Specific change with line reference]
+      - [Another change with evidence]
+
+      **Evidence**:
+      - [framework/usage-patterns.md:line-numbers]
+      - [Methodology notes]
+
+      **Confidence**: [percentage]% ([reasoning])
+      ```
+    - Include all corrections made, evidence citations, and confidence level
+    - Keep entries evidence-focused for auditability
+
+3.  **Update the shared checklist (`ai/artifacts/eo-list.md`):**
+    - This single file is the source of truth for pattern research status and E&O verification
+    - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off
+    - Include the latest version number and "Last Reviewed" date so teammates can see validation state
 
 ---
 
@@ -557,4 +600,5 @@ prompting deeper validation and user involvement for classification decisions.
 
 ## Version History
 
+- **1.1** (2025-11-10): Added component-level vs framework-level uniqueness validation criteria for Unique Innovations section
 - **1.0** (2025-11-06): Initial workflow based on modal and divider E&O sessions

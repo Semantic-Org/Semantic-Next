@@ -262,8 +262,10 @@ Last Verified: [YYYY-MM-DD]
 [View Live](URL-to-specific-example) *(if available)*
 
 ## Notable Features
-- [Any unique or innovative patterns]
-- [Implementation details worth noting]
+**Focus on component-specific features only, NOT framework-wide patterns:**
+- [Any unique or innovative patterns specific to THIS component's implementation]
+- [Implementation details worth noting that are unique to this component]
+- [Do NOT list framework-wide features like "uses context API", "zero dependencies", "Material Design styling"]
 
 ## Research Notes
 - [Any difficulties accessing docs]
@@ -335,8 +337,38 @@ Structure the report as:
 - May indicate evolving best practices
 
 ### Unique Innovations (Level 5)
-- Framework-specific innovations
-- Potentially ahead of the curve or solving niche needs
+**IMPORTANT**: Only include features unique to THIS SPECIFIC COMPONENT's implementation, NOT framework-wide patterns.
+
+- **Component-specific innovations** that are unique to how this component works
+- **Potentially ahead of the curve** or solving niche needs specific to this component type
+
+**Invalid entries (framework-level features):**
+- Styling philosophies applied to all components (e.g., "Material Design variants", "Tailwind integration")
+- Framework-wide state management patterns (e.g., "Context-first architecture", "Zero dependencies")
+- General design system requirements (e.g., "Copy-to-project approach")
+- Packaging/bundling decisions affecting all components
+- Framework-wide APIs that happen to be used by this component
+
+**Valid entries (component-specific features):**
+- Component-specific APIs (e.g., "Form.List for dynamic arrays", "Carousel.Item with inertia physics")
+- Unique architectural patterns for THIS component (e.g., "Field-level re-rendering in Form")
+- Component-specific integrations (e.g., "Multi-modal coordination via Modal.Provider")
+
+**Validation test**: If we removed this component from the framework, would this feature still exist in other components? If YES, it's framework-level and doesn't belong here.
+
+### Sophisticated Design Patterns
+Beyond feature presence, note patterns showing evidence of deep user testing or non-obvious problem-solving:
+- Patterns with conditional behavior based on context
+- Solutions preventing problems vs just enabling features
+- Features demonstrating edge case awareness
+- Implementation details revealing user research vs checklist compliance
+
+For 2-3 standout examples, explain:
+- **What it does** (technical description)
+- **Why it's sophisticated** (the non-obvious problem it solves or insight it represents)
+- **Evidence of design maturity** (user testing indicators, edge case handling, thoughtful restraint)
+
+*Example*: "PrimeReact's carousel uses `aria-live="polite"` for manual navigation but `aria-live="off"` for autoplay. This prevents screen readers from announcing automatic transitions every few seconds while browsing other content - a problem that requires actual screen reader user testing to discover. It shows understanding that good accessibility sometimes means knowing when to be quiet."
 
 ## Pattern Correlations
 [Document which patterns appear together]
@@ -445,3 +477,10 @@ Document the changes:
 "Some frameworks have text alignment which seems useful."
 
 The goal is rigorous, reproducible research that documents the actual state of UI patterns in the wild.
+
+---
+
+## Version History
+
+- **1.1** (2025-11-10): Added component-level vs framework-level uniqueness criteria for Unique Innovations and Notable Features sections
+- **1.0** (Initial): Established comprehensive research methodology and reporting structure

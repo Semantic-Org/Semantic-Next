@@ -1,234 +1,146 @@
-# Ant Design Form - Usage Patterns
+# Ant Design - Form Usage Patterns
 
-> Research Date: 2025-11-06
-> Component URL: https://ant.design/components/form
+## Component URL
+https://ant.design/components/form
+Status: ✅ Working
+Version: Current (5.x)
+Last Verified: 2025-11-10
 
-## Component Overview
+## Documentation Quality
+Comprehensive - Ant Design provides extensive documentation with live interactive examples, detailed API tables, comprehensive guides, and thorough coverage of all major use cases. Documentation includes TypeScript types, accessibility features, and performance optimization patterns.
 
-Ant Design's Form component provides a complete, production-ready form management system built for React applications. It combines field orchestration, validation, error handling, submission workflows, and layout management into a cohesive system. The Form component serves as the state container and coordinator, while Form.Item acts as the field wrapper that handles labels, validation messages, help text, and proper field registration. This architecture enables complex forms with cross-field dependencies, dynamic field arrays, asynchronous validation, and sophisticated error handling patterns.
+## Component Definition
+- **Core purpose**: High-performance form management system providing data collection, validation, submission workflows, and layout control. Manages field state, validation queue, and cross-field dependencies through a centralized form instance.
+- **Mental model**: Form acts as an intelligent orchestrator managing a registry of fields. Form.Item wraps input components to connect them to the form's state management system while handling presentation concerns (labels, errors, help text, layout).
+- **Semantic meaning**: Represents a complete data entry interface with built-in validation, error handling, submission workflows, and accessibility features. Communicates structured data collection with visual feedback and user guidance.
 
-**Mental Model**: Think of Form as an intelligent form orchestrator that manages a registry of fields, their values, validation state, and lifecycle. Form.Item acts as a smart wrapper that connects input components to the form's state management system while handling all presentation concerns (labels, errors, help text, layout spacing).
+## Pattern Support Levels
+- **Native**: Dedicated prop/API (e.g., `name="username"`, `rules={[...]}`)
+- **Composed**: Via composition/children (e.g., `<Form><Form.Item><Input /></Form.Item></Form>`)
+- **CSS-only**: Requires custom styling (e.g., `style={{ ... }}`)
 
-## Core Patterns
-
-### Form State Management
-- **Centralized State**: All field values stored in a single form instance
-- **Field Registry**: Automatic registration/unregistration of fields via Form.Item
-- **Validation Queue**: Manages validation execution order and dependencies
-- **Value Normalization**: Supports field-level value transformation on input/output
-- **Dirty Tracking**: Tracks which fields have been modified by user
-
-### Form Architecture
-- **Controller Pattern**: Form provides imperative API via `Form.useForm()` hook
-- **Observer Pattern**: Fields subscribe to form state changes and re-render selectively
-- **Compound Components**: Form, Form.Item, Form.List, Form.Provider work as a unified system
-- **Incremental Updates**: Only changed fields re-render, not the entire form
-- **Store Isolation**: Each form instance has isolated state (supports multiple forms per page)
-
-### Integration Model
-- **Input Agnostic**: Works with any component that accepts `value` and `onChange`
-- **Composition-First**: Fields composed via children, not props
-- **Controlled Fields**: Form manages all field values internally
-- **React Integration**: Uses React Context and hooks for state management
-- **Native Form Support**: Renders semantic HTML `<form>` element with proper submission handling
-
-## Props & Configuration
-
-### Form Component Props
-
-#### Layout & Presentation
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `layout` | `'horizontal' \| 'vertical' \| 'inline'` | `'horizontal'` | Form layout orientation |
-| `labelAlign` | `'left' \| 'right'` | `'right'` | Text alignment of labels (horizontal layout) |
-| `labelCol` | `object` | - | Label grid column configuration (Col props) |
-| `wrapperCol` | `object` | - | Input wrapper grid column configuration (Col props) |
-| `labelWrap` | `boolean` | `false` | Whether labels wrap text instead of truncating |
-| `colon` | `boolean` | `true` | Whether to display colon after label text |
-| `requiredMark` | `boolean \| 'optional'` | `true` | Required field indicator strategy |
-| `size` | `'small' \| 'middle' \| 'large'` | `'middle'` | Size preset for all form fields |
-
-#### Form State & Control
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `form` | `FormInstance` | - | Form control instance from `Form.useForm()` |
-| `initialValues` | `object` | - | Initial field values (only applied on mount) |
-| `name` | `string` | - | Form name, used for Form.Provider communication |
-| `preserve` | `boolean` | `true` | Keep field value when field is removed |
-| `validateMessages` | `object` | - | Custom validation messages template |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | Global validation trigger timing |
-| `disabled` | `boolean` | `false` | Disable all form fields |
-
-#### Submission & Validation
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onFinish` | `(values) => void` | - | Callback on successful validation (replaces onSubmit) |
-| `onFinishFailed` | `(errorInfo) => void` | - | Callback on failed validation |
-| `onValuesChange` | `(changed, all) => void` | - | Callback when any field value changes |
-| `onFieldsChange` | `(changed, all) => void` | - | Callback when field metadata changes (value, errors, touched) |
-| `scrollToFirstError` | `boolean \| object` | `false` | Auto-scroll to first error field on submit |
-
-#### Advanced Features
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `component` | `string \| false` | `'form'` | Form wrapper component (false for fragment) |
-| `fields` | `FieldData[]` | - | Control entire form state externally (not recommended) |
-| `validatePristine` | `boolean` | `false` | Validate untouched fields on mount |
-
-## Form.Item Component
-
-### Core Form.Item Props
-
-#### Field Registration
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `name` | `string \| string[]` | - | Field identifier for value storage (required for data binding) |
-| `dependencies` | `NamePath[]` | - | Field dependencies that trigger re-validation |
-| `shouldUpdate` | `boolean \| (prev, curr) => boolean` | `false` | Whether to re-render on any form value change |
-| `getValueFromEvent` | `(...args) => any` | - | Extract value from onChange event (e.g., `e.target.value`) |
-| `getValueProps` | `(value) => object` | - | Convert field value to component props |
-| `normalize` | `(value, prevValue, allValues) => any` | - | Transform value before storing in form |
-| `trigger` | `string` | `'onChange'` | Event name that triggers value collection |
-| `valuePropName` | `string` | `'value'` | Prop name for value binding (e.g., 'checked' for checkboxes) |
-| `preserve` | `boolean` | `true` | Keep field value when unmounted |
-
-#### Presentation
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string \| ReactNode` | - | Field label content |
-| `extra` | `string \| ReactNode` | - | Extra description below the field |
-| `help` | `string \| ReactNode` | - | Custom help/error message (overrides validation messages) |
-| `tooltip` | `string \| object` | - | Info tooltip next to label |
-| `hidden` | `boolean` | `false` | Hide field but keep it in form state |
-| `noStyle` | `boolean` | `false` | Render field without wrapper styling |
-| `labelAlign` | `'left' \| 'right'` | - | Override form-level label alignment |
-| `labelCol` | `object` | - | Override form-level label column |
-| `wrapperCol` | `object` | - | Override form-level wrapper column |
-| `colon` | `boolean` | - | Override form-level colon display |
-
-#### Validation
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `rules` | `Rule[]` | - | Validation rules array |
-| `validateTrigger` | `string \| string[]` | `'onChange'` | When to validate field |
-| `validateFirst` | `boolean \| 'parallel'` | `false` | Stop validation on first error |
-| `validateStatus` | `'success' \| 'warning' \| 'error' \| 'validating'` | - | Manual validation status override |
-| `hasFeedback` | `boolean` | `false` | Show validation status icon |
-| `required` | `boolean` | `false` | Display required mark (doesn't enforce validation) |
-| `messageVariables` | `object` | - | Template variables for validation messages |
-
-#### Layout & Styling
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `className` | `string` | - | CSS class for wrapper |
-| `style` | `CSSProperties` | - | Inline styles for wrapper |
-| `htmlFor` | `string` | - | Custom id for label's htmlFor attribute |
+## Content Patterns
+| Pattern | Present | Support | Details |
+|---------|---------|---------|---------|
+| Field grouping | ✅ | Composed | Form.Item can contain multiple fields using nested Form.Item with `noStyle` prop for complex layouts without wrapper styling |
+| Field labels | ✅ | Native | `label` prop on Form.Item with automatic positioning, alignment (`labelAlign`), and grid layout control (`labelCol`) |
+| Help text | ✅ | Native | `help` prop for custom messages, `extra` prop for additional description. Auto-displays validation errors when rules fail |
+| Error messages | ✅ | Native | Automatic error display from validation rules. Manual control via `validateStatus` prop and `form.setFields()` method |
 
 ## Validation Patterns
+| Pattern | Present | Support | Details |
+|---------|---------|---------|---------|
+| Built-in validation | ✅ | Native | `rules` array with built-in validators: `required`, `type` (13+ types), `len`, `min`, `max`, `pattern`, `whitespace`, `enum`, `transform` |
+| Custom validation | ✅ | Native | `validator` function in rules array with Promise-based API for sync/async validation logic |
+| Async validation | ✅ | Native | Async validators with automatic 'validating' status display. `hasFeedback` shows loading indicator. `validateDebounce` for performance |
+| Cross-field validation | ✅ | Native | `dependencies` prop triggers re-validation when dependent fields change. Access other field values via `getFieldValue` in validator |
+| Validation triggers | ✅ | Native | `validateTrigger` prop accepts 'onChange', 'onBlur', 'onFocus' or array. Per-rule trigger override supported |
 
-### Built-in Validation Rules
+## State Patterns
+| Pattern | Present | Support | Details |
+|---------|---------|---------|---------|
+| Controlled values | ✅ | Native | `Form.useForm()` hook returns form instance with complete API: `getFieldValue`, `setFieldsValue`, `getFieldsValue`, `resetFields` |
+| Uncontrolled values | ✅ | Native | Form manages internal state automatically. Can omit form instance for simple cases |
+| Initial values | ✅ | Native | `initialValues` prop sets defaults on mount. Dynamic loading via `form.setFieldsValue()` after data fetch |
+| Dynamic fields | ✅ | Native | `Form.List` component with render prop providing `add`, `remove`, `move` operations for array-based fields |
+| Field dependencies | ✅ | Native | `dependencies={['fieldName']}` re-validates when dependencies change. `shouldUpdate` for complex conditional rendering |
 
-#### Rule Object Structure
-```typescript
-interface Rule {
-  // Basic validation
-  required?: boolean;
-  message?: string;
+## Layout Patterns
+| Pattern | Present | Support | Details |
+|---------|---------|---------|---------|
+| Horizontal layout | ✅ | Native | `layout="horizontal"` (default) - labels beside fields with `labelCol` and `wrapperCol` grid control |
+| Vertical layout | ✅ | Native | `layout="vertical"` - labels above fields, full-width inputs |
+| Inline layout | ✅ | Native | `layout="inline"` - fields flow horizontally for compact forms (login, search) |
+| Grid layout | ✅ | Composed | Use Ant Design Grid (`<Row gutter={16}>`, `<Col xs={24} sm={12}>`) with Form.Item for responsive multi-column layouts |
+| Responsive layout | ✅ | Native | `labelCol` and `wrapperCol` accept responsive breakpoint objects: `{ xs: 24, sm: 12, md: 8 }` |
 
-  // Type validation
-  type?: 'string' | 'number' | 'boolean' | 'method' | 'regexp' | 'integer' | 'float' |
-         'array' | 'object' | 'enum' | 'date' | 'url' | 'hex' | 'email';
+## Submission Patterns
+| Pattern | Present | Support | Details |
+|---------|---------|---------|---------|
+| Submit handling | ✅ | Native | `onFinish` prop receives validated values on successful submit (replaces traditional onSubmit). Native HTML form submission supported |
+| Loading state | ✅ | Composed | Manual loading state via `useState`. Apply to submit button's `loading` prop during async operations |
+| Error handling | ✅ | Native | `onFinishFailed` receives validation errors. `form.setFields()` displays server-side validation errors |
+| Success handling | ✅ | Composed | Handle in `onFinish` callback. Integrate with Ant Design `message` or `notification` components for user feedback |
+| Reset functionality | ✅ | Native | `form.resetFields()` resets to initial values. Optional field name array to reset specific fields |
 
-  // Length/Range validation
-  len?: number;          // Exact length
-  min?: number;          // Minimum value/length
-  max?: number;          // Maximum value/length
+## Code Examples
 
-  // Pattern validation
-  pattern?: RegExp;      // Regular expression match
-
-  // Advanced validation
-  enum?: any[];          // Value must be in enum
-  whitespace?: boolean;  // Fail if only whitespace
-  transform?: (value) => any;  // Transform before validation
-
-  // Custom validation
-  validator?: (rule, value) => Promise<void>;
-  asyncValidator?: (rule, value) => Promise<void>;
-
-  // Conditional validation
-  warningOnly?: boolean; // Show warning instead of error
-}
-```
-
-#### Common Validation Patterns
+### Primary Usage - Basic Form with Validation
 ```jsx
-// Required field
+import { Form, Input, Button } from 'antd';
+
+const App = () => {
+  const [form] = Form.useForm();
+
+  const onFinish = (values) => {
+    console.log('Form submitted:', values);
+    // values = { username: 'john', email: 'john@example.com' }
+  };
+
+  const onFinishFailed = (errorInfo) => {
+    console.log('Validation failed:', errorInfo);
+  };
+
+  return (
+    <Form
+      form={form}
+      name="basic"
+      layout="vertical"
+      initialValues={{ remember: true }}
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+      autoComplete="off"
+    >
+      <Form.Item
+        label="Username"
+        name="username"
+        rules={[
+          { required: true, message: 'Please input your username!' },
+          { min: 3, message: 'Username must be at least 3 characters' }
+        ]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
+        label="Email"
+        name="email"
+        rules={[
+          { required: true, message: 'Please input your email!' },
+          { type: 'email', message: 'Please enter a valid email!' }
+        ]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+        <Button htmlType="button" onClick={() => form.resetFields()} style={{ marginLeft: 8 }}>
+          Reset
+        </Button>
+      </Form.Item>
+    </Form>
+  );
+};
+```
+[View Live](https://ant.design/components/form#components-form-demo-basic)
+
+### Async Validation with Debouncing
+```jsx
 <Form.Item
   name="username"
-  rules={[{ required: true, message: 'Username is required' }]}
->
-  <Input />
-</Form.Item>
-
-// Email validation
-<Form.Item
-  name="email"
+  label="Username"
+  hasFeedback
+  validateDebounce={500}
   rules={[
-    { required: true, message: 'Email is required' },
-    { type: 'email', message: 'Invalid email format' }
-  ]}
->
-  <Input />
-</Form.Item>
-
-// Length constraints
-<Form.Item
-  name="password"
-  rules={[
-    { required: true },
-    { min: 8, message: 'Password must be at least 8 characters' },
-    { max: 32, message: 'Password cannot exceed 32 characters' }
-  ]}
->
-  <Input.Password />
-</Form.Item>
-
-// Pattern matching
-<Form.Item
-  name="phone"
-  rules={[
-    { pattern: /^\d{3}-\d{3}-\d{4}$/, message: 'Format: 555-555-5555' }
-  ]}
->
-  <Input placeholder="555-555-5555" />
-</Form.Item>
-
-// Custom synchronous validator
-<Form.Item
-  name="age"
-  rules={[
-    {
-      validator: (_, value) => {
-        if (value < 18) {
-          return Promise.reject(new Error('Must be 18 or older'));
-        }
-        return Promise.resolve();
-      }
-    }
-  ]}
->
-  <InputNumber />
-</Form.Item>
-
-// Async validator (API check)
-<Form.Item
-  name="username"
-  rules={[
+    { required: true, message: 'Please input username' },
     {
       validator: async (_, value) => {
         if (!value) return;
 
+        // API call to check availability
         const response = await fetch(`/api/check-username?name=${value}`);
         const { available } = await response.json();
 
@@ -238,951 +150,275 @@ interface Rule {
       }
     }
   ]}
-  hasFeedback
-  validateDebounce={500}
+  validateTrigger="onBlur"
 >
-  <Input />
-</Form.Item>
-
-// Warning instead of error
-<Form.Item
-  name="confirmEmail"
-  rules={[
-    {
-      warningOnly: true,
-      validator: (_, value) => {
-        if (value && !value.includes('+')) {
-          return Promise.reject('Consider using + addressing for email filtering');
-        }
-        return Promise.resolve();
-      }
-    }
-  ]}
->
-  <Input />
-</Form.Item>
-
-// Stop on first error
-<Form.Item
-  name="password"
-  validateFirst
-  rules={[
-    { required: true, message: 'Required' },
-    { min: 8, message: 'Min 8 characters' },
-    { pattern: /[A-Z]/, message: 'Needs uppercase' },
-    { pattern: /[0-9]/, message: 'Needs number' }
-  ]}
->
-  <Input.Password />
-</Form.Item>
-
-// Run validators in parallel
-<Form.Item
-  name="email"
-  validateFirst="parallel"
-  rules={[
-    { type: 'email', message: 'Invalid format' },
-    {
-      asyncValidator: async (_, value) => {
-        // Check if email exists
-      }
-    }
-  ]}
->
-  <Input />
+  <Input placeholder="Check availability on blur" />
 </Form.Item>
 ```
+[View Live](https://ant.design/components/form#components-form-demo-register)
 
-### Field Dependencies
-
-#### Basic Dependency Validation
+### Field Dependencies - Password Confirmation
 ```jsx
 <Form.Item
+  label="Password"
   name="password"
-  rules={[{ required: true }]}
+  rules={[{ required: true, message: 'Please input your password!' }]}
 >
   <Input.Password />
 </Form.Item>
 
 <Form.Item
-  name="confirmPassword"
+  label="Confirm Password"
+  name="confirm"
   dependencies={['password']}
   rules={[
-    { required: true },
+    { required: true, message: 'Please confirm your password!' },
     ({ getFieldValue }) => ({
       validator(_, value) {
         if (!value || getFieldValue('password') === value) {
           return Promise.resolve();
         }
-        return Promise.reject(new Error('Passwords must match'));
-      }
-    })
+        return Promise.reject(new Error('Passwords do not match!'));
+      },
+    }),
   ]}
 >
   <Input.Password />
 </Form.Item>
 ```
+[View Live](https://ant.design/components/form#components-form-demo-register)
 
-#### Multiple Dependencies
+### Dynamic Fields with Form.List
 ```jsx
-<Form.Item
-  name="finalPrice"
-  dependencies={['price', 'taxRate', 'discount']}
-  rules={[
-    ({ getFieldValue }) => ({
-      validator() {
-        const price = getFieldValue('price') || 0;
-        const taxRate = getFieldValue('taxRate') || 0;
-        const discount = getFieldValue('discount') || 0;
-        const calculated = price * (1 + taxRate) - discount;
+import { Form, Input, Button, Space } from 'antd';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 
-        if (calculated < 0) {
-          return Promise.reject('Final price cannot be negative');
-        }
-        return Promise.resolve();
-      }
-    })
-  ]}
->
-  <InputNumber prefix="$" />
-</Form.Item>
-```
+<Form name="dynamic_form">
+  <Form.List name="users">
+    {(fields, { add, remove }) => (
+      <>
+        {fields.map(({ key, name, ...restField }) => (
+          <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+            <Form.Item
+              {...restField}
+              name={[name, 'first']}
+              rules={[{ required: true, message: 'Missing first name' }]}
+            >
+              <Input placeholder="First Name" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              name={[name, 'last']}
+              rules={[{ required: true, message: 'Missing last name' }]}
+            >
+              <Input placeholder="Last Name" />
+            </Form.Item>
+            <MinusCircleOutlined onClick={() => remove(name)} />
+          </Space>
+        ))}
+        <Form.Item>
+          <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+            Add User
+          </Button>
+        </Form.Item>
+      </>
+    )}
+  </Form.List>
 
-### Validation Timing
-
-#### Trigger Configuration
-```jsx
-// Validate on blur only
-<Form.Item
-  name="email"
-  validateTrigger="onBlur"
-  rules={[{ type: 'email' }]}
->
-  <Input />
-</Form.Item>
-
-// Multiple triggers
-<Form.Item
-  name="password"
-  validateTrigger={['onChange', 'onBlur']}
-  rules={[{ min: 8 }]}
->
-  <Input.Password />
-</Form.Item>
-
-// Different triggers for different rules
-<Form.Item
-  name="username"
-  rules={[
-    { required: true, validateTrigger: 'onBlur' },
-    { min: 3, validateTrigger: 'onChange' },
-    {
-      asyncValidator: checkAvailability,
-      validateTrigger: 'onBlur'
-    }
-  ]}
->
-  <Input />
-</Form.Item>
-```
-
-## Layout Patterns
-
-### Horizontal Layout (Default)
-```jsx
-<Form
-  layout="horizontal"
-  labelCol={{ span: 6 }}
-  wrapperCol={{ span: 18 }}
->
-  <Form.Item label="Username" name="username">
-    <Input />
-  </Form.Item>
-  <Form.Item label="Email" name="email">
-    <Input />
-  </Form.Item>
-</Form>
-```
-
-### Vertical Layout
-```jsx
-<Form layout="vertical">
-  <Form.Item label="Username" name="username">
-    <Input />
-  </Form.Item>
-  <Form.Item label="Email" name="email">
-    <Input />
-  </Form.Item>
-</Form>
-```
-
-### Inline Layout
-```jsx
-<Form layout="inline">
-  <Form.Item name="username">
-    <Input placeholder="Username" />
-  </Form.Item>
-  <Form.Item name="password">
-    <Input.Password placeholder="Password" />
-  </Form.Item>
   <Form.Item>
     <Button type="primary" htmlType="submit">
-      Log in
+      Submit
     </Button>
   </Form.Item>
 </Form>
 ```
+[View Live](https://ant.design/components/form#components-form-demo-dynamic-form-item)
+
+### Complex Layout - Nested Form.Item with noStyle
+```jsx
+// Multiple controls in one line with shared label
+<Form.Item label="Username">
+  <Form.Item
+    name="username"
+    noStyle
+    rules={[{ required: true, message: 'Username is required' }]}
+  >
+    <Input style={{ width: 160 }} placeholder="Username" />
+  </Form.Item>
+  <span style={{ display: 'inline-block', width: 24, textAlign: 'center' }}>@</span>
+  <Form.Item
+    name="domain"
+    noStyle
+    rules={[{ required: true, message: 'Domain is required' }]}
+  >
+    <Input style={{ width: 160 }} placeholder="example.com" />
+  </Form.Item>
+</Form.Item>
+```
+[View Live](https://ant.design/components/form#components-form-demo-complex-form-control)
 
 ### Responsive Grid Layout
 ```jsx
-<Form>
+import { Form, Input, Row, Col } from 'antd';
+
+<Form layout="horizontal">
   <Row gutter={16}>
     <Col xs={24} sm={12}>
-      <Form.Item label="First Name" name="firstName">
+      <Form.Item
+        label="First Name"
+        name="firstName"
+        rules={[{ required: true }]}
+      >
         <Input />
       </Form.Item>
     </Col>
     <Col xs={24} sm={12}>
-      <Form.Item label="Last Name" name="lastName">
+      <Form.Item
+        label="Last Name"
+        name="lastName"
+        rules={[{ required: true }]}
+      >
         <Input />
       </Form.Item>
     </Col>
   </Row>
   <Row gutter={16}>
     <Col xs={24}>
-      <Form.Item label="Address" name="address">
+      <Form.Item
+        label="Address"
+        name="address"
+      >
         <Input />
       </Form.Item>
     </Col>
   </Row>
 </Form>
 ```
+[View Live](https://ant.design/components/form#components-form-demo-layout)
 
-### Custom Label Alignment
-```jsx
-<Form
-  layout="horizontal"
-  labelAlign="left"
-  labelCol={{ span: 8 }}
-  wrapperCol={{ span: 16 }}
->
-  <Form.Item label="Username" name="username">
-    <Input />
-  </Form.Item>
-
-  {/* Override for specific field */}
-  <Form.Item
-    label="Bio"
-    name="bio"
-    labelCol={{ span: 24 }}
-    wrapperCol={{ span: 24 }}
-  >
-    <Input.TextArea rows={4} />
-  </Form.Item>
-</Form>
-```
-
-## Field Management
-
-### Dynamic Fields with Form.List
-
-#### Basic Dynamic List
-```jsx
-<Form.List name="users">
-  {(fields, { add, remove }) => (
-    <>
-      {fields.map(({ key, name, ...restField }) => (
-        <Space key={key} style={{ display: 'flex', marginBottom: 8 }}>
-          <Form.Item
-            {...restField}
-            name={[name, 'firstName']}
-            rules={[{ required: true, message: 'Missing first name' }]}
-          >
-            <Input placeholder="First Name" />
-          </Form.Item>
-          <Form.Item
-            {...restField}
-            name={[name, 'lastName']}
-            rules={[{ required: true, message: 'Missing last name' }]}
-          >
-            <Input placeholder="Last Name" />
-          </Form.Item>
-          <MinusCircleOutlined onClick={() => remove(name)} />
-        </Space>
-      ))}
-      <Form.Item>
-        <Button type="dashed" onClick={() => add()} icon={<PlusOutlined />}>
-          Add User
-        </Button>
-      </Form.Item>
-    </>
-  )}
-</Form.List>
-```
-
-#### Nested Dynamic Fields
-```jsx
-<Form.List name="categories">
-  {(categoryFields, categoryOps) => (
-    <>
-      {categoryFields.map(categoryField => (
-        <div key={categoryField.key}>
-          <Form.Item
-            name={[categoryField.name, 'name']}
-            label="Category Name"
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.List name={[categoryField.name, 'items']}>
-            {(itemFields, itemOps) => (
-              <>
-                {itemFields.map(itemField => (
-                  <Form.Item
-                    key={itemField.key}
-                    name={[itemField.name, 'title']}
-                    label="Item Title"
-                  >
-                    <Input />
-                  </Form.Item>
-                ))}
-                <Button onClick={() => itemOps.add()}>Add Item</Button>
-              </>
-            )}
-          </Form.List>
-
-          <Button onClick={() => categoryOps.remove(categoryField.name)}>
-            Remove Category
-          </Button>
-        </div>
-      ))}
-      <Button onClick={() => categoryOps.add()}>Add Category</Button>
-    </>
-  )}
-</Form.List>
-```
-
-#### List Operations
-```jsx
-<Form.List name="items">
-  {(fields, { add, remove, move }) => (
-    <>
-      {fields.map((field, index) => (
-        <div key={field.key}>
-          <Form.Item {...field} name={[field.name, 'value']}>
-            <Input />
-          </Form.Item>
-
-          <Button onClick={() => remove(field.name)}>Delete</Button>
-          <Button onClick={() => move(index, index - 1)}>Move Up</Button>
-          <Button onClick={() => move(index, index + 1)}>Move Down</Button>
-        </div>
-      ))}
-
-      <Button onClick={() => add()}>Add to End</Button>
-      <Button onClick={() => add({value: 'default'}, 0)}>Add to Start</Button>
-    </>
-  )}
-</Form.List>
-```
-
-### Conditional Fields
-
-#### Show/Hide Fields
-```jsx
-const [form] = Form.useForm();
-const userType = Form.useWatch('userType', form);
-
-<Form form={form}>
-  <Form.Item name="userType" label="User Type">
-    <Select>
-      <Select.Option value="individual">Individual</Select.Option>
-      <Select.Option value="business">Business</Select.Option>
-    </Select>
-  </Form.Item>
-
-  {userType === 'individual' && (
-    <Form.Item name="ssn" label="SSN">
-      <Input />
-    </Form.Item>
-  )}
-
-  {userType === 'business' && (
-    <Form.Item name="taxId" label="Tax ID">
-      <Input />
-    </Form.Item>
-  )}
-</Form>
-```
-
-#### shouldUpdate for Complex Dependencies
-```jsx
-<Form.Item noStyle shouldUpdate={(prev, curr) => prev.country !== curr.country}>
-  {({ getFieldValue }) => {
-    const country = getFieldValue('country');
-
-    return (
-      <Form.Item
-        name="state"
-        label="State/Province"
-        rules={[{ required: true }]}
-      >
-        <Select options={getStatesForCountry(country)} />
-      </Form.Item>
-    );
-  }}
-</Form.Item>
-```
-
-## Submission Patterns
-
-### Basic Form Submission
+### Form Instance Methods
 ```jsx
 const [form] = Form.useForm();
 
-const onFinish = (values) => {
-  console.log('Form values:', values);
-  // values = { username: 'john', email: 'john@example.com', ... }
-};
+// Get values
+const username = form.getFieldValue('username');
+const allValues = form.getFieldsValue();
 
-const onFinishFailed = (errorInfo) => {
-  console.log('Validation failed:', errorInfo);
-  // errorInfo = {
-  //   values: { username: 'john', email: 'invalid' },
-  //   errorFields: [{ name: ['email'], errors: ['Invalid email'] }],
-  //   outOfDate: false
-  // }
-};
+// Set values
+form.setFieldsValue({ username: 'john', email: 'john@example.com' });
 
-<Form
-  form={form}
-  onFinish={onFinish}
-  onFinishFailed={onFinishFailed}
->
-  <Form.Item name="username" rules={[{ required: true }]}>
-    <Input />
-  </Form.Item>
-  <Form.Item name="email" rules={[{ type: 'email' }]}>
-    <Input />
-  </Form.Item>
-  <Form.Item>
-    <Button type="primary" htmlType="submit">
-      Submit
-    </Button>
-  </Form.Item>
-</Form>
+// Validation
+await form.validateFields();
+await form.validateFields(['username', 'email']);
+
+// Reset
+form.resetFields();
+form.resetFields(['username']);
+
+// Error handling
+form.setFields([
+  { name: 'username', errors: ['Username already exists'] }
+]);
+
+// State checking
+const hasError = form.getFieldError('email').length > 0;
+const isValidating = form.isFieldValidating('username');
+const isTouched = form.isFieldTouched('email');
 ```
 
 ### Async Submission with Loading State
 ```jsx
-const [loading, setLoading] = useState(false);
+import { Form, Input, Button, message } from 'antd';
+import { useState } from 'react';
 
-const onFinish = async (values) => {
-  setLoading(true);
-  try {
-    const response = await fetch('/api/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values)
-    });
-
-    if (!response.ok) {
-      throw new Error('Submission failed');
-    }
-
-    message.success('Form submitted successfully');
-    form.resetFields();
-  } catch (error) {
-    message.error('Failed to submit form');
-  } finally {
-    setLoading(false);
-  }
-};
-
-<Form form={form} onFinish={onFinish}>
-  {/* fields */}
-  <Form.Item>
-    <Button type="primary" htmlType="submit" loading={loading}>
-      Submit
-    </Button>
-  </Form.Item>
-</Form>
-```
-
-### Manual Validation and Submission
-```jsx
-const [form] = Form.useForm();
-
-const handleSubmit = async () => {
-  try {
-    const values = await form.validateFields();
-    console.log('Valid values:', values);
-    // Submit to API
-  } catch (errorInfo) {
-    console.log('Validation failed:', errorInfo);
-  }
-};
-
-const handleValidateSpecificFields = async () => {
-  try {
-    const values = await form.validateFields(['username', 'email']);
-    console.log('Validated fields:', values);
-  } catch (errorInfo) {
-    console.log('Validation failed:', errorInfo);
-  }
-};
-
-<Form form={form}>
-  {/* fields */}
-  <Button onClick={handleSubmit}>Manual Submit</Button>
-  <Button onClick={handleValidateSpecificFields}>Validate Specific</Button>
-</Form>
-```
-
-### Scroll to First Error
-```jsx
-<Form
-  scrollToFirstError={{
-    behavior: 'smooth',
-    block: 'center'
-  }}
-  onFinish={onFinish}
->
-  {/* Many fields */}
-</Form>
-```
-
-## State Management
-
-### Form Instance API
-
-#### Getting Form Instance
-```jsx
-// Option 1: Form.useForm hook
-const [form] = Form.useForm();
-
-<Form form={form}>
-  {/* fields */}
-</Form>
-
-// Option 2: Ref (class components)
-class MyForm extends React.Component {
-  formRef = React.createRef();
-
-  render() {
-    return <Form ref={this.formRef}>{/* fields */}</Form>
-  }
-}
-```
-
-#### Reading Values
-```jsx
-const [form] = Form.useForm();
-
-// Get single field value
-const username = form.getFieldValue('username');
-
-// Get nested field value
-const city = form.getFieldValue(['address', 'city']);
-
-// Get all values
-const allValues = form.getFieldsValue();
-
-// Get specific fields
-const subset = form.getFieldsValue(['username', 'email']);
-
-// Get with filtering
-const touched = form.getFieldsValue(true); // only touched fields
-
-// Get field error
-const errors = form.getFieldError('email');
-// Returns: ['Invalid email format']
-
-// Get all errors
-const allErrors = form.getFieldsError();
-// Returns: [
-//   { name: ['email'], errors: ['Invalid email'] },
-//   { name: ['password'], errors: ['Too short'] }
-// ]
-```
-
-#### Setting Values
-```jsx
-const [form] = Form.useForm();
-
-// Set single field
-form.setFieldValue('username', 'john');
-
-// Set nested field
-form.setFieldValue(['address', 'city'], 'New York');
-
-// Set multiple fields
-form.setFieldsValue({
-  username: 'john',
-  email: 'john@example.com',
-  address: {
-    city: 'New York',
-    zip: '10001'
-  }
-});
-```
-
-#### Resetting Form
-```jsx
-// Reset all fields to initial values
-form.resetFields();
-
-// Reset specific fields
-form.resetFields(['username', 'email']);
-
-// Reset to new values
-form.resetFields();
-form.setFieldsValue({ username: 'new-default' });
-```
-
-#### Validation Control
-```jsx
-// Validate all fields
-form.validateFields()
-  .then(values => console.log('Valid:', values))
-  .catch(errorInfo => console.log('Errors:', errorInfo));
-
-// Validate specific fields
-form.validateFields(['email', 'password']);
-
-// Check if field has error
-const hasError = form.getFieldError('email').length > 0;
-
-// Check if form is validating
-const isValidating = form.isFieldValidating('username');
-
-// Check if field is touched
-const isTouched = form.isFieldTouched('email');
-
-// Check if any field is touched
-const anyTouched = form.isFieldsTouched();
-
-// Check if all fields are touched
-const allTouched = form.isFieldsTouched(true);
-
-// Check if fields have been modified
-const isModified = form.isFieldsTouched(['username', 'email'], true); // all specified
-```
-
-#### Error Management
-```jsx
-// Set field error manually
-form.setFields([
-  {
-    name: 'username',
-    errors: ['Username already exists']
-  }
-]);
-
-// Set multiple field errors
-form.setFields([
-  {
-    name: 'username',
-    errors: ['Too short'],
-    value: 'jo'
-  },
-  {
-    name: 'email',
-    errors: ['Invalid format']
-  }
-]);
-
-// Set field warnings
-form.setFields([
-  {
-    name: 'password',
-    warnings: ['Password is weak']
-  }
-]);
-```
-
-### Form State Watching
-
-#### Form.useWatch Hook
-```jsx
-function MyForm() {
+const AsyncForm = () => {
   const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
 
-  // Watch single field
-  const username = Form.useWatch('username', form);
-
-  // Watch nested field
-  const city = Form.useWatch(['address', 'city'], form);
-
-  // Watch all values
-  const allValues = Form.useWatch([], form);
-
-  return (
-    <Form form={form}>
-      <Form.Item name="username">
-        <Input />
-      </Form.Item>
-
-      <div>Current username: {username}</div>
-    </Form>
-  );
-}
-```
-
-#### onValuesChange Callback
-```jsx
-<Form
-  onValuesChange={(changedValues, allValues) => {
-    console.log('Changed:', changedValues);
-    // { username: 'new-value' }
-
-    console.log('All values:', allValues);
-    // { username: 'new-value', email: 'old@example.com' }
-  }}
->
-  {/* fields */}
-</Form>
-```
-
-#### onFieldsChange Callback
-```jsx
-<Form
-  onFieldsChange={(changedFields, allFields) => {
-    console.log('Changed fields:', changedFields);
-    // [{
-    //   name: ['username'],
-    //   value: 'john',
-    //   touched: true,
-    //   validating: false,
-    //   errors: []
-    // }]
-
-    console.log('All fields:', allFields);
-  }}
->
-  {/* fields */}
-</Form>
-```
-
-### Initial Values
-
-#### Setting Initial Values
-```jsx
-<Form
-  initialValues={{
-    username: 'john',
-    email: 'john@example.com',
-    remember: true,
-    address: {
-      city: 'New York',
-      zip: '10001'
-    }
-  }}
->
-  {/* fields */}
-</Form>
-```
-
-#### Dynamic Initial Values
-```jsx
-function EditForm({ userId }) {
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchUser(userId).then(user => {
-      form.setFieldsValue({
-        username: user.name,
-        email: user.email,
-        bio: user.bio
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
       });
+
+      if (!response.ok) throw new Error('Submission failed');
+
+      message.success('Form submitted successfully');
+      form.resetFields();
+    } catch (error) {
+      message.error('Failed to submit form');
+    } finally {
       setLoading(false);
-    });
-  }, [userId, form]);
-
-  return (
-    <Spin spinning={loading}>
-      <Form form={form}>
-        {/* fields */}
-      </Form>
-    </Spin>
-  );
-}
-```
-
-## Advanced Features
-
-### Field Value Transformation
-
-#### getValueFromEvent
-```jsx
-// Extract file from upload event
-<Form.Item
-  name="avatar"
-  getValueFromEvent={(e) => {
-    if (Array.isArray(e)) {
-      return e;
     }
-    return e?.fileList;
-  }}
->
-  <Upload>
-    <Button>Upload</Button>
-  </Upload>
-</Form.Item>
-
-// Extract checked value from Switch
-<Form.Item
-  name="enabled"
-  valuePropName="checked"
-  getValueFromEvent={(checked) => checked}
->
-  <Switch />
-</Form.Item>
-```
-
-#### normalize
-```jsx
-// Convert to uppercase
-<Form.Item
-  name="code"
-  normalize={(value) => value.toUpperCase()}
->
-  <Input />
-</Form.Item>
-
-// Remove non-numeric characters
-<Form.Item
-  name="phone"
-  normalize={(value) => value.replace(/\D/g, '')}
->
-  <Input />
-</Form.Item>
-
-// Limit number range
-<Form.Item
-  name="quantity"
-  normalize={(value, prevValue) => {
-    const num = parseInt(value, 10);
-    if (isNaN(num)) return prevValue;
-    return Math.max(1, Math.min(100, num));
-  }}
->
-  <InputNumber />
-</Form.Item>
-```
-
-#### getValueProps
-```jsx
-// Format display value
-<Form.Item
-  name="price"
-  getValueProps={(value) => ({
-    value: value ? `$${value}` : ''
-  })}
-  getValueFromEvent={(e) => {
-    const value = e.target.value.replace(/\$\s?/g, '');
-    return parseFloat(value) || 0;
-  }}
->
-  <Input />
-</Form.Item>
-```
-
-### Custom Form Controls
-
-#### Wrapping Third-Party Components
-```jsx
-// Wrap non-standard component to work with Form.Item
-function PriceInput({ value = {}, onChange }) {
-  const [number, setNumber] = useState(value.number || 0);
-  const [currency, setCurrency] = useState(value.currency || 'USD');
-
-  const triggerChange = (changedValue) => {
-    onChange?.({
-      number,
-      currency,
-      ...value,
-      ...changedValue
-    });
   };
 
   return (
-    <span>
-      <Input
-        type="number"
-        value={number}
-        onChange={(e) => {
-          const newNumber = parseFloat(e.target.value);
-          setNumber(newNumber);
-          triggerChange({ number: newNumber });
-        }}
-        style={{ width: 100 }}
-      />
-      <Select
-        value={currency}
-        onChange={(newCurrency) => {
-          setCurrency(newCurrency);
-          triggerChange({ currency: newCurrency });
-        }}
-        style={{ width: 80, marginLeft: 8 }}
-      >
-        <Select.Option value="USD">$</Select.Option>
-        <Select.Option value="EUR">€</Select.Option>
-        <Select.Option value="GBP">£</Select.Option>
-      </Select>
-    </span>
+    <Form form={form} onFinish={onFinish}>
+      <Form.Item name="username" label="Username" rules={[{ required: true }]}>
+        <Input />
+      </Form.Item>
+      <Form.Item>
+        <Button type="primary" htmlType="submit" loading={loading}>
+          {loading ? 'Submitting...' : 'Submit'}
+        </Button>
+      </Form.Item>
+    </Form>
   );
-}
-
-// Usage in form
-<Form.Item
-  name="price"
-  label="Price"
-  rules={[
-    {
-      validator: (_, value) => {
-        if (value.number > 0) {
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error('Price must be greater than 0'));
-      }
-    }
-  ]}
->
-  <PriceInput />
-</Form.Item>
+};
 ```
 
-### Form.Provider for Multiple Forms
+## Notable Features
 
-#### Coordinating Multiple Forms
-```jsx
-<Form.Provider
-  onFormChange={(name, info) => {
-    console.log(`Form ${name} changed:`, info);
-  }}
-  onFormFinish={(name, { values, forms }) => {
-    console.log(`Form ${name} finished:`, values);
+### 1. RC-Field-Form Foundation
+- Built on `rc-field-form` for framework-portable form logic
+- Field-level updates without full form re-renders
+- Sophisticated validation queue and dependency tracking
 
-    // Access other forms
-    const otherForm = forms.otherFormName;
-    const otherValues = otherForm.getFieldsValue();
-  }}
->
-  <Form name="form1">
-    {/* fields */}
-  </Form>
+### 2. Field-Level Performance Optimization
+- Only re-renders fields that have changed values
+- Subscription model: fields subscribe to specific state slices
+- Batch updates for multiple field changes
 
-  <Form name="form2">
-    {/* fields */}
-  </Form>
-</Form.Provider>
-```
+### 3. async-validator Integration
+- 13+ built-in validation types (string, number, email, url, etc.)
+- Deep path validation for nested objects/arrays
+- Template-based message system with variable substitution
+- Schema-based declarative validation
 
-### Custom Validation Messages
+### 4. Flexible Validation Rules
+- Declarative rules array with multiple validators per field
+- Mix built-in validators with custom validator functions
+- Promise-based async validation with automatic loading states
+- `validateFirst` stops on first error for better UX
+- `warningOnly` flag for non-blocking validation messages
 
-#### Global Message Template
+### 5. Dynamic Form Building
+- `Form.List` enables array-based fields with CRUD operations
+- Operations: `add(defaultValue, index)`, `remove(index)`, `move(from, to)`
+- Nested Form.List for complex nested data structures
+- List-level validation via `rules` prop
+
+### 6. Advanced State Management
+- `Form.useWatch()` hook for reactive field value watching
+- `onValuesChange` callback for value change tracking
+- `onFieldsChange` callback for metadata changes (touched, validating, errors)
+- `shouldUpdate` for complex conditional rendering optimization
+
+### 7. Server-Side Integration
+- `setFields()` method displays server-side validation errors
+- Error/warning distinction via `errors` and `warnings` properties
+- Field-level error state management
+- Integration with backend validation responses
+
+### 8. Scroll to First Error
+- `scrollToFirstError` prop auto-scrolls to first validation error
+- Configurable scroll behavior (smooth, instant) and position (center, start, end)
+- Improves UX for long forms
+
+### 9. Custom Validate Messages Template
 ```jsx
 <Form
   validateMessages={{
@@ -1194,692 +430,153 @@ function PriceInput({ value = {}, onChange }) {
     number: {
       range: '${label} must be between ${min} and ${max}',
     },
-    string: {
-      len: '${label} must be exactly ${len} characters',
-      min: '${label} must be at least ${min} characters',
-      max: '${label} cannot exceed ${max} characters',
-    }
   }}
 >
-  <Form.Item
-    name="email"
-    label="Email"
-    rules={[{ type: 'email', required: true }]}
-  >
-    <Input />
-  </Form.Item>
+  {/* All fields use template messages */}
 </Form>
 ```
 
-#### Field-Level Message Variables
-```jsx
-<Form.Item
-  name="username"
-  label="Username"
-  messageVariables={{ name: 'Username' }}
-  rules={[
-    { required: true, message: '${name} is required' },
-    { min: 3, message: '${name} must be at least ${min} characters' }
-  ]}
->
-  <Input />
-</Form.Item>
-```
-
-### Preserve Field Values
-
-#### Controlling Value Preservation
-```jsx
-// Global preservation (default: true)
-<Form preserve={false}>
-  {/* When fields unmount, values are removed */}
-</Form>
-
-// Per-field preservation
-<Form.Item
-  name="conditionalField"
-  preserve={false}
->
-  <Input />
-</Form.Item>
-```
-
-### No Style Mode
-
-#### Embedding Fields Without Wrapper
-```jsx
-<Form.Item label="Price">
-  <Form.Item name="price" noStyle>
-    <InputNumber />
-  </Form.Item>
-  <span style={{ marginLeft: 8 }}>USD</span>
-</Form.Item>
-
-// Common pattern: Inline grouped fields
-<Form.Item label="Date Range">
-  <Input.Group compact>
-    <Form.Item name="startDate" noStyle>
-      <DatePicker />
-    </Form.Item>
-    <Form.Item name="endDate" noStyle>
-      <DatePicker />
-    </Form.Item>
-  </Input.Group>
-</Form.Item>
-```
-
-## Accessibility
-
-### Built-in Accessibility Features
-
-#### Automatic ARIA Attributes
-- **aria-required**: Automatically added when field has `required` rule
-- **aria-invalid**: Added when field has validation errors
-- **aria-describedby**: Links field to help text and error messages
-- **id/htmlFor**: Automatic label-input association
-
-#### Label Association
-```jsx
-<Form.Item
-  label="Email"
-  name="email"
-  // Automatically generates:
-  // <label for="email">Email</label>
-  // <input id="email" aria-label="Email" ... />
->
-  <Input />
-</Form.Item>
-```
-
-#### Custom htmlFor
-```jsx
-<Form.Item
-  label="Email"
-  name="email"
-  htmlFor="custom-email-id"
->
-  <Input id="custom-email-id" />
-</Form.Item>
-```
-
-#### Error Message Announcement
-```jsx
-<Form.Item
-  name="email"
-  rules={[{ type: 'email', message: 'Please enter a valid email' }]}
-  // Error message automatically linked via aria-describedby
->
-  <Input />
-</Form.Item>
-```
-
-### Keyboard Support
-
-#### Built-in Keyboard Navigation
-- **Tab**: Move between form fields
-- **Shift+Tab**: Move backwards
-- **Enter**: Submit form (when button is focused)
-- **Space**: Toggle checkboxes/switches
-
-#### Focus Management
-```jsx
-const [form] = Form.useForm();
-
-// Focus first field
-useEffect(() => {
-  form.getFieldInstance('username')?.focus();
-}, [form]);
-
-// Focus field on error
-const onFinishFailed = ({ errorFields }) => {
-  form.scrollToField(errorFields[0].name, {
-    behavior: 'smooth',
-    block: 'center'
-  });
-  form.getFieldInstance(errorFields[0].name)?.focus();
-};
-```
-
-### Screen Reader Support
-
-#### Help Text and Extra Content
-```jsx
-<Form.Item
-  label="Password"
-  name="password"
-  extra="Must be at least 8 characters with uppercase, lowercase, and numbers"
-  help={errors.length > 0 ? errors[0] : undefined}
-  // extra and help are both announced by screen readers
->
-  <Input.Password />
-</Form.Item>
-```
-
-#### Tooltip Information
-```jsx
-<Form.Item
-  label="API Key"
-  name="apiKey"
-  tooltip={{
-    title: "You can find your API key in the account settings",
-    icon: <InfoCircleOutlined />
-  }}
-  // Tooltip icon is keyboard accessible and announced
->
-  <Input />
-</Form.Item>
-```
-
-## Framework-Specific Features
-
-### 1. RC-Field-Form Foundation
-Ant Design Form is built on `rc-field-form`, a standalone React form library. This architecture enables:
-- **Framework Portability**: Core logic independent of Ant Design
-- **Performance Optimization**: Field-level updates without full form re-renders
-- **Advanced State Management**: Sophisticated validation queue and dependency tracking
-
-### 2. Form Store Architecture
-- **Centralized Store**: Single store per form instance manages all field states
-- **Subscription Model**: Fields subscribe to specific state slices
-- **Change Detection**: Selective re-rendering based on actual changes
-- **Batch Updates**: Multiple field changes trigger single update cycle
-
-### 3. async-validator Integration
-Deep integration with `async-validator` library provides:
-- **Rich Rule Types**: 13+ built-in validation types
-- **Deep Path Validation**: Nested object/array validation
-- **Custom Messages**: Template-based message system with variable substitution
-- **Schema Validation**: Declarative validation rules
-
-### 4. Field Optimization Patterns
-
-#### Incremental Rendering
-```jsx
-// Only username field re-renders when its value changes
-<Form.Item name="username">
-  <Input />
-</Form.Item>
-
-// Email field does not re-render
-<Form.Item name="email">
-  <Input />
-</Form.Item>
-```
-
-#### Selective Updates with shouldUpdate
-```jsx
-// Re-render only when specific field changes
-<Form.Item
-  shouldUpdate={(prev, curr) => prev.country !== curr.country}
-  noStyle
->
-  {({ getFieldValue }) => {
-    const country = getFieldValue('country');
-    return (
-      <Form.Item name="state">
-        <Select options={getStatesFor(country)} />
-      </Form.Item>
-    );
-  }}
-</Form.Item>
-```
-
-### 5. Form.List Advanced Features
-
-#### List Operations API
-```jsx
-<Form.List name="items">
-  {(fields, operations, meta) => {
-    // operations = { add, remove, move }
-    // meta = { errors: [] }
-
-    return (
-      <>
-        {fields.map(field => (
-          <div key={field.key}>
-            {/* field.key: Unique key for React */}
-            {/* field.name: Index in array */}
-            {/* field.fieldKey: Field identifier */}
-            <Form.Item {...field} name={[field.name, 'value']}>
-              <Input />
-            </Form.Item>
-          </div>
-        ))}
-
-        {meta.errors.length > 0 && (
-          <Alert message={meta.errors} type="error" />
-        )}
-      </>
-    );
-  }}
-</Form.List>
-```
-
-### 6. Context-Based Configuration
-
-#### ConfigProvider Integration
-```jsx
-import { ConfigProvider, Form } from 'antd';
-
-<ConfigProvider
-  form={{
-    validateMessages: {
-      required: '${label} is required!',
-    },
-    requiredMark: 'optional',
-    colon: false
-  }}
->
-  <Form>
-    {/* All forms inherit these settings */}
-  </Form>
-</ConfigProvider>
-```
-
-### 7. Form Hook Patterns
-
-#### useForm with External State
-```jsx
-const [form] = Form.useForm();
-
-// External state management
-useEffect(() => {
-  const subscription = store.subscribe(() => {
-    const storeData = store.getState().formData;
-    form.setFieldsValue(storeData);
-  });
-
-  return () => subscription.unsubscribe();
-}, [form, store]);
-```
-
-### 8. Validation Timing Optimization
-
-#### validateDebounce (v5.9.0+)
-```jsx
-<Form.Item
-  name="search"
-  validateDebounce={500}
-  rules={[
-    {
-      asyncValidator: async (_, value) => {
-        const result = await checkAvailability(value);
-        if (!result.available) {
-          throw new Error('Not available');
-        }
-      }
-    }
-  ]}
->
-  <Input />
-</Form.Item>
-```
-
-### 9. Enhanced Type Safety
-
-#### TypeScript Integration
-```typescript
-interface FormValues {
-  username: string;
-  email: string;
-  age: number;
-}
-
-const [form] = Form.useForm<FormValues>();
-
-const onFinish = (values: FormValues) => {
-  // values is fully typed
-  console.log(values.username); // string
-  console.log(values.age); // number
-};
-
-<Form<FormValues>
-  form={form}
-  onFinish={onFinish}
->
-  <Form.Item<FormValues>
-    name="username"
-    rules={[{ required: true }]}
-  >
-    <Input />
-  </Form.Item>
-</Form>
-```
-
-### 10. Required Mark Variants
-
-#### Optional Mark Pattern
-```jsx
-// Show "(optional)" instead of asterisk for required
-<Form requiredMark="optional">
-  <Form.Item label="Username" name="username" required>
-    <Input />
-  </Form.Item>
-
-  <Form.Item label="Bio" name="bio">
-    {/* Shows "(optional)" */}
-    <Input.TextArea />
-  </Form.Item>
-</Form>
-```
-
-### 11. Label Wrapping Control
-
-#### labelWrap Feature
-```jsx
-<Form
-  labelCol={{ span: 8 }}
-  labelWrap
-  // Long labels wrap instead of being truncated
->
-  <Form.Item label="Very Long Field Label That Would Normally Truncate">
-    <Input />
-  </Form.Item>
-</Form>
-```
-
-### 12. Validation Status Icons
-
-#### hasFeedback Visual Indicators
-```jsx
-<Form.Item
-  name="username"
-  rules={[
-    {
-      asyncValidator: checkUsernameAvailability
-    }
-  ]}
-  hasFeedback
-  // Shows spinning icon while validating
-  // Shows checkmark on success
-  // Shows x icon on error
->
-  <Input />
-</Form.Item>
-```
-
-## Implementation Notes
-
-### Architecture Design
-
-#### Component Hierarchy
-```
-Form (State Container)
-  └─ FormContext.Provider
-      ├─ Form.Item (Field Wrapper)
-      │   ├─ Label
-      │   ├─ Field (cloneElement with value/onChange)
-      │   ├─ Help Text / Error Messages
-      │   └─ Extra Content
-      ├─ Form.List (Dynamic Fields Manager)
-      │   └─ Field Array Operations
-      └─ Form.Provider (Multi-Form Coordinator)
-```
-
-#### State Flow
-```
-User Input
-  ↓
-onChange Event
-  ↓
-Form Store Update
-  ↓
-Validation Trigger (if configured)
-  ↓
-Field Re-render (selective)
-  ↓
-onValuesChange / onFieldsChange Callbacks
-```
-
-### API Design Philosophy
-
-#### Declarative Configuration
-- **Rules as Data**: Validation rules defined as JSON-like objects
-- **Composition Over Configuration**: Complex forms built from simple primitives
-- **Sensible Defaults**: Minimal code for common use cases
-
-#### Progressive Disclosure
-- **Basic Use**: Simple props for 80% of use cases
-- **Advanced Use**: Hooks and APIs for complex scenarios
-- **Escape Hatches**: Full control when needed (shouldUpdate, noStyle)
-
-### Performance Characteristics
-
-#### Rendering Optimization
-- **Field Isolation**: Each Form.Item subscribes only to its own state
-- **Memo-ization**: Internal use of React.memo for field components
-- **Batch Updates**: Multiple value changes trigger single render cycle
-- **Virtual List Support**: Compatible with rc-virtual-list for long forms
-
-#### Validation Performance
-- **Debounced Async**: Built-in debouncing for async validators
-- **validateFirst**: Short-circuit validation on first error
-- **Parallel Validation**: Multiple rules can validate concurrently
-- **Lazy Validation**: Only validates dirty fields unless configured otherwise
-
-### Integration Patterns
-
-#### Form State Persistence
-```jsx
-// Save form state to localStorage
-const onValuesChange = (_, allValues) => {
-  localStorage.setItem('formDraft', JSON.stringify(allValues));
-};
-
-// Restore on mount
-const initialValues = JSON.parse(
-  localStorage.getItem('formDraft') || '{}'
-);
-
-<Form
-  initialValues={initialValues}
-  onValuesChange={onValuesChange}
->
-  {/* fields */}
-</Form>
-```
-
-#### Multi-Step Forms
-```jsx
-function MultiStepForm() {
-  const [current, setCurrent] = useState(0);
-  const [form] = Form.useForm();
-
-  const next = async () => {
-    try {
-      await form.validateFields(getFieldsForStep(current));
-      setCurrent(current + 1);
-    } catch (error) {
-      console.log('Validation failed:', error);
-    }
-  };
-
-  const prev = () => {
-    setCurrent(current - 1);
-  };
-
-  return (
-    <>
-      <Steps current={current}>
-        <Steps.Step title="Personal" />
-        <Steps.Step title="Address" />
-        <Steps.Step title="Confirmation" />
-      </Steps>
-
-      <Form form={form}>
-        {current === 0 && <PersonalFields />}
-        {current === 1 && <AddressFields />}
-        {current === 2 && <Confirmation />}
-
-        <div>
-          {current > 0 && <Button onClick={prev}>Previous</Button>}
-          {current < 2 && <Button onClick={next}>Next</Button>}
-          {current === 2 && <Button htmlType="submit">Submit</Button>}
-        </div>
-      </Form>
-    </>
-  );
-}
-```
-
-#### Form with URL State
-```jsx
-function SearchForm() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [form] = Form.useForm();
-
-  // Sync URL to form
-  useEffect(() => {
-    form.setFieldsValue({
-      query: searchParams.get('q'),
-      category: searchParams.get('cat')
-    });
-  }, [searchParams, form]);
-
-  // Sync form to URL
-  const onValuesChange = (_, allValues) => {
-    setSearchParams({
-      q: allValues.query,
-      cat: allValues.category
-    });
-  };
-
-  return (
-    <Form form={form} onValuesChange={onValuesChange}>
-      {/* fields */}
-    </Form>
-  );
-}
-```
-
-### Common Patterns and Best Practices
-
-#### Avoid Over-Validation
-```jsx
-// ❌ Bad: Validates on every keystroke for expensive checks
-<Form.Item
-  name="username"
-  validateTrigger="onChange"
-  rules={[{ asyncValidator: expensiveApiCheck }]}
->
-  <Input />
-</Form.Item>
-
-// ✅ Good: Validates on blur with debounce
-<Form.Item
-  name="username"
-  validateTrigger="onBlur"
-  validateDebounce={500}
-  rules={[{ asyncValidator: expensiveApiCheck }]}
->
-  <Input />
-</Form.Item>
-```
-
-#### Prefer Controlled Components
-```jsx
-// ✅ Good: Form manages state
-<Form.Item name="username">
-  <Input />
-</Form.Item>
-
-// ❌ Avoid: Manual state management
-const [username, setUsername] = useState('');
-<Form.Item>
-  <Input value={username} onChange={e => setUsername(e.target.value)} />
-</Form.Item>
-```
-
-#### Use shouldUpdate Sparingly
-```jsx
-// ❌ Expensive: Re-renders on every form change
-<Form.Item shouldUpdate>
-  {({ getFieldValue }) => (
-    <div>{getFieldValue('username')}</div>
-  )}
-</Form.Item>
-
-// ✅ Efficient: Only watches specific field
-const username = Form.useWatch('username', form);
-<div>{username}</div>
-```
-
-### Version Compatibility
-
-#### Major Features by Version
-- **v4.19.0**: Added `status` prop for error/warning states
-- **v4.20.0**: Added `validateDebounce` for async validation
-- **v5.0.0**: Improved TypeScript types, removed IE11 support
-- **v5.1.0**: Enhanced Form.List with better error handling
-- **v5.9.0**: Added global `validateDebounce` configuration
-
-### Known Limitations
-
-#### Initial Values Timing
-```jsx
-// ❌ Won't work: initialValues set after mount
-<Form initialValues={asyncData}>
-
-// ✅ Works: Use setFieldsValue after data loads
-useEffect(() => {
-  if (data) {
-    form.setFieldsValue(data);
-  }
-}, [data, form]);
-```
-
-#### Preserve Behavior
-```jsx
-// Watch out: Field values preserved by default
-// when conditionally rendered
-{showField && (
-  <Form.Item name="conditional" preserve={false}>
-    <Input />
-  </Form.Item>
-)}
-```
-
-#### Class Component Support
-```jsx
-// Limited hook support in class components
-// Use Form.create() HOC for class components (legacy pattern)
-```
-
-### Testing Considerations
-
-#### Testing Form Validation
-```jsx
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
-test('validates email format', async () => {
-  render(<MyForm />);
-
-  const emailInput = screen.getByLabelText('Email');
-  await userEvent.type(emailInput, 'invalid-email');
-  await userEvent.tab(); // Trigger blur
-
-  await waitFor(() => {
-    expect(screen.getByText('Invalid email format')).toBeInTheDocument();
-  });
-});
-```
-
-#### Testing Form Submission
-```jsx
-test('submits form with valid data', async () => {
-  const onFinish = jest.fn();
-  render(<MyForm onFinish={onFinish} />);
-
-  await userEvent.type(screen.getByLabelText('Username'), 'john');
-  await userEvent.type(screen.getByLabelText('Email'), 'john@example.com');
-  await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
-
-  await waitFor(() => {
-    expect(onFinish).toHaveBeenCalledWith({
-      username: 'john',
-      email: 'john@example.com'
-    });
-  });
-});
-```
+### 10. Field Value Transformation
+- `getValueFromEvent` extracts value from onChange event
+- `normalize` transforms value before storage
+- `getValueProps` formats value for display
+- `trigger` specifies which event triggers value collection
+- `valuePropName` customizes prop name (e.g., 'checked' for checkboxes)
+
+### 11. Form.Provider for Multi-Form Coordination
+- Coordinate state between multiple forms
+- `onFormChange` callback for cross-form updates
+- `onFormFinish` provides access to all forms in provider scope
+- Useful for wizard-style multi-step forms
+
+### 12. Built-in Accessibility
+- Automatic ARIA attributes (aria-required, aria-invalid, aria-describedby)
+- Label-input association via id/htmlFor
+- Error message announcement for screen readers
+- Keyboard navigation support (Tab, Shift+Tab, Enter, Space)
+
+### 13. TypeScript Support
+- Full generic type support for form values
+- Type-safe field names and validation
+- IntelliSense for form instance methods
+- Type inference for `onFinish` callback values
+
+### 14. Validation Debouncing
+- `validateDebounce` prop (v5.9.0+) debounces async validation
+- Reduces API calls for real-time validation
+- Configurable per-field or globally
+
+### 15. Required Mark Variants
+- `requiredMark="optional"` shows "(optional)" for non-required fields
+- Alternative to asterisk marking strategy
+- Better UX for forms with mostly required fields
+
+### 16. Preserve Field Values
+- `preserve` prop controls value persistence when field unmounts
+- Global form-level or per-field configuration
+- Useful for conditional field rendering
+
+### 17. Label Wrapping Control
+- `labelWrap` prop allows long labels to wrap instead of truncate
+- Better responsive behavior for complex label text
+- Maintains accessibility with full label content
+
+### 18. Validation Status Icons
+- `hasFeedback` shows visual status icons (spinner, checkmark, x)
+- Automatic loading indicator during async validation
+- Success/error visual feedback
+
+## Research Notes
+
+### Accessing Documentation
+- Ant Design uses React Server Components with heavy client-side rendering
+- Documentation requires JavaScript to view full interactive examples
+- API tables are well-organized with prop names, types, defaults, descriptions
+- Live code examples are editable via CodeSandbox integration
+- Examples demonstrate best practices and common patterns
+
+### Framework Approach
+**Design Philosophy:**
+- **Wrapper-based pattern**: Each field wrapped in Form.Item for consistent presentation
+- **Automatic binding**: `name` prop creates two-way data binding automatically
+- **Centralized state**: Form instance holds all field state and validation
+- **Declarative validation**: Rules defined in props rather than imperative checks
+- **Composition over configuration**: Complex forms built from simple primitives
+
+**Mental Model:**
+- Form = State container + Validation orchestrator
+- Form.Item = Field wrapper + Presentation layer
+- Form.List = Dynamic array manager
+- Form.Provider = Multi-form coordinator
+
+### Implementation Details
+**Architecture:**
+- Built on `rc-field-form` (reusable React form library)
+- Uses `async-validator` for validation rules
+- React Context for form state distribution
+- Subscription model for selective re-rendering
+- WeakMap for field registration tracking
+
+**Performance Characteristics:**
+- Field isolation prevents unnecessary re-renders
+- Batch updates for multiple value changes
+- Memo-ization of field components
+- Virtual list compatible for long forms
+- Lazy validation (only dirty fields unless configured)
+
+### Comparison to Other Libraries
+**vs Formik:**
+- More opinionated with built-in UI components
+- Better performance for large forms (field-level updates)
+- Tighter Ant Design integration
+- Less verbose for simple cases
+- More complex for non-Ant Design components
+
+**vs react-hook-form:**
+- More UI-focused (vs headless approach)
+- Built-in validation instead of schema libraries
+- Different performance strategy (context vs uncontrolled)
+- Better integration with Ant Design ecosystem
+- More declarative validation rules
+
+**vs Basic HTML Forms:**
+- Much more powerful validation
+- Better UX with instant feedback
+- Centralized state management
+- Complex field dependencies
+- Dynamic field support
+- More JavaScript required
+
+### Common Patterns
+1. **Simple forms**: Use Form + Form.Item with `rules` array
+2. **Complex forms**: Use `Form.useForm()` for programmatic control
+3. **Dynamic forms**: Use `Form.List` for array fields with add/remove
+4. **Layout control**: Combine with Grid or nested Form.Item with `noStyle`
+5. **Async operations**: Handle in `onFinish`, loading state on submit button
+6. **Multi-step forms**: Single form with conditional field rendering by step
+7. **Real-time validation**: Use `validateTrigger="onChange"` with debouncing
+8. **Server errors**: Use `form.setFields()` to display backend validation errors
+9. **Form state persistence**: Use `onValuesChange` with localStorage
+10. **Conditional fields**: Use `Form.useWatch()` or `shouldUpdate` for dependencies
+
+### Edge Cases and Gotchas
+1. **Initial values timing**: Must set `initialValues` on mount or use `setFieldsValue` after
+2. **Preserve behavior**: Fields preserve values by default when conditionally rendered
+3. **Name path**: Use array for nested fields: `name={['user', 'address', 'city']}`
+4. **Form.List field key**: Always use `field.key` for React key, not index
+5. **shouldUpdate performance**: Use sparingly as it re-renders on every change
+6. **Async validator errors**: Must throw Error or return rejected Promise
+7. **valuePropName**: Required for non-value props (e.g., `checked` for Switch)
+8. **getFieldDecorator**: Deprecated v4 API, use Form.Item with name instead
+
+### Best Practices
+1. Use `Form.useForm()` for any programmatic control needs
+2. Prefer `Form.useWatch()` over `shouldUpdate` for field watching
+3. Set `validateTrigger="onBlur"` for expensive async validations
+4. Use `validateDebounce` to reduce API calls
+5. Always provide `key` for dynamic Form.List items
+6. Use `noStyle` for layout control without extra DOM
+7. Set `hasFeedback` for async validation to show loading state
+8. Use `scrollToFirstError` for long forms
+9. Prefer controlled components (let Form manage state)
+10. Use TypeScript generics for type safety
