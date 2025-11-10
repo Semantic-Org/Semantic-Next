@@ -1,5 +1,7 @@
 # Checkbox - Aggregate Pattern Analysis
 
+> Last Reviewed: 2025-11-10 (by Codex)
+
 ## Executive Summary
 
 This report synthesizes findings from 11 leading UI frameworks to identify universal patterns, best practices, and design considerations for checkbox implementations. The analysis reveals strong consensus on core functionality while highlighting unique innovations that could enhance the modern Semantic UI checkbox component.
@@ -194,9 +196,9 @@ Advantages: Maximum flexibility, standard HTML pattern
 Disadvantages: Requires manual ID management
 
 **Label Features (Built-in Prop Frameworks):**
-- **Label Text:** 4/4 frameworks
-- **Label Placement:** 3/4 frameworks (left/right positioning)
-- **Label Styling:** 4/4 frameworks (custom classes/props)
+- **Label Text:** 2/2 frameworks
+- **Label Placement:** 2/2 frameworks (left/right positioning)
+- **Label Styling:** 2/2 frameworks (custom classes/props)
 
 **Key Insight:** Roughly 82% of frameworks rely on composition, with only 18% exposing a label prop. Composition provides more flexibility but requires more boilerplate. Consider offering both patterns if DX warrants it.
 

@@ -1,6 +1,7 @@
 # Component Pattern Research: Drawer / Offcanvas / Sheet / Sidebar
 
-> Last Modified: 2025-11-06
+> Last Modified: 2025-11-06  
+> Last Reviewed: 2025-11-10 (by Agent)
 
 ## Research Summary
 - Frameworks surveyed: 12
