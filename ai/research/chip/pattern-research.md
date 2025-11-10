@@ -1,26 +1,49 @@
-# Component Pattern Research: Chip / Tag / Badge / Pill
+# Chip / Tag / Badge / Label Component - Cross-Framework Pattern Research
 
-> Version: 1.1.0
+> Version: 1.2.0 (Merged from chip v1.1.0 and label-badge research)
 > Last Modified: 2025-11-10
-> Last Reviewed: 2025-11-10 (by Codex)
+> Last Reviewed: 2025-11-10
+> Research Date: 2025-11-04 to 2025-11-10
+> Frameworks Analyzed: 11 (with 13 distinct component implementations)
 
-## Research Summary
-- Frameworks surveyed: 11 (with 13 distinct component implementations)
-- Date: 2025-11-05
-- Unique patterns identified: 60+
-- **Critical Finding**: Significant semantic variation - "Chip," "Tag," and "Badge" mean different things across frameworks
+## Executive Summary
 
-## Component Definition Consensus
+This research reveals **NO universal consensus** on component naming or mental models for Chip/Tag/Badge/Label components. Unlike most UI components with clear semantic boundaries, this component family exhibits significant fragmentation across frameworks, with three distinct philosophical approaches to organizing these related concepts.
+
+**Critical Finding**: The same visual element (a small rounded container with text) serves fundamentally different purposes across frameworks - from static labels to interactive controls to notification indicators.
+
+### Framework Approaches
+
+**Unified Approach** (3 frameworks):
+- **Semantic UI Classic**: Single `Label` component handles badges, tags, and labels
+- **Nuxt UI**: Single `Badge` component serves both badge and tag purposes
+- **ShadCN**: Single `Badge` component (explicitly shown as dual-purpose)
+
+**Separated Approach** (5 frameworks):
+- **Ant Design**: Separate `Badge` (overlay/notification) and `Tag` (categorization)
+- **Chakra UI**: Separate `Badge` (status) and `Tag` (categorization)
+- **HeroUI**: Separate `Badge` (overlay) and `Chip` (standalone)
+- **Mantine**: Separate `Badge` (display) and `Chip` (interactive selection)
+- **PrimeReact**: Separate `Badge` (notification), `Tag` (categorization), and `Chip` (entity)
+
+**Badge-Only Approach** (2 frameworks):
+- **MUI**: Chip only (serves all purposes)
+- **Radix UI**: Badge only (serves labeling use cases)
+
+---
+
+## Component Definition & Naming Philosophy
 
 ### The Naming Problem
 
-Unlike most UI components, there is **NO universal consensus** on what distinguishes Chip, Tag, and Badge. The industry shows three distinct philosophical approaches:
+Unlike most UI components, there is **NO universal consensus** on what distinguishes Chip, Tag, Badge, and Label. The industry shows three distinct philosophical approaches:
 
 **Approach 1: Single Component (Most Common)**
 - Frameworks provide ONE component covering all use cases
 - **Badge**: Radix UI Themes, ShadCN, Nuxt UI
-- **Tag**: Ant Design, Chakra UI
+- **Tag**: Ant Design (primary), Chakra UI
 - **Chip**: MUI
+- **Label**: Semantic UI Classic
 - Philosophy: One flexible component serves labels, status indicators, and removable items
 
 **Approach 2: Functional Separation (Mantine)**
@@ -29,9 +52,30 @@ Unlike most UI components, there is **NO universal consensus** on what distingui
 - Philosophy: Separate components by interaction model
 
 **Approach 3: Use-Case Separation (PrimeReact)**
+- **Badge**: Notification counters and overlays
 - **Tag**: Static categorization labels with semantic colors
 - **Chip**: Entity representation with optional removal
 - Philosophy: Separate components by primary use case
+
+### Mental Models by Framework
+
+#### Badge Mental Models (9 frameworks)
+- **Notification/Count Indicator**: Display numerical values (Ant Design, MUI, HeroUI, PrimeReact)
+- **Status Indicator**: Show state/status with dot or text (all frameworks)
+- **Overlay Element**: Positioned on other components (Ant Design, MUI, HeroUI, PrimeReact)
+- **Standalone Label**: Inline status/category marker (Nuxt UI, Radix UI, ShadCN)
+
+#### Tag/Chip Mental Models (6 frameworks)
+- **Categorization Element**: Label content categories (Ant Design, Chakra, PrimeReact)
+- **Interactive Selection**: Toggleable/selectable filters (Mantine, HeroUI)
+- **Removable Label**: Dismissible with close button (Ant Design, Chakra, HeroUI, PrimeReact)
+- **Keyword/Metadata Display**: Show tags/hashtags (all Tag implementations)
+
+#### Semantic UI Classic Label (unique unified approach)
+- **Content Classification System**: Badges + Tags + Labels as variations of classification
+- **Spatial Relationships**: Extensive positioning (corner, ribbon, attached, floating, pointing)
+- **Semantic Variations**: Image labels, circular labels, empty labels for pure decoration
+- Philosophy: Everything is a "label" with different presentations
 
 ### Core Purpose Synthesis
 
@@ -49,113 +93,176 @@ Despite naming chaos, the **functional space** breaks into three clear patterns:
    - Interactivity: Removal via click or keyboard
    - Examples: Selected filters, contact chips, applied tags
 
-3. **Selection Controls** (Chip for Mantine only)
-   - Purpose: Visual radio button or checkbox alternative
-   - Characteristics: Checked/unchecked state, selection indicators
-   - Interactivity: Toggle selection like form controls
-   - Examples: Filter selections, preference toggles
+3. **Selectable Controls** (Chip for Mantine, CheckableTag for Ant Design)
+   - Purpose: Act as toggle switches or selection controls
+   - Characteristics: Checked/unchecked states, often in groups
+   - Interactivity: Click to toggle, keyboard navigation
+   - Examples: Filter options, multi-select items, toggle chips
 
-### Mental Model Convergence
-
-Across all implementations, users conceptualize these as:
-- **Compact information carriers** - Small, self-contained elements
-- **Visual differentiators** - Use color/style to convey meaning
-- **Metadata indicators** - Communicate properties of other content
-- **Scannable elements** - Quick visual recognition over detailed reading
-
-## Terminology Variations
-
-### Component Names by Framework
-| Framework | Primary Name | Alternative/Related | Philosophy |
-|-----------|--------------|---------------------|------------|
-| Ant Design | Tag | Tag.CheckableTag | Single component + variant |
-| Chakra UI | Tag | Badge (separate) | Tag for labels, Badge for indicators |
-| HeroUI | Chip | - | Single component |
-| Mantine | Badge, Chip | - | Chip = input, Badge = display |
-| MUI | Chip | Badge (separate) | Chip covers all interactive |
-| Nuxt UI | Badge | - | Single component |
-| PrimeReact | Tag, Chip | Badge (separate) | Tag = labels, Chip = entities |
-| Radix Themes | Badge | - | Single component (no separate Tag) |
-| ShadCN | Badge | - | Single component |
-
-### Prop Naming Variations
-
-**For Text Content:**
-- `children` (composition): 7 frameworks
-- `label`: MUI, Mantine Chip, PrimeReact Chip, Nuxt UI (option)
-- `value`: Ant Design Tag, PrimeReact Tag
-
-**For Colors:**
-- `color`: 6 frameworks (direct color names)
-- `severity`: PrimeReact Tag (semantic: success/warning/danger)
-- `colorScheme`/`colorPalette`: Chakra UI
-- `variant` (includes color): ShadCN (semantic variants)
-
-**For Close/Remove:**
-- `closable`: Ant Design
-- `removable`: PrimeReact Chip
-- `onDelete`: MUI (presence triggers icon)
-- `onClose`: Ant Design, HeroUI
-- Automatic via `onDelete` prop: MUI, ShadCN (if clickable)
+---
 
 ## Pattern Inventory
 
-### Content Patterns
-| Pattern | Description | Prevalence | Usage Level | Frameworks |
-|---------|-------------|------------|-------------|------------|
-| Text content | Primary label or text | 13/13 (100%) | Level 1 (Universal) | All frameworks |
-| Icons | Icon elements within component | 11/13 (85%) | Level 2 (Common) | All except Radix Themes (composed), ShadCN (composed) |
-| Close/remove button | Dismiss/removal control | 4/13 (31%) | Level 4 (Occasional) | Ant Design, MUI, PrimeReact Chip, HeroUI |
-| Avatar/Images | User pictures or entity images | 5/13 (38%) | Level 4 (Occasional) | MUI, Nuxt UI, PrimeReact Chip, HeroUI, Mantine Badge (via sections) |
+### 1. Content Patterns
 
-### State Patterns
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Selectable/Active | Toggle or selection state | 3/13 (23%) | Level 4 (Occasional) | Ant Design (CheckableTag), Mantine Chip, MUI (clickable feedback) |
-| Disabled | Non-interactive state | 2/13 (15%) | Level 5 (Rare) | MUI, possibly Chakra UI |
+| Text content | Primary label or text | 13/13 (100%) | **Level 1: Universal** | All frameworks |
+| Icons | Icon elements within component | 11/13 (85%) | **Level 2: Common** | All except Radix Themes (composed), ShadCN (composed) |
+| Close/remove button | Dismiss/removal control | 5/13 (38%) | **Level 4: Occasional** | Ant Design Tag, MUI Chip, PrimeReact Chip, HeroUI Chip, Chakra Tag |
+| Avatar/Images | User pictures or entity images | 5/13 (38%) | **Level 4: Occasional** | MUI Chip, Nuxt UI Badge, PrimeReact Chip, HeroUI Chip, Semantic UI Label |
+| Dot indicator | Status dot without text | 6/9 (67%) | **Level 2: Common** | Ant Design Badge, HeroUI Badge, MUI Badge, PrimeReact Badge |
+| Count/Number | Numerical values | 5/9 (56%) | **Level 3: Moderate** | Ant Design, MUI, HeroUI, PrimeReact, Semantic UI |
+
+#### Icon Support Details
+
+**Badge Icon Support**:
+| Framework | Icon Support | Implementation |
+|-----------|--------------|----------------|
+| Ant Design | ❌ No dedicated support | Composition only |
+| Chakra UI | ✅ Children composition | Inline icons |
+| HeroUI | ❌ Not shown | - |
+| Mantine | ✅ `leftSection`/`rightSection` | Dedicated slots |
+| MUI | ❌ Not shown | - |
+| Nuxt UI | ✅ `icon` prop | Native with positioning |
+| PrimeReact | ❌ Not shown | - |
+| Radix UI | ❌ Not shown | - |
+| ShadCN | ✅ Children composition | Inline icons |
+| Semantic UI Classic | ✅ Nested `<i>` elements | Composed icons |
+
+**Tag/Chip Icon Support**:
+| Framework | Icon Support | Positioning |
+|-----------|--------------|-------------|
+| Ant Design | ✅ `icon` prop | Before text |
+| Chakra UI v2 | ✅ `TagLeftIcon`/`TagRightIcon` | Left or right |
+| Chakra UI v3 | ✅ `Tag.StartElement`/`Tag.EndElement` | Start or end |
+| HeroUI | ✅ `startContent`/`endContent` | Dual slots |
+| Mantine | ✅ `icon` prop (Chip) | Custom checkmark replacement |
+| PrimeReact | ✅ `icon` prop | Adjacent to text |
+
+### 2. State Patterns
+
+| Pattern | Description | Prevalence | Usage Level | Frameworks |
+|---------|-------------|------------|-------------|------------|
+| Selectable/Active | Toggle or selection state | 3/13 (23%) | **Level 4: Occasional** | Ant Design (CheckableTag), Mantine Chip, MUI (clickable) |
+| Disabled | Non-interactive state | 2/13 (15%) | **Level 5: Rare** | MUI, Chakra UI |
 | Loading | Async operation indicator | 0/13 (0%) | Not Found | None |
-| Read-only | Display-only mode | 0/13 (0%) | Not Found | None (most are read-only by default) |
+| Read-only | Display-only mode | 13/13 (100%) | **Level 1: Universal** | All (default for Badge/Tag) |
 
-### Variation Patterns
+### 3. Visual Variant Patterns
+
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Color options | Semantic or theme colors | 12/13 (92%) | Level 1 (Universal) | All except PrimeReact Chip |
-| Size options | Predefined size variants | 7/13 (54%) | Level 3 (Moderate) | Ant Design (no), Chakra UI, HeroUI, Mantine, MUI (2 sizes), Nuxt UI, PrimeReact (no), Radix Themes |
-| Visual variants | Style treatments (filled/outline/soft) | 8/13 (62%) | Level 3 (Moderate) | Ant Design (border), Chakra UI, Mantine, MUI, Nuxt UI (4 variants), Radix Themes (4 variants), ShadCN |
-| Rounded/Pill shape | Fully rounded corners | 5/13 (38%) | Level 4 (Occasional) | Ant Design (via closable), PrimeReact Tag, Radix Themes (radius), MUI (default), Mantine |
+| Visual variants | Style treatments (filled/outline/soft) | 10/13 (77%) | **Level 2: Common** | Most frameworks |
+| Size options | Predefined size variants | 7/13 (54%) | **Level 3: Moderate** | Chakra, HeroUI, Mantine, MUI, Nuxt, Radix, Semantic |
+| Color options | Semantic or theme colors | 12/13 (92%) | **Level 1: Universal** | All except PrimeReact Chip |
+| Rounded/Pill shape | Fully rounded corners | 5/13 (38%) | **Level 4: Occasional** | Ant Design, PrimeReact, Radix, MUI, Mantine |
 
-### Interactive Patterns
+#### Variant System Details
+
+**4-Variant Systems** (most common):
+
+**Chakra UI Pattern**:
+- `solid` - Filled background, high contrast
+- `soft`/`subtle` - Light background tint
+- `outline` - Border only
+- `surface` - Elevated with shadow (v3)
+
+**Nuxt UI Pattern**:
+- `solid` - Filled
+- `soft` - Subtle tint
+- `outline` - Border
+- `subtle` - Minimal
+
+**Radix UI Pattern**:
+- `solid` - Filled
+- `soft` - Subtle (default)
+- `surface` - Elevated
+- `outline` - Border
+
+**ShadCN Pattern**:
+- `default` - Primary filled
+- `secondary` - Secondary filled
+- `destructive` - Error filled
+- `outline` - Border
+
+**7-Variant System** (Mantine Badge):
+- `filled` - Solid fill
+- `light` - Subtle background
+- `outline` - Border only
+- `dot` - Dot indicator
+- `gradient` - Gradient fill
+- `transparent` - Minimal
+- `white` - Light backgrounds
+
+**Variant Prevalence Analysis**:
+
+| Variant Type | Frameworks | Prevalence |
+|--------------|-----------|------------|
+| **Solid/Filled** | 10/10 | 100% (Level 1) |
+| **Soft/Light/Subtle** | 8/10 | 80% (Level 1) |
+| **Outline/Bordered** | 9/10 | 90% (Level 1) |
+| **Dot** | 6/10 | 60% (Level 2) |
+| **Surface/Elevated** | 3/10 | 30% (Level 4) |
+| **Gradient** | 1/10 | 10% (Level 5) |
+| **Transparent** | 2/10 | 20% (Level 4) |
+
+### 4. Color Systems
+
+#### Color Philosophy Approaches
+
+**Semantic Color Approach** (predefined types):
+- **Ant Design**: 5 status colors (success, error, default, processing, warning)
+- **Chakra UI**: 12 theme colors + semantic names
+- **MUI**: 7 semantic (default, primary, secondary, error, warning, info, success)
+- **PrimeReact**: 4 severity (success, info, warning, danger)
+
+**Theme Palette Approach** (full color access):
+- **Nuxt UI**: All theme colors + 7 semantic
+- **Radix UI**: Full 12-step color scale, all theme colors
+- **Mantine**: All theme colors
+
+**Hybrid Approach**:
+- **HeroUI**: 6 semantic colors (default, primary, secondary, success, warning, danger)
+- **ShadCN**: Design token system (primary, secondary, destructive, foreground)
+
+### 5. Interactive Patterns
+
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Clickable | General click handling | 8/13 (62%) | Level 3 (Moderate) | Most support via composition or onClick |
-| Removable/Closable | Can be dismissed by user | 5/13 (38%) | Level 4 (Occasional) | Ant Design, MUI, PrimeReact Chip, HeroUI, Mantine (CSS-only) |
-| Keyboard removal | Backspace/Enter to remove | 2/13 (15%) | Level 5 (Rare) | MUI, PrimeReact Chip |
-| Selection toggle | Check/uncheck interaction | 2/13 (15%) | Level 5 (Rare) | Ant Design CheckableTag, Mantine Chip |
+| Clickable | General click handling | 8/13 (62%) | **Level 3: Moderate** | Most via composition or onClick |
+| Removable/Closable | Can be dismissed by user | 5/13 (38%) | **Level 4: Occasional** | Ant Design, MUI, PrimeReact, HeroUI, Mantine |
+| Keyboard removal | Backspace/Enter to remove | 2/13 (15%) | **Level 5: Rare** | MUI, PrimeReact Chip |
+| Selection toggle | Check/uncheck interaction | 2/13 (15%) | **Level 5: Rare** | Ant Design CheckableTag, Mantine Chip |
 
-### Architectural Patterns
+### 6. Architectural Patterns
+
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Single component | Monolithic chip/tag/badge | 7/11 frameworks | Level 3 (Moderate) | Most with single component |
-| Dual components | Separate Tag + Chip or Badge + Chip | 2/11 (18%) | Level 5 (Rare) | Mantine, PrimeReact |
-| Compound components | Root + subcomponents | 1/13 (8%) | Level 5 (Rare) | Chakra UI v3 (Tag.Root, Tag.Label) |
-| Variant subcomponent | Specialized variant | 1/13 (8%) | Level 5 (Rare) | Ant Design (CheckableTag) |
-| Group component | Multi-chip coordination | 1/13 (8%) | Level 5 (Rare) | Mantine (Chip.Group) |
+| Single component | Monolithic chip/tag/badge | 7/11 frameworks | **Level 3: Moderate** | Most frameworks |
+| Dual components | Separate Tag + Chip or Badge + Chip | 2/11 (18%) | **Level 5: Rare** | Mantine, PrimeReact |
+| Triple components | Badge + Tag + Chip | 2/11 (18%) | **Level 5: Rare** | HeroUI, PrimeReact |
+| Compound components | Root + subcomponents | 1/13 (8%) | **Level 5: Rare** | Chakra UI v3 |
+| Variant subcomponent | Specialized variant | 1/13 (8%) | **Level 5: Rare** | Ant Design (CheckableTag) |
+| Group component | Multi-chip coordination | 1/13 (8%) | **Level 5: Rare** | Mantine (Chip.Group) |
 
-### Styling Patterns
+### 7. Positioning Patterns (Badge-specific)
+
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Prop-based variants | Color, size, variant props | 11/13 (85%) | Level 2 (Common) | Most frameworks |
-| Composition-based content | Children for content | 13/13 (100%) | Level 1 (Universal) | All (some also offer prop alternatives) |
-| Section props | Left/right content areas | 2/13 (15%) | Level 5 (Rare) | Mantine Badge, Nuxt UI (leading/trailing) |
-| Template/slot pattern | Custom content templates | 2/13 (15%) | Level 5 (Rare) | PrimeReact (template), Web components approach |
-| Polymorphic rendering | `as`/`asChild` prop | 3/13 (23%) | Level 4 (Occasional) | Nuxt UI, Radix Themes, ShadCN |
+| Overlay positioning | Badge on other elements | 5/9 (56%) | **Level 3: Moderate** | Ant Design, MUI, HeroUI, PrimeReact, Semantic |
+| Top-right position | Default overlay position | 5/9 (56%) | **Level 3: Moderate** | Ant Design, MUI, HeroUI, PrimeReact, Semantic |
+| Custom positioning | Configurable placement | 3/9 (33%) | **Level 4: Occasional** | Ant Design, MUI, Semantic UI |
+| Inline display | Not overlaid | 4/9 (44%) | **Level 3: Moderate** | Chakra, Mantine, Nuxt, Radix, ShadCN |
 
-## Notable Patterns
+---
+
+## Notable Patterns & Design Maturity
 
 ### Highly Adopted (Level 1-2)
 
 **Universal Text Content** (13/13, 100%)
-All implementations support text as primary content, though the API varies (children vs. label/value props). This represents the baseline functionality - without text, these components lose their purpose.
+All implementations support text as primary content, though the API varies (children vs. label/value props). This represents the baseline functionality.
 
 **Color Semantics** (12/13, 92%)
 Strong consensus on color-coded semantics, though implementation varies:
@@ -163,427 +270,150 @@ Strong consensus on color-coded semantics, though implementation varies:
 - Theme color palettes (blue, red, green, etc.)
 - Severity levels (danger, warning, info)
 
-Colors communicate meaning visually, making this effectively universal (PrimeReact Chip is the lone outlier, requiring custom styles for colors).
-
 **Icon Support** (11/13, 85%)
-Icons enhance visual communication and reinforce semantic meaning. Two approaches:
+Icons enhance visual communication. Two approaches:
 - **Native prop**: Direct `icon` prop for simple integration
 - **Composition**: Icons as children for positioning flexibility
 
-Both approaches are valid; prop-based is easier, composition-based is more flexible.
-
-### Emerging Patterns (Level 3-4)
-
-**Size Variants** (7/13, 54%)
-Moderately common but not universal. Frameworks without size variants rely on:
-- Theme-level sizing
-- CSS customization
-- Single default size
-
-Size variants enable visual hierarchy but add API complexity.
-
-**Visual Variants** (8/13, 62%)
-Moderate adoption of style treatments:
-- Filled/solid (opaque background)
-- Outlined (border only)
-- Soft/light (subtle background)
-- Transparent/subtle
-
-Provides flexibility for different visual contexts without custom CSS.
-
-**Removable/Closable** (5/13, 38%)
-Emerging as a standard pattern for filter chips and selected items. Two implementation approaches:
-- **Native prop**: `closable`, `removable`, `onDelete`
-- **Composed**: Close button as child element
-
-Keyboard support (Backspace/Enter) is rare but valuable for power users.
-
-**Avatar/Image Support** (5/13, 38%)
-Growing pattern for entity representation:
-- User chips in contact lists
-- Profile indicators
-- Entity avatars in multi-select
-
-Native support simplifies common use case; composition works but requires more setup.
-
-### Unique Innovations (Level 5)
-
-**Mantine's Dual-Component Philosophy** (1/11, 9%)
-Only framework with clear functional separation:
-- **Chip**: Selection control (form input paradigm)
-- **Badge**: Display label (information paradigm)
-
-Provides clarity but requires users to learn distinction. Most frameworks prefer single flexible component.
-
-**Ant Design's CheckableTag** (1/13, 8%)
-Separate subcomponent for selectable tags. Interesting middle ground:
-- Keeps base Tag simple and presentational
-- Adds selection as opt-in variant
-- Controlled component requiring explicit state management
-
-**Mantine's Chip.Group** (1/13, 8%)
-Only framework with dedicated grouping component:
-- Coordinates multiple chip selections
-- Single vs. multiple selection modes
-- Group-level state management
-
-Valuable for filter UIs and multi-select scenarios but adds API complexity.
-
-**Radix Themes Variant System** (1/13, 8%)
-Four distinct visual variants:
-- Solid, Soft (default), Surface, Outline
-- Separates visual style from semantic meaning
-- Any color works with any variant
-
-More sophisticated than typical filled/outlined binary.
-
-**Keyboard Removal** (2/13, 15%)
-MUI and PrimeReact support Backspace/Enter for removal. Power-user feature that enhances accessibility and efficiency. Surprisingly rare given the value.
-
-**Nuxt UI Avatar Integration** (1/13, 8%)
-Only Badge component with native avatar prop. Most require composition or have separate Chip component. Shows thoughtful design for common use case.
-
-## Pattern Correlations
-
-### When Removable → Often Has Avatar Support
-- 3/5 removable implementations (60%) support avatars
-- Suggests these patterns serve entity representation use case
-- User chips, contact lists, selected items
-
-### When Selection Control → Has Group Component
-- 1/2 selection implementations (50%) have grouping
-- Mantine Chip.Group manages coordinated selections
-- Ant Design CheckableTag lacks dedicated group (uses standard layout)
-
-### When Multiple Components → Clear Use-Case Separation
-- 2/2 multi-component frameworks (100%) separate by function
-- Mantine: input vs. display
-- PrimeReact: labels vs. entities
-- Suggests separation adds clarity despite added concepts
-
-### When Single Component → More Visual Variants
-- 7/9 single-component frameworks (78%) offer 3+ variants
-- Flexibility compensates for lack of specialized components
-- Variant system handles different use cases
-
-### When Icon Support → Usually Prop-Based
-- 8/11 icon implementations (73%) use dedicated prop
-- Composition approach requires more boilerplate
-- Prop approach wins for common simple case
-
-### When Size Variants → Typically 3-5 Options
-- 7/7 frameworks with sizes (100%) offer 3+ options
-- Binary size systems (small/large) are absent
-- xs/sm/md/lg/xl scale is standard
-
-## Implementation Notes
-
-### Component Naming Philosophy
-
-**Frameworks Using "Badge"** (4/11)
-- Radix Themes, ShadCN, Nuxt UI, Mantine (one of two)
-- Generally simpler, focused on display
-- Covers full spectrum from status to tags
-
-**Frameworks Using "Tag"** (3/11)
-- Ant Design, Chakra UI, PrimeReact (one of two)
-- Emphasizes categorization and labeling
-- Often includes color semantics (severity)
-
-**Frameworks Using "Chip"** (4/11)
-- MUI, HeroUI, Mantine (one of two), PrimeReact (one of two)
-- Tends toward more interactive implementations
-- Often includes avatar/removal patterns
-
-**No Clear Winner**: The industry hasn't standardized on terminology. Each name carries different connotations but functions overlap significantly.
-
-### Semantic Color Systems
-
-**Severity-Based** (2/11)
-- PrimeReact Tag: success, info, warning, danger, secondary, contrast
-- Provides semantic meaning through color vocabulary
-- Consistent across component families
-
-**Theme Palette** (7/11)
-- Most frameworks: blue, green, red, yellow, etc.
-- Integrates with design system tokens
-- Flexible but less semantic
-
-**Variant-Based** (1/11)
-- ShadCN: default, secondary, destructive, outline
-- Color baked into variant names
-- Minimal but focused
-
-**Custom** (2/11)
-- Ant Design: Preset colors + status colors + custom hex
-- Mantine: CSS-only for Chip, theme colors for Badge
-- Maximum flexibility, more complexity
-
-### Interaction Models
-
-**Display-Only** (6/13 implementations)
-- Purely presentational with no interaction
-- May support polymorphic rendering for links
-- Chakra Tag, Mantine Badge, Nuxt Badge, PrimeReact Tag, Radix Badge, ShadCN Badge
-
-**Display + Removable** (3/13 implementations)
-- Primarily display, optional removal
-- MUI Chip, PrimeReact Chip, Ant Design Tag (closable)
-
-**Display + Clickable** (2/13 implementations)
-- Support general click actions
-- HeroUI Chip, Ant Design Tag (CheckableTag)
-
-**Selection Control** (1/13 implementations)
-- Primary purpose is selection input
-- Mantine Chip only
-
-**Hybrid** (1/13 implementation)
-- Multiple modes: display, checkable, closable
-- Ant Design Tag (most versatile)
-
-### Avatar/Image Patterns
-
-**Native Image Prop** (3/13)
-- MUI (`avatar` prop), Nuxt UI (`avatar` prop), PrimeReact Chip (`image` prop)
-- Simplest API for common case
-- Limited positioning control
-
-**Section/Slot Pattern** (2/13)
-- Mantine Badge (`leftSection`), HeroUI (likely `endContent`)
-- More flexible positioning
-- Can include non-image content
-
-**Composition Only** (8/13)
-- Remaining frameworks require manual composition
-- Maximum flexibility, more boilerplate
-- No automatic sizing/positioning
-
-### Removal Patterns
-
-**Automatic Icon on Prop** (2/13)
-- MUI (`onDelete` presence), Ant Design (`closable`)
-- Clean API - icon appears when relevant
-- May lack customization options
-
-**Explicit Boolean** (1/13)
-- PrimeReact (`removable`)
-- Explicit control over icon visibility
-- May lack callback hook
-
-**Composed Close Button** (2/13)
-- Chakra UI (`Tag.CloseTrigger`), HeroUI (`onClose` triggers display)
-- Maximum flexibility
-- More composition complexity
-
-**No Native Support** (8/13)
-- Would require custom implementation
-- Keeps component simple
-- Limits use cases
-
-## Raw Data
-
-Individual framework reports available at:
-```
-ai/research/chip/ant-design/usage-patterns.md (Tag component)
-ai/research/chip/chakra-ui/usage-patterns.md (Tag component)
-ai/research/chip/heroui/usage-patterns.md (Chip component - incomplete)
-ai/research/chip/mantine-chip/usage-patterns.md (Chip - selection control)
-ai/research/chip/mantine-badge/usage-patterns.md (Badge - display label)
-ai/research/chip/mui/usage-patterns.md (Chip component)
-ai/research/chip/nuxt-ui/usage-patterns.md (Badge component)
-ai/research/chip/primereact-tag/usage-patterns.md (Tag component)
-ai/research/chip/primereact-chip/usage-patterns.md (Chip component)
-ai/research/chip/radix-ui-themes/usage-patterns.md (Badge component)
-ai/research/chip/shadcn/usage-patterns.md (Badge component)
-```
-
-## Research Methodology
-
-1. **Data Collection**: Surveyed 11 major UI frameworks with 13 distinct component implementations
-2. **Semantic Analysis**: Identified three distinct component philosophies (single, dual, functional)
-3. **Pattern Extraction**: Analyzed content, state, variation, interaction, and architectural patterns
-4. **Quantitative Analysis**: Calculated pattern prevalence across implementations
-5. **Qualitative Analysis**: Examined naming conventions, design philosophies, and implementation strategies
-6. **Correlation Analysis**: Identified relationships between patterns and component types
-
-## Frameworks Surveyed
-
-| Framework | Components | Type | Key Characteristics |
-|-----------|------------|------|---------------------|
-| Ant Design | Tag + CheckableTag | Dual (variant) | Rich colors, checkable variant, closable |
-| Chakra UI | Tag | Single | Compound components (v3), variants, composition |
-| HeroUI | Chip | Single | Closable, tailwind-based, slots (incomplete research) |
-| Mantine | Chip + Badge | Dual (functional) | Selection control vs. display label |
-| MUI | Chip | Single | Avatar support, deletable, keyboard shortcuts |
-| Nuxt UI | Badge | Single | Avatar integration, 4 variants, polymorphic |
-| PrimeReact | Tag + Chip | Dual (use-case) | Severity-based Tag, removable Chip |
-| Radix Themes | Badge | Single | 4 variants, theme integration, high contrast |
-| ShadCN | Badge | Single | Copy-paste, CVA, minimal, Tailwind-first |
-
-## Sophisticated Design Patterns
-
-### MUI - Keyboard-Triggered Deletion
-
-**What it does**: When a Chip component has the `onDelete` prop set, users can dismiss the chip using Backspace or Delete keys while focused, and Escape to blur the chip. The `deleteIcon` prop allows customization of the icon, giving developers fine-grained control over the removal affordance.
-
-**Why it's sophisticated**: Most frameworks implement removable patterns only through mouse clicks. The keyboard shortcut support addresses a non-obvious problem: power users working with dynamically generated chip lists (like tag editors or filter builders) expect form-like keyboard interactions. This bridges the gap between the chip's visual affordance as a "pseudo-form-input" and actual form behavior.
-
-**Evidence of design maturity**:
-- Keyboard accessibility extends beyond screen readers to power-user efficiency (Backspace for deletion mirrors native field behavior)
-- The `deleteIcon` customization prop shows thoughtful handling of visual consistency across design systems
-- Escape key support for blur demonstrates understanding of modal interaction patterns and focus management
-
-### Mantine - Selection Group Coordination with Deselectable Radio Pattern
-
-**What it does**: The `Chip.Group` component manages coordinated selection state across multiple chips with two modes: single selection (radio-like, `multiple={false}`) and multiple selection (checkbox-like, `multiple={true}`). The deselectable radio pattern allows toggling selection off by clicking a selected chip again, implemented via custom `onClick` handlers that compare current value to detect same-value clicks.
-
-**Why it's sophisticated**: Standard form controls (radio/checkbox) don't support "deselectable radio" behavior natively—selecting an option commits the state. The chip pattern uniquely benefits from deselection because chips are inline, space-efficient UI elements where removing a selection without replacing it is a legitimate UX flow. This solves the non-obvious problem of "how do users clear a filter choice in an inline interface without modal dialog or separate button."
-
-**Evidence of design maturity**:
-- The documented deselectable radio example (lines 195-224 of mantine-chip/usage-patterns.md) shows anticipation of real-world UX needs
-- Built-in support for both controlled and uncontrolled state (`value`/`defaultValue`) on the Group component demonstrates understanding of different integration contexts
-- The component is built on semantic HTML `<input>` elements, ensuring accessibility isn't sacrificed for advanced UX patterns
-
-### Ant Design - Controlled CheckableTag Atomicity
-
-**What it does**: The `Tag.CheckableTag` subcomponent is an absolutely controlled component with no uncontrolled mode—it requires `checked` and `onChange` props. Developers must manage selection state explicitly, providing a single source of truth that prevents state desynchronization in complex tag arrays. The `icon` prop (added in v5.27.0) allows semantic icons to represent selection meaning independent of visual state.
-
-**Why it's sophisticated**: Most interactive components offer both controlled and uncontrolled modes for developer convenience. Forcing controlled-only state for CheckableTag solves a subtle problem: in dynamic tag scenarios (like adding/removing tags from a list), uncontrolled chips create opportunities for stale UI states when items are added or removed while a chip is rendered. This enforces architectural discipline that prevents hard-to-debug synchronization bugs.
-
-**Evidence of design maturity**:
-- The version annotation (v5.27.0) for icon support shows incremental refinement based on real-world feedback
-- The dual-component philosophy (`Tag` for display, `CheckableTag` for selection) demonstrates architectural clarity about component semantics
-- Requiring controlled state forces consumers to think through state management early, preventing later refactoring costs
-
-## Key Insights for Implementation
-
-### Universal Requirements
-
-1. **Text Content Support**: Via children or dedicated prop - non-negotiable
-2. **Color Semantics**: At least 4-5 semantic colors (success, error, warning, etc.)
-3. **Composition Flexibility**: Support both simple text and complex content
-4. **Visual Variants**: Minimum 2-3 style treatments (filled, outlined, soft/subtle)
-
-### Recommended Features
-
-1. **Size Variants**: 3-5 options (xs/sm/md/lg/xl) based on 54% adoption
-2. **Icon Support**: Native prop for common case, composition for flexibility
-3. **Removable Pattern**: Optional close button with onClose callback
-4. **Keyboard Support**: Backspace/Enter for removal (rare but valuable)
-5. **Avatar Support**: For entity representation use cases
-
-### Architectural Decisions
-
-**Single vs. Multiple Components:**
-- **Single Component**: Easier to learn, flexible through variants
-- **Multiple Components**: Clearer separation, potential confusion
-- **Recommendation**: Start with single, consider split if use cases diverge significantly
-
-**Component Naming:**
-- No clear industry standard
-- "Badge" slightly more common for general use
-- "Chip" implies more interactivity
-- "Tag" implies categorization
-- **Recommendation**: Choose based on primary use case and design system terminology
-
-**Interaction Model:**
-- Display-only (6/13) vs. Interactive (7/13) split evenly
-- **Recommendation**: Support both via optional props (closable, clickable)
-
-**Content API:**
-- Children (universal) vs. Props (label/value)
-- **Recommendation**: Support both - children for flexibility, props for simplicity
-
-### Innovation Opportunities
-
-1. **Loading State**: No framework implements - opportunity for async operations
-2. **Read-Only Mode**: Distinct from default - useful for form displays
-3. **Selection State**: Only 2 frameworks - underserved pattern
-4. **Group Coordination**: Only Mantine - valuable for filter UIs
-5. **Animation**: Removal animations largely missing
-6. **Undo Pattern**: Accidental removal recovery
-
-## Terminology Recommendation
-
-Given the semantic chaos, here are guidelines for naming:
-
-### If Implementing Single Component:
-- **"Badge"**: Best if primary use is status/metadata display
-- **"Chip"**: Best if primary use includes removal/interaction
-- **"Tag"**: Best if primary use is categorization/labeling
-
-### If Implementing Multiple Components:
-**Option A: Functional Separation (Mantine Model)**
-- **Badge**: Display-only labels
-- **Chip**: Interactive selection controls
-
-**Option B: Use-Case Separation (PrimeReact Model)**
-- **Tag**: Static categorization labels
+### Framework-Specific Innovations
+
+#### Semantic UI Classic - Spatial Relationship System
+The most sophisticated positioning system found:
+- **Attached Labels**: Connect to other elements (top/bottom attached)
+- **Pointing Labels**: Arrow pointing to related content
+- **Corner Labels**: Overlay on corner of images/cards
+- **Ribbon Labels**: Banner-style across containers
+- **Floating Labels**: Hover above elements
+
+This represents the most mature spatial design system for labels.
+
+#### Mantine - True Functional Separation
+Only framework to completely separate by interaction model:
+- **Badge**: Pure display, no interaction beyond links
+- **Chip**: Pure selection control with radio/checkbox behavior
+- **Chip.Group**: Manages multi-selection state
+
+This clean separation eliminates API confusion.
+
+#### PrimeReact - Triple Component Architecture
+Most granular separation:
+- **Badge**: Notification counts only
+- **Tag**: Static categorization only
 - **Chip**: Entity representation with removal
 
-**Option C: Complexity Separation**
-- **Badge**: Simple status indicators
-- **Chip**: Complex interactive elements with avatars/removal
+Each component has a single, clear purpose.
 
-## Conclusion
-
-The Chip/Tag/Badge component space demonstrates **significant semantic divergence** across the UI framework ecosystem. Unlike components with clear consensus (Button, Input, Modal), this component category has three competing philosophies:
-
-1. **Unified Approach**: Single flexible component (7/11 frameworks)
-2. **Functional Separation**: Separate by interaction model (Mantine)
-3. **Use-Case Separation**: Separate by primary purpose (PrimeReact)
-
-### Universal Patterns
-
-Despite naming chaos, certain patterns are universal:
-- Text content support (100%)
-- Color semantics (77%)
-- Icon integration (85%)
-- Composition-based content (100%)
-
-### Evolving Patterns
-
-Emerging patterns show future direction:
-- Removal interaction (38% and growing)
-- Avatar/image support (38%)
-- Visual variant systems (62%)
-- Polymorphic rendering (23%)
-
-### Missing Opportunities
-
-Patterns with low adoption represent innovation opportunities:
-- Loading states (0%)
-- Selection controls (15%)
-- Group coordination (8%)
-- Keyboard shortcuts (15%)
-- Undo patterns (0%)
-
-### Implementation Guidance
-
-For Semantic UI or similar frameworks:
-
-1. **Choose Philosophy First**: Single unified vs. multiple specialized components
-2. **Define Primary Use Case**: Status display, categorization, or entity representation
-3. **Start Simple**: Text + colors + icons as baseline
-4. **Add Interactivity**: Optional removal and selection patterns
-5. **Support Composition**: Children for complex content
-6. **Consider Keyboard**: Power-user efficiency through keyboard shortcuts
-7. **Enable Customization**: Visual variants and theming hooks
-
-The lack of consensus is both a challenge and an opportunity - frameworks can differentiate through thoughtful naming, clear use-case guidance, and innovative feature combinations not yet widely adopted.
+#### Ant Design - CheckableTag Innovation
+Unique variant component approach:
+```jsx
+<Tag.CheckableTag checked={checked} onChange={handleChange}>
+  Selectable
+</Tag.CheckableTag>
+```
+Provides selection behavior as a subcomponent rather than a prop.
 
 ---
 
-## Version History
+## Size Systems Comparison
 
-### Version 1.1.0 (2025-11-10) - E&O Verification Round 1
-**Agent**: Codex
+| Framework | Sizes Available | Size Names |
+|-----------|----------------|-----------|
+| Ant Design Tag | No size variants | Default only |
+| Chakra UI | 3 sizes | sm, md, lg |
+| HeroUI | 3 sizes | sm, md, lg |
+| Mantine Badge | 7 sizes | xs, sm, md, lg, xl + custom |
+| Mantine Chip | 5 sizes | xs, sm, md, lg, xl |
+| MUI Chip | 2 sizes | small, medium |
+| Nuxt UI | 4 sizes | xs, sm, md, lg |
+| PrimeReact | No explicit sizes | Default only |
+| Radix Themes | 3 sizes | 1, 2, 3 |
+| ShadCN | No built-in sizes | CSS customization |
+| Semantic UI | 8 sizes | mini, tiny, small, medium, large, big, huge, massive |
 
-**Close/remove button prevalence:** Limited to 4 frameworks shipping native dismiss controls (HeroUI, Ant Design, MUI, PrimeReact Chip with `onClose`/`removable` props). Mantine badge relies on manual sections and Nuxt UI/Chakra badge components lack native close props. Evidence: `ai/research/chip/mantine-badge/usage-patterns.md:30-34,323`, `ai/research/chip/nuxt-ui/usage-patterns.md:30-55`, `ai/research/chip/heroui/usage-patterns.md:32-66`, `ai/research/chip/ant-design/usage-patterns.md:40-110`, `ai/research/chip/mui/usage-patterns.md:20-200`. (85% confidence)
+**Size Consensus**: 3-4 sizes is most common (sm, md, lg pattern)
 
-**Color semantics:** Treated as effectively universal. Every framework except PrimeReact Chip documents semantic/variant color props. Evidence: framework documentation review. (85% confidence)
+---
 
-### Version 1.0.0 (2025-11-05) - Initial Research
-- 11 frameworks surveyed
+## Common Use Cases Across All Frameworks
+
+### Display Use Cases
+1. **Status Indicators**: Active, Inactive, Pending, Processing
+2. **Category Labels**: Tags for blog posts, product categories
+3. **Feature Flags**: Beta, New, Premium, Featured
+4. **Version Numbers**: v1.0, v2.0-beta
+5. **Metadata Display**: Author names, dates, counts
+
+### Interactive Use Cases
+1. **Filter Selection**: Multi-select filters in e-commerce
+2. **Tag Management**: Adding/removing tags from items
+3. **Contact Chips**: User selection in email/messaging
+4. **Skill Tags**: Profile skills with removal
+5. **Search Filters**: Applied search criteria
+
+### Notification Use Cases
+1. **Unread Counts**: Message badges on icons
+2. **Cart Items**: Shopping cart count overlay
+3. **Notification Dots**: Simple presence indicators
+4. **Update Badges**: "New" overlays on menu items
+5. **Status Overlays**: Online/offline on avatars
+
+---
+
+## Migration Complexity
+
+### Highest Complexity Migrations
+1. **Semantic UI Label → Any Other**: Complete paradigm shift from spatial system
+2. **Mantine Chip → Others**: Chip as selection control vs display element
+3. **PrimeReact Triple → Single Component**: Consolidating three components to one
+
+### Medium Complexity Migrations
+1. **Ant Design Tag/Badge → MUI Chip**: Two components to one
+2. **Chakra Tag + Badge → Single Component**: Merging separated concerns
+3. **CheckableTag → Standard Tag**: Loss of selection functionality
+
+### Low Complexity Migrations
+1. **Radix Badge → ShadCN Badge**: Same ecosystem, similar APIs
+2. **Nuxt Badge → ShadCN Badge**: Both serve dual purposes
+3. **MUI Chip → HeroUI Chip**: Similar all-purpose approach
+
+---
+
+## Recommendations
+
+### For Framework Selection
+1. **If you need spatial relationships**: Semantic UI Classic Label
+2. **If you want clean separation**: Mantine (Badge + Chip) or PrimeReact (Badge + Tag + Chip)
+3. **If you prefer simplicity**: Single component frameworks (MUI Chip, Radix Badge)
+4. **If you need selection controls**: Mantine Chip or Ant Design CheckableTag
+
+### For Component Design
+1. **Must-have variants**: Solid, Soft, Outline (90%+ adoption)
+2. **Should-have features**: Icon support, removable option, size variants
+3. **Consider features**: Avatar support, dot indicators, gradient variants
+4. **Recommended sizes**: 3-4 size options (sm, md, lg, xl)
+
+### For Migration Planning
+1. Abstract component names in wrapper components
+2. Map framework-specific APIs to common interface
+3. Consider functional requirements before choosing target framework
+4. Plan for feature loss/gain during migration
+
+---
+
+## Industry Insights
+
+1. **No Convergence in Sight**: Unlike other components trending toward standardization, Chip/Tag/Badge shows increasing divergence
+2. **Material Design Influence**: "Chip" terminology spreading but with different semantics
+3. **Functional vs Visual Organization**: Frameworks split between organizing by function (Mantine) vs appearance (most others)
+4. **Compound Component Trend**: Newer versions (Chakra v3) moving toward compound patterns
+5. **Overlay vs Inline Debate**: Badge components split on whether overlay is core feature
+
+---
+
+## Raw Data Sources
+- Individual framework reports in subdirectories
+- URL verification in url-verification.md
 - 13 distinct component implementations analyzed
+- 11 frameworks surveyed total
+
+*Last comprehensive review: 2025-11-10*
