@@ -58,10 +58,10 @@ All frameworks use "Card" (100% consensus) - no alternative terminology found.
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | Basic card | Simple bordered/elevated container | 10/10 (100%) | **Level 1** | All |
-| Elevation/Shadow | Visual depth via shadows | 9/10 (90%) | **Level 1** | All except Semantic UI |
+| Elevation/Shadow | Visual depth via shadows | 9/10 (90%) | **Level 1** | All except PrimeReact (CSS-only) |
 | Bordered | Border-based containment | 10/10 (100%) | **Level 1** | All |
 | Hoverable | Hover state effects | 6/10 (60%) | **Level 3** | Ant Design, Chakra, HeroUI, MUI, Nuxt UI, ShadCN |
-| Loading state | Built-in loading skeleton | 2/10 (20%) | **Level 5** | Ant Design, Semantic UI |
+| Loading state | Built-in loading skeleton | 1/10 (10%) | **Level 5** | Ant Design |
 | Link card | Entire card as link | 4/10 (40%) | **Level 4** | Semantic UI, Chakra, Mantine, MUI (via CardActionArea) |
 | Clickable/Pressable | Interactive card | 7/10 (70%) | **Level 2** | Ant Design, Chakra, HeroUI, Mantine, MUI, Nuxt UI, Radix UI |
 | Fluid width | Full-width card | 3/10 (30%) | **Level 4** | Semantic UI, responsive via CSS |
@@ -141,7 +141,7 @@ All frameworks use "Card" (100% consensus) - no alternative terminology found.
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|-------------|-------------|------------|
-| Size options | Multiple size presets | 4/10 (40%) | **Level 4** | Ant Design (default, small), Chakra (sm/md/lg), Radix UI (1-5), Mantine |
+| Size options | Multiple size presets | 3/10 (30%) | **Level 4** | Ant Design (default/small), Chakra (sm/md/lg), Radix UI (1-5) |
 | Padding control | Adjustable internal spacing | 8/10 (80%) | **Level 2** | All except Semantic UI, ShadCN |
 | Compact variant | Minimal spacing | 2/10 (20%) | **Level 5** | Ant Design, Radix UI (size 1) |
 | Numeric size scale | 1-5 sizing system | 1/10 (10%) | **Level 5** | Radix UI |
@@ -439,11 +439,11 @@ Selective implementation:
 - Disabled state (30%)
 - Image in header (40%)
 - Fluid width (30%)
-- Size variants (40%)
+- Size variants (30%)
 - Header template (30%)
 - Filled variant (40%)
+- Ghost/unstyled variant (30%)
 - Compact variant (20%)
-- Button groups (70% - actually Level 2)
 
 ### Level 5 (Rare - <20%)
 Framework-specific innovations:
@@ -468,7 +468,6 @@ Framework-specific innovations:
 - Numeric size scale (10% - Radix UI)
 - Classic variant (10% - Radix UI)
 - Soft variant (10% - Nuxt UI)
-- Ghost variant (30% - actually borderline Level 4)
 - Footer template (20% - Level 5 confirmed)
 - Social actions (20%)
 - Extra content (20%)

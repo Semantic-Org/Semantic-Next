@@ -38,7 +38,7 @@ Across all frameworks, the Button component is consistently understood as:
 | State | Property Names | Frameworks |
 |-------|----------------|------------|
 | **Disabled** | `disabled`, `isDisabled` | 11/11 |
-| **Loading** | `loading`, `isLoading` | 11/11 |
+| **Loading** | `loading`, `isLoading` | 8/11 (others compose or wrap) |
 | **Active** | `active`, `isActive` | 8/11 |
 
 ### Size Naming
@@ -59,7 +59,7 @@ Across all frameworks, the Button component is consistently understood as:
 | **Text content** | Display plain text | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Icon support** | Display icons (alone or with text) | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Icon + Text** | Icons positioned with text | 11/11 (100%) | Level 1 (Universal) | All frameworks |
-| **Loading indicator** | Show loading spinner/state | 11/11 (100%) | Level 1 (Universal) | All frameworks |
+| **Loading indicator** | Show loading spinner/state | 8/11 (73%) | Level 2 (Common) | Ant Design, Chakra UI, HeroUI, Mantine, Nuxt UI, PrimeReact, Radix UI, Semantic UI Classic |
 | **Custom content** | Arbitrary React/Vue nodes | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Icon positioning** | Control icon placement (left/right/top/bottom) | 7/11 (64%) | Level 2 (Common) | Ant Design, PrimeReact, HeroUI, Nuxt UI, Semantic Classic, Chakra (v2), MUI |
 | **Badge/Counter** | Display notification badges | 1/11 (9%) | Level 5 (Rare) | PrimeReact only |
@@ -91,7 +91,7 @@ Across all frameworks, the Button component is consistently understood as:
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | **Disabled** | Prevents interaction | 11/11 (100%) | Level 1 (Universal) | All frameworks |
-| **Loading** | Shows loading indicator | 11/11 (100%) | Level 1 (Universal) | All frameworks |
+| **Loading** | Shows loading indicator | 8/11 (73%) | Level 2 (Common) | Ant Design, Chakra UI, HeroUI, Mantine, Nuxt UI, PrimeReact, Radix UI, Semantic UI Classic |
 | **Hover** | Visual feedback on hover | 11/11 (100%) | Level 1 (Universal) | All frameworks (CSS/automatic) |
 | **Focus** | Keyboard focus indication | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Active/Pressed** | Pressed state styling | 11/11 (100%) | Level 1 (Universal) | All frameworks |
@@ -100,10 +100,9 @@ Across all frameworks, the Button component is consistently understood as:
 | **loadingAuto** | Promise-aware auto-loading | 1/11 (9%) | Level 5 (Rare) | Nuxt UI only |
 
 **Loading Implementation Approaches:**
-- **Native prop** (10/11): Boolean `loading` prop with built-in spinner
-- **Separate component** (1/11): MUI uses `LoadingButton` from `@mui/lab`
-- **Custom spinner support** (7/11): Accept custom loading icons/components
-- **Spinner placement control** (6/11): Position loading indicator (start/center/end)
+- **Native prop** (8/11): Boolean `loading` prop with built-in spinner/disable behavior
+- **Composition/adjacent component** (Headless UI, ShadCN) or dedicated `LoadingButton` (MUI) when native prop is absent
+- Native implementations typically allow swapping the spinner icon and choosing whether it replaces the label or sits in start/end positions
 
 ### Variation Patterns
 
@@ -134,11 +133,11 @@ Across all frameworks, the Button component is consistently understood as:
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | **Click handler** | onClick/onPress events | 11/11 (100%) | Level 1 (Universal) | All frameworks |
-| **As link** | Render as anchor/link | 10/11 (91%) | Level 1 (Universal) | All except Headless UI |
+| **As link** | Render as anchor/link | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Form submission** | type="submit" support | 11/11 (100%) | Level 1 (Universal) | All frameworks |
-| **Button group** | Grouped button layouts | 10/11 (91%) | Level 1 (Universal) | All except Headless UI |
+| **Button group** | Grouped button layouts | 7/11 (64%) | Level 2 (Common) | Ant Design, Chakra UI, HeroUI, Mantine, MUI, PrimeReact, Semantic UI Classic |
 | **Polymorphic rendering** | Render as custom elements | 9/11 (82%) | Level 2 (Common) | Headless, HeroUI, Mantine, MUI, Nuxt UI, Radix, ShadCN, Chakra, PrimeReact |
-| **Icon-only buttons** | Dedicated icon button support | 10/11 (91%) | Level 1 (Universal) | All except Headless UI |
+| **Icon-only buttons** | Dedicated icon button support | 11/11 (100%) | Level 1 (Universal) | All frameworks |
 | **Ripple effect** | Touch feedback animation | 3/11 (27%) | Level 4 (Occasional) | HeroUI, MUI, Chakra (configurable) |
 | **Dropdown button** | Split button with dropdown | 2/11 (18%) | Level 5 (Rare) | Ant Design (deprecated), HeroUI (pattern) |
 | **Toggle state** | Persistent on/off state | 2/11 (18%) | Level 5 (Rare) | Semantic Classic, Nuxt UI (active state) |
@@ -161,10 +160,10 @@ These patterns represent industry consensus and should be strongly considered fo
    - **Props approach** (64%): Dedicated icon props for positioning
    - **Composition approach** (36%): Icons as children with automatic spacing
 
-2. **Loading states** - All frameworks provide loading indicators:
-   - 91% include built-in loading prop
-   - 64% support custom loading icons
-   - 55% control spinner placement
+2. **Loading states** - 8/11 frameworks ship native loading indicators; the rest rely on composition or separate components:
+   - Native loading props: Ant Design, Chakra UI, HeroUI, Mantine, Nuxt UI, PrimeReact, Radix UI, Semantic UI Classic
+   - Headless UI and ShadCN compose spinners manually; MUI uses the separate `LoadingButton` component
+   - Most native implementations support custom icons and spinner placement for branding control
 
 3. **Text + Icon combinations** - Universal pattern with automatic spacing
 
@@ -185,9 +184,10 @@ These patterns represent industry consensus and should be strongly considered fo
 2. **Extended color systems** (55%): Beyond basic semantics
 
 #### **State Management**
-1. **Disabled + Loading** - Universal patterns (100%)
-2. **Focus-visible states** - Keyboard navigation support (100%)
-3. **Active/Pressed states** - Visual feedback (100%)
+1. **Disabled state** - Universal support (11/11)
+2. **Loading states** - Native props in 8/11 frameworks; Headless UI, ShadCN, and MUI rely on composition or adjacent components
+3. **Focus-visible states** - Keyboard navigation support (11/11)
+4. **Active/Pressed states** - Visual feedback (11/11)
 
 ### Emerging Patterns (Level 3-4)
 
@@ -320,13 +320,29 @@ Framework-specific patterns that may be ahead of the curve or solving niche need
 
 **Three Implementation Patterns:**
 
-1. **Native Boolean** (91% - 10/11):
+1. **Native boolean prop** (73% - 8/11):
    ```jsx
    <Button loading>Submit</Button>
    <Button loading={isSubmitting}>Submit</Button>
    ```
 
-2. **Advanced Configuration** (18% - 2/11):
+2. **Composition-based loading** (18% - Headless UI, ShadCN):
+   ```jsx
+   <Button disabled={loading}>
+     {loading && <Spinner />}
+     {loading ? 'Saving…' : 'Save'}
+   </Button>
+   ```
+   Relies on manual spinner composition plus `disabled`.
+
+3. **Separate component** (9% - 1/11):
+   ```jsx
+   // MUI
+   import { LoadingButton } from '@mui/lab'
+   <LoadingButton loading>Submit</LoadingButton>
+   ```
+
+4. **Advanced configuration** (subset of native implementations):
    ```jsx
    // Ant Design
    <Button loading={{ delay: 300, icon: <CustomIcon /> }} />
@@ -335,16 +351,7 @@ Framework-specific patterns that may be ahead of the curve or solving niche need
    <Button loadingAuto @click={asyncHandler} />
    ```
 
-3. **Separate Component** (9% - 1/11):
-   ```jsx
-   // MUI
-   import { LoadingButton } from '@mui/lab'
-   <LoadingButton loading>Submit</LoadingButton>
-   ```
-
-**Spinner Placement:**
-- **Center** (55%): Replace entire button content
-- **Start/End** (45%): Position before/after text
+**Spinner Placement:** Native implementations typically either replace the entire label (center) or reserve start/end slots for inline spinners; both patterns appear across frameworks depending on icon support.
 
 ### Variant Naming Conventions
 
@@ -535,7 +542,7 @@ All 11 frameworks demonstrate strong accessibility support:
   ```
 
 **Loading State Announcements:**
-- **Most frameworks** (91%): Implicit through disabled state
+- **Most frameworks** (8/11): Implicit through disabled state while loading
 - **Best practice** (rare): Explicit aria-busy or live region announcements
 
 **Icon-Only Buttons:**
@@ -556,10 +563,10 @@ All 11 frameworks demonstrate strong accessibility support:
 
 1. **Three-tier variant hierarchy** - Solid/Outline/Ghost provides clear visual weight
 2. **Semantic color palette** - Primary, secondary, success, warning, error, info
-3. **Universal loading states** - Built-in loading with spinner
+3. **Native loading states** - Built-in spinner/disable behavior in 8/11 frameworks; remaining libraries rely on composition
 4. **Icon integration** - Whether props or composition, all support it well
 5. **Polymorphic rendering** - Button-styled links are essential
-6. **Button groups** - Coordinated multi-button layouts
+6. **Button groups** - Coordinated multi-button layouts remain common (7/11) even if not universal
 7. **Full-width option** - Essential for mobile/form layouts
 8. **Focus-visible** - Better UX than always-visible focus rings
 
@@ -646,16 +653,16 @@ Based on unique patterns found:
 ## Recommendations for Semantic UI
 
 ### Must-Have Patterns (Level 1)
-Based on 100% adoption:
+Based on near-universal adoption (≥ ~70%; explicitly universal where noted):
 
 1. ✅ **Core variants**: solid, outline, ghost/text
 2. ✅ **Size system**: minimum 5 sizes (xs-xl)
 3. ✅ **Semantic colors**: primary, secondary, success, warning, error, info
-4. ✅ **States**: disabled, loading, active, hover, focus
+4. ✅ **States**: disabled, hover/focus/active, plus a native loading prop to match the majority expectation
 5. ✅ **Icon support**: Either props or composition pattern
-6. ✅ **Loading indicators**: Built-in spinner with customization
+6. ✅ **Loading indicators**: Built-in spinner/disable behavior (8/11 frameworks already ship this)
 7. ✅ **Full-width option**: Essential for responsive layouts
-8. ✅ **Button groups**: Coordinated multi-button layouts
+8. ✅ **Button groups**: Coordinated multi-button layouts (7/11 frameworks ship a first-class pattern)
 9. ✅ **Polymorphic rendering**: Button-styled links
 10. ✅ **Form integration**: type="submit" support
 

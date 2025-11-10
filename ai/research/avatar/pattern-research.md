@@ -30,7 +30,7 @@ Across all 12 frameworks, avatars are consistently defined as:
 - **Image (with avatar class)**: 1 framework (Semantic UI Classic)
 
 ### Architectural Terms
-- **Avatar + AvatarGroup**: 8 frameworks (Ant Design, Chakra UI, HeroUI, Mantine, MUI, PrimeReact, Shadcn UI, Vuetify)
+- **Avatar + AvatarGroup**: 7 frameworks (Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact)
 - **Avatar.Root/Image/Fallback**: 2 frameworks (Radix Primitives, Shadcn UI - composition pattern)
 - **Compound components**: Avatar.Group (Mantine), AvatarGroup (MUI, Chakra UI)
 
@@ -60,7 +60,7 @@ Across all 12 frameworks, avatars are consistently defined as:
 |---------|-------------|------------|-------------|--------------|------------|
 | Image display | Primary profile photo/picture | 12/12 (100%) | Level 1 (Universal) | Native | All frameworks |
 | Text/Initials | Display user initials or short text | 11/12 (92%) | Level 1 (Universal) | Native | All except Semantic UI |
-| Icon fallback | Icon when no image available | 10/12 (83%) | Level 2 (Common) | Native | All except Semantic UI, Vuetify |
+| Icon fallback | Icon when no image available | 11/12 (92%) | Level 1 (Universal) | Native | All except Semantic UI |
 | Auto-initials generation | Extract initials from name prop | 6/12 (50%) | Level 3 (Moderate) | Native | Chakra UI, HeroUI, Mantine, Nuxt UI, Radix Themes, Shadcn UI |
 | Fallback cascade | Priority-based fallback system | 10/12 (83%) | Level 2 (Common) | Native | Most frameworks |
 | Custom content | Arbitrary React/Vue nodes | 12/12 (100%) | Level 1 (Universal) | Composed | All frameworks |
@@ -71,7 +71,7 @@ Across all 12 frameworks, avatars are consistently defined as:
 | Pattern | Description | Prevalence | Usage Level | Details | Frameworks |
 |---------|-------------|------------|-------------|---------|------------|
 | Single component | Standalone Avatar component | 12/12 (100%) | Level 1 (Universal) | Core pattern | All frameworks |
-| Group component | Dedicated component for multiple avatars | 8/12 (67%) | Level 2 (Common) | AvatarGroup pattern | Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact, Shadcn UI |
+| Group component | Dedicated component for multiple avatars | 7/12 (58%) | Level 3 (Moderate) | AvatarGroup pattern | Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact |
 | Composition pattern | Root/Image/Fallback structure | 2/12 (17%) | Level 4 (Occasional) | Radix pattern | Radix Primitives, Shadcn UI |
 | Slot-based | Vue slots for content | 2/12 (17%) | Level 4 (Occasional) | Vue pattern | Nuxt UI, Vuetify |
 
@@ -88,7 +88,7 @@ Across all 12 frameworks, avatars are consistently defined as:
 
 | Pattern | Description | Prevalence | Usage Level | Support Type | Frameworks |
 |---------|-------------|------------|-------------|--------------|------------|
-| Predefined sizes | Named size presets (xs/sm/md/lg/xl) | 10/12 (83%) | Level 2 (Common) | Native | All except Semantic UI, Vuetify |
+| Predefined sizes | Named size presets (xs/sm/md/lg/xl) | 7/12 (58%) | Level 3 (Moderate) | Native | Ant Design, Chakra UI, HeroUI, Mantine, Nuxt UI, PrimeReact, Radix Themes |
 | 3 sizes | Small/Medium/Large | 3/12 (25%) | Level 4 (Occasional) | Native | Ant Design (partial), PrimeReact, Semantic UI |
 | 5 sizes | xs through xl | 3/12 (25%) | Level 4 (Occasional) | Native | Chakra UI, Mantine, MUI (via theme) |
 | 6-7 sizes | Extended range | 2/12 (17%) | Level 5 (Rare) | Native | HeroUI, Nuxt UI (3xs-3xl) |

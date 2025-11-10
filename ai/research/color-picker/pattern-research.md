@@ -75,18 +75,18 @@ All frameworks use consistent "ColorPicker" naming with camelCase or PascalCase 
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
-| Click trigger | Open on click | 2/3 (67%) | **Level 2: Common** | Ant Design, Nuxt UI | Native |
+| Click trigger | Open on click (trigger button opens panel) | 1/3 (33%) | **Level 4: Occasional** | Ant Design | Native |
 | Hover trigger | Open on hover | 1/3 (33%) | **Level 4: Occasional** | Ant Design | Native |
 | Inline display | Always visible picker | 3/3 (100%) | **Level 1: Universal** | All | Native |
-| Trigger customization | Custom trigger element | 2/3 (67%) | **Level 2: Common** | Ant Design, Nuxt UI | Native |
+| Trigger customization | Custom trigger element/panel render | 1/3 (33%) | **Level 4: Occasional** | Ant Design | Native |
 
 ### Preset/Swatch Patterns
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
-| Preset colors | Predefined color array | 3/3 (100%) | **Level 1: Universal** | All | Native |
+| Preset colors | Predefined color array | 2/3 (67%) | **Level 2: Common** | Ant Design, Mantine | Native |
 | Swatches with labels | Named preset colors | 1/3 (33%) | **Level 4: Occasional** | Ant Design | Native |
-| Swatches per row | Grid layout control | 2/3 (67%) | **Level 2: Common** | Mantine, Nuxt UI | Native |
+| Swatches per row | Grid layout control | 1/3 (33%) | **Level 4: Occasional** | Mantine | Native |
 | Toggle swatches | Show/hide presets | 1/3 (33%) | **Level 4: Occasional** | Mantine | Native |
 
 ### Component Composition Patterns
@@ -117,10 +117,10 @@ All frameworks use consistent "ColorPicker" naming with camelCase or PascalCase 
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
-| Keyboard navigation | Arrow key controls | 3/3 (100%) | **Level 1: Universal** | All | Native |
-| Focus management | Keyboard focus handling | 3/3 (100%) | **Level 1: Universal** | All | Native |
-| ARIA labels | Screen reader labels | 2/3 (67%) | **Level 2: Common** | Mantine, Nuxt UI | Native |
-| Tab navigation | Tab order support | 3/3 (100%) | **Level 1: Universal** | All | Native |
+| Keyboard navigation | Arrow key controls | 2/3 (67%) | **Level 2: Common** | Ant Design, Mantine | Native |
+| Focus management | Keyboard focus handling | 2/3 (67%) | **Level 2: Common** | Ant Design, Mantine | Native |
+| ARIA labels | Screen reader labels/props | 1/3 (33%) | **Level 4: Occasional** | Mantine | Native |
+| Tab navigation | Tab order support | 2/3 (67%) | **Level 2: Common** | Ant Design, Mantine | Native |
 
 ### Styling Patterns
 
@@ -141,14 +141,11 @@ All frameworks use consistent "ColorPicker" naming with camelCase or PascalCase 
 - Hue slider
 - Alpha slider
 - Color preview
-- Preset swatches
 - Controlled/uncontrolled modes
 - onChange callbacks
 - Format switching
 - Size variants (small, medium, large)
 - Disabled state
-- Keyboard navigation
-- Focus management
 - Custom CSS classes
 - Theme integration
 - Inline display option

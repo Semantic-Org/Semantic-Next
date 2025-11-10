@@ -1,6 +1,7 @@
 # Component Pattern Research: Context Menu
 
-> Last Modified: 2025-11-05
+> Last Modified: 2025-11-05  
+> Last Reviewed: 2025-11-10 (by Agent)
 
 ## Research Summary
 - Frameworks surveyed: 4
@@ -42,7 +43,7 @@ All frameworks use variants of "Context Menu" terminology.
 |---------|-------------|------------|-------------|------------|--------------|
 | Text content | Text labels for items | 4/4 (100%) | **Level 1: Universal** | All | Composed/Native |
 | Icon support | Icons in menu items | 4/4 (100%) | **Level 1: Universal** | All | Composed/Native |
-| Keyboard shortcuts | Shortcut display | 3/4 (75%) | **Level 2: Common** | ShadCN, Nuxt UI, Radix UI | Composed/Native |
+| Keyboard shortcuts | Shortcut display | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Nuxt UI | Composed/Native |
 | Section labels | Non-interactive headers | 3/4 (75%) | **Level 2: Common** | ShadCN, Nuxt UI, Radix UI | Native |
 | Separators | Visual dividers | 4/4 (100%) | **Level 1: Universal** | All | Native |
 | Custom content | Any React/Vue children | 4/4 (100%) | **Level 1: Universal** | All | Composed |
@@ -56,8 +57,8 @@ All frameworks use variants of "Context Menu" terminology.
 | Standard items | Basic clickable items | 4/4 (100%) | **Level 1: Universal** | All | Native |
 | Checkbox items | Toggle state items | 3/4 (75%) | **Level 2: Common** | ShadCN, Nuxt UI, Radix UI | Native |
 | Radio items | Mutually exclusive selection | 2/4 (50%) | **Level 3: Frequent** | ShadCN, Radix UI | Native |
-| Link items | Navigation items | 1/4 (25%) | **Level 4: Occasional** | Nuxt UI | Native |
-| Label items | Section headers | 1/4 (25%) | **Level 4: Occasional** | Nuxt UI | Native |
+| Link items | Navigation items | 2/4 (50%) | **Level 3: Frequent** | Nuxt UI, PrimeReact | Native |
+| Label items | Section headers | 3/4 (75%) | **Level 2: Common** | ShadCN, Radix UI, Nuxt UI | Native |
 | Nested submenus | Multi-level menus | 4/4 (100%) | **Level 1: Universal** | All | Native |
 
 ### State Patterns

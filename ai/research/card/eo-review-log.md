@@ -1,0 +1,5 @@
+# Card – E&O Review Log
+
+| Date       | Section / Scope                          | Change Type      | Summary                                                                 | Rationale / Evidence                                                                                           |
+|------------|------------------------------------------|------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| 2025-11-10 | Pattern Inventory → Container & Variation tables | Data correction | Aligned elevation, loading state, and size-variant prevalence with per-framework capabilities (PrimeReact lacks native elevation; only Ant Design documents loading prop; size presets exist in Ant Design/Chakra/Radix). | Cross-referenced `ai/research/card/ant-design/usage-patterns.md`, `mantine/usage-patterns.md`, `primereact/usage-patterns.md`, `radix-ui/usage-patterns.md`, and `semantic-ui-classic/usage-patterns.md`; pattern tables updated accordingly. **Confidence:** ~90% (direct doc evidence). |

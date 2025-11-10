@@ -46,8 +46,8 @@ Note: Chart components are specialized and not universally provided by all UI fr
 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
-| Object array data | Data as array of objects with key-value pairs | 3/3 (100%) | **Level 1: Universal** | All | Native |
-| Labels array | Separate labels array for axis/legend | 2/3 (67%) | **Level 2: Common** | Mantine, PrimeReact | Native |
+| Object array data | Data as array of objects with key-value pairs | 2/3 (67%) | **Level 2: Common** | Mantine, ShadCN | Native |
+| Labels array | Separate labels array for axis/legend | 1/3 (33%) | **Level 4: Occasional** | PrimeReact | Native |
 | Series configuration | Array defining multiple data series | 3/3 (100%) | **Level 1: Universal** | All | Native |
 | Color mapping | Associate colors with data series | 3/3 (100%) | **Level 1: Universal** | All | Mantine/ShadCN: Config; PrimeReact: Direct |
 | Value formatting | Function to format displayed numbers | 2/3 (67%) | **Level 2: Common** | Mantine, PrimeReact | Native |
@@ -58,7 +58,7 @@ Note: Chart components are specialized and not universally provided by all UI fr
 |---------|-------------|------------|-------------|------------|--------------|
 | Tooltip on hover | Display values on data point hover | 3/3 (100%) | **Level 1: Universal** | All | Mantine: Native; PrimeReact: Native; ShadCN: Custom component |
 | Click events | Handle data point click events | 2/3 (67%) | **Level 2: Common** | Mantine, PrimeReact | Native |
-| Legend interaction | Click legend to show/hide series | 3/3 (100%) | **Level 1: Universal** | All | Native |
+| Legend interaction | Click legend to show/hide series | 1/3 (33%) | **Level 4: Occasional** | PrimeReact | Native |
 | Zoom/pan | Interactive zoom and pan controls | 0/3 (0%) | **Level 5: Rare** | None | Not supported natively |
 | Tooltip customization | Custom tooltip content and styling | 3/3 (100%) | **Level 1: Universal** | All | Mantine: Props; PrimeReact: Callbacks; ShadCN: Component |
 
@@ -87,7 +87,7 @@ Note: Chart components are specialized and not universally provided by all UI fr
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
 | Stacked series | Stack multiple series vertically | 3/3 (100%) | **Level 1: Universal** | All | Native |
-| Grouped series | Group bars/data side by side | 2/3 (67%) | **Level 2: Common** | Mantine, PrimeReact | Native |
+| Grouped series | Group bars/data side by side | 3/3 (100%) | **Level 1: Universal** | All | Mantine: Native; PrimeReact: Native; ShadCN: Composed |
 | Horizontal orientation | Horizontal bar charts | 2/3 (67%) | **Level 2: Common** | Mantine, PrimeReact | Native |
 | Gradient fills | Gradient backgrounds for areas | 2/3 (67%) | **Level 2: Common** | Mantine, ShadCN | Mantine: Native; ShadCN: Recharts |
 | SVG patterns | Pattern fills for accessibility | 1/3 (33%) | **Level 4: Occasional** | Mantine | Composed |
@@ -97,7 +97,7 @@ Note: Chart components are specialized and not universally provided by all UI fr
 ### Universal (100%)
 - Bar, Line, Area, Pie, and Radar charts
 - Tooltip on hover with value display
-- Legend with show/hide interaction
+- Legend display with configurable layout
 - Color customization for series
 - Responsive sizing and layout
 - Theme integration with design system

@@ -103,7 +103,7 @@ Across all implementations, users conceptualize these as:
 |---------|-------------|------------|-------------|------------|
 | Text content | Primary label or text | 13/13 (100%) | Level 1 (Universal) | All frameworks |
 | Icons | Icon elements within component | 11/13 (85%) | Level 2 (Common) | All except Radix Themes (composed), ShadCN (composed) |
-| Close/remove button | Dismiss/removal control | 5/13 (38%) | Level 4 (Occasional) | Ant Design, MUI, PrimeReact Chip, HeroUI, Mantine Badge (no native) |
+| Close/remove button | Dismiss/removal control | 4/13 (31%) | Level 4 (Occasional) | Ant Design, MUI, PrimeReact Chip, HeroUI |
 | Avatar/Images | User pictures or entity images | 5/13 (38%) | Level 4 (Occasional) | MUI, Nuxt UI, PrimeReact Chip, HeroUI, Mantine Badge (via sections) |
 
 ### State Patterns
@@ -117,7 +117,7 @@ Across all implementations, users conceptualize these as:
 ### Variation Patterns
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
-| Color options | Semantic or theme colors | 10/13 (77%) | Level 2 (Common) | All except PrimeReact Chip, HeroUI (likely), ShadCN (semantic variants) |
+| Color options | Semantic or theme colors | 12/13 (92%) | Level 1 (Universal) | All except PrimeReact Chip |
 | Size options | Predefined size variants | 7/13 (54%) | Level 3 (Moderate) | Ant Design (no), Chakra UI, HeroUI, Mantine, MUI (2 sizes), Nuxt UI, PrimeReact (no), Radix Themes |
 | Visual variants | Style treatments (filled/outline/soft) | 8/13 (62%) | Level 3 (Moderate) | Ant Design (border), Chakra UI, Mantine, MUI, Nuxt UI (4 variants), Radix Themes (4 variants), ShadCN |
 | Rounded/Pill shape | Fully rounded corners | 5/13 (38%) | Level 4 (Occasional) | Ant Design (via closable), PrimeReact Tag, Radix Themes (radius), MUI (default), Mantine |
@@ -155,13 +155,13 @@ Across all implementations, users conceptualize these as:
 **Universal Text Content** (13/13, 100%)
 All implementations support text as primary content, though the API varies (children vs. label/value props). This represents the baseline functionality - without text, these components lose their purpose.
 
-**Color Semantics** (10/13, 77%)
+**Color Semantics** (12/13, 92%)
 Strong consensus on color-coded semantics, though implementation varies:
 - Semantic keywords (success, error, warning, info)
 - Theme color palettes (blue, red, green, etc.)
 - Severity levels (danger, warning, info)
 
-Colors communicate meaning visually, making this a near-universal pattern despite API differences.
+Colors communicate meaning visually, making this effectively universal (PrimeReact Chip is the lone outlier, requiring custom styles for colors).
 
 **Icon Support** (11/13, 85%)
 Icons enhance visual communication and reinforce semantic meaning. Two approaches:

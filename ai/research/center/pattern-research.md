@@ -1,6 +1,7 @@
 # Component Pattern Research: Center (Layout)
 
 > Last Modified: 2025-11-05
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - Frameworks surveyed: 2
@@ -50,7 +51,7 @@ Both frameworks use the term "Center" consistently.
 |---------|-------------|------------|-------------|------------|--------------|
 | Block-level centering | Default div container | 2/2 (100%) | **Level 1: Universal** | All | Native |
 | Inline centering | Inline element centering | 1/2 (50%) | **Level 3: Frequent** | Mantine | Native |
-| Polymorphic element | Change root element type | 1/2 (50%) | **Level 3: Frequent** | Mantine | Native |
+| Polymorphic element | Change root element type | 2/2 (100%) | **Level 1: Universal** | Chakra UI (via as prop), Mantine (component prop) | Native |
 
 ### Dimension Control Patterns
 

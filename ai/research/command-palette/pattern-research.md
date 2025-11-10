@@ -100,7 +100,7 @@ Both frameworks use "Command" as the root concept, with ShadCN using the shorter
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
 | Close button | Explicit dismiss control | 1/2 (50%) | **Level 3: Frequent** | Nuxt UI | Native |
-| Close on select | Auto-dismiss behavior | 2/2 (100%) | **Level 1: Universal** | All | Native |
+| Close on select | Auto-dismiss behavior | 0/2 (0%) | **Level 5: Rare** | — | Composed |
 | Escape to close | Keyboard dismiss | 2/2 (100%) | **Level 1: Universal** | All | Native |
 | Link items | Navigation integration | 1/2 (50%) | **Level 3: Frequent** | Nuxt UI | Composed |
 
@@ -135,7 +135,6 @@ Both frameworks use "Command" as the root concept, with ShadCN using the shorter
 - Custom item rendering
 - Icon support
 - Keyboard shortcuts display
-- Close on select behavior
 - Disabled item state
 
 ### ShadCN Specializations

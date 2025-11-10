@@ -171,12 +171,12 @@ This report synthesizes findings from 11 leading UI frameworks to identify unive
 
 ### 4. Label Association
 
-**Support Level:** Level 2 (70-89% support)
-**Prevalence:** 11/11 frameworks = **100%** (but implementation varies)
+**Support Level:** Level 4 (20-39% support) for built-in props, but 100% overall via composition
+**Prevalence:** Built-in label prop in 2/11 frameworks (**18%**); all 11/11 support labels via composition
 
 **Implementation Breakdown:**
-- **Built-in Label Prop (4):** Hero UI, Mantine, NuxtUI, Headless UI
-- **Composition-Based (7):** Ant Design, Chakra UI, Material-UI, PrimeReact, Radix UI, Semantic UI Classic, ShadCN
+- **Built-in Label Prop (2):** Mantine, Nuxt UI
+- **Composition-Based (9):** Ant Design, Chakra UI, Headless UI, Hero UI, Material-UI, PrimeReact, Radix UI, Semantic UI Classic, ShadCN
 
 **Built-in Label Approach:**
 ```typescript
@@ -198,19 +198,19 @@ Disadvantages: Requires manual ID management
 - **Label Placement:** 3/4 frameworks (left/right positioning)
 - **Label Styling:** 4/4 frameworks (custom classes/props)
 
-**Key Insight:** There's a 64-36 split favoring composition. Composition provides more flexibility but requires more boilerplate. Consider offering both patterns.
+**Key Insight:** Roughly 82% of frameworks rely on composition, with only 18% exposing a label prop. Composition provides more flexibility but requires more boilerplate. Consider offering both patterns if DX warrants it.
 
 ---
 
 ### 5. Description/Help Text
 
-**Support Level:** Level 3 (40-69% support)
-**Prevalence:** 5/11 frameworks = **45%**
+**Support Level:** Level 4 (20-39% support)
+**Prevalence:** Built-in description prop in 2/11 frameworks = **18%**
 
 **Support Breakdown:**
-- **Built-in Description Prop (3):** Hero UI, Mantine, NuxtUI
-- **Composition with aria-describedby (8):** All frameworks support via ARIA attributes
-- **No Dedicated Support (6):** Ant Design, Chakra UI, Material-UI, PrimeReact, Radix UI, ShadCN (use composition)
+- **Built-in Description Prop (2):** Mantine, Nuxt UI
+- **Composition with aria-describedby (11):** All frameworks support via ARIA attributes
+- **No Dedicated Prop (9):** Ant Design, Chakra UI, Headless UI, Hero UI, Material-UI, PrimeReact, Radix UI, Semantic UI Classic, ShadCN
 
 **Implementation Pattern (Built-in Support):**
 ```typescript

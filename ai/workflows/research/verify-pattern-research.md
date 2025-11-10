@@ -24,6 +24,28 @@ This workflow uses subagents to systematically verify consolidated pattern resea
 
 ## Workflow Steps
 
+### Step 0: Self-Reflection & Tooling Check
+
+Before touching the research files, pause for a self-assessment:
+
+1. **Confirm subagent tooling**: Do you have an automated `AskUserQuestion` or subagent-launch tool available in this runtime?
+   - ✅ **Yes** → Proceed to Step 1 with normal delegation.
+   - ❌ **No** → Record the limitation in your notes and switch to the manual multi-pass protocol below.
+2. **Capability reminder**: Briefly restate (to yourself) what this runtime _can_ do (e.g., read files, edit docs, run scripts) so you plan within actual constraints.
+3. **Cognitive guardrail**: Commit to double-checking every applied correction against primary sources, since you are now both the discoverer and verifier.
+
+#### Manual Multi-Pass Protocol (when no subagent tool exists)
+
+If you lack automated subagents, emulate them explicitly:
+
+- **Virtual roles**: Run at least two distinct passes per round—one as “Discoverer” (issue hunting) and one as “Verifier” (independent confirmation). Log them separately so the audit trail mirrors multi-agent behavior.
+- **Deliberate divergence**: For the Discoverer pass, push breadth (scan for every possible inconsistency). For the Verifier pass, push depth (recompute numbers, quote sources). Treat each pass as if a different agent with its own reasoning style performed it.
+- **Prompt resets**: Between passes, restate the task from scratch to reduce anchoring bias. First-principles thinking from ML research shows that independent reasoning chains catch more errors than iterative edits on one chain.
+- **Evidence-first corrections**: Do not modify files until the Verifier pass cites exact line numbers from both the consolidated report and the originating framework file.
+- **Meta-review**: After corrections, perform a short self-reflection: “If I were a skeptical reviewer, what would I challenge?” Only exit the workflow when that answer is “nothing obvious remains.”
+
+This manual approach preserves the error-and-omission benefits of multi-agent verification while staying realistic about tooling limits.
+
 ### Step 1: Initial Configuration
 
 **Ask the user for workflow configuration:**
@@ -324,6 +346,9 @@ This final step ensures that the work is discoverable and that project-wide trac
     - This single file is the source of truth for pattern research status and E&O verification.
     - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off.
     - Include the latest “Last Reviewed” metadata so teammates can see when the doc was last validated.
+3.  **Log the editorial decision (`ai/research/<component>/eo-review-log.md`):**
+    - Append a table row capturing the date, section/scope touched, change type, concise summary, and rationale with an estimated confidence level.
+    - Keep the log evidence-focused—cite the relevant usage-pattern files or other canonical sources that drove the correction so future agents can audit the decision trail quickly.
 
 ---
 

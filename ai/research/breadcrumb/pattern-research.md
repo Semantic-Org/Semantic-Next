@@ -1,6 +1,7 @@
 # Component Pattern Research: Breadcrumb
 
 > Last Modified: 2025-11-05
+> Last Reviewed: 2025-11-10 (by Codex)
 
 ## Research Summary
 - **Frameworks surveyed**: 9
@@ -30,7 +31,7 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 ### Current Page Terminology
 - `isCurrentPage` prop - Chakra UI v2
 - `isCurrent` prop - HeroUI
-- `BreadcrumbPage` component - Chakra UI v3, ShadCN
+- `BreadcrumbPage` component - ShadCN
 - `CurrentLink` component - Chakra UI v3
 - `.active` class - Semantic UI
 - Last item convention (no href) - Ant Design, MUI, Mantine, PrimeReact
@@ -42,8 +43,8 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 | Pattern | Description | Prevalence | Usage Level | Support Type | Frameworks |
 |---------|-------------|------------|-------------|--------------|------------|
 | Text links | Clickable text navigation items | 9/9 (100%) | **Level 1** | Native/Composed | All frameworks |
-| Icon support | Icons within or alongside breadcrumb items | 9/9 (100%) | **Level 1** | Native/Composed | All frameworks |
-| Custom separators | User-defined separator content (text, icons, components) | 9/9 (100%) | **Level 1** | Native | All frameworks |
+| Icon support | Icons within or alongside breadcrumb items | 7/9 (78%) | **Level 2** | Native/Composed | Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN |
+| Custom separators | User-defined separator content (text, icons, components) | 9/9 (100%) | **Level 1** | Native (8) / CSS (PrimeReact) | All frameworks |
 | Dropdown menus | Collapsible menu for nested or hidden navigation | 6/9 (67%) | **Level 2** | Native/Composed | Ant Design, Chakra UI v3, HeroUI, MUI, Nuxt UI, ShadCN |
 | Avatar support | Avatar images for user-based navigation | 1/9 (11%) | **Level 5** | Native | Nuxt UI only |
 
@@ -52,8 +53,8 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | Simple breadcrumb | Basic text links with separators | 9/9 (100%) | **Level 1** | All frameworks |
-| Icon breadcrumb | Breadcrumb items with icons | 9/9 (100%) | **Level 1** | All frameworks |
-| Router-integrated | Seamless integration with routing libraries | 9/9 (100%) | **Level 1** | All frameworks |
+| Icon breadcrumb | Breadcrumb items with icons | 7/9 (78%) | **Level 2** | Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN |
+| Router-integrated | Seamless integration with routing libraries | 7/9 (78%) | **Level 2** | Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN |
 | With dropdown | Dropdown menus for nested navigation or overflow | 6/9 (67%) | **Level 2** | Ant Design, Chakra UI v3, HeroUI, MUI, Nuxt UI, ShadCN |
 | With ellipsis | Collapsed/truncated breadcrumbs with expand | 4/9 (44%) | **Level 3** | Chakra UI v3, HeroUI, MUI, ShadCN |
 
@@ -71,8 +72,8 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | Separator styles | Custom separator appearance (/, >, •, icons) | 9/9 (100%) | **Level 1** | All frameworks |
-| Size options | Different breadcrumb sizes (sm, md, lg) | 4/9 (44%) | **Level 3** | Chakra UI, HeroUI, Semantic UI (native); others CSS-only |
-| Responsive behavior | Automatic collapse/truncation on small screens | 5/9 (56%) | **Level 3** | Chakra UI, HeroUI, MUI, Nuxt UI, ShadCN |
+| Size options | Different breadcrumb sizes (sm, md, lg) | 3/9 (33%) | **Level 4** | Chakra UI, HeroUI, Semantic UI (native); others CSS-only |
+| Responsive behavior | Automatic collapse/truncation on small screens | 4/9 (44%) | **Level 3** | Chakra UI, HeroUI, MUI, ShadCN |
 | Color variants | Different color schemes or themes | 2/9 (22%) | **Level 4** | HeroUI (6 colors), Nuxt UI (theme-based) |
 | Visual variants | Different visual styles (solid, bordered, light) | 1/9 (11%) | **Level 5** | HeroUI only |
 
@@ -81,8 +82,8 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 | Pattern | Description | Prevalence | Usage Level | Frameworks |
 |---------|-------------|------------|-------------|------------|
 | Click navigation | Standard link click behavior | 9/9 (100%) | **Level 1** | All frameworks |
-| Router integration | Integration with React Router, Next.js, etc. | 9/9 (100%) | **Level 1** | All frameworks |
-| Programmatic navigation | onClick handlers or router.push() | 9/9 (100%) | **Level 1** | All frameworks |
+| Router integration | Integration with React Router, Next.js, etc. | 7/9 (78%) | **Level 2** | Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN |
+| Programmatic navigation | onClick handlers or router.push() | 7/9 (78%) | **Level 2** | Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN |
 | Expand collapsed items | Button/interaction to show hidden breadcrumbs | 3/9 (33%) | **Level 4** | HeroUI (renderEllipsis), MUI (expandText), ShadCN (ellipsis) |
 
 ### Accessibility Patterns
@@ -92,7 +93,7 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 | Keyboard navigation | Tab, Enter, Space key support | 9/9 (100%) | **Level 1** | All frameworks |
 | Semantic HTML | `<nav>` element with proper structure | 8/9 (89%) | **Level 1** | All except PrimeReact (undocumented) |
 | aria-label | Navigation landmark labeling | 5/9 (56%) | **Level 3** | Chakra UI, HeroUI, MUI, Nuxt UI, ShadCN |
-| aria-current | Current page indicator for screen readers | 4/9 (44%) | **Level 3** | Chakra UI, HeroUI (data-current), MUI (documented), ShadCN |
+| aria-current | Current page indicator for screen readers | 3/9 (33%) | **Level 4** | Chakra UI, HeroUI (data-current), ShadCN |
 | Separator hidden from screen readers | role="presentation" on separators | 2/9 (22%) | **Level 4** | Chakra UI, MUI |
 
 ## Notable Patterns
@@ -101,11 +102,10 @@ The mental model is universally understood as a "trail of breadcrumbs" (Hansel a
 
 **Universal breadcrumb foundations:**
 - Text links with hierarchical navigation (100%)
-- Icon support for visual enhancement (100%)
-- Custom separator configuration (100%)
+- Custom separator configuration (100% – PrimeReact via CSS)
 - Simple breadcrumb trails (100%)
 - Current page indication (100%)
-- Click navigation and router integration (100%)
+- Click navigation (100%)
 - Keyboard navigation support (100%)
 
 These patterns represent the **core breadcrumb contract** - every framework implements them in some form.
@@ -113,6 +113,8 @@ These patterns represent the **core breadcrumb contract** - every framework impl
 ### Common Patterns (Level 2: 70-89%)
 
 **Emerging standards:**
+- **Icon support (78%)**: Documented native/composed icon usage in 7 frameworks
+- **Router/programmatic integration (78%)**: Ant Design, Chakra UI, HeroUI, MUI, Nuxt UI, PrimeReact, ShadCN tie into routers and navigation callbacks
 - **Dropdown menu integration (67%)**: Growing pattern for nested navigation or overflow handling
   - Ant Design: Native `menu` prop on items
   - Chakra UI v3: Portal-based menu with `asChild`
@@ -125,14 +127,14 @@ These patterns represent the **core breadcrumb contract** - every framework impl
 
 **Context-dependent features:**
 - **Disabled items (56%)**: Supported by modern frameworks
-- **Responsive behavior (56%)**: Growing concern for mobile UX
+- **Responsive behavior (44%)**: Growing concern for mobile UX
 - **aria-label support (56%)**: Accessibility focus increasing
-- **Size variants (44% native)**: Some provide native props, others rely on CSS
 - **Ellipsis/collapse (44%)**: Handling long breadcrumb trails
 
 ### Occasional Patterns (Level 4: 20-39%)
 
 **Specialized features:**
+- **Size variants (33%)**: Native options limited to Chakra UI, HeroUI, and Semantic UI Classic
 - **Expand collapsed items (33%)**: Different approaches to revealing hidden breadcrumbs
 - **Color variants (22%)**: Theme-specific implementations
 - **Separator role="presentation" (22%)**: Advanced accessibility consideration
@@ -153,12 +155,8 @@ These patterns represent the **core breadcrumb contract** - every framework impl
 - Indicates dropdowns often serve overflow/truncation use cases
 
 ### When responsive behavior exists:
-- **80% include max-items or ellipsis** (4/5 responsive frameworks)
+- **100% include max-items or ellipsis** (4/4 responsive frameworks)
 - Responsive design strongly correlates with item truncation
-
-### When size variants exist (native):
-- **75% include color or visual variants** (3/4 frameworks)
-- Frameworks with native sizing often provide comprehensive theming
 
 ### Composition vs. Data-driven:
 - **Composition-based (78%)**: 7/9 frameworks use children/slots
@@ -166,7 +164,7 @@ These patterns represent the **core breadcrumb contract** - every framework impl
 - **Hybrid (11%)**: Nuxt UI supports both patterns
 
 ### Accessibility completeness:
-- Frameworks with `aria-label` → **80% have aria-current** (4/5)
+- Frameworks with `aria-label` → **60% have aria-current** (3/5)
 - Comprehensive accessibility is bundled, not piecemeal
 
 ## Implementation Notes
@@ -208,8 +206,9 @@ Frameworks use different mechanisms for router integration:
 
 **Two main approaches:**
 
-1. **Global separator prop** (89%): Single separator for all items
-   - Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact, ShadCN
+1. **Global separator prop** (78%): Single separator for all items
+   - Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, ShadCN
+   - PrimeReact requires CSS overrides on `.p-breadcrumb-chevron`
 
 2. **Per-item separators** (22%): Individual control
    - Ant Design (`Breadcrumb.Separator`), Chakra UI (item-level override)
@@ -241,7 +240,7 @@ Frameworks use different mechanisms for router integration:
 
 - **Item containers**: `BreadcrumbItem` (majority), `BreadcrumbMenuItem` (Chakra v3 for dropdown)
 - **Links**: `BreadcrumbLink` (most), `Link` with href (MUI), `Anchor` (Mantine)
-- **Current page**: `BreadcrumbPage` (Chakra v3, ShadCN), `Typography` (MUI), last item (Ant Design)
+- **Current page**: `Breadcrumb.CurrentLink` (Chakra v3), `BreadcrumbPage` (ShadCN), `Typography` (MUI), last item (Ant Design)
 - **Separators**: `BreadcrumbSeparator` (most), `separator` prop (all), `divider` (Semantic UI)
 - **Ellipsis**: `BreadcrumbEllipsis` (Chakra v3, ShadCN), `renderEllipsis` (HeroUI)
 
@@ -338,30 +337,31 @@ Frameworks use different mechanisms for router integration:
 ## Recommendations for Implementation
 
 ### Core Features (Must Have)
-Based on Level 1 patterns (90-100% adoption):
+Based on Level 1 patterns (100% adoption):
 1. Text links with hierarchical navigation
-2. Icon support (icons within or alongside items)
-3. Custom separator configuration (text and icon support)
-4. Current page indication (last item, non-clickable)
-5. Router integration (React Router, Next.js)
-6. Keyboard navigation (Tab, Enter)
-7. Semantic HTML (`<nav>` element)
+2. Custom separator configuration (text or icon separators)
+3. Clear current page indication (non-clickable last item)
+4. Click navigation with predictable focus/activation
+5. Keyboard navigation support (Tab/Enter) with visible focus
+6. Semantic HTML landmarks (`<nav>` with ordered/unordered lists)
 
 ### Standard Features (Should Have)
 Based on Level 2-3 patterns (40-89% adoption):
-1. Dropdown menu integration for nested navigation
-2. Responsive collapse/ellipsis for long paths
-3. Disabled state for items
-4. `aria-label` and `aria-current` support
-5. Size variants (sm, md, lg)
+1. Icon support within breadcrumb items (78%)
+2. Router/programmatic integration hooks (78%)
+3. Dropdown menu integration for nested navigation (67%)
+4. Responsive collapse/ellipsis for long paths (56%)
+5. Disabled state for items (56%)
+6. `aria-label` support on the navigation landmark (56%)
 
 ### Enhanced Features (Nice to Have)
 Based on Level 4-5 patterns (<40% adoption):
-1. Color/theme variants
-2. Visual style variants (bordered, etc.)
-3. Separator customization (role="presentation")
-4. Avatar support for user navigation
-5. Advanced slot/template systems
+1. `aria-current` helpers baked into the API
+2. Color/theme variants
+3. Visual style variants (bordered, etc.)
+4. Separator customization with role/presentation helpers
+5. Avatar support for user navigation
+6. Advanced slot/template systems
 
 ### API Design Recommendations
 
@@ -382,6 +382,7 @@ Based on Level 4-5 patterns (<40% adoption):
    - Optional separator component for fine control
 
 5. **Current Page**: Dedicated component or prop
+   - `<Breadcrumb.CurrentLink>` component (Chakra v3 pattern)
    - `<BreadcrumbPage>` component (ShadCN pattern)
    - OR `isCurrent` prop (HeroUI pattern)
 

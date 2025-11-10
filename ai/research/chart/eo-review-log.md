@@ -1,0 +1,5 @@
+# Chart – E&O Review Log
+
+| Date       | Section / Scope                    | Change Type      | Summary                                                                 | Rationale / Evidence                                                                                           |
+|------------|------------------------------------|------------------|-------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| 2025-11-10 | Pattern Inventory → Data Binding & Interaction tables | Data correction | Updated “Labels array” prevalence (PrimeReact only) and legend interaction (click-to-toggle available only via Chart.js wrapper). | Mantine and ShadCN rely on object-array datasets without separate labels arrays or legend toggles; PrimeReact docs explicitly show `labels` arrays and `legend.onClick` → `toggleDataVisibility` (see `ai/research/chart/mantine/usage-patterns.md`, `shadcn/usage-patterns.md`, `primereact/usage-patterns.md:720-780`). **Confidence:** ~90% (direct feature documentation). |
