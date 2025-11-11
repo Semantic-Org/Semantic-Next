@@ -77,6 +77,20 @@ Unlike most UI components, there is **NO universal consensus** on what distingui
 - **Semantic Variations**: Image labels, circular labels, empty labels for pure decoration
 - Philosophy: Everything is a "label" with different presentations
 
+### When Frameworks Separate Badge from Tag
+
+| Framework | Badge Use Cases | Tag/Chip Use Cases |
+|-----------|-----------------|-------------------|
+| **Ant Design** | Notification counts, status dots, overlays on avatars/icons | Category labels, closeable filters, tag clouds |
+| **Chakra UI** | Status indicators, feature flags, notification counts | Category labels, filter chips, multi-select displays |
+| **HeroUI** | Overlay notifications, status dots on avatars | Standalone tags, closeable selections, filter lists |
+| **Mantine** | Display-only status/counts, visual indicators | Interactive form controls (checkbox/radio behavior) |
+| **PrimeReact** | Notification counts, status overlays | Category labels with icons, inline tags |
+
+**Common Distinction Pattern**:
+- **Badge**: Overlay positioning, numeric content, non-interactive
+- **Tag**: Inline positioning, text content, interactive (closeable/selectable)
+
 ### Core Purpose Synthesis
 
 Despite naming chaos, the **functional space** breaks into three clear patterns:
@@ -113,6 +127,29 @@ Despite naming chaos, the **functional space** breaks into three clear patterns:
 | Avatar/Images | User pictures or entity images | 5/13 (38%) | **Level 4: Occasional** | MUI Chip, Nuxt UI Badge, PrimeReact Chip, HeroUI Chip, Semantic UI Label |
 | Dot indicator | Status dot without text | 6/9 (67%) | **Level 2: Common** | Ant Design Badge, HeroUI Badge, MUI Badge, PrimeReact Badge |
 | Count/Number | Numerical values | 5/9 (56%) | **Level 3: Moderate** | Ant Design, MUI, HeroUI, PrimeReact, Semantic UI |
+
+#### Numeric Content Details
+
+**Prevalence**: 9/9 Badge implementations (100%)
+**Pattern**: Display numerical counts with overflow handling
+
+| Framework | Max Count Support | Overflow Pattern | Show Zero |
+|-----------|------------------|------------------|-----------|
+| Ant Design | ✅ `overflowCount` (default: 99) | "99+" | ✅ `showZero` |
+| Chakra UI | ❌ Not built-in | Manual | ❌ |
+| HeroUI | ❌ Not built-in | Manual | ❌ |
+| Mantine | ❌ Not built-in | Manual | ❌ |
+| MUI | ✅ `max` (default: 99) | "99+" | ✅ `showZero` |
+| Nuxt UI | ❌ Not built-in | Manual | ❌ |
+| PrimeReact | ❌ Not built-in | Manual | ❌ |
+| Radix UI | ❌ Not built-in | Manual | ❌ |
+| ShadCN | ❌ Not built-in | Manual | ❌ |
+
+**Implementation Notes**:
+- Only Ant Design and MUI provide built-in overflow handling
+- "99+" pattern is industry standard for notification counts
+- Most frameworks expect manual implementation for overflow
+- Show zero prevents layout shift when count changes from 0→1
 
 #### Icon Support Details
 
@@ -800,6 +837,150 @@ This section highlights advanced, component-specific patterns that demonstrate d
    - Icon support (leading/trailing)
 2. **Variants**:
    - Solid
+   - Soft
+   - Outline
+3. **Colors**: Same as badge
+4. **Sizes**: sm, md, lg minimum
+5. **Closeable**: Close icon with `onClose` event
+
+### Should-Have Features (Level 2)
+
+#### `ui-badge`
+1. Max count overflow ("99+")
+2. Show zero option
+3. Additional sizes: xs, xl
+4. Positioning: all 4 corners (top-right, top-left, bottom-right, bottom-left)
+5. Overlap mode (circular vs rectangular)
+
+#### `ui-tag`
+1. Avatar support
+2. Multiple icon slots (start + end)
+3. Rounded variant (pill shape)
+4. Additional sizes: xs, xl
+
+### Consider Features (Level 3-5)
+
+1. **Ribbon variant** (Semantic UI Classic heritage)
+2. **Pointing variant** (Semantic UI Classic heritage - useful for validation)
+3. **Attached positioning** (Semantic UI Classic heritage)
+4. **Corner labels** (Semantic UI Classic heritage)
+5. **Gradient fills**
+6. **High contrast mode**
+7. **Detail/secondary text**
+8. **Interactive chips** (selectable/checkable)
+
+### API Design Recommendations
+
+#### Natural Language Settings
+
+```html
+<!-- Badge -->
+<ui-badge count="5" color="error">
+  <ui-icon name="bell"></ui-icon>
+</ui-badge>
+
+<ui-badge dot color="success" position="bottom-right">
+  <ui-avatar src="user.jpg"></ui-avatar>
+</ui-badge>
+
+<ui-badge .settings="{ variant: 'soft', color: 'primary', size: 'sm' }">
+  New
+</ui-badge>
+
+<!-- Tag -->
+<ui-tag color="info" closeable>
+  Category
+</ui-tag>
+
+<ui-tag icon="check" color="success" variant="outline">
+  Verified
+</ui-tag>
+
+<ui-tag .settings="{ avatar: { src: 'user.jpg' }, closeable: true }">
+  John Doe
+</ui-tag>
+```
+
+#### Slot-Based Composition
+
+```html
+<!-- Badge with custom content -->
+<ui-badge color="primary">
+  {#slot}
+    <ui-icon name="star"></ui-icon>
+    Featured
+  {/slot}
+</ui-badge>
+
+<!-- Tag with icon slots -->
+<ui-tag color="blue">
+  {#slot leading}
+    <ui-icon name="code"></ui-icon>
+  {/slot}
+  TypeScript
+  {#slot trailing}
+    <ui-icon name="x" @click="handleClose"></ui-icon>
+  {/slot}
+</ui-tag>
+```
+
+#### Settings Architecture
+
+```javascript
+defineComponent({
+  name: 'ui-badge',
+  defaultSettings: {
+    variant: 'solid',    // solid | soft | outline | dot
+    color: 'default',    // semantic colors + theme colors
+    size: 'md',          // xs | sm | md | lg | xl
+    position: 'top-right', // top-right | top-left | bottom-right | bottom-left
+    overlap: 'rectangular', // rectangular | circular
+    showZero: false,
+    max: 99
+  }
+})
+
+defineComponent({
+  name: 'ui-tag',
+  defaultSettings: {
+    variant: 'solid',    // solid | soft | outline
+    color: 'default',
+    size: 'md',
+    icon: null,          // icon name
+    iconPosition: 'leading', // leading | trailing
+    closeable: false,
+    rounded: false       // pill shape
+  }
+})
+```
+
+---
+
+## Conclusion
+
+This research reveals significant diversity in how modern UI frameworks approach label/badge/tag components. The key strategic decision for Semantic UI is whether to maintain the classic unified approach or adopt the modern separated pattern.
+
+**Key Findings**:
+1. No consensus on Badge vs Tag separation (50% separate, 30% unified, 20% badge-only)
+2. Strong consensus on core variants (solid, soft, outline) and semantic colors
+3. Icon support expected in tags, optional in badges
+4. Overlay positioning important for notification badges
+5. Closeable behavior expected for categorization tags
+6. 3-5 size scale is optimal
+7. Advanced features (ribbon, gradient, etc.) are differentiators, not requirements
+
+**Strategic Recommendation**:
+Implement **separate `ui-badge` and `ui-tag` components** with optional **`ui-label` as comprehensive advanced variant** preserving Semantic UI Classic's unique positioning features (ribbon, pointing, corner, attached). This balances modern semantic clarity with classic comprehensive functionality.
+
+**Implementation Priority**:
+1. **Phase 1**: Core Badge (overlay, counts, dot) + Core Tag (text, closeable, icons)
+2. **Phase 2**: Advanced positioning (ribbon, pointing, corner) as `ui-label` or tag settings
+3. **Phase 3**: Polish features (gradients, high contrast, detail text)
+
+This approach positions Semantic UI as both **modern** (clear badge/tag separation) and **comprehensive** (preserving classic advanced features).
+
+---
+
 ## Industry Insights
 
 1. **No Convergence in Sight**: Unlike other components trending toward standardization, Chip/Tag/Badge shows increasing divergence

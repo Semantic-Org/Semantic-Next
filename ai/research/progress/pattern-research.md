@@ -3,7 +3,7 @@
 > Last Modified: 2025-11-05
 
 ## Research Summary
-- Frameworks surveyed: 11
+- Frameworks surveyed: 11 (Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, PrimeReact, Radix UI, ShadCN, Semantic UI, Vuetify)
 - Date: 2025-11-05
 - Unique patterns identified: 38+
 
@@ -20,8 +20,12 @@ Progress components serve as visual indicators of task completion status across 
 ## Terminology Variations
 
 ### Component Names
-- **Progress** (9 frameworks) = Standard name across Ant Design, Chakra UI, HeroUI, Mantine, MUI, Nuxt UI, Radix UI, ShadCN, Semantic UI
-- **ProgressBar** (1 framework) = PrimeReact uses this name
+- **Progress** (8 frameworks) = Standard name across Ant Design, Chakra UI, HeroUI, Mantine, Nuxt UI, Radix UI, ShadCN, Semantic UI
+- **ProgressBar** (2 frameworks) = PrimeReact, Semantic UI uses this name
+- **LinearProgress/CircularProgress** (1 framework) = MUI uses separate components
+- **v-progress-linear/v-progress-circular** (1 framework) = Vuetify uses separate components
+
+**Architectural Note**: MUI and Vuetify treat linear and circular progress as separate components, while others offer them as variants of a single component
 
 ### Prop/Attribute Names
 - **Value prop variations:**
@@ -65,9 +69,9 @@ Progress components serve as visual indicators of task completion status across 
 | Pattern | Description | Prevalence | Usage Level | Frameworks | Support Type |
 |---------|-------------|------------|-------------|------------|--------------|
 | Linear/Bar (horizontal) | Standard horizontal progress bar | 11/11 (100%) | **Level 1: Universal** | All frameworks | Native in all |
-| Circular progress | Circular/ring-style indicator | 4/11 (36%) | **Level 4: Occasional** | Ant, Chakra, MUI, HeroUI | Ant/Chakra/MUI: Native; HeroUI: Separate component |
+| Circular progress | Circular/ring-style indicator | 5/11 (45%) | **Level 3: Moderate** | Ant, Chakra, MUI, HeroUI, Vuetify | Ant/Chakra: Native; MUI/Vuetify: Separate component |
 | Dashboard/Arc progress | 75% arc or semi-circle variant | 1/11 (9%) | **Level 5: Rare** | Ant Design | Native via `type="dashboard"` |
-| Vertical orientation | Vertical progress bar | 2/11 (18%) | **Level 5: Rare** | Mantine, Nuxt UI | Native via orientation prop |
+| Vertical orientation | Vertical progress bar | 3/11 (27%) | **Level 4: Occasional** | Mantine, Nuxt UI, Vuetify | Native via orientation prop |
 | Ring progress | Full ring variant | 1/11 (9%) | **Level 5: Rare** | Mantine | Native (RingProgress component) |
 
 ### State Patterns
@@ -76,6 +80,7 @@ Progress components serve as visual indicators of task completion status across 
 |---------|-------------|------------|-------------|------------|--------------|
 | Determinate (value-based) | Show exact completion percentage | 11/11 (100%) | **Level 1: Universal** | All frameworks | Native in all |
 | Indeterminate (loading) | Continuous animation for unknown duration | 10/11 (91%) | **Level 1: Universal** | All except Mantine | Various mechanisms (see terminology) |
+| Query variant | Reverse animation for data fetching | 1/11 (9%) | **Level 5: Rare** | MUI | LinearProgress query variant |
 | Success state | Visual indication of completion | 7/11 (64%) | **Level 2: Common** | Ant, HeroUI, MUI, Nuxt, Semantic, Chakra, Radix | Ant/Semantic: Native; Others: via color |
 | Error state | Visual indication of failure | 6/11 (55%) | **Level 3: Moderate** | Ant, HeroUI, MUI, Nuxt, Semantic, Chakra | Ant/Semantic: Native; Others: via color |
 | Active/Animating | Smooth animated transitions | 11/11 (100%) | **Level 1: Universal** | All frameworks | Native animation support |
@@ -94,10 +99,12 @@ Progress components serve as visual indicators of task completion status across 
 | Gradient colors | Multi-color gradient fills | 2/11 (18%) | **Level 5: Rare** | Ant Design, ShadCN | Ant: Native; ShadCN: CSS |
 | Segmented/Steps | Discrete progress segments | 4/11 (36%) | **Level 4: Occasional** | Ant, Mantine, Nuxt, Semantic | Native support |
 | Multi-section bars | Multiple colored sections in one bar | 2/11 (18%) | **Level 5: Rare** | Mantine, Nuxt | Composed via sections |
-| Buffer indicator | Show buffered vs loaded (video) | 1/11 (9%) | **Level 5: Rare** | MUI | Native "buffer" variant |
+| Buffer indicator | Show buffered vs loaded (video) | 2/11 (18%) | **Level 5: Rare** | MUI, Vuetify | MUI: buffer variant; Vuetify: buffer-value prop |
+| Stream indicator | Animated streaming state | 1/11 (9%) | **Level 5: Rare** | Vuetify | Native stream prop |
+| Query indicator | Query/loading state | 1/11 (9%) | **Level 5: Rare** | Vuetify | Native query prop |
 | Track customization | Unfilled portion styling | 3/11 (27%) | **Level 4: Occasional** | Ant, HeroUI, Radix | Native trailingColor/track props |
 | Animation style options | Different animation patterns | 1/11 (9%) | **Level 5: Rare** | Nuxt UI | Native (carousel, swing, elastic) |
-| Inverted direction | Fill right-to-left or bottom-to-top | 1/11 (9%) | **Level 5: Rare** | Nuxt UI | Native boolean prop |
+| Inverted direction | Fill right-to-left or bottom-to-top | 2/11 (18%) | **Level 4: Occasional** | Nuxt UI, Semantic UI | Native inverted prop |
 
 ### Composition Patterns
 
@@ -182,9 +189,10 @@ Dedicated RingProgress component separate from linear Progress. Specialized circ
 ## Pattern Correlations
 
 ### When Linear/Bar exists → Circular also present
-- 4 of 11 frameworks (36%) that have linear also provide circular variants
-- Frameworks: Ant Design, Chakra UI, MUI, HeroUI (separate component)
+- 5 of 11 frameworks (45%) that have linear also provide circular variants
+- Frameworks: Ant Design, Chakra UI, MUI, HeroUI (separate component), Vuetify (separate component)
 - Pattern: Circular typically offered when framework is comprehensive
+- Note: MUI and Vuetify use separate components (LinearProgress/CircularProgress) vs unified API
 
 ### When Multi-Section exists → Compound Components used
 - 2 of 2 frameworks (100%) with multi-section use compound component patterns
@@ -305,6 +313,19 @@ Dedicated RingProgress component separate from linear Progress. Specialized circ
 - Integrates with theming system for automatic color contrast adjustment (`autoContrast` prop)
 - Accessibility properly scoped to compound structure with shared ARIA context
 - Common use case (password strength meter with conditional coloring) shows real-world adoption
+
+### Vuetify - Stream and Query State Patterns for Real-Time Data
+
+**What it does**: Vuetify's v-progress-linear provides unique `stream` and `query` props that add semantic animation patterns specifically designed for data streaming and query operations. The `stream` prop creates a continuous animated "data flow" effect (subtle waves moving through the bar), while `query` adds an indeterminate overlay that indicates active data fetching while still showing the current progress value.
+
+**Why it's sophisticated**: These patterns solve specific UX problems in modern applications: showing that data is actively streaming (not just loading) and distinguishing between "fetching new data" vs "processing existing data." The `buffer-value` prop additionally enables video-player-style buffering visualization where you can show both playback progress and buffered content ahead.
+
+**Evidence of design maturity**:
+- Stream animation communicates "live data" semantically different from static progress
+- Query state allows showing both determinate progress AND indeterminate activity simultaneously
+- Buffer pattern essential for media players - shows download progress ahead of playback
+- These are Vue-specific patterns that leverage reactive data binding effectively
+- Vuetify is the only framework addressing streaming/real-time progress semantics
 
 ### Ant Design - Type-Variant Semantics with Positional Control
 
