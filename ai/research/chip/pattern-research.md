@@ -400,6 +400,406 @@ Provides selection behavior as a subcomponent rather than a prop.
 
 ---
 
+### 8. Special Features Analysis
+
+#### Ribbon Variant
+**Prevalence**: 2/10 frameworks
+- **Ant Design**: `Badge.Ribbon` component
+- **Semantic UI Classic**: `ribbon label` class
+
+**Support Level**: Level 5 (Rare - 20%)
+**Use Cases**: Featured items, promotional tags, section headers
+**Pattern**: Decorative ribbon extending from card/segment edge
+
+#### Gradient Support
+**Prevalence**: 2/10 frameworks
+- **Mantine**: `variant="gradient"` with `from`/`to`/`deg` props
+- **ShadCN**: Via Tailwind gradient utilities
+
+**Support Level**: Level 5 (Rare - 20%)
+
+#### High Contrast Mode
+**Prevalence**: 1/10 frameworks
+- **Radix UI**: `highContrast` boolean prop
+
+**Support Level**: Level 5 (Rare - 10%)
+**Purpose**: Accessibility enhancement, WCAG compliance
+
+#### Auto Contrast
+**Prevalence**: 1/10 frameworks
+- **Mantine**: `autoContrast` prop adjusts text color automatically
+
+**Support Level**: Level 5 (Rare - 10%)
+**Purpose**: Ensures readable contrast without manual color pairing
+
+#### Contextual Sizing
+**Prevalence**: 2/10 frameworks
+- **MUI**: Scales based on parent element
+- **Semantic UI Classic**: Scales within headings
+
+**Support Level**: Level 5 (Rare - 20%)
+**Pattern**: Badge automatically adapts size to context
+
+#### Detail/Secondary Text
+**Prevalence**: 2/10 frameworks
+- **Ant Design**: Nested detail content in Tag
+- **Semantic UI Classic**: `<div class="detail">` pattern
+
+**Support Level**: Level 5 (Rare - 20%)
+**Use Cases**: Count displays, metadata, sub-labels
+
+---
+
+### 9. Accessibility Patterns
+
+#### ARIA Support
+
+**Explicit Accessibility Features**:
+| Framework | Feature | Implementation |
+|-----------|---------|----------------|
+| Chakra UI | Focus management | Built-in for closeable tags |
+| Chakra UI | Keyboard support | Enter/Space for close triggers |
+| HeroUI | Keyboard accessible | Press events via React Aria |
+| Mantine | Form control accessibility | Native input foundation (Chip) |
+| MUI | Screen reader support | `aria-hidden` when invisible |
+| Radix UI | High contrast mode | `highContrast` prop |
+
+**Support Level**: Level 2 (Common - most frameworks mention accessibility)
+
+**Common Patterns**:
+- Close buttons need `aria-label`
+- Pressable badges should use `aria-pressed`
+- Color should not be sole indicator
+- Screen reader announcement of badge content
+
+---
+
+### 10. Advanced Composition Patterns
+
+#### AsChild / Polymorphic Rendering
+
+**Frameworks with Polymorphic Support**:
+- **Mantine Badge**: `component` prop (render as any element)
+- **Radix UI**: `asChild` prop (Slot pattern)
+- **ShadCN**: `asChild` prop (Radix Slot)
+- **Semantic UI Classic**: Semantic HTML (`<a>`, `<div>`, etc.)
+
+**Support Level**: Level 3 (Moderate - 40%)
+
+**Pattern**:
+```typescript
+// Instead of wrapper div
+<Badge asChild>
+  <a href="/profile">Profile Badge</a>
+</Badge>
+```
+
+#### Slot-Based Composition
+
+**Frameworks with Named Slots**:
+- **Nuxt UI**: `#leading`, `#trailing`, default
+- **HeroUI Chip**: `startContent`, `endContent`, `avatar`
+- **Mantine Badge**: `leftSection`, `rightSection`
+
+**Support Level**: Level 3 (Moderate - 30%)
+
+---
+
+## Cross-Framework Pattern Summary
+
+### Universal Patterns (Level 1: 90-100% adoption)
+
+1. **Text content support** - 10/10 (100%)
+2. **Color variants** - 10/10 (100%)
+   - Success/green: 100%
+   - Error/red: 100%
+   - Warning/yellow: 100%
+   - Default/neutral: 100%
+3. **Solid variant** - 10/10 (100%)
+4. **Soft/light variant** - 8/10 (80%)
+5. **Outline variant** - 9/10 (90%)
+6. **Size variants** - 9/10 (90%)
+   - Small: 90%
+   - Medium: 90%
+   - Large: 90%
+7. **Numeric content** (Badge) - 9/9 (100%)
+
+### Common Patterns (Level 2: 70-89% adoption)
+
+1. **Icon support** - 7/10 (70%)
+2. **Dot variant** - 6/9 Badge (67%)
+3. **Closeable tags** - 4/7 Tag implementations (57%)
+4. **Explicit size props** - 7/10 (70%)
+
+### Moderate Patterns (Level 3: 40-69% adoption)
+
+1. **Overlay positioning** - 5/10 (50%)
+2. **Avatar support** - 4/10 (40%)
+3. **Polymorphic rendering** - 4/10 (40%)
+4. **Named slots** - 3/10 (30%)
+
+### Occasional Patterns (Level 4: 20-39% adoption)
+
+1. **Surface/elevated variant** - 3/10 (30%)
+2. **Extra small size** - 6/10 (60%)
+3. **Extra large size** - 4/10 (40%)
+
+### Rare Patterns (Level 5: <20% adoption)
+
+1. **Ribbon variant** - 2/10 (20%)
+2. **Gradient support** - 2/10 (20%)
+3. **High contrast mode** - 1/10 (10%)
+4. **Auto contrast** - 1/10 (10%)
+5. **Contextual sizing** - 2/10 (20%)
+6. **Detail/secondary text** - 2/10 (20%)
+7. **Max count overflow** - 2/9 Badge (22%)
+8. **Show zero** - 2/9 Badge (22%)
+
+---
+
+## Key Insights
+
+### 1. Badge vs Tag Separation is Not Universal
+
+**50% of frameworks** separate Badge from Tag/Chip, **30% unify** them, **20% provide Badge only**.
+
+**Arguments for Separation**:
+- Clear semantic distinction (notification vs categorization)
+- Different interaction patterns (overlay vs inline, non-interactive vs closeable)
+- Prevents API bloat from mixed concerns
+
+**Arguments for Unification**:
+- Reduces component count
+- Shared visual styling
+- Flexible use case adaptation
+- Simpler mental model
+
+**Recommendation**: Semantic UI should consider **separation** to maintain semantic clarity and natural language naming benefits.
+
+### 2. Variant Systems Converge on 3-4 Core Options
+
+**Optimal set**:
+- **Solid/Filled**: High emphasis (100% adoption)
+- **Soft/Light**: Medium emphasis (80% adoption)
+- **Outline**: Low emphasis (90% adoption)
+- **Dot** (Badge only): Minimal indicator (67% Badge adoption)
+
+Additional variants (surface, gradient, transparent) are nice-to-have but not essential.
+
+### 3. Color Systems Trend Toward Theme Integration
+
+**Evolution**:
+- Early frameworks: Predefined semantic colors only
+- Modern frameworks: Full theme palette access + semantic names
+
+**Recommendation**: Provide both semantic shortcuts (success/error/warning/info) AND full theme color access for flexibility.
+
+### 4. Icon Support is Expected in Tags, Optional in Badges
+
+**Tag/Chip**: 86% have icon support (6/7 implementations)
+**Badge**: 40% have explicit icon support (4/10 implementations)
+
+**Pattern**: Tags are more content-rich; badges are more minimalist
+
+### 5. Overlay Positioning is Not Standard
+
+Only **5/10 frameworks** (50%) provide overlay/wrapper patterns for badges. The other half treat badges as standalone inline elements.
+
+**Implication**: "Badge" means different things:
+- Overlay notification (Ant Design, MUI, HeroUI)
+- Standalone label (Nuxt UI, Radix UI, ShadCN)
+- Both (Semantic UI Classic via floating label)
+
+### 6. Interactive Patterns Vary Significantly
+
+**Non-interactive** (traditional badges): Most Badge implementations
+**Closeable** (removable tags): 57% of Tag implementations
+**Selectable** (form controls): Only Mantine Chip, HeroUI Chip
+
+**Recommendation**: Closeable is expected for tags; badges should remain non-interactive (except when composed as links).
+
+### 7. Size Systems: 3-5 Sizes Optimal
+
+**Semantic UI Classic's 8 sizes** is an outlier. Most frameworks settle on **3-5 sizes**.
+
+**Common patterns**:
+- 3 sizes: sm, md, lg (minimal)
+- 5 sizes: xs, sm, md, lg, xl (comprehensive)
+
+### 8. Advanced Features are Rare
+
+**Features found in <30% of frameworks**:
+- Ribbon styling
+- Gradient fills
+- High contrast modes
+- Auto contrast
+- Contextual sizing
+- Detail/secondary text
+- Overflow count handling
+
+**Implication**: These are differentiators, not table stakes
+
+### 9. Accessibility Varies Widely
+
+Only **Chakra UI**, **HeroUI**, **Mantine**, **MUI**, and **Radix UI** explicitly document accessibility features.
+
+**Common needs**:
+- Focus management for closeable tags
+- Keyboard support (Enter/Space)
+- ARIA labels for icon-only badges
+- Color + text (not color alone)
+- Screen reader announcements
+
+### 10. Semantic UI Classic's Comprehensive Approach is Unique
+
+**9 positioning types**, **8 sizes**, **unified Badge/Tag/Label** - no other framework approaches this level of comprehensiveness.
+
+**Lesson**: Semantic UI's strength is breadth of use cases. Modern implementation should preserve this while modernizing API.
+
+---
+
+## Sophisticated Design Patterns
+
+This section highlights advanced, component-specific patterns that demonstrate deep thinking about label/badge problems unique to these components.
+
+### Ant Design - Count Overflow Handling with Visual Truncation
+
+**What it does**: The `overflowCount` prop implements a smart count indicator that displays numbers up to a threshold, then shows "99+" when exceeded. This solves the real-world problem of displaying unbounded notification counts in fixed-width containers without breaking layout.
+
+```jsx
+// Standard count
+<Badge count={5}>Content</Badge>        // Shows "5"
+
+// Overflow handling
+<Badge count={150} overflowCount={99}>
+  <Avatar />
+</Badge>                                // Shows "99+"
+
+// Show zero explicitly
+<Badge count={0} showZero>
+  <Avatar />
+</Badge>                                // Shows "0"
+```
+
+**Why it's sophisticated**: This isn't just a "max number" cap—it's a content truncation strategy that acknowledges badges live in constrained visual spaces. The "99+" convention is industry standard but rarely exposed as an API. Combining `overflowCount` + `showZero` suggests thought about both lower and upper bounds of acceptable badge content. This prevents layout shift when count changes from 0→1 or 99→100+.
+
+**Evidence of design maturity**:
+- Recognizes that notification counts are unbounded data in bounded UI space
+- "99+" is deliberately chosen (large enough to matter, small enough to display)
+- `showZero` prop enables use cases like "0 unread messages" vs hiding the badge entirely
+- Only 2/9 Badge frameworks implement this—most treat badges as static labels
+
+### Mantine - Polymorphic Badge with Component Prop
+
+**What it does**: The `component` prop transforms a Badge from a `<div>` into any HTML element or React component. This enables badges to function as links, buttons, or custom styled wrappers without wrapping in additional markup.
+
+```jsx
+// Default: renders as div
+<Badge>Static</Badge>
+
+// As anchor link
+<Badge component="a" href="/profile">
+  @username
+</Badge>
+
+// Type-safe polymorphism with TypeScript
+<Badge<'a'> component="a" href="/profile">
+  Link Badge
+</Badge>
+```
+
+**Why it's sophisticated**: Most badge implementations treat the component as a display-only element, requiring users to wrap it if they need interactivity. Polymorphic rendering inverts this—the component adapts to its container's needs. This is particularly elegant because badges are often small decorative elements that shouldn't require additional DOM wrapper layers. The TypeScript generic support shows the pattern is designed for type safety, not just flexibility.
+
+**Evidence of design maturity**:
+- Avoids "wrapper div syndrome" that plagues many badge implementations
+- Type-safe polymorphism demonstrates consideration for TypeScript-first teams
+- Acknowledges that small components shouldn't force extra DOM nesting
+- Enables patterns like badge-links without breaking semantic HTML
+- Only 4/10 frameworks implement polymorphic rendering—a differentiator
+
+### Chakra UI v3 - Compound Component Pattern for Tags
+
+**What it does**: Tags evolve from a flat component (v2: `<Tag><TagLabel>Text</TagLabel></Tag>`) into a namespaced compound component system (v3: `<Tag.Root><Tag.Label>Text</Tag.Label><Tag.CloseTrigger /></Tag.Root>`). This provides explicit DOM structure while maintaining flexible composition.
+
+```jsx
+// v2: Flat, loosely coupled
+<Tag colorScheme="blue">
+  <TagLeftIcon as={Icon} />
+  <TagLabel>Settings</TagLabel>
+  <TagCloseButton />
+</Tag>
+
+// v3: Compound, explicit structure
+<Tag.Root colorPalette="blue">
+  <Tag.StartElement><Icon /></Tag.StartElement>
+  <Tag.Label>Settings</Tag.Label>
+  <Tag.EndElement>
+    <Tag.CloseTrigger />
+  </Tag.EndElement>
+</Tag.Root>
+```
+
+**Why it's sophisticated**: This architectural shift represents a maturity transition. Flat components are easier to learn but harder to extend (what slot does the icon go in? where's the close button supposed to attach?). Compound components solve this by making the DOM structure explicit without requiring configuration props. The v3 migration shows intentional API evolution—not just feature addition, but structural improvement based on real-world usage patterns.
+
+**Evidence of design maturity**:
+- Recognizes that tags have optional content (icons, close buttons) that need positioned slots
+- Compound structure makes it clear what elements are available without reading docs
+- Clear semantic boundaries (StartElement vs EndElement vs Label)
+- Breaking change in v2→v3 suggests this was worth the migration cost
+- Enables TypeScript discriminated unions for safer component usage
+- Pattern now adopted across modern frameworks (Radix UI, HeadlessUI)
+
+---
+
+## Recommendations for Semantic UI Implementation
+
+### Component Structure Decision
+
+**Option A: Unified `ui-label` Component** (like Semantic UI Classic)
+- Single component handles badges, tags, labels
+- Settings determine behavior (`overlay`, `tag`, `ribbon`, `pointing`, etc.)
+- Advantages: Preserves classic API, familiar to existing users
+- Disadvantages: Large API surface, mixed concerns
+
+**Option B: Separate `ui-badge` and `ui-tag`** (like Ant Design)
+- `ui-badge`: Overlay notifications, counts, status dots
+- `ui-tag`: Standalone labels, closeable chips, categories
+- Advantages: Clear semantics, focused APIs, natural language clarity
+- Disadvantages: Two components to learn/maintain
+
+**Option C: Hybrid** (recommended)
+- **`ui-badge`**: Notification counts, overlays, status indicators
+  - Supports: overlay positioning, numeric content, dot variant, sizes, colors
+- **`ui-tag`**: Categorization, labels, closeable chips
+  - Supports: icons, closeable, variants, sizes, colors
+- **`ui-label`**: General labeling (simple wrapper/alias for tag?)
+  - Or: Semantic UI Classic comprehensive positioning types as advanced tag settings
+
+**Recommendation**: **Option C (Hybrid)** balances semantic clarity with familiar naming.
+
+### Must-Have Features (Level 1)
+
+#### `ui-badge`
+1. **Content**:
+   - Numeric display
+   - Text display (short)
+   - Dot variant (no content)
+2. **Variants**:
+   - Solid (filled)
+   - Soft (subtle background)
+   - Outline (border only)
+3. **Colors**:
+   - Semantic: success, error, warning, info, default
+   - Theme integration: all theme colors accessible
+4. **Sizes**: sm, md, lg minimum
+5. **Overlay positioning**: Top-right default (like notifications)
+
+#### `ui-tag`
+1. **Content**:
+   - Text
+   - Icon support (leading/trailing)
+2. **Variants**:
+   - Solid
 ## Industry Insights
 
 1. **No Convergence in Sight**: Unlike other components trending toward standardization, Chip/Tag/Badge shows increasing divergence
