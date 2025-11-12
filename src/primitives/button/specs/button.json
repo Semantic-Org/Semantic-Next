@@ -542,11 +542,11 @@
   "pluralDescription": "Buttons can exist together as a group",
   "pluralContent": [
     {
-      "name": "Or",
-      "attribute": "or",
-      "slot": "or",
+      "name": "Conditional",
+      "attribute": "conditional",
+      "slot": "conditional",
       "description": "show a conditional choice",
-      "exampleCode": "<ui-buttons>\n  <ui-button>Cancel</ui-button>\n  <div slot=\"or\">Or</div>\n  <ui-button primary>Save</ui-button>\n</ui-buttons>"
+      "exampleCode": "<ui-buttons>\n  <ui-button>Cancel</ui-button>\n  <span class=\"conditional\">or</span>\n  <ui-button primary>Save</ui-button>\n</ui-buttons>"
     }
   ],
   "pluralSharedTypes": ["styled", "icon"],

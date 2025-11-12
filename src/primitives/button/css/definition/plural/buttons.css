@@ -26,3 +26,6 @@
 .buttons ::slotted(ui-button:is(:last-child)) {
   --button-border-radius: 0 var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0;
 }
+.buttons ::slotted(ui-button:is(:only-child)) {
+  --button-border-radius: var(--button-group-button-border-radius);
+}

@@ -3,6 +3,7 @@
 @import url('./content/button.css') layer(button.definition.content.button);
 @import url('./content/icon.css') layer(button.definition.content.icon);
 @import url('./content/label.css') layer(button.definition.content.label);
+@import url('./content/conditional.css') layer(button.definition.content.conditional);
 
 /* Group */
 @import url('./plural/buttons.css') layer(button.definition.plural);

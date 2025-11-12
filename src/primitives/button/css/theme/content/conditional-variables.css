@@ -1,0 +1,16 @@
+:host {
+  --button-conditional-text: '';
+
+  --button-conditional-box-shadow: var(--button-border-box-shadow), var(--button-shadow-box-shadow);
+
+  --button-conditional-circle-size: var(--22px);
+  --button-conditional-horizontal-offset: calc(var(--button-conditional-circle-size) / 2 * -1 );
+
+  --button-conditional-background-color: var(--inverted-100);
+  --button-conditional-text-shadow: var(--button-text-shadow);
+  --button-conditional-text-style: var(--normal);
+  --button-conditional-text-weight: var(--bold);
+  --button-conditional-text-color: var(--standard-40);
+  --button-conditional-padding: var(--5px) var(--5px);
+
+}

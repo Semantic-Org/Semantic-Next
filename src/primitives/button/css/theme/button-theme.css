@@ -6,7 +6,7 @@
 @import url('./content/button-variables.css') layer(button.theme.content.button);
 @import url('./content/icon-variables.css') layer(button.theme.content.icon);
 @import url('./content/label-variables.css') layer(button.theme.content.label);
-@import url('./content/or-variables.css') layer(button.theme.content.or);
+@import url('./content/conditional-variables.css') layer(button.theme.content.conditional);
 
 /* Group */
 @import url('./plural/buttons-variables.css') layer(button.theme.plural);

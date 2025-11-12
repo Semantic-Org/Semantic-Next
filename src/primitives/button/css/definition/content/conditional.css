@@ -1,0 +1,24 @@
+/*-------------------
+      Or Buttons
+--------------------*/
+
+.buttons ::slotted(.conditional) {
+  position: relative;
+  user-select: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+  align-self: center;
+  padding: var(--button-conditional-padding);
+  color: var(--button-conditional-text-color);
+  font-style: var(--button-conditional-text-style);
+  font-weight: var(--button-conditional-text-weight);
+  border-radius: var(--circular-radius);
+  background-color: var(--button-conditional-background-color);
+  text-shadow: var(--button-conditional-text-shadow);
+  margin-left: var(--button-conditional-horizontal-offset);
+  margin-right: var(--button-conditional-horizontal-offset);
+  box-shadow: var(--button-conditional-box-shadow);
+}
