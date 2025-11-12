@@ -24,7 +24,11 @@ export default {
       "attribute": "image",
       "description": "include an image",
       "usageLevel": 2,
-      "exampleCode": "<ui-button image=\"/images/avatar/small/jenny.jpg\">Jenny</ui-button>"
+      "separateExamples": false,
+      "exampleCode": [
+        "<ui-button>\n  <img src=\"/images/avatar/small/jenny.jpg\" />\n  Add Jenny\n</ui-button>",
+        "<ui-button>\n  <ui-image src=\"/images/new-avatar/small/dima.jpg\" /></ui-image>\n  Add Dima\n</ui-button>"
+      ]
     },
     {
       "name": "Badge",
@@ -536,7 +540,7 @@ export default {
       "description": "Enable to position the icon after the text"
     },
     {
-      "name": "Link",
+      "name": "Href",
       "type": "string",
       "attribute": "href",
       "description": "link to a webpage"

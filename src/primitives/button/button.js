@@ -31,16 +31,21 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
   getForm() {
     return $(el).closest('form').el();
   },
+  getType() {
+    return settings.styled == 'link'
+      ? 'link'
+      : 'button';
+  },
   isDisabled() {
     return settings.state == 'disabled';
   },
 });
 
 const events = {
-  'touchstart .button'({ event, self, $ }) {
+  'touchstart .button'() {
     $(this).addClass('pressed');
   },
-  'touchend .button'({ event, self, $ }) {
+  'touchend .button'() {
     $(this).removeClass('pressed');
   },
   'click .button'({ event, self, $ }) {

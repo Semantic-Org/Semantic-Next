@@ -63,6 +63,18 @@
 /* src/primitives/button/css/definition/content/label.css */
 @layer button.definition.content.label;
 
+/* src/primitives/button/css/definition/content/image.css */
+@layer button.definition.content.image {
+  .button ::slotted(img),
+  .button ::slotted(ui-image) {
+    display: inline-block;
+    max-height: 1.5em;
+    border-radius: 4px;
+    vertical-align: top;
+    margin: -0.25em 0.5rem -0.25em -0.25em;
+  }
+}
+
 /* src/primitives/button/css/definition/content/conditional.css */
 @layer button.definition.content.conditional {
   .buttons ::slotted(.conditional) {
