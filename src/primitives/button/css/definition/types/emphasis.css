@@ -13,6 +13,11 @@
   --button-link-text-color: var(--button-primary-color);
   --button-link-text-color-hover: var(--button-primary-color-hover);
 
+  --button-subtle-background: oklch(from var(--button-primary-color) calc(l * var(--lightness-0)) calc(c * var(--chroma-0)) h);
+  --button-subtle-text-color: oklch(from var(--button-primary-color) calc(l * var(--lightness-70)) calc(c * var(--chroma-70)) h);
+  --button-subtle-background-hover: oklch(from var(--button-primary-color) calc(l * var(--lightness-5)) calc(c * var(--chroma-5)) h);
+  --button-subtle-background-pressed: oklch(from var(--button-primary-color) calc(l * var(--lightness-10)) calc(c * var(--chroma-10)) h);
+
   &:hover {
     background-color: var(--button-primary-color-hover);
     color: var(--button-primary-text-color);
@@ -75,6 +80,11 @@
 
   --button-link-text-color: var(--button-secondary-color);
   --button-link-text-color-hover: var(--button-secondary-color-hover);
+
+  --button-subtle-background: oklch(from var(--button-secondary-color) calc(l * var(--lightness-0)) calc(c * var(--chroma-0)) h);
+  --button-subtle-text-color: oklch(from var(--button-secondary-color) calc(l * var(--lightness-70)) calc(c * var(--chroma-70)) h);
+  --button-subtle-background-hover: oklch(from var(--button-secondary-color) calc(l * var(--lightness-5)) calc(c * var(--chroma-5)) h);
+  --button-subtle-background-pressed: oklch(from var(--button-secondary-color) calc(l * var(--lightness-10)) calc(c * var(--chroma-10)) h);
 
   &:hover {
     background-color: var(--button-secondary-color-hover);

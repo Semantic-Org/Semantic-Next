@@ -82,7 +82,7 @@ export default {
     "primary": "emphasis",
     "secondary": "emphasis",
     "solid": "styled",
-    "soft": "styled",
+    "subtle": "styled",
     "outline": "styled",
     "ghost": "styled",
     "link": "styled",
@@ -176,7 +176,7 @@ export default {
     ],
     "styled": [
       "solid",
-      "soft",
+      "subtle",
       "outline",
       "ghost",
       "link"

@@ -21,6 +21,11 @@
   --button-link-text-color: var(--button-red);
   --button-link-text-color-hover: var(--button-red-hover);
 
+  --button-subtle-background: var(--red-background-color);
+  --button-subtle-text-color: var(--red-text-color);
+  --button-subtle-background-hover: var(--red-5);
+  --button-subtle-background-pressed: var(--red-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-red-text-color);
@@ -55,6 +60,11 @@
   --button-link-text-color: var(--button-orange);
   --button-link-text-color-hover: var(--button-orange-hover);
 
+  --button-subtle-background: var(--orange-background-color);
+  --button-subtle-text-color: var(--orange-text-color);
+  --button-subtle-background-hover: var(--orange-5);
+  --button-subtle-background-pressed: var(--orange-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-orange-text-color);
@@ -88,6 +98,11 @@
 
   --button-link-text-color: var(--button-yellow);
   --button-link-text-color-hover: var(--button-yellow-hover);
+
+  --button-subtle-background: var(--yellow-background-color);
+  --button-subtle-text-color: var(--yellow-text-color);
+  --button-subtle-background-hover: var(--yellow-5);
+  --button-subtle-background-pressed: var(--yellow-10);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -125,6 +140,11 @@
   --button-link-text-color: var(--button-olive);
   --button-link-text-color-hover: var(--button-olive-hover);
 
+  --button-subtle-background: var(--olive-background-color);
+  --button-subtle-text-color: var(--olive-text-color);
+  --button-subtle-background-hover: var(--olive-5);
+  --button-subtle-background-pressed: var(--olive-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-olive-text-color);
@@ -158,6 +178,11 @@
 
   --button-link-text-color: var(--button-green);
   --button-link-text-color-hover: var(--button-green-hover);
+
+  --button-subtle-background: var(--green-background-color);
+  --button-subtle-text-color: var(--green-text-color);
+  --button-subtle-background-hover: var(--green-5);
+  --button-subtle-background-pressed: var(--green-10);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -193,6 +218,11 @@
   --button-link-text-color: var(--button-teal);
   --button-link-text-color-hover: var(--button-teal-hover);
 
+  --button-subtle-background: var(--teal-background-color);
+  --button-subtle-text-color: var(--teal-text-color);
+  --button-subtle-background-hover: var(--teal-5);
+  --button-subtle-background-pressed: var(--teal-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-teal-text-color);
@@ -226,6 +256,11 @@
 
   --button-link-text-color: var(--button-blue);
   --button-link-text-color-hover: var(--button-blue-hover);
+
+  --button-subtle-background: var(--blue-background-color);
+  --button-subtle-text-color: var(--blue-text-color);
+  --button-subtle-background-hover: var(--blue-5);
+  --button-subtle-background-pressed: var(--blue-10);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -262,6 +297,11 @@
   --button-link-text-color: var(--button-violet);
   --button-link-text-color-hover: var(--button-violet-hover);
 
+  --button-subtle-background: var(--violet-background-color);
+  --button-subtle-text-color: var(--violet-text-color);
+  --button-subtle-background-hover: var(--violet-5);
+  --button-subtle-background-pressed: var(--violet-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-violet-text-color);
@@ -297,6 +337,11 @@
   --button-link-text-color: var(--button-purple);
   --button-link-text-color-hover: var(--button-purple-hover);
 
+  --button-subtle-background: var(--purple-background-color);
+  --button-subtle-text-color: var(--purple-text-color);
+  --button-subtle-background-hover: var(--purple-5);
+  --button-subtle-background-pressed: var(--purple-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-purple-text-color);
@@ -330,6 +375,11 @@
 
   --button-link-text-color: var(--button-pink);
   --button-link-text-color-hover: var(--button-pink-hover);
+
+  --button-subtle-background: var(--pink-background-color);
+  --button-subtle-text-color: var(--pink-text-color);
+  --button-subtle-background-hover: var(--pink-5);
+  --button-subtle-background-pressed: var(--pink-10);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -365,6 +415,11 @@
   --button-link-text-color: var(--button-brown);
   --button-link-text-color-hover: var(--button-brown-hover);
 
+  --button-subtle-background: var(--brown-background-color);
+  --button-subtle-text-color: var(--brown-text-color);
+  --button-subtle-background-hover: var(--brown-5);
+  --button-subtle-background-pressed: var(--brown-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-brown-text-color);
@@ -399,6 +454,11 @@
   --button-link-text-color: var(--button-grey);
   --button-link-text-color-hover: var(--button-grey-hover);
 
+  --button-subtle-background: var(--grey-background-color);
+  --button-subtle-text-color: var(--grey-text-color);
+  --button-subtle-background-hover: var(--grey-5);
+  --button-subtle-background-pressed: var(--grey-10);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-grey-text-color);
@@ -432,6 +492,11 @@
 
   --button-link-text-color: var(--button-black);
   --button-link-text-color-hover: var(--button-black-hover);
+
+  --button-subtle-background: var(--standard-5);
+  --button-subtle-text-color: var(--standard-70);
+  --button-subtle-background-hover: var(--standard-10);
+  --button-subtle-background-pressed: var(--standard-15);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 

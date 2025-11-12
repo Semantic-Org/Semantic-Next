@@ -27,7 +27,7 @@ export default {
   ],
   "optionAttributes": {
     "solid": "styled",
-    "soft": "styled",
+    "subtle": "styled",
     "outline": "styled",
     "ghost": "styled",
     "link": "styled",
@@ -81,7 +81,7 @@ export default {
   "allowedValues": {
     "styled": [
       "solid",
-      "soft",
+      "subtle",
       "outline",
       "ghost",
       "link"

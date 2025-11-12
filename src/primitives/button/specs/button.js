@@ -74,8 +74,8 @@ export default {
           "description": "use a solid color"
         },
         {
-          "name": "Soft",
-          "value": "soft",
+          "name": "Subtle",
+          "value": "subtle",
           "description": "use a subtle background tint"
         },
         {

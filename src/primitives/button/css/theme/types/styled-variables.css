@@ -16,6 +16,13 @@
   --button-solid-background-pressed: var(--button-styled-background-pressed);
   --button-solid-background-active: var(--button-styled-background-active);
 
+  /* Subtle */
+  --button-subtle-background: var(--standard-5);
+  --button-subtle-text-color: var(--text-color);
+  --button-subtle-background-hover: var(--button-styled-background-hover);
+  --button-subtle-background-pressed: var(--button-styled-background-pressed);
+  --button-subtle-background-active: var(--button-styled-background-active);
+
   /* Outline */
   --button-outline-border-width: 1px;
   --button-outline-border-offset: -1px;

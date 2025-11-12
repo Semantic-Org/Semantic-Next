@@ -69,6 +69,74 @@
 }
 
 /*-------------------
+      Subtle
+--------------------*/
+
+/* Singular button styling */
+.subtle.button {
+  box-shadow: none;
+  background-image: none;
+  background-color: var(--button-subtle-background);
+  color: var(--button-subtle-text-color);
+  text-shadow: none;
+
+  /* No shading on colored buttons */
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  &.hover,
+  &:hover {
+    background-color: var(--button-subtle-background-hover);
+    color: var(--standard-80);
+  }
+
+  &.pressed,
+  &:active {
+    background-color: var(--button-subtle-background-pressed);
+    color: var(--standard-90);
+  }
+
+  .active {
+    background-color: var(--button-subtle-background-active);
+    color: var(--standard-80);
+  }
+}
+
+/* Plural buttons - override CSS variables for child components */
+.subtle.buttons {
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-box-shadow: none;
+    --button-background-image: none;
+    --button-background: var(--button-subtle-background);
+    --button-text-color: var(--button-subtle-text-color);
+    --button-text-shadow: none;
+
+    /* Remove shading for colored variants */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
+    --button-secondary-box-shadow: none;
+
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+
+    /* Default subtle background/text for non-emphasized buttons */
+    --button-background: var(--standard-5);
+  }
+}
+
+/*-------------------
       Outline
 --------------------*/
 
