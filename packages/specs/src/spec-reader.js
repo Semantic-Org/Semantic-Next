@@ -387,8 +387,31 @@ export class SpecReader {
 
         if (customExampleCode) {
           // an example was provided in the spec for us
-          code = customExampleCode;
-          componentParts = this.getComponentPartsFromHTML(code);
+          // Handle both string and array formats
+          if (isArray(customExampleCode)) {
+            // Array of example codes - create separate examples for each
+            each(customExampleCode, (codeString) => {
+              code = codeString;
+              componentParts = this.getComponentPartsFromHTML(code);
+              const example = {
+                code,
+                components: [componentParts],
+              };
+              if (part.separateExamples) {
+                examples.push(example);
+              }
+              else {
+                examplesToJoin.push(example);
+              }
+            });
+            // Skip the rest of the iteration since we handled all codes
+            return;
+          }
+          else {
+            // Single string example code
+            code = customExampleCode;
+            componentParts = this.getComponentPartsFromHTML(code);
+          }
         }
         else {
           // construct an example programatically
@@ -441,18 +464,58 @@ export class SpecReader {
         : part.exampleCode;
 
       if (customExampleCode) {
-        code = customExampleCode;
-        componentParts = this.getComponentPartsFromHTML(code);
+        // Handle both string and array formats
+        if (isArray(customExampleCode)) {
+          // Array of example codes - respect separateExamples flag
+          if (part.separateExamples) {
+            // Create separate examples for each code
+            each(customExampleCode, (codeString) => {
+              code = codeString;
+              componentParts = this.getComponentPartsFromHTML(code);
+              const example = {
+                code,
+                components: [componentParts],
+              };
+              examples.push(example);
+            });
+          }
+          else {
+            // Join all examples into one
+            let joinedExamples = [];
+            each(customExampleCode, (codeString) => {
+              code = codeString;
+              componentParts = this.getComponentPartsFromHTML(code);
+              joinedExamples.push({
+                code,
+                components: [componentParts],
+              });
+            });
+            examples.push({
+              code: joinedExamples.map(ex => ex.code).join('\n'),
+              components: flatten([...joinedExamples.map(ex => ex.components)]),
+            });
+          }
+        }
+        else {
+          // Single string example code
+          code = customExampleCode;
+          componentParts = this.getComponentPartsFromHTML(code);
+          const example = {
+            code,
+            components: [componentParts],
+          };
+          examples.push(example);
+        }
       }
       else {
         code = this.getCodeFromModifiers(modifiers, { html: defaultContent, plural: isPlural });
         componentParts = this.getComponentParts(modifiers, { html: defaultContent, plural: isPlural });
+        const example = {
+          code,
+          components: [componentParts],
+        };
+        examples.push(example);
       }
-      const example = {
-        code,
-        components: [componentParts],
-      };
-      examples.push(example);
     }
 
     return {
