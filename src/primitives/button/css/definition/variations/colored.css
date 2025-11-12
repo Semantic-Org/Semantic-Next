@@ -18,6 +18,9 @@
   --button-outline-border-color: var(--button-red);
   --button-outline-text-color: var(--button-red);
 
+  --button-link-text-color: var(--button-red);
+  --button-link-text-color-hover: var(--button-red-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-red-text-color);
@@ -49,6 +52,9 @@
   --button-outline-border-color: var(--button-orange);
   --button-outline-text-color: var(--button-orange);
 
+  --button-link-text-color: var(--button-orange);
+  --button-link-text-color-hover: var(--button-orange-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-orange-text-color);
@@ -79,6 +85,9 @@
 
   --button-outline-border-color: var(--button-yellow);
   --button-outline-text-color: var(--button-yellow);
+
+  --button-link-text-color: var(--button-yellow);
+  --button-link-text-color-hover: var(--button-yellow-hover);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -113,6 +122,9 @@
   --button-outline-border-color: var(--button-olive);
   --button-outline-text-color: var(--button-olive);
 
+  --button-link-text-color: var(--button-olive);
+  --button-link-text-color-hover: var(--button-olive-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-olive-text-color);
@@ -143,6 +155,9 @@
 
   --button-outline-border-color: var(--button-green);
   --button-outline-text-color: var(--button-green);
+
+  --button-link-text-color: var(--button-green);
+  --button-link-text-color-hover: var(--button-green-hover);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -175,6 +190,9 @@
   --button-outline-border-color: var(--button-teal);
   --button-outline-text-color: var(--button-teal);
 
+  --button-link-text-color: var(--button-teal);
+  --button-link-text-color-hover: var(--button-teal-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-teal-text-color);
@@ -205,6 +223,9 @@
 
   --button-outline-border-color: var(--button-blue);
   --button-outline-text-color: var(--button-blue);
+
+  --button-link-text-color: var(--button-blue);
+  --button-link-text-color-hover: var(--button-blue-hover);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -238,6 +259,9 @@
   --button-outline-border-color: var(--button-violet);
   --button-outline-text-color: var(--button-violet);
 
+  --button-link-text-color: var(--button-violet);
+  --button-link-text-color-hover: var(--button-violet-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-violet-text-color);
@@ -270,6 +294,9 @@
   --button-outline-border-color: var(--button-purple);
   --button-outline-text-color: var(--button-purple);
 
+  --button-link-text-color: var(--button-purple);
+  --button-link-text-color-hover: var(--button-purple-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-purple-text-color);
@@ -300,6 +327,9 @@
 
   --button-outline-border-color: var(--button-pink);
   --button-outline-text-color: var(--button-pink);
+
+  --button-link-text-color: var(--button-pink);
+  --button-link-text-color-hover: var(--button-pink-hover);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 
@@ -332,6 +362,9 @@
   --button-outline-border-color: var(--button-brown);
   --button-outline-text-color: var(--button-brown);
 
+  --button-link-text-color: var(--button-brown);
+  --button-link-text-color-hover: var(--button-brown-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-brown-text-color);
@@ -363,6 +396,9 @@
   --button-outline-border-color: var(--button-grey);
   --button-outline-text-color: var(--button-grey);
 
+  --button-link-text-color: var(--button-grey);
+  --button-link-text-color-hover: var(--button-grey-hover);
+
   --button-box-shadow: var(--button-colored-box-shadow);
 
   --button-hover-color: var(--button-grey-text-color);
@@ -393,6 +429,9 @@
 
   --button-outline-border-color: var(--button-black);
   --button-outline-text-color: var(--button-black);
+
+  --button-link-text-color: var(--button-black);
+  --button-link-text-color-hover: var(--button-black-hover);
 
   --button-box-shadow: var(--button-colored-box-shadow);
 

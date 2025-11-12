@@ -10,6 +10,9 @@
   text-shadow: var(--button-primary-text-shadow);
   background-image: var(--button-primary-background-image);
 
+  --button-link-text-color: var(--button-primary-color);
+  --button-link-text-color-hover: var(--button-primary-color-hover);
+
   &:hover {
     background-color: var(--button-primary-color-hover);
     color: var(--button-primary-text-color);
@@ -69,6 +72,9 @@
   color: var(--button-secondary-text-color);
   text-shadow: var(--button-secondary-text-shadow);
   background-image: var(--button-colored-background-image);
+
+  --button-link-text-color: var(--button-secondary-color);
+  --button-link-text-color-hover: var(--button-secondary-color-hover);
 
   &:hover {
     background-color: var(--button-secondary-color-hover);

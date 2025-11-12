@@ -31,4 +31,11 @@
   --button-ghost-background-pressed: var(--button-styled-background-pressed);
   --button-ghost-background-active: var(--button-styled-background-active);
 
+  /* Link */
+  --button-link-padding: 0;
+  --button-link-text-decoration: underline;
+  --button-link-text-color: var(--link-color);
+  --button-link-text-color-hover: var(--link-hover-color);
+  --button-link-text-decoration-hover: underline;
+
 }

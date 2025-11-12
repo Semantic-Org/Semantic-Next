@@ -220,3 +220,76 @@
 
   }
 }
+
+/*-------------------
+       Link
+--------------------*/
+
+/* Singular */
+.link.button {
+  background: none;
+  box-shadow: none;
+  padding: var(--button-link-padding);
+  text-decoration: var(--button-link-text-decoration);
+  color: var(--button-link-text-color);
+  text-shadow: none;
+
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  &.hover,
+  &:hover {
+    background: none;
+    color: var(--button-link-text-color-hover);
+    text-decoration: var(--button-link-text-decoration-hover);
+  }
+
+  &.pressed,
+  &:active,
+  &.active {
+    background: none;
+    color: var(--button-link-text-color-hover);
+  }
+}
+
+/* Plural */
+.link.buttons {
+
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-background: none;
+    --button-box-shadow: none;
+    --button-padding: var(--button-link-padding);
+    --button-text-decoration: var(--button-link-text-decoration);
+    --button-text-color: var(--button-link-text-color);
+    --button-text-shadow: none;
+
+    /* Remove shading */
+    --button-hover-background: none;
+    --button-hover-background-image: none;
+    --button-hover-box-shadow: none;
+
+    --button-pressed-background: none;
+    --button-pressed-background-image: none;
+    --button-pressed-box-shadow: none;
+
+    --button-active-background: none;
+
+    --button-colored-background-image: none;
+    --button-colored-box-shadow: none;
+
+    --button-primary-background-image: none;
+    --button-primary-box-shadow: none;
+
+    --button-secondary-background-image: none;
+    --button-secondary-box-shadow: none;
+  }
+}

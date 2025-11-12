@@ -31,11 +31,6 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
   getForm() {
     return $(el).closest('form').el();
   },
-  getType() {
-    return settings.styled == 'link'
-      ? 'link'
-      : 'button';
-  },
   isDisabled() {
     return settings.state == 'disabled';
   },
