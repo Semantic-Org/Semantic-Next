@@ -38,3 +38,51 @@
   font-weight: 700;
 }
 
+/*
+ * LINESeedSans Font Family
+ */
+
+/* Thin (100) */
+@font-face {
+  font-family: 'Line';
+  src: url('/fonts/line/LINESeedSans_W_Th.woff2') format('woff2');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Regular (400) */
+@font-face {
+  font-family: 'Line';
+  src: url('/fonts/line/LINESeedSans_W_Rg.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bold (700) */
+@font-face {
+  font-family: 'Line';
+  src: url('/fonts/line/LINESeedSans_W_Bd.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Extra Bold (800) */
+@font-face {
+  font-family: 'Line';
+  src: url('/fonts/line/LINESeedSans_W_XBd.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Heavy (900) */
+@font-face {
+  font-family: 'Line';
+  src: url('/fonts/line/LINESeedSans_W_He.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
