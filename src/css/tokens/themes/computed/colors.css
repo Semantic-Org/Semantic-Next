@@ -628,13 +628,13 @@
   --slate-20: oklch(from var(--slate) calc(l * var(--slate-lightness-20)) calc(c * var(--slate-chroma-20)) h);
   --slate-30: oklch(from var(--slate) calc(l * var(--slate-lightness-30)) calc(c * var(--slate-chroma-30)) h);
   --slate-40: oklch(from var(--slate) calc(l * var(--slate-lightness-40)) calc(c * var(--slate-chroma-40)) h);
-  --slate-50: var(--slate);
+  --slate-50: oklch(from var(--slate) calc(l * var(--slate-lightness-50)) calc(c * var(--slate-chroma-50)) h);
   --slate-60: oklch(from var(--slate) calc(l * var(--slate-lightness-60)) calc(c * var(--slate-chroma-60)) h);
   --slate-70: oklch(from var(--slate) calc(l * var(--slate-lightness-70)) calc(c * var(--slate-chroma-70)) h);
   --slate-80: oklch(from var(--slate) calc(l * var(--slate-lightness-80)) calc(c * var(--slate-chroma-80)) h);
   --slate-90: oklch(from var(--slate) calc(l * var(--slate-lightness-90)) calc(c * var(--slate-chroma-90)) h);
   --slate-95: oklch(from var(--slate) calc(l * var(--slate-lightness-95)) calc(c * var(--slate-chroma-95)) h);
-  --slate-100: oklch(from var(--slate) calc(l * var(--slate-lightness-100)) calc(c * var(--slate-chroma-100)) h);
+  --slate-100: var(--slate);
 
   /* -------------------
         Invariant Colors

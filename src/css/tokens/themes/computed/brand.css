@@ -7,10 +7,16 @@
   --primary-color: var(--blue);
   --primary: var(--primary-color); /* alias */
   --primary-text-color: var(--blue-text-color);
+  --primary-text-color-hover: var(--primary-80);
+  --primary-text-color-pressed: var(--primary-90);
+  --primary-text-color-disabled: var(--primary-40);
 
   --secondary-color: var(--slate);
   --secondary: var(--secondary-color); /* alias */
   --secondary-text-color: var(--slate-text-color);
+  --secondary-text-color-hover: var(--secondary-80);
+  --secondary-text-color-pressed: var(--secondary-90);
+  --secondary-text-color-disabled: var(--secondary-40);
 
 
   /* -------------------

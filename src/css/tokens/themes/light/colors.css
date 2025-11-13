@@ -8,7 +8,7 @@ html,
 [theme][theme="light"] {
 
   /* -------------------
-          Colors
+        Base Colors
   -------------------- */
 
   --red: oklch(0.59 0.27 28);
@@ -25,6 +25,10 @@ html,
   --grey: oklch(0.57 0 0);
   --slate: oklch(0.23 0 0);
 
+  /* -------------------
+        Text Colors
+  -------------------- */
+
   --red-text-color: var(--red-70);
   --olive-text-color: var(--olive-70);
   --green-text-color: var(--green-70);
@@ -38,6 +42,52 @@ html,
   --brown-text-color: var(--brown-70);
   --grey-text-color: var(--grey-70);
   --slate-text-color: var(--slate-70);
+
+  --red-text-color-hover: var(--red-80);
+  --olive-text-color-hover: var(--olive-80);
+  --green-text-color-hover: var(--green-80);
+  --yellow-text-color-hover: var(--yellow-80);
+  --blue-text-color-hover: var(--blue-80);
+  --teal-text-color-hover: var(--teal-80);
+  --pink-text-color-hover: var(--pink-80);
+  --violet-text-color-hover: var(--violet-80);
+  --purple-text-color-hover: var(--purple-80);
+  --orange-text-color-hover: var(--orange-80);
+  --brown-text-color-hover: var(--brown-80);
+  --grey-text-color-hover: var(--grey-80);
+  --slate-text-color-hover: var(--slate-80);
+
+  --red-text-color-pressed: var(--red-90);
+  --olive-text-color-pressed: var(--olive-90);
+  --green-text-color-pressed: var(--green-90);
+  --yellow-text-color-pressed: var(--yellow-90);
+  --blue-text-color-pressed: var(--blue-90);
+  --teal-text-color-pressed: var(--teal-90);
+  --pink-text-color-pressed: var(--pink-90);
+  --violet-text-color-pressed: var(--violet-90);
+  --purple-text-color-pressed: var(--purple-90);
+  --orange-text-color-pressed: var(--orange-90);
+  --brown-text-color-pressed: var(--brown-90);
+  --grey-text-color-pressed: var(--grey-90);
+  --slate-text-color-pressed: var(--slate-90);
+
+  --red-text-color-disabled: var(--red-40);
+  --olive-text-color-disabled: var(--olive-40);
+  --green-text-color-disabled: var(--green-40);
+  --yellow-text-color-disabled: var(--yellow-40);
+  --blue-text-color-disabled: var(--blue-40);
+  --teal-text-color-disabled: var(--teal-40);
+  --pink-text-color-disabled: var(--pink-40);
+  --violet-text-color-disabled: var(--violet-40);
+  --purple-text-color-disabled: var(--purple-40);
+  --orange-text-color-disabled: var(--orange-40);
+  --brown-text-color-disabled: var(--brown-40);
+  --grey-text-color-disabled: var(--grey-40);
+  --slate-text-color-disabled: var(--slate-40);
+
+  /* -------------------
+        Header Colors
+  -------------------- */
 
   --red-header-color: var(--red-80);
   --olive-header-color: var(--olive-80);
@@ -53,6 +103,11 @@ html,
   --grey-header-color: var(--grey-80);
   --slate-header-color: var(--slate-80);
 
+
+  /* -------------------
+     Background Colors
+  -------------------- */
+
   --red-background-color: var(--red-0);
   --olive-background-color: var(--olive-0);
   --green-background-color: var(--green-0);
@@ -66,6 +121,10 @@ html,
   --brown-background-color: var(--brown-0);
   --grey-background-color: var(--grey-0);
   --slate-background-color: var(--slate-0);
+
+  /* -------------------
+     Border Colors
+  -------------------- */
 
   --red-border-color: var(--red-30);
   --olive-border-color: var(--olive-30);

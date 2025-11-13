@@ -20,6 +20,8 @@
   --duration: 0.15s;
   --easing: ease;
 
+  --loader-duration: 0.5s;
+
   /* --------------
        States
   --------------- */
