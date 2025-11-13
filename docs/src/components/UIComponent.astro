@@ -23,32 +23,32 @@ const { name, attributes } = Astro.props;
 ---
 
 {name === 'UIButton' && (
-  <UIButton {...attributes} client:load>
+  <UIButton {...attributes} client:visible>
     <slot />
   </UIButton>
 )}
 {name === 'UISegment' && (
-  <UISegment {...attributes} client:load>
+  <UISegment {...attributes} client:visible>
     <slot />
   </UISegment>
 )}
 {name === 'UISegments' && (
-  <UISegments {...attributes} client:load>
+  <UISegments {...attributes} client:visible>
     <slot />
   </UISegments>
 )}
 {name === 'UIButtons' && (
-  <UIButtons {...attributes} client:load>
+  <UIButtons {...attributes} client:visible>
     <slot />
   </UIButtons>
 )}
 {name === 'UICard' && (
-  <UICard {...attributes} client:load>
+  <UICard {...attributes} client:visible>
     <slot />
   </UICard>
 )}
 {name === 'UICards' && (
-  <UICards {...attributes} client:load>
+  <UICards {...attributes} client:visible>
     <slot />
   </UICards>
 )}
@@ -60,7 +60,7 @@ const { name, attributes } = Astro.props;
 )}
 
 {name === 'UIDivider' && (
-  <UIDivider {...attributes} client:load>
+  <UIDivider {...attributes} client:visible>
     <slot />
   </UIDivider>
 )}
@@ -74,7 +74,7 @@ const { name, attributes } = Astro.props;
 )}
 
 {name === 'UILabel' && (
-  <UILabel {...attributes} client:load>
+  <UILabel {...attributes} client:visible>
     <slot />
   </UILabel>
 )}
@@ -85,17 +85,17 @@ const { name, attributes } = Astro.props;
   </UIRail>
 )}
 {name === 'UIMenu' && (
-  <UIMenu {...attributes} client:load>
+  <UIMenu {...attributes} client:visible>
     <slot />
   </UIMenu>
 )}
 {name === 'MenuItem' && (
-  <MenuItem {...attributes} client:load>
+  <MenuItem {...attributes} client:visible>
     <slot />
   </MenuItem>
 )}
 {name === 'UITable' && (
-  <UITable {...attributes} client:load>
+  <UITable {...attributes} client:visible>
     <slot />
   </UITable>
 )}

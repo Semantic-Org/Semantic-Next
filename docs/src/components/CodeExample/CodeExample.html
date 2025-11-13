@@ -5,8 +5,8 @@
         {title}
       </span>
       <span class="links">
-        {#if sandboxLink}
-          <ui-icon codesandbox link href="{sandboxLink}"></ui-icon>
+        {#if code}
+          <ui-icon codesandbox link class="playground"></ui-icon>
         {/if}
         <ui-icon code link class="toggle"></ui-icon>
       </span>

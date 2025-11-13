@@ -1,5 +1,7 @@
+import { getCodePlaygroundLink } from '@helpers/link-encoder.js';
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '@semantic-ui/core';
+import { openLink } from '@semantic-ui/utils';
 
 import css from './CodeExample.css?raw';
 import template from './CodeExample.html?raw';
@@ -11,7 +13,6 @@ const defaultSettings = {
   title: undefined,
   description: undefined,
   language: 'html',
-  sandboxLink: undefined,
   code: undefined,
   showCode: false, // show code on start
 };
@@ -41,6 +42,9 @@ const createComponent = ({ $, isServer, reaction, state, settings, self }) => ({
       state.displayedCode.set(code);
     });
   },
+  getPlaygroundLink(code) {
+    return getCodePlaygroundLink(code);
+  },
   /*setSlottedContent() {
     if(isServer) {
       return;
@@ -63,6 +67,10 @@ const onRendered = function({ self }) {
 const events = {
   'click ui-icon.toggle'({ state }) {
     state.codeVisible.toggle();
+  },
+  'click ui-icon.playground'({ settings, self, event }) {
+    const playgroundLink = self.getPlaygroundLink(settings.code);
+    openLink(playgroundLink, { newWindow: true, event });
   },
 };
 

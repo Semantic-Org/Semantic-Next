@@ -1,4 +1,4 @@
-import { each } from '@semantic-ui/utils';
+import { each, isServer } from '@semantic-ui/utils';
 
 /* These are top level to make it easier to format */
 
@@ -45,7 +45,7 @@ export const componentHTMLAfter = ``;
 export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
-export const isStaticBuild = Boolean(process.env.VERCEL_URL);
+export const isStaticBuild = isServer && Boolean(process.env.VERCEL_URL);
 
 // we can use the node_modules path for imports when running in server mode
 // this will let you check examples/playground against local versions of packages

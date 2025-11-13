@@ -3,15 +3,11 @@
 import { tokenize, getArticle, toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
 import UIComponent from '@components/UIComponent.astro';
-import { getCodePlaygroundLink } from '@helpers/link-encoder.js';
 
 const { spec, plural, definition, name, componentName } = Astro.props;
 
 const sections = ['types', 'content', 'states', 'variations'];
 const article = getArticle(name, { capitalize: true });
-const getSandboxLink = function(code) {
-  return getCodePlaygroundLink(code);
-};
 ---
 {sections.map((section) => (
   definition[section]?.length > 0 && (
@@ -26,7 +22,6 @@ const getSandboxLink = function(code) {
                   title={(index == 0) ? type.title : undefined }
                   description={type.description}
                   code={example.code}
-                  sandboxLink={getCodePlaygroundLink(example.code)}
                   showCode={example.showCode}
                   class={tokenize(type.title)}
                   id={tokenize(type.title) + '-example'}
