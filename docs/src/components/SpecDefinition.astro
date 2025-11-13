@@ -28,7 +28,7 @@ const article = getArticle(name, { capitalize: true });
                 >
                   {example.components.map((component) => (
                     (component.componentName)
-                      ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
+                      ? (<UIComponent tagName={component.componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
                       : (<Fragment set:html={component.html} />)
                   ))}
                 </CodeExample>
