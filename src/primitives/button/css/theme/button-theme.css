@@ -12,7 +12,8 @@
 @import url('./plural/buttons-variables.css') layer(button.theme.plural);
 
 /* Types */
-@import url('./types/styled-variables.css') layer(button.theme.types.style);
+@import url('./types/link-variables.css') layer(button.theme.types.link);
+@import url('./types/styled-variables.css') layer(button.theme.types.styled);
 @import url('./types/emphasis-variables.css') layer(button.theme.types.emphasis);
 @import url('./types/icon-variables.css') layer(button.theme.types.icon);
 @import url('./types/labeled-variables.css') layer(button.theme.types.labeled);

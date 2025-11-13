@@ -13,6 +13,7 @@ export default {
   ],
   "types": [
     "emphasis",
+    "link",
     "styled",
     "toggle",
     "animated"
@@ -51,6 +52,7 @@ export default {
     "image",
     "badge",
     "emphasis",
+    "link",
     "styled",
     "toggle",
     "animated",
@@ -81,11 +83,10 @@ export default {
   "optionAttributes": {
     "primary": "emphasis",
     "secondary": "emphasis",
-    "solid": "styled",
     "subtle": "styled",
+    "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
-    "link": "styled",
     "horizontal-animated": "animated",
     "vertical-animated": "animated",
     "fade-animated": "animated",
@@ -142,6 +143,7 @@ export default {
     "image": "string",
     "badge": "string",
     "emphasis": "string",
+    "link": "boolean",
     "styled": "string",
     "toggle": "boolean",
     "animated": "string",
@@ -175,11 +177,10 @@ export default {
       "secondary"
     ],
     "styled": [
-      "solid",
       "subtle",
+      "flat",
       "outline",
-      "ghost",
-      "link"
+      "ghost"
     ],
     "animated": [
       "horizontal-animated",
@@ -261,6 +262,7 @@ export default {
   "attributeClasses": [
     "icon",
     "emphasis",
+    "styled",
     "animated",
     "disabled",
     "attached",

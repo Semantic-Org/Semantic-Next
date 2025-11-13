@@ -18,6 +18,7 @@
 @import url('./states/loading.css') layer(button.definition.states.loading);
 
 /* Types */
+@import url('./types/link.css') layer(button.definition.types.link);
 @import url('./types/styled.css') layer(button.definition.types.styled);
 @import url('./types/animated.css') layer(button.definition.types.animated);
 @import url('./types/emphasis.css') layer(button.definition.types.emphasis);

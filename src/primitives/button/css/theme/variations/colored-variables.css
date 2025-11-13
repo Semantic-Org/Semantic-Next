@@ -2,11 +2,7 @@
 
   /* Colors */
   --button-colored-background-image: var(--button-background-image);
-  --button-colored-box-shadow:
-    0 -1px 0 0 rgba(0, 0, 0, 0.05) inset,
-    0 0 0 1px rgba(0, 0, 0, 0.13) inset,
-    0 1px 3px rgba(0, 0, 0, 0.15)
-  ;
+  --button-colored-box-shadow: var(--button-box-shadow);
   --button-inverted-text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
 
   --button-red: var(--red);
@@ -77,7 +73,6 @@
   --button-grey-pressed: oklch(from var(--button-grey) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
   --button-black-pressed: oklch(from var(--button-black) calc(l - var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
 
-
   /* Colored */
   --button-brown-text-color: var(--button-inverted-text-color);
   --button-brown-text-shadow: var(--button-inverted-text-shadow);
@@ -105,33 +100,5 @@
   --button-teal-text-shadow: var(--button-inverted-text-shadow);
   --button-grey-text-color: var(--button-inverted-text-color);
   --button-grey-text-shadow: var(--button-inverted-text-shadow);
-
-  /* Inverted */
-  --button-light-brown-text-color: var(--button-inverted-text-color);
-  --button-light-brown-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-red-text-color: var(--button-inverted-text-color);
-  --button-light-red-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-orange-text-color: var(--button-inverted-text-color);
-  --button-light-orange-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-green-text-color: var(--button-inverted-text-color);
-  --button-light-green-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-blue-text-color: var(--button-inverted-text-color);
-  --button-light-blue-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-violet-text-color: var(--button-inverted-text-color);
-  --button-light-violet-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-purple-text-color: var(--button-inverted-text-color);
-  --button-light-purple-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-pink-text-color: var(--button-inverted-text-color);
-  --button-light-pink-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-black-text-color: var(--button-inverted-text-color);
-  --button-light-black-text-shadow: var(--button-inverted-text-shadow);
-  --button-light-olive-text-color: var(--button-text-color);
-  --button-light-olive-text-shadow: var(--button-text-shadow);
-  --button-light-yellow-text-color: var(--button-text-color);
-  --button-light-yellow-text-shadow: var(--button-text-shadow);
-  --button-light-teal-text-color: var(--button-text-color);
-  --button-light-teal-text-shadow: var(--button-text-shadow);
-  --button-light-grey-text-color: var(--button-text-color);
-  --button-light-grey-text-shadow: var(--button-text-shadow);
 
 }

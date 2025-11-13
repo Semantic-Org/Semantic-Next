@@ -49,7 +49,7 @@
           "value": "primary",
           "description": "be emphasized as the first action that should be taken",
           "exampleCode": "<ui-button primary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>"
-        },
+      },
         {
           "name": "Secondary",
           "value": "secondary",
@@ -59,36 +59,38 @@
       ]
     },
     {
+      "name": "Link",
+      "attribute": "link",
+      "description": "be formatted as a page link",
+      "usageLevel": 1
+    },
+    {
       "name": "Styled",
       "attribute": "styled",
       "description": "be styled to fit into a layout",
       "usageLevel": 1,
       "separateExamples": false,
+      "includeAttributeClass": true,
       "options": [
-        {
-          "name": "Solid",
-          "value": "solid",
-          "description": "use a solid color"
-        },
         {
           "name": "Subtle",
           "value": "subtle",
-          "description": "use a subtle background tint"
+          "description": "be styled to be de-emphasized"
+        },
+        {
+          "name": "Flat",
+          "value": "flat",
+          "description": "be styled to appear flat"
         },
         {
           "name": "Outline",
           "value": "outline",
-          "description": "use no background"
+          "description": "be styled to appear outlined"
         },
         {
           "name": "Ghost",
           "value": "ghost",
           "description": "only show styling when hovered"
-        },
-        {
-          "name": "Link",
-          "value": "link",
-          "description": "appear as an underlined link"
         }
       ]
     },
@@ -237,71 +239,131 @@
       "includeAttributeClass": true,
       "description": "be colored",
       "usageLevel": 3,
+      "separateExamples": true,
+      "exampleCode": [
+        "<ui-button red>Red</ui-button>\n<ui-button orange>Orange</ui-button>\n<ui-button yellow>Yellow</ui-button>\n<ui-button olive>Olive</ui-button>\n<ui-button green>Green</ui-button>\n<ui-button teal>Teal</ui-button>\n<ui-button blue>Blue</ui-button>\n<ui-button violet>Violet</ui-button>\n<ui-button purple>Purple</ui-button>\n<ui-button pink>Pink</ui-button>\n<ui-button brown>Brown</ui-button>\n<ui-button grey>Grey</ui-button>\n<ui-button black>Black</ui-button>",
+        "<ui-button subtle red>Red</ui-button>\n<ui-button subtle orange>Orange</ui-button>\n<ui-button subtle yellow>Yellow</ui-button>\n<ui-button subtle olive>Olive</ui-button>\n<ui-button subtle green>Green</ui-button>\n<ui-button subtle teal>Teal</ui-button>\n<ui-button subtle blue>Blue</ui-button>\n<ui-button subtle violet>Violet</ui-button>\n<ui-button subtle purple>Purple</ui-button>\n<ui-button subtle pink>Pink</ui-button>\n<ui-button subtle brown>Brown</ui-button>\n<ui-button subtle grey>Grey</ui-button>\n<ui-button subtle black>Black</ui-button>",
+        "<ui-button flat red>Red</ui-button>\n<ui-button flat orange>Orange</ui-button>\n<ui-button flat yellow>Yellow</ui-button>\n<ui-button flat olive>Olive</ui-button>\n<ui-button flat green>Green</ui-button>\n<ui-button flat teal>Teal</ui-button>\n<ui-button flat blue>Blue</ui-button>\n<ui-button flat violet>Violet</ui-button>\n<ui-button flat purple>Purple</ui-button>\n<ui-button flat pink>Pink</ui-button>\n<ui-button flat brown>Brown</ui-button>\n<ui-button flat grey>Grey</ui-button>\n<ui-button flat black>Black</ui-button>",
+        "<ui-button outline red>Red</ui-button>\n<ui-button outline orange>Orange</ui-button>\n<ui-button outline yellow>Yellow</ui-button>\n<ui-button outline olive>Olive</ui-button>\n<ui-button outline green>Green</ui-button>\n<ui-button outline teal>Teal</ui-button>\n<ui-button outline blue>Blue</ui-button>\n<ui-button outline violet>Violet</ui-button>\n<ui-button outline purple>Purple</ui-button>\n<ui-button outline pink>Pink</ui-button>\n<ui-button outline brown>Brown</ui-button>\n<ui-button outline grey>Grey</ui-button>\n<ui-button outline black>Black</ui-button>",
+        "<ui-button ghost red>Red</ui-button>\n<ui-button ghost orange>Orange</ui-button>\n<ui-button ghost yellow>Yellow</ui-button>\n<ui-button ghost olive>Olive</ui-button>\n<ui-button ghost green>Green</ui-button>\n<ui-button ghost teal>Teal</ui-button>\n<ui-button ghost blue>Blue</ui-button>\n<ui-button ghost violet>Violet</ui-button>\n<ui-button ghost purple>Purple</ui-button>\n<ui-button ghost pink>Pink</ui-button>\n<ui-button ghost brown>Brown</ui-button>\n<ui-button ghost grey>Grey</ui-button>\n<ui-button ghost black>Black</ui-button>"
+      ],
       "options": [
         {
           "name": "Red",
           "value": "red",
-          "description": "red"
+          "description": "red",
+          "exampleCode": [
+            "<ui-button red>Red</ui-button>",
+            "<ui-button subtle red>Red</ui-button>"
+          ]
         },
         {
           "name": "Orange",
           "value": "orange",
-          "description": "orange"
+          "description": "orange",
+          "exampleCode": [
+            "<ui-button orange>Orange</ui-button>",
+            "<ui-button subtle orange>Orange</ui-button>"
+          ]
         },
         {
           "name": "Yellow",
           "value": "yellow",
-          "description": "yellow"
+          "description": "yellow",
+          "exampleCode": [
+            "<ui-button yellow>Yellow</ui-button>",
+            "<ui-button subtle yellow>Yellow</ui-button>"
+          ]
         },
         {
           "name": "Olive",
           "value": "olive",
-          "description": "olive"
+          "description": "olive",
+          "exampleCode": [
+            "<ui-button olive>Olive</ui-button>",
+            "<ui-button subtle olive>Olive</ui-button>"
+          ]
         },
         {
           "name": "Green",
           "value": "green",
-          "description": "green"
+          "description": "green",
+          "exampleCode": [
+            "<ui-button green>Green</ui-button>",
+            "<ui-button subtle green>Green</ui-button>"
+          ]
         },
         {
           "name": "Teal",
           "value": "teal",
-          "description": "teal"
+          "description": "teal",
+          "exampleCode": [
+            "<ui-button teal>Teal</ui-button>",
+            "<ui-button subtle teal>Teal</ui-button>"
+          ]
         },
         {
           "name": "Blue",
           "value": "blue",
-          "description": "blue"
+          "description": "blue",
+          "exampleCode": [
+            "<ui-button blue>Blue</ui-button>",
+            "<ui-button subtle blue>Blue</ui-button>"
+          ]
         },
         {
           "name": "Violet",
           "value": "violet",
-          "description": "violet"
+          "description": "violet",
+          "exampleCode": [
+            "<ui-button violet>Violet</ui-button>",
+            "<ui-button subtle violet>Violet</ui-button>"
+          ]
         },
         {
           "name": "Purple",
           "value": "purple",
-          "description": "purple"
+          "description": "purple",
+          "exampleCode": [
+            "<ui-button purple>Purple</ui-button>",
+            "<ui-button subtle purple>Purple</ui-button>"
+          ]
         },
         {
           "name": "Pink",
           "value": "pink",
-          "description": "pink"
+          "description": "pink",
+          "exampleCode": [
+            "<ui-button pink>Pink</ui-button>",
+            "<ui-button subtle pink>Pink</ui-button>"
+          ]
         },
         {
           "name": "Brown",
           "value": "brown",
-          "description": "brown"
+          "description": "brown",
+          "exampleCode": [
+            "<ui-button brown>Brown</ui-button>",
+            "<ui-button subtle brown>Brown</ui-button>"
+          ]
         },
         {
           "name": "Grey",
           "value": "grey",
-          "description": "grey"
+          "description": "grey",
+          "exampleCode": [
+            "<ui-button grey>Grey</ui-button>",
+            "<ui-button subtle grey>Grey</ui-button>"
+          ]
         },
         {
           "name": "Black",
           "value": "black",
-          "description": "black"
+          "description": "black",
+          "exampleCode": [
+            "<ui-button black>Black</ui-button>",
+            "<ui-button subtle black>Black</ui-button>"
+          ]
         }
       ]
     },

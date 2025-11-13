@@ -26,11 +26,10 @@ export default {
     "equal-width"
   ],
   "optionAttributes": {
-    "solid": "styled",
     "subtle": "styled",
+    "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
-    "link": "styled",
     "top-attached": "attached",
     "attached": "attached",
     "bottom-attached": "attached",
@@ -80,11 +79,10 @@ export default {
   },
   "allowedValues": {
     "styled": [
-      "solid",
       "subtle",
+      "flat",
       "outline",
-      "ghost",
-      "link"
+      "ghost"
     ],
     "attached": [
       "top-attached",
@@ -135,6 +133,7 @@ export default {
     ]
   },
   "attributeClasses": [
+    "styled",
     "attached",
     "color",
     "equal-width"

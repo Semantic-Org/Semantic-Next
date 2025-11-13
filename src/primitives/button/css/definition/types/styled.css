@@ -1,258 +1,140 @@
-/*-------------------
-       Solid
---------------------*/
-
-/* Singular button styling */
-.solid.button {
-  box-shadow: none;
-  background-image: none;
-  color: var(--button-solid-text-color);
-
-  /* No shading on colored buttons */
-  --button-hover-box-shadow: none;
-  --button-pressed-box-shadow: none;
-
-  --button-colored-box-shadow: none;
-  --button-primary-box-shadow: none;
-  --button-secondary-box-shadow: none;
-
-  --button-colored-background-image: none;
-  --button-primary-background-image: none;
-  --button-secondary-background-image: none;
-
-  &:not(:is(.color, .emphasis)) {
-    background-color: var(--standard-10);
-    text-shadow: none;
-
-    &.hover,
-    &:hover {
-      background-color: var(--button-solid-background-hover);
-      color: var(--standard-80);
-    }
-
-    &.pressed,
-    &:active {
-      background-color: var(--button-solid-background-pressed);
-      color: var(--standard-90);
-    }
-
-    .active {
-      background-color: var(--button-solid-background-active);
-      color: var(--standard-80);
-    }
-  }
-}
-
-/* Plural buttons - override CSS variables for child components */
-.solid.buttons {
-  ::slotted(ui-button) {
-    /* Override internal button variables */
-    --button-box-shadow: none;
-    --button-background-image: none;
-    --button-text-color: var(--button-solid-text-color);
-
-    /* Remove shading for colored variants */
-    --button-hover-box-shadow: none;
-    --button-pressed-box-shadow: none;
-    --button-colored-box-shadow: none;
-    --button-primary-box-shadow: none;
-    --button-secondary-box-shadow: none;
-
-    --button-colored-background-image: none;
-    --button-primary-background-image: none;
-    --button-secondary-background-image: none;
-
-    /* Default solid background/text for non-emphasized buttons */
-    --button-background: var(--standard-10);
-    --button-text-shadow: none;
-  }
-}
 
 /*-------------------
-      Subtle
---------------------*/
+   Styled / Subtle
+-- ------------------*/
 
-/* Singular button styling */
-.subtle.button {
-  box-shadow: none;
-  background-image: none;
-  background-color: var(--button-subtle-background);
-  color: var(--button-subtle-text-color);
-  text-shadow: none;
+/* Styled is applied to all styled type. */
+/* All styled variations use similar styles but each level of de-emphasis removes additional styles */
 
-  /* No shading on colored buttons */
-  --button-hover-box-shadow: none;
-  --button-pressed-box-shadow: none;
-
-  --button-colored-box-shadow: none;
-  --button-primary-box-shadow: none;
-  --button-secondary-box-shadow: none;
-
-  --button-colored-background-image: none;
-  --button-primary-background-image: none;
-  --button-secondary-background-image: none;
+.styled.button {
+  background: var(--button-styled-background);
+  color: var(--button-styled-text-color);
+  box-shadow: var(--button-styled-box-shadow);
+  text-shadow: var(--button-styled-text-shadow);
 
   &.hover,
   &:hover {
-    background-color: var(--button-subtle-background-hover);
-    color: var(--standard-80);
+    background-color: var(--button-styled-hover-background);
+    color: var(--button-styled-hover-color);
   }
 
   &.pressed,
   &:active {
-    background-color: var(--button-subtle-background-pressed);
-    color: var(--standard-90);
+    background-color: var(--button-styled-pressed-background);
+    color: var(--button-styled-pressed-color);
   }
 
   .active {
-    background-color: var(--button-subtle-background-active);
-    color: var(--standard-80);
+    background-color: var(--button-styled-active-background);
+    color: var(--button-styled-active-color);
   }
 }
 
 /* Plural buttons - override CSS variables for child components */
-.subtle.buttons {
+.styled.buttons {
   ::slotted(ui-button) {
-    /* Override internal button variables */
-    --button-box-shadow: none;
+
+    /* Style button */
+    --button-background: var(--button-styled-background);
+    --button-box-shadow: var(--button-styled-box-shadow);
+    --button-text-shadow: var(--button-styled-text-shadow);
+    --button-text-color: var(--button-styled-color);
+
+    /* Style States */
+    --button-hover-background-color: var(--button-styled-hover-background);
+    --button-hover-color: var(--button-styled-hover-color);
+    --button-pressed-background-color: var(--button-styled-pressed-background);
+    --button-pressed-color: var(--button-styled-pressed-color);
+
+    /* Remove gradient from variations */
     --button-background-image: none;
-    --button-background: var(--button-subtle-background);
-    --button-text-color: var(--button-subtle-text-color);
-    --button-text-shadow: none;
-
-    /* Remove shading for colored variants */
-    --button-hover-box-shadow: none;
-    --button-pressed-box-shadow: none;
-    --button-colored-box-shadow: none;
-    --button-primary-box-shadow: none;
-    --button-secondary-box-shadow: none;
-
     --button-colored-background-image: none;
     --button-primary-background-image: none;
     --button-secondary-background-image: none;
-
-    /* Default subtle background/text for non-emphasized buttons */
-    --button-background: var(--standard-5);
   }
+}
+
+/*-------------------
+       Subtle
+--------------------*/
+
+/* Nothing additonal removed */
+
+/*-------------------
+       Flat
+--------------------*/
+
+.flat.button,
+.flat.buttons ::slotted(ui-button) {
+
+  /* Remove shading variables */
+  --button-box-shadow: none;
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+}
+
+/* Shadow removed */
+.flat.buttons,
+.flat.button {
+  box-shadow: none;
 }
 
 /*-------------------
       Outline
 --------------------*/
 
-/* Singular button styling */
-.outline.button {
-  background: none;
-  box-shadow: none;
-  outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
-  outline-offset: var(--button-outline-border-offset);
-  color: var(--button-outline-text-color);
-  text-shadow: none;
+.outline.button,
+.outline.buttons ::slotted(ui-button) {
 
-  --button-hover-box-shadow: none;
-  --button-pressed-box-shadow: none;
-
-  --button-colored-box-shadow: none;
-  --button-primary-box-shadow: none;
-  --button-secondary-box-shadow: none;
-
+  /* Remove shading */
+  --button-background: none;
+  --button-hover-background-image: none;
+  --button-pressed-background-image: none;
   --button-colored-background-image: none;
   --button-primary-background-image: none;
   --button-secondary-background-image: none;
 
-  &:not(:is(.color, .emphasis)) {
-    &.hover,
-    &:hover {
-      background: var(--standard-15);
-      color: var(--standard-80);
-    }
-
-    &.pressed,
-    &:active {
-      background: var(--standard-20);
-    }
-
-    .active {
-      background: var(--standard-20);
-    }
-  }
+  /* Remove shadow */
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
 }
 
-/* Plural buttons - override CSS variables for child components */
+/* Shadow & Background removed */
+.outline.button {
+  background: none;
+  box-shadow: none;
+
+  /* Add border with outline to avoid border offset */
+  outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
+  outline-offset: var(--button-outline-border-offset);
+
+}
+
+/* Plural buttons*/
 .outline.buttons {
-
+  background: none;
+  box-shadow: none;
   border: var(--border);
-
-  ::slotted(ui-button) {
-    /* Override internal button variables */
-    --button-background: none;
-    --button-box-shadow: none;
-    --button-outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
-    --button-outline-offset: var(--button-outline-border-offset);
-    --button-text-color: var(--button-outline-text-color);
-    --button-text-shadow: none;
-
-    /* Remove shading */
-    --button-hover-background-image: none;
-    --button-hover-box-shadow: none;
-
-    --button-pressed-background-image: none;
-    --button-pressed-box-shadow: none;
-
-    --button-colored-background-image: none;
-    --button-colored-box-shadow: none;
-
-    --button-primary-background-image: none;
-    --button-primary-box-shadow: none;
-
-    --button-secondary-background-image: none;
-    --button-secondary-box-shadow: none;
-  }
 }
 
 /*-------------------
        Ghost
 --------------------*/
 
-/* Singular */
 .ghost.button {
+
   box-shadow: none;
 
-  --button-hover-box-shadow: none;
-  --button-pressed-box-shadow: none;
-
-  --button-colored-box-shadow: none;
-  --button-primary-box-shadow: none;
-  --button-secondary-box-shadow: none;
-
-  --button-colored-background-image: none;
-  --button-primary-background-image: none;
-  --button-secondary-background-image: none;
-
+  /* Remove background but only without hover */
   &:not(:is(:hover, .hover, :active, .pressed, .active)) {
     background: none;
-  }
-
-  &:not(:is(.color, .emphasis)) {
-    background: none;
-    color: var(--text-color);
-
-    &.hover,
-    &:hover {
-      background: var(--button-ghost-background-hover);
-      color: var(--standard-80);
-    }
-
-    &.pressed,
-    &:active {
-      background: var(--button-ghost-background-pressed);
-      color: var(--standard-90);
-    }
-
-    .active {
-      background: var(--button-ghost-background-active);
-      color: var(--standard-80);
-    }
   }
 }
 
@@ -265,99 +147,29 @@
     --button-background: none;
     --button-text-color: var(--text-color);
 
-    /* Ghost hover/active states */
-    --button-background-hover: var(--button-ghost-background-hover);
-    --button-background-pressed: var(--button-ghost-background-pressed);
-    --button-background-active: var(--button-ghost-background-active);
+    /* Ghost hover states */
+    --button-background-hover: var(--button-styled-background-hover);
+    --button-hover-color: var(--button-styled-color);
+    --button-background-pressed: var(--button-styled-background-pressed);
+    --button-background-pressed-color: var(--button-styled-background-pressed-color);
+
+    --button-background-active: var(--button-styled-background-active);
+    --button-background-active-color: var(--button-styled-background-active-color);
 
     /* Remove shading */
-    --button-hover-background-image: none;
-    --button-hover-box-shadow: none;
-
-    --button-pressed-background-image: none;
-    --button-pressed-box-shadow: none;
-
-    --button-colored-background-image: none;
-    --button-colored-box-shadow: none;
-
-    --button-primary-background-image: none;
-    --button-primary-box-shadow: none;
-
-    --button-secondary-background-image: none;
-    --button-secondary-box-shadow: none;
-
-  }
-}
-
-/*-------------------
-       Link
---------------------*/
-
-/* Singular */
-.link.button {
-  background: none;
-  box-shadow: none;
-  padding: var(--button-link-padding);
-  text-decoration: var(--button-link-text-decoration);
-  color: var(--button-link-text-color);
-  text-shadow: none;
-
-  --button-hover-box-shadow: none;
-  --button-pressed-box-shadow: none;
-
-  --button-colored-box-shadow: none;
-  --button-primary-box-shadow: none;
-  --button-secondary-box-shadow: none;
-
-  --button-colored-background-image: none;
-  --button-primary-background-image: none;
-  --button-secondary-background-image: none;
-
-  &.hover,
-  &:hover {
-    background: none;
-    color: var(--button-link-text-color-hover);
-    text-decoration: var(--button-link-text-decoration-hover);
-  }
-
-  &.pressed,
-  &:active,
-  &.active {
-    background: none;
-    color: var(--button-link-text-color-hover);
-  }
-}
-
-/* Plural */
-.link.buttons {
-
-  ::slotted(ui-button) {
-    /* Override internal button variables */
     --button-background: none;
-    --button-box-shadow: none;
-    --button-padding: var(--button-link-padding);
-    --button-text-decoration: var(--button-link-text-decoration);
-    --button-text-color: var(--button-link-text-color);
-    --button-text-shadow: none;
-
-    /* Remove shading */
-    --button-hover-background: none;
     --button-hover-background-image: none;
-    --button-hover-box-shadow: none;
-
-    --button-pressed-background: none;
     --button-pressed-background-image: none;
-    --button-pressed-box-shadow: none;
-
-    --button-active-background: none;
-
     --button-colored-background-image: none;
-    --button-colored-box-shadow: none;
-
     --button-primary-background-image: none;
-    --button-primary-box-shadow: none;
-
     --button-secondary-background-image: none;
+
+    /* Remove shadow */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
     --button-secondary-box-shadow: none;
+
   }
 }

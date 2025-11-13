@@ -1,48 +1,24 @@
 :host {
 
-  --button-styled-background-hover: var(--standard-15);
-  --button-styled-text-hover: var(--standard-80);
+  /* this allows variations like color to override one variable to modify all styles */
+  --button-styled-background: var(--standard-5);
+  --button-styled-text-shadow: none;
+  --button-styled-color: var(--text-color);
+  --button-styled-border-color: var(--border-color);
+  --button-styled-box-shadow: var(--button-box-shadow);
 
-  --button-styled-background-pressed: var(--standard-20);
-  --button-styled-text-pressed: var(--standard-90);
+  --button-styled-hover-background: var(--standard-15);
+  --button-styled-hover-color: var(--standard-80);
 
-  --button-styled-background-active: var(--standard-20);
-  --button-styled-text-active: var(--standard-90);
+  --button-styled-pressed-background: var(--standard-20);
+  --button-styled-pressed-color: var(--standard-90);
 
-  /* Solid */
-  --button-solid-text-color: var(--text-color);
-  --button-solid-background: var(--standard-10);
-  --button-solid-background-hover: var(--button-styled-background-hover);
-  --button-solid-background-pressed: var(--button-styled-background-pressed);
-  --button-solid-background-active: var(--button-styled-background-active);
-
-  /* Subtle */
-  --button-subtle-background: var(--standard-5);
-  --button-subtle-text-color: var(--text-color);
-  --button-subtle-background-hover: var(--button-styled-background-hover);
-  --button-subtle-background-pressed: var(--button-styled-background-pressed);
-  --button-subtle-background-active: var(--button-styled-background-active);
+  --button-styled-active-background: var(--standard-20);
+  --button-styled-active-color: var(--standard-90);
 
   /* Outline */
   --button-outline-border-width: 1px;
   --button-outline-border-offset: -1px;
-  --button-outline-border-color: var(--border-color);
-  --button-outline-text-color: var(--text-color);
-
-  --button-outline-background-hover: var(--button-styled-background-hover);
-  --button-outline-background-pressed: var(--button-styled-background-pressed);
-  --button-outline-background-active: var(--button-styled-background-active);
-
-  /* Ghost */
-  --button-ghost-background-hover: var(--button-styled-background-hover);
-  --button-ghost-background-pressed: var(--button-styled-background-pressed);
-  --button-ghost-background-active: var(--button-styled-background-active);
-
-  /* Link */
-  --button-link-padding: 0;
-  --button-link-text-decoration: underline;
-  --button-link-text-color: var(--link-color);
-  --button-link-text-color-hover: var(--link-hover-color);
-  --button-link-text-decoration-hover: underline;
+  --button-outline-border-color: var(--button-styled-border-color);
 
 }
