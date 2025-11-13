@@ -1923,7 +1923,7 @@ export class Query {
 
   // adds properties to an element after dom loads
   initialize(settings) {
-    document.addEventListener('DOMContentLoaded', () => {
+    this.chain(document).ready(() => {
       this.settings(settings);
     });
     return this;
