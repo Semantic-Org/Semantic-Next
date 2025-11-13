@@ -21,7 +21,6 @@ import { inArray } from '@semantic-ui/utils';
 
 const { name, tagName, attributes } = Astro.props;
 const componentName = tagName || name;
-console.log(componentName, attributes)
 ---
 
 {inArray(componentName, ['ui-button', 'UIButton']) && (
