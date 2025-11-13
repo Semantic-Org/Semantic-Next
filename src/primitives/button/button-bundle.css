@@ -410,7 +410,7 @@
 @layer button.definition.types.styled {
   .styled.button {
     background: var(--button-styled-background);
-    color: var(--button-styled-text-color);
+    color: var(--button-styled-color);
     box-shadow: var(--button-styled-box-shadow);
     text-shadow: var(--button-styled-text-shadow);
   }
@@ -428,9 +428,13 @@
     background-color: var(--button-styled-active-background);
     color: var(--button-styled-active-color);
   }
+  .styled.buttons:not(.separate) ::slotted(ui-button) {
+    --button-box-shadow: none;
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+  }
   .styled.buttons ::slotted(ui-button) {
     --button-background: var(--button-styled-background);
-    --button-box-shadow: var(--button-styled-box-shadow);
     --button-text-shadow: var(--button-styled-text-shadow);
     --button-text-color: var(--button-styled-color);
     --button-hover-background-color: var(--button-styled-hover-background);
@@ -442,8 +446,12 @@
     --button-primary-background-image: none;
     --button-secondary-background-image: none;
   }
+  .subtle.buttons:not(.separate) {
+    box-shadow: var(--button-box-shadow);
+  }
   .flat.button,
   .flat.buttons ::slotted(ui-button) {
+    --button-group-box-shadow: var(--button-box-shadow);
     --button-box-shadow: none;
     --button-hover-box-shadow: none;
     --button-pressed-box-shadow: none;
@@ -619,13 +627,13 @@
     background-image: var(--button-primary-background-image);
     --button-link-text-color: var(--button-primary-color);
     --button-link-text-color-hover: var(--button-primary-color-hover);
-    --button-subtle-background: var(--primary-0);
-    --button-subtle-text-color: var(--primary-text-color);
-    --button-subtle-background-hover: var(--primary-5);
-    --button-subtle-background-pressed: var(--primary-10);
-    --button-subtle-text-color-hover: var(--primary-text-color-hover);
-    --button-subtle-text-color-pressed: var(--primary-text-color-pressed);
-    --button-subtle-text-color-active: var(--primary-text-color-pressed);
+    --button-styled-background: var(--primary-background);
+    --button-styled-text-color: var(--primary-text-color);
+    --button-styled-background-hover: var(--primary-5);
+    --button-styled-background-pressed: var(--primary-10);
+    --button-styled-text-color-hover: var(--primary-text-color-hover);
+    --button-styled-text-color-pressed: var(--primary-text-color-pressed);
+    --button-styled-text-color-active: var(--primary-text-color-pressed);
   }
   .primary.buttons .button:hover,
   .primary.button:hover {
@@ -681,13 +689,13 @@
     background-image: var(--button-colored-background-image);
     --button-link-text-color: var(--button-secondary-color);
     --button-link-text-color-hover: var(--button-secondary-color-hover);
-    --button-subtle-background: var(--secondary-0);
-    --button-subtle-text-color: var(--secondary-text-color);
-    --button-subtle-background-hover: var(--secondary-5);
-    --button-subtle-background-pressed: var(--secondary-10);
-    --button-subtle-text-color-hover: var(--secondary-text-color-hover);
-    --button-subtle-text-color-pressed: var(--secondary-text-color-pressed);
-    --button-subtle-text-color-active: var(--secondary-text-color-pressed);
+    --button-styled-background: var(--secondary-background);
+    --button-styled-text-color: var(--secondary-text-color);
+    --button-styled-background-hover: var(--secondary-5);
+    --button-styled-background-pressed: var(--secondary-10);
+    --button-styled-text-color-hover: var(--secondary-text-color-hover);
+    --button-styled-text-color-pressed: var(--secondary-text-color-pressed);
+    --button-styled-text-color-active: var(--secondary-text-color-pressed);
   }
   .secondary.buttons .button:hover,
   .secondary.button:hover {
@@ -1087,7 +1095,7 @@
     --button-link-text-color: var(--button-red);
     --button-link-text-color-hover: var(--button-red-hover);
     --button-styled-background: var(--red-background-color);
-    --button-styled-text-color: var(--red-text-color);
+    --button-styled-color: var(--red-text-color);
     --button-styled-hover-background: var(--red-5);
     --button-styled-hover-color: var(--red-text-color-hover);
     --button-styled-pressed-background: var(--red-10);
@@ -1102,17 +1110,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-orange-text-color);
     --button-text-shadow: var(--button-orange-text-shadow);
-    --button-outline-border-color: var(--button-orange);
-    --button-outline-text-color: var(--button-orange);
-    --button-link-text-color: var(--button-orange);
-    --button-link-text-color-hover: var(--button-orange-hover);
-    --button-subtle-background: var(--orange-background-color);
-    --button-subtle-text-color: var(--orange-text-color);
-    --button-subtle-background-hover: var(--orange-5);
-    --button-subtle-background-pressed: var(--orange-10);
-    --button-subtle-text-color-hover: var(--orange-text-color-hover);
-    --button-subtle-text-color-pressed: var(--orange-text-color-pressed);
-    --button-subtle-text-color-active: var(--orange-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-orange-text-color);
     --button-hover-text-shadow: var(--button-orange-text-shadow);
@@ -1127,6 +1124,17 @@
     --button-active-background-color: var(--button-orange-pressed);
     --button-active-color: var(--button-orange-text-color);
     --button-active-text-shadow: var(--button-orange-text-shadow);
+    --button-link-text-color: var(--button-orange);
+    --button-link-text-color-hover: var(--button-orange-hover);
+    --button-styled-background: var(--orange-background-color);
+    --button-styled-color: var(--orange-text-color);
+    --button-styled-hover-background: var(--orange-5);
+    --button-styled-hover-color: var(--orange-text-color-hover);
+    --button-styled-pressed-background: var(--orange-10);
+    --button-styled-pressed-color: var(--orange-text-color-pressed);
+    --button-styled-active-background: var(--orange-10);
+    --button-styled-active-color: var(--orange-text-color-pressed);
+    --button-outline-border-color: var(--orange-border-color);
   }
   .yellow.buttons ::slotted(ui-button),
   .yellow.button {
@@ -1134,17 +1142,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-yellow-text-color);
     --button-text-shadow: var(--button-yellow-text-shadow);
-    --button-outline-border-color: var(--button-yellow);
-    --button-outline-text-color: var(--button-yellow);
-    --button-link-text-color: var(--button-yellow);
-    --button-link-text-color-hover: var(--button-yellow-hover);
-    --button-subtle-background: var(--yellow-background-color);
-    --button-subtle-text-color: var(--yellow-text-color);
-    --button-subtle-background-hover: var(--yellow-5);
-    --button-subtle-background-pressed: var(--yellow-10);
-    --button-subtle-text-color-hover: var(--yellow-text-color-hover);
-    --button-subtle-text-color-pressed: var(--yellow-text-color-pressed);
-    --button-subtle-text-color-active: var(--yellow-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-yellow-text-color);
     --button-hover-text-shadow: var(--button-yellow-text-shadow);
@@ -1159,6 +1156,17 @@
     --button-active-background-color: var(--button-yellow-pressed);
     --button-active-color: var(--button-yellow-text-color);
     --button-active-text-shadow: var(--button-yellow-text-shadow);
+    --button-link-text-color: var(--button-yellow);
+    --button-link-text-color-hover: var(--button-yellow-hover);
+    --button-styled-background: var(--yellow-background-color);
+    --button-styled-color: var(--yellow-text-color);
+    --button-styled-hover-background: var(--yellow-5);
+    --button-styled-hover-color: var(--yellow-text-color-hover);
+    --button-styled-pressed-background: var(--yellow-10);
+    --button-styled-pressed-color: var(--yellow-text-color-pressed);
+    --button-styled-active-background: var(--yellow-10);
+    --button-styled-active-color: var(--yellow-text-color-pressed);
+    --button-outline-border-color: var(--yellow-border-color);
   }
   .olive.buttons ::slotted(ui-button),
   .olive.button {
@@ -1166,17 +1174,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-olive-text-color);
     --button-text-shadow: var(--button-olive-text-shadow);
-    --button-outline-border-color: var(--button-olive);
-    --button-outline-text-color: var(--button-olive);
-    --button-link-text-color: var(--button-olive);
-    --button-link-text-color-hover: var(--button-olive-hover);
-    --button-subtle-background: var(--olive-background-color);
-    --button-subtle-text-color: var(--olive-text-color);
-    --button-subtle-background-hover: var(--olive-5);
-    --button-subtle-background-pressed: var(--olive-10);
-    --button-subtle-text-color-hover: var(--olive-text-color-hover);
-    --button-subtle-text-color-pressed: var(--olive-text-color-pressed);
-    --button-subtle-text-color-active: var(--olive-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-olive-text-color);
     --button-hover-text-shadow: var(--button-olive-text-shadow);
@@ -1191,6 +1188,17 @@
     --button-active-background-color: var(--button-olive-pressed);
     --button-active-color: var(--button-olive-text-color);
     --button-active-text-shadow: var(--button-olive-text-shadow);
+    --button-link-text-color: var(--button-olive);
+    --button-link-text-color-hover: var(--button-olive-hover);
+    --button-styled-background: var(--olive-background-color);
+    --button-styled-color: var(--olive-text-color);
+    --button-styled-hover-background: var(--olive-5);
+    --button-styled-hover-color: var(--olive-text-color-hover);
+    --button-styled-pressed-background: var(--olive-10);
+    --button-styled-pressed-color: var(--olive-text-color-pressed);
+    --button-styled-active-background: var(--olive-10);
+    --button-styled-active-color: var(--olive-text-color-pressed);
+    --button-outline-border-color: var(--olive-border-color);
   }
   .green.buttons ::slotted(ui-button),
   .green.button {
@@ -1198,17 +1206,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-green-text-color);
     --button-text-shadow: var(--button-green-text-shadow);
-    --button-outline-border-color: var(--button-green);
-    --button-outline-text-color: var(--button-green);
-    --button-link-text-color: var(--button-green);
-    --button-link-text-color-hover: var(--button-green-hover);
-    --button-subtle-background: var(--green-background-color);
-    --button-subtle-text-color: var(--green-text-color);
-    --button-subtle-background-hover: var(--green-5);
-    --button-subtle-background-pressed: var(--green-10);
-    --button-subtle-text-color-hover: var(--green-text-color-hover);
-    --button-subtle-text-color-pressed: var(--green-text-color-pressed);
-    --button-subtle-text-color-active: var(--green-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-green-text-color);
     --button-hover-text-shadow: var(--button-green-text-shadow);
@@ -1223,6 +1220,17 @@
     --button-active-background-color: var(--button-green-pressed);
     --button-active-color: var(--button-green-text-color);
     --button-active-text-shadow: var(--button-green-text-shadow);
+    --button-link-text-color: var(--button-green);
+    --button-link-text-color-hover: var(--button-green-hover);
+    --button-styled-background: var(--green-background-color);
+    --button-styled-color: var(--green-text-color);
+    --button-styled-hover-background: var(--green-5);
+    --button-styled-hover-color: var(--green-text-color-hover);
+    --button-styled-pressed-background: var(--green-10);
+    --button-styled-pressed-color: var(--green-text-color-pressed);
+    --button-styled-active-background: var(--green-10);
+    --button-styled-active-color: var(--green-text-color-pressed);
+    --button-outline-border-color: var(--green-border-color);
   }
   .teal.buttons ::slotted(ui-button),
   .teal.button {
@@ -1230,17 +1238,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-teal-text-color);
     --button-text-shadow: var(--button-teal-text-shadow);
-    --button-outline-border-color: var(--button-teal);
-    --button-outline-text-color: var(--button-teal);
-    --button-link-text-color: var(--button-teal);
-    --button-link-text-color-hover: var(--button-teal-hover);
-    --button-subtle-background: var(--teal-background-color);
-    --button-subtle-text-color: var(--teal-text-color);
-    --button-subtle-background-hover: var(--teal-5);
-    --button-subtle-background-pressed: var(--teal-10);
-    --button-subtle-text-color-hover: var(--teal-text-color-hover);
-    --button-subtle-text-color-pressed: var(--teal-text-color-pressed);
-    --button-subtle-text-color-active: var(--teal-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-teal-text-color);
     --button-hover-text-shadow: var(--button-teal-text-shadow);
@@ -1255,6 +1252,17 @@
     --button-active-background-color: var(--button-teal-pressed);
     --button-active-color: var(--button-teal-text-color);
     --button-active-text-shadow: var(--button-teal-text-shadow);
+    --button-link-text-color: var(--button-teal);
+    --button-link-text-color-hover: var(--button-teal-hover);
+    --button-styled-background: var(--teal-background-color);
+    --button-styled-color: var(--teal-text-color);
+    --button-styled-hover-background: var(--teal-5);
+    --button-styled-hover-color: var(--teal-text-color-hover);
+    --button-styled-pressed-background: var(--teal-10);
+    --button-styled-pressed-color: var(--teal-text-color-pressed);
+    --button-styled-active-background: var(--teal-10);
+    --button-styled-active-color: var(--teal-text-color-pressed);
+    --button-outline-border-color: var(--teal-border-color);
   }
   .blue.buttons ::slotted(ui-button),
   .blue.button {
@@ -1262,17 +1270,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-blue-text-color);
     --button-text-shadow: var(--button-blue-text-shadow);
-    --button-outline-border-color: var(--button-blue);
-    --button-outline-text-color: var(--button-blue);
-    --button-link-text-color: var(--button-blue);
-    --button-link-text-color-hover: var(--button-blue-hover);
-    --button-subtle-background: var(--blue-background-color);
-    --button-subtle-text-color: var(--blue-text-color);
-    --button-subtle-background-hover: var(--blue-5);
-    --button-subtle-background-pressed: var(--blue-10);
-    --button-subtle-text-color-hover: var(--blue-text-color-hover);
-    --button-subtle-text-color-pressed: var(--blue-text-color-pressed);
-    --button-subtle-text-color-active: var(--blue-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-blue-text-color);
     --button-hover-text-shadow: var(--button-blue-text-shadow);
@@ -1287,6 +1284,17 @@
     --button-active-background-color: var(--button-blue-pressed);
     --button-active-color: var(--button-blue-text-color);
     --button-active-text-shadow: var(--button-blue-text-shadow);
+    --button-link-text-color: var(--button-blue);
+    --button-link-text-color-hover: var(--button-blue-hover);
+    --button-styled-background: var(--blue-background-color);
+    --button-styled-color: var(--blue-text-color);
+    --button-styled-hover-background: var(--blue-5);
+    --button-styled-hover-color: var(--blue-text-color-hover);
+    --button-styled-pressed-background: var(--blue-10);
+    --button-styled-pressed-color: var(--blue-text-color-pressed);
+    --button-styled-active-background: var(--blue-10);
+    --button-styled-active-color: var(--blue-text-color-pressed);
+    --button-outline-border-color: var(--blue-border-color);
   }
   .violet.buttons ::slotted(ui-button),
   .violet.button {
@@ -1294,17 +1302,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-violet-text-color);
     --button-text-shadow: var(--button-violet-text-shadow);
-    --button-outline-border-color: var(--button-violet);
-    --button-outline-text-color: var(--button-violet);
-    --button-link-text-color: var(--button-violet);
-    --button-link-text-color-hover: var(--button-violet-hover);
-    --button-subtle-background: var(--violet-background-color);
-    --button-subtle-text-color: var(--violet-text-color);
-    --button-subtle-background-hover: var(--violet-5);
-    --button-subtle-background-pressed: var(--violet-10);
-    --button-subtle-text-color-hover: var(--violet-text-color-hover);
-    --button-subtle-text-color-pressed: var(--violet-text-color-pressed);
-    --button-subtle-text-color-active: var(--violet-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-violet-text-color);
     --button-hover-text-shadow: var(--button-violet-text-shadow);
@@ -1319,6 +1316,17 @@
     --button-active-background-color: var(--button-violet-pressed);
     --button-active-color: var(--button-violet-text-color);
     --button-active-text-shadow: var(--button-violet-text-shadow);
+    --button-link-text-color: var(--button-violet);
+    --button-link-text-color-hover: var(--button-violet-hover);
+    --button-styled-background: var(--violet-background-color);
+    --button-styled-color: var(--violet-text-color);
+    --button-styled-hover-background: var(--violet-5);
+    --button-styled-hover-color: var(--violet-text-color-hover);
+    --button-styled-pressed-background: var(--violet-10);
+    --button-styled-pressed-color: var(--violet-text-color-pressed);
+    --button-styled-active-background: var(--violet-10);
+    --button-styled-active-color: var(--violet-text-color-pressed);
+    --button-outline-border-color: var(--violet-border-color);
   }
   .purple.buttons ::slotted(ui-button),
   .purple.button {
@@ -1326,17 +1334,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-purple-text-color);
     --button-text-shadow: var(--button-purple-text-shadow);
-    --button-outline-border-color: var(--button-purple);
-    --button-outline-text-color: var(--button-purple);
-    --button-link-text-color: var(--button-purple);
-    --button-link-text-color-hover: var(--button-purple-hover);
-    --button-subtle-background: var(--purple-background-color);
-    --button-subtle-text-color: var(--purple-text-color);
-    --button-subtle-background-hover: var(--purple-5);
-    --button-subtle-background-pressed: var(--purple-10);
-    --button-subtle-text-color-hover: var(--purple-text-color-hover);
-    --button-subtle-text-color-pressed: var(--purple-text-color-pressed);
-    --button-subtle-text-color-active: var(--purple-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-purple-text-color);
     --button-hover-text-shadow: var(--button-purple-text-shadow);
@@ -1351,6 +1348,17 @@
     --button-active-background-color: var(--button-purple-pressed);
     --button-active-color: var(--button-purple-text-color);
     --button-active-text-shadow: var(--button-purple-text-shadow);
+    --button-link-text-color: var(--button-purple);
+    --button-link-text-color-hover: var(--button-purple-hover);
+    --button-styled-background: var(--purple-background-color);
+    --button-styled-color: var(--purple-text-color);
+    --button-styled-hover-background: var(--purple-5);
+    --button-styled-hover-color: var(--purple-text-color-hover);
+    --button-styled-pressed-background: var(--purple-10);
+    --button-styled-pressed-color: var(--purple-text-color-pressed);
+    --button-styled-active-background: var(--purple-10);
+    --button-styled-active-color: var(--purple-text-color-pressed);
+    --button-outline-border-color: var(--purple-border-color);
   }
   .pink.buttons ::slotted(ui-button),
   .pink.button {
@@ -1358,17 +1366,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-pink-text-color);
     --button-text-shadow: var(--button-pink-text-shadow);
-    --button-outline-border-color: var(--button-pink);
-    --button-outline-text-color: var(--button-pink);
-    --button-link-text-color: var(--button-pink);
-    --button-link-text-color-hover: var(--button-pink-hover);
-    --button-subtle-background: var(--pink-background-color);
-    --button-subtle-text-color: var(--pink-text-color);
-    --button-subtle-background-hover: var(--pink-5);
-    --button-subtle-background-pressed: var(--pink-10);
-    --button-subtle-text-color-hover: var(--pink-text-color-hover);
-    --button-subtle-text-color-pressed: var(--pink-text-color-pressed);
-    --button-subtle-text-color-active: var(--pink-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-pink-text-color);
     --button-hover-text-shadow: var(--button-pink-text-shadow);
@@ -1383,6 +1380,17 @@
     --button-active-background-color: var(--button-pink-pressed);
     --button-active-color: var(--button-pink-text-color);
     --button-active-text-shadow: var(--button-pink-text-shadow);
+    --button-link-text-color: var(--button-pink);
+    --button-link-text-color-hover: var(--button-pink-hover);
+    --button-styled-background: var(--pink-background-color);
+    --button-styled-color: var(--pink-text-color);
+    --button-styled-hover-background: var(--pink-5);
+    --button-styled-hover-color: var(--pink-text-color-hover);
+    --button-styled-pressed-background: var(--pink-10);
+    --button-styled-pressed-color: var(--pink-text-color-pressed);
+    --button-styled-active-background: var(--pink-10);
+    --button-styled-active-color: var(--pink-text-color-pressed);
+    --button-outline-border-color: var(--pink-border-color);
   }
   .brown.buttons ::slotted(ui-button),
   .brown.button {
@@ -1390,17 +1398,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-brown-text-color);
     --button-text-shadow: var(--button-brown-text-shadow);
-    --button-outline-border-color: var(--button-brown);
-    --button-outline-text-color: var(--button-brown);
-    --button-link-text-color: var(--button-brown);
-    --button-link-text-color-hover: var(--button-brown-hover);
-    --button-subtle-background: var(--brown-background-color);
-    --button-subtle-text-color: var(--brown-text-color);
-    --button-subtle-background-hover: var(--brown-5);
-    --button-subtle-background-pressed: var(--brown-10);
-    --button-subtle-text-color-hover: var(--brown-text-color-hover);
-    --button-subtle-text-color-pressed: var(--brown-text-color-pressed);
-    --button-subtle-text-color-active: var(--brown-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-brown-text-color);
     --button-hover-text-shadow: var(--button-brown-text-shadow);
@@ -1415,6 +1412,17 @@
     --button-active-background-color: var(--button-brown-pressed);
     --button-active-color: var(--button-brown-text-color);
     --button-active-text-shadow: var(--button-brown-text-shadow);
+    --button-link-text-color: var(--button-brown);
+    --button-link-text-color-hover: var(--button-brown-hover);
+    --button-styled-background: var(--brown-background-color);
+    --button-styled-color: var(--brown-text-color);
+    --button-styled-hover-background: var(--brown-5);
+    --button-styled-hover-color: var(--brown-text-color-hover);
+    --button-styled-pressed-background: var(--brown-10);
+    --button-styled-pressed-color: var(--brown-text-color-pressed);
+    --button-styled-active-background: var(--brown-10);
+    --button-styled-active-color: var(--brown-text-color-pressed);
+    --button-outline-border-color: var(--brown-border-color);
   }
   .grey.buttons ::slotted(ui-button),
   .grey.button {
@@ -1422,17 +1430,6 @@
     --button-background: var(--button-background-color) var(--button-colored-background-image);
     --button-text-color: var(--button-grey-text-color);
     --button-text-shadow: var(--button-grey-text-shadow);
-    --button-outline-border-color: var(--button-grey);
-    --button-outline-text-color: var(--button-grey);
-    --button-link-text-color: var(--button-grey);
-    --button-link-text-color-hover: var(--button-grey-hover);
-    --button-subtle-background: var(--grey-background-color);
-    --button-subtle-text-color: var(--grey-text-color);
-    --button-subtle-background-hover: var(--grey-5);
-    --button-subtle-background-pressed: var(--grey-10);
-    --button-subtle-text-color-hover: var(--grey-text-color-hover);
-    --button-subtle-text-color-pressed: var(--grey-text-color-pressed);
-    --button-subtle-text-color-active: var(--grey-text-color-pressed);
     --button-box-shadow: var(--button-colored-box-shadow);
     --button-hover-color: var(--button-grey-text-color);
     --button-hover-text-shadow: var(--button-grey-text-shadow);
@@ -1447,38 +1444,49 @@
     --button-active-background-color: var(--button-grey-pressed);
     --button-active-color: var(--button-grey-text-color);
     --button-active-text-shadow: var(--button-grey-text-shadow);
+    --button-link-text-color: var(--button-grey);
+    --button-link-text-color-hover: var(--button-grey-hover);
+    --button-styled-background: var(--grey-background-color);
+    --button-styled-color: var(--grey-text-color);
+    --button-styled-hover-background: var(--grey-5);
+    --button-styled-hover-color: var(--grey-text-color-hover);
+    --button-styled-pressed-background: var(--grey-10);
+    --button-styled-pressed-color: var(--grey-text-color-pressed);
+    --button-styled-active-background: var(--grey-10);
+    --button-styled-active-color: var(--grey-text-color-pressed);
+    --button-outline-border-color: var(--grey-border-color);
   }
-  .black.buttons ::slotted(ui-button),
-  .black.button {
-    --button-background-color: var(--button-black);
+  .slate.buttons ::slotted(ui-button),
+  .slate.button {
+    --button-background-color: var(--button-slate);
     --button-background: var(--button-background-color) var(--button-colored-background-image);
-    --button-text-color: var(--button-black-text-color);
-    --button-text-shadow: var(--button-black-text-shadow);
-    --button-outline-border-color: var(--button-black);
-    --button-outline-text-color: var(--button-black);
-    --button-link-text-color: var(--button-black);
-    --button-link-text-color-hover: var(--button-black-hover);
-    --button-subtle-background: var(--standard-15);
-    --button-subtle-text-color: var(--standard-70);
-    --button-subtle-background-hover: var(--standard-20);
-    --button-subtle-background-pressed: var(--standard-25);
-    --button-subtle-text-color-hover: var(--standard-70);
-    --button-subtle-text-color-pressed: var(--standard-70);
-    --button-subtle-text-color-active: var(--standard-70);
+    --button-text-color: var(--button-slate-text-color);
+    --button-text-shadow: var(--button-slate-text-shadow);
     --button-box-shadow: var(--button-colored-box-shadow);
-    --button-hover-color: var(--button-black-text-color);
-    --button-hover-text-shadow: var(--button-black-text-shadow);
-    --button-hover-background-color: var(--button-black-hover);
+    --button-hover-color: var(--button-slate-text-color);
+    --button-hover-text-shadow: var(--button-slate-text-shadow);
+    --button-hover-background-color: var(--button-slate-hover);
     --button-hover-box-shadow: var(--button-colored-box-shadow);
-    --button-focus-background-color: var(--button-black-focus);
-    --button-focus-color: var(--button-black-text-color);
-    --button-focus-text-shadow: var(--button-black-text-shadow);
-    --button-pressed-background-color: var(--button-black-pressed);
-    --button-pressed-color: var(--button-black-text-color);
-    --button-pressed-text-shadow: var(--button-black-text-shadow);
-    --button-active-background-color: var(--button-black-pressed);
-    --button-active-color: var(--button-black-text-color);
-    --button-active-text-shadow: var(--button-black-text-shadow);
+    --button-focus-background-color: var(--button-slate-focus);
+    --button-focus-color: var(--button-slate-text-color);
+    --button-focus-text-shadow: var(--button-slate-text-shadow);
+    --button-pressed-background-color: var(--button-slate-pressed);
+    --button-pressed-color: var(--button-slate-text-color);
+    --button-pressed-text-shadow: var(--button-slate-text-shadow);
+    --button-active-background-color: var(--button-slate-pressed);
+    --button-active-color: var(--button-slate-text-color);
+    --button-active-text-shadow: var(--button-slate-text-shadow);
+    --button-link-text-color: var(--button-slate);
+    --button-link-text-color-hover: var(--button-slate-hover);
+    --button-styled-background: var(--slate-background-color);
+    --button-styled-color: var(--slate-text-color);
+    --button-styled-hover-background: var(--slate-5);
+    --button-styled-hover-color: var(--slate-text-color-hover);
+    --button-styled-pressed-background: var(--slate-10);
+    --button-styled-pressed-color: var(--slate-text-color-pressed);
+    --button-styled-active-background: var(--slate-10);
+    --button-styled-active-color: var(--slate-text-color-pressed);
+    --button-outline-border-color: var(--slate-border-color);
   }
 }
 
@@ -2573,7 +2581,7 @@
     --button-pink: var(--pink);
     --button-brown: var(--brown);
     --button-grey: var(--grey);
-    --button-black: var(--black);
+    --button-slate: var(--slate);
     --button-colored-hover-lightness: 0.05;
     --button-colored-hover-hue: 2;
     --button-red-hover: oklch(from var(--button-red) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
@@ -2588,7 +2596,7 @@
     --button-pink-hover: oklch(from var(--button-pink) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
     --button-brown-hover: oklch(from var(--button-brown) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
     --button-grey-hover: oklch(from var(--button-grey) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
-    --button-black-hover: oklch(from var(--button-black) calc(l - var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
+    --button-slate-hover: oklch(from var(--button-slate) calc(l - var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
     --button-colored-focus-lightness: 0.08;
     --button-colored-focus-hue: 2;
     --button-red-focus: oklch(from var(--button-red) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
@@ -2603,7 +2611,7 @@
     --button-pink-focus: oklch(from var(--button-pink) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
     --button-brown-focus: oklch(from var(--button-brown) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
     --button-grey-focus: oklch(from var(--button-grey) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
-    --button-black-focus: oklch(from var(--button-black) calc(l - var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
+    --button-slate-focus: oklch(from var(--button-slate) calc(l - var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
     --button-colored-pressed-lightness: -0.02;
     --button-colored-pressed-hue: 2;
     --button-red-pressed: oklch(from var(--button-red) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
@@ -2618,7 +2626,7 @@
     --button-pink-pressed: oklch(from var(--button-pink) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
     --button-brown-pressed: oklch(from var(--button-brown) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
     --button-grey-pressed: oklch(from var(--button-grey) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
-    --button-black-pressed: oklch(from var(--button-black) calc(l - var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
+    --button-slate-pressed: oklch(from var(--button-slate) calc(l - var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
     --button-brown-text-color: var(--button-inverted-text-color);
     --button-brown-text-shadow: var(--button-inverted-text-shadow);
     --button-red-text-color: var(--button-inverted-text-color);
@@ -2635,8 +2643,8 @@
     --button-purple-text-shadow: var(--button-inverted-text-shadow);
     --button-pink-text-color: var(--button-inverted-text-color);
     --button-pink-text-shadow: var(--button-inverted-text-shadow);
-    --button-black-text-color: var(--button-inverted-text-color);
-    --button-black-text-shadow: var(--button-inverted-text-shadow);
+    --button-slate-text-color: var(--button-inverted-text-color);
+    --button-slate-text-shadow: var(--button-inverted-text-shadow);
     --button-olive-text-color: var(--button-inverted-text-color);
     --button-olive-text-shadow: var(--button-inverted-text-shadow);
     --button-yellow-text-color: var(--button-inverted-text-color);

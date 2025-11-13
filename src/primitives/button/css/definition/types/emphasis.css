@@ -13,13 +13,13 @@
   --button-link-text-color: var(--button-primary-color);
   --button-link-text-color-hover: var(--button-primary-color-hover);
 
-  --button-subtle-background: var(--primary-0);
-  --button-subtle-text-color: var(--primary-text-color);
-  --button-subtle-background-hover: var(--primary-5);
-  --button-subtle-background-pressed: var(--primary-10);
-  --button-subtle-text-color-hover: var(--primary-text-color-hover);
-  --button-subtle-text-color-pressed: var(--primary-text-color-pressed);
-  --button-subtle-text-color-active: var(--primary-text-color-pressed);
+  --button-styled-background: var(--primary-background);
+  --button-styled-text-color: var(--primary-text-color);
+  --button-styled-background-hover: var(--primary-5);
+  --button-styled-background-pressed: var(--primary-10);
+  --button-styled-text-color-hover: var(--primary-text-color-hover);
+  --button-styled-text-color-pressed: var(--primary-text-color-pressed);
+  --button-styled-text-color-active: var(--primary-text-color-pressed);
 
   &:hover {
     background-color: var(--button-primary-color-hover);
@@ -84,13 +84,13 @@
   --button-link-text-color: var(--button-secondary-color);
   --button-link-text-color-hover: var(--button-secondary-color-hover);
 
-  --button-subtle-background: var(--secondary-0);
-  --button-subtle-text-color: var(--secondary-text-color);
-  --button-subtle-background-hover: var(--secondary-5);
-  --button-subtle-background-pressed: var(--secondary-10);
-  --button-subtle-text-color-hover: var(--secondary-text-color-hover);
-  --button-subtle-text-color-pressed: var(--secondary-text-color-pressed);
-  --button-subtle-text-color-active: var(--secondary-text-color-pressed);
+  --button-styled-background: var(--secondary-background);
+  --button-styled-text-color: var(--secondary-text-color);
+  --button-styled-background-hover: var(--secondary-5);
+  --button-styled-background-pressed: var(--secondary-10);
+  --button-styled-text-color-hover: var(--secondary-text-color-hover);
+  --button-styled-text-color-pressed: var(--secondary-text-color-pressed);
+  --button-styled-text-color-active: var(--secondary-text-color-pressed);
 
   &:hover {
     background-color: var(--button-secondary-color-hover);

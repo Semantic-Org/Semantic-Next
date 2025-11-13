@@ -111,7 +111,7 @@ export default {
     "pink": "color",
     "brown": "color",
     "grey": "color",
-    "black": "color",
+    "slate": "color",
     "compact": "compact",
     "very-compact": "compact",
     "instagram": "social",
@@ -215,7 +215,7 @@ export default {
       "pink",
       "brown",
       "grey",
-      "black"
+      "slate"
     ],
     "compact": [
       "compact",

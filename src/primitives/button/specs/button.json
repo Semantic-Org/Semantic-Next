@@ -23,8 +23,8 @@
       "usageLevel": 2,
       "separateExamples": false,
       "exampleCode": [
-        "<ui-button>\n  <img src=\"/images/avatar/small/jenny.jpg\" \/>\n  Add Jenny\n</ui-button>",
-        "<ui-button>\n  <ui-image src=\"/images/new-avatar/small/dima.jpg\" \/><\/ui-image>\n  Add Dima\n</ui-button>"
+        "<ui-button>\n  <img src=\"/images/avatar/small/jenny.jpg\" />\n  Add Jenny\n</ui-button>",
+        "<ui-button>\n  <ui-image src=\"/images/new-avatar/small/dima.jpg\"></ui-image>\n  Add Dima\n</ui-button>"
       ]
     },
     {
@@ -181,31 +181,37 @@
       "description": "attach to other content",
       "usageLevel": 2,
       "includeAttributeClass": true,
+      "separateExamples": true,
       "options": [
         {
           "name": "Top Attached",
           "value": "top-attached",
-          "description": "appear attached to the top of other content"
+          "description": "appear attached to the top of other content",
+          "exampleCode": "<ui-button top-attached>Top Action</ui-button>\n<ui-segment bottom-attached>Attached content below</ui-segment>"
         },
         {
           "name": "Attached",
           "value": "attached",
-          "description": "attach to content above and below"
+          "description": "attach to content above and below",
+          "exampleCode": "<ui-segment top-attached>Content above</ui-segment>\n<ui-button attached>Middle Action</ui-button>\n<ui-segment bottom-attached>Content below</ui-segment>"
         },
         {
           "name": "Bottom Attached",
           "value": "bottom-attached",
-          "description": "attach to the bottom"
+          "description": "attach to the bottom",
+          "exampleCode": "<ui-segment top-attached>Attached content above</ui-segment>\n<ui-button bottom-attached>Bottom Action</ui-button>"
         },
         {
           "name": "Left Attached",
           "value": "left-attached",
-          "description": "attach to the left"
+          "description": "attach to the left",
+          "exampleCode": "<ui-button left-attached icon=\"save\"></ui-button>\n<ui-input right-attached placeholder=\"Enter text...\"></ui-input>"
         },
         {
           "name": "Right Attached",
           "value": "right-attached",
-          "description": "attach to the right"
+          "description": "attach to the right",
+          "exampleCode": "<ui-input left-attached placeholder=\"Enter text...\"></ui-input>\n<ui-button right-attached icon=\"settings\"></ui-button>"
         }
       ]
     },
@@ -240,130 +246,78 @@
       "description": "be colored",
       "usageLevel": 3,
       "separateExamples": true,
-      "exampleCode": [
-        "<ui-button red>Red</ui-button>\n<ui-button orange>Orange</ui-button>\n<ui-button yellow>Yellow</ui-button>\n<ui-button olive>Olive</ui-button>\n<ui-button green>Green</ui-button>\n<ui-button teal>Teal</ui-button>\n<ui-button blue>Blue</ui-button>\n<ui-button violet>Violet</ui-button>\n<ui-button purple>Purple</ui-button>\n<ui-button pink>Pink</ui-button>\n<ui-button brown>Brown</ui-button>\n<ui-button grey>Grey</ui-button>\n<ui-button black>Black</ui-button>",
-        "<ui-button subtle red>Red</ui-button>\n<ui-button subtle orange>Orange</ui-button>\n<ui-button subtle yellow>Yellow</ui-button>\n<ui-button subtle olive>Olive</ui-button>\n<ui-button subtle green>Green</ui-button>\n<ui-button subtle teal>Teal</ui-button>\n<ui-button subtle blue>Blue</ui-button>\n<ui-button subtle violet>Violet</ui-button>\n<ui-button subtle purple>Purple</ui-button>\n<ui-button subtle pink>Pink</ui-button>\n<ui-button subtle brown>Brown</ui-button>\n<ui-button subtle grey>Grey</ui-button>\n<ui-button subtle black>Black</ui-button>",
-        "<ui-button flat red>Red</ui-button>\n<ui-button flat orange>Orange</ui-button>\n<ui-button flat yellow>Yellow</ui-button>\n<ui-button flat olive>Olive</ui-button>\n<ui-button flat green>Green</ui-button>\n<ui-button flat teal>Teal</ui-button>\n<ui-button flat blue>Blue</ui-button>\n<ui-button flat violet>Violet</ui-button>\n<ui-button flat purple>Purple</ui-button>\n<ui-button flat pink>Pink</ui-button>\n<ui-button flat brown>Brown</ui-button>\n<ui-button flat grey>Grey</ui-button>\n<ui-button flat black>Black</ui-button>",
-        "<ui-button outline red>Red</ui-button>\n<ui-button outline orange>Orange</ui-button>\n<ui-button outline yellow>Yellow</ui-button>\n<ui-button outline olive>Olive</ui-button>\n<ui-button outline green>Green</ui-button>\n<ui-button outline teal>Teal</ui-button>\n<ui-button outline blue>Blue</ui-button>\n<ui-button outline violet>Violet</ui-button>\n<ui-button outline purple>Purple</ui-button>\n<ui-button outline pink>Pink</ui-button>\n<ui-button outline brown>Brown</ui-button>\n<ui-button outline grey>Grey</ui-button>\n<ui-button outline black>Black</ui-button>",
-        "<ui-button ghost red>Red</ui-button>\n<ui-button ghost orange>Orange</ui-button>\n<ui-button ghost yellow>Yellow</ui-button>\n<ui-button ghost olive>Olive</ui-button>\n<ui-button ghost green>Green</ui-button>\n<ui-button ghost teal>Teal</ui-button>\n<ui-button ghost blue>Blue</ui-button>\n<ui-button ghost violet>Violet</ui-button>\n<ui-button ghost purple>Purple</ui-button>\n<ui-button ghost pink>Pink</ui-button>\n<ui-button ghost brown>Brown</ui-button>\n<ui-button ghost grey>Grey</ui-button>\n<ui-button ghost black>Black</ui-button>"
+      "singularExampleCode": [
+        "<ui-button red>Red</ui-button>\n<ui-button orange>Orange</ui-button>\n<ui-button yellow>Yellow</ui-button>\n<ui-button olive>Olive</ui-button>\n<ui-button green>Green</ui-button>\n<ui-button teal>Teal</ui-button>\n<ui-button blue>Blue</ui-button>\n<ui-button violet>Violet</ui-button>\n<ui-button purple>Purple</ui-button>\n<ui-button pink>Pink</ui-button>\n<ui-button brown>Brown</ui-button>\n<ui-button grey>Grey</ui-button>\n<ui-button slate>Slate</ui-button>",
+        "<ui-button subtle red>Red</ui-button>\n<ui-button subtle orange>Orange</ui-button>\n<ui-button subtle yellow>Yellow</ui-button>\n<ui-button subtle olive>Olive</ui-button>\n<ui-button subtle green>Green</ui-button>\n<ui-button subtle teal>Teal</ui-button>\n<ui-button subtle blue>Blue</ui-button>\n<ui-button subtle violet>Violet</ui-button>\n<ui-button subtle purple>Purple</ui-button>\n<ui-button subtle pink>Pink</ui-button>\n<ui-button subtle brown>Brown</ui-button>\n<ui-button subtle grey>Grey</ui-button>\n<ui-button subtle slate>Slate</ui-button>",
+        "<ui-button flat red>Red</ui-button>\n<ui-button flat orange>Orange</ui-button>\n<ui-button flat yellow>Yellow</ui-button>\n<ui-button flat olive>Olive</ui-button>\n<ui-button flat green>Green</ui-button>\n<ui-button flat teal>Teal</ui-button>\n<ui-button flat blue>Blue</ui-button>\n<ui-button flat violet>Violet</ui-button>\n<ui-button flat purple>Purple</ui-button>\n<ui-button flat pink>Pink</ui-button>\n<ui-button flat brown>Brown</ui-button>\n<ui-button flat grey>Grey</ui-button>\n<ui-button flat slate>Slate</ui-button>",
+        "<ui-button outline red>Red</ui-button>\n<ui-button outline orange>Orange</ui-button>\n<ui-button outline yellow>Yellow</ui-button>\n<ui-button outline olive>Olive</ui-button>\n<ui-button outline green>Green</ui-button>\n<ui-button outline teal>Teal</ui-button>\n<ui-button outline blue>Blue</ui-button>\n<ui-button outline violet>Violet</ui-button>\n<ui-button outline purple>Purple</ui-button>\n<ui-button outline pink>Pink</ui-button>\n<ui-button outline brown>Brown</ui-button>\n<ui-button outline grey>Grey</ui-button>\n<ui-button outline slate>Slate</ui-button>",
+        "<ui-button ghost red>Red</ui-button>\n<ui-button ghost orange>Orange</ui-button>\n<ui-button ghost yellow>Yellow</ui-button>\n<ui-button ghost olive>Olive</ui-button>\n<ui-button ghost green>Green</ui-button>\n<ui-button ghost teal>Teal</ui-button>\n<ui-button ghost blue>Blue</ui-button>\n<ui-button ghost violet>Violet</ui-button>\n<ui-button ghost purple>Purple</ui-button>\n<ui-button ghost pink>Pink</ui-button>\n<ui-button ghost brown>Brown</ui-button>\n<ui-button ghost grey>Grey</ui-button>\n<ui-button ghost slate>Slate</ui-button>"
       ],
       "options": [
         {
           "name": "Red",
           "value": "red",
-          "description": "red",
-          "exampleCode": [
-            "<ui-button red>Red</ui-button>",
-            "<ui-button subtle red>Red</ui-button>"
-          ]
+          "description": "red"
         },
         {
           "name": "Orange",
           "value": "orange",
-          "description": "orange",
-          "exampleCode": [
-            "<ui-button orange>Orange</ui-button>",
-            "<ui-button subtle orange>Orange</ui-button>"
-          ]
+          "description": "orange"
         },
         {
           "name": "Yellow",
           "value": "yellow",
-          "description": "yellow",
-          "exampleCode": [
-            "<ui-button yellow>Yellow</ui-button>",
-            "<ui-button subtle yellow>Yellow</ui-button>"
-          ]
+          "description": "yellow"
         },
         {
           "name": "Olive",
           "value": "olive",
-          "description": "olive",
-          "exampleCode": [
-            "<ui-button olive>Olive</ui-button>",
-            "<ui-button subtle olive>Olive</ui-button>"
-          ]
+          "description": "olive"
         },
         {
           "name": "Green",
           "value": "green",
-          "description": "green",
-          "exampleCode": [
-            "<ui-button green>Green</ui-button>",
-            "<ui-button subtle green>Green</ui-button>"
-          ]
+          "description": "green"
         },
         {
           "name": "Teal",
           "value": "teal",
-          "description": "teal",
-          "exampleCode": [
-            "<ui-button teal>Teal</ui-button>",
-            "<ui-button subtle teal>Teal</ui-button>"
-          ]
+          "description": "teal"
         },
         {
           "name": "Blue",
           "value": "blue",
-          "description": "blue",
-          "exampleCode": [
-            "<ui-button blue>Blue</ui-button>",
-            "<ui-button subtle blue>Blue</ui-button>"
-          ]
+          "description": "blue"
         },
         {
           "name": "Violet",
           "value": "violet",
-          "description": "violet",
-          "exampleCode": [
-            "<ui-button violet>Violet</ui-button>",
-            "<ui-button subtle violet>Violet</ui-button>"
-          ]
+          "description": "violet"
         },
         {
           "name": "Purple",
           "value": "purple",
-          "description": "purple",
-          "exampleCode": [
-            "<ui-button purple>Purple</ui-button>",
-            "<ui-button subtle purple>Purple</ui-button>"
-          ]
+          "description": "purple"
         },
         {
           "name": "Pink",
           "value": "pink",
-          "description": "pink",
-          "exampleCode": [
-            "<ui-button pink>Pink</ui-button>",
-            "<ui-button subtle pink>Pink</ui-button>"
-          ]
+          "description": "pink"
         },
         {
           "name": "Brown",
           "value": "brown",
-          "description": "brown",
-          "exampleCode": [
-            "<ui-button brown>Brown</ui-button>",
-            "<ui-button subtle brown>Brown</ui-button>"
-          ]
+          "description": "brown"
         },
         {
           "name": "Grey",
           "value": "grey",
-          "description": "grey",
-          "exampleCode": [
-            "<ui-button grey>Grey</ui-button>",
-            "<ui-button subtle grey>Grey</ui-button>"
-          ]
+          "description": "grey"
         },
         {
-          "name": "Black",
-          "value": "black",
-          "description": "black",
-          "exampleCode": [
-            "<ui-button black>Black</ui-button>",
-            "<ui-button subtle black>Black</ui-button>"
-          ]
+          "name": "Slate",
+          "value": "slate",
+          "description": "slate"
         }
       ]
     },

@@ -17,7 +17,7 @@
   --button-pink: var(--pink);
   --button-brown: var(--brown);
   --button-grey: var(--grey);
-  --button-black: var(--black);
+  --button-slate: var(--slate);
 
   /* Hover */
   --button-colored-hover-lightness: 0.05;
@@ -35,7 +35,7 @@
   --button-pink-hover: oklch(from var(--button-pink) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
   --button-brown-hover: oklch(from var(--button-brown) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
   --button-grey-hover: oklch(from var(--button-grey) calc(l + var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
-  --button-black-hover: oklch(from var(--button-black) calc(l - var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
+  --button-slate-hover: oklch(from var(--button-slate) calc(l - var(--button-colored-hover-lightness)) c calc(h + var(--button-colored-hover-hue)));
 
   /* Focus */
   --button-colored-focus-lightness: 0.08;
@@ -53,7 +53,7 @@
   --button-pink-focus: oklch(from var(--button-pink) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
   --button-brown-focus: oklch(from var(--button-brown) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
   --button-grey-focus: oklch(from var(--button-grey) calc(l + var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
-  --button-black-focus: oklch(from var(--button-black) calc(l - var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
+  --button-slate-focus: oklch(from var(--button-slate) calc(l - var(--button-colored-focus-lightness)) c calc(h + var(--button-colored-focus-hue)));
 
   /* Pressed Down */
   --button-colored-pressed-lightness: -0.02;
@@ -71,7 +71,7 @@
   --button-pink-pressed: oklch(from var(--button-pink) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
   --button-brown-pressed: oklch(from var(--button-brown) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
   --button-grey-pressed: oklch(from var(--button-grey) calc(l + var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
-  --button-black-pressed: oklch(from var(--button-black) calc(l - var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
+  --button-slate-pressed: oklch(from var(--button-slate) calc(l - var(--button-colored-pressed-lightness)) c calc(h + var(--button-colored-pressed-hue)));
 
   /* Colored */
   --button-brown-text-color: var(--button-inverted-text-color);
@@ -90,8 +90,8 @@
   --button-purple-text-shadow: var(--button-inverted-text-shadow);
   --button-pink-text-color: var(--button-inverted-text-color);
   --button-pink-text-shadow: var(--button-inverted-text-shadow);
-  --button-black-text-color: var(--button-inverted-text-color);
-  --button-black-text-shadow: var(--button-inverted-text-shadow);
+  --button-slate-text-color: var(--button-inverted-text-color);
+  --button-slate-text-shadow: var(--button-inverted-text-shadow);
   --button-olive-text-color: var(--button-inverted-text-color);
   --button-olive-text-shadow: var(--button-inverted-text-shadow);
   --button-yellow-text-color: var(--button-inverted-text-color);

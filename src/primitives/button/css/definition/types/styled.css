@@ -8,7 +8,7 @@
 
 .styled.button {
   background: var(--button-styled-background);
-  color: var(--button-styled-text-color);
+  color: var(--button-styled-color);
   box-shadow: var(--button-styled-box-shadow);
   text-shadow: var(--button-styled-text-shadow);
 
@@ -32,11 +32,18 @@
 
 /* Plural buttons - override CSS variables for child components */
 .styled.buttons {
+
+  &:not(.separate) ::slotted(ui-button) {
+    /* Shadow is on button group */
+    --button-box-shadow: none;
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+  }
+
   ::slotted(ui-button) {
 
     /* Style button */
     --button-background: var(--button-styled-background);
-    --button-box-shadow: var(--button-styled-box-shadow);
     --button-text-shadow: var(--button-styled-text-shadow);
     --button-text-color: var(--button-styled-color);
 
@@ -58,7 +65,11 @@
        Subtle
 --------------------*/
 
-/* Nothing additonal removed */
+/* Plural buttons - override CSS variables for child components */
+.subtle.buttons:not(.separate) {
+  box-shadow: var(--button-box-shadow);
+}
+
 
 /*-------------------
        Flat
@@ -68,6 +79,7 @@
 .flat.buttons ::slotted(ui-button) {
 
   /* Remove shading variables */
+  --button-group-box-shadow: var(--button-box-shadow);
   --button-box-shadow: none;
   --button-hover-box-shadow: none;
   --button-pressed-box-shadow: none;
