@@ -212,13 +212,13 @@ export default {
           "name": "Left Attached",
           "value": "left-attached",
           "description": "attach to the left",
-          "exampleCode": "<ui-button left-attached icon=\"save\"></ui-button>\n<ui-input right-attached placeholder=\"Enter text...\"></ui-input>"
+          "exampleCode": "<ui-button left-attached icon=\"user\">View Profile</ui-button>\n<ui-input right-attached placeholder=\"Enter text...\"></ui-input>"
         },
         {
           "name": "Right Attached",
           "value": "right-attached",
           "description": "attach to the right",
-          "exampleCode": "<ui-input left-attached placeholder=\"Enter text...\"></ui-input>\n<ui-button right-attached icon=\"settings\"></ui-button>"
+          "exampleCode": "<ui-input left-attached placeholder=\"Enter text...\"></ui-input>\n<ui-button right-attached icon=\"settings\" icon-only></ui-button>"
         }
       ]
     },

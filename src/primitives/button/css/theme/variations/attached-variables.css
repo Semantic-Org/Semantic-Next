@@ -1,14 +1,13 @@
 :host {
-  --button-attached-offset: -1px;
-  --button-attached-border-shadow: 0px 0px 0px 1px var(--button-border-color);
+  --button-attached-offset: var(--button-border-width);
+  --button-attached-border-shadow: 0px 0px 0px var(--button-border-width) var(--button-border-color);
   --button-attached-box-shadow:
     var(--button-attached-border-shadow),
     var(--button-shadow-box-shadow)
   ;
-  --button-attached-horizontal-padding: var(--relative-12px);
-  --button-attached-z-index: 2;
+  --button-attached-z-index: var(--page-layer-2);
   --button-attached-pressed-box-shadow:
-    0 2px 2px rgba(0, 0, 0, 0.08) inset,
+    var(--button-pressed-shadow-box-shadow),
     var(--button-attached-box-shadow)
   ;
 

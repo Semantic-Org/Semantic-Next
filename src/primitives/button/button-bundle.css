@@ -947,12 +947,9 @@
   .attached.button {
     position: relative;
     display: block;
-    margin: 0em;
+    margin-left: var(--button-attached-offset);
+    margin-right: var(--button-attached-offset);
     border-radius: 0em;
-    box-shadow: var(--button-attached-box-shadow);
-  }
-  .attached.button:active {
-    box-shadow: var(--button-attached-pressed-box-shadow);
   }
   .top-attached.button {
     border-radius: var(--button-attached-top);
@@ -964,13 +961,11 @@
     display: inline-block;
     border-left: none;
     text-align: right;
-    padding-right: var(--button-attached-horizontal-padding);
     border-radius: var(--button-attached-left);
   }
   .right-attached.button {
     display: inline-block;
     text-align: left;
-    padding-left: var(--button-attached-horizontal-padding);
     border-radius: var(--button-attached-right);
   }
   .attached.buttons {
@@ -2531,12 +2526,11 @@
 /* src/primitives/button/css/theme/variations/attached-variables.css */
 @layer button.theme.variations.attached {
   :host {
-    --button-attached-offset: -1px;
-    --button-attached-border-shadow: 0px 0px 0px 1px var(--button-border-color);
+    --button-attached-offset: var(--button-border-width);
+    --button-attached-border-shadow: 0px 0px 0px var(--button-border-width) var(--button-border-color);
     --button-attached-box-shadow: var(--button-attached-border-shadow), var(--button-shadow-box-shadow) ;
-    --button-attached-horizontal-padding: var(--relative-12px);
-    --button-attached-z-index: 2;
-    --button-attached-pressed-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.08) inset, var(--button-attached-box-shadow) ;
+    --button-attached-z-index: var(--page-layer-2);
+    --button-attached-pressed-box-shadow: var(--button-pressed-shadow-box-shadow), var(--button-attached-box-shadow) ;
     --button-attached-top-left: var(--button-border-radius) 0 0 0;
     --button-attached-top-right: 0 var(--button-border-radius) 0 0;
     --button-attached-bottom-left: 0 0 0 var(--button-border-radius);
