@@ -113,10 +113,7 @@ export class SpecReader {
     };
     const spec = this.spec;
 
-    // Check for plural-specific example code if in plural mode
-    const customExampleCode = plural
-      ? spec.pluralExampleCode || spec.exampleCode
-      : spec.singularExampleCode || spec.exampleCode;
+    const customExampleCode = this.getExampleCode(spec, plural);
 
     const defaultContent = (plural && spec?.examples?.defaultPluralContent)
       ? spec?.examples?.defaultPluralContent
@@ -458,6 +455,16 @@ export class SpecReader {
     };
   }
 
+  /*
+    Gets the appropriate example code for a part based on plurality
+    Checks plural-specific, singular-specific, then falls back to general exampleCode
+  */
+  getExampleCode(part, isPlural = false) {
+    return isPlural
+      ? part.pluralExampleCode || part.exampleCode
+      : part.singularExampleCode || part.exampleCode;
+  }
+
   getCodeExamples(part, { defaultAttributes, defaultContent, isPlural = false } = {}) {
     let examples = [];
     let attribute = this.getAttributeName(part);
@@ -479,10 +486,7 @@ export class SpecReader {
       Create an example for each option present
       in the options array, i.e. colors => "red", "blue"
     */
-    // Check for plural-specific example code if in plural mode
-    const customExampleCode = isPlural
-      ? part.pluralExampleCode || part.exampleCode
-      : part.singularExampleCode || part.exampleCode;
+    const customExampleCode = this.getExampleCode(part, isPlural);
 
     if (customExampleCode) {
       // Handle both string and array formats
@@ -531,10 +535,7 @@ export class SpecReader {
     else if (part.options) {
       let examplesToJoin = [];
       each(part.options, (option, index) => {
-        // Check for plural-specific example code if in plural mode
-        const customExampleCode = isPlural
-          ? option.pluralExampleCode || option.exampleCode
-          : option.exampleCode || option.exampleCode;
+        const customExampleCode = this.getExampleCode(option, isPlural);
 
         if (customExampleCode) {
           // an example was provided in the spec for us
