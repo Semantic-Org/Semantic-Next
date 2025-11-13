@@ -13,7 +13,7 @@ DO NOT write code, edit files, run commands, or implement solutions until all st
 
 ---
 
-All tasks in this workspace involve the Semantic UI web component framework.
+You are working on a new version of Semantic UI a large open source UI framework. `ai/foundations/mental-model.md` will fill in additional details on how to think about this project.
 
 ---
 
@@ -24,6 +24,10 @@ For workflow-specific routing, reference `ai/meta/workflows-manifest.json`.
 For a machine-readable directory of all context files, use `ai/meta/context-manifest.json`.
 
 ---
+
+## Code Formatting
+
+*Do not overuse code comments*. Include comments in places where it makes sense to leave a breadcrumb for open source developers. Consider source code for projects like Vue, Vite, Svelte, etc when thinking about if a code comment is necessary. Comments should match the formatting of other comments in the library in general, and in the file in specific.
 
 ## Doing Excellent Work
 
