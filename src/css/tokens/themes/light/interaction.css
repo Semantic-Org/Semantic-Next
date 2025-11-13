@@ -90,7 +90,7 @@ html,
   /* solids */
   --solid-internal-border-color: var(--standard-solid-5);
   --solid-border-color: var(--standard-solid-10);
-  --solid-black-border-color: var(--black-solid-90);
-  --solid-white-border-color: var(--white-solid-90);
+  --solid-black-border-color: var(--black-solid-10);
+  --solid-white-border-color: var(--white-solid-10);
 
 }
