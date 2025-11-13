@@ -114,9 +114,9 @@ export class SpecReader {
     const spec = this.spec;
 
     // Check for plural-specific example code if in plural mode
-    const customExampleCode = plural && spec.pluralExampleCode
-      ? spec.pluralExampleCode
-      : spec.exampleCode;
+    const customExampleCode = plural
+      ? spec.pluralExampleCode || spec.exampleCode
+      : spec.singularExampleCode || spec.exampleCode;
 
     const defaultContent = (plural && spec?.examples?.defaultPluralContent)
       ? spec?.examples?.defaultPluralContent
@@ -141,7 +141,7 @@ export class SpecReader {
         {
           showCode: false,
           code,
-          components: [componentParts],
+          components: Array.isArray(componentParts) ? componentParts : [componentParts],
         },
       ],
     });
@@ -303,6 +303,61 @@ export class SpecReader {
   }
 
   /*
+    Splits HTML string into individual top-level components
+    Returns array of HTML strings, one for each root component
+  */
+  splitTopLevelComponents(html) {
+    html = html.trim();
+    const components = [];
+    let depth = 0;
+    let currentComponent = '';
+    let i = 0;
+
+    while (i < html.length) {
+      const char = html[i];
+
+      if (char === '<') {
+        // Check if it's a closing tag
+        if (html[i + 1] === '/') {
+          depth--;
+          currentComponent += char;
+        }
+        else if (html[i + 1] !== '!') {
+          // Opening tag (but not comment)
+          depth++;
+          currentComponent += char;
+        }
+        else {
+          currentComponent += char;
+        }
+      }
+      else if (char === '>' && html[i - 1] === '/') {
+        // Self-closing tag: <img /> or <ui-icon />
+        depth--;
+        currentComponent += char;
+      }
+      else {
+        currentComponent += char;
+      }
+
+      // When we close a root component, save it
+      if (depth === 0 && currentComponent.trim() && char === '>') {
+        components.push(currentComponent.trim());
+        currentComponent = '';
+      }
+
+      i++;
+    }
+
+    // Handle any remaining content
+    if (currentComponent.trim()) {
+      components.push(currentComponent.trim());
+    }
+
+    return components.filter(c => c.length > 0);
+  }
+
+  /*
     Returns only top level for component with all inner content as 'html'
     <ui-button icon="delete"><div>Hello</div></ui-button>
     returns {
@@ -311,17 +366,59 @@ export class SpecReader {
       attributeString 'icon="delete"'
       html: '<div>Hello</div>'
     }
+
+    If multiple root components are present, returns array of component parts
   */
-  getComponentPartsFromHTML(html, { dialect } = {}) {
+  getComponentPartsFromHTML(html, { dialect, multiple = false } = {}) {
     // Remove leading and trailing whitespace from the HTML string
     html = html.trim();
 
-    // Find the index of the first space or closing angle bracket
-    const spaceIndex = html.indexOf(' ');
+    // Check if HTML starts with a tag - if not, it's not a component
+    if (!html.startsWith('<')) {
+      return { html: html };
+    }
+
+    // Check if there are multiple root components by counting root-level tags
+    // A simple heuristic: if we have multiple opening tags at depth 0, split
+    const topLevelComponents = this.splitTopLevelComponents(html);
+
+    // Only split if we actually have multiple distinct root components
+    // AND the first component is a complete valid tag (not broken HTML)
+    if (topLevelComponents.length > 1) {
+      const firstComponent = topLevelComponents[0];
+      const lastComponent = topLevelComponents[topLevelComponents.length - 1];
+
+      // Check if first component has a proper closing or is self-closing
+      const hasProperClose = firstComponent.includes('</') || firstComponent.endsWith('/>');
+      // Check if last component starts with a tag (not loose text)
+      const lastStartsWithTag = lastComponent.trim().startsWith('<');
+
+      // Only split if both components look valid
+      if (hasProperClose && lastStartsWithTag) {
+        return topLevelComponents.map(componentHtml => this.parseSingleComponent(componentHtml, { dialect }));
+      }
+    }
+
+    // Single component or malformed multi-component - parse whole thing as single
+    return this.parseSingleComponent(html, { dialect });
+  }
+
+  /*
+    Parses a single component HTML string
+  */
+  parseSingleComponent(html, { dialect } = {}) {
+    html = html.trim();
+
+    // Find the closing bracket of the first tag
     const closingTagIndex = html.indexOf('>');
 
-    // Extract the component name
-    const componentName = html.slice(1, spaceIndex !== -1 ? spaceIndex : closingTagIndex);
+    // Find the first space, but only if it's BEFORE the closing bracket
+    const spaceIndex = html.indexOf(' ');
+    const spaceBeforeClose = (spaceIndex !== -1 && spaceIndex < closingTagIndex) ? spaceIndex : -1;
+
+    // Extract the component name (from after < to first space or >)
+    const componentName = html.slice(1, spaceBeforeClose !== -1 ? spaceBeforeClose : closingTagIndex);
+
     // complex examples arent supported
     if (componentName == 'div') {
       return {
@@ -329,9 +426,9 @@ export class SpecReader {
       };
     }
 
-    // Extract the attribute string
-    const attributeString = spaceIndex !== -1
-      ? html.slice(spaceIndex, closingTagIndex).trim()
+    // Extract the attribute string (from after component name to >)
+    const attributeString = spaceBeforeClose !== -1
+      ? html.slice(spaceBeforeClose, closingTagIndex).trim()
       : '';
 
     // Parse the attribute string into an object
@@ -371,19 +468,73 @@ export class SpecReader {
       delete attributes[attribute];
       defaultAttributes = values(attributes).join(' ');
     }
+
+    let code, componentParts;
+    let modifiers = this.getAttributeName(part);
+    if (defaultAttributes) {
+      modifiers = `${modifiers} ${defaultAttributes}`;
+    }
+
     /*
       Create an example for each option present
       in the options array, i.e. colors => "red", "blue"
     */
-    if (part.options) {
+    // Check for plural-specific example code if in plural mode
+    const customExampleCode = isPlural
+      ? part.pluralExampleCode || part.exampleCode
+      : part.singularExampleCode || part.exampleCode;
+
+    if (customExampleCode) {
+      // Handle both string and array formats
+      if (isArray(customExampleCode)) {
+        // Array of example codes - respect separateExamples flag
+        if (part.separateExamples) {
+          // Create separate examples for each code
+          each(customExampleCode, (codeString) => {
+            code = codeString;
+            componentParts = this.getComponentPartsFromHTML(code);
+            const example = {
+              code,
+              components: Array.isArray(componentParts) ? componentParts : [componentParts],
+            };
+            examples.push(example);
+          });
+        }
+        else {
+          // Join all examples into one
+          let joinedExamples = [];
+          each(customExampleCode, (codeString) => {
+            code = codeString;
+            componentParts = this.getComponentPartsFromHTML(code);
+            joinedExamples.push({
+              code,
+              components: Array.isArray(componentParts) ? componentParts : [componentParts],
+            });
+          });
+          examples.push({
+            code: joinedExamples.map(ex => ex.code).join('\n'),
+            components: flatten([...joinedExamples.map(ex => ex.components)]),
+          });
+        }
+      }
+      else {
+        // Single string example code
+        code = customExampleCode;
+        componentParts = this.getComponentPartsFromHTML(code);
+        const example = {
+          code,
+          components: Array.isArray(componentParts) ? componentParts : [componentParts],
+        };
+        examples.push(example);
+      }
+    }
+    else if (part.options) {
       let examplesToJoin = [];
       each(part.options, (option, index) => {
-        let code, componentParts;
-
         // Check for plural-specific example code if in plural mode
-        const customExampleCode = isPlural && option.pluralExampleCode
-          ? option.pluralExampleCode
-          : option.exampleCode;
+        const customExampleCode = isPlural
+          ? option.pluralExampleCode || option.exampleCode
+          : option.exampleCode || option.exampleCode;
 
         if (customExampleCode) {
           // an example was provided in the spec for us
@@ -395,7 +546,7 @@ export class SpecReader {
               componentParts = this.getComponentPartsFromHTML(code);
               const example = {
                 code,
-                components: [componentParts],
+                components: Array.isArray(componentParts) ? componentParts : [componentParts],
               };
               if (part.separateExamples) {
                 examples.push(example);
@@ -416,7 +567,6 @@ export class SpecReader {
         else {
           // construct an example programatically
           // using the option values
-          let modifiers;
           if (isString(option.value)) {
             modifiers = option.value;
           }
@@ -434,7 +584,7 @@ export class SpecReader {
         }
         const example = {
           code,
-          components: [componentParts],
+          components: Array.isArray(componentParts) ? componentParts : [componentParts],
         };
         if (part.separateExamples) {
           examples.push(example);
@@ -452,70 +602,13 @@ export class SpecReader {
       }
     }
     else {
-      let code, componentParts;
-      let modifiers = this.getAttributeName(part);
-      if (defaultAttributes) {
-        modifiers = `${modifiers} ${defaultAttributes}`;
-      }
-
-      // Check for plural-specific example code if in plural mode
-      const customExampleCode = isPlural && part.pluralExampleCode
-        ? part.pluralExampleCode
-        : part.exampleCode;
-
-      if (customExampleCode) {
-        // Handle both string and array formats
-        if (isArray(customExampleCode)) {
-          // Array of example codes - respect separateExamples flag
-          if (part.separateExamples) {
-            // Create separate examples for each code
-            each(customExampleCode, (codeString) => {
-              code = codeString;
-              componentParts = this.getComponentPartsFromHTML(code);
-              const example = {
-                code,
-                components: [componentParts],
-              };
-              examples.push(example);
-            });
-          }
-          else {
-            // Join all examples into one
-            let joinedExamples = [];
-            each(customExampleCode, (codeString) => {
-              code = codeString;
-              componentParts = this.getComponentPartsFromHTML(code);
-              joinedExamples.push({
-                code,
-                components: [componentParts],
-              });
-            });
-            examples.push({
-              code: joinedExamples.map(ex => ex.code).join('\n'),
-              components: flatten([...joinedExamples.map(ex => ex.components)]),
-            });
-          }
-        }
-        else {
-          // Single string example code
-          code = customExampleCode;
-          componentParts = this.getComponentPartsFromHTML(code);
-          const example = {
-            code,
-            components: [componentParts],
-          };
-          examples.push(example);
-        }
-      }
-      else {
-        code = this.getCodeFromModifiers(modifiers, { html: defaultContent, plural: isPlural });
-        componentParts = this.getComponentParts(modifiers, { html: defaultContent, plural: isPlural });
-        const example = {
-          code,
-          components: [componentParts],
-        };
-        examples.push(example);
-      }
+      code = this.getCodeFromModifiers(modifiers, { html: defaultContent, plural: isPlural });
+      componentParts = this.getComponentParts(modifiers, { html: defaultContent, plural: isPlural });
+      const example = {
+        code,
+        components: [componentParts],
+      };
+      examples.push(example);
     }
 
     return {
