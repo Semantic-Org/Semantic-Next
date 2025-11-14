@@ -2,540 +2,606 @@
 layout: '@layouts/Guide.astro'
 title: Specs
 icon: file-text
-description: Machine-readable API definitions for components
+description: JavaScript API definitions for components
 ---
 import Blockquote from '@components/mdx/Blockquote.astro';
 
 export const components = { blockquote: Blockquote };
 
-Component specs are declarative JSON contracts that define a component's API in a machine-readable format. All primitives in `@semantic-ui/core` use specs, but they're optional for custom components.
+Component specs are JavaScript modules that define a component's API. Specs enable automatic attribute mapping, support for three HTML dialects, and machine-readable documentation. All primitives in `@semantic-ui/core` use specs.
 
 ## What Specs Enable
 
-Without specs, components must manually handle attribute mapping and only the verbose dialect works:
+Without a spec, components only support verbose attributes:
 
 ```javascript
-// Without spec - manual attribute handling, limited dialect support
+// Without spec - manual attribute handling
 defineComponent({
   tagName: 'ui-button',
   defaultSettings: {
     primary: false,
-    secondary: false,
     size: 'medium',
-    // Must manually define every setting
   },
-  createComponent: ({ settings }) => ({
-    // Must manually handle attribute mapping
-    isPrimary() {
-      return settings.primary === 'true' || settings.primary === true;
-    }
-  }),
-  // Only verbose syntax works: <ui-button primary="true">
+  // Only works: <ui-button primary="true">
 });
 ```
 
-With a spec, attribute mapping and dialect support are automatic:
+With a spec, all three dialects work automatically:
 
 ```javascript
-// With spec - automatic attribute mapping, all dialects work
-import componentSpec from './specs/button-component.js';
+// With spec - automatic attribute mapping
+import componentSpec from './specs/button.component.js';
 
 defineComponent({
   tagName: 'ui-button',
-  componentSpec,  // Handles all attribute mapping automatically
+  componentSpec,
   template,
   css,
-  // All three dialects work:
+  // All work:
   // <ui-button primary>            (standard)
   // <ui-button primary="true">     (verbose)
   // <ui-button class="ui primary"> (classic)
 });
 ```
 
-> [!info] Why Specs Help with AI
-> When AI assistants help you code, they need to know what's valid. Without specs, AI guesses - often suggesting invalid combinations like `primary secondary` on the same button. With specs, AI knows exactly which attributes exist, which combine, and which are mutually exclusive.
-
-## When to Use a Spec
-
-### Use Specs When
-
-You want AI assistants to understand your components, need machine-readable API definitions for a design system, or want automatic support for all three HTML dialects. Specs are also essential for plural components that share variations and for enabling tooling like linters or documentation generators.
-
-### Skip Specs When
-
-You're building one-off internal components, prototyping with a rapidly evolving API, or creating simple components where the overhead isn't justified. If you don't need machine readability or dialect support, a spec may be unnecessary.
-
-
-## Using Specs at Runtime
-
-The `@semantic-ui/specs` package provides a `SpecReader` class that can load and process JSON specs at runtime.
-
-```javascript
-import { SpecReader } from '@semantic-ui/specs';
-import { defineComponent } from '@semantic-ui/component';
-
-// Load your spec at runtime
-const specReader = new SpecReader();
-const buttonSpec = await specReader.read('./specs/button.json');
-
-// Get the processed component spec
-const componentSpec = specReader.getWebComponentSpec();
-
-// Use it with defineComponent
-export const UIButton = defineComponent({
-  tagName: 'ui-button',
-  componentSpec,  // Spec configures entire API
-  template,
-  css,
-  createComponent: ({ self, settings }) => ({
-    performAction() {
-      // Component logic here
-    }
-  })
-});
-```
-
-The spec automatically provides property definitions with correct types, support for all three HTML dialects, bidirectional attribute mapping, default values, validation, and CSS class generation.
-
 > [!warning]
-> Specs are required to support all three dialects. Without a spec, only the verbose dialect works.
+> Specs are required to support all three dialects. Without a spec, only verbose syntax works.
 
-## Build-Time Integration
+## How Specs Work
 
-Runtime loading parses JSON on every page load. For production, process specs at build time to eliminate this overhead:
-
-```javascript
-// build-specs.js
-import { SpecReader } from '@semantic-ui/specs';
-import fs from 'fs/promises';
-import path from 'path';
-
-async function buildSpecs() {
-  const specReader = new SpecReader();
-  const specsDir = './src/specs';
-  const outputDir = './src/generated';
-
-  // Read all JSON specs
-  const files = await fs.readdir(specsDir);
-  const specFiles = files.filter(f => f.endsWith('.json'));
-
-  for (const file of specFiles) {
-    // Load and process spec
-    const spec = await specReader.read(path.join(specsDir, file));
-    const componentSpec = specReader.getWebComponentSpec();
-
-    // Write generated JavaScript module
-    const outputFile = file.replace('.json', '-component.js');
-    const output = `export default ${JSON.stringify(componentSpec, null, 2)};`;
-
-    await fs.writeFile(
-      path.join(outputDir, outputFile),
-      output
-    );
-  }
-}
-
-buildSpecs();
-```
-
-Then import the generated specs directly:
+A spec defines what becomes available as attributes. Here's a simple example:
 
 ```javascript
-import { defineComponent } from '@semantic-ui/component';
-import buttonSpec from './generated/button-component.js';
+// alert.spec.js
+export default {
+  name: 'Alert',
+  tagName: 'ui-alert',
 
-export const UIButton = defineComponent({
-  tagName: 'ui-button',
-  componentSpec: buttonSpec,
-  // ... implementation
-});
+  variations: [
+    {
+      name: 'Color',
+      attribute: 'color',
+      options: [
+        { name: 'Red', value: 'red' },
+        { name: 'Blue', value: 'blue' },
+      ],
+    },
+    {
+      name: 'Dismissible',
+      attribute: 'dismissible',
+    },
+  ],
+};
 ```
 
-This approach provides better performance by avoiding runtime JSON parsing, enables build-time validation, and allows tree-shaking of unused spec data.
+This spec makes these attributes available:
 
-> [!info]
-> This is the approach Semantic UI uses internally for `@semantic-ui/core` components, ensuring optimal performance and validation.
+```html
+<!-- Color variation with options -->
+<ui-alert red>Error occurred</ui-alert>
+<ui-alert blue>Info message</ui-alert>
+
+<!-- Dismissible variation (boolean) -->
+<ui-alert dismissible>You can close me</ui-alert>
+
+<!-- Combine variations -->
+<ui-alert red dismissible>Dismissible error</ui-alert>
+```
+
+All three dialects work automatically:
+
+```html
+<!-- Standard -->
+<ui-alert red dismissible>Message</ui-alert>
+
+<!-- Verbose -->
+<ui-alert color="red" dismissible="true">Message</ui-alert>
+
+<!-- Classic -->
+<ui-alert class="ui red dismissible">Message</ui-alert>
+```
 
 ## Spec Format
 
-A minimal spec looks like this:
+Specs are authored as JavaScript modules in `.spec.js` files.
 
-```json
-{
-  "uiType": "element",
-  "name": "Button",
-  "description": "A button indicates a possible user action",
-  "tagName": "ui-button",
-  "exportName": "UIButton",
-  "variations": [
+### Simple Spec (No Imports)
+
+Most specs are just plain objects with template literals:
+
+```javascript
+// divider.spec.js
+export default {
+  uiType: 'element',
+  name: 'Divider',
+  description: 'A divider visually segments content into groups',
+  tagName: 'ui-divider',
+  exportName: 'UIDivider',
+
+  content: [
     {
-      "name": "Primary",
-      "attribute": "primary",
-      "description": "be emphasized"
-    }
-  ]
-}
+      name: 'Text',
+      attribute: 'text',
+      description: 'include centered text',
+      usageLevel: 1,
+      exampleCode: `<ui-divider text="Or"></ui-divider>`,
+    },
+  ],
+
+  types: [],
+  states: [],
+  variations: [],
+  settings: [],
+  events: [],
+};
 ```
 
-### Required Fields
+### Using Shared Constants
 
-Every spec must define these core properties:
-- `uiType` - Always "element" for components
-- `name` - Display name for documentation
-- `description` - What the component does
-- `tagName` - HTML tag name (must include hyphen)
-- `exportName` - JavaScript export name
+Import common variations to avoid repetition:
 
-### Types vs Variations
+```javascript
+// label.spec.js
+import { SIZE_VARIATION } from '@semantic-ui/specs';
 
-Types are mutually exclusive behaviors (pick one), while variations are stackable visual modifications (combine many).
+export default {
+  name: 'Label',
+  tagName: 'ui-label',
+  exportName: 'UILabel',
 
-```html
-<!-- Types: Can only be primary OR secondary -->
-<ui-button primary>Save</ui-button>
-<ui-button secondary>Cancel</ui-button>
-
-<!-- Variations: Can combine multiple -->
-<ui-button large fluid red>Delete Account</ui-button>
-```
-
-## Component Definition
-
-### Content
-
-Define slots and content areas
-
-```json
-"content": [
-  {
-    "name": "Icon",
-    "attribute": "icon",
-    "slot": "icon",
-    "description": "include an icon",
-    "exampleCode": "<ui-button icon=\"save\">Save</ui-button>"
-  }
-]
-```
-
-Content supports both attribute and slot syntax.
-
-### Types
-
-Define mutually exclusive behaviors
-
-```json
-"types": [
-  {
-    "name": "Emphasis",
-    "attribute": "emphasis",
-    "description": "be emphasized in a layout",
-    "options": [
-      {
-        "name": "Primary",
-        "value": "primary",
-        "description": "be emphasized as the first action"
-      },
-      {
-        "name": "Secondary",
-        "value": "secondary",
-        "description": "be emphasized as a secondary option"
-      }
-    ]
-  }
-]
-```
-
-### States
-
-Define runtime state changes
-
-```json
-"states": [
-  {
-    "name": "Hover",
-    "attribute": "hover",
-    "description": "be hovered"
-  },
-  {
-    "name": "Disabled",
-    "attribute": "disabled",
-    "description": "have interactions disabled",
-    "options": [
-      {
-        "name": "Disabled",
-        "value": "disabled",
-        "description": "disable interactions"
-      },
-      {
-        "name": "Clickable Disabled",
-        "value": "clickable-disabled",
-        "description": "allow interactions but appear disabled"
-      }
-    ]
-  }
-]
-```
-
-### Variations
-
-Define stackable visual modifications
-
-```json
-"variations": [
-  {
-    "name": "Size",
-    "attribute": "size",
-    "description": "vary in size",
-    "options": [
-      {"name": "Small", "value": "small", "description": "appear small"},
-      {"name": "Large", "value": "large", "description": "appear larger than normal"}
-    ]
-  },
-  {
-    "name": "Fluid",
-    "attribute": "fluid",
-    "description": "take the width of its container"
-  }
-]
-```
-
-## Configuration
-
-### Settings
-
-Define configuration properties
-
-```json
-"settings": [
-  {
-    "name": "Href",
-    "type": "string",
-    "attribute": "href",
-    "description": "link to a webpage"
-  },
-  {
-    "name": "Debounced",
-    "type": "boolean",
-    "attribute": "debounced",
-    "defaultValue": false,
-    "description": "debounce input value changes"
-  }
-]
-```
-
-### Events
-
-Define custom events
-
-```json
-"events": [
-  {
-    "eventName": "change",
-    "description": "occurs after the value changes",
-    "arguments": [
-      {
-        "name": "value",
-        "description": "the updated value"
-      }
-    ]
-  }
-]
-```
-
-### Plural Components
-
-Support component collections
-
-```json
-{
-  "supportsPlural": true,
-  "pluralName": "Buttons",
-  "pluralTagName": "ui-buttons",
-  "pluralExportName": "UIButtons",
-  "pluralDescription": "Buttons can exist together as a group",
-
-  "pluralSharedVariations": ["size", "color", "floated"],
-
-  "pluralOnlyVariations": [
+  variations: [
     {
-      "name": "Equal Width",
-      "attribute": "equal-width",
-      "description": "have the same width for each button"
-    }
-  ]
-}
+      name: 'Badge',
+      attribute: 'badge',
+      description: 'be used as a badge',
+      usageLevel: 2,
+    },
+    SIZE_VARIATION,  // Includes all 8 size options
+  ],
+};
+```
+
+### Using Helpers
+
+For complex specs, use helpers to reduce boilerplate:
+
+```javascript
+// button.spec.js
+import {
+  COLOR_OPTIONS,
+  getStates,
+  getVariations,
+} from '@semantic-ui/specs';
+
+export default {
+  name: 'Button',
+  tagName: 'ui-button',
+
+  // Generate multiple states at once
+  states: getStates(['hover', 'active', 'disabled', 'loading']),
+
+  variations: [
+    // Spread multiple variations
+    ...getVariations(['floated', 'fluid', 'compact', 'size']),
+
+    // Use shared options
+    {
+      name: 'Colored',
+      attribute: 'color',
+      description: 'be colored',
+      options: COLOR_OPTIONS,  // All 13 colors
+    },
+  ],
+};
+```
+
+### Template Literals
+
+Use template literals for clean HTML examples:
+
+```javascript
+// Single example
+exampleCode: `<ui-button icon="pause">Pause</ui-button>`
+
+// Multiline
+exampleCode: `
+  <ui-button primary>Confirm</ui-button>
+  <ui-button>Cancel</ui-button>
+`
+
+// Multiple examples (array)
+exampleCode: [
+  `<ui-button>
+    <img src="/images/avatar.jpg" />
+    Add User
+  </ui-button>`,
+  `<ui-button>
+    <ui-image src="/images/avatar.jpg"></ui-image>
+    Add User
+  </ui-button>`,
+]
 ```
 
 > [!info]
-> Only share obvious visual variations (size, color). Not behavioral types (submit, reset).
+> Specs must be pure data (JSON-serializable). The build validates this.
 
-## Writing Guidelines
+## Build Process
 
-### Description Format
+The build system generates files from `.spec.js` sources:
 
-Use imperative mood without the component name
+```
+button.spec.js (source - you author)
+    ↓
+button.spec.json (snapshot for tooling)
+button.component.js (runtime spec)
+buttons.component.js (plural, if supported)
+```
 
-```json
+Your components import the generated `.component.js` file:
+
+```javascript
+import componentSpec from './specs/button.component.js';
+
+export const UIButton = defineComponent({
+  tagName: 'ui-button',
+  componentSpec,  // Generated from button.spec.js
+  template,
+  css,
+});
+```
+
+> [!info]
+> Never edit generated files. Always edit the `.spec.js` source.
+
+## Required Fields
+
+Every spec needs these properties:
+
+```javascript
+{
+  uiType: 'element',           // Always "element" for components
+  name: 'Button',              // Display name
+  description: 'A button...',  // What it does
+  tagName: 'ui-button',        // HTML tag (needs hyphen)
+  exportName: 'UIButton',      // JavaScript export name
+}
+```
+
+## Types vs Variations
+
+Types are mutually exclusive. Variations stack.
+
+```html
+<!-- Types: pick one -->
+<ui-button primary>Save</ui-button>
+<ui-button secondary>Cancel</ui-button>
+
+<!-- Variations: combine many -->
+<ui-button large fluid red>Delete</ui-button>
+```
+
+## Content
+
+Define slots and content areas:
+
+```javascript
+content: [
+  {
+    name: 'Icon',
+    attribute: 'icon',
+    slot: 'icon',
+    description: 'include an icon',
+    exampleCode: `<ui-button icon="save">Save</ui-button>`,
+  },
+],
+```
+
+## Types
+
+Define mutually exclusive behaviors:
+
+```javascript
+types: [
+  {
+    name: 'Emphasis',
+    attribute: 'emphasis',
+    description: 'be emphasized in a layout',
+    options: [
+      {
+        name: 'Primary',
+        value: 'primary',
+        description: 'be emphasized as the first action',
+      },
+      {
+        name: 'Secondary',
+        value: 'secondary',
+        description: 'be emphasized as a secondary option',
+      },
+    ],
+  },
+],
+```
+
+## States
+
+Define runtime state changes:
+
+```javascript
+states: [
+  {
+    name: 'Disabled',
+    attribute: 'disabled',
+    description: 'have interactions disabled',
+  },
+],
+```
+
+## Variations
+
+Define stackable visual modifications:
+
+```javascript
+variations: [
+  {
+    name: 'Size',
+    attribute: 'size',
+    description: 'vary in size',
+    options: [
+      { name: 'Small', value: 'small', description: 'appear small' },
+      { name: 'Large', value: 'large', description: 'appear large' },
+    ],
+  },
+  {
+    name: 'Fluid',
+    attribute: 'fluid',
+    description: 'take the width of its container',
+  },
+],
+```
+
+## Settings
+
+Define configuration properties:
+
+```javascript
+settings: [
+  {
+    name: 'Href',
+    type: 'string',
+    attribute: 'href',
+    description: 'link to a webpage',
+  },
+  {
+    name: 'Debounced',
+    type: 'boolean',
+    attribute: 'debounced',
+    defaultValue: false,
+    description: 'debounce input value changes',
+  },
+],
+```
+
+## Events
+
+Define custom events:
+
+```javascript
+events: [
+  {
+    eventName: 'change',
+    description: 'occurs after the value changes',
+    arguments: [
+      {
+        name: 'value',
+        description: 'the updated value',
+      },
+    ],
+  },
+],
+```
+
+## Plural Support
+
+Define collection components:
+
+```javascript
+{
+  supportsPlural: true,
+  pluralName: 'Buttons',
+  pluralTagName: 'ui-buttons',
+  pluralExportName: 'UIButtons',
+  pluralDescription: 'Buttons can exist together as a group',
+
+  // Which variations the plural shares
+  pluralSharedVariations: ['size', 'color', 'floated'],
+
+  // Variations only for plural
+  pluralOnlyVariations: [
+    {
+      name: 'Equal Width',
+      attribute: 'equal-width',
+      description: 'have the same width for each button',
+    },
+  ],
+}
+```
+
+## Shared Terms
+
+The `@semantic-ui/specs` package provides reusable constants and helpers.
+
+### Complete Variations
+
+Ready-to-use variations with all options defined:
+
+```javascript
+import {
+  SIZE_VARIATION,        // 8 sizes: mini → massive
+  COLORED_VARIATION,     // 13 colors
+  FLOATED_VARIATION,     // left, right
+  ATTACHED_VARIATION,    // top, bottom, left, right, both
+  COMPACT_VARIATION,     // compact, very compact
+  PADDED_VARIATION,      // padded, very padded
+  CIRCULAR_VARIATION,    // boolean
+  FLUID_VARIATION,       // boolean
+} from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    SIZE_VARIATION,      // Just drop it in
+    COLORED_VARIATION,
+  ],
+};
+```
+
+### Options Arrays
+
+Pre-defined option arrays for custom variations:
+
+```javascript
+import {
+  SIZE_OPTIONS,          // 8 size options
+  COLOR_OPTIONS,         // 13 color options
+  FLOATED_OPTIONS,       // left, right
+  ATTACHED_OPTIONS,      // 5 position options
+  COMPACT_OPTIONS,       // 2 levels
+  PADDED_OPTIONS,        // 2 levels
+  HORIZONTAL_ALIGNED_OPTIONS,  // left, center, right
+  VERTICAL_ALIGNED_OPTIONS,    // top, middle, bottom
+  EMPHASIS_OPTIONS,      // primary, secondary, tertiary
+} from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    {
+      name: 'Colored',
+      attribute: 'color',
+      options: COLOR_OPTIONS,  // All colors pre-defined
+    },
+  ],
+};
+```
+
+### State Constants
+
+Common states:
+
+```javascript
+import {
+  HOVER_STATE,
+  FOCUS_STATE,
+  ACTIVE_STATE,
+  LOADING_STATE,
+  PRESSED_STATE,
+  DISABLED_STATE,  // Has options: disabled, clickable-disabled
+} from '@semantic-ui/specs';
+
+export default {
+  states: [
+    HOVER_STATE,
+    ACTIVE_STATE,
+    DISABLED_STATE,
+  ],
+};
+```
+
+### Helper Functions
+
+**`getStates(names)`** - Get multiple states at once:
+
+```javascript
+states: getStates(['hover', 'focus', 'active', 'disabled', 'loading'])
+```
+
+**`getVariations(names)`** - Get multiple variations at once:
+
+```javascript
+variations: [
+  ...getVariations(['size', 'fluid', 'compact', 'floated']),
+  // Add custom variations
+]
+```
+
+**`modifyVariation(variation, overrides)`** - Customize a variation:
+
+```javascript
+import { ATTACHED_VARIATION, modifyVariation } from '@semantic-ui/specs';
+
+variations: [
+  modifyVariation(ATTACHED_VARIATION, {
+    usageLevel: 3,  // Change from default
+  }),
+]
+```
+
+**`addOptionExamples(options, examples)`** - Add example code to options:
+
+```javascript
+import { ATTACHED_OPTIONS, addOptionExamples } from '@semantic-ui/specs';
+
+options: addOptionExamples(ATTACHED_OPTIONS, {
+  'top-attached': `<ui-button top-attached>Action</ui-button>`,
+  'bottom-attached': `<ui-button bottom-attached>Action</ui-button>`,
+})
+```
+
+## Writing Style
+
+### Descriptions
+
+Use imperative mood without the component name:
+
+```javascript
 // Good
-"description": "be emphasized"
-"description": "appear small"
-"description": "have interactions disabled"
+description: 'be emphasized'
+description: 'appear small'
+description: 'have interactions disabled'
 
 // Bad
-"description": "The button can be emphasized"
-"description": "Makes the button appear small"
-"description": "Button with disabled interactions"
+description: 'The button can be emphasized'
+description: 'Makes the button appear small'
 ```
 
 ### Usage Levels
 
-Indicate feature commonality (1-5)
+Indicate feature commonality (1-5):
 
-```json
+```javascript
 {
-  "name": "Size",
-  "usageLevel": 1,  // Essential feature
-  "description": "vary in size"
+  name: 'Size',
+  usageLevel: 1,  // Essential
+  description: 'vary in size',
 }
 
 {
-  "name": "Animated",
-  "usageLevel": 3,  // Advanced feature
-  "description": "animate to show hidden content"
+  name: 'Animated',
+  usageLevel: 3,  // Advanced
+  description: 'animate to show hidden content',
 }
 ```
 
-1 = Essential, 2 = Common, 3 = Advanced, 4 = Specialized, 5 = Rare
-
-### Example Configuration
-
-Provide defaults for documentation
-
-```json
-"examples": {
-  "defaultAttributes": {
-    "icon": "check-circle"  // Icons always need a glyph
-  },
-  "defaultContent": "Click Me"
-}
-```
-
-## Common Patterns
-
-### Standard Sizes
-
-```json
-"options": [
-  {"name": "Mini", "value": "mini", "description": "appear extremely small"},
-  {"name": "Tiny", "value": "tiny", "description": "appear very small"},
-  {"name": "Small", "value": "small", "description": "appear small"},
-  {"name": "Medium", "value": "medium", "description": "appear normal sized"},
-  {"name": "Large", "value": "large", "description": "appear larger than normal"},
-  {"name": "Big", "value": "big", "description": "appear much larger than normal"},
-  {"name": "Huge", "value": "huge", "description": "appear very much larger than normal"},
-  {"name": "Massive", "value": "massive", "description": "appear extremely larger than normal"}
-]
-```
-
-### Standard Colors
-
-```json
-"options": [
-  {"name": "Red", "value": "red", "description": "be red"},
-  {"name": "Orange", "value": "orange", "description": "be orange"},
-  {"name": "Yellow", "value": "yellow", "description": "be yellow"},
-  {"name": "Green", "value": "green", "description": "be green"},
-  {"name": "Blue", "value": "blue", "description": "be blue"},
-  {"name": "Purple", "value": "purple", "description": "be purple"}
-]
-```
-
-### Form Components
-
-```json
-"settings": [
-  {"name": "Name", "type": "string", "attribute": "name"},
-  {"name": "Value", "type": "string", "attribute": "value"},
-  {"name": "Required", "type": "boolean", "attribute": "required", "defaultValue": false}
-],
-"events": [
-  {"eventName": "change", "arguments": [{"name": "value"}]}
-]
-```
+Scale: 1 = Essential, 2 = Common, 3 = Advanced, 4 = Specialized, 5 = Rare
 
 ## Quick Reference
 
 | Section | Purpose | Mutually Exclusive |
 |---------|---------|-------------------|
-| `types` | Core behaviors | Yes |
-| `variations` | Visual modifications | No |
+| `types` | Behaviors | Yes |
+| `variations` | Visual mods | No |
 | `states` | Runtime changes | No |
 | `settings` | Configuration | No |
-| `content` | Slots/attributes | No |
+| `content` | Slots | No |
 | `events` | Custom events | No |
 
-## Complete Example
+## When to Use Specs
 
-```json
-{
-  "uiType": "element",
-  "name": "Alert",
-  "description": "An alert displays an important message",
-  "tagName": "ui-alert",
-  "exportName": "UIAlert",
+**Use specs when:**
+- You need all three HTML dialects
+- Building a design system
+- Want AI assistants to understand your components
+- Creating plural components with shared variations
 
-  "content": [
-    {
-      "name": "Icon",
-      "attribute": "icon",
-      "slot": "icon",
-      "description": "include an icon"
-    }
-  ],
-
-  "types": [
-    {
-      "name": "Severity",
-      "attribute": "severity",
-      "description": "indicate message importance",
-      "options": [
-        {"name": "Info", "value": "info", "description": "be informational"},
-        {"name": "Warning", "value": "warning", "description": "indicate a warning"},
-        {"name": "Error", "value": "error", "description": "indicate an error"}
-      ]
-    }
-  ],
-
-  "states": [
-    {
-      "name": "Visible",
-      "attribute": "visible",
-      "description": "be visible"
-    }
-  ],
-
-  "variations": [
-    {
-      "name": "Dismissible",
-      "attribute": "dismissible",
-      "description": "be dismissible by the user"
-    }
-  ],
-
-  "settings": [
-    {
-      "name": "Auto Dismiss",
-      "type": "number",
-      "attribute": "auto-dismiss",
-      "description": "automatically dismiss after milliseconds"
-    }
-  ],
-
-  "events": [
-    {
-      "eventName": "dismiss",
-      "description": "occurs when dismissed"
-    }
-  ]
-}
-```
+**Skip specs when:**
+- Building one-off internal components
+- Prototyping with rapidly evolving APIs
+- Simple components where overhead isn't justified
