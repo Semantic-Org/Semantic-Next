@@ -4,13 +4,15 @@ import { asyncEach, each } from '@semantic-ui/utils';
 import { readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import glob from 'tiny-glob';
+import { pathToFileURL } from 'url';
 import { build } from './lib/build.js';
 import { INTERNAL_CSS_BANNER } from './lib/config.js';
+import { validateSpec } from './lib/validate-spec.js';
 
 /*
-  Generate component spec JS directly without intermediate JSON file
+  Generate component spec JS from source spec
 */
-const generateComponentSpecJS = async (spec, plural = false, specSettings = {}) => {
+const generateComponentSpecJS = async (spec, plural = false, specSettings = {}, sourceFile = '') => {
   const readerSettings = {
     plural,
     ...specSettings,
@@ -18,11 +20,13 @@ const generateComponentSpecJS = async (spec, plural = false, specSettings = {}) 
   const reader = new SpecReader(spec, readerSettings);
   const componentSpec = reader.getWebComponentSpec();
   const filename = plural
-    ? `${spec?.pluralTagName?.replace('ui-', '')}-component.js`
+    ? `${spec?.pluralTagName?.replace('ui-', '')}.component.js`
     : 'component.js';
-  return `// Auto-generated from ${spec?.tagName?.replace('ui-', '') || 'spec'}.json\nexport default ${
-    JSON.stringify(componentSpec, null, 2)
-  };\n`;
+
+  const sourceFileName = sourceFile
+    ? sourceFile.split('/').pop()
+    : (spec?.tagName?.replace('ui-', '') || 'spec') + '.spec.js';
+  return `// Auto-generated from ${sourceFileName}\nexport default ${JSON.stringify(componentSpec, null, 2)};\n`;
 };
 
 /*
@@ -51,41 +55,76 @@ export const buildUIDeps = async ({
   });
 
   // External glob needed for proper negation support
-  const allFiles = await glob('src/primitives/**/specs/*.json');
-  const entryPoints = allFiles.filter(path => !path.endsWith('-component.json'));
+  // Support both .json (legacy) and .spec.js (new) during transition
+  const jsonFiles = await glob('src/primitives/**/specs/*.json');
+  const specJsFiles = await glob('src/primitives/**/specs/*.spec.js');
+
+  const allFiles = [...jsonFiles, ...specJsFiles];
+  // Exclude all generated files (*.component.js, *.component.json, *.spec.json)
+  const entryPoints = allFiles.filter(path =>
+    !path.endsWith('.component.json')
+    && !path.endsWith('.component.js')
+    && !path.endsWith('.spec.json') // Generated JSON from .spec.js
+  );
 
   const createComponentSpecs = async () => {
     await asyncEach(entryPoints, async (entryPath) => {
       try {
-        const contents = readFileSync(entryPath, 'utf8');
-        const spec = JSON.parse(contents);
+        let spec;
+        const isJsSpec = entryPath.endsWith('.spec.js');
+
+        if (isJsSpec) {
+          // Load JS module with cache busting for watch mode
+          const specModule = await import(`${pathToFileURL(entryPath).href}?t=${Date.now()}`);
+          spec = specModule.default;
+
+          // Validate JS specs are pure data
+          validateSpec(spec, entryPath);
+
+          // Generate JSON snapshot for machine readability (LLMs, tooling)
+          const jsonPath = entryPath.replace('.spec.js', '.spec.json');
+          const jsonContent = `${JSON.stringify(spec, null, 2)}\n`;
+          writeFileSync(jsonPath, jsonContent);
+        }
+        else {
+          // Legacy JSON loading
+          const contents = readFileSync(entryPath, 'utf8');
+          spec = JSON.parse(contents);
+        }
 
         // Generate component spec JS directly
-        const componentSpecJS = await generateComponentSpecJS(spec, false);
-        const componentJSPath = entryPath.replace('.json', '-component.js');
+        const componentSpecJS = await generateComponentSpecJS(spec, false, {}, entryPath);
+        const componentJSPath = isJsSpec
+          ? entryPath.replace('.spec.js', '.component.js')
+          : entryPath.replace('.json', '.component.js');
         writeFileSync(componentJSPath, componentSpecJS);
 
         // Generate plural variant if supported
         if (spec?.supportsPlural) {
-          const pluralComponentSpecJS = await generateComponentSpecJS(spec, true);
+          const pluralComponentSpecJS = await generateComponentSpecJS(spec, true, {}, entryPath);
           const pluralName = spec?.pluralTagName.replace('ui-', '');
-          const pluralJSPath = resolve(dirname(entryPath), `${pluralName}-component.js`);
+          const pluralJSPath = resolve(dirname(entryPath), `${pluralName}.component.js`);
           writeFileSync(pluralJSPath, pluralComponentSpecJS);
         }
       }
       catch (e) {
-        // Silently skip malformed JSON files
+        console.error(`Error processing ${entryPath}:`, e.message);
+        throw e; // Don't silently skip errors in new system
       }
     });
   };
 
   // Convert raw spec JSON to JS modules to avoid ESM JSON import compatibility issues
+  // Note: .spec.js files don't need conversion - they're already JS modules
   const generateJSExportsFromSpecs = async () => {
     await createComponentSpecs();
 
-    // Only process raw spec files (not component specs, which are generated directly above)
+    // Only process legacy JSON spec files (not .spec.js/json or .component.js)
     const rawSpecFiles = await glob('src/primitives/*/specs/*.json');
-    const filteredRawSpecs = rawSpecFiles.filter(path => !path.endsWith('-component.json'));
+    const filteredRawSpecs = rawSpecFiles.filter(path =>
+      !path.endsWith('.component.json')
+      && !path.endsWith('.spec.json')
+    );
 
     each(filteredRawSpecs, (jsonFile) => {
       try {
@@ -105,22 +144,29 @@ export const buildUIDeps = async ({
 
   const generateJSExports = generateJSExportsFromSpecs();
 
-  // Set up a separate esbuild watcher for JSON spec files
+  // Set up a separate esbuild watcher for spec files
   let specWatcher;
   if (watch) {
-    // Get all spec files to watch
-    const specsPattern = 'src/primitives/**/specs/*.json';
-    const watchedFiles = await glob(specsPattern);
-    const specFiles = watchedFiles.filter(path => !path.endsWith('-component.json'));
+    // Get all spec files to watch (legacy .json and source .spec.js)
+    const jsonSpecFiles = await glob('src/primitives/**/specs/*.json');
+    const jsSpecFiles = await glob('src/primitives/**/specs/*.spec.js');
 
-    // Use esbuild to watch the JSON files by treating them as entry points
-    // with a plugin that rebuilds our spec JS files
-    if (specFiles.length > 0) {
+    // Exclude all generated files from watch
+    const watchedFiles = [...jsonSpecFiles, ...jsSpecFiles].filter(
+      path =>
+        !path.endsWith('.component.json')
+        && !path.endsWith('.component.js')
+        && !path.endsWith('.spec.json'), // Don't watch generated JSON
+    );
+
+    // Use esbuild to watch the spec files by treating them as entry points
+    // with a plugin that rebuilds our component specs
+    if (watchedFiles.length > 0) {
       specWatcher = build({
         watch,
         write: false, // Don't write output, just watch
         logLevel: 'silent', // Suppress esbuild's own logs
-        entryPoints: specFiles,
+        entryPoints: watchedFiles,
         outdir: '.temp-watch', // Required by esbuild when multiple entry points
         plugins: [
           callbackPlugin({
