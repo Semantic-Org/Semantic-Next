@@ -9,6 +9,7 @@ export * from './environment';
 export * from './equality';
 export * from './errors';
 export * from './functions';
+export * from './html';
 export * from './loops';
 export * from './numbers';
 export * from './objects';
