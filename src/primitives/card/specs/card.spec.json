@@ -10,7 +10,9 @@
       "name": "Icon",
       "includeAttributeClass": true,
       "attribute": "icon",
-      "couplesWith": ["ui-icon"],
+      "couplesWith": [
+        "ui-icon"
+      ],
       "description": "include an icon",
       "exampleCode": "<ui-card icon=\"pause\"></ui-card>\n<ui-card>\n  <ui-icon pause slot=\"icon\"></ui-icon>\n</ui-card>"
     },
@@ -35,7 +37,9 @@
     {
       "name": "Image",
       "attribute": "image",
-      "couplesWith": ["ui-image"],
+      "couplesWith": [
+        "ui-image"
+      ],
       "description": "include an image",
       "exampleCode": "<ui-card image=\"/images/avatar/jenny.jpg\">Get started with your new card.</ui-card>"
     }
@@ -106,7 +110,9 @@
   "pluralExportName": "UICards",
   "pluralDescription": "Cards can exist together as a group",
   "pluralContent": [],
-  "pluralSharedTypes": ["link"],
+  "pluralSharedTypes": [
+    "link"
+  ],
   "pluralOnlyTypes": [],
   "pluralOnlyVariations": [
     {

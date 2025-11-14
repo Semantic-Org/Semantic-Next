@@ -410,7 +410,7 @@
     },
     {
       "name": "Size",
-      "value": "size",
+      "attribute": "size",
       "usageLevel": 1,
       "description": "vary in size",
       "options": [

@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 
 import css from './divider-bundle.css?raw';
 import template from './divider.html?raw';
-import componentSpec from './specs/divider-component.js';
+import componentSpec from './specs/divider.component.js';
 
 const createComponent = ({ self, settings }) => ({
   hasContent() {

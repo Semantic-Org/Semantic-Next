@@ -1,4 +1,4 @@
-// Auto-generated from menu-item.json
+// Auto-generated from menu-item.spec.js
 export default {
   "tagName": "menu-item",
   "content": [

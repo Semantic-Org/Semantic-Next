@@ -1,4 +1,4 @@
-// Auto-generated from modal.json
+// Auto-generated from modal.spec.js
 export default {
   "tagName": "ui-modal",
   "types": [

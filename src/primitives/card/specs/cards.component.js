@@ -1,4 +1,4 @@
-// Auto-generated from card.json
+// Auto-generated from card.spec.js
 export default {
   "tagName": "ui-cards",
   "variations": [

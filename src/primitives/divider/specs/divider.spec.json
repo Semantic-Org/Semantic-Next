@@ -15,7 +15,9 @@
     {
       "name": "Icon",
       "attribute": "icon",
-      "couplesWith": ["ui-icon"],
+      "couplesWith": [
+        "ui-icon"
+      ],
       "description": "include a centered icon",
       "usageLevel": 2,
       "exampleCode": "<ui-divider icon=\"tag\"></ui-divider>"
@@ -124,8 +126,7 @@
           "value": "massive",
           "description": "appear with massive spacing"
         }
-      ],
-      "exampleCode": "<ui-divider large></ui-divider>"
+      ]
     },
     {
       "name": "Raised",
@@ -185,22 +186,22 @@
     {
       "name": "Inset",
       "attribute": "inset",
-      "description": "indent from the start edge",
+      "description": "indent its content from the start edge",
       "usageLevel": 4,
       "options": [
         {
           "name": "Small",
-          "value": "small",
+          "value": "inset-small",
           "description": "inset a small amount"
         },
         {
           "name": "Medium",
-          "value": "medium",
+          "value": "inset-medium",
           "description": "inset a medium amount"
         },
         {
           "name": "Large",
-          "value": "large",
+          "value": "inset-large",
           "description": "inset a large amount"
         }
       ],

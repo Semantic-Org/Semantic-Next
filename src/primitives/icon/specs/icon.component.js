@@ -1,4 +1,4 @@
-// Auto-generated from icon.json
+// Auto-generated from icon.spec.js
 export default {
   "tagName": "ui-icon",
   "content": [

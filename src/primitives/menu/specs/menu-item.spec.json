@@ -10,7 +10,9 @@
       "name": "Icon",
       "includeAttributeClass": true,
       "attribute": "icon",
-      "couplesWith": ["ui-icon"],
+      "couplesWith": [
+        "ui-icon"
+      ],
       "slot": "icon",
       "description": "include an icon",
       "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"

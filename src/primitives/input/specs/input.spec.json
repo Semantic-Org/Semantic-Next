@@ -1,5 +1,4 @@
-// Auto-generated from input.json
-export default {
+{
   "uiType": "element",
   "name": "Input",
   "description": "A menu displays grouped navigation actions",
@@ -85,7 +84,6 @@ export default {
       "attribute": "size",
       "usageLevel": 1,
       "description": "vary in size",
-      "separateExamples": true,
       "options": [
         {
           "name": "Mini",
@@ -187,4 +185,4 @@ export default {
     "defaultAttributes": {},
     "defaultContent": ""
   }
-};
+}

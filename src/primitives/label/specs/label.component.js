@@ -1,4 +1,4 @@
-// Auto-generated from label.json
+// Auto-generated from label.spec.js
 export default {
   "tagName": "ui-label",
   "types": [

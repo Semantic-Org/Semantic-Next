@@ -2,7 +2,7 @@ import { defineComponent } from '@semantic-ui/component';
 
 import css from './image-bundle.css?raw';
 import template from './image.html?raw';
-import componentSpec from './specs/image-component.js';
+import componentSpec from './specs/image.component.js';
 
 const defaultState = {
   darkMode: false,

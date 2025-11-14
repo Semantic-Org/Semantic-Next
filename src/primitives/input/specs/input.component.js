@@ -1,4 +1,4 @@
-// Auto-generated from input.json
+// Auto-generated from input.spec.js
 export default {
   "tagName": "ui-input",
   "content": [

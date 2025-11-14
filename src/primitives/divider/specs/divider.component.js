@@ -1,4 +1,4 @@
-// Auto-generated from divider.json
+// Auto-generated from divider.spec.js
 export default {
   "tagName": "ui-divider",
   "content": [
@@ -47,19 +47,12 @@ export default {
     "double": "styled",
     "mini": "spacing",
     "tiny": "spacing",
-    "small": [
-      "spacing",
-      "inset"
-    ],
+    "small": "spacing",
     "medium": [
       "spacing",
-      "thickness",
-      "inset"
+      "thickness"
     ],
-    "large": [
-      "spacing",
-      "inset"
-    ],
+    "large": "spacing",
     "big": "spacing",
     "huge": "spacing",
     "massive": "spacing",
@@ -67,7 +60,10 @@ export default {
     "center": "align",
     "end": "align",
     "thin": "thickness",
-    "thick": "thickness"
+    "thick": "thickness",
+    "inset-small": "inset",
+    "inset-medium": "inset",
+    "inset-large": "inset"
   },
   "propertyTypes": {
     "text": "string",
@@ -113,9 +109,9 @@ export default {
       "thick"
     ],
     "inset": [
-      "small",
-      "medium",
-      "large"
+      "inset-small",
+      "inset-medium",
+      "inset-large"
     ]
   }
 };

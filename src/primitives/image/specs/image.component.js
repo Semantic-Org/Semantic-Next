@@ -1,4 +1,4 @@
-// Auto-generated from image.json
+// Auto-generated from image.spec.js
 export default {
   "tagName": "ui-image",
   "content": [

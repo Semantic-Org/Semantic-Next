@@ -1,4 +1,4 @@
-// Auto-generated from menu.json
+// Auto-generated from menu.spec.js
 export default {
   "tagName": "ui-menu",
   "content": [
