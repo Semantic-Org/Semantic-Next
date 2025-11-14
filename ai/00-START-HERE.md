@@ -84,6 +84,11 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 **Start with:** [TypeScript Types Guide](/ai/guides/development/typescript-types.md)
 **Contains:** JSDoc patterns, type organization, documentation links, examples
 
+### Build System & Tooling
+**Need to:** Understand build commands, modify build scripts, add build outputs, debug build issues
+**Start with:** [Build System Guide](/ai/guides/development/build-system.md)
+**Contains:** Two-system architecture (JS libraries vs web components), build commands reference, esbuild plugins, export conditions, wireit orchestration, common workflows, idiosyncrasies
+
 ### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens, theming
 **Start with:** [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md) • [Theming](/ai/guides/css/theming.md) • [CSS Tokens](/ai/guides/css/tokens/token-usage.md)

@@ -66,6 +66,15 @@
       "approxTokens": 7000
     },
     {
+      "id": "development/build-system",
+      "path": "ai/guides/development/build-system.md",
+      "category": "specialized",
+      "tags": ["build", "tooling", "esbuild", "wireit", "development", "packages"],
+      "dependsOn": ["foundation/mental-model"],
+      "approxTokens": 26000,
+      "description": "Comprehensive guide to Semantic UI's build system: commands, architecture, scripts, plugins, and the two-system design for JS libraries and web components"
+    },
+    {
       "id": "html/style-guide",
       "path": "ai/guides/html/style-guide.md",
       "category": "specialized",
