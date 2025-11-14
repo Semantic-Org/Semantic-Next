@@ -21,6 +21,8 @@ xx.xx.xxxx
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
 
 ### Utils
+* **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
+* **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
 * **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
 * **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
