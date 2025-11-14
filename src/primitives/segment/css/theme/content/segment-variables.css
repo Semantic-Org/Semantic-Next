@@ -1,4 +1,5 @@
 :host {
+  --segment-display: block;
   --segment-margin: var(--spacing) 0;
   --segment-padding: var(--relative-medium);
   --segment-background: var(--inverted-100);

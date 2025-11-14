@@ -19,6 +19,7 @@
 @import url('./variations/padded-variables.css') layer(segment.theme.variations.padded);
 @import url('./variations/attached-variables.css') layer(segment.theme.variations.attached);
 @import url('./variations/emphasis-variables.css') layer(segment.theme.variations.emphasis);
+@import url('./variations/inline-variables.css') layer(segment.theme.variations.inline);
 @import url('./variations/compact-variables.css') layer(segment.theme.variations.compact);
 @import url('./variations/colored-variables.css') layer(segment.theme.variations.colored);
 @import url('./variations/circular-variables.css') layer(segment.theme.variations.circular);

@@ -1,0 +1,8 @@
+.inline.segments {
+  display: inline-flex;
+}
+
+.inline.segment,
+.inline.segments ::slotted(-ui-segment) {
+  --segment-display: inline-block;
+}

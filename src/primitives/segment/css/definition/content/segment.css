@@ -1,5 +1,6 @@
 .segment {
   position: relative;
+  display: var(--segment-display);
   background: var(--segment-background);
   box-shadow: var(--segment-box-shadow);
   margin: var(--segment-margin);
