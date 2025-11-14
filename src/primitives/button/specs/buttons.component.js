@@ -1,4 +1,4 @@
-// Auto-generated from button.json
+// Auto-generated from button.spec.js
 export default {
   "tagName": "ui-buttons",
   "types": [
@@ -6,21 +6,21 @@ export default {
     "vertical"
   ],
   "variations": [
+    "floated",
+    "compact",
+    "size",
     "attached",
     "color",
-    "compact",
-    "floated",
-    "size",
     "separate",
     "equal-width"
   ],
   "attributes": [
     "styled",
+    "floated",
+    "compact",
+    "size",
     "attached",
     "color",
-    "compact",
-    "floated",
-    "size",
     "vertical",
     "separate",
     "equal-width"
@@ -30,6 +30,18 @@ export default {
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
+    "left-floated": "floated",
+    "right-floated": "floated",
+    "compact": "compact",
+    "very-compact": "compact",
+    "mini": "size",
+    "tiny": "size",
+    "small": "size",
+    "medium": "size",
+    "large": "size",
+    "big": "size",
+    "huge": "size",
+    "massive": "size",
     "top-attached": "attached",
     "attached": "attached",
     "bottom-attached": "attached",
@@ -48,18 +60,6 @@ export default {
     "brown": "color",
     "grey": "color",
     "slate": "color",
-    "compact": "compact",
-    "very-compact": "compact",
-    "left-floated": "floated",
-    "right-floated": "floated",
-    "mini": "size",
-    "tiny": "size",
-    "small": "size",
-    "medium": "size",
-    "large": "size",
-    "big": "size",
-    "huge": "size",
-    "massive": "size",
     "two": "equal-width",
     "three": "equal-width",
     "four": "equal-width",
@@ -68,11 +68,11 @@ export default {
   },
   "propertyTypes": {
     "styled": "string",
+    "floated": "string",
+    "compact": "string",
+    "size": "string",
     "attached": "string",
     "color": "string",
-    "compact": "string",
-    "floated": "string",
-    "size": "string",
     "vertical": "boolean",
     "separate": "boolean",
     "equal-width": "string"
@@ -83,6 +83,24 @@ export default {
       "flat",
       "outline",
       "ghost"
+    ],
+    "floated": [
+      "left-floated",
+      "right-floated"
+    ],
+    "compact": [
+      "compact",
+      "very-compact"
+    ],
+    "size": [
+      "mini",
+      "tiny",
+      "small",
+      "medium",
+      "large",
+      "big",
+      "huge",
+      "massive"
     ],
     "attached": [
       "top-attached",
@@ -105,24 +123,6 @@ export default {
       "brown",
       "grey",
       "slate"
-    ],
-    "compact": [
-      "compact",
-      "very-compact"
-    ],
-    "floated": [
-      "left-floated",
-      "right-floated"
-    ],
-    "size": [
-      "mini",
-      "tiny",
-      "small",
-      "medium",
-      "large",
-      "big",
-      "huge",
-      "massive"
     ],
     "equal-width": [
       "two",

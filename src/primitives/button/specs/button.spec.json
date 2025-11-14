@@ -5,14 +5,16 @@
   "tagName": "ui-button",
   "exportName": "UIButton",
   "examples": {
-    "defaultPluralContent": "\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n"
+    "defaultPluralContent": "\n      <ui-button>One</ui-button>\n      <ui-button>Two</ui-button>\n      <ui-button>Three</ui-button>\n    "
   },
   "content": [
     {
       "name": "Icon",
       "includeAttributeClass": true,
       "attribute": "icon",
-      "couplesWith": ["ui-icon"],
+      "couplesWith": [
+        "ui-icon"
+      ],
       "description": "include an icon",
       "exampleCode": "<ui-button icon=\"pause\">Pause</ui-button>"
     },
@@ -23,8 +25,8 @@
       "usageLevel": 2,
       "separateExamples": false,
       "exampleCode": [
-        "<ui-button>\n  <img src=\"/images/avatar/small/jenny.jpg\" />\n  Add Jenny\n</ui-button>",
-        "<ui-button>\n  <ui-image src=\"/images/new-avatar/small/dima.jpg\"></ui-image>\n  Add Dima\n</ui-button>"
+        "<ui-button>\n          <img src=\"/images/avatar/small/jenny.jpg\" />\n          Add Jenny\n        </ui-button>",
+        "<ui-button>\n          <ui-image src=\"/images/new-avatar/small/dima.jpg\"></ui-image>\n          Add Dima\n        </ui-button>"
       ]
     },
     {
@@ -48,13 +50,13 @@
           "name": "Primary",
           "value": "primary",
           "description": "be emphasized as the first action that should be taken",
-          "exampleCode": "<ui-button primary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>"
-      },
+          "exampleCode": "\n            <ui-button primary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          "
+        },
         {
           "name": "Secondary",
           "value": "secondary",
           "description": "be emphasized as a secondary option",
-          "exampleCode": "<ui-button secondary>Confirm</ui-button>\n<ui-button>Cancel</ui-button>"
+          "exampleCode": "\n            <ui-button secondary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          "
         }
       ]
     },
@@ -99,7 +101,7 @@
       "attribute": "toggle",
       "description": "emphasize its active state",
       "usageLevel": 3,
-      "exampleCode": "<ui-button toggle>Inactive</ui-button>\n<ui-button toggle active>Active</ui-button>"
+      "exampleCode": "\n        <ui-button toggle>Inactive</ui-button>\n        <ui-button toggle active>Active</ui-button>\n      "
     },
     {
       "name": "Animated",
@@ -110,21 +112,25 @@
       "options": [
         {
           "name": "Animated",
-          "value": ["horizontal-animated"],
+          "value": [
+            "horizontal-animated"
+          ],
           "description": "animate hidden content horizontally",
-          "exampleCode": "<ui-button animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
+          "exampleCode": "\n            <ui-button animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         },
         {
           "name": "Vertical Animated",
           "value": "vertical-animated",
           "description": "animate hidden content vertically",
-          "exampleCode": "<ui-button vertical-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
+          "exampleCode": "\n            <ui-button vertical-animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         },
         {
           "name": "Fade Animated",
-          "value": ["fade-animated"],
+          "value": [
+            "fade-animated"
+          ],
           "description": "fade in hidden content",
-          "exampleCode": "<ui-button fade-animated>\n  <span slot=\"visible\">Hover Me</span>\n  <span slot=\"hidden\">Hidden</span>\n</ui-button>"
+          "exampleCode": "\n            <ui-button fade-animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         }
       ]
     }
@@ -176,42 +182,138 @@
   ],
   "variations": [
     {
+      "name": "Floated",
+      "attribute": "floated",
+      "usageLevel": 1,
+      "description": "align to the left or right of its container",
+      "options": [
+        {
+          "name": "Left Floated",
+          "value": "left-floated",
+          "description": "appear to the left of content"
+        },
+        {
+          "name": "Right Floated",
+          "value": "right-floated",
+          "description": "appear to the right of content"
+        }
+      ]
+    },
+    {
+      "name": "Fluid",
+      "attribute": "fluid",
+      "usageLevel": 1,
+      "description": "take the width of its container"
+    },
+    {
+      "name": "Compact",
+      "attribute": "compact",
+      "usageLevel": 3,
+      "description": "reduce its padding",
+      "options": [
+        {
+          "name": "Compact",
+          "value": "compact",
+          "description": "reduce its padding slightly"
+        },
+        {
+          "name": "Very Compact",
+          "value": "very-compact",
+          "description": "reduce its padding greatly"
+        }
+      ]
+    },
+    {
+      "name": "Size",
+      "attribute": "size",
+      "usageLevel": 1,
+      "description": "vary in size",
+      "options": [
+        {
+          "name": "Mini",
+          "value": "mini",
+          "description": "appear extremely small"
+        },
+        {
+          "name": "Tiny",
+          "value": "tiny",
+          "description": "appear very small"
+        },
+        {
+          "name": "Small",
+          "value": "small",
+          "description": "appear small"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "appear normal sized"
+        },
+        {
+          "name": "Large",
+          "value": "large",
+          "description": "appear larger than normal"
+        },
+        {
+          "name": "Big",
+          "value": "big",
+          "description": "appear much larger than normal"
+        },
+        {
+          "name": "Huge",
+          "value": "huge",
+          "description": "appear very much larger than normal"
+        },
+        {
+          "name": "Massive",
+          "value": "massive",
+          "description": "appear extremely larger than normal"
+        }
+      ]
+    },
+    {
+      "name": "Circular",
+      "attribute": "circular",
+      "usageLevel": 3,
+      "description": "be rounded like a circle"
+    },
+    {
       "name": "Attached",
       "attribute": "attached",
-      "description": "attach to other content",
-      "usageLevel": 2,
       "includeAttributeClass": true,
       "separateExamples": true,
+      "usageLevel": 2,
+      "description": "attach to other content",
       "options": [
         {
           "name": "Top Attached",
           "value": "top-attached",
           "description": "appear attached to the top of other content",
-          "exampleCode": "<ui-button top-attached>Top Action</ui-button>\n<ui-segment bottom-attached>Attached content below</ui-segment>"
+          "exampleCode": "\n          <ui-button top-attached>Top Action</ui-button>\n          <ui-segment bottom-attached>Attached content below</ui-segment>\n        "
         },
         {
           "name": "Attached",
           "value": "attached",
           "description": "attach to content above and below",
-          "exampleCode": "<ui-segment top-attached>Content above</ui-segment>\n<ui-button attached>Middle Action</ui-button>\n<ui-segment bottom-attached>Content below</ui-segment>"
+          "exampleCode": "\n          <ui-segment top-attached>Content above</ui-segment>\n          <ui-button attached>Middle Action</ui-button>\n          <ui-segment bottom-attached>Content below</ui-segment>\n        "
         },
         {
           "name": "Bottom Attached",
           "value": "bottom-attached",
           "description": "attach to the bottom",
-          "exampleCode": "<ui-segment top-attached>Attached content above</ui-segment>\n<ui-button bottom-attached>Bottom Action</ui-button>"
+          "exampleCode": "\n          <ui-segment top-attached>Attached content above</ui-segment>\n          <ui-button bottom-attached>Bottom Action</ui-button>\n        "
         },
         {
           "name": "Left Attached",
           "value": "left-attached",
           "description": "attach to the left",
-          "exampleCode": "<ui-segments horizontal>\n<ui-button left-attached icon=\"user\">View Profile</ui-button>\n<ui-segment>Text to the right</ui-segment></ui-segments>"
+          "exampleCode": "\n          <ui-segments horizontal>\n            <ui-button left-attached icon=\"user\">View Profile</ui-button>\n            <ui-segment>Text to the right</ui-segment>\n          </ui-segments>\n        "
         },
         {
           "name": "Right Attached",
           "value": "right-attached",
           "description": "attach to the right",
-          "exampleCode": "<ui-segments horizontal>\n<ui-segment>Text to the left</ui-segment>\n<ui-button right-attached icon=\"user\">View Profile</ui-button></ui-segments>"
+          "exampleCode": "\n          <ui-segments horizontal>\n            <ui-segment>Text to the left</ui-segment>\n            <ui-button right-attached icon=\"user\">View Profile</ui-button>\n          </ui-segments>\n        "
         }
       ]
     },
@@ -234,12 +336,6 @@
       ]
     },
     {
-      "name": "Circular",
-      "attribute": "circular",
-      "description": "be rounded like a circle",
-      "usageLevel": 3
-    },
-    {
       "name": "Colored",
       "attribute": "color",
       "includeAttributeClass": true,
@@ -257,85 +353,67 @@
         {
           "name": "Red",
           "value": "red",
-          "description": "red"
+          "description": "be red"
         },
         {
           "name": "Orange",
           "value": "orange",
-          "description": "orange"
+          "description": "be orange"
         },
         {
           "name": "Yellow",
           "value": "yellow",
-          "description": "yellow"
+          "description": "be yellow"
         },
         {
           "name": "Olive",
           "value": "olive",
-          "description": "olive"
+          "description": "be olive"
         },
         {
           "name": "Green",
           "value": "green",
-          "description": "green"
+          "description": "be green"
         },
         {
           "name": "Teal",
           "value": "teal",
-          "description": "teal"
+          "description": "be teal"
         },
         {
           "name": "Blue",
           "value": "blue",
-          "description": "blue"
+          "description": "be blue"
         },
         {
           "name": "Violet",
           "value": "violet",
-          "description": "violet"
+          "description": "be violet"
         },
         {
           "name": "Purple",
           "value": "purple",
-          "description": "purple"
+          "description": "be purple"
         },
         {
           "name": "Pink",
           "value": "pink",
-          "description": "pink"
+          "description": "be pink"
         },
         {
           "name": "Brown",
           "value": "brown",
-          "description": "brown"
+          "description": "be brown"
         },
         {
           "name": "Grey",
           "value": "grey",
-          "description": "grey"
+          "description": "be grey"
         },
         {
           "name": "Slate",
           "value": "slate",
-          "description": "slate"
-        }
-      ]
-    },
-    {
-      "name": "Compact",
-      "attribute": "compact",
-      "usageLevel": 3,
-      "description": "reduce its padding",
-      "options": [
-        {
-          "name": "Compact",
-          "value": "compact",
-          "description": "reduce its padding slightly"
-        },
-        {
-          "name": "Very Compact",
-          "value": "very-compact",
-          "description": "reduce its padding greatly"
+          "description": "be slate"
         }
       ]
     },
@@ -456,81 +534,7 @@
       "attribute": "transparent",
       "usageLevel": 2,
       "description": "appear transparent",
-      "exampleCode": "<div class=\"transparent segments\">\n  <div class=\"standard segment\">\n    <ui-button transparent>Transparent</ui-button>\n  </div></div>"
-    },
-    {
-      "name": "Floated",
-      "attribute": "floated",
-      "usageLevel": 1,
-      "description": "align to the left or right of its container",
-      "options": [
-        {
-          "name": "Left Floated",
-          "value": [
-            "left-floated"
-          ],
-          "description": "appear to the left of content"
-        },
-        {
-          "name": "Right Floated",
-          "value": "right-floated",
-          "description": "appear to the right of content"
-        }
-      ]
-    },
-    {
-      "name": "Fluid",
-      "attribute": "fluid",
-      "usageLevel": 1,
-      "description": "take the width of its container"
-    },
-    {
-      "name": "Size",
-      "attribute": "size",
-      "usageLevel": 1,
-      "description": "vary in size",
-      "options": [
-        {
-          "name": "Mini",
-          "value": "mini",
-          "description": "appear extremely small"
-        },
-        {
-          "name": "Tiny",
-          "value": "tiny",
-          "description": "appear very small"
-        },
-        {
-          "name": "Small",
-          "value": "small",
-          "description": "appear small"
-        },
-        {
-          "name": "Medium",
-          "value": "medium",
-          "description": "appear normal sized"
-        },
-        {
-          "name": "Large",
-          "value": "large",
-          "description": "appear larger than normal"
-        },
-        {
-          "name": "Big",
-          "value": "big",
-          "description": "appear much larger than normal"
-        },
-        {
-          "name": "Huge",
-          "value": "huge",
-          "description": "appear very much larger than normal"
-        },
-        {
-          "name": "Massive",
-          "value": "massive",
-          "description": "appear extremely larger than normal"
-        }
-      ]
+      "exampleCode": "\n        <div class=\"transparent segments\">\n          <div class=\"standard segment\">\n            <ui-button transparent>Transparent</ui-button>\n          </div>\n        </div>\n      "
     }
   ],
   "settings": [
@@ -566,10 +570,13 @@
       "attribute": "conditional",
       "slot": "conditional",
       "description": "show a conditional choice",
-      "exampleCode": "<ui-buttons>\n  <ui-button>Cancel</ui-button>\n  <span class=\"conditional\">or</span>\n  <ui-button primary>Save</ui-button>\n</ui-buttons>"
+      "exampleCode": "\n        <ui-buttons>\n          <ui-button>Cancel</ui-button>\n          <span class=\"conditional\">or</span>\n          <ui-button primary>Save</ui-button>\n        </ui-buttons>\n      "
     }
   ],
-  "pluralSharedTypes": ["styled", "icon"],
+  "pluralSharedTypes": [
+    "styled",
+    "icon"
+  ],
   "pluralOnlyTypes": [
     {
       "name": "Vertical",
@@ -595,31 +602,31 @@
           "name": "Two",
           "value": "two",
           "description": "have two items evenly split",
-          "exampleCode": "<ui-buttons equal-width=\"two\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n</ui-buttons>"
+          "exampleCode": "\n            <ui-buttons equal-width=\"two\">\n              <ui-button>One</ui-button>\n              <ui-button>Two</ui-button>\n            </ui-buttons>\n          "
         },
         {
           "name": "Three",
           "value": "three",
           "description": "have three items evenly split",
-          "exampleCode": "<ui-buttons equal-width=\"three\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n</ui-buttons>"
+          "exampleCode": "\n            <ui-buttons equal-width=\"three\">\n              <ui-button>One</ui-button>\n              <ui-button>Two</ui-button>\n              <ui-button>Three</ui-button>\n            </ui-buttons>\n          "
         },
         {
           "name": "Four",
           "value": "four",
           "description": "have four items evenly split",
-          "exampleCode": "<ui-buttons equal-width=\"four\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n</ui-buttons>"
+          "exampleCode": "\n            <ui-buttons equal-width=\"four\">\n              <ui-button>One</ui-button>\n              <ui-button>Two</ui-button>\n              <ui-button>Three</ui-button>\n              <ui-button>Four</ui-button>\n            </ui-buttons>\n          "
         },
         {
           "name": "Five",
           "value": "five",
           "description": "have five items evenly split",
-          "exampleCode": "<ui-buttons equal-width=\"five\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n  <ui-button>Five</ui-button>\n</ui-buttons>"
+          "exampleCode": "\n            <ui-buttons equal-width=\"five\">\n              <ui-button>One</ui-button>\n              <ui-button>Two</ui-button>\n              <ui-button>Three</ui-button>\n              <ui-button>Four</ui-button>\n              <ui-button>Five</ui-button>\n            </ui-buttons>\n          "
         },
         {
           "name": "Six",
           "value": "six",
           "description": "have six items evenly split",
-          "exampleCode": "<ui-buttons equal-width=\"six\">\n  <ui-button>One</ui-button>\n  <ui-button>Two</ui-button>\n  <ui-button>Three</ui-button>\n  <ui-button>Four</ui-button>\n  <ui-button>Five</ui-button>\n  <ui-button>Six</ui-button>\n</ui-buttons>"
+          "exampleCode": "\n            <ui-buttons equal-width=\"six\">\n              <ui-button>One</ui-button>\n              <ui-button>Two</ui-button>\n              <ui-button>Three</ui-button>\n              <ui-button>Four</ui-button>\n              <ui-button>Five</ui-button>\n              <ui-button>Six</ui-button>\n            </ui-buttons>\n          "
         }
       ]
     }

@@ -1,4 +1,4 @@
-// Auto-generated from button.json
+// Auto-generated from button.spec.js
 export default {
   "tagName": "ui-button",
   "content": [
@@ -19,20 +19,20 @@ export default {
     "animated"
   ],
   "variations": [
+    "floated",
+    "fluid",
+    "compact",
+    "size",
+    "circular",
     "attached",
     "type",
-    "circular",
     "color",
-    "compact",
     "social",
     "positive",
     "warning",
     "negative",
     "info",
-    "transparent",
-    "floated",
-    "fluid",
-    "size"
+    "transparent"
   ],
   "states": [
     "hover",
@@ -62,20 +62,20 @@ export default {
     "active",
     "disabled",
     "loading",
+    "floated",
+    "fluid",
+    "compact",
+    "size",
+    "circular",
     "attached",
     "type",
-    "circular",
     "color",
-    "compact",
     "social",
     "positive",
     "warning",
     "negative",
     "info",
     "transparent",
-    "floated",
-    "fluid",
-    "size",
     "icon-only",
     "icon-after",
     "href"
@@ -92,6 +92,18 @@ export default {
     "fade-animated": "animated",
     "disabled": "disabled",
     "clickable-disabled": "disabled",
+    "left-floated": "floated",
+    "right-floated": "floated",
+    "compact": "compact",
+    "very-compact": "compact",
+    "mini": "size",
+    "tiny": "size",
+    "small": "size",
+    "medium": "size",
+    "large": "size",
+    "big": "size",
+    "huge": "size",
+    "massive": "size",
     "top-attached": "attached",
     "attached": "attached",
     "bottom-attached": "attached",
@@ -112,8 +124,6 @@ export default {
     "brown": "color",
     "grey": "color",
     "slate": "color",
-    "compact": "compact",
-    "very-compact": "compact",
     "instagram": "social",
     "facebook": "social",
     "twitter": "social",
@@ -126,17 +136,7 @@ export default {
     "negative": "negative",
     "subtle-negative": "negative",
     "info": "info",
-    "subtle-info": "info",
-    "left-floated": "floated",
-    "right-floated": "floated",
-    "mini": "size",
-    "tiny": "size",
-    "small": "size",
-    "medium": "size",
-    "large": "size",
-    "big": "size",
-    "huge": "size",
-    "massive": "size"
+    "subtle-info": "info"
   },
   "propertyTypes": {
     "icon": "string",
@@ -153,20 +153,20 @@ export default {
     "active": "boolean",
     "disabled": "string",
     "loading": "boolean",
+    "floated": "string",
+    "fluid": "boolean",
+    "compact": "string",
+    "size": "string",
+    "circular": "boolean",
     "attached": "string",
     "type": "string",
-    "circular": "boolean",
     "color": "string",
-    "compact": "string",
     "social": "string",
     "positive": "string",
     "warning": "string",
     "negative": "string",
     "info": "string",
     "transparent": "boolean",
-    "floated": "string",
-    "fluid": "boolean",
-    "size": "string",
     "icon-only": "boolean",
     "icon-after": "boolean",
     "href": "string"
@@ -190,6 +190,24 @@ export default {
     "disabled": [
       "disabled",
       "clickable-disabled"
+    ],
+    "floated": [
+      "left-floated",
+      "right-floated"
+    ],
+    "compact": [
+      "compact",
+      "very-compact"
+    ],
+    "size": [
+      "mini",
+      "tiny",
+      "small",
+      "medium",
+      "large",
+      "big",
+      "huge",
+      "massive"
     ],
     "attached": [
       "top-attached",
@@ -217,10 +235,6 @@ export default {
       "grey",
       "slate"
     ],
-    "compact": [
-      "compact",
-      "very-compact"
-    ],
     "social": [
       "instagram",
       "facebook",
@@ -243,20 +257,6 @@ export default {
     "info": [
       "info",
       "subtle-info"
-    ],
-    "floated": [
-      "left-floated",
-      "right-floated"
-    ],
-    "size": [
-      "mini",
-      "tiny",
-      "small",
-      "medium",
-      "large",
-      "big",
-      "huge",
-      "massive"
     ]
   },
   "attributeClasses": [

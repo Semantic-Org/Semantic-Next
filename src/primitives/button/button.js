@@ -3,7 +3,7 @@ import { get, inArray } from '@semantic-ui/utils';
 
 import css from './button-bundle.css?raw';
 import template from './button.html?raw';
-import componentSpec from './specs/button-component.js';
+import componentSpec from './specs/button.component.js';
 
 const createComponent = ({ el, self, settings, data, $ }) => ({
   isIconBefore() {
