@@ -5,141 +5,57 @@ title: HTML Utilities
 icon: code
 description: API reference for HTML and text formatting utility functions
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The HTML utilities provide functions for indenting text and HTML markup. These functions are useful for formatting code snippets, cleaning up HTML extracted from template literals, and preparing markup for documentation.
+Functions for indenting text and HTML markup.
 
-## Functions
-
-### indentLines
-
-```javascript
-function indentLines(text, spaces = 2)
-```
+## indentLines
 
 Adds consistent indentation to every line of text.
 
-#### Parameters
+### Syntax
+```javascript
+indentLines(text, spaces = 2)
+```
 
+### Parameters
 | Name   | Type   | Description |
 |--------|--------|-------------|
 | text   | string | The text to indent |
 | spaces | number | Number of spaces to indent each line (default: 2) |
 
-#### Returns
+### Returns
+Indented text. Returns empty string for non-string input.
 
-The indented text. Returns empty string for non-string input.
+### Example
+<PlaygroundExample id="utils-indentlines" direction="horizontal"></PlaygroundExample>
 
-#### Example
+## indentHTML
 
+Indents HTML markup with nesting awareness.
+
+### Syntax
 ```javascript
-import { indentLines } from '@semantic-ui/utils';
-
-const code = 'line 1\nline 2\nline 3';
-console.log(indentLines(code)); // '  line 1\n  line 2\n  line 3'
-console.log(indentLines(code, 4)); // '    line 1\n    line 2\n    line 3'
-
-// useful for template processing
-const template = `function example() {
-  return true;
-}`;
-console.log(indentLines(template, 2));
+indentHTML(html, { indent = '  ', startLevel = 0, trimEmptyLines = true } = {})
 ```
 
-### indentHTML
-
-```javascript
-function indentHTML(html, { indent = '  ', startLevel = 0, trimEmptyLines = true } = {})
-```
-
-Intelligently indents HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly.
-
-> **Use Case** Perfect for cleaning up HTML extracted from JavaScript template literals where indentation gets messy, or for formatting documentation examples.
-
-#### Parameters
-
+### Parameters
 | Name    | Type   | Description |
 |---------|--------|-------------|
 | html    | string | The HTML string to indent |
 | options | object | Optional configuration |
 
-##### Options
-
+#### Options
 | Name           | Type    | Default | Description |
 |----------------|---------|---------|-------------|
 | indent         | string  | '  '    | String to use for each level of indentation |
 | startLevel     | number  | 0       | Initial nesting level to start indentation from |
 | trimEmptyLines | boolean | true    | Whether to remove empty lines from the output |
 
-#### Returns
+### Returns
+Indented HTML. Returns empty string for non-string input.
 
-The properly indented HTML. Returns empty string for non-string input.
+Handles void elements (`img`, `br`, `hr`, `input`), self-closing tags (`<component />`), comments, and same-line tags (`<tag>content</tag>`).
 
-#### Features
-
-- **Nesting-aware** - Tracks depth and indents accordingly
-- **Void elements** - Handles `img`, `br`, `hr`, `input`, etc. without increasing depth
-- **Self-closing tags** - Recognizes `<component />` syntax
-- **Comments** - Preserves `<!-- -->` comments without affecting depth
-- **Same-line tags** - Detects `<tag>content</tag>` patterns on single lines
-
-#### Limitations
-
-- Works best with one tag per line (typical documentation format)
-- Multiple tags on same line are not split
-- Designed for well-formed HTML snippets, not error correction
-
-#### Example
-
-```javascript
-import { indentHTML } from '@semantic-ui/utils';
-
-// basic usage
-const html = '<div>\n<p>Content</p>\n</div>';
-console.log(indentHTML(html));
-// <div>
-//   <p>Content</p>
-// </div>
-
-// nested structures
-const nested = `<div class="ui segment">
-<div class="ui header">Title</div>
-<p>Content here</p>
-<div class="ui list">
-<div class="item">
-<img src="image.jpg" />
-<div class="content">Item 1</div>
-</div>
-</div>
-</div>`;
-
-console.log(indentHTML(nested));
-// <div class="ui segment">
-//   <div class="ui header">Title</div>
-//   <p>Content here</p>
-//   <div class="ui list">
-//     <div class="item">
-//       <img src="image.jpg" />
-//       <div class="content">Item 1</div>
-//     </div>
-//   </div>
-// </div>
-
-// custom indentation
-console.log(indentHTML(html, { indent: '    ' })); // 4 spaces
-console.log(indentHTML(html, { indent: '\t' })); // tabs
-
-// start at nesting level
-console.log(indentHTML(html, { startLevel: 1 }));
-//   <div>
-//     <p>Content</p>
-//   </div>
-
-// void elements
-const voidElements = '<div>\n<img src="test.jpg">\n<br>\n<input type="text">\n</div>';
-console.log(indentHTML(voidElements));
-// <div>
-//   <img src="test.jpg">
-//   <br>
-//   <input type="text">
-// </div>
-```
+### Example
+<PlaygroundExample id="utils-indenthtml" direction="horizontal"></PlaygroundExample>

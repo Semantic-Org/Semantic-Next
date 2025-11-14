@@ -116,14 +116,15 @@ const subCategorySortOrder = {
     'Functions',
     'Colors',
     'CSS',
+    'HTML',
     'Browser',
-    'Dates',
-    'Numbers',
-    'Environment',
-    'Crypto',
-    'Equality',
     'Cloning',
-    'Errors',
+    'Crypto',
+    'Dates',
+    'Debug',
+    'Environment',
+    'Equality',
+    'Numbers',
     'Regex',
   ],
 };
@@ -874,6 +875,10 @@ export const sidebarMenuAPI = [
         url: '/docs/api/utils/dates',
       },
       {
+        name: 'Debug',
+        url: '/docs/api/utils/debug',
+      },
+      {
         name: 'Environment',
         url: '/docs/api/utils/environment',
       },
@@ -882,12 +887,12 @@ export const sidebarMenuAPI = [
         url: '/docs/api/utils/equality',
       },
       {
-        name: 'Errors',
-        url: '/docs/api/utils/errors',
-      },
-      {
         name: 'Functions',
         url: '/docs/api/utils/functions',
+      },
+      {
+        name: 'HTML',
+        url: '/docs/api/utils/html',
       },
       {
         name: 'Looping',
