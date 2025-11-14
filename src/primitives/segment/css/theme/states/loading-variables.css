@@ -2,7 +2,7 @@
 
   --segment-loading-min-height: 0px;
 
-  --segment-loading-dimmer-color: var(--white-80);
+  --segment-loading-dimmer-color: var(--inverted-80);
   --segment-loading-dimmer-z-index: var(--page-layer-2);
 
   --segment-loader-size: var(--huge);

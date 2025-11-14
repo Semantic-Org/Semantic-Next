@@ -212,13 +212,13 @@ export default {
           "name": "Left Attached",
           "value": "left-attached",
           "description": "attach to the left",
-          "exampleCode": "<ui-button left-attached icon=\"user\">View Profile</ui-button>\n<ui-input right-attached placeholder=\"Enter text...\"></ui-input>"
+          "exampleCode": "<ui-segments horizontal>\n<ui-button left-attached icon=\"user\">View Profile</ui-button>\n<ui-segment>Text to the right</ui-segment></ui-segments>"
         },
         {
           "name": "Right Attached",
           "value": "right-attached",
           "description": "attach to the right",
-          "exampleCode": "<ui-input left-attached placeholder=\"Enter text...\"></ui-input>\n<ui-button right-attached icon=\"settings\" icon-only></ui-button>"
+          "exampleCode": "<ui-segments horizontal>\n<ui-segment>Text to the left</ui-segment>\n<ui-button right-attached icon=\"user\">View Profile</ui-button></ui-segments>"
         }
       ]
     },
@@ -332,7 +332,7 @@ export default {
       "name": "Compact",
       "attribute": "compact",
       "usageLevel": 3,
-      "description": "reduce its padding to fit into tighter spaces without adjusting its font size",
+      "description": "reduce its padding",
       "options": [
         {
           "name": "Compact",

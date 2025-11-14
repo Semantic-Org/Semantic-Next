@@ -8,6 +8,7 @@
 @layer segment.definition.content.segment {
   .segment {
     position: relative;
+    display: var(--segment-display);
     background: var(--segment-background);
     box-shadow: var(--segment-box-shadow);
     margin: var(--segment-margin);
@@ -252,12 +253,19 @@
   }
 }
 
-/* src/primitives/segment/css/definition/variations/compact.css */
-@layer segment.definition.variations.compact {
-  .compact.segment {
-    display: var(--segment-compact-display);
+/* src/primitives/segment/css/definition/variations/inline.css */
+@layer segment.definition.variations.inline {
+  .inline.segments {
+    display: inline-flex;
+  }
+  .inline.segment,
+  .inline.segments ::slotted(-ui-segment) {
+    --segment-display: inline-block;
   }
 }
+
+/* src/primitives/segment/css/definition/variations/compact.css */
+@layer segment.definition.variations.compact;
 
 /* src/primitives/segment/css/definition/variations/colored.css */
 @layer segment.definition.variations.colored {
@@ -397,6 +405,7 @@
 /* src/primitives/segment/css/theme/content/segment-variables.css */
 @layer segment.theme.content.segment {
   :host {
+    --segment-display: block;
     --segment-margin: var(--spacing) 0;
     --segment-padding: var(--relative-medium);
     --segment-background: var(--inverted-100);
@@ -458,7 +467,7 @@
 @layer segment.theme.states.loading {
   :host {
     --segment-loading-min-height: 0px;
-    --segment-loading-dimmer-color: var(--white-80);
+    --segment-loading-dimmer-color: var(--inverted-80);
     --segment-loading-dimmer-z-index: var(--page-layer-2);
     --segment-loader-size: var(--huge);
     --segment-loader-z-index: var(--page-layer-3);
@@ -514,10 +523,15 @@
   }
 }
 
+/* src/primitives/segment/css/theme/variations/inline-variables.css */
+@layer segment.theme.variations.inline {
+  :host {
+  }
+}
+
 /* src/primitives/segment/css/theme/variations/compact-variables.css */
 @layer segment.theme.variations.compact {
   :host {
-    --segment-compact-display: table;
   }
 }
 
