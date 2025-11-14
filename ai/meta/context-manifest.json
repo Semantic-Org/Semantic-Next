@@ -75,6 +75,13 @@
       "description": "Comprehensive guide to Semantic UI's build system: commands, architecture, scripts, plugins, and the two-system design for JS libraries and web components"
     },
     {
+      "id": "development/code-formatting",
+      "path": "ai/guides/development/code-formatting.md",
+      "category": "specialized",
+      "tags": ["formatting", "code-style", "comments", "dprint"],
+      "approxTokens": 450
+    },
+    {
       "id": "html/style-guide",
       "path": "ai/guides/html/style-guide.md",
       "category": "specialized",
@@ -95,8 +102,8 @@
       "path": "ai/guides/css/css-guide.md",
       "category": "specialized",
       "tags": ["css", "architecture", "responsive"],
-      "dependsOn": ["html/style-guide"],
-      "approxTokens": 4200
+      "dependsOn": ["html/style-guide", "development/code-formatting"],
+      "approxTokens": 4400
     },
     {
       "id": "css/token-usage",
