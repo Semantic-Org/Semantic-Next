@@ -235,6 +235,12 @@ Add TypeScript types?
 ├── Function types → guides/typescript-types.md (Type Patterns)
 └── Examples & best practices → guides/typescript-types.md (Common Scenarios)
 
+Work with the build system?
+├── Understand build commands → guides/development/build-system.md (Build Commands Reference)
+├── Modify build scripts → guides/development/build-system.md (Build Scripts Deep Dive)
+├── Debug build issues → guides/development/build-system.md (Common Workflows)
+└── Add new build outputs → guides/development/build-system.md (Export Conditions Strategy)
+
 Style components?
 ├── Basic CSS patterns → guides/html/style-guide.md + guides/styling/css-guide.md
 ├── Design token usage → guides/styling/tokens/token-usage.md
