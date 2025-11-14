@@ -325,9 +325,9 @@ import styles from './css/button-bundle.css';  // No @imports!
 
 #### B. Spec System (JS Source → JSON Snapshot + Component Spec)
 
-**The New Architecture** (as of 2025-01):
+Component specs are authored in **JavaScript** (`.spec.js` files) with JSON snapshots generated for tooling.
 
-Component specs are now authored in **JavaScript** (`.spec.js` files) with JSON snapshots generated for tooling.
+> **Historical Note**: Prior to November 2025, specs were authored as `.json` files with `.js` files generated from them. This was reversed to provide better DX (comments, imports, trailing commas). If you encounter guides or documentation referencing editing `.json` spec files, that is legacy information - all specs should now be authored as `.spec.js` files.
 
 **Source spec format** (`.spec.js`):
 ```javascript
@@ -400,61 +400,29 @@ Ensures specs remain JSON-serializable:
    };
    ```
 
-#### C. Legacy JSON Support (Transitional)
+#### C. Spec Processing Flow
 
-**Dual format support** during migration:
 ```javascript
-// Supports both:
-const jsonFiles = await glob('src/primitives/**/specs/*.json');
+// Get all .spec.js source files
 const specJsFiles = await glob('src/primitives/**/specs/*.spec.js');
+const entryPoints = specJsFiles;
 
-const allFiles = [...jsonFiles, ...specJsFiles];
-```
-
-**Legacy `.json` files**:
-- Still supported (read directly)
-- Generate `.component.js` output
-- Will be migrated to `.spec.js` over time
-
-**Exclusions** (generated files not processed):
-```javascript
-const entryPoints = allFiles.filter(path =>
-  !path.endsWith('.component.json')  // Generated
-  && !path.endsWith('.component.js') // Generated
-  && !path.endsWith('.spec.json')    // Generated from .spec.js
-);
-```
-
-#### D. Spec Processing Flow
-
-```javascript
 const createComponentSpecs = async () => {
   await asyncEach(entryPoints, async (entryPath) => {
-    let spec;
-    const isJsSpec = entryPath.endsWith('.spec.js');
+    // Load JS module with cache busting for watch mode
+    const specModule = await import(`${pathToFileURL(entryPath).href}?t=${Date.now()}`);
+    const spec = specModule.default;
 
-    if (isJsSpec) {
-      // Load JS module with cache busting for watch mode
-      const specModule = await import(`${pathToFileURL(entryPath).href}?t=${Date.now()}`);
-      spec = specModule.default;
+    // Validate purity
+    validateSpec(spec, entryPath);
 
-      // Validate purity
-      validateSpec(spec, entryPath);
+    // Generate JSON snapshot
+    const jsonPath = entryPath.replace('.spec.js', '.spec.json');
+    writeFileSync(jsonPath, JSON.stringify(spec, null, 2));
 
-      // Generate JSON snapshot
-      const jsonPath = entryPath.replace('.spec.js', '.spec.json');
-      writeFileSync(jsonPath, JSON.stringify(spec, null, 2));
-    }
-    else {
-      // Legacy JSON loading
-      spec = JSON.parse(readFileSync(entryPath, 'utf8'));
-    }
-
-    // Generate component spec (both paths converge here)
+    // Generate component spec
     const componentSpecJS = await generateComponentSpecJS(spec, false, {}, entryPath);
-    const componentJSPath = isJsSpec
-      ? entryPath.replace('.spec.js', '.component.js')
-      : entryPath.replace('.json', '.component.js');
+    const componentJSPath = entryPath.replace('.spec.js', '.component.js');
     writeFileSync(componentJSPath, componentSpecJS);
 
     // Generate plural variant if supported
@@ -474,45 +442,31 @@ Source:                    Generated:
 button.spec.js         →   button.spec.json (snapshot)
   (authored)           →   button.component.js (processed)
                        →   buttons.component.js (if plural)
-
-OR (legacy):
-
-button.json            →   button.component.js (processed)
-  (authored)           →   buttons.component.js (if plural)
 ```
 
-#### E. Watch Mode for Specs
+#### D. Watch Mode for Specs
 
 ```javascript
 if (watch) {
-  // Watch both legacy JSON and source .spec.js files
-  const jsonSpecFiles = await glob('src/primitives/**/specs/*.json');
-  const jsSpecFiles = await glob('src/primitives/**/specs/*.spec.js');
-
-  // Exclude generated files
-  const watchedFiles = [...jsonSpecFiles, ...jsSpecFiles].filter(
-    path =>
-      !path.endsWith('.component.json')
-      && !path.endsWith('.component.js')
-      && !path.endsWith('.spec.json'), // Don't watch generated JSON
-  );
-
-  specWatcher = build({
-    watch,
-    write: false,           // Don't write esbuild output
-    logLevel: 'silent',     // Just watch for changes
-    entryPoints: watchedFiles,
-    plugins: [
-      callbackPlugin({
-        onComplete: async (result, { isRebuild }) => {
-          if (isRebuild) {
-            await createComponentSpecs();
-            await generateJSExportsFromSpecs();
-          }
-        },
-      }),
-    ],
-  });
+  // Watch .spec.js source files
+  if (entryPoints.length > 0) {
+    specWatcher = build({
+      watch,
+      write: false,           // Don't write esbuild output
+      logLevel: 'silent',     // Just watch for changes
+      entryPoints,            // Same entryPoints (*.spec.js files)
+      outdir: '.temp-watch',  // Required by esbuild
+      plugins: [
+        callbackPlugin({
+          onComplete: async (result, { isRebuild }) => {
+            if (isRebuild) {
+              await createComponentSpecs();
+            }
+          },
+        }),
+      ],
+    });
+  }
 }
 ```
 
@@ -1394,10 +1348,12 @@ watch({
 
 ### 2. JS → JSON Snapshot Generation (Spec System)
 
+> **Historical Note**: This architecture was reversed in November 2025. Previously, JSON was the source with JS generated. Now JS is the source with JSON generated as snapshots.
+
 **Why it happens**:
-- **JS is the source of truth** for component specs (as of 2025-01)
+- **JS is the source of truth** for component specs
 - Allows comments, imports, trailing commas, better DX
-- But tooling/LLMs benefit from JSON snapshots
+- Tooling/LLMs benefit from JSON snapshots for machine readability
 
 **Solution**:
 - Author specs in `.spec.js` format:
@@ -1427,8 +1383,8 @@ watch({
 
 **Impact**:
 - `.spec.js` files authored by developers
-- `.spec.json` files generated by build
-- `.component.js` files generated from either source
+- `.spec.json` files generated by build (snapshot)
+- `.component.js` files generated from spec (processed)
 - All committed to repo for source consumption
 
 ---
@@ -1475,7 +1431,6 @@ buttons.component.js  # Generated component spec (plural, if supported)
 - Multiple generated files per spec
 - Spec changes require rebuild
 - Watch mode handles auto-regeneration with cache busting
-- Legacy `.json` specs still supported during transition
 
 ---
 
@@ -1682,7 +1637,6 @@ What do you need to build?
 | Source specs (JS) | `src/primitives/*/specs/*.spec.js` |
 | Generated specs (JSON) | `src/primitives/*/specs/*.spec.json` |
 | Generated component specs | `src/primitives/*/specs/*.component.js` |
-| Legacy specs (JSON) | `src/primitives/*/specs/*.json` (transitional) |
 | Package source | `packages/*/src/` |
 | Package dist | `packages/*/dist/` |
 | Core source | `src/` |
@@ -1700,7 +1654,6 @@ What do you need to build?
 | `*.spec.json` | Generated | JSON snapshot for tooling/LLMs | ✅ Yes |
 | `*.component.js` | Generated | Processed component spec (singular) | ✅ Yes |
 | `*s.component.js` | Generated | Plural variant (e.g., `buttons.component.js`) | ✅ Yes |
-| `*.json` | Legacy | Old JSON specs (transitional) | ✅ Yes |
 
 **Example for button primitive**:
 ```
