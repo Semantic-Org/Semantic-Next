@@ -1,5 +1,4 @@
-// Auto-generated from segment.json
-export default {
+{
   "uiType": "element",
   "name": "Segment",
   "description": "A segment is used to create a grouping of related content",
@@ -11,7 +10,8 @@ export default {
       "name": "Emphasis",
       "attribute": "emphasis",
       "includeAttributeClass": true,
-      "description": "be formatted to call attention to itself",
+      "usageLevel": 2,
+      "description": "be emphasized in a layout",
       "options": [
         {
           "name": "Primary",
@@ -28,8 +28,7 @@ export default {
           "value": "tertiary",
           "description": "have tertiary emphasis"
         }
-      ],
-      "usageLevel": 2
+      ]
     },
     {
       "name": "Vertical",
@@ -98,6 +97,7 @@ export default {
     {
       "name": "Padded",
       "attribute": "padded",
+      "usageLevel": 2,
       "description": "increase its padding",
       "options": [
         {
@@ -110,8 +110,7 @@ export default {
           "value": "very-padded",
           "description": "have extra increased padding"
         }
-      ],
-      "usageLevel": 2
+      ]
     },
     {
       "name": "Inline",
@@ -213,43 +212,43 @@ export default {
     {
       "name": "Floated",
       "attribute": "floated",
-      "description": "appear to the left or right of other content",
+      "usageLevel": 1,
+      "description": "align to the left or right of its container",
       "options": [
         {
           "name": "Left Floated",
           "value": "left-floated",
-          "description": "float to the left"
+          "description": "appear to the left of content"
         },
         {
           "name": "Right Floated",
           "value": "right-floated",
-          "description": "float to the right"
+          "description": "appear to the right of content"
         }
-      ],
-      "usageLevel": 2
+      ]
     },
     {
       "name": "Text Alignment",
       "attribute": "text-align",
+      "usageLevel": 2,
       "description": "have its text aligned",
       "options": [
         {
           "name": "Left Aligned",
           "value": "left-aligned",
-          "description": "align text to the left"
+          "description": "align content to the left"
         },
         {
           "name": "Center Aligned",
           "value": "center-aligned",
-          "description": "center align text"
+          "description": "align content to the center"
         },
         {
           "name": "Right Aligned",
           "value": "right-aligned",
-          "description": "align text to the right"
+          "description": "align content to the right"
         }
-      ],
-      "usageLevel": 2
+      ]
     },
     {
       "name": "Basic",
@@ -288,4 +287,4 @@ export default {
     "defaultAttributes": {},
     "defaultPluralContent": "<ui-segment>First</ui-segment>\n<ui-segment>Second</ui-segment>\n<ui-segment>Third</ui-segment>"
   }
-};
+}

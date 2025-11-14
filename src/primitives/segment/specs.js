@@ -1,4 +1,5 @@
-import SegmentComponentSpec from './specs/segment-component.js';
-import SegmentSpec from './specs/segment.js';
+import SegmentComponentSpec from './specs/segment.component.js';
+import SegmentSpec from './specs/segment.spec.json';
+import SegmentsComponentSpec from './specs/segments.component.js';
 
-export { SegmentComponentSpec, SegmentSpec };
+export { SegmentComponentSpec, SegmentsComponentSpec, SegmentSpec };
