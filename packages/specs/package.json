@@ -11,6 +11,7 @@
   "module": "src/index.js",
   "exports": {
     ".": {
+      "node": "./src/node/spec-reader-node.js",
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
