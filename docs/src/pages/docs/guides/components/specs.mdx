@@ -13,11 +13,13 @@ Specs are JavaScript modules that define a component's API. They enable all thre
 
 ## Using Specs
 
-Specs are more verbose than [`settings`](/docs/guides/components/settings) and allow additional metadata like natural text description, code examples and metadata like [`usageLevel`](#usage-levels) to help hint AI and other humans on how to use your components.
+Specs are more opinionated version of [`settings`](/docs/guides/components/settings) particularly created to be a single source of truth for design frameworks.
+
+Specs allow additional metadata like natural text description, code examples and metadata like [`usageLevel`](#usage-levels) to be included with your components to help hint AI and other humans on how to use your components.
 
 <PlaygroundExample id="component-specs" direction="horizontal"></PlaygroundExample>
 
-Specs are used as a single source of truth to power your component and its documentation
+Specs are used as a single source of truth to power your component and its documentation:
 - Translate between multiple supported syntaxes for using your web component
 - Generates CSS classes through the [<code>&#123;ui&#125;</code> template variable](#the-ui-css-class-string)
 - Creates documentation using [`getDefinition()`](/docs/api/specs/documentation#getdefinition)
@@ -30,6 +32,7 @@ Specs are used as a single source of truth to power your component and its docum
 | **Component Type** | Design system | One-off component |
 | **Attributes** | Support shorthand | HTML attributes only |
 | **CSS Classes** | Auto-generated | Manual |
+| **Definition** | Portable JSON | JavaScript code |
 | **Documentation** | Auto-generated | Manual |
 
 > First-party components like those in [UI Primitives](/ui/primitives/button) generate their documentation programatically using [`SpecReader`](/docs/api/specs/spec-reader). The types, states, and variations you see documented are read directly from `.spec.js` files—not manually written.
@@ -37,78 +40,65 @@ Specs are used as a single source of truth to power your component and its docum
 
 ## Inside Components
 
-### Settings
+### Automatic Settings
 
-Spec attributes become reactive settings available in templates and lifecycle callbacks:
+Specs automatically generate [`defaultSettings`](docs/guides/components/settings) for your component. These settings can be used like other settings and read inside your component or template.
 
-```javascript
-// In your spec
+```javascript title='component.spec.js'
+content: [
+  {
+    name: 'Icon',
+    attribute: 'icon',
+    description: 'include an icon',
+  },
+]
+```
+
+```html title='page.html'
+<ui-button icon="save">Save</ui-button>
+```
+
+```sui title='component.html'
+{#if icon}
+  <ui-icon icon={icon}>
+{/if}
+```
+
+
+### Styling Classes
+
+Specs also create a stringified styling class in your [data context](docs/guides/components/rendering) `{ui}` for `types` and `variations` parts of your spec that are related to styling, regardless of how that data is specified.
+
+When `includeAttributeClass: true` is set on a variation, the attribute name is also included as a class. This allows styling all options of a variation together:
+
+```javascript title='component.spec.js'
 variations: [
   {
-    name: 'Emphasis',
-    attribute: 'emphasis',
+    name: 'Colored',
+    attribute: 'color',
+    includeAttributeClass: true,  // adds 'color' class
     options: [
-      { name: 'Primary', value: 'primary' },
-      { name: 'Secondary', value: 'secondary' },
+      { name: 'Red', value: 'red' },
+      { name: 'Blue', value: 'blue' },
     ],
   },
 ]
 ```
 
-```html
-<!-- In your HTML -->
-<ui-button primary large>Save</ui-button>
+```html title='page.html'
+<ui-button icon="save" red>Save</ui-button>
 ```
 
-```sui
-<!-- In your template -->
-<button class="ui button &#123;ui&#125;">
-  Current emphasis: &#123;emphasis&#125;
-  Current size: &#123;size&#125;
-</button>
-```
-
-The spec's `optionAttributes` maps `primary` → `emphasis="primary"`, making the attribute available as <code>&#123;emphasis&#125;</code> in templates.
-
-### The &#123;ui&#125; CSS Class String
-
-Spec attributes automatically generate CSS classes through the <code>&#123;ui&#125;</code> variable:
-
-```sui
-<div class="ui button &#123;ui&#125;">
-  <!-- &#123;ui&#125; becomes "primary large" -->
+```sui title='component.html'
+<!-- ui is 'color red' !-->
+<div class="{ui}button">
+  {#if icon}
+    <ui-icon icon={icon}>
+  {/if}
+  {text}
 </div>
 ```
 
-The transformation rules:
-- **Option values**: `emphasis="primary"` → class `"primary"`
-- **Boolean attributes**: `disabled` → class `"disabled"`
-- **Attribute classes**: `icon="save"` → class `"icon"` (if in spec's attributeClasses)
-
-### Accessing Settings in Lifecycle
-
-Settings are available as destructured arguments in all [lifecycle callbacks](/docs/guides/components/lifecycle):
-
-```javascript
-defineComponent({
-  tagName: 'ui-badge',
-  componentSpec,
-
-  createComponent: ({ settings }) => ({
-    setStatus(newStatus) {
-      settings.status = newStatus;  // Updates setting and triggers re-render
-    },
-
-    getCurrentStatus() {
-      return settings.status;
-    },
-  }),
-
-  onCreated: ({ settings, el }) => {
-    console.log('Initial status:', settings.status);
-  },
-});
-```
 
 ## Spec Parts
 
@@ -175,7 +165,7 @@ types: [
 
 ### States
 
-Define how you component varies over time
+Define how your component varies over time
 
 ```javascript
 states: [
@@ -189,7 +179,7 @@ states: [
 
 ### Variations
 
-Define stackable visual modifications:
+Define stackable visual modifications
 
 ```javascript
 variations: [
@@ -212,7 +202,7 @@ variations: [
 
 ### Settings
 
-Define settings that modify how your component functions:
+Define settings that modify how your component functions
 
 ```javascript
 settings: [
@@ -234,7 +224,7 @@ settings: [
 
 ### Events
 
-Define events dispatched by your components:
+Define events dispatched by your components
 
 ```javascript
 events: [
