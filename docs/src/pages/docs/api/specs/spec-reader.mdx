@@ -1,0 +1,158 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: box
+title: SpecReader
+description: Core API for creating spec readers and generating runtime metadata
+---
+
+`SpecReader` processes spec files to generate optimized runtime metadata for `defineComponent`. It converts declarative spec objects into component specs with attribute mappings, type information, and default values.
+
+## Constructor
+
+Creates a new SpecReader instance.
+
+### Syntax
+
+```javascript
+new SpecReader(spec, options)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| spec | Object | Spec object to process |
+| options | Object | Configuration options |
+
+### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| plural | boolean | false | Process as plural component |
+| dialect | string | 'standard' | HTML dialect: 'standard', 'verbose', or 'classic' |
+
+### Usage
+
+#### Basic Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+```
+
+#### Plural Component
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec, { plural: true });
+```
+
+#### Custom Dialect
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec, { dialect: 'verbose' });
+```
+
+## getWebComponentSpec()
+
+Generates optimized component spec for `defineComponent`. Returns runtime metadata including attributes, property types, allowed values, and option mappings.
+
+### Syntax
+
+```javascript
+reader.getWebComponentSpec(spec, options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| spec | Object | this.spec | Spec to process |
+| options | Object | {} | Override options |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| tagName | string | Component tag name |
+| attributes | Array | List of attribute names |
+| properties | Array | List of property-only names |
+| optionAttributes | Object | Maps option values to attributes |
+| propertyTypes | Object | Maps properties to types |
+| allowedValues | Object | Maps attributes to valid values |
+| attributeClasses | Array | Attributes that generate CSS classes |
+| defaultValues | Object | Default values for properties |
+
+### Usage
+
+Input spec:
+
+```javascript title="button.spec.js"
+export default {
+  name: 'Button',
+  tagName: 'ui-button',
+
+  types: [
+    {
+      name: 'Emphasis',
+      attribute: 'emphasis',
+      options: [
+        { name: 'Primary', value: 'primary' },
+        { name: 'Secondary', value: 'secondary' },
+      ],
+    },
+  ],
+
+  variations: [
+    {
+      name: 'Size',
+      attribute: 'size',
+      options: [
+        { name: 'Small', value: 'small' },
+        { name: 'Large', value: 'large' },
+      ],
+    },
+  ],
+};
+```
+
+Generate componentSpec:
+
+```javascript title="build.js"
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const componentSpec = reader.getWebComponentSpec();
+```
+
+Output componentSpec:
+
+```javascript title="button.component.js"
+{
+  tagName: 'ui-button',
+  attributes: ['emphasis', 'size'],
+  optionAttributes: {
+    'primary': 'emphasis',
+    'secondary': 'emphasis',
+    'small': 'size',
+    'large': 'size',
+  },
+  propertyTypes: {
+    'emphasis': 'string',
+    'size': 'string',
+  },
+  allowedValues: {
+    'emphasis': ['primary', 'secondary'],
+    'size': ['small', 'large'],
+  },
+}
+```

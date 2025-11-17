@@ -1,0 +1,75 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: code
+title: Generating HTML
+description: Create HTML from semantic attributes
+---
+
+Methods for generating HTML code from semantic modifiers.
+
+## getCodeFromModifiers()
+
+Generates HTML code from semantic modifiers. Converts semantic attribute descriptions into complete HTML markup.
+
+### Syntax
+
+```javascript
+reader.getCodeFromModifiers(modifiers, settings)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| modifiers | string | Space-separated semantic modifiers |
+| settings | Object | Code generation settings |
+| settings.html | string | Inner HTML content |
+| settings.plural | boolean | Generate plural component |
+| settings.dialect | string | HTML dialect to use |
+
+### Returns
+
+String containing the generated HTML.
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const html = reader.getCodeFromModifiers('primary large', {
+  html: 'Save',
+});
+
+console.log(html);
+// <ui-button primary large>Save</ui-button>
+```
+
+Generate with verbose dialect:
+
+```javascript
+const html = reader.getCodeFromModifiers('primary large', {
+  html: 'Save',
+  dialect: 'verbose',
+});
+
+console.log(html);
+// <ui-button emphasis="primary" size="large">Save</ui-button>
+```
+
+Generate plural component:
+
+```javascript
+const html = reader.getCodeFromModifiers('small', {
+  html: '<ui-button>One</ui-button><ui-button>Two</ui-button>',
+  plural: true,
+});
+
+console.log(html);
+// <ui-buttons small>
+//   <ui-button>One</ui-button>
+//   <ui-button>Two</ui-button>
+// </ui-buttons>
+```
