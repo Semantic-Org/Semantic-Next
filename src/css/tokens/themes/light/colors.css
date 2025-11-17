@@ -26,6 +26,22 @@ html,
   --slate: oklch(0.23 0 0);
 
   /* -------------------
+      Semantic State Colors
+  -------------------- */
+
+  --positive-color: var(--green);
+  --negative-color: var(--red);
+  --info-color: var(--teal);
+  --warning-color: var(--orange);
+
+  /* -------------------
+      Brand Colors
+  -------------------- */
+
+  --primary-color: var(--blue);
+  --secondary-color: var(--slate);
+
+  /* -------------------
         Text Colors
   -------------------- */
 

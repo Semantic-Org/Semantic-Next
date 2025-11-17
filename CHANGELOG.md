@@ -27,6 +27,10 @@ xx.xx.xxxx
 * **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
+### CSS Tokens
+* **Feature** - Added full color grade structure (0-100) for semantic state colors: `--positive-*`, `--negative-*`, `--info-*`, and `--warning-*`. These now follow the same pattern as other colors (e.g., `--positive-0` through `--positive-100`).
+* **Enhancement** - Renamed `messages.css` to `state-colors.css` to better reflect its purpose of providing semantic state color tokens.
+
 ### Build
 * **Enhancement** - Added file watching for JSON spec files in `build:ui-deps`. The build now automatically regenerates component JS files when spec JSON files are modified, using esbuild's native watch mechanism.
 * **Bug** - Fixed `isRebuild` flag in esbuild-callback plugin being inverted (was returning `true` for first build, `false` for rebuilds).
