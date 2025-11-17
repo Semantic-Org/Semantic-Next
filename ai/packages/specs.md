@@ -413,12 +413,16 @@ export default {
 
 ### Usage Levels
 
-Each spec property has a `usageLevel` (1-5) that enables progressive disclosure:
-- **1**: Essential, common features shown by default
-- **2**: Frequently used variations
-- **3**: Advanced features for specific use cases
-- **4**: Specialized features for edge cases
-- **5**: Rarely used, expert-level features
+Each spec property has a `usageLevel` (1-5) that enables progressive disclosure in documentation. This follows a **descriptive linguistics approach**: combining empirical observation (what patterns exist) with editorial judgment (how frequently users will need them).
+
+Usage levels indicate how frequently users will need a feature:
+- **1**: Essential, standard features - used in most implementations (80%+ of users)
+- **2**: Common variations - frequently needed (40-80% of users)
+- **3**: Advanced features - for specific use cases (15-40% of users)
+- **4**: Specialized features - for edge cases (5-15% of users)
+- **5**: Expert-level features - rarely needed (<5% of users)
+
+Usage levels control documentation visibility (progressive disclosure) and should reflect expected usage frequency, not research adoption percentages.
 
 ## SpecReader API
 

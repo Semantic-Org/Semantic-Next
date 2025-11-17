@@ -240,9 +240,11 @@ Once decisions are finalized:
 # Include appropriate usageLevel based on our assessment
 ```
 
-**Understanding usageLevel (Progressive Disclosure)**
+**Usage Levels**
 
-The `usageLevel` property (1-5) controls how features appear in documentation through progressive disclosure. This is separate from research adoption percentages, which inform *what* to add, not *how often users will need it*.
+The `usageLevel` property (1-5) controls how features appear in documentation through progressive disclosure. This follows a **descriptive linguistics approach**: combining empirical observation (what patterns exist across frameworks) with editorial judgment (how frequently users will need them in practice).
+
+**Important**: Usage levels reflect expected usage frequency, not research adoption percentages. Research informs *what* to add; usage levels indicate *how often users will need it* in practice.
 
 **Usage Level Definitions:**
 
