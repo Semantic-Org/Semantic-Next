@@ -53,6 +53,7 @@ const subCategorySortOrder = {
     'Settings',
     'Keybinding',
     'Comms',
+    'Specs',
   ],
   'UI Components': [
     'Interactive',
@@ -689,6 +690,37 @@ export const sidebarMenuAPI = [
       {
         name: 'Base Class',
         url: '/docs/api/component/web-component-base',
+      },
+    ],
+  },
+  {
+    name: 'Specs',
+    url: '/docs/api/specs',
+    icon: 'file-text',
+    pages: [
+      {
+        name: 'SpecReader',
+        url: '/docs/api/specs/spec-reader',
+      },
+      {
+        name: 'Spec Helpers',
+        url: '/docs/api/specs/shared-terms',
+      },
+      {
+        name: 'Generate Docs',
+        url: '/docs/api/specs/documentation',
+      },
+      {
+        name: 'Parsing HTML',
+        url: '/docs/api/specs/parsing',
+      },
+      {
+        name: 'Generating HTML',
+        url: '/docs/api/specs/generation',
+      },
+      {
+        name: 'Utilities',
+        url: '/docs/api/specs/utilities',
       },
     ],
   },
