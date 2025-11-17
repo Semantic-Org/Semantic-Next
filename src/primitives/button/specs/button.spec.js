@@ -59,32 +59,10 @@ export default {
 
   types: [
     {
-      name: 'Emphasis',
-      attribute: 'emphasis',
-      description: 'be emphasized in a layout',
-      usageLevel: 1,
-      includeAttributeClass: true,
-      separateExamples: true,
-      options: [
-        {
-          name: 'Primary',
-          value: 'primary',
-          description: 'be emphasized as the first action that should be taken',
-          exampleCode: `
-            <ui-button primary>Confirm</ui-button>
-            <ui-button>Cancel</ui-button>
-          `,
-        },
-        {
-          name: 'Secondary',
-          value: 'secondary',
-          description: 'be emphasized as a secondary option',
-          exampleCode: `
-            <ui-button secondary>Confirm</ui-button>
-            <ui-button>Cancel</ui-button>
-          `,
-        },
-      ],
+      name: 'Icon Only',
+      attribute: 'icon-only',
+      description: 'be displayed without text',
+      exampleCode: `<ui-button icon="save" icon-only></ui-button>\n<ui-button icon="hard-drive" icon-only></ui-button>`,
     },
     {
       name: 'Link',
@@ -121,16 +99,6 @@ export default {
           description: 'only show styling when hovered',
         },
       ],
-    },
-    {
-      name: 'Toggle',
-      attribute: 'toggle',
-      description: 'emphasize its active state',
-      usageLevel: 3,
-      exampleCode: `
-        <ui-button toggle>Inactive</ui-button>
-        <ui-button toggle active>Active</ui-button>
-      `,
     },
     {
       name: 'Animated',
@@ -179,6 +147,25 @@ export default {
   states: getStates(['hover', 'pressed', 'focus', 'active', 'disabled', 'loading']),
 
   variations: [
+    {
+      name: 'Emphasis',
+      attribute: 'emphasis',
+      description: 'be emphasized in a layout',
+      usageLevel: 1,
+      includeAttributeClass: true,
+      options: [
+        {
+          name: 'Primary',
+          value: 'primary',
+          description: 'be emphasized as the first action that should be taken',
+        },
+        {
+          name: 'Secondary',
+          value: 'secondary',
+          description: 'be emphasized as a secondary option'
+        },
+      ],
+    },
     ...getVariations(['floated', 'fluid', 'compact', 'size', 'circular']),
 
     modifyVariation(ATTACHED_VARIATION, {
@@ -210,6 +197,16 @@ export default {
         `,
       }),
     }),
+    {
+      name: 'Toggle',
+      attribute: 'toggle',
+      description: 'emphasize its active state',
+      usageLevel: 3,
+      exampleCode: `
+        <ui-button toggle>Inactive</ui-button>
+        <ui-button toggle active>Active</ui-button>
+      `,
+    },
     {
       name: 'Type',
       attribute: 'type',
@@ -373,13 +370,6 @@ export default {
   ],
 
   settings: [
-    {
-      name: 'Icon Only',
-      type: 'boolean',
-      attribute: 'icon-only',
-      defaultValue: false,
-      description: 'Enable to remove spacing for text',
-    },
     {
       name: 'Icon After',
       type: 'boolean',
