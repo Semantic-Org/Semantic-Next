@@ -5,200 +5,112 @@ icon: file-text
 description: JavaScript API definitions for components
 ---
 import Blockquote from '@components/mdx/Blockquote.astro';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
 export const components = { blockquote: Blockquote };
 
-Component specs are JavaScript modules that define a component's API. Specs enable automatic attribute mapping, support for three HTML dialects, and [machine-readable documentation](/docs/api/specs/documentation).
+Specs are JavaScript modules that define a component's API. They enable all three HTML dialects, generate documentation automatically, and provide runtime metadata for attribute mapping.
 
-## Why Specs Exist
+## Using Specs
 
-**Specs are the rosetta stone for component settings.** Write one definition, and it becomes web component properties, user documentation, machine-readable specs, CSS classes, natural language descriptions, and AI-interpretable semantic mappings.
+Specs are more verbose than [`settings`](/docs/guides/components/settings) and allow additional metadata like natural text description, code examples and metadata like [`usageLevel`](#usage-levels) to help hint AI and other humans on how to use your components.
 
-Here's what a spec looks like:
+<PlaygroundExample id="component-specs" direction="horizontal"></PlaygroundExample>
+
+Specs are used as a single source of truth to power your component and its documentation
+- Translate between multiple supported syntaxes for using your web component
+- Generates CSS classes through the [<code>&#123;ui&#125;</code> template variable](#the-ui-css-class-string)
+- Creates documentation using [`getDefinition()`](/docs/api/specs/documentation#getdefinition)
+- Enables AI to generate valid component usage from semantic descriptions
+
+### When to Use Specs
+
+|  | Use Specs | Use Settings |
+|--|-----------|-------------|
+| **Component Type** | Design system | One-off component |
+| **Attributes** | Support shorthand | HTML attributes only |
+| **CSS Classes** | Auto-generated | Manual |
+| **Documentation** | Auto-generated | Manual |
+
+> First-party components like those in [UI Primitives](/ui/primitives/button) generate their documentation programatically using [`SpecReader`](/docs/api/specs/spec-reader). The types, states, and variations you see documented are read directly from `.spec.js` files—not manually written.
+
+
+## Inside Components
+
+### Settings
+
+Spec attributes become reactive settings available in templates and lifecycle callbacks:
 
 ```javascript
-export default {
-  name: 'Button',
-  variations: [
-    {
-      name: 'Emphasis',
-      attribute: 'emphasis',
-      description: 'be emphasized in a layout',
-      options: [
-        { name: 'Primary', value: 'primary' },
-        { name: 'Secondary', value: 'secondary' }
-      ]
-    }
-  ]
-}
+// In your spec
+variations: [
+  {
+    name: 'Emphasis',
+    attribute: 'emphasis',
+    options: [
+      { name: 'Primary', value: 'primary' },
+      { name: 'Secondary', value: 'secondary' },
+    ],
+  },
+]
 ```
-
-This single definition translates into multiple forms:
-
-1. **It becomes HTML attributes.** The human concept "emphasized" becomes the attribute `emphasis`, and the option name "Primary" becomes the value `primary`. This attribute mapping enables developers to write `<ui-button primary>` as shorthand, working in [three dialects](/docs/api/specs/parsing):
 
 ```html
-<ui-button primary>Save</ui-button>
-<ui-button emphasis="primary">Save</ui-button>
-<ui-button class="primary">Save</ui-button>
+<!-- In your HTML -->
+<ui-button primary large>Save</ui-button>
 ```
 
-2. **It becomes CSS classes.** The template provides a [&#123;ui&#125; variable](#the-ui-css-class-string) in the data context to add related class names anywhere in your component shadow DOM. When you write `<ui-button primary>`, the runtime automatically includes `"primary"` in the &#123;ui&#125; string.
+```sui
+<!-- In your template -->
+<button class="ui button &#123;ui&#125;">
+  Current emphasis: &#123;emphasis&#125;
+  Current size: &#123;size&#125;
+</button>
+```
 
-3. **It becomes documentation.** The [Button primitive docs](/ui/primitives/button#variations) use [`getDefinition()`](/docs/api/specs/documentation#getdefinition) to add a code example under the [Variations](/ui/primitives/button#emphasis-example) heading, showing live `<ui-button primary>` and `<ui-button secondary>` examples with the description "A button can be emphasized in a layout."
+The spec's `optionAttributes` maps `primary` → `emphasis="primary"`, making the attribute available as <code>&#123;emphasis&#125;</code> in templates.
 
-4. **It becomes runtime metadata.** [`getWebComponentSpec()`](/docs/api/specs/spec-reader#getwebcomponentspec) maps variations of a concept and specific instances to their attributes and classes. For example, an icon spec with hundreds of icon options generates `optionAttributes: { 'left-arrow': 'icon', 'right-arrow': 'icon', ... }`, enabling `<ui-icon left-arrow>` to map to `icon="left-arrow"` with class `"left-arrow"` applied.
+### The &#123;ui&#125; CSS Class String
 
-5. **It becomes natural language.** The code `<ui-button primary>` becomes the human-readable description **"A button can be emphasized in a layout"** in generated documentation—translating HTML into natural language explanations for users.
+Spec attributes automatically generate CSS classes through the <code>&#123;ui&#125;</code> variable:
 
-6. **It enables AI interpretation.** Metadata like `usageLevel` and natural language descriptions provide a translation layer from human intent to implementation. An AI can translate "emphasize this button more" by matching "emphasize" to the `emphasis` attribute, checking `usageLevel: 1` to confirm it's commonly used, reading the description "be emphasized in a layout", and suggesting `<ui-button primary>` as the implementation.
+```sui
+<div class="ui button &#123;ui&#125;">
+  <!-- &#123;ui&#125; becomes "primary large" -->
+</div>
+```
 
-Change `primary` to `main` in your spec, and all six representations update automatically. No manual synchronization across documentation, CSS logic, validation rules, or AI interpretation.
+The transformation rules:
+- **Option values**: `emphasis="primary"` → class `"primary"`
+- **Boolean attributes**: `disabled` → class `"disabled"`
+- **Attribute classes**: `icon="save"` → class `"icon"` (if in spec's attributeClasses)
 
-## How Specs Work
+### Accessing Settings in Lifecycle
 
-Specs are machine-readable API definitions that transform into runtime metadata.
-
-**Without a spec**, components only support verbose attributes:
+Settings are available as destructured arguments in all [lifecycle callbacks](/docs/guides/components/lifecycle):
 
 ```javascript
 defineComponent({
-  tagName: 'ui-button',
-  defaultSettings: {
-    primary: false,
-    size: 'medium',
+  tagName: 'ui-badge',
+  componentSpec,
+
+  createComponent: ({ settings }) => ({
+    setStatus(newStatus) {
+      settings.status = newStatus;  // Updates setting and triggers re-render
+    },
+
+    getCurrentStatus() {
+      return settings.status;
+    },
+  }),
+
+  onCreated: ({ settings, el }) => {
+    console.log('Initial status:', settings.status);
   },
 });
 ```
 
-```html
-<!-- Only this syntax works -->
-<ui-button primary="true" size="large">Save</ui-button>
-```
-
-**With a spec**, you define your component's API once:
-
-```javascript
-import componentSpec from './specs/button.component.js';
-
-defineComponent({
-  tagName: 'ui-button',
-  componentSpec,  // Generated by SpecReader.getWebComponentSpec()
-  template,
-  css,
-});
-```
-
-And get multiple benefits automatically:
-
-```html
-<!-- Three HTML dialects work automatically -->
-<ui-button primary large>Save</ui-button>
-<ui-button emphasis="primary" size="large">Save</ui-button>
-<ui-button class="primary large">Save</ui-button>
-```
-
-Specs also provide:
-- Automatic CSS class generation from attributes
-- Bidirectional attribute-to-property mapping
-- [Auto-generated documentation](/docs/api/specs/documentation) from your spec definitions
-- Runtime validation of allowed attribute values
-
-> [!info]
-> **Specs in production:** Every page in [UI Primitives](/ui/primitives/button) is auto-generated from specs using [`SpecReader`](/docs/api/specs/spec-reader). The types, states, and variations you see documented are read directly from `.spec.js` files—not manually written.
-
-> [!info]
-> Specs are optional. Use `defaultSettings` and `defaultState` for simple components. Use specs when building design systems or components with many configurable options.
-
-## Spec Format
-
-Specs are JavaScript modules that export pure data. They must be JSON-serializable.
-
-### Simple Spec
-
-Most specs are plain objects with template literals:
-
-```javascript
-// divider.spec.js
-export default {
-  uiType: 'element',
-  name: 'Divider',
-  description: 'visually segment content into groups',
-  tagName: 'ui-divider',
-  exportName: 'UIDivider',
-
-  content: [
-    {
-      name: 'Text',
-      attribute: 'text',
-      description: 'include centered text',
-      exampleCode: `<ui-divider text="Or"></ui-divider>`,
-    },
-  ],
-
-  types: [],
-  states: [],
-  variations: [],
-  settings: [],
-  events: [],
-};
-```
-
-### Using Spec Helpers
-
-Import common variations to avoid repetition:
-
-```javascript
-// label.spec.js
-import { SIZE_VARIATION } from '@semantic-ui/specs';
-
-export default {
-  name: 'Label',
-  tagName: 'ui-label',
-  exportName: 'UILabel',
-
-  variations: [
-    {
-      name: 'Badge',
-      attribute: 'badge',
-      description: 'be used as a badge',
-    },
-    SIZE_VARIATION,  // Includes all 8 size options
-  ],
-};
-```
-
-### Using Helpers
-
-For complex specs, use [helper functions](/docs/api/specs/shared-terms):
-
-```javascript
-// button.spec.js
-import {
-  COLOR_OPTIONS,
-  getStates,
-  getVariations,
-} from '@semantic-ui/specs';
-
-export default {
-  name: 'Button',
-  tagName: 'ui-button',
-
-  states: getStates(['hover', 'active', 'disabled', 'loading']),
-
-  variations: [
-    ...getVariations(['floated', 'fluid', 'compact', 'size']),
-    {
-      name: 'Colored',
-      attribute: 'color',
-      description: 'be colored',
-      options: COLOR_OPTIONS,
-    },
-  ],
-};
-```
-
-## Spec Sections
+## Spec Parts
 
 Every spec has these top-level fields:
 
@@ -221,7 +133,7 @@ Every spec has these top-level fields:
 
 ### Content
 
-Define slots and content areas:
+Define content that can be rendered inside your component
 
 ```javascript
 content: [
@@ -237,7 +149,7 @@ content: [
 
 ### Types
 
-Define mutually exclusive behaviors:
+Define mutually exclusive ways your component can appear
 
 ```javascript
 types: [
@@ -263,7 +175,7 @@ types: [
 
 ### States
 
-Define runtime state changes:
+Define how you component varies over time
 
 ```javascript
 states: [
@@ -300,7 +212,7 @@ variations: [
 
 ### Settings
 
-Define configuration properties:
+Define settings that modify how your component functions:
 
 ```javascript
 settings: [
@@ -322,7 +234,7 @@ settings: [
 
 ### Events
 
-Define custom events:
+Define events dispatched by your components:
 
 ```javascript
 events: [
@@ -339,28 +251,13 @@ events: [
 ],
 ```
 
-## Types vs Variations
+## Authoring Specs
 
-Types represent distinct categories. Variations stack.
-
-```html
-<!-- Types: generally one at a time -->
-<ui-button primary>Save</ui-button>
-<ui-button secondary>Cancel</ui-button>
-
-<!-- Variations: combine many -->
-<ui-button large fluid red>Delete</ui-button>
-```
-
-This is a linguistic convention, not enforcement. The system doesn't prevent combinations. Types vs variations guide how humans think about attributes.
-
-## Spec Helpers
+### Spec Helpers
 
 The [`@semantic-ui/specs`](/docs/api/specs/shared-terms) package provides reusable constants and helpers.
 
-### Using Helpers
-
-Get multiple variations with [`getVariations()`](/docs/api/specs/shared-terms#getvariations):
+Common shared variations like `size` or `color` can be imported using [`getVariations()`](/docs/api/specs/shared-terms#getvariations):
 
 ```javascript
 import { getVariations } from '@semantic-ui/specs';
@@ -373,7 +270,7 @@ export default {
 };
 ```
 
-Get multiple states with [`getStates()`](/docs/api/specs/shared-terms#getstates):
+Common states can be added with [`getStates()`](/docs/api/specs/shared-terms#getstates):
 
 ```javascript
 import { getStates } from '@semantic-ui/specs';
@@ -382,40 +279,72 @@ export default {
   states: getStates(['hover', 'focus', 'active', 'disabled', 'loading']),
 };
 ```
+### Writing Style
 
-### Advanced Cases
+#### Descriptions
 
-Import individual [constants](/docs/api/specs/shared-terms#variation-constants) to modify with [`modifyVariation()`](/docs/api/specs/shared-terms#modifyvariation):
+Use imperative mood without the component name:
 
 ```javascript
-import { SIZE_VARIATION, modifyVariation } from '@semantic-ui/specs';
+// Good
+description: 'be emphasized'
+description: 'appear small'
+description: 'have interactions disabled'
 
-variations: [
-  modifyVariation(SIZE_VARIATION, {
-    usageLevel: 3,
-  }),
+// Bad
+description: 'The button can be emphasized'
+description: 'Makes the button appear small'
+```
+
+The [`formatDescription()`](/docs/api/specs/utilities#formatdescription) utility automatically prepends "A button can" or "An icon can".
+
+#### Template Literals
+
+Use template literals for HTML examples:
+
+```javascript
+// Single example
+exampleCode: `<ui-button icon="pause">Pause</ui-button>`
+
+// Multiline
+exampleCode: `
+  <ui-button primary>Confirm</ui-button>
+  <ui-button>Cancel</ui-button>
+`
+
+// Multiple examples (array)
+exampleCode: [
+  `<ui-button>Example 1</ui-button>`,
+  `<ui-button>Example 2</ui-button>`,
 ]
 ```
 
-Import [options arrays](/docs/api/specs/shared-terms#options-arrays) for different attribute names:
+#### Usage Levels
+
+Indicate feature commonality (1-5):
 
 ```javascript
-import { COLOR_OPTIONS } from '@semantic-ui/specs';
+{
+  name: 'Size',
+  usageLevel: 1,  // Essential
+  description: 'vary in size',
+}
 
-export default {
-  variations: [
-    {
-      name: 'Tint',
-      attribute: 'tint',
-      options: COLOR_OPTIONS,
-    },
-  ],
-};
+{
+  name: 'Animated',
+  usageLevel: 3,  // Less commonly used
+  description: 'animate to show hidden content',
+}
 ```
 
-## Converting Specs to Component Specs
+Scale: 1 = Essential, 2 = Common, 3 = Less Common, 4 = Rare, 5 = Exceptionally Rare
 
-Specs must be converted to component specs for use with `defineComponent` using [`SpecReader`](/docs/api/specs/spec-reader). You can do this at build time or runtime.
+
+## Building Component Specs
+
+Specs include a lot of additional metadata that is unnecessary to power your component in production.
+
+Use [`SpecReader`](/docs/api/specs/spec-reader) to convert specs to component specs for `defineComponent`.
 
 ### Build Time (Recommended)
 
@@ -480,176 +409,3 @@ The component spec contains optimized runtime metadata:
   }
 }
 ```
-
-## How Specs Work at Runtime
-
-Specs are transformed into runtime metadata that powers your component's template data and styling.
-
-### Spec Attributes Become Settings
-
-When you define attributes in your spec, they become reactive settings available in templates and lifecycle callbacks:
-
-```javascript
-// In your spec
-variations: [
-  {
-    name: 'Emphasis',
-    attribute: 'emphasis',
-    options: [
-      { name: 'Primary', value: 'primary' },
-      { name: 'Secondary', value: 'secondary' },
-    ],
-  },
-]
-```
-
-```html
-<!-- In your HTML -->
-<ui-button primary large>Save</ui-button>
-```
-
-```sui
-<!-- In your template -->
-<button class="ui button &#123;ui&#125;">
-  Current emphasis: &#123;emphasis&#125;
-  Current size: &#123;size&#125;
-</button>
-```
-
-The spec's `optionAttributes` maps `primary` → `emphasis="primary"`, making the attribute available as <code>{'&#123;emphasis&#125;'}</code> in templates.
-
-### The &#123;ui&#125; CSS Class String
-
-Spec attributes automatically generate CSS classes through the <code>{'&#123;ui&#125;'}</code> variable:
-
-```sui
-<div class="ui button &#123;ui&#125;">
-  <!-- &#123;ui&#125; becomes "primary large" -->
-</div>
-```
-
-The transformation rules:
-- **Option values**: `emphasis="primary"` → class `"primary"`
-- **Boolean attributes**: `disabled` → class `"disabled"`
-- **Attribute classes**: `icon="save"` → class `"icon"` (if in spec's attributeClasses)
-
-### Accessing Settings in Lifecycle
-
-Settings are available as destructured arguments in all [lifecycle callbacks](/docs/guides/components/lifecycle):
-
-```javascript
-defineComponent({
-  tagName: 'ui-badge',
-  componentSpec,
-
-  createComponent: ({ settings }) => ({
-    setStatus(newStatus) {
-      settings.status = newStatus;  // Updates setting and triggers re-render
-    },
-
-    getCurrentStatus() {
-      return settings.status;
-    },
-  }),
-
-  onCreated: ({ settings, el }) => {
-    console.log('Initial status:', settings.status);
-  },
-});
-```
-
-### Complete Data Flow
-
-```
-HTML Attribute
-  <ui-button primary large>
-      ↓
-optionAttributes mapping
-  { 'primary': 'emphasis', 'large': 'size' }
-      ↓
-Element Properties
-  el.emphasis = 'primary'
-  el.size = 'large'
-      ↓
-Template Data Context
-  &#123;emphasis&#125; = "primary"
-  &#123;size&#125; = "large"
-  &#123;ui&#125; = "primary large "
-```
-
-## Writing Style
-
-### Descriptions
-
-Use imperative mood without the component name:
-
-```javascript
-// Good
-description: 'be emphasized'
-description: 'appear small'
-description: 'have interactions disabled'
-
-// Bad
-description: 'The button can be emphasized'
-description: 'Makes the button appear small'
-```
-
-The [`formatDescription()`](/docs/api/specs/utilities#formatdescription) utility automatically prepends "A button can" or "An icon can".
-
-### Template Literals
-
-Use template literals for HTML examples:
-
-```javascript
-// Single example
-exampleCode: `<ui-button icon="pause">Pause</ui-button>`
-
-// Multiline
-exampleCode: `
-  <ui-button primary>Confirm</ui-button>
-  <ui-button>Cancel</ui-button>
-`
-
-// Multiple examples (array)
-exampleCode: [
-  `<ui-button>Example 1</ui-button>`,
-  `<ui-button>Example 2</ui-button>`,
-]
-```
-
-### Usage Levels
-
-Indicate feature commonality (1-5):
-
-```javascript
-{
-  name: 'Size',
-  usageLevel: 1,  // Essential
-  description: 'vary in size',
-}
-
-{
-  name: 'Animated',
-  usageLevel: 3,  // Advanced
-  description: 'animate to show hidden content',
-}
-```
-
-Scale: 1 = Essential, 2 = Common, 3 = Advanced, 4 = Specialized, 5 = Rare
-
-## When to Use Specs
-
-**Use specs when:**
-- You need all three HTML dialects
-- Building a design system or component library
-- You want AI assistants to understand your components
-- Creating components with many attribute options
-- Building plural components with shared variations
-
-**Skip specs when:**
-- Building one-off internal components
-- Prototyping with rapidly evolving APIs
-- Simple components where overhead isn't justified
-- Components only need a few settings
-
-Specs are human communication tools. They describe patterns and enable tooling, but don't enforce rigid rules. Like natural language, they're strictly fuzzy.
