@@ -14,6 +14,9 @@ xx.xx.xxxx
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 
+### Behaviors
+* **Feature** - Add new `portal` behavior for moving DOM like modals and popups
+
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
 
