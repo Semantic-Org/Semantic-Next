@@ -7,14 +7,14 @@
   "version": "0.18.0",
   "sideEffects": false,
   "type": "module",
-  "main": "src/index.js",
-  "module": "src/index.js",
+  "main": "src/browser.js",
+  "module": "src/browser.js",
   "exports": {
     ".": {
-      "node": "./src/node/spec-reader-node.js",
-      "import": "./src/index.js",
-      "browser": "./dist/bundle/index.min.js",
-      "importmap": "./dist/cdn/index.min.js"
+      "node": "./src/server.js",
+      "browser": "./src/browser.js",
+      "import": "./src/browser.js",
+      "default": "./src/browser.js"
     }
   },
   "scripts": {
