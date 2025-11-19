@@ -17,6 +17,10 @@ xx.xx.xxxx
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
 
+### Specs
+* **Feature** - Shared `types`, `states` and `variations` across UI are now exports from specs
+* **Feature** - Added node export path with tools for writing `componentSpec` to disk
+
 ### Query
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
 
