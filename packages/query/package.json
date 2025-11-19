@@ -15,10 +15,6 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
-    },
-    "./plugins/transition": {
-      "import": "./src/plugins/transition.js",
-      "default": "./src/plugins/transition.js"
     }
   },
   "scripts": {
