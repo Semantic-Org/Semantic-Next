@@ -1,0 +1,61 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: HTML Utilities
+icon: code
+description: API reference for HTML and text formatting utility functions
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Functions for indenting text and HTML markup.
+
+## indentLines
+
+Adds consistent indentation to every line of text.
+
+### Syntax
+```javascript
+indentLines(text, spaces = 2)
+```
+
+### Parameters
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| text   | string | The text to indent |
+| spaces | number | Number of spaces to indent each line (default: 2) |
+
+### Returns
+Indented text. Returns empty string for non-string input.
+
+### Example
+<PlaygroundExample id="utils-indentlines" direction="horizontal"></PlaygroundExample>
+
+## indentHTML
+
+Indents HTML markup with nesting awareness.
+
+### Syntax
+```javascript
+indentHTML(html, { indent = '  ', startLevel = 0, trimEmptyLines = true } = {})
+```
+
+### Parameters
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| html    | string | The HTML string to indent |
+| options | object | Optional configuration |
+
+#### Options
+| Name           | Type    | Default | Description |
+|----------------|---------|---------|-------------|
+| indent         | string  | '  '    | String to use for each level of indentation |
+| startLevel     | number  | 0       | Initial nesting level to start indentation from |
+| trimEmptyLines | boolean | true    | Whether to remove empty lines from the output |
+
+### Returns
+Indented HTML. Returns empty string for non-string input.
+
+Handles void elements (`img`, `br`, `hr`, `input`), self-closing tags (`<component />`), comments, and same-line tags (`<tag>content</tag>`).
+
+### Example
+<PlaygroundExample id="utils-indenthtml" direction="horizontal"></PlaygroundExample>

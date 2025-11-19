@@ -1,0 +1,30 @@
+.badge {
+  display: inline-block;
+  padding: var(--4px) var(--8px);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  font-weight: var(--bold);
+
+  &.small {
+    font-size: var(--small);
+  }
+
+  &.large {
+    font-size: var(--large);
+  }
+
+  &.success {
+    background: var(--positive-5);
+    color: var(--positive-text-color);
+  }
+
+  &.warning {
+    background: var(--warning-5);
+    color: var(--warning-text-color);
+  }
+
+  &.error {
+    background: var(--negative-5);
+    color: var(--negative-text-color);
+  }
+}

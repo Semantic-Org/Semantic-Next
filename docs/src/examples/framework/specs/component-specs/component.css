@@ -1,0 +1,20 @@
+.widget {
+  display: inline-block;
+  padding: var(--4px) var(--8px);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  font-weight: var(--bold);
+
+  &.small {
+    font-size: var(--small);
+  }
+
+  &.large {
+    font-size: var(--large);
+  }
+
+  &.primary {
+    background: var(--primary-5);
+    color: var(--primary-text-color);
+  }
+}

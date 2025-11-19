@@ -1,6 +1,6 @@
 # Scaffold New Primitive
 
-> Last Updated: 2024-11-03
+> Last Updated: 2025-11-14
 
 **Purpose**: Create the complete file structure for a new UI primitive in Semantic UI
 **Target**: LLMs scaffolding new primitives from scratch
@@ -11,7 +11,9 @@
 
 ## Overview
 
-UI primitives (or "primitives") in Semantic UI are spec-driven components that live in `/src/primitives/` and are powered by JSON specifications that define their entire API. This workflow creates the minimal file structure and integration points for a new primitive that can then be incrementally developed.
+UI primitives (or "primitives") in Semantic UI are spec-driven components that live in `/src/primitives/` and are powered by **JavaScript specifications** (`.spec.js` files) that define their entire API. This workflow creates the minimal file structure and integration points for a new primitive that can then be incrementally developed.
+
+> **Note**: Specs are authored as `.spec.js` files (JavaScript modules), not JSON. The build system generates `.spec.json` snapshots for tooling.
 
 **Key Principle**: Start with an empty spec stub and minimal implementation, allowing incremental feature addition through the spec authoring workflow.
 
@@ -45,9 +47,10 @@ Examples:
 ```
 src/primitives/[primitive-name]/
 ├── specs/
-│   ├── [primitive-name].json       # Primitive spec (starts as stub)
-│   ├── [primitive-name]-component.js  # Auto-generated
-│   └── [plural-name]-component.js     # Auto-generated if plural supported
+│   ├── [primitive-name].spec.js       # Primitive spec source (you author this)
+│   ├── [primitive-name].spec.json     # Auto-generated JSON snapshot
+│   ├── [primitive-name].component.js  # Auto-generated component spec
+│   └── [plural-name].component.js     # Auto-generated if plural supported
 ├── css/
 │   ├── [primitive-name].css           # Main CSS bundle import
 │   ├── [primitive-name]-theme.css     # Theme layer barrel
@@ -67,28 +70,29 @@ src/primitives/[primitive-name]/
 
 ### Step 1: Create Spec Stub
 
-Create `/src/primitives/[primitive-name]/specs/[primitive-name].json`:
+Create `/src/primitives/[primitive-name]/specs/[primitive-name].spec.js`:
 
-```json
-{
-  "uiType": "element",
-  "name": "[PrimitiveName]",
-  "description": "[Brief description of primitive purpose]",
-  "tagName": "ui-[primitive-name]",
-  "exportName": "UI[PrimitiveName]",
-  "content": [],
-  "types": [],
-  "states": [],
-  "variations": [],
-  "settings": [],
-  "events": [],
-  "supportsPlural": false,
-  "examples": {
-    "defaultAttributes": {},
-    "defaultContent": "",
-    "defaultPluralContent": ""
-  }
-}
+```javascript
+// Primitive spec stub - expand incrementally via define-primitive-spec workflow
+export default {
+  uiType: 'element',
+  name: '[PrimitiveName]',
+  description: '[Brief description of primitive purpose]',
+  tagName: 'ui-[primitive-name]',
+  exportName: 'UI[PrimitiveName]',
+  content: [],
+  types: [],
+  states: [],
+  variations: [],
+  settings: [],
+  events: [],
+  supportsPlural: false,
+  examples: {
+    defaultAttributes: {},
+    defaultContent: '',
+    defaultPluralContent: '',
+  },
+};
 ```
 
 **Naming Conventions**:
@@ -355,23 +359,23 @@ When a primitive supports plural forms (like button/buttons, card/cards), follow
 
 ### Step 1: Update Spec for Plural
 
-Update `/src/primitives/[primitive-name]/specs/[primitive-name].json`:
+Update `/src/primitives/[primitive-name]/specs/[primitive-name].spec.js`:
 
-```json
-{
+```javascript
+export default {
   // ... existing fields ...
-  "supportsPlural": true,
-  "pluralName": "[PluralName]",
-  "pluralTagName": "ui-[plural-name]",
-  "pluralExportName": "UI[PluralName]",
-  "pluralDescription": "[PluralName] can exist together as a group",
-  "pluralContent": [],
-  "pluralSharedTypes": [],
-  "pluralSharedVariations": [],
-  "pluralSharedStates": [],
-  "pluralOnlyTypes": [],
-  "pluralOnlyVariations": []
-}
+  supportsPlural: true,
+  pluralName: '[PluralName]',
+  pluralTagName: 'ui-[plural-name]',
+  pluralExportName: 'UI[PluralName]',
+  pluralDescription: '[PluralName] can exist together as a group',
+  pluralContent: [],
+  pluralSharedTypes: [],
+  pluralSharedVariations: [],
+  pluralSharedStates: [],
+  pluralOnlyTypes: [],
+  pluralOnlyVariations: [],
+};
 ```
 
 ### Step 2: Create Plural Structure

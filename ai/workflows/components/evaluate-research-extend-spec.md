@@ -1,12 +1,14 @@
 # Evaluate Research and Extend Spec
 
-> Last Updated: 2024-11-04
+> Last Updated: 2025-11-14
 
 **Purpose**: Present pattern research to the Semantic UI author for informed editorial decisions
 **Target**: LLMs working with the Semantic UI author to evolve specifications
 **Prerequisites**:
 - Pattern research completed (`research-component-patterns.md`)
 - Existing spec to potentially extend
+
+> **Note**: Specs are authored as `.spec.js` files (JavaScript modules), not JSON. The build system generates `.spec.json` snapshots for tooling.
 
 ## Overview
 
@@ -29,7 +31,7 @@ cat ai/research/[component]/pattern-research.md
 **Then load and analyze current spec:**
 ```bash
 # Read current specification
-cat src/primitives/[component]/specs/[component].json
+cat src/primitives/[component]/specs/[component].spec.js
 ```
 
 **Create a comprehensive comparison:**
@@ -238,11 +240,59 @@ Once decisions are finalized:
 # Include appropriate usageLevel based on our assessment
 ```
 
-For new additions:
-- Level 1-2 patterns → usageLevel: 1-2 (common use)
-- Level 3 patterns → usageLevel: 3-4 (moderate use)
-- Level 4-5 patterns → usageLevel: 4-5 (specialized use)
-- Innovations → usageLevel based on expected use
+**Usage Levels**
+
+The `usageLevel` property (1-5) controls how features appear in documentation through progressive disclosure. This follows a **descriptive linguistics approach**: combining empirical observation (what patterns exist across frameworks) with editorial judgment (how frequently users will need them in practice).
+
+**Important**: Usage levels reflect expected usage frequency, not research adoption percentages. Research informs *what* to add; usage levels indicate *how often users will need it* in practice.
+
+**Usage Level Definitions:**
+
+- **Level 1 - Essential**: Always visible, used in most implementations
+  - Example: `text` content on divider, `size` variation on button
+  - Criteria: 80%+ of users will need this feature
+
+- **Level 2 - Common**: Shown by default in documentation
+  - Example: `icon` content on divider, `primary` type on button
+  - Criteria: 40-80% of users will need this feature
+
+- **Level 3 - Advanced**: Hidden behind "Show more" or "Advanced options"
+  - Example: `vertical` type on divider, `align` variation
+  - Criteria: 15-40% of users will need this feature
+
+- **Level 4 - Specialized**: For specific use cases, deeply nested in docs
+  - Example: `thickness` variation on divider, `inverted` variation
+  - Criteria: 5-15% of users will need this feature
+
+- **Level 5 - Expert**: Rarely needed, for edge cases
+  - Example: `clearing` variation on divider (legacy float clearing)
+  - Criteria: <5% of users will need this feature
+
+**Assigning Usage Levels to New Features:**
+
+When adding features from research, ask:
+- "How often will users need this feature?"
+- "Is this core functionality or specialized?"
+- "Does this solve a common problem or edge case?"
+
+**Examples:**
+
+- **Pattern**: Dashed divider style (found in 64% of frameworks)
+  - **Decision**: Add as `styled="dashed"`
+  - **usageLevel**: 2 (common alternative to default style)
+  - **Reasoning**: While 64% of frameworks offer it, most users use default styles. Those who need style variants will use this moderately.
+
+- **Pattern**: Divider thickness control (found in 45% of frameworks)
+  - **Decision**: Add as `thickness="thin|medium|thick"`
+  - **usageLevel**: 4 (specialized control)
+  - **Reasoning**: Despite decent adoption, this is visual fine-tuning. Most users are satisfied with default thickness.
+
+- **Innovation**: Gradient divider style (not found in research)
+  - **Decision**: Add as `styled="gradient"`
+  - **usageLevel**: 5 (experimental feature)
+  - **Reasoning**: New feature without proven demand. Start at level 5, adjust based on usage data.
+
+**Note**: Research adoption percentages inform whether to include a feature. Usage levels reflect how frequently we expect users to need that feature in practice. A pattern found in 90% of frameworks might still be usageLevel 3-4 if it solves specialized use cases.
 
 ### 7. Create Decision Record
 

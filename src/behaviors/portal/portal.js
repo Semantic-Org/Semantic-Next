@@ -1,46 +1,50 @@
 import { registerBehavior } from '@semantic-ui/query';
 import { isDOM, isString } from '@semantic-ui/utils';
 
-// Moves a DOM element to a new parent context ("portal") on the client
-// and returns it on destruction. This is SSR-safe and escapes
-// CSS stacking and overflow contexts.
+/*
+  Moves a DOM element to a new parent context ("portal") on the client
+  and returns it on destruction. This is SSR-safe and escapes
+  CSS stacking and overflow contexts.
+
+  Settings:
+  ┌─────────┬──────────────────┬─────────────────────────────────────────────────┐
+  │ Setting │ Default          │ Description                                     │
+  ├─────────┼──────────────────┼─────────────────────────────────────────────────┤
+  │ context │ 'auto'           │ Target context to portal the element to:       │
+  │         │                  │ - 'auto': Element's positioningParent()        │
+  │         │                  │ - 'body': document.body (ideal for modals)     │
+  │         │                  │ - '.selector' or HTMLElement: Specific element │
+  └─────────┴──────────────────┴─────────────────────────────────────────────────┘
+
+  - `$(el).portal(true)`: Portals to default 'auto' context.
+  - `$(el).portal(false)`: Restores element to original parent.
+  - `$(el).portal('.my-context')`: Portals to a specific context.
+
+*/
 export const Portal = registerBehavior({
   name: 'portal',
   namespace: 'portal',
 
   defaultSettings: {
-    // The target context to portal the element to.
-    // - `auto`: (Default) Moves to the element's `positioningParent()`.
-    //   This keeps the element within its local scroll container.
-    // - `'body'`: Moves to `document.body`. Ideal for modals.
-    // - `'.selector'` or `HTMLElement`: Moves to the specified element.
     context: 'auto',
   },
 
-  // --- Lifecycle Hooks ---
-
-  // This is the "Progressive Enhancement" step. The element
-  // renders inline (SSR-friendly), and we *then* portal it
-  // on the client after it's created.
+  /*
+    Progressive enhancement: element renders inline (SSR-friendly),
+    then portals on the client after creation
+  */
   onCreated({ self, $el }) {
-    // Store instance state directly on `self`
     self.$originalParent = $el.parent();
     self.$context = null;
     self.isPortaled = false;
 
-    // Perform the initial portal
     self.portal();
   },
 
-  // The framework's auto-cleanup calls this to restore the element.
   onDestroyed({ self }) {
     self.restore();
   },
 
-  // Handles simple invocations:
-  // - `$(el).portal(true)`: Portals to default 'auto' context.
-  // - `$(el).portal(false)`: Restores element to original parent.
-  // - `$(el).portal('.my-context')`: Portals to a specific context.
   customInvocation({ self, methodName, methodArgs }) {
     if (methodName === true) {
       return self.portal();
@@ -53,7 +57,6 @@ export const Portal = registerBehavior({
     }
   },
 
-  // --- Behavior API ---
   createBehavior: ({ self, $el, $, settings, log }) => ({
     portal(newSettings) {
       const config = { ...settings, ...newSettings };

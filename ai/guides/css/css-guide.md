@@ -1,11 +1,15 @@
 # Semantic UI CSS Guide
 
-**Purpose**: Canonical patterns for CSS architecture and styling  
+> Last Updated: 2025-11-14
+
+**Purpose**: Canonical patterns for CSS architecture and styling
 **Audience**: All developers building custom components
 
 ## Core Philosophy
 
 Write minimal, maintainable CSS that leverages the design token system and mirrors HTML structure through natural nesting patterns.
+
+> **Code formatting and comment hierarchy**: See `/ai/guides/development/code-formatting.md` for dprint rules and the three-level comment hierarchy for organizing large files.
 
 ## CSS Architecture
 

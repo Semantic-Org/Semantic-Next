@@ -33,5 +33,5 @@
 @import url('./tokens/themes/computed/brand.css') layer(tokens.themes.computed.brand);
 @import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
 @import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
-@import url('./tokens/themes/computed/messages.css') layer(tokens.themes.computed.messages);
+@import url('./tokens/themes/computed/state-colors.css') layer(tokens.themes.computed.stateColors);
 @import url('./tokens/themes/computed/interaction.css') layer(tokens.themes.computed.interaction);

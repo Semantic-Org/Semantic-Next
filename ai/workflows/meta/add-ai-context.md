@@ -30,6 +30,11 @@
    - Avoid narrative/marketing prose; focus on actionable instructions.
    - Provide cross references to canonical docs using `/ai/...` paths; whenever material overlaps with an existing guide, link to that location instead of restating it.
    - **IMPORTANT**: Include a **Last Updated** field at the top of the file (e.g., `> Last Updated: 2025-10-30`). Always update this field when modifying file contents.
+     - **Getting the current date**: Use the `date` command to get the correct date:
+       ```bash
+       date +%Y-%m-%d
+       ```
+       This ensures accuracy and avoids relying on context date which may be stale.
 3. **Embed canonical references** where relevant (examples, source directories, API docs).
 
 ## 3. Register in the Manifest

@@ -37,7 +37,7 @@ src/css/
             ├── brand.css        # Brand color variations
             ├── layout.css       # Theme layouts
             ├── effects.css      # Theme effects
-            ├── messages.css     # Message type colors
+            ├── state-colors.css # Semantic state colors (positive/negative/info/warning)
             └── interaction.css  # Theme interactions
 ```
 

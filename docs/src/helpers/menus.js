@@ -53,6 +53,7 @@ const subCategorySortOrder = {
     'Settings',
     'Keybinding',
     'Comms',
+    'Specs',
   ],
   'UI Components': [
     'Interactive',
@@ -116,14 +117,15 @@ const subCategorySortOrder = {
     'Functions',
     'Colors',
     'CSS',
+    'HTML',
     'Browser',
-    'Dates',
-    'Numbers',
-    'Environment',
-    'Crypto',
-    'Equality',
     'Cloning',
-    'Errors',
+    'Crypto',
+    'Dates',
+    'Debug',
+    'Environment',
+    'Equality',
+    'Numbers',
     'Regex',
   ],
 };
@@ -692,6 +694,37 @@ export const sidebarMenuAPI = [
     ],
   },
   {
+    name: 'Specs',
+    url: '/docs/api/specs',
+    icon: 'file-text',
+    pages: [
+      {
+        name: 'SpecReader',
+        url: '/docs/api/specs/spec-reader',
+      },
+      {
+        name: 'Spec Helpers',
+        url: '/docs/api/specs/shared-terms',
+      },
+      {
+        name: 'Generate Docs',
+        url: '/docs/api/specs/documentation',
+      },
+      {
+        name: 'Parsing HTML',
+        url: '/docs/api/specs/parsing',
+      },
+      {
+        name: 'Generating HTML',
+        url: '/docs/api/specs/generation',
+      },
+      {
+        name: 'Utilities',
+        url: '/docs/api/specs/utilities',
+      },
+    ],
+  },
+  {
     name: 'Template Helpers',
     url: '/docs/api/helpers',
     icon: 'book-open',
@@ -874,6 +907,10 @@ export const sidebarMenuAPI = [
         url: '/docs/api/utils/dates',
       },
       {
+        name: 'Debug',
+        url: '/docs/api/utils/debug',
+      },
+      {
         name: 'Environment',
         url: '/docs/api/utils/environment',
       },
@@ -882,12 +919,12 @@ export const sidebarMenuAPI = [
         url: '/docs/api/utils/equality',
       },
       {
-        name: 'Errors',
-        url: '/docs/api/utils/errors',
-      },
-      {
         name: 'Functions',
         url: '/docs/api/utils/functions',
+      },
+      {
+        name: 'HTML',
+        url: '/docs/api/utils/html',
       },
       {
         name: 'Looping',

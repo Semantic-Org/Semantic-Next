@@ -1,4 +1,4 @@
-import ContainerComponentSpec from './specs/container-component.js';
-import ContainerSpec from './specs/container.js';
+import ImageComponentSpec from './specs/image.component.js';
+import ImageSpec from './specs/image.spec.json';
 
-export { ContainerComponentSpec, ContainerSpec };
+export { ImageComponentSpec, ImageSpec };

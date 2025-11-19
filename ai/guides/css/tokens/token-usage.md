@@ -43,7 +43,7 @@ src/css/
             ├── brand.css        # Brand colors
             ├── layout.css       # Layout tokens
             ├── effects.css      # Visual effects
-            ├── messages.css     # Message colors
+            ├── state-colors.css # Semantic state colors
             └── interaction.css  # Interactions
 ```
 

@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 
 import css from '../card-bundle.css?raw';
-import componentSpec from '../specs/cards-component.js';
+import componentSpec from '../specs/cards.component.js';
 import template from './cards.html?raw';
 
 export const UICards = defineComponent({

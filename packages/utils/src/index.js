@@ -9,6 +9,7 @@ export * from './debug.js';
 export * from './environment.js';
 export * from './equality.js';
 export * from './functions.js';
+export * from './html.js';
 export * from './loops.js';
 export * from './numbers.js';
 export * from './objects.js';

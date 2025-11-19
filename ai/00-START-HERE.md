@@ -89,6 +89,11 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 **Start with:** [Build System Guide](/ai/guides/development/build-system.md)
 **Contains:** Two-system architecture (JS libraries vs web components), build commands reference, esbuild plugins, export conditions, wireit orchestration, common workflows, idiosyncrasies
 
+### Code Formatting & Style
+**Need to:** Understand formatting rules, comment hierarchy, code style conventions
+**Start with:** [Code Formatting Guide](/ai/guides/development/code-formatting.md)
+**Contains:** dprint configuration, three-level comment hierarchy, formatting best practices
+
 ### HTML & CSS Guidelines
 **Need to:** Writing templates, styling components, design tokens, theming
 **Start with:** [HTML Guide](/ai/guides/html/style-guide.md) • [CSS Guide](/ai/guides/css/css-guide.md) • [Theming](/ai/guides/css/theming.md) • [CSS Tokens](/ai/guides/css/tokens/token-usage.md)

@@ -8,17 +8,18 @@ The `@semantic-ui/utils` package is a comprehensive standalone utility library p
 
 ## Package Structure
 
-The package is organized into **17 specialized modules**, each focused on a specific domain:
+The package is organized into **18 specialized modules**, each focused on a specific domain:
 
 ```
 @semantic-ui/utils
 ├── arrays.js      ← Array manipulation and processing (27+ functions)
-├── objects.js     ← Object operations and property access (15+ functions)  
+├── objects.js     ← Object operations and property access (15+ functions)
 ├── types.js       ← Type checking and validation (15+ functions)
 ├── strings.js     ← String formatting and transformation (8+ functions)
 ├── functions.js   ← Function utilities and higher-order functions
 ├── colors.js      ← OKLCH to RGB/Hex color conversion
 ├── css.js         ← CSS stylesheet adoption, extraction, and scoping
+├── html.js        ← HTML indentation and text formatting
 ├── browser.js     ← Browser-specific operations and XHR
 ├── looping.js     ← Iteration utilities for objects and arrays
 ├── dates.js       ← Date formatting with internationalization
@@ -436,6 +437,94 @@ const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
 const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
 // Result: .app html { font-size: 16px; } .app body { margin: 0; }
 ```
+
+## HTML Utilities (html.js)
+
+### Text Indentation
+```javascript
+import { indentLines } from '@semantic-ui/utils';
+
+// Add consistent indentation to all lines
+const code = 'line 1\nline 2\nline 3';
+indentLines(code);              // '  line 1\n  line 2\n  line 3' (2 spaces)
+indentLines(code, 4);           // '    line 1\n    line 2\n    line 3' (4 spaces)
+
+// Useful for template processing
+const template = `
+function example() {
+  return true;
+}
+`;
+const indented = indentLines(template.trim(), 2);
+```
+
+### HTML Indentation
+```javascript
+import { indentHTML } from '@semantic-ui/utils';
+
+// Basic HTML indentation
+const html = '<div>\n<p>Content</p>\n</div>';
+indentHTML(html);
+// Result:
+// <div>
+//   <p>Content</p>
+// </div>
+
+// Handles nested structures
+const nested = `
+<div class="ui segment">
+<div class="ui header">Title</div>
+<p>Content here</p>
+<div class="ui list">
+<div class="item">
+<img src="image.jpg" />
+<div class="content">Item 1</div>
+</div>
+</div>
+</div>
+`;
+
+indentHTML(nested);
+// Result:
+// <div class="ui segment">
+//   <div class="ui header">Title</div>
+//   <p>Content here</p>
+//   <div class="ui list">
+//     <div class="item">
+//       <img src="image.jpg" />
+//       <div class="content">Item 1</div>
+//     </div>
+//   </div>
+// </div>
+
+// Custom indentation
+indentHTML(html, { indent: '    ' });    // 4 spaces
+indentHTML(html, { indent: '\t' });      // Tabs
+
+// Start at specific nesting level
+indentHTML(html, { startLevel: 1 });     // Start with one level of indent
+
+// Preserve empty lines
+indentHTML(html, { trimEmptyLines: false });
+```
+
+**Common use cases:**
+- Cleaning up HTML extracted from JavaScript template literals
+- Formatting documentation examples
+- Processing HTML snippets from various sources
+- Preparing HTML for display in code editors
+
+**Handles correctly:**
+- Void elements (img, br, hr, input, etc.) - no closing tag needed
+- Self-closing syntax (`<component />`)
+- Comments (`<!-- comment -->`)
+- Elements with opening/closing on same line
+- Multiple nesting levels
+
+**Limitations:**
+- Works best with one tag per line (typical documentation format)
+- Multiple tags on same line are not split
+- Designed for well-formed HTML snippets, not error correction
 
 ## Browser Integration (browser.js)
 

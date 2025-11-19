@@ -3,7 +3,7 @@ import { noop } from '@semantic-ui/utils';
 
 import css from './modal-bundle.css?raw';
 import template from './modal.html?raw';
-import componentSpec from './specs/modal-component.js';
+import componentSpec from './specs/modal.component.js';
 
 const createComponent = ({ $, dispatchEvent }) => ({
   show(callback = noop) {

@@ -321,17 +321,33 @@ function createTableHTML(data) {
   return formatValue(data);
 }
 
+// Helper to escape HTML to prevent XSS
+function escapeHTML(string) {
+  const htmlEscapes = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  const htmlRegExp = /[&<>"']/g;
+  const hasHTML = RegExp(htmlRegExp.source);
+  return (string && hasHTML.test(string))
+    ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
+    : (string || '');
+}
+
 function formatValue(value, skipFormat = false, inTable = false) {
   if (skipFormat) {
-    return String(value);
+    return escapeHTML(String(value));
   }
-  
+
   if (value === null) {
     return \`<span class="json-null">null</span>\`;
   } else if (value === undefined) {
     return \`<span class="json-undefined">undefined</span>\`;
   } else if (typeof value === 'string') {
-    return \`<span class="json-string">"\${value}"</span>\`;
+    return \`<span class="json-string">"\${escapeHTML(value)}"</span>\`;
   } else if (typeof value === 'number') {
     if (Number.isNaN(value)) {
       return \`<span class="json-nan">NaN</span>\`;
@@ -346,17 +362,17 @@ function formatValue(value, skipFormat = false, inTable = false) {
   } else if (typeof value === 'function') {
     const funcStr = value.toString();
     const isArrow = funcStr.includes('=>');
-    const funcName = value.name || 'anonymous';
+    const funcName = escapeHTML(value.name || 'anonymous');
     if (inTable) {
       return \`<span class="json-function">ƒ \${funcName}()</span>\`;
     }
-    return \`<span class="json-function">ƒ \${funcName}() { \${isArrow ? funcStr : '...'} }</span>\`;
+    return \`<span class="json-function">ƒ \${funcName}() { \${isArrow ? escapeHTML(funcStr) : '...'} }</span>\`;
   } else if (value instanceof Date) {
-    return \`<span class="json-date">\${value.toISOString()}</span>\`;
+    return \`<span class="json-date">\${escapeHTML(value.toISOString())}</span>\`;
   } else if (value instanceof RegExp) {
-    return \`<span class="json-regexp">\${value.toString()}</span>\`;
+    return \`<span class="json-regexp">\${escapeHTML(value.toString())}</span>\`;
   } else if (value instanceof Error) {
-    return \`<span class="json-error">\${value.name}: \${value.message}</span>\`;
+    return \`<span class="json-error">\${escapeHTML(value.name)}: \${escapeHTML(value.message)}</span>\`;
   } else if (Array.isArray(value)) {
     if (inTable) {
       return \`<span class="json-array">Array(\${value.length})</span>\`;
@@ -369,9 +385,9 @@ function formatValue(value, skipFormat = false, inTable = false) {
   } else if (typeof value === 'object' && value !== null) {
     // Handle DOM elements
     if (value.nodeType) {
-      const tagName = value.tagName?.toLowerCase() || 'node';
-      const id = value.id ? \`#\${value.id}\` : '';
-      const className = value.className ? \`.\${value.className.split(' ').join('.')}\` : '';
+      const tagName = escapeHTML(value.tagName?.toLowerCase() || 'node');
+      const id = value.id ? \`#\${escapeHTML(value.id)}\` : '';
+      const className = value.className ? \`.\${escapeHTML(value.className.split(' ').join('.'))}\` : '';
       return \`<span class="json-dom">&lt;\${tagName}\${id}\${className}&gt;</span>\`;
     }
     
@@ -380,7 +396,7 @@ function formatValue(value, skipFormat = false, inTable = false) {
     const isCustomClass = constructor && constructor !== Object && constructor.name !== 'Object';
     
     if (isCustomClass) {
-      const className = constructor.name;
+      const className = escapeHTML(constructor.name);
       const keys = Object.keys(value);
       if (inTable) {
         return \`<span class="json-class">\${className} {...}</span>\`;
@@ -389,7 +405,7 @@ function formatValue(value, skipFormat = false, inTable = false) {
         return \`<span class="json-class">\${className} {}</span>\`;
       }
       const formattedObject = keys.slice(0, 3).map(key => {
-        return \`<span class="json-key">"\${key}"</span>: \${formatValue(value[key])}\`;
+        return \`<span class="json-key">"\${escapeHTML(key)}"</span>: \${formatValue(value[key])}\`;
       }).join(', ');
       const more = keys.length > 3 ? ', ...' : '';
       return \`<span class="json-class">\${className}</span> {\${formattedObject}\${more}}\`;
@@ -404,12 +420,12 @@ function formatValue(value, skipFormat = false, inTable = false) {
       return \`<span class="json-object">{}</span>\`;
     }
     const formattedObject = keys.slice(0, 3).map(key => {
-      return \`<span class="json-key">"\${key}"</span>: \${formatValue(value[key])}\`;
+      return \`<span class="json-key">"\${escapeHTML(key)}"</span>: \${formatValue(value[key])}\`;
     }).join(', ');
     const more = keys.length > 3 ? ', ...' : '';
     return \`<span class="json-object">{\${formattedObject}\${more}}</span>\`;
   } else {
-    return \`<span class="json-unknown">\${String(value)}</span>\`;
+    return \`<span class="json-unknown">\${escapeHTML(String(value))}</span>\`;
   }
 }
 ${hideMarkerEnd}`;
@@ -509,6 +525,7 @@ export const logCSS = `
       border-top: var(--border);
       padding: 4px 0;
       word-wrap: break-word;
+      white-space: pre;
     }
     .log-entry:first-child {
       border-top: none;
