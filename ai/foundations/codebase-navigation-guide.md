@@ -431,7 +431,6 @@ templating/
 query/
 ├── src/
 │   ├── query.js              ← **ESSENTIAL** Main query implementation
-│   ├── node-wrapper.js      ← DOM node utilities
 │   └── index.js             ← Package exports
 └── test/                    ← Query tests
 ```
