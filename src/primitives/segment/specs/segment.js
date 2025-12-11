@@ -114,10 +114,28 @@ export default {
       "usageLevel": 2
     },
     {
+      "name": "Inline",
+      "attribute": "inline",
+      "usageLevel": 3,
+      "description": "can appear inline with other "
+    },
+    {
       "name": "Compact",
       "attribute": "compact",
-      "description": "take up only as much space as is necessary",
-      "usageLevel": 2
+      "usageLevel": 3,
+      "description": "reduce its padding",
+      "options": [
+        {
+          "name": "Compact",
+          "value": "compact",
+          "description": "reduce its padding slightly"
+        },
+        {
+          "name": "Very Compact",
+          "value": "very-compact",
+          "description": "reduce its padding greatly"
+        }
+      ]
     },
     {
       "name": "Colored",
