@@ -161,15 +161,13 @@ Query allows you to opt-in to exporting globals in a browser environment. You ca
 
 ```
 
-You can also use `$.noConflict()` to restore the original values of `$` and `$$` and assign Query to a different variable:
+You can also use `useAlias()` to create a custom alias without affecting global variables:
 
 ```html
 
-  import { exportGlobals } from 'https://unpkg.com/@semantic-ui/query';
+  import { useAlias } from 'https://unpkg.com/@semantic-ui/query';
 
-  exportGlobals();
-
-  const myQuery = $.noConflict();
+  const myQuery = useAlias();
 
   // Use myQuery instead of $
   myQuery('div').addClass('active');
