@@ -142,7 +142,7 @@ packages/
 - `/api/reactivity/date-helpers` - Date signal helpers
 
 #### **4. Query** (`/api/query/`)
-- `/api/query/basic` - Basic querying methods
+- `/api/query/constructor` - Query constructor and basics
 - `/api/query/attributes` - Attribute manipulation
 - `/api/query/components` - **ESSENTIAL** Component methods (.settings, .initialize, etc.)
 - `/api/query/content` - Content manipulation
@@ -747,7 +747,7 @@ Grep: pattern="vite|astro|playwright" include="package.json" path="/"
 #### **"What's the difference between $ and $$?"**
 ```bash
 1. Read: /docs/src/pages/query/shadow-dom.mdx
-2. Read: /docs/src/pages/api/query/basic.mdx
+2. Read: /docs/src/pages/api/query/constructor.mdx
 3. Read: /packages/query/src/query.js
 4. Read: /docs/src/examples/query/dom/shadow-dom/
 ```

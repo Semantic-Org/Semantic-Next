@@ -35,7 +35,7 @@
 
 ### Documentation-Specific Context
 1. **Documentation Standards**
-   - `ai/documentation/authoring/example-authoring.md` - Example workflows and package demonstrations
+   - `ai/documentation/example/example-authoring.md` - Example workflows and package demonstrations
    - `ai/guides/html/style-guide.md` - Template structure and semantic markup patterns
    - `ai/guides/styling/css-guide.md` - Styling conventions, nesting, and responsive patterns
 

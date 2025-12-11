@@ -16,7 +16,7 @@ This guide covers building Semantic UI components for **any application** - whet
 ### **Are You Creating a Documentation Example?**
 
 **If you were asked to create an "example component" or "component example":**
-- **STOP** - You likely need the **[Example Authoring Guide](/ai/documentation/authoring/example-authoring.md)** instead
+- **STOP** - You likely need the **[Example Authoring Guide](/ai/documentation/example/example-authoring.md)** instead
 - Documentation examples have specific metadata, file structure, and playground requirements
 - **When in doubt, clarify with the user:** "Are you building a component for an application, or creating a documentation example?"
 
@@ -1139,8 +1139,8 @@ Refer to these examples for practical implementations of the patterns described 
 
 To showcase your components in the Semantic UI documentation system:
 
-- **Example Authoring Guide**: [Documentation Authoring](/ai/documentation/authoring/example-authoring.md) - Creating examples and documentation content
-- **📦 Package Examples**: Refer to [Documentation Authoring](/ai/documentation/authoring/example-authoring.md) for package-specific example creation
+- **Example Authoring Guide**: [Example Authoring](/ai/documentation/example/example-authoring.md) - Creating examples and documentation content
+- **📦 Package Examples**: Refer to [Example Authoring](/ai/documentation/example/example-authoring.md) for package-specific example creation
 
 The documentation system has specific requirements for file structure, metadata, and organization that are separate from general component development.
 

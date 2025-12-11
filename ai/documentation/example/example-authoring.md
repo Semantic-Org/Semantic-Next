@@ -7,9 +7,52 @@
 
 ---
 
-## 🎯 **Pedagogical Purpose & Style**
+## 🎯 **Example Philosophy**
 
-**CRITICAL**: Examples are **succinct pedagogical demonstrations** for an open source framework, designed in the **authoritative style of official React, Vue, Svelte, Shadcn documentation**.
+**The bar**: Would this example feel at home in official React, Vue, or Svelte docs?
+
+### **The Four Pillars**
+
+1. **Immediately obvious interaction** - User knows exactly what to do without reading instructions
+2. **Code like a koan** - Minimal lines, the essence of the concept, nothing extra
+3. **Sharp but minimal design** - Clean visuals that serve the teaching, not impress
+4. **Aha moment front and center** - The key insight is the entire example
+
+### **Critical Anti-Patterns**
+
+```html
+<!-- ❌ NEVER: Redundant description paragraph -->
+<p>This example demonstrates how to use .filter() to filter elements</p>
+
+<!-- ❌ NEVER: Raw <button> elements (breaks dark mode, not dogfooding) -->
+<button class="submit">Click</button>
+
+<!-- ✅ CORRECT: Just the example content, use ui-button -->
+<ui-button class="submit">Click</ui-button>
+```
+
+### **What Makes a Great Example**
+
+| Quality | Bad | Good |
+|---------|-----|------|
+| Interaction | "Click 'Iterate Items' to see each() in action" | Button labeled "Next" that obviously advances steps |
+| Code | 37 lines with helper functions and reset logic | 7 lines showing the one thing |
+| Design | Multiple colored borders, animations, transforms | Border, background change on state |
+| Teaching | Shows 3 variations of similar thing | Shows the one essential thing clearly |
+
+### **Real Patterns Over Demos**
+
+Examples should show things developers actually build:
+- ✅ Wizard stepper (onNext), ping/pong communication (dispatchEvent), nested box highlighting (closest/closestAll)
+- ❌ Abstract "Item A, Item B, Item C" with "Process Items" button
+
+### **Parallel Structure for Related Methods**
+
+Methods like `closest` and `closestAll` should use identical HTML/CSS with only the JS differing. The parallel structure makes the difference obvious.
+
+---
+
+## 📋 **Detailed Standards**
 
 ### **Core Pedagogical Principles**
 1. **Single Concept Focus**: Each example demonstrates ONE clear concept or API method

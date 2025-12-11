@@ -124,26 +124,70 @@
     },
     {
       "id": "docs/example-authoring",
-      "path": "ai/documentation/authoring/example-authoring.md",
+      "path": "ai/documentation/example/example-authoring.md",
       "category": "specialized",
       "tags": ["documentation", "examples", "playground"],
       "dependsOn": ["foundation/start-here"],
       "approxTokens": 14600
     },
     {
-      "id": "docs/page-writing",
-      "path": "ai/documentation/writing/page-writing.md",
-      "category": "reference",
-      "tags": ["documentation", "style-guide"],
+      "id": "docs/example-self-critique",
+      "path": "ai/documentation/example/example-self-critique.md",
+      "category": "specialized",
+      "tags": ["documentation", "examples", "quality"],
       "dependsOn": ["docs/example-authoring"],
+      "approxTokens": 800
+    },
+    {
+      "id": "docs/guide-writing",
+      "path": "ai/documentation/guide/page-writing.md",
+      "category": "specialized",
+      "tags": ["documentation", "guides", "style-guide"],
+      "dependsOn": ["foundation/start-here"],
       "approxTokens": 3200
     },
     {
-      "id": "docs/slop-identification",
-      "path": "ai/documentation/writing/slop-identification.md",
+      "id": "docs/api-authoring",
+      "path": "ai/documentation/api/api-authoring.md",
+      "category": "specialized",
+      "tags": ["documentation", "api-reference", "style-guide"],
+      "dependsOn": ["foundation/start-here"],
+      "approxTokens": 3000
+    },
+    {
+      "id": "docs/shared/slop-identification",
+      "path": "ai/documentation/shared/slop-identification.md",
       "category": "reference",
-      "tags": ["documentation", "editing"],
+      "tags": ["documentation", "editing", "quality"],
       "approxTokens": 3600
+    },
+    {
+      "id": "docs/shared/good-examples",
+      "path": "ai/documentation/shared/good-examples.md",
+      "category": "reference",
+      "tags": ["documentation", "style-guide", "writing"],
+      "approxTokens": 1000
+    },
+    {
+      "id": "docs/shared/link-grammar",
+      "path": "ai/documentation/shared/link-grammar.md",
+      "category": "reference",
+      "tags": ["documentation", "linking", "cross-references"],
+      "approxTokens": 1800
+    },
+    {
+      "id": "docs/shared/rewrite-instructions",
+      "path": "ai/documentation/shared/rewrite-instructions.md",
+      "category": "reference",
+      "tags": ["documentation", "editing", "refinement"],
+      "approxTokens": 1000
+    },
+    {
+      "id": "docs/refine/evaluation-persona",
+      "path": "ai/documentation/refine/evaluation-persona.md",
+      "category": "reference",
+      "tags": ["documentation", "evaluation", "persona"],
+      "approxTokens": 6500
     },
     {
       "id": "packages/reactivity",

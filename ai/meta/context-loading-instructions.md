@@ -111,7 +111,7 @@ Level 4: Verification & Refinement
 4.  **Code location** → foundations/codebase-navigation-guide.md
 5.  **Standalone package usage** → packages/ API documentation
 6.  **Step-by-step processes** → workflows/ task-specific procedures
-7.  **Documentation quality** → documentation/writing/ style guides
+7.  **Documentation quality** → documentation/shared/ style guides
 8.  **Self-Service Discovery** → Check `ai/meta/workflows-manifest.json` and `ai/meta/context-manifest.json` for a complete index of available resources.
 
 ---
