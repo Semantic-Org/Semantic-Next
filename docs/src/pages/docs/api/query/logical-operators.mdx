@@ -8,294 +8,148 @@ description: API reference for Query logical operator methods
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Logical operator methods in Query allow you to perform checks and filtering operations on sets of elements.
+Test conditions and check for element existence.
 
-## is
+## Methods
 
-Checks the current matched set of elements against a selector, element, or Query object and returns true if at least one of these elements matches the given arguments.
+### is
 
-### Syntax
 ```javascript
-$('selector').is(selector)
+$('selector').is(selector);
+$('selector').is(fn);
 ```
 
-### Parameters
-| Name     | Type               | Description                      |
-|----------|--------------------|----------------------------------|
-| selector | String or Function | A string containing a selector expression to match elements against or a function to test each element |
+Tests if any element matches the selector or passes the function test.
 
-### Returns
-`boolean` - `true` if at least one element matches, `false` otherwise.
+#### Parameters
 
-### Usage
+| Name     | Type     | Description                    |
+|----------|----------|--------------------------------|
+| selector | string   | CSS selector to test           |
+| fn       | function | Test function                  |
+
+#### Returns
+
+`true` if at least one element matches, `false` otherwise.
+
+#### Usage
+
 ```javascript
-if ($('#myElement').is('.active')) {
-  console.log('The element is active');
+if ($('p').is('.active')) {
+  console.log('At least one paragraph is active');
 }
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-is" direction="horizontal"></PlaygroundExample>
 
-## exists
+### not
 
-Checks if there are any elements in the current Query object.
-
-### Syntax
 ```javascript
-$('selector').exists()
+$('selector').not(selector);
+$('selector').not(fn);
 ```
 
-### Returns
-`boolean` - `true` if the Query object contains at least one element, `false` otherwise.
+Removes elements matching the selector or passing the function test.
 
-### Usage
-```javascript
-if ($('.my-element').exists()) {
-  console.log('The element exists in the DOM');
-} else {
-  console.log('The element does not exist in the DOM');
-}
-```
+#### Parameters
 
-> **Quick Check** `exists()` is a convenient way to check for the presence of elements without needing to compare the length property.
+| Name     | Type     | Description                            |
+|----------|----------|----------------------------------------|
+| selector | string   | CSS selector to exclude                |
+| fn       | function | Test function, return `true` to exclude |
 
-### Example
-<PlaygroundExample id="query-exists" direction="horizontal"></PlaygroundExample>
+#### Returns
 
+[Query object](/docs/api/query/constructor#the-query-object) containing remaining elements.
 
-## not
+#### Usage
 
-Remove elements from the set of matched elements.
-
-### Syntax
-```javascript
-$('selector').not(selector)
-```
-
-### Parameters
-| Name     | Type               | Description                      |
-|----------|--------------------|----------------------------------|
-| selector | String or Function | A string containing a selector expression to match elements against or a function to test each element |
-
-### Returns
-A new Query object with elements that do not match the selector.
-
-### Usage
 ```javascript
 $('div').not('.ignore').addClass('highlight');
 ```
 
-> **Inverse Selection** `not()` is particularly useful for excluding specific elements from a larger set based on various criteria.
+#### Example
 
-### Example
 <PlaygroundExample id="query-not" direction="horizontal"></PlaygroundExample>
 
-## contains
+### contains
 
-Checks if any element in the current set contains the specified target element or elements matching a selector.
-
-### Syntax
-
-#### Check by CSS Selector
 ```javascript
-$('selector').contains(selectorString)
+$('selector').contains(target);
 ```
 
-#### Check by Element Reference
+Tests if the first matched element contains the given element.
+
+#### Parameters
+
+| Name   | Type                          | Description                     |
+|--------|-------------------------------|---------------------------------|
+| target | string, Element, or Query     | Selector, element, or Query to check |
+
+#### Returns
+
+`true` if contained, `false` otherwise.
+
+#### Usage
+
+##### By Selector
+
 ```javascript
-$('selector').contains(element)
-```
-
-#### Check by Query Object
-```javascript
-$('selector').contains(queryObject)
-```
-
-### Parameters
-| Name     | Type               | Description                      |
-|----------|--------------------|----------------------------------|
-| selector | String &#124; Element &#124; Query | A CSS selector string, DOM element, or Query object to check for containment |
-
-### Returns
-`boolean` - `true` if any element in the set contains the specified target, `false` otherwise.
-
-### Usage
-
-#### String Selector
-```javascript
-// Check if a container has elements matching a selector
 if ($('.container').contains('.highlight')) {
   console.log('Container has highlighted elements');
 }
-
 ```
 
-#### Element Reference
+##### By Element
+
 ```javascript
-// Check if a specific element is contained
 const button = document.querySelector('button');
 if ($('.toolbar').contains(button)) {
   console.log('Button is inside the toolbar');
 }
 ```
 
-#### Query Object
+##### By Query Object
+
 ```javascript
-// Check if any selected elements are contained
 const $inputs = $('input[required]');
 if ($('form').contains($inputs)) {
   console.log('Form contains required inputs');
 }
 ```
 
-#### Shadow DOM
+##### Shadow DOM
 
 ```javascript
-// check if element is in web component
-const result = $$('web-component').contains('.shadow-element');
+$$('web-component').contains('.shadow-element');
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-contains" direction="horizontal"></PlaygroundExample>
 
-## eq
+### exists
 
-Returns a Query object containing only the element at the specified index.
-
-### Syntax
 ```javascript
-$('selector').eq(index)
+$('selector').exists();
 ```
 
-### Parameters
-| Name  | Type   | Description                           |
-|-------|--------|---------------------------------------|
-| index | Number | Zero-based index of the element to select |
+Checks if there are any elements in the Query object.
 
-### Returns
-A new Query object containing the element at the specified index.
+#### Returns
 
-### Usage
+`true` if at least one element exists, `false` otherwise.
+
+#### Usage
+
 ```javascript
-// Get the third paragraph (index 2)
-const thirdPara = $('p').eq(2);
-thirdPara.css('color', 'red');
-
-// Get the last paragraph using negative index
-const lastPara = $('p').eq(-1);
-lastPara.css('font-weight', 'bold');
+if ($('.my-element').exists()) {
+  console.log('Element found');
+}
 ```
 
-### Example
-<PlaygroundExample id="query-eq" direction="horizontal"></PlaygroundExample>
+#### Example
 
-## first
-
-Returns a Query object containing only the first element from the matched set.
-
-### Syntax
-```javascript
-$('selector').first()
-```
-
-### Returns
-A new Query object containing the first element.
-
-### Usage
-```javascript
-// Get the first list item
-const firstItem = $('li').first();
-firstItem.addClass('first-item');
-
-// Chain with other methods
-$('div').first().css('background', 'yellow').fadeIn();
-```
-
-### Example
-<PlaygroundExample id="query-first" direction="horizontal"></PlaygroundExample>
-
-## last
-
-Returns a Query object containing only the last element from the matched set.
-
-### Syntax
-```javascript
-$('selector').last()
-```
-
-### Returns
-A new Query object containing the last element.
-
-### Usage
-```javascript
-// Get the last list item
-const lastItem = $('li').last();
-lastItem.addClass('last-item');
-
-// Chain with other methods
-$('div').last().css('background', 'blue').fadeIn();
-```
-
-### Example
-<PlaygroundExample id="query-last" direction="horizontal"></PlaygroundExample>
-
-## slice
-
-Returns a Query object containing a subset of elements from the matched set, based on the specified range.
-
-### Syntax
-```javascript
-$('selector').slice(start, end)
-```
-
-### Parameters
-| Name  | Type   | Description                           |
-|-------|--------|---------------------------------------|
-| start | Number | Zero-based index to start the slice  |
-| end   | Number | (Optional) Zero-based index to end the slice |
-
-### Returns
-A new Query object containing the sliced elements.
-
-### Usage
-```javascript
-// Get elements 2 through 4 (indices 1, 2, 3)
-const middleItems = $('li').slice(1, 4);
-middleItems.addClass('middle-items');
-
-// Get all elements from index 2 onwards
-const fromSecond = $('li').slice(2);
-fromSecond.css('color', 'green');
-```
-
-### Example
-<PlaygroundExample id="query-slice" direction="horizontal"></PlaygroundExample>
-
-## end
-
-Returns to the previous set of elements in the traversal chain.
-
-### Syntax
-```javascript
-$('selector').find('childSelector').end()
-```
-
-### Returns
-The Query object that was active before the last traversal method was used.
-
-### Usage
-```javascript
-// Work with different levels in the DOM without multiple selections
-$('.card')
-  .addClass('highlighted')         // Add class to cards
-  .find('.title')                  // Switch to titles within cards
-    .css('font-weight', 'bold')    // Bold the titles
-    .end()                         // Go back to the card selection
-  .find('.content')                // Now find content within cards
-    .html('<p>New content</p>');   // Change the HTML
-```
-
-### Example
-<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>
-
+<PlaygroundExample id="query-exists" direction="horizontal"></PlaygroundExample>

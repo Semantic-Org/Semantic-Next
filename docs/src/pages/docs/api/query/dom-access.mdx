@@ -1,0 +1,117 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - DOM Access
+icon: box
+description: API reference for Query methods that access DOM elements and properties
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Access underlying DOM elements and their properties directly.
+
+## Elements
+
+### el
+
+```javascript
+$('selector').el();
+```
+
+Returns the first DOM element in the collection.
+
+#### Returns
+
+First DOM element, or `undefined` if empty.
+
+#### Usage
+
+```javascript
+const element = $('button').el();
+element.focus();
+```
+
+#### Example
+
+<PlaygroundExample id="query-el" direction="horizontal"></PlaygroundExample>
+
+### get
+
+```javascript
+$('selector').get();
+$('selector').get(index);
+```
+
+Gets DOM elements from the Query object. Returns native DOM elements, not Query objects.
+
+#### Parameters
+
+| Name  | Type   | Description                                     |
+|-------|--------|-------------------------------------------------|
+| index | number | Index of element to retrieve (supports negative) |
+
+#### Returns
+
+- **With index**: DOM element at the index, or `undefined` if out of range
+- **Without index**: Array of all DOM elements
+
+#### Usage
+
+##### Single Element
+
+```javascript
+const first = $('p').get(0);
+const last = $('p').get(-1);
+```
+
+##### All Elements
+
+```javascript
+const elements = $('p').get();
+elements.forEach(el => console.log(el.textContent));
+```
+
+#### Example
+
+<PlaygroundExample id="query-get" direction="horizontal"></PlaygroundExample>
+
+## Properties
+
+### prop
+
+```javascript
+$('selector').prop(name);
+$('selector').prop(name, value);
+```
+
+Gets or sets a DOM property on elements. Unlike attributes, properties reflect the current state (e.g., `checked`, `disabled`, `selectedIndex`).
+
+#### Parameters
+
+| Name  | Type   | Description              |
+|-------|--------|--------------------------|
+| name  | string | Property name            |
+| value | any    | Value to set             |
+
+#### Returns
+
+- **Getting**: Property value from the first element
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const isChecked = $('input[type="checkbox"]').prop('checked');
+```
+
+##### Set
+
+```javascript
+$('input[type="checkbox"]').prop('checked', true);
+```
+
+#### Example
+
+<PlaygroundExample id="query-prop" direction="horizontal"></PlaygroundExample>
