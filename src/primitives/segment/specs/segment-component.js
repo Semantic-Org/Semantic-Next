@@ -11,6 +11,7 @@ export default {
   "variations": [
     "attached",
     "padded",
+    "inline",
     "compact",
     "color",
     "circular",
@@ -33,6 +34,7 @@ export default {
     "loading",
     "attached",
     "padded",
+    "inline",
     "compact",
     "color",
     "circular",
@@ -50,6 +52,8 @@ export default {
     "bottom-attached": "attached",
     "padded": "padded",
     "very-padded": "padded",
+    "compact": "compact",
+    "very-compact": "compact",
     "red": "color",
     "orange": "color",
     "yellow": "color",
@@ -79,7 +83,8 @@ export default {
     "loading": "boolean",
     "attached": "string",
     "padded": "string",
-    "compact": "boolean",
+    "inline": "boolean",
+    "compact": "string",
     "color": "string",
     "circular": "boolean",
     "clearing": "boolean",
@@ -101,6 +106,10 @@ export default {
     "padded": [
       "padded",
       "very-padded"
+    ],
+    "compact": [
+      "compact",
+      "very-compact"
     ],
     "color": [
       "red",

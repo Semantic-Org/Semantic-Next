@@ -116,7 +116,7 @@
       "name": "Inline",
       "attribute": "inline",
       "usageLevel": 3,
-      "description": "can appear inline with other ",
+      "description": "can appear inline with other "
     },
     {
       "name": "Compact",
