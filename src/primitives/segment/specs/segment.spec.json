@@ -10,8 +10,7 @@
       "name": "Emphasis",
       "attribute": "emphasis",
       "includeAttributeClass": true,
-      "usageLevel": 2,
-      "description": "be emphasized in a layout",
+      "description": "be formatted to call attention to itself",
       "options": [
         {
           "name": "Primary",
@@ -28,7 +27,8 @@
           "value": "tertiary",
           "description": "have tertiary emphasis"
         }
-      ]
+      ],
+      "usageLevel": 2
     },
     {
       "name": "Vertical",
@@ -97,7 +97,6 @@
     {
       "name": "Padded",
       "attribute": "padded",
-      "usageLevel": 2,
       "description": "increase its padding",
       "options": [
         {
@@ -110,13 +109,14 @@
           "value": "very-padded",
           "description": "have extra increased padding"
         }
-      ]
+      ],
+      "usageLevel": 2
     },
     {
       "name": "Inline",
       "attribute": "inline",
       "usageLevel": 3,
-      "description": "can appear inline"
+      "description": "can appear inline with other "
     },
     {
       "name": "Compact",
@@ -142,58 +142,19 @@
       "description": "be colored",
       "includeAttributeClass": true,
       "options": [
-        {
-          "name": "Red",
-          "value": "red"
-        },
-        {
-          "name": "Orange",
-          "value": "orange"
-        },
-        {
-          "name": "Yellow",
-          "value": "yellow"
-        },
-        {
-          "name": "Olive",
-          "value": "olive"
-        },
-        {
-          "name": "Green",
-          "value": "green"
-        },
-        {
-          "name": "Teal",
-          "value": "teal"
-        },
-        {
-          "name": "Blue",
-          "value": "blue"
-        },
-        {
-          "name": "Violet",
-          "value": "violet"
-        },
-        {
-          "name": "Purple",
-          "value": "purple"
-        },
-        {
-          "name": "Pink",
-          "value": "pink"
-        },
-        {
-          "name": "Brown",
-          "value": "brown"
-        },
-        {
-          "name": "Grey",
-          "value": "grey"
-        },
-        {
-          "name": "Black",
-          "value": "black"
-        }
+        { "name": "Red", "value": "red" },
+        { "name": "Orange", "value": "orange" },
+        { "name": "Yellow", "value": "yellow" },
+        { "name": "Olive", "value": "olive" },
+        { "name": "Green", "value": "green" },
+        { "name": "Teal", "value": "teal" },
+        { "name": "Blue", "value": "blue" },
+        { "name": "Violet", "value": "violet" },
+        { "name": "Purple", "value": "purple" },
+        { "name": "Pink", "value": "pink" },
+        { "name": "Brown", "value": "brown" },
+        { "name": "Grey", "value": "grey" },
+        { "name": "Black", "value": "black" }
       ],
       "usageLevel": 2
     },
@@ -212,43 +173,43 @@
     {
       "name": "Floated",
       "attribute": "floated",
-      "usageLevel": 1,
-      "description": "align to the left or right of its container",
+      "description": "appear to the left or right of other content",
       "options": [
         {
           "name": "Left Floated",
           "value": "left-floated",
-          "description": "appear to the left of content"
+          "description": "float to the left"
         },
         {
           "name": "Right Floated",
           "value": "right-floated",
-          "description": "appear to the right of content"
+          "description": "float to the right"
         }
-      ]
+      ],
+      "usageLevel": 2
     },
     {
       "name": "Text Alignment",
       "attribute": "text-align",
-      "usageLevel": 2,
       "description": "have its text aligned",
       "options": [
         {
           "name": "Left Aligned",
           "value": "left-aligned",
-          "description": "align content to the left"
+          "description": "align text to the left"
         },
         {
           "name": "Center Aligned",
           "value": "center-aligned",
-          "description": "align content to the center"
+          "description": "center align text"
         },
         {
           "name": "Right Aligned",
           "value": "right-aligned",
-          "description": "align content to the right"
+          "description": "align text to the right"
         }
-      ]
+      ],
+      "usageLevel": 2
     },
     {
       "name": "Basic",
