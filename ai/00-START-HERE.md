@@ -45,7 +45,7 @@ Workflows contain required steps (testing, types, exports, documentation) that a
 
 ### Creating Documentation Examples
 **Need to:** Add examples to the documentation system
-**Start with:** [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md)
+**Start with:** [Example Authoring Guide](/ai/documentation/example/example-authoring.md)
 **Contains:** Metadata system, playground behavior, file organization, step-by-step workflows
 
 ### Package API Documentation
@@ -152,7 +152,7 @@ Context for building components for any application:
 
 ### **Documentation Creation Context**
 Context for creating examples and documentation:
-1. [Example Authoring Guide](/ai/documentation/authoring/example-authoring.md) - Complete example metadata system and docs requirements
+1. [Example Authoring Guide](/ai/documentation/example/example-authoring.md) - Complete example metadata system and docs requirements
 2. [Package Documentation](/ai/packages/) - Package API demonstrations and references
 3. [Component Generation Guide](/ai/guides/components/creating-components.md) - Component implementation patterns
 

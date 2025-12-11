@@ -8,143 +8,144 @@ description: API reference for Query iterator methods
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Iterator methods in Query allow you to loop through, manipulate, and filter sets of elements efficiently.
+Loop through matched elements, transform values, and access underlying DOM elements.
 
-## each
+## Methods
 
-Iterates over a Query object, executing a function for each matched element.
+### each
 
-### Syntax
 ```javascript
-$('selector').each(function(element, index) {
-  // Your code here
-})
+$('selector').each(callback);
 ```
 
-### Parameters
-| Name     | Type     | Description                           |
-|----------|----------|---------------------------------------|
-| function | Function | Function to execute for each element  |
+Executes a function for each matched element. Inside the callback, `this` refers to the current DOM element.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name     | Type     | Description                                          |
+|----------|----------|------------------------------------------------------|
+| callback | function | Function called with `(element, index)` for each element |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
 ```javascript
-$('div').each(function(el, index) {
-  console.log(`Div ${index}:`, el.textContent);
+$('p').each((el, index) => {
+  console.log(`Paragraph ${index}:`, el.textContent);
 });
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-each" direction="horizontal"></PlaygroundExample>
 
-> **Execution Context** Inside the callback, `this` refers to the current DOM element.
+### map
 
-## map
-
-Creates a new array with the results of calling a provided function on every element in the set.
-
-### Syntax
 ```javascript
-$('selector').map(function(element, index) {
-  // Your code here
-  return someValue;
-})
+$('selector').map(callback);
 ```
 
-### Parameters
-| Name     | Type     | Description                           |
-|----------|----------|---------------------------------------|
-| function | Function | Function to execute for each element  |
+Creates a new array with the results of calling a function on every matched element.
 
-### Returns
-A new array with the results of the function calls.
+#### Parameters
 
-### Usage
+| Name     | Type     | Description                                          |
+|----------|----------|------------------------------------------------------|
+| callback | function | Function called with `(element, index)`, returns a value |
+
+#### Returns
+
+Array of values returned by the callback.
+
+#### Usage
+
 ```javascript
-const textContents = $('p').map(function(el, index) {
-  return el.textContent;
-});
-console.log(textContents);
+const ids = $('button').map((el) => el.id);
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-map" direction="horizontal"></PlaygroundExample>
 
-> **Return Values** The `map()` method collects the return value of your callback function for each element into a new array.
+### filter
 
-## filter
-
-Creates a new Query object with all elements that pass the test implemented by the provided function.
-
-### Syntax
 ```javascript
-$('selector').filter(function(element, index) {
-  // Your code here
-  return true; // or false
-})
+$('selector').filter(selector);
+$('selector').filter(fn);
 ```
 
-### Parameters
-| Name     | Type               | Description                           |
-|----------|--------------------|---------------------------------------|
-| function | Function or String | Function or selector to test elements |
+Reduces the set to elements matching the selector or passing the function test.
 
-### Returns
-A new Query object with the filtered elements.
+> See also [filter in DOM Traversal](/docs/api/query/dom-traversal#filter) for selector-based filtering patterns.
 
-### Usage
+#### Parameters
+
+| Name     | Type              | Description                              |
+|----------|-------------------|------------------------------------------|
+| selector | string            | CSS selector to match                    |
+| fn       | function          | Test function, return `true` to include  |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing filtered elements.
+
+#### Usage
+
+##### By Selector
+
 ```javascript
-const visibleElements = $('div').filter(function(el) {
-  return $(el).css('display') !== 'none';
-});
+$('p').filter('.highlight').css('background', 'yellow');
 ```
 
-> **Flexible Filtering** You can pass either a function or a selector string to `filter()`. When using a function, return `true` to include the element, `false` to exclude it.
+##### By Function
 
-## get
-
-Retrieve the DOM element at the specified index, or all DOM elements if no index is provided.
-
-### Syntax
 ```javascript
-$('selector').get(index)
-$('selector').get()
+$('div').filter((el) => $(el).css('display') !== 'none');
 ```
 
-### Parameters
-| Name  | Type   | Description                           |
-|-------|--------|---------------------------------------|
-| index | Number | (Optional) Zero-based index of the element to retrieve |
+#### Example
 
-### Returns
-- **With index**: The DOM element at the specified index, or `undefined` if the index is out of range
-- **Without index**: An array of all DOM elements in the Query object
+<PlaygroundExample id="query-filter" direction="horizontal"></PlaygroundExample>
 
-### Usage
+### get
 
-#### Get Single Element
 ```javascript
-// Get the first paragraph element
-const firstPara = $('p').get(0);
-console.log(firstPara.textContent);
-
-// Get the last paragraph element
-const lastPara = $('p').get(-1);
-console.log(lastPara.textContent);
+$('selector').get();
+$('selector').get(index);
 ```
 
-#### Get All Elements
+Retrieves DOM elements from the Query object. Returns native DOM elements, not Query objects.
+
+#### Parameters
+
+| Name  | Type   | Description                                     |
+|-------|--------|-------------------------------------------------|
+| index | number | Index of element to retrieve (supports negative) |
+
+#### Returns
+
+- **With index**: DOM element at the index, or `undefined` if out of range
+- **Without index**: Array of all DOM elements
+
+#### Usage
+
+##### Single Element
+
 ```javascript
-// Get all paragraph elements as an array
-const allParas = $('p').get();
-allParas.forEach(para => {
-  console.log(para.textContent);
-});
+const first = $('p').get(0);
+const last = $('p').get(-1);
 ```
 
-### Example
+##### All Elements
+
+```javascript
+const elements = $('p').get();
+elements.forEach(el => console.log(el.textContent));
+```
+
+#### Example
+
 <PlaygroundExample id="query-get" direction="horizontal"></PlaygroundExample>
-
-> **Native DOM** The `get()` method returns native DOM elements, not Query objects. Use this when you need to work with the raw DOM API.

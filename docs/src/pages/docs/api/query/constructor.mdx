@@ -1,0 +1,209 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Constructor
+icon: plus-circle
+description: Creating Query collections from selectors, elements, and HTML
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+The Query constructor creates a collection from selectors, elements, HTML strings, or other Query objects.
+
+## Syntax
+
+```javascript
+$(selector, options)
+$$(selector, options)
+new Query(selector, options)
+```
+
+### Parameters
+
+| Name     | Type                                        | Description                    |
+|----------|--------------------------------------------|--------------------------------|
+| selector | string \| Element \| NodeList \| Array\<Element\> \| Window | The selector or elements to query |
+| options  | object                                     | Configuration options          |
+
+### Options
+
+| Name         | Type    | Default   | Description                                      |
+|--------------|---------|-----------|--------------------------------------------------|
+| root         | Element | document  | The root element to start the query from         |
+| pierceShadow | boolean | false     | Whether to pierce through Shadow DOM boundaries  |
+
+## Input Types
+
+### CSS Selectors
+
+```javascript
+const $divs = $('div');
+const $buttons = $('.btn.primary');
+const $inputs = $('form input[type="text"]');
+```
+
+Selector queries use `querySelectorAll` internally.
+
+<PlaygroundExample id="query-dom" direction="horizontal"></PlaygroundExample>
+
+### HTML Strings
+
+Pass HTML to create new elements:
+
+```javascript
+const $card = $('<div class="card">Content</div>');
+const $list = $('<ul><li>One</li><li>Two</li></ul>');
+```
+
+<PlaygroundExample id="query-creating-dom" direction="horizontal"></PlaygroundExample>
+
+### DOM Elements
+
+```javascript
+const $body = $(document.body);
+const $element = $(document.getElementById('app'));
+```
+
+### NodeList or HTMLCollection
+
+```javascript
+const $paragraphs = $(document.querySelectorAll('p'));
+const $forms = $(document.forms);
+```
+
+### Element Arrays
+
+```javascript
+const $elements = $([document.body, document.head]);
+```
+
+### DocumentFragment
+
+```javascript
+const fragment = document.createDocumentFragment();
+fragment.appendChild(document.createElement('div'));
+const $content = $(fragment);
+```
+
+### Window / Global
+
+```javascript
+const $window = $(window);
+```
+
+> **Memory** Query uses a proxy for `window` and `globalThis` to avoid storing the full global object in memory.
+
+### Existing Query Object
+
+```javascript
+const $div = $('div');
+const $copy = $($div);
+```
+
+## Shadow DOM
+
+Use `$$` or the `pierceShadow` option to query across shadow DOM boundaries:
+
+```javascript
+// Using $$
+const $shadowContent = $$('my-component .inner');
+
+// Using pierceShadow option
+const $shadowContent = $('my-component .inner', { pierceShadow: true });
+```
+
+<PlaygroundExample id="shadow-dom" direction="horizontal"></PlaygroundExample>
+
+### Slotted Content
+
+```javascript
+// Find slotted elements across shadow boundaries
+const $slotted = $$('my-component [slot="header"]');
+
+// Get slot content via method
+const headerHTML = $('my-component').getSlot('header');
+```
+
+## Custom Root
+
+Scope queries to a specific element using the `root` option:
+
+```javascript
+const $container = $('#app');
+const $buttons = $('button', { root: $container.el() });
+```
+
+Common pattern inside web components:
+
+```javascript
+class MyComponent extends HTMLElement {
+  $(selector) {
+    return $(selector, { root: this.shadowRoot });
+  }
+}
+```
+
+> **SUI Components** Semantic UI components use this pattern internally. See [Using Query in Components](/docs/guides/components/dom#using-query-in-components).
+
+## The Query Object
+
+The constructor returns a Query object containing the matched elements.
+
+### Properties
+
+| Property | Type   | Description |
+|----------|--------|-------------|
+| length   | number | Number of elements in the collection |
+| selector | string | The original selector (if applicable) |
+| options  | object | The options used to create the Query |
+
+### Chaining
+
+Query methods return the Query object for chaining:
+
+```javascript
+$('div')
+  .addClass('highlight')
+  .css('color', 'red')
+  .on('click', () => console.log('Clicked'));
+```
+
+<PlaygroundExample id="query-chaining" direction="horizontal"></PlaygroundExample>
+
+### Empty Collections
+
+Empty Query objects allow chaining to continue without errors:
+
+```javascript
+$('.non-existent')
+  .addClass('foo')
+  .css('color', 'red'); // No error, no effect
+```
+
+### Array-like Access
+
+Query objects support bracket notation, but array methods like `push` or `pop` are not available:
+
+```javascript
+const firstDiv = $('div')[0]; // DOM element
+const allDivs = $('div').get(); // Array of elements
+```
+
+### Return Value Conventions
+
+Query methods follow consistent patterns:
+
+**Getters** return the value for a single element, or an array of values for multiple elements:
+
+```javascript
+$('#one').width();        // 200
+$('.many').width();       // [200, 150, 300]
+```
+
+**Setters** return the Query object for chaining:
+
+```javascript
+$('div').width(100).height(50).addClass('sized');
+```
+
+These conventions apply across all Query method categories. Individual method documentation focuses on what is returned rather than repeating this pattern.

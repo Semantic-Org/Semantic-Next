@@ -3,7 +3,7 @@
 > **For:** AI agents creating examples and documentation
 > **Purpose:** Complete reference of all available CSS design tokens
 > **Source:** Verified from `/dist/semantic-ui.css` (canonical compiled tokens)
-> **Related:** [CSS Token Guide](./token-usage.md) • [Documentation Authoring](/ai/documentation/authoring/example-authoring.md)
+> **Related:** [CSS Token Guide](./token-usage.md) • [Example Authoring](/ai/documentation/example/example-authoring.md)
 
 ---
 

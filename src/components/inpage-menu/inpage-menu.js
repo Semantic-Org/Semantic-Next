@@ -162,10 +162,12 @@ const createComponent = ({ self, state, isServer, signal, reaction, el, dispatch
     if (element) {
       const targetPosition = element.offsetTop + offset;
       state.currentItem.set(itemID);
-      self.scrollToPosition(targetPosition, {
-        onSamePage() {
-          dispatchEvent('samePageActive', { element, itemID });
-        },
+      requestAnimationFrame(() => {
+        self.scrollToPosition(targetPosition, {
+          onSamePage() {
+            dispatchEvent('samePageActive', { element, itemID });
+          },
+        });
       });
       dispatchEvent('active', { itemID });
     }

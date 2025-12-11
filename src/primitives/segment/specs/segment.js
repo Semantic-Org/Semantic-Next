@@ -1,4 +1,3 @@
-// Auto-generated from segment.json
 export default {
   "uiType": "element",
   "name": "Segment",
