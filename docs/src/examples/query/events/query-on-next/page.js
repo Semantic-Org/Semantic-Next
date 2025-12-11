@@ -1,14 +1,15 @@
 import { $ } from '@semantic-ui/query';
 
-const addLog = (text) => {
-  $('.log').append(`<div>${text}</div>`);
+const stepCount = $('.step').count();
+let step = 1;
+
+const runSteps = async () => {
+  while (step <= stepCount) {
+    await $('.next').onNext('click');
+    $('.step').eq(step - 1).addClass('done');
+    step++;
+  }
+  $('.next').addClass('disabled').text('Steps Complete');
 };
 
-$('.click').on('click', async function() {
-  addLog('Clicked');
-
-  // will always run once after reentry into button
-  await $(this).onNext('mouseleave');
-  await $(this).onNext('mouseenter');
-  addLog('You re-entered the button');
-});
+runSteps();

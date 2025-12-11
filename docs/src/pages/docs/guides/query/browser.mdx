@@ -80,20 +80,17 @@ $$('ui-component .content').text('Updated content');
 If you're working in an environment with multiple libraries that use the `$` symbol (like jQuery), Query provides ways to avoid conflicts.
 
 
-### No-Conflict Mode
+### Using a Custom Alias
 
-Similar to jQuery, Query provides a `noConflict` method to yield control of the global variables:
+Create a custom alias instead of overwriting global variables:
 
 ```javascript
-import { exportGlobals } from '@semantic-ui/query';
+import { useAlias } from '@semantic-ui/query';
 
-// Export Query to global scope
-exportGlobals();
+// Create a custom alias without touching globals
+const $q = useAlias();
 
-// Store a reference and release the global variables
-const $q = $.noConflict();
-
-// Now use $q instead of $
+// Use your alias
 $q('.content').addClass('active');
 ```
 

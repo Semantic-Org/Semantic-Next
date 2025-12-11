@@ -8,517 +8,405 @@ description: API reference for Query methods related to DOM traversal
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The DOM Traversal methods allow you to get from one element to another based off their relationship. Query supports piercing shadow DOM boundaries when using `$$`
+Navigate the DOM tree relative to matched elements. Use `$$` to pierce shadow DOM boundaries.
 
-## find
+## Descendants
 
-Finds descendant elements that match the specified selector.
+### find
 
-### Syntax
 ```javascript
-$('selector').find(childSelector)
+$('selector').find(selector);
 ```
 
-### Parameters
-| Name          | Type   | Description                           |
-|---------------|--------|---------------------------------------|
-| childSelector | string | A selector to match descendant elements |
+Finds descendant elements matching the selector.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the matched elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match descendants |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing matched elements.
+
+#### Usage
+
 ```javascript
-// Find all paragraphs within a div
 $('div').find('p').addClass('highlight');
 ```
 
-#### Shadow DOM
-```javascript
-$$('my-component').find('p').addClass('highlight');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-find" direction="horizontal"></PlaygroundExample>
 
-## parent
+### children
 
-Gets the parent of each element in the current set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').parent(parentSelector)
+$('selector').children();
+$('selector').children(selector);
 ```
 
-### Parameters
-| Name           | Type   | Description                                    |
-|----------------|--------|------------------------------------------------|
-| parentSelector | string | (Optional) A selector to filter parent elements |
+Gets direct children, optionally filtered by a selector.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the parent elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter children |
 
-#### Standard
-```javascript
-// Get the parent of a button
-$('button').parent().addClass('button-group');
-```
+#### Returns
 
-#### Shadow DOM
-```javascript
-$$('my-component menu-item').parent().addClass('menu-styling');
-```
+[Query object](/docs/api/query/constructor#the-query-object) containing child elements.
 
-### Example
-<PlaygroundExample id="query-parent" direction="horizontal"></PlaygroundExample>
-
-## children
-
-Gets the children of each element in the set of matched elements.
-
-### Syntax
-```javascript
-$('selector').children(childSelector)
-```
-
-### Parameters
-| Name          | Type   | Description                                     |
-|---------------|--------|-------------------------------------------------|
-| childSelector | string | (Optional) A selector to filter children elements |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the child elements.
-
-### Usage
+#### Usage
 
 ```javascript
-// Get all direct child list items of an unordered list
 $('ul').children('li').css('color', 'red');
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-children" direction="horizontal"></PlaygroundExample>
 
+## Ancestors
 
-## siblings
+### parent
 
-Gets the siblings of each element in the set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').siblings(siblingSelector)
+$('selector').parent();
+$('selector').parent(selector);
 ```
 
-### Parameters
-| Name             | Type   | Description                                       |
-|------------------|--------|---------------------------------------------------|
-| siblingSelector  | string | (Optional) A selector to filter sibling elements   |
+Gets the parent of each element, optionally filtered by a selector.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the sibling elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter parents |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing parent elements.
+
+#### Usage
+
 ```javascript
-// Get all siblings of a selected element
-$('.selected').siblings().addClass('dimmed');
+$('button').parent().addClass('button-group');
 ```
 
-#### Shadow DOM
+#### Example
+
+<PlaygroundExample id="query-parent" direction="horizontal"></PlaygroundExample>
+
+### closest
+
 ```javascript
-$$('my-component').find('.shadow-selected').siblings().addClass('shadow-dimmed');
+$('selector').closest(selector);
+$('selector').closest(selector, { returnAll: true });
 ```
 
-### Example
-<PlaygroundExample id="query-siblings" direction="horizontal"></PlaygroundExample>
+Finds the closest ancestor matching the selector. With `returnAll: true`, returns all matching ancestors.
 
-## closest
+#### Parameters
 
-Finds the closest ancestor element that matches the selector, or optionally all matching ancestors.
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match ancestors |
+| options.returnAll | boolean | Return all matches instead of closest |
 
-### Syntax
+#### Returns
 
-#### Get Closest Ancestor
+[Query object](/docs/api/query/constructor#the-query-object) containing ancestor element(s).
+
+#### Usage
+
 ```javascript
-$('selector').closest(ancestorSelector)
-```
-
-#### Get All Matching Ancestors
-```javascript
-$('selector').closest(ancestorSelector, { returnAll: true })
-```
-
-### Parameters
-| Name              | Type    | Description                           |
-|-------------------|---------|---------------------------------------|
-| ancestorSelector  | string  | A selector to match ancestor elements |
-| options           | object  | (Optional) Options to control behavior |
-| options.returnAll | boolean | If true, returns all matching ancestors instead of just the closest |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the closest matching ancestor, or all matching ancestors if `returnAll: true`.
-
-### Usage
-
-#### Standard - Closest Ancestor
-```javascript
-// Find the closest form ancestor
 $('input').closest('form').submit();
 ```
 
-#### Get All Matching Ancestors
-```javascript
-// Find all div ancestors
-$('span').closest('div', { returnAll: true }).addClass('ancestor');
-```
+#### Example
 
-#### Shadow DOM
-```javascript
-$$('my-component').find('input').closest('.shadow-form').addClass('validated');
-```
-
-### Example
 <PlaygroundExample id="query-closest" direction="horizontal"></PlaygroundExample>
 
-## closestAll
+### closestAll
 
-Gets all ancestor elements that match the selector, traversing up the entire DOM tree. This is a convenient alias for `closest(selector, { returnAll: true })`.
-
-### Syntax
 ```javascript
-$('selector').closestAll(ancestorSelector)
+$('selector').closestAll(selector);
 ```
 
-### Parameters
-| Name              | Type   | Description                           |
-|-------------------|--------|---------------------------------------|
-| ancestorSelector  | string | A selector to match ancestor elements |
+Gets all ancestor elements matching the selector.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing all matching ancestor elements.
+> **Alias for** `closest(selector, { returnAll: true })`
 
-### Usage
+#### Parameters
 
-#### Basic Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match ancestors |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing all matching ancestors (closest to farthest).
+
+#### Usage
+
 ```javascript
-// Find all container ancestors
 $('span').closestAll('.container').addClass('highlight');
 ```
 
-#### Working with Multiple Elements
+## Siblings
+
+### siblings
+
 ```javascript
-// Find all form ancestors for all inputs
-$('input').closestAll('form').addClass('has-inputs');
+$('selector').siblings();
+$('selector').siblings(selector);
 ```
 
-#### Shadow DOM Aware
+Gets all siblings, optionally filtered by a selector.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter siblings |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing sibling elements.
+
+#### Usage
+
 ```javascript
-// Find all shadow DOM containers
-$$('input').closestAll('.shadow-container').addClass('shadow-highlight');
+$('.selected').siblings().addClass('dimmed');
 ```
 
-### Notes
-- Returns elements in DOM order (closest to farthest)
-- Automatically removes duplicates when multiple elements share the same ancestor
-- Respects the `pierceShadow` option for shadow DOM traversal
+#### Example
 
-## next
+<PlaygroundExample id="query-siblings" direction="horizontal"></PlaygroundExample>
 
-Gets the immediately following sibling of each element in the set of matched elements.
+### next
 
-### Syntax
 ```javascript
-$('selector').next(nextSelector)
+$('selector').next();
+$('selector').next(selector);
 ```
 
-### Parameters
-| Name          | Type   | Description                                            |
-|---------------|--------|--------------------------------------------------------|
-| nextSelector  | string | (Optional) A selector to filter the next element        |
+Gets the immediately following sibling, optionally filtered.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the next sibling elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing next sibling element(s).
+
+#### Usage
+
 ```javascript
-// Get the next sibling of a paragraph
-$('p').next().css('margin-top', '20px');
+$('h2').next().css('margin-top', '20px');
 ```
 
-#### Shadow DOM
-```javascript
-$$('my-component').find('.shadow-paragraph').next().css('margin-top', '10px');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-next" direction="horizontal"></PlaygroundExample>
 
-## prev
+### prev
 
-Gets the immediately preceding sibling of each element in the set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').prev(prevSelector)
+$('selector').prev();
+$('selector').prev(selector);
 ```
 
-### Parameters
-| Name          | Type   | Description                                            |
-|---------------|--------|--------------------------------------------------------|
-| prevSelector  | string | (Optional) A selector to filter the previous element    |
+Gets the immediately preceding sibling, optionally filtered.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the previous sibling elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing previous sibling element(s).
+
+#### Usage
+
 ```javascript
-// Get the previous sibling of a heading
-$('h2').prev().css('color', 'red');
+$('h2').prev().css('margin-bottom', '10px');
 ```
 
-#### Shadow DOM
-```javascript
-$$('my-component').find('.shadow-heading').prev().css('margin-bottom', '5px');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-prev" direction="horizontal"></PlaygroundExample>
 
-## end
+## Filtering
 
-Returns to the previous set of elements in the traversal chain.
+### filter
 
-### Syntax
 ```javascript
-$('selector').find('childSelector').end()
+$('selector').filter(selector);
+$('selector').filter(fn);
 ```
 
-### Parameters
-None
+Reduces the set to elements matching the selector or passing the function test.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) that was active before the last traversal method was used.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match |
+| fn | function | Test function, return `true` to include |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing filtered elements.
+
+#### Usage
+
+##### By Selector
 
 ```javascript
-// Allows working with different levels in the DOM without making multiple selections
-$('.card')
-  .addClass('highlighted')         // Add class to cards
-  .find('.title')                  // Switch to titles within cards
-    .css('font-weight', 'bold')    // Bold the titles
-    .end()                         // Go back to the card selection
-  .find('.content')                // Now find content within cards
-    .html('<p>New content</p>');   // Change the HTML
-```
-
-### Example
-<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>
-
-## filter
-
-Reduce the set of matched elements to those that match the selector or pass the function's test.
-
-### Syntax
-```javascript
-$('selector').filter(filterSelector)
-$('selector').filter(function)
-```
-
-### Parameters
-| Name           | Type     | Description                              |
-|----------------|----------|------------------------------------------|
-| filterSelector | string   | A selector to filter elements            |
-| function       | function | A function to test each element against  |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the filtered elements.
-
-### Usage
-
-#### Using Selector
-```javascript
-// Filter paragraphs to only those with class 'highlight'
 $('p').filter('.highlight').css('background', 'yellow');
 ```
 
-#### Using Function
+##### By Function
+
 ```javascript
-// Filter list items to only those with text containing 'important'
-$('li').filter(function() {
-  return $(this).text().includes('important');
-}).addClass('priority');
+$('li').filter((el) => $(el).text().includes('important')).addClass('priority');
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-filter" direction="horizontal"></PlaygroundExample>
 
-## not
+### not
 
-Remove elements from the set of matched elements that match the selector or pass the function's test.
-
-### Syntax
 ```javascript
-$('selector').not(notSelector)
-$('selector').not(function)
+$('selector').not(selector);
+$('selector').not(fn);
 ```
 
-### Parameters
-| Name        | Type     | Description                              |
-|-------------|----------|------------------------------------------|
-| notSelector | string   | A selector to exclude elements           |
-| function    | function | A function to test each element against  |
+Removes elements matching the selector or passing the function test.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the remaining elements.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to exclude |
+| fn | function | Test function, return `true` to exclude |
 
-#### Using Selector
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing remaining elements.
+
+#### Usage
+
+##### By Selector
+
 ```javascript
-// Select all paragraphs except those with class 'exclude'
 $('p').not('.exclude').css('color', 'blue');
 ```
 
-#### Using Function
+##### By Function
+
 ```javascript
-// Select all list items except empty ones
-$('li').not(function() {
-  return $(this).text().trim() === '';
-}).addClass('visible');
+$('li').not((el) => $(el).text().trim() === '').addClass('visible');
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-not" direction="horizontal"></PlaygroundExample>
 
-## is
+### is
 
-Check if any of the matched elements match the given selector.
-
-### Syntax
 ```javascript
-$('selector').is(testSelector)
-$('selector').is(function)
+$('selector').is(selector);
+$('selector').is(fn);
 ```
 
-### Parameters
-| Name         | Type     | Description                              |
-|--------------|----------|------------------------------------------|
-| testSelector | string   | A selector to test elements against      |
-| function     | function | A function to test each element against  |
+Tests if any element matches the selector or passes the function test.
 
-### Returns
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to test |
+| fn | function | Test function |
+
+#### Returns
+
 `true` if at least one element matches, `false` otherwise.
 
-### Usage
+#### Usage
 
-#### Using Selector
 ```javascript
-// Check if any paragraph has class 'active'
 if ($('p').is('.active')) {
   console.log('At least one paragraph is active');
 }
 ```
 
-#### Using Function
-```javascript
-// Check if any input is empty
-if ($('input').is(function() {
-  return $(this).val() === '';
-})) {
-  console.log('At least one input is empty');
-}
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-is" direction="horizontal"></PlaygroundExample>
 
-## index
+### contains
 
-Return the position of the first element within the jQuery object relative to its sibling elements.
-
-### Syntax
 ```javascript
-$('selector').index()
-$('selector').index(element)
+$('selector').contains(element);
 ```
 
-### Parameters
-| Name    | Type                    | Description                              |
-|---------|-------------------------|------------------------------------------|
-| element | string/element/jQuery   | (Optional) Element to find index of      |
+Tests if the first matched element contains the given element.
 
-### Returns
-The index position of the element(s).
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| element | Element | Element to check for |
 
-#### Get Index of First Element
+#### Returns
+
+`true` if contained, `false` otherwise.
+
+#### Usage
+
 ```javascript
-// Get the index of the first selected element
-const index = $('li.selected').index();
-console.log(`Selected item is at index: ${index}`);
-```
-
-#### Get Index of Specific Element
-```javascript
-// Get the index of a specific element within the selection
-const specificIndex = $('li').index($('li.highlight'));
-console.log(`Highlighted item is at index: ${specificIndex}`);
-```
-
-### Example
-<PlaygroundExample id="query-index" direction="horizontal"></PlaygroundExample>
-
-## contains
-
-Check if the first element contains the given element.
-
-### Syntax
-```javascript
-$('selector').contains(element)
-```
-
-### Parameters
-| Name    | Type          | Description                              |
-|---------|---------------|------------------------------------------|
-| element | DOM element   | The element to check for containment     |
-
-### Returns
-`true` if the element is contained, `false` otherwise.
-
-### Usage
-
-#### Basic Containment Check
-```javascript
-// Check if a div contains a specific paragraph
-const $div = $('#container');
-const $paragraph = $('#content-para');
-
-if ($div.contains($paragraph[0])) {
-  console.log('Container holds the paragraph');
+if ($('#container').contains(event.target)) {
+  console.log('Click was inside container');
 }
 ```
 
-#### Dynamic Containment Check
-```javascript
-// Check if any card contains clicked element
-$('.card').each(function() {
-  if ($(this).contains(event.target)) {
-    console.log('Click happened inside this card');
-  }
-});
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-contains" direction="horizontal"></PlaygroundExample>
 
+## Chain
+
+### end
+
+```javascript
+$('selector').find('child').end();
+```
+
+Returns to the previous Query set in the chain.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) before the last traversal.
+
+#### Usage
+
+```javascript
+$('.card')
+  .find('.title').css('font-weight', 'bold').end()
+  .find('.content').html('<p>New</p>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>
