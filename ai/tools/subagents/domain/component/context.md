@@ -23,7 +23,7 @@
 ### Component-Specific Context
 1. **Domain Expertise**
    - `ai/guides/components/creating-components.md` - Component creation patterns and best practices
-   - `ai/documentation/authoring/example-authoring.md` - How documentation components work and are structured
+   - `ai/documentation/example/example-authoring.md` - How documentation components work and are structured
    - `ai/foundations/quick-reference.md` - API syntax and patterns
    - `ai/guides/html/style-guide.md` - Template structure and semantic markup conventions
    - `ai/guides/styling/css-guide.md` - Styling architecture, nesting, and responsive patterns

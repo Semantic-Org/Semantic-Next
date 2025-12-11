@@ -3,7 +3,7 @@
 > **For:** AI agents creating or editing guide pages in the Semantic UI documentation  
 > **Prerequisites:** Understanding of documentation structure and template syntax  
 > **Scope:** Template guides, component guides, feature documentation  
-> **Related:** [Example Authoring Guide](../authoring/example-authoring.md) • [Rewrite Instructions](./rewrite-instructions.md)  
+> **Related:** [Example Authoring Guide](../example/example-authoring.md) • [Rewrite Instructions](../shared/rewrite-instructions.md)
 > **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
 
 ---

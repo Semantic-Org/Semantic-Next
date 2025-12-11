@@ -7,7 +7,7 @@
 Before starting this workflow, load:
 - `/ai/packages/utils.md` - Utils package structure and patterns
 - `/ai/docs/example-metadata-guide.md` - Example creation requirements
-- `/ai/documentation/authoring/example-authoring.md` - Package example patterns
+- `/ai/documentation/example/example-authoring.md` - Package example patterns
 
 ## Workflow Overview
 
