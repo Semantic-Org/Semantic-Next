@@ -83,8 +83,8 @@
     {
       "name": "Spacing",
       "attribute": "spacing",
-      "description": "adjust vertical spacing",
       "usageLevel": 1,
+      "description": "adjust vertical spacing",
       "options": [
         {
           "name": "Mini",

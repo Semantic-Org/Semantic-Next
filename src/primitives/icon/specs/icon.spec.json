@@ -314,13 +314,26 @@
     {
       "name": "Disabled",
       "attribute": "disabled",
-      "description": "appear disabled",
+      "includeAttributeClass": true,
+      "description": "have interactions disabled",
+      "options": [
+        {
+          "name": "Disabled",
+          "value": "disabled",
+          "description": "disable interactions"
+        },
+        {
+          "name": "Clickable Disabled",
+          "value": "clickable-disabled",
+          "description": "allow interactions but appear disabled"
+        }
+      ],
       "usageLevel": 1
     },
     {
       "name": "Loading",
       "attribute": "loading",
-      "description": "be used as a simple loader",
+      "description": "indicate it is loading content",
       "usageLevel": 1
     }
   ],
@@ -337,9 +350,10 @@
     },
     {
       "name": "Colored",
-      "value": "color",
-      "description": "be colored",
+      "attribute": "color",
+      "includeAttributeClass": true,
       "usageLevel": 2,
+      "description": "be colored",
       "options": [
         {
           "name": "Red",
@@ -400,6 +414,11 @@
           "name": "Grey",
           "value": "grey",
           "description": "be grey"
+        },
+        {
+          "name": "Slate",
+          "value": "slate",
+          "description": "be slate"
         },
         {
           "name": "Black",

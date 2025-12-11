@@ -46,22 +46,35 @@
     {
       "name": "Hover",
       "attribute": "hover",
-      "description": "hovered"
+      "description": "be hovered"
     },
     {
       "name": "Focus",
-      "attribute": "focused",
-      "description": "focused by the keyboard"
+      "attribute": "focus",
+      "description": "be focused by the keyboard"
     },
     {
       "name": "Active",
       "attribute": "active",
-      "description": "activated"
+      "description": "be activated"
     },
     {
       "name": "Disabled",
       "attribute": "disabled",
-      "description": "disable interactions"
+      "includeAttributeClass": true,
+      "description": "have interactions disabled",
+      "options": [
+        {
+          "name": "Disabled",
+          "value": "disabled",
+          "description": "disable interactions"
+        },
+        {
+          "name": "Clickable Disabled",
+          "value": "clickable-disabled",
+          "description": "allow interactions but appear disabled"
+        }
+      ]
     }
   ]
 }

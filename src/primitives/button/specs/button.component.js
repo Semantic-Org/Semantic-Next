@@ -12,20 +12,19 @@ export default {
     "badge"
   ],
   "types": [
-    "icon-only",
+    "emphasis",
     "link",
     "styled",
+    "toggle",
     "animated"
   ],
   "variations": [
-    "emphasis",
     "floated",
     "fluid",
     "compact",
     "size",
     "circular",
     "attached",
-    "toggle",
     "type",
     "color",
     "social",
@@ -44,6 +43,7 @@ export default {
     "loading"
   ],
   "settings": [
+    "icon-only",
     "icon-after",
     "href"
   ],
@@ -51,9 +51,10 @@ export default {
     "icon",
     "image",
     "badge",
-    "icon-only",
+    "emphasis",
     "link",
     "styled",
+    "toggle",
     "animated",
     "hover",
     "pressed",
@@ -61,14 +62,12 @@ export default {
     "active",
     "disabled",
     "loading",
-    "emphasis",
     "floated",
     "fluid",
     "compact",
     "size",
     "circular",
     "attached",
-    "toggle",
     "type",
     "color",
     "social",
@@ -77,10 +76,13 @@ export default {
     "negative",
     "info",
     "transparent",
+    "icon-only",
     "icon-after",
     "href"
   ],
   "optionAttributes": {
+    "primary": "emphasis",
+    "secondary": "emphasis",
     "subtle": "styled",
     "flat": "styled",
     "outline": "styled",
@@ -90,8 +92,6 @@ export default {
     "fade-animated": "animated",
     "disabled": "disabled",
     "clickable-disabled": "disabled",
-    "primary": "emphasis",
-    "secondary": "emphasis",
     "left-floated": "floated",
     "right-floated": "floated",
     "compact": "compact",
@@ -142,9 +142,10 @@ export default {
     "icon": "string",
     "image": "string",
     "badge": "string",
-    "icon-only": "boolean",
+    "emphasis": "string",
     "link": "boolean",
     "styled": "string",
+    "toggle": "boolean",
     "animated": "string",
     "hover": "boolean",
     "pressed": "boolean",
@@ -152,14 +153,12 @@ export default {
     "active": "boolean",
     "disabled": "string",
     "loading": "boolean",
-    "emphasis": "string",
     "floated": "string",
     "fluid": "boolean",
     "compact": "string",
     "size": "string",
     "circular": "boolean",
     "attached": "string",
-    "toggle": "boolean",
     "type": "string",
     "color": "string",
     "social": "string",
@@ -168,10 +167,15 @@ export default {
     "negative": "string",
     "info": "string",
     "transparent": "boolean",
+    "icon-only": "boolean",
     "icon-after": "boolean",
     "href": "string"
   },
   "allowedValues": {
+    "emphasis": [
+      "primary",
+      "secondary"
+    ],
     "styled": [
       "subtle",
       "flat",
@@ -186,10 +190,6 @@ export default {
     "disabled": [
       "disabled",
       "clickable-disabled"
-    ],
-    "emphasis": [
-      "primary",
-      "secondary"
     ],
     "floated": [
       "left-floated",
@@ -261,15 +261,16 @@ export default {
   },
   "attributeClasses": [
     "icon",
+    "emphasis",
     "styled",
     "animated",
     "disabled",
-    "emphasis",
     "attached",
     "color",
     "social"
   ],
   "defaultValues": {
+    "icon-only": false,
     "icon-after": false,
     "href": ""
   },

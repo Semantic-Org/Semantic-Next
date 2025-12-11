@@ -39,10 +39,26 @@
   ],
   "types": [
     {
-      "name": "Icon Only",
-      "attribute": "icon-only",
-      "description": "be displayed without text",
-      "exampleCode": "<ui-button icon=\"save\" icon-only></ui-button>\n<ui-button icon=\"hard-drive\" icon-only></ui-button>"
+      "name": "Emphasis",
+      "attribute": "emphasis",
+      "description": "be emphasized in a layout",
+      "usageLevel": 1,
+      "includeAttributeClass": true,
+      "separateExamples": true,
+      "options": [
+        {
+          "name": "Primary",
+          "value": "primary",
+          "description": "be emphasized as the first action that should be taken",
+          "exampleCode": "\n            <ui-button primary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          "
+        },
+        {
+          "name": "Secondary",
+          "value": "secondary",
+          "description": "be emphasized as a secondary option",
+          "exampleCode": "\n            <ui-button secondary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          "
+        }
+      ]
     },
     {
       "name": "Link",
@@ -79,6 +95,13 @@
           "description": "only show styling when hovered"
         }
       ]
+    },
+    {
+      "name": "Toggle",
+      "attribute": "toggle",
+      "description": "emphasize its active state",
+      "usageLevel": 3,
+      "exampleCode": "\n        <ui-button toggle>Inactive</ui-button>\n        <ui-button toggle active>Active</ui-button>\n      "
     },
     {
       "name": "Animated",
@@ -158,25 +181,6 @@
     }
   ],
   "variations": [
-    {
-      "name": "Emphasis",
-      "attribute": "emphasis",
-      "description": "be emphasized in a layout",
-      "usageLevel": 1,
-      "includeAttributeClass": true,
-      "options": [
-        {
-          "name": "Primary",
-          "value": "primary",
-          "description": "be emphasized as the first action that should be taken"
-        },
-        {
-          "name": "Secondary",
-          "value": "secondary",
-          "description": "be emphasized as a secondary option"
-        }
-      ]
-    },
     {
       "name": "Floated",
       "attribute": "floated",
@@ -312,13 +316,6 @@
           "exampleCode": "\n          <ui-segments horizontal>\n            <ui-segment>Text to the left</ui-segment>\n            <ui-button right-attached icon=\"user\">View Profile</ui-button>\n          </ui-segments>\n        "
         }
       ]
-    },
-    {
-      "name": "Toggle",
-      "attribute": "toggle",
-      "description": "emphasize its active state",
-      "usageLevel": 3,
-      "exampleCode": "\n        <ui-button toggle>Inactive</ui-button>\n        <ui-button toggle active>Active</ui-button>\n      "
     },
     {
       "name": "Type",
@@ -541,6 +538,13 @@
     }
   ],
   "settings": [
+    {
+      "name": "Icon Only",
+      "type": "boolean",
+      "attribute": "icon-only",
+      "defaultValue": false,
+      "description": "Enable to remove spacing for text"
+    },
     {
       "name": "Icon After",
       "type": "boolean",

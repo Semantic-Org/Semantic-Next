@@ -17,7 +17,7 @@ export default {
   ],
   "states": [
     "hover",
-    "focused",
+    "focus",
     "active",
     "disabled"
   ],
@@ -28,10 +28,14 @@ export default {
     "href",
     "value",
     "hover",
-    "focused",
+    "focus",
     "active",
     "disabled"
   ],
+  "optionAttributes": {
+    "disabled": "disabled",
+    "clickable-disabled": "disabled"
+  },
   "propertyTypes": {
     "icon": "string",
     "label": "string",
@@ -39,11 +43,18 @@ export default {
     "href": "string",
     "value": "string",
     "hover": "boolean",
-    "focused": "boolean",
+    "focus": "boolean",
     "active": "boolean",
-    "disabled": "boolean"
+    "disabled": "string"
+  },
+  "allowedValues": {
+    "disabled": [
+      "disabled",
+      "clickable-disabled"
+    ]
   },
   "attributeClasses": [
-    "icon"
+    "icon",
+    "disabled"
   ]
 };

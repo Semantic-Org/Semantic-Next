@@ -46,6 +46,28 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
 
+  // check if a hyphenated string matches an attribute-value pair
+  // e.g. "padding-small" or "small-padding" -> { attribute: "padding", value: "small" }
+  const matchCompoundAttribute = (hyphenatedValue) => {
+    if (!hyphenatedValue || !hyphenatedValue.includes('-')) {
+      return;
+    }
+    const parts = hyphenatedValue.split('-');
+    // only handle simple two-part compounds for now
+    if (parts.length !== 2) {
+      return;
+    }
+    const [first, second] = parts;
+    // try both orderings: attribute-value and value-attribute
+    const orderings = [[first, second], [second, first]];
+    for (const [maybeAttr, maybeValue] of orderings) {
+      const allowedValues = get(componentSpec, `allowedValues.${maybeAttr}`);
+      if (allowedValues && inArray(maybeValue, allowedValues)) {
+        return { matchingAttribute: maybeAttr, matchingValue: maybeValue };
+      }
+    }
+  };
+
   const checkSpecForAllowedValue = ({ attribute, optionValue, optionAttributeValue }) => {
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
@@ -69,8 +91,12 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
       (currentValue) => get(componentSpec.optionAttributes, currentValue),
     );
 
-    // this attribute value does not seem to match any in spec
+    // fallback: check if this is a compound attribute like "padding-small"
     if (!matchingValue) {
+      const compoundMatch = matchCompoundAttribute(optionValue);
+      if (compoundMatch) {
+        return compoundMatch;
+      }
       return { matchingAttribute: undefined, matchingValue: undefined };
     }
 

@@ -1,7 +1,10 @@
 import {
   SIZE_VARIATION,
-  DISABLED_STATE,
-  LOADING_STATE,
+  COLORED_VARIATION,
+  COLOR_OPTIONS,
+  modifyVariation,
+  withUsageLevel,
+  getStates,
 } from '@semantic-ui/specs';
 
 export default {
@@ -316,20 +319,7 @@ export default {
       ],
     },
   ],
-  states: [
-    {
-      name: 'Disabled',
-      attribute: 'disabled',
-      description: 'appear disabled',
-      usageLevel: 1,
-    },
-    {
-      name: 'Loading',
-      attribute: 'loading',
-      description: 'be used as a simple loader',
-      usageLevel: 1,
-    },
-  ],
+  states: getStates(['disabled', 'loading']).map(state => withUsageLevel(state, 1)),
   variations: [
     {
       name: 'Link',
@@ -341,79 +331,10 @@ export default {
       description: 'be fitted without any space to the left or right of it.',
       usageLevel: 1,
     },
-    {
-      name: 'Colored',
-      value: 'color',
-      description: 'be colored',
+    modifyVariation(COLORED_VARIATION, {
       usageLevel: 2,
-      options: [
-        {
-          name: 'Red',
-          value: 'red',
-          description: 'be red',
-        },
-        {
-          name: 'Orange',
-          value: 'orange',
-          description: 'be orange',
-        },
-        {
-          name: 'Yellow',
-          value: 'yellow',
-          description: 'be yellow',
-        },
-        {
-          name: 'Olive',
-          value: 'olive',
-          description: 'be olive',
-        },
-        {
-          name: 'Green',
-          value: 'green',
-          description: 'be green',
-        },
-        {
-          name: 'Teal',
-          value: 'teal',
-          description: 'be teal',
-        },
-        {
-          name: 'Blue',
-          value: 'blue',
-          description: 'be blue',
-        },
-        {
-          name: 'Violet',
-          value: 'violet',
-          description: 'be violet',
-        },
-        {
-          name: 'Purple',
-          value: 'purple',
-          description: 'be purple',
-        },
-        {
-          name: 'Pink',
-          value: 'pink',
-          description: 'be pink',
-        },
-        {
-          name: 'Brown',
-          value: 'brown',
-          description: 'be brown',
-        },
-        {
-          name: 'Grey',
-          value: 'grey',
-          description: 'be grey',
-        },
-        {
-          name: 'Black',
-          value: 'black',
-          description: 'be black',
-        },
-      ],
-    },
+      options: [...COLOR_OPTIONS, { name: 'Black', value: 'black', description: 'be black' }],
+    }),
     SIZE_VARIATION,
     {
       name: 'Spin',

@@ -10,7 +10,7 @@ export default {
   "variations": [
     "link",
     "fitted",
-    "colored",
+    "color",
     "size",
     "spin",
     "inverted"
@@ -29,7 +29,7 @@ export default {
     "loading",
     "link",
     "fitted",
-    "colored",
+    "color",
     "size",
     "spin",
     "inverted",
@@ -332,19 +332,22 @@ export default {
     "svelte-mark": "icon",
     "angular-mark": "icon",
     "next-mark": "icon",
-    "red": "colored",
-    "orange": "colored",
-    "yellow": "colored",
-    "olive": "colored",
-    "green": "colored",
-    "teal": "colored",
-    "blue": "colored",
-    "violet": "colored",
-    "purple": "colored",
-    "pink": "colored",
-    "brown": "colored",
-    "grey": "colored",
-    "black": "colored",
+    "disabled": "disabled",
+    "clickable-disabled": "disabled",
+    "red": "color",
+    "orange": "color",
+    "yellow": "color",
+    "olive": "color",
+    "green": "color",
+    "teal": "color",
+    "blue": "color",
+    "violet": "color",
+    "purple": "color",
+    "pink": "color",
+    "brown": "color",
+    "grey": "color",
+    "slate": "color",
+    "black": "color",
     "mini": "size",
     "tiny": "size",
     "small": "size",
@@ -356,11 +359,11 @@ export default {
   },
   "propertyTypes": {
     "icon": "string",
-    "disabled": "boolean",
+    "disabled": "string",
     "loading": "boolean",
     "link": "boolean",
     "fitted": "boolean",
-    "colored": "string",
+    "color": "string",
     "size": "string",
     "spin": "boolean",
     "inverted": "boolean",
@@ -665,7 +668,11 @@ export default {
       "angular-mark",
       "next-mark"
     ],
-    "colored": [
+    "disabled": [
+      "disabled",
+      "clickable-disabled"
+    ],
+    "color": [
       "red",
       "orange",
       "yellow",
@@ -678,6 +685,7 @@ export default {
       "pink",
       "brown",
       "grey",
+      "slate",
       "black"
     ],
     "size": [
@@ -691,6 +699,10 @@ export default {
       "massive"
     ]
   },
+  "attributeClasses": [
+    "disabled",
+    "color"
+  ],
   "defaultValues": {
     "href": "",
     "target": ""

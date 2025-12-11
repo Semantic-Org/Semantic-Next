@@ -1,3 +1,7 @@
+import {
+  getStates,
+} from '@semantic-ui/specs';
+
 export default {
   uiType: 'element',
   name: 'Menu Item',
@@ -40,26 +44,5 @@ export default {
       description: 'can specify a value',
     },
   ],
-  states: [
-    {
-      name: 'Hover',
-      attribute: 'hover',
-      description: 'hovered',
-    },
-    {
-      name: 'Focus',
-      attribute: 'focused',
-      description: 'focused by the keyboard',
-    },
-    {
-      name: 'Active',
-      attribute: 'active',
-      description: 'activated',
-    },
-    {
-      name: 'Disabled',
-      attribute: 'disabled',
-      description: 'disable interactions',
-    },
-  ],
+  states: getStates(['hover', 'focus', 'active', 'disabled']),
 };
