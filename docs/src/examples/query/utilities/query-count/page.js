@@ -1,8 +1,15 @@
 import { $ } from '@semantic-ui/query';
 
-// Count different element collections
-$('.total').text($('span').count());
-$('.fruits').text($('.fruit').count());
-$('.vegetables').text($('.vegetable').count());
-$('.headings').text($('h3').count());
-$('.none').text($('.nonexistent').count());
+const updateCount = () => {
+  $('.count').text($('.item').count());
+};
+
+$('.add').on('click', () => {
+  $('.items').append('<div class="item">Item</div>');
+  updateCount();
+});
+
+$('.remove').on('click', () => {
+  $('.item').last().remove();
+  updateCount();
+});

@@ -5,343 +5,133 @@ title: Query - Attributes
 icon: tag
 description: API reference for Query methods related to attribute manipulation
 ---
+
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-Attribute methods in Query allow you to get, set, and remove attributes on DOM elements.
+Get, set, and remove HTML attributes and data attributes on elements.
 
-## attr
+## HTML Attributes
+
+### attr
+
+```javascript
+$('selector').attr(name);
+$('selector').attr(name, value);
+$('selector').attr({ name: value, ... });
+```
 
 Gets or sets attributes on elements.
 
+#### Parameters
 
-### Syntax
+| Name  | Type           | Description                          |
+|-------|----------------|--------------------------------------|
+| name  | string         | The attribute name                   |
+| value | string         | The value to set                     |
 
-#### Get
-```javascript
-$('selector').attr(attributeName)
-```
+#### Returns
 
-#### Set
-```javascript
-$('selector').attr(attributeName, value)
-$('selector').attr({attribute1: value1, attribute2: value2})
-```
+- **Getting**: The attribute value, or array of values for multiple elements
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
 
-### Parameters
-| Name          | Type   | Description           |
-|---------------|----- |-----------------------|
-| attributeName | string | The name of the attribute to get |
+#### Example
 
-
-### Returns
-
-#### Get
-[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
-
-#### Set
-- **Single Element** The attribute value of that element.
-- **Multiple Elements** An array of attribute value , one for each matched element.
-
-### Usage
-
-#### Get an Attribute
-```javascript
-// Get an attribute value
-const href = $('a').attr('href');
-console.log(href);
-```
-
-#### Set an Attribute
-```javascript
-// Set a single attribute
-$('img').attr('alt', 'Profile picture');
-```
-
-#### Set Multiple Attributes
-```javascript
-// Set multiple attributes
-$('input').attr({
-  'type': 'text',
-  'placeholder': 'Enter your name'
-});
-```
-
-### Example
 <PlaygroundExample id="query-attr" direction="horizontal"></PlaygroundExample>
 
-## removeAttr
+### removeAttr
 
-Removes an attribute from each element in the set of matched elements.
-
-> **Boolean Attributes** This is helpful for boolean attributes where setting a value like `checked="false"` will actually result in checked being set.
-
-### Syntax
 ```javascript
-$('selector').removeAttr(attributeName)
+$('selector').removeAttr(name);
 ```
 
-### Parameters
-| Name          | Type   | Description                 |
-|---------------|--------|-----------------------------|
-| attributeName | string | The name of the attribute to remove |
+Removes an attribute from matched elements.
 
-### Returns
-[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
+> **Boolean Attributes** Use this for boolean attributes where `checked="false"` would still be truthy.
 
-### Usage
-```javascript
-// Remove the 'disabled' attribute from all buttons
-$('button').removeAttr('disabled');
-```
+#### Parameters
 
-### Example
+| Name | Type   | Description                      |
+|------|--------|----------------------------------|
+| name | string | The attribute name to remove     |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 <PlaygroundExample id="query-removeattr" direction="horizontal"></PlaygroundExample>
 
-## addAttr
+### addAttr
 
-Adds one or more attributes with empty string values to elements. This is a shorthand for setting boolean attributes like `disabled`, `readonly`, `required`, etc., which is equivalent to calling `attr(attribute, '')`.
-
-### Syntax
-
-#### Add Single Attribute
 ```javascript
-$('selector').addAttr(attributeName)
+$('selector').addAttr(name);
+$('selector').addAttr([name1, name2, ...]);
 ```
 
-#### Add Multiple Attributes
-```javascript
-$('selector').addAttr([attribute1, attribute2, ...])
-```
+Adds boolean attributes with empty string values. Equivalent to `attr(name, '')`.
 
-### Parameters
-| Name       | Type              | Description                                          |
-|------------|-------------------|------------------------------------------------------|
-| attributes | string \| string[] | A single attribute name or array of attribute names |
+#### Parameters
 
-### Returns
-[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
+| Name | Type               | Description                              |
+|------|--------------------|------------------------------------------|
+| name | string \| string[] | Attribute name or array of names         |
 
-### Usage
+#### Returns
 
-#### Add a Single Boolean Attribute
-```javascript
-// Add the 'disabled' attribute to all inputs
-$('input').addAttr('disabled');
-// Equivalent to: $('input').attr('disabled', '')
-```
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
-#### Add Multiple Boolean Attributes
-```javascript
-// Add multiple attributes at once
-$('input').addAttr(['disabled', 'readonly', 'required']);
-// Each attribute is set with an empty string value
-```
+#### Example
 
-#### Working with Form Elements
-```javascript
-// Disable form elements
-$('button').addAttr('disabled');
-$('input').addAttr(['readonly', 'required']);
-$('select').addAttr('disabled');
-```
-
-#### Working with ARIA Attributes
-```javascript
-// Add ARIA attributes for accessibility
-$('.modal').addAttr(['aria-hidden', 'aria-modal']);
-$('.loading').addAttr('aria-busy');
-```
-
-#### Method Chaining
-```javascript
-// Chain multiple operations
-$('input')
-  .addAttr('required')
-  .addClass('form-control')
-  .attr('placeholder', 'Required field');
-```
-
-#### Comparison with attr()
-```javascript
-// These are equivalent:
-$('input').addAttr('disabled');
-$('input').attr('disabled', '');
-
-// For multiple attributes:
-$('input').addAttr(['disabled', 'readonly']);
-// is equivalent to:
-$('input').attr('disabled', '').attr('readonly', '');
-```
-
-### Example
 <PlaygroundExample id="query-addattr" direction="horizontal"></PlaygroundExample>
 
-### Notes
+## Data Attributes
 
-- `addAttr` is specifically designed for boolean attributes that only need to be present (with empty string values)
-- For attributes that require specific values, use `attr()` instead
-- Common boolean attributes include: `disabled`, `readonly`, `required`, `checked`, `selected`, `hidden`, `autofocus`, `multiple`
-- The method works with any attribute name - it simply sets the value to an empty string
-- To remove these attributes, use `removeAttr()`
+### data
 
-## data
-
-Gets or sets data attributes on elements. Data attributes are HTML attributes that start with `data-` and are commonly used to store custom data.
-
-### Syntax
-
-#### Get All Data Attributes
 ```javascript
-$('selector').data()
+$('selector').data();
+$('selector').data(key);
+$('selector').data(key, value);
 ```
 
-#### Get Specific Data Attribute
-```javascript
-$('selector').data(key)
-```
+Gets or sets `data-*` attributes. Keys use camelCase and are converted to kebab-case in the DOM.
 
-#### Set Data Attribute
-```javascript
-$('selector').data(key, value)
-```
+#### Parameters
 
-### Parameters
-| Name  | Type   | Description                    |
-|-------|--------|---------------------------------|
-| key   | string | The data attribute key (without 'data-' prefix) |
-| value | string | The value to set               |
+| Name  | Type   | Description                                   |
+|-------|--------|-----------------------------------------------|
+| key   | string | The data key (without `data-` prefix)         |
+| value | string | The value to set                              |
 
-### Returns
+#### Returns
 
-#### Get All Data Attributes
-- **Single Element** An object containing all data attributes.
-- **Multiple Elements** An array of objects, one for each matched element.
+- **Getting all**: Object with all data attributes (or array for multiple elements)
+- **Getting key**: The value (or array for multiple elements)
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
 
-#### Get Specific Data Attribute
-- **Single Element** The data attribute value.
-- **Multiple Elements** An array of values, one for each matched element.
+#### Example
 
-#### Set Data Attribute
-[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
-
-### Usage
-
-#### Get All Data Attributes
-```javascript
-// HTML: <div data-user-id="123" data-role="admin"></div>
-const allData = $('div').data();
-console.log(allData); // { userId: "123", role: "admin" }
-```
-
-#### Get Specific Data Attribute
-```javascript
-// HTML: <div data-user-id="123"></div>
-const userId = $('div').data('userId');
-console.log(userId); // "123"
-```
-
-#### Set Data Attribute
-```javascript
-// Set a data attribute
-$('div').data('theme', 'dark');
-// Results in: <div data-theme="dark"></div>
-```
-
-#### Working with Multiple Elements
-```javascript
-// HTML: 
-// <div data-id="1" data-name="Alice"></div>
-// <div data-id="2" data-name="Bob"></div>
-
-// Get specific attribute from multiple elements
-const ids = $('div').data('id');
-console.log(ids); // ["1", "2"]
-
-// Get all data from multiple elements
-const allData = $('div').data();
-console.log(allData); // [{ id: "1", name: "Alice" }, { id: "2", name: "Bob" }]
-
-// Set data on multiple elements
-$('div').data('active', 'true');
-// Both divs now have data-active="true"
-```
-
-### Example
 <PlaygroundExample id="query-data" direction="horizontal"></PlaygroundExample>
 
-### Notes
-
-- Data attribute keys are automatically converted from camelCase to kebab-case in the HTML (e.g., `userId` becomes `data-user-id`)
-- When retrieving data, kebab-case attribute names are converted back to camelCase object keys
-- Data attributes are always stored and retrieved as strings
-
-## removeData
-
-Removes data attributes from elements in the current set. This method provides a convenient way to remove one or more data attributes at once.
-
-### Syntax
+### removeData
 
 ```javascript
-$('selector').removeData(keys)
+$('selector').removeData(keys);
 ```
 
-### Parameters
-| Name | Type              | Description                                                        |
-|------|-------------------|---------------------------------------------------------------------|
-| keys | string \| string[] | A space-separated string or array of data attribute keys to remove |
+Removes data attributes from elements.
 
-### Returns
-[Query object](/docs/guides/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name | Type               | Description                                      |
+|------|--------------------|--------------------------------------------------|
+| keys | string \| string[] | Space-separated string or array of keys to remove |
 
-#### Remove a Single Data Attribute
-```javascript
-// HTML: <div data-user-id="123" data-role="admin"></div>
-$('div').removeData('userId');
-// Results in: <div data-role="admin"></div>
-```
+#### Returns
 
-#### Remove Multiple Data Attributes (Space-Separated)
-```javascript
-// HTML: <div data-user-id="123" data-role="admin" data-theme="dark"></div>
-$('div').removeData('userId role');
-// Results in: <div data-theme="dark"></div>
-```
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
-#### Remove Multiple Data Attributes (Array)
-```javascript
-// HTML: <div data-user-id="123" data-role="admin" data-theme="dark"></div>
-$('div').removeData(['userId', 'role']);
-// Results in: <div data-theme="dark"></div>
-```
+#### Example
 
-#### Working with Multiple Elements
-```javascript
-// HTML:
-// <div data-temp="hot" data-status="active"></div>
-// <div data-temp="cold" data-status="inactive"></div>
-
-// Remove data attributes from all matched elements
-$('div').removeData('temp');
-// Both divs now have only data-status attribute
-```
-
-#### Method Chaining
-```javascript
-// Chain multiple operations
-$('div')
-  .data('newKey', 'newValue')
-  .removeData('oldKey')
-  .addClass('updated');
-```
-
-### Example
 <PlaygroundExample id="query-removedata" direction="horizontal"></PlaygroundExample>
-
-### Notes
-
-- Keys are automatically converted from camelCase to kebab-case (e.g., `userId` targets `data-user-id`)
-- Space-separated strings allow removing multiple attributes in a single call
-- Non-existent keys are silently ignored
-- The method returns the Query instance for chaining

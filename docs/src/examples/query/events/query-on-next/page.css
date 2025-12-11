@@ -1,20 +1,21 @@
-ui-button {
-  margin: 10px 5px;
-}
-
-.log {
-  margin: 20px 0;
-  padding: 15px;
-  background: var(--standard-5);
+.steps {
+  display: inline-flex;
+  margin-bottom: var(--16px);
   border: var(--border);
   border-radius: var(--border-radius);
-  font-family: monospace;
-  min-height: 100px;
+  overflow: hidden;
+}
 
-  div {
-    margin: 5px 0;
-    padding: 5px;
-    background: var(--standard-10);
-    border-radius: var(--border-radius);
+.step {
+  padding: var(--8px) var(--16px);
+  border-right: var(--border);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &.done {
+    background: var(--green-background);
+    color: var(--green-text-color);
   }
 }

@@ -16,37 +16,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
-  .item-btn {
-    padding: 4px 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: var(--border-radius);
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    cursor: pointer;
-    
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  }
 }
 
 .controls {
   display: flex;
   gap: 10px;
   margin: 20px 0;
-  
-  button {
-    padding: 8px 16px;
-    border: 1px solid var(--standard-20);
-    border-radius: var(--border-radius);
-    background: var(--background);
-    cursor: pointer;
-    
-    &:hover {
-      background: var(--standard-5);
-    }
-  }
 }
 
 .output {

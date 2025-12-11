@@ -1,40 +1,13 @@
 import { $ } from '@semantic-ui/query';
 
-const updateDisplay = ($filtered) => {
-  // Reset all items
-  $('.item').removeClass('filtered hidden');
-
-  // Highlight filtered items
-  $filtered.addClass('filtered');
-
-  // Hide non-filtered items
-  $('.item').not('.filtered').addClass('hidden');
-
-  // Update count
-  $('.count').text($filtered.length);
-};
-
-$('.filter-active').on('click', () => {
-  // Filter using CSS selector
-  const $filtered = $('.item').filter('.active');
-  updateDisplay($filtered);
+$('.completed').on('click', () => {
+  const $done = $('.item').filter('.done');
+  $('.item').addClass('dim');
+  $done.removeClass('dim');
+  $('.count').text($done.length);
 });
 
-$('.filter-important').on('click', () => {
-  // Filter using attribute selector
-  const $filtered = $('.item').filter('[data-type="important"]');
-  updateDisplay($filtered);
-});
-
-$('.filter-function').on('click', () => {
-  // Filter using function
-  const $filtered = $('.item').filter((el) => {
-    return $(el).hasClass('active') && $(el).attr('data-type') !== 'normal';
-  });
-  updateDisplay($filtered);
-});
-
-$('.reset-btn').on('click', () => {
-  $('.item').removeClass('filtered hidden');
-  $('.count').text($('.item').length);
+$('.all').on('click', () => {
+  $('.item').removeClass('dim');
+  $('.count').text(4);
 });

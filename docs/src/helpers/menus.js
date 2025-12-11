@@ -125,6 +125,7 @@ const subCategorySortOrder = {
     'Cloning',
     'Errors',
     'Regex',
+    'Debug',
   ],
 };
 
@@ -787,8 +788,12 @@ export const sidebarMenuAPI = [
     icon: 'mouse-pointer',
     pages: [
       {
-        name: 'Basic Usage',
-        url: '/docs/api/query/basic',
+        name: 'Setup',
+        url: '/docs/api/query/setup',
+      },
+      {
+        name: 'Constructor',
+        url: '/docs/api/query/constructor',
       },
       {
         name: 'Attributes',
@@ -807,7 +812,7 @@ export const sidebarMenuAPI = [
         url: '/docs/api/query/css',
       },
       {
-        name: 'Dimensions & Size',
+        name: 'Dimensions',
         url: '/docs/api/query/dimensions',
       },
       {
@@ -833,6 +838,10 @@ export const sidebarMenuAPI = [
       {
         name: 'Logical Operators',
         url: '/docs/api/query/logical-operators',
+      },
+      {
+        name: 'Position & Intersection',
+        url: '/docs/api/query/position',
       },
       {
         name: 'Utilities',
