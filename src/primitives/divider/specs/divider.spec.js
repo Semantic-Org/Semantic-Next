@@ -1,234 +1,231 @@
-// Auto-generated from divider.spec.json
 export default {
-  "uiType": "element",
-  "name": "Divider",
-  "description": "A divider visually segments content into groups",
-  "tagName": "ui-divider",
-  "exportName": "UIDivider",
-  "content": [
+  uiType: 'element',
+  name: 'Divider',
+  description: 'A divider visually segments content into groups',
+  tagName: 'ui-divider',
+  exportName: 'UIDivider',
+  content: [
     {
-      "name": "Text",
-      "attribute": "text",
-      "description": "include centered text",
-      "usageLevel": 1,
-      "exampleCode": "<ui-divider text=\"Or\"></ui-divider>"
+      name: 'Text',
+      attribute: 'text',
+      description: 'include centered text',
+      usageLevel: 1,
+      exampleCode: `<ui-divider text="Or"></ui-divider>`,
     },
     {
-      "name": "Icon",
-      "attribute": "icon",
-      "couplesWith": [
-        "ui-icon"
-      ],
-      "description": "include a centered icon",
-      "usageLevel": 2,
-      "exampleCode": "<ui-divider icon=\"tag\"></ui-divider>"
+      name: 'Icon',
+      attribute: 'icon',
+      couplesWith: ['ui-icon'],
+      description: 'include a centered icon',
+      usageLevel: 2,
+      exampleCode: `<ui-divider icon="tag"></ui-divider>`,
     },
     {
-      "name": "Image",
-      "attribute": "image",
-      "description": "include an image",
-      "usageLevel": 3,
-      "exampleCode": "<ui-divider image=\"/images/avatar/small/jenny.jpg\" text=\"Jenny\"></ui-divider>"
-    }
+      name: 'Image',
+      attribute: 'image',
+      description: 'include an image',
+      usageLevel: 3,
+      exampleCode: `<ui-divider image="/images/avatar/small/jenny.jpg" text="Jenny"></ui-divider>`,
+    },
   ],
-  "types": [
+  types: [
     {
-      "name": "Vertical",
-      "attribute": "vertical",
-      "description": "divide content vertically",
-      "usageLevel": 3,
-      "exampleCode": "<ui-divider vertical></ui-divider>"
+      name: 'Vertical',
+      attribute: 'vertical',
+      description: 'divide content vertically',
+      usageLevel: 3,
+      exampleCode: `<ui-divider vertical></ui-divider>`,
     },
     {
-      "name": "Styled",
-      "attribute": "styled",
-      "description": "be styled with different visual treatments",
-      "usageLevel": 2,
-      "options": [
+      name: 'Styled',
+      attribute: 'styled',
+      description: 'be styled with different visual treatments',
+      usageLevel: 2,
+      options: [
         {
-          "name": "Solid",
-          "value": "solid",
-          "description": "use a solid line"
+          name: 'Solid',
+          value: 'solid',
+          description: 'use a solid line',
         },
         {
-          "name": "Dashed",
-          "value": "dashed",
-          "description": "use a dashed line"
+          name: 'Dashed',
+          value: 'dashed',
+          description: 'use a dashed line',
         },
         {
-          "name": "Dotted",
-          "value": "dotted",
-          "description": "use a dotted line"
+          name: 'Dotted',
+          value: 'dotted',
+          description: 'use a dotted line',
         },
         {
-          "name": "Fade",
-          "value": "fade",
-          "description": "fade from transparent at edges"
+          name: 'Fade',
+          value: 'fade',
+          description: 'fade from transparent at edges',
         },
         {
-          "name": "Soft",
-          "value": "soft",
-          "description": "use shadow with no hard line"
+          name: 'Soft',
+          value: 'soft',
+          description: 'use shadow with no hard line',
         },
         {
-          "name": "Double",
-          "value": "double",
-          "description": "use a double line"
-        }
+          name: 'Double',
+          value: 'double',
+          description: 'use a double line',
+        },
       ],
-      "exampleCode": "<ui-divider styled=\"fade\"></ui-divider>"
-    }
+      exampleCode: `<ui-divider styled="fade"></ui-divider>`,
+    },
   ],
-  "states": [],
-  "variations": [
+  states: [],
+  variations: [
     {
-      "name": "Spacing",
-      "attribute": "spacing",
-      "description": "adjust vertical spacing",
-      "usageLevel": 1,
-      "options": [
+      name: 'Spacing',
+      attribute: 'spacing',
+      description: 'adjust vertical spacing',
+      usageLevel: 1,
+      options: [
         {
-          "name": "Mini",
-          "value": "mini",
-          "description": "appear with minimal spacing"
+          name: 'Mini',
+          value: 'mini',
+          description: 'appear with minimal spacing',
         },
         {
-          "name": "Tiny",
-          "value": "tiny",
-          "description": "appear with very small spacing"
+          name: 'Tiny',
+          value: 'tiny',
+          description: 'appear with very small spacing',
         },
         {
-          "name": "Small",
-          "value": "small",
-          "description": "appear with small spacing"
+          name: 'Small',
+          value: 'small',
+          description: 'appear with small spacing',
         },
         {
-          "name": "Medium",
-          "value": "medium",
-          "description": "appear with normal spacing"
+          name: 'Medium',
+          value: 'medium',
+          description: 'appear with normal spacing',
         },
         {
-          "name": "Large",
-          "value": "large",
-          "description": "appear with large spacing"
+          name: 'Large',
+          value: 'large',
+          description: 'appear with large spacing',
         },
         {
-          "name": "Big",
-          "value": "big",
-          "description": "appear with big spacing"
+          name: 'Big',
+          value: 'big',
+          description: 'appear with big spacing',
         },
         {
-          "name": "Huge",
-          "value": "huge",
-          "description": "appear with huge spacing"
+          name: 'Huge',
+          value: 'huge',
+          description: 'appear with huge spacing',
         },
         {
-          "name": "Massive",
-          "value": "massive",
-          "description": "appear with massive spacing"
-        }
-      ]
-    },
-    {
-      "name": "Raised",
-      "attribute": "raised",
-      "description": "add depth with a dual-line effect",
-      "usageLevel": 3,
-      "exampleCode": "<ui-divider raised></ui-divider>"
-    },
-    {
-      "name": "Align",
-      "attribute": "align",
-      "description": "align text or icon position",
-      "usageLevel": 3,
-      "options": [
-        {
-          "name": "Start",
-          "value": "start",
-          "description": "align to the start (left/top)"
+          name: 'Massive',
+          value: 'massive',
+          description: 'appear with massive spacing',
         },
-        {
-          "name": "Center",
-          "value": "center",
-          "description": "align to the center (default)"
-        },
-        {
-          "name": "End",
-          "value": "end",
-          "description": "align to the end (right/bottom)"
-        }
       ],
-      "exampleCode": "<ui-divider text=\"Section\" align=\"start\"></ui-divider>"
     },
     {
-      "name": "Thickness",
-      "attribute": "thickness",
-      "description": "control line thickness",
-      "usageLevel": 4,
-      "options": [
+      name: 'Raised',
+      attribute: 'raised',
+      description: 'add depth with a dual-line effect',
+      usageLevel: 3,
+      exampleCode: `<ui-divider raised></ui-divider>`,
+    },
+    {
+      name: 'Align',
+      attribute: 'align',
+      description: 'align text or icon position',
+      usageLevel: 3,
+      options: [
         {
-          "name": "Thin",
-          "value": "thin",
-          "description": "appear with a thin line"
+          name: 'Start',
+          value: 'start',
+          description: 'align to the start (left/top)',
         },
         {
-          "name": "Medium",
-          "value": "medium",
-          "description": "appear with normal thickness"
+          name: 'Center',
+          value: 'center',
+          description: 'align to the center (default)',
         },
         {
-          "name": "Thick",
-          "value": "thick",
-          "description": "appear with a thick line"
-        }
+          name: 'End',
+          value: 'end',
+          description: 'align to the end (right/bottom)',
+        },
       ],
-      "exampleCode": "<ui-divider thickness=\"thick\"></ui-divider>"
+      exampleCode: `<ui-divider text="Section" align="start"></ui-divider>`,
     },
     {
-      "name": "Inset",
-      "attribute": "inset",
-      "description": "indent its content from the start edge",
-      "usageLevel": 4,
-      "options": [
+      name: 'Thickness',
+      attribute: 'thickness',
+      description: 'control line thickness',
+      usageLevel: 4,
+      options: [
         {
-          "name": "Small",
-          "value": "inset-small",
-          "description": "inset a small amount"
+          name: 'Thin',
+          value: 'thin',
+          description: 'appear with a thin line',
         },
         {
-          "name": "Medium",
-          "value": "inset-medium",
-          "description": "inset a medium amount"
+          name: 'Medium',
+          value: 'medium',
+          description: 'appear with normal thickness',
         },
         {
-          "name": "Large",
-          "value": "inset-large",
-          "description": "inset a large amount"
-        }
+          name: 'Thick',
+          value: 'thick',
+          description: 'appear with a thick line',
+        },
       ],
-      "exampleCode": "<ui-divider inset=\"medium\"></ui-divider>"
+      exampleCode: `<ui-divider thickness="thick"></ui-divider>`,
     },
     {
-      "name": "Hidden",
-      "attribute": "hidden",
-      "description": "divide without a visible line",
-      "usageLevel": 4,
-      "exampleCode": "<ui-divider hidden></ui-divider>"
+      name: 'Inset',
+      attribute: 'inset',
+      description: 'indent its content from the start edge',
+      usageLevel: 4,
+      options: [
+        {
+          name: 'Small',
+          value: 'inset-small',
+          description: 'inset a small amount',
+        },
+        {
+          name: 'Medium',
+          value: 'inset-medium',
+          description: 'inset a medium amount',
+        },
+        {
+          name: 'Large',
+          value: 'inset-large',
+          description: 'inset a large amount',
+        },
+      ],
+      exampleCode: `<ui-divider inset="medium"></ui-divider>`,
     },
     {
-      "name": "Clearing",
-      "attribute": "clearing",
-      "description": "clear floated content",
-      "usageLevel": 5,
-      "exampleCode": "<ui-divider clearing></ui-divider>"
-    }
+      name: 'Hidden',
+      attribute: 'hidden',
+      description: 'divide without a visible line',
+      usageLevel: 4,
+      exampleCode: `<ui-divider hidden></ui-divider>`,
+    },
+    {
+      name: 'Clearing',
+      attribute: 'clearing',
+      description: 'clear floated content',
+      usageLevel: 5,
+      exampleCode: `<ui-divider clearing></ui-divider>`,
+    },
   ],
-  "settings": [],
-  "events": [],
-  "supportsPlural": false,
-  "examples": {
-    "defaultAttributes": {},
-    "defaultContent": "",
-    "defaultPluralContent": ""
-  }
+  settings: [],
+  events: [],
+  supportsPlural: false,
+  examples: {
+    defaultAttributes: {},
+    defaultContent: '',
+    defaultPluralContent: '',
+  },
 };

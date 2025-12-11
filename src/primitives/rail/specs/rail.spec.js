@@ -1,13 +1,12 @@
-// Auto-generated from rail.spec.json
 export default {
-  "uiType": "element",
-  "name": "Rail",
-  "description": "A rail is used to show accompanying content next to the main view of a site",
-  "tagName": "ui-rail",
-  "exportName": "UIRail",
-  "content": [],
-  "types": [],
-  "variations": [],
-  "events": [],
-  "settings": []
+  uiType: 'element',
+  name: 'Rail',
+  description: 'A rail is used to show accompanying content next to the main view of a site',
+  tagName: 'ui-rail',
+  exportName: 'UIRail',
+  content: [],
+  types: [],
+  variations: [],
+  events: [],
+  settings: [],
 };
