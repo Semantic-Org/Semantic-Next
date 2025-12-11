@@ -102,10 +102,11 @@ const subCategorySortOrder = {
     'Visibility',
     'DOM Manipulation',
     'DOM Traversal',
+    'DOM Access',
     'Events',
     'Iterators',
     'Logical Operators',
-    'Utilities',
+    'Collections',
   ],
   'Utils': [
     'Setup',
@@ -861,6 +862,10 @@ export const sidebarMenuAPI = [
         url: '/docs/api/query/dom-traversal',
       },
       {
+        name: 'DOM Access',
+        url: '/docs/api/query/dom-access',
+      },
+      {
         name: 'Events',
         url: '/docs/api/query/events',
       },
@@ -877,8 +882,8 @@ export const sidebarMenuAPI = [
         url: '/docs/api/query/position',
       },
       {
-        name: 'Utilities',
-        url: '/docs/api/query/utilities',
+        name: 'Collections',
+        url: '/docs/api/query/collections',
       },
       {
         name: 'Internal',
