@@ -105,13 +105,14 @@ Level 4: Verification & Refinement
 - Prerequisites indicate required background knowledge
 
 ### Search Patterns
-1. **Unknown concepts** → foundations/mental-model.md
-2. **Syntax lookup** → foundations/quick-reference.md
-3. **Implementation patterns** → guides/ documents
-4. **Code location** → foundations/codebase-navigation-guide.md
-5. **Standalone package usage** → packages/ API documentation
-6. **Step-by-step processes** → workflows/ task-specific procedures
-7. **Documentation quality** → documentation/writing/ style guides
+1.  **Unknown concepts** → foundations/mental-model.md
+2.  **Syntax lookup** → foundations/quick-reference.md
+3.  **Implementation patterns** → guides/ documents
+4.  **Code location** → foundations/codebase-navigation-guide.md
+5.  **Standalone package usage** → packages/ API documentation
+6.  **Step-by-step processes** → workflows/ task-specific procedures
+7.  **Documentation quality** → documentation/writing/ style guides
+8.  **Self-Service Discovery** → Check `ai/meta/workflows-manifest.json` and `ai/meta/context-manifest.json` for a complete index of available resources.
 
 ---
 

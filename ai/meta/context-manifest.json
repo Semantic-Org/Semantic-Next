@@ -13,9 +13,9 @@
       "id": "foundation/mental-model",
       "path": "ai/foundations/mental-model.md",
       "category": "foundation",
-      "tags": ["architecture", "reactivity", "design-philosophy"],
+      "tags": ["architecture", "reactivity", "design-philosophy", "defineComponent", "signals", "templates"],
       "recommendedOrder": 2,
-      "approxTokens": 6000
+      "approxTokens": 3000
     },
     {
       "id": "foundation/codebase-navigation",
