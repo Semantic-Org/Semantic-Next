@@ -160,7 +160,7 @@ export const Template = class Template {
     let instance;
     this.instance = {};
     if (isFunction(this.createComponent)) {
-      instance = this.call(this.createComponent) || {};
+      instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
       extend(template.instance, instance);
     }
     if (isFunction(template.instance.initialize)) {
@@ -660,7 +660,7 @@ export const Template = class Template {
   }
 
   // calls callback if defined with consistent params and this context
-  call(func, { params, additionalData = {}, firstArg, additionalArgs } = {}) {
+  call(func, { params, additionalData = {}, firstArg, additionalArgs, thisContext } = {}) {
     const args = [];
     if (this.isPrototype) {
       return;
@@ -725,7 +725,8 @@ export const Template = class Template {
       args.push(...additionalArgs);
     }
     if (isFunction(func)) {
-      return func.apply(this.element, args);
+      const context = thisContext !== undefined ? thisContext : this.element;
+      return func.apply(context, args);
     }
   }
 
