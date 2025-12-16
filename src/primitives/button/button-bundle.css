@@ -564,52 +564,52 @@
     left: auto;
     right: 0%;
   }
-  .button.vertical-animated > .visible.content,
-  .button.vertical-animated > .hidden.content {
+  .button.animated.vertical > .visible.content,
+  .button.animated.vertical > .hidden.content {
     transition: top var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
   }
-  .button.vertical-animated > .visible.content {
+  .button.animated.vertical > .visible.content {
     transform: translateY(0%);
     right: auto;
   }
-  .button.vertical-animated > .hidden.content {
+  .button.animated.vertical > .hidden.content {
     top: -50%;
     left: 0%;
   }
-  .button.vertical-animated:focus > .visible.content,
-  .button.vertical-animated:hover > .visible.content {
+  .button.animated.vertical:focus > .visible.content,
+  .button.animated.vertical:hover > .visible.content {
     transform: translateY(200%);
     right: auto;
   }
-  .button.vertical-animated:focus > .hidden.content,
-  .button.vertical-animated:hover > .hidden.content {
+  .button.animated.vertical:focus > .hidden.content,
+  .button.animated.vertical:hover > .hidden.content {
     top: 50%;
   }
-  .button.fade-animated > .visible.content,
-  .button.fade-animated > .hidden.content {
+  .button.animated.fade > .visible.content,
+  .button.animated.fade > .hidden.content {
     transition: opacity var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
   }
-  .button.fade-animated > .visible.content {
+  .button.animated.fade > .visible.content {
     left: auto;
     right: auto;
     opacity: 1;
     transform: scale(1);
   }
-  .button.fade-animated > .hidden.content {
+  .button.animated.fade > .hidden.content {
     opacity: 0;
     left: 0%;
     right: auto;
     transform: scale(var(--button-fade-scale-high));
   }
-  .button.fade-animated:focus > .visible.content,
-  .button.fade-animated:hover > .visible.content {
+  .button.animated.fade:focus > .visible.content,
+  .button.animated.fade:hover > .visible.content {
     left: auto;
     right: auto;
     opacity: 0;
     transform: scale(var(--button-fade-scale-low));
   }
-  .button.fade-animated:focus > .hidden.content,
-  .button.fade-animated:hover > .hidden.content {
+  .button.animated.fade:focus > .hidden.content,
+  .button.animated.fade:hover > .hidden.content {
     left: 0%;
     right: auto;
     opacity: 1;

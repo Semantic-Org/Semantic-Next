@@ -137,11 +137,12 @@ export default {
       attribute: 'animated',
       description: 'animate to show hidden content',
       includeAttributeClass: true,
+      compoundAliases: true,
       usageLevel: 3,
       options: [
         {
-          name: 'Animated',
-          value: ['horizontal-animated'],
+          name: 'Horizontal',
+          value: 'horizontal',
           description: 'animate hidden content horizontally',
           exampleCode: `
             <ui-button animated>
@@ -151,8 +152,8 @@ export default {
           `,
         },
         {
-          name: 'Vertical Animated',
-          value: 'vertical-animated',
+          name: 'Vertical',
+          value: 'vertical',
           description: 'animate hidden content vertically',
           exampleCode: `
             <ui-button vertical-animated>
@@ -162,8 +163,8 @@ export default {
           `,
         },
         {
-          name: 'Fade Animated',
-          value: ['fade-animated'],
+          name: 'Fade',
+          value: 'fade',
           description: 'fade in hidden content',
           exampleCode: `
             <ui-button fade-animated>
