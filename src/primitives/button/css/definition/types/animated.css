@@ -61,7 +61,7 @@
 
 /* Vertical */
 .button {
-  &.vertical-animated {
+  &.animated.vertical {
     > .visible.content,
     > .hidden.content {
       transition:
@@ -94,7 +94,7 @@
   }
 
   /* Fade */
-  &.fade-animated {
+  &.animated.fade {
     > .visible.content,
     > .hidden.content {
       transition: opacity var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
