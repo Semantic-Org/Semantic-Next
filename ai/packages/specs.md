@@ -832,7 +832,51 @@ variations: [
     }),
   }),
 ]
+
+// Compound aliases for disambiguation
+// When two variations share option values (e.g., size: small and padding: small),
+// use compoundAliases: true to enable {attribute}-{value} syntax
+{
+  name: 'Animated',
+  attribute: 'animated',
+  compoundAliases: true,  // Enables animated-vertical, vertical-animated syntax
+  options: [
+    { name: 'Horizontal', value: 'horizontal' },
+    { name: 'Vertical', value: 'vertical' },
+    { name: 'Fade', value: 'fade' },
+  ]
+}
+// Users can then write:
+// <ui-button animated-vertical> or <ui-button vertical-animated>
+// Both resolve to animated="vertical"
 ```
+
+### Compound Aliases
+
+When two spec attributes share overlapping option values, use `compoundAliases: true` to enable disambiguation syntax.
+
+**The Rule**: For any type/variation with `compoundAliases: true`, users can write `{attribute}-{value}` or `{value}-{attribute}` as a boolean attribute. Both orderings work (similar to how English allows flexible adjective ordering).
+
+**Example**: If both `size` and `padding` variations have `small` as an option:
+- `<ui-foo small>` - Ambiguous (maps to whichever was defined first)
+- `<ui-foo size-small>` or `<ui-foo small-size>` - Explicitly sets `size="small"`
+- `<ui-foo padding-small>` or `<ui-foo small-padding>` - Explicitly sets `padding="small"`
+
+**Implementation**: At build time, `compoundAliases: true` causes the spec reader to generate compound forms in `optionAttributes`:
+```javascript
+// Generated optionAttributes for animated with compoundAliases: true
+{
+  'animated-horizontal': 'animated',
+  'horizontal-animated': 'animated',
+  'animated-vertical': 'animated',
+  'vertical-animated': 'animated',
+  // ... plus the original simple values
+  'horizontal': 'animated',
+  'vertical': 'animated',
+}
+```
+
+At runtime, compound forms are recognized as observed attributes and the canonical value is extracted from the compound.
 
 ## Integration with Framework Packages
 
