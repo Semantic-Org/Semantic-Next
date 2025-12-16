@@ -46,28 +46,6 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // note "optionAttributeValue" is the value of the option attribute i.e. "somevalue" here
   // i.e <ui-button left-attached="somevalue">
 
-  // check if a hyphenated string matches an attribute-value pair
-  // e.g. "padding-small" or "small-padding" -> { attribute: "padding", value: "small" }
-  const matchCompoundAttribute = (hyphenatedValue) => {
-    if (!hyphenatedValue || !hyphenatedValue.includes('-')) {
-      return;
-    }
-    const parts = hyphenatedValue.split('-');
-    // only handle simple two-part compounds for now
-    if (parts.length !== 2) {
-      return;
-    }
-    const [first, second] = parts;
-    // try both orderings: attribute-value and value-attribute
-    const orderings = [[first, second], [second, first]];
-    for (const [maybeAttr, maybeValue] of orderings) {
-      const allowedValues = get(componentSpec, `allowedValues.${maybeAttr}`);
-      if (allowedValues && inArray(maybeValue, allowedValues)) {
-        return { matchingAttribute: maybeAttr, matchingValue: maybeValue };
-      }
-    }
-  };
-
   const checkSpecForAllowedValue = ({ attribute, optionValue, optionAttributeValue }) => {
     // "arrow down" -> arrow-down
     optionValue = tokenizeSpaces(optionValue);
@@ -91,12 +69,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
       (currentValue) => get(componentSpec.optionAttributes, currentValue),
     );
 
-    // fallback: check if this is a compound attribute like "padding-small"
     if (!matchingValue) {
-      const compoundMatch = matchCompoundAttribute(optionValue);
-      if (compoundMatch) {
-        return compoundMatch;
-      }
       return { matchingAttribute: undefined, matchingValue: undefined };
     }
 
@@ -108,7 +81,21 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
 
     // now we know the matching value is the correct name lets grab the attribute name
     const matchingAttribute = get(componentSpec.optionAttributes, matchingValue);
-    return { matchingAttribute: matchingAttribute, matchingValue: matchingValue };
+
+    // check if this is a compound alias (e.g. "size-small" or "small-size")
+    // extract the canonical value from the compound form
+    if (matchingValue.includes('-')) {
+      const prefix = `${matchingAttribute}-`;
+      const suffix = `-${matchingAttribute}`;
+      if (matchingValue.startsWith(prefix)) {
+        return { matchingAttribute, matchingValue: matchingValue.slice(prefix.length) };
+      }
+      if (matchingValue.endsWith(suffix)) {
+        return { matchingAttribute, matchingValue: matchingValue.slice(0, -suffix.length) };
+      }
+    }
+
+    return { matchingAttribute, matchingValue };
   };
 
   // this assigns the value to the DOM element
