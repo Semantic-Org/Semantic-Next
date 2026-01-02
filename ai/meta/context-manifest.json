@@ -50,6 +50,22 @@
       "approxTokens": 8100
     },
     {
+      "id": "end-user/create-components",
+      "path": "ai/guides/end-user/create-components.md",
+      "category": "specialized",
+      "tags": ["components", "web-development", "external-agents", "defineComponent", "standalone"],
+      "approxTokens": 5500,
+      "description": "Self-contained guide for AI agents building websites with Semantic UI's component framework. Designed for context loading in external projects."
+    },
+    {
+      "id": "end-user/sui-usage",
+      "path": "ai/guides/end-user/sui-usage.md",
+      "category": "specialized",
+      "tags": ["components", "web-development", "external-agents", "layouts", "markup", "specs"],
+      "approxTokens": 3200,
+      "description": "Reference for generating layouts using Semantic UI Web Components. Covers spec-driven development, markup syntax, and component interaction patterns."
+    },
+    {
       "id": "development/testing",
       "path": "ai/guides/development/testing.md",
       "category": "specialized",
