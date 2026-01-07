@@ -48,7 +48,7 @@ const createComponent = ({ $, el, self, state, dispatchEvent, settings }) => ({
   setValue(value) {
     el.value = value;
     $('input').val(value);
-    dispatchEvent('input', { value });
+    // dispatchEvent('input', { value });
   },
 
   setValueDebounced: debounce((value) => {
