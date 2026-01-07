@@ -103,15 +103,16 @@ This names what's painful, then positions the feature as a solution.
 
 ### Headings
 
-**Capability headings:**
-- "Declarative Templating"
-- "Integrated Styling"
-- "Event Handling"
+For gateway page technical tours, use **simple capability keywords**:
+- "Templating", "Styling", "Events", "Keys"
 
-**Problem-solution headings:**
-- "Templating Without String Manipulation"
-- "Styling That Actually Scopes"
-- "Events Without Boilerplate"
+These are scannable and act as navigation to subsections. Problem-solution framing belongs in the prose beneath them, not in the headers.
+
+**In section prose (good):**
+> Vanilla Web Components typically require string concatenation... The templating system replaces this with declarative syntax.
+
+**In headers (keep simple):**
+> ### Templating
 
 ---
 

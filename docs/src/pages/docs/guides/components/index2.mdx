@@ -35,7 +35,9 @@ Components work natively in React, Vue, Angular, or any framework that supports 
 
 Components defined with [`defineComponent`](/docs/guides/components/create) can register a `tagName` for direct HTML use, or export without one for use as [subtemplates](/docs/guides/templates/subtemplates) within other components.
 
-## Defining Components
+## Key Features
+
+### Defining Components
 
 [`defineComponent`](/docs/guides/components/create) registers a standard custom element. All features (templating, state, events, styling) are configured in a single definition object:
 
@@ -53,7 +55,7 @@ defineComponent({
 });
 ```
 
-## Templates, Not Strings
+### Templating
 
 Vanilla Web Components typically require string concatenation or verbose `document.createElement` calls to render dynamic content. The [templating system](/docs/guides/templates) replaces this with declarative syntax: [expressions](/docs/guides/templates/expressions), [conditionals](/docs/guides/templates/conditionals), [loops](/docs/guides/templates/loops), and [slots](/docs/guides/templates/slots). Templates compile to an AST for efficient updates.
 
@@ -70,7 +72,7 @@ Vanilla Web Components typically require string concatenation or verbose `docume
 {/each}
 ```
 
-## Styling That Scopes
+### Styling
 
 Global CSS in component-based applications leads to specificity wars, naming conventions (BEM, CSS Modules), or build-time extraction. Shadow DOM provides true encapsulation, but working with it requires understanding CSS variable inheritance and `:host` selectors. The [styling system](/docs/guides/components/styling) handles this integration:
 
@@ -88,7 +90,7 @@ Global CSS in component-based applications leads to specificity wars, naming con
 }
 ```
 
-## Events, No Boilerplate
+### Events
 
 The standard `addEventListener` / `removeEventListener` pattern requires manual cleanup, doesn't support delegation naturally, and scatters event logic across lifecycle methods. [Declarative events](/docs/guides/components/events) bind handlers to selectors, support delegation, and clean up automatically:
 
@@ -123,7 +125,7 @@ const createComponent = ({state, dispatchEvent}) => ({
 });
 ```
 
-## Keys That Scale
+### Keys
 
 Implementing keyboard shortcuts typically means parsing `event.key`, tracking modifier state, and managing focus. [Declarative key bindings](/docs/guides/components/keys) handle combinations and sequences with automatic scope management:
 
