@@ -324,16 +324,27 @@ ai/
 │   ├── utils.md               ← Utility functions
 │   ├── templating.md          ← Template system
 │   └── specs.md               ← Component specifications
-├── documentation/             ← Documentation guidelines
-│   ├── authoring/             ← Creating documentation
-│   │   └── example-authoring.md  ← Example creation guide
-│   └── writing/               ← Content quality
-│       ├── page-writing.md        ← Page writing guidelines
-│       ├── evaluation-persona.md  ← Review standards
-│       ├── good-examples.md       ← Quality examples
-│       ├── slop-identification.md ← AI-generated content detection
-│       ├── link-grammar.md        ← Link and grammar rules
-│       └── rewrite-instructions.md← Content improvement guide
+├── documentation/             ← Documentation writing hub
+│   ├── 00-START-HERE.md          ← Decision tree for documentation tasks
+│   ├── page-types/               ← How to write each page type
+│   │   ├── authoring-standards.md   ← Universal: headers, frontmatter
+│   │   ├── gateway.md               ← Landing pages (problem-first)
+│   │   ├── guide.md                 ← Instructional guides
+│   │   ├── api-reference.md         ← API documentation
+│   │   └── pedagogical.md           ← Learn REPL lessons
+│   ├── examples/                 ← Creating code examples
+│   │   ├── authoring.md             ← Example creation guide
+│   │   └── self-critique.md         ← Quality checklist
+│   ├── quality/                  ← Operational checklists
+│   │   ├── slop-identification.md   ← AI content detection
+│   │   └── good-examples.md         ← What good looks like
+│   ├── enhance/                  ← Operations on existing text
+│   │   ├── evaluate-text.md         ← Critique quality
+│   │   ├── add-links-to-text.md     ← Add internal links
+│   │   └── rewrite-text.md          ← Improve text
+│   └── reference/                ← Theory and foundations
+│       ├── target-audience.md       ← Who reads docs
+│       └── writing-effectively.md   ← McEnerney principles
 ├── workflows/                 ← Step-by-step processes
 │   ├── agents/                ← Agent workflows
 │   │   └── create-subagent-context.md  ← Subagent creation

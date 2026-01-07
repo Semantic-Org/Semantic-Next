@@ -146,71 +146,124 @@
       "approxTokens": 8500
     },
     {
-      "id": "docs/example-authoring",
-      "path": "ai/documentation/example/example-authoring.md",
+      "id": "docs/start-here",
+      "path": "ai/documentation/00-START-HERE.md",
+      "category": "specialized",
+      "tags": ["documentation", "routing", "navigation"],
+      "approxTokens": 1500,
+      "description": "Decision tree and routing for documentation writing tasks"
+    },
+    {
+      "id": "docs/page-types/authoring-standards",
+      "path": "ai/documentation/page-types/authoring-standards.md",
+      "category": "specialized",
+      "tags": ["documentation", "structure", "headers", "frontmatter"],
+      "dependsOn": ["docs/start-here"],
+      "approxTokens": 1200,
+      "description": "Structural requirements for all prose pages: heading hierarchy, frontmatter, embedding examples"
+    },
+    {
+      "id": "docs/page-types/gateway",
+      "path": "ai/documentation/page-types/gateway.md",
+      "category": "specialized",
+      "tags": ["documentation", "landing-pages", "problem-first"],
+      "dependsOn": ["docs/page-types/authoring-standards", "docs/reference/target-audience"],
+      "approxTokens": 1800,
+      "description": "Writing style for landing/index pages using problem-first approach"
+    },
+    {
+      "id": "docs/page-types/guide",
+      "path": "ai/documentation/page-types/guide.md",
+      "category": "specialized",
+      "tags": ["documentation", "guides", "instructional"],
+      "dependsOn": ["docs/page-types/authoring-standards"],
+      "approxTokens": 2000,
+      "description": "Writing style for instructional guide pages"
+    },
+    {
+      "id": "docs/page-types/api-reference",
+      "path": "ai/documentation/page-types/api-reference.md",
+      "category": "specialized",
+      "tags": ["documentation", "api-reference", "methods"],
+      "dependsOn": ["docs/page-types/authoring-standards"],
+      "approxTokens": 3000,
+      "description": "Writing style for API documentation"
+    },
+    {
+      "id": "docs/page-types/pedagogical",
+      "path": "ai/documentation/page-types/pedagogical.md",
+      "category": "specialized",
+      "tags": ["documentation", "tutorials", "learn-repl"],
+      "dependsOn": ["docs/page-types/authoring-standards"],
+      "approxTokens": 800,
+      "description": "Placeholder for Learn REPL lesson writing"
+    },
+    {
+      "id": "docs/examples/authoring",
+      "path": "ai/documentation/examples/authoring.md",
       "category": "specialized",
       "tags": ["documentation", "examples", "playground"],
-      "dependsOn": ["foundation/start-here"],
+      "dependsOn": ["docs/start-here"],
       "approxTokens": 14600
     },
     {
-      "id": "docs/example-self-critique",
-      "path": "ai/documentation/example/example-self-critique.md",
+      "id": "docs/examples/self-critique",
+      "path": "ai/documentation/examples/self-critique.md",
       "category": "specialized",
       "tags": ["documentation", "examples", "quality"],
-      "dependsOn": ["docs/example-authoring"],
+      "dependsOn": ["docs/examples/authoring"],
       "approxTokens": 800
     },
     {
-      "id": "docs/guide-writing",
-      "path": "ai/documentation/guide/page-writing.md",
-      "category": "specialized",
-      "tags": ["documentation", "guides", "style-guide"],
-      "dependsOn": ["foundation/start-here"],
-      "approxTokens": 3200
-    },
-    {
-      "id": "docs/api-authoring",
-      "path": "ai/documentation/api/api-authoring.md",
-      "category": "specialized",
-      "tags": ["documentation", "api-reference", "style-guide"],
-      "dependsOn": ["foundation/start-here"],
-      "approxTokens": 3000
-    },
-    {
-      "id": "docs/shared/slop-identification",
-      "path": "ai/documentation/shared/slop-identification.md",
+      "id": "docs/quality/slop-identification",
+      "path": "ai/documentation/quality/slop-identification.md",
       "category": "reference",
-      "tags": ["documentation", "editing", "quality"],
+      "tags": ["documentation", "quality", "ai-detection"],
       "approxTokens": 3600
     },
     {
-      "id": "docs/shared/good-examples",
-      "path": "ai/documentation/shared/good-examples.md",
+      "id": "docs/quality/good-examples",
+      "path": "ai/documentation/quality/good-examples.md",
       "category": "reference",
-      "tags": ["documentation", "style-guide", "writing"],
+      "tags": ["documentation", "quality", "writing"],
       "approxTokens": 1000
     },
     {
-      "id": "docs/shared/link-grammar",
-      "path": "ai/documentation/shared/link-grammar.md",
+      "id": "docs/enhance/add-links-to-text",
+      "path": "ai/documentation/enhance/add-links-to-text.md",
       "category": "reference",
-      "tags": ["documentation", "linking", "cross-references"],
+      "tags": ["documentation", "enhancement", "linking"],
       "approxTokens": 1800
     },
     {
-      "id": "docs/shared/rewrite-instructions",
-      "path": "ai/documentation/shared/rewrite-instructions.md",
+      "id": "docs/enhance/rewrite-text",
+      "path": "ai/documentation/enhance/rewrite-text.md",
       "category": "reference",
-      "tags": ["documentation", "editing", "refinement"],
+      "tags": ["documentation", "enhancement", "rewriting"],
       "approxTokens": 1000
     },
     {
-      "id": "docs/refine/evaluation-persona",
-      "path": "ai/documentation/refine/evaluation-persona.md",
+      "id": "docs/enhance/evaluate-text",
+      "path": "ai/documentation/enhance/evaluate-text.md",
       "category": "reference",
-      "tags": ["documentation", "evaluation", "persona"],
+      "tags": ["documentation", "evaluation", "critique"],
       "approxTokens": 6500
+    },
+    {
+      "id": "docs/reference/target-audience",
+      "path": "ai/documentation/reference/target-audience.md",
+      "category": "reference",
+      "tags": ["documentation", "audience", "writing", "early-adopters"],
+      "approxTokens": 1800,
+      "description": "Defines who reads Semantic UI documentation and how to write problem-first content"
+    },
+    {
+      "id": "docs/reference/writing-effectively",
+      "path": "ai/documentation/reference/writing-effectively.md",
+      "category": "reference",
+      "tags": ["documentation", "writing", "mcenerney"],
+      "approxTokens": 1200,
+      "description": "McEnerney's principles for effective writing"
     },
     {
       "id": "packages/reactivity",
