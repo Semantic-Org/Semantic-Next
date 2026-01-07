@@ -1,5 +1,5 @@
 {
-  "name": "@semantic-ui/mcp-server",
+  "name": "@semantic-ui/mcp",
   "version": "0.1.0",
   "description": "MCP server for Semantic UI component specs",
   "type": "module",
