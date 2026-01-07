@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "semantic-ui": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "tools/mcp/dist/index.js"
+      ],
+      "env": {}
+    }
+  }
+}

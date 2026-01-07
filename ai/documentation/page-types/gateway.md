@@ -123,38 +123,49 @@ The problem-solution framing belongs in Part 1. Part 2 headers are scannable key
 ```markdown
 ## The [Problem Name]
 
-[Status quo] **But** [tension/limitation]. [Cost of the problem]
+[Status quo] **But** [tension/limitation]. [Cost]
 
-[How this solution resolves the tension]
+[1-2 sentences: how this resolves the tension]
 
 | Problem | Solution |
 |---------|----------|
-| Pain point 1 | How this addresses it |
-| Pain point 2 | How this addresses it |
+| Pain point 1 | [Solution](/link) with brief description |
+| Pain point 2 | [Solution](/link) with brief description |
 
 <PlaygroundExample id="minimal-demo"></PlaygroundExample>
 
-### [Subsection if needed]
+### [Key Differentiator]
 
-[Framework compatibility, key differentiator, etc.]
+[Framework compatibility, no build step, etc.—keep brief]
 
-## [Feature A, Problem-Framed]
+## Key Features
 
-[1-2 sentences positioning the feature as solving a pain point]
-[Link to detailed guide]
+### Templating
+
+[One sentence + link to guide](/docs/guides/templates)
 
 ```code
-[Brief, exciting code example]
+[Exciting code example]
 ```
 
-## [Feature B, Problem-Framed]
+### Styling
+
+[One sentence + link](/docs/guides/components/styling)
+
+```code
+...
+```
+
+### Events
 
 [Same pattern—brief, code-forward, links out]
-
-## Getting Started
-
-[Clear next step—link to first guide or tutorial]
 ```
+
+**Part 2 headers should be simple keywords:**
+- ✅ "Templating", "Styling", "Events", "Keys"
+- ❌ "Templating Without String Manipulation", "Events Without Boilerplate"
+
+Problem-solution framing belongs in Part 1 prose and table, not Part 2 headers.
 
 ---
 
@@ -210,7 +221,7 @@ $$('ui-dropdown .option'); // Returns all matching elements
 - [ ] Feature sections are brief (1-2 sentences + code)
 - [ ] Code examples show what's possible, not how it works
 - [ ] Each section links to detailed guide for depth
-- [ ] Headers use problem-solution framing
+- [ ] Headers are simple capability keywords (not problem-solution phrases)
 
 ### Overall
 - [ ] Clear transition from convince to tour
