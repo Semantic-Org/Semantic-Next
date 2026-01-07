@@ -8,11 +8,11 @@ import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.a
 
 ## The Web Component Problem
 
-[Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) are the right foundation for UI development—they're native to the browser, work across frameworks, and don't require compilation. **But** vanilla Web Components force developers into painful trade-offs: verbose boilerplate for basic state management, awkward Shadow DOM querying, manual dependency tracking, and imperative patterns that feel dated compared to modern frameworks.
+[Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) are the right foundation for UI development: native to the browser, framework-agnostic, no compilation required. **But** vanilla Web Components force painful trade-offs: verbose boilerplate for basic state management, awkward Shadow DOM querying, manual dependency tracking, and imperative patterns that feel dated compared to modern frameworks.
 
-This creates an uncomfortable choice: adopt a framework and accept its lock-in, build complexity, and interoperability costs—or use the standard and lose the developer experience that makes UI work productive.
+This creates an uncomfortable choice: adopt a framework and accept its lock-in, build complexity, and interoperability costs, or use the standard and lose the developer experience that makes UI work productive.
 
-Semantic UI resolves this tension. It provides the authoring experience developers expect—[reactive state](/docs/guides/reactivity), [declarative templates](/docs/guides/templates), [scoped styling](/docs/guides/components/styling)—while producing standard Web Components that work everywhere, **without a compilation step**.
+Semantic UI resolves this tension. It provides the authoring experience developers expect ([reactive state](/docs/guides/reactivity), [declarative templates](/docs/guides/templates), [scoped styling](/docs/guides/components/styling)) while producing standard Web Components that work everywhere, **without a compilation step**.
 
 > **Getting Started:** The [interactive tutorial](/learn/selection) offers a hands-on introduction before diving into these technical guides.
 
@@ -27,17 +27,17 @@ Semantic UI resolves this tension. It provides the authoring experience develope
 | No standard approach to keyboard handling | [Declarative key bindings](/docs/guides/components/keys) with sequences and combinations |
 | CSS leaks or overly specific selectors | [Scoped styling](/docs/guides/components/styling) via Shadow DOM with CSS variable theming |
 
-<PlaygroundExample id="minimal"></PlaygroundExample>
+<PlaygroundExample id="minimal" direction="horizontal"></PlaygroundExample>
 
 ### Framework Compatibility
 
-Components work natively in <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">React</a>, <a href="https://vuejs.org/" target="_blank" rel="noopener noreferrer">Vue</a>, <a href="https://angular.io/" target="_blank" rel="noopener noreferrer">Angular</a>, or any framework that supports custom elements—because they *are* custom elements. No wrappers, no adapters, no framework-specific builds.
+Components work natively in React, Vue, Angular, or any framework that supports custom elements, because they *are* custom elements. No wrappers, no adapters, no framework-specific builds.
 
 Components defined with [`defineComponent`](/docs/guides/components/create) can register a `tagName` for direct HTML use, or export without one for use as [subtemplates](/docs/guides/templates/subtemplates) within other components.
 
 ## Defining Components
 
-[`defineComponent`](/docs/guides/components/create) registers a standard custom element. All framework features—templating, state, events, styling—are configured in a single definition object:
+[`defineComponent`](/docs/guides/components/create) registers a standard custom element. All features (templating, state, events, styling) are configured in a single definition object:
 
 ```javascript
 defineComponent({
@@ -53,9 +53,9 @@ defineComponent({
 });
 ```
 
-## Templating Without String Manipulation
+## Templates, Not Strings
 
-Vanilla Web Components typically require string concatenation or verbose `document.createElement` calls to render dynamic content. The [templating system](/docs/guides/templates) replaces this with declarative syntax—[expressions](/docs/guides/templates/expressions), [conditionals](/docs/guides/templates/conditionals), [loops](/docs/guides/templates/loops), [slots](/docs/guides/templates/slots)—that compiles to an AST for efficient updates.
+Vanilla Web Components typically require string concatenation or verbose `document.createElement` calls to render dynamic content. The [templating system](/docs/guides/templates) replaces this with declarative syntax: [expressions](/docs/guides/templates/expressions), [conditionals](/docs/guides/templates/conditionals), [loops](/docs/guides/templates/loops), and [slots](/docs/guides/templates/slots). Templates compile to an AST for efficient updates.
 
 ```sui
 {#each user in users}
@@ -70,7 +70,7 @@ Vanilla Web Components typically require string concatenation or verbose `docume
 {/each}
 ```
 
-## Styling That Actually Scopes
+## Styling That Scopes
 
 Global CSS in component-based applications leads to specificity wars, naming conventions (BEM, CSS Modules), or build-time extraction. Shadow DOM provides true encapsulation, but working with it requires understanding CSS variable inheritance and `:host` selectors. The [styling system](/docs/guides/components/styling) handles this integration:
 
@@ -88,7 +88,7 @@ Global CSS in component-based applications leads to specificity wars, naming con
 }
 ```
 
-## Events Without Boilerplate
+## Events, No Boilerplate
 
 The standard `addEventListener` / `removeEventListener` pattern requires manual cleanup, doesn't support delegation naturally, and scatters event logic across lifecycle methods. [Declarative events](/docs/guides/components/events) bind handlers to selectors, support delegation, and clean up automatically:
 
@@ -123,7 +123,7 @@ const createComponent = ({state, dispatchEvent}) => ({
 });
 ```
 
-## Keyboard Handling That Scales
+## Keys That Scale
 
 Implementing keyboard shortcuts typically means parsing `event.key`, tracking modifier state, and managing focus. [Declarative key bindings](/docs/guides/components/keys) handle combinations and sequences with automatic scope management:
 
