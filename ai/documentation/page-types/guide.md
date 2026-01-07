@@ -4,7 +4,7 @@
 
 **For:** AI agents writing instructional guide pages
 **When:** Teaching how to use a concept, feature, or pattern
-**Prerequisites:** Read [authoring-standards.md](./authoring-standards.md) first
+**Prerequisites:** Read [authoring-standards.md](../authoring-standards.md) first
 **Related:** [Target Audience](../reference/target-audience.md)
 
 ---

@@ -326,8 +326,8 @@ ai/
 │   └── specs.md               ← Component specifications
 ├── documentation/             ← Documentation writing hub
 │   ├── 00-START-HERE.md          ← Decision tree for documentation tasks
+│   ├── authoring-standards.md    ← Universal: headers, frontmatter, examples
 │   ├── page-types/               ← How to write each page type
-│   │   ├── authoring-standards.md   ← Universal: headers, frontmatter
 │   │   ├── gateway.md               ← Landing pages (problem-first)
 │   │   ├── guide.md                 ← Instructional guides
 │   │   ├── api-reference.md         ← API documentation

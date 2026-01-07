@@ -4,8 +4,7 @@
 
 **For:** AI agents writing landing/index pages
 **When:** First contact with a system, package, or major feature
-**Prerequisites:** Read [authoring-standards.md](./authoring-standards.md) and [target-audience.md](../reference/target-audience.md)
-**Related:** [Writing Effectively](../reference/writing-effectively.md)
+**Prerequisites:** Read [writing-effectively.md](../reference/writing-effectively.md) (required), [authoring-standards.md](../authoring-standards.md), and [target-audience.md](../reference/target-audience.md)
 
 ---
 
@@ -87,20 +86,46 @@ The word **"but"** (or "however", "although", "yet") transforms background into 
 
 ---
 
-## Structure Pattern
+## Two-Part Structure
+
+Gateway pages have two distinct halves: **convince** then **excite**.
+
+### Part 1: Convince (Earn Attention)
+
+The reader is uncommitted and scanning. This section must be **short**—capture attention and provide value immediately. Don't explain; establish why they should care.
+
+- Problem statement with instability language (1-2 paragraphs max)
+- Solution positioning (problem/solution table works well)
+- Minimal working example
+- Key differentiator (framework compatibility, no build step, etc.)
+
+**Keep it brief.** If Part 1 is too long, readers leave before reaching the tour. The problem/solution table does heavy lifting—use it instead of prose.
+
+**Goal:** Reader thinks "this solves a real problem I have."
+
+### Part 2: Technical Tour (Excite)
+
+The reader is now curious. This section previews what's possible and acts as a **gateway to subsections**.
+
+- Brief feature sections with code snippets
+- Each links to detailed guide for depth
+- Show, don't explain—code speaks louder than prose
+- **Simple capability headers** ("Templating", "Styling", "Events")—not problem-solution phrases
+
+The problem-solution framing belongs in Part 1. Part 2 headers are scannable keywords for readers who want to jump to a specific feature.
+
+**Goal:** Reader thinks "I want to learn how to do that" and clicks through to guides.
+
+---
+
+## Structure Template
 
 ```markdown
 ## The [Problem Name]
 
-[Describe the status quo—what readers currently do or believe]
+[Status quo] **But** [tension/limitation]. [Cost of the problem]
 
-**But** [introduce the tension, limitation, or pain point]
-
-[Show the cost of this problem]
-
-## How [Package/Feature] Solves This
-
-[Position your solution against the problem you just established]
+[How this solution resolves the tension]
 
 | Problem | Solution |
 |---------|----------|
@@ -109,16 +134,26 @@ The word **"but"** (or "however", "although", "yet") transforms background into 
 
 <PlaygroundExample id="minimal-demo"></PlaygroundExample>
 
-## Key Concepts
+### [Subsection if needed]
 
-Brief overview of what readers will learn:
+[Framework compatibility, key differentiator, etc.]
 
-- **[Concept A](/link)** — One sentence description
-- **[Concept B](/link)** — One sentence description
+## [Feature A, Problem-Framed]
+
+[1-2 sentences positioning the feature as solving a pain point]
+[Link to detailed guide]
+
+```code
+[Brief, exciting code example]
+```
+
+## [Feature B, Problem-Framed]
+
+[Same pattern—brief, code-forward, links out]
 
 ## Getting Started
 
-[Clear next step—usually link to first guide page]
+[Clear next step—link to first guide or tutorial]
 ```
 
 ---
@@ -164,25 +199,24 @@ $$('ui-dropdown .option'); // Returns all matching elements
 
 ## Checklist
 
-### Problem Statement
+### Part 1: Convince
 - [ ] First paragraph contains instability language (but, however, although)
 - [ ] Problem named before solution introduced
 - [ ] Cost of problem is clear (why should reader care?)
-
-### Solution Positioning
 - [ ] Solution framed as resolving the stated problem
-- [ ] Features presented as answers to pain points
-- [ ] Not just a capability list
-
-### Reader State
-- [ ] Written for uncommitted reader
-- [ ] Earns attention rather than assuming it
-- [ ] Clear path to next step (getting started)
-
-### Technical
-- [ ] Follows [authoring-standards.md](./authoring-standards.md)
 - [ ] Working example demonstrates the value proposition
-- [ ] Links to detailed guides for each concept
+
+### Part 2: Technical Tour
+- [ ] Feature sections are brief (1-2 sentences + code)
+- [ ] Code examples show what's possible, not how it works
+- [ ] Each section links to detailed guide for depth
+- [ ] Headers use problem-solution framing
+
+### Overall
+- [ ] Clear transition from convince to tour
+- [ ] Written for uncommitted reader (earns attention)
+- [ ] Clear path to next step (getting started)
+- [ ] Follows [authoring-standards.md](../authoring-standards.md)
 
 ---
 

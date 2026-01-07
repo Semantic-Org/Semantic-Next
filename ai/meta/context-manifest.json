@@ -154,8 +154,8 @@
       "description": "Decision tree and routing for documentation writing tasks"
     },
     {
-      "id": "docs/page-types/authoring-standards",
-      "path": "ai/documentation/page-types/authoring-standards.md",
+      "id": "docs/authoring-standards",
+      "path": "ai/documentation/authoring-standards.md",
       "category": "specialized",
       "tags": ["documentation", "structure", "headers", "frontmatter"],
       "dependsOn": ["docs/start-here"],

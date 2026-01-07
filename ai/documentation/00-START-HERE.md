@@ -18,6 +18,7 @@ What are you doing?
 │   │   │
 │   │   ├── Landing/index page for a system or package?
 │   │   │   └── page-types/gateway.md
+│   │   │       Requires: reference/writing-effectively.md
 │   │   │       "Convince readers to explore further"
 │   │   │
 │   │   ├── Teaching how to use a concept or feature?
@@ -33,7 +34,7 @@ What are you doing?
 │   │           "Code-first with challenges"
 │   │
 │   └── Before writing ANY page, also read:
-│       └── page-types/authoring-standards.md
+│       └── authoring-standards.md
 │           "Headers, frontmatter, embedding examples"
 │
 ├── CREATING CODE EXAMPLES
@@ -88,8 +89,8 @@ What are you doing?
 ai/documentation/
 ├── 00-START-HERE.md          ← You are here
 │
+├── authoring-standards.md    # Universal: headers, frontmatter, examples
 ├── page-types/               # How to write each page type
-│   ├── authoring-standards.md   # Universal: headers, frontmatter, examples
 │   ├── gateway.md               # Landing pages (problem-first)
 │   ├── guide.md                 # Instructional guides
 │   ├── api-reference.md         # API documentation
@@ -118,18 +119,19 @@ ai/documentation/
 ## Quick Reference
 
 ### Writing a new guide page
-1. Read `page-types/authoring-standards.md` (structural requirements)
+1. Read `authoring-standards.md` (structural requirements)
 2. Read `page-types/guide.md` (writing style)
 3. Read `reference/target-audience.md` (who you're writing for)
 4. Write the page
 5. Run `enhance/add-links-to-text.md` to add internal links
 
 ### Writing a gateway/landing page
-1. Read `page-types/authoring-standards.md`
-2. Read `page-types/gateway.md`
-3. Read `reference/target-audience.md` (critical for gateway pages)
-4. Write problem-first opening
-5. Review against `quality/slop-identification.md`
+1. Read `reference/writing-effectively.md` (required — problem-first principles)
+2. Read `authoring-standards.md`
+3. Read `page-types/gateway.md`
+4. Read `reference/target-audience.md` (critical for gateway pages)
+5. Write problem-first opening
+6. Review against `quality/slop-identification.md`
 
 ### Creating a code example
 1. Read `examples/authoring.md`

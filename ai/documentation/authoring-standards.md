@@ -21,6 +21,46 @@ The navigation system (`/docs/src/helpers/navigation.js`) auto-generates in-page
 | `#` | **Never use** | Reserved for page title |
 | `####` | **Avoid** | Not used in navigation |
 
+### In-Page Menu
+
+Headers auto-generate a fixed navigation menu on the right side of the page. Readers use this to scan and jump to content quickly.
+
+**Design for scanning:**
+- Headers are keywords, not sentences
+- Keep H2s under 25 characters, H3s under 30
+- Plan the hierarchy before writing
+
+**Maintain rhythm:**
+- Flat structures (`## A`, `## B`, `## C`) are valid when sections are short or parallel
+- Nested structures help when sections are long or have distinct sub-topics
+- Many consecutive flat H2s can feel like a list rather than a document
+- If most sections have sub-items, an orphaned section without any stands out awkwardly
+- Be flexible but intentional about depth choices
+
+**Bad:** Long headers, unbalanced depth
+```
+## The Web Component Problem
+### What This Solves
+### Framework Compatibility
+## Defining Components
+## Templating Without String Manipulation
+## Styling That Actually Scopes
+## Events Without Boilerplate
+```
+
+**Good:** Scannable keywords, consistent rhythm
+```
+## Sources of Reactivity
+### Reactive Data
+### Non-Reactive Data
+## Component Reactivity
+### State Reactivity
+### Settings Reactivity
+## Advanced Use
+### Exposing Reactivity
+### Reducing Reactivity
+```
+
 ### Example
 
 ```markdown
@@ -203,6 +243,30 @@ Use blockquotes for tips, warnings, and cross-references:
 | Examples | `/docs/src/examples/` |
 | Example metadata | `/docs/src/content/examples/` |
 | Learn lessons | `/docs/src/content/lessons/` |
+
+---
+
+## Writing Quality
+
+Avoid common AI writing patterns that reduce clarity. See [Slop Identification Guide](./quality/slop-identification.md) for comprehensive patterns.
+
+### Quick Reference
+
+| Pattern | Example | Fix |
+|---------|---------|-----|
+| Marketing adjectives | "powerful", "flexible", "robust", "seamless" | Delete |
+| Hedging words | "various", "specific", "certain", "particular" | Delete or be specific |
+| Em dash overuse | "feature—which is important—lets you" | Use commas or separate sentences |
+| "Note that..." | "Note that the compiler..." | "The compiler..." |
+| Verbose intros | "In this section, we will explore..." | Delete, start with content |
+| Concluding summaries | Paragraphs restating obvious benefits | Delete entirely |
+
+### Principles
+
+- **Delete over rewrite**: Removing 3 problems beats rewriting and adding 2 new ones
+- **Let features speak**: Don't tell readers something is powerful, show what it does
+- **1-2 sentence paragraphs**: Dense prose loses readers
+- **Code after brief explanation**: Don't over-explain before showing
 
 ---
 
