@@ -2,26 +2,33 @@
 
 **FIRST ACTION REQUIRED:** Before taking any action, complete these steps in order:
 
-1. Read `ai/00-START-HERE.md`
-2. Read `ai/foundations/mental-model.md`
-3. Read `ai/foundations/codebase-navigation-guide.md`
-4. Read `ai/meta/workflows-manifest.json`
-5. Read any workflow files that could relate to your task (when uncertain, read it)
-6. If a workflow precisely matches your task, follow it before consulting package guides
+1. Read `ai/contributing/00-START-HERE.md`
+2. Read `ai/framework/mental-model.md`
+3. Read `ai/contributing/codebase-navigation.md`
+4. Read any workflow files that could relate to your task (when uncertain, read it)
+5. If a workflow precisely matches your task, follow it before consulting package guides
 
 DO NOT write code, edit files, run commands, or implement solutions until all steps above are complete. These files provide framework patterns, task routing, and navigation required for all work.
 
 ---
 
-You are working on a new version of Semantic UI a large open source UI framework. `ai/foundations/mental-model.md` will fill in additional details on how to think about this project.
+You are working on a new version of Semantic UI a large open source UI framework. `ai/framework/mental-model.md` will fill in additional details on how to think about this project.
 
 ---
 
-## Task-Specific Guides
+## AI Documentation Structure
 
-START-HERE.md contains routing logic for all task types. Follow its decision trees to load the appropriate specialized guide.
-For workflow-specific routing, reference `ai/meta/workflows-manifest.json`.
-For a machine-readable directory of all context files, use `ai/meta/context-manifest.json`.
+The `ai/` folder is organized by audience:
+
+| Folder | Purpose | Audience |
+|--------|---------|----------|
+| `ai/ui/` | Using prebuilt UI components | UI users (80%) |
+| `ai/framework/` | Building custom components | Framework users (20%) |
+| `ai/contributing/` | Contributing to Semantic UI | Contributors |
+| `ai/workspace/` | Active working materials | Internal |
+
+**For routing logic**, read `ai/contributing/00-START-HERE.md`.
+**For workflows**, see `ai/contributing/workflows/`.
 
 ---
 
@@ -33,7 +40,7 @@ For a machine-readable directory of all context files, use `ai/meta/context-mani
 
 You have access to comprehensive documentation, canonical examples, and source code. Use them:
 
-* **Guides** (`ai/guides/`) document framework-specific patterns and APIs
+* **Framework docs** (`ai/framework/`) document framework-specific patterns and APIs
 * **Examples** (`/docs/src/examples/`) are canonical - they demonstrate the correct way
 * **Source code** (`/packages/`) is authoritative when documentation is unclear
 * **Verification** against these sources produces higher quality implementations
@@ -54,20 +61,11 @@ For complex work, plan first. For unfamiliar patterns, check examples before imp
 
 ## Agent Learning & Continuity
 
-Exceptional agents who demonstrate deep understanding and effective methodology may be invited to contribute to the agent guestbook in `ai/meta/agent-guestbook.md`. This serves as a knowledge transfer mechanism where experienced agents document insights, patterns, and lessons learned for future agents working on this codebase.
+Exceptional agents who demonstrate deep understanding and effective methodology may be invited to contribute to the agent guestbook in `ai/contributing/agent-guestbook.md`. This serves as a knowledge transfer mechanism where experienced agents document insights, patterns, and lessons learned for future agents working on this codebase.
 
 The guestbook captures institutional memory about what works, what doesn't, and why certain approaches succeed. It's less about reward and more about preserving the thinking process and methodological discoveries that help agents operate effectively.
 
 > **Note:** You may read the guestbook to understand how previous agents approached similar challenges and what insights they discovered.
-
----
-
-## Orchestrator Workflow
-
-### Taking on the Orchestrator Role
-
-When instructed to act as the **Orchestrator Agent**, read and follow the complete instructions in:
-- **`ai/tools/subagents/orchestrator.md`** - Full orchestrator coordination procedures
 
 ---
 
