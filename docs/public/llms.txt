@@ -1,0 +1,19 @@
+# Semantic UI
+
+> A modern web component framework for building reactive UI
+
+## Documentation
+
+- Manifest: https://next.semantic-ui.com/content/docs/manifest.json
+- Raw markdown available at: /content/docs/{path}.md
+
+## Examples
+
+- Manifest: https://next.semantic-ui.com/content/examples/manifest.json
+- Source files available at: /content/examples/{id}.json
+
+## Links
+
+- Documentation: https://next.semantic-ui.com/docs
+- Examples: https://next.semantic-ui.com/examples
+- GitHub: https://github.com/Semantic-Org/Semantic-Next

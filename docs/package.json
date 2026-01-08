@@ -18,6 +18,7 @@
     "astro": "^5.13.2",
     "astro-expressive-code": "^0.41.3",
     "fflate": "^0.8.2",
+    "gray-matter": "^4.0.3",
     "link": "^2.1.1",
     "playground-elements": "0.18.1",
     "pretty": "^2.0.0",
