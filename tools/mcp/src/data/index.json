@@ -66,16 +66,16 @@
     "pluralTagName": null
   },
   {
-    "tagName": "ui-container",
-    "name": "Container",
-    "description": "A container limits content to a maximum width",
-    "pluralTagName": null
-  },
-  {
     "tagName": "ui-card",
     "name": "Card",
     "description": "A card displays segmented content in a manner similar to a playing card.",
     "pluralTagName": "ui-cards"
+  },
+  {
+    "tagName": "ui-container",
+    "name": "Container",
+    "description": "A container limits content to a maximum width",
+    "pluralTagName": null
   },
   {
     "tagName": "ui-button",
