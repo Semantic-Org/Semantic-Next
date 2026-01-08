@@ -41,6 +41,7 @@ For plural components, additional sections apply:
 | Section | Purpose |
 |---------|---------|
 | `pluralTagName` | Group element name |
+| `pluralOnlyTypes` | Types only available on the container |
 | `pluralOnlyVariations` | Variations only available on the container |
 | `pluralSharedVariations` | Variations that propagate to children |
 
