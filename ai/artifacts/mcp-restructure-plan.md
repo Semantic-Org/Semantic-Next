@@ -7,6 +7,26 @@
 
 ---
 
+## Background: The Two Audiences
+
+Semantic UI is **two things**:
+
+1. **A UI Component Library** - Prebuilt components (`ui-button`, `ui-modal`, `ui-card`) that developers use to build sites. This is the **80% case**.
+
+2. **A Web Component Framework** - A system for building custom reactive web components using `defineComponent`, signals, and templates. This is the **20% case**.
+
+These audiences have different documentation needs:
+
+| Audience | What They Do | What They Need |
+|----------|--------------|----------------|
+| **UI Users (80%)** | Use prebuilt `ui-*` components to build sites | Component specs, markup syntax, theming |
+| **Framework Users (20%)** | Build custom components with `defineComponent` | Reactivity, templating, component lifecycle, patterns |
+| **Contributors (1%)** | Work on the Semantic UI library itself | Codebase nav, workflows, research, internal docs |
+
+This restructure separates content by audience so the MCP server can serve only what's relevant (ui/ and framework/) while keeping contributor docs (contributing/) accessible in the repo but not served externally.
+
+---
+
 ## Overview
 
 Restructure the `ai/` folder to cleanly separate:
@@ -33,40 +53,42 @@ Update MCP server to fetch from public URLs instead of bundling.
 
 ```
 ai/
-├── ui/                         # MCP: Using prebuilt UI (80% audience)
-│   └── markup.md               # ← guides/end-user/sui-usage.md
+├── ui/                              # MCP: Using prebuilt UI (80% audience)
+│   ├── markup.md                    # ← guides/end-user/sui-usage.md
+│   ├── theming.md                   # NEW STUB - applying themes, overriding colors
+│   ├── events.md                    # NEW STUB - listening to component events
+│   └── customization.md             # NEW STUB - CSS overrides, slots, extending
 │
-├── framework/                  # MCP: Building components (20% audience)
+├── framework/                       # MCP: Building components (20% audience)
 │   │
-│   ├── mental-model.md         # ← foundations/mental-model.md
-│   ├── quick-reference.md      # ← foundations/quick-reference.md
+│   │   # Entry points
+│   ├── mental-model.md              # ← foundations/mental-model.md
+│   ├── quick-reference.md           # ← foundations/quick-reference.md
 │   │
-│   ├── packages/
-│   │   ├── component.md        # ← packages/component.md
-│   │   ├── reactivity.md       # ← packages/reactivity.md
-│   │   ├── templating.md       # ← packages/templating.md
-│   │   ├── query.md            # ← packages/query.md
-│   │   └── utils.md            # ← packages/utils.md
+│   │   # Package docs (API + concepts combined)
+│   ├── reactivity.md                # ← packages/reactivity.md
+│   ├── templating.md                # ← packages/templating.md
+│   ├── query.md                     # ← packages/query.md
+│   ├── component.md                 # ← packages/component.md
+│   ├── utils.md                     # ← packages/utils.md
 │   │
-│   ├── guides/
-│   │   ├── creating-components.md           # ← guides/end-user/create-components.md
-│   │   ├── component-best-practices.md      # ← guides/components/component-authoring-best-practices.md
-│   │   ├── component-portaling.md           # ← guides/components/component-portaling.md
-│   │   ├── parent-child-primitives.md       # ← guides/components/parent-child-primitives.md
-│   │   ├── plugins-and-behaviors.md         # ← guides/query/plugins-and-behaviors.md
-│   │   ├── html-style-guide.md              # ← guides/html/style-guide.md
-│   │   ├── using-ui-primitives.md           # ← guides/html/using-ui-primitives.md
-│   │   ├── css-guide.md                     # ← guides/css/css-guide.md
-│   │   ├── theming.md                       # ← guides/css/theming.md
-│   │   └── design-tokens.md                 # ← guides/css/tokens/token-usage.md
+│   │   # Cross-cutting guides
+│   ├── creating-components.md       # ← guides/end-user/create-components.md
+│   ├── best-practices.md            # ← guides/components/component-authoring-best-practices.md
+│   ├── portaling.md                 # ← guides/components/component-portaling.md
+│   ├── parent-child.md              # ← guides/components/parent-child-primitives.md
+│   ├── plugins-and-behaviors.md     # ← guides/query/plugins-and-behaviors.md
 │   │
-│   └── workflows/              # End-user component workflows
-│       └── (empty initially - all current workflows are contributing)
+│   │   # Styling guides (framework user perspective)
+│   ├── theming.md                   # ← guides/css/theming.md (shadow DOM CSS)
+│   ├── css.md                       # ← guides/css/css-guide.md
+│   ├── html.md                      # ← guides/html/style-guide.md
+│   ├── using-primitives.md          # ← guides/html/using-ui-primitives.md
+│   └── design-tokens.md             # ← guides/css/tokens/token-usage.md
 │
-│   # Note: framework/workflows/ is for workflows that END USERS would follow
-│   # to build components for their OWN projects (not contributing to SUI).
-│   # Currently all workflows are contributing workflows. This may be populated
-│   # later with guides like "build a dashboard component for your app".
+│   # Note: Flat structure because there are only ~15 files and many are
+│   # cross-cutting (best-practices uses signals + templates + query).
+│   # AI agents use manifests for discovery, folder depth doesn't help.
 │
 ├── contributing/               # NOT MCP: Guidance for contributors
 │   │
@@ -137,20 +159,21 @@ ai/
 
 | Source | Destination | Count |
 |--------|-------------|-------|
+| (new stubs) | ui/ | 3 |
+| guides/end-user/sui-usage.md | ui/markup.md | 1 |
 | foundations/*.md | framework/ or contributing/ | 4 |
-| packages/*.md | framework/packages/ or contributing/ | 6 |
-| guides/end-user/*.md | ui/ or framework/guides/ | 2 |
-| guides/components/*.md | framework/guides/ | 4 |
-| guides/css/*.md | framework/guides/ | 3 |
-| guides/html/*.md | framework/guides/ | 2 |
-| guides/query/*.md | framework/guides/ | 1 |
+| packages/*.md | framework/ or contributing/ | 6 |
+| guides/end-user/create-components.md | framework/ | 1 |
+| guides/components/*.md | framework/ | 4 |
+| guides/css/*.md | framework/ or contributing/ | 4 |
+| guides/html/*.md | framework/ | 2 |
+| guides/query/*.md | framework/ | 1 |
 | guides/development/*.md | contributing/development/ | 4 |
-| guides/research/*.md | contributing/ | 1 |
 | documentation/**/*.md | contributing/documentation/ | ~15 |
 | workflows/**/*.md | contributing/workflows/ | ~10 |
 | research/**/* | contributing/research/ | ~100+ |
 | artifacts/* | workspace/artifacts/ | ~20 |
-| tools/* | contributing/ (evaluate) | ~10 |
+| tools/* | evaluate & delete | ~10 |
 
 ---
 
@@ -165,9 +188,14 @@ description: Core patterns for understanding Semantic UI
 keywords: [architecture, reactivity, signals, defineComponent]
 audience: framework          # ui | framework | contributing
 type: doc                    # doc | workflow | research
-# tokens computed automatically by build script
 ---
 ```
+
+**Computed fields** (added by build script, not manually maintained):
+- `tokens` - word count heuristic (~4 chars/token)
+- `lastModified` - from `git log -1 --format=%cI -- <file>`
+
+These are computed at manifest generation time, not stored in frontmatter.
 
 ---
 
@@ -192,7 +220,12 @@ Note: `workspace/` content (plans, artifacts, memory) does NOT get frontmatter -
 
 Note: Create workspace/plans/ early to store working documents.
 
-### 1.4 Document files by category
+### 1.4 Create stub files for new ui/ docs
+- [ ] Create `ai/ui/theming.md` stub (applying themes, overriding colors)
+- [ ] Create `ai/ui/events.md` stub (listening to component events)
+- [ ] Create `ai/ui/customization.md` stub (CSS overrides, slots, extending)
+
+### 1.5 Document files by category
 
 #### Foundation docs (ai/foundations/)
 - [ ] `00-START-HERE.md` → contributing/00-START-HERE.md (routing for contributors)
@@ -244,131 +277,130 @@ Note: Create workspace/plans/ early to store working documents.
 
 ---
 
-## Phase 2: Create New Folder Structure
+## Phase 2: Add Frontmatter to Existing Docs
 
-### 2.1 Create directory skeleton
+> **Why frontmatter first?** Adding frontmatter before moving files keeps git history cleaner
+> (frontmatter additions are separate commits from file moves) and ensures no files are
+> forgotten during the move phase.
+
+### 2.1 Define frontmatter schema
+- [ ] Document required fields: title, description, audience, type
+- [ ] Document optional fields: keywords
+- [ ] Create template for each type (doc, workflow, research)
+
+### 2.2 Add frontmatter to files destined for ui/
+- [ ] guides/end-user/sui-usage.md (→ ui/markup.md)
+- [ ] New stubs: ui/theming.md, ui/events.md, ui/customization.md
+
+### 2.3 Add frontmatter to files destined for framework/
+- [ ] foundations/mental-model.md
+- [ ] foundations/quick-reference.md
+- [ ] packages/reactivity.md
+- [ ] packages/templating.md
+- [ ] packages/query.md
+- [ ] packages/component.md
+- [ ] packages/utils.md
+- [ ] guides/end-user/create-components.md
+- [ ] guides/components/component-authoring-best-practices.md
+- [ ] guides/components/component-portaling.md
+- [ ] guides/components/parent-child-primitives.md
+- [ ] guides/query/plugins-and-behaviors.md
+- [ ] guides/css/theming.md
+- [ ] guides/css/css-guide.md
+- [ ] guides/css/tokens/token-usage.md
+- [ ] guides/html/style-guide.md
+- [ ] guides/html/using-ui-primitives.md
+
+### 2.4 Add frontmatter to files destined for contributing/
+- [ ] 00-START-HERE.md
+- [ ] foundations/codebase-navigation-guide.md
+- [ ] packages/specs.md
+- [ ] guides/css/tokens/architecture.md
+- [ ] All files in guides/development/
+- [ ] All files in documentation/
+- [ ] All files in workflows/
+
+### 2.5 Research frontmatter batch script
+Since research/ has 100+ files, write a script to auto-generate frontmatter:
+- [ ] Script reads each .md file in research/
+- [ ] Extracts component name from folder (e.g., accordion/, button/)
+- [ ] Generates frontmatter with title, audience=contributing, type=research
+- [ ] Prepends frontmatter to files that don't have it
+- [ ] Run script and verify output
+
+### 2.6 Validate frontmatter
+- [ ] Write validation script to check all docs have required fields
+- [ ] Run validation, fix any missing frontmatter
+- [ ] Verify audience values are valid (ui|framework|contributing)
+- [ ] Verify type values are valid (doc|workflow|research)
+
+---
+
+## Phase 3: Create New Folder Structure & Move Files
+
+### 3.1 Create directory skeleton
 - [ ] Create `ai/ui/`
 - [ ] Create `ai/framework/`
-- [ ] Create `ai/framework/packages/`
-- [ ] Create `ai/framework/components/`
-- [ ] Create `ai/framework/styling/`
-- [ ] Create `ai/framework/workflows/`
 - [ ] Create `ai/contributing/`
-- [ ] Create `ai/contributing/docs/`
-- [ ] Create `ai/contributing/docs/development/`
-- [ ] Create `ai/contributing/workflows/`
-- [ ] Create `ai/contributing/workflows/components/`
-- [ ] Create `ai/contributing/workflows/query/`
-- [ ] Create `ai/contributing/workflows/templates/`
-- [ ] Create `ai/contributing/workflows/utils/`
-- [ ] Create `ai/contributing/workflows/documentation/`
+- [ ] Create `ai/contributing/development/`
 - [ ] Create `ai/contributing/documentation/`
 - [ ] Create `ai/contributing/documentation/page-types/`
 - [ ] Create `ai/contributing/documentation/examples/`
 - [ ] Create `ai/contributing/documentation/quality/`
+- [ ] Create `ai/contributing/documentation/enhance/`
+- [ ] Create `ai/contributing/documentation/reference/`
+- [ ] Create `ai/contributing/workflows/`
 - [ ] Create `ai/contributing/research/`
 - [ ] Create `ai/workspace/`
 - [ ] Create `ai/workspace/plans/`
 - [ ] Create `ai/workspace/artifacts/`
 - [ ] Create `ai/workspace/memory/`
 
-### 2.2 Move ui/ content
-- [ ] Create/move `ai/ui/markup.md` (from end-user/sui-usage.md)
-- [ ] Create/move `ai/ui/theming.md` (extract from css/theming.md - user-facing parts)
-- [ ] Verify ui/ is minimal and focused
+### 3.2 Move ui/ content
+- [ ] Move guides/end-user/sui-usage.md → ui/markup.md
+- [ ] Move stub files to ui/ (theming.md, events.md, customization.md)
 
-### 2.3 Move framework/ content
-- [ ] Move mental-model.md → framework/
-- [ ] Move quick-reference.md → framework/
-- [ ] Move packages/reactivity.md → framework/packages/
-- [ ] Move packages/templating.md → framework/packages/
-- [ ] Move packages/query.md → framework/packages/
-- [ ] Move packages/utils.md → framework/packages/
-- [ ] Move packages/component.md → framework/packages/
-- [ ] Move component guides → framework/components/
-- [ ] Move end-user/create-components.md → framework/components/creating.md
-- [ ] Move component-authoring-best-practices.md → framework/components/best-practices.md
-- [ ] Move relevant HTML guides → framework/styling/html.md
-- [ ] Move relevant CSS guides → framework/styling/css.md
-- [ ] Move theming guide (framework parts) → framework/styling/theming.md
-- [ ] Identify/create end-user component workflows → framework/workflows/
+### 3.3 Move framework/ content
+- [ ] Move foundations/mental-model.md → framework/mental-model.md
+- [ ] Move foundations/quick-reference.md → framework/quick-reference.md
+- [ ] Move packages/reactivity.md → framework/reactivity.md
+- [ ] Move packages/templating.md → framework/templating.md
+- [ ] Move packages/query.md → framework/query.md
+- [ ] Move packages/component.md → framework/component.md
+- [ ] Move packages/utils.md → framework/utils.md
+- [ ] Move guides/end-user/create-components.md → framework/creating-components.md
+- [ ] Move guides/components/component-authoring-best-practices.md → framework/best-practices.md
+- [ ] Move guides/components/component-portaling.md → framework/portaling.md
+- [ ] Move guides/components/parent-child-primitives.md → framework/parent-child.md
+- [ ] Move guides/query/plugins-and-behaviors.md → framework/plugins-and-behaviors.md
+- [ ] Move guides/css/theming.md → framework/theming.md
+- [ ] Move guides/css/css-guide.md → framework/css.md
+- [ ] Move guides/css/tokens/token-usage.md → framework/design-tokens.md
+- [ ] Move guides/html/style-guide.md → framework/html.md
+- [ ] Move guides/html/using-ui-primitives.md → framework/using-primitives.md
 
-### 2.4 Move contributing/ content
+### 3.4 Move contributing/ content
 - [ ] Move 00-START-HERE.md → contributing/00-START-HERE.md
-- [ ] Move codebase-navigation-guide.md → contributing/docs/codebase.md
-- [ ] Move development/testing.md → contributing/docs/development/
-- [ ] Move development/typescript-types.md → contributing/docs/development/
-- [ ] Move development/build-system.md → contributing/docs/development/
-- [ ] Move development/code-formatting.md → contributing/docs/development/
-- [ ] Move packages/specs.md → contributing/docs/ (internal spec system)
-- [ ] Move all contributing workflows → contributing/workflows/
-- [ ] Move documentation/*.md → contributing/documentation/
-- [ ] Move all research/ → contributing/research/
+- [ ] Move foundations/codebase-navigation-guide.md → contributing/codebase-navigation.md
+- [ ] Move packages/specs.md → contributing/specs.md
+- [ ] Move guides/css/tokens/architecture.md → contributing/token-architecture.md
+- [ ] Move guides/development/*.md → contributing/development/
+- [ ] Move documentation/*.md → contributing/documentation/ (preserve subfolders)
+- [ ] Move workflows/*.md → contributing/workflows/ (flatten structure)
+- [ ] Move research/ → contributing/research/
 
-### 2.5 Move workspace/ content
+### 3.5 Move workspace/ content
 - [ ] Move this plan → workspace/plans/mcp-restructure-plan.md
 - [ ] Move artifacts/ contents → workspace/artifacts/
 - [ ] Create workspace/memory/ (empty initially)
-- [ ] Move any other working documents → appropriate workspace/ subfolder
 
-### 2.6 Update internal links
+### 3.6 Update internal links
 - [ ] Grep for all internal links in moved files
 - [ ] Update relative paths
 - [ ] Update absolute paths (/ai/...)
 - [ ] Verify no broken links
 
----
-
-## Phase 3: Add Frontmatter to All Docs
-
-### 3.1 Define frontmatter schema
-- [ ] Document required fields: title, description, audience, type
-- [ ] Document optional fields: keywords, prerequisites
-- [ ] Create template for each type (doc, workflow, research)
-
-### 3.2 Add frontmatter to ui/ docs
-- [ ] ui/markup.md
-- [ ] ui/theming.md (if exists)
-
-### 3.3 Add frontmatter to framework/ docs
-- [ ] framework/mental-model.md
-- [ ] framework/quick-reference.md
-- [ ] All files in framework/packages/
-- [ ] All files in framework/components/
-- [ ] All files in framework/styling/
-- [ ] All files in framework/workflows/
-
-### 3.4 Add frontmatter to contributing/ docs
-- [ ] contributing/00-START-HERE.md
-- [ ] All files in contributing/docs/
-- [ ] All files in contributing/docs/development/
-- [ ] All files in contributing/workflows/ (all subfolders)
-- [ ] All files in contributing/documentation/
-- [ ] All files in contributing/documentation/page-types/
-- [ ] All files in contributing/documentation/examples/
-- [ ] All files in contributing/documentation/quality/
-- [ ] All files in contributing/research/ (100+ files - use batch script below)
-
-### 3.5a Research frontmatter batch script
-Since research/ has 100+ files, write a script to auto-generate frontmatter:
-- [ ] Script reads each .md file in contributing/research/
-- [ ] Extracts component name from folder (e.g., accordion/, button/)
-- [ ] Generates frontmatter with title, audience=contributing, type=research
-- [ ] Prepends frontmatter to files that don't have it
-- [ ] Run script and verify output
-
-### 3.5 Workspace files (no frontmatter needed)
-- [ ] workspace/plans/ - Active plans, no manifest
-- [ ] workspace/artifacts/ - Working materials, no manifest
-- [ ] workspace/memory/ - Scratch space, no manifest
-
-Note: Workspace is for active/ephemeral working materials. No manifest generation needed.
-
-### 3.6 Validate frontmatter
-- [ ] Write validation script to check all docs have required fields
-- [ ] Run validation, fix any missing frontmatter
-- [ ] Verify audience values are valid (ui|framework|contributing)
-- [ ] Verify type values are valid (doc|workflow|research)
+Note: Workspace is for active/ephemeral working materials. No frontmatter, no manifest.
 
 ---
 
@@ -398,11 +430,16 @@ Note: Workspace is for active/ephemeral working materials. No manifest generatio
       "keywords": ["architecture", "reactivity"],
       "audience": "framework",
       "type": "doc",
-      "tokens": 3000
+      "tokens": 3000,
+      "lastModified": "2025-01-08T14:32:00Z"
     }
   ]
 }
 ```
+
+**Computed fields**:
+- `tokens`: Character count / 4 (rough token estimate)
+- `lastModified`: `git log -1 --format=%cI -- <filepath>`
 
 ### 4.3 Test manifest generation
 - [ ] Run script locally
@@ -540,10 +577,8 @@ Based on target structure mapping above:
 ### Destination (New Structure)
 | Folder | Est. Files | MCP? | Frontmatter? |
 |--------|------------|------|--------------|
-| ai/ui/ | 1 | Yes | Yes |
-| ai/framework/ | ~17 | Yes | Yes |
-| ai/framework/packages/ | 5 | Yes | Yes |
-| ai/framework/guides/ | 10 | Yes | Yes |
+| ai/ui/ | 4 | Yes | Yes |
+| ai/framework/ | 17 | Yes | Yes |
 | ai/contributing/ | ~4 | No | Yes |
 | ai/contributing/development/ | 4 | No | Yes |
 | ai/contributing/documentation/ | ~15 | No | Yes |
@@ -551,19 +586,19 @@ Based on target structure mapping above:
 | ai/contributing/research/ | ~100+ | No | Yes (batch) |
 | ai/workspace/ | ~20 | No | No |
 | ai/meta/ | 2 | Yes | N/A (generated) |
-| **Total** | **~190** | | |
+| **Total** | **~175** | | |
 
 ### MCP-Served Content
-- **ui/**: 1 file (~3K tokens)
-- **framework/**: ~17 files (~50K tokens total)
+- **ui/**: 4 files (~10K tokens) - markup, theming, events, customization
+- **framework/**: 16 files (~60K tokens total) - flat structure
 - **manifest.json**: Generated index
 
 ### Effort by Phase
 | Phase | Effort | Notes |
 |-------|--------|-------|
-| 1. Audit | Medium | Verify file mapping above |
-| 2. Move files | Medium | Mostly mechanical |
-| 3. Frontmatter | High | 100+ research files need batch processing |
+| 1. Audit | Medium | Verify file mapping, create stubs |
+| 2. Frontmatter | High | 100+ research files need batch processing |
+| 3. Move files | Medium | Mostly mechanical |
 | 4. Manifest script | Medium | ~100 lines of JS |
 | 5. MCP update | Medium | Remove bundling, add fetch |
 | 6. Docs site | Low | Symlinks + Vercel |
@@ -603,7 +638,7 @@ Based on target structure mapping above:
 - Commit after each completed phase
 - This plan may be executed across multiple agent sessions
 - Update this document as work progresses
-- **High-effort items**: Phase 1.4 categorization, Phase 3.5a research frontmatter batch script
+- **High-effort items**: Phase 1 categorization + stubs, Phase 2.5 research frontmatter batch script
 - After completion, move this plan to `workspace/plans/archive/`
 
 ## Missing Files to Handle
