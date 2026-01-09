@@ -1,11 +1,14 @@
-import { execSync } from 'child_process';
+import { statSync } from 'fs';
 import matter from 'gray-matter';
+import { resolve } from 'path';
 
 export async function getDocsManifestData() {
   const allDocs = import.meta.glob('../pages/docs/**/*.mdx', {
     query: '?raw',
     eager: true,
   });
+
+  const rootDir = process.cwd();
 
   const pages = Object.entries(allDocs).map(([filePath, module]) => {
     const content = module.default;
@@ -17,16 +20,14 @@ export async function getDocsManifestData() {
 
     const tokens = Math.ceil(content.length / 4);
 
+    // Last modified from filesystem
     let lastModified = null;
     try {
-      const gitPath = `docs/src/pages/docs/${relativePath}`;
-      lastModified = execSync(`git log -1 --format=%cI -- "${gitPath}"`, {
-        encoding: 'utf-8',
-        cwd: process.cwd().replace('/docs', ''),
-      }).trim();
+      const fsPath = resolve(rootDir, `src/pages/docs/${relativePath}`);
+      lastModified = statSync(fsPath).mtime.toISOString();
     }
-    catch (e) {
-      // Git command failed, leave as null
+    catch {
+      // File stat failed, leave as null
     }
 
     return {

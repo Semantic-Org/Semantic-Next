@@ -15,9 +15,10 @@ export async function getStaticPaths() {
       allFiles: allExampleFiles,
       basePath: '../../../examples/',
       includeFolder: example.exampleType == 'folder',
-      hideBoilerplate: false,
-      includePlaygroundInjections: true,
-      includeLog: false,
+      hideBoilerplate: true,
+      includePlaygroundInjections: false,
+      includeLog: example.data.exampleType == 'log',
+      includeError: false,
       includeImportMap: false,
     });
     files = mapObject(files, file => (file.generated) ? '' : file.content);
@@ -40,7 +41,6 @@ export async function getStaticPaths() {
   each(paths, (path) => {
     allProps[path.params.slug] = path.props;
   });
-
   paths.push({
     params: { slug: 'all' },
     props: allProps,

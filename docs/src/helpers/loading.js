@@ -16,7 +16,9 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
   }
 
   // Convert to absolute path for glob search
-  const searchBase = path.resolve(__dirname, '..', baseFolder.replace('../../', ''));
+  // Strip all leading '../' and resolve from docs/src/
+  const strippedBase = baseFolder.replace(/^(\.\.\/)+/, '');
+  const searchBase = path.resolve(__dirname, '..', strippedBase);
 
   // Generate search patterns dynamically based on depth
   const globPatterns = [];
@@ -37,8 +39,8 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
 
     for (const filePath of matchedFiles) {
       // Convert absolute path back to the relative format that getExampleFiles expects
-      const relativePath = path.relative(path.resolve(__dirname, '..'), filePath);
-      const globStylePath = ('../../' + relativePath).replace(/\\/g, '/');
+      const relativePath = path.relative(searchBase, filePath);
+      const globStylePath = (baseFolder + relativePath).replace(/\\/g, '/');
 
       files[globStylePath] = async () => {
         const content = fs.readFileSync(filePath, 'utf8');

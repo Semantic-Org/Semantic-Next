@@ -1,5 +1,6 @@
-import { execSync } from 'child_process';
+import { statSync } from 'fs';
 import matter from 'gray-matter';
+import { resolve } from 'path';
 
 const AUDIENCE_ORDER = ['ui', 'framework', 'contributing', 'research'];
 
@@ -23,6 +24,7 @@ export async function getAIManifestData() {
   });
 
   const allDocs = { ...uiDocs, ...frameworkDocs, ...contributingDocs, ...researchDocs };
+  const rootDir = process.cwd().replace('/docs', '');
 
   const pages = Object.entries(allDocs).map(([filePath, module]) => {
     const content = module.default;
@@ -38,17 +40,14 @@ export async function getAIManifestData() {
     // Token count (chars / 4 rough estimate)
     const tokens = Math.ceil(content.length / 4);
 
-    // Last modified from git
+    // Last modified from filesystem
     let lastModified = null;
     try {
-      const gitPath = `ai/${audience}/${slug}.md`;
-      lastModified = execSync(`git log -1 --format=%cI -- "${gitPath}"`, {
-        encoding: 'utf-8',
-        cwd: process.cwd().replace('/docs', ''),
-      }).trim();
+      const fsPath = resolve(rootDir, `ai/${audience}/${slug}.md`);
+      lastModified = statSync(fsPath).mtime.toISOString();
     }
-    catch (e) {
-      // Git command failed, leave as null
+    catch {
+      // File stat failed, leave as null
     }
 
     return {
@@ -59,6 +58,7 @@ export async function getAIManifestData() {
       audience,
       tokens,
       lastModified,
+      ...(frontmatter.skill && { skill: frontmatter.skill }),
     };
   });
 
@@ -91,11 +91,12 @@ export function buildSlimManifest(pages) {
     generated: new Date().toISOString(),
     totalPages: pages.length,
     totalTokens: pages.reduce((sum, p) => sum + p.tokens, 0),
-    pages: pages.map(({ path, title, audience, tokens }) => ({
+    pages: pages.map(({ path, title, audience, tokens, skill }) => ({
       path,
       title,
       audience,
       tokens,
+      ...(skill && { skill }),
     })),
   };
 }
