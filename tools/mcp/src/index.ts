@@ -2,6 +2,7 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import * as reactivity from '@semantic-ui/reactivity';
 import { TemplateCompiler } from '@semantic-ui/templating';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
@@ -14,6 +15,9 @@ import {
   findContext,
   findDoc,
   findExample,
+  findRelatedForDoc,
+  findRelatedForExample,
+  findRelatedForSpec,
   findSkill,
   initCache,
   listContext,
@@ -44,6 +48,7 @@ function runLogExample(code: string): { logs: string[]; error?: string; } {
   // Build context with utils exports + mock console
   const context: Record<string, unknown> = {
     ...utils,
+    ...reactivity,
     console: mockConsole,
   };
 
@@ -54,12 +59,18 @@ function runLogExample(code: string): { logs: string[]; error?: string; } {
   );
 
   try {
+    // Debug: log available keys
+    console.error('Available in context:', Object.keys(filteredContext).filter(k => /^[A-Z]/.test(k)));
+
     // Use with + proxy pattern for controlled scope
     const proxyHandler = {
       has(target: Record<string, unknown>, key: string) {
-        return key in target;
+        const result = key in target;
+        if (key === 'Signal') { console.error(`has('Signal') = ${result}`); }
+        return result;
       },
       get(target: Record<string, unknown>, prop: string) {
+        if (prop === 'Signal') { console.error(`get('Signal') =`, target[prop]); }
         return target[prop];
       },
     };
@@ -92,6 +103,86 @@ const server = new McpServer({
 });
 
 // ============================================================================
+// Orientation / Help
+// ============================================================================
+
+const HELP_TEXT = `# Semantic UI MCP Server
+
+## Quick Start
+
+**Already know Tailwind?** Just use it. Tailwind works inside Shadow DOM with \`TailwindPlugin\`:
+\`\`\`js
+defineComponent({ tagName: 'my-component', plugins: [TailwindPlugin] })
+\`\`\`
+Write classes you know. The sophisticated theming system is there when needed, not required.
+
+## Tools Overview
+
+### Discovery
+- \`search\` - Find anything: components, examples, docs. Start here when unsure.
+- \`list_components\` - See all UI components (button, card, modal, etc.)
+- \`list_examples\` - Browse working code examples by category
+- \`list_skills\` - See available deep-dive guides
+- \`list_user_docs\` - Browse user documentation (guides, API reference)
+
+### Get Content
+- \`get_component\` - Full spec for a component (attributes, variations, states)
+- \`get_example\` - Working code to reference or adapt
+- \`get_api\` - Look up a specific method by name (e.g., "weightedObjectSearch")
+- \`get_user_doc\` - User documentation by path:
+  - \`api/*\` - Function signatures, parameters, return types (reference format)
+  - \`guides/*\` - Tutorials explaining concepts and usage patterns
+
+### Learn (AI-Optimized Docs)
+- \`use_skill\` - Comprehensive guide for a topic (utils, reactivity, templating, etc.)
+- \`get_context\` - AI context docs by path (internal patterns, architecture details)
+
+### Utilities
+- \`validate_template\` - Check template syntax before running
+
+## Typical Workflows
+
+**Building a UI component:**
+1. \`get_component\` → see what attributes/slots are available
+2. \`get_example\` → find working code to adapt
+3. Write your component using specs as reference
+
+**Learning a package:**
+1. \`use_skill\` → load the comprehensive guide (e.g., "utils", "reactivity")
+2. \`get_api\` → look up specific methods as needed
+3. \`get_example\` → see working demonstrations
+
+**Finding something:**
+1. \`search\` → find it by keyword
+2. Results include \`related\` field pointing to connected content
+
+## Response Format
+
+Most \`get_*\` tools return a \`related\` field with connected content:
+\`\`\`json
+{
+  "content": "...",
+  "related": {
+    "examples": ["utils-weightedobjectsearch"],
+    "skills": ["utils"],
+    "docs": ["api/utils/arrays"]
+  }
+}
+\`\`\`
+`;
+
+server.tool(
+  'help',
+  'Get orientation for using this MCP server. Start here to understand available tools and workflows.',
+  {},
+  async () => {
+    return {
+      content: [{ type: 'text', text: HELP_TEXT }],
+    };
+  },
+);
+
+// ============================================================================
 // Component Tools
 // ============================================================================
 
@@ -108,8 +199,10 @@ server.tool(
       };
     }
 
+    // Slim: id + name only
+    const slim = components.map(c => ({ id: c.id, name: c.name }));
     return {
-      content: [{ type: 'text', text: JSON.stringify(components, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(slim) }],
     };
   },
 );
@@ -134,10 +227,16 @@ server.tool(
     }
 
     const { resolved, spec, children } = result.data!;
+
+    // Find related examples for this component
+    const componentId = spec.tagName.replace('ui-', '');
+    const related = findRelatedForSpec(componentId);
+
     const response = {
       resolved,
       spec,
       ...(children.length > 0 && { children }),
+      ...(Object.keys(related).length > 0 && { related }),
     };
 
     return {
@@ -168,8 +267,14 @@ server.tool(
       };
     }
 
+    // Slim: id + title, include category only when unfiltered
+    const slim = examples.map(e =>
+      category
+        ? { id: e.id, title: e.title }
+        : { id: e.id, title: e.title, category: e.category }
+    );
     return {
-      content: [{ type: 'text', text: JSON.stringify(examples, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(slim) }],
     };
   },
 );
@@ -207,19 +312,40 @@ server.tool(
 
     const data = result.data!;
 
+    // Find related API docs for this example
+    const related = findRelatedForExample(example);
+
     // Run log-type examples and capture output
     if (data.exampleType === 'log' && data.files['index.js']) {
       const { logs, error } = runLogExample(data.files['index.js']);
       return {
         content: [{
           type: 'text',
-          text: JSON.stringify({ ...data, output: { logs, error } }, null, 2),
+          text: JSON.stringify(
+            {
+              ...data,
+              output: { logs, error },
+              ...(Object.keys(related).length > 0 && { related }),
+            },
+            null,
+            2,
+          ),
         }],
       };
     }
 
     return {
-      content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+      content: [{
+        type: 'text',
+        text: JSON.stringify(
+          {
+            ...data,
+            ...(Object.keys(related).length > 0 && { related }),
+          },
+          null,
+          2,
+        ),
+      }],
     };
   },
 );
@@ -361,8 +487,8 @@ server.tool(
 // ============================================================================
 
 server.tool(
-  'list_docs',
-  'List available user documentation pages.',
+  'list_user_docs',
+  'List user documentation pages (guides, API reference). Markdown files written for developers learning the framework.',
   {},
   async () => {
     const docs = listDocs();
@@ -380,8 +506,8 @@ server.tool(
 );
 
 server.tool(
-  'get_doc',
-  'Get the content of a user documentation page by path (e.g., "guides/reactivity/signals").',
+  'get_user_doc',
+  'Get user documentation page by path. Markdown guides and API reference for developers.',
   {
     path: z.string().describe('Document path (e.g., "guides/reactivity/signals", "api/component")'),
   },
@@ -407,8 +533,19 @@ server.tool(
       };
     }
 
+    // Find related examples and skills
+    const related = findRelatedForDoc(doc);
+
+    // Return structured response with content and related
+    const response = {
+      path,
+      title: doc.title,
+      content: result.data!,
+      ...(Object.keys(related).length > 0 && { related }),
+    };
+
     return {
-      content: [{ type: 'text', text: result.data! }],
+      content: [{ type: 'text', text: JSON.stringify(response, null, 2) }],
     };
   },
 );
@@ -450,10 +587,21 @@ server.tool(
 
     // Extract just the section for the requested method
     const section = extractMarkdownSection(result.data!, method);
-    const content = section || result.data!;
+    const apiContent = section || result.data!;
+
+    // Find related examples and skills
+    const related = findRelatedForDoc(doc);
+
+    // Return structured response with content and related
+    const response = {
+      method,
+      package: doc.package,
+      content: apiContent,
+      ...(Object.keys(related).length > 0 && { related }),
+    };
 
     return {
-      content: [{ type: 'text', text: content }],
+      content: [{ type: 'text', text: JSON.stringify(response, null, 2) }],
     };
   },
 );

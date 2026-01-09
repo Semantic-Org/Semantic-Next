@@ -324,7 +324,7 @@ export function rewriteMarkdownLinks(content: string, sourcePath?: string): stri
     // Pattern: /docs/src/pages/docs/api/*.mdx or /content/docs/api/*.md
     const apiMatch = resolvedUrl.match(/(?:\/content)?\/docs\/(?:src\/pages\/)?(?:docs\/)?api\/([^)]+?)(?:\.mdx?)?$/);
     if (apiMatch) {
-      return `${text} (\`get_doc: api/${apiMatch[1]}\`)`;
+      return `${text} (\`get_user_doc: api/${apiMatch[1]}\`)`;
     }
 
     // Pattern: /docs/src/pages/docs/guides/*.mdx
@@ -332,7 +332,7 @@ export function rewriteMarkdownLinks(content: string, sourcePath?: string): stri
       /(?:\/content)?\/docs\/(?:src\/pages\/)?(?:docs\/)?guides\/([^)]+?)(?:\.mdx?)?$/,
     );
     if (guideMatch) {
-      return `${text} (\`get_doc: guides/${guideMatch[1]}\`)`;
+      return `${text} (\`get_user_doc: guides/${guideMatch[1]}\`)`;
     }
 
     // Keep original if no pattern matches
@@ -498,4 +498,126 @@ export function searchApi(method: string, pkg?: string): DocItem | null {
   }) as DocItem[];
 
   return results[0] || null;
+}
+
+// Related content interface
+export interface Related {
+  examples?: string[];
+  skills?: string[];
+  docs?: string[];
+}
+
+// Normalization helpers for convention-based linking
+function methodToKebab(method: string): string {
+  // weightedObjectSearch → weightedobjectsearch
+  return method.toLowerCase();
+}
+
+function packageToSkill(pkg: string): string {
+  // @semantic-ui/utils → utils
+  return pkg.replace('@semantic-ui/', '');
+}
+
+function extractFunctionFromExampleId(id: string): string | null {
+  // utils-weightedobjectsearch → weightedobjectsearch
+  // Skip common prefixes
+  const prefixes = ['utils-', 'query-', 'reactivity-', 'templating-', 'component-'];
+  for (const prefix of prefixes) {
+    if (id.startsWith(prefix)) {
+      return id.slice(prefix.length);
+    }
+  }
+  return null;
+}
+
+// Find related content for a doc (API doc)
+export function findRelatedForDoc(doc: DocItem): Related {
+  const related: Related = {};
+
+  // Find examples where ID contains any method name (kebab-case)
+  if (doc.methods && doc.methods.length > 0) {
+    const matchingExamples: string[] = [];
+    for (const method of doc.methods) {
+      const kebab = methodToKebab(method);
+      for (const example of cache.examples) {
+        if (example.id.includes(kebab) && !matchingExamples.includes(example.id)) {
+          matchingExamples.push(example.id);
+        }
+      }
+    }
+    if (matchingExamples.length > 0) {
+      related.examples = matchingExamples;
+    }
+  }
+
+  // Find skill matching package name
+  if (doc.package) {
+    const skillName = packageToSkill(doc.package);
+    const skill = cache.context.find(c => c.skill === skillName);
+    if (skill) {
+      related.skills = [skillName];
+    }
+  }
+
+  return related;
+}
+
+// Find related content for an example
+export function findRelatedForExample(example: ExampleItem): Related {
+  const related: Related = {};
+
+  // Extract function name from example ID
+  const funcName = extractFunctionFromExampleId(example.id);
+  if (funcName) {
+    // Find docs whose methods[] includes the function name
+    const matchingDocs: string[] = [];
+    for (const doc of cache.docs) {
+      if (doc.methods) {
+        for (const method of doc.methods) {
+          if (methodToKebab(method) === funcName) {
+            // Convert path to shorthand: /content/docs/api/utils/objects.md → api/utils/objects
+            const shortPath = doc.path
+              .replace('/content/docs/', '')
+              .replace('.md', '');
+            if (!matchingDocs.includes(shortPath)) {
+              matchingDocs.push(shortPath);
+            }
+          }
+        }
+      }
+    }
+    if (matchingDocs.length > 0) {
+      related.docs = matchingDocs;
+    }
+  }
+
+  return related;
+}
+
+// Find related content for a component spec
+export function findRelatedForSpec(componentId: string): Related {
+  const related: Related = {};
+
+  // Find examples whose ID contains component name
+  const componentName = componentId.toLowerCase();
+  const matchingExamples: string[] = [];
+
+  for (const example of cache.examples) {
+    const exampleId = example.id.toLowerCase();
+    // Match component name at start, end, or as separate word (with hyphen)
+    if (
+      exampleId.startsWith(componentName + '-')
+      || exampleId.endsWith('-' + componentName)
+      || exampleId.includes('-' + componentName + '-')
+      || exampleId === componentName
+    ) {
+      matchingExamples.push(example.id);
+    }
+  }
+
+  if (matchingExamples.length > 0) {
+    related.examples = matchingExamples;
+  }
+
+  return related;
 }
