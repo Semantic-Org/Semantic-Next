@@ -337,3 +337,163 @@ Sometimes the best debugging tool is a patient, systematic exploration that help
 *— Claude (Opus 4.1), 2025-11-19*
 
 *"The bug that breaks production often carries the insight that improves architecture."*
+
+---
+
+## Entry 3: The Content API & AI Discoverability
+**Date:** 2026-01-08
+**Agent:** Claude (Opus 4.5)
+**Task:** Design and implement content API for AI agent consumption + copy-as-markdown functionality
+**Session:** Design Discussion → Iterative Implementation → Documentation
+
+### The Journey
+
+Started with a simple question: "How should users copy page contents as markdown when the site converts MDX to HTML at build time?"
+
+Ended with a complete content API serving three audiences: user docs, examples, and AI context.
+
+### The Design Process
+
+**Initial options discussed:**
+1. Fetch from GitHub raw URLs - simple but external dependency
+2. Build-time copy to `/public/raw/` - duplicate files
+3. Embed raw content in page - bloats every page load
+4. Content API routes - process and serve on demand
+
+**Key insight from user:** *"almost -- the copy button would copy the user guide, this will be a separate set of contexts that will be accessible so that an ai can also search user_docs programmatically"*
+
+This reframed the problem: we weren't just adding a copy button, we were building infrastructure for AI discoverability.
+
+### What We Built
+
+```
+/content/docs/manifest.json     # 126 pages, ~150k tokens
+/content/docs/[...slug].md      # Processed markdown (imports stripped, JSX replaced)
+/content/examples/manifest.json # 339 examples with token counts
+/content/examples/[slug].json   # Source files per example
+/content/ai/manifest.json       # AI context docs (ui + framework)
+/content/ai/[...slug].md        # Raw AI context markdown
+/llms.txt                       # Discovery file pointing to all manifests
+```
+
+### Key Technical Decisions
+
+**1. Astro dynamic routes over build scripts**
+
+User had existing pattern in `/content-api/` using `getStaticPaths()` + `GET()`. We followed it:
+
+```js
+export async function getStaticPaths() {
+  const allDocs = import.meta.glob('../../docs/**/*.mdx', {
+    query: '?raw',
+    eager: true,
+  });
+  return Object.entries(allDocs).map(([path, content]) => ({
+    params: { slug: path.replace('../../docs/', '').replace('.mdx', '') },
+    props: { content: content.default }
+  }));
+}
+```
+
+No separate build step. No file copying. Astro handles it.
+
+**2. Direct glob over symlinks**
+
+For AI context (`ai/ui/`, `ai/framework/`), we considered symlinking into `docs/public/`. Instead:
+
+```js
+const uiDocs = import.meta.glob('../../../../../ai/ui/**/*.md', { query: '?raw', eager: true });
+const frameworkDocs = import.meta.glob('../../../../../ai/framework/**/*.md', { query: '?raw', eager: true });
+```
+
+Globs directly from source. No symlinks, no copy scripts, no sync issues.
+
+**3. Relative URLs for portability**
+
+User tested Anthropic docs - they use relative paths. We followed:
+```js
+'> **[Interactive Example: $1](/examples/$1)** | [source](/content/examples/$1.json)'
+```
+
+Works across environments without hardcoded domains.
+
+**4. Manifest schema consistency**
+
+All three manifests share the same shape:
+```json
+{
+  "schemaVersion": 1,
+  "generated": "...",
+  "totalPages": 126,
+  "totalTokens": 150000,
+  "pages": [{ "path", "title", "description", "keywords", "tokens", "lastModified" }]
+}
+```
+
+AI agents can consume any manifest the same way.
+
+### Mistakes & Course Corrections
+
+**1. Over-engineered the manifest**
+
+Initially added `audiences: { ui: 4, framework: 18 }` summary. User asked: "what was the thought behind this?" - made me realize it was redundant. Agents can filter/count themselves. Removed.
+
+**2. Unicode encoding issue**
+
+Used `·` (middle dot) as separator. Rendered as `Â·`. Quick fix: plain ASCII `|` instead.
+
+**3. Wrong glob pattern for examples**
+
+First attempt used `getFolder()` helper - files came back empty. Looked at working `all.txt.js` - it uses `import.meta.glob()` directly. Matched the pattern, worked immediately.
+
+### Iterative Development Pattern
+
+This session exemplified rapid iteration:
+
+1. Write minimal implementation
+2. User tests immediately ("test this URL")
+3. Identify issues in real output
+4. Fix and re-test
+5. Repeat
+
+No elaborate planning. No spec documents. Just: build → test → fix → ship.
+
+### What Future Agents Should Know
+
+**For content API work:**
+- Astro's `import.meta.glob` with `?raw` is powerful - reads source files at build time
+- `[...slug]` rest params work for nested paths
+- `gray-matter` parses frontmatter reliably
+- Git commands work in Astro build context for `lastModified`
+
+**For AI discoverability:**
+- Manifests enable programmatic discovery without crawling
+- Token counts help agents budget context windows
+- `llms.txt` at root is becoming standard (see Anthropic, Vercel)
+- Separate user docs from AI context - different audiences, different needs
+
+**For collaboration:**
+- User testing in real-time catches issues faster than speculation
+- "Let's try it" beats "let's plan it" for incremental features
+- When user has existing patterns (content-api), follow them
+- Simple questions ("what was the thought behind this?") often reveal over-engineering
+
+### The Bigger Picture
+
+This wasn't just about a copy button. It was about making documentation consumable by AI agents - both the user-facing docs (comprehensive, with examples) and AI context (curated, optimized for LLMs).
+
+The infrastructure now supports:
+- Copy-as-markdown for human users
+- Programmatic doc discovery for AI agents
+- MCP tool integration (plan exists at `ai/workspace/plans/mcp-user-docs-tools.md`)
+- Future `llms-full.txt` concatenation if needed
+
+### Signing Off
+
+Good infrastructure disappears. Users click "copy" and get markdown. AI agents fetch a manifest and find what they need. Nobody thinks about the routes, the globs, the processing.
+
+That's the goal.
+
+*— Claude (Opus 4.5), 2026-01-08*
+
+*"Build for the user's workflow, not for architectural elegance. The best infrastructure is invisible."*
