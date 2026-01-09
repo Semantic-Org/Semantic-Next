@@ -23,8 +23,10 @@ export interface ContextItem {
   type: 'context';
   path: string;
   title: string;
+  description?: string;
   tokens: number;
   audience: 'ui' | 'framework' | 'contributing' | 'research';
+  skill?: string;
 }
 
 export interface DocItem {
@@ -72,28 +74,31 @@ async function fetchWithTimeout(url: string, timeout = 30000): Promise<Response>
   }
 }
 
-async function fetchManifest<T>(endpoint: string): Promise<T | null> {
+interface ManifestResult<T> {
+  data: T | null;
+  error?: string;
+  url: string;
+}
+
+async function fetchManifest<T>(endpoint: string): Promise<ManifestResult<T>> {
   const baseUrl = getDocsBaseUrl();
   const fullUrl = `${baseUrl}${endpoint}`;
-  console.error(`[semantic-ui-mcp] Fetching manifest: ${fullUrl}`);
+
   try {
     const response = await fetchWithTimeout(fullUrl);
     if (!response.ok) {
-      console.error(`[semantic-ui-mcp] Failed to fetch ${endpoint}: ${response.status}`);
-      return null;
+      return { data: null, error: `HTTP ${response.status}`, url: fullUrl };
     }
     const data = await response.json() as T;
-    console.error(`[semantic-ui-mcp] Got manifest ${endpoint}: ${JSON.stringify(data).slice(0, 100)}...`);
-    return data;
+    return { data, url: fullUrl };
   }
   catch (error) {
-    console.error(`[semantic-ui-mcp] Error fetching ${endpoint}:`, error instanceof Error ? error.message : error);
-    return null;
+    const msg = error instanceof Error ? error.message : String(error);
+    return { data: null, error: msg, url: fullUrl };
   }
 }
 
 export async function initCache(): Promise<void> {
-  // Ensure config is ready before fetching
   await ensureConfigReady();
 
   const now = Date.now();
@@ -103,56 +108,60 @@ export async function initCache(): Promise<void> {
     return;
   }
 
-  console.error('[semantic-ui-mcp] Initializing content cache...');
-
-  const [specsManifest, examplesManifest, contextManifest, docsManifest] = await Promise.all([
+  const [specsResult, examplesResult, contextResult, docsResult] = await Promise.all([
     fetchManifest<{ specs: Omit<SpecItem, 'type'>[]; }>('/content/specs/index.min.json'),
     fetchManifest<{ examples: Omit<ExampleItem, 'type'>[]; }>('/content/examples/index.min.json'),
     fetchManifest<{ pages: Omit<ContextItem, 'type'>[]; }>('/content/ai/index.min.json'),
     fetchManifest<{ pages: Omit<DocItem, 'type'>[]; }>('/content/docs/index.min.json'),
   ]);
 
-  const failed: string[] = [];
+  const errors: string[] = [];
 
-  if (specsManifest?.specs) {
-    cache.specs = specsManifest.specs.map(s => ({ ...s, type: 'spec' as const }));
+  if (specsResult.data?.specs) {
+    cache.specs = specsResult.data.specs.map(s => ({ ...s, type: 'spec' as const }));
   }
   else {
-    failed.push('specs');
+    errors.push(`specs: ${specsResult.error} (${specsResult.url})`);
   }
 
-  if (examplesManifest?.examples) {
-    cache.examples = examplesManifest.examples.map(e => ({ ...e, type: 'example' as const }));
+  if (examplesResult.data?.examples) {
+    cache.examples = examplesResult.data.examples.map(e => ({ ...e, type: 'example' as const }));
   }
   else {
-    failed.push('examples');
+    errors.push(`examples: ${examplesResult.error} (${examplesResult.url})`);
   }
 
-  if (contextManifest?.pages) {
-    cache.context = contextManifest.pages.map(c => ({ ...c, type: 'context' as const }));
+  if (contextResult.data?.pages) {
+    cache.context = contextResult.data.pages.map(c => ({ ...c, type: 'context' as const }));
   }
   else {
-    failed.push('context');
+    errors.push(`context: ${contextResult.error} (${contextResult.url})`);
   }
 
-  if (docsManifest?.pages) {
-    cache.docs = docsManifest.pages.map(d => ({ ...d, type: 'doc' as const }));
+  if (docsResult.data?.pages) {
+    cache.docs = docsResult.data.pages.map(d => ({ ...d, type: 'doc' as const }));
   }
   else {
-    failed.push('docs');
+    errors.push(`docs: ${docsResult.error} (${docsResult.url})`);
   }
 
   cache.ready = true;
   cache.lastUpdated = now;
 
-  if (failed.length > 0) {
-    console.error(`[semantic-ui-mcp] WARNING: Failed to load manifests: ${failed.join(', ')}`);
-    console.error(`[semantic-ui-mcp] Some tools may return empty results. Check if the docs server is running.`);
+  if (errors.length === 4) {
+    console.error(`[semantic-ui-mcp] ERROR: Could not load any manifests from ${getDocsBaseUrl()}`);
+    console.error(`[semantic-ui-mcp] The server may be down or the content API endpoints don't exist.`);
+    each(errors, err => console.error(`  - ${err}`));
   }
-
-  console.error(
-    `[semantic-ui-mcp] Cache initialized: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context docs, ${cache.docs.length} user docs`,
-  );
+  else if (errors.length > 0) {
+    console.error(`[semantic-ui-mcp] WARNING: Some manifests failed to load:`);
+    each(errors, err => console.error(`  - ${err}`));
+  }
+  else {
+    console.error(
+      `[semantic-ui-mcp] Loaded: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context, ${cache.docs.length} docs`,
+    );
+  }
 }
 
 export function isCacheReady(): boolean {
@@ -180,6 +189,15 @@ export function listContext(audience?: 'ui' | 'framework' | 'contributing' | 're
 
 export function listDocs(): DocItem[] {
   return cache.docs;
+}
+
+// Skill functions
+export function listSkills(): ContextItem[] {
+  return cache.context.filter(c => c.skill);
+}
+
+export function findSkill(name: string): ContextItem | undefined {
+  return cache.context.find(c => c.skill === name);
 }
 
 // Search function
@@ -220,8 +238,8 @@ export function search(query: string, options: SearchOptions = {}): ContentItem[
   }
 
   const results = weightedObjectSearch(query, pool, {
-    propertiesToMatch: ['title', 'name', 'id', 'path', 'category', 'audience'],
-    matchAllWords: true,
+    propertiesToMatch: ['title', 'name', 'id', 'path', 'category', 'audience', 'methods', 'package'],
+    matchAllWords: false,
   }) as ContentItem[];
 
   return results.slice(0, limit);
@@ -235,8 +253,112 @@ export interface FetchResult<T> {
   url: string;
 }
 
+// Skill mappings for link rewriting
+const SKILL_MAPPINGS: Record<string, string> = {
+  'utils': 'utils',
+  'reactivity': 'reactivity',
+  'query': 'query',
+  'templating': 'templating',
+  'component': 'component',
+  'creating-components': 'creating-components',
+  'best-practices': 'best-practices',
+  'theming': 'theming',
+  'css': 'css',
+  'design-tokens': 'design-tokens',
+  'html': 'html',
+  'markup': 'markup',
+  'behaviors': 'behaviors',
+  'plugins-and-behaviors': 'behaviors',
+  'primitives': 'primitives',
+  'using-primitives': 'primitives',
+  'parent-child': 'parent-child',
+  'portaling': 'portaling',
+  'mental-model': 'mental-model',
+  'authoring-components': 'web-components',
+};
+
+// Rewrite markdown links to MCP tool suggestions
+export function rewriteMarkdownLinks(content: string, sourcePath?: string): string {
+  // Match markdown links: [text](url)
+  return content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    // Skip external URLs and anchors
+    if (url.startsWith('http') || url.startsWith('#')) {
+      return match;
+    }
+
+    // Resolve relative paths if we have a source path
+    let resolvedUrl = url;
+    if (sourcePath && (url.startsWith('./') || url.startsWith('../'))) {
+      const sourceDir = sourcePath.substring(0, sourcePath.lastIndexOf('/'));
+      resolvedUrl = resolvePath(sourceDir, url);
+    }
+
+    // Pattern: /ai/framework/*.md or /content/ai/framework/*.md
+    const frameworkMatch = resolvedUrl.match(/(?:\/content)?\/ai\/framework\/([^/.]+)(?:\.md)?/);
+    if (frameworkMatch) {
+      const name = frameworkMatch[1];
+      const skill = SKILL_MAPPINGS[name];
+      if (skill) {
+        return `${text} (\`use_skill: ${skill}\`)`;
+      }
+      return `${text} (\`get_context: framework/${name}\`)`;
+    }
+
+    // Pattern: /ai/ui/*.md
+    const uiMatch = resolvedUrl.match(/(?:\/content)?\/ai\/ui\/([^/.]+)(?:\.md)?/);
+    if (uiMatch) {
+      const name = uiMatch[1];
+      const skill = SKILL_MAPPINGS[name];
+      if (skill) {
+        return `${text} (\`use_skill: ${skill}\`)`;
+      }
+      return `${text} (\`get_context: ui/${name}\`)`;
+    }
+
+    // Pattern: /ai/contributing/*.md
+    const contribMatch = resolvedUrl.match(/(?:\/content)?\/ai\/contributing\/([^/.]+)(?:\.md)?/);
+    if (contribMatch) {
+      return `${text} (\`get_context: contributing/${contribMatch[1]}\`)`;
+    }
+
+    // Pattern: /docs/src/pages/docs/api/*.mdx or /content/docs/api/*.md
+    const apiMatch = resolvedUrl.match(/(?:\/content)?\/docs\/(?:src\/pages\/)?(?:docs\/)?api\/([^)]+?)(?:\.mdx?)?$/);
+    if (apiMatch) {
+      return `${text} (\`get_doc: api/${apiMatch[1]}\`)`;
+    }
+
+    // Pattern: /docs/src/pages/docs/guides/*.mdx
+    const guideMatch = resolvedUrl.match(
+      /(?:\/content)?\/docs\/(?:src\/pages\/)?(?:docs\/)?guides\/([^)]+?)(?:\.mdx?)?$/,
+    );
+    if (guideMatch) {
+      return `${text} (\`get_doc: guides/${guideMatch[1]}\`)`;
+    }
+
+    // Keep original if no pattern matches
+    return match;
+  });
+}
+
+// Simple path resolution for relative paths
+function resolvePath(base: string, relative: string): string {
+  const baseParts = base.split('/').filter(Boolean);
+  const relativeParts = relative.split('/');
+
+  for (const part of relativeParts) {
+    if (part === '..') {
+      baseParts.pop();
+    }
+    else if (part !== '.') {
+      baseParts.push(part);
+    }
+  }
+
+  return '/' + baseParts.join('/');
+}
+
 // Fetch actual content
-export async function fetchContent(path: string): Promise<FetchResult<string>> {
+export async function fetchContent(path: string, rewriteLinks = true): Promise<FetchResult<string>> {
   const baseUrl = getDocsBaseUrl();
   const fullUrl = `${baseUrl}${path}`;
 
@@ -247,7 +369,13 @@ export async function fetchContent(path: string): Promise<FetchResult<string>> {
       console.error(`[semantic-ui-mcp] Failed to fetch content: ${error} - ${fullUrl}`);
       return { success: false, error, url: fullUrl };
     }
-    const data = await response.text();
+    let data = await response.text();
+
+    // Rewrite markdown links to MCP tool suggestions
+    if (rewriteLinks && (path.endsWith('.md') || path.includes('/ai/'))) {
+      data = rewriteMarkdownLinks(data, path);
+    }
+
     return { success: true, data, url: fullUrl };
   }
   catch (error) {
@@ -281,20 +409,20 @@ export async function fetchJson<T>(path: string): Promise<FetchResult<T>> {
 // Extract a specific section from markdown by heading name
 export function extractMarkdownSection(markdown: string, sectionName: string): string | null {
   const lines = markdown.split('\n');
-  const normalizedName = sectionName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalizedName = sectionName.toLowerCase();
 
   let startIndex = -1;
   let startLevel = 0;
   let endIndex = lines.length;
 
-  // Find the heading that matches the section name
   each(lines, (line, i) => {
-    const headingMatch = line.match(/^(#{1,6})\s+[`']?(\w+)[`']?/);
+    const headingMatch = line.match(/^(#{1,6})\s+(.+)/);
     if (headingMatch) {
       const level = headingMatch[1].length;
-      const headingName = headingMatch[2].toLowerCase().replace(/[^a-z0-9]/g, '');
+      const headingText = headingMatch[2].toLowerCase();
 
-      if (startIndex === -1 && headingName === normalizedName) {
+      // Check if heading starts with the method name
+      if (startIndex === -1 && headingText.startsWith(normalizedName)) {
         startIndex = i as number;
         startLevel = level;
       }

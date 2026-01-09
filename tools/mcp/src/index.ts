@@ -2,6 +2,8 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { TemplateCompiler } from '@semantic-ui/templating';
+import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
 
 import {
@@ -12,15 +14,77 @@ import {
   findContext,
   findDoc,
   findExample,
+  findSkill,
   initCache,
   listContext,
   listDocs,
   listExamples,
+  listSkills,
   listSpecs,
   search,
   searchApi,
 } from './utils/cache.js';
 import { type ComponentSpec, getComponentWithChildren, listComponents } from './utils/specs.js';
+
+// Run log-type examples and capture console output
+function runLogExample(code: string): { logs: string[]; error?: string; } {
+  const logs: string[] = [];
+
+  // Mock console that captures output
+  const mockConsole = {
+    log: (...args: unknown[]) =>
+      logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')),
+    warn: (...args: unknown[]) => logs.push(`[warn] ${args.join(' ')}`),
+    error: (...args: unknown[]) => logs.push(`[error] ${args.join(' ')}`),
+  };
+
+  // Strip import statements
+  const codeWithoutImports = code.replace(/^import\s+.*from\s+['"].*['"];?\s*$/gm, '');
+
+  // Build context with utils exports + mock console
+  const context: Record<string, unknown> = {
+    ...utils,
+    console: mockConsole,
+  };
+
+  // Filter to valid JS variable names
+  const filteredContext = utils.filterObject(
+    context,
+    (_value: unknown, name: string) => /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name),
+  );
+
+  try {
+    // Use with + proxy pattern for controlled scope
+    const proxyHandler = {
+      has(target: Record<string, unknown>, key: string) {
+        return key in target;
+      },
+      get(target: Record<string, unknown>, prop: string) {
+        return target[prop];
+      },
+    };
+
+    const proxiedContext = new Proxy(filteredContext, proxyHandler);
+
+    const fn = new Function(
+      'ctx',
+      `
+      with (ctx) {
+        ${codeWithoutImports}
+      }
+    `,
+    );
+
+    fn(proxiedContext);
+    return { logs };
+  }
+  catch (e) {
+    return {
+      logs,
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
 
 const server = new McpServer({
   name: 'semantic-ui',
@@ -126,7 +190,10 @@ server.tool(
       };
     }
 
-    const result = await fetchJson<{ files: Record<string, { content: string; }>; }>(example.path);
+    const result = await fetchJson<{
+      exampleType?: string;
+      files: Record<string, string>;
+    }>(example.path);
 
     if (!result.success) {
       return {
@@ -138,8 +205,90 @@ server.tool(
       };
     }
 
+    const data = result.data!;
+
+    // Run log-type examples and capture output
+    if (data.exampleType === 'log' && data.files['index.js']) {
+      const { logs, error } = runLogExample(data.files['index.js']);
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({ ...data, output: { logs, error } }, null, 2),
+        }],
+      };
+    }
+
     return {
-      content: [{ type: 'text', text: JSON.stringify(result.data!, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
+    };
+  },
+);
+
+// ============================================================================
+// Skills Tools
+// ============================================================================
+
+server.tool(
+  'list_skills',
+  'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics.',
+  {},
+  async () => {
+    const skills = listSkills().map(s => ({
+      skill: s.skill,
+      title: s.title,
+      description: s.description || '',
+      tokens: s.tokens,
+    }));
+
+    if (skills.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No skills available. Skills are defined by adding `skill: name` to context doc frontmatter.',
+        }],
+      };
+    }
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(skills, null, 2) }],
+    };
+  },
+);
+
+server.tool(
+  'use_skill',
+  'Load a skill to gain comprehensive knowledge about a topic. Use list_skills to see available skills.',
+  {
+    skill: z.string().describe('Skill name (e.g., "utils", "creating-components", "reactivity")'),
+  },
+  async ({ skill: skillName }) => {
+    const skillDoc = findSkill(skillName);
+
+    if (!skillDoc) {
+      const available = listSkills().map(s => s.skill).join(', ');
+      return {
+        content: [{
+          type: 'text',
+          text: `Unknown skill: "${skillName}"\n\nAvailable skills: ${available || 'none'}`,
+        }],
+        isError: true,
+      };
+    }
+
+    const result = await fetchContent(skillDoc.path);
+
+    if (!result.success) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Failed to load skill "${skillName}"\nURL: ${result.url}\nError: ${result.error}`,
+        }],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [{ type: 'text', text: result.data! }],
     };
   },
 );
@@ -336,6 +485,53 @@ server.tool(
     return {
       content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     };
+  },
+);
+
+// ============================================================================
+// Template Validation
+// ============================================================================
+
+server.tool(
+  'validate_template',
+  'Validate template syntax and return any compile errors. Use this to check templates before running them.',
+  {
+    template: z.string().describe('Template string to validate'),
+    includeAST: z.boolean().optional().describe('Include the compiled AST in the response for debugging'),
+  },
+  async ({ template, includeAST }) => {
+    try {
+      const compiler = new TemplateCompiler(template);
+      const ast = compiler.compile();
+      const result: { valid: boolean; nodeCount: number; ast?: unknown; } = {
+        valid: true,
+        nodeCount: ast.length,
+      };
+      if (includeAST) {
+        result.ast = ast;
+      }
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }],
+      };
+    }
+    catch (e) {
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(
+            {
+              valid: false,
+              error: e instanceof Error ? e.message : String(e),
+            },
+            null,
+            2,
+          ),
+        }],
+      };
+    }
   },
 );
 
