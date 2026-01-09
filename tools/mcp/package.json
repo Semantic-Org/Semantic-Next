@@ -8,18 +8,17 @@
     "sui-mcp": "dist/index.js"
   },
   "scripts": {
-    "bundle-specs": "node scripts/bundle-specs.js",
-    "build": "npm run bundle-specs && tsc",
+    "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
+    "@semantic-ui/utils": "*",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "glob": "^10.5.0",
     "typescript": "^5.0.0"
   },
   "engines": {

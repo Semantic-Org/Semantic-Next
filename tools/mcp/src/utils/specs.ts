@@ -1,15 +1,4 @@
-import { readFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-export interface ComponentIndex {
-  tagName: string;
-  name: string;
-  description: string;
-  pluralTagName: string | null;
-}
+import { fetchJson, type FetchResult, findSpec, listSpecs, type SpecItem } from './cache.js';
 
 export interface ComponentSpec {
   tagName: string;
@@ -25,99 +14,115 @@ export interface ComponentSpec {
   [key: string]: unknown;
 }
 
-// Load bundled data
-const specsData = JSON.parse(
-  readFileSync(join(__dirname, '../data/specs.json'), 'utf-8'),
-) as Record<string, ComponentSpec>;
-
-const indexData = JSON.parse(
-  readFileSync(join(__dirname, '../data/index.json'), 'utf-8'),
-) as ComponentIndex[];
-
-// Build lookup maps
-const specsByTag = new Map<string, ComponentSpec>();
-const specsByName = new Map<string, ComponentSpec>();
-const aliases = new Map<string, string>();
-
-for (const [tagName, spec] of Object.entries(specsData)) {
-  specsByTag.set(tagName, spec);
-  specsByName.set(spec.name.toLowerCase(), spec);
-
-  // Add aliases without ui- prefix
-  if (tagName.startsWith('ui-')) {
-    aliases.set(tagName.slice(3), tagName);
-  }
-
-  // Add lowercase name as alias
-  aliases.set(spec.name.toLowerCase(), tagName);
+export interface ComponentIndex {
+  tagName: string;
+  name: string;
+  description: string;
+  pluralTagName: string | null;
 }
 
-export function listComponents(): ComponentIndex[] {
-  return indexData;
+// Spec cache for fetched full specs
+const specCache = new Map<string, ComponentSpec>();
+
+export function listComponents(): SpecItem[] {
+  return listSpecs();
 }
 
-export function getComponent(query: string): { resolved: string; spec: ComponentSpec; } | null {
-  const normalized = query.toLowerCase().trim();
+export async function getComponent(query: string): Promise<FetchResult<{ resolved: string; spec: ComponentSpec; }>> {
+  const specItem = findSpec(query);
 
-  // Try exact tag match
-  if (specsByTag.has(normalized)) {
-    return { resolved: normalized, spec: specsByTag.get(normalized)! };
+  if (!specItem) {
+    return {
+      success: false,
+      error: `Component not found: ${query}`,
+      url: '',
+    };
   }
 
-  // Try with ui- prefix
-  const withPrefix = `ui-${normalized}`;
-  if (specsByTag.has(withPrefix)) {
-    return { resolved: withPrefix, spec: specsByTag.get(withPrefix)! };
+  // Check cache first
+  if (specCache.has(specItem.id)) {
+    return {
+      success: true,
+      data: { resolved: specItem.id, spec: specCache.get(specItem.id)! },
+      url: specItem.path,
+    };
   }
 
-  // Try alias lookup
-  if (aliases.has(normalized)) {
-    const tagName = aliases.get(normalized)!;
-    return { resolved: tagName, spec: specsByTag.get(tagName)! };
+  // Fetch from docs server
+  const result = await fetchJson<ComponentSpec>(specItem.path);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error,
+      url: result.url,
+    };
   }
 
-  // Try name match
-  if (specsByName.has(normalized)) {
-    const spec = specsByName.get(normalized)!;
-    return { resolved: spec.tagName, spec };
-  }
+  // Cache the spec
+  specCache.set(specItem.id, result.data!);
 
-  return null;
+  return {
+    success: true,
+    data: { resolved: specItem.id, spec: result.data! },
+    url: result.url,
+  };
 }
 
-export function getComponentWithChildren(query: string): {
-  resolved: string;
-  spec: ComponentSpec;
-  children: ComponentSpec[];
-} | null {
-  const result = getComponent(query);
-  if (!result) { return null; }
+export async function getComponentWithChildren(query: string): Promise<
+  FetchResult<{
+    resolved: string;
+    spec: ComponentSpec;
+    children: ComponentSpec[];
+  }>
+> {
+  const result = await getComponent(query);
 
+  if (!result.success) {
+    return result as FetchResult<{ resolved: string; spec: ComponentSpec; children: ComponentSpec[]; }>;
+  }
+
+  const { resolved, spec } = result.data!;
   const children: ComponentSpec[] = [];
-  const foundTags = new Set<string>();
+  const foundIds = new Set<string>();
 
   // Find child components from parent's content array (subcomponent entries)
-  const content = result.spec.content as Array<{ subcomponent?: string; tagName?: string; }> | undefined;
+  const content = spec.content as Array<{ subcomponent?: string; tagName?: string; }> | undefined;
   if (content) {
     for (const entry of content) {
       if (entry.subcomponent === 'true' && entry.tagName) {
-        const childSpec = specsByTag.get(entry.tagName);
-        if (childSpec && !foundTags.has(entry.tagName)) {
-          children.push(childSpec);
-          foundTags.add(entry.tagName);
+        // Find the spec item for this tag
+        const childSpecItem = findSpec(entry.tagName);
+        if (childSpecItem && !foundIds.has(childSpecItem.id)) {
+          const childResult = await getComponent(entry.tagName);
+          if (childResult.success) {
+            children.push(childResult.data!.spec);
+            foundIds.add(childSpecItem.id);
+          }
         }
       }
     }
   }
 
   // Also find components that reference this as parentTag
-  for (const spec of Object.values(specsData)) {
-    const parentTag = (spec as { parentTag?: string; }).parentTag;
-    if (parentTag === result.resolved && !foundTags.has(spec.tagName)) {
-      children.push(spec);
-      foundTags.add(spec.tagName);
+  const allSpecs = listSpecs();
+  for (const specItem of allSpecs) {
+    if (foundIds.has(specItem.id)) { continue; }
+
+    const childResult = await getComponent(specItem.id);
+    if (childResult.success) {
+      const childSpec = childResult.data!.spec;
+      const parentTag = (childSpec as { parentTag?: string; }).parentTag;
+      if (parentTag === spec.tagName) {
+        children.push(childSpec);
+        foundIds.add(specItem.id);
+      }
     }
   }
 
-  return { ...result, children };
+  return {
+    success: true,
+    data: { resolved, spec, children },
+    url: result.url,
+  };
 }
