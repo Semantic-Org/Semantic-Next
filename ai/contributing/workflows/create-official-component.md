@@ -1,16 +1,16 @@
 ---
-title: Master Component Creation Workflow
+title: Create Official Semantic UI Component
 description: Orchestrator workflow that routes to appropriate component creation paths based on component type, including classic ports, research-first, and novel components.
 keywords: [components, primitives, orchestration, workflow routing, scaffolding, research]
 audience: contributing
 type: workflow
 ---
 
-# Master Component Creation Workflow
+# Master Semantic UI Offical Component Creation Workflow
 
 > Last Updated: 2024-11-04
 
-**Purpose**: Orchestrate the complete process of creating a Semantic UI component
+**Purpose**: Orchestrate the complete process of creating an official Semantic UI component
 **Target**: LLMs and developers starting any component work
 **Role**: Router and orchestrator for all component workflows
 

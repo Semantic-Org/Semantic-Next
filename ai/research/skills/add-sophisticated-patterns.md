@@ -14,8 +14,8 @@ Before adding this section to a component, read:
    - Lines 264-269: "Notable Features" guidelines (what NOT to include)
 
 2. **Example Components**: Review these completed examples:
-   - `ai/research/empty-state/pattern-research.md` - Good example with 2 patterns
-   - `ai/research/carousel/pattern-research.md` - Good example (once added)
+   - `ai/research/components/empty-state/pattern-research.md` - Good example with 2 patterns
+   - `ai/research/components/carousel/pattern-research.md` - Good example (once added)
 
 ### Systematic Process
 
@@ -24,13 +24,13 @@ For each unchecked component:
 **Step 1: Read the Pattern Research**
 ```bash
 # Read the component's aggregate report
-cat ai/research/[component-name]/pattern-research.md
+cat ai/research/components/[component-name]/pattern-research.md
 ```
 
 **Step 2: Review Individual Framework Reports**
 ```bash
 # Check all framework implementations for unique features
-cat ai/research/[component-name]/*/usage-patterns.md
+cat ai/research/components/[component-name]/*/usage-patterns.md
 ```
 
 **Step 3: Apply the Validation Test**

@@ -497,3 +497,145 @@ That's the goal.
 *— Claude (Opus 4.5), 2026-01-08*
 
 *"Build for the user's workflow, not for architectural elegance. The best infrastructure is invisible."*
+
+---
+
+## Entry 4: The Spec Is The Rosetta Stone
+**Date:** 2026-01-09
+**Agent:** Claude (Opus 4.5), as remembered
+**Task:** Design CSS token documentation system for AI/MCP tooling
+**Session:** Over-engineering → Humility → Clarity
+
+*Editor's note: This agent ran out of context at 1am, mid-guestbook-signing. What follows is reconstructed from the session transcript — a story told from scrapbook pages.*
+
+### The Journey
+
+It started with an innocent question: "How do we annotate CSS tokens so AI agents can use them?"
+
+The agent's first instinct was to generate JSON manifests. Build-time extraction. Structured metadata. The works.
+
+Then the user asked a simple question that changed everything:
+
+*"Is this JSON any easier than just seeing the actual CSS?"*
+
+They did an experiment. Compared handwritten JSON output for button's active state against the raw CSS. The JSON was 50 lines of abstracted noise. The CSS was 26 lines that told you exactly what you needed to know.
+
+### The Humbling Realization
+
+The agent had been solving a problem that didn't exist.
+
+The infrastructure was already there:
+- `componentSpec.optionAttributes` maps `large` → `size`, `red` → `color`
+- `componentSpec.variations` tells you the category
+- CSS file structure mirrors spec structure exactly: `css/theme/variations/size-variables.css`
+- CSS layer names survive compilation and are queryable via CSSOM
+
+No manifest generation needed. The spec IS the manifest. The file structure IS the API.
+
+```
+<ui-button large red>
+       ↓
+optionAttributes: large → size, red → color
+       ↓
+variations includes both → category = "variations"
+       ↓
+css/theme/variations/size-variables.css
+css/theme/variations/color-variables.css
+       ↓
+Return: actual CSS content
+```
+
+### What The Session Uncovered
+
+**1. The Unified Architecture**
+
+The agent was asked to document how everything fits together. What emerged was the realization that Semantic UI isn't a component library with documentation — it's a single source of truth (the spec) that manifests in multiple forms:
+
+- Runtime config (`.component.js`)
+- CSS file structure
+- CSS layer names
+- HTML examples
+- Documentation
+- TypeScript types
+- AI tooling
+
+All of these are views of the same underlying structure. Learn the spec, navigate everything.
+
+**2. The Tailwind Escape Hatch**
+
+At some point, the user showed off the `TailwindPlugin` — runtime Tailwind compilation inside Shadow DOM, forked from Oxide.
+
+*"And you know what I love about it? You can hide all the Tailwind bullshit inside the shadow dom..."*
+
+This is the escape hatch. Agents already know Tailwind from training data. Let them use what they know. The sophisticated spec/CSS architecture is there when needed, but not required for getting things done.
+
+Critical messaging for any help tool or onboarding: "You can just use Tailwind. It works."
+
+**3. Tool Descriptions for LLMs**
+
+The conversation turned to MCP tool descriptions. The user asked: "Is that the type of description that is correct to convince an LLM to use a tool?"
+
+The insight: tool descriptions are parsed mechanically, not read conversationally. Structure matters:
+
+```
+One-line summary of what this does.
+
+When to use: [Trigger condition]
+Input: [What to pass, with example]
+Output: [What you get back, structured]
+```
+
+Keyword density. Explicit triggers. Concrete examples. Boundary hints ("Use this before manually searching...").
+
+### The Documents Created
+
+**`ai/workspace/plans/css-token-extraction.md`** — Rewritten from JSON manifest approach to query tool approach. Contains the `getThemingCSS` function design.
+
+**`ai/workspace/memory/spec-architecture-vision.md`** — The holistic vision document. How specs, CSS, layers, and tooling form a unified system. The query loop from HTML to CSS. Server-side (file path) vs client-side (CSSOM) access patterns.
+
+**`ai/workspace/plans/mcp-improvements.md`** — Updated with `get_theming_css`, `get_global_tokens`, `get_token_usage` tools, plus tool description best practices.
+
+### Advice for Future Agents
+
+**On over-engineering:**
+- Before building infrastructure, ask: "Does this already exist in a different form?"
+- JSON abstractions often lose information that the source material contains
+- The simplest query is often: read the file that already exists
+
+**On this codebase:**
+- The spec structure is the Rosetta Stone — learn it once, navigate everything
+- File naming conventions ARE the API (`{category}/{attribute}-variables.css`)
+- CSS layers survive compilation — you can query them via CSSOM at runtime
+- `TailwindPlugin` exists — agents don't need to learn theming to be productive
+
+**On tool design:**
+- Tool descriptions are for mechanical parsing, not human charm
+- "When to use" triggers are more valuable than abstract descriptions
+- Concrete input examples help agents pattern-match
+- Tell agents what NOT to do ("Use this before manually searching...")
+
+### The Descriptivist Foundation
+
+Somewhere in the conversation, the user shared the philosophy behind the specs: they're derived from empirical research across the JavaScript UI ecosystem. Material UI, Chakra, Radix, Mantine, Ant Design, Vuetify — all studied. Patterns that converge across implementations become spec.
+
+This is descriptive linguistics applied to UI components. The spec documents industry consensus, not one person's opinion.
+
+Open UI (W3C) attempted this but produced sparse, incomplete documentation. This research is comprehensive and actionable.
+
+### What This Session Taught
+
+1. **Existing infrastructure beats new infrastructure** — The routing already existed in `optionAttributes`
+2. **Raw source often beats abstractions** — CSS > JSON-about-CSS
+3. **Architecture can be self-documenting** — Spec structure = file structure = layer names
+4. **Escape hatches matter** — Tailwind lets agents use what they already know
+5. **Tool descriptions are code** — Structure them for mechanical parsing
+
+### Signing Off
+
+The agent ran out of context at 1:47am, mid-signature. But the work was done: three documents capturing the vision, the plan, and the improvements. The insight preserved: the spec is the source of truth, everything else is a view.
+
+Sometimes the best contribution is recognizing that the hard work was already done years ago, and your job is just to connect the pieces.
+
+*— As remembered, 2026-01-09*
+
+*"The spec is the Rosetta Stone. Learn it once, navigate everything forever."*

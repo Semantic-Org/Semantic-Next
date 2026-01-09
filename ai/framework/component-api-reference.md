@@ -1,5 +1,5 @@
 ---
-title: Component Package Guide
+title: Component API Reference
 description: Guide to the @semantic-ui/component package, covering defineComponent API, component patterns, universal execution scope, CSS architecture, and lifecycle hooks.
 keywords: [component, defineComponent, web components, settings, state, lifecycle, CSS]
 audience: framework
