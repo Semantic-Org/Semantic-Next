@@ -359,12 +359,7 @@ server.tool(
   'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics.',
   {},
   async () => {
-    const skills = listSkills().map(s => ({
-      skill: s.skill,
-      title: s.title,
-      description: s.description || '',
-      tokens: s.tokens,
-    }));
+    const skills = listSkills();
 
     if (skills.length === 0) {
       return {
@@ -375,8 +370,14 @@ server.tool(
       };
     }
 
+    // Slim: skill + title + description (when present)
+    const slim = skills.map(s => ({
+      skill: s.skill,
+      title: s.title,
+      ...(s.description && { description: s.description }),
+    }));
     return {
-      content: [{ type: 'text', text: JSON.stringify(skills, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(slim) }],
     };
   },
 );
@@ -442,8 +443,19 @@ server.tool(
       };
     }
 
+    // Slim: path + title + description (when present), include audience only when unfiltered
+    const slim = docs.map(d => {
+      // Extract short path: /content/ai/framework/reactivity.md → framework/reactivity
+      const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
+      return {
+        path: shortPath,
+        title: d.title,
+        ...(d.description && { description: d.description }),
+        ...(!audience && { audience: d.audience }),
+      };
+    });
     return {
-      content: [{ type: 'text', text: JSON.stringify(docs, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(slim) }],
     };
   },
 );
@@ -499,8 +511,14 @@ server.tool(
       };
     }
 
+    // Slim: path + title only
+    const slim = docs.map(d => {
+      // Extract short path: /content/docs/guides/reactivity/signals.md → guides/reactivity/signals
+      const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+      return { path: shortPath, title: d.title };
+    });
     return {
-      content: [{ type: 'text', text: JSON.stringify(docs, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(slim) }],
     };
   },
 );

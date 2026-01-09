@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "mcp__semantic-ui__*"
+    ]
+  },
   "mcpServers": {
     "semantic-ui": {
       "command": "node",
