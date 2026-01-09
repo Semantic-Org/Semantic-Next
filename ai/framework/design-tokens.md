@@ -3,6 +3,7 @@ title: Semantic UI CSS Token Guide
 description: Comprehensive guide to the design token system, including color scales, spacing tokens, typography, visual effects, and theme-aware computed values.
 keywords: [design tokens, CSS variables, color scales, spacing, typography, theming, OKLCH]
 audience: framework
+skill: design-tokens
 type: doc
 ---
 

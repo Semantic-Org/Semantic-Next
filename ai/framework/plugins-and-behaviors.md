@@ -3,6 +3,7 @@ title: Query Plugins and Behaviors Guide
 description: Complete technical specification for Query extension architecture, covering simple plugins, complex behaviors, event systems, mutation observers, and lifecycle management.
 keywords: [plugins, behaviors, Query, events, mutations, lifecycle, registration]
 audience: framework
+skill: behaviors
 type: doc
 ---
 

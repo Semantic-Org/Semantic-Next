@@ -3,6 +3,7 @@ title: Semantic UI Primitive Usage Guide
 description: Guide for composing custom components from Semantic UI primitives, covering component discovery, attribute verification, and integration patterns.
 keywords: [primitives, composition, components, attributes, specs, UI components, reusability]
 audience: framework
+skill: primitives
 type: doc
 ---
 

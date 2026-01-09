@@ -3,6 +3,7 @@ title: Semantic UI Mental Model
 description: Core mental model for AI agents working with Semantic UI, covering component architecture, reactivity system, template syntax, and framework design patterns.
 keywords: [mental model, architecture, signals, reactivity, web components, shadow DOM, templates]
 audience: framework
+skill: mental-model
 type: doc
 ---
 

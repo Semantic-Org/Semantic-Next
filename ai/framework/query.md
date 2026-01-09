@@ -3,6 +3,7 @@ title: Query Package Guide
 description: Comprehensive reference for the @semantic-ui/query package, covering DOM querying, Shadow DOM traversal, component instance access, and event handling.
 keywords: [query, DOM, shadow DOM, traversal, events, component access, selectors]
 audience: framework
+skill: query
 type: doc
 ---
 

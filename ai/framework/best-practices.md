@@ -3,6 +3,7 @@ title: Component Authoring Best Practices
 description: Advanced patterns and best practices for implementing complex Semantic UI components, covering communication, state management, events, templates, reactivity, and performance.
 keywords: [best practices, patterns, communication, state management, events, templates, performance]
 audience: framework
+skill: best-practices
 type: doc
 ---
 

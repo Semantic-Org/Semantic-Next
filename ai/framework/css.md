@@ -3,6 +3,7 @@ title: Semantic UI CSS Guide
 description: Canonical patterns for CSS architecture and styling, including nesting patterns, container queries, responsive design, and component scoping with design tokens.
 keywords: [CSS, nesting, container queries, responsive design, component scoping, design tokens, theming]
 audience: framework
+skill: css
 type: doc
 ---
 

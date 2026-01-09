@@ -1,1158 +1,1342 @@
 ---
 title: Creating Components Guide
-description: Comprehensive guide for AI agents building Semantic UI components, covering framework patterns, component architecture, and implementation best practices.
-keywords: [components, defineComponent, web components, development, implementation]
+description: Comprehensive guide to creating Semantic UI components - from basics to advanced patterns
+keywords: [components, defineComponent, state, templates, events, lifecycle]
 audience: framework
-type: doc
+skill: creating-components
 ---
 
-# Semantic UI Component Development Guide
+# Creating Semantic UI Components
 
-> **For:** AI agents building Semantic UI components for any application
-> **Prerequisites:** Basic understanding of web components and JavaScript
-> **Scope:** Framework usage patterns, component architecture, implementation best practices
-> **Related:** [Mental Model](/ai/framework/mental-model.md) • [Best Practices](./component-authoring-best-practices.md) • [API Reference](/ai/framework/quick-reference.md)
-> **Back to:** [Documentation Hub](/ai/00-START-HERE.md)
-> **Last Updated:** 2025-10-30
+> **The definitive reference for building Semantic UI web components**
+>
+> This guide covers everything from basic component structure to advanced patterns observed in production components. It combines framework documentation with real-world patterns from `/src/components/`.
 
 ---
 
-## **CRITICAL: Read This Before Building Components**
+## Quick Start
 
-This guide covers building Semantic UI components for **any application** - whether for your own projects, libraries, or documentation examples.
-
-### **Are You Creating a Documentation Example?**
-
-**If you were asked to create an "example component" or "component example":**
-- **STOP** - You likely need the **[Example Authoring Guide](/ai/contributing/documentation/examples/authoring.md)** instead
-- Documentation examples have specific metadata, file structure, and playground requirements
-- **When in doubt, clarify with the user:** "Are you building a component for an application, or creating a documentation example?"
-
-**Use this guide for:**
-- Components for your own applications
-- Library components
-- Understanding framework patterns and architecture
-- General component development skills
-
-**MANDATORY READING BEFORE COMPONENT DEVELOPMENT:**
-
-1. **HTML Patterns**: [HTML Style Guide](/ai/framework/html.md) - Semantic markup and class naming conventions
-2. **CSS Architecture**: [CSS Guide](/ai/framework/css.md) - CSS nesting, responsive design, and architecture patterns
-3. **Design Tokens**: [Token Usage](/ai/framework/design-tokens.md) - Token system and verification workflow
-4. **Primitive Usage**: [Using UI Primitives](/ai/framework/using-primitives.md) - Using existing primitives and composition patterns
-5. **Method References**: [Mental Model](/ai/framework/mental-model.md) - Critical `self.methodName()` patterns
-6. **Component Communication**: [Best Practices](./component-authoring-best-practices.md) - Detailed guide to communication patterns
-
-**Common Mistakes**:
-- Using prefixed class names like `.size-large` instead of `.large`
-- Using `this.method()` instead of `self.method()`
-- Using hardcoded CSS values instead of design tokens like `var(--large)`
-- Not prefixing query variables with `$` (use `const $div = $('div')`)
-- Creating components without proper file organization
-- **Accessing internal component state directly** instead of using public API methods
-- **CRITICAL: Using HTML elements instead of first-party UI components** (see First-Party Components section below)
-
----
-
-## **Complete Reference Sources**
-
-For comprehensive information beyond this guide:
-
-- **HTML Patterns**: [HTML Style Guide](/ai/framework/html.md) - Semantic markup and class naming conventions
-- **CSS Architecture**: [CSS Guide](/ai/framework/css.md) - CSS nesting, responsive design, and architecture patterns
-- **Design Tokens**: [Token Usage](/ai/framework/design-tokens.md) - Token system and verification workflow
-- **Primitive Usage**: [Using UI Primitives](/ai/framework/using-primitives.md) - Using existing primitives and composition patterns
-- **Mental Model & Architecture**: [Mental Model](/ai/framework/mental-model.md) - Core concepts, method references, component communication
-- **Patterns & Recipes**: [Best Practices](./component-authoring-best-practices.md) - Detailed implementation patterns and communication
-- **Quick API Reference**: [Quick Reference](/ai/framework/quick-reference.md) - Complete API syntax and options
-- **Codebase Navigation**: [Codebase Navigation](/ai/contributing/codebase-navigation.md) - Finding documentation and examples
-
-**Rule**: When you need information beyond basic component creation, consult these canonical sources rather than guessing or duplicating information.
-
-## Tailwind CSS Integration
-
-**IMPORTANT**: Use Tailwind CSS **only when explicitly requested**. Default to design tokens and semantic class patterns.
-
-### Using the Tailwind Plugin
-
-Semantic UI provides first-class Tailwind integration through `@semantic-ui/tailwind`:
+### Minimal Component
 
 ```javascript
-import { defineComponent, getText } from '@semantic-ui/component';
-import { TailwindPlugin } from '@semantic-ui/tailwind';
+import { defineComponent } from '@semantic-ui/component';
 
-let definition = {
-  tagName: 'my-button',
-  template: `<button class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
-    <slot></slot>
-  </button>`,
-  css: `@theme { --color-blue-500: #3b82f6; }`
-};
-
-// Plugin scans for Tailwind classes and generates scoped CSS
-definition = await TailwindPlugin(definition);
-
-export const MyButton = defineComponent(definition);
-```
-
-**Key Benefits:**
-- Zero build step - Runs natively in browser via WASM
-- Shadow DOM scoped - No global CSS conflicts
-- Full Tailwind support - @theme, @utility, all features work
-
-### When to Use Tailwind vs Design Tokens
-
-**Use Tailwind for:**
-- Rapid prototyping and utility classes
-- Complex responsive layouts (`grid-cols-1 md:grid-cols-3`)
-- Team familiarity with Tailwind workflow
-
-**Use Design Tokens for:**
-- Consistent design system integration
-- Performance (no compilation overhead)
-- Simple styling needs
-
-**Combining Both:**
-```css
-:host {
-  /* Component-specific + design tokens */
-  --button-height: 2.5rem;
-  background: var(--primary-color);
-}
-/* Tailwind utilities in template */
-```
-
-**Implementation Details:**
-- Plugin architecture: `../../packages/tailwind/AGENTS.md`
-- WASM compilation: `../../packages/tailwind/node_modules/tailwindcss-iso/README.md`
-- Browser engine: `../../packages/tailwind/node_modules/tailwindcss-iso/AGENTS.md` (if available)
-
-## **CRITICAL: Use First-Party UI Components**
-
-### **ALWAYS Use Available Components from `/src/components/`**
-
-Semantic UI provides comprehensive first-party components that **MUST** be used instead of creating custom HTML elements. Each component has a specification file at `/src/components/{component}/specs/{component}.json` that defines its exact API.
-
-**Available Components**: `ui-button`, `ui-input`, `ui-label`, `ui-icon`, `ui-menu`, `ui-card`, `ui-container`, `ui-modal`, `ui-segment`, `ui-rail`
-
-### **Essential Rule: Read Component Specs First**
-
-**Before using any first-party component, read its specification:**
-- **Button**: `/src/components/button/specs/button.json`
-- **Input**: `/src/components/input/specs/input.json`
-- **Icon**: `/src/components/icon/specs/icon.json`
-- **[Component]**: `/src/components/[component]/specs/[component].json`
-
-### **Standard Usage Pattern**
-
-```html
-<!-- ❌ DON'T DO THIS - Custom HTML/CSS -->
-<button class="my-custom-button primary large">Click Me</button>
-<input type="text" class="my-styled-input" />
-
-<!-- ✅ DO THIS - Use First-Party Components (based on actual specs) -->
-<ui-button primary large>Click Me</ui-button>
-<ui-input type="text" placeholder="Enter value..." />
-<ui-icon icon="search" large />
-```
-
-### **Component Composition Example**
-
-```javascript
-// component.js - Standard pattern
-import { defineComponent, getText } from '@semantic-ui/component';
-
-const template = await getText('./component.html');
-const css = await getText('./component.css');
-
-defineComponent({
-  tagName: 'user-profile',
-  template,
-  css,
-  // ... component definition
+export const MyComponent = defineComponent({
+  tagName: 'my-component',
+  template: `<div class="container">{message}</div>`,
+  css: `:host { display: block; }`,
+  defaultState: { message: 'Hello World' }
 });
-```html
-<!-- component.html - Compose with first-party components (based on specs) -->
-<ui-container>
-  <ui-segment>
-    <ui-card>
-      <ui-icon icon="user" large />
-      <ui-button primary>Edit Profile</ui-button>
-    </ui-card>
-  </ui-segment>
-</ui-container>
 ```
 
-**Critical Rules**:
-1. **Read the spec file first** - never guess component APIs
-2. **Use exact attribute names** from the specification
-3. **Check available variations and types** in the spec
-4. **Verify icon names** against the icon spec options list
+### Production Component Structure
 
-## 📁 **Component File Organization**
+Real components use separate files for maintainability:
 
-Components are built using a consistent three-file pattern that provides separation of concerns and optimal development experience.
+```
+my-component/
+  index.js          # Re-exports for clean imports
+  my-component.js   # Component definition
+  my-component.html # Template
+  my-component.css  # Styles
+```
 
-### **Standard Component Structure**
-
-**Core component files:**
-- **`component.js`** - Main component definition with `defineComponent`
-- **`component.html`** - Component template with reactive expressions
-- **`component.css`** - Component styles (scoped via Shadow DOM)
-
-**Subcomponent files:**
-- Use hyphenated names like `todo-item.js`, `todo-item.html`, `todo-item.css`
-- Import and reference in parent component
-
-### **Component File Benefits**
-- **Separation of concerns** - Logic, markup, and styling cleanly separated
-- **Shadow DOM scoping** - CSS automatically scoped to component
-- **Hot reloading** - Each file can be modified independently
-- **Reusability** - Components can be imported and used anywhere
-
-## Component Definition Pattern
-
-Always follow this pattern for component definition:
+**Example from `src/components/panels/panel.js`:**
 
 ```javascript
-import { defineComponent, getText } from '@semantic-ui/component';
-// Import any subcomponents here
-import { subComponent } from './sub-component.js';
+import { defineComponent } from '@semantic-ui/component';
+import css from './panel.css?raw';
+import template from './panel.html?raw';
 
-const css = await getText('./component.css');
-const template = await getText('./component.html');
-// Note on getText():
-// The `getText()` utility, re-exported from `@semantic-ui/utils`, uses `fetch`
-// to load text files like component.css and component.html.
-// It's primarily useful in browser environments where build tools for direct
-// text/raw imports (e.g., import templateText from './component.html?raw')
-// are not available. If your development environment supports raw asset imports
-// (like Vite or ESBuild with appropriate loaders/plugins), using those native
-// import mechanisms is generally preferred for better bundling and performance.
-
-const defaultSettings = {
-  // Configuration that controls component behavior
-  // These are MUTABLE and REACTIVE everywhere
-  theme: 'light',
-  size: 'medium',
-  disabled: false
-};
-
-const defaultState = {
-  // Internal reactive state that changes during lifecycle
-  isOpen: false,
-  currentValue: '',
-  errors: {}
-};
-
-const createComponent = ({ self, state, settings, $, $$, findParent, findChild, reaction, dispatchEvent, signal }) => ({
-  // Component instance methods
-
-  // Example computed property
-  getComputedValue() {
-    // Access state with .get() in JavaScript code
-    const stateValue = state.someValue.get();
-    return stateValue * 2;
-  },
-
-  // Example method calling another method
-  getDisplayText() {
-    if (!settings.showLabel) return '';
-    // ✅ CRITICAL: Use self.methodName() for internal method calls
-    const percentage = self.getComputedValue();
-    return `${percentage}%`;
-  },
-
-  // Example method for setup
-  setupReactions() {
-    reaction(() => {
-      // Set up a reaction that updates when dependencies change
-      const valueA = state.valueA.get();
-      state.derivedValue.set(valueA * 2);
-    });
-  }
-});
-
-const events = {
-  // Standard: Event delegation within component
-  'click .selector'({ self, event, data }) {
-    self.methodName();
-  },
-
-  // Deep: Parent managing intentional child components
-  'deep click ui-child-component'({ self, data }) {
-    self.handleChildClick(data);
-  },
-
-  // Global: Page-level events outside component
-  'global scroll window'({ self }) {
-    self.handleScroll();
-  },
-
-  // Input handling with automatic data attribute conversion
-  'input .input-selector'({ state, value, data }) {
-    state.inputValue.set(value);
-    // data-* attributes automatically converted to proper types
-  }
-};
-
-const onCreated = ({ self, state, settings, reaction }) => {
-  // Initialize component (before DOM is ready)
-  // Setup reactions, initialize state from settings
-};
-
-const onRendered = ({ self, $, $$, isClient }) => {
-  // Component is in DOM, can access elements
-  if (isClient) {
-    self.setupReactions();
-    // DOM manipulation, focus management
-  }
-};
-
-const onDestroyed = ({ self }) => {
-  // Clean up external resources (most cleanup is automatic)
-  // Clear timers, close connections, etc.
-};
-
-export const ComponentName = defineComponent({
-  tagName: 'component-name',
+const Panel = defineComponent({
+  tagName: 'ui-panel',
   template,
   css,
   defaultSettings,
-  defaultState,
-  events,
   createComponent,
-  onCreated,
-  onRendered,
-  onDestroyed,
-  subTemplates: {
-    // Reference sub-templates here.
-    // A sub-template is typically an instance of the `Template` class.
-    // You can create such an instance by calling `defineComponent`
-    // with a template, css, etc., but *without* specifying a `tagName`.
-    // This `Template` instance can then be used here or with the
-    // "Template-as-Settings" pattern.
-    // Example:
-    // import { itemTemplate } from './item-template.js'; // assume item-template.js exports a Template instance
-    // subTemplates: { item: itemTemplate }
-    subComponent
-  }
+  events,
+});
+
+export default Panel;
+export { Panel };
+```
+
+---
+
+## Component Definition API
+
+### Complete `defineComponent` Options
+
+```javascript
+defineComponent({
+  // Identity
+  tagName: 'my-component',        // Custom element name (optional for templates-only)
+  plural: true,                   // Component manages multiple children
+
+  // Content
+  template,                       // HTML template string
+  css,                           // Scoped CSS string
+  pageCSS,                       // CSS attached to document (for Light DOM)
+
+  // Data
+  defaultSettings: {},           // Public reactive configuration
+  defaultState: {},              // Internal reactive state
+
+  // Composition
+  subTemplates: {},              // Child template components
+
+  // Logic
+  createComponent: () => ({}),   // Instance methods and properties
+  events: {},                    // Event handlers
+  keys: {},                      // Keyboard shortcuts
+
+  // Lifecycle
+  onCreated: () => {},           // After initialization, before DOM
+  onRendered: () => {},          // After DOM is ready
+  onDestroyed: () => {},         // Cleanup when removed
 });
 ```
 
-## Essential Template Syntax
+### Callback Arguments
 
-Templates have a flattened data context with automatic reactivity. Key patterns:
+Every callback receives a destructured object with these properties:
 
-### Basic Expressions
-```html
-<!-- State and settings are reactive automatically -->
-<div class="status {theme}">{currentValue}</div>
+```javascript
+{
+  // Component Instance
+  self,              // The component instance (use for method calls)
+  el,                // The DOM element
 
-<!-- Methods from createComponent are available -->
-<div>{getComputedValue}</div>
+  // Reactive Data
+  state,             // Internal signals (use .get()/.set() in JS)
+  settings,          // Public config (reactive proxy - direct access)
 
-<!-- Settings are mutable and reactive -->
-<button class="{size} {theme}" disabled="{disabled}">Click me</button>
+  // Reactivity Utilities
+  signal,            // Create signals: signal(initialValue)
+  reaction,          // Create reactive computations
+  afterFlush,        // Run after DOM updates complete
+
+  // DOM Querying
+  $,                 // Query within component (no shadow piercing)
+  $$,                // Deep query (pierces shadow DOM)
+
+  // Component Tree
+  findParent,        // Navigate up: findParent('parent-tag')
+  findChild,         // Navigate down: findChild('child-tag')
+  getChild,          // Get child by index
+  getChildren,       // Get all children of type
+
+  // Events
+  dispatchEvent,     // Emit custom events (bubbles by default)
+  attachEvent,       // Manually attach events
+  bindKey,           // Dynamic key binding
+  unbindKey,         // Remove key binding
+
+  // Environment
+  isClient,          // true in browser
+  isServer,          // true during SSR
+  isRendered,        // Function: check if component is rendered
+}
 ```
 
-### Control Flow
+**Event handlers receive additional arguments:**
+
+```javascript
+{
+  event,             // Native event object
+  target,            // Element matching selector (not event.target)
+  data,              // data-* attributes + event.detail (auto-converted)
+  value,             // Input value (for input events)
+  isDeep,            // true if from nested component
+}
+```
+
+---
+
+## State and Settings
+
+### Settings: Public Reactive Configuration
+
+Settings are for **public configuration** that external code can change:
+
+```javascript
+const defaultSettings = {
+  theme: 'light',
+  size: 'medium',
+  disabled: false,
+  items: [],
+  onSelect: null,    // Callback functions work too
+};
+```
+
+**Settings are reactive everywhere - no `.get()`/`.set()` needed:**
+
+```javascript
+// Direct assignment triggers reactivity
+settings.theme = 'dark';
+
+// In reactions, creates dependency
+reaction(() => {
+  console.log(settings.theme);  // Re-runs when theme changes
+});
+
+// In templates - automatic reactivity
+// <div class="{theme}">  updates when settings.theme changes
+```
+
+**Real pattern from `src/components/panel.js`:**
+
+```javascript
+const defaultSettings = {
+  direction: 'vertical',
+  resizable: true,
+  minSize: '0px',
+  maxSize: '0px',
+  size: 'grow',
+  label: '',
+  canMinimize: true,
+  minimized: false,
+  // Function settings for complex behavior
+  getNaturalSize: (panel, { direction, minimized }) => {
+    return panel?.component.getNaturalSize(panel, { direction, minimized });
+  },
+};
+```
+
+### State: Internal Reactive Data
+
+State is for **internal data** that changes during the component lifecycle:
+
+```javascript
+const defaultState = {
+  isOpen: false,
+  currentValue: '',
+  selectedIndex: 0,
+  items: [],
+  errors: {},
+};
+```
+
+**State uses explicit signal API in JavaScript:**
+
+```javascript
+// Reading
+const value = state.counter.get();
+const value = state.counter.value;
+
+// Writing
+state.counter.set(5);
+state.counter.value = 5;
+
+// Built-in helpers
+state.counter.increment(1);      // Numbers
+state.counter.decrement(1);
+state.isOpen.toggle();           // Booleans
+state.counter.clear();           // Reset to default
+state.counter.now();             // Set to current Date
+
+// Array helpers
+state.items.push(item);
+state.items.removeItem(item);
+state.items.setProperty(id, 'done', true);
+
+// Object helpers
+state.user.setProperty('name', 'Alice');
+state.user.setProperties({ name: 'Bob', age: 30 });
+```
+
+**In templates, state is automatically unwrapped:**
+
+```html
+<!-- No .get() needed in templates -->
+<div>{counter}</div>
+<div class="{isOpen ? 'open' : 'closed'}">
+```
+
+### Component Props: Non-Reactive Instance Data
+
+For data that doesn't need reactivity, add properties directly to the component instance:
+
+**Real pattern from `src/components/panels/panels.js`:**
+
+```javascript
+const createComponent = ({ self, el, settings, $ }) => ({
+  // Non-reactive tracking data
+  panels: [],
+  renderedPanels: [],
+
+  // Cache for performance
+  cache: {
+    groupSize: undefined,
+    groupScrollOffset: undefined,
+    resizeStart: undefined,
+    resizeIndex: undefined,
+  },
+
+  // Methods access via self
+  setGroupCalculations() {
+    self.cache.groupSize = self.getGroupSize();
+    self.cache.groupScrollOffset = self.getGroupScrollOffset();
+  },
+});
+```
+
+**Real pattern from `src/components/inpage-menu/inpage-menu.js`:**
+
+```javascript
+const createComponent = ({ self, state, ... }) => ({
+  observer: null,           // IntersectionObserver instance
+  lastScrollPosition: 0,    // Scroll tracking
+  isScrolling: false,       // Race condition prevention
+  isActivating: false,      // State flag
+  scrollingDown: false,     // Direction tracking
+  // ...
+});
+```
+
+**Use component props for:**
+- DOM references and observers
+- Timers and intervals
+- Caches and memoized values
+- Non-reactive flags for race condition prevention
+- Static configuration
+
+---
+
+## Templates
+
+### Template Data Context
+
+Templates receive a **flattened data context** - you access everything at the top level:
+
+```javascript
+// In component logic
+state.counter.get()        // Explicit
+settings.theme             // Through proxy
+self.getDisplayText()      // Method call
+
+// In templates - everything is flat
+{counter}                  // state.counter (auto-unwrapped)
+{theme}                    // settings.theme
+{getDisplayText}           // self.getDisplayText() (auto-invoked)
+```
+
+### Expression Syntax
+
+```html
+<!-- Variable interpolation -->
+{variableName}
+{user.name}
+{settings.theme}
+
+<!-- Method calls - both styles work -->
+{formatDate date 'YYYY-MM-DD'}     <!-- Lisp style -->
+{formatDate(date, 'YYYY-MM-DD')}   <!-- JS style -->
+
+<!-- JavaScript expressions -->
+{items.filter(i => i.active).length}
+{items.slice(0, 5)}
+
+<!-- HTML output (unescaped) -->
+{#html richTextContent}
+```
+
+### Conditionals
+
 ```html
 {#if condition}
-  <div>Conditional content</div>
+  <div>True content</div>
 {else if otherCondition}
-  <div>Alternative content</div>
+  <div>Alternative</div>
 {else}
-  <div>Default content</div>
+  <div>Default</div>
 {/if}
+
+<!-- With expressions -->
+{#if items.length > 0}
+  <div>Has {items.length} items</div>
+{/if}
+
+<!-- Inline in attributes -->
+<div class="{#if active}active{/if} {#if large}large{/if}">
 ```
 
-### Iteration (Multiple Syntaxes)
+### Loops
+
 ```html
-<!-- Each...in syntax (recommended) -->
+<!-- Named variable (recommended) -->
 {#each item in items}
-  <div>{item.name} - {index}</div>
+  <div>{item.name} - Index: {index}</div>
 {else}
-  <div>No items found</div>
+  <div>No items</div>
 {/each}
 
 <!-- Direct property access -->
 {#each users}
   <div>{name} - {email}</div>
 {/each}
+
+<!-- Custom index name -->
+{#each item, i in items}
+  <div>#{i}: {item.name}</div>
+{/each}
+
+<!-- Object iteration -->
+{#each value, key in object}
+  <div>{key}: {value}</div>
+{/each}
 ```
 
-### Sub-templates and Slots
-```html
-<!-- Include sub-templates with data -->
-{>subComponent data=item index=index}
+### Snippets (Reusable Fragments)
 
-<!-- Template-as-settings (fundamental pattern) -->
-{>template name=itemTemplate data=item}
-
-<!-- Content projection -->
-{>slot}
-{>slot header}
-```
-
-### Snippets (Reusable Template Fragments)
 ```html
 {#snippet userCard}
   <div class="user">
-    <img src="{avatar}" alt="{name}" />
+    <img src="{avatar}" />
     <h3>{name}</h3>
   </div>
 {/snippet}
 
+<!-- Use snippet -->
 {#each users}
   {>userCard}
 {/each}
+
+<!-- With data override -->
+{>userCard name="Guest" avatar="/default.png"}
 ```
 
-> **For complete template syntax**: See `/ai/semantic-ui-quick-reference.md` → Template Syntax Reference
+### Slots and Sub-templates
 
-## CSS Guidelines **CRITICAL PATTERNS**
+```html
+<!-- Default slot -->
+{>slot}
 
-**MANDATORY**: Read the canonical CSS guides for complete patterns:
-- [HTML Style Guide](/ai/framework/html.md) - Semantic markup and class naming
-- [CSS Guide](/ai/framework/css.md) - CSS architecture and responsive design
-- [Theming](/ai/framework/theming.md) - Light/dark mode theme system and automatic adaptation
-- [Token Usage](/ai/framework/design-tokens.md) - Design token system and verification
+<!-- Named slots -->
+{>slot header}
+{>slot content}
 
-### Essential Class Naming Rules
+<!-- Sub-template with data -->
+{>templateName data=item index=index}
 
-```css
-/* ✅ CORRECT: Use semantic class names directly (no prefixes) */
-.small { --progress-height: 0.5rem; }
-.medium { --progress-height: 1rem; }
-.large { --progress-height: 1.5rem; }
-
-.primary { --progress-color: var(--primary-color); }
-.success { --progress-color: var(--positive-color); }
-.danger { --progress-color: var(--negative-color); }
-
-/* ❌ WRONG: Don't use prefixed class names */
-.size-small { /* DON'T DO THIS */ }
-.theme-primary { /* DON'T DO THIS */ }
-.progress-bar-large { /* DON'T DO THIS */ }
+<!-- Template-as-settings pattern -->
+{>template name=rowTemplate data=row}
 ```
 
-### Essential Design Token Usage
+**Real pattern from `src/components/panels/panel.html`:**
 
-```css
-:host {
-  /* ✅ CORRECT: Use provided design tokens */
-  --progress-height: 1rem;
-  border-radius: var(--border-radius);    /* Use design token */
-  transition: var(--transition);          /* Use design token */
-}
-
-.label {
-  font-size: var(--small);               /* Use design token */
-  font-weight: var(--bold);              /* Use design token */
-  color: var(--text-color);              /* Use design token */
-  margin-top: var(--compact-spacing);    /* Use design token */
-}
-
-/* ❌ WRONG: Don't hardcode values that exist as design tokens */
-.bad-label {
-  font-size: 0.75rem;                    /* DON'T: Use var(--small) */
-  font-weight: 500;                      /* DON'T: Use var(--bold) */
-  color: #495057;                        /* DON'T: Use var(--text-color) */
-  transition: all 0.3s ease;             /* DON'T: Use var(--transition) */
-}
+```html
+<div class="{classMap getClassMap}{direction} panel" part="panel">
+  {#if label}
+    <span class="self label">
+      {label}
+      <div class="actions">
+        {#if canMinimize}
+          {#if minimized}
+            <ui-icon link maximize class="toggle-size"></ui-icon>
+          {else}
+            <ui-icon link minus class="toggle-size"></ui-icon>
+          {/if}
+        {/if}
+      </div>
+    </span>
+  {/if}
+  {>slot}
+</div>
+{#if notEqual getIndex 0}
+  <span class="{classMap getHandleClassMap}handle" part="handle">
+    <span class="divider"></span>
+  </span>
+{/if}
 ```
 
-### Shadow DOM Benefits & Pattern
+### Boolean Attributes
 
-```css
-:host {
-  /* Component-specific measurements only */
-  --component-height: 2rem;
-  --handle-size: 24px;
-}
+**Quoting determines behavior:**
 
-.container {
-  display: flex;
-  padding: var(--spacing);              /* Use design token */
-  border-radius: var(--border-radius); /* Use design token */
+```html
+<!-- Unquoted: Attribute removed if falsy -->
+<input checked={isChecked} />
+<!-- Result when false: <input /> -->
 
-  .header {
-    font-size: var(--large);           /* Use design token */
-    font-weight: var(--bold);          /* Use design token */
-
-    .title {
-      color: var(--text-color);        /* Use design token */
-    }
-  }
-}
-
-/* Settings-based theming */
-:host([data-theme="dark"]) {
-  --text-color: #ffffff;
-  --bg-color: #1a1a1a;
-}
-
-/* Modern CSS features */
-@starting-style {
-  .modal.visible {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-}
-
-.modal.visible {
-  opacity: 1;
-  transform: scale(1);
-  transition: all 0.2s ease;
-}
+<!-- Quoted: Always outputs as string -->
+<div data-count="{count}">
+<!-- Result when count=0: <div data-count="0"> -->
 ```
 
-**Shadow DOM Benefits**:
-- Use simple class names like `.container` (no namespacing needed)
-- No class name collisions between components
-- CSS custom properties for design system integration
-- Container queries: `@container component (min-width: 500px) { ... }`
-
-## Reactivity Guidelines
-
-### State vs Settings Decision Rule
-- **Settings**: Configuration that controls component behavior (mutable & reactive everywhere)
-- **State**: Internal reactive data that changes during component lifecycle
-
-### State Access Patterns
-```javascript
-// Reading state
-const value = state.counter.get();           // Explicit read
-const value = state.counter.value;           // Property access
-
-// Writing state
-state.counter.set(5);                        // Set new value
-state.counter.value = 5;                     // Property assignment
-
-// Built-in helpers
-state.counter.increment(1);                  // Numbers
-state.isVisible.toggle();                    // Booleans
-state.items.push(newItem);                   // Arrays
-state.user.setProperty('name', 'Alice');     // Objects
-```
-
-### Settings Reactivity (Key Feature)
-```javascript
-// Settings are FULLY REACTIVE everywhere
-settings.theme = 'dark';                     // Direct assignment triggers reactivity
-settings.size = 'large';                     // Template updates automatically
-
-// Reactive in component logic (inside reactions)
-reaction(() => {
-  console.log(settings.theme);               // Creates dependency, will re-run
-});
-
-// Reactive in templates (automatic)
-// {theme} will update when settings.theme changes
-```
-
-### Settings and State Initialization in `onCreated`
-
-While `settings` are reactive throughout the component's lifecycle, initializing `state` from `settings` within the `onCreated` hook is a **one-time operation**.
+### Class Binding with classMap
 
 ```javascript
-const onCreated = ({ state, settings }) => {
-  // This sets the initial value of state.items based on the
-  // current value of settings.initialItems at creation time.
-  state.items.set(settings.initialItems || []);
+// In createComponent
+getClassMap() {
+  return {
+    active: state.isActive.get(),
+    disabled: settings.disabled,
+    large: settings.size === 'large',
+  };
+}
+```
+
+```html
+<div class="{classMap getClassMap}other-class">
+```
+
+---
+
+## Event Handling
+
+### Event Binding Strategies
+
+```javascript
+const events = {
+  // Standard: Event delegation within component
+  'click .button': ({ self, data }) => {
+    self.handleClick(data);
+  },
+
+  // Multiple events on same selector
+  'mouseenter, mouseleave .item': ({ event, state }) => {
+    state.hovered.set(event.type === 'mouseenter');
+  },
+
+  // Deep: Parent listening to child component events
+  'deep click ui-button': ({ data }) => {
+    // Child button clicked
+  },
+
+  // Global: Events outside component
+  'global scroll window': ({ self }) => {
+    self.updatePosition();
+  },
+
+  'global hashchange window': ({ self }) => {
+    self.syncWithURL();
+  },
+
+  // Component-wide (no selector)
+  'mouseover': ({ state }) => {
+    state.hovered.set(true);
+  },
 };
 ```
 
-If `settings.initialItems` is changed after the component is created (e.g., programmatically via `$('my-component').settings({ initialItems: newArray })`), the `state.items` will not automatically update based on this `onCreated` logic.
-
-To keep a state property synchronized with a setting property after initial creation, you must set up an explicit reaction:
+### Dispatching Events
 
 ```javascript
-const createComponent = ({ state, settings, reaction }) => ({
-  onCreated() {
-    // One-time initialization
-    state.items.set(settings.initialItems || []);
-
-    // Explicit reaction to keep state.items in sync with settings.initialItems
-    reaction(() => {
-      // Note: Depending on the desired behavior, you might want to compare
-      // the new settings.initialItems with the current state.items
-      // to avoid unnecessary updates or to merge data.
-      // This example simply overwrites state.items when settings.initialItems changes.
-      state.items.set(settings.initialItems || []);
-    });
-  }
-});
-```
-
-Refer to the "Reactive Settings Pattern" in the Patterns Cookbook for more details.
-
-### Performance Optimization
-```javascript
-// Non-reactive reads (when you don't want dependencies)
-const currentValue = state.someValue.peek();
-
-// Batch DOM updates
-afterFlush(() => {
-  // Runs after all reactive updates complete
-  this.measureLayout();
-});
-```
-
-> **For complete reactivity patterns**: See `/ai/semantic-ui-component-authoring-best-practices.md` → Reactivity Patterns
-
-## Component Communication Patterns
-
-There are three primary ways for components to communicate, each with a specific purpose. Choosing the right one is crucial for building maintainable applications.
-
-### 1. Events (Primary Pattern)
-**Use `dispatchEvent` for child-to-parent notifications.** This is the most common and decoupled pattern. The framework's `dispatchEvent` helper ensures custom events bubble by default.
-
-```javascript
-// Child component dispatches an event
 const createComponent = ({ dispatchEvent }) => ({
   selectItem(item) {
-    // ...
-    dispatchEvent('itemSelected', { selectedItem: item });
+    dispatchEvent('itemSelected', {
+      item,
+      timestamp: Date.now()
+    });
+    // Events bubble by default
   }
 });
+```
 
-// Parent component listens for the event
+**Real pattern from `src/components/panels/panel.js`:**
+
+```javascript
+startResize(event) {
+  self.resizing.set(true);
+  self.initialSize = self.getCurrentFlex();
+
+  dispatchEvent('resizeStart', {
+    initialSize: self.initialSize,
+    direction: settings.direction,
+    startPosition: self.getPointerPosition(event),
+  });
+  // ... mouse event handling
+},
+
+endResize() {
+  // ... cleanup
+  dispatchEvent('resizeEnd', {
+    initialSize: self.initialSize,
+    finalSize: self.getCurrentFlex(),
+  });
+}
+```
+
+**Parent listening (from `src/components/panels/panels.js`):**
+
+```javascript
 const events = {
-  'itemSelected ui-child-component': ({ data }) => {
-    // data.selectedItem is available here
-    console.log('An item was selected:', data.selectedItem);
-  }
+  'resizeStart ui-panel'({ self, event, data }) {
+    const panel = event.target;
+    if (inArray(panel, self.panels)) {
+      self.setGroupCalculations();
+      self.setDragStartCalculations(panel, data);
+    }
+  },
+
+  'resizeDrag ui-panel'({ self, event, data }) {
+    const panel = event.target;
+    if (inArray(panel, self.panels)) {
+      requestAnimationFrame(() => {
+        self.setPointerCalculations(panel, data);
+        self.resizePanels(self.cache.resizeIndex, self.cache.resizeDelta);
+        self.setEndPointerCalculations();
+      });
+    }
+  },
 };
 ```
 
-### 2. Direct API Access (Parent-to-Child Control)
-**Use `$('selector').component()` when a parent needs to imperatively command a child.**
+### Keyboard Shortcuts
 
 ```javascript
-// In page.js or a parent component
-const childComponent = $('ui-child-component').component();
-childComponent.publicMethod(); // Call a method defined in the child's createComponent
-
-// In the child component (ui-child-component.js)
-const createComponent = ({ state }) => ({
-  publicMethod() {
-    state.internalValue.set('Updated by parent');
-  }
-});
-```
-
-### 3. Hierarchical Traversal (Tightly-Coupled Systems)
-**Use `findParent()` and `findChild()` only for systems of components that are designed to work together and are not intended to be used separately,** like `todo-list` and its `todo-item`s.
-
-```javascript
-// todo-item.js (Child)
-const createComponent = ({ findParent, data }) => ({
-  toggleCompleted() {
-    // Directly access and modify the parent's state
-    const parent = findParent('todo-list');
-    parent.todos.setProperty(data.todo._id, 'completed', !data.todo.completed);
-  }
-});
-```
-> **For a detailed decision guide and more examples**: See [Best Practices](./component-authoring-best-practices.md) → Component Communication Patterns
-
-## **CRITICAL Method Reference Pattern**
-
-**MANDATORY**: Always use `self.methodName()` when calling component methods from within other methods:
-
-```javascript
-const createComponent = ({ self, state, settings }) => ({
-  getPercentage() {
-    const { value, min, max } = settings;
-    const range = max - min;
-    const adjustedValue = Math.max(min, Math.min(max, value));
-    return ((adjustedValue - min) / range) * 100;
+const keys = {
+  'up'({ self, state }) {
+    if (!state.modalOpen.get()) return;
+    self.selectPrevious();
   },
 
-  getDisplayText() {
-    if (!settings.showLabel) return '';
-    // ✅ CRITICAL: Use self.methodName() for internal method calls
-    const percentage = self.getPercentage();
-    return `${percentage}%`;
+  'down'({ self, state }) {
+    if (!state.modalOpen.get()) return;
+    self.selectNext();
   },
 
-  // ❌ WRONG: Using this.methodName()
-  getBadDisplayText() {
-    const percentage = this.getPercentage(); // DON'T DO THIS
-    return `${percentage}%`;
-  }
-});
-```
+  'enter'({ self, state }) {
+    if (!state.modalOpen.get()) return;
+    self.visitResult();
+  },
 
-**Why `self.` is required**: The component methods are bound to the `self` object, not `this`. See [Mental Model](/ai/framework/mental-model.md) for complete explanation.
-
-## **CRITICAL HTML Attribute Naming**
-
-**HTML attributes don't automatically convert to camelCase - they remain lowercase:**
-
-```javascript
-// Settings definition
-const defaultSettings = {
-  showLabel: true    // camelCase in JavaScript
+  'ctrl + k'({ self }) {
+    self.openModal();
+  },
 };
-
-// Template usage (reactive)
-{#if showLabel}     // camelCase in templates
-
-// HTML usage (lowercase)
-<progress-bar showlabel="false">  // lowercase in HTML attributes
-<progress-bar show-label="false"> // kebab-case also works but converts to camelCase
 ```
 
-## Essential Component Patterns
+**Dynamic key binding from `src/components/global-search/global-search.js`:**
 
-### Lifecycle Initialization
 ```javascript
-const onCreated = ({ state, settings, reaction }) => {
+const createComponent = ({ self, bindKey, settings }) => ({
+  initialize() {
+    bindKey(settings.openKey, self.openModal);
+  },
+});
+```
+
+---
+
+## Lifecycle Hooks
+
+### Execution Order
+
+1. Component constructor
+2. Settings/State initialization
+3. `createComponent()` - returns instance methods
+4. `onCreated()` - component initialized, no DOM yet
+5. Template compilation and rendering
+6. `onRendered()` - DOM is ready
+7. Component lifetime...
+8. `onDestroyed()` - cleanup before removal
+
+### onCreated
+
+Use for initialization logic before DOM is available:
+
+```javascript
+const onCreated = ({ self, state, settings, reaction }) => {
   // Initialize state from settings
   state.theme.set(settings.defaultTheme);
 
-  // Setup reactive computations
+  // Setup reactions
   reaction(() => {
     if (state.count.get() > 10) {
       state.warning.set(true);
     }
   });
 };
+```
 
-const onRendered = ({ $, isClient }) => {
-  // Browser-only DOM setup
+**Real pattern from `src/components/theme-switcher/theme-switcher.js`:**
+
+```javascript
+const onCreated = function({ self, state, isClient }) {
+  state.theme.set(self.getLocalTheme());
   if (isClient) {
-    $('.auto-focus').focus();
-    this.setupExternalLibrary();
+    self.calculateTheme();
   }
 };
 ```
 
-### Event Binding Strategies
+### onRendered
+
+Use for DOM manipulation and browser-only setup:
+
 ```javascript
-const events = {
-  // Standard: Within component
-  'click .button': ({ self }) => self.toggle(),
+const onRendered = ({ self, $, isClient, settings }) => {
+  if (!isClient) return;
 
-  // Deep: Parent managing child components
-  'deep click ui-button': ({ self, data }) => self.handleChild(data),
+  self.bindPageEvents();
+  self.calculateScrollHeight();
 
-  // Global: Page-level events
-  'global scroll window': ({ self }) => self.updatePosition(),
-
-  // Form inputs with data attributes
-  'input .field': ({ state, value, data }) => {
-    state.fieldValue.set(value);
-    // data-field-name="email" becomes data.fieldName = "email"
+  if (settings.useAccordion) {
+    el.setAttribute('accordion', '');
   }
 };
 ```
 
-### Query Strategies **CRITICAL NAMING CONVENTION**
-
-**MANDATORY**: All variables holding query results MUST be prefixed with `$`
+**Real pattern from `src/components/inpage-menu/inpage-menu.js`:**
 
 ```javascript
-const createComponent = ({ $, $$ }) => ({
-  // ✅ CORRECT: $ prefix for query variables
-  updateLocalElement() {
-    const $button = $('.local-button');
-    $button.addClass('active');
-  },
-
-  // ✅ CORRECT: $ prefix for multiple elements
-  findGlobalElements() {
-    const $dropdowns = $$('ui-dropdown');
-    const $options = $$('ui-dropdown .option');
-    return { $dropdowns, $options };
-  },
-
-  // ✅ CORRECT: $ prefix in method parameters
-  highlightElement($element) {
-    $element.addClass('highlighted');
-  },
-
-  // ❌ WRONG: Missing $ prefix
-  badExample() {
-    const button = $('.button');        // DON'T DO THIS
-    const elements = $$('.item');       // DON'T DO THIS
+const onRendered = function({ self, isServer, settings }) {
+  if (isServer || !settings.menu.length) {
+    return;
   }
-});
-```
-
-**Why $ prefix is required**:
-- Clearly distinguishes Query collection results from other variables
-- Makes code more readable and maintainable
-- Prevents confusion between DOM elements and regular data
-- Follows established convention for query-based variables
-
-### Component Encapsulation & DOM Access **CRITICAL PATTERNS**
-
-#### **Public API Design**
-**MANDATORY**: Components must expose public API methods and hide internal state
-
-```javascript
-const createComponent = ({ self, state, settings }) => ({
-  // ✅ CORRECT: Expose public methods for external access
-  start() {
-    state.isAnimating.set(true);
-  },
-
-  stop() {
-    state.isAnimating.set(false);
-  },
-
-  toggle() {
-    state.isAnimating.toggle();
-  },
-
-  isAnimating() {
-    return state.isAnimating.get();           // Public getter, not direct state access
-  }
-});
-```
-
-#### **DOM Querying & Component Access**
-**For imperative DOM updates or access to component instances from page scope, see [Query Package](/ai/framework/query.md) - Complete Query API reference**
-
-**MANDATORY Query Variable Naming**: All variables holding query results MUST be prefixed with `$`:
-```javascript
-// ✅ CORRECT
-const $button = $('.button');
-const $loader = $('#dynamicLoader');
-const loaderComponent = $loader.eq(0).component();
-
-// ❌ WRONG
-const button = $('.button');                 // Missing $ prefix
-```
-
-#### **UI Component Preference**
-**MANDATORY**: Use existing UI components instead of regular HTML elements
-
-```html
-<!-- ✅ CORRECT: Use framework UI components -->
-<ui-button emphasis="primary">Toggle</ui-button>
-<ui-input value="text" type="text"></ui-input>
-
-<!-- ❌ WRONG: Regular HTML when UI components exist -->
-<button>Toggle</button>                      <!-- Use ui-button instead -->
-<input type="text" value="text">             <!-- Use ui-input instead -->
-```
-
-**Available UI Components** (check `/src/components/` for complete list):
-- `ui-button` - Interactive buttons with emphasis, colors, sizes
-- `ui-input` - Form inputs with validation and styling
-- `ui-card` - Content containers
-- `ui-modal` - Dialog overlays
-- `ui-menu` - Navigation menus
-
-### Template-as-Settings Pattern ⭐ **FUNDAMENTAL**
-```javascript
-// Define template components for flexible rendering
-const UserRowTemplate = defineComponent({
-  template: `<tr><td>{name}</td><td>{email}</td></tr>`
-});
-
-// Component uses template setting
-const defaultSettings = {
-  rowTemplate: new Template(),  // Will be overridden
-  items: []
+  self.bindPageEvents();
+  self.calculateScrollHeight();
 };
-
-// Template: {#each item in items}
-//            {>template name=rowTemplate data=item}
-//          {/each}
-
-// Configure at runtime
-$('data-table').settings({
-  rowTemplate: UserRowTemplate,     // Custom rendering
-  items: userData
-});
 ```
 
-> **For comprehensive patterns**: See `/ai/semantic-ui-component-authoring-best-practices.md`
+### onDestroyed
 
-## Important Notes **REVIEW BEFORE CODING**
-
-### Critical Reminders
-
-**Method References**: Always use `self.methodName()` when calling component methods from within other methods (NOT `this.methodName()`)
-
-**CSS Class Names**: Use semantic class names like `.large`, `.primary` (NOT `.size-large`, `.theme-primary`)
-
-**Design Tokens**: Use `var(--large)`, `var(--primary-color)` instead of hardcoded values like `16px`, `#007bff`
-
-**HTML Attributes**: Use lowercase `showlabel="false"` in HTML (NOT `showLabel="false"`)
-
-### Framework Behavior
-
-- The framework uses a batched update system - multiple state changes may be coalesced
-  - Use `flush()` to manually force immediate updates if needed
-  - Use `afterFlush(() => {})` to run code after all pending updates complete
-- In templates, the data context is flattened - properties from settings, state, and methods are all directly accessible
-- Always use shadow DOM principles for CSS (simple class names, nested selectors)
-- Use reaction() to set up reactive computations, not for side effects
-
-## Additional Best Practices
-
-### Class Naming in Shadow DOM
-- Keep class names simple and semantic (e.g., `.menu` instead of `.context-menu-container`)
-- No need for namespacing or prefixing since Shadow DOM provides encapsulation
-- Example: Use `.item`, `.divider`, `.header` instead of `.component-item`, etc.
-- **CRITICAL**: Use `.large`, `.primary` NOT `.size-large`, `.theme-primary`
-
-### State vs Settings
-- `settings`: Use for configurable properties that typically don't change after initialization
-  ```javascript
-  const defaultSettings = {
-    items: [],      // ✓ Configuration that the user provides
-    width: 180,     // ✓ Customizable property
-  };
-  ```
-- `state`: Use only for values that change during component lifetime due to user interaction
-  ```javascript
-  const defaultState = {
-    visible: false,    // ✓ Changes during component use
-    activeIndex: -1,   // ✓ Changes during component use
-    items: []          // ✗ Don't duplicate settings in state
-  };
-  ```
-
-### Template Syntax Clarifications
-- Iteration uses `index` automatically, don't declare an index variable:
-  ```html
-  <!-- Correct -->
-  {#each item in items}
-    <div data-index="{index}">{item.label}</div>
-  {/each}
-
-  <!-- Incorrect -->
-  {#each item, index in items}
-    <div data-index="{index}">{item.label}</div>
-  {/each}
-  ```
-
-- Use simple ternary expressions in attribute bindings:
-  ```html
-  <div tabindex="{isActive ? '0' : '-1'}"></div>
-  ```
-
-### Event Handling
-- Always use the provided `dispatchEvent` function rather than creating DOM events manually:
-  ```javascript
-  // Correct
-  dispatchEvent('select', { item, index });
-
-  // Incorrect
-  const event = new CustomEvent('select', {
-    detail: { item, index },
-    bubbles: true
-  });
-  element.dispatchEvent(event);
-  ```
-
-- For global events, use `body` rather than `document`:
-  ```javascript
-  // Correct
-  'global click body'({ self }) {
-    self.hideMenu();
-  }
-
-  // Avoid
-  'global click document'({ self }) {
-    self.hideMenu();
-  }
-  ```
-
-### Slotted Content Pattern
-- Use slots to create intuitive wrapper components:
-  ```html
-  <div class="container">
-    {>slot}
-  </div>
-  ```
-
-- This enables a natural usage pattern:
-  ```html
-  <my-component>
-    <div class="content">Wrapped content</div>
-  </my-component>
-  ```
-
-### Modern CSS Techniques
-- Use `@starting-style` for smooth enter animations:
-  ```css
-  .menu.visible {
-    opacity: 1;
-    transform: scale(1);
-  }
-  @starting-style {
-    .menu.visible {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-  }
-  ```
-
-- Use class-based visibility toggling instead of inline styles:
-  ```css
-  .menu {
-    visibility: hidden;
-    opacity: 0;
-  }
-  .menu.visible {
-    visibility: visible;
-    opacity: 1;
-  }
-  ```
-
-### Class Binding with Object Maps
-- Return object maps from methods for conditional classes:
-  ```javascript
-  getMenuStates() {
-    return {
-      visible: state.visible.get(),
-      active: state.active.get()
-    };
-  }
-  ```
-
-- Use with `classMap` helper in templates:
-  ```html
-  <div class="{classMap getMenuStates}"></div>
-  ```
-
-### Performance Optimizations
-- Use `requestAnimationFrame` for DOM measurements and position calculations:
-  ```javascript
-  showElement() {
-    state.visible.set(true);
-    requestAnimationFrame(() => self.measureAndPosition());
-  }
-  ```
-
-- For non-reactive reads in calculations, use `.peek()` to avoid triggering reactions:
-  ```javascript
-  const position = state.position.peek();
-  ```
-
-### Lifecycle Events
-- Emit events for component lifecycle where appropriate:
-  ```javascript
-  showMenu() {
-    // Setup code...
-    dispatchEvent('show');
-  }
-
-  hideMenu() {
-    // Cleanup code...
-    dispatchEvent('hide');
-  }
-  ```
-
-### Proper Parameter Access
-- Access parameters directly as provided in function arguments:
-  ```javascript
-  // Correct
-  createComponent({ self, state, settings }) {
-    // Use state and settings directly
-  }
-
-  // Incorrect
-  createComponent({ self }) {
-    // Don't use self.state or self.settings
-  }
-  ```
-
-### DOM Element Access in Event Handlers
-The `target` argument in event handlers refers to the DOM element that matched the selector.
-The `event.target` argument refers to the actual element that originated the event, which might be a child of `target`.
-Avoid using `this` in event handlers to refer to DOM elements; prefer the explicit `target` or `event.target` arguments for clarity.
+Use for cleanup of **external resources only** (framework cleans up its own APIs):
 
 ```javascript
-'input .field'({ state, $, target, event }) { // Added target, event to destructured args
-  // `target` is the .field element
-  const value = $(target).val();
-  state.inputValue.set(value);
+const onDestroyed = function({ self, isServer }) {
+  if (isServer) return;
 
-  // If you needed the precise element that the input event fired on (which is `target` in this specific 'input .field' case)
-  // you could use event.target:
-  // const specificInputElement = event.target;
-}
+  // Clean up external resources
+  if (self.observer) {
+    self.observer.disconnect();
+  }
+
+  // Clear timers
+  self.timers.forEach(timer => clearInterval(timer));
+};
 ```
-
-## Reference Examples
-
-When creating components, refer to these example implementations in the knowledgebase for guidance on common patterns:
-
-### Component Composition
-- **TodoMVC** - A complete task management implementation demonstrating:
-  - Parent-child component composition
-  - State management across multiple components
-  - Local storage persistence
-  - Filtering and computed values
-  - Reference files: `todo-list.js`, `todo-item.js`, `todo-header.js`, `todo-footer.js`
-
-### User Interface Patterns
-- **Context Menu** - Right-click menu system demonstrating:
-  - Slotted content pattern
-  - Position calculations
-  - Keyboard navigation
-  - Animation transitions
-  - Reference files: `component.js`, `component.html`, `component.css`
-
-- **UI-Panel** - Resizable panels demonstrating:
-  - Drag interaction handling
-  - Size calculations
-  - Layout persistence
-  - Reference files: `Panel.js`, `Panel.html`, `Panel.css`, `Panels.js`
-
-### Search & Input Patterns
-- **Search Component** - Search with dynamic results demonstrating:
-  - Asynchronous data handling
-  - Dynamic filtering
-  - Keyboard navigation of results
-  - Reference files: `component.js`, `component.html`, `component.css`
-
-### Data Visualization
-- **Spectrum Analyzer** - Audio visualization demonstrating:
-  - Canvas drawing
-  - Animation loops
-  - Media API integration
-  - Reference files: `component.js`
-
-### Context Menu
-- **Context Menu** - Customizable right-click menu demonstrating:
-  - Slotted content wrapper pattern for intuitive usage
-  - Dynamic positioning with viewport boundary detection
-  - Keyboard navigation with arrow keys, Enter, and Escape
-  - Modern CSS transitions with `@starting-style`
-  - Class-based state management with object maps
-  - Accessibility support with ARIA roles and keyboard focus
-  - Event delegation with `deep contextmenu` handling
-  - Reference files: `component.js`, `component.html`, `component.css`
-
-When implementing a new component, consider:
-1. Does an existing example demonstrate a similar interaction pattern?
-2. How does the reference example handle state management?
-3. What event handling patterns might be applicable?
-4. How is component composition structured?
-
-Refer to these examples for practical implementations of the patterns described in these instructions.
-
-## **Creating Documentation Examples**
-
-To showcase your components in the Semantic UI documentation system:
-
-- **Example Authoring Guide**: [Example Authoring](/ai/contributing/documentation/examples/authoring.md) - Creating examples and documentation content
-- **📦 Package Examples**: Refer to [Example Authoring](/ai/contributing/documentation/examples/authoring.md) for package-specific example creation
-
-The documentation system has specific requirements for file structure, metadata, and organization that are separate from general component development.
 
 ---
 
-**Last Updated:** Component implementation guidance
-**Maintenance:** Update this file when component patterns or framework APIs change
+## Reactivity
+
+### Creating Reactions
+
+Reactions automatically re-run when their dependencies change:
+
+```javascript
+const createComponent = ({ state, reaction, afterFlush }) => ({
+  initialize() {
+    // Basic reaction
+    reaction(() => {
+      const value = state.searchQuery.get();
+      if (value.length > 2) {
+        self.performSearch(value);
+      }
+    });
+
+    // Reaction with cleanup
+    reaction(() => {
+      const items = state.items.get();
+      afterFlush(() => {
+        self.measureLayout();
+      });
+    });
+  }
+});
+```
+
+**Real pattern from `src/components/global-search/global-search.js`:**
+
+```javascript
+async calculateResults() {
+  reaction(async (reaction) => {
+    const rawResults = state.rawResults.get();
+    const startIndex = state.resultOffset.get();
+    const endIndex = startIndex + settings.resultsPerPage;
+
+    if (reaction.firstRun) {
+      return;
+    }
+
+    const results = await Promise.all(
+      rawResults.results.slice(startIndex, endIndex).map(r => r.data())
+    );
+    state.results.set(results);
+    // ...
+  });
+}
+```
+
+### Creating Signals
+
+Create additional signals for complex state:
+
+```javascript
+const createComponent = ({ signal }) => ({
+  resizing: signal(false),
+  initialized: signal(false),
+
+  startResize() {
+    self.resizing.set(true);
+  }
+});
+```
+
+### Performance Optimization
+
+```javascript
+// Non-reactive read (no dependency created)
+const value = state.counter.peek();
+
+// Non-reactive execution block
+Reaction.nonreactive(() => {
+  // Code here doesn't track dependencies
+  state.counter.set(5);
+});
+
+// Run after all DOM updates
+afterFlush(() => {
+  self.measureLayout();
+});
+```
+
+---
+
+## Component Communication
+
+### Pattern 1: Events (Primary - Decoupled)
+
+**Child dispatches, parent listens:**
+
+```javascript
+// Child component
+const createComponent = ({ dispatchEvent }) => ({
+  toggle() {
+    state.isOpen.toggle();
+    dispatchEvent('toggle', {
+      isOpen: state.isOpen.get()
+    });
+  }
+});
+
+// Parent component
+const events = {
+  'toggle ui-accordion-panel': ({ data, self }) => {
+    if (self.settings.exclusive && data.isOpen) {
+      self.closeOtherPanels(data.panelId);
+    }
+  }
+};
+```
+
+### Pattern 2: Direct API Access (Imperative Control)
+
+**External code calling component methods:**
+
+```javascript
+// External script
+const component = $('my-component').component();
+component.publicMethod();
+
+// Or via query
+$('ui-modal').component().show();
+$('ui-modal').find('.search input').focus();
+```
+
+### Pattern 3: Parent-Child Coordination (Tightly Coupled)
+
+**For component systems designed to work together:**
+
+```javascript
+// Child (ui-panel) calls parent for complex operations
+minimize() {
+  const panels = findParent('uiPanels');
+  const index = panels.getPanelIndex(el);
+  panels.setPanelMinimized(index);  // Parent handles algorithm
+},
+
+// Parent (ui-panels) discovers and manages children
+addPanels() {
+  let $childPanelGroups = $(el).find('ui-panels');
+  let $childPanelGroupPanels = $childPanelGroups.find('ui-panel');
+  let $allPanels = $(el).find('ui-panel');
+  let $panels = $allPanels.not($childPanelGroupPanels);
+  self.panels = $panels.get();
+}
+```
+
+### Communication Decision Tree
+
+```
+Child needs to notify parent?
+  └── Use dispatchEvent (events bubble up)
+
+Parent needs to command child?
+  └── Use $('child').component().method()
+
+Tightly coupled system (like panels)?
+  └── Events for notifications + findParent for complex operations
+
+Distant components need shared state?
+  └── Navigate to common ancestor via findParent
+```
+
+---
+
+## DOM Querying
+
+### $ vs $$
+
+```javascript
+const createComponent = ({ $, $$ }) => ({
+  // $ - Query within component (no shadow crossing)
+  updateLocal() {
+    const $button = $('.button');
+    $button.addClass('active');
+  },
+
+  // $$ - Deep query (crosses shadow DOM)
+  findGlobal() {
+    const $dropdowns = $$('ui-dropdown');
+    $$('iframe').one('pointerenter', self.handleIframe);
+  },
+});
+```
+
+**CRITICAL: Always prefix query variables with `$`:**
+
+```javascript
+// Correct
+const $button = $('.button');
+const $items = $$('.item');
+
+// Wrong
+const button = $('.button');
+```
+
+### Query Options
+
+```javascript
+// Disable shadow piercing for specific query
+$('.panels', { pierceShadow: false }).scrollTop();
+
+// Query from document root
+$(settings.scrollContext, { root: document }).get(0);
+```
+
+### Component Access
+
+```javascript
+// Get component instance
+const component = $('ui-dropdown').component();
+component.setValue('new-value');
+
+// Configure component
+$('ui-panel').settings({
+  theme: 'dark',
+  collapsible: true
+});
+
+// Access data context
+const context = $('ui-dropdown').dataContext();
+```
+
+---
+
+## CSS Architecture
+
+### Shadow DOM Scoping
+
+CSS is automatically scoped - use simple class names:
+
+```css
+/* No namespacing needed */
+:host {
+  display: block;
+}
+
+.container {
+  padding: var(--spacing);
+}
+
+.button {
+  background: var(--primary-color);
+}
+
+/* State classes */
+.active { }
+.disabled { }
+.large { }
+```
+
+### Design Tokens
+
+Always use design tokens instead of hardcoded values:
+
+```css
+:host {
+  /* Component-specific custom properties */
+  --panel-handle-height: 14px;
+  --panel-divider-width: 1px;
+}
+
+.label {
+  font-size: var(--small);           /* Design token */
+  font-weight: var(--bold);          /* Design token */
+  color: var(--text-color);          /* Design token */
+  transition: var(--transition);     /* Design token */
+}
+```
+
+### Class Naming Convention
+
+```css
+/* Correct: Simple, semantic names */
+.small { }
+.medium { }
+.large { }
+.primary { }
+.success { }
+
+/* Wrong: Prefixed names */
+.size-small { }     /* Don't do this */
+.theme-primary { }  /* Don't do this */
+```
+
+### Real CSS Pattern
+
+**From `src/components/panels/panel.css`:**
+
+```css
+:host {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  overflow: hidden;
+  container: panel / inline-size;
+}
+
+:host {
+  --panel-handle-height: 14px;
+  --panel-divider-width: 1px;
+  --panel-label-font-weight: var(--bold);
+  --panel-label-padding: 0.75rem;
+  --panel-divider-color: var(--solid-border-color);
+}
+
+.panel {
+  display: contents;
+
+  .label {
+    display: flex;
+    font-weight: var(--panel-label-font-weight);
+    padding: var(--panel-label-padding);
+
+    &.active {
+      color: var(--panel-label-active-color);
+    }
+  }
+
+  &.minimized {
+    .label {
+      background: var(--panel-label-minimized-background);
+    }
+  }
+}
+
+.handle {
+  display: flex;
+  position: absolute;
+  z-index: 10;
+
+  &.disabled {
+    pointer-events: none;
+  }
+
+  &:hover .divider {
+    background-color: var(--panel-divider-color-hover);
+  }
+}
+```
+
+---
+
+## Common Patterns from Production Components
+
+### Race Condition Prevention
+
+**From `src/components/inpage-menu/inpage-menu.js`:**
+
+```javascript
+const createComponent = ({ self }) => ({
+  isScrolling: false,      // Flag to prevent intersection updates
+  isActivating: false,     // Flag to prevent scroll events
+
+  scrollToPosition(position) {
+    self.isScrolling = true;  // Set flag
+
+    $(scrollContext).one('scrollend', () => {
+      requestIdleCallback(() => {
+        self.isScrolling = false;  // Clear flag
+      });
+    });
+
+    scrollContext.scrollTo({ top: position, behavior: 'smooth' });
+  },
+
+  onIntersection(entries) {
+    // Only update when NOT scrolling
+    if (!self.isScrolling && newVisibleItems.length) {
+      self.setActiveItem(newVisibleItems[0]);
+    }
+  }
+});
+```
+
+### External Resource Cleanup
+
+```javascript
+const createComponent = ({ self, attachEvent }) => ({
+  observer: null,
+
+  bindIntersectionObserver() {
+    self.observer = new IntersectionObserver(self.onIntersection);
+    sections.forEach(s => self.observer.observe(s));
+  },
+
+  unbindPageEvents() {
+    if (self.observer) {
+      self.observer.disconnect();
+    }
+  }
+});
+
+const onDestroyed = ({ self }) => {
+  self.unbindPageEvents();
+};
+```
+
+### Initialization with Dynamic Keys
+
+**From `src/components/global-search/global-search.js`:**
+
+```javascript
+const createComponent = ({ self, bindKey, isServer, settings }) => ({
+  initialize() {
+    if (isServer) return;
+
+    bindKey(settings.openKey, self.openModal);
+    self.calculateResults();
+    self.calculateLoadSearch();
+  },
+});
+```
+
+### Async Reactions
+
+```javascript
+async calculateLoadSearch() {
+  reaction(async (reaction) => {
+    try {
+      const { Instance } = await import('@pagefind/modular-ui');
+      this.search = new Instance({
+        bundlePath: settings.bundlePath,
+      });
+      // Setup handlers...
+    } catch (error) {
+      console.warn('Search disabled:', error);
+    }
+    reaction.stop();  // One-time initialization
+  });
+}
+```
+
+### Menu/List Filtering
+
+**From `src/components/nav-menu/nav-menu.js`:**
+
+```javascript
+filterBySearchTerm(menu = [], searchTerm = state.searchTerm.get()) {
+  if (!searchTerm) return menu;
+
+  const matches = (a = '') => a.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return menu.reduce((acc, section) => {
+    const sectionMatches = matches(section.name);
+
+    if (sectionMatches) {
+      acc.push({
+        ...section,
+        highlight: self.highlightMatch(section.name, searchTerm)
+      });
+    }
+    // ... recursive filtering
+    return acc;
+  }, []);
+},
+
+highlightMatch(text, searchTerm) {
+  const index = text.toLowerCase().indexOf(searchTerm.toLowerCase());
+  if (index === -1) return text;
+
+  return {
+    before: text.substring(0, index),
+    match: text.substring(index, index + searchTerm.length),
+    after: text.substring(index + searchTerm.length)
+  };
+}
+```
+
+### Scroll Into View
+
+```javascript
+scrollIntoView(index) {
+  if (!isRendered()) return;
+
+  const element = $('.results .result').get(index);
+  const container = $('.results').get(0);
+  if (!element) return;
+
+  const elementRect = element.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  const notOnPage = elementRect.top < containerRect.top ||
+                    elementRect.bottom > containerRect.bottom;
+
+  if (notOnPage) {
+    element.scrollIntoView({ block: 'nearest' });
+  }
+}
+```
+
+---
+
+## Anti-Patterns to Avoid
+
+### Using `this` Instead of `self`
+
+```javascript
+// Wrong
+const createComponent = () => ({
+  getDisplayText() {
+    return this.getValue();  // Won't work
+  }
+});
+
+// Correct
+const createComponent = ({ self }) => ({
+  getDisplayText() {
+    return self.getValue();  // Works
+  }
+});
+```
+
+### Calling `.get()` in Templates
+
+```html
+<!-- Wrong - breaks reactivity tracking -->
+{state.counter.get()}
+
+<!-- Correct - auto-unwrapped -->
+{counter}
+```
+
+### Destructuring Settings (Loses Reactivity)
+
+```javascript
+// Wrong - static value
+const { theme } = settings;
+
+// Correct - reactive
+const theme = settings.theme;
+```
+
+### Hardcoded CSS Values
+
+```css
+/* Wrong */
+.label {
+  font-size: 0.75rem;
+  color: #495057;
+}
+
+/* Correct */
+.label {
+  font-size: var(--small);
+  color: var(--text-color);
+}
+```
+
+### Prefixed Class Names
+
+```css
+/* Wrong */
+.size-large { }
+.theme-primary { }
+
+/* Correct */
+.large { }
+.primary { }
+```
+
+### Missing $ Prefix on Query Variables
+
+```javascript
+// Wrong
+const button = $('.button');
+
+// Correct
+const $button = $('.button');
+```
+
+### Unnecessary Getter Methods
+
+```javascript
+// Wrong - redundant, data is already in template context
+getTheme() { return settings.theme; }
+getCurrentValue() { return state.value.get(); }
+
+// Correct - only create getters for complex logic or external API
+getFormData() {
+  return {
+    values: state.values.get(),
+    isValid: self.validateAll()
+  };
+}
+```
+
+---
+
+## Critical Rules Summary
+
+1. **Use `self.methodName()`** for internal method calls, not `this.methodName()`
+
+2. **Use design tokens** (`var(--spacing)`) instead of hardcoded values
+
+3. **Use simple class names** (`.large`, `.primary`) not prefixed names
+
+4. **Prefix query variables** with `$` (`const $button = $('.button')`)
+
+5. **Settings are reactive** - direct assignment triggers updates
+
+6. **State uses signals** - call `.get()` in JS, automatic in templates
+
+7. **Clean up external resources** in `onDestroyed` (framework handles its own APIs)
+
+8. **Use `dispatchEvent`** for child-to-parent communication
+
+9. **Use first-party components** (`ui-button`, `ui-icon`) instead of raw HTML
+
+10. **Check `isClient`/`isServer`** before browser-only code
+
+---
+
+## Related Documentation
+
+- [Mental Model](/ai/framework/mental-model.md) - Core concepts and architecture
+- [Best Practices](/ai/framework/best-practices.md) - Advanced patterns and communication
+- [HTML Guide](/ai/framework/html.md) - Markup conventions
+- [CSS Guide](/ai/framework/css.md) - Styling architecture
+- [Design Tokens](/ai/framework/design-tokens.md) - Token system
+
+---
+
+**Canonical Examples:**
+- `/docs/src/examples/todo-list/` - Parent-child communication
+- `/docs/src/examples/component/complex/accordion/` - Deep events
+- `/src/components/panels/` - Complex coordination
+- `/src/components/global-search/` - Async patterns, keyboard handling
+- `/src/components/inpage-menu/` - Intersection observer, scroll handling

@@ -3,6 +3,7 @@ title: Parent-Child Coordination in UI Primitives
 description: Toolkit of approaches for building composite UI primitives with parent-child coordination, including Light DOM, configuration-driven, Shadow DOM, and template patterns.
 keywords: [parent-child, coordination, Light DOM, Shadow DOM, CSS variables, templates, composition]
 audience: framework
+skill: parent-child
 type: doc
 ---
 

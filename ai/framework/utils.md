@@ -3,6 +3,7 @@ title: Utils Package Guide
 description: Comprehensive guide to the @semantic-ui/utils package, a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more.
 keywords: [utils, utilities, arrays, objects, strings, type checking, functions]
 audience: framework
+skill: utils
 type: doc
 ---
 

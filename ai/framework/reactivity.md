@@ -3,6 +3,7 @@ title: Reactivity Package Guide
 description: Comprehensive guide to the @semantic-ui/reactivity package, a standalone signals-based reactive system with automatic dependency tracking for state management.
 keywords: [reactivity, signals, reactions, dependency tracking, state management, computed values]
 audience: framework
+skill: reactivity
 type: doc
 ---
 

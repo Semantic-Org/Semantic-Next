@@ -3,6 +3,7 @@ title: Semantic UI Web Components Layout Context
 description: Reference guide for generating layouts using Semantic UI Web Components, covering markup syntax, JavaScript interaction, theming, and spec-driven development patterns.
 keywords: [web components, layout, markup, attributes, theming, specs, query]
 audience: ui
+skill: markup
 type: doc
 ---
 

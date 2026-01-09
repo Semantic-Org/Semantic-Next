@@ -3,6 +3,7 @@ title: Semantic UI Theme Architecture Guide
 description: Canonical reference for implementing light/dark mode theming, covering the four-layer architecture, standard/inverted pattern, and theme-aware component development.
 keywords: [theming, light mode, dark mode, CSS variables, OKLCH, standard tokens, inverted tokens]
 audience: framework
+skill: theming
 type: doc
 ---
 

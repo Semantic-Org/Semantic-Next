@@ -3,6 +3,7 @@ title: Templating Package Guide
 description: Complete guide to the @semantic-ui/templating package, covering template syntax, AST compilation, conditional rendering, iteration, and component integration.
 keywords: [templating, templates, AST, expressions, conditionals, loops, snippets]
 audience: framework
+skill: templating
 type: doc
 ---
 
