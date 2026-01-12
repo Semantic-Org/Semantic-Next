@@ -209,38 +209,54 @@ server.tool(
 
 server.tool(
   'get_component',
-  'Get the full spec for a Semantic UI component. Supports tag names (ui-button), names (Button), or short forms (button).',
+  'Get the full spec for a Semantic UI component. Supports batch fetching with array of queries.',
   {
-    query: z.string().describe('Component name or tag name (e.g., "button", "ui-button", "Button")'),
+    query: z.union([z.string(), z.array(z.string())])
+      .describe('Component name/tag or array of names (e.g., "button" or ["button", "card"])'),
   },
   async ({ query }) => {
-    const result = await getComponentWithChildren(query);
+    const isBatch = Array.isArray(query);
+    const queries = isBatch ? query : [query];
 
-    if (!result.success) {
+    const results = await Promise.all(queries.map(async (q) => {
+      const result = await getComponentWithChildren(q);
+
+      if (!result.success) {
+        return { query: q, error: `Failed: ${result.error}` };
+      }
+
+      const { resolved, spec, children } = result.data!;
+      const componentId = spec.tagName.replace('ui-', '');
+      const related = findRelatedForSpec(componentId);
+
       return {
-        content: [{
-          type: 'text',
-          text: `Failed to get component "${query}"\nURL: ${result.url}\nError: ${result.error}`,
-        }],
-        isError: true,
+        query: q,
+        data: {
+          resolved,
+          spec,
+          ...(children.length > 0 && { children }),
+          ...(Object.keys(related).length > 0 && { related }),
+        },
+      };
+    }));
+
+    // Single request: return data directly or error
+    if (!isBatch) {
+      const result = results[0];
+      if (result.error) {
+        return {
+          content: [{ type: 'text', text: result.error }],
+          isError: true,
+        };
+      }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }],
       };
     }
 
-    const { resolved, spec, children } = result.data!;
-
-    // Find related examples for this component
-    const componentId = spec.tagName.replace('ui-', '');
-    const related = findRelatedForSpec(componentId);
-
-    const response = {
-      resolved,
-      spec,
-      ...(children.length > 0 && { children }),
-      ...(Object.keys(related).length > 0 && { related }),
-    };
-
+    // Batch request: return array of results
     return {
-      content: [{ type: 'text', text: JSON.stringify(response, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     };
   },
 );
@@ -279,73 +295,78 @@ server.tool(
   },
 );
 
+// Helper to fetch a single example
+async function fetchSingleExample(id: string): Promise<{ id: string; data?: unknown; error?: string; }> {
+  const example = findExample(id);
+
+  if (!example) {
+    return { id, error: `Example not found: ${id}` };
+  }
+
+  const result = await fetchJson<{
+    exampleType?: string;
+    files: Record<string, string>;
+  }>(example.path);
+
+  if (!result.success) {
+    return { id, error: `Failed to fetch: ${result.error}` };
+  }
+
+  const data = result.data!;
+  const related = findRelatedForExample(example);
+
+  // Run log-type examples and capture output
+  if (data.exampleType === 'log' && data.files['index.js']) {
+    const { logs, error } = runLogExample(data.files['index.js']);
+    return {
+      id,
+      data: {
+        ...data,
+        output: { logs, error },
+        ...(Object.keys(related).length > 0 && { related }),
+      },
+    };
+  }
+
+  return {
+    id,
+    data: {
+      ...data,
+      ...(Object.keys(related).length > 0 && { related }),
+    },
+  };
+}
+
 server.tool(
   'get_example',
-  'Get the source files for a specific example by ID.',
+  'Get the source files for a specific example by ID. Supports batch fetching with array of IDs.',
   {
-    id: z.string().describe('Example ID (e.g., "component/card-search", "template/each-loop")'),
+    id: z.union([z.string(), z.array(z.string())])
+      .describe('Example ID or array of IDs (e.g., "counter" or ["counter", "dropdown"])'),
   },
   async ({ id }) => {
-    const example = findExample(id);
+    const isBatch = Array.isArray(id);
+    const ids = isBatch ? id : [id];
 
-    if (!example) {
+    const results = await Promise.all(ids.map(fetchSingleExample));
+
+    // Single request: return data directly or error
+    if (!isBatch) {
+      const result = results[0];
+      if (result.error) {
+        return {
+          content: [{ type: 'text', text: result.error }],
+          isError: true,
+        };
+      }
       return {
-        content: [{ type: 'text', text: `Example not found: ${id}` }],
-        isError: true,
+        content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }],
       };
     }
 
-    const result = await fetchJson<{
-      exampleType?: string;
-      files: Record<string, string>;
-    }>(example.path);
-
-    if (!result.success) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to fetch example "${id}"\nURL: ${result.url}\nError: ${result.error}`,
-        }],
-        isError: true,
-      };
-    }
-
-    const data = result.data!;
-
-    // Find related API docs for this example
-    const related = findRelatedForExample(example);
-
-    // Run log-type examples and capture output
-    if (data.exampleType === 'log' && data.files['index.js']) {
-      const { logs, error } = runLogExample(data.files['index.js']);
-      return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify(
-            {
-              ...data,
-              output: { logs, error },
-              ...(Object.keys(related).length > 0 && { related }),
-            },
-            null,
-            2,
-          ),
-        }],
-      };
-    }
-
+    // Batch request: return array of results
     return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify(
-          {
-            ...data,
-            ...(Object.keys(related).length > 0 && { related }),
-          },
-          null,
-          2,
-        ),
-      }],
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     };
   },
 );
@@ -462,34 +483,50 @@ server.tool(
 
 server.tool(
   'get_context',
-  'Get the full content of an AI context document by path (e.g., "framework/reactivity", "ui/markup").',
+  'Get the full content of an AI context document by path. Supports batch fetching with array of paths.',
   {
-    id: z.string().describe('Document path (e.g., "framework/reactivity", "ui/markup")'),
+    id: z.union([z.string(), z.array(z.string())])
+      .describe(
+        'Document path or array of paths (e.g., "framework/reactivity" or ["framework/reactivity", "ui/markup"])',
+      ),
   },
   async ({ id }) => {
-    const doc = findContext(id);
+    const isBatch = Array.isArray(id);
+    const ids = isBatch ? id : [id];
 
-    if (!doc) {
+    const results = await Promise.all(ids.map(async (docId) => {
+      const doc = findContext(docId);
+
+      if (!doc) {
+        return { id: docId, error: `Context document not found: ${docId}` };
+      }
+
+      const result = await fetchContent(doc.path);
+
+      if (!result.success) {
+        return { id: docId, error: `Failed to fetch: ${result.error}` };
+      }
+
+      return { id: docId, content: result.data! };
+    }));
+
+    // Single request: return content directly or error
+    if (!isBatch) {
+      const result = results[0];
+      if (result.error) {
+        return {
+          content: [{ type: 'text', text: result.error }],
+          isError: true,
+        };
+      }
       return {
-        content: [{ type: 'text', text: `Context document not found: ${id}` }],
-        isError: true,
+        content: [{ type: 'text', text: result.content! }],
       };
     }
 
-    const result = await fetchContent(doc.path);
-
-    if (!result.success) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to fetch context document "${id}"\nURL: ${result.url}\nError: ${result.error}`,
-        }],
-        isError: true,
-      };
-    }
-
+    // Batch request: return array of results
     return {
-      content: [{ type: 'text', text: result.data! }],
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     };
   },
 );
@@ -525,45 +562,60 @@ server.tool(
 
 server.tool(
   'get_user_doc',
-  'Get user documentation page by path. Markdown guides and API reference for developers.',
+  'Get user documentation page by path. Supports batch fetching with array of paths.',
   {
-    path: z.string().describe('Document path (e.g., "guides/reactivity/signals", "api/component")'),
+    path: z.union([z.string(), z.array(z.string())])
+      .describe(
+        'Document path or array of paths (e.g., "guides/reactivity/signals" or ["api/utils/arrays", "api/utils/objects"])',
+      ),
   },
   async ({ path }) => {
-    const doc = findDoc(path);
+    const isBatch = Array.isArray(path);
+    const paths = isBatch ? path : [path];
 
-    if (!doc) {
+    const results = await Promise.all(paths.map(async (docPath) => {
+      const doc = findDoc(docPath);
+
+      if (!doc) {
+        return { path: docPath, error: `Document not found: ${docPath}` };
+      }
+
+      const result = await fetchContent(doc.path);
+
+      if (!result.success) {
+        return { path: docPath, error: `Failed to fetch: ${result.error}` };
+      }
+
+      const related = findRelatedForDoc(doc);
+
       return {
-        content: [{ type: 'text', text: `Document not found: ${path}` }],
-        isError: true,
+        path: docPath,
+        data: {
+          path: docPath,
+          title: doc.title,
+          content: result.data!,
+          ...(Object.keys(related).length > 0 && { related }),
+        },
+      };
+    }));
+
+    // Single request: return data directly or error
+    if (!isBatch) {
+      const result = results[0];
+      if (result.error) {
+        return {
+          content: [{ type: 'text', text: result.error }],
+          isError: true,
+        };
+      }
+      return {
+        content: [{ type: 'text', text: JSON.stringify(result.data, null, 2) }],
       };
     }
 
-    const result = await fetchContent(doc.path);
-
-    if (!result.success) {
-      return {
-        content: [{
-          type: 'text',
-          text: `Failed to fetch document "${path}"\nURL: ${result.url}\nError: ${result.error}`,
-        }],
-        isError: true,
-      };
-    }
-
-    // Find related examples and skills
-    const related = findRelatedForDoc(doc);
-
-    // Return structured response with content and related
-    const response = {
-      path,
-      title: doc.title,
-      content: result.data!,
-      ...(Object.keys(related).length > 0 && { related }),
-    };
-
+    // Batch request: return array of results
     return {
-      content: [{ type: 'text', text: JSON.stringify(response, null, 2) }],
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
     };
   },
 );
