@@ -15,7 +15,7 @@ b {
 }
 
 .item {
-  padding: var(--compact-spacing) var(--spacing);
+  padding: var(--padding-xs) var(--padding);
   border: 1px solid var(--standard-15);
   border-radius: var(--border-radius);
   
@@ -33,8 +33,8 @@ b {
 .tab {
   display: inline-flex;
   align-items: center;
-  gap: var(--compact-spacing);
-  padding: var(--compact-spacing) var(--spacing);
+  gap: var(--gap-xs);
+  padding: var(--padding-xs) var(--padding);
   color: var(--standard-60);
   border-bottom: 2px solid transparent;
   transition: var(--transition);
@@ -46,12 +46,12 @@ b {
 }
 
 .option {
-  padding: var(--compact-spacing) var(--spacing);
+  padding: var(--padding-xs) var(--padding);
   border: 1px solid var(--standard-15);
   border-radius: var(--border-radius);
   display: flex;
   align-items: center;
-  gap: var(--compact-spacing);
+  gap: var(--gap-xs);
   
   &.selected {
     background: var(--standard-5);
@@ -80,7 +80,7 @@ b {
 }
 
 button {
-  padding: var(--compact-spacing) var(--spacing);
+  padding: var(--padding-xs) var(--padding);
   background: var(--primary-color);
   color: var(--white);
   border: none;
@@ -95,8 +95,8 @@ button {
 .checkbox {
   display: flex;
   align-items: center;
-  gap: var(--compact-spacing);
-  padding: var(--compact-spacing);
+  gap: var(--gap-xs);
+  padding: var(--padding-xs);
   
   &.checked {
     color: var(--primary-color);

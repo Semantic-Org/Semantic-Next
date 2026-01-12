@@ -12,13 +12,13 @@
   }
 
   .error {
-    margin-top: var(--compact-spacing);
+    margin-top: var(--spacing-xs);
     color: var(--red);
     font-size: var(--small);
   }
 
   .help {
-    margin-top: var(--compact-spacing);
+    margin-top: var(--spacing-xs);
     color: var(--standard-40);
     font-size: var(--small);
   }
@@ -26,7 +26,7 @@
 
 label {
   display: block;
-  margin-bottom: var(--compact-spacing);
+  margin-bottom: var(--spacing-xs);
   font-weight: var(--bold);
 
   .required {
@@ -62,6 +62,6 @@ textarea {
 
 .actions {
   display: flex;
-  gap: var(--compact-spacing);
+  gap: var(--gap-xs);
   margin-top: var(--spacing);
 }

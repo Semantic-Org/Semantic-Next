@@ -18,7 +18,7 @@
       padding: var(--padding);
       cursor: pointer;
       border-top: var(--border);
-      padding: var(--compact-padding) var(--padding);
+      padding: var(--padding-xs) var(--padding);
 
       &:hover,
       &.active {
@@ -30,7 +30,7 @@
     }
 
     .message {
-      padding: var(--compact-padding);
+      padding: var(--padding-xs);
       color: var(--standard-40);
       b {
         color: var(--primary-text-color);

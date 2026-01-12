@@ -198,7 +198,7 @@
         display: flex;
         flex-direction: row;
         border-radius: var(--attached-border-radius);
-        padding: var(--compact-padding);
+        padding: var(--padding-xs);
         border: var(--border);
       }
       .menu ui-menu {

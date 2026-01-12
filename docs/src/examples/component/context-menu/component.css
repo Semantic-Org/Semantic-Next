@@ -60,7 +60,7 @@
   }
   
   .icon {
-    margin-right: var(--compact-spacing);
+    margin-right: var(--spacing-xs);
     display: flex;
     align-items: center;
     justify-content: center;
