@@ -355,17 +355,17 @@
   :host {
     --card-icon-font-size: var(--relative-32px);
     --card-icon-color: var(--standard-40);
-    --card-icon-margin: 0 0 var(--compact-spacing) 0;
+    --card-icon-margin: 0 0 var(--spacing-xs) 0;
   }
 }
 
 /* src/primitives/card/css/theme/content/meta-variables.css */
 @layer card.theme.content.meta {
   :host {
-    --card-meta-margin: var(--compact-spacing) 0 0;
-    --card-meta-padding: var(--compact-spacing) 0 0;
+    --card-meta-margin: var(--spacing-xs) 0 0;
+    --card-meta-padding: var(--padding-xs) 0 0;
     --card-meta-border: var(--border);
-    --card-meta-gap: var(--compact-spacing);
+    --card-meta-gap: var(--gap-xs);
     --card-meta-text-color: var(--standard-90);
   }
 }
