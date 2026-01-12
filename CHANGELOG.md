@@ -40,6 +40,7 @@ xx.xx.xxxx
 * **Feature** - Added `--text-{size}` scale (3xs→3xl) for body text with `--text-size` default.
 * **Feature** - Added `--border-radius-{size}` scale (3xs→3xl) with natural language aliases.
 * **Feature** - Added `--padding-{size}` and `--margin-{size}` scales (3xs→3xl) aliasing spacing tokens.
+* **Feature** - Added `--spacing-section` and `--spacing-page` structural aliases.
 * **Feature** - Added container tokens: `--text-container`, `--content-container`, `--wide-container`, `--fluid-container`.
 * **Feature** - Added `--fluid` (100%) utility token.
 * **Feature** - Added color grades (0-100) for `--positive-*`, `--negative-*`, `--info-*`, `--warning-*`.
