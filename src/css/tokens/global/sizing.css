@@ -2,31 +2,27 @@
              Sizing
 *******************************/
 
+/*
+  Base configuration for the sizing system.
+  These primitives are used to calculate all other size values.
+
+  To scale up for marketing sites: --base-size: 16
+*/
+
 :root {
 
-  /* -------------------
-       Base Font Size
-  -------------------- */
+  /* Base values (unitless pixel equivalents) */
+  --base-3xs: 10;
+  --base-2xs: 11;
+  --base-xs: 12;
+  --base-s: 13;
+  --base-m: 14;
+  --base-l: 16;
+  --base-xl: 18;
+  --base-2xl: 20;
+  --base-3xl: 24;
 
-  /* Controls rem calculation */
-  --font-size: 14px;
-
-  /* -------------------
-        Size Scale
-  -------------------- */
-
-  /* Base size values (unitless for calculations) */
-  --size-3xs-base: 10;
-  --size-2xs-base: 11;
-  --size-xs-base: 12;
-  --size-s-base: 13;
-  --size-m-base: 14;
-  --size-l-base: 16;
-  --size-xl-base: 18;
-  --size-2xl-base: 20;
-  --size-3xl-base: 24;
-
-  /* Base em size for calculations */
-  --em-size: var(--size-m-base);
+  /* Default base size - change this to scale the entire system */
+  --base-size: var(--base-m);
 
 }

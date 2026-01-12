@@ -12,3 +12,24 @@
   - `--circular-radius` (500rem) remains for fully rounded/pill shapes
   - Natural language aliases: `--border-radius-micro` through `--border-radius-massive`
   - `--border-radius` remains as backward-compatible alias for `--border-radius-m`
+
+- [x] Padding/Margin Scales: Full 9-level scales for padding and margin as aliases to spacing.
+  - Added `--padding-3xs` through `--padding-3xl` aliasing spacing tokens
+  - Added `--margin-3xs` through `--margin-3xl` aliasing spacing tokens
+  - Natural language aliases for both
+  - `--padding` and `--margin` default to `-m` size
+
+- [x] Structural Spacing Aliases: Semantic tokens for document-level spacing.
+  - Added `--spacing-section` (48px) for between sections
+  - Added `--spacing-page` (64px) for major page divisions
+
+---
+
+## Renames to grep for later
+
+These tokens exist in docs/src and should be updated to use the new scale tokens:
+
+| Old Token | New Token |
+|-----------|-----------|
+| `--compact-spacing` | `--spacing-xs` |
+| `--compact-padding` | `--padding-xs` |

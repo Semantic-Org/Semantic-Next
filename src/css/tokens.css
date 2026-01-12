@@ -1,7 +1,6 @@
 /* Global Tokens */
 @import url('./tokens/global/constants.css') layer(tokens.global.constants);
 @import url('./tokens/global/sizing.css') layer(tokens.global.sizing);
-@import url('./tokens/global/spacing.css') layer(tokens.global.spacing);
 @import url('./tokens/global/typography.css') layer(tokens.global.typography);
 @import url('./tokens/global/layout.css') layer(tokens.global.layout);
 @import url('./tokens/global/interaction.css') layer(tokens.global.interaction);
@@ -9,8 +8,9 @@
 @import url('./tokens/global/brands.css') layer(tokens.global.brands);
 
 /* Computed Tokens */
+@import url('./tokens/computed/sizing.css') layer(tokens.computed.sizing);
+@import url('./tokens/computed/spacing.css') layer(tokens.computed.spacing);
 @import url('./tokens/computed/typography.css') layer(tokens.computed.typography);
-@import url('./tokens/computed/em-sizing.css') layer(tokens.computed.emSizing);
 @import url('./tokens/computed/layout.css') layer(tokens.computed.layout);
 @import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
 @import url('./tokens/computed/interaction.css') layer(tokens.computed.interaction);

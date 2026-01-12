@@ -1,89 +1,8 @@
-/*******************************
-       Computed Sizing
-*******************************/
+/* Extracted from: src/css/tokens/computed/em-sizing.css */
 
 :root {
 
-  /* -------------------
-       Sizing Values
-  -------------------- */
-
-  /*
-    These are the pixel values expressed as a ratio of base em
-    This is used to calculate em sizing
-  */
-
-  /* Size of page font */
-  --font-size: calc(var(--em-size) * 1px);
-
-  /* Primary rem sizes (default - most commonly used) */
-  --size-3xs: calc((var(--size-3xs-base) / var(--em-size)) * 1rem);
-  --size-2xs: calc((var(--size-2xs-base) / var(--em-size)) * 1rem);
-  --size-xs: calc((var(--size-xs-base) / var(--em-size)) * 1rem);
-  --size-s: calc((var(--size-s-base) / var(--em-size)) * 1rem);
-  --size-m: calc((var(--size-m-base) / var(--em-size)) * 1rem);
-  --size-l: calc((var(--size-l-base) / var(--em-size)) * 1rem);
-  --size-xl: calc((var(--size-xl-base) / var(--em-size)) * 1rem);
-  --size-2xl: calc((var(--size-2xl-base) / var(--em-size)) * 1rem);
-  --size-3xl: calc((var(--size-3xl-base) / var(--em-size)) * 1rem);
-
-  /* Em sizes (relative to current font-size) */
-  --size-3xs-em: calc((var(--size-3xs-base) / var(--em-size)) * 1em);
-  --size-2xs-em: calc((var(--size-2xs-base) / var(--em-size)) * 1em);
-  --size-xs-em: calc((var(--size-xs-base) / var(--em-size)) * 1em);
-  --size-s-em: calc((var(--size-s-base) / var(--em-size)) * 1em);
-  --size-m-em: calc((var(--size-m-base) / var(--em-size)) * 1em);
-  --size-l-em: calc((var(--size-l-base) / var(--em-size)) * 1em);
-  --size-xl-em: calc((var(--size-xl-base) / var(--em-size)) * 1em);
-  --size-2xl-em: calc((var(--size-2xl-base) / var(--em-size)) * 1em);
-  --size-3xl-em: calc((var(--size-3xl-base) / var(--em-size)) * 1em);
-
-  /* Natural language aliases (rem) */
-  --micro: var(--size-3xs);
-  --mini: var(--size-2xs);
-  --tiny: var(--size-xs);
-  --small: var(--size-s);
-  --medium: var(--size-m);
-  --large: var(--size-l);
-  --big: var(--size-xl);
-  --huge: var(--size-2xl);
-  --massive: var(--size-3xl);
-
-  /* Short aliases (rem) */
-  --3xs: var(--size-3xs);
-  --2xs: var(--size-2xs);
-  --xs: var(--size-xs);
-  --s: var(--size-s);
-  --m: var(--size-m);
-  --l: var(--size-l);
-  --xl: var(--size-xl);
-  --2xl: var(--size-2xl);
-  --3xl: var(--size-3xl);
-
-  /* Legacy relative aliases (em) - kept for backwards compatibility */
-  --relative-micro: var(--size-3xs-em);
-  --relative-mini: var(--size-2xs-em);
-  --relative-tiny: var(--size-xs-em);
-  --relative-small: var(--size-s-em);
-  --relative-medium: var(--size-m-em);
-  --relative-large: var(--size-l-em);
-  --relative-big: var(--size-xl-em);
-  --relative-huge: var(--size-2xl-em);
-  --relative-massive: var(--size-3xl-em);
-
-  /* -------------------
-    Exact Pixel Values
-  -------------------- */
-  /*
-    These are used to specify exact pixel values in em
-    for things like borders that remain constantly
-    sized as emSize adjusts
-
-    Since there are many more sizes than names for sizes,
-    these are named by their original pixel values.
-
-  */
-
+  /* Pixel values (rem - fixed to root) */
   --1px: calc((1 / var(--em-size)) * 1rem);
   --2px: calc((2 / var(--em-size)) * 1rem);
   --3px: calc((3 / var(--em-size)) * 1rem);
@@ -149,6 +68,7 @@
   --63px: calc((63 / var(--em-size)) * 1rem);
   --64px: calc((64 / var(--em-size)) * 1rem);
 
+  /* Pixel values (em - scales with component) */
   --relative-1px: calc((1 / var(--em-size)) * 1em);
   --relative-2px: calc((2 / var(--em-size)) * 1em);
   --relative-3px: calc((3 / var(--em-size)) * 1em);
@@ -213,6 +133,5 @@
   --relative-62px: calc((62 / var(--em-size)) * 1em);
   --relative-63px: calc((63 / var(--em-size)) * 1em);
   --relative-64px: calc((64 / var(--em-size)) * 1em);
-
 
 }

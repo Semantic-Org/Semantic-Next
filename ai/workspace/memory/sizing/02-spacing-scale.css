@@ -1,0 +1,37 @@
+/* Extracted from: src/css/tokens/global/spacing.css */
+
+:root {
+
+  /* Primary spacing tokens (rem - fixed layout rhythm) */
+  --spacing-3xs: 0.125rem;
+  --spacing-2xs: 0.25rem;
+  --spacing-xs: 0.5rem;
+  --spacing-s: 0.75rem;
+  --spacing-m: 1rem;
+  --spacing-l: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Default spacing */
+  --spacing: var(--spacing-m);
+
+  /* Natural language aliases */
+  --spacing-micro: var(--spacing-3xs);
+  --spacing-mini: var(--spacing-2xs);
+  --spacing-tiny: var(--spacing-xs);
+  --spacing-small: var(--spacing-s);
+  --spacing-medium: var(--spacing-m);
+  --spacing-large: var(--spacing-l);
+  --spacing-big: var(--spacing-xl);
+  --spacing-huge: var(--spacing-2xl);
+  --spacing-massive: var(--spacing-3xl);
+
+  /* Structural aliases */
+  --spacing-section: var(--spacing-2xl);
+  --spacing-page: var(--spacing-3xl);
+
+  /* Legacy aliases */
+  --compact-spacing: var(--spacing-xs);
+
+}

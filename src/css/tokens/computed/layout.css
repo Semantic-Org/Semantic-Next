@@ -8,76 +8,9 @@
 */
 
 :root {
-  
-  /* -------------------
-         Padding
-  -------------------- */
 
-  /* Primary padding tokens (alias spacing) */
-  --padding-3xs: var(--spacing-3xs);
-  --padding-2xs: var(--spacing-2xs);
-  --padding-xs: var(--spacing-xs);
-  --padding-s: var(--spacing-s);
-  --padding-m: var(--spacing-m);
-  --padding-l: var(--spacing-l);
-  --padding-xl: var(--spacing-xl);
-  --padding-2xl: var(--spacing-2xl);
-  --padding-3xl: var(--spacing-3xl);
-
-  /* Default padding */
-  --padding: var(--padding-m);
-
-  /* Natural language aliases */
-  --padding-micro: var(--padding-3xs);
-  --padding-mini: var(--padding-2xs);
-  --padding-tiny: var(--padding-xs);
-  --padding-small: var(--padding-s);
-  --padding-medium: var(--padding-m);
-  --padding-large: var(--padding-l);
-  --padding-big: var(--padding-xl);
-  --padding-huge: var(--padding-2xl);
-  --padding-massive: var(--padding-3xl);
-
-  --compact-padding: var(--padding-xs);
-
-  /* Directional utilities */
-  --horizontally-padded: 0rem var(--padding);
-  --vertically-padded: var(--padding) 0rem;
-
-  /* -------------------
-          Margin
-  -------------------- */
-
-  /* Primary margin tokens (alias spacing) */
-  --margin-3xs: var(--spacing-3xs);
-  --margin-2xs: var(--spacing-2xs);
-  --margin-xs: var(--spacing-xs);
-  --margin-s: var(--spacing-s);
-  --margin-m: var(--spacing-m);
-  --margin-l: var(--spacing-l);
-  --margin-xl: var(--spacing-xl);
-  --margin-2xl: var(--spacing-2xl);
-  --margin-3xl: var(--spacing-3xl);
-
-  /* Default margin */
-  --margin: var(--margin-m);
-
-  /* Natural language aliases */
-  --margin-micro: var(--margin-3xs);
-  --margin-mini: var(--margin-2xs);
-  --margin-tiny: var(--margin-xs);
-  --margin-small: var(--margin-s);
-  --margin-medium: var(--margin-m);
-  --margin-large: var(--margin-l);
-  --margin-big: var(--margin-xl);
-  --margin-huge: var(--margin-2xl);
-  --margin-massive: var(--margin-3xl);
-
-  /* Directional utilities */
-  --vertically-spaced: var(--margin) 0rem;
-  --horizontally-spaced: 0rem var(--margin);
-
-  --centered: var(--spacing) auto;
+  /* Padding/Margin EXTRACTED TO: ai/workspace/memory/sizing/06-padding-margin.css */
+  /* Awaiting new system implementation in computed/spacing.css */
 
   /* -------------------
       Border Radius
@@ -97,7 +30,7 @@
   --default-scrollbar-width: 17px;
 
   /* -------------------
-         Loader 
+         Loader
   -------------------- */
 
   /* Loaders Position Offset */
