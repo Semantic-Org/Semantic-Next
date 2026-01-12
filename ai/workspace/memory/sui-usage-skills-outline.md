@@ -35,12 +35,12 @@ Three skills for using Semantic UI official components in websites:
 **Instructions when skill is invoked:**
 
 1. **Detect codebase first**:
-   - If **SUI source repo** (this repo): assume Query and SUI style guide — skip preference questions
+   - If **SUI source repo** (this repo): assume Query and SUI style guide (nested CSS, container queries, design tokens) — skip preference questions
    - If **React/Vue/Angular/Svelte**: note that `/sui:integrate` provides framework-specific guidance
-2. **Check MCP availability** - Recommend Semantic UI MCP plugin if not detected (enables live spec access via `list_components`, `get_component`)
+2. **Check MCP availability** - Recommend Semantic UI MCP plugin if not detected. Fallback: fetch specs via https://next.semantic-ui.com/llms.txt
 3. **Ask CSS preference** (unless SUI repo) - "SUI style guide, your own CSS, or Tailwind?" (for deep customization see `/sui:style`)
 4. **Ask Query preference** (unless SUI repo) - "Use SUI's Query library or vanilla JS?"
-   - **Query** (`$`, `$$`): jQuery-like convenience, shadow DOM piercing with `$$`, `.component()` for instance access, `.settings()` for configuration
+   - **Query**: jQuery-like `$`, plus `$$` which matches recursively through shadow DOM roots and slot projections
    - **Vanilla JS**: Standard `querySelector`, `addEventListener`, direct property access - works fine, no extra dependency
    - Skill examples will use chosen approach
 
@@ -104,12 +104,21 @@ One minimal example showing spec → markup translation.
 
 Patterns unique to SUI that differ from standard HTML/web components.
 
+**Write markup that reads as natural English.** Order attributes like adjectives in speech — size before color before type:
+
+```html
+<ui-button small blue primary>  <!-- "small blue primary button" ✓ -->
+<ui-button primary small blue>  <!-- less natural ✗ -->
+```
+
 **Three attribute dialects** - all equivalent:
 ```html
-<ui-button size="large">   <!-- verbose: attribute="value" -->
-<ui-button large>          <!-- concise: just the value -->
-<ui-button class="large">  <!-- classic: CSS class (v2 compat) -->
+<ui-button large>          <!-- concise (preferred) — reads like natural language -->
+<ui-button size="large">   <!-- verbose — useful for disambiguation -->
+<ui-button class="large">  <!-- classic — easier CSS selectors (.large vs [large]) -->
 ```
+
+**Concise** preferred because it reads naturally. **Verbose** helps when attributes share values (see Compound Aliases). **Classic** rarely used but simplifies external CSS targeting.
 
 **Three content syntaxes** - for spec's `content` fields:
 ```html
@@ -120,9 +129,9 @@ Patterns unique to SUI that differ from standard HTML/web components.
 
 Use **attribute** for simple strings, **class** or **slot** for rich HTML.
 
-**Value fuzzing** - flexible value formats:
+**Value fuzzing** - flexible value formats (prefer natural language):
 ```html
-<ui-button icon="right arrow">   <!-- spaces -->
+<ui-button icon="right arrow">   <!-- spaces (preferred — reads naturally) -->
 <ui-button icon="arrow-right">   <!-- kebab -->
 <ui-button icon="right-arrow">   <!-- reversed kebab -->
 <!-- All resolve to the same canonical value -->
@@ -188,7 +197,7 @@ Quick pointers - standard web patterns apply:
 - **Methods**: Check spec's `methods` array → call on `$().component()` or `el.component`
 - **Slots**: Standard `<div slot="name">` syntax
 - **Properties**: Attributes reflect as properties (`el.disabled = true`)
-- **Theming**: Set `<html dark>` or `<html light>` - components auto-adapt
+- **Theming**: Set `dark`/`light` on `<html>` for page-wide, or on any container to override sections. `<div light>` within a dark page creates a light section. Works on individual components too.
 
 ---
 
