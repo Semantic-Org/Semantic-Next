@@ -38,8 +38,6 @@
   --padding-huge: var(--padding-2xl);
   --padding-massive: var(--padding-3xl);
 
-  /* Special values */
-  --padding-none: 0;
   --compact-padding: var(--padding-xs);
 
   /* Directional utilities */
@@ -74,9 +72,6 @@
   --margin-big: var(--margin-xl);
   --margin-huge: var(--margin-2xl);
   --margin-massive: var(--margin-3xl);
-
-  /* Special values */
-  --margin-none: 0;
 
   /* Directional utilities */
   --vertically-spaced: var(--margin) 0rem;

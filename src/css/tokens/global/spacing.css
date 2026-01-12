@@ -31,8 +31,9 @@
   --spacing-huge: var(--spacing-2xl);
   --spacing-massive: var(--spacing-3xl);
 
-  /* Special values */
-  --spacing-none: 0;
+  /* Structural aliases */
+  --spacing-section: var(--spacing-2xl);   /* 48px - between sections */
+  --spacing-page: var(--spacing-3xl);      /* 64px - major page divisions */
 
   /* Legacy aliases */
   --compact-spacing: var(--spacing-xs);
