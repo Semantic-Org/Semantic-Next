@@ -26,6 +26,64 @@
   --h4: 15px;
   --h5: 14px;
 
+  /* -------------------
+       Title Scale
+  -------------------- */
+
+  /* Primary tokens (9-level scale) */
+  --title-3xs: 10px;
+  --title-2xs: 12px;
+  --title-xs: 14px;
+  --title-s: 16px;
+  --title-m: 18px;
+  --title-l: 24px;
+  --title-xl: 32px;
+  --title-2xl: 48px;
+  --title-3xl: 64px;
+
+  /* Default */
+  --title-size: var(--title-m);
+
+  /* Natural language aliases */
+  --title-micro: var(--title-3xs);
+  --title-mini: var(--title-2xs);
+  --title-tiny: var(--title-xs);
+  --title-small: var(--title-s);
+  --title-medium: var(--title-m);
+  --title-large: var(--title-l);
+  --title-big: var(--title-xl);
+  --title-huge: var(--title-2xl);
+  --title-massive: var(--title-3xl);
+
+  /* -------------------
+       Text Scale
+  -------------------- */
+
+  /* Primary tokens (9-level scale) - pairs with title scale */
+  --text-3xs: 10px;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-s: 13px;
+  --text-m: 14px;
+  --text-l: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+
+  /* Default */
+  --text-size: var(--text-m);
+
+  /* Natural language aliases */
+  --text-micro: var(--text-3xs);
+  --text-mini: var(--text-2xs);
+  --text-tiny: var(--text-xs);
+  --text-small: var(--text-s);
+  --text-medium: var(--text-m);
+  --text-large: var(--text-l);
+  --text-big: var(--text-xl);
+  --text-huge: var(--text-2xl);
+  --text-massive: var(--text-3xl);
+
   /* Header Spacing */
   --header-top-margin: 2rem;
   --header-bottom-margin: 1rem;
