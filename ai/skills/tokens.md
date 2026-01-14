@@ -81,6 +81,7 @@ border-color: var(--border-color);      /* This is a standard border */
 --inverted-text-color
 --inverted-muted-text-color
 --inverted-light-text-color
+--inverted-disabled-text-color
 
 /* Colored text */
 --red-text-color             /* Also: -hover, -pressed, -disabled variants */
@@ -166,6 +167,10 @@ Only use these when no semantic token fits:
 --red-border
 --blue-border
 /* ...all 13 colors */
+
+/* Invariant (don't swap with theme) */
+--black-border
+--white-border
 ```
 
 **Border colors only** (when you need just the color):
@@ -182,6 +187,10 @@ Only use these when no semantic token fits:
 --red-border-color
 --blue-border-color
 /* ...all 13 colors */
+
+/* Invariant */
+--black-border-color
+--white-border-color
 
 /* Semantic states */
 --positive-border-color
@@ -375,28 +384,53 @@ Intensity: `subtle-` or none. Example: `--subtle-shadow`, `--subtle-top-lip-shad
 
 ## Spacing
 
-### Spacing Scale
+### Four Semantic Scales
 
-Full t-shirt scale available:
+Different tokens for different purposes:
+
+| Token Family | Unit | Use For |
+|--------------|------|---------|
+| `--spacing-{size}` | rem | Layout rhythm, between components |
+| `--gap-{size}` | em | Between elements within components |
+| `--padding-{size}` | em | Edge to content within components |
+| `--margin-{size}` | rem | Document flow (aliases spacing) |
+
+**Why different units?**
+- **rem** = Fixed to root. Layout stays consistent regardless of component size.
+- **em** = Scales with component. When you make a button larger via font-size, its padding/gap scale proportionally.
+
+All four families use the t-shirt scale (3xs→3xl) with natural language aliases.
+
+### Numeric Grids (For Designer Fine-Tuning)
+
+Two numeric scales for when t-shirt sizes don't give you exactly what you need:
 
 ```css
---spacing-{size}             /* 3xs→3xl: 2px, 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px */
---spacing                    /* Default (= --spacing-m, 16px) */
+--space-{n}    /* 2px base, 1-32 (2px to 64px) - fine pixel tweaking */
+--gap-{n}      /* 1em base, 1-16 (1em to 16em) - coarse layout gaps */
 ```
 
-### Layout Helpers
+**When to use which:**
+- **T-shirt sizes** (`--gap-small`, `--padding-xs`) - When you want to convey semantic meaning and are confident in the value
+- **Numeric scales** (`--gap-4`, `--space-10`) - When you expect end-users/designers to tweak the exact value
+
+### Asymmetric Padding
+
+For common patterns where one axis needs more room:
 
 ```css
---padding                    /* Default padding (= --spacing) */
---compact-padding            /* Tighter padding */
---compact-spacing            /* Tighter spacing */
---margin                     /* Default margin */
+--padding-wide: 0.5em 1em;   /* Button-like: less vertical, more horizontal */
+--padding-tall: 1em 0.5em;   /* Vertical content: more vertical, less horizontal */
+```
 
---vertically-spaced          /* margin: var(--spacing) 0 */
---horizontally-spaced        /* margin: 0 var(--spacing) */
---vertically-padded          /* padding: var(--spacing) 0 */
---horizontally-padded        /* padding: 0 var(--spacing) */
---centered                   /* margin: var(--spacing) auto */
+### Directional Utilities
+
+```css
+--horizontally-padded        /* padding: 0 var(--padding) */
+--vertically-padded          /* padding: var(--padding) 0 */
+--vertically-spaced          /* margin: var(--margin) 0 */
+--horizontally-spaced        /* margin: 0 var(--margin) */
+--centered                   /* margin: var(--margin) auto */
 ```
 
 ### Containers
@@ -448,40 +482,48 @@ Both support 1-16. Use `-wide` for grid-based layouts, `-column` for equal split
 
 ## Sizing
 
-### Size Scale
+### The Scaling System
 
-Full t-shirt scale with short aliases:
+The entire sizing system scales from a single control point:
 
 ```css
---size-{size}                /* 3xs→3xl: 10px, 11px, 12px, 13px, 14px, 16px, 18px, 20px, 24px */
---{size}                     /* Short form: --3xs, --2xs, --xs, --s, --m, --l, --xl, --2xl, --3xl */
---small, --medium, --large   /* Natural language aliases also work */
+--base-size: 14;  /* Change to 16 for marketing sites - everything scales */
 ```
 
-### Pixel Tokens (Scalable Components)
+### Size Scale
 
-**Pattern:** `--{n}px` (1-64)
+T-shirt scale with multiple alias styles:
 
-These express exact pixel values as scalable em units. Think in pixels, get components that scale proportionally when parent font-size changes.
+```css
+--size-{size}                /* Full: --size-xs, --size-m, --size-xl */
+--{size}                     /* Short: --xs, --m, --xl */
+--small, --medium, --large   /* Words: --tiny, --small, --medium, --large, --huge */
+```
+
+All three refer to the same values. Use whichever reads best in context.
+
+### Pixel Tokens (1-64)
+
+Express pixel values that scale with the system:
+
+| Token | Unit | Use For |
+|-------|------|---------|
+| `--{n}px` | rem | Fixed to root (font-size, layout dimensions) |
+| `--relative-{n}px` | em | Scales with component (padding, gap, internal spacing) |
 
 ```css
 /* A button using pixel tokens */
 .button {
-  padding: var(--8px) var(--16px);
+  padding: var(--relative-8px) var(--relative-16px);
   border-radius: var(--4px);
-  gap: var(--6px);
+  gap: var(--relative-6px);
 }
 
 /* When rendered at "large" size (larger parent font-size),
-   ALL values scale proportionally - button grows but keeps its shape */
+   em values scale proportionally - button grows but keeps its shape */
 ```
 
-| Token | Unit | Scales With |
-|-------|------|-------------|
-| `--{n}px` | rem | Root font size (global scaling) |
-| `--relative-{n}px` | em | Parent font size (local scaling) |
-
-**This is essential for components with size variations** (small/medium/large). Set font-size on the parent, and all `--{n}px` values scale together.
+**Key insight:** Use `--relative-{n}px` (em) for component internals so they scale with size variations. Use `--{n}px` (rem) for values that should stay fixed.
 
 ---
 
@@ -501,6 +543,8 @@ These express exact pixel values as scalable em units. Think in pixels, get comp
 --focused-ring-shadow        /* Focus ring for interactive elements */
 --focused-ring-color         /* Ring color (primary) */
 --focused-ring-width         /* Ring thickness */
+--focused-ring-outline-width /* Outer outline thickness */
+--focused-outline-color      /* Outer outline color */
 ```
 
 ### State Adjustments
@@ -603,7 +647,13 @@ From real component examples:
 
 ```css
 /* Layout */
---border-radius, --border, --padding, --spacing, --compact-spacing
+--border-radius, --border, --padding, --spacing, --gap
+
+/* Spacing (semantic) */
+--padding-xs, --padding-small, --gap-xs, --spacing-m
+
+/* Spacing (numeric - for tweaking) */
+--space-4, --gap-2
 
 /* Text */
 --text-color, --muted-text-color, --primary-text-color
@@ -615,7 +665,7 @@ From real component examples:
 --transition, --subtle-gradient, --angled-gradient, --floating-shadow
 
 /* Sizing */
---small, --medium, --large, --8px, --16px
+--small, --medium, --large, --8px, --relative-16px
 
 /* Borders */
 --border, --internal-border, --border-color
