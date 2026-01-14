@@ -56,8 +56,12 @@
   --spacing-massive: var(--spacing-3xl);
 
   /* Structural aliases */
-  --spacing-section: var(--spacing-2xl);
-  --spacing-page: var(--spacing-3xl);
+  --section-margin: var(--spacing-2xl);
+
+  /* Directional utilities */
+  --vertically-spaced: var(--margin) 0;
+  --horizontally-spaced: 0 var(--margin);
+  --centered: var(--margin) auto;
 
   /* -------------------
            Gap
@@ -142,49 +146,21 @@
   --padding-massive: var(--padding-3xl);
 
   /* Directional utilities */
-  --horizontally-padded: 0 var(--padding);
-  --vertically-padded: var(--padding) 0;
+  --vertical-padding: 0 var(--padding);
+  --horizontal-padding: var(--padding) 0;
 
-  /* Asymmetric padding (shape emphasis) */
-  --padding-wide: 0.5em 1em;
-  --padding-tall: 1em 0.5em;
+  --tight-padding: var(--padding-xs);
+  --very-tight-padding: var(--padding-2xs);
 
-  /* -------------------
-          Margin
-  -------------------- */
+  --tight-vertical-padding: var(--tight-padding) 0;
+  --very-tight-vertical-padding: var(--very-tight-padding) 0;
 
-  /*
-    rem - aliases spacing (same concept).
-    Use for: document flow, layout rhythm.
-  */
+  --tight-horizontal-padding: 0 var(--tight-padding);
+  --very-tight-horizontal-padding: 0 var(--very-tight-padding);
 
-  --margin-3xs: var(--spacing-3xs);
-  --margin-2xs: var(--spacing-2xs);
-  --margin-xs: var(--spacing-xs);
-  --margin-s: var(--spacing-s);
-  --margin-m: var(--spacing-m);
-  --margin-l: var(--spacing-l);
-  --margin-xl: var(--spacing-xl);
-  --margin-2xl: var(--spacing-2xl);
-  --margin-3xl: var(--spacing-3xl);
-
-  --margin: var(--margin-m);
-
-  /* Natural language aliases */
-  --margin-micro: var(--margin-3xs);
-  --margin-mini: var(--margin-2xs);
-  --margin-tiny: var(--margin-xs);
-  --margin-small: var(--margin-s);
-  --margin-medium: var(--margin-m);
-  --margin-large: var(--margin-l);
-  --margin-big: var(--margin-xl);
-  --margin-huge: var(--margin-2xl);
-  --margin-massive: var(--margin-3xl);
-
-  /* Directional utilities */
-  --vertically-spaced: var(--margin) 0;
-  --horizontally-spaced: 0 var(--margin);
-  --centered: var(--margin) auto;
+  --rectangular-padding: var(--padding-s) var(--padding-m);
+  --rectangular-tight-padding: var(--padding-xs) var(--padding-s);
+  --rectangular-very-tight-padding: var(--padding-2xs) var(--padding-xs);
 
   /* -------------------
       Numeric Grid

@@ -7,12 +7,6 @@ html.dark,
 [dark][dark],
 [theme][theme="dark"] {
 
-  /* -------------------
-        Text Colors
-  -------------------- */
-
-  --white-text-color: var(--white-80);
-  --black-text-color: var(--black-80);
 
   /* -------------------
         Inverted Base Scales
