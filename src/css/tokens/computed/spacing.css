@@ -3,15 +3,22 @@
 *******************************/
 
 /*
-  Three semantic scales for negative space:
+  Semantic scales for negative space:
 
   SPACING (rem) - layout rhythm, between components
   GAP (em)      - between elements within components
   PADDING (em)  - edge to content within components
+  MARGIN (rem)  - document flow (aliases spacing)
 
   Same progression (0.125 → 4), different units:
   - rem = fixed to root (layout consistency)
   - em = scales with component (proportional sizing)
+  - round(value, 1px) used for subpixel values (3xs, 2xs, s)
+
+  Numeric grid for manual tweaking:
+
+  SPACE (em)    - 2px base unit, --space-1 through --space-40
+                  More precision than Tailwind's 4px grid.
 */
 
 :root {
@@ -25,10 +32,10 @@
     Use for: section breaks, space between components, page layout.
   */
 
-  --spacing-3xs: 0.125rem;
-  --spacing-2xs: 0.25rem;
+  --spacing-3xs: round(0.125rem, 1px);
+  --spacing-2xs: round(0.25rem, 1px);
   --spacing-xs: 0.5rem;
-  --spacing-s: 0.75rem;
+  --spacing-s: round(0.75rem, 1px);
   --spacing-m: 1rem;
   --spacing-l: 1.5rem;
   --spacing-xl: 2rem;
@@ -61,10 +68,10 @@
     Use for: space between elements within a component (icon+label, button groups).
   */
 
-  --gap-3xs: 0.125em;
-  --gap-2xs: 0.25em;
+  --gap-3xs: round(0.125em, 1px);
+  --gap-2xs: round(0.25em, 1px);
   --gap-xs: 0.5em;
-  --gap-s: 0.75em;
+  --gap-s: round(0.75em, 1px);
   --gap-m: 1em;
   --gap-l: 1.5em;
   --gap-xl: 2em;
@@ -84,6 +91,24 @@
   --gap-huge: var(--gap-2xl);
   --gap-massive: var(--gap-3xl);
 
+  /* Numeric scale (1em increments) */
+  --gap-1: 1em;
+  --gap-2: 2em;
+  --gap-3: 3em;
+  --gap-4: 4em;
+  --gap-5: 5em;
+  --gap-6: 6em;
+  --gap-7: 7em;
+  --gap-8: 8em;
+  --gap-9: 9em;
+  --gap-10: 10em;
+  --gap-11: 11em;
+  --gap-12: 12em;
+  --gap-13: 13em;
+  --gap-14: 14em;
+  --gap-15: 15em;
+  --gap-16: 16em;
+
   /* -------------------
          Padding
   -------------------- */
@@ -93,10 +118,10 @@
     Use for: internal spacing from edge/border to content.
   */
 
-  --padding-3xs: 0.125em;
-  --padding-2xs: 0.25em;
+  --padding-3xs: round(0.125em, 1px);
+  --padding-2xs: round(0.25em, 1px);
   --padding-xs: 0.5em;
-  --padding-s: 0.75em;
+  --padding-s: round(0.75em, 1px);
   --padding-m: 1em;
   --padding-l: 1.5em;
   --padding-xl: 2em;
@@ -119,6 +144,10 @@
   /* Directional utilities */
   --horizontally-padded: 0 var(--padding);
   --vertically-padded: var(--padding) 0;
+
+  /* Asymmetric padding (shape emphasis) */
+  --padding-wide: 0.5em 1em;
+  --padding-tall: 1em 0.5em;
 
   /* -------------------
           Margin
@@ -156,5 +185,50 @@
   --vertically-spaced: var(--margin) 0;
   --horizontally-spaced: 0 var(--margin);
   --centered: var(--margin) auto;
+
+  /* -------------------
+      Numeric Grid
+  -------------------- */
+
+  /*
+    2px base unit for fine-grained manual tweaking.
+    More precision than Tailwind's 4px grid.
+    Use for: pixel-perfect adjustments, design fine-tuning.
+  */
+
+  --space-unit: var(--relative-2px);
+
+  --space-1: var(--space-unit);
+  --space-2: calc(var(--space-unit) * 2);
+  --space-3: calc(var(--space-unit) * 3);
+  --space-4: calc(var(--space-unit) * 4);
+  --space-5: calc(var(--space-unit) * 5);
+  --space-6: calc(var(--space-unit) * 6);
+  --space-7: calc(var(--space-unit) * 7);
+  --space-8: calc(var(--space-unit) * 8);
+  --space-9: calc(var(--space-unit) * 9);
+  --space-10: calc(var(--space-unit) * 10);
+  --space-11: calc(var(--space-unit) * 11);
+  --space-12: calc(var(--space-unit) * 12);
+  --space-13: calc(var(--space-unit) * 13);
+  --space-14: calc(var(--space-unit) * 14);
+  --space-15: calc(var(--space-unit) * 15);
+  --space-16: calc(var(--space-unit) * 16);
+  --space-17: calc(var(--space-unit) * 17);
+  --space-18: calc(var(--space-unit) * 18);
+  --space-19: calc(var(--space-unit) * 19);
+  --space-20: calc(var(--space-unit) * 20);
+  --space-21: calc(var(--space-unit) * 21);
+  --space-22: calc(var(--space-unit) * 22);
+  --space-23: calc(var(--space-unit) * 23);
+  --space-24: calc(var(--space-unit) * 24);
+  --space-25: calc(var(--space-unit) * 25);
+  --space-26: calc(var(--space-unit) * 26);
+  --space-27: calc(var(--space-unit) * 27);
+  --space-28: calc(var(--space-unit) * 28);
+  --space-29: calc(var(--space-unit) * 29);
+  --space-30: calc(var(--space-unit) * 30);
+  --space-31: calc(var(--space-unit) * 31);
+  --space-32: calc(var(--space-unit) * 32);
 
 }

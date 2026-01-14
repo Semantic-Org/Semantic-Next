@@ -7,22 +7,23 @@
   These primitives are used to calculate all other size values.
 
   To scale up for marketing sites: --base-size: 16
+  All values scale proportionally from the 14px design baseline.
 */
 
 :root {
 
-  /* Base values (unitless pixel equivalents) */
-  --base-3xs: 10;
-  --base-2xs: 11;
-  --base-xs: 12;
-  --base-s: 13;
-  --base-m: 14;
-  --base-l: 16;
-  --base-xl: 18;
-  --base-2xl: 20;
-  --base-3xl: 24;
-
   /* Default base size - change this to scale the entire system */
-  --base-size: var(--base-m);
+  --base-size: 14;
+
+  /* Base values (unitless, scaled from 14px baseline ratios) */
+  --base-3xs: round(calc((10 / 14) * var(--base-size)));
+  --base-2xs: round(calc((11 / 14) * var(--base-size)));
+  --base-xs:  round(calc((12 / 14) * var(--base-size)));
+  --base-s:   round(calc((13 / 14) * var(--base-size)));
+  --base-m:   var(--base-size);
+  --base-l:   round(calc((16 / 14) * var(--base-size)));
+  --base-xl:  round(calc((18 / 14) * var(--base-size)));
+  --base-2xl: round(calc((20 / 14) * var(--base-size)));
+  --base-3xl: round(calc((24 / 14) * var(--base-size)));
 
 }

@@ -56,7 +56,7 @@
   --huge: var(--size-2xl);
   --massive: var(--size-3xl);
 
-  /* Short form (rem) */
+  /* Aliases for brevity (rem) */
   --3xs: var(--size-3xs);
   --2xs: var(--size-2xs);
   --xs: var(--size-xs);
