@@ -376,6 +376,98 @@
     transform-origin: left center;
   }
 }
+/*--------------
+   Pop (Tooltip)
+---------------*/
+
+.transition[class*="pop-"] {
+  opacity: 0;
+
+  &.in {
+    animation: var(--pop-in-animation) var(--duration-short) var(--ease-out) forwards;
+  }
+
+  &.out {
+    animation: pop-out var(--duration-quick) var(--ease-in) forwards;
+  }
+
+  /* Top side (tooltip above trigger, rises up) */
+  &.pop-top,
+  &.pop-top-left,
+  &.pop-top-right {
+    --pop-in-animation: pop-in-top;
+    transform: translateY(4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  /* Bottom side (tooltip below trigger, drops down) */
+  &.pop-bottom,
+  &.pop-bottom-left,
+  &.pop-bottom-right {
+    --pop-in-animation: pop-in-bottom;
+    transform: translateY(-4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  /* Left side (tooltip left of trigger, slides left) */
+  &.pop-left,
+  &.pop-left-top,
+  &.pop-left-bottom {
+    --pop-in-animation: pop-in-left;
+    transform: translateX(4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(4px);
+    }
+  }
+
+  /* Right side (tooltip right of trigger, slides right) */
+  &.pop-right,
+  &.pop-right-top,
+  &.pop-right-bottom {
+    --pop-in-animation: pop-in-right;
+    transform: translateX(-4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(-4px);
+    }
+  }
+}
+
+@keyframes pop-in-top {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in-bottom {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in-left {
+  from { opacity: 0; transform: translateX(4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pop-in-right {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
 
 /*******************************
            Slide
