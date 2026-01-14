@@ -269,7 +269,9 @@ server.tool(
   'list_examples',
   'List available code examples. Optionally filter by category.',
   {
-    category: z.string().optional().describe('Filter by category (e.g., "component", "template", "reactivity")'),
+    category: z.string().optional().describe(
+      'Filter by category (e.g., "framework", "query", "reactivity", "templates", "ui components", "utils")',
+    ),
   },
   async ({ category }) => {
     const examples = listExamples(category);

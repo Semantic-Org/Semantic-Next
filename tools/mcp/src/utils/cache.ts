@@ -175,7 +175,8 @@ export function listSpecs(): SpecItem[] {
 
 export function listExamples(category?: string): ExampleItem[] {
   if (category) {
-    return cache.examples.filter(e => e.category === category);
+    const normalizedCategory = category.toLowerCase();
+    return cache.examples.filter(e => e.category?.toLowerCase() === normalizedCategory);
   }
   return cache.examples;
 }
@@ -219,7 +220,7 @@ export function search(query: string, options: SearchOptions = {}): ContentItem[
   }
   if (!type || type === 'example') {
     const examples = category
-      ? cache.examples.filter(e => e.category === category)
+      ? cache.examples.filter(e => e.category?.toLowerCase() === category.toLowerCase())
       : cache.examples;
     pool = pool.concat(examples);
   }
