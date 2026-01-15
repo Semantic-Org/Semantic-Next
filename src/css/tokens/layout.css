@@ -1,39 +1,56 @@
 /*******************************
-      Computed Layout
+            Layout
 *******************************/
-
-/*
-  These variables will most likely not need to be modified but are derived from theming
-  variables to handle common layout utilities
-*/
 
 :root {
 
-  /* Padding/Margin EXTRACTED TO: ai/workspace/memory/sizing/06-padding-margin.css */
-  /* Awaiting new system implementation in computed/spacing.css */
-
   /* -------------------
-      Border Radius
+        Box Model
   -------------------- */
 
-  /* Attached Borders */
+  --box-sizing: border-box;
+
+  /* -------------------
+           Page
+  -------------------- */
+
+  --page-overflow-x: hidden;
+
+  /* -------------------
+        Containers
+  -------------------- */
+
+  --fluid: 100%;
+  --text-container: 700px;
+  --content-container: 960px;
+  --wide-container: 1200px;
+  --fluid-container: var(--fluid);
+
+  /* -------------------
+           Grid
+  -------------------- */
+
+  --column-count: 16;
+
+  /* -------------------
+     Attached Borders
+  -------------------- */
+
   --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
   --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
   --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
   --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
 
   /* -------------------
-         Scrollbar
+        Scrollbar
   -------------------- */
 
-  /* Rendered Scrollbar Width */
   --default-scrollbar-width: 17px;
 
   /* -------------------
          Loader
   -------------------- */
 
-  /* Loaders Position Offset */
   --loader-offset: calc(var(--loader-size) / 2 * -1);
   --loader-margin: var(--loader-offset) 0em 0em var(--loader-offset);
 
@@ -41,20 +58,17 @@
        Responsive
   -------------------- */
 
-  /* Minimum Mobile Width */
   --page-min-width: 320px;
 
-  /* Responsive */
   --largest-mobile-screen: calc(var(--tablet-breakpoint) - 1px);
   --largest-tablet-screen: calc(var(--computer-breakpoint) - 1px);
   --largest-small-monitor: calc(var(--large-monitor-breakpoint) - 1px);
   --largest-large-monitor: calc(var(--widescreen-monitor-breakpoint) - 1px);
 
   /* -------------------
-       Split Widths
+      Column Widths
   -------------------- */
 
-  /* Columns */
   --one-wide: calc(1 / var(--column-count) * 100%);
   --two-wide: calc(2 / var(--column-count) * 100%);
   --three-wide: calc(3 / var(--column-count) * 100%);

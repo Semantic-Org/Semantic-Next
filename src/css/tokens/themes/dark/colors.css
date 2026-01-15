@@ -7,49 +7,106 @@ html.dark,
 [dark][dark],
 [theme][theme="dark"] {
 
-
   /* -------------------
-        Inverted Base Scales
+       Theme Mode Flags
   -------------------- */
 
-  /* Invert lightness scale - reference inverted base values */
-  --lightness-0: var(--base-lightness-100);   /* Near black */
-  --lightness-5: var(--base-lightness-95);    /* Very dark shades */
-  --lightness-10: var(--base-lightness-90);   /* Dark shades */
-  --lightness-20: var(--base-lightness-80);   /* More darkening */
-  --lightness-30: var(--base-lightness-70);   /* Gradual darkening */
-  --lightness-40: var(--base-lightness-60);   /* Darker than base */
-  --lightness-50: var(--base-lightness-50);   /* Base color (100% - no change) */
-  --lightness-60: var(--base-lightness-40);   /* Secondary elements */
-  --lightness-70: var(--base-lightness-30);   /* Muted elements */
-  --lightness-80: var(--base-lightness-20);   /* Subtle UI */
-  --lightness-90: var(--base-lightness-10);   /* Light backgrounds */
-  --lightness-95: var(--base-lightness-5);    /* Very light */
-  --lightness-100: var(--base-lightness-0);   /* Near white */
-
-  /* Invert chroma scale - reference inverted base values */
-  --chroma-0: var(--base-chroma-100);   /* Near black = reduced chroma */
-  --chroma-5: var(--base-chroma-95);    /* Very dark = very low chroma */
-  --chroma-10: var(--base-chroma-90);   /* Dark = lower chroma */
-  --chroma-20: var(--base-chroma-80);   /* More chroma reduction */
-  --chroma-30: var(--base-chroma-70);   /* Gradual chroma reduction */
-  --chroma-40: var(--base-chroma-60);   /* Slight chroma reduction */
-  --chroma-50: var(--base-chroma-50);   /* Base = full chroma */
-  --chroma-60: var(--base-chroma-40);   /* Secondary = near-full chroma */
-  --chroma-70: var(--base-chroma-30);   /* Muted = high-medium chroma */
-  --chroma-80: var(--base-chroma-20);   /* UI elements = medium chroma */
-  --chroma-90: var(--base-chroma-10);   /* Subtle = medium-low chroma */
-  --chroma-95: var(--base-chroma-5);    /* Light = low chroma */
-  --chroma-100: var(--base-chroma-0);   /* Very light = very low chroma */
+  --dark-mode: true;
+  --light-mode: false;
 
   /* -------------------
-        UI Colors
+      Standard/Inverted
   -------------------- */
 
-  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
-  --ui-emphasis: oklch(0.13 0.02 266.79);
+  /* Swap standard/inverted for dark mode */
 
-  /* boost some black colors to be noticable in dark mode */
+  /* For relative colors */
+  --standard-color: var(--white-lch);
+  --inverted-color: var(--black-lch);
+
+  /* For color-mix */
+  --standard-hex: var(--white-hex);
+  --inverted-hex: var(--black-hex);
+
+  /* Standard solid scale (white in dark mode) */
+  --standard-solid-5: var(--white-solid-5);
+  --standard-solid-10: var(--white-solid-10);
+  --standard-solid-15: var(--white-solid-15);
+  --standard-solid-20: var(--white-solid-20);
+  --standard-solid-25: var(--white-solid-25);
+  --standard-solid-30: var(--white-solid-30);
+  --standard-solid-40: var(--white-solid-40);
+  --standard-solid-50: var(--white-solid-50);
+  --standard-solid-60: var(--white-solid-60);
+  --standard-solid-70: var(--white-solid-70);
+  --standard-solid-75: var(--white-solid-75);
+  --standard-solid-80: var(--white-solid-80);
+  --standard-solid-85: var(--white-solid-85);
+  --standard-solid-90: var(--white-solid-90);
+  --standard-solid-95: var(--white-solid-95);
+  --standard-solid-100: var(--white-solid-100);
+
+  /* Inverted solid scale (black in dark mode) */
+  --inverted-solid-5: var(--black-solid-5);
+  --inverted-solid-10: var(--black-solid-10);
+  --inverted-solid-15: var(--black-solid-15);
+  --inverted-solid-20: var(--black-solid-20);
+  --inverted-solid-25: var(--black-solid-25);
+  --inverted-solid-30: var(--black-solid-30);
+  --inverted-solid-40: var(--black-solid-40);
+  --inverted-solid-50: var(--black-solid-50);
+  --inverted-solid-60: var(--black-solid-60);
+  --inverted-solid-70: var(--black-solid-70);
+  --inverted-solid-75: var(--black-solid-75);
+  --inverted-solid-80: var(--black-solid-80);
+  --inverted-solid-85: var(--black-solid-85);
+  --inverted-solid-90: var(--black-solid-90);
+  --inverted-solid-95: var(--black-solid-95);
+  --inverted-solid-100: var(--black-solid-100);
+
+  /* -------------------
+      Lightness Scale
+  -------------------- */
+
+  /* Invert lightness scale for dark mode */
+  --lightness-0: var(--base-lightness-100);
+  --lightness-5: var(--base-lightness-95);
+  --lightness-10: var(--base-lightness-90);
+  --lightness-20: var(--base-lightness-80);
+  --lightness-30: var(--base-lightness-70);
+  --lightness-40: var(--base-lightness-60);
+  --lightness-50: var(--base-lightness-50);
+  --lightness-60: var(--base-lightness-40);
+  --lightness-70: var(--base-lightness-30);
+  --lightness-80: var(--base-lightness-20);
+  --lightness-90: var(--base-lightness-10);
+  --lightness-95: var(--base-lightness-5);
+  --lightness-100: var(--base-lightness-0);
+
+  /* -------------------
+        Chroma Scale
+  -------------------- */
+
+  /* Invert chroma scale for dark mode */
+  --chroma-0: var(--base-chroma-100);
+  --chroma-5: var(--base-chroma-95);
+  --chroma-10: var(--base-chroma-90);
+  --chroma-20: var(--base-chroma-80);
+  --chroma-30: var(--base-chroma-70);
+  --chroma-40: var(--base-chroma-60);
+  --chroma-50: var(--base-chroma-50);
+  --chroma-60: var(--base-chroma-40);
+  --chroma-70: var(--base-chroma-30);
+  --chroma-80: var(--base-chroma-20);
+  --chroma-90: var(--base-chroma-10);
+  --chroma-95: var(--base-chroma-5);
+  --chroma-100: var(--base-chroma-0);
+
+  /* -------------------
+       Alpha Colors
+  -------------------- */
+
+  /* Boosted alpha values for dark mode visibility */
   --subtle-transparent-black: oklch(var(--black-lch) / 5%);
   --transparent-black: oklch(var(--black-lch) / 15%);
   --strong-transparent-black: oklch(var(--black-lch) / 20%);
@@ -59,5 +116,12 @@ html.dark,
   --transparent-white: oklch(var(--white-lch) / 8%);
   --strong-transparent-white: oklch(var(--white-lch) / 13%);
   --very-strong-transparent-white: oklch(var(--white-lch) / 18%);
+
+  /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-emphasis-strong: oklch(0.16 0.02 266.69);
+  --ui-emphasis: oklch(0.13 0.02 266.79);
 
 }

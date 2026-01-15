@@ -1,0 +1,18 @@
+/*******************************
+      Dark Theme - Typography
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+       Text Colors
+  -------------------- */
+
+  /* Hand-tuned for dark mode contrast */
+  --text-color: var(--standard-90);
+  --header-color: var(--standard-100);
+
+}

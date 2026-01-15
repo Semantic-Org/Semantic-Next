@@ -1,0 +1,12 @@
+/*******************************
+            Loader
+*******************************/
+
+:root {
+
+  --loader-size: var(--13px);
+  --loader-speed: 0.6s;
+  --loader-duration: 0.5s;
+  --loader-line-width: var(--2px);
+
+}

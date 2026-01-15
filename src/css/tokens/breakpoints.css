@@ -1,0 +1,13 @@
+/*******************************
+          Breakpoints
+*******************************/
+
+:root {
+
+  --mobile-breakpoint: 320px;
+  --tablet-breakpoint: 768px;
+  --computer-breakpoint: 992px;
+  --large-monitor-breakpoint: 1200px;
+  --widescreen-monitor-breakpoint: 1920px;
+
+}

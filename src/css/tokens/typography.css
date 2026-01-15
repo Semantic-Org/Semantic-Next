@@ -1,36 +1,30 @@
 /*******************************
-         Typography
+          Typography
 *******************************/
 
 :root {
 
   /* -------------------
-          Fonts
+       Font Families
   -------------------- */
 
   --font-name: 'Lato';
-  --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
   --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
-  --bold: bold;
+  --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+
+  /* -------------------
+       Font Weights
+  -------------------- */
+
   --normal: normal;
-
+  --bold: bold;
   --header-font-weight: var(--bold);
-  --header-line-height: var(--relative-18px);
-
-  --link-text-decoration: none;
-  --link-hover-text-decoration: var(--link-text-decoration);
-
-  --h1: 28px;
-  --h2: 24px;
-  --h3: 18px;
-  --h4: 15px;
-  --h5: 14px;
 
   /* -------------------
        Title Scale
   -------------------- */
 
-  /* Primary tokens (9-level scale) */
+  /* Primary tokens (9-level scale) - for headings and display text */
   --title-3xs: 10px;
   --title-2xs: 12px;
   --title-xs: 14px;
@@ -56,10 +50,10 @@
   --title-massive: var(--title-3xl);
 
   /* -------------------
-       Text Scale
+        Text Scale
   -------------------- */
 
-  /* Primary tokens (9-level scale) - pairs with title scale */
+  /* Primary tokens (9-level scale) - for body copy */
   --text-3xs: 10px;
   --text-2xs: 11px;
   --text-xs: 12px;
@@ -84,18 +78,52 @@
   --text-huge: var(--text-2xl);
   --text-massive: var(--text-3xl);
 
-  /* Header Spacing */
-  --header-top-margin: 2rem;
-  --header-bottom-margin: 1rem;
-
-
-  --line-height: calc(20 / 14);
-
   /* -------------------
-        Paragraph
+       Line Heights
   -------------------- */
 
-  --paragraph-margin: 0em 0em 1em;
+  --line-height: calc(20 / 14);
+  --header-line-height: var(--relative-18px);
   --paragraph-line-height: calc(26 / 14);
+
+  /* -------------------
+       Legacy Headers
+  -------------------- */
+
+  --h1: 28px;
+  --h2: 24px;
+  --h3: 18px;
+  --h4: 15px;
+  --h5: 14px;
+
+  /* -------------------
+       Link Styling
+  -------------------- */
+
+  --link-text-decoration: none;
+  --link-hover-text-decoration: var(--link-text-decoration);
+
+  /* -------------------
+     Element Spacing
+  -------------------- */
+
+  --header-top-margin: 2rem;
+  --header-bottom-margin: 1rem;
+  --paragraph-margin: 0em 0em 1em;
+
+  /* -------------------
+     Computed Utilities
+  -------------------- */
+
+  /* Maximum single character glyph width (Capital "W") */
+  --glyph-width: 1.1em;
+
+  /* Used to match floats with text */
+  --line-height-offset: calc((var(--line-height) - 1em) / 2);
+  --header-line-height-offset: calc(var(--header-line-height) - 1em) / 2;
+
+  /* Computed header spacing */
+  --header-calc-top-margin: calc(var(--header-top-margin) - var(--header-line-height-offset));
+  --header-margin: var(--header-calc-top-margin) 0em var(--header-bottom-margin);
 
 }

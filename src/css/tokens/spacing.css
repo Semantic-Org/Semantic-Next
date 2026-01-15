@@ -3,7 +3,7 @@
 *******************************/
 
 /*
-  Semantic scales for negative space:
+  Semantic scales for negative space.
 
   SPACING (rem) - layout rhythm, between components
   GAP (em)      - between elements within components
@@ -13,25 +13,18 @@
   Same progression (0.125 → 4), different units:
   - rem = fixed to root (layout consistency)
   - em = scales with component (proportional sizing)
-  - round(value, 1px) used for subpixel values (3xs, 2xs, s)
 
   Numeric grid for manual tweaking:
-
-  SPACE (em)    - 2px base unit, --space-1 through --space-40
-                  More precision than Tailwind's 4px grid.
+  SPACE (em) - 2px base unit, --space-1 through --space-32
 */
 
 :root {
 
   /* -------------------
-        Spacing
+        Spacing (rem)
   -------------------- */
 
-  /*
-    rem - fixed layout rhythm.
-    Use for: section breaks, space between components, page layout.
-  */
-
+  /* Fixed layout rhythm - use for section breaks, component gaps, page layout */
   --spacing-3xs: round(0.125rem, 1px);
   --spacing-2xs: round(0.25rem, 1px);
   --spacing-xs: 0.5rem;
@@ -64,14 +57,10 @@
   --centered: var(--margin) auto;
 
   /* -------------------
-           Gap
+          Gap (em)
   -------------------- */
 
-  /*
-    em - scales with component.
-    Use for: space between elements within a component (icon+label, button groups).
-  */
-
+  /* Scales with component - use for space between elements within a component */
   --gap-3xs: round(0.125em, 1px);
   --gap-2xs: round(0.25em, 1px);
   --gap-xs: 0.5em;
@@ -114,14 +103,10 @@
   --gap-16: 16em;
 
   /* -------------------
-         Padding
+        Padding (em)
   -------------------- */
 
-  /*
-    em - scales with component.
-    Use for: internal spacing from edge/border to content.
-  */
-
+  /* Scales with component - use for internal spacing from edge to content */
   --padding-3xs: round(0.125em, 1px);
   --padding-2xs: round(0.25em, 1px);
   --padding-xs: 0.5em;
@@ -163,15 +148,10 @@
   --rectangular-very-tight-padding: var(--padding-2xs) var(--padding-xs);
 
   /* -------------------
-      Numeric Grid
+      Numeric Grid (em)
   -------------------- */
 
-  /*
-    2px base unit for fine-grained manual tweaking.
-    More precision than Tailwind's 4px grid.
-    Use for: pixel-perfect adjustments, design fine-tuning.
-  */
-
+  /* 2px base unit for fine-grained manual tweaking */
   --space-unit: var(--relative-2px);
 
   --space-1: var(--space-unit);

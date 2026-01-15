@@ -1,25 +1,48 @@
 /*******************************
-        Computed Sizing
+            Sizing
 *******************************/
 
 /*
-  Component sizing: size scale and pixel utilities.
+  Base configuration and computed values for the sizing system.
 
-  Two unit types:
-  - rem (--size-*, --Npx): fixed to root
-  - em (--size-*-em, --relative-Npx): scales with component
+  Layer 1: Primitives (--base-size, --base-{scale})
+  Layer 2: Computed scales and pixel tokens
+
+  To scale up for marketing sites: --base-size: 16
+  All values scale proportionally from the 14px design baseline.
 */
 
 :root {
 
-  /* Computed font size - derives from --base-size */
+  /* -------------------
+       Base Primitives
+  -------------------- */
+
+  /* Default base size - change this to scale the entire system */
+  --base-size: 14;
+
+  /* Base values (unitless, scaled from 14px baseline ratios) */
+  --base-3xs: round(calc((10 / 14) * var(--base-size)));
+  --base-2xs: round(calc((11 / 14) * var(--base-size)));
+  --base-xs:  round(calc((12 / 14) * var(--base-size)));
+  --base-s:   round(calc((13 / 14) * var(--base-size)));
+  --base-m:   var(--base-size);
+  --base-l:   round(calc((16 / 14) * var(--base-size)));
+  --base-xl:  round(calc((18 / 14) * var(--base-size)));
+  --base-2xl: round(calc((20 / 14) * var(--base-size)));
+  --base-3xl: round(calc((24 / 14) * var(--base-size)));
+
+  /* -------------------
+      Computed Font Size
+  -------------------- */
+
   --font-size: calc(var(--base-size) * 1px);
 
   /* -------------------
-       Size Scale
+       Size Scale (rem)
   -------------------- */
 
-  /* rem - fixed to root */
+  /* Fixed to root - use for layout consistency */
   --size-3xs: calc((var(--base-3xs) / var(--base-size)) * 1rem);
   --size-2xs: calc((var(--base-2xs) / var(--base-size)) * 1rem);
   --size-xs: calc((var(--base-xs) / var(--base-size)) * 1rem);
@@ -30,7 +53,11 @@
   --size-2xl: calc((var(--base-2xl) / var(--base-size)) * 1rem);
   --size-3xl: calc((var(--base-3xl) / var(--base-size)) * 1rem);
 
-  /* em - scales with component */
+  /* -------------------
+       Size Scale (em)
+  -------------------- */
+
+  /* Scales with component - use for proportional sizing */
   --size-3xs-em: calc((var(--base-3xs) / var(--base-size)) * 1em);
   --size-2xs-em: calc((var(--base-2xs) / var(--base-size)) * 1em);
   --size-xs-em: calc((var(--base-xs) / var(--base-size)) * 1em);
@@ -56,7 +83,7 @@
   --huge: var(--size-2xl);
   --massive: var(--size-3xl);
 
-  /* Aliases for brevity (rem) */
+  /* Brevity aliases (rem) */
   --3xs: var(--size-3xs);
   --2xs: var(--size-2xs);
   --xs: var(--size-xs);
@@ -67,7 +94,7 @@
   --2xl: var(--size-2xl);
   --3xl: var(--size-3xl);
 
-  /* Relative (em) */
+  /* Relative aliases (em) */
   --relative-micro: var(--size-3xs-em);
   --relative-mini: var(--size-2xs-em);
   --relative-tiny: var(--size-xs-em);
@@ -79,10 +106,10 @@
   --relative-massive: var(--size-3xl-em);
 
   /* -------------------
-      Pixel Values
+     Pixel Tokens (rem)
   -------------------- */
 
-  /* rem - fixed to root */
+  /* Fixed to root - renders as exact pixel value */
   --1px: calc((1 / var(--base-size)) * 1rem);
   --2px: calc((2 / var(--base-size)) * 1rem);
   --3px: calc((3 / var(--base-size)) * 1rem);
@@ -148,7 +175,11 @@
   --63px: calc((63 / var(--base-size)) * 1rem);
   --64px: calc((64 / var(--base-size)) * 1rem);
 
-  /* em - scales with component */
+  /* -------------------
+      Pixel Tokens (em)
+  -------------------- */
+
+  /* Scales with component - use for proportional pixel values */
   --relative-1px: calc((1 / var(--base-size)) * 1em);
   --relative-2px: calc((2 / var(--base-size)) * 1em);
   --relative-3px: calc((3 / var(--base-size)) * 1em);

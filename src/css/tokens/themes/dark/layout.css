@@ -1,0 +1,27 @@
+/*******************************
+        Dark Theme - Layout
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+          Page
+  -------------------- */
+
+  --page-background: var(--black);
+
+  /* -------------------
+       Border Colors
+  -------------------- */
+
+  /* Swap border base colors */
+  --standard-border-color: var(--white-border-lch);
+  --inverted-border-color: var(--black-border-lch);
+
+  /* Solid borders - adjusted for dark mode */
+  --solid-border-color: var(--black-solid-75);
+
+}

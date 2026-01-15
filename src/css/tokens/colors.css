@@ -1,0 +1,355 @@
+/*******************************
+            Colors
+*******************************/
+
+:root {
+
+  /* -------------------
+      Color Primitives
+  -------------------- */
+
+  --black-lch: 0 0 0;
+  --white-lch: 1 0 0;
+
+  /* Hex fallbacks for color-mix functions */
+  --black-hex: #000000;
+  --white-hex: #FFFFFF;
+
+  /* -------------------
+        Base Colors
+  -------------------- */
+
+  --red: oklch(0.59 0.27 28);
+  --orange: oklch(0.65 0.2 44.37);
+  --yellow: oklch(0.78 0.18 81.24);
+  --olive: oklch(0.69 0.19 119.53);
+  --green: oklch(0.62 0.26 145.53);
+  --teal: oklch(0.66 0.14 188.03);
+  --blue: oklch(0.62 0.17 238.00);
+  --violet: oklch(0.46 0.26 283.29);
+  --purple: oklch(0.54 0.26 314.43);
+  --pink: oklch(0.59 0.27 358.33);
+  --brown: oklch(0.5 0.11 51.34);
+  --grey: oklch(0.57 0 0);
+  --slate: oklch(0.23 0 0);
+
+  /* -------------------
+       Social Brands
+  -------------------- */
+
+  --facebook-color: #1877F2;
+  --twitter-color: #55ACEE;
+  --linked-in-color: #1F88BE;
+  --youtube-color: #FF0000;
+  --pinterest-color: #BD081C;
+  --instagram-color: #FD1D1D;
+  --instagram-gradient: linear-gradient(45deg, #F09433 0%, #E6683C 25%, #DC2743 50%, #CC2366 75%, #BC1888 100%);
+
+  /* -------------------
+     White Opacity Scale
+  -------------------- */
+
+  --white-5: oklch(var(--white-lch) / 5%);
+  --white-10: oklch(var(--white-lch) / 10%);
+  --white-15: oklch(var(--white-lch) / 15%);
+  --white-20: oklch(var(--white-lch) / 20%);
+  --white-25: oklch(var(--white-lch) / 25%);
+  --white-30: oklch(var(--white-lch) / 30%);
+  --white-40: oklch(var(--white-lch) / 40%);
+  --white-50: oklch(var(--white-lch) / 50%);
+  --white-60: oklch(var(--white-lch) / 60%);
+  --white-70: oklch(var(--white-lch) / 70%);
+  --white-75: oklch(var(--white-lch) / 75%);
+  --white-80: oklch(var(--white-lch) / 80%);
+  --white-85: oklch(var(--white-lch) / 85%);
+  --white-90: oklch(var(--white-lch) / 90%);
+  --white-95: oklch(var(--white-lch) / 95%);
+  --white-100: oklch(var(--white-lch) / 100%);
+  --white: var(--white-100);
+
+  /* -------------------
+     Black Opacity Scale
+  -------------------- */
+
+  --black-5: oklch(var(--black-lch) / 5%);
+  --black-10: oklch(var(--black-lch) / 10%);
+  --black-15: oklch(var(--black-lch) / 15%);
+  --black-20: oklch(var(--black-lch) / 20%);
+  --black-25: oklch(var(--black-lch) / 25%);
+  --black-30: oklch(var(--black-lch) / 30%);
+  --black-40: oklch(var(--black-lch) / 40%);
+  --black-50: oklch(var(--black-lch) / 50%);
+  --black-60: oklch(var(--black-lch) / 60%);
+  --black-70: oklch(var(--black-lch) / 70%);
+  --black-75: oklch(var(--black-lch) / 75%);
+  --black-80: oklch(var(--black-lch) / 80%);
+  --black-85: oklch(var(--black-lch) / 85%);
+  --black-90: oklch(var(--black-lch) / 90%);
+  --black-95: oklch(var(--black-lch) / 95%);
+  --black-100: oklch(var(--black-lch) / 100%);
+  --black: var(--black-100);
+
+  /* -------------------
+     White Solid Scale
+  -------------------- */
+
+  --white-solid-100: oklch(1 0 0 / 100%);
+  --white-solid-95: oklch(0.95 0 0 / 100%);
+  --white-solid-90: oklch(0.9 0 0 / 100%);
+  --white-solid-85: oklch(0.85 0 0 / 100%);
+  --white-solid-80: oklch(0.8 0 0 / 100%);
+  --white-solid-75: oklch(0.75 0 0 / 100%);
+  --white-solid-70: oklch(0.7 0 0 / 100%);
+  --white-solid-60: oklch(0.6 0 0 / 100%);
+  --white-solid-50: oklch(0.5 0 0 / 100%);
+  --white-solid-40: oklch(0.4 0 0 / 100%);
+  --white-solid-30: oklch(0.3 0 0 / 100%);
+  --white-solid-25: oklch(0.25 0 0 / 100%);
+  --white-solid-20: oklch(0.2 0 0 / 100%);
+  --white-solid-15: oklch(0.15 0 0 / 100%);
+  --white-solid-10: oklch(0.1 0 0 / 100%);
+  --white-solid-5: oklch(0.05 0 0 / 100%);
+
+  /* -------------------
+     Black Solid Scale
+  -------------------- */
+
+  --black-solid-100: oklch(0 0 0 / 100%);
+  --black-solid-95: oklch(0.05 0 0 / 100%);
+  --black-solid-90: oklch(0.1 0 0 / 100%);
+  --black-solid-85: oklch(0.15 0 0 / 100%);
+  --black-solid-80: oklch(0.2 0 0 / 100%);
+  --black-solid-75: oklch(0.25 0 0 / 100%);
+  --black-solid-70: oklch(0.3 0 0 / 100%);
+  --black-solid-60: oklch(0.4 0 0 / 100%);
+  --black-solid-50: oklch(0.5 0 0 / 100%);
+  --black-solid-40: oklch(0.6 0 0 / 100%);
+  --black-solid-30: oklch(0.7 0 0 / 100%);
+  --black-solid-25: oklch(0.75 0 0 / 100%);
+  --black-solid-20: oklch(0.8 0 0 / 100%);
+  --black-solid-15: oklch(0.85 0 0 / 100%);
+  --black-solid-10: oklch(0.9 0 0 / 100%);
+  --black-solid-5: oklch(0.95 0 0 / 100%);
+
+  /* -------------------
+      Text Colors
+  -------------------- */
+
+  --white-text-color: var(--white-80);
+  --black-text-color: var(--black-80);
+
+  /* -------------------
+    Semantic State Colors
+  -------------------- */
+
+  --positive-color: var(--green);
+  --negative-color: var(--red);
+  --info-color: var(--teal);
+  --warning-color: var(--orange);
+
+  /* -------------------
+       Brand Colors
+  -------------------- */
+
+  --primary-color: var(--blue);
+  --secondary-color: var(--slate);
+
+  /* -------------------
+    Base Lightness Scale
+  -------------------- */
+
+  --base-lightness-0: 1.66;
+  --base-lightness-5: 1.61;
+  --base-lightness-10: 1.52;
+  --base-lightness-20: 1.39;
+  --base-lightness-30: 1.25;
+  --base-lightness-40: 1.10;
+  --base-lightness-50: 1.0;
+  --base-lightness-60: 0.88;
+  --base-lightness-70: 0.76;
+  --base-lightness-80: 0.64;
+  --base-lightness-90: 0.52;
+  --base-lightness-95: 0.38;
+  --base-lightness-100: 0.25;
+
+  /* -------------------
+     Base Chroma Scale
+  -------------------- */
+
+  --base-chroma-0: 0.15;
+  --base-chroma-5: 0.25;
+  --base-chroma-10: 0.35;
+  --base-chroma-20: 0.55;
+  --base-chroma-30: 0.75;
+  --base-chroma-40: 0.90;
+  --base-chroma-50: 1.0;
+  --base-chroma-60: 0.90;
+  --base-chroma-70: 0.75;
+  --base-chroma-80: 0.55;
+  --base-chroma-90: 0.35;
+  --base-chroma-95: 0.25;
+  --base-chroma-100: 0.15;
+
+  /* -------------------
+   Invariant Lightness
+  -------------------- */
+
+  --lightness-0-invariant: var(--base-lightness-0);
+  --lightness-5-invariant: var(--base-lightness-5);
+  --lightness-10-invariant: var(--base-lightness-10);
+  --lightness-20-invariant: var(--base-lightness-20);
+  --lightness-30-invariant: var(--base-lightness-30);
+  --lightness-40-invariant: var(--base-lightness-40);
+  --lightness-50-invariant: var(--base-lightness-50);
+  --lightness-60-invariant: var(--base-lightness-60);
+  --lightness-70-invariant: var(--base-lightness-70);
+  --lightness-80-invariant: var(--base-lightness-80);
+  --lightness-90-invariant: var(--base-lightness-90);
+  --lightness-100-invariant: var(--base-lightness-100);
+
+  /* -------------------
+    Invariant Chroma
+  -------------------- */
+
+  --chroma-0-invariant: var(--base-chroma-0);
+  --chroma-5-invariant: var(--base-chroma-5);
+  --chroma-10-invariant: var(--base-chroma-10);
+  --chroma-20-invariant: var(--base-chroma-20);
+  --chroma-30-invariant: var(--base-chroma-30);
+  --chroma-40-invariant: var(--base-chroma-40);
+  --chroma-50-invariant: var(--base-chroma-50);
+  --chroma-60-invariant: var(--base-chroma-60);
+  --chroma-70-invariant: var(--base-chroma-70);
+  --chroma-80-invariant: var(--base-chroma-80);
+  --chroma-90-invariant: var(--base-chroma-90);
+  --chroma-100-invariant: var(--base-chroma-100);
+
+  /* -------------------
+   Color Text Mappings
+  -------------------- */
+
+  --red-text-color: var(--red-70);
+  --olive-text-color: var(--olive-70);
+  --green-text-color: var(--green-70);
+  --yellow-text-color: var(--yellow-70);
+  --blue-text-color: var(--blue-70);
+  --teal-text-color: var(--teal-70);
+  --pink-text-color: var(--pink-70);
+  --violet-text-color: var(--violet-70);
+  --purple-text-color: var(--purple-70);
+  --orange-text-color: var(--orange-70);
+  --brown-text-color: var(--brown-70);
+  --grey-text-color: var(--grey-70);
+  --slate-text-color: var(--slate-70);
+
+  --red-text-color-hover: var(--red-80);
+  --olive-text-color-hover: var(--olive-80);
+  --green-text-color-hover: var(--green-80);
+  --yellow-text-color-hover: var(--yellow-80);
+  --blue-text-color-hover: var(--blue-80);
+  --teal-text-color-hover: var(--teal-80);
+  --pink-text-color-hover: var(--pink-80);
+  --violet-text-color-hover: var(--violet-80);
+  --purple-text-color-hover: var(--purple-80);
+  --orange-text-color-hover: var(--orange-80);
+  --brown-text-color-hover: var(--brown-80);
+  --grey-text-color-hover: var(--grey-80);
+  --slate-text-color-hover: var(--slate-80);
+
+  --red-text-color-pressed: var(--red-90);
+  --olive-text-color-pressed: var(--olive-90);
+  --green-text-color-pressed: var(--green-90);
+  --yellow-text-color-pressed: var(--yellow-90);
+  --blue-text-color-pressed: var(--blue-90);
+  --teal-text-color-pressed: var(--teal-90);
+  --pink-text-color-pressed: var(--pink-90);
+  --violet-text-color-pressed: var(--violet-90);
+  --purple-text-color-pressed: var(--purple-90);
+  --orange-text-color-pressed: var(--orange-90);
+  --brown-text-color-pressed: var(--brown-90);
+  --grey-text-color-pressed: var(--grey-90);
+  --slate-text-color-pressed: var(--slate-90);
+
+  --red-text-color-disabled: var(--red-40);
+  --olive-text-color-disabled: var(--olive-40);
+  --green-text-color-disabled: var(--green-40);
+  --yellow-text-color-disabled: var(--yellow-40);
+  --blue-text-color-disabled: var(--blue-40);
+  --teal-text-color-disabled: var(--teal-40);
+  --pink-text-color-disabled: var(--pink-40);
+  --violet-text-color-disabled: var(--violet-40);
+  --purple-text-color-disabled: var(--purple-40);
+  --orange-text-color-disabled: var(--orange-40);
+  --brown-text-color-disabled: var(--brown-40);
+  --grey-text-color-disabled: var(--grey-40);
+  --slate-text-color-disabled: var(--slate-40);
+
+  /* -------------------
+   Color Header Mappings
+  -------------------- */
+
+  --red-header-color: var(--red-80);
+  --olive-header-color: var(--olive-80);
+  --green-header-color: var(--green-80);
+  --yellow-header-color: var(--yellow-80);
+  --blue-header-color: var(--blue-80);
+  --teal-header-color: var(--teal-80);
+  --pink-header-color: var(--pink-80);
+  --violet-header-color: var(--violet-80);
+  --purple-header-color: var(--purple-80);
+  --orange-header-color: var(--orange-80);
+  --brown-header-color: var(--brown-80);
+  --grey-header-color: var(--grey-80);
+  --slate-header-color: var(--slate-80);
+
+  /* -------------------
+  Color Background Mappings
+  -------------------- */
+
+  --red-background-color: var(--red-0);
+  --olive-background-color: var(--olive-0);
+  --green-background-color: var(--green-0);
+  --yellow-background-color: var(--yellow-0);
+  --blue-background-color: var(--blue-0);
+  --teal-background-color: var(--teal-0);
+  --pink-background-color: var(--pink-0);
+  --violet-background-color: var(--violet-0);
+  --purple-background-color: var(--purple-0);
+  --orange-background-color: var(--orange-0);
+  --brown-background-color: var(--brown-0);
+  --grey-background-color: var(--grey-0);
+  --slate-background-color: var(--slate-0);
+
+  /* -------------------
+   Color Border Mappings
+  -------------------- */
+
+  --red-border-color: var(--red-30);
+  --olive-border-color: var(--olive-30);
+  --green-border-color: var(--green-30);
+  --yellow-border-color: var(--yellow-30);
+  --blue-border-color: var(--blue-30);
+  --teal-border-color: var(--teal-30);
+  --pink-border-color: var(--pink-30);
+  --violet-border-color: var(--violet-30);
+  --purple-border-color: var(--purple-30);
+  --orange-border-color: var(--orange-30);
+  --brown-border-color: var(--brown-30);
+  --grey-border-color: var(--grey-30);
+  --slate-border-color: var(--slate-30);
+
+  --red-border: 1px solid var(--red-30);
+  --olive-border: 1px solid var(--olive-30);
+  --green-border: 1px solid var(--green-30);
+  --yellow-border: 1px solid var(--yellow-30);
+  --blue-border: 1px solid var(--blue-30);
+  --teal-border: 1px solid var(--teal-30);
+  --pink-border: 1px solid var(--pink-30);
+  --violet-border: 1px solid var(--violet-30);
+  --purple-border: 1px solid var(--purple-30);
+  --orange-border: 1px solid var(--orange-30);
+  --brown-border: 1px solid var(--brown-30);
+  --grey-border: 1px solid var(--grey-30);
+  --slate-border: 1px solid var(--slate-30);
+
+}
