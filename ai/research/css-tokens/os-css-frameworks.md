@@ -49,7 +49,7 @@ The CSS variable prefix and delimiter choices across frameworks reveal clear phi
 | Element Plus | `--el-` | hyphen | category-property-modifier | `--el-color-primary-light-3`, `--el-bg-color-page` |
 
 **Category-first naming dominates**, with 9 of 11 frameworks placing the token type before the value. Pico CSS stands alone with its component-state-property pattern—the closest to natural language ordering.
-
+n
 ## Vocabulary analysis shows contested territory in semantic colors and scale naming
 
 Examining terms that appear across 3+ frameworks reveals strong consensus in some areas and significant divergence in others:
@@ -234,17 +234,3 @@ Radix includes `--focus-1` through `--focus-12`—a unique tokenization of focus
 | Element Plus | 2-tier (Sass → CSS vars) | SCSS or CSS override |
 
 Open Props takes the most minimalist position—providing only primitives and expecting users to create their own semantic mappings. Ant Design takes the most sophisticated position with algorithmic token derivation from seed values.
-
-## Recommendations for Semantic UI token design
-
-Based on this analysis, Semantic UI could differentiate through:
-
-1. **Adopt component-state-property word order** (like Pico CSS) for human-readable token names
-2. **Use everyday vocabulary** over developer jargon ("danger" not "error," "muted" not "disabled-text")
-3. **Consider sentence-like token names**: `--button-when-hovered-background` rather than `--button-hover-bg`
-4. **Embrace logical properties natively** for zero-overhead RTL support
-5. **Fill the motion gap**: Be one of the few community frameworks with comprehensive animation tokens
-6. **Maintain the 4px base unit** for ecosystem compatibility
-7. **Offer both numeric and semantic spacing** to support different mental models
-
-The community has converged enough that radical departure would create friction, but sufficient divergence exists—particularly in vocabulary and natural language naming—to carve a distinctive position.

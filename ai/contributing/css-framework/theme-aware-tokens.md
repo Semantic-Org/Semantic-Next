@@ -12,8 +12,8 @@ type: doc
 
 CSS tokens exist in two computation contexts:
 
-**Theme-Agnostic Computed** (`tokens/computed/`)
-- Pure math on global primitives
+**Theme-Agnostic** (root `tokens/` files)
+- Pure math on primitives
 - Same result regardless of theme
 - Example: `--14px: calc((14 / var(--base-size)) * 1rem)`
 
@@ -75,30 +75,10 @@ The dark override uses `--transparent-black` instead of `--strong-transparent-bl
 
 The import order in `tokens.css` is architecturally significant:
 
-```css
-/* 1. Global tokens - primitives, no dependencies */
-@import url('./tokens/global/colors.css');
-@import url('./tokens/global/sizing.css');
-/* ... */
-
-/* 2. Theme-agnostic computed - math on globals */
-@import url('./tokens/computed/sizing.css');
-@import url('./tokens/computed/spacing.css');
-/* ... */
-
-/* 3. Theme base values - inputs that differ per theme */
-@import url('./tokens/themes/light/colors.css');
-@import url('./tokens/themes/dark/colors.css');
-/* ... */
-
-/* 4. Theme-aware computed - MUST come after theme values */
-@import url('./tokens/themes/computed/effects.css');
-@import url('./tokens/themes/computed/colors.css');
-/* ... */
-
-/* 5. Theme overrides - can override computed values */
-@import url('./tokens/themes/dark/effects.css');
-```
+1. **Root tokens** - Primitives and theme-agnostic computed (colors, sizing, spacing, etc.)
+2. **Light theme** - Base values applied by default
+3. **Dark theme** - Overrides applied when dark mode is active
+4. **Theme-aware computed** - MUST come after theme definitions
 
 If theme-aware computed tokens imported before theme values, they'd reference undefined or default values instead of the theme-specific ones.
 

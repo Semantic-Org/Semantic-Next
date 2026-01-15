@@ -102,7 +102,7 @@ The 2px grid isn't about wanting more granularity—it's about **maintaining ali
 The size scale is designed at 14px, with each step defined as a ratio:
 
 ```css
-/* global/sizing.css */
+/* sizing.css - base values */
 --base-size: 14;
 
 --base-3xs: round(calc((10 / 14) * var(--base-size)));  /* tiny */
@@ -135,7 +135,7 @@ Without rounding, `--base-l` at 16 would be 18.29px—a fractional value that ca
 Computed sizing divides by `--base-size` to produce normalized units:
 
 ```css
-/* computed/sizing.css */
+/* sizing.css - computed from base values */
 --size-m: calc((var(--base-m) / var(--base-size)) * 1rem);  /* always 1rem */
 --size-l: calc((var(--base-l) / var(--base-size)) * 1rem);
 
