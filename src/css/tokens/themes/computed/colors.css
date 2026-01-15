@@ -908,4 +908,16 @@
   --warning-header-color: var(--warning-90);
   --warning-text-color: var(--warning-70);
 
+  /* -------------------
+       UI Background
+  -------------------- */
+
+  /* UI BG Subtle */
+  --ui-background-light: oklch(var(--ui-lightness-light) var(--ui-chroma) var(--ui-hue));
+  --ui-background: oklch(var(--ui-lightness) var(--ui-chroma) var(--ui-hue));
+  --ui-background-dark: oklch(var(--ui-lightness-dark) var(--ui-chroma) var(--ui-hue));
+
+  /* UI BG Emphasis */
+  --ui-background-emphasis: linear-gradient(140deg, var(--ui-emphasis-strong), var(--inverted-100), var(--ui-emphasis));
+
 }

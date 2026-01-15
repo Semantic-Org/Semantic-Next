@@ -1,5 +1,5 @@
 /*******************************
-        Computed - Layout
+       Computed - Borders
 *******************************/
 
 :root,
@@ -9,7 +9,7 @@
 [theme] {
 
   /* -------------------
-         Borders
+      Border Colors
   -------------------- */
 
   /* border colors swap on dark mode theme */
@@ -22,8 +22,10 @@
   --strong-selected-border-color: oklch(var(--standard-border-color) / 50%);
   --disabled-border-color: oklch(var(--standard-border-color) / 5%);
 
-  /* dark / light theme - variant */
-  --border-color: oklch(var(--standard-border-color) / 15%);
+  /* -------------------
+      Border Shorthand
+  -------------------- */
+
   --border: 1px solid var(--border-color);
 
   /* black - theme invariant */
@@ -49,6 +51,5 @@
   --solid-border: 1px solid var(--solid-border-color);
   --solid-black-border: 1px solid var(--solid-black-border-color);
   --solid-white-border: 1px solid var(--solid-white-border-color);
-
 
 }

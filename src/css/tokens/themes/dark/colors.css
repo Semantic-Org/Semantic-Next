@@ -124,4 +124,10 @@ html.dark,
   --ui-emphasis-strong: oklch(0.16 0.02 266.69);
   --ui-emphasis: oklch(0.13 0.02 266.79);
 
+  /* -------------------
+          Page
+  -------------------- */
+
+  --page-background: var(--black);
+
 }

@@ -4,9 +4,20 @@
 
 :root {
 
+  /* -------------------
+       Size & Timing
+  -------------------- */
+
   --loader-size: var(--13px);
   --loader-speed: 0.6s;
   --loader-duration: 0.5s;
   --loader-line-width: var(--2px);
+
+  /* -------------------
+       Positioning
+  -------------------- */
+
+  --loader-offset: calc(var(--loader-size) / 2 * -1);
+  --loader-margin: var(--loader-offset) 0em 0em var(--loader-offset);
 
 }

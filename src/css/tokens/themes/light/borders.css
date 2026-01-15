@@ -1,17 +1,11 @@
 /*******************************
-        Light Theme - Layout
+       Light Theme - Borders
 *******************************/
 
 html,
 .light.theme.theme,
 [light][light],
 [theme][theme="light"] {
-
-  /* -------------------
-          Page
-  -------------------- */
-
-  --page-background: var(--white);
 
   /* -------------------
        Border Colors

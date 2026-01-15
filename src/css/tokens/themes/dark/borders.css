@@ -1,17 +1,11 @@
 /*******************************
-        Dark Theme - Layout
+        Dark Theme - Borders
 *******************************/
 
 html.dark,
 .dark.theme.theme,
 [dark][dark],
 [theme][theme="dark"] {
-
-  /* -------------------
-          Page
-  -------------------- */
-
-  --page-background: var(--black);
 
   /* -------------------
        Border Colors

@@ -1,5 +1,5 @@
 /*******************************
-      Computed - Interaction
+       Computed - Loader
 *******************************/
 
 :root,
@@ -9,22 +9,12 @@
 [theme] {
 
   /* -------------------
-         Loader
+       Loader Colors
   -------------------- */
 
   --loader-fill-color: rgb(var(--standard-color) / 10%);
   --loader-line-color: var(--grey);
   --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
   --inverted-loader-line-color: var(--white);
-
-  /* -------------------
-      Interactive Elements
-  -------------------- */
-
-  /* Form Focus States */
-  --form-focused-muted-border-color: var(--blue-40);
-
-  /* Highlighting */
-  --highlight-background: var(--blue-20);
 
 }

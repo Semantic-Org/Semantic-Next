@@ -1,11 +1,6 @@
 /*******************************
-      Light Theme - Outliers
+       Light Theme - States
 *******************************/
-
-/*
-  Tokens that don't cleanly map to global file naming.
-  To be reorganized in a future pass.
-*/
 
 html,
 .light.theme.theme,
@@ -19,18 +14,11 @@ html,
   --form-focused-border-color: var(--primary-text-color);
 
   /* -------------------
-       Highlighted Text
+       Selection
   -------------------- */
 
   --highlight-color: var(--text-color);
   --input-highlight-background: rgb(100 100 100 / 40%);
   --input-highlight-color: var(--text-color);
-
-  /* -------------------
-          Links
-  -------------------- */
-
-  --link-color: oklch(0.61 0.17 250.88);
-  --link-hover-color: oklch(0.62 0.22 252.98);
 
 }

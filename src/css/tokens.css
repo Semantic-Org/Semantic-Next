@@ -11,23 +11,26 @@
 @import url('./tokens/states.css') layer(tokens.states);
 @import url('./tokens/forms.css') layer(tokens.forms);
 @import url('./tokens/loader.css') layer(tokens.loader);
-@import url('./tokens/scrollbar.css') layer(tokens.scrollbar);
+@import url('./tokens/scrollbars.css') layer(tokens.scrollbars);
 
 /* Light Theme Tokens */
 @import url('./tokens/themes/light/colors.css') layer(tokens.themes.light.colors);
-@import url('./tokens/themes/light/layout.css') layer(tokens.themes.light.layout);
-@import url('./tokens/themes/light/outliers.css') layer(tokens.themes.light.outliers);
+@import url('./tokens/themes/light/typography.css') layer(tokens.themes.light.typography);
+@import url('./tokens/themes/light/borders.css') layer(tokens.themes.light.borders);
+@import url('./tokens/themes/light/states.css') layer(tokens.themes.light.states);
 
 /* Dark Theme Tokens */
 @import url('./tokens/themes/dark/colors.css') layer(tokens.themes.dark.colors);
-@import url('./tokens/themes/dark/layout.css') layer(tokens.themes.dark.layout);
 @import url('./tokens/themes/dark/typography.css') layer(tokens.themes.dark.typography);
-@import url('./tokens/themes/dark/effects.css') layer(tokens.themes.dark.effects);
-@import url('./tokens/themes/dark/outliers.css') layer(tokens.themes.dark.outliers);
+@import url('./tokens/themes/dark/borders.css') layer(tokens.themes.dark.borders);
+@import url('./tokens/themes/dark/shadows.css') layer(tokens.themes.dark.shadows);
 
 /* Computed Theme Tokens */
 @import url('./tokens/themes/computed/colors.css') layer(tokens.themes.computed.colors);
 @import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
-@import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
-@import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
-@import url('./tokens/themes/computed/outliers.css') layer(tokens.themes.computed.outliers);
+@import url('./tokens/themes/computed/borders.css') layer(tokens.themes.computed.borders);
+@import url('./tokens/themes/computed/shadows.css') layer(tokens.themes.computed.shadows);
+@import url('./tokens/themes/computed/gradients.css') layer(tokens.themes.computed.gradients);
+@import url('./tokens/themes/computed/scrollbars.css') layer(tokens.themes.computed.scrollbars);
+@import url('./tokens/themes/computed/loader.css') layer(tokens.themes.computed.loader);
+@import url('./tokens/themes/computed/forms.css') layer(tokens.themes.computed.forms);

@@ -33,28 +33,6 @@
   --column-count: 16;
 
   /* -------------------
-     Attached Borders
-  -------------------- */
-
-  --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
-  --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
-  --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
-  --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
-
-  /* -------------------
-        Scrollbar
-  -------------------- */
-
-  --default-scrollbar-width: 17px;
-
-  /* -------------------
-         Loader
-  -------------------- */
-
-  --loader-offset: calc(var(--loader-size) / 2 * -1);
-  --loader-margin: var(--loader-offset) 0em 0em var(--loader-offset);
-
-  /* -------------------
        Responsive
   -------------------- */
 

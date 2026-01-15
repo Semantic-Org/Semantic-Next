@@ -33,12 +33,6 @@
   --base-3xl: round(calc((24 / 14) * var(--base-size)));
 
   /* -------------------
-      Computed Font Size
-  -------------------- */
-
-  --font-size: calc(var(--base-size) * 1px);
-
-  /* -------------------
        Size Scale (rem)
   -------------------- */
 

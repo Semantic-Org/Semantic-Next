@@ -5,6 +5,12 @@
 :root {
 
   /* -------------------
+       Base Font Size
+  -------------------- */
+
+  --font-size: calc(var(--base-size) * 1px);
+
+  /* -------------------
        Font Families
   -------------------- */
 

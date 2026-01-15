@@ -4,11 +4,21 @@
 
 :root {
 
+  /* -------------------
+       Custom Scrollbar
+  -------------------- */
+
   --use-custom-scrollbars: true;
   --scrollbar-width: 9px;
   --scrollbar-height: 5px;
   --track-border-radius: 0px;
   --thumb-border-radius: 0px;
   --thumb-transition: color 0.2s ease;
+
+  /* -------------------
+       Native Scrollbar
+  -------------------- */
+
+  --default-scrollbar-width: 17px;
 
 }
