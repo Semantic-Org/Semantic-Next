@@ -40,7 +40,7 @@ const defaultSettings = {
 
   anchorName: 'anchor-{count}', // name of anchor
 
-  moveElement: true, // whether to move element to same positioning context
+  moveElement: false, // whether to move element to same positioning context
 
   observeChanges: true, // whether to observe attribute changes
   containToScroll: true, // whether to contain element to its scroll container
@@ -295,7 +295,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
   },
 
   isCurrentlyPositioning() {
-    return self.fallbackPositions?.length;
+    return self.fallbackPositions?.length || self.searchComplete;
   },
 
   reposition() {
@@ -458,6 +458,11 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
   endFallbackSearch() {
     delete self.fallbacksTested;
     delete self.fallbackPositions;
+    // Prevent immediate re-trigger from style mutations
+    self.searchComplete = true;
+    requestAnimationFrame(() => {
+      self.searchComplete = false;
+    });
   },
 
   maybeMoveElement() {

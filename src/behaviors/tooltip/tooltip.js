@@ -1,6 +1,10 @@
 import { registerBehavior } from '@semantic-ui/query';
 import { isString, noop, tokenize } from '@semantic-ui/utils';
 
+import { Attach } from '../attach/attach.js';
+import { Portal } from '../portal/portal.js';
+import { Transition } from '../transition/transition.js';
+
 import css from './tooltip.css?raw';
 
 /*
@@ -83,7 +87,10 @@ const defaultSettings = {
   // allow hovering over tooltip without it closing
   hoverable: false,
 
-  // callbacks
+  // whether to contain tooltip to scroll container (passed to attach)
+  containToScroll: true,
+
+  // callbacks (onShow/onHide can return false or Promise<false> to cancel)
   onShow: noop,
   onHide: noop,
   onVisible: noop,
@@ -139,9 +146,11 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       .insertAfter(el);
 
     // Portal if requested
+    console.log(self.$tooltip);
     if (settings.portal) {
-      self.$tooltip.portal();
+      self.$tooltip.portal('body');
     }
+    console.log(self.$tooltip);
 
     // Bind events to tooltip
     self.bindTooltipEvents();
@@ -280,11 +289,15 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       self.createTooltip();
     }
 
+    // Allow onShow to cancel by returning false (supports async)
+    if (await Promise.resolve(settings.onShow.call(el)) === false) {
+      return;
+    }
+
     // Mark interaction for shared warm timer
     self.shared.lastInteraction = Date.now();
 
     self.isVisible = true;
-    settings.onShow.call(el);
     dispatchEvent('show');
 
     // Attach to trigger for positioning
@@ -294,6 +307,7 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       arrow: settings.arrow,
       distance: settings.distance,
       offset: settings.offset,
+      containToScroll: settings.containToScroll,
     });
 
     // Animate in with direction-aware animation
@@ -308,8 +322,12 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       return;
     }
 
+    // Allow onHide to cancel by returning false (supports async)
+    if (await Promise.resolve(settings.onHide.call(el)) === false) {
+      return;
+    }
+
     self.isVisible = false;
-    settings.onHide.call(el);
     dispatchEvent('hide');
 
     // Animate out with direction-aware animation
