@@ -49,7 +49,7 @@ A Chrome DevTools extension that provides:
 
 ### Key Architectural Decisions
 
-1. **Component Detection**: `el.component !== undefined` (not tag prefix)
+1. **Component Detection**: `el.constructor?.template !== undefined` (static property on SUI components, survives minification)
 2. **Data Access**: All via element properties (`el.template`, `el.component`, `el.componentSpec`, etc.)
 3. **CSS Discovery**: CSSOM traversal of `el.shadowRoot.adoptedStyleSheets` with `@layer` parsing
 4. **Reactivity**: Use SUI's Reaction system for live state observation
@@ -640,34 +640,50 @@ window.__SUI_DEVTOOLS__ = {
 **Test Criteria**:
 - [ ] Extension loads in DevTools
 - [ ] Panel shows "Semantic UI" tab
-- [ ] Tree populates with SUI components on page
+- [ ] Tree shows full DOM structure (not just SUI components)
+- [ ] SUI components are visually distinguished (bold, icon, or color)
+- [ ] Shadow DOM is expanded inline (no separate shadow root tree)
+- [ ] Filtered nodes (comments, astro-island) are hidden by default
+- [ ] Filter toggles in settings panel work (show/hide filtered nodes)
 - [ ] Clicking tree node logs component to console
 - [ ] Hovering tree node highlights element on page
 
-**Lazy Loading Architecture** (based on React DevTools learnings):
+**Full DOM Tree Architecture** (improved over native Elements view):
 
-Minimize bridge traffic by sending minimal tree data, then fetching full data on selection:
+The tree shows ALL DOM nodes - not just SUI components - but with intelligent filtering to reduce noise. This provides:
+- Complete DOM context (where is this button in the page?)
+- Shadow DOM expansion inline (no separate tree like native Elements)
+- Filtering of Lit comment nodes, wrapper elements, and other noise
+- Visual distinction for SUI components vs regular DOM
 
 ```typescript
 // Minimal data sent with tree (lightweight)
 interface TreeNode {
   id: string;              // Unique ID from WeakMap registry
-  tagName: string;         // e.g., "ui-button"
-  displayName: string;     // e.g., "Button" (from spec.name or tag)
+  nodeType: 'element' | 'text' | 'comment';
+  tagName: string | null;  // e.g., "ui-button", "div", null for text
+  displayName: string;     // e.g., "Button" (SUI), "div" (DOM), "#text" (text)
+  isSUI: boolean;          // true for SUI components (visual highlighting)
   hasChildren: boolean;    // For expand/collapse UI
+  hasShadow: boolean;      // true if element has shadowRoot
   depth: number;           // For indentation
+  textPreview?: string;    // For text nodes: first 50 chars
+  filtered?: boolean;      // true if node matches a filter (hidden by default)
 }
 
 // Full data sent only when component is selected (on-demand)
 interface InspectedElement {
   id: string;
   tagName: string;
-  settings: { defaults: Record<string, any>; current: Record<string, any> };
-  state: Record<string, any>;
-  methods: string[];
+  isSUI: boolean;
+  settings: { defaults: Record<string, any>; current: Record<string, any> } | null;
+  state: Record<string, any> | null;
+  methods: string[] | null;
   spec: { types: string[]; variations: string[]; states: string[]; events: any[] } | null;
-  handlers: { events: any[]; keys: any[] };
+  handlers: { events: any[]; keys: any[] } | null;
   css: { layers: any[]; variables: any[] };
+  attributes: Record<string, string>;
+  computedStyles: { display: string; position: string; width: string; height: string };
 }
 ```
 
@@ -686,109 +702,239 @@ interface InspectedElement {
    window.__SUI_DEVTOOLS__ = {
      isReady: false,
 
-     // Element registry (WeakMap for GC-friendly stable IDs)
-     elementRegistry: new WeakMap(),  // Element -> id
-     elementsById: new Map(),         // id -> Element
+     // Node registry (WeakMap for GC-friendly stable IDs)
+     nodeRegistry: new WeakMap(),  // Node -> id
+     nodesById: new Map(),         // id -> Node
      nextId: 1,
 
-     getOrCreateId(el) {
-       let id = this.elementRegistry.get(el);
+     // Filtering settings (synced from panel)
+     filterSettings: {
+       hideCommentNodes: true,      // Lit comment markers
+       hideWrapperElements: true,   // astro-island, etc.
+       hideScripts: true,           // <script> tags
+       hideEmptyText: true,         // whitespace-only text nodes
+     },
+
+     // Known wrapper elements to filter (tag names)
+     wrapperElements: new Set([
+       'astro-island',
+       'astro-slot',
+       'astro-static-slot',
+     ]),
+
+     getOrCreateId(node) {
+       let id = this.nodeRegistry.get(node);
        if (!id) {
-         id = `sui-${this.nextId++}`;
-         this.elementRegistry.set(el, id);
-         this.elementsById.set(id, el);
+         id = `node-${this.nextId++}`;
+         this.nodeRegistry.set(node, id);
+         this.nodesById.set(id, node);
+
+         // Cleanup on destroy for SUI components
+         if (this.isSUIComponent(node)) {
+           node.addEventListener('destroyed', () => {
+             this.nodesById.delete(id);
+           }, { once: true });
+         }
        }
        return id;
      },
 
-     findElementById(id) {
-       return this.elementsById.get(id);
+     findNodeById(id) {
+       return this.nodesById.get(id);
      },
 
-     // Detection - all SUI components share the UIWebComponent class name
+     // Detection - SUI components have a static `template` property on their constructor
+     // This is defined in define-component.js: `static template = litTemplate`
+     // Using this instead of constructor.name because minification can rename classes
      isSUIComponent(el) {
        return el?.nodeType === Node.ELEMENT_NODE &&
-              el?.constructor?.name === 'UIWebComponent';
+              el?.constructor?.template !== undefined;
      },
 
-     // Tree building - returns MINIMAL data only
-     getComponentTree() {
-       const roots = [];
-       const seen = new Set();
+     // Check if node should be filtered (hidden by default)
+     shouldFilter(node) {
+       const { filterSettings } = this;
 
-       // Use TreeWalker for efficient DOM traversal
-       const walker = document.createTreeWalker(
-         document.body,
-         NodeFilter.SHOW_ELEMENT,
-         {
-           acceptNode: (node) => {
-             return node.component !== undefined
-               ? NodeFilter.FILTER_ACCEPT
-               : NodeFilter.FILTER_SKIP;
-           }
-         }
-       );
-
-       // Collect all components
-       const allComponents = [];
-       let node;
-       while (node = walker.nextNode()) {
-         allComponents.push(node);
+       // Comment nodes (Lit markers like <!----> or <!--?lit...-->)
+       if (node.nodeType === Node.COMMENT_NODE) {
+         return filterSettings.hideCommentNodes;
        }
 
-       // Build tree from root components
-       for (const el of allComponents) {
-         if (seen.has(el)) continue;
-         if (this.isRootComponent(el, allComponents)) {
-           const treeNode = this.buildTreeNode(el, 0, seen);
-           if (treeNode) roots.push(treeNode);
+       // Text nodes - filter if empty/whitespace
+       if (node.nodeType === Node.TEXT_NODE) {
+         return filterSettings.hideEmptyText && !node.textContent.trim();
+       }
+
+       // Element nodes
+       if (node.nodeType === Node.ELEMENT_NODE) {
+         const tagName = node.tagName.toLowerCase();
+
+         // Scripts
+         if (tagName === 'script' && filterSettings.hideScripts) {
+           return true;
          }
+
+         // Known wrapper elements
+         if (this.wrapperElements.has(tagName) && filterSettings.hideWrapperElements) {
+           return true;
+         }
+       }
+
+       return false;
+     },
+
+     // Full DOM tree building - returns ALL nodes with filtering metadata
+     getComponentTree() {
+       const roots = [];
+
+       // Start from document.body children
+       for (const child of document.body.childNodes) {
+         const treeNode = this.buildTreeNode(child, 0);
+         if (treeNode) roots.push(treeNode);
        }
 
        return roots;
      },
 
-     buildTreeNode(el, depth, seen) {
-       if (seen.has(el)) return null;
-       seen.add(el);
+     buildTreeNode(node, depth) {
+       if (!node) return null;
 
-       const children = this.findDirectChildComponents(el);
+       const nodeType = node.nodeType;
+       const isElement = nodeType === Node.ELEMENT_NODE;
+       const isText = nodeType === Node.TEXT_NODE;
+       const isComment = nodeType === Node.COMMENT_NODE;
+
+       // Skip nodes we don't handle
+       if (!isElement && !isText && !isComment) return null;
+
+       const isSUI = isElement && this.isSUIComponent(node);
+       const filtered = this.shouldFilter(node);
+       const tagName = isElement ? node.tagName.toLowerCase() : null;
+
+       // Build child nodes - shadow DOM first, then light DOM
+       let children = [];
+
+       if (isElement) {
+         // Shadow DOM children (rendered as collapsible #shadow-root in UI)
+         if (node.shadowRoot) {
+           for (const shadowChild of node.shadowRoot.childNodes) {
+             const childNode = this.buildTreeNode(shadowChild, depth + 1);
+             if (childNode) {
+               childNode.inShadow = true;
+               children.push(childNode);
+             }
+           }
+         }
+
+         // Light DOM children
+         for (const child of node.childNodes) {
+           const childNode = this.buildTreeNode(child, depth + 1);
+           if (childNode) children.push(childNode);
+         }
+       }
 
        return {
-         id: this.getOrCreateId(el),
-         tagName: el.tagName.toLowerCase(),
-         displayName: this.getDisplayName(el),
+         id: this.getOrCreateId(node),
+         nodeType: isElement ? 'element' : (isText ? 'text' : 'comment'),
+         tagName,
+         displayName: this.getDisplayName(node),
+         isSUI,
          hasChildren: children.length > 0,
+         hasShadow: isElement && !!node.shadowRoot,
          depth,
-         children: children.map(c => this.buildTreeNode(c, depth + 1, seen)).filter(Boolean),
+         textPreview: isText ? node.textContent.trim().slice(0, 50) : undefined,
+         filtered,
+         children: children.length > 0 ? children : undefined,
        };
      },
 
-     getDisplayName(el) {
-       // Prefer spec name
-       if (el.componentSpec?.name) return el.componentSpec.name;
-       // Convert tag: ui-button -> Button
-       return el.tagName.toLowerCase()
-         .replace(/^ui-/, '')
-         .replace(/-./g, m => m[1].toUpperCase())
-         .replace(/^./, m => m.toUpperCase());
+     getDisplayName(node) {
+       if (node.nodeType === Node.TEXT_NODE) {
+         const text = node.textContent.trim();
+         return text ? `"${text.slice(0, 30)}${text.length > 30 ? '...' : ''}"` : '#text';
+       }
+       if (node.nodeType === Node.COMMENT_NODE) {
+         return '#comment';
+       }
+
+       // Element node
+       const el = node;
+
+       // For SUI components, prefer spec name
+       if (this.isSUIComponent(el) && el.componentSpec?.name) {
+         return el.componentSpec.name;
+       }
+
+       // For SUI components without spec name, convert tag: ui-button -> Button
+       if (this.isSUIComponent(el)) {
+         return el.tagName.toLowerCase()
+           .replace(/^ui-/, '')
+           .replace(/-./g, m => m[1].toUpperCase())
+           .replace(/^./, m => m.toUpperCase());
+       }
+
+       // Regular DOM element - just use tag name
+       return el.tagName.toLowerCase();
+     },
+
+     // Update filter settings from panel
+     setFilterSettings(settings) {
+       this.filterSettings = { ...this.filterSettings, ...settings };
      },
 
      // Full data - fetched on selection (lazy loading)
      getInspectedElement(id) {
-       const el = this.findElementById(id);
-       if (!el) return null;
-       if (el.template?.destroyed) return { error: 'Component destroyed' };
+       const node = this.findNodeById(id);
+       if (!node) return null;
+
+       // For non-element nodes, return minimal info
+       if (node.nodeType !== Node.ELEMENT_NODE) {
+         return {
+           id,
+           nodeType: node.nodeType === Node.TEXT_NODE ? 'text' : 'comment',
+           textContent: node.textContent,
+         };
+       }
+
+       const el = node;
+       const isSUI = this.isSUIComponent(el);
+
+       if (isSUI && el.template?.destroyed) {
+         return { error: 'Component destroyed' };
+       }
 
        return {
          id,
          tagName: el.tagName.toLowerCase(),
-         settings: this.extractSettings(el),
-         state: this.extractState(el),
-         methods: this.extractMethods(el),
-         spec: this.extractSpecInfo(el),
-         handlers: this.extractHandlers(el),
-         css: this.extractCSS(el),
+         isSUI,
+         // Only include SUI-specific data for SUI components
+         settings: isSUI ? this.extractSettings(el) : null,
+         state: isSUI ? this.extractState(el) : null,
+         methods: isSUI ? this.extractMethods(el) : null,
+         spec: isSUI ? this.extractSpecInfo(el) : null,
+         handlers: isSUI ? this.extractHandlers(el) : null,
+         css: this.extractCSS(el),  // CSS available for any element with shadow root
+         // Standard DOM info for all elements
+         attributes: this.extractAttributes(el),
+         computedStyles: this.extractComputedStyles(el),
+       };
+     },
+
+     extractAttributes(el) {
+       const attrs = {};
+       for (const attr of el.attributes) {
+         attrs[attr.name] = attr.value;
+       }
+       return attrs;
+     },
+
+     extractComputedStyles(el) {
+       const computed = getComputedStyle(el);
+       return {
+         display: computed.display,
+         position: computed.position,
+         width: computed.width,
+         height: computed.height,
        };
      },
 
@@ -802,16 +948,23 @@ interface InspectedElement {
    - Service worker routes messages between panel and content script
    - Content script relays to/from bridge via postMessage
 
-4. **Tree View Component**
+4. **Tree View Component** (panel/components/tree-view.js)
    - Render hierarchical component list
-   - Handle expand/collapse
-   - Handle selection
+   - Handle expand/collapse with keyboard navigation
+   - Handle selection and hover highlighting
+
+   **Default expansion state** (matches native DevTools behavior):
+   - All nodes collapsed by default
+   - Top-level nodes (direct children of `<body>`) are visible but collapsed
+   - User expands nodes manually via click or arrow keys
+   - When selecting via element picker, auto-expand path to selected node
 
 **Files to Create**:
 - `manifest.json`
 - `devtools.html` / `devtools.js`
 - `panel/panel.html` / `panel/panel.js` / `panel/panel.css`
 - `panel/components/tree-view.js`
+- `panel/components/filter-settings.js`
 - `background/service-worker.js`
 - `content/content-script.js`
 - `content/bridge.js`
@@ -1087,18 +1240,110 @@ interface InspectedElement {
    };
    ```
 
-2. **Element Picker**
+2. **Element Picker** (toolbar button like native DevTools)
+
+   The picker allows clicking any element on the page to select it in the tree.
+
    ```javascript
    window.__SUI_DEVTOOLS__ = {
      // ... existing ...
 
      pickerActive: false,
      pickerOverlay: null,
+     pickerHighlight: null,
 
-     startElementPicker() { /* ... */ },
-     stopElementPicker() { /* ... */ },
+     startElementPicker(onSelect) {
+       if (this.pickerActive) return;
+       this.pickerActive = true;
+
+       // Create overlay to capture clicks without affecting page
+       this.pickerOverlay = document.createElement('div');
+       this.pickerOverlay.style.cssText = `
+         position: fixed; inset: 0; z-index: 999999;
+         cursor: crosshair; background: transparent;
+       `;
+
+       // Create highlight element
+       this.pickerHighlight = document.createElement('div');
+       this.pickerHighlight.style.cssText = `
+         position: fixed; pointer-events: none; z-index: 999998;
+         background: rgba(99, 102, 241, 0.1);
+         border: 2px solid rgba(99, 102, 241, 0.8);
+         border-radius: 2px; transition: all 0.05s;
+       `;
+       document.body.appendChild(this.pickerHighlight);
+
+       // Track element under cursor
+       let currentElement = null;
+
+       const handleMouseMove = (e) => {
+         // Get element under cursor (temporarily hide overlay)
+         this.pickerOverlay.style.pointerEvents = 'none';
+         const el = document.elementFromPoint(e.clientX, e.clientY);
+         this.pickerOverlay.style.pointerEvents = 'auto';
+
+         if (el && el !== currentElement) {
+           currentElement = el;
+           const rect = el.getBoundingClientRect();
+           Object.assign(this.pickerHighlight.style, {
+             top: rect.top + 'px',
+             left: rect.left + 'px',
+             width: rect.width + 'px',
+             height: rect.height + 'px',
+             display: 'block',
+           });
+         }
+       };
+
+       const handleClick = (e) => {
+         e.preventDefault();
+         e.stopPropagation();
+         if (currentElement) {
+           const id = this.getOrCreateId(currentElement);
+           onSelect(id, currentElement);
+         }
+         this.stopElementPicker();
+       };
+
+       const handleKeydown = (e) => {
+         if (e.key === 'Escape') {
+           this.stopElementPicker();
+         }
+       };
+
+       this.pickerOverlay.addEventListener('mousemove', handleMouseMove);
+       this.pickerOverlay.addEventListener('click', handleClick);
+       document.addEventListener('keydown', handleKeydown);
+       document.body.appendChild(this.pickerOverlay);
+
+       // Store cleanup refs
+       this._pickerCleanup = () => {
+         this.pickerOverlay?.removeEventListener('mousemove', handleMouseMove);
+         this.pickerOverlay?.removeEventListener('click', handleClick);
+         document.removeEventListener('keydown', handleKeydown);
+       };
+     },
+
+     stopElementPicker() {
+       if (!this.pickerActive) return;
+       this.pickerActive = false;
+       this._pickerCleanup?.();
+       this.pickerOverlay?.remove();
+       this.pickerHighlight?.remove();
+       this.pickerOverlay = null;
+       this.pickerHighlight = null;
+     },
    };
    ```
+
+   **Panel toolbar button**:
+   ```html
+   <button class="picker-btn" title="Select element on page (Ctrl+Shift+C)">
+     <svg><!-- cursor icon --></svg>
+   </button>
+   ```
+
+   Keyboard shortcut `Ctrl+Shift+C` matches Chrome DevTools convention.
 
 3. **Live State Observation (Bundled Reaction)**
 
@@ -1251,6 +1496,7 @@ sui-devtools/
 │   ├── panel.css
 │   └── components/
 │       ├── tree-view.js
+│       ├── filter-settings.js
 │       ├── tabs.js
 │       ├── styles-tab.js
 │       ├── developer-tab.js
