@@ -767,11 +767,12 @@ import { writeFileSync, mkdirSync } from 'fs';
 import * as Specs from '@semantic-ui/core/specs';
 
 // Build lookup by tagName
-const specsByTagName = {};
+// Duck type: full specs have exportName, component specs don't
+const fullSpecsByTag = {};
 
-for (const [name, spec] of Object.entries(Specs)) {
-  if (spec && spec.tagName) {
-    specsByTagName[spec.tagName] = spec;
+for (const spec of Object.values(Specs)) {
+  if (spec?.exportName) {
+    fullSpecsByTag[spec.tagName] = spec;
   }
 }
 
@@ -780,11 +781,11 @@ mkdirSync('src/shared/specs', { recursive: true });
 writeFileSync(
   'src/shared/specs/index.js',
   `// Auto-generated - do not edit
-export default ${JSON.stringify(specsByTagName, null, 2)};
+export default ${JSON.stringify(fullSpecsByTag, null, 2)};
 `
 );
 
-console.log(`Bundled ${Object.keys(specsByTagName).length} specs`);
+console.log(`Bundled ${Object.keys(fullSpecsByTag).length} full specs`);
 ```
 
 ### Watch Script (Development)

@@ -180,11 +180,19 @@ The `el.settings` proxy creates Signals lazily when properties are accessed. Thi
 // 3. Returns the current value
 
 // For DevTools live updates, create a Reaction that reads settings:
-Reaction.create(() => {
+Reaction.create((computation) => {
+  // Self-cleanup: reactions can stop themselves
+  if (el.template?.destroyed) {
+    computation.stop();
+    return;
+  }
+
   const fitted = el.settings.fitted;  // Creates dependency
   updatePanel({ fitted });            // Called when fitted changes
 });
 ```
+
+**Reaction self-cleanup**: The callback receives the reaction instance as `computation`. Call `computation.stop()` to stop from within. This pattern handles component destruction automatically - no external cleanup needed.
 
 ### Reading and Writing Component Values
 
@@ -242,7 +250,13 @@ Reaction.nonreactive(fn)       // Run without tracking
 
 ### Runtime Spec vs Full JSON Spec
 
-**Two spec types** - know which to use:
+**Not all components have specs.** Only UI primitives (`ui-button`, `ui-menu`, etc.) are spec-based. User-created components and internal components may have `el.componentSpec === undefined`.
+
+DevTools must handle both cases:
+- **With spec**: Styles tab with variations/types chips organized by spec, full event descriptions
+- **Without spec**: CSS panel showing raw CSS layers from shadow root (no spec-based chips, but CSS is still inspectable via `el.shadowRoot.adoptedStyleSheets`)
+
+**Two spec types** for primitives:
 
 | Spec Type | Source | Contains | Use For |
 |-----------|--------|----------|---------|
@@ -268,8 +282,15 @@ el.componentSpec = {
 **Bundled JSON spec** (from build):
 ```javascript
 // Contains events, descriptions, examples not in runtime spec
+// Example from menu.spec.json:
 fullSpec.events = [
-  { eventName: "click", description: "Fired when clicked", arguments: [...] }
+  {
+    eventName: "change",
+    description: "can specify a function to occur after the value changes",
+    arguments: [
+      { name: "value", description: "the updated value" }
+    ]
+  }
 ]
 ```
 
@@ -282,10 +303,14 @@ import { ButtonComponentSpec, ButtonSpec } from '@semantic-ui/core/specs';
 // ButtonComponentSpec = processed runtime spec (on el.componentSpec)
 // ButtonSpec = raw JSON with descriptions, examples, etc.
 
-// To build spec lookup by tagName:
-const specsByTag = {};
-for (const [name, spec] of Object.entries(Specs)) {
-  if (spec.tagName) specsByTag[spec.tagName] = spec;
+// To build spec lookup by tagName (duck type: full specs have exportName):
+import * as Specs from '@semantic-ui/core/specs';
+
+const fullSpecsByTag = {};
+for (const spec of Object.values(Specs)) {
+  if (spec?.exportName) {
+    fullSpecsByTag[spec.tagName] = spec;
+  }
 }
 ```
 
@@ -575,7 +600,14 @@ window.__SUI_DEVTOOLS__ = {
     const el = this.findElementById(id);
     const state = el.template?.state;
 
-    const reaction = Reaction.create(() => {
+    const reaction = Reaction.create((computation) => {
+      // Self-cleanup when component destroyed
+      if (el.template?.destroyed) {
+        computation.stop();
+        this.stateReactions.delete(id);
+        return;
+      }
+
       const snapshot = {};
       for (const [key, signal] of Object.entries(state)) {
         snapshot[key] = signal.get();
@@ -752,16 +784,19 @@ window.__SUI_DEVTOOLS__ = {
    ```javascript
    // build-specs.js - run at extension build time
    import * as Specs from '@semantic-ui/core/specs';
+   import { writeFileSync, mkdirSync } from 'fs';
 
-   const bundled = {};
-   for (const [name, spec] of Object.entries(Specs)) {
-     if (spec.tagName) {
-       bundled[spec.tagName] = spec;
+   // Duck type: full specs have exportName, component specs don't
+   const fullSpecsByTag = {};
+   for (const spec of Object.values(Specs)) {
+     if (spec?.exportName) {
+       fullSpecsByTag[spec.tagName] = spec;
      }
    }
 
-   fs.writeFileSync('shared/bundled-specs.js',
-     `export default ${JSON.stringify(bundled)}`);
+   mkdirSync('shared/specs', { recursive: true });
+   writeFileSync('shared/specs/index.js',
+     `export default ${JSON.stringify(fullSpecsByTag, null, 2)};`);
    ```
 
 2. **Extend Bridge for CSS**
@@ -976,7 +1011,14 @@ window.__SUI_DEVTOOLS__ = {
 
        if (!state) return null;
 
-       const reaction = Reaction.create(() => {
+       const reaction = Reaction.create((computation) => {
+         // Self-cleanup: reaction stops itself when component destroyed
+         if (el.template?.destroyed) {
+           computation.stop();
+           this.stateReactions.delete(id);
+           return;
+         }
+
          const snapshot = {};
          for (const [key, signal] of Object.entries(state)) {
            snapshot[key] = signal.get();  // Creates dependency
@@ -994,13 +1036,6 @@ window.__SUI_DEVTOOLS__ = {
          reaction.stop();
          this.stateReactions.delete(id);
        }
-     },
-
-     stopAllStateObservation() {
-       for (const [id, reaction] of this.stateReactions) {
-         reaction.stop();
-       }
-       this.stateReactions.clear();
      },
    };
    ```

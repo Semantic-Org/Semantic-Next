@@ -1758,15 +1758,16 @@ import { ButtonSpec, CardSpec, ... } from '@semantic-ui/core/specs';
 // In extension
 import * as Specs from '@semantic-ui/core/specs';
 
-const specsByTagName = {};
-for (const [name, spec] of Object.entries(Specs)) {
-  if (spec.tagName) {
-    specsByTagName[spec.tagName] = spec;
+// Duck type: full specs have exportName, component specs don't
+const fullSpecsByTag = {};
+for (const spec of Object.values(Specs)) {
+  if (spec?.exportName) {
+    fullSpecsByTag[spec.tagName] = spec;
   }
 }
 
 function getFullSpec(tagName) {
-  return specsByTagName[tagName];
+  return fullSpecsByTag[tagName];
 }
 ```
 
