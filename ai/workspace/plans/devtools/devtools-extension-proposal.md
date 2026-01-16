@@ -1858,7 +1858,9 @@ This gives us:
 | **B: Add to spec system** | Authoritative | Framework change |
 | **C: Query shadow DOM** | Works at runtime | Only finds rendered parts |
 
-**Recommendation**: Use (C) for v1 - query shadow DOM for elements with `part` attribute:
+**Recommendation**: Use (C) for v1 - query shadow DOM for elements with `part` attribute.
+
+**Future**: Adding parts to the spec system (Option B) is planned but out of scope for the initial DevTools implementation. This would enable showing parts even when conditionally rendered, and provide authoritative documentation. For now, runtime discovery is sufficient.
 
 ```javascript
 function getExportedParts(el) {
@@ -1991,8 +1993,8 @@ el.component                // Same as el.template.instance
 el.settings                 // Reactive proxy
 el.getSettings()            // Current values as object
 
-// Template data
-el.template.data            // Data passed to component
+// Template data context
+el.template.getDataContext() // Returns { ...data, ...state, ...instance }
 ```
 
 ### Runtime Spec (`el.componentSpec`)

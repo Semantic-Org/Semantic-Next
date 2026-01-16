@@ -67,7 +67,7 @@ These files define the element properties DevTools reads. **Read before writing 
 |------|----------|
 | `packages/component/src/web-component.js` | `el.settings`, `el.getSettings()`, `el.defaultSettings` |
 | `packages/component/src/define-component.js` | `el.template`, `el.component`, `el.componentSpec` |
-| `packages/templating/src/template.js` | `template.events`, `template.keys`, `template.state`, `template.data` |
+| `packages/templating/src/template.js` | `template.events`, `template.keys`, `template.state`, `template.getDataContext()` |
 | `packages/query/src/query.js` | `$$()` shadow-piercing queries |
 
 ### Priority 2: Spec System (Load for Styles Tab)
@@ -132,7 +132,6 @@ template.defaultState // Object: original state definition
 template.state        // Object: { signalName: Signal } - USE THIS for live state
 template.css          // String: component CSS
 template.instance     // Object: component instance/self (same as el.component)
-template.data         // Object: THE AUTHORITATIVE DATA CONTEXT - this is what templates evaluate against
 template.templateName // String: component name for tree display
 
 // Lifecycle flags (useful for DevTools status):
@@ -153,9 +152,7 @@ template.findChildren('componentName') // Returns array of above
 template.parseEventString('deep click .btn')  // Returns [{ eventName, eventType, selector }]
 ```
 
-**Data Context Clarification**:
-- `template.data` is the **live, authoritative** data context used for template evaluation
-- `template.getDataContext()` returns merged `{ ...data, ...state, ...instance }` for display
+**Data Context**: `template.getDataContext()` returns `{ ...data, ...state, ...instance }` - the actual template data context used for expression evaluation.
 
 ### Settings Access
 
@@ -260,8 +257,8 @@ DevTools must handle both cases:
 
 | Spec Type | Source | Contains | Use For |
 |-----------|--------|----------|---------|
-| `el.componentSpec` | Runtime (*.component.js) | types, variations, states, settings, propertyTypes, allowedValues | UI controls, validation |
-| Bundled JSON spec | Build-time (*.spec.json) | events, descriptions, examples, full documentation | Events tab, tooltips, dropdowns |
+| `el.componentSpec` | Runtime (*.component.js) | types, variations, states, settings, events (names only), propertyTypes, allowedValues | UI controls, validation |
+| Bundled JSON spec | Build-time (*.spec.json) | events with descriptions/arguments, examples, full documentation | Events tab tooltips, dropdowns |
 
 **Runtime componentSpec** (on element):
 ```javascript
@@ -275,7 +272,7 @@ el.componentSpec = {
   allowedValues: { "size": ["mini", "tiny", "small", "medium", "large"] },
   propertyTypes: { "fluid": "boolean", "size": "string" },
   defaultValues: { "icon-only": false },
-  // NOTE: No 'events' field - use bundled JSON spec for events
+  events: ["click", "focus"],  // Event names; bundled spec has descriptions/arguments
 }
 ```
 
@@ -902,9 +899,8 @@ window.__SUI_DEVTOOLS__ = {
        const template = el.template;
        const tagName = el.tagName.toLowerCase();
 
-       // Events come from bundled JSON spec, NOT componentSpec
-       // componentSpec has: types, variations, states, settings, propertyTypes
-       // Full JSON spec has: events with descriptions, arguments, etc.
+       // componentSpec.events has event names like ['change', 'click']
+       // Bundled JSON spec has full event objects with descriptions, arguments
        const fullSpec = this.getBundledSpec(tagName);
 
        return {
@@ -1238,9 +1234,10 @@ Before implementing any API call, verify the property/method exists in the sourc
 |------|-------------|-------|
 | Event handlers | `el.template.events` | Object of event string → handler |
 | State signals | `el.template.state` | Object of name → Signal |
-| Live template data | `el.template.data` | Authoritative data context |
+| Full data context | `el.template.getDataContext()` | Merged `{ ...data, ...state, ...instance }` |
 | Runtime spec | `el.componentSpec` | types, variations, states, propertyTypes, allowedValues |
-| Spec events | Bundled JSON spec | `componentSpec` has no events - use bundled spec |
+| Event names | `el.componentSpec.events` | Array of event names like `['change']` |
+| Event details | Bundled JSON spec | Full objects with descriptions, arguments |
 | Adopted styles | `el.shadowRoot.adoptedStyleSheets` | Array of CSSStyleSheet |
 | All settings | `el.getSettings()` | Complete snapshot of current values |
 | Parse event string | `template.parseEventString(str)` | Handles bubbling, modifiers, selectors |
