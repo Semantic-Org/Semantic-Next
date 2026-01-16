@@ -6,6 +6,16 @@
 
 ---
 
+## Project Location
+
+```
+/tools/devtools/
+```
+
+The extension lives in the monorepo's `/tools/` directory alongside other development utilities. This keeps it separate from the core packages while maintaining access to SUI dependencies for bundling.
+
+---
+
 ## Document Relationship
 
 This document is paired with **`sui-devtools-proposal.md`** which contains:
@@ -25,14 +35,15 @@ When implementing, read relevant sections from both:
 
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Context Loading Strategy](#context-loading-strategy)
-3. [Verified API Reference](#verified-api-reference)
-4. [Build Phases](#build-phases)
-5. [Testing Strategy](#testing-strategy)
-6. [File Structure](#file-structure)
-7. [Validated Example: ui-menu](#validated-example-ui-menu)
-8. [API Quick Reference](#api-quick-reference)
+1. [Project Location](#project-location)
+2. [Project Overview](#project-overview)
+3. [Context Loading Strategy](#context-loading-strategy)
+4. [Verified API Reference](#verified-api-reference)
+5. [Build Phases](#build-phases)
+6. [Testing Strategy](#testing-strategy)
+7. [File Structure](#file-structure)
+8. [Validated Example: ui-menu](#validated-example-ui-menu)
+9. [API Quick Reference](#api-quick-reference)
 
 ---
 
@@ -959,6 +970,88 @@ interface InspectedElement {
    - User expands nodes manually via click or arrow keys
    - When selecting via element picker, auto-expand path to selected node
 
+   ```javascript
+   // Tree node rendering (pseudocode)
+   function renderTreeNode(node, showFiltered, expandedNodes) {
+     // Skip filtered nodes unless showFiltered is true
+     if (node.filtered && !showFiltered) {
+       return null;
+     }
+
+     const isExpanded = expandedNodes.has(node.id);
+     const classes = [
+       'tree-node',
+       node.isSUI ? 'sui-component' : 'dom-element',
+       node.nodeType === 'text' ? 'text-node' : '',
+       node.nodeType === 'comment' ? 'comment-node' : '',
+       node.filtered ? 'filtered' : '',
+     ].filter(Boolean).join(' ');
+
+     // Render node with expander, icon, name
+     // Render #shadow-root as collapsible child if hasShadow
+     // Render children recursively if expanded
+   }
+   ```
+
+   **Example tree for nested components:**
+   ```
+   ▶ ui-card                    ← SUI component (bold, indigo)
+     ▶ #shadow-root             ← Collapsible shadow boundary
+         div.card               ← Regular DOM inside shadow
+         slot                   ← Slot element
+     ▶ ui-button                ← Nested SUI component (in light DOM)
+       ▶ #shadow-root
+           button.button
+           "Click Me"           ← Text node
+   ```
+
+   **CSS styling for visual distinction**:
+   ```css
+   .tree-node.sui-component {
+     font-weight: 600;
+     color: var(--sui-component-color, #6366f1);  /* Indigo for SUI */
+   }
+   .tree-node.dom-element {
+     color: var(--dom-element-color, #888);
+   }
+   .tree-node.text-node {
+     color: var(--text-node-color, #666);
+     font-style: italic;
+   }
+   .tree-node.filtered {
+     opacity: 0.5;
+   }
+   .shadow-label {
+     font-style: italic;
+     color: var(--shadow-label-color, #666);
+   }
+   ```
+
+5. **Filter Settings Panel** (panel/components/filter-settings.js)
+   ```html
+   <div class="filter-settings">
+     <h4>Tree Filters</h4>
+     <label>
+       <input type="checkbox" id="hide-comments" checked>
+       Hide comment nodes (Lit markers)
+     </label>
+     <label>
+       <input type="checkbox" id="hide-wrappers" checked>
+       Hide wrapper elements (astro-island, etc.)
+     </label>
+     <label>
+       <input type="checkbox" id="hide-scripts" checked>
+       Hide script tags
+     </label>
+     <label>
+       <input type="checkbox" id="hide-empty-text" checked>
+       Hide whitespace-only text nodes
+     </label>
+   </div>
+   ```
+
+   Filter changes trigger `setFilterSettings()` on bridge and tree re-render.
+
 **Files to Create**:
 - `manifest.json`
 - `devtools.html` / `devtools.js`
@@ -1486,7 +1579,7 @@ Create test HTML files with various SUI components:
 ## File Structure
 
 ```
-sui-devtools/
+tools/devtools/
 ├── manifest.json
 ├── devtools.html
 ├── devtools.js
