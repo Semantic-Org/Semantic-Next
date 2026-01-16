@@ -162,9 +162,15 @@ el.getSettings()      // Returns plain object with all current values
 
 // For individual reactive settings:
 el.settings.propertyName  // Reactive proxy access
+
+// For direct signal access (use for live observation):
+el.settingsVars           // Map<string, Signal> - direct access to setting signals
+el.settingsVars.get('fitted')?.get()  // Read signal value
 ```
 
-**Recommended**: Use `el.getSettings()` to retrieve all settings values - it guarantees a complete snapshot of current values.
+**When to use which**:
+- `el.getSettings()` → Snapshot for displaying in panel (non-reactive)
+- `el.settingsVars` → Direct signal access for creating Reactions (reactive observation)
 
 ### Settings Reactivity
 
@@ -638,6 +644,33 @@ window.__SUI_DEVTOOLS__ = {
 - [ ] Clicking tree node logs component to console
 - [ ] Hovering tree node highlights element on page
 
+**Lazy Loading Architecture** (based on React DevTools learnings):
+
+Minimize bridge traffic by sending minimal tree data, then fetching full data on selection:
+
+```typescript
+// Minimal data sent with tree (lightweight)
+interface TreeNode {
+  id: string;              // Unique ID from WeakMap registry
+  tagName: string;         // e.g., "ui-button"
+  displayName: string;     // e.g., "Button" (from spec.name or tag)
+  hasChildren: boolean;    // For expand/collapse UI
+  depth: number;           // For indentation
+}
+
+// Full data sent only when component is selected (on-demand)
+interface InspectedElement {
+  id: string;
+  tagName: string;
+  settings: { defaults: Record<string, any>; current: Record<string, any> };
+  state: Record<string, any>;
+  methods: string[];
+  spec: { types: string[]; variations: string[]; states: string[]; events: any[] } | null;
+  handlers: { events: any[]; keys: any[] };
+  css: { layers: any[]; variables: any[] };
+}
+```
+
 **Implementation Steps**:
 
 1. **Extension Scaffold**
@@ -650,22 +683,114 @@ window.__SUI_DEVTOOLS__ = {
 
 2. **Bridge Script** (content/bridge.js)
    ```javascript
-   // Must implement:
    window.__SUI_DEVTOOLS__ = {
      isReady: false,
 
-     // Detection
-     isSUIComponent(el) {
-       return el?.nodeType === Node.ELEMENT_NODE &&
-              el?.component !== undefined;
+     // Element registry (WeakMap for GC-friendly stable IDs)
+     elementRegistry: new WeakMap(),  // Element -> id
+     elementsById: new Map(),         // id -> Element
+     nextId: 1,
+
+     getOrCreateId(el) {
+       let id = this.elementRegistry.get(el);
+       if (!id) {
+         id = `sui-${this.nextId++}`;
+         this.elementRegistry.set(el, id);
+         this.elementsById.set(id, el);
+       }
+       return id;
      },
 
-     // Tree building
-     getComponentTree() { /* ... */ },
+     findElementById(id) {
+       return this.elementsById.get(id);
+     },
 
-     // Element registry (WeakMap for GC)
-     getComponentId(el) { /* ... */ },
-     findElementById(id) { /* ... */ },
+     // Detection - all SUI components share the UIWebComponent class name
+     isSUIComponent(el) {
+       return el?.nodeType === Node.ELEMENT_NODE &&
+              el?.constructor?.name === 'UIWebComponent';
+     },
+
+     // Tree building - returns MINIMAL data only
+     getComponentTree() {
+       const roots = [];
+       const seen = new Set();
+
+       // Use TreeWalker for efficient DOM traversal
+       const walker = document.createTreeWalker(
+         document.body,
+         NodeFilter.SHOW_ELEMENT,
+         {
+           acceptNode: (node) => {
+             return node.component !== undefined
+               ? NodeFilter.FILTER_ACCEPT
+               : NodeFilter.FILTER_SKIP;
+           }
+         }
+       );
+
+       // Collect all components
+       const allComponents = [];
+       let node;
+       while (node = walker.nextNode()) {
+         allComponents.push(node);
+       }
+
+       // Build tree from root components
+       for (const el of allComponents) {
+         if (seen.has(el)) continue;
+         if (this.isRootComponent(el, allComponents)) {
+           const treeNode = this.buildTreeNode(el, 0, seen);
+           if (treeNode) roots.push(treeNode);
+         }
+       }
+
+       return roots;
+     },
+
+     buildTreeNode(el, depth, seen) {
+       if (seen.has(el)) return null;
+       seen.add(el);
+
+       const children = this.findDirectChildComponents(el);
+
+       return {
+         id: this.getOrCreateId(el),
+         tagName: el.tagName.toLowerCase(),
+         displayName: this.getDisplayName(el),
+         hasChildren: children.length > 0,
+         depth,
+         children: children.map(c => this.buildTreeNode(c, depth + 1, seen)).filter(Boolean),
+       };
+     },
+
+     getDisplayName(el) {
+       // Prefer spec name
+       if (el.componentSpec?.name) return el.componentSpec.name;
+       // Convert tag: ui-button -> Button
+       return el.tagName.toLowerCase()
+         .replace(/^ui-/, '')
+         .replace(/-./g, m => m[1].toUpperCase())
+         .replace(/^./, m => m.toUpperCase());
+     },
+
+     // Full data - fetched on selection (lazy loading)
+     getInspectedElement(id) {
+       const el = this.findElementById(id);
+       if (!el) return null;
+       if (el.template?.destroyed) return { error: 'Component destroyed' };
+
+       return {
+         id,
+         tagName: el.tagName.toLowerCase(),
+         settings: this.extractSettings(el),
+         state: this.extractState(el),
+         methods: this.extractMethods(el),
+         spec: this.extractSpecInfo(el),
+         handlers: this.extractHandlers(el),
+         css: this.extractCSS(el),
+       };
+     },
 
      // Highlighting
      highlightElement(id) { /* ... */ },
@@ -696,7 +821,7 @@ window.__SUI_DEVTOOLS__ = {
 
 ### Phase 2: Developer Tab
 
-**Goal**: Full runtime introspection panel.
+**Goal**: Full runtime introspection panel using lazy-loaded data.
 
 **Test Criteria**:
 - [ ] Settings table shows property | default | current
@@ -707,25 +832,15 @@ window.__SUI_DEVTOOLS__ = {
 
 **Implementation Steps**:
 
-1. **Extend Bridge**
+1. **Extend Bridge with extract helpers** (for `getInspectedElement`)
    ```javascript
    window.__SUI_DEVTOOLS__ = {
-     // ... existing ...
+     // ... existing from Phase 1 ...
 
-     getComponentData(id) {
-       const el = this.findElementById(id);
-       return {
-         settings: this.extractSettings(el),
-         state: this.extractState(el),
-         component: this.extractComponentInfo(el),
-         template: this.extractTemplateInfo(el),
-         element: this.extractElementInfo(el),
-       };
-     },
-
+     // These are called by getInspectedElement (lazy loading)
      extractSettings(el) {
        const defaults = el.defaultSettings || {};
-       const current = el.getSettings?.() || {};  // Complete snapshot of all settings
+       const current = el.getSettings?.() || {};
        return { defaults, current };
      },
 

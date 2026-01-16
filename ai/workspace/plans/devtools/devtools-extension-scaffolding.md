@@ -333,8 +333,8 @@ chrome.devtools.panels.create(
   (panel) => {
     // Panel created callback
     panel.onShown.addListener((panelWindow) => {
-      // Panel is now visible
-      // panelWindow is the window object of panel.html
+      // Panel is now visible - request fresh tree scan
+      // Components may have rendered while panel was hidden
       panelWindow.postMessage({ type: 'PANEL_SHOWN' }, '*');
     });
     
@@ -613,10 +613,10 @@ import { Reaction } from '@semantic-ui/reactivity';
     // State observation
     stateReactions: new Map(),
     
-    // Detection
+    // Detection - all SUI components share the UIWebComponent class name
     isSUIComponent(el) {
-      return el?.nodeType === Node.ELEMENT_NODE && 
-             el?.component !== undefined;
+      return el?.nodeType === Node.ELEMENT_NODE &&
+             el?.constructor?.name === 'UIWebComponent';
     },
     
     // ... (other methods from build plan)

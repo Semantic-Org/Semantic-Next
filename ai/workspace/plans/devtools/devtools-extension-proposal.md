@@ -202,13 +202,13 @@ sui-devtools/
 
 ### Detection Strategy
 
-**Key Insight**: SUI components are identified by `el.component !== undefined`, not by tag name prefix.
+**Key Insight**: All SUI components share the same class name `UIWebComponent`, making detection simple.
 
 ```javascript
 // bridge.js - Component detection
 function isSUIComponent(el) {
-  return el.nodeType === Node.ELEMENT_NODE &&
-         el.component !== undefined;
+  return el?.nodeType === Node.ELEMENT_NODE &&
+         el?.constructor?.name === 'UIWebComponent';
 }
 ```
 
@@ -653,16 +653,18 @@ function traverseCSSRules(cssRules, layeredCSS) {
 }
 
 function parseLayerName(layerName) {
-  // Pattern: {component}.definition.{category}.{value}
-  // Example: "button.definition.types.emphasis"
+  // Pattern: {component}.{layerType}.{category}.{value}
+  // layerType is 'definition' (CSS rules) or 'theme' (CSS variables)
+  // Example: "button.definition.types.emphasis" or "button.theme.variations.size"
   const parts = layerName.split('.');
 
-  if (parts.length < 3 || parts[1] !== 'definition') {
+  if (parts.length < 3 || (parts[1] !== 'definition' && parts[1] !== 'theme')) {
     return null;
   }
 
   return {
     component: parts[0],           // 'button'
+    layerType: parts[1],           // 'definition' or 'theme'
     category: parts[2],            // 'types', 'content', 'variations', 'states'
     specValue: parts[3] || null,   // 'emphasis', 'size', etc.
   };
@@ -1137,41 +1139,19 @@ function logToConsole(elementId) {
 ```javascript
 function getRegisteredHandlers(el) {
   const template = el.template;
-  const events = template?.events;
+  if (!template?.events) return [];
 
-  if (!events || typeof events !== 'object') {
-    return [];
-  }
-
-  // events object format: { 'click .button': handlerFn, 'deep change ui-dropdown': handlerFn }
-  return Object.entries(events).map(([eventString, handler]) => {
-    // Parse event string: "modifier event selector"
-    // Examples: "click .button", "deep change ui-dropdown", "global scroll window"
-    const parts = eventString.split(' ');
-
-    let modifier = null;
-    let eventName = parts[0];
-    let selector = parts.slice(1).join(' ');
-
-    // Check for modifiers (deep, global)
-    if (['deep', 'global'].includes(parts[0])) {
-      modifier = parts[0];
-      eventName = parts[1];
-      selector = parts.slice(2).join(' ');
-    }
-
-    // Handle multiple events: "mouseenter, mouseleave .item"
-    const eventNames = eventName.split(',').map(e => e.trim());
-
-    return {
+  // Use template.parseEventString() which handles modifiers, bubbling, multiple selectors
+  return Object.entries(template.events).flatMap(([eventString, handler]) => {
+    const parsed = template.parseEventString(eventString);
+    return parsed.map(({ eventName, eventType, selector }) => ({
       eventString,
-      events: eventNames,
+      eventName,
       selector: selector || '(element)',
-      modifier,
+      modifier: eventType === 'delegate' ? null : eventType,
       handlerName: handler.name || 'anonymous',
-      // Can't serialize the actual function, but we can show its signature
       handlerPreview: getFunctionPreview(handler),
-    };
+    }));
   });
 }
 
@@ -1916,8 +1896,7 @@ function getTreeNode(el, expanded = false) {
 import { Reaction } from '@semantic-ui/reactivity';
 
 function observeComponentState(el, callback) {
-  // IMPORTANT: Use el.template.state, NOT el.dataContext.state
-  // el.dataContext is a snapshot with spread values, not live signals
+  // Use el.template.state for live signal access
   const state = el.template?.state;
   if (!state) return null;
 
