@@ -336,17 +336,12 @@ class WebComponentBase extends LitElement {
             DOM Helpers
   *******************************/
 
-  // Rendered DOM (either shadow or regular)
-  $(selector, { root = this?.renderRoot || this.shadowRoot } = {}) {
-    if (!root) {
-      console.error('Cannot query DOM until element has rendered.');
-    }
-    return $(selector, { root });
+  $(...args) {
+    return this.template?.$.apply(this.template, args);
   }
 
-  // Original DOM (used for pulling slotted text)
-  $$(selector) {
-    return $(selector, { root: this.originalDOM.content });
+  $$(...args) {
+    return this.template?.$$.apply(this.template, args);
   }
 
   // calls callback if defined with consistent params and this context
