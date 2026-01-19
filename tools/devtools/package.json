@@ -1,0 +1,12 @@
+{
+  "name": "@semantic-ui/devtools",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Developer tools for debugging Semantic UI web components",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "watch": "node scripts/watch.js",
+    "clean": "rm -rf dist"
+  }
+}

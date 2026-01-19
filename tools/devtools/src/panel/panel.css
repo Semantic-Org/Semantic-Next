@@ -1,0 +1,508 @@
+/* ========================================
+   SUI DevTools Panel Styles
+   Visual parity with Chrome DevTools
+   ======================================== */
+
+/* ========================================
+   CSS Custom Properties (Design Tokens)
+   ======================================== */
+
+:root {
+  /* Spacing */
+  --spacing-unit: 4px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --tree-indent: 12px;
+  --tree-row-height: 20px;
+
+  /* Typography */
+  --monospace-font-family: Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --default-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-default: 11px;
+  --font-size-small: 10px;
+  --font-size-toolbar: 12px;
+  --line-height-default: 1.4;
+  --line-height-tree: 20px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+
+  /* Borders */
+  --border-radius-sm: 2px;
+  --border-radius-md: 4px;
+  --chip-radius: 3px;
+}
+
+/* Light theme (default) */
+:root,
+[data-theme="light"] {
+  --color-background: #f3f3f3;
+  --color-background-elevation-1: #fff;
+  --color-background-elevation-2: #f9f9f9;
+  --color-background-hover: rgba(0, 0, 0, 0.05);
+  --color-background-selected: #e8f0fe;
+  --color-background-selected-unfocused: #e8e8e8;
+
+  --color-text-primary: #303942;
+  --color-text-secondary: #5f6368;
+  --color-text-disabled: #9aa0a6;
+  --color-text-accent: #1a73e8;
+
+  --color-border: #cacdd1;
+  --color-border-light: #e0e0e0;
+  --color-border-focus: #1a73e8;
+
+  --color-syntax-tag: #881280;
+  --color-syntax-attribute: #994500;
+  --color-syntax-attribute-value: #1a1aa6;
+  --color-syntax-comment: #236e25;
+  --color-syntax-keyword: #881280;
+  --color-syntax-number: #1c00cf;
+  --color-syntax-string: #c41a16;
+  --color-syntax-property: #881280;
+  --color-syntax-css-property: #c80000;
+  --color-syntax-css-value: #222;
+
+  /* SUI component highlight */
+  --color-sui-component: #1a73e8;
+
+  --color-modified: #e37400;
+  --color-error: #d93025;
+  --color-warning: #f9ab00;
+  --color-success: #188038;
+  --color-link: #1a73e8;
+  --color-selection: rgba(26, 115, 232, 0.15);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --color-background: #202124;
+  --color-background-elevation-1: #292a2d;
+  --color-background-elevation-2: #35363a;
+  --color-background-hover: rgba(255, 255, 255, 0.05);
+  --color-background-selected: #3c4043;
+  --color-background-selected-unfocused: #35363a;
+
+  --color-text-primary: #e8eaed;
+  --color-text-secondary: #9aa0a6;
+  --color-text-disabled: #5f6368;
+  --color-text-accent: #8ab4f8;
+
+  --color-border: #3c4043;
+  --color-border-light: #5f6368;
+  --color-border-focus: #8ab4f8;
+
+  --color-syntax-tag: #5db0d7;
+  --color-syntax-attribute: #9bbbdc;
+  --color-syntax-attribute-value: #f28b54;
+  --color-syntax-comment: #898989;
+  --color-syntax-keyword: #5db0d7;
+  --color-syntax-number: #9980ff;
+  --color-syntax-string: #f28b54;
+  --color-syntax-property: #5db0d7;
+  --color-syntax-css-property: #9bbbdc;
+  --color-syntax-css-value: #e8eaed;
+
+  /* SUI component highlight */
+  --color-sui-component: #8ab4f8;
+
+  --color-modified: #fdd663;
+  --color-error: #f28b82;
+  --color-warning: #fdd663;
+  --color-success: #81c995;
+  --color-link: #8ab4f8;
+  --color-selection: rgba(138, 180, 248, 0.2);
+}
+
+/* ========================================
+   Base Reset & Panel Layout
+   ======================================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--default-font-family);
+  font-size: var(--font-size-default);
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  line-height: var(--line-height-default);
+}
+
+/* Panel container */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ========================================
+   Toolbar
+   ======================================== */
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 4px;
+  gap: 4px;
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+#toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+#toolbar button:hover {
+  background: var(--color-background-hover);
+  color: var(--color-text-primary);
+}
+
+#toolbar button.active {
+  color: var(--color-text-accent);
+  background: var(--color-selection);
+}
+
+#toolbar button svg {
+  width: 16px;
+  height: 16px;
+}
+
+#status {
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  margin-left: 4px;
+}
+
+/* ========================================
+   Main Content (Split Pane)
+   ======================================== */
+
+#main-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+#tree-container {
+  width: 50%;
+  min-width: 200px;
+  max-width: 70%;
+  border-right: 1px solid var(--color-border);
+  overflow: auto;
+  background: var(--color-background-elevation-1);
+}
+
+#inspector-container {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ========================================
+   Tree View
+   ======================================== */
+
+#tree-view {
+  font-family: var(--monospace-font-family);
+  font-size: var(--font-size-default);
+  line-height: var(--line-height-tree);
+  user-select: none;
+  outline: none;
+  padding: 4px 0;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  height: var(--tree-row-height);
+  padding-right: 8px;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.tree-node:hover {
+  background: var(--color-background-hover);
+}
+
+.tree-node.selected {
+  background: var(--color-background-selected);
+}
+
+.tree-node.filtered {
+  display: none;
+}
+
+.tree-indent {
+  display: inline-block;
+  width: var(--tree-indent);
+  flex-shrink: 0;
+}
+
+.tree-expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  margin-right: 2px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.tree-expander::before {
+  content: '';
+}
+
+.tree-expander.expandable::before {
+  content: '▶';
+  font-size: 8px;
+  transition: transform 0.1s ease;
+}
+
+.tree-expander.expanded::before {
+  transform: rotate(90deg);
+}
+
+.tree-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tag name styling */
+.tree-node.dom-element .tree-label {
+  color: var(--color-syntax-tag);
+}
+
+/* SUI component styling - bold and accent color */
+.tree-node.sui-component .tree-label {
+  color: var(--color-sui-component);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Text node styling */
+.tree-node.text-node .tree-label {
+  color: var(--color-syntax-string);
+  font-style: italic;
+}
+
+/* Comment node styling */
+.tree-node.comment-node .tree-label {
+  color: var(--color-syntax-comment);
+  font-style: italic;
+}
+
+/* Shadow root label */
+.shadow-label {
+  color: var(--color-text-disabled);
+  font-style: italic;
+}
+
+/* Tag and attribute syntax coloring */
+.tag-name {
+  color: var(--color-syntax-tag);
+}
+
+.attr-name {
+  color: var(--color-syntax-attribute);
+}
+
+.attr-equals {
+  color: var(--color-text-secondary);
+}
+
+.attr-value {
+  color: var(--color-syntax-attribute-value);
+}
+
+/* SUI component name (shown before tag) */
+.sui-name {
+  color: var(--color-sui-component);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Override tag color for SUI components */
+.tree-node.sui-component .tag-name {
+  color: var(--color-sui-component);
+}
+
+/* ========================================
+   Inspector Panel
+   ======================================== */
+
+#inspector-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 24px;
+}
+
+#inspector-content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-2);
+}
+
+#element-summary {
+  padding: var(--spacing-2);
+  background: var(--color-background-elevation-2);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--spacing-2);
+}
+
+/* ========================================
+   Inspector Sections
+   ======================================== */
+
+.inspector-section {
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--spacing-2);
+}
+
+.inspector-section-header {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 var(--spacing-2);
+  background: var(--color-background-elevation-2);
+  cursor: pointer;
+  user-select: none;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.inspector-section-header:hover {
+  background: var(--color-background-hover);
+}
+
+.inspector-section-content {
+  padding: var(--spacing-2);
+}
+
+/* ========================================
+   Property Table
+   ======================================== */
+
+.property-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--monospace-font-family);
+  font-size: var(--font-size-default);
+}
+
+.property-table td {
+  padding: 2px var(--spacing-2) 2px 0;
+  border-bottom: 1px solid var(--color-border-light);
+  vertical-align: top;
+}
+
+.property-table tr:hover {
+  background: var(--color-background-hover);
+}
+
+.property-name {
+  color: var(--color-syntax-property);
+  white-space: nowrap;
+}
+
+.property-value {
+  color: var(--color-text-primary);
+  word-break: break-word;
+}
+
+.property-value.modified {
+  position: relative;
+}
+
+.property-value.modified::after {
+  content: ' ← modified';
+  color: var(--color-modified);
+  font-style: italic;
+  font-size: var(--font-size-small);
+}
+
+/* Value type colors */
+.value-string { color: var(--color-syntax-string); }
+.value-number { color: var(--color-syntax-number); }
+.value-boolean { color: var(--color-syntax-keyword); }
+.value-null { color: var(--color-text-disabled); font-style: italic; }
+.value-undefined { color: var(--color-text-disabled); font-style: italic; }
+
+/* ========================================
+   Breadcrumb / Status Bar
+   ======================================== */
+
+#breadcrumb {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--spacing-2);
+  background: var(--color-background-elevation-2);
+  border-top: 1px solid var(--color-border);
+  font-family: var(--monospace-font-family);
+  font-size: var(--font-size-small);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========================================
+   Scrollbar Styling (matches DevTools)
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
