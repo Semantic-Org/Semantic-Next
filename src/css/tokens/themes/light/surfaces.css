@@ -1,0 +1,12 @@
+  /* -------------------
+        UI Colors
+  -------------------- */
+
+  --ui-hue: 234.71;
+  --ui-chroma: 0.01;
+  --ui-lightness: 0.17;
+  --ui-lightness-light: 0.2;
+  --ui-lightness-dark: 0.15;
+
+  --ui-emphasis-strong: oklch(0.98 0.01 282.32);
+  --ui-emphasis: oklch(0.98 0.01 272.79);

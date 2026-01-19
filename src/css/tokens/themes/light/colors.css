@@ -102,39 +102,5 @@ html,
   --chroma-95: var(--base-chroma-95);
   --chroma-100: var(--base-chroma-100);
 
-  /* -------------------
-       Alpha Colors
-  -------------------- */
-
-  --very-subtle-transparent-black: oklch(var(--black-lch) / 2%);
-  --subtle-transparent-black: oklch(var(--black-lch) / 3%);
-  --transparent-black: oklch(var(--black-lch) / 5%);
-  --strong-transparent-black: oklch(var(--black-lch) / 8%);
-  --very-strong-transparent-black: oklch(var(--black-lch) / 15%);
-
-  --very-subtle-transparent-white: oklch(var(--white-lch) / 3%);
-  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
-  --transparent-white: oklch(var(--white-lch) / 8%);
-  --strong-transparent-white: oklch(var(--white-lch) / 13%);
-  --very-strong-transparent-white: oklch(var(--black-lch) / 18%);
-
-  /* -------------------
-        UI Colors
-  -------------------- */
-
-  --ui-hue: 234.71;
-  --ui-chroma: 0.01;
-  --ui-lightness: 0.17;
-  --ui-lightness-light: 0.2;
-  --ui-lightness-dark: 0.15;
-
-  --ui-emphasis-strong: oklch(0.98 0.01 282.32);
-  --ui-emphasis: oklch(0.98 0.01 272.79);
-
-  /* -------------------
-          Page
-  -------------------- */
-
-  --page-background: var(--white);
 
 }

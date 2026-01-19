@@ -1,0 +1,20 @@
+:root {
+
+  /* -------------------
+       Brand Colors
+  -------------------- */
+
+  --primary-color: var(--blue);
+  --secondary-color: var(--slate);
+
+  /* -------------------
+      Content Colors
+  -------------------- */
+
+  --positive-color: var(--green);
+  --negative-color: var(--red);
+  --info-color: var(--teal);
+  --warning-color: var(--orange);
+
+
+}
