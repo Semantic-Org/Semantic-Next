@@ -19,7 +19,7 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
     const el = $$('playground-code-editor').get(0);
     if (el) {
       adoptStylesheet(codeMirrorCSS, el.shadowRoot);
-      self.modifyCodeMirror(el._codemirror);
+      self.modifyCodeMirror(el._editorView);
     }
     // we want to use custom template syntax for html files
     if ((data?.filename || '').search('.html') !== -1) {
@@ -40,7 +40,9 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
     myCodeMirror.setSize(width, height);
   },
 
-  modifyCodeMirror(cm) {
+  modifyCodeMirror(editor) {
+    console.log(editor);
+    return;
     cm.setSize(null, null);
 
     cm.refresh();

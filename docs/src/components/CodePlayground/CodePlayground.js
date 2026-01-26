@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, firstMatch, get, idleCallback, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
