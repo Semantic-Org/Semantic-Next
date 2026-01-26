@@ -1,8 +1,10 @@
 import { defineConfig } from 'vitest/config';
+import node from './projects/node.js';
+import jsdom from './projects/jsdom.js';
 
 export default defineConfig({
   test: {
-    reporter: ['basic', 'json', 'junit'],
+    reporters: [['default', { summary: false }], 'json', 'junit'],
     outputFile: {
       junit: './tests/results/test-results-unit-junit.xml',
       json: './tests/results/test-results-unit.json',
@@ -10,6 +12,6 @@ export default defineConfig({
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;
     },
-    workspace: './tests/configs/vitest/workspaces/vitest.unit.workspace.js'
+    projects: [node, jsdom],
   },
 });
