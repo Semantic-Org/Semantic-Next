@@ -4,6 +4,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     watch: false,
+    pool: 'threads', // ~20% faster than default 'forks' pool
     reporters: ['default'],
     coverage: {
       enabled: false,

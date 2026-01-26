@@ -5,6 +5,7 @@ import browser from './projects/browser.js';
 
 export default defineConfig({
   test: {
+    pool: 'threads', // ~20% faster than default 'forks' pool
     reporters: [['default', { summary: false }], 'junit'],
     outputFile: './tests/results/test-results-all-junit.xml',
     onConsoleLog (log) {

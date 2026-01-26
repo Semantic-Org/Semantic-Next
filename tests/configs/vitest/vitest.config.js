@@ -6,6 +6,7 @@ import browser from './projects/browser.js';
 export default defineConfig({
   test: {
     watch: false,
+    pool: 'threads', // ~20% faster than default 'forks' pool
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;
     },

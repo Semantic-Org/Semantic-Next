@@ -5,6 +5,7 @@ import browser from './projects/browser.js';
 
 export default defineConfig({
   test: {
+    pool: 'threads', // ~20% faster than default 'forks' pool
     coverage: {
       enabled: true,
       provider: 'istanbul',

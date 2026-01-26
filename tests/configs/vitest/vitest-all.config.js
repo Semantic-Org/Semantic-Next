@@ -9,6 +9,7 @@ export default defineConfig({
   },
   test: {
     outdir: 'tests/',
+    pool: 'threads', // ~20% faster than default 'forks' pool
     reporters: ['html'],
     coverage: {
       enabled: true,
