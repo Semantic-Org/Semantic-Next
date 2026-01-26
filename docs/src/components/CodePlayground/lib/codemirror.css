@@ -51,24 +51,59 @@
 }
 
 /* Syntax highlighting - CM6 uses .tok-* classes */
-.tok-bracket:not(.tok-tag) {
+/* Using .cm-content for specificity over playground-elements defaults */
+
+/* Tag names: <div, </div */
+.cm-content .tok-typeName {
+  color: var(--playground-code-tag-color);
+}
+
+/* Angle brackets: > */
+.cm-content .tok-angleBracket {
+  color: var(--playground-code-tag-color);
+}
+
+/* Template braces: { } */
+.cm-content .tok-brace {
   color: var(--playground-code-bracket);
 }
 
-/* TODO: These are for custom ui-template mode (not yet implemented in CM6)
-.tok-html.tok-quote {
-  color: var(--playground-code-templating-html-quote);
+/* Attribute names: class, id */
+.cm-content .tok-attributeName {
+  color: var(--playground-code-templating-attribute);
 }
-.tok-html.tok-string {
+
+/* Attribute values: "value" */
+.cm-content .tok-attributeValue {
   color: var(--playground-code-templating-html-string);
 }
-.tok-templating.tok-keyword {
+
+/* Definition operator: = */
+.cm-content .tok-definitionOperator {
+  color: var(--playground-code-templating-attribute);
+}
+
+/* Keywords: #if, else, /if */
+.cm-content .tok-keyword {
   color: var(--playground-code-templating-keyword);
 }
-.tok-templating.tok-variable {
+
+/* Variables: counter, isEven */
+.cm-content .tok-variableName {
   color: var(--playground-code-templating-variable);
 }
-.tok-templating.tok-string {
+
+/* Strings in expressions */
+.cm-content .tok-string {
   color: var(--playground-code-templating-string);
 }
-*/
+
+/* Punctuation in expressions */
+.cm-content .tok-punctuation {
+  color: var(--playground-code-bracket);
+}
+
+/* Comments */
+.cm-content .tok-comment {
+  color: var(--playground-code-comment-color);
+}

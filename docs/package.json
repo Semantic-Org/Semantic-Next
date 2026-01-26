@@ -24,7 +24,10 @@
     "pretty": "^2.0.0",
     "pretty-json-custom-element": "^1.1.19",
     "semver": "^7.7.2",
-    "shiki": "^3.9.2"
+    "shiki": "^3.9.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.4"
   },
   "devDependencies": {
     "@astropub/md": "^1.0.0",

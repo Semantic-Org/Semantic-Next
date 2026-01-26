@@ -65,6 +65,10 @@ export default defineConfig({
       force: true,
       exclude: [
         'playground-elements',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@codemirror/language',
+        '@lezer/highlight',
         'tailwindcss-iso',
         '@semantic-ui/core',
         '@semantic-ui/query',

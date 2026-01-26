@@ -12,10 +12,6 @@ import { Panel, Panels } from '@semantic-ui/core';
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';
 
-import { addSearch } from './lib/codemirror-search.js';
-import { addSimpleMode } from './lib/codemirror-simple.js';
-import { defineSyntax } from './lib/codemirror-syntax.js';
-
 import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
 import 'playground-elements/playground-preview.js';
@@ -616,8 +612,6 @@ const onCreated = ({ self, attachEvent }) => {
 const onRendered = ({ isClient, self, state, $, settings }) => {
   // TODO: CM6 Migration - these plugins need to be rewritten as CM6 extensions
   // addSearch(CodeMirror);
-  // addSimpleMode(CodeMirror);
-  // defineSyntax(CodeMirror);
 
   self.addPanelSettings();
   self.setupComponents();
