@@ -249,7 +249,36 @@ export default defineConfig({
 
 ## Package Configs
 
-Each package in `packages/` has its own `vitest.config.js` for standalone testing:
+### Two-Tier Configuration
+
+This monorepo has **two independent levels** of test configuration:
+
+| Level | Location | Purpose | Command |
+|-------|----------|---------|---------|
+| **Global** | `tests/configs/vitest/` | Run tests across all packages | `npm test` (from root) |
+| **Package** | `packages/*/vitest.config.js` | Run tests for a single package | `npm test` (from package dir) |
+
+These configs are **independent**—changes to global configs don't affect package configs and vice versa. When modifying test infrastructure (pool, reporters, timeouts), **both levels may need updates**.
+
+### Package Config Structure
+
+Each package has its own `vitest.config.js` with **inline project definitions**:
+
+```
+packages/
+├── component/vitest.config.js
+├── query/vitest.config.js
+├── reactivity/vitest.config.js
+├── renderer/vitest.config.js
+├── specs/vitest.config.js
+├── tailwind/vitest.config.js
+├── templating/vitest.config.js
+└── utils/vitest.config.js
+```
+
+### Why Inline Projects?
+
+Package configs define projects inline rather than importing from shared files:
 
 ```javascript
 // packages/utils/vitest.config.js
@@ -261,18 +290,56 @@ export default defineConfig({
     watch: false,
     reporters: ['default'],
     projects: [
-      // Inline projects - same structure as shared project files
-      { test: { name: 'node', environment: 'node', ... } },
-      { test: { name: 'jsdom', environment: 'jsdom', ... } },
-      { test: { name: 'browser', browser: { provider: playwright(), ... } } },
+      {
+        test: {
+          include: ['**/test/unit/**/*.test.{ts,js}', '**/test/*.test.{ts,js}'],
+          name: 'node',
+          environment: 'node',
+        },
+      },
+      {
+        test: {
+          include: ['**/test/dom/**/*.test.{ts,js}'],
+          name: 'jsdom',
+          environment: 'jsdom',
+        },
+      },
+      {
+        test: {
+          include: ['**/test/browser/**/*.test.{ts,js}'],
+          name: 'browser',
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            headless: true,
+            screenshotFailures: false,
+            instances: [{ browser: 'chromium' }],
+          },
+        },
+      },
     ],
   },
 });
 ```
 
-**Usage:** `cd packages/utils && npm test`
+**Rationale:**
+- **Self-contained:** Package can be tested without dependencies on root config structure
+- **Portable:** Easier to extract packages or run in isolation
+- **Explicit:** All config visible in one file, no hunting for imports
 
-Package configs use inline projects rather than imports because they're self-contained and run independently from the monorepo config.
+**Trade-off:** When changing test infrastructure globally, you must update both:
+1. Global configs in `tests/configs/vitest/` (7 files)
+2. Package configs in `packages/*/vitest.config.js` (8 files)
+
+### Usage
+
+```bash
+# Run tests for a single package (preferred during development)
+cd packages/utils && npm test
+
+# Run all tests across monorepo
+npm test  # from root
+```
 
 ---
 
@@ -304,6 +371,32 @@ npx playwright install chromium
 ---
 
 ## Common Modifications
+
+### Pool Configuration (Performance)
+
+Vitest supports two execution pools for Node.js tests:
+
+| Pool | Description | Speed | Compatibility |
+|------|-------------|-------|---------------|
+| `forks` | Child processes (default) | Baseline | Best |
+| `threads` | Worker threads | ~20% faster | Good |
+
+**Benchmark results (unit tests):**
+- `forks`: 1.83s
+- `threads`: 1.42s (22% faster)
+
+Browser tests are unaffected by pool setting—they run in actual browsers via Playwright.
+
+```javascript
+export default defineConfig({
+  test: {
+    pool: 'threads',  // Faster for unit tests
+    // ...
+  },
+});
+```
+
+**When to use `forks`:** If you encounter segfaults or "Failed to terminate worker" errors with native modules (Prisma, bcrypt, canvas), switch back to `forks`.
 
 ### Adding a New Test Environment
 
@@ -342,7 +435,12 @@ reporters: [
 ]
 ```
 
-**Available reporters:** default, verbose, dot, json, junit, html, hanging-process
+**Available reporters:** default, verbose, dot, json, junit, html, hanging-process, github-actions, blob
+
+**CI-specific reporters:**
+- `github-actions` - Adds inline annotations on PR diffs for test failures
+- `blob` - Stores results for merging sharded test runs
+- `hanging-process` - Diagnoses tests preventing Vitest from exiting
 
 ### Adjusting Coverage Thresholds
 
