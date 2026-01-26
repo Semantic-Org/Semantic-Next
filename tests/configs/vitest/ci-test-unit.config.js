@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    reporter: ['basic', 'json', 'junit'],
+    reporter: ['basic', 'json', 'junit', 'github-actions'],
     outputFile: {
       junit: './tests/results/test-results-unit-junit.xml',
       json: './tests/results/test-results-unit.json',
