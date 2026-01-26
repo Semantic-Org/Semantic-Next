@@ -1,11 +1,12 @@
+import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     watch: false,
-    reporter: ['default'],
+    reporters: ['default'],
     coverage: {
-      enabled: false, // Enable with --coverage flag
+      enabled: false,
       provider: 'istanbul',
       reporter: ['text'],
       include: ['src/**/*.js'],
@@ -38,7 +39,7 @@ export default defineConfig({
           testTimeout: 30000,
           browser: {
             enabled: true,
-            provider: 'playwright',
+            provider: playwright(),
             headless: true,
             screenshotFailures: false,
             instances: [
