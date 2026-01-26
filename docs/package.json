@@ -20,7 +20,7 @@
     "fflate": "^0.8.2",
     "gray-matter": "^4.0.3",
     "link": "^2.1.1",
-    "playground-elements": "0.18.1",
+    "playground-elements": "0.21.2",
     "pretty": "^2.0.0",
     "pretty-json-custom-element": "^1.1.19",
     "semver": "^7.7.2",
