@@ -678,5 +678,63 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 
 ---
 
+## Vitest 4 Browser APIs with Shadow DOM
+
+Vitest 4 provides browser-native testing APIs. For Shadow DOM components, combine native queries with Vitest locators.
+
+### Key Imports
+
+```javascript
+import { page, userEvent } from 'vitest/browser';
+import { Reaction } from '@semantic-ui/reactivity';
+```
+
+### Pattern: Shadow DOM + Retriable Assertions
+
+```javascript
+// Query shadow DOM natively, wrap with locator for assertions
+const el = document.createElement('my-component');
+document.body.appendChild(el);
+await el.updateComplete;
+
+const button = el.shadowRoot.querySelector('.btn');
+await expect.element(page.elementLocator(button)).toBeVisible();
+```
+
+### Pattern: Reactive State Changes
+
+```javascript
+// Trigger state change, flush, then assert
+el.component.increment();
+Reaction.flush();
+
+const result = el.shadowRoot.querySelector('.result');
+await expect.element(page.elementLocator(result)).toHaveTextContent('1');
+```
+
+### Pattern: User Events
+
+```javascript
+// userEvent works with native shadow DOM elements
+const button = el.shadowRoot.querySelector('.btn');
+await userEvent.click(button);
+
+const input = el.shadowRoot.querySelector('input');
+await userEvent.type(input, 'Hello');
+```
+
+### Available Matchers
+
+- `toHaveTextContent(text)` - Check text content
+- `toBeVisible()` - Check visibility
+- `toBeDisabled()` / `toBeEnabled()` - Form element state
+- `toBeInTheDocument()` - Element exists
+
+### Reference Test
+
+See `packages/component/test/browser/vitest4.example.js` for complete examples.
+
+---
+
 **Last Updated:** 2026-01-26
 **Maintenance:** Update when test infrastructure or conventions change
