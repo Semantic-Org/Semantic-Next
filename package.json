@@ -239,6 +239,13 @@
     "mcp": {
       "command": "cd ai/mcp && node agents-server.js",
       "service": true
+    },
+    "test:case": {
+      "command": "node tests/scripts/serve-test-case.js",
+      "service": true,
+      "dependencies": [
+        "build:packages"
+      ]
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
