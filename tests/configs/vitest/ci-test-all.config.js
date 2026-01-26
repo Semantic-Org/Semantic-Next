@@ -6,7 +6,7 @@ import browser from './projects/browser.js';
 export default defineConfig({
   test: {
     pool: 'threads', // ~20% faster than default 'forks' pool
-    reporters: [['default', { summary: false }], 'junit'],
+    reporters: [['default', { summary: false }], 'junit', 'github-actions'],
     outputFile: './tests/results/test-results-all-junit.xml',
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;
