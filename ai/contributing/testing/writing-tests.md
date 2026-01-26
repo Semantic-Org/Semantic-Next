@@ -678,5 +678,5 @@ import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
 
 ---
 
-**Last Updated:** 2025-10-30
+**Last Updated:** 2026-01-26
 **Maintenance:** Update when test infrastructure or conventions change
