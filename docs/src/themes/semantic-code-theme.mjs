@@ -9,7 +9,7 @@ const lightColors = {
   grey: '#24292E',
   default: '#54595E',
   blue: '#005CC5',
-  cyan: '#116329', // strings - green for light mode
+  green: '#116329', // functions - green for light mode
   red: '#D73A49',
   white: '#a1a1a1',
   background: '#F6F6F7',
@@ -23,9 +23,9 @@ const darkColors = {
   grey: '#656565',
   default: '#C9D1D9',
   blue: '#73B9E1', // --primary-text-color
-  cyan: '#7EE787', // strings - soft green
+  green: '#7EE787', // functions - soft green
   red: '#F97583',
-  white: '#9A9A9A', // --standard-60 approximation
+  white: '#FFFFFF',
   background: '#080C10',
   comment: '#444444',
   lineNumber: '#25272B',
@@ -66,7 +66,7 @@ export const semanticLight = {
     {
       scope: ['string', 'string.quoted'],
       settings: {
-        foreground: lightColors.cyan,
+        foreground: lightColors.blue,
       },
     },
     // Numbers
@@ -99,9 +99,15 @@ export const semanticLight = {
     },
     // Properties
     {
-      scope: ['variable.other.property', 'support.type.property-name', 'meta.object-literal.key'],
+      scope: ['variable.other.property', 'support.type.property-name'],
       settings: {
         foreground: lightColors.blue,
+      },
+    },
+    {
+      scope: ['meta.object-literal.key'],
+      settings: {
+        foreground: lightColors.white,
       },
     },
     // Operators
@@ -253,7 +259,7 @@ export const semanticDark = {
     {
       scope: ['string', 'string.quoted'],
       settings: {
-        foreground: darkColors.cyan,
+        foreground: darkColors.blue,
       },
     },
     // Numbers
@@ -286,9 +292,16 @@ export const semanticDark = {
     },
     // Properties
     {
-      scope: ['variable.other.property', 'support.type.property-name', 'meta.object-literal.key'],
+      scope: ['variable.other.property', 'support.type.property-name'],
       settings: {
         foreground: darkColors.blue,
+      },
+    },
+    // obj props
+    {
+      scope: ['meta.object-literal.key'],
+      settings: {
+        foreground: darkColors.white,
       },
     },
     // Operators
