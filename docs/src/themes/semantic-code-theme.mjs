@@ -9,6 +9,7 @@ const lightColors = {
   grey: '#24292E',
   default: '#54595E',
   blue: '#005CC5',
+  cyan: '#116329', // strings - green for light mode
   red: '#D73A49',
   white: '#a1a1a1',
   background: '#F6F6F7',
@@ -22,6 +23,7 @@ const darkColors = {
   grey: '#656565',
   default: '#C9D1D9',
   blue: '#73B9E1', // --primary-text-color
+  cyan: '#7EE787', // strings - soft green
   red: '#F97583',
   white: '#9A9A9A', // --standard-60 approximation
   background: '#080C10',
@@ -64,7 +66,7 @@ export const semanticLight = {
     {
       scope: ['string', 'string.quoted'],
       settings: {
-        foreground: lightColors.blue,
+        foreground: lightColors.cyan,
       },
     },
     // Numbers
@@ -251,7 +253,7 @@ export const semanticDark = {
     {
       scope: ['string', 'string.quoted'],
       settings: {
-        foreground: darkColors.blue,
+        foreground: darkColors.cyan,
       },
     },
     // Numbers
