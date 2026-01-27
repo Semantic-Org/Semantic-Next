@@ -5,20 +5,9 @@ import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
 
-import { semanticDark, semanticLight } from './src/themes/semantic-code-theme.mjs';
-
 // Load the package version from parent package.json
 const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
 const packageVersion = packageJson.version;
-
-// Load the custom language definition
-const sui = {
-  id: 'sui',
-  scopeName: 'source.sui',
-  aliases: ['sui-template'],
-  ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8')),
-  name: 'sui',
-};
 
 // for now this relies on deploying to vercel
 // the site param is primarily used for the ImportMap for playground/examples
@@ -84,20 +73,7 @@ export default defineConfig({
 
   integrations: [
     lit(),
-    astroExpressiveCode({
-      themes: [semanticLight, semanticDark],
-      useDarkModeMediaQuery: false,
-      themeCssSelector: (theme) => {
-        // Map themes to html.dark class-based switching
-        if (theme.type === 'dark') {
-          return '.dark';
-        }
-        return ':root';
-      },
-      shiki: {
-        langs: [sui],
-      },
-    }),
+    astroExpressiveCode(),
     mdx({}),
     starlight({
       title: 'Semantic UI',
