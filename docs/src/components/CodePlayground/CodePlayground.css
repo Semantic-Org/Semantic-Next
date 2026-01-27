@@ -56,7 +56,7 @@
   --playground-fold-border-radius: var(--border-radius);
   --playground-fold-transition: var(--transition);
   --playground-fold-size: var(--medium);
-  --playground-fold-distance: var(--spacing-2);
+  --playground-fold-distance: var(--spacing-xs);
 
 
   /* Inline Version */

@@ -77,7 +77,7 @@ html {
   /* Spacing */
   --ec-codePadInl: var(--spacing);
   --ec-codePadBlk: var(--spacing);
-  --ec-uiPadBlk: var(--spacing-xs);
+  --ec-uiPadBlk: var(--spacing-2xs);
 
   /* Filename Header */
   --ec-frm-edTabBarBrdCol: var(--border-color);
@@ -98,6 +98,11 @@ html {
 /* Frame element overrides */
 .expressive-code .frame {
   border: var(--internal-border);
+}
+.expressive-code .frame.has-title:not(.is-terminal) .header.header {
+  background-image: var(--subtle-gradient);
+  font-size: 13px;
+  border-bottom: var(--border);
 }
 
 .expressive-code .frame.has-title:not(.is-terminal) .title {
