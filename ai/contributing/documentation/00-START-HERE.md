@@ -49,6 +49,7 @@ What are you doing?
 │   └── examples/authoring.md
 │       "Metadata, file structure, code quality"
 │       Also: examples/self-critique.md for review
+│       Also: examples/debugging-with-chrome-mcp.md for live testing
 │
 ├── ENHANCING EXISTING TEXT
 │   │
@@ -68,6 +69,10 @@ What are you doing?
 │   │
 │   └── Seeing examples of good writing?
 │       └── quality/good-examples.md
+│
+├── PREVIEWING IN BROWSER
+│   └── previewing-with-chrome-mcp.md
+│       "Access Astro dev server via Chrome DevTools MCP"
 │
 └── UNDERSTANDING PRINCIPLES
     │
@@ -98,6 +103,7 @@ ai/documentation/
 ├── 00-START-HERE.md          ← You are here
 │
 ├── authoring-standards.md    # Universal: headers, frontmatter, examples
+├── previewing-with-chrome-mcp.md  # Browser preview via Chrome DevTools MCP
 ├── page-types/               # How to write each page type
 │   ├── gateway.md               # Landing pages (problem-first)
 │   ├── guide.md                 # Instructional guides
@@ -106,7 +112,8 @@ ai/documentation/
 │
 ├── examples/                 # Creating code examples
 │   ├── authoring.md             # How to create examples
-│   └── self-critique.md         # Quality checklist
+│   ├── self-critique.md         # Quality checklist
+│   └── debugging-with-chrome-mcp.md  # Live testing with Chrome DevTools
 │
 ├── quality/                  # Operational checklists
 │   ├── slop-identification.md   # Detect AI content
@@ -145,6 +152,7 @@ ai/documentation/
 1. Read `examples/authoring.md`
 2. Create example files
 3. Review against `examples/self-critique.md`
+4. Test with `examples/debugging-with-chrome-mcp.md` (optional)
 
 ### Improving existing documentation
 1. Run `enhance/evaluate-text.md` to identify issues
