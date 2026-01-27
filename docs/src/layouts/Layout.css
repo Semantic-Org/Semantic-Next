@@ -613,40 +613,53 @@
 
 }
 
-@layer code {
-  .expressive-code {
-    /* expressive code */
-    --ec-uiFontSize: 14px;
-    --ec-codeFontSize: 1em;
-    --ec-codePadBlk: 0.5em;
-    --ec-brdRad: var(--border-radius);
-    --ec-brdWd: 0px;
-    --ec-frm-edBg: linear-gradient(45deg, #17171c, #081116);
-    /*--ec-frm-edActTabIndTopCol: var(--primary-text-color);*/
-    --ec-frm-edActTabIndTopCol: transparent;
-    --ec-frm-trmTtbBrdBtmCol: transparent;
-    --ec-frm-edTabBarBg: transparent;
-    --ec-frm-edActTabIndBtmCol: transparent;
-    --ec-frm-edActTabBg: #13151a;
-    --code-background: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
-    --ec-frm-edBg: linear-gradient(140deg, oklch(0.16 0.02 266.69), oklch(0 0 0), oklch(0.13 0.02 266.79));
-    --ec-frm-trmBg: var(--ec-frm-edBg);
-    --ec-frm-trmTtbBg: #0c0e16;
-    --ec-frm-frameBoxShdCssVal: 0px 0px 5px rgba(0 0 0 / 50% inset);
-    --ec-brdWd: 1px;
-    --ec-brdCol: oklch(0.22 0.02 277.72);
-    .frame.is-terminal {
 
-    }
-    .frame.has-title:not(.is-terminal) .title {
-      background-color: transparent !important;
-    }
-    .frame {
-      border: var(--internal-border);
-    }
-    .frame.has-title:not(.is-terminal) .title {
-      font-weight: bold;
-    }
+/* Light Theme */
+html.light {
+
+  /* Page BG */
+  --playground-page-background: #FFFFFF;
+  --topbar-background-color: #000000;
+  --button-transparent-inverted-background-color: var(--black-80);
+  --button-transparent-inverted-hover-background-color: var(--black-90);
+  --button-transparent-inverted-pressed-background-color: var(--black-80);
+
+  /* Expressive Code */
+  --ec-frm-edActTabFg: var(--black-80);
+
+  /* Quotes */
+  figcaption .header {
+    background-color: var(--angled-gradient);
+  }
+
+  /* Playground */
+  learn-example,
+  ::part(playground) {
+    --playground-code-background: #F7F7F7;
+    --playground-border: var(--border);
+    --playground-button-background-color: #333333;
+
+    --playground-header-background: #FCFCFF linear-gradient(rgb(0 0 0 / 2%), rgb(0 0 0 / 6%));
+    --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
+    --playground-header-color: rgba(255, 255, 255, 0.8);
+    --playground-header-border: var(--internal-border);
+    --playground-header-box-shadow: 0px -2px 4px -3px rgba(0, 0, 0, 0.1) inset;
+
+    --playground-code-comment-color: #AAAAAA;
+
+    --learn-panel-background: linear-gradient(rgb(229 229 229), rgb(253 253 253) 100px, oklch(0.92 0.01 0));
+
+  }
+  ::part(panel) {
+    --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
+    --panel-label-color: var(--black-70);
+    --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;
+
+    --panel-label-active-color: var(--black-90);
+    --panel-label-active-background: rgb(0 0 0 / 3%);
+
+    --panel-label-minimized-background: linear-gradient(rgba(0, 0, 0, 0.02), rgb(15 17 22 / 30%));
+    --panel-label-minimized-color: rgba(0, 0, 0, 0.1);
   }
 
 }

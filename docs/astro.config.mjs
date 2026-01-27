@@ -5,6 +5,8 @@ import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
 
+import { semanticDark, semanticLight } from './src/themes/semantic-code-theme.mjs';
+
 // Load the package version from parent package.json
 const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
 const packageVersion = packageJson.version;
@@ -83,8 +85,15 @@ export default defineConfig({
   integrations: [
     lit(),
     astroExpressiveCode({
-      themes: ['github-dark'],
+      themes: [semanticLight, semanticDark],
       useDarkModeMediaQuery: false,
+      themeCssSelector: (theme) => {
+        // Map themes to html.dark class-based switching
+        if (theme.type === 'dark') {
+          return '.dark';
+        }
+        return ':root';
+      },
       shiki: {
         langs: [sui],
       },

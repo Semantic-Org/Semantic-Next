@@ -1,15 +1,14 @@
+/*
+  This is injected into the shadow DOM of the playground-element component
+  that renders the Code Mirror instance.
 
-/* Scrollbars - CM6 uses native scrollbars on .cm-scroller */
-.cm-scroller {
-  scrollbar-color: #444 rgba(255, 255, 255, 0.05);
-  scrollbar-width: thin;
-}
-.cm-scroller::-webkit-scrollbar-thumb {
-  border-radius: 100px;
-}
+  It is the only way to access .cm-* classes
+*/
+
+
 
 /* Autocomplete - CM6 uses .cm-tooltip-autocomplete */
-.cm-tooltip-autocomplete {
+.cm-tooltip-autocomplete.cm-tooltip {
   box-shadow: 1px 2px 10px #000;
   background: #090c10 var(--subtle-angled-gradient);
   font-size: var(--playground-code-font-size, 14px);
@@ -20,30 +19,31 @@
   margin-right: 1rem;
   border-radius: var(--border-radius);
   border: var(--border);
+
+  ul li {
+    line-height: 24px;
+    border-radius: var(--border-radius);
+  }
+   ul li[aria-selected="true"] {
+    background: #152d37;
+    filter: none;
+  }
 }
 
-.cm-tooltip-autocomplete ul li {
-  line-height: 24px;
-  border-radius: var(--border-radius);
-}
-.cm-tooltip-autocomplete ul li[aria-selected="true"] {
-  background: #152d37;
-  filter: none;
-}
 
 /* Fold Markers - CM6 uses .cm-foldMarker */
 .cm-foldMarker {
-  color: var(--standard-40);
-  background: var(--standard-10) var(--angled-gradient);
-  border-radius: var(--border-radius);
-  font-size: var(--medium);
+  color: var(--playground-fold-color);
+  background: var(--playground-fold-background);
+  border-radius: var(--playground-fold-border-radius);
+  font-size: var(--playground-fold-size);
   vertical-align: 3px;
-  box-shadow: var(--floating-shadow);
-  margin-left: 8px;
+  box-shadow: var(--playground-fold-shadow);
+  margin-left: var(--playground-fold-distance);
   display: inline-block;
   padding: 0px 5px 6px 4px;
   line-height: 1;
-  transition: var(--transition);
+  transition: var(--playground-fold-transition);
 }
 .cm-foldMarker:hover {
   background-color: #183a528f;
@@ -66,8 +66,20 @@
     color: var(--playground-code-property-color);
   }
 
+  &[data-language="css"] {
+    .tok-keyword {
+      color: var(--code-default);
+    }
+    .tok-propertyName {
+      color: var(--code-grey);
+    }
+    .tok-atom {
+      color: var(--code-blue);
+    }
+  }
+
   /* SUI Template-specific rules */
-  .lang-template & {
+  &[data-language="html"] {
     .tok-typeName {
       color: var(--playground-code-tag-color);
     }

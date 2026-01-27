@@ -72,7 +72,7 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     };
   },
 
-  configureEditor() {
+  configureCodeEditors() {
     // add custom styles
     if (self.editorEl) {
       adoptStylesheet(codeMirrorCSS, self.editorEl.shadowRoot);
@@ -83,7 +83,11 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     if (self.editorView && isHTML) {
       requestAnimationFrame(() => {
         self.setLanguage(templateLang);
-        self.editorView.dom.classList.add('lang-template');
+        // Set data-language for CSS scoping
+        const contentEl = self.editorView.contentDOM;
+        if (contentEl) {
+          contentEl.setAttribute('data-language', 'html');
+        }
         state.initialized.set(true);
       });
     }
@@ -175,7 +179,7 @@ const events = {
 
 const onRendered = ({ self, data }) => {
   self.setEditorInstance();
-  self.configureEditor();
+  self.configureCodeEditors();
 };
 
 const CodePlaygroundFile = defineComponent({
