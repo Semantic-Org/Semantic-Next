@@ -17,6 +17,7 @@
   --playground-code-attribute-color: var(--code-blue);
   --playground-code-background: var(--code-background);
   --playground-code-bracket: var(--code-grey);
+  --playground-code-punctuation: var(--code-default);
   --playground-code-builtin-color: var(--code-default);
   --playground-code-callee-color: var(--code-purple);
   --playground-code-comment-color: var(--code-comment-color);
@@ -24,12 +25,12 @@
   --playground-code-def-color: var(--code-blue);
   --playground-code-default-color: var(--code-default);
   --playground-code-font-size: var(--code-font-size);
-  --playground-code-keyword-color: var(--code-red);
+  --playground-code-keyword-color: var(--code-white);
   --playground-code-linenumber-color: var(--code-linenumber-color);
   --playground-code-meta-color: var(--code-default);
   --playground-code-number-color: var(--code-blue);
   --playground-code-operator-color: var(--code-blue);
-  --playground-code-property-color: var(--code-blue);
+  --playground-code-property-color: var(--code-grey);
   --playground-code-qualifier-color: var(--code-default);
   --playground-code-string-2-color: var(--code-grey);
   --playground-code-string-color: var(--code-blue);

@@ -21,7 +21,7 @@ html.dark {
   --code-blue: var(--primary-text-color);
   --code-red: #F97583;
   --code-gold: #FFC107;
-  --code-white: #FFFFFF;
+  --code-white: var(--standard-60);
   --code-background: #080C10;
   --code-comment-color: #444444;
   --code-linenumber-color: #25272B;

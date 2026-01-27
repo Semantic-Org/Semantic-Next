@@ -53,7 +53,9 @@
 /* Syntax highlighting */
 .cm-content {
   /* General rules - apply to all languages */
-  .tok-punctuation,
+  .tok-punctuation {
+    color: var(--playground-code-punctuation);
+  }
   .tok-bracket,
   .tok-brace {
     color: var(--playground-code-bracket);
@@ -112,4 +114,14 @@
       color: var(--playground-code-templating-variable);
     }
   }
+}
+
+
+/* Fix some missing CM6 tokens by inference */
+.ͼo .tok-operator + .tok-propertyName {
+  color: var(--playground-code-string-2-color);
+}
+.ͼo .tok-operator + .tok-propertyName:last-child,
+.ͼo .tok-operator + .tok-propertyName ~ .tok-propertyName {
+  color: var(--playground-code-callee-color);
 }
