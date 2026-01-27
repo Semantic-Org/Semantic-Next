@@ -30,6 +30,10 @@ function tokenText(stream, state) {
     openExpression(state, true);
     return 'brace';
   }
+  if (stream.match('{>')) {
+    openExpression(state, false);
+    return 'brace';
+  }
   if (stream.match('{')) {
     openExpression(state, false);
     return 'brace';
@@ -45,7 +49,6 @@ function tokenText(stream, state) {
     }
     state.inTag = true;
     state.attrState = 'tag';
-    stream.eatWhile(/[a-zA-Z0-9:_-]/);
     return 'typeName';
   }
 
@@ -63,23 +66,36 @@ function tokenText(stream, state) {
 // (B) tokenInTag: inside < ... >
 // ----------------------------------------------------------------------------
 function tokenInTag(stream, state) {
+  // Closing >
   if (stream.eat('>')) {
     state.inTag = false;
     state.attrState = 'tag';
-    return 'angleBracket';
-  }
-
-  if (stream.eat('/')) {
-    stream.eatWhile(/[a-zA-Z0-9:_-]/);
     return 'typeName';
   }
 
+  // Closing tag slash: /
+  if (stream.eat('/')) {
+    return 'typeName';
+  }
+
+  // Whitespace
   if (stream.eatWhile(/\s/)) {
     return null;
   }
 
+  // Tag name (right after < or /)
+  if (state.attrState === 'tag' && /[a-zA-Z0-9:_-]/.test(stream.peek())) {
+    stream.eatWhile(/[a-zA-Z0-9:_-]/);
+    state.attrState = 'afterTagName';
+    return 'typeName';
+  }
+
   if (stream.match('{{')) {
     openExpression(state, true);
+    return 'brace';
+  }
+  if (stream.match('{>')) {
+    openExpression(state, false);
     return 'brace';
   }
   if (stream.match('{')) {
@@ -118,11 +134,12 @@ function parseAttrOrTagName(stream, state) {
 // ----------------------------------------------------------------------------
 function parseAttrValue(stream, state) {
   if (state.attributeQuoteChar) {
+    // Closing quote
     if (stream.peek() === state.attributeQuoteChar) {
       stream.next();
       state.attributeQuoteChar = null;
       state.attrState = 'tag';
-      return 'attributeValue';
+      return 'meta';
     }
 
     if (stream.match('{{')) {
@@ -134,6 +151,7 @@ function parseAttrValue(stream, state) {
       return 'brace';
     }
 
+    // String content inside quotes
     let consumed = false;
     while (!stream.eol()) {
       const ch = stream.peek();
@@ -141,14 +159,15 @@ function parseAttrValue(stream, state) {
       stream.next();
       consumed = true;
     }
-    return consumed ? 'attributeValue' : null;
+    return consumed ? 'labelName' : null;
   }
   else {
     const ch = stream.peek();
+    // Opening quote
     if (ch === '"' || ch === "'") {
       state.attributeQuoteChar = ch;
       stream.next();
-      return 'attributeValue';
+      return 'meta';
     }
 
     if (stream.match('{{')) {
@@ -165,6 +184,7 @@ function parseAttrValue(stream, state) {
       return null;
     }
 
+    // Unquoted attribute value
     let consumed = false;
     while (!stream.eol()) {
       const nextCh = stream.peek();
@@ -177,7 +197,7 @@ function parseAttrValue(stream, state) {
     if (!consumed) {
       state.attrState = 'tag';
     }
-    return 'attributeValue';
+    return 'labelName';
   }
 }
 

@@ -83,6 +83,7 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     if (self.editorView && isHTML) {
       requestAnimationFrame(() => {
         self.setLanguage(templateLang);
+        self.editorView.dom.classList.add('lang-template');
         state.initialized.set(true);
       });
     }

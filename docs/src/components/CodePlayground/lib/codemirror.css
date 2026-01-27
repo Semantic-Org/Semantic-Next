@@ -50,60 +50,54 @@
   color: var(--primary-text-color);
 }
 
-/* Syntax highlighting - CM6 uses .tok-* classes */
-/* Using .cm-content for specificity over playground-elements defaults */
+/* Syntax highlighting */
+.cm-content {
+  /* General rules - apply to all languages */
+  .tok-punctuation,
+  .tok-bracket,
+  .tok-brace {
+    color: var(--playground-code-bracket);
+  }
 
-/* Tag names: <div, </div */
-.cm-content .tok-typeName {
-  color: var(--playground-code-tag-color);
-}
+  .tok-comment {
+    color: var(--playground-code-comment-color);
+  }
+  .tok-propertyName.tok-definition {
+    color: var(--playground-code-property-color);
+  }
 
-/* Angle brackets: > */
-.cm-content .tok-angleBracket {
-  color: var(--playground-code-tag-color);
-}
+  /* SUI Template-specific rules */
+  .lang-template & {
+    .tok-typeName {
+      color: var(--playground-code-tag-color);
+    }
 
-/* Template braces: { } */
-.cm-content .tok-brace {
-  color: var(--playground-code-bracket);
-}
+    .tok-propertyName {
+      color: var(--playground-code-templating-attribute);
+    }
 
-/* Attribute names: class, id */
-.cm-content .tok-attributeName {
-  color: var(--playground-code-templating-attribute);
-}
+    .tok-operator {
+      color: var(--playground-code-templating-attribute);
+    }
 
-/* Attribute values: "value" */
-.cm-content .tok-attributeValue {
-  color: var(--playground-code-templating-html-string);
-}
+    .tok-meta {
+      color: var(--playground-code-templating-html-quote);
+    }
 
-/* Definition operator: = */
-.cm-content .tok-definitionOperator {
-  color: var(--playground-code-templating-attribute);
-}
+    .tok-labelName {
+      color: var(--playground-code-attribute-color);
+    }
 
-/* Keywords: #if, else, /if */
-.cm-content .tok-keyword {
-  color: var(--playground-code-templating-keyword);
-}
+    .tok-string {
+      color: var(--playground-code-templating-string);
+    }
 
-/* Variables: counter, isEven */
-.cm-content .tok-variableName {
-  color: var(--playground-code-templating-variable);
-}
+    .tok-keyword {
+      color: var(--playground-code-templating-keyword);
+    }
 
-/* Strings in expressions */
-.cm-content .tok-string {
-  color: var(--playground-code-templating-string);
-}
-
-/* Punctuation in expressions */
-.cm-content .tok-punctuation {
-  color: var(--playground-code-bracket);
-}
-
-/* Comments */
-.cm-content .tok-comment {
-  color: var(--playground-code-comment-color);
+    .tok-variableName {
+      color: var(--playground-code-templating-variable);
+    }
+  }
 }

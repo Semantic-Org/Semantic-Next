@@ -31,8 +31,8 @@
   --playground-code-atom-color: var(--code-default);
   --playground-code-number-color: var(--primary-text-color);
   --playground-code-def-color: var(--primary-text-color);
-  --playground-code-variable-color: #e98080;
-  --playground-code-property-color: var(--code-grey);
+  --playground-code-variable-color: var(--code-purple);
+  --playground-code-property-color: var(--primary-text-color);
   --playground-code-operator-color: var(--code-blue);
   --playground-code-variable-2-color: var(--code-blue);
   --playground-code-variable-3-color: var(--code-default);
