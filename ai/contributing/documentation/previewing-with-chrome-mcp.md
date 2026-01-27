@@ -66,6 +66,18 @@ For visual verification:
 mcp__chrome-devtools__take_screenshot
 ```
 
+### Scrolling
+
+The docs site uses a custom `<page>` element as the scroll container, not the window. To scroll:
+
+```javascript
+// Scroll to position
+document.querySelector('page').scrollTo(0, 1500);
+
+// Scroll by amount
+document.querySelector('page').scrollBy(0, 500);
+```
+
 ---
 
 ## Common Use Cases
