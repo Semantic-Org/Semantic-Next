@@ -36,15 +36,14 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     const StateEffect = compartment.reconfigure([]).constructor;
 
     const ViewPlugin = view.plugins[0]?.spec?.plugin?.constructor;
-    const StateField = view.state.config.base.find(x => x?.constructor?.name === 'StateField')?.constructor;
-    const RangeSet = view.state.values.find(v => v?.constructor?.name === 'RangeSet')?.constructor;
+    // Duck-type StateField by its create/update methods
+    const StateField = view.state.config.base.find(x =>
+      typeof x?.create === 'function' && typeof x?.update === 'function'
+    )?.constructor;
+    // Duck-type RangeSet by its iter method and size property
+    const RangeSet = view.state.values.find(v => typeof v?.iter === 'function' && typeof v?.size === 'number')
+      ?.constructor;
     const Facet = EditorView.updateListener.constructor;
-
-    // Find the language compartment specifically
-    const compartmentEntries = [...view.state.config.compartments.entries()];
-    const languageCompartment = compartmentEntries.find(([comp, value]) =>
-      value?.constructor?.name === 'LanguageSupport'
-    )?.[0];
 
     // store playground code editor el
     self.editorEl = editorEl;
@@ -63,13 +62,17 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
       ViewPlugin,
       RangeSet,
       Facet,
-      // instance languages
-      languageCompartment,
       // Shortcuts
       updateListener: EditorView.updateListener,
       appendConfig: StateEffect.appendConfig,
       userEvent: Transaction.userEvent,
     };
+
+    // Find the language compartment by duck-typing LanguageSupport shape
+    const compartmentEntries = [...view.state.config.compartments.entries()];
+    self.cm.languageCompartment = compartmentEntries.find(([comp, value]) =>
+      value?.language && value?.support && value?.extension
+    )?.[0];
   },
 
   configureCodeEditors() {
@@ -103,8 +106,8 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
   },
 
   setCodeSize({ width = null, height = null } = {}) {
-    self.view.dom.style.width = width;
-    self.view.dom.style.height = height;
+    self.editorView.dom.style.width = width;
+    self.editorView.dom.style.height = height;
   },
 
   setupFolds(view) {
