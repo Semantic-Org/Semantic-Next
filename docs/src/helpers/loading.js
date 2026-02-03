@@ -15,14 +15,15 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
     return {};
   }
 
-  // Convert to absolute path for glob search
-  // Strip all leading '../' and resolve from docs/src/
-  const strippedBase = baseFolder.replace(/^(\.\.\/)+/, '');
-  const searchBase = path.resolve(__dirname, '..', strippedBase);
+  // Resolve path from process.cwd() (docs/ during build)
+  // baseFolder like '../../examples/' means docs/src/examples/ (from docs/src/pages/)
+  // From cwd (docs/), that's src/examples/
+  const normalizedBase = baseFolder.replace(/^\.\.\/\.\.\//, 'src/');
+  const searchBase = path.resolve(process.cwd(), normalizedBase);
 
   // Debug logging for build issues
   console.log('[getFolder] folderName:', folderName);
-  console.log('[getFolder] __dirname:', __dirname);
+  console.log('[getFolder] cwd:', process.cwd());
   console.log('[getFolder] searchBase:', searchBase);
   console.log('[getFolder] searchBase exists:', fs.existsSync(searchBase));
 
