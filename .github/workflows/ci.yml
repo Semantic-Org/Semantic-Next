@@ -105,23 +105,13 @@ jobs:
       - name: Install NPM Dependencies
         run: npm ci
 
-      - name: Get Playwright Version
-        run: |
-          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/playwright-bin" >> $GITHUB_ENV
-          PLAYWRIGHT_VERSION="$(npm ls playwright | grep playwright | awk -F@ '{print $NF}' | awk '!/deduped/')"
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
       - name: Cache Playwright
-        if: steps.changed-files.outputs.only_changed != 'true'
         uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-playwright-bin-${{ env.PLAYWRIGHT_VERSION }}
-          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-bin-
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.cache/ms-playwright
 
       - name: Install Playwright
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: npx playwright install chromium
 
       - name: Run Browser Tests
@@ -163,23 +153,13 @@ jobs:
       - name: Install NPM Dependencies
         run: npm ci
 
-      - name: Get Playwright Version
-        run: |
-          echo "PLAYWRIGHT_BROWSERS_PATH=$HOME/.cache/playwright-bin" >> $GITHUB_ENV
-          PLAYWRIGHT_VERSION=$(npm ls playwright | grep playwright | awk -F@ '{print $NF}' | awk '!/deduped/')
-          echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
-
       - name: Cache Playwright
-        if: steps.changed-files.outputs.only_changed != 'true'
         uses: actions/cache@v4
         with:
-          key: ${{ runner.os }}-playwright-bin-${{ env.PLAYWRIGHT_VERSION }}
-          path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-bin-
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.cache/ms-playwright
 
       - name: Install Playwright
-        if: steps.cache-playwright.outputs.cache-hit != 'true'
         run: npx playwright install chromium
 
       - name: Check Code Coverage
