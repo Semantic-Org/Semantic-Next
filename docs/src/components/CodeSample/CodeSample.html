@@ -18,11 +18,9 @@
   {/if}
   {#if formattedCode}
     <code class="code {language}">
-      {#if formattedCode}
-        {#html formattedCode}}
-      {else}
-        {>slot}
-      {/if}
+{#if formattedCode}{#html formattedCode}}{else}
+  {>slot}
+{/if}
     </code>
   {/if}
 </codeSample>

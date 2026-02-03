@@ -40,10 +40,10 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
   watchCode() {
     reaction(async () => {
       tpl.language.get(); // reactivity source
-      const code = tpl.getCode();
+      let code = tpl.getCode();
       if (code) {
         if (settings.language == 'html') {
-          tpl.formatHTML(code);
+          code = tpl.formatHTML(code);
         }
         tpl.code.set(code);
         await tpl.highlight(code);

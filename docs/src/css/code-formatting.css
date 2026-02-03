@@ -1,0 +1,126 @@
+/* Code Playground and Syntax Highlighting Colors */
+html {
+  --code-font-size: 14px;
+  --code-purple: #6F42C1;
+  --code-grey: #24292E;
+  --code-default: #54595E;
+  --code-blue: #005CC5;
+  --code-orange: #E3660F;
+  --code-gold: #FFC107;
+  --code-red: #D73A49;
+  --code-white: #a1a1a1;
+  --code-background: #F6F6F7;
+  --code-comment-color: #6A737D;
+  --code-linenumber-color: #6A737D;
+}
+html.dark {
+  --code-purple: #D2A8FF;
+  --code-grey: #656565;
+  --code-default: #C9D1D9;
+  --code-orange: #FFAB70;
+  --code-blue: var(--primary-text-color);
+  --code-red: #F97583;
+  --code-gold: #FFC107;
+  --code-white: var(--standard-60);
+  --code-background: #080C10;
+  --code-comment-color: #444444;
+  --code-linenumber-color: #25272B;
+}
+
+/* JSON Styling */
+html {
+  --arrow-color: var(--code-grey);
+  --arrow-color-hover: var(--code-default);
+  --brace-color: transparent;
+  --bracket-color: var(--code-grey);
+  --null-color: var(--code-grey);
+  --comma-color: var(--code-grey);
+  --ellipsus-color: var(--code-grey);
+  --key-color: var(--code-grey);
+  --key-name-color: var(--code-purple);
+  --ellipsis-color: var(--code-grey);
+  --ellipsis-color-hover: var(--code-blue);
+  --string-color: var(--code-blue);
+  --number-color: var(--code-purple);
+  --boolean-color: var(--code-grey);
+  --summary-color: var(--code-grey);
+}
+
+/*
+ * Expressive Code Overrides
+ * Selector matches expressive-code's generated specificity: :root .expressive-code:not(:root)
+ */
+
+/* Light mode */
+:root .expressive-code.expressive-code.expressive-code:not(:root) {
+  /* Code Background */
+  --ec-frm-edBg: var(--code-background);
+  --ec-frm-trmTtbBg: var(--code-background);
+  --ec-frm-edBg: var(--ui-background-emphasis);
+
+  /* Line Highlight */
+  --ec-tm-markBg: var(--standard-5);
+  --ec-tm-markBrdCol: var(--code-blue);
+  --tmInlineBgCol: var(--subtle-gradient);
+  --tmInlineBrdCol: var(--internal-border-color);
+
+  /* Typography */
+  --ec-uiFontSize: 14px;
+  --ec-codeFontSize: 14px;
+
+  /* Borders */
+  --ec-brdRad: var(--border-radius);
+  --ec-brdWd: 1px;
+  --ec-brdCol: var(--border-color);
+
+  /* Tab bar */
+  --ec-frm-edActTabIndTopCol: transparent;
+  --ec-frm-trmTtbBrdBtmCol: transparent;
+  --ec-frm-edTabBarBg: transparent;
+  --ec-frm-edActTabIndBtmCol: transparent;
+  --ec-frm-edActTabBg: var(--code-background);
+  --ec-frm-trmBg: var(--ec-frm-edBg);
+  --ec-frm-frameBoxShdCssVal: 0px 0px 5px rgba(0 0 0 / 50% inset);
+
+  /* Spacing */
+  --ec-codePadInl: var(--spacing);
+  --ec-codePadBlk: var(--spacing);
+  --ec-uiPadBlk: var(--spacing-2xs);
+
+  /* Filename Header */
+  --ec-frm-edTabBarBrdCol: var(--border-color);
+  --ec-frm-edTabBarBrdBtmCol: var(--border-color);
+  --ec-frm-edActTabFg: var(--standard-100);
+  --ec-frm-edTabBarBg: var(--standard-5);
+
+  /* Tooltip */
+  --ec-frm-tooltipSuccessBg: var(--slate);
+  --ec-frm-tooltipSuccessFg: var(--white);
+
+  /* Icons */
+  --ec-frm-copyIcon: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.75'%3E%3Cpath%20d%3D'M3%2019a2%202%200%200%201-1-2V2a2%202%200%200%201%201-1h13a2%202%200%200%201%202%201'%2F%3E%3Crect%20x%3D'6'%20y%3D'5'%20width%3D'16'%20height%3D'18'%20rx%3D'1.5'%20ry%3D'1.5'%2F%3E%3C%2Fsvg%3E");
+  --ec-frm-trmIcon: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2060%2016'%20preserveAspectRatio%3D'xMidYMid%20meet'%3E%3Ccircle%20cx%3D'8'%20cy%3D'8'%20r%3D'8'%2F%3E%3Ccircle%20cx%3D'30'%20cy%3D'8'%20r%3D'8'%2F%3E%3Ccircle%20cx%3D'52'%20cy%3D'8'%20r%3D'8'%2F%3E%3C%2Fsvg%3E");
+}
+
+
+/* Frame element overrides */
+.expressive-code .frame {
+  border: var(--internal-border);
+}
+.expressive-code .frame.has-title:not(.is-terminal) .header.header {
+  background-image: var(--subtle-gradient);
+  font-size: 13px;
+  border-bottom: var(--border);
+}
+
+.expressive-code .frame.has-title:not(.is-terminal) .title {
+  background-color: transparent !important;
+  font-family: var(--page-font);
+}
+
+.expressive-code .ec-line.ec-line mark {
+  --tmInlineBrdCol: var(--internal-border-color);
+}
+.expressive-code .ec-line.ec-line mark::before {
+  border-radius: var(--border-radius);
+}

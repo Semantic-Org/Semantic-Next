@@ -4,14 +4,14 @@ import css from './CodePlaygroundPanel.css?raw';
 import template from './CodePlaygroundPanel.html?raw';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
-const createComponent = ({ data }) => ({
+const createComponent = () => ({
   initialize() {
     // nothing yet
   },
 });
 
 const events = {
-  'click .label'({ $, $$ }) {
+  'click .label'({ $$ }) {
     $$('playground-code-editor').focus();
   },
   'focus ui-panel'({ $$ }) {

@@ -4,29 +4,100 @@ import css from './CodePlaygroundFile.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import codeMirrorCSS from './lib/codemirror.css?raw';
 
+import { templateLang } from './lang/template-lang.js';
+
 const defaultState = {
   initialized: false, // avoid the flash when mode is set from changing file types
 };
 
-const createComponent = ({ self, settings, state, data, $, $$ }) => ({
+const createComponent = ({ self, state, data, $, $$ }) => ({
   getClassMap() {
     return {
       initialized: state.initialized.get(),
     };
   },
 
-  configureCodeEditors() {
-    const el = $$('playground-code-editor').get(0);
-    if (el) {
-      adoptStylesheet(codeMirrorCSS, el.shadowRoot);
-      self.modifyCodeMirror(el._codemirror);
+  setEditorInstance() {
+    // CM6 editor instance
+    const editorEl = $$('playground-code-editor').get(0);
+    const view = editorEl?._editorView;
+
+    if (!view) {
+      return;
     }
-    // we want to use custom template syntax for html files
-    if ((data?.filename || '').search('.html') !== -1) {
-      requestAnimationFrame(() => {
-        const cm = $$('playground-code-editor').get(0)?._codemirror;
-        if (cm) {
-          cm.setOption('mode', 'text/ui-template');
+
+    // retrieve classes from instance
+    const EditorView = view.constructor;
+    const EditorState = view.state.constructor;
+    const Transaction = view.state.update({}).constructor;
+
+    const compartment = [...view.state.config.compartments.keys()][0];
+    const Compartment = compartment.constructor;
+    const StateEffect = compartment.reconfigure([]).constructor;
+
+    const ViewPlugin = view.plugins[0]?.spec?.plugin?.constructor;
+    // Duck-type StateField by its create/update methods
+    const StateField = view.state.config.base.find(x =>
+      typeof x?.create === 'function' && typeof x?.update === 'function'
+    )?.constructor;
+    // Duck-type RangeSet by its iter method and size property
+    const RangeSet = view.state.values.find(v => typeof v?.iter === 'function' && typeof v?.size === 'number')
+      ?.constructor;
+    const Facet = EditorView.updateListener.constructor;
+
+    // store playground code editor el
+    self.editorEl = editorEl;
+
+    // store code mirror view
+    self.editorView = view;
+
+    // store base classes
+    self.cm = {
+      EditorView,
+      EditorState,
+      Transaction,
+      Compartment,
+      StateEffect,
+      StateField,
+      ViewPlugin,
+      RangeSet,
+      Facet,
+      // Shortcuts
+      updateListener: EditorView.updateListener,
+      appendConfig: StateEffect.appendConfig,
+      userEvent: Transaction.userEvent,
+    };
+
+    // Find the language compartment by duck-typing LanguageSupport shape
+    const compartmentEntries = [...view.state.config.compartments.entries()];
+    const languageCompartment = compartmentEntries.find(([comp, value]) =>
+      value?.language && value?.support && value?.extension
+    )?.[0];
+
+    // safety check for race conditions -- try again
+    if (!languageCompartment && !self.retried) {
+      self.retried = true;
+      requestIdleCallback(() => self.setEditorInstance());
+    }
+
+    self.cm.languageCompartment = languageCompartment;
+  },
+
+  configureCodeEditors() {
+    // add custom styles
+    if (self.editorEl) {
+      adoptStylesheet(codeMirrorCSS, self.editorEl.shadowRoot);
+    }
+
+    // handle custom syntax
+    const isHTML = (data?.filename || '').search('.html') !== -1;
+    if (self.editorView && isHTML) {
+      requestIdleCallback(() => {
+        self.setLanguage(templateLang);
+        // Set data-language for CSS scoping
+        const contentEl = self.editorView.contentDOM;
+        if (contentEl) {
+          contentEl.setAttribute('data-language', 'html');
         }
         state.initialized.set(true);
       });
@@ -36,121 +107,39 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
     }
   },
 
-  setCodeSize(cm, { width = null, height = null } = {}) {
-    myCodeMirror.setSize(width, height);
-  },
-
-  modifyCodeMirror(cm) {
-    cm.setSize(null, null);
-
-    cm.refresh();
-
-    cm.setOption('tabSize', settings.tabSize);
-
-    cm.setOption('viewportMargin', Infinity);
-
-    // Enable multiple selections
-    cm.setOption('allowMultipleSelections', true);
-
-    // Use the drawSelection extension to display multiple selections
-    cm.setOption('drawSelectionMatches', true);
-
-    cm.setOption('extraKeys', {
-      ...cm.getOption('extraKeys'),
-      Tab: (cm) => {
-        if (cm.somethingSelected()) {
-          cm.indentSelection('add');
-        }
-        else {
-          cm.execCommand('insertSoftTab');
-        }
-      },
-      'Shift-Tab': () => {
-        const indentUnit = cm.getOption('indentUnit') ?? 2;
-        const selections = cm.listSelections();
-        cm.operation(() => {
-          selections.forEach((selection) => {
-            const fromLine = selection.from().line;
-            const toLine = selection.to().line;
-            for (let i = fromLine; i <= toLine; i++) {
-              const lineContent = cm.getLine(i);
-              const trimmedLine = lineContent.trimStart();
-              const outdentSize = Math.min(lineContent.length - trimmedLine.length, indentUnit);
-              cm.replaceRange('', { line: i, ch: 0 }, { line: i, ch: outdentSize });
-            }
-          });
-        });
-      },
-      'Ctrl-D': () => {
-        // Get the current selection
-        const selection = cm.getSelection();
-        // Find all occurrences of the selected text
-        const cursor = cm.getSearchCursor(selection);
-        const matches = [];
-        while (cursor.findNext()) {
-          matches.push({ anchor: cursor.from(), head: cursor.to() });
-        }
-
-        // Add the occurrences as selections
-        cm.setSelections(matches);
-      },
-    });
-
-    self.patchFold(cm);
-
-    if (data.inline) {
-      cm.on('change', (instance, changeObj) => {
-        setTimeout(() => {
-          // Use setTimeout to allow the DOM to update
-          const scrollInfo = instance.getScrollInfo();
-          const contentHeight = scrollInfo.height;
-          const clientHeight = scrollInfo.clientHeight;
-          const wrapper = instance.getWrapperElement();
-
-          // Only resize if content has transitioned to overflow state
-          if (contentHeight > clientHeight) {
-            wrapper.style.height = `${contentHeight}px`;
-            instance.refresh();
-          }
-        }, 1);
-      });
+  setLanguage(lang) {
+    if (!self.cm.languageCompartment) {
+      return;
     }
-  },
-
-  // used to remove code comment in front of wrappers
-  patchFold(cm) {
-    cm.getAllMarks().forEach((marker) => {
-      if (marker.__isFold) {
-        // Before we attach the 'clear' listener, store the fold info.
-        const range = marker.find();
-        marker._foldRange = range;
-        // If there is a widget, you can also store the widget node:
-        if (marker.widgetNode) {
-          marker._widgetNode = marker.widgetNode;
-        }
-        marker.on('clear', () => {
-          let foldComment = $(marker._widgetNode).prev('.cm-comment').text();
-          // remove comment mentioning folding
-          requestAnimationFrame(() => {
-            self.removeMatchingLine(cm, foldComment);
-          });
-        });
-      }
+    self.editorView.dispatch({
+      effects: self.cm.languageCompartment.reconfigure(lang),
     });
   },
-  removeMatchingLine(cm, searchString) {
-    const doc = cm.getDoc();
-    const cursor = doc.getSearchCursor(searchString, { line: 0, ch: 0 });
-    if (cursor.findNext()) {
-      const lineIndex = cursor.from().line;
-      // Remove all text from this line start to the next line start.
-      // This effectively deletes the entire line (including the trailing newline).
-      doc.replaceRange(
-        '',
-        { line: lineIndex, ch: 0 },
-        { line: lineIndex + 1, ch: 0 },
-      );
-    }
+
+  setCodeSize({ width = null, height = null } = {}) {
+    self.editorView.dom.style.width = width;
+    self.editorView.dom.style.height = height;
+  },
+
+  setupFolds(view = self.editorView) {
+    const $widgets = $$(view.contentDOM).find('.cm-foldMarker');
+    $widgets.each(function() {
+      const $widget = $(this);
+      const $comment = $(this).prev('.tok-comment');
+      $widget
+        .off('.clear')
+        .on('click.clear', function() {
+          const pos = view.posAtDOM($comment.el());
+          const line = view.state.doc.lineAt(pos);
+          view.dispatch({
+            changes: {
+              from: line.from,
+              to: Math.min(line.to + 1, view.state.doc.length), // +1 for newline
+              insert: '',
+            },
+          });
+        });
+    });
   },
 });
 
@@ -167,7 +156,11 @@ const events = {
 };
 
 const onRendered = ({ self, data }) => {
-  self.configureCodeEditors();
+  requestIdleCallback(() => {
+    self.setEditorInstance();
+    self.configureCodeEditors();
+    self.setupFolds();
+  });
 };
 
 const CodePlaygroundFile = defineComponent({
