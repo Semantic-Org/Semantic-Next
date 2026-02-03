@@ -18,9 +18,7 @@
   {/if}
   {#if formattedCode}
     <code class="code {language}">
-{#if formattedCode}
-  {#html formattedCode}}
-{else}
+{#if formattedCode}{#html formattedCode}}{else}
   {>slot}
 {/if}
     </code>
