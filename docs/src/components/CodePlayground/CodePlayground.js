@@ -312,15 +312,24 @@ const createComponent = (
       const $gutter = $panel.find('.cm-gutters').first();
       const $lines = $panel.find('.cm-line');
 
-      const extraSpacing = 5; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
+      const extraSpacing = 10; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
       const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
       const gutterWidth = $gutter.width();
 
-      if ($lines.count() > 0) {
-        const lineWidths = $lines.outerWidth();
-        minWidths.push(...lineWidths);
-      }
+      const fileComponent = $panel.find('playground-code-ed').component();
+
+      let lineMax = 0;
+      const range = document.createRange();
+      $lines.each((line) => {
+        if (line.firstChild) {
+          range.selectNodeContents(line);
+          const rect = range.getBoundingClientRect();
+          lineMax = Math.max(lineMax, rect.width);
+        }
+      });
+
+      minWidths.push(lineMax);
 
       const size = Math.max(...minWidths) + gutterWidth + extraSpacing;
       return size;

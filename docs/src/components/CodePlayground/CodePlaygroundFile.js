@@ -17,6 +17,13 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     };
   },
 
+  getNaturalWidth() {
+    let max = 0;
+    for (const line of self.editorView.contentDOM.children) {
+      max = Math.max(max, line.scrollWidth);
+    }
+  },
+
   setEditorInstance() {
     // CM6 editor instance
     const editorEl = $$('playground-code-editor').get(0);
