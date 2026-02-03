@@ -15,9 +15,12 @@ import Sidebar from '@components/Sidebar.astro';
 
 /* Make paths */
 export async function getStaticPaths() {
-  const entries = await getCollection('examples', ({ data }) => !data.hidden);
+  const entries = await getCollection('examples');
   const paths = [];
   each(entries, (entry) => {
+    if(entry.data.hidden) {
+      return;
+    }
     paths.push({
       params: { slug: `${entry.slug}` },
       props: { entry },
@@ -30,6 +33,7 @@ const sandboxURL = getSandboxURL();
 const example = entry.data;
 const exampleID = example.id || tokenize(example.title);
 const allExampleFiles = await getFolder(exampleID, '../../examples/');
+
 const isFolder = example.exampleType == 'folder';
 let files = await getExampleFiles({
   contentID: getExampleID(example),
@@ -76,8 +80,5 @@ const searchMeta = {
       additionalPageFiles={example.additionalPageFiles}
       tip={tip}
       ></CodePlayground>
-    <script define:vars={{ files }}>
-      console.log('CodePlayground files:', files);
-    </script>
   </page>
 </Playground>

@@ -20,6 +20,12 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
   const strippedBase = baseFolder.replace(/^(\.\.\/)+/, '');
   const searchBase = path.resolve(__dirname, '..', strippedBase);
 
+  // Debug logging for build issues
+  console.log('[getFolder] folderName:', folderName);
+  console.log('[getFolder] __dirname:', __dirname);
+  console.log('[getFolder] searchBase:', searchBase);
+  console.log('[getFolder] searchBase exists:', fs.existsSync(searchBase));
+
   // Generate search patterns dynamically based on depth
   const globPatterns = [];
 
@@ -34,8 +40,13 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
 
   const files = {};
 
+  console.log('[getFolder] globPatterns:', globPatterns.slice(0, 2), '...');
+
   for (const pattern of globPatterns) {
     const matchedFiles = await glob(pattern, { nodir: true });
+    if (matchedFiles.length > 0) {
+      console.log('[getFolder] pattern matched:', pattern, '-> found', matchedFiles.length, 'files');
+    }
 
     for (const filePath of matchedFiles) {
       // Convert absolute path back to the relative format that getExampleFiles expects
@@ -49,5 +60,6 @@ export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
     }
   }
 
+  console.log('[getFolder] total files found:', Object.keys(files).length);
   return files;
 };
