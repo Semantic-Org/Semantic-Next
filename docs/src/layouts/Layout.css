@@ -432,6 +432,7 @@
         }
 
         /* Bold in context */
+        strong,
         ul strong,
         p strong {
           color: var(--standard-100);
