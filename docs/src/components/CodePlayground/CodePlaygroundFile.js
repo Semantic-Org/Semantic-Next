@@ -17,13 +17,6 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     };
   },
 
-  getNaturalWidth() {
-    let max = 0;
-    for (const line of self.editorView.contentDOM.children) {
-      max = Math.max(max, line.scrollWidth);
-    }
-  },
-
   setEditorInstance() {
     // CM6 editor instance
     const editorEl = $$('playground-code-editor').get(0);
@@ -51,6 +44,7 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     const RangeSet = view.state.values.find(v => typeof v?.iter === 'function' && typeof v?.size === 'number')
       ?.constructor;
     const Facet = EditorView.updateListener.constructor;
+
 
     // store playground code editor el
     self.editorEl = editorEl;
@@ -80,6 +74,12 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     self.cm.languageCompartment = compartmentEntries.find(([comp, value]) =>
       value?.language && value?.support && value?.extension
     )?.[0];
+
+    // safety check for race conditions -- try again
+    if (!languageCompartment && !self.retried) {
+      self.retried = true;
+      requestIdleCallback(self.setEditorInstance);
+    }
   },
 
   configureCodeEditors() {
@@ -91,7 +91,7 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     // handle custom syntax
     const isHTML = (data?.filename || '').search('.html') !== -1;
     if (self.editorView && isHTML) {
-      requestAnimationFrame(() => {
+      requestIdleCallback(() => {
         self.setLanguage(templateLang);
         // Set data-language for CSS scoping
         const contentEl = self.editorView.contentDOM;
@@ -107,6 +107,9 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
   },
 
   setLanguage(lang) {
+    if (!self.cm.languageCompartment) {
+      return;
+    }
     self.editorView.dispatch({
       effects: self.cm.languageCompartment.reconfigure(lang),
     });
@@ -117,60 +120,24 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     self.editorView.dom.style.height = height;
   },
 
-  setupFolds(view) {
-    self._trackedFolds = new Map();
-
-    const listener = self.cm.updateListener.of((update) => {
-      const oldFolds = new Map(self._trackedFolds);
-      const newFolds = self.syncFolds(update.view);
-      self._trackedFolds = newFolds;
-
-      for (const [key, oldFold] of oldFolds) {
-        if (!newFolds.has(key)) {
-          self.onFoldCleared(update.view, oldFold);
-        }
-      }
-    });
-
-    view.dispatch({
-      effects: self.cm.appendConfig.of(listener),
-    });
-  },
-
-  syncFolds(view) {
-    const folds = new Map();
-    const $widgets = $$(view.contentDOM).find('.cm-foldPlaceholder');
-
-    $widgets.each((widget) => {
-      const $comment = $(widget).closest('.cm-line').prev().find('.tok-comment');
-      if (!$comment.length) { return; }
-
-      const pos = view.posAtDOM(widget);
-      const commentPos = view.posAtDOM($comment.get(0));
-      const key = String(pos);
-
-      folds.set(key, {
-        from: pos,
-        commentPos,
-      });
-    });
-
-    return folds;
-  },
-
-  onFoldCleared(view, fold) {
-    if (fold.commentPos == null) { return; }
-
-    requestAnimationFrame(() => {
-      const doc = view.state.doc;
-      const line = doc.lineAt(fold.commentPos);
-      const to = line.number < doc.lines
-        ? doc.line(line.number + 1).from
-        : line.to;
-
-      view.dispatch({
-        changes: { from: line.from, to, insert: '' },
-      });
+  setupFolds(view = self.editorView) {
+    const $widgets = $$(view.contentDOM).find('.cm-foldMarker');
+    $widgets.each(function() {
+      const $widget = $(this);
+      const $comment = $(this).prev('.tok-comment');
+      $widget
+        .off('.clear')
+        .on('click.clear', function() {
+          const pos = view.posAtDOM($comment.el());
+          const line = view.state.doc.lineAt(pos);
+          view.dispatch({
+            changes: {
+              from: line.from,
+              to: Math.min(line.to + 1, view.state.doc.length), // +1 for newline
+              insert: '',
+            },
+          });
+        });
     });
   },
 });
@@ -188,8 +155,11 @@ const events = {
 };
 
 const onRendered = ({ self, data }) => {
-  self.setEditorInstance();
-  self.configureCodeEditors();
+  requestIdleCallback(() => {
+    self.setEditorInstance();
+    self.configureCodeEditors();
+    self.setupFolds();
+  });
 };
 
 const CodePlaygroundFile = defineComponent({
