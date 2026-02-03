@@ -85,6 +85,12 @@
       "bundled": "./dist/bundle/icon.min.js",
       "default": "./src/primitives/icon/index.js"
     },
+    "./icon/css": {
+      "import": "./dist/icon.css",
+      "browser": "./dist/cdn/icon.min.css",
+      "bundled": "./dist/bundle/icon.min.css",
+      "default": "./dist/icon.css"
+    },
     "./input": {
       "import": "./src/primitives/input/index.js",
       "browser": "./dist/cdn/input.min.js",
