@@ -45,7 +45,6 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
       ?.constructor;
     const Facet = EditorView.updateListener.constructor;
 
-
     // store playground code editor el
     self.editorEl = editorEl;
 
@@ -71,15 +70,17 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
 
     // Find the language compartment by duck-typing LanguageSupport shape
     const compartmentEntries = [...view.state.config.compartments.entries()];
-    self.cm.languageCompartment = compartmentEntries.find(([comp, value]) =>
+    const languageCompartment = compartmentEntries.find(([comp, value]) =>
       value?.language && value?.support && value?.extension
     )?.[0];
 
     // safety check for race conditions -- try again
     if (!languageCompartment && !self.retried) {
       self.retried = true;
-      requestIdleCallback(self.setEditorInstance);
+      requestIdleCallback(() => self.setEditorInstance());
     }
+
+    self.cm.languageCompartment = languageCompartment;
   },
 
   configureCodeEditors() {
