@@ -54,6 +54,24 @@ export const buildUIDeps = async ({
     outdir: 'src',
   });
 
+  const pageCSSBundle = build({
+    banner: { css: INTERNAL_CSS_BANNER },
+    type: 'css',
+    minify: false,
+    addBanner: false,
+    metafile: false,
+    sourcemap: false,
+    watch,
+    bundle: true,
+    log: { header: 'UI Components', text: 'Page CSS Bundle' },
+    entryPoints: [
+      'src/primitives/**/page-css/*.css',
+    ],
+    entryNames: '[dir]/../[name]-bundle',
+    outbase: 'src',
+    outdir: 'src',
+  });
+
   // Get all .spec.js source files
   const specJsFiles = await glob('src/primitives/**/specs/*.spec.js');
   const entryPoints = specJsFiles;
@@ -125,6 +143,7 @@ export const buildUIDeps = async ({
 
   return await Promise.all([
     cssComponentBundle,
+    pageCSSBundle,
     createComponentSpecs(),
     specWatcher,
   ].filter(Boolean));

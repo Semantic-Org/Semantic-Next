@@ -236,24 +236,18 @@
     cursor: pointer;
     color: inherit;
   }
-  .link.card:hover,
-  a.card:hover {
+  :is(.link.card, a.card):hover {
     background: var(--card-link-hover-background);
     box-shadow: var(--card-link-hover-box-shadow);
     border: var(--card-link-hover-border);
   }
-  .link.card:hover ::slotted(.header),
-  .link.card:hover .header,
-  a.card:hover ::slotted(.header),
-  a.card:hover .header {
+  :is(.link.card, a.card):hover ::slotted(.header),
+  :is(.link.card, a.card):hover .header {
     color: var(--card-link-hover-header-color);
   }
-  .link.card:hover ::slotted(ui-icon),
-  .link.card:hover ::slotted(.icon),
-  .link.card:hover .icon ui-icon,
-  a.card:hover ::slotted(ui-icon),
-  a.card:hover ::slotted(.icon),
-  a.card:hover .icon ui-icon {
+  :is(.link.card, a.card):hover ::slotted(ui-icon),
+  :is(.link.card, a.card):hover ::slotted(.icon),
+  :is(.link.card, a.card):hover .icon ui-icon {
     color: var(--card-link-hover-icon-color);
   }
 }

@@ -18,7 +18,3 @@
 @import url('./variations/link-variables.css') layer(icon.theme.variations.link);
 @import url('./variations/colored-variables.css') layer(icon.theme.variations.colored);
 @import url('./variations/sizing-variables.css') layer(icon.theme.variations.sizing);
-
-/* Overrides */
-@import url('./overrides/feather-icons.css') layer(icon.theme.overrides.feather);
-@import url('./overrides/dev-icons.css') layer(icon.theme.overrides.dev);

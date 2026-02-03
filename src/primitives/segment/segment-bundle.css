@@ -61,10 +61,8 @@
 
 /* src/primitives/segment/css/definition/types/stacked.css */
 @layer segment.definition.types.stacked {
-  .stacked.segments::before,
-  .stacked.segments::after,
-  .stacked.segment::before,
-  .stacked.segment::after {
+  :is(.stacked.segments, .stacked.segment)::before,
+  :is(.stacked.segments, .stacked.segment)::after {
     content: "";
     position: absolute;
     bottom: calc(-1 * var(--segment-stacked-height) / 2);
@@ -75,8 +73,7 @@
     height: var(--segment-stacked-height);
     visibility: visible;
   }
-  .stacked.segments::before,
-  .stacked.segment::before {
+  :is(.stacked.segments, .stacked.segment)::before {
     display: none;
   }
   .stacked.segment {
@@ -97,10 +94,8 @@
     box-shadow: var(--segment-piled-box-shadow);
     z-index: var(--segment-piled-z-index);
   }
-  .piled.segments::before,
-  .piled.segments::after,
-  .piled.segment::before,
-  .piled.segment::after {
+  :is(.piled.segments, .piled.segment)::before,
+  :is(.piled.segments, .piled.segment)::after {
     background-color: var(--inverted-100);
     visibility: visible;
     content: "";
@@ -112,14 +107,12 @@
     border: var(--segment-piled-border);
     box-shadow: var(--segment-piled-box-shadow);
   }
-  .piled.segments::before,
-  .piled.segment::before {
+  :is(.piled.segments, .piled.segment)::before {
     transform: rotate(calc(-1 * var(--segment-piled-degrees)));
     top: 0;
     z-index: -2;
   }
-  .piled.segments::after,
-  .piled.segment::after {
+  :is(.piled.segments, .piled.segment)::after {
     transform: rotate(var(--segment-piled-degrees));
     top: 0;
     z-index: -1;
