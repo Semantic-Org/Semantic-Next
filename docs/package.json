@@ -32,5 +32,8 @@
   "devDependencies": {
     "@astropub/md": "^1.0.0",
     "unist-util-visit": "^5.1.0"
+  },
+  "overrides": {
+    "lit": "^3.0.0"
   }
 }

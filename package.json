@@ -85,11 +85,13 @@
       "bundled": "./dist/bundle/icon.min.js",
       "default": "./src/primitives/icon/index.js"
     },
-    "./icon/css": {
-      "import": "./dist/icon.css",
-      "browser": "./dist/cdn/icon.min.css",
-      "bundled": "./dist/bundle/icon.min.css",
-      "default": "./dist/icon.css"
+    "./icon/sets/feather.css": {
+      "import": "./src/primitives/icon/sets/feather/index.css",
+      "default": "./src/primitives/icon/sets/feather/index.css"
+    },
+    "./icon/sets/dev.css": {
+      "import": "./src/primitives/icon/sets/dev/index.css",
+      "default": "./src/primitives/icon/sets/dev/index.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -136,6 +138,18 @@
     "./behaviors": {
       "import": "./src/behaviors/index.js",
       "default": "./src/behaviors/index.js"
+    },
+    "./behaviors/attach": {
+      "import": "./src/behaviors/attach/attach.js",
+      "default": "./src/behaviors/attach/attach.js"
+    },
+    "./behaviors/portal": {
+      "import": "./src/behaviors/portal/portal.js",
+      "default": "./src/behaviors/portal/portal.js"
+    },
+    "./behaviors/tooltip": {
+      "import": "./src/behaviors/tooltip/tooltip.js",
+      "default": "./src/behaviors/tooltip/tooltip.js"
     },
     "./behaviors/transition": {
       "import": "./src/behaviors/transition/transition.js",
@@ -301,5 +315,8 @@
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
+  },
+  "overrides": {
+    "lit": "^3.0.0"
   }
 }
