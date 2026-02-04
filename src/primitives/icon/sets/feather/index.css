@@ -349,8 +349,6 @@
   --icon-logout: var(--icon-log-out);
   --icon-sign-out: var(--icon-logout);
   --icon-exit: var(--icon-logout);
-  --icon-fingerprint: var(--icon-user);
-  --icon-biometric: var(--icon-fingerprint);
 
   /* Actions */
   --icon-add: var(--icon-plus);
@@ -696,14 +694,11 @@
   --icon-notebook: var(--icon-laptop);
   --icon-mobile: var(--icon-smartphone);
   --icon-ipad: var(--icon-tablet);
-  --icon-keyboard: var(--icon-command);
   --icon-processor: var(--icon-cpu);
   --icon-chip: var(--icon-cpu);
   --icon-storage: var(--icon-hard-drive);
   --icon-disk: var(--icon-storage);
-  --icon-usb: var(--icon-power);
   --icon-chromecast: var(--icon-cast);
-  --icon-airplay: var(--icon-cast);
 
   /* Development */
   --icon-console: var(--icon-terminal);
@@ -713,23 +708,11 @@
   --icon-backup: var(--icon-cloud-upload);
   --icon-cloud-download: var(--icon-download-cloud);
   --icon-network: var(--icon-share-2);
-  --icon-bug: var(--icon-alert-circle);
-  --icon-issue: var(--icon-bug);
   --icon-git: var(--icon-git-branch);
   --icon-branch: var(--icon-git);
   --icon-version-control: var(--icon-git);
 
   /* AI */
-  --icon-ai: var(--icon-star);
-  --icon-sparkles: var(--icon-ai);
-  --icon-magic: var(--icon-star);
-  --icon-wand: var(--icon-magic);
-  --icon-bot: var(--icon-user);
-  --icon-robot: var(--icon-bot);
-  --icon-automation: var(--icon-bot);
-  --icon-idea: var(--icon-sun);
-  --icon-lightbulb: var(--icon-idea);
-  --icon-tip: var(--icon-idea);
   --icon-lightning: var(--icon-zap);
   --icon-fast: var(--icon-zap);
 
@@ -738,10 +721,6 @@
   --icon-wrench: var(--icon-tool);
   --icon-tools: var(--icon-tool);
   --icon-toolbox: var(--icon-tools);
-  --icon-qr-code: var(--icon-square);
-  --icon-qr: var(--icon-qr-code);
-  --icon-barcode: var(--icon-align-justify);
-  --icon-calculator: var(--icon-hash);
   --icon-dice: var(--icon-shuffle);
   --icon-history: var(--icon-clock);
   --icon-restore: var(--icon-history);
@@ -758,18 +737,12 @@
   --icon-temperature: var(--icon-thermometer);
   --icon-water: var(--icon-droplet);
   --icon-humidity: var(--icon-water);
-  --icon-fire: var(--icon-zap);
-  --icon-hot: var(--icon-fire);
-  --icon-flame: var(--icon-fire);
-  --icon-trending: var(--icon-fire);
 
   /* Finance */
   --icon-increase: var(--icon-trending-up);
   --icon-growth: var(--icon-trending-up);
   --icon-decrease: var(--icon-trending-down);
   --icon-decline: var(--icon-trending-down);
-  --icon-balance: var(--icon-activity);
-  --icon-scale: var(--icon-balance);
   --icon-swap: var(--icon-repeat);
   --icon-transfer: var(--icon-swap);
   --icon-exchange: var(--icon-swap);
@@ -782,18 +755,12 @@
   --icon-docs: var(--icon-book);
   --icon-documentation: var(--icon-docs);
   --icon-reading: var(--icon-book-open);
-  --icon-graduation: var(--icon-award);
-  --icon-education: var(--icon-graduation);
-  --icon-academic: var(--icon-graduation);
   --icon-support: var(--icon-life-buoy);
   --icon-lifebuoy: var(--icon-support);
 
   /* Business */
   --icon-work: var(--icon-briefcase);
   --icon-job: var(--icon-briefcase);
-  --icon-building: var(--icon-briefcase);
-  --icon-company: var(--icon-building);
-  --icon-office: var(--icon-building);
   --icon-news: var(--icon-file-text);
   --icon-newspaper: var(--icon-news);
   --icon-article: var(--icon-news);
@@ -802,16 +769,4 @@
   /* Misc */
   --icon-cafe: var(--icon-coffee);
   --icon-break: var(--icon-coffee);
-  --icon-infinity: var(--icon-repeat);
-  --icon-unlimited: var(--icon-infinity);
-  --icon-eco: var(--icon-feather);
-  --icon-leaf: var(--icon-eco);
-  --icon-nature: var(--icon-eco);
-
-  /* Brands */
-  --icon-google: var(--icon-chrome);
-  --icon-apple: var(--icon-command);
-  --icon-windows: var(--icon-square);
-  --icon-microsoft: var(--icon-windows);
-  --icon-discord: var(--icon-message-circle);
 }

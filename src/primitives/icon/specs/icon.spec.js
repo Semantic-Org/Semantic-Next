@@ -1,4 +1,5 @@
 import {
+  ICON_NAMES,
   SIZE_VARIATION,
   COLORED_VARIATION,
   COLOR_OPTIONS,
@@ -6,109 +7,6 @@ import {
   withUsageLevel,
   getStates,
 } from '@semantic-ui/specs';
-
-// Icon names available for use with <ui-icon>
-export const ICON_NAMES = [
-  // Navigation
-  'dashboard', 'close', 'cancel', 'dismiss', 'back', 'previous', 'next', 'forward',
-  'up', 'down', 'open-in-new', 'caret-right', 'caret-down', 'dropdown', 'expand',
-  'caret-up', 'collapse', 'caret-left', 'more', 'ellipsis', 'dots', 'more-options',
-  'ellipsis-vertical', 'kebab', 'panel', 'drawer', 'hamburger', 'jump-to',
-  // User
-  'person', 'profile', 'avatar', 'account', 'user-circle', 'team', 'people', 'group',
-  'add-user', 'invite', 'remove-user', 'assigned', 'admin', 'user-shield',
-  'user-settings', 'user-gear', 'moderator', 'anonymous', 'guest', 'incognito',
-  'roles', 'permissions', 'login', 'sign-in', 'logout', 'sign-out', 'exit',
-  'fingerprint', 'biometric',
-  // Actions
-  'add', 'create', 'new', 'edit', 'pencil', 'modify', 'delete', 'remove',
-  'refresh', 'reload', 'sync', 'synchronize', 'undo', 'revert', 'redo',
-  'duplicate', 'clone', 'clipboard', 'copied', 'clipboard-check', 'paste', 'cut',
-  'drag-handle', 'grip', 'reorder', 'import', 'export', 'print', 'share', 'submit',
-  // File
-  'document', 'pdf', 'file-pdf', 'directory', 'new-folder', 'open-folder', 'folder-open',
-  'zip', 'compress', 'attachment', 'attach', 'link', 'url', 'unlink', 'disconnect',
-  // Media
-  'photo', 'picture', 'gallery', 'images', 'photos', 'movie', 'volume', 'audio',
-  'speaker', 'volume-low', 'mute', 'volume-off', 'song', 'microphone', 'microphone-off',
-  'mute-mic', 'headset', 'podcast', 'broadcast', 'live', 'radio-tower', 'trim', 'rotate', 'turn',
-  // Media Controls
-  'stop', 'skip-next', 'forward-step', 'next-track', 'skip-previous', 'backward-step',
-  'previous-track', 'random', 'loop', 'record',
-  // Data
-  'funnel', 'sort', 'list-view', 'table-view', 'grid-view', 'card-view', 'chart',
-  'bar-chart', 'analytics', 'line-chart', 'trends', 'statistics', 'view', 'show',
-  'visible', 'hide', 'invisible', 'magnifying-glass', 'find', 'fullscreen',
-  'exit-fullscreen', 'kanban', 'board', 'activity', 'pulse',
-  // Time
-  'date', 'schedule', 'events', 'calendar-days', 'scheduled', 'due-date', 'calendar-check',
-  'overdue', 'deadline', 'calendar-x', 'time', 'timer', 'countdown', 'stopwatch', 'smartwatch',
-  // Status
-  'success', 'complete', 'error', 'failed', 'x-circle', 'warning', 'alert', 'caution',
-  'information', 'help', 'question', 'faq', 'loading', 'spinner', 'active', 'selected',
-  'circle-dot', 'inactive', 'unselected', 'verified', 'badge-check', 'happy', 'satisfied',
-  'sad', 'dissatisfied',
-  // Form
-  'checkbox', 'square-check', 'checked', 'checkbox-empty', 'unchecked', 'toggle', 'switch',
-  'toggle-on', 'toggle-off', 'switch-off', 'radio', 'radio-selected', 'radio-empty', 'radio-unselected',
-  // Social
-  'like', 'favorite', 'unlike', 'heart-crack', 'rating', 'upvote', 'dislike', 'downvote',
-  'reply', 'comment', 'message', 'comments', 'discussion', 'typing', 'message-dots',
-  'mention', 'at', 'block', 'ban', 'restricted', 'report', 'pin', 'thumbtack',
-  // Gamification
-  'badge', 'achievement', 'trophy', 'winner', 'reward', 'present', 'goal',
-  // Communication
-  'notifications', 'alerts', 'email', 'envelope', 'call', 'contacts', 'address-book',
-  // Security
-  'locked', 'secure', 'unlocked', 'security', 'protected', 'shield-check', 'password', 'access',
-  // Settings
-  'gear', 'cog', 'preferences', 'adjustments', 'theme', 'palette', 'appearance',
-  'light-mode', 'dark-mode', 'accessibility', 'plugin', 'extension', 'puzzle',
-  'webhook', 'api', 'world', 'public', 'language',
-  // Commerce
-  'cart', 'add-to-cart', 'cart-plus', 'remove-from-cart', 'cart-minus', 'payment', 'billing',
-  'wallet', 'money', 'dollar', 'currency', 'label', 'price', 'tags', 'labels', 'discount',
-  'coupon', 'ticket', 'order', 'shipping', 'delivery', 'express', 'return', 'receipt',
-  'invoice', 'store', 'shop', 'bag',
-  // Text Formatting
-  'quote', 'blockquote', 'heading', 'h1', 'title', 'paragraph', 'bullet-list', 'list-ul',
-  'unordered-list', 'numbered-list', 'list-ol', 'ordered-list', 'checklist', 'todo-list',
-  'indent', 'outdent', 'justify', 'emoji', 'smiley',
-  // Editing
-  'brush', 'paint', 'pen', 'draw', 'color', 'eyedropper', 'color-picker', 'eraser', 'clear',
-  // Organization
-  'stack', 'subtask', 'child', 'hierarchy', 'sitemap', 'org-chart', 'tree', 'progress',
-  'milestone', 'diamond', 'tasks', 'todos',
-  // Location
-  'location', 'marker', 'directions', 'route', 'navigate', 'current-location', 'crosshairs',
-  'near-me', 'measure', 'ruler', 'distance',
-  // Device
-  'desktop', 'computer', 'laptop', 'notebook', 'mobile', 'ipad', 'keyboard', 'processor',
-  'chip', 'storage', 'disk', 'usb', 'chromecast',
-  // Development
-  'console', 'command-line', 'db', 'cloud-upload', 'backup', 'cloud-download', 'network',
-  'bug', 'issue', 'git', 'branch', 'version-control',
-  // AI
-  'ai', 'sparkles', 'magic', 'wand', 'bot', 'robot', 'automation', 'idea', 'lightbulb',
-  'tip', 'lightning', 'fast',
-  // System
-  'shutdown', 'wrench', 'tools', 'toolbox', 'qr-code', 'qr', 'barcode', 'calculator',
-  'dice', 'history', 'restore',
-  // Weather
-  'rain', 'rainy', 'storm', 'stormy', 'snow', 'cold', 'snowflake', 'windy', 'temperature',
-  'water', 'humidity', 'fire', 'hot', 'flame', 'trending',
-  // Finance
-  'increase', 'growth', 'decrease', 'decline', 'balance', 'scale', 'swap', 'transfer',
-  'exchange', 'savings', 'piggy-bank', 'vault', 'safe',
-  // Education
-  'docs', 'documentation', 'reading', 'graduation', 'education', 'academic', 'support', 'lifebuoy',
-  // Business
-  'work', 'job', 'building', 'company', 'office', 'news', 'newspaper', 'article', 'feed',
-  // Misc
-  'cafe', 'break', 'infinity', 'unlimited', 'eco', 'leaf', 'nature',
-  // Brands
-  'google', 'apple', 'windows', 'microsoft', 'discord',
-];
 
 export default {
   uiType: 'element',
