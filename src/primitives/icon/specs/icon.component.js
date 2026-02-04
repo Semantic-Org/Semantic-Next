@@ -20,6 +20,7 @@ export default {
     "loading"
   ],
   "settings": [
+    "set",
     "href",
     "target"
   ],
@@ -33,6 +34,7 @@ export default {
     "size",
     "spin",
     "inverted",
+    "set",
     "href",
     "target"
   ],
@@ -367,6 +369,7 @@ export default {
     "size": "string",
     "spin": "boolean",
     "inverted": "boolean",
+    "set": "string",
     "href": "string",
     "target": "string"
   },
@@ -704,6 +707,7 @@ export default {
     "color"
   ],
   "defaultValues": {
+    "set": "",
     "href": "",
     "target": ""
   }

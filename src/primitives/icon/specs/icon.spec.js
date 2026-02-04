@@ -351,6 +351,12 @@ export default {
   ],
   settings: [
     {
+      name: 'set',
+      type: 'string',
+      attribute: 'set',
+      description: 'The icon set to use (e.g., "dev" for developer icons)',
+    },
+    {
       name: 'href',
       type: 'string',
       attribute: 'href',
