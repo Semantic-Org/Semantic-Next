@@ -23,7 +23,7 @@
   /* Mask technique (default) */
   background: var(--icon-bg, currentColor);
   mask-image: var(--icon-mask, none);
-  mask-size: contain;
+  mask-size: auto 100%;
   mask-repeat: no-repeat;
 
   /* Background image technique (colored icons) */

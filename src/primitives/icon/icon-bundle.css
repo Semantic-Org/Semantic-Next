@@ -29,7 +29,7 @@
     speak: none;
     background: var(--icon-bg, currentColor);
     mask-image: var(--icon-mask, none);
-    mask-size: contain;
+    mask-size: auto 100%;
     mask-repeat: no-repeat;
     background-image: var(--icon-image, none);
     background-size: contain;
