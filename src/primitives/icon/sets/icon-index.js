@@ -1,5 +1,4 @@
-// Universal icon names available for use with <ui-icon>
-export const ICON_NAMES = [
+export const iconIndex = [
   // action
   'add',
   'check',
@@ -74,16 +73,16 @@ export const ICON_NAMES = [
   'phone',
   // data
   'activity',
-  'analytics',
-  'chart',
+  'chart-line',
+  'chart-bar',
   'exit-fullscreen',
   'filter',
   'fullscreen',
-  'grid-view',
+  'grid',
   'hide',
-  'kanban',
+  'board',
   'list',
-  'pie-chart',
+  'chart-pie',
   'search',
   'sort',
   'table',

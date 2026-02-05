@@ -35,10 +35,7 @@ export default {
       description: 'be fitted without any space to the left or right of it.',
       usageLevel: 1,
     },
-    modifyVariation(COLORED_VARIATION, {
-      usageLevel: 2,
-      options: [...COLOR_OPTIONS, { name: 'Black', value: 'black', description: 'be black' }],
-    }),
+    COLORED_VARIATION,
     SIZE_VARIATION,
     {
       name: 'Spin',

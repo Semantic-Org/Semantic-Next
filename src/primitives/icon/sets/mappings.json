@@ -45,38 +45,6 @@
         "license": "MIT",
         "npm": "ionicons"
       }
-    },
-    "categories": {
-      "navigation": 18,
-      "user": 13,
-      "action": 24,
-      "file": 11,
-      "media": 17,
-      "media-controls": 10,
-      "data": 18,
-      "time": 7,
-      "status": 12,
-      "form": 7,
-      "social": 16,
-      "gamification": 4,
-      "communication": 5,
-      "security": 6,
-      "settings": 9,
-      "commerce": 18,
-      "text": 18,
-      "editing": 4,
-      "organization": 7,
-      "location": 7,
-      "device": 9,
-      "development": 11,
-      "ai": 6,
-      "system": 9,
-      "weather": 7,
-      "finance": 6,
-      "education": 4,
-      "business": 4,
-      "misc": 5,
-      "brand": 13
     }
   },
   "icons": {
@@ -550,8 +518,8 @@
     },
     "refresh": {
       "category": "action",
-      "aliases": ["reload"],
-      "description": "Refresh/reload content",
+      "aliases": ["reload", "sync", "synchronize"],
+      "description": "Refresh/reload/sync content",
       "lucide": "refresh-cw",
       "feather": "refresh-cw",
       "heroicons": "arrow-path",
@@ -560,19 +528,6 @@
       "bootstrap": "arrow-clockwise",
       "material": "refresh",
       "ionicons": "refresh"
-    },
-    "sync": {
-      "category": "action",
-      "aliases": ["synchronize"],
-      "description": "Sync data",
-      "lucide": "refresh-cw",
-      "feather": "refresh-cw",
-      "heroicons": "arrow-path",
-      "tabler": "refresh",
-      "phosphor": "arrows-clockwise",
-      "bootstrap": "arrow-repeat",
-      "material": "sync",
-      "ionicons": "sync"
     },
     "undo": {
       "category": "action",
@@ -600,10 +555,10 @@
       "material": "redo",
       "ionicons": "arrow-redo"
     },
-    "duplicate": {
+    "copy": {
       "category": "action",
-      "aliases": ["clone"],
-      "description": "Duplicate/copy item",
+      "aliases": ["duplicate", "clone"],
+      "description": "Copy item",
       "lucide": "copy",
       "feather": "copy",
       "heroicons": "document-duplicate",
@@ -613,10 +568,10 @@
       "material": "content_copy",
       "ionicons": "copy"
     },
-    "copy": {
+    "clipboard": {
       "category": "action",
-      "aliases": ["clipboard"],
-      "description": "Copy to clipboard",
+      "aliases": [],
+      "description": "Clipboard",
       "lucide": "clipboard",
       "feather": "clipboard",
       "heroicons": "clipboard",
@@ -1315,9 +1270,9 @@
       "material": "table_chart",
       "ionicons": "grid"
     },
-    "grid-view": {
+    "grid": {
       "category": "data",
-      "aliases": ["card-view"],
+      "aliases": ["grid-view", "card-view"],
       "description": "Grid view",
       "lucide": "grid-3x3",
       "feather": "grid",
@@ -1328,9 +1283,9 @@
       "material": "grid_view",
       "ionicons": "grid"
     },
-    "chart": {
+    "chart-bar": {
       "category": "data",
-      "aliases": ["bar-chart"],
+      "aliases": ["bar-chart", "chart"],
       "description": "Bar chart",
       "lucide": "bar-chart-2",
       "feather": "bar-chart-2",
@@ -1341,9 +1296,9 @@
       "material": "bar_chart",
       "ionicons": "bar-chart"
     },
-    "analytics": {
+    "chart-line": {
       "category": "data",
-      "aliases": ["line-chart", "trends"],
+      "aliases": ["line-chart", "analytics", "trends"],
       "description": "Line chart",
       "lucide": "trending-up",
       "feather": "trending-up",
@@ -1354,9 +1309,9 @@
       "material": "show_chart",
       "ionicons": "trending-up"
     },
-    "pie-chart": {
+    "chart-pie": {
       "category": "data",
-      "aliases": ["statistics"],
+      "aliases": ["pie-chart", "statistics"],
       "description": "Pie chart",
       "lucide": "pie-chart",
       "feather": "pie-chart",
@@ -1458,9 +1413,9 @@
       "material": "fullscreen_exit",
       "ionicons": "contract"
     },
-    "kanban": {
+    "board": {
       "category": "data",
-      "aliases": ["board"],
+      "aliases": ["kanban", "board-view"],
       "description": "Kanban board",
       "lucide": "kanban",
       "feather": "trello",
@@ -1630,7 +1585,7 @@
     "help": {
       "category": "status",
       "aliases": ["question", "faq"],
-      "description": "Help/support",
+      "description": "Help/question",
       "lucide": "help-circle",
       "feather": "help-circle",
       "heroicons": "question-mark-circle",
@@ -1653,10 +1608,10 @@
       "material": "refresh",
       "ionicons": "refresh"
     },
-    "active": {
+    "filled-circle": {
       "category": "status",
-      "aliases": ["selected", "circle-dot"],
-      "description": "Active/selected",
+      "aliases": ["active", "selected", "radio", "radio-selected", "circle-dot", "disc", "dot"],
+      "description": "Filled circle / active state",
       "lucide": "circle-dot",
       "feather": "disc",
       "heroicons": "check-circle",
@@ -1666,18 +1621,18 @@
       "material": "radio_button_checked",
       "ionicons": "radio-button-on"
     },
-    "circle": {
+    "empty-circle": {
       "category": "status",
-      "aliases": ["inactive", "unselected"],
-      "description": "Circle shape",
+      "aliases": ["inactive", "unselected", "radio-empty", "radio-unselected", "circle"],
+      "description": "Empty circle / inactive state",
       "lucide": "circle",
       "feather": "circle",
       "heroicons": "stop",
       "tabler": "circle",
       "phosphor": "circle",
       "bootstrap": "circle",
-      "material": "circle",
-      "ionicons": "ellipse"
+      "material": "radio_button_unchecked",
+      "ionicons": "radio-button-off"
     },
     "verified": {
       "category": "status",
@@ -1769,32 +1724,6 @@
       "bootstrap": "toggle-off",
       "material": "toggle_off",
       "ionicons": "toggle-outline"
-    },
-    "radio": {
-      "category": "form",
-      "aliases": ["radio-selected"],
-      "description": "Radio button selected",
-      "lucide": "circle-dot",
-      "feather": "disc",
-      "heroicons": "check-circle",
-      "tabler": "circle-dot",
-      "phosphor": "radio-button",
-      "bootstrap": "record-circle",
-      "material": "radio_button_checked",
-      "ionicons": "radio-button-on"
-    },
-    "radio-empty": {
-      "category": "form",
-      "aliases": ["radio-unselected"],
-      "description": "Radio button unselected",
-      "lucide": "circle",
-      "feather": "circle",
-      "heroicons": "stop",
-      "tabler": "circle",
-      "phosphor": "circle",
-      "bootstrap": "circle",
-      "material": "radio_button_unchecked",
-      "ionicons": "radio-button-off"
     },
     "like": {
       "category": "social",
@@ -1967,11 +1896,11 @@
     },
     "pin": {
       "category": "social",
-      "aliases": ["thumbtack"],
-      "description": "Pin/bookmark item",
+      "aliases": ["thumbtack", "pinned"],
+      "description": "Pin item (thumbtack)",
       "lucide": "pin",
-      "feather": "bookmark",
-      "heroicons": "bookmark",
+      "feather": null,
+      "heroicons": null,
       "tabler": "pin",
       "phosphor": "push-pin",
       "bootstrap": "pin",
@@ -2823,27 +2752,14 @@
       "material": "subdirectory_arrow_right",
       "ionicons": "arrow-forward"
     },
-    "hierarchy": {
-      "category": "organization",
-      "aliases": ["sitemap", "org-chart"],
-      "description": "Site structure",
-      "lucide": "git-fork",
-      "feather": "share-2",
-      "heroicons": "rectangle-group",
-      "tabler": "sitemap",
-      "phosphor": "tree-structure",
-      "bootstrap": "diagram-3",
-      "material": "account_tree",
-      "ionicons": "git-network"
-    },
     "tree": {
       "category": "organization",
-      "aliases": [],
-      "description": "Hierarchy/tree",
+      "aliases": ["hierarchy", "sitemap", "org-chart"],
+      "description": "Tree/hierarchy structure",
       "lucide": "git-fork",
       "feather": "git-branch",
       "heroicons": "rectangle-group",
-      "tabler": "binary-tree",
+      "tabler": "sitemap",
       "phosphor": "tree-structure",
       "bootstrap": "diagram-3",
       "material": "account_tree",
@@ -2890,7 +2806,7 @@
     },
     "location": {
       "category": "location",
-      "aliases": ["map-pin"],
+      "aliases": ["map-pin", "marker"],
       "description": "Location marker",
       "lucide": "map-pin",
       "feather": "map-pin",
@@ -2899,19 +2815,6 @@
       "phosphor": "map-pin",
       "bootstrap": "geo-alt",
       "material": "location_on",
-      "ionicons": "location"
-    },
-    "pin": {
-      "category": "location",
-      "aliases": ["marker"],
-      "description": "Pin/marker",
-      "lucide": "map-pin",
-      "feather": "map-pin",
-      "heroicons": "map-pin",
-      "tabler": "map-pin",
-      "phosphor": "map-pin",
-      "bootstrap": "geo-alt",
-      "material": "place",
       "ionicons": "location"
     },
     "map": {
@@ -3175,7 +3078,7 @@
       "ionicons": "cloud-download"
     },
     "network": {
-      "category": "development",
+      "category": "connectivity",
       "aliases": [],
       "description": "Network",
       "lucide": "network",
@@ -3188,7 +3091,7 @@
       "ionicons": "git-network"
     },
     "wifi": {
-      "category": "development",
+      "category": "connectivity",
       "aliases": [],
       "description": "WiFi signal",
       "lucide": "wifi",
@@ -3201,7 +3104,7 @@
       "ionicons": "wifi"
     },
     "bluetooth": {
-      "category": "development",
+      "category": "connectivity",
       "aliases": [],
       "description": "Bluetooth",
       "lucide": "bluetooth",
@@ -3239,12 +3142,12 @@
       "material": "fork_right",
       "ionicons": "git-branch"
     },
-    "ai": {
+    "sparkles": {
       "category": "ai",
-      "aliases": ["sparkles", "magic"],
+      "aliases": ["ai", "magic"],
       "description": "AI/magic/new",
       "lucide": "sparkles",
-      "feather": "star",
+      "feather": null,
       "heroicons": "sparkles",
       "tabler": "sparkles",
       "phosphor": "sparkle",
@@ -3252,13 +3155,13 @@
       "material": "auto_awesome",
       "ionicons": "sparkles"
     },
-    "magic": {
+    "wand": {
       "category": "ai",
-      "aliases": ["wand"],
-      "description": "Magic/auto-fix",
+      "aliases": ["wizard"],
+      "description": "Magic wand/auto-fix",
       "lucide": "wand-2",
-      "feather": "star",
-      "heroicons": "sparkles",
+      "feather": null,
+      "heroicons": null,
       "tabler": "wand",
       "phosphor": "magic-wand",
       "bootstrap": "magic",
@@ -3278,12 +3181,12 @@
       "material": "smart_toy",
       "ionicons": "hardware-chip"
     },
-    "idea": {
-      "category": "ai",
-      "aliases": ["lightbulb", "tip"],
-      "description": "Idea/tip",
+    "tip": {
+      "category": "status",
+      "aliases": ["idea", "lightbulb", "hint"],
+      "description": "Tip/hint",
       "lucide": "lightbulb",
-      "feather": "sun",
+      "feather": null,
       "heroicons": "light-bulb",
       "tabler": "bulb",
       "phosphor": "lightbulb",
@@ -3292,9 +3195,9 @@
       "ionicons": "bulb"
     },
     "zap": {
-      "category": "ai",
-      "aliases": ["lightning", "fast"],
-      "description": "Fast/instant",
+      "category": "action",
+      "aliases": ["lightning", "fast", "instant"],
+      "description": "Fast/instant action",
       "lucide": "zap",
       "feather": "zap",
       "heroicons": "bolt",
@@ -3500,11 +3403,11 @@
       "ionicons": "water"
     },
     "fire": {
-      "category": "weather",
+      "category": "status",
       "aliases": ["hot", "flame", "trending"],
       "description": "Hot/trending",
       "lucide": "flame",
-      "feather": "zap",
+      "feather": null,
       "heroicons": "fire",
       "tabler": "flame",
       "phosphor": "fire",
@@ -3630,9 +3533,9 @@
       "ionicons": "school"
     },
     "support": {
-      "category": "education",
+      "category": "status",
       "aliases": ["lifebuoy"],
-      "description": "Support/help",
+      "description": "Support",
       "lucide": "life-buoy",
       "feather": "life-buoy",
       "heroicons": "lifebuoy",
@@ -3655,17 +3558,30 @@
       "material": "work",
       "ionicons": "briefcase"
     },
-    "building": {
+    "company": {
       "category": "business",
-      "aliases": ["company", "office"],
+      "aliases": ["building", "office"],
       "description": "Company/office",
       "lucide": "building-2",
-      "feather": "briefcase",
+      "feather": null,
       "heroicons": "building-office-2",
       "tabler": "building",
-      "phosphor": "buildings",
+      "phosphor": "building-office",
       "bootstrap": "building",
       "material": "business",
+      "ionicons": "business"
+    },
+    "organization": {
+      "category": "business",
+      "aliases": ["org", "corporate", "enterprise"],
+      "description": "Organization/corporate",
+      "lucide": "landmark",
+      "feather": null,
+      "heroicons": "building-library",
+      "tabler": "building-bank",
+      "phosphor": "buildings",
+      "bootstrap": "bank",
+      "material": "corporate_fare",
       "ionicons": "business"
     },
     "news": {

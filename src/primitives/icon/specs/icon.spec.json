@@ -518,7 +518,7 @@
       "name": "Colored",
       "attribute": "color",
       "includeAttributeClass": true,
-      "usageLevel": 2,
+      "usageLevel": 3,
       "description": "be colored",
       "options": [
         {
@@ -585,11 +585,6 @@
           "name": "Slate",
           "value": "slate",
           "description": "be slate"
-        },
-        {
-          "name": "Black",
-          "value": "black",
-          "description": "be black"
         }
       ]
     },

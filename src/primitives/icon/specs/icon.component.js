@@ -516,7 +516,6 @@ export default {
     "brown": "color",
     "grey": "color",
     "slate": "color",
-    "black": "color",
     "mini": "size",
     "tiny": "size",
     "small": "size",
@@ -1022,8 +1021,7 @@ export default {
       "pink",
       "brown",
       "grey",
-      "slate",
-      "black"
+      "slate"
     ],
     "size": [
       "mini",
