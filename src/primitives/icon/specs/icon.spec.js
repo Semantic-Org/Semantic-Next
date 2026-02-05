@@ -55,7 +55,7 @@ export default {
       name: 'set',
       type: 'string',
       attribute: 'set',
-      description: 'The icon set to use (e.g., "dev" for developer icons)',
+      description: 'The icon set to use',
     },
     {
       name: 'href',

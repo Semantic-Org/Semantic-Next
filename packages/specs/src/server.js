@@ -4,7 +4,7 @@ import { SpecReader as BaseSpecReader } from './spec-reader.js';
 
 // Re-export all shared terms and helpers
 export * from './helpers.js';
-export * from './icon.js';
+export * from './icons/index.js';
 export * from './states/index.js';
 export * from './types/index.js';
 export * from './variations/index.js';
