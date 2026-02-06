@@ -1,6 +1,7 @@
 /* Dev Icons (Colored background-image) */
 :root {
   /* Set-level defaults for background-image technique */
+  --icon-dev: none;
   --icon-dev-bg: transparent;
   --icon-dev-image: none;
 

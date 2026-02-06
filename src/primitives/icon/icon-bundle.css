@@ -27,7 +27,7 @@
     backface-visibility: hidden;
     speak: none;
     background: var(--icon-bg, currentColor);
-    mask-image: var(--icon-mask, none);
+    mask-image: var(--icon-mask, var(--icon-fallback));
     mask-size: 100% 100%;
     mask-repeat: no-repeat;
     background-image: var(--icon-bg-image, none);
@@ -191,7 +191,7 @@
     --icon-height: 1em;
     --icon-opacity: 1;
     --icon-distance-from-text: var(--relative-3px);
-    --icon-mask: linear-gradient(transparent, transparent);
+    --icon-fallback: linear-gradient(transparent, transparent);
   }
 }
 
