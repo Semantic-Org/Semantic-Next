@@ -1,0 +1,222 @@
+{
+  "close": {
+    "value": "x",
+    "reason": "Lucide's 'x' icon is the standard close/dismiss symbol, direct semantic match"
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": "Standard left-pointing arrow for back navigation, universally recognized"
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": "Standard right-pointing arrow for forward navigation, pairs with arrow-left for back"
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": "Standard upward arrow, direct match for go-up navigation"
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": "Standard downward arrow, direct match for go-down navigation"
+  },
+  "external-link": {
+    "value": "external-link",
+    "reason": "Direct name match in Lucide, the standard icon for opening links in a new window"
+  },
+  "chevron-right": {
+    "value": "chevron-right",
+    "reason": "Direct name match in Lucide, standard right-pointing chevron"
+  },
+  "chevron-down": {
+    "value": "chevron-down",
+    "reason": "Direct name match in Lucide, standard downward chevron used for dropdowns and expand"
+  },
+  "chevron-up": {
+    "value": "chevron-up",
+    "reason": "Direct name match in Lucide, standard upward chevron used for collapse"
+  },
+  "chevron-left": {
+    "value": "chevron-left",
+    "reason": "Direct name match in Lucide, standard left-pointing chevron"
+  },
+  "more": {
+    "value": "ellipsis",
+    "reason": "Lucide's 'ellipsis' is three horizontal dots, the standard 'more options' indicator"
+  },
+  "more-options": {
+    "value": "ellipsis-vertical",
+    "reason": "Lucide's 'ellipsis-vertical' is three vertical dots (kebab menu), matches vertical more-options pattern"
+  },
+  "sidebar": {
+    "value": "panel-left",
+    "reason": "Lucide's 'panel-left' represents a sidebar panel on the left side, best generic sidebar toggle icon"
+  },
+  "columns": {
+    "value": "columns-3",
+    "reason": "Lucide's 'columns-3' shows a three-column layout, best match for generic column layout concept"
+  },
+  "anchor": {
+    "value": "hash",
+    "reason": "Anchor links use the # symbol; Lucide's 'hash' icon represents this concept better than the nautical 'anchor' icon"
+  },
+  "user": {
+    "value": "user",
+    "reason": "Direct name match in Lucide, standard single-person silhouette icon"
+  },
+  "avatar": {
+    "value": "circle-user-round",
+    "reason": "Lucide's 'circle-user-round' shows a rounded user inside a circle, ideal for avatar/profile picture placeholders"
+  },
+  "users": {
+    "value": "users",
+    "reason": "Direct name match in Lucide, shows multiple people for team/group"
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": "Lucide's 'user-plus' is a person with a plus sign, standard add/invite user icon"
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": "Lucide's 'user-minus' is a person with a minus sign, standard remove user icon"
+  },
+  "assigned": {
+    "value": "user-check",
+    "reason": "Lucide's 'user-check' is a person with a checkmark, perfect for verified/assigned user"
+  },
+  "admin": {
+    "value": "shield-user",
+    "reason": "Lucide's 'shield-user' combines a shield with a user, conveying administrative authority and protection"
+  },
+  "user-settings": {
+    "value": "user-cog",
+    "reason": "Lucide's 'user-cog' is a person with a gear/cog, standard icon for user configuration"
+  },
+  "anonymous": {
+    "value": "venetian-mask",
+    "reason": "Lucide's 'venetian-mask' represents disguise/anonymity, best match for anonymous/incognito user concept"
+  },
+  "roles": {
+    "value": "crown",
+    "reason": "Crown symbolizes authority and rank; best available metaphor for user roles/permissions in Lucide"
+  },
+  "login": {
+    "value": "log-in",
+    "reason": "Lucide's 'log-in' is the standard sign-in icon with an arrow entering a bracket"
+  },
+  "logout": {
+    "value": "log-out",
+    "reason": "Lucide's 'log-out' is the standard sign-out icon with an arrow leaving a bracket"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": "Direct name match in Lucide, standard fingerprint biometric icon"
+  },
+  "add": {
+    "value": "plus",
+    "reason": "Lucide's 'plus' is the universal add/create icon, a simple plus sign"
+  },
+  "edit": {
+    "value": "pencil",
+    "reason": "Lucide renamed 'edit' to 'pencil'; the pencil icon is the standard edit/modify symbol"
+  },
+  "delete": {
+    "value": "trash-2",
+    "reason": "Lucide's 'trash-2' is the more detailed trash can icon (with lid lines), preferred over plain 'trash' for clarity"
+  },
+  "save": {
+    "value": "save",
+    "reason": "Direct name match in Lucide, the classic floppy disk save icon"
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct name match in Lucide, a simple checkmark for confirm/done/approve"
+  },
+  "refresh": {
+    "value": "refresh-cw",
+    "reason": "Lucide's 'refresh-cw' shows clockwise circular arrows, the standard refresh/reload/sync icon"
+  },
+  "undo": {
+    "value": "undo-2",
+    "reason": "Lucide's 'undo-2' is the standard curved-arrow undo icon, preferred over 'undo' for clearer visual"
+  },
+  "redo": {
+    "value": "redo-2",
+    "reason": "Lucide's 'redo-2' is the standard curved-arrow redo icon, pairs with undo-2"
+  },
+  "copy": {
+    "value": "copy",
+    "reason": "Direct name match in Lucide, shows two overlapping documents for copy/duplicate"
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": "Direct name match in Lucide, the standard clipboard icon"
+  },
+  "copied": {
+    "value": "clipboard-check",
+    "reason": "Lucide's 'clipboard-check' shows a clipboard with a checkmark, tagged with 'copied' and 'pasted'"
+  },
+  "paste": {
+    "value": "clipboard-paste",
+    "reason": "Lucide's 'clipboard-paste' is specifically designed for the paste action"
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": "Lucide's 'scissors' icon is the universal cut symbol, tagged with 'cut' and 'snip'"
+  },
+  "move": {
+    "value": "move",
+    "reason": "Direct name match in Lucide, shows a four-directional arrow cross for moving items"
+  },
+  "drag-handle": {
+    "value": "grip-vertical",
+    "reason": "Lucide's 'grip-vertical' shows vertical dots pattern, the standard drag handle for reorderable lists"
+  },
+  "upload": {
+    "value": "upload",
+    "reason": "Direct name match in Lucide, standard upward-arrow upload icon"
+  },
+  "download": {
+    "value": "download",
+    "reason": "Direct name match in Lucide, standard downward-arrow download icon"
+  },
+  "import": {
+    "value": "file-input",
+    "reason": "Lucide's 'file-input' shows data entering a file, better semantic match for import than generic 'import'"
+  },
+  "export": {
+    "value": "file-output",
+    "reason": "Lucide's 'file-output' shows data leaving a file, the standard export concept"
+  },
+  "print": {
+    "value": "printer",
+    "reason": "Lucide's 'printer' icon shows a printer device, the standard print action icon"
+  },
+  "share": {
+    "value": "share-2",
+    "reason": "Lucide's 'share-2' shows the network/nodes share icon, more universally recognized than iOS-style 'share'"
+  },
+  "send": {
+    "value": "send",
+    "reason": "Direct name match in Lucide, a paper airplane icon for sending messages/submitting"
+  },
+  "zap": {
+    "value": "zap",
+    "reason": "Direct name match in Lucide, a lightning bolt for fast/instant action"
+  },
+  "checkbox": {
+    "value": "square-check",
+    "reason": "Lucide's 'square-check' is a square with a checkmark inside, the standard checked checkbox"
+  },
+  "checkbox-empty": {
+    "value": "square",
+    "reason": "Lucide's 'square' is an empty square outline, represents an unchecked checkbox"
+  },
+  "toggle": {
+    "value": "toggle-right",
+    "reason": "Lucide's 'toggle-right' shows a toggle switch in the on/right position"
+  },
+  "toggle-off": {
+    "value": "toggle-left",
+    "reason": "Lucide's 'toggle-left' shows a toggle switch in the off/left position"
+  }
+}

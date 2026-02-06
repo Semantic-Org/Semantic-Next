@@ -1,0 +1,976 @@
+/* Material Symbols (Mask-based) */
+:root {
+
+  /* ==============================
+   * Native Icon Definitions
+   * ============================== */
+
+  /* Navigation */
+  --icon-home: url('./svg/home.svg');
+  --icon-dashboard: url('./svg/dashboard.svg');
+  --icon-menu: url('./svg/menu.svg');
+  --icon-close: url('./svg/close.svg');
+  --icon-arrow_back: url('./svg/arrow_back.svg');
+  --icon-arrow_forward: url('./svg/arrow_forward.svg');
+  --icon-arrow_upward: url('./svg/arrow_upward.svg');
+  --icon-arrow_downward: url('./svg/arrow_downward.svg');
+  --icon-open_in_new: url('./svg/open_in_new.svg');
+  --icon-chevron_right: url('./svg/chevron_right.svg');
+  --icon-keyboard_arrow_down: url('./svg/keyboard_arrow_down.svg');
+  --icon-keyboard_arrow_up: url('./svg/keyboard_arrow_up.svg');
+  --icon-chevron_left: url('./svg/chevron_left.svg');
+  --icon-more_horiz: url('./svg/more_horiz.svg');
+  --icon-more_vert: url('./svg/more_vert.svg');
+  --icon-view_sidebar: url('./svg/view_sidebar.svg');
+  --icon-view_column: url('./svg/view_column.svg');
+  --icon-tag: url('./svg/tag.svg');
+
+  /* Action */
+  --icon-add: url('./svg/add.svg');
+  --icon-edit: url('./svg/edit.svg');
+  --icon-delete: url('./svg/delete.svg');
+  --icon-save: url('./svg/save.svg');
+  --icon-check: url('./svg/check.svg');
+  --icon-sync: url('./svg/sync.svg');
+  --icon-undo: url('./svg/undo.svg');
+  --icon-redo: url('./svg/redo.svg');
+  --icon-content_copy: url('./svg/content_copy.svg');
+  --icon-assignment: url('./svg/assignment.svg');
+  --icon-assignment_turned_in: url('./svg/assignment_turned_in.svg');
+  --icon-content_paste: url('./svg/content_paste.svg');
+  --icon-content_cut: url('./svg/content_cut.svg');
+  --icon-open_with: url('./svg/open_with.svg');
+  --icon-drag_indicator: url('./svg/drag_indicator.svg');
+  --icon-upload: url('./svg/upload.svg');
+  --icon-download: url('./svg/download.svg');
+  --icon-print: url('./svg/print.svg');
+  --icon-share: url('./svg/share.svg');
+  --icon-send: url('./svg/send.svg');
+  --icon-bolt: url('./svg/bolt.svg');
+
+  /* Status */
+  --icon-check_circle: url('./svg/check_circle.svg');
+  --icon-error: url('./svg/error.svg');
+  --icon-warning: url('./svg/warning.svg');
+  --icon-info: url('./svg/info.svg');
+  --icon-help: url('./svg/help.svg');
+  --icon-progress_activity: url('./svg/progress_activity.svg');
+  --icon-radio_button_checked: url('./svg/radio_button_checked.svg');
+  --icon-radio_button_unchecked: url('./svg/radio_button_unchecked.svg');
+  --icon-verified: url('./svg/verified.svg');
+  --icon-sentiment_satisfied: url('./svg/sentiment_satisfied.svg');
+  --icon-sentiment_dissatisfied: url('./svg/sentiment_dissatisfied.svg');
+  --icon-lightbulb: url('./svg/lightbulb.svg');
+  --icon-local_fire_department: url('./svg/local_fire_department.svg');
+  --icon-support: url('./svg/support.svg');
+
+  /* User */
+  --icon-person: url('./svg/person.svg');
+  --icon-account_circle: url('./svg/account_circle.svg');
+  --icon-group: url('./svg/group.svg');
+  --icon-person_add: url('./svg/person_add.svg');
+  --icon-person_remove: url('./svg/person_remove.svg');
+  --icon-how_to_reg: url('./svg/how_to_reg.svg');
+  --icon-admin_panel_settings: url('./svg/admin_panel_settings.svg');
+  --icon-manage_accounts: url('./svg/manage_accounts.svg');
+  --icon-login: url('./svg/login.svg');
+  --icon-logout: url('./svg/logout.svg');
+  --icon-fingerprint: url('./svg/fingerprint.svg');
+
+  /* Form */
+  --icon-check_box: url('./svg/check_box.svg');
+  --icon-check_box_outline_blank: url('./svg/check_box_outline_blank.svg');
+  --icon-toggle_on: url('./svg/toggle_on.svg');
+  --icon-toggle_off: url('./svg/toggle_off.svg');
+
+  /* Data */
+  --icon-filter_list: url('./svg/filter_list.svg');
+  --icon-sort: url('./svg/sort.svg');
+  --icon-list: url('./svg/list.svg');
+  --icon-table: url('./svg/table.svg');
+  --icon-grid_view: url('./svg/grid_view.svg');
+  --icon-bar_chart: url('./svg/bar_chart.svg');
+  --icon-show_chart: url('./svg/show_chart.svg');
+  --icon-pie_chart: url('./svg/pie_chart.svg');
+  --icon-visibility: url('./svg/visibility.svg');
+  --icon-visibility_off: url('./svg/visibility_off.svg');
+  --icon-search: url('./svg/search.svg');
+  --icon-zoom_in: url('./svg/zoom_in.svg');
+  --icon-zoom_out: url('./svg/zoom_out.svg');
+  --icon-fullscreen: url('./svg/fullscreen.svg');
+  --icon-fullscreen_exit: url('./svg/fullscreen_exit.svg');
+  --icon-view_kanban: url('./svg/view_kanban.svg');
+  --icon-monitoring: url('./svg/monitoring.svg');
+
+  /* File */
+  --icon-draft: url('./svg/draft.svg');
+  --icon-description: url('./svg/description.svg');
+  --icon-picture_as_pdf: url('./svg/picture_as_pdf.svg');
+  --icon-folder: url('./svg/folder.svg');
+  --icon-create_new_folder: url('./svg/create_new_folder.svg');
+  --icon-folder_open: url('./svg/folder_open.svg');
+  --icon-archive: url('./svg/archive.svg');
+  --icon-folder_zip: url('./svg/folder_zip.svg');
+  --icon-attach_file: url('./svg/attach_file.svg');
+  --icon-link: url('./svg/link.svg');
+  --icon-link_off: url('./svg/link_off.svg');
+
+  /* Media */
+  --icon-image: url('./svg/image.svg');
+  --icon-photo_library: url('./svg/photo_library.svg');
+  --icon-videocam: url('./svg/videocam.svg');
+  --icon-photo_camera: url('./svg/photo_camera.svg');
+  --icon-no_photography: url('./svg/no_photography.svg');
+  --icon-volume_up: url('./svg/volume_up.svg');
+  --icon-volume_down: url('./svg/volume_down.svg');
+  --icon-volume_off: url('./svg/volume_off.svg');
+  --icon-music_note: url('./svg/music_note.svg');
+  --icon-mic: url('./svg/mic.svg');
+  --icon-mic_off: url('./svg/mic_off.svg');
+  --icon-headphones: url('./svg/headphones.svg');
+  --icon-podcasts: url('./svg/podcasts.svg');
+  --icon-cell_tower: url('./svg/cell_tower.svg');
+  --icon-crop: url('./svg/crop.svg');
+  --icon-rotate_right: url('./svg/rotate_right.svg');
+
+  /* Media Controls */
+  --icon-play_arrow: url('./svg/play_arrow.svg');
+  --icon-pause: url('./svg/pause.svg');
+  --icon-stop: url('./svg/stop.svg');
+  --icon-skip_next: url('./svg/skip_next.svg');
+  --icon-skip_previous: url('./svg/skip_previous.svg');
+  --icon-fast_forward: url('./svg/fast_forward.svg');
+  --icon-fast_rewind: url('./svg/fast_rewind.svg');
+  --icon-shuffle: url('./svg/shuffle.svg');
+  --icon-repeat: url('./svg/repeat.svg');
+  --icon-fiber_manual_record: url('./svg/fiber_manual_record.svg');
+
+  /* Text */
+  --icon-format_bold: url('./svg/format_bold.svg');
+  --icon-format_italic: url('./svg/format_italic.svg');
+  --icon-format_underlined: url('./svg/format_underlined.svg');
+  --icon-format_strikethrough: url('./svg/format_strikethrough.svg');
+  --icon-code: url('./svg/code.svg');
+  --icon-format_quote: url('./svg/format_quote.svg');
+  --icon-title: url('./svg/title.svg');
+  --icon-notes: url('./svg/notes.svg');
+  --icon-format_list_bulleted: url('./svg/format_list_bulleted.svg');
+  --icon-format_list_numbered: url('./svg/format_list_numbered.svg');
+  --icon-checklist: url('./svg/checklist.svg');
+  --icon-format_indent_increase: url('./svg/format_indent_increase.svg');
+  --icon-format_indent_decrease: url('./svg/format_indent_decrease.svg');
+  --icon-format_align_left: url('./svg/format_align_left.svg');
+  --icon-format_align_center: url('./svg/format_align_center.svg');
+  --icon-format_align_right: url('./svg/format_align_right.svg');
+  --icon-format_align_justify: url('./svg/format_align_justify.svg');
+  --icon-mood: url('./svg/mood.svg');
+
+  /* Editing */
+  --icon-brush: url('./svg/brush.svg');
+  --icon-colorize: url('./svg/colorize.svg');
+
+  /* Communication */
+  --icon-notifications: url('./svg/notifications.svg');
+  --icon-mail: url('./svg/mail.svg');
+  --icon-inbox: url('./svg/inbox.svg');
+  --icon-call: url('./svg/call.svg');
+  --icon-contacts: url('./svg/contacts.svg');
+
+  /* Social */
+  --icon-favorite: url('./svg/favorite.svg');
+  --icon-heart_broken: url('./svg/heart_broken.svg');
+  --icon-star: url('./svg/star.svg');
+  --icon-bookmark: url('./svg/bookmark.svg');
+  --icon-thumb_up: url('./svg/thumb_up.svg');
+  --icon-thumb_down: url('./svg/thumb_down.svg');
+  --icon-reply: url('./svg/reply.svg');
+  --icon-comment: url('./svg/comment.svg');
+  --icon-forum: url('./svg/forum.svg');
+  --icon-alternate_email: url('./svg/alternate_email.svg');
+  --icon-block: url('./svg/block.svg');
+  --icon-flag: url('./svg/flag.svg');
+  --icon-keep: url('./svg/keep.svg');
+
+  /* Commerce */
+  --icon-shopping_cart: url('./svg/shopping_cart.svg');
+  --icon-add_shopping_cart: url('./svg/add_shopping_cart.svg');
+  --icon-credit_card: url('./svg/credit_card.svg');
+  --icon-account_balance_wallet: url('./svg/account_balance_wallet.svg');
+  --icon-payments: url('./svg/payments.svg');
+  --icon-sell: url('./svg/sell.svg');
+  --icon-percent: url('./svg/percent.svg');
+  --icon-confirmation_number: url('./svg/confirmation_number.svg');
+  --icon-package: url('./svg/package.svg');
+  --icon-local_shipping: url('./svg/local_shipping.svg');
+  --icon-assignment_return: url('./svg/assignment_return.svg');
+  --icon-receipt: url('./svg/receipt.svg');
+  --icon-receipt_long: url('./svg/receipt_long.svg');
+  --icon-storefront: url('./svg/storefront.svg');
+  --icon-shopping_bag: url('./svg/shopping_bag.svg');
+
+  /* Time */
+  --icon-calendar_today: url('./svg/calendar_today.svg');
+  --icon-calendar_month: url('./svg/calendar_month.svg');
+  --icon-event_available: url('./svg/event_available.svg');
+  --icon-event_busy: url('./svg/event_busy.svg');
+  --icon-schedule: url('./svg/schedule.svg');
+  --icon-timer: url('./svg/timer.svg');
+  --icon-watch: url('./svg/watch.svg');
+
+  /* Security */
+  --icon-lock: url('./svg/lock.svg');
+  --icon-lock_open: url('./svg/lock_open.svg');
+  --icon-shield: url('./svg/shield.svg');
+  --icon-verified_user: url('./svg/verified_user.svg');
+  --icon-vpn_key: url('./svg/vpn_key.svg');
+
+  /* Settings */
+  --icon-settings: url('./svg/settings.svg');
+  --icon-tune: url('./svg/tune.svg');
+  --icon-palette: url('./svg/palette.svg');
+  --icon-light_mode: url('./svg/light_mode.svg');
+  --icon-dark_mode: url('./svg/dark_mode.svg');
+  --icon-accessibility_new: url('./svg/accessibility_new.svg');
+  --icon-extension: url('./svg/extension.svg');
+  --icon-webhook: url('./svg/webhook.svg');
+  --icon-language: url('./svg/language.svg');
+
+  /* Organization */
+  --icon-layers: url('./svg/layers.svg');
+  --icon-subdirectory_arrow_right: url('./svg/subdirectory_arrow_right.svg');
+  --icon-account_tree: url('./svg/account_tree.svg');
+  --icon-diamond: url('./svg/diamond.svg');
+  --icon-task_alt: url('./svg/task_alt.svg');
+
+  /* Business */
+  --icon-work: url('./svg/work.svg');
+  --icon-apartment: url('./svg/apartment.svg');
+  --icon-corporate_fare: url('./svg/corporate_fare.svg');
+  --icon-newspaper: url('./svg/newspaper.svg');
+  --icon-rss_feed: url('./svg/rss_feed.svg');
+
+  /* Finance */
+  --icon-trending_up: url('./svg/trending_up.svg');
+  --icon-trending_down: url('./svg/trending_down.svg');
+  --icon-balance: url('./svg/balance.svg');
+  --icon-swap_horiz: url('./svg/swap_horiz.svg');
+  --icon-savings: url('./svg/savings.svg');
+
+  /* Location */
+  --icon-location_on: url('./svg/location_on.svg');
+  --icon-map: url('./svg/map.svg');
+  --icon-directions: url('./svg/directions.svg');
+  --icon-explore: url('./svg/explore.svg');
+  --icon-my_location: url('./svg/my_location.svg');
+  --icon-straighten: url('./svg/straighten.svg');
+
+  /* System */
+  --icon-power_settings_new: url('./svg/power_settings_new.svg');
+  --icon-battery_full: url('./svg/battery_full.svg');
+  --icon-build: url('./svg/build.svg');
+  --icon-construction: url('./svg/construction.svg');
+  --icon-qr_code_2: url('./svg/qr_code_2.svg');
+  --icon-calculate: url('./svg/calculate.svg');
+  --icon-casino: url('./svg/casino.svg');
+  --icon-history: url('./svg/history.svg');
+
+  /* Device */
+  --icon-desktop_windows: url('./svg/desktop_windows.svg');
+  --icon-laptop_mac: url('./svg/laptop_mac.svg');
+  --icon-mobile: url('./svg/mobile.svg');
+  --icon-tablet: url('./svg/tablet.svg');
+  --icon-keyboard: url('./svg/keyboard.svg');
+  --icon-memory: url('./svg/memory.svg');
+  --icon-storage: url('./svg/storage.svg');
+  --icon-usb: url('./svg/usb.svg');
+  --icon-cast: url('./svg/cast.svg');
+
+  /* Connectivity */
+  --icon-hub: url('./svg/hub.svg');
+  --icon-wifi: url('./svg/wifi.svg');
+  --icon-bluetooth: url('./svg/bluetooth.svg');
+
+  /* Development */
+  --icon-terminal: url('./svg/terminal.svg');
+  --icon-database: url('./svg/database.svg');
+  --icon-dns: url('./svg/dns.svg');
+  --icon-cloud: url('./svg/cloud.svg');
+  --icon-cloud_upload: url('./svg/cloud_upload.svg');
+  --icon-cloud_download: url('./svg/cloud_download.svg');
+  --icon-bug_report: url('./svg/bug_report.svg');
+
+  /* Gamification */
+  --icon-military_tech: url('./svg/military_tech.svg');
+  --icon-trophy: url('./svg/trophy.svg');
+  --icon-redeem: url('./svg/redeem.svg');
+  --icon-target: url('./svg/target.svg');
+
+  /* Ai */
+  --icon-auto_awesome_mosaic: url('./svg/auto_awesome_mosaic.svg');
+  --icon-smart_toy: url('./svg/smart_toy.svg');
+
+  /* Education */
+  --icon-menu_book: url('./svg/menu_book.svg');
+  --icon-auto_stories: url('./svg/auto_stories.svg');
+  --icon-school: url('./svg/school.svg');
+
+  /* Weather */
+  --icon-rainy: url('./svg/rainy.svg');
+  --icon-thunderstorm: url('./svg/thunderstorm.svg');
+  --icon-ac_unit: url('./svg/ac_unit.svg');
+  --icon-air: url('./svg/air.svg');
+  --icon-thermostat: url('./svg/thermostat.svg');
+  --icon-water_drop: url('./svg/water_drop.svg');
+
+  /* Misc */
+  --icon-local_cafe: url('./svg/local_cafe.svg');
+  --icon-all_inclusive: url('./svg/all_inclusive.svg');
+  --icon-eco: url('./svg/eco.svg');
+  --icon-hexagon: url('./svg/hexagon.svg');
+  --icon-change_history: url('./svg/change_history.svg');
+
+  /* ==============================
+   * Canonical Names
+   * ============================== */
+
+  /* Navigation */
+  --icon-back: var(--icon-arrow_back);
+  --icon-next: var(--icon-arrow_forward);
+  --icon-up: var(--icon-arrow_upward);
+  --icon-down: var(--icon-arrow_downward);
+  --icon-external-link: var(--icon-open_in_new);
+  --icon-chevron-right: var(--icon-chevron_right);
+  --icon-chevron-down: var(--icon-keyboard_arrow_down);
+  --icon-chevron-up: var(--icon-keyboard_arrow_up);
+  --icon-chevron-left: var(--icon-chevron_left);
+  --icon-more: var(--icon-more_horiz);
+  --icon-more-options: var(--icon-more_vert);
+  --icon-sidebar: var(--icon-view_sidebar);
+  --icon-columns: var(--icon-view_column);
+  --icon-anchor: var(--icon-tag);
+
+  /* Action */
+  --icon-refresh: var(--icon-sync);
+  --icon-copy: var(--icon-content_copy);
+  --icon-clipboard: var(--icon-assignment);
+  --icon-copied: var(--icon-assignment_turned_in);
+  --icon-paste: var(--icon-content_paste);
+  --icon-cut: var(--icon-content_cut);
+  --icon-move: var(--icon-open_with);
+  --icon-drag-handle: var(--icon-drag_indicator);
+  --icon-zap: var(--icon-bolt);
+
+  /* Status */
+  --icon-success: var(--icon-check_circle);
+  --icon-loading: var(--icon-progress_activity);
+  --icon-filled-circle: var(--icon-radio_button_checked);
+  --icon-empty-circle: var(--icon-radio_button_unchecked);
+  --icon-smile: var(--icon-sentiment_satisfied);
+  --icon-frown: var(--icon-sentiment_dissatisfied);
+  --icon-tip: var(--icon-lightbulb);
+  --icon-fire: var(--icon-local_fire_department);
+
+  /* User */
+  --icon-user: var(--icon-person);
+  --icon-avatar: var(--icon-account_circle);
+  --icon-users: var(--icon-group);
+  --icon-add-user: var(--icon-person_add);
+  --icon-remove-user: var(--icon-person_remove);
+  --icon-assigned: var(--icon-how_to_reg);
+  --icon-admin: var(--icon-admin_panel_settings);
+  --icon-user-settings: var(--icon-manage_accounts);
+
+  /* Form */
+  --icon-checkbox: var(--icon-check_box);
+  --icon-checkbox-empty: var(--icon-check_box_outline_blank);
+  --icon-toggle: var(--icon-toggle_on);
+  --icon-toggle-off: var(--icon-toggle_off);
+
+  /* Data */
+  --icon-filter: var(--icon-filter_list);
+  --icon-grid: var(--icon-grid_view);
+  --icon-chart-bar: var(--icon-bar_chart);
+  --icon-chart-line: var(--icon-show_chart);
+  --icon-chart-pie: var(--icon-pie_chart);
+  --icon-view: var(--icon-visibility);
+  --icon-hide: var(--icon-visibility_off);
+  --icon-zoom-in: var(--icon-zoom_in);
+  --icon-zoom-out: var(--icon-zoom_out);
+  --icon-exit-fullscreen: var(--icon-fullscreen_exit);
+  --icon-board: var(--icon-view_kanban);
+  --icon-activity: var(--icon-monitoring);
+
+  /* File */
+  --icon-file: var(--icon-draft);
+  --icon-document: var(--icon-description);
+  --icon-pdf: var(--icon-picture_as_pdf);
+  --icon-new-folder: var(--icon-create_new_folder);
+  --icon-open-folder: var(--icon-folder_open);
+  --icon-zip: var(--icon-folder_zip);
+  --icon-attachment: var(--icon-attach_file);
+  --icon-unlink: var(--icon-link_off);
+
+  /* Media */
+  --icon-gallery: var(--icon-photo_library);
+  --icon-video: var(--icon-videocam);
+  --icon-camera: var(--icon-photo_camera);
+  --icon-camera-off: var(--icon-no_photography);
+  --icon-volume: var(--icon-volume_up);
+  --icon-volume-low: var(--icon-volume_down);
+  --icon-mute: var(--icon-volume_off);
+  --icon-music: var(--icon-music_note);
+  --icon-microphone: var(--icon-mic);
+  --icon-microphone-off: var(--icon-mic_off);
+  --icon-podcast: var(--icon-podcasts);
+  --icon-broadcast: var(--icon-cell_tower);
+  --icon-rotate: var(--icon-rotate_right);
+
+  /* Media Controls */
+  --icon-play: var(--icon-play_arrow);
+  --icon-skip-next: var(--icon-skip_next);
+  --icon-skip-previous: var(--icon-skip_previous);
+  --icon-fast-forward: var(--icon-fast_forward);
+  --icon-rewind: var(--icon-fast_rewind);
+  --icon-record: var(--icon-fiber_manual_record);
+
+  /* Text */
+  --icon-bold: var(--icon-format_bold);
+  --icon-italic: var(--icon-format_italic);
+  --icon-underline: var(--icon-format_underlined);
+  --icon-strikethrough: var(--icon-format_strikethrough);
+  --icon-quote: var(--icon-format_quote);
+  --icon-heading: var(--icon-title);
+  --icon-paragraph: var(--icon-notes);
+  --icon-bullet-list: var(--icon-format_list_bulleted);
+  --icon-numbered-list: var(--icon-format_list_numbered);
+  --icon-indent: var(--icon-format_indent_increase);
+  --icon-outdent: var(--icon-format_indent_decrease);
+  --icon-align-left: var(--icon-format_align_left);
+  --icon-align-center: var(--icon-format_align_center);
+  --icon-align-right: var(--icon-format_align_right);
+  --icon-justify: var(--icon-format_align_justify);
+  --icon-emoji: var(--icon-mood);
+
+  /* Editing */
+  --icon-pen: var(--icon-edit);
+  --icon-color: var(--icon-colorize);
+
+  /* Communication */
+  --icon-email: var(--icon-mail);
+  --icon-phone: var(--icon-call);
+
+  /* Social */
+  --icon-like: var(--icon-favorite);
+  --icon-unlike: var(--icon-heart_broken);
+  --icon-thumbs-up: var(--icon-thumb_up);
+  --icon-thumbs-down: var(--icon-thumb_down);
+  --icon-comments: var(--icon-forum);
+  --icon-typing: var(--icon-more_horiz);
+  --icon-mention: var(--icon-alternate_email);
+  --icon-pin: var(--icon-keep);
+
+  /* Commerce */
+  --icon-cart: var(--icon-shopping_cart);
+  --icon-add-to-cart: var(--icon-add_shopping_cart);
+  --icon-payment: var(--icon-credit_card);
+  --icon-wallet: var(--icon-account_balance_wallet);
+  --icon-money: var(--icon-payments);
+  --icon-tag: var(--icon-sell);
+  --icon-tags: var(--icon-sell);
+  --icon-discount: var(--icon-percent);
+  --icon-coupon: var(--icon-confirmation_number);
+  --icon-shipping: var(--icon-local_shipping);
+  --icon-delivery: var(--icon-local_shipping);
+  --icon-return: var(--icon-assignment_return);
+  --icon-invoice: var(--icon-receipt_long);
+  --icon-store: var(--icon-storefront);
+  --icon-shopping-bag: var(--icon-shopping_bag);
+
+  /* Time */
+  --icon-calendar: var(--icon-calendar_today);
+  --icon-schedule: var(--icon-calendar_month);
+  --icon-scheduled: var(--icon-event_available);
+  --icon-overdue: var(--icon-event_busy);
+  --icon-time: var(--icon-schedule);
+
+  /* Security */
+  --icon-unlock: var(--icon-lock_open);
+  --icon-security: var(--icon-shield);
+  --icon-secure: var(--icon-verified_user);
+  --icon-key: var(--icon-vpn_key);
+
+  /* Settings */
+  --icon-sliders: var(--icon-tune);
+  --icon-theme: var(--icon-palette);
+  --icon-light-mode: var(--icon-light_mode);
+  --icon-dark-mode: var(--icon-dark_mode);
+  --icon-accessibility: var(--icon-accessibility_new);
+  --icon-plugin: var(--icon-extension);
+  --icon-globe: var(--icon-language);
+
+  /* Organization */
+  --icon-subtask: var(--icon-subdirectory_arrow_right);
+  --icon-tree: var(--icon-account_tree);
+  --icon-progress: var(--icon-progress_activity);
+  --icon-milestone: var(--icon-diamond);
+  --icon-tasks: var(--icon-task_alt);
+
+  /* Business */
+  --icon-briefcase: var(--icon-work);
+  --icon-company: var(--icon-apartment);
+  --icon-organization: var(--icon-corporate_fare);
+  --icon-news: var(--icon-newspaper);
+  --icon-rss: var(--icon-rss_feed);
+
+  /* Finance */
+  --icon-trending-up: var(--icon-trending_up);
+  --icon-trending-down: var(--icon-trending_down);
+  --icon-swap: var(--icon-swap_horiz);
+
+  /* Location */
+  --icon-location: var(--icon-location_on);
+  --icon-compass: var(--icon-explore);
+  --icon-current-location: var(--icon-my_location);
+  --icon-measure: var(--icon-straighten);
+
+  /* System */
+  --icon-power: var(--icon-power_settings_new);
+  --icon-battery: var(--icon-battery_full);
+  --icon-tool: var(--icon-build);
+  --icon-tools: var(--icon-construction);
+  --icon-qr-code: var(--icon-qr_code_2);
+  --icon-calculator: var(--icon-calculate);
+  --icon-random: var(--icon-casino);
+
+  /* Device */
+  --icon-desktop: var(--icon-desktop_windows);
+  --icon-laptop: var(--icon-laptop_mac);
+  --icon-cpu: var(--icon-memory);
+
+  /* Connectivity */
+  --icon-network: var(--icon-hub);
+
+  /* Development */
+  --icon-server: var(--icon-dns);
+  --icon-cloud-upload: var(--icon-cloud_upload);
+  --icon-cloud-download: var(--icon-cloud_download);
+  --icon-bug: var(--icon-bug_report);
+  --icon-git: var(--icon-account_tree);
+
+  /* Gamification */
+  --icon-award: var(--icon-military_tech);
+  --icon-gift: var(--icon-redeem);
+
+  /* Ai */
+  --icon-sparkles: var(--icon-auto_awesome_mosaic);
+  --icon-bot: var(--icon-smart_toy);
+
+  /* Education */
+  --icon-docs: var(--icon-menu_book);
+  --icon-book-open: var(--icon-auto_stories);
+  --icon-graduation: var(--icon-school);
+
+  /* Weather */
+  --icon-rain: var(--icon-rainy);
+  --icon-storm: var(--icon-thunderstorm);
+  --icon-snow: var(--icon-ac_unit);
+  --icon-wind: var(--icon-air);
+  --icon-temperature: var(--icon-thermostat);
+  --icon-water: var(--icon-water_drop);
+
+  /* Misc */
+  --icon-coffee: var(--icon-local_cafe);
+  --icon-infinity: var(--icon-all_inclusive);
+  --icon-triangle: var(--icon-change_history);
+
+  /* ==============================
+   * Aliases
+   * ============================== */
+
+  /* Navigation */
+  --icon-hamburger: var(--icon-menu);
+  --icon-cancel: var(--icon-close);
+  --icon-dismiss: var(--icon-close);
+  --icon-x: var(--icon-close);
+  --icon-previous: var(--icon-arrow_back);
+  --icon-arrow-left: var(--icon-arrow_back);
+  --icon-forward: var(--icon-arrow_forward);
+  --icon-arrow-right: var(--icon-arrow_forward);
+  --icon-arrow-up: var(--icon-arrow_upward);
+  --icon-arrow-down: var(--icon-arrow_downward);
+  --icon-open-in-new: var(--icon-open_in_new);
+  --icon-caret-right: var(--icon-chevron_right);
+  --icon-caret-down: var(--icon-keyboard_arrow_down);
+  --icon-dropdown: var(--icon-keyboard_arrow_down);
+  --icon-expand: var(--icon-keyboard_arrow_down);
+  --icon-caret-up: var(--icon-keyboard_arrow_up);
+  --icon-collapse: var(--icon-keyboard_arrow_up);
+  --icon-caret-left: var(--icon-chevron_left);
+  --icon-ellipsis: var(--icon-more_horiz);
+  --icon-dots: var(--icon-more_horiz);
+  --icon-ellipsis-vertical: var(--icon-more_vert);
+  --icon-kebab: var(--icon-more_vert);
+  --icon-panel: var(--icon-view_sidebar);
+  --icon-drawer: var(--icon-view_sidebar);
+  --icon-layout: var(--icon-view_column);
+  --icon-jump-to: var(--icon-tag);
+
+  /* Action */
+  --icon-plus: var(--icon-add);
+  --icon-create: var(--icon-add);
+  --icon-new: var(--icon-add);
+  --icon-pencil: var(--icon-edit);
+  --icon-modify: var(--icon-edit);
+  --icon-trash: var(--icon-delete);
+  --icon-remove: var(--icon-delete);
+  --icon-floppy-disk: var(--icon-save);
+  --icon-done: var(--icon-check);
+  --icon-confirm: var(--icon-check);
+  --icon-complete: var(--icon-check);
+  --icon-reload: var(--icon-sync);
+  --icon-synchronize: var(--icon-sync);
+  --icon-revert: var(--icon-undo);
+  --icon-duplicate: var(--icon-content_copy);
+  --icon-clone: var(--icon-content_copy);
+  --icon-clipboard-check: var(--icon-assignment_turned_in);
+  --icon-scissors: var(--icon-content_cut);
+  --icon-grip: var(--icon-drag_indicator);
+  --icon-reorder: var(--icon-drag_indicator);
+  --icon-submit: var(--icon-send);
+  --icon-lightning: var(--icon-bolt);
+  --icon-fast: var(--icon-bolt);
+  --icon-instant: var(--icon-bolt);
+
+  /* Status */
+  --icon-check-circle: var(--icon-check_circle);
+  --icon-complete: var(--icon-check_circle);
+  --icon-x-circle: var(--icon-error);
+  --icon-failed: var(--icon-error);
+  --icon-alert: var(--icon-warning);
+  --icon-caution: var(--icon-warning);
+  --icon-information: var(--icon-info);
+  --icon-question: var(--icon-help);
+  --icon-faq: var(--icon-help);
+  --icon-spinner: var(--icon-progress_activity);
+  --icon-active: var(--icon-radio_button_checked);
+  --icon-selected: var(--icon-radio_button_checked);
+  --icon-radio: var(--icon-radio_button_checked);
+  --icon-radio-selected: var(--icon-radio_button_checked);
+  --icon-circle-dot: var(--icon-radio_button_checked);
+  --icon-disc: var(--icon-radio_button_checked);
+  --icon-dot: var(--icon-radio_button_checked);
+  --icon-inactive: var(--icon-radio_button_unchecked);
+  --icon-unselected: var(--icon-radio_button_unchecked);
+  --icon-radio-empty: var(--icon-radio_button_unchecked);
+  --icon-radio-unselected: var(--icon-radio_button_unchecked);
+  --icon-circle: var(--icon-radio_button_unchecked);
+  --icon-badge-check: var(--icon-verified);
+  --icon-happy: var(--icon-sentiment_satisfied);
+  --icon-satisfied: var(--icon-sentiment_satisfied);
+  --icon-sad: var(--icon-sentiment_dissatisfied);
+  --icon-dissatisfied: var(--icon-sentiment_dissatisfied);
+  --icon-idea: var(--icon-lightbulb);
+  --icon-hint: var(--icon-lightbulb);
+  --icon-hot: var(--icon-local_fire_department);
+  --icon-flame: var(--icon-local_fire_department);
+  --icon-trending: var(--icon-local_fire_department);
+  --icon-lifebuoy: var(--icon-support);
+
+  /* User */
+  --icon-profile: var(--icon-person);
+  --icon-account: var(--icon-account_circle);
+  --icon-user-circle: var(--icon-account_circle);
+  --icon-team: var(--icon-group);
+  --icon-people: var(--icon-group);
+  --icon-user-plus: var(--icon-person_add);
+  --icon-invite: var(--icon-person_add);
+  --icon-user-minus: var(--icon-person_remove);
+  --icon-user-check: var(--icon-how_to_reg);
+  --icon-user-shield: var(--icon-admin_panel_settings);
+  --icon-user-gear: var(--icon-manage_accounts);
+  --icon-moderator: var(--icon-manage_accounts);
+  --icon-sign-in: var(--icon-login);
+  --icon-sign-out: var(--icon-logout);
+  --icon-exit: var(--icon-logout);
+  --icon-biometric: var(--icon-fingerprint);
+
+  /* Form */
+  --icon-square-check: var(--icon-check_box);
+  --icon-checked: var(--icon-check_box);
+  --icon-unchecked: var(--icon-check_box_outline_blank);
+  --icon-square: var(--icon-check_box_outline_blank);
+  --icon-switch: var(--icon-toggle_on);
+  --icon-toggle-on: var(--icon-toggle_on);
+  --icon-switch-off: var(--icon-toggle_off);
+
+  /* Data */
+  --icon-funnel: var(--icon-filter_list);
+  --icon-list-view: var(--icon-list);
+  --icon-table-view: var(--icon-table);
+  --icon-grid-view: var(--icon-grid_view);
+  --icon-card-view: var(--icon-grid_view);
+  --icon-bar-chart: var(--icon-bar_chart);
+  --icon-chart: var(--icon-bar_chart);
+  --icon-line-chart: var(--icon-show_chart);
+  --icon-analytics: var(--icon-show_chart);
+  --icon-trends: var(--icon-show_chart);
+  --icon-pie-chart: var(--icon-pie_chart);
+  --icon-statistics: var(--icon-pie_chart);
+  --icon-show: var(--icon-visibility);
+  --icon-visible: var(--icon-visibility);
+  --icon-eye: var(--icon-visibility);
+  --icon-invisible: var(--icon-visibility_off);
+  --icon-eye-off: var(--icon-visibility_off);
+  --icon-magnifying-glass: var(--icon-search);
+  --icon-find: var(--icon-search);
+  --icon-maximize: var(--icon-fullscreen);
+  --icon-expand: var(--icon-fullscreen);
+  --icon-minimize: var(--icon-fullscreen_exit);
+  --icon-kanban: var(--icon-view_kanban);
+  --icon-board-view: var(--icon-view_kanban);
+  --icon-pulse: var(--icon-monitoring);
+
+  /* File */
+  --icon-file-text: var(--icon-description);
+  --icon-file-pdf: var(--icon-picture_as_pdf);
+  --icon-directory: var(--icon-folder);
+  --icon-folder-plus: var(--icon-create_new_folder);
+  --icon-folder-open: var(--icon-folder_open);
+  --icon-box: var(--icon-archive);
+  --icon-compress: var(--icon-folder_zip);
+  --icon-paperclip: var(--icon-attach_file);
+  --icon-attach: var(--icon-attach_file);
+  --icon-url: var(--icon-link);
+  --icon-disconnect: var(--icon-link_off);
+
+  /* Media */
+  --icon-photo: var(--icon-image);
+  --icon-picture: var(--icon-image);
+  --icon-images: var(--icon-photo_library);
+  --icon-photos: var(--icon-photo_library);
+  --icon-movie: var(--icon-videocam);
+  --icon-camera-slash: var(--icon-no_photography);
+  --icon-audio: var(--icon-volume_up);
+  --icon-speaker: var(--icon-volume_up);
+  --icon-volume-off: var(--icon-volume_off);
+  --icon-volume-x: var(--icon-volume_off);
+  --icon-audio: var(--icon-music_note);
+  --icon-song: var(--icon-music_note);
+  --icon-mic-off: var(--icon-mic_off);
+  --icon-mute-mic: var(--icon-mic_off);
+  --icon-headset: var(--icon-headphones);
+  --icon-live: var(--icon-cell_tower);
+  --icon-radio-tower: var(--icon-cell_tower);
+  --icon-trim: var(--icon-crop);
+  --icon-turn: var(--icon-rotate_right);
+
+  /* Media Controls */
+  --icon-forward-step: var(--icon-skip_next);
+  --icon-next-track: var(--icon-skip_next);
+  --icon-backward-step: var(--icon-skip_previous);
+  --icon-previous-track: var(--icon-skip_previous);
+  --icon-random: var(--icon-shuffle);
+  --icon-loop: var(--icon-repeat);
+
+  /* Text */
+  --icon-blockquote: var(--icon-format_quote);
+  --icon-h1: var(--icon-title);
+  --icon-list-ul: var(--icon-format_list_bulleted);
+  --icon-unordered-list: var(--icon-format_list_bulleted);
+  --icon-list-ol: var(--icon-format_list_numbered);
+  --icon-ordered-list: var(--icon-format_list_numbered);
+  --icon-todo-list: var(--icon-checklist);
+  --icon-align-justify: var(--icon-format_align_justify);
+  --icon-smiley: var(--icon-mood);
+
+  /* Editing */
+  --icon-paint: var(--icon-brush);
+  --icon-draw: var(--icon-edit);
+  --icon-eyedropper: var(--icon-colorize);
+  --icon-color-picker: var(--icon-colorize);
+
+  /* Communication */
+  --icon-bell: var(--icon-notifications);
+  --icon-alerts: var(--icon-notifications);
+  --icon-envelope: var(--icon-mail);
+  --icon-address-book: var(--icon-contacts);
+
+  /* Social */
+  --icon-heart: var(--icon-favorite);
+  --icon-heart-crack: var(--icon-heart_broken);
+  --icon-favorite: var(--icon-star);
+  --icon-rating: var(--icon-star);
+  --icon-save: var(--icon-bookmark);
+  --icon-upvote: var(--icon-thumb_up);
+  --icon-dislike: var(--icon-thumb_down);
+  --icon-downvote: var(--icon-thumb_down);
+  --icon-message: var(--icon-comment);
+  --icon-discussion: var(--icon-forum);
+  --icon-message-dots: var(--icon-more_horiz);
+  --icon-at: var(--icon-alternate_email);
+  --icon-ban: var(--icon-block);
+  --icon-restricted: var(--icon-block);
+  --icon-report: var(--icon-flag);
+  --icon-thumbtack: var(--icon-keep);
+  --icon-pinned: var(--icon-keep);
+
+  /* Commerce */
+  --icon-shopping-cart: var(--icon-shopping_cart);
+  --icon-cart-plus: var(--icon-add_shopping_cart);
+  --icon-credit-card: var(--icon-credit_card);
+  --icon-billing: var(--icon-credit_card);
+  --icon-dollar: var(--icon-payments);
+  --icon-currency: var(--icon-payments);
+  --icon-label: var(--icon-sell);
+  --icon-price: var(--icon-sell);
+  --icon-labels: var(--icon-sell);
+  --icon-ticket: var(--icon-confirmation_number);
+  --icon-box: var(--icon-package);
+  --icon-order: var(--icon-package);
+  --icon-truck: var(--icon-local_shipping);
+  --icon-express: var(--icon-local_shipping);
+  --icon-shop: var(--icon-storefront);
+  --icon-bag: var(--icon-shopping_bag);
+
+  /* Time */
+  --icon-date: var(--icon-calendar_today);
+  --icon-events: var(--icon-calendar_month);
+  --icon-calendar-days: var(--icon-calendar_month);
+  --icon-due-date: var(--icon-event_available);
+  --icon-calendar-check: var(--icon-event_available);
+  --icon-deadline: var(--icon-event_busy);
+  --icon-calendar-x: var(--icon-event_busy);
+  --icon-clock: var(--icon-schedule);
+  --icon-countdown: var(--icon-timer);
+  --icon-stopwatch: var(--icon-timer);
+  --icon-smartwatch: var(--icon-watch);
+
+  /* Security */
+  --icon-locked: var(--icon-lock);
+  --icon-secure: var(--icon-lock);
+  --icon-unlocked: var(--icon-lock_open);
+  --icon-shield-check: var(--icon-verified_user);
+  --icon-protected: var(--icon-verified_user);
+  --icon-password: var(--icon-vpn_key);
+  --icon-access: var(--icon-vpn_key);
+
+  /* Settings */
+  --icon-gear: var(--icon-settings);
+  --icon-cog: var(--icon-settings);
+  --icon-preferences: var(--icon-settings);
+  --icon-adjustments: var(--icon-tune);
+  --icon-appearance: var(--icon-palette);
+  --icon-sun: var(--icon-light_mode);
+  --icon-moon: var(--icon-dark_mode);
+  --icon-puzzle: var(--icon-extension);
+  --icon-api: var(--icon-webhook);
+  --icon-world: var(--icon-language);
+  --icon-public: var(--icon-language);
+
+  /* Organization */
+  --icon-stack: var(--icon-layers);
+  --icon-child: var(--icon-subdirectory_arrow_right);
+  --icon-hierarchy: var(--icon-account_tree);
+  --icon-sitemap: var(--icon-account_tree);
+  --icon-org-chart: var(--icon-account_tree);
+  --icon-todos: var(--icon-task_alt);
+
+  /* Business */
+  --icon-job: var(--icon-work);
+  --icon-building: var(--icon-apartment);
+  --icon-office: var(--icon-apartment);
+  --icon-org: var(--icon-corporate_fare);
+  --icon-corporate: var(--icon-corporate_fare);
+  --icon-enterprise: var(--icon-corporate_fare);
+  --icon-article: var(--icon-newspaper);
+  --icon-feed: var(--icon-rss_feed);
+
+  /* Finance */
+  --icon-increase: var(--icon-trending_up);
+  --icon-growth: var(--icon-trending_up);
+  --icon-decrease: var(--icon-trending_down);
+  --icon-decline: var(--icon-trending_down);
+  --icon-scale: var(--icon-balance);
+  --icon-transfer: var(--icon-swap_horiz);
+  --icon-exchange: var(--icon-swap_horiz);
+  --icon-piggy-bank: var(--icon-savings);
+
+  /* Location */
+  --icon-map-pin: var(--icon-location_on);
+  --icon-marker: var(--icon-location_on);
+  --icon-route: var(--icon-directions);
+  --icon-navigate: var(--icon-explore);
+  --icon-crosshairs: var(--icon-my_location);
+  --icon-near-me: var(--icon-my_location);
+  --icon-ruler: var(--icon-straighten);
+  --icon-distance: var(--icon-straighten);
+
+  /* System */
+  --icon-shutdown: var(--icon-power_settings_new);
+  --icon-wrench: var(--icon-build);
+  --icon-toolbox: var(--icon-construction);
+  --icon-qr: var(--icon-qr_code_2);
+  --icon-dice: var(--icon-casino);
+  --icon-restore: var(--icon-history);
+
+  /* Device */
+  --icon-monitor: var(--icon-desktop_windows);
+  --icon-computer: var(--icon-desktop_windows);
+  --icon-notebook: var(--icon-laptop_mac);
+  --icon-smartphone: var(--icon-mobile);
+  --icon-phone: var(--icon-mobile);
+  --icon-ipad: var(--icon-tablet);
+  --icon-processor: var(--icon-memory);
+  --icon-chip: var(--icon-memory);
+  --icon-hard-drive: var(--icon-storage);
+  --icon-disk: var(--icon-storage);
+  --icon-chromecast: var(--icon-cast);
+  --icon-airplay: var(--icon-cast);
+
+  /* Development */
+  --icon-console: var(--icon-terminal);
+  --icon-command-line: var(--icon-terminal);
+  --icon-db: var(--icon-database);
+  --icon-backup: var(--icon-cloud_upload);
+  --icon-issue: var(--icon-bug_report);
+  --icon-branch: var(--icon-account_tree);
+  --icon-version-control: var(--icon-account_tree);
+
+  /* Gamification */
+  --icon-badge: var(--icon-military_tech);
+  --icon-achievement: var(--icon-military_tech);
+  --icon-winner: var(--icon-trophy);
+  --icon-reward: var(--icon-redeem);
+  --icon-present: var(--icon-redeem);
+  --icon-goal: var(--icon-target);
+
+  /* Ai */
+  --icon-ai: var(--icon-auto_awesome_mosaic);
+  --icon-magic: var(--icon-auto_awesome_mosaic);
+  --icon-robot: var(--icon-smart_toy);
+  --icon-automation: var(--icon-smart_toy);
+
+  /* Education */
+  --icon-book: var(--icon-menu_book);
+  --icon-documentation: var(--icon-menu_book);
+  --icon-reading: var(--icon-auto_stories);
+  --icon-education: var(--icon-school);
+  --icon-academic: var(--icon-school);
+
+  /* Weather */
+  --icon-stormy: var(--icon-thunderstorm);
+  --icon-lightning: var(--icon-thunderstorm);
+  --icon-cold: var(--icon-ac_unit);
+  --icon-snowflake: var(--icon-ac_unit);
+  --icon-windy: var(--icon-air);
+  --icon-thermometer: var(--icon-thermostat);
+  --icon-droplet: var(--icon-water_drop);
+  --icon-humidity: var(--icon-water_drop);
+
+  /* Misc */
+  --icon-cafe: var(--icon-local_cafe);
+  --icon-break: var(--icon-local_cafe);
+  --icon-unlimited: var(--icon-all_inclusive);
+  --icon-leaf: var(--icon-eco);
+  --icon-nature: var(--icon-eco);
+}

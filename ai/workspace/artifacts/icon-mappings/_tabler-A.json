@@ -1,0 +1,222 @@
+{
+  "close": {
+    "value": "x",
+    "reason": "Tabler uses 'x' for close/dismiss"
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": ""
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": ""
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": ""
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": ""
+  },
+  "external-link": {
+    "value": "external-link",
+    "reason": ""
+  },
+  "chevron-right": {
+    "value": "chevron-right",
+    "reason": ""
+  },
+  "chevron-down": {
+    "value": "chevron-down",
+    "reason": ""
+  },
+  "chevron-up": {
+    "value": "chevron-up",
+    "reason": ""
+  },
+  "chevron-left": {
+    "value": "chevron-left",
+    "reason": ""
+  },
+  "more": {
+    "value": "dots",
+    "reason": "Horizontal ellipsis for more options"
+  },
+  "more-options": {
+    "value": "dots-vertical",
+    "reason": "Vertical ellipsis for kebab menu"
+  },
+  "sidebar": {
+    "value": "layout-sidebar",
+    "reason": ""
+  },
+  "columns": {
+    "value": "layout-columns",
+    "reason": "Tabler prefixes layout icons with 'layout-'"
+  },
+  "anchor": {
+    "value": "anchor",
+    "reason": "Nautical anchor icon; maps to anchor link concept"
+  },
+  "add": {
+    "value": "plus",
+    "reason": ""
+  },
+  "edit": {
+    "value": "pencil",
+    "reason": ""
+  },
+  "delete": {
+    "value": "trash",
+    "reason": ""
+  },
+  "save": {
+    "value": "device-floppy",
+    "reason": "Tabler prefixes device icons with 'device-'"
+  },
+  "check": {
+    "value": "check",
+    "reason": ""
+  },
+  "refresh": {
+    "value": "refresh",
+    "reason": ""
+  },
+  "undo": {
+    "value": "arrow-back-up",
+    "reason": "Curved arrow pointing back and up"
+  },
+  "redo": {
+    "value": "arrow-forward-up",
+    "reason": "Curved arrow pointing forward and up"
+  },
+  "copy": {
+    "value": "copy",
+    "reason": ""
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": ""
+  },
+  "copied": {
+    "value": "clipboard-check",
+    "reason": "Clipboard with checkmark indicating successful copy"
+  },
+  "paste": {
+    "value": "clipboard-text",
+    "reason": "No direct paste icon in Tabler; clipboard-text is the closest match"
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": ""
+  },
+  "move": {
+    "value": "arrows-move",
+    "reason": "Four-directional arrow icon"
+  },
+  "drag-handle": {
+    "value": "grip-vertical",
+    "reason": "Six dots arranged in two columns"
+  },
+  "upload": {
+    "value": "upload",
+    "reason": ""
+  },
+  "download": {
+    "value": "download",
+    "reason": ""
+  },
+  "import": {
+    "value": "file-import",
+    "reason": ""
+  },
+  "export": {
+    "value": "file-export",
+    "reason": ""
+  },
+  "print": {
+    "value": "printer",
+    "reason": ""
+  },
+  "share": {
+    "value": "share",
+    "reason": ""
+  },
+  "send": {
+    "value": "send",
+    "reason": "Paper airplane style icon"
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Lightning bolt icon"
+  },
+  "user": {
+    "value": "user",
+    "reason": ""
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "User icon inside a circle"
+  },
+  "users": {
+    "value": "users",
+    "reason": ""
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": ""
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": ""
+  },
+  "assigned": {
+    "value": "user-check",
+    "reason": "User with checkmark"
+  },
+  "admin": {
+    "value": "user-shield",
+    "reason": "User with shield indicating admin/protected role"
+  },
+  "user-settings": {
+    "value": "user-cog",
+    "reason": "User with gear/cog icon"
+  },
+  "anonymous": {
+    "value": "user-question",
+    "reason": "User with question mark; represents unknown/guest user"
+  },
+  "roles": {
+    "value": null,
+    "reason": "No satisfactory Tabler icon for roles/permissions concept. shield-half is too abstract, users-group doesn't convey permissions."
+  },
+  "login": {
+    "value": "login",
+    "reason": "Arrow pointing into a bracket/door"
+  },
+  "logout": {
+    "value": "logout",
+    "reason": "Arrow pointing out of a bracket/door"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": ""
+  },
+  "checkbox": {
+    "value": "square-check",
+    "reason": "Square with checkmark inside"
+  },
+  "checkbox-empty": {
+    "value": "square",
+    "reason": "Empty square representing unchecked state"
+  },
+  "toggle": {
+    "value": "toggle-right",
+    "reason": "Toggle switch in the on/right position"
+  },
+  "toggle-off": {
+    "value": "toggle-left",
+    "reason": "Toggle switch in the off/left position"
+  }
+}

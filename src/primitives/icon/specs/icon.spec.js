@@ -43,12 +43,6 @@ export default {
       usageLevel: 3,
       attribute: 'spin',
     },
-    {
-      name: 'Inverted',
-      description: 'be formatted to appear on dark backgrounds',
-      usageLevel: 2,
-      attribute: 'inverted',
-    },
   ],
   settings: [
     {
@@ -80,7 +74,7 @@ export default {
   ],
   examples: {
     defaultAttributes: {
-      icon: 'check-circle',
+      icon: 'check',
     },
   },
 };

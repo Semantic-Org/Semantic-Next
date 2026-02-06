@@ -1,0 +1,222 @@
+{
+  "close": {
+    "value": "x-mark",
+    "reason": "Heroicons uses 'x-mark' for the close/dismiss X symbol. Direct semantic match."
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": "Direct match. Standard left-pointing arrow for back navigation."
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": "Direct match. Standard right-pointing arrow for forward navigation."
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": "Direct match. Standard upward arrow."
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": "Direct match. Standard downward arrow."
+  },
+  "external-link": {
+    "value": "arrow-top-right-on-square",
+    "reason": "Heroicons uses 'arrow-top-right-on-square' for the open-in-new/external link concept. Arrow exiting a square."
+  },
+  "chevron-right": {
+    "value": "chevron-right",
+    "reason": "Direct match."
+  },
+  "chevron-down": {
+    "value": "chevron-down",
+    "reason": "Direct match."
+  },
+  "chevron-up": {
+    "value": "chevron-up",
+    "reason": "Direct match."
+  },
+  "chevron-left": {
+    "value": "chevron-left",
+    "reason": "Direct match."
+  },
+  "more": {
+    "value": "ellipsis-horizontal",
+    "reason": "Heroicons uses 'ellipsis-horizontal' for three horizontal dots. Direct semantic match for more options."
+  },
+  "more-options": {
+    "value": "ellipsis-vertical",
+    "reason": "Heroicons uses 'ellipsis-vertical' for three vertical dots (kebab menu). Direct semantic match."
+  },
+  "sidebar": {
+    "value": "bars-3-bottom-left",
+    "reason": "Three horizontal bars with bottom one shorter on the left side. Visually suggests sidebar/panel layout. Best available match in Heroicons."
+  },
+  "columns": {
+    "value": "view-columns",
+    "reason": "Heroicons 'view-columns' represents a multi-column layout. Direct semantic match."
+  },
+  "anchor": {
+    "value": null,
+    "reason": "No anchor or jump-to-section icon in Heroicons. 'link' exists but would conflict with the separate 'link' mapping and doesn't convey anchor semantics."
+  },
+  "user": {
+    "value": "user",
+    "reason": "Direct match. Standard single-person silhouette."
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "Heroicons 'user-circle' shows a user inside a circle. Exact match for avatar/profile picture."
+  },
+  "users": {
+    "value": "user-group",
+    "reason": "Heroicons 'user-group' shows multiple people. Direct semantic match for team/group."
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": "Direct match. Person with a plus sign."
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": "Direct match. Person with a minus sign."
+  },
+  "assigned": {
+    "value": null,
+    "reason": "No user-check icon in Heroicons. Using generic 'user' would lose the 'verified/assigned' distinction."
+  },
+  "admin": {
+    "value": "shield-check",
+    "reason": "Heroicons 'shield-check' combines a shield with a checkmark. Conveys authority and verification, reasonable for admin."
+  },
+  "user-settings": {
+    "value": null,
+    "reason": "No user-cog or user-gear icon in Heroicons. Using generic 'user' would lose the 'settings' distinction."
+  },
+  "anonymous": {
+    "value": null,
+    "reason": "No incognito, mask, or anonymous user icon in Heroicons."
+  },
+  "roles": {
+    "value": null,
+    "reason": "No roles or permissions-specific icon in Heroicons. 'user-group' is already used for 'users'."
+  },
+  "login": {
+    "value": "arrow-right-end-on-rectangle",
+    "reason": "Heroicons 'arrow-right-end-on-rectangle' shows an arrow entering a rectangle. Standard login/sign-in metaphor."
+  },
+  "logout": {
+    "value": "arrow-left-start-on-rectangle",
+    "reason": "Heroicons 'arrow-left-start-on-rectangle' shows an arrow leaving a rectangle. Standard logout/sign-out metaphor."
+  },
+  "fingerprint": {
+    "value": "finger-print",
+    "reason": "Direct match (hyphenated as 'finger-print' in Heroicons). Standard biometric icon."
+  },
+  "add": {
+    "value": "plus",
+    "reason": "Direct match. Universal plus sign for add/create."
+  },
+  "edit": {
+    "value": "pencil-square",
+    "reason": "Heroicons has both 'pencil' and 'pencil-square'. 'pencil-square' (pencil on a square) is the standard edit icon in UI contexts, matching the edit-in-place concept."
+  },
+  "delete": {
+    "value": "trash",
+    "reason": "Direct match. Standard trash can icon."
+  },
+  "save": {
+    "value": null,
+    "reason": "Heroicons has no floppy disk or save icon. This is a well-known gap. 'document-arrow-down' is a download icon, not a save icon."
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct match. Simple checkmark for confirm/done/approve."
+  },
+  "refresh": {
+    "value": "arrow-path",
+    "reason": "Heroicons 'arrow-path' shows circular arrows forming a loop. Standard refresh/reload icon."
+  },
+  "undo": {
+    "value": "arrow-uturn-left",
+    "reason": "Heroicons 'arrow-uturn-left' is a U-turn arrow pointing left. Standard undo metaphor."
+  },
+  "redo": {
+    "value": "arrow-uturn-right",
+    "reason": "Heroicons 'arrow-uturn-right' is a U-turn arrow pointing right. Standard redo metaphor."
+  },
+  "copy": {
+    "value": "document-duplicate",
+    "reason": "Heroicons 'document-duplicate' shows two overlapping documents. Standard copy/duplicate icon."
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": "Direct match. Standard clipboard icon."
+  },
+  "copied": {
+    "value": "clipboard-document-check",
+    "reason": "Heroicons 'clipboard-document-check' shows a clipboard with a checkmark. Exact match for copied/confirmed clipboard action."
+  },
+  "paste": {
+    "value": "clipboard-document",
+    "reason": "Heroicons 'clipboard-document' shows a clipboard with a document. Reasonable match for paste (content on clipboard ready to place)."
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": "Direct match. Universal scissors icon for cut."
+  },
+  "move": {
+    "value": null,
+    "reason": "No move/four-directional arrow icon in Heroicons. 'arrows-pointing-out' is expand/fullscreen, not move."
+  },
+  "drag-handle": {
+    "value": "bars-2",
+    "reason": "Heroicons 'bars-2' shows two horizontal bars. Commonly used as a drag handle indicator. No grip-dots icon available."
+  },
+  "upload": {
+    "value": "arrow-up-tray",
+    "reason": "Heroicons 'arrow-up-tray' shows an upward arrow with a tray. Standard upload icon."
+  },
+  "download": {
+    "value": "arrow-down-tray",
+    "reason": "Heroicons 'arrow-down-tray' shows a downward arrow with a tray. Standard download icon."
+  },
+  "import": {
+    "value": "arrow-down-on-square",
+    "reason": "Heroicons 'arrow-down-on-square' shows a downward arrow onto a square. Reasonable match for importing data."
+  },
+  "export": {
+    "value": "arrow-up-on-square",
+    "reason": "Heroicons 'arrow-up-on-square' shows an upward arrow from a square. Reasonable match for exporting data."
+  },
+  "print": {
+    "value": "printer",
+    "reason": "Direct match. Standard printer icon."
+  },
+  "share": {
+    "value": "share",
+    "reason": "Direct match. Standard share icon."
+  },
+  "send": {
+    "value": "paper-airplane",
+    "reason": "Heroicons 'paper-airplane' is the standard send/submit icon. Direct semantic match."
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Heroicons 'bolt' is a lightning bolt. Direct semantic match for fast/instant action."
+  },
+  "checkbox": {
+    "value": null,
+    "reason": "No checkbox icon in Heroicons. 'check' is a standalone checkmark without a bounding square."
+  },
+  "checkbox-empty": {
+    "value": null,
+    "reason": "No empty checkbox (square outline) icon in Heroicons."
+  },
+  "toggle": {
+    "value": null,
+    "reason": "No toggle switch icon in Heroicons."
+  },
+  "toggle-off": {
+    "value": null,
+    "reason": "No toggle switch icon in Heroicons."
+  }
+}

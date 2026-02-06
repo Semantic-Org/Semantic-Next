@@ -4,7 +4,7 @@ import css from './icon-bundle.css?raw';
 import template from './icon.html?raw';
 import componentSpec from './specs/icon.component.js';
 
-const createComponent = ({ settings, self }) => ({
+const createComponent = ({ settings, data, self }) => ({
   // support either <ui-icon set="baz" or <ui-icon icon="icon:baz">
   getIconParts() {
     if (settings.set) {
@@ -17,19 +17,25 @@ const createComponent = ({ settings, self }) => ({
       icon: parts[0],
     };
   },
-  getIconStyle: () => {
+  maybeCustomIcon() {
+    // if this icon is not in standard set include it additionally
+    if (data.ui.search(settings.icon) == -1) {
+      return ' ' + settings.icon;
+    }
+  },
+  getIconStyle() {
     const { icon, set } = self.getIconParts();
     if (set) {
       return `
         --icon-mask: var(--icon-${icon}, var(--icon-${set}));
-        --icon-image: var(--icon-${icon}-image, var(--icon-${set}-image));
+        --icon-bg-image: var(--icon-${icon}-image, var(--icon-${set}-image));
         --icon-bg: var(--icon-${icon}-bg, var(--icon-${set}-bg));
         --icon-glyph: var(--icon-${icon}-glyph, var(--icon-${set}-glyph));
       `;
     }
     return `
       --icon-mask: var(--icon-${icon});
-      --icon-image: var(--icon-${icon}-image);
+      --icon-bg-image: var(--icon-${icon}-image);
       --icon-bg: var(--icon-${icon}-bg);
       --icon-glyph: var(--icon-${icon}-glyph);
     `;

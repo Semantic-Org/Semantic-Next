@@ -85,9 +85,25 @@
       "bundled": "./dist/bundle/icon.min.js",
       "default": "./src/primitives/icon/index.js"
     },
-    "./icon/sets/feather.css": {
-      "import": "./src/primitives/icon/sets/feather/index.css",
-      "default": "./src/primitives/icon/sets/feather/index.css"
+    "./icon/sets/lucide.css": {
+      "import": "./src/primitives/icon/sets/lucide/lucide.css",
+      "default": "./src/primitives/icon/sets/lucide/lucide.css"
+    },
+    "./icon/sets/phosphor.css": {
+      "import": "./src/primitives/icon/sets/phosphor/phosphor.css",
+      "default": "./src/primitives/icon/sets/phosphor/phosphor.css"
+    },
+    "./icon/sets/tabler.css": {
+      "import": "./src/primitives/icon/sets/tabler/tabler.css",
+      "default": "./src/primitives/icon/sets/tabler/tabler.css"
+    },
+    "./icon/sets/material-symbols.css": {
+      "import": "./src/primitives/icon/sets/material-symbols/material-symbols.css",
+      "default": "./src/primitives/icon/sets/material-symbols/material-symbols.css"
+    },
+    "./icon/sets/heroicons.css": {
+      "import": "./src/primitives/icon/sets/heroicons/heroicons.css",
+      "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
     "./icon/sets/dev.css": {
       "import": "./src/primitives/icon/sets/dev/index.css",

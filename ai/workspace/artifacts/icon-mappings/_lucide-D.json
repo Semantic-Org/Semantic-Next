@@ -1,0 +1,206 @@
+{
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Standard e-commerce shopping cart icon; direct match in Lucide"
+  },
+  "add-to-cart": {
+    "value": "shopping-basket",
+    "reason": "No cart-plus icon in Lucide; shopping-basket conveys adding items to purchase, distinct from shopping-cart"
+  },
+  "remove-from-cart": {
+    "value": "shopping-cart",
+    "reason": "No cart-minus variant in Lucide; reuses shopping-cart as the closest match for cart removal context"
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Direct match for credit card / payment method icon in Lucide"
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Direct match; Lucide has wallet, wallet-cards, and wallet-minimal variants"
+  },
+  "money": {
+    "value": "circle-dollar-sign",
+    "reason": "Circle with dollar sign is the standard generic money/currency icon; more universally recognizable than bare dollar-sign"
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Direct match for price tag / label icon"
+  },
+  "tags": {
+    "value": "tags",
+    "reason": "Direct match for multiple tags / labels icon"
+  },
+  "discount": {
+    "value": "badge-percent",
+    "reason": "Badge with percent sign clearly conveys discount; preferred over bare percent icon for commerce context"
+  },
+  "coupon": {
+    "value": "ticket-percent",
+    "reason": "Ticket with percent symbol perfectly represents a discount coupon / promo code"
+  },
+  "package": {
+    "value": "package",
+    "reason": "Direct match for package / box / order icon"
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Standard shipping truck icon; Lucide also has truck-electric but plain truck is most universal"
+  },
+  "delivery": {
+    "value": "package-open",
+    "reason": "Open package conveys delivered/fast delivery; differentiates from shipping (truck) by showing the arrival/unboxing moment"
+  },
+  "return": {
+    "value": "undo-2",
+    "reason": "Curved return arrow represents product return/refund; undo-2 is a clear backwards arrow in Lucide"
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Direct match for receipt / purchase confirmation"
+  },
+  "invoice": {
+    "value": "receipt-text",
+    "reason": "Receipt with text lines represents a detailed invoice document; differentiates from plain receipt"
+  },
+  "store": {
+    "value": "store",
+    "reason": "Direct match for store / shop storefront icon"
+  },
+  "shopping-bag": {
+    "value": "shopping-bag",
+    "reason": "Direct match for shopping bag icon"
+  },
+  "calendar": {
+    "value": "calendar",
+    "reason": "Direct match for basic calendar / date picker icon"
+  },
+  "schedule": {
+    "value": "calendar-days",
+    "reason": "Calendar with day grid represents a schedule with multiple events; matches the alias calendar-days"
+  },
+  "scheduled": {
+    "value": "calendar-check",
+    "reason": "Calendar with checkmark indicates a confirmed / scheduled date; matches alias calendar-check"
+  },
+  "overdue": {
+    "value": "calendar-x",
+    "reason": "Calendar with X mark represents missed deadline / overdue date; matches alias calendar-x"
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Direct match for clock / time icon"
+  },
+  "timer": {
+    "value": "timer",
+    "reason": "Direct match for timer / countdown / stopwatch icon"
+  },
+  "watch": {
+    "value": "watch",
+    "reason": "Direct match for smartwatch / wristwatch icon"
+  },
+  "layers": {
+    "value": "layers",
+    "reason": "Direct match for stacked layers icon"
+  },
+  "subtask": {
+    "value": "git-fork",
+    "reason": "Forking branch visual represents a subtask branching from a parent task; clearer hierarchy metaphor than workflow"
+  },
+  "tree": {
+    "value": "network",
+    "reason": "Network graph icon shows connected hierarchy / tree structure; best match for org chart / sitemap among Lucide options"
+  },
+  "progress": {
+    "value": "loader-circle",
+    "reason": "Circular loader represents ongoing progress; fits the progress bar / in-progress metaphor"
+  },
+  "milestone": {
+    "value": "milestone",
+    "reason": "Direct match; Lucide has a dedicated milestone icon (diamond shape)"
+  },
+  "tasks": {
+    "value": "list-todo",
+    "reason": "List with todo items directly represents a task list; verified to exist in Lucide"
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Standard map pin / location marker; the universal location icon"
+  },
+  "map": {
+    "value": "map",
+    "reason": "Direct match for map view icon"
+  },
+  "directions": {
+    "value": "route",
+    "reason": "Route line icon represents directions / navigation path between points"
+  },
+  "compass": {
+    "value": "compass",
+    "reason": "Direct match for compass / orientation / navigation icon"
+  },
+  "current-location": {
+    "value": "locate-fixed",
+    "reason": "Crosshair with fixed indicator represents current GPS location / near-me; more specific than plain locate"
+  },
+  "measure": {
+    "value": "ruler",
+    "reason": "Ruler icon directly represents measurement / distance; straightforward match"
+  },
+  "trending-up": {
+    "value": "trending-up",
+    "reason": "Direct match for upward trend / growth line chart"
+  },
+  "trending-down": {
+    "value": "trending-down",
+    "reason": "Direct match for downward trend / decline line chart"
+  },
+  "balance": {
+    "value": "scale",
+    "reason": "Scale icon represents balance / weighing / justice; direct semantic match in Lucide"
+  },
+  "swap": {
+    "value": "arrow-left-right",
+    "reason": "Bidirectional arrow represents transfer / swap / exchange between two sides"
+  },
+  "savings": {
+    "value": "piggy-bank",
+    "reason": "Piggy bank is the universal savings icon; verified to exist in Lucide"
+  },
+  "vault": {
+    "value": "vault",
+    "reason": "Direct match for vault / safe / secure storage icon"
+  },
+  "docs": {
+    "value": "book-text",
+    "reason": "Book with text represents documentation / reference material; more specific than plain book"
+  },
+  "book-open": {
+    "value": "book-open",
+    "reason": "Direct match for open book / reading icon"
+  },
+  "graduation": {
+    "value": "graduation-cap",
+    "reason": "Direct match for education / academic / degree icon"
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Direct match for work / business briefcase icon"
+  },
+  "company": {
+    "value": "building-2",
+    "reason": "Building-2 is a modern office building icon; represents company / corporate office better than plain building"
+  },
+  "organization": {
+    "value": "building",
+    "reason": "Building icon represents an organization / institution; uses plain building to differentiate from company (building-2)"
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Direct match for news / article / blog post icon"
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Direct match for RSS feed icon"
+  }
+}

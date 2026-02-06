@@ -19,6 +19,8 @@
   },
   "scripts": {
     "build": "wireit",
+    "generate:icons": "node scripts/generate-icon-css.js",
+    "download:icons": "node scripts/download-icon-svg.js",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -34,8 +36,13 @@
     "@semantic-ui/utils": "^0.18.0"
   },
   "devDependencies": {
+    "@material-symbols/svg-400": "^0.40.2",
+    "@phosphor-icons/core": "^2.1.1",
     "@semantic-ui/internal-scripts": "^0.18.0",
+    "@tabler/icons": "^3.36.1",
     "@vitest/browser-playwright": "^4.0.18",
+    "heroicons": "^2.2.0",
+    "lucide-static": "^0.563.0",
     "vitest": "^4.0.18"
   },
   "wireit": {

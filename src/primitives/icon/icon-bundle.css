@@ -8,8 +8,6 @@
 @layer icon.definition.singular {
   :host {
     display: inline-block;
-    content-visibility: auto;
-    contain-intrinsic-size: 1em;
     height: 1em;
     font-style: normal;
     font-weight: normal;
@@ -18,6 +16,7 @@
     margin: 0em var(--icon-distance-from-text) 0em 0em;
     font-size: inherit;
     vertical-align: text-top;
+    contain-intrinsic-size: 1em;
   }
   .icon {
     display: inherit;
@@ -29,9 +28,9 @@
     speak: none;
     background: var(--icon-bg, currentColor);
     mask-image: var(--icon-mask, none);
-    mask-size: auto 100%;
+    mask-size: 100% 100%;
     mask-repeat: no-repeat;
-    background-image: var(--icon-image, none);
+    background-image: var(--icon-bg-image, none);
     background-size: contain;
     background-repeat: no-repeat;
     font-family: var(--icon-font, inherit);
