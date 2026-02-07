@@ -179,7 +179,6 @@
         "globe",
         "cart",
         "add-to-cart",
-        "remove-from-cart",
         "payment",
         "wallet",
         "money",
@@ -290,18 +289,14 @@
         "eco",
         "hexagon",
         "triangle",
-        "google",
         "github",
         "apple",
         "facebook",
         "twitter",
         "linkedin",
-        "microsoft",
         "slack",
-        "discord",
         "instagram",
-        "youtube",
-        "android"
+        "youtube"
       ]
     }
   ],

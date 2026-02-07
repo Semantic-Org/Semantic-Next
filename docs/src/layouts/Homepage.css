@@ -53,7 +53,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     contain: strict;
-    height: 620px;
+    height: 80vh;
     perspective: 1000px;
 
 
@@ -80,13 +80,13 @@ body {
         top: 0;
         left: 0;
         height: 100%;
-        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
+        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0 / 0.9) 0%, oklch(0.32 0.08 228.42 / 0.5) 350px, oklch(0 0 0) 1200px);
+        /*
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
-        /*background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
+        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);*/
-        pointer-events: none;
+        */pointer-events: none;
       }
 
       * {
@@ -123,19 +123,27 @@ body {
     }
 
     .text {
-      margin: 0;
+      margin: 0 auto;
+      text-align: center;
       max-width : 550px;
     }
 
+    canvas#plasma,
     canvas#gradient {
       position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 2s ease;
+      image-rendering: auto;
+      will-change: contents;
+      contain: strict;
 
-      --gradient-color-1: #001019;
-      --gradient-color-2: #0a5471;
-      --gradient-color-3: #112129;
-      --gradient-color-4: #174557;
+      &.loaded {
+        opacity: 1;
+      }
     }
     &:before {
       position: absolute;
@@ -320,7 +328,7 @@ body {
   @media only screen and (max-width: 767px) {
 
     aboveFold {
-      height: 550px;
+      height: 90vh;
 
       content:before {
         background-image: none;
