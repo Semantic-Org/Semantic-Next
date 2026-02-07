@@ -46,9 +46,9 @@ const code2=`
     <content>
       <UIContainer>
         <div class="text">
-          <Image src={logoImage} alt="Logo" height="75" loading="eager" />
-          <h1>From Prompt to Production</h1>
-          <p>A <b>web component framework</b> and UI library designed for natural language to code. <b>No build step. No framework lock-in.</b></p>
+          <Image src={logoImage} alt="Logo" height="55" loading="eager" style="margin-bottom:2rem;"/>
+          <h1>A New Language for UI</h1>
+          <p>A <b>web component framework</b> and UI library designed for NL to code. <b>No build step. No framework lock-in.</b></p>
           <UIButton secondary href="/ui/start">View Docs</UIButton>
           <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
         </div>
@@ -62,7 +62,7 @@ const code2=`
       // Colors — just hex
       colorFrom:       '#000000',
       colorTo:         '#0d6e8a',
-      colorShift:      -1000,
+      colorShift:       100,
       fps: false,
 
       // Specular
@@ -71,14 +71,14 @@ const code2=`
       specularAmbient: 0.45,
 
       // Animation
-      speed:       0.3,
+      speed:       0.2,
       density:     1.5,
-      brightness:  1.2,
+      brightness:  0.4,
       resolution:  2,
       // Mouse interaction
       mouse: {
         light: 2,   // specular follows cursor
-        warp:  0.5,   // gravity well pulls bands
+        warp:  1.5,   // gravity well pulls bands
       },
     });
   </script>
@@ -87,17 +87,17 @@ const code2=`
       <UIContainer>
         <UICards three spaced stackable>
           <ui-card>
-            <ui-icon cpu></ui-icon>
-            <div class="header">AI Generates It. Browsers Run It.</div>
-            <div class="description">
-              No compiler between prompt and production. Components run natively in the browser — AI writes markup, users see UI. No webpack, no Vite, no build pipeline in between.
-            </div>
-          </ui-card>
-          <ui-card>
             <ui-icon pdf></ui-icon>
             <div class="header">From Human to AI</div>
             <div class="description">
               Components powered by machine readable specifications designed to translate from natural language to code.
+            </div>
+          </ui-card>
+          <ui-card>
+            <ui-icon cpu></ui-icon>
+            <div class="header">No Build Necessary</div>
+            <div class="description">
+              AI writes markup, users see UI. No webpack, no Vite, no compilation.
             </div>
           </ui-card>
           <ui-card>

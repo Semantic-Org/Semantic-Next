@@ -63,6 +63,9 @@ body {
     p {
       color: var(--white-60);
     }
+      b, strong {
+        color: #FFF;
+      }
 
     content {
       position: relative;
@@ -86,6 +89,7 @@ body {
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);*/
+
         */pointer-events: none;
       }
 
@@ -107,7 +111,7 @@ body {
       margin-top: 0.5rem;
 
       b {
-        color: var(--primary-light-text-color);
+        color: #FFFFFF;
       }
     }
 
