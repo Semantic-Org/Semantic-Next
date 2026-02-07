@@ -108,7 +108,32 @@ LitRenderer refactored to delegate: `this.evaluator = new ExpressionEvaluator({ 
 
 ## Phase 1: VanillaRenderer
 
-### 1.0 Renderer Interface Contract
+### 1.0 Signal-Based Binding Primitive
+
+All bindings use `Signal.computed` + `signal.subscribe` rather than raw Reactions. This provides:
+
+- **Automatic deduplication** — `Signal.computed` uses `isEqual` internally. If a dependency fires but the computed value is unchanged, subscribers don't run. No manual `if (old !== new)` guards.
+- **Composability** — `signal.derive()` chains transformations (e.g., object→array conversion for `{#each}`).
+- **Built-in cleanup** — `subscribe` returns a Reaction. `reaction.stop()` is the entire cleanup API.
+- **Debuggable** — Each binding has an inspectable Signal with `peek()`, `setContext()`, debug tracing.
+- **Consistent** — Components use Signals for state. The renderer uses Signals for bindings. Same primitives everywhere.
+
+Pattern for every binding type:
+
+```javascript
+// 1. Computed signal evaluates expression with deduplication
+const value = Signal.computed(() => evaluator.evaluate(expr, data));
+
+// 2. Subscribe writes to DOM only when value actually changes
+const reaction = value.subscribe((v) => { /* DOM write */ });
+
+// 3. Cleanup via ReactionScope
+scope.track(reaction);
+```
+
+Cost: one additional lightweight object (computed Signal) per binding. Negligible against the DOM nodes they're bound to.
+
+### 1.0b Renderer Interface Contract
 
 Both renderers must satisfy:
 
@@ -184,13 +209,40 @@ readAST({ ast, data }) {
 
 **HTML node batching:** The AST optimizer already joins adjacent HTML nodes. So each `html` node may contain a substantial HTML string. Use `<template>.innerHTML` for parsing — it handles all valid HTML including tables, SVG references, etc. without the parser quirks of `div.innerHTML`.
 
-**Node tracking:** For dynamic regions, use paired Comment nodes as markers:
-```html
-<!--sui:if:start-->
-  <div>conditional content</div>
-<!--sui:if:end-->
+**DOM Position Tracking: No Comment Markers**
+
+Lit litters the DOM with `<!--lit-part-->` comment pairs for every binding. The vanilla renderer avoids this entirely:
+
+- **Expressions** need zero markers — hold a direct reference to the Text node or element. `textNode.data = value` or `el.setAttribute(name, value)`.
+- **Block regions** (`{#if}`, `{#each}`, `{#async}`, `{#rerender}`) need a positional anchor only when empty (to know where to insert when content appears). Use a **single empty Text node** — invisible in rendered output, barely visible in dev tools.
+
+```javascript
+class DynamicRegion {
+  constructor() {
+    this.anchor = document.createTextNode('');  // invisible position marker
+    this.ownedNodes = [];                        // tracked for cleanup
+    this.childScopes = [];                       // nested ReactionScopes
+  }
+
+  clear() {
+    for (const scope of this.childScopes) scope.dispose();
+    this.childScopes = [];
+    for (const node of this.ownedNodes) node.remove();
+    this.ownedNodes = [];
+  }
+
+  setContent(fragment, scope) {
+    this.clear();
+    this.ownedNodes = [...fragment.childNodes];
+    if (scope) this.childScopes.push(scope);
+    this.anchor.after(fragment);
+  }
+}
 ```
-Content between markers is owned by the Reaction that manages that region. On update, clear between markers, insert new content.
+
+For a component with 15 expressions, 2 conditionals, and 1 each loop:
+- **Lit**: ~36 comment nodes (paired markers for every binding)
+- **Vanilla**: 3 invisible empty text nodes (only for block-level regions)
 
 ### 1.2 Reactive Bindings ({expression})
 
@@ -199,11 +251,9 @@ Each `{expression}` in the AST needs to resolve to a DOM binding that updates wh
 **Text content binding:**
 ```javascript
 const textNode = document.createTextNode('');
-const reaction = Reaction.create(() => {
-  const value = this.evaluator.evaluate(node.value, this.data);
-  textNode.data = value ?? '';
-});
-this.reactions.push(reaction);
+const value = Signal.computed(() => this.evaluator.evaluate(node.value, this.data));
+const reaction = value.subscribe((v) => { textNode.data = v ?? ''; });
+scope.track(reaction);
 fragment.append(textNode);
 ```
 
@@ -286,45 +336,40 @@ This is the most implementation effort in the whole plan, but it's a solved prob
 ### 1.3 Conditional Rendering ({#if}/{else if}/{else})
 
 ```javascript
-// Create marker region
-const startMarker = document.createComment('sui:if:start');
-const endMarker = document.createComment('sui:if:end');
-fragment.append(startMarker, endMarker);
+const region = new DynamicRegion();
+fragment.append(region.anchor);
 
-// Current branch tracking
 let currentBranchIndex = -1;
 
 const reaction = Reaction.create(() => {
-  const { matchIndex, content } = this.getBranch(node, data);
+  const { matchIndex, contentAST } = this.getBranch(node, data);
 
-  // Only swap DOM if branch changed
   if (matchIndex !== currentBranchIndex) {
     currentBranchIndex = matchIndex;
-    this.clearBetweenMarkers(startMarker, endMarker);
-    if (content) {
-      startMarker.after(content); // content is a DocumentFragment
+    if (contentAST) {
+      const scope = new ReactionScope();
+      const branchFragment = this.readAST({ ast: contentAST, data, scope });
+      region.setContent(branchFragment, scope);
+    } else {
+      region.clear();
     }
   }
 });
 ```
 
-**getBranch:** Same logic as `ReactiveConditionalDirective.getBranch()` — check condition, iterate branches, return matching content.
+**getBranch:** Same logic as `ReactiveConditionalDirective.getBranch()` — check condition, iterate branches, return matching AST content array.
 
-**clearBetweenMarkers helper:**
+**ReactionScope:** Groups Reactions created during a `readAST` call. When the region is cleared (branch swap), `scope.dispose()` stops all Reactions owned by that branch. This prevents leaked Reactions from removed DOM.
+
 ```javascript
-clearBetweenMarkers(start, end) {
-  let node = start.nextSibling;
-  while (node && node !== end) {
-    const next = node.nextSibling;
-    node.remove();
-    node = next;
-  }
+class ReactionScope {
+  constructor() { this.reactions = []; }
+  track(reaction) { this.reactions.push(reaction); }
+  dispose() { for (const r of this.reactions) r.stop(); this.reactions = []; }
 }
 ```
 
-Content for each branch is produced by recursively calling `readAST` with the branch's `content` array. The result is a DocumentFragment that gets inserted.
-
-**Cleanup concern:** When swapping branches, any Reactions owned by the removed branch's DOM need to be stopped. This requires each branch to track its own Reactions. Use a `ReactionScope` that groups Reactions and can be stopped/restarted as a unit.
+All Reaction creation inside `readAST` goes through the current scope, so cleanup is hierarchical.
 
 ### 1.4 List Rendering ({#each})
 
@@ -339,50 +384,77 @@ The hardest reactive DOM pattern. Needs efficient insert, remove, reorder withou
 
 **Implementation: `mapArray`-style reconciliation**
 
-Use a keyed reconciliation algorithm. The core idea:
+Use a keyed reconciliation algorithm. Each item is a `DynamicRegion` tracked by key:
 
 ```javascript
-const startMarker = document.createComment('sui:each:start');
-const endMarker = document.createComment('sui:each:end');
+const listRegion = new DynamicRegion();
+fragment.append(listRegion.anchor);
 
-// Map of key → { fragment, reactions, startMarker, endMarker }
+// Map of key → DynamicRegion (each item gets its own region)
 let itemMap = new Map();
 let currentKeys = [];
 
 const reaction = Reaction.create(() => {
   const items = evaluator.evaluate(node.over, data) || [];
+
+  // Handle empty list → {else} content
+  if (isEmpty(items) && node.elseContent) {
+    listRegion.clear();
+    itemMap.clear();
+    currentKeys = [];
+    const scope = new ReactionScope();
+    const elseFragment = this.readAST({ ast: node.elseContent, data, scope });
+    listRegion.setContent(elseFragment, scope);
+    return;
+  }
+
   const newKeys = items.map((item, i) => getItemID(item, i));
 
-  // Reconcile
-  const { toAdd, toRemove, toMove } = diffKeyedLists(currentKeys, newKeys);
-
-  // Remove
-  for (const key of toRemove) {
-    const entry = itemMap.get(key);
-    entry.reactions.forEach(r => r.stop());
-    clearBetweenMarkers(entry.startMarker, entry.endMarker);
-    entry.startMarker.remove();
-    entry.endMarker.remove();
-    itemMap.delete(key);
+  // Remove items no longer present
+  for (const key of currentKeys) {
+    if (!newKeys.includes(key)) {
+      const region = itemMap.get(key);
+      region.clear();
+      region.anchor.remove();
+      itemMap.delete(key);
+    }
   }
 
-  // Add new items
-  for (const { key, index } of toAdd) {
-    const item = items[index];
-    const itemData = getEachData(item, index, node);
-    const itemFragment = readAST({ ast: node.content, data: { ...data, ...itemData } });
-    // Insert at correct position
-    const refNode = getInsertionPoint(index, newKeys, itemMap, endMarker);
-    // Wrap in markers for future removal
-    const itemStart = document.createComment(`sui:each-item:${key}`);
-    const itemEnd = document.createComment(`sui:each-item-end:${key}`);
-    refNode.before(itemStart, itemFragment, itemEnd);
-    itemMap.set(key, { startMarker: itemStart, endMarker: itemEnd, reactions: [...] });
-  }
+  // Add/reorder items
+  let insertAfter = listRegion.anchor;
+  for (let i = 0; i < newKeys.length; i++) {
+    const key = newKeys[i];
+    const item = items[i];
 
-  // Reorder (move existing items to correct positions)
-  for (const { key, newIndex } of toMove) {
-    // Move markers + content to new position
+    if (itemMap.has(key)) {
+      // Existing item — move to correct position if needed
+      const region = itemMap.get(key);
+      if (region.anchor.previousSibling !== insertAfter &&
+          region.anchor !== insertAfter) {
+        // Move: anchor + owned nodes
+        insertAfter.after(region.anchor, ...region.ownedNodes);
+      }
+      insertAfter = region.ownedNodes.length
+        ? region.ownedNodes[region.ownedNodes.length - 1]
+        : region.anchor;
+    } else {
+      // New item — create region and render
+      const itemRegion = new DynamicRegion();
+      const scope = new ReactionScope();
+      const itemData = getEachData(item, i, node);
+      const itemFragment = this.readAST({
+        ast: node.content,
+        data: { ...data, ...itemData },
+        scope,
+      });
+      itemRegion.ownedNodes = [...itemFragment.childNodes];
+      itemRegion.childScopes.push(scope);
+      insertAfter.after(itemRegion.anchor, itemFragment);
+      itemMap.set(key, itemRegion);
+      insertAfter = itemRegion.ownedNodes.length
+        ? itemRegion.ownedNodes[itemRegion.ownedNodes.length - 1]
+        : itemRegion.anchor;
+    }
   }
 
   currentKeys = newKeys;
@@ -397,46 +469,34 @@ const reaction = Reaction.create(() => {
 
 ### 1.5 Async Blocks ({#async})
 
-Same marker pattern as conditionals, with three states:
+Uses `DynamicRegion` — same pattern as conditionals, with three states:
 
 ```javascript
-const startMarker = document.createComment('sui:async:start');
-const endMarker = document.createComment('sui:async:end');
-let currentState = 'loading';
+const region = new DynamicRegion();
+fragment.append(region.anchor);
+
+const renderState = (ast, extraData = {}) => {
+  const scope = new ReactionScope();
+  const stateFragment = this.readAST({ ast, data: { ...data, ...extraData }, scope });
+  region.setContent(stateFragment, scope);
+};
 
 const reaction = Reaction.create(() => {
   const result = evaluator.evaluate(node.expression, data);
 
   if (isPromise(result)) {
-    // Show loading content
-    if (node.loadingContent?.length) {
-      this.clearBetweenMarkers(startMarker, endMarker);
-      const loadingFragment = readAST({ ast: node.loadingContent, data });
-      startMarker.after(loadingFragment);
-    }
+    if (node.loadingContent?.length) renderState(node.loadingContent);
 
     result.then(value => {
-      currentState = 'success';
-      const successData = createSuccessDataContext(node, value);
-      this.clearBetweenMarkers(startMarker, endMarker);
-      const contentFragment = readAST({ ast: node.content, data: { ...data, ...successData } });
-      startMarker.after(contentFragment);
+      renderState(node.content, createSuccessDataContext(node, value));
     }).catch(error => {
-      currentState = 'error';
       if (node.errorContent?.length) {
         const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
-        this.clearBetweenMarkers(startMarker, endMarker);
-        const errorFragment = readAST({ ast: node.errorContent, data: { ...data, ...errorData } });
-        startMarker.after(errorFragment);
+        renderState(node.errorContent, errorData);
       }
     });
   } else {
-    // Synchronous value
-    currentState = 'success';
-    const successData = createSuccessDataContext(node, result);
-    this.clearBetweenMarkers(startMarker, endMarker);
-    const contentFragment = readAST({ ast: node.content, data: { ...data, ...successData } });
-    startMarker.after(contentFragment);
+    renderState(node.content, createSuccessDataContext(node, result));
   }
 });
 ```
@@ -448,15 +508,18 @@ const reaction = Reaction.create(() => {
 These force a full re-render of a template region when specific reactive dependencies change.
 
 ```javascript
-const startMarker = document.createComment('sui:rerender:start');
-const endMarker = document.createComment('sui:rerender:end');
+const region = new DynamicRegion();
+fragment.append(region.anchor);
 
 // Initial render
-const initialFragment = readAST({ ast: node.content, data });
-fragment.append(startMarker, initialFragment, endMarker);
+const initialScope = new ReactionScope();
+const initialFragment = this.readAST({ ast: node.content, data, scope: initialScope });
+region.ownedNodes = [...initialFragment.childNodes];
+region.childScopes.push(initialScope);
+region.anchor.after(initialFragment);
 
 const reaction = Reaction.create((computation) => {
-  // Touch reactive dependencies
+  // Touch reactive dependencies to subscribe
   if (node.key) {
     Reaction.guard(() => evaluator.evaluate(node.key, data));
   }
@@ -465,10 +528,9 @@ const reaction = Reaction.create((computation) => {
   }
 
   if (!computation.firstRun) {
-    // Stop child reactions, clear DOM, re-render
-    this.clearBetweenMarkers(startMarker, endMarker);
-    const newFragment = readAST({ ast: node.content, data });
-    startMarker.after(newFragment);
+    const scope = new ReactionScope();
+    const newFragment = this.readAST({ ast: node.content, data, scope });
+    region.setContent(newFragment, scope);
   }
 });
 ```
@@ -484,8 +546,8 @@ Subtemplates are full Template instances with their own lifecycle. The vanilla r
 5. Attach events and styles via `template.attach()`
 
 ```javascript
-const startMarker = document.createComment('sui:template:start');
-const endMarker = document.createComment('sui:template:end');
+const region = new DynamicRegion();
+fragment.append(region.anchor);
 
 const reaction = Reaction.create(() => {
   const templateOrName = evaluator.evaluate(node.name, data);
@@ -504,13 +566,12 @@ const reaction = Reaction.create(() => {
   // Clone and render
   const instance = template.clone({ data: templateData });
   instance.initialize();
-  const fragment = instance.render(); // VanillaRenderer returns DocumentFragment
+  const templateFragment = instance.render(); // VanillaRenderer returns DocumentFragment
 
-  this.clearBetweenMarkers(startMarker, endMarker);
-  startMarker.after(fragment);
+  region.setContent(templateFragment);
 
   // Attach for events and parent/child tracking
-  instance.attach(renderRoot, { parentNode, startNode: startMarker, endNode: endMarker });
+  instance.attach(renderRoot, { parentNode, startNode: region.anchor, endNode: null });
   instance.setParent(parentTemplate);
 });
 ```
@@ -863,9 +924,9 @@ The placeholder approach for detecting attribute vs text positions is the bigges
 **Mitigation:** Prototype this first. If the placeholder approach is too fragile, consider modifying the AST to explicitly classify expression positions (requires template compiler changes but would be the cleanest solution long-term).
 
 ### Reaction Cleanup on Branch Swap
-When `{#if}` swaps branches or `{#each}` removes items, all Reactions owned by the removed DOM must be stopped. This requires hierarchical Reaction tracking — each dynamic region tracks its child Reactions.
+When `{#if}` swaps branches or `{#each}` removes items, all Reactions owned by the removed DOM must be stopped. This requires hierarchical Reaction tracking.
 
-**Mitigation:** Implement a `ReactionScope` class that groups Reactions and can be disposed as a unit. Each conditional branch, each list item, each rerender block gets its own scope.
+**Mitigation:** The `DynamicRegion` + `ReactionScope` pattern handles this. Each region tracks its child scopes. `region.setContent()` disposes old scopes before inserting new content. Since `readAST` takes a scope parameter, all Reactions created during rendering are automatically tracked for cleanup.
 
 ### Performance vs Lit
 Lit's tagged template literal approach is highly optimized — the browser caches the template parse result, and Lit only diffs expression values. The vanilla renderer creates DOM nodes directly, which may be slower for first render of large templates.
