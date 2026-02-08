@@ -40,10 +40,8 @@ const defaultSettings = {
 
   anchorName: 'anchor-{count}', // name of anchor
 
-  moveElement: false, // whether to move element to same positioning context
-
   observeChanges: true, // whether to observe attribute changes
-  containToScroll: true, // whether to contain element to its scroll container
+  containToScroll: false, // whether to contain element to its scroll container
 
   // throttle delays for performance optimization
   scrollThrottle: (1000 / 60), // target 60fps
@@ -145,11 +143,11 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       settings.scrollThrottle,
       settings.throttleSettings,
     )
-    : idleCallback(self.reposition),
+    : () => idleCallback(self.reposition),
 
   onResize: (settings.resizeThrottle > 0)
     ? debounce(() => idleCallback(self.reposition), settings.resizeThrottle, settings.throttleSettings)
-    : idleCallback(self.reposition),
+    : () => idleCallback(self.reposition),
 
   getNextAnchorName() {
     if (!cache.count) {
@@ -246,7 +244,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
 
   // Helper to normalize units (assume px for numbers)
   normalizeUnit(value) {
-    if (!value || value === 0 || (isString(value) && value.startsWith('0'))) {
+    if (!value || value === 0 || (isString(value) && parseFloat(value) === 0)) {
       return null;
     }
     if (isNumber(value)) {
@@ -310,6 +308,10 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       }
     }
     else if (!settings.preferOriginal && self.currentPositionInView()) {
+      return;
+    }
+    // checkInView may have already completed a search via currentPositionInView
+    if (self.searchComplete) {
       return;
     }
     // test first position
@@ -465,25 +467,6 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
     });
   },
 
-  maybeMoveElement() {
-    const $anchor = self.getAnchor();
-    const anchorParent = $anchor.positioningParent().el();
-    const elParent = $el.positioningParent().el();
-
-    // same positioning context
-    if (anchorParent === elParent) {
-      return;
-    }
-
-    // Move element and warn
-    const targetParent = anchorParent || document.body;
-    warn(`Moving anchored element to compatible positioning context`, {
-      from: elParent,
-      to: targetParent,
-    });
-    $el.detach().appendTo(targetParent);
-  },
-
   attach() {
     if (!self.anchorName) {
       self.setAnchorName();
@@ -502,13 +485,10 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
   },
 });
 
-const onCreated = ({ self, settings }) => {
+const onCreated = ({ self, settings, error }) => {
   if (!settings.to) {
     error('No element specified to attach to');
     return;
-  }
-  if (settings.moveElement) {
-    self.maybeMoveElement();
   }
   self.attach();
   self.bindScroll();
@@ -533,7 +513,7 @@ const mutations = {
     if (settings.observeChanges) {
       // only observe changes that cause layout changes
       const styleChanged = attributeName === 'style';
-      const displayChanged = attributeValue.includes('display');
+      const displayChanged = (attributeValue || '').includes('display');
       if (styleChanged && displayChanged) {
         self.reposition();
       }
