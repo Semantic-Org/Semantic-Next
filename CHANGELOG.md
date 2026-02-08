@@ -39,6 +39,9 @@ xx.xx.xxxx
 * **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
 * **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.
 * **Performance** - Optimized `containsDeep()` to skip redundant `contains()` calls on light DOM children already checked by the parent scope.
+* **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
+* **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
+* **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
 
 ### Utils
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
