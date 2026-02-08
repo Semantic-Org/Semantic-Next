@@ -79,6 +79,10 @@ export class Query {
   */
   static elementDisplayCache = new WeakMap();
 
+  static isWindow(el) {
+    return el === Query.globalThisProxy || el === globalThis;
+  }
+
   // Tag → natural display value (pre-inverted for O(1) lookup)
   static naturalDisplayMap = Object.freeze(Object.fromEntries([
     ...[
@@ -193,6 +197,18 @@ export class Query {
 
   end() {
     return this.prevObject || this;
+  }
+
+  [Symbol.iterator]() {
+    let index = 0;
+    return {
+      next: () => {
+        if (index < this.length) {
+          return { value: this[index++], done: false };
+        }
+        return { done: true };
+      },
+    };
   }
 
   /* we will add all elements across shadow root boundaries while matching
@@ -323,8 +339,16 @@ export class Query {
   }
 
   parent(selector) {
+    const pierceShadow = this.options.pierceShadow;
     const parents = Array.from(this)
-      .map((el) => el.parentElement)
+      .map((el) => {
+        const parent = el.parentElement;
+        if (!parent && pierceShadow) {
+          // cross shadow boundary to host element
+          return el.getRootNode?.()?.host || null;
+        }
+        return parent;
+      })
       .filter(Boolean);
     return selector ? this.chain(parents).filter(selector) : this.chain(parents);
   }
@@ -1297,7 +1321,7 @@ export class Query {
 
     const heights = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return window.innerHeight;
       }
 
@@ -1367,7 +1391,7 @@ export class Query {
 
     const widths = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return window.innerWidth;
       }
 
@@ -2081,7 +2105,7 @@ export class Query {
       return undefined;
     }
     const rects = this.map(el => {
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return document.documentElement.getBoundingClientRect();
       }
       return el.getBoundingClientRect();
@@ -2095,7 +2119,7 @@ export class Query {
     }
     const results = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         const boxValues = { top: 0, right: 0, bottom: 0, left: 0 };
         return {
           top: 0,
