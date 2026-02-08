@@ -1455,6 +1455,41 @@ describe('query', () => {
     });
   });
 
+  describe('toggle class', () => {
+    it('should toggle a single class on', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(true);
+    });
+
+    it('should toggle a single class off', () => {
+      const div = document.createElement('div');
+      div.classList.add('active');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(false);
+    });
+
+    it('should toggle multiple classes independently', () => {
+      const div = document.createElement('div');
+      div.classList.add('foo');
+      document.body.appendChild(div);
+      $('div').toggleClass('foo bar');
+      expect(div.classList.contains('foo')).toBe(false);
+      expect(div.classList.contains('bar')).toBe(true);
+    });
+
+    it('should handle no argument gracefully', () => {
+      const div = document.createElement('div');
+      div.classList.add('test');
+      document.body.appendChild(div);
+      const $div = $('div').toggleClass();
+      expect(div.classList.contains('test')).toBe(true);
+      expect($div.length).toBe(1);
+    });
+  });
+
   describe('html', () => {
     it('html should return the innerHTML of an element', () => {
       const div = document.createElement('div');
