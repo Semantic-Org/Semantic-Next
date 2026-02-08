@@ -23,6 +23,20 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
+// Walks to the next parent node, optionally crossing shadow DOM boundaries
+const getParentNode = (node, pierceShadow) => {
+  if (node.parentNode) {
+    return node.parentNode;
+  }
+  if (pierceShadow) {
+    const root = node.getRootNode?.();
+    if (root?.host) {
+      return root.host;
+    }
+  }
+  return null;
+};
+
 export class Query {
   /*
     This avoids keeping a copy of window/globalThis in
@@ -230,6 +244,13 @@ export class Query {
     };
 
     const findElements = (node, selector, query) => {
+      // Skip nodes that can't have shadow roots or meaningful children
+      if (
+        node.nodeType !== Node.ELEMENT_NODE
+        && node.nodeType !== Node.DOCUMENT_FRAGMENT_NODE
+        && node.nodeType !== Node.DOCUMENT_NODE
+      ) { return; }
+
       // Early termination condition for DOM selector search
       if (domSelector && domFound) { return; }
 
@@ -457,28 +478,23 @@ export class Query {
       return false;
     }
 
-    // Check direct containment first
     if (container.contains && container.contains(target)) {
       return true;
     }
 
-    // Check within shadow roots
-    if (container.shadowRoot) {
-      if (this.containsDeep(container.shadowRoot, target)) {
+    // contains() checked all light DOM — target can only be in a shadow root
+    const searchShadows = (node) => {
+      if (node.shadowRoot && this.containsDeep(node.shadowRoot, target)) {
         return true;
       }
-    }
-
-    // Check children recursively
-    if (container.children) {
-      for (let child of container.children) {
-        if (this.containsDeep(child, target)) {
-          return true;
+      if (node.children) {
+        for (const child of node.children) {
+          if (searchShadows(child)) { return true; }
         }
       }
-    }
-
-    return false;
+      return false;
+    };
+    return searchShadows(container);
   }
 
   closest(selector, { returnAll = false } = {}) {
@@ -713,9 +729,9 @@ export class Query {
 
     // We add a custom abort controller so that we can remove all events at once
     options = options || {};
-    const abortController = new AbortController();
+    const abortController = options.abortController || new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = (...args) => {
+    const wrappedHandler = function(...args) {
       abortController.abort();
       handler.apply(this, args);
     };
@@ -736,6 +752,10 @@ export class Query {
         options = targetSelectorOrOptions;
       }
 
+      // Shared abort controller so timeout can cleanly remove the listener
+      const abortController = new AbortController();
+      options = { ...options, abortController };
+
       // Extract timeout if specified
       const timeout = options?.timeout;
       let timeoutId;
@@ -743,8 +763,7 @@ export class Query {
       // Set up timeout if specified
       if (timeout) {
         timeoutId = setTimeout(() => {
-          // Clean up event listener
-          this.off(eventName, handler);
+          abortController.abort();
           reject(new Error(`Event '${eventName}' timeout after ${timeout}ms`));
         }, timeout);
       }
@@ -1747,7 +1766,7 @@ export class Query {
   }
 
   // this is the element that clips current element
-  clippingParent() {
+  clippingParent({ pierceShadow = false } = {}) {
     const parents = this.map((el) => {
       const emptyValues = ['', 'none'];
 
@@ -1758,7 +1777,7 @@ export class Query {
       const isAnchored = hasAnchor && isPositioned;
       const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
 
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
       while (current) {
         if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
@@ -1781,7 +1800,7 @@ export class Query {
             return current;
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
       return document.documentElement;
     });
@@ -1790,7 +1809,7 @@ export class Query {
 
   // this is the parent element where top/left and offsetTop/left will be relative
   // supports both fixed and absolute elements
-  positioningParent({ calculate = true } = {}) {
+  positioningParent({ calculate = true, pierceShadow = false } = {}) {
     const parents = this.map((el) => {
       const reportedParent = el.offsetParent || document.documentElement;
 
@@ -1803,7 +1822,7 @@ export class Query {
         return reportedParent;
       }
 
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
@@ -1834,7 +1853,7 @@ export class Query {
             }
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
       return document.documentElement;
     });
@@ -1842,10 +1861,10 @@ export class Query {
   }
 
   // this is the nearest element that creates a scroll container
-  scrollParent({ all = false } = {}) {
+  scrollParent({ all = false, pierceShadow = false } = {}) {
     const results = this.map((el) => {
       const scrollParents = [];
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
 
       while (current && current !== document.body) {
         if (current instanceof Element) {
@@ -1861,7 +1880,7 @@ export class Query {
             }
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
 
       // documentElement is the final scroll container
@@ -2102,10 +2121,8 @@ export class Query {
         };
       }
 
-      const $el = this.chain(el);
-
       // Position Properties
-      const rect = $el.bounds();
+      const rect = el.getBoundingClientRect();
       const top = rect.top;
       const left = rect.left;
 
