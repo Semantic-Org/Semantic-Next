@@ -1,11 +1,11 @@
-
+:host,
 :root {
   /* Duration Tokens */
-  --motion-scale-factor: 1;
-  --duration-quick: calc(100ms * var(--motion-scale-factor));      /* Tooltips, micro-interactions */
-  --duration-short: calc(130ms * var(--motion-scale-factor));      /* Standard/default for most UI */
-  --duration-medium: calc(180ms * var(--motion-scale-factor));     /* Emphasis animations, modals */
-  --duration-long: calc(250ms * var(--motion-scale-factor));       /* Complex sequences */
+  --motion-speed: 1;
+  --duration-quick: calc(100ms / var(--motion-speed));      /* Tooltips, micro-interactions */
+  --duration-short: calc(130ms / var(--motion-speed));      /* Standard/default for most UI */
+  --duration-medium: calc(180ms / var(--motion-speed));     /* Emphasis animations, modals */
+  --duration-long: calc(250ms / var(--motion-speed));       /* Complex sequences */
 
   /* Easing Functions */
   --ease-standard: cubic-bezier(0.3, 0.07, 0.3, 1);   /* Smoother out, slight overshoot */
@@ -26,8 +26,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :host,
   :root {
-    --motion-scale-factor: 0.1;
+    --motion-speed: 10;
   }
 }
 
@@ -383,10 +384,6 @@
 .transition[class*="pop-"] {
   opacity: 0;
 
-  &.in {
-    animation: var(--pop-in-animation) var(--duration-short) var(--ease-out) forwards;
-  }
-
   &.out {
     animation: pop-out var(--duration-quick) var(--ease-in) forwards;
   }
@@ -395,12 +392,15 @@
   &.pop-top,
   &.pop-top-left,
   &.pop-top-right {
-    --pop-in-animation: pop-in-top;
     transform: translateY(4px);
 
     @starting-style {
       opacity: 0;
       transform: translateY(4px);
+    }
+
+    &.in {
+      animation: pop-in-top var(--duration-short) var(--ease-out) forwards;
     }
   }
 
@@ -408,12 +408,15 @@
   &.pop-bottom,
   &.pop-bottom-left,
   &.pop-bottom-right {
-    --pop-in-animation: pop-in-bottom;
     transform: translateY(-4px);
 
     @starting-style {
       opacity: 0;
       transform: translateY(-4px);
+    }
+
+    &.in {
+      animation: pop-in-bottom var(--duration-short) var(--ease-out) forwards;
     }
   }
 
@@ -421,12 +424,15 @@
   &.pop-left,
   &.pop-left-top,
   &.pop-left-bottom {
-    --pop-in-animation: pop-in-left;
     transform: translateX(4px);
 
     @starting-style {
       opacity: 0;
       transform: translateX(4px);
+    }
+
+    &.in {
+      animation: pop-in-left var(--duration-short) var(--ease-out) forwards;
     }
   }
 
@@ -434,12 +440,15 @@
   &.pop-right,
   &.pop-right-top,
   &.pop-right-bottom {
-    --pop-in-animation: pop-in-right;
     transform: translateX(-4px);
 
     @starting-style {
       opacity: 0;
       transform: translateX(-4px);
+    }
+
+    &.in {
+      animation: pop-in-right var(--duration-short) var(--ease-out) forwards;
     }
   }
 }
