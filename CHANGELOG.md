@@ -15,7 +15,9 @@ xx.xx.xxxx
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 
 ### Behaviors
-* **Feature** - Add new `portal` behavior for moving DOM like modals and popups
+* **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
+* **Feature** - Add new `tooltip` behavior for creating tooltips or popover content
+* **Feature** - Add new `escape` behavior for moving DOM like modals and popups
 
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
