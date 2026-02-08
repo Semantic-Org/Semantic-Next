@@ -65,6 +65,48 @@ export class Query {
   */
   static elementDisplayCache = new WeakMap();
 
+  // Tag → natural display value (pre-inverted for O(1) lookup)
+  static naturalDisplayMap = Object.freeze(Object.fromEntries([
+    ...[
+      'a',
+      'abbr',
+      'b',
+      'bdi',
+      'bdo',
+      'br',
+      'cite',
+      'code',
+      'dfn',
+      'em',
+      'i',
+      'kbd',
+      'mark',
+      'q',
+      'ruby',
+      'samp',
+      'small',
+      'span',
+      'strong',
+      'sub',
+      'sup',
+      'time',
+      'u',
+      'var',
+      'wbr',
+    ].map(t => [t, 'inline']),
+    ...['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'].map(t => [t, 'inline-block']),
+    ...['table'].map(t => [t, 'table']),
+    ...['tr'].map(t => [t, 'table-row']),
+    ...['td', 'th'].map(t => [t, 'table-cell']),
+    ...['thead'].map(t => [t, 'table-header-group']),
+    ...['tbody'].map(t => [t, 'table-row-group']),
+    ...['tfoot'].map(t => [t, 'table-footer-group']),
+    ...['caption'].map(t => [t, 'table-caption']),
+    ...['col'].map(t => [t, 'table-column']),
+    ...['colgroup'].map(t => [t, 'table-column-group']),
+    ...['li'].map(t => [t, 'list-item']),
+  ]));
+
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
@@ -728,6 +770,7 @@ export class Query {
   off(eventNames, handler) {
     if (isFunction(eventNames)) {
       handler = eventNames;
+      eventNames = undefined;
     }
 
     // actually handle removing an event handler
@@ -859,7 +902,9 @@ export class Query {
       return this;
     }
     const classesToToggle = classNames.trim().split(' ');
-    return this.each((el) => el?.classList.toggle(...classesToToggle));
+    return this.each((el) => {
+      classesToToggle.forEach(cls => el?.classList.toggle(cls));
+    });
   }
 
   hasClass(className) {
@@ -1531,8 +1576,8 @@ export class Query {
         margin: '0px',
         border: '0px',
       };
-      if (!preserveMaxWidth) {
-        css.maxWidth = 'none';
+      if (preserveMaxWidth) {
+        delete css.maxWidth;
       }
       $clone
         .insertAfter(el)
@@ -1564,8 +1609,8 @@ export class Query {
         margin: '0px',
         border: '0px',
       };
-      if (!preserveMaxHeight) {
-        css.maxHeight = 'none';
+      if (preserveMaxHeight) {
+        delete css.maxHeight;
       }
       $clone
         .insertAfter(el)
@@ -1688,57 +1733,8 @@ export class Query {
         }
       }
 
-      // BACKUP Path: Use natural display type for browsers based on a lookup table
-      const naturalDisplay = {
-        inline: [
-          'a',
-          'abbr',
-          'b',
-          'bdi',
-          'bdo',
-          'br',
-          'cite',
-          'code',
-          'dfn',
-          'em',
-          'i',
-          'kbd',
-          'mark',
-          'q',
-          'ruby',
-          'samp',
-          'small',
-          'span',
-          'strong',
-          'sub',
-          'sup',
-          'time',
-          'u',
-          'var',
-          'wbr',
-        ],
-        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
-        'table': ['table'],
-        'table-row': ['tr'],
-        'table-cell': ['td', 'th'],
-        'table-header-group': ['thead'],
-        'table-row-group': ['tbody'],
-        'table-footer-group': ['tfoot'],
-        'table-caption': ['caption'],
-        'table-column': ['col'],
-        'table-column-group': ['colgroup'],
-        'list-item': ['li'],
-      };
-
       const tagName = el.tagName.toLowerCase();
-      let displayValue;
-      for (const [display, tags] of Object.entries(naturalDisplay)) {
-        if (tags.includes(tagName)) {
-          displayValue = display;
-          break;
-        }
-      }
-      displayValue = displayValue || 'block'; // Default for most elements
+      const displayValue = Query.naturalDisplayMap[tagName] || 'block';
 
       // Cache the result if we are calculating
       if (calculate) {
