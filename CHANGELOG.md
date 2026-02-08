@@ -34,6 +34,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `one()` wrapping handler in arrow function which prevented `this` from being set to the matched element in delegated event handlers.
 * **Bug** - Fixed `onNext()` timeout failing to remove event listener because `off()` couldn't match the wrapped handler — now uses shared `AbortController` for cleanup.
 * **Bug** - Fixed `naturalWidth()` / `naturalHeight()` `preserveMaxWidth` / `preserveMaxHeight` options being no-ops due to inverted conditional logic.
+* **Bug** - Fixed constructor leaking `options` and `prevObject` when wrapping a Query instance (e.g. `$($deep)`) — `Object.assign` copied all source properties, overwriting the new instance's intended options.
 * **Performance** - Hoisted `naturalDisplay()` tag-to-display lookup to a static class property, avoiding object recreation on every call.
 * **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
 * **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.

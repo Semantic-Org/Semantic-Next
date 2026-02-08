@@ -130,10 +130,9 @@ export class Query {
 
     // this is an existing query object
     if (selector instanceof Query) {
-      elements = selector;
+      elements = Array.from(selector);
     }
-
-    if (
+    else if (
       (selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])
       || selector == Query.globalThisProxy
     ) {
