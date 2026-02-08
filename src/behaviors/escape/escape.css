@@ -1,0 +1,12 @@
+:where([popover]) {
+  position: unset;
+  inset: unset;
+  margin: unset;
+  border: unset;
+  padding: unset;
+  overflow: unset;
+  color: unset;
+  background: unset;
+  width: unset;
+  height: unset;
+}

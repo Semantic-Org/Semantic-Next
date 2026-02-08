@@ -91,7 +91,7 @@ Every function in the component definition (`createComponent`, `events`, `keys`,
 ## CSS Architecture
 
 - **`css`**: Scoped to the component's Shadow DOM. Use this for 99% of styling.
-- **`pageCSS`**: Injected into the Light DOM (Global Document). Use for `@keyframes`, body scroll locks, or portal styling.
+- **`pageCSS`**: Injected into the Light DOM (Global Document). Use for `@keyframes`, body scroll locks, or global overlay styling.
 
 ## Lifecycle Hooks
 

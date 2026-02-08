@@ -15,7 +15,9 @@ xx.xx.xxxx
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 
 ### Behaviors
-* **Feature** - Add new `portal` behavior for moving DOM like modals and popups
+* **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
+* **Feature** - Add new `tooltip` behavior for creating tooltips or popover content
+* **Feature** - Add new `escape` behavior for moving DOM like modals and popups
 
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
@@ -26,6 +28,20 @@ xx.xx.xxxx
 
 ### Query
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
+* **Feature** - Added `pierceShadow` option to `scrollParent()`, `clippingParent()`, and `positioningParent()` to optionally walk parents across shadow DOM boundaries.
+* **Bug** - Fixed `toggleClass()` with multiple classes passing second class as `force` parameter to `classList.toggle()` instead of toggling each class independently.
+* **Bug** - Fixed `off(handler)` crashing when called with a function but no event name — `eventNames` was not cleared after reassignment.
+* **Bug** - Fixed `one()` wrapping handler in arrow function which prevented `this` from being set to the matched element in delegated event handlers.
+* **Bug** - Fixed `onNext()` timeout failing to remove event listener because `off()` couldn't match the wrapped handler — now uses shared `AbortController` for cleanup.
+* **Bug** - Fixed `naturalWidth()` / `naturalHeight()` `preserveMaxWidth` / `preserveMaxHeight` options being no-ops due to inverted conditional logic.
+* **Bug** - Fixed constructor leaking `options` and `prevObject` when wrapping a Query instance (e.g. `$($deep)`) — `Object.assign` copied all source properties, overwriting the new instance's intended options.
+* **Performance** - Hoisted `naturalDisplay()` tag-to-display lookup to a static class property, avoiding object recreation on every call.
+* **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
+* **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.
+* **Performance** - Optimized `containsDeep()` to skip redundant `contains()` calls on light DOM children already checked by the parent scope.
+* **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
+* **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
+* **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
 
 ### Utils
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.

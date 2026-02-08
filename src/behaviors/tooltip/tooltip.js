@@ -1,13 +1,17 @@
 import { registerBehavior } from '@semantic-ui/query';
 import { isString, noop, tokenize } from '@semantic-ui/utils';
 
+import { Attach } from '../attach/attach.js';
+import { Escape } from '../escape/escape.js';
+import { Transition } from '../transition/transition.js';
+
 import css from './tooltip.css?raw';
 
 /*
   Tooltip behavior - attaches floating content to a trigger element
-  with automatic positioning, transitions, and optional portaling.
+  with automatic positioning, transitions, and top layer escape.
 
-  Uses: attach (positioning), transition (animations), portal (optional)
+  Uses: attach (positioning), transition (animations), escape (top layer)
 
   Settings:
   ┌──────────────┬──────────────────┬─────────────────────────────────────────────────┐
@@ -22,7 +26,6 @@ import css from './tooltip.css?raw';
   │ hideDelay    │ 70               │ Delay before hiding (ms)                       │
   │ warmWindow   │ 1000             │ Skip delay if tooltip shown within this period │
   │ arrow        │ true             │ Whether to show pointing arrow                 │
-  │ portal       │ false            │ Portal tooltip to body to escape stacking      │
   │ distance     │ 0                │ Distance from trigger element                  │
   │ offset       │ 0                │ Offset along the edge                          │
   │ preserve     │ true             │ Keep tooltip in DOM after hiding               │
@@ -68,9 +71,6 @@ const defaultSettings = {
   // show pointing arrow
   arrow: true,
 
-  // portal to body to escape overflow/stacking contexts
-  portal: false,
-
   // distance away from trigger
   distance: 0,
 
@@ -83,7 +83,10 @@ const defaultSettings = {
   // allow hovering over tooltip without it closing
   hoverable: false,
 
-  // callbacks
+  // whether to contain tooltip to scroll container (passed to attach)
+  containToScroll: true,
+
+  // callbacks (onShow/onHide can return false or Promise<false> to cancel)
   onShow: noop,
   onHide: noop,
   onVisible: noop,
@@ -138,11 +141,6 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       .end()
       .insertAfter(el);
 
-    // Portal if requested
-    if (settings.portal) {
-      self.$tooltip.portal();
-    }
-
     // Bind events to tooltip
     self.bindTooltipEvents();
   },
@@ -192,6 +190,91 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       $el.on('click', self.handleToggle);
     }
     // 'manual' trigger requires programmatic control
+  },
+
+  async show() {
+    if (self.isVisible) {
+      return;
+    }
+
+    // Recreate tooltip if it was removed
+    if (!self.$tooltip) {
+      self.createTooltip();
+    }
+
+    // Allow onShow to cancel by returning false (supports async)
+    if (await Promise.resolve(settings.onShow.call(el)) === false) {
+      return;
+    }
+
+    self.$tooltip.removeClass(classNames.hidden);
+
+    // Mark interaction for shared warm timer
+    self.shared.lastInteraction = Date.now();
+
+    self.isVisible = true;
+    dispatchEvent('show');
+
+    // Promote to top layer (creates escape behavior on first call)
+    self.$tooltip
+      .escape('show')
+      .attach({
+        to: el,
+        position: self.position,
+        arrow: settings.arrow,
+        distance: settings.distance,
+        offset: settings.offset,
+        containToScroll: settings.containToScroll,
+      });
+
+    // Animate in with direction-aware animation
+    const animation = self.getAnimation();
+    await self.$tooltip.transition(`${animation} in`, settings.duration);
+
+    self.$tooltip.addClass(classNames.visible);
+    settings.onVisible.call(el);
+    dispatchEvent('visible');
+  },
+
+  async hide() {
+    if (!self.$tooltip || !self.isVisible) {
+      return;
+    }
+
+    // Allow onHide to cancel by returning false (supports async)
+    if (await Promise.resolve(settings.onHide.call(el)) === false) {
+      return;
+    }
+
+    self.$tooltip.removeClass(classNames.visible);
+    self.isVisible = false;
+    dispatchEvent('hide');
+
+    // Animate out with direction-aware animation
+    const animation = self.getAnimation();
+    await self.$tooltip.transition(`${animation} out`, settings.duration);
+
+    // Remove from DOM if not preserving
+    if (!settings.preserve && self.$tooltip) {
+      self.$tooltip.remove();
+      self.$tooltip = null;
+    }
+    else {
+      self.$tooltip.escape('hide');
+      self.$tooltip.addClass(classNames.hidden);
+    }
+
+    settings.onHidden.call(el);
+    dispatchEvent('hidden');
+  },
+
+  toggle() {
+    if (self.isVisible) {
+      self.hide();
+    }
+    else {
+      self.show();
+    }
   },
 
   isWarm() {
@@ -270,71 +353,6 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     return `pop-${tokenize(position)}`;
   },
 
-  async show() {
-    if (self.isVisible) {
-      return;
-    }
-
-    // Recreate tooltip if it was removed
-    if (!self.$tooltip) {
-      self.createTooltip();
-    }
-
-    // Mark interaction for shared warm timer
-    self.shared.lastInteraction = Date.now();
-
-    self.isVisible = true;
-    settings.onShow.call(el);
-    dispatchEvent('show');
-
-    // Attach to trigger for positioning
-    self.$tooltip.attach({
-      to: el,
-      position: self.position,
-      arrow: settings.arrow,
-      distance: settings.distance,
-      offset: settings.offset,
-    });
-
-    // Animate in with direction-aware animation
-    const animation = self.getAnimation();
-    await self.$tooltip.transition(`${animation} in`, settings.duration);
-    settings.onVisible.call(el);
-    dispatchEvent('visible');
-  },
-
-  async hide() {
-    if (!self.$tooltip || !self.isVisible) {
-      return;
-    }
-
-    self.isVisible = false;
-    settings.onHide.call(el);
-    dispatchEvent('hide');
-
-    // Animate out with direction-aware animation
-    const animation = self.getAnimation();
-    await self.$tooltip.transition(`${animation} out`, settings.duration);
-
-    // Remove from DOM if not preserving
-    if (!settings.preserve && self.$tooltip) {
-      self.$tooltip.remove();
-      self.$tooltip = null;
-    }
-
-    settings.onHidden.call(el);
-    dispatchEvent('hidden');
-  },
-
-  toggle() {
-    if (self.isVisible) {
-      self.hide();
-    }
-    else {
-      self.show();
-    }
-  },
-
   setContent({ html, text, header } = {}) {
     if (!self.$tooltip) {
       return;
@@ -383,7 +401,7 @@ const onDestroyed = ({ self }) => {
 
 const customInvocation = ({ self, methodName, methodArgs }) => {
   // Handle string content as shorthand: $el.tooltip('My content')
-  if (isString(methodName) && !!self[methodName]) {
+  if (isString(methodName) && !self[methodName]) {
     // Treat as content
     self.setContent(methodName);
     return;

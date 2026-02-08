@@ -1,16 +1,16 @@
 ---
-title: Component Portaling Guide
-description: Guide for implementing overlay components (modals, popovers, dropdowns) with optional portaling using behaviors to escape clipping and stacking contexts.
-keywords: [portaling, overlay, modal, popover, attach behavior, transition, stacking context]
+title: Overflow Escape Guide
+description: Guide for implementing overlay components (modals, popovers, tooltips) that escape clipping and stacking contexts using the escape behavior and Popover API.
+keywords: [escape, top layer, overlay, modal, popover, attach behavior, transition, stacking context, popover api]
 audience: framework
 type: doc
 ---
 
-# AI Guide: Implementing Optional Portaling with Behaviors
+# AI Guide: Escaping Overflow with the Top Layer
 
-> **For:** AI agents implementing overlay components (modals, popovers, dropdowns)
-> **Purpose:** To understand the correct, SSR-friendly pattern for moving overlay DOM elements to escape clipping and stacking contexts.
-> **Prerequisites:** [Mental Model](ai/framework/mental-model.md), [Plugins and Behaviors](ai/guides/query/plugins-and-behaviors.md), [attach.js](src/behaviors/attach/attach.js), [transition.js](src/behaviors/transition/transition.js)
+> **For:** AI agents implementing overlay components (modals, popovers, tooltips)
+> **Purpose:** To understand the correct pattern for rendering elements above clipping and stacking contexts without DOM mutation.
+> **Prerequisites:** [Mental Model](ai/framework/mental-model.md), [Plugins and Behaviors](ai/guides/query/plugins-and-behaviors.md), [attach.js](src/behaviors/attach/attach.js), [escape.js](src/behaviors/escape/escape.js)
 
 ---
 
@@ -21,66 +21,64 @@ Many UI components (modals, dropdowns, tooltips) must render "on top" of other c
 1.  **Clipping:** A parent with `overflow: hidden` will cut off the component.
 2.  **Stacking:** A parent with a `z-index` (or other properties like `transform` or `opacity`) creates a new stacking context. The component can *never* appear above its parent's sibling, even with `z-index: 9999`.
 
-The *only* solution is to move the component's overlay element in the DOM, typically to `document.body`.
+## 2. The Solution: Browser Top Layer via Popover API
 
-## 2. The Anti-Pattern: A `<ui-portal>` Component
+The browser's [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) promotes elements to the **top layer** — a rendering layer that sits above all other content. This escapes `overflow: hidden`, z-index stacking contexts, and `clip-path` **without moving the element in the DOM**.
 
-It is tempting to create a declarative `<ui-portal>` web component. **DO NOT DO THIS.**
+This means:
+- The element stays in its original tree scope — CSS `anchor-name` resolves correctly across shadow DOM
+- No DOM mutation — scroll listeners remain valid, no positioning context changes
+- Custom properties inherit from the original ancestor chain
+- Event bubbling follows the original DOM path
 
-This pattern is fundamentally incompatible with the framework's "Progressive Enhancement" philosophy and breaks SSR.
+### Why Not Portal (DOM Relocation)?
 
-* **Server-Side (SSR):** The server renders the component's content *inline*, inside the `<ui-portal>`.
-* **Client-Side (Hydration):** The `<ui-portal>` JavaScript loads, moves its content to `document.body`.
-* **Result:** **Hydration Mismatch.** The client DOM no longer matches the server DOM, forcing a full-page re-render and defeating the purpose of SSR.
+DOM relocation was the previous approach but has fundamental problems:
+- CSS `anchor-name` is tree-scoped — moving elements across shadow DOM boundaries breaks anchor positioning silently
+- Scroll listeners become stale after the element moves
+- Positioning context changes unexpectedly
+- Style inheritance breaks
 
-## 3. The SUI Solution: Abstracted Behaviors
+The `escape` behavior replaces portaling for all overflow escape use cases.
 
-The correct pattern is to abstract the portal mechanic into **behaviors**. The component itself does not know *how* to portal; it only coordinates the behaviors.
+## 3. The `escape` Behavior
 
-* **`attach` Behavior:** This behavior handles all positioning and DOM-moving logic.
-* **`transition` Behavior:** This behavior handles all `show` and `hide` animations.
+The `escape` behavior wraps the Popover API (`popover="manual"` + `showPopover()`/`hidePopover()`) with state tracking to prevent double-call errors.
 
-The component (`ui-popover`, `ui-modal`) is just a "coordinator" that initializes these behaviors and passes them its settings.
+```javascript
+// Promote to top layer
+$content.escape('show');
 
-### The Portal Mechanic: `attach.js`
-
-The "portal" mechanic is controlled by the `moveElement` setting in the `attach` behavior.
-
-* **`$(el).attach({ moveElement: true, context: 'body' })`**
-    This is the "Portal Mode". On initialization, the `attach` behavior will `detach()` the element and `appendTo()` the specified `context` (usually `body`). This escapes all parent stacking contexts.
-
-* **`$(el).attach({ moveElement: false })`**
-    This is the "Inline Mode". The element is not moved. It will be positioned relative to its trigger but will be clipped by parent `overflow` or `z-index` contexts.
-
-### Making it Optional
-
-This portaling mechanic **must** be optional. Some users *want* the popover to be clipped by a scroll container.
-
-We achieve this by adding a component setting (e.g., `detachable: true`) and passing its value to the behavior.
-
-* Component `defaultSettings`: `{ detachable: true }`
-* Behavior Initialization: `$(el).attach({ moveElement: settings.detachable, ... })`
-
-This gives the user full control while providing a robust default.
-
-## 4. Practical Example: `ui-popover`
-
-This example shows the complete, correct implementation of a popover component that coordinates the `attach` and `transition` behaviors.
-
-### `popover.html`
-
-The template is simple and includes the trigger and the (initially hidden) content.
-
-```html
-<div class="trigger" part="trigger">
-  <!-- Default slot for the trigger element -->
-  {>slot}
-</div>
-<div class="content {ui}" part="content" {hidden}>
-  <!-- Named slot for the popover's content -->
-  {>slot name="content"}
-</div>
+// Remove from top layer
+$content.escape('hide');
 ```
+
+The behavior is lazy-created on first string invocation. It:
+- Sets `popover="manual"` on the element in `onCreated`
+- Guards against `InvalidStateError` from double `showPopover()`/`hidePopover()` calls
+- Auto-releases from top layer on destroy
+
+### Why Always-On (No Setting)
+
+Top layer promotion via `popover="manual"` has zero cost:
+- No DOM mutation
+- No added event listeners (unlike `popover="auto"`)
+- No change to containing block or positioning context
+- No interference with CSS `position: absolute` or anchor positioning
+
+Every overlay benefits from it. Making this a setting creates a footgun where users discover clipping and have to hunt for a flag.
+
+## 4. The SUI Pattern: Coordinated Behaviors
+
+Overlay components coordinate three behaviors:
+
+* **`escape` Behavior:** Promotes the element to the top layer (above all clipping).
+* **`attach` Behavior:** Handles CSS anchor positioning relative to a trigger element.
+* **`transition` Behavior:** Handles show/hide animations.
+
+The component is a "coordinator" that initializes these behaviors.
+
+## 5. Practical Example: `ui-popover`
 
 ```javascript
 import { defineComponent } from '@semantic-ui/component';
@@ -88,42 +86,31 @@ import { defineComponent } from '@semantic-ui/component';
 export const UIPopover = defineComponent({
   tagName: 'ui-popover',
 
-  // Default settings that will be passed to the behaviors
   defaultSettings: {
-    detachable: true,       // This controls the "portal" mechanic
-    context: 'body',        // The destination for the portal [cite: attach.js]
     position: 'bottom left',
     offset: 8,
     distance: 0,
-    transition: 'fade',     // [cite: transition.js]
+    transition: 'fade',
     duration: 200,
-    observeChanges: true,   // [cite: attach.js]
+    observeChanges: true,
   },
 
-  // --- 2. State ---
   defaultState: {
     isOpen: false,
   },
 
-  // --- 3. Lifecycle ---
-  // Behaviors are initialized once the shadow DOM is rendered
   onRendered({ self, settings, $ }) {
-
-    const $trigger = $('.trigger');
     const $content = $('.content');
 
-    // Initialize the attach behavior, passing the portal setting
+    // Set up positioning
     $content
       .attach({
-        to: $trigger,
-        context: settings.context,
-        moveElement: settings.detachable, // This is the optional portal switch
+        to: $('.trigger'),
         position: settings.position,
         offset: settings.offset,
         distance: settings.distance,
         observeChanges: settings.observeChanges,
       })
-      // set hidden state
       .transition('set hidden');
   },
 
@@ -133,25 +120,25 @@ export const UIPopover = defineComponent({
     }
   },
 
-  // --- 5. Instance Factory ---
-  // Returns the component's public/private API
   createComponent: ({ settings, state, $, self }) => ({
-    
     toggle() {
       if (state.isOpen.get()) {
         self.hide();
-      } else {
+      }
+      else {
         self.show();
       }
     },
 
     show() {
       if (state.isOpen.get()) return;
-      
+
       const $content = $('.content');
 
+      // Promote to top layer, then position and animate
+      $content.escape('show');
       $content
-        .attach('reposition') // query supports chaining
+        .attach('reposition')
         .transition({
           animation: settings.transition + ' in',
           duration: settings.duration,
@@ -162,10 +149,15 @@ export const UIPopover = defineComponent({
     hide() {
       if (!state.isOpen.get()) return;
 
-      $('.content').transition({
+      const $content = $('.content');
+
+      $content.transition({
         animation: settings.transition + ' out',
         duration: settings.duration,
-        onComplete: () => state.isOpen.set(false)
+        onComplete: () => {
+          $content.escape('hide');
+          state.isOpen.set(false);
+        }
       });
     },
   }),

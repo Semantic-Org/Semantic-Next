@@ -1478,4 +1478,118 @@ describe('query', () => {
       expect(result[0]).toBe(document.getElementById('container'));
     });
   });
+
+  describe('pierceShadow parent walking', () => {
+    let host;
+
+    beforeEach(() => {
+      document.body.innerHTML = '';
+      // Create: outer-container > shadow-host > shadowRoot > inner-child
+      host = document.createElement('div');
+      host.id = 'shadow-host';
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner">Inner child</div>';
+      document.body.appendChild(host);
+    });
+
+    it('scrollParent should stop at shadow boundary by default', () => {
+      document.body.innerHTML = '';
+      const outer = document.createElement('div');
+      outer.id = 'scroller';
+      outer.style.overflow = 'auto';
+      outer.style.height = '100px';
+
+      host = document.createElement('div');
+      host.id = 'shadow-host';
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner">Inner child</div>';
+
+      outer.appendChild(host);
+      document.body.appendChild(outer);
+
+      const inner = shadow.getElementById('inner');
+      const result = $(inner).scrollParent();
+
+      // Should NOT find the outer scroller — shadow boundary blocks it
+      expect(result[0]).toBe(window);
+    });
+
+    it('scrollParent should cross shadow boundary with pierceShadow: true', () => {
+      document.body.innerHTML = '';
+      const outer = document.createElement('div');
+      outer.id = 'scroller';
+      outer.style.overflow = 'auto';
+      outer.style.height = '100px';
+
+      host = document.createElement('div');
+      host.id = 'shadow-host';
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner">Inner child</div>';
+
+      outer.appendChild(host);
+      document.body.appendChild(outer);
+
+      const inner = shadow.getElementById('inner');
+      const result = $(inner).scrollParent({ pierceShadow: true });
+
+      expect(result[0]).toBe(outer);
+    });
+
+    it('clippingParent should stop at shadow boundary by default', () => {
+      document.body.innerHTML = '';
+      const outer = document.createElement('div');
+      outer.id = 'clipper';
+      outer.style.overflow = 'hidden';
+
+      host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner">Inner child</div>';
+
+      outer.appendChild(host);
+      document.body.appendChild(outer);
+
+      const inner = shadow.getElementById('inner');
+      const result = $(inner).clippingParent();
+
+      expect(result[0]).toBe(document.documentElement);
+    });
+
+    it('clippingParent should cross shadow boundary with pierceShadow: true', () => {
+      document.body.innerHTML = '';
+      const outer = document.createElement('div');
+      outer.id = 'clipper';
+      outer.style.overflow = 'hidden';
+
+      host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner">Inner child</div>';
+
+      outer.appendChild(host);
+      document.body.appendChild(outer);
+
+      const inner = shadow.getElementById('inner');
+      const result = $(inner).clippingParent({ pierceShadow: true });
+
+      expect(result[0]).toBe(outer);
+    });
+
+    it('positioningParent should cross shadow boundary with pierceShadow: true', () => {
+      document.body.innerHTML = '';
+      const outer = document.createElement('div');
+      outer.id = 'positioned';
+      outer.style.transform = 'translateX(0)';
+
+      host = document.createElement('div');
+      const shadow = host.attachShadow({ mode: 'open' });
+      shadow.innerHTML = '<div id="inner" style="position: fixed;">Inner child</div>';
+
+      outer.appendChild(host);
+      document.body.appendChild(outer);
+
+      const inner = shadow.getElementById('inner');
+      const result = $(inner).positioningParent({ pierceShadow: true });
+
+      expect(result[0]).toBe(outer);
+    });
+  });
 });
