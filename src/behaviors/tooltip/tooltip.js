@@ -254,15 +254,16 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     const animation = self.getAnimation();
     await self.$tooltip.transition(`${animation} out`, settings.duration);
 
-    self.$tooltip.escape('hide');
-
     // Remove from DOM if not preserving
     if (!settings.preserve && self.$tooltip) {
       self.$tooltip.remove();
       self.$tooltip = null;
     }
+    else {
+      self.$tooltip.escape('hide');
+      self.$tooltip.addClass(classNames.hidden);
+    }
 
-    self.$tooltip.addClass(classNames.hidden);
     settings.onHidden.call(el);
     dispatchEvent('hidden');
   },
