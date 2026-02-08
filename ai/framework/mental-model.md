@@ -21,7 +21,7 @@ Semantic UI is **two things**:
 
 1. **A Web Component Framework** - For building reactive web components with signals-based state management, Shadow DOM encapsulation, and a novel template syntax
 
-2. **A First-Party UI Widget Library** - Ships with primitives (spec-driven components like `ui-button`, `ui-input`), behaviors (logic attachments like transitions, portals), and complex components
+2. **A First-Party UI Widget Library** - Ships with primitives (spec-driven components like `ui-button`, `ui-input`), behaviors (logic attachments like transitions, escape), and complex components
 
 **Core Philosophy**: Web standards first, progressive enhancement, signals-based reactivity. Components render as standard HTML, enhance with JavaScript, and become fully reactive with the framework.
 
@@ -425,19 +425,18 @@ Behaviors are **reusable logic units that attach to any DOM element** - not just
 
 ```javascript
 // Usage
-$('.modal-content').portal('body');
+$('.tooltip').escape('show');
 $('.element').transition('fade in');
 $('.form').validation({ rules: {...} });
 
 // Definition (registerBehavior)
 registerBehavior({
-  name: 'portal',
-  defaultSettings: { context: 'auto' },
-  onCreated({ self, $el }) { /* setup */ },
+  name: 'escape',
+  onCreated({ $el, self }) { /* setup */ },
   onDestroyed({ self }) { /* cleanup */ },
-  createBehavior: ({ self, $el, settings }) => ({
-    portal() { /* implementation */ },
-    restore() { /* implementation */ }
+  createBehavior: ({ el, self }) => ({
+    show() { /* promote to top layer */ },
+    hide() { /* remove from top layer */ }
   })
 });
 ```
@@ -446,7 +445,7 @@ registerBehavior({
 - **Components** = Custom elements with Shadow DOM (`<my-component>`)
 - **Behaviors** = Logic attached to existing elements (`$('.any-element').behaviorName()`)
 
-Behaviors handle cross-cutting concerns: transitions, portals, validation, tooltips, infinite scroll.
+Behaviors handle cross-cutting concerns: transitions, overflow escape, validation, tooltips, infinite scroll.
 
 ---
 
@@ -605,7 +604,7 @@ const $button = $('.button');  /* $ prefix for query results */
 
 **Components** (`src/components/`) - Logic-driven components for complex UI (panels, menus, modals).
 
-**Behaviors** (`src/behaviors/`) - Attachable logic (transitions, portals).
+**Behaviors** (`src/behaviors/`) - Attachable logic (transitions, escape, attach).
 
 ---
 
