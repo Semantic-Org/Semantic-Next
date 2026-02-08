@@ -121,6 +121,15 @@ export class Query {
     ...['li'].map(t => [t, 'list-item']),
   ]));
 
+  // This is a fast path for wrapping el for use with $each
+  static wrap(el, options) {
+    const $el = Object.create(Query.prototype);
+    $el[0] = el;
+    $el.length = 1;
+    $el.options = options;
+    return $el;
+  }
+
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
@@ -294,7 +303,8 @@ export class Query {
     // "for" perf
     for (let index = 0; index < this.length; index++) {
       const el = this[index];
-      const $el = this.chain(el);
+      // special fast path for chaining
+      const $el = Query.wrap(el, this.options);
       callback.call($el, el, index);
     }
     return this;
