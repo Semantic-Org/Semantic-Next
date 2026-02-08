@@ -32,21 +32,21 @@ class PrettyJSON extends HTMLElement {
 
   static styles = `/* css */
     :host {
-      --arrow-color: #444444;
-      --arrow-color-hover: #888888;
-      --brace-color: transparent;
-      --bracket-color: #444444;
-      --null-color: #444444;
-      --comma-color: #444444;
-      --ellipsus-color: #444444;
-      --key-color: #444444;
-      --key-name-color: #C69FF1;
-      --ellipsis-color: #444444;
-      --ellipsis-color-hover: #58C1FE;
-      --string-color: #58C1FE;
-      --number-color: #58a6ff;
-      --boolean-color: #656565;
-      --summary-color: #656565;
+  --arrow-color: var(--code-grey);
+  --arrow-color-hover: var(--code-default);
+  --brace-color: transparent;
+  --bracket-color: var(--code-grey);
+  --null-color: var(--code-grey);
+  --comma-color: var(--code-grey);
+  --ellipsus-color: var(--code-grey);
+  --key-color: var(--code-grey);
+  --key-name-color: var(--code-purple);
+  --ellipsis-color: var(--code-grey);
+  --ellipsis-color-hover: var(--code-blue);
+  --string-color: var(--code-blue);
+  --number-color: var(--code-purple);
+  --boolean-color: var(--code-grey);
+  --summary-color: var(--code-grey);
 
       --indent: 18px;
     }

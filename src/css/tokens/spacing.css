@@ -52,9 +52,9 @@
   --section-margin: var(--spacing-2xl);
 
   /* Directional utilities */
-  --vertically-spaced: var(--margin) 0;
-  --horizontally-spaced: 0 var(--margin);
-  --centered: var(--margin) auto;
+  --vertically-spaced: var(--spacing) 0;
+  --horizontally-spaced: 0 var(--spacing);
+  --centered: var(--spacing) auto;
 
   /* -------------------
           Gap (em)

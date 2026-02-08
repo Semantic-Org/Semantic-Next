@@ -1,0 +1,28 @@
+
+  /* -------------------
+      Shading Colors
+  -------------------- */
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /*
+     These colors are used as alpha overlays on a base color
+     used for gradients and ui states
+  */
+
+  --very-subtle-transparent-black: oklch(var(--black-lch) / 2%);
+  --subtle-transparent-black: oklch(var(--black-lch) / 3%);
+  --transparent-black: oklch(var(--black-lch) / 5%);
+  --strong-transparent-black: oklch(var(--black-lch) / 8%);
+  --very-strong-transparent-black: oklch(var(--black-lch) / 15%);
+
+  --very-subtle-transparent-white: oklch(var(--white-lch) / 3%);
+  --subtle-transparent-white: oklch(var(--white-lch) / 5%);
+  --transparent-white: oklch(var(--white-lch) / 8%);
+  --strong-transparent-white: oklch(var(--white-lch) / 13%);
+  --very-strong-transparent-white: oklch(var(--black-lch) / 18%);
+
+}

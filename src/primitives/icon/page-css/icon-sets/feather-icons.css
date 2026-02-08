@@ -1,5 +1,5 @@
 /* Note link is changed to linkify for compatibility */
-:host {
+:root {
   --icon-activity-svg: url('./feather/activity.svg');
   --icon-airplay-svg: url('./feather/airplay.svg');
   --icon-alert-circle-svg: url('./feather/alert-circle.svg');

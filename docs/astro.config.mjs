@@ -9,15 +9,6 @@ import fs from 'fs';
 const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
 const packageVersion = packageJson.version;
 
-// Load the custom language definition
-const sui = {
-  id: 'sui',
-  scopeName: 'source.sui',
-  aliases: ['sui-template'],
-  ...JSON.parse(fs.readFileSync('./../sui.tmlanguage.json', 'utf-8')),
-  name: 'sui',
-};
-
 // for now this relies on deploying to vercel
 // the site param is primarily used for the ImportMap for playground/examples
 const isProduction = process.env.VERCEL_ENV === 'production';
@@ -65,6 +56,10 @@ export default defineConfig({
       force: true,
       exclude: [
         'playground-elements',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@codemirror/language',
+        '@lezer/highlight',
         'tailwindcss-iso',
         '@semantic-ui/core',
         '@semantic-ui/query',
@@ -78,13 +73,7 @@ export default defineConfig({
 
   integrations: [
     lit(),
-    astroExpressiveCode({
-      themes: ['github-dark'],
-      useDarkModeMediaQuery: false,
-      shiki: {
-        langs: [sui],
-      },
-    }),
+    astroExpressiveCode(),
     mdx({}),
     starlight({
       title: 'Semantic UI',

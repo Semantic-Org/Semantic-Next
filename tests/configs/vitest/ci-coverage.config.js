@@ -1,7 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import node from './projects/node.js';
+import jsdom from './projects/jsdom.js';
+import browser from './projects/browser.js';
 
 export default defineConfig({
   test: {
+    pool: 'threads', // ~20% faster than default 'forks' pool
     coverage: {
       enabled: true,
       provider: 'istanbul',
@@ -21,6 +25,6 @@ export default defineConfig({
     onConsoleLog (log) {
       if (log.includes('Lit is in dev mode.')) return false;
     },
-    workspace: './tests/configs/vitest/workspaces/vitest.all.workspace.js'
+    projects: [node, jsdom, browser],
   },
 });
