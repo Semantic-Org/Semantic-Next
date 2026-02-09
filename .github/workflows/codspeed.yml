@@ -1,0 +1,50 @@
+name: CodSpeed
+
+on:
+  push:
+    branches:
+      - main
+      - next/*
+      - feat/*
+      - fix/*
+      - perf/*
+      - v1
+      - v1.*
+  pull_request:
+    branches:
+      - main
+      - next/*
+      - feat/*
+      - fix/*
+      - perf/*
+      - v1
+      - v1.*
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  benchmarks:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: "npm"
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Run Benchmarks with CodSpeed
+        uses: CodSpeedHQ/action@v4
+        with:
+          mode: simulation
+          run: npx vitest bench --run --config vitest.bench.config.js

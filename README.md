@@ -3,6 +3,7 @@
 [![UnitTests](https://badgen.net/https/wzcozo2uwacu4dfvawkdkmxi640guflx.lambda-url.us-east-1.on.aws?cache=300)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
 [![E2ETests](https://badgen.net/https/ien5pqfy4lsyqy5a2vegyvevpa0petpj.lambda-url.us-east-1.on.aws?cache=300)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
 [![Coverage](https://badgen.net/https/fnipttzwzg6ieemy4winuladuu0jhqef.lambda-url.us-east-1.on.aws?cache=300)](https://github.com/Semantic-Org/Semantic-Next/actions/workflows/ci.yml)
+[![CodSpeed](https://img.shields.io/endpoint?url=https://codspeed.io/badge.json)](https://codspeed.io/Semantic-Org/Semantic-Next?utm_source=badge)
 
 A modern, lightweight UI framework built with Web Components.
 
