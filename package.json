@@ -166,7 +166,8 @@
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
-    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
+    "bench:query": "npm run bench -w packages/query"
   },
   "wireit": {
     "dev": {

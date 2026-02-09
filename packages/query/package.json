@@ -19,6 +19,7 @@
   },
   "scripts": {
     "build": "wireit",
+    "bench": "wireit",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -36,6 +37,8 @@
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0",
     "@vitest/browser-playwright": "^4.0.18",
+    "chromedriver": "^139.0.0",
+    "tachometer": "^0.7.1",
     "vitest": "^4.0.18"
   },
   "wireit": {
@@ -54,6 +57,17 @@
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    },
+    "bench": {
+      "command": "npx tachometer --config ../../tachometer-query.json --json-file benchmarks/results/results.json",
+      "files": [
+        "src/**/*.js",
+        "benchmarks/**/*.html",
+        "../../tachometer-query.json"
+      ],
+      "output": [
+        "benchmarks/results/**"
+      ]
     }
   }
 }

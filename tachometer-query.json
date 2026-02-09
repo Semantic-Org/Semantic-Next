@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Polymer/tachometer/master/config.schema.json",
+  "sampleSize": 50,
+  "timeout": 5,
+  "autoSampleConditions": [
+    "0%",
+    "5%"
+  ],
+  "root": ".",
+  "resolveBareModules": true,
+  "benchmarks": [
+    {
+      "name": "query-ops",
+      "url": "packages/query/benchmarks/query-ops.html",
+      "measurement": {
+        "mode": "callback"
+      },
+      "browser": {
+        "name": "chrome",
+        "headless": true
+      }
+    }
+  ]
+}

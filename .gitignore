@@ -8,6 +8,7 @@ docs/dist/
 dist/
 tests/results/
 tests/test-case/dist
+**/benchmarks/results/
 
 # for my ai friends
 ai/artifacts/prompts

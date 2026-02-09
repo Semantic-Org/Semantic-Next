@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Query Operations Benchmark</title>
+</head>
+<body>
+  <div id="root">
+    <div class="parent" data-index="0">
+      <div class="child item" data-value="a">1a</div>
+      <div class="child item" data-value="b">1b</div>
+      <div class="child item" data-value="c">1c</div>
+      <div class="child item" data-value="d">1d</div>
+    </div>
+    <div class="parent" data-index="1">
+      <div class="child item" data-value="a">2a</div>
+      <div class="child item" data-value="b">2b</div>
+      <div class="child item" data-value="c">2c</div>
+      <div class="child item" data-value="d">2d</div>
+    </div>
+    <div class="parent" data-index="2">
+      <div class="child item" data-value="a">3a</div>
+      <div class="child item" data-value="b">3b</div>
+      <div class="child item" data-value="c">3c</div>
+      <div class="child item" data-value="d">3d</div>
+    </div>
+    <div class="parent" data-index="3">
+      <div class="child item" data-value="a">4a</div>
+      <div class="child item" data-value="b">4b</div>
+      <div class="child item" data-value="c">4c</div>
+      <div class="child item" data-value="d">4d</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { $, Query } from '/packages/query/src/index.js';
+    import * as bench from '/bench.js';
+
+    const ITERATIONS = 100;
+
+    bench.start();
+    for (let i = 0; i < ITERATIONS; i++) {
+      // Construction from selector
+      const $items = $('.item');
+
+      // Traversal
+      const $parents = $('.parent');
+      $parents.children('.child');
+      $items.filter('[data-value="a"]');
+      $items.parent();
+
+      // Class manipulation
+      $items.addClass('active');
+      $items.hasClass('active');
+      $items.removeClass('active');
+      $items.toggleClass('highlight');
+
+      // Attribute access
+      $items.attr('data-value');
+
+      // Iteration
+      $items.each((el) => {
+        el.textContent;
+      });
+
+      // Chaining
+      $('#root')
+        .find('.parent')
+        .eq(0)
+        .find('.child')
+        .addClass('selected')
+        .removeClass('selected');
+    }
+    bench.stop();
+  </script>
+</body>
+</html>
