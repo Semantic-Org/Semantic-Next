@@ -1,10 +1,10 @@
 :host {
-  --icon-mini: var(--10px);
-  --icon-tiny: var(--11px);
-  --icon-small: var(--13px);
+  --icon-mini: var(--mini);
+  --icon-tiny: var(--tiny);
+  --icon-small: var(--small);
   --icon-medium: inherit;
-  --icon-large: var(--16px);
-  --icon-big: var(--24px);
-  --icon-huge: var(--32px);
-  --icon-massive: var(--64px);
+  --icon-large: var(--large);
+  --icon-big: var(--big);
+  --icon-huge: var(--huge);
+  --icon-massive: var(--massive);
 }

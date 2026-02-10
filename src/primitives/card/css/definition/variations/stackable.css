@@ -1,6 +1,5 @@
 .component {
   --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
-  width: --card-stackable-comparison;
 }
 
 @container component style(--card-stackable-comparison: 0) {
