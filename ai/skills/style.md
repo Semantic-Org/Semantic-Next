@@ -34,7 +34,7 @@ Affects all instances of a component:
 ```css
 ui-button {
   --primary-color: green;
-  --button-padding: 1.5em;
+  --padding: var(--padding-l);
 }
 ```
 
@@ -44,11 +44,11 @@ Affects components within a specific section:
 
 ```css
 .sidebar ui-button {
-  --primary-color: var(--gray);
+  --primary-color: var(--grey);
 }
 
 .checkout-form ui-input {
-  --input-border-color: var(--blue);
+  --border-color: var(--blue-border-color);
 }
 ```
 
@@ -59,7 +59,7 @@ Affects a specific instance. **Use a class, not inline styles:**
 ```css
 /* ✅ Correct — class-based */
 ui-button.submit {
-  --button-padding: 2em;
+  --padding: var(--padding-l);
   --primary-color: var(--green);
 }
 
@@ -75,7 +75,7 @@ ui-button.cancel {
 
 ```css
 /* ❌ Avoid — inline styles are harder to maintain */
-<ui-button style="--button-padding: 2em">
+<ui-button style="--padding: var(--padding-l)">
 ```
 
 ### Finding Available Variables
@@ -99,7 +99,7 @@ ui-button.special::part(icon) {
 
 /* Style menu item labels */
 ui-menu.nav::part(item-label) {
-  font-weight: bold;
+  font-weight: var(--bold);
   text-transform: uppercase;
 }
 ```
@@ -169,20 +169,47 @@ This lets your custom CSS adapt alongside SUI components without hardcoding them
 
 ## Responsive Styling with Container Queries
 
-Breakpoint tokens work with container queries, not media queries:
+CSS custom properties can't be used in media queries, but SUI uses a technique to make breakpoints work as overridable CSS variables with container queries.
+
+The pattern: compute a comparison value from the container's width minus the breakpoint. When the container is below the breakpoint, the result clamps to `0px`. A `@container style()` query matches on that result.
 
 ```css
-.my-component {
-  --below-tablet: max(calc(100cqi - var(--tablet-breakpoint)), 0px);
-  container-type: inline-size;
+/* 1. Register the comparison property */
+@property --breakpoint-comparison {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1px;
 }
 
-@container style(--below-tablet: 0px) {
-  .my-component {
+:root {
+  --mobile-breakpoint: 768px;
+}
+
+/* 2. Compute: collapses to 0px when below breakpoint */
+.component {
+  --breakpoint-comparison: max(calc(100cqi - var(--mobile-breakpoint)), 0px);
+}
+
+/* 3. Query the result */
+@container component style(--breakpoint-comparison: 0) {
+  .stackable.cards {
+    display: flex;
     flex-direction: column;
   }
 }
 ```
+
+The `@property` registration ensures the computed value resolves correctly for the style query. The `initial-value: 1px` means above-breakpoint by default.
+
+Theme authors override the breakpoint with a single line:
+
+```css
+ui-card {
+  --card-stackable-breakpoint: 500px;
+}
+```
+
+Because it uses `cqi` (container inline size), the same component responds differently depending on its container — a card in a sidebar stacks at a different point than a card in the main content.
 
 ---
 
@@ -201,7 +228,7 @@ ui-button {
 
 /* Instance with class (preferred) */
 ui-button.hero-cta {
-  --button-padding: 1.5em 3em;
+  --padding: var(--padding-l);
 }
 
 /* ::part() for one-offs */
