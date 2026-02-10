@@ -8,8 +8,8 @@
        Input Padding
   -------------------- */
 
-  --input-vertical-padding: var(--relative-10px);
-  --input-horizontal-padding: var(--relative-12px);
+  --input-vertical-padding: var(--relative-12px);
+  --input-horizontal-padding: var(--relative-14px);
   --input-padding: var(--input-vertical-padding) var(--input-horizontal-padding);
 
 }
