@@ -139,12 +139,14 @@ Both renderers must satisfy:
 
 ```javascript
 class Renderer {
-  constructor({ ast, data, template, subTemplates, helpers, isSVG })
-  render({ ast, data })          // First render → returns DOM-appendable result
+  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG, inheritsData })
+  render({ ast, data })          // First render → returns renderable result
   setData(newData)               // Update data context
   // cachedRender(data)          // For subtree caching (experimental, currently disabled)
 }
 ```
+
+Note: `Template.initialize()` currently passes `{ ast, data, template, subTemplates, helpers }` — it does not pass `snippets` (the renderer discovers them from AST nodes) or `inheritsData` (only used internally by LitRenderer when creating subtree renderers via `renderContent()`). The vanilla renderer handles subtrees differently — recursive `readAST` calls with scoped Reactions — so `inheritsData` and `renderContent` are Lit-specific patterns that don't carry over.
 
 For Lit, `render()` returns a Lit `TemplateResult`.
 For vanilla, `render()` returns a `DocumentFragment` on first call. Subsequent calls are no-ops — Reactions handle updates.
@@ -382,15 +384,17 @@ The hardest reactive DOM pattern. Needs efficient insert, remove, reorder withou
 - `as` aliasing and `indexAs` for custom variable names
 - Data context injection per item (`{item, index}`)
 
-**Implementation: `mapArray`-style reconciliation**
+**Implementation: `mapArray`-style reconciliation with per-item reactivity**
 
-Use a keyed reconciliation algorithm. Each item is a `DynamicRegion` tracked by key:
+Use a keyed reconciliation algorithm. Each item is a `DynamicRegion` tracked by key, with a **Signal-backed data channel** so inner Reactions update when item data changes.
+
+**The data update problem:** In Lit, the each Reaction re-renders ALL items and `repeat()` diffs per key — data updates happen naturally. In vanilla, we don't re-render existing items (no diff layer). So each item needs a reactive data channel: a Signal holding the item's data context. Inner expressions subscribe to it during first render. When the collection changes and an existing item has new data, we update the Signal and inner Reactions fire automatically.
 
 ```javascript
 const listRegion = new DynamicRegion();
 fragment.append(listRegion.anchor);
 
-// Map of key → DynamicRegion (each item gets its own region)
+// Map of key → { region, itemSignal, scope }
 let itemMap = new Map();
 let currentKeys = [];
 
@@ -400,6 +404,7 @@ const reaction = Reaction.create(() => {
   // Handle empty list → {else} content
   if (isEmpty(items) && node.elseContent) {
     listRegion.clear();
+    for (const entry of itemMap.values()) entry.scope.dispose();
     itemMap.clear();
     currentKeys = [];
     const scope = new ReactionScope();
@@ -408,49 +413,61 @@ const reaction = Reaction.create(() => {
     return;
   }
 
-  const newKeys = items.map((item, i) => getItemID(item, i));
+  const collectionType = getCollectionType(items);
+  const processedItems = (collectionType === 'object') ? arrayFromObject(items) : items;
+  const newKeys = processedItems.map((item, i) => getItemID(item, i, collectionType));
 
   // Remove items no longer present
   for (const key of currentKeys) {
     if (!newKeys.includes(key)) {
-      const region = itemMap.get(key);
-      region.clear();
-      region.anchor.remove();
+      const entry = itemMap.get(key);
+      entry.scope.dispose();
+      entry.region.clear();
+      entry.region.anchor.remove();
       itemMap.delete(key);
     }
   }
 
-  // Add/reorder items
+  // Add/reorder/update items
   let insertAfter = listRegion.anchor;
   for (let i = 0; i < newKeys.length; i++) {
     const key = newKeys[i];
-    const item = items[i];
+    const item = processedItems[i];
+    const eachData = getEachData(item, i, collectionType, node);
 
     if (itemMap.has(key)) {
-      // Existing item — move to correct position if needed
-      const region = itemMap.get(key);
+      // Existing item — update data + move to correct position if needed
+      const entry = itemMap.get(key);
+
+      // Update per-item Signal → inner Reactions fire, DOM updates in place
+      entry.itemSignal.set(eachData);
+
+      const { region } = entry;
       if (region.anchor.previousSibling !== insertAfter &&
           region.anchor !== insertAfter) {
-        // Move: anchor + owned nodes
         insertAfter.after(region.anchor, ...region.ownedNodes);
       }
       insertAfter = region.ownedNodes.length
         ? region.ownedNodes[region.ownedNodes.length - 1]
         : region.anchor;
     } else {
-      // New item — create region and render
+      // New item — create Signal, render, track
       const itemRegion = new DynamicRegion();
       const scope = new ReactionScope();
-      const itemData = getEachData(item, i, node);
+
+      // Signal holds item-specific data; inner expressions subscribe via Proxy
+      const itemSignal = Signal.create(eachData);
+      const itemProxy = createItemDataProxy(data, itemSignal);
+
       const itemFragment = this.readAST({
         ast: node.content,
-        data: { ...data, ...itemData },
+        data: itemProxy,
         scope,
       });
       itemRegion.ownedNodes = [...itemFragment.childNodes];
       itemRegion.childScopes.push(scope);
       insertAfter.after(itemRegion.anchor, itemFragment);
-      itemMap.set(key, itemRegion);
+      itemMap.set(key, { region: itemRegion, itemSignal, scope });
       insertAfter = itemRegion.ownedNodes.length
         ? itemRegion.ownedNodes[itemRegion.ownedNodes.length - 1]
         : itemRegion.anchor;
@@ -461,9 +478,35 @@ const reaction = Reaction.create(() => {
 });
 ```
 
+**`createItemDataProxy` — the per-item reactive bridge:**
+
+```javascript
+function createItemDataProxy(parentData, itemSignal) {
+  return new Proxy(parentData, {
+    get(target, prop) {
+      const itemData = itemSignal.value; // establishes Signal dependency
+      if (prop in itemData) return itemData[prop];
+      return target[prop]; // fall through to parent data
+    },
+    has(target, prop) {
+      const itemData = itemSignal.peek();
+      return (prop in itemData) || (prop in target);
+    }
+  });
+}
+```
+
+When `readAST` creates a computed signal for an expression like `{name}`:
+```javascript
+const value = Signal.computed(() => evaluator.evaluate('name', itemProxy));
+```
+The evaluator accesses `itemProxy.name` → Proxy get trap → `itemSignal.value.name` → establishes dependency on `itemSignal`. When the collection Reaction updates the item (`entry.itemSignal.set(newData)`), the computed re-evaluates, and `Signal.computed`'s built-in `isEqual` deduplication prevents unnecessary DOM writes if the value didn't actually change.
+
+**Cost:** One Signal + one Proxy per list item. Negligible against the DOM nodes they contain.
+
 **Existing art:** Solid.js `mapArray` (~200 lines), uhtml's list diffing, or a minimal implementation of the Ivi list reconciliation algorithm. Don't need a full VDOM diff — just keyed list reconciliation.
 
-**`getItemID`:** Reuse existing logic from `ReactiveEachDirective.getItemID()` — checks `_id`, `id`, `key`, `hash`, `value`, then falls back to index.
+**`getItemID`:** Reuse existing logic from `ReactiveEachDirective.getItemID()` — checks `_id`, `id`, `key`, `hash`, `value`, then falls back to index. Note: for objects from object iteration, the object key (`indexOrKey`) is preferred over item properties.
 
 **`getEachData`:** Reuse existing logic from `ReactiveEachDirective.getEachData()` — handles `as` aliasing, `indexAs`, object→array conversion.
 
@@ -537,46 +580,93 @@ const reaction = Reaction.create((computation) => {
 
 ### 1.7 Subtemplate Rendering ({> templateName})
 
-Subtemplates are full Template instances with their own lifecycle. The vanilla renderer creates them the same way the Lit `RenderTemplateDirective` does:
+Subtemplates are full Template instances with their own lifecycle. This is **Pattern B** — distinct from inline AST subtrees (Pattern A, handled by recursive `readAST`).
 
-1. Resolve template name (may be a string from `subTemplates` or a `Template` instance from an expression)
-2. Clone the template with data context
-3. Initialize and render into a marker region
-4. Set parent relationship for `findParent`/`findChild` traversal
-5. Attach events and styles via `template.attach()`
+**The central challenge: dynamic template names.** Unlike most frameworks, SUI permits the template name to be a reactive expression: `{> templateName name=getName data=getData}` where `getName` can return different template names over time. The subtemplate must swap entirely when the name changes, but only update data when the name stays the same. Both the name expression AND the data expressions are reactive and tracked by the same Reaction.
+
+**How the Lit renderer handles this:**
+`RenderTemplateDirective.maybeCreateTemplate()` unconditionally clones a new Template on every Reaction run (render-template.js:107). There's no guard — even if only data changed and the template name is the same, it creates a fresh clone. This works in Lit because Lit diffs the new TemplateResult against the old one, so DOM updates are minimal. The cost is creating and discarding Template/Renderer instances on every reactive tick — wasteful but correct because Lit absorbs it.
+
+**Why vanilla can't do this:** Cloning creates a fresh Template with a fresh VanillaRenderer. `render()` returns a new DocumentFragment. `region.setContent()` would tear down ALL existing DOM, Reactions, and event bindings, then rebuild from scratch — turning every subtemplate into a `{#rerender}` block. A data change on a parent signal would cascade into full destruction and reconstruction of every subtemplate.
+
+**The fix — separate identity from data:**
 
 ```javascript
 const region = new DynamicRegion();
 fragment.append(region.anchor);
 
+let currentTemplateID = null;
+let currentInstance = null;
+
 const reaction = Reaction.create(() => {
   const templateOrName = evaluator.evaluate(node.name, data);
   const templateData = unpackNodeData(node, data);
 
-  // Resolve template
+  // Resolve source template
   let template;
+  let templateName;
   if (isString(templateOrName)) {
-    template = subTemplates[templateOrName];
+    templateName = templateOrName;
+    template = subTemplates[templateName];
   } else if (templateOrName instanceof Template) {
     template = templateOrName;
+    templateName = template.templateName;
   }
 
-  if (!template) return;
+  if (!template) {
+    // Template not found — clear region
+    if (currentInstance) {
+      currentInstance.onDestroyed();
+      currentInstance = null;
+      currentTemplateID = null;
+      region.clear();
+    }
+    return;
+  }
 
-  // Clone and render
-  const instance = template.clone({ data: templateData });
-  instance.initialize();
-  const templateFragment = instance.render(); // VanillaRenderer returns DocumentFragment
+  if (template.id !== currentTemplateID) {
+    // Template identity changed — tear down old, clone and render new
+    if (currentInstance) {
+      currentInstance.onDestroyed();
+    }
 
-  region.setContent(templateFragment);
+    currentTemplateID = template.id;
+    currentInstance = template.clone({
+      templateName,
+      subTemplates,
+      data: templateData,
+    });
+    currentInstance.initialize();
+    const templateFragment = currentInstance.render();
 
-  // Attach for events and parent/child tracking
-  instance.attach(renderRoot, { parentNode, startNode: region.anchor, endNode: null });
-  instance.setParent(parentTemplate);
+    region.setContent(templateFragment);
+
+    // Attach for events and parent/child tracking
+    currentInstance.attach(renderRoot, {
+      parentNode,
+      startNode: region.anchor,
+      endNode: null,
+    });
+    currentInstance.setParent(parentTemplate);
+  } else {
+    // Same template, data changed — update data context on existing instance
+    currentInstance.setDataContext(templateData);
+  }
 });
 ```
 
-**Key difference from other blocks:** Subtemplates are full `Template` instances with their own renderer, reactions, events, and lifecycle. When they're removed from DOM, their `onDestroyed` must be called.
+**Key behaviors:**
+- **Reactive tracking:** `evaluator.evaluate(node.name, data)` inside the Reaction establishes reactive dependencies on whatever signals the name expression touches. When `getName` returns `"foo"` → `"bar"`, the Reaction re-fires. Similarly, `unpackNodeData(node, data)` tracks reactive data expressions. Both are tracked by the same Reaction — any change triggers re-evaluation, but the `template.id` guard ensures only name changes cause re-cloning.
+- **Template identity change** (e.g., `getName` returns a different template name): `subTemplates["foo"].id !== subTemplates["bar"].id` → old instance is destroyed, new clone is created and rendered.
+- **Data change only** (same template, new data): `template.id === currentTemplateID` → calls `setDataContext()` on the existing instance. The subtemplate's own Reactions pick up the new data and update DOM in place. No DOM destruction.
+- **Template instance via expression:** If the expression returns a `Template` object directly (not a string), the same `template.id` check applies. Stable prototype reference → data update. Different prototype → re-clone.
+- **Cleanup:** `currentInstance.onDestroyed()` handles Template lifecycle cleanup (reactions, events, `Template.renderedTemplates` registry).
+- **Packed data:** In Lit, `getPackedNodeData()` wraps values in functions (`() => evaluateExpression(...)`) for lazy/reactive evaluation. For vanilla, `unpackNodeData()` evaluates eagerly since the Reaction already tracks dependencies.
+
+**Why subtemplates must be full Template instances (not simplified to readAST):**
+The `Template` wrapper is required for the communication system — `findParent()`, `findChildren()`, `dispatchEvent`, parent-child traversal via `setParent()`. This is how composite components coordinate (e.g., a data-table row template calling `findParent('uiDataTable')` to access table state). Subtemplates that are just recursive `readAST` calls would be invisible to this system. Every `{> name}` must produce a real Template instance.
+
+**Note on snippets:** Snippets (`{> snippet name}`) use Pattern A (inline AST subtrees via `renderContent()`) in the Lit renderer. They are NOT full Templates — just AST sub-sections rendered with `readAST`. They don't participate in `findParent()`/`findChildren()` traversal. The vanilla plan handles these correctly via recursive `readAST` with `inheritsData: true`.
 
 ### 1.8 SVG Handling
 
@@ -609,11 +699,15 @@ class VanillaComponentBase extends HTMLElement {
 
   disconnectedCallback() {
     if (this.template) {
-      this.template.onDestroyed();
+      this.template.onDestroyed(); // destroy instance
       delete this.template;
       delete this.component;
       delete this.dataContext;
     }
+    // Prototype template cleanup — matches LitComponentBase behavior.
+    // The closure-scoped `litTemplate` (the prototype) also needs
+    // onDestroyed() called for the global Template.renderedTemplates registry.
+    // This is wired up in defineComponent where `litTemplate` is in scope.
   }
 
   attributeChangedCallback(attribute, oldValue, newValue) {
@@ -621,6 +715,14 @@ class VanillaComponentBase extends HTMLElement {
     if (this.shadowRoot) {
       this._scheduleUpdate();
     }
+  }
+
+  // Public API — called by:
+  //   - Template.call() params as `rerender: () => this.element.requestUpdate()`
+  //   - adjustPropertyFromAttribute() for special attrs (disabled, value)
+  // Must exist on both base classes under this exact name.
+  requestUpdate() {
+    this._scheduleUpdate();
   }
 
   adoptedCallback() {
@@ -728,6 +830,17 @@ _firstUpdated() {
 
 **Key insight:** After first render, the vanilla model doesn't re-render the template. Data context updates flow through Reactions automatically. The `_performUpdate` for subsequent calls just ensures the data context is current — the Reactions pick up changes via signal dependencies.
 
+**`Template.render()` compatibility:** The existing `Template.render()` method gates on `this.rendered` — it only calls `this.renderer.render()` on the first call and returns the cached result thereafter. This works for vanilla because:
+- First call: `renderer.render()` returns a DocumentFragment, which `_performUpdate` appends to shadowRoot.
+- Subsequent calls: `Template.render()` returns the (now-empty) cached DocumentFragment. The vanilla base never calls `render()` again — it calls `renderer.setData()` instead, and Reactions handle DOM writes.
+- `Template.render()` does not need modification for vanilla support.
+
+**`requestUpdate()` contract:** Both `LitComponentBase` (inherits from LitElement) and `VanillaComponentBase` must expose `requestUpdate()` as a public method. This is called by:
+- `template.js` — exposed as `rerender()` in the callback params (`rerender: () => this.element.requestUpdate()`)
+- `adjust-property-from-attribute.js` — triggers update for special attributes like `disabled` and `value`
+
+Because both base classes satisfy this contract, `adjust-property-from-attribute.js` works unchanged with either renderer.
+
 ### 2.4 Style Adoption
 
 Replace `static get styles()` + Lit's `unsafeCSS` with native `adoptedStyleSheets`:
@@ -791,6 +904,8 @@ initialize() {
 
 **Option B is better** — the renderer class is passed through from `defineComponent`, which knows the rendering engine. This makes the renderer tree-shakeable: if you only use vanilla, Lit is never imported.
 
+The current hard import `import { LitRenderer } from '@semantic-ui/renderer'` at the top of `template.js` must also be removed — the renderer class arrives via the constructor/clone chain. This moves the Lit dependency from `@semantic-ui/templating` to `@semantic-ui/component` (where `defineComponent` selects the renderer class).
+
 ### 3.2 defineComponent Changes
 
 ```javascript
@@ -833,7 +948,8 @@ packages/component/src/
 ├── vanilla-component-base.js   ← NEW
 ├── component-helpers.js        ← NEW: shared logic extracted from web-component.js
 └── helpers/
-    └── adjust-property-from-attribute.js  ← unchanged
+    └── adjust-property-from-attribute.js  ← unchanged (calls el.requestUpdate()
+                                              which both base classes provide)
 ```
 
 ### 3.4 Renderer Package Exports
@@ -936,9 +1052,9 @@ However: the vanilla renderer's update path should be faster (signal → DOM wri
 **Mitigation:** Benchmark both renderers on the same set of components. The existing `docs/src/examples/` provide good test cases.
 
 ### Template.render() Return Type
-Currently `Template.render()` returns a Lit `TemplateResult` which is consumed by `LitElement.render()`. For vanilla, it would return a `DocumentFragment` (first render) or `undefined` (subsequent renders, since Reactions handle updates).
+Currently `Template.render()` returns a Lit `TemplateResult` which is consumed by `LitElement.render()`. For vanilla, `renderer.render()` returns a `DocumentFragment`.
 
-The return type divergence means code that consumes `template.render()` needs to know which renderer it's using. This is contained to `defineComponent` — the web component base class knows its own rendering model.
+This is a non-issue in practice. `Template.render()` caches the result in `this.html` and gates on `this.rendered` — it only calls `renderer.render()` once. The Lit base class returns `this.html` from its `render()` method (Lit processes the TemplateResult). The vanilla base class calls `this.template.render()` once in `_performUpdate()` and appends the DocumentFragment. Subsequent updates flow through `renderer.setData()` + Reactions. `Template.render()` itself needs no changes.
 
 ### SSR
 The vanilla renderer is browser-first. `isServer` checks exist throughout the codebase. SSR with the vanilla renderer would require a DOM shim (like `linkedom` or `happy-dom`). The Lit renderer already handles SSR via Lit's SSR package.
