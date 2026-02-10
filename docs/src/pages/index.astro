@@ -8,9 +8,9 @@ import { Image } from 'astro:assets';
 import logoImage from '@images/logo.png';
 
 const code1=`
-<ui-buttons large>
+<ui-buttons>
   <ui-button subtle-negative>
-    <ui-icon x></ui-icon>
+    <ui-icon delete></ui-icon>
     Delete
   </ui-button>
   <ui-button>
@@ -68,12 +68,12 @@ const code2=`
       // Specular
       specularTint:    '#1a99e6',
       specularPower:   2,
-      specularAmbient: 0.45,
+      specularAmbient: 0.5,
 
       // Animation
       speed:       0.2,
       density:     1.5,
-      brightness:  0.2,
+      brightness:  0.3,
       resolution:  2,
       // Mouse interaction
       mouse: {
@@ -82,7 +82,7 @@ const code2=`
       },
     });
 
-    createGlobeUI(document.querySelector('aboveFold'));
+    // createGlobeUI(document.querySelector('aboveFold'));
   </script>
   <ribbons>
     <ribbon class="proof">
@@ -90,23 +90,23 @@ const code2=`
         <UICards three spaced stackable>
           <ui-card>
             <ui-icon pdf></ui-icon>
-            <div class="header">From Human to AI</div>
+            <div class="header">Designed for Agents</div>
             <div class="description">
-              Components powered by machine readable specifications designed to translate from natural language to code.
+              Components are powered by machine readable specs designed to translate from natural language to code.
             </div>
           </ui-card>
           <ui-card>
             <ui-icon cpu></ui-icon>
             <div class="header">No Build Necessary</div>
             <div class="description">
-              AI writes markup, users see UI. No webpack, no Vite, no compilation.
+              Signals, JSX style expression evaluation, and modern ESM running directly in the browser powered by web components.
             </div>
           </ui-card>
           <ui-card>
             <ui-icon layers></ui-icon>
             <div class="header">Complete UI Library</div>
             <div class="description">
-              Use Tailwind or our CSS Token Framework. Ship complex UI using built-in primitives like button, menu, card.
+              A complete UI framework designed for compositionality and human in the loop editing. JIT Client-Side Tailwind inside Web Components too.
             </div>
           </ui-card>
         </UICards>
@@ -118,9 +118,9 @@ const code2=`
           <div class="container">
             <div class="segment">
               <div class="one">
-                <ui-buttons large>
+                <ui-buttons>
                   <ui-button subtle-negative>
-                    <ui-icon x></ui-icon>
+                    <ui-icon delete></ui-icon>
                     Delete
                   </ui-button>
                   <ui-button>
@@ -143,33 +143,36 @@ const code2=`
                   lang="sui"
                 />
               </div>
+              <div class="three">
+                <!-- Example 3 !-->
+              </div>
             </div>
           </div>
         </div>
         <div class="left">
           <div class="copy">
-            <h4 class="sub header">Primitives</h4>
-            <h3 class="header">Markup That Reads Like English</h3>
-            <p><code>&lt;ui-button primary large&gt;</code> — not <code>&lt;Button variant="primary" size="large" /&gt;</code>. Boolean attributes mean the markup reads the way you'd describe it, and the way an LLM would generate it.</p>
+            <h4 class="sub header">Beautiful Markup</h4>
+            <h3 class="header">Code Designed to Edit</h3>
+            <p>Use AI to author websites that read like English so you can manually make tweaks and understand changes made.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                A growing library of first-party primitives — buttons, menus, cards, modals, inputs — built on the same framework you use
+                Feature 1
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Every component defined by a spec — natural language descriptions, valid attributes, example code — readable by humans, AI, and the framework itself
+                Feature 2
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Three dialects: boolean shorthand, explicit attributes, or class-based — same component, your preferred syntax
+                Feature 3
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/ui/primitives">Browse Primitives</UIButton>
           </div>
           <div class="copy">
-            <h4 class="sub header">Templating</h4>
-            <h3 class="header">Templates Without a Compiler</h3>
+            <h4 class="sub header">Component Authoring</h4>
+            <h3 class="header">Author Components</h3>
             <p>Templates compile to an AST at runtime in the browser. Ternaries, arithmetic, inline objects, nested function calls, reactive expressions — full expressiveness without a compile step.</p>
             <ul class="feature-list">
               <li>
@@ -178,7 +181,7 @@ const code2=`
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Single <code>{`{}`}</code> or double <code>{`{{}}`}</code> brackets, Lisp-style or JS-style calls — write templates the way you already think
+                Lisp-style or JS-style calls — write templates the way you already think
               </li>
               <li>
                 <ui-icon check></ui-icon>
@@ -188,21 +191,21 @@ const code2=`
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
           </div>
           <div class="copy">
-            <h4 class="sub header">Reactivity</h4>
-            <h3 class="header">Signals With Less Ceremony</h3>
-            <p>Mutation helpers replace the <code>{`setState(prev => ...)`}</code> pattern. Auto-unwrapping means <code>{`{counter}`}</code> in a template just works — no <code>.value</code>, no <code>.get()</code>.</p>
+            <h4 class="sub header">Subheader 3</h4>
+            <h3 class="header">Value Prop 3</h3>
+            <p>Description of third</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                <code>increment()</code>, <code>toggle()</code>, <code>push()</code>, <code>setProperty()</code> — direct mutation instead of immutable update patterns
+                Feature 1
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Clone-by-default with deep equality — safe mutation without accidental reference sharing
+                Feature 2
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Standalone package — use the reactivity system with or without the component framework
+                Feature 3
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/reactivity">Reactivity Guide</UIButton>
@@ -215,7 +218,7 @@ const code2=`
         <h3 class="ui header">
           See It In Action
         </h3>
-        <PlaygroundExample height="500" id="card-search"></PlaygroundExample>
+        <PlaygroundExample height="800" id="card-search"></PlaygroundExample>
       </UIContainer>
     </ribbon>
   </ribbons>
