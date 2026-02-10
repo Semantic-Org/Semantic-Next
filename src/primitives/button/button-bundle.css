@@ -51,12 +51,15 @@
 
 /* src/primitives/button/css/definition/content/icon.css */
 @layer button.definition.content.icon {
-  .button ui-icon {
+  .button ui-icon,
+  :slotted(ui-icon) {
     vertical-align: top;
     opacity: var(--button-icon-opacity);
   }
-  .button ui-icon:only-child {
+  :is(.button ui-icon, :slotted(ui-icon)):only-child {
     margin: 0rem;
+  }
+  } {
   }
 }
 
@@ -619,7 +622,7 @@
     background-image: var(--button-primary-background-image);
     --button-link-text-color: var(--button-primary-color);
     --button-link-text-color-hover: var(--button-primary-color-hover);
-    --button-styled-background: var(--primary-background);
+    --button-styled-background: var(--primary-background-color);
     --button-styled-text-color: var(--primary-text-color);
     --button-styled-background-hover: var(--primary-5);
     --button-styled-background-pressed: var(--primary-10);
@@ -675,7 +678,7 @@
     background-image: var(--button-colored-background-image);
     --button-link-text-color: var(--button-secondary-color);
     --button-link-text-color-hover: var(--button-secondary-color-hover);
-    --button-styled-background: var(--secondary-background);
+    --button-styled-background: var(--secondary-background-color);
     --button-styled-text-color: var(--secondary-text-color);
     --button-styled-background-hover: var(--secondary-5);
     --button-styled-background-pressed: var(--secondary-10);
