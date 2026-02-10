@@ -16,7 +16,22 @@
     --sl-color-gray-7: #f5f6f8;
     --sl-color-black: #ffffff;
     --bullet-size: 16px;
-    --sl-font: 'Lato', serif;
+    --sl-font: var(--page-font);
+
+    --page-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;*/
+
+/*     --page-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+*/
+    /* --page-font: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;*/
+
+ /*   --page-font: 'Public Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Public Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+*/
+    /* --page-font: 'Geist', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Geist', 'Helvetica Neue', Arial, Helvetica, sans-serif; */
     --ec-uiFontSize: 14px;
 
   }
@@ -72,8 +87,7 @@
   h3,
   h4,
   h5 {
-    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    color: #131313;
+    font-family: var(--header-font);
   }
 
   h1:first-child,
@@ -186,14 +200,12 @@
   }
 
   html.dark {
-  }
-  html.dark {
     h1,
     h2,
     h3,
     h4,
     h5 {
-      color: #FFFFFF;
+      /*color: #FFFFFF;*/
     }
     .shiki,
     .shiki span {

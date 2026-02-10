@@ -215,8 +215,9 @@ body {
       color: var(--secondary-text-color);
       font-size: 16px;
       margin-bottom: 0;
+
       + .header {
-        margin-top: 1rem;
+        margin-top: 0rem;
       }
     }
     h3.header {
