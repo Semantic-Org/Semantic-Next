@@ -1,12 +1,12 @@
 .ui-tooltip {
   --tooltip-background: var(--black);
-  --tooltip-padding: var(--rectangular-tight-padding);
+  --tooltip-padding: var(--padding-xs) var(--padding-s);
   --tooltip-color: var(--white-text-color);
   --tootip-font-weight: var(--bold);
   --tooltip-border-radius: var(--border-radius);
   --tooltip-font-size: var(--small);
 
-  --tooltip-header-distance: var(--space-2);
+  --tooltip-header-distance: var(--gap-2xs);
   --tooltip-header-color: var(--white);
   --tooltip-text-font-weight: var(--bold);
   --tooltip-text-color: var(--white-60);

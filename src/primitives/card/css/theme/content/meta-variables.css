@@ -1,5 +1,5 @@
 :host {
-  --card-meta-margin: var(--spacing-xs) 0 0;
+  --card-meta-margin: var(--margin-xs) 0 0;
   --card-meta-padding: var(--padding-xs) 0 0;
   --card-meta-border: var(--border);
   --card-meta-gap: var(--gap-xs);

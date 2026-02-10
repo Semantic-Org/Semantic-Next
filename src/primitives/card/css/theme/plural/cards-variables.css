@@ -1,5 +1,5 @@
 :host {
-  --cards-gap: var(--spacing);
-  --cards-margin: var(--vertical-spacing);
+  --cards-gap: var(--gutter);
+  --cards-margin: var(--vertical-margin);
 }
 

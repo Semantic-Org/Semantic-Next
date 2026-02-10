@@ -1,7 +1,7 @@
 @layer themeSwitcher.shadow {
 
   :host {
-    --theme-switcher-hitbox-padding: var(--spacing) ;
+    --theme-switcher-hitbox-padding: var(--padding);
     --theme-switcher-icon-opacity: 0.6;
     --theme-switcher-icon-opacity-active: 1;
     --theme-switcher-transition: opacity var(--duration) var(--easing);

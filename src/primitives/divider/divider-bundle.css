@@ -119,15 +119,15 @@
 /* src/primitives/divider/css/theme/variations/spacing-variables.css */
 @layer divider.theme.variations.spacing {
   :host {
-    --divider-spacing-micro: var(--spacing-micro);
-    --divider-spacing-mini: var(--spacing-mini);
-    --divider-spacing-tiny: var(--spacing-tiny);
-    --divider-spacing-small: var(--spacing-small);
-    --divider-spacing-medium: var(--spacing-medium);
-    --divider-spacing-large: var(--spacing-large);
-    --divider-spacing-big: var(--spacing-big);
-    --divider-spacing-huge: var(--spacing-huge);
-    --divider-spacing-massive: var(--spacing-massive);
+    --divider-spacing-micro: var(--margin-3xs);
+    --divider-spacing-mini: var(--margin-2xs);
+    --divider-spacing-tiny: var(--margin-xs);
+    --divider-spacing-small: var(--margin-s);
+    --divider-spacing-medium: var(--margin-m);
+    --divider-spacing-large: var(--margin-l);
+    --divider-spacing-big: var(--margin-xl);
+    --divider-spacing-huge: var(--margin-2xl);
+    --divider-spacing-massive: var(--margin-3xl);
   }
 }
 

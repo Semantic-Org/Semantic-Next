@@ -2197,7 +2197,7 @@
     --labeled-label-font-size: var(--medium);
     --labeled-label-align: center;
     --labeled-label-padding: "";
-    --labeled-label-font-size: var(--relative-medium);
+    --labeled-label-font-size: var(--text-m);
     --labeled-label-border-color: var(--border-color);
     --labeled-label-border-offset: -var(--border-box-shadow-width);
     --labeled-tag-label-size: 1.85em;

@@ -8,8 +8,8 @@ body {
 }
 
 html {
-  font-size: var(--font-size);
   container: page / normal;
+  font-size: var(--em-size);
 }
 
 *,
@@ -20,6 +20,7 @@ html {
 
 body {
   margin: 0px;
+  font-size: var(--body-size);
   padding: 0px;
   overflow-x: var(--page-overflow-x);
   min-width: var(--page-min-width);

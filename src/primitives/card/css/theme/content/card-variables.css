@@ -1,8 +1,8 @@
 :host {
   --card-margin: 0px 5px 5px 0px;
   --card-text-align: center;
-  --card-padding: var(--spacing);
-  --card-reverse-padding: calc(var(--spacing) * -1);
+  --card-padding: var(--padding);
+  --card-reverse-padding: calc(var(--padding) * -1);
   --card-flex-direction: column;
   --card-border-radius: var(--border-radius);
   --card-transition: var(--transition);
