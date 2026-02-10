@@ -269,7 +269,7 @@ function createWebGLRenderer(canvas, getCfg) {
   }
 
   // ── GPU resources (rebuilt on context restore) ──
-  let prog = null, vs = null, fs = null, quad = null, loc = {};
+  let prog = null, vs = null, fs = null, quad = null, loc = {}, aPos = -1;
   let contextLost = false;
 
   function buildProgram() {
@@ -304,7 +304,7 @@ function createWebGLRenderer(canvas, getCfg) {
     quad = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(prog, 'a_pos');
+    aPos = gl.getAttribLocation(prog, 'a_pos');
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
@@ -383,6 +383,11 @@ function createWebGLRenderer(canvas, getCfg) {
 
     render(time, mx, my) {
       if (contextLost) { return; }
+      // Re-set program/buffer state (layers may have modified it)
+      gl.useProgram(prog);
+      gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
       const cfg = getCfg();
       const p = cfg._palette;
       const wv = cfg.wave;
@@ -867,6 +872,8 @@ export function createPlasma(selector, settings = {}) {
       get isRunning() {
         return false;
       },
+      addLayer() {},
+      removeLayer() {},
     };
   }
 
@@ -877,6 +884,7 @@ export function createPlasma(selector, settings = {}) {
   let running = false;
   let destroyed = false;
   let lastFrameTime = performance.now();
+  const layers = [];
 
   // ── Mouse tracking (smoothed) ─────────────────────────────
 
@@ -932,6 +940,14 @@ export function createPlasma(selector, settings = {}) {
     [mouseY, mouseVelY] = springStep(mouseY, mouseVelY, mouseTargetY, spring.freq, spring.damp, dtSec);
 
     renderer.render(time, mouseX, mouseY);
+    for (let i = 0; i < layers.length; i++) {
+      try {
+        layers[i]({ time, mouseX, mouseY, dt: dtSec, renderer, cfg });
+      }
+      catch (e) {
+        console.error('plasma layer error:', e);
+      }
+    }
     fpsSystem.tick(now);
     animId = requestAnimationFrame(loop);
   }
@@ -1084,8 +1100,17 @@ export function createPlasma(selector, settings = {}) {
       return running;
     },
 
+    addLayer(fn) {
+      layers.push(fn);
+    },
+    removeLayer(fn) {
+      const i = layers.indexOf(fn);
+      if (i >= 0) { layers.splice(i, 1); }
+    },
+
     destroy() {
       destroyed = true;
+      layers.length = 0;
       cancelFrame();
       fpsSystem.remove();
       renderer.destroy();

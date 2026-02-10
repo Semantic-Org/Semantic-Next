@@ -57,7 +57,7 @@ const code2=`
   </aboveFold>
   <script>
     import { createPlasma } from '../javascript/plasma.js'
-
+    import { createGlobeUI } from '../javascript/hero-globe-ui.js'
     const plasma = createPlasma('#plasma', {
       // Colors — just hex
       colorFrom:       '#000000',
@@ -73,7 +73,7 @@ const code2=`
       // Animation
       speed:       0.2,
       density:     1.5,
-      brightness:  0.4,
+      brightness:  0.2,
       resolution:  2,
       // Mouse interaction
       mouse: {
@@ -81,6 +81,8 @@ const code2=`
         warp:  1.5,   // gravity well pulls bands
       },
     });
+
+    createGlobeUI(document.querySelector('aboveFold'));
   </script>
   <ribbons>
     <ribbon class="proof">
