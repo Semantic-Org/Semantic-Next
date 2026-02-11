@@ -1,15 +1,10 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { iconMappings as mappings } from '../src/icons/mappings.js';
 
 const scriptsDir = dirname(fileURLToPath(import.meta.url));
-const specsDir = join(scriptsDir, '..');
-const setsDir = join(specsDir, '../../src/primitives/icon/sets');
-
-// Parse mappings.js (it's an ES export, so we extract the object via regex)
-const src = readFileSync(join(specsDir, 'src/icons/mappings.js'), 'utf8');
-const objStr = src.replace(/^.*?export const iconMappings = /s, '').replace(/;\s*$/, '');
-const mappings = new Function(`return ${objStr}`)();
+const setsDir = join(scriptsDir, '../../../src/primitives/icon/sets');
 
 const libraries = {
   lucide: { dir: 'lucide', field: 'lucide', label: 'Lucide Icons' },

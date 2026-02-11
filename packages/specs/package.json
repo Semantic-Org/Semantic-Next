@@ -19,8 +19,10 @@
   },
   "scripts": {
     "build": "wireit",
-    "generate:icons": "node scripts/generate-icon-css.js",
-    "download:icons": "node scripts/download-icon-svg.js",
+    "generate:icons": "wireit",
+    "icons:generate-css": "wireit",
+    "icons:generate-meta": "wireit",
+    "icons:download-svg": "wireit",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -61,6 +63,23 @@
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    },
+    "generate:icons": {
+      "dependencies": [
+        "icons:generate-css",
+        "icons:generate-meta",
+        "icons:download-svg"
+      ]
+    },
+    "icons:generate-css": {
+      "command": "node scripts/generate-icon-css.js"
+    },
+    "icons:generate-meta": {
+      "command": "node scripts/generate-icon-meta.js"
+    },
+    "icons:download-svg": {
+      "command": "node scripts/download-icon-svg.js",
+      "dependencies": ["icons:generate-css"]
     }
   }
 }
