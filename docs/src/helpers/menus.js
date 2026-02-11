@@ -146,11 +146,11 @@ export const standardMenuIcons = {
   'Introduction': 'zap',
   'Quick Start': 'zap',
   'Install & Setup': 'zap',
-  'Tokens': 'droplet',
-  'Styling': 'droplet',
-  'CSS Tokens': 'droplet',
-  'CSS Framework': 'droplet',
-  'CSS Theming': 'droplet',
+  'Tokens': 'theme',
+  'Styling': 'theme',
+  'CSS Tokens': 'theme',
+  'CSS Framework': 'theme',
+  'CSS Theming': 'theme',
   'Templates': 'table',
   'Framework': 'package',
   'Primitives': 'layers',
@@ -159,7 +159,7 @@ export const standardMenuIcons = {
   'UI Components': 'package',
   'Behaviors': 'cpu',
   'UI Behaviors': 'cpu',
-  'Reactivity': 'cpu',
+  'Reactivity': 'activity',
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
   'API References': 'code',
@@ -228,7 +228,7 @@ export const topbarMenu = [
   {
     _id: 'css',
     name: 'Styling',
-    icon: 'droplet',
+    icon: 'theme',
     url: '/ui/css',
   },
   {
@@ -297,7 +297,7 @@ export const sidebarMenuStart = [
   },
   {
     name: "What's New?",
-    icon: 'radio',
+    icon: 'sparkles',
     url: '/ui/start/whats-new',
     description: '0.12.0',
   },
@@ -363,7 +363,7 @@ export const sidebarMenuStart = [
   {
     name: 'Philosophy',
     url: '/ui/start/philosophy',
-    icon: 'message-circle',
+    icon: 'chat',
     pages: [
       {
         name: 'Natural Language',
@@ -382,7 +382,7 @@ export const sidebarMenuCSS = [
   {
     name: 'CSS Tokens',
     url: '/ui/css/tokens',
-    icon: 'droplet',
+    icon: 'theme',
     pages: [
       {
         name: 'Colors',
@@ -468,7 +468,7 @@ export const sidebarMenuBehaviors = [
   {
     name: 'Behaviors',
     url: '/ui/behaviors',
-    icon: 'package',
+    icon: 'cpu',
     pages: behaviorPages,
   },
 ];
@@ -582,7 +582,7 @@ export const sidebarMenuFramework = [
     name: 'Reactivity',
     description: 'Signals',
     url: '/docs/guides/reactivity',
-    icon: 'cpu',
+    icon: 'activity',
     pages: [
       {
         name: 'Signals',
@@ -776,7 +776,7 @@ export const sidebarMenuAPI = [
   {
     name: 'Reactivity',
     url: '/docs/api/reactivity',
-    icon: 'cpu',
+    icon: 'activity',
     pages: [
       {
         name: 'Signal',
@@ -992,7 +992,7 @@ export const sidebarMenuAPI = [
   {
     name: 'Renderer',
     url: '/docs/api/renderer',
-    icon: 'edit-3',
+    icon: 'brush',
     pages: [
       {
         name: 'Lit Renderer',
