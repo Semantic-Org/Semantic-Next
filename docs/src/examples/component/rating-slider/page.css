@@ -4,7 +4,7 @@ body {
 
 .message {
   display: none;
-  margin-top: var(--spacing);
+  margin-top: var(--margin);
   padding: var(--padding);
   border-radius: var(--border-radius);
   background: var(--standard-5) var(--subtle-gradient);

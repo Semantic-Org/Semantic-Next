@@ -1,5 +1,5 @@
 .status {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--margin-xs);
   color: var(--text-color);
   opacity: 0.8;
 }

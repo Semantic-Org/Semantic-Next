@@ -2,7 +2,7 @@
   border-radius: var(--border-radius);
   background: var(--ui-background-emphasis);
   box-shadow: var(--subtle-shadow);
-  padding: var(--spacing);
+  padding: var(--padding);
   max-width: 300px;
   cursor: pointer;
   transition: transform var(--duration), box-shadow var(--duration);

@@ -133,6 +133,37 @@
 
 
   /*-------------------
+    Spacing (alias)
+  --------------------*/
+
+  /*
+   * --spacing-* aliases --margin-* for natural language use.
+   * Designers say "spacing" when they mean the distance between
+   * components — that's margin. Do NOT use --spacing-* for
+   * padding or gap contexts; those have their own tokens.
+   */
+
+  --spacing-3xs: var(--margin-3xs);
+  --spacing-2xs: var(--margin-2xs);
+  --spacing-xs:  var(--margin-xs);
+  --spacing-s:   var(--margin-s);
+  --spacing-m:   var(--margin-m);
+  --spacing-l:   var(--margin-l);
+  --spacing-xl:  var(--margin-xl);
+  --spacing-2xl: var(--margin-2xl);
+  --spacing-3xl: var(--margin-3xl);
+  --spacing-4xl: var(--margin-4xl);
+  --spacing-5xl: var(--margin-5xl);
+
+  /* Bare default */
+  --spacing: var(--spacing-m);
+
+  /* Directional shorthands */
+  --vertically-spaced:   var(--vertical-margin);
+  --horizontally-spaced: var(--horizontal-margin);
+
+
+  /*-------------------
     Gutter (alias)
   --------------------*/
 

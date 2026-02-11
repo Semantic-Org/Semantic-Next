@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100px;
-  padding: var(--spacing);
+  padding: var(--padding);
   font-weight: var(--bold);
   border: var(--border);
   box-shadow: var(--raised-shadow);

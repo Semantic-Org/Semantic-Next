@@ -367,7 +367,7 @@
 @layer card.theme.plural {
   :host {
     --cards-gap: var(--gutter);
-    --cards-margin: var(--vertical-margin);
+    --cards-margin: var(--vertically-spaced);
   }
 }
 

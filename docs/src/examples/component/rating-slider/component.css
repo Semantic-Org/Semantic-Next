@@ -16,10 +16,10 @@
   background: var(--track-color);
   border-radius: var(--slider-border-radius);
   cursor: pointer;
-  margin: var(--spacing) 0;
+  margin: var(--margin) 0;
 
   .area {
-    margin: 0rem var(--spacing);
+    margin: 0rem var(--margin);
     position: relative;
     height: var(--slider-height);
     width: calc(100% - 2em);
@@ -93,7 +93,7 @@
 
 .reset {
   display: inline-block;
-  margin-top: var(--spacing);
+  margin-top: var(--margin);
 }
 
 

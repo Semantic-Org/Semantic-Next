@@ -1,5 +1,5 @@
 :host {
-  --menu-margin: var(--vertical-margin);
+  --menu-margin: var(--vertically-spaced);
   --menu-font-weight: var(--normal);
   --menu-gap: var(--4px);
   --menu-align-items: flex-start;

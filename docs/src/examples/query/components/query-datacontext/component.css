@@ -9,7 +9,7 @@
   align-items: center;
 
   .count {
-    margin-right: var(--spacing);
+    margin-right: var(--margin);
     vertical-align: middle;
   }
 }

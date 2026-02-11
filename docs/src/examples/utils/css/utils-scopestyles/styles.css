@@ -10,13 +10,13 @@
 
 .modal {
   background: var(--standard-5);
-  padding: var(--spacing);
+  padding: var(--padding);
   border-radius: var(--border-radius);
   box-shadow: var(--floating-shadow);
   
   .header {
     font-weight: var(--bold);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--margin-xs);
   }
 }
 

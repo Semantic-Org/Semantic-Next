@@ -1,6 +1,6 @@
 :host {
   display: inline-block;
-  margin-right: var(--spacing);
+  margin-right: var(--margin);
 }
 
 .rating {
@@ -53,7 +53,7 @@
 }
 
 .value {
-  margin-left: var(--spacing-xs);
+  margin-left: var(--margin-xs);
   font-size: var(--small);
   color: var(--standard-60);
 }

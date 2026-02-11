@@ -60,7 +60,7 @@
   }
   
   .icon {
-    margin-right: var(--spacing-xs);
+    margin-right: var(--margin-xs);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,7 +73,7 @@
   }
   
   .shortcut {
-    margin-left: var(--spacing);
+    margin-left: var(--margin);
     color: var(--standard-40);
     font-size: var(--small);
   }

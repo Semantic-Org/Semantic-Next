@@ -207,9 +207,21 @@ Common use case — resetting to single-side spacing:
 }
 ```
 
-### No `--spacing-*` Tokens
+### `--spacing-*` = Layout Spacing (Alias for `--margin-*`)
 
-`--spacing-*` is intentionally omitted. Every spacing token names a specific CSS property so you always know where it goes. If you're unsure whether to use padding, gap, or margin — that's a layout decision, not a token decision.
+Designers say "spacing" when they mean the distance *between* components — that's margin. `--spacing-*` exists as a natural-language alias for `--margin-*` so code reads like design intent:
+
+```css
+/* These are identical */
+margin: var(--spacing-l);
+margin: var(--margin-l);
+
+/* Directional shorthands */
+margin: var(--vertically-spaced);    /* = var(--vertical-margin) */
+margin: var(--horizontally-spaced);  /* = var(--horizontal-margin) */
+```
+
+**`--spacing-*` is ONLY for margin contexts.** Do not use it for padding or gap — those have their own tokens with different units (em vs rem). The ambiguity of "spacing" in CSS is exactly why `--padding-*`, `--gap-*`, and `--margin-*` exist as primary tokens. `--spacing-*` is a convenience alias for the most common interpretation.
 
 ---
 
@@ -525,7 +537,6 @@ Each has full scale (`--positive-0` to `--positive-100`) and shortcuts (`--posit
 --gray                  /* British spelling: --grey */
 --primary-bg            /* Must be --primary-background-color */
 --standard              /* Needs number: --standard-80 */
---spacing-m             /* Doesn't exist — use --padding-m, --gap-m, or --margin-m */
 ```
 
 ---

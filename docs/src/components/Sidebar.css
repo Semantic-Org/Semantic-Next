@@ -143,7 +143,7 @@
   }
 
   sidebar nav-menu {
-    margin-top: var(--spacing-xs);
+    margin-top: var(--margin-xs);
     flex-grow: 1;
   }
 }
