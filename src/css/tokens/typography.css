@@ -11,6 +11,7 @@
   --font-name: 'Lato';
   --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
   --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
   /*-------------------
      Font Weights

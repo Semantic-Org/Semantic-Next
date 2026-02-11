@@ -2,7 +2,7 @@ html {
   height: 100%;
   margin: 0;
   padding: 0;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: var(--scrollbar-gutter);
   container: page / normal;
   overscroll-behavior: none;
   font-size: var(--em-size);
@@ -108,12 +108,12 @@ textarea {
 img, video, svg {
   max-width: 100%;
   height: auto;
-  display: block;
 }
 
 /* Code Blocks */
 pre, code {
   tab-size: 2;
+  font-family: var(--code-font);
 }
 
 
