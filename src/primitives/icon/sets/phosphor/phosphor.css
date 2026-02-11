@@ -173,6 +173,7 @@
   --icon-pen-nib: url('./svg/pen-nib.svg');
   --icon-eyedropper: url('./svg/eyedropper.svg');
   --icon-eraser: url('./svg/eraser.svg');
+  --icon-cursor: url('./svg/cursor.svg');
 
   /* Communication */
   --icon-bell: url('./svg/bell.svg');
@@ -245,7 +246,6 @@
 
   /* Organization */
   --icon-stack: url('./svg/stack.svg');
-  --icon-git-merge: url('./svg/git-merge.svg');
   --icon-tree-structure: url('./svg/tree-structure.svg');
   --icon-hourglass: url('./svg/hourglass.svg');
   --icon-flag-pennant: url('./svg/flag-pennant.svg');
@@ -282,6 +282,8 @@
   --icon-calculator: url('./svg/calculator.svg');
   --icon-dice-five: url('./svg/dice-five.svg');
   --icon-clock-counter-clockwise: url('./svg/clock-counter-clockwise.svg');
+  --icon-command: url('./svg/command.svg');
+  --icon-hash: url('./svg/hash.svg');
 
   /* Device */
   --icon-desktop: url('./svg/desktop.svg');
@@ -293,13 +295,17 @@
   --icon-hard-drives: url('./svg/hard-drives.svg');
   --icon-usb: url('./svg/usb.svg');
   --icon-screencast: url('./svg/screencast.svg');
+  --icon-television: url('./svg/television.svg');
+  --icon-battery-charging: url('./svg/battery-charging.svg');
 
   /* Connectivity */
   --icon-graph: url('./svg/graph.svg');
   --icon-wifi-high: url('./svg/wifi-high.svg');
   --icon-bluetooth: url('./svg/bluetooth.svg');
+  --icon-wifi-slash: url('./svg/wifi-slash.svg');
 
   /* Development */
+  --icon-git-fork: url('./svg/git-fork.svg');
   --icon-terminal: url('./svg/terminal.svg');
   --icon-database: url('./svg/database.svg');
   --icon-cloud: url('./svg/cloud.svg');
@@ -307,6 +313,9 @@
   --icon-cloud-arrow-down: url('./svg/cloud-arrow-down.svg');
   --icon-bug: url('./svg/bug.svg');
   --icon-git-branch: url('./svg/git-branch.svg');
+  --icon-git-merge: url('./svg/git-merge.svg');
+  --icon-git-pull-request: url('./svg/git-pull-request.svg');
+  --icon-git-commit: url('./svg/git-commit.svg');
 
   /* Brand */
   --icon-github-logo: url('./svg/github-logo.svg');
@@ -492,6 +501,7 @@
   --icon-brush: var(--icon-paint-brush);
   --icon-pen: var(--icon-pen-nib);
   --icon-color: var(--icon-eyedropper);
+  --icon-mouse-pointer: var(--icon-cursor);
 
   /* Communication */
   --icon-notifications: var(--icon-bell);
@@ -550,7 +560,6 @@
 
   /* Organization */
   --icon-layers: var(--icon-stack);
-  --icon-subtask: var(--icon-git-merge);
   --icon-tree: var(--icon-tree-structure);
   --icon-progress: var(--icon-hourglass);
   --icon-milestone: var(--icon-flag-pennant);
@@ -587,16 +596,23 @@
   --icon-tablet: var(--icon-device-tablet-speaker);
   --icon-storage: var(--icon-hard-drives);
   --icon-cast: var(--icon-screencast);
+  --icon-tv: var(--icon-television);
+  --icon-charging: var(--icon-battery-charging);
 
   /* Connectivity */
   --icon-network: var(--icon-graph);
   --icon-wifi: var(--icon-wifi-high);
+  --icon-wifi-off: var(--icon-wifi-slash);
 
   /* Development */
+  --icon-fork: var(--icon-git-fork);
   --icon-server: var(--icon-hard-drives);
   --icon-cloud-upload: var(--icon-cloud-arrow-up);
   --icon-cloud-download: var(--icon-cloud-arrow-down);
-  --icon-git: var(--icon-git-branch);
+  --icon-branch: var(--icon-git-branch);
+  --icon-merge: var(--icon-git-merge);
+  --icon-pull-request: var(--icon-git-pull-request);
+  --icon-commit: var(--icon-git-commit);
 
   /* Brand */
   --icon-github: var(--icon-github-logo);
@@ -812,6 +828,8 @@
   --icon-draw: var(--icon-pen-nib);
   --icon-color-picker: var(--icon-eyedropper);
   --icon-clear: var(--icon-eraser);
+  --icon-select: var(--icon-cursor);
+  --icon-pointer: var(--icon-cursor);
 
   /* Communication */
   --icon-alerts: var(--icon-bell);
@@ -890,7 +908,6 @@
   --icon-language: var(--icon-globe);
 
   /* Organization */
-  --icon-child: var(--icon-git-merge);
   --icon-hierarchy: var(--icon-tree-structure);
   --icon-sitemap: var(--icon-tree-structure);
   --icon-org-chart: var(--icon-tree-structure);
@@ -931,6 +948,10 @@
   --icon-qr: var(--icon-qr-code);
   --icon-dice: var(--icon-dice-five);
   --icon-restore: var(--icon-clock-counter-clockwise);
+  --icon-cmd: var(--icon-command);
+  --icon-hashtag: var(--icon-hash);
+  --icon-number-sign: var(--icon-hash);
+  --icon-pound: var(--icon-hash);
 
   /* Device */
   --icon-monitor: var(--icon-desktop);
@@ -945,6 +966,12 @@
   --icon-disk: var(--icon-hard-drives);
   --icon-chromecast: var(--icon-screencast);
   --icon-airplay: var(--icon-screencast);
+  --icon-screen: var(--icon-television);
+
+  /* Connectivity */
+  --icon-wifi-disabled: var(--icon-wifi-slash);
+  --icon-no-wifi: var(--icon-wifi-slash);
+  --icon-offline: var(--icon-wifi-slash);
 
   /* Development */
   --icon-console: var(--icon-terminal);
@@ -952,8 +979,6 @@
   --icon-db: var(--icon-database);
   --icon-backup: var(--icon-cloud-arrow-up);
   --icon-issue: var(--icon-bug);
-  --icon-branch: var(--icon-git-branch);
-  --icon-version-control: var(--icon-git-branch);
 
   /* Brand */
   --icon-x: var(--icon-x-logo);

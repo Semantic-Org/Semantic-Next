@@ -63,7 +63,7 @@ let totalMissing = 0;
 for (const [libKey, lib] of Object.entries(libraries)) {
   const cssPath = join(setsDir, lib.dir, `${lib.dir}.css`);
   if (!existsSync(cssPath)) {
-    console.warn(`SKIP ${lib.dir}: no CSS file found (run icons:generate-css first)`);
+    console.warn(`SKIP ${lib.dir}: no CSS file found (run icons:build-css first)`);
     continue;
   }
 

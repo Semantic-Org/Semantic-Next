@@ -172,6 +172,7 @@
   /* Editing */
   --icon-brush: url('./svg/brush.svg');
   --icon-colorize: url('./svg/colorize.svg');
+  --icon-arrow_selector_tool: url('./svg/arrow_selector_tool.svg');
 
   /* Communication */
   --icon-notifications: url('./svg/notifications.svg');
@@ -243,7 +244,6 @@
 
   /* Organization */
   --icon-layers: url('./svg/layers.svg');
-  --icon-subdirectory_arrow_right: url('./svg/subdirectory_arrow_right.svg');
   --icon-account_tree: url('./svg/account_tree.svg');
   --icon-diamond: url('./svg/diamond.svg');
   --icon-task_alt: url('./svg/task_alt.svg');
@@ -279,6 +279,7 @@
   --icon-calculate: url('./svg/calculate.svg');
   --icon-casino: url('./svg/casino.svg');
   --icon-history: url('./svg/history.svg');
+  --icon-keyboard_command_key: url('./svg/keyboard_command_key.svg');
 
   /* Device */
   --icon-desktop_windows: url('./svg/desktop_windows.svg');
@@ -290,11 +291,14 @@
   --icon-storage: url('./svg/storage.svg');
   --icon-usb: url('./svg/usb.svg');
   --icon-cast: url('./svg/cast.svg');
+  --icon-tv: url('./svg/tv.svg');
+  --icon-battery_charging_full: url('./svg/battery_charging_full.svg');
 
   /* Connectivity */
   --icon-hub: url('./svg/hub.svg');
   --icon-wifi: url('./svg/wifi.svg');
   --icon-bluetooth: url('./svg/bluetooth.svg');
+  --icon-wifi_off: url('./svg/wifi_off.svg');
 
   /* Development */
   --icon-terminal: url('./svg/terminal.svg');
@@ -304,6 +308,8 @@
   --icon-cloud_upload: url('./svg/cloud_upload.svg');
   --icon-cloud_download: url('./svg/cloud_download.svg');
   --icon-bug_report: url('./svg/bug_report.svg');
+  --icon-merge: url('./svg/merge.svg');
+  --icon-commit: url('./svg/commit.svg');
 
   /* Gamification */
   --icon-military_tech: url('./svg/military_tech.svg');
@@ -464,6 +470,7 @@
   /* Editing */
   --icon-pen: var(--icon-edit);
   --icon-color: var(--icon-colorize);
+  --icon-mouse-pointer: var(--icon-arrow_selector_tool);
 
   /* Communication */
   --icon-email: var(--icon-mail);
@@ -521,7 +528,6 @@
   --icon-globe: var(--icon-language);
 
   /* Organization */
-  --icon-subtask: var(--icon-subdirectory_arrow_right);
   --icon-tree: var(--icon-account_tree);
   --icon-progress: var(--icon-progress_activity);
   --icon-milestone: var(--icon-diamond);
@@ -553,21 +559,25 @@
   --icon-qr-code: var(--icon-qr_code_2);
   --icon-calculator: var(--icon-calculate);
   --icon-random: var(--icon-casino);
+  --icon-command: var(--icon-keyboard_command_key);
+  --icon-hash: var(--icon-tag);
 
   /* Device */
   --icon-desktop: var(--icon-desktop_windows);
   --icon-laptop: var(--icon-laptop_mac);
   --icon-cpu: var(--icon-memory);
+  --icon-charging: var(--icon-battery_charging_full);
 
   /* Connectivity */
   --icon-network: var(--icon-hub);
+  --icon-wifi-off: var(--icon-wifi_off);
 
   /* Development */
   --icon-server: var(--icon-dns);
   --icon-cloud-upload: var(--icon-cloud_upload);
   --icon-cloud-download: var(--icon-cloud_download);
   --icon-bug: var(--icon-bug_report);
-  --icon-git: var(--icon-account_tree);
+  --icon-branch: var(--icon-account_tree);
 
   /* Gamification */
   --icon-award: var(--icon-military_tech);
@@ -806,6 +816,9 @@
   --icon-draw: var(--icon-edit);
   --icon-eyedropper: var(--icon-colorize);
   --icon-color-picker: var(--icon-colorize);
+  --icon-cursor: var(--icon-arrow_selector_tool);
+  --icon-select: var(--icon-arrow_selector_tool);
+  --icon-pointer: var(--icon-arrow_selector_tool);
 
   /* Communication */
   --icon-bell: var(--icon-notifications);
@@ -894,7 +907,6 @@
 
   /* Organization */
   --icon-stack: var(--icon-layers);
-  --icon-child: var(--icon-subdirectory_arrow_right);
   --icon-hierarchy: var(--icon-account_tree);
   --icon-sitemap: var(--icon-account_tree);
   --icon-org-chart: var(--icon-account_tree);
@@ -937,6 +949,10 @@
   --icon-qr: var(--icon-qr_code_2);
   --icon-dice: var(--icon-casino);
   --icon-restore: var(--icon-history);
+  --icon-cmd: var(--icon-keyboard_command_key);
+  --icon-hashtag: var(--icon-tag);
+  --icon-number-sign: var(--icon-tag);
+  --icon-pound: var(--icon-tag);
 
   /* Device */
   --icon-monitor: var(--icon-desktop_windows);
@@ -951,6 +967,14 @@
   --icon-disk: var(--icon-storage);
   --icon-chromecast: var(--icon-cast);
   --icon-airplay: var(--icon-cast);
+  --icon-television: var(--icon-tv);
+  --icon-screen: var(--icon-tv);
+  --icon-battery-charging: var(--icon-battery_charging_full);
+
+  /* Connectivity */
+  --icon-wifi-disabled: var(--icon-wifi_off);
+  --icon-no-wifi: var(--icon-wifi_off);
+  --icon-offline: var(--icon-wifi_off);
 
   /* Development */
   --icon-console: var(--icon-terminal);
@@ -958,8 +982,6 @@
   --icon-db: var(--icon-database);
   --icon-backup: var(--icon-cloud_upload);
   --icon-issue: var(--icon-bug_report);
-  --icon-branch: var(--icon-account_tree);
-  --icon-version-control: var(--icon-account_tree);
 
   /* Gamification */
   --icon-badge: var(--icon-military_tech);

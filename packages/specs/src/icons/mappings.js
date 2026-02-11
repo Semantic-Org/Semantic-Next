@@ -2161,14 +2161,13 @@ export const iconMappings = {
     materialSymbols: 'layers',
     heroicons: 'rectangle-stack',
   },
-  'subtask': {
-    category: 'organization',
-    aliases: ['child'],
+  'fork': {
+    category: 'development',
     description: 'Subtask',
     lucide: 'git-fork',
-    phosphor: 'git-merge',
-    tabler: 'subtask',
-    materialSymbols: 'subdirectory_arrow_right',
+    phosphor: 'git-fork',
+    tabler: null,
+    materialSymbols: null,
     heroicons: null,
   },
   'tree': {
@@ -2491,9 +2490,8 @@ export const iconMappings = {
     materialSymbols: 'bug_report',
     heroicons: 'bug-ant',
   },
-  'git': {
+  'branch': {
     category: 'development',
-    aliases: ['branch', 'version-control'],
     description: 'Git branch',
     lucide: 'git-branch',
     phosphor: 'git-branch',
@@ -2501,9 +2499,8 @@ export const iconMappings = {
     materialSymbols: 'account_tree',
     heroicons: null,
   },
-  'git-merge': {
+  'merge': {
     category: 'development',
-    aliases: ['merge'],
     description: 'Git merge',
     lucide: 'git-merge',
     phosphor: 'git-merge',
@@ -2511,9 +2508,8 @@ export const iconMappings = {
     materialSymbols: 'merge',
     heroicons: null,
   },
-  'git-pull-request': {
+  'pull-request': {
     category: 'development',
-    aliases: ['pull-request', 'pr'],
     description: 'Pull request',
     lucide: 'git-pull-request',
     phosphor: 'git-pull-request',
@@ -2521,7 +2517,7 @@ export const iconMappings = {
     materialSymbols: null,
     heroicons: null,
   },
-  'git-commit': {
+  'commit': {
     category: 'development',
     aliases: ['commit'],
     description: 'Git commit',

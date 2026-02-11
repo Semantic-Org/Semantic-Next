@@ -174,6 +174,7 @@
   --icon-pen: url('./svg/pen.svg');
   --icon-pipette: url('./svg/pipette.svg');
   --icon-eraser: url('./svg/eraser.svg');
+  --icon-mouse-pointer: url('./svg/mouse-pointer.svg');
 
   /* Communication */
   --icon-bell: url('./svg/bell.svg');
@@ -248,7 +249,6 @@
 
   /* Organization */
   --icon-layers: url('./svg/layers.svg');
-  --icon-git-fork: url('./svg/git-fork.svg');
   --icon-network: url('./svg/network.svg');
   --icon-circle-percent: url('./svg/circle-percent.svg');
   --icon-milestone: url('./svg/milestone.svg');
@@ -287,6 +287,7 @@
   --icon-calculator: url('./svg/calculator.svg');
   --icon-dices: url('./svg/dices.svg');
   --icon-history: url('./svg/history.svg');
+  --icon-command: url('./svg/command.svg');
 
   /* Device */
   --icon-monitor: url('./svg/monitor.svg');
@@ -298,12 +299,16 @@
   --icon-hard-drive: url('./svg/hard-drive.svg');
   --icon-usb: url('./svg/usb.svg');
   --icon-cast: url('./svg/cast.svg');
+  --icon-tv: url('./svg/tv.svg');
+  --icon-battery-charging: url('./svg/battery-charging.svg');
 
   /* Connectivity */
   --icon-wifi: url('./svg/wifi.svg');
   --icon-bluetooth: url('./svg/bluetooth.svg');
+  --icon-wifi-off: url('./svg/wifi-off.svg');
 
   /* Development */
+  --icon-git-fork: url('./svg/git-fork.svg');
   --icon-terminal: url('./svg/terminal.svg');
   --icon-database: url('./svg/database.svg');
   --icon-server: url('./svg/server.svg');
@@ -312,6 +317,9 @@
   --icon-cloud-download: url('./svg/cloud-download.svg');
   --icon-bug: url('./svg/bug.svg');
   --icon-git-branch: url('./svg/git-branch.svg');
+  --icon-git-merge: url('./svg/git-merge.svg');
+  --icon-git-pull-request: url('./svg/git-pull-request.svg');
+  --icon-git-commit-horizontal: url('./svg/git-commit-horizontal.svg');
 
   /* Brand */
   --icon-github: url('./svg/github.svg');
@@ -519,7 +527,6 @@
   --icon-plugin: var(--icon-puzzle);
 
   /* Organization */
-  --icon-subtask: var(--icon-git-fork);
   --icon-tree: var(--icon-network);
   --icon-progress: var(--icon-circle-percent);
   --icon-tasks: var(--icon-list-todo);
@@ -549,9 +556,14 @@
   --icon-desktop: var(--icon-monitor);
   --icon-mobile: var(--icon-smartphone);
   --icon-storage: var(--icon-hard-drive);
+  --icon-charging: var(--icon-battery-charging);
 
   /* Development */
-  --icon-git: var(--icon-git-branch);
+  --icon-fork: var(--icon-git-fork);
+  --icon-branch: var(--icon-git-branch);
+  --icon-merge: var(--icon-git-merge);
+  --icon-pull-request: var(--icon-git-pull-request);
+  --icon-commit: var(--icon-git-commit-horizontal);
 
   /* Ai */
   --icon-wand: var(--icon-wand-sparkles);
@@ -756,6 +768,9 @@
   --icon-eyedropper: var(--icon-pipette);
   --icon-color-picker: var(--icon-pipette);
   --icon-clear: var(--icon-eraser);
+  --icon-cursor: var(--icon-mouse-pointer);
+  --icon-select: var(--icon-mouse-pointer);
+  --icon-pointer: var(--icon-mouse-pointer);
 
   /* Communication */
   --icon-alerts: var(--icon-bell);
@@ -834,7 +849,6 @@
 
   /* Organization */
   --icon-stack: var(--icon-layers);
-  --icon-child: var(--icon-git-fork);
   --icon-hierarchy: var(--icon-network);
   --icon-sitemap: var(--icon-network);
   --icon-org-chart: var(--icon-network);
@@ -873,6 +887,10 @@
   --icon-qr: var(--icon-qr-code);
   --icon-dice: var(--icon-dices);
   --icon-restore: var(--icon-history);
+  --icon-cmd: var(--icon-command);
+  --icon-hashtag: var(--icon-hash);
+  --icon-number-sign: var(--icon-hash);
+  --icon-pound: var(--icon-hash);
 
   /* Device */
   --icon-computer: var(--icon-monitor);
@@ -884,6 +902,13 @@
   --icon-disk: var(--icon-hard-drive);
   --icon-chromecast: var(--icon-cast);
   --icon-airplay: var(--icon-cast);
+  --icon-television: var(--icon-tv);
+  --icon-screen: var(--icon-tv);
+
+  /* Connectivity */
+  --icon-wifi-disabled: var(--icon-wifi-off);
+  --icon-no-wifi: var(--icon-wifi-off);
+  --icon-offline: var(--icon-wifi-off);
 
   /* Development */
   --icon-console: var(--icon-terminal);
@@ -891,8 +916,6 @@
   --icon-db: var(--icon-database);
   --icon-backup: var(--icon-cloud-upload);
   --icon-issue: var(--icon-bug);
-  --icon-branch: var(--icon-git-branch);
-  --icon-version-control: var(--icon-git-branch);
 
   /* Brand */
   --icon-x: var(--icon-twitter);

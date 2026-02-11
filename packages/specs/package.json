@@ -19,10 +19,11 @@
   },
   "scripts": {
     "build": "wireit",
-    "generate:icons": "wireit",
-    "icons:generate-css": "wireit",
-    "icons:generate-meta": "wireit",
+    "build:icons": "wireit",
+    "icons:build-css": "wireit",
+    "icons:build-meta": "wireit",
     "icons:download-svg": "wireit",
+    "watch:icons": "wireit",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -64,22 +65,29 @@
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/build-cdn.js"
     },
-    "generate:icons": {
+    "build:icons": {
       "dependencies": [
-        "icons:generate-css",
-        "icons:generate-meta",
+        "icons:build-css",
+        "icons:build-meta",
         "icons:download-svg"
       ]
     },
-    "icons:generate-css": {
-      "command": "node scripts/generate-icon-css.js"
+    "icons:build-css": {
+      "command": "node scripts/build-icon-css.js",
+      "files": ["src/icons/mappings.js", "scripts/build-icon-css.js"]
     },
-    "icons:generate-meta": {
-      "command": "node scripts/generate-icon-meta.js"
+    "icons:build-meta": {
+      "command": "node scripts/build-icon-meta.js",
+      "files": ["src/icons/mappings.js", "scripts/build-icon-meta.js"]
     },
     "icons:download-svg": {
-      "command": "node scripts/download-icon-svg.js",
-      "dependencies": ["icons:generate-css"]
+      "command": "node scripts/build-icon-svg.js",
+      "files": ["scripts/build-icon-svg.js"],
+      "dependencies": ["icons:build-css"]
+    },
+    "watch:icons": {
+      "command": "node scripts/watch-icons.js",
+      "service": true
     }
   }
 }

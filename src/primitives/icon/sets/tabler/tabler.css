@@ -174,6 +174,7 @@
   --icon-brush: url('./svg/brush.svg');
   --icon-color-picker: url('./svg/color-picker.svg');
   --icon-eraser: url('./svg/eraser.svg');
+  --icon-pointer: url('./svg/pointer.svg');
 
   /* Communication */
   --icon-bell-off: url('./svg/bell-off.svg');
@@ -226,7 +227,6 @@
 
   /* Organization */
   --icon-stack-2: url('./svg/stack-2.svg');
-  --icon-subtask: url('./svg/subtask.svg');
   --icon-hierarchy: url('./svg/hierarchy.svg');
   --icon-progress: url('./svg/progress.svg');
   --icon-diamond: url('./svg/diamond.svg');
@@ -252,6 +252,22 @@
   --icon-compass: url('./svg/compass.svg');
   --icon-current-location: url('./svg/current-location.svg');
   --icon-ruler: url('./svg/ruler.svg');
+
+  /* System */
+  --icon-command: url('./svg/command.svg');
+  --icon-hash: url('./svg/hash.svg');
+
+  /* Device */
+  --icon-device-tv: url('./svg/device-tv.svg');
+  --icon-battery-charging: url('./svg/battery-charging.svg');
+
+  /* Connectivity */
+  --icon-wifi-off: url('./svg/wifi-off.svg');
+
+  /* Development */
+  --icon-git-merge: url('./svg/git-merge.svg');
+  --icon-git-pull-request: url('./svg/git-pull-request.svg');
+  --icon-git-commit: url('./svg/git-commit.svg');
 
   /* Gamification */
   --icon-award: url('./svg/award.svg');
@@ -380,6 +396,7 @@
   /* Editing */
   --icon-pen: var(--icon-pencil);
   --icon-color: var(--icon-color-picker);
+  --icon-mouse-pointer: var(--icon-pointer);
 
   /* Communication */
   --icon-notifications-off: var(--icon-bell-off);
@@ -441,6 +458,15 @@
   --icon-location: var(--icon-map-pin);
   --icon-directions: var(--icon-route);
   --icon-measure: var(--icon-ruler);
+
+  /* Device */
+  --icon-tv: var(--icon-device-tv);
+  --icon-charging: var(--icon-battery-charging);
+
+  /* Development */
+  --icon-merge: var(--icon-git-merge);
+  --icon-pull-request: var(--icon-git-pull-request);
+  --icon-commit: var(--icon-git-commit);
 
   /* Education */
   --icon-docs: var(--icon-book);
@@ -633,6 +659,8 @@
   --icon-draw: var(--icon-pencil);
   --icon-eyedropper: var(--icon-color-picker);
   --icon-clear: var(--icon-eraser);
+  --icon-cursor: var(--icon-pointer);
+  --icon-select: var(--icon-pointer);
 
   /* Communication */
   --icon-alerts-off: var(--icon-bell-off);
@@ -687,7 +715,6 @@
 
   /* Organization */
   --icon-stack: var(--icon-stack-2);
-  --icon-child: var(--icon-subtask);
   --icon-sitemap: var(--icon-hierarchy);
   --icon-org-chart: var(--icon-hierarchy);
   --icon-todos: var(--icon-list-check);
@@ -718,6 +745,21 @@
   --icon-crosshairs: var(--icon-current-location);
   --icon-near-me: var(--icon-current-location);
   --icon-distance: var(--icon-ruler);
+
+  /* System */
+  --icon-cmd: var(--icon-command);
+  --icon-hashtag: var(--icon-hash);
+  --icon-number-sign: var(--icon-hash);
+  --icon-pound: var(--icon-hash);
+
+  /* Device */
+  --icon-television: var(--icon-device-tv);
+  --icon-screen: var(--icon-device-tv);
+
+  /* Connectivity */
+  --icon-wifi-disabled: var(--icon-wifi-off);
+  --icon-no-wifi: var(--icon-wifi-off);
+  --icon-offline: var(--icon-wifi-off);
 
   /* Gamification */
   --icon-badge: var(--icon-award);
