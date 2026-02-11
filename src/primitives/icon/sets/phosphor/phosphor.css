@@ -45,6 +45,7 @@
   --icon-printer: url('./svg/printer.svg');
   --icon-share-network: url('./svg/share-network.svg');
   --icon-paper-plane-tilt: url('./svg/paper-plane-tilt.svg');
+  --icon-minus: url('./svg/minus.svg');
   --icon-lightning: url('./svg/lightning.svg');
 
   /* Status */
@@ -113,11 +114,14 @@
   --icon-paperclip: url('./svg/paperclip.svg');
   --icon-link: url('./svg/link.svg');
   --icon-link-break: url('./svg/link-break.svg');
+  --icon-file-plus: url('./svg/file-plus.svg');
+  --icon-file-minus: url('./svg/file-minus.svg');
 
   /* Media */
   --icon-image: url('./svg/image.svg');
   --icon-images-square: url('./svg/images-square.svg');
   --icon-video-camera: url('./svg/video-camera.svg');
+  --icon-video-camera-slash: url('./svg/video-camera-slash.svg');
   --icon-camera: url('./svg/camera.svg');
   --icon-camera-slash: url('./svg/camera-slash.svg');
   --icon-speaker-high: url('./svg/speaker-high.svg');
@@ -162,6 +166,7 @@
   --icon-text-align-right: url('./svg/text-align-right.svg');
   --icon-text-align-justify: url('./svg/text-align-justify.svg');
   --icon-smiley-sticker: url('./svg/smiley-sticker.svg');
+  --icon-text-t: url('./svg/text-t.svg');
 
   /* Editing */
   --icon-paint-brush: url('./svg/paint-brush.svg');
@@ -175,6 +180,8 @@
   --icon-tray: url('./svg/tray.svg');
   --icon-phone: url('./svg/phone.svg');
   --icon-address-book: url('./svg/address-book.svg');
+  --icon-bell-slash: url('./svg/bell-slash.svg');
+  --icon-chat: url('./svg/chat.svg');
 
   /* Social */
   --icon-heart: url('./svg/heart.svg');
@@ -223,6 +230,7 @@
   --icon-lock-open: url('./svg/lock-open.svg');
   --icon-shield: url('./svg/shield.svg');
   --icon-key: url('./svg/key.svg');
+  --icon-shield-slash: url('./svg/shield-slash.svg');
 
   /* Settings */
   --icon-gear: url('./svg/gear.svg');
@@ -442,10 +450,13 @@
   --icon-zip: var(--icon-file-zip);
   --icon-attachment: var(--icon-paperclip);
   --icon-unlink: var(--icon-link-break);
+  --icon-file-add: var(--icon-file-plus);
+  --icon-file-remove: var(--icon-file-minus);
 
   /* Media */
   --icon-gallery: var(--icon-images-square);
   --icon-video: var(--icon-video-camera);
+  --icon-video-off: var(--icon-video-camera-slash);
   --icon-camera-off: var(--icon-camera-slash);
   --icon-volume: var(--icon-speaker-high);
   --icon-volume-low: var(--icon-speaker-low);
@@ -475,6 +486,7 @@
   --icon-align-right: var(--icon-text-align-right);
   --icon-justify: var(--icon-text-align-justify);
   --icon-emoji: var(--icon-smiley-sticker);
+  --icon-type: var(--icon-text-t);
 
   /* Editing */
   --icon-brush: var(--icon-paint-brush);
@@ -486,6 +498,7 @@
   --icon-email: var(--icon-envelope-simple);
   --icon-inbox: var(--icon-tray);
   --icon-contacts: var(--icon-address-book);
+  --icon-notifications-off: var(--icon-bell-slash);
 
   /* Social */
   --icon-like: var(--icon-heart);
@@ -524,6 +537,7 @@
   --icon-unlock: var(--icon-lock-open);
   --icon-security: var(--icon-shield);
   --icon-secure: var(--icon-shield-check);
+  --icon-security-off: var(--icon-shield-slash);
 
   /* Settings */
   --icon-settings: var(--icon-gear);
@@ -658,6 +672,8 @@
   --icon-grip: var(--icon-dots-six-vertical);
   --icon-reorder: var(--icon-dots-six-vertical);
   --icon-submit: var(--icon-paper-plane-tilt);
+  --icon-subtract: var(--icon-minus);
+  --icon-remove: var(--icon-minus);
   --icon-fast: var(--icon-lightning);
   --icon-instant: var(--icon-lightning);
 
@@ -744,6 +760,8 @@
   --icon-attach: var(--icon-paperclip);
   --icon-url: var(--icon-link);
   --icon-disconnect: var(--icon-link-break);
+  --icon-new-file: var(--icon-file-plus);
+  --icon-delete-file: var(--icon-file-minus);
 
   /* Media */
   --icon-photo: var(--icon-image);
@@ -751,6 +769,7 @@
   --icon-images: var(--icon-images-square);
   --icon-photos: var(--icon-images-square);
   --icon-movie: var(--icon-video-camera);
+  --icon-video-disabled: var(--icon-video-camera-slash);
   --icon-audio: var(--icon-speaker-high);
   --icon-speaker: var(--icon-speaker-high);
   --icon-volume-off: var(--icon-speaker-x);
@@ -785,6 +804,8 @@
   --icon-todo-list: var(--icon-list-checks);
   --icon-align-justify: var(--icon-text-align-justify);
   --icon-smiley: var(--icon-smiley-sticker);
+  --icon-typography: var(--icon-text-t);
+  --icon-font: var(--icon-text-t);
 
   /* Editing */
   --icon-paint: var(--icon-paint-brush);
@@ -797,6 +818,13 @@
   --icon-mail: var(--icon-envelope-simple);
   --icon-envelope: var(--icon-envelope-simple);
   --icon-call: var(--icon-phone);
+  --icon-bell-off: var(--icon-bell-slash);
+  --icon-alerts-off: var(--icon-bell-slash);
+  --icon-mention: var(--icon-at);
+  --icon-at-sign: var(--icon-at);
+  --icon-message-square: var(--icon-chat);
+  --icon-im: var(--icon-chat);
+  --icon-direct-message: var(--icon-chat);
 
   /* Social */
   --icon-favorite: var(--icon-heart);
@@ -846,6 +874,8 @@
   --icon-protected: var(--icon-shield-check);
   --icon-password: var(--icon-key);
   --icon-access: var(--icon-key);
+  --icon-shield-off: var(--icon-shield-slash);
+  --icon-unprotected: var(--icon-shield-slash);
 
   /* Settings */
   --icon-cog: var(--icon-gear);

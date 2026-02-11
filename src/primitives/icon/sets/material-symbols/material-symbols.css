@@ -46,6 +46,7 @@
   --icon-print: url('./svg/print.svg');
   --icon-share: url('./svg/share.svg');
   --icon-send: url('./svg/send.svg');
+  --icon-remove: url('./svg/remove.svg');
   --icon-bolt: url('./svg/bolt.svg');
 
   /* Status */
@@ -114,11 +115,13 @@
   --icon-attach_file: url('./svg/attach_file.svg');
   --icon-link: url('./svg/link.svg');
   --icon-link_off: url('./svg/link_off.svg');
+  --icon-note_add: url('./svg/note_add.svg');
 
   /* Media */
   --icon-image: url('./svg/image.svg');
   --icon-photo_library: url('./svg/photo_library.svg');
   --icon-videocam: url('./svg/videocam.svg');
+  --icon-videocam_off: url('./svg/videocam_off.svg');
   --icon-photo_camera: url('./svg/photo_camera.svg');
   --icon-no_photography: url('./svg/no_photography.svg');
   --icon-volume_up: url('./svg/volume_up.svg');
@@ -164,6 +167,7 @@
   --icon-format_align_right: url('./svg/format_align_right.svg');
   --icon-format_align_justify: url('./svg/format_align_justify.svg');
   --icon-mood: url('./svg/mood.svg');
+  --icon-text_fields: url('./svg/text_fields.svg');
 
   /* Editing */
   --icon-brush: url('./svg/brush.svg');
@@ -175,6 +179,8 @@
   --icon-inbox: url('./svg/inbox.svg');
   --icon-call: url('./svg/call.svg');
   --icon-contacts: url('./svg/contacts.svg');
+  --icon-notifications_off: url('./svg/notifications_off.svg');
+  --icon-chat: url('./svg/chat.svg');
 
   /* Social */
   --icon-favorite: url('./svg/favorite.svg');
@@ -358,6 +364,7 @@
   --icon-cut: var(--icon-content_cut);
   --icon-move: var(--icon-open_with);
   --icon-drag-handle: var(--icon-drag_indicator);
+  --icon-minus: var(--icon-remove);
   --icon-zap: var(--icon-bolt);
 
   /* Status */
@@ -409,10 +416,12 @@
   --icon-zip: var(--icon-folder_zip);
   --icon-attachment: var(--icon-attach_file);
   --icon-unlink: var(--icon-link_off);
+  --icon-file-add: var(--icon-note_add);
 
   /* Media */
   --icon-gallery: var(--icon-photo_library);
   --icon-video: var(--icon-videocam);
+  --icon-video-off: var(--icon-videocam_off);
   --icon-camera: var(--icon-photo_camera);
   --icon-camera-off: var(--icon-no_photography);
   --icon-volume: var(--icon-volume_up);
@@ -450,6 +459,7 @@
   --icon-align-right: var(--icon-format_align_right);
   --icon-justify: var(--icon-format_align_justify);
   --icon-emoji: var(--icon-mood);
+  --icon-type: var(--icon-text_fields);
 
   /* Editing */
   --icon-pen: var(--icon-edit);
@@ -458,6 +468,8 @@
   /* Communication */
   --icon-email: var(--icon-mail);
   --icon-phone: var(--icon-call);
+  --icon-notifications-off: var(--icon-notifications_off);
+  --icon-at: var(--icon-alternate_email);
 
   /* Social */
   --icon-like: var(--icon-favorite);
@@ -637,6 +649,7 @@
   --icon-grip: var(--icon-drag_indicator);
   --icon-reorder: var(--icon-drag_indicator);
   --icon-submit: var(--icon-send);
+  --icon-subtract: var(--icon-remove);
   --icon-lightning: var(--icon-bolt);
   --icon-fast: var(--icon-bolt);
   --icon-instant: var(--icon-bolt);
@@ -742,6 +755,8 @@
   --icon-attach: var(--icon-attach_file);
   --icon-url: var(--icon-link);
   --icon-disconnect: var(--icon-link_off);
+  --icon-file-plus: var(--icon-note_add);
+  --icon-new-file: var(--icon-note_add);
 
   /* Media */
   --icon-photo: var(--icon-image);
@@ -749,6 +764,7 @@
   --icon-images: var(--icon-photo_library);
   --icon-photos: var(--icon-photo_library);
   --icon-movie: var(--icon-videocam);
+  --icon-video-disabled: var(--icon-videocam_off);
   --icon-camera-slash: var(--icon-no_photography);
   --icon-audio: var(--icon-volume_up);
   --icon-speaker: var(--icon-volume_up);
@@ -782,6 +798,8 @@
   --icon-todo-list: var(--icon-checklist);
   --icon-align-justify: var(--icon-format_align_justify);
   --icon-smiley: var(--icon-mood);
+  --icon-typography: var(--icon-text_fields);
+  --icon-font: var(--icon-text_fields);
 
   /* Editing */
   --icon-paint: var(--icon-brush);
@@ -794,6 +812,13 @@
   --icon-alerts: var(--icon-notifications);
   --icon-envelope: var(--icon-mail);
   --icon-address-book: var(--icon-contacts);
+  --icon-bell-off: var(--icon-notifications_off);
+  --icon-alerts-off: var(--icon-notifications_off);
+  --icon-mention: var(--icon-alternate_email);
+  --icon-at-sign: var(--icon-alternate_email);
+  --icon-message-square: var(--icon-chat);
+  --icon-im: var(--icon-chat);
+  --icon-direct-message: var(--icon-chat);
 
   /* Social */
   --icon-heart: var(--icon-favorite);

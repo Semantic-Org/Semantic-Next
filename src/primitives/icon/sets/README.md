@@ -20,7 +20,7 @@ After editing `mappings.js`, regenerate the CSS files:
 
 ```
 cd packages/specs
-npm run generate:icons
+npm run icons:generate-css
 ```
 
 This runs `scripts/generate-icon-css.js`, which reads the mappings and writes out `index.css` for each library.

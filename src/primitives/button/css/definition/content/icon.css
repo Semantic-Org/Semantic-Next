@@ -3,7 +3,7 @@
 --------------------*/
 
 .button ui-icon,
-  :slotted(ui-icon) {
+:slotted(ui-icon) {
   vertical-align: top;
   opacity: var(--button-icon-opacity);
 

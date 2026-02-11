@@ -356,6 +356,8 @@
   --icon-notifications: var(--icon-bell);
   --icon-email: var(--icon-envelope);
   --icon-contacts: var(--icon-identification);
+  --icon-at: var(--icon-at-symbol);
+  --icon-chat: var(--icon-chat-bubble-left-right);
 
   /* Social */
   --icon-like: var(--icon-heart);
@@ -599,6 +601,11 @@
   --icon-mail: var(--icon-envelope);
   --icon-call: var(--icon-phone);
   --icon-address-book: var(--icon-identification);
+  --icon-mention: var(--icon-at-symbol);
+  --icon-at-sign: var(--icon-at-symbol);
+  --icon-message-square: var(--icon-chat-bubble-left-right);
+  --icon-im: var(--icon-chat-bubble-left-right);
+  --icon-direct-message: var(--icon-chat-bubble-left-right);
 
   /* Social */
   --icon-favorite: var(--icon-heart);

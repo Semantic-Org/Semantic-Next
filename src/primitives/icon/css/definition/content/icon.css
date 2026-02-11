@@ -8,9 +8,7 @@
   margin: 0em var(--icon-distance-from-text) 0em 0em;
   font-size: inherit;
   vertical-align: text-top;
-  /* breaks layout in chrome
   content-visibility: auto;
-  */
   contain-intrinsic-size: 1em;
 }
 .icon {

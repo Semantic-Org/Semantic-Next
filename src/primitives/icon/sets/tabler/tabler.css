@@ -48,6 +48,7 @@
   --icon-printer: url('./svg/printer.svg');
   --icon-share: url('./svg/share.svg');
   --icon-send: url('./svg/send.svg');
+  --icon-minus: url('./svg/minus.svg');
   --icon-bolt: url('./svg/bolt.svg');
 
   /* Status */
@@ -117,10 +118,13 @@
   --icon-paperclip: url('./svg/paperclip.svg');
   --icon-link: url('./svg/link.svg');
   --icon-unlink: url('./svg/unlink.svg');
+  --icon-file-plus: url('./svg/file-plus.svg');
+  --icon-file-minus: url('./svg/file-minus.svg');
 
   /* Media */
   --icon-photo: url('./svg/photo.svg');
   --icon-video: url('./svg/video.svg');
+  --icon-video-off: url('./svg/video-off.svg');
   --icon-camera: url('./svg/camera.svg');
   --icon-camera-off: url('./svg/camera-off.svg');
   --icon-volume: url('./svg/volume.svg');
@@ -164,11 +168,15 @@
   --icon-align-right: url('./svg/align-right.svg');
   --icon-align-justified: url('./svg/align-justified.svg');
   --icon-mood-smile: url('./svg/mood-smile.svg');
+  --icon-typography: url('./svg/typography.svg');
 
   /* Editing */
   --icon-brush: url('./svg/brush.svg');
   --icon-color-picker: url('./svg/color-picker.svg');
   --icon-eraser: url('./svg/eraser.svg');
+
+  /* Communication */
+  --icon-bell-off: url('./svg/bell-off.svg');
 
   /* Social */
   --icon-heart: url('./svg/heart.svg');
@@ -212,6 +220,9 @@
   --icon-clock: url('./svg/clock.svg');
   --icon-hourglass: url('./svg/hourglass.svg');
   --icon-device-watch: url('./svg/device-watch.svg');
+
+  /* Security */
+  --icon-shield-off: url('./svg/shield-off.svg');
 
   /* Organization */
   --icon-stack-2: url('./svg/stack-2.svg');
@@ -334,6 +345,8 @@
   --icon-open-folder: var(--icon-folder-open);
   --icon-zip: var(--icon-file-zip);
   --icon-attachment: var(--icon-paperclip);
+  --icon-file-add: var(--icon-file-plus);
+  --icon-file-remove: var(--icon-file-minus);
 
   /* Media */
   --icon-image: var(--icon-photo);
@@ -362,10 +375,15 @@
   --icon-outdent: var(--icon-indent-decrease);
   --icon-justify: var(--icon-align-justified);
   --icon-emoji: var(--icon-mood-smile);
+  --icon-type: var(--icon-typography);
 
   /* Editing */
   --icon-pen: var(--icon-pencil);
   --icon-color: var(--icon-color-picker);
+
+  /* Communication */
+  --icon-notifications-off: var(--icon-bell-off);
+  --icon-chat: var(--icon-message);
 
   /* Social */
   --icon-like: var(--icon-heart);
@@ -400,6 +418,9 @@
   --icon-time: var(--icon-clock);
   --icon-timer: var(--icon-hourglass);
   --icon-watch: var(--icon-device-watch);
+
+  /* Security */
+  --icon-security-off: var(--icon-shield-off);
 
   /* Organization */
   --icon-layers: var(--icon-stack-2);
@@ -470,6 +491,8 @@
   --icon-grip: var(--icon-grip-vertical);
   --icon-reorder: var(--icon-grip-vertical);
   --icon-submit: var(--icon-send);
+  --icon-subtract: var(--icon-minus);
+  --icon-remove: var(--icon-minus);
   --icon-lightning: var(--icon-bolt);
   --icon-fast: var(--icon-bolt);
   --icon-instant: var(--icon-bolt);
@@ -563,10 +586,13 @@
   --icon-attach: var(--icon-paperclip);
   --icon-url: var(--icon-link);
   --icon-disconnect: var(--icon-unlink);
+  --icon-new-file: var(--icon-file-plus);
+  --icon-delete-file: var(--icon-file-minus);
 
   /* Media */
   --icon-picture: var(--icon-photo);
   --icon-movie: var(--icon-video);
+  --icon-video-disabled: var(--icon-video-off);
   --icon-camera-slash: var(--icon-camera-off);
   --icon-audio: var(--icon-volume);
   --icon-speaker: var(--icon-volume);
@@ -600,12 +626,21 @@
   --icon-todo-list: var(--icon-list-check);
   --icon-align-justify: var(--icon-align-justified);
   --icon-smiley: var(--icon-mood-smile);
+  --icon-font: var(--icon-typography);
 
   /* Editing */
   --icon-paint: var(--icon-brush);
   --icon-draw: var(--icon-pencil);
   --icon-eyedropper: var(--icon-color-picker);
   --icon-clear: var(--icon-eraser);
+
+  /* Communication */
+  --icon-alerts-off: var(--icon-bell-off);
+  --icon-mention: var(--icon-at);
+  --icon-at-sign: var(--icon-at);
+  --icon-message-square: var(--icon-message);
+  --icon-im: var(--icon-message);
+  --icon-direct-message: var(--icon-message);
 
   /* Social */
   --icon-favorite: var(--icon-heart);
@@ -646,6 +681,9 @@
   --icon-countdown: var(--icon-hourglass);
   --icon-stopwatch: var(--icon-hourglass);
   --icon-smartwatch: var(--icon-device-watch);
+
+  /* Security */
+  --icon-unprotected: var(--icon-shield-off);
 
   /* Organization */
   --icon-stack: var(--icon-stack-2);
