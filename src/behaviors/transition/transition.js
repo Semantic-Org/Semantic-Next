@@ -103,7 +103,7 @@ const createBehavior = (
     if (cssAnimations.directional) {
       direction = self.determineDirection(animationSettings.animation);
     }
-    if (total > 0) {
+    if (total > 1) {
       await self.performGroupAnimation(cssAnimations, direction, animationSettings);
     }
     else {
