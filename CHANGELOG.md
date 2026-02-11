@@ -36,6 +36,7 @@ xx.xx.xxxx
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
 ### CSS Tokens
+* **Bug** - Fixed solid color scales (`--black-solid-*`, `--white-solid-*`) not matching their alpha equivalents. The naive `oklch(L 0 0)` mapping diverged from alpha compositing due to the sRGB gamma curve. Now uses `color-mix(in srgb)` so solid and alpha tokens are visually identical by definition.
 * **Feature** - Added `--title-{size}` scale (3xs→3xl) for display typography with `--title-size` default.
 * **Feature** - Added `--text-{size}` scale (3xs→3xl) for body text with `--text-size` default.
 * **Feature** - Added `--border-radius-{size}` scale (3xs→3xl) with natural language aliases.
