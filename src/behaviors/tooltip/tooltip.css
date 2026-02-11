@@ -1,4 +1,4 @@
-.ui-tooltip {
+.ui.tooltip {
   --tooltip-background: var(--black);
   --tooltip-padding: var(--padding-xs) var(--padding-s);
   --tooltip-color: var(--white-text-color);
@@ -17,7 +17,7 @@
   --arrow-border-base-color: var(--black-solid-70);
 }
 
-.ui-tooltip {
+.ui.tooltip {
 
   position: fixed;
   z-index: var(--float-layer);

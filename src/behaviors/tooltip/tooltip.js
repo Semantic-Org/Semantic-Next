@@ -71,6 +71,9 @@ const defaultSettings = {
   // show pointing arrow
   arrow: true,
 
+  // whether should render in top layer
+  topLayer: false,
+
   // distance away from trigger
   distance: 0,
 
@@ -94,13 +97,13 @@ const defaultSettings = {
 };
 
 const classNames = {
-  tooltip: 'ui-tooltip',
+  tooltip: 'tooltip',
   visible: 'visible',
   hidden: 'hidden',
 };
 
 const templates = {
-  tooltip: '<div class="ui-tooltip"><div class="content"></div></div>',
+  tooltip: '<div class="ui tooltip"><div class="content"></div></div>',
 };
 
 // Shared state across all tooltip instances
@@ -110,7 +113,7 @@ const setup = () => ({
   },
 });
 
-const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dispatchEvent, log }) => ({
+const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dispatchEvent, log, warn }) => ({
   $tooltip: null,
   showTimer: null,
   hideTimer: null,
@@ -126,7 +129,7 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Build content from settings
     const content = self.buildContent();
     if (!content) {
-      log.warn('No tooltip content provided');
+      warn('No tooltip content provided');
       return;
     }
 
@@ -175,6 +178,19 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     return content;
   },
 
+  getTooltip() {
+    return self.$tooltip;
+  },
+  setHeader(text) {
+    self.$tooltip.children('.content').children('.header').text(text);
+  },
+  setText(text) {
+    self.$tooltip.children('.content').children('.text').text(text);
+  },
+  setHTML(html) {
+    self.$tooltip.html(html);
+  },
+
   bindTriggerEvents() {
     const trigger = settings.trigger;
 
@@ -215,9 +231,12 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     self.isVisible = true;
     dispatchEvent('show');
 
+    if (settings.topLayer) {
+      self.$tooltip.escape('show');
+    }
+
     // Promote to top layer (creates escape behavior on first call)
     self.$tooltip
-      .escape('show')
       .attach({
         to: el,
         position: self.position,
@@ -260,7 +279,9 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
       self.$tooltip = null;
     }
     else {
-      self.$tooltip.escape('hide');
+      if (settings.topLayer) {
+        self.$tooltip.escape('hide');
+      }
       self.$tooltip.addClass(classNames.hidden);
     }
 
