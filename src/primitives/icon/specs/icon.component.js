@@ -12,6 +12,7 @@ export default {
     "fitted",
     "color",
     "size",
+    "size",
     "spin"
   ],
   "states": [
@@ -30,6 +31,7 @@ export default {
     "link",
     "fitted",
     "color",
+    "size",
     "size",
     "spin",
     "set",
@@ -717,7 +719,8 @@ export default {
   },
   "attributeClasses": [
     "disabled",
-    "color"
+    "color",
+    "size"
   ],
   "defaultValues": {
     "set": "",

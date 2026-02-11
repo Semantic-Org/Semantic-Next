@@ -16,8 +16,6 @@
     margin: 0em var(--icon-distance-from-text) 0em 0em;
     font-size: inherit;
     vertical-align: text-top;
-    content-visibility: auto;
-    contain-intrinsic-size: 1em;
   }
   .icon {
     display: inherit;
@@ -181,6 +179,9 @@
   .massive.icon {
     font-size: var(--icon-massive);
   }
+  .icon:not(.size) {
+    content-visibility: auto;
+  }
 }
 
 /* src/primitives/icon/css/definition/icon-definition.css */
@@ -253,10 +254,10 @@
     --icon-tiny: var(--tiny);
     --icon-small: var(--small);
     --icon-medium: inherit;
-    --icon-large: var(--large);
-    --icon-big: var(--big);
-    --icon-huge: var(--huge);
-    --icon-massive: var(--massive);
+    --icon-large: var(--24px);
+    --icon-big: var(--32px);
+    --icon-huge: var(--48px);
+    --icon-massive: var(--64px);
   }
 }
 
