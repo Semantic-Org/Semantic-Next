@@ -122,6 +122,7 @@ export const buildUIDeps = async ({
         watch,
         write: false, // Don't write output, just watch
         logLevel: 'silent', // Suppress esbuild's own logs
+        log: { header: 'UI Components', text: 'Specs Built' },
         entryPoints,
         outdir: '.temp-watch', // Required by esbuild when multiple entry points
         plugins: [

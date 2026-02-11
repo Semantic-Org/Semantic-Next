@@ -14,7 +14,7 @@ export const buildUIComponents = async ({
 } = {}) => {
   const tasks = [];
 
-  // Build primitives (former components)
+  // Build primitives
   const primitivesConfig = {
     watch,
     type: 'javascript',
@@ -38,7 +38,7 @@ export const buildUIComponents = async ({
     },
   };
 
-  // Build behaviors if they exist
+  // Build behaviors
   const behaviorsConfig = {
     watch,
     type: 'javascript',
