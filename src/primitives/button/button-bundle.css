@@ -59,8 +59,6 @@
   :is(.button ui-icon, :slotted(ui-icon)):only-child {
     margin: 0rem;
   }
-  } {
-  }
 }
 
 /* src/primitives/button/css/definition/content/label.css */
