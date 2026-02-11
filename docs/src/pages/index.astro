@@ -2,6 +2,8 @@
 import Homepage from '../layouts/Homepage.astro';
 import { Code } from '@astrojs/starlight/components';
 import { CodeSample } from '@components/CodeSample/CodeSample.js';
+import { codeToHtml } from 'shiki';
+import pretty from 'pretty';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { CurrentTime } from '@components/CurrentTime.js'
 import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
@@ -39,6 +41,85 @@ const code2=`
   </ui-buttons>
 </user-panel>
 `.trim();
+const code3=`
+{
+  "tagName": "ui-button",
+  "types": [
+    {
+      "name": "Emphasis",
+      "usageLevel": 1,
+      "options": [
+        { "value": "primary",
+          "description": "be emphasized as
+            the first action" },
+        { "value": "secondary" }
+      ]
+    },
+    {
+      "name": "Social Site",
+      "usageLevel": 5,
+      "options": [
+        "instagram", "facebook", "twitter"
+      ]
+    }
+  ],
+  "variations": [
+    { "name": "Size",
+      "usageLevel": 1,
+      "options": [
+        "small", "medium", "large"
+      ] },
+    { "name": "Circular", "usageLevel": 3 }
+  ]
+}
+`.trim();
+const code4=`
+import { defineComponent } from '@semantic-ui/component';
+
+const template = await getText('./panel.html');
+const css = await getText('./panel.css');
+
+export const UserPanel = defineComponent({
+  tagName: 'user-panel',
+  template,
+  css,
+  defaultState: {
+    users: [],
+    loading: true,
+  },
+  createComponent: ({ state, signal }) => ({
+    async loadUsers() {
+      const data = await fetch('/api/users');
+      state.users.set(await data.json());
+      state.loading.set(false);
+    },
+  }),
+  onCreated: ({ self }) => self.loadUsers(),
+});
+`.trim();
+
+const colorReplacements = {
+  // dark mode
+  '#85e89d': '#979797', // <foo
+  '#e1e4e8': '#979797',
+  '#b392f0': '#58C1FE', // attr
+  '#032F62': '#6F42C1',
+  '#FFAB70': '#58C1FE',
+  // light mode
+  '#22863a': '#777',
+  '#24292e': '#777',
+};
+const formatCode = async (code, lang = 'html') => {
+  if (lang === 'html') {
+    code = pretty(code, { ocd: true });
+  }
+  return await codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
+};
+
+const formattedCode1 = await formatCode(code1, 'html');
+const formattedCode2 = await formatCode(code2, 'html');
+const formattedCode3 = await formatCode(code3, 'json');
+const formattedCode4 = await formatCode(code4, 'javascript');
 
 ---
 <Homepage>
@@ -49,12 +130,12 @@ const code2=`
         <div class="text">
           <h1>The JS Framework for the AI Era</h1>
           <p>Agents write it. Browsers run it. Humans read it.</p>
-          <p>A web component framework with signals, expressive templates,  and a complete UI kit — no build step between generation and execution.</p>
+          <p>A web component framework with signals, expressive templates,  and a complete UI kit with no build step from generation to execution.</p>
           <UIButton secondary href="/ui/start">View Docs</UIButton>
           <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
         </div>
-        <div class="visual">
-          <div class="fixed">
+        <div class="visual one">
+          <div class="sticky">
             <div class="segment">
               <div class="one section">
                 <ui-buttons>
@@ -72,26 +153,37 @@ const code2=`
                   </ui-button>
                 </ui-buttons>
                 <CodeSample
-                  client:load="lit"
                   code={code1}
-                  lang="html"
+                  client:load
+                  formattedCode={formattedCode1}
+                  language="html"
                 />
               </div>
-              <div class="two section hidden">
+              <div class="two section">
                 <CodeSample
-                  client:load="lit"
-                  code={code2}
-                  lang="sui"
+                  formattedCode={formattedCode2}
+                  client:load
+                  language="html"
                 />
               </div>
-              <div class="three section hidden">
-                <!-- Example 3 !-->
+              <div class="three section">
+                <CodeSample
+                  formattedCode={formattedCode3}
+                  client:load
+                  language="html"
+                />
+              </div>
+              <div class="four section">
+                <CodeSample
+                  formattedCode={formattedCode4}
+                  client:load
+                  language="json"
+                />
               </div>
             </div>
           </div>
         </div>
       </UIContainer>
-      </div>
     </content>
   </aboveFold>
   <script>
@@ -109,7 +201,7 @@ const code2=`
       specularAmbient: 0.2,
 
       // Animation
-      speed:       0.1,
+      speed:       0.3,
       density:     1.5,
       brightness:  0.6,
       resolution:  1,
@@ -121,70 +213,102 @@ const code2=`
     });
 
   </script>
+  <script>
+    import { $ } from '@semantic-ui/query';
+
+    const $visual = $('.visual');
+    const $sticky = $('.visual .sticky');
+    const $copies = $('.tour .copy');
+    const $proof = $('ribbon.proof');
+    const allSections = ['one', 'two', 'three', 'four'];
+    const copySections = ['two', 'three', 'four'];
+    let isParked = false;
+
+    // measure the panel's natural sticky position once (before any scroll)
+    let naturalTop = null;
+
+    const update = () => {
+      // update which section is active
+      let activeClass = 'one';
+      $copies.each((copy, index) => {
+        const bounds = $(copy).bounds();
+        if (bounds.top < window.innerHeight / 3) {
+          activeClass = copySections[index];
+        }
+      });
+      if (!$visual.hasClass(activeClass)) {
+        allSections.forEach(s => $visual.removeClass(s));
+        $visual.addClass(activeClass);
+      }
+    };
+
+    $(window).on('scroll', update);
+    update();
+  </script>
   <ribbons>
     <ribbon class="tour">
       <UIContainer>
         <div class="right"></div>
         <div class="left">
           <div class="copy">
-            <h4 class="sub header">Beautiful Markup</h4>
-            <h3 class="header">Code Designed to Edit</h3>
-            <p>Use AI to author websites that read like English so you can manually make tweaks and understand changes made.</p>
-            <ul class="feature-list">
-              <li>
-                <ui-icon check></ui-icon>
-                Feature 1
-              </li>
-              <li>
-                <ui-icon check></ui-icon>
-                Feature 2
-              </li>
-              <li>
-                <ui-icon check></ui-icon>
-                Feature 3
-              </li>
-            </ul>
-            <UIButton subtle icon-after icon="right-chevron" href="/ui/primitives">Browse Primitives</UIButton>
-          </div>
-          <div class="copy">
             <h4 class="sub header">Component Authoring</h4>
-            <h3 class="header">Author Components</h3>
-            <p>Templates compile to an AST at runtime in the browser. Ternaries, arithmetic, inline objects, nested function calls, reactive expressions — full expressiveness without a compile step.</p>
+            <h3 class="header">Expressive Templates</h3>
+            <p>Templates compile to an AST at runtime in the browser. Ternaries, nested function calls, inline objects, reactive expressions — full expressiveness without a compile step.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                <code>{`{isActive ? 'Yes' : 'No'}`}</code> — same expression power as JSX, no compiler required
+                <code>{`{isActive ? 'Yes' : 'No'}`}</code> — same power as JSX, no build step
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Lisp-style or JS-style calls — write templates the way you already think
+                Lisp-style or JS-style calls — write templates the way you think
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Templates are first-class values — pass them as component settings, swap layouts at runtime
+                Templates are first-class values — pass them as settings, swap layouts at runtime
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
           </div>
           <div class="copy">
-            <h4 class="sub header">Subheader 3</h4>
-            <h3 class="header">Value Prop 3</h3>
-            <p>Description of third</p>
+            <h4 class="sub header">Designed for Agents</h4>
+            <h3 class="header">Specs as Code Contracts</h3>
+            <p>Every component ships with a machine-readable spec. Agents read structured contracts to know exactly what's valid, what attributes compose, and what's appropriate.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                Feature 1
+                Types, variations, and states with natural language descriptions
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Feature 2
+                <code>usageLevel</code> tells agents what's common vs. niche — no hallucinated <code>{`<ui-button instagram>`}</code> in a checkout flow
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Feature 3
+                Specs are a code contract that also inform usage patterns
               </li>
             </ul>
-            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/reactivity">Reactivity Guide</UIButton>
+            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/specs">Component Specs</UIButton>
+          </div>
+          <div class="copy">
+            <h4 class="sub header">No Build Required</h4>
+            <h3 class="header">Runtime Components</h3>
+            <p>Define reactive web components with signals, Shadow DOM, and lifecycle hooks. Templates compile in the browser in under a millisecond — no bundler, no transpiler, no waiting.</p>
+            <ul class="feature-list">
+              <li>
+                <ui-icon check></ui-icon>
+                Signals-based state with built-in helpers — <code>toggle()</code>, <code>increment()</code>, <code>push()</code>
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Shadow DOM scoping — <code>.primary</code> just works, no prefixes or modules
+              </li>
+              <li>
+                <ui-icon check></ui-icon>
+                Ship as standard ESM — works in any agent sandbox, CDN, or import map
+              </li>
+            </ul>
+            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/components">Component Guide</UIButton>
           </div>
         </div>
       </UIContainer>

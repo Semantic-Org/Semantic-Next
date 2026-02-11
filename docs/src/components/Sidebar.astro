@@ -35,6 +35,8 @@ $$('sidebar ui-menu menu-item').each((el) => {
       text: label,
       position: 'right',
       preserve: true,
+      delay: 500,
+      topLayer: true,
       containToScroll: false,
       onShow: () => !!isCollapsed(),
     });

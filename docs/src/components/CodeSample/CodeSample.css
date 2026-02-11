@@ -1,3 +1,12 @@
+:host {
+  display: block;
+
+  --code-border-radius: var(--border-radius);
+  --code-background: none;
+  --code-padding: var(--padding);
+  --code-border: var(--border);
+}
+
 ui-menu {
   display: none;
 }
@@ -5,8 +14,9 @@ ui-menu {
 
 .segment {
   display: block;
-  border-radius: var(--border-radius);
-  padding: 1rem;
+  border-radius: var(--code-border-radius);
+  background: var(--code-background);
+  padding: var(--code-padding);
   border: var(--border);
 }
 .attached.segment {
@@ -37,9 +47,6 @@ codeSample:hover {
   }
 }
 
-ui-icon[copy]:hover {
-  color: var(--standard-100);
-}
 
 code {
   min-width: 500px;
@@ -48,7 +55,11 @@ code {
 }
 pre, code {
   font-family: var(--code-font);
+  line-height: var(--line-height);
+}
 
+code .line {
+  font-size: var(--code-font-size);
 }
 
 /* Code */

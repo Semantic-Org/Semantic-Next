@@ -13,19 +13,29 @@ const defaultSettings = {
   language: 'html',
   languageMenu: 'auto',
   code: '',
+  formattedCode: '',
   copyable: true,
   segment: true,
   attached: false,
   onCodeVisible: function() {},
 };
 
-const createComponent = ({ el, $, settings, reaction, darkMode, self }) => ({
-  // internal
-  code: new Signal(false),
-  language: new Signal(''),
-  languages: new Signal([]),
-  slottedCode: new Signal(false),
-  formattedCode: new Signal(''),
+const defaultState = {
+  formattedCode: null,
+  languages: [],
+  language: null,
+  slottedCode: null,
+};
+
+const createComponent = ({ el, $, settings, reaction, darkMode, self, state, afterFlush }) => ({
+  initialize() {
+    // allow slotted content for code instead
+    if (!settings.code && el.innerHTML) {
+      settings.code = el.innerHTML;
+    }
+    self.configureFormatting();
+    self.formatCode();
+  },
 
   getCode() {
     let code;
@@ -38,108 +48,75 @@ const createComponent = ({ el, $, settings, reaction, darkMode, self }) => ({
     return code;
   },
 
-  watchCode() {
-    reaction(async () => {
-      self.language.get(); // reactivity source
-      let code = self.getCode();
-      if (code) {
-        if (settings.language == 'html') {
-          code = self.formatHTML(code);
-        }
-        self.code.set(code);
-        await self.highlight(code);
-      }
+  async formatCode(useDarkMode = darkMode) {
+    const language = settings.language;
+    let code = settings.code;
+    // format html
+    if (settings.language == 'html') {
+      code = pretty(settings.code, { ocd: true });
+    }
+    const formattedCode = await codeToHtml(code, {
+      lang: language,
+      theme: (useDarkMode)
+        ? 'github-dark'
+        : 'github-light',
+      colorReplacements: {
+        // dark mode
+        '#85e89d': '#979797', // <foo
+        '#e1e4e8': '#979797',
+        '#b392f0': '#58C1FE', // attr
+        '#032F62': '#6F42C1',
+        '#FFAB70': '#58C1FE',
+        // light mode
+        '#22863a': '#777',
+        '#24292e': '#777',
+      },
     });
+    afterFlush(() => settings.onCodeVisible(formattedCode.value, settings.code));
+    return formattedCode;
   },
 
-  async highlight(code = self.getCode(), darkModeOverride) {
-    let useDarkMode = (darkModeOverride !== undefined)
-        ? darkModeOverride
-        : darkMode,
-      language = self.language.get(),
-      formattedCode = await codeToHtml(code, {
-        lang: language,
-        theme: (useDarkMode)
-          ? 'github-dark'
-          : 'github-light',
-        colorReplacements: {
-          // dark mode
-          '#85e89d': '#979797', // <foo
-          '#e1e4e8': '#979797',
-          '#b392f0': '#58C1FE', // attr
-          '#032F62': '#6F42C1',
-          '#FFAB70': '#58C1FE',
-          // light mode
-          '#22863a': '#777',
-          '#24292e': '#777',
-        },
-      });
-    self.formattedCode.set(formattedCode);
-    Reaction.afterFlush(function() {
-      settings.onCodeVisible(formattedCode.value, self.code.get());
-    });
-  },
-
-  configureHighlighting() {
+  configureFormatting() {
     // nothing yet
   },
 
-  get: {
-    languages() {
-      let languages;
-      if (settings.languageMenu !== 'auto') {
-        languages = settings.languageMenu;
-      }
-      else if (settings.language == 'html') {
-        languages = ['html', 'astro'];
-      }
-      else {
-        languages = [settings.language];
-      }
-      return languages;
-    },
-  },
-
-  formatHTML: function(html) {
-    return pretty(html, { ocd: true });
-  },
-
-  set: {
-    language() {
-      if (settings.language) {
-        self.language.set(settings.language);
-      }
-    },
-    slottedCode() {
-      let slottedCode = el.innerHTML;
-      if (slottedCode) {
-        self.slottedCode.set(slottedCode);
-      }
-    },
+  getLanguages() {
+    let languages;
+    if (settings.languageMenu !== 'auto') {
+      languages = settings.languageMenu;
+    }
+    else if (settings.language == 'html') {
+      languages = ['html', 'astro'];
+    }
+    else {
+      languages = [settings.language];
+    }
+    return languages;
   },
 });
-
-const onCreated = function({ self }) {
-  self.set.slottedCode();
-  self.set.language();
-  self.configureHighlighting();
-  self.watchCode();
-};
 
 const onRendered = ({ $, isServer, self }) => {
   if (isServer) {
     return;
   }
-  $('ui-icon').tooltip();
+  $('ui-icon[copy]').tooltip({
+    onHidden: function() {
+      $(this).tooltip('set text', 'Copy Code');
+    },
+  });
 };
 
 const onThemeChanged = function({ self, isClient, darkMode, settings }) {
-  self.highlight(self.getCode(), darkMode);
+  self.formatCode(darkMode);
 };
 
 const events = {
-  'click ui-icon[copy]'({ event, self }) {
-    copyText(self.code.get());
+  'click ui-icon[copy]'({ event, target, settings }) {
+    copyText(settings.code);
+    $(target)
+      .tooltip('set text', 'Copied!');
+    const $tooltip = $(target).tooltip('get tooltip');
+    $tooltip.transition('jiggle');
   },
 };
 
@@ -148,10 +125,10 @@ const CodeSample = defineComponent({
   template,
   events,
   css,
-  onCreated,
   onRendered,
   onThemeChanged,
   createComponent,
+  defaultState,
   defaultSettings,
 });
 

@@ -48,6 +48,10 @@
     overflow: hidden;
     transition: width 0.3s ease;
 
+    .ui.tooltip {
+      --tooltip-border: var(--very-subtle-border);
+    }
+
     sidebar-toggle {
       position: absolute;
       right: 6px;
