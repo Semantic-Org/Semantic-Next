@@ -37,6 +37,9 @@ export default {
     },
     COLORED_VARIATION,
     SIZE_VARIATION,
+    modifyVariation(SIZE_VARIATION, {
+      includeAttributeClass: true
+    }),
     {
       name: 'Spin',
       description: 'be formatted to spin like a loader',
