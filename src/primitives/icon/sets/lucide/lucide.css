@@ -917,9 +917,6 @@
   --icon-backup: var(--icon-cloud-upload);
   --icon-issue: var(--icon-bug);
 
-  /* Brand */
-  --icon-x: var(--icon-twitter);
-
   /* Gamification */
   --icon-badge: var(--icon-award);
   --icon-achievement: var(--icon-award);

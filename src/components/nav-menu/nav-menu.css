@@ -220,6 +220,9 @@ a {
     cursor: default;
     color: var(--primary-text-color);
 
+    .icon {
+      opacity: var(--nav-menu-title-icon-active-opacity);
+    }
     &[href] {
       cursor: pointer;
     }

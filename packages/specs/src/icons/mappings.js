@@ -2989,7 +2989,7 @@ export const iconMappings = {
   },
   'twitter': {
     category: 'brand',
-    aliases: ['x'],
+    aliases: [],
     description: 'Twitter/X',
     lucide: 'twitter',
     phosphor: 'x-logo',

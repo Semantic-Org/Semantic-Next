@@ -980,9 +980,6 @@
   --icon-backup: var(--icon-cloud-arrow-up);
   --icon-issue: var(--icon-bug);
 
-  /* Brand */
-  --icon-x: var(--icon-x-logo);
-
   /* Gamification */
   --icon-badge: var(--icon-medal);
   --icon-achievement: var(--icon-medal);
