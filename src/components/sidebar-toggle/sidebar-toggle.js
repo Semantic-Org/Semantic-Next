@@ -12,6 +12,8 @@ const defaultSettings = {
   storeAs: 'sidebar-collapsed',
   collapseIcon: 'left chevron',
   showIcon: 'right chevron',
+  hideText: 'Collapse',
+  showText: 'Expand',
 };
 
 const defaultState = {};
@@ -64,9 +66,15 @@ const createComponent = ({ settings, self, $, isClient, dispatchEvent }) => ({
   },
 });
 
-const onRendered = ({ self, settings }) => {
+const onRendered = ({ $, isClient, self, settings }) => {
   if (self.canSaveState()) {
     settings.collapsed = self.getSavedCollapsedState();
+  }
+  if (isClient) {
+    $('.toggle').tooltip({
+      topLayer: true,
+      position: 'right',
+    });
   }
 };
 

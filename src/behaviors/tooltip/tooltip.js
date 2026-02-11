@@ -66,7 +66,7 @@ const defaultSettings = {
   hideDelay: 70,
 
   // warm timer duration (ms) - skip delay if tooltip shown within this period
-  warmWindow: 1500,
+  warmWindow: 1200,
 
   // show pointing arrow
   arrow: true,
@@ -119,6 +119,7 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
   hideTimer: null,
   isVisible: false,
   position: null,
+  createdTooltip: false,
 
   initialize() {
     self.createTooltip();
@@ -136,13 +137,23 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Get position from settings
     self.position = settings.position;
 
-    // Create tooltip element and insert after trigger
-    self.$tooltip = $(templates.tooltip)
-      .addClass(classNames.hidden)
-      .children('.content')
-      .html(content)
-      .end()
-      .insertAfter(el);
+    const $existingTooltip = $(el).next(`.${classNames.tooltip}`);
+    if (settings.$tooltip) {
+      self.tooltip = $tooltip;
+    }
+    else if ($existingTooltip.exists()) {
+      self.$tooltip = $existingTooltip;
+    }
+    else {
+      self.createdTooltip = true;
+      // Create tooltip element and insert after trigger
+      self.$tooltip = $(templates.tooltip)
+        .addClass(classNames.hidden)
+        .children('.content')
+        .html(content)
+        .end()
+        .insertAfter(el);
+    }
 
     // Bind events to tooltip
     self.bindTooltipEvents();
@@ -250,6 +261,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     const animation = self.getAnimation();
     await self.$tooltip.transition(`${animation} in`, settings.duration);
 
+    if (!self.isVisible) {
+      return;
+    }
+
     self.$tooltip.addClass(classNames.visible);
     settings.onVisible.call(el);
     dispatchEvent('visible');
@@ -272,6 +287,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Animate out with direction-aware animation
     const animation = self.getAnimation();
     await self.$tooltip.transition(`${animation} out`, settings.duration);
+
+    if (self.isVisible) {
+      return;
+    }
 
     // Remove from DOM if not preserving
     if (!settings.preserve && self.$tooltip) {
@@ -415,8 +434,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
 const onDestroyed = ({ self }) => {
   self.clearTimers();
   if (self.$tooltip) {
-    self.$tooltip.remove();
     self.$tooltip = null;
+    if (self.createdTooltip) {
+      self.$tooltip.remove();
+    }
   }
 };
 

@@ -4,3 +4,10 @@
     <ui-icon icon="{collapsed ? showIcon : collapseIcon }"></ui-icon>
   </div>
 </div>
+<div class="ui tooltip">
+  {#if collapsed}
+    {showText}
+  {else}
+    {hideText}
+  {/if}
+</div>

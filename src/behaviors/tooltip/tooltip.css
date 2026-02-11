@@ -10,16 +10,17 @@
   --tooltip-header-color: var(--white);
   --tooltip-text-font-weight: var(--bold);
   --tooltip-text-color: var(--white-60);
-  --tooltip-border: 1px solid var(--black-solid-70);
+  --tooltip-border: var(--border);
 
   /* Arrow styling  */
   --arrow-background: var(--tooltip-background);
-  --arrow-border-base-color: var(--black-solid-70);
+  --arrow-border-base-color: var(--border-color);
 }
 
 .ui.tooltip {
 
   position: fixed;
+  display: none;
   z-index: var(--float-layer);
 
   border-radius: var(--tooltip-border-radius);
@@ -29,23 +30,15 @@
 
   box-shadow: var(--floating-shadow);
   pointer-events: none;
+  border: var(--tooltip-border);
+  z-index: var(--float-layer-2);
+  background: var(--tooltip-background);
+  color: var(--tooltip-color);
+  padding: var(--tooltip-padding);
 
 
   &::before {
     z-index: var(--float-layer-1);
-  }
-
-  .content {
-    border-radius: inherit;
-    border: var(--tooltip-border);
-    z-index: var(--float-layer-2);
-    background: var(--tooltip-background);
-    color: var(--tooltip-color);
-    padding: var(--tooltip-padding);
-  }
-
-  &.hidden {
-    display: none;
   }
 
   &.visible {
