@@ -47,8 +47,8 @@ const code2=`
       <UIContainer>
         <div class="text">
           <Image src={logoImage} alt="Logo" height="55" loading="eager" style="margin-bottom:2rem;"/>
-          <h1>A New Language for UI</h1>
-          <p>A <b>web component framework</b> and UI library designed for NL to code. <b>No build step. No framework lock-in.</b></p>
+          <h1>A UI Framework for the AI Era</h1>
+          <p>A <b>web component framework</b> with <b>signals</b>, <b>jsx-like templates</b>, and a complete <b>UI Kit</b>. Built to run in the browser without tooling.</p>
           <UIButton secondary href="/ui/start">View Docs</UIButton>
           <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
         </div>
@@ -57,24 +57,23 @@ const code2=`
   </aboveFold>
   <script>
     import { createPlasma } from '../javascript/plasma.js'
-    import { createGlobeUI } from '../javascript/hero-globe-ui.js'
     const plasma = createPlasma('#plasma', {
       // Colors — just hex
-      colorFrom:       '#000000',
+      colorFrom:       '#00405C',
       colorTo:         '#0d6e8a',
-      colorShift:       100,
-      fps: false,
+      colorShift:       0,
+      fps: true,
 
       // Specular
       specularTint:    '#1a99e6',
-      specularPower:   2,
-      specularAmbient: 0.5,
+      specularPower:   0.5,
+      specularAmbient: 0.2,
 
       // Animation
-      speed:       0.2,
+      speed:       0.1,
       density:     1.5,
-      brightness:  0.3,
-      resolution:  2,
+      brightness:  0.8,
+      resolution:  1,
       // Mouse interaction
       mouse: {
         light: 2,   // specular follows cursor
@@ -82,7 +81,6 @@ const code2=`
       },
     });
 
-    // createGlobeUI(document.querySelector('aboveFold'));
   </script>
   <ribbons>
     <ribbon class="proof">
