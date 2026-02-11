@@ -178,12 +178,14 @@
     "build:ui-deps": "wireit",
     "build:ui-components": "wireit",
     "build:specs": "wireit",
+    "build:icons": "wireit",
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
     "build:docs": "wireit",
     "build:packages": "wireit",
     "watch": "wireit",
+    "watch:icons": "wireit",
     "publish": "wireit",
     "update-version": "wireit",
     "test:case": "wireit",
@@ -219,7 +221,8 @@
       "dependencies": [
         "build:ui-deps",
         "build:ui-components",
-        "build:specs"
+        "build:specs",
+        "./packages/specs:build:icons"
       ]
     },
     "build:packages": {
@@ -252,12 +255,24 @@
     "build:specs": {
       "command": "node ./internal-packages/scripts/src/build-specs.js"
     },
+    "build:icons": {
+      "dependencies": ["./packages/specs:build:icons"]
+    },
     "build:ui-framework": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
     },
     "watch": {
+      "dependencies": [
+        "watch:ui",
+        "watch:icons"
+      ]
+    },
+    "watch:ui": {
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
+    },
+    "watch:icons": {
+      "dependencies": ["./packages/specs:watch:icons"]
     },
     "prepublishOnly": {
       "command": "node ./scripts/prepare.js",
