@@ -1,3 +1,4 @@
+import { Tooltip } from '@semantic-ui/core';
 import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
@@ -18,7 +19,7 @@ const defaultSettings = {
   onCodeVisible: function() {},
 };
 
-const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
+const createComponent = ({ el, $, settings, reaction, darkMode, self }) => ({
   // internal
   code: new Signal(false),
   language: new Signal(''),
@@ -31,31 +32,31 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
     if (settings.code) {
       code = settings.code;
     }
-    else if (tpl.slottedCode.get()) {
-      code = tpl.slottedCode.get();
+    else if (self.slottedCode.get()) {
+      code = self.slottedCode.get();
     }
     return code;
   },
 
   watchCode() {
     reaction(async () => {
-      tpl.language.get(); // reactivity source
-      let code = tpl.getCode();
+      self.language.get(); // reactivity source
+      let code = self.getCode();
       if (code) {
         if (settings.language == 'html') {
-          code = tpl.formatHTML(code);
+          code = self.formatHTML(code);
         }
-        tpl.code.set(code);
-        await tpl.highlight(code);
+        self.code.set(code);
+        await self.highlight(code);
       }
     });
   },
 
-  async highlight(code = tpl.getCode(), darkModeOverride) {
+  async highlight(code = self.getCode(), darkModeOverride) {
     let useDarkMode = (darkModeOverride !== undefined)
         ? darkModeOverride
         : darkMode,
-      language = tpl.language.get(),
+      language = self.language.get(),
       formattedCode = await codeToHtml(code, {
         lang: language,
         theme: (useDarkMode)
@@ -73,9 +74,9 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
           '#24292e': '#777',
         },
       });
-    tpl.formattedCode.set(formattedCode);
+    self.formattedCode.set(formattedCode);
     Reaction.afterFlush(function() {
-      settings.onCodeVisible(formattedCode.value, tpl.code.get());
+      settings.onCodeVisible(formattedCode.value, self.code.get());
     });
   },
 
@@ -106,32 +107,39 @@ const createComponent = ({ el, $, settings, reaction, darkMode, tpl }) => ({
   set: {
     language() {
       if (settings.language) {
-        tpl.language.set(settings.language);
+        self.language.set(settings.language);
       }
     },
     slottedCode() {
       let slottedCode = el.innerHTML;
       if (slottedCode) {
-        tpl.slottedCode.set(slottedCode);
+        self.slottedCode.set(slottedCode);
       }
     },
   },
 });
 
-const onCreated = function({ tpl }) {
-  tpl.set.slottedCode();
-  tpl.set.language();
-  tpl.configureHighlighting();
-  tpl.watchCode();
+const onCreated = function({ self }) {
+  self.set.slottedCode();
+  self.set.language();
+  self.configureHighlighting();
+  self.watchCode();
 };
 
-const onThemeChanged = function({ tpl, isClient, darkMode, settings }) {
-  tpl.highlight(tpl.getCode(), darkMode);
+const onRendered = ({ $, isServer, self }) => {
+  if (isServer) {
+    return;
+  }
+  $('ui-icon').tooltip();
+};
+
+const onThemeChanged = function({ self, isClient, darkMode, settings }) {
+  self.highlight(self.getCode(), darkMode);
 };
 
 const events = {
-  'click ui-icon[copy]'({ event, tpl }) {
-    copyText(tpl.code.get());
+  'click ui-icon[copy]'({ event, self }) {
+    copyText(self.code.get());
   },
 };
 
@@ -141,6 +149,7 @@ const CodeSample = defineComponent({
   events,
   css,
   onCreated,
+  onRendered,
   onThemeChanged,
   createComponent,
   defaultSettings,

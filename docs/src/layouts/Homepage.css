@@ -3,6 +3,9 @@ body {
 
   --topbar-border-bottom: none;
 
+  --glow-border-color: oklch(0.22 0.02 277.72);
+  --glow-border: 1px solid var(--docs-border-color);
+
   ui-card {
     --card-padding: 1.5rem 2rem;
     --card-description-line-height: 1.6;
@@ -53,7 +56,7 @@ body {
     flex-direction: column;
     overflow: hidden;
     contain: strict;
-    height: 80vh;
+    height: 90dvh;
     perspective: 1000px;
 
 
@@ -85,11 +88,11 @@ body {
         height: 100%;
         background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0 / 0.9) 0%, oklch(0.32 0.08 228.42 / 0.14) 350px);
         background-image: radial-gradient(circle at 50% 50%,
-    oklch(0 0 0 / 0.75) 0%,
-    oklch(0.25 0.07 228.42 / 0.35) 350px,
-    oklch(0.12 0.04 228.42 / 0.55) 650px,
-    oklch(0 0 0) 90vw)
-;
+          oklch(0 0 0 / 0.75) 0%,
+          oklch(0.25 0.07 228.42 / 0.35) 350px,
+          oklch(0.12 0.04 228.42 / 0.55) 650px,
+          oklch(0 0 0) 90vw)
+        ;
         /*
         background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0 / 0.9) 0%, oklch(0.32 0.08 228.42 / 0.5) 350px, oklch(0 0 0) 1200px);
         background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
@@ -122,21 +125,50 @@ body {
       }
     }
 
-    ui-button {
-      font-size: 18px;
-    }
-
-    .image {
-      float: right;
-      filter: saturate(0);
-      width: 450px;
-      margin-left: 2rem;
+    ui-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
 
     .text {
-      margin: 0 auto;
-      text-align: center;
-      max-width : 550px;
+      margin: 0 2rem 0 0;
+      text-align: left;
+      max-width : 60ch;
+      ui-button {
+        font-size: 18px;
+      }
+    }
+
+    .visual {
+      position: relative;
+      width: 650px;
+      margin-left: auto;
+      ui-button {
+        font-size: 16px;
+      }
+
+      .expressive-code {
+        margin: var(--top-margin);
+      }
+
+      .fixed {
+        position: sticky;
+      }
+      .segment {
+        padding: var(--padding-l);
+        border: var(--glow-border);
+        border-radius: var(--border-radius-xl);
+        background-image: var(--angled-gradient);
+
+        pre {
+          --ec-brdWd: 0;
+        }
+
+        .hidden {
+          display: none;
+        }
+      }
     }
 
     canvas#plasma,
@@ -240,16 +272,6 @@ body {
     ui-container {
       display: flex;
       flex-direction: row-reverse;
-    }
-    .container {
-      position: sticky;
-      top: 1rem;
-    }
-    .segment {
-      padding: 2rem;
-      border: var(--glow-border);
-      background: oklch(0.15 0.05 240.81 / 0.52) var(--angled-gradient);
-      background-image: var(--angled-gradient);
     }
     .left {
       flex: 1 1 auto;

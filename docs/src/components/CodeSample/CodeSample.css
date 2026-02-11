@@ -46,6 +46,10 @@ code {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
+pre, code {
+  font-family: var(--code-font);
+
+}
 
 /* Code */
 code pre {
@@ -54,5 +58,4 @@ code pre {
   margin: 0em 0em;
   padding: 0em;
   font-size: 15px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
