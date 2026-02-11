@@ -49,7 +49,7 @@
    * The bodys's root font-size.
    * Makes sure 1em for a component matches --base-size
    */
-  --body-size: calc(var(--base-size) * 1px);
+  --page-size: calc(var(--base-size) * 1px);
 
 
 

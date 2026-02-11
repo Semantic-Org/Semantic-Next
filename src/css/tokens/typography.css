@@ -32,7 +32,9 @@
      Link Styling
   --------------------*/
 
-  --link-text-decoration: none;
+  --link-text-decoration: underline;
+  --link-text-thickness: 1px;
+  --link-text-offset: 0.2em;
   --link-hover-text-decoration: var(--link-text-decoration);
 
 
