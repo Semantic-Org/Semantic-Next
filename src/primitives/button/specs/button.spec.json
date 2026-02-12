@@ -564,8 +564,6 @@
   "pluralContent": [
     {
       "name": "Conditional",
-      "attribute": "conditional",
-      "slot": "conditional",
       "description": "show a conditional choice",
       "exampleCode": "\n        <ui-buttons>\n          <ui-button>Cancel</ui-button>\n          <span class=\"conditional\">or</span>\n          <ui-button primary>Save</ui-button>\n        </ui-buttons>\n      "
     }

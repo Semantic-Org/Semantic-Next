@@ -406,8 +406,6 @@ export default {
   pluralContent: [
     {
       name: 'Conditional',
-      attribute: 'conditional',
-      slot: 'conditional',
       description: 'show a conditional choice',
       exampleCode: `
         <ui-buttons>
