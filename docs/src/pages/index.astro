@@ -167,6 +167,7 @@ const demoSteps = [
                   <div class="pane-label">Code</div>
                   <div class="demo-code"></div>
                 </div>
+                <div class="demo-note"></div>
               </div>
               <div class="two section">
                 <CodeSample
@@ -206,6 +207,7 @@ const demoSteps = [
     const segment = sticky.querySelector('.demo-segment');
     const demoUI = sticky.querySelector('.demo-ui');
     const demoCode = sticky.querySelector('.demo-code');
+    const demoNote = sticky.querySelector('.demo-note');
 
     let segmentRevealed = false;
     let demoAborted = false;
@@ -301,6 +303,8 @@ const demoSteps = [
 
       cotLine.innerHTML = '<ai-loader size="24" active></ai-loader><span class="cot-text shimmer">Thinking...</span>';
       cotLine.classList.add('visible');
+      demoNote.classList.remove('visible');
+      demoNote.textContent = '';
 
       let htmlAccum = '';
 
@@ -346,13 +350,22 @@ const demoSteps = [
             if (data.type === 'cot') {
               const cotText = cotLine.querySelector('.cot-text');
               if (cotText) cotText.textContent = data.text;
+            } else if (data.type === 'note') {
+              demoNote.textContent = data.text;
+              demoNote.classList.add('visible');
             } else if (data.type === 'html') {
               htmlAccum += data.text;
               if (window.formatCode) {
                 demoCode.innerHTML = window.formatCode(htmlAccum);
               }
             } else if (data.type === 'done') {
-              currentHTML = htmlAccum.trim();
+              const trimmed = htmlAccum.trim();
+              if (!trimmed.includes('<')) {
+                demoNote.textContent = trimmed || 'No valid HTML was returned';
+                demoNote.classList.add('visible');
+                break;
+              }
+              currentHTML = trimmed;
               demoUI.innerHTML = currentHTML;
               promptHistory.push({ prompt, html: currentHTML });
 

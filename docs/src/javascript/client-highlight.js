@@ -1,3 +1,4 @@
+import pretty from 'pretty';
 import { createHighlighter } from 'shiki';
 
 const colorReplacements = {
@@ -15,6 +16,9 @@ createHighlighter({
   langs: ['html'],
 }).then(highlighter => {
   window.formatCode = (code, lang = 'html') => {
+    if (lang === 'html') {
+      code = pretty(code, { ocd: true });
+    }
     return highlighter.codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
   };
 });
