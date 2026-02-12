@@ -1,5 +1,18 @@
 #hero-demo {
 
+  .prompt-hint {
+    font-size: 12px;
+    color: var(--white-30);
+    padding: 0 0.25rem;
+    margin-bottom: 0.35rem;
+    transition: color 0.3s ease, font-size 0.3s ease;
+
+    &.live {
+      color: var(--primary-text-color);
+      font-size: 14px;
+    }
+  }
+
   .prompt-bar {
     display: flex;
     align-items: center;
@@ -9,26 +22,28 @@
     background: var(--black-50);
     border: var(--border);
 
-    .prompt-text {
+    .prompt-input {
       flex: 1;
       font-size: 16px;
+      font-family: inherit;
       color: var(--white-70);
-      white-space: nowrap;
-      overflow: hidden;
-      user-select: none;
+      background: transparent;
+      border: none;
+      outline: none;
+      min-width: 0;
       transition: color 0.3s ease;
+
+      &::placeholder {
+        color: var(--white-30);
+      }
     }
 
-    &.submitted .prompt-text {
+    &.submitted .prompt-input {
       color: var(--white-40);
     }
 
     &.submitted .submit-button {
       color: var(--white-20);
-    }
-
-    .prompt-placeholder {
-      color: var(--white-30);
     }
 
     .submit-button {
@@ -50,9 +65,14 @@
         color: var(--white-80);
       }
 
-      &:hover {
+      &:hover:not(:disabled) {
         background: var(--white-15);
         color: var(--white-70);
+      }
+
+      &:disabled {
+        opacity: 0.3;
+        cursor: default;
       }
 
       ui-icon {

@@ -154,10 +154,9 @@ const formattedSteps = demoSteps.map(step => ({
         <div class="visual one">
           <div class="sticky">
             <div id="hero-demo">
+              <div class="prompt-hint">Click to try it yourself</div>
               <div class="prompt-bar">
-                <div class="prompt-text">
-                  <span class="prompt-placeholder">Ask anything...</span>
-                </div>
+                <input class="prompt-input" type="text" placeholder="Describe your UI..." maxlength="150" />
                 <button class="submit-button">
                   <ui-icon send></ui-icon>
                 </button>
@@ -204,87 +203,149 @@ const formattedSteps = demoSteps.map(step => ({
   </aboveFold>
   <script is:inline define:vars={{ formattedSteps }}>
     const demo = document.getElementById('hero-demo');
-    const promptText = demo.querySelector('.prompt-text');
+    const promptInput = demo.querySelector('.prompt-input');
     const submitButton = demo.querySelector('.submit-button');
     const cotLine = demo.querySelector('.cot-line');
+    const promptBar = demo.querySelector('.prompt-bar');
+    const promptHint = demo.querySelector('.prompt-hint');
     const sticky = demo.closest('.sticky');
     const segment = sticky.querySelector('.demo-segment');
     const demoUI = sticky.querySelector('.demo-ui');
     const demoCode = sticky.querySelector('.demo-code');
+
     let segmentRevealed = false;
+    let demoAborted = false;
+    let isLive = false;
+    let resolveCurrentWait = null;
+    let completedSteps = 0;
+    let currentHTML = '';
+    let promptHistory = [];
 
-    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+    const wait = (ms) => new Promise(r => {
+      if (demoAborted) return r();
+      const id = setTimeout(() => { resolveCurrentWait = null; r(); }, ms);
+      resolveCurrentWait = () => { clearTimeout(id); r(); };
+    });
 
-    const typeText = async (text, target) => {
-      target.textContent = '';
+    const typeText = async (text) => {
+      promptInput.value = '';
       for (const char of text) {
-        target.textContent += char;
+        if (demoAborted) return;
+        promptInput.value += char;
         await wait(40 + Math.random() * 30);
       }
     };
 
-    const showPlaceholder = () => {
-      promptText.innerHTML = '<span class="prompt-placeholder">Ask anything...</span>';
-    };
-
-    const promptBar = demo.querySelector('.prompt-bar');
-
     const runStep = async (step) => {
-      // type the prompt
+      if (demoAborted) return;
       promptBar.classList.remove('submitted');
-      promptText.innerHTML = '';
-      const span = document.createElement('span');
-      promptText.appendChild(span);
-      await typeText(step.prompt, span);
+      promptInput.value = '';
 
-      // brief pause then "submit"
+      await typeText(step.prompt);
+      if (demoAborted) return;
+
       await wait(400);
+      if (demoAborted) return;
       submitButton.classList.add('active');
       await wait(150);
       submitButton.classList.remove('active');
       promptBar.classList.add('submitted');
 
-      // CoT appears with loader while "thinking"
       cotLine.innerHTML = '<ai-loader size="24" active></ai-loader><span class="cot-text shimmer">' + step.cot + '</span>';
       cotLine.classList.add('visible');
       await wait(800 + Math.random() * 400);
+      if (demoAborted) return;
 
-      // loader stops, shimmer stops, summary stays
       const loader = cotLine.querySelector('ai-loader');
       const cotText = cotLine.querySelector('.cot-text');
       if (loader?.component) loader.active = false;
       if (cotText) cotText.classList.remove('shimmer');
       cotLine.classList.remove('visible');
 
-      // reveal segment on first output
       if (!segmentRevealed) {
         segment.classList.add('visible');
         segmentRevealed = true;
       }
 
-      // output appears
-      console.log('updating html');
       demoUI.innerHTML = step.html;
       demoCode.innerHTML = step.formattedCode;
+      completedSteps++;
+      currentHTML = step.html;
     };
+
+    const goLive = () => {
+      if (isLive) return;
+      isLive = true;
+      promptHistory = formattedSteps.slice(0, completedSteps).map(s => ({
+        prompt: s.prompt,
+        html: s.html,
+      }));
+      promptInput.value = '';
+      promptBar.classList.remove('submitted');
+      promptHint.textContent = 'Try it — modify these buttons';
+      promptHint.classList.add('live');
+      cotLine.classList.remove('visible');
+      cotLine.innerHTML = '';
+    };
+
+    const updateSubmitState = () => {
+      submitButton.disabled = !promptInput.value.trim();
+    };
+
+    const handleSubmit = () => {
+      const prompt = promptInput.value.trim();
+      if (!prompt || !isLive) return;
+      promptBar.classList.add('submitted');
+      promptInput.value = '';
+      updateSubmitState();
+      // TODO: send to AI endpoint
+    };
+
+    submitButton.addEventListener('mousedown', () => {
+      if (promptInput.value.trim() && isLive) submitButton.classList.add('active');
+    });
+    submitButton.addEventListener('mouseup', () => {
+      submitButton.classList.remove('active');
+      handleSubmit();
+    });
+    promptInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && promptInput.value.trim() && isLive) submitButton.classList.add('active');
+    });
+    promptInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        submitButton.classList.remove('active');
+        handleSubmit();
+      }
+    });
+    promptInput.addEventListener('input', updateSubmitState);
+
+    promptInput.addEventListener('focus', () => {
+      if (isLive) return;
+      demoAborted = true;
+      if (resolveCurrentWait) {
+        resolveCurrentWait();
+        resolveCurrentWait = null;
+      }
+      goLive();
+    });
 
     const runDemo = async () => {
       await wait(1500);
-
       for (let i = 0; i < formattedSteps.length; i++) {
+        if (demoAborted) break;
         await runStep(formattedSteps[i]);
-
+        if (demoAborted) break;
         if (i < formattedSteps.length - 1) {
           await wait(1200);
-          // clear CoT line and reset prompt for next step
+          if (demoAborted) break;
           cotLine.classList.remove('visible');
           cotLine.innerHTML = '';
-          showPlaceholder();
+          promptInput.value = '';
           await wait(600);
+          if (demoAborted) break;
         }
       }
-
-      // final state — prompt and CoT stay visible
+      goLive();
     };
 
     runDemo();
