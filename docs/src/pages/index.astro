@@ -99,7 +99,6 @@ export const UserPanel = defineComponent({
 });
 `.trim();
 
-const formattedCode1 = formatCode(code1, 'html', { highlightClasses: true });
 const formattedCode2 = formatCode(code2, 'sui');
 const formattedCode3 = formatCode(code3, 'json');
 const formattedCode4 = formatCode(code4, 'javascript');
@@ -132,11 +131,6 @@ const demoSteps = [
   },
 ];
 
-// Pre-format each step's code with syntax highlighting
-const formattedSteps = demoSteps.map(step => ({
-  ...step,
-  formattedCode: formatCode(step.code, 'html', { highlightClasses: true }),
-}));
 
 ---
 <Homepage>
@@ -201,7 +195,7 @@ const formattedSteps = demoSteps.map(step => ({
       </UIContainer>
     </content>
   </aboveFold>
-  <script is:inline define:vars={{ formattedSteps }}>
+  <script is:inline define:vars={{ demoSteps }}>
     const demo = document.getElementById('hero-demo');
     const promptInput = demo.querySelector('.prompt-input');
     const submitButton = demo.querySelector('.submit-button');
@@ -268,7 +262,7 @@ const formattedSteps = demoSteps.map(step => ({
       }
 
       demoUI.innerHTML = step.html;
-      demoCode.innerHTML = step.formattedCode;
+      demoCode.innerHTML = window.formatCode(step.code);
       completedSteps++;
       currentHTML = step.html;
     };
@@ -276,7 +270,7 @@ const formattedSteps = demoSteps.map(step => ({
     const goLive = () => {
       if (isLive) return;
       isLive = true;
-      promptHistory = formattedSteps.slice(0, completedSteps).map(s => ({
+      promptHistory = demoSteps.slice(0, completedSteps).map(s => ({
         prompt: s.prompt,
         html: s.html,
       }));
@@ -331,11 +325,11 @@ const formattedSteps = demoSteps.map(step => ({
 
     const runDemo = async () => {
       await wait(1500);
-      for (let i = 0; i < formattedSteps.length; i++) {
+      for (let i = 0; i < demoSteps.length; i++) {
         if (demoAborted) break;
-        await runStep(formattedSteps[i]);
+        await runStep(demoSteps[i]);
         if (demoAborted) break;
-        if (i < formattedSteps.length - 1) {
+        if (i < demoSteps.length - 1) {
           await wait(1200);
           if (demoAborted) break;
           cotLine.classList.remove('visible');
@@ -352,6 +346,9 @@ const formattedSteps = demoSteps.map(step => ({
   </script>
   <script>
     import { AILoader } from '@components/AILoader/AILoader.js';
+  </script>
+  <script>
+    import '../javascript/client-highlight.js';
   </script>
   <script>
     import { createPlasma } from '../javascript/plasma.js'
