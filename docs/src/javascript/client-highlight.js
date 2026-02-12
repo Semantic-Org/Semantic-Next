@@ -1,5 +1,8 @@
 import pretty from 'pretty';
-import { createHighlighter } from 'shiki';
+import { createHighlighterCore } from 'shiki/core';
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
+import html from 'shiki/langs/html.mjs';
+import githubDark from 'shiki/themes/github-dark.mjs';
 
 const colorReplacements = {
   '#85e89d': '#979797',
@@ -11,9 +14,10 @@ const colorReplacements = {
   '#24292e': '#777',
 };
 
-createHighlighter({
-  themes: ['github-dark'],
-  langs: ['html'],
+createHighlighterCore({
+  themes: [githubDark],
+  langs: [html],
+  engine: createOnigurumaEngine(() => import('shiki/wasm')),
 }).then(highlighter => {
   window.formatCode = (code, lang = 'html') => {
     if (lang === 'html') {
