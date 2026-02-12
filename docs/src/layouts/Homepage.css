@@ -100,11 +100,6 @@ body {
         */pointer-events: none;
       }
 
-      * {
-        position: relative;
-        z-index: 2;
-        transition: opacity 1s ease-in-out;
-      }
     }
 
 
@@ -123,6 +118,7 @@ body {
     }
 
     ui-container {
+      position: relative;
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -144,9 +140,6 @@ body {
       width: 500px;
       height: 2600px; /* height until value props */
       margin-left: auto;
-      ui-button {
-        font-size: 16px;
-      }
 
       code-sample,
       .expressive-code {

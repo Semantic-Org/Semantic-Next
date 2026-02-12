@@ -160,9 +160,6 @@
     min-height: 36px;
     display: flex;
     align-items: center;
-    ui-button {
-      font-size: 16px;
-    }
   }
 
   .demo-code {

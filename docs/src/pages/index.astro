@@ -106,21 +106,21 @@ const formattedCode4 = formatCode(code4, 'javascript');
 // Hero demo script — each step is a prompt + the resulting code/UI
 const demoSteps = [
   {
-    prompt: 'Make a delete button',
+    prompt: 'Make a large delete button',
     cot: 'Creating button from spec',
-    code: '<ui-button>Delete</ui-button>',
-    html: '<ui-button>Delete</ui-button>',
+    code: '<ui-button large>Delete</ui-button>',
+    html: '<ui-button large>Delete</ui-button>',
   },
   {
     prompt: 'Add an icon',
     cot: 'Retrieving icon spec and adding icon',
-    code: `<ui-button>\n  <ui-icon delete></ui-icon>\n  Delete\n</ui-button>`,
-    html: '<ui-button><ui-icon delete></ui-icon>Delete</ui-button>',
+    code: `<ui-button large>\n  <ui-icon delete></ui-icon>\n  Delete\n</ui-button>`,
+    html: '<ui-button large><ui-icon delete></ui-icon>Delete</ui-button>',
   },
   {
     prompt: 'Add edit and save',
     cot: 'Lookup plural variation add additional icons',
-    code: `<ui-buttons>\n  <ui-button>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
+    code: `<ui-buttons large>\n  <ui-button>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
     html: '<ui-buttons><ui-button><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
   },
   {
@@ -150,7 +150,7 @@ const demoSteps = [
             <div id="hero-demo">
               <div class="prompt-hint">Click to try it yourself</div>
               <div class="prompt-bar">
-                <input class="prompt-input" type="text" placeholder="Describe your UI..." maxlength="150" />
+                <input class="prompt-input" type="text" placeholder="Describe..." maxlength="150" />
                 <button class="submit-button">
                   <ui-icon send></ui-icon>
                 </button>
@@ -276,7 +276,7 @@ const demoSteps = [
       }));
       promptInput.value = '';
       promptBar.classList.remove('submitted');
-      promptHint.textContent = 'Try it — modify these buttons';
+      promptHint.textContent = 'Enter your prompt below';
       promptHint.classList.add('live');
       cotLine.classList.remove('visible');
       cotLine.innerHTML = '';
@@ -286,13 +286,105 @@ const demoSteps = [
       submitButton.disabled = !promptInput.value.trim();
     };
 
-    const handleSubmit = () => {
+    const API_BASE = 'https://ai.semantic-ui.com';
+    let streaming = false;
+
+    const handleSubmit = async () => {
       const prompt = promptInput.value.trim();
-      if (!prompt || !isLive) return;
+      if (!prompt || !isLive || streaming) return;
+
+      streaming = true;
       promptBar.classList.add('submitted');
       promptInput.value = '';
+      promptInput.disabled = true;
       updateSubmitState();
-      // TODO: send to AI endpoint
+
+      cotLine.innerHTML = '<ai-loader size="24" active></ai-loader><span class="cot-text shimmer">Thinking...</span>';
+      cotLine.classList.add('visible');
+
+      let htmlAccum = '';
+
+      try {
+        const tokenRes = await fetch(`${API_BASE}/api/token`, { method: 'POST' });
+        const { token, error: tokenError } = await tokenRes.json();
+        if (tokenError) throw new Error(tokenError);
+
+        const res = await fetch(`${API_BASE}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token,
+            prompt,
+            currentHTML,
+            promptHistory,
+            component: 'button',
+            syntax: 'succinct',
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Request failed');
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            const data = JSON.parse(line.slice(6));
+
+            if (data.type === 'cot') {
+              const cotText = cotLine.querySelector('.cot-text');
+              if (cotText) cotText.textContent = data.text;
+            } else if (data.type === 'html') {
+              htmlAccum += data.text;
+              if (window.formatCode) {
+                demoCode.innerHTML = window.formatCode(htmlAccum);
+              }
+            } else if (data.type === 'done') {
+              currentHTML = htmlAccum.trim();
+              demoUI.innerHTML = currentHTML;
+              promptHistory.push({ prompt, html: currentHTML });
+
+              if (window.formatCode) {
+                demoCode.innerHTML = window.formatCode(currentHTML);
+              }
+
+              if (!segmentRevealed) {
+                segment.classList.add('visible');
+                segmentRevealed = true;
+              }
+
+              const loader = cotLine.querySelector('ai-loader');
+              const cotText = cotLine.querySelector('.cot-text');
+              if (loader?.component) loader.active = false;
+              if (cotText) cotText.classList.remove('shimmer');
+            } else if (data.type === 'error') {
+              throw new Error(data.text);
+            }
+          }
+        }
+      } catch (err) {
+        cotLine.innerHTML = '<span class="cot-text">Error: ' + err.message + '</span>';
+        cotLine.classList.add('visible');
+        setTimeout(() => cotLine.classList.remove('visible'), 3000);
+      } finally {
+        streaming = false;
+        promptInput.disabled = false;
+        promptBar.classList.remove('submitted');
+        promptInput.focus();
+        updateSubmitState();
+      }
     };
 
     submitButton.addEventListener('mousedown', () => {
