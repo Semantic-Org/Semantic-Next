@@ -111,7 +111,7 @@
   border: var(--border);
   padding: var(--padding-xs) var(--padding-s);
   opacity: 0;
-  background: var(--black-80);
+  background: var(--angled-gradient);
   transform: translateY(8px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 
