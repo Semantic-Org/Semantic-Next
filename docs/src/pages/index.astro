@@ -2,8 +2,7 @@
 import Homepage from '../layouts/Homepage.astro';
 import { Code } from '@astrojs/starlight/components';
 import { CodeSample } from '@components/CodeSample/CodeSample.js';
-import { codeToHtml } from 'shiki';
-import pretty from 'pretty';
+import { formatCode } from '@helpers/format-code.js';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { CurrentTime } from '@components/CurrentTime.js'
 import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
@@ -27,18 +26,20 @@ const code1=`
 </ui-buttons>
 `.trim();
 const code2=`
-<user-panel>
+<current-date>
   <h3 class="header">
     Welcome {getDisplayName (getUser userId) }
   </h3>
-  <ui-buttons large>
-    {#each action in actions}
-      <ui-button {style}>
-        <ui-icon {icon}>
-        {text}
-      </ui-button>
-    {/each}
-  </ui-buttons>
+  {#if isAdmin userId}
+    <ui-buttons large>
+      {#each actions}
+        <ui-button {style}>
+          <ui-icon {icon}>
+          {text}
+        </ui-button>
+      {/each}
+    </ui-buttons>
+  {/if}
 </user-panel>
 `.trim();
 const code3=`
@@ -98,28 +99,10 @@ export const UserPanel = defineComponent({
 });
 `.trim();
 
-const colorReplacements = {
-  // dark mode
-  '#85e89d': '#979797', // <foo
-  '#e1e4e8': '#979797',
-  '#b392f0': '#58C1FE', // attr
-  '#032F62': '#6F42C1',
-  '#FFAB70': '#58C1FE',
-  // light mode
-  '#22863a': '#777',
-  '#24292e': '#777',
-};
-const formatCode = async (code, lang = 'html') => {
-  if (lang === 'html') {
-    code = pretty(code, { ocd: true });
-  }
-  return await codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
-};
-
-const formattedCode1 = await formatCode(code1, 'html');
-const formattedCode2 = await formatCode(code2, 'html');
-const formattedCode3 = await formatCode(code3, 'json');
-const formattedCode4 = await formatCode(code4, 'javascript');
+const formattedCode1 = formatCode(code1, 'html', { highlightClasses: true });
+const formattedCode2 = formatCode(code2, 'sui');
+const formattedCode3 = formatCode(code3, 'json');
+const formattedCode4 = formatCode(code4, 'javascript');
 
 ---
 <Homepage>
@@ -128,9 +111,9 @@ const formattedCode4 = await formatCode(code4, 'javascript');
     <content>
       <UIContainer>
         <div class="text">
-          <h1>The JS Framework for the AI Era</h1>
+          <h1>The UI Framework for the AI Era</h1>
           <p>Agents write it. Browsers run it. Humans read it.</p>
-          <p>A web component framework with signals, expressive templates,  and a complete UI kit with no build step from generation to execution.</p>
+          <p>A web component framework with signals, expressive templates,  and an off-the-shelf UI kit. No build step from generation to execution.</p>
           <UIButton secondary href="/ui/start">View Docs</UIButton>
           <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
         </div>
@@ -253,19 +236,19 @@ const formattedCode4 = await formatCode(code4, 'javascript');
           <div class="copy">
             <h4 class="sub header">Component Authoring</h4>
             <h3 class="header">Expressive Templates</h3>
-            <p>Templates compile to an AST at runtime in the browser. Ternaries, nested function calls, inline objects, reactive expressions — full expressiveness without a compile step.</p>
+            <p>Author components using a signals based templating engine. Updates are surgical without full component rerenders.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                <code>{`{isActive ? 'Yes' : 'No'}`}</code> — same power as JSX, no build step
+                Use <code>js</code> style expression to handle complexity.
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Lisp-style or JS-style calls — write templates the way you think
+                 Use <code>lisp</code> style expression to improve legibility and semantic intent.
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Templates are first-class values — pass them as settings, swap layouts at runtime
+                Mix syntaxes to get the best of both worlds
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
