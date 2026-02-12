@@ -380,6 +380,7 @@ export default {
       attribute: 'icon-only',
       defaultValue: false,
       description: 'Enable to remove spacing for text',
+      exampleCode: `<ui-button icon="pause" icon-only></ui-button>`,
     },
     {
       name: 'Icon After',
