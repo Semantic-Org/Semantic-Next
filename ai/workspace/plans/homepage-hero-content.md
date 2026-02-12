@@ -14,16 +14,39 @@
 
 ## Tour Sections (right graphic chases user down page)
 
-### Section One — "Code Designed to Edit" (WYSIWYG Agent Code Gen)
+### Section One — "Code Designed to Edit" (Agentic Coding Simulation)
 
-**Concept:** Fake prompt → code morph animation. Shows the agent loop: natural language in, readable markup out, working UI rendered.
+**Concept:** Simulated AI prompt bar above a code panel + rendered UI. Prompts appear, an agent "thinks", then code updates and UI re-renders. Demonstrates the feedback loop: lazy human prompt → spec-aware agent → readable markup → working UI.
 
-Prompt sequence (each updates the live code + rendered output):
-1. "make the buttons larger" → `<ui-buttons large>` (attribute flashes in)
-2. "emphasize the save button" → `<ui-button primary>` (attribute flashes in)
-3. "add a delete icon" → `<ui-icon delete>` (element flashes in)
+**Prompt bar:** Simplified chat input (like Claude/ChatGPT but abstracted). Right-side arrow button that visually submits. Brief "thinking..." state with animated icon before each code update. No loop — plays once, lands on final state.
 
-Key insight: each edit is a small, legible diff. The human can see exactly what changed and why. This is the human-in-the-loop story.
+**Script (4 steps):**
+
+| # | Prompt text | HTML output |
+|---|------------|-------------|
+| 1 | "Make a delete button" | `<ui-button>Delete</ui-button>` |
+| 2 | "Add an icon" | `<ui-button>`<br>`  <ui-icon delete></ui-icon>`<br>`  Delete`<br>`</ui-button>` |
+| 3 | "Add edit and save" | `<ui-buttons>`<br>`  <ui-button><ui-icon delete></ui-icon>Delete</ui-button>`<br>`  <ui-button><ui-icon edit></ui-icon>Edit</ui-button>`<br>`  <ui-button><ui-icon save></ui-icon>Save</ui-button>`<br>`</ui-buttons>` |
+| 4 | "Emphasize save" | `<ui-buttons>`<br>`  <ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button>`<br>`  <ui-button><ui-icon edit></ui-icon>Edit</ui-button>`<br>`  <ui-button primary><ui-icon save></ui-icon>Save</ui-button>`<br>`</ui-buttons>` |
+
+**Key details:**
+- Prompts get lazier/terser as conversation builds context — realistic human behavior
+- Step 4 is the money shot: user says "emphasize save" but agent also adds `subtle-negative` to delete — spec-aware compositional reasoning the user didn't ask for
+- Rendered UI and code panel layout TBD (try UI above code vs below)
+- Timing: natural pace, not rushed. Can tighten later like editing film
+- Code transitions: simple opacity swap to start, refine later
+- Mobile: non-goal for now
+
+**Code organization:**
+- All styles in a standalone CSS file, scoped under an ID (e.g. `#hero-demo`)
+- All JS self-contained in `<script>` in index.astro
+- Will eventually become a Semantic UI web component — don't design for that now, just don't make it hard (no scattered selectors, no global state)
+
+**Implementation order (piece by piece):**
+1. Static prompt bar HTML/CSS — get the visual right with no animation
+2. Script data structure — each step's prompt, code, rendered HTML
+3. Sequencer JS — steps through script with timing: prompt appears → thinking → resolve
+4. Code/UI transitions — simple swap first, polish later
 
 **Copy direction:**
 - Sub: Beautiful Markup

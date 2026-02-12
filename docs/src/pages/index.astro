@@ -104,6 +104,40 @@ const formattedCode2 = formatCode(code2, 'sui');
 const formattedCode3 = formatCode(code3, 'json');
 const formattedCode4 = formatCode(code4, 'javascript');
 
+// Hero demo script — each step is a prompt + the resulting code/UI
+const demoSteps = [
+  {
+    prompt: 'Make a delete button',
+    cot: 'Creating button from spec',
+    code: '<ui-button>Delete</ui-button>',
+    html: '<ui-button>Delete</ui-button>',
+  },
+  {
+    prompt: 'Add an icon',
+    cot: 'Retrieving icon spec and adding icon',
+    code: `<ui-button>\n  <ui-icon delete></ui-icon>\n  Delete\n</ui-button>`,
+    html: '<ui-button><ui-icon delete></ui-icon>Delete</ui-button>',
+  },
+  {
+    prompt: 'Add edit and save',
+    cot: 'Lookup plural variation add additional icons',
+    code: `<ui-buttons>\n  <ui-button>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
+    html: '<ui-buttons><ui-button><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
+  },
+  {
+    prompt: 'Emphasize save',
+    cot: 'Adjusting button emphasis',
+    code: `<ui-buttons>\n  <ui-button subtle-negative>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button primary>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
+    html: '<ui-buttons><ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button primary><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
+  },
+];
+
+// Pre-format each step's code with syntax highlighting
+const formattedSteps = demoSteps.map(step => ({
+  ...step,
+  formattedCode: formatCode(step.code, 'html', { highlightClasses: true }),
+}));
+
 ---
 <Homepage>
   <aboveFold>
@@ -119,28 +153,27 @@ const formattedCode4 = formatCode(code4, 'javascript');
         </div>
         <div class="visual one">
           <div class="sticky">
-            <div class="segment">
+            <div id="hero-demo">
+              <div class="prompt-bar">
+                <div class="prompt-text">
+                  <span class="prompt-placeholder">Ask anything...</span>
+                </div>
+                <button class="submit-button">
+                  <ui-icon send></ui-icon>
+                </button>
+              </div>
+              <div class="cot-line"></div>
+            </div>
+            <div class="segment demo-segment">
               <div class="one section">
-                <ui-buttons>
-                  <ui-button subtle-negative>
-                    <ui-icon delete></ui-icon>
-                    Delete
-                  </ui-button>
-                  <ui-button>
-                    <ui-icon edit></ui-icon>
-                    Edit
-                  </ui-button>
-                  <ui-button primary>
-                    <ui-icon save></ui-icon>
-                    Save
-                  </ui-button>
-                </ui-buttons>
-                <CodeSample
-                  code={code1}
-                  client:load
-                  formattedCode={formattedCode1}
-                  language="html"
-                />
+                <div class="demo-pane">
+                  <div class="pane-label">Preview</div>
+                  <div class="demo-ui"></div>
+                </div>
+                <div class="demo-pane">
+                  <div class="pane-label">Code</div>
+                  <div class="demo-code"></div>
+                </div>
               </div>
               <div class="two section">
                 <CodeSample
@@ -169,13 +202,103 @@ const formattedCode4 = formatCode(code4, 'javascript');
       </UIContainer>
     </content>
   </aboveFold>
+  <script is:inline define:vars={{ formattedSteps }}>
+    const demo = document.getElementById('hero-demo');
+    const promptText = demo.querySelector('.prompt-text');
+    const submitButton = demo.querySelector('.submit-button');
+    const cotLine = demo.querySelector('.cot-line');
+    const sticky = demo.closest('.sticky');
+    const segment = sticky.querySelector('.demo-segment');
+    const demoUI = sticky.querySelector('.demo-ui');
+    const demoCode = sticky.querySelector('.demo-code');
+    let segmentRevealed = false;
+
+    const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+    const typeText = async (text, target) => {
+      target.textContent = '';
+      for (const char of text) {
+        target.textContent += char;
+        await wait(40 + Math.random() * 30);
+      }
+    };
+
+    const showPlaceholder = () => {
+      promptText.innerHTML = '<span class="prompt-placeholder">Ask anything...</span>';
+    };
+
+    const promptBar = demo.querySelector('.prompt-bar');
+
+    const runStep = async (step) => {
+      // type the prompt
+      promptBar.classList.remove('submitted');
+      promptText.innerHTML = '';
+      const span = document.createElement('span');
+      promptText.appendChild(span);
+      await typeText(step.prompt, span);
+
+      // brief pause then "submit"
+      await wait(400);
+      submitButton.classList.add('active');
+      await wait(150);
+      submitButton.classList.remove('active');
+      promptBar.classList.add('submitted');
+
+      // CoT appears with loader while "thinking"
+      cotLine.innerHTML = '<ai-loader size="24" active></ai-loader><span class="cot-text shimmer">' + step.cot + '</span>';
+      cotLine.classList.add('visible');
+      await wait(800 + Math.random() * 400);
+
+      // loader stops, shimmer stops, summary stays
+      const loader = cotLine.querySelector('ai-loader');
+      const cotText = cotLine.querySelector('.cot-text');
+      if (loader?.component) loader.active = false;
+      if (cotText) cotText.classList.remove('shimmer');
+      cotLine.classList.remove('visible');
+
+      // reveal segment on first output
+      if (!segmentRevealed) {
+        segment.classList.add('visible');
+        segmentRevealed = true;
+      }
+
+      // output appears
+      console.log('updating html');
+      demoUI.innerHTML = step.html;
+      demoCode.innerHTML = step.formattedCode;
+    };
+
+    const runDemo = async () => {
+      await wait(1500);
+
+      for (let i = 0; i < formattedSteps.length; i++) {
+        await runStep(formattedSteps[i]);
+
+        if (i < formattedSteps.length - 1) {
+          await wait(1200);
+          // clear CoT line and reset prompt for next step
+          cotLine.classList.remove('visible');
+          cotLine.innerHTML = '';
+          showPlaceholder();
+          await wait(600);
+        }
+      }
+
+      // final state — prompt and CoT stay visible
+    };
+
+    runDemo();
+  </script>
+  <script>
+    import { AILoader } from '@components/AILoader/AILoader.js';
+  </script>
   <script>
     import { createPlasma } from '../javascript/plasma.js'
     const plasma = createPlasma('#plasma', {
       // Colors — just hex
       colorFrom:       '#00405C',
       colorTo:         '#0d6e8a',
-      colorShift:       50,
+      colorShift:       150,
       fps: false,
 
       // Specular
@@ -185,7 +308,7 @@ const formattedCode4 = formatCode(code4, 'javascript');
 
       // Animation
       speed:       0.3,
-      density:     1.5,
+      density:     2.5,
       brightness:  0.6,
       resolution:  1,
       // Mouse interaction

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Loader — Faithful Recreation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #212120;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Sora', sans-serif;
+  }
+
+  .demo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 56px;
+  }
+
+  .inline-demos { display: flex; flex-direction: column; gap: 18px; align-items: center; }
+  .inline-row {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 14px; color: #78716c; letter-spacing: 0.01em;
+  }
+
+  canvas { display: block; }
+
+  .controls {
+    position: fixed; bottom: 34px;
+    display: flex; gap: 10px;
+  }
+  .btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: #78716c; padding: 7px 18px; border-radius: 100px;
+    font-family: 'Sora', sans-serif; font-size: 12px;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .btn:hover { background: rgba(255,255,255,0.08); color: #a8a29e; }
+  .btn.active {
+    background: rgba(218,119,86,0.12);
+    border-color: rgba(218,119,86,0.22); color: #d07050;
+  }
+  .hint {
+    position: fixed; bottom: 74px;
+    font-size: 11px; color: #4a4540; transition: opacity 0.4s;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-area">
+  <div><canvas id="main" data-size="120"></canvas></div>
+  <div class="inline-demos">
+    <div class="inline-row">
+      <canvas class="loader" data-size="30"></canvas>
+      <span>Claude is thinking</span>
+    </div>
+    <div class="inline-row">
+      <span>Generating response</span>
+      <canvas class="loader" data-size="22"></canvas>
+    </div>
+    <div class="inline-row">
+      <canvas class="loader" data-size="16"></canvas>
+      <span style="font-size:12px; color:#57534e;">Loading</span>
+    </div>
+  </div>
+</div>
+
+<div class="hint" id="hint" style="opacity:0">hover when still</div>
+<div class="controls">
+  <button class="btn active" id="btnAnim" onclick="toggle('animate')">Animating</button>
+  <button class="btn" id="btnStill" onclick="toggle('still')">Still</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CLAUDE LOADER — Tendrils at FIXED angles.
+//  A traveling wave of extension/contraction creates the
+//  spinning illusion. No rigid rotation.
+//  Data extracted directly from the original GIF frames.
+// ═══════════════════════════════════════════════════════════
+
+const NUM = 12;
+
+// 8 tendrils at fixed angles (degrees), evenly spaced
+// Offset so the default resting pose matches frame 0
+const TENDRIL_ANGLES = [];
+for (let i = 0; i < NUM; i++) {
+  TENDRIL_ANGLES.push((i / NUM) * Math.PI * 2 - Math.PI / 2); // start from top
+}
+
+// ── Keyframe data ──
+// Sharp localized pulse — only 2-3 tendrils noticeably extended at once
+// The rest stay compact. This is what makes it organic, not mechanical.
+
+const KEYFRAME_LENGTHS = (() => {
+  const frames = [];
+  const NUM_FRAMES = 10;
+  for (let f = 0; f < NUM_FRAMES; f++) {
+    const row = [];
+    // The pulse center advances around the shape
+    const pulseCenter = (f / NUM_FRAMES) * 12;
+
+    for (let i = 0; i < 12; i++) {
+      // Circular distance from pulse center
+      let dist = Math.abs(i - pulseCenter);
+      dist = Math.min(dist, 12 - dist); // wrap around
+
+      // Very sharp falloff — only ~2 tendrils get the full extension
+      let extension;
+      if (dist < 0.8) {
+        extension = 1.0;
+      } else if (dist < 1.5) {
+        extension = 0.7 - (dist - 0.8) * 0.6;
+      } else if (dist < 2.2) {
+        extension = 0.28 - (dist - 1.5) * 0.3;
+      } else {
+        extension = 0;
+      }
+
+      // Base compact length + extension
+      const base = 0.75 + Math.sin(i * 3.1 + f * 0.7) * 0.02; // tiny organic jitter
+      const len = base + extension * 0.22;
+
+      // Secondary smaller pulse on the opposite side (subtle, organic)
+      let dist2 = Math.abs(i - ((pulseCenter + 5.5) % 12));
+      dist2 = Math.min(dist2, 12 - dist2);
+      const secondary = dist2 < 1.2 ? (1.2 - dist2) / 1.2 * 0.08 : 0;
+
+      row.push(Math.min(1.0, len + secondary));
+    }
+    frames.push(row);
+  }
+  return frames;
+})();
+
+// Frame delays — variable for organic rhythm
+const FRAME_DELAYS = [30, 110, 90, 70, 100, 80, 110, 70, 100, 90];
+
+// Per-tendril width multiplier — slight natural variation
+const TENDRIL_WIDTHS = Array.from({ length: 12 }, (_, i) =>
+  0.6 + 0.8 * (0.5 + 0.5 * Math.sin(i * 2.3 + 0.7))
+);
+
+// Color
+const CORAL = { r: 210, g: 112, b: 80 };
+
+let globalState = 'animate';
+let mouse = { x: -9999, y: -9999 };
+
+document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+function toggle(s) {
+  globalState = s;
+  document.getElementById('btnAnim').classList.toggle('active', s === 'animate');
+  document.getElementById('btnStill').classList.toggle('active', s === 'still');
+  document.getElementById('hint').style.opacity = s === 'still' ? '1' : '0';
+}
+
+class ClaudeLoader {
+  constructor(canvas, size) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.size = size;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 3);
+
+    canvas.width = size * this.dpr;
+    canvas.height = size * this.dpr;
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+    this.cx = size / 2;
+    this.cy = size / 2;
+
+    // From pixel analysis: tendril length ~30% of size, width ~14%
+    this.maxLen = size * 0.32;
+    this.tendrilW = size * 0.044;
+
+    // Animation
+    this.frameIdx = Math.floor(Math.random() * 10);
+    this.lastFrameTime = -9999;
+
+    // Current displayed lengths (for snappy step transitions)
+    this.lengths = KEYFRAME_LENGTHS[this.frameIdx].slice();
+    this.targetLengths = this.lengths.slice();
+
+    // Cursor reactivity
+    this.cursorStretch = new Float32Array(NUM);
+  }
+
+  update(now) {
+    const anim = globalState === 'animate';
+
+    // ── Step to next keyframe ──
+    if (anim) {
+      const delay = FRAME_DELAYS[this.frameIdx];
+      if (now - this.lastFrameTime > delay) {
+        this.frameIdx = (this.frameIdx + 1) % 10;
+        this.targetLengths = KEYFRAME_LENGTHS[this.frameIdx].slice();
+        this.lastFrameTime = now;
+      }
+    }
+
+    // ── Snap lengths — quick step, not smooth lerp ──
+    for (let i = 0; i < NUM; i++) {
+      const diff = this.targetLengths[i] - this.lengths[i];
+      // Near-instant snap — old school frame-by-frame, not tweened
+      this.lengths[i] += diff * 0.85;
+    }
+
+    // ── Cursor reactivity (still state) ──
+    const rect = this.canvas.getBoundingClientRect();
+    const mx = mouse.x - rect.left - this.cx;
+    const my = mouse.y - rect.top - this.cy;
+    const mDist = Math.sqrt(mx * mx + my * my);
+    const mAng = Math.atan2(my, mx);
+    const prox = Math.max(0, 1 - mDist / (this.size * 1.5));
+
+    for (let i = 0; i < NUM; i++) {
+      if (!anim) {
+        let diff = TENDRIL_ANGLES[i] - mAng;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        const facing = Math.max(0, Math.cos(diff));
+        const target = facing * prox * 0.22 - (1 - facing) * prox * 0.08;
+        this.cursorStretch[i] += (target - this.cursorStretch[i]) * 0.1;
+      } else {
+        this.cursorStretch[i] *= 0.9;
+      }
+    }
+  }
+
+  draw() {
+    const { ctx, cx, cy, size, maxLen, tendrilW } = this;
+    ctx.clearRect(0, 0, size, size);
+
+    for (let i = 0; i < NUM; i++) {
+      const angle = TENDRIL_ANGLES[i];
+      const lenNorm = this.lengths[i] + this.cursorStretch[i];
+      const len = maxLen * lenNorm;
+      const w = tendrilW * TENDRIL_WIDTHS[i];
+
+      // Subtle color shift — slightly brighter for extended tendrils
+      const bright = (lenNorm - 0.7) / 0.3; // 0 at min, 1 at max
+      const r = Math.min(255, CORAL.r + bright * 15 | 0);
+      const g = Math.min(255, CORAL.g + bright * 12 | 0);
+      const b = Math.min(255, CORAL.b + bright * 10 | 0);
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(angle);
+
+      // ── Organic tendril shape ──
+      // Tapered teardrop: narrow at center, widens, rounds at tip
+      this.drawTendril(ctx, w, len);
+
+      ctx.fillStyle = `rgb(${r},${g},${b})`;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  drawTendril(ctx, w, len) {
+    // Pill/stadium shape — fully rounded ends
+    const hw = w / 2;
+    const r = hw; // radius = half width for perfect semicircle caps
+    const gap = 0; // tendrils start from center, overlap forms the core mass
+
+    ctx.beginPath();
+    // Bottom semicircle (at center end)
+    ctx.arc(0, -gap, r, 0, Math.PI);
+    // Left edge up
+    ctx.lineTo(-hw, -(len - r));
+    // Top semicircle (tip)
+    ctx.arc(0, -(len - r), r, Math.PI, 0);
+    // Right edge down
+    ctx.lineTo(hw, -gap);
+    ctx.closePath();
+  }
+}
+
+// ── Instantiate ──
+const allCanvases = [document.getElementById('main'), ...document.querySelectorAll('.loader')];
+const loaders = allCanvases.map(c => {
+  const size = parseInt(c.dataset.size);
+  const l = new ClaudeLoader(c, size);
+  l.frameIdx = Math.floor(Math.random() * 10);
+  l.lengths = KEYFRAME_LENGTHS[l.frameIdx].slice();
+  l.targetLengths = l.lengths.slice();
+  return l;
+});
+
+function frame(now) {
+  for (const l of loaders) { l.update(now); l.draw(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+document.getElementById('main').style.cursor = 'pointer';
+document.getElementById('main').addEventListener('click', () => {
+  toggle(globalState === 'animate' ? 'still' : 'animate');
+});
+</script>
+</body>
+</html>
