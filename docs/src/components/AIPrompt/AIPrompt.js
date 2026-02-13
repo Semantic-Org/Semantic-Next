@@ -1,5 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
-import { get } from '@semantic-ui/utils';
+import { each, get } from '@semantic-ui/utils';
+
+// handle client side highlighting
+import '@javascript/client-highlight.js';
+
+// load wc
+import { AILoader } from '@components/AILoader/AILoader.js';
+import { UIButton } from '@semantic-ui/core';
 
 import css from './AIPrompt.css?raw';
 import template from './AIPrompt.html?raw';
@@ -15,6 +22,19 @@ const defaultState = {
   hasPrompt: false,
   hasResults: false,
 };
+
+// wait might get moved to utils so should be generic
+const wait = (ms) =>
+  new Promise(resolve => {
+    const id = setTimeout(() => {
+      resolveWait = null;
+      resolve();
+    }, ms);
+    resolveWait = () => {
+      clearTimeout(id);
+      resolve();
+    };
+  });
 
 const createComponent = ({ $, settings, state, reaction }) => ({
   apiBase: 'https://ai.semantic-ui.com',
@@ -32,7 +52,6 @@ const createComponent = ({ $, settings, state, reaction }) => ({
   calculateDemo() {
     reaction(() => {
       const demoMode = state.demoMode.get();
-
       if (!demoMode) {
         self.stopDemo();
         self.enablePrompt();
@@ -46,10 +65,8 @@ const createComponent = ({ $, settings, state, reaction }) => ({
     };
   },
 
-  maybeSubmitDisabled() {
-    return state.hasPrompt.get()
-      ? ''
-      : 'disabled';
+  canSubmit() {
+    return state.hasPrompt.get();
   },
 
   maybeResultsVisible() {
@@ -64,15 +81,22 @@ const createComponent = ({ $, settings, state, reaction }) => ({
     // allow user input
   },
 
-  typeDemoText() {
+  async typeDemoText() {
+    const prompt = $('.prompt input').el();
     //
+    prompt.value = '';
+    for (const char of text) {
+      if (demoAborted) { return; }
+      promptInput.value += char;
+      await wait(40 + Math.random() * 30);
+    }
   },
 
   runDemoStep() {
   },
 
   stopDemo() {
-    //
+    // resolve wait etc
   },
 
   async streamAPI(method) {
@@ -81,7 +105,7 @@ const createComponent = ({ $, settings, state, reaction }) => ({
       generate: '/api/generate',
     };
     const url = get(api, method);
-    const res = await fetch(url, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -96,15 +120,24 @@ const createComponent = ({ $, settings, state, reaction }) => ({
     // rest
   },
 
-  wait(ms) {
-  },
-
   submit() {
   },
   // rest
 });
 
 const events = {
+  'mousedown .prompt input'({ $, state, value }) {
+    if (!value || state.demoMode.get()) {
+      return;
+    }
+    // rest
+  },
+  'input .prompt input'({ $, state, value }) {
+    // rest
+  },
+  'mouseup .prompt input'({ $, state, value }) {
+    // rest
+  },
   'focus .prompt input'({ state }) {
     state.demoMode.set(false);
   },

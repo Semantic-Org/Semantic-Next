@@ -2,9 +2,19 @@
   <div class="hint">{hint}</div>
   <div class="prompt">
     <input class="input" type="text" placeholder="Describe..." maxlength="150" />
-    <ui-button {maybeSubmitDisabled} class="submit" icon-only icon="send"></ui-button>
+    <ui-button disabled={!hasPrompt} class="submit" icon-only icon="send"></ui-button>
   </div>
-  <div class="cot"></div>
+  {#if isThinking}
+    <div class="thinking cot">
+      <ai-loader active></ai-loader>
+      <div class="text">
+    </div>
+  {else}
+    <div class="cot">
+      <ai-loader></ai-loader>
+      <div class="text"></div>
+    </div>
+  {/if}
 </div>
 
 <div class="result {maybeResultsVisible}">
