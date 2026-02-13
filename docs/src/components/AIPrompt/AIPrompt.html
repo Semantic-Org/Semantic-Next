@@ -1,0 +1,20 @@
+<div class="prompt {classMap promptClass}">
+  <div class="hint">{hint}</div>
+  <div class="prompt">
+    <input class="input" type="text" placeholder="Describe..." maxlength="150" />
+    <ui-button {maybeSubmitDisabled} class="submit" icon-only icon="send"></ui-button>
+  </div>
+  <div class="cot"></div>
+</div>
+
+<div class="result {maybeResultsVisible}">
+  <div class="preview pane">
+    <div class="label">Preview</div>
+    <div class="output"></div>
+  </div>
+  <div class="code pane">
+    <div class="label">Code</div>
+    <div class="output"></div>
+  </div>
+  <div class="note"></div>
+</div>
