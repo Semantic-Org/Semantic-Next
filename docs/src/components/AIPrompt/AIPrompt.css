@@ -1,2 +1,229 @@
+/*******************************
+          AI Prompt
+*******************************/
+
 :host {
+  display: block;
+
+  /* Hint */
+  --ai-prompt-hint-font-size: var(--text-xs);
+  --ai-prompt-hint-color: var(--standard-40);
+  --ai-prompt-hint-live-color: var(--primary-text-color);
+  --ai-prompt-hint-live-font-size: var(--text-s);
+  --ai-prompt-hint-margin: 0 0 var(--margin-2xs) var(--margin-2xs);
+
+  /* Bar */
+  --ai-prompt-bar-gap: var(--gap-s);
+  --ai-prompt-bar-padding: var(--input-padding);
+  --ai-prompt-bar-border-radius: var(--border-radius-l);
+  --ai-prompt-bar-background: var(--inverted-50);
+  --ai-prompt-bar-border: var(--border);
+
+  /* Input */
+  --ai-prompt-input-font-size: var(--text-l);
+  --ai-prompt-input-color: var(--text-color);
+  --ai-prompt-input-placeholder-color: var(--standard-30);
+  --ai-prompt-input-submitted-color: var(--standard-60);
+
+  /* COT */
+  --ai-prompt-cot-font-size: var(--text-xs);
+  --ai-prompt-cot-color: var(--muted-text-color);
+  --ai-prompt-cot-gap: var(--gap-3xs);
+  --ai-prompt-cot-height: 1.4em;
+
+  /* Shimmer */
+  --ai-prompt-shimmer-from: var(--muted-text-color);
+  --ai-prompt-shimmer-to: var(--text-color);
+
+  /* Results */
+  --ai-prompt-results-background: var(--subtle-angled-gradient);
+  --ai-prompt-results-border: var(--border);
+  --ai-prompt-results-padding: var(--padding-xs) var(--padding-s);
+  --ai-prompt-results-border-radius: var(--border-radius);
+
+  /* Pane */
+  --ai-prompt-pane-padding: var(--padding-s);
+  --ai-prompt-pane-border: 1px solid var(--standard-10);
+
+  /* Label */
+  --ai-prompt-label-font-size: var(--text-2xs);
+  --ai-prompt-label-color: var(--muted-text-color);
+  --ai-prompt-label-letter-spacing: 0.05em;
+
+  /* Preview */
+  --ai-prompt-preview-min-height: 36px;
+
+  /* Note */
+  --ai-prompt-note-font-size: var(--text-xs);
+  --ai-prompt-note-color: var(--warning-text-color);
+}
+
+/*******************************
+            Hint
+*******************************/
+
+.hint {
+  font-size: var(--ai-prompt-hint-font-size);
+  color: var(--ai-prompt-hint-color);
+  margin: var(--ai-prompt-hint-margin);
+  transition: color 0.3s ease, font-size 0.3s ease;
+
+  &.live {
+    color: var(--ai-prompt-hint-live-color);
+    font-size: var(--ai-prompt-hint-live-font-size);
+  }
+}
+
+/*******************************
+          Prompt Bar
+*******************************/
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--ai-prompt-bar-gap);
+  padding: var(--ai-prompt-bar-padding);
+  border-radius: var(--ai-prompt-bar-border-radius);
+  background: var(--ai-prompt-bar-background);
+  border: var(--ai-prompt-bar-border);
+
+  .input {
+    flex: 1;
+    font-size: var(--ai-prompt-input-font-size);
+    font-family: inherit;
+    color: var(--ai-prompt-input-color);
+    background: transparent;
+    border: none;
+    outline: none;
+    min-width: 0;
+    transition: color 0.3s ease;
+
+    &::placeholder {
+      color: var(--ai-prompt-input-placeholder-color);
+    }
+  }
+
+  &.submitted .input {
+    color: var(--ai-prompt-input-submitted-color);
+  }
+}
+
+/*******************************
+        Chain of Thought
+*******************************/
+
+.cot {
+  display: flex;
+  align-items: center;
+  gap: var(--ai-prompt-cot-gap);
+  font-size: var(--ai-prompt-cot-font-size);
+  color: var(--ai-prompt-cot-color);
+  padding: 0 var(--padding-xs);
+  margin-top: var(--gap-3xs);
+  margin-bottom: var(--gap-s);
+  height: var(--ai-prompt-cot-height);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  ai-loader {
+    flex-shrink: 0;
+  }
+
+  .text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.shimmer {
+      background: linear-gradient(
+        90deg,
+        var(--ai-prompt-shimmer-from) 0%,
+        var(--ai-prompt-shimmer-to) 40%,
+        var(--ai-prompt-shimmer-to) 60%,
+        var(--ai-prompt-shimmer-from) 100%
+      );
+      background-size: 200% 100%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+/*******************************
+           Results
+*******************************/
+
+.results {
+  background: var(--ai-prompt-results-background);
+  border: var(--ai-prompt-results-border);
+  border-radius: var(--ai-prompt-results-border-radius);
+  padding: var(--ai-prompt-results-padding);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pane {
+  padding: var(--ai-prompt-pane-padding);
+
+  &:first-child {
+    border-bottom: var(--ai-prompt-pane-border);
+  }
+}
+
+.label {
+  font-size: var(--ai-prompt-label-font-size);
+  text-transform: uppercase;
+  letter-spacing: var(--ai-prompt-label-letter-spacing);
+  color: var(--ai-prompt-label-color);
+  margin-bottom: var(--gap-3xs);
+}
+
+.preview {
+  min-height: var(--ai-prompt-preview-min-height);
+  display: flex;
+  align-items: center;
+}
+
+.code {
+  pre {
+    background-color: transparent !important;
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    border-width: 0;
+  }
+}
+
+.note {
+  font-size: var(--ai-prompt-note-font-size);
+  color: var(--ai-prompt-note-color);
+  padding: 0 var(--ai-prompt-pane-padding);
+  padding-bottom: var(--padding-xs);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+/*******************************
+          Animations
+*******************************/
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }

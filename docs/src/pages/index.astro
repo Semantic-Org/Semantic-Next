@@ -8,6 +8,8 @@ import { CurrentTime } from '@components/CurrentTime.js'
 import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
 import { Image } from 'astro:assets';
 import logoImage from '@images/logo.png';
+import { AIPrompt } from '@components/AIPrompt/AIPrompt.js';
+import { AILoader } from '@components/AILoader/AILoader.js';
 
 const code1=`
 <ui-buttons>
@@ -147,6 +149,9 @@ const demoSteps = [
         </div>
         <div class="visual one">
           <div class="sticky">
+            <AIPrompt steps={demoSteps} dark client:load></AIPrompt>
+
+            <!-- OLD INLINE VERSION (preserved for comparison) -->
             <div id="hero-demo">
               <div class="prompt-hint">Click to try it yourself</div>
               <div class="prompt-bar">
@@ -450,9 +455,6 @@ const demoSteps = [
     runDemo();
   </script>
   <script>
-    import { AILoader } from '@components/AILoader/AILoader.js';
-  </script>
-  <script>
     import '../javascript/client-highlight.js';
   </script>
   <script>
@@ -470,14 +472,14 @@ const demoSteps = [
       specularAmbient: 0.2,
 
       // Animation
-      speed:       0.3,
+      speed:       0.2,
       density:     2.5,
       brightness:  0.6,
       resolution:  1,
       // Mouse interaction
       mouse: {
         light: 2,   // specular follows cursor
-        warp:  1.5,   // gravity well pulls bands
+        warp:  0.5,   // gravity well pulls bands
       },
     });
 

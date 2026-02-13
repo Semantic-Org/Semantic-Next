@@ -1,30 +1,20 @@
-<div class="prompt {classMap promptClass}">
-  <div class="hint">{hint}</div>
-  <div class="prompt">
-    <input class="input" type="text" placeholder="Describe..." maxlength="150" />
-    <ui-button disabled={!hasPrompt} class="submit" icon-only icon="send"></ui-button>
-  </div>
-  {#if isThinking}
-    <div class="thinking cot">
-      <ai-loader active></ai-loader>
-      <div class="text">
-    </div>
-  {else}
-    <div class="cot">
-      <ai-loader></ai-loader>
-      <div class="text"></div>
-    </div>
-  {/if}
+<div class="hint {classMap hintClass}">{currentHint}</div>
+<div class="bar {classMap barClass}">
+  <input class="input" type="text" placeholder="{placeholder}" maxlength="{maxLength}" />
+  <ui-button grey subtle class="submit" icon-only icon="send" disabled={cannotSubmit}></ui-button>
 </div>
-
-<div class="result {maybeResultsVisible}">
-  <div class="preview pane">
+<div class="cot {classMap cotClass}">
+  <ai-loader size="24" active="{isThinking}"></ai-loader>
+  <span class="text {#if isThinking}shimmer{/if}">{cotText}</span>
+</div>
+<div class="results {classMap resultsClass}">
+  <div class="pane">
     <div class="label">Preview</div>
-    <div class="output"></div>
+    <div class="preview">{#html previewHTML}</div>
   </div>
-  <div class="code pane">
+  <div class="pane">
     <div class="label">Code</div>
-    <div class="output"></div>
+    <div class="code">{#html codeHTML}</div>
   </div>
-  <div class="note"></div>
+  <div class="note {classMap noteClass}">{note}</div>
 </div>

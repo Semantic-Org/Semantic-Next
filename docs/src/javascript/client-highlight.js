@@ -1,3 +1,4 @@
+import { isClient } from '@semantic-ui/utils';
 import pretty from 'pretty';
 import { createHighlighterCore } from 'shiki/core';
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
@@ -14,15 +15,26 @@ const colorReplacements = {
   '#24292e': '#777',
 };
 
-createHighlighterCore({
+let highlighter;
+
+export const ready = createHighlighterCore({
   themes: [githubDark],
   langs: [html],
   engine: createOnigurumaEngine(() => import('shiki/wasm')),
-}).then(highlighter => {
-  window.formatCode = (code, lang = 'html') => {
-    if (lang === 'html') {
-      code = pretty(code, { ocd: true });
-    }
-    return highlighter.codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
-  };
+}).then(h => {
+  highlighter = h;
+  // backward compat for inline scripts during migration
+  if (isClient) {
+    window.formatCode = formatCode;
+  }
 });
+
+export function formatCode(code, lang = 'html') {
+  if (!highlighter) {
+    return `<pre><code>${code}</code></pre>`;
+  }
+  if (lang === 'html') {
+    code = pretty(code, { ocd: true });
+  }
+  return highlighter.codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
+}
