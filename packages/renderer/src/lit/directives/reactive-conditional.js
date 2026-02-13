@@ -111,7 +111,6 @@ export class ReactiveConditionalDirective extends AsyncDirective {
     }
 
     if (content?.strings) {
-      console.log(content);
       // For simple conditionals in attributes, just join the static strings
       // This works for basic cases like {#if condition}text{/if}
       return content.strings.join('');
