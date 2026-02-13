@@ -6,8 +6,8 @@ const NUM = 12;
 const FRAME_DELAYS = [30, 110, 90, 70, 100, 80, 110, 70, 100, 90];
 
 const defaultSettings = {
-  size: 20,
-  color: '',
+  size: 24,
+  color: '#EAB59F',
   active: true,
 };
 

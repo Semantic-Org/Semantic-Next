@@ -33,10 +33,10 @@ let resolveWait = null;
 
 const defaultState = {
   demoMode: false,
-  isThinking: false,
   submitted: false,
   hasPrompt: false,
   hasResults: false,
+  isThinking: false,
   cotVisible: false,
   cotText: '',
   previewHTML: '',
@@ -82,26 +82,30 @@ const createComponent = ({ self, $, settings, state }) => ({
     return !state.hasPrompt.get();
   },
 
+  isLive() {
+    return !state.demoMode.get();
+  },
+
   async typeText(text) {
     const input = $('.input').el();
     input.value = '';
     for (const char of text) {
-      if (self.demoAborted) { return; }
+      if (self.isLive()) { return; }
       input.value += char;
       await wait(40 + Math.random() * 30);
     }
   },
 
   async runDemoStep(step) {
-    if (self.demoAborted) { return; }
+    if (self.isLive()) { return; }
     state.submitted.set(false);
     $('.input').el().value = '';
 
     await self.typeText(step.prompt);
-    if (self.demoAborted) { return; }
+    if (self.isLive()) { return; }
 
     await wait(400);
-    if (self.demoAborted) { return; }
+    if (self.isLive()) { return; }
 
     state.submitted.set(true);
     state.isThinking.set(true);
@@ -109,7 +113,7 @@ const createComponent = ({ self, $, settings, state }) => ({
     state.cotText.set(step.cot);
 
     await wait(800 + Math.random() * 400);
-    if (self.demoAborted) { return; }
+    if (self.isLive()) { return; }
 
     state.isThinking.set(false);
     state.cotVisible.set(false);
@@ -120,28 +124,31 @@ const createComponent = ({ self, $, settings, state }) => ({
     self.currentHTML = step.html;
   },
 
+  clearPrompt() {
+    $('.input').val('');
+  },
+
   async runDemo() {
     const steps = settings.steps;
     await wait(1500);
     for (let i = 0; i < steps.length; i++) {
-      if (self.demoAborted) { break; }
+      if (self.isLive()) { break; }
       await self.runDemoStep(steps[i]);
-      if (self.demoAborted) { break; }
+      if (self.isLive()) { break; }
       if (i < steps.length - 1) {
         await wait(1200);
-        if (self.demoAborted) { break; }
+        if (self.isLive()) { break; }
         state.cotVisible.set(false);
         state.cotText.set('');
-        $('.input').el().value = '';
+        self.clearPrompt();
         await wait(600);
-        if (self.demoAborted) { break; }
+        if (self.isLive()) { break; }
       }
     }
     self.goLive();
   },
 
   stopDemo() {
-    self.demoAborted = true;
     if (resolveWait) {
       resolveWait();
       resolveWait = null;
@@ -154,12 +161,8 @@ const createComponent = ({ self, $, settings, state }) => ({
       prompt: s.prompt,
       html: s.html,
     }));
-    $('.input').val('');
-    state.submitted.set(false);
+    self.clearPrompt();
     state.demoMode.set(false);
-    state.cotVisible.set(false);
-    state.cotText.set('');
-    state.isThinking.set(false);
   },
 
   async submit() {
@@ -178,6 +181,7 @@ const createComponent = ({ self, $, settings, state }) => ({
     state.hasPrompt.set(false);
 
     let htmlAccum = '';
+    let isValidHTML = true;
 
     try {
       let token = self.token;
@@ -238,6 +242,9 @@ const createComponent = ({ self, $, settings, state }) => ({
           else if (data.type === 'done') {
             const trimmed = htmlAccum.trim();
             if (!trimmed.includes('<')) {
+              // API returned plain text, not HTML — show as note instead
+              state.codeHTML.set('');
+              state.previewHTML.set('');
               state.note.set(trimmed || 'No valid HTML was returned');
               break;
             }
@@ -286,7 +293,7 @@ const onDestroyed = ({ self }) => {
 
 const events = {
   'input .input'({ state, value }) {
-    state.hasPrompt.set(!!value.trim());
+    state.hasPrompt.set(!!value);
   },
   'focus .input'({ self, state }) {
     if (!state.demoMode.get()) { return; }

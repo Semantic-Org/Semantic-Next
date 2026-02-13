@@ -28,12 +28,12 @@
   /* COT */
   --ai-prompt-cot-font-size: var(--text-xs);
   --ai-prompt-cot-color: var(--muted-text-color);
-  --ai-prompt-cot-gap: var(--gap-3xs);
+  --ai-prompt-cot-gap: var(--gap);
   --ai-prompt-cot-height: 1.4em;
 
   /* Shimmer */
-  --ai-prompt-shimmer-from: var(--muted-text-color);
-  --ai-prompt-shimmer-to: var(--text-color);
+  --ai-prompt-shimmer-from: var(--standard-20);
+  --ai-prompt-shimmer-to: var(--standard-80);
 
   /* Results */
   --ai-prompt-results-background: var(--subtle-angled-gradient);
@@ -115,14 +115,11 @@
 .cot {
   display: flex;
   align-items: center;
-  gap: var(--ai-prompt-cot-gap);
+  gap: var(--gap-3xs);
   font-size: var(--ai-prompt-cot-font-size);
   color: var(--ai-prompt-cot-color);
-  padding: 0 var(--padding-xs);
-  margin-top: var(--gap-3xs);
+  margin-top: var(--gap-2xs);
   margin-bottom: var(--gap-s);
-  height: var(--ai-prompt-cot-height);
-  opacity: 0;
   transition: opacity 0.2s ease;
 
   &.visible {
