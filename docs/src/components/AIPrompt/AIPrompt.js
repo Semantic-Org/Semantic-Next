@@ -131,7 +131,6 @@ const createComponent = ({ self, $, settings, state }) => ({
 
   async runDemo() {
     const steps = settings.steps;
-    await wait(1500);
     for (let i = 0; i < steps.length; i++) {
       if (self.isLive()) { break; }
       await self.runDemoStep(steps[i]);
