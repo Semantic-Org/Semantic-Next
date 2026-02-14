@@ -169,6 +169,7 @@ const onRendered = ({ self, settings, reaction, isServer }) => {
       self.startLoop();
     }
     else {
+      debugger;
       self.stopLoop();
     }
   });

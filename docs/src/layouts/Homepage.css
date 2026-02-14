@@ -6,6 +6,10 @@ body {
   --glow-border-color: oklch(0.22 0.02 277.72);
   --glow-border: 1px solid var(--docs-border-color);
 
+  ai-prompt {
+   --ai-prompt-label-color: #EAB59F;
+  }
+
   ui-card {
     --card-padding: 1.5rem 2rem;
     --card-description-line-height: 1.6;

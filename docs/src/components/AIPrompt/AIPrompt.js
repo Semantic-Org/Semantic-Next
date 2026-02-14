@@ -54,6 +54,12 @@ const createComponent = ({ self, $, settings, state }) => ({
   promptHistory: [],
   completedSteps: 0,
 
+  initialize() {
+    if (settings.steps.length) {
+      state.demoMode.set(true);
+    }
+  },
+
   currentHint() {
     return state.demoMode.get() ? settings.demoHint : settings.liveHint;
   },
@@ -64,10 +70,6 @@ const createComponent = ({ self, $, settings, state }) => ({
 
   barClass() {
     return { submitted: state.submitted.get() };
-  },
-
-  cotClass() {
-    return { visible: state.cotVisible.get() };
   },
 
   resultsClass() {
@@ -116,7 +118,6 @@ const createComponent = ({ self, $, settings, state }) => ({
     if (self.isLive()) { return; }
 
     state.isThinking.set(false);
-    state.cotVisible.set(false);
     state.hasResults.set(true);
     state.previewHTML.set(step.html);
     state.codeHTML.set(formatCode(step.code));
@@ -138,8 +139,6 @@ const createComponent = ({ self, $, settings, state }) => ({
       if (i < steps.length - 1) {
         await wait(1200);
         if (self.isLive()) { break; }
-        state.cotVisible.set(false);
-        state.cotText.set('');
         self.clearPrompt();
         await wait(600);
         if (self.isLive()) { break; }
@@ -235,13 +234,18 @@ const createComponent = ({ self, $, settings, state }) => ({
             state.note.set(data.text);
           }
           else if (data.type === 'html') {
+            if (!htmlAccum && !data.text.trimStart().startsWith('<')) {
+              isValidHTML = false;
+            }
             htmlAccum += data.text;
-            state.hasResults.set(true);
-            state.codeHTML.set(formatCode(htmlAccum));
+            if (isValidHTML) {
+              state.hasResults.set(true);
+              state.codeHTML.set(formatCode(htmlAccum));
+            }
           }
           else if (data.type === 'done') {
             const trimmed = htmlAccum.trim();
-            if (!trimmed.includes('<')) {
+            if (!isValidHTML) {
               // API returned plain text, not HTML — show as note instead
               state.codeHTML.set('');
               state.previewHTML.set('');
@@ -264,7 +268,6 @@ const createComponent = ({ self, $, settings, state }) => ({
     catch (err) {
       state.cotText.set('Error: ' + err.message);
       state.isThinking.set(false);
-      setTimeout(() => state.cotVisible.set(false), 3000);
     }
     finally {
       self.streaming = false;
@@ -280,9 +283,7 @@ const onRendered = async ({ isServer, self, settings, state }) => {
     return;
   }
   await highlighterReady;
-  console.log(settings.steps);
   if (settings.steps.length) {
-    state.demoMode.set(true);
     self.runDemo();
   }
 };
