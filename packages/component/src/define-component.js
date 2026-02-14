@@ -1,5 +1,5 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { adoptStylesheet, camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, camelToKebab, each, isClient, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
@@ -193,6 +193,14 @@ export const defineComponent = ({
           oldValue,
           componentSpec,
         });
+        // trigger reactive proxy
+        if(this.settings[attribute]) {
+          const converter = webComponent.properties[attribute]?.converter?.fromAttribute;
+          if(isFunction(converter)) {
+            newValue = converter(newValue)
+          }
+          this.settings[attribute] = newValue;
+        }
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
       }
 

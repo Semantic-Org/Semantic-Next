@@ -13,6 +13,7 @@ xx.xx.xxxx
 
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
+* **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
