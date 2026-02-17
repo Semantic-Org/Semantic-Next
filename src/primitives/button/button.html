@@ -12,7 +12,7 @@
   {#if animated}
     {> animated}
   {else}
-    {#if isIconBefore}
+    {#if not iconAfter}
       {> icon}
     {/if}
     {#if not iconOnly}
@@ -20,14 +20,17 @@
         {> slot}
       </span>
     {/if}
-    {#if isIconAfter}
+    {#if iconAfter}
       {> icon}
     {/if}
   {/if}
 {/snippet}
 
 {#snippet icon}
-  <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
+  {#if icon}
+    <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
+  {/if}
+  {>slot icon}
 {/snippet}
 
 {#snippet animated}
