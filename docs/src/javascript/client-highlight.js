@@ -26,19 +26,31 @@ export const ready = createHighlighterCore({
   // backward compat for inline scripts during migration
   if (isClient) {
     window.formatCode = formatCode;
+    window.highlightCode = highlightCode;
   }
 });
 
-export function formatCode(code, lang = 'html') {
-  // trim and add newline for pretty to fix
+const suiDefaults = {
+  unformatted: ['code', 'pre'],
+  inline_custom_elements: false,
+  inline: ['ui-icon', 'ui-label'],
+};
+
+export function formatCode(code, lang = 'html', { sui = true, ...options } = {}) {
   code = code.trim();
 
   if (lang === 'html') {
-    code = code.replaceAll('>', '>\n');
-    code = code.replaceAll('<', '\n<');
-    code = pretty(code, { ocd: true });
+    code = pretty(code, {
+      ocd: true,
+      ...(sui && suiDefaults),
+      ...options,
+    });
   }
 
+  return code;
+}
+
+export function highlightCode(code, lang = 'html') {
   if (!highlighter) {
     return `<pre><code>${code}</code></pre>`;
   }

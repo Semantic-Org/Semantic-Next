@@ -1,7 +1,6 @@
-import { formatCode, ready as highlighterReady } from '@javascript/client-highlight.js';
+import { formatCode, highlightCode, ready as highlighterReady } from '@javascript/client-highlight.js';
 import { defineComponent } from '@semantic-ui/component';
 import { getJSON } from '@semantic-ui/utils';
-import pretty from 'pretty';
 
 import { AILoader } from '@components/AILoader/AILoader.js';
 import { UIButton } from '@semantic-ui/core';
@@ -121,7 +120,7 @@ const createComponent = ({ self, $, settings, state }) => ({
     state.isThinking.set(false);
     state.hasResults.set(true);
     state.previewHTML.set(step.html);
-    state.codeHTML.set(formatCode(step.code));
+    state.codeHTML.set(highlightCode(formatCode(step.code)));
     self.completedSteps++;
     self.currentHTML = step.html;
   },
@@ -240,12 +239,12 @@ const createComponent = ({ self, $, settings, state }) => ({
             htmlAccum += data.text;
             if (isValidHTML) {
               state.hasResults.set(true);
-              state.codeHTML.set(formatCode(htmlAccum));
+              state.codeHTML.set(highlightCode(formatCode(htmlAccum)));
             }
           }
           else if (data.type === 'done') {
             // trim and add newline for pretty to fix
-            const currentHTML = htmlAccum;
+            const currentHTML = formatCode(htmlAccum);
             if (!isValidHTML) {
               // API returned plain text, not HTML — show as note instead
               state.codeHTML.set('');
@@ -253,9 +252,9 @@ const createComponent = ({ self, $, settings, state }) => ({
               state.note.set(currentHTML || 'No valid HTML was returned');
               break;
             }
-            self.currentHTML = pretty(currentHTML, { ocd: true });
+            self.currentHTML = currentHTML;
             state.previewHTML.set(self.currentHTML);
-            state.codeHTML.set(formatCode(self.currentHTML));
+            state.codeHTML.set(highlightCode(self.currentHTML));
             self.promptHistory.push({ prompt, html: self.currentHTML });
             state.hasResults.set(true);
             state.isThinking.set(false);
