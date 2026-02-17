@@ -30,11 +30,17 @@ export const ready = createHighlighterCore({
 });
 
 export function formatCode(code, lang = 'html') {
+  // trim and add newline for pretty to fix
+  code = code.trim();
+
+  if (lang === 'html') {
+    code = code.replaceAll('>', '>\n');
+    code = code.replaceAll('<', '\n<');
+    code = pretty(code, { ocd: true });
+  }
+
   if (!highlighter) {
     return `<pre><code>${code}</code></pre>`;
-  }
-  if (lang === 'html') {
-    code = pretty(code, { ocd: true });
   }
   return highlighter.codeToHtml(code, { lang, theme: 'github-dark', colorReplacements });
 }

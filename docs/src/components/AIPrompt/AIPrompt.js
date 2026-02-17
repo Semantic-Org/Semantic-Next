@@ -1,6 +1,7 @@
 import { formatCode, ready as highlighterReady } from '@javascript/client-highlight.js';
 import { defineComponent } from '@semantic-ui/component';
 import { getJSON } from '@semantic-ui/utils';
+import pretty from 'pretty';
 
 import { AILoader } from '@components/AILoader/AILoader.js';
 import { UIButton } from '@semantic-ui/core';
@@ -243,15 +244,16 @@ const createComponent = ({ self, $, settings, state }) => ({
             }
           }
           else if (data.type === 'done') {
-            const trimmed = htmlAccum.trim();
+            // trim and add newline for pretty to fix
+            const currentHTML = htmlAccum;
             if (!isValidHTML) {
               // API returned plain text, not HTML — show as note instead
               state.codeHTML.set('');
               state.previewHTML.set('');
-              state.note.set(trimmed || 'No valid HTML was returned');
+              state.note.set(currentHTML || 'No valid HTML was returned');
               break;
             }
-            self.currentHTML = trimmed;
+            self.currentHTML = pretty(currentHTML, { ocd: true });
             state.previewHTML.set(self.currentHTML);
             state.codeHTML.set(formatCode(self.currentHTML));
             self.promptHistory.push({ prompt, html: self.currentHTML });
