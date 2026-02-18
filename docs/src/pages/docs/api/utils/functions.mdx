@@ -126,10 +126,10 @@ console.log(memoizedCustomOperation({id: 2, a: 3, b: 4})); // Logs: Processing o
 ### wait
 
 ```javascript
-function wait(ms, { abortController } = {})
+function wait(ms, { abortController, rejectOnAbort = true } = {})
 ```
 
-Returns a promise that resolves after the specified number of milliseconds. Supports early resolution via `AbortController` for cancellable delays.
+Returns a promise that resolves after the specified number of milliseconds. Supports cancellation via `AbortController` — by default, aborting rejects the promise with an `AbortError`, matching web platform conventions like `fetch`. Set `rejectOnAbort: false` to resolve early instead.
 
 #### Parameters
 
@@ -142,11 +142,12 @@ Returns a promise that resolves after the specified number of milliseconds. Supp
 
 | Name            | Type            | Default | Description |
 |-----------------|-----------------|---------|-------------|
-| abortController | AbortController |         | Resolves the wait early when aborted |
+| abortController | AbortController |         | Controller or signal to cancel the wait |
+| rejectOnAbort   | boolean         | `true`  | Reject with `AbortError` when aborted. Set to `false` to resolve early instead |
 
 #### Returns
 
-A `Promise<void>` that resolves after the specified delay, or immediately if the controller is already aborted.
+A `Promise<void>` that resolves after the specified delay, or rejects with `AbortError` when aborted.
 
 #### Example
 
@@ -156,11 +157,17 @@ import { wait } from '@semantic-ui/utils';
 // basic delay
 await wait(300);
 
-// cancellable with AbortController
+// cancellable — rejects with AbortError
 const controller = new AbortController();
-await wait(5000, { abortController: controller });
+try {
+  await wait(5000, { abortController: controller });
+  // elsewhere: controller.abort() rejects with AbortError
+} catch(e) {
+  console.log(e.name); // 'AbortError'
+}
 
-// elsewhere: controller.abort() resolves the wait early
+// resolve early instead of rejecting
+await wait(5000, { abortController: controller, rejectOnAbort: false });
 ```
 
 <PlaygroundExample id="utils-wait" />

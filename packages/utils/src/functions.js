@@ -39,16 +39,19 @@ export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(arg
 /*
   Async wait
 */
-export const wait = (ms, { abortController } = {}) =>
-  new Promise((resolve) => {
+export const wait = (ms, { abortController, rejectOnAbort = true } = {}) =>
+  new Promise((resolve, reject) => {
     const signal = abortController?.signal ?? abortController;
+    const onAbort = rejectOnAbort
+      ? () => reject(signal.reason ?? new DOMException('Aborted', 'AbortError'))
+      : resolve;
     if (signal?.aborted) {
-      return resolve();
+      return onAbort();
     }
     const id = setTimeout(resolve, ms);
     signal?.addEventListener('abort', () => {
       clearTimeout(id);
-      resolve();
+      onAbort();
     }, { once: true });
   });
 

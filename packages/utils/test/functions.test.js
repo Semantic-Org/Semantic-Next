@@ -210,40 +210,39 @@ describe('function utilities', () => {
     });
 
     describe('AbortSignal support', () => {
-      it('should resolve early when signal is aborted', async () => {
+      it('should reject when signal is aborted', async () => {
         const controller = new AbortController();
-        let resolved = false;
 
-        wait(5000, { abortController: controller }).then(() => {
-          resolved = true;
-        });
+        const promise = wait(5000, { abortController: controller });
 
         await vi.advanceTimersByTime(100);
-        expect(resolved).toBe(false);
-
         controller.abort();
-        await vi.advanceTimersByTime(0);
-        expect(resolved).toBe(true);
+
+        await expect(promise).rejects.toThrow(/aborted/i);
       });
 
-      it('should resolve immediately if signal is already aborted', async () => {
+      it('should reject immediately if signal is already aborted', async () => {
         const controller = new AbortController();
         controller.abort();
 
-        let resolved = false;
-        wait(5000, { abortController: controller }).then(() => {
-          resolved = true;
-        });
+        await expect(wait(5000, { abortController: controller })).rejects.toThrow(/aborted/i);
+      });
 
-        await vi.advanceTimersByTime(0);
-        expect(resolved).toBe(true);
+      it('should reject with custom abort reason', async () => {
+        const controller = new AbortController();
+        const reason = new Error('User cancelled');
+
+        const promise = wait(5000, { abortController: controller });
+        controller.abort(reason);
+
+        await expect(promise).rejects.toThrow('User cancelled');
       });
 
       it('should clear the timeout when aborted', async () => {
         const controller = new AbortController();
         const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
-        wait(5000, { abortController: controller });
+        wait(5000, { abortController: controller }).catch(() => {});
         controller.abort();
 
         expect(clearTimeoutSpy).toHaveBeenCalled();
@@ -252,9 +251,20 @@ describe('function utilities', () => {
 
       it('should accept a bare AbortSignal', async () => {
         const controller = new AbortController();
+
+        const promise = wait(5000, { abortController: controller.signal });
+
+        await vi.advanceTimersByTime(100);
+        controller.abort();
+
+        await expect(promise).rejects.toThrow(/aborted/i);
+      });
+
+      it('should resolve on abort when rejectOnAbort is false', async () => {
+        const controller = new AbortController();
         let resolved = false;
 
-        wait(5000, { abortController: controller.signal }).then(() => {
+        wait(5000, { abortController: controller, rejectOnAbort: false }).then(() => {
           resolved = true;
         });
 

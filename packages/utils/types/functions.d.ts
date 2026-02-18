@@ -122,27 +122,37 @@ export function memoize<T extends (...args: any[]) => any>(
 export interface WaitOptions {
   /** AbortController or AbortSignal for cancellation */
   abortController?: AbortController | AbortSignal;
+  /** Whether to reject the promise when aborted. Defaults to `true` */
+  rejectOnAbort?: boolean;
 }
 
 /**
  * Returns a promise that resolves after the specified number of milliseconds.
- * Supports early resolution via AbortSignal for cancellable delays.
+ * Supports cancellation via `AbortController` — by default, aborting rejects
+ * the promise with an `AbortError`, matching web platform conventions.
+ * Set `rejectOnAbort: false` to resolve early instead.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wait wait}
  * @see {@link https://next.semantic-ui.com/examples/utils-wait Example}
  *
  * @param ms - The number of milliseconds to wait
  * @param options - Optional configuration
- * @returns A promise that resolves after the specified delay
+ * @returns A promise that resolves after the specified delay, or rejects on abort
  *
  * @example
  * ```ts
  * // Basic usage
  * await wait(1000);
  *
- * // With AbortController for cancellation
+ * // Cancellable — rejects with AbortError
  * const controller = new AbortController();
- * await wait(5000, { abortController: controller });
- * // elsewhere: controller.abort() resolves the wait early
+ * try {
+ *   await wait(5000, { abortController: controller });
+ * } catch (e) {
+ *   // e.name === 'AbortError'
+ * }
+ *
+ * // Resolve early instead of rejecting
+ * await wait(5000, { abortController: controller, rejectOnAbort: false });
  * ```
  */
 export function wait(ms?: number, options?: WaitOptions): Promise<void>;

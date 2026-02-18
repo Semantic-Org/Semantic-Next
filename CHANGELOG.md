@@ -45,7 +45,7 @@ xx.xx.xxxx
 * **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
 
 ### Utils
-* **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits.
+* **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
 * **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
 * **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
