@@ -108,43 +108,44 @@ const createComponent = ({ self, el, $, settings }) => ({
   },
 
   render(now) {
-    const delay = FRAME_DELAYS[self.frameIdx];
-    if (now - self.lastFrameTime > delay) {
-      self.frameIdx = (self.frameIdx + 1) % 10;
-      self.targetLengths = self.keyframes[self.frameIdx].slice();
-      self.lastFrameTime = now;
+    if (settings.active) {
+      const delay = FRAME_DELAYS[self.frameIdx];
+      if (now - self.lastFrameTime > delay) {
+        self.frameIdx = (self.frameIdx + 1) % 10;
+        self.targetLengths = self.keyframes[self.frameIdx].slice();
+        self.lastFrameTime = now;
+      }
+
+      for (let i = 0; i < NUM; i++) {
+        self.lengths[i] += (self.targetLengths[i] - self.lengths[i]) * 0.85;
+      }
+
+      const { ctx, canvasSize, baseColor, tendrilAngles, tendrilWidths } = self;
+      const cx = canvasSize / 2;
+      const cy = canvasSize / 2;
+      const maxLen = canvasSize * 0.32;
+      const tendrilW = canvasSize * 0.044;
+
+      ctx.clearRect(0, 0, canvasSize, canvasSize);
+      for (let i = 0; i < NUM; i++) {
+        const lenNorm = self.lengths[i];
+        const len = maxLen * lenNorm;
+        const w = tendrilW * tendrilWidths[i];
+
+        const bright = (lenNorm - 0.7) / 0.3;
+        const r = Math.min(255, baseColor.r + bright * 15 | 0);
+        const g = Math.min(255, baseColor.g + bright * 12 | 0);
+        const b = Math.min(255, baseColor.b + bright * 10 | 0);
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(tendrilAngles[i]);
+        self.drawTendril(w, len);
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fill();
+        ctx.restore();
+      }
     }
-
-    for (let i = 0; i < NUM; i++) {
-      self.lengths[i] += (self.targetLengths[i] - self.lengths[i]) * 0.85;
-    }
-
-    const { ctx, canvasSize, baseColor, tendrilAngles, tendrilWidths } = self;
-    const cx = canvasSize / 2;
-    const cy = canvasSize / 2;
-    const maxLen = canvasSize * 0.32;
-    const tendrilW = canvasSize * 0.044;
-
-    ctx.clearRect(0, 0, canvasSize, canvasSize);
-    for (let i = 0; i < NUM; i++) {
-      const lenNorm = self.lengths[i];
-      const len = maxLen * lenNorm;
-      const w = tendrilW * tendrilWidths[i];
-
-      const bright = (lenNorm - 0.7) / 0.3;
-      const r = Math.min(255, baseColor.r + bright * 15 | 0);
-      const g = Math.min(255, baseColor.g + bright * 12 | 0);
-      const b = Math.min(255, baseColor.b + bright * 10 | 0);
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(tendrilAngles[i]);
-      self.drawTendril(w, len);
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fill();
-      ctx.restore();
-    }
-
     self.rafId = requestAnimationFrame((t) => self.render(t));
   },
 
@@ -164,15 +165,7 @@ const createComponent = ({ self, el, $, settings }) => ({
 const onRendered = ({ self, settings, reaction, isServer }) => {
   if (isServer) { return; }
   self.setupCanvas();
-  reaction(() => {
-    if (settings.active) {
-      self.startLoop();
-    }
-    else {
-      debugger;
-      self.stopLoop();
-    }
-  });
+  self.startLoop();
 };
 
 const onDestroyed = ({ self }) => {

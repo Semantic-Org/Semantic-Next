@@ -159,20 +159,21 @@
            Results
 *******************************/
 
+@starting-style {
+  .results {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
 .results {
   margin-top: var(--margin);
   background: var(--ai-prompt-results-background);
   border: var(--ai-prompt-results-border);
   border-radius: var(--ai-prompt-results-border-radius);
   padding: var(--ai-prompt-results-padding);
-  opacity: 0;
-  transform: translateY(8px);
+  opacity: 1;
+  transform: translateY(0);
   transition: opacity 0.4s ease, transform 0.4s ease;
-
-  &.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .pane {

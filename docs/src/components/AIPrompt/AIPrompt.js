@@ -1,7 +1,8 @@
-import { formatCode, highlightCode, ready as highlighterReady } from '@javascript/client-highlight.js';
+import { formatCode, highlightCode, ready as highlighterReady } from '@helpers/highlight/client.js';
 import { defineComponent } from '@semantic-ui/component';
-import { getJSON } from '@semantic-ui/utils';
+import { getJSON, wait } from '@semantic-ui/utils';
 
+// web components
 import { AILoader } from '@components/AILoader/AILoader.js';
 import { UIButton } from '@semantic-ui/core';
 
@@ -17,32 +18,20 @@ const defaultSettings = {
   primitive: 'button',
 };
 
-const wait = (ms) =>
-  new Promise(resolve => {
-    const id = setTimeout(() => {
-      resolveWait = null;
-      resolve();
-    }, ms);
-    resolveWait = () => {
-      clearTimeout(id);
-      resolve();
-    };
-  });
-
-let resolveWait = null;
-
 const defaultState = {
   demoMode: false,
   submitted: false,
   hasPrompt: false,
   hasResults: false,
+
   isThinking: false,
   cotVisible: false,
   cotText: '',
-  previewHTML: '',
-  codeHTML: '',
+
   note: '',
   token: null,
+  previewHTML: '',
+  codeHTML: '',
 };
 
 const createComponent = ({ self, $, settings, state }) => ({
@@ -50,135 +39,117 @@ const createComponent = ({ self, $, settings, state }) => ({
   syntax: 'succinct',
   streaming: false,
   demoAborted: false,
+  controller: null,
   currentHTML: '',
   promptHistory: [],
   completedSteps: 0,
 
   initialize() {
     if (settings.steps.length) {
-      state.demoMode.set(true);
+      self.startDemo();
     }
   },
 
-  currentHint() {
+  getHint() {
     return state.demoMode.get() ? settings.demoHint : settings.liveHint;
   },
 
-  hintClass() {
-    return { live: !state.demoMode.get() };
-  },
+  promptClass: () => ({
+    live: !state.demoMode.get(),
+    results: state.hasResults.get(),
+  }),
 
-  barClass() {
-    return { submitted: state.submitted.get() };
-  },
-
-  resultsClass() {
-    return { visible: state.hasResults.get() };
-  },
-
-  noteClass() {
-    return { visible: !!state.note.get() };
-  },
-
-  cannotSubmit() {
-    return !state.hasPrompt.get();
-  },
+  barClass: () => ({
+    submitted: state.submitted.get(),
+  }),
 
   isLive() {
     return !state.demoMode.get();
   },
 
-  async typeText(text) {
-    const input = $('.input').el();
-    input.value = '';
-    for (const char of text) {
-      if (self.isLive()) { return; }
-      input.value += char;
-      await wait(40 + Math.random() * 30);
-    }
-  },
-
-  async runDemoStep(step) {
-    if (self.isLive()) { return; }
-    state.submitted.set(false);
-    $('.input').el().value = '';
-
-    await self.typeText(step.prompt);
-    if (self.isLive()) { return; }
-
-    await wait(400);
-    if (self.isLive()) { return; }
-
-    state.submitted.set(true);
-    state.isThinking.set(true);
-    state.cotVisible.set(true);
-    state.cotText.set(step.cot);
-
-    await wait(800 + Math.random() * 400);
-    if (self.isLive()) { return; }
-
-    state.isThinking.set(false);
-    state.hasResults.set(true);
-    state.previewHTML.set(step.html);
-    state.codeHTML.set(highlightCode(formatCode(step.code)));
-    self.completedSteps++;
-    self.currentHTML = step.html;
+  focusPrompt() {
+    $('.input').focus();
   },
 
   clearPrompt() {
     $('.input').val('');
   },
 
-  async runDemo() {
-    const steps = settings.steps;
-    for (let i = 0; i < steps.length; i++) {
-      if (self.isLive()) { break; }
-      await self.runDemoStep(steps[i]);
-      if (self.isLive()) { break; }
-      if (i < steps.length - 1) {
-        await wait(1200);
-        if (self.isLive()) { break; }
-        self.clearPrompt();
-        await wait(600);
-        if (self.isLive()) { break; }
-      }
-    }
-    self.goLive();
-  },
-
-  stopDemo() {
-    if (resolveWait) {
-      resolveWait();
-      resolveWait = null;
-    }
-  },
-
-  goLive() {
-    const steps = settings.steps;
-    self.promptHistory = steps.slice(0, self.completedSteps).map(s => ({
-      prompt: s.prompt,
-      html: s.html,
-    }));
+  startStreaming() {
     self.clearPrompt();
-    state.demoMode.set(false);
+    self.streaming = true;
+    self.results = '';
+    state.submitted.set(true);
+    state.note.clear();
+  },
+
+  endStreaming() {
+    self.streaming = false;
+    state.submitted.set(false);
+    self.focusPrompt();
+  },
+
+  startThinking(text = 'Thinking...') {
+    state.isThinking.set(true);
+    state.cotVisible.set(true);
+    state.cotText.set(text);
+  },
+
+  endThinking(text) {
+    state.isThinking.set(false);
+    if (text !== undefined) {
+      state.cotText.set(text);
+    }
+  },
+
+  getPrompt() {
+    return $('.input').val();
+  },
+
+  setPrompt(val = '') {
+    $('.input').val(val);
+  },
+
+  setNote(note) {
+    state.note.set(note);
+  },
+
+  setCode(html, { isComplete = false, prompt } = {}) {
+    // only allow html from server
+    if (!self.isHTML(html)) {
+      return;
+    }
+
+    state.hasResults.set(true);
+    console.log('set code to', html);
+    state.codeHTML.set(highlightCode(html));
+
+    if (isComplete) {
+      self.currentHTML = html;
+      self.promptHistory.push({ prompt, html });
+      console.log('set final code to', html);
+      state.previewHTML.set(html);
+      self.endThinking();
+    }
+  },
+
+  clearCode() {
+    state.codeHTML.clear();
+    state.previewHTML.clear();
   },
 
   async submit() {
-    const input = $('.input').el();
-    const prompt = input.value.trim();
-    if (!prompt || self.streaming) { return; }
+    const prompt = self.getPrompt();
+    if (!prompt || self.streaming) {
+      return;
+    }
 
-    self.streaming = true;
-    state.submitted.set(true);
-    state.isThinking.set(true);
-    state.cotVisible.set(true);
-    state.cotText.set('Thinking...');
-    state.note.set('');
-    input.value = '';
-    input.disabled = true;
-    state.hasPrompt.set(false);
+    // begin receiving streamed results
+    self.startStreaming();
 
-    let htmlAccum = '';
+    // announce we're thinking even though no cot yet
+    self.startThinking();
+
     let isValidHTML = true;
 
     try {
@@ -216,7 +187,9 @@ const createComponent = ({ self, $, settings, state }) => ({
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) { break; }
+        if (done) {
+          break;
+        }
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
@@ -230,51 +203,129 @@ const createComponent = ({ self, $, settings, state }) => ({
             state.cotText.set(data.text);
           }
           else if (data.type === 'note') {
-            state.note.set(data.text);
+            self.setNote(data.text);
           }
           else if (data.type === 'html') {
-            if (!htmlAccum && !data.text.trimStart().startsWith('<')) {
+            console.log(data);
+            // bail early if the first thing returned isnt html
+            // this happens if the ai doesnt do the right thing
+            if (!self.results && !self.isHTML(data.text)) {
               isValidHTML = false;
             }
-            htmlAccum += data.text;
+            self.results += data.text;
             if (isValidHTML) {
-              state.hasResults.set(true);
-              state.codeHTML.set(highlightCode(formatCode(htmlAccum)));
+              self.setCode(self.results);
             }
           }
           else if (data.type === 'done') {
-            // trim and add newline for pretty to fix
-            const currentHTML = formatCode(htmlAccum);
+            const currentHTML = formatCode(self.results);
             if (!isValidHTML) {
-              // API returned plain text, not HTML — show as note instead
-              state.codeHTML.set('');
-              state.previewHTML.set('');
-              state.note.set(currentHTML || 'No valid HTML was returned');
+              self.clearCode();
+              self.setNote('No valid HTML was returned');
               break;
             }
-            self.currentHTML = currentHTML;
-            state.previewHTML.set(self.currentHTML);
-            state.codeHTML.set(highlightCode(self.currentHTML));
-            self.promptHistory.push({ prompt, html: self.currentHTML });
-            state.hasResults.set(true);
-            state.isThinking.set(false);
+            self.setCode(currentHTML, {
+              isComplete: true,
+              prompt,
+            });
           }
           else if (data.type === 'error') {
+            self.setNote(`Error: ${data.text}`);
             throw new Error(data.text);
           }
         }
       }
     }
     catch (err) {
-      state.cotText.set('Error: ' + err.message);
-      state.isThinking.set(false);
+      self.endThinking();
+      self.setNote(`Error: ${err.message}`);
     }
     finally {
-      self.streaming = false;
-      input.disabled = false;
-      state.submitted.set(false);
-      input.focus();
+      self.endStreaming();
     }
+  },
+
+  isHTML(text) {
+    return text?.trimStart().startsWith('<');
+  },
+
+  // demo
+  startDemo() {
+    self.controller = new AbortController();
+    state.demoMode.set(true);
+  },
+
+  wait(ms) {
+    return wait(ms, { abortController: self.controller });
+  },
+
+  async typeText(text) {
+    const input = $('.input').el();
+    input.value = '';
+    for (const char of text) {
+      if (self.isLive()) { return; }
+      input.value += char;
+      await self.wait(40 + Math.random() * 30);
+    }
+  },
+
+  async runDemoStep(step) {
+    if (self.isLive()) { return; }
+    state.submitted.set(false);
+    $('.input').el().value = '';
+
+    await self.typeText(step.prompt);
+    if (self.isLive()) { return; }
+
+    await self.wait(400);
+    if (self.isLive()) { return; }
+
+    state.submitted.set(true);
+    state.isThinking.set(true);
+    state.cotVisible.set(true);
+    state.cotText.set(step.cot);
+
+    await self.wait(800 + Math.random() * 400);
+    if (self.isLive()) { return; }
+
+    state.isThinking.set(false);
+    state.hasResults.set(true);
+    state.previewHTML.set(step.html);
+    state.codeHTML.set(highlightCode(step.code));
+    self.completedSteps++;
+    self.currentHTML = step.html;
+  },
+
+  async runDemo() {
+    const steps = settings.steps;
+    for (let i = 0; i < steps.length; i++) {
+      if (self.isLive()) { break; }
+      await self.runDemoStep(steps[i]);
+      if (self.isLive()) { break; }
+      if (i < steps.length - 1) {
+        await self.wait(1200);
+        if (self.isLive()) { break; }
+        self.clearPrompt();
+        await self.wait(600);
+        if (self.isLive()) { break; }
+      }
+    }
+    self.goLive();
+  },
+
+  goLive() {
+    const steps = settings.steps;
+    self.promptHistory = steps.slice(0, self.completedSteps).map(s => ({
+      prompt: s.prompt,
+      html: s.html,
+    }));
+    self.stopDemo();
+    self.clearPrompt();
+    state.demoMode.set(false);
+  },
+
+  stopDemo() {
+    self?.controller.abort();
   },
 });
 
