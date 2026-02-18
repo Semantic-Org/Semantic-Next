@@ -2,11 +2,6 @@ import { wait } from '@semantic-ui/utils';
 
 const start = performance.now();
 const getTime = () => Math.round(performance.now() - start);
-const controller = new AbortController();
-const stopWaiting = () => controller.abort();
-
-// cancel all waits after timeout
-setTimeout(stopWaiting, 1200);
 
 // basic usage
 await wait(500);
@@ -18,6 +13,18 @@ for (let i = 1; i <= 3; i++) {
   console.log(`Step ${i}: ${getTime()}ms`);
 }
 
-// this wait gets cancelled by the abort above
-await wait(5000, { abortController: controller });
-console.log(`Cancelled: ${getTime()}ms (not 5000ms later)`);
+// abort rejects with AbortError (default)
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 100);
+try {
+  await wait(5000, { abortController: controller });
+}
+catch (e) {
+  console.log(`Rejected: ${e.name} at ${getTime()}ms`);
+}
+
+// rejectOnAbort: false resolves instead
+const controller2 = new AbortController();
+setTimeout(() => controller2.abort(), 100);
+await wait(5000, { abortController: controller2, rejectOnAbort: false });
+console.log(`Resolved early: ${getTime()}ms`);

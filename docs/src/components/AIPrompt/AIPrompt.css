@@ -131,14 +131,18 @@
 
   ai-loader {
     flex-shrink: 0;
+    margin-right: var(--gap-3xs);
   }
 
   .text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
 
     &.shimmer {
+      opacity: 1;
       background: linear-gradient(
         90deg,
         var(--ai-prompt-shimmer-from) 0%,
@@ -159,10 +163,9 @@
            Results
 *******************************/
 
+
 @starting-style {
   .results {
-    opacity: 0;
-    transform: translateY(8px);
   }
 }
 .results {
@@ -171,9 +174,9 @@
   border: var(--ai-prompt-results-border);
   border-radius: var(--ai-prompt-results-border-radius);
   padding: var(--ai-prompt-results-padding);
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: all 0.4s ease 0.2s;
+  opacity: 0;
+  transform: translateY(8px);
 }
 
 .pane {
@@ -223,6 +226,33 @@
 
   &.visible {
     opacity: 1;
+  }
+}
+
+/*******************************
+           States
+*******************************/
+
+.prompt {
+
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.has-results {
+    transform: translateY(-100px);
+
+    .bar {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      /*
+        width: 80%
+      font-size: 12px;
+      padding: 7px 10px;
+      */
+    }
+
+    .results {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 

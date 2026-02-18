@@ -1,6 +1,6 @@
 import { formatCode, highlightCode, ready as highlighterReady } from '@helpers/highlight/client.js';
 import { defineComponent } from '@semantic-ui/component';
-import { getJSON, wait } from '@semantic-ui/utils';
+import { asyncEach, getJSON, wait } from '@semantic-ui/utils';
 
 // web components
 import { AILoader } from '@components/AILoader/AILoader.js';
@@ -34,7 +34,7 @@ const defaultState = {
   codeHTML: '',
 };
 
-const createComponent = ({ self, $, settings, state }) => ({
+const createComponent = ({ self, $, settings, state, flush }) => ({
   apiBase: 'https://ai.semantic-ui.com',
   syntax: 'succinct',
   streaming: false,
@@ -56,7 +56,8 @@ const createComponent = ({ self, $, settings, state }) => ({
 
   promptClass: () => ({
     live: !state.demoMode.get(),
-    results: state.hasResults.get(),
+    'is-thinking': state.isThinking.get(),
+    'has-results': state.hasResults.get(),
   }),
 
   barClass: () => ({
@@ -121,16 +122,16 @@ const createComponent = ({ self, $, settings, state }) => ({
     }
 
     state.hasResults.set(true);
-    console.log('set code to', html);
     state.codeHTML.set(highlightCode(html));
 
     if (isComplete) {
       self.currentHTML = html;
       self.promptHistory.push({ prompt, html });
-      console.log('set final code to', html);
       state.previewHTML.set(html);
       self.endThinking();
     }
+    // show this immediately
+    flush();
   },
 
   clearCode() {
@@ -206,7 +207,6 @@ const createComponent = ({ self, $, settings, state }) => ({
             self.setNote(data.text);
           }
           else if (data.type === 'html') {
-            console.log(data);
             // bail early if the first thing returned isnt html
             // this happens if the ai doesnt do the right thing
             if (!self.results && !self.isHTML(data.text)) {
@@ -262,63 +262,48 @@ const createComponent = ({ self, $, settings, state }) => ({
   async typeText(text) {
     const input = $('.input').el();
     input.value = '';
-    for (const char of text) {
-      if (self.isLive()) { return; }
+    await asyncEach([...text], async (char) => {
       input.value += char;
       await self.wait(40 + Math.random() * 30);
-    }
+    });
   },
 
   async runDemoStep(step) {
-    if (self.isLive()) { return; }
     state.submitted.set(false);
-    $('.input').el().value = '';
+    self.clearPrompt();
 
     await self.typeText(step.prompt);
-    if (self.isLive()) { return; }
-
     await self.wait(400);
-    if (self.isLive()) { return; }
 
     state.submitted.set(true);
-    state.isThinking.set(true);
-    state.cotVisible.set(true);
-    state.cotText.set(step.cot);
+    self.startThinking(step.cot);
 
     await self.wait(800 + Math.random() * 400);
-    if (self.isLive()) { return; }
 
-    state.isThinking.set(false);
-    state.hasResults.set(true);
-    state.previewHTML.set(step.html);
-    state.codeHTML.set(highlightCode(step.code));
+    self.setCode(step.html, { isComplete: true, prompt: step.prompt });
     self.completedSteps++;
-    self.currentHTML = step.html;
   },
 
   async runDemo() {
-    const steps = settings.steps;
-    for (let i = 0; i < steps.length; i++) {
-      if (self.isLive()) { break; }
-      await self.runDemoStep(steps[i]);
-      if (self.isLive()) { break; }
-      if (i < steps.length - 1) {
-        await self.wait(1200);
-        if (self.isLive()) { break; }
-        self.clearPrompt();
-        await self.wait(600);
-        if (self.isLive()) { break; }
-      }
+    try {
+      await asyncEach(settings.steps, async (step, index) => {
+        await self.runDemoStep(step);
+        if (index < settings.steps.length - 1) {
+          await self.wait(1200);
+          self.clearPrompt();
+          await self.wait(600);
+        }
+      });
+    }
+    catch (e) {
+      // abort means demo was interrupted, goLive() called by event handler
+      if (e.name === 'AbortError') { return; }
+      throw e;
     }
     self.goLive();
   },
 
   goLive() {
-    const steps = settings.steps;
-    self.promptHistory = steps.slice(0, self.completedSteps).map(s => ({
-      prompt: s.prompt,
-      html: s.html,
-    }));
     self.stopDemo();
     self.clearPrompt();
     state.demoMode.set(false);
