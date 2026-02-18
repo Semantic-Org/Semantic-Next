@@ -361,7 +361,16 @@ import { wait, memoize, debounce, throttle, wrapFunction } from '@semantic-ui/ut
 
 // Async delay
 await wait(300);                                           // Simple pause
-await wait(5000, { abortController: controller });         // Cancellable
+
+// Cancellable — rejects with AbortError by default
+try {
+  await wait(5000, { abortController: controller });
+} catch(e) {
+  // e.name === 'AbortError'
+}
+
+// Resolve early instead of rejecting
+await wait(5000, { abortController: controller, rejectOnAbort: false });
 
 // Memoization with custom hash function
 const expensiveFunction = memoize((a, b, c) => {
