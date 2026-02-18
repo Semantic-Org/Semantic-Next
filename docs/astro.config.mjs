@@ -50,6 +50,9 @@ export default defineConfig({
         host: 'dev.semantic-ui.com',
         protocol: 'wss',
       },
+      fs: {
+        allow: ['..'],
+      },
     },
     ssr: {
       // Example: Force a broken package to skip SSR processing, if needed

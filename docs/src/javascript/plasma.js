@@ -996,8 +996,6 @@ export function createPlasma(selector, settings = {}) {
 
   // ── Init ──────────────────────────────────────────────────
 
-  const onResize = () => resize();
-  window.addEventListener('resize', onResize);
   document.addEventListener('visibilitychange', onVisibilityChange);
   window.addEventListener('blur', onWindowBlur);
   window.addEventListener('focus', onWindowFocus);
