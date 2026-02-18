@@ -36,6 +36,22 @@ export const memoize = (fn, hashFunction = (args) => hashCode(JSON.stringify(arg
     return result;
   };
 };
+/*
+  Async wait
+*/
+export const wait = (ms, { abortController } = {}) =>
+  new Promise((resolve) => {
+    const signal = abortController?.signal ?? abortController;
+    if (signal?.aborted) {
+      return resolve();
+    }
+    const id = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(id);
+      resolve();
+    }, { once: true });
+  });
+
 export const debounce = (func, wait, options = {}) => {
   // overload
   if (isPlainObject(wait)) {
@@ -66,7 +82,7 @@ export const debounce = (func, wait, options = {}) => {
   let pendingPromises = [];
   let leadingInvoked = false;
 
-  const signal = abortController?.signal;
+  const signal = abortController?.signal ?? abortController;
 
   const cleanupListener = () => {
     if (signal) {
@@ -337,7 +353,7 @@ export const throttle = (func, wait, options = {}) => {
   let pendingPromises = [];
   let trailingInvoked = false;
 
-  const signal = abortController?.signal;
+  const signal = abortController?.signal ?? abortController;
 
   const cleanupListener = () => {
     if (signal) {

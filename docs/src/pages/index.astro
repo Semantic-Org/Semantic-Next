@@ -2,7 +2,7 @@
 import Homepage from '../layouts/Homepage.astro';
 import { Code } from '@astrojs/starlight/components';
 import { CodeSample } from '@components/CodeSample/CodeSample.js';
-import { formatCode } from '@helpers/format-code.js';
+import { formatCode } from '@helpers/highlight/server.js';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import { CurrentTime } from '@components/CurrentTime.js'
 import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
@@ -101,9 +101,9 @@ export const UserPanel = defineComponent({
 });
 `.trim();
 
-const formattedCode2 = formatCode(code2, 'sui');
-const formattedCode3 = formatCode(code3, 'json');
-const formattedCode4 = formatCode(code4, 'javascript');
+const formattedCode2 = 'zz';
+const formattedCode3 = 'zz';
+const formattedCode4 = formatCode(code4, { lang: 'javascript' });
 
 // Hero demo script — each step is a prompt + the resulting code/UI
 const demoSteps = [
@@ -128,8 +128,8 @@ const demoSteps = [
   {
     prompt: 'Emphasize save',
     cot: 'Adjusting button emphasis',
-    code: `<ui-buttons>\n  <ui-button subtle-negative>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button primary>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
-    html: '<ui-buttons><ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button primary><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
+    code: `<ui-buttons large>\n  <ui-button subtle-negative>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button primary>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
+    html: '<ui-buttons large><ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button primary><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
   },
 ];
 
@@ -265,7 +265,7 @@ const demoSteps = [
               <li>
                 <ui-icon check></ui-icon>
                 Try out natural-language style Lisp syntax to improve comprehension during Huma in the Loop
-              </li>
+            </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
           </div>

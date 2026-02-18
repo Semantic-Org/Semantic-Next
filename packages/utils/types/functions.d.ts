@@ -21,8 +21,8 @@ export interface DebounceOptions {
   trailing?: boolean;
   /** Maximum time to wait before forcing execution */
   maxWait?: number;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -37,8 +37,8 @@ export interface ThrottleOptions {
   leading?: boolean;
   /** Execute once more after wait period if calls occurred (default: true) */
   trailing?: boolean;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -115,6 +115,37 @@ export function memoize<T extends (...args: any[]) => any>(
   fn: T,
   hashFunction?: (args: Parameters<T>) => string | number,
 ): T & { cache: Map<string | number, ReturnType<T>>; };
+
+/**
+ * Options for the wait function
+ */
+export interface WaitOptions {
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
+}
+
+/**
+ * Returns a promise that resolves after the specified number of milliseconds.
+ * Supports early resolution via AbortSignal for cancellable delays.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wait wait}
+ * @see {@link https://next.semantic-ui.com/examples/utils-wait Example}
+ *
+ * @param ms - The number of milliseconds to wait
+ * @param options - Optional configuration
+ * @returns A promise that resolves after the specified delay
+ *
+ * @example
+ * ```ts
+ * // Basic usage
+ * await wait(1000);
+ *
+ * // With AbortController for cancellation
+ * const controller = new AbortController();
+ * await wait(5000, { abortController: controller });
+ * // elsewhere: controller.abort() resolves the wait early
+ * ```
+ */
+export function wait(ms?: number, options?: WaitOptions): Promise<void>;
 
 /**
  * Creates a debounced version of a function that delays execution until after wait milliseconds

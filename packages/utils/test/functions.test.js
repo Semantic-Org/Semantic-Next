@@ -1,4 +1,4 @@
-import { debounce, memoize, noop, throttle, wrapFunction } from '@semantic-ui/utils';
+import { debounce, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -129,6 +129,152 @@ describe('function utilities', () => {
       const result2 = memoizedFunction(4, 5);
       expect(result2).toBe(5); // Note: This is the memoized result, not 9
       expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same hash
+    });
+  });
+
+  describe('wait', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should return a promise', () => {
+      const result = wait(100);
+      expect(result).toBeInstanceOf(Promise);
+      vi.advanceTimersByTime(100);
+    });
+
+    it('should resolve after specified milliseconds', async () => {
+      let resolved = false;
+      wait(100).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(50);
+      expect(resolved).toBe(false);
+
+      await vi.advanceTimersByTime(50);
+      expect(resolved).toBe(true);
+    });
+
+    it('should resolve immediately for wait(0)', async () => {
+      let resolved = false;
+      wait(0).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should handle negative values like setTimeout does', async () => {
+      let resolved = false;
+      wait(-100).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should handle no arguments', async () => {
+      let resolved = false;
+      wait().then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should support multiple concurrent waits', async () => {
+      let first = false;
+      let second = false;
+
+      wait(100).then(() => {
+        first = true;
+      });
+      wait(200).then(() => {
+        second = true;
+      });
+
+      await vi.advanceTimersByTime(100);
+      expect(first).toBe(true);
+      expect(second).toBe(false);
+
+      await vi.advanceTimersByTime(100);
+      expect(second).toBe(true);
+    });
+
+    describe('AbortSignal support', () => {
+      it('should resolve early when signal is aborted', async () => {
+        const controller = new AbortController();
+        let resolved = false;
+
+        wait(5000, { abortController: controller }).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(100);
+        expect(resolved).toBe(false);
+
+        controller.abort();
+        await vi.advanceTimersByTime(0);
+        expect(resolved).toBe(true);
+      });
+
+      it('should resolve immediately if signal is already aborted', async () => {
+        const controller = new AbortController();
+        controller.abort();
+
+        let resolved = false;
+        wait(5000, { abortController: controller }).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(0);
+        expect(resolved).toBe(true);
+      });
+
+      it('should clear the timeout when aborted', async () => {
+        const controller = new AbortController();
+        const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+        wait(5000, { abortController: controller });
+        controller.abort();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+        clearTimeoutSpy.mockRestore();
+      });
+
+      it('should accept a bare AbortSignal', async () => {
+        const controller = new AbortController();
+        let resolved = false;
+
+        wait(5000, { abortController: controller.signal }).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(100);
+        expect(resolved).toBe(false);
+
+        controller.abort();
+        await vi.advanceTimersByTime(0);
+        expect(resolved).toBe(true);
+      });
+
+      it('should work without signal option', async () => {
+        let resolved = false;
+        wait(100, {}).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(100);
+        expect(resolved).toBe(true);
+      });
     });
   });
 

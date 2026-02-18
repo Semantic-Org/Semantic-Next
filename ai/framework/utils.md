@@ -357,7 +357,11 @@ const existingHex = oklchToHex('#ff5733');          // '#ff5733' (unchanged)
 
 ### Higher-Order Functions
 ```javascript
-import { memoize, debounce, throttle, wrapFunction } from '@semantic-ui/utils';
+import { wait, memoize, debounce, throttle, wrapFunction } from '@semantic-ui/utils';
+
+// Async delay
+await wait(300);                                           // Simple pause
+await wait(5000, { abortController: controller });         // Cancellable
 
 // Memoization with custom hash function
 const expensiveFunction = memoize((a, b, c) => {

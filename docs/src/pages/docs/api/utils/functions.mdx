@@ -123,6 +123,48 @@ console.log(memoizedCustomOperation({id: 1, a: 2, b: 3})); // Logs: 5 (no reproc
 console.log(memoizedCustomOperation({id: 2, a: 3, b: 4})); // Logs: Processing object... 7
 ```
 
+### wait
+
+```javascript
+function wait(ms, { abortController } = {})
+```
+
+Returns a promise that resolves after the specified number of milliseconds. Supports early resolution via `AbortController` for cancellable delays.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| ms      | number | Milliseconds to wait before resolving |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name            | Type            | Default | Description |
+|-----------------|-----------------|---------|-------------|
+| abortController | AbortController |         | Resolves the wait early when aborted |
+
+#### Returns
+
+A `Promise<void>` that resolves after the specified delay, or immediately if the controller is already aborted.
+
+#### Example
+
+```javascript
+import { wait } from '@semantic-ui/utils';
+
+// basic delay
+await wait(300);
+
+// cancellable with AbortController
+const controller = new AbortController();
+await wait(5000, { abortController: controller });
+
+// elsewhere: controller.abort() resolves the wait early
+```
+
+<PlaygroundExample id="utils-wait" />
+
 ### debounce
 
 ```javascript
