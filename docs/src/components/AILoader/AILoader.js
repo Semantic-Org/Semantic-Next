@@ -29,6 +29,13 @@ const createComponent = ({ self, el, $, settings }) => ({
     self.createKeyframes();
   },
 
+  getClasses() {
+    return {
+      active: settings.active,
+      idle: !settings.active,
+    };
+  },
+
   createTendrils() {
     self.tendrilAngles = Array.from({ length: NUM }, (_, i) => (i / NUM) * Math.PI * 2 - Math.PI / 2);
     self.tendrilWidths = Array.from({ length: NUM }, (_, i) => 0.6 + 0.8 * (0.5 + 0.5 * Math.sin(i * 2.3 + 0.7)));
@@ -146,6 +153,7 @@ const createComponent = ({ self, el, $, settings }) => ({
         ctx.restore();
       }
     }
+
     self.rafId = requestAnimationFrame((t) => self.render(t));
   },
 

@@ -9,4 +9,19 @@
 
 canvas {
   display: block;
+
+  &.idle {
+    animation: jiggle 1500ms ease;
+    animation-iteration-count: infinite;
+  }
+}
+
+@keyframes jiggle {
+  0% { transform: scale3d(1, 1, 1); }
+  30% { transform: scale3d(1.05, 0.96, 1); }
+  40% { transform: scale3d(0.95, 1.05, 1); }
+  50% { transform: scale3d(1.05, 0.95, 1); }
+  65% { transform: scale3d(.98, 1.03, 1); }
+  75% { transform: scale3d(1.03, .98, 1); }
+  100% { transform: scale3d(1, 1, 1); }
 }

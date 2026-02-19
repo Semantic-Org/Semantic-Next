@@ -242,8 +242,7 @@
 
     .bar {
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      /*
-        width: 80%
+      /* Too much
       font-size: 12px;
       padding: 7px 10px;
       */
@@ -253,6 +252,13 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  ui-button {
+    --button-styled-background: var(--standard-solid-20);
+    --button-styled-hover-background: var(--standard-solid-25);
+
+    --button-styled-pressed-background: var(--standard-solid-30);
+    --button-styled-active-background: var(--standard-solid-30);
   }
 }
 
