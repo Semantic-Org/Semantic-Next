@@ -5,6 +5,7 @@
 /* Content */
 @import url('./content/button-variables.css') layer(button.theme.content.button);
 @import url('./content/icon-variables.css') layer(button.theme.content.icon);
+@import url('./content/badge-variables.css') layer(button.theme.content.badge);
 @import url('./content/label-variables.css') layer(button.theme.content.label);
 @import url('./content/conditional-variables.css') layer(button.theme.content.conditional);
 

@@ -76,6 +76,31 @@
   }
 }
 
+/* src/primitives/button/css/definition/content/badge.css */
+@layer button.definition.content.badge {
+  .button .badge,
+  ::slotted(.badge) {
+    margin: var(--button-badge-margin);
+    --label-background: var(--black-10);
+    --label-color: var(--button-text-color);
+    --label-outline-text-color: var(--button-text-color);
+    --label-outline: var(--solid-black-border);
+  }
+  .badge {
+    outline: var(--border);
+    padding: var(--button-vertical-padding) var(--padding-s);
+    border-radius: var(--left-attached-border-radius);
+    line-height: 1;
+    outline-offset: -1px;
+    text-align: center;
+    display: inline-block;
+    margin-right: -5px;
+  }
+  .badge + .button {
+    border-radius: var(--right-attached-border-radius);
+  }
+}
+
 /* src/primitives/button/css/definition/content/conditional.css */
 @layer button.definition.content.conditional {
   .buttons ::slotted(.conditional) {
@@ -2189,6 +2214,13 @@
   }
 }
 
+/* src/primitives/button/css/theme/content/badge-variables.css */
+@layer button.theme.content.badge {
+  :host {
+    --button-badge-margin: 0 var(--gap-2xs) 0 0;
+  }
+}
+
 /* src/primitives/button/css/theme/content/label-variables.css */
 @layer button.theme.content.label {
   :host {
@@ -2200,13 +2232,6 @@
     --labeled-label-border-offset: -var(--border-box-shadow-width);
     --labeled-tag-label-size: 1.85em;
     --labeled-icon-margin: 0em;
-    --labeled-icon-width: 1em + calc(var(--vertical-padding) * 2);
-    --labeled-icon-background-color: rgba(0, 0, 0, 0.05);
-    --labeled-icon-padding: calc(var(--horizontal-padding) + var(--labeled-icon-width));
-    --labeled-icon-border: transparent;
-    --labeled-icon-color: "";
-    --labeled-icon-left-shadow: -1px 0px 0px 0px var(--labeled-icon-border) inset;
-    --labeled-icon-right-shadow: 1px 0px 0px 0px var(--labeled-icon-border) inset;
   }
 }
 
