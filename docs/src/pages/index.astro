@@ -1,138 +1,15 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
-import { Code } from '@astrojs/starlight/components';
 import { CodeSample } from '@components/CodeSample/CodeSample.js';
-import { formatCode } from '@helpers/highlight/server.js';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { CurrentTime } from '@components/CurrentTime.js'
 import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
-import { Image } from 'astro:assets';
-import logoImage from '@images/logo.png';
 import { AIPrompt } from '@components/AIPrompt/AIPrompt.js';
-import { AILoader } from '@components/AILoader/AILoader.js';
+import { formatCode } from '@helpers/highlight/server.js';
+import { demoSteps, templateExample, specExample, componentExample } from '../data/homepage.js';
 
-const code1=`
-<ui-buttons>
-  <ui-button subtle-negative>
-    <ui-icon delete></ui-icon>
-    Delete
-  </ui-button>
-  <ui-button>
-    <ui-icon edit></ui-icon>
-    Edit
-  </ui-button>
-  <ui-button primary>
-    <ui-icon save></ui-icon>
-    Save
-  </ui-button>
-</ui-buttons>
-`.trim();
-const code2=`
-<current-date>
-  <h3 class="header">
-    Welcome {getDisplayName (getUser userId) }
-  </h3>
-  {#if isAdmin userId}
-    <ui-buttons large>
-      {#each actions}
-        <ui-button {style}>
-          <ui-icon {icon}>
-          {text}
-        </ui-button>
-      {/each}
-    </ui-buttons>
-  {/if}
-</user-panel>
-`.trim();
-const code3=`
-{
-  "tagName": "ui-button",
-  "types": [
-    {
-      "name": "Emphasis",
-      "usageLevel": 1,
-      "options": [
-        { "value": "primary",
-          "description": "be emphasized as
-            the first action" },
-        { "value": "secondary" }
-      ]
-    },
-    {
-      "name": "Social Site",
-      "usageLevel": 5,
-      "options": [
-        "instagram", "facebook", "twitter"
-      ]
-    }
-  ],
-  "variations": [
-    { "name": "Size",
-      "usageLevel": 1,
-      "options": [
-        "small", "medium", "large"
-      ] },
-    { "name": "Circular", "usageLevel": 3 }
-  ]
-}
-`.trim();
-const code4=`
-import { defineComponent } from '@semantic-ui/component';
-
-const template = await getText('./panel.html');
-const css = await getText('./panel.css');
-
-export const UserPanel = defineComponent({
-  tagName: 'user-panel',
-  template,
-  css,
-  defaultState: {
-    users: [],
-    loading: true,
-  },
-  createComponent: ({ state, signal }) => ({
-    async loadUsers() {
-      const data = await fetch('/api/users');
-      state.users.set(await data.json());
-      state.loading.set(false);
-    },
-  }),
-  onCreated: ({ self }) => self.loadUsers(),
-});
-`.trim();
-
-const formattedCode2 = 'zz';
-const formattedCode3 = 'zz';
-const formattedCode4 = formatCode(code4, { lang: 'javascript' });
-
-// Hero demo script — each step is a prompt + the resulting code/UI
-const demoSteps = [
-  {
-    prompt: 'Make a large delete button',
-    cot: 'Creating button from spec',
-    code: '<ui-button large>Delete</ui-button>',
-    html: '<ui-button large>Delete</ui-button>',
-  },
-  {
-    prompt: 'Add an icon',
-    cot: 'Retrieving icon spec and adding icon',
-    code: `<ui-button large>\n  <ui-icon delete></ui-icon>\n  Delete\n</ui-button>`,
-    html: '<ui-button large><ui-icon delete></ui-icon>Delete</ui-button>',
-  },
-  {
-    prompt: 'Add edit and save',
-    cot: 'Lookup plural variation add additional icons',
-    code: `<ui-buttons large>\n  <ui-button>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
-    html: '<ui-buttons><ui-button><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
-  },
-  {
-    prompt: 'Emphasize save',
-    cot: 'Adjusting button emphasis',
-    code: `<ui-buttons large>\n  <ui-button subtle-negative>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button primary>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
-    html: '<ui-buttons large><ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button primary><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
-  },
-];
-
+const templateFormatted = formatCode(templateExample, { lang: 'html' });
+const specFormatted = formatCode(specExample, { lang: 'json' });
+const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
 
 ---
 <Homepage>
@@ -164,21 +41,21 @@ const demoSteps = [
                 <div class="demo-note"></div>
               <div class="two section">
                 <CodeSample
-                  formattedCode={formattedCode2}
+                  formattedCode={templateFormatted}
                   client:load
                   language="html"
                 />
               </div>
               <div class="three section">
                 <CodeSample
-                  formattedCode={formattedCode3}
+                  formattedCode={specFormatted}
                   client:load
                   language="html"
                 />
               </div>
               <div class="four section">
                 <CodeSample
-                  formattedCode={formattedCode4}
+                  formattedCode={componentFormatted}
                   client:load
                   language="json"
                 />
@@ -190,63 +67,7 @@ const demoSteps = [
     </content>
   </aboveFold>
   <script>
-    import { createPlasma } from '../javascript/plasma.js'
-    const plasma = createPlasma('#plasma', {
-      // Colors — just hex
-      colorFrom:       '#00405C',
-      colorTo:         '#2b6fb6',
-      colorShift:       0,
-      fps: false,
-
-      // Specular
-      specularTint:    '#1a99e6',
-      specularPower:   1.5,
-      specularAmbient: 0.2,
-
-      // Animation
-      speed:       0.2,
-      density:     2.5,
-      brightness:  0.6,
-      resolution:  1,
-      // Mouse interaction
-      mouse: {
-        light: 2,   // specular follows cursor
-        warp:  0.5,   // gravity well pulls bands
-      },
-    });
-
-  </script>
-  <script>
-    import { $ } from '@semantic-ui/query';
-
-    const $visual = $('.visual');
-    const $sticky = $('.visual .sticky');
-    const $copies = $('.tour .copy');
-    const $proof = $('ribbon.proof');
-    const allSections = ['one', 'two', 'three', 'four'];
-    const copySections = ['two', 'three', 'four'];
-    let isParked = false;
-
-    // measure the panel's natural sticky position once (before any scroll)
-    let naturalTop = null;
-
-    const update = () => {
-      // update which section is active
-      let activeClass = 'one';
-      $copies.each((copy, index) => {
-        const bounds = $(copy).bounds();
-        if (bounds.top < window.innerHeight / 3) {
-          activeClass = copySections[index];
-        }
-      });
-      if (!$visual.hasClass(activeClass)) {
-        allSections.forEach(s => $visual.removeClass(s));
-        $visual.addClass(activeClass);
-      }
-    };
-
-    $(window).on('scroll', update);
-    update();
+    import '../javascript/homepage.js';
   </script>
   <ribbons>
     <ribbon class="tour">
