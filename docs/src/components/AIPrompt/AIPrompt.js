@@ -345,7 +345,11 @@ const events = {
 const keys = {
   'enter'({ self, $, el }) {
     if (!$(document.activeElement).is(el)) { return; }
+    $('.submit').addAttr('pressed');
     self.submit();
+    $('.input').one('keyup', () => {
+      $('.submit').removeAttr('pressed');
+    });
   },
 };
 

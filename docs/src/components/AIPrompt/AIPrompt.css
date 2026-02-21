@@ -221,12 +221,9 @@
   color: var(--ai-prompt-note-color);
   padding: 0 var(--ai-prompt-pane-padding);
   padding-bottom: var(--padding-xs);
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.3s ease;
 
-  &.visible {
-    opacity: 1;
-  }
 }
 
 /*******************************
@@ -257,8 +254,8 @@
     --button-styled-background: var(--standard-solid-20);
     --button-styled-hover-background: var(--standard-solid-25);
 
-    --button-styled-pressed-background: var(--standard-solid-30);
-    --button-styled-active-background: var(--standard-solid-30);
+    --button-styled-pressed-background: var(--standard-solid-10);
+    --button-styled-active-background: var(--standard-solid-10);
   }
 }
 
