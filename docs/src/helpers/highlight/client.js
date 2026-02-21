@@ -15,6 +15,9 @@ export const ready = createHighlighterCore({
   engine: createOnigurumaEngine(() => import('shiki/wasm')),
 }).then(async (h) => {
   highlighter = h;
+  if (!isClient) {
+    return;
+  }
   // load SUI grammar for template highlighting
   const suiGrammar = await getJSON('/sui.tmlanguage.json');
   if (suiGrammar) {
@@ -26,10 +29,8 @@ export const ready = createHighlighterCore({
       name: 'sui',
     });
   }
-  if (isClient) {
-    window.formatCode = formatCode;
-    window.highlightCode = highlightCode;
-  }
+  window.formatCode = formatCode;
+  window.highlightCode = highlightCode;
 });
 
 export function highlightCode(code, { lang = 'html', format = true } = {}) {
