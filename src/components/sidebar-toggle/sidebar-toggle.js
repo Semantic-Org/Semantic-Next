@@ -1,6 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
 import { UIIcon } from '../../primitives/index.js';
-import {} from '@semantic-ui/utils';
 import css from './sidebar-toggle.css?raw';
 import template from './sidebar-toggle.html?raw';
 
