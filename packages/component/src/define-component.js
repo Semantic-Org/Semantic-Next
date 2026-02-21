@@ -193,22 +193,6 @@ export const defineComponent = ({
           oldValue,
           componentSpec,
         });
-        // trigger reactive proxy
-        if(this.settings[attribute]) {
-          const converter = webComponent.properties[attribute]?.converter?.fromAttribute;
-          if(isFunction(converter)) {
-            newValue = converter(newValue)
-          }
-          else {
-            try {
-              newValue = JSON.parse(newValue)
-            }
-            catch (e) {
-              // not json
-            }
-          }
-          this.settings[attribute] = newValue;
-        }
         this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
       }
 

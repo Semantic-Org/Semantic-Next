@@ -1,4 +1,14 @@
-import { difference, each, firstMatch, get, inArray, isString, kebabToCamel, unique } from '@semantic-ui/utils';
+import {
+  difference,
+  each,
+  firstMatch,
+  get,
+  inArray,
+  isFunction,
+  isString,
+  kebabToCamel,
+  unique,
+} from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -14,7 +24,7 @@ import { difference, each, firstMatch, get, inArray, isString, kebabToCamel, uni
 */
 const SPACE_REGEX = /\s+/mg;
 
-const SPECIAL_ATTRIBUTES = ['disabled', 'value'];
+const SPECIAL_PROPERTIES = ['disabled', 'value'];
 
 // allow 'arrow-down' or 'down-arrow'
 const reverseDashes = (string) => {
@@ -94,21 +104,39 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
         return { matchingAttribute, matchingValue: matchingValue.slice(0, -suffix.length) };
       }
     }
-
     return { matchingAttribute, matchingValue };
   };
 
   // this assigns the value to the DOM element
-  const setProperty = (attribute, value) => {
+  const setProperty = (attributes, value) => {
     // convert <div icon-after> to => el.iconAfter
-    const property = kebabToCamel(attribute);
+    const property = kebabToCamel(attributes);
     if (value !== undefined) {
       el[property] = value;
+      setSetting(property, value);
     }
-
-    // this appears to be necessary for special attributes like "disabled"
-    if (inArray(attribute, SPECIAL_ATTRIBUTES)) {
+    // this is necessary for special propertys like "disabled"
+    if (inArray(property, SPECIAL_PROPERTIES)) {
       el.requestUpdate();
+    }
+  };
+
+  // settings have signals that mirror the prop and need to be triggered
+  const setSetting = (property, value) => {
+    let newValue = value;
+    if (el.settings[property]) {
+      const converter = properties?.[property]?.converter?.fromproperty;
+      if (isFunction(converter)) {
+        newValue = converter(newValue);
+      }
+      else {
+        // check if json
+        try {
+          newValue = JSON.parse(newValue);
+        }
+        catch (e) {}
+      }
+      el.settings[property] = newValue;
     }
   };
 
@@ -119,7 +147,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     el[property] = null;
 
     // this appears to be necessary for special attributes like "disabled"
-    if (inArray(attribute, SPECIAL_ATTRIBUTES)) {
+    if (inArray(attribute, SPECIAL_PROPERTIES)) {
       el.requestUpdate();
     }
   };
@@ -127,10 +155,10 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // this checks for boolean values like <ui-button disabled>
   const isBooleanValue = (attribute, attributeValue) => {
     // handles basic booleans of type Boolean in spec
-    const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
+    const isBooleanType = componentSpec.propertyTypes[attribute] === Boolean;
 
     // handles complex booleans where one value of allowed values is a identity, i.e. disabled, clickable-disabled
-    const isIdentityBoolean = componentSpec.optionAttributes?.[attribute] == attribute;
+    const isIdentityBoolean = componentSpec.optionAttributes?.[attribute] === attribute;
 
     // this is a scenario where a grouping has a default styling like `animated`
     const isAttributeClass = inArray(attribute, componentSpec.attributeClasses);
@@ -226,7 +254,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     const attributeSettings = properties[attribute];
     if (propertyName !== attribute && attributeSettings?.alias) {
       const convertFunc = attributeSettings?.converter?.fromAttribute;
-      let propertyValue = (convertFunc)
+      const propertyValue = (convertFunc)
         ? convertFunc(attributeValue)
         : attributeValue;
       if (propertyValue) {
