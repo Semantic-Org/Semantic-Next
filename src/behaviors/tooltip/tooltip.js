@@ -72,7 +72,7 @@ const defaultSettings = {
   arrow: true,
 
   // whether should render in top layer
-  topLayer: false,
+  topLayer: true,
 
   // distance away from trigger
   distance: 0,
@@ -227,6 +227,9 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Recreate tooltip if it was removed
     if (!self.$tooltip) {
       self.createTooltip();
+      if (!self.$tooltip) {
+        return;
+      }
     }
 
     // Allow onShow to cancel by returning false (supports async)
