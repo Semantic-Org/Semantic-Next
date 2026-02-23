@@ -685,7 +685,7 @@ export class LitRenderer {
     return tree.render();
   }
   cleanup() {
-    this.renderTrees = [];
+    this.renderTrees = {};
   }
 
   setData(newData) {
