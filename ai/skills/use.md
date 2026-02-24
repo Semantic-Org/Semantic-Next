@@ -51,6 +51,15 @@ Every SUI component is defined by a JSON spec. The spec is the authoritative API
 | `methods` | Methods available on the component instance |
 | `usageLevel` | Commonality (1 = common, 5 = rare/specialized) — higher levels are valid but use sparingly |
 
+**Option values** are always the canonical verbose form (what goes after `=`). Colliding values are automatically disambiguated — see Compound Aliases.
+
+**Option flags:**
+
+| Flag | Meaning |
+|------|---------|
+| `compoundAliases` | Concise form requires `value-attribute` compound (e.g. `"very"` on compact → `very-compact`) |
+| `prefixCompound` | Compound uses `attribute-value` order instead (e.g. `text-centered` instead of `centered-text`) |
+
 **Spec hints**: When a content field name matches a component (e.g., `icon` in button), check that component's spec for exhaustive options via `couplesWith`.
 
 **Golden rule: If it's not in the spec, don't use it.**
@@ -134,14 +143,40 @@ SUI normalizes value formats — these are all equivalent (prefer natural langua
 
 ### Compound Aliases
 
-When multiple attributes share option values, disambiguate with compound form:
+**Spec values are always the canonical verbose form** — what goes after `=`. The concise compound form is derived, never stored.
+
+When a value like `"subtle"` appears in multiple attributes (e.g. `styled` and `positive`), you must disambiguate in concise form:
 
 ```html
-<ui-segment size-small>    <!-- size="small" -->
-<ui-segment padding-small> <!-- padding="small" -->
+<ui-button subtle>            <!-- sets styled="subtle" (styled owns the bare form) -->
+<ui-button subtle-positive>   <!-- sets positive="subtle" -->
+<ui-button subtle-warning>    <!-- sets warning="subtle" -->
 ```
 
-Order is flexible: `small-size` also works.
+In verbose form, the attribute name removes ambiguity — just use the raw value:
+
+```html
+<ui-button positive="subtle">  <!-- no compound needed -->
+<ui-button styled="subtle">    <!-- also fine -->
+```
+
+When any value in an attribute collides, **all sibling values** also support compound form for consistency:
+
+```html
+<!-- "left" and "right" collide between floated and attached -->
+<!-- so ALL attached values support compounds, even non-colliding ones -->
+<ui-button top-attached>       <!-- works (compound) -->
+<ui-button top>                <!-- also works (bare, no collision) -->
+<ui-button left-attached>      <!-- required (bare "left" is ambiguous) -->
+```
+
+Some values use `compoundAliases` for readability even without collision — the compound form is the only concise option:
+
+```html
+<ui-button very-compact>       <!-- compact="very" — "very" alone reads unnaturally -->
+<ui-button clickable-disabled> <!-- disabled="clickable" -->
+<ui-button vertical-animated>  <!-- animated="vertical" -->
+```
 
 ---
 
@@ -245,6 +280,11 @@ Equivalent syntaxes: `dark`, `class="dark"`, `theme="dark"` — use whichever fi
 <!-- Get spec first, then use exact tagName -->
 <ui-button large primary>Click</ui-button>
 <ui-card header="Title" image="/photo.jpg"></ui-card>
+
+<!-- Compound aliases — disambiguate colliding values -->
+<ui-button subtle>             <!-- styled="subtle" (owner) -->
+<ui-button subtle-positive>    <!-- positive="subtle" (compound) -->
+<ui-button very-compact>       <!-- compact="very" (readability) -->
 
 <!-- Plural containers with inheritance -->
 <ui-buttons size="small">
