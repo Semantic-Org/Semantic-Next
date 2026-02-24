@@ -1104,7 +1104,10 @@ export class SpecReader {
     }
     else if (allowedValues.length) {
       // if they specify allowed values we can infer type from a sample
-      stringType = typeof allowedValues[0];
+      const valueTypes = unique(allowedValues.map(value => typeof value));
+      stringType = (valueTypes.length > 1)
+        ? types.string
+        : valueTypes[0];
     }
     if (stringType) {
       type = get(types, stringType);
