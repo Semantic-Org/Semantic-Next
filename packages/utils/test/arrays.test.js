@@ -102,6 +102,21 @@ describe('Array Utilities', () => {
       const result = firstMatch(arr, x => x > 2);
       expect(result).toBe(3);
     });
+
+    it('should return the matching element when passed a value', () => {
+      const arr = [1, 2, 3, 4];
+      expect(firstMatch(arr, 3)).toBe(3);
+    });
+
+    it('should return undefined when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(firstMatch(arr, 5)).toBeUndefined();
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(firstMatch(arr, { id: 2 })).toEqual({ id: 2 });
+    });
   });
 
   describe('findIndex', () => {
@@ -109,6 +124,21 @@ describe('Array Utilities', () => {
       const arr = ['apple', 'banana', 'orange'];
       const index = findIndex(arr, fruit => fruit === 'banana');
       expect(index).toBe(1);
+    });
+
+    it('should return the index when passed a value', () => {
+      const arr = ['apple', 'banana', 'orange'];
+      expect(findIndex(arr, 'banana')).toBe(1);
+    });
+
+    it('should return -1 when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(findIndex(arr, 5)).toBe(-1);
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(findIndex(arr, { id: 2 })).toBe(1);
     });
   });
 

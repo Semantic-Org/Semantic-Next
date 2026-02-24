@@ -50,6 +50,7 @@ xx.xx.xxxx
 * **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
 
 ### Utils
+* **Enhancement** - `firstMatch()` and `findIndex()` now accept a value in addition to a callback, matching the `remove()` API. Values are compared using deep equality.
 * **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
 * **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.

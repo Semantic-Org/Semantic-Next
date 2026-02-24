@@ -148,34 +148,36 @@ export function first<T>(array: T[], number: number): T[]; // 'number' parameter
 export function first<T>(array: T[], number?: number): T | T[] | undefined; // combined for ease of use, optional 'number' parameter
 
 /**
- * Returns the first element that matches the callback criteria
+ * Returns the first element that matches the callback or value
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#firstmatch firstMatch}
  *
  * @param array - The array to search
- * @param callback - Function to test each element
+ * @param callbackOrValue - Function to test each element or value to match
  * @returns The first matching element or undefined
  *
  * @example
  * ```ts
  * firstMatch([1, 2, 3, 4], x => x > 2) // returns 3
+ * firstMatch([1, 2, 3, 4], 3) // returns 3
  * ```
  */
-export function firstMatch<T>(array: T[], callback: ArrayCallback<T>): T | undefined;
+export function firstMatch<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): T | undefined;
 
 /**
- * Finds the index of the first element that matches the callback criteria
+ * Finds the index of the first element that matches the callback or value
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#findindex findIndex}
  *
  * @param array - The array to search
- * @param callback - Function to test each element
+ * @param callbackOrValue - Function to test each element or value to match
  * @returns The index of the first matching element or -1
  *
  * @example
  * ```ts
  * findIndex([1, 2, 3], x => x === 2) // returns 1
+ * findIndex([1, 2, 3], 2) // returns 1
  * ```
  */
-export function findIndex<T>(array: T[], callback: ArrayCallback<T>): number;
+export function findIndex<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): number;
 
 /**
  * Removes elements from an array that match a value or callback

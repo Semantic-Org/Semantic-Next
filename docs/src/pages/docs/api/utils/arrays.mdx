@@ -54,18 +54,18 @@ The first element, an array of the first n elements, or undefined if the array i
 
 ## firstMatch
 
-Return the first value that matches the callback condition.
+Return the first value that matches the callback or value.
 
 ### Syntax
 ```javascript
-firstMatch(array, callback)
+firstMatch(array, callbackOrValue)
 ```
 
 ### Parameters
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
 ### Returns
 The first matching element or undefined if no match is found.
@@ -75,18 +75,18 @@ The first matching element or undefined if no match is found.
 
 ## findIndex
 
-Find the index of the first element that satisfies the testing function.
+Find the index of the first element that matches the callback or value.
 
 ### Syntax
 ```javascript
-findIndex(array, callback)
+findIndex(array, callbackOrValue)
 ```
 
 ### Parameters
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
 ### Returns
 The index of the first matching element, or -1 if no match is found.

@@ -107,11 +107,18 @@ uniqueItems([arr1, arr2]);       // [1, 2, 3, 4, 5, 6] - unique across all array
 
 ### Additional Operations
 ```javascript
-import { findIndex, inArray } from '@semantic-ui/utils';
+import { findIndex, firstMatch, inArray } from '@semantic-ui/utils';
 
 const items = [{ id: 1, name: 'Apple' }, { id: 2, name: 'Banana' }];
 
-findIndex(items, item => item.id === 2);
+// With callback
+findIndex(items, item => item.id === 2);               // 1
+firstMatch(items, item => item.id === 2);               // { id: 2, name: 'Banana' }
+
+// With value (uses deep equality)
+findIndex([1, 2, 3], 2);                               // 1
+firstMatch([1, 2, 3], 2);                              // 2
+
 inArray('search', ['apple', 'banana', 'search', 'orange']);
 ```
 

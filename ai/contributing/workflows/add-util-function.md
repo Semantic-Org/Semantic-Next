@@ -259,7 +259,7 @@ const customResult = newFunc(input, options);      // 'custom output'
 ## Step 7: Release Notes
 
 ### Release Notes Location
-`/RELEASE-NOTES.md`
+`/CHANGELOG.md`
 
 ### Categories
 - **Breaking** - Renamed or removed functions

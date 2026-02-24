@@ -57,7 +57,11 @@ export const first = (array, number = 1) => {
 /*
   Iterate through returning first value
 */
-export const firstMatch = (array = [], callback) => {
+export const firstMatch = (array = [], callbackOrValue) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue);
+
   let result;
   each(array, (value, index) => {
     if (callback(value, index, array)) {
@@ -68,7 +72,11 @@ export const firstMatch = (array = [], callback) => {
   return result;
 };
 
-export const findIndex = (array = [], callback) => {
+export const findIndex = (array = [], callbackOrValue) => {
+  const callback = isFunction(callbackOrValue)
+    ? callbackOrValue
+    : (val) => isEqual(val, callbackOrValue);
+
   let matchedIndex = -1;
   each(array, (value, index) => {
     if (callback(value, index, array)) {
