@@ -3,7 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
 import Body from '../layouts/Body.astro';
-import { UIMenu, MenuItem } from '@semantic-ui/core'
+import { UIButton } from '@semantic-ui/core'
 
 ---
 <style>
@@ -12,10 +12,5 @@ import { UIMenu, MenuItem } from '@semantic-ui/core'
   }
 </style>
 <Body>
-          <UIMenu client:load selection inset class="menu" value="card-search">
-            <MenuItem client:load value="card-search">Card Search</MenuItem>
-            <MenuItem client:load value="fireworks-display">Fireworks</MenuItem>
-            <MenuItem client:load value="advanced-ball-simulation">Ball Simulation</MenuItem>
-            <MenuItem client:load value="spectrum-analyzer">Spectrum Analyzer</MenuItem>
-          </UIMenu>
+          <UIButton client:load subtle-negative>Delete</UIButton>
 </Body>

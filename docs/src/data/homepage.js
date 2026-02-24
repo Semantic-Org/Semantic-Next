@@ -38,7 +38,7 @@ export const demoSteps = [
     code:
       `<ui-buttons large>\n  <ui-button>\n    <ui-icon delete></ui-icon>\n    Delete\n  </ui-button>\n  <ui-button>\n    <ui-icon edit></ui-icon>\n    Edit\n  </ui-button>\n  <ui-button>\n    <ui-icon save></ui-icon>\n    Save\n  </ui-button>\n</ui-buttons>`,
     html:
-      '<ui-buttons><ui-button><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
+      '<ui-buttons large><ui-button><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
   },
   {
     prompt: 'Emphasize save',
