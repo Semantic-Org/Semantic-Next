@@ -344,7 +344,6 @@ export default {
     "instagram": "icon",
     "youtube": "icon",
     "disabled": "disabled",
-    "clickable-disabled": "disabled",
     "red": "color",
     "orange": "color",
     "yellow": "color",
@@ -365,7 +364,8 @@ export default {
     "large": "size",
     "big": "size",
     "huge": "size",
-    "massive": "size"
+    "massive": "size",
+    "clickable-disabled": "disabled"
   },
   "propertyTypes": {
     "icon": "string",
@@ -689,7 +689,7 @@ export default {
     ],
     "disabled": [
       "disabled",
-      "clickable-disabled"
+      "clickable"
     ],
     "color": [
       "red",

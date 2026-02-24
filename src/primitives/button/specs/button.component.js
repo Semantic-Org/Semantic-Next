@@ -83,19 +83,11 @@ export default {
   "optionAttributes": {
     "primary": "emphasis",
     "secondary": "emphasis",
-    "subtle": "styled",
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
-    "horizontal": "animated",
-    "vertical": "animated",
-    "fade": "animated",
     "disabled": "disabled",
-    "clickable-disabled": "disabled",
-    "left-floated": "floated",
-    "right-floated": "floated",
     "compact": "compact",
-    "very-compact": "compact",
     "mini": "size",
     "tiny": "size",
     "small": "size",
@@ -104,11 +96,9 @@ export default {
     "big": "size",
     "huge": "size",
     "massive": "size",
-    "top-attached": "attached",
+    "top": "attached",
     "attached": "attached",
-    "bottom-attached": "attached",
-    "left-attached": "attached",
-    "right-attached": "attached",
+    "bottom": "attached",
     "submit": "type",
     "reset": "type",
     "red": "color",
@@ -130,19 +120,28 @@ export default {
     "linkedin": "social",
     "youtube": "social",
     "positive": "positive",
-    "subtle-positive": "positive",
     "warning": "warning",
-    "subtle-warning": "warning",
     "negative": "negative",
-    "subtle-negative": "negative",
     "info": "info",
+    "subtle-styled": "styled",
+    "flat-styled": "styled",
+    "outline-styled": "styled",
+    "ghost-styled": "styled",
+    "left-floated": "floated",
+    "right-floated": "floated",
+    "top-attached": "attached",
+    "bottom-attached": "attached",
+    "left-attached": "attached",
+    "right-attached": "attached",
+    "subtle-positive": "positive",
+    "subtle-warning": "warning",
+    "subtle-negative": "negative",
     "subtle-info": "info",
-    "animated-horizontal": "animated",
     "horizontal-animated": "animated",
-    "animated-vertical": "animated",
     "vertical-animated": "animated",
-    "animated-fade": "animated",
-    "fade-animated": "animated"
+    "fade-animated": "animated",
+    "clickable-disabled": "disabled",
+    "very-compact": "compact"
   },
   "propertyTypes": {
     "icon": "string",
@@ -195,15 +194,15 @@ export default {
     ],
     "disabled": [
       "disabled",
-      "clickable-disabled"
+      "clickable"
     ],
     "floated": [
-      "left-floated",
-      "right-floated"
+      "left",
+      "right"
     ],
     "compact": [
       "compact",
-      "very-compact"
+      "very"
     ],
     "size": [
       "mini",
@@ -216,11 +215,11 @@ export default {
       "massive"
     ],
     "attached": [
-      "top-attached",
+      "top",
       "attached",
-      "bottom-attached",
-      "left-attached",
-      "right-attached"
+      "bottom",
+      "left",
+      "right"
     ],
     "type": [
       "submit",
@@ -250,19 +249,19 @@ export default {
     ],
     "positive": [
       "positive",
-      "subtle-positive"
+      "subtle"
     ],
     "warning": [
       "warning",
-      "subtle-warning"
+      "subtle"
     ],
     "negative": [
       "negative",
-      "subtle-negative"
+      "subtle"
     ],
     "info": [
       "info",
-      "subtle-info"
+      "subtle"
     ]
   },
   "attributeClasses": [

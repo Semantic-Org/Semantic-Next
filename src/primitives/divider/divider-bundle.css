@@ -54,28 +54,28 @@
 
 /* src/primitives/divider/css/definition/variations/spacing.css */
 @layer divider.definition.variations.spacing {
-  .divider.mini {
+  .divider.mini-spacing {
     margin: var(--divider-spacing-mini) 0;
   }
-  .divider.tiny {
+  .divider.tiny-spacing {
     margin: var(--divider-spacing-tiny) 0;
   }
-  .divider.small {
+  .divider.small-spacing {
     margin: var(--divider-spacing-small) 0;
   }
-  .divider.medium {
+  .divider.medium-spacing {
     margin: var(--divider-spacing-medium) 0;
   }
-  .divider.large {
+  .divider.large-spacing {
     margin: var(--divider-spacing-large) 0;
   }
-  .divider.big {
+  .divider.big-spacing {
     margin: var(--divider-spacing-big) 0;
   }
-  .divider.huge {
+  .divider.huge-spacing {
     margin: var(--divider-spacing-huge) 0;
   }
-  .divider.massive {
+  .divider.massive-spacing {
     margin: var(--divider-spacing-massive) 0;
   }
 }

@@ -107,7 +107,7 @@
         },
         {
           "name": "Very Padded",
-          "value": "very-padded",
+          "value": "very",
           "description": "have extra increased padding"
         }
       ]
@@ -123,6 +123,7 @@
       "attribute": "compact",
       "usageLevel": 3,
       "description": "reduce its padding",
+      "compoundAliases": true,
       "options": [
         {
           "name": "Compact",
@@ -131,7 +132,7 @@
         },
         {
           "name": "Very Compact",
-          "value": "very-compact",
+          "value": "very",
           "description": "reduce its padding greatly"
         }
       ]
@@ -217,12 +218,12 @@
       "options": [
         {
           "name": "Left Floated",
-          "value": "left-floated",
+          "value": "left",
           "description": "appear to the left of content"
         },
         {
           "name": "Right Floated",
-          "value": "right-floated",
+          "value": "right",
           "description": "appear to the right of content"
         }
       ]

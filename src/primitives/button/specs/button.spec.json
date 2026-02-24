@@ -157,6 +157,7 @@
       "name": "Disabled",
       "attribute": "disabled",
       "includeAttributeClass": true,
+      "compoundAliases": true,
       "description": "have interactions disabled",
       "options": [
         {
@@ -166,7 +167,7 @@
         },
         {
           "name": "Clickable Disabled",
-          "value": "clickable-disabled",
+          "value": "clickable",
           "description": "allow interactions but appear disabled"
         }
       ]
@@ -186,12 +187,12 @@
       "options": [
         {
           "name": "Left Floated",
-          "value": "left-floated",
+          "value": "left",
           "description": "appear to the left of content"
         },
         {
           "name": "Right Floated",
-          "value": "right-floated",
+          "value": "right",
           "description": "appear to the right of content"
         }
       ]
@@ -207,6 +208,7 @@
       "attribute": "compact",
       "usageLevel": 3,
       "description": "reduce its padding",
+      "compoundAliases": true,
       "options": [
         {
           "name": "Compact",
@@ -215,7 +217,7 @@
         },
         {
           "name": "Very Compact",
-          "value": "very-compact",
+          "value": "very",
           "description": "reduce its padding greatly"
         }
       ]
@@ -284,9 +286,8 @@
       "options": [
         {
           "name": "Top Attached",
-          "value": "top-attached",
-          "description": "appear attached to the top of other content",
-          "exampleCode": "\n          <ui-button top-attached>Top Action</ui-button>\n          <ui-segment bottom-attached>Attached content below</ui-segment>\n        "
+          "value": "top",
+          "description": "appear attached to the top of other content"
         },
         {
           "name": "Attached",
@@ -296,21 +297,18 @@
         },
         {
           "name": "Bottom Attached",
-          "value": "bottom-attached",
-          "description": "attach to the bottom",
-          "exampleCode": "\n          <ui-segment top-attached>Attached content above</ui-segment>\n          <ui-button bottom-attached>Bottom Action</ui-button>\n        "
+          "value": "bottom",
+          "description": "attach to the bottom"
         },
         {
           "name": "Left Attached",
-          "value": "left-attached",
-          "description": "attach to the left",
-          "exampleCode": "\n          <ui-segments horizontal>\n            <ui-button left-attached icon=\"user\">View Profile</ui-button>\n            <ui-segment>Text to the right</ui-segment>\n          </ui-segments>\n        "
+          "value": "left",
+          "description": "attach to the left"
         },
         {
           "name": "Right Attached",
-          "value": "right-attached",
-          "description": "attach to the right",
-          "exampleCode": "\n          <ui-segments horizontal>\n            <ui-segment>Text to the left</ui-segment>\n            <ui-button right-attached icon=\"user\">View Profile</ui-button>\n          </ui-segments>\n        "
+          "value": "right",
+          "description": "attach to the right"
         }
       ]
     },
@@ -467,7 +465,7 @@
         },
         {
           "name": "Subtle Positive",
-          "value": "subtle-positive",
+          "value": "subtle",
           "description": "subtly hint at a positive action"
         }
       ]
@@ -485,7 +483,7 @@
         },
         {
           "name": "Subtle Warning",
-          "value": "subtle-warning",
+          "value": "subtle",
           "description": "subtly hint it may be dangerous"
         }
       ]
@@ -503,7 +501,7 @@
         },
         {
           "name": "Subtle Negative",
-          "value": "subtle-negative",
+          "value": "subtle",
           "description": "subtly hint at a negative action"
         }
       ]
@@ -521,7 +519,7 @@
         },
         {
           "name": "Subtle Info",
-          "value": "subtle-info",
+          "value": "subtle",
           "description": "subtly hint it may be dangerous"
         }
       ]

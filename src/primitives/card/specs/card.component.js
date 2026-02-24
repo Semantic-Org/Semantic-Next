@@ -63,7 +63,7 @@ export default {
   "allowedValues": {
     "disabled": [
       "disabled",
-      "clickable-disabled"
+      "clickable"
     ]
   },
   "attributeClasses": [

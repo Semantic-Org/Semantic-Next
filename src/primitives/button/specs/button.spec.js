@@ -236,7 +236,6 @@ export default {
       description: 'be colored',
       usageLevel: 3,
       separateExamples: true,
-      // Generate repetitive color examples programmatically!
       singularExampleCode: [
         COLOR_OPTIONS.map(c => `<ui-button ${c.value}>${c.name}</ui-button>`).join('\n'),
         COLOR_OPTIONS.map(c => `<ui-button subtle ${c.value}>${c.name}</ui-button>`).join('\n'),
@@ -299,7 +298,7 @@ export default {
         },
         {
           name: 'Subtle Positive',
-          value: 'subtle-positive',
+          value: 'subtle',
           description: 'subtly hint at a positive action',
         },
       ],
@@ -317,7 +316,7 @@ export default {
         },
         {
           name: 'Subtle Warning',
-          value: 'subtle-warning',
+          value: 'subtle',
           description: 'subtly hint it may be dangerous',
         },
       ],
@@ -335,7 +334,7 @@ export default {
         },
         {
           name: 'Subtle Negative',
-          value: 'subtle-negative',
+          value: 'subtle',
           description: 'subtly hint at a negative action',
         },
       ],
@@ -353,7 +352,7 @@ export default {
         },
         {
           name: 'Subtle Info',
-          value: 'subtle-info',
+          value: 'subtle',
           description: 'subtly hint it may be dangerous',
         },
       ],

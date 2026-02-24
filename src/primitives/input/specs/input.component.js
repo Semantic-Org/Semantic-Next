@@ -52,7 +52,6 @@ export default {
   ],
   "optionAttributes": {
     "disabled": "disabled",
-    "clickable-disabled": "disabled",
     "mini": "size",
     "tiny": "size",
     "small": "size",
@@ -60,7 +59,8 @@ export default {
     "large": "size",
     "big": "size",
     "huge": "size",
-    "massive": "size"
+    "massive": "size",
+    "clickable-disabled": "disabled"
   },
   "propertyTypes": {
     "placeholder": "string",
@@ -82,7 +82,7 @@ export default {
   "allowedValues": {
     "disabled": [
       "disabled",
-      "clickable-disabled"
+      "clickable"
     ],
     "size": [
       "mini",

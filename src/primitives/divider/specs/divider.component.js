@@ -48,10 +48,6 @@ export default {
     "mini": "spacing",
     "tiny": "spacing",
     "small": "spacing",
-    "medium": [
-      "spacing",
-      "thickness"
-    ],
     "large": "spacing",
     "big": "spacing",
     "huge": "spacing",
@@ -63,7 +59,18 @@ export default {
     "thick": "thickness",
     "inset-small": "inset",
     "inset-medium": "inset",
-    "inset-large": "inset"
+    "inset-large": "inset",
+    "mini-spacing": "spacing",
+    "tiny-spacing": "spacing",
+    "small-spacing": "spacing",
+    "medium-spacing": "spacing",
+    "large-spacing": "spacing",
+    "big-spacing": "spacing",
+    "huge-spacing": "spacing",
+    "massive-spacing": "spacing",
+    "thin-thickness": "thickness",
+    "medium-thickness": "thickness",
+    "thick-thickness": "thickness"
   },
   "propertyTypes": {
     "text": "string",

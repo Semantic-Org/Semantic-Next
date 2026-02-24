@@ -51,9 +51,7 @@ export default {
     "attached": "attached",
     "bottom-attached": "attached",
     "padded": "padded",
-    "very-padded": "padded",
     "compact": "compact",
-    "very-compact": "compact",
     "red": "color",
     "orange": "color",
     "yellow": "color",
@@ -67,11 +65,13 @@ export default {
     "brown": "color",
     "grey": "color",
     "black": "color",
-    "left-floated": "floated",
-    "right-floated": "floated",
+    "left": "floated",
+    "right": "floated",
     "left-aligned": "text-align",
     "center-aligned": "text-align",
-    "right-aligned": "text-align"
+    "right-aligned": "text-align",
+    "very-padded": "padded",
+    "very-compact": "compact"
   },
   "propertyTypes": {
     "emphasis": "string",
@@ -105,11 +105,11 @@ export default {
     ],
     "padded": [
       "padded",
-      "very-padded"
+      "very"
     ],
     "compact": [
       "compact",
-      "very-compact"
+      "very"
     ],
     "color": [
       "red",
@@ -127,8 +127,8 @@ export default {
       "black"
     ],
     "floated": [
-      "left-floated",
-      "right-floated"
+      "left",
+      "right"
     ],
     "text-align": [
       "left-aligned",
