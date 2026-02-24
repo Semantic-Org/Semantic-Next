@@ -1,11 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
+import { findIndex } from '@semantic-ui/utils';
 
 import css from './menu-bundle.css?raw';
 import pageCSS from './menu-page.css?raw';
 import template from './menu.html?raw';
 import componentSpec from './specs/menu.component.js';
 
-const createComponent = ({ settings, self, $$, el, dispatchEvent }) => ({
+const createComponent = ({ settings, self, $$, el, dispatchEvent, isServer }) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', { value });
@@ -27,8 +28,13 @@ const createComponent = ({ settings, self, $$, el, dispatchEvent }) => ({
   },
 
   selectValue(value) {
+    if (isServer) {
+      return;
+    }
     const $items = $$(el).find('menu-item');
-    const $item = $items.filter(`[value="${value}"]`).first();
+    const values = $items.val();
+    const activeIndex = findIndex(values, value);
+    const $item = $items.eq(activeIndex);
     if ($item.exists()) {
       $items.removeAttr('active');
       $item.attr('active', '');
@@ -46,7 +52,10 @@ const createComponent = ({ settings, self, $$, el, dispatchEvent }) => ({
 const onCreated = ({ settings }) => {
 };
 
-const onRendered = function({ $ }) {
+const onRendered = function({ settings, self }) {
+  if (settings.value) {
+    self.setValue(settings.value);
+  }
 };
 
 const events = {
