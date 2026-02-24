@@ -2,7 +2,7 @@ export const plasmaConfig = {
   colorFrom: '#00405C',
   colorTo: '#2b6fb6',
   colorShift: 0,
-  fps: false,
+  fps: true,
 
   specularTint: '#1a99e6',
   specularPower: 1.5,
@@ -49,96 +49,3 @@ export const demoSteps = [
       '<ui-buttons large><ui-button subtle-negative><ui-icon delete></ui-icon>Delete</ui-button><ui-button><ui-icon edit></ui-icon>Edit</ui-button><ui-button primary><ui-icon save></ui-icon>Save</ui-button></ui-buttons>',
   },
 ];
-
-export const buttonsExample = `
-<ui-buttons>
-  <ui-button subtle-negative>
-    <ui-icon delete></ui-icon>
-    Delete
-  </ui-button>
-  <ui-button>
-    <ui-icon edit></ui-icon>
-    Edit
-  </ui-button>
-  <ui-button primary>
-    <ui-icon save></ui-icon>
-    Save
-  </ui-button>
-</ui-buttons>
-`.trim();
-
-export const templateExample = `
-<current-date>
-  <h3 class="header">
-    Welcome {getDisplayName (getUser userId) }
-  </h3>
-  {#if isAdmin userId}
-    <ui-buttons large>
-      {#each actions}
-        <ui-button {style}>
-          <ui-icon {icon}>
-          {text}
-        </ui-button>
-      {/each}
-    </ui-buttons>
-  {/if}
-</user-panel>
-`.trim();
-
-export const specExample = `
-{
-  "tagName": "ui-button",
-  "types": [
-    {
-      "name": "Emphasis",
-      "usageLevel": 1,
-      "options": [
-        { "value": "primary",
-          "description": "be emphasized as
-            the first action" },
-        { "value": "secondary" }
-      ]
-    },
-    {
-      "name": "Social Site",
-      "usageLevel": 5,
-      "options": [
-        "instagram", "facebook", "twitter"
-      ]
-    }
-  ],
-  "variations": [
-    { "name": "Size",
-      "usageLevel": 1,
-      "options": [
-        "small", "medium", "large"
-      ] },
-    { "name": "Circular", "usageLevel": 3 }
-  ]
-}
-`.trim();
-
-export const componentExample = `
-import { defineComponent } from '@semantic-ui/component';
-
-const template = await getText('./panel.html');
-const css = await getText('./panel.css');
-
-export const UserPanel = defineComponent({
-  tagName: 'user-panel',
-  template,
-  css,
-  defaultState: {
-    users: [],
-    loading: true,
-  },
-  createComponent: ({ state, signal }) => ({
-    async loadUsers() {
-      const data = await fetch('/api/users');
-      state.users.set(await data.json());
-      state.loading.set(false);
-    },
-  }),
-  onCreated: ({ self }) => self.loadUsers(),
-});
-`.trim();

@@ -9,12 +9,6 @@ body {
   ai-prompt {
    --ai-prompt-label-color: #EAB59F;
   }
-
-  ui-card {
-    --card-padding: 1.5rem 2rem;
-    --card-description-line-height: 1.6;
-    --cards-gap: 2rem;
-  }
 }
 
 @layer page {
@@ -60,7 +54,6 @@ body {
     flex-direction: column;
     height: 90dvh;
 
-
     h1 {
       color: var(--white);
     }
@@ -95,13 +88,6 @@ body {
           oklch(0.12 0.04 228.42 / 0.55) 650px,
           oklch(0 0 0) 90vw)
         ;
-        /*
-        background-image: radial-gradient(circle at 50% 50%, oklch(0 0 0 / 0.9) 0%, oklch(0.32 0.08 228.42 / 0.5) 350px, oklch(0 0 0) 1200px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(circle at 50% 50%, oklch(0 0 0) 0%, oklch(0.32 0.08 228.42 / 0.66) 600px, oklch(0 0 0) 1200px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgba(0, 0, 0, 0.8) 0, oklch(0.37 0.09 227.35) 500px, rgba(0, 0, 0, 0) 800px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(50% 50% at 50% 50%, oklch(0 0 0) 0%, transparent 800px);
-        background-image: linear-gradient(#000, transparent 300px), radial-gradient(100vw 1000px at 50% 50%, rgb(0 0 0 / 0%) 0, rgba(0, 0, 0, 0.7) 500px, rgba(0, 0, 0, 0) 800px);
-        */
         pointer-events: none;
       }
 
@@ -143,46 +129,14 @@ body {
       top: 0;
       right: 0;
       width: 500px;
-      height: 2600px; /* height until value props */
+      height: 100%;
       margin-left: auto;
-
-      code-sample,
-      .expressive-code {
-        margin: var(--top-margin);
-        --code-padding: var(--padding-l);
-        --code-border-radius: var(--border-radius-l);
-        --code-background: var(--black-40);
-        --code-font-size: 14px;
-      }
 
       .sticky {
         position: sticky;
         width: inherit;
         left: auto;
         top: 8em;
-      }
-
-      .segment {
-        padding: var(--padding-l);
-        border: var(--glow-border);
-        border-radius: var(--border-radius-xl);
-        background-image: var(--angled-gradient);
-
-        pre {
-          --ec-brdWd: 0;
-        }
-
-        .section {
-          display: none;
-        }
-      }
-
-      /* show the active section based on class on .visual */
-      &.one .section.one,
-      &.two .section.two,
-      &.three .section.three,
-      &.four .section.four {
-        display: block;
       }
     }
 
@@ -217,6 +171,10 @@ body {
 
   }
 
+  /*******************************
+            Ribbons
+  *******************************/
+
   ribbon {
     position: relative;
     display: block;
@@ -224,12 +182,6 @@ body {
     min-height: 300px;
 
     padding: 5rem 0rem;
-
-    &.proof {
-      ui-cards {
-        font-size: 16px;
-      }
-    }
 
     ui-container {
       position: relative;
@@ -248,74 +200,103 @@ body {
       font-size: 24px;
       font-weight: bold;
     }
-
-    .expressive-code {
-      margin-top: 1rem;
-    }
-
-
   }
+
+  /*******************************
+        Tour Section
+  *******************************/
 
   .tour {
-    .copy {
-      min-height: 500px;
-      margin-bottom: 3rem;
-    }
     ui-container {
       display: flex;
-      flex-direction: row-reverse;
+      flex-direction: row;
+      gap: 4rem;
     }
-    .left {
+
+    .content {
       flex: 1 1 auto;
-      padding-right: 5rem;
     }
-    .right {
+
+    .visual {
       width: 500px;
-      flex: 0 0 auto;
+      flex: 0 0 500px;
+
+      .sticky {
+        position: sticky;
+        top: 4rem;
+      }
+    }
+
+    .example {
+      display: none;
+
+      &.active {
+        display: block;
+      }
+    }
+
+    .placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+      border: var(--glow-border);
+      border-radius: var(--border-radius-l);
+      background-image: var(--subtle-angled-gradient);
+      color: var(--standard-30);
+      gap: 1rem;
+
+      ui-icon {
+        font-size: 48px;
+        opacity: 0.3;
+      }
+      span {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    .copy {
+      min-height: 100dvh;
+      margin-bottom: 4rem;
+      padding-right: 2rem;
     }
   }
 
-  .cards {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    /*margin-top: -10rem;*/
+  /*******************************
+        Proof Cards
+  *******************************/
 
-    flex-wrap: wrap;
+  .proof {
+  }
 
-    .card {
-      background-color: oklch(0.13 0.02 238.07);
-      background-image: var(--subtle-gradient);
-      box-shadow: var(--floating-shadow);
-      flex-grow: 1;
-      flex-basis: calc(33.333% - 1.5rem);
-      border-radius: var(--border-radius);
-      border: var(--glow-border);
-      padding: 1.5rem;
-      text-align: center;
-      color: var(--white);
-      margin-bottom: 5rem;
+  /*******************************
+        Showcase Section
+  *******************************/
 
-      img {
+  .showcase {
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+
+      h3 {
+        margin: 0;
+      }
+    }
+
+    .menu {
+      font-size: 15px;
+    }
+
+    .example {
+      display: none;
+
+      &.active {
         display: block;
-        height: 165px;
-        margin: -60px auto 1rem;
-      }
-      ui-icon {
-        font-size: 48px;
-        margin-bottom: 0.5rem;
-        color: var(--primary-text-color);
-      }
-      .header {
-        font-size: 24px;
-        line-height: 1.2;
-        font-weight: bold;
-        color: var(--primary-text-color);
-        margin: 0rem 0rem 0.5rem;
-      }
-      p {
-        max-width: 500px;
-        margin: 0 auto;
       }
     }
   }
@@ -324,6 +305,10 @@ body {
     display: block;
     margin-bottom: 5rem;
   }
+
+  /*******************************
+            Footer
+  *******************************/
 
   footer {
     border-top: 1px solid var(--glow-border-color);
@@ -460,25 +445,31 @@ body {
 
       &.proof {
         ui-cards {
-          margin-top: -3rem;
-          font-size: 15px;
-        }
-      }
-
-      .cards {
-        margin-top: 0rem;
-        .card {
-          margin: 0;
-          flex-basis: 100%;
+          flex-direction: column;
         }
       }
 
       &.tour {
-        .left {
+        ui-container {
+          flex-direction: column;
+        }
+        .visual {
+          display: none;
+        }
+        .content {
           padding-right: 0rem;
         }
-        .right {
-          display: none;
+      }
+
+      &.showcase {
+        .header {
+          flex-direction: column;
+          gap: 1rem;
+          align-items: flex-start;
+        }
+        .menu {
+          overflow-x: auto;
+          max-width: 100%;
         }
       }
     }

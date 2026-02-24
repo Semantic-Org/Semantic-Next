@@ -4,24 +4,52 @@ import { createPlasma } from './plasma.js';
 
 createPlasma('#plasma', plasmaConfig);
 
-const $visual = $('.visual');
-const $copies = $('.tour .copy');
-const allSections = ['one', 'two', 'three', 'four'];
-const copySections = ['two', 'three', 'four'];
+/*-------------------------------
+      Tour Scroll Switching
+-------------------------------*/
 
-const update = () => {
-  let activeClass = 'one';
-  $copies.each((copy, index) => {
+const $tourExamples = $('.tour .example');
+const $tourCopies = $('.tour .content .copy');
+const sections = ['templates', 'specs', 'components'];
+
+const updateTourSection = () => {
+  let activeSection = sections[0];
+  $tourCopies.each((copy, index) => {
     const bounds = $(copy).bounds();
     if (bounds.top < window.innerHeight / 3) {
-      activeClass = copySections[index];
+      activeSection = sections[index];
     }
   });
-  if (!$visual.hasClass(activeClass)) {
-    allSections.forEach(s => $visual.removeClass(s));
-    $visual.addClass(activeClass);
-  }
+  $tourExamples.each((example) => {
+    const $example = $(example);
+    if ($example.data('section') === activeSection) {
+      $example.addClass('active');
+    }
+    else {
+      $example.removeClass('active');
+    }
+  });
 };
 
-$(window).on('scroll', update);
-update();
+$(window).on('scroll', updateTourSection);
+updateTourSection();
+
+/*-------------------------------
+      Showcase Tab Switching
+-------------------------------*/
+
+const $showcaseMenu = $('.showcase .menu');
+const $showcaseExamples = $('.showcase .example');
+
+$showcaseMenu.on('change', (event) => {
+  const value = event.detail.value;
+  $showcaseExamples.each((example) => {
+    const $example = $(example);
+    if ($example.data('example') === value) {
+      $example.addClass('active');
+    }
+    else {
+      $example.removeClass('active');
+    }
+  });
+});

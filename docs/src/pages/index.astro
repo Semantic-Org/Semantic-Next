@@ -1,15 +1,9 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
-import { CodeSample } from '@components/CodeSample/CodeSample.js';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { UIButton, UIContainer, UICards } from '@semantic-ui/core'
+import { UIButton, UIContainer, UICards, UIMenu, MenuItem } from '@semantic-ui/core'
 import { AIPrompt } from '@components/AIPrompt/AIPrompt.js';
-import { formatCode } from '@helpers/highlight/server.js';
-import { demoSteps, templateExample, specExample, componentExample } from '../data/homepage.js';
-
-const templateFormatted = formatCode(templateExample, { lang: 'html' });
-const specFormatted = formatCode(specExample, { lang: 'json' });
-const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
+import { demoSteps } from '../data/homepage.js';
 
 ---
 <Homepage>
@@ -38,28 +32,27 @@ const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
   <ribbons>
     <ribbon class="tour">
       <UIContainer>
-        <div class="right"></div>
-        <div class="left">
-          <div class="copy">
+        <div class="content">
+          <div class="copy" data-section="templates">
             <h4 class="sub header">Component Authoring</h4>
             <h3 class="header">Expressive Templates</h3>
-            <p>Use javascript or list style expressions. Surgically update values with Signals against your data.</p>
+            <p>Write templates with full JavaScript expressions or natural language-style Lisp syntax. Signals surgically update only what changed — no virtual DOM diffing.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                Use any javascript inside templates without arbitrary limitations
+                Full JavaScript in templates — ternaries, method calls, destructuring
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Use NL-style Lisp syntax to improve legibility and coherence when pairing with AI
-            </li>
+                NL-style Lisp syntax for cleaner AI generation and human readability
+              </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
           </div>
-          <div class="copy">
+          <div class="copy" data-section="specs">
             <h4 class="sub header">Designed for Agents</h4>
             <h3 class="header">Specs as Code Contracts</h3>
-            <p>Every component ships with a machine-readable spec. Agents read structured contracts to know exactly what's valid, what attributes compose, and what's appropriate.</p>
+            <p>Every component ships with a machine-readable spec. Agents know what's valid, how things compose, and what's contextually appropriate — no hallucination.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
@@ -67,34 +60,51 @@ const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                <code>usageLevel</code> tells agents what's common vs. niche — no hallucinated <code>{`<ui-button instagram>`}</code> in a checkout flow
-              </li>
-              <li>
-                <ui-icon check></ui-icon>
-                Specs are a code contract that also inform usage patterns
+                <code>usageLevel</code> tells agents what's common vs. niche
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/specs">Component Specs</UIButton>
           </div>
-          <div class="copy">
+          <div class="copy" data-section="components">
             <h4 class="sub header">No Build Required</h4>
             <h3 class="header">Runtime Components</h3>
-            <p>Define reactive web components with signals, Shadow DOM, and lifecycle hooks. Templates compile in the browser in under a millisecond — no bundler, no transpiler, no waiting.</p>
+            <p>Define reactive web components with signals, Shadow DOM, and lifecycle hooks. Templates compile in the browser in under a millisecond — no bundler needed.</p>
             <ul class="feature-list">
               <li>
                 <ui-icon check></ui-icon>
-                Signals-based state with built-in helpers — <code>toggle()</code>, <code>increment()</code>, <code>push()</code>
+                Signals with built-in helpers — <code>toggle()</code>, <code>increment()</code>, <code>push()</code>
               </li>
               <li>
                 <ui-icon check></ui-icon>
-                Shadow DOM scoping — <code>.primary</code> just works, no prefixes or modules
-              </li>
-              <li>
-                <ui-icon check></ui-icon>
-                Ship as standard ESM — works in any agent sandbox, CDN, or import map
+                Standard ESM — works in any agent sandbox, CDN, or import map
               </li>
             </ul>
             <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/components">Component Guide</UIButton>
+          </div>
+        </div>
+        <div class="visual">
+          <div class="sticky">
+            <div class="example active" data-section="templates">
+              <!-- TODO: PlaygroundExample for templates -->
+              <div class="placeholder">
+                <ui-icon code></ui-icon>
+                <span>Templates Example</span>
+              </div>
+            </div>
+            <div class="example" data-section="specs">
+              <!-- TODO: PlaygroundExample for specs -->
+              <div class="placeholder">
+                <ui-icon file-json></ui-icon>
+                <span>Specs Example</span>
+              </div>
+            </div>
+            <div class="example" data-section="components">
+              <!-- TODO: PlaygroundExample for components -->
+              <div class="placeholder">
+                <ui-icon box></ui-icon>
+                <span>Components Example</span>
+              </div>
+            </div>
           </div>
         </div>
       </UIContainer>
@@ -103,35 +113,48 @@ const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
       <UIContainer>
         <UICards three spaced stackable>
           <ui-card>
-            <ui-icon pdf></ui-icon>
+            <ui-icon sparkles></ui-icon>
             <div class="header">Designed for Agents</div>
-            <div class="description">
-              Components are powered by machine readable specs designed to translate from natural language to code.
-            </div>
+            <div class="description">Machine-readable specs translate natural language to valid, composable UI code.</div>
           </ui-card>
           <ui-card>
-            <ui-icon cpu></ui-icon>
+            <ui-icon zap></ui-icon>
             <div class="header">No Build Necessary</div>
-            <div class="description">
-              Signals, JSX style expression evaluation, and modern ESM running directly in the browser powered by web components.
-            </div>
+            <div class="description">Signals, expression evaluation, and modern ESM running directly in the browser.</div>
           </ui-card>
           <ui-card>
             <ui-icon layers></ui-icon>
             <div class="header">Complete UI Library</div>
-            <div class="description">
-              A complete UI framework designed for compositionality and human in the loop editing. JIT Client-Side Tailwind inside Web Components too.
-            </div>
+            <div class="description">A full component library with composable primitives and JIT Tailwind in Shadow DOM.</div>
           </ui-card>
         </UICards>
       </UIContainer>
     </ribbon>
-    <ribbon>
+    <ribbon class="showcase">
       <UIContainer>
-        <h3 class="ui header">
-          See It In Action
-        </h3>
-        <PlaygroundExample height="800" id="card-search"></PlaygroundExample>
+        <div class="header">
+          <h3 class="ui header">See It In Action</h3>
+          <UIMenu client:load selection inset class="menu" value="card-search">
+            <MenuItem client:load value="card-search">Card Search</MenuItem>
+            <MenuItem client:load value="fireworks-display">Fireworks</MenuItem>
+            <MenuItem client:load value="advanced-ball-simulation">Ball Simulation</MenuItem>
+            <MenuItem client:load value="spectrum-analyzer">Spectrum Analyzer</MenuItem>
+          </UIMenu>
+        </div>
+        <div class="examples">
+          <div class="example active" data-example="card-search">
+            <PlaygroundExample height="800" id="card-search"></PlaygroundExample>
+          </div>
+          <div class="example" data-example="fireworks-display">
+            <PlaygroundExample height="800" id="fireworks-display"></PlaygroundExample>
+          </div>
+          <div class="example" data-example="advanced-ball-simulation">
+            <PlaygroundExample height="800" id="advanced-ball-simulation"></PlaygroundExample>
+          </div>
+          <div class="example" data-example="spectrum-analyzer">
+            <PlaygroundExample height="800" id="spectrum-analyzer"></PlaygroundExample>
+          </div>
+        </div>
       </UIContainer>
     </ribbon>
   </ribbons>
