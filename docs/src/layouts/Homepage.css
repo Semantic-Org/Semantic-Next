@@ -147,7 +147,7 @@ body {
       height: 100%;
       z-index: 0;
       opacity: 0;
-      transition: opacity 2s ease;
+      transition: opacity 10s ease;
       image-rendering: auto;
       will-change: contents;
       contain: strict;

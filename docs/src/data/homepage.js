@@ -2,7 +2,7 @@ export const plasmaConfig = {
   colorFrom: '#00405C',
   colorTo: '#2b6fb6',
   colorShift: 0,
-  fps: true,
+  fps: false,
 
   specularTint: '#1a99e6',
   specularPower: 1.5,
