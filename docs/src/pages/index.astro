@@ -24,43 +24,9 @@ const componentFormatted = formatCode(componentExample, { lang: 'javascript' });
           <UIButton secondary href="/ui/start">View Docs</UIButton>
           <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
         </div>
-        <div class="visual one">
+        <div class="visual">
           <div class="sticky">
             <AIPrompt steps={demoSteps} dark client:load></AIPrompt>
-            <div class="segment demo-segment">
-              <div class="one section">
-              </div>
-                <div class="demo-pane">
-                  <div class="pane-label">Preview</div>
-                  <div class="demo-ui"></div>
-                </div>
-                <div class="demo-pane">
-                  <div class="pane-label">Code</div>
-                  <div class="demo-code"></div>
-                </div>
-                <div class="demo-note"></div>
-              <div class="two section">
-                <CodeSample
-                  formattedCode={templateFormatted}
-                  client:load
-                  language="html"
-                />
-              </div>
-              <div class="three section">
-                <CodeSample
-                  formattedCode={specFormatted}
-                  client:load
-                  language="html"
-                />
-              </div>
-              <div class="four section">
-                <CodeSample
-                  formattedCode={componentFormatted}
-                  client:load
-                  language="json"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </UIContainer>

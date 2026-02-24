@@ -27,7 +27,16 @@ export interface EventOptions {
    */
   abortController?: AbortController;
   /**
-   * Event listener options (e.g., `capture`, `passive`).
+   * Listen in capture phase (event fires top-down before bubbling).
+   */
+  capture?: boolean;
+  /**
+   * Mark listener as passive (will not call preventDefault).
+   * Automatically set to `true` for `scroll` and `resize` events.
+   */
+  passive?: boolean;
+  /**
+   * Additional event listener options passed through to addEventListener.
    */
   eventSettings?: AddEventListenerOptions;
 }
@@ -375,6 +384,26 @@ export class Query {
    * @returns A Promise that resolves with the event object.
    */
   onNext(eventNames: string, targetSelector: string, options?: { timeout?: number; }): Promise<Event>;
+
+  /**
+   * Attaches a capture-phase event listener that fires top-down before bubbling.
+   * Useful for intercepting events before children handle them.
+   * @see https://next.semantic-ui.com/docs/api/query/events#intercept
+   * @param eventNames - A space-separated string of event names.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, handler: EventListener, options?: EventOptions): this;
+  /**
+   * Attaches a capture-phase event listener with delegation.
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
 
   /**
    * Removes event listeners from each element in the current set.

@@ -455,7 +455,7 @@ export const Template = class Template {
             return value;
           });
           const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
-          template.call(boundEvent, {
+          return template.call(boundEvent, {
             additionalData: {
               event: event,
               isDeep,

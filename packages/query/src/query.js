@@ -79,6 +79,8 @@ export class Query {
   */
   static elementDisplayCache = new WeakMap();
 
+  static autoPassiveEvents = ['scroll', 'resize'];
+
   static isWindow(el) {
     return el === Query.globalThisProxy || el === globalThis;
   }
@@ -687,7 +689,18 @@ export class Query {
     events.forEach(({ eventName, namespaces }) => {
       const abortController = options?.abortController || new AbortController();
       const eventSettings = options?.eventSettings || {};
+      const capture = options?.capture;
+      const passive = options?.passive;
       const signal = abortController.signal;
+
+      // build addEventListener options
+      const listenerOptions = { signal, ...eventSettings };
+      if (capture !== undefined) { listenerOptions.capture = capture; }
+      if (passive !== undefined) { listenerOptions.passive = passive; }
+      if (inArray(eventName, Query.autoPassiveEvents) && passive !== false) {
+        listenerOptions.passive = true;
+      }
+
       this.each((el) => {
         let delegateHandler;
         if (targetSelector) {
@@ -708,17 +721,32 @@ export class Query {
             }
 
             if (target) {
-              // If a matching target is found, call the handler with the correct context
-              handler.call(target, event);
+              return handler.call(target, event);
             }
           };
         }
-        const eventListener = delegateHandler || handler;
+
+        // wrap listener to support return false / return 'cancel'
+        // only wrap if handler has a return statement to preserve native reference
+        const rawListener = delegateHandler || handler;
+        const needsWrapping = delegateHandler || /\breturn\b/.test(handler.toString());
+        const eventListener = needsWrapping
+          ? function(e) {
+            const result = rawListener.call(this, e);
+            if (result === false) {
+              e.stopPropagation();
+            }
+            else if (result === 'cancel') {
+              e.preventDefault();
+            }
+            return result;
+          }
+          : handler;
 
         // will cause illegal invocation if used from proxy object
         const domEL = (el == Query.globalThisProxy) ? globalThis : el;
         if (domEL.addEventListener) {
-          domEL.addEventListener(eventName, eventListener, { signal, ...eventSettings });
+          domEL.addEventListener(eventName, eventListener, listenerOptions);
         }
 
         const eventHandler = {
@@ -766,7 +794,7 @@ export class Query {
     options.abortController = abortController;
     const wrappedHandler = function(...args) {
       abortController.abort();
-      handler.apply(this, args);
+      return handler.apply(this, args);
     };
     return (targetSelector)
       ? this.on(eventName, targetSelector, wrappedHandler, options)
@@ -2507,6 +2535,21 @@ export class Query {
 
     // Use intersects method directly on the full collection
     return this.intersects($viewport, intersectionOptions);
+  }
+
+  intercept(eventNames, targetSelectorOrHandler, handlerOrOptions, options) {
+    if (isString(targetSelectorOrHandler)) {
+      // delegation: intercept('click', '.selector', handler, options?)
+      return this.on(eventNames, targetSelectorOrHandler, handlerOrOptions, { ...options, capture: true });
+    }
+    else if (isObject(handlerOrOptions)) {
+      // handler with options: intercept('click', handler, options)
+      return this.on(eventNames, targetSelectorOrHandler, { ...handlerOrOptions, capture: true });
+    }
+    else {
+      // handler only: intercept('click', handler)
+      return this.on(eventNames, targetSelectorOrHandler, { capture: true });
+    }
   }
 
   // special helper for SUI components

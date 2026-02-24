@@ -43,6 +43,11 @@ xx.xx.xxxx
 * **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
 * **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
 * **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
+* **Bug** - Fixed `one()` not propagating handler return values through the wrapper chain.
+* **Feature** - Added `capture` and `passive` as top-level options for `on()` and `one()`, no longer requiring `eventSettings` nesting.
+* **Feature** - `scroll` and `resize` events are now passive by default for better performance. Override with `{ passive: false }`.
+* **Feature** - Event handlers can `return false` to call `stopPropagation()` or `return 'cancel'` to call `preventDefault()`.
+* **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
 
 ### Utils
 * **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.

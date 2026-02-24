@@ -162,12 +162,14 @@ The Query class provides a comprehensive set of methods organized into logical c
 - `hasClass(className)` - Check for CSS class
 
 ### Event Handling
-- `on(event, selector, handler)` - Event delegation
+- `on(event, selector, handler, options)` - Event binding with optional delegation. Supports `{ capture, passive }` as top-level options. `scroll` and `resize` events are passive by default.
 - `off(event, handler)` - Remove event listeners
 - `trigger(event, data)` - Trigger events
 - `dispatchEvent(event, data, settings)` - Dispatch custom events
 - `one(event, handler)` - One-time event listener
 - `onNext(event, options)` - Promise-based event waiting
+- `intercept(event, selector, handler)` - Capture-phase listener (fires top-down before bubbling). Use when a parent needs to handle/block events before children.
+- Handler return values: `return false` calls `stopPropagation()`, `return 'cancel'` calls `preventDefault()`
 
 ### Dimensions and Positioning
 - `width(value)`, `height(value)` - Get/set dimensions
@@ -408,6 +410,39 @@ $('document').on('keydown', function(event) {
   if (event.key === 'Escape') {
     $('.modal').component().close();
   }
+});
+```
+
+### Intercepting Events (Capture Phase)
+
+```javascript
+// Parent intercepts ESC before children handle it
+$('.modal').intercept('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    return false; // children never see this event
+  }
+});
+
+// With delegation — intercept submit button clicks for validation
+$('.form').intercept('click', '[type="submit"]', function(e) {
+  if (!isValid()) {
+    return false; // button's handler never fires
+  }
+});
+```
+
+### Handler Return Values
+
+```javascript
+// return false stops propagation (event won't reach parent handlers)
+$('span').on('click', () => {
+  return false;
+});
+
+// return 'cancel' prevents default browser action
+$('form').on('submit', () => {
+  return 'cancel';
 });
 ```
 
