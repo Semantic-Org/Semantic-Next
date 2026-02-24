@@ -70,8 +70,15 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
   },
 });
 
-const onRendered = ({ reaction, self }) => {
+const onRendered = ({ reaction, self, $, isClient }) => {
   reaction(self.calculateAST);
+
+  if (isClient) {
+    $('.links a').tooltip({
+      position: 'top',
+      containToScroll: false,
+    });
+  }
 };
 
 const events = {
