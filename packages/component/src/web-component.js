@@ -3,6 +3,7 @@ import { Signal } from '@semantic-ui/reactivity';
 import {
   camelToKebab,
   each,
+  firstMatch,
   get,
   inArray,
   isClassInstance,
@@ -302,8 +303,10 @@ class WebComponentBase extends LitElement {
         }
         else if (allowedValues && inArray(value, allowedValues)) {
           // this is a variation like emphasis="primary"
-          // it receives the class "primary"
-          classes.push(value);
+          // check if value requires compound form for CSS class (e.g. "subtle" → "subtle-positive")
+          const compoundForms = [`${value}-${attribute}`, `${attribute}-${value}`];
+          const compoundClass = firstMatch(compoundForms, (form) => componentSpec.optionAttributes[form]);
+          classes.push(compoundClass || value);
         }
         else if (value === true && inArray(property, allowedValues)) {
           // this is identity like positive="true"

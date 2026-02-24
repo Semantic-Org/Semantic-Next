@@ -2,6 +2,7 @@ import {
   clone,
   each,
   filterObject,
+  firstMatch,
   flatten,
   get,
   getArticle,
@@ -568,13 +569,14 @@ export class SpecReader {
           // construct an example programatically
           // using the option values
           if (isString(option.value)) {
-            modifiers = option.value;
+            modifiers = this.getConciseModifier(attribute, option.value);
           }
           else if (isString(option)) {
-            modifiers = option;
+            modifiers = this.getConciseModifier(attribute, option);
           }
           if (isArray(option.value)) {
-            modifiers = option.value.filter(val => isString(val))[0];
+            const firstValue = option.value.filter(val => isString(val))[0];
+            modifiers = this.getConciseModifier(attribute, firstValue);
           }
           if (defaultAttributes) {
             modifiers = `${modifiers} ${defaultAttributes}`;
@@ -894,31 +896,8 @@ export class SpecReader {
       each(pluralOnlyParts, addSettingsFromPart);
     }
 
-    // avoid having to reverse array at runtime
-    let options = mapObject(componentSpec.allowedValues, (values, key) => {
-      return values = values.filter(value => isString(value));
-    });
-    componentSpec.optionAttributes = reverseKeys(options);
-
-    // add compound aliases for types/variations that opt-in
-    // this enables disambiguation syntax like <ui-foo size-small> or <ui-foo small-size>
-    const partsWithOptions = [...(spec.types || []), ...(spec.variations || [])];
-    each(partsWithOptions, (part) => {
-      if (!part.compoundAliases) {
-        return;
-      }
-      const attr = part.attribute || part.name?.toLowerCase();
-      const allowedValues = componentSpec.allowedValues[attr];
-      if (!allowedValues) {
-        return;
-      }
-      each(allowedValues, (value) => {
-        if (isString(value)) {
-          componentSpec.optionAttributes[`${attr}-${value}`] = attr;
-          componentSpec.optionAttributes[`${value}-${attr}`] = attr;
-        }
-      });
-    });
+    // build optionAttributes: reverse lookup from value → attribute name
+    this.buildOptionAttributes({ componentSpec, spec });
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
@@ -1030,11 +1009,8 @@ export class SpecReader {
     addSettingsFromPart('settings');
     addSettingsFromPart('events');
 
-    // avoid having to reverse array at runtime
-    let options = mapObject(componentSpec.allowedValues, (values, key) => {
-      return values = values.filter(value => isString(value));
-    });
-    componentSpec.optionAttributes = reverseKeys(options);
+    // build optionAttributes with collision detection
+    this.buildOptionAttributes({ componentSpec });
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
@@ -1150,5 +1126,113 @@ export class SpecReader {
       return false;
     }
     return true;
+  }
+
+  /*
+    Returns the concise attribute form for a value.
+    If the value requires a compound form (e.g. "subtle" on "positive" → "subtle-positive"),
+    returns the compound. Otherwise returns the bare value.
+  */
+  getConciseModifier(attribute, value) {
+    const componentSpec = this.getWebComponentSpec();
+    const compoundForms = [`${value}-${attribute}`, `${attribute}-${value}`];
+    const compoundForm = firstMatch(compoundForms, (form) => componentSpec.optionAttributes[form]);
+    // use compound if bare value doesn't point to this attribute
+    if (compoundForm && componentSpec.optionAttributes[value] !== attribute) {
+      return compoundForm;
+    }
+    return value;
+  }
+
+  /*
+    Builds the optionAttributes lookup from allowedValues.
+    Handles three cases:
+    - Bare values: unique values get direct lookup (e.g. "primary" → "emphasis")
+    - Auto-detected collisions: values appearing in multiple attributes get compound forms
+      (e.g. "subtle" in styled + positive → "subtle-styled", "subtle-positive")
+    - Manual compoundAliases: parts opt-in to compound forms for readability
+      (e.g. animated → "vertical-animated", "fade-animated")
+  */
+  buildOptionAttributes({ componentSpec, spec }) {
+    // step 1: base lookup via reverseKeys
+    let options = mapObject(componentSpec.allowedValues, (values, key) => {
+      return values = values.filter(value => isString(value));
+    });
+    componentSpec.optionAttributes = reverseKeys(options);
+
+    // step 2: detect which specific values collide across attributes
+    // skip identity values (value === attr) as they are boolean-style attributes
+    // track first attribute to register each value — it "owns" the bare form
+    const valueCounts = {};
+    const firstOwner = {};
+    each(componentSpec.allowedValues, (allowedValues, attr) => {
+      each(allowedValues, (value) => {
+        if (isString(value) && value !== attr) {
+          if (!valueCounts[value]) {
+            valueCounts[value] = [];
+            firstOwner[value] = attr;
+          }
+          valueCounts[value].push(attr);
+        }
+      });
+    });
+    const collidingValues = new Set();
+    const collidingAttributes = new Set();
+    each(valueCounts, (attrs, value) => {
+      if (attrs.length > 1) {
+        collidingValues.add(value);
+        each(attrs, (attr) => collidingAttributes.add(attr));
+      }
+    });
+
+    // step 3: generate compound entries
+    // when any value in an attribute collides, ALL sibling values get compound forms
+    // e.g. "left" and "right" collide between floated/attached
+    // → attached also generates "top-attached", "bottom-attached" for consistency
+    // colliding values lose their bare entry, non-colliding siblings keep theirs
+    each(componentSpec.allowedValues, (allowedValues, attr) => {
+      if (!collidingAttributes.has(attr)) {
+        return;
+      }
+      each(allowedValues, (value) => {
+        if (!isString(value) || value === attr) {
+          return;
+        }
+        // generate compound form for all values in a colliding attribute
+        componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+        // only remove bare entry for actually colliding values
+        if (collidingValues.has(value) && attr !== firstOwner[value]) {
+          delete componentSpec.optionAttributes[value];
+        }
+      });
+    });
+
+    // step 4: add compound aliases for parts that manually opt-in (e.g. animated)
+    // compounds all non-identity, non-colliding values on the part
+    if (spec) {
+      const partsWithOptions = [...(spec.types || []), ...(spec.states || []), ...(spec.variations || [])];
+      each(partsWithOptions, (part) => {
+        if (!part.compoundAliases) {
+          return;
+        }
+        const attr = part.attribute || part.name?.toLowerCase();
+        const allowedValues = componentSpec.allowedValues[attr];
+        if (!allowedValues) {
+          return;
+        }
+        each(allowedValues, (value) => {
+          if (!isString(value) || value === attr || collidingValues.has(value)) {
+            return;
+          }
+          if (part.prefixCompound) {
+            componentSpec.optionAttributes[`${attr}-${value}`] = attr;
+          }
+          else {
+            componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+          }
+          delete componentSpec.optionAttributes[value];
+        });
+      });
+    }
   }
 }
