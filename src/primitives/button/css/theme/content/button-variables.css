@@ -26,6 +26,7 @@
   --button-text-color: var(--black-80);
   --button-inverted-text-color: var(--white-90);
   --button-text-shadow: none;
+  --button-text-align: center;
   --button-inverted-text-shadow: var(--button-text-shadow);
 
   /* Border */
