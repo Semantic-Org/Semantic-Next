@@ -12,7 +12,8 @@ import template from './AIPrompt.html?raw';
 const defaultSettings = {
   demoHint: 'Click to try it yourself',
   liveHint: 'Enter your prompt below',
-  placeholder: 'Describe a button...',
+  placeholder: 'Create something...',
+  editPlaceholder: 'Make a change...',
   maxLength: 150,
   steps: [],
   primitive: 'button',
@@ -52,6 +53,10 @@ const createComponent = ({ self, $, settings, state, flush }) => ({
 
   getHint() {
     return state.demoMode.get() ? settings.demoHint : settings.liveHint;
+  },
+
+  getPlaceholder() {
+    return state.hasResults.get() ? settings.editPlaceholder : settings.placeholder;
   },
 
   promptClass: () => ({
@@ -269,6 +274,7 @@ const createComponent = ({ self, $, settings, state, flush }) => ({
   },
 
   async runDemoStep(step) {
+    this.demoStep = step; // shadow for clear
     state.submitted.set(false);
     self.clearPrompt();
 
@@ -303,9 +309,12 @@ const createComponent = ({ self, $, settings, state, flush }) => ({
     self.goLive();
   },
 
-  goLive() {
+  async goLive() {
     self.stopDemo();
     self.clearPrompt();
+    if (state.isThinking.get()) {
+      self.setCode(this.demoStep.html, { isComplete: true, prompt: this.demoStep.prompt });
+    }
     state.demoMode.set(false);
   },
 

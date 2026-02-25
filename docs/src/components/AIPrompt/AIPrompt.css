@@ -154,7 +154,7 @@
       background-clip: text;
       -webkit-background-clip: text;
       color: transparent;
-      animation: shimmer 1.5s ease-in-out infinite;
+      animation: shimmer 2s ease-in-out infinite;
     }
   }
 }
@@ -164,10 +164,6 @@
 *******************************/
 
 
-@starting-style {
-  .results {
-  }
-}
 .results {
   margin-top: var(--margin);
   background: var(--ai-prompt-results-background);
@@ -237,13 +233,13 @@
   &.has-results {
     transform: translateY(-100px);
 
+    /* Too much
     .bar {
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      /* Too much
       font-size: 12px;
       padding: 7px 10px;
-      */
     }
+    */
 
     .results {
       opacity: 1;
