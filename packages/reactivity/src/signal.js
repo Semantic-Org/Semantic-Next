@@ -113,9 +113,8 @@ export class Signal {
   }
 
   set(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.value = newValue;
-    }
+    // equality check in setter
+    this.value = newValue;
   }
 
   subscribe(callback) {
@@ -243,7 +242,7 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
-    if(index === -1) {
+    if (index === -1) {
       return;
     }
     const newValue = this.peek().map((object, currentIndex) => {
@@ -296,7 +295,7 @@ export class Signal {
   }
   getItem(id) {
     const index = this.getItemIndex(id);
-    if(index !== -1) {
+    if (index !== -1) {
       return this.getIndex(index);
     }
   }
