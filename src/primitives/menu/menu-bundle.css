@@ -223,7 +223,7 @@
 @layer menu.theme.variations.vertical {
   :host {
     --menu-vertical-align-items: stretch;
-    --menu-vertical-text-align: center;
+    --menu-vertical-text-align: left;
   }
 }
 

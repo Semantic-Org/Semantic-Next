@@ -35,7 +35,7 @@
     font-weight: var(--button-font-weight);
     line-height: var(--button-line-height);
     font-style: normal;
-    text-align: center;
+    text-align: var(--button-text-align);
     text-decoration: none;
     border-radius: var(--button-border-radius);
     box-shadow: var(--button-box-shadow);
@@ -2151,6 +2151,7 @@
   }
   .vertical.buttons ::slotted(ui-button) {
     --button-width: 100%;
+    --button-text-align: left;
   }
   .vertical.buttons ::slotted(ui-button:is(:first-child)) {
     --button-border-radius: var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0 0;
@@ -2183,6 +2184,7 @@
     --button-text-color: var(--black-80);
     --button-inverted-text-color: var(--white-90);
     --button-text-shadow: none;
+    --button-text-align: center;
     --button-inverted-text-shadow: var(--button-text-shadow);
     --button-border-radius: var(--border-radius);
     --button-border: none;
