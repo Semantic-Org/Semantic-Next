@@ -171,6 +171,8 @@
   border-radius: var(--ai-prompt-results-border-radius);
   padding: var(--ai-prompt-results-padding);
   transition: all 0.4s ease 0.2s;
+  backdrop-filter: blur(2px);
+  box-shadow: var(--floating-shadow);
   opacity: 0;
   transform: translateY(8px);
 }

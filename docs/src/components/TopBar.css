@@ -118,9 +118,8 @@
     &.floating {
 
       background-color: transparent;
+
       .content {
-        width: 1170px;
-        max-width: 100%;
         margin: 0 auto;
       }
 
@@ -130,6 +129,12 @@
       global-search {
         margin-right: 0;
         max-width: max-content;
+      }
+    }
+
+    &:not(.floating) {
+      .content {
+        width: 100%;
       }
     }
 
