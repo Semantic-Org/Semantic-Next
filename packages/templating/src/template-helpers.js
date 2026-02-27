@@ -183,7 +183,7 @@ export const TemplateHelpers = {
   formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {
     return formatDate(date, format, options);
   },
-  formatDateTimeSeconds(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
+  formatTime(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
     return formatDate(date, format, options);
   },
   roundNumber(number, precision) {
