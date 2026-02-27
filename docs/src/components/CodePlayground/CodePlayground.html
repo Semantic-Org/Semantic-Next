@@ -1,5 +1,5 @@
 <div class="playground {classMap getClassMap}" part="playground">
-  {#if title}
+  {#if both (not minimal) title}
     <div class="masthead" part="masthead">
       <h3 class="title" part="title">{title}</h3>
       <span class="description" part="description">{description}</span>
@@ -86,6 +86,7 @@
       {/if}
       {>CodePlaygroundFile
         inline=true
+        lineNumbers={!minimal}
         filename=activeFile
       }
     </ui-panel>

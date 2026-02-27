@@ -5,7 +5,7 @@ import { getFolder } from '@helpers/loading.js';
 
 import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
-const { id, direction, height } = Astro.props;
+const { id, direction, height, minimal } = Astro.props;
 const matchingExamples = await getCollection('examples', ({ data }) => {
   return getExampleID(data) == id;
 });
@@ -25,7 +25,6 @@ let files = await getExampleFiles({
   includeLog: example.exampleType == 'log',
 });
 const sandboxURL = getSandboxURL();
-const inlineDirection = direction;
 const exampleURL = `/examples/${id}/`;
 const saveID = `example-${id}`;
 ---
@@ -34,9 +33,10 @@ const saveID = `example-${id}`;
   maxHeight={height}
   inline=true
   saveState=true
+  minimal={minimal}
   saveID={saveID}
   selectedFile={example.selectedFile}
-  inlineDirection={inlineDirection}
+  inlineDirection={direction}
   exampleURL={exampleURL}
   sandboxURL={sandboxURL}
   ></CodePlayground>
