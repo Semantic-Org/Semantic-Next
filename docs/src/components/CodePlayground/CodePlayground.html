@@ -86,7 +86,8 @@
       {/if}
       {>CodePlaygroundFile
         inline=true
-        lineNumbers={!minimal}
+        lineNumbers=!minimal
+        lineWrapping=minimal
         filename=activeFile
       }
     </ui-panel>
@@ -114,6 +115,8 @@
           {>CodePlaygroundPanel
             panel=getPagePanel
             size='natural'
+            lineNumbers=!minimal
+            lineWrapping=minimal
             maxSize='50%'
           }
           {>CodePlaygroundPanel

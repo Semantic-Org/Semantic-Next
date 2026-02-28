@@ -25,6 +25,7 @@ let files = await getExampleFiles({
   includeLog: example.exampleType == 'log',
 });
 const sandboxURL = getSandboxURL();
+const inlineDirection = direction;
 const exampleURL = `/examples/${id}/`;
 const saveID = `example-${id}`;
 ---
@@ -33,10 +34,10 @@ const saveID = `example-${id}`;
   maxHeight={height}
   inline=true
   saveState=true
-  minimal={minimal}
   saveID={saveID}
   selectedFile={example.selectedFile}
-  inlineDirection={direction}
+  inlineDirection={inlineDirection}
   exampleURL={exampleURL}
   sandboxURL={sandboxURL}
+  minimal={minimal}
   ></CodePlayground>

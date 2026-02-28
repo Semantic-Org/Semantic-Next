@@ -21,14 +21,6 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
     };
   },
 
-  maybeLineWrapping() {
-    return settings.lineNumbers;
-  },
-
-  maybeLineNumbers() {
-    return settings.lineNumbers;
-  },
-
   setEditorInstance() {
     // CM6 editor instance
     const editorEl = $$('playground-code-editor').get(0);
@@ -99,6 +91,23 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
     // add custom styles
     if (self.editorEl) {
       adoptStylesheet(codeMirrorCSS, self.editorEl.shadowRoot);
+    }
+
+    const $editor = $('playground-file-editor');
+
+    // disable line numbers if requested
+    if (data.lineNumbers) {
+      $editor.addAttr('line-numbers');
+    }
+    else {
+      $editor.removeAttr('line-numbers');
+    }
+    // disable line numbers if requested
+    if (data.lineWrapping) {
+      $editor.addAttr('line-wrapping');
+    }
+    else {
+      $editor.removeAttr('line-wrapping');
     }
 
     // handle custom syntax
