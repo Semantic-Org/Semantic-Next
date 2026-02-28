@@ -125,6 +125,10 @@ export const Template = class Template {
     }
   }
 
+  isSubtemplate() {
+    return this.parentTemplate !== undefined;
+  }
+
   // when rendered as a partial/subtemplate
   setParent(parentTemplate) {
     // add child templates to parent for searching with getChild
