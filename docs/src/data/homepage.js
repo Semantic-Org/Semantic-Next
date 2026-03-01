@@ -10,11 +10,11 @@ export const plasmaConfig = {
 
   speed: 0.2,
   density: 2.5,
-  brightness: 0.6,
+  brightness: 1,
   resolution: 1,
   mouse: {
-    light: 2,
-    warp: 0.5,
+    light: 5,
+    warp: 1.5,
   },
 };
 

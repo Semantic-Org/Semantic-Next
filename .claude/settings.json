@@ -7,7 +7,7 @@
   "mcpServers": {
     "semantic-ui": {
       "command": "node",
-      "args": ["./tools/mcp-server/dist/index.js"]
+      "args": ["./tools/mcp/dist/index.js"]
     }
   }
 }
