@@ -15,7 +15,7 @@ export async function getStaticPaths() {
       allFiles: allExampleFiles,
       basePath: '../../../examples/',
       includeFolder: example.exampleType == 'folder',
-      hideBoilerplate: true,
+      hideBoilerplate: false,
       includePlaygroundInjections: false,
       includeLog: example.data.exampleType == 'log',
       includeError: false,

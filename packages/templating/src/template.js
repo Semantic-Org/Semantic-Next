@@ -25,6 +25,10 @@ import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
 export const Template = class Template {
+  static [Symbol.hasInstance](instance) {
+    return instance?.constructor?.name === 'Template';
+  }
+
   static templateCount = 0;
 
   static isServer = isServer;

@@ -1,9 +1,7 @@
-// click ellipsus to show imports /* playground-fold */
 import { defineComponent, getText } from '@semantic-ui/component';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
-/* playground-fold-end */
 
 const defaultState = {
   password: '',
@@ -46,7 +44,6 @@ const events = {
   },
 };
 
-// click ellipsus to show exports /* playground-fold */
 defineComponent({
   tagName: 'password-strength',
   template,
@@ -55,5 +52,3 @@ defineComponent({
   createComponent,
   events,
 });
-
-/* playground-fold-end */
