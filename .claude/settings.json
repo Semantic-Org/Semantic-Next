@@ -9,5 +9,8 @@
       "command": "node",
       "args": ["./tools/mcp/dist/index.js"]
     }
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
   }
 }
