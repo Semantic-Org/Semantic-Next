@@ -14,6 +14,10 @@ import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
 
 export class Signal {
+  static [Symbol.hasInstance](instance) {
+    return instance?.constructor?.name === 'Signal';
+  }
+
   constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
     // pass in some metadata for debugging
     this.dependency = new Dependency({

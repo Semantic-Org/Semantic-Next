@@ -53,6 +53,11 @@ export class Query {
     },
   });
 
+  // fixes instanceof when multiple copies loaded
+  static [Symbol.hasInstance](instance) {
+    return instance?.constructor?.name === 'Query';
+  }
+
   static isDevelopment = isDevelopment;
 
   static logLevel = isDevelopment ? 'debug' : 'silent';

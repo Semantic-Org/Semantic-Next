@@ -25,6 +25,7 @@ import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
 export const Template = class Template {
+  // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
     return instance?.constructor?.name === 'Template';
   }
