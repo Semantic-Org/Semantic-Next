@@ -1,2 +1,6 @@
 :host {
+  --spinner-overlay-size: 64px;
+  --spinner-overlay-thickness: 0.09;
+  --spinner-overlay-speed: 0.9s;
+  --spinner-overlay-text-gap: var(--gap-s);
 }

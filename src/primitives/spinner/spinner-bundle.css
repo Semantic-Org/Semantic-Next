@@ -7,19 +7,21 @@
 /* src/primitives/spinner/css/definition/content/spinner.css */
 @layer spinner.definition.content.spinner {
   .spinner {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: var(--spinner-vertical-align);
+    gap: var(--spinner-text-gap);
   }
   .circle {
     --spinner-stroke: calc(var(--spinner-size) * var(--spinner-thickness));
-    --spinner-gap: calc(360deg - var(--spinner-arc));
-    display: block;
+    --spinner-arc-gap: calc(360deg - var(--spinner-arc));
     width: var(--spinner-size);
     height: var(--spinner-size);
-    margin-inline: auto;
     border-radius: 50%;
+    flex-shrink: 0;
     background:
       conic-gradient(
-        from calc(var(--spinner-gap) / 2),
+        from calc(var(--spinner-arc-gap) / 2),
         transparent 0deg,
         var(--spinner-color) var(--spinner-arc),
         transparent var(--spinner-arc));
@@ -45,18 +47,8 @@
 /* src/primitives/spinner/css/definition/content/text.css */
 @layer spinner.definition.content.text {
   .spinner .text {
-    display: block;
-    margin-top: var(--spinner-text-margin);
-    text-align: center;
     font-size: var(--spinner-text-font-size);
     color: var(--spinner-text-color);
-  }
-}
-
-/* src/primitives/spinner/css/definition/states/active.css */
-@layer spinner.definition.states.active {
-  .active.spinner {
-    display: inline-block;
   }
 }
 
@@ -64,6 +56,13 @@
 @layer spinner.definition.states.hidden {
   .hidden.spinner {
     display: none;
+  }
+}
+
+/* src/primitives/spinner/css/definition/states/active.css */
+@layer spinner.definition.states.active {
+  .active.spinner {
+    display: inline-flex;
   }
 }
 
@@ -113,19 +112,32 @@
 /* src/primitives/spinner/css/definition/variations/centered.css */
 @layer spinner.definition.variations.centered {
   .centered.spinner {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-inline: auto;
+    gap: var(--spinner-centered-text-gap);
+    --spinner-size: var(--spinner-centered-size);
+    --spinner-thickness: var(--spinner-centered-thickness);
+    --spinner-speed: var(--spinner-centered-speed);
   }
 }
 
 /* src/primitives/spinner/css/definition/variations/overlay.css */
 @layer spinner.definition.variations.overlay {
   .overlay.spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: absolute;
     inset: 0;
     width: fit-content;
     height: fit-content;
     margin: auto;
+    gap: var(--spinner-overlay-text-gap);
+    --spinner-size: var(--spinner-overlay-size);
+    --spinner-thickness: var(--spinner-overlay-thickness);
+    --spinner-speed: var(--spinner-overlay-speed);
   }
 }
 
@@ -166,18 +178,19 @@
 /* src/primitives/spinner/css/theme/content/spinner-variables.css */
 @layer spinner.theme.content.spinner {
   :host {
-    --spinner-size: 64px;
+    --spinner-size: 1em;
     --spinner-color: #2274b4;
-    --spinner-thickness: 0.09;
+    --spinner-thickness: 0.07;
     --spinner-arc: 330deg;
-    --spinner-speed: 0.9s;
+    --spinner-speed: 0.7s;
+    --spinner-vertical-align: -0.15em;
   }
 }
 
 /* src/primitives/spinner/css/theme/content/text-variables.css */
 @layer spinner.theme.content.text {
   :host {
-    --spinner-text-margin: var(--gap-s);
+    --spinner-text-gap: var(--gap-2xs);
     --spinner-text-font-size: var(--relative-small);
     --spinner-text-color: var(--muted-text-color);
   }
@@ -204,12 +217,20 @@
 /* src/primitives/spinner/css/theme/variations/centered-variables.css */
 @layer spinner.theme.variations.centered {
   :host {
+    --spinner-centered-size: 64px;
+    --spinner-centered-thickness: 0.09;
+    --spinner-centered-speed: 0.9s;
+    --spinner-centered-text-gap: var(--gap-s);
   }
 }
 
 /* src/primitives/spinner/css/theme/variations/overlay-variables.css */
 @layer spinner.theme.variations.overlay {
   :host {
+    --spinner-overlay-size: 64px;
+    --spinner-overlay-thickness: 0.09;
+    --spinner-overlay-speed: 0.9s;
+    --spinner-overlay-text-gap: var(--gap-s);
   }
 }
 

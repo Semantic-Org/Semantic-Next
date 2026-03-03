@@ -3,9 +3,6 @@
 --------------------*/
 
 .spinner .text {
-  display: block;
-  margin-top: var(--spinner-text-margin);
-  text-align: center;
   font-size: var(--spinner-text-font-size);
   color: var(--spinner-text-color);
 }

@@ -3,5 +3,5 @@
 --------------------*/
 
 .active.spinner {
-  display: inline-block;
+  display: inline-flex;
 }

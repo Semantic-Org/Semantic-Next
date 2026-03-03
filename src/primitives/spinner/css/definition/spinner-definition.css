@@ -3,8 +3,8 @@
 @import url('./content/text.css') layer(spinner.definition.content.text);
 
 /* States */
-@import url('./states/active.css') layer(spinner.definition.states.active);
 @import url('./states/hidden.css') layer(spinner.definition.states.hidden);
+@import url('./states/active.css') layer(spinner.definition.states.active);
 
 /* Variations */
 @import url('./variations/colored.css') layer(spinner.definition.variations.colored);
