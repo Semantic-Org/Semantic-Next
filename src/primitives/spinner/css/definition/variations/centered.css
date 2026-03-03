@@ -9,6 +9,6 @@
   margin-inline: auto;
   gap: var(--spinner-centered-text-gap);
   --spinner-size: var(--spinner-centered-size);
-  --spinner-thickness: var(--spinner-centered-thickness);
+  --spinner-arc-thickness: var(--spinner-centered-arc-thickness);
   --spinner-speed: var(--spinner-centered-speed);
 }

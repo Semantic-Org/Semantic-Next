@@ -11,14 +11,17 @@
     align-items: center;
     vertical-align: var(--spinner-vertical-align);
     gap: var(--spinner-text-gap);
+    contain: layout style paint;
   }
   .circle {
-    --spinner-stroke: calc(var(--spinner-size) * var(--spinner-thickness));
+    --spinner-arc-stroke: calc(var(--spinner-size) * var(--spinner-arc-thickness));
     --spinner-arc-gap: calc(360deg - var(--spinner-arc));
     width: var(--spinner-size);
     height: var(--spinner-size);
     border-radius: 50%;
     flex-shrink: 0;
+    contain: strict;
+    will-change: transform;
     background:
       conic-gradient(
         from calc(var(--spinner-arc-gap) / 2),
@@ -28,13 +31,13 @@
     -webkit-mask:
       radial-gradient(
         farthest-side,
-        transparent calc(100% - var(--spinner-stroke) - 0.5px),
-        #000 calc(100% - var(--spinner-stroke)));
+        transparent calc(100% - var(--spinner-arc-stroke) - 0.5px),
+        #000 calc(100% - var(--spinner-arc-stroke)));
     mask:
       radial-gradient(
         farthest-side,
-        transparent calc(100% - var(--spinner-stroke) - 0.5px),
-        #000 calc(100% - var(--spinner-stroke)));
+        transparent calc(100% - var(--spinner-arc-stroke) - 0.5px),
+        #000 calc(100% - var(--spinner-arc-stroke)));
     animation: spin var(--spinner-speed) linear infinite;
   }
   @keyframes spin {
@@ -54,7 +57,7 @@
 
 /* src/primitives/spinner/css/definition/states/hidden.css */
 @layer spinner.definition.states.hidden {
-  .hidden.spinner {
+  .hidden.spinner:not(.active) {
     display: none;
   }
 }
@@ -118,7 +121,7 @@
     margin-inline: auto;
     gap: var(--spinner-centered-text-gap);
     --spinner-size: var(--spinner-centered-size);
-    --spinner-thickness: var(--spinner-centered-thickness);
+    --spinner-arc-thickness: var(--spinner-centered-arc-thickness);
     --spinner-speed: var(--spinner-centered-speed);
   }
 }
@@ -136,7 +139,7 @@
     margin: auto;
     gap: var(--spinner-overlay-text-gap);
     --spinner-size: var(--spinner-overlay-size);
-    --spinner-thickness: var(--spinner-overlay-thickness);
+    --spinner-arc-thickness: var(--spinner-overlay-arc-thickness);
     --spinner-speed: var(--spinner-overlay-speed);
   }
 }
@@ -180,7 +183,7 @@
   :host {
     --spinner-size: 1em;
     --spinner-color: #2274b4;
-    --spinner-thickness: 0.07;
+    --spinner-arc-thickness: 0.07;
     --spinner-arc: 330deg;
     --spinner-speed: 0.7s;
     --spinner-vertical-align: -0.15em;
@@ -218,7 +221,7 @@
 @layer spinner.theme.variations.centered {
   :host {
     --spinner-centered-size: 64px;
-    --spinner-centered-thickness: 0.09;
+    --spinner-centered-arc-thickness: 0.09;
     --spinner-centered-speed: 0.9s;
     --spinner-centered-text-gap: var(--gap-s);
   }
@@ -228,7 +231,7 @@
 @layer spinner.theme.variations.overlay {
   :host {
     --spinner-overlay-size: 64px;
-    --spinner-overlay-thickness: 0.09;
+    --spinner-overlay-arc-thickness: 0.09;
     --spinner-overlay-speed: 0.9s;
     --spinner-overlay-text-gap: var(--gap-s);
   }
@@ -237,20 +240,20 @@
 /* src/primitives/spinner/css/theme/variations/sizing-variables.css */
 @layer spinner.theme.variations.sizing {
   :host {
-    --spinner-mini-size: 16px;
-    --spinner-mini-speed: 0.6s;
-    --spinner-tiny-size: 24px;
-    --spinner-tiny-speed: 0.65s;
-    --spinner-small-size: 32px;
-    --spinner-small-speed: 0.7s;
-    --spinner-large-size: 80px;
-    --spinner-large-speed: 1.1s;
-    --spinner-big-size: 96px;
-    --spinner-big-speed: 1.15s;
-    --spinner-huge-size: 120px;
-    --spinner-huge-speed: 1.2s;
-    --spinner-massive-size: 160px;
-    --spinner-massive-speed: 1.3s;
+    --spinner-mini-size: var(--relative-10px);
+    --spinner-mini-speed: 0.5s;
+    --spinner-tiny-size: var(--relative-11px);
+    --spinner-tiny-speed: 0.55s;
+    --spinner-small-size: var(--relative-12px);
+    --spinner-small-speed: 0.6s;
+    --spinner-large-size: var(--relative-16px);
+    --spinner-large-speed: 0.8s;
+    --spinner-big-size: var(--relative-18px);
+    --spinner-big-speed: 0.85s;
+    --spinner-huge-size: var(--relative-20px);
+    --spinner-huge-speed: 0.9s;
+    --spinner-massive-size: var(--relative-24px);
+    --spinner-massive-speed: 1s;
   }
 }
 

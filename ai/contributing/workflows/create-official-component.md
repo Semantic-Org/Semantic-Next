@@ -6,13 +6,13 @@ audience: contributing
 type: workflow
 ---
 
-# Master Semantic UI Official Component Creation Workflow
+# Create Official Semantic UI Component
 
 **Purpose**: Orchestrate the complete process of creating an official Semantic UI component
 **Target**: LLMs and developers starting any component work
-**Role**: Router and orchestrator for all component workflows
+**Role**: Router and orchestrator — read each referenced workflow before executing it
 
-All workflows referenced below live in `ai/contributing/workflows/`. Read each workflow file before executing it.
+All workflows live in `ai/contributing/workflows/`.
 
 ## Decision Tree
 
@@ -28,178 +28,127 @@ Is this component in classic Semantic UI?
 
 ## Path A: Port Classic Component
 
-For components that exist in classic Semantic UI.
+For components that exist in classic Semantic UI (button, divider, segment, etc.).
 
-### Full Process:
 ```
-1. Scaffold Component Structure
+1. Scaffold
    → scaffold-primitive.md
-   → Creates: File structure, spec stub (.spec.js), barrel exports
+   Creates file structure, spec stub, barrel exports
+   Autonomous — no user interaction needed
 
 2. Research Modern Patterns
    → research-component-patterns.md
-   → Creates: ai/research/[component]/pattern-research.md
+   Surveys 10+ frameworks, creates ai/research/[component]/pattern-research.md
+   Autonomous — web fetching and report generation
 
-3. Port Classic Component
+3. Analyze Classic Sources
    → port-classic-primitive.md
-   → Creates: ai/research/[component]/migration-decisions.md
+   Collects classic SUI docs/LESS/variables, enumerates features with modernization analysis
+   Creates ai/research/[component]/feature-analysis.md
+   Autonomous — source collection and analysis
 
-4. Evaluate Research & Extend Spec
+4. Review Features & Build Spec ⬅ INTERACTIVE
    → evaluate-research-extend-spec.md
-   → Updates .spec.js with modern patterns
-   → Creates: ai/research/[component]/spec-decisions.md
+   Presents classic features + research patterns to author for decisions
+   Writes the .spec.js based on approved features
+   Creates ai/research/[component]/spec-decisions.md
 
 5. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files (definition + theme layers)
+   Creates definition + theme CSS files for each spec feature
+   Autonomous — follow spec, ask user only when uncertain about tokens
 ```
-
-### Complexity: Medium
-- Research provides modern context
-- Classic SUI provides historical reference
-- Decisions balance legacy patterns with current standards
 
 ## Path B: Research-First Component
 
-For new components based on common UI patterns (tabs, tooltips, modals, etc.).
+For new components based on common UI patterns (tabs, tooltips, modals, etc.) that don't exist in classic Semantic UI.
 
-### Full Process:
 ```
-1. Research Component Patterns
-   → research-component-patterns.md
-   → Creates: ai/research/[component]/pattern-research.md
-
-2. Scaffold Component Structure
+1. Scaffold
    → scaffold-primitive.md
-   → Creates: File structure, spec stub (.spec.js)
+   Creates file structure, spec stub, barrel exports
+   Autonomous
 
-3. Build Spec from Research
+2. Research Modern Patterns
+   → research-component-patterns.md
+   Surveys 10+ frameworks, creates ai/research/[component]/pattern-research.md
+   Autonomous
+
+3. Review Features & Build Spec ⬅ INTERACTIVE
    → evaluate-research-extend-spec.md
-   → Creates: Initial spec based on research patterns
-   → Creates: ai/research/[component]/spec-decisions.md
+   Presents research patterns to author for decisions (no classic analysis)
+   Writes the .spec.js based on approved features
+   Creates ai/research/[component]/spec-decisions.md
 
-4. Polish Spec Language
-   → define-primitive-spec.md
-   → Refines naming for natural language clarity
-   → Finalizes descriptions and examples
-
-5. Implement CSS
+4. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files (definition + theme layers)
+   Creates definition + theme CSS files for each spec feature
+   Autonomous
 ```
-
-### Complexity: High
-- Research requires checking 10+ frameworks
-- Spec creation needs synthesis of many patterns
-- More decision points about what to include
 
 ## Path C: Novel Component
 
 For truly new components without established patterns.
 
-### Full Process:
 ```
-1. Scaffold Component Structure
+1. Scaffold
    → scaffold-primitive.md
-   → Creates: File structure, spec stub (.spec.js)
+   Creates file structure, spec stub, barrel exports
+   Autonomous
 
-2. Define Spec from First Principles
-   → define-primitive-spec.md
-   → Author-driven spec creation
+2. Build Spec with Author ⬅ INTERACTIVE
+   Work directly with the author to define the spec
+   No research to guide decisions — author-driven from first principles
 
-3. [Optional] Validate Against Patterns
+3. [Optional] Research Validation
    → research-component-patterns.md
-   → Sanity check against existing patterns
+   Sanity check against existing patterns if desired
 
 4. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files (definition + theme layers)
+   Creates definition + theme CSS files for each spec feature
+   Autonomous
 ```
 
-### Complexity: Variable
-- Depends entirely on component complexity
-- No research to guide decisions
-- Requires more creative/architectural thinking
+## Reference Guides (Not Steps)
 
-## Workflow Selection Guide
+These are consulted during spec authoring and CSS implementation — they're reference material, not sequential steps:
 
-### Path A: Classic Component Exists
-- Component exists in classic Semantic UI
-- Research provides modern context
-- Classic provides starting point
-
-### Path B: Common Pattern Component
-- Component appears in 5+ other frameworks
-- No classic SUI version to reference
-- Build spec from research consensus
-
-### Path C: Novel Component
-- Component doesn't exist elsewhere
-- Solving a unique problem
-- Experimental or innovative approach
+- **`define-primitive-spec.md`** — Spec field reference, shared terms system, validation rules. Use when writing or editing `.spec.js` files (during step 4 of Path A/B, step 2 of Path C).
+- **`implement-primitive-css.md`** — CSS architecture, file structure, token usage, selector patterns. Use during the CSS implementation step.
 
 ## Usage Level Assignment
 
-Usage levels (1-5) are assigned at different points:
-- **Research phase**: Calculates adoption levels from framework analysis
-- **Evaluation phase**: Author adjusts based on Semantic UI priorities
-- **Spec definition**: Final usage levels set based on expected use
+Usage levels (1-5) are assigned during the spec review step:
+- **Research data** informs which features to consider (adoption percentages)
+- **Author judgment** determines the actual usage level (expected frequency of use)
+- See `evaluate-research-extend-spec.md` for full usage level definitions
 
 ## Component Readiness Checklist
 
-Before considering a component complete:
-
 ### Specification
-- [ ] All features have natural language names
-- [ ] Usage levels assigned based on research or experience
+- [ ] All features have natural language names and descriptions
+- [ ] Usage levels assigned (1-5) based on expected frequency
 - [ ] Example code provided for all variations
 - [ ] Content, types, states, variations properly categorized
+- [ ] Shared terms used where available (`getStates`, `getVariations`, etc.)
 
 ### Implementation
-- [ ] All spec features implemented
-- [ ] CSS follows token system
-- [ ] Theme and definition layers separated
-- [ ] Responsive behavior considered
-- [ ] Accessibility attributes included
+- [ ] All spec features have definition + theme CSS files
+- [ ] CSS follows token system (verified tokens exist)
+- [ ] Barrel files updated with correct layer names
+- [ ] Nested CSS syntax used throughout
 
 ### Documentation
 - [ ] Research archived in `ai/research/[component]/`
-- [ ] Decision rationale documented
-- [ ] Migration notes for classic users (if applicable)
-- [ ] Implementation notes for maintainers
+- [ ] Decision rationale documented in `spec-decisions.md`
+- [ ] MDX page created in `docs/src/content/primitives/`
+- [ ] Astro component registry updated
 
-## Workflow Sequence Reference
+## Anti-Patterns
 
-```bash
-# Path A: Port classic component (with mandatory research)
-scaffold-primitive.md → research-component-patterns.md → port-classic-primitive.md → evaluate-research-extend-spec.md → implement-primitive-css.md
-
-# Path B: New component from patterns
-scaffold-primitive.md → research-component-patterns.md → evaluate-research-extend-spec.md → define-primitive-spec.md → implement-primitive-css.md
-
-# Path C: Novel component
-scaffold-primitive.md → define-primitive-spec.md → implement-primitive-css.md
-```
-
-## Anti-Patterns to Avoid
-
-❌ **Starting implementation before spec**
-❌ **Skipping workflow steps**
-❌ **Not documenting decisions**
-
-## Output Artifacts
-
-A complete component workflow produces:
-1. **Component structure** - Files, defineComponent, barrel updates
-2. **Specification** - Complete spec with all features defined
-3. **Research documentation** - Pattern analysis and decisions (if researched)
-4. **CSS implementation** - Theme and definition layers with proper tokens
-5. **Decision records** - Why features were included or excluded
-
-## Workflow Execution Notes
-
-- Scaffold first to establish component structure
-- Research provides data but author makes editorial decisions
-- Document all decisions in ai/research/[component]/
-- Each workflow produces specific artifacts
-- Track progress with TaskCreate/TaskUpdate tools throughout
+- Starting CSS before the spec is reviewed with the author
+- Running scaffold/research again inside port-classic (the orchestrator handles those)
+- Treating define-primitive-spec.md as a sequential step instead of a reference
+- Making spec decisions autonomously without author review
+- Skipping research for Path A/B — it provides essential modern context

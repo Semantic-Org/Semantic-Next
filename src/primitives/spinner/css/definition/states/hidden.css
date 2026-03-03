@@ -3,5 +3,7 @@
 --------------------*/
 
 .hidden.spinner {
-  display: none;
+  &:not(.active) {
+    display: none;
+  }
 }

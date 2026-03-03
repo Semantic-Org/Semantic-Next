@@ -13,6 +13,6 @@
   margin: auto;
   gap: var(--spinner-overlay-text-gap);
   --spinner-size: var(--spinner-overlay-size);
-  --spinner-thickness: var(--spinner-overlay-thickness);
+  --spinner-arc-thickness: var(--spinner-overlay-arc-thickness);
   --spinner-speed: var(--spinner-overlay-speed);
 }

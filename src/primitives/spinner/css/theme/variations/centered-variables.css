@@ -1,6 +1,6 @@
 :host {
   --spinner-centered-size: 64px;
-  --spinner-centered-thickness: 0.09;
+  --spinner-centered-arc-thickness: 0.09;
   --spinner-centered-speed: 0.9s;
   --spinner-centered-text-gap: var(--gap-s);
 }

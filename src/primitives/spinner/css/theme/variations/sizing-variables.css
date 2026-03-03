@@ -1,22 +1,22 @@
 :host {
-  --spinner-mini-size: 16px;
-  --spinner-mini-speed: 0.6s;
+  --spinner-mini-size: var(--relative-10px);
+  --spinner-mini-speed: 0.5s;
 
-  --spinner-tiny-size: 24px;
-  --spinner-tiny-speed: 0.65s;
+  --spinner-tiny-size: var(--relative-11px);
+  --spinner-tiny-speed: 0.55s;
 
-  --spinner-small-size: 32px;
-  --spinner-small-speed: 0.7s;
+  --spinner-small-size: var(--relative-12px);
+  --spinner-small-speed: 0.6s;
 
-  --spinner-large-size: 80px;
-  --spinner-large-speed: 1.1s;
+  --spinner-large-size: var(--relative-16px);
+  --spinner-large-speed: 0.8s;
 
-  --spinner-big-size: 96px;
-  --spinner-big-speed: 1.15s;
+  --spinner-big-size: var(--relative-18px);
+  --spinner-big-speed: 0.85s;
 
-  --spinner-huge-size: 120px;
-  --spinner-huge-speed: 1.2s;
+  --spinner-huge-size: var(--relative-20px);
+  --spinner-huge-speed: 0.9s;
 
-  --spinner-massive-size: 160px;
-  --spinner-massive-speed: 1.3s;
+  --spinner-massive-size: var(--relative-24px);
+  --spinner-massive-speed: 1s;
 }
