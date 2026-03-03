@@ -1,0 +1,17 @@
+/*******************************
+            Spinner
+*******************************/
+
+/* Content */
+@import url('./content/spinner-variables.css') layer(spinner.theme.content.spinner);
+@import url('./content/text-variables.css') layer(spinner.theme.content.text);
+
+/* States */
+@import url('./states/active-variables.css') layer(spinner.theme.states.active);
+@import url('./states/hidden-variables.css') layer(spinner.theme.states.hidden);
+
+/* Variations */
+@import url('./variations/colored-variables.css') layer(spinner.theme.variations.colored);
+@import url('./variations/centered-variables.css') layer(spinner.theme.variations.centered);
+@import url('./variations/overlay-variables.css') layer(spinner.theme.variations.overlay);
+@import url('./variations/sizing-variables.css') layer(spinner.theme.variations.sizing);

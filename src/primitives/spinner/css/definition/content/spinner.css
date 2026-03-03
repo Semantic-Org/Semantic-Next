@@ -1,0 +1,38 @@
+.spinner {
+  display: inline-block;
+}
+
+.circle {
+  --spinner-stroke: calc(var(--spinner-size) * var(--spinner-thickness));
+  --spinner-gap: calc(360deg - var(--spinner-arc));
+
+  display: block;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  margin-inline: auto;
+  border-radius: 50%;
+
+  background: conic-gradient(
+    from calc(var(--spinner-gap) / 2),
+    transparent 0deg,
+    var(--spinner-color) var(--spinner-arc),
+    transparent var(--spinner-arc)
+  );
+
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-stroke) - 0.5px),
+    #000 calc(100% - var(--spinner-stroke))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-stroke) - 0.5px),
+    #000 calc(100% - var(--spinner-stroke))
+  );
+
+  animation: spin var(--spinner-speed) linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

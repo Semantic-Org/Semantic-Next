@@ -1,0 +1,11 @@
+/*-------------------
+       Overlay
+--------------------*/
+
+.overlay.spinner {
+  position: absolute;
+  inset: 0;
+  width: fit-content;
+  height: fit-content;
+  margin: auto;
+}

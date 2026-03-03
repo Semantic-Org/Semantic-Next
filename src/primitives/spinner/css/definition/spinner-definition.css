@@ -1,0 +1,13 @@
+/* Content */
+@import url('./content/spinner.css') layer(spinner.definition.content.spinner);
+@import url('./content/text.css') layer(spinner.definition.content.text);
+
+/* States */
+@import url('./states/active.css') layer(spinner.definition.states.active);
+@import url('./states/hidden.css') layer(spinner.definition.states.hidden);
+
+/* Variations */
+@import url('./variations/colored.css') layer(spinner.definition.variations.colored);
+@import url('./variations/centered.css') layer(spinner.definition.variations.centered);
+@import url('./variations/overlay.css') layer(spinner.definition.variations.overlay);
+@import url('./variations/sizing.css') layer(spinner.definition.variations.sizing);

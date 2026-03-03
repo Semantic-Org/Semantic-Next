@@ -8,7 +8,7 @@ type: workflow
 
 # Port Classic Semantic UI Primitive
 
-> Last Updated: 2024-11-03
+> Last Updated: 2026-03-03
 
 **Purpose**: Port a component from classic Semantic UI to the new web component framework
 **Target**: LLMs working with the Semantic UI author to modernize components
@@ -159,44 +159,50 @@ Include?
 
 ### Step 2: Update Component Spec
 
-Add agreed features to `/src/primitives/[name]/specs/[name].json`:
+Add agreed features to `/src/primitives/[name]/specs/[name].spec.js`:
 
-```json
-{
-  "content": [
+```javascript
+import { getVariations } from '@semantic-ui/specs';
+
+export default {
+  // ... existing fields ...
+
+  content: [
     {
-      "name": "Text",
-      "attribute": "text",
-      "description": "include centered text",
-      "usageLevel": 1,
-      "exampleCode": "<ui-divider text=\"Or\"></ui-divider>"
-    }
+      name: 'Text',
+      attribute: 'text',
+      description: 'include centered text',
+      usageLevel: 1,
+      exampleCode: `<ui-divider text="Or"></ui-divider>`,
+    },
   ],
-  "types": [
+
+  types: [
     {
-      "name": "Styled",
-      "attribute": "styled",
-      "description": "be styled with different visual treatments",
-      "usageLevel": 2,
-      "options": [
-        {"name": "Solid", "value": "solid", "description": "use a solid line"},
-        {"name": "Fade", "value": "fade", "description": "fade from transparent at edges"}
-      ]
-    }
+      name: 'Styled',
+      attribute: 'styled',
+      description: 'be styled with different visual treatments',
+      usageLevel: 2,
+      options: [
+        { name: 'Solid', value: 'solid', description: 'use a solid line' },
+        { name: 'Fade', value: 'fade', description: 'fade from transparent at edges' },
+      ],
+    },
   ],
-  "variations": [
+
+  variations: [
     {
-      "name": "Spacing",
-      "attribute": "spacing",
-      "description": "adjust vertical spacing",
-      "usageLevel": 1,
-      "options": [
-        {"name": "Mini", "value": "mini", "description": "appear with minimal spacing"},
-        {"name": "Large", "value": "large", "description": "appear with large spacing"}
-      ]
-    }
-  ]
-}
+      name: 'Spacing',
+      attribute: 'spacing',
+      description: 'adjust vertical spacing',
+      usageLevel: 1,
+      options: [
+        { name: 'Mini', value: 'mini', description: 'appear with minimal spacing' },
+        { name: 'Large', value: 'large', description: 'appear with large spacing' },
+      ],
+    },
+  ],
+};
 ```
 
 **Important Spec Considerations**:
@@ -210,13 +216,13 @@ Add agreed features to `/src/primitives/[name]/specs/[name].json`:
 **Validation Steps**:
 ```bash
 # Verify icon glyphs exist
-grep '"tag"' /src/primitives/icon/specs/icon.json
+grep 'tag' /src/primitives/icon/specs/icon.spec.js
 
 # Check patterns in other components
-grep -A5 '"styled"' /src/primitives/button/specs/button.json
+grep -A5 'styled' /src/primitives/button/specs/button.spec.js
 
 # Verify scale patterns
-grep -E "mini|tiny|small|medium|large|big|huge|massive" /src/primitives/*/specs/*.json
+grep -E "mini|tiny|small|medium|large|big|huge|massive" /src/primitives/*/specs/*.spec.js
 ```
 
 ## Phase 3: CSS Implementation

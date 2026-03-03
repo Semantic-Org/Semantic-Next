@@ -1,0 +1,5 @@
+:host {
+  --spinner-text-margin: var(--gap-s);
+  --spinner-text-font-size: var(--relative-small);
+  --spinner-text-color: var(--muted-text-color);
+}

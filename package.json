@@ -145,6 +145,12 @@
       "bundled": "./dist/bundle/segment.min.js",
       "default": "./src/primitives/segment/index.js"
     },
+    "./spinner": {
+      "import": "./src/primitives/spinner/index.js",
+      "browser": "./dist/cdn/spinner.min.js",
+      "bundled": "./dist/bundle/spinner.min.js",
+      "default": "./src/primitives/spinner/index.js"
+    },
     "./table": {
       "import": "./src/primitives/table/index.js",
       "browser": "./dist/cdn/table.min.js",

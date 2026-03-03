@@ -497,22 +497,22 @@ Add rendering cases for both:
 
 ### Component with Settings
 
-For components with configurable properties, add to spec:
+For components with configurable properties, add to the `.spec.js`:
 
-```json
-"settings": [
+```javascript
+settings: [
   {
-    "name": "Value",
-    "type": "string",
-    "attribute": "value",
-    "description": "The component value"
-  }
-]
+    name: 'Value',
+    type: 'string',
+    attribute: 'value',
+    description: 'The component value',
+  },
+],
 ```
 
 ## Validation Checklist
 
-- [ ] Spec JSON is valid and follows naming conventions
+- [ ] Spec `.spec.js` is valid and follows naming conventions
 - [ ] Component imports from `-component.js` not `.json`
 - [ ] CSS directory structure created with all folders
 - [ ] CSS barrel files created in correct locations (definition/ and theme/)

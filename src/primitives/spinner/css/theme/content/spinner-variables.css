@@ -1,0 +1,7 @@
+:host {
+  --spinner-size: 64px;
+  --spinner-color: #2274b4;
+  --spinner-thickness: 0.09;
+  --spinner-arc: 330deg;
+  --spinner-speed: 0.9s;
+}

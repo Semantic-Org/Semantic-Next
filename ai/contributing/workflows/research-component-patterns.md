@@ -18,9 +18,8 @@ This is **descriptive, not prescriptive** - we're documenting what exists in the
 
 ### 0. Initialize Task Tracking
 
-**Start with TodoWrite tool:**
-```
-Create a todo list with these items:
+**Start with TaskCreate tool:**
+Create tasks for each phase:
 1. Search exhaustive list for all [component] components
 2. Create URL verification file
 3. Research all frameworks in parallel
@@ -28,9 +27,8 @@ Create a todo list with these items:
 5. Compile aggregate pattern research report
 6. Review and validate all reports
 7. Add documentation metadata
-```
 
-Update status as you progress through each phase for clear progress tracking.
+Use TaskUpdate to mark tasks in_progress/completed as you progress through each phase.
 
 ### 1. Identify Component and Sources
 

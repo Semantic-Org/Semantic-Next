@@ -1,0 +1,8 @@
+/*-------------------
+       Centered
+--------------------*/
+
+.centered.spinner {
+  display: block;
+  margin-inline: auto;
+}

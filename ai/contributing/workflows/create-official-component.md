@@ -6,17 +6,13 @@ audience: contributing
 type: workflow
 ---
 
-# Master Semantic UI Offical Component Creation Workflow
-
-> Last Updated: 2024-11-04
+# Master Semantic UI Official Component Creation Workflow
 
 **Purpose**: Orchestrate the complete process of creating an official Semantic UI component
 **Target**: LLMs and developers starting any component work
 **Role**: Router and orchestrator for all component workflows
 
-## Overview
-
-This workflow routes to the appropriate component creation path based on component type.
+All workflows referenced below live in `ai/contributing/workflows/`. Read each workflow file before executing it.
 
 ## Decision Tree
 
@@ -38,7 +34,7 @@ For components that exist in classic Semantic UI.
 ```
 1. Scaffold Component Structure
    → scaffold-primitive.md
-   → Creates: Basic file structure and stubs
+   → Creates: File structure, spec stub (.spec.js), barrel exports
 
 2. Research Modern Patterns
    → research-component-patterns.md
@@ -50,12 +46,12 @@ For components that exist in classic Semantic UI.
 
 4. Evaluate Research & Extend Spec
    → evaluate-research-extend-spec.md
-   → Updates spec with modern patterns
+   → Updates .spec.js with modern patterns
    → Creates: ai/research/[component]/spec-decisions.md
 
 5. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files
+   → Creates: Component CSS files (definition + theme layers)
 ```
 
 ### Complexity: Medium
@@ -75,7 +71,7 @@ For new components based on common UI patterns (tabs, tooltips, modals, etc.).
 
 2. Scaffold Component Structure
    → scaffold-primitive.md
-   → Creates: Basic file structure
+   → Creates: File structure, spec stub (.spec.js)
 
 3. Build Spec from Research
    → evaluate-research-extend-spec.md
@@ -89,7 +85,7 @@ For new components based on common UI patterns (tabs, tooltips, modals, etc.).
 
 5. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files
+   → Creates: Component CSS files (definition + theme layers)
 ```
 
 ### Complexity: High
@@ -105,7 +101,7 @@ For truly new components without established patterns.
 ```
 1. Scaffold Component Structure
    → scaffold-primitive.md
-   → Creates: Basic file structure
+   → Creates: File structure, spec stub (.spec.js)
 
 2. Define Spec from First Principles
    → define-primitive-spec.md
@@ -117,7 +113,7 @@ For truly new components without established patterns.
 
 4. Implement CSS
    → implement-primitive-css.md
-   → Creates: Component CSS files
+   → Creates: Component CSS files (definition + theme layers)
 ```
 
 ### Complexity: Variable
@@ -206,4 +202,4 @@ A complete component workflow produces:
 - Research provides data but author makes editorial decisions
 - Document all decisions in ai/research/[component]/
 - Each workflow produces specific artifacts
-- Track progress with TodoWrite tool throughout
+- Track progress with TaskCreate/TaskUpdate tools throughout
