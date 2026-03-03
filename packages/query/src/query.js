@@ -2297,9 +2297,9 @@ export class Query {
         const $target = this.chain(targetEl);
         const targetDims = $target.dimensions();
 
-        // Get source position relative to target
-        const { relative } = $source.position({ relativeTo: targetEl });
-        const { top, left } = relative;
+        // Get source position relative to target (border-box to border-box)
+        const top = sourceDims.top - targetDims.top;
+        const left = sourceDims.left - targetDims.left;
         const sourceRight = left + sourceDims.outerWidth;
         const sourceBottom = top + sourceDims.outerHeight;
 
