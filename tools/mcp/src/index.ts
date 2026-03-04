@@ -158,7 +158,12 @@ Write classes you know. The sophisticated theming system is there when needed, n
 
 ## Response Format
 
-Most \`get_*\` tools return a \`related\` field with connected content:
+**List tools** return compact markdown by default (\`id - title\`, one per line). Examples are grouped by category.
+Optional params:
+- \`json: true\` — return JSON array instead of markdown
+- \`includeMetadata: true\` — include descriptions (available on \`list_skills\`, \`list_context\`)
+
+**Get tools** return a \`related\` field with connected content:
 \`\`\`json
 {
   "content": "...",
@@ -189,8 +194,10 @@ server.tool(
 server.tool(
   'list_components',
   'List all available Semantic UI components with their tag names and descriptions',
-  {},
-  async () => {
+  {
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
+  },
+  async ({ json }) => {
     const components = listComponents();
 
     if (components.length === 0) {
@@ -199,10 +206,16 @@ server.tool(
       };
     }
 
-    // Slim: id + name only
-    const slim = components.map(c => ({ id: c.id, name: c.name }));
+    if (json) {
+      const slim = components.map(c => ({ id: c.id, name: c.name }));
+      return {
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
+      };
+    }
+
+    const lines = components.map(c => `* ${c.id} - ${c.name}`);
     return {
-      content: [{ type: 'text', text: JSON.stringify(slim) }],
+      content: [{ type: 'text', text: lines.join('\n') }],
     };
   },
 );
@@ -272,8 +285,9 @@ server.tool(
     category: z.string().optional().describe(
       'Filter by category (e.g., "framework", "query", "reactivity", "templates", "ui components", "utils")',
     ),
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
-  async ({ category }) => {
+  async ({ category, json }) => {
     const examples = listExamples(category);
 
     if (examples.length === 0) {
@@ -285,14 +299,38 @@ server.tool(
       };
     }
 
-    // Slim: id + title, include category only when unfiltered
-    const slim = examples.map(e =>
-      category
-        ? { id: e.id, title: e.title }
-        : { id: e.id, title: e.title, category: e.category }
-    );
+    if (json) {
+      const slim = examples.map(e =>
+        category
+          ? { id: e.id, title: e.title }
+          : { id: e.id, title: e.title, category: e.category }
+      );
+      return {
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
+      };
+    }
+
+    if (category) {
+      // Filtered: simple list, category already known
+      const lines = examples.map(e => `* ${e.id} - ${e.title}`);
+      return {
+        content: [{ type: 'text', text: lines.join('\n') }],
+      };
+    }
+
+    // Unfiltered: group by category
+    const groups: Record<string, typeof examples> = {};
+    for (const e of examples) {
+      const cat = e.category || 'Other';
+      if (!groups[cat]) { groups[cat] = []; }
+      groups[cat].push(e);
+    }
+    const sections: string[] = [];
+    for (const [cat, items] of Object.entries(groups)) {
+      sections.push(`## ${cat}\n${items.map(e => `* ${e.id} - ${e.title}`).join('\n')}`);
+    }
     return {
-      content: [{ type: 'text', text: JSON.stringify(slim) }],
+      content: [{ type: 'text', text: sections.join('\n\n') }],
     };
   },
 );
@@ -380,8 +418,11 @@ server.tool(
 server.tool(
   'list_skills',
   'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics.',
-  {},
-  async () => {
+  {
+    includeMetadata: z.boolean().optional().describe('Include descriptions for each skill'),
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
+  },
+  async ({ includeMetadata, json }) => {
     const skills = listSkills();
 
     if (skills.length === 0) {
@@ -393,14 +434,26 @@ server.tool(
       };
     }
 
-    // Slim: skill + title + description (when present)
-    const slim = skills.map(s => ({
-      skill: s.skill,
-      title: s.title,
-      ...(s.description && { description: s.description }),
-    }));
+    if (json) {
+      const slim = skills.map(s => ({
+        skill: s.skill,
+        title: s.title,
+        ...(s.description && { description: s.description }),
+      }));
+      return {
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
+      };
+    }
+
+    const lines = skills.map(s => {
+      let line = `* ${s.skill} - ${s.title}`;
+      if (includeMetadata && s.description) {
+        line += ` — ${s.description}`;
+      }
+      return line;
+    });
     return {
-      content: [{ type: 'text', text: JSON.stringify(slim) }],
+      content: [{ type: 'text', text: lines.join('\n') }],
     };
   },
 );
@@ -453,8 +506,10 @@ server.tool(
   {
     audience: z.enum(['ui', 'framework', 'contributing', 'research']).optional()
       .describe('Filter by audience'),
+    includeMetadata: z.boolean().optional().describe('Include descriptions for each document'),
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
-  async ({ audience }) => {
+  async ({ audience, includeMetadata, json }) => {
     const docs = listContext(audience);
 
     if (docs.length === 0) {
@@ -466,19 +521,34 @@ server.tool(
       };
     }
 
-    // Slim: path + title + description (when present), include audience only when unfiltered
-    const slim = docs.map(d => {
-      // Extract short path: /content/ai/framework/reactivity.md → framework/reactivity
-      const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
+    if (json) {
+      const slim = docs.map(d => {
+        const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
+        return {
+          path: shortPath,
+          title: d.title,
+          ...(d.description && { description: d.description }),
+          ...(!audience && { audience: d.audience }),
+        };
+      });
       return {
-        path: shortPath,
-        title: d.title,
-        ...(d.description && { description: d.description }),
-        ...(!audience && { audience: d.audience }),
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
       };
+    }
+
+    const lines = docs.map(d => {
+      const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
+      let line = `* ${shortPath} - ${d.title}`;
+      if (!audience) {
+        line += ` (${d.audience})`;
+      }
+      if (includeMetadata && d.description) {
+        line += ` — ${d.description}`;
+      }
+      return line;
     });
     return {
-      content: [{ type: 'text', text: JSON.stringify(slim) }],
+      content: [{ type: 'text', text: lines.join('\n') }],
     };
   },
 );
@@ -540,8 +610,10 @@ server.tool(
 server.tool(
   'list_user_docs',
   'List user documentation pages (guides, API reference). Markdown files written for developers learning the framework.',
-  {},
-  async () => {
+  {
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
+  },
+  async ({ json }) => {
     const docs = listDocs();
 
     if (docs.length === 0) {
@@ -550,14 +622,22 @@ server.tool(
       };
     }
 
-    // Slim: path + title only
-    const slim = docs.map(d => {
-      // Extract short path: /content/docs/guides/reactivity/signals.md → guides/reactivity/signals
+    if (json) {
+      const slim = docs.map(d => {
+        const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+        return { path: shortPath, title: d.title };
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
+      };
+    }
+
+    const lines = docs.map(d => {
       const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
-      return { path: shortPath, title: d.title };
+      return `* ${shortPath} - ${d.title}`;
     });
     return {
-      content: [{ type: 'text', text: JSON.stringify(slim) }],
+      content: [{ type: 'text', text: lines.join('\n') }],
     };
   },
 );
