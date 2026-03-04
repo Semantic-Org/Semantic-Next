@@ -2,48 +2,36 @@ import { statSync } from 'fs';
 import matter from 'gray-matter';
 import { resolve } from 'path';
 
-const AUDIENCE_ORDER = ['ui', 'framework', 'contributing', 'research'];
+const AUDIENCE_ORDER = ['ui', 'authoring', 'skills', 'contributing', 'workflows', 'research'];
+
+function getAudience(frontmatter, relativePath) {
+  if (frontmatter.audience) { return frontmatter.audience; }
+  // Fall back to first directory segment
+  const dir = relativePath.split('/')[0];
+  return dir || 'unknown';
+}
 
 export async function getAIManifestData() {
-  // Glob from all ai/ subdirectories
-  const uiDocs = import.meta.glob('../../../ai/ui/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const frameworkDocs = import.meta.glob('../../../ai/framework/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const contributingDocs = import.meta.glob('../../../ai/contributing/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const researchDocs = import.meta.glob('../../../ai/research/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-
-  const allDocs = { ...uiDocs, ...frameworkDocs, ...contributingDocs, ...researchDocs };
+  const allDocs = import.meta.glob(
+    ['../../../ai/**/*.md', '!../../../ai/workspace/**/*.md'],
+    { query: '?raw', eager: true },
+  );
   const rootDir = process.cwd().replace('/docs', '');
 
   const pages = Object.entries(allDocs).map(([filePath, module]) => {
     const content = module.default;
     const { data: frontmatter } = matter(content);
 
-    // Extract audience and filename from path
-    const match = filePath.match(/ai\/(ui|framework|contributing|research)\/(.+)\.md$/);
-    const audience = match ? match[1] : 'unknown';
-    const slug = match ? match[2] : filePath;
+    const match = filePath.match(/ai\/(.+)\.md$/);
+    const relativePath = match ? match[1] : filePath;
+    const audience = getAudience(frontmatter, relativePath);
 
-    const urlPath = `/content/ai/${audience}/${slug}.md`;
-
-    // Token count (chars / 4 rough estimate)
+    const urlPath = `/content/ai/${relativePath}.md`;
     const tokens = Math.ceil(content.length / 4);
 
-    // Last modified from filesystem
     let lastModified = null;
     try {
-      const fsPath = resolve(rootDir, `ai/${audience}/${slug}.md`);
+      const fsPath = resolve(rootDir, `ai/${relativePath}.md`);
       lastModified = statSync(fsPath).mtime.toISOString();
     }
     catch {
@@ -52,7 +40,7 @@ export async function getAIManifestData() {
 
     return {
       path: urlPath,
-      title: frontmatter.title || slug,
+      title: frontmatter.title || relativePath.split('/').pop(),
       description: frontmatter.description || '',
       keywords: frontmatter.keywords || [],
       audience,
@@ -64,8 +52,10 @@ export async function getAIManifestData() {
 
   // Sort by audience order, then by title
   pages.sort((a, b) => {
-    const aOrder = AUDIENCE_ORDER.indexOf(a.audience);
-    const bOrder = AUDIENCE_ORDER.indexOf(b.audience);
+    const aIdx = AUDIENCE_ORDER.indexOf(a.audience);
+    const bIdx = AUDIENCE_ORDER.indexOf(b.audience);
+    const aOrder = aIdx === -1 ? AUDIENCE_ORDER.length : aIdx;
+    const bOrder = bIdx === -1 ? AUDIENCE_ORDER.length : bIdx;
     if (aOrder !== bOrder) {
       return aOrder - bOrder;
     }
