@@ -445,15 +445,33 @@ server.tool(
       };
     }
 
-    const lines = skills.map(s => {
-      let line = `* ${s.skill} - ${s.title}`;
-      if (includeMetadata && s.description) {
-        line += ` — ${s.description}`;
-      }
-      return line;
-    });
+    // Group by audience
+    const groups: Record<string, typeof skills> = {};
+    for (const s of skills) {
+      const key = s.audience || 'other';
+      if (!groups[key]) { groups[key] = []; }
+      groups[key].push(s);
+    }
+
+    const AUDIENCE_LABELS: Record<string, string> = {
+      ui: 'Using Components',
+      framework: 'Authoring Components',
+    };
+
+    const sections: string[] = [];
+    for (const [key, items] of Object.entries(groups)) {
+      const heading = AUDIENCE_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
+      const lines = items.map(s => {
+        let line = `* ${s.skill} - ${s.title}`;
+        if (includeMetadata && s.description) {
+          line += ` — ${s.description}`;
+        }
+        return line;
+      });
+      sections.push(`## ${heading}\n${lines.join('\n')}`);
+    }
     return {
-      content: [{ type: 'text', text: lines.join('\n') }],
+      content: [{ type: 'text', text: sections.join('\n\n') }],
     };
   },
 );
@@ -502,7 +520,7 @@ server.tool(
 
 server.tool(
   'list_context',
-  'List available AI context documents. Filter by audience: "ui" (using components), "framework" (building components), "contributing", or "research".',
+  'List available AI context documents. Defaults to ui, framework, and skills. Pass audience to filter, including "contributing" or "research" for specialized docs.',
   {
     audience: z.enum(['ui', 'framework', 'skills', 'contributing', 'research']).optional()
       .describe('Filter by audience'),
@@ -539,9 +557,6 @@ server.tool(
     const lines = docs.map(d => {
       const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
       let line = `* ${shortPath} - ${d.title}`;
-      if (!audience) {
-        line += ` (${d.audience})`;
-      }
       if (includeMetadata && d.description) {
         line += ` — ${d.description}`;
       }
@@ -625,19 +640,51 @@ server.tool(
     if (json) {
       const slim = docs.map(d => {
         const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
-        return { path: shortPath, title: d.title };
+        return {
+          path: shortPath,
+          title: d.title,
+          ...(d.section && { section: d.section }),
+          ...(d.category && { category: d.category }),
+        };
       });
       return {
         content: [{ type: 'text', text: JSON.stringify(slim) }],
       };
     }
 
-    const lines = docs.map(d => {
-      const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
-      return `* ${shortPath} - ${d.title}`;
-    });
+    // Group by section + category, preserving menu order
+    const grouped: Record<string, typeof docs> = {};
+    const ungrouped: typeof docs = [];
+    for (const d of docs) {
+      if (d.section && d.category) {
+        const key = `${d.section} - ${d.category}`;
+        if (!grouped[key]) { grouped[key] = []; }
+        grouped[key].push(d);
+      }
+      else {
+        ungrouped.push(d);
+      }
+    }
+
+    const sections: string[] = [];
+    for (const [heading, items] of Object.entries(grouped)) {
+      sections.push(`## ${heading}\n${
+        items.map(d => {
+          const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+          return `* ${shortPath} - ${d.title}`;
+        }).join('\n')
+      }`);
+    }
+    if (ungrouped.length > 0) {
+      sections.push(`## Other\n${
+        ungrouped.map(d => {
+          const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+          return `* ${shortPath} - ${d.title}`;
+        }).join('\n')
+      }`);
+    }
     return {
-      content: [{ type: 'text', text: lines.join('\n') }],
+      content: [{ type: 'text', text: sections.join('\n\n') }],
     };
   },
 );
@@ -741,8 +788,8 @@ server.tool(
     const section = extractMarkdownSection(result.data!, method);
     const apiContent = section || result.data!;
 
-    // Find related examples and skills
-    const related = findRelatedForDoc(doc);
+    // Find related examples and skills scoped to the specific method
+    const related = findRelatedForDoc(doc, method);
 
     // Return structured response with content and related
     const response = {

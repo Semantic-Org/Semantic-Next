@@ -37,6 +37,9 @@ export interface DocItem {
   tokens: number;
   package?: string;
   methods?: string[];
+  section?: string;
+  category?: string;
+  order?: number;
 }
 
 export type ContentItem = SpecItem | ExampleItem | ContextItem | DocItem;
@@ -181,11 +184,14 @@ export function listExamples(category?: string): ExampleItem[] {
   return cache.examples;
 }
 
+const DEFAULT_AUDIENCES = ['ui', 'framework', 'skills'];
+
 export function listContext(audience?: 'ui' | 'framework' | 'skills' | 'contributing' | 'research'): ContextItem[] {
   if (audience) {
     return cache.context.filter(c => c.audience === audience);
   }
-  return cache.context;
+  // Default: exclude contributing and research
+  return cache.context.filter(c => DEFAULT_AUDIENCES.includes(c.audience));
 }
 
 export function listDocs(): DocItem[] {
@@ -531,23 +537,21 @@ function extractFunctionFromExampleId(id: string): string | null {
   return null;
 }
 
-// Find related content for a doc (API doc)
-export function findRelatedForDoc(doc: DocItem): Related {
+// Find related content for a doc
+// When methodFilter is provided, only match that specific method instead of all doc methods
+export function findRelatedForDoc(doc: DocItem, methodFilter?: string): Related {
   const related: Related = {};
 
-  // Find examples where ID contains any method name (kebab-case)
-  if (doc.methods && doc.methods.length > 0) {
-    const matchingExamples: string[] = [];
-    for (const method of doc.methods) {
-      const kebab = methodToKebab(method);
-      for (const example of cache.examples) {
-        if (example.id.includes(kebab) && !matchingExamples.includes(example.id)) {
-          matchingExamples.push(example.id);
-        }
-      }
-    }
-    if (matchingExamples.length > 0) {
-      related.examples = matchingExamples;
+  const methods = methodFilter ? [methodFilter] : doc.methods;
+  if (methods && methods.length > 0) {
+    const query = methods.join(' ');
+    const maxResults = methodFilter ? 5 : 10;
+    const results = weightedObjectSearch(query, cache.examples, {
+      propertiesToMatch: ['id', 'title'],
+      matchAllWords: false,
+    }) as ExampleItem[];
+    if (results.length > 0) {
+      related.examples = results.slice(0, maxResults).map(r => r.id);
     }
   }
 
