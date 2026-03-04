@@ -25,7 +25,7 @@ export interface ContextItem {
   title: string;
   description?: string;
   tokens: number;
-  audience: 'ui' | 'framework' | 'contributing' | 'research';
+  audience: 'ui' | 'framework' | 'skills' | 'contributing' | 'research';
   skill?: string;
 }
 
@@ -181,7 +181,7 @@ export function listExamples(category?: string): ExampleItem[] {
   return cache.examples;
 }
 
-export function listContext(audience?: 'ui' | 'framework' | 'contributing' | 'research'): ContextItem[] {
+export function listContext(audience?: 'ui' | 'framework' | 'skills' | 'contributing' | 'research'): ContextItem[] {
   if (audience) {
     return cache.context.filter(c => c.audience === audience);
   }
@@ -204,7 +204,7 @@ export function findSkill(name: string): ContextItem | undefined {
 // Search function
 export interface SearchOptions {
   type?: 'spec' | 'example' | 'context' | 'doc';
-  audience?: 'ui' | 'framework' | 'contributing' | 'research';
+  audience?: 'ui' | 'framework' | 'skills' | 'contributing' | 'research';
   category?: string;
   limit?: number;
 }

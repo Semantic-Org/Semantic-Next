@@ -504,7 +504,7 @@ server.tool(
   'list_context',
   'List available AI context documents. Filter by audience: "ui" (using components), "framework" (building components), "contributing", or "research".',
   {
-    audience: z.enum(['ui', 'framework', 'contributing', 'research']).optional()
+    audience: z.enum(['ui', 'framework', 'skills', 'contributing', 'research']).optional()
       .describe('Filter by audience'),
     includeMetadata: z.boolean().optional().describe('Include descriptions for each document'),
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
