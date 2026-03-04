@@ -4,6 +4,10 @@ import { resolve } from 'path';
 
 const AUDIENCE_ORDER = ['ui', 'authoring', 'skills', 'contributing', 'workflows', 'research'];
 
+// Folders excluded from AI context manifests
+// Note: also listed as static glob negations below (Vite requires static strings)
+export const EXCLUDED_AI_FOLDERS = ['workspace', 'old'];
+
 function getAudience(frontmatter, relativePath) {
   if (frontmatter.audience) { return frontmatter.audience; }
   // Fall back to first directory segment
@@ -13,42 +17,46 @@ function getAudience(frontmatter, relativePath) {
 
 export async function getAIManifestData() {
   const allDocs = import.meta.glob(
-    ['../../../ai/**/*.md', '!../../../ai/workspace/**/*.md'],
+    ['../../../ai/**/*.md', '!../../../ai/workspace/**/*.md', '!../../../ai/old/**/*.md'],
     { query: '?raw', eager: true },
   );
   const rootDir = process.cwd().replace('/docs', '');
 
-  const pages = Object.entries(allDocs).map(([filePath, module]) => {
-    const content = module.default;
-    const { data: frontmatter } = matter(content);
+  const excludePattern = new RegExp(`ai/(${EXCLUDED_AI_FOLDERS.join('|')})/`);
 
-    const match = filePath.match(/ai\/(.+)\.md$/);
-    const relativePath = match ? match[1] : filePath;
-    const audience = getAudience(frontmatter, relativePath);
+  const pages = Object.entries(allDocs)
+    .filter(([filePath]) => !excludePattern.test(filePath))
+    .map(([filePath, module]) => {
+      const content = module.default;
+      const { data: frontmatter } = matter(content);
 
-    const urlPath = `/content/ai/${relativePath}.md`;
-    const tokens = Math.ceil(content.length / 4);
+      const match = filePath.match(/ai\/(.+)\.md$/);
+      const relativePath = match ? match[1] : filePath;
+      const audience = getAudience(frontmatter, relativePath);
 
-    let lastModified = null;
-    try {
-      const fsPath = resolve(rootDir, `ai/${relativePath}.md`);
-      lastModified = statSync(fsPath).mtime.toISOString();
-    }
-    catch {
-      // File stat failed, leave as null
-    }
+      const urlPath = `/content/ai/${relativePath}.md`;
+      const tokens = Math.ceil(content.length / 4);
 
-    return {
-      path: urlPath,
-      title: frontmatter.title || relativePath.split('/').pop(),
-      description: frontmatter.description || '',
-      keywords: frontmatter.keywords || [],
-      audience,
-      tokens,
-      lastModified,
-      ...(frontmatter.skill && { skill: frontmatter.skill }),
-    };
-  });
+      let lastModified = null;
+      try {
+        const fsPath = resolve(rootDir, `ai/${relativePath}.md`);
+        lastModified = statSync(fsPath).mtime.toISOString();
+      }
+      catch {
+        // File stat failed, leave as null
+      }
+
+      return {
+        path: urlPath,
+        title: frontmatter.title || relativePath.split('/').pop(),
+        description: frontmatter.description || '',
+        keywords: frontmatter.keywords || [],
+        audience,
+        tokens,
+        lastModified,
+        ...(frontmatter.skill && { skill: frontmatter.skill }),
+      };
+    });
 
   // Sort by audience order, then by title
   pages.sort((a, b) => {

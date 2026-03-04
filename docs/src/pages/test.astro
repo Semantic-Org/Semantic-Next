@@ -2,13 +2,9 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
-import '../css/code-formatting.css';
 import '@semantic-ui/core/icon/sets/lucide.css';
-
-import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { Checklist } from '../examples/component/checklist/component.js';
 ---
 <Body class="dark">
-<PlaygroundExample height="400" id="card-search"></PlaygroundExample>
-<PlaygroundExample height="400" id="advanced-ball-simulation"></PlaygroundExample>
-
+<Checklist client:load />
 </Body>

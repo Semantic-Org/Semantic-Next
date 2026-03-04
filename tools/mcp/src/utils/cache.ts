@@ -135,7 +135,11 @@ export async function initCache(): Promise<void> {
   }
 
   if (contextResult.data?.pages) {
-    cache.context = contextResult.data.pages.map(c => ({ ...c, type: 'context' as const }));
+    const EXCLUDED_FOLDERS = ['workspace', 'old'];
+    const excludePattern = new RegExp(`/(${EXCLUDED_FOLDERS.join('|')})/`);
+    cache.context = contextResult.data.pages
+      .filter(c => !excludePattern.test(c.path))
+      .map(c => ({ ...c, type: 'context' as const }));
   }
   else {
     errors.push(`context: ${contextResult.error} (${contextResult.url})`);
