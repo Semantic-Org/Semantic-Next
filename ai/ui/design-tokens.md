@@ -1,7 +1,16 @@
-# CSS Tokens
+---
+title: CSS Design Tokens Reference
+description: Reference for available CSS design tokens in Semantic UI. Covers sizing, spacing, typography, colors, borders, effects, and layout tokens.
+keywords: [CSS variables, custom properties, design tokens, colors, spacing, typography, theming, dark mode, light mode]
+audience: ui
+skill: design-tokens
+---
 
-> **Skill:** `sui:tokens`
+# CSS Design Tokens Reference
+
+> **Skill:** `sui:design-tokens`
 > **Purpose:** Reference for available CSS design tokens in Semantic UI
+> **Last Updated:** 2026-03-04
 
 CSS tokens are CSS custom properties that provide consistent, theme-aware values for styling components.
 
@@ -31,12 +40,12 @@ CSS token names are designed for 3 goals:
 Tokens exist in layers. Semantic tokens (like `--text-color`) are built from raw scale values (like `--standard-80`). Always prefer the semantic token when it matches your intent.
 
 ```css
-/* WRONG - raw scale values when semantic tokens exist */
+/* ❌ WRONG - raw scale values when semantic tokens exist */
 color: var(--standard-80);              /* What is this? Body text? An icon? */
 background: var(--red-0);               /* Is this a background? A highlight? */
 border-color: var(--standard-15);       /* What kind of border? */
 
-/* RIGHT - semantic tokens communicate intent */
+/* ✅ RIGHT - semantic tokens communicate intent */
 color: var(--text-color);               /* This is body text */
 background: var(--red-background-color); /* This is a red background */
 border-color: var(--border-color);      /* This is a standard border */
@@ -531,7 +540,7 @@ Each has full scale (`--positive-0` to `--positive-100`) and shortcuts (`--posit
 ### Invalid Token Examples
 
 ```css
-/* WRONG - these don't exist */
+/* ❌ WRONG - these don't exist */
 --red-15                /* Scale: 0,5,10,20,30... no 15 */
 --red-text              /* Must be --red-text-color */
 --gray                  /* British spelling: --grey */
@@ -779,3 +788,13 @@ Cross-component tokens for consistent form styling (inputs, dropdowns, textareas
 /* Effects */
 --transition, --subtle-gradient, --floating-shadow
 ```
+
+---
+
+## Related Skills
+
+| Skill | Command | Use when... |
+|-------|---------|-------------|
+| **Style Components** | `sui:style-components` | Customizing component appearance, `::part()`, CSS variable overrides |
+| **Use Components** | `sui:use-components` | Component usage, specs, attributes, events |
+| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |

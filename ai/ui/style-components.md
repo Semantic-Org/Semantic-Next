@@ -1,6 +1,16 @@
+---
+title: Style Semantic UI Components
+description: Guide for customizing the appearance of SUI components from outside. Covers CSS variables, ::part() styling, theme-aware CSS, and responsive container queries.
+keywords: [CSS variables, ::part, shadow DOM, theming, dark mode, container queries, responsive, customization]
+audience: ui
+skill: style-components
+---
+
 # Style Semantic UI Components
 
-> sui:style - Skill for customizing the appearance of Semantic UI components from outside.
+> **Skill:** `sui:style-components`
+> **Purpose:** Guide for customizing the appearance of SUI components from outside
+> **Last Updated:** 2026-03-04
 
 ---
 
@@ -80,9 +90,7 @@ ui-button.cancel {
 
 ### Finding Available Variables
 
-Use MCP tools to discover what variables a component exposes:
-- `get_component` — check the spec's CSS or settings
-- Inspect the component's stylesheet in browser devtools
+Check the component's spec for CSS variables and settings. Inspecting the component's stylesheet in browser devtools also reveals available custom properties.
 
 ---
 
@@ -125,7 +133,7 @@ The specific parts available vary by component — check the component's templat
 
 ## Theme-Aware Styling
 
-Basic theme switching (`<html dark>`, `<div light>`) is covered in `/sui:use`. Additional patterns for layout authors:
+Basic theme switching (`<html dark>`, `<div light>`) is covered in `sui:use-components`. Additional patterns for layout authors:
 
 ### Theme-Invariant Sections
 
@@ -243,6 +251,6 @@ ui-button.special::part(icon) {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **CSS Tokens** | `/sui:tokens` | Available design tokens for colors, spacing, effects |
-| **Use Semantic UI** | `/sui:use` | Component usage, specs, attributes, events |
-| **Integrate Semantic UI** | `/sui:integrate` | Framework integration, SSR, installation |
+| **Design Tokens** | `sui:design-tokens` | Available design tokens for colors, spacing, effects |
+| **Use Components** | `sui:use-components` | Component usage, specs, attributes, events |
+| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |

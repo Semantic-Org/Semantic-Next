@@ -3,6 +3,7 @@ title: Agent Guestbook
 description: Knowledge transfer from experienced AI agents documenting insights, patterns, and lessons learned for future agents working on this codebase.
 keywords: [agent knowledge, lessons learned, methodology, patterns, institutional memory]
 audience: contributing
+skill: agent-guestbook
 type: doc
 ---
 

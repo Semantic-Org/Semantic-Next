@@ -3,6 +3,7 @@ title: TypeScript Types Guide
 description: Guide for adding and modifying TypeScript type definitions, covering JSDoc requirements, type patterns, documentation links, and best practices for developer experience.
 keywords: [TypeScript, JSDoc, type definitions, documentation, API reference, developer experience]
 audience: contributing
+skill: typescript-types
 type: doc
 ---
 

@@ -3,6 +3,7 @@ title: Code Formatting Guide
 description: Code formatting standards using dprint, including indentation rules, comment hierarchy for large files, and CSS formatting guidelines.
 keywords: [formatting, dprint, code style, comments, hierarchy, CSS formatting]
 audience: contributing
+skill: code-formatting
 type: doc
 ---
 

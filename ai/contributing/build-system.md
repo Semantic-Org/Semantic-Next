@@ -3,6 +3,7 @@ title: Semantic UI Build System
 description: Complete reference for the build system architecture, covering the two-system design, build scripts, esbuild plugins, export conditions, and common workflows.
 keywords: [build system, esbuild, wireit, CSS bundling, specs, export conditions, CDN]
 audience: contributing
+skill: build-system
 type: doc
 ---
 

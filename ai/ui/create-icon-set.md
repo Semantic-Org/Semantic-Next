@@ -1,7 +1,16 @@
-# Create Icon Sets
+---
+title: Create Icon Sets for Semantic UI
+description: Guide for creating custom icon sets for use with SUI's icon component. Covers mask, image, and font rendering techniques, canonical name mappings, and SVG guidelines.
+keywords: [icons, icon set, SVG, ui-icon, CSS custom properties, mask, font icons, canonical names]
+audience: ui
+skill: create-icon-set
+---
+
+# Create Icon Sets for Semantic UI
 
 > **Skill:** `sui:create-icon-set`
-> **Purpose:** Create custom icon sets for use with Semantic UI's `<ui-icon>` component
+> **Purpose:** Guide for creating custom icon sets for use with SUI's icon component
+> **Last Updated:** 2026-03-04
 
 ---
 
@@ -269,8 +278,10 @@ import './app-icons.css';                           // app-specific icons
 
 ---
 
-## Related
+## Related Skills
 
-- **Icon System Guide** (`ai/framework/icons.md`) — Full architecture reference including the CSS cascade, spec integration, and cross-library mapping system
-- **Using SUI Components** (`ai/skills/use.md`) — General component usage patterns
-- **Styling SUI** (`ai/skills/style.md`) — CSS customization and design tokens
+| Skill | Command | Use when... |
+|-------|---------|-------------|
+| **Use Components** | `sui:use-components` | General component usage, specs, attributes, events |
+| **Style Components** | `sui:style-components` | Customizing component appearance, CSS variables, `::part()` |
+| **Design Tokens** | `sui:design-tokens` | Available design tokens for colors, spacing, effects |

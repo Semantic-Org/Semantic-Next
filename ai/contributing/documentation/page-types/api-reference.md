@@ -3,6 +3,7 @@ title: API Reference Authoring Guide
 description: Guide for creating API reference pages with consistent header hierarchy, method signatures, parameter tables, and usage patterns across all packages.
 keywords: [API reference, documentation, header hierarchy, method signatures, parameters, code examples]
 audience: contributing
+skill: doc-page-api-reference
 type: doc
 ---
 

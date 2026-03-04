@@ -3,6 +3,7 @@ title: AI Slop Identification and Removal Guide
 description: Guide for identifying and removing low-quality AI-generated content patterns including concluding paragraphs, marketing buzzwords, hedging words, and verbose introductions.
 keywords: [slop identification, AI content, quality, marketing language, hedging, removal strategy]
 audience: contributing
+skill: doc-slop-identification
 type: doc
 ---
 

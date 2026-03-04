@@ -3,6 +3,7 @@ title: Semantic UI Codebase Navigation Guide
 description: Comprehensive navigation guide for finding files, APIs, examples, and documentation within the Semantic UI codebase, including search strategies and tool usage patterns.
 keywords: [navigation, codebase, search patterns, file locations, grep, glob, documentation]
 audience: contributing
+skill: codebase-navigation
 type: doc
 ---
 

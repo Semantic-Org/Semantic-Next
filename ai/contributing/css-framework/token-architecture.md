@@ -3,6 +3,7 @@ title: CSS Token Architecture Guide
 description: Technical architecture of the CSS token system, covering the two-context computation model, cascade ordering rules, and variable resolution patterns.
 keywords: [token architecture, CSS layers, variable resolution, theme-agnostic, theme-aware, cascade order]
 audience: contributing
+skill: token-architecture
 type: doc
 ---
 

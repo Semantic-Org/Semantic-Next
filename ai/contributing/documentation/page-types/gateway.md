@@ -3,6 +3,7 @@ title: Writing Gateway Pages
 description: Guide for writing landing and index pages that earn reader attention through problem-first structure and instability language before introducing features.
 keywords: [gateway pages, landing pages, problem-first, instability language, technical tour, convince]
 audience: contributing
+skill: doc-page-gateway
 type: doc
 ---
 

@@ -3,6 +3,7 @@ title: Testing Guide
 description: Comprehensive guide for writing and running tests, covering test organization, test types (unit, DOM, browser), coverage requirements, and package-specific testing patterns.
 keywords: [testing, vitest, unit tests, DOM tests, browser tests, coverage, test patterns]
 audience: contributing
+skill: writing-tests
 type: doc
 ---
 

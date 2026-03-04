@@ -3,6 +3,7 @@ title: Target Audience for Semantic UI Documentation
 description: Definition of documentation readers as early adopters, explaining their characteristics, expectations, and how to write problem-first content that changes their beliefs.
 keywords: [target audience, early adopters, problem-first, instability language, reader expectations]
 audience: contributing
+skill: doc-target-audience
 type: doc
 ---
 

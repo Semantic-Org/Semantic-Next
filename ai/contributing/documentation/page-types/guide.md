@@ -3,6 +3,7 @@ title: Writing Guide Pages
 description: Instructions for writing instructional guide pages that teach how to use concepts, features, and patterns with progressive complexity and practical examples.
 keywords: [guide pages, instructional writing, progressive complexity, code examples, technical accuracy]
 audience: contributing
+skill: doc-page-guide
 type: doc
 ---
 

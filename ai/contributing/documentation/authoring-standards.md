@@ -3,6 +3,7 @@ title: Documentation Authoring Standards
 description: Structural requirements for all documentation page types, covering heading hierarchy, frontmatter, imports, code blocks, and embedded examples.
 keywords: [authoring, standards, headings, frontmatter, code blocks, examples, formatting]
 audience: contributing
+skill: doc-authoring-standards
 type: doc
 ---
 

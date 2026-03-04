@@ -3,6 +3,7 @@ title: Previewing Documentation with Chrome DevTools MCP
 description: Guide for AI agents to access and preview the Astro documentation server using Chrome DevTools MCP.
 keywords: [preview, chrome, devtools, mcp, astro, documentation, routing]
 audience: contributing
+skill: doc-preview-chrome
 type: doc
 ---
 

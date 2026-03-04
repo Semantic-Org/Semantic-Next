@@ -3,6 +3,7 @@ title: Writing Lessons (Learn REPL)
 description: How to write interactive lessons for the Semantic UI Learn section — standalone REPLs that sequentially teach framework concepts.
 keywords: [lessons, Learn REPL, interactive tutorials, challenges, code-first, pedagogical]
 audience: contributing
+skill: doc-page-pedagogical
 type: doc
 ---
 

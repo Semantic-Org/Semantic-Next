@@ -3,6 +3,7 @@ title: Base Size Scaling System
 description: How the sizing system scales from a single control point, why 14px is the default, and why a 2px grid is necessary for dense application UIs.
 keywords: [base-size, scaling, 14px, 2px grid, dense UI, sizing tokens]
 audience: contributing
+skill: base-size-scaling
 type: doc
 ---
 

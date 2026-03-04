@@ -3,6 +3,7 @@ title: Example Creation Self-Critique Protocol
 description: Mandatory verification process for AI agents creating examples, with 13 verification criteria covering uniqueness, simplicity, CSS patterns, and documentation compliance.
 keywords: [self-critique, verification, examples, quality checklist, validation, code review]
 audience: contributing
+skill: doc-examples-self-critique
 type: doc
 ---
 

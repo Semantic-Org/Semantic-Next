@@ -3,6 +3,7 @@ title: Documentation Writing Hub
 description: Central navigation hub for AI agents working on Semantic UI documentation, providing task routing to page types, examples, enhancement operations, and quality guidelines.
 keywords: [documentation, writing, navigation, page types, examples, quality, guides]
 audience: contributing
+skill: doc-start-here
 type: doc
 ---
 

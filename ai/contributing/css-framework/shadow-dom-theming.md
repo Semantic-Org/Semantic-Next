@@ -3,6 +3,7 @@ title: Shadow DOM and Theme Cascade
 description: How CSS custom properties flow through nested themes and into shadow DOM, and why the token system uses specific selector patterns.
 keywords: [shadow DOM, CSS variables, theme cascade, nested themes, custom properties]
 audience: contributing
+skill: shadow-dom-theming
 type: doc
 ---
 

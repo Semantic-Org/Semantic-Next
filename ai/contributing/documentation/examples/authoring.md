@@ -3,6 +3,7 @@ title: Examples System Canonical Guide
 description: Complete reference for creating documentation examples, covering metadata schema, file organization, example types, design tokens, and quality standards.
 keywords: [examples, metadata, playground, design tokens, component examples, code patterns, validation]
 audience: contributing
+skill: doc-examples-authoring
 type: doc
 ---
 

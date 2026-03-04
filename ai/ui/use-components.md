@@ -1,5 +1,16 @@
+---
+title: Use Semantic UI Components
+description: Guide for using SUI's published web components to build websites. Covers component discovery, attributes, slots, events, and responsive patterns.
+keywords: [web components, custom elements, ui-button, ui-card, shadow DOM, attributes, slots, query, specs]
+audience: ui
+skill: use-components
+---
+
 # Use Semantic UI Components
-> sui:use - Skill for using Semantic UI's official web components to build websites.
+
+> **Skill:** `sui:use-components`
+> **Purpose:** Guide for using SUI's published web components to build websites
+> **Last Updated:** 2026-03-04
 
 ---
 
@@ -15,13 +26,11 @@ Before generating code, gather context:
 
 1. **Detect codebase first**:
    - If **SUI source repo** (packages/, docs/, specs in this repo): assume Query and SUI style guide (nested CSS, container queries, design tokens) — skip preference questions below
-   - If **React/Vue/Angular/Svelte** project: note that `/sui:integrate` provides framework-specific patterns
+   - If **React/Vue/Angular/Svelte** project: note that framework integration patterns are available
 
-2. **Check MCP availability** — If Semantic UI MCP tools are available (`list_components`, `get_component`), use them for live spec access. If not, recommend installing the MCP plugin, or fetch specs via https://next.semantic-ui.com/llms.txt for content URLs.
+2. **Ask CSS preference** (unless SUI repo) — "SUI style guide, your own CSS, or Tailwind?" For deep customization, see `sui:style-components`.
 
-3. **Ask CSS preference** (unless SUI repo) — "SUI style guide, your own CSS, or Tailwind?" For deep customization, see `/sui:style`.
-
-4. **Ask Query preference** (unless SUI repo) — "Use SUI's Query library (`$`, `$$`) or vanilla JS?"
+3. **Ask Query preference** (unless SUI repo) — "Use SUI's Query library (`$`, `$$`) or vanilla JS?"
    - **Query**: jQuery-like `$`, plus `$$` which matches recursively through shadow DOM roots and slot projections
    - **Vanilla JS**: Standard DOM APIs, no extra dependency
    - Use the chosen approach in all code examples
@@ -31,11 +40,6 @@ Before generating code, gather context:
 ## Discovering Syntax from Specs
 
 Every SUI component is defined by a JSON spec. The spec is the authoritative API reference.
-
-**Access specs via MCP:**
-- `list_components` — see all available components
-- `get_component` — get full spec for a component
-- `search` — find components by keyword
 
 **Spec fields:**
 
@@ -63,6 +67,31 @@ Every SUI component is defined by a JSON spec. The spec is the authoritative API
 **Spec hints**: When a content field name matches a component (e.g., `icon` in button), check that component's spec for exhaustive options via `couplesWith`.
 
 **Golden rule: If it's not in the spec, don't use it.**
+
+### Accessing Specs via MCP
+
+If Semantic UI MCP tools are available, use them for live spec access:
+
+- `list_components` — discover all available components and their tag names
+- `get_component` — retrieve a component's full spec (attributes, events, methods, etc.)
+- `search` — find components by keyword when you don't know the exact name
+
+If MCP tools are not available, fetch specs via `https://next.semantic-ui.com/llms.txt` for content URLs.
+
+### Tag Naming Conventions
+
+Tag names are defined in each spec's `tagName` field. Do not infer tag names.
+
+- Top-level components use `ui-` prefix: `ui-button`, `ui-modal`, `ui-card`
+- Plural containers use `ui-` prefix: `ui-buttons`, `ui-cards`
+- Subcomponents often omit the prefix: `menu-item`, `form-field`
+
+Always retrieve the tag name from the spec:
+
+```json
+{ "tagName": "ui-menu" }        // Use <ui-menu>
+{ "tagName": "menu-item" }      // Use <menu-item>, not <ui-menu-item>
+```
 
 ### Plural Container Inheritance
 
@@ -130,6 +159,21 @@ For fields in the spec's `content` section:
 ```
 
 Use **attribute** for simple strings, **class** or **slot** for rich HTML content.
+
+### Boolean Attributes
+
+Boolean attributes can be explicitly set to false using the string `"false"`:
+
+```html
+<!-- Checked by default, explicitly unchecked -->
+<ui-checkbox checked="false"></ui-checkbox>
+
+<!-- Closeable modal vs non-closeable -->
+<ui-modal closeable="true">...</ui-modal>
+<ui-modal closeable="false">...</ui-modal>
+```
+
+This differs from standard HTML boolean attributes where presence alone means true.
 
 ### Value Fuzzing
 
@@ -223,6 +267,19 @@ Query's `.component()` method and vanilla's `.component` property access the sam
 | `initialize()` | Before DOM ready | Waits for DOM ready, then sets properties |
 | Direct properties | Component in DOM | Same as `settings()`, vanilla JS style |
 
+### Form Values
+
+Get and set values on form components:
+
+```js
+// Query syntax
+$('ui-input').val()              // Get value
+$('ui-input').val('new value')   // Set value
+
+// Vanilla JS
+document.querySelector('ui-input').value
+```
+
 **Debugging**: Use `$('ui-component').dataContext()` or `el.dataContext` to inspect the component's flattened template context (state + data + methods).
 
 ---
@@ -261,6 +318,9 @@ document.querySelector('ui-modal').component.show();
 ```js
 element.disabled = true;
 element.size = 'large';
+
+// setAttribute works too
+element.setAttribute('size', 'large');
 ```
 
 **Theming** — Components auto-adapt to light/dark mode. Set on `<html>` for page-wide, or on any container/component to override:
@@ -271,6 +331,78 @@ element.size = 'large';
 ```
 
 Equivalent syntaxes: `dark`, `class="dark"`, `theme="dark"` — use whichever fits your styling approach.
+
+---
+
+## Query Essentials
+
+The `$` function provides DOM selection and manipulation:
+
+```js
+$('ui-button')                   // Select elements
+$('ui-modal').component()        // Get component instance
+$('ui-button').on('click', fn)   // Bind events
+$('ui-button').attr('disabled', true)  // Set attributes
+```
+
+### Shadow DOM Piercing
+
+The `$$` function queries across Shadow DOM boundaries:
+
+```js
+$$('ui-dropdown .item')  // Finds .item inside dropdown's shadow root
+```
+
+This is an advanced pattern. Only use `$$` when you understand a component's internal shadow DOM structure — typically for custom components you've authored.
+
+---
+
+## Common Patterns
+
+Examples using components with known specs. For other components, retrieve the spec first.
+
+### Modal with Trigger
+
+```html
+<ui-button id="open-btn">Open Modal</ui-button>
+
+<ui-modal id="my-modal" large>
+  <h2>Title</h2>
+  <p>Modal content here.</p>
+  <ui-buttons>
+    <ui-button>Cancel</ui-button>
+    <ui-button primary>Confirm</ui-button>
+  </ui-buttons>
+</ui-modal>
+
+<script>
+$('#open-btn').on('click', () => {
+  $('#my-modal').component().show();
+});
+</script>
+```
+
+### Navigation Menu
+
+```html
+<ui-menu>
+  <menu-item icon="home" active>Home</menu-item>
+  <menu-item icon="user">Profile</menu-item>
+  <menu-item icon="settings">Settings</menu-item>
+</ui-menu>
+
+<!-- Selection menu with event -->
+<ui-menu selection id="nav">
+  <menu-item value="home">Home</menu-item>
+  <menu-item value="about">About</menu-item>
+</ui-menu>
+
+<script>
+$('#nav').on('change', (e) => {
+  console.log('Selected:', e.detail.value);
+});
+</script>
+```
 
 ---
 
@@ -308,6 +440,10 @@ $('ui-modal').component().show();
 
 // Listen to events
 $('ui-menu').on('change', (e) => console.log(e.detail.value));
+
+// Form values
+$('ui-input').val()              // get
+$('ui-input').val('new value')   // set
 ```
 
 **Always check the spec. If it's not in the spec, don't use it.**
@@ -318,5 +454,6 @@ $('ui-menu').on('change', (e) => console.log(e.detail.value));
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Style Semantic UI** | `/sui:style` | Customizing CSS, theming, design tokens, `::part()` styling |
-| **Integrate Semantic UI** | `/sui:integrate` | Framework integration (React, Vue, etc.), SSR, installation |
+| **Style Components** | `sui:style-components` | Customizing CSS, theming, design tokens, `::part()` styling |
+| **Design Tokens** | `sui:design-tokens` | Looking up available design tokens for colors, spacing, effects |
+| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |

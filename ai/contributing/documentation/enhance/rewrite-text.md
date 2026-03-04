@@ -3,6 +3,7 @@ title: Documentation Rewrite Instructions
 description: Technical editor instructions for rewriting and refining Semantic UI documentation prose, covering style guidelines, linking requirements, and technical accuracy.
 keywords: [rewriting, editing, prose, style, clarity, linking, technical accuracy]
 audience: contributing
+skill: doc-rewrite-text
 type: doc
 ---
 

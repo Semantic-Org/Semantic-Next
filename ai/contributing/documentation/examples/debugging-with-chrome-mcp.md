@@ -3,6 +3,7 @@ title: Debugging Examples with Chrome DevTools MCP
 description: Guide for AI agents to debug documentation examples running on the Astro dev server using Chrome DevTools MCP.
 keywords: [debugging, chrome, devtools, mcp, examples, console, testing]
 audience: contributing
+skill: doc-examples-debugging
 type: doc
 ---
 

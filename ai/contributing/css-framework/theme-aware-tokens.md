@@ -3,6 +3,7 @@ title: Theme-Aware Token Architecture
 description: How CSS tokens flow through global, computed, and theme layers, with emphasis on understanding the two computation contexts and cascade order.
 keywords: [theme tokens, computed tokens, cascade order, light mode, dark mode, CSS variables]
 audience: contributing
+skill: theme-aware-tokens
 type: doc
 ---
 
