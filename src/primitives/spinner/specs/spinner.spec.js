@@ -39,11 +39,13 @@ export default {
   variations: [
     ...getVariations(['size', 'colored']),
     {
-      name: 'Centered',
-      attribute: 'centered',
-      description: 'appear centered within its container',
+      name: 'Block',
+      attribute: 'block',
+      description: 'appear in the page as a block element',
       usageLevel: 2,
-      exampleCode: `<ui-spinner centered></ui-spinner>`,
+      exampleCode: [
+        `<ui-spinner block text="Loading..."></ui-spinner>`,
+      ]
     },
     {
       name: 'Overlay',

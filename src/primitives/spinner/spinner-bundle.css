@@ -53,6 +53,9 @@
     font-size: var(--spinner-text-font-size);
     color: var(--spinner-text-color);
   }
+  .spinner .circle + .text {
+    margin-left: var(--gap-xs);
+  }
 }
 
 /* src/primitives/spinner/css/definition/states/hidden.css */
@@ -112,17 +115,17 @@
   }
 }
 
-/* src/primitives/spinner/css/definition/variations/centered.css */
-@layer spinner.definition.variations.centered {
-  .centered.spinner {
+/* src/primitives/spinner/css/definition/variations/block.css */
+@layer spinner.definition.variations.block {
+  .block.spinner {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-inline: auto;
-    gap: var(--spinner-centered-text-gap);
-    --spinner-size: var(--spinner-centered-size);
-    --spinner-arc-thickness: var(--spinner-centered-arc-thickness);
-    --spinner-speed: var(--spinner-centered-speed);
+    gap: var(--spinner-block-text-gap);
+    --spinner-size: var(--spinner-block-size);
+    --spinner-arc-thickness: var(--spinner-block-arc-thickness);
+    --spinner-speed: var(--spinner-block-speed);
   }
 }
 
@@ -148,31 +151,24 @@
 @layer spinner.definition.variations.sizing {
   .mini.spinner {
     --spinner-size: var(--spinner-mini-size);
-    --spinner-speed: var(--spinner-mini-speed);
   }
   .tiny.spinner {
     --spinner-size: var(--spinner-tiny-size);
-    --spinner-speed: var(--spinner-tiny-speed);
   }
   .small.spinner {
     --spinner-size: var(--spinner-small-size);
-    --spinner-speed: var(--spinner-small-speed);
   }
   .large.spinner {
     --spinner-size: var(--spinner-large-size);
-    --spinner-speed: var(--spinner-large-speed);
   }
   .big.spinner {
     --spinner-size: var(--spinner-big-size);
-    --spinner-speed: var(--spinner-big-speed);
   }
   .huge.spinner {
     --spinner-size: var(--spinner-huge-size);
-    --spinner-speed: var(--spinner-huge-speed);
   }
   .massive.spinner {
     --spinner-size: var(--spinner-massive-size);
-    --spinner-speed: var(--spinner-massive-speed);
   }
 }
 
@@ -183,7 +179,7 @@
   :host {
     --spinner-size: 1em;
     --spinner-color: #2274b4;
-    --spinner-arc-thickness: 0.07;
+    --spinner-arc-thickness: 0.12;
     --spinner-arc: 330deg;
     --spinner-speed: 0.7s;
     --spinner-vertical-align: -0.15em;
@@ -217,13 +213,13 @@
   }
 }
 
-/* src/primitives/spinner/css/theme/variations/centered-variables.css */
-@layer spinner.theme.variations.centered {
+/* src/primitives/spinner/css/theme/variations/block-variables.css */
+@layer spinner.theme.variations.block {
   :host {
-    --spinner-centered-size: 64px;
-    --spinner-centered-arc-thickness: 0.09;
-    --spinner-centered-speed: 0.9s;
-    --spinner-centered-text-gap: var(--gap-s);
+    --spinner-block-size: 64px;
+    --spinner-block-arc-thickness: 0.09;
+    --spinner-block-speed: 0.9s;
+    --spinner-block-text-gap: var(--gap-s);
   }
 }
 
@@ -240,20 +236,13 @@
 /* src/primitives/spinner/css/theme/variations/sizing-variables.css */
 @layer spinner.theme.variations.sizing {
   :host {
-    --spinner-mini-size: var(--relative-10px);
-    --spinner-mini-speed: 0.5s;
-    --spinner-tiny-size: var(--relative-11px);
-    --spinner-tiny-speed: 0.55s;
-    --spinner-small-size: var(--relative-12px);
-    --spinner-small-speed: 0.6s;
-    --spinner-large-size: var(--relative-16px);
-    --spinner-large-speed: 0.8s;
-    --spinner-big-size: var(--relative-18px);
-    --spinner-big-speed: 0.85s;
-    --spinner-huge-size: var(--relative-20px);
-    --spinner-huge-speed: 0.9s;
-    --spinner-massive-size: var(--relative-24px);
-    --spinner-massive-speed: 1s;
+    --spinner-mini-size: 10px;
+    --spinner-tiny-size: 11px;
+    --spinner-small-size: 12px;
+    --spinner-large-size: 16px;
+    --spinner-big-size: 18px;
+    --spinner-huge-size: 20px;
+    --spinner-massive-size: 24px;
   }
 }
 

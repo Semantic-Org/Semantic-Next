@@ -12,6 +12,6 @@
 
 /* Variations */
 @import url('./variations/colored-variables.css') layer(spinner.theme.variations.colored);
-@import url('./variations/centered-variables.css') layer(spinner.theme.variations.centered);
+@import url('./variations/block-variables.css') layer(spinner.theme.variations.block);
 @import url('./variations/overlay-variables.css') layer(spinner.theme.variations.overlay);
 @import url('./variations/sizing-variables.css') layer(spinner.theme.variations.sizing);

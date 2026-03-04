@@ -1,22 +1,9 @@
 :host {
-  --spinner-mini-size: var(--relative-10px);
-  --spinner-mini-speed: 0.5s;
-
-  --spinner-tiny-size: var(--relative-11px);
-  --spinner-tiny-speed: 0.55s;
-
-  --spinner-small-size: var(--relative-12px);
-  --spinner-small-speed: 0.6s;
-
-  --spinner-large-size: var(--relative-16px);
-  --spinner-large-speed: 0.8s;
-
-  --spinner-big-size: var(--relative-18px);
-  --spinner-big-speed: 0.85s;
-
-  --spinner-huge-size: var(--relative-20px);
-  --spinner-huge-speed: 0.9s;
-
-  --spinner-massive-size: var(--relative-24px);
-  --spinner-massive-speed: 1s;
+  --spinner-mini-size: 10px;
+  --spinner-tiny-size: 11px;
+  --spinner-small-size: 12px;
+  --spinner-large-size: 16px;
+  --spinner-big-size: 18px;
+  --spinner-huge-size: 20px;
+  --spinner-massive-size: 24px;
 }

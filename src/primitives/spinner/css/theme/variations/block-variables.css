@@ -1,0 +1,6 @@
+:host {
+  --spinner-block-size: 64px;
+  --spinner-block-arc-thickness: 0.09;
+  --spinner-block-speed: 0.9s;
+  --spinner-block-text-gap: var(--gap-s);
+}

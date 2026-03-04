@@ -10,7 +10,7 @@ export default {
   "variations": [
     "size",
     "color",
-    "centered",
+    "block",
     "overlay"
   ],
   "states": [
@@ -23,7 +23,7 @@ export default {
     "hidden",
     "size",
     "color",
-    "centered",
+    "block",
     "overlay"
   ],
   "optionAttributes": {
@@ -55,7 +55,7 @@ export default {
     "hidden": "boolean",
     "size": "string",
     "color": "string",
-    "centered": "boolean",
+    "block": "boolean",
     "overlay": "boolean"
   },
   "allowedValues": {

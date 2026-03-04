@@ -8,6 +8,6 @@
 
 /* Variations */
 @import url('./variations/colored.css') layer(spinner.definition.variations.colored);
-@import url('./variations/centered.css') layer(spinner.definition.variations.centered);
+@import url('./variations/block.css') layer(spinner.definition.variations.block);
 @import url('./variations/overlay.css') layer(spinner.definition.variations.overlay);
 @import url('./variations/sizing.css') layer(spinner.definition.variations.sizing);
