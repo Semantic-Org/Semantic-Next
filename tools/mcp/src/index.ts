@@ -185,6 +185,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ json }) => {
+    await ensureCache();
     const components = listComponents();
 
     if (components.length === 0) {
@@ -215,6 +216,7 @@ server.tool(
       .describe('Component name/tag or array of names (e.g., "button" or ["button", "card"])'),
   },
   async ({ query }) => {
+    await ensureCache();
     const isBatch = Array.isArray(query);
     const queries = isBatch ? query : [query];
 
@@ -275,6 +277,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ category, json }) => {
+    await ensureCache();
     const examples = listExamples(category);
 
     if (examples.length === 0) {
@@ -372,6 +375,7 @@ server.tool(
       .describe('Example ID or array of IDs (e.g., "counter" or ["counter", "dropdown"])'),
   },
   async ({ id }) => {
+    await ensureCache();
     const isBatch = Array.isArray(id);
     const ids = isBatch ? id : [id];
 
@@ -412,6 +416,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ audience, includeMetadata, json }) => {
+    await ensureCache();
     const skills = listSkills(audience);
 
     if (skills.length === 0) {
@@ -473,6 +478,7 @@ server.tool(
     skill: z.string().describe('Skill name (e.g., "utils", "creating-components", "reactivity")'),
   },
   async ({ skill: skillName }) => {
+    await ensureCache();
     const skillDoc = findSkill(skillName);
 
     if (!skillDoc) {
@@ -517,6 +523,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ audience, json }) => {
+    await ensureCache();
     const workflows = listWorkflows(audience);
 
     if (workflows.length === 0) {
@@ -562,6 +569,7 @@ server.tool(
       ),
   },
   async ({ id }) => {
+    await ensureCache();
     const isBatch = Array.isArray(id);
     const ids = isBatch ? id : [id];
 
@@ -614,6 +622,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ audience, includeMetadata, json }) => {
+    await ensureCache();
     const docs = listContext(audience);
 
     if (docs.length === 0) {
@@ -664,6 +673,7 @@ server.tool(
       ),
   },
   async ({ id }) => {
+    await ensureCache();
     const isBatch = Array.isArray(id);
     const ids = isBatch ? id : [id];
 
@@ -715,6 +725,7 @@ server.tool(
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
   async ({ json }) => {
+    await ensureCache();
     const docs = listDocs();
 
     if (docs.length === 0) {
@@ -785,6 +796,7 @@ server.tool(
       ),
   },
   async ({ path }) => {
+    await ensureCache();
     const isBatch = Array.isArray(path);
     const paths = isBatch ? path : [path];
 
@@ -855,6 +867,7 @@ server.tool(
     ),
   },
   async ({ method, package: pkg }) => {
+    await ensureCache();
     const doc = searchApi(method, pkg);
 
     if (!doc) {
@@ -913,6 +926,7 @@ server.tool(
     limit: z.number().optional().describe('Max results (default: 20)'),
   },
   async ({ query, type, audience, limit }) => {
+    await ensureCache();
     const results = search(query, { type, audience, limit });
 
     if (results.length === 0) {

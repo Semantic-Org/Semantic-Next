@@ -1,3 +1,11 @@
+---
+title: Rewrite Context or Skill
+description: Workflow for rewriting existing AI context or skill files to comply with current authoring standards, including metadata, structure, and content conventions.
+keywords: [rewriting, context, skills, standards, metadata, authoring]
+audience: contributing
+type: workflow
+---
+
 You will be rewriting an existing AI context or skill file to comply with current authoring standards. This is not a from-scratch authoring task — the content already exists. Your job is to pare it down, fix its metadata, verify its claims against source code, and reshape it to follow the structural and content conventions.
 
 **Before starting, load the `author-context-or-skill` skill via `use_skill`.** That skill is the authoritative reference for all content standards. Every decision you make should trace back to a principle in that skill.

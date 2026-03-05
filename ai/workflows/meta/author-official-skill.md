@@ -1,3 +1,11 @@
+---
+title: Author Official Skill
+description: Workflow for writing new skills for Semantic UI in collaboration with the framework author, distributed to end users via MCP or Claude plugin.
+keywords: [skills, authoring, MCP, context, documentation]
+audience: contributing
+type: workflow
+---
+
 You will be authoring new skills for Semantic UI in collaboration with the framework author. These skills will be distributed to end users of the open source project via MCP or Claude plugin.
 
 **Before starting, load the `author-context-or-skill` skill via `use_skill`.** That skill is the authoritative reference for all content standards — frontmatter, structure, content principles, file length, terminology. This workflow covers the *process* of writing a skill; that skill covers the *craft* of writing one.

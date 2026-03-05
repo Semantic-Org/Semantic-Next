@@ -2,7 +2,8 @@ import { statSync } from 'fs';
 import matter from 'gray-matter';
 import { resolve } from 'path';
 
-const AUDIENCE_ORDER = ['usage', 'authoring', 'essentials', 'contributing', 'research'];
+const VALID_AUDIENCES = ['usage', 'authoring', 'essentials', 'contributing', 'research'];
+const AUDIENCE_ORDER = VALID_AUDIENCES;
 
 // Folders excluded from AI context manifests
 // Note: also listed as static glob negations below (Vite requires static strings)
@@ -33,6 +34,14 @@ export async function getAIManifestData() {
       const match = filePath.match(/ai\/(.+)\.md$/);
       const relativePath = match ? match[1] : filePath;
       const audience = getAudience(frontmatter, relativePath);
+
+      if (!VALID_AUDIENCES.includes(audience)) {
+        console.warn(
+          `[ai-manifest] Unknown audience "${audience}" in ai/${relativePath}.md — expected one of: ${
+            VALID_AUDIENCES.join(', ')
+          }`,
+        );
+      }
 
       const urlPath = `/content/ai/${relativePath}.md`;
       const tokens = Math.ceil(content.length / 4);

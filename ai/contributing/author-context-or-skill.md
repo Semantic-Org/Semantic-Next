@@ -80,7 +80,7 @@ description: Core mental model for AI agents...    # Shown in list results, fed 
 keywords: [mental model, architecture, signals]    # Fed to search ranking — quote values with special YAML chars: "@event" not @event
 audience: authoring                                # Filters: usage | authoring | essentials | contributing | research
 skill: mental-model                                # If set, makes this loadable via use_skill
-type: doc                                          # Content type classification
+type: workflow                                     # Only set for workflows — routes to list_workflows/get_workflow
 ---
 ```
 
@@ -127,6 +127,8 @@ keywords: [mental model]
 | `essentials` | Core concepts for all audiences | Mental model, fundamentals |
 | `contributing` | Contributors to the SUI codebase | Code conventions, PR process |
 | `research` | Architectural investigation | Design decisions, tradeoffs |
+
+**`type`** — Only meaningful value is `workflow`, which routes the file to `list_workflows`/`get_workflow` instead of `list_context`/`get_context`. Omit for non-workflow files.
 
 **`skill`** — Registers this file as loadable via `use_skill` and discoverable via `list_skills`. Use a kebab-case name. Every file in `ai/` should have this field — it's the primary delivery mechanism for downstream users via the MCP plugin.
 
