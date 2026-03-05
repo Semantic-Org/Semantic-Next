@@ -1,7 +1,7 @@
 ---
 title: Resolving Documentation Paths
 description: How to derive the correct URL for any page in docs/, including anchor links to specific methods and headings.
-keywords: [docs path, URL, anchor, @see, hyperlink, mdx, astro routing, method link]
+keywords: [docs path, URL, anchor, hyperlink, mdx, astro routing, method link]
 audience: contributing
 skill: docs-paths
 type: doc
