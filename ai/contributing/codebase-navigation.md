@@ -33,7 +33,7 @@ type: doc
 ├── packages/               ← Core framework source code
 ├── examples/               ← Standalone examples and demos
 ├── src/                    ← Component library (design system)
-├── tests/                  ← Test suites and configurations
+├── tests/                  ← Monorepo test harnesses (individual tests in each package)
 └── scripts/                ← Build and utility scripts
 ```
 

@@ -717,12 +717,18 @@ server.tool(
 
       const related = findRelatedForDoc(doc);
 
+      // Replace interactive example URL references with tool-use hints
+      const content = result.data!.replace(
+        />\s*\*\*\[Interactive Example:\s*([^\]]+)\]\(\/examples\/([^)]+)\)\*\*\s*\|\s*\[source\]\([^)]+\)/g,
+        '> **Interactive Example:** Use `get_example("$2")` to view the full source code.',
+      );
+
       return {
         path: docPath,
         data: {
           path: docPath,
           title: doc.title,
-          content: result.data!,
+          content,
           ...(Object.keys(related).length > 0 && { related }),
         },
       };

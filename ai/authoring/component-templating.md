@@ -13,7 +13,7 @@ skill: component-templating
 
 ---
 
-**Golden rule: This is a custom expression language.** Do not assume Handlebars, JSX, Mustache, or any known template syntax. Expressions support **both** Lisp-style (`{fn arg}`) and JS-style (`{fn(arg)}`) simultaneously. Signals auto-unwrap. Both `{}` and `{{}}` compile identically. Templates are reactive by default — expressions re-evaluate when signals change without manual subscriptions.
+**Golden rule: This is a custom expression language.** Do not assume Handlebars, JSX, Mustache, or any known template syntax. Expressions support **both** Lisp-style (`{fn arg}`) and JS-style (`{fn(arg)}`) simultaneously. Signals auto-unwrap. Both `{}` and `{{}}` compile identically. Templates are reactive by default — expressions re-evaluate when signals change without manual subscriptions. Expressions themselves use signals under the hood to surgically update html when values change.
 
 ---
 

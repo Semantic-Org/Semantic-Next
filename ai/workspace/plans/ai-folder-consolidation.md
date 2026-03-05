@@ -114,7 +114,7 @@ All 30 contributing files have proper YAML frontmatter with `audience: contribut
 
 1. **Contributing content review** — 30 files have frontmatter but content not reviewed for staleness
 2. **Workflow content review** — 15 files copied but content not reviewed
-3. **Parked files** — `workspace/consolidation-queue/using-primitives.md` and `parent-child.md` need full rework or deletion decision
+3. **Parked files** — ✅ `using-primitives.md` superseded (one-liner added to component-authoring). ✅ `parent-child.md` rewritten as `authoring/component-composition.md` (514 lines)
 4. **Final verification** — once MCP changes land, test `list_skills`, `list_context`, `use_skill`, `search`
 
 ---

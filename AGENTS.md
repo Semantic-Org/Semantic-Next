@@ -4,34 +4,20 @@
   Be mindful that you are working on the open source repository yourself, so although you are using the framework internally, the vast amount of user who will consume this code will be downstream users of the published packages. **This is fundamentally different than most repositories you will work in.**
 </project_background>
 
+<codebase_orientation>
+  This is a monorepo with two layers:
+  - packages/    — Core framework source (component, reactivity, templating, query, renderer, utils, specs, tailwind)
+  - src/         — First-party UI components built WITH the framework (the design system)
+  - docs/        — Astro documentation site
+
+  Documentation content, examples, API reference, and AI context are all available via
+  Semantic UI MCP tools — use those rather than reading files directly from docs/ or ai/.
+  Use the `codebase-navigation` skill for detailed search strategies and file locations.
+</codebase_orientation>
+
 <context_discovery>
   You have access to Semantic UI MCP which has tools available to provide Skills, AI Context, API Reference, and User Guides. Use list_skills and use_skill before writing code — skills contain framework-specific patterns and conventions that can't be inferred from reading source code alone (e.g., how the template compiler works, how reactivity integrates with rendering). Pass audience: 'contributing' to list_context to discover workflow guides and architecture docs that aren't shown by default — these contain step-by-step procedures for common contributor tasks like adding a new component, porting a primitive, or extending the spec system.
 </context_discovery>
-
-<component_authoring>
-  Non-obvious patterns that cause incorrect code when writing components. These are vetted — not suggestions.
-
-  **Flat data context.** Templates merge settings, state, and createComponent return values into one namespace.
-  ❌ `{state.count}` `{settings.name}`
-  ✅ `{count}` `{name}`
-
-  **Dual expression syntax.** Lisp-style and JavaScript-style work in the same expression.
-  ❌ Assuming one style excludes the other
-  ✅ `{formatDate date 'h:mm a'}` — Lisp
-  ✅ `{value + 2 * 5}` — JS
-  ✅ `{concat 'hi ' (isNew ? 'new' : 'old')}` — mixed
-
-  **Signal auto-unwrapping.** Signals resolve automatically in templates.
-  ❌ `{count.get()}` `{count.value}`
-  ✅ `{count}`
-
-  **Signal mutation methods.** Signals have built-in helpers. Use them directly — never get-mutate-set.
-  ❌ `const arr = state.items.get(); arr.push(x); state.items.set(arr);`
-  ✅ `state.items.push(x)` `state.active.toggle()` `state.count.increment()`
-
-  **`{ui}` is a computed class string.** In spec-driven primitives, `{ui}` expands to CSS classes from active spec attributes. It is not a variable.
-  `<div class="{ui}button">` → `<div class="primary large button">`
-</component_authoring>
 
 <code_formatting>
   *Do not overuse code comments*. Include comments in places where it makes sense to leave a breadcrumb for open source developers. Consider source code for projects like Vue, Vite, Svelte, etc when thinking about if a code comment is necessary. Comments should match the formatting of other comments in the library in general, and in the file in specific.
@@ -78,3 +64,49 @@
 
   > **Note:** You may read the guestbook to understand how previous agents approached similar challenges and what insights they discovered.
 </agent_continuity_and_reward>
+
+
+<nonobvious_patterns>
+  These are non-obvious patterns which differ from your training data. Be aware of them when working with the related packages.
+
+  Templates:
+  ---
+  **Flat data context.** Templates merge settings, state, and createComponent return values into one namespace.
+  ❌ `{state.count}` `{settings.name}`
+  ✅ `{count}` `{name}`
+
+  **Dual expression syntax.** Lisp-style and JavaScript-style work in the same expression.
+  ❌ Assuming one style excludes the other
+  ✅ `{formatDate date 'h:mm a'}` — Lisp
+  ✅ `{value + 2 * 5}` — JS
+  ✅ `{concat 'hi ' (isNew ? 'new' : 'old')}` — mixed
+
+  **Signal auto-unwrapping.** Signals resolve automatically in templates.
+  ❌ `{count.get()}` `{count.value}`
+  ✅ `{count}`
+
+  Signals
+  ----------
+  **Signal mutation methods.** Signals have built-in helpers. Use them directly — never get-mutate-set.
+  ❌ `const arr = state.items.get(); arr.push(x); state.items.set(arr);`
+  ✅ `state.items.push(x)` `state.active.toggle()` `state.count.increment()`
+
+  **`{ui}` is a computed class string.** In spec-driven primitives, `{ui}` expands to CSS classes from active spec attributes. It is not a variable.
+  `<div class="{ui}button">` → `<div class="primary large button">`
+</nonobvious_patterns>
+
+<tool_gotchas>
+  Semantic UI MCP
+  -------------
+  - **No Results** - If Semantic UI MCP appears to be returning no results this is because the dev server has not been started locally. Ask the user to start the dev server and reconnect mcp.
+  ❌ `list_guides` endpoint returns no results and inferring no guides written
+  ✅ `list_guides` endpoint returns no results ask user to start dev server
+
+  Chrome MCP
+  -----------
+  - **Site Location** - Local docs in `docs/` are usually run during claude sessions and hosted locally at https://dev.semantic-ui.com
+  - **Server Startup** - If you are confident in a path and it returns 404, confirm the user has started the server.
+  - **Determining URL** - You will need to determine the URL path using inference from the location in docs and astros url pipeline.
+  ❌ https://localhost/deep/path
+  ✅ https://dev.semantic-ui.com/deep/path
+</tool_gotchas>

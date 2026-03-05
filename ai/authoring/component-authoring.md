@@ -272,6 +272,8 @@ const defaultState = { name: 'Jack' };
 // Template: {name} → "Jack" in all cases
 ```
 
+**Composing with primitives**: Semantic UI ships spec-driven primitives — use them directly in your templates. When the Semantic UI MCP server is available, use `list_components` to see what's available. See `sui:use` for attribute syntax.
+
 ---
 
 ## Subtemplates

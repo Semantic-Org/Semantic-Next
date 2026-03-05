@@ -6,6 +6,7 @@ import template from './checklist-item.html?raw';
 const createComponent = ({ self, data, findParent }) => ({
   toggleCompleted() {
     const tasks = findParent('uiChecklist').tasks;
+    console.log(data.task.completed);
     tasks.setProperty(data.task._id, 'completed', !data.task.completed);
   },
 });
