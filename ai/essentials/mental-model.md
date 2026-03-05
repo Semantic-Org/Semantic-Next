@@ -2,7 +2,7 @@
 title: Semantic UI Mental Model
 description: Foundational mental model for understanding what Semantic UI is, how it thinks, and how to work with it effectively. Covers component architecture, template syntax, reactivity, Query, specs, and design philosophy.
 keywords: [mental model, framework, architecture, components, templates, reactivity, signals, defineComponent, shadow DOM, expressions, specs, query]
-audience: framework
+audience: essentials
 skill: mental-model
 ---
 

@@ -2,7 +2,7 @@
 title: Use Icons in Semantic UI
 description: How to use the ui-icon component — syntax, icon sets, sizing, coloring, and icons inside other components.
 keywords: [icons, ui-icon, icon sets, lucide, canonical names, shorthand, set attribute, ui-icons]
-audience: ui
+audience: usage
 skill: use-icons
 ---
 

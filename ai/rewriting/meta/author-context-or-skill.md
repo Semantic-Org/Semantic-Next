@@ -77,8 +77,8 @@ Every file in `ai/` should have YAML frontmatter. These fields are not optional 
 ---
 title: Semantic UI Mental Model                    # Shown in list results
 description: Core mental model for AI agents...    # Shown in list results, fed to search
-keywords: [mental model, architecture, signals]    # Fed to search ranking
-audience: framework                                # Filters: ui | framework | contributing | research
+keywords: [mental model, architecture, signals]    # Fed to search ranking — quote values with special YAML chars: "@event" not @event
+audience: authoring                                # Filters: usage | authoring | essentials | contributing | research
 skill: mental-model                                # If set, makes this loadable via use_skill
 type: doc                                          # Content type classification
 ---

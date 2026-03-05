@@ -2,7 +2,7 @@
 title: Query DOM with Semantic UI
 description: End-user guide for using SUI's Query library — selecting elements, binding events, manipulating the DOM, accessing component instances, and piercing shadow DOM with $$.
 keywords: [query, $, $$, DOM, events, shadow DOM, component access, selectors, jQuery-like]
-audience: ui
+audience: usage
 skill: query
 ---
 

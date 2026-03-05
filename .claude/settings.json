@@ -6,8 +6,8 @@
   },
   "mcpServers": {
     "semantic-ui": {
-      "command": "node",
-      "args": ["./tools/mcp/dist/index.js"]
+      "command": "bash",
+      "args": ["-c", "cd tools/mcp && npm run build --silent && node dist/index.js"]
     }
   },
   "enabledPlugins": {

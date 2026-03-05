@@ -1,15 +1,15 @@
 ---
-title: Semantic UI Architecture
-description: Internal architecture for contributors to the Semantic UI framework. Covers package internals, the Template/WebComponent relationship, AST pipeline, spec system, and CSS layer architecture.
+title: Semantic UI Framework Internals
+description: Internal architecture for contributors — the Template/WebComponent relationship, AST pipeline, reactivity chain, spec system, event system, and behavior system.
 keywords: [architecture, internals, packages, template, AST, renderer, specs, CSS layers, contributing]
 audience: contributing
-skill: architecture
+skill: internals
 dependsOn: [mental-model]
 ---
 
-# Semantic UI — Architecture
+# Semantic UI — Framework Internals
 
-> **Skill:** `sui:architecture`
+> **Skill:** `sui:internals`
 > **Purpose:** Internal architecture for contributors. Read `sui:mental-model` first for the user-facing concepts this builds on.
 > **Last Updated:** 2026-03-04
 

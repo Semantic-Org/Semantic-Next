@@ -2,7 +2,7 @@
 title: Theme Semantic UI
 description: Runtime theming for SUI pages and layouts — switching light/dark mode, nested theme contexts, theme-invariant sections, color overrides, and writing custom CSS that responds to the current theme.
 keywords: [dark mode, light mode, theme switching, nested themes, color overrides, container style queries, theme-invariant]
-audience: ui
+audience: usage
 skill: adjust-theme
 ---
 

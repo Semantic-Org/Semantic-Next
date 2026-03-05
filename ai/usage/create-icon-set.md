@@ -2,7 +2,7 @@
 title: Create Icon Sets for Semantic UI
 description: Guide for creating custom icon sets for use with SUI's icon component. Covers mask, image, and font rendering techniques, canonical name mappings, and SVG guidelines.
 keywords: [icons, icon set, SVG, ui-icon, CSS custom properties, mask, font icons, canonical names]
-audience: ui
+audience: usage
 skill: create-icon-set
 ---
 

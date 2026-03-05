@@ -2,7 +2,7 @@
 title: CSS Design Tokens Reference
 description: Reference for available CSS design tokens in Semantic UI. Covers sizing, spacing, typography, colors, borders, effects, and layout tokens.
 keywords: [CSS variables, custom properties, design tokens, colors, spacing, typography, theming, dark mode, light mode]
-audience: ui
+audience: usage
 skill: design-tokens
 ---
 

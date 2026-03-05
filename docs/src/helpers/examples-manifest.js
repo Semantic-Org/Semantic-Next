@@ -57,6 +57,21 @@ export function buildFullManifest(examples) {
   };
 }
 
+export function buildMarkdownManifest(examples) {
+  const groups = {};
+  for (const e of examples) {
+    const cat = e.category || 'Other';
+    if (!groups[cat]) { groups[cat] = []; }
+    groups[cat].push(e);
+  }
+  const sections = Object.entries(groups).map(([cat, items]) =>
+    `## ${cat}\n${items.map(e => `* ${e.id} - ${e.title}`).join('\n')}`
+  );
+  return `# Examples\n\n${examples.length} examples\n\nFetch JSON: /content/examples/{id}.json\n\n${
+    sections.join('\n\n')
+  }\n`;
+}
+
 export function buildSlimManifest(examples) {
   return {
     schemaVersion: 1,

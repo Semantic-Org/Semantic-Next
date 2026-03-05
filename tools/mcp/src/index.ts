@@ -19,12 +19,14 @@ import {
   findRelatedForExample,
   findRelatedForSpec,
   findSkill,
+  findWorkflow,
   initCache,
   listContext,
   listDocs,
   listExamples,
   listSkills,
   listSpecs,
+  listWorkflows,
   search,
   searchApi,
 } from './utils/cache.js';
@@ -59,24 +61,6 @@ function runLogExample(code: string): { logs: string[]; error?: string; } {
   );
 
   try {
-    // Debug: log available keys
-    console.error('Available in context:', Object.keys(filteredContext).filter(k => /^[A-Z]/.test(k)));
-
-    // Use with + proxy pattern for controlled scope
-    const proxyHandler = {
-      has(target: Record<string, unknown>, key: string) {
-        const result = key in target;
-        if (key === 'Signal') { console.error(`has('Signal') = ${result}`); }
-        return result;
-      },
-      get(target: Record<string, unknown>, prop: string) {
-        if (prop === 'Signal') { console.error(`get('Signal') =`, target[prop]); }
-        return target[prop];
-      },
-    };
-
-    const proxiedContext = new Proxy(filteredContext, proxyHandler);
-
     const fn = new Function(
       'ctx',
       `
@@ -86,7 +70,7 @@ function runLogExample(code: string): { logs: string[]; error?: string; } {
     `,
     );
 
-    fn(proxiedContext);
+    fn(filteredContext);
     return { logs };
   }
   catch (e) {
@@ -123,6 +107,7 @@ Write classes you know. The sophisticated theming system is there when needed, n
 - \`list_components\` - See all UI components (button, card, modal, etc.)
 - \`list_examples\` - Browse working code examples by category
 - \`list_skills\` - See available deep-dive guides
+- \`list_workflows\` - See step-by-step procedures (pass audience: "contributing" to see contributor workflows)
 - \`list_user_docs\` - Browse user documentation (guides, API reference)
 
 ### Get Content
@@ -136,11 +121,12 @@ Write classes you know. The sophisticated theming system is there when needed, n
 ### Learn (AI-Optimized Docs)
 - \`use_skill\` - Comprehensive guide for a topic (utils, reactivity, templating, etc.)
 - \`get_context\` - AI context docs by path (internal patterns, architecture details)
+- \`get_workflow\` - Step-by-step procedure by path
 
 ### Utilities
 - \`validate_template\` - Check template syntax before running
 
-## Typical Workflows
+## Common Patterns
 
 **Building a UI component:**
 1. \`get_component\` → see what attributes/slots are available
@@ -417,13 +403,15 @@ server.tool(
 
 server.tool(
   'list_skills',
-  'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics.',
+  'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" skills.',
   {
+    audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      .describe('Filter by audience'),
     includeMetadata: z.boolean().optional().describe('Include descriptions for each skill'),
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
   },
-  async ({ includeMetadata, json }) => {
-    const skills = listSkills();
+  async ({ audience, includeMetadata, json }) => {
+    const skills = listSkills(audience);
 
     if (skills.length === 0) {
       return {
@@ -454,8 +442,9 @@ server.tool(
     }
 
     const AUDIENCE_LABELS: Record<string, string> = {
-      ui: 'Using Components',
-      framework: 'Authoring Components',
+      usage: 'Using Components',
+      authoring: 'Authoring Components',
+      essentials: 'Essentials',
     };
 
     const sections: string[] = [];
@@ -515,14 +504,110 @@ server.tool(
 );
 
 // ============================================================================
+// Workflow Tools
+// ============================================================================
+
+server.tool(
+  'list_workflows',
+  'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" workflows.',
+  {
+    audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      .describe('Filter by audience'),
+    json: z.boolean().optional().describe('Return JSON instead of markdown'),
+  },
+  async ({ audience, json }) => {
+    const workflows = listWorkflows(audience);
+
+    if (workflows.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: audience ? `No workflows for audience: ${audience}` : 'No workflows available.',
+        }],
+      };
+    }
+
+    if (json) {
+      const slim = workflows.map(w => {
+        const shortPath = w.path.replace('/content/ai/', '').replace('.md', '');
+        return {
+          path: shortPath,
+          title: w.title,
+          ...(!audience && { audience: w.audience }),
+        };
+      });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(slim) }],
+      };
+    }
+
+    const lines = workflows.map(w => {
+      const shortPath = w.path.replace('/content/ai/', '').replace('.md', '');
+      return `* ${shortPath} - ${w.title}`;
+    });
+    return {
+      content: [{ type: 'text', text: lines.join('\n') }],
+    };
+  },
+);
+
+server.tool(
+  'get_workflow',
+  'Get a step-by-step workflow by path. Supports batch fetching with array of paths.',
+  {
+    id: z.union([z.string(), z.array(z.string())])
+      .describe(
+        'Workflow path or array of paths (e.g., "workflows/framework/add-util-function")',
+      ),
+  },
+  async ({ id }) => {
+    const isBatch = Array.isArray(id);
+    const ids = isBatch ? id : [id];
+
+    const results = await Promise.all(ids.map(async (docId) => {
+      const workflow = findWorkflow(docId);
+
+      if (!workflow) {
+        return { id: docId, error: `Workflow not found: ${docId}` };
+      }
+
+      const result = await fetchContent(workflow.path);
+
+      if (!result.success) {
+        return { id: docId, error: `Failed to fetch: ${result.error}` };
+      }
+
+      return { id: docId, content: result.data! };
+    }));
+
+    if (!isBatch) {
+      const result = results[0];
+      if (result.error) {
+        return {
+          content: [{ type: 'text', text: result.error }],
+          isError: true,
+        };
+      }
+      return {
+        content: [{ type: 'text', text: result.content! }],
+      };
+    }
+
+    return {
+      content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+    };
+  },
+);
+
+// ============================================================================
 // AI Context Tools
 // ============================================================================
 
 server.tool(
   'list_context',
-  'List available AI context documents. Defaults to ui, framework, and skills. Pass audience to filter, including "contributing" or "research" for specialized docs.',
+  'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" docs.',
   {
-    audience: z.enum(['ui', 'framework', 'skills', 'contributing', 'research']).optional()
+    audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
       .describe('Filter by audience'),
     includeMetadata: z.boolean().optional().describe('Include descriptions for each document'),
     json: z.boolean().optional().describe('Return JSON instead of markdown'),
@@ -817,12 +902,12 @@ server.tool(
 
 server.tool(
   'search',
-  'Search across all content: components, examples, AI context, and user docs. Returns results ranked by relevance.',
+  'Search across all content: components, examples, AI context, workflows, and user docs. Returns results ranked by relevance.',
   {
     query: z.string().describe('Search query'),
-    type: z.enum(['spec', 'example', 'context', 'doc']).optional()
+    type: z.enum(['spec', 'example', 'context', 'workflow', 'doc']).optional()
       .describe('Limit search to specific content type'),
-    audience: z.enum(['ui', 'framework', 'contributing', 'research']).optional()
+    audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
       .describe('Filter context docs by audience'),
     limit: z.number().optional().describe('Max results (default: 20)'),
   },

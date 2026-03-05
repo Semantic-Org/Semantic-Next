@@ -1,7 +1,7 @@
 ---
 title: Tailwind CSS in Shadow DOM
 description: Using the TailwindPlugin to compile and use Tailwind CSS at runtime inside Shadow DOM components — setup, configuration, class usage, and integration with the design token system.
-keywords: [tailwind, tailwindcss, shadow DOM, runtime compilation, TailwindPlugin, utility classes, tailwindcss-iso, @theme, @utility, @custom-variant]
+keywords: [tailwind, tailwindcss, shadow DOM, runtime compilation, TailwindPlugin, utility classes, tailwindcss-iso]
 audience: authoring
 skill: component-tailwind
 ---

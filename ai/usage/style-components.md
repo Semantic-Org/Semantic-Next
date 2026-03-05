@@ -2,7 +2,7 @@
 title: Style Semantic UI Components
 description: Guide for customizing the appearance of SUI components from outside. Covers CSS variables, ::part() styling, theme-aware CSS, and responsive container queries.
 keywords: [CSS variables, ::part, shadow DOM, theming, dark mode, container queries, responsive, customization]
-audience: ui
+audience: usage
 skill: style-components
 ---
 

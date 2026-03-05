@@ -2,7 +2,7 @@
 title: Use Semantic UI Components
 description: Guide for using SUI's published web components to build websites. Covers component discovery, attributes, slots, events, and responsive patterns.
 keywords: [web components, custom elements, ui-button, ui-card, shadow DOM, attributes, slots, query, specs]
-audience: ui
+audience: usage
 skill: use-components
 ---
 

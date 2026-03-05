@@ -1,7 +1,7 @@
 ---
 title: Component Events Guide
 description: Event handling in Semantic UI components — the event DSL, delegation, dispatching custom events, event data, handler return values, @event template syntax, attachEvent, and cross-component communication patterns.
-keywords: [events, event DSL, delegation, dispatchEvent, attachEvent, deep events, global events, bind events, custom events, event data, @event, keys, keyboard, findParent, findChild]
+keywords: [events, event DSL, delegation, dispatchEvent, attachEvent, deep events, global events, bind events, custom events, event data, "@event", keys, keyboard, findParent, findChild]
 audience: authoring
 skill: component-events
 ---

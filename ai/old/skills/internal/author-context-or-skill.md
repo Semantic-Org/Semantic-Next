@@ -72,7 +72,6 @@ description: Core mental model for AI agents...    # Shown in list results, fed 
 keywords: [mental model, architecture, signals]    # Fed to search ranking
 audience: framework                                # Filters: ui | framework | contributing | research
 skill: mental-model                                # If set, makes this loadable via use_skill
-type: doc                                          # Content type classification
 ---
 ```
 

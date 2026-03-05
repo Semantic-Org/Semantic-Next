@@ -6,9 +6,10 @@
 
 <codebase_orientation>
   This is a monorepo with two layers:
-  - packages/    — Core framework source (component, reactivity, templating, query, renderer, utils, specs, tailwind)
-  - src/         — First-party UI components built WITH the framework (the design system)
-  - docs/        — Astro documentation site
+  - packages/  — Core framework source (component, reactivity, templating, query, renderer, utils, specs, tailwind)
+  - src/{primitives,components,behaviors} — First-party UI components built WITH the framework (the design system)
+  - src/css/tokens - Underlying css tokens used for theming
+  - docs/ — Astro documentation site
 
   Documentation content, examples, API reference, and AI context are all available via
   Semantic UI MCP tools — use those rather than reading files directly from docs/ or ai/.
@@ -99,8 +100,8 @@
   Semantic UI MCP
   -------------
   - **No Results** - If Semantic UI MCP appears to be returning no results this is because the dev server has not been started locally. Ask the user to start the dev server and reconnect mcp.
-  ❌ `list_guides` endpoint returns no results and inferring no guides written
-  ✅ `list_guides` endpoint returns no results ask user to start dev server
+  ❌ `list_guides` endpoint returns no results - and inferring no guides written or ignoring mcp entirely
+  ✅ `list_guides` endpoint returns no results - wait for user to start dev server before continuing
 
   Chrome MCP
   -----------

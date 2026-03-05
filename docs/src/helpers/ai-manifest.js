@@ -2,7 +2,7 @@ import { statSync } from 'fs';
 import matter from 'gray-matter';
 import { resolve } from 'path';
 
-const AUDIENCE_ORDER = ['ui', 'authoring', 'skills', 'contributing', 'workflows', 'research'];
+const AUDIENCE_ORDER = ['usage', 'authoring', 'essentials', 'contributing', 'research'];
 
 // Folders excluded from AI context manifests
 // Note: also listed as static glob negations below (Vite requires static strings)
@@ -55,6 +55,7 @@ export async function getAIManifestData() {
         tokens,
         lastModified,
         ...(frontmatter.skill && { skill: frontmatter.skill }),
+        ...(frontmatter.type && { contentType: frontmatter.type }),
       };
     });
 
@@ -83,18 +84,38 @@ export function buildFullManifest(pages) {
   };
 }
 
+export function buildMarkdownManifest(pages) {
+  const groups = {};
+  for (const p of pages) {
+    const key = p.audience || 'other';
+    if (!groups[key]) { groups[key] = []; }
+    groups[key].push(p);
+  }
+  const sections = Object.entries(groups).map(([audience, items]) => {
+    const lines = items.map(p => {
+      const shortPath = p.path.replace('/content/ai/', '').replace('.md', '');
+      return `* ${shortPath} - ${p.title}`;
+    });
+    return `## ${audience}\n${lines.join('\n')}`;
+  });
+  return `# AI Context\n\n${pages.length} documents\n\nFetch content: /content/ai/{path}.md\n\n${
+    sections.join('\n\n')
+  }\n`;
+}
+
 export function buildSlimManifest(pages) {
   return {
     schemaVersion: 1,
     generated: new Date().toISOString(),
     totalPages: pages.length,
     totalTokens: pages.reduce((sum, p) => sum + p.tokens, 0),
-    pages: pages.map(({ path, title, audience, tokens, skill }) => ({
+    pages: pages.map(({ path, title, audience, tokens, skill, contentType }) => ({
       path,
       title,
       audience,
       tokens,
       ...(skill && { skill }),
+      ...(contentType && { contentType }),
     })),
   };
 }

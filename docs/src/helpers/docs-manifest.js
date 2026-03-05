@@ -71,6 +71,39 @@ export function buildFullManifest(pages) {
   };
 }
 
+export function buildMarkdownManifest(pages) {
+  const groups = {};
+  const ungrouped = [];
+  for (const d of pages) {
+    if (d.section && d.category) {
+      const key = `${d.section} - ${d.category}`;
+      if (!groups[key]) { groups[key] = []; }
+      groups[key].push(d);
+    }
+    else {
+      ungrouped.push(d);
+    }
+  }
+  const sections = Object.entries(groups).map(([heading, items]) => {
+    const lines = items.map(d => {
+      const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+      return `* ${shortPath} - ${d.title}`;
+    });
+    return `## ${heading}\n${lines.join('\n')}`;
+  });
+  if (ungrouped.length > 0) {
+    sections.push(`## Other\n${
+      ungrouped.map(d => {
+        const shortPath = d.path.replace('/content/docs/', '').replace('.md', '');
+        return `* ${shortPath} - ${d.title}`;
+      }).join('\n')
+    }`);
+  }
+  return `# User Documentation\n\n${pages.length} pages\n\nFetch content: /content/docs/{path}.md\n\n${
+    sections.join('\n\n')
+  }\n`;
+}
+
 export function buildSlimManifest(pages) {
   return {
     schemaVersion: 1,

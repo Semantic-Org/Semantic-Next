@@ -25,7 +25,7 @@ export interface ContextItem {
   title: string;
   description?: string;
   tokens: number;
-  audience: 'ui' | 'framework' | 'skills' | 'contributing' | 'research';
+  audience: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
   skill?: string;
 }
 
@@ -42,13 +42,23 @@ export interface DocItem {
   order?: number;
 }
 
-export type ContentItem = SpecItem | ExampleItem | ContextItem | DocItem;
+export interface WorkflowItem {
+  type: 'workflow';
+  path: string;
+  title: string;
+  description?: string;
+  tokens: number;
+  audience: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
+}
+
+export type ContentItem = SpecItem | ExampleItem | ContextItem | DocItem | WorkflowItem;
 
 // Cache state
 interface ContentCache {
   specs: SpecItem[];
   examples: ExampleItem[];
   context: ContextItem[];
+  workflows: WorkflowItem[];
   docs: DocItem[];
   ready: boolean;
   lastUpdated: number;
@@ -58,6 +68,7 @@ const cache: ContentCache = {
   specs: [],
   examples: [],
   context: [],
+  workflows: [],
   docs: [],
   ready: false,
   lastUpdated: 0,
@@ -114,7 +125,7 @@ export async function initCache(): Promise<void> {
   const [specsResult, examplesResult, contextResult, docsResult] = await Promise.all([
     fetchManifest<{ specs: Omit<SpecItem, 'type'>[]; }>('/content/specs/index.min.json'),
     fetchManifest<{ examples: Omit<ExampleItem, 'type'>[]; }>('/content/examples/index.min.json'),
-    fetchManifest<{ pages: Omit<ContextItem, 'type'>[]; }>('/content/ai/index.min.json'),
+    fetchManifest<{ pages: (Omit<ContextItem, 'type'> & { contentType?: string; })[]; }>('/content/ai/index.min.json'),
     fetchManifest<{ pages: Omit<DocItem, 'type'>[]; }>('/content/docs/index.min.json'),
   ]);
 
@@ -137,9 +148,9 @@ export async function initCache(): Promise<void> {
   if (contextResult.data?.pages) {
     const EXCLUDED_FOLDERS = ['workspace', 'old'];
     const excludePattern = new RegExp(`/(${EXCLUDED_FOLDERS.join('|')})/`);
-    cache.context = contextResult.data.pages
-      .filter(c => !excludePattern.test(c.path))
-      .map(c => ({ ...c, type: 'context' as const }));
+    const pages = contextResult.data.pages.filter(c => !excludePattern.test(c.path));
+    cache.context = pages.filter(c => c.contentType !== 'workflow').map(c => ({ ...c, type: 'context' as const }));
+    cache.workflows = pages.filter(c => c.contentType === 'workflow').map(c => ({ ...c, type: 'workflow' as const }));
   }
   else {
     errors.push(`context: ${contextResult.error} (${contextResult.url})`);
@@ -166,7 +177,7 @@ export async function initCache(): Promise<void> {
   }
   else {
     console.error(
-      `[semantic-ui-mcp] Loaded: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context, ${cache.docs.length} docs`,
+      `[semantic-ui-mcp] Loaded: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context, ${cache.workflows.length} workflows, ${cache.docs.length} docs`,
     );
   }
 }
@@ -188,9 +199,11 @@ export function listExamples(category?: string): ExampleItem[] {
   return cache.examples;
 }
 
-const DEFAULT_AUDIENCES = ['ui', 'framework', 'skills'];
+const DEFAULT_AUDIENCES = ['usage', 'authoring', 'essentials'];
 
-export function listContext(audience?: 'ui' | 'framework' | 'skills' | 'contributing' | 'research'): ContextItem[] {
+export function listContext(
+  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+): ContextItem[] {
   if (audience) {
     return cache.context.filter(c => c.audience === audience);
   }
@@ -202,9 +215,32 @@ export function listDocs(): DocItem[] {
   return cache.docs;
 }
 
+// Workflow functions
+export function listWorkflows(
+  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+): WorkflowItem[] {
+  if (audience) {
+    return cache.workflows.filter(w => w.audience === audience);
+  }
+  return cache.workflows.filter(w => DEFAULT_AUDIENCES.includes(w.audience));
+}
+
+export function findWorkflow(query: string): WorkflowItem | undefined {
+  const normalized = query.startsWith('/content/ai/')
+    ? query
+    : `/content/ai/${query}.md`;
+  return cache.workflows.find(w => w.path === normalized);
+}
+
 // Skill functions
-export function listSkills(): ContextItem[] {
-  return cache.context.filter(c => c.skill);
+export function listSkills(
+  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+): ContextItem[] {
+  if (audience) {
+    return cache.context.filter(c => c.skill && c.audience === audience);
+  }
+  // Default: exclude contributing and research
+  return cache.context.filter(c => c.skill && DEFAULT_AUDIENCES.includes(c.audience));
 }
 
 export function findSkill(name: string): ContextItem | undefined {
@@ -213,8 +249,8 @@ export function findSkill(name: string): ContextItem | undefined {
 
 // Search function
 export interface SearchOptions {
-  type?: 'spec' | 'example' | 'context' | 'doc';
-  audience?: 'ui' | 'framework' | 'skills' | 'contributing' | 'research';
+  type?: 'spec' | 'example' | 'context' | 'workflow' | 'doc';
+  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
   category?: string;
   limit?: number;
 }
@@ -240,6 +276,12 @@ export function search(query: string, options: SearchOptions = {}): ContentItem[
       : cache.context;
     pool = pool.concat(context);
   }
+  if (!type || type === 'workflow') {
+    const workflows = audience
+      ? cache.workflows.filter(w => w.audience === audience)
+      : cache.workflows;
+    pool = pool.concat(workflows);
+  }
   if (!type || type === 'doc') {
     pool = pool.concat(cache.docs);
   }
@@ -264,29 +306,26 @@ export interface FetchResult<T> {
   url: string;
 }
 
-// Skill mappings for link rewriting
-const SKILL_MAPPINGS: Record<string, string> = {
-  'utils': 'utils',
-  'reactivity': 'reactivity',
-  'query': 'query',
-  'templating': 'templating',
-  'component': 'component',
-  'creating-components': 'creating-components',
-  'best-practices': 'best-practices',
-  'theming': 'theming',
-  'css': 'css',
-  'design-tokens': 'design-tokens',
-  'html': 'html',
-  'markup': 'markup',
-  'behaviors': 'behaviors',
-  'plugins-and-behaviors': 'behaviors',
-  'primitives': 'primitives',
-  'using-primitives': 'primitives',
-  'parent-child': 'parent-child',
-  'portaling': 'portaling',
-  'mental-model': 'mental-model',
-  'authoring-components': 'web-components',
-};
+// Map slug → skill name for link rewriting
+// Only needed when the slug in a link doesn't match the skill name directly
+function resolveSkill(slug: string): string | null {
+  // Check if any skill matches directly
+  const direct = cache.context.find(c => c.skill === slug);
+  if (direct) { return slug; }
+
+  // Aliases for common old/alternate names
+  const aliases: Record<string, string> = {
+    'utils': 'utility-functions',
+    'reactivity': 'reactive-state',
+    'templating': 'component-templating',
+    'theming': 'component-theming',
+    'behaviors': 'component-behaviors',
+    'plugins-and-behaviors': 'query-behaviors',
+    'css': 'component-css',
+    'html': 'component-html',
+  };
+  return aliases[slug] || null;
+}
 
 // Rewrite markdown links to MCP tool suggestions
 export function rewriteMarkdownLinks(content: string, sourcePath?: string): string {
@@ -304,32 +343,15 @@ export function rewriteMarkdownLinks(content: string, sourcePath?: string): stri
       resolvedUrl = resolvePath(sourceDir, url);
     }
 
-    // Pattern: /ai/framework/*.md or /content/ai/framework/*.md
-    const frameworkMatch = resolvedUrl.match(/(?:\/content)?\/ai\/framework\/([^/.]+)(?:\.md)?/);
-    if (frameworkMatch) {
-      const name = frameworkMatch[1];
-      const skill = SKILL_MAPPINGS[name];
+    // Pattern: /ai/{audience}/*.md or /content/ai/{audience}/*.md
+    const aiMatch = resolvedUrl.match(/(?:\/content)?\/ai\/([\w-]+)\/([\w-]+)(?:\.md)?/);
+    if (aiMatch) {
+      const [, folder, name] = aiMatch;
+      const skill = resolveSkill(name);
       if (skill) {
         return `${text} (\`use_skill: ${skill}\`)`;
       }
-      return `${text} (\`get_context: framework/${name}\`)`;
-    }
-
-    // Pattern: /ai/ui/*.md
-    const uiMatch = resolvedUrl.match(/(?:\/content)?\/ai\/ui\/([^/.]+)(?:\.md)?/);
-    if (uiMatch) {
-      const name = uiMatch[1];
-      const skill = SKILL_MAPPINGS[name];
-      if (skill) {
-        return `${text} (\`use_skill: ${skill}\`)`;
-      }
-      return `${text} (\`get_context: ui/${name}\`)`;
-    }
-
-    // Pattern: /ai/contributing/*.md
-    const contribMatch = resolvedUrl.match(/(?:\/content)?\/ai\/contributing\/([^/.]+)(?:\.md)?/);
-    if (contribMatch) {
-      return `${text} (\`get_context: contributing/${contribMatch[1]}\`)`;
+      return `${text} (\`get_context: ${folder}/${name}\`)`;
     }
 
     // Pattern: /docs/src/pages/docs/api/*.mdx or /content/docs/api/*.md

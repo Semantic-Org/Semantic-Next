@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
+    "@semantic-ui/reactivity": "*",
+    "@semantic-ui/templating": "*",
     "@semantic-ui/utils": "*",
     "zod": "^3.23.0"
   },
