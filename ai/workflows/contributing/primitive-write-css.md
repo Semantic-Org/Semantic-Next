@@ -4,7 +4,7 @@ description: Workflow for implementing CSS for spec-defined primitive features, 
 keywords: [CSS, primitives, shadow DOM, tokens, definition, theme, variations, states, layers]
 audience: contributing
 type: workflow
-skill: primitive-write-css
+workflow: primitive-write-css
 ---
 
 # Write Primitive CSS

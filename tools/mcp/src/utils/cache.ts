@@ -49,6 +49,7 @@ export interface WorkflowItem {
   description?: string;
   tokens: number;
   audience: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
+  workflow?: string;
 }
 
 export type ContentItem = SpecItem | ExampleItem | ContextItem | DocItem | WorkflowItem;
@@ -244,6 +245,11 @@ export function listWorkflows(
 }
 
 export function findWorkflow(query: string): WorkflowItem | undefined {
+  // Match by workflow ID first (e.g., "create-context")
+  const byId = cache.workflows.find(w => w.workflow === query);
+  if (byId) { return byId; }
+
+  // Fall back to path match
   const normalized = query.startsWith('/content/ai/')
     ? query
     : `/content/ai/${query}.md`;

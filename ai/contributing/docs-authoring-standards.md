@@ -3,17 +3,15 @@ title: Documentation Authoring Standards
 description: Structural requirements for all documentation page types, covering heading hierarchy, frontmatter, imports, code blocks, and embedded examples.
 keywords: [authoring, standards, headings, frontmatter, code blocks, examples, formatting]
 audience: contributing
-skill: doc-authoring-standards
-type: doc
+skill: docs-authoring-standards
 ---
 
 # Documentation Authoring Standards
 
-> Last Updated: 2026-01-07
+> **Skill:** `sui:docs-authoring-standards`
+> **Purpose:** Structural requirements that apply to ALL documentation page types (gateway, guide, API reference)
 
-**For:** AI agents creating any prose page in Semantic UI documentation
-**Scope:** Structural requirements that apply to ALL page types (gateway, guide, API reference)
-**Related:** [Guide Writing](./guide.md) • [Gateway Writing](./gateway.md) • [API Reference](./api-reference.md)
+**Related:** [Guide Writing](./docs-page-guide.md) • [Gateway Writing](./docs-page-gateway.md) • [API Reference](./docs-page-api-reference.md)
 
 ---
 
@@ -257,7 +255,7 @@ Use blockquotes for tips, warnings, and cross-references:
 
 ## Writing Quality
 
-Avoid common AI writing patterns that reduce clarity. See [Slop Identification Guide](./quality/slop-identification.md) for comprehensive patterns.
+Avoid common AI writing patterns that reduce clarity. See [Slop Identification Guide](./docs-slop-identification.md) for comprehensive patterns.
 
 ### Quick Reference
 

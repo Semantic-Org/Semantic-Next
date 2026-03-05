@@ -3,8 +3,8 @@ title: Documentation Link and Grammar Agent Instructions
 description: Proofreader agent instructions for adding internal links, fixing spelling errors, and correcting grammar in Semantic UI documentation.
 keywords: [links, grammar, proofreading, internal links, spelling, corrections]
 audience: contributing
-skill: doc-add-links
-type: doc
+type: workflow
+workflow: docs-add-links
 ---
 
 # Semantic UI Documentation Link & Grammar Agent Instructions

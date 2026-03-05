@@ -3,20 +3,17 @@ title: Examples System Canonical Guide
 description: Complete reference for creating documentation examples, covering metadata schema, file organization, example types, design tokens, and quality standards.
 keywords: [examples, metadata, playground, design tokens, component examples, code patterns, validation]
 audience: contributing
-skill: doc-examples-authoring
-type: doc
+skill: docs-examples-authoring
 ---
 
 # Semantic UI Examples System - Canonical Guide
 
-> **For:** AI agents working with the Semantic UI documentation example system
-> **Prerequisites:** Understanding of Semantic UI architecture and documentation structure
-> **Scope:** Complete reference for example creation, metadata, organization, and navigation
-> **Related:** [Component Development Guide](/ai/framework/creating-components.md) • [HTML Guide](/ai/framework/html.md) • [CSS Token Guide](/ai/framework/design-tokens.md) • [Documentation Hub](/ai/00-START-HERE.md)
+> **Skill:** `sui:docs-examples-authoring`
+> **Purpose:** Complete reference for creating documentation examples, covering metadata schema, file organization, example types, design tokens, and quality standards
 
 ---
 
-## 🎯 **Example Philosophy**
+## Example Philosophy
 
 **The bar**: Would this example feel at home in official React, Vue, or Svelte docs?
 
@@ -645,9 +642,9 @@ else {
 #### Step 1: Plan Component
 - Use TodoWrite tool for multi-step component creation
 - **MANDATORY**: Read `/ai/contributing/token-reference.md` for complete design token reference
-- **MANDATORY**: Read `/ai/framework/html.md` for semantic HTML patterns
-- **MANDATORY**: Read `/ai/framework/design-tokens.md` for design token usage patterns
-- **MANDATORY**: Read relevant package guide in `/ai/framework/` if using specific packages
+- **MANDATORY**: Read `sui:html` skill for semantic HTML patterns
+- **MANDATORY**: Read `sui:tokens` skill for design token usage patterns
+- **MANDATORY**: Read relevant framework skill via `list_skills` if using specific packages
 - **MANDATORY**: Read 1-3 existing examples with highest similarity to requested example for style patterns
 - Check existing components in `/src/components/` for patterns
 - Review component specs in `/src/components/{component}/specs/`
@@ -701,19 +698,19 @@ tip: 'Use design tokens for consistent styling'
 
 #### Step 4: Implement Component Files
 - **component.js**: Use `defineComponent`, `self.method()` references, `$` prefixed queries
-- **component.html**: Follow `/ai/framework/html.md` - semantic classes, natural hierarchy
-- **component.css**: Follow `/ai/framework/design-tokens.md` - 100% design tokens, CSS nesting
+- **component.html**: Follow `sui:html` skill - semantic classes, natural hierarchy
+- **component.css**: Follow `sui:tokens` skill - 100% design tokens, CSS nesting
 
 #### Step 5: Page File Standards
-- **page.css**: **MANDATORY** - Use only design tokens per `/ai/framework/design-tokens.md`
-- **page.html**: **MANDATORY** - Follow `/ai/framework/html.md` semantic patterns
+- **page.css**: **MANDATORY** - Use only design tokens per `sui:tokens` skill
+- **page.html**: **MANDATORY** - Follow `sui:html` skill semantic patterns
 - **page.js**: Prefix query variables with `$` (`const $button = $('#btn')`)
 
 ### **Package Example Workflow**
 
 #### Step 1: Research and Plan
-- **MANDATORY**: Read `/ai/framework/design-tokens.md` for design token usage
-- **MANDATORY**: Read relevant package guide in `/ai/framework/` for API patterns
+- **MANDATORY**: Read `sui:tokens` skill for design token usage
+- **MANDATORY**: Read relevant framework skill via `list_skills` for API patterns
 - **MANDATORY**: Read 1-3 existing package examples with highest similarity for style patterns
 - Plan minimal demonstration of single API concept
 
@@ -1008,7 +1005,7 @@ See the [Query .width() example](query-width) for basic usage patterns.
 #### **Code Quality Requirements**
 - **Professional standards**: Production-quality code that developers can trust
 - **Design token usage**: Use only `var(--token-name)` - never hardcoded values
-- **Semantic HTML**: Follow `/ai/framework/html.md` patterns exactly
+- **Semantic HTML**: Follow `sui:html` skill patterns exactly
 - **Query prefixing**: All DOM queries must use `$` prefix (`const $element = $('.selector')`)
 
 #### **Educational Requirements**
@@ -1304,9 +1301,9 @@ tip: # Leave empty rather than stating the obvious
 ### **Quality Checklist**
 
 #### **Before Creating Any Example**
-1. ✅ Read `/ai/framework/html.md` for HTML patterns
-2. ✅ Read `/ai/framework/design-tokens.md` for CSS token usage
-3. ✅ Read relevant `/ai/framework/` guide for package-specific patterns
+1. ✅ Read `sui:html` skill for HTML patterns
+2. ✅ Read `sui:tokens` skill for CSS token usage
+3. ✅ Read relevant framework skill via `list_skills` for package-specific patterns
 4. ✅ **Read 1-3 existing examples with highest similarity to requested example**
 5. ✅ Identify the single concept to demonstrate
 6. ✅ Plan minimal code to show that concept clearly

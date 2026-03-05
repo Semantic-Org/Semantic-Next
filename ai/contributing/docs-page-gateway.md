@@ -3,17 +3,15 @@ title: Writing Gateway Pages
 description: Guide for writing landing and index pages that earn reader attention through problem-first structure and instability language before introducing features.
 keywords: [gateway pages, landing pages, problem-first, instability language, technical tour, convince]
 audience: contributing
-skill: doc-page-gateway
-type: doc
+skill: docs-page-gateway
 ---
 
 # Writing Gateway Pages
 
-> Last Updated: 2026-01-07
+> **Skill:** `sui:docs-page-gateway`
+> **Purpose:** How to write landing/index pages that earn reader attention through problem-first structure
 
-**For:** AI agents writing landing/index pages
-**When:** First contact with a system, package, or major feature
-**Prerequisites:** Read [writing-effectively.md](../reference/writing-effectively.md) (required), [authoring-standards.md](../authoring-standards.md), and [target-audience.md](../reference/target-audience.md)
+**Prerequisites:** Load `sui:docs-writing-effectively` (required), `sui:docs-authoring-standards`, and `sui:docs-target-audience`
 
 ---
 

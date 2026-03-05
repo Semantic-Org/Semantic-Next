@@ -4,6 +4,7 @@ description: Step-by-step workflow for adding or modifying utility functions in 
 keywords: [utils, utility functions, workflow, implementation, testing]
 audience: contributing
 type: workflow
+workflow: add-util-function
 ---
 
 # AI Workflow: Adding a New Utility Function

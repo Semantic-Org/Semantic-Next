@@ -4,6 +4,7 @@ description: Systematic workflow for verifying pattern research documents agains
 keywords: [verification, research, quality assurance, E&O, subagents, validation, accuracy]
 audience: contributing
 type: workflow
+workflow: verify-pattern-research
 ---
 
 # Pattern Research E&O Verification Workflow

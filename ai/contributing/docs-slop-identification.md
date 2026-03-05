@@ -3,11 +3,15 @@ title: AI Slop Identification and Removal Guide
 description: Guide for identifying and removing low-quality AI-generated content patterns including concluding paragraphs, marketing buzzwords, hedging words, and verbose introductions.
 keywords: [slop identification, AI content, quality, marketing language, hedging, removal strategy]
 audience: contributing
-skill: doc-slop-identification
-type: doc
+skill: docs-slop-identification
 ---
 
 # AI Slop Identification & Removal Guide
+
+> **Skill:** `sui:docs-slop-identification`
+> **Purpose:** Guide for identifying and removing low-quality AI-generated content patterns
+
+---
 
 ## Core Principle
 **Remove problems without adding new ones.** It's better to delete 3 issues than to rewrite and introduce 2 new problems.
@@ -37,7 +41,7 @@ Execute this validation sequence before any content modification:
 - **PROCEDURE**: When in doubt, preserve and flag for human review
 
 ## Good Writing Reference
-See `doc-good-writing-examples.md` for concrete examples of excellent technical writing patterns to emulate. Key principles:
+Load `sui:docs-good-writing` for concrete examples of excellent technical writing patterns to emulate. Key principles:
 - 1-2 sentence paragraphs
 - Direct statements without hedging
 - No introductory fluff

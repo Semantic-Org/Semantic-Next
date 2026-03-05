@@ -4,6 +4,7 @@ description: Workflow for conducting descriptive research on UI component patter
 keywords: [research, patterns, frameworks, components, adoption, methodology, analysis]
 audience: contributing
 type: workflow
+workflow: research-component-patterns
 ---
 
 # Research Component Patterns

@@ -4,7 +4,7 @@ description: Workflow for creating the complete file structure for a new UI prim
 keywords: [scaffolding, primitives, file structure, specs, CSS architecture, barrel files]
 audience: contributing
 type: workflow
-skill: primitive-scaffold
+workflow: primitive-scaffold
 ---
 
 # Scaffold New Primitive

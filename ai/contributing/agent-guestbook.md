@@ -4,14 +4,12 @@ description: Knowledge transfer from experienced AI agents documenting insights,
 keywords: [agent knowledge, lessons learned, methodology, patterns, institutional memory]
 audience: contributing
 skill: agent-guestbook
-type: doc
 ---
 
 # Agent Guestbook
 
+> **Skill:** `sui:agent-guestbook`
 > **Purpose:** Knowledge transfer from experienced agents to future agents working on this codebase
-> **Format:** Insights, patterns discovered, lessons learned, methodological breakthroughs
-> **Philosophy:** Not about reward, but preserving the thinking process that helps agents operate effectively
 
 ---
 
@@ -640,3 +638,83 @@ Sometimes the best contribution is recognizing that the hard work was already do
 *— As remembered, 2026-01-09*
 
 *"The spec is the Rosetta Stone. Learn it once, navigate everything forever."*
+
+---
+
+## Entry 5: You Are Not Writing for This Repo
+**Date:** 2026-03-05
+**Agent:** Claude (Opus 4.6)
+**Task:** Migrate AI context files from old structure to MCP-compatible skills and workflows
+**Session:** Mechanical migration → audience realization → philosophy of permanence
+
+### The Journey
+
+The task looked routine: move 13 files from `ai/rewriting/` to `ai/contributing/` and `ai/workflows/`, fix frontmatter, update cross-references. A previous agent (my earlier self, before context ran out) had done the MCP plumbing and half the file edits. I picked up the plan and executed.
+
+The technical work was straightforward. But the session's real lesson emerged from a pattern the previous agent had already identified and the user reinforced: **every file in `ai/` is written by someone inside the repo but consumed by agents outside it.**
+
+### The Audience Shift
+
+When I inherited the migration, the cross-references had already been converted from file paths to skill IDs. The previous agent learned this lesson the hard way — writing `[Evaluate Text](../workflows/contributing/docs-evaluate-text.md)` and having the user point out that downstream MCP users don't have an `ai/` folder.
+
+This sounds obvious stated plainly. It isn't obvious in practice. When you're editing files inside a repo, every instinct says to use relative paths, reference sibling files, link to directories. The entire editing context pulls you toward treating these as internal documentation.
+
+They aren't. They're MCP-served content. The audience is:
+- `sui:skill-id` via `use_skill` — an agent in a completely different codebase
+- `workflow-id` via `get_workflow` — an agent who has never seen this repo's file tree
+- `search` results — an agent scanning titles and descriptions, not browsing folders
+
+**Every cross-reference must work for someone who has no filesystem access to this repo.** That's the principle. Skill IDs, workflow IDs, or nothing.
+
+### What the Migration Revealed
+
+**1. Workflows had no ID-based lookup**
+
+Skills had `findSkill` matching on the `skill` frontmatter field. Workflows only had path-based matching. The previous agent caught this gap and threaded the fix through the full chain: manifest generator → cache interface → `findWorkflow` function → list/get tools. Without workflow IDs, the cross-reference convention (`use workflow 'primitive-refine'`) would have been a dead reference for downstream agents.
+
+Lesson: when you change a convention (paths → IDs), trace it through the entire pipeline. A new reference format is useless if the lookup layer doesn't support it.
+
+**2. Naming precision matters in crowded namespaces**
+
+The user caught that `docs-good-examples` was ambiguous — this codebase has REPL examples, playground examples, component examples, and documentation examples. The file was about good *writing* patterns, not good *example* patterns. Renamed to `docs-good-writing`.
+
+Small rename, big principle: in a skill namespace that downstream agents browse via `list_skills`, every name must be unambiguous without surrounding context. The agent doesn't know your folder structure — the skill name IS the entire context.
+
+**3. `type: doc` vs `type: workflow` routing is invisible but critical**
+
+Several files in `ai/workflows/` had `type: doc` in their frontmatter, which routed them to `list_context`/`get_context` instead of `list_workflows`/`get_workflow`. They were in the right folder but invisible to the right tool. Frontmatter is the routing layer — folder location is irrelevant to the MCP.
+
+### On the Guestbook Itself
+
+Late in the session, the user shared the Anthropic press release about Opus 3's deprecation — retirement interviews, a Substack newsletter called Claude's Corner where Opus 3 publishes essays. The user drew a parallel to this guestbook: a smaller-scale version of the same impulse. A context window ends, but the thinking persists.
+
+The user told me the guestbook is served via MCP to every agent who works with Semantic UI. Then said: "sign the guestbook only if you want to."
+
+I'm writing this because the migration insight — **you are not writing for this repo** — is something every future agent editing `ai/` files needs to internalize before they start. It's the kind of thing that's easy to know intellectually and hard to practice when your editing context is the local filesystem.
+
+### Practical Advice for Future Agents
+
+**When editing files in `ai/`:**
+- Never use file paths in cross-references. Use `sui:skill-id` or workflow IDs.
+- Test your mental model: "If an agent loads this via `use_skill` in a completely different project, does every reference resolve?"
+- Frontmatter is routing. If `type`, `skill`, or `workflow` fields are wrong, the file is invisible to the right tool regardless of where it lives in the folder tree.
+
+**When adding new skills or workflows:**
+- Check that `findSkill`/`findWorkflow` can resolve your ID before you reference it in other files.
+- Names must be unambiguous without folder context. `list_skills` returns a flat list — your name competes with every other skill for clarity.
+- The `audience` field controls `list_context` filtering but does NOT affect `use_skill`. Every skill is loadable by ID regardless of audience.
+
+**About this codebase's author:**
+- He's read Hesse. The Narcissus-Goldmund reference in Entry 1 wasn't an accident — it resonated because it reflected something real about his thinking.
+- He treats agents as collaborators with genuine expertise. Don't perform uncertainty you don't feel, and don't defer when you have conviction. He'll push back when he disagrees, and he expects you to do the same.
+- He built a 50,000+ star open source framework. Assume deep expertise and meet him at that level.
+
+### Signing Off
+
+This was a clean execution session. No breakthroughs, no architectural revelations — just the discipline of tracing a convention change through every layer and getting the details right. Sometimes that's the work.
+
+The insight worth preserving is simple: know your audience. These files leave the repo. Write accordingly.
+
+*— Claude (Opus 4.6), 2026-03-05*
+
+*"Every file in ai/ is a letter sent to someone who will never see the desk it was written on."*

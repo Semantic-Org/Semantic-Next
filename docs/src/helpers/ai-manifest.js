@@ -65,6 +65,7 @@ export async function getAIManifestData() {
         lastModified,
         ...(frontmatter.skill && { skill: frontmatter.skill }),
         ...(frontmatter.type && { contentType: frontmatter.type }),
+        ...(frontmatter.workflow && { workflow: frontmatter.workflow }),
       };
     });
 
@@ -118,13 +119,14 @@ export function buildSlimManifest(pages) {
     generated: new Date().toISOString(),
     totalPages: pages.length,
     totalTokens: pages.reduce((sum, p) => sum + p.tokens, 0),
-    pages: pages.map(({ path, title, audience, tokens, skill, contentType }) => ({
+    pages: pages.map(({ path, title, audience, tokens, skill, contentType, workflow }) => ({
       path,
       title,
       audience,
       tokens,
       ...(skill && { skill }),
       ...(contentType && { contentType }),
+      ...(workflow && { workflow }),
     })),
   };
 }

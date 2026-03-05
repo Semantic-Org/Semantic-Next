@@ -4,6 +4,7 @@ description: Complete workflow for implementing new template syntax features inc
 keywords: [templates, syntax, compiler, renderer, directives, AST, parsing]
 audience: contributing
 type: workflow
+workflow: add-template-syntax
 ---
 
 # Adding New Template Syntax

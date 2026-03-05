@@ -3,18 +3,16 @@ title: Writing Guide Pages
 description: Instructions for writing instructional guide pages that teach how to use concepts, features, and patterns with progressive complexity and practical examples.
 keywords: [guide pages, instructional writing, progressive complexity, code examples, technical accuracy]
 audience: contributing
-skill: doc-page-guide
-type: doc
+skill: docs-page-guide
 ---
 
 # Writing Guide Pages
 
-> Last Updated: 2026-01-07
+> **Skill:** `sui:docs-page-guide`
+> **Purpose:** How to write instructional guide pages that teach concepts with progressive complexity
 
-**For:** AI agents writing instructional guide pages
-**When:** Teaching how to use a concept, feature, or pattern
-**Prerequisites:** Read [authoring-standards.md](../authoring-standards.md) first
-**Related:** [Target Audience](../reference/target-audience.md)
+**Prerequisites:** Load `sui:docs-authoring-standards` first
+**Related:** [Target Audience](./docs-target-audience.md)
 
 ---
 

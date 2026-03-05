@@ -3,11 +3,15 @@ title: Good Technical Writing Examples
 description: Reference examples of excellent technical writing patterns from Vite documentation, showing concise introductions, clear structure, and effective header patterns.
 keywords: [good writing, examples, Vite style, concise, headers, technical documentation]
 audience: contributing
-skill: doc-good-examples
-type: doc
+skill: docs-good-writing
 ---
 
 # Good Technical Writing Examples
+
+> **Skill:** `sui:docs-good-writing`
+> **Purpose:** Reference examples of excellent technical writing patterns from Vite documentation
+
+---
 
 ## Reference: Vite Documentation Style
 

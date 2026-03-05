@@ -537,9 +537,9 @@ server.tool(
 
     if (json) {
       const slim = workflows.map(w => {
-        const shortPath = w.path.replace('/content/ai/', '').replace('.md', '');
+        const id = w.workflow || w.path.replace('/content/ai/', '').replace('.md', '');
         return {
-          path: shortPath,
+          id,
           title: w.title,
           ...(!audience && { audience: w.audience }),
         };
@@ -550,8 +550,8 @@ server.tool(
     }
 
     const lines = workflows.map(w => {
-      const shortPath = w.path.replace('/content/ai/', '').replace('.md', '');
-      return `* ${shortPath} - ${w.title}`;
+      const id = w.workflow || w.path.replace('/content/ai/', '').replace('.md', '');
+      return `* ${id} - ${w.title}`;
     });
     return {
       content: [{ type: 'text', text: lines.join('\n') }],
@@ -561,11 +561,11 @@ server.tool(
 
 server.tool(
   'get_workflow',
-  'Get a step-by-step workflow by path. Supports batch fetching with array of paths.',
+  'Get a step-by-step workflow by ID or path. Supports batch fetching with array of IDs.',
   {
     id: z.union([z.string(), z.array(z.string())])
       .describe(
-        'Workflow path or array of paths (e.g., "workflows/framework/add-util-function")',
+        'Workflow ID or array of IDs (e.g., "add-util-function" or "workflows/framework/add-util-function")',
       ),
   },
   async ({ id }) => {

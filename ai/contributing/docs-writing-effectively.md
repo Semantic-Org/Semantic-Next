@@ -3,8 +3,14 @@ title: Writing Effectively
 description: Framework based on McEnerney principles for writing that changes reader understanding, covering problem-first structure, instability language, and argument over explanation.
 keywords: [writing effectively, McEnerney, instability, problem-first, argument, reader-focused]
 audience: contributing
-skill: doc-writing-effectively
-type: doc
+skill: docs-writing-effectively
+---
+
+# Writing Effectively
+
+> **Skill:** `sui:docs-writing-effectively`
+> **Purpose:** Framework for writing that changes reader understanding — problem-first structure, instability language, argument over explanation
+
 ---
 
 ## The Core Reframe

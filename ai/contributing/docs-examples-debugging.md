@@ -3,15 +3,13 @@ title: Debugging Examples with Chrome DevTools MCP
 description: Guide for AI agents to debug documentation examples running on the Astro dev server using Chrome DevTools MCP.
 keywords: [debugging, chrome, devtools, mcp, examples, console, testing]
 audience: contributing
-skill: doc-examples-debugging
-type: doc
+skill: docs-examples-debugging
 ---
 
 # Debugging Examples with Chrome DevTools MCP
 
-> **For:** AI agents testing and debugging documentation examples
-> **Prerequisites:** Chrome running with remote debugging, dev server at `https://dev.semantic-ui.com`
-> **Scope:** Navigating to examples, reading console output, interacting with the page
+> **Skill:** `sui:docs-examples-debugging`
+> **Purpose:** Guide for debugging documentation examples running on the Astro dev server using Chrome DevTools MCP
 
 ---
 
@@ -201,7 +199,9 @@ mcp__chrome-devtools__take_snapshot
 
 ---
 
-## Related
+## Related Skills
 
-- [Example Authoring Guide](./authoring.md) - Creating documentation examples
-- [Example Self-Critique](./self-critique.md) - Quality checklist for examples
+| Skill | Command | Use when... |
+|-------|---------|-------------|
+| **Example Authoring** | `sui:docs-examples-authoring` | Creating documentation examples |
+| **Example Self-Critique** | workflow `docs-examples-self-critique` | Quality checklist for examples |

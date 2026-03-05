@@ -4,7 +4,7 @@ description: Interactive workflow for making editorial decisions about primitive
 keywords: [specs, primitives, editorial decisions, adoption levels, pattern evaluation, spec authoring, usage levels]
 audience: contributing
 type: workflow
-skill: primitive-refine
+workflow: primitive-refine
 ---
 
 # Refine Primitive Spec

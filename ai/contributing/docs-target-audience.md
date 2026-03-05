@@ -3,13 +3,15 @@ title: Target Audience for Semantic UI Documentation
 description: Definition of documentation readers as early adopters, explaining their characteristics, expectations, and how to write problem-first content that changes their beliefs.
 keywords: [target audience, early adopters, problem-first, instability language, reader expectations]
 audience: contributing
-skill: doc-target-audience
-type: doc
+skill: docs-target-audience
 ---
 
 # Target Audience for Semantic UI Documentation
 
-> Last Updated: 2026-01-07
+> **Skill:** `sui:docs-target-audience`
+> **Purpose:** Define who reads Semantic UI documentation and how to write content that changes their understanding
+
+---
 
 ## Overview
 
@@ -186,9 +188,9 @@ For any guide or landing page, verify:
 | Guide | Focus | Relationship |
 |-------|-------|--------------|
 | **This document** | Who the audience is, what they believe | Defines the reader |
-| [evaluation-persona.md](/ai/contributing/documentation/enhance/evaluate-text.md) | How to evaluate docs as a technical reviewer | Simulates the reader |
-| [page-writing.md](/ai/contributing/documentation/page-types/guide.md) | Structural conventions for guide pages | How to format for the reader |
-| [slop-identification.md](/ai/contributing/documentation/quality/slop-identification.md) | Detecting low-quality AI-generated content | What to avoid |
+| [Evaluate Text](../workflows/contributing/docs-evaluate-text.md) | How to evaluate docs as a technical reviewer | Simulates the reader |
+| [Guide Writing](./docs-page-guide.md) | Structural conventions for guide pages | How to format for the reader |
+| [Slop Identification](./docs-slop-identification.md) | Detecting low-quality AI-generated content | What to avoid |
 
 ---
 

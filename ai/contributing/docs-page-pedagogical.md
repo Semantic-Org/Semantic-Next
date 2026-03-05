@@ -3,14 +3,13 @@ title: Writing Lessons (Learn REPL)
 description: How to write interactive lessons for the Semantic UI Learn section — standalone REPLs that sequentially teach framework concepts.
 keywords: [lessons, Learn REPL, interactive tutorials, challenges, code-first, pedagogical]
 audience: contributing
-skill: doc-page-pedagogical
-type: doc
+skill: docs-page-pedagogical
 ---
 
 # Writing Lessons (Learn REPL)
 
-**For:** AI agents writing interactive tutorial lessons
-**When:** Creating step-by-step learning content in the Learn REPL
+> **Skill:** `sui:docs-page-pedagogical`
+> **Purpose:** How to write interactive lessons for the Semantic UI Learn section — standalone REPLs that sequentially teach framework concepts
 
 ---
 
@@ -21,7 +20,7 @@ Lessons are standalone interactive REPLs that teach Semantic UI concepts sequent
 Lessons are grouped into learning tracks (Quickstart, Basic Guide, Advanced Guide, etc.) and ordered within subcategories. The reader navigates linearly with Previous/Next buttons or jumps via the sidebar menu.
 
 **Reference model:** [Svelte's interactive tutorial](https://svelte.dev/tutorial)
-**Prerequisite reading:** [Examples System Canonical Guide](../examples/authoring.md) — lessons wrap the same playground system used for documentation examples.
+**Prerequisite reading:** Load `sui:docs-examples-authoring` — lessons wrap the same playground system used for documentation examples.
 
 ---
 
@@ -301,7 +300,7 @@ Lessons use the same playground system as documentation examples. Understanding 
 
 ### CSS standards
 
-Lesson code follows the same CSS standards as all playground examples. See [Examples System Canonical Guide](../examples/authoring.md) for the full reference.
+Lesson code follows the same CSS standards as all playground examples. Load `sui:docs-examples-authoring` for the full reference.
 
 - **Use design tokens, not hardcoded values.** Colors, spacing, borders, radii, and transitions should use CSS variables: `var(--border)`, `var(--padding)`, `var(--primary-text-color)`, `var(--border-radius)`, `var(--standard-5)`.
 - **Use CSS nesting.** Nest child selectors and state variants with `&`:
@@ -447,7 +446,7 @@ var(--subtle-shadow)        /* Subtle box shadow */
 var(--circular-radius)      /* Fully round radius */
 ```
 
-For a complete reference, see the [CSS Token Guide](/ai/framework/design-tokens.md) and verify tokens against `/src/css/tokens/`.
+For a complete reference, load `sui:tokens` and verify tokens against `/src/css/tokens/`.
 
 ### Reactivity patterns
 
@@ -530,7 +529,7 @@ Within a track, order concepts from fundamental to derived:
 
 ## Step-by-Step: Creating a New Lesson
 
-1. **Read prerequisites** — This guide, [Examples System Canonical Guide](../examples/authoring.md), and 2-3 existing lessons similar to what you're creating
+1. **Read prerequisites** — This guide, `sui:docs-examples-authoring`, and 2-3 existing lessons similar to what you're creating
 2. **Identify the concept** and where it fits in the learning sequence
 3. **Determine the directory number** based on category, subcategory, and sequence
 4. **Create the directory** with the naming pattern `{number}-{slug}/`
@@ -540,8 +539,8 @@ Within a track, order concepts from fundamental to derived:
 8. **Write the solution** — clean, minimal implementation of the challenge
 9. **Set frontmatter** — ensure `sort`, `category`, and `subcategory` match the numbering scheme and existing lessons in the same group
 10. **Add references** — link to relevant documentation pages
-11. **Verify code quality** — run through the [Example Self-Critique Protocol](../examples/self-critique.md) for the code files
-12. **Test** — verify the example code renders correctly in the playground and the solution works. Use [Chrome DevTools MCP](../examples/debugging-with-chrome-mcp.md) if available.
+11. **Verify code quality** — run through workflow `docs-examples-self-critique` for the code files
+12. **Test** — verify the example code renders correctly in the playground and the solution works. Load `sui:docs-examples-debugging` if Chrome DevTools MCP is available.
 
 ---
 

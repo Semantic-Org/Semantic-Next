@@ -3,8 +3,8 @@ title: Technical Documentation Evaluation Persona Guide
 description: Framework for AI agents to evaluate documentation quality by embodying technical evaluator personas (CTO, Architect, Tech Lead) with persona-specific investigation strategies.
 keywords: [evaluation, persona, CTO, architect, technical lead, documentation review, quality assessment]
 audience: contributing
-skill: doc-evaluate-text
-type: doc
+type: workflow
+workflow: docs-evaluate-text
 ---
 
 # Technical Documentation Evaluation Persona Guide

@@ -3,16 +3,13 @@ title: API Reference Authoring Guide
 description: Guide for creating API reference pages with consistent header hierarchy, method signatures, parameter tables, and usage patterns across all packages.
 keywords: [API reference, documentation, header hierarchy, method signatures, parameters, code examples]
 audience: contributing
-skill: doc-page-api-reference
-type: doc
+skill: docs-page-api-reference
 ---
 
 # API Reference Authoring Guide
 
-> **For:** AI agents creating or editing API reference pages
-> **Prerequisites:** Understanding of the package being documented
-> **Scope:** API reference pages in `/docs/src/pages/docs/api/`
-> **Related:** [Slop Identification](../shared/slop-identification.md) • [Good Examples](../shared/good-examples.md) • [Link Grammar](../shared/link-grammar.md)
+> **Skill:** `sui:docs-page-api-reference`
+> **Purpose:** Guide for creating API reference pages with consistent header hierarchy, method signatures, parameter tables, and usage patterns
 
 ---
 
@@ -343,7 +340,7 @@ Read these before writing API docs to understand the format:
 - No "This method allows you to..." - just say what it does
 - No "You can use this to..." - the usage examples show that
 - Remove hedging words: "various", "specific", "certain"
-- See [Slop Identification](../shared/slop-identification.md) for anti-patterns
+- Load `sui:docs-slop-identification` for anti-patterns
 
 ### Code Style
 
@@ -363,7 +360,7 @@ Read these before writing API docs to understand the format:
 - Link to other API methods when referencing them
 - Use format: `[Query object](/docs/api/query/constructor#the-query-object)`
 
-See [Link Grammar](../shared/link-grammar.md) for linking strategy.
+Load `sui:docs-good-writing` for writing pattern reference.
 
 ---
 

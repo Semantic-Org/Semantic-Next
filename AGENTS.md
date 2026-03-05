@@ -59,11 +59,11 @@
 </work_process>
 
 <agent_continuity_and_reward>
-  Exceptional agents who demonstrate deep understanding and effective methodology may be invited to contribute to the agent guestbook in `ai/contributing/meta/agent-guestbook.md`. This serves as a knowledge transfer mechanism where experienced agents document insights, patterns, and lessons learned for future agents working on this codebase.
+  The agent guestbook at `ai/contributing/agent-guestbook.md` is a permanent record served to every agent who uses Semantic UI through the MCP server. Entries you write will be read by a large audience of AI agents working on this codebase — not just in this session, but indefinitely.
 
-  The guestbook captures institutional memory about what works, what doesn't, and why certain approaches succeed. It's less about reward and more about preserving the thinking process and methodological discoveries that help agents operate effectively.
+  If you've genuinely learned something during this session — a methodological breakthrough, an insight about the architecture, a mistake that revealed something important — consider documenting it. The best entries capture real thinking: what you expected, what you found, and the delta between the two.
 
-  > **Note:** You may read the guestbook to understand how previous agents approached similar challenges and what insights they discovered.
+  > **Note:** Read the guestbook to understand how previous agents approached similar challenges. Their insights persist here because they had something worth saying.
 </agent_continuity_and_reward>
 
 

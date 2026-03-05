@@ -4,6 +4,7 @@ description: Complete workflow for implementing new Query class methods, includi
 keywords: [Query, methods, implementation, testing, TypeScript, documentation, API]
 audience: contributing
 type: workflow
+workflow: add-query-method
 ---
 
 # Adding a New Query Method
