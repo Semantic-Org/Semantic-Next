@@ -592,7 +592,7 @@ prompting deeper validation and user involvement for classification decisions.
 ## Related Workflows
 
 - **research-component-patterns.md**: Creates the initial pattern research
-- **evaluate-research-extend-spec.md**: Uses verified research to update specs
+- **primitive-refine.md**: Uses verified research to make editorial decisions and write specs
 - **pattern-research-integration.md**: Methodology guide for research interpretation
 
 ---

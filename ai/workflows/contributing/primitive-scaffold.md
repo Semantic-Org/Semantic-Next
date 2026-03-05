@@ -4,18 +4,20 @@ description: Workflow for creating the complete file structure for a new UI prim
 keywords: [scaffolding, primitives, file structure, specs, CSS architecture, barrel files]
 audience: contributing
 type: workflow
+skill: primitive-scaffold
 ---
 
 # Scaffold New Primitive
 
-> Last Updated: 2025-11-14
+> **Skill:** `sui:primitive-scaffold`
+> **Purpose:** Create the complete file structure for a new UI primitive in Semantic UI
 
-**Purpose**: Create the complete file structure for a new UI primitive in Semantic UI
-**Target**: LLMs scaffolding new primitives from scratch
-**Prerequisites**: Understanding of spec structure and primitive architecture
-**Related Workflows**:
-- `define-primitive-spec.md` - For spec content authoring
-- `implement-primitive-css.md` - For CSS implementation from specs
+## Lifecycle Context
+
+This is the **first step** in creating a new primitive.
+- **Before**: Decision to create a new primitive
+- **After**: `primitive-refine.md` (define and author the spec), then `primitive-write-css.md` (implement CSS)
+- **Reference**: Load `sui:component-specs` skill for spec format details
 
 ## Overview
 
@@ -81,7 +83,7 @@ src/primitives/[primitive-name]/
 Create `/src/primitives/[primitive-name]/specs/[primitive-name].spec.js`:
 
 ```javascript
-// Primitive spec stub - expand incrementally via define-primitive-spec workflow
+// Primitive spec stub - expand via primitive-refine workflow
 export default {
   uiType: 'element',
   name: '[PrimitiveName]',
@@ -356,8 +358,8 @@ This will:
 
 After scaffolding:
 
-1. **Add spec content** - Use `define-primitive-spec.md` workflow to add types, variations, states, etc.
-2. **Implement CSS** - Use `implement-primitive-css.md` workflow for styling
+1. **Refine the spec** - Use `primitive-refine.md` workflow to define types, variations, states, etc.
+2. **Implement CSS** - Use `primitive-write-css.md` workflow for styling
 3. **Add behavior** - Implement `createComponent` methods and events
 4. **Create examples** - Add example code to spec and documentation
 

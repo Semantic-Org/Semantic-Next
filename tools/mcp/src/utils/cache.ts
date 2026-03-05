@@ -75,6 +75,8 @@ const cache: ContentCache = {
 };
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const RETRY_DELAY = 5 * 1000; // 5 seconds before retrying after failure
+let lastFailedAttempt = 0;
 
 async function fetchWithTimeout(url: string, timeout = 30000): Promise<Response> {
   const controller = new AbortController();
@@ -110,6 +112,18 @@ async function fetchManifest<T>(endpoint: string): Promise<ManifestResult<T>> {
     const msg = error instanceof Error ? error.message : String(error);
     return { data: null, error: msg, url: fullUrl };
   }
+}
+
+// Call before any tool handler to ensure cache is populated (retries on failure)
+export async function ensureCache(): Promise<void> {
+  if (cache.ready && (Date.now() - cache.lastUpdated) < CACHE_TTL) {
+    return;
+  }
+  // Throttle retries after failure
+  if (lastFailedAttempt && (Date.now() - lastFailedAttempt) < RETRY_DELAY) {
+    return;
+  }
+  await initCache();
 }
 
 export async function initCache(): Promise<void> {
@@ -163,22 +177,26 @@ export async function initCache(): Promise<void> {
     errors.push(`docs: ${docsResult.error} (${docsResult.url})`);
   }
 
-  cache.ready = true;
-  cache.lastUpdated = now;
-
   if (errors.length === 4) {
+    // All fetches failed — don't mark cache as ready so next tool call retries
+    lastFailedAttempt = now;
     console.error(`[semantic-ui-mcp] ERROR: Could not load any manifests from ${getDocsBaseUrl()}`);
-    console.error(`[semantic-ui-mcp] The server may be down or the content API endpoints don't exist.`);
-    each(errors, err => console.error(`  - ${err}`));
-  }
-  else if (errors.length > 0) {
-    console.error(`[semantic-ui-mcp] WARNING: Some manifests failed to load:`);
+    console.error(`[semantic-ui-mcp] Will retry on next request.`);
     each(errors, err => console.error(`  - ${err}`));
   }
   else {
-    console.error(
-      `[semantic-ui-mcp] Loaded: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context, ${cache.workflows.length} workflows, ${cache.docs.length} docs`,
-    );
+    cache.ready = true;
+    cache.lastUpdated = now;
+
+    if (errors.length > 0) {
+      console.error(`[semantic-ui-mcp] WARNING: Some manifests failed to load:`);
+      each(errors, err => console.error(`  - ${err}`));
+    }
+    else {
+      console.error(
+        `[semantic-ui-mcp] Loaded: ${cache.specs.length} specs, ${cache.examples.length} examples, ${cache.context.length} context, ${cache.workflows.length} workflows, ${cache.docs.length} docs`,
+      );
+    }
   }
 }
 

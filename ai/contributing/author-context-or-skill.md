@@ -122,8 +122,9 @@ keywords: [mental model]
 
 | Value | Who | Example content |
 |-------|-----|-----------------|
-| `ui` | Developers using SUI components | Markup syntax, styling, theming |
-| `framework` | Developers building components with SUI | defineComponent, reactivity, templates |
+| `usage` | Developers using SUI components | Markup syntax, styling, theming |
+| `authoring` | Developers building components with SUI | defineComponent, reactivity, templates |
+| `essentials` | Core concepts for all audiences | Mental model, fundamentals |
 | `contributing` | Contributors to the SUI codebase | Code conventions, PR process |
 | `research` | Architectural investigation | Design decisions, tradeoffs |
 

@@ -60,7 +60,7 @@ The entire process is broken down into five distinct steps, often handled by spe
 
 -   **Agent**: A specialized AI agent working in direct collaboration with the Semantic UI author, Jack Lukic.
 -   **Task**: The agent presents the verified research findings to the author. The presentation is structured around the "Usage Level" of each pattern, from most common to most rare.
--   **Workflow**: This collaborative session follows the `ai/workflows/components/evaluate-research-extend-spec.md` workflow. The AI's role is to present the evidence and act as an advocate for community-driven patterns, while the author makes the final editorial decisions based on the data, first principles, and the long-term vision for the framework.
+-   **Workflow**: This collaborative session follows the `ai/workflows/contributing/primitive-refine.md` workflow. The AI's role is to present the evidence and act as an advocate for community-driven patterns, while the author makes the final editorial decisions based on the data, first principles, and the long-term vision for the framework.
 -   **Artifacts**:
     1.  An updated component specification file (e.g., `src/primitives/[component]/specs/[component].json`). The `usageLevel` property in this spec is directly derived from the research.
     2.  A detailed decision record, stored at `ai/research/[component]/spec-decisions.md`, which documents what was included, what was excluded, and why.

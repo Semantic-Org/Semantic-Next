@@ -1,19 +1,22 @@
 ---
-title: Implement Primitive CSS
+title: Write Primitive CSS
 description: Workflow for implementing CSS for spec-defined primitive features, covering file structure, definition/theme separation, shadow DOM boundaries, and plural component patterns.
 keywords: [CSS, primitives, shadow DOM, tokens, definition, theme, variations, states, layers]
 audience: contributing
 type: workflow
+skill: primitive-write-css
 ---
 
-# Implement Primitive CSS
+# Write Primitive CSS
 
-**Purpose**: Implement CSS for primitive features defined in `.spec.js` files
-**Prerequisite**: Primitive `.spec.js` exists with the feature defined
-**Related Guides**:
-- `define-primitive-spec.md` — Adding features to a spec
-- `/ai/framework/design-tokens.md` — Design token usage and verification
-- `/ai/framework/css.md` — CSS architecture overview
+> **Skill:** `sui:primitive-write-css`
+> **Purpose:** Implement CSS for primitive features defined in `.spec.js` files
+
+## Lifecycle Context
+
+This is typically the **third step** in creating a primitive, after scaffolding and spec authoring.
+- **Before**: Spec must exist with the feature defined (`primitive-refine.md`)
+- **Reference**: Load `sui:component-specs` skill for spec format, `sui:component-css` or `sui:design-tokens` for token details
 
 ## How It Works
 
@@ -153,7 +156,7 @@ This is essential when options share common CSS. Here's the real animated button
 }
 ```
 
-**Note on `compoundAliases`**: The animated spec also has `compoundAliases: true`, which means users write `<ui-button vertical-animated>` instead of just `<ui-button vertical>`. This is a spec-level concern for HTML disambiguation — it does **not** affect CSS. The generated classes are still `.animated.vertical.button` regardless of how the HTML attribute was written. See `define-primitive-spec.md` for details.
+**Note on `compoundAliases`**: The animated spec also has `compoundAliases: true`, which means users write `<ui-button vertical-animated>` instead of just `<ui-button vertical>`. This is a spec-level concern for HTML disambiguation — it does **not** affect CSS. The generated classes are still `.animated.vertical.button` regardless of how the HTML attribute was written. See the `sui:component-specs` skill for details.
 
 ## Before You Start
 

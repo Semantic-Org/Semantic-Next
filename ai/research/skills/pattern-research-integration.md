@@ -160,7 +160,7 @@ This approach gives us:
    - Document chosen patterns in spec format
    - Include usageLevel based on research
 
-4. **Port or Implement** (`port-classic-primitive.md`)
+4. **Implement CSS** (`primitive-write-css.md`)
    - Execute on the specification
    - Reference research for implementation details
 

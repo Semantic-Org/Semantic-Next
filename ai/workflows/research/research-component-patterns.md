@@ -470,7 +470,7 @@ Document the changes:
 
 ## Relationship to Other Workflows
 
-- **Use BEFORE** `port-classic-primitive.md` - provides data for informed decisions
+- **Use BEFORE** `primitive-refine.md` - provides data for informed editorial decisions
 - **Independent of** current specs - research first, design second
 - **Complements** implementation workflows - provides the "why" behind choices
 

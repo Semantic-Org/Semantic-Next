@@ -8,6 +8,7 @@ import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
 
 import {
+  ensureCache,
   extractMarkdownSection,
   fetchContent,
   fetchJson,
