@@ -363,27 +363,17 @@ Target both `::slotted(*)` (composition path) and the child tag directly (config
 .selection.menu menu-item { --menu-item-padding: 8px; }
 ```
 
-### pageCSS for Deeply Nested Slotted Content
+### pageCSS for Document-Scope CSS
 
-`::slotted()` only targets **direct** slot children. You cannot write `::slotted(tr td)`. When a component needs to style light DOM descendants at arbitrary depth, use `pageCSS` — it injects styles into the **document** (once per component definition, not per instance).
+`pageCSS` injects styles into the **document** (once per component definition, not per instance). Use it for CSS that Shadow DOM cannot express:
+
+- **`::slotted()` depth** — `::slotted()` only targets direct slot children. `pageCSS` reaches any light DOM depth.
+- **CSS Houdini `@property`** — `@property` declarations don't work inside Shadow DOM. Required for dynamic container breakpoints where typed `<length>` properties enable `@container style()` queries (see `card-page.css`, `card/css/definition/variations/stackable.css`).
 
 ```js
-// menu.js — pageCSS alongside shadow DOM css
 import pageCSS from './menu-page.css?raw';
 defineComponent({ tagName: 'ui-menu', css, pageCSS, ... });
 ```
-
-```css
-/* menu-page.css — targets light DOM children by tag+attribute */
-ui-menu[selection] menu-item {
-  --menu-item-padding: var(--menu-selection-item-padding);
-  --menu-item-color: var(--menu-selection-item-color);
-}
-```
-
-*Source: `src/primitives/menu/menu-page.css`*
-
-Also used for `@property` rules that require global scope (see `card-page.css`).
 
 ```css
 /* ❌ WRONG — ::slotted() cannot target descendants */
@@ -391,6 +381,12 @@ Also used for `@property` rules that require global scope (see `card-page.css`).
 
 /* ✅ RIGHT — pageCSS targets any light DOM depth */
 ui-table tr td { padding: var(--cell-padding); }
+
+/* ❌ WRONG — @property inside Shadow DOM (silently ignored) */
+@property --flag { syntax: "<length>"; inherits: true; initial-value: 1px; }
+
+/* ✅ RIGHT — @property in pageCSS (document scope) */
+/* Then @container style(--flag: 0) works in shadow DOM css */
 ```
 
 ### `deep` Events for Shadow-Piercing Interaction
