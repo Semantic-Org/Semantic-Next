@@ -193,7 +193,7 @@ export function findIndex<T>(array: T[], callbackOrValue: T | ArrayCallback<T>):
  * remove([1, 2, 3], x => x > 2) // removes 3 from array
  * ```
  */
-export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): boolean;
+export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): number;
 
 /**
  * Checks if a value exists in an array
@@ -209,7 +209,7 @@ export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): bo
  * inArray(4, [1, 2, 3]) // returns false
  * ```
  */
-export function inArray<T>(array: T[], value: T): boolean;
+export function inArray<T>(value: T, array: T[]): boolean;
 
 /**
  * Creates an array of numbers progressing from start up to, but not including, end

@@ -39,7 +39,7 @@ export interface GetIPAddressOptions {
  * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#copytext copyText}
  * @param text - The text to copy
  */
-export function copyText(text: string): void;
+export function copyText(text: string): Promise<void>;
 
 /**
  * Opens a URL with configurable options
@@ -107,3 +107,10 @@ export function getJSON<T = any>(src: string, settings?: FetchSettings): Promise
  * ```
  */
 export function getIPAddress(options?: GetIPAddressOptions): Promise<string | string[]>;
+
+/**
+ * Schedules a callback to run during browser idle time, with a setTimeout fallback.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/browser#idlecallback idleCallback}
+ * @param callback - The function to call when idle
+ */
+export function idleCallback(callback: () => void): void;

@@ -178,12 +178,6 @@ export class Query {
   each(callback: (this: Query, el: Element, index: number) => void): this;
 
   /**
-   * Removes all event handlers attached by this Query class. Resets the static `eventHandlers` array.
-   * @see https://next.semantic-ui.com/docs/api/query/events#off
-   */
-  removeAllEvents(): void;
-
-  /**
    * Finds elements within the current set of elements.
    * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#find
    * @param selector - The CSS selector to search for.
@@ -1302,6 +1296,53 @@ export class Query {
    * @returns `true` if any element contains any element from the Query instance, `false` otherwise.
    */
   contains(query: Query): boolean;
+
+  /**
+   * Returns the bounding client rect(s) of the element(s).
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#bounds
+   * @returns A DOMRect for a single element, or an array of DOMRects for multiple elements.
+   */
+  bounds(): DOMRect | DOMRect[];
+
+  /**
+   * Restores the previous Query set before the last traversal operation.
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#end
+   * @returns The previous Query instance, or this if no previous set exists.
+   */
+  end(): Query;
+
+  /**
+   * Triggers a submit event on form elements.
+   * @see https://next.semantic-ui.com/docs/api/query/events#submit
+   * @returns The Query instance for chaining.
+   */
+  submit(eventSettings?: Record<string, any>): this;
+
+  /**
+   * Gets elements assigned to a named slot in a shadow DOM component.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#getslot
+   * @param name - The slot name. If omitted, gets the default slot.
+   * @returns A new Query instance containing the slot's assigned elements.
+   */
+  getSlot(name?: string): Query;
+
+  /**
+   * Sets content into a named slot.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#setslot
+   * @param nameOrHTML - Slot name (when newHTML provided) or HTML string (for default slot).
+   * @param newHTML - HTML content to set into the named slot.
+   * @returns The Query instance for chaining.
+   */
+  setSlot(nameOrHTML: string, newHTML?: string): this;
+
+  /**
+   * Checks if a container element contains a target element, piercing shadow DOM boundaries.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#containsdeep
+   * @param container - The potential container element.
+   * @param target - The element to check for containment.
+   * @returns `true` if container contains target (crossing shadow boundaries), `false` otherwise.
+   */
+  containsDeep(container: Element, target: Element): boolean;
 }
 
 export default Query;

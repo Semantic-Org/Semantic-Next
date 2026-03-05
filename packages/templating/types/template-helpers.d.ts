@@ -38,8 +38,7 @@ export interface TemplateHelpersType {
   numberFromIndex(a: number): number;
   formatDate(date?: Date, format?: string, options?: { timezone?: string; }): string;
   formatDateTime(date?: Date, format?: string, options?: { timezone?: string; }): string;
-  formatDateTimeSeconds(date?: Date, format?: string, options?: { timezone?: string; }): string;
-  object(params: { obj: any; }): any;
+  formatTime(date?: Date, format?: string, options?: { timezone?: string; }): string;
   log(...args: any[]): void;
   debugger(): void;
   tokenize(string?: string): string[];

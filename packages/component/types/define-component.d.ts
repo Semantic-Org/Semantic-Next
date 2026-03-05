@@ -267,6 +267,13 @@ export interface DefineComponentOptions<
    */
   onRendered?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
+   * Lifecycle callback - invoked after the component is updated (re-rendered).
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onupdated onUpdated Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions.
+   * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
+   */
+  onUpdated?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  /**
    * Lifecycle callback - invoked after the component is destroyed.
    * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#ondestroyed onDestroyed Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions.

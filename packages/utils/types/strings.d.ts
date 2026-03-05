@@ -25,6 +25,8 @@ export interface JoinWordsOptions {
 export interface GetArticleOptions {
   /** Capitalize the article */
   capitalize?: boolean;
+  /** Include the word after the article */
+  includeWord?: boolean;
 }
 
 /**
