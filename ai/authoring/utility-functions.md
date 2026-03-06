@@ -1,53 +1,23 @@
 ---
-title: Utils Package Guide
-description: Comprehensive guide to the @semantic-ui/utils package — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate]
+title: Utility Functions Reference
+description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, each, range, remove, noop]
 audience: authoring
 skill: utility-functions
 ---
 
-# Utility Functions Guide
+# Utility Functions Reference
 
 > **Skill:** `sui:utility-functions`
-> **Purpose:** Comprehensive guide to the @semantic-ui/utils package — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more.
-> **Last Updated:** 2026-03-04
+> **Purpose:** Complete reference for `@semantic-ui/utils` — use this before reimplementing common operations
 
 ---
 
-## Overview
+**Golden rule: Always check `@semantic-ui/utils` before writing your own utility function.** This package covers arrays, objects, strings, types, dates, CSS, functions, and more. If you're about to write a helper for debouncing, deep cloning, object searching, or array manipulation — it's probably already here.
 
-The `@semantic-ui/utils` package is a comprehensive standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. It's designed to be framework-agnostic and serves as the foundation for other Semantic UI packages while being useful for any JavaScript application.
-
-## Package Structure
-
-The package is organized into **18 specialized modules**, each focused on a specific domain:
-
-```
-@semantic-ui/utils
-├── arrays.js      ← Array manipulation and processing (27+ functions)
-├── objects.js     ← Object operations and property access (15+ functions)
-├── types.js       ← Type checking and validation (15+ functions)
-├── strings.js     ← String formatting and transformation (8+ functions)
-├── functions.js   ← Function utilities and higher-order functions
-├── colors.js      ← OKLCH to RGB/Hex color conversion
-├── css.js         ← CSS stylesheet adoption, extraction, and scoping
-├── html.js        ← HTML indentation and text formatting
-├── browser.js     ← Browser-specific operations and XHR
-├── looping.js     ← Iteration utilities for objects and arrays
-├── dates.js       ← Date formatting with internationalization
-├── numbers.js     ← Number formatting and rounding
-├── crypto.js      ← Hashing and ID generation
-├── equality.js    ← Deep equality comparison
-├── cloning.js     ← Deep cloning of objects and arrays
-├── debug.js       ← Logging, debugging, and error handling
-├── environment.js  ← Environment detection (server/client/dev/CI)
-└── regexp.js      ← Regular expression and HTML escaping
-```
-
-**Main Import**:
+All functions are named exports:
 ```javascript
 import { functionName } from '@semantic-ui/utils';
-// All functions are available as named exports
 ```
 
 ---
@@ -56,75 +26,94 @@ import { functionName } from '@semantic-ui/utils';
 
 ### Basic Operations
 ```javascript
-import { unique, filterEmpty, first, last, flatten } from '@semantic-ui/utils';
+import { unique, filterEmpty, first, last, flatten, inArray } from '@semantic-ui/utils';
 
-const items = [1, 2, 2, 3, null, '', 4];
-
-unique(items);                    // [1, 2, 3, null, '', 4] - removes duplicates
-filterEmpty(items);               // [1, 2, 2, 3, 4] - removes null, undefined, ''
-first(items);                     // 1 - first element
-last(items);                      // 4 - last element
-flatten([[1, 2], [3, [4, 5]]]);   // [1, 2, 3, 4, 5] - deep flatten
+unique([1, 2, 2, 3]);               // [1, 2, 3] — removes duplicates via Set
+filterEmpty([1, 0, null, '', 'hi']); // [1, 'hi'] — removes all falsy values
+first([1, 2, 3]);                    // 1
+first([1, 2, 3], 2);                 // [1, 2] — first N elements
+last([1, 2, 3]);                     // 3
+last([1, 2, 3], 2);                  // [2, 3] — last N elements
+flatten([[1, 2], [3, [4, 5]]]);      // [1, 2, 3, 4, 5] — deep flatten
+inArray('b', ['a', 'b', 'c']);       // true
 ```
 
-### Advanced Processing
+### Search and Filter
 ```javascript
-import { sortBy, groupBy, where } from '@semantic-ui/utils';
+import { firstMatch, findIndex, where, some, any } from '@semantic-ui/utils';
+
+// Accept callback or value (uses deep equality for values)
+firstMatch([1, 2, 3], val => val > 1);           // 2
+firstMatch([{id: 1}, {id: 2}], {id: 2});         // {id: 2}
+
+findIndex([1, 2, 3], val => val > 1);             // 1
+findIndex([{id: 1}, {id: 2}], {id: 2});           // 1
+
+// Filter by property match — second arg is an object
+const users = [
+  { name: 'Alice', role: 'admin' },
+  { name: 'Bob', role: 'user' },
+];
+where(users, { role: 'admin' });                   // [{ name: 'Alice', role: 'admin' }]
+
+// Predicate check
+some([1, 2, 3], x => x > 2);                      // true
+any([1, 2, 3], x => x > 5);                       // false (alias for some)
+```
+
+### Mutation
+```javascript
+import { remove, moveItem, moveToFront, moveToBack } from '@semantic-ui/utils';
+
+// In-place removal — returns count removed
+const items = [1, 2, 3, 4, 5];
+remove(items, val => val > 3);       // 2 (items is now [1, 2, 3])
+remove(items, 2);                    // 1 (items is now [1, 3]) — uses deep equality
+
+// Move by value or callback, not index
+const letters = ['a', 'b', 'c', 'd'];
+moveItem(letters, 'b', 3);          // ['a', 'c', 'd', 'b'] — move 'b' to position 3
+moveItem(letters, el => el === 'd', 'first'); // accepts 'first', 'last', or numeric index
+moveToFront(letters, 'c');          // move 'c' to front
+moveToBack(letters, 'a');           // move 'a' to back
+```
+
+### Sorting and Grouping
+```javascript
+import { sortBy, groupBy } from '@semantic-ui/utils';
 
 const users = [
   { name: 'Alice', age: 30, role: 'admin' },
   { name: 'Bob', age: 25, role: 'user' },
-  { name: 'Carol', age: 35, role: 'admin' }
+  { name: 'Carol', age: 35, role: 'admin' },
 ];
 
-// Sort by property
-sortBy(users, 'age');                    // Sorted by age ascending
+sortBy(users, 'age');                // sorted by age ascending
+sortBy(users, ['role', 'age']);      // multi-key: role first, then age
+sortBy(users, 'name', (a, b) => b.localeCompare(a)); // custom comparator
 
-// Group by property
-groupBy(users, 'role');                  // { admin: [...], user: [...] }
-
-// Filter by criteria
-where(users, { role: 'admin' });         // All admin users
-```
-
-### Array Manipulation
-```javascript
-import { moveItem, moveToFront, moveToBack } from '@semantic-ui/utils';
-
-const items = ['a', 'b', 'c', 'd'];
-
-moveItem(items, 1, 3);           // ['a', 'c', 'd', 'b'] - move 'b' to position 3
-moveToFront(items, 'c');         // ['c', 'a', 'b', 'd'] - move 'c' to front
-moveToBack(items, 'a');          // ['c', 'b', 'd', 'a'] - move 'a' to back
+groupBy(users, 'role');              // { admin: [Alice, Carol], user: [Bob] }
 ```
 
 ### Set Operations
 ```javascript
 import { intersection, difference, uniqueItems } from '@semantic-ui/utils';
 
-const arr1 = [1, 2, 3, 4];
-const arr2 = [3, 4, 5, 6];
-
-intersection(arr1, arr2);        // [3, 4] - common elements
-difference(arr1, arr2);          // [1, 2] - elements in arr1 but not arr2
-uniqueItems([arr1, arr2]);       // [1, 2, 3, 4, 5, 6] - unique across all arrays
+// All take variadic arrays (spread args, not a single array)
+intersection([1, 2, 3], [2, 3, 4]);          // [2, 3] — common elements
+difference([1, 2, 3], [2, 3, 4]);            // [1] — in first but not others
+uniqueItems([1, 2, 3], [2, 3, 4]);           // [1, 4] — items unique to ONE array only
 ```
 
-### Additional Operations
+### Generation
 ```javascript
-import { findIndex, firstMatch, inArray } from '@semantic-ui/utils';
+import { range, sum } from '@semantic-ui/utils';
 
-const items = [{ id: 1, name: 'Apple' }, { id: 2, name: 'Banana' }];
+range(5);                            // [0, 1, 2, 3, 4]
+range(2, 6);                         // [2, 3, 4, 5]
+range(0, 10, 2);                     // [0, 2, 4, 6, 8]
 
-// With callback
-findIndex(items, item => item.id === 2);               // 1
-firstMatch(items, item => item.id === 2);               // { id: 2, name: 'Banana' }
-
-// With value (uses deep equality)
-findIndex([1, 2, 3], 2);                               // 1
-firstMatch([1, 2, 3], 2);                              // 2
-
-inArray('search', ['apple', 'banana', 'search', 'orange']);
+sum([1, 2, 3, 4]);                   // 10
 ```
 
 ---
@@ -133,164 +122,162 @@ inArray('search', ['apple', 'banana', 'search', 'orange']);
 
 ### Property Access
 ```javascript
-import { get, hasProperty } from '@semantic-ui/utils';
+import { get, keys, values, hasProperty } from '@semantic-ui/utils';
 
 const data = {
   user: {
-    profile: {
-      name: 'Alice',
-      settings: { theme: 'dark' }
-    },
-    posts: [
-      { title: 'First Post', tags: ['tech', 'web'] }
-    ]
-  }
+    profile: { name: 'Alice' },
+    posts: [{ title: 'First Post' }],
+  },
 };
 
-// Nested property access
+// Nested dot-path access (supports array indices)
 get(data, 'user.profile.name');              // 'Alice'
 get(data, 'user.posts.0.title');             // 'First Post'
-get(data, 'user.profile.bio', 'No bio');     // 'No bio' (default value)
+get(data, 'user.profile.bio');               // undefined (no default parameter)
 
-// Check property existence
-hasProperty(data, 'user.profile.name');      // true
+// hasProperty checks own properties only (shallow, no dot paths)
+hasProperty(data, 'user');                   // true
+hasProperty(data, 'toString');               // false (inherited)
+
+// Safe key/value extraction (returns undefined for non-objects)
+keys({ a: 1, b: 2 });                       // ['a', 'b']
+values({ a: 1, b: 2 });                     // [1, 2]
 ```
 
 ### Object Manipulation
 ```javascript
-import { extend, deepExtend, pick, filterObject, mapObject } from '@semantic-ui/utils';
+import { extend, deepExtend, pick, onlyKeys, filterObject, mapObject } from '@semantic-ui/utils';
 
-const source = { a: 1, b: 2, c: 3, d: 4 };
-const target = { b: 10, e: 5 };
+// Shallow merge (preserves getter/setter descriptors)
+extend({ a: 1 }, { b: 2 }, { c: 3 });       // { a: 1, b: 2, c: 3 }
 
-// Shallow merge objects
-extend(target, source);                      // { a: 1, b: 2, c: 3, d: 4, e: 5 }
+// Deep merge
+const config = { api: { url: 'localhost', timeout: 5000 } };
+deepExtend(config, { api: { timeout: 3000 } });
+// { api: { url: 'localhost', timeout: 3000 } }
 
-// Deep merge objects with nested properties
-const config = {
-  api: { baseUrl: 'localhost', timeout: 5000 },
-  features: { darkMode: false }
-};
-const overrides = {
-  api: { timeout: 3000, retries: 3 },
-  features: { notifications: true }
-};
+// Deep merge with options (last arg if it has known option keys)
+deepExtend(target, source, { preserveNonCloneable: true, preserveDOM: true });
 
-deepExtend(config, overrides);
-// Result: {
-//   api: { baseUrl: 'localhost', timeout: 3000, retries: 3 },
-//   features: { darkMode: false, notifications: true }
-// }
+// Select properties — spread args, not array
+pick({ a: 1, b: 2, c: 3 }, 'a', 'c');       // { a: 1, c: 3 }
 
-// Deep merge with custom class preservation
-const settings = {
-  template: new MyTemplate(),
-  data: { items: [1, 2, 3] }
-};
-deepExtend(settings, { data: { items: [4, 5] } }, { preserveNonCloneable: true });
-// Preserves MyTemplate instance, merges data.items array
-
-// Select properties
-pick(source, ['a', 'c']);                    // { a: 1, c: 3 }
+// Select properties — array arg
+onlyKeys({ a: 1, b: 2, c: 3 }, ['a', 'c']); // { a: 1, c: 3 }
 
 // Filter and transform
-filterObject(source, (value, key) => value > 2);  // { c: 3, d: 4 }
-mapObject(source, (value, key) => value * 2);     // { a: 2, b: 4, c: 6, d: 8 }
+filterObject({ a: 1, b: 5, c: 3 }, (value, key) => value > 2); // { b: 5, c: 3 }
+mapObject({ a: 1, b: 2 }, (value, key) => value * 2);           // { a: 2, b: 4 }
 ```
 
-### Advanced Object Operations
+### Conversion
 ```javascript
-import { weightedObjectSearch, reverseKeys, proxyObject } from '@semantic-ui/utils';
+import { arrayFromObject, reverseKeys } from '@semantic-ui/utils';
+
+// Object to key/value array
+arrayFromObject({ x: 10, y: 20 });
+// [{ key: 'x', value: 10 }, { key: 'y', value: 20 }]
+
+// Reverse lookup (handles array values and collisions)
+reverseKeys({ a: 1, b: [1, 2] });           // { 1: ['a', 'b'], 2: 'b' }
+reverseKeys({ active: 1, inactive: 0 });     // { 1: 'active', 0: 'inactive' }
+```
+
+### Search
+```javascript
+import { weightedObjectSearch } from '@semantic-ui/utils';
 
 const items = [
   { name: 'Apple iPhone', category: 'phone', tags: ['mobile', 'apple'] },
   { name: 'Samsung Galaxy', category: 'phone', tags: ['mobile', 'android'] },
-  { name: 'iPad Pro', category: 'tablet', tags: ['tablet', 'apple'] }
+  { name: 'iPad Pro', category: 'tablet', tags: ['tablet', 'apple'] },
 ];
 
-// Weighted search across object properties
-const results = weightedObjectSearch(items, 'apple', {
-  name: 3,           // Name matches weighted 3x
-  category: 1,       // Category matches weighted 1x
-  tags: 2           // Tag matches weighted 2x
+// First arg is query string, second is array, third is options
+const results = weightedObjectSearch('apple', items, {
+  propertiesToMatch: ['name', 'category', 'tags'],  // array of property names to search
+  matchAllWords: true,                                // all query words must match (default)
+  returnMatches: false,                               // set true to attach match details
 });
-// Returns items sorted by relevance score
+// Returns items sorted by relevance: startsWith > wordStartsWith > anywhere > anyWord
+```
 
-// Reverse object key-value pairs
-const statusMap = { active: 1, inactive: 0, pending: 2 };
-reverseKeys(statusMap);          // { 1: 'active', 0: 'inactive', 2: 'pending' }
+### Proxy
+```javascript
+import { proxyObject } from '@semantic-ui/utils';
 
-// Create reactive proxy
-const reactive = proxyObject(source, {
-  onChange: (key, value, oldValue) => {
-    console.log(`${key} changed from ${oldValue} to ${value}`);
-  }
-});
+// Creates a read-through proxy: properties resolve from referenceObj first, then sourceObj()
+// sourceObj is a FUNCTION that returns the current source object (avoids stale references)
+const proxy = proxyObject(
+  () => getLatestSettings(),  // getter function, called on each property access
+  localOverrides              // checked first
+);
+proxy.theme; // returns localOverrides.theme if set, otherwise getLatestSettings().theme
 ```
 
 ---
 
 ## Type Checking (types.js)
 
-### Basic Type Checks
+### Basic Types
 ```javascript
 import {
-  isObject, isArray, isString, isNumber, isFunction, isBoolean,
-  isEmpty, isPlainObject, isSet, isMap
+  isObject, isPlainObject, isArray, isString, isNumber,
+  isBoolean, isFunction, isBinary
 } from '@semantic-ui/utils';
 
-// Standard type checking
-isObject({});                    // true
+isObject({});                    // true (any non-null object)
+isObject([]);                    // true (arrays are objects)
+isPlainObject({});               // true (only Object literals, excludes class instances)
+isPlainObject([]);               // false
 isArray([]);                     // true
 isString('hello');               // true
 isNumber(42);                    // true
-isFunction(() => {});            // true
 isBoolean(true);                 // true
+isFunction(() => {});            // true
+isBinary(new Uint8Array());      // true (TypedArrays and ArrayBuffer)
+```
 
-// Collection type checking
-isSet(new Set([1, 2, 3]));       // true
-isSet([1, 2, 3]);                // false
-isMap(new Map([['a', 1]]));      // true
-isMap({ a: 1 });                 // false
+### Special Types
+```javascript
+import {
+  isEmpty, isPromise, isDOM, isNode, isClassInstance,
+  isIterable, isMap, isSet, isArguments
+} from '@semantic-ui/utils';
 
-// Special cases
 isEmpty('');                     // true
 isEmpty([]);                     // true
 isEmpty({});                     // true
-isPlainObject({});               // true (excludes class instances)
+isEmpty(null);                   // true
+isEmpty({ a: undefined });       // true (only checks nullish values in objects)
 
-// Type-safe collection operations
-function processCollection(data) {
-  if (isSet(data)) {
-    return `Set with ${data.size} unique items`;
-  } else if (isMap(data)) {
-    return `Map with ${data.size} key-value pairs`;
-  } else if (isArray(data)) {
-    return `Array with ${data.length} elements`;
-  }
-  return 'Unknown collection type';
-}
+isPromise(fetch('/api'));        // true (checks for .then method)
+isDOM(document.body);            // true (Element, Document, window, DocumentFragment)
+isNode(document.createTextNode('text')); // true (checks nodeType)
+isClassInstance(new MyClass());  // true (excludes built-in types like Date, Map, Array)
+
+isIterable(new Set());           // true (checks Symbol.iterator)
+isMap(new Map());                // true
+isSet(new Set());                // true
+isArguments(arguments);          // true
 ```
 
-### Advanced Type Checks
+### Environment Detection (environment.js)
+
+These are **boolean constants**, not functions — no parentheses needed:
+
 ```javascript
-import { isDOM, isNode, isClassInstance, isPromise, isClient, isServer, isDevelopment, isCI } from '@semantic-ui/utils';
+import { isServer, isClient, isDevelopment, isCI } from '@semantic-ui/utils';
 
-// DOM-related checks
-isDOM(document.body);            // true
-isNode(document.createTextNode('text')); // true
+// ❌ WRONG — these are not functions
+if (isClient()) { ... }
 
-// Class and promise detection
-class MyClass {}
-const instance = new MyClass();
-isClassInstance(instance);       // true
-isPromise(fetch('/api'));        // true
-
-// Environment detection
-isClient();                      // true in browser
-isServer();                      // true in Node.js/server environment
-isDevelopment();                 // true in development environments
-isCI();                          // true in CI/CD pipelines
+// ✅ RIGHT — boolean constants, evaluated once at import time
+if (isClient) { ... }
+if (isServer) { ... }
+if (isDevelopment) { ... }  // detects NODE_ENV, Vite DEV, Vercel preview, etc.
+if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 ```
 
 ---
@@ -299,545 +286,458 @@ isCI();                          // true in CI/CD pipelines
 
 ### Case Conversion
 ```javascript
-import { kebabToCamel, camelToKebab, capitalize, toTitleCase } from '@semantic-ui/utils';
+import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase } from '@semantic-ui/utils';
 
-// Case transformations
 kebabToCamel('my-component-name');       // 'myComponentName'
 camelToKebab('myComponentName');         // 'my-component-name'
 capitalize('hello world');               // 'Hello world'
-toTitleCase('hello world');              // 'Hello World'
+capitalizeWords('hello world');          // 'Hello World'
+toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)
 ```
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, truncate, reverseString } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, reverseString } from '@semantic-ui/utils';
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
 joinWords(['apple', 'banana']);                     // 'apple and banana'
+joinWords(['a', 'b'], { oxford: false });           // 'a and b'
+joinWords(['a', 'b'], { quotes: true });            // '"a" and "b"'
 
 // Grammar helpers
 getArticle('apple');                                // 'an'
 getArticle('banana');                               // 'a'
+getArticle('apple', { includeWord: true });         // 'an apple'
+getArticle('apple', { capitalize: true });          // 'An'
 
 // HTML escaping
-escapeHTML('<script>alert("xss")</script>');        // Safe HTML output
+escapeHTML('<script>alert("xss")</script>');        // '&lt;script&gt;...'
 
-// String reversal with Unicode support
+// Unicode-aware string reversal
 reverseString('hello');                             // 'olleh'
 reverseString('Hello 👋');                          // '👋 olleH'
-reverseString('🇺🇸🇬🇧');                             // '🇬🇧🇺🇸' (preserves flag emojis)
 ```
 
 ### Text Truncation
 ```javascript
 import { truncate } from '@semantic-ui/utils';
 
-// Basic text truncation with Unicode support
 truncate('This is a long text that needs truncating', 20);     // 'This is a long text…'
 truncate('Short text', 20);                                    // 'Short text'
-
-// Word boundary handling
-truncate('This is a very long sentence', 15);                  // 'This is a very…'
-truncate('verylongtextwithoutspaces', 12);                     // 'verylongtext…'
-
-// Custom suffix and options
 truncate('Hello world', 8, { suffix: '...' });                // 'Hello...'
-truncate('Cut at exact length', 10, { wordBoundary: false });  // 'Cut at exa…'
-
-// Unicode and emoji support
-truncate('Hello 👋 World 🌍', 10);                           // 'Hello 👋…'
-
-// Locale-aware segmentation for international text
+truncate('Cut here exactly', 10, { wordBoundary: false });     // 'Cut here e…'
 truncate('こんにちは世界です', 8, { locale: 'ja' });          // 'こんにちは…'
-```
-
----
-
-## Color System (colors.js)
-
-### OKLCH to RGB/Hex Conversion
-```javascript
-import { oklchToRgb, oklchToHex } from '@semantic-ui/utils';
-
-// Modern color space conversion
-const oklchColor = 'oklch(0.7 0.15 180)';          // Lightness, Chroma, Hue
-
-// Convert to RGB
-const rgb = oklchToRgb(oklchColor);                 // { r: 123, g: 156, b: 89 }
-
-// Convert to Hex
-const hex = oklchToHex(oklchColor);                 // '#7b9c59'
-
-// Passthrough for existing hex colors
-const existingHex = oklchToHex('#ff5733');          // '#ff5733' (unchanged)
 ```
 
 ---
 
 ## Function Utilities (functions.js)
 
-### Higher-Order Functions
+### Core
 ```javascript
-import { wait, memoize, debounce, throttle, wrapFunction } from '@semantic-ui/utils';
+import { noop, wrapFunction } from '@semantic-ui/utils';
 
-// Async delay
-await wait(300);                                           // Simple pause
+// Identity function — returns its argument
+noop(42);                              // 42
+noop('hello');                         // 'hello'
 
-// Cancellable — rejects with AbortError by default
+// Wraps non-functions into a function that returns the value
+const fn = wrapFunction('default');    // () => 'default'
+const fn2 = wrapFunction(myFunc);     // myFunc (returned as-is if already a function)
+```
+
+### Async
+```javascript
+import { wait } from '@semantic-ui/utils';
+
+await wait(300);                       // simple pause
+
+// Cancellable — rejects with AbortError
+const controller = new AbortController();
 try {
   await wait(5000, { abortController: controller });
-} catch(e) {
-  // e.name === 'AbortError'
-}
+} catch(e) { /* e.name === 'AbortError' */ }
 
-// Resolve early instead of rejecting
+// Resolve instead of rejecting on abort
 await wait(5000, { abortController: controller, rejectOnAbort: false });
+```
 
-// Memoization with custom hash function
-const expensiveFunction = memoize((a, b, c) => {
-  // Expensive computation
-  return a * b * c;
-}, (a, b, c) => `${a}-${b}-${c}`);  // Custom hash function
+### Memoization
+```javascript
+import { memoize } from '@semantic-ui/utils';
 
-// Debouncing with async support and options
+const expensive = memoize((a, b) => {
+  return a * b;  // only computed once per unique args
+});
+
+// Custom hash function for complex args
+const cached = memoize(fetchData, (args) => args[0].id);
+```
+
+### Debounce
+```javascript
+import { debounce } from '@semantic-ui/utils';
+
 const debouncedSave = debounce(async (data) => {
   await saveToServer(data);
   return 'saved';
 }, 300, {
-  leading: true,      // Execute on first call
-  maxWait: 1000,      // Force execution after 1s max
-  abortController: controller
+  leading: false,         // default: don't execute on first call
+  trailing: true,         // default: execute after wait
+  maxWait: 1000,          // force execution after 1s max
+  rejectSkipped: false,   // reject promises for skipped calls
+  abortController: ctrl,  // cancel with AbortController
 });
 
-// All calls resolve to same result via promise sharing
-Promise.all([
-  debouncedSave('data1'),
-  debouncedSave('data2'),  // Only this executes
-  debouncedSave('data3')
-]).then(results => {
-  // All resolve to 'saved'
+// All calls share the same promise
+await debouncedSave('data');
+
+// Control methods
+debouncedSave.cancel();   // cancel pending, rejects promises with CANCELLED code
+debouncedSave.flush();    // execute immediately
+debouncedSave.pending();  // true if scheduled
+```
+
+### Throttle
+```javascript
+import { throttle } from '@semantic-ui/utils';
+
+const throttled = throttle(handleScroll, 100, {
+  leading: true,           // default: execute on first call
+  trailing: true,          // default: execute after wait
+  rejectSkipped: false,    // reject promises for skipped calls
+  abortController: ctrl,
 });
 
-// Throttling for high-frequency events
-const throttledScroll = throttle(handleScroll, 100);     // Leading + trailing
-const throttledClick = throttle(handleClick, 1000, {
-  leading: true,
-  trailing: false
-});
-
-// Rate limiting API calls
-const rateLimitedAPI = throttle(apiCall, 2000);
-rateLimitedAPI('/users');    // Executes immediately
-rateLimitedAPI('/posts');    // Queued for trailing
-rateLimitedAPI('/comments'); // Replaces previous trailing
-
-// Method usage
-debouncedSave.cancel();      // Cancel pending
-debouncedSave.flush();       // Execute immediately
-debouncedSave.pending();     // Check if scheduled
-
-// Safe function wrapping
-const safeFunction = wrapFunction(riskyFunction);
-const result = safeFunction(args); // Won't throw errors
+throttled.cancel();        // same control methods as debounce
+throttled.flush();
+throttled.pending();
 ```
 
 ---
 
 ## CSS Utilities (css.js)
 
-### Stylesheet Management
 ```javascript
 import { adoptStylesheet, extractCSS, scopeStyles } from '@semantic-ui/utils';
 
-// Adopt CSS to document or shadow root with caching
-adoptStylesheet('.button { background: blue; color: white; }');
+// Adopt CSS via constructable stylesheets with dedup caching
+adoptStylesheet('.button { color: white; }');                // adopts to document
+adoptStylesheet(css, shadowRoot);                            // adopts to shadow root
+adoptStylesheet(css, element, { cacheStylesheet: false });   // skip cache
 
-// Adopt to shadow root with custom options
-const shadowRoot = element.attachShadow({ mode: 'open' });
-adoptStylesheet(css, shadowRoot, { cacheStylesheet: false });
+// Extract matching CSS rules from various sources
+extractCSS('.button', cssString, { returnText: true });      // returns CSS text
+extractCSS('.btn', stylesheet, { exactMatch: true });        // exact selector match
+extractCSS('.widget', [sheet1, sheet2]);                     // from array of sheets
 
-// Extract matching CSS rules
-const buttonCSS = extractCSS('.button', cssString, { returnText: true });
-const exactMatch = extractCSS('.btn', css, { exactMatch: true });
+// Scope CSS rules under a selector
+scopeStyles('.button { color: red; }', '.my-scope');
+// '.my-scope .button { color: red; }'
 
-// Extract from multiple sources
-const widgetRules = extractCSS('.widget', [sheet1, sheet2]);
-```
-
-### CSS Scoping and Web Components
-```javascript
-import { scopeStyles } from '@semantic-ui/utils';
-
-// Basic scoping - prepends selector to all rules
-const scoped = scopeStyles('.button { color: red; }', '.my-component');
-// Result: .my-component .button { color: red; }
-
-// Web component CSS porting with :host replacement
-const hostCSS = ':host { display: block; } :host(.active) { background: blue; }';
-const ported = scopeStyles(hostCSS, '.widget', { replaceHost: true });
-// Result: .widget { display: block; } .widget.active { background: blue; }
-
-// Root element handling
-const rootCSS = 'html { font-size: 16px; } body { margin: 0; }';
-const rootScoped = scopeStyles(rootCSS, '.app', { appendToRootElements: false });
-// Result: .app html { font-size: 16px; } .app body { margin: 0; }
+// Replace :host for web component CSS porting
+scopeStyles(':host(.active) { background: blue; }', '.widget', { replaceHost: true });
+// '.widget.active { background: blue; }'
 ```
 
 ---
 
 ## HTML Utilities (html.js)
 
-### Text Indentation
 ```javascript
-import { indentLines } from '@semantic-ui/utils';
+import { indentLines, indentHTML } from '@semantic-ui/utils';
 
-// Add consistent indentation to all lines
-const code = 'line 1\nline 2\nline 3';
-indentLines(code);              // '  line 1\n  line 2\n  line 3' (2 spaces)
-indentLines(code, 4);           // '    line 1\n    line 2\n    line 3' (4 spaces)
+// Add uniform indentation to all lines
+indentLines('line 1\nline 2', 4);    // '    line 1\n    line 2'
 
-// Useful for template processing
-const template = `
-function example() {
-  return true;
-}
-`;
-const indented = indentLines(template.trim(), 2);
-```
-
-### HTML Indentation
-```javascript
-import { indentHTML } from '@semantic-ui/utils';
-
-// Basic HTML indentation
-const html = '<div>\n<p>Content</p>\n</div>';
-indentHTML(html);
-// Result:
+// Smart HTML indentation (handles void elements, self-closing, comments)
+indentHTML('<div>\n<p>Content</p>\n</div>');
 // <div>
 //   <p>Content</p>
 // </div>
 
-// Custom indentation
-indentHTML(html, { indent: '    ' });    // 4 spaces
-indentHTML(html, { indent: '\t' });      // Tabs
-
-// Start at specific nesting level
-indentHTML(html, { startLevel: 1 });     // Start with one level of indent
-
-// Preserve empty lines
-indentHTML(html, { trimEmptyLines: false });
+indentHTML(html, { indent: '\t', startLevel: 1, trimEmptyLines: false });
 ```
-
-**Handles correctly:**
-- Void elements (img, br, hr, input, etc.) - no closing tag needed
-- Self-closing syntax (`<component />`)
-- Comments (`<!-- comment -->`)
-- Elements with opening/closing on same line
-- Multiple nesting levels
 
 ---
 
-## Browser Integration (browser.js)
+## Browser Utilities (browser.js)
 
-### Clipboard and Navigation
 ```javascript
-import { copyText, openLink, getKeyFromEvent, getIPAddress } from '@semantic-ui/utils';
+import { copyText, openLink, getKeyFromEvent, idleCallback, getText, getJSON } from '@semantic-ui/utils';
 
-// Clipboard operations
-await copyText('Text to copy');     // Returns promise
+// Clipboard
+await copyText('Text to copy');
 
-// Navigation
-openLink('https://example.com', '_blank');
+// Navigation — second arg is options object
+openLink('https://example.com', { newWindow: true, target: '_blank' });
 
-// Keyboard handling
+// Normalized keyboard event string with modifier prefixes
 document.addEventListener('keydown', (event) => {
-  const key = getKeyFromEvent(event);  // Normalized key handling
-  if (key === 'Escape') {
-    closeModal();
-  }
+  const key = getKeyFromEvent(event);
+  // Returns: 'esc', 'space', 'ctrl+s', 'shift+up', 'meta+alt+k', etc.
+  // Normalizes: ArrowUp→'up', Escape→'esc', ' '→'space'
 });
 
-// IP address detection
-const publicIP = await getIPAddress();                   // '203.0.113.45' (default)
-const localIPs = await getIPAddress({ type: 'local' });  // ['192.168.1.100', '10.0.0.5']
-const allIPs = await getIPAddress({ type: 'all' });      // ['192.168.1.100', '10.0.0.5', '203.0.113.45']
+// Run when browser is idle (falls back to setTimeout on Safari)
+idleCallback(() => performNonCriticalTask());
+
+// Fetch helpers
+const html = await getText('/api/content');
+const data = await getJSON('/api/data');
 ```
 
-### Async Operations
+### IP Address Detection
 ```javascript
-import { idleCallback, getText, getJSON } from '@semantic-ui/utils';
+import { getIPAddress } from '@semantic-ui/utils';
 
-// Run when browser is idle
-idleCallback(() => {
-  performNonCriticalTask();
-});
-
-// Fetch utilities
-const htmlContent = await getText('/api/content');
-const apiData = await getJSON('/api/data');
+const publicIP = await getIPAddress();                    // '203.0.113.45' (string)
+const localIPs = await getIPAddress({ type: 'local' });   // ['192.168.1.100'] (array)
+const allIPs = await getIPAddress({ type: 'all' });        // [...local, ...public] (array)
 ```
 
 ---
 
 ## Date Formatting (dates.js)
 
-### Internationalized Date Formatting
 ```javascript
 import { formatDate } from '@semantic-ui/utils';
 
 const date = new Date('2023-12-25T15:30:00');
 
-// Basic formatting
-formatDate(date, 'YYYY-MM-DD');                    // '2023-12-25'
-formatDate(date, 'MMM DD, YYYY');                  // 'Dec 25, 2023'
-formatDate(date, 'HH:mm:ss');                      // '15:30:00'
+// Preset formats (moment.js-style shortcuts)
+formatDate(date, 'LLL');              // 'December 25, 2023 3:30 PM' (default)
+formatDate(date, 'L');                // '12/25/2023'
+formatDate(date, 'LL');               // 'December 25, 2023'
+formatDate(date, 'LT');              // '3:30 PM'
 
-// With locale and timezone
-formatDate(date, 'MMMM DD, YYYY', {
-  locale: 'fr-FR',                                  // French locale
-  timezone: 'Europe/Paris'                          // Paris timezone
-});
-// 'décembre 25, 2023'
+// Custom format tokens
+formatDate(date, 'YYYY-MM-DD');       // '2023-12-25'
+formatDate(date, 'MMM DD, YYYY');     // 'Dec 25, 2023'
+formatDate(date, 'h:mm a');           // '3:30 pm'
+formatDate(date, 'dddd, MMMM D');     // 'Monday, December 25'
 
-// Relative formatting
-formatDate(date, 'relative');                      // 'in 2 days' or '2 days ago'
+// Locale and timezone (default timezone is 'UTC')
+formatDate(date, 'MMMM DD, YYYY', { locale: 'fr-FR', timezone: 'Europe/Paris' });
+formatDate(date, 'LT', { timezone: 'local' });   // use browser's local timezone
+formatDate(date, 'LT', { timezone: 'PT' });       // shorthand timezone aliases supported
 ```
+
+**Available tokens:** `YYYY`, `YY`, `MMMM`, `MMM`, `MM`, `M`, `DD`, `D`, `Do`, `dddd`, `ddd`, `HH`, `hh`, `h`, `mm`, `ss`, `a`
+
+**Preset formats:** `LT`, `LTS`, `L`, `l`, `LL`, `ll`, `LLL`, `lll`, `LLLL`, `llll`
 
 ---
 
 ## Number Utilities (numbers.js)
 
-### Number Processing
 ```javascript
 import { roundNumber, roundDecimal } from '@semantic-ui/utils';
 
-// Number rounding
-roundNumber(3.14159, 2);                           // 3.14
-roundDecimal(123.456, 1);                          // 123.5
+// roundNumber — rounds to N significant digits
+roundNumber(3.14159, 2);              // 3.1
+roundNumber(0.001234, 3);             // 0.00123
+
+// roundDecimal — rounds to N decimal places
+roundDecimal(3.14159, 2);             // 3.14
+roundDecimal(123.456, 1);             // 123.5
+```
+
+---
+
+## Color Utilities (colors.js)
+
+```javascript
+import { oklchToRgb, oklchToHex } from '@semantic-ui/utils';
+
+oklchToRgb('oklch(0.7 0.15 180)');    // { r: 0, g: 181, b: 155 }
+oklchToHex('oklch(0.7 0.15 180)');    // '#00b59b'
+oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 ```
 
 ---
 
 ## Crypto and Hashing (crypto.js)
 
-### ID Generation and Hashing
 ```javascript
-import { generateID, hashCode, prettifyHash, getRandomSeed, tokenize } from '@semantic-ui/utils';
+import { hashCode, prettifyHash, generateID, getRandomSeed, tokenize } from '@semantic-ui/utils';
 
-// Generate unique IDs
-const uniqueId = generateID();                      // 'A7B3X9'
-const seededId = generateID(12345);                 // '00009IX' (reproducible)
+// UMASH-based string hashing
+hashCode('input string');                          // 3421556088 (numeric)
+hashCode('input', { prettify: true });             // 'XXXXXX' (alphanumeric)
+hashCode('input', { seed: 0xABCD });               // seeded hash
 
-// Get cryptographically secure random seed
-const seed = getRandomSeed();                      // 2949673445
+// Numeric hash to alphanumeric string
+prettifyHash(123456);                               // '002N9C'
+prettifyHash(123, { minLength: 8, padChar: 'X' });  // 'XXXXXX3F'
 
-// String hashing using UMASH algorithm
-const hash = hashCode('input string');              // 3421556088
-const prettyHash = hashCode('input', { prettify: true }); // '2A8KG8'
+// ID generation
+generateID();                                       // 'A7B3X9' (random)
+generateID(12345);                                  // '00009IX' (reproducible from seed)
+getRandomSeed();                                    // cryptographically random uint32
 
-// Convert numeric hash to alphanumeric
-const pretty = prettifyHash(123456);                // '000U9C'
-const customPretty = prettifyHash(123, {
-  minLength: 8,
-  padChar: 'X'
-});                                                 // 'XXXXXX3F'
-
-// Create URL-friendly tokens
-const token = tokenize('Hello World!');             // 'hello-world'
+// URL-friendly slug
+tokenize('Hello World!');                           // 'hello-world'
 ```
 
 ---
 
 ## Equality and Cloning (equality.js, cloning.js)
 
-### Deep Comparison and Cloning
 ```javascript
 import { isEqual, clone } from '@semantic-ui/utils';
 
-const obj1 = { a: 1, b: { c: 2, d: [3, 4] } };
-const obj2 = { a: 1, b: { c: 2, d: [3, 4] } };
+// Deep equality (handles arrays, objects, Maps, Sets, RegExp, Date, TypedArrays)
+isEqual({ a: [1, 2] }, { a: [1, 2] });             // true
+isEqual(new Set([1, 2]), new Set([1, 2]));          // true
 
-// Deep equality
-isEqual(obj1, obj2);                                // true
+// Deep clone (handles Date, RegExp, Array, Map, Set, DOM nodes, plain objects)
+const cloned = clone(obj);
+clone(obj, { preserveDOM: true });                  // keep DOM node references
+clone(obj, { preserveNonCloneable: true });         // keep class instance references
+```
 
-// Deep cloning
-const cloned = clone(obj1);
-cloned.b.c = 99;
-console.log(obj1.b.c);                             // 2 (original unchanged)
+---
+
+## Iteration Utilities (loops.js)
+
+### each — Universal Iterator
+```javascript
+import { each } from '@semantic-ui/utils';
+
+// Works on arrays, objects, Maps, Sets, and iterables
+each([1, 2, 3], (value, index) => { ... });
+each({ a: 1 }, (value, key) => { ... });
+each(new Map([['k', 'v']]), (value, key) => { ... });
+each(new Set([1, 2]), (value, index) => { ... });
+
+// Return false to break early
+each([1, 2, 3, 4], (value) => {
+  if (value === 3) return false;  // stops
+});
+```
+
+### Async Iteration
+```javascript
+import { asyncEach, asyncMap } from '@semantic-ui/utils';
+
+// Sequential async iteration (same collection support as each)
+await asyncEach([1, 2, 3], async (value) => { ... });
+await asyncEach(new Map([['a', 1]]), async (value, key) => { ... });
+
+// Async mapping — return type matches input type
+await asyncMap([1, 2, 3], async (x) => x * 2);                        // [2, 4, 6]
+await asyncMap(new Map([['a', 1]]), async (v, k) => v * 10);          // Map([['a', 10]])
+await asyncMap({ a: 1, b: 2 }, async (v, k) => v + 1);               // { a: 2, b: 3 }
 ```
 
 ---
 
 ## Debug Utilities (debug.js)
 
-### Logging and Error Management
 ```javascript
 import { log, fatal } from '@semantic-ui/utils';
 
-// Flexible logging with levels and formatting
-log('Application started', 'info');                     // Basic info log
-log('User action', 'debug', {                           // Debug with namespace
-  namespace: 'UserService',
-  data: [{ action: 'login', userId: 123 }]
-});
+// Styled console logging
+log('App started');                                     // console.log
+log('User action', 'debug', { namespace: 'UserService' });
+log('Warning', 'warn', { timestamp: true, title: 'SYSTEM', titleColor: '#FF6B35' });
 
-// JSON format for structured logging
-log('API response', 'info', {                           // Structured output
-  format: 'json',
-  namespace: 'ApiClient',
-  timestamp: true,
-  data: [{ status: 200, endpoint: '/api/users' }]
-});
+// JSON format for structured output
+log('API response', 'info', { format: 'json', namespace: 'API', timestamp: true });
 
-// Custom styling and colors
-log('Important notice', 'warn', {                       // Custom title styling
-  title: 'SYSTEM',
-  titleColor: '#FF6B35',
-  timestamp: true
-});
-
-// Fatal error handling with metadata
-fatal('Critical system error', {                        // Async error throwing
+// Async fatal error (thrown via queueMicrotask)
+fatal('Critical error', {
   errorType: TypeError,
-  metadata: { code: 'SYS_ERROR' }
+  metadata: { code: 'SYS_ERROR' },
+  removeStackLines: 1,
 });
-```
-
----
-
-## Iteration Utilities (looping.js)
-
-### Enhanced Iteration
-```javascript
-import { each, asyncEach, asyncMap } from '@semantic-ui/utils';
-
-// Array iteration
-each([1, 2, 3], (value, index) => {
-  console.log(`Item ${index}: ${value}`);
-});
-
-// Object iteration
-each({ a: 1, b: 2 }, (value, key) => {
-  console.log(`${key}: ${value}`);
-});
-
-// Set iteration (index is 0-based counter)
-each(new Set(['apple', 'banana']), (value, index) => {
-  console.log(`Set item ${index}: ${value}`);
-});
-
-// Map iteration (preserves key types)
-each(new Map([['key1', 'val1'], [2, 'val2']]), (value, key) => {
-  console.log(`${key}: ${value}`);  // key1: val1, 2: val2
-});
-
-// Breaking iteration early
-each([1, 2, 3, 4], (value) => {
-  if (value === 3) return false;  // stops iteration
-});
-
-// Async iterations with Set/Map support
-await asyncEach(new Set([1, 2, 3]), async (value) => {
-  await processAsync(value);
-});
-
-await asyncEach(new Map([['a', 1], ['b', 2]]), async (value, key) => {
-  await updateEntry(key, value);
-});
-
-// Async mapping - arrays return arrays
-const results = await asyncMap([1, 2, 3], async (x) => x * 2);      // [2, 4, 6]
-
-// Async Set mapping - returns array
-const setResults = await asyncMap(new Set([1, 2, 3]), async (x) => x * 2); // [2, 4, 6]
-
-// Async Map mapping - returns new Map with same keys
-const mapResults = await asyncMap(
-  new Map([['a', 1], ['b', 2]]),
-  async (value, key) => value * 10
-);                                                                   // Map([['a', 10], ['b', 20]])
 ```
 
 ---
 
 ## RegExp Utilities (regexp.js)
 
-### Text Escaping
 ```javascript
 import { escapeRegExp } from '@semantic-ui/utils';
 
-// RegExp escaping for safe pattern matching
-const userInput = 'Hello (world)';
-const pattern = new RegExp(escapeRegExp(userInput), 'i');
+const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 ```
 
 ---
 
-## Integration Patterns
+## Quick Reference
 
-### With Other Semantic UI Packages
-```javascript
-// Utils with Reactivity
-import { Signal } from '@semantic-ui/reactivity';
-import { debounce, throttle, memoize } from '@semantic-ui/utils';
+### Arrays (arrays.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `unique` | `(arr)` | New array without duplicates |
+| `filterEmpty` | `(arr)` | New array without falsy values |
+| `first` | `(arr, n=1)` | First element, or first N as array |
+| `last` | `(arr, n=1)` | Last element, or last N as array |
+| `firstMatch` | `(arr, cbOrVal)` | First matching element |
+| `findIndex` | `(arr, cbOrVal)` | Index of first match, or -1 |
+| `remove` | `(arr, cbOrVal)` | Count removed (mutates array) |
+| `inArray` | `(value, arr)` | Boolean |
+| `range` | `(start, stop?, step=1)` | Numeric array |
+| `sum` | `(arr)` | Number |
+| `where` | `(arr, propsObj)` | Filtered array matching all props |
+| `flatten` | `(arr)` | Deep-flattened array |
+| `some` / `any` | `(collection, pred)` | Boolean |
+| `sortBy` | `(arr, key\|keys, comparator?)` | New sorted array |
+| `groupBy` | `(arr, prop)` | Object of grouped arrays |
+| `moveItem` | `(arr, cbOrVal, index)` | Mutated array |
+| `moveToFront` | `(arr, cbOrVal)` | Mutated array |
+| `moveToBack` | `(arr, cbOrVal)` | Mutated array |
+| `intersection` | `(...arrays)` | Common elements |
+| `difference` | `(...arrays)` | In first, not in others |
+| `uniqueItems` | `(...arrays)` | Elements unique to one array |
 
-const searchQuery = new Signal('');
-const debouncedSearch = debounce(async (query) => {
-  const results = await performSearch(query);
-  return results;
-}, 300, { maxWait: 1000 });
+### Objects (objects.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `get` | `(obj, dotPath)` | Nested value or undefined |
+| `keys` | `(obj)` | `Object.keys` or undefined |
+| `values` | `(obj)` | `Object.values` or undefined |
+| `hasProperty` | `(obj, prop)` | Own property check (shallow) |
+| `extend` | `(obj, ...sources)` | Merged object (mutates target) |
+| `deepExtend` | `(target, ...sources, opts?)` | Deep merged (mutates target) |
+| `pick` | `(obj, ...keys)` | New object with selected keys |
+| `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
+| `filterObject` | `(obj, fn(val,key))` | Filtered object |
+| `mapObject` | `(obj, fn(val,key))` | Transformed object |
+| `arrayFromObject` | `(obj)` | `[{key, value}, ...]` |
+| `reverseKeys` | `(obj)` | Inverted lookup object |
+| `proxyObject` | `(getterFn, refObj)` | Read-through Proxy |
+| `weightedObjectSearch` | `(query, arr, opts)` | Relevance-sorted array |
 
-// Throttled reactive updates
-const scrollPosition = new Signal(0);
-const throttledScroll = throttle((position) => {
-  scrollPosition.value = position;
-}, 16); // ~60fps
+### Types (types.js + environment.js)
+| Function | Notes |
+|----------|-------|
+| `isObject` | Any non-null object (includes arrays) |
+| `isPlainObject` | Object literals only |
+| `isArray`, `isString`, `isNumber`, `isBoolean`, `isFunction` | Standard checks |
+| `isBinary` | TypedArrays and ArrayBuffer |
+| `isEmpty` | null, undefined, empty string/array, object with only nullish values |
+| `isPromise` | Has `.then` method |
+| `isDOM` | Element, Document, window, DocumentFragment |
+| `isNode` | Has `nodeType` |
+| `isClassInstance` | Excludes built-in types |
+| `isIterable` | Has `Symbol.iterator` |
+| `isMap`, `isSet` | `instanceof` checks |
+| `isArguments` | Arguments object |
+| `isServer`, `isClient`, `isDevelopment`, `isCI` | **Boolean constants** (no parens) |
 
-// Utils with Query
-import { $ } from '@semantic-ui/query';
-import { formatDate, copyText } from '@semantic-ui/utils';
-
-$('.date').text(formatDate(new Date(), 'MMM DD, YYYY'));
-$('.copy-btn').on('click', () => copyText($('.content').text()));
-```
-
-### Standalone Usage
-```javascript
-// Complete utility toolkit for any project
-import {
-  sortBy, groupBy, where,           // Array processing
-  get, set, extend,                 // Object manipulation
-  isObject, isArray, isEmpty,       // Type checking
-  formatDate, formatNumber,         // Formatting
-  debounce, throttle, memoize,     // Function utilities
-  oklchToHex                       // Color conversion
-} from '@semantic-ui/utils';
-
-// Build complex data processing pipelines
-const processUserData = (users) => {
-  return sortBy(
-    where(users, 'active', true),   // Filter active users
-    'lastLoginDate'                 // Sort by last login
-  ).map(user => ({
-    ...user,
-    displayName: get(user, 'profile.displayName', user.email),
-    lastLogin: formatDate(user.lastLoginDate, 'MMM DD, YYYY')
-  }));
-};
-```
-
----
-
-## Key Principles
-
-1. **Framework Agnostic**: All utilities work in any JavaScript environment
-2. **Performance Optimized**: Algorithms adapt to data size and type
-3. **Type Safe**: Comprehensive type checking and validation
-4. **Modern Standards**: Uses ES6+ features and modern APIs
-5. **Tree Shakeable**: Import only what you need
-6. **Error Resilient**: Graceful handling of edge cases
-7. **Cross-Platform**: Works in browser, Node.js, and other environments
+### Functions (functions.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `noop` | `(v)` | `v` (identity function) |
+| `wrapFunction` | `(x)` | `x` if function, else `() => x` |
+| `memoize` | `(fn, hashFn?)` | Memoized function |
+| `wait` | `(ms, opts?)` | Promise |
+| `debounce` | `(fn, ms, opts?)` | Debounced fn with `.cancel()/.flush()/.pending()` |
+| `throttle` | `(fn, ms, opts?)` | Throttled fn with `.cancel()/.flush()/.pending()` |
 
 ---
 
@@ -846,5 +746,5 @@ const processUserData = (users) => {
 | Skill | Command | Use when... |
 |-------|---------|-------------|
 | **Reactive State** | `sui:reactive-state` | Using signals and reactions alongside utility functions |
-| **Architecture Overview** | `sui:architecture-overview` | Understanding how utils fits into the SUI framework |
 | **Query & Behaviors** | `sui:query-behaviors` | DOM queries and events that complement utility functions |
+| **Mental Model** | `sui:mental-model` | Understanding how utils fits into the SUI framework |
