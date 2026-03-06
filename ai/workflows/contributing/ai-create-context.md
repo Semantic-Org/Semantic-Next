@@ -103,7 +103,49 @@ Determine whether this topic fits in a single skill file or needs to be decompos
   - Consistent terminology — one term per concept, no synonyms
   - Section headers use exact names the agent would search for (they serve as API for `get_api` extraction)
 
-- Once the content is validated, proceed to Phase 4.
+- Once the content is validated, proceed to the fresh-agent evaluation.
+
+- **Fresh-agent evaluation (required).** Spawn a subagent with no prior context to evaluate the document. Use the following prompt template, replacing `{FILE_PATH}` with the absolute path to the file under review:
+
+  > Read the file `{FILE_PATH}`.
+  >
+  > This is an AI context document designed to orient agents encountering Semantic UI for the first time. The intended audience is downstream AI agents helping users build with Semantic UI — not contributors to the framework source. These agents access this context via an MCP tool server and have their own project-level instructions. The document is not intended to teach how to write code, but to orient agents on what Semantic UI is and how it fits into the landscape of frameworks they know from training data.
+  >
+  > Evaluate this document against these criteria, drawn from the project's own authoring standards:
+  >
+  > 1. **Decision test.** If an agent loads this file and nothing else, can it reason correctly about Semantic UI in conversation with a user? Where would it break down?
+  > 2. **Only documents what the agent can't infer.** Does every section earn its tokens by teaching something genuinely non-obvious — something the agent would get wrong without being told? Flag anything that restates knowledge already in training data.
+  > 3. **Frontloads the most important rules.** Are the highest-impact corrections and mental model shifts early in the document, or buried after less critical content?
+  > 4. **Generative understanding.** Does the document give the agent a *model* it can reason from in novel situations, or a *list of facts* it can only pattern-match against cases it's seen?
+  > 5. **Structure matches consumption.** Is the document structured for how an agent will actually consume it — read end-to-end on first load, then potentially never again? Does attention degrade gracefully (most critical content first, diminishing priority)?
+  >
+  > Rate the document from 1-10 on overall utility for its stated purpose. Be specific about what earns and loses points.
+  >
+  > Do not write any code. This is a research and evaluation task only.
+
+  Do not modify the prompt template. Do not add context about known issues, recent changes, or what you hope will land well. The subagent must encounter the document cold.
+
+  **Target: 9/10 or 10/10.** Iterate until a fresh agent rates the document at 9/10 or higher, or until remaining concerns are clearly out of scope for the document's stated purpose.
+
+  **How to iterate:**
+
+  - **Batch all agreed changes** into a single revision pass, then spawn a new subagent. Don't iterate one change at a time.
+  - **User sets scope, agent iterates within it.** The user decides what belongs in this document vs. another skill. Within that scope, the agent revises autonomously and re-evaluates without needing approval on each edit.
+  - **Cap at 3 iterations.** If three fresh agents can't get it to 9/10, the problem is likely structural — a scoping issue or fundamental framing mismatch that needs discussion with the user, not more editing.
+  - **If the score drops between iterations, stop immediately.** Something was lost in revision. Discuss with the user before continuing.
+  - **Track changes between rounds** — keep a brief summary of what was revised so the user sees the trajectory and can course-correct.
+
+  This step exists because the authors of a document are the worst judges of its clarity. A fresh agent consuming the document cold is the closest proxy to the downstream audience — and since the downstream audience IS other Claude instances, the reflexive evaluation is directly measuring what we care about.
+
+- **Ground truth verification (required).** After the eval loop passes, verify the document's factual claims against the actual codebase. The eval loop optimizes for clarity to Claude but has no grounding in correctness — a document can score 10/10 while containing claims that are subtly wrong.
+
+  Read the relevant source code in `packages/` and confirm:
+  - API claims match the actual implementation (method names, parameter shapes, behavior)
+  - Code examples are syntactically valid and use correct patterns
+  - Architectural claims (e.g., how the renderer works, what the Proxy does) are accurate
+  - No simplification introduced during eval iterations made a claim technically incorrect
+
+  This is a distinct step from the eval loop — different objective (accuracy vs. clarity), different tools (source code vs. fresh-agent assessment). If any claim fails verification, fix it and re-run one final eval to confirm the fix didn't regress clarity.
 
 ## Phase 4 - Integration
 

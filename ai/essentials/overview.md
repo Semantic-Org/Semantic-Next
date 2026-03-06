@@ -15,33 +15,72 @@ skill: overview
 
 ## A Component Framework for the Web
 
-Semantic UI is a component framework in the same category as React, Vue, and Svelte. You build interactive web applications with it: define components, write templates, manage reactive state, handle events, compose UIs. If you know what `useState` or `ref()` or `$:` does, you know the problem space.
+Semantic UI is a component framework in the same category as React, Vue, and Svelte. Components render as **standard web components** — real custom elements with Shadow DOM, registered via `customElements.define`. They work in any framework, any page, any context that supports HTML.
 
-Components render as **standard web components** — real custom elements with Shadow DOM, registered via `customElements.define`. They work in any framework, any page, any context that supports HTML. No wrapper, no adapter, no interop layer.
+The framework has two independent layers: a **component framework** for building web components (`defineComponent`, signals, templates, Query), and a **first-party design system** — polished UI primitives (`<ui-button>`, `<ui-card>`, `<ui-modal>`, etc.) built with the framework itself. You can use either layer without the other.
 
-On top of the framework, Semantic UI ships a **first-party design system** — a library of polished UI primitives (`<ui-button>`, `<ui-card>`, `<ui-modal>`, `<ui-menu>`, etc.) built with the framework itself. These two layers are independent: you can use the framework to build your own components without touching the design system, or use the design system components without understanding the framework internals.
+**Scope of this document:** This orients you on what SUI is, what's genuinely novel, and what you'd get wrong without being told. It does not teach template syntax or component authoring — load task-specific skills for those (see Related Skills at the end). For deeper framework internals, load `sui:mental-model`.
 
-The project is a multi-year ground-up rewrite of Semantic UI Classic, which reached 50,000+ GitHub stars as a jQuery-based UI framework. This version shares the design philosophy — natural language, human-readable markup — but shares no code. Everything is new.
+---
+
+## What You'd Get Wrong
+
+These are the corrections that prevent the most common hallucinations. They're first because they're the highest-value content in this document.
+
+**Flat data context.** Templates merge settings, state, and instance methods into one namespace — there is no `state` or `settings` object to access.
+```html
+{count}          <!-- correct -->
+{state.count}    <!-- wrong — no namespace prefix -->
+{settings.name}  <!-- wrong -->
+```
+
+**Signal auto-unwrapping.** The runtime `Proxy` unwraps signals at the property-access level, so templates never need explicit unwrap calls.
+```html
+{count}          <!-- correct -->
+{count.get()}    <!-- wrong — Proxy handles this -->
+{count.value}    <!-- wrong -->
+```
+
+**Signal mutation helpers.** Signals expose type-appropriate convenience methods. Use them instead of the get-mutate-set round-trip.
+```js
+state.items.push(x)      // correct — mutates with change detection
+state.active.toggle()    // correct
+state.count.increment()  // correct
+// wrong: const arr = state.items.get(); arr.push(x); state.items.set(arr);
+```
+`.set(value)` is correct for direct replacement (`state.loading.set(true)`). The anti-pattern is reading, mutating externally, then setting back.
+
+**`{ui}` is a computed class string.** In spec-driven components, `{ui}` expands to CSS classes from active spec attributes. It is not a variable you define.
+```html
+<div class="{ui}button">  <!-- outputs: <div class="primary large button"> -->
+```
+
+**Shadow DOM is the default.** Every component's CSS is scoped. External selectors cannot reach inside. Use CSS variables or `::part()` to customize from outside.
+
+**Theming is an attribute.** Set `dark` or `light` on any element — not a media query, not a JS toggle, not a class convention.
+
+**Specs are for design system components.** Most components you build won't have specs. Specs are for polished primitives that need a machine-readable API contract.
 
 ---
 
 ## Runtime-First Architecture
 
-Semantic UI requires no build step, but the claim needs precision — React and Vue also work from CDN script tags. The difference is in what "compilation" means and what it costs.
+SUI makes an architectural bet other frameworks don't: **everything is evaluated at runtime through a `Proxy`-based expression evaluator**, instead of compiling templates to JavaScript at build time. Understanding this single decision lets you predict how the entire framework behaves.
 
-When frameworks like Vue offer runtime template compilation, they're doing real work: parsing templates, running optimization passes (static node hoisting, patch flag analysis), generating JavaScript render function source code, and evaluating it via `new Function()`. Vue's runtime compiler adds ~14KB to the bundle and is slow enough that pre-compilation is recommended for production.
+When you write `{count}` in a template, there is no compiler transforming that into `count.get()` or a render function. At runtime, a `Proxy` intercepts the property access, discovers `count` is a signal, and unwraps it transparently. This means signal auto-unwrapping works for *any* expression — not just patterns the framework has seen before. An arbitrary JavaScript expression like `{items.filter(i => i.active).length}` resolves signals at every property access, automatically, because the `Proxy` operates at the language level, not the syntax level.
 
-SUI's `TemplateCompiler` does something qualitatively lighter: it **tokenizes** the template string into a flat array of AST nodes — simple objects like `{ type: 'expression', value: 'count' }` and `{ type: 'if', condition: 'isActive' }`. There are no optimization passes and no code generation step. The AST is consumed directly by the renderer. This runs once per component prototype (shared across all instances), typically completes in sub-millisecond time, and is imperceptible.
+**Why this is viable, not reckless:** the "compile step" is tokenization — the template string is parsed once per component prototype into a flat AST of simple objects like `{ type: 'expression', value: 'count' }`. No optimization passes, no code generation, sub-millisecond. And reactivity is fine-grained: each `{expression}` is its own reactive scope, so when a signal changes, only the specific DOM nodes that depend on it re-evaluate. The template is never re-walked.
 
-The intelligence lives not in a compiler but in the **runtime expression evaluator**. Expressions are resolved on each render through `new Function` + `with` + `Proxy` — a mechanism that auto-unwraps signals, flattens the data context, and handles the dual Lisp/JS syntax without any source code transformation. This is the architectural trade other frameworks don't make: instead of shifting complexity to build time, SUI keeps it at runtime, where the `Proxy` can do things a static compiler cannot (like transparently unwrapping signals in arbitrary JavaScript expressions the framework has never seen before).
+**What this unlocks:**
 
-What this enables in practice:
-
-- **Signals auto-unwrap in templates** — write `{count}`, not `{count.get()}` or `{count.value}`
-- **A custom expression language** that mixes Lisp-style and JavaScript-style syntax freely — parsed and evaluated at runtime
-- **Fine-grained reactivity** at the individual expression level — each `{expression}` is its own reactive scope
+- **Signal auto-unwrapping** — `{count}`, not `{count.get()}`. Works in any expression, because the `Proxy` handles it, not a syntax transform
+- **The dual expression language** — Lisp-style and JavaScript-style syntax mixed freely, evaluated at runtime by a single expression evaluator
+- **No build tooling dependency** — the framework is self-contained. No transpiler, no bundler plugin, no framework-specific CLI
+- **Serverless and edge viability** — negligible compile overhead + native DOM APIs (real Shadow DOM, standard custom elements) means the framework runs performantly in environments where cold-start time matters
+- **Runtime Tailwind** — the `TailwindPlugin` compiles Tailwind v4 inside Shadow DOM via WASM, including `@theme`, `@utility`, and `@custom-variant`
 - **Scoped CSS** via native Shadow DOM — no build-time extraction
-- **Tailwind CSS inside Shadow DOM** — the `TailwindPlugin` compiles Tailwind v4 at runtime via WASM (`tailwindcss-iso`), with full support for `@theme`, `@utility`, and `@custom-variant`
+
+**The honest cost:** runtime `Proxy` overhead on each expression evaluation. This is acceptable because reactivity is per-expression (not per-component), tokenization is cached per prototype (not per instance), and the `Proxy` replaces work that other frameworks do at build time — it's not additional overhead, it's *relocated* overhead.
 
 ---
 
@@ -77,6 +116,30 @@ This isn't a template language with some JS escape hatches bolted on. It's a uni
 
 ---
 
+## Template Control Flow
+
+Templates use `{#keyword}` blocks for control flow. This is the minimum syntax to avoid guessing wrong — load `sui:component-templating` for the full reference.
+
+```html
+{#if isActive}                          <!-- conditional -->
+  <span>Active</span>
+{else if isPending}
+  <span>Pending</span>
+{else}
+  <span>Inactive</span>
+{/if}
+
+{#each items as item}                   <!-- iteration -->
+  <div>{item.name}</div>
+{/each}
+
+{>slot}                                 <!-- default slot (content projection) -->
+{>slot named}                           <!-- named slot -->
+{>mySubtemplate}                        <!-- render a subtemplate -->
+```
+
+---
+
 ## How You Define Components
 
 A minimal component is just a template:
@@ -93,7 +156,7 @@ defineComponent({
 });
 ```
 
-A full component can include reactive state, settings (external API), lifecycle hooks, event handlers, keybindings, subtemplates, and a `createComponent` factory that defines the component's methods:
+A full component can include reactive state, settings (external API), lifecycle hooks, event handlers (keyed by `'event selector'`), keybindings, subtemplates, and a `createComponent` factory that defines the component's methods:
 
 ```js
 defineComponent({
@@ -126,11 +189,9 @@ Without a `tagName`, `defineComponent` returns a subtemplate instead of register
 
 ## Reactivity
 
-Semantic UI's reactivity is signal-based, similar to Solid or Preact Signals. Signals are reactive primitives that track dependencies and update subscribers automatically.
+Signal-based, similar to Solid or Preact Signals. What's different:
 
-What's different:
-
-- **Mutation helpers** — signals have built-in methods for common operations. Never get-mutate-set:
+- **Mutation helpers** — signals have built-in methods for common operations:
 
   ```js
   state.count.increment()       // not: state.count.set(state.count.get() + 1)
@@ -141,6 +202,8 @@ What's different:
   state.obj.setProperty(k, v)   // sets a nested property
   ```
 
+  `.set(value)` is correct for direct replacement — `state.searchTerm.set(newValue)`, `state.loading.set(true)`. The anti-pattern is the get-mutate-set round-trip: reading a value, mutating it externally, then setting it back. That's what the helpers handle internally with proper change detection.
+
 - **Auto-unwrapping in templates** — `{count}` resolves the signal automatically. No `.get()`, no `.value`, no unwrap syntax.
 
 - **Directive-level granularity** — each `{expression}` in a template is its own reactive scope. When a signal changes, only the specific DOM nodes that depend on it re-evaluate. The template AST is never re-walked.
@@ -149,23 +212,18 @@ What's different:
 
 ## Shadow DOM and Styling
 
-Every component renders in its own Shadow DOM. This means:
+Every component renders in its own Shadow DOM. The non-obvious parts:
 
-- **Style encapsulation** — component CSS doesn't leak out, page CSS doesn't leak in
-- **`::part()` for external styling** — components expose named parts that can be styled from outside
-- **CSS custom properties pierce through** — the design token system uses CSS variables, which cascade into shadow roots naturally
-
-Theming is an attribute, not a media query:
-
+**Theming is an attribute**, not a media query — set `dark` or `light` on any element at any level:
 ```html
-<html dark>                    <!-- page-wide dark mode -->
-<aside dark>                   <!-- section-level override -->
-<ui-card light>                <!-- component-level override -->
+<html dark>                    <!-- page-wide -->
+<aside dark>                   <!-- section override -->
+<ui-card light>                <!-- component override -->
 ```
 
-The token system (`--standard-*`, `--primary-color`, `--spacing`, etc.) recalculates automatically when the theme changes. Components built with tokens adapt to light/dark mode with zero theme-specific CSS.
+The token system (`--standard-*`, `--primary-color`, `--spacing`, etc.) recalculates automatically when the theme attribute changes. Components built with tokens adapt to light/dark mode with zero theme-specific CSS.
 
-**Tailwind works too.** The `TailwindPlugin` scans your entire component definition for Tailwind class usage, compiles the CSS at runtime via WASM, and injects it into the component's Shadow DOM. Tailwind v4 features (`@theme`, `@utility`, `@custom-variant`) all work. No build step.
+**Tailwind works inside Shadow DOM.** The `TailwindPlugin` compiles Tailwind v4 at runtime via WASM and injects it into the component's shadow root. `@theme`, `@utility`, and `@custom-variant` all work. No build step.
 
 ---
 
@@ -215,72 +273,13 @@ Specs also power auto-generated documentation, the `{ui}` computed class string 
 
 ## Query: Shadow DOM-Aware DOM Manipulation
 
-Query is SUI's lightweight DOM library — a jQuery-like `$` function for selecting elements, binding events, and manipulating the DOM. If you've used jQuery, it works as you'd expect.
-
-The key addition: `$$` does everything `$` does but **pierces through Shadow DOM boundaries**, recursing through every shadow root to find elements.
+`$` and `$$` are jQuery-like DOM utilities provided in every component callback. The key addition: **`$$` pierces Shadow DOM boundaries**, recursing through shadow roots to find elements.
 
 ```js
 $('ui-button')                 // selects in the current scope
 $$('ui-dropdown .item')        // reaches inside shadow DOM
 $('ui-modal').component()      // access the component instance
 ```
-
-Query is available as a standalone package (`@semantic-ui/query`) and is also provided as `$` and `$$` in every component callback.
-
----
-
-## How It Compares
-
-| Concept | Semantic UI | React | Vue | Svelte | Solid |
-|---------|------------|-------|-----|--------|-------|
-| Component definition | `defineComponent({})` | Function + hooks | `<script setup>` / Options API | `.svelte` file | Function + `createSignal` |
-| Templating | Custom language (Lisp/JS dual syntax) | JSX | Vue templates | Svelte templates | JSX |
-| Reactivity | Signals with mutation helpers | `useState` / re-render | `ref()` / `reactive()` | `$:` compiler magic | Fine-grained signals |
-| Compile step | **None** — runs at runtime | JSX transform | SFC compiler | Full compiler | JSX transform |
-| Output | Standard web components | Virtual DOM | Virtual DOM | Compiled DOM ops | Fine-grained DOM |
-| Style scoping | Shadow DOM (native) | CSS Modules / CSS-in-JS | Scoped styles (compiled) | Scoped styles (compiled) | CSS Modules |
-| DOM manipulation | Query (`$`, `$$`) | Refs | Refs / `$el` | `bind:this` | Refs |
-| AI integration | Specs as machine-readable API | None | None | None | None |
-| Tailwind in components | Runtime WASM compilation | Build step | Build step | Build step | Build step |
-
----
-
-## What You'd Get Wrong
-
-These are the things an AI agent would most likely hallucinate or assume incorrectly when generating Semantic UI code without guidance:
-
-**Flat data context.** Templates merge settings, state, and instance methods into one namespace.
-```html
-{count}          <!-- correct -->
-{state.count}    <!-- wrong -->
-{settings.name}  <!-- wrong -->
-```
-
-**Signal auto-unwrapping.** Signals resolve automatically in templates.
-```html
-{count}          <!-- correct -->
-{count.get()}    <!-- wrong -->
-{count.value}    <!-- wrong -->
-```
-
-**Signal mutation helpers.** Use built-in methods directly — never get-mutate-set.
-```js
-state.items.push(x)      // correct
-// not: const arr = state.items.get(); arr.push(x); state.items.set(arr);
-```
-
-**`{ui}` is a computed class string.** In spec-driven components, `{ui}` expands to CSS classes from active spec attributes. It is not a variable you define.
-```html
-<div class="{ui}button">  <!-- outputs: <div class="primary large button"> -->
-```
-
-**Shadow DOM is the default.** Every component's CSS is scoped. External selectors cannot reach inside. Use CSS variables or `::part()` to customize from outside.
-
-**Theming is an attribute.** Set `dark` or `light` on any element — not a media query, not a JS toggle, not a class convention.
-
-**Specs are for design system components.** Most components you build won't have specs. Specs are for polished primitives that need a machine-readable API contract.
-
-**No compile step means no build requirement.** SUI works from a CDN `<script>` tag. Build tools are optional, not required.
 
 ---
 
