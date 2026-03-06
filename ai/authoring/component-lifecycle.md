@@ -4,6 +4,7 @@ description: Complete guide to component lifecycle hooks, execution order, callb
 keywords: [lifecycle, createComponent, initialize, onCreated, onRendered, onDestroyed, onThemeChanged, SSR, isClient, isServer, cleanup, attachEvent, DOM events]
 audience: authoring
 skill: component-lifecycle
+type: skill
 ---
 
 # Component Lifecycle

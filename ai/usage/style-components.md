@@ -4,6 +4,7 @@ description: Guide for customizing the appearance of SUI components from outside
 keywords: [CSS variables, ::part, shadow DOM, theming, dark mode, container queries, responsive, customization]
 audience: usage
 skill: style-components
+type: skill
 ---
 
 # Style Semantic UI Components

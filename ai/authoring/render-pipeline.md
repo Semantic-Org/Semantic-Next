@@ -4,6 +4,7 @@ description: How a template string becomes pixels. Covers the four-stage pipelin
 keywords: [render pipeline, template compiler, AST, LitRenderer, defineComponent, expression evaluation, lit directives, tagged template literals, StringScanner, reactivity, signals]
 audience: authoring
 skill: render-pipeline
+type: skill
 ---
 
 # Render Pipeline — Template String to DOM

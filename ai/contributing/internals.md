@@ -4,6 +4,7 @@ description: Internal architecture for contributors — the Template/WebComponen
 keywords: [architecture, internals, packages, template, AST, renderer, specs, CSS layers, contributing]
 audience: contributing
 skill: internals
+type: skill
 dependsOn: [mental-model]
 ---
 

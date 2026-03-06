@@ -4,6 +4,7 @@ description: Complete reference for Semantic UI template syntax — expressions,
 keywords: [template, expression, conditional, loop, each, if, async, snippet, subtemplate, slot, helper, classMap, rerender, guard, html, svg, reactivity, signal, data context]
 audience: authoring
 skill: component-templating
+type: skill
 ---
 
 # Component Template Syntax Reference

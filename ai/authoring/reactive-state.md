@@ -4,6 +4,7 @@ description: Comprehensive guide to the @semantic-ui/reactivity package — a st
 keywords: [signals, reactions, dependency tracking, state management, computed values, derived signals, reactive proxy, Signal.computed, afterFlush]
 audience: authoring
 skill: reactive-state
+type: skill
 ---
 
 # Reactivity System Guide

@@ -4,6 +4,7 @@ description: How types work in Semantic UI — hand-authored .d.ts files that sh
 keywords: [types, typescript, d.ts, declaration files, type definitions, JSDoc, generics, type guards, IDE support]
 audience: contributing
 skill: types
+type: skill
 ---
 
 # Type Declarations Guide

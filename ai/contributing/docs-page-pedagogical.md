@@ -4,6 +4,7 @@ description: How to write interactive lessons for the Semantic UI Learn section 
 keywords: [lessons, Learn REPL, interactive tutorials, challenges, code-first, pedagogical]
 audience: contributing
 skill: docs-page-pedagogical
+type: skill
 ---
 
 # Writing Lessons (Learn REPL)

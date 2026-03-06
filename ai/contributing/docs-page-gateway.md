@@ -4,6 +4,7 @@ description: Guide for writing landing and index pages that earn reader attentio
 keywords: [gateway pages, landing pages, problem-first, instability language, technical tour, convince]
 audience: contributing
 skill: docs-page-gateway
+type: skill
 ---
 
 # Writing Gateway Pages

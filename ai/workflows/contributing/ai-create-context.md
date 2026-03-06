@@ -75,7 +75,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
   keywords: [Search terms beyond title/description]
   audience: [usage | authoring | essentials | contributing | research]
   skill: [kebab-case-name]
-  type: doc
+  type: skill
   ---
   ```
 
@@ -107,9 +107,11 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 - **Fresh-agent evaluation (required).** Spawn a subagent with no prior context to evaluate the document. Use the following prompt template, replacing `{FILE_PATH}` with the absolute path to the file under review:
 
-  > Read the file `{FILE_PATH}`.
+  > Read the file `{FILE_PATH}`. **Do not read any other files.** Evaluate this document using only its own content — treat it as the sole source of truth about the framework. This simulates the downstream experience: one file lands in your context via a tool call, and you reason from it alone.
   >
-  > This is an AI context document designed to orient agents encountering Semantic UI for the first time. The intended audience is downstream AI agents helping users build with Semantic UI — not contributors to the framework source. These agents access this context via an MCP tool server and have their own project-level instructions. The document is not intended to teach how to write code, but to orient agents on what Semantic UI is and how it fits into the landscape of frameworks they know from training data.
+  > The file's YAML frontmatter contains a `description` field — this is the promise the document makes to agents who load it. The content should deliver on that promise. Judge the document against its own stated purpose, not against what you wish it covered.
+  >
+  > Context: this is an AI context document for the Semantic UI framework. The intended audience is downstream AI agents helping users build with Semantic UI — not contributors to the framework source. These agents access this context via an MCP tool server and have their own project-level instructions.
   >
   > Evaluate this document against these criteria, drawn from the project's own authoring standards:
   >
@@ -157,7 +159,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
   - **Consistency** — does this skill use the same terminology and conventions as its neighbors? Align where they diverge.
   - **Related Skills table** — ensure the table at the end accurately reflects the skills a user might need alongside this one, and that those skills reference back.
 
-- Once the skill sits cleanly alongside its neighbors, move it from `ai/{audience}/` to `ai/skills/`.
+- Once the skill sits cleanly alongside its neighbors, confirm it's in the right location.
 
 ---
 
@@ -165,12 +167,10 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 All AI content lives under `ai/` in the repo root. End users don't have this folder — they access skills exclusively through the Semantic UI MCP server or Anthropic plugin.
 
-Skills and context files live at `ai/{audience}/{skill-id}.md`, where `audience` matches the frontmatter field (`ui`, `framework`, `contributing`, `research`). Workflows follow the same pattern at `ai/workflows/{audience}/{workflow-id}.md`.
+Skills and context files live at `ai/{audience}/{skill-id}.md`, where `audience` matches the frontmatter field (`usage`, `authoring`, `essentials`, `contributing`, `research`). Workflows follow the same pattern at `ai/workflows/{audience}/{workflow-id}.md`.
 
 | Path | Purpose |
 |------|---------|
 | `ai/{audience}/{skill-id}.md` | Skills and context served via MCP |
-| `ai/workflows/{audience}/{workflow-id}.md` | Internal workflows (like this one) |
-| `ai/{audience}/` | Work-in-progress drafts (not served to users) |
-
-During authoring, draft in `ai/{audience}/`. Once finalized and reviewed, move to `ai/{audience}/`.
+| `ai/workflows/{audience}/{workflow-id}.md` | Step-by-step workflows |
+| `ai/research/skills/{skill-id}.md` | Research skills |

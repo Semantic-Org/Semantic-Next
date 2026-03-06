@@ -4,6 +4,7 @@ description: Using design tokens inside shadow DOM CSS, responding to theme chan
 keywords: [shadow DOM theming, design tokens, onThemeChanged, theme-aware CSS, dark mode components, container style queries, standard tokens, inverted tokens]
 audience: authoring
 skill: component-theming
+type: skill
 ---
 
 # Make Components Theme-Aware

@@ -4,6 +4,7 @@ description: Definition of documentation readers as early adopters, explaining t
 keywords: [target audience, early adopters, problem-first, instability language, reader expectations]
 audience: contributing
 skill: docs-target-audience
+type: skill
 ---
 
 # Target Audience for Semantic UI Documentation

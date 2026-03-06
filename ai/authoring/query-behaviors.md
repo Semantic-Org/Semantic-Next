@@ -4,6 +4,7 @@ description: Guide for extending SUI's Query system with custom plugins and beha
 keywords: [Query plugins, behaviors, mutation observer, event delegation, lifecycle, extend Query]
 audience: authoring
 skill: query-behaviors
+type: skill
 ---
 
 # Query Plugins and Behaviors
@@ -186,9 +187,9 @@ All behavior callbacks (`createBehavior`, event/mutation handlers, `onCreated`, 
   namespace,            // behavior namespace string
   attachEvent,          // bind external events with auto-cleanup
   dispatchEvent,        // dispatch auto-namespaced CustomEvent
-  dispatchGroupEvent,   // dispatch event across all elements in group
+  dispatchGroupEvent,   // dispatch event across all elements initialized in the same $().behavior() call
   abortSignal,          // AbortController for lifecycle teardown
-  cache,                // persistent cache on Query.prototype[namespace]
+  cache,                // persistent cache on Query.prototype[namespace] (shared across ALL instances of this behavior)
   data,                 // element's dataset as parsed native values
 
   // Logging
@@ -271,7 +272,7 @@ events: {
 |---------|----------|
 | *(none)* | Event delegation on `$element` |
 | `global` | Binds to the specified selector anywhere in the document |
-| `bind` | Direct binding (no delegation) on matched children |
+| `bind` | Direct binding (no delegation) on matched children — use for non-bubbling events like custom component events that don't set `composed` or `bubbles` |
 
 **Bubble mapping:** Non-bubbling events are automatically mapped to their bubbling equivalents for delegation (`blur` -> `focusout`, `focus` -> `focusin`, `mouseenter` -> `mouseover`, `mouseleave` -> `mouseout`).
 
@@ -439,7 +440,7 @@ createBehavior: ({ $el, self, settings }) => ({
 
 ### setup() Function
 
-Runs once for the entire behavior type (not per-element). Returns shared resources accessible via `self`:
+Runs once for the entire behavior type (not per-element). The return value is stored on `Query.prototype[namespace]` and persists for the lifetime of the page — it does not re-run if all instances are destroyed and new ones created. Returns shared resources accessible via `self`:
 
 ```javascript
 setup: ({ $, settings, $elements, templates }) => {
@@ -457,6 +458,18 @@ createBehavior: ({ self }) => ({
   },
 }),
 ```
+
+### Destroying a Behavior
+
+Call `destroy` via string invocation:
+
+```javascript
+$('.element').tooltip('destroy');
+// or directly
+document.querySelector('.element').tooltip.destroy();
+```
+
+This disconnects mutation observers, aborts all events via the AbortController, calls `onDestroyed()`, and deletes the instance from `element[namespace]`.
 
 ### Reinitialization
 

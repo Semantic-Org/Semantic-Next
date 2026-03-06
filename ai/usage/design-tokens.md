@@ -4,6 +4,7 @@ description: Reference for available CSS design tokens in Semantic UI. Covers si
 keywords: [CSS variables, custom properties, design tokens, colors, spacing, typography, theming, dark mode, light mode]
 audience: usage
 skill: design-tokens
+type: skill
 ---
 
 # CSS Design Tokens Reference

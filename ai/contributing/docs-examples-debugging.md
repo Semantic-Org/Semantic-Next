@@ -4,6 +4,7 @@ description: Guide for AI agents to debug documentation examples running on the 
 keywords: [debugging, chrome, devtools, mcp, examples, console, testing]
 audience: contributing
 skill: docs-examples-debugging
+type: skill
 ---
 
 # Debugging Examples with Chrome DevTools MCP

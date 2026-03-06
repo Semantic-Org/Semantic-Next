@@ -4,6 +4,7 @@ description: Event handling in Semantic UI components — the event DSL, delegat
 keywords: [events, event DSL, delegation, dispatchEvent, attachEvent, deep events, global events, bind events, custom events, event data, "@event", keys, keyboard, findParent, findChild]
 audience: authoring
 skill: component-events
+type: skill
 ---
 
 # Component Events Guide

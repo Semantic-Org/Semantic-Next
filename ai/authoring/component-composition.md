@@ -4,6 +4,7 @@ description: Three patterns for structuring parent-child web components in Seman
 keywords: [composition, parent-child, slots, items, hybrid, subtemplate, template-as-settings, findParent, findChild, pageCSS, deep events, CSS variables, slotted, coordination, panels, menu, table]
 audience: authoring
 skill: component-composition
+type: skill
 ---
 
 # Component Composition Patterns

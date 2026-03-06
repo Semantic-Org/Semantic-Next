@@ -4,6 +4,7 @@ description: Guide to the keys system in defineComponent — static key bindings
 keywords: [keys, keyboard, shortcuts, keybinding, bindKey, unbindKey, key combination, key sequence, ctrl, meta, inputFocused, repeatedKey]
 audience: authoring
 skill: component-keybindings
+type: skill
 ---
 
 # Component Keyboard Shortcuts

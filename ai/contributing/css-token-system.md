@@ -4,6 +4,7 @@ description: How Semantic UI's design token system is structured and how to exte
 keywords: [CSS tokens, design tokens, OKLCH, theming, dark mode, light mode, base-size, base-spacing, custom properties, cascade layers, color scales, sizing, spacing, typography]
 audience: contributing
 skill: css-token-system
+type: skill
 ---
 
 # CSS Token System Architecture

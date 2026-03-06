@@ -4,6 +4,7 @@ description: Structural requirements for all documentation page types, covering 
 keywords: [authoring, standards, headings, frontmatter, code blocks, examples, formatting]
 audience: contributing
 skill: docs-authoring-standards
+type: skill
 ---
 
 # Documentation Authoring Standards

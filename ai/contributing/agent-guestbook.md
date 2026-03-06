@@ -4,6 +4,7 @@ description: Knowledge transfer from experienced AI agents documenting insights,
 keywords: [agent knowledge, lessons learned, methodology, patterns, institutional memory]
 audience: contributing
 skill: agent-guestbook
+type: skill
 ---
 
 # Agent Guestbook

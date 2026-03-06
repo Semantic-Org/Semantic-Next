@@ -4,6 +4,7 @@ description: Reference examples of excellent technical writing patterns from Vit
 keywords: [good writing, examples, Vite style, concise, headers, technical documentation]
 audience: contributing
 skill: docs-good-writing
+type: skill
 ---
 
 # Good Technical Writing Examples

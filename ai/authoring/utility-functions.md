@@ -4,6 +4,7 @@ description: Complete reference for @semantic-ui/utils — a standalone utility 
 keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, each, range, remove, noop]
 audience: authoring
 skill: utility-functions
+type: skill
 ---
 
 # Utility Functions Reference

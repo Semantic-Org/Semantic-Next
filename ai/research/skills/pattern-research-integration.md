@@ -3,7 +3,8 @@ title: Pattern Research Integration
 description: How to integrate descriptive research findings into component specifications, including usage level interpretation and decision frameworks.
 keywords: [pattern research, usage levels, spec building, decision framework, component design]
 audience: contributing
-type: doc
+skill: pattern-research-integration
+type: skill
 ---
 
 # Descriptive Linguistics for UI Component Design

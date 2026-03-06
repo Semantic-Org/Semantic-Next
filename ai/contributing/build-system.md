@@ -4,6 +4,7 @@ description: Build architecture, scripts, wireit orchestration, export condition
 keywords: [build system, esbuild, wireit, CSS bundling, specs, export conditions, CDN, build-ui-deps]
 audience: contributing
 skill: build-system
+type: skill
 ---
 
 # Build System Reference

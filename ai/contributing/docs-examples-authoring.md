@@ -4,6 +4,7 @@ description: Complete reference for creating documentation examples, covering me
 keywords: [examples, metadata, playground, design tokens, component examples, code patterns, validation]
 audience: contributing
 skill: docs-examples-authoring
+type: skill
 ---
 
 # Semantic UI Examples System - Canonical Guide

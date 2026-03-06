@@ -4,7 +4,7 @@ description: How to write, organize, and run tests in the Semantic UI monorepo. 
 keywords: [testing, vitest, unit tests, DOM tests, browser tests, coverage, Reaction.flush, shadow DOM, playwright]
 audience: contributing
 skill: testing
-type: doc
+type: skill
 ---
 
 # Writing and Running Tests

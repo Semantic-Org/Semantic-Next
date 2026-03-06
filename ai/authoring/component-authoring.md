@@ -4,6 +4,7 @@ description: Practical guide to building components with defineComponent — fil
 keywords: [defineComponent, createComponent, component, self, settings, state, template, lifecycle, subtemplate, web component, tagName, shadow DOM]
 audience: authoring
 skill: component-authoring
+type: skill
 ---
 
 # Component Authoring Guide

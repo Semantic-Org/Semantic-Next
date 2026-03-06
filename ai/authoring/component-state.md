@@ -4,6 +4,7 @@ description: How to manage data in components — settings (public reactive API)
 keywords: [settings, state, signal, component props, defaultSettings, defaultState, createComponent, reactive proxy, data context, afterFlush, peek, nonreactive, self]
 audience: authoring
 skill: component-state
+type: skill
 ---
 
 # Component State Management

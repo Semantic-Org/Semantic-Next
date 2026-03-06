@@ -34,9 +34,11 @@ This context is necessary to judge whether omissions are intentional scoping dec
 
 Spawn a subagent with no prior context using the following prompt template. Replace `{FILE_PATH}` with the absolute path to the file under review.
 
-> Read the file `{FILE_PATH}`.
+> Read the file `{FILE_PATH}`. **Do not read any other files.** Evaluate this document using only its own content — treat it as the sole source of truth about the framework. This simulates the downstream experience: one file lands in your context via a tool call, and you reason from it alone.
 >
-> This is an AI context document designed to orient agents encountering Semantic UI for the first time. The intended audience is downstream AI agents helping users build with Semantic UI — not contributors to the framework source. These agents access this context via an MCP tool server and have their own project-level instructions. The document is not intended to teach how to write code, but to orient agents on what Semantic UI is and how it fits into the landscape of frameworks they know from training data.
+> The file's YAML frontmatter contains a `description` field — this is the promise the document makes to agents who load it. The content should deliver on that promise. Judge the document against its own stated purpose, not against what you wish it covered.
+>
+> Context: this is an AI context document for the Semantic UI framework. The intended audience is downstream AI agents helping users build with Semantic UI — not contributors to the framework source. These agents access this context via an MCP tool server and have their own project-level instructions.
 >
 > Evaluate this document against these criteria, drawn from the project's own authoring standards:
 >

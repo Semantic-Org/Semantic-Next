@@ -4,6 +4,7 @@ description: How Semantic UI components render on the server — Lit SSR integra
 keywords: [SSR, server-side rendering, isServer, isClient, Lit SSR, hydration, astro, server rendering, declarative shadow DOM]
 audience: authoring
 skill: component-ssr
+type: skill
 ---
 
 # Server-Side Rendering

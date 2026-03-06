@@ -4,7 +4,6 @@ description: Conceptual overview of Semantic UI for agents and developers with n
 keywords: [overview, introduction, framework, web components, signals, reactivity, templating, expression language, specs, natural language, no compile step, shadow DOM, tailwind, design system]
 audience: essentials
 skill: overview
-type: skill
 ---
 
 # What Is Semantic UI
@@ -84,7 +83,7 @@ SUI makes an architectural bet other frameworks don't: **everything is evaluated
 
 When you write `{count}` in a template, there is no compiler transforming that into `count.get()` or a render function. At runtime, a `Proxy` intercepts the property access, discovers `count` is a signal, and unwraps it transparently. This means signal auto-unwrapping works for *any* expression — not just patterns the framework has seen before. An arbitrary JavaScript expression like `{items.filter(i => i.active).length}` resolves signals at every property access, automatically, because the `Proxy` operates at the language level, not the syntax level.
 
-**Why this works in practice:** the "compile step" is tokenization — parsed once per component prototype into a flat AST, no code generation, sub-millisecond. Reactivity is per-expression (not per-component), so only the specific DOM nodes depending on a changed signal re-evaluate. Load `sui:mental-model` for the full rendering pipeline.
+**Why this works in practice:** the "compile step" is tokenization — parsed once per component prototype into a flat AST, no code generation, sub-millisecond. Reactivity is per-expression (not per-component), so only the specific DOM nodes depending on a changed signal re-evaluate. The `Proxy` overhead replaces work other frameworks do at build time — it's relocated overhead, not additional overhead. Tokenization is cached per prototype, not per instance.
 
 **What this unlocks:**
 
@@ -187,7 +186,7 @@ A full component can also include settings (external API), event handlers, keybi
   ```js
   events: {
     'click .save'({ self }) { self.save(); },
-    'input .search'({ state, value }) { state.query.set(value); },
+    'input .search'({ value }) { state.query.set(value); },
   }
   ```
 - **`createComponent`** receives the same params object and returns methods that merge into the flat template namespace:

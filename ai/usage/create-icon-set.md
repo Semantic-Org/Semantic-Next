@@ -4,6 +4,7 @@ description: Guide for creating custom icon sets for use with SUI's icon compone
 keywords: [icons, icon set, SVG, ui-icon, CSS custom properties, mask, font icons, canonical names]
 audience: usage
 skill: create-icon-set
+type: skill
 ---
 
 # Create Icon Sets for Semantic UI

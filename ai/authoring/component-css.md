@@ -4,6 +4,7 @@ description: Canonical patterns for writing CSS inside a component's shadow DOM 
 keywords: [CSS, nesting, container queries, responsive design, shadow DOM, design tokens, theming, host, custom properties, animation]
 audience: authoring
 skill: component-css
+type: skill
 ---
 
 # Component CSS Authoring

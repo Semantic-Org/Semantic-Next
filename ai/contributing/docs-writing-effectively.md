@@ -4,6 +4,7 @@ description: Framework based on McEnerney principles for writing that changes re
 keywords: [writing effectively, McEnerney, instability, problem-first, argument, reader-focused]
 audience: contributing
 skill: docs-writing-effectively
+type: skill
 ---
 
 # Writing Effectively

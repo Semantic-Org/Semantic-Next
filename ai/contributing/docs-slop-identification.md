@@ -4,6 +4,7 @@ description: Guide for identifying and removing low-quality AI-generated content
 keywords: [slop identification, AI content, quality, marketing language, hedging, removal strategy]
 audience: contributing
 skill: docs-slop-identification
+type: skill
 ---
 
 # AI Slop Identification & Removal Guide

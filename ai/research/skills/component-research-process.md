@@ -3,7 +3,8 @@ title: Component Research Process
 description: Guide to the comprehensive multi-agent research process used to inform Semantic UI component design through descriptive pattern analysis.
 keywords: [component research, pattern analysis, UI research, descriptive linguistics, specification development]
 audience: contributing
-type: doc
+skill: component-research-process
+type: skill
 ---
 
 # A Guide to Descriptive UI Component Research

@@ -4,6 +4,7 @@ description: Guide for using SUI's published web components to build websites. C
 keywords: [web components, custom elements, ui-button, ui-card, shadow DOM, attributes, slots, query, specs]
 audience: usage
 skill: use-components
+type: skill
 ---
 
 # Use Semantic UI Components

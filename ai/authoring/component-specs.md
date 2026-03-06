@@ -4,6 +4,7 @@ description: Guide to the @semantic-ui/specs package — declarative component m
 keywords: [specs, SpecReader, shared terms, component metadata, spec files, build pipeline, documentation generation, dialects, optionAttributes]
 audience: authoring
 skill: component-specs
+type: skill
 ---
 
 # Spec-Driven Component Design

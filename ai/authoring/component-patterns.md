@@ -4,6 +4,7 @@ description: Decision trees and production patterns for component communication,
 keywords: [findParent, findChild, dispatchEvent, attachEvent, $, $$, race conditions, intersection observer, cleanup, async, lazy loading, scroll, form handling, anti-patterns]
 audience: authoring
 skill: component-patterns
+type: skill
 ---
 
 # Advanced Component Patterns and Recipes

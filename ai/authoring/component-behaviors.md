@@ -4,6 +4,7 @@ description: How to use free-standing behaviors (transition, tooltip, escape, at
 keywords: [behaviors, transition, tooltip, escape, attach, registerBehavior, component integration, shadow DOM, lifecycle, onRendered]
 audience: authoring
 skill: component-behaviors
+type: skill
 ---
 
 # Using Behaviors in Components

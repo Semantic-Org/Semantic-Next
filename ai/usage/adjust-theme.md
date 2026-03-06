@@ -4,6 +4,7 @@ description: Runtime theming for SUI pages and layouts — switching light/dark 
 keywords: [dark mode, light mode, theme switching, nested themes, color overrides, container style queries, theme-invariant]
 audience: usage
 skill: adjust-theme
+type: skill
 ---
 
 # Adjust Theme in Semantic UI

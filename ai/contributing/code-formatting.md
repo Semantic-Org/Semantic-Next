@@ -4,7 +4,7 @@ description: Code formatting standards using dprint, including indentation rules
 keywords: [formatting, dprint, code style, comments, hierarchy, CSS formatting]
 audience: contributing
 skill: code-formatting
-type: doc
+type: skill
 ---
 
 # Code Formatting Guide

@@ -4,7 +4,7 @@ description: How the test infrastructure works in this monorepo — config archi
 keywords: [testing, vitest, CI, infrastructure, config, browser tests, coverage, projects]
 audience: contributing
 skill: testing-internals
-type: doc
+type: skill
 ---
 
 # Test Infrastructure Internals

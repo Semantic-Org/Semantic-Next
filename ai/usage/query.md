@@ -4,6 +4,7 @@ description: End-user guide for using SUI's Query library — selecting elements
 keywords: [query, $, $$, DOM, events, shadow DOM, component access, selectors, jQuery-like]
 audience: usage
 skill: query
+type: skill
 ---
 
 # Query DOM with Semantic UI
@@ -41,13 +42,24 @@ $('<div>Content</div>')      // Create element
 | Method | Description |
 |--------|-------------|
 | `.length` | Number of matched elements |
-| `.get(index)` | Raw DOM element at index |
+| `.count()` | Returns `.length` (useful in expressions) |
+| `.exists()` | Returns `true` if collection is non-empty |
+| `.get(index)` | Raw DOM element at index (no args = all as array) |
+| `.el()` | First raw DOM element (shorthand for `.get(0)`) |
 | `.eq(index)` | New Query with element at index |
 | `.first()`, `.last()` | First/last element as new Query |
 | `[index]` | Array-like index access |
-| `.add(selector)` | Combine with another selection |
+| `.add(selector)` | Combine with another selection (deduplicated) |
 | `.each(fn)` | Iterate: `(el, index) => {}` |
+| `.map(fn)` | Map over elements, returns array |
 | `.filter(selector\|fn)` | Reduce to matching subset |
+| `.not(selector\|fn)` | Inverse of `.filter()` — exclude matching elements |
+| `.is(selector)` | Test if any element matches selector |
+| `.slice(start, end)` | Subset of elements by index range |
+| `.clone()` | Deep clone all matched elements |
+| `.reverse()` | Reverse element order in collection |
+| `.index(selector)` | Index of element among its siblings |
+| `.indexOf(filter)` | Index of matching element within collection |
 
 ---
 
@@ -62,6 +74,7 @@ $('<div>Content</div>')      // Create element
 | `.children(selector)` | Direct children |
 | `.siblings(selector)` | Sibling elements |
 | `.next(selector)`, `.prev(selector)` | Adjacent siblings |
+| `.contains(selector)` | Test if selection contains target element (shadow DOM aware with `$$`) |
 | `.end()` | Return to previous selection in chain |
 
 ---
@@ -71,13 +84,15 @@ $('<div>Content</div>')      // Create element
 | Method | Description |
 |--------|-------------|
 | `.html()`, `.html(content)` | Get/set innerHTML |
+| `.outerHTML()`, `.outerHTML(content)` | Get/set outerHTML (includes the element itself) |
 | `.text()`, `.text(content)` | Get/set textContent |
+| `.textNode()` | Get text from direct text nodes only (not descendant elements) |
 | `.append(content)`, `.prepend(content)` | Add content inside element |
 | `.appendTo(target)`, `.prependTo(target)` | Insert self into target |
 | `.before(content)`, `.after(content)` | Insert content adjacent to element |
 | `.insertBefore(target)`, `.insertAfter(target)` | Insert self adjacent to target |
 | `.remove()` | Remove elements from DOM |
-| `.empty()` | Remove all children |
+| `.detach()` | Remove from DOM but keep the Query chain (for reinsertion) |
 
 ---
 
@@ -122,13 +137,20 @@ $('ui-input').addAttr(['required', 'readonly'])
 | `.off(event, handler)` | Remove event listener |
 | `.one(event, handler)` | One-time event listener |
 | `.onNext(event, options)` | Promise-based — await next occurrence |
-| `.trigger(event, data)` | Trigger event |
-| `.dispatchEvent(event, data, settings)` | Dispatch custom event (bubbles by default) |
+| `.trigger(event, settings)` | Trigger event — calls native handler (e.g., `el.click()`) if available, else dispatches CustomEvent |
+| `.dispatchEvent(event, data, settings)` | Dispatch CustomEvent with `event.detail` data payload (bubbles + composed by default) |
 | `.intercept(event, [selector], handler)` | Capture-phase listener (parent-first) |
+| `.click()`, `.submit()` | Shorthands for `.trigger('click')` and `.trigger('requestSubmit')` |
+| `.focus()`, `.blur()` | Focus management |
+| `.ready(handler)` | Execute handler when DOM is ready (use on `$(document)`) |
 
-Supports event delegation, multiple event types (space-separated), and `{ capture, passive }` options. `scroll` and `resize` are passive by default.
+Supports event delegation, multiple event types (space-separated), and `{ capture, passive, abortController }` options. `scroll` and `resize` are passive by default. All events default to `composed: true` (cross shadow DOM).
 
 ### Non-obvious patterns
+
+**`.trigger()` vs `.dispatchEvent()`** — `.trigger()` is for triggering native behavior (clicks, submits). `.dispatchEvent()` is for custom events with data payloads via `event.detail`. Note that `.submit()` calls `requestSubmit` under the hood, which triggers form validation (unlike native `form.submit()`).
+
+**Handler `this` context** — delegated handlers: `this` is the matched delegate target. Direct handlers: `this` is the element the listener is attached to. Same as jQuery.
 
 **Handler return values** — unlike jQuery where `return false` does both:
 
@@ -162,7 +184,7 @@ $('.form').intercept('click', '[type="submit"]', (e) => {
 
 ## Form Values
 
-`.val()`, `.val(value)` — works with SUI form components (`ui-input`, `ui-dropdown`, `ui-checkbox`, etc.) and native `<input>`, `<select>`, `<textarea>`.
+`.val()`, `.val(value)` — works with SUI form components (`ui-input`, `ui-dropdown`, `ui-checkbox`, etc.) and native `<input>`, `<select>`, `<textarea>`. `.val()` is an alias for `.value()` — both are identical.
 
 ---
 
@@ -210,7 +232,9 @@ $('.el').isInView({ all: true })        // All elements in selection visible
 
 | Method | Description |
 |--------|-------------|
-| `.width()`, `.height()` | Get dimensions |
+| `.width()`, `.height()` | Get/set dimensions |
+| `.innerWidth()`, `.innerHeight()` | Width/height including padding |
+| `.outerWidth(options)`, `.outerHeight(options)` | Width/height including padding + border (pass `{ includeMargin: true }` for margin) |
 | `.naturalWidth()`, `.naturalHeight()` | Natural dimensions (ignoring display: none) |
 | `.scrollWidth()`, `.scrollHeight()` | Total scrollable dimensions |
 | `.scrollTop(value)`, `.scrollLeft(value)` | Get/set scroll position |
@@ -263,7 +287,7 @@ $('ui-dropdown').setting('searchable', false)   // Set individual setting
 
 ### .initialize()
 
-Set complex properties before a component is fully upgraded — use when setting non-serializable values (functions, objects) around DOM insertion time:
+Set complex properties on components, deferred until DOM ready — use when setting non-serializable values (functions, objects) around DOM insertion time:
 
 ```js
 $('ui-data-table').initialize({
@@ -271,6 +295,8 @@ $('ui-data-table').initialize({
   columns: columnDefinitions,
 });
 ```
+
+`.initialize()` wraps `.settings()` in a `.ready()` callback. Use `.initialize()` when you're setting properties at page load and need to ensure the DOM is ready. Use `.settings()` when you know the component is already in the DOM.
 
 ### .component()
 
@@ -281,6 +307,8 @@ $('ui-modal').component().show();
 $('ui-modal').component().hide();
 ```
 
+> **Note:** Returns `undefined` if the element hasn't upgraded yet. There is no built-in waiting mechanism — if you need to ensure the component is ready, use `customElements.whenDefined()` or listen for the component's initialization event first.
+
 ### .dataContext()
 
 Debug a component's internal state:
@@ -289,6 +317,15 @@ Debug a component's internal state:
 const ctx = $('ui-form').dataContext();
 console.log(ctx);  // { state, settings, self, el, ... }
 ```
+
+---
+
+## Shadow DOM Slots
+
+| Method | Description |
+|--------|-------------|
+| `.getSlot(name)` | Get content projected into a named slot (or default slot) |
+| `.setSlot(name, html)` | Set content of a named slot (or default slot if one arg) |
 
 ---
 
@@ -343,15 +380,19 @@ restoreGlobals();     // Restore original $ and $$ values
 $('.selector')  $$('.selector')  $('<div>html</div>')
 
 // Collection
-.length  .get(i)  .eq(i)  .first()  .last()  .add()  .each(fn)  .filter(fn)
+.length  .count()  .exists()  .get(i)  .el()  .eq(i)  .first()  .last()
+.add()  .each(fn)  .map(fn)  .filter(fn)  .not()  .is()
+.slice()  .clone()  .reverse()  .index()  .indexOf()
 
 // Traversal
 .find()  .parent()  .closest()  .closestAll()  .children()
-.siblings()  .next()  .prev()  .end()
+.siblings()  .next()  .prev()  .contains()  .end()
 
 // Content
-.html()  .text()  .append()  .prepend()  .appendTo()  .prependTo()
-.before()  .after()  .insertBefore()  .insertAfter()  .remove()  .empty()
+.html()  .outerHTML()  .text()  .textNode()
+.append()  .prepend()  .appendTo()  .prependTo()
+.before()  .after()  .insertBefore()  .insertAfter()
+.remove()  .detach()
 
 // Attributes
 .attr()  .removeAttr()  .addAttr()  .data()  .removeData()  .prop()
@@ -362,22 +403,33 @@ $('.selector')  $$('.selector')  $('<div>html</div>')
 
 // Events
 .on()  .off()  .one()  .onNext()  .trigger()  .dispatchEvent()  .intercept()
+.click()  .submit()  .focus()  .blur()  .ready()
 
 // Forms
-.val()
+.val()  .value()
 
 // Visibility
 .show()  .hide()  .toggle()  .isVisible()  .isInView()  .naturalDisplay()
 
 // Dimensions
-.width()  .height()  .naturalWidth()  .naturalHeight()
+.width()  .height()  .innerWidth()  .innerHeight()
+.outerWidth()  .outerHeight()  .naturalWidth()  .naturalHeight()
 .scrollWidth()  .scrollHeight()  .scrollTop()  .scrollLeft()
 .position()  .pagePosition()  .dimensions()  .bounds()
-.intersects()  .scrollParent()  .clippingParent()  .positioningParent()
+.intersects()  .scrollParent()  .clippingParent()  .positioningParent()  .offsetParent()
+
+// Shadow DOM Slots
+.getSlot()  .setSlot()
 
 // Components
 .settings()  .setting()  .initialize()  .component()  .dataContext()
 ```
+
+---
+
+## Extending Query
+
+Query is extensible via plugins and behaviors. Simple plugins add methods to `$.plugin` (prototype extension). Behaviors are full-lifecycle stateful plugins with settings, events, mutations, and CSS injection. See the **Query Behaviors** skill for details.
 
 ---
 

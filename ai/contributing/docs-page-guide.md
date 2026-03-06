@@ -4,6 +4,7 @@ description: Instructions for writing instructional guide pages that teach how t
 keywords: [guide pages, instructional writing, progressive complexity, code examples, technical accuracy]
 audience: contributing
 skill: docs-page-guide
+type: skill
 ---
 
 # Writing Guide Pages

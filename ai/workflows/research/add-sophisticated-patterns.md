@@ -1,25 +1,30 @@
+---
+title: Add Sophisticated Design Patterns to Research
+description: Workflow for evaluating component research reports and identifying component-specific design innovations worth including in Semantic UI.
+keywords: [research, design patterns, component innovations, pattern analysis, sophisticated patterns]
+audience: contributing
+type: workflow
+workflow: add-sophisticated-patterns
+---
+
 # Add Sophisticated Design Patterns Section
 
-This checklist tracks which component research reports have the "Sophisticated Design Patterns" section properly filled with **component-specific** innovations (not framework-wide patterns).
+Evaluate component research reports to identify **component-specific** innovations (not framework-wide patterns) worth including in Semantic UI.
 
-## Instructions for Agents
+---
 
-### Source Materials
+## Source Materials
 
 Before adding this section to a component, read:
 
-1. **Workflow Definition**: `ai/workflows/components/research-component-patterns.md`
-   - Lines 357-383: "Sophisticated Design Patterns" section requirements
-   - Lines 339-356: "Unique Innovations (Level 5)" validation criteria
-   - Lines 264-269: "Notable Features" guidelines (what NOT to include)
-
+1. **Workflow Definition**: `ai/workflows/research/research-component-patterns.md`
 2. **Example Components**: Review these completed examples:
    - `ai/research/components/empty-state/pattern-research.md` - Good example with 2 patterns
-   - `ai/research/components/carousel/pattern-research.md` - Good example (once added)
+   - `ai/research/components/carousel/pattern-research.md` - Good example
 
-### Systematic Process
+## Systematic Process
 
-For each unchecked component:
+For each component:
 
 **Step 1: Read the Pattern Research**
 ```bash
@@ -86,15 +91,7 @@ Add to the component's `pattern-research.md` after "Unique Innovations" section:
 [Optional: 1 sentence explaining why this is component-specific]
 ```
 
-**Step 6: Update This Checklist**
-
-Mark the component as complete:
-```bash
-# In this file, change [ ] to [x] for the component
-- [x] ComponentName
-```
-
-### Quality Standards
+## Quality Standards
 
 **Good Pattern Description:**
 - Explains a specific implementation choice unique to this component
@@ -108,119 +105,16 @@ Mark the component as complete:
 - Focuses on technology choices rather than user problems solved
 - One sentence with no analysis
 
-### Common Pitfalls
+## Common Pitfalls
 
 1. **Mistaking architecture for innovation**: Multi-part composition is how Chakra works, not a Button innovation
 2. **Describing the framework, not the component**: TypeScript support is framework-wide
 3. **Listing features without sophistication**: "Has a disabled state" isn't sophisticated
 4. **No evidence of design thinking**: Must explain WHY the pattern is smart, not just WHAT it is
 
-### Expected Time
+## Completion Criteria
 
-- **Reading**: 10-15 minutes per component (aggregate + individual reports)
-- **Analysis**: 5-10 minutes (applying validation test, identifying patterns)
-- **Writing**: 10-15 minutes (2-3 patterns with full explanations)
-- **Total**: ~30 minutes per component
-
-## Checklist
-
-### Criteria for Completion
-A component is checked off when its `pattern-research.md` includes:
+A component is done when its `pattern-research.md` includes:
 - **Sophisticated Design Patterns** section with 2-3 examples
 - Each example explains: What it does, Why it's sophisticated, Evidence of design maturity
-- Examples pass the validation test: "If we removed this component, would this feature still exist in other components?" → NO
-- Focus on component-specific innovations, NOT framework-wide patterns
-
----
-
-- [x] Divider / Separator
-- [x] Table
-- [x] Button
-- [x] Popup
-- [x] Message
-- [x] Segment
-- [x] Card
-- [x] Label / Badge
-- [x] Image
-- [x] Container
-- [x] Statistic
-- [x] Placeholder / Skeleton
-- [x] Loader
-- [x] Checkbox
-- [x] Dropdown
-- [x] Breadcrumb
-- [x] Grid
-- [x] List
-- [x] Tab
-- [x] Header
-- [x] Icon
-- [x] Input
-- [x] Rail / Offscreen
-- [x] Step
-- N/A Menu (covered by context-menu, menubar, navigation-menu)
-- [x] Accordion
-- [x] Modal
-- [x] Progress Bar
-- [x] Rating
-- [x] Search
-- [x] Toast / Snackbar
-- [x] Tooltip
-- [x] Alert / Notification
-- [x] Switch / Toggle
-- [x] Textarea
-- [x] Radio Button / Radio Group
-- [x] Avatar
-- [x] Drawer / Offcanvas / Sheet
-- [x] Pagination
-- [x] Form
-- [x] Chip / Tag / Pill
-- [x] Link
-- [x] Select
-- [x] Navbar / App Bar
-- [x] Slider (Range Input)
-- [x] Popover / Hover Card
-- [x] Text / Typography
-- [x] Timeline
-- [x] Carousel
-- [x] Calendar / Date Picker
-- [x] Autocomplete / Combobox
-- [x] Tree / Tree View
-- [x] Empty State - Has Ant Design's component-aware API and illustration presets
-- [x] File Upload
-- [x] Code
-- [x] Stepper / Wizard
-- [x] Stack (Layout)
-- [x] Flex (Layout)
-- [x] Box (Layout)
-- [x] Form Field
-- [x] Number Input
-- [x] Password Input
-- [x] Color Picker
-- [x] Heading
-- [x] Space (Layout)
-- [x] Scroll Area
-- [x] Command Palette
-- [x] Context Menu
-- [x] Portal
-- [x] Center (Layout)
-- [x] Menubar
-- [x] Result
-- [x] Kbd (Keyboard Key)
-- [x] Aspect Ratio
-- [x] Chart
-- [x] Transfer / Transfer List
-- [x] QR Code
-- [x] Navigation Menu
-- [x] Progress
-
----
-
-## Progress
-- **Completed**: 78 / 78 components (100%)
-- **Note**: "Menu" doesn't exist as a standalone component - it's covered by context-menu, menubar, and navigation-menu
-
-## Notes
-- This section was added to the workflow on 2025-11-10
-- Components researched before this date need to be reviewed and updated
-- Focus on finding patterns that solve **non-obvious problems** specific to the component type
-- Bulk update completed on 2025-11-10 using parallel agents
+- Examples pass the validation test: component-specific, not framework-wide

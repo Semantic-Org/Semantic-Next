@@ -4,6 +4,7 @@ description: Guide for creating API reference pages with consistent header hiera
 keywords: [API reference, documentation, header hierarchy, method signatures, parameters, code examples]
 audience: contributing
 skill: docs-page-api-reference
+type: skill
 ---
 
 # API Reference Authoring Guide

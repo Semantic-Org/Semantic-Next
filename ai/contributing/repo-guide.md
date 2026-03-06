@@ -4,6 +4,7 @@ description: Top-level directory structure, documentation site layout, test loca
 keywords: [repo, directory, navigation, docs, tests, config, menus, astro, dprint, examples]
 audience: contributing
 skill: repo-guide
+type: skill
 ---
 
 # Repository Guide

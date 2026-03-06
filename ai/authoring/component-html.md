@@ -4,6 +4,7 @@ description: Canonical patterns for writing HTML inside a component's shadow DOM
 keywords: [HTML, semantic markup, class naming, accessibility, ARIA, data attributes, DOM structure, shadow DOM, parts, slots]
 audience: authoring
 skill: component-html
+type: skill
 ---
 
 # Component HTML Authoring
