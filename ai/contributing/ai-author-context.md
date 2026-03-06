@@ -3,7 +3,7 @@ title: Authoring AI Context Files and Skills
 description: Rules for writing and maintaining files in ai/ that are served to agents via the Semantic UI MCP server.
 keywords: [authoring guide, skills, context, frontmatter, MCP, content principles]
 audience: contributing
-skill: author-context-or-skill
+skill: ai-author-context
 ---
 
 # Authoring AI Context Files and Skills

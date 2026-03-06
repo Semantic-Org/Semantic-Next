@@ -1,10 +1,10 @@
 ---
-title: Create Context
+title: Create AI Context
 description: Workflow for writing new skills for Semantic UI in collaboration with the framework author, distributed to end users via MCP or Claude plugin.
 keywords: [skills, authoring, MCP, context, documentation]
 audience: contributing
 type: workflow
-workflow: create-context
+workflow: ai-create-context
 ---
 
 You will be authoring new skills for Semantic UI in collaboration with the framework author. These skills will be distributed to end users of the open source project via MCP or Claude plugin.
