@@ -9,21 +9,23 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:vercel": "node build.js",
     "dev": "tsc --watch",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
-    "@semantic-ui/reactivity": "*",
-    "@semantic-ui/templating": "*",
-    "@semantic-ui/utils": "*",
+    "@semantic-ui/reactivity": "latest",
+    "@semantic-ui/templating": "latest",
+    "@semantic-ui/utils": "latest",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": "24.x"
   }
 }
