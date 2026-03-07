@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build:vercel",
-  "outputDirectory": ".",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/mcp", "destination": "/api/mcp" },
     { "source": "/", "destination": "/api/index" }

@@ -140,10 +140,9 @@ Write classes you know. The sophisticated theming system is there when needed, n
 
 ## Response Format
 
-**List tools** return compact markdown by default (\`id - title\`, one per line). Examples are grouped by category.
+**List tools** return compact markdown by default (\`id — description\`, one per line). Examples are grouped by category.
 Optional params:
 - \`json: true\` — return JSON array instead of markdown
-- \`includeMetadata: true\` — include descriptions (available on \`list_skills\`, \`list_context\`)
 
 **Get tools** return a \`related\` field with connected content:
 \`\`\`json
@@ -407,10 +406,9 @@ Optional params:
     {
       audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
         .describe('Filter by audience'),
-      includeMetadata: z.boolean().optional().describe('Include descriptions for each skill'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
-    async ({ audience, includeMetadata, json }) => {
+    async ({ audience, json }) => {
       await ensureCache();
       const skills = listSkills(audience);
 
@@ -452,11 +450,10 @@ Optional params:
       for (const [key, items] of Object.entries(groups)) {
         const heading = AUDIENCE_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
         const lines = items.map(s => {
-          let line = `* ${s.skill} - ${s.title}`;
-          if (includeMetadata && s.description) {
-            line += ` — ${s.description}`;
+          if (s.description) {
+            return `* **${s.skill}** — ${s.description}`;
           }
-          return line;
+          return `* **${s.skill}** — ${s.title}`;
         });
         sections.push(`## ${heading}\n${lines.join('\n')}`);
       }
@@ -536,6 +533,7 @@ Optional params:
           return {
             id,
             title: w.title,
+            ...(w.description && { description: w.description }),
             ...(!audience && { audience: w.audience }),
           };
         });
@@ -546,7 +544,10 @@ Optional params:
 
       const lines = workflows.map(w => {
         const id = w.workflow || w.path.replace('/content/ai/', '').replace('.md', '');
-        return `* ${id} - ${w.title}`;
+        if (w.description) {
+          return `* **${id}** — ${w.description}`;
+        }
+        return `* **${id}** — ${w.title}`;
       });
       return {
         content: [{ type: 'text', text: lines.join('\n') }],
@@ -613,10 +614,9 @@ Optional params:
     {
       audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
         .describe('Filter by audience'),
-      includeMetadata: z.boolean().optional().describe('Include descriptions for each document'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
-    async ({ audience, includeMetadata, json }) => {
+    async ({ audience, json }) => {
       await ensureCache();
       const docs = listContext(audience);
 
@@ -646,11 +646,10 @@ Optional params:
 
       const lines = docs.map(d => {
         const shortPath = d.path.replace('/content/ai/', '').replace('.md', '');
-        let line = `* ${shortPath} - ${d.title}`;
-        if (includeMetadata && d.description) {
-          line += ` — ${d.description}`;
+        if (d.description) {
+          return `* **${shortPath}** — ${d.description}`;
         }
-        return line;
+        return `* **${shortPath}** — ${d.title}`;
       });
       return {
         content: [{ type: 'text', text: lines.join('\n') }],

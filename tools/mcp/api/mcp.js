@@ -34036,10 +34036,9 @@ Write classes you know. The sophisticated theming system is there when needed, n
 
 ## Response Format
 
-**List tools** return compact markdown by default (\`id - title\`, one per line). Examples are grouped by category.
+**List tools** return compact markdown by default (\`id \u2014 description\`, one per line). Examples are grouped by category.
 Optional params:
 - \`json: true\` \u2014 return JSON array instead of markdown
-- \`includeMetadata: true\` \u2014 include descriptions (available on \`list_skills\`, \`list_context\`)
 
 **Get tools** return a \`related\` field with connected content:
 \`\`\`json
@@ -34252,10 +34251,9 @@ ${items.map((e5) => `* ${e5.id} - ${e5.title}`).join('\n')}`);
     {
       audience: external_exports.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
         .describe('Filter by audience'),
-      includeMetadata: external_exports.boolean().optional().describe('Include descriptions for each skill'),
       json: external_exports.boolean().optional().describe('Return JSON instead of markdown'),
     },
-    async ({ audience, includeMetadata, json }) => {
+    async ({ audience, json }) => {
       await ensureCache();
       const skills = listSkills(audience);
       if (skills.length === 0) {
@@ -34293,11 +34291,10 @@ ${items.map((e5) => `* ${e5.id} - ${e5.title}`).join('\n')}`);
       for (const [key, items] of Object.entries(groups)) {
         const heading = AUDIENCE_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
         const lines = items.map((s6) => {
-          let line = `* ${s6.skill} - ${s6.title}`;
-          if (includeMetadata && s6.description) {
-            line += ` \u2014 ${s6.description}`;
+          if (s6.description) {
+            return `* **${s6.skill}** \u2014 ${s6.description}`;
           }
-          return line;
+          return `* **${s6.skill}** \u2014 ${s6.title}`;
         });
         sections.push(`## ${heading}
 ${lines.join('\n')}`);
@@ -34370,6 +34367,7 @@ Error: ${result.error}`,
           return {
             id,
             title: w2.title,
+            ...w2.description && { description: w2.description },
             ...!audience && { audience: w2.audience },
           };
         });
@@ -34379,7 +34377,10 @@ Error: ${result.error}`,
       }
       const lines = workflows.map((w2) => {
         const id = w2.workflow || w2.path.replace('/content/ai/', '').replace('.md', '');
-        return `* ${id} - ${w2.title}`;
+        if (w2.description) {
+          return `* **${id}** \u2014 ${w2.description}`;
+        }
+        return `* **${id}** \u2014 ${w2.title}`;
       });
       return {
         content: [{ type: 'text', text: lines.join('\n') }],
@@ -34433,10 +34434,9 @@ Error: ${result.error}`,
     {
       audience: external_exports.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
         .describe('Filter by audience'),
-      includeMetadata: external_exports.boolean().optional().describe('Include descriptions for each document'),
       json: external_exports.boolean().optional().describe('Return JSON instead of markdown'),
     },
-    async ({ audience, includeMetadata, json }) => {
+    async ({ audience, json }) => {
       await ensureCache();
       const docs = listContext(audience);
       if (docs.length === 0) {
@@ -34463,11 +34463,10 @@ Error: ${result.error}`,
       }
       const lines = docs.map((d3) => {
         const shortPath = d3.path.replace('/content/ai/', '').replace('.md', '');
-        let line = `* ${shortPath} - ${d3.title}`;
-        if (includeMetadata && d3.description) {
-          line += ` \u2014 ${d3.description}`;
+        if (d3.description) {
+          return `* **${shortPath}** \u2014 ${d3.description}`;
         }
-        return line;
+        return `* **${shortPath}** \u2014 ${d3.title}`;
       });
       return {
         content: [{ type: 'text', text: lines.join('\n') }],

@@ -10,8 +10,17 @@
   "scripts": {
     "build": "tsc",
     "build:vercel": "node build.js",
+    "deploy": "wireit",
     "dev": "tsc --watch",
     "start": "node dist/index.js"
+  },
+  "wireit": {
+    "deploy": {
+      "command": "npx vercel --prod",
+      "dependencies": [
+        "build:vercel"
+      ]
+    }
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
