@@ -188,6 +188,7 @@
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
+    "deploy:mcp": "wireit",
     "build:docs": "wireit",
     "build:packages": "wireit",
     "watch": "wireit",
@@ -296,6 +297,11 @@
     "mcp": {
       "command": "cd ai/mcp && node agents-server.js",
       "service": true
+    },
+    "deploy:mcp": {
+      "dependencies": [
+        "./tools/mcp:deploy"
+      ]
     },
     "test:case": {
       "command": "node tests/scripts/serve-test-case.js",
