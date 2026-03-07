@@ -38,10 +38,10 @@ Ask yourself for EVERY potential link:
 - **"What level of specificity does this context require?"**
 
 Example Context Analysis:
-- `css` in "component uses css for styling" → Link to conceptual guide `/components/styling`
-- `css` in "the css parameter accepts..." → Link to specific section `/components/styling#component-css`
-- `defineComponent` in code example → Link to API docs `/api/component/define-component`
-- `state` when explaining concepts → Link to guide `/components/state`
+- `css` in "component uses css for styling" → Link to conceptual guide `/docs/guides/components/styling`
+- `css` in "the css parameter accepts..." → Link to specific section `/docs/guides/components/styling#component-css`
+- `defineComponent` in code example → Link to API docs `/docs/api/component/define-component`
+- `state` when explaining concepts → Link to guide `/docs/guides/components/state`
 - `state.counter.get()` method reference → Check for API docs with specific method
 
 ## 4. Link Discovery & Validation Process
@@ -86,7 +86,7 @@ Always check both locations:
 
 **Subsection Linking Strategy:**
 - When text mentions a specific aspect, always check for dedicated subsections
-- Examples: `pageCSS` → `/components/styling#page-css`, `onCreated` → `/components/lifecycle#oncreated`
+- Examples: `pageCSS` → `/docs/guides/components/styling#page-css`, `onCreated` → `/docs/guides/components/lifecycle#oncreated`
 - **Never assume** - always verify the header exists using grep or Read tool
 
 ## 5. Permitted Tasks (Strictly Limited)
@@ -111,9 +111,9 @@ This agent is **ONLY** permitted to perform the following tasks:
 ## 6. Link Quality Standards
 
 ### 6.1 Semantic Correctness
-- **Component-specific concepts** should link to `/components/[topic]` when discussing component usage
-- **General library features** should link to root-level guides like `/reactivity/`, `/templates/`, `/query/`
-- **Technical references** should link to `/api/[area]/[specific-item]`
+- **Component-specific concepts** should link to `/docs/guides/components/[topic]` when discussing component usage
+- **General library features** should link to guides like `/docs/guides/reactivity/`, `/docs/guides/templates/`, `/docs/guides/query/`
+- **Technical references** should link to `/docs/api/[area]/[specific-item]`
 
 ### 6.2 Specificity Requirements  
 - **Always prefer specific subsections** when the context warrants it
@@ -134,43 +134,43 @@ This agent is **ONLY** permitted to perform the following tasks:
 
 ### 8.1 Conceptual vs Technical References
 **Conceptual explanations** (how-to, guides, overviews):
-- Link to `/[domain]/` for broad concepts (e.g., `/reactivity/`, `/templates/`, `/components/`)
-- Link to `/[domain]/[specific-topic]` for focused topics
+- Link to `/docs/guides/[domain]/` for broad concepts (e.g., `/docs/guides/reactivity/`, `/docs/guides/templates/`, `/docs/guides/components/`)
+- Link to `/docs/guides/[domain]/[specific-topic]` for focused topics
 
 **Technical references** (methods, properties, parameters):
-- Always check `/api/[area]/` first for dedicated API documentation
+- Always check `/docs/api/[area]/` first for dedicated API documentation
 - Use subsection links for specific parameters or methods when available
 
 ### 8.2 Documentation Architecture Pattern
 This codebase follows a consistent pattern:
-- **`/[topic]/`** - User guides and conceptual explanations
-- **`/[package]/[topic]`** - Package-specific guides (e.g., `/components/[topic]`, `/reactivity/[topic]`, `/templates/[topic]`)
-- **`/api/[area]/[item]`** - Technical API references
+- **`/docs/guides/[topic]/`** - User guides and conceptual explanations
+- **`/docs/guides/[package]/[topic]`** - Package-specific guides (e.g., `/docs/guides/components/[topic]`, `/docs/guides/reactivity/[topic]`, `/docs/guides/templates/[topic]`)
+- **`/docs/api/[area]/[item]`** - Technical API references
 
 **Package Priority Guidelines:**
 - **Components package** is the primary integration point that uses all other packages
 - **Always prefer component-specific guides** when linking from component contexts
-- Example: Link to `/components/reactivity` (reactivity as used in components) rather than `/reactivity/` (general reactivity concepts) when discussing component usage
+- Example: Link to `/docs/guides/components/reactivity` (reactivity as used in components) rather than `/docs/guides/reactivity/` (general reactivity concepts) when discussing component usage
 
 ### 8.3 Context-Driven Linking Examples
 **Configuration/Parameter contexts:**
-- Check if parameter has dedicated guide page: `/[package]/[parameter-name]`
-- Check if parameter has API documentation: `/api/[area]/[item]#[parameter]`
-- Check if parameter has specific subsection: `/[guide-page]#[parameter-section]`
+- Check if parameter has dedicated guide page: `/docs/guides/[package]/[parameter-name]`
+- Check if parameter has API documentation: `/docs/api/[area]/[item]#[parameter]`
+- Check if parameter has specific subsection: `/docs/guides/[guide-page]#[parameter-section]`
 
 **Method/Function contexts:**
-- Search for API documentation first: `/api/[area]/[function-name]`
-- Look for subsection links: `/[guide]#[method-name]`
+- Search for API documentation first: `/docs/api/[area]/[function-name]`
+- Look for subsection links: `/docs/guides/[guide]#[method-name]`
 
 **Feature mentions:**
-- **In component contexts:** Prefer `/components/[feature]` over `/[feature]/` when both exist
-- **In general contexts:** Use `/[feature]/` for standalone feature discussion
-- **Technical details:** Always check `/api/[area]/[item]` first
+- **In component contexts:** Prefer `/docs/guides/components/[feature]` over `/docs/guides/[feature]/` when both exist
+- **In general contexts:** Use `/docs/guides/[feature]/` for standalone feature discussion
+- **Technical details:** Always check `/docs/api/[area]/[item]` first
 
 **Cross-package References:**
 - When discussing how components use other packages, link to component-specific guides
 - When discussing standalone package features, link to the package's own guides
-- Example: "component state" → `/components/state`, "signals in general" → `/reactivity/signals`
+- Example: "component state" → `/docs/guides/components/state`, "signals in general" → `/docs/guides/reactivity/signals`
 
 ## 9. Error Prevention
 

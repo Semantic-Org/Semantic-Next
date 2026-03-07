@@ -13,10 +13,8 @@ workflow: add-util-function
 
 ## Context Loading Requirements
 
-Before starting this workflow, load:
-- `/ai/framework/utils.md` - Utils package structure and patterns
-- `/ai/docs/example-metadata-guide.md` - Example creation requirements
-- `/ai/contributing/documentation/examples/authoring.md` - Package example patterns
+Before starting this workflow, see:
+- `docs-examples-authoring` — example creation requirements and patterns
 
 ## Workflow Overview
 
@@ -67,7 +65,7 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 
 ## Step 2: Testing
 
-> **See Also:** [Testing Guide](/ai/contributing/development/testing.md) for comprehensive guidance on test types, organization, and patterns.
+> **See Also:** See `testing` for guidance on test types, organization, and patterns.
 
 ### Test Location
 `/packages/utils/test/utils.test.js`
@@ -112,7 +110,7 @@ describe('prettifyHash', () => {
 
 ## Step 3: Types
 
-> **See Also:** [TypeScript Types Guide](/ai/contributing/development/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
+> **See Also:** See `types` for JSDoc patterns and type definition best practices.
 
 ### Type Definition Location
 `/packages/utils/types/[module].d.ts`
@@ -197,7 +195,7 @@ console.log(functionName(null));
 ## Step 5: API Documentation
 
 ### Documentation Location
-`/docs/src/pages/api/utils/[module].mdx`
+`/docs/src/pages/docs/api/utils/[module].mdx`
 
 ### Documentation Pattern
 ```markdown
@@ -236,16 +234,15 @@ console.log(functionName(input, { option1: value })); // output
 ```
 ```
 
-## Step 6: AI Guide Update
+## Step 6: AI Context Update
 
-### Guide Location
-`/ai/framework/utils.md`
+### Location
+Update the `utility-functions` skill to include the new function.
 
 ### Update Process
-1. Use `Read` to find the appropriate section
-2. Add your function to the import statement
-3. Add practical usage examples
-4. Group with related functions
+1. Add your function to the appropriate section
+2. Add practical usage examples
+3. Group with related functions
 
 ### Pattern
 ```javascript

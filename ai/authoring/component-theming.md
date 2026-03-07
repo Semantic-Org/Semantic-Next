@@ -9,7 +9,7 @@ type: skill
 
 # Make Components Theme-Aware
 
-> **Skill:** `sui:component-theming`
+> **Skill:** `component-theming`
 > **Purpose:** Build custom components whose styles automatically adapt to light/dark mode and respond to runtime theme changes
 > **Last Updated:** 2026-03-04
 
@@ -365,6 +365,6 @@ defineComponent({
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component CSS** | `sui:component-css` | General CSS patterns inside shadow DOM |
-| **Design Tokens** | `sui:design-tokens` | Full token reference (all families, all values) |
-| **Adjust Theme** | `sui:adjust-theme` | Consumer-side theming (setting light/dark, nested contexts) |
+| **Component CSS** | `component-css` | General CSS patterns inside shadow DOM |
+| **Design Tokens** | `design-tokens` | Full token reference (all families, all values) |
+| **Adjust Theme** | `adjust-theme` | Consumer-side theming (setting light/dark, nested contexts) |

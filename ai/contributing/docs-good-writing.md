@@ -9,7 +9,7 @@ type: skill
 
 # Good Technical Writing Examples
 
-> **Skill:** `sui:docs-good-writing`
+> **Skill:** `docs-good-writing`
 > **Purpose:** Reference examples of excellent technical writing patterns from Vite documentation
 
 ---

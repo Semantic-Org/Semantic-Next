@@ -9,7 +9,7 @@ type: skill
 
 # Writing Effectively
 
-> **Skill:** `sui:docs-writing-effectively`
+> **Skill:** `docs-writing-effectively`
 > **Purpose:** Framework for writing that changes reader understanding — problem-first structure, instability language, argument over explanation
 
 ---

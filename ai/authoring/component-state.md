@@ -9,7 +9,7 @@ type: skill
 
 # Component State Management
 
-> **Skill:** `sui:component-state`
+> **Skill:** `component-state`
 > **Purpose:** Decision-making guide for managing data in Semantic UI components — when to use settings vs state vs component props, how each behaves reactively, and how templates access them.
 > **Last Updated:** 2026-03-04
 
@@ -493,6 +493,6 @@ flush()                                   // force immediate processing
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Reactivity System** | `sui:reactive-state` | Deep dive on standalone Signal/Reaction APIs outside components |
-| **Component HTML** | `sui:component-html` | Writing template markup that consumes settings and state |
-| **Component CSS** | `sui:component-css` | Styling that responds to state-driven class changes |
+| **Reactivity System** | `reactive-state` | Deep dive on standalone Signal/Reaction APIs outside components |
+| **Component HTML** | `component-html` | Writing template markup that consumes settings and state |
+| **Component CSS** | `component-css` | Styling that responds to state-driven class changes |

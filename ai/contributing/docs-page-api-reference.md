@@ -9,7 +9,7 @@ type: skill
 
 # API Reference Authoring Guide
 
-> **Skill:** `sui:docs-page-api-reference`
+> **Skill:** `docs-page-api-reference`
 > **Purpose:** Guide for creating API reference pages with consistent header hierarchy, method signatures, parameter tables, and usage patterns
 
 ---
@@ -31,6 +31,7 @@ This guide applies to all API documentation across packages:
 | Utils | `docs/src/pages/docs/api/utils/` | Standalone utility functions |
 | Template Compiler | `docs/src/pages/docs/api/templating/` | Template compiler, AST, String Scanner |
 | Renderer | `docs/src/pages/docs/api/renderer/` | Lit Renderer, Lit Directives |
+| Specs | `docs/src/pages/docs/api/specs/` | Spec parsing, generation, utilities, shared terms |
 
 Each package may have conventions specific to its domain (e.g., Query methods are chainable, Utils functions are standalone), but the header hierarchy and documentation structure remain consistent.
 
@@ -341,7 +342,7 @@ Read these before writing API docs to understand the format:
 - No "This method allows you to..." - just say what it does
 - No "You can use this to..." - the usage examples show that
 - Remove hedging words: "various", "specific", "certain"
-- Load `sui:docs-slop-identification` for anti-patterns
+- Load `docs-slop-identification` for anti-patterns
 
 ### Code Style
 
@@ -361,7 +362,7 @@ Read these before writing API docs to understand the format:
 - Link to other API methods when referencing them
 - Use format: `[Query object](/docs/api/query/constructor#the-query-object)`
 
-Load `sui:docs-good-writing` for writing pattern reference.
+Load `docs-good-writing` for writing pattern reference.
 
 ---
 

@@ -9,7 +9,7 @@ type: skill
 
 # Reactivity System Guide
 
-> **Skill:** `sui:reactive-state`
+> **Skill:** `reactive-state`
 > **Purpose:** Comprehensive guide to the @semantic-ui/reactivity package — a standalone signals-based reactive system with automatic dependency tracking for state management.
 > **Last Updated:** 2026-03-04
 
@@ -552,5 +552,5 @@ Reaction.create(() => {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Architecture Overview** | `sui:architecture-overview` | Understanding how reactivity fits into SUI's architecture |
-| **Utility Functions** | `sui:utility-functions` | Utility functions for debounce, throttle, and other patterns alongside signals |
+| **Architecture Overview** | `architecture-overview` | Understanding how reactivity fits into SUI's architecture |
+| **Utility Functions** | `utility-functions` | Utility functions for debounce, throttle, and other patterns alongside signals |

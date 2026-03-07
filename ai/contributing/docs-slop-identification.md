@@ -9,7 +9,7 @@ type: skill
 
 # AI Slop Identification & Removal Guide
 
-> **Skill:** `sui:docs-slop-identification`
+> **Skill:** `docs-slop-identification`
 > **Purpose:** Guide for identifying and removing low-quality AI-generated content patterns
 
 ---
@@ -42,7 +42,7 @@ Execute this validation sequence before any content modification:
 - **PROCEDURE**: When in doubt, preserve and flag for human review
 
 ## Good Writing Reference
-Load `sui:docs-good-writing` for concrete examples of excellent technical writing patterns to emulate. Key principles:
+Load `docs-good-writing` for concrete examples of excellent technical writing patterns to emulate. Key principles:
 - 1-2 sentence paragraphs
 - Direct statements without hedging
 - No introductory fluff

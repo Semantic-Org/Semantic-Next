@@ -9,7 +9,7 @@ type: skill
 
 # Component Keyboard Shortcuts
 
-> **Skill:** `sui:component-keybindings`
+> **Skill:** `component-keybindings`
 > **Purpose:** How to bind, unbind, and respond to keyboard shortcuts in Semantic UI components
 
 ---
@@ -259,6 +259,6 @@ const createComponent = ({ bindKey, unbindKey, self, reaction, state }) => ({
 
 | Skill | Use when... |
 |-------|-------------|
-| **Mental Model** (`sui:mental-model`) | Understanding destructured callback params and component lifecycle |
-| **Reactive State** (`sui:reactive-state`) | Using signals and reactions with dynamic keybindings |
-| **Component HTML** (`sui:component-html`) | Template syntax for the UI that key handlers manipulate |
+| **Mental Model** (`mental-model`) | Understanding destructured callback params and component lifecycle |
+| **Reactive State** (`reactive-state`) | Using signals and reactions with dynamic keybindings |
+| **Component HTML** (`component-html`) | Template syntax for the UI that key handlers manipulate |

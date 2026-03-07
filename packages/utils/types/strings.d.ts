@@ -208,7 +208,7 @@ export function escapeHTML(string: string): string;
 /**
  * Reverses a string while properly handling Unicode grapheme clusters
  * Uses Intl.Segmenter for correct handling of emojis, flag sequences, skin tones, and combined characters
- * @see {@link https://next.semantic-ui.com/api/utils/strings#reversestring reverseString}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#reversestring reverseString}
  * @see {@link https://next.semantic-ui.com/examples/utils-reversestring Example}
  *
  * @param str - The string to reverse (null/undefined/empty returns empty string)

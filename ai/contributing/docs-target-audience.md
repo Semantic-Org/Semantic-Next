@@ -9,7 +9,7 @@ type: skill
 
 # Target Audience for Semantic UI Documentation
 
-> **Skill:** `sui:docs-target-audience`
+> **Skill:** `docs-target-audience`
 > **Purpose:** Define who reads Semantic UI documentation and how to write content that changes their understanding
 
 ---

@@ -9,7 +9,7 @@ type: skill
 
 # Component HTML Authoring
 
-> **Skill:** `sui:component-html`
+> **Skill:** `component-html`
 > **Purpose:** Canonical patterns for writing HTML inside a component's shadow DOM template — semantic class naming, role-based structures, accessibility integration, and DOM patterns.
 > **Last Updated:** 2026-03-04
 
@@ -297,7 +297,7 @@ slider-component::part(handle) {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component CSS** | `sui:component-css` | Writing CSS that targets these HTML patterns |
-| **Component Specs** | `sui:component-specs` | How specs define content slots and component structure |
-| **Style Components** | `sui:style-components` | Customizing component appearance from outside |
-| **Use Components** | `sui:use-components` | Consuming these components as an end user |
+| **Component CSS** | `component-css` | Writing CSS that targets these HTML patterns |
+| **Component Specs** | `component-specs` | How specs define content slots and component structure |
+| **Style Components** | `style-components` | Customizing component appearance from outside |
+| **Use Components** | `use-components` | Consuming these components as an end user |

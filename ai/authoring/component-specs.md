@@ -9,7 +9,7 @@ type: skill
 
 # Spec-Driven Component Design
 
-> **Skill:** `sui:component-specs`
+> **Skill:** `component-specs`
 > **Purpose:** Guide to the @semantic-ui/specs package — declarative component metadata, spec file format, SpecReader API, shared terms system, and build pipeline integration for spec-driven web components.
 > **Last Updated:** 2026-03-04
 
@@ -806,7 +806,7 @@ variations: [
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Architecture Overview** | `sui:architecture-overview` | Understanding how specs fit into the overall architecture |
-| **Component CSS** | `sui:component-css` | Writing CSS for spec-driven components |
-| **Component HTML** | `sui:component-html` | Writing HTML templates for spec-driven components |
-| **Design Tokens** | `sui:design-tokens` | Design tokens referenced by spec-driven components |
+| **Architecture Overview** | `architecture-overview` | Understanding how specs fit into the overall architecture |
+| **Component CSS** | `component-css` | Writing CSS for spec-driven components |
+| **Component HTML** | `component-html` | Writing HTML templates for spec-driven components |
+| **Design Tokens** | `design-tokens` | Design tokens referenced by spec-driven components |

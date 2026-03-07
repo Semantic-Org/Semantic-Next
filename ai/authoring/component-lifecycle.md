@@ -9,7 +9,7 @@ type: skill
 
 # Component Lifecycle
 
-> **Skill:** `sui:component-lifecycle`
+> **Skill:** `component-lifecycle`
 > **Purpose:** Complete guide to component lifecycle hooks, execution order, callback arguments, cleanup patterns, and SSR considerations.
 > **Last Updated:** 2026-03-04
 
@@ -343,7 +343,7 @@ defineComponent({
 
 | Skill | Use when... |
 |-------|-------------|
-| **Component HTML** (`sui:component-html`) | Writing shadow DOM templates |
-| **Component CSS** (`sui:component-css`) | Styling components |
-| **Reactive State** (`sui:reactive-state`) | Signals, reactions, dependency tracking |
-| **Component Specs** (`sui:component-specs`) | Adding specs to primitives |
+| **Component HTML** (`component-html`) | Writing shadow DOM templates |
+| **Component CSS** (`component-css`) | Styling components |
+| **Reactive State** (`reactive-state`) | Signals, reactions, dependency tracking |
+| **Component Specs** (`component-specs`) | Adding specs to primitives |

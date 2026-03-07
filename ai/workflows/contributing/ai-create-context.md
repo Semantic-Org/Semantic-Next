@@ -9,7 +9,7 @@ workflow: ai-create-context
 
 You will be authoring new skills for Semantic UI in collaboration with the framework author. These skills will be distributed to end users of the open source project via MCP or Claude plugin.
 
-**Before starting, load the `author-context-or-skill` skill via `use_skill`.** That skill is the authoritative reference for all content standards — frontmatter, structure, content principles, file length, terminology. This workflow covers the *process* of writing a skill; that skill covers the *craft* of writing one.
+**Before starting, load the `ai-author-context` skill via `use_skill`.** That skill is the authoritative reference for all content standards — frontmatter, structure, content principles, file length, terminology. This workflow covers the *process* of writing a skill; that skill covers the *craft* of writing one.
 
 ---
 
@@ -21,12 +21,12 @@ You will be authoring new skills for Semantic UI in collaboration with the frame
 
   **Prioritize MCP tools** — they surface well-curated content:
   - `list_context`, `get_context` — AI context documents
-  - `list_docs`, `get_doc` — user documentation
+  - `list_user_docs`, `get_user_doc` — user documentation
   - `list_examples`, `get_example` — code examples
   - `list_components`, `get_component` — component specs
   - `search` — cross-content search
 
-  **Do NOT use `list_skills` or `use_skill`** — these contain old skills being replaced and will bias your output. Similarly, if you encounter any AI context file with `type: skill` in its frontmatter, ignore its content. *Exception: loading `author-context-or-skill` as instructed above.*
+  **Do NOT use `list_skills` or `use_skill`** — these contain old skills being replaced and will bias your output. Similarly, if you encounter any AI context file with `type: skill` in its frontmatter, ignore its content. *Exception: loading `ai-author-context` as instructed above.*
 
   **Also required:** Read source code in `packages/` using Read, Glob, Grep. MCP content is curated but source code is authoritative.
 
@@ -34,9 +34,9 @@ You will be authoring new skills for Semantic UI in collaboration with the frame
 
 - Once discussion is complete, ask follow up questions and confirm goals and non-goals. If there are ambiguities on the margins, NOW IS THE TIME to discuss them.
 
-- Confirm the exact name of the skill — both the title ("Create Components") and the slash command name (`/sui:component`). These are critical for discoverability.
+- Confirm the exact name of the skill — both the title ("Create Components") and the slash command name (`/component`). These are critical for discoverability.
 
-- Determine the **skill subtype** (see `author-context-or-skill` for full definitions):
+- Determine the **skill subtype** (see `ai-author-context` for full definitions):
 
   | Subtype | Agent consumption | Length tolerance |
   |---------|-------------------|-----------------|
@@ -52,7 +52,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 - **If it fits in one skill:** proceed to Phase 2.
 
-- **If it exceeds the budget, decompose into multiple skills.** Each skill must independently pass the decision test from `author-context-or-skill`: *if the agent loads this file and nothing else, can it complete a task in this domain correctly?*
+- **If it exceeds the budget, decompose into multiple skills.** Each skill must independently pass the decision test from `ai-author-context`: *if the agent loads this file and nothing else, can it complete a task in this domain correctly?*
 
   Guidelines for decomposition:
   - Find natural task boundaries — what are the distinct things a user would ask an agent to *do*?
@@ -66,7 +66,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 - Create a new file in `ai/{audience}/` for the skill (or each skill if decomposed).
 
-- Start with proper frontmatter and structural skeleton per `author-context-or-skill`:
+- Start with proper frontmatter and structural skeleton per `ai-author-context`:
 
   ```yaml
   ---
@@ -81,11 +81,11 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
   Followed by:
   ```markdown
-  > **Skill:** `sui:[name]`
+  > **Skill:** `[name]`
   > **Purpose:** [One line explaining what this file gives the agent]
   ```
 
-- Write the skill following the content principles from `author-context-or-skill`. Write the introduction/preamble last — after all sections are complete you'll have the clearest picture of what the skill actually covers.
+- Write the skill following the content principles from `ai-author-context`. Write the introduction/preamble last — after all sections are complete you'll have the clearest picture of what the skill actually covers.
 
 - Every file should end with a Quick Reference (for files > ~100 lines). Leave the Related Skills table empty — it gets filled in during Phase 4 after you can see neighboring skills.
 
@@ -97,7 +97,7 @@ Determine whether this topic fits in a single skill file or needs to be decompos
 
 - When the content is settled, write the introduction/preamble. This might include decision trees, introductory questions to the end-user, or a golden rule.
 
-- **Validate against `author-context-or-skill`:**
+- **Validate against `ai-author-context`:**
   - Frontmatter is complete and correct
   - Structural skeleton is followed (frontmatter, blockquote header, sections, Quick Reference)
   - Consistent terminology — one term per concept, no synonyms

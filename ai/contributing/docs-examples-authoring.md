@@ -9,7 +9,7 @@ type: skill
 
 # Semantic UI Examples System - Canonical Guide
 
-> **Skill:** `sui:docs-examples-authoring`
+> **Skill:** `docs-examples-authoring`
 > **Purpose:** Complete reference for creating documentation examples, covering metadata schema, file organization, example types, design tokens, and quality standards
 
 ---
@@ -270,19 +270,23 @@ This means examples can be organized in **any nested structure** and the system 
 ## 🧭 **Navigation & Taxonomy System**
 
 ### **Top-Level Categories**
-Defined in `docs/src/helpers/menus.js` as `topbarDisplayMenu`:
+Defined in `docs/src/helpers/menus.js` as `exampleCategorySortOrder`:
 - Framework
 - UI Components
 - Templates
 - Reactivity
 - Query
+- Utils
 
 ### **Subcategory Organization**
 Also defined in `menus.js` as `subCategorySortOrder`:
 ```javascript
 'Reactivity': [
   'Introduction',
-  'Variables',
+  'Signals',
+  'Reactions',
+  'Flushing',
+  'Settings',
   'Helpers',
   'Performance',
   'Controls',
@@ -335,6 +339,7 @@ const basicCheck = $box.isInView({ viewport: $container });
 #### **Reactivity Package Examples**
 **From `signals/page.js`:**
 ```javascript
+import { $ } from '@semantic-ui/query';
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 
 // Create a signal for the count
@@ -426,13 +431,13 @@ const defaultSettings = {
   transition-property: border, background;
 
   &.in-view {
-    background: var(--green-background);
+    background: var(--green-background-color);
     border: var(--green-border);
     color: var(--green-text-color);
   }
 
   &.partially-in-view {
-    background: var(--orange-background);
+    background: var(--orange-background-color);
     border: var(--orange-border);
     color: var(--orange-text-color);
   }
@@ -529,10 +534,10 @@ else {
 --orange-text-color   /* Orange text color */
 
 /* Background colors */
---red-background      /* Red background color */
---green-background    /* Green background color */
---blue-background     /* Blue background color */
---orange-background   /* Orange background color */
+--red-background-color      /* Red background color */
+--green-background-color    /* Green background color */
+--blue-background-color     /* Blue background color */
+--orange-background-color   /* Orange background color */
 
 /* Border colors */
 --red-border          /* Red border color */
@@ -643,8 +648,8 @@ else {
 #### Step 1: Plan Component
 - Use TodoWrite tool for multi-step component creation
 - **MANDATORY**: Read `/ai/contributing/token-reference.md` for complete design token reference
-- **MANDATORY**: Read `sui:html` skill for semantic HTML patterns
-- **MANDATORY**: Read `sui:tokens` skill for design token usage patterns
+- **MANDATORY**: Read `html` skill for semantic HTML patterns
+- **MANDATORY**: Read `tokens` skill for design token usage patterns
 - **MANDATORY**: Read relevant framework skill via `list_skills` if using specific packages
 - **MANDATORY**: Read 1-3 existing examples with highest similarity to requested example for style patterns
 - Check existing components in `/src/components/` for patterns
@@ -699,18 +704,18 @@ tip: 'Use design tokens for consistent styling'
 
 #### Step 4: Implement Component Files
 - **component.js**: Use `defineComponent`, `self.method()` references, `$` prefixed queries
-- **component.html**: Follow `sui:html` skill - semantic classes, natural hierarchy
-- **component.css**: Follow `sui:tokens` skill - 100% design tokens, CSS nesting
+- **component.html**: Follow `html` skill - semantic classes, natural hierarchy
+- **component.css**: Follow `tokens` skill - 100% design tokens, CSS nesting
 
 #### Step 5: Page File Standards
-- **page.css**: **MANDATORY** - Use only design tokens per `sui:tokens` skill
-- **page.html**: **MANDATORY** - Follow `sui:html` skill semantic patterns
+- **page.css**: **MANDATORY** - Use only design tokens per `tokens` skill
+- **page.html**: **MANDATORY** - Follow `html` skill semantic patterns
 - **page.js**: Prefix query variables with `$` (`const $button = $('#btn')`)
 
 ### **Package Example Workflow**
 
 #### Step 1: Research and Plan
-- **MANDATORY**: Read `sui:tokens` skill for design token usage
+- **MANDATORY**: Read `tokens` skill for design token usage
 - **MANDATORY**: Read relevant framework skill via `list_skills` for API patterns
 - **MANDATORY**: Read 1-3 existing package examples with highest similarity for style patterns
 - Plan minimal demonstration of single API concept
@@ -847,7 +852,7 @@ elements.forEach(el => {
 
 ### **Utility Examples**
 ```javascript
-import { helper, utility } from '@semantic-ui/utilities';
+import { helper, utility } from '@semantic-ui/utils';
 
 // Show practical usage of utility functions
 const result = helper(inputData);
@@ -917,7 +922,7 @@ Creating standalone page/integration?
 **File naming for subcomponents:**
 - Use simple names: `row.js`, `row.html`, `row.css`
 - Multiple variants: `row.js`, `row2.js` for different templates
-- **NOT hyphenated** for subcomponents (unlike main component folders)
+- **Shortest reasonable name** — prefer `row.js` over `todo-item-row.js` since they appear in the REPL file tabs
 
 **Template-only component exports:**
 ```javascript
@@ -1006,7 +1011,7 @@ See the [Query .width() example](query-width) for basic usage patterns.
 #### **Code Quality Requirements**
 - **Professional standards**: Production-quality code that developers can trust
 - **Design token usage**: Use only `var(--token-name)` - never hardcoded values
-- **Semantic HTML**: Follow `sui:html` skill patterns exactly
+- **Semantic HTML**: Follow `html` skill patterns exactly
 - **Query prefixing**: All DOM queries must use `$` prefix (`const $element = $('.selector')`)
 
 #### **Educational Requirements**
@@ -1302,8 +1307,8 @@ tip: # Leave empty rather than stating the obvious
 ### **Quality Checklist**
 
 #### **Before Creating Any Example**
-1. ✅ Read `sui:html` skill for HTML patterns
-2. ✅ Read `sui:tokens` skill for CSS token usage
+1. ✅ Read `html` skill for HTML patterns
+2. ✅ Read `tokens` skill for CSS token usage
 3. ✅ Read relevant framework skill via `list_skills` for package-specific patterns
 4. ✅ **Read 1-3 existing examples with highest similarity to requested example**
 5. ✅ Identify the single concept to demonstrate

@@ -82,10 +82,10 @@ This guide is for AI agents embodying a sophisticated technical evaluator person
 1. Read `/docs/src/helpers/menus.js` - This is the canonical source of truth for documentation structure and navigation order
 2. Read `/docs/src/pages/index.astro` - Homepage positioning, value propositions, and feature highlights
 3. Read `/docs/src/pages/introduction.mdx` - Framework overview and positioning
-4. Read `/ai/contributing/codebase-navigation.md` - Understanding file locations and search patterns
+4. See `repo-guide` — understanding file locations and search patterns
 
 **Phase 2: Core Architecture Understanding**
-Read files in `/docs/src/pages/components/` with human-motivated completion patterns:
+Read files in `/docs/src/pages/docs/guides/components/` with human-motivated completion patterns:
 
 **Minimum Viable Understanding (addresses feedback #4):**
 - `index.mdx` - Component overview (REQUIRED - sets mental model)
@@ -107,10 +107,10 @@ Read files in `/docs/src/pages/components/` with human-motivated completion patt
 
 **Phase 3: Supporting System Understanding**
 Read index pages for each major system:
-- `/docs/src/pages/templates/index.mdx` - Template system overview
-- `/docs/src/pages/reactivity/index.mdx` - Signals-based reactivity
-- `/docs/src/pages/query/index.mdx` - DOM manipulation library
-- `/docs/src/pages/api/index.mdx` - API reference entry point
+- `/docs/src/pages/docs/guides/templates/index.mdx` - Template system overview
+- `/docs/src/pages/docs/guides/reactivity/index.mdx` - Signals-based reactivity
+- `/docs/src/pages/docs/guides/query/index.mdx` - DOM manipulation library
+- `/docs/src/pages/docs/api/index.mdx` - API reference entry point
 
 **Phase 4: Interest-Driven Exploration**
 
@@ -186,10 +186,10 @@ When a question spans multiple personas (e.g., "How does this affect system scal
 **Method 1: Use LS Tool for File Discovery**
 ```bash
 # List all available pages in a section
-LS: /docs/src/pages/templates/
+LS: /docs/src/pages/docs/guides/templates/
 # Returns: expressions.mdx, loops.mdx, conditionals.mdx, async.mdx, etc.
 
-LS: /docs/src/pages/api/reactivity/
+LS: /docs/src/pages/docs/api/reactivity/
 # Returns: signal.mdx, reaction.mdx, dependency.mdx, array-helpers.mdx, etc.
 ```
 
@@ -207,7 +207,7 @@ Documentation follows predictable patterns:
 - Common patterns: `basics.mdx`, `advanced.mdx`, `performance.mdx`
 - System-specific: templates has `expressions.mdx`, `loops.mdx`; reactivity has `signals.mdx`, `reactions.mdx`
 
-**API Reference** (`/docs/src/pages/api/[system]/`):
+**API Reference** (`/docs/src/pages/docs/api/[system]/`):
 - Always has `index.mdx` (API overview)
 - Mirrors the package structure: `api/reactivity/signal.mdx` matches `/packages/reactivity/src/signal.js`
 - Helper categories: `array-helpers.mdx`, `boolean-helpers.mdx`, `date-helpers.mdx`
@@ -283,17 +283,17 @@ A real evaluator wouldn't rigidly complete Phase 2 if they're confused about fun
 
 **Example Guide Reading Process**:
 ```
-LS /docs/src/pages/templates/
+LS /docs/src/pages/docs/guides/templates/
 → Read templates/index.mdx (overview)
 → Read templates/expressions.mdx (core syntax)
 → Note: "See API reference for complete expression syntax" → Queue api/templating/ for later
 → Note: "See subtemplates-advanced example" → Queue example for later
 ```
 
-#### 2. API Reference Pages (`/docs/src/pages/api/[system]/`)
+#### 2. API Reference Pages (`/docs/src/pages/docs/api/[system]/`)
 
 **Purpose**: Detailed method signatures, parameters, return types
-**Discovery**: `LS /docs/src/pages/api/[system]/` - mirrors `/packages/[system]/src/` structure
+**Discovery**: `LS /docs/src/pages/docs/api/[system]/` - mirrors `/packages/[system]/src/` structure
 **Reading Strategy**:
 - Always read the index page first for package overview
 - Focus on primary classes/functions (Signal, defineComponent, etc.)
@@ -302,7 +302,7 @@ LS /docs/src/pages/templates/
 
 **Example API Reference Reading Process**:
 ```
-LS /docs/src/pages/api/reactivity/
+LS /docs/src/pages/docs/api/reactivity/
 → Read api/reactivity/index.mdx (package overview)
 → Read api/reactivity/signal.mdx (primary class)
 → Note method signatures: signal.get(), signal.set(), signal.derive()
@@ -414,13 +414,13 @@ After reading SOURCE CODE:
 ### Practical Discovery Examples
 
 **Question**: *"How does async templating work?"*
-1. **Guide**: `LS /docs/src/pages/templates/` → read `async.mdx`
-2. **API**: `LS /docs/src/pages/api/templating/` → read relevant API methods
+1. **Guide**: `LS /docs/src/pages/docs/guides/templates/` → read `async.mdx`
+2. **API**: `LS /docs/src/pages/docs/api/templating/` → read relevant API methods
 3. **Examples**: `LS /docs/src/examples/templates/` → find async examples
 4. **Source** (if needed): `/packages/templating/src/` → verify implementation
 
 **Question**: *"What performance optimizations are available?"*
-1. **Guide**: `LS /docs/src/pages/reactivity/` → read `performance.mdx`
+1. **Guide**: `LS /docs/src/pages/docs/guides/reactivity/` → read `performance.mdx`
 2. **Examples**: `LS /docs/src/examples/` → find `ball-simulation` performance example
 3. **API**: `api/reactivity/signal.mdx` → check optimization methods
 4. **Source**: `/packages/reactivity/src/signal.js` → verify optimization claims
@@ -486,15 +486,15 @@ When evaluating architectural claims or investigating specific features:
 
 ### API Reference Usage
 
-**Canonical API Documentation Location:** `/docs/src/pages/api/`
+**Canonical API Documentation Location:** `/docs/src/pages/docs/api/`
 
 **Structure:**
-- `/docs/src/pages/api/component/` - Component creation and utilities
-- `/docs/src/pages/api/reactivity/` - Signals, Reactions, Helpers
-- `/docs/src/pages/api/templating/` - Template compilation and runtime
-- `/docs/src/pages/api/query/` - DOM querying and manipulation
-- `/docs/src/pages/api/utils/` - Utility functions
-- `/docs/src/pages/api/helpers/` - Template helpers
+- `/docs/src/pages/docs/api/component/` - Component creation and utilities
+- `/docs/src/pages/docs/api/reactivity/` - Signals, Reactions, Helpers
+- `/docs/src/pages/docs/api/templating/` - Template compilation and runtime
+- `/docs/src/pages/docs/api/query/` - DOM querying and manipulation
+- `/docs/src/pages/docs/api/utils/` - Utility functions
+- `/docs/src/pages/docs/api/helpers/` - Template helpers
 
 **API Reference Reading Strategy:**
 1. Read index page for overview

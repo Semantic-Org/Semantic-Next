@@ -9,7 +9,7 @@ type: skill
 
 # Advanced Component Patterns and Recipes
 
-> **Skill:** `sui:component-patterns`
+> **Skill:** `component-patterns`
 > **Purpose:** Decision trees and production patterns for component communication, DOM querying, race condition prevention, resource cleanup, async reactions, lazy loading, scroll handling, and key anti-patterns.
 > **Last Updated:** 2026-03-04
 
@@ -559,7 +559,7 @@ const onRendered = ({ self, isServer, attachEvent }) => {
 
 | Skill | Use when... |
 |-------|-------------|
-| **Reactive State** (`sui:reactive-state`) | Working with signals, reactions, and the reactivity system |
-| **Component CSS** (`sui:component-css`) | Styling patterns inside shadow DOM |
-| **Component HTML** (`sui:component-html`) | Template syntax and conditional rendering |
-| **Mental Model** (`sui:mental-model`) | Understanding core architecture and callback parameters |
+| **Reactive State** (`reactive-state`) | Working with signals, reactions, and the reactivity system |
+| **Component CSS** (`component-css`) | Styling patterns inside shadow DOM |
+| **Component HTML** (`component-html`) | Template syntax and conditional rendering |
+| **Mental Model** (`mental-model`) | Understanding core architecture and callback parameters |

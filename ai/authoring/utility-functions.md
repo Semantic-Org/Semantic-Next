@@ -9,7 +9,7 @@ type: skill
 
 # Utility Functions Reference
 
-> **Skill:** `sui:utility-functions`
+> **Skill:** `utility-functions`
 > **Purpose:** Complete reference for `@semantic-ui/utils` — use this before reimplementing common operations
 
 ---
@@ -746,6 +746,6 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Reactive State** | `sui:reactive-state` | Using signals and reactions alongside utility functions |
-| **Query & Behaviors** | `sui:query-behaviors` | DOM queries and events that complement utility functions |
-| **Mental Model** | `sui:mental-model` | Understanding how utils fits into the SUI framework |
+| **Reactive State** | `reactive-state` | Using signals and reactions alongside utility functions |
+| **Query & Behaviors** | `query-behaviors` | DOM queries and events that complement utility functions |
+| **Mental Model** | `mental-model` | Understanding how utils fits into the SUI framework |

@@ -9,7 +9,7 @@ type: skill
 
 # Render Pipeline — Template String to DOM
 
-> **Skill:** `sui:render-pipeline`
+> **Skill:** `render-pipeline`
 > **Purpose:** How a template string becomes DOM. The four-stage pipeline from source text to reactive UI, for agents working on framework internals.
 
 ---

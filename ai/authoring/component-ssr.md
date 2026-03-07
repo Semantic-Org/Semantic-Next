@@ -9,7 +9,7 @@ type: skill
 
 # Server-Side Rendering
 
-> **Skill:** `sui:component-ssr`
+> **Skill:** `component-ssr`
 > **Purpose:** SUI-specific SSR patterns — what the framework auto-guards, the two scopes where `isServer`/`isClient` are available, lifecycle behavior during server rendering, and canonical guard patterns from first-party components.
 > **Last Updated:** 2026-03-04
 
@@ -326,8 +326,8 @@ const onCreated = ({ state, self, isClient }) => {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component Behaviors** | `sui:component-behaviors` | Attaching behaviors (always need `isClient` guard) |
-| **Component Lifecycle** | `sui:component-lifecycle` | Understanding hook execution order and params |
-| **Component Authoring** | `sui:component-authoring` | Full `defineComponent` guide |
-| **Component Patterns** | `sui:component-patterns` | Communication, cleanup, DOM querying patterns |
-| **Mental Model** | `sui:mental-model` | Framework-level overview |
+| **Component Behaviors** | `component-behaviors` | Attaching behaviors (always need `isClient` guard) |
+| **Component Lifecycle** | `component-lifecycle` | Understanding hook execution order and params |
+| **Component Authoring** | `component-authoring` | Full `defineComponent` guide |
+| **Component Patterns** | `component-patterns` | Communication, cleanup, DOM querying patterns |
+| **Mental Model** | `mental-model` | Framework-level overview |

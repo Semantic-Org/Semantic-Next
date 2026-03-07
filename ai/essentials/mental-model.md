@@ -1,6 +1,6 @@
 ---
 title: Semantic UI Mental Model
-description: How the framework thinks — the architectural decisions, abstraction layers, and internal mechanics that let you make good design decisions. Assumes basic orientation from sui:overview.
+description: How the framework thinks — the architectural decisions, abstraction layers, and internal mechanics that let you make good design decisions. Assumes basic orientation from overview.
 keywords: [mental model, architecture, template abstraction, formalization gradient, reactivity, rendering, data context, event DSL, behaviors, specs, CSS layers]
 audience: essentials
 skill: mental-model
@@ -9,10 +9,10 @@ type: skill
 
 # Semantic UI — Mental Model
 
-> **Skill:** `sui:mental-model`
-> **Purpose:** How the framework thinks internally — the abstraction layers, rendering mechanics, and design decisions that let you make good design decisions. Load `sui:overview` first if you haven't.
+> **Skill:** `mental-model`
+> **Purpose:** How the framework thinks internally — the abstraction layers, rendering mechanics, and design decisions that let you make good design decisions. Load `overview` first if you haven't.
 
-This document assumes you've loaded `sui:overview` and know the basics: flat namespace, signal auto-unwrapping, `.get()` in JS, mutation helpers, Shadow DOM. This goes deeper — how the abstractions compose, how rendering works, and how to choose the right level of formalization for your task.
+This document assumes you've loaded `overview` and know the basics: flat namespace, signal auto-unwrapping, `.get()` in JS, mutation helpers, Shadow DOM. This goes deeper — how the abstractions compose, how rendering works, and how to choose the right level of formalization for your task.
 
 ---
 
@@ -81,7 +81,7 @@ instance  (createComponent return values — methods and computed properties)
 
 On name collision: **instance wins over state wins over data.** This is intentional — you can refactor a value from a plain property to a reactive Signal to a setting without changing any template code. The template just sees `{count}` regardless of which layer provides it.
 
-In templates, a `Proxy` wraps this context and auto-unwraps Signals at the property-access level. In JavaScript (callbacks, `createComponent`), you access the layers directly via the destructured params — `state.count.get()`, `settings.name.get()`.
+In templates, a `Proxy` wraps this context and auto-unwraps Signals at the property-access level. In JavaScript (callbacks, `createComponent`), you access the layers directly via the destructured params — `state.count.get()` for state (raw Signals) and `settings.name` for settings (a Proxy that auto-unwraps reactively).
 
 ---
 
@@ -150,7 +150,7 @@ events: {
 ```
 
 - **Standard** (`'click .selector'`) — delegated event within the component's shadow root
-- **Deep** (`'deep click .selector'`) — uses `$$` (piercing query) to listen across Shadow DOM boundaries
+- **Deep** (`'deep click .selector'`) — allows events from nested Shadow DOM children to match the selector
 - **Global** (`'global event target'`) — attaches to `window` or `document` for app-level events
 
 All event callbacks receive the same destructured params as every other callback, plus event-specific properties: `value` (element's value), `data` (merged dataset + event detail), `event` (native DOM event).
@@ -180,7 +180,7 @@ $('.element').transition({ animation: 'fade' });
 $('.element').transition('show');
 ```
 
-Behaviors store their instance on the element (`el.transition`). Calling `$el.transition('show')` lazily creates the instance if needed, then calls the method. First-party behaviors include `transition`, `tooltip`, `escape`, `dropdown`, and others.
+Behaviors store their instance on the element (`el.transition`). Calling `$el.transition('show')` lazily creates the instance if needed, then calls the method. First-party behaviors include `transition`, `tooltip`, `escape`, `attach`, and others.
 
 **When to use behaviors vs. components:** behaviors add interactive capability to existing elements. Components create new elements. If you're adding "fade in on scroll" to a div, that's a behavior. If you're building a date picker, that's a component.
 
@@ -217,7 +217,7 @@ In production, CSS layers mirror this: `layer(button.theme.states.disabled)`. Op
 
 ### Three Attribute Dialects
 
-Specs define an `optionAttributes` mapping that enables concise (`<ui-button large>`), verbose (`size="large"`), and classic (`class="large"`) attribute syntax on primitives. See `sui:overview` for examples. Ad-hoc components use standard HTML attributes only.
+Specs define an `optionAttributes` mapping that enables concise (`<ui-button large>`), verbose (`size="large"`), and classic (`class="large"`) attribute syntax on primitives. See `overview` for examples. Ad-hoc components use standard HTML attributes only.
 
 ---
 
@@ -284,11 +284,11 @@ data (settings, external) → state (Signals) → instance (createComponent retu
 
 | Skill | Use when... |
 |-------|-------------|
-| **Overview** (`sui:overview`) | First contact — what SUI is, what you'd get wrong |
-| **Component Authoring** (`sui:component-authoring`) | Building new components — the how-to |
-| **Render Pipeline** (`sui:render-pipeline`) | Deep dive into compiler, AST, and renderer internals |
-| **Reactive State** (`sui:reactive-state`) | Signals, Reactions, and the reactivity system |
-| **Component Events** (`sui:component-events`) | Full event system reference |
-| **Query** (`sui:query`) | The `$`/`$$` DOM library and its API |
-| **Query Behaviors** (`sui:query-behaviors`) | Building and using behaviors |
-| **Component Specs** (`sui:component-specs`) | Writing and reading spec definitions |
+| **Overview** (`overview`) | First contact — what SUI is, what you'd get wrong |
+| **Component Authoring** (`component-authoring`) | Building new components — the how-to |
+| **Render Pipeline** (`render-pipeline`) | Deep dive into compiler, AST, and renderer internals |
+| **Reactive State** (`reactive-state`) | Signals, Reactions, and the reactivity system |
+| **Component Events** (`component-events`) | Full event system reference |
+| **Query** (`query`) | The `$`/`$$` DOM library and its API |
+| **Query Behaviors** (`query-behaviors`) | Building and using behaviors |
+| **Component Specs** (`component-specs`) | Writing and reading spec definitions |

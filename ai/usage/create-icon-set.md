@@ -9,7 +9,7 @@ type: skill
 
 # Create Icon Sets for Semantic UI
 
-> **Skill:** `sui:create-icon-set`
+> **Skill:** `create-icon-set`
 > **Purpose:** Guide for creating custom icon sets for use with SUI's icon component
 > **Last Updated:** 2026-03-04
 
@@ -283,6 +283,6 @@ import './app-icons.css';                           // app-specific icons
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Use Components** | `sui:use-components` | General component usage, specs, attributes, events |
-| **Style Components** | `sui:style-components` | Customizing component appearance, CSS variables, `::part()` |
-| **Design Tokens** | `sui:design-tokens` | Available design tokens for colors, spacing, effects |
+| **Use Components** | `use-components` | General component usage, specs, attributes, events |
+| **Style Components** | `style-components` | Customizing component appearance, CSS variables, `::part()` |
+| **Design Tokens** | `design-tokens` | Available design tokens for colors, spacing, effects |

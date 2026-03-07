@@ -37,7 +37,7 @@ This workflow uses subagents to systematically verify consolidated pattern resea
 
 Before touching the research files, pause for a self-assessment:
 
-1. **Confirm subagent tooling**: Do you have an automated `AskUserQuestion` or subagent-launch tool available in this runtime?
+1. **Confirm subagent tooling**: Do you have a subagent-launch tool available in this runtime?
    - ✅ **Yes** → Proceed to Step 1 with normal delegation.
    - ❌ **No** → Record the limitation in your notes and switch to the manual multi-pass protocol below.
 2. **Capability reminder**: Briefly restate (to yourself) what this runtime _can_ do (e.g., read files, edit docs, run scripts) so you plan within actual constraints.
@@ -59,7 +59,7 @@ This manual approach preserves the error-and-omission benefits of multi-agent ve
 
 **Ask the user for workflow configuration:**
 
-Use the **AskUserQuestion** tool if available (Claude Code), otherwise present options as A/B/C and ask for response.
+Present options and ask the user for their preference.
 
 **Questions to ask:**
 
@@ -77,14 +77,7 @@ Use the **AskUserQuestion** tool if available (Claude Code), otherwise present o
    - All patterns (default)
    - Specific sections only (e.g., "only Content Patterns and Type Patterns")
 
-**If using AskUserQuestion tool (Claude Code):**
-```
-AskUserQuestion with 2 questions:
-Q1: "How many subagents should I use for verification?"
-Q2: "Which verification mode should I use?"
-```
-
-**If AskUserQuestion unavailable (other agents):**
+**Example prompt:**
 ```
 Please configure the verification workflow:
 
@@ -108,8 +101,8 @@ Please respond with your choices (e.g., "1A, 2B" or "B, single pass")
 
 1. **Identify the research files:**
    ```
-   - Consolidated research: ai/research/[component]/pattern-research.md
-   - Individual frameworks: ai/research/[component]/[framework]/usage-patterns.md
+   - Consolidated research: ai/research/components/[component]/pattern-research.md
+   - Individual frameworks: ai/research/components/[component]/[framework]/usage-patterns.md
    - Count total frameworks documented
    ```
 
@@ -237,25 +230,7 @@ When a subagent reports only 1-3 errors, this is a **potential AI failure mode**
 - Methodology clarification: Should we count frameworks that mention patterns vs demonstrate them?
 - Disputed findings: When subagents strongly disagree (e.g., 0 errors vs 4 errors)
 
-**If using AskUserQuestion tool (Claude Code):**
-
-Present each disputed claim using the tool with:
-- Your assessment of the evidence
-- 2-3 clear options for resolution (e.g., "Yes, it's an error" vs "No, it's acceptable")
-- Description explaining implications of each choice
-
-Example:
-```
-AskUserQuestion:
-Q: "Should ShadCN be included in max-width constraint pattern (line 73)?"
-Options:
-  A) No - 2/4 only (Pattern should only count native prop support)
-  B) Yes - keep 3/4 (ShadCN supports it via Tailwind classes, that counts)
-```
-
-**If AskUserQuestion unavailable (other agents):**
-
-Present each claim clearly and ask for A/B/C response:
+Present each disputed claim clearly to the user with options:
 ```
 **Claim: Line 73 - Max-width constraint count**
 
@@ -397,7 +372,7 @@ This final step ensures that the work is discoverable and that project-wide trac
     - Include all corrections made, evidence citations, and confidence level
     - Keep entries evidence-focused for auditability
 
-3.  **Update the shared checklist (`ai/artifacts/eo-list.md`):**
+3.  **Update the shared checklist (`ai/workspace/artifacts/eo-list.md`):**
     - This single file is the source of truth for pattern research status and E&O verification
     - Flip the component entry to `[+]` when you start, `[x]` when you finish, and back to `[ ]` if you hand off
     - Include the latest version number and "Last Reviewed" date so teammates can see validation state

@@ -9,7 +9,7 @@ type: skill
 
 # Test Infrastructure Internals
 
-> **Skill:** `sui:testing-internals`
+> **Skill:** `testing-internals`
 > **Purpose:** Reference for modifying the test runner config, adding test utilities, or changing the CI test pipeline
 
 ---
@@ -114,7 +114,7 @@ CI Pipeline
 
 ### CI-Specific Details
 
-- All CI configs include `github-actions` reporter (inline annotations on PR diffs)
+- CI test configs include `github-actions` reporter (inline annotations on PR diffs)
 - Unit and browser jobs use `dorny/test-reporter@v1` to render junit XML
 - Coverage uses `davelosert/vitest-coverage-report-action@v2` for PR comments
 - Coverage job only runs on `main` (`if: github.ref == 'refs/heads/main'`)
@@ -204,5 +204,5 @@ export default {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Build System** | `sui:build-system` | Understanding wireit, package builds, npm scripts |
-| **Repo Guide** | `sui:repo-guide` | Navigating the monorepo structure |
+| **Build System** | `build-system` | Understanding wireit, package builds, npm scripts |
+| **Repo Guide** | `repo-guide` | Navigating the monorepo structure |

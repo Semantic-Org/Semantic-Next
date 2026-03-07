@@ -9,7 +9,7 @@ type: skill
 
 # Query Plugins and Behaviors
 
-> **Skill:** `sui:query-behaviors`
+> **Skill:** `query-behaviors`
 > **Purpose:** Extending SUI's Query system with custom plugins and behaviors
 > **Last Updated:** 2026-03-04
 
@@ -649,5 +649,5 @@ document.querySelector('.el').myBehavior.show(); // direct
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Query** | `sui:query` | Basic `$` / `$$` usage, selectors, DOM manipulation, events |
-| **Reactive State** | `sui:reactive-state` | Signals and reactions for reactive state |
+| **Query** | `query` | Basic `$` / `$$` usage, selectors, DOM manipulation, events |
+| **Reactive State** | `reactive-state` | Signals and reactions for reactive state |

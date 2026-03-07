@@ -9,7 +9,7 @@ type: skill
 
 # Component CSS Authoring
 
-> **Skill:** `sui:component-css`
+> **Skill:** `component-css`
 > **Purpose:** Canonical patterns for writing CSS inside a component's shadow DOM — nesting, container queries, responsive design, state management, theming, and design token usage.
 > **Last Updated:** 2026-03-04
 
@@ -434,8 +434,8 @@ font-size: var(--medium);
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Design Tokens** | `sui:design-tokens` | Looking up available design tokens |
-| **Component HTML** | `sui:component-html` | Writing the HTML template your CSS targets |
-| **Style Components** | `sui:style-components` | Customizing component appearance from outside |
-| **Component Theming** | `sui:component-theming` | Making components fully theme-aware |
-| **Component Specs** | `sui:component-specs` | How specs generate CSS classes automatically |
+| **Design Tokens** | `design-tokens` | Looking up available design tokens |
+| **Component HTML** | `component-html` | Writing the HTML template your CSS targets |
+| **Style Components** | `style-components` | Customizing component appearance from outside |
+| **Component Theming** | `component-theming` | Making components fully theme-aware |
+| **Component Specs** | `component-specs` | How specs generate CSS classes automatically |

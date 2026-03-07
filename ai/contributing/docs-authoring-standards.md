@@ -9,7 +9,7 @@ type: skill
 
 # Documentation Authoring Standards
 
-> **Skill:** `sui:docs-authoring-standards`
+> **Skill:** `docs-authoring-standards`
 > **Purpose:** Structural requirements that apply to ALL documentation page types (gateway, guide, API reference)
 
 **Related:** [Guide Writing](./docs-page-guide.md) • [Gateway Writing](./docs-page-gateway.md) • [API Reference](./docs-page-api-reference.md)

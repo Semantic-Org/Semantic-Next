@@ -9,7 +9,7 @@ type: skill
 
 # Component Composition Patterns
 
-> **Skill:** `sui:component-composition`
+> **Skill:** `component-composition`
 > **Purpose:** How to structure parent-child component relationships — when to use configuration, slots, passed templates, or imperative coordination.
 > **Last Updated:** 2026-03-04
 
@@ -398,7 +398,7 @@ Without `deep`, event handlers only hear events from the component's own Shadow 
 'deep click menu-item'({ self, value }) { ... }  // hears clicks inside menu-item's shadow root
 ```
 
-*Source: `src/primitives/menu/menu.js`* | For full event DSL coverage, see `sui:component-events`.
+*Source: `src/primitives/menu/menu.js`* | For full event DSL coverage, see `component-events`.
 
 ### `$$()` for Attribute-Based State Coordination
 
@@ -504,8 +504,8 @@ selectValue(value) {
 
 | Skill | Use when... |
 |-------|-------------|
-| `sui:component-authoring` | Building a component from scratch — file structure, createComponent, lifecycle |
-| `sui:component-events` | Event DSL details — `deep`, `global`, delegation syntax |
-| `sui:component-css` | Shadow DOM CSS patterns, `::slotted()`, CSS layers |
-| `sui:component-patterns` | Race conditions, cleanup, async reactions, drag patterns |
-| `sui:mental-model` | Core framework concepts — Template abstraction, reactivity, specs |
+| `component-authoring` | Building a component from scratch — file structure, createComponent, lifecycle |
+| `component-events` | Event DSL details — `deep`, `global`, delegation syntax |
+| `component-css` | Shadow DOM CSS patterns, `::slotted()`, CSS layers |
+| `component-patterns` | Race conditions, cleanup, async reactions, drag patterns |
+| `mental-model` | Core framework concepts — Template abstraction, reactivity, specs |

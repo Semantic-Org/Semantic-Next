@@ -9,7 +9,7 @@ type: skill
 
 # Tailwind CSS in Shadow DOM
 
-> **Skill:** `sui:component-tailwind`
+> **Skill:** `component-tailwind`
 > **Purpose:** How to use Tailwind CSS inside Semantic UI components via the `TailwindPlugin` — a pre-processing plugin that compiles Tailwind utilities at runtime for Shadow DOM encapsulation.
 > **Last Updated:** 2026-03-04
 
@@ -354,8 +354,8 @@ export const Demo = defineComponent(await TailwindPlugin({ tagName: 'x-demo', te
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component CSS** | `sui:component-css` | Writing CSS with design tokens instead of Tailwind |
-| **Component Authoring** | `sui:component-authoring` | Full guide to `defineComponent` and component structure |
-| **Component Theming** | `sui:component-theming` | Design token system and theme integration |
-| **Component Composition** | `sui:component-composition` | Subtemplates and component nesting patterns |
-| **Mental Model** | `sui:mental-model` | Framework-level overview including where Tailwind fits |
+| **Component CSS** | `component-css` | Writing CSS with design tokens instead of Tailwind |
+| **Component Authoring** | `component-authoring` | Full guide to `defineComponent` and component structure |
+| **Component Theming** | `component-theming` | Design token system and theme integration |
+| **Component Composition** | `component-composition` | Subtemplates and component nesting patterns |
+| **Mental Model** | `mental-model` | Framework-level overview including where Tailwind fits |

@@ -19,8 +19,7 @@ This is **descriptive, not prescriptive** - we're documenting what exists in the
 
 ### 0. Initialize Task Tracking
 
-**Start with TaskCreate tool:**
-Create tasks for each phase:
+Create a tracking plan for each phase:
 1. Search exhaustive list for all [component] components
 2. Create URL verification file
 3. Research all frameworks in parallel
@@ -29,7 +28,7 @@ Create tasks for each phase:
 6. Review and validate all reports
 7. Add documentation metadata
 
-Use TaskUpdate to mark tasks in_progress/completed as you progress through each phase.
+Mark phases in_progress/completed as you progress.
 
 ### 1. Identify Component and Sources
 
@@ -64,10 +63,10 @@ When multiple agents are working on the component research list simultaneously:
 **First, check for existing resources:**
 ```bash
 # Check if research directory already exists
-if [ -d "ai/research/[component]" ]; then
+if [ -d "ai/research/components/[component]" ]; then
   echo "Using existing research directory"
   # Check for existing URL verification file
-  if [ -f "ai/research/[component]/url-verification.md" ]; then
+  if [ -f "ai/research/components/[component]/url-verification.md" ]; then
     echo "Found existing URL list - will use as starting point"
   fi
 fi
@@ -85,12 +84,12 @@ fi
 "I'll be researching the [COMPONENT] component patterns across UI frameworks."
 ```
 
-**Then locate ALL sources from `ai/research/ui-list-exhaustive.md`:**
+**Then locate ALL sources from `ai/research/components/_list/ui-list-exhaustive.md`:**
 
 **Tool Usage Instructions:**
 ```bash
 # Always use Grep for the exhaustive list (file is too large to read directly)
-grep -i "divider\|separator" ai/research/ui-list-exhaustive.md
+grep -i "divider\|separator" ai/research/components/_list/ui-list-exhaustive.md
 
 # Note: The file contains 3 separate sections with component listings
 # You must search for ALL occurrences, not just the first match
@@ -100,7 +99,7 @@ grep -i "divider\|separator" ai/research/ui-list-exhaustive.md
 
 Create a URL verification file at:
 ```
-ai/research/[component]/url-verification.md
+ai/research/components/[component]/url-verification.md
 ```
 
 **File format:**
@@ -140,7 +139,7 @@ Total URLs found: [N]
 **Check for existing structure, create if needed:**
 ```bash
 # Only create if doesn't exist
-[ ! -d "ai/research/[component]" ] && mkdir -p ai/research/[component]
+[ ! -d "ai/research/components/[component]" ] && mkdir -p ai/research/components/[component]
 ```
 
 Benefits of pre-created structure:
@@ -193,7 +192,7 @@ Example prompt structure:
 ```
 Research the divider component from [Framework] at [URL]
 
-Create a detailed report and save it to: ai/research/[component]/[framework]/usage-patterns.md
+Create a detailed report and save it to: ai/research/components/[component]/[framework]/usage-patterns.md
 
 Use this template for the report:
 [Include complete template here]
@@ -203,7 +202,7 @@ Include actual code examples from the docs.
 
 **For each framework, create a detailed report:**
 
-Save to: `ai/research/[component]/[framework-name]/usage-patterns.md`
+Save to: `ai/research/components/[component]/[framework-name]/usage-patterns.md`
 
 Example: `ai/research/divider/ant-design/usage-patterns.md`
 
@@ -401,7 +400,7 @@ For 2-3 standout examples, explain:
 2. **Validate Pattern Counts**
    ```bash
    # Example: Count frameworks with text content support
-   grep -h "| Text content |" ai/research/[component]/*/usage-patterns.md | cut -d'|' -f3 | sort | uniq -c
+   grep -h "| Text content |" ai/research/components/[component]/*/usage-patterns.md | cut -d'|' -f3 | sort | uniq -c
    ```
    - Verify percentages in aggregate report match actual counts
    - Check for counting errors or misclassifications
@@ -428,12 +427,12 @@ For 2-3 standout examples, explain:
 
 **Individual framework reports:**
 ```
-ai/research/[component]/[framework-name]/usage-patterns.md
+ai/research/components/[component]/[framework-name]/usage-patterns.md
 ```
 
 **Final aggregate report:**
 ```
-ai/research/[component]/pattern-research.md
+ai/research/components/[component]/pattern-research.md
 ```
 
 **Check for existing aggregate report:**
@@ -444,7 +443,7 @@ ai/research/[component]/pattern-research.md
 **Update exhaustive list if URLs have changed:**
 If you found any 404s or incorrect URLs, update the exhaustive list:
 ```
-ai/research/ui-list-exhaustive.md
+ai/research/components/_list/ui-list-exhaustive.md
 ```
 Document the changes:
 - Mark 404 URLs with [BROKEN]
@@ -457,7 +456,7 @@ Document the changes:
 ```javascript
 {
   "description": "Research component patterns",
-  "prompt": "Follow the workflow in ai/workflows/components/research-component-patterns.md to research [COMPONENT] patterns across all frameworks listed in ai/research/ui-list-exhaustive.md. Generate a complete pattern research report.",
+  "prompt": "Follow the `research-component-patterns` workflow to research [COMPONENT] patterns across all frameworks listed in ai/research/components/_list/ui-list-exhaustive.md. Generate a complete pattern research report.",
   "subagent_type": "general-purpose"
 }
 ```

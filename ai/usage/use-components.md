@@ -9,7 +9,7 @@ type: skill
 
 # Use Semantic UI Components
 
-> **Skill:** `sui:use-components`
+> **Skill:** `use-components`
 > **Purpose:** Guide for using SUI's published web components to build websites
 > **Last Updated:** 2026-03-04
 
@@ -29,7 +29,7 @@ Before generating code, gather context:
    - If **SUI source repo** (packages/, docs/, specs in this repo): assume Query and SUI style guide (nested CSS, container queries, design tokens) — skip preference questions below
    - If **React/Vue/Angular/Svelte** project: note that framework integration patterns are available
 
-2. **Ask CSS preference** (unless SUI repo) — "SUI style guide, your own CSS, or Tailwind?" For deep customization, see `sui:style-components`.
+2. **Ask CSS preference** (unless SUI repo) — "SUI style guide, your own CSS, or Tailwind?" For deep customization, see `style-components`.
 
 3. **Ask Query preference** (unless SUI repo) — "Use SUI's Query library (`$`, `$$`) or vanilla JS?"
    - **Query**: jQuery-like `$`, plus `$$` which matches recursively through shadow DOM roots and slot projections
@@ -455,6 +455,6 @@ $('ui-input').val('new value')   // set
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Style Components** | `sui:style-components` | Customizing CSS, theming, design tokens, `::part()` styling |
-| **Design Tokens** | `sui:design-tokens` | Looking up available design tokens for colors, spacing, effects |
-| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |
+| **Style Components** | `style-components` | Customizing CSS, theming, design tokens, `::part()` styling |
+| **Design Tokens** | `design-tokens` | Looking up available design tokens for colors, spacing, effects |
+| **Use Icons** | `use-icons` | Creating custom icon sets for `<ui-icon>` |

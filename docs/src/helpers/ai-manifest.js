@@ -119,9 +119,10 @@ export function buildSlimManifest(pages) {
     generated: new Date().toISOString(),
     totalPages: pages.length,
     totalTokens: pages.reduce((sum, p) => sum + p.tokens, 0),
-    pages: pages.map(({ path, title, audience, tokens, skill, contentType, workflow }) => ({
+    pages: pages.map(({ path, title, description, audience, tokens, skill, contentType, workflow }) => ({
       path,
       title,
+      ...(description && { description }),
       audience,
       tokens,
       ...(skill && { skill }),

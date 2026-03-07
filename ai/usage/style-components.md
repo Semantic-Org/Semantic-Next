@@ -9,7 +9,7 @@ type: skill
 
 # Style Semantic UI Components
 
-> **Skill:** `sui:style-components`
+> **Skill:** `style-components`
 > **Purpose:** Guide for customizing the appearance of SUI components from outside
 > **Last Updated:** 2026-03-04
 
@@ -134,7 +134,7 @@ The specific parts available vary by component — check the component's templat
 
 ## Theme-Aware Styling
 
-Basic theme switching (`<html dark>`, `<div light>`) is covered in `sui:use-components`. Additional patterns for layout authors:
+Basic theme switching (`<html dark>`, `<div light>`) is covered in `use-components`. Additional patterns for layout authors:
 
 ### Theme-Invariant Sections
 
@@ -252,6 +252,6 @@ ui-button.special::part(icon) {
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Design Tokens** | `sui:design-tokens` | Available design tokens for colors, spacing, effects |
-| **Use Components** | `sui:use-components` | Component usage, specs, attributes, events |
-| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |
+| **Design Tokens** | `design-tokens` | Available design tokens for colors, spacing, effects |
+| **Use Components** | `use-components` | Component usage, specs, attributes, events |
+| **Use Icons** | `use-icons` | Creating custom icon sets for `<ui-icon>` |

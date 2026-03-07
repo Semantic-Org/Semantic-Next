@@ -9,7 +9,7 @@ type: skill
 
 # Query DOM with Semantic UI
 
-> **Skill:** `sui:query`
+> **Skill:** `query`
 > **Purpose:** Select elements, bind events, manipulate the DOM, and interact with SUI components using `$` and `$$`
 > **Last Updated:** 2026-03-04
 
@@ -437,6 +437,6 @@ Query is extensible via plugins and behaviors. Simple plugins add methods to `$.
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Use Components** | `sui:use-components` | Component usage, specs, attributes, events |
-| **Query & Behaviors** | `sui:query-behaviors` | Extending Query with plugins and behaviors |
-| **Style Components** | `sui:style-components` | Customizing component appearance from outside |
+| **Use Components** | `use-components` | Component usage, specs, attributes, events |
+| **Query & Behaviors** | `query-behaviors` | Extending Query with plugins and behaviors |
+| **Style Components** | `style-components` | Customizing component appearance from outside |

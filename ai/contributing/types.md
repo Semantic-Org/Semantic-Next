@@ -9,7 +9,7 @@ type: skill
 
 # Type Declarations Guide
 
-> **Skill:** `sui:types`
+> **Skill:** `types`
 > **Purpose:** How to author and maintain `.d.ts` type declaration files for Semantic UI packages
 
 ---
@@ -98,6 +98,7 @@ Every exported module in `src/` has a corresponding `.d.ts` in `types/`. The `ty
 // src/index.js
 export { Dependency } from './dependency.js';
 export { Reaction } from './reaction.js';
+export { Scheduler } from './scheduler.js';
 export { Signal } from './signal.js';
 ```
 
@@ -105,6 +106,7 @@ export { Signal } from './signal.js';
 // types/index.d.ts
 export { Dependency } from './dependency';
 export { Reaction } from './reaction';
+export { Scheduler } from './scheduler';
 export { Signal, SignalOptions } from './signal';
 ```
 
@@ -156,9 +158,9 @@ Types follow the same dependency graph as the packages themselves:
        ↓
 @semantic-ui/reactivity     @semantic-ui/query
        ↓                          ↓
-       └────── @semantic-ui/templating ──┐
-                      ↓                   ↓
-       @semantic-ui/renderer    @semantic-ui/component
+@semantic-ui/renderer  ←→  @semantic-ui/templating
+       ↓                          ↓
+       └────── @semantic-ui/component ──┘
                                          ↓
                               @semantic-ui/tailwind
 ```
@@ -196,7 +198,7 @@ toggle(this: Signal<boolean | null | undefined>): void;
 push<U extends any[]>(this: Signal<U>, ...items: U[number][]): void;
 
 // Only callable on Signal<number>
-increment(this: Signal<number | null | undefined>, amount?: number): void;
+increment(this: Signal<number | null | undefined>, amount?: number, max?: number): void;
 ```
 
 This gives IDE users errors if they call `toggle()` on a `Signal<string>` — without any runtime enforcement.
@@ -241,7 +243,7 @@ This allows partial object updates on object signals while keeping primitive sig
 
 ```typescript
 export interface CallParams<
-  TState extends Record<string, any> = Record<string, any>,
+  TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
   TSettings extends Record<string, any> = Record<string, any>,
   TComponentInstance extends Record<string, any> = Record<string, any>,
   TProperties extends Record<string, any> = Record<string, any>,
@@ -383,5 +385,5 @@ packages/your-package/
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Repo Guide** | `/sui:repo-guide` | Understanding overall project structure |
-| **Internals** | `/sui:internals` | Understanding package architecture |
+| **Repo Guide** | `/repo-guide` | Understanding overall project structure |
+| **Internals** | `/internals` | Understanding package architecture |

@@ -9,7 +9,7 @@ workflow: primitive-refine
 
 # Refine Primitive Spec
 
-> **Skill:** `sui:primitive-refine`
+> **Skill:** `primitive-refine`
 > **Purpose:** Interactive workflow for deciding what goes in a primitive's spec and writing it correctly
 
 ## Lifecycle Context
@@ -17,7 +17,7 @@ workflow: primitive-refine
 This is the **second step** in creating a primitive — the interactive editorial session.
 - **Before**: Primitive scaffolded (`primitive-scaffold.md`)
 - **After**: `primitive-write-css.md` (implement CSS for approved features)
-- **Reference**: Load `sui:component-specs` skill for full spec format, shared terms, and SpecReader details
+- **Reference**: Load `component-specs` skill for full spec format, shared terms, and SpecReader details
 
 ---
 
@@ -102,11 +102,11 @@ Each included feature gets a `usageLevel` (1-5) reflecting **how often users wil
 
 ## Phase 3: Write the Spec
 
-Once features are decided, write the `.spec.js` file. Load the `sui:component-specs` skill for full format reference (shared terms, helper functions, SpecReader details). The rules below are the critical contributor guardrails.
+Once features are decided, write the `.spec.js` file. Load the `component-specs` skill for full format reference (shared terms, helper functions, SpecReader details). The rules below are the critical contributor guardrails.
 
 ### Spec Writing Rules
 
-**Golden rule: Only use fields documented in `sui:component-specs`. Never invent fields.**
+**Golden rule: Only use fields documented in `component-specs`. Never invent fields.**
 
 #### Naming Conventions
 - **All `name` fields use Title Case**: "Primary", "Top Attached", "Very Padded"
@@ -188,7 +188,7 @@ variations: [
 ],
 ```
 
-See `sui:component-specs` for the complete list of available constants and helpers.
+See `component-specs` for the complete list of available constants and helpers.
 
 ### Types vs Variations vs States
 
@@ -252,6 +252,6 @@ Before finalizing a spec:
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component Specs** | `sui:component-specs` | Full spec format reference, shared terms, SpecReader API |
-| **Write Primitive CSS** | `sui:primitive-write-css` | Implementing CSS after spec is finalized |
-| **Scaffold Primitive** | `sui:primitive-scaffold` | Creating initial file structure |
+| **Component Specs** | `component-specs` | Full spec format reference, shared terms, SpecReader API |
+| **Write Primitive CSS** | `primitive-write-css` | Implementing CSS after spec is finalized |
+| **Scaffold Primitive** | `primitive-scaffold` | Creating initial file structure |

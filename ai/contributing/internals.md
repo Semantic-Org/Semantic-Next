@@ -10,8 +10,8 @@ dependsOn: [mental-model]
 
 # Semantic UI — Framework Internals
 
-> **Skill:** `sui:internals`
-> **Purpose:** Internal architecture for contributors. Read `sui:mental-model` first for the user-facing concepts this builds on.
+> **Skill:** `internals`
+> **Purpose:** Internal architecture for contributors. Read `mental-model` first for the user-facing concepts this builds on.
 > **Last Updated:** 2026-03-04
 
 ---
@@ -29,10 +29,10 @@ This guide assumes familiarity with the concepts in `ai/essentials/mental-model.
 @semantic-ui/reactivity     ← depends on utils only
 @semantic-ui/query           ← depends on utils only
 @semantic-ui/specs           ← depends on utils only
-@semantic-ui/renderer        ← depends on reactivity, utils, lit
+@semantic-ui/renderer        ← depends on reactivity, templating, utils, lit (peer)
 @semantic-ui/templating      ← depends on renderer, reactivity, query, utils
-@semantic-ui/component       ← depends on templating, utils, lit
-@semantic-ui/tailwind        ← depends on tailwindcss-iso
+@semantic-ui/component       ← depends on query, reactivity, renderer, templating, utils, lit (peer)
+@semantic-ui/tailwind        ← depends on component, utils, tailwindcss-iso
 ```
 
 **The standalone trio** — `reactivity`, `query`, and `utils` have zero framework dependencies. They can be used independently in any JavaScript environment. This is a deliberate architectural principle, not an accident.
@@ -325,7 +325,7 @@ src/primitives/button/
 
 Location: `packages/templating/src/template.js:672`
 
-`Template.call()` builds the destructured parameter object passed to every callback. This is the single source of truth for what's available:
+`Template.call()` builds the destructured parameter object passed to every callback. Key params:
 
 ```js
 params = {
@@ -368,7 +368,7 @@ Extends `LitElement` with Semantic UI-specific functionality:
 - **`createSettingsProxy()`** — creates a reactive Proxy over element properties. Reading a setting returns the current property value; the proxy enables `settings.foo` syntax in callbacks
 - **`getUIClasses()`** — computes the `{ui}` CSS class string from active spec attributes
 - **`isDarkMode()`** — detects dark mode via Query on closest ancestor
-- **`getContent()`** — retrieves slotted content
+- **`$$(selector)`** — queries original (slotted) DOM
 
 The `requestUpdate()` method (inherited from LitElement) is the critical interface contract — called by `Template.call()` params as `rerender()` and by `adjustPropertyFromAttribute()`. Any alternative base class must provide this method.
 
@@ -383,25 +383,25 @@ Events defined in `defineComponent({ events })` are attached via `Template.attac
 ```
 'deep click menu-item'
   ↓
-modifier: 'deep'        → pierces Shadow DOM (uses $$)
+eventType: 'deep'        → allows events from nested Shadow DOM children
 eventName: 'click'
 selector: 'menu-item'
 
 'global hashchange window'
   ↓
-modifier: 'global'       → attaches to window/document
+eventType: 'global'       → attaches to window/document
 eventName: 'hashchange'
 selector: 'window'
 ```
 
-Events are delegated — attached to the render root, not individual elements. The selector filters which events trigger the handler. The `deep` modifier uses `$$` (piercing query) instead of `$`.
+Standard events are delegated at the render root. The selector filters which events trigger the handler. Deep events allow events from nested shadow DOM children to match. Global events attach to the target (window/document). Bind events attach directly to matched elements after first render.
 
 ### Event Handler Params
 
 Event handlers receive the same destructured params as `Template.call()`, plus:
 - `event` — the native DOM event
 - `target` — event target element
-- `value` — convenience: `target.value` or `target.getAttribute('value')`
+- `value` — convenience: `target.value`, `event.target.value`, or `event.detail.value`
 - `this` — the matched element (like jQuery delegation)
 
 ---

@@ -9,7 +9,7 @@ type: skill
 
 # Adjust Theme in Semantic UI
 
-> **Skill:** `sui:adjust-theme`
+> **Skill:** `adjust-theme`
 > **Purpose:** Control light/dark mode across pages, sections, and individual components
 > **Last Updated:** 2026-03-04
 
@@ -234,7 +234,7 @@ Inverted text tokens also exist for text on colored or dark backgrounds:
 --inverted-disabled-text-color     /* Disabled text on inverted backgrounds */
 ```
 
-For the complete token reference, see `sui:design-tokens`.
+For the complete token reference, see `design-tokens`.
 
 ### Container Style Queries
 
@@ -343,7 +343,7 @@ background: var(--blue-50-invariant);
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Style Components** | `sui:style-components` | Customizing component appearance from outside |
-| **Design Tokens** | `sui:design-tokens` | Looking up available design tokens |
-| **Use Components** | `sui:use-components` | Component usage, attributes, events |
-| **Component Theming** | `sui:component-theming` | Building custom components that respond to themes |
+| **Style Components** | `style-components` | Customizing component appearance from outside |
+| **Design Tokens** | `design-tokens` | Looking up available design tokens |
+| **Use Components** | `use-components` | Component usage, attributes, events |
+| **Component Theming** | `component-theming` | Building custom components that respond to themes |

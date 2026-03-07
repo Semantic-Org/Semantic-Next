@@ -9,7 +9,7 @@ type: skill
 
 # Writing and Running Tests
 
-> **Skill:** `sui:testing`
+> **Skill:** `testing`
 > **Purpose:** Repo-specific test conventions, environment selection, and patterns for writing tests in the Semantic UI monorepo
 
 ---
@@ -120,7 +120,7 @@ CI coverage thresholds (from `ci-coverage.config.js`):
 | `npm run test:all` | UI reporter + coverage | Interactive review |
 | `npm run ci:coverage` | Istanbul coverage, json output | CI / checking coverage |
 | `npm run ci:test` | All tests for CI | CI pipeline |
-| `npm run ci:test:unit` | Unit tests only for CI | CI pipeline |
+| `npm run ci:test:unit` | Non-browser tests for CI (node + jsdom) | CI pipeline |
 | `npm run ci:test:browser` | Browser tests only for CI | CI pipeline |
 
 ---
@@ -297,6 +297,6 @@ import { page, userEvent } from 'vitest/browser';  // browser tests only
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Repo Guide** | `sui:repo-guide` | Navigating the monorepo structure |
-| **Component Authoring** | `sui:component-authoring` | Understanding component architecture before testing |
-| **Internals** | `sui:internals` | Deep understanding of framework internals |
+| **Repo Guide** | `repo-guide` | Navigating the monorepo structure |
+| **Component Authoring** | `component-authoring` | Understanding component architecture before testing |
+| **Internals** | `internals` | Deep understanding of framework internals |

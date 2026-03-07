@@ -30,9 +30,8 @@ packages/query/src/query.js             # Main implementation
 packages/query/test/dom/query.test.js    # DOM-based unit tests
 packages/query/test/browser/query.test.js # Browser-only tests (window, custom elements, etc.)
 packages/query/types/query.d.ts         # TypeScript definitions
-docs/src/pages/api/query/*.mdx          # API documentation
-ai/packages/query.md                    # AI package guide
-RELEASE-NOTES.md                        # Change log
+docs/src/pages/docs/api/query/*.mdx     # API documentation
+CHANGELOG.md                            # Change log
 ```
 
 ## Step 1: Implementation
@@ -43,7 +42,7 @@ Add your method to `/packages/query/src/query.js`
 ### Key Conventions
 
 #### Use Semantic UI Utils
-Query uses utilities from `@semantic-ui/utils`. Use existing imported helpers from the import statement at the top of `query.js`, or import additional ones as needed. See the comprehensive [Utils Package Guide](/ai/framework/utils.md) for all available utilities.
+Query uses utilities from `@semantic-ui/utils`. Use existing imported helpers from the import statement at the top of `query.js`, or import additional ones as needed. See `utility-functions` for all available utilities.
 
 #### Method Placement
 - Add new methods before the comment `// special helper for SUI components`
@@ -114,7 +113,7 @@ methodName(param1, param2) {
 
 ## Step 2: Testing
 
-> **See Also:** [Testing Guide](/ai/contributing/development/testing.md) for help choosing between unit, DOM, and browser tests.
+> **See Also:** See `testing` for help choosing between unit, DOM, and browser tests.
 
 ### Location
 Add tests to `/packages/query/test/dom/query.test.js` for standard DOM operations.
@@ -175,7 +174,7 @@ expect($result[0]).toBe(/* original element */);
 
 ## Step 3: TypeScript Definitions
 
-> **See Also:** [TypeScript Types Guide](/ai/contributing/development/typescript-types.md) for comprehensive JSDoc patterns and type definition best practices.
+> **See Also:** See `types` for JSDoc patterns and type definition best practices.
 
 ### Location
 Add type definitions to `/packages/query/types/query.d.ts`
@@ -201,7 +200,7 @@ methodName(): SomeType | SomeType[] | undefined;
 ### JSDoc Comments
 Include proper JSDoc with:
 - Description of what the method does
-- `@see` link to documentation (use pattern: `https://next.semantic-ui.com/api/query/category#methodname`)
+- `@see` link to documentation (use pattern: `https://next.semantic-ui.com/docs/api/query/category#methodname`)
 - Parameter descriptions
 - Return value descriptions
 
@@ -213,7 +212,7 @@ Include proper JSDoc with:
 ## Step 4: Documentation
 
 ### Location
-Add documentation to the appropriate file in `/docs/src/pages/api/query/`
+Add documentation to the appropriate file in `/docs/src/pages/docs/api/query/`
 
 Choose the most relevant category:
 - `attributes.mdx` - for attribute-related methods
@@ -282,10 +281,10 @@ $('selector').methodName(key, value)
 - Related methods or concepts
 ```
 
-## Step 5: AI Guide
+## Step 5: AI Context
 
 ### Location
-Update `/ai/framework/query.md` to include the new method
+Update the `query` skill to include the new method.
 
 ### Method Categories
 Add your method to the appropriate section in the "Query Methods Overview":
@@ -320,7 +319,7 @@ Include practical examples showing:
 ## Step 6: Release Notes
 
 ### Location
-`RELEASE-NOTES.md` (may already be updated)
+`CHANGELOG.md` (may already be updated)
 
 ### Format
 Add entry following the existing pattern:
@@ -364,8 +363,8 @@ Add entry following the existing pattern:
 - [ ] Coverage verified with `npm run test:coverage` - all reasonable lines covered
 - [ ] TypeScript definitions added with proper overloads
 - [ ] Documentation added to appropriate category file
-- [ ] AI guide updated with method reference and examples
-- [ ] Release notes updated (if needed)
+- [ ] AI context updated with method reference and examples
+- [ ] Changelog updated (if needed)
 - [ ] Tests pass (`npm test` in packages/query)
 - [ ] Method follows single/multiple element return patterns
 - [ ] Setter returns Query instance for chaining

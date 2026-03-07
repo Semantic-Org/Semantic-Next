@@ -9,7 +9,7 @@ workflow: primitive-scaffold
 
 # Scaffold New Primitive
 
-> **Skill:** `sui:primitive-scaffold`
+> **Skill:** `primitive-scaffold`
 > **Purpose:** Create the complete file structure for a new UI primitive in Semantic UI
 
 ## Lifecycle Context
@@ -17,7 +17,7 @@ workflow: primitive-scaffold
 This is the **first step** in creating a new primitive.
 - **Before**: Decision to create a new primitive
 - **After**: `primitive-refine.md` (define and author the spec), then `primitive-write-css.md` (implement CSS)
-- **Reference**: Load `sui:component-specs` skill for spec format details
+- **Reference**: Load `component-specs` skill for spec format details
 
 ## Overview
 
@@ -131,7 +131,7 @@ import { defineComponent } from '@semantic-ui/component';
 
 import css from './[primitive-name]-bundle.css?raw';
 import template from './[primitive-name].html?raw';
-import componentSpec from './specs/[primitive-name]-component.js';
+import componentSpec from './specs/[primitive-name].component.js';
 
 const createComponent = ({ $ }) => ({});
 
@@ -147,7 +147,7 @@ export { UI[PrimitiveName] };
 ```
 
 **Important**:
-- Import from `[primitive-name]-component.js` (auto-generated), NOT the JSON directly
+- Import from `[primitive-name].component.js` (auto-generated), NOT the JSON directly
 - Always include `createComponent` even if empty
 - Export using destructuring: `export { UI[PrimitiveName] }`
 
@@ -261,8 +261,8 @@ export { UI[PrimitiveName] } from './[primitive-name].js';
 Create `/src/primitives/[primitive-name]/specs.js`:
 
 ```javascript
-export { default as [PrimitiveName]Spec } from './specs/[primitive-name].js';
-export { default as [PrimitiveName]ComponentSpec } from './specs/[primitive-name]-component.js';
+export { default as [PrimitiveName]Spec } from './specs/[primitive-name].spec.json';
+export { default as [PrimitiveName]ComponentSpec } from './specs/[primitive-name].component.js';
 ```
 
 ### Step 6: Update Framework Exports
@@ -332,8 +332,8 @@ import {
 
 2. Add rendering case (maintain alphabetical order):
 ```jsx
-{name === 'UI[PrimitiveName]' && (
-  <UI[PrimitiveName] {...attributes} client:load>
+{inArray(componentName, ['ui-[primitive-name]', 'UI[PrimitiveName]']) && (
+  <UI[PrimitiveName] {...attributes} client:visible>
     <slot />
   </UI[PrimitiveName]>
 )}
@@ -350,7 +350,7 @@ npm run build:ui-deps
 ```
 
 This will:
-- Generate `[component-name].js` and `[component-name]-component.js` from the spec
+- Generate `[component-name].js` and `[component-name].component.js` from the spec
 - Bundle CSS into `[component-name]-bundle.css`
 - Make the component available for use
 
@@ -418,7 +418,7 @@ Create `/src/primitives/[primitive-name]/plural/[plural-name].js`:
 import { defineComponent } from '@semantic-ui/component';
 
 import css from '../[primitive-name]-bundle.css?raw';
-import componentSpec from '../specs/[plural-name]-component.js';
+import componentSpec from '../specs/[plural-name].component.js';
 import template from './[plural-name].html?raw';
 
 export const UI[PluralName] = defineComponent({
@@ -433,7 +433,7 @@ export const UI[PluralName] = defineComponent({
 
 **Important Differences from Singular**:
 - Imports CSS from parent directory (`../[primitive-name]-bundle.css`)
-- Imports plural component spec (`[plural-name]-component.js`)
+- Imports plural component spec (`[plural-name].component.js`)
 - Adds `plural: true`
 - Adds `singularTag: 'ui-[primitive-name]'`
 - No `createComponent` function needed
@@ -486,13 +486,13 @@ import {
 Add rendering cases for both:
 
 ```jsx
-{name === 'UI[PrimitiveName]' && (
-  <UI[PrimitiveName] {...attributes} client:load>
+{inArray(componentName, ['ui-[primitive-name]', 'UI[PrimitiveName]']) && (
+  <UI[PrimitiveName] {...attributes} client:visible>
     <slot />
   </UI[PrimitiveName]>
 )}
-{name === 'UI[PluralName]' && (
-  <UI[PluralName] {...attributes} client:load>
+{inArray(componentName, ['ui-[plural-name]', 'UI[PluralName]']) && (
+  <UI[PluralName] {...attributes} client:visible>
     <slot />
   </UI[PluralName]>
 )}
@@ -515,7 +515,7 @@ settings: [
 ## Validation Checklist
 
 - [ ] Spec `.spec.js` is valid and follows naming conventions
-- [ ] Component imports from `-component.js` not `.json`
+- [ ] Component imports from `.component.js` not `.json`
 - [ ] CSS directory structure created with all folders
 - [ ] CSS barrel files created in correct locations (definition/ and theme/)
 - [ ] CSS layer names match component name and follow pattern
@@ -528,7 +528,7 @@ settings: [
 
 ## Common Mistakes to Avoid
 
-1. **Importing spec JSON directly** - Always import from generated `-component.js`
+1. **Importing spec JSON directly** - Always import from generated `.component.js`
 2. **Space in template class** - Must be `{ui}component` not `{ui} component`
 3. **Missing createComponent** - Even if empty, it's required
 4. **Wrong export syntax** - Use `export { UIComponent }` not `export default`

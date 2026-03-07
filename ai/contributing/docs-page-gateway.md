@@ -9,10 +9,10 @@ type: skill
 
 # Writing Gateway Pages
 
-> **Skill:** `sui:docs-page-gateway`
+> **Skill:** `docs-page-gateway`
 > **Purpose:** How to write landing/index pages that earn reader attention through problem-first structure
 
-**Prerequisites:** Load `sui:docs-writing-effectively` (required), `sui:docs-authoring-standards`, and `sui:docs-target-audience`
+**Prerequisites:** Load `docs-writing-effectively` (required), `docs-authoring-standards`, and `docs-target-audience`
 
 ---
 
@@ -26,8 +26,8 @@ Gateway pages are **first contact**. The reader is uncommitted—they're decidin
 - Feature landing pages (`/docs/guides/reactivity/index.mdx`)
 
 **Don't use gateway format for:**
-- Teaching how to use something → use [guide.md](./guide.md)
-- Method documentation → use [api-reference.md](./api-reference.md)
+- Teaching how to use something → see `docs-page-guide`
+- Method documentation → see `docs-page-api-reference`
 
 ---
 
@@ -235,7 +235,7 @@ $$('ui-dropdown .option'); // Returns all matching elements
 - [ ] Clear transition from convince to tour
 - [ ] Written for uncommitted reader (earns attention)
 - [ ] Clear path to next step (getting started)
-- [ ] Follows [authoring-standards.md](../authoring-standards.md)
+- [ ] Follows `docs-authoring-standards`
 
 ---
 

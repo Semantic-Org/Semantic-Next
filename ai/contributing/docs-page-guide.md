@@ -9,11 +9,11 @@ type: skill
 
 # Writing Guide Pages
 
-> **Skill:** `sui:docs-page-guide`
+> **Skill:** `docs-page-guide`
 > **Purpose:** How to write instructional guide pages that teach concepts with progressive complexity
 
-**Prerequisites:** Load `sui:docs-authoring-standards` first
-**Related:** [Target Audience](./docs-target-audience.md)
+**Prerequisites:** Load `docs-authoring-standards` first
+**Related:** see `docs-target-audience`
 
 ---
 
@@ -28,9 +28,9 @@ Guide pages teach readers **how to use something**. The reader has already decid
 - Query library usage
 
 **Don't use guide format for:**
-- Landing/index pages → use [gateway.md](./gateway.md)
-- Method documentation → use [api-reference.md](./api-reference.md)
-- Interactive tutorials → use [pedagogical.md](./pedagogical.md)
+- Landing/index pages → see `docs-page-gateway`
+- Method documentation → see `docs-page-api-reference`
+- Interactive tutorials → see `docs-page-pedagogical`
 
 ---
 

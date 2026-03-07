@@ -9,7 +9,7 @@ type: skill
 
 # Component Authoring Guide
 
-> **Skill:** `sui:component-authoring`
+> **Skill:** `component-authoring`
 > **Purpose:** Practical guide to building components with `defineComponent` — file structure, instance creation, the `self` pattern, data context, lifecycle ordering, and common mistakes.
 > **Last Updated:** 2026-03-04
 
@@ -60,13 +60,13 @@ Start: I need a component
 │  └─ YES → use createComponent
 │
 ├─ Does it listen to DOM events?
-│  └─ YES → use events (see sui:component-events)
+│  └─ YES → use events (see component-events)
 │
 ├─ Does it have scoped styles?
-│  └─ YES → use css (see sui:component-css)
+│  └─ YES → use css (see component-css)
 │
 └─ Is it a canonical UI primitive (button, input, menu)?
-   └─ YES → add componentSpec (see sui:component-specs)
+   └─ YES → add componentSpec (see component-specs)
 ```
 
 ---
@@ -231,7 +231,7 @@ const defaultState = {
 
 **Key distinction**: Settings are read through a reactive proxy (`settings.color`), not through `.get()`. State values are Signals and use `.get()` / `.set()`.
 
-For deep coverage of state management, see `sui:reactive-state`.
+For deep coverage of state management, see `reactive-state`.
 
 ---
 
@@ -273,7 +273,7 @@ const defaultState = { name: 'Jack' };
 // Template: {name} → "Jack" in all cases
 ```
 
-**Composing with primitives**: Semantic UI ships spec-driven primitives — use them directly in your templates. When the Semantic UI MCP server is available, use `list_components` to see what's available. See `sui:use` for attribute syntax.
+**Composing with primitives**: Semantic UI ships spec-driven primitives — use them directly in your templates. When the Semantic UI MCP server is available, use `list_components` to see what's available. See `use` for attribute syntax.
 
 ---
 
@@ -491,9 +491,9 @@ Template → flat lookup:            {name} checks instance → settings → sta
 
 | Skill | Use when... |
 |-------|-------------|
-| `sui:component-css` | Writing scoped CSS for component shadow DOM |
-| `sui:component-html` | HTML structure and class naming patterns |
-| `sui:reactive-state` | Deep dive into signals, reactions, and state management |
-| `sui:component-specs` | Building spec-driven primitives (ui-button, ui-input) |
-| `sui:component-theming` | Design tokens and theme integration |
-| `sui:mental-model` | Framework-level understanding of how everything fits together |
+| `component-css` | Writing scoped CSS for component shadow DOM |
+| `component-html` | HTML structure and class naming patterns |
+| `reactive-state` | Deep dive into signals, reactions, and state management |
+| `component-specs` | Building spec-driven primitives (ui-button, ui-input) |
+| `component-theming` | Design tokens and theme integration |
+| `mental-model` | Framework-level understanding of how everything fits together |

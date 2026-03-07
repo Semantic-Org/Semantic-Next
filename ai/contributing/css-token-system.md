@@ -9,7 +9,7 @@ type: skill
 
 # CSS Token System Architecture
 
-> **Skill:** `sui:css-token-system`
+> **Skill:** `css-token-system`
 > **Purpose:** Deep knowledge of how SUI's CSS tokens are computed so you can extend the system using the same principles
 > **Last Updated:** 2026-03-05
 
@@ -174,6 +174,7 @@ Component sizes are defined as `--size-*` tokens that map to `--Xpx` values. The
 --size-3xs: var(--10px);   --mini:    var(--size-3xs);
 --size-2xs: var(--11px);   --tiny:    var(--size-2xs);
 --size-xs:  var(--12px);   --small:   var(--size-xs);
+--size-s:   var(--13px);
 --size-m:   var(--14px);   --medium:  var(--size-m);
 --size-l:   var(--16px);   --large:   var(--size-l);
 --size-xl:  var(--18px);   --big:     var(--size-xl);
@@ -350,7 +351,7 @@ Borders use a separate LCH base (`--standard-border-color`) hand-tuned for contr
 Five intensity levels of alpha overlays defined per-theme in `themes/light/shading.css` and `themes/dark/colors.css`:
 
 ```css
---very-subtle-transparent-black  /* 2-3% */
+--very-subtle-transparent-black  /* 2% */
 --subtle-transparent-black       /* 3-5% */
 --transparent-black              /* 5-15% */
 --strong-transparent-black       /* 8-20% */

@@ -9,7 +9,7 @@ type: skill
 
 # Component Template Syntax Reference
 
-> **Skill:** `sui:component-templating`
+> **Skill:** `component-templating`
 > **Purpose:** Complete syntax reference for writing templates in Semantic UI components — every block type, expression style, attribute binding rule, and built-in helper.
 
 ---
@@ -104,7 +104,7 @@ Bind events directly in templates with `@event` syntax:
 <input @input={handleSearch}>
 ```
 
-The handler must be a method from `createComponent` available in the data context. For details on event delegation and the full event DSL, see `sui:component-events`.
+The handler must be a method from `createComponent` available in the data context. For details on event delegation and the full event DSL, see `component-events`.
 
 ---
 
@@ -549,9 +549,9 @@ DATA CONTEXT LOOKUP ORDER
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Component Authoring** | `sui:component-authoring` | `defineComponent` structure, `createComponent`, file layout |
-| **Component State** | `sui:component-state` | Settings vs state, signal management |
-| **Component HTML** | `sui:component-html` | Semantic class naming, accessibility, DOM structure |
-| **Component Events** | `sui:component-events` | Event DSL, delegation, `dispatchEvent`, `@event` details |
-| **Reactive State** | `sui:reactive-state` | Signal/Reaction primitives, `Reaction.guard`, `nonreactive` |
-| **Component CSS** | `sui:component-css` | Shadow DOM styling, `:host`, `part`, CSS custom properties |
+| **Component Authoring** | `component-authoring` | `defineComponent` structure, `createComponent`, file layout |
+| **Component State** | `component-state` | Settings vs state, signal management |
+| **Component HTML** | `component-html` | Semantic class naming, accessibility, DOM structure |
+| **Component Events** | `component-events` | Event DSL, delegation, `dispatchEvent`, `@event` details |
+| **Reactive State** | `reactive-state` | Signal/Reaction primitives, `Reaction.guard`, `nonreactive` |
+| **Component CSS** | `component-css` | Shadow DOM styling, `:host`, `part`, CSS custom properties |

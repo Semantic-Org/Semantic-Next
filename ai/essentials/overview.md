@@ -9,7 +9,7 @@ type: skill
 
 # What Is Semantic UI
 
-> **Skill:** `sui:overview`
+> **Skill:** `overview`
 > **Purpose:** Conceptual orientation for agents encountering Semantic UI for the first time — what it is, what makes it genuinely novel, and what you'd get wrong without being told.
 
 Semantic UI is what you get when you design a component framework around two assumptions: a runtime `Proxy` makes compile steps unnecessary, and native Shadow DOM makes framework-specific styling unnecessary.
@@ -21,7 +21,7 @@ Semantic UI is what you get when you design a component framework around two ass
 - Signals auto-unwrap. Mutation helpers instead of get-mutate-set.
 - Settings are the external API (attributes). State is internal reactivity.
 - Two layers: a **component framework** (`defineComponent`, signals, templates) and a **design system** (`<ui-button>`, `<ui-card>`, etc.). Use either independently.
-- Load a skill before writing code — start with `sui:use-components` or `sui:component-authoring`.
+- Load a skill before writing code — start with `use-components` or `component-authoring`.
 
 ---
 
@@ -74,7 +74,7 @@ state.count.increment()  // correct
 
 ---
 
-**Scope of this document:** orientation and correction, not comprehensive reference. Load task-specific skills before writing code (see Related Skills at the end). For deeper framework internals, load `sui:mental-model`.
+**Scope of this document:** orientation and correction, not comprehensive reference. Load task-specific skills before writing code (see Related Skills at the end). For deeper framework internals, load `mental-model`.
 
 ---
 
@@ -84,7 +84,7 @@ SUI makes an architectural bet other frameworks don't: **everything is evaluated
 
 When you write `{count}` in a template, there is no compiler transforming that into `count.get()` or a render function. At runtime, a `Proxy` intercepts the property access, discovers `count` is a signal, and unwraps it transparently. This means signal auto-unwrapping works for *any* expression — not just patterns the framework has seen before. An arbitrary JavaScript expression like `{items.filter(i => i.active).length}` resolves signals at every property access, automatically, because the `Proxy` operates at the language level, not the syntax level.
 
-**Why this works in practice:** the "compile step" is tokenization — parsed once per component prototype into a flat AST, no code generation, sub-millisecond. Reactivity is per-expression (not per-component), so only the specific DOM nodes depending on a changed signal re-evaluate. Load `sui:mental-model` for the full rendering pipeline.
+**Why this works in practice:** the "compile step" is tokenization — parsed once per component prototype into a flat AST, no code generation, sub-millisecond. Reactivity is per-expression (not per-component), so only the specific DOM nodes depending on a changed signal re-evaluate. Load `mental-model` for the full rendering pipeline.
 
 **What this unlocks:**
 
@@ -127,7 +127,7 @@ All of this resolves against a **flat data context**. Settings, state, and compo
 
 ## Template Control Flow
 
-Templates use `{#keyword}` blocks for control flow. Slots use standard web component projection — consumers pass content via the `slot` attribute. This is the minimum syntax to avoid guessing wrong — load `sui:component-templating` for the full reference.
+Templates use `{#keyword}` blocks for control flow. Slots use standard web component projection — consumers pass content via the `slot` attribute. This is the minimum syntax to avoid guessing wrong — load `component-templating` for the full reference.
 
 ```html
 {#if isActive}                          <!-- conditional -->
@@ -144,7 +144,7 @@ Templates use `{#keyword}` blocks for control flow. Slots use standard web compo
 
 {>slot}                                 <!-- default slot -->
 {>slot header}                          <!-- named slot -->
-{>mySubtemplate}                        <!-- subtemplate (load sui:component-templating for details) -->
+{>mySubtemplate}                        <!-- subtemplate (load component-templating for details) -->
 ```
 
 Consumer-side slot projection uses the standard `slot` attribute:
@@ -175,7 +175,7 @@ defineComponent({
 });
 ```
 
-A full component can also include settings (external API), event handlers, keybindings, and a `createComponent` factory. Load `sui:component-authoring` for the full API — the key structural points are:
+A full component can also include settings (external API), event handlers, keybindings, and a `createComponent` factory. Load `component-authoring` for the full API — the key structural points are:
 
 - **Every callback** receives the same destructured parameter object: `{ self, state, settings, $, $$, reaction, signal, dispatchEvent, findParent, isClient, isServer, ... }`. No imports, no dependency injection. `reaction` creates reactive computations that re-run when their signal dependencies change — dependencies are tracked automatically, not declared:
   ```js
@@ -204,7 +204,7 @@ Without a `tagName`, `defineComponent` returns a subtemplate instead of register
 
 **Settings vs. state.** `defaultSettings` defines the component's external API — values consumers pass via HTML attributes or JavaScript. `defaultState` defines internal reactive state that consumers don't see. Both merge into the flat template namespace, but they serve different roles: settings are the contract with the outside world, state is private reactivity.
 
-**Lifecycle.** Components are created once, then rendered, then connected to the DOM. `onCreated` runs after creation (before DOM is available — use it for setup, timers, data fetching). `onRendered` runs after each render (DOM is available). `onDestroyed` runs on disconnect (cleanup). All callbacks receive the same parameter object.
+**Lifecycle.** Components are created once, then rendered, then connected to the DOM. `onCreated` runs after creation (before DOM is available — use it for setup, timers, data fetching). `onRendered` runs after the first render (DOM is available). `onDestroyed` runs on disconnect (cleanup). All callbacks receive the same parameter object.
 
 **Server-side rendering.** SUI supports SSR. Every callback receives `isClient` and `isServer` booleans — use them to guard browser-only code (DOM APIs, timers, event listeners) so the same component definition works in both contexts.
 
@@ -268,7 +268,7 @@ Specs also power auto-generated documentation, the `{ui}` computed class string 
 
 ## Query
 
-`$` and `$$` are jQuery-like DOM utilities provided in every component callback. `$` selects within the current scope; `$$` does the same but **pierces Shadow DOM boundaries**. Load `sui:query` before using them — the API surface is large and Shadow DOM–aware in ways that aren't guessable.
+`$` and `$$` are jQuery-like DOM utilities provided in every component callback. `$` selects within the current scope; `$$` does the same but **pierces Shadow DOM boundaries**. Load `query` before using them — the API surface is large and Shadow DOM–aware in ways that aren't guessable.
 
 Query also supports **behaviors** — reusable interactive patterns (tooltip, dropdown, escape) attached to elements via `$el.behaviorName()`. If you encounter `$el.tooltip()` or `$el.escape('show')` in user code, that's the behavior system.
 
@@ -276,18 +276,18 @@ Query also supports **behaviors** — reusable interactive patterns (tooltip, dr
 
 ## Related Skills
 
-Load task-specific skills via MCP when you need to act, not just orient. **For most tasks, start with `sui:use-components` (using existing primitives) or `sui:component-authoring` (building new ones).** Use `list_components` and `get_component` for first-party component specs. Use `search` to find content by keyword.
+Load task-specific skills via MCP when you need to act, not just orient. **For most tasks, start with `use-components` (using existing primitives) or `component-authoring` (building new ones).** Use `list_components` and `get_component` for first-party component specs. Use `search` to find content by keyword.
 
 | Task | Skill |
 |------|-------|
-| Use first-party components | `sui:use-components` |
-| Build custom components | `sui:component-authoring` |
-| Write component templates | `sui:component-templating` |
-| Write component CSS | `sui:component-css` |
-| Understand reactivity | `sui:reactive-state` |
-| Style components from outside | `sui:style-components` |
-| Use design tokens | `sui:design-tokens` |
-| Control themes | `sui:adjust-theme` |
-| Use Tailwind in components | `sui:component-tailwind` |
-| Use the Query DOM library | `sui:query` |
-| Deep framework internals | `sui:mental-model` |
+| Use first-party components | `use-components` |
+| Build custom components | `component-authoring` |
+| Write component templates | `component-templating` |
+| Write component CSS | `component-css` |
+| Understand reactivity | `reactive-state` |
+| Style components from outside | `style-components` |
+| Use design tokens | `design-tokens` |
+| Control themes | `adjust-theme` |
+| Use Tailwind in components | `component-tailwind` |
+| Use the Query DOM library | `query` |
+| Deep framework internals | `mental-model` |

@@ -9,7 +9,7 @@ type: skill
 
 # CSS Design Tokens Reference
 
-> **Skill:** `sui:design-tokens`
+> **Skill:** `design-tokens`
 > **Purpose:** Reference for available CSS design tokens in Semantic UI
 > **Last Updated:** 2026-03-04
 
@@ -796,6 +796,6 @@ Cross-component tokens for consistent form styling (inputs, dropdowns, textareas
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Style Components** | `sui:style-components` | Customizing component appearance, `::part()`, CSS variable overrides |
-| **Use Components** | `sui:use-components` | Component usage, specs, attributes, events |
-| **Use Icons** | `sui:use-icons` | Creating custom icon sets for `<ui-icon>` |
+| **Style Components** | `style-components` | Customizing component appearance, `::part()`, CSS variable overrides |
+| **Use Components** | `use-components` | Component usage, specs, attributes, events |
+| **Use Icons** | `use-icons` | Creating custom icon sets for `<ui-icon>` |

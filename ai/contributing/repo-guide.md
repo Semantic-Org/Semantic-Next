@@ -9,7 +9,7 @@ type: skill
 
 # Repository Guide
 
-> **Skill:** `sui:repo-guide`
+> **Skill:** `repo-guide`
 > **Purpose:** Quick orientation to the monorepo layout — where things live and how to find them.
 
 ---
@@ -20,13 +20,13 @@ type: skill
 ├── ai/                     # AI context, skills, and workflows
 ├── docs/                   # Documentation website (Astro)
 ├── examples/               # Standalone demos
-├── packages/               # Core framework packages (see sui:internals for details)
+├── packages/               # Core framework packages (see internals for details)
 ├── src/                    # First-party UI library
 │   ├── primitives/         # Spec-driven canonical components (button, input, menu, ...)
 │   ├── components/         # Application-level components (nav-menu, panels, ...)
 │   ├── behaviors/          # Reusable logic attachments (transition, tooltip, ...)
 │   ├── css/                # Global tokens and reset
-│   │   ├── tokens/         # Design token definitions (see sui:css-token-system)
+│   │   ├── tokens/         # Design token definitions (see css-token-system)
 │   │   └── global/         # Reset, base styles
 │   └── specs/              # Spec entry points and exports
 ├── tests/                  # Monorepo test harnesses
@@ -45,7 +45,7 @@ docs/
 │   │   ├── docs/
 │   │   │   ├── guides/     # Conceptual guides (components, templates, reactivity, query)
 │   │   │   └── api/        # API reference (organized by package)
-│   │   └── content/        # AI context served via MCP
+│   │   └── content/        # Content API endpoints (docs, examples, specs, lessons, AI context)
 │   ├── examples/           # Interactive examples (hand-written, canonical patterns)
 │   ├── helpers/
 │   │   └── menus.js        # Documentation menu structure — MUST modify when adding pages
@@ -67,7 +67,7 @@ tests/
 └── setup/                  # Test environment setup
 ```
 
-Individual package tests live in `packages/{name}/test/`. See `sui:writing-tests` for patterns and `sui:testing-architecture` for infrastructure.
+Individual package tests live in `packages/{name}/test/`. See `writing-tests` for patterns and `testing-architecture` for infrastructure.
 
 ---
 
@@ -76,8 +76,7 @@ Individual package tests live in `packages/{name}/test/`. See `sui:writing-tests
 | File | Purpose |
 |------|---------|
 | `package.json` | Monorepo root, workspace config, scripts |
-| `dprint.json` | Code formatting rules (see `sui:code-formatting`) |
-| `meta.json` | Project metadata |
+| `dprint.json` | Code formatting rules (see `code-formatting`) |
 | `docs/astro.config.mjs` | Documentation site config |
 | `docs/src/helpers/menus.js` | Sidebar menu structure — modify for new pages |
 
@@ -87,7 +86,7 @@ Individual package tests live in `packages/{name}/test/`. See `sui:writing-tests
 
 | Skill | Use when... |
 |-------|-------------|
-| **Framework Internals** (`sui:internals`) | Understanding package internals, AST pipeline, reactivity chain |
-| **Mental Model** (`sui:mental-model`) | User-facing framework concepts |
-| **Build System** (`sui:build-system`) | Build scripts, esbuild plugins, export conditions |
-| **Writing Tests** (`sui:writing-tests`) | Writing unit/DOM/browser tests |
+| **Framework Internals** (`internals`) | Understanding package internals, AST pipeline, reactivity chain |
+| **Mental Model** (`mental-model`) | User-facing framework concepts |
+| **Build System** (`build-system`) | Build scripts, esbuild plugins, export conditions |
+| **Writing Tests** (`writing-tests`) | Writing unit/DOM/browser tests |

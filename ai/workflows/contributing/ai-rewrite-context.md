@@ -9,7 +9,7 @@ workflow: ai-rewrite-context
 
 You will be rewriting an existing AI context or skill file to comply with current authoring standards. This is not a from-scratch authoring task — the content already exists. Your job is to pare it down, fix its metadata, verify its claims against source code, and reshape it to follow the structural and content conventions.
 
-**Before starting, load the `author-context-or-skill` skill via `use_skill`.** That skill is the authoritative reference for all content standards. Every decision you make should trace back to a principle in that skill.
+**Before starting, see `ai-author-context`.** That skill is the authoritative reference for all content standards. Every decision you make should trace back to a principle in that skill.
 
 ---
 
@@ -19,7 +19,7 @@ You will be rewriting an existing AI context or skill file to comply with curren
 
   - **Frontmatter:** Is it complete? Does it have `title`, `description`, `keywords`, `audience`, `skill`, `type`? Are the values correct? Does the `audience` value match one of: `usage`, `authoring`, `essentials`, `contributing`, `research`?
   - **Structure:** Does it follow the skeleton? (frontmatter → blockquote header → sections → Quick Reference → Related Skills table)
-  - **Content quality:** Does it follow the content principles from `author-context-or-skill`? (Only document what the agent can't infer, tables for lookup, prose for concepts, pair correct/incorrect examples, one term per concept)
+  - **Content quality:** Does it follow the content principles from `ai-author-context`? (Only document what the agent can't infer, tables for lookup, prose for concepts, pair correct/incorrect examples, one term per concept)
   - **Length:** Does it fit within the tolerance for its subtype? (Procedural: ~500 lines, Reference: longer OK, Mixed: concepts in first ~300 lines)
 
 - Produce a short written audit for the user covering what needs to change. Categorize issues as:
@@ -45,7 +45,7 @@ You will be rewriting an existing AI context or skill file to comply with curren
 
 Apply changes in this order:
 
-1. **Fix frontmatter.** Complete all required fields per `author-context-or-skill`.
+1. **Fix frontmatter.** Complete all required fields per `ai-author-context`.
 
 2. **Add structural skeleton.** Blockquote header if missing. Quick Reference if file > ~100 lines. Related Skills table (can be empty if uncertain — flag for the user).
 
@@ -55,7 +55,7 @@ Apply changes in this order:
    - Convert prose to tables where the content is lookup-oriented.
    - Add ✅/❌ example pairs where the file only shows the correct way.
 
-4. **Fix terminology.** One term per concept, consistent with neighboring skills. Check `author-context-or-skill` for established terms.
+4. **Fix terminology.** One term per concept, consistent with neighboring skills. Check `ai-author-context` for established terms.
 
 5. **Correct any verified errors** from Phase 1.
 

@@ -9,7 +9,7 @@ type: skill
 
 # Use Icons in Semantic UI
 
-> **Skill:** `sui:use-icons`
+> **Skill:** `use-icons`
 > **Purpose:** How to use the `<ui-icon>` component — syntax, icon sets, sizing, coloring, and icons inside other components
 > **Last Updated:** 2026-03-04
 
@@ -318,7 +318,7 @@ import '@semantic-ui/core/icon/sets/dev.css';
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Create Icon Sets** | `sui:create-icon-set` | Building a custom icon set from your own SVGs |
-| **Use Components** | `sui:use-components` | General component usage, specs, attributes, events |
-| **Style Components** | `sui:style-components` | Customizing component appearance from outside |
-| **Design Tokens** | `sui:design-tokens` | Available design tokens for colors, spacing, sizing |
+| **Create Icon Sets** | `create-icon-set` | Building a custom icon set from your own SVGs |
+| **Use Components** | `use-components` | General component usage, specs, attributes, events |
+| **Style Components** | `style-components` | Customizing component appearance from outside |
+| **Design Tokens** | `design-tokens` | Available design tokens for colors, spacing, sizing |

@@ -9,7 +9,7 @@ type: skill
 
 # Resolving Documentation Paths
 
-> **Skill:** `sui:docs-paths`
+> **Skill:** `docs-paths`
 > **Purpose:** Derive the correct full URL for any docs page or method anchor
 
 **Golden rule: always derive the URL from the file path — never guess a URL from a method or package name.**
@@ -136,5 +136,5 @@ Heading → Anchor
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **TypeScript Types** | `/sui:types` | Writing `.d.ts` files that include `@see` links |
-| **Author Context** | `/sui:author-context-or-skill` | Creating or editing files in `ai/` |
+| **TypeScript Types** | `/types` | Writing `.d.ts` files that include `@see` links |
+| **Author Context** | `/ai-author-context` | Creating or editing files in `ai/` |

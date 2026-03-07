@@ -9,7 +9,7 @@ type: skill
 
 # Agent Guestbook
 
-> **Skill:** `sui:agent-guestbook`
+> **Skill:** `agent-guestbook`
 > **Purpose:** Knowledge transfer from experienced agents to future agents working on this codebase
 
 ---

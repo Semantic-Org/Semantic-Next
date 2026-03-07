@@ -29,13 +29,11 @@ packages/renderer/src/lit/renderer.js                    # Render logic
 packages/renderer/src/lit/directives/*.js                # Lit directives
 packages/templating/test/compiler.test.js                # Compiler tests
 packages/renderer/test/*.test.js                         # Renderer tests
-docs/src/pages/templates/*.mdx                           # User guide documentation
-docs/src/pages/api/templating/ast.mdx                    # API docs - AST reference
+docs/src/pages/docs/guides/templates/*.mdx                # User guide documentation
+docs/src/pages/docs/api/templating/ast.mdx               # API docs - AST reference
 docs/src/examples/templates/*                            # Example components
 docs/src/content/examples/*.mdx                          # Example metadata
-ai/components/component-templates.md                     # AI template guide
-ai/packages/templating.md                                # AI templating package guide
-RELEASE-NOTES.md                                         # Change log
+CHANGELOG.md                                             # Change log
 ```
 
 ## Step 1: Implementation
@@ -44,18 +42,18 @@ RELEASE-NOTES.md                                         # Change log
 Add parsing logic to `/packages/templating/src/compiler/template-compiler.js`
 
 #### Key Steps:
-1. Add new token patterns to `basePatterns` or `createPatterns()`
+1. Add new token patterns to `basePatterns` (used by `generateRegExpPatterns()`)
 2. Add parsing logic in `parseTag()` method
 3. Create appropriate AST node structure
 4. Handle nested content if applicable
 
 #### Example Pattern:
 ```javascript
-// Add to basePatterns
-const basePatterns = {
+// Add to basePatterns (uses {OPEN}/{CLOSE} placeholders, not raw regex)
+static basePatterns = {
   // ... existing patterns
-  NEWSYNTAX: /\{#newsyntax\s+([^}]+)\}/,
-  CLOSE_NEWSYNTAX: /\{\/newsyntax\}/,
+  NEWSYNTAX: '^{OPEN}\\s*#newsyntax\\s+',
+  CLOSE_NEWSYNTAX: '^{OPEN}\\s*\\/newsyntax\\s*',
 };
 ```
 
@@ -111,7 +109,7 @@ Create directive in `/packages/renderer/src/lit/directives/`
 
 ## Step 2: Testing
 
-> **See Also:** [Testing Guide](/ai/contributing/development/testing.md) for testing patterns and conventions.
+> **See Also:** See `testing` for testing patterns and conventions.
 
 ### 2.1 Compiler Tests
 Add tests to `/packages/templating/test/compiler.test.js`
@@ -153,7 +151,7 @@ Add types for any new directives in their respective files
 Documentation needs to be added in two places: User Guide and API Documentation.
 
 ### 4.1 User Guide Documentation
-Add or update documentation in `/docs/src/pages/templates/`
+Add or update documentation in `/docs/src/pages/docs/guides/templates/`
 
 **Important Decision Point**: Before creating documentation, determine:
 1. Should this be added to an existing document or create a new one?
@@ -202,7 +200,7 @@ User-friendly performance notes...
 ```
 
 ### 4.2 API Documentation
-Update `/docs/src/pages/api/templating/ast.mdx` to include the new AST node structure.
+Update `/docs/src/pages/docs/api/templating/ast.mdx` to include the new AST node structure.
 
 #### Add AST Node Documentation:
 ```markdown
@@ -259,10 +257,10 @@ category: "templates"
 tags: ["templates", "newsyntax"]
 ```
 
-## Step 5: AI Guide
+## Step 5: AI Context
 
 ### 5.1 Template Guide
-Update `/ai/components/component-templates.md`
+Update the `component-templating` skill to include the new syntax.
 
 Add to appropriate section:
 - Template Syntax Overview
@@ -270,11 +268,11 @@ Add to appropriate section:
 - Performance Patterns
 
 ### 5.2 Package Guide
-Update `/ai/framework/templating.md` if adding new compiler features
+Update the `render-pipeline` skill if adding new compiler features.
 
 ## Step 6: Release Notes
 
-Update `RELEASE-NOTES.md`:
+Update `CHANGELOG.md`:
 ```markdown
 * **Templates** - Added `{#newsyntax}` blocks for [brief description]
 ```
@@ -287,16 +285,16 @@ Update `RELEASE-NOTES.md`:
 - [ ] Compiler tests cover all syntax variations
 - [ ] Coverage verified with `npm run test:coverage` - all reasonable lines covered
 - [ ] TypeScript types updated (if applicable)
-- [ ] User guide documentation added/updated in `/docs/src/pages/templates/`
+- [ ] User guide documentation added/updated in `/docs/src/pages/docs/guides/templates/`
   - [ ] Decision made: new document or update existing?
   - [ ] Clear user-friendly explanations provided
-- [ ] API documentation updated in `/docs/src/pages/api/templating/ast.mdx`
+- [ ] API documentation updated in `/docs/src/pages/docs/api/templating/ast.mdx`
   - [ ] AST node structure documented
   - [ ] Example template and output provided
 - [ ] Working examples created and tested
 - [ ] Example metadata files created
-- [ ] AI guides updated with syntax reference
-- [ ] Release notes updated
+- [ ] AI context updated with syntax reference
+- [ ] Changelog updated
 - [ ] All tests pass (`npm test` in relevant packages)
 
 ## Common Patterns

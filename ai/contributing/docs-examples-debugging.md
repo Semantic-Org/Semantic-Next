@@ -9,7 +9,7 @@ type: skill
 
 # Debugging Examples with Chrome DevTools MCP
 
-> **Skill:** `sui:docs-examples-debugging`
+> **Skill:** `docs-examples-debugging`
 > **Purpose:** Guide for debugging documentation examples running on the Astro dev server using Chrome DevTools MCP
 
 ---
@@ -138,7 +138,7 @@ mcp__chrome-devtools__fill
 
 ```
 mcp__chrome-devtools__wait_for
-  text: "Expected output"
+  text: ["Expected output"]
   timeout: 3000
 ```
 
@@ -204,5 +204,5 @@ mcp__chrome-devtools__take_snapshot
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Example Authoring** | `sui:docs-examples-authoring` | Creating documentation examples |
+| **Example Authoring** | `docs-examples-authoring` | Creating documentation examples |
 | **Example Self-Critique** | workflow `docs-examples-self-critique` | Quality checklist for examples |

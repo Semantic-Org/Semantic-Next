@@ -9,14 +9,14 @@ workflow: primitive-write-css
 
 # Write Primitive CSS
 
-> **Skill:** `sui:primitive-write-css`
+> **Skill:** `primitive-write-css`
 > **Purpose:** Implement CSS for primitive features defined in `.spec.js` files
 
 ## Lifecycle Context
 
 This is typically the **third step** in creating a primitive, after scaffolding and spec authoring.
 - **Before**: Spec must exist with the feature defined (`primitive-refine.md`)
-- **Reference**: Load `sui:component-specs` skill for spec format, `sui:component-css` or `sui:design-tokens` for token details
+- **Reference**: Load `component-specs` skill for spec format, `component-css` or `design-tokens` for token details
 
 ## How It Works
 
@@ -156,7 +156,7 @@ This is essential when options share common CSS. Here's the real animated button
 }
 ```
 
-**Note on `compoundAliases`**: The animated spec also has `compoundAliases: true`, which means users write `<ui-button vertical-animated>` instead of just `<ui-button vertical>`. This is a spec-level concern for HTML disambiguation — it does **not** affect CSS. The generated classes are still `.animated.vertical.button` regardless of how the HTML attribute was written. See the `sui:component-specs` skill for details.
+**Note on `compoundAliases`**: The animated spec also has `compoundAliases: true`, which means users write `<ui-button vertical-animated>` instead of just `<ui-button vertical>`. This is a spec-level concern for HTML disambiguation — it does **not** affect CSS. The generated classes are still `.animated.vertical.button` regardless of how the HTML attribute was written. See the `component-specs` skill for details.
 
 ## Before You Start
 

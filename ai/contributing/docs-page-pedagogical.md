@@ -9,7 +9,7 @@ type: skill
 
 # Writing Lessons (Learn REPL)
 
-> **Skill:** `sui:docs-page-pedagogical`
+> **Skill:** `docs-page-pedagogical`
 > **Purpose:** How to write interactive lessons for the Semantic UI Learn section — standalone REPLs that sequentially teach framework concepts
 
 ---
@@ -21,7 +21,7 @@ Lessons are standalone interactive REPLs that teach Semantic UI concepts sequent
 Lessons are grouped into learning tracks (Quickstart, Basic Guide, Advanced Guide, etc.) and ordered within subcategories. The reader navigates linearly with Previous/Next buttons or jumps via the sidebar menu.
 
 **Reference model:** [Svelte's interactive tutorial](https://svelte.dev/tutorial)
-**Prerequisite reading:** Load `sui:docs-examples-authoring` — lessons wrap the same playground system used for documentation examples.
+**Prerequisite reading:** Load `docs-examples-authoring` — lessons wrap the same playground system used for documentation examples.
 
 ---
 
@@ -104,7 +104,7 @@ The `sort` frontmatter field is a semver string derived from the digits: directo
 title: State and Reactivity           # Display title (required)
 category: 'Basic Guide'               # Category name (required) — must match other lessons in same 1st digit
 subcategory: 'Core Concepts'          # Subcategory name (required) — must match other lessons in same 2nd digit
-description: Learn how to use reactive state  # Short description (required)
+description: Learn how to use reactive state  # Short description (optional — not in content schema)
 sort: '2.2.1'                         # Semver sort string (required) — must match directory numbering
 references:                            # Related docs (optional, recommended)
   - title: Reactivity System
@@ -120,7 +120,7 @@ hideNavigation: true                   # Hide prev/next buttons (optional) — o
 ---
 ```
 
-**Required fields:** `title`, `category`, `subcategory`, `description`, `sort`
+**Required fields:** `title`, `category`, `subcategory`, `sort`
 
 The `category` and `subcategory` strings must be identical across all lessons sharing the same first or second digit. The sidebar menu derives group names from the first lesson encountered in each group.
 
@@ -301,7 +301,7 @@ Lessons use the same playground system as documentation examples. Understanding 
 
 ### CSS standards
 
-Lesson code follows the same CSS standards as all playground examples. Load `sui:docs-examples-authoring` for the full reference.
+Lesson code follows the same CSS standards as all playground examples. Load `docs-examples-authoring` for the full reference.
 
 - **Use design tokens, not hardcoded values.** Colors, spacing, borders, radii, and transitions should use CSS variables: `var(--border)`, `var(--padding)`, `var(--primary-text-color)`, `var(--border-radius)`, `var(--standard-5)`.
 - **Use CSS nesting.** Nest child selectors and state variants with `&`:
@@ -447,7 +447,7 @@ var(--subtle-shadow)        /* Subtle box shadow */
 var(--circular-radius)      /* Fully round radius */
 ```
 
-For a complete reference, load `sui:tokens` and verify tokens against `/src/css/tokens/`.
+For a complete reference, load `tokens` and verify tokens against `/src/css/tokens/`.
 
 ### Reactivity patterns
 
@@ -530,7 +530,7 @@ Within a track, order concepts from fundamental to derived:
 
 ## Step-by-Step: Creating a New Lesson
 
-1. **Read prerequisites** — This guide, `sui:docs-examples-authoring`, and 2-3 existing lessons similar to what you're creating
+1. **Read prerequisites** — This guide, `docs-examples-authoring`, and 2-3 existing lessons similar to what you're creating
 2. **Identify the concept** and where it fits in the learning sequence
 3. **Determine the directory number** based on category, subcategory, and sequence
 4. **Create the directory** with the naming pattern `{number}-{slug}/`
@@ -541,7 +541,7 @@ Within a track, order concepts from fundamental to derived:
 9. **Set frontmatter** — ensure `sort`, `category`, and `subcategory` match the numbering scheme and existing lessons in the same group
 10. **Add references** — link to relevant documentation pages
 11. **Verify code quality** — run through workflow `docs-examples-self-critique` for the code files
-12. **Test** — verify the example code renders correctly in the playground and the solution works. Load `sui:docs-examples-debugging` if Chrome DevTools MCP is available.
+12. **Test** — verify the example code renders correctly in the playground and the solution works. Load `docs-examples-debugging` if Chrome DevTools MCP is available.
 
 ---
 

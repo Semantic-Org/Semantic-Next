@@ -9,7 +9,7 @@ type: skill
 
 # Authoring AI Context Files and Skills
 
-> **Skill:** `sui:author-context-or-skill`
+> **Skill:** `ai-author-context`
 > **Purpose:** Rules for writing and maintaining files in `ai/` that are served to agents via the Semantic UI MCP server
 
 ---
@@ -20,7 +20,7 @@ Downstream users don't have the `ai/` folder. They interact with these files exc
 
 | MCP Tool | What it does | What it reads from your file |
 |----------|-------------|------------------------------|
-| `search` | Keyword search across all content | Title, description, keywords, body text |
+| `search` | Keyword search across all content | `title`, `name`, `id`, `path`, `category`, `audience`, `methods`, `package` |
 | `list_context` | Browse by audience filter | `audience` frontmatter field |
 | `list_skills` | Browse available skills | `skill` frontmatter field, title, description |
 | `use_skill` | Load full skill content | Entire file body |
@@ -99,7 +99,7 @@ title: Components
 title: Styling
 ```
 
-**`description`** — Appears in `list_skills` and `list_context` responses, and feeds search ranking. Write it as a concise scope statement — what the file covers and what it doesn't.
+**`description`** — Appears in `list_skills` and `list_context` responses. Write it as a concise scope statement — what the file covers and what it doesn't.
 
 ```yaml
 # Good — clear scope boundaries
@@ -109,7 +109,7 @@ description: Core mental model for AI agents working with Semantic UI, covering 
 description: Information about Semantic UI.
 ```
 
-**`keywords`** — Fed to the `search` tool. Include terms the agent might search for that don't appear in the title or description. Think about what queries should surface this file.
+**`keywords`** — Terms that help surface this file in search and related-content lookups. Include terms the agent might search for that don't appear in the title or description.
 
 ```yaml
 # Good — includes search terms beyond what's in the title
@@ -133,7 +133,7 @@ keywords: [mental model]
 
 | Value | Meaning | Routing |
 |-------|---------|---------|
-| `skill` | Procedural or reference knowledge loadable via `use_skill` | `list_skills`/`use_skill`, `list_context`/`get_context` |
+| `skill` | Procedural or reference knowledge | `list_context`/`get_context` (routing to `list_skills`/`use_skill` depends on the `skill` field below, not this field) |
 | `workflow` | Step-by-step procedure | `list_workflows`/`get_workflow` |
 | `ref` | Reference material not loadable as a skill | `list_context`/`get_context` |
 
@@ -227,8 +227,8 @@ A cross-reference table as the final section linking to adjacent skills:
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **CSS Tokens** | `/sui:tokens` | Available design tokens |
-| **Style SUI** | `/sui:style` | Customizing appearance from outside |
+| **CSS Tokens** | `/tokens` | Available design tokens |
+| **Style SUI** | `/style` | Customizing appearance from outside |
 ```
 
 The MCP computes `related` links separately via `findRelatedFor*`, so these tables don't feed the agent's graph traversal. They serve two other audiences: human contributors browsing the raw markdown on GitHub, and agents that receive the full file content via `use_skill` (where the Related table appears at the bottom and may prompt the agent to load a companion skill).
@@ -267,7 +267,7 @@ All context files should follow the same pattern: frontmatter → blockquote hea
 ### Blockquote header format
 
 ```markdown
-> **Skill:** `sui:identifier`
+> **Skill:** `identifier`
 > **Purpose:** One line explaining what this file gives the agent
 ```
 

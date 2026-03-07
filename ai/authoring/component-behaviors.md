@@ -9,7 +9,7 @@ type: skill
 
 # Using Behaviors in Components
 
-> **Skill:** `sui:component-behaviors`
+> **Skill:** `component-behaviors`
 > **Purpose:** How to attach and use shipped behaviors (transition, tooltip, escape, attach) inside components. Covers lifecycle timing, Shadow DOM integration, cleanup, and invocation patterns.
 > **Last Updated:** 2026-03-04
 
@@ -421,8 +421,8 @@ $('.overlay').escape('hide');                 // remove from top layer
 
 | Skill | Command | Use when... |
 |-------|---------|-------------|
-| **Query Behaviors** | `sui:query-behaviors` | Building/registering custom behaviors (the authoring side) |
-| **Component Lifecycle** | `sui:component-lifecycle` | Understanding when hooks fire and what's available in each |
-| **Component Patterns** | `sui:component-patterns` | Communication, cleanup, and DOM querying patterns |
-| **Component CSS** | `sui:component-css` | CSS animations and transitions without behaviors |
-| **Query** | `sui:query` | Basic `$` / `$$` usage, selectors, DOM manipulation |
+| **Query Behaviors** | `query-behaviors` | Building/registering custom behaviors (the authoring side) |
+| **Component Lifecycle** | `component-lifecycle` | Understanding when hooks fire and what's available in each |
+| **Component Patterns** | `component-patterns` | Communication, cleanup, and DOM querying patterns |
+| **Component CSS** | `component-css` | CSS animations and transitions without behaviors |
+| **Query** | `query` | Basic `$` / `$$` usage, selectors, DOM manipulation |

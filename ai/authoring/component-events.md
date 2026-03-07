@@ -9,7 +9,7 @@ type: skill
 
 # Component Events Guide
 
-> **Skill:** `sui:component-events`
+> **Skill:** `component-events`
 > **Purpose:** Event handling in Semantic UI components — the DSL syntax, delegation model, dispatching, data flow, and the decision tree for cross-component communication
 > **Last Updated:** 2026-03-04
 
@@ -437,8 +437,8 @@ bindKey('ctrl+k', handler)                   // dynamic keyboard binding
 
 | Skill | Use when... |
 |-------|-------------|
-| **Mental Model** (`sui:mental-model`) | Understanding callback params and destructuring patterns |
-| **Component HTML** (`sui:component-html`) | Template syntax including `@event` binding |
-| **Reactive State** (`sui:reactive-state`) | Signal methods used in event handlers (`toggle`, `increment`, `set`) |
-| **Query Behaviors** (`sui:query-behaviors`) | Building behaviors with their own event delegation |
-| **Component Specs** (`sui:component-specs`) | Declaring events in spec definitions for primitives |
+| **Mental Model** (`mental-model`) | Understanding callback params and destructuring patterns |
+| **Component HTML** (`component-html`) | Template syntax including `@event` binding |
+| **Reactive State** (`reactive-state`) | Signal methods used in event handlers (`toggle`, `increment`, `set`) |
+| **Query Behaviors** (`query-behaviors`) | Building behaviors with their own event delegation |
+| **Component Specs** (`component-specs`) | Declaring events in spec definitions for primitives |
