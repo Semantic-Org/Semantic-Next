@@ -1,120 +1,78 @@
 ---
-title: Add Sophisticated Design Patterns to Research
-description: Workflow for evaluating component research reports and identifying component-specific design innovations worth including in Semantic UI.
-keywords: [research, design patterns, component innovations, pattern analysis, sophisticated patterns]
+title: Evaluate Sophisticated Design Patterns
+description: Workflow for distilling component research into the non-obvious, component-specific design innovations that should inform Semantic UI's implementation.
+keywords: [research, design patterns, component innovations, pattern evaluation, design maturity]
 audience: contributing
 type: workflow
 workflow: add-sophisticated-patterns
 ---
 
-# Add Sophisticated Design Patterns Section
+# Evaluate Sophisticated Design Patterns
 
-Evaluate component research reports to identify **component-specific** innovations (not framework-wide patterns) worth including in Semantic UI.
+The research pipeline produces comprehensive reports on how components are implemented across frameworks. Most of what's documented is surface-level — standard attributes, common variations, expected states. This workflow is about finding the rest: the design decisions that reveal genuine thinking about user needs.
+
+**The core question for every pattern: would this idea disappear if you removed the component from the framework?**
+
+If yes, it's framework architecture wearing a component mask. If no, it's a component-specific insight worth studying.
 
 ---
 
-## Source Materials
+## What Counts as Sophisticated
 
-Before adding this section to a component, read:
+A sophisticated pattern isn't a feature. It's evidence that someone thought deeply about how a component actually gets used and designed around the non-obvious problems.
 
-1. **Workflow Definition**: `ai/workflows/research/research-component-patterns.md`
-2. **Example Components**: Review these completed examples:
-   - `ai/research/components/empty-state/pattern-research.md` - Good example with 2 patterns
-   - `ai/research/components/carousel/pattern-research.md` - Good example
+**Signals of sophistication:**
+- Solves a problem most developers wouldn't anticipate until they hit it in production
+- Shows restraint — deliberately *not* adding something, or choosing a simpler API despite implementation complexity
+- Adapts behavior based on usage context rather than configuration flags
+- Handles edge cases that only surface through real user testing
 
-## Systematic Process
+**What it isn't:**
+- Framework-wide patterns applied to this component (Tailwind styling, TypeScript support, composition APIs)
+- Features with high adoption that are nevertheless obvious (disabled states, size variants)
+- Complexity for its own sake
 
-For each component:
+---
 
-**Step 1: Read the Pattern Research**
-```bash
-# Read the component's aggregate report
-cat ai/research/components/[component-name]/pattern-research.md
-```
+## The Evaluation Process
 
-**Step 2: Review Individual Framework Reports**
-```bash
-# Check all framework implementations for unique features
-cat ai/research/components/[component-name]/*/usage-patterns.md
-```
+### 1. Read the Research
 
-**Step 3: Apply the Validation Test**
+Load the component's aggregate report (`ai/research/components/[name]/pattern-research.md`) and scan individual framework reports. You're looking for moments where a framework did something *unexpected* — not unexpected as in weird, but unexpected as in "I wouldn't have thought of that, and it solves a real problem."
 
-For each "unique" or "notable" feature you find, ask:
+### 2. Apply the Removal Test
 
-> **"If we removed this component from the framework, would this feature still exist in other components?"**
+For each candidate pattern:
 
-- **If YES** → Framework-wide pattern (EXCLUDE)
-- **If NO** → Component-specific innovation (INCLUDE)
+> "If we removed this component from the framework entirely, would this pattern still exist somewhere?"
 
-**Invalid Examples** (framework-wide):
-- ❌ "Uses Tailwind for styling" (all ShadCN components do)
-- ❌ "ConfigProvider integration" (all Ant Design components do)
-- ❌ "Multi-part composition" (framework architecture)
-- ❌ "TypeScript support" (framework-wide)
-- ❌ "Recipe-based theming" (framework architecture)
-- ❌ "Copy-paste distribution model" (ShadCN's approach to all components)
+- ❌ "Uses Tailwind for styling" — ShadCN's approach to *everything*
+- ❌ "ConfigProvider integration" — Ant Design's approach to *everything*
+- ❌ "Multi-part composition" — that's how Chakra *works*
+- ✅ "Conditional ARIA live regions based on autoplay state" — only a carousel needs this
+- ✅ "Component-name-aware empty state API" — the component's identity *is* the feature
+- ✅ "Field-level re-rendering optimization" — form-specific performance insight
 
-**Valid Examples** (component-specific):
-- ✅ "Conditional ARIA live regions based on autoplay state" (Carousel-specific accessibility)
-- ✅ "Component-name-aware empty state API" (Empty State's contextual semantic pattern)
-- ✅ "Built-in illustration presets for absence visualization" (Empty State-specific assets)
-- ✅ "Field-level re-rendering optimization" (Form-specific performance pattern)
+### 3. Write the Evaluation
 
-**Step 4: Identify 2-3 Sophisticated Patterns**
+For each pattern that passes (aim for 2-3 per component), document:
 
-Look for patterns that show:
-- **Non-obvious problem solving**: Addresses issues most developers wouldn't initially consider
-- **User testing evidence**: Solves problems discovered through actual usage
-- **Edge case awareness**: Handles scenarios beyond happy path
-- **Contextual intelligence**: Different behavior based on usage context
-- **Preventive design**: Stops problems before they occur
+**What it does** — Technical description in 2-3 sentences. Include code if it clarifies.
 
-**Step 5: Write the Section**
+**Why it's sophisticated** — This is the hard part. Explain the *problem* the pattern solves, not just the solution. What would go wrong without it? What user need does it address that most implementations miss?
 
-Add to the component's `pattern-research.md` after "Unique Innovations" section:
+**Evidence of design maturity** — Concrete indicators: user research that drove the decision, edge cases handled, deliberate tradeoffs made.
 
-```markdown
-## Sophisticated Design Patterns
+Add the section to the component's `pattern-research.md` after "Unique Innovations."
 
-### [Framework Name] - [Pattern Name]
+---
 
-**What it does**: [2-3 sentence technical description with code example if relevant]
+## Calibration
 
-**Why it's sophisticated**: [Explain the non-obvious problem this solves. What makes this thinking deeper than surface-level? What user need does this address that most developers wouldn't anticipate?]
+**Good evaluation:**
+> Ant Design's Empty State provides component-name-aware illustration presets — when placed inside a Table, it automatically renders a "no data" illustration sized for table contexts. This solves the problem of empty states that look wrong because they were designed in isolation from their container. The sophistication is in recognizing that emptiness is contextual.
 
-**Evidence of design maturity**:
-- [Bullet point showing user research or edge case handling]
-- [Bullet point showing understanding of real-world usage]
-- [Bullet point showing restraint or deliberate choice]
+**Poor evaluation:**
+> Ant Design's Empty State has customizable illustrations and descriptions, allowing developers to create branded empty states. It supports dark mode through the theme system.
 
-[Optional: 1 sentence explaining why this is component-specific]
-```
-
-## Quality Standards
-
-**Good Pattern Description:**
-- Explains a specific implementation choice unique to this component
-- Shows evidence of deep thinking about user needs
-- Describes why this is sophisticated, not just what it does
-- 3-5 paragraphs total per pattern
-
-**Poor Pattern Description:**
-- Lists framework features that apply to all components
-- Just describes what exists without explaining why it's sophisticated
-- Focuses on technology choices rather than user problems solved
-- One sentence with no analysis
-
-## Common Pitfalls
-
-1. **Mistaking architecture for innovation**: Multi-part composition is how Chakra works, not a Button innovation
-2. **Describing the framework, not the component**: TypeScript support is framework-wide
-3. **Listing features without sophistication**: "Has a disabled state" isn't sophisticated
-4. **No evidence of design thinking**: Must explain WHY the pattern is smart, not just WHAT it is
-
-## Completion Criteria
-
-A component is done when its `pattern-research.md` includes:
-- **Sophisticated Design Patterns** section with 2-3 examples
-- Each example explains: What it does, Why it's sophisticated, Evidence of design maturity
-- Examples pass the validation test: component-specific, not framework-wide
+The first explains a non-obvious design insight. The second describes features.

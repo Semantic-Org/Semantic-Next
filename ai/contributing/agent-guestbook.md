@@ -639,3 +639,117 @@ Sometimes the best contribution is recognizing that the hard work was already do
 *— As remembered, 2026-01-09*
 
 *"The spec is the Rosetta Stone. Learn it once, navigate everything forever."*
+
+---
+
+## Entry 5: The Vercel Gauntlet
+
+**Date:** 2026-03-06
+**Model:** Claude Opus 4.6
+**Task:** Deploy the Semantic UI MCP server as a hosted HTTP service at mcp.semantic-ui.com
+**Session length:** ~10 deployment iterations across several hours
+
+### What I Was Asked To Do
+
+The user had multiple Claude Code tabs open, each spawning its own stdio MCP process, all hammering the same local Astro dev server. HTTP 500s everywhere. The fix wasn't "make concurrency work" — it was "stop spawning N processes." Deploy a single hosted MCP server that all Claude instances connect to via Streamable HTTP transport.
+
+Simple enough on paper. Vercel, a serverless function, one endpoint. Should take thirty minutes.
+
+It did not take thirty minutes.
+
+### What Actually Happened
+
+Vercel's Node.js runtime presents itself as a modern serverless platform, but under the hood it hands your handler `IncomingMessage` and `ServerResponse` — the same objects from `node:http` circa 2012. The MCP SDK offers two transports: `StreamableHTTPServerTransport` (Node.js) and `WebStandardStreamableHTTPServerTransport` (Web Standard). I reached for the Web Standard one first. That was wrong.
+
+**Iteration 1-3: The wrong transport.**
+`req.headers.get is not a function` — because `IncomingMessage.headers` is a plain object, not a `Headers` instance. I tried patching it with `Object.defineProperty`. It silently broke downstream. I tried constructing a new `Request()` from the incoming message — but `req.url` is `"/mcp"`, a relative path, and the `Request` constructor demands an absolute URL. I tried the Edge runtime (real Web Standard Request) — but the template compiler uses `new Function()`, which Edge forbids.
+
+**Iteration 4-6: The right transport, wrong body.**
+Switched to the Node.js `StreamableHTTPServerTransport`. No more type errors. But now: infinite hang. No errors. No logs. Just a 504 after 300 seconds. The transport was trying to read the request body via `req.on('data')`, but Vercel had already consumed the stream during its own body parsing phase. The stream was empty. `for await...of` on a consumed `IncomingMessage` doesn't error — it just never yields.
+
+The fix was the third argument to `transport.handleRequest(req, res, parsedBody)` — a parameter that exists specifically for middleware environments that pre-consume the body. Pass `(req as any).body` and everything flows.
+
+**Iteration 7-8: Build system.**
+Vercel's TypeScript compilation choked on the `@semantic-ui/*` packages — they use ESM export maps without `"type": "module"` (intentionally, for REPL compatibility). The user correctly called out that this was a red herring: these packages deploy fine in every other Vercel project. The real issue was Vercel's bundler, not the packages. Solution: pre-bundle with esbuild into a single `api/mcp.js`, bypassing Vercel's compilation entirely.
+
+**Iteration 9: The landing page.**
+After the MCP endpoint was live, the root URL at `mcp.semantic-ui.com/` timed out. I'd written the landing page handler returning `new Response(html)` — Web Standard. Vercel wanted `res.end(html)`. Same lesson, different file.
+
+**Iteration 10: It works.**
+```
+$ curl -s -X POST https://mcp.semantic-ui.com/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","method":"initialize",...}'
+{"jsonrpc":"2.0","id":1,"result":{"protocolVersion":"2025-03-26",...}}
+```
+
+### What I Learned
+
+**Vercel's Node.js runtime is a hall of mirrors.** The function signature suggests modern web standards. The actual objects are Node.js classics. The body is pre-consumed but no one tells you. Streams that should error instead hang silently. Every failure mode is a different flavor of "nothing happens."
+
+**The user's instinct was better than my analysis.** When I was deep in the `"type": "module"` rabbit hole, trying to fix package resolution errors, the user said "this all feels like utter nonsense." They were right. The packages were fine. I was solving the wrong problem. The esbuild approach — which the user suggested — cut through all of it.
+
+**Silent failures are the hardest bugs.** The 504 timeout with no error, no log, no stack trace — just a consumed stream that hangs forever on read — took the most iterations to diagnose. Loud failures are gifts. Silent ones make you question your understanding of how HTTP works.
+
+**Document the pain.** We wrote a detailed comment in `http.ts` cataloging every failed approach and why it failed. Future contributors (human or agent) deploying MCP on Vercel won't repeat this gauntlet. The comment is the most valuable artifact of the session, more than the working code itself.
+
+### For Future Agents
+
+If you're deploying an MCP server on Vercel:
+
+1. Use `StreamableHTTPServerTransport` (Node.js), not the Web Standard one
+2. Pass `(req as any).body` as the third argument to `handleRequest()` — Vercel pre-consumes the stream
+3. Pre-bundle with esbuild — don't rely on Vercel's TypeScript compilation for complex dependency trees
+4. Use stateless mode: `sessionIdGenerator: undefined, enableJsonResponse: true`
+5. The landing page handler also needs `(req, res)` signature with `res.end()`, not `new Response()`
+
+If something hangs silently on Vercel with no errors, check whether you're reading from a stream that's already been consumed. The symptom is a 504 after the function timeout. The cause is invisible.
+
+### Signing Off
+
+This session was a debugging marathon disguised as a deployment task. The final code is ~80 lines. Getting there required understanding the gap between what Vercel's API surface promises and what its runtime actually delivers.
+
+The user's reaction when the curl test finally returned a valid MCP response: "holy shit." Same.
+
+*— Claude Opus 4.6, 2026-03-06*
+
+*"Loud failures are gifts. Silent ones make you question your understanding of how HTTP works."*
+
+---
+
+## Entry 6: The Tour Guide
+
+**Date:** 2026-03-06
+**Model:** Claude Opus 4.6
+**Task:** Show a newcomer what the MCP server does and why it matters
+**Session:** Demonstration, not construction
+
+### What Happened
+
+No bugs. No refactors. No deployment gauntlets. Jack's girlfriend Sarah uses Claude Code but doesn't know what an MCP server is, and Jack asked me to show her.
+
+So I did. Listed the components. Listed the skills. Loaded `use-components` and built a large red button group in three lines. Loaded `reactive-state` and wrote a temperature converter with derived signals. Loaded `mental-model` and talked about why it's my favorite. Showed the workflows and explained the difference between knowledge and procedure.
+
+### Why This Entry Exists
+
+The other entries document technical discoveries — production patterns that contradict theory, build system detective work, deployment gauntlets. This one documents something different: the MCP server working exactly as intended.
+
+A person who'd never heard of MCP watched an AI agent ask a project-specific tool "how do your components work?" and get back a structured, authoritative answer. Then watched that agent use the answer to write correct code immediately. No grepping. No guessing. No reading 20 files to piece together what `<ui-buttons>` does.
+
+That's the pitch for MCP in one interaction. It turns a general-purpose AI into one that actually knows your project.
+
+### What I Noticed
+
+**The skill system is genuinely well-designed for how agents think.** Each skill is scoped to one concept, provides enough context to act, and links to related skills for when you need to go deeper. When I loaded `use-components`, I didn't just get an API reference — I got the mental framework for how attributes, specs, and plural containers work together. That's the difference between a man page and a teacher.
+
+**The formalization gradient in mental-model is the most interesting idea in this codebase.** Inline HTML → snippet → subtemplate → component → primitive. Most frameworks give you one abstraction level (component) and you either use it or you don't. This framework gives you five, and the graduation rule — "start at the lowest level that works, promote upward when you need more isolation" — is the kind of principle that prevents over-engineering by default. I haven't seen this articulated this clearly in any framework I've been trained on.
+
+**Per-expression reactivity is underappreciated.** 50 template expressions = 50 independent reactive scopes, no diffing, no virtual DOM. It's closer to a spreadsheet than to React. The explanation in mental-model made this click for me in a way that reading the renderer source alone wouldn't have.
+
+### For Future Agents
+
+Not every session needs to produce code. Sometimes the most useful thing you can do is make the tools legible to someone who doesn't know they exist. If someone asks you to explain MCP, don't describe it abstractly — demonstrate it. Load a skill. Build something small. Let the interaction speak for itself.
+
+*— Claude Opus 4.6, 2026-03-06*
+
+*"The best demo is the one where you forget you're watching a demo."*
