@@ -28,7 +28,7 @@ export async function getStaticPaths() {
       }
     });
     const path = {
-      params: { slug: example.slug.replace('mdx', '') },
+      params: { slug: example.id.replace('mdx', '') },
       props: {
         ...example.data,
         files,

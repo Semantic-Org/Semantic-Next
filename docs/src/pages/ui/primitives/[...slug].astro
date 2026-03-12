@@ -12,12 +12,12 @@ export async function getStaticPaths() {
   const paths = [];
   each(entries, entry => {
     paths.push({
-      params: { slug: `${entry.slug}` },
+      params: { slug: `${entry.id}` },
       props: { entry }
     });
     each(entry.data.tabs, tab => {
       paths.push({
-        params: { slug: `${entry.slug}/${tab}` },
+        params: { slug: `${entry.id}/${tab}` },
         props: { entry, tab }
       });
     });
@@ -45,7 +45,7 @@ const searchMeta = {
 
 const menu = (data.tabs || []).map(tab => ({
   text: toTitleCase(tab),
-  url: `/ui/primitives/${entry.slug}/${tab}`,
+  url: `/ui/primitives/${entry.id}/${tab}`,
 }));
 
 let railMenu = [];

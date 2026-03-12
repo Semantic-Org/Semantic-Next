@@ -30,7 +30,7 @@ export async function getExamplesManifestData() {
       }
     });
 
-    const slug = example.slug.replace('mdx', '');
+    const slug = example.id;
 
     return {
       id: slug,
