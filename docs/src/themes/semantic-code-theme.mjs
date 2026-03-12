@@ -90,6 +90,13 @@ export const semanticLight = {
         foreground: lightColors.purple,
       },
     },
+    // Shell commands (npm, git, etc.)
+    {
+      scope: ['entity.name.command.shell'],
+      settings: {
+        foreground: lightColors.purple,
+      },
+    },
     // Function names and calls
     {
       scope: ['entity.name.function', 'support.function', 'meta.function-call'],
@@ -279,6 +286,13 @@ export const semanticDark = {
     // Variables
     {
       scope: ['variable', 'variable.other'],
+      settings: {
+        foreground: darkColors.purple,
+      },
+    },
+    // Shell commands (npm, git, etc.)
+    {
+      scope: ['entity.name.command.shell'],
       settings: {
         foreground: darkColors.purple,
       },
