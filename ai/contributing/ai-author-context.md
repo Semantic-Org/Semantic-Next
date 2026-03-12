@@ -1,6 +1,6 @@
 ---
 title: Authoring AI Context Files and Skills
-description: Rules for writing and maintaining files in ai/ that are served to agents via the Semantic UI MCP server.
+description: Rules for writing and maintaining files in ai/ that are served to agents via the Semantic UI MCP server and llms.txt.
 keywords: [authoring guide, skills, context, frontmatter, MCP, content principles]
 audience: contributing
 skill: ai-author-context
@@ -10,13 +10,18 @@ type: skill
 # Authoring AI Context Files and Skills
 
 > **Skill:** `ai-author-context`
-> **Purpose:** Rules for writing and maintaining files in `ai/` that are served to agents via the Semantic UI MCP server
+> **Purpose:** Rules for writing and maintaining files in `ai/` that are served to agents via MCP and llms.txt
 
 ---
 
 ## How Files Reach the Agent
 
-Downstream users don't have the `ai/` folder. They interact with these files exclusively through the Semantic UI MCP server (or its Anthropic plugin, which exposes `list_skills`/`use_skill`). Understanding this pipeline is essential because it determines what matters in authoring.
+Downstream users don't have access to this repository. They interact with these files through two discovery channels:
+
+1. **Semantic UI MCP server** — Tools like `list_skills`/`use_skill` serve files programmatically to agents. Also available as an Anthropic plugin.
+2. **llms.txt** — The docs site publishes an `llms.txt` file that exposes skill content for web-based context discovery.
+
+In both cases, the agent receives the file content as a standalone document with no surrounding repository context. This determines what matters in authoring — files must be self-contained and well-structured regardless of which channel delivers them.
 
 | MCP Tool | What it does | What it reads from your file |
 |----------|-------------|------------------------------|
@@ -79,7 +84,7 @@ Every file in `ai/` should have YAML frontmatter. These fields are not optional 
 title: Semantic UI Mental Model                    # Shown in list results
 description: Core mental model for AI agents...    # Shown in list results, fed to search
 keywords: [mental model, architecture, signals]    # Fed to search ranking — quote values with special YAML chars: "@event" not @event
-audience: authoring                                # Filters: usage | authoring | essentials | contributing | research
+audience: authoring                                # Filters: usage | authoring | essentials | contributing | docs | research
 skill: mental-model                                # If set, makes this loadable via use_skill
 type: skill                                        # One of: skill, workflow, ref
 ---
@@ -127,6 +132,7 @@ keywords: [mental model]
 | `authoring` | Developers building components with SUI | defineComponent, reactivity, templates |
 | `essentials` | Core concepts for all audiences | Mental model, fundamentals |
 | `contributing` | Contributors to the SUI codebase | Code conventions, PR process |
+| `docs` | Documentation authors | Writing quality, page types, examples |
 | `research` | Architectural investigation | Design decisions, tradeoffs |
 
 **`type`** — Required. Categorizes the file for routing and future filtering:

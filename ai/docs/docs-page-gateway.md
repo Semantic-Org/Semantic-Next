@@ -2,7 +2,7 @@
 title: Writing Gateway Pages
 description: Guide for writing landing and index pages that earn reader attention through problem-first structure and instability language before introducing features.
 keywords: [gateway pages, landing pages, problem-first, instability language, technical tour, convince]
-audience: contributing
+audience: docs
 skill: docs-page-gateway
 type: skill
 ---
@@ -12,7 +12,7 @@ type: skill
 > **Skill:** `docs-page-gateway`
 > **Purpose:** How to write landing/index pages that earn reader attention through problem-first structure
 
-**Prerequisites:** Load `docs-writing-effectively` (required), `docs-authoring-standards`, and `docs-target-audience`
+**Prerequisites:** Load `docs-writing` (required), `docs-authoring-standards`, and `docs-target-audience`
 
 ---
 
@@ -73,24 +73,7 @@ This names a problem readers experience, then positions the solution.
 
 ## Instability Language
 
-The word **"but"** (or "however", "although", "yet") transforms background into problem-building.
-
-### Tension Markers
-- but, however, although, nonetheless, yet
-- despite, while, even though
-- inconsistent, contradicts, challenges
-- tension, conflict, gap, limitation
-
-### Cost Language
-- painful trade-offs, verbose boilerplate
-- forces developers to, requires manual
-- breaks, leaks, scatters, couples
-- awkward, dated, tedious
-
-### Solution Language
-- resolves this tension, bridges this gap
-- replaces X with Y, eliminates the need for
-- without requiring, while maintaining
+Use tension markers ("but", "however", "although", "yet") to transform background into problem-building. See `docs-writing` for the complete instability language reference with tension, cost, and solution vocabulary.
 
 ---
 

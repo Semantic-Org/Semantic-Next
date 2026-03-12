@@ -2,7 +2,7 @@
 title: Documentation Authoring Standards
 description: Structural requirements for all documentation page types, covering heading hierarchy, frontmatter, imports, code blocks, and embedded examples.
 keywords: [authoring, standards, headings, frontmatter, code blocks, examples, formatting]
-audience: contributing
+audience: docs
 skill: docs-authoring-standards
 type: skill
 ---
@@ -256,7 +256,7 @@ Use blockquotes for tips, warnings, and cross-references:
 
 ## Writing Quality
 
-Avoid common AI writing patterns that reduce clarity. See [Slop Identification Guide](./docs-slop-identification.md) for comprehensive patterns.
+Avoid common AI writing patterns that reduce clarity. See Writing Documentation (`use_skill: docs-writing`) for comprehensive quality standards and `docs-ai-tropes` for the full anti-pattern catalog.
 
 ### Quick Reference
 
