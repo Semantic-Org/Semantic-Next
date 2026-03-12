@@ -305,7 +305,7 @@ class WebComponentBase extends LitElement {
           // this is a variation like emphasis="primary"
           // check if value requires compound form for CSS class (e.g. "subtle" → "subtle-positive")
           const compoundForms = [`${value}-${attribute}`, `${attribute}-${value}`];
-          const compoundClass = firstMatch(compoundForms, (form) => componentSpec.optionAttributes[form]);
+          const compoundClass = firstMatch(compoundForms, (form) => componentSpec.optionAttributes?.[form]);
           classes.push(compoundClass || value);
         }
         else if (value === true && inArray(property, allowedValues)) {
