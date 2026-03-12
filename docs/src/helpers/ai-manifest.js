@@ -2,7 +2,7 @@ import { statSync } from 'fs';
 import matter from 'gray-matter';
 import { resolve } from 'path';
 
-const VALID_AUDIENCES = ['usage', 'authoring', 'essentials', 'contributing', 'research'];
+const VALID_AUDIENCES = ['usage', 'authoring', 'essentials', 'docs', 'contributing', 'research'];
 const AUDIENCE_ORDER = VALID_AUDIENCES;
 
 // Folders excluded from AI context manifests

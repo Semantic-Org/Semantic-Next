@@ -2,66 +2,65 @@
 layout: '@layouts/Guide.astro'
 icon: sliders
 title: Reactive Controls
-description: Controlling the behavior of Reactions using the instance passed to the callback.
+description: Stopping, skipping, and suppressing reactive updates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-Creating a [Reaction](/docs/guides/reactivity/reactions) using [`Reaction.create()`](/docs/api/reactivity/reaction#create) will provide the `Reaction` instance itself as the first argument.
-
+[`Reaction.create()`](/docs/api/reactivity/reaction#create) provides the `Reaction` instance as the first argument, which can be used to control when and whether the reaction runs.
 
 ```javascript
-const mySignal = new Signal(0);
-
-Reaction.create((reaction) => { // reaction is the Reaction instance
+Reaction.create((reaction) => {
   console.log('Current value:', mySignal.get());
-  // do something with reaction
 });
 ```
 
-The `reaction` instance can be used to control the execution of your reaction after it runs under certain conditions.
+## Stopping a Reaction
 
-## Controlling Reactions
+[`reaction.stop()`](/docs/api/reactivity/reaction#stop) permanently prevents a reaction from running again, even if its [Signal](/docs/guides/reactivity/signals) dependencies change.
 
-### Stopping a Reaction
+### From the Return Value
 
-You can permanently stop a reaction from running again, even if its [Signal](/docs/guides/reactivity/signals) dependencies change, by calling the [`reaction.stop()`](/docs/api/reactivity/reaction#stop) method.
-
-Once stopped, the reaction will no longer track [dependencies](/docs/api/reactivity/dependency) or execute its callback.
+`Reaction.create()` returns the reaction instance, so you can stop it externally.
 
 ```javascript
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+const counter = new Signal(0);
 
+const reaction = Reaction.create(() => {
+  console.log('Count:', counter.get());
+});
+
+counter.increment(); // reaction runs
+reaction.stop();
+counter.increment(); // no longer updating
+```
+
+### From Inside the Callback
+
+The reaction instance is also passed as the first argument, so it can stop itself based on a condition.
+
+```javascript
 const percentComplete = new Signal(0);
 Reaction.create((reaction) => {
   const currentPercent = percentComplete.get();
-  if(currentPercent < 100) {
-    // updateProgress(currentPercent);
-    console.log('Progress:', currentPercent);
-  }
-  else {
-    console.log('Progress complete, stopping reaction.');
+  if(currentPercent >= 100) {
     reaction.stop();
+    return;
   }
+  console.log('Progress:', currentPercent);
 });
 
-progress.increment(80);
-progress.increment(20); // at 100 stopping
-progress.increment(50); // over 100 no longer updating
+percentComplete.increment(80);
+percentComplete.increment(20); // at 100, reaction stops
+percentComplete.increment(50); // no longer updating
 ```
 
-### Adjusting First Execution
+## Skipping First Run
 
-The [`reaction.firstRun`](/docs/api/reactivity/reaction#firstrun) property (boolean) can be used to determine if the reaction is on its first execution.
+Reactions run immediately when created to discover their dependencies. Use [`reaction.firstRun`](/docs/api/reactivity/reaction#firstrun) to skip side effects during this initial execution.
 
-This can be useful if you have special conditions for the initial run, or would like to prevent some side effects from running the first time code runs.
-
-```javascript title="Special Conditions"
-import { Signal, Reaction } from '@semantic-ui/reactivity';
-
+```javascript
 const score = new Signal(0);
 
-// Don't show the score unless the user has scored points
 Reaction.create((reaction) => {
   const currentScore = score.get();
   if (!reaction.firstRun) {
@@ -70,18 +69,58 @@ Reaction.create((reaction) => {
 });
 ```
 
-#### Common Pitfalls
-Be sure that any [Signal](/docs/guides/reactivity/signals) accesses (`.get()` or `.value`) necessary for your function are reachable during the first run, otherwise they will not be tracked as [dependencies](/docs/api/reactivity/dependency).
+### Dependency Pitfall
 
-```javascript title="Special Conditions"
-import { Signal, Reaction } from '@semantic-ui/reactivity';
+Signal accesses must be reachable during the first run to register as dependencies. A common mistake is returning early on the first run, which prevents any dependencies from being established.
 
+```javascript
 const score = new Signal(0);
 
-// This will never rerun because score.get() is never reached on first run
+// reaction wont rerun when score changes because dependency is not established
 Reaction.create((reaction) => {
-  if (!reaction.firstRun) {
-    console.log(`Score: ${score.get()}`);
+  if (reaction.firstRun) {
+    return;
   }
+  console.log(`Score: ${score.get()}`);
 });
 ```
+
+## Suppressing Reactivity
+
+### Nonreactive
+
+[`Reaction.nonreactive()`](/docs/api/reactivity/reaction#nonreactive) reads reactive values inside a reaction without creating dependencies.
+
+```javascript
+const name = new Signal('Alice');
+const status = new Signal('Online');
+
+Reaction.create(() => {
+  const currentName = name.get(); // dependency created
+  const currentStatus = Reaction.nonreactive(() => status.get()); // no dependency
+  console.log(`${currentName} is ${currentStatus}`);
+});
+
+name.set('Bob'); // triggers reaction
+status.set('Offline'); // does not trigger reaction
+```
+
+### Peek
+
+[`signal.peek()`](/docs/api/reactivity/signal#peek) reads a single signal's value without creating a dependency. Same effect as `nonreactive` but scoped to one value.
+
+```javascript
+const counter = new Signal(0);
+const trigger = new Signal(false);
+
+Reaction.create(() => {
+  trigger.get(); // dependency created
+  const currentCount = counter.peek(); // no dependency
+  console.log('Count:', currentCount);
+});
+
+counter.set(1); // does not trigger reaction
+trigger.set(true); // triggers reaction
+```
+
+> See [Reactive Performance](/docs/guides/reactivity/performance) for `guard` and `subscribe`, which optimize reactivity for specific patterns.
