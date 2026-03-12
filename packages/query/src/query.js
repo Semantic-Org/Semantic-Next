@@ -37,7 +37,10 @@ const getParentNode = (node, pierceShadow) => {
   return null;
 };
 
+const IS_QUERY = Symbol.for('semantic-ui/Query');
+
 export class Query {
+  [IS_QUERY] = true;
   /*
     This avoids keeping a copy of window/globalThis in
     memory when an element references the global object
@@ -55,7 +58,7 @@ export class Query {
 
   // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
-    return instance?.constructor?.name === 'Query';
+    return !!instance?.[IS_QUERY];
   }
 
   static isDevelopment = isDevelopment;
