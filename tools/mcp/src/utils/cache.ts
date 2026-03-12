@@ -1,6 +1,8 @@
 import { each, weightedObjectSearch } from '@semantic-ui/utils';
 import { ensureConfigReady, getDocsBaseUrl } from '../config.js';
 
+export type Audience = 'usage' | 'authoring' | 'essentials' | 'contributing' | 'docs' | 'research';
+
 // Content item interfaces
 export interface SpecItem {
   type: 'spec';
@@ -25,7 +27,7 @@ export interface ContextItem {
   title: string;
   description?: string;
   tokens: number;
-  audience: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
+  audience: Audience;
   skill?: string;
 }
 
@@ -48,7 +50,7 @@ export interface WorkflowItem {
   title: string;
   description?: string;
   tokens: number;
-  audience: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
+  audience: Audience;
   workflow?: string;
 }
 
@@ -221,7 +223,7 @@ export function listExamples(category?: string): ExampleItem[] {
 const DEFAULT_AUDIENCES = ['usage', 'authoring', 'essentials'];
 
 export function listContext(
-  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+  audience?: Audience,
 ): ContextItem[] {
   if (audience) {
     return cache.context.filter(c => c.audience === audience);
@@ -236,7 +238,7 @@ export function listDocs(): DocItem[] {
 
 // Workflow functions
 export function listWorkflows(
-  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+  audience?: Audience,
 ): WorkflowItem[] {
   if (audience) {
     return cache.workflows.filter(w => w.audience === audience);
@@ -258,7 +260,7 @@ export function findWorkflow(query: string): WorkflowItem | undefined {
 
 // Skill functions
 export function listSkills(
-  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research',
+  audience?: Audience,
 ): ContextItem[] {
   if (audience) {
     return cache.context.filter(c => c.skill && c.audience === audience);
@@ -274,7 +276,7 @@ export function findSkill(name: string): ContextItem | undefined {
 // Search function
 export interface SearchOptions {
   type?: 'spec' | 'example' | 'context' | 'workflow' | 'doc';
-  audience?: 'usage' | 'authoring' | 'essentials' | 'contributing' | 'research';
+  audience?: Audience;
   category?: string;
   limit?: number;
 }

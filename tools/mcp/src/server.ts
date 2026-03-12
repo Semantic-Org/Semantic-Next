@@ -103,7 +103,7 @@ Write classes you know. The sophisticated theming system is there when needed, n
 - \`list_components\` - See all UI components (button, card, modal, etc.)
 - \`list_examples\` - Browse working code examples by category
 - \`list_skills\` - See available deep-dive guides
-- \`list_workflows\` - See step-by-step procedures (pass audience: "contributing" to see contributor workflows)
+- \`list_workflows\` - See step-by-step procedures (pass audience: "contributing" or "docs" to see more)
 - \`list_user_docs\` - Browse user documentation (guides, API reference)
 
 ### Get Content
@@ -402,9 +402,9 @@ Optional params:
 
   server.tool(
     'list_skills',
-    'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" skills.',
+    'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" skills.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -508,9 +508,9 @@ Optional params:
 
   server.tool(
     'list_workflows',
-    'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" workflows.',
+    'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" workflows.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -610,9 +610,9 @@ Optional params:
 
   server.tool(
     'list_context',
-    'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing" or "research" docs.',
+    'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" docs.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -915,7 +915,7 @@ Optional params:
       query: z.string().describe('Search query'),
       type: z.enum(['spec', 'example', 'context', 'workflow', 'doc']).optional()
         .describe('Limit search to specific content type'),
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'research']).optional()
+      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter context docs by audience'),
       limit: z.number().optional().describe('Max results (default: 20)'),
     },
