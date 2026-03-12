@@ -10,24 +10,24 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.37.4",
-    "@astrojs/vercel": "^9.0.4",
+    "@astrojs/starlight": "^0.38.1",
+    "@astrojs/vercel": "^10.0.0",
     "@pagefind/modular-ui": "^1.4.0",
     "@semantic-ui/astro-lit": "5.1.1",
     "@webcomponents/template-shadowroot": "^0.2.1",
-    "astro": "^5.16.15",
-    "astro-expressive-code": "^0.41.6",
+    "astro": "^6.0.4",
+    "astro-expressive-code": "^0.41.7",
     "fflate": "^0.8.2",
     "gray-matter": "^4.0.3",
     "link": "^2.1.2",
     "playground-elements": "0.21.2",
     "pretty": "^2.0.0",
     "pretty-json-custom-element": "^1.1.19",
-    "semver": "^7.7.3",
-    "shiki": "^3.21.0",
-    "@codemirror/language": "^6.12.1",
-    "@codemirror/state": "^6.5.4",
-    "@codemirror/view": "^6.39.11"
+    "semver": "^7.7.4",
+    "shiki": "^4.0.2",
+    "@codemirror/language": "^6.12.2",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.40.0"
   },
   "devDependencies": {
     "@astropub/md": "^1.0.0",
