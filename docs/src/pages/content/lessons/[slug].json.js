@@ -1,5 +1,6 @@
 import { getLessonContent, getNextLesson, getPreviousLesson } from '@helpers/navigation.js';
-import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
+import { addPlaygroundInjections } from '@helpers/injections.js';
+import { getExampleFiles, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
 import { getFolder } from '@helpers/loading.js';
 import { asyncMap, asyncEach, isEmpty } from '@semantic-ui/utils';
 import { getCollection, render } from 'astro:content';
