@@ -79,6 +79,29 @@ export default defineConfig({
 
   integrations: [
     lit(),
+    {
+      name: 'lit-hydration-blocking',
+      hooks: {
+        'astro:config:setup': ({ updateConfig }) => {
+          // Add a blocking <script> for hydration support to guarantee it runs
+          // before any module scripts load lit-element. See: https://github.com/withastro/astro/pull/15904
+          updateConfig({
+            vite: {
+              plugins: [{
+                name: 'inject-hydration-script',
+                transformIndexHtml() {
+                  return [{
+                    tag: 'script',
+                    attrs: { src: '/_astro/hydration-support.min.js' },
+                    injectTo: 'head-prepend',
+                  }];
+                },
+              }],
+            },
+          });
+        },
+      },
+    },
     astroExpressiveCode(),
     mdx({}),
     starlight({
