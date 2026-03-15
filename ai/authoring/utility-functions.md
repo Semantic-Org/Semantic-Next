@@ -298,7 +298,7 @@ toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, reverseString } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString } from '@semantic-ui/utils';
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -314,6 +314,7 @@ getArticle('apple', { capitalize: true });          // 'An'
 
 // HTML escaping
 escapeHTML('<script>alert("xss")</script>');        // '&lt;script&gt;...'
+unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;');       // '<div>Hello</div>'
 
 // Unicode-aware string reversal
 reverseString('hello');                             // 'olleh'
