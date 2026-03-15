@@ -25,9 +25,18 @@ import { LitElement } from 'lit';
 class WebComponentBase extends LitElement {
   static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: false };
 
+  static hydrationReady = false;
+
   constructor() {
     super();
     this.renderCallbacks = [];
+    // Lit checks for hydration support at module evaluation time, but module
+    // load order isn't guaranteed in production builds. Re-apply the patches
+    // here to catch cases where lit-element evaluated first.
+    if (!WebComponentBase.hydrationReady && globalThis.litElementHydrateSupport) {
+      globalThis.litElementHydrateSupport({ LitElement });
+      WebComponentBase.hydrationReady = true;
+    }
   }
 
   updated() {

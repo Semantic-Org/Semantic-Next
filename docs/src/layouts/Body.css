@@ -210,6 +210,21 @@
   }
 }
 
+/* Cross-document view transitions for navigation continuity */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation: none;
+}
+sidebar {
+  view-transition-name: sidebar;
+}
+topbar {
+  view-transition-name: topbar;
+}
+
 
 /* experimental small topbar
 @layer page {
