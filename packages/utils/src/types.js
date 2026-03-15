@@ -9,7 +9,9 @@ export const isObject = (x) => {
 };
 
 export const isPlainObject = (x) => {
-  return isObject(x) && x.constructor === Object;
+  if (!isObject(x)) { return false; }
+  const proto = Object.getPrototypeOf(x);
+  return proto === null || proto === Object.prototype;
 };
 
 export const isString = (x) => {
@@ -109,8 +111,8 @@ export const isClassInstance = (obj) => {
     return false;
   }
 
-  const proto = Object.getPrototypeOf(obj);
-  const constructorName = proto.constructor.name;
+  const constructorName = Object.getPrototypeOf(obj)?.constructor?.name;
+  if (!constructorName) { return false; }
 
   const builtInTypes = [
     'Object',

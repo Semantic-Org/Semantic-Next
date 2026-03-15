@@ -89,7 +89,7 @@ export const fatal = (
   {
     errorType = Error,
     metadata = {},
-    onError = null,
+    onError,
     removeStackLines = 1,
   } = {},
 ) => {
@@ -103,6 +103,10 @@ export const fatal = (
   }
 
   const throwError = () => {
+    if (onError) {
+      onError(error);
+      return;
+    }
     if (typeof globalThis.onError === 'function') {
       globalThis.onError(error);
     }
