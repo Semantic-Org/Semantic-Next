@@ -56,8 +56,7 @@ describe('ID/Hashing Functions', () => {
 
   describe('hashCode', () => {
     it('should produce consistent hash code for the same input', () => {
-      const input = 'Test String';
-      expect(hashCode(input)).toBe(hashCode(input));
+      expect(hashCode('Test String')).toBe(1884887178);
     });
 
     it('should generally produce unique hash codes for different inputs', () => {
@@ -92,27 +91,32 @@ describe('ID/Hashing Functions', () => {
 
     it('should handle extremely long inputs', () => {
       const longInput = 'a'.repeat(100000);
-      expect(() => hashCode(longInput)).not.toThrow();
+      const result = hashCode(longInput);
+      expect(typeof result).toBe('number');
     });
 
     it('should handle inputs with special characters', () => {
       const specialInput = '!@#$%^&*()_+{}[]|\\:;"<>,.?/~`';
-      expect(() => hashCode(specialInput)).not.toThrow();
+      const result = hashCode(specialInput);
+      expect(typeof result).toBe('number');
     });
 
     it('should handle inputs with Unicode characters', () => {
       const unicodeInput = '你好世界 こんにちは世界 안녕하세요 세계';
-      expect(() => hashCode(unicodeInput)).not.toThrow();
+      const result = hashCode(unicodeInput);
+      expect(typeof result).toBe('number');
     });
 
     it('should handle inputs with emojis', () => {
       const emojiInput = '😀😃😄😁😆😅😂🤣';
-      expect(() => hashCode(emojiInput)).not.toThrow();
+      const result = hashCode(emojiInput);
+      expect(typeof result).toBe('number');
     });
 
     it('should handle inputs with control characters', () => {
       const controlInput = '\n\r\t\b\f';
-      expect(() => hashCode(controlInput)).not.toThrow();
+      const result = hashCode(controlInput);
+      expect(typeof result).toBe('number');
     });
 
     it('should handle empty input', () => {

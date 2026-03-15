@@ -3,7 +3,9 @@ import { debounce, memoize, noop, throttle, wait, wrapFunction } from '@semantic
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('function utilities', () => {
-  it('noop should not return anything', () => {
+  it('noop should act as an identity function', () => {
+    expect(noop(42)).toBe(42);
+    expect(noop('hello')).toBe('hello');
     expect(noop()).toBeUndefined();
   });
   it('wrapFunction should return the same function if a function is passed', () => {
@@ -560,20 +562,21 @@ describe('function utilities', () => {
     });
 
     describe('context preservation', () => {
-      it('should maintain this context', () => {
+      it('should maintain this context', async () => {
         const obj = {
           value: 'test',
-          method: function() {
+          method: vi.fn(function() {
             return this.value;
-          },
+          }),
         };
         const debounced = debounce(obj.method, 100);
 
-        debounced.call(obj);
+        const promise = debounced.call(obj);
         vi.advanceTimersByTime(100);
 
-        // Note: We can't easily test the return value preservation with vi.fn
-        // but the implementation handles it correctly
+        const result = await promise;
+        expect(obj.method).toHaveBeenCalledTimes(1);
+        expect(result).toBe('test');
       });
     });
 

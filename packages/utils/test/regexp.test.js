@@ -8,6 +8,7 @@ describe('regular expression utilities', () => {
       const specialChars = '. * + ? ^ $ { } ( ) | [ ] \\';
       const escaped = escapeRegExp(specialChars);
       expect(() => new RegExp(escaped)).not.toThrow();
+      expect(new RegExp(escaped).test(specialChars)).toBe(true);
     });
   });
 

@@ -286,7 +286,8 @@ describe('CSS Utilities', () => {
         `;
 
         const extracted = extractCSS('.nested-test', cssWithNested);
-        expect(extracted.cssRules.length).toBeGreaterThan(0);
+        const extractedCSS = Array.from(extracted.cssRules).map(r => r.cssText).join('\n');
+        expect(extractedCSS).toContain('.nested-test');
       });
     });
 

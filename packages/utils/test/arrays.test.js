@@ -321,10 +321,12 @@ describe('Array Utilities', () => {
 
   describe('moveItem', () => {
     it('should move item to a specific index when using number', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, 1)).toEqual([1, 2, 3, 4]);
-      expect(moveItem(arr, 1, 3)).toEqual([2, 3, 4, 1]);
-      expect(moveItem(arr, 4, 0)).toEqual([4, 2, 3, 1]);
+      // value 2 is already at index 1, no move
+      expect(moveItem([1, 2, 3, 4], 2, 1)).toEqual([1, 2, 3, 4]);
+      // move value 1 from index 0 to index 3
+      expect(moveItem([1, 2, 3, 4], 1, 3)).toEqual([2, 3, 4, 1]);
+      // move value 4 from index 3 to index 0
+      expect(moveItem([1, 2, 3, 4], 4, 0)).toEqual([4, 1, 2, 3]);
     });
 
     it('should move item to first position when using "first"', () => {
@@ -352,9 +354,8 @@ describe('Array Utilities', () => {
     });
 
     it('should clamp target index to valid array bounds', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
-      expect(moveItem(arr, 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
+      expect(moveItem([1, 2, 3, 4], 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
+      expect(moveItem([1, 2, 3, 4], 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
     });
 
     it('should return original array if item not found', () => {

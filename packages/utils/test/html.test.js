@@ -22,6 +22,7 @@ describe('HTML Utilities', () => {
     });
 
     it('should handle empty string', () => {
+      // Intentional: an empty string is treated as a single empty line, so it gets indented
       expect(indentLines('')).toBe('  ');
       expect(indentLines('', 4)).toBe('    ');
     });

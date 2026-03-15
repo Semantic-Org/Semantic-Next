@@ -502,7 +502,9 @@ describe('Object Utilities', () => {
 
     it('should skip __proto__ for security', () => {
       const target = {};
-      const source = { __proto__: { malicious: true }, safe: 'value' };
+      // JSON.parse creates an actual own property named "__proto__"
+      // unlike literal { __proto__: ... } which sets the prototype
+      const source = JSON.parse('{"__proto__": {"malicious": true}, "safe": "value"}');
 
       deepExtend(target, source);
 
