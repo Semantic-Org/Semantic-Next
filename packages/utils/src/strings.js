@@ -173,16 +173,31 @@ export const truncate = (text, length, options = {}) => {
 
 export const escapeHTML = (string) => {
   const htmlEscapes = {
-    '&': '&amp',
-    '<': '&lt',
-    '>': '&gt',
-    '"': '&quot',
-    "'": '&#39',
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
   };
   const htmlRegExp = /[&<>"']/g;
   const hasHTML = RegExp(htmlRegExp.source);
   return (string && hasHTML.test(string))
     ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
+    : string;
+};
+
+export const unescapeHTML = (string) => {
+  const htmlUnescapes = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#39;': "'",
+  };
+  const htmlRegExp = /&(?:amp|lt|gt|quot|#39);/g;
+  const hasEscaped = RegExp(htmlRegExp.source);
+  return (string && hasEscaped.test(string))
+    ? string.replace(htmlRegExp, (entity) => htmlUnescapes[entity])
     : string;
 };
 

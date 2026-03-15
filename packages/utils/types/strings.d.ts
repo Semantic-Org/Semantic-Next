@@ -206,6 +206,25 @@ export function truncate(text: string | null | undefined, length: number, option
 export function escapeHTML(string: string): string;
 
 /**
+ * Unescapes HTML entities in a string back to their original characters
+ * The inverse of escapeHTML — converts &amp; &lt; &gt; &quot; &#39; back to & < > " '
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#unescapehtml unescapeHTML}
+ * @see {@link https://next.semantic-ui.com/examples/utils-unescapehtml Example}
+ *
+ * @param string - The string containing HTML entities to unescape
+ * @returns The string with HTML entities converted back to characters
+ *
+ * @example
+ * ```ts
+ * unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;')
+ * // returns '<div>Hello</div>'
+ * unescapeHTML('rock &amp; roll')
+ * // returns 'rock & roll'
+ * ```
+ */
+export function unescapeHTML(string: string): string;
+
+/**
  * Reverses a string while properly handling Unicode grapheme clusters
  * Uses Intl.Segmenter for correct handling of emojis, flag sequences, skin tones, and combined characters
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#reversestring reverseString}

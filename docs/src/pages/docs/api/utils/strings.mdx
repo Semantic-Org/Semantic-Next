@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: String Utilities
 package: "@semantic-ui/utils"
-methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, joinWords, getArticle, truncate, tokenize, escapeHTML, reverseString]
+methods: [kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase, joinWords, getArticle, truncate, tokenize, escapeHTML, unescapeHTML, reverseString]
 icon: type
 description: API reference for string manipulation functions
 ---
@@ -341,6 +341,33 @@ import { escapeHTML } from '@semantic-ui/utils';
 
 const str = '<script>alert("XSS")</script>';
 console.log(escapeHTML(str)); // "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;"
+```
+
+### unescapeHTML
+
+```javascript
+function unescapeHTML(string)
+```
+
+Converts HTML entities back to their original characters. The inverse of `escapeHTML`.
+
+#### Parameters
+
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string containing HTML entities to unescape |
+
+#### Returns
+
+A new string with HTML entities converted back to characters.
+
+#### Example
+
+```javascript
+import { unescapeHTML } from '@semantic-ui/utils';
+
+console.log(unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;')); // '<div>Hello</div>'
+console.log(unescapeHTML('rock &amp; roll')); // 'rock & roll'
 ```
 
 ### reverseString
