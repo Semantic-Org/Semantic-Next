@@ -23,6 +23,7 @@
     "astro-expressive-code": "^0.41.7",
     "fflate": "^0.8.2",
     "gray-matter": "^4.0.3",
+    "js.foresight": "^3.4.0",
     "link": "^2.1.2",
     "playground-elements": "0.21.2",
     "pretty": "^2.0.0",

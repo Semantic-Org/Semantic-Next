@@ -41,7 +41,7 @@ const pageTraversal = await getPageTraversalLinks({
 
 const activeURL = Astro.url.pathname;
 ---
-<Body title={title} description={description} searchMeta={searchMeta}>
+<Body title={title} description={description} searchMeta={searchMeta} prefetch>
 	<TopBar></TopBar>
 	<layout id={id}>
 		<Sidebar><slot name="sidebar"></slot></Sidebar>
