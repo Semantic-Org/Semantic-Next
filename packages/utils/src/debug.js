@@ -50,7 +50,7 @@ export const log = (
       level,
       namespace,
       message,
-      ...(data?.length) ? { data } : {},
+      ...(data !== undefined && (!Array.isArray(data) || data.length > 0)) ? { data } : {},
     });
     return;
   }
@@ -73,7 +73,7 @@ export const log = (
   logFormat += message;
   logArgs.unshift(logFormat);
 
-  if (data?.length > 0) {
+  if (data !== undefined && (!Array.isArray(data) || data.length > 0)) {
     logArgs.push(data);
   }
 
