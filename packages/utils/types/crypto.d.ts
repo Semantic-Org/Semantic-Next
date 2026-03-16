@@ -62,14 +62,19 @@ interface HashCodeOptions {
    */
   prettify?: boolean;
   /**
-   *  A seed value for the hash function.
-   *  @default 0x12345678
+   * A seed value for the hash function.
    */
   seed?: number;
+  /**
+   * Use FNV-1a (fast, zero allocation). Set to false for UMASH (stronger collision resistance).
+   * @default true
+   */
+  fast?: boolean;
 }
 
 /**
- * Creates a unique ID (hash code) from a string using an adapted UMASH algorithm
+ * Generates a hash code for the given input. Uses FNV-1a by default (zero allocation).
+ * Set `fast: false` to use UMASH for stronger collision resistance.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/crypto#hashcode hashCode}
  * @see {@link https://next.semantic-ui.com/examples/utils-hashcode Example}
  *
@@ -79,10 +84,9 @@ interface HashCodeOptions {
  *
  * @example
  * ```ts
- * hashCode('test') // returns 2949673445
- * hashCode('test', { prettify: true }) // returns '29LGN5'
- * hashCode({ a: 1, b: 2 }) // returns 123456789
- * hashCode('test', { seed: 0x87654321 }) // returns 987654321
+ * hashCode('test') // FNV-1a (default)
+ * hashCode('test', { prettify: true })
+ * hashCode('test', { fast: false }) // UMASH mode
  * ```
  */
 export function hashCode(input: string | object | null | undefined, options?: HashCodeOptions): number | string;

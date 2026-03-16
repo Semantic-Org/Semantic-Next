@@ -12,6 +12,7 @@ description: Latest updates and changes in Semantic UI
 xx.xx.xxxx
 
 ### Utils
+* **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
 * **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
 * **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
 

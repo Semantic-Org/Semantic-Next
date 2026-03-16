@@ -2,7 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { plasmaConfig } from '../data/homepage.js';
 import { createPlasma } from './plasma.js';
 
-createPlasma('#plasma', plasmaConfig);
+createPlasma('#plasma', { ...plasmaConfig, fadeInClass: false });
 
 /*-------------------------------
       Tour Scroll Switching

@@ -580,10 +580,11 @@ oklchToHex('#ff5733');                 // '#ff5733' (hex passthrough)
 ```javascript
 import { hashCode, prettifyHash, generateID, getRandomSeed, tokenize } from '@semantic-ui/utils';
 
-// UMASH-based string hashing
-hashCode('input string');                          // 3421556088 (numeric)
+// FNV-1a hashing (default, zero allocation)
+hashCode('input string');                          // numeric hash
 hashCode('input', { prettify: true });             // 'XXXXXX' (alphanumeric)
 hashCode('input', { seed: 0xABCD });               // seeded hash
+hashCode('input', { fast: false });                // UMASH mode (stronger collisions)
 
 // Numeric hash to alphanumeric string
 prettifyHash(123456);                               // '002N9C'

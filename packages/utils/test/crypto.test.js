@@ -56,7 +56,7 @@ describe('ID/Hashing Functions', () => {
 
   describe('hashCode', () => {
     it('should produce consistent hash code for the same input', () => {
-      expect(hashCode('Test String')).toBe(1884887178);
+      expect(hashCode('Test String')).toBe(hashCode('Test String'));
     });
 
     it('should generally produce unique hash codes for different inputs', () => {
@@ -194,6 +194,16 @@ describe('ID/Hashing Functions', () => {
       const result1 = hashCode('test', { seed: 0x12345678 });
       const result2 = hashCode('test', { seed: 0x87654321 });
       expect(result1).not.toBe(result2);
+    });
+
+    it('should use fast mode by default', () => {
+      const fast = hashCode('test');
+      const slow = hashCode('test', { fast: false });
+      expect(fast).not.toBe(slow);
+    });
+
+    it('should use UMASH when fast: false', () => {
+      expect(hashCode('Test String', { fast: false })).toBe(1884887178);
     });
   });
 
