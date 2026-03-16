@@ -31,20 +31,7 @@ export const isArray = (x) => {
 };
 
 export const isBinary = (x) => {
-  return !!(
-    x instanceof Int8Array
-    || x instanceof Uint8Array
-    || x instanceof Uint8ClampedArray
-    || x instanceof Int16Array
-    || x instanceof Uint16Array
-    || x instanceof Int32Array
-    || x instanceof Uint32Array
-    || x instanceof Float32Array
-    || x instanceof Float64Array
-    || x instanceof BigInt64Array
-    || x instanceof BigUint64Array
-    || x instanceof ArrayBuffer
-  );
+  return ArrayBuffer.isView(x) || x instanceof ArrayBuffer;
 };
 
 export const isFunction = (x) => {
@@ -55,8 +42,18 @@ export const isPromise = (x) => {
   return x && isFunction(x.then);
 };
 
-export const isArguments = function(obj) {
-  return Object.prototype.toString.call(obj) === '[object Arguments]';
+export const isDate = (x) => {
+  return toString.call(x) === '[object Date]';
+};
+
+export const isRegExp = (x) => {
+  return toString.call(x) === '[object RegExp]';
+};
+
+const toString = Object.prototype.toString;
+
+export const isArguments = (obj) => {
+  return toString.call(obj) === '[object Arguments]';
 };
 
 export const isDOM = (element) => {
@@ -98,13 +95,34 @@ export const isIterable = x => {
   return isFunction(x?.[Symbol.iterator]);
 };
 
-export const isMap = x => {
-  return x instanceof Map;
+export const isMap = (x) => {
+  return toString.call(x) === '[object Map]';
 };
 
-export const isSet = x => {
-  return x instanceof Set;
+export const isSet = (x) => {
+  return toString.call(x) === '[object Set]';
 };
+
+const builtInTypes = new Set([
+  'Object',
+  'Array',
+  'Date',
+  'RegExp',
+  'Map',
+  'Set',
+  'Error',
+  'Uint8Array',
+  'Int8Array',
+  'Uint16Array',
+  'Int16Array',
+  'Uint32Array',
+  'Int32Array',
+  'Float32Array',
+  'Float64Array',
+  'BigInt64Array',
+  'BigUint64Array',
+  'NodeList',
+]);
 
 export const isClassInstance = (obj) => {
   if (obj === null || typeof obj !== 'object') {
@@ -114,26 +132,5 @@ export const isClassInstance = (obj) => {
   const constructorName = Object.getPrototypeOf(obj)?.constructor?.name;
   if (!constructorName) { return false; }
 
-  const builtInTypes = [
-    'Object',
-    'Array',
-    'Date',
-    'RegExp',
-    'Map',
-    'Set',
-    'Error',
-    'Uint8Array',
-    'Int8Array',
-    'Uint16Array',
-    'Int16Array',
-    'Uint32Array',
-    'Int32Array',
-    'Float32Array',
-    'Float64Array',
-    'BigInt64Array',
-    'BigUint64Array',
-    'NodeList',
-  ];
-
-  return !builtInTypes.includes(constructorName);
+  return !builtInTypes.has(constructorName);
 };

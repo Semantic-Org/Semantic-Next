@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Types Utilities
 package: "@semantic-ui/utils"
-methods: [isObject, isPlainObject, isString, isBoolean, isNumber, isArray, isBinary, isFunction, isPromise, isArguments, isDOM, isNode, isEmpty, isClassInstance, isSet, isMap]
+methods: [isObject, isPlainObject, isString, isBoolean, isNumber, isArray, isDate, isRegExp, isBinary, isFunction, isPromise, isArguments, isDOM, isNode, isEmpty, isClassInstance, isSet, isMap]
 icon: type
 description: API reference for type checking and manipulation functions
 ---
@@ -180,13 +180,13 @@ console.log(isArray([1, 2, 3])); // true
 console.log(isArray({})); // false
 ```
 
-### isBinary
+### isDate
 
 ```javascript
-function isBinary(x)
+function isDate(x)
 ```
 
-Checks if the given value is a binary (Uint8Array).
+Checks if the given value is a Date instance. Uses `Object.prototype.toString` tag dispatch for cross-realm safety.
 
 #### Parameters
 
@@ -196,7 +196,63 @@ Checks if the given value is a binary (Uint8Array).
 
 #### Returns
 
-`boolean` - True if the value is a binary, false otherwise.
+`boolean` - True if the value is a Date, false otherwise.
+
+#### Example
+
+```javascript
+import { isDate } from '@semantic-ui/utils';
+
+console.log(isDate(new Date())); // true
+console.log(isDate(Date.now())); // false
+console.log(isDate('2024-01-01')); // false
+```
+
+### isRegExp
+
+```javascript
+function isRegExp(x)
+```
+
+Checks if the given value is a RegExp instance. Uses `Object.prototype.toString` tag dispatch for cross-realm safety.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is a RegExp, false otherwise.
+
+#### Example
+
+```javascript
+import { isRegExp } from '@semantic-ui/utils';
+
+console.log(isRegExp(/abc/)); // true
+console.log(isRegExp(new RegExp('abc'))); // true
+console.log(isRegExp('abc')); // false
+```
+
+### isBinary
+
+```javascript
+function isBinary(x)
+```
+
+Checks if the given value is binary data (an ArrayBuffer or any typed array view such as Uint8Array).
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| x    | any  | Any value to check |
+
+#### Returns
+
+`boolean` - True if the value is binary data, false otherwise.
 
 #### Example
 
@@ -204,7 +260,9 @@ Checks if the given value is a binary (Uint8Array).
 import { isBinary } from '@semantic-ui/utils';
 
 console.log(isBinary(new Uint8Array())); // true
-console.log(isBinary(new ArrayBuffer(8))); // false
+console.log(isBinary(new ArrayBuffer(8))); // true
+console.log(isBinary(new Float32Array(4))); // true
+console.log(isBinary([])); // false
 ```
 
 ### isFunction
@@ -477,4 +535,4 @@ const mapLike = { set: () => {}, get: () => {}, size: 0 };
 console.log(isMap(mapLike)); // false
 ```
 
-> **Instance Checking** `isMap()` uses `instanceof Map` to distinguish real Map instances from plain objects that might have similar method names.
+> **Instance Checking** `isMap()` uses `Object.prototype.toString` tag dispatch to distinguish real Map instances from plain objects that might have similar method names.
