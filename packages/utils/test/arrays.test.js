@@ -13,6 +13,7 @@ import {
   moveToFront,
   range,
   remove,
+  sequence,
   some,
   sortBy,
   unique,
@@ -242,9 +243,29 @@ describe('Array Utilities', () => {
   });
 
   describe('range', () => {
-    it('should create an array of numbers', () => {
+    it('should create an array from start to stop (exclusive)', () => {
+      expect(range(5)).toEqual([0, 1, 2, 3, 4]);
       expect(range(1, 5)).toEqual([1, 2, 3, 4]);
-      expect(range(0, 4, 5)).toEqual([0, 5, 10, 15]);
+      expect(range(0, 10, 2)).toEqual([0, 2, 4, 6, 8]);
+      expect(range(0, 10, 3)).toEqual([0, 3, 6, 9]);
+    });
+
+    it('should avoid floating-point drift with fractional steps', () => {
+      const result = range(0, 1, 0.1);
+      expect(result).toHaveLength(10);
+      // multiplication path avoids accumulated drift
+      expect(result[3]).toBe(0.1 * 3); // not 0.30000000000000004
+    });
+  });
+
+  describe('sequence', () => {
+    it('should generate multiples', () => {
+      expect(sequence(5)).toEqual([1, 2, 3, 4, 5]);
+      expect(sequence(3, 3)).toEqual([3, 6, 9]);
+      expect(sequence(5, 10)).toEqual([10, 20, 30, 40, 50]);
+      expect(sequence(5, 3, 2)).toEqual([6, 9, 12, 15, 18]);
+      expect(sequence(4, 100, 0)).toEqual([0, 100, 200, 300]);
+      expect(sequence(8, 60, 0)).toEqual([0, 60, 120, 180, 240, 300, 360, 420]);
     });
   });
 
