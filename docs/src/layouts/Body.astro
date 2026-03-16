@@ -47,7 +47,7 @@ searchMeta = {
       import { exportGlobals } from '@semantic-ui/query';
       exportGlobals();
     </script>
-    {prefetch && (
+    {prefetch && !import.meta.env.DEV && (
       <script>
         import '../javascript/prefetch.js';
       </script>
