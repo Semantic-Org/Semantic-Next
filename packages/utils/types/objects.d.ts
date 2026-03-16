@@ -257,37 +257,79 @@ export function arrayFromObject<T>(
 ): Array<{ key: string; value: T; }>;
 
 /**
+ * Match type indicating how a field matched the query
+ */
+type WeightedSearchMatchType = 'startsWith' | 'wordStartsWith' | 'anywhere' | 'anyWord';
+
+/**
+ * Details about a single field match returned when `returnMatches` is enabled
+ */
+export interface WeightedSearchMatchDetail {
+  /** The property path that matched */
+  field: string;
+  /** How the field matched the query */
+  type: WeightedSearchMatchType;
+  /** Numeric score (lower is better): 1=startsWith, 2=wordStartsWith, 3=anywhere, 4+=anyWord */
+  score: number;
+  /** The raw (pre-lowercase) value that was matched against */
+  value: string | string[] | unknown;
+}
+
+/**
  * Options for weighted object search
  */
 export interface WeightedSearchOptions {
-  /** Return details about matches */
+  /** Return details about how each result matched the query */
   returnMatches?: boolean;
-  /** Require all words to match */
+  /** Require all query words to match (default true) */
   matchAllWords?: boolean;
-  /** Properties to search within */
+  /** Property paths to search within (supports dot-path notation) */
   propertiesToMatch?: string[];
 }
 
 /**
- * Performs a weighted search across an array of objects
+ * Searches and ranks objects by query relevance using a weight hierarchy:
+ * startsWith > wordStartsWith > anywhere > anyWord.
+ *
+ * Uses toLowerCase + string methods for common checks, stable sort via
+ * original index, and returns spread copies (never mutates originals)
+ * when `returnMatches` is enabled.
+ *
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#weightedobjectsearch weightedObjectSearch}
  *
- * @param query - The search query
+ * @param query - The search query (case-insensitive, trimmed)
  * @param objectArray - Array of objects to search
  * @param options - Search configuration options
- * @returns Filtered and sorted array based on match quality
+ * @returns Filtered and sorted array based on match quality. When `returnMatches`
+ *   is true, each result is a shallow copy with an added `matches` array.
  *
  * @example
  * ```ts
- * const users = [
- *   { name: 'John Smith', email: 'john@example.com' },
- *   { name: 'Jane Smith', email: 'jane@example.com' }
+ * const items = [
+ *   { name: 'Apple Pie', tags: ['fruit', 'dessert'] },
+ *   { name: 'Green Apple', tags: ['fruit'] },
+ *   { name: 'Snapple Juice', tags: ['drink'] },
  * ];
- * weightedObjectSearch('john', users, {
- *   propertiesToMatch: ['name', 'email']
+ *
+ * // Basic search — sorted by relevance
+ * weightedObjectSearch('apple', items, {
+ *   propertiesToMatch: ['name', 'tags']
  * });
+ *
+ * // With match details
+ * weightedObjectSearch('apple', items, {
+ *   propertiesToMatch: ['name'],
+ *   returnMatches: true,
+ * });
+ * // [{ name: 'Apple Pie', matches: [{ field: 'name', type: 'startsWith', ... }] }, ...]
  * ```
  */
+export function weightedObjectSearch<T extends object>(
+  query: string,
+  objectArray: T[],
+  options: WeightedSearchOptions & { returnMatches: true; },
+): (T & { matches: WeightedSearchMatchDetail[]; })[];
+
 export function weightedObjectSearch<T extends object>(
   query: string,
   objectArray: T[],
