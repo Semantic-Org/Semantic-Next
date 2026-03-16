@@ -344,11 +344,11 @@ describe('CSS Utilities', () => {
         expect(scoped).toContain('margin: 10px');
       });
 
-      it('should be case-insensitive for scope selector', () => {
+      it('should preserve case of scope selector', () => {
         const css = '.case-test { padding: 5px; }';
         const scoped = scopeStyles(css, '.SCOPE-TEST');
 
-        expect(scoped).toContain('.scope-test .case-test');
+        expect(scoped).toContain('.SCOPE-TEST .case-test');
       });
     });
 

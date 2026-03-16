@@ -34,6 +34,8 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
  * Create a uniqueID from a string using an adapted UMASH algorithm
   https://github.com/backtrace-labs/umash
  */
+const encoder = new TextEncoder();
+
 export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
   const prime1 = 0x9e3779b1;
   const prime2 = 0x85ebca77;
@@ -42,11 +44,11 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
   let inputData;
 
   if (input === null || input === undefined) {
-    inputData = new TextEncoder().encode('');
+    inputData = encoder.encode('');
   }
   else if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
     try {
-      inputData = new TextEncoder().encode(JSON.stringify(input));
+      inputData = encoder.encode(JSON.stringify(input));
     }
     catch (error) {
       console.error('Error serializing input', error);
@@ -54,7 +56,7 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
     }
   }
   else {
-    inputData = new TextEncoder().encode(input.toString());
+    inputData = encoder.encode(input.toString());
   }
 
   let hash;
