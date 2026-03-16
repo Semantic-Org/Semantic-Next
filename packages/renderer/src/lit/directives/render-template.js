@@ -1,7 +1,7 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
-import { isClient, isEqual, isString, mapObject } from '@semantic-ui/utils';
-import { noChange, nothing } from 'lit';
+import { isClient, isString, mapObject } from '@semantic-ui/utils';
+import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 

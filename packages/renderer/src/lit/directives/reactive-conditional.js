@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
-import { noChange, nothing } from 'lit';
+import { nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
