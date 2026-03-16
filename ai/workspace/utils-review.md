@@ -8,43 +8,43 @@ Review conducted across 20 source files and 21 test files using 5 parallel revie
 
 ### Confidence 9-10
 
-| # | File | Line | Finding |
-|---|------|------|---------|
-| 1 | `types.js` | 12 | **`isPlainObject` throws on `Object.create(null)`** — no `constructor` property exists, `x.constructor === Object` throws TypeError |
-| 2 | `types.js` | 113 | **`isClassInstance` throws on `Object.create(null)`** — `proto.constructor.name` throws when proto is null |
-| 3 | `debug.js` | 87-118 | **`fatal`'s `onError` parameter is accepted but never called** — dead parameter, code checks `globalThis.onError` instead |
-| 4 | ~~`utils.js`~~ | ~~9~~ | ~~**`export * from './errors.js'`** — file does not exist~~ — **RESOLVED: stale barrel file deleted** |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 1 | `types.js` | **`isPlainObject` throws on `Object.create(null)`** | **FIXED** — uses `Object.getPrototypeOf` + proto check |
+| 2 | `types.js` | **`isClassInstance` throws on `Object.create(null)`** | **FIXED** — optional chaining + `!constructorName` guard |
+| 3 | `debug.js` | **`fatal`'s `onError` parameter never called** | **FIXED** — wired up as interception (call + return, prevents throw) |
+| 4 | ~~`utils.js`~~ | ~~`export * from './errors.js'`~~ | **RESOLVED** — stale barrel file deleted |
 
 ### Confidence 8
 
-| # | File | Line | Finding |
-|---|------|------|---------|
-| 5 | `types.js` | 62 | **`isDOM` returns `true` for ANY input in SSR** — when `typeof window === 'undefined'`, returns `true` unconditionally |
-| 6 | `arrays.js` | — | **`range` treats `stop=0` as absent** — `if (!stop)` is truthy for `0`, so `range(5, 0)` returns `[0,1,2,3,4]` instead of `[]` |
-| 7 | `strings.js` | — | **`toTitleCase` doesn't capitalize the last word** — standard title case rules say the last word should always be capitalized regardless of stopword status |
-| 8 | `css.js` | 107-115 | **`extractCSS` strips `@media`/`@supports` wrappers** — nested rules extracted without their at-rule context, changing semantics |
-| 9 | `environment.js` | 66-68 | **`__DEV__` check ignores the value** — `typeof __DEV__ !== 'undefined'` is true even when `__DEV__ === false` (React Native production) |
-| 10 | `browser.js` | 11-21 | **`openLink` calls `preventDefault()` after navigation** — should come before `window.location.href =` |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 5 | `types.js` | **`isDOM` returns `true` for ANY input in SSR** | **INTENTIONAL** — SSR optimistically assumes DOM so code paths don't bail out |
+| 6 | `arrays.js` | **`range` treats `stop=0` as absent** | **FIXED** — `!stop` → `stop === undefined`; also rewrote `range` with V8-optimized fast paths and added new `sequence` function |
+| 7 | `strings.js` | **`toTitleCase` doesn't capitalize the last word** | **FIXED** — added `index === arr.length - 1` check |
+| 8 | `css.js` | **`extractCSS` strips `@media`/`@supports` wrappers** | **FIXED** — recursive `extractFromRules` preserves at-rule wrappers, handles arbitrary nesting depth, passes through nested style rules as-is |
+| 9 | `environment.js` | **`__DEV__` check ignores the value** | **FIXED** — added `&& __DEV__`; also fixed `env.MODE` (now checks `=== 'development'` not `!== 'production'`) and removed dead `env.CI === true` check |
+| 10 | `browser.js` | **`openLink` calls `preventDefault()` after navigation** | Not yet addressed |
 
 ### Confidence 7
 
-| # | File | Line | Finding |
-|---|------|------|---------|
-| 11 | `numbers.js` | 8,19 | **`== 0` loose equality** — coerces `''`, `false`, `null` to `0`, bypassing the `isNumber` guard below |
-| 12 | `objects.js` | 220 | **`proxyObject` uses `\|\|` fallback** — suppresses falsy values (`0`, `""`, `false`) from the reference object |
-| 13 | `functions.js` | 119-146 | **`debounce`/`throttle` `cleanupListener` removes abort handler after first invocation** — subsequent calls can't be aborted |
-| 14 | `dates.js` | — | **EST/PST not in shorthand map** — only `ET`/`PT` exist; tests previously passed by accident because V8 accepts them as raw Intl timezone IDs (now fixed in tests) |
-| 15 | `css.js` | 129 | **`scopeStyles` lowercases the scope selector** — `.MyComponent` becomes `.mycomponent`, breaking case-sensitive CSS matching |
-| 16 | `css.js` | 107 | **`extractCSS` only descends one nesting level** — `@media` inside `@layer` etc. are missed |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 11 | `numbers.js` | **`== 0` loose equality** | **FIXED** — `=== 0` |
+| 12 | `objects.js` | **`proxyObject` uses `\|\|` fallback** | **FIXED** — `??` |
+| 13 | `functions.js` | **`debounce`/`throttle` `cleanupListener` removes abort handler after first invocation** | Not yet addressed |
+| 14 | `dates.js` | **EST/PST not in shorthand map** | **FIXED** — tests updated to use actual shorthand keys `ET`/`PT` |
+| 15 | `css.js` | **`scopeStyles` lowercases the scope selector** | Not yet addressed |
+| 16 | `css.js` | **`extractCSS` only descends one nesting level** | **FIXED** — recursive approach (same fix as #8) |
 
 ### Confidence 6
 
-| # | File | Line | Finding |
-|---|------|------|---------|
-| 17 | `functions.js` | 23 | **`memoize` default hash conflates `undefined` and `null`** — `JSON.stringify([undefined])` === `JSON.stringify([null])` === `"[null]"` |
-| 18 | `strings.js` | — | **`escapeHTML(null)` returns `null`** — inconsistent with `truncate` which returns `''` for falsy input |
-| 19 | `debug.js` | 53,76 | **`log` `data` parameter silently dropped for non-array-like objects** — `data?.length` is undefined for `{key: val}` |
-| 20 | `css.js` | 160 | **`scopeStyles` uses `==` instead of `===`** for `rule.type` comparison |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 17 | `functions.js` | **`memoize` default hash conflates `undefined` and `null`** | Not yet addressed |
+| 18 | `strings.js` | **`escapeHTML(null)` returns `null`** | Not yet addressed |
+| 19 | `debug.js` | **`log` `data` parameter silently dropped for non-array-like objects** | Not yet addressed |
+| 20 | `css.js` | **`scopeStyles` uses `==` instead of `===`** | Not yet addressed |
 
 ---
 
@@ -66,6 +66,7 @@ Review conducted across 20 source files and 21 test files using 5 parallel revie
 | 10 | `dates.test.js:177-178` | Timezone tests changed from V8-specific `EST`/`PST` to actual shorthand keys `ET`/`PT` |
 | 11 | `browser/browser.test.js:64` | Added `expect.assertions(1)` to invalid type test |
 | 12 | `browser/css.test.js:289` | Nested rule extraction verifies selector in extracted CSS |
+| 13 | `renderer/helpers.test.js:381` | `escapeHTML` expected value was missing semicolons in HTML entities |
 
 ### Still Present (not addressed)
 
@@ -74,7 +75,7 @@ Review conducted across 20 source files and 21 test files using 5 parallel revie
 | 1 | `colors.test.js:28-34` | oklch expectations recorded from implementation output, not verified against CSS Color Level 4 reference (commented) |
 | 2 | `dates.test.js` | No tests for the shorthand timezone feature's full map (only ET/PT tested) |
 | 3 | `equality.test.js` | Set equality tests only use primitives, hiding reference-equality limitation for objects (commented) |
-| 4 | `css.test.js:289` | Nested rule extraction doesn't verify `@media` wrapper is preserved (it isn't — implementation bug) |
+| 4 | `css.test.js:289` | Nested rule extraction doesn't verify `@media` wrapper is preserved (implementation now fixed, test should be updated) |
 | 5 | `css.test.js:477-481` | `scopeStyles` multiple-selector test doesn't verify each selector is individually scoped |
 
 ---
@@ -83,34 +84,55 @@ Review conducted across 20 source files and 21 test files using 5 parallel revie
 
 ### High Impact (hot paths)
 
-| # | File | Finding |
-|---|------|---------|
-| 1 | `dates.js` | **`reverseKeys(shorthand)` rebuilt on every `formatDate` call** — static data, should be module-level constant |
-| 2 | `crypto.js` | **`new TextEncoder()` on every `hashCode` call** — used by `adoptStylesheet` for every component's CSS |
-| 3 | `strings.js` | **`escapeHTML`/`unescapeHTML` re-create lookup objects + compile regex every call** — per-render hot path in a UI framework |
-| 4 | `browser.js` | **`specialKeys` object allocated on every `getKeyFromEvent` call** — fires on every keypress |
-| 5 | `objects.js` | **`weightedObjectSearch` creates `new RegExp(word, 'i')` per word per field per object** — should precompile once |
-| 6 | `strings.js` | **`Intl.Segmenter` constructed fresh on every `truncate`/`reverseString` call** — expensive constructor, cache by locale |
-| 7 | `functions.js` | **`memoize` default hash runs `JSON.stringify` + `hashCode` (with TextEncoder) on every call including hits** |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 1 | `dates.js` | **`reverseKeys(shorthand)` rebuilt on every `formatDate` call** | **FIXED** — `timezoneShorthand` at module scope |
+| 2 | `crypto.js` | **`new TextEncoder()` on every `hashCode` call** | **FIXED** — `encoder` singleton at module scope |
+| 3 | `strings.js` | **`escapeHTML`/`unescapeHTML` re-create lookup objects + compile regex every call** | **FIXED** — all hoisted above their functions |
+| 4 | `browser.js` | **`specialKeys` object allocated on every `getKeyFromEvent` call** | **FIXED** — hoisted above function |
+| 5 | `objects.js` | **`weightedObjectSearch` creates `new RegExp(word, 'i')` per word per field per object** | Not yet addressed |
+| 6 | `strings.js` | **`Intl.Segmenter` constructed fresh on every `truncate`/`reverseString` call** | Not yet addressed |
+| 7 | `functions.js` | **`memoize` default hash runs `JSON.stringify` + `hashCode` (with TextEncoder) on every call including hits** | Not yet addressed |
 
 ### Medium Impact
 
-| # | File | Finding |
-|---|------|---------|
-| 8 | `types.js` | **`isBinary`: 11 `instanceof` checks → `ArrayBuffer.isView(x) \|\| x instanceof ArrayBuffer`** — single native call |
-| 9 | `types.js` | **`isClassInstance` allocates `builtInTypes` array on every call** — hoist to module-scope `Set` |
-| 10 | `cloning.js` | **`{ ...options, seen }` allocates a new object per recursive call** — pass `seen` as direct parameter |
-| 11 | `strings.js` | **`capitalizeWords` runs 3 regex passes where 1 suffices** |
-| 12 | `strings.js` | **`toTitleCase` re-creates `stopWords` array per call** — should be module-level `Set` |
-| 13 | `equality.js` | **Map equality iterates entries twice; object equality iterates keys three times** |
-| 14 | `arrays.js` | **`sortBy` uses `each()` inside the sort comparator** — `each` has dispatch overhead, use plain `for` loop |
-| 15 | `colors.js` | **Regex + `clamp01`/`applyGamma` closures allocated inside `oklchToRgb` per call** |
-| 16 | `dates.js` | **Format regex compiled on every `formatDate` call** — fixed pattern, hoist to module scope |
+| # | File | Finding | Status |
+|---|------|---------|--------|
+| 8 | `types.js` | **`isBinary`: 11 `instanceof` checks → `ArrayBuffer.isView(x)`** | Not yet addressed |
+| 9 | `types.js` | **`isClassInstance` allocates `builtInTypes` array on every call** | **FIXED** — module-level `Set` |
+| 10 | `cloning.js` | **`{ ...options, seen }` allocates per recursive call** | Not yet addressed |
+| 11 | `strings.js` | **`capitalizeWords` runs 3 regex passes where 1 suffices** | Not yet addressed |
+| 12 | `strings.js` | **`toTitleCase` re-creates `stopWords` array per call** | **FIXED** — module-level `Set` |
+| 13 | `equality.js` | **Map equality iterates entries twice; object equality iterates keys three times** | Not yet addressed |
+| 14 | `arrays.js` | **`sortBy` uses `each()` inside the sort comparator** | Not yet addressed |
+| 15 | `colors.js` | **Regex + `clamp01`/`applyGamma` closures allocated inside `oklchToRgb` per call** | **FIXED** — all hoisted above function |
+| 16 | `dates.js` | **Format regex compiled on every `formatDate` call** | **FIXED** — `formatTokenRegExp` at module scope |
 
 ---
 
 ## 4. Structural Issues
 
 - ~~**`utils.js` vs `index.js` barrel drift**~~ — **RESOLVED: deleted stale `utils.js` barrel and orphaned `meta.json` build artifact**
-- **`equality.js` `isEqual` accepts `options` parameter that is never read or forwarded**
-- **`arrays.js` `range` semantics diverge from every known `range` implementation** — `step` doesn't affect length, produces values past `stop`
+- **`equality.js` `isEqual` accepts `options` parameter that is never read or forwarded** — not yet addressed
+- ~~**`arrays.js` `range` semantics diverge from every known `range` implementation**~~ — **RESOLVED: `range` rewritten with standard semantics + V8 fast paths; old behavior extracted to new `sequence` function**
+
+---
+
+## 5. New Work
+
+### `range` rewrite
+- Standard `range(start, stop, step)` semantics (exclusive stop)
+- V8-optimized: fast path for single-arg, integer/fractional bifurcation, pre-allocated arrays, step=0 guard
+- All existing call sites verified compatible
+
+### `sequence` (new function)
+- `sequence(count, interval = 1, start = 1)` — generates multiples
+- Designed via `design-util-function` workflow: usage elicitation → naming → implementation
+- `count | 0` guard for NaN/float truncation
+- Exported from arrays.js, added to template helpers
+
+### `design-util-function` workflow
+- New contributing workflow at `ai/workflows/contributing/design-util-function.md`
+- 5-step process: Intent → Usage elicitation → Naming → Implementation → Validate
+- Uses isolated subagents at each step to avoid leading the witness
+- Targets V8 internals, frontend scale, first-principles API design
