@@ -7,8 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "postinstall": "patch-package"
+    "astro": "astro"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.38.1",
@@ -17,7 +16,7 @@
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.40.0",
     "@pagefind/modular-ui": "^1.4.0",
-    "@semantic-ui/astro-lit": "5.1.3",
+    "@semantic-ui/astro-lit": "5.2.0",
     "@webcomponents/template-shadowroot": "^0.2.1",
     "astro": "6.0.4",
     "astro-expressive-code": "^0.41.7",
@@ -33,8 +32,7 @@
   },
   "devDependencies": {
     "@astropub/md": "^1.0.0",
-    "patch-package": "^8.0.1",
-    "unist-util-visit": "^5.1.0"
+"unist-util-visit": "^5.1.0"
   },
   "overrides": {
     "lit": "^3.0.0"
