@@ -495,6 +495,23 @@ describe('function utilities', () => {
           debounce(() => {}, 100, { abortController: controller });
         }).toThrow('The operation was aborted');
       });
+
+      it('should still abort after a successful invocation', async () => {
+        const controller = new AbortController();
+        const func = vi.fn(() => 'result');
+        const debounced = debounce(func, 100, { abortController: controller });
+
+        // First call — let it invoke successfully
+        debounced('first');
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(1);
+
+        // Second call — then abort before it fires
+        const promise = debounced('second');
+        controller.abort();
+
+        await expect(promise).rejects.toThrow('The operation was aborted');
+      });
     });
 
     describe('rejectSkipped option', () => {
