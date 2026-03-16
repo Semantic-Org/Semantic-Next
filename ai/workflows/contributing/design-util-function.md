@@ -108,6 +108,10 @@ Constraints:
 - Guard against degenerate inputs without throwing.
 - Use `export const` with arrow functions.
 - Return concrete values. No generators, iterators, or lazy evaluation.
+- Destructure options with defaults in the function signature:
+  `export const fn = (required, { option1 = default1, option2 = default2 } = {}) => { ... }`
+  This is the library's standard pattern — it makes defaults visible at the
+  call site, enables IDE autocompletion, and avoids manual default assignment.
 - Prefer using `each(collection, callback)` for iteration. `each` is the
   library's universal iterator — it handles arrays, plain objects, Maps, Sets,
   and iterables with early-break via `return false`. Signature:
@@ -115,8 +119,25 @@ Constraints:
   Using it consistently means one pattern everywhere. If you believe a specific
   hot path (e.g., inside a sort comparator called O(n log n) times) justifies
   a raw `for` loop instead, explain why.
+- Prefer the library's own type helpers over raw `typeof`, `instanceof`, or
+  `Object.prototype.toString` checks. Available helpers:
+  `isArray(x)`, `isObject(x)`, `isPlainObject(x)`, `isString(x)`,
+  `isNumber(x)`, `isBoolean(x)`, `isFunction(x)`, `isDate(x)`, `isRegExp(x)`,
+  `isMap(x)`, `isSet(x)`, `isBinary(x)`, `isDOM(x)`, `isNode(x)`,
+  `isPromise(x)`, `isEmpty(x)`, `isClassInstance(x)`.
+  These use `Object.prototype.toString` tag dispatch where applicable, making
+  them cross-realm safe (objects from iframes, workers, or VM contexts). Using
+  them also improves tree-shaking (shared helpers are deduplicated by the
+  bundler) and means a fix to a type check propagates to every consumer.
 
-Propose an implementation that takes the algorithmic wins (caching expensive
+Before writing code, brainstorm the five most common usage patterns for this
+function in frontend applications. Consider: what types of input data are
+most frequent? What call patterns dominate? What sizes are typical? Use these
+patterns as a reference when making implementation decisions — type check
+ordering, fast paths, allocation strategy, and branching should all optimize
+for the most common real-world case first, with rarer cases handled after.
+
+Then propose an implementation that takes the algorithmic wins (caching expensive
 constructors, avoiding O(n²) patterns, eliminating per-call allocations) while
 keeping the code readable and compact. If a micro-optimization (switch vs object
 lookup, manual loop vs .replace(), for vs .reduce()) saves nanoseconds but costs
