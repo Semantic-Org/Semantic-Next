@@ -12,6 +12,7 @@ import {
   range,
   roundDecimal,
   roundNumber,
+  sequence,
   tokenize,
   toTitleCase,
   truncate,
@@ -171,6 +172,9 @@ export const TemplateHelpers = {
   },
   range(start, stop, step = 1) {
     return range(start, stop, step);
+  },
+  sequence(count, interval = 1, start = 1) {
+    return sequence(count, interval, start);
   },
   arrayFromObject(obj) {
     return arrayFromObject(obj);
