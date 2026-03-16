@@ -5,6 +5,17 @@ import { isArray, isFunction, isString } from './types.js';
        Strings
 --------------------*/
 
+const segmenterCache = new Map();
+const getSegmenter = (locale, granularity) => {
+  const key = `${locale}:${granularity}`;
+  let segmenter = segmenterCache.get(key);
+  if (!segmenter) {
+    segmenter = new Intl.Segmenter(locale, { granularity });
+    segmenterCache.set(key, segmenter);
+  }
+  return segmenter;
+};
+
 /*
   HTML Attributes -> JS Properties
 */
@@ -23,41 +34,39 @@ export const capitalize = (str = '') => {
 };
 
 export const capitalizeWords = (str = '') => {
-  return str
-    .replace(/\b(\w)/g, (match, capture) => capture.toUpperCase())
-    .replace(/\b(\w+)\b/g, (match) => match.toLowerCase())
-    .replace(/\b(\w)/g, (match) => match.toUpperCase());
+  return str.replace(/\b\w+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
 };
 
+const stopWords = new Set([
+  'the',
+  'a',
+  'an',
+  'and',
+  'but',
+  'for',
+  'at',
+  'by',
+  'from',
+  'to',
+  'in',
+  'on',
+  'of',
+  'or',
+  'nor',
+  'with',
+  'as',
+]);
+
 export const toTitleCase = (str = '') => {
-  const stopWords = [
-    'the',
-    'a',
-    'an',
-    'and',
-    'but',
-    'for',
-    'at',
-    'by',
-    'from',
-    'to',
-    'in',
-    'on',
-    'of',
-    'or',
-    'nor',
-    'with',
-    'as',
-  ];
   if (!isString(str)) {
     return;
   }
   return str
     .toLowerCase()
     .split(' ')
-    .map((word, index) => {
-      // Always capitalize the first word and any word not in stopWords
-      if (index === 0 || !stopWords.includes(word)) {
+    .map((word, index, arr) => {
+      // Always capitalize the first word, last word, and any word not in stopWords
+      if (index === 0 || index === arr.length - 1 || !stopWords.has(word)) {
         return word.charAt(0).toUpperCase() + word.slice(1);
       }
       return word;
@@ -138,7 +147,7 @@ export const truncate = (text, length, options = {}) => {
   const cutoff = Math.max(0, length - suffixChars.length);
 
   if (wordBoundary && typeof Intl?.Segmenter === 'function') {
-    const segmenter = new Intl.Segmenter(locale, { granularity: 'word' });
+    const segmenter = getSegmenter(locale, 'word');
     let count = 0;
     let truncated = '';
 
@@ -171,33 +180,34 @@ export const truncate = (text, length, options = {}) => {
   return truncated.trimEnd() + suffix;
 };
 
+const htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;',
+};
+const escapeHTMLRegExp = /[&<>"']/g;
+
 export const escapeHTML = (string) => {
-  const htmlEscapes = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  };
-  const htmlRegExp = /[&<>"']/g;
-  const hasHTML = RegExp(htmlRegExp.source);
-  return (string && hasHTML.test(string))
-    ? string.replace(htmlRegExp, (chr) => htmlEscapes[chr])
+  if (!string) { return ''; }
+  return escapeHTMLRegExp.test(string)
+    ? string.replace(escapeHTMLRegExp, (chr) => htmlEscapes[chr])
     : string;
 };
 
+const htmlUnescapes = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+};
+const unescapeHTMLRegExp = /&(?:amp|lt|gt|quot|#39);/g;
+
 export const unescapeHTML = (string) => {
-  const htmlUnescapes = {
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&quot;': '"',
-    '&#39;': "'",
-  };
-  const htmlRegExp = /&(?:amp|lt|gt|quot|#39);/g;
-  const hasEscaped = RegExp(htmlRegExp.source);
-  return (string && hasEscaped.test(string))
-    ? string.replace(htmlRegExp, (entity) => htmlUnescapes[entity])
+  return (string && unescapeHTMLRegExp.test(string))
+    ? string.replace(unescapeHTMLRegExp, (entity) => htmlUnescapes[entity])
     : string;
 };
 
@@ -210,7 +220,7 @@ export const reverseString = (str = '', options = {}) => {
 
   // Use Intl.Segmenter for proper grapheme cluster handling (flags, skin tones, etc.)
   if (typeof Intl?.Segmenter === 'function') {
-    const segmenter = new Intl.Segmenter(locale, { granularity: 'grapheme' });
+    const segmenter = getSegmenter(locale, 'grapheme');
     const segments = Array.from(segmenter.segment(str), s => s.segment);
     return segments.reverse().join('');
   }

@@ -192,8 +192,8 @@ export function truncate(text: string | null | undefined, length: number, option
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#escapehtml escapeHTML}
  * @see {@link https://next.semantic-ui.com/examples/utils-escapehtml Example}
  *
- * @param string - The string to escape
- * @returns The string with HTML special characters escaped
+ * @param string - The string to escape. Falsy values return an empty string.
+ * @returns The string with HTML special characters escaped, or empty string for falsy input
  *
  * @example
  * ```ts
@@ -201,9 +201,10 @@ export function truncate(text: string | null | undefined, length: number, option
  * // returns '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
  * escapeHTML('Price: $5 & "free" shipping')
  * // returns 'Price: $5 &amp; &quot;free&quot; shipping'
+ * escapeHTML(null) // returns ''
  * ```
  */
-export function escapeHTML(string: string): string;
+export function escapeHTML(string: string | null | undefined | false | 0): string;
 
 /**
  * Unescapes HTML entities in a string back to their original characters

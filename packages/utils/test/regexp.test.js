@@ -23,6 +23,12 @@ describe('regular expression utilities', () => {
       const input = 'Hello World';
       expect(escapeHTML(input)).toBe(input);
     });
+
+    it('should return empty string for falsy input', () => {
+      expect(escapeHTML(null)).toBe('');
+      expect(escapeHTML(undefined)).toBe('');
+      expect(escapeHTML('')).toBe('');
+    });
   });
 
   describe('unescapeHTML', () => {

@@ -322,7 +322,7 @@ console.log(tokenize("User's Name_123")); // "users-name-123"
 function escapeHTML(string)
 ```
 
-Escapes HTML special characters in a string.
+Escapes HTML special characters in a string. Returns an empty string for falsy input.
 
 #### Parameters
 
@@ -332,7 +332,7 @@ Escapes HTML special characters in a string.
 
 #### Returns
 
-A new string with HTML special characters escaped.
+A new string with HTML special characters escaped, or `''` if the input is falsy.
 
 #### Example
 
@@ -341,6 +341,10 @@ import { escapeHTML } from '@semantic-ui/utils';
 
 const str = '<script>alert("XSS")</script>';
 console.log(escapeHTML(str)); // "&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;"
+
+console.log(escapeHTML(null)); // ''
+console.log(escapeHTML(undefined)); // ''
+console.log(escapeHTML('')); // ''
 ```
 
 ### unescapeHTML
