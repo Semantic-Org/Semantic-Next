@@ -1,0 +1,12 @@
+/*-------------------
+       Text
+--------------------*/
+
+.spinner .text {
+  font-size: var(--spinner-text-font-size);
+  color: var(--spinner-text-color);
+}
+
+.spinner .circle + .text {
+  margin-left: var(--gap-xs);
+}

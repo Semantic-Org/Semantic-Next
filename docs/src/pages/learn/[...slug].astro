@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { each, asyncEach, isEmpty, findIndex, tokenize } from '@semantic-ui/utils';
 import { getExampleFiles, addPlaygroundInjections, getSandboxURL, getPanelIndexes } from '@helpers/playground.js';
 import { lessonPages, getLessonContent, getPreviousLesson, getNextLesson, getSidebarMenu } from '@helpers/navigation.js';
@@ -11,7 +11,7 @@ import LearnExample from '@components/LearnExample/LearnExample.js';
 import Sidebar from '@components/Sidebar.astro';
 
 const { entry } = Astro.props;
-const { Content } = await entry.render();
+const { Content } = await render(entry);
 
 /* Make paths */
 export async function getStaticPaths() {
@@ -60,7 +60,7 @@ export async function getStaticPaths() {
     });
 
     paths.push({
-      params: { slug: `${entry.slug}` },
+      params: { slug: `${entry.id}` },
       props: { entry, files, solutionFiles, panelIndexes },
     });
   });

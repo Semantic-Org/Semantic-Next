@@ -154,8 +154,8 @@ describe('String Utilities', () => {
     });
 
     it('should disable word boundary when specified', () => {
-      // Note: With a hard cut, the result is the same in this case.
-      expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a very…');
+      // Hard cut at the character limit, even if it falls mid-word
+      expect(truncate('Abcdefghij klmnop', 14, { wordBoundary: false })).toBe('Abcdefghij kl…');
     });
 
     it('should truncate at punctuation boundaries (comma, period, etc)', () => {

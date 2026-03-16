@@ -413,6 +413,13 @@ describe('Component', () => {
       // Create a mock component spec
       const componentSpec = {
         attributes: ['emphasis', 'active', 'disabled', 'icon'],
+        properties: [],
+        optionAttributes: {
+          'primary': 'emphasis',
+          'secondary': 'emphasis',
+          'tertiary': 'emphasis',
+          'disabled': 'disabled',
+        },
         propertyTypes: {
           emphasis: 'string',
           active: 'boolean',

@@ -1,0 +1,15 @@
+<div class="checklist">
+  <h3>Tasks</h3>
+  <div class="items">
+    {#each task in getTasks}
+      {>checklistItem task=task}
+    {/each}
+  </div>
+  <div class="footer">
+    <span class="summary">{getCompletedCount} of {getTotalCount} completed</span>
+    <div class="actions">
+      <ui-button class="add" size="tiny">Add</ui-button>
+      <ui-button class="remove" size="tiny" type="secondary">Remove</ui-button>
+    </div>
+  </div>
+</div>

@@ -2,8 +2,9 @@
 title: Pattern Research Integration
 description: How to integrate descriptive research findings into component specifications, including usage level interpretation and decision frameworks.
 keywords: [pattern research, usage levels, spec building, decision framework, component design]
-audience: contributing
-type: doc
+audience: research
+skill: pattern-research-integration
+type: skill
 ---
 
 # Descriptive Linguistics for UI Component Design
@@ -160,7 +161,7 @@ This approach gives us:
    - Document chosen patterns in spec format
    - Include usageLevel based on research
 
-4. **Port or Implement** (`port-classic-primitive.md`)
+4. **Implement CSS** (`primitive-write-css.md`)
    - Execute on the specification
    - Reference research for implementation details
 

@@ -13,9 +13,12 @@ import {
 import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
 
+const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+
 export class Signal {
+  [IS_SIGNAL] = true;
   static [Symbol.hasInstance](instance) {
-    return instance?.constructor?.name === 'Signal';
+    return !!instance?.[IS_SIGNAL];
   }
 
   constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {

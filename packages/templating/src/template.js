@@ -24,10 +24,13 @@ import { LitRenderer } from '@semantic-ui/renderer';
 import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
+const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
+
 export const Template = class Template {
+  [IS_TEMPLATE] = true;
   // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
-    return instance?.constructor?.name === 'Template';
+    return !!instance?.[IS_TEMPLATE];
   }
 
   static templateCount = 0;

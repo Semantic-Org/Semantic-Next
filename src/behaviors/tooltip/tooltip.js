@@ -245,11 +245,11 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     self.isVisible = true;
     dispatchEvent('show');
 
+    // Promote to top layer (creates escape behavior on first call)
     if (settings.topLayer) {
       self.$tooltip.escape('show');
     }
 
-    // Promote to top layer (creates escape behavior on first call)
     self.$tooltip
       .attach({
         to: el,

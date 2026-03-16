@@ -9,19 +9,29 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:vercel": "node build.js",
+    "deploy": "wireit",
     "dev": "tsc --watch",
     "start": "node dist/index.js"
   },
+  "wireit": {
+    "deploy": {
+      "command": "npx vercel --prod",
+      "dependencies": [
+        "build:vercel"
+      ]
+    }
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
-    "@semantic-ui/utils": "*",
+    "@semantic-ui/reactivity": "latest",
+    "@semantic-ui/templating": "latest",
+    "@semantic-ui/utils": "latest",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
     "typescript": "^5.0.0"
-  },
-  "engines": {
-    "node": ">=20"
   }
 }

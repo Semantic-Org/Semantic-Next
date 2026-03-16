@@ -43,6 +43,13 @@ export function buildFullManifest(specs) {
   };
 }
 
+export function buildMarkdownManifest(specs) {
+  const lines = specs.map(s => `* ${s.id} - ${s.name}`);
+  return `# Component Specs\n\n${specs.length} components\n\nFetch JSON: /content/specs/{id}.json\n\n${
+    lines.join('\n')
+  }\n`;
+}
+
 export function buildSlimManifest(specs) {
   return {
     schemaVersion: 1,

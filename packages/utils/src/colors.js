@@ -1,14 +1,3 @@
-/**
- * Converts an OKLCH color string to an RGB object.
- * Handles potential out-of-gamut colors by clamping the final RGB values.
- * Based on https://bottosson.github.io/posts/oklab/
- *
- * @param {string} oklchString - The color string in the format "oklch(L C H)" or "oklch(L, C, H)".
- *                                L: Lightness (0-1), C: Chroma (0-~0.4), H: Hue (0-360).
- * @returns {{r: number, g: number, b: number} | null} An object with r, g, b properties (0-255),
- *                                                     or null if the input string is invalid.
- */
-
 // --- Oklab Conversion Constants ---
 
 // Matrix 1: Oklab to LMS' (intermediate cone responses)
@@ -46,13 +35,22 @@ const GAMMA_HIGH_MULTIPLIER = 1.055;
 const GAMMA_EXPONENT = 1.0 / 2.4;
 const GAMMA_OFFSET = 0.055;
 
+const oklchRegExp = /oklch\(\s*(-?[\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*\)/i;
+
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
+
+const applyGamma = (channel) => {
+  const clamped = clamp01(channel);
+  if (clamped <= GAMMA_THRESHOLD) {
+    return GAMMA_LOW_MULTIPLIER * clamped;
+  }
+  else {
+    return GAMMA_HIGH_MULTIPLIER * Math.pow(clamped, GAMMA_EXPONENT) - GAMMA_OFFSET;
+  }
+};
 
 export function oklchToRgb(oklchString = '') {
-  // Regex to parse oklch(L C H) or oklch(L, C, H) with optional whitespace
-  // Allow optional negative sign for lightness
-  const match = oklchString.match(
-    /oklch\(\s*(-?[\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*\)/i
-  );
+  const match = oklchString.match(oklchRegExp);
 
   if (!match) {
     return null;
@@ -81,9 +79,12 @@ export function oklchToRgb(oklchString = '') {
   const oklab_b = chroma * Math.sin(hueRadians);
 
   // Convert Oklab to intermediate LMS cone responses (primed) using Matrix 1 constants
-  const lms_l_prime = OKLAB_TO_LMS_PRIME_L_FROM_L * lightness + OKLAB_TO_LMS_PRIME_L_FROM_A * oklab_a + OKLAB_TO_LMS_PRIME_L_FROM_B * oklab_b;
-  const lms_m_prime = OKLAB_TO_LMS_PRIME_M_FROM_L * lightness + OKLAB_TO_LMS_PRIME_M_FROM_A * oklab_a + OKLAB_TO_LMS_PRIME_M_FROM_B * oklab_b;
-  const lms_s_prime = OKLAB_TO_LMS_PRIME_S_FROM_L * lightness + OKLAB_TO_LMS_PRIME_S_FROM_A * oklab_a + OKLAB_TO_LMS_PRIME_S_FROM_B * oklab_b;
+  const lms_l_prime = OKLAB_TO_LMS_PRIME_L_FROM_L * lightness + OKLAB_TO_LMS_PRIME_L_FROM_A * oklab_a
+    + OKLAB_TO_LMS_PRIME_L_FROM_B * oklab_b;
+  const lms_m_prime = OKLAB_TO_LMS_PRIME_M_FROM_L * lightness + OKLAB_TO_LMS_PRIME_M_FROM_A * oklab_a
+    + OKLAB_TO_LMS_PRIME_M_FROM_B * oklab_b;
+  const lms_s_prime = OKLAB_TO_LMS_PRIME_S_FROM_L * lightness + OKLAB_TO_LMS_PRIME_S_FROM_A * oklab_a
+    + OKLAB_TO_LMS_PRIME_S_FROM_B * oklab_b;
 
   // Apply cube root non-linearity
   const lms_l = lms_l_prime * lms_l_prime * lms_l_prime;
@@ -91,22 +92,12 @@ export function oklchToRgb(oklchString = '') {
   const lms_s = lms_s_prime * lms_s_prime * lms_s_prime;
 
   // Convert LMS to Linear sRGB using Matrix 2 constants
-  const linearRed   = LMS_TO_LINEAR_RGB_R_FROM_L * lms_l + LMS_TO_LINEAR_RGB_R_FROM_M * lms_m + LMS_TO_LINEAR_RGB_R_FROM_S * lms_s;
-  const linearGreen = LMS_TO_LINEAR_RGB_G_FROM_L * lms_l + LMS_TO_LINEAR_RGB_G_FROM_M * lms_m + LMS_TO_LINEAR_RGB_G_FROM_S * lms_s;
-  const linearBlue  = LMS_TO_LINEAR_RGB_B_FROM_L * lms_l + LMS_TO_LINEAR_RGB_B_FROM_M * lms_m + LMS_TO_LINEAR_RGB_B_FROM_S * lms_s;
-
-  // Clamp Linear sRGB values to [0, 1] range to handle out-of-gamut colors
-  const clamp01 = (value) => Math.max(0, Math.min(1, value));
-
-  // Apply sRGB gamma correction (transfer function) using constants
-  const applyGamma = (channel) => {
-    const clamped = clamp01(channel);
-    if (clamped <= GAMMA_THRESHOLD) {
-      return GAMMA_LOW_MULTIPLIER * clamped;
-    } else {
-      return GAMMA_HIGH_MULTIPLIER * Math.pow(clamped, GAMMA_EXPONENT) - GAMMA_OFFSET;
-    }
-  };
+  const linearRed = LMS_TO_LINEAR_RGB_R_FROM_L * lms_l + LMS_TO_LINEAR_RGB_R_FROM_M * lms_m
+    + LMS_TO_LINEAR_RGB_R_FROM_S * lms_s;
+  const linearGreen = LMS_TO_LINEAR_RGB_G_FROM_L * lms_l + LMS_TO_LINEAR_RGB_G_FROM_M * lms_m
+    + LMS_TO_LINEAR_RGB_G_FROM_S * lms_s;
+  const linearBlue = LMS_TO_LINEAR_RGB_B_FROM_L * lms_l + LMS_TO_LINEAR_RGB_B_FROM_M * lms_m
+    + LMS_TO_LINEAR_RGB_B_FROM_S * lms_s;
 
   const finalRed = applyGamma(linearRed);
   const finalGreen = applyGamma(linearGreen);
@@ -120,32 +111,18 @@ export function oklchToRgb(oklchString = '') {
   };
 }
 
-
-/**
- * Converts an RGB color component (0-255) to its two-digit hex representation.
- *
- * @param {number} component - The RGB component value (0-255).
- * @returns {string} The two-digit hex string (e.g., "0A", "FF").
- */
 function rgbComponentToHex(component) {
   const hex = component.toString(16);
   return hex.length === 1 ? '0' + hex : hex;
 }
 
-/**
- * Converts an OKLCH color string to a hex color string (e.g., "#RRGGBB"),
- * or returns the input if it's already a valid hex color string.
- *
- * @param {string} colorString - The color string, either OKLCH format "oklch(L C H)" or a hex code.
- * @returns {string} The hex color string (e.g., "#FF0000") or an empty string if the input is invalid or empty.
- */
+const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 export function oklchToHex(colorString = '') {
-  if(!colorString) {
+  if (!colorString) {
     return '';
   }
 
-  // Regex to check for valid hex codes: #rgb, #rgba, #rrggbb, #rrggbbaa
-  const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
   if (hexRegex.test(colorString)) {
     return colorString; // Return directly if it's already a valid hex code
   }

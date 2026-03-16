@@ -119,13 +119,11 @@ export const debounce = (func, wait, options = {}) => {
             result = value;
             pendingPromises.forEach(({ resolve }) => resolve(value));
             pendingPromises = [];
-            cleanupListener();
             return value;
           },
           error => {
             pendingPromises.forEach(({ reject }) => reject(error));
             pendingPromises = [];
-            cleanupListener();
             throw error;
           },
         );
@@ -134,14 +132,12 @@ export const debounce = (func, wait, options = {}) => {
         result = funcResult;
         pendingPromises.forEach(({ resolve }) => resolve(funcResult));
         pendingPromises = [];
-        cleanupListener();
         return funcResult;
       }
     }
     catch (error) {
       pendingPromises.forEach(({ reject }) => reject(error));
       pendingPromises = [];
-      cleanupListener();
       throw error;
     }
   };
@@ -389,13 +385,11 @@ export const throttle = (func, wait, options = {}) => {
             result = value;
             pendingPromises.forEach(({ resolve }) => resolve(value));
             pendingPromises = [];
-            cleanupListener();
             return value;
           },
           error => {
             pendingPromises.forEach(({ reject }) => reject(error));
             pendingPromises = [];
-            cleanupListener();
             throw error;
           },
         );
@@ -404,14 +398,12 @@ export const throttle = (func, wait, options = {}) => {
         result = funcResult;
         pendingPromises.forEach(({ resolve }) => resolve(funcResult));
         pendingPromises = [];
-        cleanupListener();
         return funcResult;
       }
     }
     catch (error) {
       pendingPromises.forEach(({ reject }) => reject(error));
       pendingPromises = [];
-      cleanupListener();
       throw error;
     }
   };

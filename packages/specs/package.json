@@ -7,10 +7,12 @@
   "version": "0.18.0",
   "sideEffects": false,
   "type": "module",
+  "types": "types/index.d.ts",
   "main": "src/browser.js",
   "module": "src/browser.js",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "node": "./src/server.js",
       "browser": "./src/browser.js",
       "import": "./src/browser.js",

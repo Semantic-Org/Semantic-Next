@@ -33,5 +33,8 @@ export { RailComponentSpec, RailSpec } from '../primitives/rail/specs.js';
 // Segment
 export { SegmentComponentSpec, SegmentSpec } from '../primitives/segment/specs.js';
 
+// Spinner
+export { SpinnerComponentSpec, SpinnerSpec } from '../primitives/spinner/specs.js';
+
 // Table
 export { TableComponentSpec, TableSpec } from '../primitives/table/specs.js';

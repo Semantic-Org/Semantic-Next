@@ -205,6 +205,21 @@ describe('log', () => {
     expect(consoleSpy.log).toHaveBeenCalledWith('message', [data1, data2]);
   });
 
+  it('should include data when passed as a plain object', () => {
+    const data = { error: 'something failed', code: 500 };
+    log('message', 'log', { data });
+    expect(consoleSpy.log).toHaveBeenCalledWith('message', data);
+  });
+
+  it('should include falsy data values like 0 and null', () => {
+    log('zero', 'log', { data: 0 });
+    expect(consoleSpy.log).toHaveBeenCalledWith('zero', 0);
+
+    consoleSpy.log.mockClear();
+    log('null', 'log', { data: null });
+    expect(consoleSpy.log).toHaveBeenCalledWith('null', null);
+  });
+
   it('should fallback to info level for unknown levels', () => {
     log('message', 'invalidLevel');
     expect(consoleSpy.info).toHaveBeenCalled();

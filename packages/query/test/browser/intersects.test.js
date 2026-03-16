@@ -253,4 +253,78 @@ describe('Query intersects()', () => {
       expect(result).toBe(false); // Just touching edges shouldn't count as intersection
     });
   });
+
+  describe('target with borders', () => {
+    it('detects intersection within border area', () => {
+      // Target: border-box (50,50) → (190,190), 20px border, 100x100 content
+      // Source at (175,90), 10x10 — overlaps the right border area
+      // Borders are part of the visual footprint, so this should intersect
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 90px; left: 175px; width: 10px; height: 10px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; border: 20px solid black; box-sizing: content-box;"></div>
+      `;
+
+      const result = $('#source').intersects('#target');
+      expect(result).toBe(true);
+    });
+
+    it('returns false for element outside border-box', () => {
+      // Target border-box: (50,50) → (190,190)
+      // Source at (195,90), 10x10 — completely outside border-box
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 90px; left: 195px; width: 10px; height: 10px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; border: 20px solid black; box-sizing: content-box;"></div>
+      `;
+
+      const result = $('#source').intersects('#target');
+      expect(result).toBe(false);
+    });
+
+    it('reports fully contained correctly when target has borders', () => {
+      // Target border-box: (50,50) → (190,190), outerWidth/Height = 140
+      // Source at (55,55) 130x130 — fits inside border-box
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 55px; left: 55px; width: 130px; height: 130px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; border: 20px solid black; box-sizing: content-box;"></div>
+      `;
+
+      const result = $('#source').intersects('#target', { fully: true });
+      expect(result).toBe(true);
+
+      // Source at (55,55) 140x140 — right/bottom at 195, past border-box (190)
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 55px; left: 55px; width: 140px; height: 140px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; border: 20px solid black; box-sizing: content-box;"></div>
+      `;
+
+      const resultOverflow = $('#source').intersects('#target', { fully: true });
+      expect(resultOverflow).toBe(false);
+    });
+
+    it('calculates correct intersection ratio with bordered target', () => {
+      // Target border-box: (50,50) → (190,190), outerWidth/Height = 140
+      // Source: (50,50) 70x70 — fully inside border-box, ratio should be 1.0
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 50px; left: 50px; width: 70px; height: 70px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 100px; height: 100px; border: 20px solid black; box-sizing: content-box;"></div>
+      `;
+
+      const details = $('#source').intersects('#target', { returnDetails: true });
+      expect(details.intersects).toBe(true);
+      expect(details.ratio).toBe(1);
+    });
+
+    it('works correctly with border-box sizing on target', () => {
+      // Target: border-box sizing, total 140x140, border 20px
+      // Target border-box: (50,50) → (190,190) — same geometry as content-box tests
+      // Source at (175,90), 10x10 — in the border area, should intersect
+      document.body.innerHTML = `
+        <div id="source" style="position: absolute; top: 90px; left: 175px; width: 10px; height: 10px;"></div>
+        <div id="target" style="position: absolute; top: 50px; left: 50px; width: 140px; height: 140px; border: 20px solid black; box-sizing: border-box;"></div>
+      `;
+
+      const result = $('#source').intersects('#target');
+      expect(result).toBe(true);
+    });
+  });
 });

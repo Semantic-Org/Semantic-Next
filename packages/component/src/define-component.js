@@ -180,7 +180,6 @@ export const defineComponent = ({
       // callback if moves doc
       adoptedCallback() {
         super.adoptedCallback();
-        this.call(onMoved);
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {

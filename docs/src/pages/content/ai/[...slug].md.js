@@ -1,27 +1,12 @@
 export async function getStaticPaths() {
-  const uiDocs = import.meta.glob('../../../../../ai/ui/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const frameworkDocs = import.meta.glob('../../../../../ai/framework/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const contributingDocs = import.meta.glob('../../../../../ai/contributing/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-  const researchDocs = import.meta.glob('../../../../../ai/research/**/*.md', {
-    query: '?raw',
-    eager: true,
-  });
-
-  const allDocs = { ...uiDocs, ...frameworkDocs, ...contributingDocs, ...researchDocs };
+  const allDocs = import.meta.glob(
+    ['../../../../../ai/**/*.md', '!../../../../../ai/workspace/**/*.md'],
+    { query: '?raw', eager: true }
+  );
 
   return Object.entries(allDocs).map(([path, module]) => {
-    // Path: ../../../../../ai/ui/markup.md -> ui/markup
-    const match = path.match(/ai\/(ui|framework|contributing|research)\/(.+)\.md$/);
-    const slug = match ? `${match[1]}/${match[2]}` : path;
+    const match = path.match(/ai\/(.+)\.md$/);
+    const slug = match ? match[1] : path;
 
     return {
       params: { slug },

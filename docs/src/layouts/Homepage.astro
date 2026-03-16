@@ -12,7 +12,7 @@ import './Homepage.css';
 import '../css/hero-demo.css';
 let { title, description, searchMeta } = Astro.props;
 ---
-<Body title={title} description={description} searchMeta={searchMeta} >
+<Body title={title} description={description} searchMeta={searchMeta} prefetch>
   <TopBar floating showThemeSwitcher=false />
   <page data-pagefind-body>
     <slot></slot>

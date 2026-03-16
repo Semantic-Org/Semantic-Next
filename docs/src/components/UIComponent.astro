@@ -15,6 +15,7 @@ import {
   UIRail,
   UISegment,
   UISegments,
+  UISpinner,
   UITable,
 } from '@semantic-ui/core';
 import { inArray } from '@semantic-ui/utils';
@@ -94,6 +95,9 @@ const componentName = tagName || name;
   <MenuItem {...attributes} client:visible>
     <slot />
   </MenuItem>
+)}
+{inArray(componentName, ['ui-spinner', 'UISpinner']) && (
+  <UISpinner {...attributes} client:visible />
 )}
 {inArray(componentName, ['ui-table', 'UITable']) && (
   <UITable {...attributes} client:visible>

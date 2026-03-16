@@ -1,0 +1,8 @@
+:host {
+  --spinner-size: 1em;
+  --spinner-color: #2274b4;
+  --spinner-arc-thickness: 0.12;
+  --spinner-arc: 330deg;
+  --spinner-speed: 0.7s;
+  --spinner-vertical-align: -0.15em;
+}

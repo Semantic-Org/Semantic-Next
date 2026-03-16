@@ -14,7 +14,7 @@ export async function getStaticPaths() {
       contentID: contentID,
       allFiles: allExampleFiles,
       basePath: '../../../examples/',
-      includeFolder: example.exampleType == 'folder',
+      includeFolder: example.data.exampleType == 'folder',
       hideBoilerplate: false,
       includePlaygroundInjections: false,
       includeLog: example.data.exampleType == 'log',
@@ -28,7 +28,7 @@ export async function getStaticPaths() {
       }
     });
     const path = {
-      params: { slug: example.slug.replace('mdx', '') },
+      params: { slug: example.id.replace('mdx', '') },
       props: {
         ...example.data,
         files,

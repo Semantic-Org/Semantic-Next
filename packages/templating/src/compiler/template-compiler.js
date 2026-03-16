@@ -82,6 +82,7 @@ class TemplateCompiler {
     STANDARD: /(\w+)\s*=\s*((?:(?!\n|$|\w+\s*=).)+)/g,
     DATA_OBJECT: /(\w+)\s*:\s*([^,}]+)/g, // parses { one: 'two' }
     SINGLE_QUOTES: /\'/g,
+    AS_KEYWORD: /\bas\b/,
   };
 
   /*
@@ -627,9 +628,8 @@ class TemplateCompiler {
   }
 
   static parseAsyncString(asyncString = '') {
-    // support string like 'as foo' without leading space
-    // tag content does will not match ' as ' split
-    asyncString = asyncString.replace('as', ' as');
+    // normalize 'as' keyword to have surrounding spaces for splitting
+    asyncString = asyncString.replace(TemplateCompiler.templateRegExp.AS_KEYWORD, ' as ');
 
     // split as string
     const asParts = asyncString.split(' as ');

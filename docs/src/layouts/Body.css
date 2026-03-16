@@ -19,7 +19,7 @@
     --sl-font: var(--page-font);
 
     --page-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    --header-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;*/
+    --header-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
 /*     --page-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     --header-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -64,7 +64,7 @@
   html, body {
     margin: 0px;
     padding: 0px;
-    height: 100%;
+    min-height: 100%;
     box-sizing: border-box;
   }
   body {
@@ -208,6 +208,21 @@
       /*color: #FFFFFF;*/
     }
   }
+}
+
+/* Cross-document view transitions for navigation continuity */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation: none;
+}
+sidebar {
+  view-transition-name: sidebar;
+}
+topbar {
+  view-transition-name: topbar;
 }
 
 

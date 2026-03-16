@@ -1,0 +1,178 @@
+{
+  "uiType": "element",
+  "name": "Spinner",
+  "description": "A spinner indicates indeterminate activity",
+  "tagName": "ui-spinner",
+  "exportName": "UISpinner",
+  "content": [
+    {
+      "name": "Text",
+      "attribute": "text",
+      "slot": "text",
+      "description": "include a loading message",
+      "usageLevel": 2,
+      "exampleCode": "<ui-spinner text=\"Loading...\"></ui-spinner>"
+    }
+  ],
+  "types": [],
+  "states": [
+    {
+      "name": "Active",
+      "attribute": "active",
+      "description": "force the spinner to be visible",
+      "usageLevel": 2
+    },
+    {
+      "name": "Hidden",
+      "attribute": "hidden",
+      "description": "force the spinner to be hidden",
+      "usageLevel": 2
+    }
+  ],
+  "variations": [
+    {
+      "name": "Size",
+      "attribute": "size",
+      "usageLevel": 1,
+      "description": "vary in size",
+      "options": [
+        {
+          "name": "Mini",
+          "value": "mini",
+          "description": "appear extremely small"
+        },
+        {
+          "name": "Tiny",
+          "value": "tiny",
+          "description": "appear very small"
+        },
+        {
+          "name": "Small",
+          "value": "small",
+          "description": "appear small"
+        },
+        {
+          "name": "Medium",
+          "value": "medium",
+          "description": "appear normal sized"
+        },
+        {
+          "name": "Large",
+          "value": "large",
+          "description": "appear larger than normal"
+        },
+        {
+          "name": "Big",
+          "value": "big",
+          "description": "appear much larger than normal"
+        },
+        {
+          "name": "Huge",
+          "value": "huge",
+          "description": "appear very much larger than normal"
+        },
+        {
+          "name": "Massive",
+          "value": "massive",
+          "description": "appear extremely larger than normal"
+        }
+      ]
+    },
+    {
+      "name": "Colored",
+      "attribute": "color",
+      "includeAttributeClass": true,
+      "usageLevel": 3,
+      "description": "be colored",
+      "options": [
+        {
+          "name": "Red",
+          "value": "red",
+          "description": "be red"
+        },
+        {
+          "name": "Orange",
+          "value": "orange",
+          "description": "be orange"
+        },
+        {
+          "name": "Yellow",
+          "value": "yellow",
+          "description": "be yellow"
+        },
+        {
+          "name": "Olive",
+          "value": "olive",
+          "description": "be olive"
+        },
+        {
+          "name": "Green",
+          "value": "green",
+          "description": "be green"
+        },
+        {
+          "name": "Teal",
+          "value": "teal",
+          "description": "be teal"
+        },
+        {
+          "name": "Blue",
+          "value": "blue",
+          "description": "be blue"
+        },
+        {
+          "name": "Violet",
+          "value": "violet",
+          "description": "be violet"
+        },
+        {
+          "name": "Purple",
+          "value": "purple",
+          "description": "be purple"
+        },
+        {
+          "name": "Pink",
+          "value": "pink",
+          "description": "be pink"
+        },
+        {
+          "name": "Brown",
+          "value": "brown",
+          "description": "be brown"
+        },
+        {
+          "name": "Grey",
+          "value": "grey",
+          "description": "be grey"
+        },
+        {
+          "name": "Slate",
+          "value": "slate",
+          "description": "be slate"
+        }
+      ]
+    },
+    {
+      "name": "Block",
+      "attribute": "block",
+      "description": "appear in the page as a block element",
+      "usageLevel": 2,
+      "exampleCode": [
+        "<ui-spinner block text=\"Loading...\"></ui-spinner>"
+      ]
+    },
+    {
+      "name": "Overlay",
+      "attribute": "overlay",
+      "description": "overlay its parent content with a loading state",
+      "usageLevel": 2,
+      "exampleCode": "\n        <ui-segment>\n          <ui-spinner overlay></ui-spinner>\n          <p>Content being loaded</p>\n        </ui-segment>\n      "
+    }
+  ],
+  "settings": [],
+  "events": [],
+  "examples": {
+    "defaultAttributes": {},
+    "defaultContent": ""
+  }
+}

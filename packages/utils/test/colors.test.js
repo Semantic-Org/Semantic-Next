@@ -19,18 +19,21 @@ describe('Color Utilities', () => {
     });
 
     it('should convert specific OKLCH colors to RGB (approximate)', () => {
-      // Values obtained from https://oklch.com/ - allow for minor rounding differences
+      // Implementation-recorded values — these were captured from our OKLCH-to-RGB conversion
+      // and may diverge slightly from the CSS Color Level 4 reference algorithm due to
+      // differences in gamut mapping and floating-point precision near sRGB gamut boundaries.
       // Red (verified from oklch.com)
       expect(oklchToRgb('oklch(0.628 0.257 29.23)')).toEqual({ r: 255, g: 3, b: 2 });
       // Green (oklch.com gives #00ff00)
       expect(oklchToRgb('oklch(0.866 0.323 142.5)')).toEqual({ r: 0, g: 255, b: 0 });
-      // Blue (Accepting implementation result due to floating point precision near gamut edge)
+      // Blue — pure blue should be near (0, 0, 255); the (0, 5, 254) result suggests minor
+      // gamut-mapping drift that may warrant verification against the CSS Color Level 4 spec
       expect(oklchToRgb('oklch(0.452 0.311 264.05)')).toEqual({ r: 0, g: 5, b: 254 });
-      // Yellow (Verified output from oklch.com, standard conversion results in some blue)
+      // Yellow (verified from oklch.com, standard conversion results in some blue channel)
       expect(oklchToRgb('oklch(0.968 0.191 109.01)')).toEqual({ r: 255, g: 254, b: 70 });
-      // Cyan (Accepting implementation result)
+      // Cyan (implementation-recorded)
       expect(oklchToRgb('oklch(0.9 0.3 180)')).toEqual({ r: 0, g: 255, b: 230 });
-      // Magenta (Accepting implementation result)
+      // Magenta (implementation-recorded)
       expect(oklchToRgb('oklch(0.7 0.3 330)')).toEqual({ r: 251, g: 42, b: 244 });
     });
 

@@ -25,6 +25,8 @@ export interface JoinWordsOptions {
 export interface GetArticleOptions {
   /** Capitalize the article */
   capitalize?: boolean;
+  /** Include the word after the article */
+  includeWord?: boolean;
 }
 
 /**
@@ -190,8 +192,8 @@ export function truncate(text: string | null | undefined, length: number, option
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#escapehtml escapeHTML}
  * @see {@link https://next.semantic-ui.com/examples/utils-escapehtml Example}
  *
- * @param string - The string to escape
- * @returns The string with HTML special characters escaped
+ * @param string - The string to escape. Falsy values return an empty string.
+ * @returns The string with HTML special characters escaped, or empty string for falsy input
  *
  * @example
  * ```ts
@@ -199,14 +201,34 @@ export function truncate(text: string | null | undefined, length: number, option
  * // returns '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
  * escapeHTML('Price: $5 & "free" shipping')
  * // returns 'Price: $5 &amp; &quot;free&quot; shipping'
+ * escapeHTML(null) // returns ''
  * ```
  */
-export function escapeHTML(string: string): string;
+export function escapeHTML(string: string | null | undefined | false | 0): string;
+
+/**
+ * Unescapes HTML entities in a string back to their original characters
+ * The inverse of escapeHTML — converts &amp; &lt; &gt; &quot; &#39; back to & < > " '
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#unescapehtml unescapeHTML}
+ * @see {@link https://next.semantic-ui.com/examples/utils-unescapehtml Example}
+ *
+ * @param string - The string containing HTML entities to unescape
+ * @returns The string with HTML entities converted back to characters
+ *
+ * @example
+ * ```ts
+ * unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;')
+ * // returns '<div>Hello</div>'
+ * unescapeHTML('rock &amp; roll')
+ * // returns 'rock & roll'
+ * ```
+ */
+export function unescapeHTML(string: string): string;
 
 /**
  * Reverses a string while properly handling Unicode grapheme clusters
  * Uses Intl.Segmenter for correct handling of emojis, flag sequences, skin tones, and combined characters
- * @see {@link https://next.semantic-ui.com/api/utils/strings#reversestring reverseString}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#reversestring reverseString}
  * @see {@link https://next.semantic-ui.com/examples/utils-reversestring Example}
  *
  * @param str - The string to reverse (null/undefined/empty returns empty string)
