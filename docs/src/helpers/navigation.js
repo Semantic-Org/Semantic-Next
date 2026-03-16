@@ -39,16 +39,16 @@ const examplePages = examples
   .filter(doc => !doc?.data?.hidden)
   .map(doc => ({
     ...doc.data,
-    url: `/examples/${doc.slug}`,
+    url: `/examples/${doc.id}`,
   }));
 
 export const getLessonContent = (lesson) => {
   return {
-    id: lesson.slug,
+    id: lesson.id,
     title: lesson.data.title,
     category: lesson.data.category,
     subcategory: lesson.data.subcategory,
-    url: `/learn/${lesson.slug}`,
+    url: `/learn/${lesson.id}`,
     hidden: lesson.data.hidden,
     sort: lesson.data.sort,
     hint: lesson.data.hint,
@@ -635,5 +635,5 @@ export const primitivePages = componentDocs.map(page => ({
   image: page.data.image,
   description: page.data.description,
   meta: page.data,
-  url: `/primitives/${page.slug}`,
+  url: `/primitives/${page.id}`,
 }));

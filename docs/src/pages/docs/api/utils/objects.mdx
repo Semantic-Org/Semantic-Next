@@ -468,12 +468,12 @@ Performs a weighted search across an array of objects, with matches prioritized 
 | matchAllWords    | boolean  | true    | Require all words to match |
 | propertiesToMatch| array    | []      | Properties to search within objects |
 
-> **Understanding Matches** You can use the option `returnMatches` to return details of how each result matched alongside the result.
+> **Understanding Matches** When `returnMatches` is `true`, each result is a **spread copy** of the original object with an added `matches` array property. The original objects are never mutated. Each match has the shape `{ field, type, score, value }` where `type` is one of `'startsWith'`, `'wordStartsWith'`, `'anywhere'`, or `'anyWord'`.
 
 
 #### Returns
 
-Array of matching objects sorted by relevance.
+Array of matching objects sorted by relevance. When `returnMatches` is `true`, each result is a shallow copy with an additional `matches` property containing an array of match details.
 
 #### Example
 
@@ -485,9 +485,17 @@ const items = [
   { title: 'World News', desc: 'Current events' }
 ];
 
+// Basic search
 const results = weightedObjectSearch('world', items, {
   propertiesToMatch: ['title', 'desc']
 });
+
+// With match details (does not mutate originals)
+const detailed = weightedObjectSearch('world', items, {
+  propertiesToMatch: ['title', 'desc'],
+  returnMatches: true,
+});
+// detailed[0].matches → [{ field: 'title', type: 'startsWith', score: 1, value: 'World News' }]
 ```
 
 ### proxyObject

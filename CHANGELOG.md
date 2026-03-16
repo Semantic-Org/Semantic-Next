@@ -11,6 +11,10 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Utils
+* **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
+* **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
+
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 * **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.

@@ -2,33 +2,33 @@ import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
-const primitives = sortBy(await getCollection('primitives'), 'slug');
+const primitives = sortBy(await getCollection('primitives'), 'id');
 export const primitivePages = primitives.map(page => ({
   name: page.data.title,
   description: page.data.description,
   imageSrc: page.data.imageSrc,
   darkImageSrc: page.data.darkImageSrc,
-  url: `/ui/primitives/${page.slug}`,
+  url: `/ui/primitives/${page.id}`,
   matchSubPaths: true,
 }));
 
-const components = sortBy(await getCollection('components'), 'slug');
+const components = sortBy(await getCollection('components'), 'id');
 export const componentPages = components.map(page => ({
   name: page.data.title,
   description: page.data.description,
   imageSrc: page.data.imageSrc,
   darkImageSrc: page.data.darkImageSrc,
-  url: `/ui/components/${page.slug}`,
+  url: `/ui/components/${page.id}`,
   matchSubPaths: true,
 }));
 
-const behaviors = sortBy(await getCollection('behaviors'), 'slug');
+const behaviors = sortBy(await getCollection('behaviors'), 'id');
 export const behaviorPages = behaviors.map(page => ({
   name: page.data.title,
   description: page.data.description,
   imageSrc: page.data.imageSrc,
   darkImageSrc: page.data.darkImageSrc,
-  url: `/ui/behaviors/${page.slug}`,
+  url: `/ui/behaviors/${page.id}`,
   matchSubPaths: true,
 }));
 

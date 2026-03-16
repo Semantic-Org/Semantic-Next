@@ -68,7 +68,7 @@ export async function GET() {
       }
     });
 
-    const slug = example.slug.replace('mdx', '');
+    const slug = example.id;
 
     return {
       path: `/content/examples/${slug}.json`,

@@ -502,6 +502,7 @@
   layout h3,
   layout h4,
   layout h5 {
+    text-wrap: balance;
     transition: all var(--easing) var(--duration);
     box-shadow: -3px 0px 0px transparent;/*
     margin-left: -0.5rem !important;

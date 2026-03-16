@@ -1,4 +1,4 @@
-import { isClassInstance } from './types.js';
+import { isArray, isClassInstance, isDate, isMap, isObject, isPlainObject, isRegExp, isSet } from './types.js';
 
 /*-------------------
         Cloning
@@ -8,64 +8,62 @@ import { isClassInstance } from './types.js';
   Clone an object or array
 */
 // adapted from nanoclone <https://github.com/Kelin2025/nanoclone>
-export const clone = (src, options = {}) => {
-  const { preserveDOM = false, preserveNonCloneable = false, seen = new Map() } = options;
-
+const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
   if (!src || typeof src !== 'object') { return src; }
 
   if (seen.has(src)) { return seen.get(src); }
 
   let copy;
-  if (src.nodeType && 'cloneNode' in src && !preserveDOM) {
+  if (src.nodeType && 'cloneNode' in src) {
+    if (preserveDOM) { return src; }
     copy = src.cloneNode(true);
     seen.set(src, copy);
   }
-  else if (src instanceof Date) {
-    // Date
+  else if (isDate(src)) {
     copy = new Date(src.getTime());
     seen.set(src, copy);
   }
-  else if (src instanceof RegExp) {
-    // RegExp
+  else if (isRegExp(src)) {
     copy = new RegExp(src);
     seen.set(src, copy);
   }
-  else if (Array.isArray(src)) {
-    // Array
+  else if (isArray(src)) {
     copy = new Array(src.length);
     seen.set(src, copy);
     for (let i = 0; i < src.length; i++) {
-      copy[i] = clone(src[i], { ...options, seen });
+      copy[i] = cloneValue(src[i], preserveDOM, preserveNonCloneable, seen);
     }
   }
-  else if (src instanceof Map) {
-    // Map
+  else if (isMap(src)) {
     copy = new Map();
     seen.set(src, copy);
     for (const [k, v] of src.entries()) {
-      copy.set(k, clone(v, { ...options, seen }));
+      copy.set(k, cloneValue(v, preserveDOM, preserveNonCloneable, seen));
     }
   }
-  else if (src instanceof Set) {
-    // Set
+  else if (isSet(src)) {
     copy = new Set();
     seen.set(src, copy);
     for (const v of src) {
-      copy.add(clone(v, { ...options, seen }));
+      copy.add(cloneValue(v, preserveDOM, preserveNonCloneable, seen));
     }
   }
-  else if (src instanceof Object) {
-    // Check if it's a custom class instance and preserve if requested
+  else if (isObject(src)) {
     if (preserveNonCloneable && isClassInstance(src)) {
-      return src; // Return reference to original custom class instance
+      return src;
     }
-    // Plain object
-    copy = {};
+    copy = isPlainObject(src) && Object.getPrototypeOf(src) === null
+      ? Object.create(null)
+      : {};
     seen.set(src, copy);
     for (const [k, v] of Object.entries(src)) {
-      copy[k] = clone(v, { ...options, seen });
+      copy[k] = cloneValue(v, preserveDOM, preserveNonCloneable, seen);
     }
   }
 
   return copy;
+};
+
+export const clone = (src, { preserveDOM = false, preserveNonCloneable = false } = {}) => {
+  return cloneValue(src, preserveDOM, preserveNonCloneable, new WeakMap());
 };

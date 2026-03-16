@@ -35,12 +35,22 @@ const GAMMA_HIGH_MULTIPLIER = 1.055;
 const GAMMA_EXPONENT = 1.0 / 2.4;
 const GAMMA_OFFSET = 0.055;
 
+const oklchRegExp = /oklch\(\s*(-?[\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*\)/i;
+
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
+
+const applyGamma = (channel) => {
+  const clamped = clamp01(channel);
+  if (clamped <= GAMMA_THRESHOLD) {
+    return GAMMA_LOW_MULTIPLIER * clamped;
+  }
+  else {
+    return GAMMA_HIGH_MULTIPLIER * Math.pow(clamped, GAMMA_EXPONENT) - GAMMA_OFFSET;
+  }
+};
+
 export function oklchToRgb(oklchString = '') {
-  // Regex to parse oklch(L C H) or oklch(L, C, H) with optional whitespace
-  // Allow optional negative sign for lightness
-  const match = oklchString.match(
-    /oklch\(\s*(-?[\d.]+)\s*[,\s]\s*([\d.]+)\s*[,\s]\s*([\d.]+)\s*\)/i,
-  );
+  const match = oklchString.match(oklchRegExp);
 
   if (!match) {
     return null;
@@ -89,20 +99,6 @@ export function oklchToRgb(oklchString = '') {
   const linearBlue = LMS_TO_LINEAR_RGB_B_FROM_L * lms_l + LMS_TO_LINEAR_RGB_B_FROM_M * lms_m
     + LMS_TO_LINEAR_RGB_B_FROM_S * lms_s;
 
-  // Clamp Linear sRGB values to [0, 1] range to handle out-of-gamut colors
-  const clamp01 = (value) => Math.max(0, Math.min(1, value));
-
-  // Apply sRGB gamma correction (transfer function) using constants
-  const applyGamma = (channel) => {
-    const clamped = clamp01(channel);
-    if (clamped <= GAMMA_THRESHOLD) {
-      return GAMMA_LOW_MULTIPLIER * clamped;
-    }
-    else {
-      return GAMMA_HIGH_MULTIPLIER * Math.pow(clamped, GAMMA_EXPONENT) - GAMMA_OFFSET;
-    }
-  };
-
   const finalRed = applyGamma(linearRed);
   const finalGreen = applyGamma(linearGreen);
   const finalBlue = applyGamma(linearBlue);
@@ -120,13 +116,13 @@ function rgbComponentToHex(component) {
   return hex.length === 1 ? '0' + hex : hex;
 }
 
+const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
+
 export function oklchToHex(colorString = '') {
   if (!colorString) {
     return '';
   }
 
-  // Regex to check for valid hex codes: #rgb, #rgba, #rrggbb, #rrggbbaa
-  const hexRegex = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
   if (hexRegex.test(colorString)) {
     return colorString; // Return directly if it's already a valid hex code
   }

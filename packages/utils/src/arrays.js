@@ -72,6 +72,9 @@ export const firstMatch = (array = [], callbackOrValue) => {
   return result;
 };
 
+/*
+  Find the index of the first match
+*/
 export const findIndex = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
@@ -87,6 +90,9 @@ export const findIndex = (array = [], callbackOrValue) => {
   return matchedIndex;
 };
 
+/*
+  Remove matching elements in place, return count removed
+*/
 export const remove = (array = [], callbackOrValue) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
@@ -113,37 +119,115 @@ export const remove = (array = [], callbackOrValue) => {
   return removedCount;
 };
 
+/*
+  Check if a value exists in an array
+*/
 export const inArray = (value, array = []) => {
   return array.indexOf(value) > -1;
 };
 
-export const range = (start, stop, step = 1) => {
-  if (!stop) {
-    stop = start;
-    start = 0;
+/*
+  Generate an array of numbers from start to stop (exclusive)
+*/
+export const range = (start, stop, step) => {
+  // Fast path: range(stop) — most common use case
+  if (stop === undefined) {
+    const len = start > 0 ? start : 0;
+    const arr = new Array(len);
+    for (let i = 0; i < len; i++) {
+      arr[i] = i;
+    }
+    return arr;
   }
-  const length = stop - start;
-  return Array(length)
-    .fill(undefined)
-    .map((_, index) => {
-      return index * step + start;
-    });
+
+  step = step !== undefined ? step : 1;
+  if (step === 0) { return []; }
+
+  const length = Math.max(Math.ceil((stop - start) / step), 0);
+  if (length === 0) { return []; }
+
+  const arr = new Array(length);
+  if (step % 1 === 0) {
+    for (let i = 0, val = start; i < length; i++, val += step) {
+      arr[i] = val;
+    }
+  }
+  else {
+    for (let i = 0; i < length; i++) {
+      arr[i] = start + i * step;
+    }
+  }
+  return arr;
 };
 
+/*
+  Generate a sequence of multiples
+*/
+export const sequence = (count, interval = 1, start = 1) => {
+  const len = count | 0;
+  if (len <= 0) { return []; }
+  const arr = new Array(len);
+  for (let i = 0; i < len; i++) {
+    arr[i] = (start + i) * interval;
+  }
+  return arr;
+};
+
+/*
+  Sum all values in an array
+*/
 export const sum = (values = []) => {
   return values.reduce((acc, num) => acc + num, 0);
 };
 
+/*
+  Filter array by matching property values
+*/
 export const where = (array = [], properties) => {
   return array.filter((obj) => Object.keys(properties).every((key) => obj[key] === properties[key]));
 };
 
-export const flatten = (arr = []) => {
-  return arr.reduce((acc, val) => {
-    return Array.isArray(val) ? acc.concat(flatten(val)) : acc.concat(val);
-  }, []);
+/*
+  Deep flatten a nested array
+*/
+export const flatten = (arr) => {
+  if (!Array.isArray(arr) || arr.length === 0) { return []; }
+
+  const result = [];
+  const stackArr = [arr];
+  const stackIdx = [0];
+  let depth = 0;
+
+  while (depth >= 0) {
+    const current = stackArr[depth];
+    const len = current.length;
+    let i = stackIdx[depth];
+
+    while (i < len) {
+      const item = current[i];
+      if (Array.isArray(item)) {
+        stackIdx[depth] = i + 1;
+        depth++;
+        stackArr[depth] = item;
+        stackIdx[depth] = 0;
+        break;
+      }
+      result.push(item);
+      i++;
+    }
+
+    if (i >= len) {
+      stackArr[depth] = null;
+      depth--;
+    }
+  }
+
+  return result;
 };
 
+/*
+  Check if any element matches a predicate
+*/
 export const some = (collection, predicate) => {
   return (collection?.some)
     ? collection.some(predicate)
@@ -151,59 +235,52 @@ export const some = (collection, predicate) => {
 };
 export const any = some;
 
+const collator = new Intl.Collator(undefined, { numeric: true });
+
+/*
+  Sort an array of objects by one or more keys
+*/
 export const sortBy = (arr = [], key, comparator) => {
+  if (!arr || !arr.length) { return []; }
+
   const keys = Array.isArray(key) ? key : [key];
+  const keyCount = keys.length;
 
+  // Compare by each key in order until we find a difference
   const compare = (a, b) => {
-    let finalResult = 0;
+    for (let i = 0; i < keyCount; i++) {
+      const valA = get(a, keys[i]);
+      const valB = get(b, keys[i]);
 
-    // Compare by each key in order until we find a difference
-    each(keys, (currentKey, i) => {
-      const valA = get(a, currentKey);
-      const valB = get(b, currentKey);
-
-      if (valA === undefined && valB === undefined) {
-        return; // Both undefined, check next key
-      }
-      if (valA === undefined) {
-        finalResult = 1; // Place undefined values at the end
-        return false;
-      }
-      if (valB === undefined) {
-        finalResult = -1; // Place undefined values at the end
-        return false;
-      }
+      // Place undefined values at the end
+      if (valA === undefined && valB === undefined) { continue; }
+      if (valA === undefined) { return 1; }
+      if (valB === undefined) { return -1; }
 
       let result;
       if (comparator) {
-        // Pass key index as fifth parameter for multi-key sorting
         result = comparator(valA, valB, a, b, i);
       }
+      else if (typeof valA === 'string' && typeof valB === 'string') {
+        result = collator.compare(valA, valB);
+      }
       else {
-        // Use localeCompare for strings, numeric comparison for numbers
-        if (typeof valA === 'string' && typeof valB === 'string') {
-          result = valA.localeCompare(valB, undefined, { numeric: true });
-        }
-        else {
-          if (valA < valB) { result = -1; }
-          else if (valA > valB) { result = 1; }
-          else { result = 0; }
-        }
+        if (valA < valB) { result = -1; }
+        else if (valA > valB) { result = 1; }
+        else { result = 0; }
       }
 
-      if (result !== 0) {
-        finalResult = result;
-        return false; // Break out of each loop
-      }
-      // If values are equal, continue to next key
-    });
-
-    return finalResult;
+      if (result !== 0) { return result; }
+    }
+    return 0;
   };
 
   return arr.slice().sort(compare);
 };
 
+/*
+  Group array elements by a property value
+*/
 export const groupBy = (array = [], property) => {
   return array.reduce((result, obj) => {
     const key = get(obj, property);
@@ -217,6 +294,9 @@ export const groupBy = (array = [], property) => {
   }, {});
 };
 
+/*
+  Move an element to a specific position
+*/
 export const moveItem = (array = [], callbackOrValue, index) => {
   const callback = isFunction(callbackOrValue)
     ? callbackOrValue
@@ -249,10 +329,16 @@ export const moveItem = (array = [], callbackOrValue, index) => {
   return array;
 };
 
+/*
+  Move an element to the front of the array
+*/
 export const moveToFront = (array = [], callbackOrValue) => {
   return moveItem(array, callbackOrValue, 'first');
 };
 
+/*
+  Move an element to the back of the array
+*/
 export const moveToBack = (array = [], callbackOrValue) => {
   return moveItem(array, callbackOrValue, 'last');
 };

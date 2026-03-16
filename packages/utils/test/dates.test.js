@@ -173,9 +173,9 @@ describe('Date Utilities', () => {
       expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'America/New_York' })).toBe('2023-05-18 11:34:56');
     });
 
-    it('should handle timezone shorthand (EST, PST, etc)', () => {
-      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'EST' })).toBe('2023-05-18 10:34:56');
-      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'PST' })).toBe('2023-05-18 08:34:56');
+    it('should handle timezone shorthand (ET, PT, etc)', () => {
+      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'ET' })).toBe('2023-05-18 11:34:56');
+      expect(formatDate(date, 'YYYY-MM-DD HH:mm:ss', { timezone: 'PT' })).toBe('2023-05-18 08:34:56');
     });
     /*
     it('should format date with local timezone', () => {

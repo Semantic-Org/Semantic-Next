@@ -2,7 +2,7 @@ import { clone } from './cloning.js';
 import { noop } from './functions.js';
 import { each } from './loops.js';
 import { escapeRegExp } from './regexp.js';
-import { isArray, isObject, isPlainObject } from './types.js';
+import { isArray, isObject, isPlainObject, isString } from './types.js';
 
 /*-------------------
        Objects
@@ -142,6 +142,11 @@ export const get = function(obj, path = '') {
     return undefined;
   }
 
+  // Simple property access — no dots, no brackets
+  if (path.indexOf('.') === -1 && path.indexOf('[') === -1) {
+    return (obj !== null && isObject(obj)) ? obj[path] : undefined;
+  }
+
   function extractArrayLikeAccess(part) {
     const key = part.substring(0, part.indexOf('['));
     const index = parseInt(part.substring(part.indexOf('[') + 1, part.indexOf(']')), 10);
@@ -217,7 +222,7 @@ export const proxyObject = (sourceObj = noop, referenceObj = {}) => {
   return new Proxy(referenceObj, {
     get: (target, property) => {
       const propKey = typeof property === 'symbol' ? property.toString() : property;
-      return get(referenceObj, propKey) || get(sourceObj(), propKey);
+      return get(referenceObj, propKey) ?? get(sourceObj(), propKey);
     },
   });
 };
@@ -270,142 +275,120 @@ export const reverseKeys = (obj) => {
 };
 
 /*
-  Searches a search object
-  returning matches for a query
-
-  Matches are sorted
-    - Start of word
-    - Start of any word
-    - Anywhere in string
+  Search and rank objects by query relevance
+  Weight hierarchy: startsWith > wordStartsWith > anywhere > anyWord
 */
-export const weightedObjectSearch = (query = '', objectArray = [], {
+export const weightedObjectSearch = (query, objectArray = [], {
   returnMatches = false,
   matchAllWords = true,
   propertiesToMatch = [],
 } = {}) => {
-  if (!query) {
-    return objectArray;
-  }
+  if (!isArray(objectArray)) { return []; }
+  if (!isString(query) || !query.trim()) { return objectArray; }
+  if (!objectArray.length || !propertiesToMatch.length) { return []; }
 
-  const trimmedQuery = query.trim();
-  if (!trimmedQuery) {
-    return objectArray;
-  }
+  const queryLower = query.trim().toLowerCase();
+  const queryWords = queryLower.split(/\s+/);
+  const wordCount = queryWords.length;
+  const isMultiWord = wordCount > 1;
 
-  const escapedQuery = escapeRegExp(trimmedQuery);
-  const words = trimmedQuery.split(/\s+/).filter(Boolean);
-  const escapedWords = words.map(w => escapeRegExp(w));
+  // Regex only for wordStartsWith — startsWith and anywhere use string methods
+  const wordStartsWithRe = new RegExp('(?:^|\\s)' + escapeRegExp(queryLower));
 
-  // Priority weights (lower = better match)
-  const weights = {
-    startsWith: 1,
-    wordStartsWith: 2,
-    anywhere: 3,
-    anyWord: 4,
-  };
-
-  // Regexes for full phrase matching
-  const phraseRegexes = {
-    startsWith: new RegExp(`^${escapedQuery}`, 'i'),
-    wordStartsWith: new RegExp(`(^|\\s)${escapedQuery}`, 'i'),
-    anywhere: new RegExp(escapedQuery, 'i'),
-  };
-
-  // Get string value from a field (handles arrays like tags)
-  const getFieldString = (value) => {
-    if (isArray(value)) {
-      return value.join(' ');
-    }
-    return value ? String(value) : '';
-  };
-
-  // Calculate best weight for an object
-  const calculateWeight = (obj) => {
-    let bestWeight = null;
-    const matchDetails = [];
-
-    for (const field of propertiesToMatch) {
-      const rawValue = get(obj, field);
-      const value = getFieldString(rawValue);
-
-      if (!value) {
-        continue;
-      }
-
-      // Try full phrase matches first (best priority)
-      for (const [matchType, regex] of Object.entries(phraseRegexes)) {
-        if (regex.test(value)) {
-          const weight = weights[matchType];
-          if (bestWeight === null || weight < bestWeight) {
-            bestWeight = weight;
-          }
-          if (returnMatches) {
-            matchDetails.push({ field, query: trimmedQuery, name: matchType, value: rawValue, weight });
-          }
-          break; // Found best match type for this field
-        }
-      }
-
-      // Try individual word matches if we have multiple words
-      if (words.length > 1) {
-        let matchedCount = 0;
-        for (const word of escapedWords) {
-          const wordRegex = new RegExp(word, 'i');
-          if (wordRegex.test(value)) {
-            matchedCount++;
-          }
-        }
-
-        if (matchedCount > 0) {
-          const meetsThreshold = matchAllWords
-            ? matchedCount === words.length
-            : true;
-
-          if (meetsThreshold) {
-            // More words matched = better score (lower weight)
-            const weight = weights.anyWord + (1 - matchedCount / words.length);
-            if (bestWeight === null || weight < bestWeight) {
-              bestWeight = weight;
-            }
-            if (returnMatches) {
-              matchDetails.push({
-                field,
-                query: trimmedQuery,
-                name: 'anyWord',
-                value: rawValue,
-                matchCount: matchedCount,
-              });
-            }
-          }
-        }
-      }
-    }
-
-    if (returnMatches) {
-      obj.matches = matchDetails;
-    }
-
-    return bestWeight;
-  };
-
-  // Calculate weights for all objects
   const results = [];
-  for (const obj of objectArray) {
-    const weight = calculateWeight(obj);
-    if (weight !== null) {
-      results.push({ obj, weight });
+
+  each(objectArray, (obj, index) => {
+    let bestScore = Infinity;
+    const matchDetails = returnMatches ? [] : null;
+
+    for (let f = 0; f < propertiesToMatch.length; f++) {
+      const field = propertiesToMatch[f];
+      let rawValue = get(obj, field);
+      if (rawValue == null) { continue; }
+
+      // Normalize field value to searchable string
+      let value;
+      if (isString(rawValue)) {
+        value = rawValue;
+      }
+      else if (isArray(rawValue)) {
+        value = rawValue.join(' ');
+      }
+      else {
+        value = String(rawValue);
+      }
+      if (!value) { continue; }
+
+      const valueLower = value.toLowerCase();
+      let fieldScore = Infinity;
+      let matchType;
+
+      // Cascade from best to worst — exit on first match per field
+      if (valueLower.startsWith(queryLower)) {
+        fieldScore = 1;
+        matchType = 'startsWith';
+      }
+      else if (wordStartsWithRe.test(valueLower)) {
+        fieldScore = 2;
+        matchType = 'wordStartsWith';
+      }
+      else if (valueLower.indexOf(queryLower) !== -1) {
+        fieldScore = 3;
+        matchType = 'anywhere';
+      }
+      else if (isMultiWord) {
+        let wordsMatched = 0;
+        for (let w = 0; w < wordCount; w++) {
+          if (valueLower.indexOf(queryWords[w]) !== -1) {
+            wordsMatched++;
+          }
+        }
+
+        const meetsThreshold = matchAllWords
+          ? wordsMatched === wordCount
+          : wordsMatched > 0;
+
+        if (meetsThreshold) {
+          fieldScore = 4 + (1 - wordsMatched / wordCount);
+          matchType = 'anyWord';
+        }
+      }
+
+      if (fieldScore === Infinity) { continue; }
+
+      if (fieldScore < bestScore) {
+        bestScore = fieldScore;
+      }
+
+      if (returnMatches) {
+        matchDetails.push({ field, type: matchType, score: fieldScore, value: rawValue });
+      }
+
+      // Weight 1 is the ceiling — skip remaining fields unless collecting matches
+      if (bestScore === 1 && !returnMatches) { break; }
     }
+
+    if (bestScore < Infinity) {
+      results.push({ obj, score: bestScore, index, matches: matchDetails });
+    }
+  });
+
+  // Stable sort: by score ascending, then original position
+  results.sort((a, b) => a.score - b.score || a.index - b.index);
+
+  // Return without mutating originals
+  if (returnMatches) {
+    const output = new Array(results.length);
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      output[i] = { ...r.obj, matches: r.matches };
+    }
+    return output;
   }
 
-  // Sort by weight (lower = better)
-  results.sort((a, b) => a.weight - b.weight);
-
-  // Clean up and return
-  if (!returnMatches) {
-    for (const obj of objectArray) {
-      delete obj.matches;
-    }
+  const output = new Array(results.length);
+  for (let i = 0; i < results.length; i++) {
+    output[i] = results[i].obj;
   }
-
-  return results.map(r => r.obj);
+  return output;
 };

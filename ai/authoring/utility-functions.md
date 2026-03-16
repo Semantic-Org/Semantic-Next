@@ -1,7 +1,7 @@
 ---
 title: Utility Functions Reference
 description: Complete reference for @semantic-ui/utils — a standalone utility library providing functions for arrays, objects, strings, type checking, colors, dates, and more. Use this before reimplementing common operations.
-keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, each, range, remove, noop]
+keywords: [utilities, arrays, objects, strings, type checking, functions, debounce, throttle, memoize, clone, equality, formatDate, each, range, sequence, remove, noop, isDate, isRegExp]
 audience: authoring
 skill: utility-functions
 type: skill
@@ -108,11 +108,16 @@ uniqueItems([1, 2, 3], [2, 3, 4]);           // [1, 4] — items unique to ONE a
 
 ### Generation
 ```javascript
-import { range, sum } from '@semantic-ui/utils';
+import { range, sequence, sum } from '@semantic-ui/utils';
 
-range(5);                            // [0, 1, 2, 3, 4]
+range(5);                            // [0, 1, 2, 3, 4] — stop is exclusive
 range(2, 6);                         // [2, 3, 4, 5]
 range(0, 10, 2);                     // [0, 2, 4, 6, 8]
+
+// Generate multiples: sequence(count, interval = 1, start = 1)
+sequence(5);                         // [1, 2, 3, 4, 5]
+sequence(3, 3);                      // [3, 6, 9]
+sequence(5, 3, 2);                   // [6, 9, 12, 15, 18]
 
 sum([1, 2, 3, 4]);                   // 10
 ```
@@ -230,7 +235,7 @@ import {
 
 isObject({});                    // true (any non-null object)
 isObject([]);                    // true (arrays are objects)
-isPlainObject({});               // true (only Object literals, excludes class instances)
+isPlainObject({});               // true (Object literals and Object.create(null))
 isPlainObject([]);               // false
 isArray([]);                     // true
 isString('hello');               // true
@@ -238,6 +243,15 @@ isNumber(42);                    // true
 isBoolean(true);                 // true
 isFunction(() => {});            // true
 isBinary(new Uint8Array());      // true (TypedArrays and ArrayBuffer)
+```
+
+### Additional Types
+```javascript
+import { isDate, isRegExp } from '@semantic-ui/utils';
+
+// Cross-realm safe via Object.prototype.toString tag dispatch
+isDate(new Date());                 // true
+isRegExp(/pattern/i);               // true
 ```
 
 ### Special Types
@@ -298,7 +312,7 @@ toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop
 
 ### Text Processing
 ```javascript
-import { joinWords, getArticle, escapeHTML, reverseString } from '@semantic-ui/utils';
+import { joinWords, getArticle, escapeHTML, unescapeHTML, reverseString } from '@semantic-ui/utils';
 
 // Smart word joining with Oxford comma
 joinWords(['apple', 'banana', 'orange']);           // 'apple, banana, and orange'
@@ -312,8 +326,10 @@ getArticle('banana');                               // 'a'
 getArticle('apple', { includeWord: true });         // 'an apple'
 getArticle('apple', { capitalize: true });          // 'An'
 
-// HTML escaping
+// HTML escaping (returns '' for falsy input)
 escapeHTML('<script>alert("xss")</script>');        // '&lt;script&gt;...'
+escapeHTML(null);                                   // ''
+unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;');       // '<div>Hello</div>'
 
 // Unicode-aware string reversal
 reverseString('hello');                             // 'olleh'
@@ -593,6 +609,19 @@ import { isEqual, clone } from '@semantic-ui/utils';
 isEqual({ a: [1, 2] }, { a: [1, 2] });             // true
 isEqual(new Set([1, 2]), new Set([1, 2]));          // true
 
+// Options: { loose, ignoreKeys, partial }
+isEqual('5', 5, { loose: true });                   // true — uses == instead of ===
+isEqual(
+  { a: 1, b: 2, c: 3 },
+  { a: 1, b: 9, c: 3 },
+  { ignoreKeys: ['b'] }
+);                                                   // true — skips listed keys
+isEqual(
+  { a: 1 },
+  { a: 1, b: 2 },
+  { partial: true }
+);                                                   // true — a is a subset of b
+
 // Deep clone (handles Date, RegExp, Array, Map, Set, DOM nodes, plain objects)
 const cloned = clone(obj);
 clone(obj, { preserveDOM: true });                  // keep DOM node references
@@ -681,7 +710,8 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `findIndex` | `(arr, cbOrVal)` | Index of first match, or -1 |
 | `remove` | `(arr, cbOrVal)` | Count removed (mutates array) |
 | `inArray` | `(value, arr)` | Boolean |
-| `range` | `(start, stop?, step=1)` | Numeric array |
+| `range` | `(start, stop?, step=1)` | Numeric array (stop exclusive) |
+| `sequence` | `(count, interval=1, start=1)` | Array of multiples |
 | `sum` | `(arr)` | Number |
 | `where` | `(arr, propsObj)` | Filtered array matching all props |
 | `flatten` | `(arr)` | Deep-flattened array |
@@ -717,8 +747,10 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | Function | Notes |
 |----------|-------|
 | `isObject` | Any non-null object (includes arrays) |
-| `isPlainObject` | Object literals only |
+| `isPlainObject` | Object literals and `Object.create(null)` |
 | `isArray`, `isString`, `isNumber`, `isBoolean`, `isFunction` | Standard checks |
+| `isDate` | Tag dispatch, cross-realm safe |
+| `isRegExp` | Tag dispatch, cross-realm safe |
 | `isBinary` | TypedArrays and ArrayBuffer |
 | `isEmpty` | null, undefined, empty string/array, object with only nullish values |
 | `isPromise` | Has `.then` method |
@@ -729,6 +761,12 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `isMap`, `isSet` | `instanceof` checks |
 | `isArguments` | Arguments object |
 | `isServer`, `isClient`, `isDevelopment`, `isCI` | **Boolean constants** (no parens) |
+
+### Equality & Cloning (equality.js, cloning.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `isEqual` | `(a, b, opts?)` | Boolean — opts: `{ loose, ignoreKeys, partial }` |
+| `clone` | `(obj, opts?)` | Deep clone — opts: `{ preserveDOM, preserveNonCloneable }` |
 
 ### Functions (functions.js)
 | Function | Signature | Returns |

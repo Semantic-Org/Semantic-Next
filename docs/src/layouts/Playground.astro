@@ -15,7 +15,7 @@ if(!title) {
   title = searchMeta?.title;
 }
 ---
-<Body title={title} description={description} searchMeta={searchMeta} >
+<Body title={title} description={description} searchMeta={searchMeta} prefetch>
   <script is:inline slot="head">
   </script>
   <layout id="playground">

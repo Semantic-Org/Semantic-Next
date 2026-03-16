@@ -1,8 +1,10 @@
-import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+import { defineCollection } from 'astro:content';
 
 /* UI Primitives */
 const primitivesCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/primitives' }),
   schema: z.object({
     title: z.string(),
     id: z.optional(z.string()),
@@ -17,7 +19,7 @@ const primitivesCollection = defineCollection({
 
 /* UI Components */
 const componentsCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/components' }),
   schema: z.object({
     title: z.string(),
     id: z.optional(z.string()),
@@ -32,7 +34,7 @@ const componentsCollection = defineCollection({
 
 /* UI Behaviors */
 const behaviorsCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/behaviors' }),
   schema: z.object({
     title: z.string(),
     id: z.optional(z.string()),
@@ -46,7 +48,7 @@ const behaviorsCollection = defineCollection({
 
 /* Examples */
 const examplesCollection = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/examples' }),
   schema: z.object({
     id: z.optional(z.string()),
     sortIndex: z.optional(z.number()),
@@ -72,7 +74,10 @@ const resourceSchema = z.object({
   link: z.string(),
 });
 const lessonCollection = defineCollection({
-  type: 'content',
+  loader: glob({
+    pattern: '**/index.{md,mdx}',
+    base: './src/content/lessons',
+  }),
   schema: z.object({
     hidden: z.optional(z.boolean()),
     id: z.optional(z.string()), // use instead of slug
