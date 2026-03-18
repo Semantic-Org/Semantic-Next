@@ -6,837 +6,821 @@
    * ============================== */
 
   /* Navigation */
-  --icon-home: url('./svg/home.svg');
-  --icon-dashboard: url('./svg/dashboard.svg');
-  --icon-menu-2: url('./svg/menu-2.svg');
-  --icon-x: url('./svg/x.svg');
+  --icon-arrow-down: url('./svg/arrow-down.svg');
   --icon-arrow-left: url('./svg/arrow-left.svg');
+  --icon-arrows-horizontal: url('./svg/arrows-horizontal.svg');
   --icon-arrow-right: url('./svg/arrow-right.svg');
   --icon-arrow-up: url('./svg/arrow-up.svg');
-  --icon-arrow-down: url('./svg/arrow-down.svg');
-  --icon-external-link: url('./svg/external-link.svg');
-  --icon-chevron-right: url('./svg/chevron-right.svg');
+  --icon-arrows-vertical: url('./svg/arrows-vertical.svg');
   --icon-chevron-down: url('./svg/chevron-down.svg');
-  --icon-chevron-up: url('./svg/chevron-up.svg');
+  --icon-chevrons-left: url('./svg/chevrons-left.svg');
+  --icon-chevrons-right: url('./svg/chevrons-right.svg');
   --icon-chevron-left: url('./svg/chevron-left.svg');
-  --icon-dots: url('./svg/dots.svg');
-  --icon-dots-vertical: url('./svg/dots-vertical.svg');
+  --icon-chevron-right: url('./svg/chevron-right.svg');
+  --icon-chevron-up: url('./svg/chevron-up.svg');
+  --icon-selector: url('./svg/selector.svg');
+  --icon-compass: url('./svg/compass.svg');
+  --icon-corner-down-left: url('./svg/corner-down-left.svg');
+  --icon-corner-down-right: url('./svg/corner-down-right.svg');
+  --icon-crosshair: url('./svg/crosshair.svg');
+  --icon-external-link: url('./svg/external-link.svg');
+  --icon-home: url('./svg/home.svg');
   --icon-layout-sidebar: url('./svg/layout-sidebar.svg');
-  --icon-layout-columns: url('./svg/layout-columns.svg');
-  --icon-anchor: url('./svg/anchor.svg');
+  --icon-layout-navbar: url('./svg/layout-navbar.svg');
+  --icon-menu-2: url('./svg/menu-2.svg');
+  --icon-pointer: url('./svg/pointer.svg');
 
   /* Action */
-  --icon-plus: url('./svg/plus.svg');
-  --icon-pencil: url('./svg/pencil.svg');
-  --icon-trash: url('./svg/trash.svg');
-  --icon-device-floppy: url('./svg/device-floppy.svg');
-  --icon-check: url('./svg/check.svg');
-  --icon-refresh: url('./svg/refresh.svg');
-  --icon-arrow-back-up: url('./svg/arrow-back-up.svg');
-  --icon-arrow-forward-up: url('./svg/arrow-forward-up.svg');
-  --icon-copy: url('./svg/copy.svg');
-  --icon-clipboard: url('./svg/clipboard.svg');
-  --icon-clipboard-check: url('./svg/clipboard-check.svg');
-  --icon-clipboard-text: url('./svg/clipboard-text.svg');
-  --icon-scissors: url('./svg/scissors.svg');
-  --icon-arrows-move: url('./svg/arrows-move.svg');
-  --icon-grip-vertical: url('./svg/grip-vertical.svg');
-  --icon-upload: url('./svg/upload.svg');
-  --icon-download: url('./svg/download.svg');
-  --icon-file-import: url('./svg/file-import.svg');
-  --icon-file-export: url('./svg/file-export.svg');
-  --icon-printer: url('./svg/printer.svg');
-  --icon-share: url('./svg/share.svg');
-  --icon-send: url('./svg/send.svg');
-  --icon-minus: url('./svg/minus.svg');
-  --icon-bolt: url('./svg/bolt.svg');
-  --icon-rocket: url('./svg/rocket.svg');
-
-  /* Status */
-  --icon-circle-check: url('./svg/circle-check.svg');
+  --icon-archive: url('./svg/archive.svg');
+  --icon-archive-off: url('./svg/archive-off.svg');
+  --icon-sort-ascending-letters: url('./svg/sort-ascending-letters.svg');
+  --icon-sort-descending-letters: url('./svg/sort-descending-letters.svg');
+  --icon-bookmark: url('./svg/bookmark.svg');
+  --icon-bookmark-edit: url('./svg/bookmark-edit.svg');
+  --icon-bookmark-plus: url('./svg/bookmark-plus.svg');
+  --icon-dots-circle-horizontal: url('./svg/dots-circle-horizontal.svg');
+  --icon-circle-minus: url('./svg/circle-minus.svg');
+  --icon-circle-plus: url('./svg/circle-plus.svg');
   --icon-circle-x: url('./svg/circle-x.svg');
-  --icon-alert-triangle: url('./svg/alert-triangle.svg');
-  --icon-info-circle: url('./svg/info-circle.svg');
-  --icon-help-circle: url('./svg/help-circle.svg');
-  --icon-loader-2: url('./svg/loader-2.svg');
-  --icon-circle-dot: url('./svg/circle-dot.svg');
-  --icon-circle: url('./svg/circle.svg');
-  --icon-rosette-discount-check: url('./svg/rosette-discount-check.svg');
-  --icon-mood-happy: url('./svg/mood-happy.svg');
-  --icon-mood-sad: url('./svg/mood-sad.svg');
-  --icon-bulb: url('./svg/bulb.svg');
-  --icon-flame: url('./svg/flame.svg');
-  --icon-lifebuoy: url('./svg/lifebuoy.svg');
-
-  /* User */
-  --icon-user: url('./svg/user.svg');
-  --icon-user-circle: url('./svg/user-circle.svg');
-  --icon-users: url('./svg/users.svg');
-  --icon-user-plus: url('./svg/user-plus.svg');
-  --icon-user-minus: url('./svg/user-minus.svg');
-  --icon-user-check: url('./svg/user-check.svg');
-  --icon-user-shield: url('./svg/user-shield.svg');
-  --icon-user-cog: url('./svg/user-cog.svg');
-  --icon-user-question: url('./svg/user-question.svg');
-  --icon-login: url('./svg/login.svg');
-  --icon-logout: url('./svg/logout.svg');
-  --icon-fingerprint: url('./svg/fingerprint.svg');
-
-  /* Form */
-  --icon-square-check: url('./svg/square-check.svg');
-  --icon-square: url('./svg/square.svg');
-  --icon-toggle-right: url('./svg/toggle-right.svg');
-  --icon-toggle-left: url('./svg/toggle-left.svg');
-
-  /* Data */
-  --icon-filter: url('./svg/filter.svg');
-  --icon-sort-ascending: url('./svg/sort-ascending.svg');
-  --icon-list: url('./svg/list.svg');
-  --icon-table: url('./svg/table.svg');
-  --icon-grid-dots: url('./svg/grid-dots.svg');
-  --icon-chart-bar: url('./svg/chart-bar.svg');
-  --icon-chart-line: url('./svg/chart-line.svg');
-  --icon-chart-pie: url('./svg/chart-pie.svg');
+  --icon-clipboard: url('./svg/clipboard.svg');
+  --icon-clipboard-text: url('./svg/clipboard-text.svg');
+  --icon-cloud-download: url('./svg/cloud-download.svg');
+  --icon-cloud-upload: url('./svg/cloud-upload.svg');
+  --icon-copy: url('./svg/copy.svg');
+  --icon-clipboard-check: url('./svg/clipboard-check.svg');
+  --icon-backspace: url('./svg/backspace.svg');
+  --icon-download: url('./svg/download.svg');
+  --icon-dots: url('./svg/dots.svg');
+  --icon-dots-vertical: url('./svg/dots-vertical.svg');
+  --icon-arrows-maximize: url('./svg/arrows-maximize.svg');
   --icon-eye: url('./svg/eye.svg');
   --icon-eye-off: url('./svg/eye-off.svg');
+  --icon-grip-horizontal: url('./svg/grip-horizontal.svg');
+  --icon-grip-vertical: url('./svg/grip-vertical.svg');
+  --icon-hand-stop: url('./svg/hand-stop.svg');
+  --icon-heart: url('./svg/heart.svg');
+  --icon-heart-off: url('./svg/heart-off.svg');
+  --icon-link: url('./svg/link.svg');
+  --icon-list-check: url('./svg/list-check.svg');
+  --icon-git-merge: url('./svg/git-merge.svg');
+  --icon-arrows-minimize: url('./svg/arrows-minimize.svg');
+  --icon-minus: url('./svg/minus.svg');
+  --icon-click: url('./svg/click.svg');
+  --icon-arrows-move: url('./svg/arrows-move.svg');
+  --icon-paperclip: url('./svg/paperclip.svg');
+  --icon-pencil: url('./svg/pencil.svg');
+  --icon-pinned: url('./svg/pinned.svg');
+  --icon-pinned-off: url('./svg/pinned-off.svg');
+  --icon-plus: url('./svg/plus.svg');
+  --icon-arrow-forward-up: url('./svg/arrow-forward-up.svg');
+  --icon-refresh: url('./svg/refresh.svg');
+  --icon-replace: url('./svg/replace.svg');
+  --icon-rocket: url('./svg/rocket.svg');
+  --icon-rotate: url('./svg/rotate.svg');
+  --icon-rotate-clockwise: url('./svg/rotate-clockwise.svg');
+  --icon-device-floppy: url('./svg/device-floppy.svg');
+  --icon-scan: url('./svg/scan.svg');
+  --icon-scissors: url('./svg/scissors.svg');
   --icon-search: url('./svg/search.svg');
+  --icon-share: url('./svg/share.svg');
+  --icon-arrows-split: url('./svg/arrows-split.svg');
+  --icon-thumb-down: url('./svg/thumb-down.svg');
+  --icon-thumb-up: url('./svg/thumb-up.svg');
+  --icon-trash: url('./svg/trash.svg');
+  --icon-arrow-back-up: url('./svg/arrow-back-up.svg');
+  --icon-unlink: url('./svg/unlink.svg');
+  --icon-upload: url('./svg/upload.svg');
+  --icon-x: url('./svg/x.svg');
   --icon-zoom-in: url('./svg/zoom-in.svg');
   --icon-zoom-out: url('./svg/zoom-out.svg');
-  --icon-arrows-maximize: url('./svg/arrows-maximize.svg');
-  --icon-arrows-minimize: url('./svg/arrows-minimize.svg');
-  --icon-layout-kanban: url('./svg/layout-kanban.svg');
+
+  /* Status */
+  --icon-alert-square-rounded: url('./svg/alert-square-rounded.svg');
+  --icon-rosette-discount-check: url('./svg/rosette-discount-check.svg');
+  --icon-info-square-rounded: url('./svg/info-square-rounded.svg');
+  --icon-ban: url('./svg/ban.svg');
+  --icon-check: url('./svg/check.svg');
+  --icon-checks: url('./svg/checks.svg');
+  --icon-alert-circle: url('./svg/alert-circle.svg');
+  --icon-circle-check: url('./svg/circle-check.svg');
+  --icon-circle-dashed: url('./svg/circle-dashed.svg');
+  --icon-help-circle: url('./svg/help-circle.svg');
+  --icon-barrier-block: url('./svg/barrier-block.svg');
+  --icon-flag: url('./svg/flag.svg');
+  --icon-flame: url('./svg/flame.svg');
+  --icon-mood-sad: url('./svg/mood-sad.svg');
+  --icon-info-circle: url('./svg/info-circle.svg');
+  --icon-lifebuoy: url('./svg/lifebuoy.svg');
+  --icon-loader: url('./svg/loader.svg');
+  --icon-loader-2: url('./svg/loader-2.svg');
+  --icon-mood-empty: url('./svg/mood-empty.svg');
+  --icon-server-off: url('./svg/server-off.svg');
+  --icon-alert-triangle: url('./svg/alert-triangle.svg');
+  --icon-bolt: url('./svg/bolt.svg');
+
+  /* User */
+  --icon-user-circle: url('./svg/user-circle.svg');
+  --icon-address-book: url('./svg/address-book.svg');
+  --icon-id: url('./svg/id.svg');
+  --icon-user: url('./svg/user.svg');
+  --icon-user-check: url('./svg/user-check.svg');
+  --icon-user-cog: url('./svg/user-cog.svg');
+  --icon-user-minus: url('./svg/user-minus.svg');
+  --icon-user-plus: url('./svg/user-plus.svg');
+  --icon-user-search: url('./svg/user-search.svg');
+  --icon-user-x: url('./svg/user-x.svg');
+  --icon-users: url('./svg/users.svg');
+
+  /* Form */
+  --icon-circle-dot: url('./svg/circle-dot.svg');
+  --icon-password: url('./svg/password.svg');
+  --icon-square-check: url('./svg/square-check.svg');
+  --icon-cursor-text: url('./svg/cursor-text.svg');
+  --icon-toggle-left: url('./svg/toggle-left.svg');
+  --icon-toggle-right: url('./svg/toggle-right.svg');
+
+  /* Data */
   --icon-activity-heartbeat: url('./svg/activity-heartbeat.svg');
+  --icon-chart-area-line: url('./svg/chart-area-line.svg');
+  --icon-chart-bar: url('./svg/chart-bar.svg');
+  --icon-chart-candle: url('./svg/chart-candle.svg');
+  --icon-chart-arrows: url('./svg/chart-arrows.svg');
+  --icon-chart-line: url('./svg/chart-line.svg');
+  --icon-topology-star-3: url('./svg/topology-star-3.svg');
+  --icon-chart-pie: url('./svg/chart-pie.svg');
+  --icon-chart-dots: url('./svg/chart-dots.svg');
+  --icon-clipboard-list: url('./svg/clipboard-list.svg');
+  --icon-filter: url('./svg/filter.svg');
+  --icon-gauge: url('./svg/gauge.svg');
+  --icon-layout-grid: url('./svg/layout-grid.svg');
+  --icon-grid-3x3: url('./svg/grid-3x3.svg');
+  --icon-layout-dashboard: url('./svg/layout-dashboard.svg');
+  --icon-layout-list: url('./svg/layout-list.svg');
+  --icon-list-tree: url('./svg/list-tree.svg');
+  --icon-qrcode: url('./svg/qrcode.svg');
+  --icon-radar: url('./svg/radar.svg');
+  --icon-sum: url('./svg/sum.svg');
+  --icon-table: url('./svg/table.svg');
+  --icon-table-plus: url('./svg/table-plus.svg');
+  --icon-table-minus: url('./svg/table-minus.svg');
+  --icon-trending-down: url('./svg/trending-down.svg');
+  --icon-trending-up: url('./svg/trending-up.svg');
 
   /* File */
   --icon-file: url('./svg/file.svg');
-  --icon-file-text: url('./svg/file-text.svg');
-  --icon-file-type-pdf: url('./svg/file-type-pdf.svg');
-  --icon-folder: url('./svg/folder.svg');
-  --icon-folder-plus: url('./svg/folder-plus.svg');
-  --icon-folder-open: url('./svg/folder-open.svg');
-  --icon-archive: url('./svg/archive.svg');
   --icon-file-zip: url('./svg/file-zip.svg');
-  --icon-paperclip: url('./svg/paperclip.svg');
-  --icon-link: url('./svg/link.svg');
-  --icon-unlink: url('./svg/unlink.svg');
+  --icon-file-check: url('./svg/file-check.svg');
+  --icon-file-code: url('./svg/file-code.svg');
+  --icon-photo: url('./svg/photo.svg');
+  --icon-file-text-shield: url('./svg/file-text-shield.svg');
   --icon-file-plus: url('./svg/file-plus.svg');
-  --icon-file-minus: url('./svg/file-minus.svg');
+  --icon-file-search: url('./svg/file-search.svg');
+  --icon-file-spreadsheet: url('./svg/file-spreadsheet.svg');
+  --icon-file-text: url('./svg/file-text.svg');
+  --icon-file-x: url('./svg/file-x.svg');
+  --icon-file-stack: url('./svg/file-stack.svg');
+  --icon-folder: url('./svg/folder.svg');
+  --icon-folder-open: url('./svg/folder-open.svg');
+  --icon-folder-plus: url('./svg/folder-plus.svg');
+  --icon-folders: url('./svg/folders.svg');
+  --icon-news: url('./svg/news.svg');
+  --icon-notebook: url('./svg/notebook.svg');
+  --icon-presentation: url('./svg/presentation.svg');
+  --icon-script: url('./svg/script.svg');
+  --icon-note: url('./svg/note.svg');
 
   /* Media */
-  --icon-photo: url('./svg/photo.svg');
-  --icon-video: url('./svg/video.svg');
-  --icon-video-off: url('./svg/video-off.svg');
+  --icon-wave-sine: url('./svg/wave-sine.svg');
   --icon-camera: url('./svg/camera.svg');
   --icon-camera-off: url('./svg/camera-off.svg');
+  --icon-badge-cc: url('./svg/badge-cc.svg');
+  --icon-movie: url('./svg/movie.svg');
+  --icon-carousel-horizontal: url('./svg/carousel-horizontal.svg');
+  --icon-photo-off: url('./svg/photo-off.svg');
+  --icon-photo-plus: url('./svg/photo-plus.svg');
+  --icon-library-photo: url('./svg/library-photo.svg');
+  --icon-microphone: url('./svg/microphone.svg');
+  --icon-microphone-off: url('./svg/microphone-off.svg');
+  --icon-music: url('./svg/music.svg');
+  --icon-microphone-2: url('./svg/microphone-2.svg');
+  --icon-video: url('./svg/video.svg');
+  --icon-video-off: url('./svg/video-off.svg');
+
+  /* Media Controls */
+  --icon-player-pause: url('./svg/player-pause.svg');
+  --icon-player-play: url('./svg/player-play.svg');
+  --icon-player-stop: url('./svg/player-stop.svg');
+  --icon-player-track-next: url('./svg/player-track-next.svg');
+  --icon-picture-in-picture: url('./svg/picture-in-picture.svg');
+  --icon-repeat: url('./svg/repeat.svg');
+  --icon-player-track-prev: url('./svg/player-track-prev.svg');
+  --icon-arrows-shuffle: url('./svg/arrows-shuffle.svg');
+  --icon-player-skip-back: url('./svg/player-skip-back.svg');
+  --icon-player-skip-forward: url('./svg/player-skip-forward.svg');
   --icon-volume: url('./svg/volume.svg');
   --icon-volume-2: url('./svg/volume-2.svg');
   --icon-volume-off: url('./svg/volume-off.svg');
-  --icon-music: url('./svg/music.svg');
-  --icon-microphone: url('./svg/microphone.svg');
-  --icon-microphone-off: url('./svg/microphone-off.svg');
-  --icon-headphones: url('./svg/headphones.svg');
-  --icon-live-photo: url('./svg/live-photo.svg');
-  --icon-crop: url('./svg/crop.svg');
-  --icon-rotate: url('./svg/rotate.svg');
-
-  /* Media Controls */
-  --icon-player-play: url('./svg/player-play.svg');
-  --icon-player-pause: url('./svg/player-pause.svg');
-  --icon-player-stop: url('./svg/player-stop.svg');
-  --icon-player-skip-forward: url('./svg/player-skip-forward.svg');
-  --icon-player-skip-back: url('./svg/player-skip-back.svg');
-  --icon-player-track-next: url('./svg/player-track-next.svg');
-  --icon-player-track-prev: url('./svg/player-track-prev.svg');
-  --icon-arrows-shuffle: url('./svg/arrows-shuffle.svg');
-  --icon-repeat: url('./svg/repeat.svg');
-  --icon-player-record: url('./svg/player-record.svg');
 
   /* Text */
+  --icon-text-decrease: url('./svg/text-decrease.svg');
+  --icon-text-increase: url('./svg/text-increase.svg');
+  --icon-text-resize: url('./svg/text-resize.svg');
+  --icon-asterisk: url('./svg/asterisk.svg');
   --icon-bold: url('./svg/bold.svg');
-  --icon-italic: url('./svg/italic.svg');
-  --icon-underline: url('./svg/underline.svg');
-  --icon-strikethrough: url('./svg/strikethrough.svg');
-  --icon-code: url('./svg/code.svg');
-  --icon-blockquote: url('./svg/blockquote.svg');
+  --icon-hash: url('./svg/hash.svg');
   --icon-heading: url('./svg/heading.svg');
-  --icon-pilcrow: url('./svg/pilcrow.svg');
-  --icon-list-numbers: url('./svg/list-numbers.svg');
-  --icon-list-check: url('./svg/list-check.svg');
-  --icon-indent-increase: url('./svg/indent-increase.svg');
+  --icon-h-1: url('./svg/h-1.svg');
+  --icon-h-2: url('./svg/h-2.svg');
+  --icon-h-3: url('./svg/h-3.svg');
+  --icon-italic: url('./svg/italic.svg');
+  --icon-list: url('./svg/list.svg');
   --icon-indent-decrease: url('./svg/indent-decrease.svg');
-  --icon-align-left: url('./svg/align-left.svg');
+  --icon-indent-increase: url('./svg/indent-increase.svg');
+  --icon-list-numbers: url('./svg/list-numbers.svg');
+  --icon-blockquote: url('./svg/blockquote.svg');
+  --icon-clear-formatting: url('./svg/clear-formatting.svg');
+  --icon-writing: url('./svg/writing.svg');
+  --icon-strikethrough: url('./svg/strikethrough.svg');
+  --icon-subscript: url('./svg/subscript.svg');
+  --icon-superscript: url('./svg/superscript.svg');
   --icon-align-center: url('./svg/align-center.svg');
   --icon-align-right: url('./svg/align-right.svg');
   --icon-align-justified: url('./svg/align-justified.svg');
-  --icon-mood-smile: url('./svg/mood-smile.svg');
+  --icon-align-left: url('./svg/align-left.svg');
+  --icon-text-recognition: url('./svg/text-recognition.svg');
   --icon-typography: url('./svg/typography.svg');
+  --icon-underline: url('./svg/underline.svg');
 
   /* Editing */
-  --icon-brush: url('./svg/brush.svg');
-  --icon-color-picker: url('./svg/color-picker.svg');
+  --icon-align-box-center-middle: url('./svg/align-box-center-middle.svg');
+  --icon-align-box-bottom-center: url('./svg/align-box-bottom-center.svg');
+  --icon-align-box-right-middle: url('./svg/align-box-right-middle.svg');
+  --icon-align-box-top-center: url('./svg/align-box-top-center.svg');
+  --icon-align-box-left-middle: url('./svg/align-box-left-middle.svg');
+  --icon-stack-front: url('./svg/stack-front.svg');
+  --icon-columns-2: url('./svg/columns-2.svg');
+  --icon-columns-3: url('./svg/columns-3.svg');
+  --icon-crop: url('./svg/crop.svg');
+  --icon-droplet: url('./svg/droplet.svg');
   --icon-eraser: url('./svg/eraser.svg');
-  --icon-pointer: url('./svg/pointer.svg');
+  --icon-flip-horizontal: url('./svg/flip-horizontal.svg');
+  --icon-flip-vertical: url('./svg/flip-vertical.svg');
+  --icon-highlight: url('./svg/highlight.svg');
+  --icon-stack-2: url('./svg/stack-2.svg');
+  --icon-paint: url('./svg/paint.svg');
+  --icon-brush: url('./svg/brush.svg');
+  --icon-palette: url('./svg/palette.svg');
+  --icon-color-picker: url('./svg/color-picker.svg');
+  --icon-ruler: url('./svg/ruler.svg');
+  --icon-stack-back: url('./svg/stack-back.svg');
+  --icon-shape: url('./svg/shape.svg');
+  --icon-signature: url('./svg/signature.svg');
 
   /* Communication */
-  --icon-bell-off: url('./svg/bell-off.svg');
-  --icon-speakerphone: url('./svg/speakerphone.svg');
-
-  /* Social */
-  --icon-heart: url('./svg/heart.svg');
-  --icon-heart-broken: url('./svg/heart-broken.svg');
-  --icon-star: url('./svg/star.svg');
-  --icon-bookmark: url('./svg/bookmark.svg');
-  --icon-thumb-up: url('./svg/thumb-up.svg');
-  --icon-thumb-down: url('./svg/thumb-down.svg');
-  --icon-message: url('./svg/message.svg');
-  --icon-messages: url('./svg/messages.svg');
-  --icon-message-dots: url('./svg/message-dots.svg');
   --icon-at: url('./svg/at.svg');
-  --icon-ban: url('./svg/ban.svg');
-  --icon-flag: url('./svg/flag.svg');
-  --icon-pinned: url('./svg/pinned.svg');
+  --icon-bell: url('./svg/bell.svg');
+  --icon-bell-plus: url('./svg/bell-plus.svg');
+  --icon-bell-off: url('./svg/bell-off.svg');
+  --icon-bell-ringing: url('./svg/bell-ringing.svg');
+  --icon-inbox: url('./svg/inbox.svg');
+  --icon-mail: url('./svg/mail.svg');
+  --icon-mail-opened: url('./svg/mail-opened.svg');
+  --icon-mail-plus: url('./svg/mail-plus.svg');
+  --icon-speakerphone: url('./svg/speakerphone.svg');
+  --icon-message-circle: url('./svg/message-circle.svg');
+  --icon-message-dots: url('./svg/message-dots.svg');
+  --icon-message-circle-plus: url('./svg/message-circle-plus.svg');
+  --icon-message: url('./svg/message.svg');
+  --icon-message-2: url('./svg/message-2.svg');
+  --icon-message-reply: url('./svg/message-reply.svg');
+  --icon-messages: url('./svg/messages.svg');
+  --icon-phone: url('./svg/phone.svg');
+  --icon-phone-call: url('./svg/phone-call.svg');
+  --icon-phone-x: url('./svg/phone-x.svg');
+  --icon-phone-off: url('./svg/phone-off.svg');
+  --icon-arrows-up: url('./svg/arrows-up.svg');
+  --icon-screen-share: url('./svg/screen-share.svg');
+  --icon-screen-share-off: url('./svg/screen-share-off.svg');
+  --icon-send: url('./svg/send.svg');
+  --icon-mood-happy: url('./svg/mood-happy.svg');
+  --icon-phone-pause: url('./svg/phone-pause.svg');
 
   /* Commerce */
-  --icon-shopping-cart: url('./svg/shopping-cart.svg');
-  --icon-shopping-cart-plus: url('./svg/shopping-cart-plus.svg');
+  --icon-barcode: url('./svg/barcode.svg');
+  --icon-box: url('./svg/box.svg');
   --icon-credit-card: url('./svg/credit-card.svg');
-  --icon-wallet: url('./svg/wallet.svg');
-  --icon-coins: url('./svg/coins.svg');
+  --icon-gift: url('./svg/gift.svg');
+  --icon-package: url('./svg/package.svg');
+  --icon-receipt: url('./svg/receipt.svg');
+  --icon-shopping-bag: url('./svg/shopping-bag.svg');
+  --icon-shopping-cart: url('./svg/shopping-cart.svg');
+  --icon-building-store: url('./svg/building-store.svg');
   --icon-tag: url('./svg/tag.svg');
   --icon-tags: url('./svg/tags.svg');
-  --icon-percentage: url('./svg/percentage.svg');
   --icon-ticket: url('./svg/ticket.svg');
-  --icon-package: url('./svg/package.svg');
   --icon-truck: url('./svg/truck.svg');
-  --icon-truck-delivery: url('./svg/truck-delivery.svg');
-  --icon-receipt-refund: url('./svg/receipt-refund.svg');
-  --icon-receipt: url('./svg/receipt.svg');
-  --icon-file-invoice: url('./svg/file-invoice.svg');
-  --icon-building-store: url('./svg/building-store.svg');
-  --icon-shopping-bag: url('./svg/shopping-bag.svg');
 
   /* Time */
+  --icon-alarm: url('./svg/alarm.svg');
   --icon-calendar: url('./svg/calendar.svg');
-  --icon-calendar-event: url('./svg/calendar-event.svg');
   --icon-calendar-check: url('./svg/calendar-check.svg');
-  --icon-calendar-off: url('./svg/calendar-off.svg');
+  --icon-calendar-time: url('./svg/calendar-time.svg');
+  --icon-calendar-event: url('./svg/calendar-event.svg');
+  --icon-calendar-plus: url('./svg/calendar-plus.svg');
+  --icon-calendar-stats: url('./svg/calendar-stats.svg');
+  --icon-calendar-x: url('./svg/calendar-x.svg');
   --icon-clock: url('./svg/clock.svg');
+  --icon-history: url('./svg/history.svg');
   --icon-hourglass: url('./svg/hourglass.svg');
-  --icon-device-watch: url('./svg/device-watch.svg');
+  --icon-clock-hour-3: url('./svg/clock-hour-3.svg');
 
   /* Security */
+  --icon-cookie: url('./svg/cookie.svg');
+  --icon-fingerprint: url('./svg/fingerprint.svg');
+  --icon-world-off: url('./svg/world-off.svg');
+  --icon-key: url('./svg/key.svg');
+  --icon-lock: url('./svg/lock.svg');
+  --icon-lock-open: url('./svg/lock-open.svg');
+  --icon-login: url('./svg/login.svg');
+  --icon-logout: url('./svg/logout.svg');
+  --icon-face-id: url('./svg/face-id.svg');
+  --icon-shield: url('./svg/shield.svg');
+  --icon-shield-exclamation: url('./svg/shield-exclamation.svg');
+  --icon-shield-check: url('./svg/shield-check.svg');
   --icon-shield-off: url('./svg/shield-off.svg');
+  --icon-shield-x: url('./svg/shield-x.svg');
+  --icon-lock-square: url('./svg/lock-square.svg');
+  --icon-mask: url('./svg/mask.svg');
+
+  /* Settings */
+  --icon-language: url('./svg/language.svg');
+  --icon-moon: url('./svg/moon.svg');
+  --icon-settings: url('./svg/settings.svg');
+  --icon-adjustments-horizontal: url('./svg/adjustments-horizontal.svg');
+  --icon-sun-moon: url('./svg/sun-moon.svg');
+  --icon-tool: url('./svg/tool.svg');
 
   /* Organization */
-  --icon-stack-2: url('./svg/stack-2.svg');
-  --icon-hierarchy: url('./svg/hierarchy.svg');
-  --icon-progress: url('./svg/progress.svg');
+  --icon-building: url('./svg/building.svg');
+  --icon-layout-kanban: url('./svg/layout-kanban.svg');
   --icon-diamond: url('./svg/diamond.svg');
 
   /* Business */
   --icon-briefcase: url('./svg/briefcase.svg');
-  --icon-building: url('./svg/building.svg');
-  --icon-buildings: url('./svg/buildings.svg');
-  --icon-news: url('./svg/news.svg');
-  --icon-rss: url('./svg/rss.svg');
 
   /* Finance */
-  --icon-trending-up: url('./svg/trending-up.svg');
-  --icon-trending-down: url('./svg/trending-down.svg');
+  --icon-cash-banknote: url('./svg/cash-banknote.svg');
+  --icon-coin: url('./svg/coin.svg');
+  --icon-coins: url('./svg/coins.svg');
+  --icon-currency-dollar: url('./svg/currency-dollar.svg');
+  --icon-currency-euro: url('./svg/currency-euro.svg');
+  --icon-building-bank: url('./svg/building-bank.svg');
+  --icon-percentage: url('./svg/percentage.svg');
   --icon-scale: url('./svg/scale.svg');
-  --icon-arrows-exchange: url('./svg/arrows-exchange.svg');
-  --icon-pig-money: url('./svg/pig-money.svg');
+  --icon-wallet: url('./svg/wallet.svg');
 
   /* Location */
-  --icon-map-pin: url('./svg/map-pin.svg');
-  --icon-map: url('./svg/map.svg');
-  --icon-route: url('./svg/route.svg');
-  --icon-compass: url('./svg/compass.svg');
-  --icon-current-location: url('./svg/current-location.svg');
+  --icon-car: url('./svg/car.svg');
   --icon-building-hospital: url('./svg/building-hospital.svg');
-  --icon-ruler: url('./svg/ruler.svg');
+  --icon-current-location: url('./svg/current-location.svg');
+  --icon-map: url('./svg/map.svg');
+  --icon-map-pin: url('./svg/map-pin.svg');
+  --icon-map-pin-off: url('./svg/map-pin-off.svg');
+  --icon-map-pin-plus: url('./svg/map-pin-plus.svg');
+  --icon-plane: url('./svg/plane.svg');
+  --icon-route: url('./svg/route.svg');
 
   /* System */
+  --icon-app-window: url('./svg/app-window.svg');
   --icon-command: url('./svg/command.svg');
-  --icon-hash: url('./svg/hash.svg');
+  --icon-layout-bottombar: url('./svg/layout-bottombar.svg');
+  --icon-layout-bottombar-collapse: url('./svg/layout-bottombar-collapse.svg');
+  --icon-layout-bottombar-expand: url('./svg/layout-bottombar-expand.svg');
+  --icon-layout-sidebar-left-collapse: url('./svg/layout-sidebar-left-collapse.svg');
+  --icon-layout-sidebar-left-expand: url('./svg/layout-sidebar-left-expand.svg');
+  --icon-layout-sidebar-right: url('./svg/layout-sidebar-right.svg');
+  --icon-layout-sidebar-right-collapse: url('./svg/layout-sidebar-right-collapse.svg');
+  --icon-layout-sidebar-right-expand: url('./svg/layout-sidebar-right-expand.svg');
+  --icon-power: url('./svg/power.svg');
+  --icon-separator-horizontal: url('./svg/separator-horizontal.svg');
 
   /* Device */
-  --icon-device-tv: url('./svg/device-tv.svg');
+  --icon-battery: url('./svg/battery.svg');
   --icon-battery-charging: url('./svg/battery-charging.svg');
+  --icon-battery-4: url('./svg/battery-4.svg');
+  --icon-battery-1: url('./svg/battery-1.svg');
+  --icon-battery-2: url('./svg/battery-2.svg');
+  --icon-battery-off: url('./svg/battery-off.svg');
+  --icon-device-desktop: url('./svg/device-desktop.svg');
+  --icon-cpu: url('./svg/cpu.svg');
+  --icon-server: url('./svg/server.svg');
+  --icon-headphones: url('./svg/headphones.svg');
+  --icon-keyboard: url('./svg/keyboard.svg');
+  --icon-device-laptop: url('./svg/device-laptop.svg');
+  --icon-devices: url('./svg/devices.svg');
+  --icon-mouse: url('./svg/mouse.svg');
+  --icon-printer: url('./svg/printer.svg');
+  --icon-device-mobile: url('./svg/device-mobile.svg');
+  --icon-device-tablet: url('./svg/device-tablet.svg');
+  --icon-device-tv: url('./svg/device-tv.svg');
+  --icon-usb: url('./svg/usb.svg');
+  --icon-device-watch: url('./svg/device-watch.svg');
 
   /* Connectivity */
+  --icon-bluetooth: url('./svg/bluetooth.svg');
+  --icon-bluetooth-off: url('./svg/bluetooth-off.svg');
+  --icon-cast: url('./svg/cast.svg');
+  --icon-cloud-off: url('./svg/cloud-off.svg');
+  --icon-cloud-data-connection: url('./svg/cloud-data-connection.svg');
+  --icon-world: url('./svg/world.svg');
+  --icon-network: url('./svg/network.svg');
+  --icon-plug: url('./svg/plug.svg');
+  --icon-antenna-bars-5: url('./svg/antenna-bars-5.svg');
+  --icon-router: url('./svg/router.svg');
+  --icon-rss: url('./svg/rss.svg');
+  --icon-signal-5g: url('./svg/signal-5g.svg');
+  --icon-plug-off: url('./svg/plug-off.svg');
+  --icon-wifi: url('./svg/wifi.svg');
+  --icon-wifi-2: url('./svg/wifi-2.svg');
   --icon-wifi-off: url('./svg/wifi-off.svg');
 
   /* Development */
-  --icon-git-merge: url('./svg/git-merge.svg');
-  --icon-git-pull-request: url('./svg/git-pull-request.svg');
+  --icon-braces: url('./svg/braces.svg');
+  --icon-bug: url('./svg/bug.svg');
+  --icon-code: url('./svg/code.svg');
+  --icon-components: url('./svg/components.svg');
+  --icon-database: url('./svg/database.svg');
+  --icon-database-export: url('./svg/database-export.svg');
+  --icon-file-diff: url('./svg/file-diff.svg');
+  --icon-git-branch: url('./svg/git-branch.svg');
   --icon-git-commit: url('./svg/git-commit.svg');
+  --icon-git-compare: url('./svg/git-compare.svg');
+  --icon-git-fork: url('./svg/git-fork.svg');
+  --icon-git-pull-request: url('./svg/git-pull-request.svg');
+  --icon-git-pull-request-closed: url('./svg/git-pull-request-closed.svg');
+  --icon-git-pull-request-draft: url('./svg/git-pull-request-draft.svg');
+  --icon-puzzle: url('./svg/puzzle.svg');
+  --icon-regex: url('./svg/regex.svg');
+  --icon-terminal: url('./svg/terminal.svg');
+  --icon-variable: url('./svg/variable.svg');
+  --icon-webhook: url('./svg/webhook.svg');
+
+  /* Brand */
+  --icon-brand-github: url('./svg/brand-github.svg');
 
   /* Gamification */
   --icon-award: url('./svg/award.svg');
+  --icon-crown: url('./svg/crown.svg');
+  --icon-dice: url('./svg/dice.svg');
+  --icon-confetti: url('./svg/confetti.svg');
+  --icon-star: url('./svg/star.svg');
+  --icon-star-half: url('./svg/star-half.svg');
   --icon-trophy: url('./svg/trophy.svg');
-  --icon-gift: url('./svg/gift.svg');
-  --icon-target: url('./svg/target.svg');
+
+  /* Ai */
+  --icon-robot: url('./svg/robot.svg');
+  --icon-brain: url('./svg/brain.svg');
+  --icon-sparkles: url('./svg/sparkles.svg');
+  --icon-wand: url('./svg/wand.svg');
 
   /* Education */
   --icon-book: url('./svg/book.svg');
   --icon-book-2: url('./svg/book-2.svg');
+  --icon-flask: url('./svg/flask.svg');
   --icon-school: url('./svg/school.svg');
+  --icon-books: url('./svg/books.svg');
+
+  /* Weather */
+  --icon-cloud: url('./svg/cloud.svg');
+  --icon-cloud-storm: url('./svg/cloud-storm.svg');
+  --icon-cloud-rain: url('./svg/cloud-rain.svg');
+  --icon-snowflake: url('./svg/snowflake.svg');
+  --icon-sun: url('./svg/sun.svg');
+  --icon-thermometer: url('./svg/thermometer.svg');
+  --icon-wind: url('./svg/wind.svg');
+
+  /* Misc */
+  --icon-accessible: url('./svg/accessible.svg');
+  --icon-calculator: url('./svg/calculator.svg');
+  --icon-circle: url('./svg/circle.svg');
+  --icon-coffee: url('./svg/coffee.svg');
+  --icon-copyright: url('./svg/copyright.svg');
+  --icon-first-aid-kit: url('./svg/first-aid-kit.svg');
+  --icon-hexagon: url('./svg/hexagon.svg');
+  --icon-infinity: url('./svg/infinity.svg');
+  --icon-leaf: url('./svg/leaf.svg');
+  --icon-bulb: url('./svg/bulb.svg');
+  --icon-recycle: url('./svg/recycle.svg');
+  --icon-square: url('./svg/square.svg');
+  --icon-target: url('./svg/target.svg');
+  --icon-triangle: url('./svg/triangle.svg');
 
   /* ==============================
    * Canonical Names
    * ============================== */
 
   /* Navigation */
+  --icon-arrow-left-right: var(--icon-arrows-horizontal);
+  --icon-arrow-up-down: var(--icon-arrows-vertical);
+  --icon-chevron-first: var(--icon-chevrons-left);
+  --icon-chevron-last: var(--icon-chevrons-right);
+  --icon-chevrons-down-up: var(--icon-selector);
+  --icon-chevrons-left-right: var(--icon-arrows-horizontal);
+  --icon-chevrons-up-down: var(--icon-selector);
+  --icon-house: var(--icon-home);
+  --icon-layout-panel-left: var(--icon-layout-sidebar);
+  --icon-layout-panel-top: var(--icon-layout-navbar);
   --icon-menu: var(--icon-menu-2);
-  --icon-close: var(--icon-x);
-  --icon-back: var(--icon-arrow-left);
-  --icon-next: var(--icon-arrow-right);
-  --icon-up: var(--icon-arrow-up);
-  --icon-down: var(--icon-arrow-down);
-  --icon-more: var(--icon-dots);
-  --icon-more-options: var(--icon-dots-vertical);
-  --icon-sidebar: var(--icon-layout-sidebar);
-  --icon-columns: var(--icon-layout-columns);
+  --icon-mouse-pointer: var(--icon-pointer);
+  --icon-square-arrow-out-up-right: var(--icon-external-link);
 
   /* Action */
-  --icon-add: var(--icon-plus);
-  --icon-edit: var(--icon-pencil);
-  --icon-delete: var(--icon-trash);
-  --icon-save: var(--icon-device-floppy);
-  --icon-undo: var(--icon-arrow-back-up);
-  --icon-redo: var(--icon-arrow-forward-up);
-  --icon-copied: var(--icon-clipboard-check);
-  --icon-paste: var(--icon-clipboard-text);
-  --icon-cut: var(--icon-scissors);
+  --icon-archive-restore: var(--icon-archive);
+  --icon-archive-x: var(--icon-archive-off);
+  --icon-arrow-down-a-z: var(--icon-sort-ascending-letters);
+  --icon-arrow-up-a-z: var(--icon-sort-descending-letters);
+  --icon-bookmark-check: var(--icon-bookmark-edit);
+  --icon-circle-ellipsis: var(--icon-dots-circle-horizontal);
+  --icon-clipboard-paste: var(--icon-clipboard-text);
+  --icon-copy-check: var(--icon-clipboard-check);
+  --icon-delete: var(--icon-backspace);
+  --icon-ellipsis: var(--icon-dots);
+  --icon-ellipsis-vertical: var(--icon-dots-vertical);
+  --icon-expand: var(--icon-arrows-maximize);
+  --icon-hand: var(--icon-hand-stop);
+  --icon-list-checks: var(--icon-list-check);
+  --icon-maximize: var(--icon-arrows-maximize);
+  --icon-merge: var(--icon-git-merge);
+  --icon-minimize: var(--icon-arrows-minimize);
+  --icon-mouse-pointer-click: var(--icon-click);
   --icon-move: var(--icon-arrows-move);
-  --icon-drag-handle: var(--icon-grip-vertical);
-  --icon-import: var(--icon-file-import);
-  --icon-export: var(--icon-file-export);
-  --icon-print: var(--icon-printer);
-  --icon-zap: var(--icon-bolt);
+  --icon-pin: var(--icon-pinned);
+  --icon-pin-off: var(--icon-pinned-off);
+  --icon-redo: var(--icon-arrow-forward-up);
+  --icon-refresh-ccw: var(--icon-refresh);
+  --icon-rotate-ccw: var(--icon-rotate);
+  --icon-rotate-cw: var(--icon-rotate-clockwise);
+  --icon-save: var(--icon-device-floppy);
+  --icon-split: var(--icon-arrows-split);
+  --icon-thumbs-down: var(--icon-thumb-down);
+  --icon-thumbs-up: var(--icon-thumb-up);
+  --icon-undo: var(--icon-arrow-back-up);
+  --icon-vote: var(--icon-thumb-up);
 
   /* Status */
-  --icon-success: var(--icon-circle-check);
-  --icon-error: var(--icon-circle-x);
-  --icon-warning: var(--icon-alert-triangle);
-  --icon-info: var(--icon-info-circle);
-  --icon-help: var(--icon-help-circle);
-  --icon-loading: var(--icon-loader-2);
-  --icon-filled-circle: var(--icon-circle-dot);
-  --icon-empty-circle: var(--icon-circle);
-  --icon-verified: var(--icon-rosette-discount-check);
-  --icon-smile: var(--icon-mood-happy);
+  --icon-badge-alert: var(--icon-alert-square-rounded);
+  --icon-badge-check: var(--icon-rosette-discount-check);
+  --icon-badge-info: var(--icon-info-square-rounded);
+  --icon-check-check: var(--icon-checks);
+  --icon-circle-alert: var(--icon-alert-circle);
+  --icon-circle-question-mark: var(--icon-help-circle);
+  --icon-construction: var(--icon-barrier-block);
   --icon-frown: var(--icon-mood-sad);
-  --icon-tip: var(--icon-bulb);
-  --icon-fire: var(--icon-flame);
-  --icon-support: var(--icon-lifebuoy);
+  --icon-info: var(--icon-info-circle);
+  --icon-life-buoy: var(--icon-lifebuoy);
+  --icon-loader-circle: var(--icon-loader-2);
+  --icon-meh: var(--icon-mood-empty);
+  --icon-server-crash: var(--icon-server-off);
+  --icon-triangle-alert: var(--icon-alert-triangle);
+  --icon-zap: var(--icon-bolt);
 
   /* User */
-  --icon-avatar: var(--icon-user-circle);
-  --icon-add-user: var(--icon-user-plus);
-  --icon-remove-user: var(--icon-user-minus);
-  --icon-assigned: var(--icon-user-check);
-  --icon-admin: var(--icon-user-shield);
-  --icon-user-settings: var(--icon-user-cog);
-  --icon-anonymous: var(--icon-user-question);
+  --icon-circle-user: var(--icon-user-circle);
+  --icon-contact: var(--icon-address-book);
+  --icon-id-card: var(--icon-id);
 
   /* Form */
-  --icon-checkbox: var(--icon-square-check);
-  --icon-checkbox-empty: var(--icon-square);
-  --icon-toggle: var(--icon-toggle-right);
-  --icon-toggle-off: var(--icon-toggle-left);
+  --icon-rectangle-ellipsis: var(--icon-password);
+  --icon-text-cursor-input: var(--icon-cursor-text);
 
   /* Data */
-  --icon-sort: var(--icon-sort-ascending);
-  --icon-grid: var(--icon-grid-dots);
-  --icon-view: var(--icon-eye);
-  --icon-hide: var(--icon-eye-off);
-  --icon-fullscreen: var(--icon-arrows-maximize);
-  --icon-exit-fullscreen: var(--icon-arrows-minimize);
-  --icon-board: var(--icon-layout-kanban);
   --icon-activity: var(--icon-activity-heartbeat);
+  --icon-chart-area: var(--icon-chart-area-line);
+  --icon-chart-bar-stacked: var(--icon-chart-bar);
+  --icon-chart-candlestick: var(--icon-chart-candle);
+  --icon-chart-gantt: var(--icon-chart-arrows);
+  --icon-chart-network: var(--icon-topology-star-3);
+  --icon-chart-scatter: var(--icon-chart-dots);
+  --icon-funnel: var(--icon-filter);
+  --icon-grid-2x2: var(--icon-layout-grid);
+  --icon-list-filter: var(--icon-filter);
+  --icon-qr-code: var(--icon-qrcode);
+  --icon-sigma: var(--icon-sum);
+  --icon-table-cells-merge: var(--icon-table-plus);
+  --icon-table-cells-split: var(--icon-table-minus);
 
   /* File */
-  --icon-document: var(--icon-file-text);
-  --icon-pdf: var(--icon-file-type-pdf);
-  --icon-new-folder: var(--icon-folder-plus);
-  --icon-open-folder: var(--icon-folder-open);
-  --icon-zip: var(--icon-file-zip);
-  --icon-attachment: var(--icon-paperclip);
-  --icon-file-add: var(--icon-file-plus);
-  --icon-file-remove: var(--icon-file-minus);
+  --icon-file-archive: var(--icon-file-zip);
+  --icon-file-image: var(--icon-photo);
+  --icon-file-lock: var(--icon-file-text-shield);
+  --icon-files: var(--icon-file-stack);
+  --icon-folder-tree: var(--icon-folders);
+  --icon-newspaper: var(--icon-news);
+  --icon-scroll-text: var(--icon-script);
+  --icon-sticky-note: var(--icon-note);
 
   /* Media */
+  --icon-audio-lines: var(--icon-wave-sine);
+  --icon-captions: var(--icon-badge-cc);
+  --icon-film: var(--icon-movie);
+  --icon-gallery-horizontal: var(--icon-carousel-horizontal);
   --icon-image: var(--icon-photo);
-  --icon-volume-low: var(--icon-volume-2);
-  --icon-mute: var(--icon-volume-off);
-  --icon-broadcast: var(--icon-live-photo);
+  --icon-image-off: var(--icon-photo-off);
+  --icon-image-plus: var(--icon-photo-plus);
+  --icon-images: var(--icon-library-photo);
+  --icon-mic: var(--icon-microphone);
+  --icon-mic-off: var(--icon-microphone-off);
+  --icon-podcast: var(--icon-microphone-2);
 
   /* Media Controls */
-  --icon-play: var(--icon-player-play);
-  --icon-pause: var(--icon-player-pause);
-  --icon-stop: var(--icon-player-stop);
-  --icon-skip-next: var(--icon-player-skip-forward);
-  --icon-skip-previous: var(--icon-player-skip-back);
+  --icon-circle-pause: var(--icon-player-pause);
+  --icon-circle-play: var(--icon-player-play);
+  --icon-circle-stop: var(--icon-player-stop);
   --icon-fast-forward: var(--icon-player-track-next);
+  --icon-pause: var(--icon-player-pause);
+  --icon-play: var(--icon-player-play);
   --icon-rewind: var(--icon-player-track-prev);
   --icon-shuffle: var(--icon-arrows-shuffle);
-  --icon-record: var(--icon-player-record);
+  --icon-skip-back: var(--icon-player-skip-back);
+  --icon-skip-forward: var(--icon-player-skip-forward);
+  --icon-volume-2: var(--icon-volume);
+  --icon-volume-low: var(--icon-volume-2);
+  --icon-volume-x: var(--icon-volume-off);
 
   /* Text */
+  --icon-a-arrow-down: var(--icon-text-decrease);
+  --icon-a-arrow-up: var(--icon-text-increase);
+  --icon-a-large-small: var(--icon-text-resize);
+  --icon-heading-1: var(--icon-h-1);
+  --icon-heading-2: var(--icon-h-2);
+  --icon-heading-3: var(--icon-h-3);
+  --icon-list-indent-decrease: var(--icon-indent-decrease);
+  --icon-list-indent-increase: var(--icon-indent-increase);
+  --icon-list-ordered: var(--icon-list-numbers);
   --icon-quote: var(--icon-blockquote);
-  --icon-paragraph: var(--icon-pilcrow);
-  --icon-bullet-list: var(--icon-list);
-  --icon-numbered-list: var(--icon-list-numbers);
-  --icon-checklist: var(--icon-list-check);
-  --icon-indent: var(--icon-indent-increase);
-  --icon-outdent: var(--icon-indent-decrease);
-  --icon-justify: var(--icon-align-justified);
-  --icon-emoji: var(--icon-mood-smile);
+  --icon-remove-formatting: var(--icon-clear-formatting);
+  --icon-spell-check: var(--icon-writing);
+  --icon-table-of-contents: var(--icon-list);
+  --icon-text-align-center: var(--icon-align-center);
+  --icon-text-align-end: var(--icon-align-right);
+  --icon-text-align-justify: var(--icon-align-justified);
+  --icon-text-align-start: var(--icon-align-left);
+  --icon-text-quote: var(--icon-blockquote);
+  --icon-text-select: var(--icon-text-recognition);
   --icon-type: var(--icon-typography);
 
   /* Editing */
-  --icon-pen: var(--icon-pencil);
-  --icon-color: var(--icon-color-picker);
-  --icon-mouse-pointer: var(--icon-pointer);
+  --icon-align-center-horizontal: var(--icon-align-box-center-middle);
+  --icon-align-center-vertical: var(--icon-align-box-center-middle);
+  --icon-align-end-horizontal: var(--icon-align-box-bottom-center);
+  --icon-align-end-vertical: var(--icon-align-box-right-middle);
+  --icon-align-start-horizontal: var(--icon-align-box-top-center);
+  --icon-align-start-vertical: var(--icon-align-box-left-middle);
+  --icon-bring-to-front: var(--icon-stack-front);
+  --icon-highlighter: var(--icon-highlight);
+  --icon-layers: var(--icon-stack-2);
+  --icon-paint-bucket: var(--icon-paint);
+  --icon-paintbrush: var(--icon-brush);
+  --icon-pipette: var(--icon-color-picker);
+  --icon-send-to-back: var(--icon-stack-back);
+  --icon-shapes: var(--icon-shape);
 
   /* Communication */
-  --icon-notifications-off: var(--icon-bell-off);
-  --icon-chat: var(--icon-message);
+  --icon-at-sign: var(--icon-at);
+  --icon-bell-dot: var(--icon-bell-plus);
+  --icon-bell-ring: var(--icon-bell-ringing);
+  --icon-forward: var(--icon-arrow-forward-up);
+  --icon-mail-open: var(--icon-mail-opened);
   --icon-megaphone: var(--icon-speakerphone);
-
-  /* Social */
-  --icon-unlike: var(--icon-heart-broken);
-  --icon-thumbs-up: var(--icon-thumb-up);
-  --icon-thumbs-down: var(--icon-thumb-down);
+  --icon-message-circle-more: var(--icon-message-dots);
+  --icon-message-square: var(--icon-message);
+  --icon-message-square-dot: var(--icon-message-2);
+  --icon-message-square-reply: var(--icon-message-reply);
+  --icon-messages-square: var(--icon-messages);
+  --icon-phone-missed: var(--icon-phone-x);
   --icon-reply: var(--icon-arrow-back-up);
-  --icon-comment: var(--icon-message);
-  --icon-comments: var(--icon-messages);
-  --icon-typing: var(--icon-message-dots);
-  --icon-mention: var(--icon-at);
-  --icon-pin: var(--icon-pinned);
+  --icon-reply-all: var(--icon-arrows-up);
+  --icon-smile: var(--icon-mood-happy);
+  --icon-voicemail: var(--icon-phone-pause);
 
   /* Commerce */
-  --icon-cart: var(--icon-shopping-cart);
-  --icon-add-to-cart: var(--icon-shopping-cart-plus);
-  --icon-payment: var(--icon-credit-card);
-  --icon-money: var(--icon-coins);
-  --icon-percent: var(--icon-percentage);
-  --icon-shipping: var(--icon-truck);
-  --icon-delivery: var(--icon-truck-delivery);
-  --icon-return: var(--icon-receipt-refund);
-  --icon-invoice: var(--icon-file-invoice);
+  --icon-package-open: var(--icon-package);
   --icon-store: var(--icon-building-store);
 
   /* Time */
-  --icon-schedule: var(--icon-calendar-event);
-  --icon-scheduled: var(--icon-calendar-check);
-  --icon-overdue: var(--icon-calendar-off);
-  --icon-timer: var(--icon-hourglass);
-  --icon-watch: var(--icon-device-watch);
+  --icon-alarm-clock: var(--icon-alarm);
+  --icon-calendar-clock: var(--icon-calendar-time);
+  --icon-calendar-days: var(--icon-calendar-event);
+  --icon-calendar-range: var(--icon-calendar-stats);
+  --icon-timer: var(--icon-clock-hour-3);
 
   /* Security */
-  --icon-security-off: var(--icon-shield-off);
+  --icon-globe-lock: var(--icon-world-off);
+  --icon-key-round: var(--icon-key);
+  --icon-log-in: var(--icon-login);
+  --icon-log-out: var(--icon-logout);
+  --icon-scan-face: var(--icon-face-id);
+  --icon-shield-alert: var(--icon-shield-exclamation);
+  --icon-vault: var(--icon-lock-square);
+  --icon-venetian-mask: var(--icon-mask);
+
+  /* Settings */
+  --icon-languages: var(--icon-language);
+  --icon-sliders-horizontal: var(--icon-adjustments-horizontal);
+  --icon-wrench: var(--icon-tool);
 
   /* Organization */
-  --icon-layers: var(--icon-stack-2);
-  --icon-tree: var(--icon-hierarchy);
+  --icon-kanban: var(--icon-layout-kanban);
   --icon-milestone: var(--icon-diamond);
-  --icon-tasks: var(--icon-list-check);
-
-  /* Business */
-  --icon-company: var(--icon-building);
-  --icon-organization: var(--icon-buildings);
 
   /* Finance */
-  --icon-balance: var(--icon-scale);
-  --icon-swap: var(--icon-arrows-exchange);
-  --icon-savings: var(--icon-pig-money);
+  --icon-banknote: var(--icon-cash-banknote);
+  --icon-circle-dollar-sign: var(--icon-coin);
+  --icon-dollar-sign: var(--icon-currency-dollar);
+  --icon-euro: var(--icon-currency-euro);
+  --icon-landmark: var(--icon-building-bank);
+  --icon-percent: var(--icon-percentage);
 
   /* Location */
-  --icon-location: var(--icon-map-pin);
-  --icon-directions: var(--icon-route);
   --icon-hospital: var(--icon-building-hospital);
-  --icon-measure: var(--icon-ruler);
+  --icon-locate: var(--icon-current-location);
+  --icon-locate-fixed: var(--icon-current-location);
+  --icon-waypoints: var(--icon-route);
+
+  /* System */
+  --icon-panel-bottom: var(--icon-layout-bottombar);
+  --icon-panel-bottom-close: var(--icon-layout-bottombar-collapse);
+  --icon-panel-bottom-open: var(--icon-layout-bottombar-expand);
+  --icon-panel-left: var(--icon-layout-sidebar);
+  --icon-panel-left-close: var(--icon-layout-sidebar-left-collapse);
+  --icon-panel-left-open: var(--icon-layout-sidebar-left-expand);
+  --icon-panel-right: var(--icon-layout-sidebar-right);
+  --icon-panel-right-close: var(--icon-layout-sidebar-right-collapse);
+  --icon-panel-right-open: var(--icon-layout-sidebar-right-expand);
 
   /* Device */
+  --icon-battery-full: var(--icon-battery-4);
+  --icon-battery-low: var(--icon-battery-1);
+  --icon-battery-medium: var(--icon-battery-2);
+  --icon-battery-warning: var(--icon-battery-off);
+  --icon-computer: var(--icon-device-desktop);
+  --icon-hard-drive: var(--icon-server);
+  --icon-laptop: var(--icon-device-laptop);
+  --icon-monitor: var(--icon-device-desktop);
+  --icon-monitor-smartphone: var(--icon-devices);
+  --icon-smartphone: var(--icon-device-mobile);
+  --icon-tablet: var(--icon-device-tablet);
   --icon-tv: var(--icon-device-tv);
-  --icon-charging: var(--icon-battery-charging);
+  --icon-watch: var(--icon-device-watch);
+  --icon-webcam: var(--icon-camera);
+
+  /* Connectivity */
+  --icon-cloud-sync: var(--icon-cloud-data-connection);
+  --icon-globe: var(--icon-world);
+  --icon-radio-tower: var(--icon-antenna-bars-5);
+  --icon-signal: var(--icon-signal-5g);
+  --icon-unplug: var(--icon-plug-off);
+  --icon-wifi-high: var(--icon-wifi);
+  --icon-wifi-low: var(--icon-wifi-2);
+  --icon-wifi-zero: var(--icon-wifi-off);
 
   /* Development */
-  --icon-merge: var(--icon-git-merge);
-  --icon-pull-request: var(--icon-git-pull-request);
-  --icon-commit: var(--icon-git-commit);
+  --icon-component: var(--icon-components);
+  --icon-container: var(--icon-box);
+  --icon-database-backup: var(--icon-database-export);
+  --icon-diff: var(--icon-file-diff);
+  --icon-git-commit-horizontal: var(--icon-git-commit);
+  --icon-git-graph: var(--icon-git-branch);
+  --icon-logs: var(--icon-file-text);
+  --icon-search-code: var(--icon-file-search);
+  --icon-workflow: var(--icon-git-branch);
+
+  /* Brand */
+  --icon-github: var(--icon-brand-github);
+
+  /* Gamification */
+  --icon-dices: var(--icon-dice);
+  --icon-party-popper: var(--icon-confetti);
+
+  /* Ai */
+  --icon-bot: var(--icon-robot);
+  --icon-wand-sparkles: var(--icon-wand);
 
   /* Education */
-  --icon-docs: var(--icon-book);
   --icon-book-open: var(--icon-book-2);
-  --icon-graduation: var(--icon-school);
+  --icon-flask-conical: var(--icon-flask);
+  --icon-graduation-cap: var(--icon-school);
+  --icon-library: var(--icon-books);
+
+  /* Weather */
+  --icon-cloud-lightning: var(--icon-cloud-storm);
+
+  /* Misc */
+  --icon-accessibility: var(--icon-accessible);
+  --icon-cross: var(--icon-first-aid-kit);
+  --icon-lightbulb: var(--icon-bulb);
 
   /* ==============================
    * Aliases
    * ============================== */
-
-  /* Navigation */
-  --icon-hamburger: var(--icon-menu-2);
-  --icon-bars: var(--icon-menu-2);
-  --icon-cancel: var(--icon-x);
-  --icon-dismiss: var(--icon-x);
-  --icon-previous: var(--icon-arrow-left);
-  --icon-forward: var(--icon-arrow-right);
-  --icon-level-up: var(--icon-arrow-up);
-  --icon-open-in-new: var(--icon-external-link);
-  --icon-external: var(--icon-external-link);
-  --icon-caret-right: var(--icon-chevron-right);
-  --icon-angle-right: var(--icon-chevron-right);
-  --icon-pointing-right: var(--icon-chevron-right);
-  --icon-caret-down: var(--icon-chevron-down);
-  --icon-dropdown: var(--icon-chevron-down);
-  --icon-expand: var(--icon-chevron-down);
-  --icon-angle-down: var(--icon-chevron-down);
-  --icon-caret-up: var(--icon-chevron-up);
-  --icon-collapse: var(--icon-chevron-up);
-  --icon-angle-up: var(--icon-chevron-up);
-  --icon-caret-left: var(--icon-chevron-left);
-  --icon-angle-left: var(--icon-chevron-left);
-  --icon-ellipsis: var(--icon-dots);
-  --icon-ellipsis-vertical: var(--icon-dots-vertical);
-  --icon-kebab: var(--icon-dots-vertical);
-  --icon-options: var(--icon-dots-vertical);
-  --icon-panel: var(--icon-layout-sidebar);
-  --icon-drawer: var(--icon-layout-sidebar);
-  --icon-layout: var(--icon-layout-columns);
-  --icon-jump-to: var(--icon-anchor);
-
-  /* Action */
-  --icon-create: var(--icon-plus);
-  --icon-new: var(--icon-plus);
-  --icon-plus-circle: var(--icon-plus);
-  --icon-add-circle: var(--icon-plus);
-  --icon-add-square: var(--icon-plus);
-  --icon-modify: var(--icon-pencil);
-  --icon-write: var(--icon-pencil);
-  --icon-compose: var(--icon-pencil);
-  --icon-remove: var(--icon-trash);
-  --icon-floppy-disk: var(--icon-device-floppy);
-  --icon-done: var(--icon-check);
-  --icon-confirm: var(--icon-check);
-  --icon-complete: var(--icon-check);
-  --icon-checkmark: var(--icon-check);
-  --icon-reload: var(--icon-refresh);
-  --icon-sync: var(--icon-refresh);
-  --icon-synchronize: var(--icon-refresh);
-  --icon-revert: var(--icon-arrow-back-up);
-  --icon-duplicate: var(--icon-copy);
-  --icon-clone: var(--icon-copy);
-  --icon-grip: var(--icon-grip-vertical);
-  --icon-reorder: var(--icon-grip-vertical);
-  --icon-submit: var(--icon-send);
-  --icon-subtract: var(--icon-minus);
-  --icon-remove: var(--icon-minus);
-  --icon-remove-circle: var(--icon-minus);
-  --icon-minus-circle: var(--icon-minus);
-  --icon-lightning: var(--icon-bolt);
-  --icon-fast: var(--icon-bolt);
-  --icon-instant: var(--icon-bolt);
-  --icon-launch: var(--icon-rocket);
-  --icon-deploy: var(--icon-rocket);
-  --icon-boost: var(--icon-rocket);
-
-  /* Status */
-  --icon-check-circle: var(--icon-circle-check);
-  --icon-complete: var(--icon-circle-check);
-  --icon-x-circle: var(--icon-circle-x);
-  --icon-failed: var(--icon-circle-x);
-  --icon-alert: var(--icon-alert-triangle);
-  --icon-caution: var(--icon-alert-triangle);
-  --icon-attention: var(--icon-alert-triangle);
-  --icon-warning-circle: var(--icon-alert-triangle);
-  --icon-exclamation-circle: var(--icon-alert-triangle);
-  --icon-exclamation: var(--icon-alert-triangle);
-  --icon-warning-sign: var(--icon-alert-triangle);
-  --icon-exclamation-triangle: var(--icon-alert-triangle);
-  --icon-information: var(--icon-info-circle);
-  --icon-question: var(--icon-help-circle);
-  --icon-faq: var(--icon-help-circle);
-  --icon-question-circle: var(--icon-help-circle);
-  --icon-spinner: var(--icon-loader-2);
-  --icon-wait: var(--icon-loader-2);
-  --icon-hourglass: var(--icon-loader-2);
-  --icon-active: var(--icon-circle-dot);
-  --icon-selected: var(--icon-circle-dot);
-  --icon-radio: var(--icon-circle-dot);
-  --icon-radio-selected: var(--icon-circle-dot);
-  --icon-disc: var(--icon-circle-dot);
-  --icon-dot: var(--icon-circle-dot);
-  --icon-inactive: var(--icon-circle);
-  --icon-unselected: var(--icon-circle);
-  --icon-radio-empty: var(--icon-circle);
-  --icon-radio-unselected: var(--icon-circle);
-  --icon-badge-check: var(--icon-rosette-discount-check);
-  --icon-certificate: var(--icon-rosette-discount-check);
-  --icon-happy: var(--icon-mood-happy);
-  --icon-satisfied: var(--icon-mood-happy);
-  --icon-sad: var(--icon-mood-sad);
-  --icon-dissatisfied: var(--icon-mood-sad);
-  --icon-idea: var(--icon-bulb);
-  --icon-lightbulb: var(--icon-bulb);
-  --icon-hint: var(--icon-bulb);
-  --icon-hot: var(--icon-flame);
-  --icon-trending: var(--icon-flame);
-
-  /* User */
-  --icon-person: var(--icon-user);
-  --icon-profile: var(--icon-user);
-  --icon-account: var(--icon-user-circle);
-  --icon-team: var(--icon-users);
-  --icon-people: var(--icon-users);
-  --icon-group: var(--icon-users);
-  --icon-invite: var(--icon-user-plus);
-  --icon-user-gear: var(--icon-user-cog);
-  --icon-moderator: var(--icon-user-cog);
-  --icon-guest: var(--icon-user-question);
-  --icon-incognito: var(--icon-user-question);
-  --icon-sign-in: var(--icon-login);
-  --icon-log-in: var(--icon-login);
-  --icon-sign-out: var(--icon-logout);
-  --icon-exit: var(--icon-logout);
-  --icon-log-out: var(--icon-logout);
-  --icon-biometric: var(--icon-fingerprint);
-
-  /* Form */
-  --icon-checked: var(--icon-square-check);
-  --icon-unchecked: var(--icon-square);
-  --icon-switch: var(--icon-toggle-right);
-  --icon-toggle-on: var(--icon-toggle-right);
-  --icon-switch-off: var(--icon-toggle-left);
-
-  /* Data */
-  --icon-funnel: var(--icon-filter);
-  --icon-sort-content-ascending: var(--icon-sort-ascending);
-  --icon-sort-content-descending: var(--icon-sort-ascending);
-  --icon-sort-numeric-ascending: var(--icon-sort-ascending);
-  --icon-list-view: var(--icon-list);
-  --icon-list-layout: var(--icon-list);
-  --icon-table-view: var(--icon-table);
-  --icon-grid-view: var(--icon-grid-dots);
-  --icon-card-view: var(--icon-grid-dots);
-  --icon-bar-chart: var(--icon-chart-bar);
-  --icon-chart: var(--icon-chart-bar);
-  --icon-line-chart: var(--icon-chart-line);
-  --icon-analytics: var(--icon-chart-line);
-  --icon-trends: var(--icon-chart-line);
-  --icon-line-graph: var(--icon-chart-line);
-  --icon-pie-chart: var(--icon-chart-pie);
-  --icon-statistics: var(--icon-chart-pie);
-  --icon-show: var(--icon-eye);
-  --icon-visible: var(--icon-eye);
-  --icon-invisible: var(--icon-eye-off);
-  --icon-blind: var(--icon-eye-off);
-  --icon-magnifying-glass: var(--icon-search);
-  --icon-find: var(--icon-search);
-  --icon-zoom: var(--icon-zoom-in);
-  --icon-maximize: var(--icon-arrows-maximize);
-  --icon-expand: var(--icon-arrows-maximize);
-  --icon-minimize: var(--icon-arrows-minimize);
-  --icon-kanban: var(--icon-layout-kanban);
-  --icon-board-view: var(--icon-layout-kanban);
-  --icon-pulse: var(--icon-activity-heartbeat);
-
-  /* File */
-  --icon-content: var(--icon-file-text);
-  --icon-file-pdf: var(--icon-file-type-pdf);
-  --icon-directory: var(--icon-folder);
-  --icon-box: var(--icon-archive);
-  --icon-compress: var(--icon-file-zip);
-  --icon-attach: var(--icon-paperclip);
-  --icon-url: var(--icon-link);
-  --icon-chain: var(--icon-link);
-  --icon-linkify: var(--icon-link);
-  --icon-disconnect: var(--icon-unlink);
-  --icon-new-file: var(--icon-file-plus);
-  --icon-delete-file: var(--icon-file-minus);
-
-  /* Media */
-  --icon-picture: var(--icon-photo);
-  --icon-movie: var(--icon-video);
-  --icon-video-camera: var(--icon-video);
-  --icon-video-disabled: var(--icon-video-off);
-  --icon-camera-slash: var(--icon-camera-off);
-  --icon-audio: var(--icon-volume);
-  --icon-speaker: var(--icon-volume);
-  --icon-unmute: var(--icon-volume);
-  --icon-volume-x: var(--icon-volume-off);
-  --icon-audio: var(--icon-music);
-  --icon-song: var(--icon-music);
-  --icon-mic: var(--icon-microphone);
-  --icon-mic-off: var(--icon-microphone-off);
-  --icon-mute-mic: var(--icon-microphone-off);
-  --icon-headset: var(--icon-headphones);
-  --icon-live: var(--icon-live-photo);
-  --icon-radio-tower: var(--icon-live-photo);
-  --icon-trim: var(--icon-crop);
-  --icon-turn: var(--icon-rotate);
-
-  /* Media Controls */
-  --icon-play-circle: var(--icon-player-play);
-  --icon-pause-circle: var(--icon-player-pause);
-  --icon-forward-step: var(--icon-player-skip-forward);
-  --icon-next-track: var(--icon-player-skip-forward);
-  --icon-backward-step: var(--icon-player-skip-back);
-  --icon-previous-track: var(--icon-player-skip-back);
-  --icon-random: var(--icon-arrows-shuffle);
-  --icon-loop: var(--icon-repeat);
-
-  /* Text */
-  --icon-h1: var(--icon-heading);
-  --icon-title: var(--icon-heading);
-  --icon-list-ul: var(--icon-list);
-  --icon-unordered-list: var(--icon-list);
-  --icon-list-ol: var(--icon-list-numbers);
-  --icon-ordered-list: var(--icon-list-numbers);
-  --icon-todo-list: var(--icon-list-check);
-  --icon-align-justify: var(--icon-align-justified);
-  --icon-smiley: var(--icon-mood-smile);
-  --icon-font: var(--icon-typography);
-
-  /* Editing */
-  --icon-paint: var(--icon-brush);
-  --icon-draw: var(--icon-pencil);
-  --icon-eyedropper: var(--icon-color-picker);
-  --icon-clear: var(--icon-eraser);
-  --icon-cursor: var(--icon-pointer);
-  --icon-select: var(--icon-pointer);
-
-  /* Communication */
-  --icon-alerts-off: var(--icon-bell-off);
-  --icon-message-square: var(--icon-message);
-  --icon-im: var(--icon-message);
-  --icon-direct-message: var(--icon-message);
-  --icon-announcement: var(--icon-speakerphone);
-  --icon-bullhorn: var(--icon-speakerphone);
-  --icon-loudspeaker: var(--icon-speakerphone);
-
-  /* Social */
-  --icon-like: var(--icon-heart);
-  --icon-favorite: var(--icon-heart);
-  --icon-heart-crack: var(--icon-heart-broken);
-  --icon-favorite: var(--icon-star);
-  --icon-rating: var(--icon-star);
-  --icon-empty-star: var(--icon-star);
-  --icon-star-outline: var(--icon-star);
-  --icon-save: var(--icon-bookmark);
-  --icon-remove-bookmark: var(--icon-bookmark);
-  --icon-upvote: var(--icon-thumb-up);
-  --icon-dislike: var(--icon-thumb-down);
-  --icon-downvote: var(--icon-thumb-down);
-  --icon-discussion: var(--icon-messages);
-  --icon-at-sign: var(--icon-at);
-  --icon-block: var(--icon-ban);
-  --icon-restricted: var(--icon-ban);
-  --icon-dont: var(--icon-ban);
-  --icon-prohibited: var(--icon-ban);
-  --icon-report: var(--icon-flag);
-  --icon-thumbtack: var(--icon-pinned);
-
-  /* Commerce */
-  --icon-cart-plus: var(--icon-shopping-cart-plus);
-  --icon-billing: var(--icon-credit-card);
-  --icon-dollar: var(--icon-coins);
-  --icon-currency: var(--icon-coins);
-  --icon-usd: var(--icon-coins);
-  --icon-label: var(--icon-tag);
-  --icon-price: var(--icon-tag);
-  --icon-labels: var(--icon-tags);
-  --icon-discount: var(--icon-percentage);
-  --icon-coupon: var(--icon-ticket);
-  --icon-box: var(--icon-package);
-  --icon-order: var(--icon-package);
-  --icon-cube: var(--icon-package);
-  --icon-cubes: var(--icon-package);
-  --icon-express: var(--icon-truck-delivery);
-  --icon-shop: var(--icon-building-store);
-  --icon-bag: var(--icon-shopping-bag);
-
-  /* Time */
-  --icon-date: var(--icon-calendar);
-  --icon-events: var(--icon-calendar-event);
-  --icon-calendar-days: var(--icon-calendar-event);
-  --icon-due-date: var(--icon-calendar-check);
-  --icon-deadline: var(--icon-calendar-off);
-  --icon-calendar-x: var(--icon-calendar-off);
-  --icon-time: var(--icon-clock);
-  --icon-countdown: var(--icon-hourglass);
-  --icon-stopwatch: var(--icon-hourglass);
-  --icon-smartwatch: var(--icon-device-watch);
-
-  /* Security */
-  --icon-unprotected: var(--icon-shield-off);
-
-  /* Organization */
-  --icon-stack: var(--icon-stack-2);
-  --icon-sitemap: var(--icon-hierarchy);
-  --icon-org-chart: var(--icon-hierarchy);
-  --icon-todos: var(--icon-list-check);
-
-  /* Business */
-  --icon-work: var(--icon-briefcase);
-  --icon-job: var(--icon-briefcase);
-  --icon-office: var(--icon-building);
-  --icon-org: var(--icon-buildings);
-  --icon-corporate: var(--icon-buildings);
-  --icon-enterprise: var(--icon-buildings);
-  --icon-newspaper: var(--icon-news);
-  --icon-article: var(--icon-news);
-  --icon-feed: var(--icon-rss);
-
-  /* Finance */
-  --icon-increase: var(--icon-trending-up);
-  --icon-growth: var(--icon-trending-up);
-  --icon-decrease: var(--icon-trending-down);
-  --icon-decline: var(--icon-trending-down);
-  --icon-transfer: var(--icon-arrows-exchange);
-  --icon-exchange: var(--icon-arrows-exchange);
-  --icon-piggy-bank: var(--icon-pig-money);
-
-  /* Location */
-  --icon-marker: var(--icon-map-pin);
-  --icon-navigate: var(--icon-compass);
-  --icon-crosshairs: var(--icon-current-location);
-  --icon-near-me: var(--icon-current-location);
-  --icon-medical: var(--icon-building-hospital);
-  --icon-clinic: var(--icon-building-hospital);
-  --icon-distance: var(--icon-ruler);
-
-  /* System */
-  --icon-cmd: var(--icon-command);
-  --icon-hashtag: var(--icon-hash);
-  --icon-number-sign: var(--icon-hash);
-  --icon-pound: var(--icon-hash);
-
-  /* Device */
-  --icon-television: var(--icon-device-tv);
-  --icon-screen: var(--icon-device-tv);
-
-  /* Connectivity */
-  --icon-wifi-disabled: var(--icon-wifi-off);
-  --icon-no-wifi: var(--icon-wifi-off);
-  --icon-offline: var(--icon-wifi-off);
-
-  /* Gamification */
-  --icon-badge: var(--icon-award);
-  --icon-achievement: var(--icon-award);
-  --icon-winner: var(--icon-trophy);
-  --icon-reward: var(--icon-gift);
-  --icon-present: var(--icon-gift);
-  --icon-goal: var(--icon-target);
-  --icon-bullseye: var(--icon-target);
-
-  /* Education */
-  --icon-documentation: var(--icon-book);
-  --icon-reading: var(--icon-book-2);
-  --icon-education: var(--icon-school);
-  --icon-academic: var(--icon-school);
-  --icon-student: var(--icon-school);
 }
