@@ -46,6 +46,7 @@
   --icon-share: url('./svg/share.svg');
   --icon-paper-airplane: url('./svg/paper-airplane.svg');
   --icon-bolt: url('./svg/bolt.svg');
+  --icon-rocket-launch: url('./svg/rocket-launch.svg');
 
   /* Status */
   --icon-check-circle: url('./svg/check-circle.svg');
@@ -134,6 +135,7 @@
   --icon-inbox: url('./svg/inbox.svg');
   --icon-phone: url('./svg/phone.svg');
   --icon-identification: url('./svg/identification.svg');
+  --icon-megaphone: url('./svg/megaphone.svg');
 
   /* Social */
   --icon-heart: url('./svg/heart.svg');
@@ -190,7 +192,6 @@
 
   /* Business */
   --icon-briefcase: url('./svg/briefcase.svg');
-  --icon-building-office: url('./svg/building-office.svg');
   --icon-building-office-2: url('./svg/building-office-2.svg');
   --icon-newspaper: url('./svg/newspaper.svg');
   --icon-rss: url('./svg/rss.svg');
@@ -204,6 +205,7 @@
   /* Location */
   --icon-map-pin: url('./svg/map-pin.svg');
   --icon-map: url('./svg/map.svg');
+  --icon-building-office: url('./svg/building-office.svg');
 
   /* System */
   --icon-power: url('./svg/power.svg');
@@ -279,6 +281,7 @@
   --icon-print: var(--icon-printer);
   --icon-send: var(--icon-paper-airplane);
   --icon-zap: var(--icon-bolt);
+  --icon-rocket: var(--icon-rocket-launch);
 
   /* Status */
   --icon-success: var(--icon-check-circle);
@@ -356,11 +359,9 @@
   --icon-notifications: var(--icon-bell);
   --icon-email: var(--icon-envelope);
   --icon-contacts: var(--icon-identification);
-  --icon-at: var(--icon-at-symbol);
   --icon-chat: var(--icon-chat-bubble-left-right);
 
   /* Social */
-  --icon-like: var(--icon-heart);
   --icon-thumbs-up: var(--icon-hand-thumb-up);
   --icon-thumbs-down: var(--icon-hand-thumb-down);
   --icon-reply: var(--icon-arrow-uturn-left);
@@ -368,14 +369,13 @@
   --icon-comments: var(--icon-chat-bubble-left-right);
   --icon-typing: var(--icon-chat-bubble-left-ellipsis);
   --icon-mention: var(--icon-at-symbol);
-  --icon-block: var(--icon-no-symbol);
+  --icon-ban: var(--icon-no-symbol);
 
   /* Commerce */
   --icon-cart: var(--icon-shopping-cart);
   --icon-payment: var(--icon-credit-card);
   --icon-money: var(--icon-banknotes);
-  --icon-discount: var(--icon-percent-badge);
-  --icon-coupon: var(--icon-ticket);
+  --icon-percent: var(--icon-percent-badge);
   --icon-package: var(--icon-cube);
   --icon-shipping: var(--icon-truck);
   --icon-delivery: var(--icon-truck);
@@ -387,7 +387,6 @@
   /* Time */
   --icon-schedule: var(--icon-calendar-days);
   --icon-scheduled: var(--icon-calendar-date-range);
-  --icon-time: var(--icon-clock);
 
   /* Security */
   --icon-lock: var(--icon-lock-closed);
@@ -399,7 +398,6 @@
   --icon-settings: var(--icon-cog-6-tooth);
   --icon-sliders: var(--icon-adjustments-horizontal);
   --icon-theme: var(--icon-swatch);
-  --icon-light-mode: var(--icon-sun);
   --icon-dark-mode: var(--icon-moon);
   --icon-plugin: var(--icon-puzzle-piece);
   --icon-globe: var(--icon-globe-alt);
@@ -421,6 +419,7 @@
 
   /* Location */
   --icon-location: var(--icon-map-pin);
+  --icon-hospital: var(--icon-building-office);
 
   /* System */
   --icon-battery: var(--icon-battery-100);
@@ -455,22 +454,31 @@
 
   /* Navigation */
   --icon-hamburger: var(--icon-bars-3);
+  --icon-bars: var(--icon-bars-3);
   --icon-cancel: var(--icon-x-mark);
   --icon-dismiss: var(--icon-x-mark);
   --icon-x: var(--icon-x-mark);
   --icon-previous: var(--icon-arrow-left);
   --icon-forward: var(--icon-arrow-right);
+  --icon-level-up: var(--icon-arrow-up);
   --icon-open-in-new: var(--icon-arrow-top-right-on-square);
+  --icon-external: var(--icon-arrow-top-right-on-square);
   --icon-caret-right: var(--icon-chevron-right);
+  --icon-angle-right: var(--icon-chevron-right);
+  --icon-pointing-right: var(--icon-chevron-right);
   --icon-caret-down: var(--icon-chevron-down);
   --icon-dropdown: var(--icon-chevron-down);
   --icon-expand: var(--icon-chevron-down);
+  --icon-angle-down: var(--icon-chevron-down);
   --icon-caret-up: var(--icon-chevron-up);
   --icon-collapse: var(--icon-chevron-up);
+  --icon-angle-up: var(--icon-chevron-up);
   --icon-caret-left: var(--icon-chevron-left);
+  --icon-angle-left: var(--icon-chevron-left);
   --icon-ellipsis: var(--icon-ellipsis-horizontal);
   --icon-dots: var(--icon-ellipsis-horizontal);
   --icon-kebab: var(--icon-ellipsis-vertical);
+  --icon-options: var(--icon-ellipsis-vertical);
   --icon-panel: var(--icon-bars-3-bottom-left);
   --icon-drawer: var(--icon-bars-3-bottom-left);
   --icon-layout: var(--icon-view-columns);
@@ -478,12 +486,18 @@
   /* Action */
   --icon-create: var(--icon-plus);
   --icon-new: var(--icon-plus);
+  --icon-plus-circle: var(--icon-plus);
+  --icon-add-circle: var(--icon-plus);
+  --icon-add-square: var(--icon-plus);
   --icon-pencil: var(--icon-pencil-square);
   --icon-modify: var(--icon-pencil-square);
+  --icon-write: var(--icon-pencil-square);
+  --icon-compose: var(--icon-pencil-square);
   --icon-remove: var(--icon-trash);
   --icon-done: var(--icon-check);
   --icon-confirm: var(--icon-check);
   --icon-complete: var(--icon-check);
+  --icon-checkmark: var(--icon-check);
   --icon-reload: var(--icon-arrow-path);
   --icon-sync: var(--icon-arrow-path);
   --icon-synchronize: var(--icon-arrow-path);
@@ -497,17 +511,31 @@
   --icon-lightning: var(--icon-bolt);
   --icon-fast: var(--icon-bolt);
   --icon-instant: var(--icon-bolt);
+  --icon-launch: var(--icon-rocket-launch);
+  --icon-deploy: var(--icon-rocket-launch);
+  --icon-boost: var(--icon-rocket-launch);
 
   /* Status */
   --icon-complete: var(--icon-check-circle);
   --icon-failed: var(--icon-x-circle);
   --icon-alert: var(--icon-exclamation-triangle);
   --icon-caution: var(--icon-exclamation-triangle);
+  --icon-attention: var(--icon-exclamation-triangle);
+  --icon-warning-circle: var(--icon-exclamation-triangle);
+  --icon-exclamation-circle: var(--icon-exclamation-triangle);
+  --icon-exclamation: var(--icon-exclamation-triangle);
+  --icon-warning-sign: var(--icon-exclamation-triangle);
   --icon-information: var(--icon-information-circle);
+  --icon-info-circle: var(--icon-information-circle);
   --icon-question: var(--icon-question-mark-circle);
   --icon-faq: var(--icon-question-mark-circle);
+  --icon-help-circle: var(--icon-question-mark-circle);
+  --icon-question-circle: var(--icon-question-mark-circle);
   --icon-spinner: var(--icon-arrow-path);
+  --icon-wait: var(--icon-arrow-path);
+  --icon-hourglass: var(--icon-arrow-path);
   --icon-badge-check: var(--icon-check-badge);
+  --icon-certificate: var(--icon-check-badge);
   --icon-happy: var(--icon-face-smile);
   --icon-satisfied: var(--icon-face-smile);
   --icon-sad: var(--icon-face-frown);
@@ -529,12 +557,18 @@
   --icon-invite: var(--icon-user-plus);
   --icon-user-shield: var(--icon-shield-check);
   --icon-sign-in: var(--icon-arrow-right-end-on-rectangle);
+  --icon-log-in: var(--icon-arrow-right-end-on-rectangle);
   --icon-sign-out: var(--icon-arrow-left-start-on-rectangle);
   --icon-exit: var(--icon-arrow-left-start-on-rectangle);
+  --icon-log-out: var(--icon-arrow-left-start-on-rectangle);
   --icon-biometric: var(--icon-finger-print);
 
   /* Data */
+  --icon-sort-content-ascending: var(--icon-bars-arrow-down);
+  --icon-sort-content-descending: var(--icon-bars-arrow-down);
+  --icon-sort-numeric-ascending: var(--icon-bars-arrow-down);
   --icon-list-view: var(--icon-list-bullet);
+  --icon-list-layout: var(--icon-list-bullet);
   --icon-table-view: var(--icon-table-cells);
   --icon-grid-view: var(--icon-squares-2x2);
   --icon-card-view: var(--icon-squares-2x2);
@@ -546,7 +580,9 @@
   --icon-visible: var(--icon-eye);
   --icon-invisible: var(--icon-eye-slash);
   --icon-eye-off: var(--icon-eye-slash);
+  --icon-blind: var(--icon-eye-slash);
   --icon-find: var(--icon-magnifying-glass);
+  --icon-zoom: var(--icon-magnifying-glass-plus);
   --icon-maximize: var(--icon-arrows-pointing-out);
   --icon-expand: var(--icon-arrows-pointing-out);
   --icon-minimize: var(--icon-arrows-pointing-in);
@@ -555,11 +591,14 @@
 
   /* File */
   --icon-file-text: var(--icon-document-text);
+  --icon-content: var(--icon-document-text);
   --icon-directory: var(--icon-folder);
   --icon-box: var(--icon-archive-box);
   --icon-paperclip: var(--icon-paper-clip);
   --icon-attach: var(--icon-paper-clip);
   --icon-url: var(--icon-link);
+  --icon-chain: var(--icon-link);
+  --icon-linkify: var(--icon-link);
   --icon-disconnect: var(--icon-link-slash);
 
   /* Media */
@@ -567,6 +606,7 @@
   --icon-movie: var(--icon-video-camera);
   --icon-audio: var(--icon-speaker-wave);
   --icon-speaker: var(--icon-speaker-wave);
+  --icon-unmute: var(--icon-speaker-wave);
   --icon-volume-off: var(--icon-speaker-x-mark);
   --icon-volume-x: var(--icon-speaker-x-mark);
   --icon-audio: var(--icon-musical-note);
@@ -576,6 +616,8 @@
   --icon-radio-tower: var(--icon-signal);
 
   /* Media Controls */
+  --icon-play-circle: var(--icon-play);
+  --icon-pause-circle: var(--icon-pause);
   --icon-forward-step: var(--icon-forward);
   --icon-next-track: var(--icon-forward);
   --icon-backward-step: var(--icon-backward);
@@ -598,20 +640,26 @@
 
   /* Communication */
   --icon-alerts: var(--icon-bell);
+  --icon-alarm: var(--icon-bell);
   --icon-mail: var(--icon-envelope);
   --icon-call: var(--icon-phone);
   --icon-address-book: var(--icon-identification);
-  --icon-mention: var(--icon-at-symbol);
-  --icon-at-sign: var(--icon-at-symbol);
   --icon-message-square: var(--icon-chat-bubble-left-right);
   --icon-im: var(--icon-chat-bubble-left-right);
   --icon-direct-message: var(--icon-chat-bubble-left-right);
+  --icon-announcement: var(--icon-megaphone);
+  --icon-bullhorn: var(--icon-megaphone);
+  --icon-loudspeaker: var(--icon-megaphone);
 
   /* Social */
+  --icon-like: var(--icon-heart);
   --icon-favorite: var(--icon-heart);
   --icon-favorite: var(--icon-star);
   --icon-rating: var(--icon-star);
+  --icon-empty-star: var(--icon-star);
+  --icon-star-outline: var(--icon-star);
   --icon-save: var(--icon-bookmark);
+  --icon-remove-bookmark: var(--icon-bookmark);
   --icon-upvote: var(--icon-hand-thumb-up);
   --icon-dislike: var(--icon-hand-thumb-down);
   --icon-downvote: var(--icon-hand-thumb-down);
@@ -619,19 +667,25 @@
   --icon-discussion: var(--icon-chat-bubble-left-right);
   --icon-message-dots: var(--icon-chat-bubble-left-ellipsis);
   --icon-at: var(--icon-at-symbol);
-  --icon-ban: var(--icon-no-symbol);
+  --icon-at-sign: var(--icon-at-symbol);
+  --icon-block: var(--icon-no-symbol);
   --icon-restricted: var(--icon-no-symbol);
+  --icon-dont: var(--icon-no-symbol);
+  --icon-prohibited: var(--icon-no-symbol);
   --icon-report: var(--icon-flag);
 
   /* Commerce */
   --icon-billing: var(--icon-credit-card);
   --icon-dollar: var(--icon-banknotes);
   --icon-currency: var(--icon-banknotes);
+  --icon-usd: var(--icon-banknotes);
   --icon-label: var(--icon-tag);
   --icon-price: var(--icon-tag);
-  --icon-percent: var(--icon-percent-badge);
+  --icon-discount: var(--icon-percent-badge);
+  --icon-coupon: var(--icon-ticket);
   --icon-box: var(--icon-cube);
   --icon-order: var(--icon-cube);
+  --icon-cubes: var(--icon-cube);
   --icon-express: var(--icon-truck);
   --icon-shop: var(--icon-building-storefront);
   --icon-bag: var(--icon-shopping-bag);
@@ -641,10 +695,12 @@
   --icon-events: var(--icon-calendar-days);
   --icon-due-date: var(--icon-calendar-date-range);
   --icon-calendar-check: var(--icon-calendar-date-range);
+  --icon-time: var(--icon-clock);
 
   /* Security */
   --icon-locked: var(--icon-lock-closed);
   --icon-secure: var(--icon-lock-closed);
+  --icon-privacy: var(--icon-lock-closed);
   --icon-unlocked: var(--icon-lock-open);
   --icon-shield: var(--icon-shield-exclamation);
   --icon-protected: var(--icon-shield-check);
@@ -655,14 +711,19 @@
   --icon-gear: var(--icon-cog-6-tooth);
   --icon-cog: var(--icon-cog-6-tooth);
   --icon-preferences: var(--icon-cog-6-tooth);
+  --icon-configure: var(--icon-cog-6-tooth);
+  --icon-cogs: var(--icon-cog-6-tooth);
+  --icon-setting: var(--icon-cog-6-tooth);
   --icon-adjustments: var(--icon-adjustments-horizontal);
   --icon-palette: var(--icon-swatch);
   --icon-appearance: var(--icon-swatch);
+  --icon-light-mode: var(--icon-sun);
   --icon-extension: var(--icon-puzzle-piece);
   --icon-puzzle: var(--icon-puzzle-piece);
   --icon-world: var(--icon-globe-alt);
   --icon-public: var(--icon-globe-alt);
   --icon-language: var(--icon-globe-alt);
+  --icon-browser: var(--icon-globe-alt);
 
   /* Organization */
   --icon-stack: var(--icon-rectangle-stack);
@@ -689,18 +750,20 @@
 
   /* Location */
   --icon-marker: var(--icon-map-pin);
+  --icon-medical: var(--icon-building-office);
+  --icon-clinic: var(--icon-building-office);
 
   /* System */
   --icon-shutdown: var(--icon-power);
   --icon-toolbox: var(--icon-wrench-screwdriver);
   --icon-qr: var(--icon-qr-code);
+  --icon-qrcode: var(--icon-qr-code);
   --icon-restore: var(--icon-clock);
 
   /* Device */
   --icon-monitor: var(--icon-computer-desktop);
   --icon-computer: var(--icon-computer-desktop);
   --icon-smartphone: var(--icon-device-phone-mobile);
-  --icon-phone: var(--icon-device-phone-mobile);
   --icon-ipad: var(--icon-device-tablet);
   --icon-processor: var(--icon-cpu-chip);
   --icon-chip: var(--icon-cpu-chip);
@@ -728,6 +791,7 @@
   --icon-reading: var(--icon-book-open);
   --icon-education: var(--icon-academic-cap);
   --icon-academic: var(--icon-academic-cap);
+  --icon-student: var(--icon-academic-cap);
 
   /* Weather */
   --icon-stormy: var(--icon-bolt);

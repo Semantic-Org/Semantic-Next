@@ -23,7 +23,7 @@ export const iconMappings = {
   },
   'menu': {
     category: 'navigation',
-    aliases: ['hamburger'],
+    aliases: ['hamburger', 'bars'],
     description: 'Menu/hamburger',
     lucide: 'menu',
     phosphor: 'list',
@@ -63,7 +63,7 @@ export const iconMappings = {
   },
   'up': {
     category: 'navigation',
-    aliases: ['arrow-up'],
+    aliases: ['arrow-up', 'level-up'],
     description: 'Go up',
     lucide: 'arrow-up',
     phosphor: 'arrow-up',
@@ -83,7 +83,7 @@ export const iconMappings = {
   },
   'external-link': {
     category: 'navigation',
-    aliases: ['open-in-new'],
+    aliases: ['open-in-new', 'external'],
     description: 'Open external link',
     lucide: 'external-link',
     phosphor: 'arrow-square-out',
@@ -93,7 +93,7 @@ export const iconMappings = {
   },
   'chevron-right': {
     category: 'navigation',
-    aliases: ['caret-right'],
+    aliases: ['caret-right', 'angle-right', 'pointing-right'],
     description: 'Chevron right',
     lucide: 'chevron-right',
     phosphor: 'caret-right',
@@ -103,7 +103,7 @@ export const iconMappings = {
   },
   'chevron-down': {
     category: 'navigation',
-    aliases: ['caret-down', 'dropdown', 'expand'],
+    aliases: ['caret-down', 'dropdown', 'expand', 'angle-down'],
     description: 'Chevron down',
     lucide: 'chevron-down',
     phosphor: 'caret-down',
@@ -113,7 +113,7 @@ export const iconMappings = {
   },
   'chevron-up': {
     category: 'navigation',
-    aliases: ['caret-up', 'collapse'],
+    aliases: ['caret-up', 'collapse', 'angle-up'],
     description: 'Chevron up',
     lucide: 'chevron-up',
     phosphor: 'caret-up',
@@ -123,7 +123,7 @@ export const iconMappings = {
   },
   'chevron-left': {
     category: 'navigation',
-    aliases: ['caret-left'],
+    aliases: ['caret-left', 'angle-left'],
     description: 'Chevron left',
     lucide: 'chevron-left',
     phosphor: 'caret-left',
@@ -143,7 +143,7 @@ export const iconMappings = {
   },
   'more-options': {
     category: 'navigation',
-    aliases: ['ellipsis-vertical', 'kebab'],
+    aliases: ['ellipsis-vertical', 'kebab', 'options'],
     description: 'More options (vertical)',
     lucide: 'ellipsis-vertical',
     phosphor: 'dots-three-vertical',
@@ -283,7 +283,7 @@ export const iconMappings = {
   },
   'login': {
     category: 'user',
-    aliases: ['sign-in'],
+    aliases: ['sign-in', 'log-in'],
     description: 'Log in',
     lucide: 'log-in',
     phosphor: 'sign-in',
@@ -293,7 +293,7 @@ export const iconMappings = {
   },
   'logout': {
     category: 'user',
-    aliases: ['sign-out', 'exit'],
+    aliases: ['sign-out', 'exit', 'log-out'],
     description: 'Log out',
     lucide: 'log-out',
     phosphor: 'sign-out',
@@ -313,7 +313,7 @@ export const iconMappings = {
   },
   'add': {
     category: 'action',
-    aliases: ['plus', 'create', 'new'],
+    aliases: ['plus', 'create', 'new', 'plus-circle', 'add-circle', 'add-square'],
     description: 'Add new item',
     lucide: 'plus',
     phosphor: 'plus',
@@ -323,7 +323,7 @@ export const iconMappings = {
   },
   'edit': {
     category: 'action',
-    aliases: ['pencil', 'modify'],
+    aliases: ['pencil', 'modify', 'write', 'compose'],
     description: 'Edit/modify item',
     lucide: 'pencil',
     phosphor: 'pencil-simple',
@@ -353,7 +353,7 @@ export const iconMappings = {
   },
   'check': {
     category: 'action',
-    aliases: ['done', 'confirm', 'complete'],
+    aliases: ['done', 'confirm', 'complete', 'checkmark'],
     description: 'Confirm/approve action',
     lucide: 'check',
     phosphor: 'check',
@@ -533,7 +533,7 @@ export const iconMappings = {
   },
   'minus': {
     category: 'action',
-    aliases: ['subtract', 'remove'],
+    aliases: ['subtract', 'remove', 'remove-circle', 'minus-circle'],
     description: 'Minus/subtract',
     lucide: 'minus',
     phosphor: 'minus',
@@ -553,7 +553,7 @@ export const iconMappings = {
   },
   'document': {
     category: 'file',
-    aliases: ['file-text'],
+    aliases: ['file-text', 'content'],
     description: 'Text document',
     lucide: 'file-text',
     phosphor: 'file-text',
@@ -633,7 +633,7 @@ export const iconMappings = {
   },
   'link': {
     category: 'file',
-    aliases: ['url'],
+    aliases: ['url', 'chain', 'linkify'],
     description: 'Link/URL',
     lucide: 'link',
     phosphor: 'link',
@@ -693,7 +693,7 @@ export const iconMappings = {
   },
   'video': {
     category: 'media',
-    aliases: ['movie'],
+    aliases: ['movie', 'video-camera'],
     description: 'Video',
     lucide: 'video',
     phosphor: 'video-camera',
@@ -733,7 +733,7 @@ export const iconMappings = {
   },
   'volume': {
     category: 'media',
-    aliases: ['audio', 'speaker'],
+    aliases: ['audio', 'speaker', 'unmute'],
     description: 'Volume on',
     lucide: 'volume-2',
     phosphor: 'speaker-high',
@@ -843,7 +843,7 @@ export const iconMappings = {
   },
   'play': {
     category: 'media-controls',
-    aliases: [],
+    aliases: ['play-circle'],
     description: 'Play media',
     lucide: 'play',
     phosphor: 'play',
@@ -853,7 +853,7 @@ export const iconMappings = {
   },
   'pause': {
     category: 'media-controls',
-    aliases: [],
+    aliases: ['pause-circle'],
     description: 'Pause media',
     lucide: 'pause',
     phosphor: 'pause',
@@ -953,7 +953,7 @@ export const iconMappings = {
   },
   'sort': {
     category: 'data',
-    aliases: [],
+    aliases: ['sort-content-ascending', 'sort-content-descending', 'sort-numeric-ascending'],
     description: 'Sort items',
     lucide: 'arrow-up-down',
     phosphor: 'sort-ascending',
@@ -963,7 +963,7 @@ export const iconMappings = {
   },
   'list': {
     category: 'data',
-    aliases: ['list-view'],
+    aliases: ['list-view', 'list-layout'],
     description: 'List view',
     lucide: 'list',
     phosphor: 'list-dashes',
@@ -1003,7 +1003,7 @@ export const iconMappings = {
   },
   'chart-line': {
     category: 'data',
-    aliases: ['line-chart', 'analytics', 'trends'],
+    aliases: ['line-chart', 'analytics', 'trends', 'line-graph'],
     description: 'Line chart',
     lucide: 'chart-line',
     phosphor: 'chart-line-up',
@@ -1033,7 +1033,7 @@ export const iconMappings = {
   },
   'hide': {
     category: 'data',
-    aliases: ['invisible', 'eye-off'],
+    aliases: ['invisible', 'eye-off', 'blind'],
     description: 'Hide/invisible',
     lucide: 'eye-off',
     phosphor: 'eye-slash',
@@ -1053,7 +1053,7 @@ export const iconMappings = {
   },
   'zoom-in': {
     category: 'data',
-    aliases: [],
+    aliases: ['zoom'],
     description: 'Zoom in',
     lucide: 'zoom-in',
     phosphor: 'magnifying-glass-plus',
@@ -1151,9 +1151,9 @@ export const iconMappings = {
     materialSymbols: 'event_busy',
     heroicons: null,
   },
-  'time': {
+  'clock': {
     category: 'time',
-    aliases: ['clock'],
+    aliases: ['time'],
     description: 'Clock/time',
     lucide: 'clock',
     phosphor: 'clock',
@@ -1203,7 +1203,16 @@ export const iconMappings = {
   },
   'warning': {
     category: 'status',
-    aliases: ['alert', 'caution'],
+    aliases: [
+      'alert',
+      'caution',
+      'attention',
+      'warning-circle',
+      'exclamation-circle',
+      'exclamation',
+      'warning-sign',
+      'exclamation-triangle',
+    ],
     description: 'Warning alert',
     lucide: 'triangle-alert',
     phosphor: 'warning',
@@ -1213,7 +1222,7 @@ export const iconMappings = {
   },
   'info': {
     category: 'status',
-    aliases: ['information'],
+    aliases: ['information', 'info-circle'],
     description: 'Information',
     lucide: 'info',
     phosphor: 'info',
@@ -1223,7 +1232,7 @@ export const iconMappings = {
   },
   'help': {
     category: 'status',
-    aliases: ['question', 'faq'],
+    aliases: ['question', 'faq', 'help-circle', 'question-circle'],
     description: 'Help/question',
     lucide: 'circle-help',
     phosphor: 'question',
@@ -1233,7 +1242,7 @@ export const iconMappings = {
   },
   'loading': {
     category: 'status',
-    aliases: ['spinner'],
+    aliases: ['spinner', 'wait', 'hourglass'],
     description: 'Loading spinner',
     lucide: 'loader-2',
     phosphor: 'spinner-gap',
@@ -1263,7 +1272,7 @@ export const iconMappings = {
   },
   'verified': {
     category: 'status',
-    aliases: ['badge-check'],
+    aliases: ['badge-check', 'certificate'],
     description: 'Verified',
     lucide: 'badge-check',
     phosphor: 'seal-check',
@@ -1331,10 +1340,10 @@ export const iconMappings = {
     materialSymbols: 'toggle_off',
     heroicons: null,
   },
-  'like': {
+  'heart': {
     category: 'social',
-    aliases: ['favorite', 'heart'],
-    description: 'Heart/like',
+    aliases: ['like', 'favorite'],
+    description: 'Heart/favorite',
     lucide: 'heart',
     phosphor: 'heart',
     tabler: 'heart',
@@ -1353,7 +1362,7 @@ export const iconMappings = {
   },
   'star': {
     category: 'social',
-    aliases: ['favorite', 'rating'],
+    aliases: ['favorite', 'rating', 'empty-star', 'star-outline'],
     description: 'Star/favorite',
     lucide: 'star',
     phosphor: 'star',
@@ -1363,7 +1372,7 @@ export const iconMappings = {
   },
   'bookmark': {
     category: 'social',
-    aliases: ['save'],
+    aliases: ['save', 'remove-bookmark'],
     description: 'Bookmark/save for later',
     lucide: 'bookmark',
     phosphor: 'bookmark-simple',
@@ -1433,7 +1442,7 @@ export const iconMappings = {
   },
   'mention': {
     category: 'social',
-    aliases: ['at'],
+    aliases: ['at', 'at-sign'],
     description: 'At symbol/mention',
     lucide: 'at-sign',
     phosphor: 'at',
@@ -1441,10 +1450,10 @@ export const iconMappings = {
     materialSymbols: 'alternate_email',
     heroicons: 'at-symbol',
   },
-  'block': {
+  'ban': {
     category: 'social',
-    aliases: ['ban', 'restricted'],
-    description: 'Block/ban',
+    aliases: ['block', 'restricted', 'dont', 'prohibited'],
+    description: 'Ban/prohibit',
     lucide: 'ban',
     phosphor: 'prohibit',
     tabler: 'ban',
@@ -1503,7 +1512,7 @@ export const iconMappings = {
   },
   'target': {
     category: 'gamification',
-    aliases: ['goal'],
+    aliases: ['goal', 'bullseye'],
     description: 'Goal/target',
     lucide: 'target',
     phosphor: 'target',
@@ -1513,7 +1522,7 @@ export const iconMappings = {
   },
   'notifications': {
     category: 'communication',
-    aliases: ['bell', 'alerts'],
+    aliases: ['bell', 'alerts', 'alarm'],
     description: 'Notifications/alerts',
     lucide: 'bell',
     phosphor: 'bell',
@@ -1571,16 +1580,6 @@ export const iconMappings = {
     materialSymbols: 'notifications_off',
     heroicons: null,
   },
-  'at': {
-    category: 'communication',
-    aliases: ['mention', 'at-sign'],
-    description: 'At symbol/mention',
-    lucide: 'at-sign',
-    phosphor: 'at',
-    tabler: 'at',
-    materialSymbols: 'alternate_email',
-    heroicons: 'at-symbol',
-  },
   'chat': {
     category: 'communication',
     aliases: ['message-square', 'im', 'direct-message'],
@@ -1591,9 +1590,19 @@ export const iconMappings = {
     materialSymbols: 'chat',
     heroicons: 'chat-bubble-left-right',
   },
+  'megaphone': {
+    category: 'communication',
+    aliases: ['announcement', 'bullhorn', 'loudspeaker'],
+    description: 'Megaphone/announcement',
+    lucide: 'megaphone',
+    phosphor: 'megaphone',
+    tabler: 'speakerphone',
+    materialSymbols: 'campaign',
+    heroicons: 'megaphone',
+  },
   'lock': {
     category: 'security',
-    aliases: ['locked', 'secure'],
+    aliases: ['locked', 'secure', 'privacy'],
     description: 'Locked/secure',
     lucide: 'lock',
     phosphor: 'lock',
@@ -1653,7 +1662,7 @@ export const iconMappings = {
   },
   'settings': {
     category: 'settings',
-    aliases: ['gear', 'cog', 'preferences'],
+    aliases: ['gear', 'cog', 'preferences', 'configure', 'cogs', 'setting'],
     description: 'Settings/preferences',
     lucide: 'settings',
     phosphor: 'gear',
@@ -1681,10 +1690,10 @@ export const iconMappings = {
     materialSymbols: 'palette',
     heroicons: 'swatch',
   },
-  'light-mode': {
+  'sun': {
     category: 'settings',
-    aliases: ['sun'],
-    description: 'Light mode',
+    aliases: ['light-mode'],
+    description: 'Sun/light mode',
     lucide: 'sun',
     phosphor: 'sun',
     tabler: null,
@@ -1733,7 +1742,7 @@ export const iconMappings = {
   },
   'globe': {
     category: 'settings',
-    aliases: ['world', 'public', 'language'],
+    aliases: ['world', 'public', 'language', 'browser'],
     description: 'Globe/world',
     lucide: 'globe',
     phosphor: 'globe',
@@ -1783,7 +1792,7 @@ export const iconMappings = {
   },
   'money': {
     category: 'commerce',
-    aliases: ['dollar', 'currency'],
+    aliases: ['dollar', 'currency', 'usd'],
     description: 'Money/currency',
     lucide: 'circle-dollar-sign',
     phosphor: 'currency-dollar',
@@ -1811,20 +1820,20 @@ export const iconMappings = {
     materialSymbols: 'sell',
     heroicons: null,
   },
-  'discount': {
+  'percent': {
     category: 'commerce',
-    aliases: ['percent'],
-    description: 'Discount/percentage',
+    aliases: ['discount'],
+    description: 'Percent/discount',
     lucide: 'badge-percent',
     phosphor: 'percent',
     tabler: 'percentage',
     materialSymbols: 'percent',
     heroicons: 'percent-badge',
   },
-  'coupon': {
+  'ticket': {
     category: 'commerce',
-    aliases: ['ticket'],
-    description: 'Coupon/ticket',
+    aliases: ['coupon'],
+    description: 'Ticket/coupon',
     lucide: 'ticket-percent',
     phosphor: 'ticket',
     tabler: 'ticket',
@@ -1833,7 +1842,7 @@ export const iconMappings = {
   },
   'package': {
     category: 'commerce',
-    aliases: ['box', 'order'],
+    aliases: ['box', 'order', 'cube', 'cubes'],
     description: 'Package/module',
     lucide: 'package',
     phosphor: 'package',
@@ -2260,6 +2269,16 @@ export const iconMappings = {
     materialSymbols: 'my_location',
     heroicons: null,
   },
+  'hospital': {
+    category: 'location',
+    aliases: ['medical', 'clinic'],
+    description: 'Hospital/medical',
+    lucide: 'hospital',
+    phosphor: 'hospital',
+    tabler: 'building-hospital',
+    materialSymbols: 'local_hospital',
+    heroicons: 'building-office',
+  },
   'measure': {
     category: 'location',
     aliases: ['ruler', 'distance'],
@@ -2292,7 +2311,7 @@ export const iconMappings = {
   },
   'mobile': {
     category: 'device',
-    aliases: ['smartphone', 'phone'],
+    aliases: ['smartphone'],
     description: 'Mobile phone',
     lucide: 'smartphone',
     phosphor: 'device-mobile',
@@ -2577,6 +2596,16 @@ export const iconMappings = {
     materialSymbols: 'bolt',
     heroicons: 'bolt',
   },
+  'rocket': {
+    category: 'action',
+    aliases: ['launch', 'deploy', 'boost'],
+    description: 'Rocket/launch',
+    lucide: 'rocket',
+    phosphor: 'rocket',
+    tabler: 'rocket',
+    materialSymbols: 'rocket_launch',
+    heroicons: 'rocket-launch',
+  },
   'power': {
     category: 'system',
     aliases: ['shutdown'],
@@ -2619,7 +2648,7 @@ export const iconMappings = {
   },
   'qr-code': {
     category: 'system',
-    aliases: ['qr'],
+    aliases: ['qr', 'qrcode'],
     description: 'QR code',
     lucide: 'qr-code',
     phosphor: 'qr-code',
@@ -2839,7 +2868,7 @@ export const iconMappings = {
   },
   'graduation': {
     category: 'education',
-    aliases: ['education', 'academic'],
+    aliases: ['education', 'academic', 'student'],
     description: 'Education/degree',
     lucide: 'graduation-cap',
     phosphor: 'graduation-cap',
