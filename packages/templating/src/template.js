@@ -20,8 +20,8 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import { LitRenderer } from '@semantic-ui/renderer';
-import { TemplateCompiler } from './compiler/template-compiler.js';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');

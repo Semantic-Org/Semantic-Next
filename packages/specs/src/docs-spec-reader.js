@@ -11,6 +11,7 @@ import {
   values,
 } from '@semantic-ui/utils';
 
+import { StringScanner } from '@semantic-ui/compiler';
 import { SpecReader } from './spec-reader.js';
 
 export class DocsSpecReader extends SpecReader {
@@ -737,170 +738,127 @@ export class DocsSpecReader extends SpecReader {
   }
 
   /*
-    Parses an opening tag starting at position `pos` in the HTML string.
-    Returns { tag, attributeString, selfClosing, endIndex }
-    where endIndex is the index of the closing `>`.
+    Scans an opening tag from the current scanner position (at '<').
+    Advances the scanner past the closing '>'.
+    Returns { tag, attributeString, selfClosing }
   */
-  parseOpeningTag(html, pos) {
-    let i = pos + 1; // skip '<'
+  scanOpeningTag(scanner) {
+    scanner.step(); // skip '<'
+    const tag = scanner.consume(/[^\s>\/\n\t]+/);
 
-    // read tag name
-    const tagStart = i;
-    while (
-      i < html.length && html[i] !== ' ' && html[i] !== '>' && html[i] !== '/' && html[i] !== '\n' && html[i] !== '\t'
-    ) {
-      i++;
-    }
-    const tag = html.slice(tagStart, i);
-
-    // read attributes until we hit > or />
-    const attrStart = i;
-    let inQuote = null;
-    while (i < html.length) {
-      const ch = html[i];
-      if (inQuote) {
-        if (ch === inQuote) { inQuote = null; }
-      }
-      else if (ch === '"' || ch === "'") {
-        inQuote = ch;
-      }
-      else if (ch === '>') {
-        break;
-      }
-      i++;
+    // consume attributes, respecting quoted values
+    const attrStart = scanner.pos;
+    while (!scanner.isEOF()) {
+      const ch = scanner.peek();
+      if (ch === '>') { break; }
+      if (ch === '"') { scanner.consume(/^"[^"]*"/); }
+      else if (ch === "'") { scanner.consume(/^'[^']*'/); }
+      else { scanner.step(); }
     }
 
-    const selfClosing = html[i - 1] === '/';
-    const attributeString = html.slice(attrStart, selfClosing ? i - 1 : i).trim();
+    const selfClosing = scanner.input[scanner.pos - 1] === '/';
+    const attributeString = scanner.input.slice(attrStart, selfClosing ? scanner.pos - 1 : scanner.pos).trim();
+    scanner.step(); // skip '>'
 
-    return { tag, attributeString, selfClosing, endIndex: i };
+    return { tag, attributeString, selfClosing };
   }
 
   /*
-    Finds the index of the matching closing tag for `tag`,
-    starting search at `startPos`. Tracks nesting depth.
-    Returns the index of the `<` in `</tag>`.
+    Scans forward from the current scanner position to find the matching
+    closing tag for `tag`, tracking nesting depth. Leaves the scanner
+    positioned at the '<' of the closing tag.
   */
-  findClosingTag(html, tag, startPos) {
+  scanToClosingTag(scanner, tag) {
     let depth = 1;
-    let i = startPos;
+    while (!scanner.isEOF() && depth > 0) {
+      scanner.consumeUntil(/</);
+      if (scanner.isEOF()) { break; }
 
-    while (i < html.length && depth > 0) {
-      if (html[i] === '<') {
-        // closing tag?
-        if (html[i + 1] === '/') {
-          const closeTagStart = i + 2;
-          let j = closeTagStart;
-          while (j < html.length && html[j] !== '>' && html[j] !== ' ') { j++; }
-          const closeTag = html.slice(closeTagStart, j);
-          if (closeTag === tag) {
-            depth--;
-            if (depth === 0) { return i; }
+      // closing tag
+      if (scanner.matches(/^<\//)) {
+        const closePos = scanner.pos;
+        scanner.step(); // <
+        scanner.step(); // /
+        const closeTag = scanner.consume(/[^>\s]+/);
+        scanner.consumeUntil(/>/);
+        scanner.step(); // >
+        if (closeTag === tag) {
+          depth--;
+          if (depth === 0) {
+            scanner.pos = closePos;
+            return;
           }
-          i = html.indexOf('>', j);
-          if (i === -1) { break; }
-          i++;
-          continue;
         }
-
-        // opening tag — parse to check for self-closing and same-tag nesting
-        const nested = this.parseOpeningTag(html, i);
-        if (nested.tag === tag && !nested.selfClosing && !DocsSpecReader.VOID_ELEMENTS.has(nested.tag)) {
-          depth++;
-        }
-        i = nested.endIndex + 1;
         continue;
       }
-      i++;
-    }
 
-    // fallback: end of string
-    return html.length;
+      // opening tag — check for same-tag nesting
+      const nestedPos = scanner.pos;
+      const nested = this.scanOpeningTag(scanner);
+      if (nested.tag === tag && !nested.selfClosing && !DocsSpecReader.VOID_ELEMENTS.has(nested.tag)) {
+        depth++;
+      }
+    }
   }
 
   /*
-    Splits an HTML string into top-level segments.
+    Splits an HTML string into top-level segments using StringScanner.
     Returns array of:
       { type: 'element', tag, attributeString, innerHTML, raw }
       { type: 'text', content }
   */
   segmentHTML(html) {
+    const scanner = new StringScanner(html);
     const segments = [];
-    let i = 0;
-    let textStart = 0;
 
-    while (i < html.length) {
-      if (html[i] === '<') {
-        // skip comments
-        if (html.slice(i, i + 4) === '<!--') {
-          const commentEnd = html.indexOf('-->', i + 4);
-          if (commentEnd !== -1) {
-            i = commentEnd + 3;
-            continue;
-          }
-        }
+    while (!scanner.isEOF()) {
+      // consume text before next tag
+      const text = scanner.consumeUntil(/</);
+      if (text?.trim()) {
+        segments.push({ type: 'text', content: text });
+      }
+      if (scanner.isEOF()) { break; }
 
-        // skip closing tags (shouldn't appear at top level, but be safe)
-        if (html[i + 1] === '/') {
-          i++;
-          continue;
-        }
+      // skip comments
+      if (scanner.matches(/^<!--/)) {
+        scanner.consumeUntil(/-->/);
+        scanner.consume('-->');
+        continue;
+      }
 
-        // flush accumulated text
-        if (i > textStart) {
-          const text = html.slice(textStart, i);
-          if (text.trim()) {
-            segments.push({ type: 'text', content: text });
-          }
-        }
+      // skip stray closing tags
+      if (scanner.matches(/^<\//)) {
+        scanner.consumeUntil(/>/);
+        scanner.step();
+        continue;
+      }
 
-        // parse the opening tag
-        const tagInfo = this.parseOpeningTag(html, i);
-        const { tag, attributeString, selfClosing, endIndex } = tagInfo;
+      // parse opening tag
+      const elementStart = scanner.pos;
+      const { tag, attributeString, selfClosing } = this.scanOpeningTag(scanner);
 
-        if (selfClosing || DocsSpecReader.VOID_ELEMENTS.has(tag)) {
-          const raw = html.slice(i, endIndex + 1);
-          segments.push({
-            type: 'element',
-            tag,
-            attributeString,
-            innerHTML: '',
-            raw,
-          });
-          i = endIndex + 1;
-        }
-        else {
-          // find matching close tag
-          const innerStart = endIndex + 1;
-          const closeIndex = this.findClosingTag(html, tag, innerStart);
-          const innerHTML = html.slice(innerStart, closeIndex);
-
-          // find end of closing tag
-          const closeTagEnd = html.indexOf('>', closeIndex);
-          const rawEnd = (closeTagEnd !== -1) ? closeTagEnd + 1 : html.length;
-          const raw = html.slice(i, rawEnd);
-
-          segments.push({
-            type: 'element',
-            tag,
-            attributeString,
-            innerHTML,
-            raw,
-          });
-          i = rawEnd;
-        }
-        textStart = i;
+      if (selfClosing || DocsSpecReader.VOID_ELEMENTS.has(tag)) {
+        segments.push({
+          type: 'element',
+          tag,
+          attributeString,
+          innerHTML: '',
+          raw: html.slice(elementStart, scanner.pos),
+        });
       }
       else {
-        i++;
-      }
-    }
-
-    // flush trailing text
-    if (textStart < html.length) {
-      const text = html.slice(textStart);
-      if (text.trim()) {
-        segments.push({ type: 'text', content: text });
+        const innerStart = scanner.pos;
+        this.scanToClosingTag(scanner, tag);
+        const innerHTML = html.slice(innerStart, scanner.pos);
+        // consume the closing tag
+        scanner.consume(`</${tag}>`);
+        segments.push({
+          type: 'element',
+          tag,
+          attributeString,
+          innerHTML,
+          raw: html.slice(elementStart, scanner.pos),
+        });
       }
     }
 

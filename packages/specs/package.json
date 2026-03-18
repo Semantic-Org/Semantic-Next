@@ -38,6 +38,7 @@
     "LICENSE"
   ],
   "dependencies": {
+    "@semantic-ui/compiler": "^0.18.0",
     "@semantic-ui/utils": "^0.18.0"
   },
   "devDependencies": {
