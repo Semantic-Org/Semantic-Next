@@ -1,3 +1,4 @@
+export { DocsSpecReader } from './docs-spec-reader.js';
 export * from './helpers.js';
 export * from './icons/index.js';
 export { SpecReader } from './spec-reader.js';

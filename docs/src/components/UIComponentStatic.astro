@@ -25,86 +25,79 @@ const componentName = tagName || name;
 ---
 
 {inArray(componentName, ['ui-button', 'UIButton']) && (
-  <UIButton {...attributes} client:visible>
+  <UIButton {...attributes}>
     <slot />
   </UIButton>
 )}
 {inArray(componentName, ['ui-segment', 'UISegment']) && (
-  <UISegment {...attributes} client:visible>
+  <UISegment {...attributes}>
     <slot />
   </UISegment>
 )}
 {inArray(componentName, ['ui-segments', 'UISegments']) && (
-  <UISegments {...attributes} client:visible>
+  <UISegments {...attributes}>
     <slot />
   </UISegments>
 )}
 {inArray(componentName, ['ui-buttons', 'UIButtons']) && (
-  <UIButtons {...attributes} client:visible>
+  <UIButtons {...attributes}>
     <slot />
   </UIButtons>
 )}
 {inArray(componentName, ['ui-card', 'UICard']) && (
-  <UICard {...attributes} client:visible>
+  <UICard {...attributes}>
     <slot />
   </UICard>
 )}
 {inArray(componentName, ['ui-cards', 'UICards']) && (
-  <UICards {...attributes} client:visible>
+  <UICards {...attributes}>
     <slot />
   </UICards>
 )}
-
 {inArray(componentName, ['ui-container', 'UIContainer']) && (
   <UIContainer {...attributes}>
     <slot />
   </UIContainer>
 )}
-
 {inArray(componentName, ['ui-divider', 'UIDivider']) && (
-  <UIDivider {...attributes} client:visible>
+  <UIDivider {...attributes}>
     <slot />
   </UIDivider>
 )}
-
 {inArray(componentName, ['ui-icon', 'UIIcon']) && (
   <UIIcon {...attributes} />
 )}
-
 {inArray(componentName, ['ui-image', 'UIImage']) && (
-  <UIImage {...attributes} client:visible />
+  <UIImage {...attributes} />
 )}
-
 {inArray(componentName, ['ui-input', 'UIInput']) && (
   <UIInput {...attributes} />
 )}
-
 {inArray(componentName, ['ui-label', 'UILabel']) && (
-  <UILabel {...attributes} client:visible>
+  <UILabel {...attributes}>
     <slot />
   </UILabel>
 )}
-
 {inArray(componentName, ['ui-rail', 'UIRail']) && (
   <UIRail {...attributes}>
     <slot />
   </UIRail>
 )}
 {inArray(componentName, ['ui-menu', 'UIMenu']) && (
-  <UIMenu {...attributes} client:visible>
+  <UIMenu {...attributes}>
     <slot />
   </UIMenu>
 )}
 {inArray(componentName, ['menu-item', 'MenuItem']) && (
-  <MenuItem {...attributes} client:visible>
+  <MenuItem {...attributes}>
     <slot />
   </MenuItem>
 )}
 {inArray(componentName, ['ui-spinner', 'UISpinner']) && (
-  <UISpinner {...attributes} client:visible />
+  <UISpinner {...attributes} />
 )}
 {inArray(componentName, ['ui-table', 'UITable']) && (
-  <UITable {...attributes} client:visible>
+  <UITable {...attributes}>
     <slot />
   </UITable>
 )}
