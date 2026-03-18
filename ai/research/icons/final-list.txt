@@ -112,7 +112,9 @@ clipboard-paste
 clock
 cloud
 cloud-download
+cloud-lightning
 cloud-off
+cloud-rain
 cloud-sync
 cloud-upload
 code
@@ -142,6 +144,7 @@ crown
 database
 database-backup
 delete
+dices
 diff
 dollar-sign
 download
@@ -204,11 +207,13 @@ grip-vertical
 hand
 hard-drive
 hash
+heading
 heading-1
 heading-2
 heading-3
 headphones
 heart
+heart-off
 hexagon
 highlighter
 history
@@ -238,11 +243,14 @@ layout-panel-left
 layout-panel-top
 leaf
 library
+life-buoy
 lightbulb
 link
 list
 list-checks
 list-filter
+list-indent-decrease
+list-indent-increase
 list-ordered
 list-tree
 loader
@@ -328,7 +336,8 @@ puzzle
 qr-code
 quote
 radar
-receipt
+radio-tower
+receipt-text
 rectangle-ellipsis
 recycle
 redo-2
@@ -345,6 +354,7 @@ rotate-ccw
 rotate-cw
 route
 router
+ruler
 rss
 save
 scale
@@ -444,6 +454,7 @@ user-x
 users
 variable
 vault
+venetian-mask
 video
 video-off
 voicemail

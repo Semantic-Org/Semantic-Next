@@ -76,13 +76,13 @@ Both Agent A and Agent B signed off on all 30 additions.
 
 ## Final Result
 
-**471 icons** in `final-471.txt`. Estimated ~97%+ first-pass agent hit rate across dashboard, chat, e-commerce, dev tools, rich text editor, design tool, IoT, and admin panel contexts.
+**482 icons** in `final-list.txt`. Estimated ~97%+ first-pass agent hit rate across dashboard, chat, e-commerce, dev tools, rich text editor, design tool, IoT, and admin panel contexts.
 
 ## Files
 
 | File | Description |
 |------|-------------|
-| `final-471.txt` | The converged icon list (ship this) |
+| `final-list.txt` | The converged icon list (ship this) |
 | `pass-1-exhaustive-827.txt` | Agent A's broad vibe pass |
 | `pass-1-editorial-341.txt` | Agent B's tight editorial pass |
 | `expansion-review.md` | Every addition/rejection with rationale and proposed semantic names |

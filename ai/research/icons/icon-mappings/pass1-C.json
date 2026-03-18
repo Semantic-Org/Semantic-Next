@@ -1,0 +1,482 @@
+{
+  "git-graph": {
+    "lucide": "git-graph",
+    "category": "development",
+    "description": "Git commit history graph"
+  },
+  "git-merge": {
+    "lucide": "git-merge",
+    "category": "development",
+    "description": "Git branch merge"
+  },
+  "git-pull-request": {
+    "lucide": "git-pull-request",
+    "category": "development",
+    "description": "Git pull request"
+  },
+  "git-pull-request-closed": {
+    "lucide": "git-pull-request-closed",
+    "category": "development",
+    "description": "Closed pull request"
+  },
+  "git-pull-request-draft": {
+    "lucide": "git-pull-request-draft",
+    "category": "development",
+    "description": "Draft pull request"
+  },
+  "github": {
+    "lucide": "github",
+    "category": "brand",
+    "description": "GitHub platform"
+  },
+  "globe": {
+    "lucide": "globe",
+    "category": "connectivity",
+    "description": "World wide web or global scope"
+  },
+  "globe-lock": {
+    "lucide": "globe-lock",
+    "category": "security",
+    "description": "Secure or restricted web access"
+  },
+  "graduation-cap": {
+    "lucide": "graduation-cap",
+    "category": "education",
+    "description": "Graduation or academic achievement"
+  },
+  "grid-2x2": {
+    "lucide": "grid-2x2",
+    "category": "data",
+    "description": "Two-by-two grid layout"
+  },
+  "grid-3x3": {
+    "lucide": "grid-3x3",
+    "category": "data",
+    "description": "Three-by-three grid layout"
+  },
+  "grip-horizontal": {
+    "lucide": "grip-horizontal",
+    "category": "action",
+    "description": "Horizontal drag handle"
+  },
+  "grip-vertical": {
+    "lucide": "grip-vertical",
+    "category": "action",
+    "description": "Vertical drag handle"
+  },
+  "hand": {
+    "lucide": "hand",
+    "category": "action",
+    "description": "Stop or raise hand gesture"
+  },
+  "hard-drive": {
+    "lucide": "hard-drive",
+    "category": "device",
+    "description": "Hard drive or storage device"
+  },
+  "hash": {
+    "lucide": "hash",
+    "category": "text",
+    "description": "Hash symbol or tag"
+  },
+  "heading": {
+    "lucide": "heading",
+    "category": "text",
+    "description": "Text heading"
+  },
+  "heading-1": {
+    "lucide": "heading-1",
+    "category": "text",
+    "description": "Level one heading"
+  },
+  "heading-2": {
+    "lucide": "heading-2",
+    "category": "text",
+    "description": "Level two heading"
+  },
+  "heading-3": {
+    "lucide": "heading-3",
+    "category": "text",
+    "description": "Level three heading"
+  },
+  "headphones": {
+    "lucide": "headphones",
+    "category": "device",
+    "description": "Headphones or audio listening"
+  },
+  "heart": {
+    "lucide": "heart",
+    "category": "action",
+    "description": "Like or favorite"
+  },
+  "heart-off": {
+    "lucide": "heart-off",
+    "category": "action",
+    "description": "Unlike or remove favorite"
+  },
+  "hexagon": {
+    "lucide": "hexagon",
+    "category": "misc",
+    "description": "Hexagon shape"
+  },
+  "highlighter": {
+    "lucide": "highlighter",
+    "category": "editing",
+    "description": "Text highlighter tool"
+  },
+  "history": {
+    "lucide": "history",
+    "category": "time",
+    "description": "History or past activity"
+  },
+  "hospital": {
+    "lucide": "hospital",
+    "category": "location",
+    "description": "Hospital or medical facility"
+  },
+  "hourglass": {
+    "lucide": "hourglass",
+    "category": "time",
+    "description": "Waiting or time passing"
+  },
+  "house": {
+    "lucide": "house",
+    "category": "navigation",
+    "description": "Home page or main screen"
+  },
+  "id-card": {
+    "lucide": "id-card",
+    "category": "user",
+    "description": "Identification card or badge"
+  },
+  "image": {
+    "lucide": "image",
+    "category": "media",
+    "description": "Image or photo"
+  },
+  "image-off": {
+    "lucide": "image-off",
+    "category": "media",
+    "description": "Broken or missing image"
+  },
+  "image-plus": {
+    "lucide": "image-plus",
+    "category": "media",
+    "description": "Add an image"
+  },
+  "images": {
+    "lucide": "images",
+    "category": "media",
+    "description": "Multiple images or gallery"
+  },
+  "inbox": {
+    "lucide": "inbox",
+    "category": "communication",
+    "description": "Inbox or received messages"
+  },
+  "infinity": {
+    "lucide": "infinity",
+    "category": "misc",
+    "description": "Infinity or unlimited"
+  },
+  "info": {
+    "lucide": "info",
+    "category": "status",
+    "description": "Information or details"
+  },
+  "italic": {
+    "lucide": "italic",
+    "category": "text",
+    "description": "Italic text formatting"
+  },
+  "kanban": {
+    "lucide": "kanban",
+    "category": "organization",
+    "description": "Kanban board or task columns"
+  },
+  "key-round": {
+    "lucide": "key-round",
+    "category": "security",
+    "description": "Authentication key or credential"
+  },
+  "keyboard": {
+    "lucide": "keyboard",
+    "category": "device",
+    "description": "Keyboard input device"
+  },
+  "landmark": {
+    "lucide": "landmark",
+    "category": "finance",
+    "description": "Bank or financial institution"
+  },
+  "languages": {
+    "lucide": "languages",
+    "category": "settings",
+    "description": "Language or translation options"
+  },
+  "laptop": {
+    "lucide": "laptop-minimal",
+    "category": "device",
+    "description": "Laptop computer"
+  },
+  "layers": {
+    "lucide": "layers",
+    "category": "editing",
+    "description": "Stacked layers or depth"
+  },
+  "layout-dashboard": {
+    "lucide": "layout-dashboard",
+    "category": "data",
+    "description": "Dashboard layout with widgets"
+  },
+  "layout-grid": {
+    "lucide": "layout-grid",
+    "category": "data",
+    "description": "Grid view layout"
+  },
+  "layout-list": {
+    "lucide": "layout-list",
+    "category": "data",
+    "description": "List view layout"
+  },
+  "layout-panel-left": {
+    "lucide": "layout-panel-left",
+    "category": "navigation",
+    "description": "Layout with left sidebar panel"
+  },
+  "layout-panel-top": {
+    "lucide": "layout-panel-top",
+    "category": "navigation",
+    "description": "Layout with top panel"
+  },
+  "leaf": {
+    "lucide": "leaf",
+    "category": "misc",
+    "description": "Nature or eco-friendly"
+  },
+  "library": {
+    "lucide": "library",
+    "category": "education",
+    "description": "Library or collection"
+  },
+  "life-buoy": {
+    "lucide": "life-buoy",
+    "category": "status",
+    "description": "Help or support"
+  },
+  "lightbulb": {
+    "lucide": "lightbulb",
+    "category": "misc",
+    "description": "Idea or tip"
+  },
+  "link": {
+    "lucide": "link",
+    "category": "action",
+    "description": "Hyperlink or connection"
+  },
+  "list": {
+    "lucide": "list",
+    "category": "text",
+    "description": "Unordered list"
+  },
+  "list-checks": {
+    "lucide": "list-checks",
+    "category": "action",
+    "description": "Checklist or completed tasks"
+  },
+  "list-filter": {
+    "lucide": "list-filter",
+    "category": "data",
+    "description": "Filter a list"
+  },
+  "list-indent-decrease": {
+    "lucide": "list-indent-decrease",
+    "category": "text",
+    "description": "Decrease list indentation"
+  },
+  "list-indent-increase": {
+    "lucide": "list-indent-increase",
+    "category": "text",
+    "description": "Increase list indentation"
+  },
+  "list-ordered": {
+    "lucide": "list-ordered",
+    "category": "text",
+    "description": "Ordered or numbered list"
+  },
+  "list-tree": {
+    "lucide": "list-tree",
+    "category": "data",
+    "description": "Tree structure or hierarchy"
+  },
+  "loader": {
+    "lucide": "loader",
+    "category": "status",
+    "description": "Loading spinner"
+  },
+  "loader-circle": {
+    "lucide": "loader-circle",
+    "category": "status",
+    "description": "Circular loading indicator"
+  },
+  "locate": {
+    "lucide": "locate",
+    "category": "location",
+    "description": "Find current location"
+  },
+  "locate-fixed": {
+    "lucide": "locate-fixed",
+    "category": "location",
+    "description": "Current location locked"
+  },
+  "lock": {
+    "lucide": "lock",
+    "category": "security",
+    "description": "Locked or secure"
+  },
+  "lock-open": {
+    "lucide": "lock-open",
+    "category": "security",
+    "description": "Unlocked or unsecured"
+  },
+  "log-in": {
+    "lucide": "log-in",
+    "category": "security",
+    "description": "Sign in or log in"
+  },
+  "log-out": {
+    "lucide": "log-out",
+    "category": "security",
+    "description": "Sign out or log out"
+  },
+  "logs": {
+    "lucide": "logs",
+    "category": "development",
+    "description": "Log entries or activity log"
+  },
+  "mail": {
+    "lucide": "mail",
+    "category": "communication",
+    "description": "Email message"
+  },
+  "mail-open": {
+    "lucide": "mail-open",
+    "category": "communication",
+    "description": "Opened email message"
+  },
+  "mail-plus": {
+    "lucide": "mail-plus",
+    "category": "communication",
+    "description": "Compose new email"
+  },
+  "map": {
+    "lucide": "map",
+    "category": "location",
+    "description": "Map or geographic view"
+  },
+  "map-pin": {
+    "lucide": "map-pin",
+    "category": "location",
+    "description": "Location marker on a map"
+  },
+  "map-pin-off": {
+    "lucide": "map-pin-off",
+    "category": "location",
+    "description": "Remove or disable location pin"
+  },
+  "map-pin-plus": {
+    "lucide": "map-pin-plus",
+    "category": "location",
+    "description": "Add a location pin"
+  },
+  "maximize": {
+    "lucide": "maximize-2",
+    "category": "action",
+    "description": "Maximize or enter fullscreen"
+  },
+  "megaphone": {
+    "lucide": "megaphone",
+    "category": "communication",
+    "description": "Announcement or broadcast"
+  },
+  "meh": {
+    "lucide": "meh",
+    "category": "status",
+    "description": "Neutral or indifferent reaction"
+  },
+  "menu": {
+    "lucide": "menu",
+    "category": "navigation",
+    "description": "Hamburger menu"
+  },
+  "merge": {
+    "lucide": "merge",
+    "category": "action",
+    "description": "Merge or combine items"
+  },
+  "message-circle": {
+    "lucide": "message-circle",
+    "category": "communication",
+    "description": "Chat message bubble"
+  },
+  "message-circle-more": {
+    "lucide": "message-circle-more",
+    "category": "communication",
+    "description": "More messages or typing indicator"
+  },
+  "message-circle-plus": {
+    "lucide": "message-circle-plus",
+    "category": "communication",
+    "description": "Start a new conversation"
+  },
+  "message-square": {
+    "lucide": "message-square",
+    "category": "communication",
+    "description": "Comment or message"
+  },
+  "message-square-dot": {
+    "lucide": "message-square-dot",
+    "category": "communication",
+    "description": "Unread message notification"
+  },
+  "message-square-reply": {
+    "lucide": "message-square-reply",
+    "category": "communication",
+    "description": "Reply to a message"
+  },
+  "messages-square": {
+    "lucide": "messages-square",
+    "category": "communication",
+    "description": "Multiple messages or conversation thread"
+  },
+  "mic": {
+    "lucide": "mic",
+    "category": "media",
+    "description": "Microphone or audio input"
+  },
+  "mic-off": {
+    "lucide": "mic-off",
+    "category": "media",
+    "description": "Muted microphone"
+  },
+  "milestone": {
+    "lucide": "milestone",
+    "category": "organization",
+    "description": "Project milestone or checkpoint"
+  },
+  "minimize": {
+    "lucide": "minimize-2",
+    "category": "action",
+    "description": "Minimize or exit fullscreen"
+  },
+  "minus": {
+    "lucide": "minus",
+    "category": "action",
+    "description": "Remove or subtract"
+  },
+  "monitor": {
+    "lucide": "monitor",
+    "category": "device",
+    "description": "Desktop monitor or display"
+  }
+}
