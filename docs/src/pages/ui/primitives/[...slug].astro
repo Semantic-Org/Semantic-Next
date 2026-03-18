@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { each, toTitleCase, inArray } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
+import SpecViewer from '@components/SpecViewer.astro';
 import { SpecReader } from '@semantic-ui/specs';
 import * as Specs from '@semantic-ui/core/specs';
 
@@ -71,6 +72,6 @@ if(definitionDisplayed) {
     />
   )}
   {displayedTab === 'spec' && (
-    <p>Spec goes here</p>
+    <SpecViewer spec={spec} />
   )}
 </Definition>
