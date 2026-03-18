@@ -12,12 +12,76 @@ import {
 import { describe, expect, it } from 'vitest';
 
 describe('String Utilities', () => {
-  it('should correctly convert kebab-case to camelCase', () => {
+  it('should convert kebab-case to camelCase with lossless encoding by default', () => {
     expect(kebabToCamel('test-string')).toBe('testString');
+    expect(kebabToCamel('background-color')).toBe('backgroundColor');
+    expect(kebabToCamel('grid-2x2')).toBe('grid_2x2');
+    expect(kebabToCamel('heading-1')).toBe('heading_1');
+    expect(kebabToCamel('arrow-down-a-z')).toBe('arrowDownAZ');
+    expect(kebabToCamel('a-large-small')).toBe('aLargeSmall');
   });
 
-  it('should correctly convert camelCase to kebab-case', () => {
+  it('should convert camelCase to kebab-case with lossless decoding by default', () => {
     expect(camelToKebab('testString')).toBe('test-string');
+    expect(camelToKebab('backgroundColor')).toBe('background-color');
+    expect(camelToKebab('grid_2x2')).toBe('grid-2x2');
+    expect(camelToKebab('heading_1')).toBe('heading-1');
+    expect(camelToKebab('step_1Of_3')).toBe('step-1-of-3');
+  });
+
+  it('should round-trip attr → prop → attr', () => {
+    const attrs = [
+      'arrow-down',
+      'text-cursor-input',
+      'wifi-off',
+      'background-color',
+      'grid-2x2',
+      'grid-3x3',
+      'heading-1',
+      'heading-6',
+      'volume-2',
+      'columns-3',
+      'arrow-down-a-z',
+      'a-large-small',
+      'a-arrow-up',
+      'sort-a-z',
+      'a-z',
+      'step-1-of-3',
+      'layer-2-opacity',
+      'gap-x-4',
+      'icon-arrow-up-1-0',
+      'aria-label',
+      'data-test-id',
+    ];
+    for (const attr of attrs) {
+      expect(camelToKebab(kebabToCamel(attr))).toBe(attr);
+    }
+  });
+
+  it('should round-trip prop → attr → prop', () => {
+    const props = [
+      'arrowDown',
+      'backgroundColor',
+      'textCursorInput',
+      'wifiOff',
+      'fontSize',
+      'tabIndex',
+      'isDisabled',
+      'onChange',
+      'grid_2x2',
+      'heading_1',
+      'columns_3',
+      'step_1Of_3',
+    ];
+    for (const prop of props) {
+      expect(kebabToCamel(camelToKebab(prop))).toBe(prop);
+    }
+  });
+
+  it('should support a custom separator', () => {
+    const opts = { separator: '$' };
+    expect(kebabToCamel('grid-2x2', opts)).toBe('grid$2x2');
+    expect(camelToKebab('grid$2x2', opts)).toBe('grid-2x2');
   });
 
   it('should capitalize the first letter of each word', () => {

@@ -304,7 +304,11 @@ if (isCI) { ... }           // detects GitHub Actions, GitLab CI, Jenkins, etc.
 import { kebabToCamel, camelToKebab, capitalize, capitalizeWords, toTitleCase } from '@semantic-ui/utils';
 
 kebabToCamel('my-component-name');       // 'myComponentName'
+kebabToCamel('grid-2x2');               // 'grid_2x2' (digit segments use _ for lossless round-trip)
+kebabToCamel('heading-1');              // 'heading_1'
 camelToKebab('myComponentName');         // 'my-component-name'
+camelToKebab('grid_2x2');               // 'grid-2x2'
+camelToKebab('arrowDownAZ');            // 'arrow-down-a-z'
 capitalize('hello world');               // 'Hello world'
 capitalizeWords('hello world');          // 'Hello World'
 toTitleCase('the quick brown fox');      // 'The Quick Brown Fox' (respects stop words: the, a, of, etc.)

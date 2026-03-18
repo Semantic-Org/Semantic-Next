@@ -21,12 +21,25 @@ const getSegmenter = (locale, granularity) => {
 */
 
 // attr-name to varName
-export const kebabToCamel = (str = '') => {
-  return str.replace(/-./g, (m) => m[1].toUpperCase());
+export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
+  const parts = str.split('-');
+  let out = parts[0];
+  for (let i = 1; i < parts.length; i++) {
+    const seg = parts[i];
+    if (/^[0-9]/.test(seg)) {
+      out += separator + seg;
+    }
+    else {
+      out += seg[0].toUpperCase() + seg.slice(1);
+    }
+  }
+  return out;
 };
 
-export const camelToKebab = (str = '') => {
-  return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+export const camelToKebab = (str = '', { separator = '_' } = {}) => {
+  return str
+    .replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
+    .replace(new RegExp(`\\${separator}(?=[0-9])`, 'g'), '-');
 };
 
 export const capitalize = (str = '') => {

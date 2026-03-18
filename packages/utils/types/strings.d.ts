@@ -50,36 +50,48 @@ export interface ReverseStringOptions {
 }
 
 /**
- * Converts a kebab-case string to camelCase
- * Useful for converting HTML attributes to JavaScript property names
+ * Options for kebab/camel case conversion
+ */
+export interface CaseConversionOptions {
+  /** Character used to encode digit-leading segments (default: "_") */
+  separator?: string;
+}
+
+/**
+ * Converts a kebab-case string to camelCase with lossless round-trip support
+ * Digit-leading segments are preserved with an underscore prefix (e.g. `grid-2x2` becomes `grid_2x2`)
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#kebabtocamel kebabToCamel}
  *
  * @param str - The kebab-case string to convert
+ * @param options - Conversion options
  * @returns The camelCase version of the string
  *
  * @example
  * ```ts
  * kebabToCamel('background-color') // returns 'backgroundColor'
- * kebabToCamel('data-test-id') // returns 'dataTestId'
+ * kebabToCamel('grid-2x2') // returns 'grid_2x2'
+ * kebabToCamel('arrow-down-a-z') // returns 'arrowDownAZ'
  * ```
  */
-export function kebabToCamel(str?: string): string;
+export function kebabToCamel(str?: string, options?: CaseConversionOptions): string;
 
 /**
- * Converts a camelCase string to kebab-case
- * Useful for converting JavaScript property names to HTML attributes
+ * Converts a camelCase string to kebab-case with lossless round-trip support
+ * Underscore-digit sequences are decoded back to hyphen-digit (e.g. `grid_2x2` becomes `grid-2x2`)
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#cameltokebab camelToKebab}
  *
  * @param str - The camelCase string to convert
+ * @param options - Conversion options
  * @returns The kebab-case version of the string
  *
  * @example
  * ```ts
  * camelToKebab('backgroundColor') // returns 'background-color'
- * camelToKebab('dataTestId') // returns 'data-test-id'
+ * camelToKebab('grid_2x2') // returns 'grid-2x2'
+ * camelToKebab('arrowDownAZ') // returns 'arrow-down-a-z'
  * ```
  */
-export function camelToKebab(str?: string): string;
+export function camelToKebab(str?: string, options?: CaseConversionOptions): string;
 
 /**
  * Capitalizes the first letter of a string

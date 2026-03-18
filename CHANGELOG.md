@@ -12,6 +12,7 @@ description: Latest updates and changes in Semantic UI
 xx.xx.xxxx
 
 ### Utils
+* **Breaking** - `kebabToCamel` and `camelToKebab` now use lossless encoding by default — digit-leading segments are preserved with `_` (e.g. `grid-2x2` → `grid_2x2`), and every uppercase letter gets its own hyphen (e.g. `arrowDownAZ` → `arrow-down-a-z`). Both accept a `separator` option to customize the digit-boundary character.
 * **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
 * **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
 * **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
