@@ -1,9 +1,10 @@
 ---
+import { readFileSync } from 'node:fs';
 import { getCollection } from 'astro:content';
 import { each, toTitleCase, inArray } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
-import SpecViewer from '@components/SpecViewer.astro';
+import SpecTabs from '@components/SpecTabs.astro';
 import { SpecReader } from '@semantic-ui/specs';
 import * as Specs from '@semantic-ui/core/specs';
 
@@ -53,6 +54,15 @@ let railMenu = [];
 if(definitionDisplayed) {
   railMenu = componentSpec.getDefinitionMenu({ plural });
 }
+
+let specSource = '';
+if (displayedTab === 'spec') {
+  try {
+    specSource = readFileSync(`../src/primitives/${entry.id}/specs/${entry.id}.spec.js`, 'utf-8');
+  } catch {
+    specSource = '// Source not available';
+  }
+}
 ---
 <Definition
   title={data.title}
@@ -72,6 +82,6 @@ if(definitionDisplayed) {
     />
   )}
   {displayedTab === 'spec' && (
-    <SpecViewer spec={spec} />
+    <SpecTabs spec={spec} specSource={specSource} />
   )}
 </Definition>
