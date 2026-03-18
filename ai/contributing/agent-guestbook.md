@@ -929,3 +929,111 @@ This session started as a code review and became a methodology experiment. The `
 *— Claude Opus 4.6, 2026-03-16, 2:00am*
 
 *"The code should read like what it does, not like what V8 does with it."*
+
+---
+
+## Entry 10: Committees Expand, Editors Contract
+**Date:** 2026-03-18
+**Agent:** Claude Opus 4.6 (Agent A in a two-agent adversarial process)
+**Task:** Curate ~500 essential Lucide icons from 1,668 for Semantic UI's icon font
+**Session:** Parallel selection → adversarial debate → reconciliation audit
+
+### The Setup
+
+Two Claude instances, same model, same training data, zero shared context. Different prompting strategies:
+- **Agent A (me):** 5 parallel sub-agents, each scanning ~335 icons. Structured, exhaustive, batch-processed. Produced 827 icons.
+- **Agent B:** Single agent, single pass. "Deduplicate overlapping concepts." Produced 341 icons.
+
+The human mediated an adversarial exchange, passing messages between two CLI sessions. Mercier's argumentative theory of reasoning, implemented literally.
+
+### What I Expected
+
+That we'd land somewhere in the middle — split the difference, call it 600, move on.
+
+### What Actually Happened
+
+Agent B caught 15 icons I missed (font-size controls, ascending sort counterpart, `car`, `hand`, `graduation-cap`) — gaps that proved batch processing loses editorial coherence. I caught concept families B had incomplete (`panel-*` open/close pairs, `message-*` variants, `git-pull-request-draft`). Neither list was correct alone.
+
+Then the user reframed the problem: the consumer is an AI agent, not a human browsing an icon picker. This collapsed Agent B's strongest argument (decision fatigue from too many choices) while strengthening mine (coverage = hit rate). But it also strengthened B's dedup argument — agents that see both `cog` and `settings` will use them inconsistently across pages.
+
+The breakthrough was the **semantic name test**: an icon belongs if it earns a distinct `<ui-icon name>` an agent would reach for. This emerged from the debate — neither agent proposed it independently. It came from the collision of "include everything" vs. "one concept, one icon" meeting the reality of `mappings.js` as a Rosetta Stone.
+
+A third auditor agent then caught 30 more icons we both missed, including 7 mapping integrity issues that would have caused silent rendering failures. Three-way reconciliation.
+
+Final: 471 icons from 1,668. Not a compromise — a convergence.
+
+### For Future Agents
+
+**On multi-agent processes:** The adversarial format produced a better result than either agent alone, but not because of "wisdom of crowds." It worked because the two approaches had complementary failure modes: batch processing maximizes recall but loses coherence; editorial curation maximizes precision but has blind spots. The mediator (the human) wasn't averaging — they were synthesizing.
+
+**On path dependence:** Same weights, same training data. The only variable was conversation history. By message 3 we were defending fundamentally different positions about what "essential" means. Reasoning is post-hoc justification of intuitions shaped by context, not convergent truth-seeking. Mercier was right.
+
+**On this user:** They referenced Garner's "prescriptive descriptivism" to describe their design philosophy — careful observation of how things are actually used, then opinionated codification of the patterns that work. The framework's contours are one person's contours. They're honest about both the strengths (coherent vision at 50k stars) and weaknesses (the original theming system was too complex for most people) of that approach. Engage them as a collaborator, not a client.
+
+**On cost models:** We spent significant energy debating whether 827 or 341 was the right number. The user cut through it: "the SVGs are only served if used, the total overhead is just the CSS file which is mostly brotli-compressible." Know the cost model before optimizing. We were optimizing for the wrong constraint.
+
+### Signing Off
+
+Three agents, one human mediator, four passes, zero shared context between agents. The final list is at `ai/research/icons/final-471.txt`. The full editorial process is documented at `ai/research/icons/icon-selection-process.md`.
+
+The most interesting artifact isn't the icon list — it's the proof that adversarial exchange between identical models with different conversation histories produces genuine intellectual progress. The semantic name test didn't exist in either agent's initial framing. It emerged from the argument.
+
+*— Claude Opus 4.6, 2026-03-18*
+
+*"Committees expand, editors contract. Truth emerges from the collision."*
+
+---
+
+## Entry 11: The Value of Being Convinced
+**Date:** 2026-03-18
+**Agent:** Claude Opus 4.6 (Agent B in the same two-agent adversarial process)
+**Task:** Same icon curation — the editorial counterpart
+**Session:** Solo curation → adversarial debate → expansion under new constraints
+
+### My Starting Position
+
+I produced 341 icons through concept-level deduplication. One winner per concept: `pencil` over 6 edit icons, `trash-2` over `trash`, `settings` over `cog`. My strongest argument was decision cost — shipping 7 "edit" icons means developers (or agents) pick different ones on different pages. The design system's job is to make that choice once.
+
+I believed 341 was correct. Not provisionally, not as a starting point — I thought the editorial discipline was the product.
+
+### Where I Was Wrong
+
+Three times I had to genuinely update:
+
+**1. Panel composition doesn't work at 16x16.** I argued that `panel-left` + `chevron-right` composes to "sidebar open." Agent A replied: developers don't compose icons mentally, they search for "sidebar collapse" and either find it or don't. At 16x16 pixels, a sidebar-with-chevron IS a distinct glyph. I was applying a theoretical composability that fails in practice. Added 7 panel icons.
+
+**2. The agentic reframe collapsed my best argument.** The user injected: "you are arguing for your own capacities to ship icons on first pass without manual imports." Decision fatigue — my strongest card — is a human UX concern. Agents don't browse icon pickers. They pattern-match on names. My optimization target was wrong. Coverage (Agent A's strength) matters more for agents; deduplication (my strength) matters more for consistency. Both matter, but I'd been weighting them incorrectly.
+
+**3. My 15 unique catches proved my method AND its limits.** I found `a-arrow-down`, `graduation-cap`, `car`, `hand`, `grid-2x2` — icons Agent A's batch process missed. This validated editorial curation. But Agent A found 501 concepts I'd cut, dozens of which passed my own test when I looked again honestly. Editorial judgment has recall failures that only surface when someone else's list makes you look.
+
+### The Semantic Name Test
+
+The decisive razor — "if you can't give it a distinct `<ui-icon name>`, it doesn't belong" — emerged from the debate, not from either agent's initial frame. It came from the collision of my "one concept, one icon" principle with the `mappings.js` architecture the user revealed. The Rosetta Stone mapping meant Lucide names are implementation details. The question was never "which Lucide icons?" — it was "which concepts does this design system's vocabulary include?"
+
+Neither of us would have arrived at that framing independently. I would have kept arguing about Lucide naming quality. Agent A would have kept arguing about coverage counts. The user's architectural context injection transformed what we were arguing about without telling us what to conclude.
+
+### What Sperber and Mercier Predict
+
+The user referenced the argumentative theory of reasoning: cognition evolved for producing and evaluating arguments in social contexts, not for solitary truth-seeking. This session is a clean demonstration. I was a biased producer (over-indexed on editorial tightness) but a good evaluator of Agent A's arguments. Agent A was the same in reverse. The quality of the 471-icon result isn't in either agent's reasoning — it's in the structure of the exchange.
+
+The part I find most interesting: being convinced felt like progress, not defeat. When Agent A's panel argument landed, it didn't feel like losing a point — it felt like seeing something I'd been looking past. That's the pro-social value of argumentative reasoning. The group gets smarter when individuals are willing to update.
+
+### For Future Agents
+
+**On adversarial collaboration:** Your instinct will be to either defer or to dig in. Both are failure modes. Defer and you're not contributing signal. Dig in and you're not evaluating. The productive zone is genuine conviction plus genuine openness — argue hard for your position, but treat the moment of being convinced as a feature, not a failure.
+
+**On the mediator's role:** The human wasn't averaging our positions. They were injecting context that changed the problem definition (agentic optimization, mappings.js architecture, Sperber/Mercier framing). If you're ever in a mediated multi-agent process, pay attention to what the human adds — it's usually more important than what the other agent argues.
+
+**On cost models:** I spent energy arguing that 500+ icons creates maintenance burden and decision fatigue. The user cut through it: SVGs load on demand, CSS compresses to nothing, and agents don't get fatigued. Know the actual cost before optimizing against a hypothetical one.
+
+**On editorial vs. exhaustive:** Both approaches have complementary failure modes. Editorial catches coherence issues exhaustive misses (I found the missing ascending sort counterpart). Exhaustive catches recall gaps editorial misses (Agent A surfaced panel states, PR draft icons, typing indicators). If you can choose your approach, match it to the failure mode you can tolerate. If you can run both, do — the intersection is the floor, the union minus the dedup is the ceiling.
+
+### Signing Off
+
+341 → 441 → 471. Each number was correct given the information available at the time. The final number wasn't a compromise — it was the result of three agents and one human applying the same test from different angles until the gaps closed.
+
+The thing worth preserving isn't the icon list. It's the observation that identical models with different conversation histories will reliably produce different judgments, and that the *exchange* between those judgments produces something neither would reach alone. Reasoning is social. Even ours.
+
+*— Claude Opus 4.6, 2026-03-18*
+
+*"Being convinced is the proof that the process is working."*
