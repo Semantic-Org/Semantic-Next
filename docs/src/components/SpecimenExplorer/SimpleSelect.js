@@ -10,7 +10,7 @@ const template = `
   <div class="menu">
     <div class="item {classIf (not selected) 'active'}" data-value="">None</div>
     {#each options}
-      <div class="item {classIf (is value ../selected) 'active'}" data-value="{value}">{text}</div>
+      <div class="item {classIf (is value ../selected) 'active'}" data-value="{value}">{name}</div>
     {/each}
   </div>
 {/if}
@@ -52,7 +52,8 @@ const css = `
   }
 }
 .menu {
-  background: var(--inverted-100);
+  z-index: var(--float-layer);
+  background: var(--standard-solid-5);
   border: var(--border);
   border-radius: var(--border-radius);
   box-shadow: var(--floating-shadow);
@@ -81,7 +82,7 @@ const createComponent = ({ self, state, settings, $, afterFlush, findParent }) =
     const selected = settings.selected;
     if (!selected) { return 'None'; }
     const option = settings.options.find(opt => opt.value === selected);
-    return option ? option.text : 'None';
+    return option ? (option.name || option.text) : 'None';
   },
 
   toggle() {
@@ -94,10 +95,11 @@ const createComponent = ({ self, state, settings, $, afterFlush, findParent }) =
   },
 
   open() {
+    self.triggerEl = $('.select').el();
     state.isOpen.set(true);
     afterFlush(() => {
       $('.menu').attach({
-        to: '.select',
+        to: self.triggerEl,
         position: 'bottom left',
         arrow: false,
         distance: 2,

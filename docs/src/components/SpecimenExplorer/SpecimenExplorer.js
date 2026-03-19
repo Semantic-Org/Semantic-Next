@@ -107,6 +107,9 @@ const createComponent = ({ self, state, settings, $ }) => ({
       groups.push({ label: 'Variations', controls: variationControls });
     }
 
+    if (groups.length) {
+      groups[groups.length - 1].last = true;
+    }
     return groups;
   },
 

@@ -17,7 +17,7 @@
     <ui-panel direction="horizontal" size="280px" min-size="200px" max-size="400px">
       <ui-panels direction="vertical" class="control-panels">
         {#each group in getControlGroups}
-          <ui-panel direction="vertical" size="natural" label="{group.label}">
+          <ui-panel direction="vertical" size="{#if group.last}grow{else}natural{/if}" label="{group.label}">
             <div class="section-controls">
               {#each control in group.controls}
                 {#if is control.type 'radio'}
@@ -42,7 +42,11 @@
 {#snippet radioControl}
   <div class="control select-control">
     <label class="select-label">{control.name}</label>
-    {>SimpleSelect options=control.options selected=(getSelection control.attribute) attribute=control.attribute}
+    {> template
+      name='SimpleSelect'
+      data={ options: control.options, attribute: control.attribute }
+      reactiveData={ selected: (getSelection control.attribute) }
+    }
   </div>
 {/snippet}
 

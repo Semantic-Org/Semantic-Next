@@ -59,23 +59,13 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       ? (isHorizontal ? $label.outerWidth() : $label.outerHeight())
       : 0;
     if (minimized) {
-      console.log('[naturalSize]', settings.label, { minimized, labelSize });
       return labelSize;
     }
     const $children = $(panel).children();
     const boxModel = { includePadding: true, includeBorder: true, includeMargin: true };
     const sizes = isHorizontal ? $children.naturalWidth(boxModel) : $children.naturalHeight(boxModel);
     const contentSize = ($children.length > 1) ? sum(sizes) : (sizes || 0);
-    const total = labelSize + contentSize;
-    console.log('[naturalSize]', settings.label || '(no label)', {
-      direction,
-      labelSize,
-      contentSize,
-      childCount: $children.length,
-      childSizes: ($children.length > 1) ? sizes : [sizes],
-      total,
-    });
-    return total;
+    return labelSize + contentSize;
   },
 
   getHandleClassMap: () => ({

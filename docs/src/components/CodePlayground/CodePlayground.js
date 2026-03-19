@@ -349,6 +349,7 @@ const createComponent = (
         const height = codeHeight + labelHeight + menuHeight + extraSpacing;
         size = Math.max(height, 100);
       }
+      console.log(size);
       return size;
     }
   },
