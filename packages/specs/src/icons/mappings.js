@@ -196,17 +196,26 @@ export const iconMappings = {
   },
   'external-link': {
     category: 'navigation',
-    aliases: ['open-in-new', 'new-window', 'new-tab', 'launch', 'arrow-square-out', 'outbound'],
-    description: 'Open in new window',
-    lucide: 'external-link',
+    aliases: [
+      'square-arrow-out-up-right',
+      'open-in-new',
+      'new-window',
+      'new-tab',
+      'launch',
+      'arrow-square-out',
+      'outbound',
+      'open-external',
+    ],
+    description: 'Open in new window or external link',
+    lucide: 'square-arrow-out-up-right',
     phosphor: 'arrow-square-out',
     tabler: 'external-link',
     materialSymbols: 'open_in_new',
     heroicons: 'arrow-top-right-on-square',
   },
-  'house': {
+  'home': {
     category: 'navigation',
-    aliases: ['home', 'homepage', 'main'],
+    aliases: ['house', 'homepage', 'main'],
     description: 'Home page or main screen',
     lucide: 'house',
     phosphor: 'house',
@@ -253,16 +262,6 @@ export const iconMappings = {
     tabler: 'pointer',
     materialSymbols: 'arrow_selector_tool',
     heroicons: 'cursor-arrow-rays',
-  },
-  'square-arrow-out-up-right': {
-    category: 'navigation',
-    aliases: ['open-external'],
-    description: 'Open in new window or external link',
-    lucide: 'square-arrow-out-up-right',
-    phosphor: 'arrow-square-out',
-    tabler: 'external-link',
-    materialSymbols: 'open_in_new',
-    heroicons: 'arrow-top-right-on-square',
   },
 
   //
@@ -448,9 +447,9 @@ export const iconMappings = {
     materialSymbols: 'library_add_check',
     heroicons: 'clipboard-document-check',
   },
-  'delete': {
+  'backspace': {
     category: 'action',
-    aliases: ['backspace', 'back-delete', 'erase-back', 'remove-character'],
+    aliases: ['delete', 'back-delete', 'erase-back', 'remove-character'],
     description: 'Delete or backspace',
     lucide: 'delete',
     phosphor: 'backspace',
@@ -708,9 +707,9 @@ export const iconMappings = {
     materialSymbols: 'redo',
     heroicons: 'arrow-uturn-right',
   },
-  'refresh-ccw': {
+  'refresh': {
     category: 'action',
-    aliases: ['refresh', 'reload', 'sync', 'update', 'retry'],
+    aliases: ['refresh-ccw', 'reload', 'sync', 'update', 'retry'],
     description: 'Refresh or reload content',
     lucide: 'refresh-ccw',
     phosphor: 'arrows-clockwise',
@@ -982,10 +981,10 @@ export const iconMappings = {
     materialSymbols: 'done_all',
     heroicons: 'check',
   },
-  'circle-alert': {
+  'error': {
     category: 'status',
     aliases: [
-      'error',
+      'circle-alert',
       'error-circle',
       'warning-circle',
       'alert-circle',
@@ -1020,9 +1019,9 @@ export const iconMappings = {
     materialSymbols: 'pending',
     heroicons: null,
   },
-  'circle-question-mark': {
+  'help': {
     category: 'status',
-    aliases: ['help', 'help-circle', 'faq', 'question', 'question-circle', 'support'],
+    aliases: ['circle-question-mark', 'help-circle', 'faq', 'question', 'question-circle', 'support'],
     description: 'Help or unknown state',
     lucide: 'circle-question-mark',
     phosphor: 'question',
@@ -1130,9 +1129,9 @@ export const iconMappings = {
     materialSymbols: 'running_with_errors',
     heroicons: 'server',
   },
-  'triangle-alert': {
+  'warning': {
     category: 'status',
-    aliases: ['warning', 'caution', 'alert-triangle', 'danger', 'exclamation-triangle'],
+    aliases: ['triangle-alert', 'caution', 'alert-triangle', 'danger', 'exclamation-triangle'],
     description: 'Warning or caution alert',
     lucide: 'triangle-alert',
     phosphor: 'warning',
@@ -1140,9 +1139,9 @@ export const iconMappings = {
     materialSymbols: 'warning',
     heroicons: 'exclamation-triangle',
   },
-  'zap': {
+  'bolt': {
     category: 'status',
-    aliases: ['lightning', 'bolt', 'flash', 'electric', 'instant'],
+    aliases: ['zap', 'lightning', 'flash', 'electric', 'instant'],
     description: 'Instant action or lightning-fast',
     lucide: 'zap',
     phosphor: 'lightning',
@@ -1154,9 +1153,9 @@ export const iconMappings = {
   //
   // user
   //
-  'circle-user': {
+  'avatar': {
     category: 'user',
-    aliases: ['avatar', 'user-circle', 'account-circle', 'profile', 'user-avatar'],
+    aliases: ['circle-user', 'user-circle', 'account-circle', 'profile', 'user-avatar'],
     description: 'User profile avatar',
     lucide: 'circle-user',
     phosphor: 'user-circle',
@@ -1278,9 +1277,9 @@ export const iconMappings = {
     materialSymbols: 'radio_button_checked',
     heroicons: null,
   },
-  'rectangle-ellipsis': {
+  'password': {
     category: 'form',
-    aliases: ['password-field', 'hidden-input', 'password-input', 'dots-input'],
+    aliases: ['rectangle-ellipsis', 'password-field', 'hidden-input', 'password-input', 'dots-input'],
     description: 'Password field or hidden input',
     lucide: 'rectangle-ellipsis',
     phosphor: 'password',
@@ -2114,9 +2113,9 @@ export const iconMappings = {
     materialSymbols: 'skip_next',
     heroicons: 'forward',
   },
-  'volume-2': {
+  'volume-high': {
     category: 'media-controls',
-    aliases: ['volume-high', 'volume-up', 'speaker', 'speaker-high', 'sound'],
+    aliases: ['volume-2', 'volume-up', 'speaker', 'speaker-high', 'sound'],
     description: 'High audio volume level',
     lucide: 'volume-2',
     phosphor: 'speaker-high',
@@ -2642,9 +2641,9 @@ export const iconMappings = {
     materialSymbols: 'palette',
     heroicons: 'swatch',
   },
-  'pipette': {
+  'eyedropper': {
     category: 'editing',
-    aliases: ['eyedropper', 'color-picker', 'colorize', 'eye-dropper', 'color-sample'],
+    aliases: ['pipette', 'color-picker', 'colorize', 'eye-dropper', 'color-sample'],
     description: 'Pick or sample a color',
     lucide: 'pipette',
     phosphor: 'eyedropper',
@@ -2820,9 +2819,9 @@ export const iconMappings = {
     materialSymbols: 'campaign',
     heroicons: 'megaphone',
   },
-  'message-circle': {
+  'chat': {
     category: 'communication',
-    aliases: ['chat', 'chat-bubble', 'conversation', 'chat-circle', 'comment-circle', 'bubble'],
+    aliases: ['message-circle', 'chat-bubble', 'conversation', 'chat-circle', 'comment-circle', 'bubble'],
     description: 'Chat message bubble',
     lucide: 'message-circle',
     phosphor: 'chat-circle',
@@ -2830,9 +2829,9 @@ export const iconMappings = {
     materialSymbols: 'chat_bubble',
     heroicons: 'chat-bubble-oval-left',
   },
-  'message-circle-more': {
+  'chat-more': {
     category: 'communication',
-    aliases: ['chat-dots', 'chat-typing', 'message-dots', 'chat-loading'],
+    aliases: ['message-circle-more', 'chat-dots', 'chat-typing', 'message-dots', 'chat-loading'],
     description: 'More messages or typing indicator',
     lucide: 'message-circle-more',
     phosphor: 'chat-circle-dots',
@@ -2840,9 +2839,9 @@ export const iconMappings = {
     materialSymbols: 'chat',
     heroicons: 'chat-bubble-oval-left-ellipsis',
   },
-  'message-circle-plus': {
+  'chat-plus': {
     category: 'communication',
-    aliases: ['new-chat', 'add-comment', 'new-conversation', 'start-chat'],
+    aliases: ['message-circle-plus', 'new-chat', 'add-comment', 'new-conversation', 'start-chat'],
     description: 'Start a new conversation',
     lucide: 'message-circle-plus',
     phosphor: 'chat-circle',
@@ -3302,9 +3301,9 @@ export const iconMappings = {
     materialSymbols: 'vpn_lock',
     heroicons: 'globe-alt',
   },
-  'key-round': {
+  'key': {
     category: 'security',
-    aliases: ['key', 'password', 'access', 'vpn-key', 'credential', 'authentication'],
+    aliases: ['key-round', 'access', 'vpn-key', 'credential', 'authentication'],
     description: 'Authentication key or credential',
     lucide: 'key-round',
     phosphor: 'key',
@@ -3422,9 +3421,9 @@ export const iconMappings = {
     materialSymbols: 'encrypted',
     heroicons: 'lock-closed',
   },
-  'venetian-mask': {
+  'incognito': {
     category: 'security',
-    aliases: ['incognito', 'anonymous', 'disguise', 'mask', 'privacy-mask'],
+    aliases: ['venetian-mask', 'anonymous', 'disguise', 'mask', 'privacy-mask'],
     description: 'Anonymous or incognito identity',
     lucide: 'venetian-mask',
     phosphor: 'mask-happy',
@@ -4398,9 +4397,9 @@ export const iconMappings = {
     materialSymbols: 'fork_right',
     heroicons: null,
   },
-  'git-commit-horizontal': {
+  'git-commit': {
     category: 'development',
-    aliases: ['commit', 'git-commit', 'version-commit'],
+    aliases: ['git-commit-horizontal', 'commit', 'version-commit'],
     description: 'Version control commit',
     lucide: 'git-commit-horizontal',
     phosphor: 'git-commit',
@@ -4596,9 +4595,9 @@ export const iconMappings = {
     materialSymbols: 'crown',
     heroicons: null,
   },
-  'dices': {
+  'dice': {
     category: 'gamification',
-    aliases: ['dice', 'random', 'chance', 'gamble', 'casino', 'roll'],
+    aliases: ['dices', 'random', 'chance', 'gamble', 'casino', 'roll'],
     description: 'Random chance or games',
     lucide: 'dices',
     phosphor: 'dice-five',
@@ -4680,9 +4679,9 @@ export const iconMappings = {
     materialSymbols: 'star_shine',
     heroicons: 'sparkles',
   },
-  'wand-sparkles': {
+  'magic-wand': {
     category: 'ai',
-    aliases: ['magic-wand', 'auto-fix', 'enhance', 'wizard', 'wand'],
+    aliases: ['wand-sparkles', 'auto-fix', 'enhance', 'wizard', 'wand'],
     description: 'Magic wand or auto-enhance',
     lucide: 'wand-sparkles',
     phosphor: 'magic-wand',
@@ -4714,9 +4713,9 @@ export const iconMappings = {
     materialSymbols: 'auto_stories',
     heroicons: 'book-open',
   },
-  'flask-conical': {
+  'flask': {
     category: 'education',
-    aliases: ['flask', 'lab', 'experiment', 'science', 'beaker', 'chemistry', 'test-tube'],
+    aliases: ['flask-conical', 'lab', 'experiment', 'science', 'beaker', 'chemistry', 'test-tube'],
     description: 'Science experiment or lab',
     lucide: 'flask-conical',
     phosphor: 'flask',

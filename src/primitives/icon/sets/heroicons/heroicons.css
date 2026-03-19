@@ -313,11 +313,9 @@
   --icon-corner-down-right: var(--icon-arrow-turn-down-right);
   --icon-crosshair: var(--icon-viewfinder-circle);
   --icon-external-link: var(--icon-arrow-top-right-on-square);
-  --icon-house: var(--icon-home);
   --icon-layout-panel-left: var(--icon-bars-3-bottom-left);
   --icon-menu: var(--icon-bars-3);
   --icon-mouse-pointer: var(--icon-cursor-arrow-rays);
-  --icon-square-arrow-out-up-right: var(--icon-arrow-top-right-on-square);
 
   /* Action */
   --icon-archive: var(--icon-archive-box);
@@ -336,7 +334,6 @@
   --icon-cloud-upload: var(--icon-cloud-arrow-up);
   --icon-copy: var(--icon-document-duplicate);
   --icon-copy-check: var(--icon-clipboard-document-check);
-  --icon-delete: var(--icon-backspace);
   --icon-download: var(--icon-arrow-down-tray);
   --icon-ellipsis: var(--icon-ellipsis-horizontal);
   --icon-expand: var(--icon-arrows-pointing-out);
@@ -353,7 +350,7 @@
   --icon-pin: var(--icon-map-pin);
   --icon-pin-off: var(--icon-map-pin);
   --icon-redo: var(--icon-arrow-uturn-right);
-  --icon-refresh-ccw: var(--icon-arrow-path);
+  --icon-refresh: var(--icon-arrow-path);
   --icon-rocket: var(--icon-rocket-launch);
   --icon-rotate-ccw: var(--icon-arrow-uturn-left);
   --icon-rotate-cw: var(--icon-arrow-uturn-right);
@@ -375,9 +372,9 @@
   --icon-badge-info: var(--icon-information-circle);
   --icon-ban: var(--icon-no-symbol);
   --icon-check-check: var(--icon-check);
-  --icon-circle-alert: var(--icon-exclamation-circle);
+  --icon-error: var(--icon-exclamation-circle);
   --icon-circle-check: var(--icon-check-circle);
-  --icon-circle-question-mark: var(--icon-question-mark-circle);
+  --icon-help: var(--icon-question-mark-circle);
   --icon-flame: var(--icon-fire);
   --icon-frown: var(--icon-face-frown);
   --icon-info: var(--icon-information-circle);
@@ -385,11 +382,10 @@
   --icon-loader: var(--icon-arrow-path);
   --icon-loader-circle: var(--icon-arrow-path);
   --icon-server-crash: var(--icon-server);
-  --icon-triangle-alert: var(--icon-exclamation-triangle);
-  --icon-zap: var(--icon-bolt);
+  --icon-warning: var(--icon-exclamation-triangle);
 
   /* User */
-  --icon-circle-user: var(--icon-user-circle);
+  --icon-avatar: var(--icon-user-circle);
   --icon-contact: var(--icon-identification);
   --icon-id-card: var(--icon-identification);
   --icon-user-check: var(--icon-user);
@@ -458,7 +454,7 @@
   --icon-rewind: var(--icon-backward);
   --icon-skip-back: var(--icon-backward);
   --icon-skip-forward: var(--icon-forward);
-  --icon-volume-2: var(--icon-speaker-wave);
+  --icon-volume-high: var(--icon-speaker-wave);
   --icon-volume-low: var(--icon-speaker-wave);
   --icon-volume-x: var(--icon-speaker-x-mark);
 
@@ -485,7 +481,7 @@
   --icon-paint-bucket: var(--icon-paint-brush);
   --icon-paintbrush: var(--icon-paint-brush);
   --icon-palette: var(--icon-swatch);
-  --icon-pipette: var(--icon-eye-dropper);
+  --icon-eyedropper: var(--icon-eye-dropper);
   --icon-signature: var(--icon-pencil);
 
   /* Communication */
@@ -496,9 +492,9 @@
   --icon-mail: var(--icon-envelope);
   --icon-mail-open: var(--icon-envelope-open);
   --icon-mail-plus: var(--icon-envelope);
-  --icon-message-circle: var(--icon-chat-bubble-oval-left);
-  --icon-message-circle-more: var(--icon-chat-bubble-oval-left-ellipsis);
-  --icon-message-circle-plus: var(--icon-chat-bubble-oval-left);
+  --icon-chat: var(--icon-chat-bubble-oval-left);
+  --icon-chat-more: var(--icon-chat-bubble-oval-left-ellipsis);
+  --icon-chat-plus: var(--icon-chat-bubble-oval-left);
   --icon-message-square: var(--icon-chat-bubble-left);
   --icon-message-square-dot: var(--icon-chat-bubble-left);
   --icon-message-square-reply: var(--icon-chat-bubble-left);
@@ -533,7 +529,6 @@
   /* Security */
   --icon-fingerprint: var(--icon-finger-print);
   --icon-globe-lock: var(--icon-globe-alt);
-  --icon-key-round: var(--icon-key);
   --icon-lock: var(--icon-lock-closed);
   --icon-log-in: var(--icon-arrow-right-end-on-rectangle);
   --icon-log-out: var(--icon-arrow-left-start-on-rectangle);
@@ -619,11 +614,11 @@
   --icon-star-half: var(--icon-star);
 
   /* Ai */
-  --icon-wand-sparkles: var(--icon-sparkles);
+  --icon-magic-wand: var(--icon-sparkles);
 
   /* Education */
   --icon-book: var(--icon-book-open);
-  --icon-flask-conical: var(--icon-beaker);
+  --icon-flask: var(--icon-beaker);
   --icon-graduation-cap: var(--icon-academic-cap);
   --icon-library: var(--icon-building-library);
 
@@ -719,12 +714,15 @@
   --icon-location-searching: var(--icon-viewfinder-circle);
   --icon-viewfinder: var(--icon-viewfinder-circle);
   --icon-scope: var(--icon-viewfinder-circle);
+  --icon-square-arrow-out-up-right: var(--icon-arrow-top-right-on-square);
   --icon-open-in-new: var(--icon-arrow-top-right-on-square);
   --icon-new-window: var(--icon-arrow-top-right-on-square);
   --icon-new-tab: var(--icon-arrow-top-right-on-square);
   --icon-launch: var(--icon-arrow-top-right-on-square);
   --icon-arrow-square-out: var(--icon-arrow-top-right-on-square);
   --icon-outbound: var(--icon-arrow-top-right-on-square);
+  --icon-open-external: var(--icon-arrow-top-right-on-square);
+  --icon-house: var(--icon-home);
   --icon-homepage: var(--icon-home);
   --icon-main: var(--icon-home);
   --icon-sidebar: var(--icon-bars-3-bottom-left);
@@ -741,7 +739,6 @@
   --icon-arrow-cursor: var(--icon-cursor-arrow-rays);
   --icon-cursor-arrow: var(--icon-cursor-arrow-rays);
   --icon-arrow-selector: var(--icon-cursor-arrow-rays);
-  --icon-open-external: var(--icon-arrow-top-right-on-square);
 
   /* Action */
   --icon-file-away: var(--icon-archive-box);
@@ -802,6 +799,7 @@
   --icon-copy-success: var(--icon-clipboard-document-check);
   --icon-clipboard-check: var(--icon-clipboard-document-check);
   --icon-copy-confirmed: var(--icon-clipboard-document-check);
+  --icon-delete: var(--icon-backspace);
   --icon-back-delete: var(--icon-backspace);
   --icon-erase-back: var(--icon-backspace);
   --icon-remove-character: var(--icon-backspace);
@@ -905,7 +903,7 @@
   --icon-redo-action: var(--icon-arrow-uturn-right);
   --icon-arrow-clockwise: var(--icon-arrow-uturn-right);
   --icon-step-forward: var(--icon-arrow-uturn-right);
-  --icon-refresh: var(--icon-arrow-path);
+  --icon-refresh-ccw: var(--icon-arrow-path);
   --icon-reload: var(--icon-arrow-path);
   --icon-sync: var(--icon-arrow-path);
   --icon-update: var(--icon-arrow-path);
@@ -998,7 +996,7 @@
   --icon-done-all: var(--icon-check);
   --icon-all-done: var(--icon-check);
   --icon-verified-check: var(--icon-check);
-  --icon-error: var(--icon-exclamation-circle);
+  --icon-circle-alert: var(--icon-exclamation-circle);
   --icon-error-circle: var(--icon-exclamation-circle);
   --icon-warning-circle: var(--icon-exclamation-circle);
   --icon-alert-circle: var(--icon-exclamation-circle);
@@ -1009,7 +1007,7 @@
   --icon-done-circle: var(--icon-check-circle);
   --icon-approved: var(--icon-check-circle);
   --icon-circle-success: var(--icon-check-circle);
-  --icon-help: var(--icon-question-mark-circle);
+  --icon-circle-question-mark: var(--icon-question-mark-circle);
   --icon-help-circle: var(--icon-question-mark-circle);
   --icon-faq: var(--icon-question-mark-circle);
   --icon-question: var(--icon-question-mark-circle);
@@ -1049,17 +1047,18 @@
   --icon-server-off: var(--icon-server);
   --icon-server-failure: var(--icon-server);
   --icon-outage: var(--icon-server);
-  --icon-warning: var(--icon-exclamation-triangle);
+  --icon-triangle-alert: var(--icon-exclamation-triangle);
   --icon-caution: var(--icon-exclamation-triangle);
   --icon-alert-triangle: var(--icon-exclamation-triangle);
   --icon-danger: var(--icon-exclamation-triangle);
+  --icon-zap: var(--icon-bolt);
   --icon-lightning: var(--icon-bolt);
   --icon-flash: var(--icon-bolt);
   --icon-electric: var(--icon-bolt);
   --icon-instant: var(--icon-bolt);
 
   /* User */
-  --icon-avatar: var(--icon-user-circle);
+  --icon-circle-user: var(--icon-user-circle);
   --icon-account-circle: var(--icon-user-circle);
   --icon-profile: var(--icon-user-circle);
   --icon-user-avatar: var(--icon-user-circle);
@@ -1352,7 +1351,7 @@
   --icon-player-skip-back: var(--icon-backward);
   --icon-skip-next: var(--icon-forward);
   --icon-player-skip-forward: var(--icon-forward);
-  --icon-volume-high: var(--icon-speaker-wave);
+  --icon-volume-2: var(--icon-speaker-wave);
   --icon-volume-up: var(--icon-speaker-wave);
   --icon-speaker: var(--icon-speaker-wave);
   --icon-speaker-high: var(--icon-speaker-wave);
@@ -1445,7 +1444,7 @@
   --icon-color-palette: var(--icon-swatch);
   --icon-theme-colors: var(--icon-swatch);
   --icon-colors: var(--icon-swatch);
-  --icon-eyedropper: var(--icon-eye-dropper);
+  --icon-pipette: var(--icon-eye-dropper);
   --icon-color-picker: var(--icon-eye-dropper);
   --icon-colorize: var(--icon-eye-dropper);
   --icon-color-sample: var(--icon-eye-dropper);
@@ -1499,16 +1498,18 @@
   --icon-speakerphone: var(--icon-megaphone);
   --icon-bullhorn: var(--icon-megaphone);
   --icon-promote: var(--icon-megaphone);
-  --icon-chat: var(--icon-chat-bubble-oval-left);
+  --icon-message-circle: var(--icon-chat-bubble-oval-left);
   --icon-chat-bubble: var(--icon-chat-bubble-oval-left);
   --icon-conversation: var(--icon-chat-bubble-oval-left);
   --icon-chat-circle: var(--icon-chat-bubble-oval-left);
   --icon-comment-circle: var(--icon-chat-bubble-oval-left);
   --icon-bubble: var(--icon-chat-bubble-oval-left);
+  --icon-message-circle-more: var(--icon-chat-bubble-oval-left-ellipsis);
   --icon-chat-dots: var(--icon-chat-bubble-oval-left-ellipsis);
   --icon-chat-typing: var(--icon-chat-bubble-oval-left-ellipsis);
   --icon-message-dots: var(--icon-chat-bubble-oval-left-ellipsis);
   --icon-chat-loading: var(--icon-chat-bubble-oval-left-ellipsis);
+  --icon-message-circle-plus: var(--icon-chat-bubble-oval-left);
   --icon-new-chat: var(--icon-chat-bubble-oval-left);
   --icon-add-comment: var(--icon-chat-bubble-oval-left);
   --icon-new-conversation: var(--icon-chat-bubble-oval-left);
@@ -1674,7 +1675,7 @@
   --icon-vpn-lock: var(--icon-globe-alt);
   --icon-secure-web: var(--icon-globe-alt);
   --icon-private-browsing: var(--icon-globe-alt);
-  --icon-password: var(--icon-key);
+  --icon-key-round: var(--icon-key);
   --icon-access: var(--icon-key);
   --icon-vpn-key: var(--icon-key);
   --icon-credential: var(--icon-key);
@@ -2031,7 +2032,7 @@
   --icon-stars: var(--icon-sparkles);
   --icon-glitter: var(--icon-sparkles);
   --icon-sparkle: var(--icon-sparkles);
-  --icon-magic-wand: var(--icon-sparkles);
+  --icon-wand-sparkles: var(--icon-sparkles);
   --icon-auto-fix: var(--icon-sparkles);
   --icon-enhance: var(--icon-sparkles);
   --icon-wizard: var(--icon-sparkles);
@@ -2048,7 +2049,7 @@
   --icon-open-book: var(--icon-book-open);
   --icon-story: var(--icon-book-open);
   --icon-novel: var(--icon-book-open);
-  --icon-flask: var(--icon-beaker);
+  --icon-flask-conical: var(--icon-beaker);
   --icon-lab: var(--icon-beaker);
   --icon-experiment: var(--icon-beaker);
   --icon-science: var(--icon-beaker);

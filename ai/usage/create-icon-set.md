@@ -94,12 +94,12 @@ For icons with multiple colors like brand logos, colored illustrations, or emoji
   --icon-brand-bg: transparent;
 
   /* Icon definitions */
-  --icon-figma-image: url('./figma.svg');
-  --icon-sketch-image: url('./sketch.svg');
+  --icon-figma-img: url('./figma.svg');
+  --icon-sketch-img: url('./sketch.svg');
 }
 ```
 
-**Property pattern:** `--icon-{name}-image`
+**Property pattern:** `--icon-{name}-img`
 
 Set `--icon-{setname}-bg: transparent` to prevent the mask technique's `currentColor` from overlaying the image.
 
@@ -131,7 +131,7 @@ A single CSS file can mix techniques. Most icons can use masks while a few speci
   --icon-search: url('./search.svg');
 
   /* Colored logo (image) */
-  --icon-company-logo-image: url('./company-logo.svg');
+  --icon-company-logo-img: url('./company-logo.svg');
   --icon-company-logo-bg: transparent;
 }
 ```
@@ -148,8 +148,8 @@ For icon sets with a distinct identity (like brand logos), name your set and use
   --icon-brands-bg: transparent;
 
   /* Icons in this set */
-  --icon-figma-image: url('./figma.svg');
-  --icon-sketch-image: url('./sketch.svg');
+  --icon-figma-img: url('./figma.svg');
+  --icon-sketch-img: url('./sketch.svg');
 }
 ```
 
@@ -257,7 +257,7 @@ A real-world example combining monochrome UI icons with a colored logo:
   --icon-reports: url('./icons/reports.svg');
 
   /* Colored app logo (image technique) */
-  --icon-app-logo-image: url('./icons/app-logo.svg');
+  --icon-app-logo-img: url('./icons/app-logo.svg');
   --icon-app-logo-bg: transparent;
 }
 ```

@@ -27,14 +27,14 @@ const createComponent = ({ settings, data, self }) => ({
     if (set) {
       return `
         --icon-mask: var(--icon-${icon}, var(--icon-${set}));
-        --icon-bg-image: var(--icon-${icon}-image, var(--icon-${set}-image));
+        --icon-bg-image: var(--icon-${icon}-img, var(--icon-${set}-img));
         --icon-bg: var(--icon-${icon}-bg, var(--icon-${set}-bg));
         --icon-glyph: var(--icon-${icon}-glyph, var(--icon-${set}-glyph));
       `;
     }
     return `
       --icon-mask: var(--icon-${icon});
-      --icon-bg-image: var(--icon-${icon}-image);
+      --icon-bg-image: var(--icon-${icon}-img);
       --icon-bg: var(--icon-${icon}-bg);
       --icon-glyph: var(--icon-${icon}-glyph);
     `;
