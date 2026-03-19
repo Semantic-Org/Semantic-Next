@@ -200,6 +200,23 @@ const createComponent = ({ self, el, settings, $ }) => ({
         return availableWidth / growPanels.length;
       });
     });
+
+    // normalize to 100 if min constraints caused overflow
+    let total = sum(self.panels.map(panel => self.getPanelSize(panel) || 0));
+    if (total > 100.01) {
+      const excess = total - 100;
+      const exactSizes = exactPanels.map(panel => self.getPanelSize(panel) || 0);
+      const exactTotal = sum(exactSizes);
+      if (exactTotal > 0) {
+        each(exactPanels, (panel) => {
+          const index = self.panels.indexOf(panel);
+          const currentSize = self.getPanelSize(panel);
+          const reduction = excess * (currentSize / exactTotal);
+          const minSize = self.getRelativeSettingSize(panel.settings.minSize, index) || 0;
+          self.setPanelSize(index, Math.max(currentSize - reduction, minSize));
+        });
+      }
+    }
   },
 
   // cache some sizing on pane group
@@ -207,11 +224,19 @@ const createComponent = ({ self, el, settings, $ }) => ({
     self.cache.groupSize = self.getGroupSize();
     self.cache.groupScrollOffset = self.getGroupScrollOffset();
     self.cache.naturalSizes = self.panels.map((panel, index) => self.getNaturalPanelSize(index));
+    self.cache.minSizes = self.panels.map((panel, index) => {
+      let minSize = panel.settings.minSize;
+      if (minSize == 'auto') {
+        return panel.settings.label ? self.getNaturalPanelSize(index, { minimized: true }) : 0;
+      }
+      return self.getPixelSettingSize(minSize, index) || 0;
+    });
   },
   removeGroupCalculations() {
     delete self.cache.groupSize;
     delete self.cache.groupScrollOffset;
     delete self.cache.naturalSizes;
+    delete self.cache.minSizes;
   },
 
   // store current resize position when starting drag
@@ -310,7 +335,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     return Math.abs(delta / panelSize * 100);
   },
   getPanelSize(panel) {
-    const size = $(panel).css('flex-grow');
+    const size = panel.style.flexGrow;
     return size ? parseFloat(size) : undefined;
   },
   getPanelSizePixels(index) {
@@ -401,7 +426,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
 
   setPanelSize(index, relativeSize) {
     let panel = self.panels[index];
-    $(panel).css('flex-grow', relativeSize);
+    panel.style.flexGrow = relativeSize;
   },
 
   setPanelSizePixels(index, pixelSize, settings) {
@@ -450,6 +475,9 @@ const createComponent = ({ self, el, settings, $ }) => ({
         return minimized || false;
       }),
       getMinSize = memoize((index) => {
+        if (self.cache.minSizes) {
+          return self.cache.minSizes[index];
+        }
         let minSize = self.getPanelSetting(index, 'minSize');
         return self.getPixelSettingSize(minSize, index) || 0;
       }),
