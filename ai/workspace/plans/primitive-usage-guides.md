@@ -61,12 +61,12 @@ docs/src/components/
 ├── SpecDefinition.astro      # existing — definition tab renderer
 ├── SpecViewer.astro           # existing — spec tab renderer
 ├── UsageGuide.astro           # NEW — usage tab orchestrator
+├── SpecimenExplorer/          # NEW — the killer feature
+│   └── SpecimenExplorer.js    #   interactive spec-driven component explorer
 ├── usage/                     # NEW — auto-generated section components
-│   ├── UsageHero.astro        #   hero example + description
 │   ├── UsageImports.astro     #   import snippets per framework
 │   ├── UsageSettingsTable.astro  # settings reference table
-│   ├── UsageEventsTable.astro    # events reference table
-│   └── UsageCSSReference.astro   # CSS variables and ::part() reference
+│   └── UsageEventsTable.astro    # events reference table
 ```
 
 ### Route Handler Changes
@@ -121,44 +121,144 @@ if (definitionDisplayed) {
 
 The `UsageGuide.astro` component renders sections in this order. Each section is auto-generated from the spec unless the MDX body provides an override.
 
-### 1. Hero / Getting Started
-- Component description
-- Simplest possible example (tag + default content)
-- Source: spec `tagName`, `description`
+### 1. Specimen Explorer (Hero)
 
-### 2. Import / Setup
+The centerpiece of the usage tab. A live, interactive component explorer that lets developers compose their own variation in real time. **Entirely spec-driven — works for every primitive automatically.**
+
+#### Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────┐    │
+│  │                                             │    │
+│  │          [ Live Component Preview ]         │    │
+│  │                                             │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+│  Types       ○ None  ● Primary  ○ Secondary         │
+│  Styled      ○ None  ○ Subtle  ○ Flat  ○ Outline    │
+│  Size        [  Medium  ▾ ]                         │
+│  Color       [ ● ● ● ● ● ● ● ● ● ● ● ● ● ]      │
+│  States      ☐ Disabled  ☐ Loading  ☐ Active        │
+│  Content     ☐ Icon  ☐ Badge                        │
+│  Variations  ☐ Fluid  ☐ Circular  ☐ Compact         │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ <ui-button primary large icon="save">       │    │
+│  │   Save                                      │    │
+│  │ </ui-button>                                │    │
+│  └─────────────────────────────────────────────┘    │
+│                                          [ Copy ]   │
+└─────────────────────────────────────────────────────┘
+```
+
+#### How It Works
+
+The specimen reads the spec and generates controls for each section:
+
+| Spec Section | Control Type | Behavior |
+|---|---|---|
+| `types` | Radio group per type (with "None") | Mutually exclusive within a type, stackable across types |
+| `variations` (with options) | Dropdown or radio | Select one option per variation |
+| `variations` (boolean) | Checkbox | Toggle on/off |
+| `states` | Checkbox | Toggle on/off |
+| `content` | Checkbox + input | Toggle content on, optionally set value (e.g., icon name) |
+| `settings` | Type-appropriate input | Text, boolean, number based on spec `type` |
+
+#### Generated Code Output
+
+As the user toggles controls, the code block below updates in real time showing the exact HTML:
+
+```html
+<ui-button primary large icon="save">Save</ui-button>
+```
+
+This teaches the concise attribute syntax implicitly. The user sees that clicking "Primary" adds `primary` to the tag, clicking "Large" adds `large` — they learn the dialect by doing.
+
+#### Code Output Options
+
+A toggle to switch between the three dialects:
+
+```html
+<!-- Concise (default) -->
+<ui-button primary large icon="save">Save</ui-button>
+
+<!-- Verbose -->
+<ui-button emphasis="primary" size="large" icon="save">Save</ui-button>
+
+<!-- Classic -->
+<ui-button class="primary large" icon="save">Save</ui-button>
+```
+
+This is one of the best ways to teach the three-dialect system — seeing the same component expressed three ways.
+
+#### Technical Implementation
+
+The SpecimenExplorer is a **client-side SUI component** (not an Astro island wrapping React — it's built with the framework itself):
+
+```javascript
+defineComponent({
+  tagName: 'specimen-explorer',
+  // Receives the raw spec as a setting
+  // Generates controls from spec.types, spec.variations, spec.states, spec.content
+  // Renders the actual component live using the tag name from the spec
+  // Generates HTML string using SpecReader.getCodeFromModifiers()
+});
+```
+
+Key details:
+- Uses `SpecReader.getCodeFromModifiers()` to generate the HTML output — same system the docs generation uses
+- The live preview renders the *actual component* (not a mock) — so you see real CSS, real interactions
+- Controls are grouped by spec section (Types, Variations, States, Content, Settings)
+- `usageLevel` determines initial visibility — level 1-2 controls shown by default, level 3+ collapsed under "More options"
+- A "Reset" button clears to defaults
+- A "Copy" button copies the generated HTML
+- A "Open in Definition" link jumps to the definition tab filtered to the active type/variation
+
+#### Why This Is The Killer Feature
+
+1. **Spec-driven = zero per-component authoring**: Drop the spec in, the explorer works. Every primitive gets it for free.
+2. **Teaches the dialect implicitly**: Users learn `<ui-button primary>` syntax by composing it, not reading about it.
+3. **Replaces the "hero example"**: The specimen IS the hero — it's the first thing on the page, and it's interactive.
+4. **Bridges to the definition tab**: "I found my variation in the specimen, now let me see it in context on the definition page."
+5. **Code generation for agents and humans**: The copy button produces valid, idiomatic HTML that can go straight into a project.
+6. **Show First + Do First in one**: You see the component AND you build the code simultaneously. Combines the two strongest documentation patterns from the cross-framework analysis.
+
+### 2. When To Use
+- Brief decision guidance — when to reach for this component vs alternatives
+- Authored content (only Ant Design does this, but it's high-value for complex components)
+- Optional — not every primitive needs it (divider doesn't, but input vs textarea vs select does)
+
+### 3. Import / Setup
 - HTML: just use the tag, no import needed
 - ES module: `import { UIButton } from '@semantic-ui/core'`
 - React/Vue/Angular: framework-specific wrapper patterns
 - Source: spec `tagName`, `exportName`
 
-### 3. Authored Content (slot)
+### 4. Authored Content (slot)
 - The MDX body renders here — editorial prose, custom preview components, composition patterns, design guidance
 - For primitives with no MDX body, this section is omitted
 - For odd-ducks like icon, this is the bulk of the page
 
-### 4. Types Overview
-- Brief overview of available types with one example each
-- Links to definition tab for exhaustive visual catalog
-- Source: spec `types`, filtered by `usageLevel`
-
-### 5. Common Variations
-- Key variations grouped by `usageLevel` (1-2 shown, 3+ mentioned)
-- Links to definition tab for full gallery
-- Source: spec `variations`
-
-### 6. Settings Reference Table
+### 5. Settings Reference Table
 - Auto-generated table: name, attribute, type, default, description
 - Source: spec `settings`
 
-### 7. Events Reference Table
+### 6. Events Reference Table
 - Auto-generated table: event name, description, arguments
 - Source: spec `events`
 
-### 8. Accessibility
-- Keyboard interactions (if defined)
-- ARIA roles auto-applied
-- Source: partially auto-generated, partially authored
+### 7. Accessibility (deferred — not in v1)
+
+Accessibility is critically important but a hand-authored section would be premature in v1. Here's the reasoning:
+
+**The current ARIA model asks developers to manually classify UI semantics** — adding `role`, `aria-label`, `aria-expanded` and similar attributes by hand. This is fundamentally a classification task performed at authoring time, with no validation feedback loop. The result is that ARIA annotations are frequently incomplete or incorrect, which can actively mislead assistive technology — a worse outcome than the absence of annotations.
+
+**ML-based semantic inference is poised to shift this responsibility to the consumption layer.** The task — inferring the purpose and state of a UI element from its structure, styling, behavior, and surrounding context — is a bounded classification problem well-suited to small, fast models. Training corpora exist in the form of ARIA-annotated web content across the Common Crawl. Screen readers and accessibility extensions (NVDA, JAWS, browser-level tools) are well-positioned to integrate this inference without requiring a W3C standards cycle, since they ship on their own release cadence.
+
+**SUI's spec system provides richer semantic data than ARIA does.** The spec encodes component identity, state semantics, variation intent, and content relationships in structured form. This is a stronger signal for future inference systems than hand-written ARIA attributes, and it's already present in every primitive.
+
+**For v1**, the right investment is ensuring the framework's semantic foundation is solid — which the spec system already provides — rather than authoring per-component ARIA documentation that may not reflect best practices 12-18 months from now. An accessibility section can be added when the tooling landscape stabilizes, with confidence that SUI's architecture supports it well.
 
 ---
 
@@ -169,18 +269,12 @@ The usage tab rail menu is built from the section structure:
 ```javascript
 function getUsageMenu(spec, { hasContent }) {
   const menu = [
-    { text: 'Getting Started', id: 'getting-started' },
+    { text: 'Explorer', id: 'explorer' },
     { text: 'Import', id: 'import' },
   ];
   if (hasContent) {
     // Parse MDX headings for authored sections
     // and insert them here
-  }
-  if (spec.types?.length) {
-    menu.push({ text: 'Types', id: 'types' });
-  }
-  if (spec.variations?.length) {
-    menu.push({ text: 'Variations', id: 'variations' });
   }
   if (spec.settings?.length) {
     menu.push({ text: 'Settings', id: 'settings' });
@@ -188,7 +282,6 @@ function getUsageMenu(spec, { hasContent }) {
   if (spec.events?.length) {
     menu.push({ text: 'Events', id: 'events' });
   }
-  menu.push({ text: 'CSS', id: 'css' });
   return menu;
 }
 ```
@@ -390,19 +483,28 @@ guideSections:
 
 ## Implementation Phases
 
-### Phase 1: Usage Tab Infrastructure
+### Phase 1: Specimen Explorer
+- [ ] Design the `specimen-explorer` component using `defineComponent`
+- [ ] Build control generation from spec sections (types → radio, variations → dropdown/checkbox, states → checkbox)
+- [ ] Integrate `SpecReader.getCodeFromModifiers()` for live HTML output
+- [ ] Add dialect toggle (concise / verbose / classic)
+- [ ] Add `usageLevel`-based progressive disclosure (1-2 visible, 3+ collapsed)
+- [ ] Add copy button for generated HTML
+- [ ] Style the specimen to be a strong visual hero
+
+### Phase 2: Usage Tab Infrastructure
 - [ ] Add `UsageGuide.astro` component with auto-generated sections
 - [ ] Update route handler to support `usage` tab
 - [ ] Build `getUsageMenu()` for rail navigation
 - [ ] Add `usage` to tab arrays in content entries
-- [ ] Build auto-generated section components (hero, imports, settings table, events table)
+- [ ] Build auto-generated section components (imports, settings table, events table)
+- [ ] Integrate SpecimenExplorer as the hero section
 
-### Phase 2: Usage Tab Default Template Polish
+### Phase 3: Usage Tab Default Template Polish
 - [ ] Settings table component with proper formatting
 - [ ] Events table component
-- [ ] Types overview with `usageLevel` filtering
-- [ ] Variations overview with grouping
 - [ ] Framework import snippets (HTML, React, Vue, Angular)
+- [ ] "When To Use" section support (authored)
 
 ### Phase 3: CSS Tab + Theme Spec
 - [ ] Build barrel CSS parser (extract `@import` lines, follow paths, parse `--*` declarations)
