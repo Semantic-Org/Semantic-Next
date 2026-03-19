@@ -11,6 +11,9 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Query
+* **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
+
 ### Utils
 * **Breaking** - `kebabToCamel` and `camelToKebab` now use lossless encoding — digit-leading segments are preserved with `_` (e.g. `grid-2x2` → `grid_2x2`), and every uppercase letter gets its own hyphen (e.g. `arrowDownAZ` → `arrow-down-a-z`). Both accept a `separator` option to customize the digit-boundary character. `camelToKebab` now normalizes leading uppercase by default for DOM-safe output (e.g. `FooBar` → `foo-bar`); pass `{ lossless: true }` to preserve it for exact round-trips.
 * **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
