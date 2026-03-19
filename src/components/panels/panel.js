@@ -8,7 +8,7 @@ const defaultSettings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
-  minSize: '0px',
+  minSize: 'auto',
   maxSize: '0px',
   naturalSize: '',
   size: 'grow',
@@ -53,14 +53,29 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       const panels = self.getPanels();
       return panels.getPixelSettingSize(settings.naturalSize);
     }
+    const isHorizontal = direction == 'horizontal';
+    const $label = $('.self.label');
+    const labelSize = $label.exists()
+      ? (isHorizontal ? $label.outerWidth() : $label.outerHeight())
+      : 0;
+    if (minimized) {
+      console.log('[naturalSize]', settings.label, { minimized, labelSize });
+      return labelSize;
+    }
     const $children = $(panel).children();
-    return (direction == 'horizontal')
-      ? ($children.length > 1)
-        ? sum($children.width())
-        : $children.width()
-      : ($children.length > 1)
-      ? sum($children.height())
-      : $children.height();
+    const boxModel = { includePadding: true, includeBorder: true, includeMargin: true };
+    const sizes = isHorizontal ? $children.naturalWidth(boxModel) : $children.naturalHeight(boxModel);
+    const contentSize = ($children.length > 1) ? sum(sizes) : (sizes || 0);
+    const total = labelSize + contentSize;
+    console.log('[naturalSize]', settings.label || '(no label)', {
+      direction,
+      labelSize,
+      contentSize,
+      childCount: $children.length,
+      childSizes: ($children.length > 1) ? sizes : [sizes],
+      total,
+    });
+    return total;
   },
 
   getHandleClassMap: () => ({
