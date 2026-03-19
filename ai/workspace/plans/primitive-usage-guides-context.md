@@ -111,6 +111,63 @@ The barrel file `button-theme.css` is a complete index — each `@import url(...
 
 ---
 
+## Implementation Reference
+
+### Key Files
+
+| File | Role |
+|---|---|
+| `docs/src/pages/ui/primitives/[...slug].astro` | Route handler — generates paths per entry + tab, renders the right component per tab |
+| `docs/src/components/SpecDefinition.astro` | Definition tab renderer — loops spec sections, renders CodeExample per type/variation |
+| `docs/src/components/SpecViewer.astro` | Spec tab renderer — custom syntax-highlighted spec viewer with collapsible sections |
+| `docs/src/layouts/Definition.astro` | Thin wrapper around Layout.astro, passes through props |
+| `docs/src/layouts/Layout.astro` | Main page layout — TopBar, Sidebar, DocsMasthead (tab menu), DocsRail (jump nav), slot |
+| `docs/src/components/DocsMasthead.astro` | Renders title, description, and tab menu (UIMenu with active tab detection) |
+| `docs/src/components/DocsRail.astro` | Right sidebar jump menu |
+| `docs/src/content/primitives/*.mdx` | Content entries — frontmatter defines tabs/specName/etc, body is currently empty |
+| `docs/src/content.config.js` | Content collection config — defines schema for primitives/components/behaviors |
+| `docs/src/helpers/menus.js` | Sidebar navigation structure — must update when adding pages |
+
+### Spec System Files
+
+| File | Role |
+|---|---|
+| `packages/specs/src/spec-reader.js` | SpecReader class — `getDefinition()`, `getDefinitionMenu()`, `getWebComponentSpec()`, `getCodeFromModifiers()` |
+| `src/primitives/button/specs/button.spec.js` | Source spec (authored, imports shared helpers) |
+| `src/primitives/button/specs/button.spec.json` | Compiled spec (auto-generated, full JSON) |
+| `src/primitives/button/specs/button.component.js` | Runtime componentSpec (auto-generated, tree-shaken) |
+| `src/specs/` | Spec entry points and exports — `@semantic-ui/core/specs` resolves here |
+
+### CSS Architecture Files (for CSS tab)
+
+| File | Role |
+|---|---|
+| `src/primitives/button/css/button.css` | Root — imports definition + theme |
+| `src/primitives/button/css/theme/button-theme.css` | **Barrel file** — `@import` index mapping every variation to its CSS layer and variables file |
+| `src/primitives/button/css/theme/types/*.css` | Theme variables per type (emphasis, styled, link, etc.) |
+| `src/primitives/button/css/theme/states/*.css` | Theme variables per state (hover, focus, disabled, etc.) |
+| `src/primitives/button/css/theme/variations/*.css` | Theme variables per variation (sizing, colored, etc.) |
+| `src/primitives/button/css/definition/` | Structural CSS that consumes the theme variables |
+
+### Existing Patterns to Follow
+
+**Tab routing**: The route handler uses `displayedTab` to decide what to render. Adding a new tab means:
+1. Adding it to the `tabs` array in content entry frontmatter
+2. Adding a condition in the route handler template section
+3. Building a rail menu for that tab
+
+**Content entry rendering**: Astro's `entry.render()` returns a `Content` component from the MDX body. Currently unused since bodies are empty.
+
+**Spec consumption in docs**: The route handler imports all specs via `import * as Specs from '@semantic-ui/core/specs'`, looks up by `data.specName`, and creates a `SpecReader` instance. The same pattern works for the specimen explorer and CSS tab.
+
+**Component structure convention**: Docs components live in `docs/src/components/`. Complex interactive components (like CodeExample) use SUI's `defineComponent` with `client:load` for hydration.
+
+### MCP Context
+
+The `use-components` context doc (`ai/essentials/use-components.md`) is the system-level guide that teaches agents how to interpret specs. It covers dialects, compound aliases, plural inheritance, content syntaxes. Per-component usage guides would be exposed alongside it via `get_user_doc`.
+
+---
+
 ## What's Not In v1
 
 ### Accessibility section
