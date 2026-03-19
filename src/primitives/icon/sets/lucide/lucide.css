@@ -580,6 +580,7 @@
   --icon-volume-low: var(--icon-volume-1);
 
   /* Editing */
+  --icon-brush: var(--icon-paintbrush);
   --icon-eyedropper: var(--icon-pipette);
 
   /* Communication */
@@ -595,8 +596,14 @@
   --icon-key: var(--icon-key-round);
   --icon-incognito: var(--icon-venetian-mask);
 
+  /* Settings */
+  --icon-sliders: var(--icon-sliders-horizontal);
+
   /* Organization */
   --icon-building: var(--icon-building-2);
+
+  /* System */
+  --icon-sidebar: var(--icon-panel-left);
 
   /* Device */
   --icon-laptop: var(--icon-laptop-minimal);

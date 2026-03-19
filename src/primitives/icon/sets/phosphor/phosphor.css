@@ -683,7 +683,7 @@
   --icon-columns-3: var(--icon-columns);
   --icon-droplet: var(--icon-drop);
   --icon-layers: var(--icon-stack);
-  --icon-paintbrush: var(--icon-paint-brush);
+  --icon-brush: var(--icon-paint-brush);
   --icon-send-to-back: var(--icon-selection-background);
 
   /* Communication */
@@ -739,6 +739,7 @@
   /* Settings */
   --icon-languages: var(--icon-translate);
   --icon-settings: var(--icon-gear);
+  --icon-sliders: var(--icon-sliders-horizontal);
   --icon-sun-moon: var(--icon-sun-dim);
 
   /* Organization */
@@ -766,7 +767,6 @@
   --icon-panel-bottom: var(--icon-layout);
   --icon-panel-bottom-close: var(--icon-layout);
   --icon-panel-bottom-open: var(--icon-layout);
-  --icon-panel-left: var(--icon-sidebar);
   --icon-panel-left-close: var(--icon-sidebar);
   --icon-panel-left-open: var(--icon-sidebar);
   --icon-panel-right: var(--icon-sidebar-simple);

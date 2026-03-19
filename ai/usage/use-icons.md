@@ -11,7 +11,7 @@ type: skill
 
 > **Skill:** `use-icons`
 > **Purpose:** How to use the `<ui-icon>` component — syntax, icon sets, sizing, coloring, and icons inside other components
-> **Last Updated:** 2026-03-04
+> **Last Updated:** 2026-03-19
 
 ---
 
@@ -92,7 +92,7 @@ An icon set is a CSS file that defines `--icon-*` custom properties on `:root`. 
 | Heroicons | `@semantic-ui/core/icon/sets/heroicons.css` | Monochrome (mask) |
 | Dev | `@semantic-ui/core/icon/sets/dev.css` | Multi-color (image) |
 
-The five monochrome sets all define the same canonical names, so you can swap between them by changing one import — no markup changes needed:
+The five monochrome sets all define the same 481 canonical names, so you can swap between them by changing one import — no markup changes needed:
 
 ```js
 // Switch from Lucide to Tabler — all <ui-icon home>, <ui-icon close>, etc. still work
@@ -134,24 +134,59 @@ When `set` is specified, the component creates a CSS fallback chain: if the icon
 
 ## Canonical Names
 
-SUI defines ~320 canonical icon names organized by category. These are the names that support shorthand syntax and remain stable across icon set swaps.
+SUI defines **481 canonical icon names** organized across 31 categories. These are the names that support shorthand syntax and remain stable across icon set swaps.
 
 | Category | Example names |
 |----------|---------------|
-| Navigation | `home`, `close`, `back`, `next`, `menu`, `chevron-down` |
-| Action | `add`, `edit`, `delete`, `save`, `copy`, `share`, `upload`, `download` |
-| Status | `success`, `error`, `warning`, `info`, `help`, `loading` |
-| User | `user`, `users`, `avatar`, `login`, `logout` |
-| Communication | `email`, `notifications`, `phone`, `chat` |
-| Commerce | `cart`, `payment`, `shipping`, `store`, `wallet` |
-| Data | `search`, `filter`, `sort`, `chart-line`, `chart-bar` |
-| AI | `sparkles`, `bot`, `wand` |
+| Navigation | `home`, `chevron-down`, `arrow-left`, `external-link`, `menu`, `compass` |
+| Action | `plus`, `pencil`, `trash`, `save`, `copy`, `share`, `upload`, `download`, `search`, `refresh` |
+| Status | `check`, `error`, `warning`, `info`, `help`, `loader`, `badge-check`, `ban` |
+| User | `user`, `users`, `avatar`, `user-plus`, `user-check`, `user-x`, `user-search` |
+| Form | `circle-dot`, `square-check`, `toggle-right`, `password`, `text-cursor-input` |
+| Data | `chart-line`, `chart-bar`, `chart-pie`, `table`, `funnel`, `trending-up`, `sigma`, `radar` |
+| File | `file`, `folder`, `file-code`, `file-text`, `folder-tree`, `newspaper`, `notebook` |
+| Media | `image`, `camera`, `video`, `mic`, `music`, `film`, `podcast`, `audio-lines` |
+| Media Controls | `play`, `pause`, `skip-forward`, `volume-high`, `shuffle`, `repeat` |
+| Text | `bold`, `italic`, `heading`, `list`, `quote`, `underline`, `strikethrough`, `spell-check` |
+| Editing | `crop`, `layers`, `palette`, `paintbrush`, `eyedropper`, `eraser`, `shapes`, `ruler` |
+| Communication | `mail`, `chat`, `phone`, `bell`, `send`, `inbox`, `megaphone`, `at-sign` |
+| Commerce | `shopping-cart`, `credit-card`, `store`, `tag`, `receipt`, `truck`, `gift`, `barcode` |
+| Time | `calendar`, `clock`, `timer`, `hourglass`, `history`, `alarm-clock` |
+| Security | `lock`, `key`, `shield`, `fingerprint`, `log-in`, `log-out`, `vault`, `cookie` |
+| Settings | `settings`, `moon`, `languages`, `wrench`, `sliders-horizontal`, `incognito` |
+| Organization | `building`, `kanban`, `milestone` |
+| Finance | `banknote`, `wallet`, `dollar-sign`, `landmark`, `coins`, `percent`, `scale` |
+| Location | `map-pin`, `map`, `globe`, `route`, `plane`, `car`, `waypoints` |
+| System | `app-window`, `panel-left`, `power`, `command`, `separator-horizontal` |
+| Device | `smartphone`, `laptop`, `monitor`, `keyboard`, `cpu`, `server`, `printer`, `battery` |
+| Connectivity | `wifi`, `bluetooth`, `globe`, `network`, `plug`, `cloud-sync`, `signal`, `rss` |
+| Development | `code`, `terminal`, `git-branch`, `git-pull-request`, `database`, `bug`, `braces`, `regex` |
+| Brand | `github` |
+| Gamification | `star`, `trophy`, `award`, `crown`, `dice`, `party-popper` |
+| AI | `sparkles`, `bot`, `brain`, `magic-wand` |
+| Education | `book`, `graduation-cap`, `flask`, `library` |
+| Weather | `sun`, `cloud`, `snowflake`, `wind`, `thermometer` |
+| Misc | `accessibility`, `coffee`, `lightbulb`, `leaf`, `infinity`, `calculator`, `circle`, `hexagon` |
 
 **Why canonical names matter:**
 - **Portability** — `<ui-icon close>` works regardless of whether Lucide, Tabler, or Heroicons is loaded
 - **Readability** — `notifications` communicates intent better than the library-specific `bell`
 - **Shorthand** — only canonical names work as boolean attributes (`<ui-icon close>` vs `<ui-icon icon="close">`)
 - **Aliases** — common alternatives resolve automatically (`cancel`, `dismiss`, and `x` all show the close icon)
+
+### Aliases
+
+Most canonical names have rich alias sets. Use whichever name feels natural — the component resolves it at runtime:
+
+```html
+<!-- All resolve to the same icon -->
+<ui-icon close></ui-icon>       <!-- alias for x -->
+<ui-icon cancel></ui-icon>      <!-- alias for circle-x -->
+<ui-icon edit></ui-icon>        <!-- alias for pencil -->
+<ui-icon notifications></ui-icon> <!-- alias for bell -->
+<ui-icon favorite></ui-icon>    <!-- alias for heart -->
+<ui-icon loading></ui-icon>     <!-- alias for loader -->
+```
 
 The canonical set is not a hardcoded catalog to memorize. Use descriptive, intent-based names and they will likely resolve. When unsure, use the `icon` attribute with the library-native name as a fallback.
 
@@ -192,7 +227,7 @@ Monochrome icons (the default mask technique) inherit `currentColor`. Set a colo
 </p>
 ```
 
-Available colors: `red`, `orange`, `yellow`, `olive`, `green`, `teal`, `blue`, `violet`, `purple`, `pink`, `brown`, `grey`, `black`.
+Available colors: `red`, `orange`, `yellow`, `olive`, `green`, `teal`, `blue`, `violet`, `purple`, `pink`, `brown`, `grey`, `slate`.
 
 Multi-color icons (like the `dev` set) do **not** respond to color variations — they render their native colors.
 

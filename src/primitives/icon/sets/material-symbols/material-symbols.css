@@ -769,7 +769,6 @@
   --icon-flip-vertical: var(--icon-flip);
   --icon-highlighter: var(--icon-ink_highlighter);
   --icon-paint-bucket: var(--icon-format_color_fill);
-  --icon-paintbrush: var(--icon-brush);
   --icon-eyedropper: var(--icon-colorize);
   --icon-ruler: var(--icon-straighten);
   --icon-send-to-back: var(--icon-flip_to_back);
@@ -844,7 +843,7 @@
   /* Settings */
   --icon-languages: var(--icon-translate);
   --icon-moon: var(--icon-dark_mode);
-  --icon-sliders-horizontal: var(--icon-tune);
+  --icon-sliders: var(--icon-tune);
   --icon-sun-moon: var(--icon-brightness_6);
   --icon-wrench: var(--icon-build);
 
@@ -882,7 +881,7 @@
   --icon-panel-bottom: var(--icon-bottom_panel_open);
   --icon-panel-bottom-close: var(--icon-bottom_panel_close);
   --icon-panel-bottom-open: var(--icon-bottom_panel_open);
-  --icon-panel-left: var(--icon-left_panel_open);
+  --icon-sidebar: var(--icon-left_panel_open);
   --icon-panel-left-close: var(--icon-left_panel_close);
   --icon-panel-left-open: var(--icon-left_panel_open);
   --icon-panel-right: var(--icon-right_panel_open);

@@ -1,0 +1,90 @@
+{
+  "1": {
+    "visual": "A badge-shaped outline (scalloped/starburst edge) with a bold exclamation mark centered inside. The scalloped border has multiple small rounded lobes forming the perimeter, distinguishing it from a plain circle.",
+    "usage": "Flagging a critical alert or policy-level warning; badge indicating an item requires attention; certification or trust badge with a caution state; highlighting a required field or action."
+  },
+  "2": {
+    "visual": "A badge-shaped outline (scalloped/starburst edge) with a check mark centered inside. Identical border shape to the exclamation badge, but the interior symbol is a tick/checkmark rather than an exclamation mark.",
+    "usage": "Verified account or identity badge; certified or approved status on a listing; trust indicator next to a username; marking a completed certification or credential."
+  },
+  "3": {
+    "visual": "A badge-shaped outline (scalloped/starburst edge) with a lowercase letter 'i' (information symbol) centered inside. The scalloped border matches the other badge icons; the interior contains only the info 'i' glyph.",
+    "usage": "Tooltip trigger indicating informational badge content; help or guidance indicator on a UI element; informational status label; directing users to learn more about a verified or certified item."
+  },
+  "4": {
+    "visual": "A plain circle with a diagonal line crossing through it from upper-right to lower-left (prohibition/no-entry symbol). There is no other interior symbol — just the circle and the single diagonal stroke.",
+    "usage": "Disabled or blocked state for a feature; permission denied indicator; marking a forbidden action or unavailable option; 'not allowed' overlay on dragged items."
+  },
+  "5": {
+    "visual": "A standalone check mark (tick) with no enclosing shape. The stroke curves slightly at the base of the short left arm and the longer right arm sweeps upward to the right.",
+    "usage": "Confirming a completed task or step in a list; selected state for a checkbox or menu item; success confirmation after a form submission; indicating agreement or acceptance."
+  },
+  "6": {
+    "visual": "Two overlapping check marks (double tick), both angled the same direction, with the second tick offset slightly to the right of and behind the first. No enclosing shape.",
+    "usage": "Message read/delivered receipt (like messaging apps); double-confirmation of an action; indicating both sent and received status; marking a two-step verification as complete."
+  },
+  "7": {
+    "visual": "A circle outline with a bold exclamation mark centered inside. Unlike the scalloped badge version, the border is a smooth perfect circle with no lobes.",
+    "usage": "General warning or alert indicator; error state on a form field or notification; attention-required badge on an icon or avatar; highlighting a system alert message."
+  },
+  "8": {
+    "visual": "A circle outline with a small check mark centered inside. The border is a smooth perfect circle (not scalloped), and the check mark is relatively small compared to the circle's interior.",
+    "usage": "Task or item marked as done within a list; successful validation state on a form field; confirming a selection is active; step completion indicator in a progress flow."
+  },
+  "9": {
+    "visual": "A dashed circle made up of evenly spaced short strokes arranged in a ring, with no interior symbol. The gaps between dashes are consistent, giving the appearance of an incomplete or in-progress ring.",
+    "usage": "Placeholder for an empty or pending state; indicating an unassigned slot or optional field; representing an in-progress or draft status; showing a position not yet filled."
+  },
+  "10": {
+    "visual": "A circle outline with a question mark centered inside. The border is a smooth perfect circle, and the question mark includes both the curved upper portion and the dot below.",
+    "usage": "Unknown or unresolved status; help or FAQ trigger; indicating a value is not yet determined; showing ambiguous or uncertain state in a data field."
+  },
+  "11": {
+    "visual": "A rectangular barrier or roadblock icon: a wide horizontal rectangle with diagonal stripes (hatching) across its face, supported by two vertical posts at each end that extend below the bar. Resembles a construction barricade.",
+    "usage": "Blocked or under-construction page state; access restriction indicator; maintenance mode banner; marking a route or workflow path that is currently unavailable."
+  },
+  "12": {
+    "visual": "A flag icon with a waving rectangular flag on a vertical pole. The flag curves slightly at the right edge suggesting motion, and the pole is a straight vertical line on the left. The flag is outlined without fill.",
+    "usage": "Flagging or bookmarking a record for follow-up; marking a message or item as important; reporting content; indicating a milestone or starting point."
+  },
+  "13": {
+    "visual": "A flame icon showing a single teardrop-shaped fire with a curved inner highlight stroke suggesting the flame's inner core. The silhouette tapers to a point at the top and widens at the base.",
+    "usage": "Trending or hot content indicator; urgent or high-priority status; streak or activity indicator; highlighting a popular or featured item."
+  },
+  "14": {
+    "visual": "A circle outline containing a simple sad face: two small dots for eyes positioned in the upper half, and a downward-curved arc for a frown in the lower half.",
+    "usage": "Error or failure state with a human-friendly tone; empty state illustration for no results; negative feedback or rating indicator; conveying a system or process failure empathetically."
+  },
+  "15": {
+    "visual": "A circle outline with a lowercase 'i' (information symbol) centered inside. The border is a smooth perfect circle — identical shape to the warning circle and question circle icons, differentiated only by the 'i' glyph.",
+    "usage": "Inline information tooltip trigger; informational status indicator next to a label; help text toggle; neutral informational notice in a notification system."
+  },
+  "16": {
+    "visual": "A circle with a smaller circle centered inside it and four lines extending outward from the inner circle toward the outer ring at the four diagonal (45°) positions, dividing the ring into quadrants. Resembles a life preserver or crosshair.",
+    "usage": "Help or support indicator; life preserver / rescue metaphor for a help center link; targeting or focus state; safety or rescue-related status."
+  },
+  "17": {
+    "visual": "A loading spinner made of eight short rounded strokes radiating outward from the center like spokes on a wheel, evenly spaced at 45° intervals. The strokes vary in opacity or weight suggesting rotation direction.",
+    "usage": "Loading or processing state while waiting for a response; spinner for asynchronous operations; indicating that content is being fetched; busy state for a button or panel."
+  },
+  "18": {
+    "visual": "A thin arc forming approximately three-quarters of a circle, open at the lower-right, with rounded endpoints. It looks like an incomplete circle or a 'C' rotated slightly — commonly associated with a spinning loader.",
+    "usage": "Lightweight loading indicator for inline or small-context spinners; progress arc for a task in flight; refreshing state; minimal spinner variant where a full icon would be too heavy."
+  },
+  "19": {
+    "visual": "A circle outline containing a neutral face: two small dots for eyes and a straight horizontal line for a mouth, expressing neither happiness nor sadness.",
+    "usage": "Neutral or indifferent feedback rating; empty or placeholder state with a mild tone; representing a mediocre or average status; conveying an inconclusive result."
+  },
+  "20": {
+    "visual": "A rounded rectangle outline (like a badge or ID card shape) containing a bold lightning bolt symbol centered inside, with two small circles in the lower-left and lower-right corners of the rectangle.",
+    "usage": "Power or energy status indicator; battery or charging state; quick-action or shortcut badge; indicating an automated or accelerated process."
+  },
+  "21": {
+    "visual": "A triangle outline with rounded corners pointing upward and a bold exclamation mark centered inside. Unlike the circle-based warning icons, the enclosing shape is clearly triangular — the standard caution/warning symbol shape.",
+    "usage": "Warning or caution alert (the canonical warning symbol); validation error on a form; system or security alert requiring user attention; indicating a potentially destructive action."
+  },
+  "22": {
+    "visual": "A standalone lightning bolt shape — a thick zigzag stroke that angles sharply downward-right then down-left, with no enclosing shape. The bolt has a slight backward lean at the top.",
+    "usage": "Quick action or instant trigger; power or energy indicator; flash or boost feature; indicating a fast or automated operation."
+  }
+}

@@ -256,7 +256,7 @@ export const iconNames = [
   'highlighter',
   'layers',
   'paint-bucket',
-  'paintbrush',
+  'brush',
   'palette',
   'eyedropper',
   'ruler',
@@ -337,7 +337,7 @@ export const iconNames = [
   'languages',
   'moon',
   'settings',
-  'sliders-horizontal',
+  'sliders',
   'sun-moon',
   'wrench',
   'building',
@@ -369,7 +369,7 @@ export const iconNames = [
   'panel-bottom',
   'panel-bottom-close',
   'panel-bottom-open',
-  'panel-left',
+  'sidebar',
   'panel-left-close',
   'panel-left-open',
   'panel-right',
@@ -532,7 +532,7 @@ export const iconAliasGroups = [
     'open-external',
   ],
   ['home', 'house', 'homepage', 'main'],
-  ['layout-panel-left', 'sidebar', 'sidebar-left', 'layout-sidebar', 'view-sidebar', 'side-panel'],
+  ['layout-panel-left', 'sidebar-left', 'layout-sidebar', 'view-sidebar', 'side-panel'],
   ['layout-panel-top', 'navbar', 'layout-navbar', 'header-panel', 'top-bar', 'web-asset'],
   ['menu', 'hamburger', 'hamburger-menu', 'bars-3', 'navigation-menu', 'nav-menu'],
   ['mouse-pointer', 'cursor', 'pointer', 'arrow-cursor', 'cursor-arrow', 'arrow-selector'],
@@ -667,14 +667,14 @@ export const iconAliasGroups = [
   ['chart-pie', 'pie-chart', 'donut-chart', 'graph-pie', 'pie-graph'],
   ['chart-scatter', 'scatter-plot', 'dot-plot', 'scatter-chart', 'data-points'],
   ['clipboard-list', 'task-list', 'checklist', 'todo-list', 'assignment-list'],
-  ['funnel', 'filter-list', 'sort-funnel', 'filter-alt', 'sieve'],
+  ['funnel', 'filter', 'filter-list', 'sort-funnel', 'filter-alt', 'sieve'],
   ['gauge', 'speedometer', 'performance', 'speed', 'meter', 'dashboard-gauge', 'tachometer'],
   ['grid-2x2', 'grid-four', 'grid-view', 'squares-2x2', 'grid-small'],
   ['grid-3x3', 'grid-nine', 'grid-large'],
   ['layout-dashboard', 'dashboard', 'widgets', 'dashboard-layout', 'rectangle-group'],
   ['layout-grid', 'apps', 'grid-layout', 'app-grid'],
   ['layout-list', 'list-view', 'view-list', 'queue-list'],
-  ['list-filter', 'filter', 'sort-filter'],
+  ['list-filter', 'sort-filter'],
   ['list-tree', 'tree-view', 'nested-list'],
   ['qr-code', 'qrcode', 'barcode-2d'],
   ['radar', 'chart-polar', 'sonar', 'detection', 'sweep'],
@@ -782,8 +782,8 @@ export const iconAliasGroups = [
   ['highlighter', 'highlight', 'marker', 'ink-highlighter', 'text-highlight'],
   ['layers', 'stack', 'stacked', 'depth', 'rectangle-stack', 'overlay'],
   ['paint-bucket', 'fill', 'color-fill', 'flood-fill', 'format-color-fill'],
-  ['paintbrush', 'brush', 'paint', 'draw'],
-  ['palette', 'color-palette', 'swatch', 'theme-colors', 'colors'],
+  ['brush', 'paintbrush', 'paint', 'draw'],
+  ['palette', 'color-palette', 'swatch', 'theme', 'colors'],
   ['eyedropper', 'pipette', 'color-picker', 'colorize', 'eye-dropper', 'color-sample'],
   ['ruler', 'measure', 'dimensions', 'straighten', 'measurement'],
   ['send-to-back', 'move-back', 'layer-back', 'stack-back', 'flip-to-back', 'behind'],
@@ -879,7 +879,7 @@ export const iconAliasGroups = [
   ['languages', 'translate', 'translation', 'language', 'i18n', 'localization', 'l10n'],
   ['moon', 'dark-mode', 'night', 'dark-theme', 'crescent'],
   ['settings', 'preferences', 'config', 'configuration', 'gear', 'cog'],
-  ['sliders-horizontal', 'adjustments', 'filters-horizontal'],
+  ['sliders', 'sliders-horizontal', 'adjustments', 'filters-horizontal'],
   ['sun-moon', 'theme-toggle', 'dark-mode-toggle', 'appearance', 'light-dark', 'brightness-toggle'],
   ['wrench', 'tool', 'spanner', 'fix', 'repair', 'build', 'configure'],
   ['building', 'company', 'office', 'organization', 'enterprise', 'corporate', 'apartment'],
@@ -911,7 +911,7 @@ export const iconAliasGroups = [
   ['panel-bottom', 'bottom-panel', 'dock-bottom', 'layout-bottombar'],
   ['panel-bottom-close', 'bottom-panel-close', 'collapse-bottom', 'layout-bottombar-collapse'],
   ['panel-bottom-open', 'bottom-panel-open', 'expand-bottom', 'layout-bottombar-expand'],
-  ['panel-left', 'left-panel', 'drawer', 'navigation-panel'],
+  ['sidebar', 'left-panel', 'drawer', 'navigation-panel'],
   ['panel-left-close', 'sidebar-close', 'left-panel-close', 'collapse-sidebar', 'drawer-close'],
   ['panel-left-open', 'sidebar-open', 'left-panel-open', 'expand-sidebar', 'drawer-open'],
   ['panel-right', 'right-panel', 'sidebar-right', 'aside', 'layout-sidebar-right'],
@@ -1023,5 +1023,12 @@ export const iconAliasGroups = [
   ['target', 'crosshair-circle', 'focal-point'],
   ['triangle', 'shape-triangle', 'delta', 'change-history'],
 ];
-export const iconAliases = {};
-for (const g of iconAliasGroups) { for (let i = 1; i < g.length; i++) { iconAliases[g[i]] = g[0]; } }
+// Grouped format reduces bundle size ~40% vs flat object — expanded once at module load
+function expandAliases(groups) {
+  const aliases = {};
+  for (const [canonical, ...names] of groups) {
+    for (const name of names) { aliases[name] = canonical; }
+  }
+  return aliases;
+}
+export const iconAliases = expandAliases(iconAliasGroups);

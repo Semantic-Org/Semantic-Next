@@ -1,0 +1,46 @@
+{
+  "1": {
+    "visual": "A person silhouette enclosed within a full circle border. Inside the circle, a small hollow circle represents the head, positioned above a short arc representing the shoulders/torso. The enclosing ring gives it an avatar or profile badge appearance.",
+    "usage": "User profile avatar placeholder, account menu trigger, profile page header, login/logout button"
+  },
+  "2": {
+    "visual": "A person silhouette enclosed within a rounded rectangle border, resembling a contact card or ID badge frame. A small circle for the head sits above a shoulder arc, all contained within the card outline.",
+    "usage": "Contact card display, address book entry, vCard or ID badge context, profile detail panel"
+  },
+  "3": {
+    "visual": "A horizontal rounded rectangle (card shape) containing a small person silhouette on the left side, paired with two short horizontal lines on the right representing text rows. The layout explicitly mimics a contact list row or ID card.",
+    "usage": "Contact list item, user directory entry, team member card, identity document reference"
+  },
+  "4": {
+    "visual": "A plain, unenclosed person silhouette: a hollow circle for the head centered above a smooth upward-curving arc representing the shoulders. No border, badge, or additional decoration — the minimal baseline user icon.",
+    "usage": "Generic user field label, profile section heading, unauthenticated user state, single-user context anywhere a neutral person icon is needed"
+  },
+  "5": {
+    "visual": "A person silhouette (head circle above shoulder arc) with a checkmark badge positioned at the lower-right. The check is drawn in the same stroke weight as the figure and floats just outside the shoulder arc.",
+    "usage": "Verified user indicator, approved account status, user confirmation action, successful identity check"
+  },
+  "6": {
+    "visual": "A person silhouette (head circle above shoulder arc) with a small gear/cog icon positioned at the lower-right of the figure. The gear badge clearly signals a settings or configuration action tied to the user.",
+    "usage": "User account settings, profile preferences, manage user action in admin UI, per-user configuration"
+  },
+  "7": {
+    "visual": "A person silhouette (head circle above shoulder arc) with a horizontal minus/dash symbol positioned at the lower-right. The minus badge indicates subtraction or removal of the user.",
+    "usage": "Remove user from a group, revoke access, demote or unfriend action, decrease user count"
+  },
+  "8": {
+    "visual": "A person silhouette (head circle above shoulder arc) with a plus symbol positioned at the lower-right. The plus badge clearly signals adding or inviting a new person.",
+    "usage": "Add new user, invite to team, create account action, follow or friend request button"
+  },
+  "9": {
+    "visual": "A person silhouette (head circle above shoulder arc) with a magnifying glass icon positioned at the lower-right. The search badge combined with the figure suggests looking up or finding a specific user.",
+    "usage": "Search for a user, find member in directory, user lookup field, people search feature"
+  },
+  "10": {
+    "visual": "A person silhouette (head circle above shoulder arc) with an X symbol positioned at the lower-right. The X badge signals deletion, blocking, or dismissal of the user.",
+    "usage": "Delete user account, block or ban user, remove member from list, close/dismiss user record"
+  },
+  "11": {
+    "visual": "A person silhouette (head circle above shoulder arc) with two small curved concentric arcs emanating from the right side of the head, resembling sound waves or speech lines. The arcs suggest the person is speaking, broadcasting, or active.",
+    "usage": "Active speaker in a call, voice or audio mode indicator, text-to-speech user action, live or broadcasting user status"
+  }
+}

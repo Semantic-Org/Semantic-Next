@@ -1,0 +1,26 @@
+{
+  "1": {
+    "visual": "A language/translation icon showing a stylized Chinese character on the left overlapping with a large Latin letter 'A' on the right, representing bilingual or multilingual text conversion.",
+    "usage": "Language and locale settings panel, translation feature toggle, internationalization preferences, switching UI language in account settings."
+  },
+  "2": {
+    "visual": "A crescent moon outline with a circular cutout on its inner right edge, creating a classic waning crescent shape — no additional decorative elements.",
+    "usage": "Dark mode toggle, do-not-disturb or sleep mode setting, night theme preference, quiet hours configuration."
+  },
+  "3": {
+    "visual": "A gear/cog icon with eight rounded teeth around a circular outer edge and a hollow circle at the center, rendered as a clean outline with no fill.",
+    "usage": "General settings or preferences page, application configuration menu, system options panel, account settings entry point."
+  },
+  "4": {
+    "visual": "Three horizontal lines of varying lengths, each with a small vertical tick (handle) positioned at a different point along the line — top handle on the right, middle handle in the center, bottom handle on the left — representing adjustable sliders.",
+    "usage": "Filter or sort options panel, audio/display adjustment controls, advanced preferences with multiple tunable parameters, dashboard customization."
+  },
+  "5": {
+    "visual": "A crescent moon combined with a small sun — the crescent faces left and is accompanied by a partial sun burst with short rays in the upper-right area, visually blending night and day symbols together.",
+    "usage": "Auto or adaptive theme setting (follows system light/dark mode), time-of-day based appearance toggle, display brightness schedule, day/night mode switcher."
+  },
+  "6": {
+    "visual": "A wrench icon depicted at a roughly 45-degree angle, with a rounded open jaw at the upper left and a tapered handle extending to the lower right — a classic single-ended wrench silhouette.",
+    "usage": "Maintenance or repair tools section, developer or advanced settings, build/tooling configuration, system diagnostics panel."
+  }
+}

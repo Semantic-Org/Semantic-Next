@@ -1,0 +1,62 @@
+{
+  "1": {
+    "visual": "A thick circular ring enclosing two vertical parallel bars centered inside it. The circle acts as a border/container around the pause symbol.",
+    "usage": "Pause button in a video or audio player, suspend a podcast episode, pause a slideshow, pause a streaming media playback control."
+  },
+  "2": {
+    "visual": "A thick circular ring enclosing a right-pointing triangle (play arrow) that is slightly inset from the right edge of the circle. The triangle is unfilled/outlined, and the circle forms the outer boundary.",
+    "usage": "Play button in an audio or video player, start a podcast episode, resume paused media, trigger playback in an inline media widget."
+  },
+  "3": {
+    "visual": "A thick circular ring enclosing a small filled square centered inside it. The square is clearly smaller than the circle, creating visible space between the square and the ring.",
+    "usage": "Stop button in a media player, end a recording session, stop a live stream, halt audio playback completely."
+  },
+  "4": {
+    "visual": "Two right-pointing outlined triangles side by side with no enclosing circle, both using a thick rounded outline stroke. The left triangle is slightly behind the right, creating a double-chevron fast-forward appearance.",
+    "usage": "Fast-forward through audio or video content, skip ahead in a podcast, increase playback speed, advance through a recording."
+  },
+  "5": {
+    "visual": "Two tall rounded rectangles side by side with no enclosing circle, rendered as thick outlined bars with substantial gap between them. This is the bare pause symbol without any container shape.",
+    "usage": "Pause button in a compact media player UI, pause icon in a toolbar or icon set, pause state indicator in a music app, suspend media in an inline player."
+  },
+  "6": {
+    "visual": "A picture-in-picture icon showing a small rectangle overlapping the lower-left corner of a larger rectangle, with a downward-left arrow pointing toward the smaller rectangle. The arrow suggests collapsing or moving content into the smaller view.",
+    "usage": "Activate picture-in-picture mode for a video, minimize a video to a floating window, enter compact media view, collapse a fullscreen video to an overlay."
+  },
+  "7": {
+    "visual": "A single right-pointing triangle rendered with a thick rounded outline stroke, no enclosing circle. Larger and more prominent than the play triangle in icon 2, with rounded corners on the triangle shape itself.",
+    "usage": "Play button in a media player toolbar, start video or audio playback, play icon in an icon-only control bar, trigger a preview in a media library."
+  },
+  "8": {
+    "visual": "Two curved arrows forming a loop — one arrow curves from left to right across the top, the other curves from right to left across the bottom, each with an arrowhead pointing in its travel direction. The arrows interlock to suggest continuous cycling.",
+    "usage": "Loop or repeat toggle for a track or playlist, enable repeat mode in a music player, refresh or reload media content, cycle through a playlist indefinitely."
+  },
+  "9": {
+    "visual": "Two left-pointing outlined triangles side by side with no enclosing circle, using a thick rounded outline stroke. Mirrors icon 4 but pointing left, creating a double-chevron rewind appearance.",
+    "usage": "Rewind audio or video content, skip backward in a podcast, go to the beginning of a recording, fast-reverse through playback."
+  },
+  "10": {
+    "visual": "Two curved arrows crossing diagonally — one bends from lower-left to upper-right, the other from upper-left to lower-right — each with an arrowhead, forming an X-like shuffle pattern.",
+    "usage": "Shuffle or randomize track order in a playlist, enable random playback mode in a music app, toggle shuffle in a queue, randomize a media queue."
+  },
+  "11": {
+    "visual": "A single left-pointing outlined triangle with a vertical bar on its left side, and no enclosing circle. The bar acts as a hard stop/boundary to the left of the triangle, indicating skip-to-previous rather than continuous rewind.",
+    "usage": "Skip to the previous track in a media player, go back to the beginning of the current track, previous chapter in a podcast, navigate to the prior item in a playlist."
+  },
+  "12": {
+    "visual": "A single right-pointing outlined triangle with a vertical bar on its right side, and no enclosing circle. The bar sits flush to the right of the triangle tip, indicating skip-to-next rather than continuous fast-forward.",
+    "usage": "Skip to the next track in a media player, advance to the next chapter or episode, next item in a playlist, skip forward in a queue."
+  },
+  "13": {
+    "visual": "A speaker shape (trapezoidal body with a rectangular base) with two curved sound wave arcs radiating from its right side, indicating active audio output at a moderate volume level.",
+    "usage": "Volume control button in a media player, audio output indicator, mute/unmute toggle when sound is active, sound settings entry point in a video player."
+  },
+  "14": {
+    "visual": "A speaker shape identical to icon 13 but with only a single small curved arc to its right, indicating low volume output. The single arc is noticeably smaller than the two arcs in icon 13.",
+    "usage": "Low volume indicator in a media player, volume-down state before muting, quiet audio level indicator, step in a volume slider control."
+  },
+  "15": {
+    "visual": "A speaker shape identical to icons 13 and 14 but with an X mark to its right instead of sound wave arcs, clearly indicating muted or no audio output.",
+    "usage": "Mute button in a video or audio player, silence notifications toggle, muted state indicator in a conference call UI, disable audio output in media settings."
+  }
+}

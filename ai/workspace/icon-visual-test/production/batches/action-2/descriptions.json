@@ -1,0 +1,122 @@
+{
+  "1": {
+    "visual": "Two interlocking chain links arranged diagonally, forming the classic hyperlink symbol. The links are rendered as thick rounded rectangles overlapping at the center.",
+    "usage": "Copy or share a URL, insert a hyperlink in a text editor, link two related records, display a connected/linked state."
+  },
+  "2": {
+    "visual": "A checklist with two rows, each showing a bold checkmark on the left and a short horizontal line representing text on the right. The checkmarks are large and the lines are medium-length.",
+    "usage": "View a to-do list, display task completion status, show a checklist form, represent a list of verified items."
+  },
+  "3": {
+    "visual": "Two diagonal arrows pointing away from each other — one toward the upper-right and one toward the lower-left — connected by a dashed line in the middle, indicating expansion or fullscreen.",
+    "usage": "Expand a panel to fullscreen, maximize a modal or card, scale content outward, enter an expanded view mode."
+  },
+  "4": {
+    "visual": "A single upward-pointing arrow whose shaft splits into two branches diverging to the lower-left and lower-right, resembling a merge or fork shape pointing upward.",
+    "usage": "Merge two branches into one, combine multiple inputs into a single output, represent a git merge action, indicate consolidation."
+  },
+  "5": {
+    "visual": "Two diagonal arrows pointing toward each other — one from the upper-right and one from the lower-left — both aimed at the center, indicating compression or collapse.",
+    "usage": "Collapse a fullscreen view, minimize or compress a panel, shrink content to fit, exit an expanded view mode."
+  },
+  "6": {
+    "visual": "A single short, thick horizontal line centered in the icon with rounded ends, representing a minus or remove symbol.",
+    "usage": "Remove an item from a list, decrease a quantity, collapse a section, indicate a subtraction or deletion action."
+  },
+  "7": {
+    "visual": "A cursor arrow pointer angled to the lower-left with short radiating lines around its tip, suggesting a click or tap action with visual feedback.",
+    "usage": "Indicate a clickable element, represent an interactive cursor, show click or tap feedback, highlight a selectable area."
+  },
+  "8": {
+    "visual": "Four arrows pointing outward in all four cardinal directions (up, down, left, right) from a shared center point, forming a cross or move symbol.",
+    "usage": "Drag and reposition an element, move a widget on a canvas, indicate a draggable item, represent pan or move mode."
+  },
+  "9": {
+    "visual": "A paperclip shape with a looping oval form tapering to a point at the bottom, rendered in the classic diagonal paperclip orientation.",
+    "usage": "Attach a file to a message or form, indicate an attachment is present, add a document to an email, link a file resource."
+  },
+  "10": {
+    "visual": "A pencil or pen shape oriented diagonally from lower-left to upper-right, with a pointed tip at the lower-left and a flat eraser end at the upper-right.",
+    "usage": "Edit or modify content, open a text or field editor, rename an item, annotate a document."
+  },
+  "11": {
+    "visual": "A pushpin with a round head at the top and a narrow vertical stem pointing downward, viewed from the front with the pin centered and symmetric.",
+    "usage": "Pin an item to stay visible, mark a pinned or saved message, indicate a fixed/sticky element, add a location marker."
+  },
+  "12": {
+    "visual": "A pushpin shape with a diagonal line crossing through it from upper-left to lower-right, indicating a disabled or negated pin state.",
+    "usage": "Unpin an item, remove a pinned status, indicate unpinning is available, show a not-pinned state."
+  },
+  "13": {
+    "visual": "A large plus sign with four equal arms of uniform thickness, centered in the icon, representing add or create.",
+    "usage": "Add a new item or record, create a new entry, expand a collapsed section, insert content into a list or canvas."
+  },
+  "14": {
+    "visual": "A curved arrow that arcs to the left and then turns sharply to point right, resembling a forward-redirect or redo shape with the arrowhead on the right side.",
+    "usage": "Redo an undone action, forward a message, redirect to another destination, indicate a reply-forward gesture."
+  },
+  "15": {
+    "visual": "Two circular arrows forming a complete refresh loop — one arc on the upper-left curving clockwise and one on the lower-right, with arrowheads at both tips pointing in opposite directions.",
+    "usage": "Refresh or reload data, sync content between two sources, retry a failed operation, indicate a two-way sync process."
+  },
+  "16": {
+    "visual": "A small square in the lower-left with a downward-pointing arrow above it and a dotted/dashed partial square shape in the upper-right, suggesting an item being dragged or dropped into place.",
+    "usage": "Drag and drop an element, move a component to a target zone, indicate a drop target, represent a reorder action."
+  },
+  "17": {
+    "visual": "A rocket ship silhouette pointing toward the upper-right, with a rounded body, a pointed nose cone, and a small flame or exhaust detail at the lower-left tail.",
+    "usage": "Launch a new project or app, indicate a deploy or publish action, represent speed or acceleration, show a startup or onboarding action."
+  },
+  "18": {
+    "visual": "A circular arrow forming almost a full circle with the arrowhead on the left side pointing counterclockwise, representing undo or rotate-left.",
+    "usage": "Undo the last action, rotate content counterclockwise, go back to a previous state, replay from the beginning."
+  },
+  "19": {
+    "visual": "A circular arrow forming almost a full circle with the arrowhead on the right side pointing clockwise, representing redo or rotate-right.",
+    "usage": "Redo a previously undone action, rotate content clockwise, advance to the next state, refresh in a forward direction."
+  },
+  "20": {
+    "visual": "A floppy disk shape with a square body, a rectangular cutout at the top-right corner for the label area, and a smaller rectangle centered at the bottom representing the disk slot.",
+    "usage": "Save a file or document, trigger a save action in an editor, indicate unsaved changes, store current work."
+  },
+  "21": {
+    "visual": "Four right-angle corner brackets at each of the four corners of an imaginary rectangle, with open space in the center, representing a fullscreen or focus frame.",
+    "usage": "Enter fullscreen mode, focus on a selected area, frame or crop content, indicate a scan or capture region."
+  },
+  "22": {
+    "visual": "A pair of scissors with two circular handle loops on the left and two open blades extending to the upper-right and lower-right, in the classic cut symbol orientation.",
+    "usage": "Cut selected text or content, remove a clipping from a layout, trigger a cut action in an editor, separate a portion of content."
+  },
+  "23": {
+    "visual": "A magnifying glass with a circular lens on the upper-left and a short handle extending to the lower-right, representing search or zoom.",
+    "usage": "Open a search field, zoom into content, find items in a list or page, trigger a search or filter action."
+  },
+  "24": {
+    "visual": "An upward-pointing arrow emerging from a tray or box shape at the bottom — the box has an open top and the arrow points straight up out of it, representing an upload or share-from action.",
+    "usage": "Upload a file, share content to an external destination, export data, send from a local device to a remote service."
+  },
+  "25": {
+    "visual": "A single vertical arrow pointing downward that splits into two branches diverging upward-left and upward-right, resembling an upside-down fork or a split/branch shape.",
+    "usage": "Fork a workflow into multiple paths, split a single input into two outputs, represent a branching decision, indicate a diverging process."
+  },
+  "26": {
+    "visual": "A hand with the thumb pointing downward and fingers curled, the classic thumbs-down or dislike gesture, viewed at a slight angle.",
+    "usage": "Dislike or downvote content, rate something negatively, reject a suggestion, indicate disapproval in a feedback system."
+  },
+  "27": {
+    "visual": "A hand with the thumb pointing upward and fingers curled forward, the classic thumbs-up or like gesture, viewed at a slight angle.",
+    "usage": "Like or upvote content, approve a suggestion, give positive feedback, indicate agreement or endorsement."
+  },
+  "28": {
+    "visual": "A trash can with a rectangular body, a flat lid at the top with a small handle tab, and two vertical lines inside the body representing slots or dividers.",
+    "usage": "Delete an item or file, move content to the trash, permanently remove a record, clear selected items."
+  },
+  "29": {
+    "visual": "A curved arrow that arcs upward to the right and then turns to point back to the left, resembling a reply or undo shape with the arrowhead on the left side.",
+    "usage": "Reply to a message, undo the last action, go back to a previous step, return to a prior state."
+  },
+  "30": {
+    "visual": "Two curved arc segments breaking apart from each other — one in the upper-right and one in the lower-left — with small radiating tick marks at the break points, suggesting a chain or link being severed.",
+    "usage": "Unlink or disconnect two items, remove a hyperlink, break a connection between records, indicate a broken or invalid link."
+  }
+}

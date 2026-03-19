@@ -1,0 +1,38 @@
+{
+  "1": {
+    "visual": "A rounded rectangle (like a cassette tape or payment card) with a small circular element in the center and two dots flanking it on the left and right — resembling a cash or credit card in landscape orientation.",
+    "usage": "Payment method selection; card-on-file management; checkout billing sections; stored payment settings."
+  },
+  "2": {
+    "visual": "A dollar sign symbol enclosed within a perfect circle with a thin outline — the circle frames the currency symbol cleanly with even padding on all sides.",
+    "usage": "Monetary value fields; pricing or subscription plan indicators; in-app currency or credits displays; payment amount labels."
+  },
+  "3": {
+    "visual": "Two overlapping coin circles, each containing a numeral '1', with a small curved arrow suggesting a swap or exchange between them — depicting a coin transfer or currency conversion.",
+    "usage": "Currency exchange or conversion tools; peer-to-peer payment flows; coin or token transfer actions; transaction history entries."
+  },
+  "4": {
+    "visual": "A standalone dollar sign without any enclosing shape — a vertical stroke crossed by two horizontal bars, rendered with bold weight and no surrounding border or circle.",
+    "usage": "Price or cost fields in forms; revenue or earnings summary labels; financial totals in dashboards; currency input prefixes."
+  },
+  "5": {
+    "visual": "A euro sign — the stylized 'C' shape with two horizontal parallel bars through its center — rendered as a plain glyph with no enclosing shape.",
+    "usage": "Euro-denominated price fields; European payment or billing forms; currency selector options; localized financial dashboards."
+  },
+  "6": {
+    "visual": "A classical columned building with a triangular pediment roof and four vertical pillars above a solid base — representing a bank, government institution, or financial establishment.",
+    "usage": "Banking or financial institution sections; account or routing number fields; government services portals; institutional partner listings."
+  },
+  "7": {
+    "visual": "A percent sign composed of two small open circles connected by a diagonal line running from lower-left to upper-right — cleanly drawn with no enclosing shape.",
+    "usage": "Discount or coupon code fields; interest rate displays; tax rate inputs; sale or promotional percentage indicators."
+  },
+  "8": {
+    "visual": "A balance scale icon: a central vertical post with a horizontal beam balanced at the top, and two hanging pans of equal size suspended from each end — representing justice, fairness, or comparison.",
+    "usage": "Legal or compliance sections; price comparison features; terms and conditions pages; fairness or audit-related settings."
+  },
+  "9": {
+    "visual": "A bi-fold wallet icon viewed from the front: a rectangular outline with a small rectangular clasp or card slot protruding from the right edge near the top — suggesting a folded wallet that can hold cards.",
+    "usage": "Wallet or payment method management; stored funds or balance displays; digital wallet features; personal finance dashboards."
+  }
+}

@@ -479,7 +479,7 @@
   --icon-droplet: var(--icon-eye-dropper);
   --icon-layers: var(--icon-rectangle-stack);
   --icon-paint-bucket: var(--icon-paint-brush);
-  --icon-paintbrush: var(--icon-paint-brush);
+  --icon-brush: var(--icon-paint-brush);
   --icon-palette: var(--icon-swatch);
   --icon-eyedropper: var(--icon-eye-dropper);
   --icon-signature: var(--icon-pencil);
@@ -541,7 +541,7 @@
   /* Settings */
   --icon-languages: var(--icon-language);
   --icon-settings: var(--icon-cog-6-tooth);
-  --icon-sliders-horizontal: var(--icon-adjustments-horizontal);
+  --icon-sliders: var(--icon-adjustments-horizontal);
   --icon-sun-moon: var(--icon-sun);
 
   /* Organization */
@@ -570,7 +570,7 @@
   /* System */
   --icon-app-window: var(--icon-window);
   --icon-command: var(--icon-command-line);
-  --icon-panel-left: var(--icon-bars-3-bottom-left);
+  --icon-sidebar: var(--icon-bars-3-bottom-left);
 
   /* Device */
   --icon-battery: var(--icon-battery-100);

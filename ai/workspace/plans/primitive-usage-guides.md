@@ -483,6 +483,13 @@ guideSections:
 
 ## Implementation Phases
 
+### Phase 0: Usage Tab Plumbing
+- [ ] Add `usage` to tab arrays in primitive content entries (e.g., `tabs: ['usage', 'singular', 'plural', 'spec']`)
+- [ ] Update route handler (`docs/src/pages/ui/primitives/[...slug].astro`) to render MDX body when `usage` tab is active
+- [ ] Wire up rail nav for the usage tab (initially from MDX headings, or empty)
+- [ ] Make `usage` the first tab so it becomes the landing page
+- [ ] Verify the empty usage page renders correctly with the existing layout chrome (sidebar, masthead, rail)
+
 ### Phase 1: Specimen Explorer
 - [ ] Design the `specimen-explorer` component using `defineComponent`
 - [ ] Build control generation from spec sections (types → radio, variations → dropdown/checkbox, states → checkbox)
@@ -492,13 +499,11 @@ guideSections:
 - [ ] Add copy button for generated HTML
 - [ ] Style the specimen to be a strong visual hero
 
-### Phase 2: Usage Tab Infrastructure
-- [ ] Add `UsageGuide.astro` component with auto-generated sections
-- [ ] Update route handler to support `usage` tab
-- [ ] Build `getUsageMenu()` for rail navigation
-- [ ] Add `usage` to tab arrays in content entries
+### Phase 2: Usage Tab Auto-Generated Sections
+- [ ] Add `UsageGuide.astro` component to orchestrate auto-generated + authored sections
 - [ ] Build auto-generated section components (imports, settings table, events table)
 - [ ] Integrate SpecimenExplorer as the hero section
+- [ ] Build `getUsageMenu()` for rail navigation (auto-generated sections + MDX headings)
 
 ### Phase 3: Usage Tab Default Template Polish
 - [ ] Settings table component with proper formatting

@@ -225,7 +225,7 @@ export const iconMappings = {
   },
   'layout-panel-left': {
     category: 'navigation',
-    aliases: ['sidebar', 'sidebar-left', 'layout-sidebar', 'view-sidebar', 'side-panel'],
+    aliases: ['sidebar-left', 'layout-sidebar', 'view-sidebar', 'side-panel'],
     description: 'Layout with left sidebar panel',
     lucide: 'layout-panel-left',
     phosphor: 'sidebar',
@@ -1443,7 +1443,7 @@ export const iconMappings = {
   },
   'funnel': {
     category: 'data',
-    aliases: ['filter-list', 'sort-funnel', 'filter-alt', 'sieve'],
+    aliases: ['filter', 'filter-list', 'sort-funnel', 'filter-alt', 'sieve'],
     description: 'Filter data',
     lucide: 'funnel',
     phosphor: 'funnel',
@@ -1513,7 +1513,7 @@ export const iconMappings = {
   },
   'list-filter': {
     category: 'data',
-    aliases: ['filter', 'sort-filter'],
+    aliases: ['sort-filter'],
     description: 'Filter a list',
     lucide: 'list-filter',
     phosphor: 'funnel',
@@ -2621,9 +2621,9 @@ export const iconMappings = {
     materialSymbols: 'format_color_fill',
     heroicons: 'paint-brush',
   },
-  'paintbrush': {
+  'brush': {
     category: 'editing',
-    aliases: ['brush', 'paint', 'draw'],
+    aliases: ['paintbrush', 'paint', 'draw'],
     description: 'Paint or draw freeform',
     lucide: 'paintbrush',
     phosphor: 'paint-brush',
@@ -2633,7 +2633,7 @@ export const iconMappings = {
   },
   'palette': {
     category: 'editing',
-    aliases: ['color-palette', 'swatch', 'theme-colors', 'colors'],
+    aliases: ['color-palette', 'swatch', 'theme', 'colors'],
     description: 'Color palette or theme selection',
     lucide: 'palette',
     phosphor: 'palette',
@@ -3465,9 +3465,9 @@ export const iconMappings = {
     materialSymbols: 'settings',
     heroicons: 'cog-6-tooth',
   },
-  'sliders-horizontal': {
+  'sliders': {
     category: 'settings',
-    aliases: ['adjustments', 'filters-horizontal'],
+    aliases: ['sliders-horizontal', 'adjustments', 'filters-horizontal'],
     description: 'Adjustable filter or preference controls',
     lucide: 'sliders-horizontal',
     phosphor: 'sliders-horizontal',
@@ -3805,7 +3805,7 @@ export const iconMappings = {
     materialSymbols: 'bottom_panel_open',
     heroicons: null,
   },
-  'panel-left': {
+  'sidebar': {
     category: 'system',
     aliases: ['left-panel', 'drawer', 'navigation-panel'],
     description: 'Left sidebar panel layout',

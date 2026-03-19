@@ -1,0 +1,86 @@
+{
+  "1": {
+    "visual": "A plain document outline with a folded upper-right corner, containing no interior content. The clean silhouette uses just the page shape and dog-ear fold.",
+    "usage": "New file creation button, blank document placeholder, generic file type indicator, empty state for a document viewer."
+  },
+  "2": {
+    "visual": "A document with a folded upper-right corner and a vertical ellipsis (three stacked dots) in the center, with a small circle below it resembling a version-control node. Suggests a file with additional options or a commit point.",
+    "usage": "File options/overflow menu trigger, version history entry for a document, file action menu in a code repository, document more-actions button."
+  },
+  "3": {
+    "visual": "A document with a folded upper-right corner and a bold checkmark in the lower-center area. The check visually signals approval or completion.",
+    "usage": "Mark a file as reviewed, approved document indicator, task checklist file item, file verification status badge."
+  },
+  "4": {
+    "visual": "A document with a folded upper-right corner and a pair of angle brackets (< >) centered inside, representing source code. The symbols are distinctly code-like.",
+    "usage": "Source code file indicator, open a code editor, code file type badge, programming file in a file browser."
+  },
+  "5": {
+    "visual": "A document with a folded upper-right corner containing a small circle with a landscape/mountain image placeholder in the lower area. Represents an image embedded in or attached to a file.",
+    "usage": "Image file type indicator, photo attachment in a document, media file in a file manager, picture document preview."
+  },
+  "6": {
+    "visual": "A document with a folded upper-right corner and a padlock icon centered in the lower half. The lock clearly signals restricted or protected access.",
+    "usage": "Locked or read-only file indicator, confidential document marker, password-protected file, access-restricted content badge."
+  },
+  "7": {
+    "visual": "A document with a folded upper-right corner and a bold plus sign (+) centered inside. The plus signals adding or creating.",
+    "usage": "Create a new file, add a document to a collection, upload new file button, new document action in a file list."
+  },
+  "8": {
+    "visual": "A document with a folded upper-right corner and a magnifying glass icon centered inside. The lens overlaps the lower portion of the page.",
+    "usage": "Search within a file, document search action, find-in-file button, file preview/inspect trigger."
+  },
+  "9": {
+    "visual": "A document with a folded upper-right corner containing three pairs of short horizontal dashes arranged in rows, resembling a structured list or spreadsheet grid.",
+    "usage": "Spreadsheet or data file indicator, structured document type badge, CSV/table file in a file browser, data report file."
+  },
+  "10": {
+    "visual": "A document with a folded upper-right corner and three full-width horizontal lines inside, representing lines of text. The lines extend closer to the edges than those in icon 9.",
+    "usage": "Text document or notes file indicator, document detail view, readme or text file badge, open document action."
+  },
+  "11": {
+    "visual": "A document with a folded upper-right corner and a bold X (cross) centered inside. The X clearly signals removal or error.",
+    "usage": "Delete a file, remove document from list, file error or invalid state, close/discard document action."
+  },
+  "12": {
+    "visual": "Two overlapping document outlines — a smaller page in front and a slightly larger one behind and to the left — both with folded upper-right corners, representing duplication.",
+    "usage": "Copy file action, duplicate document button, clipboard copy indicator, clone a file in a file manager."
+  },
+  "13": {
+    "visual": "A simple open folder outline — a rectangular body with a slightly raised tab on the top-left — with no contents visible. The folder is closed-looking but rendered with rounded corners.",
+    "usage": "Navigate to a directory, closed folder in a file tree, empty folder state, folder/directory indicator."
+  },
+  "14": {
+    "visual": "An open folder with its lid flipped up and a small document shape visible inside the opening. The flap is angled to clearly show the folder is open and accessible.",
+    "usage": "Open or browse a folder, active/expanded directory in a file tree, file access action, current working directory indicator."
+  },
+  "15": {
+    "visual": "A folder outline with a bold plus sign (+) centered in the lower body. The plus clearly signals creation.",
+    "usage": "Create a new folder, add directory button, new folder action in a file manager, organize files into a new location."
+  },
+  "16": {
+    "visual": "Two folder outlines arranged in a parent-child tree structure — a larger folder on the upper-left connected by an L-shaped line to a smaller folder on the lower-right. Represents a nested directory hierarchy.",
+    "usage": "File system tree navigation, nested folder structure indicator, directory hierarchy view, project structure overview."
+  },
+  "17": {
+    "visual": "Two overlapping document shapes — a larger one behind on the left and a smaller one in front on the right — each showing horizontal text lines inside, suggesting copying or duplicating text documents.",
+    "usage": "Copy document with content, duplicate report action, document copy indicator, clone a text file."
+  },
+  "18": {
+    "visual": "A notebook or binder with spiral binding rings along the left edge and two horizontal lines on the right page, representing organized notes or a ruled notebook.",
+    "usage": "Notes or journal section, notebook or planner feature, personal document collection, meeting notes file type."
+  },
+  "19": {
+    "visual": "A rectangular presentation board or whiteboard on a two-legged easel stand, with no content on the surface. The shape is minimal and clean.",
+    "usage": "Presentation or slideshow file, start a presentation mode, whiteboard or slide deck indicator, display/present document action."
+  },
+  "20": {
+    "visual": "A rolled or curled scroll with two horizontal text lines visible on the unrolled portion. The bottom-left corner curls inward, giving a parchment or scroll appearance.",
+    "usage": "Terms and conditions document, legal or contract file, historical or formal document indicator, license or policy file."
+  },
+  "21": {
+    "visual": "A document outline with a folded upper-right corner and significantly more rounded corners on the remaining three sides compared to similar page icons. The interior is blank with no symbols.",
+    "usage": "Generic file placeholder with a softer visual style, new document in a rounded-design UI, blank note or memo, file icon in a card-based layout."
+  }
+}

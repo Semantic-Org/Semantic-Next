@@ -674,7 +674,6 @@
   --icon-highlighter: var(--icon-highlight);
   --icon-layers: var(--icon-stack-2);
   --icon-paint-bucket: var(--icon-paint);
-  --icon-paintbrush: var(--icon-brush);
   --icon-eyedropper: var(--icon-color-picker);
   --icon-send-to-back: var(--icon-stack-back);
   --icon-shapes: var(--icon-shape);
@@ -721,7 +720,7 @@
 
   /* Settings */
   --icon-languages: var(--icon-language);
-  --icon-sliders-horizontal: var(--icon-adjustments-horizontal);
+  --icon-sliders: var(--icon-adjustments-horizontal);
   --icon-wrench: var(--icon-tool);
 
   /* Organization */
@@ -746,7 +745,7 @@
   --icon-panel-bottom: var(--icon-layout-bottombar);
   --icon-panel-bottom-close: var(--icon-layout-bottombar-collapse);
   --icon-panel-bottom-open: var(--icon-layout-bottombar-expand);
-  --icon-panel-left: var(--icon-layout-sidebar);
+  --icon-sidebar: var(--icon-layout-sidebar);
   --icon-panel-left-close: var(--icon-layout-sidebar-left-collapse);
   --icon-panel-left-open: var(--icon-layout-sidebar-left-expand);
   --icon-panel-right: var(--icon-layout-sidebar-right);
