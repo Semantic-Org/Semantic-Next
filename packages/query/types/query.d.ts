@@ -92,6 +92,50 @@ export interface DimensionOptions {
 }
 
 /**
+ * Options for naturalWidth calculations.
+ */
+export interface NaturalWidthOptions {
+  /**
+   * Preserve the element's max-width constraint during calculation. Defaults to false.
+   */
+  preserveMaxWidth?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
+}
+
+/**
+ * Options for naturalHeight calculations.
+ */
+export interface NaturalHeightOptions {
+  /**
+   * Preserve the element's max-height constraint during calculation. Defaults to false.
+   */
+  preserveMaxHeight?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
+}
+
+/**
  * A minimal toolkit for querying and performing modifications
  * across DOM nodes based off a selector.
  * @see {@link https://next.semantic-ui.com/docs/api/query Query API Reference}
@@ -859,18 +903,24 @@ export class Query {
   detach(): this;
 
   /**
-   * Gets the natural width (width without applied styles) of the *first* element in the set.
+   * Gets the natural width (width without applied styles) of the *first* element in the set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-width preservation (preserveMaxWidth).
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalWidth
+   * @param options - Options to control max-width preservation and box model inclusions.
    * @returns The natural width of the element.
    */
-  naturalWidth(): number | number[];
+  naturalWidth(options?: NaturalWidthOptions): number | number[];
 
   /**
-   * Gets the natural height (height without applied styles) of the *first* in the current set.
+   * Gets the natural height (height without applied styles) of the *first* element in the current set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-height preservation (preserveMaxHeight).
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalHeight
+   * @param options - Options to control max-height preservation and box model inclusions.
    * @returns The natural height of the element.
    */
-  naturalHeight(): number | number[];
+  naturalHeight(options?: NaturalHeightOptions): number | number[];
 
   /**
    * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.

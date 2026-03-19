@@ -1644,8 +1644,9 @@ export class Query {
     });
   }
 
-  naturalWidth({ preserveMaxWidth = true } = {}) {
+  naturalWidth({ preserveMaxWidth = true, includeMargin = false, includePadding = false, includeBorder = false } = {}) {
     const widths = this.map((el) => {
+      const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
         position: 'absolute',
@@ -1659,26 +1660,31 @@ export class Query {
         isolation: 'isolate',
         contain: 'layout paint style',
         maxWidth: 'none',
-        boxSizing: 'content-box',
-        padding: '0px',
-        margin: '0px',
-        border: '0px',
       };
+      if (!includeBoxModel) {
+        css.boxSizing = 'content-box';
+        css.padding = '0px';
+        css.margin = '0px';
+        css.border = '0px';
+      }
       if (preserveMaxWidth) {
         delete css.maxWidth;
       }
       $clone
         .insertAfter(el)
         .css(css);
-      const naturalWidth = $clone.width();
+      const naturalWidth = $clone.width({ includeMargin, includePadding, includeBorder });
       $clone.remove();
       return naturalWidth;
     });
     return widths.length > 1 ? widths : widths[0];
   }
 
-  naturalHeight({ preserveMaxHeight = true } = {}) {
+  naturalHeight(
+    { preserveMaxHeight = true, includeMargin = false, includePadding = false, includeBorder = false } = {},
+  ) {
     const height = this.map((el) => {
+      const includeBoxModel = includeMargin || includePadding || includeBorder;
       const $clone = this.chain(el).clone();
       const css = {
         position: 'absolute',
@@ -1692,18 +1698,20 @@ export class Query {
         isolation: 'isolate',
         contain: 'layout paint style',
         maxHeight: 'none',
-        boxSizing: 'content-box',
-        padding: '0px',
-        margin: '0px',
-        border: '0px',
       };
+      if (!includeBoxModel) {
+        css.boxSizing = 'content-box';
+        css.padding = '0px';
+        css.margin = '0px';
+        css.border = '0px';
+      }
       if (preserveMaxHeight) {
         delete css.maxHeight;
       }
       $clone
         .insertAfter(el)
         .css(css);
-      const naturalHeight = $clone.height();
+      const naturalHeight = $clone.height({ includeMargin, includePadding, includeBorder });
       $clone.remove();
       return naturalHeight;
     });
