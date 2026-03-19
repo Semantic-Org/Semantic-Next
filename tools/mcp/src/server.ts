@@ -1,5 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as reactivity from '@semantic-ui/reactivity';
+import { ICON_CATEGORIES, iconMappings } from '@semantic-ui/specs';
+import { iconAliases } from '@semantic-ui/specs/icons/meta';
 import { TemplateCompiler } from '@semantic-ui/templating';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
@@ -108,6 +110,7 @@ Write classes you know. The sophisticated theming system is there when needed, n
 
 ### Get Content
 - \`get_component\` - Full spec for a component (attributes, variations, states)
+- \`get_icon\` - Look up icons by canonical name, alias, or library-native name (e.g., Lucide's "house" → "home")
 - \`get_example\` - Working code to reference or adapt
 - \`get_api\` - Look up a specific method by name (e.g., "weightedObjectSearch")
 - \`get_user_doc\` - User documentation by path:
@@ -253,6 +256,198 @@ Optional params:
       // Batch request: return array of results
       return {
         content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+      };
+    },
+  );
+
+  // ============================================================================
+  // Icon Tools
+  // ============================================================================
+
+  // Build reverse lookup: library-native name → canonical name
+  const ICON_LIBRARIES = ['lucide', 'phosphor', 'tabler', 'materialSymbols', 'heroicons'] as const;
+  const LIB_DISPLAY: Record<string, string> = {
+    lucide: 'lucide',
+    phosphor: 'phosphor',
+    tabler: 'tabler',
+    materialSymbols: 'material-symbols',
+    heroicons: 'heroicons',
+  };
+
+  // Reverse index: native name → { canonical, library }
+  type NativeEntry = { canonical: string; library: string; };
+  const nativeIndex = new Map<string, NativeEntry[]>();
+  for (const [canonical, entry] of Object.entries(iconMappings)) {
+    for (const lib of ICON_LIBRARIES) {
+      const native = (entry as Record<string, unknown>)[lib] as string | null;
+      if (native && native !== canonical) {
+        const existing = nativeIndex.get(native) || [];
+        existing.push({ canonical, library: lib });
+        nativeIndex.set(native, existing);
+      }
+    }
+  }
+
+  function searchIcons(query: string, set?: string): object[] {
+    const q = query.toLowerCase().replace(/\s+/g, '-');
+    const results: object[] = [];
+    const seen = new Set<string>();
+
+    function addResult(canonical: string, match: string, via?: string) {
+      if (seen.has(canonical)) { return; }
+      seen.add(canonical);
+      const entry = (iconMappings as Record<string, object>)[canonical];
+      if (!entry) { return; }
+      results.push({ name: canonical, match, ...(via && { via }), ...entry });
+    }
+
+    // If set is specified, do a targeted library-native lookup
+    if (set) {
+      const libKey = Object.entries(LIB_DISPLAY).find(([k, v]) => v === set || k === set)?.[0];
+      if (libKey) {
+        for (const [canonical, entry] of Object.entries(iconMappings)) {
+          const native = (entry as Record<string, unknown>)[libKey] as string | null;
+          if (native === q) {
+            addResult(canonical, 'native', `${LIB_DISPLAY[libKey]}:${native}`);
+          }
+        }
+      }
+      if (results.length > 0) { return results; }
+    }
+
+    // Exact canonical match
+    if ((iconMappings as Record<string, object>)[q]) {
+      addResult(q, 'canonical');
+    }
+
+    // Exact alias match
+    const aliasTarget = (iconAliases as Record<string, string>)[q];
+    if (aliasTarget) {
+      addResult(aliasTarget, 'alias', q);
+    }
+
+    // Exact native name match (any library)
+    const nativeMatches = nativeIndex.get(q);
+    if (nativeMatches) {
+      for (const { canonical, library } of nativeMatches) {
+        addResult(canonical, 'native', `${LIB_DISPLAY[library]}:${q}`);
+      }
+    }
+
+    // If we got exact matches, return them
+    if (results.length > 0) { return results; }
+
+    // Fuzzy: substring match — collect by match type, then concat for natural tiering
+    const nameMatches: [string, string, string?][] = [];
+    const aliasMatches: [string, string, string?][] = [];
+    const nativeFuzzy: [string, string, string?][] = [];
+    const descMatches: [string, string, string?][] = [];
+
+    for (const [canonical, entry] of Object.entries(iconMappings)) {
+      const e = entry as Record<string, unknown>;
+      if (canonical.includes(q)) {
+        nameMatches.push([canonical, 'canonical']);
+      }
+      const aliases = e.aliases as string[] | undefined;
+      if (aliases?.some(a => a.includes(q))) {
+        aliasMatches.push([canonical, 'alias']);
+      }
+      for (const lib of ICON_LIBRARIES) {
+        const native = e[lib] as string | null;
+        if (native?.includes(q)) {
+          nativeFuzzy.push([canonical, 'native', `${LIB_DISPLAY[lib]}:${native}`]);
+          break;
+        }
+      }
+      if ((e.description as string)?.toLowerCase().includes(q)) {
+        descMatches.push([canonical, 'description']);
+      }
+    }
+
+    for (const args of [...nameMatches, ...aliasMatches, ...nativeFuzzy, ...descMatches]) {
+      addResult(args[0], args[1], args[2]);
+    }
+
+    return results;
+  }
+
+  server.tool(
+    'get_icon',
+    'Look up Semantic UI icon names. Search by canonical name, alias, or library-native name (e.g., Lucide\'s "house" → SUI\'s "home"). Pass a category to browse, or no args to list categories.',
+    {
+      query: z.string().optional().describe(
+        'Icon name to search — canonical, alias, or library-native (e.g., "house", "trash-2", "arrow_downward")',
+      ),
+      set: z.string().optional().describe(
+        'Icon library for native name lookup (lucide, phosphor, tabler, material-symbols, heroicons)',
+      ),
+      category: z.string().optional().describe(
+        'Browse all icons in a category (e.g., "navigation", "action", "status")',
+      ),
+      verbose: z.boolean().optional().describe(
+        'Include full library mappings in category results (default: false, returns names + descriptions only)',
+      ),
+    },
+    async ({ query, set, category, verbose }) => {
+      // Browse by category
+      if (category) {
+        const entries = Object.entries(iconMappings)
+          .filter(([, e]) => (e as Record<string, unknown>).category === category);
+
+        if (entries.length === 0) {
+          return {
+            content: [{
+              type: 'text',
+              text: `No icons in category: ${category}\n\nCategories: ${ICON_CATEGORIES.join(', ')}`,
+            }],
+            isError: true,
+          };
+        }
+
+        if (verbose) {
+          const icons = entries.map(([name, e]) => ({ name, ...e as object }));
+          return {
+            content: [{ type: 'text', text: JSON.stringify({ category, count: icons.length, icons }, null, 2) }],
+          };
+        }
+
+        // Compact: names + descriptions only
+        const icons = entries.map(([name, e]) => {
+          const { description, aliases } = e as Record<string, unknown>;
+          return { name, description, aliases };
+        });
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ category, count: icons.length, icons }, null, 2) }],
+        };
+      }
+
+      // Search by query
+      if (query) {
+        const results = searchIcons(query, set);
+        if (results.length === 0) {
+          return {
+            content: [{ type: 'text', text: `No icons found for: ${query}${set ? ` (in ${set})` : ''}` }],
+          };
+        }
+        return {
+          content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+        };
+      }
+
+      // No args: compact category overview
+      const lines = [
+        `${Object.keys(iconMappings).length} canonical icons across ${ICON_CATEGORIES.length} categories:\n`,
+      ];
+      for (const cat of ICON_CATEGORIES) {
+        const count = Object.values(iconMappings)
+          .filter(e => (e as Record<string, unknown>).category === cat).length;
+        if (count > 0) {
+          lines.push(`  ${cat} (${count})`);
+        }
+      }
+      lines.push('\nUse get_icon(category: "...") to browse a category, or get_icon(query: "...") to search.');
+      return {
+        content: [{ type: 'text', text: lines.join('\n') }],
       };
     },
   );

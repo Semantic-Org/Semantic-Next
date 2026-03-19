@@ -25,6 +25,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@semantic-ui/reactivity": "latest",
+    "@semantic-ui/specs": "latest",
     "@semantic-ui/templating": "latest",
     "@semantic-ui/utils": "latest",
     "zod": "^3.23.0"
