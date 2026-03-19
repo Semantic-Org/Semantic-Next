@@ -26,6 +26,7 @@ export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
   let out = parts[0];
   for (let i = 1; i < parts.length; i++) {
     const seg = parts[i];
+    if (!seg) { continue; }
     if (/^[0-9]/.test(seg)) {
       out += separator + seg;
     }
@@ -36,8 +37,9 @@ export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
   return out;
 };
 
-export const camelToKebab = (str = '', { separator = '_' } = {}) => {
-  return str
+export const camelToKebab = (str = '', { lossless = false, separator = '_' } = {}) => {
+  const normalized = lossless ? str : (str[0]?.toLowerCase() + str.slice(1));
+  return normalized
     .replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
     .replace(new RegExp(`\\${separator}(?=[0-9])`, 'g'), '-');
 };

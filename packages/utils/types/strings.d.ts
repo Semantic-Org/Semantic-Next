@@ -50,10 +50,20 @@ export interface ReverseStringOptions {
 }
 
 /**
- * Options for kebab/camel case conversion
+ * Options for kebab-to-camel conversion
  */
-export interface CaseConversionOptions {
+export interface KebabToCamelOptions {
   /** Character used to encode digit-leading segments (default: "_") */
+  separator?: string;
+}
+
+/**
+ * Options for camel-to-kebab conversion
+ */
+export interface CamelToKebabOptions {
+  /** Preserve leading uppercase for exact round-trip instead of normalizing for DOM safety (default: false) */
+  lossless?: boolean;
+  /** Character used to decode digit-leading segments (default: "_") */
   separator?: string;
 }
 
@@ -73,11 +83,12 @@ export interface CaseConversionOptions {
  * kebabToCamel('arrow-down-a-z') // returns 'arrowDownAZ'
  * ```
  */
-export function kebabToCamel(str?: string, options?: CaseConversionOptions): string;
+export function kebabToCamel(str?: string, options?: KebabToCamelOptions): string;
 
 /**
  * Converts a camelCase string to kebab-case with lossless round-trip support
  * Underscore-digit sequences are decoded back to hyphen-digit (e.g. `grid_2x2` becomes `grid-2x2`)
+ * By default, normalizes leading uppercase for DOM-safe attribute names
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#cameltokebab camelToKebab}
  *
  * @param str - The camelCase string to convert
@@ -88,10 +99,11 @@ export function kebabToCamel(str?: string, options?: CaseConversionOptions): str
  * ```ts
  * camelToKebab('backgroundColor') // returns 'background-color'
  * camelToKebab('grid_2x2') // returns 'grid-2x2'
- * camelToKebab('arrowDownAZ') // returns 'arrow-down-a-z'
+ * camelToKebab('FooBar') // returns 'foo-bar' (PascalCase normalized)
+ * camelToKebab('FooBar', { lossless: true }) // returns '-foo-bar' (preserved for round-trip)
  * ```
  */
-export function camelToKebab(str?: string, options?: CaseConversionOptions): string;
+export function camelToKebab(str?: string, options?: CamelToKebabOptions): string;
 
 /**
  * Capitalizes the first letter of a string

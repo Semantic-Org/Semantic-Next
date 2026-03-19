@@ -84,6 +84,23 @@ describe('String Utilities', () => {
     expect(camelToKebab('grid$2x2', opts)).toBe('grid-2x2');
   });
 
+  it('should handle empty segments from consecutive or trailing hyphens', () => {
+    expect(kebabToCamel('foo--bar')).toBe('fooBar');
+    expect(kebabToCamel('foo-')).toBe('foo');
+    expect(kebabToCamel('--foo')).toBe('Foo');
+    expect(kebabToCamel('')).toBe('');
+  });
+
+  it('should silently lowercase leading PascalCase by default', () => {
+    expect(camelToKebab('FooBar')).toBe('foo-bar');
+    expect(camelToKebab('BackgroundColor')).toBe('background-color');
+  });
+
+  it('should preserve leading uppercase in lossless mode for exact round-trip', () => {
+    expect(camelToKebab('FooBar', { lossless: true })).toBe('-foo-bar');
+    expect(kebabToCamel(camelToKebab('FooBar', { lossless: true }))).toBe('FooBar');
+  });
+
   it('should capitalize the first letter of each word', () => {
     expect(capitalizeWords('test string')).toBe('Test String');
   });
