@@ -24,6 +24,10 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
   resizing: signal(false),
   initialized: signal(false),
 
+  canShowMinimize() {
+    return settings.canMinimize && settings.direction === 'vertical';
+  },
+
   getClassMap() {
     return {
       resizing: self.resizing.get(),
@@ -72,6 +76,7 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       : 'ns-resize';
   },
   getIndex() {
+    if (isServer) { return 0; }
     return $(el).index();
   },
   isResizable() {

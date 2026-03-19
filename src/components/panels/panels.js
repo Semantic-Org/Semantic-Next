@@ -686,8 +686,10 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
 });
 
-const onCreated = ({ el, self }) => {
-  self.addPanels();
+const onCreated = ({ el, self, isClient }) => {
+  if (isClient) {
+    self.addPanels();
+  }
 };
 
 const onDestroyed = ({ self }) => {

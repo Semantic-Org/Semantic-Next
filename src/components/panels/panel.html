@@ -1,9 +1,9 @@
 <div class="{classMap getClassMap}{direction} panel" part="panel">
   {#if label}
-    <span class="self label">
+    <span class="label">
       {label}
       <div class="actions">
-        {#if canMinimize}
+        {#if canShowMinimize}
           {#if minimized}
             <ui-icon link maximize class="toggle-size"></ui-icon>
           {else}
