@@ -668,6 +668,30 @@ export class DocsSpecReader extends SpecReader {
     }
     if (dialect == SpecReader.DIALECT_TYPES.standard) {
       // <ui-button large red>
+      // Some names collide with component attributes or framework internals
+      // and can't use bare shorthand — use verbose form instead
+      const reservedNames = ['component', 'settings'];
+      const componentSpec = this.getWebComponentSpec();
+      if (attributes) {
+        const hasCollision = Object.values(attributes).some(value =>
+          isString(value) && (inArray(value, componentSpec?.attributes || []) || inArray(value, reservedNames))
+        );
+        if (hasCollision) {
+          const parts = [];
+          each(attributes, (value, attribute) => {
+            if (isString(value) && (inArray(value, componentSpec?.attributes || []) || inArray(value, reservedNames))) {
+              parts.push(`${attribute}="${value}"`);
+            }
+            else if (value === true) {
+              parts.push(attribute);
+            }
+            else {
+              parts.push(value);
+            }
+          });
+          return ` ${parts.join(' ')}`;
+        }
+      }
       return ` ${modifiers}`;
     }
     else if (dialect == SpecReader.DIALECT_TYPES.classic) {

@@ -2,9 +2,11 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
+import { UIIcon } from '@semantic-ui/core';
 import '@semantic-ui/core/icon/sets/lucide.css';
-import { Checklist } from '../examples/component/checklist/component.js';
 ---
 <Body class="dark">
-<Checklist client:load />
+<div style="padding: 24px; color: white;">
+  <UIIcon heading-1>heading-1</UIIcon>
+</div>
 </Body>

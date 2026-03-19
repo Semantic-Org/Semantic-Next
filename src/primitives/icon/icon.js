@@ -3,7 +3,6 @@ import { defineComponent } from '@semantic-ui/component';
 import css from './icon-bundle.css?raw';
 import template from './icon.html?raw';
 import componentSpec from './specs/icon.component.js';
-
 const createComponent = ({ settings, data, self }) => ({
   // support either <ui-icon set="baz" or <ui-icon icon="icon:baz">
   getIconParts() {

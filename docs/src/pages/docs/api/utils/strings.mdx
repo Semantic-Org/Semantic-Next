@@ -15,16 +15,23 @@ The String utilities provide a set of functions for working with strings in Java
 ### kebabToCamel
 
 ```javascript
-function kebabToCamel(str = '')
+function kebabToCamel(str = '', { separator = '_' } = {})
 ```
 
-Converts a kebab-case string to camelCase.
+Converts a kebab-case string to camelCase. Digit-leading segments are preserved with an underscore prefix to enable lossless round-trips with `camelToKebab`.
 
 #### Parameters
 
 | Name | Type   | Description |
 |------|--------|-------------|
 | str  | string | The kebab-case string to convert |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name      | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| separator | string | `_`     | Character used to encode digit-leading segments |
 
 #### Returns
 
@@ -35,23 +42,32 @@ The camelCase version of the input string.
 ```javascript
 import { kebabToCamel } from '@semantic-ui/utils';
 
-console.log(kebabToCamel('foo-bar')); // 'fooBar'
 console.log(kebabToCamel('background-color')); // 'backgroundColor'
+console.log(kebabToCamel('grid-2x2')); // 'grid_2x2'
+console.log(kebabToCamel('heading-1')); // 'heading_1'
+console.log(kebabToCamel('arrow-down-a-z')); // 'arrowDownAZ'
 ```
 
 ### camelToKebab
 
 ```javascript
-function camelToKebab(str = '')
+function camelToKebab(str = '', { separator = '_' } = {})
 ```
 
-Converts a camelCase string to kebab-case.
+Converts a camelCase string to kebab-case. Underscore-digit sequences are decoded back to hyphen-digit to enable lossless round-trips with `kebabToCamel`.
 
 #### Parameters
 
 | Name | Type   | Description |
 |------|--------|-------------|
 | str  | string | The camelCase string to convert |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name      | Type   | Default | Description |
+|-----------|--------|---------|-------------|
+| separator | string | `_`     | Character used to decode digit-leading segments |
 
 #### Returns
 
@@ -62,8 +78,10 @@ The kebab-case version of the input string.
 ```javascript
 import { camelToKebab } from '@semantic-ui/utils';
 
-console.log(camelToKebab('fooBar')); // 'foo-bar'
 console.log(camelToKebab('backgroundColor')); // 'background-color'
+console.log(camelToKebab('grid_2x2')); // 'grid-2x2'
+console.log(camelToKebab('heading_1')); // 'heading-1'
+console.log(camelToKebab('arrowDownAZ')); // 'arrow-down-a-z'
 ```
 
 ### capitalize
