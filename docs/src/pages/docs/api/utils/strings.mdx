@@ -51,10 +51,12 @@ console.log(kebabToCamel('arrow-down-a-z')); // 'arrowDownAZ'
 ### camelToKebab
 
 ```javascript
-function camelToKebab(str = '', { separator = '_' } = {})
+function camelToKebab(str = '', { lossless = false, separator = '_' } = {})
 ```
 
 Converts a camelCase string to kebab-case. Underscore-digit sequences are decoded back to hyphen-digit to enable lossless round-trips with `kebabToCamel`.
+
+By default, a leading uppercase character is silently lowercased to produce a valid HTML attribute name. If `lossless` is `true`, leading uppercase is preserved — the output may start with a hyphen (e.g. `FooBar` → `-foo-bar`), which is not a valid attribute name but allows an exact round-trip back through `kebabToCamel`.
 
 #### Parameters
 
@@ -65,9 +67,10 @@ Converts a camelCase string to kebab-case. Underscore-digit sequences are decode
 
 ##### Options
 
-| Name      | Type   | Default | Description |
-|-----------|--------|---------|-------------|
-| separator | string | `_`     | Character used to decode digit-leading segments |
+| Name      | Type    | Default | Description |
+|-----------|---------|---------|-------------|
+| lossless  | boolean | `false` | Preserve leading uppercase for exact round-trip. Output may not be a valid attribute name. |
+| separator | string  | `_`     | Character used to decode digit-leading segments |
 
 #### Returns
 
@@ -82,6 +85,12 @@ console.log(camelToKebab('backgroundColor')); // 'background-color'
 console.log(camelToKebab('grid_2x2')); // 'grid-2x2'
 console.log(camelToKebab('heading_1')); // 'heading-1'
 console.log(camelToKebab('arrowDownAZ')); // 'arrow-down-a-z'
+
+// PascalCase is normalized by default
+console.log(camelToKebab('FooBar')); // 'foo-bar'
+
+// lossless preserves leading uppercase for exact round-trip
+console.log(camelToKebab('FooBar', { lossless: true })); // '-foo-bar'
 ```
 
 ### capitalize
