@@ -38,8 +38,9 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
 
   // ios handles flex on opacity: 0 items in unexpected ways
   isSafari() {
+    if (!isClient) { return false; }
     const userAgent = navigator.userAgent;
-    return isClient && !userAgent.includes('Chrome') && userAgent.includes('Safari') !== -1;
+    return !userAgent.includes('Chrome') && userAgent.includes('Safari');
   },
 
   setInitialized() {
@@ -131,12 +132,11 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       .css('cursor', '');
     $$('iframe').off('pointerenter');
     self.resizing.set(false);
-    delete self.initialPosition;
-    delete self.initialSize;
     dispatchEvent('resizeEnd', {
       initialSize: self.initialSize,
       finalSize: self.getCurrentFlex(),
     });
+    delete self.initialSize;
   },
   setPreviousNaturalSize() {
     const panels = self.getPanels();

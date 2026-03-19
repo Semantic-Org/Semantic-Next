@@ -119,7 +119,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
         }
         return p;
       });
-      localStorage.setItem(settings.saveStateID, JSON.stringify(storedLayout));
+      localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: storedLayout }));
     }
 
     each(storedLayout, (stored, index) => {
@@ -244,7 +244,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let availableWidth = 100;
     each(self.panels, (panel) => {
       const setWidth = $(panel).css('flex-grow');
-      if (panel.settings.width !== 'grow' && setWidth) {
+      if (panel.settings.size !== 'grow' && setWidth) {
         availableWidth -= setWidth;
       }
     });
@@ -303,7 +303,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     return size ? parseFloat(size) : undefined;
   },
   getPanelSizePixels(index) {
-    let panel = this.panels[index];
+    let panel = self.panels[index];
     return (self.getPanelSize(panel) / 100) * self.getGroupSize();
   },
 
@@ -692,12 +692,6 @@ const onCreated = ({ el, self, isClient }) => {
   }
 };
 
-const onDestroyed = ({ self }) => {
-};
-
-const onRendered = ({ $, el, self, settings }) => {
-};
-
 const events = {
   'rendered ui-panel'({ self, event, data }) {
     const panel = event.target;
@@ -743,8 +737,6 @@ const Panels = defineComponent({
   createComponent,
   defaultSettings,
   onCreated,
-  onDestroyed,
-  onRendered,
   events,
 });
 
