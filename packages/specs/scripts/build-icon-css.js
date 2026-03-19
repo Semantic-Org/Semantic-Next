@@ -14,7 +14,7 @@ const libraries = {
   heroicons: { dir: 'heroicons', field: 'heroicons', label: 'Heroicons' },
 };
 
-import { ICON_CATEGORIES } from '../src/icons/index.js';
+import { ICON_CATEGORIES } from '../src/icons/categories.js';
 const categoryOrder = ICON_CATEGORIES;
 
 function categoryLabel(cat) {
@@ -90,18 +90,7 @@ for (const [libKey, lib] of Object.entries(libraries)) {
     }
   }
 
-  // Section 3: Aliases
-  css += '\n  /* ==============================\n';
-  css += '   * Aliases\n';
-  css += '   * ============================== */\n';
-  for (const cat of cats) {
-    const { aliases } = byCategory[cat];
-    if (aliases.length === 0) { continue; }
-    css += `\n  /* ${categoryLabel(cat)} */\n`;
-    for (const { alias, native } of aliases) {
-      css += `  --icon-${alias}: var(--icon-${native});\n`;
-    }
-  }
+  // Aliases are resolved in JS (icons.meta.js) not CSS — keeps CSS lean
 
   css += '}\n';
 
@@ -110,10 +99,7 @@ for (const [libKey, lib] of Object.entries(libraries)) {
 
   const nativeCount = nativeSeen.size;
   const canonicalCount = cats.reduce((n, c) => n + byCategory[c].canonicals.length, 0);
-  const aliasCount = cats.reduce((n, c) => n + byCategory[c].aliases.length, 0);
   console.log(
-    `${lib.dir}: ${nativeCount} native + ${canonicalCount} canonical + ${aliasCount} aliases = ${
-      nativeCount + canonicalCount + aliasCount
-    } vars`,
+    `${lib.dir}: ${nativeCount} native + ${canonicalCount} canonical = ${nativeCount + canonicalCount} vars`,
   );
 }

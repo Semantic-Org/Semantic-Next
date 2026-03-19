@@ -17,7 +17,8 @@
       "browser": "./src/browser.js",
       "import": "./src/browser.js",
       "default": "./src/browser.js"
-    }
+    },
+    "./icons/meta": "./src/icons/icons.meta.js"
   },
   "scripts": {
     "build": "wireit",

@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+import { iconAliases } from '@semantic-ui/specs/icons/meta';
 
 import css from './icon-bundle.css?raw';
 import template from './icon.html?raw';
@@ -8,12 +9,13 @@ const createComponent = ({ settings, data, self }) => ({
   getIconParts() {
     if (settings.set) {
       const { icon, set } = settings;
-      return { icon, set };
+      return { icon: iconAliases[icon] || icon, set };
     }
     const parts = (settings.icon || '').split(':');
+    const icon = parts[0];
     return {
       set: parts[1],
-      icon: parts[0],
+      icon: iconAliases[icon] || icon,
     };
   },
   maybeCustomIcon() {
