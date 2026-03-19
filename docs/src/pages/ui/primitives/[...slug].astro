@@ -1,10 +1,11 @@
 ---
 import { readFileSync } from 'node:fs';
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import { each, toTitleCase, inArray } from '@semantic-ui/utils';
 import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
 import SpecTabs from '@components/SpecTabs.astro';
+import SpecimenExplorer from '@components/SpecimenExplorer/SpecimenExplorer.js';
 import { DocsSpecReader } from '@semantic-ui/specs';
 import * as Specs from '@semantic-ui/core/specs';
 
@@ -31,6 +32,7 @@ const data = entry.data;
 const displayedTab = tab || data.tabs[0];
 const plural = (displayedTab == 'plural');
 const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'plural']);
+const usageDisplayed = (displayedTab === 'usage');
 
 const spec = Specs[data.specName];
 const componentSpec = new DocsSpecReader(spec, { plural });
@@ -55,6 +57,12 @@ if(definitionDisplayed) {
   railMenu = componentSpec.getDefinitionMenu({ plural });
 }
 
+// Render MDX body for usage tab
+let Content;
+if (usageDisplayed) {
+  ({ Content } = await render(entry));
+}
+
 let specSource = '';
 if (displayedTab === 'spec') {
   try {
@@ -72,6 +80,10 @@ if (displayedTab === 'spec') {
   railMenu={railMenu}
   id={data.id}
 >
+  {usageDisplayed && (
+    <SpecimenExplorer spec={JSON.stringify(spec)} client:only></SpecimenExplorer>
+    <Content />
+  )}
   {definitionDisplayed && (
     <SpecDefinition
       definition={definition}

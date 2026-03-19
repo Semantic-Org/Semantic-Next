@@ -1,0 +1,77 @@
+<div class="specimen">
+  <ui-panels direction="horizontal">
+    <ui-panel direction="horizontal" size="grow" min-size="200px">
+      <div class="stage">
+        <div class="preview">
+          <div class="component-frame"></div>
+        </div>
+        <div class="output">
+          <ui-menu selection compact items={dialectMenuItems} value={dialect} class="dialect-menu"></ui-menu>
+          <div class="code-output">
+            <code-sample code="{getCodeOutput}" language="html" segment="false"></code-sample>
+          </div>
+        </div>
+      </div>
+    </ui-panel>
+
+    <ui-panel direction="horizontal" size="280px" min-size="200px" max-size="400px">
+      <ui-panels direction="vertical" class="control-panels">
+        {#each group in getControlGroups}
+          <ui-panel direction="vertical" size="natural" label="{group.label}">
+            <div class="section-controls">
+              {#each control in group.controls}
+                {#if is control.type 'radio'}
+                  {>radioControl}
+                {/if}
+                {#if is control.type 'checkbox'}
+                  {>checkboxControl}
+                {/if}
+                {#if is control.type 'text'}
+                  {>textControl}
+                {/if}
+              {/each}
+            </div>
+          </ui-panel>
+        {/each}
+      </ui-panels>
+
+    </ui-panel>
+  </ui-panels>
+</div>
+
+{#snippet radioControl}
+  <div class="control select-control">
+    <label class="select-label">{control.name}</label>
+    {>SimpleSelect options=control.options selected=(getSelection control.attribute) attribute=control.attribute}
+  </div>
+{/snippet}
+
+{#snippet checkboxControl}
+  <label class="control toggle-control {classIf (isSelected control.attribute control.attribute) 'on'}">
+    <input type="checkbox"
+      checked={isSelected control.attribute control.attribute}
+      data-attribute="{control.attribute}" data-value="{control.attribute}"
+    />
+    <span class="switch"><span class="knob"></span></span>
+    <span class="toggle-label">{control.name}</span>
+  </label>
+{/snippet}
+
+{#snippet textControl}
+  <div class="control text-control">
+    <label class="{classIf (hasSelection control.attribute) 'on'}">
+      <input type="checkbox"
+        checked={hasSelection control.attribute}
+        data-attribute="{control.attribute}" data-value="{control.defaultValue}" data-content="true"
+      />
+      <span class="switch"><span class="knob"></span></span>
+      <span class="toggle-label">{control.name}</span>
+    </label>
+    {#if hasSelection control.attribute}
+      <input type="text" class="text-input" value="{getSelection control.attribute}"
+        data-attribute="{control.attribute}" data-text-input="true"
+        placeholder="{control.placeholder}"
+      />
+    {/if}
+  </div>
+{/snippet}

@@ -1,0 +1,172 @@
+:host {
+  display: block;
+}
+
+.specimen {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  height: 480px;
+}
+
+/* ── Stage (Preview + Output) ── */
+.stage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--padding-l);
+  background: var(--page-background);
+  min-height: 120px;
+}
+
+.component-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-xs);
+}
+
+.output {
+  border-top: var(--internal-border);
+  background: var(--standard-5);
+  padding: var(--padding-xs);
+}
+
+.code-output {
+  margin-bottom: var(--margin-xs);
+
+  code-sample {
+    font-size: var(--text-xs);
+  }
+}
+
+/* ── Controls Panel ── */
+.control-panels {
+  height: 100%;
+}
+
+.section-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-3xs);
+  padding: var(--padding-xs) var(--padding-xs);
+}
+
+/* ── Select Controls ── */
+.select-control {
+  display: flex;
+  align-items: center;
+  gap: var(--6px);
+  padding: var(--2px) var(--4px);
+}
+
+.select-label {
+  font-size: var(--text-xs);
+  color: var(--muted-text-color);
+  min-width: var(--64px);
+}
+
+/* ── Toggle Controls ── */
+.toggle-control {
+  display: flex;
+  align-items: center;
+  gap: var(--6px);
+  padding: var(--2px) var(--4px);
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--border-radius-xs);
+
+  &:hover {
+    background: var(--standard-5);
+  }
+
+  input { display: none; }
+}
+
+.toggle-label {
+  font-size: var(--text-xs);
+  color: var(--muted-text-color);
+  transition: var(--transition);
+}
+
+.switch {
+  display: inline-flex;
+  width: var(--24px);
+  height: var(--14px);
+  border-radius: var(--8px);
+  background: var(--standard-15);
+  position: relative;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.knob {
+  display: block;
+  width: var(--10px);
+  height: var(--10px);
+  border-radius: var(--circular-radius);
+  background: var(--standard-40);
+  position: absolute;
+  top: var(--2px);
+  left: var(--2px);
+  transition: var(--transition);
+}
+
+.on {
+  .switch {
+    background: var(--primary-color);
+  }
+
+  .knob {
+    background: var(--inverted-text-color);
+    left: var(--12px);
+  }
+
+  .toggle-label {
+    color: var(--text-color);
+  }
+}
+
+/* ── Text Controls ── */
+.text-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-3xs);
+  padding: var(--2px) var(--4px);
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: var(--6px);
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--border-radius-xs);
+    padding: var(--1px) 0;
+
+    input[type="checkbox"] { display: none; }
+  }
+
+  .text-input {
+    padding: var(--4px) var(--6px);
+    border: var(--subtle-border);
+    border-radius: var(--border-radius-xs);
+    font-size: var(--text-2xs);
+    background: var(--standard-5);
+    color: var(--text-color);
+    width: 100%;
+    margin-left: var(--32px);
+
+    &:focus {
+      outline: none;
+      border-color: var(--form-focused-border-color);
+    }
+  }
+}
+
