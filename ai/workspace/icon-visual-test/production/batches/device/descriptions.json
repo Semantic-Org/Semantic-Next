@@ -1,0 +1,94 @@
+{
+  "1": {
+    "visual": "A battery shown empty — horizontal rectangle body with a small terminal nub on the right and a blank interior.",
+    "usage": "empty battery state, critically low power warning, device status bar, power settings"
+  },
+  "2": {
+    "visual": "A battery currently charging, shown with a lightning bolt symbol inside and a small terminal nub on the right.",
+    "usage": "charging status indicator, power connected state, battery charging progress, device power management"
+  },
+  "3": {
+    "visual": "A battery with three vertical bars filling the interior, indicating a high or full charge level.",
+    "usage": "high battery level display, device status bar, power indicator, hardware dashboard"
+  },
+  "4": {
+    "visual": "A battery with a single short vertical bar on the far left of the interior, indicating a very low charge level.",
+    "usage": "low battery warning, power alert, device diagnostics, mobile or peripheral status"
+  },
+  "5": {
+    "visual": "A battery with two vertical bars filling roughly half the interior, indicating a medium charge level.",
+    "usage": "medium battery status, power level indicator, device toolbar, mobile settings"
+  },
+  "6": {
+    "visual": "A battery with an exclamation mark inside, indicating a battery fault, error, or warning state.",
+    "usage": "battery error alert, faulty battery notification, power issue warning, device health dashboard"
+  },
+  "7": {
+    "visual": "A desktop computer shown as a monitor stacked above a wider base unit with a dash on its face.",
+    "usage": "desktop computer settings, workstation reference, device selection menu, IT asset management"
+  },
+  "8": {
+    "visual": "A CPU chip with a square body, a smaller square cutout inside, and short pin connectors extending from all four sides.",
+    "usage": "processor settings, hardware specifications, CPU usage monitoring, system performance dashboard"
+  },
+  "9": {
+    "visual": "A hard drive or optical drive enclosure — a wide trapezoidal shape with two small indicator dots on the front face.",
+    "usage": "storage device management, drive status, file system settings, hardware backup interface"
+  },
+  "10": {
+    "visual": "Over-ear headphones with an arched headband connecting two rounded rectangular ear cups.",
+    "usage": "audio output settings, headphone device selection, music or podcast player, call center or support tools"
+  },
+  "11": {
+    "visual": "A keyboard shown as a rounded rectangle with rows of small dots representing keys and a horizontal bar near the bottom.",
+    "usage": "keyboard shortcuts, input method settings, on-screen keyboard toggle, accessibility input options"
+  },
+  "12": {
+    "visual": "A laptop computer open and facing forward, with a wide screen panel above a thin base and a short horizontal bar beneath.",
+    "usage": "laptop device reference, computer settings, responsive design preview, device compatibility list"
+  },
+  "13": {
+    "visual": "A desktop monitor with a wide flat screen, a narrow neck, and a short pedestal stand at the bottom center.",
+    "usage": "display settings, external monitor configuration, screen resolution preferences, desktop device indicator"
+  },
+  "14": {
+    "visual": "A desktop monitor on a stand paired with a small smartphone shape beside it, representing a multi-device setup.",
+    "usage": "multi-device preview, responsive layout toggle, cross-device sync, desktop-and-mobile pairing"
+  },
+  "15": {
+    "visual": "A computer mouse viewed from above — a tall oval with a vertical center line dividing the two button halves.",
+    "usage": "mouse or pointer settings, input device configuration, cursor preferences, peripheral device list"
+  },
+  "16": {
+    "visual": "A desktop printer with a paper output slot near the top and a rectangular body with a front tray.",
+    "usage": "print action, print dialog, printer settings, document output options"
+  },
+  "17": {
+    "visual": "Two identical server units stacked vertically, each a horizontal rounded rectangle with a small indicator dot on the left.",
+    "usage": "server infrastructure, database hosting, backend system settings, cloud or rack server management"
+  },
+  "18": {
+    "visual": "A smartphone in portrait orientation with rounded corners and a single circular home button at the bottom.",
+    "usage": "mobile device settings, phone viewport preview, app compatibility indicator, responsive design mode"
+  },
+  "19": {
+    "visual": "A tablet in portrait orientation with rounded corners and a single circular home button at the bottom, proportionally wider than a smartphone.",
+    "usage": "tablet device settings, tablet viewport preview, device selection UI, responsive layout breakpoint"
+  },
+  "20": {
+    "visual": "A widescreen monitor or TV with a flat rectangular display and a short horizontal base, without a visible stand neck.",
+    "usage": "TV or large display settings, screen mirroring, media output, widescreen layout reference"
+  },
+  "21": {
+    "visual": "The standard USB symbol — a trident with a circle at the base, an upward arrow at the top center, and two branches ending in a small square and circle.",
+    "usage": "USB connection indicator, peripheral device port, file transfer via USB, hardware interface documentation"
+  },
+  "22": {
+    "visual": "A smartwatch with a round clock face showing hour and minute hands, set in a watch body with a band and buckle.",
+    "usage": "smartwatch app, wearable device settings, fitness tracker interface, time and notification features"
+  },
+  "23": {
+    "visual": "A webcam shown as a large circle with a concentric inner circle representing the lens, mounted on a small flat base.",
+    "usage": "webcam settings, video call device selection, camera permissions, live streaming or recording setup"
+  }
+}

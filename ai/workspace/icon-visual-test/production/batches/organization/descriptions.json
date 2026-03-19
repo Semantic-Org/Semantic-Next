@@ -1,14 +1,14 @@
 {
   "1": {
-    "visual": "A building facade icon with a wide rectangular base, two side wings, and a central arched entrance doorway — resembling an office or institutional building. Three horizontal lines inside the building suggest floors or windows.",
-    "usage": "Company or organization profile pages; office location fields in address forms; corporate directory listings; building management or facilities dashboards."
+    "visual": "A multi-story office building with a wide base, two side wings, an arched entrance, and horizontal lines suggesting floors or windows.",
+    "usage": "company profile, office location field, corporate directory, facilities dashboard"
   },
   "2": {
-    "visual": "Three vertical bars of varying heights arranged side by side — the leftmost is tallest, the middle is shortest, and the rightmost is medium height — forming an abstract column chart or Kanban-style column indicator.",
-    "usage": "Kanban board views; project pipeline column layouts; analytics bar chart toggles; workflow stage selectors."
+    "visual": "Three vertical bars of unequal height side by side — tallest on the left, shortest in the middle, medium on the right.",
+    "usage": "Kanban board columns, project pipeline stages, analytics chart toggle, workflow view switcher"
   },
   "3": {
-    "visual": "A directional signpost icon: a rectangular sign with a pointed right-facing arrow on its right end, mounted on a vertical pole — like a road waypoint or navigation marker.",
-    "usage": "Navigation or wayfinding features; onboarding step indicators; roadmap milestones; location or destination markers in maps."
+    "visual": "A rectangular sign with a right-pointing arrow tip on its right end, mounted on a vertical pole — a directional signpost.",
+    "usage": "onboarding step indicator, navigation waypoint, roadmap milestone, destination marker"
   }
 }

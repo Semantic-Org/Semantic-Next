@@ -1,66 +1,66 @@
 {
   "1": {
-    "visual": "A circle with a bite taken out of the upper-right edge, representing a browser cookie. The interior contains four small filled dots arranged loosely to suggest chocolate chips.",
-    "usage": "Cookie consent banners, browser privacy settings, GDPR compliance notices, cookie policy pages."
+    "visual": "A round cookie with a bite taken out of the upper-right edge and several small dots scattered across the surface.",
+    "usage": "cookie consent banner, browser cookie settings, GDPR compliance prompt, privacy policy notice"
   },
   "2": {
-    "visual": "A fingerprint composed of concentric curved ridgelines that spiral inward, with subtle gaps between the lines to replicate a real fingerprint scan. The overall shape is roughly circular.",
-    "usage": "Biometric authentication prompts, Touch ID or fingerprint login buttons, identity verification flows, security settings."
+    "visual": "A fingerprint with concentric curved ridgelines spiraling inward and small gaps between lines, roughly circular in shape.",
+    "usage": "biometric login, Touch ID authentication, identity verification, fingerprint scanner prompt"
   },
   "3": {
-    "visual": "A globe showing meridian and latitude lines on the left half, with a closed padlock overlaid on the lower-right portion of the globe. The padlock's shackle is fully closed.",
-    "usage": "HTTPS / secure connection indicators, geo-restricted content warnings, VPN or encrypted browsing features, international privacy settings."
+    "visual": "A globe showing latitude and longitude grid lines with a small closed padlock overlaid on the upper-right area.",
+    "usage": "secure website connection, HTTPS indicator, VPN or encrypted browsing, geo-restricted content lock"
   },
   "4": {
-    "visual": "A classic key shape oriented diagonally (pointing upper-right), with a circular bow on the upper-left end and two small rectangular teeth along the bottom of the blade.",
-    "usage": "Password fields, API key management, access credentials, login or authentication actions."
+    "visual": "A classic key with a round bow on one end and two teeth on the blade, oriented diagonally.",
+    "usage": "password field, API key management, account credentials, access permissions"
   },
   "5": {
-    "visual": "A closed padlock with a rounded rectangular body and a symmetrical U-shaped shackle fully seated into the top of the body, rendered in outline style.",
-    "usage": "Locked/protected content indicators, secure checkout steps, password-protected sections, privacy or encryption status."
+    "visual": "A closed padlock with a U-shaped shackle fully inserted into a rounded rectangular body.",
+    "usage": "locked content, password-protected resource, security toggle locked state, private account indicator"
   },
   "6": {
-    "visual": "An open padlock identical in body shape to the closed version, but with the U-shaped shackle raised and pivoted to the right so it no longer closes the lock.",
-    "usage": "Unlocked or public content states, disabling a lock action, unsecured connection warnings, toggling permissions off."
+    "visual": "An open padlock with the U-shaped shackle lifted and swung to the right, no longer closing the body.",
+    "usage": "unlocked content, public resource indicator, security toggle unlocked state, disable lock prompt"
   },
   "7": {
-    "visual": "A right-pointing arrow entering through the open right side of a bracket (the bracket opens to the left, resembling a doorframe on the right edge). The arrow points inward toward the bracket.",
-    "usage": "Log in action, sign-in button, entering a secured area, session start."
+    "visual": "A rightward-pointing arrow moving into the open side of a vertical bracket, like an arrow entering a doorframe.",
+    "usage": "sign in, log in action, enter app, authentication entry point"
   },
   "8": {
-    "visual": "A right-pointing arrow exiting through the open right side of a bracket (the bracket opens to the right, like a doorframe on the left edge). The arrow points outward away from the bracket.",
-    "usage": "Log out action, sign-out button, leaving a secured session, exit or disconnect."
+    "visual": "A rightward-pointing arrow moving out of a vertical bracket on the left, like an arrow exiting a doorframe.",
+    "usage": "sign out, log out action, exit session, end authentication"
   },
   "9": {
-    "visual": "A smiling face with two small dot eyes centered inside a rounded-corner square frame whose four corners are marked with short L-shaped tick marks, suggesting a face-scanning viewfinder.",
-    "usage": "Face ID or facial recognition prompts, biometric login, identity verification, camera-based authentication."
+    "visual": "A smiling face with two dot eyes inside a rounded square frame with L-shaped corner brackets at each corner.",
+    "usage": "face ID authentication, facial recognition login, selfie verification, biometric scan prompt"
   },
   "10": {
-    "visual": "A plain shield outline with a slightly pointed bottom and gently curved sides, containing no internal symbol — rendered as a clean empty outline.",
-    "usage": "General security or protection indicator, privacy policy sections, security feature marketing, baseline safe-state badge."
+    "visual": "A plain shield outline with a pointed bottom and gently curved sides, no interior markings.",
+    "usage": "security status indicator, protection feature, privacy settings, antivirus or firewall section"
   },
   "11": {
-    "visual": "A shield outline identical in shape to the plain shield, but with a bold exclamation mark centered inside it, indicating a warning or alert state.",
-    "usage": "Security warning or vulnerability alert, account at risk notification, failed security check, suspicious activity banner."
+    "visual": "A shield outline with a bold exclamation mark centered inside it.",
+    "usage": "security warning, threat detected alert, protection failure notice, vulnerability notification"
   },
   "12": {
-    "visual": "A shield outline identical in shape to the plain shield, but with a checkmark centered inside it, indicating a verified or secure state.",
-    "usage": "Verified or trusted status badge, successful security scan result, secure transaction confirmation, two-factor authentication success."
+    "visual": "A shield outline with a checkmark centered inside it.",
+    "usage": "verified account badge, security check passed, trusted source indicator, two-factor auth confirmed"
   },
   "13": {
-    "visual": "A shield outline with a diagonal strike-through line running from lower-left to upper-right, crossing the entire shield to indicate it is disabled or inactive.",
-    "usage": "Security disabled state, unprotected connection warning, turning off a firewall or shield feature, indicating no protection is active."
+    "visual": "A shield outline with a diagonal line struck through it from corner to corner, crossing the entire shape.",
+    "usage": "security disabled state, unprotected connection warning, shield off indicator, antivirus inactive"
   },
   "14": {
-    "visual": "A shield outline identical in shape to the plain shield, but with a bold X (cross) centered inside it, indicating rejection, failure, or a blocked state.",
-    "usage": "Security check failed, blocked or rejected access, antivirus threat detected, permission denied indicator."
+    "visual": "A shield outline with a bold X mark centered inside it.",
+    "usage": "access denied, security check failed, blocked content indicator, threat blocked notification"
   },
   "15": {
-    "visual": "A small filled circle in the center connected by four short lines to the midpoints of the four sides of a rounded-corner square, resembling a node in a circuit or a crosshair inside a box.",
-    "usage": "Network node or connection point visualization, circuit board reference, hardware security module, grid or topology diagrams."
+    "visual": "A rounded square containing a small circle at center with four short lines extending outward to each side, like a crosshair or hub.",
+    "usage": "network node, connection hub, system core settings, device or topology management"
   },
   "16": {
-    "visual": "A stylized mask shape resembling a masquerade or superhero domino mask: a wide symmetrical outline with two rounded eye openings and a scalloped lower edge that curves upward at the center like a beak.",
-    "usage": "Anonymous or incognito mode, masked identity or alias features, privacy mode toggle, Halloween or masquerade themed security context."
+    "visual": "A wide masquerade-style mask with two rounded eye cutouts and a lower edge that curves upward at the center.",
+    "usage": "anonymous mode, masked identity, incognito feature, privacy alias or persona"
   }
 }

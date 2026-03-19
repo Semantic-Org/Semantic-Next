@@ -1,26 +1,26 @@
 {
   "1": {
-    "visual": "A large hollow circle with a small filled circle (dot) at its center, representing a radio button in its selected/active state. The outer ring is thick and the inner dot is clearly centered.",
-    "usage": "Radio button selected state in a single-choice question group, option selector in settings panels, plan/tier selection UI, gender or preference form fields."
+    "visual": "A radio button: a large circle with a small filled dot at its center.",
+    "usage": "radio button group, single-select option list, settings preference, survey question"
   },
   "2": {
-    "visual": "A rounded rectangle (pill-shaped outer border) containing three horizontal dots evenly spaced in a row, resembling a text input field with placeholder dots. The corners are fully rounded giving it a capsule shape.",
-    "usage": "Password input field indicator, masked or hidden text field, PIN entry input, placeholder representation for a text input in a form layout."
+    "visual": "A rounded rectangle containing three evenly-spaced dots in a row, like an input field with placeholder content.",
+    "usage": "text input field, form field placeholder, inline editing, data entry row"
   },
   "3": {
-    "visual": "A square with rounded corners containing a bold checkmark in the lower-left-to-upper-right direction, representing a checked checkbox. The checkmark stroke is thick and clearly visible inside the square.",
-    "usage": "Checkbox in its checked/selected state, task completion toggle, agreement to terms of service, multi-select list item that has been chosen."
+    "visual": "A rounded square with a checkmark inside, the standard checked checkbox symbol.",
+    "usage": "checkbox, task completion, multi-select list, terms acceptance"
   },
   "4": {
-    "visual": "A text cursor (I-beam) symbol with two horizontal bars — one at the top and one at the bottom — flanked by curved bracket-like serifs on the left and right sides, indicating an active text input field. The overall shape resembles a capital letter I with wide serifs.",
-    "usage": "Active or focused text input field, cursor placement indicator in a form field, inline text editing mode, search input focus state."
+    "visual": "A text cursor I-beam flanked by bracket handles on the left and right, indicating an active text input.",
+    "usage": "active text field, cursor position indicator, editable input, form focus state"
   },
   "5": {
-    "visual": "A rounded rectangle (toggle switch outline) with a circle positioned on the left side inside it, indicating an off/disabled toggle state. The circle sits flush to the left end of the pill-shaped track.",
-    "usage": "Toggle switch in the off/disabled position, feature flag disabled state, notification preference turned off, dark mode switcher in the inactive state."
+    "visual": "A toggle switch in the off position, with the circular thumb resting on the left side of the pill-shaped track.",
+    "usage": "feature toggle off, settings disabled state, boolean switch, enable/disable control"
   },
   "6": {
-    "visual": "A rounded rectangle (toggle switch outline) with a circle positioned on the right side inside it, indicating an on/enabled toggle state. The circle sits flush to the right end of the pill-shaped track, mirroring icon 5 but flipped.",
-    "usage": "Toggle switch in the on/enabled position, feature flag enabled state, notification preference turned on, settings option that is currently active."
+    "visual": "A toggle switch in the on position, with the circular thumb resting on the right side of the pill-shaped track.",
+    "usage": "feature toggle on, settings enabled state, boolean switch, active mode indicator"
   }
 }

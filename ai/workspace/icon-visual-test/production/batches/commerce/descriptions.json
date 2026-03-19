@@ -1,58 +1,58 @@
 {
   "1": {
-    "visual": "A barcode consisting of several evenly spaced vertical black bars of uniform height. There are no numbers beneath the bars — it reads as a classic linear product barcode stripped to its essential pattern.",
-    "usage": "Product detail pages showing a scannable barcode, inventory management item lookup, point-of-sale product scanning UI, barcode label printing workflows."
+    "visual": "A barcode made of several tall vertical bars of equal height arranged side by side.",
+    "usage": "product scanning, inventory lookup, barcode display, point-of-sale"
   },
   "2": {
-    "visual": "A three-dimensional cube rendered with clean outline strokes — a top diamond face and two visible side faces give it a 3D isometric appearance. The faces are empty with no markings or labels.",
-    "usage": "Product packaging or 3D model representation, order shipment detail for a generic product unit, augmented reality or 3D viewer toggle, inventory item icon."
+    "visual": "A 3D cube with visible top, left, and right faces showing perspective lines, closed on all sides.",
+    "usage": "product packaging, 3D model viewer, inventory item, package contents"
   },
   "3": {
-    "visual": "A credit card depicted as a rounded rectangle with a single horizontal stripe across the upper portion, representing the magnetic stripe or card number area. The card has a simple, flat outline style with no chip or logo.",
-    "usage": "Payment method selection, saved cards list, checkout billing information form, add or manage payment methods screen."
+    "visual": "A credit card with a thick stripe across the upper portion inside a rounded rectangle.",
+    "usage": "payment method, saved cards, checkout billing, wallet settings"
   },
   "4": {
-    "visual": "A wrapped gift box with a ribbon tied into a bow on top. The box body has clean rectangular sides and the bow forms two symmetrical loops at the center of the lid.",
-    "usage": "Gift wrapping option at checkout, wishlist or gift registry feature, promotional gift-with-purchase offer, sending a gift to another person."
+    "visual": "A gift box with a ribbon bow on top and a lid slightly separated from the base.",
+    "usage": "promotions, gift cards, rewards, send a gift"
   },
   "5": {
-    "visual": "A three-dimensional box/package rendered with isometric outline strokes, similar to icon 2 but with a visible horizontal line across the front face indicating a sealed parcel or shipping box. The top face and two sides are visible.",
-    "usage": "Shipment tracking, order packaging status, warehouse or fulfillment workflow, product inventory item."
+    "visual": "A closed 3D box with two horizontal lines on the front face suggesting a sealed label or tape.",
+    "usage": "shipped package, order fulfillment, parcel tracking, product shipment"
   },
   "6": {
-    "visual": "An open box viewed from above and slightly in front, with the four top flaps folded outward to reveal the open interior. The isometric outline shows the box body and splayed lid panels clearly.",
-    "usage": "Unboxing or unpacking an order, open/received shipment status, product returns or unpackaged items, 3D model or AR product preview."
+    "visual": "An open box with all four lid flaps folded outward and upward, revealing the empty interior.",
+    "usage": "unboxing, package received, open order, delivery confirmed"
   },
   "7": {
-    "visual": "A receipt or paper bill depicted as a tall rounded rectangle with three short horizontal lines representing printed text and a wavy bottom edge simulating a torn or perforated receipt tail.",
-    "usage": "View order receipt, transaction history detail, invoice or billing summary, print or download receipt action."
+    "visual": "A receipt with three short horizontal text lines and a wavy bottom edge.",
+    "usage": "order receipt, transaction history, invoice, purchase summary"
   },
   "8": {
-    "visual": "A shopping bag depicted as a square rounded-corner outline with a small curved U-shaped handle cutout at the top center and a smile-like arc inside the lower half representing the bag interior or a fill line.",
-    "usage": "Shopping bag or cart overview, saved items or favorites bag, fashion or retail storefront action, checkout bag contents."
+    "visual": "A shopping bag with a small smile-shaped cutout near the top center serving as the handle opening.",
+    "usage": "shopping cart, purchases, my orders, buy now"
   },
   "9": {
-    "visual": "A shopping cart rendered as a wireframe outline: a large trapezoidal basket angled forward on two wheels, with a short vertical handle bar at the upper right. The two wheels are solid filled circles at the base.",
-    "usage": "Add to cart action, view cart contents, e-commerce store navigation, checkout initiation."
+    "visual": "A shopping cart with a basket, angled handle at the upper right, and two wheels at the base.",
+    "usage": "add to cart, shopping cart, checkout, e-commerce"
   },
   "10": {
-    "visual": "A storefront facade showing a wide awning along the top edge with three scalloped or arched decorative scallops, and a recessed doorway or shop entrance centered beneath it. The overall shape reads as a classic retail shop front.",
-    "usage": "Marketplace or seller shop page, browse stores or vendors, merchant profile navigation, retail location or store finder."
+    "visual": "A storefront with a scalloped awning across the top, a wide display window, and a centered doorway.",
+    "usage": "marketplace, seller profile, store page, browse shops"
   },
   "11": {
-    "visual": "A single price tag shape — a rounded-corner pentagon (like a rectangular tag with a pointed left end) with a small circular hole punched near the point. The tag is shown rotated roughly 45 degrees.",
-    "usage": "Product pricing display, apply a discount or coupon tag, label or categorize a product, promotional pricing highlight."
+    "visual": "A single price tag — a rounded rectangle with one pointed end and a small punch hole near the tip.",
+    "usage": "product pricing, discount label, tag an item, sale badge"
   },
   "12": {
-    "visual": "Two overlapping price tags stacked at a slight offset, both sharing the same rounded-pentagon shape with a small hole near the pointed end. The second tag is visible behind and below the first.",
-    "usage": "Multiple pricing tiers or sale tags, bulk discount labeling, compare prices feature, tags or labels management for multiple products."
+    "visual": "Two overlapping price tags of the same shape stacked at a slight angle, each with a small hole near the point.",
+    "usage": "multiple tags, bulk pricing, labels, category tagging"
   },
   "13": {
-    "visual": "A ticket or voucher depicted as a horizontal rectangle with rounded ends and a small notch cut into each long side at the center, forming the classic perforation indent of a tear-off ticket. A colon-like pair of dots appears in the middle.",
-    "usage": "Event ticket purchase or redemption, coupon or voucher code display, promo code field, digital ticket wallet."
+    "visual": "A ticket with a wide rectangular body, concave notch cutouts on each long side, and a dashed center divider.",
+    "usage": "event ticket, coupon code, voucher, promo pass"
   },
   "14": {
-    "visual": "A delivery truck shown in side-profile outline: a large square cargo box on the left, a smaller raised cab on the right, and two solid circular wheels at the base. The silhouette is immediately recognizable as a shipping van or box truck.",
-    "usage": "Shipping and delivery status, estimated delivery date display, choose a shipping method at checkout, track an outbound order."
+    "visual": "A delivery truck in side profile with a square cargo box, raised cab section, and two wheels.",
+    "usage": "shipping status, delivery tracking, logistics, dispatch"
   }
 }

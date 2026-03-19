@@ -1,46 +1,46 @@
 {
   "1": {
-    "visual": "A side-profile outline of an SUV or car with two visible wheels, rounded body, and windows. The icon is a clean outline drawing of a passenger vehicle viewed from the side.",
-    "usage": "Ride-sharing or car rental booking flows, vehicle selection in transportation apps, directions or navigation screens showing driving mode, parking or garage location features."
+    "visual": "A side-profile SUV or car with two visible wheels and a rounded passenger body.",
+    "usage": "vehicle type selection, ride-sharing app, driving directions mode, parking locator"
   },
   "2": {
-    "visual": "A building outline with a large cross symbol centered at the top, resembling a hospital or medical facility. The structure has a rounded entrance arch at the bottom and flanking side walls.",
-    "usage": "Locating hospitals or clinics on a map, healthcare facility search results, emergency services directory, medical points of interest in a navigation app."
+    "visual": "A hospital building with a plus cross on its facade and an arched entrance door.",
+    "usage": "find nearby hospital, medical facility map pin, emergency services, healthcare locator"
   },
   "3": {
-    "visual": "A crosshair or targeting reticle with a plain open circle at its center and four short tick marks extending outward at the cardinal directions. The center circle is hollow with no fill.",
-    "usage": "GPS location acquisition indicator, centering the map on current position, precision coordinate selection on a map, sniper or targeting UI in a game or tracking interface."
+    "visual": "A crosshair reticle with a hollow open circle at center and four short tick marks at cardinal points.",
+    "usage": "acquire GPS location, center map on position, coordinate picker, location targeting"
   },
   "4": {
-    "visual": "A crosshair or targeting reticle identical in outer form to icon 3, but with a solid filled inner circle at its center, giving it a bullseye appearance. The outer ring and tick marks are the same.",
-    "usage": "Active current-location indicator on a map, confirmed GPS lock state, precise drop pin action, focus or target-acquired state in navigation or tracking UIs."
+    "visual": "A crosshair reticle with a filled solid inner circle at center, giving a bullseye appearance.",
+    "usage": "GPS lock confirmed, active current location, selected map target, tracking enabled"
   },
   "5": {
-    "visual": "An unfolded paper map rendered as three vertical panels with slightly angled fold lines, giving a three-dimensional folded-map silhouette. There is no geographic detail — the shape alone conveys a map.",
-    "usage": "Opening a full map view, navigation or directions section of an app, travel planning features, explore or discover nearby places."
+    "visual": "An unfolded paper map with two visible fold lines creating three vertical panels.",
+    "usage": "open map view, travel planning, directions, explore nearby area"
   },
   "6": {
-    "visual": "A classic map pin or location marker shape — a teardrop outline that comes to a point at the bottom with a small open circle inside the rounded top half. This is the standard 'place' pin.",
-    "usage": "Marking a saved location or address, showing a point of interest on a map, delivery or pickup address selection, 'find nearby' or 'share location' actions."
+    "visual": "A standard map pin — a teardrop shape pointing downward with a small open circle inside the top.",
+    "usage": "mark a location, point of interest, drop a pin, delivery address"
   },
   "7": {
-    "visual": "A location pin/teardrop shape with a diagonal strike-through line crossing the entire icon, indicating the pin is disabled, hidden, or unavailable. The slash runs from upper-left to lower-right.",
-    "usage": "Location services disabled or denied state, removing or hiding a saved location, 'location unavailable' error state, opt-out of location sharing."
+    "visual": "A map pin teardrop with a diagonal slash struck through it, indicating unavailability.",
+    "usage": "location services off, GPS disabled, hide location, location unavailable state"
   },
   "8": {
-    "visual": "A location pin/teardrop outline with a small plus sign in the lower-right area, attached to the pin. The plus indicates an add or create action applied to the pin.",
-    "usage": "Adding a new saved place or bookmark, dropping a new pin on a map, creating a custom location or waypoint, 'save this address' action."
+    "visual": "A map pin teardrop with a small plus sign attached at the lower-right corner.",
+    "usage": "add a new saved place, create a waypoint, bookmark an address, drop a new pin"
   },
   "9": {
-    "visual": "An airplane silhouette viewed from above and slightly angled, with swept-back wings and a small tail fin, oriented pointing toward the upper-right. The icon is a bold outline with slightly chunky stroke weight.",
-    "usage": "Flight search or booking, airport locations on a map, travel mode selector in a directions interface, arrivals and departures tracking."
+    "visual": "An airplane viewed from above, wings swept back, nose pointed toward the upper-right.",
+    "usage": "flight booking, airport map marker, airplane mode, travel mode selector"
   },
   "10": {
-    "visual": "An S-shaped or winding route line with a filled circle at each end (top-left and bottom-right), forming an abstract path between two points. The curved line represents a road or travel route.",
-    "usage": "Viewing a route between two locations, turn-by-turn navigation start, itinerary or trip planning, showing a multi-segment path in a directions app."
+    "visual": "An S-shaped winding route with a filled circle endpoint at each end of the curve.",
+    "usage": "route between two points, turn-by-turn navigation, trip planning, directions path"
   },
   "11": {
-    "visual": "A horizontal line connecting two filled circles on the left and right, with a third filled circle centered above the line connected by a short vertical stem, forming a simple T-shaped or branching node diagram. It resembles a three-point route junction or network node.",
-    "usage": "Route branching or waypoint management, multi-stop trip planning, transit connection or transfer point, network topology or path-splitting UI."
+    "visual": "A horizontal bar connecting left and right filled circle nodes, with additional nodes branching off each end forming a short fork or network junction.",
+    "usage": "multi-stop route, waypoints, network connections, itinerary with multiple legs"
   }
 }

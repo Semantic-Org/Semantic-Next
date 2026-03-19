@@ -1,122 +1,122 @@
 {
   "1": {
-    "visual": "A rectangular archive box with a flat lid and a small horizontal slot or handle cutout centered on the front face. The box body sits below a separate flat top panel, resembling a storage bin or document box.",
-    "usage": "Archive a conversation or email thread, move items to long-term storage, collapse a section into archived state, indicate stored/inactive records."
+    "visual": "A storage box with a flat lid and a small rectangular slot on the front face.",
+    "usage": "archive item, store record, move to archive, inbox management"
   },
   "2": {
-    "visual": "A rectangular box identical in shape to an archive box, but with an upward-pointing arrow emerging from inside the box through the open top. The arrow indicates content being lifted out or exported upward.",
-    "usage": "Unarchive or restore an item from archive, export from a storage container, retrieve a stored file, move content out of a folder."
+    "visual": "A storage box with a flat lid and an upward arrow rising from its opening.",
+    "usage": "unarchive item, restore from archive, move out of storage, retrieve record"
   },
   "3": {
-    "visual": "A rectangular archive box with a flat lid containing an X symbol centered on the front face instead of a slot. The X clearly marks the box for deletion or rejection.",
-    "usage": "Delete an archived item, discard or reject a stored record, permanently remove from archive, clear a storage slot."
+    "visual": "A storage box with a flat lid and an X mark on the front face.",
+    "usage": "delete archive, discard item, remove from storage, reject and archive"
   },
   "4": {
-    "visual": "A downward-pointing arrow on the left side alongside the letters A (top) and Z (bottom) stacked on the right, indicating descending alphabetical order from A down to Z.",
-    "usage": "Sort a list A to Z, apply ascending alphabetical sort to a table column, order search results alphabetically, sort contacts or files by name."
+    "visual": "A downward arrow beside the letters A and Z stacked vertically, A on top.",
+    "usage": "sort A to Z, ascending alphabetical sort, order list by name, apply text sort"
   },
   "5": {
-    "visual": "An upward-pointing arrow on the left side alongside the letters A (top) and Z (bottom) stacked on the right, indicating ascending or reverse sort direction where the arrow points up rather than down.",
-    "usage": "Sort a list Z to A, apply descending alphabetical sort to a table column, reverse alphabetical ordering, toggle sort direction from ascending to descending."
+    "visual": "An upward arrow beside the letters A and Z stacked vertically, A on top.",
+    "usage": "sort Z to A, descending alphabetical sort, reverse text order, apply reverse sort"
   },
   "6": {
-    "visual": "A bookmark ribbon shape — a tall rounded rectangle with a downward V-notch cut into the bottom center, making it look like a classic page marker. The shape is outline-only with no interior symbols.",
-    "usage": "Save or bookmark a page or article, add to reading list, mark a favorite item, indicate a saved but unconfirmed bookmark state."
+    "visual": "A bookmark ribbon with a V-shaped notch cut into the bottom edge, no interior symbol.",
+    "usage": "save item, bookmark page, add to saved list, mark for later"
   },
   "7": {
-    "visual": "A bookmark ribbon shape identical to the plain bookmark, but with a checkmark drawn inside the upper portion of the ribbon. The check distinguishes this as a confirmed or active saved state.",
-    "usage": "Indicate an item is already bookmarked or saved, confirm a bookmark was successfully added, mark a reading list item as saved, show active favorite status."
+    "visual": "A bookmark ribbon with a V-notched bottom and a checkmark inside the ribbon body.",
+    "usage": "item saved, bookmark confirmed, mark as read, confirm bookmarked state"
   },
   "8": {
-    "visual": "A bookmark ribbon shape identical to the plain bookmark, but with a plus sign drawn inside the upper portion of the ribbon. The plus sign signals the action of adding a new bookmark.",
-    "usage": "Add a new bookmark, save a page to a reading list, create a new saved item, prompt the user to bookmark the current content."
+    "visual": "A bookmark ribbon with a V-notched bottom and a plus sign inside the ribbon body.",
+    "usage": "add bookmark, save new item, create bookmark, add to favorites"
   },
   "9": {
-    "visual": "A circle outline containing three small filled dots arranged horizontally in the center, evenly spaced. The dots are contained within the circular border.",
-    "usage": "Open a contextual overflow menu within a circular button, access additional options for an item, secondary actions menu, more-options trigger styled as a pill or badge."
+    "visual": "A circle outline containing three small dots arranged horizontally in the center.",
+    "usage": "more options, overflow menu within a circular button, additional actions, contextual menu"
   },
   "10": {
-    "visual": "A circle outline containing a single short horizontal dash or minus sign centered within it. The minus sits alone inside the circular border.",
-    "usage": "Remove an item from a list or group, decrease a quantity, collapse or minimize a section, unsubscribe or remove from a set."
+    "visual": "A circle outline containing a single horizontal minus sign in the center.",
+    "usage": "remove item, decrement value, collapse section, decrease quantity"
   },
   "11": {
-    "visual": "A circle outline containing a plus sign centered within it, formed by one vertical and one horizontal stroke crossing at the center.",
-    "usage": "Add a new item to a list, create a new entry, increment a quantity, subscribe or join a group, insert content."
+    "visual": "A circle outline containing a plus sign in the center.",
+    "usage": "add item, increment value, create new, expand or include"
   },
   "12": {
-    "visual": "A circle outline containing an X formed by two diagonal strokes crossing at the center. The X is enclosed within the circular border.",
-    "usage": "Close a dialog or modal, dismiss a notification or tag, cancel an action, remove a chip or filter token, clear a field."
+    "visual": "A circle outline containing an X mark in the center.",
+    "usage": "close dialog, cancel action, clear field, dismiss notification"
   },
   "13": {
-    "visual": "A clipboard shape — a tall rounded rectangle representing a clipboard board — with a small rectangular clip tab at the top center. The interior is empty with no content lines.",
-    "usage": "Copy content to clipboard, paste from clipboard, represent clipboard history, indicate a notes or task list context."
+    "visual": "A clipboard with a small rectangular clip at the top center, empty body.",
+    "usage": "clipboard, paste destination, copy content, view copied items"
   },
   "14": {
-    "visual": "A clipboard shape with the small top clip tab, and a right-pointing arrow overlaid in the lower right area of the clipboard body, suggesting content being sent or pasted out from the clipboard.",
-    "usage": "Paste clipboard content into a target, send copied content to another location, clipboard-to-destination transfer, share clipboard contents."
+    "visual": "A clipboard with a small rectangular clip at the top and a rightward arrow on the body.",
+    "usage": "paste and proceed, clipboard export, submit copied content, forward clipboard item"
   },
   "15": {
-    "visual": "A cloud outline with a downward-pointing arrow hanging below the cloud and pointing into a small horizontal base line or tray. The arrow descends from the bottom center of the cloud.",
-    "usage": "Download a file from cloud storage, sync from cloud to local device, retrieve a cloud-saved document, cloud backup restore."
+    "visual": "A cloud shape with a downward arrow pointing out of its base toward a tray line.",
+    "usage": "download from cloud, save to device, cloud sync down, fetch remote file"
   },
   "16": {
-    "visual": "A cloud outline with an upward-pointing arrow rising from within the cloud toward the top center. The arrow points upward out of or into the cloud body.",
-    "usage": "Upload a file to cloud storage, sync local content to the cloud, back up data to cloud, publish or push content to a cloud service."
+    "visual": "A cloud shape with an upward arrow rising from within and pointing out of the top.",
+    "usage": "upload to cloud, sync to remote, backup file, publish to cloud storage"
   },
   "17": {
-    "visual": "Two overlapping rounded rectangles — one slightly behind and offset to the upper-left, one in the foreground — representing a copy or duplicate action. Both rectangles are outline only with no interior content.",
-    "usage": "Copy an element, duplicate a card or block, copy text to clipboard, clone a configuration or record."
+    "visual": "Two overlapping rounded squares, the front one offset to the lower right, both empty.",
+    "usage": "copy to clipboard, duplicate item, clone element, copy selection"
   },
   "18": {
-    "visual": "Two overlapping rounded rectangles identical to the plain copy icon, but the front (foreground) rectangle contains a checkmark inside it, indicating the copy action was completed successfully.",
-    "usage": "Confirm content was successfully copied, indicate clipboard copy confirmation, show a completed duplicate action, toggle state after a copy button is clicked."
+    "visual": "Two overlapping rounded squares with a checkmark inside the front square.",
+    "usage": "copy confirmed, paste success, clipboard check, duplicate verified"
   },
   "19": {
-    "visual": "A leftward-pointing pentagon or arrow-tab shape (like a speech bubble pointing left) containing an X formed by two diagonal crossing strokes inside it. The overall shape resembles a backspace key.",
-    "usage": "Backspace or delete the last character in a text input, clear a search query token, remove the most recently typed input, keyboard backspace action."
+    "visual": "A leftward-pointing tag shape containing an X mark, resembling a backspace key.",
+    "usage": "delete tag, backspace last character, remove label, clear search token"
   },
   "20": {
-    "visual": "A downward-pointing arrow with a horizontal baseline below it — the arrow descends from above and its tip points into or rests on the flat line at the bottom. The baseline extends left and right below the arrowhead.",
-    "usage": "Download a file, save content to local storage, pull data from a source, indicate a download action in a toolbar or button."
+    "visual": "A downward arrow descending into a tray or inbox trough at the bottom.",
+    "usage": "download file, save to device, import data, receive into inbox"
   },
   "21": {
-    "visual": "Three solid filled circles arranged in a horizontal row with equal spacing between them. The circles are larger and bolder than typical dots, with no enclosing border or container.",
-    "usage": "Open a horizontal overflow or more-options menu, access additional actions for a row or card, indicate expandable content, contextual action menu trigger."
+    "visual": "Three filled dots arranged in a horizontal row, no border or container.",
+    "usage": "more options, horizontal overflow menu, additional settings, action menu trigger"
   },
   "22": {
-    "visual": "Three solid filled circles arranged in a vertical column with equal spacing between them, stacked top to bottom. No enclosing border or container.",
-    "usage": "Open a vertical overflow or more-options menu, contextual action menu for a list row, additional options in a sidebar or card, kebab menu trigger."
+    "visual": "Three filled dots arranged in a vertical column, no border or container.",
+    "usage": "more options, vertical overflow menu, contextual actions, kebab menu"
   },
   "23": {
-    "visual": "Four diagonal arrows pointing outward toward each of the four corners — upper-left, upper-right, lower-left, lower-right — creating a symmetrical expand or fullscreen symbol.",
-    "usage": "Expand a panel or modal to fullscreen, maximize a window or media player, enter fullscreen mode, scale content to fill available space."
+    "visual": "Four diagonal arrows pointing outward toward each corner, forming an expand pattern.",
+    "usage": "fullscreen, expand view, maximize panel, zoom out to fit"
   },
   "24": {
-    "visual": "An eye shape — a wide oval outline forming the eye surround — with a smaller circle (iris/pupil) centered within it. The overall icon is outline-only and horizontally elongated.",
-    "usage": "Toggle password visibility, preview content before publishing, indicate a watched or monitored item, view or inspect details."
+    "visual": "An eye with a visible iris and pupil, representing the act of looking.",
+    "usage": "view item, preview content, show password, toggle visibility on"
   },
   "25": {
-    "visual": "An eye shape with a diagonal line (slash) crossing through it from lower-left to upper-right, obscuring the eye and indicating the hidden or invisible state.",
-    "usage": "Hide a password field, indicate content is hidden or invisible, toggle off visibility, mark a layer or element as not visible."
+    "visual": "An eye shape crossed out by a diagonal slash line running through it.",
+    "usage": "hide content, toggle visibility off, hide password, mark as hidden"
   },
   "26": {
-    "visual": "Six solid filled circles arranged in a 2-column by 3-row grid (two columns, three rows), evenly spaced. The grid is wider than tall and resembles a drag handle or app grid.",
-    "usage": "Drag to reorder an item, open an app launcher or grid menu, indicate a draggable list row, switch between grid-layout views."
+    "visual": "Six filled dots in a 3-row by 2-column grid, wider than tall.",
+    "usage": "drag to reorder, grid view toggle, move handle, rearrange items"
   },
   "27": {
-    "visual": "Six solid filled circles arranged in a 2-column by 3-row grid, identical in layout to icon 26 but the individual dots are slightly larger and the grid appears taller than wide, with a more vertical proportion.",
-    "usage": "Drag to reorder a list item, indicate a draggable handle on a card or row, vertical grip handle for sortable lists, reorder mode indicator."
+    "visual": "Six filled dots in a 3-row by 2-column grid, taller than wide with larger dots.",
+    "usage": "drag handle, reorder rows, grip for sorting, move item"
   },
   "28": {
-    "visual": "An open hand with four fingers extended upward and thumb slightly out to the side, drawn as a bold outline shape. The hand faces forward as if signaling stop or requesting attention.",
-    "usage": "Indicate a drag or pan interaction, block or restrict an action, signal a stop or hold state, grab/drag cursor affordance for interactive elements."
+    "visual": "An open hand with four fingers raised and thumb out, palm facing forward.",
+    "usage": "grab or drag mode, pan canvas, cursor grab state, move element"
   },
   "29": {
-    "visual": "A heart shape drawn as a smooth outline, formed by two rounded lobes at the top meeting at a downward point at the bottom. The interior is empty with no fill.",
-    "usage": "Like or favorite an item, add to a wishlist, show appreciation or love for content, indicate a saved or loved state."
+    "visual": "A heart outline with smooth curved lobes at the top and a pointed bottom tip.",
+    "usage": "like, favorite, add to wishlist, show appreciation"
   },
   "30": {
-    "visual": "A heart shape with a diagonal line (slash) crossing through it from lower-left to upper-right, negating the heart symbol. The slash breaks through the heart outline.",
-    "usage": "Remove from favorites or liked items, indicate dislike or not interested, undo a like action, mark content as disliked or blocked."
+    "visual": "A heart outline crossed out by a diagonal slash line running through it.",
+    "usage": "unlike, remove from favorites, dislike, clear wishlist item"
   }
 }

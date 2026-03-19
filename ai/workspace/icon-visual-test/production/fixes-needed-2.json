@@ -1,0 +1,52 @@
+{
+  "archive-restore": {
+    "current": "A rectangular box identical in shape to an archive box, but with an upward-pointing arrow emerging from inside the box through the open top. The arrow indicates content being lifted out or exported upward.",
+    "usage": "Unarchive or restore an item from archive, export from a storage container, retrieve a stored file, move content out of a folder.",
+    "lucide": "archive-restore"
+  },
+  "zoom-out": {
+    "current": "A magnifying glass with a minus sign inside the circular lens — identical in shape to a standard search icon but with a horizontal dash replacing the typical center detail.",
+    "usage": "Zoom out on a map or image, decrease text size, remove a search filter, collapse a detail view.",
+    "lucide": "zoom-out"
+  },
+  "badge-check": {
+    "current": "A badge-shaped outline (scalloped/starburst edge) with a check mark centered inside. Identical border shape to the exclamation badge, but the interior symbol is a tick/checkmark rather than an exclamation mark.",
+    "usage": "Verified account or identity badge; certified or approved status on a listing; trust indicator next to a username; marking a completed certification or credential.",
+    "lucide": "badge-check"
+  },
+  "info": {
+    "current": "A circle outline with a lowercase 'i' (information symbol) centered inside. The border is a smooth perfect circle — identical shape to the warning circle and question circle icons, differentiated only by the 'i' glyph.",
+    "usage": "Inline information tooltip trigger; informational status indicator next to a label; help text toggle; neutral informational notice in a notification system.",
+    "lucide": "info"
+  },
+  "camera-off": {
+    "current": "A camera icon identical in shape to a standard camera (rounded body, circular lens, top bump) but with a diagonal strikethrough line crossing from the lower-left to the upper-right, indicating the camera is disabled or unavailable.",
+    "usage": "Camera permission denied states, disabling camera in video call settings, indicating no camera detected, muting video input in a conference call.",
+    "lucide": "camera-off"
+  },
+  "bell-dot": {
+    "current": "A bell icon identical in shape to a standard notification bell, but with a small filled circle in the upper-right corner of the bell dome, indicating an unread or active notification badge.",
+    "usage": "Unread notification indicator, new alert badge on the notification icon, unseen activity alert, push notification pending state",
+    "lucide": "bell-dot"
+  },
+  "lock-open": {
+    "current": "An open padlock identical in body shape to the closed version, but with the U-shaped shackle raised and pivoted to the right so it no longer closes the lock.",
+    "usage": "Unlocked or public content states, disabling a lock action, unsecured connection warnings, toggling permissions off.",
+    "lucide": "lock-open"
+  },
+  "shield-alert": {
+    "current": "A shield outline identical in shape to the plain shield, but with a bold exclamation mark centered inside it, indicating a warning or alert state.",
+    "usage": "Security warning or vulnerability alert, account at risk notification, failed security check, suspicious activity banner.",
+    "lucide": "shield-alert"
+  },
+  "shield-check": {
+    "current": "A shield outline identical in shape to the plain shield, but with a checkmark centered inside it, indicating a verified or secure state.",
+    "usage": "Verified or trusted status badge, successful security scan result, secure transaction confirmation, two-factor authentication success.",
+    "lucide": "shield-check"
+  },
+  "shield-x": {
+    "current": "A shield outline identical in shape to the plain shield, but with a bold X (cross) centered inside it, indicating rejection, failure, or a blocked state.",
+    "usage": "Security check failed, blocked or rejected access, antivirus threat detected, permission denied indicator.",
+    "lucide": "shield-x"
+  }
+}

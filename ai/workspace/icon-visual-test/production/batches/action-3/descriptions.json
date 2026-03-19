@@ -1,22 +1,22 @@
 {
   "1": {
-    "visual": "An upward-pointing arrow emerging from a tray or inbox shape — a thick arrow pointing up sits above a rectangular container open at the top, resembling a document being lifted out of a slot.",
-    "usage": "Upload a file or asset, share content to a platform, export data from a local store, send a document from a device."
+    "visual": "An upload symbol: an upward arrow rising out of an open tray shape.",
+    "usage": "file upload button, export action, share to cloud, send attachment"
   },
   "2": {
-    "visual": "A laptop computer outline with a checkmark inside the screen area — the lid and keyboard base are shown in profile, and a bold tick mark fills the screen cavity.",
-    "usage": "Confirm a device task is complete, indicate a successful deployment or build, mark a laptop or desktop as verified, show an approved remote session."
+    "visual": "A laptop with a checkmark displayed inside the open screen.",
+    "usage": "task completed on device, verified download, successful login, confirmed submission"
   },
   "3": {
-    "visual": "A large X formed by two diagonal lines crossing at the center of the icon, with rounded or slightly tapered ends on each line stroke.",
-    "usage": "Close a dialog or modal, dismiss a notification or toast, remove a tag or chip, cancel an ongoing action."
+    "visual": "An X mark formed by two diagonal lines crossing at the center.",
+    "usage": "close dialog, dismiss notification, remove tag, cancel action"
   },
   "4": {
-    "visual": "A magnifying glass with a plus sign inside the circular lens — the handle extends to the lower right, and the plus symbol is centered within the circle.",
-    "usage": "Zoom in on a map or image, increase text size, add a search filter, expand a detail view."
+    "visual": "A magnifying glass with a plus sign inside the lens.",
+    "usage": "zoom in, increase magnification, expand view, add search filter"
   },
   "5": {
-    "visual": "A magnifying glass with a minus sign inside the circular lens — identical in shape to a standard search icon but with a horizontal dash replacing the typical center detail.",
-    "usage": "Zoom out on a map or image, decrease text size, remove a search filter, collapse a detail view."
+    "visual": "A magnifying glass with a minus sign inside the lens.",
+    "usage": "zoom out, decrease magnification, shrink view, remove search filter"
   }
 }

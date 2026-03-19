@@ -1,66 +1,66 @@
 {
   "1": {
-    "visual": "A sound wave visualization made of five vertical bars of varying heights arranged symmetrically — tall bars in the center tapering down toward the outer edges — resembling an audio waveform or equalizer display.",
-    "usage": "Audio playback interfaces to indicate a track is playing, voice message indicators in chat apps, podcast or audio player controls, audio level visualization toggles."
+    "visual": "Audio waveform with five vertical bars of varying heights, tall in the center and shorter at the edges, like an equalizer or sound visualization.",
+    "usage": "audio playback indicator, voice input active state, sound level display, waveform visualization"
   },
   "2": {
-    "visual": "A camera icon with a rounded rectangular body, a circular lens in the center, and a small raised bump on the top left representing the shutter or viewfinder. The outline style is clean with no fill.",
-    "usage": "Photo capture buttons in camera apps, profile picture upload prompts, adding photos to a post or form, switching to camera mode in a media picker."
+    "visual": "Camera with a rounded rectangular body, circular lens centered inside, and a small bump on the top edge.",
+    "usage": "take photo, upload image, profile picture capture, camera access toggle"
   },
   "3": {
-    "visual": "A camera icon identical in shape to a standard camera (rounded body, circular lens, top bump) but with a diagonal strikethrough line crossing from the lower-left to the upper-right, indicating the camera is disabled or unavailable.",
-    "usage": "Camera permission denied states, disabling camera in video call settings, indicating no camera detected, muting video input in a conference call."
+    "visual": "Camera with a diagonal slash through it indicating the camera is disabled or unavailable.",
+    "usage": "camera disabled, no photo allowed, camera permission denied, video off fallback"
   },
   "4": {
-    "visual": "A rounded rectangle resembling a screen or card, containing two short horizontal lines (like text) stacked inside it — representing a caption or subtitle overlay on a display.",
-    "usage": "Toggling subtitles or closed captions in a video player, enabling transcripts for accessibility, indicating caption settings in media playback controls, video content accessibility options."
+    "visual": "Closed captions symbol — a rounded rectangle containing two short horizontal lines arranged in two rows inside.",
+    "usage": "toggle subtitles, closed captions setting, accessibility options, video player caption control"
   },
   "5": {
-    "visual": "A film strip icon: a rounded square with two columns of small square perforations along the left and right edges, and two horizontal dividing lines inside creating three sections, representing a strip of movie film.",
-    "usage": "Video library or media gallery navigation, adding video content, video file type indicators, accessing video editing features in a content creation tool."
+    "visual": "Film strip — a rounded square with rows of small rectangular perforations along the top and bottom edges, divided into sections like actual film.",
+    "usage": "video library, movie file, media gallery, film or video content type"
   },
   "6": {
-    "visual": "Three vertical rectangles side by side — a narrower one on the left, a taller one in the center, and a narrower one on the right — suggesting a carousel or slideshow view with a focused center slide.",
-    "usage": "Switching to carousel or slideshow display mode, image gallery view toggles, story or card browsing interfaces, pagination controls for media content."
+    "visual": "Carousel view — a tall centered rectangle flanked by two shorter, narrower rectangles on each side, suggesting a focused center slide.",
+    "usage": "carousel navigation, slideshow mode, media viewer, image gallery browsing"
   },
   "7": {
-    "visual": "A photo or image placeholder icon: a rounded square outline containing a small circle in the upper left (representing a sun or subject) and a triangular mountain silhouette in the lower right, the classic symbol for a photograph.",
-    "usage": "Image upload placeholders, photo field indicators in forms, empty state for an image slot, thumbnail previews in media managers."
+    "visual": "Image placeholder — a rounded square with a small circle in the upper left and a diagonal mountain silhouette, the standard photo symbol.",
+    "usage": "image placeholder, photo upload, broken image fallback, media attachment"
   },
   "8": {
-    "visual": "The same photo/image icon — rounded square with a small circle and mountain silhouette — but with a diagonal strikethrough line drawn across it, indicating no image or image unavailable.",
-    "usage": "Broken image fallback states, indicating a missing or failed-to-load photo, disabling image display in content settings, no-image-found error indicators."
+    "visual": "Image placeholder with a diagonal slash through it, indicating no image or image unavailable.",
+    "usage": "image unavailable, broken image, no thumbnail, media load error"
   },
   "9": {
-    "visual": "A photo icon — rounded square with a small circle and mountain silhouette — with a plus sign (+) overlaid in the upper right corner, indicating the action of adding a new image.",
-    "usage": "Adding a photo to a post, gallery, or profile, uploading a new image in a media library, attaching an image to a message or form field, creating a new photo entry."
+    "visual": "Image placeholder with a plus sign in the upper right corner, indicating a new image can be added.",
+    "usage": "add photo, upload new image, attach image, add media"
   },
   "10": {
-    "visual": "Two overlapping image/photo icons — the classic rounded square with circle and mountain silhouette — stacked with one slightly offset behind the other, suggesting a collection or multiple images.",
-    "usage": "Photo album or gallery indicators, multiple image selection in a media picker, representing an image collection or stack, batch photo operations."
+    "visual": "Two overlapping image thumbnails offset behind one another, suggesting a stack or collection of photos.",
+    "usage": "photo album, image gallery, media collection, multiple photos"
   },
   "11": {
-    "visual": "A microphone icon with a rounded rectangular capsule body at the top and a curved stand/base below it, representing the classic condenser or studio microphone shape in outline style.",
-    "usage": "Voice recording controls, speech-to-text input activation, unmuting a microphone in a call interface, podcast or audio recording tools."
+    "visual": "Microphone — a rounded capsule body on a short stem with a curved arc base beneath it.",
+    "usage": "voice input, start recording, speech-to-text, podcast or audio recording"
   },
   "12": {
-    "visual": "The same microphone icon — capsule body with curved stand — but with a diagonal strikethrough line crossing over it, indicating the microphone is muted or disabled.",
-    "usage": "Mute microphone button in video or audio calls, indicating microphone is off or permission denied, muted state in a voice chat interface, disabling voice input."
+    "visual": "Microphone with a diagonal slash through it indicating muted or disabled state.",
+    "usage": "mute microphone, mic disabled, voice input off, microphone permission denied"
   },
   "13": {
-    "visual": "A musical note icon showing two eighth notes joined by a horizontal beam at the top, each with a filled oval note head and a vertical stem, the standard music symbol.",
-    "usage": "Music playback controls or players, indicating audio or music content in a list, toggling background music in an app, linking to a music library or playlist."
+    "visual": "Two eighth notes joined by a beam at the top, each with a filled oval head and a stem — the standard music symbol.",
+    "usage": "audio track, music playback, song or playlist, sound file type"
   },
   "14": {
-    "visual": "A podcast or radio broadcast icon: a person silhouette at the bottom center with two sets of concentric curved arcs radiating outward above them on both sides, representing signal transmission or broadcasting.",
-    "usage": "Podcast app navigation or episode listings, live radio or streaming broadcast indicators, subscribing to a podcast feed, broadcasting or going live in a creator tool."
+    "visual": "Podcast symbol — a small person silhouette at the bottom with concentric curved arcs radiating outward above, like a broadcast signal.",
+    "usage": "podcast feed, live broadcast, radio streaming, subscribe to show"
   },
   "15": {
-    "visual": "A video camera icon with a rounded rectangular body on the left and a triangular arrow or lens element pointing inward on the right side, representing a camcorder in outline style.",
-    "usage": "Starting a video call or recording, switching to video mode, indicating video content in a feed, video chat or conferencing controls."
+    "visual": "Video camera — a horizontal rounded rectangle for the lens body with a solid triangular flag extending from the right side.",
+    "usage": "start video call, record video, video chat, camera toggle on"
   },
   "16": {
-    "visual": "The same video camera icon — rectangular body with the triangular right-side element — but with a diagonal strikethrough line crossing over it, indicating video is disabled or camera is turned off.",
-    "usage": "Turning off video in a conference call, video camera muted or unavailable state, disabling video capture, indicating no video permission granted."
+    "visual": "Video camera with a diagonal slash through it indicating video is turned off or unavailable.",
+    "usage": "video muted, camera off, video call disabled, no video stream"
   }
 }

@@ -1,54 +1,54 @@
 {
   "1": {
-    "visual": "A browser window outline with a rounded-rectangle frame, a horizontal title bar at the top containing two small squares (representing window controls or tabs), and a large empty content area below.",
-    "usage": "Representing a web browser or app window; opening a new browser tab; linking to a web-based resource; indicating a preview or iframe embed."
+    "visual": "A browser window with a title bar containing two small squares in the top-left corner and an empty content area below.",
+    "usage": "open in browser, new window, web view, external link"
   },
   "2": {
-    "visual": "A command symbol (the looped square or 'bowen knot' shape) composed of four rounded squares connected at their corners by curved loops, commonly associated with the macOS Command key.",
-    "usage": "Displaying keyboard shortcut hints; macOS-specific hotkey documentation; shortcut reference panels; command palette triggers."
+    "visual": "The Command key symbol: four rounded squares joined in a pinwheel by curved loops at their corners.",
+    "usage": "keyboard shortcut display, macOS modifier key, hotkey reference, command palette"
   },
   "3": {
-    "visual": "A rounded rectangle divided horizontally into two sections: a large upper area and a thinner horizontal bar fixed to the bottom edge, resembling a panel with a bottom toolbar or shelf.",
-    "usage": "Toggling a bottom panel or drawer; representing a layout with a fixed footer bar; showing a bottom navigation bar; activating a status bar."
+    "visual": "A rectangle divided into a tall upper content area and a narrow horizontal bar fixed to the bottom edge.",
+    "usage": "bottom panel toggle, status bar, terminal drawer, layout with footer"
   },
   "4": {
-    "visual": "A rounded rectangle divided horizontally into two sections — a large upper area and a thinner bottom bar — with a checkmark icon centered in the upper area, indicating a confirmed or collapsed bottom panel state.",
-    "usage": "Confirming closure of a bottom panel; marking a panel as resolved or done; toggling a verified bottom-shelf state; indicating a completed drawer action."
+    "visual": "A rectangle with a narrow bottom bar and a downward-pointing chevron centered in the upper content area.",
+    "usage": "collapse bottom panel, dismiss bottom sheet, minimize drawer, scroll to bottom"
   },
   "5": {
-    "visual": "A rounded rectangle divided horizontally into two sections — a large upper area and a thinner bottom bar — with an upward-pointing chevron centered in the upper area, suggesting the bottom panel can be collapsed or scrolled up.",
-    "usage": "Collapsing a bottom drawer or panel upward; dismissing a bottom sheet; scrolling to the top of a panel; hiding a bottom toolbar."
+    "visual": "A rectangle with a narrow bottom bar and an upward-pointing chevron centered in the upper content area.",
+    "usage": "expand bottom panel, open bottom drawer, scroll to top, maximize bottom sheet"
   },
   "6": {
-    "visual": "A rounded rectangle divided vertically into two unequal columns: a narrow left sidebar panel and a wider right content area, with both separated by a single vertical line.",
-    "usage": "Toggling a left sidebar layout; switching to a two-column view with a narrow left panel; activating a navigation rail or side menu; representing a sidebar-open state."
+    "visual": "A rectangle divided into a narrow left column and a wider right content area by a single vertical line.",
+    "usage": "left sidebar toggle, navigation drawer, side panel layout, split view"
   },
   "7": {
-    "visual": "A rounded rectangle divided vertically into a narrow left panel and a wider right content area, with a left-pointing chevron centered inside the narrow left panel, suggesting the sidebar can be collapsed to the left.",
-    "usage": "Collapsing a left sidebar or navigation panel; hiding a left drawer; closing a side menu; minimizing a left-side panel."
+    "visual": "A rectangle with a narrow left column and wider right area, with a left-pointing chevron inside the left column.",
+    "usage": "collapse left sidebar, close left panel, hide navigation drawer, retract side menu"
   },
   "8": {
-    "visual": "A rounded rectangle divided vertically into a narrow left panel and a wider right content area, with a right-pointing chevron centered inside the narrow left panel, suggesting the sidebar can be expanded to the right.",
-    "usage": "Expanding a collapsed left sidebar; opening a side navigation panel; revealing a hidden left drawer; showing a side menu."
+    "visual": "A rectangle with a narrow left column and wider right area, with a right-pointing chevron inside the left column.",
+    "usage": "expand left sidebar, open left panel, show navigation drawer, reveal side menu"
   },
   "9": {
-    "visual": "A rounded rectangle divided vertically into a wider left content area and a narrow right panel, with both separated by a single vertical line — the mirror image of the left-sidebar layout icon.",
-    "usage": "Toggling a right sidebar or details panel; switching to a two-column view with a narrow right panel; activating a properties or inspector panel on the right; representing a right-side panel open state."
+    "visual": "A rectangle divided into a wider left content area and a narrow right column by a single vertical line.",
+    "usage": "right sidebar toggle, inspector panel, details drawer, right-side layout"
   },
   "10": {
-    "visual": "A rounded rectangle divided vertically into a wider left content area and a narrow right panel, with a right-pointing chevron centered inside the narrow right panel, suggesting the right sidebar can be collapsed outward.",
-    "usage": "Collapsing a right sidebar or details panel; hiding a right drawer; closing a properties inspector; minimizing a right-side panel."
+    "visual": "A rectangle with a wider left area and a narrow right column, with a right-pointing chevron inside the right column.",
+    "usage": "collapse right sidebar, close inspector panel, hide right drawer, retract details panel"
   },
   "11": {
-    "visual": "A rounded rectangle divided vertically into a wider left content area and a narrow right panel, with a left-pointing chevron centered inside the narrow right panel, suggesting the right sidebar can be expanded inward.",
-    "usage": "Expanding a collapsed right sidebar; opening a right-side details or inspector panel; revealing a hidden right drawer; showing contextual properties."
+    "visual": "A rectangle with a wider left area and a narrow right column, with a left-pointing chevron inside the right column.",
+    "usage": "expand right sidebar, open inspector panel, show right drawer, reveal details panel"
   },
   "12": {
-    "visual": "A power symbol: a circle with a gap at the top center and a short vertical line extending upward through the gap, universally recognized as a power on/off button icon.",
-    "usage": "Power on/off controls; shutting down or restarting a system; sleep or standby toggles; device or session termination actions."
+    "visual": "A power button: a circle with a gap at the top and a short vertical line passing through the gap.",
+    "usage": "power on/off, shutdown, sleep mode, device or session toggle"
   },
   "13": {
-    "visual": "Two stacked chevrons pointing in opposite vertical directions (one up, one down) with a horizontal line between them, forming a sort or resize handle indicator.",
-    "usage": "Sorting a table column in either direction; indicating a draggable resize handle; representing a toggle between ascending and descending order; showing an expandable/collapsible row splitter."
+    "visual": "Two chevrons pointing up and down with a horizontal line between them, forming a sort or drag handle indicator.",
+    "usage": "sort column toggle, drag to reorder, resize handle, expand or collapse row"
   }
 }
