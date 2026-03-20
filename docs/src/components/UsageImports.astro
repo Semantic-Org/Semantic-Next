@@ -1,0 +1,17 @@
+---
+const { spec } = Astro.props;
+
+const tagName = spec?.tagName;
+const exportName = spec?.exportName;
+if (!tagName) return;
+---
+<section class="usage-section" id="import">
+  <h2>Import</h2>
+  <h3>HTML</h3>
+  <code-sample code={`<script type="module">\n  import '@semantic-ui/core/${tagName.replace('ui-', '')}';\n</script>\n\n<${tagName}>...</${tagName}>`} language="html" client:load></code-sample>
+
+  {exportName && (
+    <h3>JavaScript</h3>
+    <code-sample code={`import { ${exportName} } from '@semantic-ui/core';`} language="javascript" client:load></code-sample>
+  )}
+</section>

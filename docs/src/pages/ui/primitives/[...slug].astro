@@ -6,6 +6,9 @@ import Definition from '@layouts/Definition.astro';
 import SpecDefinition from '@components/SpecDefinition.astro';
 import SpecTabs from '@components/SpecTabs.astro';
 import SpecimenExplorer from '@components/SpecimenExplorer/SpecimenExplorer.js';
+import UsageImports from '@components/UsageImports.astro';
+import UsageSettings from '@components/UsageSettings.astro';
+import UsageEvents from '@components/UsageEvents.astro';
 import { DocsSpecReader } from '@semantic-ui/specs';
 import * as Specs from '@semantic-ui/core/specs';
 
@@ -82,7 +85,10 @@ if (displayedTab === 'spec') {
 >
   {usageDisplayed && (
     <SpecimenExplorer spec={JSON.stringify(spec)} client:only></SpecimenExplorer>
+    <UsageImports spec={spec} />
     <Content />
+    <UsageSettings spec={spec} />
+    <UsageEvents spec={spec} />
   )}
   {definitionDisplayed && (
     <SpecDefinition

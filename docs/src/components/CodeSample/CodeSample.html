@@ -9,12 +9,10 @@
     <ui-icon link copy data-text="Copy Code"></ui-icon>
   {/if}
   <code class="code {language}">
-    {#if formattedCode}
-      {#html formattedCode}
-    {else}
+    {#rerender darkMode}
       {#async formatCode as formattedCode}
         {#html formattedCode}
       {/async}
-    {/if}
+    {rerender}
   </code>
 </codeSample>

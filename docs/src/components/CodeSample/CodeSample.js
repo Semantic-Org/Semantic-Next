@@ -3,52 +3,31 @@ import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
 import { defineComponent } from '@semantic-ui/component';
+import { copyText } from '@semantic-ui/utils';
 import css from './CodeSample.css?raw';
 import template from './CodeSample.html?raw';
-
-import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { copyText } from '@semantic-ui/utils';
 
 const defaultSettings = {
   language: 'html',
   languageMenu: 'auto',
   code: '',
-  formattedCode: '',
   copyable: true,
   segment: true,
   attached: false,
-  onCodeVisible: function() {},
 };
 
 const defaultState = {
-  formattedCode: null,
   languages: [],
   language: null,
-  slottedCode: null,
+  darkMode: null,
 };
 
-const createComponent = ({ el, $, settings, reaction, darkMode, self, state, afterFlush }) => ({
+const createComponent = ({ el, $, settings, reaction, darkMode, self, state, dispatchEvent }) => ({
   initialize() {
-    // allow slotted content for code instead
-    if (!settings.code && el.innerHTML) {
-      settings.code = el.innerHTML;
-    }
-    self.configureFormatting();
-    self.formatCode();
+    state.darkMode.set(darkMode);
   },
 
-  getCode() {
-    let code;
-    if (settings.code) {
-      code = settings.code;
-    }
-    else if (self.slottedCode.get()) {
-      code = self.slottedCode.get();
-    }
-    return code;
-  },
-
-  async formatCode(useDarkMode = darkMode) {
+  async formatCode(useDarkMode = state.darkMode.get()) {
     const language = settings.language;
     let code = settings.code;
     // format html
@@ -72,12 +51,8 @@ const createComponent = ({ el, $, settings, reaction, darkMode, self, state, aft
         '#24292e': '#777',
       },
     });
-    afterFlush(() => settings.onCodeVisible(formattedCode.value, settings.code));
+    dispatchEvent('formatted', { code: code, formattedCode: formattedCode });
     return formattedCode;
-  },
-
-  configureFormatting() {
-    // nothing yet
   },
 
   getLanguages() {
@@ -95,10 +70,15 @@ const createComponent = ({ el, $, settings, reaction, darkMode, self, state, aft
   },
 });
 
-const onRendered = ({ $, isServer, self }) => {
+const onRendered = ({ $, el, isServer, reaction, state, settings }) => {
   if (isServer) {
     return;
   }
+  // allow slotted content for code instead
+  if (!settings.code && el.innerHTML) {
+    settings.code = el.innerHTML;
+  }
+  // add tooltip
   $('ui-icon[copy]').tooltip({
     onHidden: function() {
       $(this).tooltip('set text', 'Copy Code');
@@ -106,15 +86,14 @@ const onRendered = ({ $, isServer, self }) => {
   });
 };
 
-const onThemeChanged = function({ self, isClient, darkMode, settings }) {
-  self.formatCode(darkMode);
+const onThemeChanged = function({ state, darkMode }) {
+  state.darkMode.set(darkMode);
 };
 
 const events = {
   'click ui-icon[copy]'({ event, target, settings }) {
     copyText(settings.code);
-    $(target)
-      .tooltip('set text', 'Copied!');
+    $(target).tooltip('set text', 'Copied!');
     const $tooltip = $(target).tooltip('get tooltip');
     $tooltip.transition('jiggle');
   },
