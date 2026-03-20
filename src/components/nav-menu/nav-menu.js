@@ -143,6 +143,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
       }
       // start on first match
       if (!firstMatch && item.highlight) {
+        console.log('[filterBySearchTerm] setting selectedIndex to', selectedIndex, 'for', item.name);
         state.selectedIndex.set(selectedIndex);
         firstMatch = true;
       }
@@ -158,6 +159,14 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
       return currentMenu;
     });
     state.maxIndex.set(selectedIndex);
+    console.log(
+      '[filterBySearchTerm] done, firstMatch:',
+      firstMatch,
+      'maxIndex:',
+      selectedIndex,
+      'stateIdx now:',
+      state.selectedIndex.peek(),
+    );
     return menu;
   },
 
@@ -213,8 +222,14 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     };
   },
   getPageClasses(page) {
+    const selected = state.selectedIndex.value == page?.selectedIndex;
+    console.log('[getPageClasses]', page?.name, {
+      stateIdx: state.selectedIndex.value,
+      pageIdx: page?.selectedIndex,
+      selected,
+    });
     return {
-      selected: state.selectedIndex.value == page?.selectedIndex,
+      selected,
       current: self.isCurrentItem(page),
     };
   },
@@ -303,11 +318,13 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
 
 const keys = {
   'up'({ self, state }) {
+    console.log('[getPageClasses] up key pressed', self.isSearching());
     if (self.isSearching()) {
       state.selectedIndex.decrement(1, 0);
     }
   },
   'down'({ self, state }) {
+    console.log('[getPageClasses] down key pressed', self.isSearching());
     if (self.isSearching()) {
       state.selectedIndex.increment(1, state.maxIndex.get());
     }
