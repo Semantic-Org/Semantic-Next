@@ -206,6 +206,7 @@ export class LitRenderer {
         };
       }
       if (key == 'loadingContent') {
+        if (!value.length) { return null; }
         return () => {
           return this.renderContent({
             ast: value,
@@ -214,6 +215,7 @@ export class LitRenderer {
         };
       }
       if (key == 'errorContent') {
+        if (!value.length) { return null; }
         return (errorData) => {
           // error data contains the error context
           data = { ...this.data, ...errorData };

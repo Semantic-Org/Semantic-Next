@@ -1,4 +1,4 @@
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -97,7 +97,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         if (asyncCondition.loadingContent) {
           return asyncCondition.loadingContent();
         }
-        return nothing;
+        return noChange;
 
       case 'error':
         if (asyncCondition.errorContent) {
@@ -108,7 +108,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
 
           return asyncCondition.errorContent(errorData);
         }
-        return nothing;
+        return noChange;
 
       case 'success':
         if (asyncCondition.content) {
@@ -116,10 +116,10 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           const successData = this.createSuccessDataContext(asyncCondition);
           return asyncCondition.content(successData);
         }
-        return nothing;
+        return noChange;
 
       default:
-        return nothing;
+        return noChange;
     }
   }
 

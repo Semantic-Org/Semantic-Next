@@ -11,6 +11,9 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Renderer
+* **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
+
 ### Query
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
