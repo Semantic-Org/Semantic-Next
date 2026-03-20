@@ -9,6 +9,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
     this.reaction = null;
+    this.generation = 0;
     this.state = 'loading'; // 'loading', 'success', 'error'
     this.resolvedValue = null;
     this.error = null;
@@ -58,6 +59,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   handleExpressionResult(result, asyncCondition) {
+    const currentGeneration = ++this.generation;
+
     // Reset state
     this.state = 'loading';
     this.resolvedValue = null;
@@ -68,6 +71,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Handle promise
       result
         .then((value) => {
+          if (currentGeneration < this.generation) { return; }
           this.state = 'success';
           this.resolvedValue = value;
           if (this.isConnected) {
@@ -76,6 +80,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           }
         })
         .catch((error) => {
+          if (currentGeneration < this.generation) { return; }
           this.state = 'error';
           this.error = error;
           if (this.isConnected) {

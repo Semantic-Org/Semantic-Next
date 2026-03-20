@@ -13,6 +13,7 @@ xx.xx.xxxx
 
 ### Renderer
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
+* **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
 
 ### Query
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
