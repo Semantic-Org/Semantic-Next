@@ -16,6 +16,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   render(asyncCondition) {
+    console.log('[async] render() called, current state:', this.state);
+
     // Stop existing reaction
     if (this.reaction) {
       this.reaction.stop();
@@ -28,7 +30,9 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     }
 
     // Return initial render
-    return this.renderCurrentState(asyncCondition);
+    const result = this.renderCurrentState(asyncCondition);
+    console.log('[async] render() returning:', result === noChange ? 'noChange' : result);
+    return result;
   }
 
   watchChanges(asyncCondition) {
@@ -53,7 +57,16 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Render based on current state (after first run)
       if (!computation.firstRun) {
         const rendered = this.renderCurrentState(asyncCondition);
+        console.log(
+          '[async] reaction re-fire, state:',
+          this.state,
+          'rendered:',
+          rendered === noChange ? 'noChange' : rendered,
+        );
         this.setValue(rendered);
+      }
+      else {
+        console.log('[async] reaction first run, state:', this.state);
       }
     }, { context });
   }
@@ -71,7 +84,11 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Handle promise
       result
         .then((value) => {
-          if (currentGeneration < this.generation) { return; }
+          if (currentGeneration < this.generation) {
+            console.log('[async] stale promise resolved, ignoring (gen', currentGeneration, '<', this.generation, ')');
+            return;
+          }
+          console.log('[async] promise resolved, gen:', currentGeneration);
           this.state = 'success';
           this.resolvedValue = value;
           if (this.isConnected) {

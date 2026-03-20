@@ -1,3 +1,4 @@
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -11,6 +12,8 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   }
 
   render(condition) {
+    console.log('[rerender] render() called, hasReaction:', !!this.reaction);
+
     // Stop existing reaction
     if (this.reaction) {
       this.reaction.stop();
@@ -52,7 +55,11 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       }
 
       if (!computation.firstRun) {
+        console.log('[rerender] reaction re-fire, re-rendering content');
         this.setValue(condition.content());
+      }
+      else {
+        console.log('[rerender] reaction first run');
       }
     }, { context });
   }

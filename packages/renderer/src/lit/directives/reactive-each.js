@@ -94,7 +94,8 @@ export class ReactiveEachDirective extends AsyncDirective {
 
   getTemplate(item, indexOrKey, collectionType) {
     const templateData = this.getEachData(item, indexOrKey, collectionType, this.eachCondition);
-    return this.eachCondition.content(templateData);
+    const key = this.getItemID(item, indexOrKey, collectionType);
+    return this.eachCondition.content(templateData, key);
   }
 
   getItemID(item, indexOrKey, collectionType) {

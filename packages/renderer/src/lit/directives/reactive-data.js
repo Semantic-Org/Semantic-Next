@@ -28,11 +28,13 @@ export class ReactiveDataDirective extends AsyncDirective {
     // that dont trigger rerender occur
     if (this.reaction) {
       // if reaction already set up just return value for rerender
+      console.log('[data] render() rerender, expr:', expression.expression);
       return this.getReactiveValue();
     }
     else {
       // Create a new reaction to rerun the computation function if reactive data updates
       // that dont trigger rerender occur
+      console.log('[data] render() first, expr:', expression.expression);
       let value;
       if (isClient) {
         value = this.watchChanges();

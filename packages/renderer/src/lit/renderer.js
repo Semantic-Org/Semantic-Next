@@ -29,10 +29,12 @@ export class LitRenderer {
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
-  static useSubtreeCache = false; // experimental
+  static useSubtreeCache = true; // experimental
 
-  static getID({ ast, data, isSVG } = {}) {
-    return hashCode({ ast });
+  static getID({ ast, key, isSVG } = {}) {
+    return (key !== undefined)
+      ? hashCode({ ast, key })
+      : hashCode({ ast });
   }
 
   constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true }) {
@@ -245,12 +247,13 @@ export class LitRenderer {
         };
       }
       if (key == 'content') {
-        return (eachData) => {
+        return (eachData, eachKey) => {
           // each data is (index, this, as) from curent position
           data = { ...this.data, ...eachData };
           return this.renderContent({
             ast: value,
             data,
+            key: eachKey,
           });
         };
       }
@@ -663,13 +666,12 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
-  renderContent({ ast, data, isSVG = this.isSVG } = {}) {
-    const contentID = LitRenderer.getID({ ast, data, isSVG });
+  renderContent({ ast, data, key, isSVG = this.isSVG } = {}) {
+    const contentID = LitRenderer.getID({ ast, key, isSVG });
     const treeRef = this.renderTrees[contentID];
     const existingTree = treeRef ? treeRef.deref() : undefined;
 
-    // this is disabled globally currently as it is experimental
-    if (LitRenderer.useSubtreeCache && existingTree) {
+    if (existingTree) {
       return existingTree.cachedRender(data);
     }
 
