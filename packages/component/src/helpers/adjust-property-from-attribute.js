@@ -124,7 +124,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // settings have signals that mirror the prop and need to be triggered
   const setSetting = (property, value) => {
     let newValue = value;
-    if (el.settings[property]) {
+    if (el.settings[property] !== undefined) {
       const converter = properties?.[property]?.converter?.fromproperty;
       if (isFunction(converter)) {
         newValue = converter(newValue);
