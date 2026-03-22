@@ -1,0 +1,309 @@
+<div class="test-suite">
+
+  <h2>Async & Rerender</h2>
+
+  <h3>1. Async inside Rerender</h3>
+  <p class="desc">Click to toggle darkMode. Message should update without flashing empty. Loading only on initial load.</p>
+  <div class="test">
+    {#rerender darkMode}
+      {#async formatMessage as msg}
+        <span class="result">{msg}</span>
+      {loading}
+        <span class="loading">loading...</span>
+      {/async}
+    {/rerender}
+    <button class="trigger-rerender">Toggle darkMode</button>
+  </div>
+
+  <h3>2. Async Stale Promise</h3>
+  <p class="desc">Click once to trigger 3 rapid fetches (v1, v2, v3 at 100ms intervals, 500ms each). Only "Result v3" should appear.</p>
+  <div class="test">
+    {#async fetchWithDelay as result}
+      <span class="result">{result}</span>
+    {/async}
+    <button class="rapid-fetch">Rapid Fetch (3x)</button>
+  </div>
+
+  <h3>3. Computed Value in Rerender</h3>
+  <p class="desc">Click to change label and increment counter. The computed string should reflect both changes immediately.</p>
+  <div class="test">
+    {#rerender counter}
+      <span class="computed">{getComputedLabel}</span>
+    {/rerender}
+    <button class="change-label">Change Label</button>
+  </div>
+
+  <h3>4. Nested Rerender (Same Key)</h3>
+  <p class="desc">Two rerender blocks nested, both keyed on same signal. Both label and timestamp should update on each click.</p>
+  <div class="test">
+    {#rerender depthSignal}
+      <span class="tag">Outer: {getDepthLabel}</span>
+      {#rerender depthSignal}
+        <span class="result">Inner: {getTimestamp}</span>
+      {/rerender}
+    {/rerender}
+    <button class="depth-bump">Bump</button>
+  </div>
+
+  <h2>Each Loops</h2>
+
+  <h3>5. Each with Filter Toggle</h3>
+  <p class="desc">Toggle between all 4 items and only active items (Alpha, Gamma). List should update with no stale entries.</p>
+  <div class="test">
+    {#each item in getFilteredItems}
+      <div class="item">
+        <span class="name">{item.name}</span>
+        <span class="value">{item.value}</span>
+      </div>
+    {else}
+      <div class="empty">No items</div>
+    {/each}
+    <button class="toggle-filter">Toggle Filter</button>
+  </div>
+
+  <h3>6. Each with Duplicate Primitive Values</h3>
+  <p class="desc">Renders [1,1,2,2,3] — duplicate values test key degeneracy. Click to multiply by 10. All 5 items should show distinct indices.</p>
+  <div class="test">
+    {#each val, i in getDuplicates}
+      <span class="pill">[{i}] {val}</span>
+    {/each}
+    <button class="dup-toggle">Toggle x10</button>
+  </div>
+
+  <h3>7. Each Empty/Populated Transition</h3>
+  <p class="desc">Toggles between populated list and else branch. Should alternate cleanly between "No items" and fruit names.</p>
+  <div class="test">
+    {#each item in getToggleableList}
+      <span class="pill">{item.text}</span>
+    {else}
+      <span class="empty">No items yet</span>
+    {/each}
+    <button class="toggle-list">Toggle List</button>
+  </div>
+
+  <h3>8. Conditional inside Each</h3>
+  <p class="desc">Toggle active state on all items. Checkmarks and crosses should swap. If stale, symbols won't change.</p>
+  <div class="test">
+    {#each item in getToggleItems}
+      <div class="cond-item">
+        {#if item.active}
+          <span class="active">✓ {item.name}</span>
+        {else}
+          <span class="inactive">✗ {item.name}</span>
+        {/if}
+      </div>
+    {/each}
+    <button class="toggle-active">Toggle Active</button>
+  </div>
+
+  <h3>9. External Signal Controls Conditionals in Each</h3>
+  <p class="desc">Items have thresholds 1/2/3. Bump cycles 0→1→2→3→0. At 0: all wait. At 3: all active. Signal is external to each data.</p>
+  <div class="test">
+    <span class="tag">Level: {globalThreshold}</span>
+    {#each item in thresholdItems}
+      <div class="cond-item">
+        <span class="name">{item.name}</span>
+        {#if isAboveThreshold item.threshold}
+          <span class="active">active</span>
+        {else}
+          <span class="inactive">waiting</span>
+        {/if}
+      </div>
+    {/each}
+    <button class="threshold-bump">Bump Level</button>
+  </div>
+
+  <h2>Nested Structures</h2>
+
+  <h3>10. Nested Each with Highlights</h3>
+  <p class="desc">Cycle search: none → "se" → "set" → none. Items should filter and bold-highlight correctly. No stale highlights on return.</p>
+  <div class="test">
+    {#each group in getGroups}
+      <div class="group">
+        <strong>{group.name}</strong>
+        {#each entry in group.entries}
+          <div class="entry">
+            {>entryDisplay entry=entry}
+          </div>
+        {/each}
+      </div>
+    {/each}
+    <button class="cycle-search">Cycle Search</button>
+  </div>
+
+  <h3>11. Three-Level Nesting (Rerender / Each / If)</h3>
+  <p class="desc">Rerender wraps each, each wraps if. "Bump" forces outer rerender. "Flip" inverts visible/hidden. Both should work independently.</p>
+  <div class="test">
+    {#rerender layerKey}
+      {#each item in getLayeredItems}
+        <div class="cond-item">
+          <span class="name">{item.name}</span>
+          <span class="tag">{item.tier}</span>
+          {#if item.show}
+            <span class="active">visible</span>
+          {else}
+            <span class="inactive">hidden</span>
+          {/if}
+        </div>
+      {/each}
+    {/rerender}
+    <button class="layer-bump">Bump Key</button>
+    <button class="layer-flip">Flip</button>
+  </div>
+
+  <h2>Snippets</h2>
+
+  <h3>12. Snippet Called Per Item</h3>
+  <p class="desc">Each badge should show different name and color. If snippets collide, all badges show same text/color.</p>
+  <div class="test">
+    {#each item in items}
+      {>badge label=item.name color=item.color}
+    {/each}
+  </div>
+
+  <h3>13. Nested Snippet Invocations</h3>
+  <p class="desc">Outer snippet calls inner snippet. Two instances with swapped data. Instance 1: "hello → world", Instance 2: "world → hello". Swap button reverses both.</p>
+  <div class="test">
+    <span class="tag">1:</span>
+    {>wrapSnippet outer=getOuterText inner=getInnerText}
+    <span class="tag">2:</span>
+    {>wrapSnippet outer=getInnerText inner=getOuterText}
+    <button class="snippet-swap">Swap</button>
+  </div>
+
+  <h2>Async in Loops</h2>
+
+  <h3>14. Async Per-Item in Each</h3>
+  <p class="desc">Three items with different delays (100/250/400ms). Each resolves independently. "Bump Version" should trigger fresh resolution with new labels.</p>
+  <div class="test">
+    {#each item in getAsyncItems}
+      <div class="item">
+        <span class="tag">{item.label}:</span>
+        {#async resolveItem item as result}
+          <span class="result">{result}</span>
+        {loading}
+          <span class="loading">resolving...</span>
+        {/async}
+      </div>
+    {/each}
+    <button class="async-version">Bump Version</button>
+  </div>
+
+  <h2>Special Cases</h2>
+
+  <h3>15. Guard Block: Equivalent Outputs</h3>
+  <p class="desc">Cycles low→medium→high. "low" and "medium" both map to "basic". Guard should NOT re-render on low→medium but SHOULD on medium→high.</p>
+  <div class="test">
+    <span class="tag">Input: {guardInput}</span>
+    {#guard getGuardCategory}
+      <span class="result">Category: {getGuardCategory}</span>
+    {/guard}
+    <button class="guard-cycle">Cycle Input</button>
+  </div>
+
+  <h2>Non-Reactive Data Propagation</h2>
+
+  <h3>15a. Non-reactive Expressions in Each</h3>
+  <p class="desc">Click to change item status from "pending" to "done". Plain object properties (no signals) must update in cached each subtrees.</p>
+  <div class="test">
+    {#each item in getNonReactiveItems}
+      <span>{item.name}:{item.status}</span>
+    {/each}
+    <button class="nr-version">Change Status</button>
+  </div>
+
+  <h3>15b. Non-reactive Conditionals in Each</h3>
+  <p class="desc">Click to flip visibility. Conditional branches should swap based on plain data, not signals.</p>
+  <div class="test">
+    {#each item in getNonReactiveCondItems}
+      {#if item.visible}<span class="active">SHOW:{item.name}</span>{else}<span class="inactive">HIDE:{item.name}</span>{/if}
+    {/each}
+    <button class="nr-cond-version">Flip Visibility</button>
+  </div>
+
+  <h3>15c. Non-reactive Snippet Data in Each</h3>
+  <p class="desc">Click to change tags. Snippet content should reflect new plain data values.</p>
+  <div class="test">
+    {#each item in getNonReactiveSnippetItems}
+      {>tagSnippet label=item.tag}
+    {/each}
+    <button class="nr-snippet-version">Change Tags</button>
+  </div>
+
+  <h3>15d. Non-reactive Data in Rerender</h3>
+  <p class="desc">Click to change label and bump counter. The computed string should reflect both changes immediately.</p>
+  <div class="test">
+    {#rerender rerenderTick}
+      <span class="computed">{getRerenderLabel}</span>
+    {/rerender}
+    <button class="nr-rerender">Change Label</button>
+  </div>
+
+  <h2>Attribute & Reorder</h2>
+
+  <h3>13b. Attribute-driven Async</h3>
+  <p class="desc">Click to change the label setting via attribute. Async should preserve old content while re-resolving, then show new value.</p>
+  <div class="test">
+    {#async formatAttrLabel as result}
+      <span class="result">{result}</span>
+    {loading}
+      <span class="loading">loading...</span>
+    {/async}
+    <button class="attr-change">Change Attr</button>
+  </div>
+
+  <h3>14. Each Item Reorder</h3>
+  <p class="desc">Click to reverse item order. Colors must stay with their names. If cached subtrees swap incorrectly, Alpha might show green.</p>
+  <div class="test">
+    {#each item in getOrderedItems}
+      <span class="pill" style="color: {item.color}">{item.name}:{item.color}</span>
+    {/each}
+    <button class="reorder">Reverse Order</button>
+  </div>
+
+  <h3>16. SVG and HTML with Shared Data</h3>
+  <p class="desc">SVG each-loop renders circles, HTML each-loop renders text from same data. Scaling one should not affect the other.</p>
+  <div class="test">
+    <span class="tag">SVG:</span>
+    <svg width="120" height="50" viewBox="0 0 120 50">
+      {#each shape in svgShapes}
+        <circle cx="{shape.cx * getSvgScale}" cy="{shape.cy}" r="{shape.r * getSvgScale}" fill="#3498db" opacity="0.7"></circle>
+      {/each}
+    </svg>
+    <span class="tag">HTML:</span>
+    {#each shape in svgShapes}
+      <span class="pill" style="font-size: {12 * getHtmlScale}px">{shape.label}</span>
+    {/each}
+    <button class="svg-scale">Scale SVG</button>
+    <button class="html-scale">Scale HTML</button>
+  </div>
+
+</div>
+
+{#snippet badge}
+  <span class="badge" style="background: {color}">{label}</span>
+{/snippet}
+
+{#snippet entryDisplay}
+  {#if entry.highlight}
+    <span class="highlight">{entry.highlight.before}<b>{entry.highlight.match}</b>{entry.highlight.after}</span>
+  {else}
+    <span>{entry.name}</span>
+  {/if}
+{/snippet}
+
+{#snippet wrapSnippet}
+  <span class="snippet-outer">
+    <span>{outer}</span>
+    <span class="tag">→</span>
+    {>chipSnippet text=inner}
+  </span>
+{/snippet}
+
+{#snippet chipSnippet}
+  <span class="snippet-chip">{text}</span>
+{/snippet}
+
+{#snippet tagSnippet}
+  <span class="pill">[{label}]</span>
+{/snippet}
