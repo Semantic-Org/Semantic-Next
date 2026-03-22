@@ -60,9 +60,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   handleExpressionResult(result, asyncCondition) {
     const currentGeneration = ++this.generation;
 
-    // Reset state
+    // Preserve previous resolved value for stale-while-revalidate
     this.state = 'loading';
-    this.resolvedValue = null;
     this.error = null;
 
     // Check if result is a promise
@@ -83,6 +82,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         .catch((error) => {
           if (currentGeneration < this.generation) { return; }
           this.state = 'error';
+          this.resolvedValue = null;
           this.error = error;
           if (this.isConnected) {
             const rendered = this.renderCurrentState(asyncCondition);
@@ -102,6 +102,11 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       case 'loading':
         if (asyncCondition.loadingContent) {
           return asyncCondition.loadingContent();
+        }
+        // No loading block: preserve previous content if available
+        if (this.resolvedValue !== null && asyncCondition.content) {
+          const successData = this.createSuccessDataContext(asyncCondition);
+          return asyncCondition.content(successData);
         }
         return noChange;
 
