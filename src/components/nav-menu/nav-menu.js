@@ -215,9 +215,8 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     };
   },
   getPageClasses(page) {
-    const selected = state.selectedIndex.value == page?.selectedIndex;
     return {
-      selected,
+      selected: state.selectedIndex.value == page?.selectedIndex,
       current: self.isCurrentItem(page),
     };
   },
@@ -306,16 +305,13 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
 
 const keys = {
   'up'({ self, state }) {
-    const before = state.selectedIndex.peek();
     if (self.isSearching()) {
       state.selectedIndex.decrement(1, 0);
     }
   },
   'down'({ self, state }) {
-    const before = state.selectedIndex.peek();
-    const max = state.maxIndex.peek();
     if (self.isSearching()) {
-      state.selectedIndex.increment(1, max);
+      state.selectedIndex.increment(1, state.maxIndex.get());
     }
   },
   'enter'({ self, state, $ }) {
