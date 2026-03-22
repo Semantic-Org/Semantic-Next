@@ -57,6 +57,7 @@ export class LitRenderer {
     this.html = [];
     this.html.raw = [];
     this.expressions = [];
+    this._contentCallIndex = 0;
   }
 
   /*
@@ -359,6 +360,7 @@ export class LitRenderer {
       inheritsData,
       ast: snippet.content,
       data: snippetData,
+      cache: false,
     });
   }
 
@@ -686,13 +688,28 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
-  renderContent({ ast, data, key, isSVG = this.isSVG } = {}) {
-    const contentID = LitRenderer.getID({ ast, key, isSVG });
-    const treeRef = this.renderTrees[contentID];
-    const existingTree = treeRef ? treeRef.deref() : undefined;
+  renderContent({ ast, data, key, cache = true, isSVG = this.isSVG } = {}) {
+    if (cache && LitRenderer.useSubtreeCache) {
+      const contentID = LitRenderer.getID({ ast, key, isSVG });
+      const treeRef = this.renderTrees[contentID];
+      const existingTree = treeRef ? treeRef.deref() : undefined;
 
-    if (existingTree) {
-      return existingTree.cachedRender(data);
+      if (existingTree) {
+        return existingTree.cachedRender(data);
+      }
+
+      const tree = new LitRenderer({
+        ast,
+        data,
+        isSVG,
+        subTemplates: this.subTemplates,
+        snippets: this.snippets,
+        helpers: this.helpers,
+        template: this.template,
+      });
+      this.treeIDs.push(contentID);
+      this.renderTrees[contentID] = new WeakRef(tree);
+      return tree.render();
     }
 
     const tree = new LitRenderer({
@@ -704,8 +721,6 @@ export class LitRenderer {
       helpers: this.helpers,
       template: this.template,
     });
-    this.treeIDs.push(contentID);
-    this.renderTrees[contentID] = new WeakRef(tree);
     return tree.render();
   }
   cleanup() {
@@ -735,18 +750,22 @@ export class LitRenderer {
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
   updateData(newData, { preserveExistingData = true } = {}) {
+    let changed = false;
     // if specified remove all existing data before setting new data
     if (!preserveExistingData) {
       each(this.data, (value, name) => {
         delete this.data[name];
       });
+      changed = true;
     }
     // add new data
     each(newData, (value, name) => {
       if (this.data[name] !== value) {
         this.data[name] = value;
+        changed = true;
       }
     });
+    return changed;
   }
 
   clearTemp() {
