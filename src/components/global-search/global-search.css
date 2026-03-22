@@ -249,6 +249,10 @@ ui-modal {
       background-color: #009fda;
       color: #FFFFFF;
     }
+    .highlight {
+      color: var(--primary-text-color);
+      box-shadow: 0px 1px 0px 0px var(--primary-text-color);
+    }
   }
 
   .placeholder {
