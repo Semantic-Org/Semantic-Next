@@ -12,11 +12,14 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   render(conditional) {
-    let matchIndex = -1;
-    // Ensure existing reaction is stopped
+    this.conditional = conditional;
+
+    // Reuse existing reaction — just re-evaluate with current closures
     if (this.reaction) {
-      this.reaction.stop();
+      const result = this.getBranch(this.conditional);
+      return this.formatForPart(result.content);
     }
+
     let content = nothing;
     let context = {
       message: `if/else statement: {#if ${conditional.expression}}`,
@@ -31,8 +34,8 @@ export class ReactiveConditionalDirective extends AsyncDirective {
           return;
         }
 
-        const result = this.getBranch(conditional);
-        matchIndex = result.matchIndex;
+        const result = this.getBranch(this.conditional);
+        const matchIndex = result.matchIndex;
         content = result.content;
 
         if (!comp.firstRun && this.matchIndex !== matchIndex) {
@@ -43,15 +46,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       }, { context });
     }
     else {
-      const result = this.getBranch(conditional);
-      matchIndex = result.matchIndex;
+      const result = this.getBranch(this.conditional);
       content = result.content;
     }
-
-    /* Experimental (not used currently *
-    if(this.matchIndex == matchIndex) {
-      return noChange;
-    } */
 
     return this.formatForPart(content);
   }

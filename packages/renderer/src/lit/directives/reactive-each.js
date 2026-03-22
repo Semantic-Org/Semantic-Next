@@ -19,10 +19,9 @@ export class ReactiveEachDirective extends AsyncDirective {
   render(eachCondition, settings = {}) {
     this.eachCondition = eachCondition;
 
-    // Stop existing reaction
+    // Reuse existing reaction — just re-render with current closures
     if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
+      return this.renderItems();
     }
 
     // pass through context for debugging
@@ -35,7 +34,6 @@ export class ReactiveEachDirective extends AsyncDirective {
       };
     }
 
-    // Create a new reaction
     let html = this.renderItems();
 
     if (isClient) {

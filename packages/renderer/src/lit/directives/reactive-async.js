@@ -16,30 +16,25 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   render(asyncCondition) {
-    console.log('[async] render() called, current state:', this.state);
+    this.asyncCondition = asyncCondition;
 
-    // Stop existing reaction
+    // Reuse existing reaction — return current state
     if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
+      return this.renderCurrentState(this.asyncCondition);
     }
 
     // Create a new reaction that watches for reactive changes on client
     if (isClient) {
-      this.watchChanges(asyncCondition);
+      this.watchChanges();
     }
 
-    // Return initial render
-    const result = this.renderCurrentState(asyncCondition);
-    console.log('[async] render() returning:', result === noChange ? 'noChange' : result);
-    return result;
+    return this.renderCurrentState(this.asyncCondition);
   }
 
-  watchChanges(asyncCondition) {
-    // pass through context for debugging
+  watchChanges() {
     let context = {
-      message: `async block: {#async ${asyncCondition.expression}}`,
-      async: asyncCondition,
+      message: `async block: {#async ${this.asyncCondition.expression}}`,
+      async: this.asyncCondition,
     };
 
     this.reaction = Reaction.create((computation) => {
@@ -49,24 +44,15 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       }
 
       // Evaluate the expression to get the promise or value
-      const expressionResult = asyncCondition.expression();
+      const expressionResult = this.asyncCondition.expression();
 
       // Handle the result
-      this.handleExpressionResult(expressionResult, asyncCondition);
+      this.handleExpressionResult(expressionResult, this.asyncCondition);
 
       // Render based on current state (after first run)
       if (!computation.firstRun) {
-        const rendered = this.renderCurrentState(asyncCondition);
-        console.log(
-          '[async] reaction re-fire, state:',
-          this.state,
-          'rendered:',
-          rendered === noChange ? 'noChange' : rendered,
-        );
+        const rendered = this.renderCurrentState(this.asyncCondition);
         this.setValue(rendered);
-      }
-      else {
-        console.log('[async] reaction first run, state:', this.state);
       }
     }, { context });
   }
