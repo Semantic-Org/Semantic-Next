@@ -1,4 +1,4 @@
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
@@ -24,11 +24,9 @@ export class ReactiveDataDirective extends AsyncDirective {
       return this.expression.value();
     }
 
-    // Create a new reaction to rerun the computation function if reactive data updates
-    // that dont trigger rerender occur
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      // if reaction already set up just return value for rerender
-      return this.getReactiveValue();
+      return noChange;
     }
     else {
       // Create a new reaction to rerun the computation function if reactive data updates

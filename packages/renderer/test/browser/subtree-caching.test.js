@@ -670,3 +670,70 @@ describe('15d. Non-reactive data in rerender content', () => {
     expect(shadowText(el)).toContain('updated:1');
   });
 });
+
+/*******************************
+   16. Subtemplate inside each — focus preservation
+*******************************/
+
+describe('16. Subtemplate inside each', () => {
+  it('should not destroy subtemplate DOM when sibling item data changes', async () => {
+    const tag = uniqueTag('sub-each');
+
+    const itemTemplate = defineComponent({
+      template: '<li><input class="toggle" type="checkbox" checked={todo.completed}><span>{todo.text}</span></li>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      defaultState: { version: 0 },
+      createComponent: ({ state, signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+          { _id: 'c', text: 'Third', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos() {
+            state.version.get(); // track for reactivity
+            return todos.get();
+          },
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    const content = shadowText(el);
+    expect(content).toContain('First');
+    expect(content).toContain('Second');
+    expect(content).toContain('Third');
+
+    // Focus an input in the second item
+    const inputs = el.shadowRoot.querySelectorAll('input.toggle');
+    expect(inputs.length).toBe(3);
+    inputs[1].focus();
+    expect(document.activeElement === el || el.shadowRoot.activeElement === inputs[1]).toBe(true);
+
+    // Toggle first item — should NOT destroy second item's DOM
+    el.component.toggleItem('a');
+    await waitForUpdate(el);
+
+    // Second item's input should still exist and be focusable
+    const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
+    expect(inputsAfter.length).toBe(3);
+    expect(shadowText(el)).toContain('Second');
+
+    // The key test: focus should be preserved on the second input
+    // If the subtemplate was destroyed and recreated, focus is lost
+    const activeEl = el.shadowRoot.activeElement;
+    expect(activeEl).toBe(inputsAfter[1]);
+  });
+});
