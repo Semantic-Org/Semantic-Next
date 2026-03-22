@@ -2,42 +2,10 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
-import { NavMenu } from '@semantic-ui/core';
+import { SubtreeCachingTest } from '@components/SubtreeCachingTest/SubtreeCachingTest.js';
 ---
 <Body class="dark">
-<div style="padding: 24px; max-width: 300px;">
-  <h2 style="margin-bottom: 16px; color: white;">Nav Menu Caching Debug</h2>
-  <NavMenu client:load
-    searchable
-    expandAll
-    id="test-nav"
-    menu={[
-      {
-        name: 'Getting Started',
-        pages: [
-          { name: 'Installation', url: '/install' },
-          { name: 'Setup Guide', url: '/setup' },
-          { name: 'Quick Start', url: '/start' },
-        ]
-      },
-      {
-        name: 'Components',
-        pages: [
-          { name: 'Button', url: '/button' },
-          { name: 'Input', url: '/input' },
-          { name: 'Select', url: '/select' },
-          { name: 'Search', url: '/search' },
-        ]
-      },
-      {
-        name: 'Guides',
-        pages: [
-          { name: 'Styling', url: '/styling' },
-          { name: 'State Management', url: '/state' },
-          { name: 'Server Rendering', url: '/ssr' },
-        ]
-      }
-    ]}
-  ></NavMenu>
+<div style="padding: 24px; max-width: 600px;">
+  <SubtreeCachingTest client:load />
 </div>
 </Body>

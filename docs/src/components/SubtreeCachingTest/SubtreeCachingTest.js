@@ -80,7 +80,6 @@ const defaultState = {
   rerenderLabel: 'initial',
   // Attribute & reorder
   reversed: false,
-  attrLabel: 'initial',
   // Special
   guardInput: 'low',
   svgScale: 1,
@@ -333,6 +332,26 @@ const events = {
   'click .html-scale'({ state }) {
     state.htmlScale.set(state.htmlScale.peek() === 1 ? 1.5 : 1);
   },
+  'click .nr-version'({ state }) {
+    state.nrVersion.set(state.nrVersion.peek() === 0 ? 1 : 0);
+  },
+  'click .nr-cond-version'({ state }) {
+    state.nrCondVersion.set(state.nrCondVersion.peek() === 0 ? 1 : 0);
+  },
+  'click .nr-snippet-version'({ state }) {
+    state.nrSnippetVersion.set(state.nrSnippetVersion.peek() === 0 ? 1 : 0);
+  },
+  'click .nr-rerender'({ state }) {
+    state.rerenderLabel.set(state.rerenderLabel.peek() === 'initial' ? 'updated' : 'initial');
+    state.rerenderTick.increment();
+  },
+  'click .attr-change'({ el }) {
+    const current = el.getAttribute('attr-label') || 'initial';
+    el.setAttribute('attr-label', current === 'initial' ? 'changed' : 'initial');
+  },
+  'click .reorder'({ state }) {
+    state.reversed.toggle();
+  },
 };
 
 const SubtreeCachingTest = defineComponent({
@@ -341,6 +360,7 @@ const SubtreeCachingTest = defineComponent({
   css,
   createComponent,
   defaultState,
+  defaultSettings,
   events,
 });
 
