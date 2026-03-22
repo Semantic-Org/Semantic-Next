@@ -1,7 +1,7 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { isClient, isString, mapObject } from '@semantic-ui/utils';
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -100,6 +100,11 @@ export class RenderTemplateDirective extends AsyncDirective {
     // make sure we have something to create
     if (!template) {
       return false;
+    }
+
+    // reuse existing clone if template definition hasn't changed
+    if (this.template && this.templateID === template.id) {
+      return;
     }
 
     // store template id

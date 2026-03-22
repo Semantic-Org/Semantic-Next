@@ -724,7 +724,7 @@ describe('16. Subtemplate inside each', () => {
 
     // Toggle first item — should NOT destroy second item's DOM
     el.component.toggleItem('a');
-    await waitForUpdate(el);
+    await flush(el);
 
     // Second item's input should still exist and be focusable
     const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
