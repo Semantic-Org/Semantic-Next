@@ -768,7 +768,7 @@ class TemplateCompiler {
   }
 
   // joins neighboring html nodes into a single node and moves snippets to front
-  static optimizeAST(ast) {
+  static optimizeAST(ast, position = { index: 0 }) {
     const optimizedAST = [];
     const snippets = [];
     const otherNodes = [];
@@ -785,11 +785,12 @@ class TemplateCompiler {
         }
       }
       else {
+        node.position = position.index++;
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }
         if (Array.isArray(node.content)) {
-          node.content = this.optimizeAST(node.content);
+          node.content = this.optimizeAST(node.content, position);
         }
         // Process else block if it exists
         if (node.else && node.else.content) {
