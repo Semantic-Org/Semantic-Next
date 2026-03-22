@@ -177,6 +177,7 @@ class TemplateCompiler {
 
     // the entire AST being generaetd
     const ast = [];
+    let nodePosition = 0;
 
     // a stack containing nodes that can receive nodes in their subtree
     let contentStack = [];
@@ -247,6 +248,11 @@ class TemplateCompiler {
       const addToAST = (...nodes) => {
         if (contentTarget == undefined) {
           contentTarget = [];
+        }
+        for (const node of nodes) {
+          if (node.type !== 'html') {
+            node.position = nodePosition++;
+          }
         }
         contentTarget.push(...nodes);
       };
@@ -768,7 +774,7 @@ class TemplateCompiler {
   }
 
   // joins neighboring html nodes into a single node and moves snippets to front
-  static optimizeAST(ast, position = { index: 0 }) {
+  static optimizeAST(ast) {
     const optimizedAST = [];
     const snippets = [];
     const otherNodes = [];
@@ -785,12 +791,11 @@ class TemplateCompiler {
         }
       }
       else {
-        node.position = position.index++;
         if (currentHtmlNode) {
           currentHtmlNode = null;
         }
         if (Array.isArray(node.content)) {
-          node.content = this.optimizeAST(node.content, position);
+          node.content = this.optimizeAST(node.content);
         }
         // Process else block if it exists
         if (node.else && node.else.content) {
