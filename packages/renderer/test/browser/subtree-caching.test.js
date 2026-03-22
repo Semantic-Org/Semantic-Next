@@ -610,6 +610,41 @@ describe('15c2. Snippet with multiple snippets and shared each', () => {
   });
 });
 
+describe('15c3. Same snippet called at multiple call sites', () => {
+  it('should render distinct content for each call site after reactive update', async () => {
+    const tag = uniqueTag('snippet-callsite');
+    defineComponent({
+      tagName: tag,
+      template: [
+        '{#snippet label}<span>[{text}]</span>{/snippet}',
+        '{>label text=getTitle}',
+        '{>label text=getSubtitle}',
+      ].join(''),
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getTitle: () => state.version.get() === 0 ? 'Title-A' : 'Title-B',
+        getSubtitle: () => state.version.get() === 0 ? 'Sub-A' : 'Sub-B',
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('[Title-A]');
+    expect(shadowText(el)).toContain('[Sub-A]');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    // Both call sites must show their OWN updated content
+    expect(shadowText(el)).toContain('[Title-B]');
+    expect(shadowText(el)).toContain('[Sub-B]');
+    // Must NOT show Title-B in both positions (collision would cause this)
+    expect(shadowText(el)).not.toContain('[Title-A]');
+    expect(shadowText(el)).not.toContain('[Sub-A]');
+  });
+});
+
 describe('15d. Non-reactive data in rerender content', () => {
   it('should update plain expressions when rerender block re-fires', async () => {
     const tag = uniqueTag('nr-rerender');
