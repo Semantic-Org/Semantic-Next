@@ -568,6 +568,49 @@ describe('15c. Non-reactive snippet data in each', () => {
   });
 });
 
+describe('15c2. Snippet with multiple snippets and shared each', () => {
+  it('should update snippet data when other snippets coexist in template', async () => {
+    const tag = uniqueTag('nr-snippet-multi');
+    defineComponent({
+      tagName: tag,
+      template: [
+        '{#snippet badge}<b>{label}</b>{/snippet}',
+        '{#snippet pill}<span>[{text}]</span>{/snippet}',
+        '{#each item in getItems}',
+        '  {>badge label=item.name}',
+        '  {>pill text=item.status}',
+        '{/each}',
+      ].join(''),
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItems: () => {
+          const v = state.version.get();
+          return [
+            { id: 'x', name: v === 0 ? 'Alpha' : 'Changed', status: v === 0 ? 'pending' : 'done' },
+            { id: 'y', name: v === 0 ? 'Beta' : 'Also Changed', status: v === 0 ? 'pending' : 'done' },
+          ];
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('Alpha');
+    expect(shadowText(el)).toContain('[pending]');
+    expect(shadowText(el)).toContain('Beta');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('Changed');
+    expect(shadowText(el)).toContain('[done]');
+    expect(shadowText(el)).toContain('Also Changed');
+    expect(shadowText(el)).not.toContain('Alpha');
+    expect(shadowText(el)).not.toContain('pending');
+  });
+});
+
 describe('15d. Non-reactive data in rerender content', () => {
   it('should update plain expressions when rerender block re-fires', async () => {
     const tag = uniqueTag('nr-rerender');
