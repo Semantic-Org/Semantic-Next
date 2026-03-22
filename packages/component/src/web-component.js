@@ -266,13 +266,11 @@ class WebComponentBase extends LitElement {
         });
         const setting = get(settings, property);
         let signal = component.settingsVars.get(property);
-        if (signal) {
-          signal.get();
-        }
-        else {
+        if (!signal) {
           signal = new Signal(setting);
           component.settingsVars.set(property, signal);
         }
+        signal.get();
         return setting;
       },
       set: (target, property, value, receiver) => {
