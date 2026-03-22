@@ -38,8 +38,7 @@ describe('1. Async inside Rerender', () => {
     const tag = uniqueTag('async-rerender');
     defineComponent({
       tagName: tag,
-      template:
-        '{#rerender darkMode}{#async formatMessage as msg}<span>{msg}</span>{loading}<span>loading</span>{/async}{/rerender}',
+      template: '{#rerender darkMode}{#async formatMessage as msg}<span>{msg}</span>{/async}{/rerender}',
       defaultState: { darkMode: false },
       createComponent: ({ state }) => ({
         async formatMessage(dark = state.darkMode.get()) {
