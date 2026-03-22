@@ -245,6 +245,11 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     }
   }
 
+  // sync shadow signals for all settings, not just spec-driven ones
+  if (!componentSpec && properties?.[attribute]) {
+    setSetting(attribute, attributeValue);
+  }
+
   if (properties && attributeValue !== undefined && attribute.includes('-')) {
     /* This handles the case of multiword properties like `useAccordion`
        maps to <ui-menu use-accordion> or <ui-menu useaccordion>
