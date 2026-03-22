@@ -1,4 +1,4 @@
-import { noChange, nothing } from 'lit';
+import { noChange } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -14,9 +14,9 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   render(condition) {
     this.condition = condition;
 
-    // Reuse existing reaction — just re-render with current closures
+    // Reuse existing reaction — signals handle updates
     if (this.reaction) {
-      return this.condition.content();
+      return noChange;
     }
 
     // Create new reaction on client

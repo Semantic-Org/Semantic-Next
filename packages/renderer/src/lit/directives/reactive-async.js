@@ -18,9 +18,9 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   render(asyncCondition) {
     this.asyncCondition = asyncCondition;
 
-    // Reuse existing reaction — return current state
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      return this.renderCurrentState(this.asyncCondition);
+      return noChange;
     }
 
     // Create a new reaction that watches for reactive changes on client
@@ -71,10 +71,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       result
         .then((value) => {
           if (currentGeneration < this.generation) {
-            console.log('[async] stale promise resolved, ignoring (gen', currentGeneration, '<', this.generation, ')');
             return;
           }
-          console.log('[async] promise resolved, gen:', currentGeneration);
           this.state = 'success';
           this.resolvedValue = value;
           if (this.isConnected) {

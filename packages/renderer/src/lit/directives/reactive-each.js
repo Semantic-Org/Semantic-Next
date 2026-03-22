@@ -1,4 +1,4 @@
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -19,9 +19,9 @@ export class ReactiveEachDirective extends AsyncDirective {
   render(eachCondition, settings = {}) {
     this.eachCondition = eachCondition;
 
-    // Reuse existing reaction — just re-render with current closures
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      return this.renderItems();
+      return noChange;
     }
 
     // pass through context for debugging

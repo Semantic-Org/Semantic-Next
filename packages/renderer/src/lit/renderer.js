@@ -50,6 +50,7 @@ export class LitRenderer {
     this.isSVG = isSVG;
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.id = LitRenderer.getID({ ast, data, isSVG });
+    this.dataVersion = new Signal(0);
   }
 
   resetHTML() {
@@ -74,8 +75,20 @@ export class LitRenderer {
   cachedRender(data) {
     if (data) {
       this.updateData(data);
+      this.bumpDataVersion();
     }
     return this.litTemplate;
+  }
+
+  bumpDataVersion() {
+    this.dataVersion.increment();
+    each(this.renderTrees, (ref) => {
+      const tree = ref.deref();
+      if (tree?.inheritsData) {
+        tree.updateData(this.data);
+        tree.bumpDataVersion();
+      }
+    });
   }
 
   readAST({ ast = this.ast, data = this.data } = {}) {
@@ -370,13 +383,20 @@ export class LitRenderer {
       if (asDirective) {
         const dataArguments = {
           expression,
-          literalValue: () => this.lookupTokenValue(expression, this.data),
-          value: () => this.lookupExpressionValue(expression, this.data),
+          literalValue: () => {
+            this.dataVersion.get();
+            return this.lookupTokenValue(expression, this.data);
+          },
+          value: () => {
+            this.dataVersion.get();
+            return this.lookupExpressionValue(expression, this.data);
+          },
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
       else {
-        return this.lookupExpressionValue(expression, data);
+        this.dataVersion.get();
+        return this.lookupExpressionValue(expression, this.data);
       }
     }
     return expression;

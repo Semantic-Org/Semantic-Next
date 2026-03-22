@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
@@ -14,10 +14,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   render(conditional) {
     this.conditional = conditional;
 
-    // Reuse existing reaction — just re-evaluate with current closures
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      const result = this.getBranch(this.conditional);
-      return this.formatForPart(result.content);
+      return noChange;
     }
 
     let content = nothing;
