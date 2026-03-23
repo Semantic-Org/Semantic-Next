@@ -74,6 +74,9 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let $allPanels = $(el).find('ui-panel');
     let $panels = $allPanels.not($childPanelGroupPanels);
     self.panels = $panels.get();
+    each(self.panels, (panel) => {
+      panel.settings.direction = settings.direction;
+    });
   },
 
   setPanelRendered(el) {

@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { findIndex } from '@semantic-ui/utils';
-import { Transition } from '../../behaviors/index.js';
+import { Tooltip, Transition } from '../../behaviors/index.js';
 
 import css from './menu-bundle.css?raw';
 import pageCSS from './menu-page.css?raw';
@@ -100,9 +100,17 @@ const createComponent = ({ $, settings, self, $$, el, state, dispatchEvent, isSe
 const onCreated = ({ settings }) => {
 };
 
-const onRendered = function({ settings, self }) {
+const onRendered = function({ $, $$, settings, self, isClient }) {
   if (settings.value) {
     self.setValue(settings.value);
+  }
+  if (isClient && settings.iconOnly) {
+    $$('menu-item').each((itemEl) => {
+      const label = $$(itemEl).find('.label').first().text();
+      if (label) {
+        $(itemEl).tooltip({ text: label, ...settings.tooltipSettings });
+      }
+    });
   }
 };
 

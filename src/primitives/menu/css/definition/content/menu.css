@@ -16,3 +16,7 @@
   align-items: var(--menu-align-items);
   justify-content: var(--menu-justify-content);
 }
+
+.icon-only .label {
+  display: none;
+}

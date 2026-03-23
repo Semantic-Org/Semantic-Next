@@ -12,11 +12,13 @@ export default {
     "evenly-spaced",
     "fitted",
     "vertical",
-    "inset"
+    "inset",
+    "icon-only"
   ],
   "settings": [
     "items",
-    "value"
+    "value",
+    "tooltip-settings"
   ],
   "attributes": [
     "item",
@@ -26,8 +28,10 @@ export default {
     "fitted",
     "vertical",
     "inset",
+    "icon-only",
     "items",
-    "value"
+    "value",
+    "tooltip-settings"
   ],
   "propertyTypes": {
     "item": "string",
@@ -37,11 +41,16 @@ export default {
     "fitted": "boolean",
     "vertical": "boolean",
     "inset": "boolean",
+    "icon-only": "boolean",
     "items": "array",
-    "value": "string"
+    "value": "string",
+    "tooltip-settings": "object"
   },
   "defaultValues": {
     "items": [],
-    "value": ""
+    "value": "",
+    "tooltip-settings": {
+      "duration": 0
+    }
   }
 };
