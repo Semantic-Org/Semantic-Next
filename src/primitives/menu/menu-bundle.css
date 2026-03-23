@@ -23,8 +23,11 @@
     align-items: var(--menu-align-items);
     justify-content: var(--menu-justify-content);
   }
-  .icon-only .label {
+  .menu.icon-only .label {
     display: none;
+  }
+  .menu.icon-only ui-icon {
+    margin: 0 !important;
   }
 }
 

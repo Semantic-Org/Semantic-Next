@@ -17,6 +17,7 @@
   justify-content: var(--menu-justify-content);
 }
 
-.icon-only .label {
-  display: none;
+.menu.icon-only {
+  .label { display: none; }
+  ui-icon { margin: 0 !important; }
 }

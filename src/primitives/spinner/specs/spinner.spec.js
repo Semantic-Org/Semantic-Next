@@ -7,7 +7,7 @@ export default {
   name: 'Spinner',
   description: 'A spinner indicates indeterminate activity',
   tagName: 'ui-spinner',
-  exportName: 'UISpinner',
+  exportName: 'Spinner',
 
   content: [
     {
