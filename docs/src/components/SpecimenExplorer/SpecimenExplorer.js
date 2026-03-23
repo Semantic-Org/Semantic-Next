@@ -8,7 +8,7 @@ import { each, inArray, keys, some } from '@semantic-ui/utils';
 import css from './SpecimenExplorer.css?raw';
 import template from './SpecimenExplorer.html?raw';
 
-import { Panel, Panels } from '@semantic-ui/core';
+import { Panel, Panels, Spinner } from '@semantic-ui/core';
 import { SimpleSelect } from './SimpleSelect.js';
 
 const defaultSettings = {
@@ -19,6 +19,7 @@ const defaultState = {
   selections: {},
   dialect: 'standard',
   viewMode: 'split',
+  ready: false,
 };
 
 const createComponent = ({ self, state, settings, $ }) => ({
@@ -275,6 +276,7 @@ const events = {
 
 const onRendered = ({ self, reaction, state, isClient }) => {
   if (!isClient) { return; }
+  state.ready.set(true);
   reaction(() => {
     state.selections.get();
     self.updatePreview();

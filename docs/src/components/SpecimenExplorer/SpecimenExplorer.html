@@ -1,4 +1,7 @@
-<div class="specimen">
+<div class="specimen {classIf ready 'ready'}">
+  <div class="loading">
+    <ui-spinner></ui-spinner>
+  </div>
   <ui-panels direction="horizontal">
     <ui-panel size="grow" min-size="200px" class="outer-panel">
       <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode-menu"></ui-menu>

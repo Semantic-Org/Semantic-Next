@@ -7,6 +7,21 @@
   border-radius: var(--border-radius);
   overflow: hidden;
   height: 480px;
+
+  ui-panels { opacity: 0; }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: var(--page-background);
+  }
+
+  &.ready {
+    ui-panels { opacity: 1; transition: opacity var(--duration-medium) var(--ease); }
+    .loading { display: none; }
+  }
 }
 
 .outer-panel::part(panel) {
