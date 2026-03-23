@@ -26,9 +26,9 @@ const createComponent = ({ self, state, settings, $ }) => ({
   parsedSpec: null,
 
   viewModeItems: [
-    { icon: 'eye', value: 'preview' },
-    { icon: 'columns-2', value: 'split' },
-    { icon: 'code', value: 'code' },
+    { icon: 'eye', label: 'Preview', value: 'preview' },
+    { icon: 'columns-2', label: 'Split', value: 'split' },
+    { icon: 'code', label: 'Code', value: 'code' },
   ],
 
   isMode(...modes) {

@@ -1,14 +1,14 @@
 <div class="specimen">
   <ui-panels direction="horizontal">
-    <ui-panel direction="horizontal" size="grow" min-size="200px" class="outer-panel">
-      <ui-menu sliding fitted items={viewModeItems} value={viewMode} class="view-mode-menu"></ui-menu>
+    <ui-panel size="grow" min-size="200px" class="outer-panel">
+      <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode-menu"></ui-menu>
       <ui-panels direction="vertical" class="stage {viewMode}">
-        <ui-panel direction="vertical" size="66%" min-size="80px" class="preview-panel">
+        <ui-panel size="66%" min-size="80px" class="preview-panel">
           <div class="preview">
             <div class="component-frame"></div>
           </div>
         </ui-panel>
-        <ui-panel direction="vertical" size="34%" min-size="60px" max-size="300px" class="code-panel">
+        <ui-panel size="34%" min-size="60px" max-size="300px" class="code-panel">
           <div class="output">
             <div class="output-header">
               <span class="output-label">Code</span>
@@ -24,10 +24,10 @@
       </ui-panels>
     </ui-panel>
 
-    <ui-panel direction="horizontal" size="280px" min-size="200px" max-size="400px">
+    <ui-panel size="280px" min-size="200px" max-size="400px">
       <ui-panels direction="vertical" class="control-panels">
         {#each group in getControlGroups}
-          <ui-panel direction="vertical" size="{#if group.last}grow{else}natural{/if}" label="{group.label}">
+          <ui-panel size="{#if group.last}grow{else}natural{/if}" label="{group.label}">
             <div class="section-controls">
               {#each control in group.controls}
                 {#if is control.type 'radio'}

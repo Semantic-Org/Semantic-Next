@@ -20,6 +20,7 @@
 
   &.preview .code-panel { display: none; }
   &.code .preview-panel { display: none; }
+  &.code .output { padding-top: var(--padding-xl); }
 }
 
 .preview {
