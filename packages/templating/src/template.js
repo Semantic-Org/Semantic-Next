@@ -263,11 +263,31 @@ export const Template = class Template {
   }
 
   getDataContext() {
-    return {
+    const context = {
       ...this.data,
       ...this.state,
       ...this.instance,
     };
+    // Overlay settings shadow signals for reactive template tracking.
+    const settingsVars = this.element?.settingsVars;
+    const defaultSettings = this.element?.defaultSettings;
+    if (settingsVars && defaultSettings) {
+      each(defaultSettings, (value, name) => {
+        this.element.settings[name]; // ensure shadow signal exists
+      });
+      settingsVars.forEach((signal, name) => {
+        if (name in defaultSettings) {
+          context[name] = signal;
+        }
+      });
+      console.log(
+        '[getDataContext] after overlay, collapsed isSignal:',
+        context.collapsed instanceof Signal,
+        'value:',
+        context.collapsed,
+      );
+    }
+    return context;
   }
 
   async adoptStylesheet() {
