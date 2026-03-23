@@ -9,13 +9,20 @@
   height: 480px;
 }
 
+.outer-panel::part(panel) {
+  display: block;
+  position: relative;
+}
+
 /* ── Stage (Preview + Output) ── */
 .stage {
   height: 100%;
+
+  &.preview .code-panel { display: none; }
+  &.code .preview-panel { display: none; }
 }
 
 .preview {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,6 +39,7 @@
   position: absolute;
   top: var(--padding-xs);
   right: var(--padding-xs);
+  z-index: 1;
 }
 
 .component-frame {

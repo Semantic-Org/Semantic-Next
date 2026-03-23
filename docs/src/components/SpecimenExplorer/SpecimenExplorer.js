@@ -31,6 +31,10 @@ const createComponent = ({ self, state, settings, $ }) => ({
     { icon: 'code', value: 'code' },
   ],
 
+  isMode(...modes) {
+    return inArray(state.viewMode.get(), modes);
+  },
+
   dialectMenuItems: [
     { label: 'Standard', value: 'standard' },
     { label: 'Verbose', value: 'verbose' },

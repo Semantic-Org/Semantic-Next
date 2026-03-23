@@ -1,14 +1,14 @@
 <div class="specimen">
   <ui-panels direction="horizontal">
-    <ui-panel direction="horizontal" size="grow" min-size="200px">
-      <ui-panels direction="vertical" class="stage">
-        <ui-panel direction="vertical" size="66%" min-size="80px">
+    <ui-panel direction="horizontal" size="grow" min-size="200px" class="outer-panel">
+      <ui-menu sliding fitted items={viewModeItems} value={viewMode} class="view-mode-menu"></ui-menu>
+      <ui-panels direction="vertical" class="stage {viewMode}">
+        <ui-panel direction="vertical" size="66%" min-size="80px" class="preview-panel">
           <div class="preview">
-            <ui-menu sliding fitted items={viewModeItems} value={viewMode} class="view-mode-menu"></ui-menu>
             <div class="component-frame"></div>
           </div>
         </ui-panel>
-        <ui-panel direction="vertical" size="34%" min-size="60px" max-size="300px">
+        <ui-panel direction="vertical" size="34%" min-size="60px" max-size="300px" class="code-panel">
           <div class="output">
             <div class="output-header">
               <span class="output-label">Code</span>
