@@ -4,16 +4,12 @@ export default {
   "content": [
     "icon",
     "label",
-    "badge",
-    "href",
-    "value"
+    "badge"
   ],
   "contentAttributes": [
     "icon",
     "label",
-    "badge",
-    "href",
-    "value"
+    "badge"
   ],
   "states": [
     "hover",
@@ -21,16 +17,20 @@ export default {
     "active",
     "disabled"
   ],
+  "settings": [
+    "href",
+    "value"
+  ],
   "attributes": [
     "icon",
     "label",
     "badge",
-    "href",
-    "value",
     "hover",
     "focus",
     "active",
-    "disabled"
+    "disabled",
+    "href",
+    "value"
   ],
   "optionAttributes": {
     "disabled": "disabled",
@@ -40,12 +40,12 @@ export default {
     "icon": "string",
     "label": "string",
     "badge": "string",
-    "href": "string",
-    "value": "string",
     "hover": "boolean",
     "focus": "boolean",
     "active": "boolean",
-    "disabled": "string"
+    "disabled": "string",
+    "href": "string",
+    "value": "string"
   },
   "allowedValues": {
     "disabled": [
@@ -56,5 +56,9 @@ export default {
   "attributeClasses": [
     "icon",
     "disabled"
-  ]
+  ],
+  "defaultValues": {
+    "href": "",
+    "value": ""
+  }
 };

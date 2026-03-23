@@ -1,0 +1,7 @@
+.menu ui-icon {
+  margin-right: var(--menu-icon-margin);
+
+  &:only-child {
+    margin-right: 0;
+  }
+}

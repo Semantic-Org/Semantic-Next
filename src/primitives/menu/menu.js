@@ -1,12 +1,17 @@
 import { defineComponent } from '@semantic-ui/component';
 import { findIndex } from '@semantic-ui/utils';
+import { Transition } from '../../behaviors/index.js';
 
 import css from './menu-bundle.css?raw';
 import pageCSS from './menu-page.css?raw';
 import template from './menu.html?raw';
 import componentSpec from './specs/menu.component.js';
 
-const createComponent = ({ settings, self, $$, el, dispatchEvent, isServer }) => ({
+const defaultState = {
+  activeIndex: -1,
+};
+
+const createComponent = ({ $, settings, self, $$, el, state, dispatchEvent, isServer }) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', { value });
@@ -17,12 +22,12 @@ const createComponent = ({ settings, self, $$, el, dispatchEvent, isServer }) =>
     return item.value || item.href;
   },
 
-  isValueActive(activeValue, item) {
+  isCurrentValue(currentValue, item) {
     if (item.active) {
       return true;
     }
-    if (activeValue !== undefined) {
-      return activeValue == self.getValue(item);
+    if (currentValue !== undefined) {
+      return currentValue == self.getValue(item);
     }
     return false;
   },
@@ -31,14 +36,34 @@ const createComponent = ({ settings, self, $$, el, dispatchEvent, isServer }) =>
     if (isServer) {
       return;
     }
-    const $items = $$(el).find('menu-item');
-    const values = $items.val();
-    const activeIndex = findIndex(values, value);
-    const $item = $items.eq(activeIndex);
-    if ($item.exists()) {
+    const $item = self.getItemByValue(value);
+    self.selectItem($item);
+    state.activeIndex.set($item);
+  },
+
+  // reactivity will also pick this up when item changes
+  selectItem($item) {
+    const $items = self.getMenuItems();
+    if ($item?.exists()) {
       $items.removeAttr('active');
       $item.attr('active', '');
     }
+  },
+
+  getIndicatorPosition(index = self.getActiveIndex()) {
+    if (isServer || self.getActiveIndex() == -1) {
+      return 'opacity: 0;';
+    }
+    const $item = self.getActiveItem();
+    if (!$item.exists()) {
+      return;
+    }
+    const position = $item.position('local');
+    const width = $item.width();
+    return `
+      left: ${position.local?.left}px;
+      width: ${width}px;
+    `;
   },
 
   selectIndex(eq) {
@@ -46,6 +71,29 @@ const createComponent = ({ settings, self, $$, el, dispatchEvent, isServer }) =>
     if (value !== undefined) {
       self.setValue(value);
     }
+  },
+
+  getMenuItems() {
+    return $$(el).find('menu-item');
+  },
+  getItemValues() {
+    return self.getMenuItems().val();
+  },
+  getActiveIndex() {
+    return state.activeIndex.get();
+  },
+  getActiveItem() {
+    return self.getItemByValue(settings.value);
+  },
+  getItemIndex(value) {
+    return findIndex(self.getItemValues(), value);
+  },
+  getItemByValue(value) {
+    const index = findIndex(self.getItemValues(), value);
+    return self.getItemByIndex(index);
+  },
+  getItemByIndex(index) {
+    return self.getMenuItems().eq(index);
   },
 });
 
@@ -72,6 +120,7 @@ const UIMenu = defineComponent({
   template,
   css,
   pageCSS,
+  defaultState,
   createComponent,
   events,
   onCreated,

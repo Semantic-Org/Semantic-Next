@@ -3,6 +3,11 @@
     <ui-icon icon={icon}></ui-icon>
   {/if}
   {>slot}
+  {#if badge}
+    <ui-label outline badge>
+      {badge}
+    </ui-label>
+  {/if}
 {/snippet}
 
 {#if href}

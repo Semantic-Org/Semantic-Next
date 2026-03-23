@@ -1,4 +1,4 @@
-ui-menu {
+:host(ui-menu) {
   display: block;
   margin: var(--menu-margin);
   padding: var(--menu-padding);

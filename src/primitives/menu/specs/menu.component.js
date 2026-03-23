@@ -5,7 +5,8 @@ export default {
     "item"
   ],
   "types": [
-    "selection"
+    "selection",
+    "sliding"
   ],
   "variations": [
     "evenly-spaced",
@@ -20,6 +21,7 @@ export default {
   "attributes": [
     "item",
     "selection",
+    "sliding",
     "evenly-spaced",
     "fitted",
     "vertical",
@@ -30,6 +32,7 @@ export default {
   "propertyTypes": {
     "item": "string",
     "selection": "boolean",
+    "sliding": "boolean",
     "evenly-spaced": "boolean",
     "fitted": "boolean",
     "vertical": "boolean",

@@ -20,6 +20,12 @@ export default {
       description: 'allow for selection between choices',
       usageLevel: 1,
     },
+    {
+      name: 'Sliding',
+      attribute: 'sliding',
+      description: 'indicate active selection with a sliding indicator',
+      usageLevel: 1,
+    },
   ],
   variations: [
     {
