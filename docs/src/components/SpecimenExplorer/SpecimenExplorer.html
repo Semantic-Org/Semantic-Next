@@ -1,17 +1,26 @@
 <div class="specimen">
   <ui-panels direction="horizontal">
     <ui-panel direction="horizontal" size="grow" min-size="200px">
-      <div class="stage">
-        <div class="preview">
-          <div class="component-frame"></div>
-        </div>
-        <div class="output">
-          <ui-menu selection compact items={dialectMenuItems} value={dialect} class="dialect-menu"></ui-menu>
-          <div class="code-output">
-            <code-sample code="{getCodeOutput}" language="html" segment="false"></code-sample>
+      <ui-panels direction="vertical" class="stage">
+        <ui-panel direction="vertical" size="66%" min-size="80px">
+          <div class="preview">
+            <div class="component-frame"></div>
           </div>
-        </div>
-      </div>
+        </ui-panel>
+        <ui-panel direction="vertical" size="34%" min-size="60px" max-size="300px">
+          <div class="output">
+            <div class="output-header">
+              <span class="output-label">Code</span>
+              {#if hasModifiers}
+                <ui-menu inset fitted items={dialectMenuItems} value={dialect} class="dialect-menu"></ui-menu>
+              {/if}
+            </div>
+            <div class="code-output">
+              <code-sample code="{getCodeOutput}" language="html" segment="false"></code-sample>
+            </div>
+          </div>
+        </ui-panel>
+      </ui-panels>
     </ui-panel>
 
     <ui-panel direction="horizontal" size="280px" min-size="200px" max-size="400px">

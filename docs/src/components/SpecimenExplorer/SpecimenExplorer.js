@@ -1,12 +1,14 @@
 import { defineComponent } from '@semantic-ui/component';
 import { DocsSpecReader } from '@semantic-ui/specs';
-import { each } from '@semantic-ui/utils';
+
+import CodeSample from '@components/CodeSample/CodeSample.js';
+
+import { each, inArray, keys, some } from '@semantic-ui/utils';
 
 import css from './SpecimenExplorer.css?raw';
 import template from './SpecimenExplorer.html?raw';
 
 import { Panel, Panels } from '@semantic-ui/core';
-import CodeSample from '../CodeSample/CodeSample.js';
 import { SimpleSelect } from './SimpleSelect.js';
 
 const defaultSettings = {
@@ -146,6 +148,17 @@ const createComponent = ({ self, state, settings, $ }) => ({
       selections[attribute] = value;
     }
     state.selections.set(selections);
+  },
+
+  hasModifiers() {
+    const selections = state.selections.get();
+    const contentSlotAttrs = (self.parsedSpec?.content || [])
+      .filter(c => {
+        const attr = c.attribute || c.name?.toLowerCase();
+        return attr !== 'icon' && attr !== 'badge';
+      })
+      .map(c => c.attribute || c.name?.toLowerCase());
+    return some(keys(selections), (attr) => !inArray(attr, contentSlotAttrs));
   },
 
   // Code generation

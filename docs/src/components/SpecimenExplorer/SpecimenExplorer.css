@@ -11,19 +11,16 @@
 
 /* ── Stage (Preview + Output) ── */
 .stage {
-  display: flex;
-  flex-direction: column;
   height: 100%;
 }
 
 .preview {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--padding-l);
   background: var(--page-background);
-  min-height: 120px;
+  height: 100%;
 }
 
 .component-frame {
@@ -34,13 +31,31 @@
 }
 
 .output {
-  border-top: var(--internal-border);
-  background: var(--standard-5);
+  background: var(--subtle-angled-gradient);
   padding: var(--padding-xs);
+  flex: 1;
+}
+
+.output-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.output-label {
+  font-size: var(--text-2xs);
+  font-weight: var(--bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-text-color);
+}
+
+.dialect-menu {
+  font-size: var(--text-2xs);
 }
 
 .code-output {
-  margin-bottom: var(--margin-xs);
+  margin-top: var(--margin-xs);
 
   code-sample {
     font-size: var(--text-xs);
