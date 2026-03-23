@@ -36,6 +36,9 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   watchChanges() {
+    if (this.reaction) {
+      this.reaction.stop();
+    }
     this.reaction = Reaction.create((reaction) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
@@ -102,7 +105,7 @@ export class RenderTemplateDirective extends AsyncDirective {
       return false;
     }
 
-    // reuse existing clone if template definition hasn't changed
+    // Preserve existing clone when the same prototype is reused.
     if (this.template && this.templateID === template.id) {
       return;
     }
