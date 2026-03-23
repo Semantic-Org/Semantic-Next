@@ -736,4 +736,202 @@ describe('16. Subtemplate inside each', () => {
     const activeEl = el.shadowRoot.activeElement;
     expect(activeEl).toBe(inputsAfter[1]);
   });
+
+  it('should preserve focus on the CHANGED item after toggle', async () => {
+    const tag = uniqueTag('sub-focus-self');
+
+    const itemTemplate = defineComponent({
+      template: '<li><input class="toggle" type="checkbox" checked={todo.completed}><span>{todo.text}</span></li>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'Alpha', completed: false },
+          { _id: 'b', text: 'Beta', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Focus the first item's checkbox
+    const inputs = el.shadowRoot.querySelectorAll('input.toggle');
+    inputs[0].focus();
+
+    // Toggle the focused item
+    el.component.toggleItem('a');
+
+    // Debug: check step by step
+    const inputBeforeFlush = el.shadowRoot.querySelectorAll('input.toggle')[0];
+    console.log('before flush - same?', inputs[0] === inputBeforeFlush);
+
+    Reaction.flush();
+    const inputAfterFlush = el.shadowRoot.querySelectorAll('input.toggle')[0];
+    console.log('after flush - same?', inputs[0] === inputAfterFlush);
+
+    await el.updateComplete;
+    const inputAfterUpdate = el.shadowRoot.querySelectorAll('input.toggle')[0];
+    console.log('after updateComplete - same?', inputs[0] === inputAfterUpdate);
+
+    await new Promise(r => setTimeout(r, 0));
+    const inputAfterTimeout = el.shadowRoot.querySelectorAll('input.toggle')[0];
+    console.log('after timeout - same?', inputs[0] === inputAfterTimeout);
+
+    // The first item's checkbox should still be focused
+    const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
+    expect(inputsAfter.length).toBe(2);
+    expect(el.shadowRoot.activeElement).toBe(inputsAfter[0]);
+  });
+
+  it('should update sibling subtemplate that reads shared state', async () => {
+    const tag = uniqueTag('sub-shared-state');
+
+    const itemTemplate = defineComponent({
+      template: '<li>{todo.text}: {todo.completed ? "done" : "pending"}</li>',
+    });
+
+    const footerTemplate = defineComponent({
+      template: '<footer>{getRemaining} items left</footer>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}{>footerTemplate getRemaining=getRemaining}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'Alpha', completed: false },
+          { _id: 'b', text: 'Beta', completed: false },
+          { _id: 'c', text: 'Gamma', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          getRemaining: () => todos.get().filter(t => !t.completed).length,
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate, footerTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('3 items left');
+
+    // Toggle one item
+    el.component.toggleItem('a');
+    await flush(el);
+
+    // Footer should update to reflect 2 remaining
+    expect(shadowText(el)).toContain('2 items left');
+    expect(shadowText(el)).not.toContain('3 items left');
+
+    // Toggle another
+    el.component.toggleItem('b');
+    await flush(el);
+
+    expect(shadowText(el)).toContain('1 items left');
+  });
+});
+
+/*******************************
+   17. Settings-driven conditional and ternary updates
+*******************************/
+
+describe('17. Settings-driven conditional and ternary', () => {
+  it('should update {#if} branch when setting changes via proxy', async () => {
+    const tag = uniqueTag('settings-if');
+    defineComponent({
+      tagName: tag,
+      template: '{#if collapsed}SHOW{else}HIDE{/if}',
+      defaultSettings: { collapsed: false },
+      createComponent: ({ settings }) => ({
+        toggle() {
+          settings.collapsed = !settings.collapsed;
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('HIDE');
+
+    el.component.toggle();
+    await flush(el);
+
+    expect(shadowText(el)).toContain('SHOW');
+    expect(shadowText(el)).not.toContain('HIDE');
+
+    el.component.toggle();
+    await flush(el);
+
+    expect(shadowText(el)).toContain('HIDE');
+  });
+
+  it('should update ternary expression when setting changes via proxy', async () => {
+    const tag = uniqueTag('settings-ternary');
+    defineComponent({
+      tagName: tag,
+      template: '<span>{collapsed ? "expanded" : "collapsed"}</span>',
+      defaultSettings: { collapsed: false },
+      createComponent: ({ settings }) => ({
+        toggle() {
+          settings.collapsed = !settings.collapsed;
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('collapsed');
+
+    el.component.toggle();
+    await flush(el);
+
+    expect(shadowText(el)).toContain('expanded');
+    expect(shadowText(el)).not.toContain('collapsed');
+  });
+
+  it('should update expressions inside conditional branches when setting changes', async () => {
+    const tag = uniqueTag('settings-branch-content');
+    defineComponent({
+      tagName: tag,
+      template: '{#if active}<span>{onLabel}</span>{else}<span>{offLabel}</span>{/if}',
+      defaultSettings: { active: false, onLabel: 'ON', offLabel: 'OFF' },
+      createComponent: ({ settings }) => ({
+        toggle() {
+          settings.active = !settings.active;
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('OFF');
+
+    el.component.toggle();
+    await flush(el);
+
+    expect(shadowText(el)).toContain('ON');
+    expect(shadowText(el)).not.toContain('OFF');
+  });
 });
