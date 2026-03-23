@@ -18,11 +18,18 @@ const defaultSettings = {
 const defaultState = {
   selections: {},
   dialect: 'standard',
+  viewMode: 'split',
 };
 
 const createComponent = ({ self, state, settings, $ }) => ({
   reader: null,
   parsedSpec: null,
+
+  viewModeItems: [
+    { icon: 'eye', value: 'preview' },
+    { icon: 'columns-2', value: 'split' },
+    { icon: 'code', value: 'code' },
+  ],
 
   dialectMenuItems: [
     { label: 'Standard', value: 'standard' },
@@ -255,6 +262,10 @@ const events = {
 
   'change .dialect-menu'({ state, value }) {
     state.dialect.set(value);
+  },
+
+  'change .view-mode-menu'({ state, value }) {
+    state.viewMode.set(value);
   },
 };
 
