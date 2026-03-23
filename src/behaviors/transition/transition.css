@@ -795,7 +795,7 @@
 
 /*******************************
        Standard Animations
-*******************************/***/
+*******************************/
 
 /*--------------
     Jiggle
@@ -838,6 +838,19 @@
   0% { background-color: rgba(230, 199, 56, 0); }
   30% { background-color: rgba(230, 199, 56, 0.5); }
   100% { background-color: rgba(230, 199, 56, 0); }
+}
+
+/*--------------
+    Confirm
+---------------*/
+
+.confirm.transition {
+  animation: confirm var(--duration-medium) var(--ease-out);
+}
+@keyframes confirm {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 
