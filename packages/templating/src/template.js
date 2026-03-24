@@ -175,7 +175,7 @@ export const Template = class Template {
     this.instance = {};
 
     // create settings proxy for subtemplates that declare defaultSettings
-    if (this.defaultSettings && Object.keys(this.defaultSettings).length > 0) {
+    if (this.isSubtemplate() && this.defaultSettings && Object.keys(this.defaultSettings).length > 0) {
       this.createSubtemplateSettings();
     }
 
@@ -281,21 +281,18 @@ export const Template = class Template {
   // Overlay settings shadow signals so the renderer tracks settings reactively.
   // Applied after all spreads so Signals always win over plain duplicates.
   overlaySettingsSignals(context) {
-    // subtemplate with own settings — overlay own settingsVars
-    if (this.settingsVars && this.defaultSettings) {
-      each(this.defaultSettings, (_, name) => {
-        this.settings[name]; // ensure shadow signal exists
-      });
-      this.settingsVars.forEach((signal, name) => {
-        if (name in this.defaultSettings) {
-          context[name] = signal;
-        }
-      });
-      return context;
-    }
-    // subtemplates without own settings should not inherit parent WC settings
-    // into their data context — passed data takes priority
-    if (this.defaultSettings !== undefined) {
+    // subtemplates — overlay own settingsVars if declared, otherwise skip
+    if (this.isSubtemplate()) {
+      if (this.settingsVars && this.defaultSettings) {
+        each(this.defaultSettings, (_, name) => {
+          this.settings[name]; // ensure shadow signal exists
+        });
+        this.settingsVars.forEach((signal, name) => {
+          if (name in this.defaultSettings) {
+            context[name] = signal;
+          }
+        });
+      }
       return context;
     }
     // web component — overlay element settingsVars
