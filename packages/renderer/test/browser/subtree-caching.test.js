@@ -959,3 +959,485 @@ describe('18. Subtemplate data overrides parent setting', () => {
     expect(shadowText(el)).not.toContain('override-A');
   });
 });
+
+/*******************************
+   19. Subtemplate spurious re-evaluation inside each
+
+   Pattern: detecting spurious re-evaluation in subtemplates
+   ─────────────────────────────────────────────────────────
+   To test whether a subtemplate's expressions re-fire, define a marker
+   function in the subtemplate's own createComponent and call it from the
+   template. This works because createComponent return values live on the
+   template instance — they bypass the parent→child data packing layer
+   (which resolves functions to their return values via wrapFunction).
+
+     const child = defineComponent({
+       template: '<span>{marker}{value}</span>',
+       createComponent: ({ data }) => ({
+         marker: () => { callLog.push(data.item._id); return ''; },
+       }),
+     });
+
+   The marker expression becomes a reactiveData directive inside the
+   subtemplate's own LitRenderer. It re-fires only when that renderer's
+   dataVersion changes — making it a direct probe of whether the
+   subtemplate actually re-evaluated, not just whether the parent
+   considered re-rendering it.
+
+   Do NOT pass spy functions through subtemplate data props (e.g.
+   {>child spy=spy}). The packing mechanism calls wrapFunction(fn)()
+   during unpacking, which invokes the function with no arguments and
+   passes the return value instead of the function itself.
+*******************************/
+
+describe('19. Subtemplate isolation inside each', () => {
+  it('should not re-evaluate unchanged item subtemplates when sibling item changes', async () => {
+    const tag = uniqueTag('sub-spurious');
+    let evaluatedIds = [];
+
+    const itemTemplate = defineComponent({
+      template: '<span>{markEvaluated}{todo.text}</span>',
+      createComponent: ({ data }) => ({
+        markEvaluated: () => {
+          evaluatedIds.push(data.todo?._id);
+          return '';
+        },
+      }),
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+          { _id: 'c', text: 'Third', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // All 3 items should have evaluated initially
+    expect(evaluatedIds).toContain('a');
+    expect(evaluatedIds).toContain('b');
+    expect(evaluatedIds).toContain('c');
+
+    // Clear and toggle item A only
+    evaluatedIds = [];
+    el.component.toggleItem('a');
+    await flush(el);
+
+    // Unchanged items should NOT have re-evaluated
+    expect(evaluatedIds).not.toContain('b');
+    expect(evaluatedIds).not.toContain('c');
+  });
+});
+
+/*******************************
+   20. DOM node identity for unchanged items
+*******************************/
+
+describe('20. DOM node identity preservation', () => {
+  it('should preserve DOM node references for unchanged items in each', async () => {
+    const tag = uniqueTag('dom-identity');
+
+    const itemTemplate = defineComponent({
+      template: '<li><input class="toggle" type="checkbox"><span>{todo.text}</span></li>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+          { _id: 'c', text: 'Third', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Capture DOM node references before mutation
+    const inputsBefore = el.shadowRoot.querySelectorAll('input.toggle');
+    const secondInput = inputsBefore[1];
+    const thirdInput = inputsBefore[2];
+    expect(inputsBefore.length).toBe(3);
+
+    // Mutate first item only
+    el.component.toggleItem('a');
+    await flush(el);
+
+    const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');
+    expect(inputsAfter.length).toBe(3);
+
+    // Unchanged items should be the exact same DOM nodes
+    expect(inputsAfter[1]).toBe(secondInput);
+    expect(inputsAfter[2]).toBe(thirdInput);
+  });
+});
+
+/*******************************
+   21. Subtemplate internal state preservation
+*******************************/
+
+describe('21. Subtemplate internal state preservation', () => {
+  it('should preserve subtemplate state when sibling item changes', async () => {
+    const tag = uniqueTag('sub-internal-state');
+
+    const itemTemplate = defineComponent({
+      templateName: 'itemTemplate',
+      template:
+        '<li>{#if editing}<input class="edit" value={todo.text}>{else}<span class="view">{todo.text}</span>{/if}</li>',
+      defaultState: { editing: false },
+      createComponent: ({ state }) => ({
+        startEditing() {
+          state.editing.set(true);
+        },
+      }),
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // No edit inputs initially
+    expect(el.shadowRoot.querySelectorAll('input.edit').length).toBe(0);
+    expect(el.shadowRoot.querySelectorAll('.view').length).toBe(2);
+
+    // Start editing on item B via its subtemplate instance
+    const children = el.template.findChildren('itemTemplate');
+    children[1].startEditing();
+    await flush(el);
+
+    // Item B should now be in editing mode
+    expect(el.shadowRoot.querySelectorAll('input.edit').length).toBe(1);
+
+    // Toggle item A — should NOT reset item B's editing state
+    el.component.toggleItem('a');
+    await flush(el);
+
+    // Item B should still be in editing mode
+    expect(el.shadowRoot.querySelectorAll('input.edit').length).toBe(1);
+    expect(el.shadowRoot.querySelectorAll('.view').length).toBe(1);
+  });
+});
+
+/*******************************
+   22. Rapid successive mutations
+*******************************/
+
+describe('22. Rapid successive mutations', () => {
+  it('should handle rapid mutations to different items without losing updates', async () => {
+    const tag = uniqueTag('rapid-mutate');
+
+    const itemTemplate = defineComponent({
+      template: '<span>{todo.text}:{todo.completed ? "done" : "pending"}</span>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+          { _id: 'c', text: 'Third', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('First:pending');
+    expect(shadowText(el)).toContain('Second:pending');
+    expect(shadowText(el)).toContain('Third:pending');
+
+    // Toggle A and B before flushing
+    el.component.toggleItem('a');
+    el.component.toggleItem('b');
+    await flush(el);
+
+    expect(shadowText(el)).toContain('First:done');
+    expect(shadowText(el)).toContain('Second:done');
+    expect(shadowText(el)).toContain('Third:pending');
+  });
+});
+
+/*******************************
+   23. Subtemplate lifecycle callbacks
+*******************************/
+
+describe('23. Subtemplate lifecycle callbacks', () => {
+  it('should not fire onRendered on data-only updates', async () => {
+    let renderCount = 0;
+    const tag = uniqueTag('sub-lifecycle');
+
+    const itemTemplate = defineComponent({
+      template: '<span>{todo.text}</span>',
+      onRendered: () => {
+        renderCount++;
+      },
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+    // onRendered fires in setTimeout — wait for it
+    await new Promise(r => setTimeout(r, 10));
+
+    const countAfterInitial = renderCount;
+    expect(countAfterInitial).toBe(2); // one per item
+
+    el.component.toggleItem('a');
+    await flush(el);
+    await new Promise(r => setTimeout(r, 10));
+
+    // Data-only update should NOT re-trigger onRendered
+    expect(renderCount).toBe(countAfterInitial);
+  });
+
+  it('should fire onDestroyed when item is removed from each', async () => {
+    let destroyCount = 0;
+    const tag = uniqueTag('sub-destroy');
+
+    const itemTemplate = defineComponent({
+      template: '<span>{todo.text}</span>',
+      onDestroyed: () => {
+        destroyCount++;
+      },
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First' },
+          { _id: 'b', text: 'Second' },
+          { _id: 'c', text: 'Third' },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          removeItem(id) {
+            todos.removeItem(id);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('Second');
+
+    el.component.removeItem('b');
+    await flush(el);
+
+    expect(shadowText(el)).not.toContain('Second');
+    expect(shadowText(el)).toContain('First');
+    expect(shadowText(el)).toContain('Third');
+    // Removed item's subtemplate should fire onDestroyed
+    expect(destroyCount).toBe(1);
+  });
+});
+
+/*******************************
+   24. Subtemplate using findParent for reactive data
+*******************************/
+
+describe('24. Subtemplate with findParent reactivity', () => {
+  it('should update expression that reads parent signal via findParent', async () => {
+    const tag = uniqueTag('sub-findparent');
+
+    const footerTemplate = defineComponent({
+      templateName: 'footerTemplate',
+      template: '<footer>{getIncompleteCount} items left</footer>',
+      createComponent: ({ self, findParent }) => ({
+        getIncompleteCount() {
+          const parent = findParent('todoList');
+          return parent.todos.get().filter(t => !t.completed).length;
+        },
+      }),
+    });
+
+    const itemTemplate = defineComponent({
+      template: '<li><input class="toggle" type="checkbox" checked={todo.completed}><span>{todo.text}</span></li>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      templateName: 'todoList',
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}{>footerTemplate}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+          { _id: 'c', text: 'Third', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate, footerTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('3 items left');
+
+    // Toggle one item complete
+    el.component.toggleItem('a');
+    await flush(el);
+
+    expect(shadowText(el)).toContain('2 items left');
+    expect(shadowText(el)).not.toContain('3 items left');
+
+    // Toggle another
+    el.component.toggleItem('b');
+    await flush(el);
+
+    expect(shadowText(el)).toContain('1 items left');
+  });
+});
+
+/*******************************
+   25. Closure-captured data in subtemplate createComponent
+*******************************/
+
+describe('25. Closure-captured data in subtemplate', () => {
+  it('should update classMap when data.todo.completed changes via setProperty', async () => {
+    const tag = uniqueTag('sub-classmap');
+
+    const itemTemplate = defineComponent({
+      template: '<li class="{classMap getClasses} item"><span>{todo.text}</span></li>',
+      createComponent: ({ data }) => ({
+        getClasses() {
+          return { completed: data.todo.completed };
+        },
+      }),
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Initial: no completed class
+    const li = el.shadowRoot.querySelector('li');
+    expect(li.className).toContain('item');
+    expect(li.className).not.toContain('completed');
+
+    // Toggle first item complete
+    el.component.toggleItem('a');
+    await flush(el);
+
+    const liAfter = el.shadowRoot.querySelector('li');
+    expect(liAfter.className).toContain('completed');
+
+    // Toggle back to incomplete
+    el.component.toggleItem('a');
+    await flush(el);
+
+    const liAfter2 = el.shadowRoot.querySelector('li');
+    expect(liAfter2.className).not.toContain('completed');
+  });
+});

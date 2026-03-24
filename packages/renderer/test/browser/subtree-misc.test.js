@@ -534,3 +534,164 @@ describe('subtemplate with dynamic name=expression', () => {
     expect(shadowText(el)).not.toContain('Card');
   });
 });
+
+/*******************************
+   Shorthand static prop=expr
+   (no parens, standalone)
+*******************************/
+
+describe('subtemplate shorthand without parens', () => {
+  it('should reactively update — compiler routes all shorthand to reactiveData', async () => {
+    const tag = uniqueTag();
+    const child = defineComponent({
+      template: '<span>{label}</span>',
+    });
+    defineComponent({
+      tagName: tag,
+      template: '{>child label=getMessage}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getMessage: () => `v${state.version.get()}`,
+      }),
+      subTemplates: { child },
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('v0');
+
+    el.template.state.version.set(1);
+    await waitForUpdate(el);
+
+    // Shorthand without parens is still reactive (compiler always uses reactiveData)
+    expect(shadowText(el)).toContain('v1');
+    expect(shadowText(el)).not.toContain('v0');
+  });
+
+  it('should behave identically to shorthand with parens', async () => {
+    const tag = uniqueTag();
+    const child = defineComponent({
+      template: '<span>{a}|{b}</span>',
+    });
+    defineComponent({
+      tagName: tag,
+      template: '{>child a=getLabel b=(getLabel)}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getLabel: () => `v${state.version.get()}`,
+      }),
+      subTemplates: { child },
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('v0|v0');
+
+    el.template.state.version.set(1);
+    await waitForUpdate(el);
+
+    // Both forms should update identically
+    expect(shadowText(el)).toContain('v1|v1');
+  });
+});
+
+/*******************************
+   Subtemplate data inside #each
+*******************************/
+
+describe('subtemplate data contract inside each', () => {
+  it('shorthand prop=expr should update when each item changes', async () => {
+    const tag = uniqueTag();
+    const child = defineComponent({
+      template: '<span>{label}</span>',
+    });
+    defineComponent({
+      tagName: tag,
+      template: '{#each item in getItems}{>child label=item.name}{/each}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItems: () => {
+          const v = state.version.get();
+          return [{ id: 'a', name: v === 0 ? 'Alpha' : 'Updated' }];
+        },
+      }),
+      subTemplates: { child },
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('Alpha');
+
+    el.template.state.version.set(1);
+    await waitForUpdate(el);
+
+    expect(shadowText(el)).toContain('Updated');
+    expect(shadowText(el)).not.toContain('Alpha');
+  });
+
+  it('mixed static and reactive props should both update inside each', async () => {
+    const tag = uniqueTag();
+    const child = defineComponent({
+      template: '<span>{staticProp}|{reactiveProp}</span>',
+    });
+    defineComponent({
+      tagName: tag,
+      template: '{#each item in getItems}{>child staticProp=item.name reactiveProp=(item.status)}{/each}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItems: () => {
+          const v = state.version.get();
+          return [{ id: 'a', name: v === 0 ? 'Alpha' : 'Changed', status: v === 0 ? 'pending' : 'done' }];
+        },
+      }),
+      subTemplates: { child },
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('Alpha|pending');
+
+    el.template.state.version.set(1);
+    await waitForUpdate(el);
+
+    // Inside each, both shorthand forms should update
+    expect(shadowText(el)).toContain('Changed|done');
+  });
+
+  it('verbose data={} inside each should update when item changes', async () => {
+    // Inside #each, dataVersion overrides the static/reactive distinction —
+    // even verbose data={} should update because the each body's cachedRender
+    // triggers the renderTemplate reaction via dataVersion
+    const tag = uniqueTag();
+    const child = defineComponent({
+      template: '<span>{label}</span>',
+    });
+    defineComponent({
+      tagName: tag,
+      template: "{#each item in getItems}{>template name='child' data={label: item.name}}{/each}",
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItems: () => {
+          const v = state.version.get();
+          return [{ id: 'a', name: v === 0 ? 'Alpha' : 'Updated' }];
+        },
+      }),
+      subTemplates: { child },
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('Alpha');
+
+    el.template.state.version.set(1);
+    await waitForUpdate(el);
+
+    // Even verbose static data should update inside each
+    expect(shadowText(el)).toContain('Updated');
+  });
+});
