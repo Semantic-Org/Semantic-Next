@@ -1,11 +1,11 @@
 export async function getStaticPaths() {
   const allDocs = import.meta.glob(
-    ['../../../../../ai/**/*.md', '!../../../../../ai/workspace/**/*.md'],
+    '../../../../../ai/skills/**/*.md',
     { query: '?raw', eager: true }
   );
 
   return Object.entries(allDocs).map(([path, module]) => {
-    const match = path.match(/ai\/(.+)\.md$/);
+    const match = path.match(/ai\/skills\/(.+)\.md$/);
     const slug = match ? match[1] : path;
 
     return {

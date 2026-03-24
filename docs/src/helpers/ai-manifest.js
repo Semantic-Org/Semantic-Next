@@ -5,10 +5,6 @@ import { resolve } from 'path';
 const VALID_AUDIENCES = ['usage', 'authoring', 'essentials', 'docs', 'contributing', 'research'];
 const AUDIENCE_ORDER = VALID_AUDIENCES;
 
-// Folders excluded from AI context manifests
-// Note: also listed as static glob negations below (Vite requires static strings)
-export const EXCLUDED_AI_FOLDERS = ['workspace', 'old'];
-
 function getAudience(frontmatter, relativePath) {
   if (frontmatter.audience) { return frontmatter.audience; }
   // Fall back to first directory segment
@@ -18,20 +14,17 @@ function getAudience(frontmatter, relativePath) {
 
 export async function getAIManifestData() {
   const allDocs = import.meta.glob(
-    ['../../../ai/**/*.md', '!../../../ai/workspace/**/*.md', '!../../../ai/old/**/*.md'],
+    '../../../ai/skills/**/*.md',
     { query: '?raw', eager: true },
   );
   const rootDir = process.cwd().replace('/docs', '');
 
-  const excludePattern = new RegExp(`ai/(${EXCLUDED_AI_FOLDERS.join('|')})/`);
-
   const pages = Object.entries(allDocs)
-    .filter(([filePath]) => !excludePattern.test(filePath))
     .map(([filePath, module]) => {
       const content = module.default;
       const { data: frontmatter } = matter(content);
 
-      const match = filePath.match(/ai\/(.+)\.md$/);
+      const match = filePath.match(/ai\/skills\/(.+)\.md$/);
       const relativePath = match ? match[1] : filePath;
       const audience = getAudience(frontmatter, relativePath);
 
@@ -48,7 +41,7 @@ export async function getAIManifestData() {
 
       let lastModified = null;
       try {
-        const fsPath = resolve(rootDir, `ai/${relativePath}.md`);
+        const fsPath = resolve(rootDir, `ai/skills/${relativePath}.md`);
         lastModified = statSync(fsPath).mtime.toISOString();
       }
       catch {
