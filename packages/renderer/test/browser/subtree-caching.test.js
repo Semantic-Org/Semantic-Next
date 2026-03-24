@@ -935,3 +935,42 @@ describe('17. Settings-driven conditional and ternary', () => {
     expect(shadowText(el)).not.toContain('OFF');
   });
 });
+
+/*******************************
+   18. Subtemplate data context wins over parent settings
+*******************************/
+
+describe('18. Subtemplate data overrides parent setting', () => {
+  it('should use subtemplate-provided value, not parent setting Signal', async () => {
+    const tag = uniqueTag('sub-override');
+
+    const child = defineComponent({
+      template: '<span>{label}</span>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{>child label=getOverride}',
+      defaultSettings: { label: 'parent-setting' },
+      createComponent: ({ state }) => ({
+        getOverride: () => state.version.get() === 0 ? 'override-A' : 'override-B',
+      }),
+      defaultState: { version: 0 },
+      subTemplates: { child },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Subtemplate should show the override, NOT the parent setting
+    expect(shadowText(el)).toContain('override-A');
+    expect(shadowText(el)).not.toContain('parent-setting');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('override-B');
+    expect(shadowText(el)).not.toContain('override-A');
+  });
+});
