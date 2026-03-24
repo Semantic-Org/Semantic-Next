@@ -1545,7 +1545,7 @@ describe('26. Subtemplate settings', () => {
 
     const child = defineComponent({
       defaultSettings: { itemData: null },
-      template: '<span>{itemData.name}:{parentLabel}</span>',
+      template: '<span>{itemData.name}:{getParentLabel}</span>',
       createComponent: ({ settings }) => ({
         // Access own setting
         getItemName: () => settings.itemData?.name,

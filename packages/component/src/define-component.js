@@ -70,6 +70,7 @@ export const defineComponent = ({
     events,
     keys,
     defaultState,
+    defaultSettings: tagName ? undefined : defaultSettings,
     subTemplates,
     onCreated,
     onRendered,

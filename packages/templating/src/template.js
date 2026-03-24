@@ -51,6 +51,7 @@ export const Template = class Template {
     events,
     keys,
     defaultState,
+    defaultSettings,
     subTemplates,
     createComponent,
     parentTemplate, // the parent template when nested
@@ -76,6 +77,7 @@ export const Template = class Template {
     this.data = data || {};
     this.reactions = [];
     this.defaultState = defaultState;
+    this.defaultSettings = defaultSettings;
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
@@ -171,6 +173,12 @@ export const Template = class Template {
     let template = this;
     let instance;
     this.instance = {};
+
+    // create settings proxy for subtemplates that declare defaultSettings
+    if (this.defaultSettings && Object.keys(this.defaultSettings).length > 0) {
+      this.createSubtemplateSettings();
+    }
+
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
       extend(template.instance, instance);
@@ -273,7 +281,24 @@ export const Template = class Template {
   // Overlay settings shadow signals so the renderer tracks settings reactively.
   // Applied after all spreads so Signals always win over plain duplicates.
   overlaySettingsSignals(context) {
-    if (this.isSubtemplate()) { return context; }
+    // subtemplate with own settings — overlay own settingsVars
+    if (this.settingsVars && this.defaultSettings) {
+      each(this.defaultSettings, (_, name) => {
+        this.settings[name]; // ensure shadow signal exists
+      });
+      this.settingsVars.forEach((signal, name) => {
+        if (name in this.defaultSettings) {
+          context[name] = signal;
+        }
+      });
+      return context;
+    }
+    // subtemplates without own settings should not inherit parent WC settings
+    // into their data context — passed data takes priority
+    if (this.defaultSettings !== undefined) {
+      return context;
+    }
+    // web component — overlay element settingsVars
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
     if (settingsVars && defaultSettings) {
@@ -315,12 +340,13 @@ export const Template = class Template {
   }
 
   clone(settings) {
-    const defaultSettings = {
+    const cloneDefaults = {
       templateName: this.templateName,
       element: this.element,
       ast: this.ast,
       css: this.css,
       defaultState: this.defaultState,
+      defaultSettings: this.defaultSettings,
       events: this.events,
       keys: this.keys,
       renderingEngine: this.renderingEngine,
@@ -333,7 +359,7 @@ export const Template = class Template {
       createComponent: this.createComponent,
     };
     const templateSettings = {
-      ...defaultSettings,
+      ...cloneDefaults,
       ...settings,
     };
     return new Template(templateSettings);
@@ -649,6 +675,7 @@ export const Template = class Template {
       ...additionalData,
     };
     this.setDataContext(dataContext, { rerender: false });
+    this.updateSubtemplateSettings(dataContext);
 
     this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
@@ -722,7 +749,7 @@ export const Template = class Template {
         flush: Reaction.flush,
 
         data: this.data,
-        settings: this.element?.settings,
+        settings: this.settings || this.element?.settings,
         state: this.state,
 
         isRendered: () => this.rendered,
@@ -790,6 +817,74 @@ export const Template = class Template {
 
     // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
+  }
+
+  /*******************************
+        Subtemplate Settings
+  *******************************/
+
+  createSubtemplateSettings() {
+    const template = this;
+    const parentSettings = this.element?.settings;
+    const ownSettings = {};
+    template.settingsVars = new Map();
+
+    // initialize from defaults
+    each(this.defaultSettings, (value, name) => {
+      ownSettings[name] = value;
+    });
+
+    // populate from passed data (reactiveData from parent)
+    each(this.defaultSettings, (_, name) => {
+      if (this.data[name] !== undefined) {
+        ownSettings[name] = this.data[name];
+      }
+    });
+
+    this.settings = new Proxy(ownSettings, {
+      get: (target, property) => {
+        if (typeof property === 'symbol') {
+          return target[property];
+        }
+        // own settings first
+        if (property in target) {
+          let signal = template.settingsVars.get(property);
+          if (!signal) {
+            signal = new Signal(target[property], { allowClone: false });
+            template.settingsVars.set(property, signal);
+          }
+          signal.get(); // track dependency
+          return target[property];
+        }
+        // fall back to parent web component settings
+        if (parentSettings) {
+          return parentSettings[property];
+        }
+      },
+      set: (target, property, value) => {
+        target[property] = value;
+        let signal = template.settingsVars.get(property);
+        if (signal) {
+          signal.set(value);
+        }
+        else {
+          signal = new Signal(value, { allowClone: false });
+          template.settingsVars.set(property, signal);
+        }
+        return true;
+      },
+    });
+  }
+
+  updateSubtemplateSettings(dataContext) {
+    if (!this.settings || !this.defaultSettings) {
+      return;
+    }
+    each(this.defaultSettings, (_, name) => {
+      if (name in dataContext) {
+        this.settings[name] = dataContext[name];
+      }
+    });
   }
 
   /*******************************
