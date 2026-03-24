@@ -1441,3 +1441,216 @@ describe('25. Closure-captured data in subtemplate', () => {
     expect(liAfter2.className).not.toContain('completed');
   });
 });
+
+/*******************************
+   26. Subtemplate settings — reactive external data
+*******************************/
+
+describe('26. Subtemplate settings', () => {
+  it('should reactively update classMap via settings.todo when parent data changes', async () => {
+    const tag = uniqueTag('sub-settings');
+
+    const itemTemplate = defineComponent({
+      defaultSettings: { todo: null },
+      template: '<li class="{classMap getClasses} item"><span>{todo.text}</span></li>',
+      createComponent: ({ settings }) => ({
+        getClasses() {
+          return { completed: settings.todo.completed };
+        },
+      }),
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each todo in getTodos}{>itemTemplate todo=todo}{/each}',
+      createComponent: ({ signal }) => {
+        const todos = signal([
+          { _id: 'a', text: 'First', completed: false },
+          { _id: 'b', text: 'Second', completed: false },
+        ]);
+        return {
+          todos,
+          getTodos: () => todos.get(),
+          toggleItem(id) {
+            todos.setProperty(id, 'completed', !todos.getItem(id).completed);
+          },
+        };
+      },
+      subTemplates: { itemTemplate },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    const li = el.shadowRoot.querySelector('li');
+    expect(li.className).toContain('item');
+    expect(li.className).not.toContain('completed');
+
+    // Toggle complete
+    el.component.toggleItem('a');
+    await flush(el);
+
+    expect(el.shadowRoot.querySelector('li').className).toContain('completed');
+
+    // Toggle back — the specific failure case with stale data
+    el.component.toggleItem('a');
+    await flush(el);
+
+    expect(el.shadowRoot.querySelector('li').className).not.toContain('completed');
+
+    // Third toggle to confirm stable cycling
+    el.component.toggleItem('a');
+    await flush(el);
+
+    expect(el.shadowRoot.querySelector('li').className).toContain('completed');
+  });
+
+  it('should use default value when parent does not pass a setting', async () => {
+    const tag = uniqueTag('sub-defaults');
+
+    const child = defineComponent({
+      defaultSettings: { label: 'default-label', showIcon: true },
+      template: '<span>{label}:{showIcon ? "icon" : "no-icon"}</span>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{>child label=getMessage}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getMessage: () => `v${state.version.get()}`,
+      }),
+      subTemplates: { child },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // label is passed, showIcon uses default
+    expect(shadowText(el)).toContain('v0');
+    expect(shadowText(el)).toContain('icon');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    // label updates reactively, showIcon still default
+    expect(shadowText(el)).toContain('v1');
+    expect(shadowText(el)).toContain('icon');
+  });
+
+  it('should merge own settings with parent web component settings', async () => {
+    const tag = uniqueTag('sub-merged');
+
+    const child = defineComponent({
+      defaultSettings: { itemData: null },
+      template: '<span>{itemData.name}:{parentLabel}</span>',
+      createComponent: ({ settings }) => ({
+        // Access own setting
+        getItemName: () => settings.itemData?.name,
+        // Access parent WC setting via fallback
+        getParentLabel: () => settings.parentLabel,
+      }),
+    });
+
+    defineComponent({
+      tagName: tag,
+      defaultSettings: { parentLabel: 'from-parent' },
+      template: '{>child itemData=getItem}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItem: () => ({ name: state.version.get() === 0 ? 'Alpha' : 'Beta' }),
+      }),
+      subTemplates: { child },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Own setting from passed data + parent WC setting via fallback
+    expect(shadowText(el)).toContain('Alpha');
+    expect(shadowText(el)).toContain('from-parent');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('Beta');
+    expect(shadowText(el)).toContain('from-parent');
+  });
+
+  it('should overlay settings signals into data context for template expressions', async () => {
+    const tag = uniqueTag('sub-overlay');
+
+    const child = defineComponent({
+      defaultSettings: { count: 0 },
+      template: '<span>{count} items</span>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{>child count=getCount}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getCount: () => state.version.get() * 10,
+      }),
+      subTemplates: { child },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('0 items');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('10 items');
+
+    el.template.state.version.set(3);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('30 items');
+  });
+
+  it('should not break naive subtemplates without defaultSettings', async () => {
+    // Regression guard: subtemplates that don't declare defaultSettings
+    // should continue to work exactly as before
+    const tag = uniqueTag('sub-naive-guard');
+
+    const row = defineComponent({
+      template: '<span>{name}:{status}</span>',
+    });
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each item in getItems}{>row name=item.name status=item.status}{/each}',
+      defaultState: { version: 0 },
+      createComponent: ({ state }) => ({
+        getItems: () => {
+          const v = state.version.get();
+          return [
+            { name: 'A', status: v === 0 ? 'pending' : 'done' },
+            { name: 'B', status: v === 0 ? 'waiting' : 'complete' },
+          ];
+        },
+      }),
+      subTemplates: { row },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('A:pending');
+    expect(shadowText(el)).toContain('B:waiting');
+
+    el.template.state.version.set(1);
+    await flush(el);
+
+    expect(shadowText(el)).toContain('A:done');
+    expect(shadowText(el)).toContain('B:complete');
+  });
+});
