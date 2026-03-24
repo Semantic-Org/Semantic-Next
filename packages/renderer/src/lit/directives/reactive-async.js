@@ -12,6 +12,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     this.generation = 0;
     this.state = 'loading'; // 'loading', 'success', 'error'
     this.resolvedValue = null;
+    this.hasResolved = false;
     this.error = null;
   }
 
@@ -74,6 +75,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           }
           this.state = 'success';
           this.resolvedValue = value;
+          this.hasResolved = true;
           if (this.isConnected) {
             const rendered = this.renderCurrentState(asyncCondition);
             this.setValue(rendered);
@@ -94,6 +96,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Synchronous value
       this.state = 'success';
       this.resolvedValue = result;
+      this.hasResolved = true;
     }
   }
 
@@ -104,7 +107,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           return asyncCondition.loadingContent();
         }
         // No loading block: preserve previous content if available
-        if (this.resolvedValue !== null && asyncCondition.content) {
+        if (this.hasResolved && asyncCondition.content) {
           const successData = this.createSuccessDataContext(asyncCondition);
           return asyncCondition.content(successData);
         }
@@ -177,7 +180,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // The reaction will be recreated in the next render
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

@@ -73,7 +73,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // Reaction will be recreated in next render
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

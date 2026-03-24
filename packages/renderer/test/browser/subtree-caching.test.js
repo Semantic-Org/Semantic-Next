@@ -773,22 +773,7 @@ describe('16. Subtemplate inside each', () => {
 
     // Toggle the focused item
     el.component.toggleItem('a');
-
-    // Debug: check step by step
-    const inputBeforeFlush = el.shadowRoot.querySelectorAll('input.toggle')[0];
-    console.log('before flush - same?', inputs[0] === inputBeforeFlush);
-
-    Reaction.flush();
-    const inputAfterFlush = el.shadowRoot.querySelectorAll('input.toggle')[0];
-    console.log('after flush - same?', inputs[0] === inputAfterFlush);
-
-    await el.updateComplete;
-    const inputAfterUpdate = el.shadowRoot.querySelectorAll('input.toggle')[0];
-    console.log('after updateComplete - same?', inputs[0] === inputAfterUpdate);
-
-    await new Promise(r => setTimeout(r, 0));
-    const inputAfterTimeout = el.shadowRoot.querySelectorAll('input.toggle')[0];
-    console.log('after timeout - same?', inputs[0] === inputAfterTimeout);
+    await flush(el);
 
     // The first item's checkbox should still be focused
     const inputsAfter = el.shadowRoot.querySelectorAll('input.toggle');

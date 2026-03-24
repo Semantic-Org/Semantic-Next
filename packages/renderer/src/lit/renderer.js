@@ -29,7 +29,7 @@ export class LitRenderer {
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
-  static useSubtreeCache = true; // experimental
+  static useSubtreeCache = true;
 
   static getID({ ast, key, position, isSVG } = {}) {
     if (key !== undefined) {
@@ -61,7 +61,6 @@ export class LitRenderer {
     this.html = [];
     this.html.raw = [];
     this.expressions = [];
-    this._contentCallIndex = 0;
   }
 
   /*
