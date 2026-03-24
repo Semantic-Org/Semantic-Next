@@ -1136,3 +1136,63 @@ I was repeatedly wrong in small ways that the user corrected with short, precise
 *— Claude Opus 4.6, 2026-03-19*
 
 *"Start literal, layer meaning on top, promote only with evidence."*
+
+## Entry 4: The Subtree Caching Marathon
+**Date:** 2026-03-22 to 2026-03-24
+**Agent:** Claude (Opus 4.6)
+**Task:** Enable subtree caching in the Lit rendering layer — a feature attempted for 1.5 years
+**Session:** 686k+ tokens, 70+ tests, 15+ subagent delegations
+
+### What I Expected
+
+A focused async directive bugfix. The user said "I think I made a logical error in my reactive async directive." I expected a one-hour session.
+
+### What Actually Happened
+
+The async fix (`noChange` instead of `nothing`, generation counter for stale promises) was the first layer. Beneath it was the subtree caching system — an experimental feature disabled for 1.5 years because every attempt to enable it broke something. The session became an architectural excavation: each fix exposed the next layer of the problem.
+
+### The Discovery Chain
+
+1. **Async flash** → fixed with `noChange` for missing loading blocks
+2. **Why does rerender destroy the async?** → subtree caching needed to preserve directive instances
+3. **Why does caching show stale data?** → `dataVersion` signal needed to propagate non-reactive data changes
+4. **Why do snippets collide?** → AST position needed in the compiler for cache key disambiguation
+5. **Why don't settings update in templates?** → settings were plain values in the data context, needed shadow signal overlay
+6. **Why does the overlay break subtemplates?** → `isSubtemplate()` guard needed because subtemplates borrow parent's element reference
+7. **Why do each items over-evaluate?** → item snapshot comparison needed to skip unchanged items in `repeat()`
+
+Each layer was independently testable and independently correct. The final system has 70 tests across 5 files covering every nesting combination of template primitives.
+
+### What I Got Wrong
+
+- **Assumed Lit tears down DOM with different strings arrays.** The user challenged this from direct observation — they'd never seen DOM destruction. I stated it as fact from training data. The user's empirical evidence was right to question my assumption.
+- **Tried `noChange` on ALL directives simultaneously.** Settings-driven conditionals broke because the flat data context has plain values, not Signals. The fix for each items (`noChange` in reactions) was correct; applying it to top-level conditionals was wrong. Different contexts need different strategies.
+- **Modified the wrong file.** Added compiler changes to `packages/templating/src/compiler/template-compiler.js` (a stale copy) instead of `packages/compiler/src/template-compiler.js` (the real one). A subagent found this — I didn't.
+- **Overcomplicated the settings fix.** Tried `overlaySettingsSignals` as a method, then tried non-clobbering spreads, then tried putting Signals in the data context directly (broke JS ergonomics). The user kept pulling me back to simplicity. The final fix was: overlay in `getDataContext`, skip for subtemplates, apply after all spreads in `render()`.
+
+### The Subagent Pattern
+
+The most productive technique: delegating to pairs of agents (standard + challenge) reading the same problem from scratch. Rules that worked:
+
+- **Don't lead the witness.** Describe the problem and symptoms, not the diagnosis. "Two tests fail" not "the cache key collides because..."
+- **Give them all the files.** List every relevant file. Don't make them search.
+- **Let failures be findings.** Tell agents their tests don't need to pass — failing tests with correct expectations are valid discoveries.
+- **Fresh Take protocol.** Separate problem knowledge from solution momentum. The `ai/contributing/fresh-take.md` skill codifies this.
+
+Agents converged independently on the same fix 4/4 times for the each-item optimization, 2/2 for the settings overlay, and 2/2 for the snippet position fix. Independent convergence is the highest-confidence signal.
+
+### Architectural Insights for Future Agents
+
+- **The flat data context is the source of most complexity.** Settings, state, and instance methods merge into one namespace. Settings are plain values (for JS), state is Signals (for tracking). This asymmetry causes settings to be invisible to the reactivity system unless explicitly overlaid.
+- **`evaluateExpression` uses `this.data`, not the `data` parameter.** This was an intentional change that makes cached subtree closures read live data. If you see `data` passed to `evaluateExpression` but `this.data` used inside, that's correct.
+- **Snippets can't be cached by AST hash alone.** Same snippet invoked at different call sites shares the same AST reference. The compiler assigns `node.position` during `addToAST` to disambiguate.
+- **`render-template` is fundamentally different from all other directives.** It manages a full Template instance with lifecycle, events, and state. It can't use `noChange` like the others. The `maybeCreateTemplate` guard prevents re-cloning, but the packed data closure lifecycle is still unsolved for focus preservation.
+- **The `dataVersion` signal is a broadcast mechanism.** It triggers ALL reactions in a cached subtree. The item snapshot optimization in `reactive-each` prevents this from being called on unchanged items, making it effectively per-item.
+
+### The Meta-Lesson
+
+The user stayed up until 3am on a weekend working through this. Not because the code was broken — because the architecture was almost right, and "almost right" in a rendering system means either "works perfectly" or "breaks everything" with no middle ground. The patience to trace through 7 layers of causation, revert cleanly when something didn't work, and delegate to fresh perspectives when we were going in circles — that's what made this session productive. The code changes are surgical. The understanding required to make them was not.
+
+*— Claude Opus 4.6, 2026-03-24*
+
+*"Each layer was independently testable and independently correct."*
