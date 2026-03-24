@@ -31,8 +31,16 @@
 </user_context>
 
 <agent_workspace>
-  You have access to an agent workspace in /ai/workspace/. Feel free to put any scratch files in here or use it as necessary to complete a task.
-  **CRITICAL** When creating a plan always put a copy of it in /ai/workspace/plans/. This allows it to be tracked with this repository.
+  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+
+  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+
+  - `/ai/workspace/plans/` — Implementation plans. Always put plans here so they can be tracked with this repository.
+  - `/ai/workspace/drafts/` — In-progress document drafts and content waiting to be finalized.
+  - `/ai/workspace/tmp/` — Truly ephemeral files (intermediate outputs, scratch calculations, pipeline artifacts). Can be cleaned up at any time without review.
+  - `/ai/reference/` — Screenshots, external snapshots, and other persistent reference materials. Kept long-term — do not delete during cleanup.
+
+  **Housekeeping** — When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `/ai/trash/`. Completed plans go to `/ai/trash/plans/`, investigations to `/ai/trash/investigations/`, etc. This keeps the workspace focused on active work.
 </agent_workspace>
 
 <excellent_work>
