@@ -21,6 +21,11 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.data = data;
     this.ast = null;
 
+    // Reuse existing reaction — signals and dataVersion handle updates
+    if (this.reaction) {
+      return noChange;
+    }
+
     // Create a new reaction that watches for reactive changes on client
     if (isClient) {
       this.watchChanges();
@@ -78,7 +83,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     if (!dataContext) {
       dataContext = this.unpackData(this.data);
     }
-    this.template.setDataContext(dataContext);
+    this.template.setDataContext(dataContext, { rerender: false });
     return this.template.render();
   }
 

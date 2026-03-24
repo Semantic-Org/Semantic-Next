@@ -658,6 +658,11 @@ export const Template = class Template {
       this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
+    else {
+      // data changed but template structure is the same — trigger reactive
+      // updates in place without recreating DOM (preserves focus, state, etc.)
+      this.renderer.bumpDataVersion();
+    }
     this.rendered = true;
     this.destroyed = false;
     setTimeout(this.onUpdated, 0);
