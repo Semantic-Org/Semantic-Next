@@ -225,7 +225,7 @@ export const Template = class Template {
     if (this.renderingEngine == 'lit') {
       this.renderer = new LitRenderer({
         ast: this.ast,
-        data: this.getDataContext(),
+        data: this.overlaySettingsSignals(this.getDataContext()),
         template: this,
         subTemplates: this.subTemplates,
         helpers: TemplateHelpers,
@@ -263,12 +263,17 @@ export const Template = class Template {
   }
 
   getDataContext() {
-    const context = {
+    return {
       ...this.data,
       ...this.state,
       ...this.instance,
     };
-    // Overlay settings shadow signals for reactive template tracking.
+  }
+
+  // Overlay settings shadow signals so the renderer tracks settings reactively.
+  // Applied after all spreads so Signals always win over plain duplicates.
+  overlaySettingsSignals(context) {
+    if (this.isSubtemplate()) { return context; }
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
     if (settingsVars && defaultSettings) {
@@ -280,12 +285,6 @@ export const Template = class Template {
           context[name] = signal;
         }
       });
-      console.log(
-        '[getDataContext] after overlay, collapsed isSignal:',
-        context.collapsed instanceof Signal,
-        'value:',
-        context.collapsed,
-      );
     }
     return context;
   }
@@ -651,6 +650,7 @@ export const Template = class Template {
     };
     this.setDataContext(dataContext, { rerender: false });
 
+    this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
 
     // render will rerender the AST creating new lit html

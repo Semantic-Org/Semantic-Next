@@ -36,7 +36,6 @@ export class ReactiveConditionalDirective extends AsyncDirective {
         const result = this.getBranch(this.conditional);
         const matchIndex = result.matchIndex;
         content = result.content;
-
         if (!comp.firstRun && this.matchIndex !== matchIndex) {
           this.matchIndex = matchIndex;
           this.setValue(content);
