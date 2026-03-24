@@ -2,11 +2,11 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./todo-item.css');
 const template = await getText('./todo-item.html');
 
-const createComponent = ({ self, data, signal, findParent, $ }) => ({
+const createComponent = ({ self, settings, signal, findParent, $ }) => ({
   editing: signal(false),
   getClasses() {
     return {
-      completed: data.todo.completed,
+      completed: settings.todo.completed,
       editing: self.editing.get(),
     };
   },
@@ -15,15 +15,15 @@ const createComponent = ({ self, data, signal, findParent, $ }) => ({
   },
   toggleCompleted() {
     const todos = self.getTodos();
-    const todo = data.todo;
+    const todo = settings.todo;
     todos.setProperty(todo._id, 'completed', !todo.completed);
   },
   changeText(text) {
     const todos = self.getTodos();
-    todos.setProperty(data.todo._id, 'text', text);
+    todos.setProperty(settings.todo._id, 'text', text);
   },
   removeTodo() {
-    self.getTodos().removeItem(data.todo._id);
+    self.getTodos().removeItem(settings.todo._id);
   },
 });
 
@@ -55,6 +55,7 @@ const todoItem = defineComponent({
   templateName: 'todoItem',
   template,
   css,
+  defaultSettings: { todo: null },
   createComponent,
   events,
 });

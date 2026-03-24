@@ -54,9 +54,6 @@ const createComponent = ({ self, signal, $ }) => ({
   },
 });
 
-const onCreated = ({ self, isClient }) => {
-};
-
 const onRendered = ({ self, isClient }) => {
   if (isClient) {
     self.setRouteFilter();
@@ -92,7 +89,6 @@ const TodoList = defineComponent({
   css,
   events,
   createComponent,
-  onCreated,
   onRendered,
 });
 

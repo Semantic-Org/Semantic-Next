@@ -16,7 +16,7 @@ const createComponent = ({ self, findParent, $ }) => ({
   },
 
   hasAnyCompleted() {
-    return self.todoList().todos.value.some((todo) => todo.completed);
+    return self.todoList().todos.get().some((todo) => todo.completed);
   },
 
   isActiveFilter(filter) {
