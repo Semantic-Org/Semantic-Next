@@ -2,6 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import {
   any,
+  assignInPlace,
   capitalize,
   debounce,
   each,
@@ -76,6 +77,8 @@ export const Template = class Template {
     this.css = css;
     this.data = data || {};
     this.reactions = [];
+    this.abortController = new AbortController();
+    this.abortSignal = this.abortController.signal;
     this.defaultState = defaultState;
     this.defaultSettings = defaultSettings;
     this.state = this.createReactiveState(defaultState, data) || {};
@@ -129,7 +132,7 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    this.data = data;
+    assignInPlace(this.data, data);
     if (rerender) {
       this.rendered = false;
     }
@@ -220,6 +223,7 @@ export const Template = class Template {
       Template.removeTemplate(this);
       this.rendered = false;
       this.destroyed = true;
+      this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
       this.removeObservers();
@@ -741,6 +745,9 @@ export const Template = class Template {
 
         reaction: this.reaction.bind(this),
         signal: this.signal.bind(this),
+        interval: this.createInterval.bind(this),
+        timeout: this.createTimeout.bind(this),
+        abortSignal: this.abortSignal,
         afterFlush: Reaction.afterFlush,
         nonreactive: Reaction.nonreactive,
         flush: Reaction.flush,
@@ -882,6 +889,22 @@ export const Template = class Template {
         this.settings[name] = dataContext[name];
       }
     });
+  }
+
+  /*******************************
+            Timers
+  *******************************/
+
+  createInterval(callback, ms) {
+    const id = setInterval(callback, ms);
+    this.abortSignal.addEventListener('abort', () => clearInterval(id));
+    return id;
+  }
+
+  createTimeout(callback, ms) {
+    const id = setTimeout(callback, ms);
+    this.abortSignal.addEventListener('abort', () => clearTimeout(id));
+    return id;
   }
 
   /*******************************

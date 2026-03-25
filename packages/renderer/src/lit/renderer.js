@@ -2,6 +2,7 @@ import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import {
+  assignInPlace,
   each,
   fatal,
   filterObject,
@@ -753,22 +754,7 @@ export class LitRenderer {
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
   updateData(newData, { preserveExistingData = true } = {}) {
-    let changed = false;
-    // if specified remove all existing data before setting new data
-    if (!preserveExistingData) {
-      each(this.data, (value, name) => {
-        delete this.data[name];
-      });
-      changed = true;
-    }
-    // add new data
-    each(newData, (value, name) => {
-      if (this.data[name] !== value) {
-        this.data[name] = value;
-        changed = true;
-      }
-    });
-    return changed;
+    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData });
   }
 
   clearTemp() {

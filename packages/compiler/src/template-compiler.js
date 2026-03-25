@@ -249,11 +249,6 @@ class TemplateCompiler {
         if (contentTarget == undefined) {
           contentTarget = [];
         }
-        for (const node of nodes) {
-          if (node.type !== 'html') {
-            node.position = nodePosition++;
-          }
-        }
         contentTarget.push(...nodes);
       };
 
@@ -814,8 +809,23 @@ class TemplateCompiler {
 
     ast.forEach(processNode);
 
+    // Disambiguate duplicate template calls so subtree caching can tell them apart
+    const allNodes = [...snippets, ...otherNodes];
+    const templateCounts = {};
+    for (const node of allNodes) {
+      if (node.type === 'template') {
+        templateCounts[node.name] = (templateCounts[node.name] || 0) + 1;
+      }
+    }
+    let position = 0;
+    for (const node of allNodes) {
+      if (node.type === 'template' && templateCounts[node.name] > 1) {
+        node.position = position++;
+      }
+    }
+
     // Return snippets first, then other nodes
-    return [...snippets, ...otherNodes];
+    return allNodes;
   }
 }
 

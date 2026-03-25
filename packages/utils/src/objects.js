@@ -110,6 +110,25 @@ export const deepExtend = (target, ...args) => {
   return target;
 };
 
+export const assignInPlace = (target, source, { preserveExistingKeys = false, returnChanged = false } = {}) => {
+  let changed = false;
+  if (!preserveExistingKeys) {
+    for (const key in target) {
+      if (!(key in source)) {
+        delete target[key];
+        changed = true;
+      }
+    }
+  }
+  for (const key in source) {
+    if (target[key] !== source[key]) {
+      target[key] = source[key];
+      changed = true;
+    }
+  }
+  return returnChanged ? changed : target;
+};
+
 export const pick = (obj, ...keys) => {
   let copy = {};
   each(keys, function(key) {
