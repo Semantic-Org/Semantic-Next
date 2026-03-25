@@ -270,6 +270,7 @@ class WebComponentBase extends LitElement {
           signal = new Signal(setting);
           component.settingsVars.set(property, signal);
         }
+        signal.set(setting);
         signal.get();
         return setting;
       },
