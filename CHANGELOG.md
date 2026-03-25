@@ -12,6 +12,7 @@ description: Latest updates and changes in Semantic UI
 xx.xx.xxxx
 
 ### Renderer
+* **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
 * **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
 
