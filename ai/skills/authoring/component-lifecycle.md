@@ -167,7 +167,9 @@ Every lifecycle callback, event handler, and key binding receives the same destr
 | `dispatchEvent` | Emit custom events from component |
 | `attachEvent` | Listen to external events (auto-cleaned on destroy) |
 | `bindKey` | Bind keyboard shortcuts dynamically |
-| `abortController` | AbortController tied to component lifecycle |
+| `interval` | `setInterval` that auto-clears on destroy |
+| `timeout` | `setTimeout` that auto-clears on destroy |
+| `abortSignal` | AbortSignal tied to component lifecycle |
 | `helpers` | Access to template helpers |
 | `template` / `templateName` | Underlying Template instance and its name |
 | `templates` | All rendered templates on page |
@@ -302,16 +304,15 @@ const onDestroyed = ({ self, isServer }) => {
 
 ### Timer Cleanup
 
+Use `interval` and `timeout` from the destructured params — they auto-cancel on destroy:
+
 ```javascript
-const createComponent = ({ self, state }) => ({
+const createComponent = ({ state, interval }) => ({
   initialize() {
-    self.interval = setInterval(() => state.counter.increment(), 1000);
+    interval(() => state.counter.increment(), 1000);
   },
 });
-
-const onDestroyed = ({ self }) => {
-  clearInterval(self.interval);
-};
+// No onDestroyed needed — interval is automatically cleared
 ```
 
 ---

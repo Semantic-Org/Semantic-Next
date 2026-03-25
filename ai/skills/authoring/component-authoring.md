@@ -154,19 +154,15 @@ If the returned object has an `initialize` method, it is **automatically called*
 
 ```js
 // In createComponent — self references the instance being built
-const createComponent = ({ self, state }) => ({
+const createComponent = ({ self, state, interval }) => ({
   start() {
-    self.interval = setInterval(() => state.count.increment(), 1000);
-  },
-  stop() {
-    clearInterval(self.interval);
+    interval(() => state.count.increment(), 1000);
   },
 });
 
 // In events — same self
 const events = {
   'click .start'({ self }) { self.start(); },
-  'click .stop'({ self }) { self.stop(); },
 };
 
 // In lifecycle — same self
@@ -175,7 +171,7 @@ const onRendered = ({ self, isClient }) => {
 };
 ```
 
-You can store arbitrary values on `self` (like `self.interval` above). It is a plain object — not a class, not a proxy.
+The `interval` and `timeout` helpers auto-cancel when the component is destroyed — no manual cleanup needed.
 
 ---
 

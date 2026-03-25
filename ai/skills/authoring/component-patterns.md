@@ -304,7 +304,7 @@ attachEvent(document, 'astro:after-swap', self.onPageChange);
 
 ### Manual cleanup in `onDestroyed`
 
-For resources `attachEvent` cannot manage (IntersectionObserver, ResizeObserver, intervals):
+For resources `attachEvent` cannot manage (IntersectionObserver, ResizeObserver):
 
 ```javascript
 // inpage-menu.js
@@ -326,7 +326,7 @@ unbindPageEvents() {
 | Window/document event listeners | `attachEvent` (auto-cleanup) |
 | IntersectionObserver | `observer.disconnect()` in `onDestroyed` |
 | ResizeObserver | `observer.disconnect()` in `onDestroyed` |
-| `setInterval` | `clearInterval(id)` in `onDestroyed` |
+| Timers | `interval()` / `timeout()` (auto-cleanup) |
 | Body event listeners from drag | Remove in the end handler |
 | SSR-unsafe code | Guard with `if (isServer) return;` at top of `onRendered`/`initialize` |
 
