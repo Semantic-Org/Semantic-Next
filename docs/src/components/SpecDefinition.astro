@@ -2,7 +2,7 @@
 
 import { tokenize, getArticle, toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
-import UIComponent from '@components/UIComponent.astro';
+import RenderComponentTree from '@components/RenderComponentTree.astro';
 
 const { spec, plural, definition, name, componentName } = Astro.props;
 
@@ -26,11 +26,7 @@ const article = getArticle(name, { capitalize: true });
                   class={tokenize(type.title)}
                   id={tokenize(type.title) + '-example'}
                 >
-                  {example.components.map((component) => (
-                    (component.componentName)
-                      ? (<UIComponent tagName={component.componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
-                      : (<Fragment set:html={component.html} />)
-                  ))}
+                  <RenderComponentTree nodes={example.components} />
                 </CodeExample>
               </>
             ))}

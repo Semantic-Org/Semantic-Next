@@ -5,6 +5,56 @@ import { each } from './loops.js';
 import { isArray, isString } from './types.js';
 
 /*-------------------
+      CSS Prefixing
+--------------------*/
+
+/*
+  Adds vendor prefixes to CSS properties that still require them in modern browsers.
+  Only properties that need prefixes within a ~2yr support window are included.
+  This list should shrink over time as browsers adopt unprefixed standards.
+*/
+
+const prefixRules = [
+  // Still prefixed in Safari
+  { prop: 'user-select', prefix: '-webkit-' },
+  { prop: 'backdrop-filter', prefix: '-webkit-' },
+  { prop: 'print-color-adjust', prefix: '-webkit-' },
+
+  // Still prefixed in Firefox
+  { prop: 'text-size-adjust', prefix: '-moz-' },
+];
+
+const prefixMap = {};
+for (const rule of prefixRules) {
+  prefixMap[rule.prop] = rule.prefix;
+}
+
+const propNames = prefixRules.map(r => r.prop.replace(/-/g, '\\-'));
+const propPattern = new RegExp(`^(\\s*)(${propNames.join('|')})\\s*:(.*)$`);
+
+export const prefixCSS = (css) => {
+  if (!css) {
+    return css;
+  }
+  const lines = css.split('\n');
+  const result = [];
+  for (const line of lines) {
+    const match = line.match(propPattern);
+    if (match) {
+      const indent = match[1];
+      const prop = match[2];
+      const value = match[3];
+      const prefix = prefixMap[prop];
+      if (prefix && !line.trimStart().startsWith('-')) {
+        result.push(`${indent}${prefix}${prop}:${value}`);
+      }
+    }
+    result.push(line);
+  }
+  return result.join('\n');
+};
+
+/*-------------------
          CSS
 --------------------*/
 
@@ -102,18 +152,29 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
     styleSheets = document.styleSheets;
   }
 
+  const extractFromRules = (rules, wrappers = []) => {
+    each(rules, (rule) => {
+      if (matchesSelector(rule.selectorText)) {
+        let cssText = rule.cssText;
+        for (let i = wrappers.length - 1; i >= 0; i--) {
+          cssText = `${wrappers[i]} { ${cssText} }`;
+        }
+        newStyleSheet.insertRule(cssText, newStyleSheet.cssRules.length);
+      }
+      if (rule.cssRules?.length) {
+        // Only at-rules need wrapping — nested style rules already have resolved selectors
+        const isAtRule = !rule.selectorText;
+        const nextWrappers = isAtRule
+          ? [...wrappers, rule.cssText.substring(0, rule.cssText.indexOf('{')).trim()]
+          : wrappers;
+        extractFromRules(rule.cssRules, nextWrappers);
+      }
+    });
+  };
+
   each(styleSheets, (sheet) => {
     try {
-      each(sheet.cssRules, (rule) => {
-        if (matchesSelector(rule.selectorText)) {
-          newStyleSheet.insertRule(rule.cssText, newStyleSheet.cssRules.length);
-        }
-        each(rule.cssRules || [], (nestedRule) => {
-          if (matchesSelector(nestedRule.selectorText)) {
-            newStyleSheet.insertRule(nestedRule.cssText, newStyleSheet.cssRules.length);
-          }
-        });
-      });
+      extractFromRules(sheet.cssRules);
     }
     catch (err) {
       console.error('Error accessing stylesheet:', err);
@@ -126,7 +187,7 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
 };
 
 export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appendToRootElements = true } = {}) => {
-  scopeSelector = scopeSelector.toLowerCase();
+  scopeSelector = scopeSelector.trim();
 
   const scopeRule = (rule, scopeSelector) => {
     if (rule.type === CSSRule.STYLE_RULE) {
@@ -157,7 +218,7 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
         scopedInnerRules.join(' ')
       } }`;
     }
-    else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || rule.type == 0 && rule.cssRules) {
+    else if (rule.type === CSSRule.LAYER_STATEMENT_RULE || (rule.type === 0 && rule.cssRules)) {
       let scopedInnerRules = [];
       each(rule.cssRules, (innerRule) => {
         scopedInnerRules.push(scopeRule(innerRule, scopeSelector));

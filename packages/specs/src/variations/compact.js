@@ -1,6 +1,6 @@
 export const COMPACT_OPTIONS = [
   { name: 'Compact', value: 'compact', description: 'reduce its padding slightly' },
-  { name: 'Very Compact', value: 'very-compact', description: 'reduce its padding greatly' },
+  { name: 'Very Compact', value: 'very', description: 'reduce its padding greatly' },
 ];
 
 export const COMPACT_VARIATION = {
@@ -8,5 +8,6 @@ export const COMPACT_VARIATION = {
   attribute: 'compact',
   usageLevel: 3,
   description: 'reduce its padding',
+  compoundAliases: true,
   options: COMPACT_OPTIONS,
 };

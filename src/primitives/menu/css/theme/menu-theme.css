@@ -5,9 +5,12 @@
 /* Content */
 @import url('./content/menu-variables.css') layer(menu.theme.content.menu);
 @import url('./content/menu-item-variables.css') layer(menu.theme.content.menuItem);
+@import url('./content/icon-variables.css') layer(menu.theme.content.icon);
+@import url('./content/badge-variables.css') layer(menu.theme.content.badge);
 
 /* Types */
 @import url('./types/selection-variables.css') layer(menu.theme.type.selection);
+@import url('./types/sliding-variables.css') layer(menu.theme.type.sliding);
 
 /* Variations */
 @import url('./variations/evenly-spaced-variables.css') layer(menu.theme.variations.evenlySpaced);

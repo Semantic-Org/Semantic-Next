@@ -1,6 +1,12 @@
 import { camelToKebab } from '@semantic-ui/utils';
 
-console.log(camelToKebab('fooBar'));
+// Standard conversion
 console.log(camelToKebab('backgroundColor'));
 console.log(camelToKebab('myComponentName'));
-console.log(camelToKebab('single'));
+
+// Underscore-digit decoded back to hyphen-digit
+console.log(camelToKebab('grid_2x2'));
+console.log(camelToKebab('heading_1'));
+
+// Consecutive uppercase
+console.log(camelToKebab('arrowDownAZ'));

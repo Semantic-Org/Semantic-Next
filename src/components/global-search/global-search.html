@@ -8,9 +8,9 @@
       {#each displayResults}
         <a class="result {activeIf is index selectedIndex}" href="{url}">
           <h3>
-            {title}
+            {>highlight text=title match=titleHighlight}
             {#if subtitle}
-              <span class="subtitle"><span>in</span> {subtitle}</span>
+              <span class="subtitle"><span>in</span> {>highlight text=subtitle match=subtitleHighlight}</span>
             {/if}
             <div class="tags">
               {#if hasAny tags}
@@ -20,7 +20,7 @@
               {/if}
             </div>
           </h3>
-          <div class="description">{description}</div>
+          <div class="description">{>highlight text=description match=descriptionHighlight}</div>
         </a>
       {/each}
     {else if noResults}
@@ -36,3 +36,11 @@
     {/if}
   </div>
 </ui-modal>
+
+{#snippet highlight}
+  {#if match}
+    {match.before}<span class="highlight">{match.match}</span>{match.after}
+  {else}
+    {text}
+  {/if}
+{/snippet}

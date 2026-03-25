@@ -1,0 +1,38 @@
+:host {
+  display: inline-flex;
+  font-size: 1rem;
+  --copy-button-size: var(--28px);
+  --copy-button-icon-size: var(--text-xs);
+  --copy-button-color: var(--standard-40);
+  --copy-button-hover-color: var(--standard-70);
+  --copy-button-hover-background: var(--standard-10);
+  --copy-button-copied-color: var(--primary-color);
+  --copy-button-border-radius: var(--border-radius);
+  --copy-button-transition: var(--transition);
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--copy-button-size);
+  height: var(--copy-button-size);
+  cursor: pointer;
+  border-radius: var(--copy-button-border-radius);
+  color: var(--copy-button-color);
+  transition: var(--copy-button-transition);
+
+  &:hover {
+    color: var(--copy-button-hover-color);
+    background: var(--copy-button-hover-background);
+  }
+
+  &.copied {
+    color: var(--copy-button-copied-color);
+  }
+
+  ui-icon {
+    font-size: var(--copy-button-icon-size);
+    margin: 0;
+  }
+}

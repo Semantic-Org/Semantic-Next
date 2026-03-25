@@ -35,7 +35,7 @@ const events = {
   },
 
   'mouseover, mouseleave .option'({ event, data, state }) {
-    const color = (event.type == 'mouseover')
+    const color = (event.type === 'mouseover')
       ? data.color
       : undefined;
     state.hoveredColor.set(color);

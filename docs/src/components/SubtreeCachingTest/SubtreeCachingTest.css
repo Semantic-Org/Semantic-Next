@@ -1,0 +1,91 @@
+:host {
+  display: block;
+  font-family: system-ui;
+  color: var(--text-color, #e0e0e0);
+}
+.test-suite {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+h2 {
+  margin: 16px 0 0;
+  font-size: 16px;
+  color: var(--primary-text-color, #58C1FE);
+}
+h3 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--standard-60, #999);
+  border-bottom: 1px solid var(--standard-20, #333);
+  padding-bottom: 4px;
+}
+.desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--standard-40, #777);
+  line-height: 1.4;
+}
+.test {
+  padding: 8px 12px;
+  border: 1px solid var(--standard-20, #333);
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+button {
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--standard-30, #555);
+  background: var(--standard-10, #222);
+  color: var(--text-color, #e0e0e0);
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: auto;
+}
+button:hover {
+  background: var(--standard-20, #333);
+}
+.item, .cond-item {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.entry { padding-left: 12px; }
+.badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: white;
+}
+.pill {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: var(--standard-20, #333);
+}
+.snippet-outer { display: inline-flex; gap: 4px; align-items: center; }
+.snippet-chip {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--standard-20, #333);
+  font-size: 12px;
+}
+.active { color: #2ecc71; }
+.inactive { color: #e74c3c; }
+.loading { color: #f39c12; font-style: italic; }
+.highlight b { color: #3498db; }
+.empty { color: #999; font-style: italic; }
+.name { font-weight: 500; }
+.value { color: var(--standard-50, #888); font-size: 12px; }
+.tag { color: var(--standard-50, #888); font-size: 12px; }
+.computed { font-family: monospace; }
+.result { font-family: monospace; color: #2ecc71; }

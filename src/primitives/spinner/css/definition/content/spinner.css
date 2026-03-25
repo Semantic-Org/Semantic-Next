@@ -1,0 +1,43 @@
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: var(--spinner-vertical-align);
+  gap: var(--spinner-text-gap);
+  contain: layout style paint;
+}
+
+.circle {
+  --spinner-arc-stroke: calc(var(--spinner-size) * var(--spinner-arc-thickness));
+  --spinner-arc-gap: calc(360deg - var(--spinner-arc));
+
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  border-radius: 50%;
+  flex-shrink: 0;
+  contain: strict;
+  will-change: transform;
+
+  background: conic-gradient(
+    from calc(var(--spinner-arc-gap) / 2),
+    transparent 0deg,
+    var(--spinner-color) var(--spinner-arc),
+    transparent var(--spinner-arc)
+  );
+
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-arc-stroke) - 0.5px),
+    #000 calc(100% - var(--spinner-arc-stroke))
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--spinner-arc-stroke) - 0.5px),
+    #000 calc(100% - var(--spinner-arc-stroke))
+  );
+
+  animation: spin var(--spinner-speed) linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

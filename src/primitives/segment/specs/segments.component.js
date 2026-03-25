@@ -34,7 +34,7 @@ export default {
   "allowedValues": {
     "compact": [
       "compact",
-      "very-compact"
+      "very"
     ]
   },
   "inheritedPluralVariations": [

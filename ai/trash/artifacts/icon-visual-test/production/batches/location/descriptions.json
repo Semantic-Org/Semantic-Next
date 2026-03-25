@@ -1,0 +1,46 @@
+{
+  "1": {
+    "visual": "A side-profile SUV or car with two visible wheels and a rounded passenger body.",
+    "usage": "vehicle type selection, ride-sharing app, driving directions mode, parking locator"
+  },
+  "2": {
+    "visual": "A hospital building with a plus cross on its facade and an arched entrance door.",
+    "usage": "find nearby hospital, medical facility map pin, emergency services, healthcare locator"
+  },
+  "3": {
+    "visual": "A crosshair reticle with a hollow open circle at center and four short tick marks at cardinal points.",
+    "usage": "acquire GPS location, center map on position, coordinate picker, location targeting"
+  },
+  "4": {
+    "visual": "A crosshair reticle with a filled solid inner circle at center, giving a bullseye appearance.",
+    "usage": "GPS lock confirmed, active current location, selected map target, tracking enabled"
+  },
+  "5": {
+    "visual": "An unfolded paper map with two visible fold lines creating three vertical panels.",
+    "usage": "open map view, travel planning, directions, explore nearby area"
+  },
+  "6": {
+    "visual": "A standard map pin — a teardrop shape pointing downward with a small open circle inside the top.",
+    "usage": "mark a location, point of interest, drop a pin, delivery address"
+  },
+  "7": {
+    "visual": "A map pin teardrop with a diagonal slash struck through it, indicating unavailability.",
+    "usage": "location services off, GPS disabled, hide location, location unavailable state"
+  },
+  "8": {
+    "visual": "A map pin teardrop with a small plus sign attached at the lower-right corner.",
+    "usage": "add a new saved place, create a waypoint, bookmark an address, drop a new pin"
+  },
+  "9": {
+    "visual": "An airplane viewed from above, wings swept back, nose pointed toward the upper-right.",
+    "usage": "flight booking, airport map marker, airplane mode, travel mode selector"
+  },
+  "10": {
+    "visual": "An S-shaped winding route with a filled circle endpoint at each end of the curve.",
+    "usage": "route between two points, turn-by-turn navigation, trip planning, directions path"
+  },
+  "11": {
+    "visual": "A horizontal bar connecting left and right filled circle nodes, with additional nodes branching off each end forming a short fork or network junction.",
+    "usage": "multi-stop route, waypoints, network connections, itinerary with multiple legs"
+  }
+}

@@ -6,7 +6,7 @@ h4 {
   font-weight: bold;
 }
 .log {
-  margin-top: var(--spacing);
+  margin-top: var(--margin);
   border: var(--border);
   padding: var(--padding);
 }

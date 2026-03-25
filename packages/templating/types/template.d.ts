@@ -483,6 +483,16 @@ export interface CallParams<
    * @see https://next.semantic-ui.com/ui/start/guides/theming
    */
   darkMode: boolean;
+
+  /**
+   * Forces a re-render of the component.
+   *
+   * @example
+   * rerender();
+   *
+   * @see https://next.semantic-ui.com/docs/guides/components/rendering
+   */
+  rerender: () => void;
 }
 
 export interface EventData {

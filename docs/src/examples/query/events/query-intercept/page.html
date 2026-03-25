@@ -1,0 +1,23 @@
+<div class="controls">
+  <label><input type="checkbox" class="block-intercept"> intercept - return false from middle</label>
+  <label><input type="checkbox" class="block-on"> on - return false from middle</label>
+</div>
+
+<div class="outer">
+  Outer
+  <div class="middle">
+    Middle
+    <div class="inner">Inner</div>
+  </div>
+</div>
+
+<div class="logs">
+  <div class="log-group">
+    <div class="log-label">intercept <span>(capture — top down)</span></div>
+    <div class="log intercept-log"></div>
+  </div>
+  <div class="log-group">
+    <div class="log-label">on <span>(bubble — bottom up)</span></div>
+    <div class="log on-log"></div>
+  </div>
+</div>

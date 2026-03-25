@@ -93,43 +93,49 @@
      White Solid Scale
   -------------------- */
 
-  --white-solid-100: oklch(1 0 0 / 100%);
-  --white-solid-95: oklch(0.95 0 0 / 100%);
-  --white-solid-90: oklch(0.9 0 0 / 100%);
-  --white-solid-85: oklch(0.85 0 0 / 100%);
-  --white-solid-80: oklch(0.8 0 0 / 100%);
-  --white-solid-75: oklch(0.75 0 0 / 100%);
-  --white-solid-70: oklch(0.7 0 0 / 100%);
-  --white-solid-60: oklch(0.6 0 0 / 100%);
-  --white-solid-50: oklch(0.5 0 0 / 100%);
-  --white-solid-40: oklch(0.4 0 0 / 100%);
-  --white-solid-30: oklch(0.3 0 0 / 100%);
-  --white-solid-25: oklch(0.25 0 0 / 100%);
-  --white-solid-20: oklch(0.2 0 0 / 100%);
-  --white-solid-15: oklch(0.15 0 0 / 100%);
-  --white-solid-10: oklch(0.1 0 0 / 100%);
-  --white-solid-5: oklch(0.05 0 0 / 100%);
+  /* Opaque equivalents of the white alpha scale — color-mix in sRGB
+     matches alpha compositing so these are visually identical to
+     white at N% opacity over black */
+  --white-solid-100: white;
+  --white-solid-95: color-mix(in srgb, white 95%, black);
+  --white-solid-90: color-mix(in srgb, white 90%, black);
+  --white-solid-85: color-mix(in srgb, white 85%, black);
+  --white-solid-80: color-mix(in srgb, white 80%, black);
+  --white-solid-75: color-mix(in srgb, white 75%, black);
+  --white-solid-70: color-mix(in srgb, white 70%, black);
+  --white-solid-60: color-mix(in srgb, white 60%, black);
+  --white-solid-50: color-mix(in srgb, white 50%, black);
+  --white-solid-40: color-mix(in srgb, white 40%, black);
+  --white-solid-30: color-mix(in srgb, white 30%, black);
+  --white-solid-25: color-mix(in srgb, white 25%, black);
+  --white-solid-20: color-mix(in srgb, white 20%, black);
+  --white-solid-15: color-mix(in srgb, white 15%, black);
+  --white-solid-10: color-mix(in srgb, white 10%, black);
+  --white-solid-5: color-mix(in srgb, white 5%, black);
 
   /* -------------------
      Black Solid Scale
   -------------------- */
 
-  --black-solid-100: oklch(0 0 0 / 100%);
-  --black-solid-95: oklch(0.05 0 0 / 100%);
-  --black-solid-90: oklch(0.1 0 0 / 100%);
-  --black-solid-85: oklch(0.15 0 0 / 100%);
-  --black-solid-80: oklch(0.2 0 0 / 100%);
-  --black-solid-75: oklch(0.25 0 0 / 100%);
-  --black-solid-70: oklch(0.3 0 0 / 100%);
-  --black-solid-60: oklch(0.4 0 0 / 100%);
-  --black-solid-50: oklch(0.5 0 0 / 100%);
-  --black-solid-40: oklch(0.6 0 0 / 100%);
-  --black-solid-30: oklch(0.7 0 0 / 100%);
-  --black-solid-25: oklch(0.75 0 0 / 100%);
-  --black-solid-20: oklch(0.8 0 0 / 100%);
-  --black-solid-15: oklch(0.85 0 0 / 100%);
-  --black-solid-10: oklch(0.9 0 0 / 100%);
-  --black-solid-5: oklch(0.95 0 0 / 100%);
+  /* Opaque equivalents of the black alpha scale — color-mix in sRGB
+     matches alpha compositing so these are visually identical to
+     black at N% opacity over white */
+  --black-solid-100: black;
+  --black-solid-95: color-mix(in srgb, black 95%, white);
+  --black-solid-90: color-mix(in srgb, black 90%, white);
+  --black-solid-85: color-mix(in srgb, black 85%, white);
+  --black-solid-80: color-mix(in srgb, black 80%, white);
+  --black-solid-75: color-mix(in srgb, black 75%, white);
+  --black-solid-70: color-mix(in srgb, black 70%, white);
+  --black-solid-60: color-mix(in srgb, black 60%, white);
+  --black-solid-50: color-mix(in srgb, black 50%, white);
+  --black-solid-40: color-mix(in srgb, black 40%, white);
+  --black-solid-30: color-mix(in srgb, black 30%, white);
+  --black-solid-25: color-mix(in srgb, black 25%, white);
+  --black-solid-20: color-mix(in srgb, black 20%, white);
+  --black-solid-15: color-mix(in srgb, black 15%, white);
+  --black-solid-10: color-mix(in srgb, black 10%, white);
+  --black-solid-5: color-mix(in srgb, black 5%, white);
 
   /* -------------------
       Text Colors

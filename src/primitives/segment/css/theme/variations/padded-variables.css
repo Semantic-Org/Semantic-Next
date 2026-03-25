@@ -1,4 +1,4 @@
 :host {
-  --segment-padded-padding: var(--relative-large);
-  --segment-very-padded-padding: var(--relative-huge);
+  --segment-padded-padding: var(--padding-l);
+  --segment-very-padded-padding: var(--padding-2xl);
 }

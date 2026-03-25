@@ -4,6 +4,7 @@
   --hitbox-size: 3px 7px;
   --overlay-color: var(--black-solid-80);
   --underlay-icon-opacity: 0.6;
+  --tooltip-border: ;
 
   font-size: var(--icon-size);
 }
@@ -63,4 +64,9 @@
     }
   }
 
+}
+
+.ui.tooltip {
+  display: none;
+  border: var(--very-subtle-border);
 }

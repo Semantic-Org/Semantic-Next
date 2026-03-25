@@ -1,0 +1,166 @@
+{
+  "file": {
+    "value": "file",
+    "reason": "Direct match; Phosphor has a base file icon representing a generic document"
+  },
+  "document": {
+    "value": "file-text",
+    "reason": "Phosphor's file-text icon shows a file with text lines, representing a text document"
+  },
+  "pdf": {
+    "value": "file-pdf",
+    "reason": "Direct match; Phosphor has a dedicated file-pdf icon for PDF documents"
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match; Phosphor has a standard folder icon"
+  },
+  "new-folder": {
+    "value": "folder-plus",
+    "reason": "Direct match; Phosphor's folder-plus shows a folder with a plus sign for creating new folders"
+  },
+  "open-folder": {
+    "value": "folder-open",
+    "reason": "Direct match; Phosphor has a folder-open icon showing an opened folder"
+  },
+  "archive": {
+    "value": "archive",
+    "reason": "Direct match; Phosphor has an archive icon (box with lid) for archived items"
+  },
+  "zip": {
+    "value": "file-zip",
+    "reason": "Direct match; Phosphor has a file-zip icon representing compressed files"
+  },
+  "attachment": {
+    "value": "paperclip",
+    "reason": "Direct match; Phosphor has a paperclip icon representing file attachments"
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match; Phosphor has a link icon showing chain links for URLs"
+  },
+  "unlink": {
+    "value": "link-break",
+    "reason": "Direct match; Phosphor's link-break shows broken chain links representing unlinking"
+  },
+  "image": {
+    "value": "image",
+    "reason": "Direct match; Phosphor has an image icon showing a landscape photo placeholder"
+  },
+  "gallery": {
+    "value": "images-square",
+    "reason": "Phosphor's images-square shows overlapping image frames, representing a photo gallery or collection"
+  },
+  "video": {
+    "value": "video-camera",
+    "reason": "Phosphor uses video-camera for the video/movie concept; a camcorder icon clearly conveys video"
+  },
+  "camera": {
+    "value": "camera",
+    "reason": "Direct match; Phosphor has a camera icon for photo capture"
+  },
+  "camera-off": {
+    "value": "camera-slash",
+    "reason": "Phosphor uses the -slash suffix convention; camera-slash shows a camera with a diagonal line through it"
+  },
+  "volume": {
+    "value": "speaker-high",
+    "reason": "Phosphor's speaker-high shows a speaker with full sound waves, representing volume on at normal/high level"
+  },
+  "volume-low": {
+    "value": "speaker-low",
+    "reason": "Direct match; Phosphor's speaker-low shows a speaker with reduced sound waves"
+  },
+  "mute": {
+    "value": "speaker-x",
+    "reason": "Phosphor's speaker-x shows a speaker with an X mark, representing muted audio"
+  },
+  "music": {
+    "value": "music-note",
+    "reason": "Phosphor's music-note shows a single musical note; clear representation of music/audio content"
+  },
+  "microphone": {
+    "value": "microphone",
+    "reason": "Direct match; Phosphor has a microphone icon for audio recording"
+  },
+  "microphone-off": {
+    "value": "microphone-slash",
+    "reason": "Phosphor uses the -slash suffix convention; microphone-slash shows a mic with a diagonal line through it"
+  },
+  "headphones": {
+    "value": "headphones",
+    "reason": "Direct match; Phosphor has a headphones icon for audio listening"
+  },
+  "podcast": {
+    "value": "podcast",
+    "reason": "Direct match; Phosphor has a dedicated podcast icon"
+  },
+  "broadcast": {
+    "value": "broadcast",
+    "reason": "Direct match; Phosphor has a broadcast icon showing signal waves for live/radio broadcasting"
+  },
+  "crop": {
+    "value": "crop",
+    "reason": "Direct match; Phosphor has a crop icon for image cropping"
+  },
+  "rotate": {
+    "value": "arrows-counter-clockwise",
+    "reason": "Phosphor's arrows-counter-clockwise shows circular arrows indicating rotation; best match for a rotate action"
+  },
+  "play": {
+    "value": "play",
+    "reason": "Direct match; Phosphor has a standard play triangle icon"
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match; Phosphor has a standard pause icon with two vertical bars"
+  },
+  "stop": {
+    "value": "stop",
+    "reason": "Direct match; Phosphor has a standard stop square icon"
+  },
+  "skip-next": {
+    "value": "skip-forward",
+    "reason": "Phosphor uses skip-forward for the next track action; shows a forward skip triangle with bar"
+  },
+  "skip-previous": {
+    "value": "skip-back",
+    "reason": "Phosphor uses skip-back for the previous track action; shows a backward skip triangle with bar"
+  },
+  "fast-forward": {
+    "value": "fast-forward",
+    "reason": "Direct match; Phosphor has a fast-forward icon with double forward triangles"
+  },
+  "rewind": {
+    "value": "rewind",
+    "reason": "Direct match; Phosphor has a rewind icon with double backward triangles"
+  },
+  "shuffle": {
+    "value": "shuffle",
+    "reason": "Direct match; Phosphor has a shuffle icon showing crossing arrows for random playback"
+  },
+  "repeat": {
+    "value": "repeat",
+    "reason": "Direct match; Phosphor has a repeat icon showing looping arrows"
+  },
+  "record": {
+    "value": "record",
+    "reason": "Direct match; Phosphor has a record icon showing a filled circle"
+  },
+  "brush": {
+    "value": "paint-brush",
+    "reason": "Phosphor uses paint-brush for the brush/paint tool; shows a painting brush"
+  },
+  "pen": {
+    "value": "pen-nib",
+    "reason": "Phosphor's pen-nib shows a pen tip/nib for drawing; more visually distinct than the plain pen icon which resembles a ballpoint pen"
+  },
+  "color": {
+    "value": "eyedropper",
+    "reason": "Phosphor's eyedropper icon represents a color picker/sampling tool; standard metaphor for color selection"
+  },
+  "eraser": {
+    "value": "eraser",
+    "reason": "Direct match; Phosphor has an eraser icon for clearing/erasing content"
+  }
+}

@@ -1,6 +1,6 @@
 .example-section {
   padding: var(--padding);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--margin-xs);
   border: var(--border);
   border-radius: var(--border-radius);
 }

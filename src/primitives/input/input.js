@@ -48,7 +48,7 @@ const createComponent = ({ $, el, self, state, dispatchEvent, settings }) => ({
   setValue(value) {
     el.value = value;
     $('input').val(value);
-    // dispatchEvent('input', { value });
+    dispatchEvent('input', { value });
   },
 
   setValueDebounced: debounce((value) => {
@@ -69,7 +69,8 @@ const events = {
     state.focused.set(false);
     dispatchEvent('change', { value: el.value });
   },
-  'input input'({ el, self, value, settings }) {
+  'input input'({ el, event, self, value, settings }) {
+    event.stopPropagation();
     if (settings.debounced) {
       self.setValueDebounced(value);
     }

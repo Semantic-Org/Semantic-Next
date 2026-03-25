@@ -15,19 +15,26 @@ The Cloning utilities provide functions for creating copies of objects and array
 ### clone
 
 ```javascript
-function clone(src, seen = new Map())
+function clone(src, options?)
 ```
 
 Creates a deep clone of the provided value.
 
-> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, and sets. It also handles circular references to prevent infinite recursion.
+> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion.
 
 #### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
 | src  | any  | The value to clone |
-| seen | Map  | Internal use. A Map to keep track of circular references |
+| options | object | Optional cloning options |
+
+#### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| preserveDOM | boolean | `false` | Preserve DOM nodes by reference instead of cloning them |
+| preserveNonCloneable | boolean | `false` | Preserve custom class instances by reference instead of flattening to plain objects |
 
 #### Returns
 
@@ -38,9 +45,9 @@ A deep clone of the input value.
 ```javascript
 import { clone } from '@semantic-ui/utils';
 
-const original = { 
-  a: 1, 
-  b: { c: 2 }, 
+const original = {
+  a: 1,
+  b: { c: 2 },
   d: [1, 2, 3],
   e: new Date(),
   f: /test/gi
@@ -51,6 +58,38 @@ console.log(cloned); // { a: 1, b: { c: 2 }, d: [1, 2, 3], e: Date, f: /test/gi 
 console.log(cloned !== original); // true
 console.log(cloned.b !== original.b); // true
 console.log(cloned.d !== original.d); // true
+```
+
+#### Preserving DOM Nodes
+
+When `preserveDOM` is `true`, DOM nodes are kept by reference rather than deep cloned.
+
+```javascript
+import { clone } from '@semantic-ui/utils';
+
+const data = { el: document.querySelector('.my-element'), value: 42 };
+const cloned = clone(data, { preserveDOM: true });
+
+console.log(cloned.el === data.el); // true (same reference)
+console.log(cloned.value === data.value); // true
+console.log(cloned !== data); // true
+```
+
+#### Preserving Class Instances
+
+When `preserveNonCloneable` is `true`, custom class instances are kept by reference instead of being flattened to plain objects.
+
+```javascript
+import { clone } from '@semantic-ui/utils';
+
+class Store { value = 42; }
+const store = new Store();
+
+const data = { store, config: { a: 1 } };
+const cloned = clone(data, { preserveNonCloneable: true });
+
+console.log(cloned.store === store); // true (same reference)
+console.log(cloned.config !== data.config); // true (deep cloned)
 ```
 
 ### extend

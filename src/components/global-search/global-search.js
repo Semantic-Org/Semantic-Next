@@ -118,7 +118,23 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
     }
   },
 
+  highlightMatch(text, searchTerm) {
+    if (!searchTerm || !text) {
+      return;
+    }
+    const index = text.toLowerCase().indexOf(searchTerm.toLowerCase());
+    if (index === -1) {
+      return;
+    }
+    return {
+      before: text.substring(0, index),
+      match: text.substring(index, index + searchTerm.length),
+      after: text.substring(index + searchTerm.length),
+    };
+  },
+
   mapResult(result) {
+    const searchTerm = state.searchTerm.get();
     const primaryResult = result.sub_results[0];
     const otherResults = result.sub_results.slice(1);
     const title = primaryResult.title;
@@ -149,11 +165,15 @@ const createComponent = ({ self, el, bindKey, reaction, state, isRendered, setti
         }
       }
     }
+    const description = result.meta.description;
     const displayResult = {
-      title: title,
-      subtitle: subtitle,
-      tags: tags,
-      description: result.meta.description,
+      title,
+      titleHighlight: self.highlightMatch(title, searchTerm),
+      subtitle,
+      subtitleHighlight: self.highlightMatch(subtitle, searchTerm),
+      tags,
+      description,
+      descriptionHighlight: self.highlightMatch(description, searchTerm),
       url: primaryResult.url || result.url,
       meta: result.meta,
       excerpt: result.excerpt,

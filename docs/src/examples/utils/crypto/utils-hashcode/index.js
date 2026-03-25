@@ -10,3 +10,6 @@ console.log(hashCode('test string', { prettify: true }));
 // with custom seed
 console.log(hashCode('same string', { seed: 123 }));
 console.log(hashCode('same string', { seed: 456 }));
+
+// UMASH mode for stronger collision resistance
+console.log(hashCode('hello world', { fast: false }));

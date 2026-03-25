@@ -57,7 +57,7 @@
   --playground-fold-border-radius: var(--border-radius);
   --playground-fold-transition: var(--transition);
   --playground-fold-size: var(--medium);
-  --playground-fold-distance: var(--spacing-xs);
+  --playground-fold-distance: var(--gap-xs);
 
 
   /* Inline Version */
@@ -361,7 +361,7 @@
         overflow: hidden;
       }
       playground-preview::part(preview-reload-button) {
-        margin-top: -1px;
+        margin-top: -3px;
       }
     }
 

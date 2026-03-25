@@ -123,6 +123,53 @@ console.log(memoizedCustomOperation({id: 1, a: 2, b: 3})); // Logs: 5 (no reproc
 console.log(memoizedCustomOperation({id: 2, a: 3, b: 4})); // Logs: Processing object... 7
 ```
 
+### wait
+
+```javascript
+function wait(ms, { abortController, rejectOnAbort = true } = {})
+```
+
+Returns a promise that resolves after the specified number of milliseconds. Supports cancellation via `AbortController` — by default, aborting rejects the promise with an `AbortError`, matching web platform conventions like `fetch`. Set `rejectOnAbort: false` to resolve early instead.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| ms      | number | Milliseconds to wait before resolving |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name            | Type            | Default | Description |
+|-----------------|-----------------|---------|-------------|
+| abortController | AbortController |         | Controller or signal to cancel the wait |
+| rejectOnAbort   | boolean         | `true`  | Reject with `AbortError` when aborted. Set to `false` to resolve early instead |
+
+#### Returns
+
+A `Promise<void>` that resolves after the specified delay, or rejects with `AbortError` when aborted.
+
+#### Example
+
+```javascript
+import { wait } from '@semantic-ui/utils';
+
+// basic delay
+await wait(300);
+
+// cancellable — rejects with AbortError
+const controller = new AbortController();
+try {
+  await wait(5000, { abortController: controller });
+  // elsewhere: controller.abort() rejects with AbortError
+} catch(e) {
+  console.log(e.name); // 'AbortError'
+}
+
+// resolve early instead of rejecting
+await wait(5000, { abortController: controller, rejectOnAbort: false });
+```
+
 ### debounce
 
 ```javascript

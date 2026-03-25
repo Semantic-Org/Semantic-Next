@@ -20,7 +20,7 @@ function formatDate(date, format = 'LLL', options = {})
 
 Formats a date according to the specified format string and options.
 
-> **International Support** This function uses `Intl.DateTimeFormat` internally, please refer to the [associated docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat) for details on timezone and formatting usage.
+> **International Support** This function uses `Intl.DateTimeFormat` internally, please refer to the [associated docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat) for details on timezone and formatting usage. Formatter instances are cached internally for performance, so repeated calls with the same locale and timezone avoid re-creating `Intl.DateTimeFormat` objects.
 
 > **Timezone Lookup** You can use [IANA.org's guide](https://www.iana.org/time-zones) to look up supported timezones.
 
@@ -76,12 +76,51 @@ const shorthand = reverseKeys({
 | Name     | Type    | Default   | Description |
 |----------|---------|-----------|-------------|
 | locale   | string  | 'default' | The locale to use for formatting |
-| hour12   | boolean | true      | Whether to use 12-hour time |
-| timezone | string  | 'UTC'     | The timezone to use. Use 'local' for the local timezone. |
+| hour12   | boolean | true      | Whether to use 12-hour time. When `false`, the `hh` and `h` tokens output 24-hour values and the `a` token outputs an empty string. |
+| timezone | string  | 'UTC'     | The timezone to use. Use `'local'` for the browser's local timezone. |
 
 #### Returns
 
-A formatted date string.
+A formatted date string, or `'Invalid Date'` if the input is not a valid date.
+
+#### Format Tokens
+
+| Token  | Output                  | Example       |
+|--------|-------------------------|---------------|
+| `YYYY` | 4-digit year            | `2023`        |
+| `YY`   | 2-digit year            | `23`          |
+| `MMMM` | Full month name         | `January`     |
+| `MMM`  | 3-letter month          | `Jan`         |
+| `MM`   | Zero-padded month       | `01`          |
+| `M`    | Month number            | `1`           |
+| `DD`   | Zero-padded day         | `05`          |
+| `D`    | Day number              | `5`           |
+| `Do`   | Day with ordinal suffix | `5th`         |
+| `dddd` | Full weekday name       | `Thursday`    |
+| `ddd`  | 3-letter weekday        | `Thu`         |
+| `HH`   | 24-hour padded          | `14`          |
+| `hh`   | 12-hour padded (or 24-hour when `hour12: false`) | `02`  |
+| `h`    | 12-hour (or 24-hour when `hour12: false`) | `2` |
+| `mm`   | Zero-padded minutes     | `05`          |
+| `ss`   | Zero-padded seconds     | `09`          |
+| `a`    | am/pm (empty when `hour12: false`) | `pm` |
+
+Text inside square brackets is treated as a literal and passed through without replacement: `[Today is] dddd` outputs `Today is Thursday`.
+
+#### Preset Formats
+
+| Preset | Pattern                           | Example                              |
+|--------|-----------------------------------|--------------------------------------|
+| `LT`   | `h:mm a`                         | `3:34 pm`                            |
+| `LTS`  | `h:mm:ss a`                      | `3:34:56 pm`                         |
+| `L`    | `MM/DD/YYYY`                     | `05/18/2023`                         |
+| `l`    | `M/D/YYYY`                       | `5/18/2023`                          |
+| `LL`   | `MMMM D, YYYY`                   | `May 18, 2023`                       |
+| `ll`   | `MMM D, YYYY`                    | `May 18, 2023`                       |
+| `LLL`  | `MMMM D, YYYY h:mm a`            | `May 18, 2023 3:34 pm`              |
+| `lll`  | `MMM D, YYYY h:mm a`             | `May 18, 2023 3:34 pm`              |
+| `LLLL` | `dddd, MMMM D, YYYY h:mm a`      | `Thursday, May 18, 2023 3:34 pm`    |
+| `llll` | `ddd, MMM D, YYYY h:mm a`        | `Thu, May 18, 2023 3:34 pm`         |
 
 #### Example
 
@@ -90,8 +129,16 @@ import { formatDate } from '@semantic-ui/utils';
 
 const date = new Date('2023-05-15T14:30:00Z');
 
-console.log(formatDate(date)); // "May 15, 2023 2:30 PM"
+console.log(formatDate(date)); // "May 15, 2023 2:30 pm"
 console.log(formatDate(date, 'YYYY-MM-DD')); // "2023-05-15"
-console.log(formatDate(date, 'LT', { timezone: 'America/New_York' })); // "10:30 AM"
+console.log(formatDate(date, 'LT', { timezone: 'America/New_York' })); // "10:30 am"
+console.log(formatDate(date, 'LT', { timezone: 'ET' })); // "10:30 am" (shorthand)
 console.log(formatDate(date, 'LT', { timezone: 'local' })); // Formats using the local timezone
+
+// 24-hour format — hh and h give 24h values, a gives empty string
+console.log(formatDate(date, 'HH:mm', { hour12: false })); // "14:30"
+console.log(formatDate(date, 'hh:mm a', { hour12: false })); // "14:30 "
+
+// Escaped literal text
+console.log(formatDate(date, '[Today is] dddd, MMMM Do, YYYY')); // "Today is Monday, May 15th, 2023"
 ```

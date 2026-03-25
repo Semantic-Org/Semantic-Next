@@ -1,0 +1,62 @@
+{
+  "1": {
+    "visual": "Pause button — two vertical bars enclosed inside a circle.",
+    "usage": "video player pause, audio player pause, podcast playback controls, media toolbar"
+  },
+  "2": {
+    "visual": "Play button — a rightward-pointing triangle enclosed inside a circle.",
+    "usage": "video player play, audio player start, podcast episode play, media preview"
+  },
+  "3": {
+    "visual": "Stop button — a small square enclosed inside a circle.",
+    "usage": "media playback stop, recording stop, live stream stop, audio player controls"
+  },
+  "4": {
+    "visual": "Fast-forward symbol — two rightward-pointing chevrons side by side, no enclosing circle.",
+    "usage": "fast-forward video, skip ahead in podcast, audio scrubbing, media player controls"
+  },
+  "5": {
+    "visual": "Pause symbol — two tall vertical bars side by side, no enclosing circle.",
+    "usage": "audio player pause, video pause button, inline media controls, player toolbar"
+  },
+  "6": {
+    "visual": "Picture-in-picture icon — a small rectangle in the lower-left corner of a larger rectangle, with an arrow pointing toward the smaller rectangle.",
+    "usage": "picture-in-picture video mode, floating player toggle, minimize video to overlay, video layout controls"
+  },
+  "7": {
+    "visual": "Play button — a single rightward-pointing triangle with rounded corners, no enclosing circle.",
+    "usage": "video playback start, audio play button, inline media player, content preview"
+  },
+  "8": {
+    "visual": "Repeat symbol — two arrows forming a closed rectangular loop, one traveling right along the top and one traveling left along the bottom.",
+    "usage": "loop playback toggle, repeat track, repeat playlist, music player controls"
+  },
+  "9": {
+    "visual": "Rewind symbol — two leftward-pointing chevrons side by side, no enclosing circle.",
+    "usage": "rewind media, skip backward in video, fast-reverse audio, media player controls"
+  },
+  "10": {
+    "visual": "Shuffle symbol — two arrows crossing diagonally, both arrowheads pointing right.",
+    "usage": "shuffle playlist, randomize queue, random playback mode, music player controls"
+  },
+  "11": {
+    "visual": "Skip-to-previous symbol — a leftward-pointing triangle with a vertical bar anchored to its left edge, no enclosing circle.",
+    "usage": "previous track, skip to track start, navigate playlist backward, media player controls"
+  },
+  "12": {
+    "visual": "Skip-to-next symbol — a rightward-pointing triangle with a vertical bar anchored to its right edge, no enclosing circle.",
+    "usage": "next track, skip to end, advance playlist, media player controls"
+  },
+  "13": {
+    "visual": "Speaker with two curved sound wave arcs to its right, indicating medium or high volume.",
+    "usage": "volume control, unmute audio, sound settings, media player volume button"
+  },
+  "14": {
+    "visual": "Speaker with a single small curved arc to its right, indicating low volume.",
+    "usage": "low volume level, quiet audio indicator, volume-down state, media player volume control"
+  },
+  "15": {
+    "visual": "Speaker with an X mark to its right, indicating muted audio.",
+    "usage": "mute toggle, silence audio, muted state indicator, video call mute button"
+  }
+}

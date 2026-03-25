@@ -61,6 +61,7 @@ describe('Browser Utilities', () => {
     });
 
     it('should handle invalid type gracefully', async () => {
+      expect.assertions(1);
       try {
         // @ts-ignore - testing invalid type
         await getIPAddress({ type: 'invalid', timeout: 200 });

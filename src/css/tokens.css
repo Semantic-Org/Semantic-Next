@@ -1,4 +1,5 @@
 /* Global Tokens */
+@import url('./tokens/base.css') layer(tokens.base);
 @import url('./tokens/sizing.css') layer(tokens.sizing);
 @import url('./tokens/spacing.css') layer(tokens.spacing);
 @import url('./tokens/typography.css') layer(tokens.typography);

@@ -1,0 +1,182 @@
+{
+  "promotions": [
+    {
+      "old": "house",
+      "new": "home",
+      "reason": "4/4 cross-library consensus (Phosphor=house, Tabler=home, Material=home, Heroicons=home). Every developer says 'home icon' — the concept is 'home page' not 'house building'",
+      "family_renames": {}
+    },
+    {
+      "old": "circle-user",
+      "new": "avatar",
+      "reason": "All libraries use user-circle/account-circle. Developers reach for 'avatar' — the concept is identity/profile, not 'a user drawn inside a circle'. Standalone extraction from circle family is safe since avatar is a distinct concept",
+      "family_renames": {}
+    },
+    {
+      "old": "message-circle",
+      "new": "chat",
+      "reason": "Universal concept name for chat bubble. Phosphor=chat-circle, Material=chat_bubble, Heroicons=chat-bubble-oval-left. All family members rename cleanly",
+      "family_renames": {
+        "message-circle-more": "chat-more",
+        "message-circle-plus": "chat-plus"
+      }
+    },
+    {
+      "old": "circle-alert",
+      "new": "error",
+      "reason": "Material=error, Heroicons=exclamation-circle. The universal status concept is 'error' — developers never search for 'circle-alert'. Standalone extraction from circle family is safe since 'error' is a distinct status concept",
+      "family_renames": {}
+    },
+    {
+      "old": "triangle-alert",
+      "new": "warning",
+      "reason": "Phosphor=warning, Material=warning. 'Warning' is the universal status concept. 'Triangle-alert' describes the glyph shape (exclamation mark in a triangle)",
+      "family_renames": {}
+    },
+    {
+      "old": "circle-question-mark",
+      "new": "help",
+      "reason": "Tabler=help-circle, Material=help, Heroicons=question-mark-circle. 'Help' is what every developer searches for. The current name is 5 syllables describing a glyph",
+      "family_renames": {}
+    },
+    {
+      "old": "key-round",
+      "new": "key",
+      "reason": "4/4 libraries use 'key' (Phosphor=key, Tabler=key, Material=vpn_key, Heroicons=key). The '-round' suffix describes the glyph bow shape — no developer thinks 'key-round'",
+      "family_renames": {}
+    },
+    {
+      "old": "rectangle-ellipsis",
+      "new": "password",
+      "reason": "3/3 libraries use 'password' (Phosphor, Tabler, Material all use 'password'). 'Rectangle-ellipsis' describes the glyph (dots in a rectangle); the concept is a password field",
+      "family_renames": {}
+    },
+    {
+      "old": "square-arrow-out-up-right",
+      "new": "external-link",
+      "reason": "Tabler=external-link, Material=open_in_new, Heroicons=arrow-top-right-on-square. The canonical name is 7 syllables of pure glyph description. Every developer searches 'external link'",
+      "family_renames": {}
+    },
+    {
+      "old": "flask-conical",
+      "new": "flask",
+      "reason": "Phosphor=flask, Tabler=flask. The '-conical' suffix describes the flask shape. Developers searching for a science/lab icon think 'flask', not 'flask-conical'",
+      "family_renames": {}
+    },
+    {
+      "old": "zap",
+      "new": "bolt",
+      "reason": "3/4 libraries use 'bolt' (Tabler=bolt, Material=bolt, Heroicons=bolt). 'Bolt' is the more universal and descriptive name for a lightning bolt icon",
+      "family_renames": {}
+    },
+    {
+      "old": "volume-2",
+      "new": "volume-high",
+      "reason": "The numeral '2' is meaningless to developers. Phosphor=speaker-high, Material=volume_up. 'volume-high' pairs logically with existing 'volume-low' and 'volume-x' in the family",
+      "family_renames": {}
+    },
+    {
+      "old": "git-commit-horizontal",
+      "new": "git-commit",
+      "reason": "3/3 libraries use 'git-commit' (Phosphor, Tabler, Material). The '-horizontal' suffix describes glyph orientation, not the concept",
+      "family_renames": {}
+    },
+    {
+      "old": "delete",
+      "new": "backspace",
+      "reason": "4/4 libraries use 'backspace'. The glyph is specifically a backspace key, but 'delete' in UI contexts means 'remove/trash'. This rename eliminates semantic collision with the trash/remove concept",
+      "family_renames": {}
+    },
+    {
+      "old": "venetian-mask",
+      "new": "incognito",
+      "reason": "'Venetian mask' describes the physical glyph. The concept developers reach for is 'incognito' (private browsing, anonymous). No cross-library consensus but the concept gap is enormous",
+      "family_renames": {}
+    },
+    {
+      "old": "pipette",
+      "new": "eyedropper",
+      "reason": "Phosphor=eyedropper, Heroicons=eye-dropper. 'Pipette' is chemistry terminology; 'eyedropper' is the universal digital design tool name (Photoshop, Figma, etc.)",
+      "family_renames": {}
+    },
+    {
+      "old": "refresh-ccw",
+      "new": "refresh",
+      "reason": "Tabler=refresh, Material=sync. The '-ccw' (counter-clockwise) describes rotation direction of the glyph arrows. Every developer just searches 'refresh'. Not in the rotate family",
+      "family_renames": {}
+    },
+    {
+      "old": "wand-sparkles",
+      "new": "magic-wand",
+      "reason": "Phosphor=magic-wand, Tabler=wand. 'Wand-sparkles' describes the glyph (a wand with sparkle particles). The concept is 'magic wand' — auto-enhance, wizard, etc.",
+      "family_renames": {}
+    }
+  ],
+  "considered_but_rejected": [
+    {
+      "canonical": "circle-check",
+      "candidate": "check-circle",
+      "reason": "3/4 libs use 'check-circle' but this is just word-order swap. Extracting from the 12-member circle family for a word-order preference would be inconsistent while keeping circle-dot, circle-minus, circle-plus, circle-x, etc."
+    },
+    {
+      "canonical": "circle-x",
+      "candidate": "cancel",
+      "reason": "Material=cancel, but 'cancel' is too semantically broad. circle-x is used for close/dismiss/cancel — renaming to just 'cancel' loses the visual description that helps distinguish it from the X icon"
+    },
+    {
+      "canonical": "landmark",
+      "candidate": "bank",
+      "reason": "Phosphor=bank, Tabler=building-bank, but Heroicons=building-library. The glyph is a classical columned building that represents banks, courthouses, and institutions. 'Landmark' is broader and more accurate than 'bank'"
+    },
+    {
+      "canonical": "log-in",
+      "candidate": "login",
+      "reason": "2/4 libs use 'login' but this breaks the hyphenated naming convention used across all other icons. The log family (log-in, log-out) is consistent as-is"
+    },
+    {
+      "canonical": "log-out",
+      "candidate": "logout",
+      "reason": "Same reasoning as log-in. Marginal improvement that breaks naming convention"
+    },
+    {
+      "canonical": "mic",
+      "candidate": "microphone",
+      "reason": "3/4 libs use 'microphone' but 'mic' is universally understood as an abbreviation. The savings in clarity don't justify the churn"
+    },
+    {
+      "canonical": "chevrons-down-up",
+      "candidate": "collapse",
+      "reason": "Would orphan chevrons-left-right and chevrons-up-down from consistent naming. The chevrons-* family needs to stay together"
+    },
+    {
+      "canonical": "audio-lines",
+      "candidate": "equalizer",
+      "reason": "No cross-library consensus: Phosphor=waveform, Tabler=wave-sine, Material=graphic_eq. Aliases split between equalizer, waveform, and spectrum"
+    },
+    {
+      "canonical": "ellipsis",
+      "candidate": "more",
+      "reason": "While devs think 'more icon', the ellipsis name is technically precise and widely understood. Material=more_horiz supports 'more' but Phosphor=dots-three, Tabler=dots — no consensus on what to call it"
+    },
+    {
+      "canonical": "bot",
+      "candidate": "robot",
+      "reason": "Phosphor=robot, Tabler=robot, but 'bot' is shorter and increasingly the standard term in AI/chat contexts. Both are equally intuitive"
+    },
+    {
+      "canonical": "smile",
+      "candidate": "emoji",
+      "reason": "The icon is a smiley face, not a generic emoji. 'Smile' accurately describes the specific expression. Other face icons (frown, meh) follow the emotion-name pattern"
+    },
+    {
+      "canonical": "circle-play",
+      "candidate": "play-circle",
+      "reason": "Same word-order issue as circle-check. Would be inconsistent to extract from circle family for just a word swap"
+    },
+    {
+      "canonical": "store",
+      "candidate": "storefront",
+      "reason": "Phosphor=storefront, Material=storefront, but 'store' is already the intuitive concept name. 'Storefront' is longer and not more intuitive"
+    }
+  ]
+}

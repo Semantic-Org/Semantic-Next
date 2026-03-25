@@ -7,14 +7,15 @@ import {
   UIContainer,
   UIDivider,
   UIIcon,
+  UIImage,
   UIInput,
   UILabel,
   UIMenu,
   MenuItem,
-  UIInput,
   UIRail,
   UISegment,
   UISegments,
+  UISpinner,
   UITable,
 } from '@semantic-ui/core';
 import { inArray } from '@semantic-ui/utils';
@@ -70,6 +71,10 @@ const componentName = tagName || name;
   <UIIcon {...attributes} />
 )}
 
+{inArray(componentName, ['ui-image', 'UIImage']) && (
+  <UIImage {...attributes} client:visible />
+)}
+
 {inArray(componentName, ['ui-input', 'UIInput']) && (
   <UIInput {...attributes} />
 )}
@@ -94,6 +99,9 @@ const componentName = tagName || name;
   <MenuItem {...attributes} client:visible>
     <slot />
   </MenuItem>
+)}
+{inArray(componentName, ['ui-spinner', 'UISpinner']) && (
+  <UISpinner {...attributes} client:visible />
 )}
 {inArray(componentName, ['ui-table', 'UITable']) && (
   <UITable {...attributes} client:visible>

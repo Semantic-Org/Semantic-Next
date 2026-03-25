@@ -1,0 +1,206 @@
+{
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Exact match. Tabler uses `shopping-cart` for the standard cart icon."
+  },
+  "add-to-cart": {
+    "value": "shopping-cart-plus",
+    "reason": "Exact match. `shopping-cart-plus` shows a cart with a plus symbol."
+  },
+  "remove-from-cart": {
+    "value": "shopping-cart-x",
+    "reason": "Tabler has `shopping-cart-x` (cart with an X). No `shopping-cart-minus` was found."
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Exact match. Standard credit card icon."
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Exact match."
+  },
+  "money": {
+    "value": "coins",
+    "reason": "Tabler has `coins` (multiple coins) and `currency-dollar`. `coins` is the best general money/currency icon."
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Exact match."
+  },
+  "tags": {
+    "value": "tags",
+    "reason": "Exact match."
+  },
+  "discount": {
+    "value": "percentage",
+    "reason": "Exact match. `percentage` shows a percent symbol."
+  },
+  "coupon": {
+    "value": "ticket",
+    "reason": "Exact match. `ticket` represents a coupon/ticket."
+  },
+  "package": {
+    "value": "package",
+    "reason": "Exact match."
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Exact match. Standard truck icon for shipping."
+  },
+  "delivery": {
+    "value": "truck-delivery",
+    "reason": "Exact match. `truck-delivery` is a truck with a delivery/speed indicator."
+  },
+  "return": {
+    "value": "receipt-refund",
+    "reason": "Tabler has `receipt-refund` (receipt with return arrow). Best match for return/refund concept."
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Exact match."
+  },
+  "invoice": {
+    "value": "file-invoice",
+    "reason": "Exact match. `file-invoice` is a document styled as an invoice."
+  },
+  "store": {
+    "value": "building-store",
+    "reason": "Exact match. `building-store` shows a storefront building."
+  },
+  "shopping-bag": {
+    "value": "shopping-bag",
+    "reason": "Exact match."
+  },
+  "calendar": {
+    "value": "calendar",
+    "reason": "Exact match."
+  },
+  "schedule": {
+    "value": "calendar-event",
+    "reason": "Exact match. `calendar-event` shows a calendar with an event marker."
+  },
+  "scheduled": {
+    "value": "calendar-check",
+    "reason": "Exact match. `calendar-check` shows a calendar with a checkmark."
+  },
+  "overdue": {
+    "value": "calendar-off",
+    "reason": "Tabler has `calendar-off` and `calendar-cancel`. No `calendar-x` was confirmed. `calendar-off` conveys an expired/overdue calendar state."
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Exact match."
+  },
+  "timer": {
+    "value": "hourglass",
+    "reason": "Tabler has both `hourglass` and `stopwatch`. `hourglass` is a better fit for timer/countdown."
+  },
+  "watch": {
+    "value": "device-watch",
+    "reason": "Tabler uses `device-watch` for smartwatch. Confirmed to exist."
+  },
+  "layers": {
+    "value": "stack-2",
+    "reason": "Tabler has `stack` and `stack-2`. `stack-2` shows three layered shapes, which better represents the layers/stack concept."
+  },
+  "subtask": {
+    "value": "subtask",
+    "reason": "Exact match."
+  },
+  "tree": {
+    "value": "hierarchy",
+    "reason": "Exact match. `hierarchy` shows a tree/org-chart structure."
+  },
+  "progress": {
+    "value": "progress",
+    "reason": "Exact match."
+  },
+  "milestone": {
+    "value": "diamond",
+    "reason": "Exact match. Diamond shape is the standard milestone symbol in project management."
+  },
+  "tasks": {
+    "value": "list-check",
+    "reason": "Exact match. `list-check` shows a checklist with checkmarks."
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Exact match. Standard map pin/marker icon."
+  },
+  "map": {
+    "value": "map",
+    "reason": "Exact match."
+  },
+  "directions": {
+    "value": "route",
+    "reason": "Exact match. `route` shows a path/directions line."
+  },
+  "compass": {
+    "value": "compass",
+    "reason": "Exact match."
+  },
+  "current-location": {
+    "value": "current-location",
+    "reason": "Exact match. Crosshairs/GPS-style current location icon."
+  },
+  "measure": {
+    "value": "ruler",
+    "reason": "Exact match."
+  },
+  "trending-up": {
+    "value": "trending-up",
+    "reason": "Exact match."
+  },
+  "trending-down": {
+    "value": "trending-down",
+    "reason": "Exact match."
+  },
+  "balance": {
+    "value": "scale",
+    "reason": "Exact match. `scale` shows a balance/weighing scale."
+  },
+  "swap": {
+    "value": "arrows-exchange",
+    "reason": "Tabler has `arrows-exchange`, `arrows-exchange-2`, and `exchange`. `arrows-exchange` shows bidirectional arrows for transfer/swap."
+  },
+  "savings": {
+    "value": "pig-money",
+    "reason": "Tabler uses `pig-money` (not `piggy-bank`). Shows a pig with a coin, representing savings."
+  },
+  "vault": {
+    "value": null,
+    "reason": "No safe/vault icon found in Tabler. Searched for `safe`, `vault`, `safe-box`, and `lock-dollar` -- none exist."
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Exact match."
+  },
+  "company": {
+    "value": "building",
+    "reason": "Exact match. Single building/office icon."
+  },
+  "organization": {
+    "value": "buildings",
+    "reason": "Exact match. `buildings` shows multiple buildings, representing a larger organization/corporate entity."
+  },
+  "news": {
+    "value": "news",
+    "reason": "Exact match."
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Exact match."
+  },
+  "docs": {
+    "value": "book",
+    "reason": "Exact match. Closed book icon for documentation."
+  },
+  "book-open": {
+    "value": "book-2",
+    "reason": "Tabler uses `book-2` for an open/alternative book style. Best match for an open book."
+  },
+  "graduation": {
+    "value": "school",
+    "reason": "Tabler uses `school` (building with academic context). No graduation-cap icon was found; `school` is the closest education/academic icon."
+  }
+}

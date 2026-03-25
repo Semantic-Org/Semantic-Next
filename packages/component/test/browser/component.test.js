@@ -413,6 +413,13 @@ describe('Component', () => {
       // Create a mock component spec
       const componentSpec = {
         attributes: ['emphasis', 'active', 'disabled', 'icon'],
+        properties: [],
+        optionAttributes: {
+          'primary': 'emphasis',
+          'secondary': 'emphasis',
+          'tertiary': 'emphasis',
+          'disabled': 'disabled',
+        },
         propertyTypes: {
           emphasis: 'string',
           active: 'boolean',
@@ -1516,5 +1523,97 @@ describe('Component', () => {
         }
       });
     });
+  });
+});
+
+/*******************************
+   Lifecycle: interval/timeout cleanup
+*******************************/
+
+describe('interval and timeout lifecycle cleanup', () => {
+  it('should stop interval when component is removed from DOM', async () => {
+    let tickCount = 0;
+    const tag = 'test-interval-cleanup';
+    defineComponent({
+      tagName: tag,
+      template: '<span>{count}</span>',
+      defaultState: { count: 0 },
+      createComponent: ({ state, interval }) => ({
+        initialize() {
+          interval(() => {
+            tickCount++;
+            state.count.increment();
+          }, 50);
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Let it tick a few times
+    await new Promise(r => setTimeout(r, 160));
+    const countBeforeRemove = tickCount;
+    expect(countBeforeRemove).toBeGreaterThan(0);
+
+    // Remove from DOM — triggers destroy
+    document.body.removeChild(el);
+    await new Promise(r => setTimeout(r, 10));
+
+    // Wait and verify no more ticks
+    await new Promise(r => setTimeout(r, 160));
+    expect(tickCount).toBe(countBeforeRemove);
+  });
+
+  it('should stop timeout when component is removed before it fires', async () => {
+    let fired = false;
+    const tag = 'test-timeout-cleanup';
+    defineComponent({
+      tagName: tag,
+      template: '<span>test</span>',
+      createComponent: ({ timeout }) => ({
+        initialize() {
+          timeout(() => {
+            fired = true;
+          }, 200);
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Remove before timeout fires
+    document.body.removeChild(el);
+    await new Promise(r => setTimeout(r, 10));
+
+    // Wait past the timeout duration
+    await new Promise(r => setTimeout(r, 300));
+    expect(fired).toBe(false);
+  });
+
+  it('should allow timeout to fire if component is still alive', async () => {
+    let fired = false;
+    const tag = 'test-timeout-fires';
+    defineComponent({
+      tagName: tag,
+      template: '<span>test</span>',
+      createComponent: ({ timeout }) => ({
+        initialize() {
+          timeout(() => {
+            fired = true;
+          }, 50);
+        },
+      }),
+    });
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Wait for timeout to fire
+    await new Promise(r => setTimeout(r, 100));
+    expect(fired).toBe(true);
+
+    document.body.removeChild(el);
   });
 });

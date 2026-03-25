@@ -61,12 +61,16 @@ export class Reaction {
       firstRun: this.firstRun,
     });
     Scheduler.current = this;
-    this.dependencies.forEach(dep => dep.cleanUp(this));
-    this.dependencies.clear();
-    this.callback(this);
-    this.firstRun = false;
-    Scheduler.current = null;
-    Scheduler.pendingReactions.delete(this);
+    try {
+      this.dependencies.forEach(dep => dep.cleanUp(this));
+      this.dependencies.clear();
+      this.callback(this);
+      this.firstRun = false;
+    }
+    finally {
+      Scheduler.current = null;
+      Scheduler.pendingReactions.delete(this);
+    }
   }
 
   invalidate(context) {

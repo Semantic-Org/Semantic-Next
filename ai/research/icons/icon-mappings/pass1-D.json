@@ -1,0 +1,487 @@
+{
+  "monitor-smartphone": {
+    "lucide": "monitor-smartphone",
+    "category": "device",
+    "description": "Responsive design across desktop and mobile"
+  },
+  "moon": {
+    "lucide": "moon",
+    "category": "settings",
+    "description": "Dark mode or night theme"
+  },
+  "mouse": {
+    "lucide": "mouse",
+    "category": "device",
+    "description": "Computer mouse input device"
+  },
+  "mouse-pointer": {
+    "lucide": "mouse-pointer",
+    "category": "navigation",
+    "description": "Cursor or pointer interaction"
+  },
+  "mouse-pointer-click": {
+    "lucide": "mouse-pointer-click",
+    "category": "action",
+    "description": "Click or tap interaction"
+  },
+  "move": {
+    "lucide": "move",
+    "category": "action",
+    "description": "Move or reposition an element"
+  },
+  "music": {
+    "lucide": "music",
+    "category": "media",
+    "description": "Music or audio content"
+  },
+  "network": {
+    "lucide": "network",
+    "category": "connectivity",
+    "description": "Network topology or connected nodes"
+  },
+  "newspaper": {
+    "lucide": "newspaper",
+    "category": "file",
+    "description": "News article or publication"
+  },
+  "notebook": {
+    "lucide": "notebook",
+    "category": "file",
+    "description": "Notebook or journal"
+  },
+  "package": {
+    "lucide": "package",
+    "category": "commerce",
+    "description": "Package or shipped product"
+  },
+  "package-open": {
+    "lucide": "package-open",
+    "category": "commerce",
+    "description": "Opened package or unboxing"
+  },
+  "paint-bucket": {
+    "lucide": "paint-bucket",
+    "category": "editing",
+    "description": "Fill area with color"
+  },
+  "paintbrush": {
+    "lucide": "paintbrush",
+    "category": "editing",
+    "description": "Paint or draw freeform"
+  },
+  "palette": {
+    "lucide": "palette",
+    "category": "editing",
+    "description": "Color palette or theme selection"
+  },
+  "panel-bottom": {
+    "lucide": "panel-bottom",
+    "category": "system",
+    "description": "Bottom panel layout region"
+  },
+  "panel-bottom-close": {
+    "lucide": "panel-bottom-close",
+    "category": "system",
+    "description": "Close bottom panel"
+  },
+  "panel-bottom-open": {
+    "lucide": "panel-bottom-open",
+    "category": "system",
+    "description": "Open bottom panel"
+  },
+  "panel-left": {
+    "lucide": "panel-left",
+    "category": "system",
+    "description": "Left sidebar panel layout"
+  },
+  "panel-left-close": {
+    "lucide": "panel-left-close",
+    "category": "system",
+    "description": "Close left sidebar panel"
+  },
+  "panel-left-open": {
+    "lucide": "panel-left-open",
+    "category": "system",
+    "description": "Open left sidebar panel"
+  },
+  "panel-right": {
+    "lucide": "panel-right",
+    "category": "system",
+    "description": "Right sidebar panel layout"
+  },
+  "panel-right-close": {
+    "lucide": "panel-right-close",
+    "category": "system",
+    "description": "Close right sidebar panel"
+  },
+  "panel-right-open": {
+    "lucide": "panel-right-open",
+    "category": "system",
+    "description": "Open right sidebar panel"
+  },
+  "paperclip": {
+    "lucide": "paperclip",
+    "category": "action",
+    "description": "Attach a file or document"
+  },
+  "party-popper": {
+    "lucide": "party-popper",
+    "category": "gamification",
+    "description": "Celebration or achievement"
+  },
+  "pause": {
+    "lucide": "pause",
+    "category": "media-controls",
+    "description": "Pause playback"
+  },
+  "pencil": {
+    "lucide": "pencil",
+    "category": "action",
+    "description": "Edit or modify content"
+  },
+  "percent": {
+    "lucide": "percent",
+    "category": "finance",
+    "description": "Percentage or discount rate"
+  },
+  "phone": {
+    "lucide": "phone",
+    "category": "communication",
+    "description": "Phone call or telephone"
+  },
+  "phone-call": {
+    "lucide": "phone-call",
+    "category": "communication",
+    "description": "Active or incoming phone call"
+  },
+  "phone-missed": {
+    "lucide": "phone-missed",
+    "category": "communication",
+    "description": "Missed phone call"
+  },
+  "phone-off": {
+    "lucide": "phone-off",
+    "category": "communication",
+    "description": "Phone disabled or call ended"
+  },
+  "picture-in-picture": {
+    "lucide": "picture-in-picture",
+    "category": "media-controls",
+    "description": "Picture-in-picture video mode"
+  },
+  "pin": {
+    "lucide": "pin",
+    "category": "action",
+    "description": "Pin item to keep it visible"
+  },
+  "pin-off": {
+    "lucide": "pin-off",
+    "category": "action",
+    "description": "Unpin a previously pinned item"
+  },
+  "pipette": {
+    "lucide": "pipette",
+    "category": "editing",
+    "description": "Pick or sample a color"
+  },
+  "plane": {
+    "lucide": "plane",
+    "category": "location",
+    "description": "Air travel or flight"
+  },
+  "play": {
+    "lucide": "play",
+    "category": "media-controls",
+    "description": "Start or resume playback"
+  },
+  "plug": {
+    "lucide": "plug",
+    "category": "connectivity",
+    "description": "Plugin or power connection"
+  },
+  "plus": {
+    "lucide": "plus",
+    "category": "action",
+    "description": "Add or create new item"
+  },
+  "podcast": {
+    "lucide": "podcast",
+    "category": "media",
+    "description": "Podcast or audio broadcast"
+  },
+  "power": {
+    "lucide": "power",
+    "category": "system",
+    "description": "Power on/off or shutdown"
+  },
+  "presentation": {
+    "lucide": "presentation",
+    "category": "file",
+    "description": "Slideshow or presentation"
+  },
+  "printer": {
+    "lucide": "printer",
+    "category": "device",
+    "description": "Print a document"
+  },
+  "puzzle": {
+    "lucide": "puzzle",
+    "category": "development",
+    "description": "Plugin, extension, or integration"
+  },
+  "qr-code": {
+    "lucide": "qr-code",
+    "category": "data",
+    "description": "QR code for scanning"
+  },
+  "quote": {
+    "lucide": "quote",
+    "category": "text",
+    "description": "Block quote or citation"
+  },
+  "radar": {
+    "lucide": "radar",
+    "category": "data",
+    "description": "Radar chart or detection scan"
+  },
+  "radio-tower": {
+    "lucide": "radio-tower",
+    "category": "connectivity",
+    "description": "Broadcast tower or signal transmission"
+  },
+  "receipt": {
+    "lucide": "receipt-text",
+    "category": "commerce",
+    "description": "Purchase receipt or invoice"
+  },
+  "rectangle-ellipsis": {
+    "lucide": "rectangle-ellipsis",
+    "category": "form",
+    "description": "Password field or hidden input"
+  },
+  "recycle": {
+    "lucide": "recycle",
+    "category": "misc",
+    "description": "Recycle or sustainable disposal"
+  },
+  "redo": {
+    "lucide": "redo-2",
+    "category": "action",
+    "description": "Redo last undone action"
+  },
+  "refresh-ccw": {
+    "lucide": "refresh-ccw",
+    "category": "action",
+    "description": "Refresh or reload content"
+  },
+  "regex": {
+    "lucide": "regex",
+    "category": "development",
+    "description": "Regular expression pattern matching"
+  },
+  "remove-formatting": {
+    "lucide": "remove-formatting",
+    "category": "text",
+    "description": "Clear text formatting"
+  },
+  "repeat": {
+    "lucide": "repeat",
+    "category": "media-controls",
+    "description": "Repeat or loop playback"
+  },
+  "replace": {
+    "lucide": "replace",
+    "category": "action",
+    "description": "Find and replace content"
+  },
+  "reply": {
+    "lucide": "reply",
+    "category": "communication",
+    "description": "Reply to a message"
+  },
+  "reply-all": {
+    "lucide": "reply-all",
+    "category": "communication",
+    "description": "Reply to all recipients"
+  },
+  "rewind": {
+    "lucide": "rewind",
+    "category": "media-controls",
+    "description": "Rewind or skip backward"
+  },
+  "rocket": {
+    "lucide": "rocket",
+    "category": "action",
+    "description": "Launch or deploy"
+  },
+  "rotate-ccw": {
+    "lucide": "rotate-ccw",
+    "category": "action",
+    "description": "Rotate counterclockwise"
+  },
+  "rotate-cw": {
+    "lucide": "rotate-cw",
+    "category": "action",
+    "description": "Rotate clockwise"
+  },
+  "route": {
+    "lucide": "route",
+    "category": "location",
+    "description": "Navigation route or directions"
+  },
+  "router": {
+    "lucide": "router",
+    "category": "connectivity",
+    "description": "Network router or wireless access point"
+  },
+  "ruler": {
+    "lucide": "ruler",
+    "category": "editing",
+    "description": "Measure distance or dimensions"
+  },
+  "rss": {
+    "lucide": "rss",
+    "category": "connectivity",
+    "description": "RSS feed subscription"
+  },
+  "save": {
+    "lucide": "save",
+    "category": "action",
+    "description": "Save current work"
+  },
+  "scale": {
+    "lucide": "scale",
+    "category": "finance",
+    "description": "Balance scale for comparison or justice"
+  },
+  "scan": {
+    "lucide": "scan",
+    "category": "action",
+    "description": "Scan or capture with viewfinder"
+  },
+  "scan-face": {
+    "lucide": "scan-face",
+    "category": "security",
+    "description": "Facial recognition or biometric scan"
+  },
+  "scissors": {
+    "lucide": "scissors",
+    "category": "action",
+    "description": "Cut content to clipboard"
+  },
+  "screen-share": {
+    "lucide": "screen-share",
+    "category": "communication",
+    "description": "Share screen with others"
+  },
+  "screen-share-off": {
+    "lucide": "screen-share-off",
+    "category": "communication",
+    "description": "Stop sharing screen"
+  },
+  "scroll-text": {
+    "lucide": "scroll-text",
+    "category": "file",
+    "description": "Terms of service or legal document"
+  },
+  "search": {
+    "lucide": "search",
+    "category": "action",
+    "description": "Search or find content"
+  },
+  "search-code": {
+    "lucide": "search-code",
+    "category": "development",
+    "description": "Search within source code"
+  },
+  "send": {
+    "lucide": "send",
+    "category": "communication",
+    "description": "Send a message"
+  },
+  "send-to-back": {
+    "lucide": "send-to-back",
+    "category": "editing",
+    "description": "Move layer behind others"
+  },
+  "separator-horizontal": {
+    "lucide": "separator-horizontal",
+    "category": "system",
+    "description": "Horizontal divider between sections"
+  },
+  "server": {
+    "lucide": "server",
+    "category": "device",
+    "description": "Server hardware or backend system"
+  },
+  "server-crash": {
+    "lucide": "server-crash",
+    "category": "status",
+    "description": "Server failure or downtime"
+  },
+  "settings": {
+    "lucide": "settings",
+    "category": "settings",
+    "description": "Application settings or preferences"
+  },
+  "shapes": {
+    "lucide": "shapes",
+    "category": "editing",
+    "description": "Geometric shapes or design elements"
+  },
+  "share": {
+    "lucide": "share",
+    "category": "action",
+    "description": "Share content with others"
+  },
+  "shield": {
+    "lucide": "shield",
+    "category": "security",
+    "description": "Security or protection"
+  },
+  "shield-alert": {
+    "lucide": "shield-alert",
+    "category": "security",
+    "description": "Security warning or vulnerability"
+  },
+  "shield-check": {
+    "lucide": "shield-check",
+    "category": "security",
+    "description": "Verified security or protected"
+  },
+  "shield-off": {
+    "lucide": "shield-off",
+    "category": "security",
+    "description": "Security disabled or unprotected"
+  },
+  "shield-x": {
+    "lucide": "shield-x",
+    "category": "security",
+    "description": "Security rejected or blocked"
+  },
+  "shopping-bag": {
+    "lucide": "shopping-bag",
+    "category": "commerce",
+    "description": "Shopping bag for purchases"
+  },
+  "shopping-cart": {
+    "lucide": "shopping-cart",
+    "category": "commerce",
+    "description": "Shopping cart for e-commerce"
+  },
+  "shuffle": {
+    "lucide": "shuffle",
+    "category": "media-controls",
+    "description": "Shuffle or randomize playback order"
+  },
+  "sigma": {
+    "lucide": "sigma",
+    "category": "data",
+    "description": "Sum or mathematical aggregation"
+  },
+  "signal": {
+    "lucide": "signal",
+    "category": "connectivity",
+    "description": "Signal strength indicator"
+  }
+}

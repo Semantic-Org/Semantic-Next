@@ -65,7 +65,7 @@ const onRendered = function({ self }) {
 };
 
 const events = {
-  'click ui-icon.toggle'({ state }) {
+  'click ui-icon.show'({ state }) {
     state.codeVisible.toggle();
   },
   'click ui-icon.playground'({ settings, self, event }) {

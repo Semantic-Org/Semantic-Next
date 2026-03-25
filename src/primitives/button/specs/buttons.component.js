@@ -30,10 +30,7 @@ export default {
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
-    "left-floated": "floated",
-    "right-floated": "floated",
     "compact": "compact",
-    "very-compact": "compact",
     "mini": "size",
     "tiny": "size",
     "small": "size",
@@ -42,11 +39,9 @@ export default {
     "big": "size",
     "huge": "size",
     "massive": "size",
-    "top-attached": "attached",
+    "top": "attached",
     "attached": "attached",
-    "bottom-attached": "attached",
-    "left-attached": "attached",
-    "right-attached": "attached",
+    "bottom": "attached",
     "red": "color",
     "orange": "color",
     "yellow": "color",
@@ -64,7 +59,14 @@ export default {
     "three": "equal-width",
     "four": "equal-width",
     "five": "equal-width",
-    "six": "equal-width"
+    "six": "equal-width",
+    "left-floated": "floated",
+    "right-floated": "floated",
+    "top-attached": "attached",
+    "bottom-attached": "attached",
+    "left-attached": "attached",
+    "right-attached": "attached",
+    "very-compact": "compact"
   },
   "propertyTypes": {
     "styled": "string",
@@ -85,12 +87,12 @@ export default {
       "ghost"
     ],
     "floated": [
-      "left-floated",
-      "right-floated"
+      "left",
+      "right"
     ],
     "compact": [
       "compact",
-      "very-compact"
+      "very"
     ],
     "size": [
       "mini",
@@ -103,11 +105,11 @@ export default {
       "massive"
     ],
     "attached": [
-      "top-attached",
+      "top",
       "attached",
-      "bottom-attached",
-      "left-attached",
-      "right-attached"
+      "bottom",
+      "left",
+      "right"
     ],
     "color": [
       "red",

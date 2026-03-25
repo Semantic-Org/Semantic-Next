@@ -11,8 +11,24 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Renderer
+* **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
+* **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
+* **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
+
+### Query
+* **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
+
+### Utils
+* **Feature** - Added `assignInPlace()` for syncing an object's contents to match a source without replacing the reference — supports `preserveExistingKeys` to skip deletion and `returnChanged` to detect modifications
+* **Breaking** - `kebabToCamel` and `camelToKebab` now use lossless encoding — digit-leading segments are preserved with `_` (e.g. `grid-2x2` → `grid_2x2`), and every uppercase letter gets its own hyphen (e.g. `arrowDownAZ` → `arrow-down-a-z`). Both accept a `separator` option to customize the digit-boundary character. `camelToKebab` now normalizes leading uppercase by default for DOM-safe output (e.g. `FooBar` → `foo-bar`); pass `{ lossless: true }` to preserve it for exact round-trips.
+* **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
+* **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`
+* **Bug** - Fixed `escapeHTML()` producing entities without semicolons (e.g. `&amp` instead of `&amp;`)
+
 ### Component
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
+* **Bug** - Fix reactions on `settings` would not trigger reactions when settings updated via attribute.
 
 ### Behaviors
 * **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
@@ -22,9 +38,14 @@ xx.xx.xxxx
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
 
+### Compiler
+* **Feature** - New `@semantic-ui/compiler` package — extracted `TemplateCompiler` and `StringScanner` from `@semantic-ui/templating` into a standalone package with zero framework dependencies
+
 ### Specs
 * **Feature** - Shared `types`, `states` and `variations` across UI are now exports from specs
 * **Feature** - Added node export path with tools for writing `componentSpec` to disk
+* **Feature** - Added `DocsSpecReader` class that extends `SpecReader` with documentation-specific methods — definition generation, code examples, HTML parsing, and component tree building for SSR
+* **Refactor** - Moved all documentation-related methods out of `SpecReader` into `DocsSpecReader` to reduce bundle size for runtime consumers
 
 ### Query
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
@@ -42,8 +63,15 @@ xx.xx.xxxx
 * **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
 * **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
 * **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
+* **Bug** - Fixed `one()` not propagating handler return values through the wrapper chain.
+* **Feature** - Added `capture` and `passive` as top-level options for `on()` and `one()`, no longer requiring `eventSettings` nesting.
+* **Feature** - `scroll` and `resize` events are now passive by default for better performance. Override with `{ passive: false }`.
+* **Feature** - Event handlers can `return false` to call `stopPropagation()` or `return 'cancel'` to call `preventDefault()`.
+* **Feature** - Added [`intercept()`](https://next.semantic-ui.com/docs/api/query/events#intercept) for capture-phase event listeners. Events fire top-down, letting parents handle events before children. Supports delegation.
 
 ### Utils
+* **Enhancement** - `firstMatch()` and `findIndex()` now accept a value in addition to a callback, matching the `remove()` API. Values are compared using deep equality.
+* **Feature** - Added [`wait()`](https://next.semantic-ui.com/docs/api/utils/functions#wait) for creating async delays with `await wait(ms)`. Supports `AbortSignal` for cancellable waits — aborts reject with `AbortError` by default (matching web platform conventions). Set `rejectOnAbort: false` to resolve early instead.
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
 * **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
 * **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
@@ -52,6 +80,7 @@ xx.xx.xxxx
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
 ### CSS Tokens
+* **Bug** - Fixed solid color scales (`--black-solid-*`, `--white-solid-*`) not matching their alpha equivalents. The naive `oklch(L 0 0)` mapping diverged from alpha compositing due to the sRGB gamma curve. Now uses `color-mix(in srgb)` so solid and alpha tokens are visually identical by definition.
 * **Feature** - Added `--title-{size}` scale (3xs→3xl) for display typography with `--title-size` default.
 * **Feature** - Added `--text-{size}` scale (3xs→3xl) for body text with `--text-size` default.
 * **Feature** - Added `--border-radius-{size}` scale (3xs→3xl) with natural language aliases.

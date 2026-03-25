@@ -35,7 +35,7 @@
     font-weight: var(--button-font-weight);
     line-height: var(--button-line-height);
     font-style: normal;
-    text-align: center;
+    text-align: var(--button-text-align);
     text-decoration: none;
     border-radius: var(--button-border-radius);
     box-shadow: var(--button-box-shadow);
@@ -51,11 +51,12 @@
 
 /* src/primitives/button/css/definition/content/icon.css */
 @layer button.definition.content.icon {
-  .button ui-icon {
+  .button ui-icon,
+  :slotted(ui-icon) {
     vertical-align: top;
     opacity: var(--button-icon-opacity);
   }
-  .button ui-icon:only-child {
+  :is(.button ui-icon, :slotted(ui-icon)):only-child {
     margin: 0rem;
   }
 }
@@ -72,6 +73,31 @@
     border-radius: 4px;
     vertical-align: top;
     margin: -0.25em 0.5rem -0.25em -0.25em;
+  }
+}
+
+/* src/primitives/button/css/definition/content/badge.css */
+@layer button.definition.content.badge {
+  .button .badge,
+  ::slotted(.badge) {
+    margin: var(--button-badge-margin);
+    --label-background: var(--black-10);
+    --label-color: var(--button-text-color);
+    --label-outline-text-color: var(--button-text-color);
+    --label-outline: var(--solid-black-border);
+  }
+  .badge {
+    outline: var(--border);
+    padding: var(--button-vertical-padding) var(--padding-s);
+    border-radius: var(--left-attached-border-radius);
+    line-height: 1;
+    outline-offset: -1px;
+    text-align: center;
+    display: inline-block;
+    margin-right: -5px;
+  }
+  .badge + .button {
+    border-radius: var(--right-attached-border-radius);
   }
 }
 
@@ -619,7 +645,7 @@
     background-image: var(--button-primary-background-image);
     --button-link-text-color: var(--button-primary-color);
     --button-link-text-color-hover: var(--button-primary-color-hover);
-    --button-styled-background: var(--primary-background);
+    --button-styled-background: var(--primary-background-color);
     --button-styled-text-color: var(--primary-text-color);
     --button-styled-background-hover: var(--primary-5);
     --button-styled-background-pressed: var(--primary-10);
@@ -675,7 +701,7 @@
     background-image: var(--button-colored-background-image);
     --button-link-text-color: var(--button-secondary-color);
     --button-link-text-color-hover: var(--button-secondary-color-hover);
-    --button-styled-background: var(--secondary-background);
+    --button-styled-background: var(--secondary-background-color);
     --button-styled-text-color: var(--secondary-text-color);
     --button-styled-background-hover: var(--secondary-5);
     --button-styled-background-pressed: var(--secondary-10);
@@ -2125,6 +2151,7 @@
   }
   .vertical.buttons ::slotted(ui-button) {
     --button-width: 100%;
+    --button-text-align: left;
   }
   .vertical.buttons ::slotted(ui-button:is(:first-child)) {
     --button-border-radius: var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0 0;
@@ -2157,6 +2184,7 @@
     --button-text-color: var(--black-80);
     --button-inverted-text-color: var(--white-90);
     --button-text-shadow: none;
+    --button-text-align: center;
     --button-inverted-text-shadow: var(--button-text-shadow);
     --button-border-radius: var(--border-radius);
     --button-border: none;
@@ -2188,24 +2216,24 @@
   }
 }
 
+/* src/primitives/button/css/theme/content/badge-variables.css */
+@layer button.theme.content.badge {
+  :host {
+    --button-badge-margin: 0 var(--gap-2xs) 0 0;
+  }
+}
+
 /* src/primitives/button/css/theme/content/label-variables.css */
 @layer button.theme.content.label {
   :host {
     --labeled-label-font-size: var(--medium);
     --labeled-label-align: center;
     --labeled-label-padding: "";
-    --labeled-label-font-size: var(--relative-medium);
+    --labeled-label-font-size: var(--text-m);
     --labeled-label-border-color: var(--border-color);
     --labeled-label-border-offset: -var(--border-box-shadow-width);
     --labeled-tag-label-size: 1.85em;
     --labeled-icon-margin: 0em;
-    --labeled-icon-width: 1em + calc(var(--vertical-padding) * 2);
-    --labeled-icon-background-color: rgba(0, 0, 0, 0.05);
-    --labeled-icon-padding: calc(var(--horizontal-padding) + var(--labeled-icon-width));
-    --labeled-icon-border: transparent;
-    --labeled-icon-color: "";
-    --labeled-icon-left-shadow: -1px 0px 0px 0px var(--labeled-icon-border) inset;
-    --labeled-icon-right-shadow: 1px 0px 0px 0px var(--labeled-icon-border) inset;
   }
 }
 
@@ -2251,17 +2279,17 @@
 /* src/primitives/button/css/theme/types/styled-variables.css */
 @layer button.theme.types.styled {
   :host {
-    --button-styled-background: var(--standard-5);
+    --button-styled-background: var(--standard-solid-5);
     --button-styled-text-shadow: none;
     --button-styled-color: var(--text-color);
     --button-styled-border-color: var(--border-color);
     --button-styled-box-shadow: var(--button-box-shadow);
-    --button-styled-hover-background: var(--standard-15);
-    --button-styled-hover-color: var(--standard-80);
-    --button-styled-pressed-background: var(--standard-20);
-    --button-styled-pressed-color: var(--standard-90);
-    --button-styled-active-background: var(--standard-20);
-    --button-styled-active-color: var(--standard-90);
+    --button-styled-hover-background: var(--standard-solid-15);
+    --button-styled-hover-color: var(--standard-solid-80);
+    --button-styled-pressed-background: var(--standard-solid-20);
+    --button-styled-pressed-color: var(--standard-solid-90);
+    --button-styled-active-background: var(--standard-solid-20);
+    --button-styled-active-color: var(--standard-solid-90);
     --button-outline-border-width: 1px;
     --button-outline-border-offset: -1px;
     --button-outline-border-color: var(--button-styled-border-color);

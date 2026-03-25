@@ -6,7 +6,7 @@
 }
 
 .selection {
-  margin-top: var(--spacing);
+  margin-top: var(--margin);
   display: inline-block;
 }
 
@@ -33,7 +33,7 @@
   }
 
   .empty {
-    margin: var(--spacing);
+    margin: var(--margin);
     color: var(--standard-50);
   }
 }

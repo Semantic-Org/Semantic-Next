@@ -6,7 +6,7 @@
 }
 
 .element {
-  margin: var(--spacing-xs) 0;
+  margin: var(--margin-xs) 0;
   padding: var(--padding);
   border-radius: var(--border-radius);
   font-size: var(--medium);
@@ -37,9 +37,9 @@
 
 .measurements {
   background: var(--standard-5);
-  padding: var(--spacing);
+  padding: var(--padding);
   border-radius: var(--border-radius);
-  margin: var(--spacing) 0;
+  margin: var(--margin) 0;
   
   p {
     margin: var(--4px) 0;
@@ -58,10 +58,10 @@
 
 .actions {
   display: flex;
-  gap: var(--spacing);
-  
+  gap: var(--gap);
+
   button {
-    padding: var(--spacing);
+    padding: var(--padding);
     border: 1px solid var(--standard-20);
     border-radius: var(--border-radius);
     background: var(--component-background);

@@ -13,4 +13,5 @@ export { UILabel } from './label/index.js';
 export { MenuItem, UIMenu } from './menu/index.js';
 export { UIModal } from './modal/index.js';
 export { UISegment, UISegments } from './segment/index.js';
+export { Spinner } from './spinner/index.js';
 export { UITable } from './table/index.js';

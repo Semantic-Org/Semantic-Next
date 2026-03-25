@@ -11,7 +11,7 @@ export interface FatalOptions {
   errorType?: ErrorConstructor;
   /** Additional metadata to attach to the error */
   metadata?: Record<string, any>;
-  /** Optional callback to handle the error */
+  /** Optional callback to intercept the error — when provided, prevents the error from being thrown */
   onError?: (error: Error) => void;
   /** Number of stack trace lines to remove (defaults to 1) */
   removeStackLines?: number;
@@ -50,8 +50,8 @@ export type LogFormat = 'standard' | 'json';
 export interface LogOptions {
   /** Namespace for grouping related logs (used as default title) */
   namespace?: string;
-  /** Additional data to include with the log message */
-  data?: any[];
+  /** Additional data to include with the log message — accepts arrays or single objects */
+  data?: any;
   /** Text color for the message */
   color?: string;
   /** Whether to include timestamp in the output */

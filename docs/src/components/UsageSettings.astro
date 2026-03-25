@@ -1,0 +1,29 @@
+---
+const { spec } = Astro.props;
+
+const settings = spec?.settings || [];
+if (settings.length === 0) return;
+---
+<section class="usage-section" id="settings">
+  <h2>Settings</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {settings.map((setting) => (
+        <tr>
+          <td><code>{setting.attribute || setting.name?.toLowerCase()}</code></td>
+          <td><code>{setting.type || 'string'}</code></td>
+          <td>{setting.defaultValue !== undefined ? <code>{String(setting.defaultValue)}</code> : '—'}</td>
+          <td>{setting.description}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>

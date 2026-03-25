@@ -1,7 +1,7 @@
 
 :host {
-  --card-min: var(250px);
-  --card-gap: var(--spacing);
+  --card-min: 250px;
+  --card-gap: var(--gap);
   --card-image-max-height: 150px;
 }
 
@@ -12,7 +12,7 @@
 .actions {
   display: flex;
   align-items: center;
-  margin-bottom: var(--spacing);
+  margin-bottom: var(--margin);
 
   .search {
     margin-left: auto;

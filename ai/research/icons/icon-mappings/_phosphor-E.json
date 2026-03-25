@@ -1,0 +1,298 @@
+{
+  "settings": {
+    "value": "gear",
+    "reason": "Phosphor's 'gear' is the standard settings/preferences cog icon, direct semantic match"
+  },
+  "sliders": {
+    "value": "sliders",
+    "reason": "Direct name match in Phosphor, horizontal slider controls representing adjustments"
+  },
+  "theme": {
+    "value": "palette",
+    "reason": "Phosphor's 'palette' is an artist's palette icon, represents theme/colors/appearance"
+  },
+  "light-mode": {
+    "value": "sun",
+    "reason": "Phosphor's 'sun' is the universal light mode icon, direct semantic match"
+  },
+  "dark-mode": {
+    "value": "moon",
+    "reason": "Phosphor's 'moon' is the universal dark mode icon, direct semantic match"
+  },
+  "accessibility": {
+    "value": "wheelchair",
+    "reason": "Phosphor's 'wheelchair' is the standard accessibility symbol, widely recognized"
+  },
+  "plugin": {
+    "value": "puzzle-piece",
+    "reason": "Phosphor's 'puzzle-piece' represents a plugin/extension that fits into a larger system"
+  },
+  "webhook": {
+    "value": "webhooks-logo",
+    "reason": "Phosphor has a dedicated 'webhooks-logo' icon that exactly represents webhooks/API endpoints"
+  },
+  "globe": {
+    "value": "globe",
+    "reason": "Direct name match in Phosphor, a globe/world icon for language, public, or internationalization"
+  },
+  "desktop": {
+    "value": "desktop",
+    "reason": "Direct name match in Phosphor, a desktop monitor icon"
+  },
+  "laptop": {
+    "value": "laptop",
+    "reason": "Direct name match in Phosphor, a laptop computer icon"
+  },
+  "mobile": {
+    "value": "device-mobile",
+    "reason": "Phosphor uses 'device-mobile' for the smartphone icon, prefixed with 'device' for clarity"
+  },
+  "tablet": {
+    "value": "device-tablet-speaker",
+    "reason": "Phosphor's 'device-tablet-speaker' is a tablet device with speaker detail, the closest tablet icon available"
+  },
+  "keyboard": {
+    "value": "keyboard",
+    "reason": "Direct name match in Phosphor, a keyboard input device icon"
+  },
+  "cpu": {
+    "value": "cpu",
+    "reason": "Direct name match in Phosphor, a processor/chip icon"
+  },
+  "storage": {
+    "value": "hard-drives",
+    "reason": "Phosphor's 'hard-drives' shows stacked storage drives, representing storage/disk"
+  },
+  "usb": {
+    "value": "usb",
+    "reason": "Direct name match in Phosphor, the USB connection symbol"
+  },
+  "cast": {
+    "value": "screencast",
+    "reason": "Phosphor's 'screencast' shows a screen with broadcast waves, matching cast/stream concept"
+  },
+  "terminal": {
+    "value": "terminal",
+    "reason": "Direct name match in Phosphor, a terminal/command prompt window icon"
+  },
+  "database": {
+    "value": "database",
+    "reason": "Direct name match in Phosphor, the standard cylindrical database icon"
+  },
+  "server": {
+    "value": "hard-drives",
+    "reason": "Phosphor's 'hard-drives' shows stacked server/drive units; there is no dedicated server rack icon in Phosphor that is distinct enough"
+  },
+  "cloud": {
+    "value": "cloud",
+    "reason": "Direct name match in Phosphor, a cloud icon"
+  },
+  "cloud-upload": {
+    "value": "cloud-arrow-up",
+    "reason": "Phosphor uses 'cloud-arrow-up' for cloud upload, showing a cloud with an upward arrow"
+  },
+  "cloud-download": {
+    "value": "cloud-arrow-down",
+    "reason": "Phosphor uses 'cloud-arrow-down' for cloud download, showing a cloud with a downward arrow"
+  },
+  "bug": {
+    "value": "bug",
+    "reason": "Direct name match in Phosphor, a bug/insect icon representing software bugs"
+  },
+  "git": {
+    "value": "git-branch",
+    "reason": "Phosphor's 'git-branch' shows a branching version control diagram, the standard git icon"
+  },
+  "network": {
+    "value": "graph",
+    "reason": "Phosphor's 'graph' shows interconnected nodes, representing a network topology"
+  },
+  "wifi": {
+    "value": "wifi-high",
+    "reason": "Phosphor's 'wifi-high' shows full WiFi signal strength, the standard WiFi icon"
+  },
+  "bluetooth": {
+    "value": "bluetooth",
+    "reason": "Direct name match in Phosphor, the standard Bluetooth symbol"
+  },
+  "power": {
+    "value": "power",
+    "reason": "Direct name match in Phosphor, the standard power on/off circle-with-line icon"
+  },
+  "battery": {
+    "value": "battery-full",
+    "reason": "Phosphor's 'battery-full' shows a fully charged battery, the standard battery status icon"
+  },
+  "tool": {
+    "value": "wrench",
+    "reason": "Phosphor's 'wrench' is the standard tool/fix icon, a single wrench"
+  },
+  "tools": {
+    "value": "toolbox",
+    "reason": "Phosphor's 'toolbox' represents a collection of tools, matching the toolbox concept"
+  },
+  "qr-code": {
+    "value": "qr-code",
+    "reason": "Direct name match in Phosphor, the standard QR code pattern icon"
+  },
+  "barcode": {
+    "value": "barcode",
+    "reason": "Direct name match in Phosphor, vertical lines representing a barcode"
+  },
+  "calculator": {
+    "value": "calculator",
+    "reason": "Direct name match in Phosphor, a calculator device icon"
+  },
+  "random": {
+    "value": "dice-five",
+    "reason": "Phosphor's 'dice-five' is a die showing five dots, representing randomness/chance"
+  },
+  "history": {
+    "value": "clock-counter-clockwise",
+    "reason": "Phosphor's 'clock-counter-clockwise' shows a clock with a counter-clockwise arrow, the standard history/restore icon"
+  },
+  "rain": {
+    "value": "cloud-rain",
+    "reason": "Phosphor's 'cloud-rain' shows a cloud with rain drops, direct semantic match"
+  },
+  "storm": {
+    "value": "cloud-lightning",
+    "reason": "Phosphor's 'cloud-lightning' shows a cloud with a lightning bolt, representing a storm"
+  },
+  "snow": {
+    "value": "snowflake",
+    "reason": "Phosphor's 'snowflake' is the standard snow/cold weather icon"
+  },
+  "wind": {
+    "value": "wind",
+    "reason": "Direct name match in Phosphor, flowing lines representing wind"
+  },
+  "temperature": {
+    "value": "thermometer",
+    "reason": "Phosphor's 'thermometer' is the standard temperature measurement icon"
+  },
+  "water": {
+    "value": "drop",
+    "reason": "Phosphor's 'drop' is a water droplet icon, representing water/humidity"
+  },
+  "coffee": {
+    "value": "coffee",
+    "reason": "Direct name match in Phosphor, a coffee cup icon"
+  },
+  "infinity": {
+    "value": "infinity",
+    "reason": "Direct name match in Phosphor, the infinity/lemniscate symbol"
+  },
+  "eco": {
+    "value": "leaf",
+    "reason": "Phosphor's 'leaf' is a natural leaf icon, representing eco/nature/sustainability"
+  },
+  "hexagon": {
+    "value": "hexagon",
+    "reason": "Direct name match in Phosphor, a hexagon geometric shape"
+  },
+  "triangle": {
+    "value": "triangle",
+    "reason": "Direct name match in Phosphor, a triangle geometric shape"
+  },
+  "google": {
+    "value": "google-logo",
+    "reason": "Phosphor's 'google-logo' is a stylized Google brand icon following Phosphor's naming convention for brands"
+  },
+  "github": {
+    "value": "github-logo",
+    "reason": "Phosphor's 'github-logo' is the GitHub octocat brand icon"
+  },
+  "apple": {
+    "value": "apple-logo",
+    "reason": "Phosphor's 'apple-logo' is the Apple brand icon"
+  },
+  "facebook": {
+    "value": "facebook-logo",
+    "reason": "Phosphor's 'facebook-logo' is the Facebook brand icon"
+  },
+  "twitter": {
+    "value": "x-logo",
+    "reason": "Phosphor added 'x-logo' for the rebranded Twitter/X platform; 'twitter-logo' also exists but X is the current brand"
+  },
+  "linkedin": {
+    "value": "linkedin-logo",
+    "reason": "Phosphor's 'linkedin-logo' is the LinkedIn brand icon"
+  },
+  "microsoft": {
+    "value": "windows-logo",
+    "reason": "Phosphor's 'windows-logo' is the Microsoft Windows brand icon, the most recognizable Microsoft identifier"
+  },
+  "slack": {
+    "value": "slack-logo",
+    "reason": "Phosphor's 'slack-logo' is the Slack brand icon"
+  },
+  "discord": {
+    "value": "discord-logo",
+    "reason": "Phosphor's 'discord-logo' is the Discord brand icon"
+  },
+  "instagram": {
+    "value": "instagram-logo",
+    "reason": "Phosphor's 'instagram-logo' is the Instagram brand icon"
+  },
+  "youtube": {
+    "value": "youtube-logo",
+    "reason": "Phosphor's 'youtube-logo' is the YouTube brand icon"
+  },
+  "android": {
+    "value": "android-logo",
+    "reason": "Phosphor's 'android-logo' is the Android brand icon"
+  },
+  "sparkles": {
+    "value": "sparkle",
+    "reason": "Phosphor's 'sparkle' is a four-pointed star sparkle icon, representing AI/magic/new features"
+  },
+  "wand": {
+    "value": "magic-wand",
+    "reason": "Phosphor's 'magic-wand' is a wand with sparkle, representing auto-fix/wizard functionality"
+  },
+  "bot": {
+    "value": "robot",
+    "reason": "Phosphor's 'robot' is a robot face icon, representing bots/automation"
+  },
+  "notifications": {
+    "value": "bell",
+    "reason": "Phosphor's 'bell' is the universal notifications/alerts icon"
+  },
+  "email": {
+    "value": "envelope-simple",
+    "reason": "Phosphor's 'envelope-simple' is a clean envelope icon for email, preferred over the more detailed 'envelope'"
+  },
+  "inbox": {
+    "value": "tray",
+    "reason": "Phosphor's 'tray' is an inbox tray icon, representing an email inbox or collection point"
+  },
+  "phone": {
+    "value": "phone",
+    "reason": "Direct name match in Phosphor, a telephone handset for phone calls"
+  },
+  "contacts": {
+    "value": "address-book",
+    "reason": "Phosphor's 'address-book' is a contact list/address book icon, direct semantic match"
+  },
+  "lock": {
+    "value": "lock",
+    "reason": "Direct name match in Phosphor, a closed padlock icon representing locked/secure state"
+  },
+  "unlock": {
+    "value": "lock-open",
+    "reason": "Phosphor's 'lock-open' shows an open padlock, representing unlocked state"
+  },
+  "security": {
+    "value": "shield",
+    "reason": "Phosphor's 'shield' is a plain shield icon representing security/protection"
+  },
+  "secure": {
+    "value": "shield-check",
+    "reason": "Phosphor's 'shield-check' is a shield with a checkmark, representing verified security"
+  },
+  "key": {
+    "value": "key",
+    "reason": "Direct name match in Phosphor, a key icon representing passwords/access"
+  }
+}

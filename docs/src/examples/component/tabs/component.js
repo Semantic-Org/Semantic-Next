@@ -18,7 +18,7 @@ const createComponent = ({ self, state, settings }) => ({
       : '';
   },
   getTabContent() {
-    return settings.tabs[state.tabIndex.value]?.content;
+    return settings.tabs[state.tabIndex.get()]?.content;
   },
 });
 

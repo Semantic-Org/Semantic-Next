@@ -1,0 +1,12 @@
+<div class="select">
+  <span class="value">{getDisplayText}</span>
+  <ui-icon icon="chevron-down" class="chevron {classIf isOpen 'open'}"></ui-icon>
+</div>
+{#if isOpen}
+  <div class="menu">
+    <div class="item {classIf (not selected) 'active'}" data-value="">None</div>
+    {#each option in options}
+      <div class="item {classIf (is option.value selected) 'active'}" data-value="{option.value}">{option.name}</div>
+    {/each}
+  </div>
+{/if}

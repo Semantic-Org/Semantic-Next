@@ -10,4 +10,5 @@ export { MenuComponentSpec, MenuItemComponentSpec } from '../primitives/menu/spe
 export { ModalComponentSpec } from '../primitives/modal/specs.js';
 export { RailComponentSpec } from '../primitives/rail/specs.js';
 export { SegmentComponentSpec } from '../primitives/segment/specs.js';
+export { SpinnerComponentSpec } from '../primitives/spinner/specs.js';
 export { TableComponentSpec } from '../primitives/table/specs.js';

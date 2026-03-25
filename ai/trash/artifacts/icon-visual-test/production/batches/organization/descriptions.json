@@ -1,0 +1,14 @@
+{
+  "1": {
+    "visual": "A multi-story office building with a wide base, two side wings, an arched entrance, and horizontal lines suggesting floors or windows.",
+    "usage": "company profile, office location field, corporate directory, facilities dashboard"
+  },
+  "2": {
+    "visual": "Three vertical bars of unequal height side by side — tallest on the left, shortest in the middle, medium on the right.",
+    "usage": "Kanban board columns, project pipeline stages, analytics chart toggle, workflow view switcher"
+  },
+  "3": {
+    "visual": "A rectangular sign with a right-pointing arrow tip on its right end, mounted on a vertical pole — a directional signpost.",
+    "usage": "onboarding step indicator, navigation waypoint, roadmap milestone, destination marker"
+  }
+}

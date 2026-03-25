@@ -66,10 +66,13 @@ const defaultSettings = {
   hideDelay: 70,
 
   // warm timer duration (ms) - skip delay if tooltip shown within this period
-  warmWindow: 1500,
+  warmWindow: 1200,
 
   // show pointing arrow
   arrow: true,
+
+  // whether should render in top layer
+  topLayer: true,
 
   // distance away from trigger
   distance: 0,
@@ -94,13 +97,13 @@ const defaultSettings = {
 };
 
 const classNames = {
-  tooltip: 'ui-tooltip',
+  tooltip: 'tooltip',
   visible: 'visible',
   hidden: 'hidden',
 };
 
 const templates = {
-  tooltip: '<div class="ui-tooltip"><div class="content"></div></div>',
+  tooltip: '<div class="ui tooltip"><div class="content"></div></div>',
 };
 
 // Shared state across all tooltip instances
@@ -110,12 +113,13 @@ const setup = () => ({
   },
 });
 
-const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dispatchEvent, log }) => ({
+const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dispatchEvent, log, warn }) => ({
   $tooltip: null,
   showTimer: null,
   hideTimer: null,
   isVisible: false,
   position: null,
+  createdTooltip: false,
 
   initialize() {
     self.createTooltip();
@@ -125,21 +129,31 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
   createTooltip() {
     // Build content from settings
     const content = self.buildContent();
-    if (!content) {
-      log.warn('No tooltip content provided');
-      return;
-    }
 
     // Get position from settings
     self.position = settings.position;
 
-    // Create tooltip element and insert after trigger
-    self.$tooltip = $(templates.tooltip)
-      .addClass(classNames.hidden)
-      .children('.content')
-      .html(content)
-      .end()
-      .insertAfter(el);
+    const $existingTooltip = $(el).next(`.${classNames.tooltip}`);
+    if (!content && !$existingTooltip.exists()) {
+      warn('No tooltip content provided');
+      return;
+    }
+    if (settings.$tooltip) {
+      self.tooltip = $tooltip;
+    }
+    else if ($existingTooltip.exists()) {
+      self.$tooltip = $existingTooltip;
+    }
+    else {
+      self.createdTooltip = true;
+      // Create tooltip element and insert after trigger
+      self.$tooltip = $(templates.tooltip)
+        .addClass(classNames.hidden)
+        .children('.content')
+        .html(content)
+        .end()
+        .insertAfter(el);
+    }
 
     // Bind events to tooltip
     self.bindTooltipEvents();
@@ -175,6 +189,19 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     return content;
   },
 
+  getTooltip() {
+    return self.$tooltip;
+  },
+  setHeader(text) {
+    self.$tooltip.children('.content').children('.header').text(text);
+  },
+  setText(text) {
+    self.$tooltip.children('.content').children('.text').text(text);
+  },
+  setHTML(html) {
+    self.$tooltip.html(html);
+  },
+
   bindTriggerEvents() {
     const trigger = settings.trigger;
 
@@ -200,6 +227,9 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Recreate tooltip if it was removed
     if (!self.$tooltip) {
       self.createTooltip();
+      if (!self.$tooltip) {
+        return;
+      }
     }
 
     // Allow onShow to cancel by returning false (supports async)
@@ -216,8 +246,11 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     dispatchEvent('show');
 
     // Promote to top layer (creates escape behavior on first call)
+    if (settings.topLayer) {
+      self.$tooltip.escape('show');
+    }
+
     self.$tooltip
-      .escape('show')
       .attach({
         to: el,
         position: self.position,
@@ -230,6 +263,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     // Animate in with direction-aware animation
     const animation = self.getAnimation();
     await self.$tooltip.transition(`${animation} in`, settings.duration);
+
+    if (!self.isVisible) {
+      return;
+    }
 
     self.$tooltip.addClass(classNames.visible);
     settings.onVisible.call(el);
@@ -254,13 +291,19 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
     const animation = self.getAnimation();
     await self.$tooltip.transition(`${animation} out`, settings.duration);
 
+    if (self.isVisible) {
+      return;
+    }
+
     // Remove from DOM if not preserving
     if (!settings.preserve && self.$tooltip) {
       self.$tooltip.remove();
       self.$tooltip = null;
     }
     else {
-      self.$tooltip.escape('hide');
+      if (settings.topLayer) {
+        self.$tooltip.escape('hide');
+      }
       self.$tooltip.addClass(classNames.hidden);
     }
 
@@ -394,8 +437,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
 const onDestroyed = ({ self }) => {
   self.clearTimers();
   if (self.$tooltip) {
-    self.$tooltip.remove();
     self.$tooltip = null;
+    if (self.createdTooltip) {
+      self.$tooltip.remove();
+    }
   }
 };
 

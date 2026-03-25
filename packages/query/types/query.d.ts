@@ -27,7 +27,16 @@ export interface EventOptions {
    */
   abortController?: AbortController;
   /**
-   * Event listener options (e.g., `capture`, `passive`).
+   * Listen in capture phase (event fires top-down before bubbling).
+   */
+  capture?: boolean;
+  /**
+   * Mark listener as passive (will not call preventDefault).
+   * Automatically set to `true` for `scroll` and `resize` events.
+   */
+  passive?: boolean;
+  /**
+   * Additional event listener options passed through to addEventListener.
    */
   eventSettings?: AddEventListenerOptions;
 }
@@ -80,6 +89,50 @@ export interface DimensionOptions {
    * Include padding in the calculation. Defaults to true.
    */
   includePadding?: boolean;
+}
+
+/**
+ * Options for naturalWidth calculations.
+ */
+export interface NaturalWidthOptions {
+  /**
+   * Preserve the element's max-width constraint during calculation. Defaults to false.
+   */
+  preserveMaxWidth?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
+}
+
+/**
+ * Options for naturalHeight calculations.
+ */
+export interface NaturalHeightOptions {
+  /**
+   * Preserve the element's max-height constraint during calculation. Defaults to false.
+   */
+  preserveMaxHeight?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
 }
 
 /**
@@ -167,12 +220,6 @@ export class Query {
    * @returns The Query instance for chaining.
    */
   each(callback: (this: Query, el: Element, index: number) => void): this;
-
-  /**
-   * Removes all event handlers attached by this Query class. Resets the static `eventHandlers` array.
-   * @see https://next.semantic-ui.com/docs/api/query/events#off
-   */
-  removeAllEvents(): void;
 
   /**
    * Finds elements within the current set of elements.
@@ -375,6 +422,26 @@ export class Query {
    * @returns A Promise that resolves with the event object.
    */
   onNext(eventNames: string, targetSelector: string, options?: { timeout?: number; }): Promise<Event>;
+
+  /**
+   * Attaches a capture-phase event listener that fires top-down before bubbling.
+   * Useful for intercepting events before children handle them.
+   * @see https://next.semantic-ui.com/docs/api/query/events#intercept
+   * @param eventNames - A space-separated string of event names.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, handler: EventListener, options?: EventOptions): this;
+  /**
+   * Attaches a capture-phase event listener with delegation.
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
 
   /**
    * Removes event listeners from each element in the current set.
@@ -836,18 +903,24 @@ export class Query {
   detach(): this;
 
   /**
-   * Gets the natural width (width without applied styles) of the *first* element in the set.
+   * Gets the natural width (width without applied styles) of the *first* element in the set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-width preservation (preserveMaxWidth).
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalWidth
+   * @param options - Options to control max-width preservation and box model inclusions.
    * @returns The natural width of the element.
    */
-  naturalWidth(): number | number[];
+  naturalWidth(options?: NaturalWidthOptions): number | number[];
 
   /**
-   * Gets the natural height (height without applied styles) of the *first* in the current set.
+   * Gets the natural height (height without applied styles) of the *first* element in the current set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-height preservation (preserveMaxHeight).
    * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalHeight
+   * @param options - Options to control max-height preservation and box model inclusions.
    * @returns The natural height of the element.
    */
-  naturalHeight(): number | number[];
+  naturalHeight(options?: NaturalHeightOptions): number | number[];
 
   /**
    * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.
@@ -1273,6 +1346,53 @@ export class Query {
    * @returns `true` if any element contains any element from the Query instance, `false` otherwise.
    */
   contains(query: Query): boolean;
+
+  /**
+   * Returns the bounding client rect(s) of the element(s).
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#bounds
+   * @returns A DOMRect for a single element, or an array of DOMRects for multiple elements.
+   */
+  bounds(): DOMRect | DOMRect[];
+
+  /**
+   * Restores the previous Query set before the last traversal operation.
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#end
+   * @returns The previous Query instance, or this if no previous set exists.
+   */
+  end(): Query;
+
+  /**
+   * Triggers a submit event on form elements.
+   * @see https://next.semantic-ui.com/docs/api/query/events#submit
+   * @returns The Query instance for chaining.
+   */
+  submit(eventSettings?: Record<string, any>): this;
+
+  /**
+   * Gets elements assigned to a named slot in a shadow DOM component.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#getslot
+   * @param name - The slot name. If omitted, gets the default slot.
+   * @returns A new Query instance containing the slot's assigned elements.
+   */
+  getSlot(name?: string): Query;
+
+  /**
+   * Sets content into a named slot.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#setslot
+   * @param nameOrHTML - Slot name (when newHTML provided) or HTML string (for default slot).
+   * @param newHTML - HTML content to set into the named slot.
+   * @returns The Query instance for chaining.
+   */
+  setSlot(nameOrHTML: string, newHTML?: string): this;
+
+  /**
+   * Checks if a container element contains a target element, piercing shadow DOM boundaries.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#containsdeep
+   * @param container - The potential container element.
+   * @param target - The element to check for containment.
+   * @returns `true` if container contains target (crossing shadow boundaries), `false` otherwise.
+   */
+  containsDeep(container: Element, target: Element): boolean;
 }
 
 export default Query;

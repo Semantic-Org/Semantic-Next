@@ -1,0 +1,166 @@
+{
+  "file": {
+    "value": "document",
+    "reason": "Heroicons uses 'document' for a generic file icon (blank page). Exact match."
+  },
+  "document": {
+    "value": "document-text",
+    "reason": "Heroicons 'document-text' shows a page with text lines, matching 'text document'."
+  },
+  "pdf": {
+    "value": null,
+    "reason": "No PDF-specific icon in Heroicons. 'document' is too generic to be a good match."
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match."
+  },
+  "new-folder": {
+    "value": "folder-plus",
+    "reason": "Heroicons 'folder-plus' is a folder with a plus sign. Exact semantic match."
+  },
+  "open-folder": {
+    "value": "folder-open",
+    "reason": "Direct match."
+  },
+  "archive": {
+    "value": "archive-box",
+    "reason": "Heroicons 'archive-box' represents an archive/box. Good match."
+  },
+  "zip": {
+    "value": null,
+    "reason": "No compressed file or zip icon in Heroicons."
+  },
+  "attachment": {
+    "value": "paper-clip",
+    "reason": "Heroicons 'paper-clip' is the standard attachment/paperclip icon. Exact match."
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match."
+  },
+  "unlink": {
+    "value": "link-slash",
+    "reason": "Heroicons added 'link-slash' to represent a broken/removed link. Added in v2.1."
+  },
+  "image": {
+    "value": "photo",
+    "reason": "Heroicons uses 'photo' for an image/picture icon. Exact semantic match."
+  },
+  "gallery": {
+    "value": null,
+    "reason": "No multi-image or gallery icon in Heroicons. 'photo' is singular only."
+  },
+  "video": {
+    "value": "video-camera",
+    "reason": "Heroicons uses 'video-camera' for video. Also has 'film' but video-camera is more standard."
+  },
+  "camera": {
+    "value": "camera",
+    "reason": "Direct match."
+  },
+  "camera-off": {
+    "value": null,
+    "reason": "Heroicons has 'video-camera-slash' but no 'camera-slash' or camera-off equivalent for still cameras."
+  },
+  "volume": {
+    "value": "speaker-wave",
+    "reason": "Heroicons 'speaker-wave' shows a speaker with sound waves. Good match for volume on."
+  },
+  "volume-low": {
+    "value": null,
+    "reason": "No low-volume speaker variant in Heroicons. Only 'speaker-wave' (full) and 'speaker-x-mark' (muted)."
+  },
+  "mute": {
+    "value": "speaker-x-mark",
+    "reason": "Heroicons 'speaker-x-mark' shows a speaker with an X. Exact match for muted."
+  },
+  "music": {
+    "value": "musical-note",
+    "reason": "Heroicons 'musical-note' represents music/audio. Exact semantic match."
+  },
+  "microphone": {
+    "value": "microphone",
+    "reason": "Direct match."
+  },
+  "microphone-off": {
+    "value": null,
+    "reason": "No microphone-off or microphone-slash icon confirmed in Heroicons v2."
+  },
+  "headphones": {
+    "value": null,
+    "reason": "No headphones icon in Heroicons."
+  },
+  "podcast": {
+    "value": null,
+    "reason": "No podcast-specific icon in Heroicons."
+  },
+  "broadcast": {
+    "value": "signal",
+    "reason": "Heroicons 'signal' represents wireless/broadcast signal. Reasonable match for broadcast/live."
+  },
+  "crop": {
+    "value": null,
+    "reason": "No crop/trim icon in Heroicons."
+  },
+  "rotate": {
+    "value": null,
+    "reason": "No rotate icon in Heroicons. 'arrow-path' is a loop, not a rotation."
+  },
+  "play": {
+    "value": "play",
+    "reason": "Direct match. Standalone play triangle icon."
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match. Standalone pause icon."
+  },
+  "stop": {
+    "value": "stop-circle",
+    "reason": "No standalone 'stop' icon exists. 'stop-circle' (stop inside a circle) is the closest available."
+  },
+  "skip-next": {
+    "value": "forward",
+    "reason": "Heroicons 'forward' represents skip to next track. Good match."
+  },
+  "skip-previous": {
+    "value": "backward",
+    "reason": "Heroicons 'backward' represents skip to previous track. Good match."
+  },
+  "fast-forward": {
+    "value": null,
+    "reason": "No fast-forward icon in Heroicons. 'forward' is skip-next, not fast-forward."
+  },
+  "rewind": {
+    "value": null,
+    "reason": "No rewind icon in Heroicons. 'backward' is skip-previous, not rewind."
+  },
+  "shuffle": {
+    "value": null,
+    "reason": "No shuffle/random icon in Heroicons."
+  },
+  "repeat": {
+    "value": "arrow-path",
+    "reason": "Heroicons 'arrow-path' shows circular arrows forming a loop. Reasonable match for repeat/loop."
+  },
+  "record": {
+    "value": null,
+    "reason": "No record icon (filled circle) in Heroicons."
+  },
+  "brush": {
+    "value": "paint-brush",
+    "reason": "Heroicons 'paint-brush' is a brush/paint icon. Exact semantic match."
+  },
+  "pen": {
+    "value": "pencil",
+    "reason": "Heroicons has 'pencil' (simple pencil) and 'pencil-square' (pencil with square). 'pencil' is the better match for a drawing/pen tool."
+  },
+  "color": {
+    "value": "eye-dropper",
+    "reason": "Heroicons 'eye-dropper' is a color picker/eyedropper tool. Exact semantic match."
+  },
+  "eraser": {
+    "value": null,
+    "reason": "No eraser icon in Heroicons."
+  }
+}

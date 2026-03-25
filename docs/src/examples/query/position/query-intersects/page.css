@@ -50,6 +50,7 @@
 
   &.overlap {
     opacity: 0;
+    margin: -1px; /* top/left is relative to content but we want to overlap border */
     background: var(--red-background-color);
     padding: 0px;
     border: var(--red-border);
@@ -59,6 +60,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    box-sizing: border-box;
   }
 
   &.intersecting {

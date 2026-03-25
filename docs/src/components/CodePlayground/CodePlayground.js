@@ -35,6 +35,9 @@ const defaultSettings = {
   // the initial selected file
   selectedFile: '',
 
+  // whether to remove all ui besides code on left and preview on right
+  minimal: false,
+
   // whether to use tabs or panels
   useTabs: true,
 
@@ -463,6 +466,11 @@ const createComponent = (
     return settings.panelGroupWidth[index];
   },
   canShowMenu() {
+    // minimal is used to hide menu for demo purposes
+    // selected file is usually the only one showed to the user
+    if (settings.minimal) {
+      return false;
+    }
     if (settings.inline && self.getFileMenuItems().length <= 1) {
       return false;
     }

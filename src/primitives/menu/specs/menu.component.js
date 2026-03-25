@@ -5,40 +5,52 @@ export default {
     "item"
   ],
   "types": [
-    "selection"
+    "selection",
+    "sliding"
   ],
   "variations": [
     "evenly-spaced",
     "fitted",
     "vertical",
-    "inset"
+    "inset",
+    "icon-only"
   ],
   "settings": [
     "items",
-    "value"
+    "value",
+    "tooltip-settings"
   ],
   "attributes": [
     "item",
     "selection",
+    "sliding",
     "evenly-spaced",
     "fitted",
     "vertical",
     "inset",
+    "icon-only",
     "items",
-    "value"
+    "value",
+    "tooltip-settings"
   ],
   "propertyTypes": {
     "item": "string",
     "selection": "boolean",
+    "sliding": "boolean",
     "evenly-spaced": "boolean",
     "fitted": "boolean",
     "vertical": "boolean",
     "inset": "boolean",
+    "icon-only": "boolean",
     "items": "array",
-    "value": "string"
+    "value": "string",
+    "tooltip-settings": "object"
   },
   "defaultValues": {
     "items": [],
-    "value": ""
+    "value": "",
+    "tooltip-settings": {
+      "duration": 0
+    }
   }
 };

@@ -1,0 +1,482 @@
+{
+  "circle-dollar-sign": {
+    "lucide": "circle-dollar-sign",
+    "category": "finance",
+    "description": "Currency or price indicator"
+  },
+  "circle-dot": {
+    "lucide": "circle-dot",
+    "category": "form",
+    "description": "Radio button or selected option"
+  },
+  "circle-ellipsis": {
+    "lucide": "circle-ellipsis",
+    "category": "action",
+    "description": "More options menu"
+  },
+  "circle-minus": {
+    "lucide": "circle-minus",
+    "category": "action",
+    "description": "Remove or decrease"
+  },
+  "circle-pause": {
+    "lucide": "circle-pause",
+    "category": "media-controls",
+    "description": "Pause playback"
+  },
+  "circle-play": {
+    "lucide": "circle-play",
+    "category": "media-controls",
+    "description": "Start playback"
+  },
+  "circle-plus": {
+    "lucide": "circle-plus",
+    "category": "action",
+    "description": "Add or create new item"
+  },
+  "circle-question-mark": {
+    "lucide": "circle-question-mark",
+    "category": "status",
+    "description": "Help or unknown state"
+  },
+  "circle-stop": {
+    "lucide": "circle-stop",
+    "category": "media-controls",
+    "description": "Stop playback"
+  },
+  "circle-user": {
+    "lucide": "circle-user",
+    "category": "user",
+    "description": "User profile avatar"
+  },
+  "circle-x": {
+    "lucide": "circle-x",
+    "category": "action",
+    "description": "Cancel or dismiss"
+  },
+  "clipboard": {
+    "lucide": "clipboard",
+    "category": "action",
+    "description": "Clipboard or paste target"
+  },
+  "clipboard-list": {
+    "lucide": "clipboard-list",
+    "category": "data",
+    "description": "Task list or checklist"
+  },
+  "clipboard-paste": {
+    "lucide": "clipboard-paste",
+    "category": "action",
+    "description": "Paste from clipboard"
+  },
+  "clock": {
+    "lucide": "clock",
+    "category": "time",
+    "description": "Time or schedule"
+  },
+  "cloud": {
+    "lucide": "cloud",
+    "category": "weather",
+    "description": "Cloud or cloud computing"
+  },
+  "cloud-download": {
+    "lucide": "cloud-download",
+    "category": "action",
+    "description": "Download from cloud storage"
+  },
+  "cloud-lightning": {
+    "lucide": "cloud-lightning",
+    "category": "weather",
+    "description": "Thunderstorm"
+  },
+  "cloud-off": {
+    "lucide": "cloud-off",
+    "category": "connectivity",
+    "description": "Offline or no cloud connection"
+  },
+  "cloud-rain": {
+    "lucide": "cloud-rain",
+    "category": "weather",
+    "description": "Rain"
+  },
+  "cloud-sync": {
+    "lucide": "cloud-sync",
+    "category": "connectivity",
+    "description": "Syncing with cloud"
+  },
+  "cloud-upload": {
+    "lucide": "cloud-upload",
+    "category": "action",
+    "description": "Upload to cloud storage"
+  },
+  "code": {
+    "lucide": "code",
+    "category": "development",
+    "description": "Source code or markup"
+  },
+  "coffee": {
+    "lucide": "coffee",
+    "category": "misc",
+    "description": "Coffee or break time"
+  },
+  "coins": {
+    "lucide": "coins",
+    "category": "finance",
+    "description": "Money or currency"
+  },
+  "columns-2": {
+    "lucide": "columns-2",
+    "category": "editing",
+    "description": "Two-column layout"
+  },
+  "columns-3": {
+    "lucide": "columns-3",
+    "category": "editing",
+    "description": "Three-column layout"
+  },
+  "command": {
+    "lucide": "command",
+    "category": "system",
+    "description": "Command key or keyboard shortcut"
+  },
+  "compass": {
+    "lucide": "compass",
+    "category": "navigation",
+    "description": "Direction or exploration"
+  },
+  "component": {
+    "lucide": "component",
+    "category": "development",
+    "description": "UI component or module"
+  },
+  "computer": {
+    "lucide": "computer",
+    "category": "device",
+    "description": "Desktop computer"
+  },
+  "construction": {
+    "lucide": "construction",
+    "category": "status",
+    "description": "Under construction or maintenance"
+  },
+  "contact": {
+    "lucide": "contact",
+    "category": "user",
+    "description": "Contact card or person details"
+  },
+  "container": {
+    "lucide": "container",
+    "category": "development",
+    "description": "Container or packaging unit"
+  },
+  "cookie": {
+    "lucide": "cookie",
+    "category": "security",
+    "description": "Browser cookie or consent"
+  },
+  "copy": {
+    "lucide": "copy",
+    "category": "action",
+    "description": "Copy to clipboard"
+  },
+  "copy-check": {
+    "lucide": "copy-check",
+    "category": "action",
+    "description": "Copied successfully"
+  },
+  "copyright": {
+    "lucide": "copyright",
+    "category": "misc",
+    "description": "Copyright or intellectual property"
+  },
+  "corner-down-left": {
+    "lucide": "corner-down-left",
+    "category": "navigation",
+    "description": "Return or enter key"
+  },
+  "corner-down-right": {
+    "lucide": "corner-down-right",
+    "category": "navigation",
+    "description": "Forward direction indicator"
+  },
+  "cpu": {
+    "lucide": "cpu",
+    "category": "device",
+    "description": "Processor or computing power"
+  },
+  "credit-card": {
+    "lucide": "credit-card",
+    "category": "commerce",
+    "description": "Payment card"
+  },
+  "crop": {
+    "lucide": "crop",
+    "category": "editing",
+    "description": "Crop or trim image"
+  },
+  "cross": {
+    "lucide": "cross",
+    "category": "misc",
+    "description": "Medical cross or first aid"
+  },
+  "crosshair": {
+    "lucide": "crosshair",
+    "category": "navigation",
+    "description": "Target or precise location"
+  },
+  "crown": {
+    "lucide": "crown",
+    "category": "gamification",
+    "description": "Premium status or top rank"
+  },
+  "database": {
+    "lucide": "database",
+    "category": "development",
+    "description": "Database or data storage"
+  },
+  "database-backup": {
+    "lucide": "database-backup",
+    "category": "development",
+    "description": "Database backup or restore"
+  },
+  "delete": {
+    "lucide": "delete",
+    "category": "action",
+    "description": "Delete or backspace"
+  },
+  "dices": {
+    "lucide": "dices",
+    "category": "gamification",
+    "description": "Random chance or games"
+  },
+  "diff": {
+    "lucide": "diff",
+    "category": "development",
+    "description": "Code diff or file comparison"
+  },
+  "dollar-sign": {
+    "lucide": "dollar-sign",
+    "category": "finance",
+    "description": "US dollar currency"
+  },
+  "download": {
+    "lucide": "download",
+    "category": "action",
+    "description": "Download file"
+  },
+  "droplet": {
+    "lucide": "droplet",
+    "category": "editing",
+    "description": "Color picker or water drop"
+  },
+  "ellipsis": {
+    "lucide": "ellipsis",
+    "category": "action",
+    "description": "More options horizontal"
+  },
+  "ellipsis-vertical": {
+    "lucide": "ellipsis-vertical",
+    "category": "action",
+    "description": "More options vertical"
+  },
+  "eraser": {
+    "lucide": "eraser",
+    "category": "editing",
+    "description": "Erase or clear content"
+  },
+  "euro": {
+    "lucide": "euro",
+    "category": "finance",
+    "description": "Euro currency"
+  },
+  "expand": {
+    "lucide": "expand",
+    "category": "action",
+    "description": "Expand or enlarge"
+  },
+  "external-link": {
+    "lucide": "external-link",
+    "category": "navigation",
+    "description": "Open in new window"
+  },
+  "eye": {
+    "lucide": "eye",
+    "category": "action",
+    "description": "Visible or show content"
+  },
+  "eye-off": {
+    "lucide": "eye-off",
+    "category": "action",
+    "description": "Hidden or hide content"
+  },
+  "fast-forward": {
+    "lucide": "fast-forward",
+    "category": "media-controls",
+    "description": "Skip forward"
+  },
+  "file": {
+    "lucide": "file",
+    "category": "file",
+    "description": "Generic file"
+  },
+  "file-archive": {
+    "lucide": "file-archive",
+    "category": "file",
+    "description": "Compressed or archived file"
+  },
+  "file-check": {
+    "lucide": "file-check",
+    "category": "file",
+    "description": "Verified or approved file"
+  },
+  "file-code": {
+    "lucide": "file-code",
+    "category": "file",
+    "description": "Source code file"
+  },
+  "file-image": {
+    "lucide": "file-image",
+    "category": "file",
+    "description": "Image file"
+  },
+  "file-lock": {
+    "lucide": "file-lock",
+    "category": "file",
+    "description": "Protected or locked file"
+  },
+  "file-plus": {
+    "lucide": "file-plus",
+    "category": "file",
+    "description": "Create new file"
+  },
+  "file-search": {
+    "lucide": "file-search",
+    "category": "file",
+    "description": "Search within file"
+  },
+  "file-spreadsheet": {
+    "lucide": "file-spreadsheet",
+    "category": "file",
+    "description": "Spreadsheet file"
+  },
+  "file-text": {
+    "lucide": "file-text",
+    "category": "file",
+    "description": "Text document"
+  },
+  "file-x": {
+    "lucide": "file-x",
+    "category": "file",
+    "description": "Remove or rejected file"
+  },
+  "files": {
+    "lucide": "files",
+    "category": "file",
+    "description": "Multiple files"
+  },
+  "film": {
+    "lucide": "film",
+    "category": "media",
+    "description": "Video or movie content"
+  },
+  "fingerprint": {
+    "lucide": "fingerprint-pattern",
+    "category": "security",
+    "description": "Biometric authentication"
+  },
+  "flag": {
+    "lucide": "flag",
+    "category": "status",
+    "description": "Flag or report item"
+  },
+  "flame": {
+    "lucide": "flame",
+    "category": "status",
+    "description": "Trending or popular"
+  },
+  "flask-conical": {
+    "lucide": "flask-conical",
+    "category": "education",
+    "description": "Science experiment or lab"
+  },
+  "flip-horizontal": {
+    "lucide": "flip-horizontal",
+    "category": "editing",
+    "description": "Flip horizontally"
+  },
+  "flip-vertical": {
+    "lucide": "flip-vertical",
+    "category": "editing",
+    "description": "Flip vertically"
+  },
+  "folder": {
+    "lucide": "folder",
+    "category": "file",
+    "description": "File folder"
+  },
+  "folder-open": {
+    "lucide": "folder-open",
+    "category": "file",
+    "description": "Open folder"
+  },
+  "folder-plus": {
+    "lucide": "folder-plus",
+    "category": "file",
+    "description": "Create new folder"
+  },
+  "folder-tree": {
+    "lucide": "folder-tree",
+    "category": "file",
+    "description": "Directory structure"
+  },
+  "forward": {
+    "lucide": "forward",
+    "category": "communication",
+    "description": "Forward message"
+  },
+  "frown": {
+    "lucide": "frown",
+    "category": "status",
+    "description": "Negative feedback or unhappy"
+  },
+  "funnel": {
+    "lucide": "funnel",
+    "category": "data",
+    "description": "Filter data"
+  },
+  "gallery-horizontal": {
+    "lucide": "gallery-horizontal",
+    "category": "media",
+    "description": "Image gallery or carousel"
+  },
+  "gauge": {
+    "lucide": "gauge",
+    "category": "data",
+    "description": "Performance metric or speed"
+  },
+  "gift": {
+    "lucide": "gift",
+    "category": "commerce",
+    "description": "Gift or reward"
+  },
+  "git-branch": {
+    "lucide": "git-branch",
+    "category": "development",
+    "description": "Version control branch"
+  },
+  "git-commit-horizontal": {
+    "lucide": "git-commit-horizontal",
+    "category": "development",
+    "description": "Version control commit"
+  },
+  "git-compare": {
+    "lucide": "git-compare",
+    "category": "development",
+    "description": "Compare branches or versions"
+  },
+  "git-fork": {
+    "lucide": "git-fork",
+    "category": "development",
+    "description": "Fork repository"
+  }
+}

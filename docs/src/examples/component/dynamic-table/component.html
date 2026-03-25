@@ -1,0 +1,14 @@
+<table>
+  <thead>
+    <tr>
+      {#each header in headers}
+        <th>{header}</th>
+      {/each}
+    </tr>
+  </thead>
+  <tbody>
+    {#each rows as row}
+      {> template name=rowTemplate data=row}
+    {/each}
+  </tbody>
+</table>

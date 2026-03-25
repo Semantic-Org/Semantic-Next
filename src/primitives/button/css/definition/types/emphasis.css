@@ -13,7 +13,7 @@
   --button-link-text-color: var(--button-primary-color);
   --button-link-text-color-hover: var(--button-primary-color-hover);
 
-  --button-styled-background: var(--primary-background);
+  --button-styled-background: var(--primary-background-color);
   --button-styled-text-color: var(--primary-text-color);
   --button-styled-background-hover: var(--primary-5);
   --button-styled-background-pressed: var(--primary-10);
@@ -84,7 +84,7 @@
   --button-link-text-color: var(--button-secondary-color);
   --button-link-text-color-hover: var(--button-secondary-color-hover);
 
-  --button-styled-background: var(--secondary-background);
+  --button-styled-background: var(--secondary-background-color);
   --button-styled-text-color: var(--secondary-text-color);
   --button-styled-background-hover: var(--secondary-5);
   --button-styled-background-pressed: var(--secondary-10);

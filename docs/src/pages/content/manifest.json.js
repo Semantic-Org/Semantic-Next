@@ -6,22 +6,21 @@ import matter from 'gray-matter';
 
 export async function GET() {
   // ========== AI CONTEXT ==========
-  const uiDocs = import.meta.glob('../../../../ai/ui/**/*.md', { query: '?raw', eager: true });
-  const frameworkDocs = import.meta.glob('../../../../ai/framework/**/*.md', { query: '?raw', eager: true });
-  const contributingDocs = import.meta.glob('../../../../ai/contributing/**/*.md', { query: '?raw', eager: true });
-  const researchDocs = import.meta.glob('../../../../ai/research/**/*.md', { query: '?raw', eager: true });
-  const allAiDocs = { ...uiDocs, ...frameworkDocs, ...contributingDocs, ...researchDocs };
+  const allAiDocs = import.meta.glob(
+    ['../../../../ai/**/*.md', '!../../../../ai/workspace/**/*.md'],
+    { query: '?raw', eager: true },
+  );
 
   const aiPages = Object.entries(allAiDocs).map(([filePath, module]) => {
     const content = module.default;
     const { data: frontmatter } = matter(content);
-    const match = filePath.match(/ai\/(ui|framework|contributing|research)\/(.+)\.md$/);
-    const audience = match ? match[1] : 'unknown';
-    const slug = match ? match[2] : filePath;
+    const match = filePath.match(/ai\/(.+)\.md$/);
+    const relativePath = match ? match[1] : filePath;
+    const audience = frontmatter.audience || relativePath.split('/')[0];
 
     return {
-      path: `/content/ai/${audience}/${slug}.md`,
-      title: frontmatter.title || slug,
+      path: `/content/ai/${relativePath}.md`,
+      title: frontmatter.title || relativePath.split('/').pop(),
       description: frontmatter.description || '',
       audience,
       tokens: Math.ceil(content.length / 4),
@@ -69,7 +68,7 @@ export async function GET() {
       }
     });
 
-    const slug = example.slug.replace('mdx', '');
+    const slug = example.id;
 
     return {
       path: `/content/examples/${slug}.json`,

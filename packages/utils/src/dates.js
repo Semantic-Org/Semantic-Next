@@ -4,134 +4,133 @@ import { reverseKeys } from './objects.js';
         Dates
 --------------------*/
 
-export const formatDate = function(date, format = 'LLL', {
+const timezoneMap = {
+  ET: 'America/New_York',
+  CT: 'America/Chicago',
+  MT: 'America/Denver',
+  PT: 'America/Los_Angeles',
+  AKT: 'America/Anchorage',
+  HT: 'Pacific/Honolulu',
+  AT: 'America/Halifax',
+  UK: 'Europe/London',
+  WET: 'Europe/London',
+  CET: 'Europe/Paris',
+  ECT: 'Europe/Paris',
+  EET: 'Europe/Helsinki',
+  IRST: 'Europe/Dublin',
+  AET: 'Australia/Sydney',
+  ACT: 'Australia/Adelaide',
+  AWT: 'Australia/Perth',
+  NZT: 'Pacific/Auckland',
+  BRT: 'America/Sao_Paulo',
+  IST: 'Asia/Kolkata',
+  INST: 'Asia/Kolkata',
+  JST: 'Asia/Tokyo',
+  SGT: 'Asia/Singapore',
+};
+
+const presetFormats = {
+  LT: 'h:mm a',
+  LTS: 'h:mm:ss a',
+  L: 'MM/DD/YYYY',
+  l: 'M/D/YYYY',
+  LL: 'MMMM D, YYYY',
+  ll: 'MMM D, YYYY',
+  LLL: 'MMMM D, YYYY h:mm a',
+  lll: 'MMM D, YYYY h:mm a',
+  LLLL: 'dddd, MMMM D, YYYY h:mm a',
+  llll: 'ddd, MMM D, YYYY h:mm a',
+};
+
+const tokenRegExp = /\[([^\]]*)]|YYYY|YY|MMMM|MMM|MM|M|Do|DD|D|dddd|ddd|HH|hh|h|mm|ss|a/g;
+const needsNumericMonth = /\bMM?\b/;
+const formatterCache = new Map();
+
+export const formatDate = (date, format = 'LLL', {
   locale = 'default',
   hour12 = true,
   timezone = 'UTC',
   ...additionalOptions
-} = {}) {
-  // Check for invalid dates
-  if (isNaN(date.getTime())) {
-    return 'Invalid Date';
+} = {}) => {
+  if (date == null || isNaN(date.getTime?.())) { return 'Invalid Date'; }
+
+  const resolvedTimezone = timezone === 'local' ? undefined : (timezoneMap[timezone] || timezone);
+  const formatString = presetFormats[format] || format;
+  const resolvedLocale = locale === 'default' ? undefined : locale;
+
+  // Cached Intl.DateTimeFormat — construction is ~100x more expensive than formatToParts
+  const cacheKey = locale + '|' + (resolvedTimezone || '') + '|' + JSON.stringify(additionalOptions);
+  let formatter = formatterCache.get(cacheKey);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(resolvedLocale, {
+      timeZone: resolvedTimezone,
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      weekday: 'long',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hourCycle: 'h23',
+      ...additionalOptions,
+    });
+    formatterCache.set(cacheKey, formatter);
   }
 
-  // Create a new Date object with the same timestamp as the original date
-  const localDate = new Date(date.getTime());
-
-  if (timezone === 'local') {
-    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  }
-
-  const pad = (n) => (n < 10 ? `0${n}` : n);
-
-  // standard timezone abbreviations for convenience
-  const shorthand = reverseKeys({
-    // North America
-    'America/New_York': ['ET'],
-    'America/Chicago': ['CT'],
-    'America/Denver': ['MT'],
-    'America/Los_Angeles': ['PT'],
-    'America/Anchorage': ['AKT'],
-    'Pacific/Honolulu': ['HT'],
-    'America/Halifax': ['AT'],
-
-    // Europe
-    'Europe/London': ['UK', 'WET'],
-    'Europe/Paris': ['CET', 'ECT'],
-    'Europe/Helsinki': ['EET'],
-    'Europe/Dublin': ['IRST'], // Note disambiguation with India
-
-    // Australia/Oceania
-    'Australia/Sydney': ['AET'],
-    'Australia/Adelaide': ['ACT'],
-    'Australia/Perth': ['AWT'],
-    'Pacific/Auckland': ['NZT'],
-
-    // South America
-    'America/Sao_Paulo': ['BRT'],
-
-    // Asia
-    'Asia/Kolkata': ['IST', 'INST'], // Note disambiguation with Ireland
-    'Asia/Tokyo': ['JST'],
-    'Asia/Singapore': ['SGT']
-  });
-
-  if(timezone && shorthand[timezone]) {
-    timezone = shorthand[timezone];
-  }
-
-  const localeOptions = {
-    timeZone: timezone,
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    weekday: 'long',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: hour12,
-    ...additionalOptions,
-  };
-
-  // Create an Intl.DateTimeFormat instance with the specified timezone or user's local timezone
-  const formatter = new Intl.DateTimeFormat(locale, localeOptions);
-
-  // Get the formatted date components using the Intl.DateTimeFormat instance
-  const dateParts = formatter.formatToParts(localDate).reduce((acc, part) => {
+  const dateParts = formatter.formatToParts(date).reduce((acc, part) => {
     acc[part.type] = part.value;
     return acc;
   }, {});
 
-  let { year, month, day, weekday, hour, minute, second, dayPeriod } = dateParts;
+  const { year, month, day, weekday, hour, minute, second } = dateParts;
 
-  // Handle midnight in 24-hour format
-  if (hour === '24') {
-    hour = '00';
+  // Numeric month — only create a second formatter when format uses MM or M tokens
+  let numericMonth = 0;
+  if (needsNumericMonth.test(formatString)) {
+    const monthFormatter = new Intl.DateTimeFormat(resolvedLocale, {
+      timeZone: resolvedTimezone,
+      month: 'numeric',
+    });
+    const monthParts = monthFormatter.formatToParts(date);
+    for (let i = 0; i < monthParts.length; i++) {
+      if (monthParts[i].type === 'month') {
+        numericMonth = parseInt(monthParts[i].value, 10);
+        break;
+      }
+    }
   }
 
-  // Create a new Date object with the specified timezone
-  const timezoneDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  // Derived values for token resolution
+  const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
+  const hour24Value = hour === '24' ? 0 : (parseInt(hour, 10) || 0);
+  const hour12Value = hour24Value % 12 || 12;
+  const dayNumber = parseInt(day, 10) || 0;
+  const ordinalSuffix = ['th', 'st', 'nd', 'rd'];
+  const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
-  const dateMap = {
+  const tokens = {
     YYYY: year,
-    YY: year.slice(-2),
+    YY: pad2(parseInt(year, 10) % 100),
     MMMM: month,
     MMM: month.slice(0, 3),
-    MM: pad(timezoneDate.getMonth() + 1),
-    M: timezoneDate.getMonth() + 1,
-    DD: pad(timezoneDate.getDate()),
-    D: timezoneDate.getDate(),
-    Do: day + ['th', 'st', 'nd', 'rd'][day % 10 > 3 ? 0 : (day % 100 - day % 10 !== 10) * day % 10],
+    MM: pad2(numericMonth),
+    M: numericMonth,
+    DD: pad2(dayNumber),
+    D: dayNumber,
+    Do: getOrdinal(dayNumber),
     dddd: weekday,
     ddd: weekday.slice(0, 3),
-    HH: hour.padStart(2, '0'),
-    hh: hour12 ? (hour % 12 || 12).toString().padStart(2, '0') : hour.padStart(2, '0'),
-    h: hour12 ? (hour % 12 || 12).toString() : hour,
+    HH: pad2(hour24Value),
+    hh: hour12 ? pad2(hour12Value) : pad2(hour24Value),
+    h: hour12 ? hour12Value : hour24Value,
     mm: minute,
     ss: second,
-    a: hour12 && dayPeriod ? dayPeriod.toLowerCase() : '',
+    a: hour12 ? (hour24Value < 12 ? 'am' : 'pm') : '',
   };
 
-  const formatMap = {
-    LT: 'h:mm a',
-    LTS: 'h:mm:ss a',
-    L: 'MM/DD/YYYY',
-    l: 'M/D/YYYY',
-    LL: 'MMMM D, YYYY',
-    ll: 'MMM D, YYYY',
-    LLL: 'MMMM D, YYYY h:mm a',
-    lll: 'MMM D, YYYY h:mm a',
-    LLLL: 'dddd, MMMM D, YYYY h:mm a',
-    llll: 'ddd, MMM D, YYYY h:mm a',
-  };
-
-  format = format.trim();
-  const expandedFormat = formatMap[format] || format;
-
-  return expandedFormat
-    .replace(/\b(?:YYYY|YY|MMMM|MMM|MM|M|DD|D|Do|dddd|ddd|HH|hh|h|mm|ss|a)\b/g, (match) => {
-      return dateMap[match];
-    })
-    .replace(/\[(.+?)\]/g, (match, p1) => p1)
-    .trim();
+  // single-pass replacement
+  tokenRegExp.lastIndex = 0;
+  return formatString.replace(tokenRegExp, (match, escaped) => {
+    return escaped !== undefined ? escaped : tokens[match];
+  });
 };

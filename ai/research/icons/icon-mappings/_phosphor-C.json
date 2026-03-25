@@ -1,0 +1,270 @@
+{
+  "filter": {
+    "value": "funnel",
+    "reason": "Phosphor's 'funnel' icon is the standard filter/funnel shape, direct semantic match for filtering results"
+  },
+  "sort": {
+    "value": "sort-ascending",
+    "reason": "Phosphor's 'sort-ascending' shows vertical bars in ascending order, the standard sort indicator"
+  },
+  "list": {
+    "value": "list-dashes",
+    "reason": "Phosphor's 'list-dashes' shows horizontal lines representing a list view, cleaner than 'list' which is more generic"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct name match in Phosphor, shows a grid/table structure for spreadsheet or tabular data"
+  },
+  "grid": {
+    "value": "squares-four",
+    "reason": "Phosphor's 'squares-four' shows a 2x2 grid of squares, the standard grid/card view icon"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Direct name match in Phosphor, shows vertical bars representing a bar chart"
+  },
+  "chart-line": {
+    "value": "chart-line-up",
+    "reason": "Phosphor's 'chart-line-up' shows a line trending upward on axes, the standard line chart/analytics icon"
+  },
+  "chart-pie": {
+    "value": "chart-pie-slice",
+    "reason": "Phosphor's 'chart-pie-slice' shows a pie chart with a separated slice, the standard pie chart/statistics icon"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Direct name match in Phosphor, the universal show/visible icon"
+  },
+  "hide": {
+    "value": "eye-slash",
+    "reason": "Phosphor's 'eye-slash' shows an eye with a diagonal line through it, the standard hide/invisible icon"
+  },
+  "search": {
+    "value": "magnifying-glass",
+    "reason": "Phosphor's 'magnifying-glass' is the standard search/find icon"
+  },
+  "zoom-in": {
+    "value": "magnifying-glass-plus",
+    "reason": "Phosphor's 'magnifying-glass-plus' shows a magnifying glass with a plus sign, standard zoom-in icon"
+  },
+  "zoom-out": {
+    "value": "magnifying-glass-minus",
+    "reason": "Phosphor's 'magnifying-glass-minus' shows a magnifying glass with a minus sign, standard zoom-out icon"
+  },
+  "fullscreen": {
+    "value": "arrows-out",
+    "reason": "Phosphor's 'arrows-out' shows four arrows pointing outward from center, the standard maximize/fullscreen icon"
+  },
+  "exit-fullscreen": {
+    "value": "arrows-in",
+    "reason": "Phosphor's 'arrows-in' shows four arrows pointing inward to center, the standard minimize/exit-fullscreen icon"
+  },
+  "board": {
+    "value": "kanban",
+    "reason": "Phosphor's 'kanban' shows a kanban board layout with columns and cards, direct semantic match"
+  },
+  "activity": {
+    "value": "pulse",
+    "reason": "Phosphor's 'pulse' shows an ECG/heartbeat-style waveform, the standard activity/pulse indicator"
+  },
+  "success": {
+    "value": "check-circle",
+    "reason": "Phosphor's 'check-circle' shows a checkmark inside a circle, the universal success indicator"
+  },
+  "error": {
+    "value": "x-circle",
+    "reason": "Phosphor's 'x-circle' shows an X inside a circle, the universal error/failure indicator"
+  },
+  "warning": {
+    "value": "warning",
+    "reason": "Direct name match in Phosphor, shows a triangle with an exclamation mark for caution/alert"
+  },
+  "info": {
+    "value": "info",
+    "reason": "Direct name match in Phosphor, shows a lowercase i inside a circle for informational messages"
+  },
+  "help": {
+    "value": "question",
+    "reason": "Phosphor's 'question' shows a question mark inside a circle, the standard help/FAQ icon"
+  },
+  "loading": {
+    "value": "spinner-gap",
+    "reason": "Phosphor's 'spinner-gap' shows a circular spinner with a gap, designed specifically as a loading indicator"
+  },
+  "filled-circle": {
+    "value": "circle",
+    "reason": "Phosphor's 'circle' in fill weight renders as a solid filled circle; as the base icon it represents the filled/active state"
+  },
+  "empty-circle": {
+    "value": "circle",
+    "reason": "Phosphor's 'circle' in regular weight renders as an empty circle outline, representing inactive/unselected state"
+  },
+  "verified": {
+    "value": "seal-check",
+    "reason": "Phosphor's 'seal-check' shows a badge/seal with a checkmark, the standard verified/certification icon"
+  },
+  "smile": {
+    "value": "smiley",
+    "reason": "Phosphor's 'smiley' shows a happy face emoji, the standard satisfied/happy mood icon"
+  },
+  "frown": {
+    "value": "smiley-sad",
+    "reason": "Phosphor's 'smiley-sad' shows a sad face emoji, the standard dissatisfied/unhappy mood icon"
+  },
+  "tip": {
+    "value": "lightbulb",
+    "reason": "Phosphor's 'lightbulb' represents ideas, tips, and hints - the universal icon for suggestions and insights"
+  },
+  "fire": {
+    "value": "fire",
+    "reason": "Direct name match in Phosphor, shows a flame icon for hot/trending content"
+  },
+  "support": {
+    "value": "lifebuoy",
+    "reason": "Phosphor's 'lifebuoy' shows a life preserver ring, the standard support/help desk icon"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Phosphor's 'heart' is the universal like/favorite icon, direct semantic match"
+  },
+  "unlike": {
+    "value": "heart-break",
+    "reason": "Phosphor's 'heart-break' shows a broken heart, the visual opposite of the heart/like icon"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct name match in Phosphor, the standard star/favorite/rating icon"
+  },
+  "bookmark": {
+    "value": "bookmark-simple",
+    "reason": "Phosphor's 'bookmark-simple' shows a clean bookmark ribbon shape, ideal for save-for-later functionality"
+  },
+  "thumbs-up": {
+    "value": "thumbs-up",
+    "reason": "Direct name match in Phosphor, the universal upvote/approval icon"
+  },
+  "thumbs-down": {
+    "value": "thumbs-down",
+    "reason": "Direct name match in Phosphor, the universal downvote/disapproval icon"
+  },
+  "reply": {
+    "value": "arrow-bend-up-left",
+    "reason": "Phosphor's 'arrow-bend-up-left' shows a curved arrow going back and up, the standard reply icon shape"
+  },
+  "comment": {
+    "value": "chat-circle",
+    "reason": "Phosphor's 'chat-circle' shows a rounded speech bubble, the standard comment/message icon"
+  },
+  "comments": {
+    "value": "chats-circle",
+    "reason": "Phosphor's 'chats-circle' shows two overlapping rounded speech bubbles, representing multiple comments/discussion"
+  },
+  "typing": {
+    "value": "chat-circle-dots",
+    "reason": "Phosphor's 'chat-circle-dots' shows a speech bubble with three dots inside, the standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at",
+    "reason": "Phosphor's 'at' shows the @ symbol, the universal mention/at-sign icon"
+  },
+  "block": {
+    "value": "prohibit",
+    "reason": "Phosphor's 'prohibit' shows a circle with a diagonal line through it, the universal block/ban/restricted icon"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct name match in Phosphor, the standard flag icon for reporting or flagging content"
+  },
+  "pin": {
+    "value": "push-pin",
+    "reason": "Phosphor's 'push-pin' shows a thumbtack/pushpin, the standard icon for pinning items"
+  },
+  "award": {
+    "value": "medal",
+    "reason": "Phosphor's 'medal' shows a medal on a ribbon, representing badges, awards, and achievements"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Direct name match in Phosphor, the standard winner/achievement trophy icon"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Direct name match in Phosphor, shows a wrapped gift box for rewards and presents"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct name match in Phosphor, shows a bullseye target for goals and objectives"
+  },
+  "bold": {
+    "value": "text-b",
+    "reason": "Phosphor's 'text-b' shows a bold letter B, the standard bold text formatting icon"
+  },
+  "italic": {
+    "value": "text-italic",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows an italicized letter I for italic formatting"
+  },
+  "underline": {
+    "value": "text-underline",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows an underlined letter U for underline formatting"
+  },
+  "strikethrough": {
+    "value": "text-strikethrough",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows a letter S with a line through it for strikethrough"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct name match in Phosphor, shows angle brackets <> representing code/markup"
+  },
+  "quote": {
+    "value": "quotes",
+    "reason": "Phosphor's 'quotes' shows quotation marks, the standard blockquote/citation icon"
+  },
+  "heading": {
+    "value": "text-h",
+    "reason": "Phosphor's 'text-h' shows a capital H, the standard heading/title formatting icon"
+  },
+  "paragraph": {
+    "value": "paragraph",
+    "reason": "Direct name match in Phosphor, shows the pilcrow paragraph symbol"
+  },
+  "bullet-list": {
+    "value": "list-bullets",
+    "reason": "Phosphor's 'list-bullets' shows lines with bullet points, the standard unordered/bullet list icon"
+  },
+  "numbered-list": {
+    "value": "list-numbers",
+    "reason": "Phosphor's 'list-numbers' shows lines with numbers, the standard ordered/numbered list icon"
+  },
+  "checklist": {
+    "value": "list-checks",
+    "reason": "Phosphor's 'list-checks' shows lines with checkmarks, the standard todo/checklist icon"
+  },
+  "indent": {
+    "value": "text-indent",
+    "reason": "Phosphor's 'text-indent' shows lines shifting to the right, the standard text indent icon"
+  },
+  "outdent": {
+    "value": "text-outdent",
+    "reason": "Phosphor's 'text-outdent' shows lines shifting to the left, the standard text outdent/dedent icon"
+  },
+  "align-left": {
+    "value": "text-align-left",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows left-aligned text lines"
+  },
+  "align-center": {
+    "value": "text-align-center",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows center-aligned text lines"
+  },
+  "align-right": {
+    "value": "text-align-right",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows right-aligned text lines"
+  },
+  "justify": {
+    "value": "text-align-justify",
+    "reason": "Direct name match in Phosphor (with text- prefix), shows fully justified text lines"
+  },
+  "emoji": {
+    "value": "smiley-sticker",
+    "reason": "Phosphor's 'smiley-sticker' shows a smiley face with a folded corner like a sticker, representing an emoji picker"
+  }
+}
