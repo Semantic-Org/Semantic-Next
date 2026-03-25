@@ -3,5 +3,5 @@
 /* CSS Reset */
 @import url('./global/reset.css') layer(global.reset);
 
-/* Barebones Global Styling */
-@import url('./global/site.css') layer(global.site);
+/* Barebones Base Styling */
+@import url('./global/base.css') layer(global.base);

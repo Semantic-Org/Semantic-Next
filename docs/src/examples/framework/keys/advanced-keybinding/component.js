@@ -41,7 +41,7 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
       const searchTerm = state.searchTerm.get();
 
       // Select first result
-      const initialIndex = searchTerm == '' ? -1 : 0;
+      const initialIndex = searchTerm === '' ? -1 : 0;
       state.selectedIndex.set(initialIndex);
 
       // in a real-world example this would pull from db
@@ -61,7 +61,7 @@ const createComponent = ({ self, reaction, state, settings, bindKey, unbindKey, 
   },
 
   selectPrevious() {
-    if (state.selectedIndex.get() == -1) {
+    if (state.selectedIndex.get() === -1) {
       state.selectedIndex.set(state.results.get().length - 1);
     }
     else if (state.selectedIndex.get() > 0) {

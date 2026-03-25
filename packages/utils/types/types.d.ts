@@ -46,11 +46,11 @@ export function isNumber(x: unknown): x is number;
 export function isArray(x: unknown): x is any[];
 
 /**
- * Checks if the value is a binary array (Uint8Array)
+ * Checks if the value is a binary type (ArrayBuffer or typed array view)
  * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isbinary isBinary}
  * @param x - The value to check
  */
-export function isBinary(x: unknown): x is Uint8Array;
+export function isBinary(x: unknown): x is ArrayBufferView | ArrayBuffer;
 
 /**
  * Checks if the value is a function
@@ -65,6 +65,36 @@ export function isFunction(x: unknown): x is Function;
  * @param x - The value to check
  */
 export function isPromise(x: unknown): x is Promise<any>;
+
+/**
+ * Checks if the value is a Date instance (cross-realm safe)
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isdate isDate}
+ * @param x - The value to check
+ * @returns True if the value is a Date, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isDate(new Date());              // true
+ * isDate(Date.now());              // false
+ * isDate('2024-01-01');            // false
+ * ```
+ */
+export function isDate(x: unknown): x is Date;
+
+/**
+ * Checks if the value is a RegExp instance (cross-realm safe)
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/types#isregexp isRegExp}
+ * @param x - The value to check
+ * @returns True if the value is a RegExp, false otherwise
+ *
+ * @example
+ * ```typescript
+ * isRegExp(/abc/);                 // true
+ * isRegExp(new RegExp('abc'));     // true
+ * isRegExp('abc');                 // false
+ * ```
+ */
+export function isRegExp(x: unknown): x is RegExp;
 
 /**
  * Checks if the value is an arguments object

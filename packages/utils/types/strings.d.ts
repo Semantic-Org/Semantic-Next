@@ -25,6 +25,8 @@ export interface JoinWordsOptions {
 export interface GetArticleOptions {
   /** Capitalize the article */
   capitalize?: boolean;
+  /** Include the word after the article */
+  includeWord?: boolean;
 }
 
 /**
@@ -48,36 +50,60 @@ export interface ReverseStringOptions {
 }
 
 /**
- * Converts a kebab-case string to camelCase
- * Useful for converting HTML attributes to JavaScript property names
+ * Options for kebab-to-camel conversion
+ */
+export interface KebabToCamelOptions {
+  /** Character used to encode digit-leading segments (default: "_") */
+  separator?: string;
+}
+
+/**
+ * Options for camel-to-kebab conversion
+ */
+export interface CamelToKebabOptions {
+  /** Preserve leading uppercase for exact round-trip instead of normalizing for DOM safety (default: false) */
+  lossless?: boolean;
+  /** Character used to decode digit-leading segments (default: "_") */
+  separator?: string;
+}
+
+/**
+ * Converts a kebab-case string to camelCase with lossless round-trip support
+ * Digit-leading segments are preserved with an underscore prefix (e.g. `grid-2x2` becomes `grid_2x2`)
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#kebabtocamel kebabToCamel}
  *
  * @param str - The kebab-case string to convert
+ * @param options - Conversion options
  * @returns The camelCase version of the string
  *
  * @example
  * ```ts
  * kebabToCamel('background-color') // returns 'backgroundColor'
- * kebabToCamel('data-test-id') // returns 'dataTestId'
+ * kebabToCamel('grid-2x2') // returns 'grid_2x2'
+ * kebabToCamel('arrow-down-a-z') // returns 'arrowDownAZ'
  * ```
  */
-export function kebabToCamel(str?: string): string;
+export function kebabToCamel(str?: string, options?: KebabToCamelOptions): string;
 
 /**
- * Converts a camelCase string to kebab-case
- * Useful for converting JavaScript property names to HTML attributes
+ * Converts a camelCase string to kebab-case with lossless round-trip support
+ * Underscore-digit sequences are decoded back to hyphen-digit (e.g. `grid_2x2` becomes `grid-2x2`)
+ * By default, normalizes leading uppercase for DOM-safe attribute names
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#cameltokebab camelToKebab}
  *
  * @param str - The camelCase string to convert
+ * @param options - Conversion options
  * @returns The kebab-case version of the string
  *
  * @example
  * ```ts
  * camelToKebab('backgroundColor') // returns 'background-color'
- * camelToKebab('dataTestId') // returns 'data-test-id'
+ * camelToKebab('grid_2x2') // returns 'grid-2x2'
+ * camelToKebab('FooBar') // returns 'foo-bar' (PascalCase normalized)
+ * camelToKebab('FooBar', { lossless: true }) // returns '-foo-bar' (preserved for round-trip)
  * ```
  */
-export function camelToKebab(str?: string): string;
+export function camelToKebab(str?: string, options?: CamelToKebabOptions): string;
 
 /**
  * Capitalizes the first letter of a string
@@ -190,8 +216,8 @@ export function truncate(text: string | null | undefined, length: number, option
  * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#escapehtml escapeHTML}
  * @see {@link https://next.semantic-ui.com/examples/utils-escapehtml Example}
  *
- * @param string - The string to escape
- * @returns The string with HTML special characters escaped
+ * @param string - The string to escape. Falsy values return an empty string.
+ * @returns The string with HTML special characters escaped, or empty string for falsy input
  *
  * @example
  * ```ts
@@ -199,14 +225,34 @@ export function truncate(text: string | null | undefined, length: number, option
  * // returns '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;'
  * escapeHTML('Price: $5 & "free" shipping')
  * // returns 'Price: $5 &amp; &quot;free&quot; shipping'
+ * escapeHTML(null) // returns ''
  * ```
  */
-export function escapeHTML(string: string): string;
+export function escapeHTML(string: string | null | undefined | false | 0): string;
+
+/**
+ * Unescapes HTML entities in a string back to their original characters
+ * The inverse of escapeHTML — converts &amp; &lt; &gt; &quot; &#39; back to & < > " '
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#unescapehtml unescapeHTML}
+ * @see {@link https://next.semantic-ui.com/examples/utils-unescapehtml Example}
+ *
+ * @param string - The string containing HTML entities to unescape
+ * @returns The string with HTML entities converted back to characters
+ *
+ * @example
+ * ```ts
+ * unescapeHTML('&lt;div&gt;Hello&lt;/div&gt;')
+ * // returns '<div>Hello</div>'
+ * unescapeHTML('rock &amp; roll')
+ * // returns 'rock & roll'
+ * ```
+ */
+export function unescapeHTML(string: string): string;
 
 /**
  * Reverses a string while properly handling Unicode grapheme clusters
  * Uses Intl.Segmenter for correct handling of emojis, flag sequences, skin tones, and combined characters
- * @see {@link https://next.semantic-ui.com/api/utils/strings#reversestring reverseString}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/strings#reversestring reverseString}
  * @see {@link https://next.semantic-ui.com/examples/utils-reversestring Example}
  *
  * @param str - The string to reverse (null/undefined/empty returns empty string)

@@ -1,10 +1,10 @@
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
-import { isEmpty } from '@semantic-ui/utils';
+import { clone, isEmpty, isEqual } from '@semantic-ui/utils';
 
 import { arrayFromObject, isArray, isClient, isPlainObject, isString } from '@semantic-ui/utils';
 
@@ -14,15 +14,15 @@ export class ReactiveEachDirective extends AsyncDirective {
     this.reaction = null;
     this.items = [];
     this.eachCondition = null;
+    this._itemSnapshots = new Map();
   }
 
   render(eachCondition, settings = {}) {
     this.eachCondition = eachCondition;
 
-    // Stop existing reaction
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
+      return noChange;
     }
 
     // pass through context for debugging
@@ -35,7 +35,6 @@ export class ReactiveEachDirective extends AsyncDirective {
       };
     }
 
-    // Create a new reaction
     let html = this.renderItems();
 
     if (isClient) {
@@ -60,6 +59,7 @@ export class ReactiveEachDirective extends AsyncDirective {
 
     // if iterable is empty (no keys or length 0) trigger else conditions
     if (this.eachCondition.elseContent && isEmpty(items)) {
+      this._itemSnapshots.clear();
       // this is necessary to avoid lit errors
       // when returned lit html structure changes
       return repeat(
@@ -74,6 +74,18 @@ export class ReactiveEachDirective extends AsyncDirective {
     if (collectionType == 'object') {
       items = arrayFromObject(items);
     }
+
+    // Collect current keys and prune snapshots for removed items
+    const currentKeys = new Set();
+    items.forEach((item, indexOrKey) => {
+      currentKeys.add(this.getItemID(item, indexOrKey, collectionType));
+    });
+    this._itemSnapshots.forEach((_, key) => {
+      if (!currentKeys.has(key)) {
+        this._itemSnapshots.delete(key);
+      }
+    });
+
     return repeat(
       items,
       (item, indexOrKey) => this.getItemID(item, indexOrKey, collectionType),
@@ -93,8 +105,17 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   getTemplate(item, indexOrKey, collectionType) {
+    const key = this.getItemID(item, indexOrKey, collectionType);
+
+    // skip unchanged items to avoid redundant re-renders
+    const snapshot = this._itemSnapshots.get(key);
+    if (snapshot !== undefined && isEqual(snapshot, item)) {
+      return noChange;
+    }
+    this._itemSnapshots.set(key, isPlainObject(item) ? clone(item) : item);
+
     const templateData = this.getEachData(item, indexOrKey, collectionType, this.eachCondition);
-    return this.eachCondition.content(templateData);
+    return this.eachCondition.content(templateData, key);
   }
 
   getItemID(item, indexOrKey, collectionType) {
@@ -141,7 +162,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // The reaction will be recreated in the next render
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

@@ -1,8 +1,12 @@
 ---
 import Message from '@components/Message/Message.js';
+import { unescapeHTML } from '@semantic-ui/utils';
 
 // Get the slot content to check for [!type] pattern
-const html = await Astro.slots.render('default');
+let html = await Astro.slots.render('default');
+
+// Astro 6 MDX component overrides return HTML-escaped slot content
+html = unescapeHTML(html);
 
 // Parse for [!type] optional header pattern (only on same line, not across newlines)
 const match = html.match(/^\s*<p>\[!(\w+)\](?:[ \t]+([^\n<]+))?/);

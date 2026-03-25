@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Array Utilities
 package: "@semantic-ui/utils"
-methods: [filterEmpty, first, firstMatch, findIndex, last, remove, inArray, range, moveItem, moveToFront, moveToBack, sum, unique, where, flatten, some, any, sortBy, groupBy, intersection, difference, uniqueItems]
+methods: [filterEmpty, first, firstMatch, findIndex, last, remove, inArray, range, sequence, moveItem, moveToFront, moveToBack, sum, unique, where, flatten, some, any, sortBy, groupBy, intersection, difference, uniqueItems]
 icon: list
 description: API reference for array manipulation functions
 ---
@@ -54,18 +54,18 @@ The first element, an array of the first n elements, or undefined if the array i
 
 ## firstMatch
 
-Return the first value that matches the callback condition.
+Return the first value that matches the callback or value.
 
 ### Syntax
 ```javascript
-firstMatch(array, callback)
+firstMatch(array, callbackOrValue)
 ```
 
 ### Parameters
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
 ### Returns
 The first matching element or undefined if no match is found.
@@ -75,18 +75,18 @@ The first matching element or undefined if no match is found.
 
 ## findIndex
 
-Find the index of the first element that satisfies the testing function.
+Find the index of the first element that matches the callback or value.
 
 ### Syntax
 ```javascript
-findIndex(array, callback)
+findIndex(array, callbackOrValue)
 ```
 
 ### Parameters
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
 ### Returns
 The index of the first matching element, or -1 if no match is found.
@@ -159,7 +159,7 @@ True if the value is in the array, false otherwise.
 
 ## range
 
-Generate an array of numbers within a specified range.
+Generate an array of numbers within a specified range. The stop value is exclusive, matching Python's `range()` semantics. When called with a single argument, it generates numbers from `0` to `start` (exclusive). Integer steps use addition; fractional steps use multiplication to avoid floating-point drift.
 
 ### Syntax
 ```javascript
@@ -169,15 +169,34 @@ range(start, stop, step = 1)
 ### Parameters
 | Name  | Type   | Description | Default |
 |-------|--------|-------------|---------|
-| start | number | The start of the range (or end if stop is not provided) | |
-| stop  | number | The end of the range (optional) | |
-| step  | number | The step between numbers | 1 |
+| start | number | The start of the range, or the exclusive stop if `stop` is not provided | |
+| stop  | number | The exclusive end of the range (optional) | |
+| step  | number | The step between numbers. A step of `0` returns an empty array | 1 |
 
 ### Returns
-Array of numbers within the specified range.
+Array of numbers from `start` up to (but not including) `stop`.
 
 ### Example
 <PlaygroundExample id="utils-range" direction="horizontal"></PlaygroundExample>
+
+## sequence
+
+Generate a sequence of multiples. Useful for creating evenly spaced numeric sequences starting from a given value.
+
+### Syntax
+```javascript
+sequence(count, interval = 1, start = 1)
+```
+
+### Parameters
+| Name     | Type   | Description | Default |
+|----------|--------|-------------|---------|
+| count    | number | The number of elements to generate | |
+| interval | number | The multiplier interval between elements | 1 |
+| start    | number | The starting multiplier offset | 1 |
+
+### Returns
+Array of `count` numbers where each element is `(start + index) * interval`.
 
 ## moveItem
 
@@ -354,7 +373,7 @@ An alias for `some`.
 
 ## sortBy
 
-Sort an array of objects by one or more keys.
+Sort an array of objects by one or more keys. String values are compared using natural sort order via `Intl.Collator` (e.g. `"item2"` sorts before `"item10"`).
 
 ### Syntax
 ```javascript

@@ -336,6 +336,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
       returnDetails: true,
       viewport: $viewport,
     });
+    debug('Testing position', view, $viewport.el(), el);
     const eventData = {
       view,
       viewport: $viewport,
@@ -355,7 +356,7 @@ const createBehavior = ({ $, $el, el, self, attachEvent, cache, settings, dispat
         else {
           warn('No positions fit viewport');
         }
-        debug('no positions left to test');
+        debug('No positions left to test');
         self.endFallbackSearch();
       }
       return true;

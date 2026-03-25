@@ -277,7 +277,7 @@ export class Behavior {
           // dataset is always stringified for atts, we want this as native values
           const elData = self.getElementData(targetElement);
           const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
-          self.call(boundEvent, {
+          return self.call(boundEvent, {
             additionalParams: {
               event: event,
               target: targetElement,

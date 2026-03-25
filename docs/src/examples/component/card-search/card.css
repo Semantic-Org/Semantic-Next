@@ -46,12 +46,12 @@
       font-size: 11px;
       flex-wrap: wrap;
       color: var(--standard-40);
-      margin-bottom: var(--spacing-xs);
+      margin-bottom: var(--margin-xs);
     }
   }
 
   .meta {
-    margin-top: var(--spacing-xs);
+    margin-top: var(--margin-xs);
     padding-top: var(--padding-xs);
     border-top: var(--border);
     display: flex;

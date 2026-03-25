@@ -8,6 +8,7 @@
 
   ::slotted(ui-button) {
     --button-width: 100%;
+    --button-text-align: left;
   }
   ::slotted(ui-button:is(:first-child)) {
     --button-border-radius: var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0 0;

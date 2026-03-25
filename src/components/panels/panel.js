@@ -8,7 +8,7 @@ const defaultSettings = {
   direction: 'vertical',
   resizable: true,
   itemCount: 'auto',
-  minSize: '0px',
+  minSize: 'auto',
   maxSize: '0px',
   naturalSize: '',
   size: 'grow',
@@ -24,6 +24,10 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
   resizing: signal(false),
   initialized: signal(false),
 
+  canShowMinimize() {
+    return settings.canMinimize && settings.direction === 'vertical';
+  },
+
   getClassMap() {
     return {
       resizing: self.resizing.get(),
@@ -34,8 +38,9 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
 
   // ios handles flex on opacity: 0 items in unexpected ways
   isSafari() {
+    if (!isClient) { return false; }
     const userAgent = navigator.userAgent;
-    return isClient && !userAgent.includes('Chrome') && userAgent.includes('Safari') !== -1;
+    return !userAgent.includes('Chrome') && userAgent.includes('Safari');
   },
 
   setInitialized() {
@@ -48,14 +53,19 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       const panels = self.getPanels();
       return panels.getPixelSettingSize(settings.naturalSize);
     }
+    const isHorizontal = direction == 'horizontal';
+    const $label = $('.self.label');
+    const labelSize = $label.exists()
+      ? (isHorizontal ? $label.outerWidth() : $label.outerHeight())
+      : 0;
+    if (minimized) {
+      return labelSize;
+    }
     const $children = $(panel).children();
-    return (direction == 'horizontal')
-      ? ($children.length > 1)
-        ? sum($children.width())
-        : $children.width()
-      : ($children.length > 1)
-      ? sum($children.height())
-      : $children.height();
+    const boxModel = { includePadding: true, includeBorder: true, includeMargin: true };
+    const sizes = isHorizontal ? $children.naturalWidth(boxModel) : $children.naturalHeight(boxModel);
+    const contentSize = ($children.length > 1) ? sum(sizes) : (sizes || 0);
+    return labelSize + contentSize;
   },
 
   getHandleClassMap: () => ({
@@ -72,6 +82,7 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       : 'ns-resize';
   },
   getIndex() {
+    if (isServer) { return 0; }
     return $(el).index();
   },
   isResizable() {
@@ -126,12 +137,11 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       .css('cursor', '');
     $$('iframe').off('pointerenter');
     self.resizing.set(false);
-    delete self.initialPosition;
-    delete self.initialSize;
     dispatchEvent('resizeEnd', {
       initialSize: self.initialSize,
       finalSize: self.getCurrentFlex(),
     });
+    delete self.initialSize;
   },
   setPreviousNaturalSize() {
     const panels = self.getPanels();

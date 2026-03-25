@@ -148,6 +148,7 @@ export function resolveBareImports(options = {}) {
 
   // Fetch entrypoint from jsDelivr API
   const getEntrypoint = async (packageName, version) => {
+    const cleanVersion = version.replace(/[\^~]/g, '');
     try {
       // First check cache
       await ensureCacheDir();
@@ -155,9 +156,6 @@ export function resolveBareImports(options = {}) {
       if (cachedEntrypoint !== null) {
         return cachedEntrypoint;
       }
-
-      // Clean version by removing ^ or ~
-      const cleanVersion = version.replace(/[\^~]/g, '');
 
       log.verbose(`🔍 Fetching entrypoint for ${packageName}@${cleanVersion}...`);
 

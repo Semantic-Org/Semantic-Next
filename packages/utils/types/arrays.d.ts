@@ -148,34 +148,36 @@ export function first<T>(array: T[], number: number): T[]; // 'number' parameter
 export function first<T>(array: T[], number?: number): T | T[] | undefined; // combined for ease of use, optional 'number' parameter
 
 /**
- * Returns the first element that matches the callback criteria
+ * Returns the first element that matches the callback or value
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#firstmatch firstMatch}
  *
  * @param array - The array to search
- * @param callback - Function to test each element
+ * @param callbackOrValue - Function to test each element or value to match
  * @returns The first matching element or undefined
  *
  * @example
  * ```ts
  * firstMatch([1, 2, 3, 4], x => x > 2) // returns 3
+ * firstMatch([1, 2, 3, 4], 3) // returns 3
  * ```
  */
-export function firstMatch<T>(array: T[], callback: ArrayCallback<T>): T | undefined;
+export function firstMatch<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): T | undefined;
 
 /**
- * Finds the index of the first element that matches the callback criteria
+ * Finds the index of the first element that matches the callback or value
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#findindex findIndex}
  *
  * @param array - The array to search
- * @param callback - Function to test each element
+ * @param callbackOrValue - Function to test each element or value to match
  * @returns The index of the first matching element or -1
  *
  * @example
  * ```ts
  * findIndex([1, 2, 3], x => x === 2) // returns 1
+ * findIndex([1, 2, 3], 2) // returns 1
  * ```
  */
-export function findIndex<T>(array: T[], callback: ArrayCallback<T>): number;
+export function findIndex<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): number;
 
 /**
  * Removes elements from an array that match a value or callback
@@ -191,7 +193,7 @@ export function findIndex<T>(array: T[], callback: ArrayCallback<T>): number;
  * remove([1, 2, 3], x => x > 2) // removes 3 from array
  * ```
  */
-export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): boolean;
+export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): number;
 
 /**
  * Checks if a value exists in an array
@@ -207,28 +209,52 @@ export function remove<T>(array: T[], callbackOrValue: T | ArrayCallback<T>): bo
  * inArray(4, [1, 2, 3]) // returns false
  * ```
  */
-export function inArray<T>(array: T[], value: T): boolean;
+export function inArray<T>(value: T, array: T[]): boolean;
 
 /**
- * Creates an array of numbers progressing from start up to, but not including, end
+ * Generates an array of numbers from start up to, but not including, stop.
+ * Uses integer fast path for whole-number steps and multiplication for fractional
+ * steps to avoid floating-point drift. Returns an empty array when step is 0.
  * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#range range}
+ * @see {@link https://next.semantic-ui.com/examples/utils-range Example}
  *
- * @param start - The start number
- * @param stop - The end number
- * @param step - The value to increment by (default: 1)
- * @returns Array of numbers
+ * @param start - When called with one argument, acts as stop (start defaults to 0). Otherwise the start value.
+ * @param stop - The exclusive upper bound
+ * @param step - The increment between values (default: 1). Returns [] if 0.
+ * @returns Array of numbers in the range [start, stop)
  *
  * @example
  * ```ts
- * range(4) // returns [0, 1, 2, 3]
+ * range(5) // returns [0, 1, 2, 3, 4]
  * range(1, 5) // returns [1, 2, 3, 4]
- * range(0, 20, 5) // returns [0, 5, 10, 15]
+ * range(0, 10, 2) // returns [0, 2, 4, 6, 8]
+ * range(0, 1, 0.1) // returns [0, 0.1, 0.2, ..., 0.9] — no drift
  * ```
  */
-export function range(stop: number): number[]; // Only 'stop' provided
-export function range(start: number, stop: number): number[]; // 'start' and 'stop' provided
-export function range(start: number, stop: number, step: number): number[]; // 'start', 'stop', and 'step' provided
-export function range(start: number, stop?: number, step?: number): number[]; // combined for ease of use
+export function range(stop: number): number[];
+export function range(start: number, stop: number): number[];
+export function range(start: number, stop: number, step: number): number[];
+export function range(start: number, stop?: number, step?: number): number[];
+
+/**
+ * Generates a sequence of multiples. Each element is `(start + index) * interval`.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/arrays#sequence sequence}
+ * @see {@link https://next.semantic-ui.com/examples/utils-sequence Example}
+ *
+ * @param count - Number of elements to generate
+ * @param interval - The multiplier for each position (default: 1)
+ * @param start - The starting offset before multiplication (default: 1)
+ * @returns Array of `count` multiples
+ *
+ * @example
+ * ```ts
+ * sequence(5) // returns [1, 2, 3, 4, 5]
+ * sequence(3, 3) // returns [3, 6, 9]
+ * sequence(5, 3, 2) // returns [6, 9, 12, 15, 18]
+ * sequence(4, 100, 0) // returns [0, 100, 200, 300]
+ * ```
+ */
+export function sequence(count: number, interval?: number, start?: number): number[];
 
 /**
  * Calculates the sum of an array of numbers

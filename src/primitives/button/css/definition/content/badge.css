@@ -1,0 +1,28 @@
+/*-------------------
+    Button Badge
+--------------------*/
+
+.button .badge,
+::slotted(.badge) {
+  margin: var(--button-badge-margin);
+  --label-background: var(--black-10);
+  --label-color: var(--button-text-color);
+  --label-outline-text-color: var(--button-text-color);
+  --label-outline: var(--solid-black-border);
+}
+
+
+.badge {
+  outline: var(--border);
+  padding: var(--button-vertical-padding) var(--padding-s);
+  border-radius: var(--left-attached-border-radius);
+  line-height: 1;
+  outline-offset: -1px;
+  text-align: center;
+  display: inline-block;
+  margin-right: -5px;
+}
+
+.badge + .button {
+  border-radius: var(--right-attached-border-radius);
+}

@@ -26,7 +26,8 @@ describe('isEqual', () => {
       expect(isEqual([1, 2, 3], [3, 2, 1])).toBe(false);
     });
 
-    // sets
+    // Sets — note: Set equality uses SameValueZero (Set.has) for members,
+    // so object members are compared by reference, not structural equality
     it('should return true for equal Sets', () => {
       const setA = new Set([1, 2, 3]);
       const setB = new Set([1, 2, 3]);

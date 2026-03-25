@@ -21,8 +21,8 @@ export interface DebounceOptions {
   trailing?: boolean;
   /** Maximum time to wait before forcing execution */
   maxWait?: number;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -37,8 +37,8 @@ export interface ThrottleOptions {
   leading?: boolean;
   /** Execute once more after wait period if calls occurred (default: true) */
   trailing?: boolean;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -115,6 +115,47 @@ export function memoize<T extends (...args: any[]) => any>(
   fn: T,
   hashFunction?: (args: Parameters<T>) => string | number,
 ): T & { cache: Map<string | number, ReturnType<T>>; };
+
+/**
+ * Options for the wait function
+ */
+export interface WaitOptions {
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
+  /** Whether to reject the promise when aborted. Defaults to `true` */
+  rejectOnAbort?: boolean;
+}
+
+/**
+ * Returns a promise that resolves after the specified number of milliseconds.
+ * Supports cancellation via `AbortController` — by default, aborting rejects
+ * the promise with an `AbortError`, matching web platform conventions.
+ * Set `rejectOnAbort: false` to resolve early instead.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wait wait}
+ * @see {@link https://next.semantic-ui.com/examples/utils-wait Example}
+ *
+ * @param ms - The number of milliseconds to wait
+ * @param options - Optional configuration
+ * @returns A promise that resolves after the specified delay, or rejects on abort
+ *
+ * @example
+ * ```ts
+ * // Basic usage
+ * await wait(1000);
+ *
+ * // Cancellable — rejects with AbortError
+ * const controller = new AbortController();
+ * try {
+ *   await wait(5000, { abortController: controller });
+ * } catch (e) {
+ *   // e.name === 'AbortError'
+ * }
+ *
+ * // Resolve early instead of rejecting
+ * await wait(5000, { abortController: controller, rejectOnAbort: false });
+ * ```
+ */
+export function wait(ms?: number, options?: WaitOptions): Promise<void>;
 
 /**
  * Creates a debounced version of a function that delays execution until after wait milliseconds

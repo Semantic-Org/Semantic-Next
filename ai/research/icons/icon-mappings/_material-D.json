@@ -1,0 +1,206 @@
+{
+  "cart": {
+    "value": "shopping_cart",
+    "reason": "Direct match; Material Symbols' standard e-commerce shopping cart icon"
+  },
+  "add-to-cart": {
+    "value": "add_shopping_cart",
+    "reason": "Direct match; Material Symbols has a dedicated add_shopping_cart icon (cart with plus sign)"
+  },
+  "remove-from-cart": {
+    "value": "remove_shopping_cart",
+    "reason": "Direct match; Material Symbols has a dedicated remove_shopping_cart icon (cart with X/minus)"
+  },
+  "payment": {
+    "value": "credit_card",
+    "reason": "Standard credit card icon for payment/billing; direct semantic match in Material Symbols"
+  },
+  "wallet": {
+    "value": "account_balance_wallet",
+    "reason": "Material Symbols' wallet icon; the name is account_balance_wallet rather than just 'wallet'"
+  },
+  "money": {
+    "value": "payments",
+    "reason": "Material Symbols' 'payments' shows stacked bills/currency; better generic money icon than 'attach_money' which is just a dollar sign"
+  },
+  "tag": {
+    "value": "sell",
+    "reason": "Material Symbols' 'sell' is a price tag icon; best match for price tag/label concept"
+  },
+  "tags": {
+    "value": "sell",
+    "reason": "Material Symbols has no multi-tag icon; 'sell' (price tag) is the closest single-tag match"
+  },
+  "discount": {
+    "value": "percent",
+    "reason": "Material Symbols' 'percent' icon shows a percentage symbol; directly conveys discount"
+  },
+  "coupon": {
+    "value": "confirmation_number",
+    "reason": "Material Symbols' 'confirmation_number' shows a ticket-like shape with perforated edges; best match for coupon/ticket concept"
+  },
+  "package": {
+    "value": "package",
+    "reason": "Direct name match in Material Symbols; a box/package icon for orders and shipments"
+  },
+  "shipping": {
+    "value": "local_shipping",
+    "reason": "Direct match; Material Symbols' standard shipping/delivery truck icon"
+  },
+  "delivery": {
+    "value": "local_shipping",
+    "reason": "Material Symbols has no distinct express/fast delivery icon; reuses 'local_shipping' (truck) as it is the closest match for delivery"
+  },
+  "return": {
+    "value": "assignment_return",
+    "reason": "Material Symbols' 'assignment_return' shows a document with return arrow; represents product return/refund"
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Direct name match in Material Symbols; standard receipt icon"
+  },
+  "invoice": {
+    "value": "receipt_long",
+    "reason": "Material Symbols' 'receipt_long' shows an extended receipt with line items; differentiates from plain receipt for detailed invoices"
+  },
+  "store": {
+    "value": "storefront",
+    "reason": "Material Symbols' 'storefront' shows a shop facade with awning; the standard store/shop icon"
+  },
+  "shopping-bag": {
+    "value": "shopping_bag",
+    "reason": "Direct match; Material Symbols' standard shopping bag icon"
+  },
+  "calendar": {
+    "value": "calendar_today",
+    "reason": "Material Symbols' 'calendar_today' is a single-day calendar; the standard date picker icon"
+  },
+  "schedule": {
+    "value": "calendar_month",
+    "reason": "Material Symbols' 'calendar_month' shows a calendar with a full month grid; represents a schedule with multiple events"
+  },
+  "scheduled": {
+    "value": "event_available",
+    "reason": "Material Symbols' 'event_available' shows a calendar with a checkmark; indicates a confirmed/scheduled date"
+  },
+  "overdue": {
+    "value": "event_busy",
+    "reason": "Material Symbols' 'event_busy' shows a calendar with an X; represents a missed deadline or overdue date"
+  },
+  "time": {
+    "value": "schedule",
+    "reason": "Material Symbols' 'schedule' is a clock face icon; the standard time/clock icon (confusingly named 'schedule' in Material)"
+  },
+  "timer": {
+    "value": "timer",
+    "reason": "Direct name match in Material Symbols; a stopwatch/countdown timer icon"
+  },
+  "watch": {
+    "value": "watch",
+    "reason": "Direct name match in Material Symbols; a wristwatch/smartwatch icon"
+  },
+  "layers": {
+    "value": "layers",
+    "reason": "Direct name match in Material Symbols; stacked layers icon"
+  },
+  "subtask": {
+    "value": "subdirectory_arrow_right",
+    "reason": "Material Symbols' 'subdirectory_arrow_right' shows a right-angle arrow branching down; visually represents a subtask branching from a parent"
+  },
+  "tree": {
+    "value": "account_tree",
+    "reason": "Direct match; Material Symbols' 'account_tree' shows a hierarchy/tree diagram, perfect for org charts and sitemaps"
+  },
+  "progress": {
+    "value": "progress_activity",
+    "reason": "Material Symbols' 'progress_activity' shows a circular progress indicator; directly represents ongoing progress"
+  },
+  "milestone": {
+    "value": "diamond",
+    "reason": "Material Symbols' 'diamond' is a diamond shape; the standard milestone marker used in project management (Gantt charts)"
+  },
+  "tasks": {
+    "value": "task_alt",
+    "reason": "Material Symbols' 'task_alt' shows a checkmark in a circle; represents completed tasks/todos"
+  },
+  "location": {
+    "value": "location_on",
+    "reason": "Direct match; Material Symbols' standard map pin/location marker icon"
+  },
+  "map": {
+    "value": "map",
+    "reason": "Direct name match in Material Symbols; a folded map icon"
+  },
+  "directions": {
+    "value": "directions",
+    "reason": "Direct name match in Material Symbols; a directional sign/route icon"
+  },
+  "compass": {
+    "value": "explore",
+    "reason": "Material Symbols' 'explore' is a compass icon; the standard compass/navigation icon in the library"
+  },
+  "current-location": {
+    "value": "my_location",
+    "reason": "Direct match; Material Symbols' 'my_location' is a crosshair icon indicating current GPS position"
+  },
+  "measure": {
+    "value": "straighten",
+    "reason": "Material Symbols' 'straighten' shows a ruler; the standard measurement/distance icon"
+  },
+  "trending-up": {
+    "value": "trending_up",
+    "reason": "Direct name match in Material Symbols; upward trend line for growth/increase"
+  },
+  "trending-down": {
+    "value": "trending_down",
+    "reason": "Direct name match in Material Symbols; downward trend line for decline/decrease"
+  },
+  "balance": {
+    "value": "balance",
+    "reason": "Direct name match in Material Symbols; a balance scale icon"
+  },
+  "swap": {
+    "value": "swap_horiz",
+    "reason": "Material Symbols' 'swap_horiz' shows bidirectional horizontal arrows; represents transfer/exchange"
+  },
+  "savings": {
+    "value": "savings",
+    "reason": "Direct name match in Material Symbols; a piggy bank icon"
+  },
+  "vault": {
+    "value": null,
+    "reason": "Material Symbols has no vault or safe icon; 'lock' is a padlock (generic security), not a vault/safe box"
+  },
+  "docs": {
+    "value": "menu_book",
+    "reason": "Material Symbols' 'menu_book' shows an open book with pages; represents documentation/reference material"
+  },
+  "book-open": {
+    "value": "auto_stories",
+    "reason": "Material Symbols' 'auto_stories' shows an open book with flipping pages; conveys active reading/open book"
+  },
+  "graduation": {
+    "value": "school",
+    "reason": "Material Symbols' 'school' shows a graduation cap; the standard education/academic icon"
+  },
+  "briefcase": {
+    "value": "work",
+    "reason": "Material Symbols' 'work' is a briefcase icon; the standard work/job icon (named 'work' rather than 'briefcase')"
+  },
+  "company": {
+    "value": "apartment",
+    "reason": "Material Symbols' 'apartment' shows a multi-story building; represents a company office/building"
+  },
+  "organization": {
+    "value": "corporate_fare",
+    "reason": "Material Symbols' 'corporate_fare' shows a building with organizational structure; ideal for corporate/enterprise concept"
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Direct match; Material Symbols' 'newspaper' icon represents news/article content"
+  },
+  "rss": {
+    "value": "rss_feed",
+    "reason": "Direct match; Material Symbols' 'rss_feed' is the standard RSS broadcast icon"
+  }
+}

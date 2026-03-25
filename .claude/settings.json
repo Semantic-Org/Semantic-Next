@@ -6,8 +6,11 @@
   },
   "mcpServers": {
     "semantic-ui": {
-      "command": "node",
-      "args": ["./tools/mcp-server/dist/index.js"]
+      "command": "bash",
+      "args": ["-c", "cd tools/mcp && npm run build --silent && node dist/index.js"]
     }
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
   }
 }

@@ -1,3 +1,4 @@
+import { noChange } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -11,26 +12,27 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   }
 
   render(condition) {
-    // Stop existing reaction
+    this.condition = condition;
+
+    // Reuse existing reaction — signals handle updates
     if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
+      return noChange;
     }
 
     // Create new reaction on client
     if (isClient) {
-      this.watchChanges(condition);
+      this.watchChanges();
     }
 
-    return condition.content();
+    return this.condition.content();
   }
 
-  watchChanges(condition) {
+  watchChanges() {
     const context = {
-      message: `rerender block: {#${condition.key ? 'guard' : 'rerender'} ${
-        condition.keyString || condition.expressionString
+      message: `rerender block: {#${this.condition.key ? 'guard' : 'rerender'} ${
+        this.condition.keyString || this.condition.expressionString
       }}`,
-      rerender: condition,
+      rerender: this.condition,
     };
 
     this.reaction = Reaction.create((computation) => {
@@ -42,17 +44,17 @@ export class ReactiveRerenderDirective extends AsyncDirective {
       // this guards against the return value of a reactive expression the "key"
       // {#guard expression} -> key=expression
       // {#rerender key=expression} -> key=expressin`
-      if (condition.keyString) {
-        Reaction.guard(() => this.getValue(condition.key()));
+      if (this.condition.keyString) {
+        Reaction.guard(() => this.getValue(this.condition.key()));
       }
 
       // {#rerender expression} - naively add a reactive context to this reaction
-      if (condition.expressionString) {
-        this.getValue(condition.expression());
+      if (this.condition.expressionString) {
+        this.getValue(this.condition.expression());
       }
 
       if (!computation.firstRun) {
-        this.setValue(condition.content());
+        this.setValue(this.condition.content());
       }
     }, { context });
   }
@@ -71,7 +73,7 @@ export class ReactiveRerenderDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // Reaction will be recreated in next render
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

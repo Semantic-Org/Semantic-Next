@@ -1,6 +1,6 @@
 export const FLOATED_OPTIONS = [
-  { name: 'Left Floated', value: 'left-floated', description: 'appear to the left of content' },
-  { name: 'Right Floated', value: 'right-floated', description: 'appear to the right of content' },
+  { name: 'Left Floated', value: 'left', description: 'appear to the left of content' },
+  { name: 'Right Floated', value: 'right', description: 'appear to the right of content' },
 ];
 
 export const FLOATED_VARIATION = {

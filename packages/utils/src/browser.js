@@ -9,15 +9,21 @@ export const copyText = (text) => {
 };
 
 export const openLink = (url, { newWindow = false, settings, target, event } = {}) => {
+  if (event) {
+    event.preventDefault();
+  }
   if (newWindow) {
     window.open(url, target, settings);
   }
   else {
     window.location.href = url;
   }
-  if (event) {
-    event.preventDefault();
-  }
+};
+
+const specialKeys = {
+  Control: 'ctrl',
+  Escape: 'esc',
+  ' ': 'space',
 };
 
 export const getKeyFromEvent = (event) => {
@@ -38,12 +44,6 @@ export const getKeyFromEvent = (event) => {
   if (event.metaKey && pressedKey !== 'Meta') {
     key += 'meta+';
   }
-  // standardize key names
-  const specialKeys = {
-    Control: 'ctrl',
-    Escape: 'esc',
-    ' ': 'space',
-  };
   pressedKey = pressedKey.replace('Arrow', ''); // ArrowUp -> up
   key += specialKeys[pressedKey] || pressedKey.toLowerCase();
   return key;

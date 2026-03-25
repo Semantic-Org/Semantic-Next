@@ -29,7 +29,7 @@ const createComponent = ({ $, self, state, settings, dispatchEvent }) => ({
 
   getLabelStyles(number) {
     return {
-      current: state.rating.get() == number,
+      current: state.rating.get() === number,
     };
   },
 

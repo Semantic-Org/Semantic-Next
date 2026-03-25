@@ -1,0 +1,103 @@
+---
+import {
+  UIButton,
+  UIButtons,
+  UICard,
+  UICards,
+  UIContainer,
+  UIDivider,
+  UIIcon,
+  UIImage,
+  UIInput,
+  UILabel,
+  UIMenu,
+  MenuItem,
+  UIRail,
+  UISegment,
+  UISegments,
+  UISpinner,
+  UITable,
+} from '@semantic-ui/core';
+import { inArray } from '@semantic-ui/utils';
+
+const { name, tagName, attributes } = Astro.props;
+const componentName = tagName || name;
+---
+
+{inArray(componentName, ['ui-button', 'UIButton']) && (
+  <UIButton {...attributes}>
+    <slot />
+  </UIButton>
+)}
+{inArray(componentName, ['ui-segment', 'UISegment']) && (
+  <UISegment {...attributes}>
+    <slot />
+  </UISegment>
+)}
+{inArray(componentName, ['ui-segments', 'UISegments']) && (
+  <UISegments {...attributes}>
+    <slot />
+  </UISegments>
+)}
+{inArray(componentName, ['ui-buttons', 'UIButtons']) && (
+  <UIButtons {...attributes}>
+    <slot />
+  </UIButtons>
+)}
+{inArray(componentName, ['ui-card', 'UICard']) && (
+  <UICard {...attributes}>
+    <slot />
+  </UICard>
+)}
+{inArray(componentName, ['ui-cards', 'UICards']) && (
+  <UICards {...attributes}>
+    <slot />
+  </UICards>
+)}
+{inArray(componentName, ['ui-container', 'UIContainer']) && (
+  <UIContainer {...attributes}>
+    <slot />
+  </UIContainer>
+)}
+{inArray(componentName, ['ui-divider', 'UIDivider']) && (
+  <UIDivider {...attributes}>
+    <slot />
+  </UIDivider>
+)}
+{inArray(componentName, ['ui-icon', 'UIIcon']) && (
+  <UIIcon {...attributes} />
+)}
+{inArray(componentName, ['ui-image', 'UIImage']) && (
+  <UIImage {...attributes} />
+)}
+{inArray(componentName, ['ui-input', 'UIInput']) && (
+  <UIInput {...attributes} />
+)}
+{inArray(componentName, ['ui-label', 'UILabel']) && (
+  <UILabel {...attributes}>
+    <slot />
+  </UILabel>
+)}
+{inArray(componentName, ['ui-rail', 'UIRail']) && (
+  <UIRail {...attributes}>
+    <slot />
+  </UIRail>
+)}
+{inArray(componentName, ['ui-menu', 'UIMenu']) && (
+  <UIMenu {...attributes}>
+    <slot />
+  </UIMenu>
+)}
+{inArray(componentName, ['menu-item', 'MenuItem']) && (
+  <MenuItem {...attributes}>
+    <slot />
+  </MenuItem>
+)}
+{inArray(componentName, ['ui-spinner', 'UISpinner']) && (
+  <UISpinner {...attributes} />
+)}
+{inArray(componentName, ['ui-table', 'UITable']) && (
+  <UITable {...attributes}>
+    <slot />
+  </UITable>
+)}

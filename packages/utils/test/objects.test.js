@@ -1,6 +1,7 @@
 import {
   any,
   arrayFromObject,
+  assignInPlace,
   deepExtend,
   extend,
   filterObject,
@@ -388,6 +389,84 @@ describe('Object Utilities', () => {
       });
       expect(result).toEqual([]);
     });
+
+    it('should rank startsWith above wordStartsWith above anywhere', () => {
+      const data = [
+        { name: 'Snapple Juice' }, // anywhere: "apple" inside "Snapple"
+        { name: 'Green Apple' }, // wordStartsWith: "Apple" starts a word
+        { name: 'Apple Pie' }, // startsWith: begins with "Apple"
+      ];
+      const result = weightedObjectSearch('apple', data, {
+        propertiesToMatch: ['name'],
+      });
+      expect(result[0].name).toBe('Apple Pie');
+      expect(result[1].name).toBe('Green Apple');
+      expect(result[2].name).toBe('Snapple Juice');
+    });
+
+    it('should support dot-path property access', () => {
+      const data = [
+        { user: { profile: { name: 'Alice' } } },
+        { user: { profile: { name: 'Bob' } } },
+      ];
+      const result = weightedObjectSearch('alice', data, {
+        propertiesToMatch: ['user.profile.name'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].user.profile.name).toBe('Alice');
+    });
+
+    it('should search array field values as joined string', () => {
+      const data = [
+        { name: 'Item A', tags: ['frontend', 'react'] },
+        { name: 'Item B', tags: ['backend', 'node'] },
+      ];
+      const result = weightedObjectSearch('react', data, {
+        propertiesToMatch: ['tags'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('Item A');
+    });
+
+    it('should rank more matched words higher with fractional scoring', () => {
+      const data = [
+        { name: 'red large button primary' },
+        { name: 'red button' },
+        { name: 'red large button' },
+      ];
+      const result = weightedObjectSearch('red large button', data, {
+        propertiesToMatch: ['name'],
+        matchAllWords: false,
+      });
+      // 3/3 words matched ranks above 2/3 which ranks above 1/3
+      expect(result[0].name).toBe('red large button primary');
+      expect(result[1].name).toBe('red large button');
+    });
+
+    it('should handle regex special characters in the query itself', () => {
+      const data = [
+        { name: 'price ($5.00)' },
+        { name: 'regular item' },
+      ];
+      const result = weightedObjectSearch('($5.00)', data, {
+        propertiesToMatch: ['name'],
+      });
+      expect(result.length).toBe(1);
+      expect(result[0].name).toBe('price ($5.00)');
+    });
+
+    it('should not mutate original objects when returnMatches is true', () => {
+      const data = [
+        { name: 'Apple' },
+        { name: 'Banana' },
+      ];
+      weightedObjectSearch('apple', data, {
+        propertiesToMatch: ['name'],
+        returnMatches: true,
+      });
+      expect(data[0].matches).toBeUndefined();
+      expect(data[1].matches).toBeUndefined();
+    });
   });
 
   describe('onlyKeys', () => {
@@ -407,6 +486,50 @@ describe('Object Utilities', () => {
   describe('any', () => {
     it('should be an alias for some', () => {
       expect(any).toBe(some);
+    });
+  });
+
+  describe('assignInPlace', () => {
+    it('should assign source properties to target', () => {
+      const target = { a: 1 };
+      const source = { b: 2, c: 3 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ b: 2, c: 3 });
+    });
+
+    it('should delete keys from target not present in source', () => {
+      const target = { a: 1, b: 2, stale: 'gone' };
+      const source = { a: 10, b: 20 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ a: 10, b: 20 });
+      expect('stale' in target).toBe(false);
+    });
+
+    it('should preserve existing keys when preserveExistingKeys is true', () => {
+      const target = { a: 1, keep: 'me' };
+      const source = { a: 10, b: 2 };
+      assignInPlace(target, source, { preserveExistingKeys: true });
+      expect(target).toEqual({ a: 10, keep: 'me', b: 2 });
+    });
+
+    it('should return the same object reference', () => {
+      const target = { a: 1 };
+      const source = { b: 2 };
+      const result = assignInPlace(target, source);
+      expect(result).toBe(target);
+    });
+
+    it('should clear target when source is empty', () => {
+      const target = { a: 1, b: 2 };
+      assignInPlace(target, {});
+      expect(target).toEqual({});
+    });
+
+    it('should populate empty target from source', () => {
+      const target = {};
+      const source = { a: 1, b: 2 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ a: 1, b: 2 });
     });
   });
 
@@ -502,7 +625,9 @@ describe('Object Utilities', () => {
 
     it('should skip __proto__ for security', () => {
       const target = {};
-      const source = { __proto__: { malicious: true }, safe: 'value' };
+      // JSON.parse creates an actual own property named "__proto__"
+      // unlike literal { __proto__: ... } which sets the prototype
+      const source = JSON.parse('{"__proto__": {"malicious": true}, "safe": "value"}');
 
       deepExtend(target, source);
 

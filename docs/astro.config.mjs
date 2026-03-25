@@ -32,6 +32,9 @@ export default defineConfig({
   },
 
   vite: {
+    resolve: {
+      dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
+    },
     define: {
       PACKAGE_VERSION: JSON.stringify(packageVersion),
     },
@@ -46,6 +49,9 @@ export default defineConfig({
       hmr: {
         host: 'dev.semantic-ui.com',
         protocol: 'wss',
+      },
+      fs: {
+        allow: ['..'],
       },
     },
     ssr: {

@@ -4,8 +4,8 @@ id: 'utils-hashcode'
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Crypto'
-description: 'Generate hash codes using adapted UMASH algorithm'
-tags: ['utils', 'crypto', 'hashcode', 'hash']
+description: 'Generate hash codes with fast FNV-1a default or stronger UMASH mode'
+tags: ['utils', 'crypto', 'hashcode', 'hash', 'fnv', 'umash', 'fast']
 selectedFile: 'index.js'
-tip: 'Based on [UMASH](https://github.com/backtrace-labs/umash), supports objects and custom seeds'
+tip: 'Defaults to zero-allocation FNV-1a for performance. Use `{ fast: false }` for stronger collision resistance via UMASH'
 ---

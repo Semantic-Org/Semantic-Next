@@ -13,6 +13,7 @@ import {
   moveToFront,
   range,
   remove,
+  sequence,
   some,
   sortBy,
   unique,
@@ -102,6 +103,21 @@ describe('Array Utilities', () => {
       const result = firstMatch(arr, x => x > 2);
       expect(result).toBe(3);
     });
+
+    it('should return the matching element when passed a value', () => {
+      const arr = [1, 2, 3, 4];
+      expect(firstMatch(arr, 3)).toBe(3);
+    });
+
+    it('should return undefined when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(firstMatch(arr, 5)).toBeUndefined();
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(firstMatch(arr, { id: 2 })).toEqual({ id: 2 });
+    });
   });
 
   describe('findIndex', () => {
@@ -109,6 +125,21 @@ describe('Array Utilities', () => {
       const arr = ['apple', 'banana', 'orange'];
       const index = findIndex(arr, fruit => fruit === 'banana');
       expect(index).toBe(1);
+    });
+
+    it('should return the index when passed a value', () => {
+      const arr = ['apple', 'banana', 'orange'];
+      expect(findIndex(arr, 'banana')).toBe(1);
+    });
+
+    it('should return -1 when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(findIndex(arr, 5)).toBe(-1);
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(findIndex(arr, { id: 2 })).toBe(1);
     });
   });
 
@@ -212,9 +243,29 @@ describe('Array Utilities', () => {
   });
 
   describe('range', () => {
-    it('should create an array of numbers', () => {
+    it('should create an array from start to stop (exclusive)', () => {
+      expect(range(5)).toEqual([0, 1, 2, 3, 4]);
       expect(range(1, 5)).toEqual([1, 2, 3, 4]);
-      expect(range(0, 4, 5)).toEqual([0, 5, 10, 15]);
+      expect(range(0, 10, 2)).toEqual([0, 2, 4, 6, 8]);
+      expect(range(0, 10, 3)).toEqual([0, 3, 6, 9]);
+    });
+
+    it('should avoid floating-point drift with fractional steps', () => {
+      const result = range(0, 1, 0.1);
+      expect(result).toHaveLength(10);
+      // multiplication path avoids accumulated drift
+      expect(result[3]).toBe(0.1 * 3); // not 0.30000000000000004
+    });
+  });
+
+  describe('sequence', () => {
+    it('should generate multiples', () => {
+      expect(sequence(5)).toEqual([1, 2, 3, 4, 5]);
+      expect(sequence(3, 3)).toEqual([3, 6, 9]);
+      expect(sequence(5, 10)).toEqual([10, 20, 30, 40, 50]);
+      expect(sequence(5, 3, 2)).toEqual([6, 9, 12, 15, 18]);
+      expect(sequence(4, 100, 0)).toEqual([0, 100, 200, 300]);
+      expect(sequence(8, 60, 0)).toEqual([0, 60, 120, 180, 240, 300, 360, 420]);
     });
   });
 
@@ -291,10 +342,12 @@ describe('Array Utilities', () => {
 
   describe('moveItem', () => {
     it('should move item to a specific index when using number', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, 1)).toEqual([1, 2, 3, 4]);
-      expect(moveItem(arr, 1, 3)).toEqual([2, 3, 4, 1]);
-      expect(moveItem(arr, 4, 0)).toEqual([4, 2, 3, 1]);
+      // value 2 is already at index 1, no move
+      expect(moveItem([1, 2, 3, 4], 2, 1)).toEqual([1, 2, 3, 4]);
+      // move value 1 from index 0 to index 3
+      expect(moveItem([1, 2, 3, 4], 1, 3)).toEqual([2, 3, 4, 1]);
+      // move value 4 from index 3 to index 0
+      expect(moveItem([1, 2, 3, 4], 4, 0)).toEqual([4, 1, 2, 3]);
     });
 
     it('should move item to first position when using "first"', () => {
@@ -322,9 +375,8 @@ describe('Array Utilities', () => {
     });
 
     it('should clamp target index to valid array bounds', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
-      expect(moveItem(arr, 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
+      expect(moveItem([1, 2, 3, 4], 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
+      expect(moveItem([1, 2, 3, 4], 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
     });
 
     it('should return original array if item not found', () => {

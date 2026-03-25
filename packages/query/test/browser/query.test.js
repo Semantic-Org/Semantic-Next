@@ -1135,6 +1135,215 @@ describe('query', () => {
     });
   });
 
+  describe('naturalWidth and naturalHeight', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    describe('naturalHeight', () => {
+      it('should strip box model by default and return content height', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'height: 200px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'height: 80px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const height = $(div).naturalHeight();
+
+        // Clone strips padding/margin/border, auto height wraps to child height
+        expect(height).toBe(80);
+      });
+
+      it('should include padding when includePadding is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'height: 200px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'height: 80px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const height = $(div).naturalHeight({ includePadding: true });
+
+        // Auto height of content (80) + top padding (15) + bottom padding (15)
+        expect(height).toBe(110);
+      });
+
+      it('should include border when includeBorder is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'height: 200px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'height: 80px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const height = $(div).naturalHeight({ includeBorder: true });
+
+        // Auto content height (80) + border (5+5), padding subtracted by width()
+        expect(height).toBe(90);
+      });
+
+      it('should include margin when includeMargin is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'height: 200px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'height: 80px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const height = $(div).naturalHeight({ includeMargin: true });
+
+        // Auto content height (80) + margin (20+20), padding and border subtracted
+        expect(height).toBe(120);
+      });
+
+      it('should include all box model parts when all options are true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'height: 200px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'height: 80px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const height = $(div).naturalHeight({ includePadding: true, includeBorder: true, includeMargin: true });
+
+        // Auto content height (80) + padding (15+15) + border (5+5) + margin (20+20)
+        expect(height).toBe(160);
+      });
+
+      it('should return array for multiple elements', () => {
+        const div1 = document.createElement('div');
+        div1.className = 'test';
+        div1.style.cssText = 'height: 200px; padding: 10px; box-sizing: content-box;';
+        const child1 = document.createElement('div');
+        child1.style.cssText = 'height: 50px;';
+        div1.appendChild(child1);
+
+        const div2 = document.createElement('div');
+        div2.className = 'test';
+        div2.style.cssText = 'height: 300px; padding: 20px; box-sizing: content-box;';
+        const child2 = document.createElement('div');
+        child2.style.cssText = 'height: 75px;';
+        div2.appendChild(child2);
+
+        document.body.appendChild(div1);
+        document.body.appendChild(div2);
+
+        const heights = $('.test').naturalHeight();
+
+        expect(Array.isArray(heights)).toBe(true);
+        expect(heights).toEqual([50, 75]);
+      });
+    });
+
+    describe('naturalWidth', () => {
+      it('should strip box model by default and return content width', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'width: 300px; padding: 10px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'width: 120px; height: 10px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const width = $(div).naturalWidth();
+
+        // Clone is absolutely positioned with width: auto, shrink-wraps to child
+        // Box model is stripped so pure content width
+        expect(width).toBe(120);
+      });
+
+      it('should include padding when includePadding is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'width: 300px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'width: 120px; height: 10px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const width = $(div).naturalWidth({ includePadding: true });
+
+        // Auto content width (120) + padding (15+15)
+        expect(width).toBe(150);
+      });
+
+      it('should include border when includeBorder is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'width: 300px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'width: 120px; height: 10px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const width = $(div).naturalWidth({ includeBorder: true });
+
+        // Auto content width (120) + border (5+5), padding subtracted by width()
+        expect(width).toBe(130);
+      });
+
+      it('should include margin when includeMargin is true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'width: 300px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'width: 120px; height: 10px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const width = $(div).naturalWidth({ includeMargin: true });
+
+        // Auto content width (120) + margin (20+20), padding and border subtracted
+        expect(width).toBe(160);
+      });
+
+      it('should include all box model parts when all options are true', () => {
+        const div = document.createElement('div');
+        div.style.cssText =
+          'width: 300px; padding: 15px; border: 5px solid black; margin: 20px; box-sizing: content-box;';
+        const child = document.createElement('div');
+        child.style.cssText = 'width: 120px; height: 10px;';
+        div.appendChild(child);
+        document.body.appendChild(div);
+
+        const width = $(div).naturalWidth({ includePadding: true, includeBorder: true, includeMargin: true });
+
+        // Auto content width (120) + padding (15+15) + border (5+5) + margin (20+20)
+        expect(width).toBe(200);
+      });
+
+      it('should return array for multiple elements', () => {
+        const div1 = document.createElement('div');
+        div1.className = 'test';
+        div1.style.cssText = 'width: 300px; padding: 10px; box-sizing: content-box;';
+        const child1 = document.createElement('div');
+        child1.style.cssText = 'width: 100px; height: 10px;';
+        div1.appendChild(child1);
+
+        const div2 = document.createElement('div');
+        div2.className = 'test';
+        div2.style.cssText = 'width: 400px; padding: 20px; box-sizing: content-box;';
+        const child2 = document.createElement('div');
+        child2.style.cssText = 'width: 150px; height: 10px;';
+        div2.appendChild(child2);
+
+        document.body.appendChild(div1);
+        document.body.appendChild(div2);
+
+        const widths = $('.test').naturalWidth();
+
+        expect(Array.isArray(widths)).toBe(true);
+        expect(widths).toEqual([100, 150]);
+      });
+    });
+  });
+
   describe('naturalDisplay', () => {
     beforeEach(() => {
       document.body.innerHTML = '';

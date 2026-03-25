@@ -1,0 +1,50 @@
+{
+  "1": {
+    "visual": "An alarm clock with a round face, two dome bells on top, and small diagonal lines flanking the base.",
+    "usage": "alarm settings, wake-up reminders, scheduled alerts, notification timing"
+  },
+  "2": {
+    "visual": "A calendar page with two binding rings at the top and a blank content area below a thin header bar.",
+    "usage": "date picker, event creation, schedule view, monthly planner"
+  },
+  "3": {
+    "visual": "A calendar page with two binding rings at the top and a checkmark in the content area.",
+    "usage": "confirmed appointment, completed event, booking confirmation, task due date marked done"
+  },
+  "4": {
+    "visual": "A calendar page with two binding rings at the top and a small clock face overlapping the bottom-right corner.",
+    "usage": "timed appointment, datetime picker, scheduled event with time, meeting scheduler"
+  },
+  "5": {
+    "visual": "A calendar page with two binding rings at the top and six dots in a two-column grid in the content area.",
+    "usage": "monthly calendar view, date grid, event overview, recurring schedule"
+  },
+  "6": {
+    "visual": "A calendar page with two binding rings at the top and a plus sign at the bottom-right corner.",
+    "usage": "add new event, create appointment, schedule new item, book a date"
+  },
+  "7": {
+    "visual": "A calendar page with two binding rings at the top and two short lines with a small dot beside each in the content area.",
+    "usage": "event details, agenda view, appointment description, scheduled notes"
+  },
+  "8": {
+    "visual": "A calendar page with two binding rings at the top and an X mark in the content area.",
+    "usage": "cancel event, remove appointment, declined meeting, delete scheduled date"
+  },
+  "9": {
+    "visual": "A plain round clock face with two hands and no bells or extra decoration.",
+    "usage": "current time display, time picker, timestamp, hours of operation"
+  },
+  "10": {
+    "visual": "A round clock face with a counterclockwise arrow wrapping around the left and bottom of its outer edge.",
+    "usage": "undo recent action, restore previous state, activity history, revert to earlier time"
+  },
+  "11": {
+    "visual": "An hourglass — wide at top and bottom, pinched to a narrow crossing point in the middle.",
+    "usage": "loading state, waiting indicator, countdown in progress, time limit warning"
+  },
+  "12": {
+    "visual": "A stopwatch with a round face, a flat crown button on top, and a single hand inside the dial.",
+    "usage": "elapsed time tracking, countdown timer, performance measurement, lap timing"
+  }
+}

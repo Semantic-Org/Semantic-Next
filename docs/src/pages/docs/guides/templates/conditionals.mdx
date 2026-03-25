@@ -1,14 +1,13 @@
 ---
 layout: '@layouts/Guide.astro'
 title: Conditionals
-description: Using conditional statements inside templates
+description: Branching logic in templates with if, else if, and else
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
+## Basic Usage
 
-### Control Structures
-
-Templates support common control structures like `if`, `elseif` and `else` to handle branching paths in your template.
+`{#if}`, `{else if}`, and `{else}` handle branching in templates.
 
 ```sui
 {#if isEven number}
@@ -20,29 +19,41 @@ Templates support common control structures like `if`, `elseif` and `else` to ha
 {/if}
 ```
 
-### Conditional Syntax
-
-[Expressions](/docs/guides/templates/expressions) support both lisp-like and javascript syntax wherever expressions are used including in conditionals.
-
-```sui
-{#if isEqual(a, b) }
-  A is B
-{else if isEqual a c}
-  A is C
+```sui title="Nested"
+{#if isLoggedIn}
+  {#if isAdmin}
+    <div class="admin-panel">Admin Controls</div>
+  {else}
+    <div class="user-panel">User Dashboard</div>
+  {/if}
+{else}
+  <div class="login">Please log in</div>
 {/if}
 ```
 
-### Conditional Helpers
+## Expression Syntax
 
-[Template helpers](/docs/guides/templates/helpers) can be used to make your templates easier to read and to provide common utilities like checking if a value is empty.
+Conditionals accept both semantic (lisp-like) and JavaScript [expressions](/docs/guides/templates/expressions). Both styles can be mixed in the same template.
 
-> For a full list of comparators view the [dedicated section on comparison helpers](/docs/api/helpers/comparison)
-
-
-##### With Helpers
 ```sui
-{#if is valueA valueB}
-  Values are equal
+{#if isEqual a b}
+  A is B
+{/if}
+```
+
+```sui
+{#if a === b}
+  A is B
+{/if}
+```
+
+### Using Helpers
+
+[Template helpers](/docs/guides/templates/helpers) provide readable alternatives to JavaScript operators. See [Comparison Helpers](/docs/api/helpers/comparison) for the full list.
+
+```sui
+{#if hasAny items}
+  Has items
 {/if}
 ```
 
@@ -54,17 +65,44 @@ Templates support common control structures like `if`, `elseif` and `else` to ha
 {/if}
 ```
 
-##### No Helpers
+The same logic without helpers:
 
 ```sui
-{#if valueA == valueB}
-  Values are equal
+{#if items.length > 0}
+  Has items
 {/if}
 ```
+
 ```sui
 {#if !isEven(number)}
   Odd
 {else}
   Even
 {/if}
+```
+
+## Conditionals in Attributes
+
+Conditional blocks and ternary [expressions](/docs/guides/templates/expressions) work inside attribute values, not just around elements.
+
+### Conditional Classes
+
+```sui
+<div class="{#if isActive}active{/if}">
+  Content
+</div>
+```
+
+```sui
+<li class="{#if selectedItem === id}selected{/if}">
+  {title}
+</li>
+```
+
+### Ternary in Attributes
+
+```sui
+<div class="{isActive ? 'active' : 'inactive'}">
+  Status
+</div>
 ```

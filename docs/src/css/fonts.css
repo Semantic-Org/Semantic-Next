@@ -2,87 +2,133 @@
              Global
 *******************************/
 
-/* Regular */
+/* Lato */
 @font-face {
   font-family: 'Lato';
-  src:
-    url(/fonts/lato/LatoLatin-Regular.woff2) format('woff2')
-  ;
+  src: url(/fonts/lato/LatoLatin-Regular.woff2) format('woff2');
   font-style: normal;
   font-weight: normal;
 }
 @font-face {
   font-family: 'Lato';
-  src:
-    url(/fonts/lato/LatoLatin-Italic.woff2) format('woff2')
-  ;
+  src: url(/fonts/lato/LatoLatin-Italic.woff2) format('woff2');
   font-style: italic;
   font-weight: normal;
 }
-
-/* Bold */
 @font-face {
   font-family: 'Lato';
-  src:
-    url(/fonts/lato/LatoLatin-Bold.woff2) format('woff2')
-  ;
+  src: url(/fonts/lato/LatoLatin-Semibold.woff2) format('woff2');
   font-style: normal;
   font-weight: 700;
 }
 @font-face {
   font-family: 'Lato';
-  src:
-    url(/fonts/lato/LatoLatin-BoldItalic.woff2) format('woff2')
-  ;
+  src: url(/fonts/lato/LatoLatin-SemiboldItalic.woff2) format('woff2');
   font-style: italic;
   font-weight: 700;
 }
 
-/*
- * LINESeedSans Font Family
- */
+/* For testing other fonts
 
-/* Thin (100) */
 @font-face {
-  font-family: 'Line';
-  src: url('/fonts/line/LINESeedSans_W_Th.woff2') format('woff2');
-  font-weight: 100;
+  font-family: 'Inter';
+  src: url(/fonts/inter/Inter-Regular.woff2) format('woff2');
   font-style: normal;
+  font-weight: normal;
   font-display: swap;
 }
-
-/* Regular (400) */
 @font-face {
-  font-family: 'Line';
-  src: url('/fonts/line/LINESeedSans_W_Rg.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
+  font-family: 'Inter';
+  src: url(/fonts/inter/Inter-Italic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: normal;
   font-display: swap;
 }
-
-/* Bold (700) */
 @font-face {
-  font-family: 'Line';
-  src: url('/fonts/line/LINESeedSans_W_Bd.woff2') format('woff2');
+  font-family: 'Inter';
+  src: url(/fonts/inter/Inter-SemiBold.woff2) format('woff2');
+  font-style: normal;
   font-weight: 700;
-  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url(/fonts/inter/Inter-SemiBoldItalic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: 700;
   font-display: swap;
 }
 
-/* Extra Bold (800) */
 @font-face {
-  font-family: 'Line';
-  src: url('/fonts/line/LINESeedSans_W_XBd.woff2') format('woff2');
-  font-weight: 800;
+  font-family: 'Plus Jakarta Sans';
+  src: url(/fonts/plus-jakarta-sans/PlusJakartaSans-Regular.woff2) format('woff2');
   font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url(/fonts/plus-jakarta-sans/PlusJakartaSans-Italic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url(/fonts/plus-jakarta-sans/PlusJakartaSans-Bold.woff2) format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  src: url(/fonts/plus-jakarta-sans/PlusJakartaSans-BoldItalic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: 700;
   font-display: swap;
 }
 
-/* Heavy (900) */
 @font-face {
-  font-family: 'Line';
-  src: url('/fonts/line/LINESeedSans_W_He.woff2') format('woff2');
-  font-weight: 900;
+  font-family: 'Public Sans';
+  src: url(/fonts/public-sans/PublicSans-Regular.woff2) format('woff2');
   font-style: normal;
+  font-weight: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Public Sans';
+  src: url(/fonts/public-sans/PublicSans-Italic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Public Sans';
+  src: url(/fonts/public-sans/PublicSans-SemiBold.woff2) format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Public Sans';
+  src: url(/fonts/public-sans/PublicSans-SemiBoldItalic.woff2) format('woff2');
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url(/fonts/geist-sans/Geist-Regular.woff2) format('woff2');
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url(/fonts/geist-sans/Geist-Bold.woff2) format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+*/

@@ -7,18 +7,26 @@
   "version": "0.18.0",
   "sideEffects": false,
   "type": "module",
+  "types": "types/index.d.ts",
   "main": "src/browser.js",
   "module": "src/browser.js",
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "node": "./src/server.js",
       "browser": "./src/browser.js",
       "import": "./src/browser.js",
       "default": "./src/browser.js"
-    }
+    },
+    "./icons/meta": "./src/icons/icons.meta.js"
   },
   "scripts": {
     "build": "wireit",
+    "build:icons": "wireit",
+    "icons:build-css": "wireit",
+    "icons:build-meta": "wireit",
+    "icons:download-svg": "wireit",
+    "watch:icons": "wireit",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage"
@@ -31,11 +39,17 @@
     "LICENSE"
   ],
   "dependencies": {
+    "@semantic-ui/compiler": "^0.18.0",
     "@semantic-ui/utils": "^0.18.0"
   },
   "devDependencies": {
+    "@material-symbols/svg-400": "^0.40.2",
+    "@phosphor-icons/core": "^2.1.1",
     "@semantic-ui/internal-scripts": "^0.18.0",
+    "@tabler/icons": "^3.36.1",
     "@vitest/browser-playwright": "^4.0.18",
+    "heroicons": "^2.2.0",
+    "lucide-static": "^0.563.0",
     "vitest": "^4.0.18"
   },
   "wireit": {
@@ -54,6 +68,30 @@
     },
     "build:cdn": {
       "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    },
+    "build:icons": {
+      "dependencies": [
+        "icons:build-css",
+        "icons:build-meta",
+        "icons:download-svg"
+      ]
+    },
+    "icons:build-css": {
+      "command": "node scripts/build-icon-css.js",
+      "files": ["src/icons/mappings.js", "scripts/build-icon-css.js"]
+    },
+    "icons:build-meta": {
+      "command": "node scripts/build-icon-meta.js",
+      "files": ["src/icons/mappings.js", "scripts/build-icon-meta.js"]
+    },
+    "icons:download-svg": {
+      "command": "node scripts/build-icon-svg.js",
+      "files": ["scripts/build-icon-svg.js"],
+      "dependencies": ["icons:build-css"]
+    },
+    "watch:icons": {
+      "command": "node scripts/watch-icons.js",
+      "service": true
     }
   }
 }

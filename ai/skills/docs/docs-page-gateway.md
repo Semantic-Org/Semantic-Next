@@ -1,0 +1,237 @@
+---
+title: Writing Gateway Pages
+description: Guide for writing landing and index pages that earn reader attention through problem-first structure and instability language before introducing features.
+keywords: [gateway pages, landing pages, problem-first, instability language, technical tour, convince]
+audience: docs
+skill: docs-page-gateway
+type: skill
+---
+
+# Writing Gateway Pages
+
+> **Skill:** `docs-page-gateway`
+> **Purpose:** How to write landing/index pages that earn reader attention through problem-first structure
+
+**Prerequisites:** Load `docs-writing` (required), `docs-authoring-standards`, and `docs-target-audience`
+
+---
+
+## When to Use This Page Type
+
+Gateway pages are **first contact**. The reader is uncommitted—they're deciding whether to invest time learning more.
+
+**Use gateway format for:**
+- Package index pages (`/docs/guides/query/index.mdx`)
+- System overviews (`/docs/guides/components/index.mdx`)
+- Feature landing pages (`/docs/guides/reactivity/index.mdx`)
+
+**Don't use gateway format for:**
+- Teaching how to use something → see `docs-page-guide`
+- Method documentation → see `docs-page-api-reference`
+
+---
+
+## The Core Principle
+
+**Gateway pages must earn attention.**
+
+Readers arrive with existing beliefs and limited time. They're pattern-matching against frameworks they know, looking for reasons to care or move on.
+
+Don't explain what the thing *is*. Establish what problem it *solves*.
+
+---
+
+## Problem-First Structure
+
+### ❌ Wrong (stability model)
+
+```markdown
+## Overview
+
+Semantic UI Query is a lightweight DOM manipulation library. It provides
+a chainable API for selecting and manipulating elements...
+```
+
+This explains what it is. Readers ask: "So what? I have jQuery/vanilla JS."
+
+### ✅ Right (instability model)
+
+```markdown
+## The Shadow DOM Challenge
+
+Web components encapsulate their internal structure using Shadow DOM.
+This is powerful for isolation, **but** standard DOM APIs cannot cross
+these boundaries—`querySelector` stops at shadow roots.
+
+Query solves this by providing intuitive traversal across all DOM
+boundaries, with a familiar chainable API.
+```
+
+This names a problem readers experience, then positions the solution.
+
+---
+
+## Instability Language
+
+Use tension markers ("but", "however", "although", "yet") to transform background into problem-building. See `docs-writing` for the complete instability language reference with tension, cost, and solution vocabulary.
+
+---
+
+## Two-Part Structure
+
+Gateway pages have two distinct halves: **convince** then **excite**.
+
+### Part 1: Convince (Earn Attention)
+
+The reader is uncommitted and scanning. This section must be **short**—capture attention and provide value immediately. Don't explain; establish why they should care.
+
+- Problem statement with instability language (1-2 paragraphs max)
+- Solution positioning (problem/solution table works well)
+- Minimal working example
+- Key differentiator (framework compatibility, no build step, etc.)
+
+**Keep it brief.** If Part 1 is too long, readers leave before reaching the tour. The problem/solution table does heavy lifting—use it instead of prose.
+
+**Goal:** Reader thinks "this solves a real problem I have."
+
+### Part 2: Technical Tour (Excite)
+
+The reader is now curious. This section previews what's possible and acts as a **gateway to subsections**.
+
+- Brief feature sections with code snippets
+- Each links to detailed guide for depth
+- Show, don't explain—code speaks louder than prose
+- **Simple capability headers** ("Templating", "Styling", "Events")—not problem-solution phrases
+
+The problem-solution framing belongs in Part 1. Part 2 headers are scannable keywords for readers who want to jump to a specific feature.
+
+**Goal:** Reader thinks "I want to learn how to do that" and clicks through to guides.
+
+---
+
+## Structure Template
+
+```markdown
+## The [Problem Name]
+
+[Status quo] **But** [tension/limitation]. [Cost]
+
+[1-2 sentences: how this resolves the tension]
+
+| Problem | Solution |
+|---------|----------|
+| Pain point 1 | [Solution](/link) with brief description |
+| Pain point 2 | [Solution](/link) with brief description |
+
+<PlaygroundExample id="minimal-demo"></PlaygroundExample>
+
+### [Key Differentiator]
+
+[Framework compatibility, no build step, etc.—keep brief]
+
+## Key Features
+
+### Templating
+
+[One sentence + link to guide](/docs/guides/templates)
+
+```code
+[Exciting code example]
+```
+
+### Styling
+
+[One sentence + link](/docs/guides/components/styling)
+
+```code
+...
+```
+
+### Events
+
+[Same pattern—brief, code-forward, links out]
+```
+
+**Part 2 headers should be simple keywords:**
+- ✅ "Templating", "Styling", "Events", "Keys"
+- ❌ "Templating Without String Manipulation", "Events Without Boilerplate"
+
+Problem-solution framing belongs in Part 1 prose and table, not Part 2 headers.
+
+---
+
+## Example: Query Package
+
+### ❌ Before (stability)
+
+```markdown
+## Introduction
+
+Query is a lightweight (21kb) DOM manipulation library designed to work
+with both standard DOM and Shadow DOM. It provides a familiar, chainable
+API inspired by jQuery.
+```
+
+### ✅ After (instability)
+
+```markdown
+## The Shadow DOM Challenge
+
+Web components encapsulate their internal structure using Shadow DOM,
+creating clear boundaries that standard DOM APIs cannot cross. This
+encapsulation is powerful for building isolated components, **but**
+presents challenges when you need to:
+
+- Select elements across multiple component boundaries
+- Traverse from one component into another's shadow DOM
+- Access slotted content from parent components
+
+With native DOM APIs, these operations stop at shadow boundaries.
+
+```javascript
+// Native APIs stop at shadow boundaries
+document.querySelector('ui-dropdown .option'); // Returns null
+
+// Query seamlessly crosses boundaries
+$$('ui-dropdown .option'); // Returns all matching elements
+```
+```
+
+---
+
+## Checklist
+
+### Part 1: Convince
+- [ ] First paragraph contains instability language (but, however, although)
+- [ ] Problem named before solution introduced
+- [ ] Cost of problem is clear (why should reader care?)
+- [ ] Solution framed as resolving the stated problem
+- [ ] Working example demonstrates the value proposition
+
+### Part 2: Technical Tour
+- [ ] Feature sections are brief (1-2 sentences + code)
+- [ ] Code examples show what's possible, not how it works
+- [ ] Each section links to detailed guide for depth
+- [ ] Headers are simple capability keywords (not problem-solution phrases)
+
+### Overall
+- [ ] Clear transition from convince to tour
+- [ ] Written for uncommitted reader (earns attention)
+- [ ] Clear path to next step (getting started)
+- [ ] Follows `docs-authoring-standards`
+
+---
+
+## Common Mistakes
+
+### Leading with definition
+"X is a library that..." → Readers don't care what it is until they know why they need it.
+
+### Feature lists without context
+Bullet points of capabilities don't establish value. Frame each feature as a solution to a problem.
+
+### Assuming reader commitment
+Guide pages can assume commitment. Gateway pages cannot—they must earn it.
+
+### Marketing language
+"Powerful", "seamless", "easy" are empty. Show the problem/solution concretely.

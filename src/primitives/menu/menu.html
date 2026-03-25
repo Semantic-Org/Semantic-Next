@@ -1,7 +1,10 @@
 <div class="{ui}menu" part="menu">
+  {#if sliding}
+    <div class="indicator" part="indicator" style={getIndicatorPosition}></div>
+  {/if}
   {#each item in items}
     <menu-item
-      active={isValueActive value item}
+      active={isCurrentValue value item}
       href={item.href}
       value={item.value}
       exportparts="item"
@@ -9,7 +12,9 @@
       {#if item.icon}
         <ui-icon part="item-icon" icon={item.icon}></ui-icon>
       {/if}
-      <span part="item-label" class="label">{item.label}</span>
+      {#if item.label}
+        <span part="item-label" class="label">{item.label}</span>
+      {/if}
       {#if item.badge}
         <ui-label part="item-badge" outline badge>
           {item.badge}

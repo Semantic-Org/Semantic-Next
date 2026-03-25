@@ -1,0 +1,30 @@
+{
+  "1": {
+    "visual": "A medal or award badge — a circle with two ribbon tails forming a downward V hanging below it.",
+    "usage": "Achievement badge, certification earned, user rank display, reward milestone"
+  },
+  "2": {
+    "visual": "A crown with three upward peaks and a flat horizontal bar along the base, the classic royalty symbol.",
+    "usage": "Top-ranked user, premium membership tier, leaderboard leader, VIP status badge"
+  },
+  "3": {
+    "visual": "Two overlapping dice at an angle — one showing two dots, the other three dots, suggesting a roll.",
+    "usage": "Random action, chance mechanic, board game feature, shuffle or randomize"
+  },
+  "4": {
+    "visual": "A party popper or confetti cannon pointing upper-right, firing dots and streamers outward in a burst.",
+    "usage": "Celebration event, level-up notification, task completion, onboarding success"
+  },
+  "5": {
+    "visual": "A five-pointed star outline with smooth, symmetric points and a hollow interior.",
+    "usage": "Favorite or bookmark, star rating input, featured item, wishlist"
+  },
+  "6": {
+    "visual": "An asymmetric single star stroke where only the left half is fully drawn, the right side trailing off — a partial or half-star shape.",
+    "usage": "Half-star rating display, partial score, fractional achievement indicator, incomplete favorite"
+  },
+  "7": {
+    "visual": "A trophy cup with two side handles, a wide bowl on a narrow stem, and a flat pedestal base.",
+    "usage": "Winner or first place, leaderboard top entry, competition result, achievement unlocked"
+  }
+}

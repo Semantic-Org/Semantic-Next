@@ -57,13 +57,13 @@ export const isDevelopment = (() => {
       return true;
     }
 
-    if (env.MODE && env.MODE !== 'production') {
+    if (env.MODE === 'development') {
       return true;
     }
   }
 
   // Check global __DEV__ flag (React Native, some bundlers)
-  if (typeof __DEV__ !== 'undefined') {
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
     return true;
   }
 
@@ -79,7 +79,7 @@ export const isCI = (() => {
   const env = process.env;
 
   // Check common CI environment indicators
-  if (env.CI === 'true' || env.CI === true) {
+  if (env.CI === 'true') {
     return true;
   }
 

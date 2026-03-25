@@ -192,7 +192,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
   },
 
   getPointerPosition(event) {
-    const canvas = this.getCanvas();
+    const canvas = self.getCanvas();
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;

@@ -35,7 +35,7 @@ const defaultState = {
   copiedColor: '',
 };
 
-const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) => ({
+const createComponent = ({ self, state, settings, $, isServer, dispatchEvent, timeout }) => ({
   // Get all color data for display
   getColors() {
     const { colors, shades } = settings;
@@ -74,7 +74,7 @@ const createComponent = ({ self, state, settings, $, isServer, dispatchEvent }) 
     state.copiedColor.set(`${colorName}-${shade}`);
 
     clearTimeout(self.timeout);
-    self.timeout = setTimeout(() => {
+    self.timeout = timeout(() => {
       state.copiedColor.set(null);
       delete self.timeout;
     }, 2000);

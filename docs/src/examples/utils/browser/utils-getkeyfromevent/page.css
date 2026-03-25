@@ -1,5 +1,5 @@
 .output {
-  margin-top: var(--spacing-xs);
+  margin-top: var(--margin-xs);
   padding: var(--padding-xs);
   background: var(--standard-5);
   border-radius: var(--border-radius);

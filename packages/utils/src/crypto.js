@@ -31,10 +31,49 @@ export const prettifyHash = (numericHash, { minLength = 6, padChar = '0' } = {})
 };
 
 /*
- * Create a uniqueID from a string using an adapted UMASH algorithm
-  https://github.com/backtrace-labs/umash
+ * Hash with fast (FNV-1a) default. Pass { fast: false } for stronger
+ * collision resistance via UMASH at the cost of allocations.
  */
-export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
+const encoder = new TextEncoder();
+
+export function hashCode(input, { prettify = false, seed, fast = true } = {}) {
+  if (fast) {
+    return fnv1a(input, { prettify, seed: seed ?? 0x811c9dc5 });
+  }
+  return umash(input, { prettify, seed: seed ?? 0x12345678 });
+}
+
+// FNV-1a — zero allocation, operates on JS string char codes
+function fnv1a(input, { prettify, seed }) {
+  let str;
+  if (input === null || input === undefined) {
+    str = '';
+  }
+  else if (typeof input === 'object' && input.toString === Object.prototype.toString) {
+    try {
+      str = JSON.stringify(input);
+    }
+    catch {
+      return 0;
+    }
+  }
+  else {
+    str = String(input);
+  }
+
+  let hash = seed;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+
+  hash = hash >>> 0;
+  return prettify ? prettifyHash(hash) : hash;
+}
+
+// Adapted UMASH — better distribution and avalanche properties
+// https://github.com/backtrace-labs/umash
+function umash(input, { prettify, seed }) {
   const prime1 = 0x9e3779b1;
   const prime2 = 0x85ebca77;
   const prime3 = 0xc2b2ae3d;
@@ -42,11 +81,11 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
   let inputData;
 
   if (input === null || input === undefined) {
-    inputData = new TextEncoder().encode('');
+    inputData = encoder.encode('');
   }
   else if (input && input.toString === Object.prototype.toString && typeof input === 'object') {
     try {
-      inputData = new TextEncoder().encode(JSON.stringify(input));
+      inputData = encoder.encode(JSON.stringify(input));
     }
     catch (error) {
       console.error('Error serializing input', error);
@@ -54,13 +93,12 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
     }
   }
   else {
-    inputData = new TextEncoder().encode(input.toString());
+    inputData = encoder.encode(input.toString());
   }
 
   let hash;
 
   if (inputData.length <= 8) {
-    // optimize performance for short inputs
     hash = seed;
     for (let i = 0; i < inputData.length; i++) {
       hash ^= inputData[i];
@@ -69,28 +107,20 @@ export function hashCode(input, { prettify = false, seed = 0x12345678 } = {}) {
     }
   }
   else {
-    // compress input blocks while maintaining good mixing properties
     hash = seed;
     for (let i = 0; i < inputData.length; i++) {
       hash = Math.imul(hash ^ inputData[i], prime1);
       hash = (hash << 13) | (hash >>> 19);
       hash = Math.imul(hash, prime2);
     }
-
-    // protect against length extension attacks
     hash ^= inputData.length;
   }
 
-  // improve the distribution and avalanche properties of the hash
   hash ^= hash >>> 16;
   hash = Math.imul(hash, prime3);
   hash ^= hash >>> 13;
 
-  if (prettify) {
-    return prettifyHash(hash >>> 0);
-  }
-
-  return hash >>> 0;
+  return prettify ? prettifyHash(hash >>> 0) : hash >>> 0;
 }
 
 export const getRandomSeed = () => {

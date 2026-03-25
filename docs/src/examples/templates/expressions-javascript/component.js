@@ -26,11 +26,9 @@ export default defineComponent({
   css,
   defaultState,
 
-  createComponent() {
-    return {
-      formatScore(score) {
-        return score >= 90 ? `${score} (excellent)` : `${score}`;
-      },
-    };
-  },
+  createComponent: () => ({
+    formatScore(score) {
+      return score >= 90 ? `${score} (excellent)` : `${score}`;
+    },
+  }),
 });

@@ -43,13 +43,16 @@ interface RestoreGlobalsOptions {
 declare function restoreGlobals(settings?: RestoreGlobalsOptions): typeof $;
 
 /**
- * Creates a Query instance with different alias function.
+ * Returns the `$` function for use under a different variable name.
+ * @returns The `$` query function.
  */
+declare function useAlias(): typeof $;
 
-declare function useAlias(
-  selector: string | Node | NodeList | HTMLCollection | Element[] | typeof Query.globalThisProxy,
-  args?: QueryOptions,
-): Query;
+/**
+ * Registers a behavior that can be called as a method on Query instances.
+ * @param behavior - The behavior configuration object.
+ */
+declare function registerBehavior(behavior: BehaviorConfig): void;
 
 export {
   $,
@@ -62,6 +65,7 @@ export {
   exportGlobals,
   Query,
   QueryOptions,
+  registerBehavior,
   restoreGlobals,
   useAlias,
 };

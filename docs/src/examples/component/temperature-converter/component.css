@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.converter {
+  display: flex;
+  align-items: center;
+  gap: var(--margin-xs);
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: var(--4px);
+}
+
+input {
+  width: 5em;
+  padding: var(--padding-xs);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  font-size: var(--base);
+  font-family: inherit;
+  text-align: right;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+  }
+}
+
+.equals {
+  color: var(--standard-40);
+}

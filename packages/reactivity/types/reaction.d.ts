@@ -13,7 +13,7 @@ export class Reaction {
    *
    * @param callback - Function to run when dependencies change
    */
-  constructor(callback: (computation: Reaction) => void);
+  constructor(callback: (computation: Reaction) => void, options?: { context?: Record<string, any>; });
 
   /**
    * Indicates if this is the first execution of the reaction.
@@ -43,6 +43,29 @@ export class Reaction {
    * Updated automatically when reactive values are accessed during execution.
    */
   readonly dependencies: Set<Dependency>;
+
+  /**
+   * Sets debugging context on the reaction, replacing any existing context.
+   * Context appears in reactive debugging output and helps trace which reaction
+   * is responding to which change.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#setcontext setContext}
+   * @param additionalContext - Key-value pairs to store as debugging context
+   */
+  setContext(additionalContext?: Record<string, any>): void;
+
+  /**
+   * Adds debugging context without replacing existing context.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#addcontext addContext}
+   * @param additionalContext - Key-value pairs to merge into existing context
+   */
+  addContext(additionalContext?: Record<string, any>): void;
+
+  /**
+   * Captures a stack trace into the reaction's context for debugging.
+   * Call after setContext to see where the reaction was configured.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/reaction#settrace setTrace}
+   */
+  setTrace(): void;
 
   /**
    * Executes the reaction's callback, tracking accessed reactive values as dependencies.

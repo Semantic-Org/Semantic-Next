@@ -399,8 +399,8 @@
 @layer segment.theme.content.segment {
   :host {
     --segment-display: block;
-    --segment-margin: var(--spacing) 0;
-    --segment-padding: var(--relative-medium);
+    --segment-margin: var(--vertically-spaced);
+    --segment-padding: var(--padding);
     --segment-background: var(--inverted-100);
     --segment-border: var(--border);
     --segment-top-border: var(--border);
@@ -489,8 +489,8 @@
 /* src/primitives/segment/css/theme/variations/padded-variables.css */
 @layer segment.theme.variations.padded {
   :host {
-    --segment-padded-padding: var(--relative-large);
-    --segment-very-padded-padding: var(--relative-huge);
+    --segment-padded-padding: var(--padding-l);
+    --segment-very-padded-padding: var(--padding-2xl);
   }
 }
 
@@ -550,7 +550,7 @@
 /* src/primitives/segment/css/theme/variations/floated-variables.css */
 @layer segment.theme.variations.floated {
   :host {
-    --segment-floated-distance: var(--spacing);
+    --segment-floated-distance: var(--gap);
   }
 }
 

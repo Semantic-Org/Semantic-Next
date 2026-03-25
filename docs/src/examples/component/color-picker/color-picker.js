@@ -4,16 +4,16 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const defaultSettings = {
-  colorOptions: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
+  colorOptions: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'],
 };
 
 const defaultState = {
-  selectedColor: '#ff0000'
+  selectedColor: '#ff0000',
 };
 
 const createComponent = ({ state, dispatchEvent }) => ({
   selectColor(color) {
-    state.selectedColor.value = color;
+    state.selectedColor.set(color);
     dispatchEvent('color-selected', { color });
   },
 });

@@ -4,7 +4,8 @@ id: 'utils-kebabtocamel'
 exampleType: 'log'
 category: 'Utils'
 subcategory: 'Strings'
-description: 'Convert a kebab-case string to camelCase'
-tags: ['utils', 'strings', 'kebabtocamel', 'case']
+description: 'Convert a kebab-case string to camelCase with lossless digit handling'
+tags: ['utils', 'strings', 'kebabtocamel', 'case', 'lossless']
+tip: 'Digit-leading segments like 2x2 in grid-2x2 are preserved with an underscore prefix, ensuring lossless round-trips through camelToKebab'
 selectedFile: 'index.js'
 ---

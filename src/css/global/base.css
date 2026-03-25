@@ -1,0 +1,154 @@
+html {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  scrollbar-gutter: var(--scrollbar-gutter);
+  container: page / normal;
+  overscroll-behavior: none;
+  font-size: var(--em-size);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-optical-sizing: auto;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--page-size);
+  overflow-x: var(--page-overflow-x);
+  min-width: var(--page-min-width);
+  background: var(--page-background);
+  font-family: var(--page-font);
+  line-height: var(--line-height);
+  color: var(--text-color);
+}
+
+/* Content */
+*,
+*:before,
+*:after {
+  box-sizing: var(--box-sizing);
+}
+
+/* Headears */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--header-font);
+  color: var(--header-color);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--h1);
+}
+h2 {
+  font-size: var(--h2);
+}
+h3 {
+  font-size: var(--h3);
+}
+h4 {
+  font-size: var(--h4);
+}
+h5 {
+  font-size: var(--h5);
+}
+
+/* Typography */
+p {
+  text-wrap: pretty;
+  hanging-punctuation: first allow-end last;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: var(--link-hover-text-decoration);
+}
+
+
+/* Animations */
+:root {
+  interpolate-size: allow-keywords;
+}
+
+/* Native Controls */
+:root {
+  accent-color: var(--primary-color);
+}
+
+/* Buttons */
+a, button, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Inputs */
+input[type="text"], input[type="email"], input[type="search"], input[type="password"] {
+  /* Input Shadows */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Text Area */
+textarea {
+  field-sizing: content;
+  min-height: 3lh;
+}
+
+/* Images */
+img, video, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Code Blocks */
+pre, code {
+  tab-size: 2;
+  font-family: var(--code-font);
+}
+
+
+/* Scrollbars */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+* {
+  scrollbar-color: var(--thumb-background) var(--track-background);
+  scrollbar-width: var(--scrollbar-width);
+}
+
+
+/* Extra for Chrome */
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-height);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--track-background);
+  border-radius: var(--track-border-radius);
+}
+::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  border-radius: var(--thumb-border-radius);
+  background: var(--thumb-background);
+  transition: var(--thumb-transition);
+}
+::-webkit-scrollbar-thumb:window-inactive {
+  background: var(--thumb-inactive-background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--thumb-hover-background);
+}

@@ -1,0 +1,18 @@
+/*-------------------
+       Overlay
+--------------------*/
+
+.overlay.spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  inset: 0;
+  width: fit-content;
+  height: fit-content;
+  margin: auto;
+  gap: var(--spinner-overlay-text-gap);
+  --spinner-size: var(--spinner-overlay-size);
+  --spinner-arc-thickness: var(--spinner-overlay-arc-thickness);
+  --spinner-speed: var(--spinner-overlay-speed);
+}

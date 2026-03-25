@@ -83,9 +83,9 @@ html {
   --ec-frm-frameBoxShdCssVal: 0px 0px 5px rgba(0 0 0 / 50% inset);
 
   /* Spacing */
-  --ec-codePadInl: var(--spacing);
-  --ec-codePadBlk: var(--spacing);
-  --ec-uiPadBlk: var(--spacing-2xs);
+  --ec-codePadInl: var(--padding);
+  --ec-codePadBlk: var(--padding);
+  --ec-uiPadBlk: var(--padding-2xs);
 
   /* Filename Header */
   --ec-frm-edTabBarBrdCol: var(--border-color);

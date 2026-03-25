@@ -12,6 +12,7 @@ import {
   range,
   roundDecimal,
   roundNumber,
+  sequence,
   tokenize,
   toTitleCase,
   truncate,
@@ -172,6 +173,9 @@ export const TemplateHelpers = {
   range(start, stop, step = 1) {
     return range(start, stop, step);
   },
+  sequence(count, interval = 1, start = 1) {
+    return sequence(count, interval, start);
+  },
   arrayFromObject(obj) {
     return arrayFromObject(obj);
   },
@@ -183,7 +187,7 @@ export const TemplateHelpers = {
   formatDateTime(date = new Date(), format = 'LLL', options = { timezone: 'local' }) {
     return formatDate(date, format, options);
   },
-  formatDateTimeSeconds(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
+  formatTime(date = new Date(), format = 'LTS', options = { timezone: 'local' }) {
     return formatDate(date, format, options);
   },
   roundNumber(number, precision) {

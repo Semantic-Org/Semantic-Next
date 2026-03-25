@@ -164,6 +164,23 @@ In the following example events are attached to four separate buttons to control
 
 <PlaygroundExample id="event-binding" direction="horizontal"></PlaygroundExample>
 
+## Handler Return Values
+
+Event handlers support special return values to control propagation:
+
+- **`return false`** — calls `stopPropagation()`, preventing the event from reaching other handlers
+- **`return 'cancel'`** — calls `preventDefault()`, canceling the browser's default action
+
+```javascript
+const events = {
+  'click .item'({ event }) {
+    return false; // stops propagation
+  },
+  'submit form'({ event }) {
+    return 'cancel'; // prevents default
+  }
+};
+```
 
 ## Event Data
 

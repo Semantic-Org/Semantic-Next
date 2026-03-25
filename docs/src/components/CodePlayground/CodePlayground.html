@@ -1,5 +1,5 @@
 <div class="playground {classMap getClassMap}" part="playground">
-  {#if title}
+  {#if both (not minimal) title}
     <div class="masthead" part="masthead">
       <h3 class="title" part="title">{title}</h3>
       <span class="description" part="description">{description}</span>
@@ -17,7 +17,7 @@
       {#if canShowButtons}
         <div class="buttons">
           {#if allowLayoutSwap}
-            <ui-button transparent small compact class="tabs">
+            <ui-button transparent class="tabs">
               {#if is layout 'tabs'}
                 Use Panels
               {else}
@@ -67,7 +67,6 @@
     exportparts="panels"
   >
     <ui-panel
-      direction="{getTabDirection}"
       size="60"
       class="files"
       exportparts="panel, handle"
@@ -86,11 +85,12 @@
       {/if}
       {>CodePlaygroundFile
         inline=true
+        lineNumbers=!minimal
+        lineWrapping=minimal
         filename=activeFile
       }
     </ui-panel>
     <ui-panel
-      direction="{getTabDirection}"
       size=40
       class="preview"
       exportparts="panel, handle"
@@ -113,6 +113,8 @@
           {>CodePlaygroundPanel
             panel=getPagePanel
             size='natural'
+            lineNumbers=!minimal
+            lineWrapping=minimal
             maxSize='50%'
           }
           {>CodePlaygroundPanel
@@ -142,7 +144,6 @@
   >
     {#each panelGroup in getPanels}
       <ui-panel
-        direction="horizontal"
         size={getPanelGroupWidth index}
         class="code-group"
         exportparts="panel, handle">

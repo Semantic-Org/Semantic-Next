@@ -20,5 +20,6 @@
   -------------------- */
 
   --default-scrollbar-width: 17px;
+  --scrollbar-gutter: auto;
 
 }

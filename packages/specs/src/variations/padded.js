@@ -1,6 +1,6 @@
 export const PADDED_OPTIONS = [
   { name: 'Padded', value: 'padded', description: 'have standard increased padding' },
-  { name: 'Very Padded', value: 'very-padded', description: 'have extra increased padding' },
+  { name: 'Very Padded', value: 'very', description: 'have extra increased padding' },
 ];
 
 export const PADDED_VARIATION = {

@@ -1,18 +1,16 @@
-{#if href}
-  <a class="{ui}button" href="{href}" part="button">
-    {> content}
-  </a>
-{else}
-  <div class="{ui}button" tabindex="0" part="button">
-    {> content}
-  </div>
+{#if badge}
+  <span class="badge">
+    {badge}
+  </span>
 {/if}
+{>button}
+
 
 {#snippet content}
   {#if animated}
     {> animated}
   {else}
-    {#if isIconBefore}
+    {#if not iconAfter}
       {> icon}
     {/if}
     {#if not iconOnly}
@@ -20,14 +18,36 @@
         {> slot}
       </span>
     {/if}
-    {#if isIconAfter}
+    {#if iconAfter}
       {> icon}
     {/if}
   {/if}
 {/snippet}
 
+{#snippet button}
+  {#if href}
+    <a class="{ui}button" href="{href}" part="button">
+      {> content}
+    </a>
+  {else}
+    <div class="{ui}button" tabindex="0" part="button">
+      {> content}
+    </div>
+  {/if}
+{/snipppet}
+
 {#snippet icon}
-  <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
+  {#if icon}
+    <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
+  {/if}
+  {>slot icon}
+{/snippet}
+
+{#snippet badge}
+  {#if badge}
+    <span class="badge" part="badge">{badge}</span>
+  {/if}
+  {>slot badge}
 {/snippet}
 
 {#snippet animated}

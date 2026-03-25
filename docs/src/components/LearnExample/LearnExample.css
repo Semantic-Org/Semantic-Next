@@ -31,7 +31,7 @@
       box-shadow: var(--subtle-shadow);
 
       .location {
-        margin-left: var(--spacing);
+        margin-left: var(--margin);
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -240,13 +240,13 @@
             display: block;
             font-size: 32px;
             color: var(--primary-text-color);
-            margin-bottom: var(--spacing-xs);
+            margin-bottom: var(--margin-xs);
           }
           .header {
             font-size: 18px;
             font-weight: var(--bold);
             color: var(--standard-100);
-            margin-bottom: var(--spacing-xs);
+            margin-bottom: var(--margin-xs);
           }
           .text {
             color: var(--standard-40);

@@ -1,0 +1,270 @@
+{
+  "filter": {
+    "value": "filter",
+    "reason": "Direct match; Tabler has a filter/funnel icon (v1.0)"
+  },
+  "sort": {
+    "value": "sort-ascending",
+    "reason": "Tabler has sort-ascending (v1.0) for ascending sort indicator; no plain 'sort' icon"
+  },
+  "list": {
+    "value": "list",
+    "reason": "Direct match; Tabler list icon shows horizontal lines representing a list view"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct match; Tabler table icon shows a grid/spreadsheet layout"
+  },
+  "grid": {
+    "value": "grid-dots",
+    "reason": "Tabler grid-dots shows a 3x3 dot grid representing grid/card view; no plain 'grid' icon"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Direct match; Tabler chart-bar icon (v1.0) shows vertical bar chart"
+  },
+  "chart-line": {
+    "value": "chart-line",
+    "reason": "Direct match; Tabler chart-line icon (v1.0) shows a line graph for analytics/trends"
+  },
+  "chart-pie": {
+    "value": "chart-pie",
+    "reason": "Direct match; Tabler chart-pie icon (v1.0) shows a pie/donut chart for statistics"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Direct match; Tabler eye icon (v1.0) is the standard show/visible indicator"
+  },
+  "hide": {
+    "value": "eye-off",
+    "reason": "Direct match; Tabler eye-off icon (v1.22) shows a crossed-out eye for hidden/invisible state"
+  },
+  "search": {
+    "value": "search",
+    "reason": "Direct match; Tabler search icon (v1.0) is a magnifying glass"
+  },
+  "zoom-in": {
+    "value": "zoom-in",
+    "reason": "Direct match; Tabler zoom-in icon shows a magnifying glass with plus symbol"
+  },
+  "zoom-out": {
+    "value": "zoom-out",
+    "reason": "Direct match; Tabler zoom-out icon shows a magnifying glass with minus symbol"
+  },
+  "fullscreen": {
+    "value": "arrows-maximize",
+    "reason": "Tabler arrows-maximize (v1.0) shows outward-pointing arrows for fullscreen/maximize"
+  },
+  "exit-fullscreen": {
+    "value": "arrows-minimize",
+    "reason": "Tabler arrows-minimize (v1.0) shows inward-pointing arrows for exit fullscreen/minimize"
+  },
+  "board": {
+    "value": "layout-kanban",
+    "reason": "Tabler layout-kanban (v1.11) shows column-based kanban board layout"
+  },
+  "activity": {
+    "value": "activity-heartbeat",
+    "reason": "Tabler activity-heartbeat (v1.64) shows a pulse/lifeline waveform for activity monitoring"
+  },
+  "success": {
+    "value": "circle-check",
+    "reason": "Direct match; Tabler circle-check shows a checkmark inside a circle for success state"
+  },
+  "error": {
+    "value": "circle-x",
+    "reason": "Direct match; Tabler circle-x shows an X inside a circle for error/failure state"
+  },
+  "warning": {
+    "value": "alert-triangle",
+    "reason": "Direct match; Tabler alert-triangle shows the standard warning triangle with exclamation mark"
+  },
+  "info": {
+    "value": "info-circle",
+    "reason": "Direct match; Tabler info-circle shows an 'i' inside a circle for informational messages"
+  },
+  "help": {
+    "value": "help-circle",
+    "reason": "Direct match; Tabler help-circle (v2.10) shows a question mark inside a circle"
+  },
+  "loading": {
+    "value": "loader-2",
+    "reason": "Tabler loader-2 is a spinner/loading indicator; preferred over loader for its cleaner animation-ready design"
+  },
+  "filled-circle": {
+    "value": "circle-dot",
+    "reason": "Tabler circle-dot shows a filled dot inside a circle, matching radio-selected/active state"
+  },
+  "empty-circle": {
+    "value": "circle",
+    "reason": "Direct match; Tabler circle is a plain empty circle for inactive/unselected radio state"
+  },
+  "verified": {
+    "value": "rosette-discount-check",
+    "reason": "Tabler rosette-discount-check shows a checkmark inside a rosette badge; the standard verified/badge-check icon"
+  },
+  "smile": {
+    "value": "mood-happy",
+    "reason": "Tabler mood-happy shows a happy smiley face; matches satisfied/happy emoji concept"
+  },
+  "frown": {
+    "value": "mood-sad",
+    "reason": "Tabler mood-sad shows a sad face with downturned mouth; matches dissatisfied/frown concept"
+  },
+  "tip": {
+    "value": "bulb",
+    "reason": "Tabler bulb shows a lightbulb icon; the universal symbol for tip/idea/hint"
+  },
+  "fire": {
+    "value": "flame",
+    "reason": "Tabler flame (v1.35) shows a fire icon; tagged with fire, burn, bonfire, hot"
+  },
+  "support": {
+    "value": "lifebuoy",
+    "reason": "Tabler lifebuoy (v1.0) shows a life ring; tagged with help and support"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Direct match; Tabler heart icon is the standard like/favorite symbol"
+  },
+  "unlike": {
+    "value": "heart-broken",
+    "reason": "Tabler heart-broken (v1.18) shows a cracked heart; represents unlike/unfavorite"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct match; Tabler star icon is the standard favorite/rating symbol"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Direct match; Tabler bookmark icon represents save-for-later"
+  },
+  "thumbs-up": {
+    "value": "thumb-up",
+    "reason": "Tabler thumb-up (v1.0) shows a thumbs up gesture; tagged with like, emotion, good"
+  },
+  "thumbs-down": {
+    "value": "thumb-down",
+    "reason": "Tabler thumb-down (v1.0) shows a thumbs down gesture; tagged with dislike, bad"
+  },
+  "reply": {
+    "value": "arrow-back-up",
+    "reason": "Tabler arrow-back-up shows a curved backwards arrow; the standard reply action icon"
+  },
+  "comment": {
+    "value": "message",
+    "reason": "Tabler message shows a single speech bubble; represents comment/message"
+  },
+  "comments": {
+    "value": "messages",
+    "reason": "Tabler messages (v1.2) shows overlapping speech bubbles; tagged with chat, reply, conversation"
+  },
+  "typing": {
+    "value": "message-dots",
+    "reason": "Tabler message-dots shows a speech bubble with three dots; the standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at",
+    "reason": "Direct match; Tabler at icon shows the @ symbol for mentions"
+  },
+  "block": {
+    "value": "ban",
+    "reason": "Direct match; Tabler ban icon shows a circle with slash; tagged with no, reject, restriction, prohibited"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct match; Tabler flag icon represents report/flag action"
+  },
+  "pin": {
+    "value": "pinned",
+    "reason": "Tabler pinned (v1.31) shows a thumbtack/pushpin; represents pinning an item"
+  },
+  "award": {
+    "value": "award",
+    "reason": "Direct match; Tabler award icon shows a medal/ribbon badge for achievements"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Direct match; Tabler trophy icon shows a trophy cup for winner/achievement"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Direct match; Tabler gift icon (v1.2) shows a wrapped present; tagged with birthday, celebration, reward"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct match; Tabler target icon (v1.0) shows a bullseye; tagged with focus, aim, goal"
+  },
+  "bold": {
+    "value": "bold",
+    "reason": "Direct match; Tabler bold icon shows a bold 'B' character for text formatting"
+  },
+  "italic": {
+    "value": "italic",
+    "reason": "Direct match; Tabler italic icon shows an italic 'I' character for text formatting"
+  },
+  "underline": {
+    "value": "underline",
+    "reason": "Direct match; Tabler underline icon shows an underlined 'U' character for text formatting"
+  },
+  "strikethrough": {
+    "value": "strikethrough",
+    "reason": "Direct match; Tabler strikethrough icon shows struck-through text for text formatting"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct match; Tabler code icon shows angle brackets for code/markup"
+  },
+  "quote": {
+    "value": "blockquote",
+    "reason": "Tabler blockquote (v1.39) shows quotation marks with lines; matches blockquote/quote concept"
+  },
+  "heading": {
+    "value": "heading",
+    "reason": "Direct match; Tabler heading (v1.39) shows an 'H' character representing heading/title"
+  },
+  "paragraph": {
+    "value": "pilcrow",
+    "reason": "Tabler pilcrow (v1.113) shows the paragraph symbol; tagged with paragraph, letter, text"
+  },
+  "bullet-list": {
+    "value": "list",
+    "reason": "Tabler list icon shows horizontal lines with bullets; represents unordered/bullet list"
+  },
+  "numbered-list": {
+    "value": "list-numbers",
+    "reason": "Tabler list-numbers (v1.40) shows numbered lines; represents ordered/numbered list"
+  },
+  "checklist": {
+    "value": "list-check",
+    "reason": "Tabler list-check (v1.2) shows lines with checkmarks; tagged with todo, tasks, reminders"
+  },
+  "indent": {
+    "value": "indent-increase",
+    "reason": "Tabler indent-increase shows lines with rightward arrow; represents increasing indent level"
+  },
+  "outdent": {
+    "value": "indent-decrease",
+    "reason": "Tabler indent-decrease (v1.3) shows lines with leftward arrow; represents decreasing indent level"
+  },
+  "align-left": {
+    "value": "align-left",
+    "reason": "Direct match; Tabler align-left shows left-aligned text lines"
+  },
+  "align-center": {
+    "value": "align-center",
+    "reason": "Direct match; Tabler align-center shows center-aligned text lines"
+  },
+  "align-right": {
+    "value": "align-right",
+    "reason": "Direct match; Tabler align-right shows right-aligned text lines"
+  },
+  "justify": {
+    "value": "align-justified",
+    "reason": "Tabler align-justified shows fully justified text lines; matches justify/align-justify concept"
+  },
+  "emoji": {
+    "value": "mood-smile",
+    "reason": "Tabler mood-smile (v1.0) shows a smiley face; represents emoji picker trigger"
+  }
+}

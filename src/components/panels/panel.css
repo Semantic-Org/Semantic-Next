@@ -12,25 +12,25 @@
 }
 
 :host {
-  --panel-handle-height: 14px;
-  --panel-divider-width: 1px;
+  --panel-handle-height: var(--relative-14px);
+  --panel-divider-width: var(--relative-1px);
 
   --panel-label-font-weight: var(--bold);
-  --panel-label-padding: 0.75rem 0.75rem 0.7rem 2.5rem;
-  --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
-  --panel-label-border: 1px solid rgba(221, 221, 221, 0.05);
-  --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
+  --panel-label-padding: var(--padding-s);
+  --panel-label-background: var(--very-subtle-gradient);
+  --panel-label-border: var(--subtle-border);
+  --panel-label-box-shadow: var(--subtle-bottom-lip-shadow);
   --panel-label-transition: background-color 0.1s ease, color 0.1s ease-in-out;
-  --panel-label-color: rgba(255, 255, 255, 0.4);
-  --panel-label-font-size: 10px;
+  --panel-label-color: var(--light-text-color);
+  --panel-label-font-size: var(--text-3xs);
 
-  --panel-action-font-size: 15px;
+  --panel-action-font-size: var(--relative-15px);
 
-  --panel-label-active-color: rgb(255 255 255 / 80%);
-  --panel-label-active-background: rgb(255 255 255 / 3%);
+  --panel-label-active-color: var(--text-color);
+  --panel-label-active-background: var(--standard-5);
 
-  --panel-label-minimized-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 10%));
-  --panel-label-minimized-color: rgba(255, 255, 255, 0.1);
+  --panel-label-minimized-background: var(--very-subtle-gradient);
+  --panel-label-minimized-color: var(--standard-10);
 
   --panel-divider-color: var(--solid-border-color);
   --panel-divider-color-hover: var(--selected-border-color);
@@ -66,8 +66,8 @@
 
     .actions {
       margin-left: auto;
-      margin-top: -3px;
-      margin-bottom: -3px;
+      margin-top: calc(var(--relative-3px) * -1);
+      margin-bottom: calc(var(--relative-3px) * -1);
 
       ui-icon {
         font-size: var(--panel-action-font-size);

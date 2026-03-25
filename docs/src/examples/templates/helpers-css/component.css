@@ -60,7 +60,7 @@ b {
 }
 
 .statuses {
-  padding: var(--spacing);
+  padding: var(--padding);
   border: 1px solid var(--standard-15);
   border-radius: var(--border-radius);
   

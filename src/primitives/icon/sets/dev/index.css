@@ -1,0 +1,22 @@
+/* Dev Icons (Colored background-image) */
+:root {
+  /* Set-level defaults for background-image technique */
+  --icon-dev: none;
+  --icon-dev-bg: transparent;
+  --icon-dev-img: none;
+
+  /* Icon definitions */
+  --icon-js-img: url('./js.svg');
+  --icon-astro-img: url('./astro.svg');
+  --icon-vue-img: url('./vue.svg');
+  --icon-react-img: url('./react.svg');
+  --icon-svelte-img: url('./svelte.svg');
+  --icon-angular-img: url('./angular.svg');
+  --icon-nextjs-img: url('./nextjs.svg');
+  --icon-astro-mark-img: url('./astro-mark.svg');
+  --icon-vue-mark-img: url('./vue-mark.svg');
+  --icon-react-mark-img: url('./react-mark.svg');
+  --icon-svelte-mark-img: url('./svelte-mark.svg');
+  --icon-angular-mark-img: url('./angular-mark.svg');
+  --icon-nextjs-mark-img: url('./nextjs-mark.svg');
+}

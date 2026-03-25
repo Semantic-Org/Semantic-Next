@@ -17,9 +17,6 @@ const defaultState = {
 };
 
 const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
-  initialize() {
-  },
-
   showMenu(event) {
     // Position menu at cursor
     const x = event.clientX;
@@ -84,7 +81,6 @@ const createComponent = ({ self, state, settings, $, dispatchEvent }) => ({
   },
 
   navigateNext() {
-    const items = settings.items;
     const newIndex = (state.activeIndex.get() + 1) % settings.items.length;
     state.activeIndex.set(newIndex);
   },
@@ -186,7 +182,7 @@ const events = {
   },
 
   'global show context-menu'({ self, el, target }) {
-    if (el == target) {
+    if (el === target) {
       return;
     }
     self.hideMenu();

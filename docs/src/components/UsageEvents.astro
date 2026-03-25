@@ -1,0 +1,34 @@
+---
+const { spec } = Astro.props;
+
+const events = spec?.events || [];
+if (events.length === 0) return;
+---
+<section class="usage-section" id="events">
+  <h2>Events</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Description</th>
+        <th>Arguments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {events.map((event) => (
+        <tr>
+          <td><code>{event.eventName || event.name?.toLowerCase()}</code></td>
+          <td>{event.description}</td>
+          <td>
+            {event.arguments?.length > 0
+              ? event.arguments.map((arg) => (
+                  <span><code>{arg.name}</code>{arg.description ? ` — ${arg.description}` : ''}<br /></span>
+                ))
+              : '—'
+            }
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</section>

@@ -49,8 +49,8 @@
   -------------------- */
 
   --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
-  --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
+  --left-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
   --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
-  --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
+  --right-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
 
 }

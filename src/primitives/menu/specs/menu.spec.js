@@ -20,6 +20,12 @@ export default {
       description: 'allow for selection between choices',
       usageLevel: 1,
     },
+    {
+      name: 'Sliding',
+      attribute: 'sliding',
+      description: 'indicate active selection with a sliding indicator',
+      usageLevel: 1,
+    },
   ],
   variations: [
     {
@@ -46,6 +52,12 @@ export default {
       description: 'can have its menu items inset',
       usageLevel: 1,
     },
+    {
+      name: 'Icon Only',
+      attribute: 'icon-only',
+      description: 'display only icons with labels shown as tooltips',
+      usageLevel: 2,
+    },
   ],
   events: [
     {
@@ -71,6 +83,13 @@ export default {
       type: 'string',
       attribute: 'value',
       description: 'can specify the active menu item value when generating menu items',
+    },
+    {
+      name: 'Tooltip Settings',
+      type: 'object',
+      attribute: 'tooltip-settings',
+      defaultValue: { duration: 0 },
+      description: 'can configure tooltip settings when using icon-only',
     },
   ],
   examples: {

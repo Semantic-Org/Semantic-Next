@@ -4,6 +4,7 @@
 @import url('./content/icon.css') layer(button.definition.content.icon);
 @import url('./content/label.css') layer(button.definition.content.label);
 @import url('./content/image.css') layer(button.definition.content.image);
+@import url('./content/badge.css') layer(button.definition.content.badge);
 @import url('./content/conditional.css') layer(button.definition.content.conditional);
 
 /* Group */

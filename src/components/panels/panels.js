@@ -74,6 +74,9 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let $allPanels = $(el).find('ui-panel');
     let $panels = $allPanels.not($childPanelGroupPanels);
     self.panels = $panels.get();
+    each(self.panels, (panel) => {
+      panel.settings.direction = settings.direction;
+    });
   },
 
   setPanelRendered(el) {
@@ -119,7 +122,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
         }
         return p;
       });
-      localStorage.setItem(settings.saveStateID, JSON.stringify(storedLayout));
+      localStorage.setItem(settings.saveStateID, JSON.stringify({ panels: storedLayout }));
     }
 
     each(storedLayout, (stored, index) => {
@@ -151,6 +154,13 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
   setPanelCalculatedSizes() {
     let exactPanels = self.getExactPanels();
+    let growPanels = self.getGrowingPanels();
+
+    // auto-promote last panel to grow if none exist
+    if (growPanels.length === 0 && exactPanels.length > 1) {
+      console.warn('ui-panels: no panels with size="grow". Auto-promoting last panel to absorb remaining space.');
+      growPanels = [exactPanels.pop()];
+    }
 
     // handle shared implementation of setting size
     // relative to constraints
@@ -162,8 +172,8 @@ const createComponent = ({ self, el, settings, $ }) => ({
       let relativeSize = getRelativeSize();
 
       // constraints remain the same
-      const minSize = self.getRelativeSettingSize(panel.settings.minSize);
-      const maxSize = self.getRelativeSettingSize(panel.settings.maxSize);
+      const minSize = self.getRelativeSettingSize(panel.settings.minSize, index);
+      const maxSize = self.getRelativeSettingSize(panel.settings.maxSize, index);
       if (relativeSize < minSize) {
         relativeSize = minSize;
       }
@@ -183,14 +193,8 @@ const createComponent = ({ self, el, settings, $ }) => ({
       });
     });
 
-    // get panels without a fixed size and extra pixels to share
-    let growPanels = self.getGrowingPanels();
+    // get available width for grow panels
     const availableWidth = self.getAvailableGrowWidth();
-
-    if (growPanels.length == 0 && availableWidth > 0) {
-      console.error('No panels can grow but panels have excess pixels. Using last panel to grow');
-      growPanels = self.panels.slice(-1);
-    }
 
     // grow each panel that does not have a fixed width
     // splitting available width
@@ -199,6 +203,23 @@ const createComponent = ({ self, el, settings, $ }) => ({
         return availableWidth / growPanels.length;
       });
     });
+
+    // normalize to 100 if min constraints caused overflow
+    let total = sum(self.panels.map(panel => self.getPanelSize(panel) || 0));
+    if (total > 100.01) {
+      const excess = total - 100;
+      const exactSizes = exactPanels.map(panel => self.getPanelSize(panel) || 0);
+      const exactTotal = sum(exactSizes);
+      if (exactTotal > 0) {
+        each(exactPanels, (panel) => {
+          const index = self.panels.indexOf(panel);
+          const currentSize = self.getPanelSize(panel);
+          const reduction = excess * (currentSize / exactTotal);
+          const minSize = self.getRelativeSettingSize(panel.settings.minSize, index) || 0;
+          self.setPanelSize(index, Math.max(currentSize - reduction, minSize));
+        });
+      }
+    }
   },
 
   // cache some sizing on pane group
@@ -206,11 +227,19 @@ const createComponent = ({ self, el, settings, $ }) => ({
     self.cache.groupSize = self.getGroupSize();
     self.cache.groupScrollOffset = self.getGroupScrollOffset();
     self.cache.naturalSizes = self.panels.map((panel, index) => self.getNaturalPanelSize(index));
+    self.cache.minSizes = self.panels.map((panel, index) => {
+      let minSize = panel.settings.minSize;
+      if (minSize == 'auto') {
+        return panel.settings.label ? self.getNaturalPanelSize(index, { minimized: true }) : 0;
+      }
+      return self.getPixelSettingSize(minSize, index) || 0;
+    });
   },
   removeGroupCalculations() {
     delete self.cache.groupSize;
     delete self.cache.groupScrollOffset;
     delete self.cache.naturalSizes;
+    delete self.cache.minSizes;
   },
 
   // store current resize position when starting drag
@@ -244,7 +273,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let availableWidth = 100;
     each(self.panels, (panel) => {
       const setWidth = $(panel).css('flex-grow');
-      if (panel.settings.width !== 'grow' && setWidth) {
+      if (panel.settings.size !== 'grow' && setWidth) {
         availableWidth -= setWidth;
       }
     });
@@ -259,7 +288,13 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
 
   getRelativeSettingSize(size, index) {
-    if (size == 'natural') {
+    if (size == 'auto') {
+      const label = self.getPanelSetting(index, 'label');
+      if (!label) { return 0; }
+      let pixels = self.getNaturalPanelSize(index, { minimized: true });
+      return self.getRelativeSize(pixels);
+    }
+    else if (size == 'natural') {
       let pixels = self.getNaturalPanelSize(index);
       return self.getRelativeSize(pixels);
     }
@@ -274,7 +309,11 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
 
   getPixelSettingSize(size, index) {
-    if (size == 'natural') {
+    if (size == 'auto') {
+      const label = self.getPanelSetting(index, 'label');
+      return label ? self.getNaturalPanelSize(index, { minimized: true }) : 0;
+    }
+    else if (size == 'natural') {
       return self.getNaturalPanelSize(index);
     }
     else if (isString(size) && size.includes('px')) {
@@ -299,11 +338,11 @@ const createComponent = ({ self, el, settings, $ }) => ({
     return Math.abs(delta / panelSize * 100);
   },
   getPanelSize(panel) {
-    const size = $(panel).css('flex-grow');
+    const size = panel.style.flexGrow;
     return size ? parseFloat(size) : undefined;
   },
   getPanelSizePixels(index) {
-    let panel = this.panels[index];
+    let panel = self.panels[index];
     return (self.getPanelSize(panel) / 100) * self.getGroupSize();
   },
 
@@ -338,12 +377,12 @@ const createComponent = ({ self, el, settings, $ }) => ({
     return (relativeSize / 100) * self.getGroupSize();
   },
 
-  getNaturalPanelSize(index) {
+  getNaturalPanelSize(index, { minimized } = {}) {
     let panel = self.panels[index];
     let getPanelNaturalSize = self.getPanelSetting(index, 'getNaturalSize');
     let naturalSize = getPanelNaturalSize(panel, {
       direction: settings.direction,
-      minimized: panel.settings.minimized,
+      minimized: minimized ?? panel.settings.minimized,
     });
     return naturalSize;
   },
@@ -390,7 +429,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
 
   setPanelSize(index, relativeSize) {
     let panel = self.panels[index];
-    $(panel).css('flex-grow', relativeSize);
+    panel.style.flexGrow = relativeSize;
   },
 
   setPanelSizePixels(index, pixelSize, settings) {
@@ -432,15 +471,18 @@ const createComponent = ({ self, el, settings, $ }) => ({
       }),
       getMaxSize = memoize((index) => {
         let maxSize = self.getPanelSetting(index, 'maxSize');
-        return self.getPixelSettingSize(maxSize) || 0;
+        return self.getPixelSettingSize(maxSize, index) || 0;
       }),
       isMinimized = memoize((index) => {
         let minimized = self.isMinimized(index);
         return minimized || false;
       }),
       getMinSize = memoize((index) => {
+        if (self.cache.minSizes) {
+          return self.cache.minSizes[index];
+        }
         let minSize = self.getPanelSetting(index, 'minSize');
-        return self.getPixelSettingSize(minSize) || 0;
+        return self.getPixelSettingSize(minSize, index) || 0;
       }),
       getSize = (index) => {
         let panelSize = self.getPanelSizePixels(index);
@@ -686,14 +728,10 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
 });
 
-const onCreated = ({ el, self }) => {
-  self.addPanels();
-};
-
-const onDestroyed = ({ self }) => {
-};
-
-const onRendered = ({ $, el, self, settings }) => {
+const onCreated = ({ el, self, isClient }) => {
+  if (isClient) {
+    self.addPanels();
+  }
 };
 
 const events = {
@@ -741,8 +779,6 @@ const Panels = defineComponent({
   createComponent,
   defaultSettings,
   onCreated,
-  onDestroyed,
-  onRendered,
   events,
 });
 

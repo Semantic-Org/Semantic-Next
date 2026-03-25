@@ -43,6 +43,28 @@ export class Signal<T> {
   constructor();
 
   /**
+   * Sets debugging context on the signal, replacing any existing context.
+   * Context appears in reactive debugging output and helps trace signal behavior.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#setcontext setContext}
+   * @param additionalContext - Key-value pairs to store as debugging context
+   */
+  setContext(additionalContext?: Record<string, any>): void;
+
+  /**
+   * Adds debugging context without replacing existing context.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#addcontext addContext}
+   * @param additionalContext - Key-value pairs to merge into existing context
+   */
+  addContext(additionalContext?: Record<string, any>): void;
+
+  /**
+   * Captures a stack trace into the signal's context for debugging.
+   * Call after setContext to see where the signal was configured.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#settrace setTrace}
+   */
+  setTrace(): void;
+
+  /**
    * Gets the current value, establishing a reactive dependency.
    * When accessed within a reactive context (like a Reaction),
    * any changes to this Signal will cause the reactive context to re-run.
@@ -105,6 +127,15 @@ export class Signal<T> {
    *          preventing further calls to the callback.
    */
   subscribe(callback: (value: T, computation: { stop: () => void; }) => void): { stop: () => void; };
+
+  /**
+   * Mutates the current value in-place via a callback function.
+   * If the callback returns a value, that value is set. Otherwise the original
+   * value is kept and reactivity is triggered if it changed.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#mutate mutate}
+   * @param mutationFn - Function that receives the current value and optionally returns a new value
+   */
+  mutate(mutationFn: (value: T) => T | void): void;
 
   // Array-specific methods (only available when T is or extends any[])
   // These methods are available when the Signal's value is an array, providing
@@ -209,16 +240,17 @@ export class Signal<T> {
    * @param amount - Amount to increment by
    * @default 1
    */
-  increment(this: Signal<number | null | undefined>, amount?: number): void;
+  increment(this: Signal<number | null | undefined>, amount?: number, max?: number): void;
 
   /**
    * Decrements the numeric value.
    * This method is only available when `T` is or extends `number`, or is null/undefined.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/number-helpers#decrement decrement}
    * @param amount - Amount to decrement by
+   * @param min - Minimum value (floor)
    * @default 1
    */
-  decrement(this: Signal<number | null | undefined>, amount?: number): void;
+  decrement(this: Signal<number | null | undefined>, amount?: number, min?: number): void;
 
   // Date methods (only available when T is or extends Date)
   // These methods are available when the Signal's value is a Date object.
@@ -278,9 +310,17 @@ export class Signal<T> {
    * Assumes the Signal's value is an array of objects.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitem getItem}
    * @param id - ID to look for
+   * @returns The matching object in the array, or undefined if not found.
+   */
+  getItem<U extends Record<string, any>[]>(this: Signal<U>, id: string): U[number] | undefined;
+
+  /**
+   * Gets the index of an object with the specified ID within the Signal's array value.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/collection-helpers#getitemindex getItemIndex}
+   * @param id - ID to look for
    * @returns Index of the matching object in the array, or -1 if not found.
    */
-  getItem(id: string): number;
+  getItemIndex<U extends Record<string, any>[]>(this: Signal<U>, id: string): number;
 
   /**
    * Sets a property on an object with the specified ID within the Signal's array value.

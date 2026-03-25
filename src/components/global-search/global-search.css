@@ -128,7 +128,7 @@ ui-modal {
   .results {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing);
+    gap: var(--gap);
     background-color: var(--standard-0);
     background-image: linear-gradient(to bottom right, rgb(23 27 30), rgb(2 14 22));
     border-radius: var(--bottom-attached-border-radius);
@@ -248,6 +248,10 @@ ui-modal {
     mark {
       background-color: #009fda;
       color: #FFFFFF;
+    }
+    .highlight {
+      color: var(--primary-text-color);
+      box-shadow: 0px 1px 0px 0px var(--primary-text-color);
     }
   }
 

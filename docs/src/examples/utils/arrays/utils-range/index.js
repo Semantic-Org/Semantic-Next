@@ -1,9 +1,13 @@
 import { range } from '@semantic-ui/utils';
 
-// single argument becomes stop value, start defaults to 0
+// single argument is the stop value (exclusive), start defaults to 0
 console.log(range(5));
 
+// start and stop
 console.log(range(1, 5));
 
 // with custom step
 console.log(range(0, 10, 2));
+
+// fractional steps without floating-point drift
+console.log(range(0, 1, 0.2));

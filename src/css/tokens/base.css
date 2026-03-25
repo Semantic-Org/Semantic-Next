@@ -1,0 +1,230 @@
+
+:root {
+
+  /*-------------------
+       Base Units
+  --------------------*/
+
+  /*
+   * The active base font size. Change this to scale
+   * the entire type system proportionally.
+   *
+   * All --size-* tokens, --Xpx tokens, and the em bridge
+   * in spacing.css derive from this value.
+   */
+  --base-size: 14;
+
+  /*
+   * The active base spacing value. Change this to
+   * scale all spacing proportionally.
+   *
+   * This also controls the rem base via --em-size.
+   * 1rem = --base-spacing px, so raw rem values
+   * in any CSS are automatically on the spacing grid.
+   */
+  --base-spacing: 16;
+
+
+  /*******************************
+               Computed
+  *******************************/
+
+  /* Generally you do not ever need to edit these values when theming */
+
+  /*
+   * We are using 16px base spacing and 14px base sizing
+   * Em ratio ensures that padding is relative to sizing
+   * 16 / 14 = 1.1429
+   */
+  --size-ratio: calc(var(--base-spacing) / var(--base-size));
+
+  /*
+   * The document's root font-size.
+   * Sets 1rem = --base-spacing px.
+   */
+  --em-size: calc(var(--base-spacing) * 1px);
+
+
+  /*
+   * The bodys's root font-size.
+   * Makes sure 1em for a component matches --base-size
+   */
+  --page-size: calc(var(--base-size) * 1px);
+
+
+
+  /*-------------------
+      Reference Size
+  --------------------*/
+
+  /*
+   * The base design system uses a 14px reference size
+     All values that should scale are fixed to the original reference size.
+
+     This means they scale up with changes to --em-size
+  */
+  --reference-size: 14;
+
+
+  /*******************************
+         Precise Sizes (rem)
+  *******************************/
+
+  /*
+   * Use for precise pixel sizes that DO NOT scale with component but scall with site theme (--base-size)
+
+   * Exact pixel values expressed in rem.
+   * Scales with --base-size, does not ratchet.
+   */
+
+
+  --1px:  calc(round(var(--base-size) * 1  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --2px:  calc(round(var(--base-size) * 2  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --3px:  calc(round(var(--base-size) * 3  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --4px:  calc(round(var(--base-size) * 4  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --5px:  calc(round(var(--base-size) * 5  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --6px:  calc(round(var(--base-size) * 6  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --7px:  calc(round(var(--base-size) * 7  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --8px:  calc(round(var(--base-size) * 8  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --9px:  calc(round(var(--base-size) * 9  / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --10px: calc(round(var(--base-size) * 10 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --11px: calc(round(var(--base-size) * 11 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --12px: calc(round(var(--base-size) * 12 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --13px: calc(round(var(--base-size) * 13 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --14px: calc(round(var(--base-size) * 14 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --15px: calc(round(var(--base-size) * 15 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --16px: calc(round(var(--base-size) * 16 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --17px: calc(round(var(--base-size) * 17 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --18px: calc(round(var(--base-size) * 18 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --19px: calc(round(var(--base-size) * 19 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --20px: calc(round(var(--base-size) * 20 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --21px: calc(round(var(--base-size) * 21 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --22px: calc(round(var(--base-size) * 22 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --23px: calc(round(var(--base-size) * 23 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --24px: calc(round(var(--base-size) * 24 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --25px: calc(round(var(--base-size) * 25 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --26px: calc(round(var(--base-size) * 26 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --27px: calc(round(var(--base-size) * 27 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --28px: calc(round(var(--base-size) * 28 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --29px: calc(round(var(--base-size) * 29 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --30px: calc(round(var(--base-size) * 30 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --31px: calc(round(var(--base-size) * 31 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --32px: calc(round(var(--base-size) * 32 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --33px: calc(round(var(--base-size) * 33 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --34px: calc(round(var(--base-size) * 34 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --35px: calc(round(var(--base-size) * 35 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --36px: calc(round(var(--base-size) * 36 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --37px: calc(round(var(--base-size) * 37 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --38px: calc(round(var(--base-size) * 38 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --39px: calc(round(var(--base-size) * 39 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --40px: calc(round(var(--base-size) * 40 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --41px: calc(round(var(--base-size) * 41 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --42px: calc(round(var(--base-size) * 42 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --43px: calc(round(var(--base-size) * 43 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --44px: calc(round(var(--base-size) * 44 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --45px: calc(round(var(--base-size) * 45 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --46px: calc(round(var(--base-size) * 46 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --47px: calc(round(var(--base-size) * 47 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --48px: calc(round(var(--base-size) * 48 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --49px: calc(round(var(--base-size) * 49 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --50px: calc(round(var(--base-size) * 50 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --51px: calc(round(var(--base-size) * 51 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --52px: calc(round(var(--base-size) * 52 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --53px: calc(round(var(--base-size) * 53 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --54px: calc(round(var(--base-size) * 54 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --55px: calc(round(var(--base-size) * 55 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --56px: calc(round(var(--base-size) * 56 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --57px: calc(round(var(--base-size) * 57 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --58px: calc(round(var(--base-size) * 58 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --59px: calc(round(var(--base-size) * 59 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --60px: calc(round(var(--base-size) * 60 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --61px: calc(round(var(--base-size) * 61 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --62px: calc(round(var(--base-size) * 62 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --63px: calc(round(var(--base-size) * 63 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+  --64px: calc(round(var(--base-size) * 64 / var(--reference-size), 1) / var(--base-spacing) * 1rem);
+
+
+  /*******************************
+       Relative Sizes (em)
+  *******************************/
+
+  /*
+   * Exact pixel values expressed in em.
+   * Scales with --base-size AND ratchets with
+   * component font-size.
+   *
+   * Use for component-internal values that need
+   * precise control: input padding, icon offsets,
+   * border widths that should scale with the component.
+   *
+   * At base 14, --relative-12px inside a 14px context = 12px.
+   * Inside a large component (16px context) = 13.7px.
+   * At base 13, inside a 13px context = 11.1px.
+   */
+
+
+  --relative-1px:  calc(1  / var(--reference-size) * 1em);
+  --relative-2px:  calc(2  / var(--reference-size) * 1em);
+  --relative-3px:  calc(3  / var(--reference-size) * 1em);
+  --relative-4px:  calc(4  / var(--reference-size) * 1em);
+  --relative-5px:  calc(5  / var(--reference-size) * 1em);
+  --relative-6px:  calc(6  / var(--reference-size) * 1em);
+  --relative-7px:  calc(7  / var(--reference-size) * 1em);
+  --relative-8px:  calc(8  / var(--reference-size) * 1em);
+  --relative-9px:  calc(9  / var(--reference-size) * 1em);
+  --relative-10px: calc(10 / var(--reference-size) * 1em);
+  --relative-11px: calc(11 / var(--reference-size) * 1em);
+  --relative-12px: calc(12 / var(--reference-size) * 1em);
+  --relative-13px: calc(13 / var(--reference-size) * 1em);
+  --relative-14px: calc(14 / var(--reference-size) * 1em);
+  --relative-15px: calc(15 / var(--reference-size) * 1em);
+  --relative-16px: calc(16 / var(--reference-size) * 1em);
+  --relative-17px: calc(17 / var(--reference-size) * 1em);
+  --relative-18px: calc(18 / var(--reference-size) * 1em);
+  --relative-19px: calc(19 / var(--reference-size) * 1em);
+  --relative-20px: calc(20 / var(--reference-size) * 1em);
+  --relative-21px: calc(21 / var(--reference-size) * 1em);
+  --relative-22px: calc(22 / var(--reference-size) * 1em);
+  --relative-23px: calc(23 / var(--reference-size) * 1em);
+  --relative-24px: calc(24 / var(--reference-size) * 1em);
+  --relative-25px: calc(25 / var(--reference-size) * 1em);
+  --relative-26px: calc(26 / var(--reference-size) * 1em);
+  --relative-27px: calc(27 / var(--reference-size) * 1em);
+  --relative-28px: calc(28 / var(--reference-size) * 1em);
+  --relative-29px: calc(29 / var(--reference-size) * 1em);
+  --relative-30px: calc(30 / var(--reference-size) * 1em);
+  --relative-31px: calc(31 / var(--reference-size) * 1em);
+  --relative-32px: calc(32 / var(--reference-size) * 1em);
+  --relative-33px: calc(33 / var(--reference-size) * 1em);
+  --relative-34px: calc(34 / var(--reference-size) * 1em);
+  --relative-35px: calc(35 / var(--reference-size) * 1em);
+  --relative-36px: calc(36 / var(--reference-size) * 1em);
+  --relative-37px: calc(37 / var(--reference-size) * 1em);
+  --relative-38px: calc(38 / var(--reference-size) * 1em);
+  --relative-39px: calc(39 / var(--reference-size) * 1em);
+  --relative-40px: calc(40 / var(--reference-size) * 1em);
+  --relative-41px: calc(41 / var(--reference-size) * 1em);
+  --relative-42px: calc(42 / var(--reference-size) * 1em);
+  --relative-43px: calc(43 / var(--reference-size) * 1em);
+  --relative-44px: calc(44 / var(--reference-size) * 1em);
+  --relative-45px: calc(45 / var(--reference-size) * 1em);
+  --relative-46px: calc(46 / var(--reference-size) * 1em);
+  --relative-47px: calc(47 / var(--reference-size) * 1em);
+  --relative-48px: calc(48 / var(--reference-size) * 1em);
+  --relative-49px: calc(49 / var(--reference-size) * 1em);
+  --relative-50px: calc(50 / var(--reference-size) * 1em);
+  --relative-51px: calc(51 / var(--reference-size) * 1em);
+  --relative-52px: calc(52 / var(--reference-size) * 1em);
+  --relative-53px: calc(53 / var(--reference-size) * 1em);
+  --relative-54px: calc(54 / var(--reference-size) * 1em);
+  --relative-55px: calc(55 / var(--reference-size) * 1em);
+  --relative-56px: calc(56 / var(--reference-size) * 1em);
+  --relative-57px: calc(57 / var(--reference-size) * 1em);
+  --relative-58px: calc(58 / var(--reference-size) * 1em);
+  --relative-59px: calc(59 / var(--reference-size) * 1em);
+  --relative-60px: calc(60 / var(--reference-size) * 1em);
+  --relative-61px: calc(61 / var(--reference-size) * 1em);
+  --relative-62px: calc(62 / var(--reference-size) * 1em);
+  --relative-63px: calc(63 / var(--reference-size) * 1em);
+  --relative-64px: calc(64 / var(--reference-size) * 1em);
+}

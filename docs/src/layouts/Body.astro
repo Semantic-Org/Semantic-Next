@@ -1,5 +1,5 @@
 ---
-let { title, description, searchMeta, bodyClass = '', padded } = Astro.props;
+let { title, description, searchMeta, bodyClass = '', padded, prefetch } = Astro.props;
 
 if(!title) {
   title = 'Semantic UI';
@@ -47,6 +47,11 @@ searchMeta = {
       import { exportGlobals } from '@semantic-ui/query';
       exportGlobals();
     </script>
+    {prefetch && !import.meta.env.DEV && (
+      <script>
+        import '../javascript/prefetch.js';
+      </script>
+    )}
     <script is:inline data-astro-rerun>
       if(!window.systemPrefersDark) {
         window.systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

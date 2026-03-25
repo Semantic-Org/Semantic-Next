@@ -6,11 +6,15 @@ import codeMirrorCSS from './lib/codemirror.css?raw';
 
 import { templateLang } from './lang/template-lang.js';
 
+const defaultSettings = {
+  lineNumbers: true,
+};
+
 const defaultState = {
   initialized: false, // avoid the flash when mode is set from changing file types
 };
 
-const createComponent = ({ self, state, data, $, $$ }) => ({
+const createComponent = ({ self, settings, state, data, $, $$ }) => ({
   getClassMap() {
     return {
       initialized: state.initialized.get(),
@@ -87,6 +91,23 @@ const createComponent = ({ self, state, data, $, $$ }) => ({
     // add custom styles
     if (self.editorEl) {
       adoptStylesheet(codeMirrorCSS, self.editorEl.shadowRoot);
+    }
+
+    const $editor = $('playground-file-editor');
+
+    // disable line numbers if requested
+    if (data.lineNumbers) {
+      $editor.addAttr('line-numbers');
+    }
+    else {
+      $editor.removeAttr('line-numbers');
+    }
+    // disable line numbers if requested
+    if (data.lineWrapping) {
+      $editor.addAttr('line-wrapping');
+    }
+    else {
+      $editor.removeAttr('line-wrapping');
     }
 
     // handle custom syntax
@@ -170,6 +191,7 @@ const CodePlaygroundFile = defineComponent({
   onRendered,
   events,
   defaultState,
+  defaultSettings,
 });
 
 export default CodePlaygroundFile;

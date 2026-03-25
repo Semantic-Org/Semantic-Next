@@ -5,7 +5,7 @@ title: Query - Events
 icon: zap
 description: API reference for Query methods related to event handling
 package: "@semantic-ui/query"
-methods: ["on", "off", "one", "onNext", "trigger", "dispatchEvent", "focus", "blur", "click", "submit", "ready"]
+methods: ["on", "off", "one", "onNext", "intercept", "trigger", "dispatchEvent", "focus", "blur", "click", "submit", "ready"]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -38,7 +38,7 @@ Attaches an event listener to matched elements.
 | abortController | AbortController | auto | Custom AbortController for removal |
 | capture | boolean | false | Use capture phase |
 | once | boolean | false | Remove after first execution |
-| passive | boolean | false | Handler won't call preventDefault() |
+| passive | boolean | false | Handler won't call preventDefault(). Automatically `true` for `scroll` and `resize` events. |
 
 #### Returns
 
@@ -50,6 +50,27 @@ Attaches an event listener to matched elements.
 ```javascript
 $('button').on('click', (e) => {
   console.log('Clicked!', e.target);
+});
+```
+
+#### Handler Return Values
+
+Handlers can use return values to control event propagation:
+
+- **`return false`** — calls `stopPropagation()`, preventing the event from reaching other handlers
+- **`return 'cancel'`** — calls `preventDefault()`, canceling the browser's default action
+
+```javascript
+// Stop the event from bubbling to parent handlers
+$('span').on('click', (e) => {
+  return false;
+});
+
+// Prevent the browser's default action (e.g., form submission)
+$('form').on('submit', (e) => {
+  if (!isValid()) {
+    return 'cancel';
+  }
 });
 ```
 
@@ -119,6 +140,51 @@ $('button').one('click', () => {
 #### Example
 
 <PlaygroundExample id="query-one" direction="horizontal"></PlaygroundExample>
+
+### intercept
+
+```javascript
+$('selector').intercept(eventName, handler);
+$('selector').intercept(eventName, delegateSelector, handler);
+```
+
+Attaches a capture-phase event listener. Events fire top-down during capture (parent first), unlike `on()` which fires bottom-up during bubbling (child first). Use `intercept` when a parent needs to handle or block an event before children see it.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Space-separated event types |
+| delegateSelector | string | Optional CSS selector for event delegation |
+| handler | function | Event handler function |
+| options | object | Same options as `on()` (except `capture`, which is always `true`) |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+// Parent intercepts ESC before children handle it
+$('.modal').intercept('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    return false; // children never see this event
+  }
+});
+
+// With delegation
+$('.form').intercept('click', '[type="submit"]', function(e) {
+  if (!isValid()) {
+    return false; // button's own handler never fires
+  }
+});
+```
+
+#### Example
+
+<PlaygroundExample id="query-intercept" direction="horizontal"></PlaygroundExample>
 
 ### onNext
 

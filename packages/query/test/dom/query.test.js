@@ -1070,13 +1070,16 @@ describe('query', () => {
     it('should allow native removeEventListener use with handler', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      const callback = vi.fn();
+      let called = false;
+      const callback = () => {
+        called = true;
+      };
 
       const eventHandler = $('div').on('click', callback, { returnHandler: true });
 
       div.removeEventListener('click', callback);
       div.click();
-      expect(callback).not.toHaveBeenCalled();
+      expect(called).toBe(false);
     });
 
     it('should remove delegated events', () => {
@@ -1407,6 +1410,272 @@ describe('query', () => {
 
       expect(callback1).toHaveBeenCalled();
       expect(callback2).toHaveBeenCalled();
+    });
+  });
+
+  describe('return false / return cancel', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should call stopPropagation when handler returns false', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').on('click', () => {
+        return false;
+      });
+
+      child.click();
+      expect(parentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should not call preventDefault when handler returns false', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let defaultPrevented = false;
+      $('div').on('click', () => {
+        return false;
+      });
+      div.addEventListener('click', (e) => {
+        defaultPrevented = e.defaultPrevented;
+      }, { capture: true });
+
+      div.click();
+      expect(defaultPrevented).toBe(false);
+    });
+
+    it('should call preventDefault when handler returns cancel', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let defaultPrevented = false;
+      $('div').on('click', () => {
+        return 'cancel';
+      });
+      div.addEventListener('click', (e) => {
+        defaultPrevented = e.defaultPrevented;
+      });
+
+      div.click();
+      expect(defaultPrevented).toBe(true);
+    });
+
+    it('should not stopPropagation when handler returns cancel', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').on('click', () => {
+        return 'cancel';
+      });
+
+      child.click();
+      expect(parentCallback).toHaveBeenCalled();
+    });
+
+    it('should work with return false through one()', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').one('click', () => {
+        return false;
+      });
+
+      child.click();
+      expect(parentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should work with return false in delegated handlers', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const grandparentCallback = vi.fn();
+      document.body.addEventListener('click', grandparentCallback);
+      $('div').on('click', 'span', () => {
+        return false;
+      });
+
+      child.click();
+      expect(grandparentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should not wrap handlers without return statements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const callback = () => {};
+      const eventHandler = $('div').on('click', callback, { returnHandler: true });
+
+      // unwrapped handler preserves native reference
+      expect(eventHandler.eventListener).toBe(callback);
+    });
+  });
+
+  describe('capture and passive options', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should accept capture as a top-level option', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const order = [];
+      $('div').on('click', () => {
+        order.push('capture');
+      }, { capture: true });
+      $('span').on('click', () => {
+        order.push('bubble');
+      });
+
+      child.click();
+      expect(order).toEqual(['capture', 'bubble']);
+    });
+
+    it('should accept passive as a top-level option', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // passive listeners should not throw when attached
+      expect(() => {
+        $('div').on('click', () => {}, { passive: true });
+      }).not.toThrow();
+    });
+
+    it('should auto-set passive for scroll events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // scroll handlers should be passive by default
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('scroll', () => {});
+
+      expect(spy).toHaveBeenCalledWith(
+        'scroll',
+        expect.any(Function),
+        expect.objectContaining({ passive: true }),
+      );
+      spy.mockRestore();
+    });
+
+    it('should auto-set passive for resize events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('resize', () => {});
+
+      expect(spy).toHaveBeenCalledWith(
+        'resize',
+        expect.any(Function),
+        expect.objectContaining({ passive: true }),
+      );
+      spy.mockRestore();
+    });
+
+    it('should allow overriding auto-passive with passive: false', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('scroll', () => {}, { passive: false });
+
+      expect(spy).toHaveBeenCalledWith(
+        'scroll',
+        expect.any(Function),
+        expect.objectContaining({ passive: false }),
+      );
+      spy.mockRestore();
+    });
+  });
+
+  describe('intercept', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should listen in capture phase', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const order = [];
+      $('div').intercept('click', () => {
+        order.push('intercept');
+      });
+      $('span').on('click', () => {
+        order.push('bubble');
+      });
+
+      child.click();
+      expect(order).toEqual(['intercept', 'bubble']);
+    });
+
+    it('should support return false to stop propagation to children', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const childCallback = vi.fn();
+      $('div').intercept('click', () => {
+        return false;
+      });
+      $('span').on('click', childCallback);
+
+      child.click();
+      expect(childCallback).not.toHaveBeenCalled();
+    });
+
+    it('should support event delegation', () => {
+      const grandparent = document.createElement('div');
+      const parent = document.createElement('section');
+      const child = document.createElement('span');
+      grandparent.appendChild(parent);
+      parent.appendChild(child);
+      document.body.appendChild(grandparent);
+
+      let interceptTarget;
+      $('div').intercept('click', 'section', function() {
+        interceptTarget = this;
+      });
+
+      child.click();
+      expect(interceptTarget).toBe(parent);
+    });
+
+    it('should be removable with off()', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let called = false;
+      const handler = () => {
+        called = true;
+        return false;
+      };
+      $('div').intercept('click', handler);
+      $('div').off('click', handler);
+
+      div.click();
+      expect(called).toBe(false);
     });
   });
 

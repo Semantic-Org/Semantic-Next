@@ -1,0 +1,222 @@
+{
+  "close": {
+    "value": "close",
+    "reason": "Direct name match in Material Symbols, the standard X/close icon"
+  },
+  "back": {
+    "value": "arrow_back",
+    "reason": "Material Symbols' 'arrow_back' is the standard left-pointing arrow for back navigation"
+  },
+  "next": {
+    "value": "arrow_forward",
+    "reason": "Material Symbols' 'arrow_forward' is the standard right-pointing arrow for forward navigation"
+  },
+  "up": {
+    "value": "arrow_upward",
+    "reason": "Material Symbols' 'arrow_upward' is the standard upward arrow for go-up navigation"
+  },
+  "down": {
+    "value": "arrow_downward",
+    "reason": "Material Symbols' 'arrow_downward' is the standard downward arrow for go-down navigation"
+  },
+  "external-link": {
+    "value": "open_in_new",
+    "reason": "Material Symbols' 'open_in_new' shows a box with an arrow pointing out, the standard external link icon"
+  },
+  "chevron-right": {
+    "value": "chevron_right",
+    "reason": "Direct name match in Material Symbols, standard right-pointing chevron"
+  },
+  "chevron-down": {
+    "value": "expand_more",
+    "reason": "Material Symbols uses 'expand_more' for the downward chevron, the standard dropdown/expand indicator"
+  },
+  "chevron-up": {
+    "value": "expand_less",
+    "reason": "Material Symbols uses 'expand_less' for the upward chevron, the standard collapse indicator"
+  },
+  "chevron-left": {
+    "value": "chevron_left",
+    "reason": "Direct name match in Material Symbols, standard left-pointing chevron"
+  },
+  "more": {
+    "value": "more_horiz",
+    "reason": "Material Symbols' 'more_horiz' is three horizontal dots, the standard horizontal more-options indicator"
+  },
+  "more-options": {
+    "value": "more_vert",
+    "reason": "Material Symbols' 'more_vert' is three vertical dots (kebab menu), the standard vertical more-options icon"
+  },
+  "sidebar": {
+    "value": "view_sidebar",
+    "reason": "Material Symbols' 'view_sidebar' represents a sidebar panel layout, direct match for toggle sidebar"
+  },
+  "columns": {
+    "value": "view_column",
+    "reason": "Material Symbols' 'view_column' shows a multi-column layout, direct match for column layout concept"
+  },
+  "anchor": {
+    "value": "tag",
+    "reason": "Material Symbols' 'tag' (a hash/pound symbol) represents anchor links (#); 'anchor' in Material Symbols is a nautical anchor which is the wrong metaphor"
+  },
+  "user": {
+    "value": "person",
+    "reason": "Material Symbols' 'person' is the standard single-person silhouette icon"
+  },
+  "avatar": {
+    "value": "account_circle",
+    "reason": "Material Symbols' 'account_circle' shows a person inside a circle, the standard avatar/profile picture placeholder"
+  },
+  "users": {
+    "value": "group",
+    "reason": "Material Symbols' 'group' shows multiple people, the standard team/group icon"
+  },
+  "add-user": {
+    "value": "person_add",
+    "reason": "Material Symbols' 'person_add' is a person with a plus sign, the standard add/invite user icon"
+  },
+  "remove-user": {
+    "value": "person_remove",
+    "reason": "Material Symbols' 'person_remove' is a person with a minus sign, the standard remove user icon"
+  },
+  "assigned": {
+    "value": "how_to_reg",
+    "reason": "Material Symbols' 'how_to_reg' is a person with a checkmark, used for verified/assigned user status"
+  },
+  "admin": {
+    "value": "admin_panel_settings",
+    "reason": "Material Symbols' 'admin_panel_settings' shows a shield with a gear, conveying administrative authority"
+  },
+  "user-settings": {
+    "value": "manage_accounts",
+    "reason": "Material Symbols' 'manage_accounts' shows a person with a gear, the standard icon for user configuration"
+  },
+  "anonymous": {
+    "value": null,
+    "reason": "Material Symbols has no incognito/anonymous user icon; 'visibility_off' and 'person_off' convey different meanings (hiding, not anonymity)"
+  },
+  "roles": {
+    "value": null,
+    "reason": "Material Symbols has no icon that clearly represents user roles or permissions as an abstract concept; 'badge' and 'assignment_ind' are about identity, not roles"
+  },
+  "login": {
+    "value": "login",
+    "reason": "Direct name match in Material Symbols, an arrow entering a bracket for sign-in"
+  },
+  "logout": {
+    "value": "logout",
+    "reason": "Direct name match in Material Symbols, an arrow leaving a bracket for sign-out"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": "Direct name match in Material Symbols, the standard fingerprint biometric icon"
+  },
+  "add": {
+    "value": "add",
+    "reason": "Direct name match in Material Symbols, the universal plus-sign add/create icon"
+  },
+  "edit": {
+    "value": "edit",
+    "reason": "Direct name match in Material Symbols, a pencil icon for edit/modify"
+  },
+  "delete": {
+    "value": "delete",
+    "reason": "Direct name match in Material Symbols, the standard trash can icon for delete/remove"
+  },
+  "save": {
+    "value": "save",
+    "reason": "Direct name match in Material Symbols, the classic floppy disk save icon"
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct name match in Material Symbols, a simple checkmark for confirm/done/approve"
+  },
+  "refresh": {
+    "value": "sync",
+    "reason": "Material Symbols' 'sync' shows circular arrows, the standard refresh/reload/sync icon; 'refresh' also exists but 'sync' is more universally used in Material"
+  },
+  "undo": {
+    "value": "undo",
+    "reason": "Direct name match in Material Symbols, the standard curved-arrow undo icon"
+  },
+  "redo": {
+    "value": "redo",
+    "reason": "Direct name match in Material Symbols, the standard curved-arrow redo icon"
+  },
+  "copy": {
+    "value": "content_copy",
+    "reason": "Material Symbols' 'content_copy' shows two overlapping documents, the standard copy/duplicate icon"
+  },
+  "clipboard": {
+    "value": "assignment",
+    "reason": "Material Symbols' 'assignment' is a clipboard icon; Material Symbols has no icon literally named 'clipboard'"
+  },
+  "copied": {
+    "value": "assignment_turned_in",
+    "reason": "Material Symbols' 'assignment_turned_in' is a clipboard with a checkmark, representing copied/completed clipboard action"
+  },
+  "paste": {
+    "value": "content_paste",
+    "reason": "Material Symbols' 'content_paste' is the standard paste-from-clipboard icon"
+  },
+  "cut": {
+    "value": "content_cut",
+    "reason": "Material Symbols' 'content_cut' shows scissors, the universal cut symbol"
+  },
+  "move": {
+    "value": "open_with",
+    "reason": "Material Symbols' 'open_with' shows a four-directional arrow cross, the standard move/drag icon"
+  },
+  "drag-handle": {
+    "value": "drag_indicator",
+    "reason": "Material Symbols' 'drag_indicator' shows a six-dot vertical grip pattern, the standard drag handle for reorderable items"
+  },
+  "upload": {
+    "value": "upload",
+    "reason": "Direct name match in Material Symbols, standard upward-arrow upload icon"
+  },
+  "download": {
+    "value": "download",
+    "reason": "Direct name match in Material Symbols, standard downward-arrow download icon"
+  },
+  "import": {
+    "value": null,
+    "reason": "Material Symbols has no dedicated import-data icon; 'input' shows a generic input arrow and 'publish' is for uploading, neither clearly conveys data import"
+  },
+  "export": {
+    "value": null,
+    "reason": "Material Symbols has no dedicated export-data icon; 'ios_share' is platform-specific and 'output' is not a standard Material Symbols icon"
+  },
+  "print": {
+    "value": "print",
+    "reason": "Direct name match in Material Symbols, the standard printer icon"
+  },
+  "share": {
+    "value": "share",
+    "reason": "Direct name match in Material Symbols, the standard share icon with branching nodes"
+  },
+  "send": {
+    "value": "send",
+    "reason": "Direct name match in Material Symbols, a paper airplane icon for sending messages"
+  },
+  "zap": {
+    "value": "bolt",
+    "reason": "Material Symbols' 'bolt' is a lightning bolt icon, the standard fast/instant action symbol"
+  },
+  "checkbox": {
+    "value": "check_box",
+    "reason": "Material Symbols' 'check_box' is a square with a checkmark inside, the standard checked checkbox"
+  },
+  "checkbox-empty": {
+    "value": "check_box_outline_blank",
+    "reason": "Material Symbols' 'check_box_outline_blank' is an empty square outline, the standard unchecked checkbox"
+  },
+  "toggle": {
+    "value": "toggle_on",
+    "reason": "Material Symbols' 'toggle_on' shows a toggle switch in the on position"
+  },
+  "toggle-off": {
+    "value": "toggle_off",
+    "reason": "Material Symbols' 'toggle_off' shows a toggle switch in the off position"
+  }
+}

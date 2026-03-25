@@ -8,16 +8,16 @@ const defaultState = {
   time: new Date(),
 };
 
-const createComponent = ({ self, state }) => ({
+const createComponent = ({ self, state, interval }) => ({
   majorMarkers: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
   minorMarkers: [1, 2, 3, 4],
   viewBox: '-50 -50 100 100',
 
   initialize() {
-    self.interval = self.startClock();
+    self.startClock();
   },
 
-  startClock: () => setInterval(() => state.time.now(), 1000),
+  startClock: () => interval(() => state.time.now(), 1000),
   getTime() {
     const time = state.time.get();
     return {
@@ -47,15 +47,10 @@ const createComponent = ({ self, state }) => ({
   },
 });
 
-const onDestroyed = ({ self }) => {
-  clearInterval(self.interval);
-};
-
 export const UIClock = defineComponent({
   tagName: 'ui-clock',
   createComponent,
   template,
   defaultState,
   css,
-  onDestroyed,
 });

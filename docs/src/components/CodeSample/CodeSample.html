@@ -2,25 +2,17 @@
   {#if label}
     <div class="label">
       {label}
+      {log label}
     </div>
   {/if}
-  {#if get.languages}
-    <ui-menu dashboard>
-      {#each language in get.languages}
-        <a class="{maybeActiveLanguage language} item" data-value="{language}">
-          {titleCase language}
-        </a>
-      {/each}
-    </ui-menu>
-  {/if}
   {#if copyable}
-    <ui-icon link copy></ui-icon>
+    <copy-button text={code}></copy-button>
   {/if}
-  {#if formattedCode}
-    <code class="code {language}">
-{#if formattedCode}{#html formattedCode}}{else}
-  {>slot}
-{/if}
-    </code>
-  {/if}
+  <code class="code {language}">
+    {#rerender darkMode}
+      {#async formatCode as formattedCode}
+        {#html formattedCode}
+      {/async}
+    {rerender}
+  </code>
 </codeSample>
