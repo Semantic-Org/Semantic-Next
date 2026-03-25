@@ -303,7 +303,7 @@ export const Template = class Template {
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
     if (settingsVars && defaultSettings) {
-      each(defaultSettings, (value, name) => {
+      each(defaultSettings, (_, name) => {
         this.element.settings[name]; // ensure shadow signal exists
       });
       settingsVars.forEach((signal, name) => {

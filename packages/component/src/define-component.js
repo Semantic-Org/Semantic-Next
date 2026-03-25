@@ -70,6 +70,7 @@ export const defineComponent = ({
     events,
     keys,
     defaultState,
+    // web components handle settings via WebComponentBase — only subtemplates need defaultSettings on Template
     defaultSettings: tagName ? undefined : defaultSettings,
     subTemplates,
     onCreated,

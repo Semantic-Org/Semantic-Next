@@ -107,9 +107,7 @@ export class ReactiveEachDirective extends AsyncDirective {
   getTemplate(item, indexOrKey, collectionType) {
     const key = this.getItemID(item, indexOrKey, collectionType);
 
-    // Skip re-rendering items whose data hasn't changed since last render.
-    // This prevents repeat() from triggering redundant expression evaluations
-    // and dataVersion bumps for unchanged items in the list.
+    // skip unchanged items to avoid redundant re-renders
     const snapshot = this._itemSnapshots.get(key);
     if (snapshot !== undefined && isEqual(snapshot, item)) {
       return noChange;

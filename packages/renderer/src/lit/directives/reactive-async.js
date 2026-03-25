@@ -85,6 +85,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
           if (currentGeneration < this.generation) { return; }
           this.state = 'error';
           this.resolvedValue = null;
+          this.hasResolved = false;
           this.error = error;
           if (this.isConnected) {
             const rendered = this.renderCurrentState(asyncCondition);

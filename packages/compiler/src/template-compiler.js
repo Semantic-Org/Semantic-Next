@@ -177,7 +177,6 @@ class TemplateCompiler {
 
     // the entire AST being generaetd
     const ast = [];
-    let nodePosition = 0;
 
     // a stack containing nodes that can receive nodes in their subtree
     let contentStack = [];
