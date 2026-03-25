@@ -129,15 +129,15 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
   createTooltip() {
     // Build content from settings
     const content = self.buildContent();
-    if (!content) {
-      warn('No tooltip content provided');
-      return;
-    }
 
     // Get position from settings
     self.position = settings.position;
 
     const $existingTooltip = $(el).next(`.${classNames.tooltip}`);
+    if (!content && !$existingTooltip.exists()) {
+      warn('No tooltip content provided');
+      return;
+    }
     if (settings.$tooltip) {
       self.tooltip = $tooltip;
     }

@@ -12,6 +12,7 @@ description: Latest updates and changes in Semantic UI
 xx.xx.xxxx
 
 ### Renderer
+* **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
 * **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
 
@@ -19,6 +20,7 @@ xx.xx.xxxx
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
+* **Feature** - Added `assignInPlace()` for syncing an object's contents to match a source without replacing the reference — supports `preserveExistingKeys` to skip deletion and `returnChanged` to detect modifications
 * **Breaking** - `kebabToCamel` and `camelToKebab` now use lossless encoding — digit-leading segments are preserved with `_` (e.g. `grid-2x2` → `grid_2x2`), and every uppercase letter gets its own hyphen (e.g. `arrowDownAZ` → `arrow-down-a-z`). Both accept a `separator` option to customize the digit-boundary character. `camelToKebab` now normalizes leading uppercase by default for DOM-safe output (e.g. `FooBar` → `foo-bar`); pass `{ lossless: true }` to preserve it for exact round-trips.
 * **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.
 * **Feature** - Added `unescapeHTML()` for converting HTML entities back to characters — the inverse of `escapeHTML`

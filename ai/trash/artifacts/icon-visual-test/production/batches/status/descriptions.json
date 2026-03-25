@@ -1,0 +1,90 @@
+{
+  "1": {
+    "visual": "A scalloped badge shape containing a centered exclamation mark.",
+    "usage": "content warnings, badge alerts, flagged items, policy violations"
+  },
+  "2": {
+    "visual": "A scalloped badge shape containing a centered checkmark.",
+    "usage": "verified accounts, certified content, approved badges, trusted status"
+  },
+  "3": {
+    "visual": "A scalloped badge shape containing a lowercase letter i.",
+    "usage": "info badges, certified information, annotated status, help tooltips"
+  },
+  "4": {
+    "visual": "A circle with a diagonal slash cutting across it, the universal prohibition symbol.",
+    "usage": "blocked actions, prohibited items, disabled features, not-allowed states"
+  },
+  "5": {
+    "visual": "A single bare checkmark with no enclosing shape.",
+    "usage": "task completion, form validation success, item selected, confirmation"
+  },
+  "6": {
+    "visual": "Two overlapping checkmarks side by side, the second offset slightly behind and to the right.",
+    "usage": "message read receipts, double confirmation, all items checked, delivery confirmed"
+  },
+  "7": {
+    "visual": "A smooth circle containing a centered exclamation mark.",
+    "usage": "warnings, error states, important notices, alert indicators"
+  },
+  "8": {
+    "visual": "A smooth circle containing a small checkmark.",
+    "usage": "task done, step completed, item verified, success state"
+  },
+  "9": {
+    "visual": "A dashed circle made of evenly spaced short segments with gaps between them.",
+    "usage": "pending state, draft items, placeholder slots, incomplete progress"
+  },
+  "10": {
+    "visual": "A smooth circle containing a question mark.",
+    "usage": "help prompts, unknown status, FAQ links, ambiguous states"
+  },
+  "11": {
+    "visual": "A rectangular road barricade with diagonal stripes and two vertical posts at each end.",
+    "usage": "under construction, blocked routes, feature unavailable, access restricted"
+  },
+  "12": {
+    "visual": "A waving flag on a vertical pole, open toward the right.",
+    "usage": "flagging content, bookmarking items, reporting issues, marking milestones"
+  },
+  "13": {
+    "visual": "A flame shape with a curved body tapering to a point at the top.",
+    "usage": "trending content, hot items, streak indicators, high activity alerts"
+  },
+  "14": {
+    "visual": "A circle containing a sad face with downturned mouth and dot eyes.",
+    "usage": "error pages, empty states, negative feedback, user dissatisfaction"
+  },
+  "15": {
+    "visual": "A smooth circle containing a lowercase letter i.",
+    "usage": "informational tooltips, contextual help, info panels, detail overlays"
+  },
+  "16": {
+    "visual": "A circle divided by a cross into four quadrants with a small circle at the center, resembling a life preserver.",
+    "usage": "help and support, safety resources, rescue indicators, SOS states"
+  },
+  "17": {
+    "visual": "Eight short lines radiating outward from a center point like sun rays, evenly spaced.",
+    "usage": "loading spinners, processing states, busy indicators, refreshing content"
+  },
+  "18": {
+    "visual": "An arc forming roughly three-quarters of a circle, open at the lower-right, suggesting rotation.",
+    "usage": "loading indicators, refreshing data, syncing states, progress spinners"
+  },
+  "19": {
+    "visual": "A circle containing a neutral face with a flat straight mouth and dot eyes.",
+    "usage": "neutral feedback, indifferent rating, no preference selected, ambiguous sentiment"
+  },
+  "20": {
+    "visual": "A rounded rectangle containing a lightning bolt with two small dots in opposite corners.",
+    "usage": "battery charging, power status, energy mode, device charging indicators"
+  },
+  "21": {
+    "visual": "A rounded triangle pointing upward containing a centered exclamation mark, the standard caution symbol.",
+    "usage": "warnings, caution alerts, system errors, destructive action confirmations"
+  },
+  "22": {
+    "visual": "A bare lightning bolt shape with no enclosing frame, a jagged zigzag tapering to a point.",
+    "usage": "quick actions, power or energy indicators, flash mode, instant triggers"
+  }
+}

@@ -2,90 +2,10 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
-import { UIIcon } from '@semantic-ui/core';
-import '@semantic-ui/core/icon/sets/lucide.css';
+import { SubtreeCachingTest } from '@components/SubtreeCachingTest/SubtreeCachingTest.js';
 ---
 <Body class="dark">
-<div style="padding: 24px; color: white; font-family: system-ui;">
-  <h2 style="margin-bottom: 16px;">Flagged Icons — Visual Description QA</h2>
-  <div style="display: grid; grid-template-columns: 48px 160px 1fr; gap: 12px 16px; align-items: center; font-size: 14px;">
-
-    <UIIcon merge size="large"></UIIcon>
-    <strong>merge</strong>
-    <span>Two converging lines merging into a single upward arrow.</span>
-
-    <UIIcon replace size="large"></UIIcon>
-    <strong>replace</strong>
-    <span>Small square + arrow + dotted target, suggesting drag-and-drop or swap.</span>
-
-    <UIIcon vote size="large"></UIIcon>
-    <strong>vote</strong>
-    <span>Laptop with a checkmark inside the screen.</span>
-
-    <UIIcon chart-gantt size="large"></UIIcon>
-    <strong>chart-gantt</strong>
-    <span>Three horizontal bars of decreasing length anchored to a left axis.</span>
-
-    <UIIcon table-cells-merge size="large"></UIIcon>
-    <strong>table-cells-merge</strong>
-    <span>Table with spanning top row and two cells below.</span>
-
-    <UIIcon table-cells-split size="large"></UIIcon>
-    <strong>table-cells-split</strong>
-    <span>Table with spanning top row and two cells below (very similar to merge).</span>
-
-    <UIIcon newspaper size="large"></UIIcon>
-    <strong>newspaper</strong>
-    <span>Two overlapping documents with text lines.</span>
-
-    <UIIcon vault size="large"></UIIcon>
-    <strong>vault</strong>
-    <span>Rounded square with center dot connected to four sides.</span>
-
-    <UIIcon server-crash size="large"></UIIcon>
-    <strong>server-crash</strong>
-    <span>Rounded rectangle with lightning bolt and two corner dots.</span>
-
-    <UIIcon bring-to-front size="large"></UIIcon>
-    <strong>bring-to-front</strong>
-    <span>Three overlapping rounded squares in a diagonal stack.</span>
-
-    <UIIcon send-to-back size="large"></UIIcon>
-    <strong>send-to-back</strong>
-    <span>Two rounded squares with curved arrows between them.</span>
-
-    <UIIcon wifi-high size="large"></UIIcon>
-    <strong>wifi-high</strong>
-    <span>Dot with two arcs (described as medium, should be high/3 arcs).</span>
-
-    <UIIcon file-archive size="large"></UIIcon>
-    <strong>file-archive</strong>
-    <span>Document with vertical dots and circle (zipper motif or more-options?).</span>
-
-    <UIIcon banknote size="large"></UIIcon>
-    <strong>banknote</strong>
-    <span>Landscape rectangle with center circle and flanking dots.</span>
-
-    <UIIcon coins size="large"></UIIcon>
-    <strong>coins</strong>
-    <span>Two overlapping coin circles with swap arrow.</span>
-
-    <UIIcon picture-in-picture size="large"></UIIcon>
-    <strong>picture-in-picture</strong>
-    <span>Large rectangle with small rectangle in lower corner + arrow.</span>
-
-    <UIIcon separator-horizontal size="large"></UIIcon>
-    <strong>separator-horizontal</strong>
-    <span>Two chevrons (up/down) with horizontal line between them.</span>
-
-    <UIIcon flip-horizontal size="large"></UIIcon>
-    <strong>flip-horizontal</strong>
-    <span>Two brackets flanking a vertical dashed center line.</span>
-
-    <UIIcon sticky-note size="large"></UIIcon>
-    <strong>sticky-note</strong>
-    <span>Document with folded corner and extra-rounded corners.</span>
-
-  </div>
+<div style="padding: 24px; max-width: 600px;">
+  <SubtreeCachingTest client:load />
 </div>
 </Body>

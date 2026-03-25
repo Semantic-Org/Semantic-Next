@@ -18,7 +18,7 @@ const createComponent = ({ self, afterFlush, reaction, findParent, data, state, 
     return true;
   },
 
-  getMenu: () => {
+  getMenu() {
     let menu = [
       { label: data.previewText || 'Preview', value: 'preview' },
     ];

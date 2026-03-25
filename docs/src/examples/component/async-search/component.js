@@ -31,7 +31,7 @@ const defaultState = {
   selectedIndex: -1,
 };
 
-const createComponent = ({ $, state, settings, self }) => ({
+const createComponent = ({ $, state, settings, self, timeout }) => ({
   results: [],
 
   async getResults(term) {
@@ -39,7 +39,7 @@ const createComponent = ({ $, state, settings, self }) => ({
     const matchResult = (result) => result.title.toLowerCase().includes(term.toLowerCase());
     return new Promise((resolve) => {
       clearTimeout(self.timer);
-      self.timer = setTimeout(() => {
+      self.timer = timeout(() => {
         const matchingResults = settings.items.filter(matchResult);
         self.setResults(matchingResults);
         requestAnimationFrame(() => resolve(matchingResults));

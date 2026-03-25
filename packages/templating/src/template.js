@@ -2,6 +2,7 @@ import { $ } from '@semantic-ui/query';
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import {
   any,
+  assignInPlace,
   capitalize,
   debounce,
   each,
@@ -51,6 +52,7 @@ export const Template = class Template {
     events,
     keys,
     defaultState,
+    defaultSettings,
     subTemplates,
     createComponent,
     parentTemplate, // the parent template when nested
@@ -75,7 +77,10 @@ export const Template = class Template {
     this.css = css;
     this.data = data || {};
     this.reactions = [];
+    this.abortController = new AbortController();
+    this.abortSignal = this.abortController.signal;
     this.defaultState = defaultState;
+    this.defaultSettings = defaultSettings;
     this.state = this.createReactiveState(defaultState, data) || {};
     this.templateName = templateName || this.getGenericTemplateName();
     this.subTemplates = subTemplates;
@@ -127,7 +132,7 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    this.data = data;
+    assignInPlace(this.data, data);
     if (rerender) {
       this.rendered = false;
     }
@@ -171,6 +176,12 @@ export const Template = class Template {
     let template = this;
     let instance;
     this.instance = {};
+
+    // create settings proxy for subtemplates that declare defaultSettings
+    if (this.isSubtemplate() && this.defaultSettings && Object.keys(this.defaultSettings).length > 0) {
+      this.createSubtemplateSettings();
+    }
+
     if (isFunction(this.createComponent)) {
       instance = this.call(this.createComponent, { thisContext: this.instance }) || {};
       extend(template.instance, instance);
@@ -212,6 +223,7 @@ export const Template = class Template {
       Template.removeTemplate(this);
       this.rendered = false;
       this.destroyed = true;
+      this.abortController.abort('Template destroyed');
       this.clearReactions();
       this.removeEvents();
       this.removeObservers();
@@ -225,7 +237,7 @@ export const Template = class Template {
     if (this.renderingEngine == 'lit') {
       this.renderer = new LitRenderer({
         ast: this.ast,
-        data: this.getDataContext(),
+        data: this.overlaySettingsSignals(this.getDataContext()),
         template: this,
         subTemplates: this.subTemplates,
         helpers: TemplateHelpers,
@@ -270,6 +282,39 @@ export const Template = class Template {
     };
   }
 
+  // Overlay settings shadow signals so the renderer tracks settings reactively.
+  // Applied after all spreads so Signals always win over plain duplicates.
+  overlaySettingsSignals(context) {
+    // subtemplates — overlay own settingsVars if declared, otherwise skip
+    if (this.isSubtemplate()) {
+      if (this.settingsVars && this.defaultSettings) {
+        each(this.defaultSettings, (_, name) => {
+          this.settings[name]; // ensure shadow signal exists
+        });
+        this.settingsVars.forEach((signal, name) => {
+          if (name in this.defaultSettings) {
+            context[name] = signal;
+          }
+        });
+      }
+      return context;
+    }
+    // web component — overlay element settingsVars
+    const settingsVars = this.element?.settingsVars;
+    const defaultSettings = this.element?.defaultSettings;
+    if (settingsVars && defaultSettings) {
+      each(defaultSettings, (_, name) => {
+        this.element.settings[name]; // ensure shadow signal exists
+      });
+      settingsVars.forEach((signal, name) => {
+        if (name in defaultSettings) {
+          context[name] = signal;
+        }
+      });
+    }
+    return context;
+  }
+
   async adoptStylesheet() {
     if (!this.css) {
       return;
@@ -296,12 +341,13 @@ export const Template = class Template {
   }
 
   clone(settings) {
-    const defaultSettings = {
+    const cloneDefaults = {
       templateName: this.templateName,
       element: this.element,
       ast: this.ast,
       css: this.css,
       defaultState: this.defaultState,
+      defaultSettings: this.defaultSettings,
       events: this.events,
       keys: this.keys,
       renderingEngine: this.renderingEngine,
@@ -314,7 +360,7 @@ export const Template = class Template {
       createComponent: this.createComponent,
     };
     const templateSettings = {
-      ...defaultSettings,
+      ...cloneDefaults,
       ...settings,
     };
     return new Template(templateSettings);
@@ -630,13 +676,20 @@ export const Template = class Template {
       ...additionalData,
     };
     this.setDataContext(dataContext, { rerender: false });
+    this.updateSubtemplateSettings(dataContext);
 
+    this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
 
     // render will rerender the AST creating new lit html
     if (!this.rendered) {
       this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
+    }
+    else {
+      // data changed but template structure is the same — trigger reactive
+      // updates in place without recreating DOM (preserves focus, state, etc.)
+      this.renderer.bumpDataVersion();
     }
     this.rendered = true;
     this.destroyed = false;
@@ -692,12 +745,15 @@ export const Template = class Template {
 
         reaction: this.reaction.bind(this),
         signal: this.signal.bind(this),
+        interval: this.createInterval.bind(this),
+        timeout: this.createTimeout.bind(this),
+        abortSignal: this.abortSignal,
         afterFlush: Reaction.afterFlush,
         nonreactive: Reaction.nonreactive,
         flush: Reaction.flush,
 
         data: this.data,
-        settings: this.element?.settings,
+        settings: this.settings || this.element?.settings,
         state: this.state,
 
         isRendered: () => this.rendered,
@@ -765,6 +821,90 @@ export const Template = class Template {
 
     // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
+  }
+
+  /*******************************
+        Subtemplate Settings
+  *******************************/
+
+  createSubtemplateSettings() {
+    const template = this;
+    const parentSettings = this.element?.settings;
+    const ownSettings = {};
+    template.settingsVars = new Map();
+
+    // initialize from defaults
+    each(this.defaultSettings, (value, name) => {
+      ownSettings[name] = value;
+    });
+
+    // populate from passed data (reactiveData from parent)
+    each(this.defaultSettings, (_, name) => {
+      if (this.data[name] !== undefined) {
+        ownSettings[name] = this.data[name];
+      }
+    });
+
+    this.settings = new Proxy(ownSettings, {
+      get: (target, property) => {
+        if (typeof property === 'symbol') {
+          return target[property];
+        }
+        // own settings first
+        if (property in target) {
+          let signal = template.settingsVars.get(property);
+          if (!signal) {
+            signal = new Signal(target[property], { allowClone: false });
+            template.settingsVars.set(property, signal);
+          }
+          signal.get(); // track dependency
+          return target[property];
+        }
+        // fall back to parent web component settings
+        if (parentSettings) {
+          return parentSettings[property];
+        }
+      },
+      set: (target, property, value) => {
+        target[property] = value;
+        let signal = template.settingsVars.get(property);
+        if (signal) {
+          signal.set(value);
+        }
+        else {
+          signal = new Signal(value, { allowClone: false });
+          template.settingsVars.set(property, signal);
+        }
+        return true;
+      },
+    });
+  }
+
+  updateSubtemplateSettings(dataContext) {
+    if (!this.settings || !this.defaultSettings) {
+      return;
+    }
+    each(this.defaultSettings, (_, name) => {
+      if (name in dataContext) {
+        this.settings[name] = dataContext[name];
+      }
+    });
+  }
+
+  /*******************************
+            Timers
+  *******************************/
+
+  createInterval(callback, ms) {
+    const id = setInterval(callback, ms);
+    this.abortSignal.addEventListener('abort', () => clearInterval(id));
+    return id;
+  }
+
+  createTimeout(callback, ms) {
+    const id = setTimeout(callback, ms);
+    this.abortSignal.addEventListener('abort', () => clearTimeout(id));
+    return id;
   }
 
   /*******************************

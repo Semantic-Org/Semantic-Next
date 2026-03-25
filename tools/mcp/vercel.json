@@ -1,4 +1,5 @@
 {
+  "installCommand": "cd ../.. && npm install",
   "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist",
   "rewrites": [

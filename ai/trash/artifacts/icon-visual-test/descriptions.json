@@ -1,0 +1,46 @@
+{
+  "sample_1": {
+    "visual": "A house with a triangular roof and a rectangular door at the bottom center. The classic home icon silhouette with walls, a peaked roofline, and an inset doorway.",
+    "usage": "Home page navigation, returning to a main dashboard, breadcrumb root link, app home screen shortcut"
+  },
+  "sample_2": {
+    "visual": "An open book viewed from above, with two page sections spreading outward from a central spine. Small curved accents on each side suggest page edges curling upward.",
+    "usage": "Documentation or help section, library or reading list, knowledge base navigation, educational content or learning module"
+  },
+  "sample_3": {
+    "visual": "A trash can with a lid, a small handle on top, and two vertical lines on the body suggesting panel detail. The standard waste bin icon used for deletion.",
+    "usage": "Delete action in a toolbar or context menu, removing items from a list, clearing a cart, emptying a folder"
+  },
+  "sample_4": {
+    "visual": "A magic wand drawn as a diagonal stick with small starburst or sparkle marks radiating around its ends. The sparkles are rendered as small cross or plus shapes at opposite corners.",
+    "usage": "Auto-enhance or auto-format action, applying effects or filters, AI-assisted generation or suggestion, quick-fix or auto-correct tool"
+  },
+  "sample_5": {
+    "visual": "A fingerprint composed of concentric curved ridges and arcs forming the distinctive whorl pattern of a human fingerprint. A small dot sits at the lower-left edge.",
+    "usage": "Biometric authentication or login, identity verification, security settings for fingerprint unlock, user identification step in onboarding"
+  },
+  "sample_6": {
+    "visual": "A pie chart with one quarter-segment slightly separated or distinguished from the remaining three-quarter circle. The separated wedge sits in the upper-right quadrant.",
+    "usage": "Analytics or reporting dashboard, data visualization section, usage statistics overview, financial or budget breakdown"
+  },
+  "sample_7": {
+    "visual": "A large four-pointed sparkle or starburst in the center, a small plus-sign cross in the upper right, and a small filled circle in the lower left. The overall impression is of twinkling or magical sparkles.",
+    "usage": "AI or smart feature indicator, new or premium feature badge, magic or auto-generate action, creative or inspiration tool"
+  },
+  "sample_8": {
+    "visual": "A shield with a pointed bottom containing a checkmark inside it. The shield outline is the classic heraldic shape, and the interior check mark indicates verification or approval.",
+    "usage": "Security verification status, trusted or verified badge, privacy and protection settings, secure checkout or payment confirmation"
+  },
+  "sample_9": {
+    "visual": "Two curved arrows forming a circular loop — one arcing clockwise from the top with an arrowhead at the upper-left, the other arcing from the bottom with an arrowhead at the lower-right. The classic refresh or sync symbol.",
+    "usage": "Refresh or reload content, sync data between devices, undo/redo cycle, retry a failed operation"
+  },
+  "sample_10": {
+    "visual": "A floppy disk icon — a square with a folded corner at the upper right, a rectangular label area at the bottom, and a small tab or slot at the top. The universal save symbol.",
+    "usage": "Save action in a toolbar or editor, save-as file operation, persist changes confirmation, document save shortcut"
+  },
+  "sample_11": {
+    "visual": "A laboratory flask or Erlenmeyer-style beaker — narrow neck at the top with a flat rim, widening to a broad triangular base. A horizontal line crosses the midsection suggesting a liquid level or filter boundary.",
+    "usage": "Filter or sort controls, science or lab-related section, data filtering in tables or lists, chemistry or research application feature"
+  }
+}

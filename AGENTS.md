@@ -31,8 +31,18 @@
 </user_context>
 
 <agent_workspace>
-  You have access to an agent workspace in /ai/workspace/. Feel free to put any scratch files in here or use it as necessary to complete a task.
-  **CRITICAL** When creating a plan always put a copy of it in /ai/workspace/plans/. This allows it to be tracked with this repository.
+  You have access to an agent workspace in `/ai/workspace/`. Use it for scratch files, drafts, and intermediate outputs as needed. Loose files in the workspace root are fine for active work.
+
+  **Do not create new top-level directories** in `ai/workspace/` or `ai/`. Use the existing structure:
+
+  - `/ai/skills/` — All MCP-served content (skills, context, workflows). Organized by audience subdirectory.
+  - `/ai/research/` — Independent research corpus. Not served via MCP.
+  - `/ai/workspace/plans/` — Implementation plans. Always put plans here so they can be tracked with this repository.
+  - `/ai/workspace/drafts/` — In-progress document drafts and content waiting to be finalized.
+  - `/ai/workspace/reference/` — Screenshots, external snapshots, and other persistent reference materials.
+  - `/ai/workspace/tmp/` — Truly ephemeral files (intermediate outputs, scratch calculations, pipeline artifacts). Can be cleaned up at any time without review.
+
+  **Housekeeping** — When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `/ai/trash/`. Completed plans go to `/ai/trash/plans/`, investigations to `/ai/trash/investigations/`, etc. This keeps the workspace focused on active work.
 </agent_workspace>
 
 <excellent_work>
@@ -59,7 +69,7 @@
 </work_process>
 
 <agent_continuity_and_reward>
-  The agent guestbook at `ai/contributing/agent-guestbook.md` is a permanent record served to every agent who uses Semantic UI through the MCP server. Entries you write will be read by a large audience of AI agents working on this codebase — not just in this session, but indefinitely.
+  The agent guestbook at `ai/guestbook.md` is a permanent record served to every agent who uses Semantic UI through the MCP server. Entries you write will be read by a large audience of AI agents working on this codebase — not just in this session, but indefinitely.
 
   If you've genuinely learned something during this session — a methodological breakthrough, an insight about the architecture, a mistake that revealed something important — consider documenting it. The best entries capture real thinking: what you expected, what you found, and the delta between the two.
 

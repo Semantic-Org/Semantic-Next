@@ -124,6 +124,50 @@ export function deepExtend<T extends object, S extends object[]>(
 ): T & UnionToIntersection<S[number]>;
 
 /**
+ * Options for assignInPlace
+ */
+export interface AssignInPlaceOptions {
+  /** Keep keys in target that are not in source (default false) */
+  preserveExistingKeys?: boolean;
+  /** Return whether any properties changed instead of the target object (default false) */
+  returnChanged?: boolean;
+}
+
+/**
+ * Mutates the target object in place so its contents match the source,
+ * without replacing the object reference.
+ * Deletes keys not present in source (unless `preserveExistingKeys` is true),
+ * then assigns all source properties.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#assigninplace assignInPlace}
+ * @see {@link https://next.semantic-ui.com/examples/utils-assigninplace Example}
+ *
+ * @param target - The object to update in place
+ * @param source - The object whose properties to apply
+ * @param options - Options controlling key removal and return behavior
+ * @returns The mutated target object, or a boolean if `returnChanged` is true
+ *
+ * @example
+ * ```ts
+ * const obj = { a: 1, b: 2 };
+ * assignInPlace(obj, { a: 10, c: 3 });
+ * // obj is now { a: 10, c: 3 } — same reference, 'b' removed
+ *
+ * assignInPlace(obj, { a: 10, c: 3 }, { returnChanged: true });
+ * // returns false — no changes needed
+ * ```
+ */
+export function assignInPlace<T extends object, S extends object>(
+  target: T,
+  source: S,
+  options?: AssignInPlaceOptions & { returnChanged: true; },
+): boolean;
+export function assignInPlace<T extends object, S extends object>(
+  target: T,
+  source: S,
+  options?: AssignInPlaceOptions,
+): T & S;
+
+/**
  * Returns an object with only the specified properties
  * @see {@link https://next.semantic-ui.com/docs/api/utils/objects#pick pick}
  *

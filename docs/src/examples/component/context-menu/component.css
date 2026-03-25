@@ -23,7 +23,6 @@
   opacity: 1;
   transform: scale(1);
   transition-property: top, left, opacity, transform, visibility;
-  pointer-events: auto;
   visibility: visible;
 }
 @starting-style {

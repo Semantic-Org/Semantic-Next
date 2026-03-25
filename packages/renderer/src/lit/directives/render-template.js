@@ -1,7 +1,7 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { Template } from '@semantic-ui/templating';
 import { isClient, isString, mapObject } from '@semantic-ui/utils';
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive } from 'lit/directive.js';
 
@@ -21,6 +21,11 @@ export class RenderTemplateDirective extends AsyncDirective {
     this.data = data;
     this.ast = null;
 
+    // Reuse existing reaction — signals and dataVersion handle updates
+    if (this.reaction) {
+      return noChange;
+    }
+
     // Create a new reaction that watches for reactive changes on client
     if (isClient) {
       this.watchChanges();
@@ -36,6 +41,9 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   watchChanges() {
+    if (this.reaction) {
+      this.reaction.stop();
+    }
     this.reaction = Reaction.create((reaction) => {
       this.maybeCreateTemplate(); // reactive reference to template
       const dataContext = this.unpackData(this.data); // reactive reference to data
@@ -75,7 +83,7 @@ export class RenderTemplateDirective extends AsyncDirective {
     if (!dataContext) {
       dataContext = this.unpackData(this.data);
     }
-    this.template.setDataContext(dataContext);
+    this.template.setDataContext(dataContext, { rerender: false });
     return this.template.render();
   }
 
@@ -102,12 +110,18 @@ export class RenderTemplateDirective extends AsyncDirective {
       return false;
     }
 
+    // Preserve existing clone when the same prototype is reused.
+    if (this.template && this.templateID === template.id) {
+      return;
+    }
+
     // store template id
     this.templateID = template.id;
     this.template = template.clone({
       templateName,
       subTemplates: this.subTemplates,
       data: this.unpackData(this.data),
+      parentTemplate: this.parentTemplate,
     });
   }
 
@@ -137,7 +151,7 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // nothing yet
+    // Lit calls render() on reconnect which recreates the reaction
   }
 
   disconnected() {

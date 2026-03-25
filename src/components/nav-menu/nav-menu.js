@@ -136,13 +136,14 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     // then adding indexes to all items after
     let selectedIndex = -1;
     let firstMatch = false;
+    const searchTermChanged = self._lastSearchTerm !== searchTerm;
     const addSelectedIndex = (item) => {
       if (item?.url) {
         selectedIndex++;
         item.selectedIndex = selectedIndex;
       }
-      // start on first match
-      if (!firstMatch && item.highlight) {
+      // reset selected index only when search term changes
+      if (searchTermChanged && !firstMatch && item.highlight && item?.url) {
         state.selectedIndex.set(selectedIndex);
         firstMatch = true;
       }
@@ -157,6 +158,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
       });
       return currentMenu;
     });
+    self._lastSearchTerm = searchTerm;
     state.maxIndex.set(selectedIndex);
     return menu;
   },

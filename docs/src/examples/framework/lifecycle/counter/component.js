@@ -7,9 +7,9 @@ const defaultState = {
   counter: 0,
 };
 
-const createComponent = ({ state }) => ({
-  initialize: () => setInterval(() => state.counter.increment(), 1000),
-  isEven: (number) => (number % 2 == 0),
+const createComponent = ({ state, interval }) => ({
+  initialize: () => interval(() => state.counter.increment(), 1000),
+  isEven: (number) => (number % 2 === 0),
 });
 
 defineComponent({

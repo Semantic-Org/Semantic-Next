@@ -1,19 +1,15 @@
-# Agent Workspace
+# AI Workspace
 
-Scratch space for in-progress agent work. Files here are temporary and should move to permanent homes when finished.
+Scratch space for active agent work. Files here are in-progress and tied to current or recent tasks.
 
-## Folders
+## Contents
 
-- **plans/** — Implementation plans. Move to `plans/complete/` when done or rejected.
-- **memory/** — Reference docs that inform ongoing work. Delete when the work lands.
+- **plans/** — Active implementation plans (completed plans move to `ai/trash/plans/`)
 - **artifacts/** — Intermediate outputs (CSVs, reports, checklists). Delete when consumed.
-- **artifacts/skills/** — Skill drafts that need workshopping before publishing to `ai/`.
-- **scripts/** — One-off analysis scripts. Delete after use.
+- **drafts/** — In-progress document drafts
+- **reference/** — Screenshots, external snapshots, and other persistent reference materials
+- **tmp/** — Ephemeral files that can be cleaned up at any time without review
 
-## Lifecycle
+## Housekeeping
 
-`workspace → artifacts/skills → ai/` (published skill)
-
-## ai/resources/ (separate from workspace)
-
-`ai/resources/` stores **ingested reference material** supplied by humans — classic SUI source, competitive screenshots, etc. Agents should not add files there; it is curated input, not agent output.
+When a task or project is finished, move its workspace artifacts to the appropriate subdirectory in `ai/trash/`. This keeps the workspace focused on active work and prevents accumulation of stale files.

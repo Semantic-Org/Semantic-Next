@@ -1,6 +1,7 @@
 import {
   any,
   arrayFromObject,
+  assignInPlace,
   deepExtend,
   extend,
   filterObject,
@@ -485,6 +486,50 @@ describe('Object Utilities', () => {
   describe('any', () => {
     it('should be an alias for some', () => {
       expect(any).toBe(some);
+    });
+  });
+
+  describe('assignInPlace', () => {
+    it('should assign source properties to target', () => {
+      const target = { a: 1 };
+      const source = { b: 2, c: 3 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ b: 2, c: 3 });
+    });
+
+    it('should delete keys from target not present in source', () => {
+      const target = { a: 1, b: 2, stale: 'gone' };
+      const source = { a: 10, b: 20 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ a: 10, b: 20 });
+      expect('stale' in target).toBe(false);
+    });
+
+    it('should preserve existing keys when preserveExistingKeys is true', () => {
+      const target = { a: 1, keep: 'me' };
+      const source = { a: 10, b: 2 };
+      assignInPlace(target, source, { preserveExistingKeys: true });
+      expect(target).toEqual({ a: 10, keep: 'me', b: 2 });
+    });
+
+    it('should return the same object reference', () => {
+      const target = { a: 1 };
+      const source = { b: 2 };
+      const result = assignInPlace(target, source);
+      expect(result).toBe(target);
+    });
+
+    it('should clear target when source is empty', () => {
+      const target = { a: 1, b: 2 };
+      assignInPlace(target, {});
+      expect(target).toEqual({});
+    });
+
+    it('should populate empty target from source', () => {
+      const target = {};
+      const source = { a: 1, b: 2 };
+      assignInPlace(target, source);
+      expect(target).toEqual({ a: 1, b: 2 });
     });
   });
 

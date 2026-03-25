@@ -12,30 +12,30 @@ export class ReactiveAsyncDirective extends AsyncDirective {
     this.generation = 0;
     this.state = 'loading'; // 'loading', 'success', 'error'
     this.resolvedValue = null;
+    this.hasResolved = false;
     this.error = null;
   }
 
   render(asyncCondition) {
-    // Stop existing reaction
+    this.asyncCondition = asyncCondition;
+
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      this.reaction.stop();
-      this.reaction = null;
+      return noChange;
     }
 
     // Create a new reaction that watches for reactive changes on client
     if (isClient) {
-      this.watchChanges(asyncCondition);
+      this.watchChanges();
     }
 
-    // Return initial render
-    return this.renderCurrentState(asyncCondition);
+    return this.renderCurrentState(this.asyncCondition);
   }
 
-  watchChanges(asyncCondition) {
-    // pass through context for debugging
+  watchChanges() {
     let context = {
-      message: `async block: {#async ${asyncCondition.expression}}`,
-      async: asyncCondition,
+      message: `async block: {#async ${this.asyncCondition.expression}}`,
+      async: this.asyncCondition,
     };
 
     this.reaction = Reaction.create((computation) => {
@@ -45,14 +45,14 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       }
 
       // Evaluate the expression to get the promise or value
-      const expressionResult = asyncCondition.expression();
+      const expressionResult = this.asyncCondition.expression();
 
       // Handle the result
-      this.handleExpressionResult(expressionResult, asyncCondition);
+      this.handleExpressionResult(expressionResult, this.asyncCondition);
 
       // Render based on current state (after first run)
       if (!computation.firstRun) {
-        const rendered = this.renderCurrentState(asyncCondition);
+        const rendered = this.renderCurrentState(this.asyncCondition);
         this.setValue(rendered);
       }
     }, { context });
@@ -61,9 +61,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   handleExpressionResult(result, asyncCondition) {
     const currentGeneration = ++this.generation;
 
-    // Reset state
+    // Preserve previous resolved value for stale-while-revalidate
     this.state = 'loading';
-    this.resolvedValue = null;
     this.error = null;
 
     // Check if result is a promise
@@ -71,9 +70,12 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Handle promise
       result
         .then((value) => {
-          if (currentGeneration < this.generation) { return; }
+          if (currentGeneration < this.generation) {
+            return;
+          }
           this.state = 'success';
           this.resolvedValue = value;
+          this.hasResolved = true;
           if (this.isConnected) {
             const rendered = this.renderCurrentState(asyncCondition);
             this.setValue(rendered);
@@ -82,6 +84,8 @@ export class ReactiveAsyncDirective extends AsyncDirective {
         .catch((error) => {
           if (currentGeneration < this.generation) { return; }
           this.state = 'error';
+          this.resolvedValue = null;
+          this.hasResolved = false;
           this.error = error;
           if (this.isConnected) {
             const rendered = this.renderCurrentState(asyncCondition);
@@ -93,6 +97,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       // Synchronous value
       this.state = 'success';
       this.resolvedValue = result;
+      this.hasResolved = true;
     }
   }
 
@@ -101,6 +106,11 @@ export class ReactiveAsyncDirective extends AsyncDirective {
       case 'loading':
         if (asyncCondition.loadingContent) {
           return asyncCondition.loadingContent();
+        }
+        // No loading block: preserve previous content if available
+        if (this.hasResolved && asyncCondition.content) {
+          const successData = this.createSuccessDataContext(asyncCondition);
+          return asyncCondition.content(successData);
         }
         return noChange;
 
@@ -171,7 +181,7 @@ export class ReactiveAsyncDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // The reaction will be recreated in the next render
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

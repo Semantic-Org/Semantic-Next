@@ -1,6 +1,6 @@
 
 :host {
-  --card-min: var(250px);
+  --card-min: 250px;
   --card-gap: var(--gap);
   --card-image-max-height: 150px;
 }

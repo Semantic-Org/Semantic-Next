@@ -1,6 +1,6 @@
 import { Reaction } from '@semantic-ui/reactivity';
 import { each, isArray, isClient, isObject } from '@semantic-ui/utils';
-import { nothing } from 'lit';
+import { noChange, nothing } from 'lit';
 import { AsyncDirective } from 'lit/async-directive.js';
 import { directive, PartType } from 'lit/directive.js';
 
@@ -12,11 +12,13 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   render(conditional) {
-    let matchIndex = -1;
-    // Ensure existing reaction is stopped
+    this.conditional = conditional;
+
+    // Reuse existing reaction — signals and dataVersion handle updates
     if (this.reaction) {
-      this.reaction.stop();
+      return noChange;
     }
+
     let content = nothing;
     let context = {
       message: `if/else statement: {#if ${conditional.expression}}`,
@@ -31,10 +33,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
           return;
         }
 
-        const result = this.getBranch(conditional);
-        matchIndex = result.matchIndex;
+        const result = this.getBranch(this.conditional);
+        const matchIndex = result.matchIndex;
         content = result.content;
-
         if (!comp.firstRun && this.matchIndex !== matchIndex) {
           this.matchIndex = matchIndex;
           this.setValue(content);
@@ -43,15 +44,9 @@ export class ReactiveConditionalDirective extends AsyncDirective {
       }, { context });
     }
     else {
-      const result = this.getBranch(conditional);
-      matchIndex = result.matchIndex;
+      const result = this.getBranch(this.conditional);
       content = result.content;
     }
-
-    /* Experimental (not used currently *
-    if(this.matchIndex == matchIndex) {
-      return noChange;
-    } */
 
     return this.formatForPart(content);
   }
@@ -137,7 +132,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // nothing
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 
