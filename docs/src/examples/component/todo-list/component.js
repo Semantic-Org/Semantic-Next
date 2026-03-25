@@ -89,8 +89,9 @@ const createComponent = ({ self, state, reaction }) => ({
     }
   },
 
-  toggleAll(completed) {
-    state.todos.map(t => ({ ...t, completed }));
+  toggleAll() {
+    const allCompleted = state.todos.get().every(t => t.completed);
+    state.todos.setArrayProperty('completed', !allCompleted);
   },
 
   deleteTodo(id) {
@@ -98,13 +99,13 @@ const createComponent = ({ self, state, reaction }) => ({
   },
 
   saveTodo(id, title) {
+    state.editingId.set(null);
     const trimmed = title.trim();
     if (!trimmed) {
       self.deleteTodo(id);
       return;
     }
     state.todos.setProperty(id, 'title', trimmed);
-    state.editingId.set(null);
   },
 
   clearCompleted() {
@@ -114,15 +115,15 @@ const createComponent = ({ self, state, reaction }) => ({
 
 const events = {
 
-  'keydown .new-todo'({ self, event }) {
+  'keydown .new-todo'({ self, value, target, event }) {
     if (event.key === 'Enter') {
-      self.addTodo(event.target.value);
-      event.target.value = '';
+      self.addTodo(value);
+      target.value = '';
     }
   },
 
-  'change .toggle-all'({ self, event }) {
-    self.toggleAll(event.target.checked);
+  'change .toggle-all'({ self }) {
+    self.toggleAll();
   },
 
   'change .toggle'({ self, data }) {
@@ -132,8 +133,7 @@ const events = {
   'dblclick .todo-list label'({ state, data, $, afterFlush }) {
     state.editingId.set(data.id);
     afterFlush(() => {
-      const editInput = $('.editing .edit').el();
-      if (editInput) editInput.focus();
+      $('.editing .edit').focus();
     });
   },
 
@@ -141,15 +141,15 @@ const events = {
     self.deleteTodo(data.id);
   },
 
-  'keydown .edit'({ event }) {
+  'keydown .edit'({ target, event }) {
     if (event.key === 'Enter') {
-      event.target.blur();
+      target.blur();
     }
   },
 
-  'focusout .edit'({ self, state, data, event }) {
+  'focusout .edit'({ self, state, data, value }) {
     if (state.editingId.get() !== null) {
-      self.saveTodo(data.id, event.target.value);
+      self.saveTodo(data.id, value);
     }
   },
 
