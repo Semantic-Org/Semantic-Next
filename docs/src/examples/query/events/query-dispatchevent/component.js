@@ -20,9 +20,9 @@ const createComponent = ({ state, dispatchEvent }) => ({
 });
 
 const events = {
-  'global ping .ping-dispatcher': ({ self, data, dispatchEvent }) => {
+  'global ping .ping-dispatcher': ({ self, data, dispatchEvent, timeout }) => {
     self.appendLog(`Ping received`, data.date);
-    setTimeout(self.sendPong, 1000);
+    timeout(self.sendPong, 1000);
   },
 };
 

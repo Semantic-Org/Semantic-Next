@@ -12,14 +12,14 @@ const defaultState = {
   counter2: 0,
 };
 
-const createComponent = ({ signal, self }) => ({
+const createComponent = ({ signal, self, interval }) => ({
   counter3: signal(0),
   counter4: 0,
   counter5: () => self.counter4,
 });
 
-const onCreated = function({ settings, state, self }) {
-  setInterval(() => {
+const onCreated = function({ settings, state, self, interval }) {
+  interval(() => {
     settings.counter1++;
     state.counter2.increment();
     self.counter3.increment();

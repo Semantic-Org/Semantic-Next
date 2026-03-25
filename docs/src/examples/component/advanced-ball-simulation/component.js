@@ -261,7 +261,7 @@ const createComponent = ({ self, $, reaction, settings, state }) => ({
     ctx.fillText(`FPS: ${fps}`, canvas.width - 10, canvas.height - 10);
   },
   getPointerPosition(event) {
-    const canvas = this.getCanvas();
+    const canvas = self.getCanvas();
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;

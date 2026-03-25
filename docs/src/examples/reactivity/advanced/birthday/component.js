@@ -34,7 +34,7 @@ const createComponent = ({ self, state, reaction }) => ({
 
       // find people whose birthday is today
       let birthdayNames = self.birthdayCalendar
-        .filter(person => person.birthday == today)
+        .filter(person => person.birthday === today)
         .map(person => person.name);
       if (birthdayNames.length) {
         state.birthdayNames.set(birthdayNames.join(', '));
