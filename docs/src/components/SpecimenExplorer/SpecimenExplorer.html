@@ -55,10 +55,10 @@
 {#snippet radioControl}
   <div class="control select-control">
     <label class="select-label">{control.name}</label>
-    {> template
-      name='SimpleSelect'
-      data={ options: control.options, attribute: control.attribute }
-      reactiveData={ selected: (getSelection control.attribute) }
+    {>SimpleSelect
+      options=control.options
+      attribute=control.attribute
+      selected=(getSelection control.attribute)
     }
   </div>
 {/snippet}

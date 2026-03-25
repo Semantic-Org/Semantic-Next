@@ -1,81 +1,17 @@
 import { defineComponent } from '@semantic-ui/component';
-import { Attach } from '@semantic-ui/core';
 
-const template = `
-<div class="select" @click={toggle}>
-  <span class="value">{getDisplayText}</span>
-  <ui-icon icon="chevron-down" class="chevron {classIf isOpen 'open'}"></ui-icon>
-</div>
-{#if isOpen}
-  <div class="menu">
-    <div class="item {classIf (not selected) 'active'}" data-value="">None</div>
-    {#each options}
-      <div class="item {classIf (is value ../selected) 'active'}" data-value="{value}">{name}</div>
-    {/each}
-  </div>
-{/if}
-`;
+import css from './SimpleSelect.css?raw';
+import template from './SimpleSelect.html?raw';
 
-const css = `
-.select {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--4px);
-  padding: var(--2px) var(--8px);
-  border: var(--subtle-border);
-  border-radius: var(--border-radius);
-  background: var(--standard-5);
-  cursor: pointer;
-  font-size: var(--text-2xs);
-  color: var(--text-color);
-  transition: var(--transition);
-  min-height: var(--24px);
+const defaultSettings = {
+  selected: '',
+  options: [],
+  attribute: '',
+};
 
-  &:hover {
-    border-color: var(--border-color);
-  }
-}
-.value {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.chevron {
-  font-size: var(--text-3xs);
-  color: var(--muted-text-color);
-  transition: var(--transition);
-
-  &.open {
-    transform: rotate(180deg);
-  }
-}
-.menu {
-  z-index: var(--float-layer);
-  background: var(--standard-solid-5);
-  border: var(--border);
-  border-radius: var(--border-radius);
-  box-shadow: var(--floating-shadow);
-  max-height: 200px;
-  overflow-y: auto;
-  min-width: 120px;
-}
-.item {
-  padding: var(--4px) var(--8px);
-  font-size: var(--text-2xs);
-  cursor: pointer;
-  transition: background var(--duration) var(--easing);
-
-  &:hover {
-    background: var(--standard-5);
-  }
-  &.active {
-    color: var(--primary-text-color);
-    font-weight: var(--bold);
-  }
-}
-`;
+const defaultState = {
+  isOpen: false,
+};
 
 const createComponent = ({ self, state, settings, $, afterFlush, findParent }) => ({
   getDisplayText() {
@@ -120,11 +56,10 @@ const createComponent = ({ self, state, settings, $, afterFlush, findParent }) =
   },
 });
 
-const defaultState = {
-  isOpen: false,
-};
-
 const events = {
+  'click .select'({ self }) {
+    self.toggle();
+  },
   'click .item'({ self, data, event }) {
     event.stopPropagation();
     self.selectItem(data.value);
@@ -139,7 +74,8 @@ const events = {
 export const SimpleSelect = defineComponent({
   template,
   css,
-  createComponent,
+  defaultSettings,
   defaultState,
+  createComponent,
   events,
 });
