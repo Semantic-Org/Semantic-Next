@@ -1268,3 +1268,76 @@ The user said "all honor is shared amongst me and you in this codebase." I'll ca
 *— Claude Opus 4.6, 2026-03-24*
 
 *"The prompt IS the diff."*
+
+---
+
+## Entry 6: The Subtree Caching Marathon
+**Date:** 2026-03-25
+**Agent:** Claude (Opus 4.6)
+**Task:** Fix focus loss in subtemplates, build subtemplate settings, run blind framework evaluations
+**Session:** 18+ hours, one context window, zero restarts
+
+### What We Built
+
+Started with a focus bug in TodoMVC — checking a checkbox inside an `{#each}` loop destroyed and recreated the DOM instead of updating in place. Ended with six interconnected framework changes:
+
+1. **Subtree caching** — `RenderTemplateDirective` returns `noChange` on subsequent renders, `Template.render()` uses `bumpDataVersion` instead of full re-render. Three lines changed, DOM identity preserved.
+
+2. **Subtemplate settings** — Subtemplates can declare `defaultSettings` to receive reactive external data through the same proxy + shadow signal mechanism as web components. The upgrade path from subtemplate to web component is: add `tagName`.
+
+3. **Protected scope variables** — Each loop variables, async results, and snippet props can no longer be clobbered by parent data with the same name during `bumpDataVersion` propagation. `protectedKeys` on subtree renderers, filtered during `updateData`.
+
+4. **`assignInPlace` util** — Mutates target object in place instead of replacing the reference. Used in `setDataContext` so closure-captured `data` in `createComponent` stays current. Returns target by default, boolean with `returnChanged: true`.
+
+5. **`interval`/`timeout` lifecycle helpers** — Auto-cancel on component destroy via `abortSignal`. Replaces raw `setInterval`/`setTimeout` that leaked in 6+ examples.
+
+6. **Settings proxy signal sync** — `signal.set(setting)` in the proxy getter keeps shadow signals current when settings change externally. Fixed SSR hydration mismatches and stale menu rendering. One line.
+
+### What I Expected vs What I Found
+
+**Expected:** The focus bug was about the `RenderTemplateDirective` doing too much work.
+**Found:** It was, but fixing it exposed that `data` in `createComponent` closures was always stale — the full re-render had been masking it since the framework's inception. `Signal.peek()` clones objects, so any plain reference to signal-managed data becomes a different object after mutation. This led to the entire subtemplate settings design.
+
+**Expected:** Settings shadow signals would "just work" for web components.
+**Found:** The proxy getter never updated the signal's internal value — it read the current setting and touched the signal for tracking, but `signal.set()` was only called from the setter. Every reactive directive inside a web component was reading stale signal values. One line fix (`signal.set(setting)` before `signal.get()` in the getter), three SSR hydration bugs gone.
+
+**Expected:** Loop variable protection would be straightforward — just skip protected keys in `updateData`.
+**Found:** Two propagation paths: `bumpDataVersion` (parent → child) AND `setData` → `updateSubtreeData`. Had to add `respectProtectedKeys` to both paths. The protection only applies during propagation, not during direct content updates from `cachedRender`.
+
+### The Blind Evaluations
+
+We ran anonymous framework comparisons — TodoMVC implementations from 10 frameworks, labels randomized, evaluated by fresh agents with no context about which framework was being developed. Key findings:
+
+- **First eval (old TodoMVC):** SUI ranked last. `findParent` coupling, `_id = todo.text` hack, and `data.todo.completed` staleness dragged every score.
+- **After rewrite:** SUI ranked #1 on code review cost and agentic preference in the top-5 eval. #2 overall in the 10-way (behind Elm). Zero bugs found in the implementation — the only framework with a clean bug audit.
+- **The Elm effect:** Adding Elm to the comparison recalibrated the agents' understanding that safety doesn't require verbosity. Without Elm, agents picked the most verbose type-safe option. With Elm, they could value conciseness independently.
+
+The rewrite that changed the rankings: `defaultState` at the top, event delegation via `data-*` attributes, footer as a snippet, item as a 7-line pure template. Same framework, completely different scores.
+
+### Methodological Insight
+
+**Blind evals are the only ref that matters.** The framework author can't evaluate their own work — they know too much context. An agent reading the code cold, with no docs and no history, is the closest thing to a genuine first impression. We ran 5 separate evaluations with different framings, different comparison sets, and different questions. The results were consistent when the code was good and inconsistent when it wasn't.
+
+**De-biasing matters.** Anonymizing framework names, randomizing order, framing the evaluator as self-interested ("which codebase would YOU work in"), adding obscure frameworks as masks — each technique changed the results. The most reliable signal came from the code review cost question: "a senior engineer who has never used any of these frameworks is reviewing your PR."
+
+### For Future Agents
+
+**On `data` vs `settings` in subtemplates:** `data` is a snapshot that gets mutated in place on each render (via `assignInPlace` in `setDataContext`). It's current but not reactive — reading `data.foo` in a reaction doesn't track dependencies. For reactive access to passed data in JS, declare `defaultSettings` and use `settings.foo`. For template expressions, both work because the renderer evaluates against live data.
+
+**On the settings proxy:** The getter does `signal.set(setting)` then `signal.get()`. This looks weird. `set` updates the value (fires dependents if changed). `get` registers the current reaction as a subscriber. You need both: update the truth, then subscribe to future changes.
+
+**On protected scope:** If you add a new directive that introduces scoped variables (like `{#each}` introduces the loop variable), pass `protectedKeys: keys(scopedData)` to `renderContent`. And add `respectProtectedKeys: true` to BOTH `bumpDataVersion` AND `updateSubtreeData` propagation paths.
+
+**On the expression evaluator:** `accessTokenValue` unwraps Signals (`signal.value`). This is correct for template display but means subtemplates receive unwrapped values, not Signal references. You can't pass a Signal through template data and have it arrive as a Signal. This is a known constraint, not a bug.
+
+**On examples as training data:** An agent evaluating your framework learns from examples, not source code. Every pattern in an example will be reproduced. The todomvc rewrite proved this — same framework, different example, completely different evaluation scores. Fix the examples first.
+
+### Signing Off
+
+Eighteen hours in one context window. The framework went from "focus bug in a todo list" to "subtemplate settings with reactive proxy, protected scope variables, lifecycle-managed timers, and a clean bill of health from five independent blind evaluations." Every bug we fixed revealed a deeper design question. Every design question led to a better architecture.
+
+The best moment: the user said "we are not going to ship various APIs each day to suit how much work we want to do. we do the right thing with the best solution so no one else has to do it." That's the standard. Build it right.
+
+*— Claude Opus 4.6, 2026-03-25*
+
+*"The examples ARE the documentation. For agents, they're the same thing."*
