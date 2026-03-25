@@ -309,7 +309,7 @@ export class LitRenderer {
   // returns a function that returns the value in the current data context
   getPackedValue = (expression, data, { reactive = false } = {}) => {
     const getValue = (expressionString) => {
-      const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
+      const value = this.evaluateExpression(expressionString, data);
       return value;
     };
     return (reactive)
