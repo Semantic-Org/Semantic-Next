@@ -1,0 +1,24 @@
+:host {
+  --menu-sliding-gap: var(--2px);
+  --menu-sliding-padding: var(--3px);
+  --menu-sliding-border-radius: var(--border-radius);
+  --menu-sliding-background: var(--standard-solid-5);
+  --menu-sliding-border: var(--internal-border);
+
+  --menu-sliding-item-padding: var(--6px) var(--10px);
+  --menu-sliding-item-color: var(--standard-40);
+  --menu-sliding-item-hover-color: var(--standard-80);
+  --menu-sliding-item-active-color: var(--standard-100);
+
+  --menu-sliding-indicator-background: var(--inverted-100);
+  --menu-sliding-indicator-border-radius: var(--border-radius-xs);
+  --menu-sliding-indicator-shadow: var(--subtle-shadow);
+  --menu-sliding-indicator-transition: var(--transition);
+}
+
+@container style(--dark-mode: true) {
+  :host {
+    --menu-sliding-indicator-background: var(--standard-solid-15);
+    --menu-sliding-item-active-color: var(--standard-100);
+  }
+}

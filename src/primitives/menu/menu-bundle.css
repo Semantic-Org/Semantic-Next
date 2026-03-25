@@ -6,7 +6,7 @@
 
 /* src/primitives/menu/css/definition/content/menu.css */
 @layer menu.definition.content.menu {
-  ui-menu {
+  :host(ui-menu) {
     display: block;
     margin: var(--menu-margin);
     padding: var(--menu-padding);
@@ -23,10 +23,16 @@
     align-items: var(--menu-align-items);
     justify-content: var(--menu-justify-content);
   }
+  .menu.icon-only .label {
+    display: none;
+  }
+  .menu.icon-only ui-icon {
+    margin: 0 !important;
+  }
 }
 
-/* src/primitives/menu/css/definition/content/item.css */
-@layer menu.definition.content.item {
+/* src/primitives/menu/css/definition/content/menu-item.css */
+@layer menu.definition.content.menuItem {
   .item {
     display: block;
     cursor: pointer;
@@ -65,6 +71,23 @@
   }
 }
 
+/* src/primitives/menu/css/definition/content/icon.css */
+@layer menu.definition.content.icon {
+  .menu ui-icon {
+    margin-right: var(--menu-icon-margin);
+  }
+  .menu ui-icon:only-child {
+    margin-right: 0;
+  }
+}
+
+/* src/primitives/menu/css/definition/content/badge.css */
+@layer menu.definition.content.badge {
+  .menu ui-label[badge] {
+    margin-left: var(--menu-badge-margin);
+  }
+}
+
 /* src/primitives/menu/css/definition/types/selection.css */
 @layer menu.definition.types.selection {
   .selection.menu {
@@ -84,6 +107,40 @@
     --menu-item-active-padding: var(--menu-selection-item-active-padding);
     --menu-item-active-color: var(--menu-selection-item-active-color);
     --menu-item-active-box-shadow: var(--menu-selection-item-active-box-shadow);
+  }
+}
+
+/* src/primitives/menu/css/definition/types/sliding.css */
+@layer menu.definition.types.sliding {
+  .sliding.menu {
+    position: relative;
+    gap: var(--menu-sliding-gap);
+    padding: var(--menu-sliding-padding);
+    border-radius: var(--menu-sliding-border-radius);
+    background: var(--menu-sliding-background);
+    border: var(--menu-sliding-border);
+  }
+  .sliding.menu ::slotted(*),
+  .sliding.menu menu-item {
+    --menu-item-padding: var(--menu-sliding-item-padding);
+    --menu-item-color: var(--menu-sliding-item-color);
+    --menu-item-hover-color: var(--menu-sliding-item-hover-color);
+    --menu-item-hover-background: transparent;
+    --menu-item-active-background: transparent;
+    --menu-item-active-color: var(--menu-sliding-item-active-color);
+    --menu-item-active-font-weight: var(--bold);
+    position: relative;
+    z-index: 1;
+  }
+  .sliding.menu .indicator {
+    position: absolute;
+    top: var(--menu-sliding-padding);
+    bottom: var(--menu-sliding-padding);
+    background: var(--menu-sliding-indicator-background);
+    border-radius: var(--menu-sliding-indicator-border-radius);
+    box-shadow: var(--menu-sliding-indicator-shadow);
+    transition: var(--menu-sliding-indicator-transition);
+    z-index: 0;
   }
 }
 
@@ -185,6 +242,20 @@
   }
 }
 
+/* src/primitives/menu/css/theme/content/icon-variables.css */
+@layer menu.theme.content.icon {
+  :host {
+    --menu-icon-margin: var(--relative-6px);
+  }
+}
+
+/* src/primitives/menu/css/theme/content/badge-variables.css */
+@layer menu.theme.content.badge {
+  :host {
+    --menu-badge-margin: var(--relative-6px);
+  }
+}
+
 /* src/primitives/menu/css/theme/types/selection-variables.css */
 @layer menu.theme.type.selection {
   :host {
@@ -208,6 +279,31 @@
       --menu-selection-item-active-background: #35B7F1;
       --menu-selection-item-active-color: var(--black-90);
       --menu-selection-item-active-box-shadow: 0px 0px 10px rgb(0 92 165) inset;
+    }
+  }
+}
+
+/* src/primitives/menu/css/theme/types/sliding-variables.css */
+@layer menu.theme.type.sliding {
+  :host {
+    --menu-sliding-gap: var(--2px);
+    --menu-sliding-padding: var(--3px);
+    --menu-sliding-border-radius: var(--border-radius);
+    --menu-sliding-background: var(--standard-solid-5);
+    --menu-sliding-border: var(--internal-border);
+    --menu-sliding-item-padding: var(--6px) var(--10px);
+    --menu-sliding-item-color: var(--standard-40);
+    --menu-sliding-item-hover-color: var(--standard-80);
+    --menu-sliding-item-active-color: var(--standard-100);
+    --menu-sliding-indicator-background: var(--inverted-100);
+    --menu-sliding-indicator-border-radius: var(--border-radius-xs);
+    --menu-sliding-indicator-shadow: var(--subtle-shadow);
+    --menu-sliding-indicator-transition: var(--transition);
+  }
+  @container style(--dark-mode: true) {
+    :host {
+      --menu-sliding-indicator-background: var(--standard-solid-15);
+      --menu-sliding-item-active-color: var(--standard-100);
     }
   }
 }

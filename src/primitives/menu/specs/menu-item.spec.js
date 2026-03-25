@@ -31,6 +31,8 @@ export default {
       attribute: 'badge',
       description: 'can specify a badge to appear next to text',
     },
+  ],
+  settings: [
     {
       name: 'Href',
       type: 'string',

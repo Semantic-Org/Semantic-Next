@@ -1,9 +1,8 @@
-import { Tooltip } from '@semantic-ui/core';
+import { CopyButton, Tooltip } from '@semantic-ui/core';
 import pretty from 'pretty';
 import { codeToHtml } from 'shiki';
 
 import { defineComponent } from '@semantic-ui/component';
-import { copyText } from '@semantic-ui/utils';
 import css from './CodeSample.css?raw';
 import template from './CodeSample.html?raw';
 
@@ -78,26 +77,13 @@ const onRendered = ({ $, el, isServer, reaction, state, settings }) => {
   if (!settings.code && el.innerHTML) {
     settings.code = el.innerHTML;
   }
-  // add tooltip
-  $('ui-icon[copy]').tooltip({
-    onHidden: function() {
-      $(this).tooltip('set text', 'Copy Code');
-    },
-  });
 };
 
 const onThemeChanged = function({ state, darkMode }) {
   state.darkMode.set(darkMode);
 };
 
-const events = {
-  'click ui-icon[copy]'({ event, target, settings }) {
-    copyText(settings.code);
-    $(target).tooltip('set text', 'Copied!');
-    const $tooltip = $(target).tooltip('get tooltip');
-    $tooltip.transition('jiggle');
-  },
-};
+const events = {};
 
 const CodeSample = defineComponent({
   tagName: 'code-sample',

@@ -5,6 +5,7 @@ Scratch space for active agent work. Files here are in-progress and tied to curr
 ## Contents
 
 - **plans/** — Active implementation plans (completed plans move to `ai/trash/plans/`)
+- **artifacts/** — Intermediate outputs (CSVs, reports, checklists). Delete when consumed.
 - **drafts/** — In-progress document drafts
 - **reference/** — Screenshots, external snapshots, and other persistent reference materials
 - **tmp/** — Ephemeral files that can be cleaned up at any time without review

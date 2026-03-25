@@ -1,12 +1,14 @@
 import { defineComponent } from '@semantic-ui/component';
 import { DocsSpecReader } from '@semantic-ui/specs';
-import { each } from '@semantic-ui/utils';
+
+import CodeSample from '@components/CodeSample/CodeSample.js';
+
+import { each, inArray, keys, some } from '@semantic-ui/utils';
 
 import css from './SpecimenExplorer.css?raw';
 import template from './SpecimenExplorer.html?raw';
 
-import { Panel, Panels } from '@semantic-ui/core';
-import CodeSample from '../CodeSample/CodeSample.js';
+import { Panel, Panels, Spinner } from '@semantic-ui/core';
 import { SimpleSelect } from './SimpleSelect.js';
 
 const defaultSettings = {
@@ -16,11 +18,23 @@ const defaultSettings = {
 const defaultState = {
   selections: {},
   dialect: 'standard',
+  viewMode: 'split',
+  ready: false,
 };
 
 const createComponent = ({ self, state, settings, $ }) => ({
   reader: null,
   parsedSpec: null,
+
+  viewModeItems: [
+    { icon: 'eye', label: 'Preview', value: 'preview' },
+    { icon: 'columns-2', label: 'Split', value: 'split' },
+    { icon: 'code', label: 'Code', value: 'code' },
+  ],
+
+  isMode(...modes) {
+    return inArray(state.viewMode.get(), modes);
+  },
 
   dialectMenuItems: [
     { label: 'Standard', value: 'standard' },
@@ -148,6 +162,17 @@ const createComponent = ({ self, state, settings, $ }) => ({
     state.selections.set(selections);
   },
 
+  hasModifiers() {
+    const selections = state.selections.get();
+    const contentSlotAttrs = (self.parsedSpec?.content || [])
+      .filter(c => {
+        const attr = c.attribute || c.name?.toLowerCase();
+        return attr !== 'icon' && attr !== 'badge';
+      })
+      .map(c => c.attribute || c.name?.toLowerCase());
+    return some(keys(selections), (attr) => !inArray(attr, contentSlotAttrs));
+  },
+
   // Code generation
   getCodeOutput() {
     if (!self.reader) { return ''; }
@@ -243,10 +268,15 @@ const events = {
   'change .dialect-menu'({ state, value }) {
     state.dialect.set(value);
   },
+
+  'change .view-mode-menu'({ state, value }) {
+    state.viewMode.set(value);
+  },
 };
 
 const onRendered = ({ self, reaction, state, isClient }) => {
   if (!isClient) { return; }
+  state.ready.set(true);
   reaction(() => {
     state.selections.get();
     self.updatePreview();

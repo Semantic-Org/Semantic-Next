@@ -6,7 +6,7 @@
     </div>
   {/if}
   {#if copyable}
-    <ui-icon link copy data-text="Copy Code"></ui-icon>
+    <copy-button text={code}></copy-button>
   {/if}
   <code class="code {language}">
     {#rerender darkMode}

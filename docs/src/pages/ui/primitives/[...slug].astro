@@ -84,7 +84,7 @@ if (displayedTab === 'spec') {
   id={data.id}
 >
   {usageDisplayed && (
-    <SpecimenExplorer spec={JSON.stringify(spec)} client:only></SpecimenExplorer>
+    <SpecimenExplorer client:load spec={JSON.stringify(spec)} client:only></SpecimenExplorer>
     <UsageImports spec={spec} />
     <Content />
     <UsageSettings spec={spec} />

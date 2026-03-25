@@ -67,7 +67,6 @@
     exportparts="panels"
   >
     <ui-panel
-      direction="{getTabDirection}"
       size="60"
       class="files"
       exportparts="panel, handle"
@@ -92,7 +91,6 @@
       }
     </ui-panel>
     <ui-panel
-      direction="{getTabDirection}"
       size=40
       class="preview"
       exportparts="panel, handle"
@@ -146,7 +144,6 @@
   >
     {#each panelGroup in getPanels}
       <ui-panel
-        direction="horizontal"
         size={getPanelGroupWidth index}
         class="code-group"
         exportparts="panel, handle">
