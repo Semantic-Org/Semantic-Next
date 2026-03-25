@@ -75,11 +75,29 @@ export class ReactiveDataDirective extends AsyncDirective {
     // template compiler does this automatically for boolean attrs
     if (this.settings.ifDefined) {
       if (inArray(reactiveValue, ['', undefined, null, false, 0])) {
+        this.syncProperty(false);
         return ifDefined(undefined);
       }
     }
 
+    // After user interaction, boolean attributes like checked/selected
+    // diverge from their DOM properties — toggling the attribute alone
+    // won't update the element's state, so we sync the property directly
+    this.syncProperty(!!reactiveValue);
+
     return this.formatForPart(reactiveValue);
+  }
+
+  // After user interaction, boolean attrs like checked/selected diverge
+  // from their DOM properties — sync the property to match
+  syncProperty(value) {
+    const name = this.partInfo.name;
+    if (inArray(name, ['checked', 'selected'])) {
+      const el = this.__part?.element;
+      if (el) {
+        el[name] = value;
+      }
+    }
   }
 
   formatForPart(reactiveValue) {
