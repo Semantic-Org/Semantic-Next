@@ -9,11 +9,12 @@
 | 1 | [Vanilla Renderer](#vanilla-renderer) | 10 | 0/10 | **Not started** — all 3 phases unimplemented | Extract ExpressionEvaluator, build VanillaRenderer, VanillaWebComponent. Eliminates Lit dependency + root cause of cache bugs |
 | 2 | [Homepage Hero](#homepage-hero) | 9 | 7/10 | **Hero + AIPrompt done, tour visuals placeholder** | Three tour section visuals are TODO divs. Section names diverge from plan |
 | 3 | [Primitive Usage Guides](#primitive-usage-guides) | 8 | 4/10 | **Phases 0–1 done, rest partial/not started** — Specimen Explorer fully working | CSS tab + theme spec (not started), authored MDX content, MCP exposure, `getUsageMenu()` |
-| 4 | [Subtree Caching Eval](#subtree-caching-evaluation) | 7 | 4/10 | **Partial** — core cache works, key recommendations unimplemented | dataVersion in structural directives, async Reaction.guard, positional keying. Priority contingent on vanilla renderer timeline |
-| 5 | [MCP Improvements](#mcp-improvements) | 7 | 7/10 | **6/9 done** — discovery, help, batch, categories, slim, clarity all shipped | `get_theming_css`, `get_global_tokens`, `get_token_usage` not implemented |
-| 6 | [CSS Token Extraction](#css-token-extraction) | 6 | 0/10 | **Not started** — no code, prereqs not met | Implement `getThemingCSS` util + MCP tool. Rename inconsistent CSS filenames in 7 primitives |
-| 7 | [Token Migration](#token-migration) | 5 | 6/10 | **Infra done, migration partial** — new tokens exist, old aliases provide backward compat | ~3 primitives still use old aliases (`--vertically-spaced`, `--spacing-*`). ~65 docs files use old tokens |
-| 8 | [Sizing System Redesign](#sizing-system-redesign) | 5 | 7/10 | **Implemented differently** — flat structure instead of planned `global/`+`computed/` subdirs | Formally reconcile plan vs reality. Decide on `--size-*-em` and short aliases (absent) |
+| 4 | [State from Settings](#state-from-settings) | 7 | 0/10 | **Not started** — design complete, ~25 lines across 3 files | `defaultState` object-form metadata, Lit property registration, signal seeding from attributes |
+| 5 | [Subtree Caching Eval](#subtree-caching-evaluation) | 7 | 4/10 | **Partial** — core cache works, key recommendations unimplemented | dataVersion in structural directives, async Reaction.guard, positional keying. Priority contingent on vanilla renderer timeline |
+| 6 | [MCP Improvements](#mcp-improvements) | 7 | 7/10 | **6/9 done** — discovery, help, batch, categories, slim, clarity all shipped | `get_theming_css`, `get_global_tokens`, `get_token_usage` not implemented |
+| 7 | [CSS Token Extraction](#css-token-extraction) | 6 | 0/10 | **Not started** — no code, prereqs not met | Implement `getThemingCSS` util + MCP tool. Rename inconsistent CSS filenames in 7 primitives |
+| 8 | [Token Migration](#token-migration) | 5 | 6/10 | **Infra done, migration partial** — new tokens exist, old aliases provide backward compat | ~3 primitives still use old aliases (`--vertically-spaced`, `--spacing-*`). ~65 docs files use old tokens |
+| 9 | [Sizing System Redesign](#sizing-system-redesign) | 5 | 7/10 | **Implemented differently** — flat structure instead of planned `global/`+`computed/` subdirs | Formally reconcile plan vs reality. Decide on `--size-*-em` and short aliases (absent) |
 
 ### Deferred Plans (moved to `plans/deferred/`)
 
