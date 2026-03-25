@@ -153,10 +153,20 @@ values({ a: 1, b: 2 });                     // [1, 2]
 
 ### Object Manipulation
 ```javascript
-import { extend, deepExtend, pick, onlyKeys, filterObject, mapObject } from '@semantic-ui/utils';
+import { extend, assignInPlace, deepExtend, pick, onlyKeys, filterObject, mapObject } from '@semantic-ui/utils';
 
 // Shallow merge (preserves getter/setter descriptors)
 extend({ a: 1 }, { b: 2 }, { c: 3 });       // { a: 1, b: 2, c: 3 }
+
+// Sync object in place — deletes keys not in source, assigns source properties
+const obj = { a: 1, b: 2, stale: true };
+assignInPlace(obj, { a: 10, b: 20 });        // obj is now { a: 10, b: 20 }
+
+// Preserve existing keys — only adds and updates
+assignInPlace(obj, { a: 99 }, { preserveExistingKeys: true }); // { a: 99, b: 20 }
+
+// Detect changes without side effects
+assignInPlace(obj, { a: 99 }, { returnChanged: true }); // false (no change)
 
 // Deep merge
 const config = { api: { url: 'localhost', timeout: 5000 } };
@@ -738,6 +748,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `values` | `(obj)` | `Object.values` or undefined |
 | `hasProperty` | `(obj, prop)` | Own property check (shallow) |
 | `extend` | `(obj, ...sources)` | Merged object (mutates target) |
+| `assignInPlace` | `(target, source, opts?)` | Synced target or boolean |
 | `deepExtend` | `(target, ...sources, opts?)` | Deep merged (mutates target) |
 | `pick` | `(obj, ...keys)` | New object with selected keys |
 | `onlyKeys` | `(obj, keysArray)` | New object with selected keys |
