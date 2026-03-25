@@ -1654,3 +1654,174 @@ describe('26. Subtemplate settings', () => {
     expect(shadowText(el)).toContain('B:complete');
   });
 });
+
+/*******************************
+   27. Protected scope variables
+*******************************/
+
+describe('27. Protected scope variables', () => {
+  it('each loop variable should not be clobbered by parent data with same name', async () => {
+    const tag = uniqueTag('scope-each');
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each color in colorOptions}<span class="{color}">{color}</span>{/each}',
+      defaultSettings: { color: '#FF0000' },
+      defaultState: { colorOptions: ['red', 'green', 'blue'] },
+      createComponent: ({ settings }) => ({
+        updateColor() {
+          settings.color = '#00FF00';
+        },
+      }),
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('red');
+    expect(shadowText(el)).toContain('green');
+    expect(shadowText(el)).toContain('blue');
+
+    // Change the setting that shares the name 'color' with the loop var
+    el.component.updateColor();
+    await flush(el);
+
+    // Loop variable should still be the item, not the setting
+    expect(shadowText(el)).toContain('red');
+    expect(shadowText(el)).toContain('green');
+    expect(shadowText(el)).toContain('blue');
+    expect(shadowText(el)).not.toContain('#00FF00');
+  });
+
+  it('each index variable should not be clobbered by parent data with same name', async () => {
+    const tag = uniqueTag('scope-index');
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each item, index in getItems}<span>{item}:{index}</span>{/each}',
+      defaultState: { index: 999, items: ['a', 'b', 'c'] },
+      createComponent: ({ state }) => ({
+        getItems: () => state.items.get(),
+      }),
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('a:0');
+    expect(shadowText(el)).toContain('b:1');
+    expect(shadowText(el)).toContain('c:2');
+    expect(shadowText(el)).not.toContain('999');
+  });
+
+  it('async result variable should not be clobbered by parent data with same name', async () => {
+    const tag = uniqueTag('scope-async');
+
+    defineComponent({
+      tagName: tag,
+      template: '{#async fetchResult as result}<span>{result}</span>{/async}',
+      defaultState: { result: 'stale-parent-value' },
+      createComponent: ({ state }) => ({
+        async fetchResult() {
+          state.result.get(); // track for reactivity
+          return 'async-resolved';
+        },
+      }),
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    await new Promise(r => setTimeout(r, 50));
+    await flush(el);
+
+    // Should show the async result, not the parent state with same name
+    expect(shadowText(el)).toContain('async-resolved');
+    expect(shadowText(el)).not.toContain('stale-parent-value');
+  });
+
+  it('snippet prop should not be clobbered by parent data with same name', async () => {
+    const tag = uniqueTag('scope-snippet');
+
+    defineComponent({
+      tagName: tag,
+      template: '{#snippet badge}<b>{label}</b>{/snippet}{>badge label="from-snippet"}',
+      defaultState: { label: 'from-state' },
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    // Snippet should show the passed prop, not the parent state
+    expect(shadowText(el)).toContain('from-snippet');
+    expect(shadowText(el)).not.toContain('from-state');
+  });
+
+  it('each loop variable should survive multiple parent re-renders', async () => {
+    const tag = uniqueTag('scope-multi');
+
+    defineComponent({
+      tagName: tag,
+      template: '{#each item in items}<span>{item}:{count}</span>{/each}',
+      defaultState: { count: 0, items: ['x', 'y'] },
+      createComponent: ({ state }) => ({
+        bump() {
+          state.count.increment();
+        },
+      }),
+    });
+
+    const el = document.createElement(tag);
+    document.body.appendChild(el);
+    await el.updateComplete;
+
+    expect(shadowText(el)).toContain('x:0');
+    expect(shadowText(el)).toContain('y:0');
+
+    // Bump count multiple times — loop vars should survive each time
+    el.component.bump();
+    await flush(el);
+    expect(shadowText(el)).toContain('x:1');
+    expect(shadowText(el)).toContain('y:1');
+
+    el.component.bump();
+    await flush(el);
+    expect(shadowText(el)).toContain('x:2');
+    expect(shadowText(el)).toContain('y:2');
+  });
+});
+
+it('snippet prop should not be clobbered by changing parent data with same name', async () => {
+  const tag = uniqueTag('scope-snippet-reactive');
+
+  defineComponent({
+    tagName: tag,
+    template: '{#snippet badge}<b>{label}</b>{/snippet}<span>{label}</span>{>badge label="from-snippet"}',
+    defaultState: { label: 'v0' },
+    createComponent: ({ state }) => ({
+      updateLabel() {
+        state.label.set('v1');
+      },
+    }),
+  });
+
+  const el = document.createElement(tag);
+  document.body.appendChild(el);
+  await el.updateComplete;
+
+  // Snippet should show override, span should show state
+  expect(shadowText(el)).toContain('from-snippet');
+  expect(shadowText(el)).toContain('v0');
+
+  // Change state — should update span but NOT the snippet's label
+  el.component.updateLabel();
+  await flush(el);
+
+  expect(shadowText(el)).toContain('v1');
+  expect(shadowText(el)).toContain('from-snippet');
+  expect(shadowText(el)).not.toContain('<b>v1</b>');
+});

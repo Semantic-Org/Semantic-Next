@@ -132,7 +132,7 @@ export class ReactiveConditionalDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // nothing
+    // Lit calls render() on reconnect which recreates the reaction
   }
 }
 

@@ -151,7 +151,7 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   reconnected() {
-    // nothing yet
+    // Lit calls render() on reconnect which recreates the reaction
   }
 
   disconnected() {

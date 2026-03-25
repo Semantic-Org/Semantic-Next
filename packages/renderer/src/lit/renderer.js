@@ -7,10 +7,12 @@ import {
   fatal,
   filterObject,
   hashCode,
+  inArray,
   isArray,
   isFunction,
   isPlainObject,
   isString,
+  keys,
   mapObject,
   wrapFunction,
 } from '@semantic-ui/utils';
@@ -42,7 +44,9 @@ export class LitRenderer {
     return hashCode({ ast });
   }
 
-  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true }) {
+  constructor(
+    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
+  ) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = {}; // stores templates but garbage collectable
@@ -54,6 +58,7 @@ export class LitRenderer {
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
+    this.protectedKeys = protectedKeys; // keys scoped to this subtree (loop vars, async results) that parent updates cannot overwrite
     this.id = LitRenderer.getID({ ast, data, isSVG });
     this.dataVersion = new Signal(0);
   }
@@ -90,7 +95,7 @@ export class LitRenderer {
     each(this.renderTrees, (ref) => {
       const tree = ref.deref();
       if (tree?.inheritsData) {
-        tree.updateData(this.data);
+        tree.updateData(this.data, { respectProtectedKeys: true });
         tree.bumpDataVersion();
       }
     });
@@ -222,6 +227,7 @@ export class LitRenderer {
           return this.renderContent({
             ast: value,
             data,
+            protectedKeys: keys(asyncData),
           });
         };
       }
@@ -242,6 +248,7 @@ export class LitRenderer {
           return this.renderContent({
             ast: value,
             data,
+            protectedKeys: keys(errorData),
           });
         };
       }
@@ -272,6 +279,7 @@ export class LitRenderer {
             ast: value,
             data,
             key: eachKey,
+            protectedKeys: keys(eachData),
           });
         };
       }
@@ -692,7 +700,7 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
-  renderContent({ ast, data, key, position, cache = true, isSVG = this.isSVG } = {}) {
+  renderContent({ ast, data, key, position, cache = true, isSVG = this.isSVG, protectedKeys } = {}) {
     if (cache && LitRenderer.useSubtreeCache) {
       const contentID = LitRenderer.getID({ ast, key, position, isSVG });
       const treeRef = this.renderTrees[contentID];
@@ -706,6 +714,7 @@ export class LitRenderer {
         ast,
         data,
         isSVG,
+        protectedKeys,
         subTemplates: this.subTemplates,
         snippets: this.snippets,
         helpers: this.helpers,
@@ -720,6 +729,7 @@ export class LitRenderer {
       ast,
       data,
       isSVG,
+      protectedKeys,
       subTemplates: this.subTemplates,
       snippets: this.snippets,
       helpers: this.helpers,
@@ -744,7 +754,7 @@ export class LitRenderer {
       // use deref to allow mem cleanup of subtrees
       const tree = ref.deref();
       if (tree?.inheritsData) {
-        tree.updateData(newData);
+        tree.updateData(newData, { respectProtectedKeys: true });
       }
     });
   }
@@ -753,7 +763,12 @@ export class LitRenderer {
     Note this is important to preserve the object reference vs clobbering
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
-  updateData(newData, { preserveExistingData = true } = {}) {
+  updateData(newData, { preserveExistingData = true, respectProtectedKeys = false } = {}) {
+    // filter out keys scoped to this subtree (each loop vars, async results, snippet props)
+    // only during parent propagation, not direct content updates
+    if (respectProtectedKeys && this.protectedKeys) {
+      newData = filterObject(newData, (value, key) => !inArray(key, this.protectedKeys));
+    }
     assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData });
   }
 
