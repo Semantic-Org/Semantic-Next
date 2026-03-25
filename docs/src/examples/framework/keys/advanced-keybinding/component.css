@@ -13,7 +13,7 @@
 .results {
 
   border: var(--border);
-  padding: var(--compact-padding);
+  padding: var(--padding-xs);
   border-radius: var(--border-radius);
 
   .result {

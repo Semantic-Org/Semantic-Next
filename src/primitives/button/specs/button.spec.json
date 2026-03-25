@@ -108,27 +108,24 @@
       "attribute": "animated",
       "description": "animate to show hidden content",
       "includeAttributeClass": true,
+      "compoundAliases": true,
       "usageLevel": 3,
       "options": [
         {
-          "name": "Animated",
-          "value": [
-            "horizontal-animated"
-          ],
+          "name": "Horizontal",
+          "value": "horizontal",
           "description": "animate hidden content horizontally",
           "exampleCode": "\n            <ui-button animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         },
         {
-          "name": "Vertical Animated",
-          "value": "vertical-animated",
+          "name": "Vertical",
+          "value": "vertical",
           "description": "animate hidden content vertically",
           "exampleCode": "\n            <ui-button vertical-animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         },
         {
-          "name": "Fade Animated",
-          "value": [
-            "fade-animated"
-          ],
+          "name": "Fade",
+          "value": "fade",
           "description": "fade in hidden content",
           "exampleCode": "\n            <ui-button fade-animated>\n              <span slot=\"visible\">Hover Me</span>\n              <span slot=\"hidden\">Hidden</span>\n            </ui-button>\n          "
         }

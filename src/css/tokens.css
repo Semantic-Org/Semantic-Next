@@ -1,37 +1,87 @@
 /* Global Tokens */
-@import url('./tokens/global/constants.css') layer(tokens.global.constants);
-@import url('./tokens/global/sizing.css') layer(tokens.global.sizing);
-@import url('./tokens/global/spacing.css') layer(tokens.global.spacing);
-@import url('./tokens/global/typography.css') layer(tokens.global.typography);
-@import url('./tokens/global/layout.css') layer(tokens.global.layout);
-@import url('./tokens/global/interaction.css') layer(tokens.global.interaction);
-@import url('./tokens/global/visual.css') layer(tokens.global.visual);
-@import url('./tokens/global/brands.css') layer(tokens.global.brands);
+@import url('./tokens/sizing.css') layer(tokens.sizing);
+@import url('./tokens/spacing.css') layer(tokens.spacing);
+@import url('./tokens/typography.css') layer(tokens.typography);
+@import url('./tokens/layout.css') layer(tokens.layout);
+@import url('./tokens/colors.css') layer(tokens.colors);
+@import url('./tokens/brand.css') layer(tokens.brand);
+@import url('./tokens/border-radius.css') layer(tokens.borderRadius);
+@import url('./tokens/breakpoints.css') layer(tokens.breakpoints);
+@import url('./tokens/z-index.css') layer(tokens.zIndex);
+@import url('./tokens/motion.css') layer(tokens.motion);
+@import url('./tokens/states.css') layer(tokens.states);
+@import url('./tokens/forms.css') layer(tokens.forms);
+@import url('./tokens/loader.css') layer(tokens.loader);
+@import url('./tokens/scrollbars.css') layer(tokens.scrollbars);
 
-/* Computed Tokens */
-@import url('./tokens/computed/typography.css') layer(tokens.computed.typography);
-@import url('./tokens/computed/em-sizing.css') layer(tokens.computed.emSizing);
-@import url('./tokens/computed/layout.css') layer(tokens.computed.layout);
-@import url('./tokens/computed/colors.css') layer(tokens.computed.colors);
-@import url('./tokens/computed/interaction.css') layer(tokens.computed.interaction);
 
 /* Light Theme Tokens */
-@import url('./tokens/themes/light/base.css') layer(tokens.themes.light.base);
+/*
+  This allows for themes to be nested and recomputed per component / level
+  overriding root or inherited theme
+
+  Ex 1:
+  i.e.
+  <html theme="dark">
+    <some-component light>
+    </some-component>
+  </html>
+
+  Ex 2:
+  <html>
+    <div theme="dark">
+      <div theme="light">
+
+      </div>
+    </div>
+  </html>
+*/
 @import url('./tokens/themes/light/colors.css') layer(tokens.themes.light.colors);
-@import url('./tokens/themes/light/interaction.css') layer(tokens.themes.light.interaction);
+@import url('./tokens/themes/light/typography.css') layer(tokens.themes.light.typography);
+@import url('./tokens/themes/light/borders.css') layer(tokens.themes.light.borders);
+@import url('./tokens/themes/light/shading.css') layer(tokens.themes.light.shading);
+@import url('./tokens/themes/light/surfaces.css') layer(tokens.themes.light.surfaces);
+@import url('./tokens/themes/light/states.css') layer(tokens.themes.light.states);
 
-/* Dark Theme Tokens */
-@import url('./tokens/themes/dark/base.css') layer(tokens.themes.dark.base);
+/* Dark Theme Tokens
+  This allows for themes to be nested and recomputed per component / level
+  overriding root or inherited theme
+
+  Ex 1:
+  i.e.
+  <html theme="light">
+    <some-component dark>
+    </some-component>
+  </html>
+
+  Ex 2:
+  <html>
+    <div theme="light">
+      <div theme="dark">
+
+      </div>
+    </div>
+  </html>
+*/
 @import url('./tokens/themes/dark/colors.css') layer(tokens.themes.dark.colors);
-@import url('./tokens/themes/dark/interaction.css') layer(tokens.themes.dark.interaction);
-@import url('./tokens/themes/dark/effects.css') layer(tokens.themes.dark.effects);
+@import url('./tokens/themes/dark/typography.css') layer(tokens.themes.dark.typography);
+@import url('./tokens/themes/dark/borders.css') layer(tokens.themes.dark.borders);
+@import url('./tokens/themes/dark/shadows.css') layer(tokens.themes.dark.shadows);
 
-/* Computed Theme Tokens */
-@import url('./tokens/themes/computed/base.css') layer(tokens.themes.computed.base);
+/* Computed Theme Tokens
+
+  These are computed values that rely on dark/light css variables and must be recomputed
+  when a theme is applied
+
+*/
 @import url('./tokens/themes/computed/colors.css') layer(tokens.themes.computed.colors);
-@import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
 @import url('./tokens/themes/computed/brand.css') layer(tokens.themes.computed.brand);
-@import url('./tokens/themes/computed/layout.css') layer(tokens.themes.computed.layout);
-@import url('./tokens/themes/computed/effects.css') layer(tokens.themes.computed.effects);
-@import url('./tokens/themes/computed/state-colors.css') layer(tokens.themes.computed.stateColors);
-@import url('./tokens/themes/computed/interaction.css') layer(tokens.themes.computed.interaction);
+@import url('./tokens/themes/computed/surfaces.css') layer(tokens.themes.computed.surfaces);
+@import url('./tokens/themes/computed/typography.css') layer(tokens.themes.computed.typography);
+@import url('./tokens/themes/computed/borders.css') layer(tokens.themes.computed.borders);
+@import url('./tokens/themes/computed/shadows.css') layer(tokens.themes.computed.shadows);
+@import url('./tokens/themes/computed/surfaces.css') layer(tokens.themes.computed.surfaces);
+@import url('./tokens/themes/computed/shading.css') layer(tokens.themes.computed.shading);
+@import url('./tokens/themes/computed/scrollbars.css') layer(tokens.themes.computed.scrollbars);
+@import url('./tokens/themes/computed/loader.css') layer(tokens.themes.computed.loader);
+@import url('./tokens/themes/computed/forms.css') layer(tokens.themes.computed.forms);

@@ -1,0 +1,104 @@
+# Semantic UI
+
+> A reactive web component framework built on signals and web standards
+
+Base URL: https://next.semantic-ui.com
+
+## How This Works
+
+Manifests return metadata (path, title, description, token count per item).
+Fetch individual items via their `path` field to get actual content.
+
+**Manifest formats:**
+- `manifest.json` - Human-readable, full metadata
+- `manifest.min.json` - Minified, full metadata
+- `index.min.json` - Minified, slim (path, title, tokens only)
+
+## Decision Tree
+
+**Using UI components in a project?**
+- Component Specs: /content/specs/index.min.json (~12k content tokens)
+- Examples: /content/examples/index.min.json (~105k content tokens)
+- AI Context (ui): /content/ai/ui/index.min.json (~3k content tokens)
+
+**Building custom components with the framework?**
+- AI Context (framework): /content/ai/framework/index.min.json (~93k content tokens)
+- User Documentation: /content/docs/index.min.json (~150k content tokens)
+
+**Contributing to Semantic UI?**
+- AI Context (contributing): /content/ai/contributing/index.min.json (~159k content tokens)
+
+**Building your own UI framework or design system?**
+- AI Context (research): /content/ai/research/index.min.json (~3.3M content tokens)
+- Specialized corpus analyzing UI primitives across major JS frameworks (React, Vue, Angular, Svelte, etc.). Intended for: framework authors, design system architects, academics, AI/ML researchers training on UI patterns. This was the research foundation for Semantic UI's component specs.
+
+---
+
+## Component Specs
+
+Machine-readable component API definitions (states, variations, settings, examples).
+
+~12k content tokens total.
+
+| Format | Path | Tokens |
+|--------|------|--------|
+| Slim | /content/specs/index.min.json | ~300 |
+| Full | /content/specs/manifest.json | ~1.5k |
+
+Files: /content/specs/{component}.json (e.g., button.json, menu.json)
+Direct access: If you know the component name, fetch directly. Use manifest for discovery.
+
+## Examples
+
+Interactive code examples with source files.
+
+~105k content tokens total.
+
+| Format | Path | Tokens |
+|--------|------|--------|
+| Slim | /content/examples/index.min.json | ~8k |
+| Full | /content/examples/manifest.json | ~31k |
+
+Files: /content/examples/{id}.json
+
+## User Documentation
+
+Comprehensive docs, guides, and tutorials.
+
+~150k content tokens total.
+
+| Format | Path | Tokens |
+|--------|------|--------|
+| Slim | /content/docs/index.min.json | ~2.5k |
+| Full | /content/docs/manifest.json | ~10k |
+
+Files: /content/docs/{path}.md
+
+## AI Context
+
+Curated documentation optimized for AI agents.
+
+~3.5M content tokens total (mostly research).
+
+| Audience | Slim Index | Content Tokens |
+|----------|------------|----------------|
+| ui | /content/ai/ui/index.min.json | ~3k |
+| framework | /content/ai/framework/index.min.json | ~93k |
+| contributing | /content/ai/contributing/index.min.json | ~159k |
+| research | /content/ai/research/index.min.json | ~3.3M |
+
+Combined manifests:
+- Slim: /content/ai/index.min.json
+- Full: /content/ai/manifest.json
+
+Raw files: /content/ai/{audience}/{slug}.md
+
+## Full Manifest
+
+All content types combined. Not for context loading - intended for tooling, scrapers, and indexing systems.
+
+/content/manifest.json
+
+## Links
+
+- https://github.com/Semantic-Org/Semantic-Next

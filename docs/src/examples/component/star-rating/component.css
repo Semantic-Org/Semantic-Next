@@ -53,7 +53,7 @@
 }
 
 .value {
-  margin-left: var(--compact-spacing);
+  margin-left: var(--spacing-xs);
   font-size: var(--small);
   color: var(--standard-60);
 }

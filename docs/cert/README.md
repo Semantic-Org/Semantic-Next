@@ -1,13 +1,23 @@
-# Self Signed Certs
+# Development SSL Certificates
 
-These are self signed certs created with [`mkcert`](https://github.com/FiloSottile/mkcert) and used to serve the documentation to `https://dev.semantic-ui.com` in the browser.
+CA-signed certificates for `https://dev.semantic-ui.com`. See `docs/README.md` for installation instructions.
 
-You will need to install these certs locally for Chrome to show the SSL certs as trusted, and for the 'playground' section to work.
-
-## Certificate Generation
-
-To generate a new self-signed TLS/SSL certificate (`cert.pem`) and private key (`key.pem`) suitable for local development or internal use (valid for 3650 days, approximately 10 years, using `localhost` as the Common Name), run the following command within this directory:
+## Regenerating Certificates
 
 ```bash
-openssl pkcs12 -export -out dev.semantic-ui.com.pfx -inkey dev.semantic-ui.com-key.pem -in dev.semantic-ui.com.pem
+# Generate CA (10 year validity)
+openssl genrsa -out ca-key.pem 2048
+openssl req -new -x509 -key ca-key.pem -out ca.pem -days 3650 -subj "/CN=Semantic UI Dev CA/O=Semantic UI LLC"
+
+# Generate server cert signed by CA
+openssl genrsa -out dev.semantic-ui.com-key.pem 2048
+openssl req -new -key dev.semantic-ui.com-key.pem -out temp.csr -subj "/CN=dev.semantic-ui.com/O=Semantic UI LLC"
+echo "subjectAltName=DNS:dev.semantic-ui.com,DNS:localhost" > /tmp/san.ext
+openssl x509 -req -in temp.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -out dev.semantic-ui.com.pem -days 3650 -extfile /tmp/san.ext
+rm temp.csr /tmp/san.ext ca.srl
+
+# Generate .pfx for Windows (no password)
+openssl pkcs12 -export -nokeys -in ca.pem -out ca.pfx -passout pass:
 ```
+
+All developers must reinstall the CA after regeneration.

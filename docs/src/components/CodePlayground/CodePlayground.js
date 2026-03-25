@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, firstMatch, get, idleCallback, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -11,10 +11,6 @@ import { Panel, Panels } from '@semantic-ui/core';
 
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';
-
-import { addSearch } from './lib/codemirror-search.js';
-import { addSimpleMode } from './lib/codemirror-simple.js';
-import { defineSyntax } from './lib/codemirror-syntax.js';
 
 import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
@@ -310,40 +306,47 @@ const createComponent = (
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
-    const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
-    const $sizer = $$(panel).find('.CodeMirror-sizer');
+    const $panel = $$(panel);
     if (direction === 'horizontal') {
-      const $menu = $$(panel).find('ui-menu .menu').first();
-      const extraSpacing = 5; // rounding
-      const scrollbarWidth = $scrollbar.width() ? 17 : 0;
+      const $menu = $panel.find('ui-menu .menu').first();
+      const $gutter = $panel.find('.cm-gutters').first();
+      const $lines = $panel.find('.cm-line');
+
+      const extraSpacing = 5; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
       const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      $sizer.each(sizer => {
-        const $sizer = $(sizer);
-        const sizerMargin = parseFloat($sizer.css('margin-left'));
-        const sizerWidth = parseFloat($sizer.css('min-width'));
-        minWidths.push(sizerMargin + sizerWidth + scrollbarWidth);
-      });
-      const size = Math.max(...minWidths) + extraSpacing;
+      const gutterWidth = $gutter.width();
+
+      if ($lines.count() > 0) {
+        const additionalSpace = 18; // add space so its not cramped
+        const lineWidths = $lines.naturalWidth().map(val => val + additionalSpace);
+        minWidths.push(...lineWidths);
+      }
+
+      const size = Math.max(...minWidths) + gutterWidth + extraSpacing;
       return size;
     }
     else {
-      const $label = $$(panel).find('.label').first();
-      const $menu = $$(panel).find('.menu').first();
+      // gutters gets minheight which is code height
+      const $gutter = $panel.find('.cm-gutters').first();
+
+      // label height and menu need to be added to code height
+      const $label = $panel.find('.label').first();
+      const $menu = $panel.find('.menu').first();
 
       const extraSpacing = 2; // rounding
       const labelHeight = $label.height() || 0;
       const menuHeight = $menu.height() || 0;
+      let size;
       if (minimized) {
-        return labelHeight;
+        size = labelHeight;
       }
       else {
-        const $sizer = $$(panel).find('.CodeMirror-sizer').first();
-
-        const codeHeight = parseFloat($sizer.css('min-height'));
+        const codeHeight = parseFloat($gutter.css('min-height'));
         const height = codeHeight + labelHeight + menuHeight + extraSpacing;
-        return Math.max(height, 100);
+        size = Math.max(height, 100);
       }
+      return size;
     }
   },
 
@@ -583,7 +586,7 @@ const createComponent = (
     if (isServer) {
       return;
     }
-    const codeHeight = $$('.CodeMirror-sizer').first().height();
+    const codeHeight = parseFloat($$('.cm-gutters').first().css('min-height')) || 100;
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     let panelHeight = menuHeight + codeHeight + offset;
@@ -608,10 +611,8 @@ const onCreated = ({ self, attachEvent }) => {
 };
 
 const onRendered = ({ isClient, self, state, $, settings }) => {
-  // external mods to codemirror
-  addSearch(CodeMirror);
-  addSimpleMode(CodeMirror);
-  defineSyntax(CodeMirror);
+  // TODO: CM6 Migration - these plugins need to be rewritten as CM6 extensions
+  // addSearch(CodeMirror);
 
   self.addPanelSettings();
   self.setupComponents();

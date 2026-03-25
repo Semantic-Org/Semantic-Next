@@ -1,0 +1,66 @@
+.ui-tooltip {
+  --tooltip-background: var(--black);
+  --tooltip-padding: var(--rectangular-tight-padding);
+  --tooltip-color: var(--white-text-color);
+  --tootip-font-weight: var(--bold);
+  --tooltip-border-radius: var(--border-radius);
+  --tooltip-font-size: var(--small);
+
+  --tooltip-header-distance: var(--space-2);
+  --tooltip-header-color: var(--white);
+  --tooltip-text-font-weight: var(--bold);
+  --tooltip-text-color: var(--white-60);
+  --tooltip-border: 1px solid var(--black-solid-70);
+
+  /* Arrow styling  */
+  --arrow-background: var(--tooltip-background);
+  --arrow-border-base-color: var(--black-solid-70);
+}
+
+.ui-tooltip {
+
+  position: fixed;
+  z-index: var(--float-layer);
+
+  border-radius: var(--tooltip-border-radius);
+
+  font-size: var(--tooltip-font-size);
+  white-space: nowrap;
+
+  box-shadow: var(--floating-shadow);
+  pointer-events: none;
+
+
+  &::before {
+    z-index: var(--float-layer-1);
+  }
+
+  .content {
+    border-radius: inherit;
+    border: var(--tooltip-border);
+    z-index: var(--float-layer-2);
+    background: var(--tooltip-background);
+    color: var(--tooltip-color);
+    padding: var(--tooltip-padding);
+  }
+
+  &.hidden {
+    display: none;
+  }
+
+  &.visible {
+    display: block !important;
+    pointer-events: auto;
+  }
+
+  > .header {
+    font-weight: var(--bold);
+    color: var(--tooltip-header-color);
+  }
+
+  > .header + .text {
+    margin-top: var(--tooltip-header-distance);
+    color: var(--tooltip-text-color);
+    font-weight: var(--tooltip-text-font-weight);
+  }
+}

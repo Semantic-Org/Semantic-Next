@@ -1,0 +1,38 @@
+/*******************************
+            States
+*******************************/
+
+:root {
+
+  /* -------------------
+    Lightness Modifiers
+  -------------------- */
+
+  --hover-lightness: 0.05;
+  --focus-lightness: -0.05;
+  --down-lightness: -0.08;
+  --active-lightness: -0.08;
+
+  /* -------------------
+    Opacity Modifiers
+  -------------------- */
+
+  --recessed-opacity: 0.4;
+  --disabled-opacity: 0.4;
+  --link-opacity: 0.6;
+
+  /* -------------------
+        Focus Ring
+  -------------------- */
+
+  --focused-ring: 0px 0px 1px 3px var(--standard-100);
+  --focused-ring-color: var(--primary-color);
+  --focused-outline-color: var(--inverted-100);
+  --focused-ring-width: 3px;
+  --focused-ring-outline-width: 1px;
+  --focused-ring-shadow:
+    0px 0px 0px var(--focused-ring-outline-width) var(--focused-outline-color),
+    0px 0px 0px var(--focused-ring-width) var(--focused-ring-color)
+  ;
+
+}

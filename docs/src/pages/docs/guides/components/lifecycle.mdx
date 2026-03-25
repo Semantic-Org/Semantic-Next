@@ -67,7 +67,7 @@ All lifecycle events will fire on the server in the same order as on the client.
 
 This means you should use `isServer` or `isClient` during server side rendering to handle checking for globals that may not be defined.
 
-```javascript
+```javascript 'isClient'
 const onRendered = function ({ isClient, self }) {
   if(isClient) {
     self.url.set(window.location.pathname);

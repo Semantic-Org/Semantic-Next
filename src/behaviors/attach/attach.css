@@ -10,10 +10,10 @@
   --arrow-distance-corner: calc(var(--arrow-offset) + var(--arrow-size));
 
 
-  --arrow-border-base: inherit;
+  --arrow-border-base-color: inherit;
   --arrow-border-color: color-mix(
     in oklch,
-    var(--arrow-border-base),
+    var(--arrow-border-base-color),
     var(--standard-100) 5%
   );
 

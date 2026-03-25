@@ -79,7 +79,7 @@
 .color {
   display: flex;
   flex-direction: column;
-  gap: var(--compact-spacing);
+  gap: var(--gap-xs);
 }
 
 .color label {

@@ -8,202 +8,67 @@ html,
 [theme][theme="light"] {
 
   /* -------------------
-        Base Colors
+       Theme Mode Flags
   -------------------- */
 
-  --red: oklch(0.59 0.27 28);
-  --orange: oklch(0.65 0.2 44.37);
-  --yellow: oklch(0.78 0.18 81.24);
-  --olive: oklch(0.69 0.19 119.53);
-  --green: oklch(0.62 0.26 145.53);
-  --teal: oklch(0.66 0.14 188.03);
-  --blue: oklch(0.62 0.17 238.00);
-  --violet: oklch(0.46 0.26 283.29);
-  --purple: oklch(0.54 0.26 314.43);
-  --pink: oklch(0.59 0.27 358.33);
-  --brown: oklch(0.5 0.11 51.34);
-  --grey: oklch(0.57 0 0);
-  --slate: oklch(0.23 0 0);
+  --dark-mode: false;
+  --light-mode: true;
 
   /* -------------------
-      Semantic State Colors
+      Standard/Inverted
   -------------------- */
 
-  --positive-color: var(--green);
-  --negative-color: var(--red);
-  --info-color: var(--teal);
-  --warning-color: var(--orange);
+  /* Generally light swaps to dark and vice versa */
 
-  /* -------------------
-      Brand Colors
-  -------------------- */
+  /* For relative colors */
+  --standard-color: var(--black-lch);
+  --inverted-color: var(--white-lch);
 
-  --primary-color: var(--blue);
-  --secondary-color: var(--slate);
+  /* For color-mix */
+  --standard-hex: var(--black-hex);
+  --inverted-hex: var(--white-hex);
 
-  /* -------------------
-        Text Colors
-  -------------------- */
+  /* Standard solid scale (black in light mode) */
+  --standard-solid-5: var(--black-solid-5);
+  --standard-solid-10: var(--black-solid-10);
+  --standard-solid-15: var(--black-solid-15);
+  --standard-solid-20: var(--black-solid-20);
+  --standard-solid-25: var(--black-solid-25);
+  --standard-solid-30: var(--black-solid-30);
+  --standard-solid-40: var(--black-solid-40);
+  --standard-solid-50: var(--black-solid-50);
+  --standard-solid-60: var(--black-solid-60);
+  --standard-solid-70: var(--black-solid-70);
+  --standard-solid-75: var(--black-solid-75);
+  --standard-solid-80: var(--black-solid-80);
+  --standard-solid-85: var(--black-solid-85);
+  --standard-solid-90: var(--black-solid-90);
+  --standard-solid-95: var(--black-solid-95);
+  --standard-solid-100: var(--black-solid-100);
 
-  --red-text-color: var(--red-70);
-  --olive-text-color: var(--olive-70);
-  --green-text-color: var(--green-70);
-  --yellow-text-color: var(--yellow-70);
-  --blue-text-color: var(--blue-70);
-  --teal-text-color: var(--teal-70);
-  --pink-text-color: var(--pink-70);
-  --violet-text-color: var(--violet-70);
-  --purple-text-color: var(--purple-70);
-  --orange-text-color: var(--orange-70);
-  --brown-text-color: var(--brown-70);
-  --grey-text-color: var(--grey-70);
-  --slate-text-color: var(--slate-70);
-
-  --red-text-color-hover: var(--red-80);
-  --olive-text-color-hover: var(--olive-80);
-  --green-text-color-hover: var(--green-80);
-  --yellow-text-color-hover: var(--yellow-80);
-  --blue-text-color-hover: var(--blue-80);
-  --teal-text-color-hover: var(--teal-80);
-  --pink-text-color-hover: var(--pink-80);
-  --violet-text-color-hover: var(--violet-80);
-  --purple-text-color-hover: var(--purple-80);
-  --orange-text-color-hover: var(--orange-80);
-  --brown-text-color-hover: var(--brown-80);
-  --grey-text-color-hover: var(--grey-80);
-  --slate-text-color-hover: var(--slate-80);
-
-  --red-text-color-pressed: var(--red-90);
-  --olive-text-color-pressed: var(--olive-90);
-  --green-text-color-pressed: var(--green-90);
-  --yellow-text-color-pressed: var(--yellow-90);
-  --blue-text-color-pressed: var(--blue-90);
-  --teal-text-color-pressed: var(--teal-90);
-  --pink-text-color-pressed: var(--pink-90);
-  --violet-text-color-pressed: var(--violet-90);
-  --purple-text-color-pressed: var(--purple-90);
-  --orange-text-color-pressed: var(--orange-90);
-  --brown-text-color-pressed: var(--brown-90);
-  --grey-text-color-pressed: var(--grey-90);
-  --slate-text-color-pressed: var(--slate-90);
-
-  --red-text-color-disabled: var(--red-40);
-  --olive-text-color-disabled: var(--olive-40);
-  --green-text-color-disabled: var(--green-40);
-  --yellow-text-color-disabled: var(--yellow-40);
-  --blue-text-color-disabled: var(--blue-40);
-  --teal-text-color-disabled: var(--teal-40);
-  --pink-text-color-disabled: var(--pink-40);
-  --violet-text-color-disabled: var(--violet-40);
-  --purple-text-color-disabled: var(--purple-40);
-  --orange-text-color-disabled: var(--orange-40);
-  --brown-text-color-disabled: var(--brown-40);
-  --grey-text-color-disabled: var(--grey-40);
-  --slate-text-color-disabled: var(--slate-40);
-
-  /* -------------------
-        Header Colors
-  -------------------- */
-
-  --red-header-color: var(--red-80);
-  --olive-header-color: var(--olive-80);
-  --green-header-color: var(--green-80);
-  --yellow-header-color: var(--yellow-80);
-  --blue-header-color: var(--blue-80);
-  --teal-header-color: var(--teal-80);
-  --pink-header-color: var(--pink-80);
-  --violet-header-color: var(--violet-80);
-  --purple-header-color: var(--purple-80);
-  --orange-header-color: var(--orange-80);
-  --brown-header-color: var(--brown-80);
-  --grey-header-color: var(--grey-80);
-  --slate-header-color: var(--slate-80);
-
-
-  /* -------------------
-     Background Colors
-  -------------------- */
-
-  --red-background-color: var(--red-0);
-  --olive-background-color: var(--olive-0);
-  --green-background-color: var(--green-0);
-  --yellow-background-color: var(--yellow-0);
-  --blue-background-color: var(--blue-0);
-  --teal-background-color: var(--teal-0);
-  --pink-background-color: var(--pink-0);
-  --violet-background-color: var(--violet-0);
-  --purple-background-color: var(--purple-0);
-  --orange-background-color: var(--orange-0);
-  --brown-background-color: var(--brown-0);
-  --grey-background-color: var(--grey-0);
-  --slate-background-color: var(--slate-0);
-
-  /* -------------------
-     Border Colors
-  -------------------- */
-
-  --red-border-color: var(--red-30);
-  --olive-border-color: var(--olive-30);
-  --green-border-color: var(--green-30);
-  --yellow-border-color: var(--yellow-30);
-  --blue-border-color: var(--blue-30);
-  --teal-border-color: var(--teal-30);
-  --pink-border-color: var(--pink-30);
-  --violet-border-color: var(--violet-30);
-  --purple-border-color: var(--purple-30);
-  --orange-border-color: var(--orange-30);
-  --brown-border-color: var(--brown-30);
-  --grey-border-color: var(--grey-30);
-  --slate-border-color: var(--slate-30);
-
-  --red-border: 1px solid var(--red-30);
-  --olive-border: 1px solid var(--olive-30);
-  --green-border: 1px solid var(--green-30);
-  --yellow-border: 1px solid var(--yellow-30);
-  --blue-border: 1px solid var(--blue-30);
-  --teal-border: 1px solid var(--teal-30);
-  --pink-border: 1px solid var(--pink-30);
-  --violet-border: 1px solid var(--violet-30);
-  --purple-border: 1px solid var(--purple-30);
-  --orange-border: 1px solid var(--orange-30);
-  --brown-border: 1px solid var(--brown-30);
-  --grey-border: 1px solid var(--grey-30);
-  --slate-border: 1px solid var(--slate-30);
-
-
-  /* -------------------
-      Color Palette
-  -------------------- */
-
-  /* Note:
-    The color pallete is designed to be derived from base colors
-    Theming should only involve modifying above this line
-  */
-
-  /* -------------------
-      Base Lightness Scale
-  -------------------- */
-
-  /* Base values - multipliers for relative lightness adjustment */
-  --base-lightness-0: 1.66;   /* Near white (166% of base) */
-  --base-lightness-5: 1.61;   /* Very light */
-  --base-lightness-10: 1.52;  /* Light backgrounds */
-  --base-lightness-20: 1.39;  /* Subtle UI */
-  --base-lightness-30: 1.25;  /* Muted elements */
-  --base-lightness-40: 1.10;  /* Secondary elements */
-  --base-lightness-50: 1.0;   /* Base color (100% - no change) */
-  --base-lightness-60: 0.88;  /* Darker than base */
-  --base-lightness-70: 0.76;  /* Gradual darkening */
-  --base-lightness-80: 0.64;  /* More darkening */
-  --base-lightness-90: 0.52;  /* Dark shades */
-  --base-lightness-95: 0.38;  /* Very dark shades */
-  --base-lightness-100: 0.25; /* Near black (25% of base) */
+  /* Inverted solid scale (white in light mode) */
+  --inverted-solid-5: var(--white-solid-5);
+  --inverted-solid-10: var(--white-solid-10);
+  --inverted-solid-15: var(--white-solid-15);
+  --inverted-solid-20: var(--white-solid-20);
+  --inverted-solid-25: var(--white-solid-25);
+  --inverted-solid-30: var(--white-solid-30);
+  --inverted-solid-40: var(--white-solid-40);
+  --inverted-solid-50: var(--white-solid-50);
+  --inverted-solid-60: var(--white-solid-60);
+  --inverted-solid-70: var(--white-solid-70);
+  --inverted-solid-75: var(--white-solid-75);
+  --inverted-solid-80: var(--white-solid-80);
+  --inverted-solid-85: var(--white-solid-85);
+  --inverted-solid-90: var(--white-solid-90);
+  --inverted-solid-95: var(--white-solid-95);
+  --inverted-solid-100: var(--white-solid-100);
 
   /* -------------------
       Lightness Scale
   -------------------- */
 
-  /* Working lightness values that can be overridden by themes */
+  /* Working lightness values - dark mode inverts these */
   --lightness-0: var(--base-lightness-0);
   --lightness-5: var(--base-lightness-5);
   --lightness-10: var(--base-lightness-10);
@@ -219,30 +84,10 @@ html,
   --lightness-100: var(--base-lightness-100);
 
   /* -------------------
-      Base Chroma Scale
+        Chroma Scale
   -------------------- */
 
-  /* Base values - single source of truth for all chroma values */
-  --base-chroma-0: 0.15;   /* Very light = very low chroma */
-  --base-chroma-5: 0.25;   /* Light = low chroma */
-  --base-chroma-10: 0.35;  /* Subtle = medium-low chroma */
-  --base-chroma-20: 0.55;  /* UI elements = medium chroma */
-  --base-chroma-30: 0.75;  /* Muted = high-medium chroma */
-  --base-chroma-40: 0.90;  /* Secondary = near-full chroma */
-  --base-chroma-50: 1.0;   /* Base = full chroma */
-  --base-chroma-60: 0.90;  /* Slight chroma reduction */
-  --base-chroma-70: 0.75;  /* Gradual chroma reduction */
-  --base-chroma-80: 0.55;  /* More chroma reduction */
-  --base-chroma-90: 0.35;  /* Dark = lower chroma */
-  --base-chroma-95: 0.25;  /* Very dark = very low chroma */
-  --base-chroma-100: 0.15; /* Near black = reduced chroma */
-
-
-  /* -------------------
-      Chroma Scale
-  -------------------- */
-
-  /* Working chroma values that can be overridden by themes */
+  /* Working chroma values - can be adjusted per theme */
   --chroma-0: var(--base-chroma-0);
   --chroma-5: var(--base-chroma-5);
   --chroma-10: var(--base-chroma-10);
@@ -256,76 +101,6 @@ html,
   --chroma-90: var(--base-chroma-90);
   --chroma-95: var(--base-chroma-95);
   --chroma-100: var(--base-chroma-100);
-
-  /* -------------------
-      Invariant Base Scales
-  -------------------- */
-
-  /* Invariant lightness scale - always reference base values, never overridden */
-  --lightness-0-invariant: var(--base-lightness-0);
-  --lightness-5-invariant: var(--base-lightness-5);
-  --lightness-10-invariant: var(--base-lightness-10);
-  --lightness-20-invariant: var(--base-lightness-20);
-  --lightness-30-invariant: var(--base-lightness-30);
-  --lightness-40-invariant: var(--base-lightness-40);
-  --lightness-50-invariant: var(--base-lightness-50);
-  --lightness-60-invariant: var(--base-lightness-60);
-  --lightness-70-invariant: var(--base-lightness-70);
-  --lightness-80-invariant: var(--base-lightness-80);
-  --lightness-90-invariant: var(--base-lightness-90);
-  --lightness-100-invariant: var(--base-lightness-100);
-
-  /* Invariant chroma scale - always reference base values, never overridden */
-  --chroma-0-invariant: var(--base-chroma-0);
-  --chroma-5-invariant: var(--base-chroma-5);
-  --chroma-10-invariant: var(--base-chroma-10);
-  --chroma-20-invariant: var(--base-chroma-20);
-  --chroma-30-invariant: var(--base-chroma-30);
-  --chroma-40-invariant: var(--base-chroma-40);
-  --chroma-50-invariant: var(--base-chroma-50);
-  --chroma-60-invariant: var(--base-chroma-60);
-  --chroma-70-invariant: var(--base-chroma-70);
-  --chroma-80-invariant: var(--base-chroma-80);
-  --chroma-90-invariant: var(--base-chroma-90);
-  --chroma-100-invariant: var(--base-chroma-100);
-
-  /* -------------------
-          Red
-  -------------------- */
-
-  /* Lightness */
-  --red-lightness-0: var(--lightness-0);
-  --red-lightness-5: var(--lightness-5);
-  --red-lightness-10: var(--lightness-10);
-  --red-lightness-20: var(--lightness-20);
-  --red-lightness-30: var(--lightness-30);
-  --red-lightness-40: var(--lightness-40);
-  --red-lightness-50: var(--lightness-50);
-  --red-lightness-60: var(--lightness-60);
-  --red-lightness-70: var(--lightness-70);
-  --red-lightness-80: var(--lightness-80);
-  --red-lightness-90: var(--lightness-90);
-  --red-lightness-100: var(--lightness-100);
-
-  /* Chrome */
-  --red-chroma-0: var(--chroma-0);
-  --red-chroma-5: var(--chroma-5);
-  --red-chroma-10: var(--chroma-10);
-  --red-chroma-20: var(--chroma-20);
-  --red-chroma-30: var(--chroma-30);
-  --red-chroma-40: var(--chroma-40);
-  --red-chroma-50: var(--chroma-50);
-  --red-chroma-60: var(--chroma-60);
-  --red-chroma-70: var(--chroma-70);
-  --red-chroma-80: var(--chroma-80);
-  --red-chroma-90: var(--chroma-90);
-  --red-chroma-100: var(--chroma-100);
-
-  /* Red: Slight hue adjustments in darker ranges to prevent muddiness */
-  --red-hue-shift-70: 2;
-  --red-hue-shift-80: 3;
-  --red-hue-shift-90: 4;
-  --red-hue-shift-100: 5;
 
 
 }

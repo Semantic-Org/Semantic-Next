@@ -15,7 +15,9 @@ xx.xx.xxxx
 * **Feature** - All callbacks now receive a `rerender()` function to fully rerender the DOM of the component.
 
 ### Behaviors
-* **Feature** - Add new `portal` behavior for moving DOM like modals and popups
+* **Feature** - Add new popup optimized animations `pop-x` for all directions of a popup
+* **Feature** - Add new `tooltip` behavior for creating tooltips or popover content
+* **Feature** - Add new `escape` behavior for moving DOM like modals and popups
 
 ### Testing
 * **Feature** - Added `test:coverage` script to all packages for running tests with coverage reports. Coverage configuration is now centralized in each package's vitest.config.js file.
@@ -26,17 +28,38 @@ xx.xx.xxxx
 
 ### Query
 * **Feature** - Added [`addAttr()`](https://next.semantic-ui.com/api/query/attributes#addattr) method for adding one or more attributes with empty string values. Useful shorthand for boolean attributes common in web components.
+* **Feature** - Added `pierceShadow` option to `scrollParent()`, `clippingParent()`, and `positioningParent()` to optionally walk parents across shadow DOM boundaries.
+* **Bug** - Fixed `toggleClass()` with multiple classes passing second class as `force` parameter to `classList.toggle()` instead of toggling each class independently.
+* **Bug** - Fixed `off(handler)` crashing when called with a function but no event name — `eventNames` was not cleared after reassignment.
+* **Bug** - Fixed `one()` wrapping handler in arrow function which prevented `this` from being set to the matched element in delegated event handlers.
+* **Bug** - Fixed `onNext()` timeout failing to remove event listener because `off()` couldn't match the wrapped handler — now uses shared `AbortController` for cleanup.
+* **Bug** - Fixed `naturalWidth()` / `naturalHeight()` `preserveMaxWidth` / `preserveMaxHeight` options being no-ops due to inverted conditional logic.
+* **Bug** - Fixed constructor leaking `options` and `prevObject` when wrapping a Query instance (e.g. `$($deep)`) — `Object.assign` copied all source properties, overwriting the new instance's intended options.
+* **Performance** - Hoisted `naturalDisplay()` tag-to-display lookup to a static class property, avoiding object recreation on every call.
+* **Performance** - Added early return in `querySelectorAllDeep` to skip text and comment nodes during recursive shadow DOM traversal.
+* **Performance** - Inlined `getBoundingClientRect()` in `dimensions()` to avoid allocating a throwaway `Query` instance per element.
+* **Performance** - Optimized `containsDeep()` to skip redundant `contains()` calls on light DOM children already checked by the parent scope.
+* **Feature** - Query collections are now iterable, supporting `for...of`, spread syntax, and destructuring.
+* **Feature** - `parent()` now crosses shadow DOM boundaries when `pierceShadow` is enabled.
+* **Bug** - Fixed `dimensions()`, `height()`, `width()`, and `bounds()` not recognizing raw `window` from `scrollParent()` results.
 
 ### Utils
 * **Feature** - Added [`indentHTML()`](https://next.semantic-ui.com/docs/api/utils/html#indenthtml) for intelligently indenting HTML markup with proper nesting awareness. Handles void elements, self-closing tags, and comments correctly. Perfect for cleaning up HTML extracted from template literals.
 * **Feature** - Added [`indentLines()`](https://next.semantic-ui.com/docs/api/utils/html#indentlines) for adding consistent indentation to every line of text. Useful for formatting code snippets and template processing.
 * **Feature** - Added `reverseString()` for reversing strings with Unicode grapheme cluster handling using Intl.Segmenter. Preserves emojis, flag sequences, skin tone modifiers, and combined diacritics.
 * **Bug** - Fixed `weightedObjectSearch()` regex pattern escaping where multi-word queries with `matchAllWords: false` returned no results. Template string was using `\W` (literal 'W') instead of `\\W` (non-word character class), breaking word boundary matching.
+* **Bug** - Fixed issues with object pollution from weightedObjectSearch.
 * **Enhancement** - `remove()` now removes all matching instances from an array instead of just the first. Uses an optimized two-pointer approach for O(n) performance. Returns the count of removed elements for backward compatibility.
 
 ### CSS Tokens
-* **Feature** - Added full color grade structure (0-100) for semantic state colors: `--positive-*`, `--negative-*`, `--info-*`, and `--warning-*`. These now follow the same pattern as other colors (e.g., `--positive-0` through `--positive-100`).
-* **Enhancement** - Renamed `messages.css` to `state-colors.css` to better reflect its purpose of providing semantic state color tokens.
+* **Feature** - Added `--title-{size}` scale (3xs→3xl) for display typography with `--title-size` default.
+* **Feature** - Added `--text-{size}` scale (3xs→3xl) for body text with `--text-size` default.
+* **Feature** - Added `--border-radius-{size}` scale (3xs→3xl) with natural language aliases.
+* **Feature** - Added `--padding-{size}` and `--margin-{size}` scales (3xs→3xl) aliasing spacing tokens.
+* **Feature** - Added `--spacing-section` and `--spacing-page` structural aliases.
+* **Feature** - Added container tokens: `--text-container`, `--content-container`, `--wide-container`, `--fluid-container`.
+* **Feature** - Added `--fluid` (100%) utility token.
+* **Feature** - Added color grades (0-100) for `--positive-*`, `--negative-*`, `--info-*`, `--warning-*`.
 
 ### Build
 * **Enhancement** - Added file watching for JSON spec files in `build:ui-deps`. The build now automatically regenerates component JS files when spec JSON files are modified, using esbuild's native watch mechanism.

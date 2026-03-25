@@ -2,66 +2,67 @@
 
 :host {
 
+  /* Tab Bar */
+  --playground-tab-bar-background: #ffffff;
+  --playground-bar-height: 32px;
+
+  /* Code Header */
   --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.02), rgb(15 17 22 / 50%));
   --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
   --playground-header-color: rgba(255, 255, 255, 0.4);
   --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
 
-  --playground-code-cursor-color: var(--white-60);
-  --playground-code-qualifier-color: var(--primary-text-color);
-
-  --playground-tab-bar-background: #ffffff;
-
-  --inline-code-height: 350px;
-  --playground-bar-height: 32px;
-
-  --code-purple: #D2A8FF;
-  --code-grey: #656565;
-  --code-default: #c9d1d9;
-  --code-blue: var(--primary-text-color);
-  --code-red: #FFADAD;
-  --code-white: var(--standard-60);
-
-  --playground-code-background: #080C10;
-  --playground-code-comment-color: #444444;
-  --playground-code-linenumber-color: #25272B;
-  --playground-code-font-size: 14px;
-  --playground-code-default-color: var(--code-default);
-  --playground-code-keyword-color: #AAAAAA;
+  /* Standard Code */
   --playground-code-atom-color: var(--code-default);
-  --playground-code-number-color: var(--primary-text-color);
-  --playground-code-def-color: var(--primary-text-color);
-  --playground-code-variable-color: #e98080;
-  --playground-code-property-color: var(--code-grey);
+  --playground-code-attribute-color: var(--code-blue);
+  --playground-code-background: var(--code-background);
+  --playground-code-bracket: var(--code-grey);
+  --playground-code-punctuation: var(--code-default);
+  --playground-code-builtin-color: var(--code-default);
+  --playground-code-callee-color: var(--code-purple);
+  --playground-code-comment-color: var(--code-comment-color);
+  --playground-code-cursor-color: var(--standard-60);
+  --playground-code-def-color: var(--code-blue);
+  --playground-code-default-color: var(--code-default);
+  --playground-code-font-size: var(--code-font-size);
+  --playground-code-keyword-color: var(--code-white);
+  --playground-code-linenumber-color: var(--code-linenumber-color);
+  --playground-code-meta-color: var(--code-default);
+  --playground-code-number-color: var(--code-blue);
   --playground-code-operator-color: var(--code-blue);
+  --playground-code-property-color: var(--code-grey);
+  --playground-code-qualifier-color: var(--code-default);
+  --playground-code-string-2-color: var(--code-grey);
+  --playground-code-string-color: var(--code-blue);
+  --playground-code-tag-color: var(--code-purple);
+  --playground-code-tag-color: var(--code-purple);
+  --playground-code-type-color: var(--code-default);
   --playground-code-variable-2-color: var(--code-blue);
   --playground-code-variable-3-color: var(--code-default);
-  --playground-code-type-color: var(--code-default);
-  --playground-code-string-color: var(--primary-text-color);
-  --playground-code-string-2-color: var(--code-grey);
-  --playground-code-meta-color: var(--code-default);
-  --playground-code-qualifier-color: var(--code-default);
-  --playground-code-builtin-color: var(--code-default);
-  --playground-code-tag-color: var(--code-purple);
-  --playground-code-attribute-color: var(--code-blue);
-  --playground-code-callee-color: var(--code-purple);
+  --playground-code-variable-color: var(--code-purple);
 
-  --playground-code-attribute-color: var(--primary-text-color);
-  --playground-code-bracket: var(--code-grey);
-
-  --playground-code-tag-color: var(--code-purple);
-  --playground-code-templating-html-string: var(--code-blue);
+  /* Special Templating Syntax */
   --playground-code-templating-attribute: var(--code-grey);
   --playground-code-templating-html-quote: var(--code-grey);
+  --playground-code-templating-html-string: var(--code-blue);
   --playground-code-templating-html-string: var(--code-white);
+  --playground-code-templating-keyword: var(--code-red);
   --playground-code-templating-quote: var(--code-grey);
   --playground-code-templating-string: var(--code-white);
-  --playground-code-templating-keyword: var(--code-red);
   --playground-code-templating-variable: var(--code-blue);
 
+  /* Code Folding */
+  --playground-fold-color: var(--standard-60);
+  --playground-fold-background: var(--standard-5) var(--angled-gradient);
+  --playground-fold-border-radius: var(--border-radius);
+  --playground-fold-transition: var(--transition);
+  --playground-fold-size: var(--medium);
+  --playground-fold-distance: var(--spacing-xs);
 
-  --playground-tab-bar-background: #ffffff;
-  --playground-bar-height: 32px;
+
+  /* Inline Version */
+  --inline-code-height: 350px;
+
 
   display: contents;
 }
@@ -170,7 +171,7 @@
           font-weight: bold;
           margin-right: 0.5rem;
           white-space: nowrap;
-          color: var(--primary-text-color);
+          color: var(--code-blue);
         }
       }
     }
@@ -198,7 +199,7 @@
         display: flex;
         flex-direction: row;
         border-radius: var(--attached-border-radius);
-        padding: var(--compact-padding);
+        padding: var(--padding-xs);
         border: var(--border);
       }
       .menu ui-menu {
@@ -409,7 +410,7 @@
       margin-top: 7px;
     }
     playground-preview::part(preview-loading-indicator) {
-      --mdc-theme-primary: var(--primary-text-color);
+      --mdc-theme-primary: var(--code-blue);
       height: 3px;
       overflow: hidden;
       top: -5px;

@@ -23,6 +23,20 @@ A minimal toolkit for querying and performing modifications
 across DOM nodes based off a selector
 */
 
+// Walks to the next parent node, optionally crossing shadow DOM boundaries
+const getParentNode = (node, pierceShadow) => {
+  if (node.parentNode) {
+    return node.parentNode;
+  }
+  if (pierceShadow) {
+    const root = node.getRootNode?.();
+    if (root?.host) {
+      return root.host;
+    }
+  }
+  return null;
+};
+
 export class Query {
   /*
     This avoids keeping a copy of window/globalThis in
@@ -65,6 +79,61 @@ export class Query {
   */
   static elementDisplayCache = new WeakMap();
 
+  static isWindow(el) {
+    return el === Query.globalThisProxy || el === globalThis;
+  }
+
+  // Tag → natural display value (pre-inverted for O(1) lookup)
+  static naturalDisplayMap = Object.freeze(Object.fromEntries([
+    ...[
+      'a',
+      'abbr',
+      'b',
+      'bdi',
+      'bdo',
+      'br',
+      'cite',
+      'code',
+      'dfn',
+      'em',
+      'i',
+      'kbd',
+      'mark',
+      'q',
+      'ruby',
+      'samp',
+      'small',
+      'span',
+      'strong',
+      'sub',
+      'sup',
+      'time',
+      'u',
+      'var',
+      'wbr',
+    ].map(t => [t, 'inline']),
+    ...['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'].map(t => [t, 'inline-block']),
+    ...['table'].map(t => [t, 'table']),
+    ...['tr'].map(t => [t, 'table-row']),
+    ...['td', 'th'].map(t => [t, 'table-cell']),
+    ...['thead'].map(t => [t, 'table-header-group']),
+    ...['tbody'].map(t => [t, 'table-row-group']),
+    ...['tfoot'].map(t => [t, 'table-footer-group']),
+    ...['caption'].map(t => [t, 'table-caption']),
+    ...['col'].map(t => [t, 'table-column']),
+    ...['colgroup'].map(t => [t, 'table-column-group']),
+    ...['li'].map(t => [t, 'list-item']),
+  ]));
+
+  // This is a fast path for wrapping el for use with $each
+  static wrap(el, options) {
+    const $el = Object.create(Query.prototype);
+    $el[0] = el;
+    $el.length = 1;
+    $el.options = options;
+    return $el;
+  }
+
   constructor(selector, { root = document, pierceShadow = false, prevObject = null } = {}) {
     let elements = [];
 
@@ -74,10 +143,9 @@ export class Query {
 
     // this is an existing query object
     if (selector instanceof Query) {
-      elements = selector;
+      elements = Array.from(selector);
     }
-
-    if (
+    else if (
       (selector === window || selector === globalThis) || inArray(selector, ['window', 'globalThis'])
       || selector == Query.globalThisProxy
     ) {
@@ -129,6 +197,18 @@ export class Query {
 
   end() {
     return this.prevObject || this;
+  }
+
+  [Symbol.iterator]() {
+    let index = 0;
+    return {
+      next: () => {
+        if (index < this.length) {
+          return { value: this[index++], done: false };
+        }
+        return { done: true };
+      },
+    };
   }
 
   /* we will add all elements across shadow root boundaries while matching
@@ -188,6 +268,13 @@ export class Query {
     };
 
     const findElements = (node, selector, query) => {
+      // Skip nodes that can't have shadow roots or meaningful children
+      if (
+        node.nodeType !== Node.ELEMENT_NODE
+        && node.nodeType !== Node.DOCUMENT_FRAGMENT_NODE
+        && node.nodeType !== Node.DOCUMENT_NODE
+      ) { return; }
+
       // Early termination condition for DOM selector search
       if (domSelector && domFound) { return; }
 
@@ -232,7 +319,8 @@ export class Query {
     // "for" perf
     for (let index = 0; index < this.length; index++) {
       const el = this[index];
-      const $el = this.chain(el);
+      // special fast path for chaining
+      const $el = Query.wrap(el, this.options);
       callback.call($el, el, index);
     }
     return this;
@@ -251,8 +339,16 @@ export class Query {
   }
 
   parent(selector) {
+    const pierceShadow = this.options.pierceShadow;
     const parents = Array.from(this)
-      .map((el) => el.parentElement)
+      .map((el) => {
+        const parent = el.parentElement;
+        if (!parent && pierceShadow) {
+          // cross shadow boundary to host element
+          return el.getRootNode?.()?.host || null;
+        }
+        return parent;
+      })
       .filter(Boolean);
     return selector ? this.chain(parents).filter(selector) : this.chain(parents);
   }
@@ -415,28 +511,23 @@ export class Query {
       return false;
     }
 
-    // Check direct containment first
     if (container.contains && container.contains(target)) {
       return true;
     }
 
-    // Check within shadow roots
-    if (container.shadowRoot) {
-      if (this.containsDeep(container.shadowRoot, target)) {
+    // contains() checked all light DOM — target can only be in a shadow root
+    const searchShadows = (node) => {
+      if (node.shadowRoot && this.containsDeep(node.shadowRoot, target)) {
         return true;
       }
-    }
-
-    // Check children recursively
-    if (container.children) {
-      for (let child of container.children) {
-        if (this.containsDeep(child, target)) {
-          return true;
+      if (node.children) {
+        for (const child of node.children) {
+          if (searchShadows(child)) { return true; }
         }
       }
-    }
-
-    return false;
+      return false;
+    };
+    return searchShadows(container);
   }
 
   closest(selector, { returnAll = false } = {}) {
@@ -671,9 +762,9 @@ export class Query {
 
     // We add a custom abort controller so that we can remove all events at once
     options = options || {};
-    const abortController = new AbortController();
+    const abortController = options.abortController || new AbortController();
     options.abortController = abortController;
-    const wrappedHandler = (...args) => {
+    const wrappedHandler = function(...args) {
       abortController.abort();
       handler.apply(this, args);
     };
@@ -694,6 +785,10 @@ export class Query {
         options = targetSelectorOrOptions;
       }
 
+      // Shared abort controller so timeout can cleanly remove the listener
+      const abortController = new AbortController();
+      options = { ...options, abortController };
+
       // Extract timeout if specified
       const timeout = options?.timeout;
       let timeoutId;
@@ -701,8 +796,7 @@ export class Query {
       // Set up timeout if specified
       if (timeout) {
         timeoutId = setTimeout(() => {
-          // Clean up event listener
-          this.off(eventName, handler);
+          abortController.abort();
           reject(new Error(`Event '${eventName}' timeout after ${timeout}ms`));
         }, timeout);
       }
@@ -728,6 +822,7 @@ export class Query {
   off(eventNames, handler) {
     if (isFunction(eventNames)) {
       handler = eventNames;
+      eventNames = undefined;
     }
 
     // actually handle removing an event handler
@@ -859,7 +954,9 @@ export class Query {
       return this;
     }
     const classesToToggle = classNames.trim().split(' ');
-    return this.each((el) => el?.classList.toggle(...classesToToggle));
+    return this.each((el) => {
+      classesToToggle.forEach(cls => el?.classList.toggle(cls));
+    });
   }
 
   hasClass(className) {
@@ -1224,7 +1321,7 @@ export class Query {
 
     const heights = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return window.innerHeight;
       }
 
@@ -1294,7 +1391,7 @@ export class Query {
 
     const widths = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return window.innerWidth;
       }
 
@@ -1531,8 +1628,8 @@ export class Query {
         margin: '0px',
         border: '0px',
       };
-      if (!preserveMaxWidth) {
-        css.maxWidth = 'none';
+      if (preserveMaxWidth) {
+        delete css.maxWidth;
       }
       $clone
         .insertAfter(el)
@@ -1564,8 +1661,8 @@ export class Query {
         margin: '0px',
         border: '0px',
       };
-      if (!preserveMaxHeight) {
-        css.maxHeight = 'none';
+      if (preserveMaxHeight) {
+        delete css.maxHeight;
       }
       $clone
         .insertAfter(el)
@@ -1688,57 +1785,8 @@ export class Query {
         }
       }
 
-      // BACKUP Path: Use natural display type for browsers based on a lookup table
-      const naturalDisplay = {
-        inline: [
-          'a',
-          'abbr',
-          'b',
-          'bdi',
-          'bdo',
-          'br',
-          'cite',
-          'code',
-          'dfn',
-          'em',
-          'i',
-          'kbd',
-          'mark',
-          'q',
-          'ruby',
-          'samp',
-          'small',
-          'span',
-          'strong',
-          'sub',
-          'sup',
-          'time',
-          'u',
-          'var',
-          'wbr',
-        ],
-        'inline-block': ['button', 'img', 'input', 'meter', 'object', 'progress', 'select', 'textarea'],
-        'table': ['table'],
-        'table-row': ['tr'],
-        'table-cell': ['td', 'th'],
-        'table-header-group': ['thead'],
-        'table-row-group': ['tbody'],
-        'table-footer-group': ['tfoot'],
-        'table-caption': ['caption'],
-        'table-column': ['col'],
-        'table-column-group': ['colgroup'],
-        'list-item': ['li'],
-      };
-
       const tagName = el.tagName.toLowerCase();
-      let displayValue;
-      for (const [display, tags] of Object.entries(naturalDisplay)) {
-        if (tags.includes(tagName)) {
-          displayValue = display;
-          break;
-        }
-      }
-      displayValue = displayValue || 'block'; // Default for most elements
+      const displayValue = Query.naturalDisplayMap[tagName] || 'block';
 
       // Cache the result if we are calculating
       if (calculate) {
@@ -1751,7 +1799,7 @@ export class Query {
   }
 
   // this is the element that clips current element
-  clippingParent() {
+  clippingParent({ pierceShadow = false } = {}) {
     const parents = this.map((el) => {
       const emptyValues = ['', 'none'];
 
@@ -1762,7 +1810,7 @@ export class Query {
       const isAnchored = hasAnchor && isPositioned;
       const containRegex = isAnchored ? /layout|paint|strict/ : /paint|layout|size|strict/;
 
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
       while (current) {
         if (current instanceof Element && current !== document.body) {
           const style = window.getComputedStyle(current);
@@ -1785,7 +1833,7 @@ export class Query {
             return current;
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
       return document.documentElement;
     });
@@ -1794,7 +1842,7 @@ export class Query {
 
   // this is the parent element where top/left and offsetTop/left will be relative
   // supports both fixed and absolute elements
-  positioningParent({ calculate = true } = {}) {
+  positioningParent({ calculate = true, pierceShadow = false } = {}) {
     const parents = this.map((el) => {
       const reportedParent = el.offsetParent || document.documentElement;
 
@@ -1807,7 +1855,7 @@ export class Query {
         return reportedParent;
       }
 
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
       while (current) {
         if (current instanceof Element) {
           const style = window.getComputedStyle(current);
@@ -1838,7 +1886,7 @@ export class Query {
             }
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
       return document.documentElement;
     });
@@ -1846,10 +1894,10 @@ export class Query {
   }
 
   // this is the nearest element that creates a scroll container
-  scrollParent({ all = false } = {}) {
+  scrollParent({ all = false, pierceShadow = false } = {}) {
     const results = this.map((el) => {
       const scrollParents = [];
-      let current = el.parentNode;
+      let current = getParentNode(el, pierceShadow);
 
       while (current && current !== document.body) {
         if (current instanceof Element) {
@@ -1865,7 +1913,7 @@ export class Query {
             }
           }
         }
-        current = current.parentNode;
+        current = getParentNode(current, pierceShadow);
       }
 
       // documentElement is the final scroll container
@@ -2057,7 +2105,7 @@ export class Query {
       return undefined;
     }
     const rects = this.map(el => {
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         return document.documentElement.getBoundingClientRect();
       }
       return el.getBoundingClientRect();
@@ -2071,7 +2119,7 @@ export class Query {
     }
     const results = this.map(el => {
       // Handle window/global object special case
-      if (el === Query.globalThisProxy) {
+      if (Query.isWindow(el)) {
         const boxValues = { top: 0, right: 0, bottom: 0, left: 0 };
         return {
           top: 0,
@@ -2106,10 +2154,8 @@ export class Query {
         };
       }
 
-      const $el = this.chain(el);
-
       // Position Properties
-      const rect = $el.bounds();
+      const rect = el.getBoundingClientRect();
       const top = rect.top;
       const left = rect.left;
 

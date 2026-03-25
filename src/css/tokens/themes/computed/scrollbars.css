@@ -1,0 +1,29 @@
+/*******************************
+      Computed - Scrollbar
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+       Standard
+  -------------------- */
+
+  --track-background: oklch(var(--standard-color) / 10%);
+  --thumb-background: oklch(var(--standard-color) / 15%);
+  --thumb-inactive-background: oklch(var(--standard-color) / 15%);
+  --thumb-hover-background: oklch(var(--standard-color) / 20%);
+
+  /* -------------------
+       Inverted
+  -------------------- */
+
+  --track-inverted-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-background: oklch(var(--inverted-color) / 10%);
+  --thumb-inverted-inactive-background: oklch(var(--inverted-color) / 5%);
+  --thumb-inverted-hover-background: oklch(var(--inverted-color) / 15%);
+
+}

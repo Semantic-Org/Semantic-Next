@@ -178,9 +178,7 @@
     background-image: var(--input-disabled-background-image) !important;
     box-shadow: var(--input-disabled-box-shadow) !important;
   }
-  .disabled.input input,
-  .disabled.input:hover input,
-  .disabled.active.input input {
+  :is(.disabled.input, .disabled.input:hover, .disabled.active.input) input {
     cursor: var(--input-disabled-cursor);
   }
   .clickable-disabled.input {

@@ -87,9 +87,9 @@ export default {
     "flat": "styled",
     "outline": "styled",
     "ghost": "styled",
-    "horizontal-animated": "animated",
-    "vertical-animated": "animated",
-    "fade-animated": "animated",
+    "horizontal": "animated",
+    "vertical": "animated",
+    "fade": "animated",
     "disabled": "disabled",
     "clickable-disabled": "disabled",
     "left-floated": "floated",
@@ -136,7 +136,13 @@ export default {
     "negative": "negative",
     "subtle-negative": "negative",
     "info": "info",
-    "subtle-info": "info"
+    "subtle-info": "info",
+    "animated-horizontal": "animated",
+    "horizontal-animated": "animated",
+    "animated-vertical": "animated",
+    "vertical-animated": "animated",
+    "animated-fade": "animated",
+    "fade-animated": "animated"
   },
   "propertyTypes": {
     "icon": "string",
@@ -183,9 +189,9 @@ export default {
       "ghost"
     ],
     "animated": [
-      "horizontal-animated",
-      "vertical-animated",
-      "fade-animated"
+      "horizontal",
+      "vertical",
+      "fade"
     ],
     "disabled": [
       "disabled",

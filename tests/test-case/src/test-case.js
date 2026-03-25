@@ -3,22 +3,33 @@ import { defineComponent } from '@semantic-ui/component';
 import template from './test-case.html?raw';
 import css from './test-case.css?raw';
 
-const createComponent = function(tpl, $) {
-  // test instance
-  return {};
-};
+const createComponent = ({ self, el, settings, $ }) => ({
 
-const onCreated = (tpl) => {
+  // example prop
+  prop: 1,
+
+  example() {
+    // example method
+  }
+
+});
+
+const onCreated = ({ self, el, settings, $ }) => {
   // test created
   console.log('test case created');
 };
 
-const onDestroyed = (tpl) => {
+const onDestroyed = ({ self, el, settings, $ }) => {
   // test destroyed
 };
 
 const events = {
-  // test events
+  // events
+};
+
+
+const keys = {
+  // keys
 };
 
 const TestCase = defineComponent({
@@ -29,6 +40,7 @@ const TestCase = defineComponent({
   onCreated,
   onDestroyed,
   events,
+  keys
 });
 
 export { TestCase };

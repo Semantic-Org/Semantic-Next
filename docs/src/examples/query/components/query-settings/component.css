@@ -2,7 +2,7 @@
   border: var(--border);
   background: var(--standard-5);
   margin: var(--vertically-spaced);
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   font-weight: bold;
 
   &.red b {

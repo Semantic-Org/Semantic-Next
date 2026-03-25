@@ -6,7 +6,7 @@
 }
 
 .element {
-  margin: var(--compact-padding) 0;
+  margin: var(--spacing-xs) 0;
   padding: var(--padding);
   border-radius: var(--border-radius);
   font-size: var(--medium);

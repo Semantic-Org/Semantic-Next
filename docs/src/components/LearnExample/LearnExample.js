@@ -45,7 +45,7 @@ const defaultSettings = {
     panelIndexes: {},
   },
 
-  lessonEndpoint: '/content-api/lessons/{id}.json',
+  lessonEndpoint: '/content/lessons/{id}.json',
 };
 
 const defaultState = {

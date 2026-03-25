@@ -240,13 +240,13 @@
             display: block;
             font-size: 32px;
             color: var(--primary-text-color);
-            margin-bottom: var(--compact-spacing);
+            margin-bottom: var(--spacing-xs);
           }
           .header {
             font-size: 18px;
             font-weight: var(--bold);
             color: var(--standard-100);
-            margin-bottom: var(--compact-spacing);
+            margin-bottom: var(--spacing-xs);
           }
           .text {
             color: var(--standard-40);

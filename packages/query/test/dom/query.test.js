@@ -163,6 +163,40 @@ describe('query', () => {
     });
   });
 
+  describe('wrapping Query instances', () => {
+    it('should wrap a Query and preserve its elements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const $original = $('div');
+      const $wrapped = $($original);
+      expect($wrapped.length).toBe(1);
+      expect($wrapped[0]).toBe(div);
+    });
+
+    it('should not leak pierceShadow from source Query', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const $deep = $$('div');
+      expect($deep.options.pierceShadow).toBe(true);
+
+      const $wrapped = $($deep);
+      expect($wrapped.options.pierceShadow).toBe(false);
+    });
+
+    it('should not leak prevObject from source Query', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $chained = $('div').find('span');
+      expect($chained.prevObject).toBeTruthy();
+
+      const $wrapped = $($chained);
+      expect($wrapped.prevObject).toBeNull();
+    });
+  });
+
   describe('find', () => {
     it('find should return all nested elements inside an element', () => {
       const div = document.createElement('div');
@@ -1452,6 +1486,41 @@ describe('query', () => {
       const $div = $('div').removeClass('test test2');
       expect($div.hasClass('test')).toBe(false);
       expect($div.hasClass('test2')).toBe(false);
+    });
+  });
+
+  describe('toggle class', () => {
+    it('should toggle a single class on', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(true);
+    });
+
+    it('should toggle a single class off', () => {
+      const div = document.createElement('div');
+      div.classList.add('active');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(false);
+    });
+
+    it('should toggle multiple classes independently', () => {
+      const div = document.createElement('div');
+      div.classList.add('foo');
+      document.body.appendChild(div);
+      $('div').toggleClass('foo bar');
+      expect(div.classList.contains('foo')).toBe(false);
+      expect(div.classList.contains('bar')).toBe(true);
+    });
+
+    it('should handle no argument gracefully', () => {
+      const div = document.createElement('div');
+      div.classList.add('test');
+      document.body.appendChild(div);
+      const $div = $('div').toggleClass();
+      expect(div.classList.contains('test')).toBe(true);
+      expect($div.length).toBe(1);
     });
   });
 

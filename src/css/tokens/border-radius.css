@@ -1,0 +1,56 @@
+/*******************************
+         Border Radius
+*******************************/
+
+:root {
+
+  /* -------------------
+       Primary Scale
+  -------------------- */
+
+  --border-radius-3xs: 0;
+  --border-radius-2xs: 1px;
+  --border-radius-xs: 2px;
+  --border-radius-s: 3px;
+  --border-radius-m: 4px;
+  --border-radius-l: 8px;
+  --border-radius-xl: 12px;
+  --border-radius-2xl: 16px;
+  --border-radius-3xl: 24px;
+
+  /* -------------------
+      Special Values
+  -------------------- */
+
+  --circular-radius: 500rem;
+
+  /* -------------------
+          Default
+  -------------------- */
+
+  --border-radius: var(--border-radius-m);
+
+  /* -------------------
+   Natural Language Aliases
+  -------------------- */
+
+  --border-radius-micro: var(--border-radius-3xs);
+  --border-radius-mini: var(--border-radius-2xs);
+  --border-radius-tiny: var(--border-radius-xs);
+  --border-radius-small: var(--border-radius-s);
+  --border-radius-medium: var(--border-radius-m);
+  --border-radius-large: var(--border-radius-l);
+  --border-radius-big: var(--border-radius-xl);
+  --border-radius-huge: var(--border-radius-2xl);
+  --border-radius-massive: var(--border-radius-3xl);
+
+  /* -------------------
+      Attached Variants
+  -------------------- */
+
+  --top-attached-border-radius: var(--border-radius) var(--border-radius) 0px 0px;
+  --right-attached-border-radius: var(--border-radius) 0px 0px var(--border-radius);
+  --bottom-attached-border-radius: 0px 0px var(--border-radius) var(--border-radius);
+  --left-attached-border-radius: 0px var(--border-radius) var(--border-radius) 0px;
+
+}

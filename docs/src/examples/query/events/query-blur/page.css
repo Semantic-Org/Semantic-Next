@@ -1,5 +1,5 @@
 .input {
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   border: var(--border);
   border-radius: var(--border-radius);
   font-size: inherit;

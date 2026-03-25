@@ -1,20 +1,34 @@
 <div class="search">
-  <input type="text" placeholder="Search fruit..." value={searchTerm} />
+  <ui-input fluid type="text" placeholder="Search fruit..." value={searchTerm}></ui-input>
   {#if canSearch}
     <div class="results">
-      {#if isSearching}
-        <div class="loading">Retrieving results...</div>
-      {else}
+      {#async getResults searchTerm as searchResults}
         {#if hasAny searchResults}
           {#each searchResults}
-            <div class="result" data-id="{id}" data-title="{title}">
+            <div class="{activeIf is index selectedIndex} result" data-id="{id}" data-title="{title}">
               {title}
             </div>
           {/each}
         {else}
-          No results found for "<b>{searchTerm}</b>"
+          {>message type='noResults'}
         {/if}
-      {/if}
+      {loading}
+        {>message type='loading'}
+      {error as e}
+        {>message type='error'}
+      {/async}
     </div>
   {/if}
 </div>
+
+{#snippet message}
+  <div class="{type} message">
+    {#if is type 'noResults'}
+      No results found for "<b>{searchTerm}</b>"
+    {else if is type 'loading'}
+      Retrieving results...
+    {else if is type 'error'}
+      Search failed
+    {/if}
+  </div>
+{/snippet}

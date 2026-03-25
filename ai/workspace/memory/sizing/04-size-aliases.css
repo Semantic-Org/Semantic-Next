@@ -1,0 +1,38 @@
+/* Extracted from: src/css/tokens/computed/em-sizing.css */
+
+:root {
+
+  /* Natural language aliases (rem) */
+  --micro: var(--size-3xs);
+  --mini: var(--size-2xs);
+  --tiny: var(--size-xs);
+  --small: var(--size-s);
+  --medium: var(--size-m);
+  --large: var(--size-l);
+  --big: var(--size-xl);
+  --huge: var(--size-2xl);
+  --massive: var(--size-3xl);
+
+  /* Short aliases (rem) */
+  --3xs: var(--size-3xs);
+  --2xs: var(--size-2xs);
+  --xs: var(--size-xs);
+  --s: var(--size-s);
+  --m: var(--size-m);
+  --l: var(--size-l);
+  --xl: var(--size-xl);
+  --2xl: var(--size-2xl);
+  --3xl: var(--size-3xl);
+
+  /* Relative aliases (em) */
+  --relative-micro: var(--size-3xs-em);
+  --relative-mini: var(--size-2xs-em);
+  --relative-tiny: var(--size-xs-em);
+  --relative-small: var(--size-s-em);
+  --relative-medium: var(--size-m-em);
+  --relative-large: var(--size-l-em);
+  --relative-big: var(--size-xl-em);
+  --relative-huge: var(--size-2xl-em);
+  --relative-massive: var(--size-3xl-em);
+
+}

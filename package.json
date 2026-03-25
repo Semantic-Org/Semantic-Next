@@ -1,6 +1,6 @@
 {
   "name": "@semantic-ui/core",
-  "version": "0.18.0",
+  "version": "0.17.0",
   "title": "Semantic UI Core",
   "description": "Semantic empowers designers and developers by creating a shared vocabulary for UI.",
   "homepage": "http://next.semantic-ui.com",
@@ -84,6 +84,12 @@
       "browser": "./dist/cdn/icon.min.js",
       "bundled": "./dist/bundle/icon.min.js",
       "default": "./src/primitives/icon/index.js"
+    },
+    "./icon/css": {
+      "import": "./dist/icon.css",
+      "browser": "./dist/cdn/icon.min.css",
+      "bundled": "./dist/bundle/icon.min.css",
+      "default": "./dist/icon.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -239,6 +245,13 @@
     "mcp": {
       "command": "cd ai/mcp && node agents-server.js",
       "service": true
+    },
+    "test:case": {
+      "command": "node tests/scripts/serve-test-case.js",
+      "service": true,
+      "dependencies": [
+        "build:packages"
+      ]
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
@@ -251,27 +264,28 @@
     "@pagefind/modular-ui": "^1.3.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@types/node": "^24.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
-    "@vitest/browser": "^3.2.4",
-    "@vitest/coverage-istanbul": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
-    "chalk": "^5.6.0",
-    "dprint": "^0.50.1",
-    "esbuild": "^0.25.9",
-    "glob": "^11.0.3",
-    "inquirer": "^12.9.3",
-    "jsdom": "^26.1.0",
-    "playwright": "^1.54.2",
-    "semver": "^7.7.2",
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "@types/node": "^25.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "chalk": "^5.6.2",
+    "dprint": "^0.51.1",
+    "esbuild": "^0.27.2",
+    "glob": "^13.0.0",
+    "inquirer": "^13.2.1",
+    "jsdom": "^27.4.0",
+    "playwright": "^1.58.0",
+    "semver": "^7.7.3",
     "simple-git-hooks": "^2.13.1",
     "underscore": "^1.13.7",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.18",
     "wireit": "^0.14.12",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "ciDependencies": {
     "axios": "^1.6.8",
@@ -283,7 +297,7 @@
     "packages/*",
     "docs/*",
     "examples/*",
-    "ai/mcp/*"
+    "tools/*"
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"

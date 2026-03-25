@@ -5,7 +5,6 @@ export const buildESM = async ({
   minify = true,
   ...config
 } = {}) => {
-
   const tasks = [];
 
   tasks.push(
@@ -13,18 +12,50 @@ export const buildESM = async ({
       ...config,
       watch,
       esm: true,
-      minify: false
-    })
+      minify: false,
+    }),
   );
 
-  if(minify){
+  if (minify) {
     tasks.push(
       build({
         ...config,
         watch,
         esm: true,
-        minify: true
-      })
+        minify: true,
+      }),
+    );
+  }
+
+  return Promise.all(tasks);
+};
+
+export const buildPageCSS = async ({
+  watch = false,
+  minify = true,
+  ...config
+} = {}) => {
+  const tasks = [];
+
+  tasks.push(
+    build({
+      ...config,
+      watch,
+      type: 'css',
+      bundle: true,
+      minify: false,
+    }),
+  );
+
+  if (minify) {
+    tasks.push(
+      build({
+        ...config,
+        watch,
+        type: 'css',
+        bundle: true,
+        minify: true,
+      }),
     );
   }
 

@@ -28,7 +28,8 @@
   },
   "devDependencies": {
     "@semantic-ui/internal-scripts": "^0.18.0",
-    "vitest": "^3.2.4"
+    "@vitest/browser-playwright": "^4.0.18",
+    "vitest": "^4.0.18"
   },
   "files": [
     "src",

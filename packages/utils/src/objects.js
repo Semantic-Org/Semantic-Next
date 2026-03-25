@@ -286,103 +286,126 @@ export const weightedObjectSearch = (query = '', objectArray = [], {
   if (!query) {
     return objectArray;
   }
-  query = query.trim();
-  query = escapeRegExp(query);
-  let words = query.split(' '),
-    wordRegexes = [],
-    regexes = {
-      startsWith: new RegExp(`^${query}`, 'i'),
-      wordStartsWith: new RegExp(`\\s${query}`, 'i'),
-      anywhere: new RegExp(query, 'i'),
-    },
-    weights = {
-      startsWith: 1,
-      wordStartsWith: 2,
-      anywhere: 3,
-      anyWord: 4,
-    },
-    calculateWeight = (obj) => {
-      let matchDetails = [],
-        weight;
-      // do a weighted search across all fields
-      each(propertiesToMatch, (field) => {
-        let value = get(obj, field),
-          fieldWeight;
-        if (value) {
-          each(regexes, (regex, name) => {
-            if (fieldWeight) {
-              return;
-            }
-            if (String(value).search(regex) !== -1) {
-              fieldWeight = weights[name];
-              if (returnMatches) {
-                matchDetails.push({
-                  field,
-                  query,
-                  name,
-                  value,
-                  weight: fieldWeight,
-                });
-              }
-            }
-          });
-          // match any word higher score for more words
-          if (!weight && wordRegexes.length) {
-            let wordsMatching = 0;
-            each(wordRegexes, regex => {
-              if (String(value).search(regex) !== -1) {
-                wordsMatching++;
-              }
-            });
-            if (wordsMatching > 0) {
-              if (!matchAllWords || (matchAllWords && wordsMatching === wordRegexes.length)) {
-                fieldWeight = weights['anyWord'] / wordsMatching;
-                if (returnMatches) {
-                  matchDetails.push({
-                    field,
-                    query,
-                    name: 'anyWord',
-                    value,
-                    matchCount: wordsMatching,
-                  });
-                }
-              }
-            }
+
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return objectArray;
+  }
+
+  const escapedQuery = escapeRegExp(trimmedQuery);
+  const words = trimmedQuery.split(/\s+/).filter(Boolean);
+  const escapedWords = words.map(w => escapeRegExp(w));
+
+  // Priority weights (lower = better match)
+  const weights = {
+    startsWith: 1,
+    wordStartsWith: 2,
+    anywhere: 3,
+    anyWord: 4,
+  };
+
+  // Regexes for full phrase matching
+  const phraseRegexes = {
+    startsWith: new RegExp(`^${escapedQuery}`, 'i'),
+    wordStartsWith: new RegExp(`(^|\\s)${escapedQuery}`, 'i'),
+    anywhere: new RegExp(escapedQuery, 'i'),
+  };
+
+  // Get string value from a field (handles arrays like tags)
+  const getFieldString = (value) => {
+    if (isArray(value)) {
+      return value.join(' ');
+    }
+    return value ? String(value) : '';
+  };
+
+  // Calculate best weight for an object
+  const calculateWeight = (obj) => {
+    let bestWeight = null;
+    const matchDetails = [];
+
+    for (const field of propertiesToMatch) {
+      const rawValue = get(obj, field);
+      const value = getFieldString(rawValue);
+
+      if (!value) {
+        continue;
+      }
+
+      // Try full phrase matches first (best priority)
+      for (const [matchType, regex] of Object.entries(phraseRegexes)) {
+        if (regex.test(value)) {
+          const weight = weights[matchType];
+          if (bestWeight === null || weight < bestWeight) {
+            bestWeight = weight;
           }
-          if (fieldWeight && (!weight || fieldWeight < weight)) {
-            weight = fieldWeight;
+          if (returnMatches) {
+            matchDetails.push({ field, query: trimmedQuery, name: matchType, value: rawValue, weight });
+          }
+          break; // Found best match type for this field
+        }
+      }
+
+      // Try individual word matches if we have multiple words
+      if (words.length > 1) {
+        let matchedCount = 0;
+        for (const word of escapedWords) {
+          const wordRegex = new RegExp(word, 'i');
+          if (wordRegex.test(value)) {
+            matchedCount++;
           }
         }
-      });
-      // flag for removal if not a match
-      if (returnMatches) {
-        obj.matches = matchDetails;
+
+        if (matchedCount > 0) {
+          const meetsThreshold = matchAllWords
+            ? matchedCount === words.length
+            : true;
+
+          if (meetsThreshold) {
+            // More words matched = better score (lower weight)
+            const weight = weights.anyWord + (1 - matchedCount / words.length);
+            if (bestWeight === null || weight < bestWeight) {
+              bestWeight = weight;
+            }
+            if (returnMatches) {
+              matchDetails.push({
+                field,
+                query: trimmedQuery,
+                name: 'anyWord',
+                value: rawValue,
+                matchCount: matchedCount,
+              });
+            }
+          }
+        }
       }
-      obj.remove = !weight;
-      return weight;
-    };
-  if (objectArray.length == 1) {
-    objectArray.push([]);
+    }
+
+    if (returnMatches) {
+      obj.matches = matchDetails;
+    }
+
+    return bestWeight;
+  };
+
+  // Calculate weights for all objects
+  const results = [];
+  for (const obj of objectArray) {
+    const weight = calculateWeight(obj);
+    if (weight !== null) {
+      results.push({ obj, weight });
+    }
   }
 
-  if (words.length > 1) {
-    each(words, (word) => {
-      wordRegexes.push(new RegExp(`(\\W|^)${word}(\\W|$)`, 'i'));
-    });
+  // Sort by weight (lower = better)
+  results.sort((a, b) => a.weight - b.weight);
+
+  // Clean up and return
+  if (!returnMatches) {
+    for (const obj of objectArray) {
+      delete obj.matches;
+    }
   }
 
-  each(objectArray, obj => {
-    // clear previous remove flag and weight if present
-    delete obj.remove;
-    delete obj.weight;
-
-    obj.weight = calculateWeight(obj);
-  });
-
-  let result = objectArray
-    .filter(obj => !obj.remove)
-    .sort((a, b) => {
-      return a.weight - b.weight;
-    });
-  return result;
+  return results.map(r => r.obj);
 };

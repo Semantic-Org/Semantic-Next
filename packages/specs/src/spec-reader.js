@@ -1,5 +1,4 @@
 import {
-  capitalize,
   clone,
   each,
   filterObject,
@@ -900,6 +899,26 @@ export class SpecReader {
       return values = values.filter(value => isString(value));
     });
     componentSpec.optionAttributes = reverseKeys(options);
+
+    // add compound aliases for types/variations that opt-in
+    // this enables disambiguation syntax like <ui-foo size-small> or <ui-foo small-size>
+    const partsWithOptions = [...(spec.types || []), ...(spec.variations || [])];
+    each(partsWithOptions, (part) => {
+      if (!part.compoundAliases) {
+        return;
+      }
+      const attr = part.attribute || part.name?.toLowerCase();
+      const allowedValues = componentSpec.allowedValues[attr];
+      if (!allowedValues) {
+        return;
+      }
+      each(allowedValues, (value) => {
+        if (isString(value)) {
+          componentSpec.optionAttributes[`${attr}-${value}`] = attr;
+          componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+        }
+      });
+    });
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];

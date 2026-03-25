@@ -139,8 +139,7 @@
       box-shadow: var(--button-hover-box-shadow);
       color: var(--button-hover-color);
     }
-    .button.hover .icon,
-    .button:hover .icon {
+    :is(.button.hover, .button:hover) .icon {
       opacity: var(--button-hover-icon-opacity);
     }
   }
@@ -158,8 +157,7 @@
     box-shadow: var(--button-focus-box-shadow);
     box-shadow: var(--button-focus-box-shadow), var(--focused-ring-shadow) !important;
   }
-  .button.focus .icon,
-  .button:focus-visible .icon {
+  :is(.button.focus, .button:focus-visible) .icon {
     opacity: var(--button-focus-icon-opacity);
   }
 }
@@ -554,62 +552,56 @@
     right: -100%;
     margin-top: calc(var(--button-line-height) / 2 * -1);
   }
-  .button.animated:focus > .visible.content,
-  .button.animated:hover > .visible.content {
+  :is(.button.animated:focus, .button.animated:hover) > .visible.content {
     left: auto;
     right: 200%;
   }
-  .button.animated:focus > .hidden.content,
-  .button.animated:hover > .hidden.content {
+  :is(.button.animated:focus, .button.animated:hover) > .hidden.content {
     left: auto;
     right: 0%;
   }
-  .button.vertical-animated > .visible.content,
-  .button.vertical-animated > .hidden.content {
+  .button.animated.vertical > .visible.content,
+  .button.animated.vertical > .hidden.content {
     transition: top var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
   }
-  .button.vertical-animated > .visible.content {
+  .button.animated.vertical > .visible.content {
     transform: translateY(0%);
     right: auto;
   }
-  .button.vertical-animated > .hidden.content {
+  .button.animated.vertical > .hidden.content {
     top: -50%;
     left: 0%;
   }
-  .button.vertical-animated:focus > .visible.content,
-  .button.vertical-animated:hover > .visible.content {
+  :is(.button.animated.vertical:focus, .button.animated.vertical:hover) > .visible.content {
     transform: translateY(200%);
     right: auto;
   }
-  .button.vertical-animated:focus > .hidden.content,
-  .button.vertical-animated:hover > .hidden.content {
+  :is(.button.animated.vertical:focus, .button.animated.vertical:hover) > .hidden.content {
     top: 50%;
   }
-  .button.fade-animated > .visible.content,
-  .button.fade-animated > .hidden.content {
+  .button.animated.fade > .visible.content,
+  .button.animated.fade > .hidden.content {
     transition: opacity var(--button-animation-duration) var(--button-animation-easing), transform var(--button-animation-duration) var(--button-animation-easing);
   }
-  .button.fade-animated > .visible.content {
+  .button.animated.fade > .visible.content {
     left: auto;
     right: auto;
     opacity: 1;
     transform: scale(1);
   }
-  .button.fade-animated > .hidden.content {
+  .button.animated.fade > .hidden.content {
     opacity: 0;
     left: 0%;
     right: auto;
     transform: scale(var(--button-fade-scale-high));
   }
-  .button.fade-animated:focus > .visible.content,
-  .button.fade-animated:hover > .visible.content {
+  :is(.button.animated.fade:focus, .button.animated.fade:hover) > .visible.content {
     left: auto;
     right: auto;
     opacity: 0;
     transform: scale(var(--button-fade-scale-low));
   }
-  .button.fade-animated:focus > .hidden.content,
-  .button.fade-animated:hover > .hidden.content {
+  :is(.button.animated.fade:focus, .button.animated.fade:hover) > .hidden.content {
     left: 0%;
     right: auto;
     opacity: 1;
@@ -635,38 +627,32 @@
     --button-styled-text-color-pressed: var(--primary-text-color-pressed);
     --button-styled-text-color-active: var(--primary-text-color-pressed);
   }
-  .primary.buttons .button:hover,
-  .primary.button:hover {
+  :is(.primary.buttons .button, .primary.button):hover {
     background-color: var(--button-primary-color-hover);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .primary.buttons .button:focus,
-  .primary.button:focus {
+  :is(.primary.buttons .button, .primary.button):focus {
     background-color: var(--button-primary-color-focus);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .primary.buttons .button.pressed,
-  .primary.buttons .button:active,
-  .primary.button.pressed,
-  .primary.button:active {
+  :is(.primary.buttons .button, .primary.button).pressed,
+  :is(.primary.buttons .button, .primary.button):active {
     background-color: var(--button-primary-color-down);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .primary.buttons .button.active,
-  .primary.button.active {
+  :is(.primary.buttons .button, .primary.button).active {
     background-color: var(--button-primary-color-active);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .primary.buttons .button.active:active,
-  .primary.button.active:active {
+  :is(.primary.buttons .button, .primary.button).active:active {
     background-color: var(--button-primary-color-active);
     color: var(--button-primary-text-color);
     text-shadow: var(--button-primary-text-shadow);
@@ -697,38 +683,32 @@
     --button-styled-text-color-pressed: var(--secondary-text-color-pressed);
     --button-styled-text-color-active: var(--secondary-text-color-pressed);
   }
-  .secondary.buttons .button:hover,
-  .secondary.button:hover {
+  :is(.secondary.buttons .button, .secondary.button):hover {
     background-color: var(--button-secondary-color-hover);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .secondary.buttons .button:focus,
-  .secondary.button:focus {
+  :is(.secondary.buttons .button, .secondary.button):focus {
     background-color: var(--button-secondary-color-focus);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .secondary.buttons .button.pressed,
-  .secondary.buttons .button:active,
-  .secondary.button.pressed,
-  .secondary.button:active {
+  :is(.secondary.buttons .button, .secondary.button).pressed,
+  :is(.secondary.buttons .button, .secondary.button):active {
     background-color: var(--button-secondary-color-down);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .secondary.buttons .button.active,
-  .secondary.button.active {
+  :is(.secondary.buttons .button, .secondary.button).active {
     background-color: var(--button-secondary-color-active);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .secondary.buttons .button.active:active,
-  .secondary.button.active:active {
+  :is(.secondary.buttons .button, .secondary.button).active:active {
     background-color: var(--button-secondary-color-active);
     color: var(--button-secondary-text-color);
     text-shadow: var(--button-secondary-text-shadow);
@@ -751,8 +731,7 @@
   .icon-only.button {
     padding: var(--button-vertical-padding);
   }
-  .icon-only.buttons .button > ui-icon,
-  .icon-only.button > ui-icon {
+  :is(.icon-only.buttons .button, .icon-only.button) > ui-icon {
     opacity: 1;
     margin: 0em;
     vertical-align: top;
@@ -815,8 +794,7 @@
     padding-left: var(--labeled-icon-padding) !important;
     padding-right: var(--horizontal-padding) !important;
   }
-  .labeled.icon.buttons .button > .icon,
-  .labeled.icon.button > .icon {
+  :is(.labeled.icon.buttons .button, .labeled.icon.button) > .icon {
     position: absolute;
     height: 100%;
     line-height: 1;
@@ -832,10 +810,8 @@
     top: 0em;
     left: 0em;
   }
-  .labeled.icon.buttons .button > .icon::before,
-  .labeled.icon.buttons .button > .icon::after,
-  .labeled.icon.button > .icon::before,
-  .labeled.icon.button > .icon::after {
+  :is(.labeled.icon.buttons .button, .labeled.icon.button) > .icon::before,
+  :is(.labeled.icon.buttons .button, .labeled.icon.button) > .icon::after {
     display: block;
     position: absolute;
     width: 100%;
@@ -843,12 +819,10 @@
     text-align: center;
     transform: translateY(-50%);
   }
-  .labeled.icon.buttons .button > .icon.loading,
-  .labeled.icon.button > .icon.loading {
+  :is(.labeled.icon.buttons .button, .labeled.icon.button) > .icon.loading {
     animation: none;
   }
-  .labeled.icon.buttons .button > .icon.loading::before,
-  .labeled.icon.button > .icon.loading::before {
+  :is(.labeled.icon.buttons .button, .labeled.icon.button) > .icon.loading::before {
     animation: labeled-button-icon-loading var(--loading-icon-duration) linear infinite;
   }
   [class*="right labeled"].icon.button {
@@ -934,9 +908,7 @@
     color: var(--button-toggle-active-color) !important;
     text-shadow: var(--button-toggle-active-text-shadow);
   }
-  .toggle.buttons .active.button:hover,
-  .buttons .button.toggle.active:hover,
-  .button.toggle.active:hover {
+  :is(.toggle.buttons .active.button, .buttons .button.toggle.active, .button.toggle.active):hover {
     background-color: var(--button-toggle-active-hover-background) !important;
     color: var(--button-toggle-active-hover-color) !important;
   }
@@ -1586,38 +1558,32 @@
     text-shadow: var(--button-negative-text-shadow);
     background-image: var(--button-colored-background-image);
   }
-  .negative.buttons .button:hover,
-  .negative.button:hover {
+  :is(.negative.buttons .button, .negative.button):hover {
     background-color: var(--button-negative-color-hover);
     color: var(--button-negative-text-color);
     text-shadow: var(--button-negative-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .negative.buttons .button:focus,
-  .negative.button:focus {
+  :is(.negative.buttons .button, .negative.button):focus {
     background-color: var(--button-negative-color-focus);
     color: var(--button-negative-text-color);
     text-shadow: var(--button-negative-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .negative.buttons .button.pressed,
-  .negative.buttons .button:active,
-  .negative.button.pressed,
-  .negative.button:active {
+  :is(.negative.buttons .button, .negative.button).pressed,
+  :is(.negative.buttons .button, .negative.button):active {
     background-color: var(--button-negative-color-down);
     color: var(--button-negative-text-color);
     text-shadow: var(--button-negative-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .negative.buttons .button.active,
-  .negative.button.active {
+  :is(.negative.buttons .button, .negative.button).active {
     background-color: var(--button-negative-color-active);
     color: var(--button-negative-text-color);
     text-shadow: var(--button-negative-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .negative.buttons .button.active:active,
-  .negative.button.active:active {
+  :is(.negative.buttons .button, .negative.button).active:active {
     background-color: var(--button-negative-color-active);
     color: var(--button-negative-text-color);
     text-shadow: var(--button-negative-text-shadow);
@@ -1639,47 +1605,40 @@
     text-shadow: var(--button-subtle-negative-text-shadow);
     background-image: var(--button-subtle-negative-background-image);
   }
-  .subtle-negative.buttons .button:hover,
-  .subtle-negative.button:hover {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button):hover {
     background-color: var(--button-subtle-negative-color-hover);
     color: var(--button-subtle-negative-text-color);
     text-shadow: var(--button-subtle-negative-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .subtle-negative.buttons .button:focus,
-  .subtle-negative.button:focus {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button):focus {
     background-color: var(--button-subtle-negative-color-focus);
     color: var(--button-subtle-negative-text-color);
     text-shadow: var(--button-subtle-negative-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .subtle-negative.buttons .button.pressed,
-  .subtle-negative.buttons .button:active,
-  .subtle-negative.button.pressed,
-  .subtle-negative.button:active {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button).pressed,
+  :is(.subtle-negative.buttons .button, .subtle-negative.button):active {
     background-color: var(--button-subtle-negative-color-down);
     color: var(--button-subtle-negative-text-color);
     text-shadow: var(--button-subtle-negative-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .subtle-negative.buttons .button.active,
-  .subtle-negative.button.active {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button).active {
     background-color: var(--button-subtle-negative-color-active);
     background-image: var(--button-subtle-negative-background-image);
     color: var(--button-subtle-negative-text-color);
     text-shadow: var(--button-subtle-negative-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-negative.buttons .button.active:active,
-  .subtle-negative.button.active:active {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button).active:active {
     background-color: var(--button-subtle-negative-color-active);
     background-image: var(--button-subtle-negative-background-image);
     color: var(--button-subtle-negative-text-color);
     text-shadow: var(--button-subtle-negative-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-negative.buttons .button > .icon,
-  .subtle-negative.button > .icon {
+  :is(.subtle-negative.buttons .button, .subtle-negative.button) > .icon {
     color: var(--button-subtle-negative-text-color);
   }
   .subtle-negative.button {
@@ -1703,38 +1662,32 @@
     text-shadow: var(--button-positive-text-shadow);
     background-image: var(--button-positive-background-image);
   }
-  .positive.buttons .button:hover,
-  .positive.button:hover {
+  :is(.positive.buttons .button, .positive.button):hover {
     background-color: var(--button-positive-color-hover);
     color: var(--button-positive-text-color);
     text-shadow: var(--button-positive-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .positive.buttons .button:focus,
-  .positive.button:focus {
+  :is(.positive.buttons .button, .positive.button):focus {
     background-color: var(--button-positive-color-focus);
     color: var(--button-positive-text-color);
     text-shadow: var(--button-positive-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .positive.buttons .button.pressed,
-  .positive.buttons .button:active,
-  .positive.button.pressed,
-  .positive.button:active {
+  :is(.positive.buttons .button, .positive.button).pressed,
+  :is(.positive.buttons .button, .positive.button):active {
     background-color: var(--button-positive-color-down);
     color: var(--button-positive-text-color);
     text-shadow: var(--button-positive-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .positive.buttons .button.active,
-  .positive.button.active {
+  :is(.positive.buttons .button, .positive.button).active {
     background-color: var(--button-positive-color-active);
     color: var(--button-positive-text-color);
     text-shadow: var(--button-positive-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .positive.buttons .button.active:active,
-  .positive.button.active:active {
+  :is(.positive.buttons .button, .positive.button).active:active {
     background-color: var(--button-positive-color-active);
     color: var(--button-positive-text-color);
     text-shadow: var(--button-positive-text-shadow);
@@ -1756,47 +1709,40 @@
     text-shadow: var(--button-subtle-positive-text-shadow);
     background-image: var(--button-subtle-positive-background-image);
   }
-  .subtle-positive.buttons .button:hover,
-  .subtle-positive.button:hover {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button):hover {
     background-color: var(--button-subtle-positive-color-hover);
     color: var(--button-subtle-positive-text-color);
     text-shadow: var(--button-subtle-positive-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .subtle-positive.buttons .button:focus,
-  .subtle-positive.button:focus {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button):focus {
     background-color: var(--button-subtle-positive-color-focus);
     color: var(--button-subtle-positive-text-color);
     text-shadow: var(--button-subtle-positive-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .subtle-positive.buttons .button.pressed,
-  .subtle-positive.buttons .button:active,
-  .subtle-positive.button.pressed,
-  .subtle-positive.button:active {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button).pressed,
+  :is(.subtle-positive.buttons .button, .subtle-positive.button):active {
     background-color: var(--button-subtle-positive-color-down);
     color: var(--button-subtle-positive-text-color);
     text-shadow: var(--button-subtle-positive-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .subtle-positive.buttons .button.active,
-  .subtle-positive.button.active {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button).active {
     background-color: var(--button-subtle-positive-color-active);
     background-image: var(--button-subtle-positive-background-image);
     color: var(--button-subtle-positive-text-color);
     text-shadow: var(--button-subtle-positive-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-positive.buttons .button.active:active,
-  .subtle-positive.button.active:active {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button).active:active {
     background-color: var(--button-subtle-positive-color-active);
     background-image: var(--button-subtle-positive-background-image);
     color: var(--button-subtle-positive-text-color);
     text-shadow: var(--button-subtle-positive-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-positive.buttons .button > .icon,
-  .subtle-positive.button > .icon {
+  :is(.subtle-positive.buttons .button, .subtle-positive.button) > .icon {
     color: var(--button-subtle-positive-text-color);
   }
   .subtle-positive.button {
@@ -1820,34 +1766,29 @@
     text-shadow: var(--button-warning-text-shadow);
     background-image: var(--button-colored-background-image);
   }
-  .warning.buttons .button:hover,
-  .warning.button:hover {
+  :is(.warning.buttons .button, .warning.button):hover {
     background-color: var(--button-warning-color-hover);
     color: var(--button-warning-text-color);
     text-shadow: var(--button-warning-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .warning.buttons .button:focus,
-  .warning.button:focus {
+  :is(.warning.buttons .button, .warning.button):focus {
     background-color: var(--button-warning-color-focus);
     color: var(--button-warning-text-color);
     text-shadow: var(--button-warning-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .warning.buttons .button:active,
-  .warning.button:active {
+  :is(.warning.buttons .button, .warning.button):active {
     background-color: var(--button-warning-color-down);
     color: var(--button-warning-text-color);
     text-shadow: var(--button-warning-text-shadow);
   }
-  .warning.buttons .button.active,
-  .warning.button.active {
+  :is(.warning.buttons .button, .warning.button).active {
     background-color: var(--button-warning-color-active);
     color: var(--button-warning-text-color);
     text-shadow: var(--button-warning-text-shadow);
   }
-  .warning.buttons .button.active:active,
-  .warning.button.active:active {
+  :is(.warning.buttons .button, .warning.button).active:active {
     background-color: var(--button-warning-color-active);
     color: var(--button-warning-text-color);
     text-shadow: var(--button-warning-text-shadow);
@@ -1867,45 +1808,39 @@
     text-shadow: var(--button-subtle-warning-text-shadow);
     background-image: var(--button-subtle-warning-background-image);
   }
-  .subtle-warning.buttons .button:hover,
-  .subtle-warning.button:hover {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button):hover {
     background-color: var(--button-subtle-warning-color-hover);
     color: var(--button-subtle-warning-text-color);
     text-shadow: var(--button-subtle-warning-text-shadow);
     box-shadow: var(--button-hover-box-shadow);
   }
-  .subtle-warning.buttons .button:focus,
-  .subtle-warning.button:focus {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button):focus {
     background-color: var(--button-subtle-warning-color-focus);
     color: var(--button-subtle-warning-text-color);
     text-shadow: var(--button-subtle-warning-text-shadow);
     box-shadow: var(--button-focus-box-shadow);
   }
-  .subtle-warning.buttons .button:active,
-  .subtle-warning.button:active {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button):active {
     background-color: var(--button-subtle-warning-color-down);
     color: var(--button-subtle-warning-text-color);
     text-shadow: var(--button-subtle-warning-text-shadow);
     box-shadow: var(--button-pressed-box-shadow);
   }
-  .subtle-warning.buttons .button.active,
-  .subtle-warning.button.active {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button).active {
     background-color: var(--button-subtle-warning-color-active);
     background-image: var(--button-subtle-warning-background-image);
     color: var(--button-subtle-warning-text-color);
     text-shadow: var(--button-subtle-warning-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-warning.buttons .button.active:active,
-  .subtle-warning.button.active:active {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button).active:active {
     background-color: var(--button-subtle-warning-color-active);
     background-image: var(--button-subtle-warning-background-image);
     color: var(--button-subtle-warning-text-color);
     text-shadow: var(--button-subtle-warning-text-shadow);
     box-shadow: var(--button-active-box-shadow);
   }
-  .subtle-warning.buttons .button > .icon,
-  .subtle-warning.button > .icon {
+  :is(.subtle-warning.buttons .button, .subtle-warning.button) > .icon {
     color: var(--button-subtle-warning-text-color);
   }
   .subtle-warning.button {
@@ -1929,34 +1864,28 @@
     text-shadow: var(--button-info-text-shadow);
     background-image: var(--button-colored-background-image);
   }
-  .info.buttons .button:hover,
-  .info.button:hover {
+  :is(.info.buttons .button, .info.button):hover {
     background-color: var(--button-info-color-hover);
     color: var(--button-info-text-color);
     text-shadow: var(--button-info-text-shadow);
   }
-  .info.buttons .button:focus,
-  .info.button:focus {
+  :is(.info.buttons .button, .info.button):focus {
     background-color: var(--button-info-color-focus);
     color: var(--button-info-text-color);
     text-shadow: var(--button-info-text-shadow);
   }
-  .info.buttons .button.pressed,
-  .info.buttons .button:active,
-  .info.button.pressed,
-  .info.button:active {
+  :is(.info.buttons .button, .info.button).pressed,
+  :is(.info.buttons .button, .info.button):active {
     background-color: var(--button-info-color-down);
     color: var(--button-info-text-color);
     text-shadow: var(--button-info-text-shadow);
   }
-  .info.buttons .button.active,
-  .info.button.active {
+  :is(.info.buttons .button, .info.button).active {
     background-color: var(--button-info-color-active);
     color: var(--button-info-text-color);
     text-shadow: var(--button-info-text-shadow);
   }
-  .info.buttons .button.active:active,
-  .info.button.active:active {
+  :is(.info.buttons .button, .info.button).active:active {
     background-color: var(--button-info-color-active);
     color: var(--button-info-text-color);
     text-shadow: var(--button-info-text-shadow);
@@ -1976,42 +1905,35 @@
     text-shadow: var(--button-subtle-info-text-shadow);
     background-image: var(--button-subtle-info-background-image);
   }
-  .subtle-info.buttons .button:hover,
-  .subtle-info.button:hover {
+  :is(.subtle-info.buttons .button, .subtle-info.button):hover {
     background-color: var(--button-subtle-info-color-hover);
     color: var(--button-subtle-info-text-color);
     text-shadow: var(--button-subtle-info-text-shadow);
   }
-  .subtle-info.buttons .button:focus,
-  .subtle-info.button:focus {
+  :is(.subtle-info.buttons .button, .subtle-info.button):focus {
     background-color: var(--button-subtle-info-color-focus);
     color: var(--button-subtle-info-text-color);
     text-shadow: var(--button-subtle-info-text-shadow);
   }
-  .subtle-info.buttons .button.pressed,
-  .subtle-info.buttons .button:active,
-  .subtle-info.button.pressed,
-  .subtle-info.button:active {
+  :is(.subtle-info.buttons .button, .subtle-info.button).pressed,
+  :is(.subtle-info.buttons .button, .subtle-info.button):active {
     background-color: var(--button-subtle-info-color-down);
     color: var(--button-subtle-info-text-color);
     text-shadow: var(--button-subtle-info-text-shadow);
   }
-  .subtle-info.buttons .button.active,
-  .subtle-info.button.active {
+  :is(.subtle-info.buttons .button, .subtle-info.button).active {
     background-color: var(--button-subtle-info-color-active);
     background-image: var(--button-subtle-info-background-image);
     color: var(--button-subtle-info-text-color);
     text-shadow: var(--button-subtle-info-text-shadow);
   }
-  .subtle-info.buttons .button.active:active,
-  .subtle-info.button.active:active {
+  :is(.subtle-info.buttons .button, .subtle-info.button).active:active {
     background-color: var(--button-subtle-info-color-active);
     background-image: var(--button-subtle-info-background-image);
     color: var(--button-subtle-info-text-color);
     text-shadow: var(--button-subtle-info-text-shadow);
   }
-  .subtle-info.buttons .button > .icon,
-  .subtle-info.button > .icon {
+  :is(.subtle-info.buttons .button, .subtle-info.button) > .icon {
     color: var(--button-subtle-info-text-color);
   }
   .subtle-info.button {

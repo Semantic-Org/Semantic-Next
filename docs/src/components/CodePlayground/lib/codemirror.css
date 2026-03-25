@@ -1,104 +1,127 @@
+/*
+  This is injected into the shadow DOM of the playground-element component
+  that renders the Code Mirror instance.
 
-/* Scrollbars */
-.CodeMirror-hscrollbar,
-.CodeMirror-vscrollbar {
-  scrollbar-color: #444 rgba(255, 255, 255, 0.05);
-  scrollbar-width: thin;
-}
-.CodeMirror-vscrollbar::webkit-scrollbar-thumb {
-  border-radius: 100px;
-}
+  It is the only way to access .cm-* classes
+*/
 
-/* Autocomplete */
-.CodeMirror-hints {
+
+
+/* Autocomplete - CM6 uses .cm-tooltip-autocomplete */
+.cm-tooltip-autocomplete.cm-tooltip {
   box-shadow: 1px 2px 10px #000;
   background: #090c10 var(--subtle-angled-gradient);
   font-size: var(--playground-code-font-size, 14px);
   font-family: 'Lato';
   max-height: 20em;
   width: 600px;
-/*  max-width: min(600px, 100%);*/
   max-width: -webkit-fill-available;
   margin-right: 1rem;
   border-radius: var(--border-radius);
   border: var(--border);
-}
 
-.CodeMirror-hint {
-  line-height: 24px;
-  border-radius: var(--border-radius);
-}
-.CodeMirror-hint-active {
-  background: #152d37;
-  filter: none;
-}
-.CodeMirror-hint .hint-object-name {
-  color: #FFFFFF;
-  font-weight: bold;
-}
-.CodeMirror-hint .hint-object-details {
-  color: #818691;
-  opacity: 1;
-  line-height: 1.4;
-  margin-top: 3px;
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  text-align: right;
-  flex-basis: 80%;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.CodeMirror-hint mark {
-  color: var(--primary-text-color);
-  border-bottom: 1px solid #003351;
-  color: #90c0db;
+  ul li {
+    line-height: 24px;
+    border-radius: var(--border-radius);
+  }
+   ul li[aria-selected="true"] {
+    background: #152d37;
+    filter: none;
+  }
 }
 
 
-/* Fold Markers */
-.CodeMirror-foldmarker {
-  color: var(--standard-40);
-  background: var(--standard-10) var(--angled-gradient);
-  border-radius: var(--border-radius);
-  font-size: var(--medium);
+/* Fold Markers - CM6 uses .cm-foldMarker */
+.cm-foldMarker {
+  color: var(--playground-fold-color);
+  background: var(--playground-fold-background);
+  border-radius: var(--playground-fold-border-radius);
+  font-size: var(--playground-fold-size);
   vertical-align: 3px;
-  box-shadow: var(--floating-shadow);
-  margin-left: 8px;
+  box-shadow: var(--playground-fold-shadow);
+  margin-left: var(--playground-fold-distance);
   display: inline-block;
   padding: 0px 5px 6px 4px;
   line-height: 1;
-  transition: var(--transition);
+  transition: var(--playground-fold-transition);
 }
-.CodeMirror-foldmarker:hover {
+.cm-foldMarker:hover {
   background-color: #183a528f;
   color: var(--primary-text-color);
 }
-.cm-bracket:not(.cm-tag) {
-  color: var(--playground-code-bracket);
+
+/* Syntax highlighting */
+.cm-content {
+  /* General rules - apply to all languages */
+  .tok-punctuation {
+    color: var(--playground-code-punctuation);
+  }
+  .tok-bracket,
+  .tok-brace {
+    color: var(--playground-code-bracket);
+  }
+
+  .tok-comment {
+    color: var(--playground-code-comment-color);
+  }
+  .tok-propertyName.tok-definition {
+    color: var(--playground-code-property-color);
+  }
+
+  &[data-language="css"] {
+    .tok-keyword {
+      color: var(--code-default);
+    }
+    .tok-propertyName {
+      color: var(--code-grey);
+    }
+    .tok-atom {
+      color: var(--code-blue);
+    }
+  }
+
+  /* SUI Template-specific rules */
+  &[data-language="html"] {
+    .tok-typeName {
+      color: var(--playground-code-tag-color);
+    }
+
+    .tok-propertyName {
+      color: var(--playground-code-templating-attribute);
+    }
+
+    .tok-operator {
+      color: var(--playground-code-templating-attribute);
+    }
+
+    .tok-meta {
+      color: var(--playground-code-templating-html-quote);
+    }
+
+    .tok-labelName {
+      color: var(--playground-code-attribute-color);
+    }
+
+    .tok-string {
+      color: var(--playground-code-templating-string);
+    }
+
+    .tok-keyword {
+      color: var(--playground-code-templating-keyword);
+    }
+
+    .tok-variableName {
+      color: var(--playground-code-templating-variable);
+    }
+  }
 }
-.cm-html.cm-quote {
-  color: var(--playground-code-templating-html-quote);
+
+
+/* Fix some missing CM6 tokens by inference */
+.ͼo .tok-operator + .tok-propertyName {
+  color: var(--playground-code-string-2-color);
 }
-.cm-html.cm-string {
-  color: var(--playground-code-templating-html-string);
-}
-.cm-html.cm-templating.cm-string {
-  color: var(--playground-code-templating-html-string);
-}
-.cm-operator.cm-attribute,
-.cm-name.cm-attribute {
-  color: var(--playground-code-templating-attribute);
-}
-.cm-keyword.cm-templating {
-  color: var(--playground-code-templating-keyword);
-}
-.cm-variable.cm-templating {
-  color: var(--playground-code-templating-variable);
-}
-.cm-string.cm-templating {
-  color: var(--playground-code-templating-string);
+.ͼo .tok-operator + .tok-propertyName:last-child,
+.ͼo .tok-operator + .tok-propertyName ~ .tok-propertyName {
+  color: var(--playground-code-callee-color);
 }

@@ -1,6 +1,6 @@
 import { buildBundle } from './build-bundle.js';
 import { buildCDN } from './build-cdn.js';
-import { buildESM } from './build-esm.js';
+import { buildESM, buildPageCSS } from './build-esm.js';
 
 /*
   This exports each individual component from framework
@@ -50,6 +50,14 @@ export const buildUIComponents = async ({
     },
   };
 
+  // Build page CSS for components that have it (depends on build-ui-deps)
+  const pageCSSConfig = {
+    watch,
+    entryPoints: ['./src/primitives/**/page-bundle.css'],
+    entryNames: '[dir]', // icon.css
+    outbase: 'src/primitives',
+  };
+
   if (includeESM) {
     tasks.push(
       buildESM({
@@ -66,6 +74,11 @@ export const buildUIComponents = async ({
         ...behaviorsConfig,
         outdir: 'dist',
         log: { header: 'UI Behaviors', text: 'Build ESM' },
+      }),
+      buildPageCSS({
+        ...pageCSSConfig,
+        outdir: 'dist',
+        log: { header: 'UI Primitives', text: 'Page CSS' },
       }),
     );
   }
@@ -87,6 +100,11 @@ export const buildUIComponents = async ({
         outdir: 'dist/bundle',
         log: { header: 'UI Behaviors', text: 'Build Bundle' },
       }),
+      buildPageCSS({
+        ...pageCSSConfig,
+        outdir: 'dist/bundle',
+        log: { header: 'UI Primitives', text: 'Page CSS Bundle' },
+      }),
     );
   }
 
@@ -106,6 +124,11 @@ export const buildUIComponents = async ({
         ...behaviorsConfig,
         outdir: 'dist/cdn',
         log: { header: 'UI Behaviors', text: 'Build CDN' },
+      }),
+      buildPageCSS({
+        ...pageCSSConfig,
+        outdir: 'dist/cdn',
+        log: { header: 'UI Primitives', text: 'Page CSS CDN' },
       }),
     );
   }

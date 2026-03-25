@@ -16,12 +16,12 @@
   
   .header {
     font-weight: var(--bold);
-    margin-bottom: var(--compact-spacing);
+    margin-bottom: var(--spacing-xs);
   }
 }
 
 @container component (max-width: 600px) {
   .modal {
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
   }
 }

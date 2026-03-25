@@ -1,0 +1,27 @@
+{
+  "name": "@semantic-ui/mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Semantic UI component specs",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "sui-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@semantic-ui/utils": "*",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

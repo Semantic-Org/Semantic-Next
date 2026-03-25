@@ -329,6 +329,38 @@ Indicate feature commonality (1-5):
 
 Scale: 1 = Essential, 2 = Common, 3 = Less Common, 4 = Rare, 5 = Exceptionally Rare
 
+#### Compound Aliases
+
+When two variations share option values (e.g., `size: small` and `padding: small`), use `compoundAliases: true` to enable disambiguation syntax:
+
+```javascript
+variations: [
+  {
+    name: 'Size',
+    attribute: 'size',
+    compoundAliases: true,  // enables size-small and small-size syntax
+    options: [
+      { name: 'Small', value: 'small' },
+      { name: 'Large', value: 'large' },
+    ],
+  },
+  {
+    name: 'Padding',
+    attribute: 'padding',
+    compoundAliases: true,
+    options: [
+      { name: 'Small', value: 'small' },
+      { name: 'Large', value: 'large' },
+    ],
+  },
+]
+```
+
+This allows users to disambiguate with compound attributes:
+- `<ui-foo size-small>` or `<ui-foo small-size>` → `size="small"`
+- `<ui-foo padding-small>` or `<ui-foo small-padding>` → `padding="small"`
+
+Either ordering works, similar to how English allows flexible adjective ordering.
 
 ## Building Component Specs
 
