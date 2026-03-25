@@ -1,5 +1,4 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each } from '@semantic-ui/utils';
 
 import { todoFooter } from './todo-footer.js';
 import { todoHeader } from './todo-header.js';
@@ -9,18 +8,12 @@ const css = await getText('./component.css');
 const template = await getText('./component.html');
 
 const createComponent = ({ self, signal, $ }) => ({
-  // global state
   todos: signal([]),
   filter: signal('all'),
 
   getVisibleTodos() {
     const filter = self.filter.get();
     const todos = self.todos.get();
-    each(todos, (todo) => {
-      if (!todo._id) {
-        todo._id = todo.text;
-      }
-    });
     return todos.filter((todo) => {
       if (filter == 'active') {
         return !todo.completed;
@@ -45,7 +38,6 @@ const createComponent = ({ self, signal, $ }) => ({
     self.todos.setArrayProperty('completed', false);
   },
 
-  // handle state
   getRouteFilter() {
     return window.location.hash.substring(2) || 'all'; // #/foo
   },
@@ -59,7 +51,6 @@ const onRendered = ({ self, isClient }) => {
     self.setRouteFilter();
   }
 };
-
 
 const events = {
   'global hashchange window'({ self }) {

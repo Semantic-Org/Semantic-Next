@@ -3,28 +3,28 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./todo-footer.css');
 const template = await getText('./todo-footer.html');
 
-const createComponent = ({ self, findParent, $ }) => ({
+const defaultSettings = {
+  todos: [],
+  currentFilter: null,
+};
+
+const createComponent = ({ self, findParent, $, settings }) => ({
   filters: ['all', 'active', 'complete'],
 
-  todoList() {
-    return findParent('todoList');
-  },
-
   getIncompleteCount() {
-    const todos = self.todoList().todos.get();
-    return todos.filter((todo) => !todo.completed)?.length;
+    return settings.todos.filter((todo) => !todo.completed)?.length;
   },
 
   hasAnyCompleted() {
-    return self.todoList().todos.get().some((todo) => todo.completed);
+    return settings.todos.some((todo) => todo.completed);
   },
 
   isActiveFilter(filter) {
-    return self.todoList().filter.get() == filter;
+    return settings.currentFilter == filter;
   },
 
   setFilter(filter) {
-    self.todoList().filter.set(filter);
+    settings.filter.set(filter);
   },
 
   scrollToBottom() {
@@ -33,7 +33,7 @@ const createComponent = ({ self, findParent, $ }) => ({
   },
 
   clearCompleted() {
-    self.todoList().todos.filter((todo) => !todo.completed);
+    settings.todos.filter((todo) => !todo.completed);
   },
 });
 
@@ -48,6 +48,7 @@ const todoFooter = defineComponent({
   template,
   css,
   createComponent,
+  defaultSettings,
   events,
 });
 

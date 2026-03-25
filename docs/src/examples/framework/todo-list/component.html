@@ -8,12 +8,12 @@
       <label class="toggle-all-label" htmlFor="toggle-all">Toggle All Input</label>
     </div>
     <ul class="todo-list">
-      {#each todo in getVisibleTodos}
+      {#each todo, index in getVisibleTodos}
         {>todoItem todo=todo index=index}
       {/each}
     </ul>
   </main>
   <footer class="footer">
-    {>todoFooter}
+    {>todoFooter todos=todos currentFilter=filter}
   </footer>
 </div>

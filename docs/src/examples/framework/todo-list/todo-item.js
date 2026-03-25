@@ -2,6 +2,10 @@ import { defineComponent, getText } from '@semantic-ui/component';
 const css = await getText('./todo-item.css');
 const template = await getText('./todo-item.html');
 
+const defaultSettings = {
+  todo: null, // this todo
+};
+
 const createComponent = ({ self, settings, signal, findParent, $ }) => ({
   editing: signal(false),
   getClasses() {
@@ -55,8 +59,8 @@ const todoItem = defineComponent({
   templateName: 'todoItem',
   template,
   css,
-  defaultSettings: { todo: null },
   createComponent,
+  defaultSettings,
   events,
 });
 
