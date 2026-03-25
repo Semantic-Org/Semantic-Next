@@ -7,6 +7,9 @@ import { inArray, isArray, isClient, isObject, isServer } from '@semantic-ui/uti
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
+// attrs whose DOM property diverges from the HTML attribute after user interaction
+const PROPERTY_SYNCED_ATTRS = ['checked', 'selected', 'value'];
+
 export class ReactiveDataDirective extends AsyncDirective {
   constructor(partInfo) {
     super(partInfo);
@@ -80,21 +83,18 @@ export class ReactiveDataDirective extends AsyncDirective {
       }
     }
 
-    // After user interaction, boolean attributes like checked/selected
-    // diverge from their DOM properties — toggling the attribute alone
-    // won't update the element's state, so we sync the property directly
+    // HTML attrs like checked/selected diverge from DOM properties after
+    // user interaction — setting the attribute alone won't update the element
     this.syncProperty(!!reactiveValue);
 
     return this.formatForPart(reactiveValue);
   }
 
-  // After user interaction, boolean attrs like checked/selected diverge
-  // from their DOM properties — sync the property to match
   syncProperty(value) {
     const name = this.partInfo.name;
-    if (inArray(name, ['checked', 'selected'])) {
+    if (inArray(name, PROPERTY_SYNCED_ATTRS)) {
       const el = this.__part?.element;
-      if (el) {
+      if (el && el[name] !== value) {
         el[name] = value;
       }
     }
