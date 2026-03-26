@@ -13,6 +13,7 @@ const BASE_DIR = process.env.BASE_DIR || process.cwd();
 const DOCS_PACKAGES_DIR = path.resolve(BASE_DIR, 'docs/public/packages');
 
 const packages = [
+  'compiler',
   'component',
   'query',
   'reactivity',

@@ -235,6 +235,7 @@
     },
     "build:packages": {
       "dependencies": [
+        "./packages/compiler:build",
         "./packages/component:build",
         "./packages/query:build",
         "./packages/reactivity:build",
