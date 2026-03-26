@@ -1,1 +1,1 @@
-export { Spinner } from './spinner.js';
+export { UISpinner } from './spinner.js';
