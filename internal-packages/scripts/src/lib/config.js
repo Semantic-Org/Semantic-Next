@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'fs';
+import { join, resolve } from 'path';
+
 // package is package.json
 export const getBanner = (packageFile) =>
   `/**
@@ -72,10 +75,71 @@ export const CSS_BUILD_CONFIG = {
   },
 };
 
-/* Used when generating CDNized copy (note these are identical to defaults) */
+const SUI_SCOPE = '@semantic-ui/';
+
+/* Resolve a package's CDN entrypoint from its local package.json */
+function resolveEntrypointFromPackageJson(packageName) {
+  // Walk up from cwd to find node_modules containing this package
+  const pkgPath = join(process.cwd(), 'node_modules', ...packageName.split('/'), 'package.json');
+  if (!existsSync(pkgPath)) {
+    // Try the monorepo root node_modules
+    const rootPkgPath = resolve(process.cwd(), '../../node_modules', ...packageName.split('/'), 'package.json');
+    if (!existsSync(rootPkgPath)) {
+      return null;
+    }
+    return readEntryFromPackageJson(rootPkgPath);
+  }
+  return readEntryFromPackageJson(pkgPath);
+}
+
+function readEntryFromPackageJson(pkgPath) {
+  try {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const mainExport = pkg.exports?.['.'];
+    if (mainExport && typeof mainExport === 'object') {
+      // Prefer cdn/jsdelivr/importmap export conditions for CDN format
+      const entry = mainExport.cdn
+        || mainExport.jsdelivr
+        || mainExport.importmap
+        || (typeof mainExport.browser === 'string' ? mainExport.browser : null)
+        || (typeof mainExport.import === 'string' ? mainExport.import : null)
+        || (typeof mainExport.default === 'string' ? mainExport.default : null);
+      if (entry) {
+        return entry.replace(/^\.\//, '');
+      }
+    }
+    // Fall back to top-level fields
+    const entry = pkg.cdn || pkg.jsdelivr || pkg.browser || pkg.module || pkg.main;
+    if (entry) {
+      return (typeof entry === 'string') ? entry.replace(/^\.\//, '') : null;
+    }
+  }
+  catch { /* fall through */ }
+  return null;
+}
+
+/* CDN config for cdn.semantic-ui.com */
 export const CDN_CONFIG = {
-  cdnRoot: 'https://cdn.jsdelivr.net/npm',
-  directReplacements: {},
+  cdnRoot: process.env.CDN_ROOT || 'https://cdn.semantic-ui.com',
   cacheDir: '.cache',
   logging: 'silent',
+  directReplacements: {},
+
+  // SUI packages use a clean {name}.min.js convention
+  // Third-party resolves from local package.json exports
+  resolveEntrypoint(packageName) {
+    if (packageName.startsWith(SUI_SCOPE)) {
+      const name = packageName.slice(SUI_SCOPE.length);
+      return `${name}.min.js`;
+    }
+    return resolveEntrypointFromPackageJson(packageName);
+  },
+
+  // SUI packages drop the scope, third-party gets /vendor/ prefix
+  resolvePackagePath(packageName) {
+    if (packageName.startsWith(SUI_SCOPE)) {
+      return packageName.slice(SUI_SCOPE.length);
+    }
+    return `vendor/${packageName}`;
+  },
 };
