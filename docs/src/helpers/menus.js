@@ -186,7 +186,7 @@ const exampleCategoryMenus = exampleCategorySortOrder.map(category => {
 export const topbarDisplayMenu = [
   {
     _id: 'ui',
-    _ids: ['start', 'css', 'primitives', 'components', 'behaviors'],
+    _ids: ['start', /* 'css', */ 'primitives' /* 'components', 'behaviors' */],
     name: 'UI Framework',
     url: '/ui/start',
   },
@@ -225,19 +225,19 @@ export const topbarMenu = [
     icon: 'zap',
     url: '/ui/start',
   },
-  {
+  /*{
     _id: 'css',
     name: 'Styling',
     icon: 'theme',
     url: '/ui/css',
-  },
+  },*/
   {
     _id: 'primitives',
     name: 'Primitives',
     icon: 'layers',
     url: '/ui/primitives',
   },
-  {
+  /*{
     _id: 'components',
     name: 'Components',
     icon: 'package',
@@ -248,7 +248,7 @@ export const topbarMenu = [
     name: 'Behaviors',
     icon: 'cpu',
     url: '/ui/behaviors',
-  },
+  },*/
   // API Docs
   {
     _id: 'framework',
@@ -299,9 +299,9 @@ export const sidebarMenuStart = [
     name: "What's New?",
     icon: 'sparkles',
     url: '/ui/start/whats-new',
-    description: '0.12.0',
+    description: '0.18.0',
   },
-  {
+  /*{
     name: 'Roadmap',
     icon: 'calendar',
     url: '/ui/roadmap',
@@ -374,12 +374,12 @@ export const sidebarMenuStart = [
         url: '/ui/start/philosophy/project',
       },
     ],
-  },
+  },*/
 ];
 
-/* CSS Token Sidebar */
+/* CSS Token Sidebar — hidden until token/concept pages are written */
 export const sidebarMenuCSS = [
-  {
+  /*{
     name: 'CSS Tokens',
     url: '/ui/css/tokens',
     icon: 'theme',
@@ -440,7 +440,7 @@ export const sidebarMenuCSS = [
         url: '/ui/css/concepts/sizes',
       },
     ],
-  },
+  },*/
 ];
 
 /* Primitive Sidebar */
@@ -453,24 +453,24 @@ export const sidebarMenuPrimitives = [
   },
 ];
 
-/* Component Sidebar */
+/* Component Sidebar — hidden until component docs are written */
 export const sidebarMenuComponents = [
-  {
+  /*{
     name: 'Components',
     url: '/ui/components',
     icon: 'package',
     pages: componentPages,
-  },
+  },*/
 ];
 
-/* Behavior Sidebar */
+/* Behavior Sidebar — hidden until behavior docs are written */
 export const sidebarMenuBehaviors = [
-  {
+  /*{
     name: 'Behaviors',
     url: '/ui/behaviors',
     icon: 'cpu',
     pages: behaviorPages,
-  },
+  },*/
 ];
 
 /* Component Framework Sidebar — re-exported from standalone file */
