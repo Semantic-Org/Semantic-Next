@@ -1,13 +1,13 @@
-name: Deploy CDN
+name: Deploy CDN Canary
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 concurrency:
-  group: cdn-deploy
-  cancel-in-progress: false
+  group: cdn-canary
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -31,20 +31,10 @@ jobs:
       - name: Install CDN tools
         run: cd tools/cdn && npm ci
 
-      - name: Extract version
-        id: version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Upload to R2
+      - name: Upload canary to R2
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: cd tools/cdn && node upload.js --version ${{ steps.version.outputs.version }} --latest
-
-      - name: Deploy Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.R2_TOKEN_VALUE }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: cd tools/cdn && npx wrangler deploy
+        run: cd tools/cdn && node upload.js --version canary

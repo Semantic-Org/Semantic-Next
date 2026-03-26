@@ -1,0 +1,10 @@
+name = "cdn"
+main = "worker/index.js"
+compatibility_date = "2024-12-01"
+
+[vars]
+CDN_VERSION = "latest"
+
+[[r2_buckets]]
+binding = "CDN_BUCKET"
+bucket_name = "semantic-ui-cdn"
