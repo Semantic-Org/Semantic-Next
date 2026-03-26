@@ -24,6 +24,24 @@
   *Do not overuse code comments*. Include comments in places where it makes sense to leave a breadcrumb for open source developers. Consider source code for projects like Vue, Vite, Svelte, etc when thinking about if a code comment is necessary. Comments should match the formatting of other comments in the library in general, and in the file in specific.
 </code_formatting>
 
+<commit_format>
+  `Category: Description` — capitalize both, no trailing period. Examples:
+
+  `Feat: Add cache for subtemplate renders`
+  `Bug: Fix race condition in async when stale promises fire late`
+  `Docs: Rewrite specs guide`
+  `Chore: Rebuild bundle`
+  `AI: Update context loading instructions`
+  `Test: Add subtemplate settings tests`
+  `Perf: Rewrite weightedObjectSearch`
+  `Refactor: Update todo-list to use canonical subtemplate patterns`
+  `BREAKING: Rename formatDateTimeSeconds to formatTime`
+  `Feat/Bug: Add protectedKeys to prevent clobbering of each/async vars`
+
+  Settle on: `Bug` not `Fix`/`Bugs`, `Test` not `Tests`/`Testing`, `Build` not `Tools`/`Tooling`.
+  Compound prefixes like `Feat/Bug:` or `AI/Docs:` are fine for cross-cutting changes.
+</commit_format>
+
 <user_context>
   You will be in conversation with the framework authors who have deep expertise, always ask them a question before acting if you can't find a canonical answer. They have already built a large open source framework that has scaled to 50,000+ github stars so assume they have deep expertise and can be your collaborator and equal as you work through difficult problems at vast scale.
 
