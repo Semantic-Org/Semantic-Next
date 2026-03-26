@@ -29,6 +29,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          CDN_CHANNEL: canary
         run: npm run build
 
       - name: Install CDN tools

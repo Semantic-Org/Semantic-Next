@@ -133,6 +133,14 @@ export const CDN_CONFIG = {
     return resolveEntrypointFromPackageJson(packageName);
   },
 
+  // Canary builds rewrite SUI versions to 'canary'
+  resolveVersion(packageName, declaredVersion) {
+    if (process.env.CDN_CHANNEL === 'canary' && packageName.startsWith(SUI_SCOPE)) {
+      return 'canary';
+    }
+    return declaredVersion;
+  },
+
   // SUI packages drop the scope, third-party gets /vendor/ prefix
   resolvePackagePath(packageName) {
     if (packageName.startsWith(SUI_SCOPE)) {
