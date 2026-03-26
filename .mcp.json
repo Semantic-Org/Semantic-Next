@@ -6,7 +6,9 @@
       "args": [
         "tools/mcp/dist/index.js"
       ],
-      "env": {}
+      "env": {
+        "SEMANTIC_UI_DOCS_URL": "https://staging.semantic-ui.com"
+      }
     }
   }
 }
