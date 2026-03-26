@@ -180,15 +180,27 @@ export default {
 
         // No filepath → serve the entry point JS directly
         const resolvedFilepath = filepath || getSuiEntrypoint(name);
-        const r2Key = `@semantic-ui/${name}/${version}/dist/cdn/${resolvedFilepath}`;
-        const object = await env.CDN_BUCKET.get(r2Key);
+        const baseKey = `@semantic-ui/${name}/${version}/dist/cdn/${resolvedFilepath}`;
+
+        // Try exact path first, then with .min.js and .js extensions
+        let object = await env.CDN_BUCKET.get(baseKey);
+        let servedPath = resolvedFilepath;
+        if (!object && !resolvedFilepath.endsWith('.js')) {
+          object = await env.CDN_BUCKET.get(`${baseKey}.min.js`);
+          servedPath = `${resolvedFilepath}.min.js`;
+          if (!object) {
+            object = await env.CDN_BUCKET.get(`${baseKey}.js`);
+            servedPath = `${resolvedFilepath}.js`;
+          }
+        }
+
         if (!object) {
-          return new Response(`Not found: ${r2Key}`, { status: 404 });
+          return new Response(`Not found: ${baseKey}`, { status: 404 });
         }
 
         return new Response(object.body, {
           headers: {
-            'Content-Type': getContentType(resolvedFilepath),
+            'Content-Type': getContentType(servedPath),
             ...corsHeaders(),
             ...cacheHeaders(version),
           },
