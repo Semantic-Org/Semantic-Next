@@ -31,6 +31,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Build vendor CDN
+        run: npm run build:vendor-cdn
+
       - name: Install CDN tools
         run: cd tools/cdn && npm ci
 

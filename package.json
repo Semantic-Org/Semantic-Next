@@ -192,6 +192,7 @@
     "build:docs": "wireit",
     "build:docs-packages": "wireit",
     "build:packages": "wireit",
+    "build:vendor-cdn": "wireit",
     "watch": "wireit",
     "watch:icons": "wireit",
     "publish": "wireit",
@@ -257,6 +258,12 @@
       "command": "node ./internal-packages/scripts/src/copy-docs-packages.js",
       "dependencies": [
         "build"
+      ]
+    },
+    "build:vendor-cdn": {
+      "command": "node ./internal-packages/scripts/src/build-vendor-cdn.js",
+      "dependencies": [
+        "build:packages"
       ]
     },
     "build:clean-directory": {

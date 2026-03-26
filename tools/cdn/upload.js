@@ -31,17 +31,7 @@ function getSuiEntrypoint(name) {
   return `${name}.min.js`;
 }
 
-// Third-party packages to upload (resolved from node_modules)
-const VENDOR_PACKAGES = [
-  'lit',
-  'lit-html',
-  'lit-element',
-  '@lit/reactive-element',
-  '@lit-labs/ssr-dom-shim',
-  'tailwindcss-iso',
-  'tailwindcss',
-  '@pagefind/modular-ui',
-];
+// Vendor packages are discovered from dist/vendor-cdn/ (built by build-vendor-cdn.js)
 
 const CONTENT_TYPES = {
   '.js': 'application/javascript',
@@ -124,14 +114,6 @@ function collectFiles(dir, prefix = '') {
   return files;
 }
 
-function getPackageVersion(packageName) {
-  const pkgPath = join(ROOT, 'node_modules', ...packageName.split('/'), 'package.json');
-  if (!existsSync(pkgPath)) {
-    throw new Error(`Package not found: ${packageName} (looked at ${pkgPath})`);
-  }
-  return JSON.parse(readFileSync(pkgPath, 'utf-8')).version;
-}
-
 // Upload SUI packages
 async function uploadSuiPackages(s3, version, { force = false } = {}) {
   console.log(`\nUploading SUI packages @ ${version}`);
@@ -177,26 +159,54 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
   console.log(`  core CSS uploaded`);
 }
 
-// Upload vendor (third-party) packages
+// Upload vendor packages from pre-built dist/vendor-cdn/
 async function uploadVendorPackages(s3) {
   console.log('\nUploading vendor packages');
 
-  for (const packageName of VENDOR_PACKAGES) {
-    const version = getPackageVersion(packageName);
+  const vendorDir = join(ROOT, 'dist', 'vendor-cdn');
+  if (!existsSync(vendorDir)) {
+    console.warn('  dist/vendor-cdn/ not found — run build-vendor-cdn.js first');
+    return;
+  }
+
+  // Walk dist/vendor-cdn/{package}/{version}/... structure
+  for (const entry of readdirSync(vendorDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) { continue; }
+
+    // Handle scoped packages (@scope/name)
+    const scopeOrName = entry.name;
+    if (scopeOrName.startsWith('@')) {
+      const scopeDir = join(vendorDir, scopeOrName);
+      for (const subEntry of readdirSync(scopeDir, { withFileTypes: true })) {
+        if (!subEntry.isDirectory()) { continue; }
+        const packageName = `${scopeOrName}/${subEntry.name}`;
+        await uploadVendorPackage(s3, vendorDir, packageName);
+      }
+    }
+    else {
+      await uploadVendorPackage(s3, vendorDir, scopeOrName);
+    }
+  }
+}
+
+async function uploadVendorPackage(s3, vendorDir, packageName) {
+  const pkgDir = join(vendorDir, ...packageName.split('/'));
+  // Version is the directory name inside the package dir
+  for (const versionEntry of readdirSync(pkgDir, { withFileTypes: true })) {
+    if (!versionEntry.isDirectory()) { continue; }
+    const version = versionEntry.name;
+    const versionDir = join(pkgDir, version);
     const r2Prefix = `vendor/${packageName}/${version}`;
 
+    const files = collectFiles(versionDir);
+    if (files.length === 0) { continue; }
+
     // Check if already uploaded
-    const checkKey = `${r2Prefix}/package.json`;
-    if (await objectExists(s3, checkKey)) {
+    const firstKey = `${r2Prefix}/${files[0].key}`;
+    if (await objectExists(s3, firstKey)) {
       console.log(`  ${packageName}@${version} — already exists, skipping`);
       continue;
     }
-
-    // Upload the full package directory from node_modules
-    const pkgDir = join(ROOT, 'node_modules', ...packageName.split('/'));
-    const files = collectFiles(pkgDir)
-      .filter(f => !f.key.startsWith('node_modules/'))
-      .filter(f => !f.key.startsWith('.'));
 
     for (const file of files) {
       const key = `${r2Prefix}/${file.key}`;

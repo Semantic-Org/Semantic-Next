@@ -33,6 +33,11 @@ jobs:
           CDN_CHANNEL: canary
         run: npm run build
 
+      - name: Build vendor CDN
+        env:
+          CDN_CHANNEL: canary
+        run: npm run build:vendor-cdn
+
       - name: Install CDN tools
         run: cd tools/cdn && npm ci
 
