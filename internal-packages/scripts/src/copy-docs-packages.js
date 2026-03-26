@@ -1,3 +1,4 @@
+import { readdirSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -7,21 +8,16 @@ import path from 'path';
 
   This allows playground examples to resolve imports from the
   same build rather than relying on a CDN for tagged releases.
+
+  Packages are discovered from packages/*, not hardcoded.
 */
 
 const BASE_DIR = process.env.BASE_DIR || process.cwd();
 const DOCS_PACKAGES_DIR = path.resolve(BASE_DIR, 'docs/public/packages');
 
-const packages = [
-  'component',
-  'query',
-  'reactivity',
-  'renderer',
-  'specs',
-  'tailwind',
-  'templating',
-  'utils',
-];
+const packages = readdirSync(path.resolve(BASE_DIR, 'packages'), { withFileTypes: true })
+  .filter(d => d.isDirectory())
+  .map(d => d.name);
 
 async function copyDir(src, dest) {
   await fs.mkdir(dest, { recursive: true });
@@ -62,9 +58,15 @@ async function copyPackages() {
     }
   }
 
-  // copy each package's bundle dir
+  // copy each package's bundle dir (skip packages without dist/bundle)
   for (const pkg of packages) {
     const pkgSrc = path.resolve(BASE_DIR, 'packages', pkg, 'dist', 'bundle');
+    try {
+      await fs.access(pkgSrc);
+    }
+    catch {
+      continue;
+    }
     const pkgDest = path.resolve(DOCS_PACKAGES_DIR, `@semantic-ui/${pkg}/dist/bundle`);
     await copyDir(pkgSrc, pkgDest);
   }

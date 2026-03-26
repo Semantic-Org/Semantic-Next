@@ -235,6 +235,7 @@
     },
     "build:packages": {
       "dependencies": [
+        "./packages/compiler:build",
         "./packages/component:build",
         "./packages/query:build",
         "./packages/reactivity:build",
@@ -362,7 +363,8 @@
     "packages/*",
     "docs/*",
     "examples/*",
-    "tools/*"
+    "tools/mcp",
+    "tools/devtools"
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
