@@ -122,7 +122,7 @@ const events = {
   },
 };
 
-const UIMenu = defineComponent({
+const Menu = defineComponent({
   tagName: 'ui-menu',
   componentSpec,
   template,
@@ -135,4 +135,4 @@ const UIMenu = defineComponent({
   onRendered,
 });
 
-export { UIMenu };
+export { Menu };

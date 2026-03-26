@@ -72,10 +72,10 @@ import { SpecReader } from '@semantic-ui/specs';
 import buttonSpec from './button.spec.js';
 
 const reader = new SpecReader(buttonSpec);
-console.log(reader.getComponentName()); // 'UIButton'
+console.log(reader.getComponentName()); // 'Button'
 
 const pluralReader = new SpecReader(buttonSpec, { plural: true });
-console.log(pluralReader.getComponentName()); // 'UIButtons'
+console.log(pluralReader.getComponentName()); // 'Buttons'
 ```
 
 ## formatDescription()

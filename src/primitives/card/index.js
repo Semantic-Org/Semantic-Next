@@ -1,2 +1,2 @@
-export { UICard } from './card.js';
-export { UICards } from './plural/cards.js';
+export { Card } from './card.js';
+export { Cards } from './plural/cards.js';

@@ -1,4 +1,4 @@
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 
 import { defineComponent } from '@semantic-ui/component';
 import { get } from '@semantic-ui/utils';

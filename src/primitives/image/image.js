@@ -29,7 +29,7 @@ const onThemeChanged = ({ state, darkMode }) => {
   state.darkMode.set(darkMode);
 };
 
-const UIImage = defineComponent({
+const Image = defineComponent({
   tagName: 'ui-image',
   componentSpec,
   template,
@@ -39,4 +39,4 @@ const UIImage = defineComponent({
   onThemeChanged,
 });
 
-export { UIImage };
+export { Image };

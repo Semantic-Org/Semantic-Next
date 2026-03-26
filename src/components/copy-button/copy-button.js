@@ -1,5 +1,5 @@
 import { Tooltip, Transition } from '../../behaviors/index.js';
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 
 import { defineComponent } from '@semantic-ui/component';
 import { copyText } from '@semantic-ui/utils';

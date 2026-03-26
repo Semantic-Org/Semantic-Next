@@ -1,6 +1,6 @@
 import { defineComponent } from '@semantic-ui/component';
 import { any, clone, isArray, isFunction, openLink } from '@semantic-ui/utils';
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 import css from './nav-menu.css?raw';
 import template from './nav-menu.html?raw';
 

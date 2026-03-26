@@ -6,7 +6,7 @@ import template from './table.html?raw';
 
 const createComponent = ({ $ }) => ({});
 
-const UITable = defineComponent({
+const Table = defineComponent({
   tagName: 'ui-table',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UITable = defineComponent({
   createComponent,
 });
 
-export { UITable };
+export { Table };

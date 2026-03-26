@@ -1,22 +1,22 @@
 ---
 import {
-  UIButton,
-  UIButtons,
-  UICard,
-  UICards,
-  UIContainer,
-  UIDivider,
-  UIIcon,
-  UIImage,
-  UIInput,
-  UILabel,
-  UIMenu,
+  Button,
+  Buttons,
+  Card,
+  Cards,
+  Container,
+  Divider,
+  Icon,
+  Image,
+  Input,
+  Label,
+  Menu,
   MenuItem,
-  UIRail,
-  UISegment,
-  UISegments,
-  UISpinner,
-  UITable,
+  Rail,
+  Segment,
+  Segments,
+  Spinner,
+  Table,
 } from '@semantic-ui/core';
 import { inArray } from '@semantic-ui/utils';
 
@@ -24,80 +24,80 @@ const { name, tagName, attributes } = Astro.props;
 const componentName = tagName || name;
 ---
 
-{inArray(componentName, ['ui-button', 'UIButton']) && (
-  <UIButton {...attributes}>
+{inArray(componentName, ['ui-button', 'Button']) && (
+  <Button {...attributes}>
     <slot />
-  </UIButton>
+  </Button>
 )}
-{inArray(componentName, ['ui-segment', 'UISegment']) && (
-  <UISegment {...attributes}>
+{inArray(componentName, ['ui-segment', 'Segment']) && (
+  <Segment {...attributes}>
     <slot />
-  </UISegment>
+  </Segment>
 )}
-{inArray(componentName, ['ui-segments', 'UISegments']) && (
-  <UISegments {...attributes}>
+{inArray(componentName, ['ui-segments', 'Segments']) && (
+  <Segments {...attributes}>
     <slot />
-  </UISegments>
+  </Segments>
 )}
-{inArray(componentName, ['ui-buttons', 'UIButtons']) && (
-  <UIButtons {...attributes}>
+{inArray(componentName, ['ui-buttons', 'Buttons']) && (
+  <Buttons {...attributes}>
     <slot />
-  </UIButtons>
+  </Buttons>
 )}
-{inArray(componentName, ['ui-card', 'UICard']) && (
-  <UICard {...attributes}>
+{inArray(componentName, ['ui-card', 'Card']) && (
+  <Card {...attributes}>
     <slot />
-  </UICard>
+  </Card>
 )}
-{inArray(componentName, ['ui-cards', 'UICards']) && (
-  <UICards {...attributes}>
+{inArray(componentName, ['ui-cards', 'Cards']) && (
+  <Cards {...attributes}>
     <slot />
-  </UICards>
+  </Cards>
 )}
-{inArray(componentName, ['ui-container', 'UIContainer']) && (
-  <UIContainer {...attributes}>
+{inArray(componentName, ['ui-container', 'Container']) && (
+  <Container {...attributes}>
     <slot />
-  </UIContainer>
+  </Container>
 )}
-{inArray(componentName, ['ui-divider', 'UIDivider']) && (
-  <UIDivider {...attributes}>
+{inArray(componentName, ['ui-divider', 'Divider']) && (
+  <Divider {...attributes}>
     <slot />
-  </UIDivider>
+  </Divider>
 )}
-{inArray(componentName, ['ui-icon', 'UIIcon']) && (
-  <UIIcon {...attributes} />
+{inArray(componentName, ['ui-icon', 'Icon']) && (
+  <Icon {...attributes} />
 )}
-{inArray(componentName, ['ui-image', 'UIImage']) && (
-  <UIImage {...attributes} />
+{inArray(componentName, ['ui-image', 'Image']) && (
+  <Image {...attributes} />
 )}
-{inArray(componentName, ['ui-input', 'UIInput']) && (
-  <UIInput {...attributes} />
+{inArray(componentName, ['ui-input', 'Input']) && (
+  <Input {...attributes} />
 )}
-{inArray(componentName, ['ui-label', 'UILabel']) && (
-  <UILabel {...attributes}>
+{inArray(componentName, ['ui-label', 'Label']) && (
+  <Label {...attributes}>
     <slot />
-  </UILabel>
+  </Label>
 )}
-{inArray(componentName, ['ui-rail', 'UIRail']) && (
-  <UIRail {...attributes}>
+{inArray(componentName, ['ui-rail', 'Rail']) && (
+  <Rail {...attributes}>
     <slot />
-  </UIRail>
+  </Rail>
 )}
-{inArray(componentName, ['ui-menu', 'UIMenu']) && (
-  <UIMenu {...attributes}>
+{inArray(componentName, ['ui-menu', 'Menu']) && (
+  <Menu {...attributes}>
     <slot />
-  </UIMenu>
+  </Menu>
 )}
 {inArray(componentName, ['menu-item', 'MenuItem']) && (
   <MenuItem {...attributes}>
     <slot />
   </MenuItem>
 )}
-{inArray(componentName, ['ui-spinner', 'UISpinner']) && (
-  <UISpinner {...attributes} />
+{inArray(componentName, ['ui-spinner', 'Spinner']) && (
+  <Spinner {...attributes} />
 )}
-{inArray(componentName, ['ui-table', 'UITable']) && (
-  <UITable {...attributes}>
+{inArray(componentName, ['ui-table', 'Table']) && (
+  <Table {...attributes}>
     <slot />
-  </UITable>
+  </Table>
 )}

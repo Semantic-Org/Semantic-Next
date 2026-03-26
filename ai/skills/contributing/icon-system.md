@@ -231,7 +231,7 @@ Moving resolution to a single JS module (`icons.meta.js`) eliminated this redund
 | `icon-bundle.css` | Bundled CSS — definition + theme layers for the shadow DOM |
 | `specs/icon.spec.js` | Spec definition — declares content, variations, states, settings |
 | `specs/icon.component.js` | Auto-generated from spec — the flat attribute map with `optionAttributes` |
-| `index.js` | Exports `UIIcon` |
+| `index.js` | Exports `Icon` |
 
 ### How shorthand attributes work
 

@@ -4,7 +4,7 @@ import css from '../button-bundle.css?raw';
 import componentSpec from '../specs/buttons.component.js';
 import template from './buttons.html?raw';
 
-export const UIButtons = defineComponent({
+export const Buttons = defineComponent({
   tagName: 'ui-buttons',
   singularTag: 'ui-button',
   plural: true,

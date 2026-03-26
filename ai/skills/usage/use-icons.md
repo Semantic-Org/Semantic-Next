@@ -26,7 +26,7 @@ type: skill
 Import the icon component and at least one icon set:
 
 ```js
-import { UIIcon } from '@semantic-ui/core';
+import { Icon } from '@semantic-ui/core';
 import '@semantic-ui/core/icon/sets/lucide.css';
 ```
 

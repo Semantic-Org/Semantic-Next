@@ -1,17 +1,17 @@
 /* Structural */
-export { UIContainer } from './container/index.js';
-export { UIRail } from './rail/index.js';
+export { Container } from './container/index.js';
+export { Rail } from './rail/index.js';
 
 /* Primitives */
-export { UIButton, UIButtons } from './button/index.js';
-export { UICard, UICards } from './card/index.js';
-export { UIDivider } from './divider/index.js';
-export { UIIcon } from './icon/index.js';
-export { UIImage } from './image/index.js';
-export { UIInput } from './input/index.js';
-export { UILabel } from './label/index.js';
-export { MenuItem, UIMenu } from './menu/index.js';
-export { UIModal } from './modal/index.js';
-export { UISegment, UISegments } from './segment/index.js';
-export { UISpinner } from './spinner/index.js';
-export { UITable } from './table/index.js';
+export { Button, Buttons } from './button/index.js';
+export { Card, Cards } from './card/index.js';
+export { Divider } from './divider/index.js';
+export { Icon } from './icon/index.js';
+export { Image } from './image/index.js';
+export { Input } from './input/index.js';
+export { Label } from './label/index.js';
+export { Menu, MenuItem } from './menu/index.js';
+export { Modal } from './modal/index.js';
+export { Segment, Segments } from './segment/index.js';
+export { Spinner } from './spinner/index.js';
+export { Table } from './table/index.js';

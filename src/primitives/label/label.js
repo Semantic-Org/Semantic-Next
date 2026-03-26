@@ -6,7 +6,7 @@ import componentSpec from './specs/label.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UILabel = defineComponent({
+const Label = defineComponent({
   tagName: 'ui-label',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UILabel = defineComponent({
   createComponent,
 });
 
-export { UILabel };
+export { Label };

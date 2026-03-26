@@ -110,16 +110,16 @@ In Lit, since the underlying web components are built using Lit, you can directl
 
 ```javascript
 import { LitElement, html } from 'lit';
-import { UIButton } from '@semantic-ui/core/components/button';
-import { UIIcon } from '@semantic-ui/core/components/icon';
+import { Button } from '@semantic-ui/core/components/button';
+import { Icon } from '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
-class MyButton extends UIButton {
+class MyButton extends Button {
   // Customize the button component
 }
 
-class MyIcon extends UIIcon {
+class MyIcon extends Icon {
   // Customize the icon component
 }
 
@@ -159,8 +159,8 @@ import '@semantic-ui/core/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
-export const UIButton = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
-export const UIIcon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
+export const Button = React.forwardRef((props, ref) => <ui-button ref={ref} {...props} />);
+export const Icon = React.forwardRef((props, ref) => <ui-icon ref={ref} {...props} />);
 ```
 #### Legacy React
 
@@ -187,8 +187,8 @@ const WebComponentWrapper = React.forwardRef(({ component, ...props }, ref) => {
   return <Component ref={ref} {...props} onEvent={handleEvent} />;
 });
 
-export const UIButton = (props) => <WebComponentWrapper component="ui-button" {...props} />;
-export const UIIcon = (props) => <WebComponentWrapper component="ui-icon" {...props} />;
+export const Button = (props) => <WebComponentWrapper component="ui-button" {...props} />;
+export const Icon = (props) => <WebComponentWrapper component="ui-icon" {...props} />;
 ```
 </TabItem>
 <TabItem label="Angular">
@@ -203,7 +203,7 @@ import '@semantic-ui/core/themes/button.css';
   selector: 'ui-button',
   template: '<ui-button [properties]="properties"></ui-button>',
 })
-export class UIButtonComponent {
+export class ButtonComponent {
   @Input() properties: any;
   @Output() event = new EventEmitter<any>();
 
@@ -227,7 +227,7 @@ import '@semantic-ui/core/themes/icon.css';
   selector: 'ui-icon',
   template: '<ui-icon [properties]="properties"></ui-icon>',
 })
-export class UIIconComponent {
+export class IconComponent {
   @Input() properties: any;
   @Output() event = new EventEmitter<any>();
 
@@ -305,16 +305,16 @@ In Lit, since the web components are already built using Lit, you can directly e
 
 ```javascript
 import { LitElement, html } from 'lit';
-import { UIButton } from '@semantic-ui/core/components/button';
-import { UIIcon } from '@semantic-ui/core/components/icon';
+import { Button } from '@semantic-ui/core/components/button';
+import { Icon } from '@semantic-ui/core/components/icon';
 import '@semantic-ui/core/themes/button.css';
 import '@semantic-ui/core/themes/icon.css';
 
-export class MyButton extends UIButton {
+export class MyButton extends Button {
   // Customize the button component
 }
 
-export class MyIcon extends UIIcon {
+export class MyIcon extends Icon {
   // Customize the icon component
 }
 ```

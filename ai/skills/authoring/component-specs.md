@@ -135,13 +135,13 @@ export default {
   name: 'Button',                 // Display name
   description: 'A button indicates a possible user action',
   tagName: 'ui-button',           // HTML tag name
-  exportName: 'UIButton',         // JavaScript export name
+  exportName: 'Button',            // JavaScript export name
 
   // Plural (collection) support
   supportsPlural: true,
   pluralName: 'Buttons',
   pluralTagName: 'ui-buttons',
-  pluralExportName: 'UIButtons',
+  pluralExportName: 'Buttons',
   pluralDescription: 'Buttons can exist together as a group',
 
   // Component sections
@@ -554,7 +554,7 @@ When a spec is provided to `defineComponent`, it **automatically configures the 
 import componentSpec from './specs/button.component.js';
 
 // 2. Pass to defineComponent - spec drives EVERYTHING
-export const UIButton = defineComponent({
+export const Button = defineComponent({
   tagName: 'ui-button',
   componentSpec,  // ← This configures the entire component API
 

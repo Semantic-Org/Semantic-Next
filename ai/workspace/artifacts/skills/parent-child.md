@@ -196,7 +196,7 @@ Components render into light DOM (no shadow boundary), styled via a stylesheet a
 import { defineComponent } from '@semantic-ui/component';
 import pageCSS from './table-page.css?raw';
 
-const UITable = defineComponent({
+const Table = defineComponent({
   tagName: 'ui-table',
   template: `<table><slot></slot></table>`,
   pageCSS,  // Attaches to document, not shadow DOM
@@ -888,7 +888,7 @@ const template = `
 ```javascript
 // ui-table: Pattern 1 (Light DOM)
 // For basic semantic tables
-const UITable = defineComponent({
+const Table = defineComponent({
   tagName: 'ui-table',
   template: `<table><slot></slot></table>`,
   pageCSS,  // Styles semantic HTML
@@ -1133,7 +1133,7 @@ Can you support multiple approaches?
 
 ```javascript
 // WRONG: Menu that requires JavaScript to render
-const UIMenu = defineComponent({
+const Menu = defineComponent({
   onCreated({ $$, el }) {
     // Build menu structure via DOM manipulation
     const items = self.getItems();
@@ -1184,7 +1184,7 @@ $('ui-data-table').settings({
 
 ```javascript
 // WRONG: Hybrid everything "just in case"
-const UIButton = defineComponent({
+const Button = defineComponent({
   defaultSettings: {
     items: [],  // Configuration
   },

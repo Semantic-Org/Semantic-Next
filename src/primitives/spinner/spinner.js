@@ -6,7 +6,7 @@ import template from './spinner.html?raw';
 
 const createComponent = ({ $ }) => ({});
 
-const UISpinner = defineComponent({
+const Spinner = defineComponent({
   tagName: 'ui-spinner',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UISpinner = defineComponent({
   createComponent,
 });
 
-export { UISpinner };
+export { Spinner };

@@ -3,7 +3,7 @@ export default {
   name: 'Container',
   description: 'A container limits content to a maximum width',
   tagName: 'ui-container',
-  exportName: 'UIContainer',
+  exportName: 'Container',
   content: [],
   types: [],
   variations: [],

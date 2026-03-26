@@ -1,1 +1,1 @@
-export { UILabel } from './label.js';
+export { Label } from './label.js';

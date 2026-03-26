@@ -116,7 +116,7 @@ export default {
   name: 'Divider',
   description: 'A divider visually segments content into groups',
   tagName: 'ui-divider',
-  exportName: 'UIDivider',
+  exportName: 'Divider',
 
   content: [
     {
@@ -147,7 +147,7 @@ import { SIZE_VARIATION } from '@semantic-ui/specs';
 export default {
   name: 'Label',
   tagName: 'ui-label',
-  exportName: 'UILabel',
+  exportName: 'Label',
 
   variations: [
     {
@@ -242,7 +242,7 @@ Your components import the generated `.component.js` file:
 ```javascript
 import componentSpec from './specs/button.component.js';
 
-export const UIButton = defineComponent({
+export const Button = defineComponent({
   tagName: 'ui-button',
   componentSpec,  // Generated from button.spec.js
   template,
@@ -263,7 +263,7 @@ Every spec needs these properties:
   name: 'Button',              // Display name
   description: 'A button...',  // What it does
   tagName: 'ui-button',        // HTML tag (needs hyphen)
-  exportName: 'UIButton',      // JavaScript export name
+  exportName: 'Button',      // JavaScript export name
 }
 ```
 
@@ -409,7 +409,7 @@ Define collection components:
   supportsPlural: true,
   pluralName: 'Buttons',
   pluralTagName: 'ui-buttons',
-  pluralExportName: 'UIButtons',
+  pluralExportName: 'Buttons',
   pluralDescription: 'Buttons can exist together as a group',
 
   // Which variations the plural shares

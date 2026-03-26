@@ -6,7 +6,7 @@ import componentSpec from './specs/segment.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UISegment = defineComponent({
+const Segment = defineComponent({
   tagName: 'ui-segment',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UISegment = defineComponent({
   createComponent,
 });
 
-export { UISegment };
+export { Segment };

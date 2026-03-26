@@ -8,7 +8,7 @@ export default {
   description: 'A menu item displays an individual selection in a menu',
   parentTag: 'ui-menu',
   tagName: 'menu-item',
-  exportName: 'UIMenuItem',
+  exportName: 'MenuItem',
   content: [
     {
       name: 'Icon',

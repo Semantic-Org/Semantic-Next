@@ -6,7 +6,7 @@ import componentSpec from './specs/rail.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UIRail = defineComponent({
+const Rail = defineComponent({
   tagName: 'ui-rail',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UIRail = defineComponent({
   createComponent,
 });
 
-export { UIRail };
+export { Rail };

@@ -3,7 +3,7 @@ export default {
   "name": "Segment",
   "description": "A segment is used to create a grouping of related content",
   "tagName": "ui-segment",
-  "exportName": "UISegment",
+  "exportName": "Segment",
   "content": [],
   "types": [
     {
@@ -262,7 +262,7 @@ export default {
   "supportsPlural": true,
   "pluralName": "Segments",
   "pluralTagName": "ui-segments",
-  "pluralExportName": "UISegments",
+  "pluralExportName": "Segments",
   "pluralDescription": "Segments can be grouped together",
   "pluralContent": [],
   "pluralSharedTypes": [

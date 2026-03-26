@@ -1,1 +1,1 @@
-export { UIIcon } from './icon.js';
+export { Icon } from './icon.js';

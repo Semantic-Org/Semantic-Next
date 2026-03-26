@@ -1,1 +1,1 @@
-export { UIImage } from './image.js';
+export { Image } from './image.js';
