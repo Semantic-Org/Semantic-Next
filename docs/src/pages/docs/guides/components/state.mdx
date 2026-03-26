@@ -21,7 +21,7 @@ Semantic UI uses its [Signals reactivity system](/docs/guides/reactivity) to man
 
 Default state values are provided via the `defaultState` object when [creating a component](/docs/guides/components/create) using [`defineComponent`](/create#defining-components).
 
-When a component instance is initialized, each property in the `defaultState` object is automatically converted into a reactive [Signal](/docs/guides/reactivity/variables), allowing its value to be tracked and updated.
+When a component instance is initialized, each property in the `defaultState` object is automatically converted into a reactive [Signal](/docs/guides/reactivity/signals), allowing its value to be tracked and updated.
 
 ```js
 const defaultState = {
@@ -61,7 +61,7 @@ const createComponent = ({state}) => ({
 });
 ```
 
-> **Flexible Syntax** Both `.value` and `.get()` can be used to read a signal's current value within component logic. See [Reactivity Basics](/docs/guides/reactivity/variables) for details. Note that accessing state within a [Reaction](/docs/guides/reactivity) establishes a dependency.
+> **Flexible Syntax** Both `.value` and `.get()` can be used to read a signal's current value within component logic. See [Reactivity Basics](/docs/guides/reactivity/signals) for details. Note that accessing state within a [Reaction](/docs/guides/reactivity) establishes a dependency.
 
 ### Accessing in Templates
 

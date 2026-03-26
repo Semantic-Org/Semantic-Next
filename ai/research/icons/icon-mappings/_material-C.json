@@ -1,0 +1,270 @@
+{
+  "filter": {
+    "value": "filter_list",
+    "reason": "Material Symbols' 'filter_list' is the standard funnel/filter icon used for filtering results"
+  },
+  "sort": {
+    "value": "sort",
+    "reason": "Direct name match in Material Symbols, shows stacked horizontal lines of varying length for sorting"
+  },
+  "list": {
+    "value": "list",
+    "reason": "Direct name match in Material Symbols, shows a list layout with horizontal lines and bullet points"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct name match in Material Symbols, shows a grid/spreadsheet table layout"
+  },
+  "grid": {
+    "value": "grid_view",
+    "reason": "Material Symbols' 'grid_view' shows a 2x2 grid of squares, the standard card/grid view icon"
+  },
+  "chart-bar": {
+    "value": "bar_chart",
+    "reason": "Material Symbols' 'bar_chart' shows vertical bars of varying heights, the standard bar chart icon"
+  },
+  "chart-line": {
+    "value": "show_chart",
+    "reason": "Material Symbols' 'show_chart' shows a line graph trending upward, the standard line chart/analytics icon"
+  },
+  "chart-pie": {
+    "value": "pie_chart",
+    "reason": "Direct semantic match in Material Symbols, shows a circle divided into segments for pie chart/statistics"
+  },
+  "view": {
+    "value": "visibility",
+    "reason": "Material Symbols' 'visibility' is the standard open-eye icon for show/visible state"
+  },
+  "hide": {
+    "value": "visibility_off",
+    "reason": "Material Symbols' 'visibility_off' is the standard eye-with-slash icon for hide/invisible state"
+  },
+  "search": {
+    "value": "search",
+    "reason": "Direct name match in Material Symbols, the standard magnifying glass search icon"
+  },
+  "zoom-in": {
+    "value": "zoom_in",
+    "reason": "Direct name match in Material Symbols, magnifying glass with a plus sign"
+  },
+  "zoom-out": {
+    "value": "zoom_out",
+    "reason": "Direct name match in Material Symbols, magnifying glass with a minus sign"
+  },
+  "fullscreen": {
+    "value": "fullscreen",
+    "reason": "Direct name match in Material Symbols, shows four outward-pointing corner arrows for maximize/fullscreen"
+  },
+  "exit-fullscreen": {
+    "value": "fullscreen_exit",
+    "reason": "Material Symbols' 'fullscreen_exit' shows four inward-pointing corner arrows for minimize/exit fullscreen"
+  },
+  "board": {
+    "value": "view_kanban",
+    "reason": "Material Symbols' 'view_kanban' shows a kanban board layout with vertical columns, direct match for board/kanban view"
+  },
+  "activity": {
+    "value": "monitoring",
+    "reason": "Material Symbols' 'monitoring' shows a chart with a pulse-like line, representing activity monitoring and analytics"
+  },
+  "success": {
+    "value": "check_circle",
+    "reason": "Material Symbols' 'check_circle' is a checkmark inside a circle, the universal success/complete indicator"
+  },
+  "error": {
+    "value": "error",
+    "reason": "Direct name match in Material Symbols, shows an exclamation mark inside a circle for error alerts"
+  },
+  "warning": {
+    "value": "warning",
+    "reason": "Direct name match in Material Symbols, shows an exclamation mark inside a triangle for warning alerts"
+  },
+  "info": {
+    "value": "info",
+    "reason": "Direct name match in Material Symbols, shows the letter 'i' inside a circle for information"
+  },
+  "help": {
+    "value": "help",
+    "reason": "Direct name match in Material Symbols, shows a question mark inside a circle for help/FAQ"
+  },
+  "loading": {
+    "value": "progress_activity",
+    "reason": "Material Symbols' 'progress_activity' is the circular loading/spinner indicator, the standard loading state icon"
+  },
+  "filled-circle": {
+    "value": "radio_button_checked",
+    "reason": "Material Symbols' 'radio_button_checked' shows a filled circle inside a ring, the standard active/selected radio state"
+  },
+  "empty-circle": {
+    "value": "radio_button_unchecked",
+    "reason": "Material Symbols' 'radio_button_unchecked' shows an empty circle outline, the standard inactive/unselected radio state"
+  },
+  "verified": {
+    "value": "verified",
+    "reason": "Direct name match in Material Symbols, shows a checkmark inside a shield/badge shape for verified status"
+  },
+  "smile": {
+    "value": "sentiment_satisfied",
+    "reason": "Material Symbols' 'sentiment_satisfied' shows a smiling face, the standard happy/satisfied emoji icon"
+  },
+  "frown": {
+    "value": "sentiment_dissatisfied",
+    "reason": "Material Symbols' 'sentiment_dissatisfied' shows a frowning face, the standard sad/dissatisfied emoji icon"
+  },
+  "tip": {
+    "value": "lightbulb",
+    "reason": "Material Symbols' 'lightbulb' is the universal symbol for ideas, tips, and hints"
+  },
+  "fire": {
+    "value": "local_fire_department",
+    "reason": "Material Symbols' 'local_fire_department' shows a flame icon, the best match for hot/trending/fire concept"
+  },
+  "support": {
+    "value": "support",
+    "reason": "Direct name match in Material Symbols, shows a lifebuoy/life ring icon for support and assistance"
+  },
+  "like": {
+    "value": "favorite",
+    "reason": "Material Symbols' 'favorite' is a filled heart icon, the standard like/heart symbol"
+  },
+  "unlike": {
+    "value": "heart_broken",
+    "reason": "Material Symbols' 'heart_broken' shows a broken heart, the standard unlike/heartbreak icon"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct name match in Material Symbols, a five-pointed star for favorite/rating"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Direct name match in Material Symbols, a bookmark/ribbon icon for save-for-later"
+  },
+  "thumbs-up": {
+    "value": "thumb_up",
+    "reason": "Material Symbols' 'thumb_up' is the standard thumbs-up icon for upvote/approval"
+  },
+  "thumbs-down": {
+    "value": "thumb_down",
+    "reason": "Material Symbols' 'thumb_down' is the standard thumbs-down icon for downvote/disapproval"
+  },
+  "reply": {
+    "value": "reply",
+    "reason": "Direct name match in Material Symbols, shows a curved left-pointing arrow for replying"
+  },
+  "comment": {
+    "value": "comment",
+    "reason": "Direct name match in Material Symbols, shows a speech bubble for comments/messages"
+  },
+  "comments": {
+    "value": "forum",
+    "reason": "Material Symbols' 'forum' shows overlapping speech bubbles, representing multiple comments/discussion"
+  },
+  "typing": {
+    "value": "more_horiz",
+    "reason": "Material Symbols' 'more_horiz' shows three horizontal dots, commonly used as a typing indicator in chat UIs"
+  },
+  "mention": {
+    "value": "alternate_email",
+    "reason": "Material Symbols' 'alternate_email' shows the @ symbol, the standard mention/at-sign icon"
+  },
+  "block": {
+    "value": "block",
+    "reason": "Direct name match in Material Symbols, shows a circle with a diagonal line through it for block/ban"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct name match in Material Symbols, a flag icon for reporting/flagging content"
+  },
+  "pin": {
+    "value": "push_pin",
+    "reason": "Material Symbols' 'push_pin' shows a thumbtack/pushpin, the standard icon for pinning items"
+  },
+  "award": {
+    "value": "military_tech",
+    "reason": "Material Symbols' 'military_tech' shows a medal with a ribbon, representing badges and awards"
+  },
+  "trophy": {
+    "value": "emoji_events",
+    "reason": "Material Symbols' 'emoji_events' shows a trophy cup, the standard achievement/winner icon"
+  },
+  "gift": {
+    "value": "card_giftcard",
+    "reason": "Material Symbols' 'card_giftcard' shows a gift card with a ribbon, the closest match for gift/reward/present"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct name match in Material Symbols, shows a target/bullseye icon for goal/target concept"
+  },
+  "bold": {
+    "value": "format_bold",
+    "reason": "Material Symbols' 'format_bold' shows a bold letter 'B', the standard bold text formatting icon"
+  },
+  "italic": {
+    "value": "format_italic",
+    "reason": "Material Symbols' 'format_italic' shows an italic letter 'I', the standard italic text formatting icon"
+  },
+  "underline": {
+    "value": "format_underlined",
+    "reason": "Material Symbols' 'format_underlined' shows an underlined letter 'U', the standard underline text formatting icon"
+  },
+  "strikethrough": {
+    "value": "format_strikethrough",
+    "reason": "Material Symbols' 'format_strikethrough' shows a struck-through letter 'S', the standard strikethrough icon"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct name match in Material Symbols, shows angle brackets <> for code/programming snippets"
+  },
+  "quote": {
+    "value": "format_quote",
+    "reason": "Material Symbols' 'format_quote' shows quotation marks, the standard blockquote icon"
+  },
+  "heading": {
+    "value": "title",
+    "reason": "Material Symbols' 'title' shows a 'T' with formatting lines, the standard heading/title icon for text editors"
+  },
+  "paragraph": {
+    "value": "notes",
+    "reason": "Material Symbols' 'notes' shows horizontal lines representing paragraph text, the closest match for paragraph body text"
+  },
+  "bullet-list": {
+    "value": "format_list_bulleted",
+    "reason": "Material Symbols' 'format_list_bulleted' shows bulleted list lines, the standard unordered list icon"
+  },
+  "numbered-list": {
+    "value": "format_list_numbered",
+    "reason": "Material Symbols' 'format_list_numbered' shows numbered list lines, the standard ordered list icon"
+  },
+  "checklist": {
+    "value": "checklist",
+    "reason": "Direct name match in Material Symbols, shows a list with checkboxes for todo/checklist"
+  },
+  "indent": {
+    "value": "format_indent_increase",
+    "reason": "Material Symbols' 'format_indent_increase' shows lines shifting right, the standard indent text icon"
+  },
+  "outdent": {
+    "value": "format_indent_decrease",
+    "reason": "Material Symbols' 'format_indent_decrease' shows lines shifting left, the standard outdent/decrease indent icon"
+  },
+  "align-left": {
+    "value": "format_align_left",
+    "reason": "Material Symbols' 'format_align_left' shows left-aligned lines, the standard left alignment icon"
+  },
+  "align-center": {
+    "value": "format_align_center",
+    "reason": "Material Symbols' 'format_align_center' shows center-aligned lines, the standard center alignment icon"
+  },
+  "align-right": {
+    "value": "format_align_right",
+    "reason": "Material Symbols' 'format_align_right' shows right-aligned lines, the standard right alignment icon"
+  },
+  "justify": {
+    "value": "format_align_justify",
+    "reason": "Material Symbols' 'format_align_justify' shows fully justified lines, the standard justify alignment icon"
+  },
+  "emoji": {
+    "value": "emoji_emotions",
+    "reason": "Material Symbols' 'emoji_emotions' shows a smiley face, the standard emoji picker icon"
+  }
+}

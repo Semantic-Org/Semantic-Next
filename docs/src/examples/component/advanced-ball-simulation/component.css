@@ -12,7 +12,7 @@
   }
   input {
    vertical-align: middle;
-    margin-left: var(--compact-spacing);
+    margin-left: var(--margin-xs);
   }
 }
 

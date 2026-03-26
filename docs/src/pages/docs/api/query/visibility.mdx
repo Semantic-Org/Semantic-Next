@@ -4,6 +4,8 @@ pageType: 'API Reference'
 title: Query - Visibility
 icon: eye-off
 description: API reference for Query methods related to element visibility control
+package: "@semantic-ui/query"
+methods: ["show", "hide", "toggle", "naturalDisplay", "isVisible", "clippingParent", "offsetParent", "positioningParent", "scrollParent", "isInView"]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
@@ -31,7 +33,7 @@ $('selector').show(options)
 
 ### Returns
 
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
 ### Usage
 
@@ -64,7 +66,7 @@ $('selector').hide()
 
 ### Returns
 
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
 ### Usage
 
@@ -105,7 +107,7 @@ $('selector').toggle(options)
 
 ### Returns
 
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
 ### Usage
 
@@ -238,7 +240,7 @@ $('selector').clippingParent()
 
 ### Returns
 
-A new [Query object](/docs/api/query/basic#the-query-object) containing the clipping parent elements.
+A new [Query object](/docs/api/query/constructor#the-query-object) containing the clipping parent elements.
 
 ### Usage
 
@@ -276,7 +278,7 @@ $('selector').offsetParent()
 
 ### Returns
 
-A new [Query object](/docs/api/query/basic#the-query-object) containing the offset parent elements.
+A new [Query object](/docs/api/query/constructor#the-query-object) containing the offset parent elements.
 
 ### Usage
 
@@ -314,7 +316,7 @@ $('selector').positioningParent(options)
 
 ### Returns
 
-A new [Query object](/docs/api/query/basic#the-query-object) containing the positioning parent elements.
+A new [Query object](/docs/api/query/constructor#the-query-object) containing the positioning parent elements.
 
 ### Usage
 
@@ -370,7 +372,7 @@ $('selector').scrollParent(options)
 
 ### Returns
 
-A new [Query object](/docs/api/query/basic#the-query-object) containing the scroll parent element(s).
+A new [Query object](/docs/api/query/constructor#the-query-object) containing the scroll parent element(s).
 
 ### Usage
 

@@ -138,14 +138,14 @@
 /* src/primitives/label/css/theme/variations/sizing-variables.css */
 @layer label.theme.variations.sizing {
   :host {
-    --label-mini: var(--9px);
-    --label-tiny: var(--10px);
-    --label-small: var(--11px);
+    --label-mini: var(--mini);
+    --label-tiny: var(--tiny);
+    --label-small: var(--small);
     --label-medium: inherit;
-    --label-large: var(--15px);
-    --label-big: var(--16px);
-    --label-huge: var(--18px);
-    --label-massive: var(--24px);
+    --label-large: var(--large);
+    --label-big: var(--big);
+    --label-huge: var(--huge);
+    --label-massive: var(--massive);
   }
 }
 

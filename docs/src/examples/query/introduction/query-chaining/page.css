@@ -1,5 +1,5 @@
 .item {
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   background: var(--standard-5);
   border: var(--border);
   margin: var(--vertically-spaced);
@@ -10,7 +10,7 @@
   }
   
   &.padded {
-    padding: var(--spacing);
+    padding: var(--padding);
     background-color: var(--primary-5);
     color: var(--standard-80);
   }

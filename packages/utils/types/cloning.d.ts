@@ -1,31 +1,36 @@
 /**
  * Object and array cloning utilities
- * @see {@link https://next.semantic-ui.com/api/utils/cloning Cloning Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning Cloning Utilities Documentation}
  */
 
 /**
  * Options for deep cloning
  */
 export interface CloneOptions {
-  /** Preserve custom class instances instead of flattening them to plain objects */
+  /** Preserve DOM nodes by reference instead of cloning them (default: false) */
+  preserveDOM?: boolean;
+  /** Preserve custom class instances by reference instead of flattening to plain objects (default: false) */
   preserveNonCloneable?: boolean;
-  /** Internal seen map for circular reference detection (do not use directly) */
-  seen?: Map<any, any>;
 }
 
 /**
  * Creates a deep clone of a value
- * Handles arrays, objects, dates, maps, sets, and primitive types
- * @see {@link https://next.semantic-ui.com/api/utils/cloning#clone clone}
+ * Handles arrays, objects, dates, regular expressions, maps, sets, DOM nodes, and primitive types
+ * Uses WeakMap for circular reference detection and preserves null-prototype objects
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning#clone clone}
  *
  * @param src - Value to clone
  * @param options - Cloning options
  * @returns Deep clone of the input value
  *
  * @example
- * ```typescript
+ * ```ts
  * const obj = { a: [1, { b: 2 }] };
  * const cloned = clone(obj);
+ *
+ * // Preserve DOM nodes by reference
+ * const withDOM = clone({ el: document.body }, { preserveDOM: true });
+ * // withDOM.el === document.body (same reference)
  *
  * // Preserve custom class instances
  * class MyClass { value = 42; }

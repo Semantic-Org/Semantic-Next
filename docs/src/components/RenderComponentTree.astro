@@ -1,0 +1,33 @@
+---
+import UIComponent from '@components/UIComponent.astro';
+import UIComponentStatic from '@components/UIComponentStatic.astro';
+
+const { nodes = [], isNested = false } = Astro.props;
+
+const selfClosingTags = new Set(['ui-icon', 'ui-input', 'ui-spinner', 'ui-image']);
+
+const Component = isNested ? UIComponentStatic : UIComponent;
+---
+
+{nodes.map((node) => (
+  node.type === 'component' ? (
+    selfClosingTags.has(node.componentName) ? (
+      <Component tagName={node.componentName} attributes={node.attributes} />
+    ) : (
+      <Component tagName={node.componentName} attributes={node.attributes}>
+        {node.children?.length > 0
+          ? <Astro.self nodes={node.children} isNested />
+          : null
+        }
+      </Component>
+    )
+  ) : node.type === 'wrapper' ? (
+    <>
+      <Fragment set:html={`<${node.tag}${node.attributeString ? ' ' + node.attributeString : ''}>`} />
+      <Astro.self nodes={node.children} isNested />
+      <Fragment set:html={`</${node.tag}>`} />
+    </>
+  ) : (
+    <Fragment set:html={node.html} />
+  )
+))}

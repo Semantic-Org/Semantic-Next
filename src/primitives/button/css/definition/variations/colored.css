@@ -2,526 +2,661 @@
        Colors
 --------------------*/
 
+.color.buttons,
+.color.button {
+  --button-background-image: var(--button-colored-background-image);
+}
+
 /*--- Red ---*/
-.red.buttons,
+.red.buttons ::slotted(ui-button),
 .red.button {
+
+  /* Red Button */
+  --button-background-color: var(--button-red);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-red-text-color);
   --button-text-shadow: var(--button-red-text-shadow);
-  --button-background: var(--button-red) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.red.buttons,
-.red.button:hover {
+
+  /* Red Hover */
   --button-hover-color: var(--button-red-text-color);
   --button-hover-text-shadow: var(--button-red-text-shadow);
   --button-hover-background-color: var(--button-red-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.red.buttons,
-.red.button:focus {
+
+  /* Red Focus */
   --button-focus-background-color: var(--button-red-focus);
   --button-focus-color: var(--button-red-text-color);
   --button-focus-text-shadow: var(--button-red-text-shadow);
-}
-.red.buttons,
-.red.button.pressed,
-.red.button:active {
+
+  /* Red Pressed */
   --button-pressed-background-color: var(--button-red-pressed);
   --button-pressed-color: var(--button-red-text-color);
   --button-pressed-text-shadow: var(--button-red-text-shadow);
-}
-.red.buttons .active.button,
-.red.buttons .active.button.pressed,
-.red.buttons .active.button:active,
-.red.active.button,
-.red.button .active.button.pressed,
-.red.button .active.button:active {
-  background-color: var(--button-red-active);
-  color: var(--button-red-text-color);
-  text-shadow: var(--button-red-text-shadow);
-}
 
+  /* Red Active */
+  --button-active-background-color: var(--button-red-pressed);
+  --button-active-color: var(--button-red-text-color);
+  --button-active-text-shadow: var(--button-red-text-shadow);
+
+  /* Red Link */
+  --button-link-text-color: var(--button-red);
+  --button-link-text-color-hover: var(--button-red-hover);
+
+  /* Red Styled */
+  --button-styled-background: var(--red-background-color);
+  --button-styled-color: var(--red-text-color);
+  --button-styled-hover-background: var(--red-5);
+  --button-styled-hover-color: var(--red-text-color-hover);
+  --button-styled-pressed-background: var(--red-10);
+  --button-styled-pressed-color: var(--red-text-color-pressed);
+  --button-styled-active-background: var(--red-10);
+  --button-styled-active-color: var(--red-text-color-pressed);
+
+  /* Red Outlined */
+  --button-outline-border-color: var(--red-border-color);
+}
 
 /*--- Orange ---*/
-
-.orange.buttons,
+.orange.buttons ::slotted(ui-button),
 .orange.button {
+
+  /* Orange Button */
+  --button-background-color: var(--button-orange);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-orange-text-color);
   --button-text-shadow: var(--button-orange-text-shadow);
-  --button-background: var(--button-orange) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.orange.buttons,
-.orange.button:hover {
+
+  /* Orange Hover */
   --button-hover-color: var(--button-orange-text-color);
   --button-hover-text-shadow: var(--button-orange-text-shadow);
   --button-hover-background-color: var(--button-orange-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.orange.buttons,
-.orange.button:focus {
+
+  /* Orange Focus */
   --button-focus-background-color: var(--button-orange-focus);
   --button-focus-color: var(--button-orange-text-color);
   --button-focus-text-shadow: var(--button-orange-text-shadow);
-}
-.orange.buttons,
-.orange.button.pressed,
-.orange.button:active {
+
+  /* Orange Pressed */
   --button-pressed-background-color: var(--button-orange-pressed);
   --button-pressed-color: var(--button-orange-text-color);
   --button-pressed-text-shadow: var(--button-orange-text-shadow);
-}
-.orange.buttons .active.button,
-.orange.buttons .active.button.pressed,
-.orange.buttons .active.button:active,
-.orange.active.button,
-.orange.button .active.button.pressed,
-.orange.button .active.button:active {
-  background-color: var(--button-orange-active);
-  color: var(--button-orange-text-color);
-  text-shadow: var(--button-orange-text-shadow);
+
+  /* Orange Active */
+  --button-active-background-color: var(--button-orange-pressed);
+  --button-active-color: var(--button-orange-text-color);
+  --button-active-text-shadow: var(--button-orange-text-shadow);
+
+  /* Orange Link */
+  --button-link-text-color: var(--button-orange);
+  --button-link-text-color-hover: var(--button-orange-hover);
+
+  /* Orange Styled */
+  --button-styled-background: var(--orange-background-color);
+  --button-styled-color: var(--orange-text-color);
+  --button-styled-hover-background: var(--orange-5);
+  --button-styled-hover-color: var(--orange-text-color-hover);
+  --button-styled-pressed-background: var(--orange-10);
+  --button-styled-pressed-color: var(--orange-text-color-pressed);
+  --button-styled-active-background: var(--orange-10);
+  --button-styled-active-color: var(--orange-text-color-pressed);
+
+  /* Orange Outlined */
+  --button-outline-border-color: var(--orange-border-color);
 }
 
 /*--- Yellow ---*/
-
-.yellow.buttons,
+.yellow.buttons ::slotted(ui-button),
 .yellow.button {
+
+  /* Yellow Button */
+  --button-background-color: var(--button-yellow);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-yellow-text-color);
   --button-text-shadow: var(--button-yellow-text-shadow);
-  --button-background: var(--button-yellow) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.yellow.buttons,
-.yellow.button:hover {
+
+  /* Yellow Hover */
   --button-hover-color: var(--button-yellow-text-color);
   --button-hover-text-shadow: var(--button-yellow-text-shadow);
   --button-hover-background-color: var(--button-yellow-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.yellow.buttons,
-.yellow.button:focus {
+
+  /* Yellow Focus */
   --button-focus-background-color: var(--button-yellow-focus);
   --button-focus-color: var(--button-yellow-text-color);
   --button-focus-text-shadow: var(--button-yellow-text-shadow);
-}
-.yellow.buttons,
-.yellow.button.pressed,
-.yellow.button:active {
+
+  /* Yellow Pressed */
   --button-pressed-background-color: var(--button-yellow-pressed);
   --button-pressed-color: var(--button-yellow-text-color);
   --button-pressed-text-shadow: var(--button-yellow-text-shadow);
-}
-.yellow.buttons .active.button,
-.yellow.buttons .active.button.pressed,
-.yellow.buttons .active.button:active,
-.yellow.active.button,
-.yellow.button .active.button.pressed,
-.yellow.button .active.button:active {
-  background-color: var(--button-yellow-active);
-  color: var(--button-yellow-text-color);
-  text-shadow: var(--button-yellow-text-shadow);
+
+  /* Yellow Active */
+  --button-active-background-color: var(--button-yellow-pressed);
+  --button-active-color: var(--button-yellow-text-color);
+  --button-active-text-shadow: var(--button-yellow-text-shadow);
+
+  /* Yellow Link */
+  --button-link-text-color: var(--button-yellow);
+  --button-link-text-color-hover: var(--button-yellow-hover);
+
+  /* Yellow Styled */
+  --button-styled-background: var(--yellow-background-color);
+  --button-styled-color: var(--yellow-text-color);
+  --button-styled-hover-background: var(--yellow-5);
+  --button-styled-hover-color: var(--yellow-text-color-hover);
+  --button-styled-pressed-background: var(--yellow-10);
+  --button-styled-pressed-color: var(--yellow-text-color-pressed);
+  --button-styled-active-background: var(--yellow-10);
+  --button-styled-active-color: var(--yellow-text-color-pressed);
+
+  /* Yellow Outlined */
+  --button-outline-border-color: var(--yellow-border-color);
 }
 
 
 
 /*--- Olive ---*/
-
-.olive.buttons,
+.olive.buttons ::slotted(ui-button),
 .olive.button {
+
+  /* Olive Button */
+  --button-background-color: var(--button-olive);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-olive-text-color);
   --button-text-shadow: var(--button-olive-text-shadow);
-  --button-background: var(--button-olive) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.olive.buttons,
-.olive.button:hover {
+
+  /* Olive Hover */
   --button-hover-color: var(--button-olive-text-color);
   --button-hover-text-shadow: var(--button-olive-text-shadow);
   --button-hover-background-color: var(--button-olive-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.olive.buttons,
-.olive.button:focus {
+
+  /* Olive Focus */
   --button-focus-background-color: var(--button-olive-focus);
   --button-focus-color: var(--button-olive-text-color);
   --button-focus-text-shadow: var(--button-olive-text-shadow);
-}
-.olive.buttons,
-.olive.button.pressed,
-.olive.button:active {
+
+  /* Olive Pressed */
   --button-pressed-background-color: var(--button-olive-pressed);
   --button-pressed-color: var(--button-olive-text-color);
   --button-pressed-text-shadow: var(--button-olive-text-shadow);
-}
-.olive.buttons .active.button,
-.olive.buttons .active.button.pressed,
-.olive.buttons .active.button:active,
-.olive.active.button,
-.olive.button .active.button.pressed,
-.olive.button .active.button:active {
-  background-color: var(--button-olive-active);
-  color: var(--button-olive-text-color);
-  text-shadow: var(--button-olive-text-shadow);
+
+  /* Olive Active */
+  --button-active-background-color: var(--button-olive-pressed);
+  --button-active-color: var(--button-olive-text-color);
+  --button-active-text-shadow: var(--button-olive-text-shadow);
+
+  /* Olive Link */
+  --button-link-text-color: var(--button-olive);
+  --button-link-text-color-hover: var(--button-olive-hover);
+
+  /* Olive Styled */
+  --button-styled-background: var(--olive-background-color);
+  --button-styled-color: var(--olive-text-color);
+  --button-styled-hover-background: var(--olive-5);
+  --button-styled-hover-color: var(--olive-text-color-hover);
+  --button-styled-pressed-background: var(--olive-10);
+  --button-styled-pressed-color: var(--olive-text-color-pressed);
+  --button-styled-active-background: var(--olive-10);
+  --button-styled-active-color: var(--olive-text-color-pressed);
+
+  /* Olive Outlined */
+  --button-outline-border-color: var(--olive-border-color);
 }
 
 /*--- Green ---*/
-
-.green.buttons,
+.green.buttons ::slotted(ui-button),
 .green.button {
+
+  /* Green Button */
+  --button-background-color: var(--button-green);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-green-text-color);
   --button-text-shadow: var(--button-green-text-shadow);
-  --button-background: var(--button-green) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.green.buttons,
-.green.button:hover {
+
+  /* Green Hover */
   --button-hover-color: var(--button-green-text-color);
   --button-hover-text-shadow: var(--button-green-text-shadow);
   --button-hover-background-color: var(--button-green-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.green.buttons,
-.green.button:focus {
+
+  /* Green Focus */
   --button-focus-background-color: var(--button-green-focus);
   --button-focus-color: var(--button-green-text-color);
   --button-focus-text-shadow: var(--button-green-text-shadow);
-}
-.green.buttons,
-.green.button.pressed,
-.green.button:active {
+
+  /* Green Pressed */
   --button-pressed-background-color: var(--button-green-pressed);
   --button-pressed-color: var(--button-green-text-color);
   --button-pressed-text-shadow: var(--button-green-text-shadow);
-}
-.green.buttons .active.button,
-.green.buttons .active.button.pressed,
-.green.buttons .active.button:active,
-.green.active.button,
-.green.button .active.button.pressed,
-.green.button .active.button:active {
-  background-color: var(--button-green-active);
-  color: var(--button-green-text-color);
-  text-shadow: var(--button-green-text-shadow);
+
+  /* Green Active */
+  --button-active-background-color: var(--button-green-pressed);
+  --button-active-color: var(--button-green-text-color);
+  --button-active-text-shadow: var(--button-green-text-shadow);
+
+  /* Green Link */
+  --button-link-text-color: var(--button-green);
+  --button-link-text-color-hover: var(--button-green-hover);
+
+  /* Green Styled */
+  --button-styled-background: var(--green-background-color);
+  --button-styled-color: var(--green-text-color);
+  --button-styled-hover-background: var(--green-5);
+  --button-styled-hover-color: var(--green-text-color-hover);
+  --button-styled-pressed-background: var(--green-10);
+  --button-styled-pressed-color: var(--green-text-color-pressed);
+  --button-styled-active-background: var(--green-10);
+  --button-styled-active-color: var(--green-text-color-pressed);
+
+  /* Green Outlined */
+  --button-outline-border-color: var(--green-border-color);
 }
 
 /*--- Teal ---*/
-
-.teal.buttons,
+.teal.buttons ::slotted(ui-button),
 .teal.button {
+
+  /* Teal Button */
+  --button-background-color: var(--button-teal);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-teal-text-color);
   --button-text-shadow: var(--button-teal-text-shadow);
-  --button-background: var(--button-teal) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.teal.buttons,
-.teal.button:hover {
+
+  /* Teal Hover */
   --button-hover-color: var(--button-teal-text-color);
   --button-hover-text-shadow: var(--button-teal-text-shadow);
   --button-hover-background-color: var(--button-teal-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.teal.buttons,
-.teal.button:focus {
+
+  /* Teal Focus */
   --button-focus-background-color: var(--button-teal-focus);
   --button-focus-color: var(--button-teal-text-color);
   --button-focus-text-shadow: var(--button-teal-text-shadow);
-}
-.teal.buttons,
-.teal.button.pressed,
-.teal.button:active {
+
+  /* Teal Pressed */
   --button-pressed-background-color: var(--button-teal-pressed);
   --button-pressed-color: var(--button-teal-text-color);
   --button-pressed-text-shadow: var(--button-teal-text-shadow);
-}
-.teal.buttons .active.button,
-.teal.buttons .active.button.pressed,
-.teal.buttons .active.button:active,
-.teal.active.button,
-.teal.button .active.button.pressed,
-.teal.button .active.button:active {
-  background-color: var(--button-teal-active);
-  color: var(--button-teal-text-color);
-  text-shadow: var(--button-teal-text-shadow);
+
+  /* Teal Active */
+  --button-active-background-color: var(--button-teal-pressed);
+  --button-active-color: var(--button-teal-text-color);
+  --button-active-text-shadow: var(--button-teal-text-shadow);
+
+  /* Teal Link */
+  --button-link-text-color: var(--button-teal);
+  --button-link-text-color-hover: var(--button-teal-hover);
+
+  /* Teal Styled */
+  --button-styled-background: var(--teal-background-color);
+  --button-styled-color: var(--teal-text-color);
+  --button-styled-hover-background: var(--teal-5);
+  --button-styled-hover-color: var(--teal-text-color-hover);
+  --button-styled-pressed-background: var(--teal-10);
+  --button-styled-pressed-color: var(--teal-text-color-pressed);
+  --button-styled-active-background: var(--teal-10);
+  --button-styled-active-color: var(--teal-text-color-pressed);
+
+  /* Teal Outlined */
+  --button-outline-border-color: var(--teal-border-color);
 }
 
 /*--- Blue ---*/
-
-.blue.buttons,
+.blue.buttons ::slotted(ui-button),
 .blue.button {
+
+  /* Blue Button */
+  --button-background-color: var(--button-blue);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-blue-text-color);
   --button-text-shadow: var(--button-blue-text-shadow);
-  --button-background: var(--button-blue) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.blue.buttons,
-.blue.button:hover {
+
+  /* Blue Hover */
   --button-hover-color: var(--button-blue-text-color);
   --button-hover-text-shadow: var(--button-blue-text-shadow);
   --button-hover-background-color: var(--button-blue-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.blue.buttons,
-.blue.button:focus {
+
+  /* Blue Focus */
   --button-focus-background-color: var(--button-blue-focus);
   --button-focus-color: var(--button-blue-text-color);
   --button-focus-text-shadow: var(--button-blue-text-shadow);
-}
-.blue.buttons,
-.blue.button.pressed,
-.blue.button:active {
+
+  /* Blue Pressed */
   --button-pressed-background-color: var(--button-blue-pressed);
   --button-pressed-color: var(--button-blue-text-color);
   --button-pressed-text-shadow: var(--button-blue-text-shadow);
-}
-.blue.buttons .active.button,
-.blue.buttons .active.button.pressed,
-.blue.buttons .active.button:active,
-.blue.active.button,
-.blue.button .active.button.pressed,
-.blue.button .active.button:active {
-  background-color: var(--button-blue-active);
-  color: var(--button-blue-text-color);
-  text-shadow: var(--button-blue-text-shadow);
+
+  /* Blue Active */
+  --button-active-background-color: var(--button-blue-pressed);
+  --button-active-color: var(--button-blue-text-color);
+  --button-active-text-shadow: var(--button-blue-text-shadow);
+
+  /* Blue Link */
+  --button-link-text-color: var(--button-blue);
+  --button-link-text-color-hover: var(--button-blue-hover);
+
+  /* Blue Styled */
+  --button-styled-background: var(--blue-background-color);
+  --button-styled-color: var(--blue-text-color);
+  --button-styled-hover-background: var(--blue-5);
+  --button-styled-hover-color: var(--blue-text-color-hover);
+  --button-styled-pressed-background: var(--blue-10);
+  --button-styled-pressed-color: var(--blue-text-color-pressed);
+  --button-styled-active-background: var(--blue-10);
+  --button-styled-active-color: var(--blue-text-color-pressed);
+
+  /* Blue Outlined */
+  --button-outline-border-color: var(--blue-border-color);
 }
 
 
 /*--- Violet ---*/
-
-.violet.buttons,
+.violet.buttons ::slotted(ui-button),
 .violet.button {
+
+  /* Violet Button */
+  --button-background-color: var(--button-violet);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-violet-text-color);
   --button-text-shadow: var(--button-violet-text-shadow);
-  --button-background: var(--button-violet) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.violet.buttons,
-.violet.button:hover {
+
+  /* Violet Hover */
   --button-hover-color: var(--button-violet-text-color);
   --button-hover-text-shadow: var(--button-violet-text-shadow);
   --button-hover-background-color: var(--button-violet-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.violet.buttons,
-.violet.button:focus {
+
+  /* Violet Focus */
   --button-focus-background-color: var(--button-violet-focus);
   --button-focus-color: var(--button-violet-text-color);
   --button-focus-text-shadow: var(--button-violet-text-shadow);
-}
-.violet.buttons,
-.violet.button.pressed,
-.violet.button:active {
+
+  /* Violet Pressed */
   --button-pressed-background-color: var(--button-violet-pressed);
   --button-pressed-color: var(--button-violet-text-color);
   --button-pressed-text-shadow: var(--button-violet-text-shadow);
-}
-.violet.buttons .active.button,
-.violet.buttons .active.button.pressed,
-.violet.buttons .active.button:active,
-.violet.active.button,
-.violet.button .active.button.pressed,
-.violet.button .active.button:active {
-  background-color: var(--button-violet-active);
-  color: var(--button-violet-text-color);
-  text-shadow: var(--button-violet-text-shadow);
+
+  /* Violet Active */
+  --button-active-background-color: var(--button-violet-pressed);
+  --button-active-color: var(--button-violet-text-color);
+  --button-active-text-shadow: var(--button-violet-text-shadow);
+
+  /* Violet Link */
+  --button-link-text-color: var(--button-violet);
+  --button-link-text-color-hover: var(--button-violet-hover);
+
+  /* Violet Styled */
+  --button-styled-background: var(--violet-background-color);
+  --button-styled-color: var(--violet-text-color);
+  --button-styled-hover-background: var(--violet-5);
+  --button-styled-hover-color: var(--violet-text-color-hover);
+  --button-styled-pressed-background: var(--violet-10);
+  --button-styled-pressed-color: var(--violet-text-color-pressed);
+  --button-styled-active-background: var(--violet-10);
+  --button-styled-active-color: var(--violet-text-color-pressed);
+
+  /* Violet Outlined */
+  --button-outline-border-color: var(--violet-border-color);
 }
 
 
 /*--- Purple ---*/
-
-.purple.buttons,
+.purple.buttons ::slotted(ui-button),
 .purple.button {
+
+  /* Purple Button */
+  --button-background-color: var(--button-purple);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-purple-text-color);
   --button-text-shadow: var(--button-purple-text-shadow);
-  --button-background: var(--button-purple) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.purple.buttons,
-.purple.button:hover {
+
+  /* Purple Hover */
   --button-hover-color: var(--button-purple-text-color);
   --button-hover-text-shadow: var(--button-purple-text-shadow);
   --button-hover-background-color: var(--button-purple-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.purple.buttons,
-.purple.button:focus {
+
+  /* Purple Focus */
   --button-focus-background-color: var(--button-purple-focus);
   --button-focus-color: var(--button-purple-text-color);
   --button-focus-text-shadow: var(--button-purple-text-shadow);
-}
-.purple.buttons,
-.purple.button.pressed,
-.purple.button:active {
+
+  /* Purple Pressed */
   --button-pressed-background-color: var(--button-purple-pressed);
   --button-pressed-color: var(--button-purple-text-color);
   --button-pressed-text-shadow: var(--button-purple-text-shadow);
-}
-.purple.buttons .active.button,
-.purple.buttons .active.button.pressed,
-.purple.buttons .active.button:active,
-.purple.active.button,
-.purple.button .active.button.pressed,
-.purple.button .active.button:active {
-  background-color: var(--button-purple-active);
-  color: var(--button-purple-text-color);
-  text-shadow: var(--button-purple-text-shadow);
+
+  /* Purple Active */
+  --button-active-background-color: var(--button-purple-pressed);
+  --button-active-color: var(--button-purple-text-color);
+  --button-active-text-shadow: var(--button-purple-text-shadow);
+
+  /* Purple Link */
+  --button-link-text-color: var(--button-purple);
+  --button-link-text-color-hover: var(--button-purple-hover);
+
+  /* Purple Styled */
+  --button-styled-background: var(--purple-background-color);
+  --button-styled-color: var(--purple-text-color);
+  --button-styled-hover-background: var(--purple-5);
+  --button-styled-hover-color: var(--purple-text-color-hover);
+  --button-styled-pressed-background: var(--purple-10);
+  --button-styled-pressed-color: var(--purple-text-color-pressed);
+  --button-styled-active-background: var(--purple-10);
+  --button-styled-active-color: var(--purple-text-color-pressed);
+
+  /* Purple Outlined */
+  --button-outline-border-color: var(--purple-border-color);
 }
 
 /*--- Pink ---*/
-
-.pink.buttons,
+.pink.buttons ::slotted(ui-button),
 .pink.button {
+
+  /* Pink Button */
+  --button-background-color: var(--button-pink);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-pink-text-color);
   --button-text-shadow: var(--button-pink-text-shadow);
-  --button-background: var(--button-pink) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.pink.buttons,
-.pink.button:hover {
+
+  /* Pink Hover */
   --button-hover-color: var(--button-pink-text-color);
   --button-hover-text-shadow: var(--button-pink-text-shadow);
   --button-hover-background-color: var(--button-pink-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.pink.buttons,
-.pink.button:focus {
+
+  /* Pink Focus */
   --button-focus-background-color: var(--button-pink-focus);
   --button-focus-color: var(--button-pink-text-color);
   --button-focus-text-shadow: var(--button-pink-text-shadow);
-}
-.pink.buttons,
-.pink.button.pressed,
-.pink.button:active {
+
+  /* Pink Pressed */
   --button-pressed-background-color: var(--button-pink-pressed);
   --button-pressed-color: var(--button-pink-text-color);
   --button-pressed-text-shadow: var(--button-pink-text-shadow);
-}
-.pink.buttons .active.button,
-.pink.buttons .active.button.pressed,
-.pink.buttons .active.button:active,
-.pink.active.button,
-.pink.button .active.button.pressed,
-.pink.button .active.button:active {
-  background-color: var(--button-pink-active);
-  color: var(--button-pink-text-color);
-  text-shadow: var(--button-pink-text-shadow);
+
+  /* Pink Active */
+  --button-active-background-color: var(--button-pink-pressed);
+  --button-active-color: var(--button-pink-text-color);
+  --button-active-text-shadow: var(--button-pink-text-shadow);
+
+  /* Pink Link */
+  --button-link-text-color: var(--button-pink);
+  --button-link-text-color-hover: var(--button-pink-hover);
+
+  /* Pink Styled */
+  --button-styled-background: var(--pink-background-color);
+  --button-styled-color: var(--pink-text-color);
+  --button-styled-hover-background: var(--pink-5);
+  --button-styled-hover-color: var(--pink-text-color-hover);
+  --button-styled-pressed-background: var(--pink-10);
+  --button-styled-pressed-color: var(--pink-text-color-pressed);
+  --button-styled-active-background: var(--pink-10);
+  --button-styled-active-color: var(--pink-text-color-pressed);
+
+  /* Pink Outlined */
+  --button-outline-border-color: var(--pink-border-color);
 }
 
 /*--- Brown ---*/
-
-.brown.buttons,
+.brown.buttons ::slotted(ui-button),
 .brown.button {
+
+  /* Brown Button */
+  --button-background-color: var(--button-brown);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-brown-text-color);
   --button-text-shadow: var(--button-brown-text-shadow);
-  --button-background: var(--button-brown) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.brown.buttons,
-.brown.button:hover {
+
+  /* Brown Hover */
   --button-hover-color: var(--button-brown-text-color);
   --button-hover-text-shadow: var(--button-brown-text-shadow);
   --button-hover-background-color: var(--button-brown-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.brown.buttons,
-.brown.button:focus {
+
+  /* Brown Focus */
   --button-focus-background-color: var(--button-brown-focus);
   --button-focus-color: var(--button-brown-text-color);
   --button-focus-text-shadow: var(--button-brown-text-shadow);
-}
-.brown.buttons,
-.brown.button.pressed,
-.brown.button:active {
+
+  /* Brown Pressed */
   --button-pressed-background-color: var(--button-brown-pressed);
   --button-pressed-color: var(--button-brown-text-color);
   --button-pressed-text-shadow: var(--button-brown-text-shadow);
-}
-.brown.buttons .active.button,
-.brown.buttons .active.button.pressed,
-.brown.buttons .active.button:active,
-.brown.active.button,
-.brown.button .active.button.pressed,
-.brown.button .active.button:active {
-  background-color: var(--button-brown-active);
-  color: var(--button-brown-text-color);
-  text-shadow: var(--button-brown-text-shadow);
+
+  /* Brown Active */
+  --button-active-background-color: var(--button-brown-pressed);
+  --button-active-color: var(--button-brown-text-color);
+  --button-active-text-shadow: var(--button-brown-text-shadow);
+
+  /* Brown Link */
+  --button-link-text-color: var(--button-brown);
+  --button-link-text-color-hover: var(--button-brown-hover);
+
+  /* Brown Styled */
+  --button-styled-background: var(--brown-background-color);
+  --button-styled-color: var(--brown-text-color);
+  --button-styled-hover-background: var(--brown-5);
+  --button-styled-hover-color: var(--brown-text-color-hover);
+  --button-styled-pressed-background: var(--brown-10);
+  --button-styled-pressed-color: var(--brown-text-color-pressed);
+  --button-styled-active-background: var(--brown-10);
+  --button-styled-active-color: var(--brown-text-color-pressed);
+
+  /* Brown Outlined */
+  --button-outline-border-color: var(--brown-border-color);
 }
 
 /*--- Grey ---*/
-
-.grey.buttons,
+.grey.buttons ::slotted(ui-button),
 .grey.button {
+
+  /* Grey Button */
+  --button-background-color: var(--button-grey);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
   --button-text-color: var(--button-grey-text-color);
   --button-text-shadow: var(--button-grey-text-shadow);
-  --button-background: var(--button-grey) var(--button-colored-background-image);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.grey.buttons,
-.grey.button:hover {
+
+  /* Grey Hover */
   --button-hover-color: var(--button-grey-text-color);
   --button-hover-text-shadow: var(--button-grey-text-shadow);
   --button-hover-background-color: var(--button-grey-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.grey.buttons,
-.grey.button:focus {
+
+  /* Grey Focus */
   --button-focus-background-color: var(--button-grey-focus);
   --button-focus-color: var(--button-grey-text-color);
   --button-focus-text-shadow: var(--button-grey-text-shadow);
-}
-.grey.buttons,
-.grey.button.pressed,
-.grey.button:active {
+
+  /* Grey Pressed */
   --button-pressed-background-color: var(--button-grey-pressed);
   --button-pressed-color: var(--button-grey-text-color);
   --button-pressed-text-shadow: var(--button-grey-text-shadow);
-}
-.grey.buttons .active.button,
-.grey.buttons .active.button.pressed,
-.grey.buttons .active.button:active,
-.grey.active.button,
-.grey.button .active.button.pressed,
-.grey.button .active.button:active {
-  background-color: var(--button-grey-active);
-  color: var(--button-grey-text-color);
-  text-shadow: var(--button-grey-text-shadow);
+
+  /* Grey Active */
+  --button-active-background-color: var(--button-grey-pressed);
+  --button-active-color: var(--button-grey-text-color);
+  --button-active-text-shadow: var(--button-grey-text-shadow);
+
+  /* Grey Link */
+  --button-link-text-color: var(--button-grey);
+  --button-link-text-color-hover: var(--button-grey-hover);
+
+  /* Grey Styled */
+  --button-styled-background: var(--grey-background-color);
+  --button-styled-color: var(--grey-text-color);
+  --button-styled-hover-background: var(--grey-5);
+  --button-styled-hover-color: var(--grey-text-color-hover);
+  --button-styled-pressed-background: var(--grey-10);
+  --button-styled-pressed-color: var(--grey-text-color-pressed);
+  --button-styled-active-background: var(--grey-10);
+  --button-styled-active-color: var(--grey-text-color-pressed);
+
+  /* Grey Outlined */
+  --button-outline-border-color: var(--grey-border-color);
 }
 
-/*--- Black ---*/
+/*--- Slate ---*/
+.slate.buttons ::slotted(ui-button),
+.slate.button {
 
-.black.buttons,
-.black.button {
-  --button-text-color: var(--button-black-text-color);
-  --button-text-shadow: var(--button-black-text-shadow);
-  --button-background: var(--button-black) var(--button-colored-background-image);
+  /* Slate Button */
+  --button-background-color: var(--button-slate);
+  --button-background: var(--button-background-color) var(--button-colored-background-image);
+  --button-text-color: var(--button-slate-text-color);
+  --button-text-shadow: var(--button-slate-text-shadow);
   --button-box-shadow: var(--button-colored-box-shadow);
-}
-.black.buttons,
-.black.button:hover {
-  --button-hover-color: var(--button-black-text-color);
-  --button-hover-text-shadow: var(--button-black-text-shadow);
-  --button-hover-background-color: var(--button-black-hover);
+
+  /* Slate Hover */
+  --button-hover-color: var(--button-slate-text-color);
+  --button-hover-text-shadow: var(--button-slate-text-shadow);
+  --button-hover-background-color: var(--button-slate-hover);
   --button-hover-box-shadow: var(--button-colored-box-shadow);
-}
-.black.buttons,
-.black.button:focus {
-  --button-focus-background-color: var(--button-black-focus);
-  --button-focus-color: var(--button-black-text-color);
-  --button-focus-text-shadow: var(--button-black-text-shadow);
-}
-.black.buttons,
-.black.button.pressed,
-.black.button:active {
-  --button-pressed-background-color: var(--button-black-pressed);
-  --button-pressed-color: var(--button-black-text-color);
-  --button-pressed-text-shadow: var(--button-black-text-shadow);
-}
-.black.buttons .active.button,
-.black.buttons .active.button.pressed,
-.black.buttons .active.button:active,
-.black.active.button,
-.black.button .active.button.pressed,
-.black.button .active.button:active {
-  background-color: var(--button-black-active);
-  color: var(--button-black-text-color);
-  text-shadow: var(--button-black-text-shadow);
+
+  /* Slate Focus */
+  --button-focus-background-color: var(--button-slate-focus);
+  --button-focus-color: var(--button-slate-text-color);
+  --button-focus-text-shadow: var(--button-slate-text-shadow);
+
+  /* Slate Pressed */
+  --button-pressed-background-color: var(--button-slate-pressed);
+  --button-pressed-color: var(--button-slate-text-color);
+  --button-pressed-text-shadow: var(--button-slate-text-shadow);
+
+  /* Slate Active */
+  --button-active-background-color: var(--button-slate-pressed);
+  --button-active-color: var(--button-slate-text-color);
+  --button-active-text-shadow: var(--button-slate-text-shadow);
+
+  /* Slate Link */
+  --button-link-text-color: var(--button-slate);
+  --button-link-text-color-hover: var(--button-slate-hover);
+
+  /* Slate Styled */
+  --button-styled-background: var(--slate-background-color);
+  --button-styled-color: var(--slate-text-color);
+  --button-styled-hover-background: var(--slate-5);
+  --button-styled-hover-color: var(--slate-text-color-hover);
+  --button-styled-pressed-background: var(--slate-10);
+  --button-styled-pressed-color: var(--slate-text-color-pressed);
+  --button-styled-active-background: var(--slate-10);
+  --button-styled-active-color: var(--slate-text-color-pressed);
+
+  /* Slate Outlined */
+  --button-outline-border-color: var(--slate-border-color);
 }

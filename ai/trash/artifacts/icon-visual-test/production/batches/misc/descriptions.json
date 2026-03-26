@@ -1,0 +1,58 @@
+{
+  "1": {
+    "visual": "The international wheelchair accessibility symbol — a dynamic forward-leaning figure in a wheelchair with one arm extended.",
+    "usage": "Accessibility settings, wheelchair-accessible location marker, disability accommodation notice, inclusive design indicator"
+  },
+  "2": {
+    "visual": "A calculator — a small rectangular device with a display area at the top and a grid of round buttons below.",
+    "usage": "Math or calculation tool, expense calculator, numeric input, finance or accounting feature"
+  },
+  "3": {
+    "visual": "A plain empty circle outline — a simple unfilled ring with no marks, symbols, or decoration inside.",
+    "usage": "Unselected radio button, empty state placeholder, step not started indicator, geometric primitive"
+  },
+  "4": {
+    "visual": "A coffee mug or teacup with a handle on the right and three steam wisps rising from the open top.",
+    "usage": "Break time, café or food section, hot beverage context, idle or away status"
+  },
+  "5": {
+    "visual": "The copyright symbol — the letter C enclosed within a full circle border.",
+    "usage": "Copyright notice, legal footer, content ownership label, rights reserved attribution"
+  },
+  "6": {
+    "visual": "A rounded plus sign — four equal thick arms forming a cross with smooth rounded ends, like a medical cross.",
+    "usage": "Add new item, medical or health feature, first aid section, create or insert action"
+  },
+  "7": {
+    "visual": "A regular hexagon outline — a six-sided polygon with equal sides and no interior detail.",
+    "usage": "Category badge, honeycomb grid cell, module icon, geometric design element"
+  },
+  "8": {
+    "visual": "The infinity symbol — a continuous figure-eight lying on its side forming two overlapping loops.",
+    "usage": "Unlimited plan, infinite scroll, loop or repeat, no-expiry indicator"
+  },
+  "9": {
+    "visual": "A single leaf — a teardrop-shaped leaf outline with a pointed tip and a short curved stem.",
+    "usage": "Eco or sustainability feature, nature theme, organic product label, green energy section"
+  },
+  "10": {
+    "visual": "A lightbulb — a rounded glass dome tapering to a base with two short horizontal lines suggesting the socket fitting.",
+    "usage": "Idea or insight callout, tips section, suggestion prompt, innovation feature"
+  },
+  "11": {
+    "visual": "Three curved arrows forming a closed triangular loop, each arrow flowing into the next in a clockwise direction — the universal recycling symbol.",
+    "usage": "Recycling option, refresh or reload, sustainability label, circular process indicator"
+  },
+  "12": {
+    "visual": "A square with generously rounded corners and no fill — an empty rounded-rectangle outline.",
+    "usage": "Checkbox unchecked state, selectable card border, empty slot placeholder, container shape"
+  },
+  "13": {
+    "visual": "A bullseye target — three concentric rings with a solid dot at the center, all enclosed in a circle.",
+    "usage": "Goal tracking, precision or focus setting, target audience indicator, campaign objective"
+  },
+  "14": {
+    "visual": "An upward-pointing triangle with rounded corners on all three vertices and a thick stroke, no fill.",
+    "usage": "Scroll to top, ascending sort, increase value control, alert or warning indicator"
+  }
+}

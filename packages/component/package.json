@@ -4,7 +4,7 @@
   "description": "A framework for creating web components.",
   "author": "Jack Lukic",
   "license": "ISC",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "sideEffects": false,
   "main": "src/index.js",
   "module": "src/index.js",
@@ -22,7 +22,8 @@
     "build:esm": "wireit",
     "build:cdn": "wireit",
     "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
   },
   "files": [
     "src",
@@ -34,15 +35,16 @@
     "lit": "^3.0.0"
   },
   "dependencies": {
-    "@semantic-ui/query": "^0.17.0",
-    "@semantic-ui/reactivity": "^0.17.0",
-    "@semantic-ui/renderer": "^0.17.0",
-    "@semantic-ui/templating": "^0.17.0",
-    "@semantic-ui/utils": "^0.17.0"
+    "@semantic-ui/query": "^0.18.0",
+    "@semantic-ui/reactivity": "^0.18.0",
+    "@semantic-ui/renderer": "^0.18.0",
+    "@semantic-ui/templating": "^0.18.0",
+    "@semantic-ui/utils": "^0.18.0"
   },
   "devDependencies": {
-    "@semantic-ui/internal-scripts": "^0.17.0",
-    "vitest": "^3.2.4"
+    "@semantic-ui/internal-scripts": "^0.18.0",
+    "@vitest/browser-playwright": "^4.0.18",
+    "vitest": "^4.0.18"
   },
   "wireit": {
     "build": {

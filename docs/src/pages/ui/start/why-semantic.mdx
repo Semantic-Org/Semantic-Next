@@ -1,6 +1,178 @@
 ---
 layout: '@layouts/Guide.astro'
-icon: zap
-title: Why Semantic?
-description: Why choose Semantic UI for your web components
+icon: help-circle
+title: Why Semantic UI?
+description: What makes Semantic UI different
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## The Problem
+
+Modern UI development forces a choice: adopt a framework's component model or stick with web standards.
+
+React, Vue, and Svelte provide reactive state, declarative templates, and scoped styling—but components only work inside their ecosystem. A React component can't render in Vue. A design system built in one framework must be rebuilt for another.
+
+Web Components solve portability. They're native to the browser and work everywhere. But vanilla Web Components are painful: manual state management, imperative DOM updates, awkward Shadow DOM ergonomics.
+
+Semantic UI bridges this gap. Modern DX—signals, declarative templates, scoped styles—producing standard Web Components that work anywhere.
+
+## No Build Step
+
+Most frameworks require compilation. JSX needs Babel. Vue templates need a compiler. Svelte compiles to vanilla JS.
+
+Semantic UI runs natively in the browser:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.semantic-ui.com/@semantic-ui/core/dist/semantic-ui.css">
+  <script src="https://cdn.semantic-ui.com/@semantic-ui/core/dist/cdn/semantic-ui.js"></script>
+</head>
+<body>
+  <ui-button primary>Click me</ui-button>
+  <ui-icon name="arrow-right"></ui-icon>
+</body>
+</html>
+```
+
+No npm, no bundler, no dev server. Open in a browser.
+
+For production, you can use npm and bundlers for tree-shaking and minification. The framework works either way.
+
+## Signals
+
+Vanilla Web Components require manual property observation, `attributeChangedCallback` boilerplate, and imperative DOM updates. Signals track dependencies and update only what changed.
+
+```javascript
+const defaultState = {
+  items: [],
+  filter: 'all'
+};
+
+const createComponent = ({ self, state, reaction }) => ({
+  initialize() {
+    reaction(() => {
+      const filtered = self.getFilteredItems();
+      console.log(`Showing ${filtered.length} items`);
+    });
+  },
+
+  getFilteredItems() {
+    const items = state.items.get();
+    const filter = state.filter.get();
+    if (filter === 'all') return items;
+    return items.filter(item => item.status === filter);
+  },
+
+  addItem(item) {
+    state.items.push(item);
+  }
+});
+```
+
+The reactivity system is a [standalone package](/docs/guides/reactivity)—use it outside Semantic UI components.
+
+## Templates
+
+Conditionals, loops, and expressions without compilation:
+
+```sui
+{#if items.length}
+  <ul>
+    {#each item in items}
+      <li class="{item.status}">
+        {item.name}
+        <button onclick={remove item.id}>×</button>
+      </li>
+    {/each}
+  </ul>
+{else}
+  <p class="empty">No items yet</p>
+{/if}
+```
+
+Templates parse to an AST at runtime. When `items` changes, only affected elements update.
+
+Two syntax styles:
+
+```sui
+<!-- Semantic style -->
+{formatDate createdAt 'MMM d'}
+
+<!-- JavaScript style -->
+{formatDate(createdAt, 'MMM d')}
+```
+
+## Theming
+
+Shadow DOM encapsulation prevents style leakage. CSS variables bridge the boundary.
+
+Semantic UI provides tokens for color, spacing, typography, and light/dark mode:
+
+```css
+.button {
+  background: var(--primary-color);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+}
+
+.surface {
+  background: var(--background-color);
+  color: var(--text-color);
+}
+```
+
+Components you build inherit the same tokens as the library.
+
+## Portable
+
+Components are standard custom elements:
+
+```jsx
+// React
+function App() {
+  return <ui-button primary onClick={handleClick}>Save</ui-button>
+}
+```
+
+```vue
+<!-- Vue -->
+<template>
+  <ui-button primary @click="handleClick">Save</ui-button>
+</template>
+```
+
+```svelte
+<!-- Svelte -->
+<ui-button primary on:click={handleClick}>Save</ui-button>
+```
+
+```html
+<!-- Plain HTML -->
+<ui-button primary>Save</ui-button>
+<script>
+  document.querySelector('ui-button').addEventListener('click', handleClick);
+</script>
+```
+
+No wrappers. No framework-specific versions.
+
+## Modular
+
+Each package works independently:
+
+| Package | Purpose |
+|---------|---------|
+| [@semantic-ui/reactivity](/docs/guides/reactivity) | Signals and reactions |
+| [@semantic-ui/query](/docs/guides/query) | Shadow-DOM-aware DOM queries |
+| [@semantic-ui/templating](/docs/guides/templates) | AST-based templates |
+| [@semantic-ui/component](/docs/guides/components) | Web Component factory |
+
+Use the full framework or just the pieces you need.
+
+## Next Steps
+
+- [Install Semantic UI](/ui/start/installation)
+- [Build a component](/docs/guides/components/create)
+- Explore [standalone packages](/docs/guides)

@@ -2,55 +2,103 @@
     Loading
 ---------------*/
 
-.loading.button:not(.icon) {
-  position: relative;
-  cursor: default;
-  text-shadow: none !important;
-  color: transparent !important;
-  opacity: var(--button-loading-opacity);
-  pointer-events: auto;
-  transition: var(--button-loading-transition);
-}
+.button {
+  &.loading {
+    &:not(.icon) {
+      position: relative;
+      cursor: default;
+      text-shadow: none !important;
+      color: transparent !important;
+      opacity: var(--button-loading-opacity);
+      pointer-events: auto;
+      transition: var(--button-loading-transition);
 
-.loading.icon.button .icon {
-  position: relative;
-  color: transparent !important;
-}
+      &::before {
+        position: absolute;
+        content: '';
+        top: 50%;
+        left: 50%;
+        margin: var(--loader-margin);
+        width: var(--loader-size);
+        height: var(--loader-size);
+        border-radius: var(--circular-radius);
+        border: var(--loader-line-width) solid var(--loader-fill-color);
+      }
 
-.loading.icon.button > .icon:before,
-.loading.button:not(.icon)::before {
-  position: absolute;
-  content: '';
-  top: 50%;
-  left: 50%;
-  margin: var(--loader-margin);
-  width: var(--loader-size);
-  height: var(--loader-size);
+      &::after {
+        position: absolute;
+        content: '';
+        top: 50%;
+        left: 50%;
+        margin: var(--loader-margin);
+        width: var(--loader-size);
+        height: var(--loader-size);
+        animation: button-spin var(--loader-speed) linear;
+        animation-iteration-count: infinite;
+        border-radius: var(--circular-radius);
+        border-color: var(--loader-line-color) transparent transparent;
+        border-style: solid;
+        border-width: var(--loader-line-width);
+        box-shadow: 0px 0px 0px 1px transparent;
+      }
+    }
 
-  border-radius: var(--circular-radius);
-  border: var(--loader-line-width) solid var(--loader-fill-color);
-}
-.loading.icon.button > .icon:after,
-.loading.button:not(.icon)::after {
-  position: absolute;
-  content: '';
-  top: 50%;
-  left: 50%;
+    &.icon {
+      .icon {
+        position: relative;
+        color: transparent !important;
 
-  margin: var(--loader-margin);
-  width: var(--loader-size);
-  height: var(--loader-size);
+        &:before {
+          position: absolute;
+          content: '';
+          top: 50%;
+          left: 50%;
+          margin: var(--loader-margin);
+          width: var(--loader-size);
+          height: var(--loader-size);
+          border-radius: var(--circular-radius);
+          border: var(--loader-line-width) solid var(--loader-fill-color);
+        }
 
-  animation: button-spin var(--loader-speed) linear;
-  animation-iteration-count: infinite;
+        &:after {
+          position: absolute;
+          content: '';
+          top: 50%;
+          left: 50%;
+          margin: var(--loader-margin);
+          width: var(--loader-size);
+          height: var(--loader-size);
+          animation: button-spin var(--loader-speed) linear;
+          animation-iteration-count: infinite;
+          border-radius: var(--circular-radius);
+          border-color: var(--loader-line-color) transparent transparent;
+          border-style: solid;
+          border-width: var(--loader-line-width);
+          box-shadow: 0px 0px 0px 1px transparent;
+        }
+      }
+    }
 
-  border-radius: var(--circular-radius);
+    &.inverted {
+      &:before {
+        border-color: var(--inverted-loader-fill-color);
+      }
 
-  border-color: var(--loader-line-color) transparent transparent;
-  border-style: solid;
-  border-width: var(--loader-line-width);
+      &:after {
+        border-top-color: var(--inverted-loader-line-color);
+      }
 
-  box-shadow: 0px 0px 0px 1px transparent;
+      .icon {
+        &:before {
+          border-color: var(--inverted-loader-fill-color);
+        }
+
+        &:after {
+          border-top-color: var(--inverted-loader-line-color);
+        }
+      }
+    }
+  }
 }
 
 @keyframes button-spin {
@@ -60,16 +108,5 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-
-/* Inverted */
-.loading.button.inverted .icon:before,
-.loading.button.inverted:before {
-  border-color: var(--inverted-loader-fill-color);
-}
-.loading.button.inverted .icon:after,
-.loading.button.inverted:after {
-  border-top-color: var(--inverted-loader-line-color);
 }
 

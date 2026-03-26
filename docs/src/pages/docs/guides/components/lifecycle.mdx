@@ -67,7 +67,7 @@ All lifecycle events will fire on the server in the same order as on the client.
 
 This means you should use `isServer` or `isClient` during server side rendering to handle checking for globals that may not be defined.
 
-```javascript
+```javascript 'isClient'
 const onRendered = function ({ isClient, self }) {
   if(isClient) {
     self.url.set(window.location.pathname);
@@ -116,13 +116,16 @@ The following parameters are destructurable from all callbacks.
 | settings          | a read-write copy of the component's settings         |
 | state             | a reactive data store for internal state              |
 | data              | the full data context used when evaluated expressions |
+| rerender          | trigger a full DOM rerender for component             |
 | isRendered        | a function returning whether the DOM has rendered     |
 | isServer          | whether component is rendering on server              |
 | isClient          | whether component is rendering on client              |
 | dispatchEvent     | helper to emit events from the component              |
 | attachEvent       | helper to listen to external events                   |
 | bindKey           | helper to bind keyboard shortcuts dynamically         |
-| abortController   | abortSignal for async events tied to lifecycle        |
+| interval          | setInterval that auto-clears on component destroy     |
+| timeout           | setTimeout that auto-clears on component destroy      |
+| abortSignal       | AbortSignal tied to component lifecycle                |
 | helpers           | allows access to template helpers                     |
 | template          | the underlying semantic template                      |
 | templateName      | the name of the current semantic template             |

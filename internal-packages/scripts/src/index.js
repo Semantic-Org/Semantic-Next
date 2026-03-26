@@ -2,7 +2,6 @@
 export * from './lib/index.js';
 
 /* Builders */
-export { buildAIWorkspace } from './build-ai-workspace.js';
 export { buildBundle } from './build-bundle.js';
 export { buildCDN } from './build-cdn.js';
 export { buildESM } from './build-esm.js';

@@ -2,6 +2,8 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Debug Utilities
+package: "@semantic-ui/utils"
+methods: [log, fatal]
 icon: bug
 description: API reference for debugging, logging, and error handling utility functions
 ---
@@ -31,7 +33,7 @@ A flexible logging utility with formatting, namespacing, and multiple output opt
 | Name          | Type    | Default              | Description |
 |---------------|---------|----------------------|-------------|
 | namespace     | string  | ''                   | Namespace for grouping related logs (used as default title) |
-| data          | array   | undefined            | Additional data to include with the log message |
+| data          | any     | undefined            | Additional data to include with the log message. Accepts arrays and objects |
 | color         | string  | 'inherit'            | Text color for the message |
 | timestamp     | boolean | false                | Whether to include timestamp in the output |
 | format        | string  | 'standard'           | Output format ('standard' or 'json') |
@@ -99,7 +101,7 @@ Throws an error with enhanced control over the error type, metadata, and stack t
 |------------------|----------|---------|-------------|
 | errorType        | function | Error   | The type of error to throw |
 | metadata         | object   | {}      | Additional data to attach to the error |
-| onError          | function | null    | Callback to execute before throwing the error |
+| onError          | function | null    | Callback to intercept the error. When provided, the error is passed to this callback and the throw is prevented |
 | removeStackLines | number   | 1       | Number of stack trace lines to remove |
 
 #### Example
@@ -107,13 +109,14 @@ Throws an error with enhanced control over the error type, metadata, and stack t
 ```javascript
 import { fatal } from '@semantic-ui/utils';
 
-try {
-  fatal("Something went wrong", {
-    errorType: TypeError,
-    metadata: { code: "ERR_001" },
-    onError: (err) => console.log("Error occurred:", err.message)
-  });
-} catch (error) {
-  console.error(error);
-}
+// Throws asynchronously via queueMicrotask
+fatal("Something went wrong", {
+  errorType: TypeError,
+  metadata: { code: "ERR_001" },
+});
+
+// Using onError to intercept and prevent the throw
+fatal("Handled error", {
+  onError: (err) => console.log("Intercepted:", err.message)
+});
 ```

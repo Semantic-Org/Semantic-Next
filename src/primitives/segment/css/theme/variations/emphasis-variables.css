@@ -1,0 +1,10 @@
+:host {
+  --segment-primary-background: var(--ui-emphasis);
+  --segment-primary-color: var(--text-color);
+
+  --segment-secondary-background: var(--inverted-solid-95);
+  --segment-secondary-color: var(--standard-60);
+
+  --segment-tertiary-background: var(--inverted-solid-90);
+  --segment-tertiary-color: var(--standard-50);
+}

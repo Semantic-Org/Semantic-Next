@@ -1,0 +1,9 @@
+/*******************************
+      Icon Content Variables
+*******************************/
+
+:host {
+  /* Icon content styling */
+  --divider-icon-padding: 0 1rem;
+  --divider-icon-size: 1rem;
+}

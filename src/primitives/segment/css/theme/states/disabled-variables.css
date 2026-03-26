@@ -1,0 +1,3 @@
+:host {
+  --segment-disabled-opacity: var(--disabled-opacity);
+}

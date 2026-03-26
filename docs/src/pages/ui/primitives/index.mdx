@@ -4,17 +4,21 @@ layout: '@layouts/Guide.astro'
 ---
 
 import { primitivePages } from '@helpers/menus.js';
-import { UICards, UICard } from '@semantic-ui/core';
-
+import { UICards, UICard, UIImage } from '@semantic-ui/core';
 
 ## Primitives
 
 <UICards three>
   {(primitivePages || []).map((page) => (
-    <UICard
-        header={page.name}
-        href={page.url}
-        description={page.description}
-      ></UICard>
+    <UICard href={page.url}>
+        <div slot="header">{page.name}</div>
+        <div class="description" slot="description">
+          {page.imageSrc && (
+          <>
+            <ui-image src={page.imageSrc} darkSrc={page.darkImageSrc} class="image"></ui-image>
+          </>
+        )}
+        </div>
+      </UICard>
   ))}
 </UICards>

@@ -1,0 +1,13 @@
+<div class="{ui}divider {classMap getDividerClasses}" role={getAriaProp 'role'} aria-orientation={getAriaProp 'aria-orientation'} aria-hidden={getAriaProp 'aria-hidden'}>
+  {#if hasContent}
+    <div class="line"></div>
+    {#if text}
+      <span class="text">{text}</span>
+    {else if icon}
+      <ui-icon icon={icon} class="icon" part="icon"></ui-icon>
+    {/if}
+    <div class="line"></div>
+  {else}
+    {>slot}
+  {/if}
+</div>

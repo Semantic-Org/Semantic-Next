@@ -1,0 +1,4 @@
+.vertical.segment {
+  border: none;
+  border-top: var(--segment-border)
+}

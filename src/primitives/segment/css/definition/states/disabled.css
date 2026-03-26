@@ -1,0 +1,4 @@
+.disabled.segment {
+  opacity: var(--segment-disabled-opacity);
+  color: var(--disabled-text-color);
+}

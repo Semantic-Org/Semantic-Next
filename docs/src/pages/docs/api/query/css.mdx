@@ -2,307 +2,251 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Query - CSS
-icon: droplet
+icon: theme
 description: API reference for Query methods related to CSS manipulation
+package: "@semantic-ui/query"
+methods: ["addClass", "removeClass", "toggleClass", "hasClass", "css", "computedStyle", "cssVar"]
 ---
+
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The CSS Manipulation methods in Query allow you to easily modify classes and CSS properties of elements, providing powerful tools for dynamic styling in your Semantic UI components.
+Add, remove, and toggle classes. Get and set inline styles and CSS variables.
 
-## addClass
+## Classes
 
-Adds one or more classes to the set of matched elements.
+### addClass
 
-### Syntax
 ```javascript
-$('selector').addClass(className)
+$('selector').addClass(className);
 ```
 
-### Parameters
-| Name      | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| className | string | One or more class names to be added   |
+Adds one or more space-separated classes to matched elements.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to add |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
 ```javascript
-// Add a class to all paragraphs
 $('p').addClass('highlighted');
 ```
 
-#### Shadow DOM
-```javascript
-// Add a class to the user name in a user-profile web component
-$$('user-profile').find('.user-name').addClass('premium-user');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-addclass" direction="horizontal"></PlaygroundExample>
 
-## removeClass
+### removeClass
 
-Removes one or more classes from the set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').removeClass(className)
+$('selector').removeClass(className);
 ```
 
-### Parameters
-| Name      | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| className | string | One or more class names to be removed |
+Removes one or more space-separated classes from matched elements.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to remove |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
 ```javascript
-// Remove a class from all buttons
 $('button').removeClass('disabled');
 ```
 
-#### Shadow DOM
-```javascript
-// Remove the 'offline' class from the status indicator in a user-profile
-$$('user-profile').find('.status-indicator').removeClass('offline');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-removeclass" direction="horizontal"></PlaygroundExample>
 
-## toggleClass
+### toggleClass
 
-Toggles one or more classes for the set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').toggleClass(className)
+$('selector').toggleClass(className);
 ```
 
-### Parameters
-| Name      | Type   | Description                           |
-|-----------|--------|---------------------------------------|
-| className | string | One or more class names to be toggled |
+Toggles one or more space-separated classes on matched elements.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to toggle |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
 ```javascript
-// Toggle a class on all list items
 $('li').toggleClass('active');
 ```
 
-#### Shadow DOM
-```javascript
-// Toggle the 'expanded' class on the user bio in a user-profile
-$$('user-profile').find('.user-bio').toggleClass('expanded');
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-toggleclass" direction="horizontal"></PlaygroundExample>
 
-## hasClass
+### hasClass
 
-Determines whether any of the matched elements are assigned the given class.
-
-### Syntax
 ```javascript
-$('selector').hasClass(className)
+$('selector').hasClass(className);
 ```
 
-### Parameters
-| Name      | Type   | Description                       |
-|-----------|--------|-----------------------------------|
-| className | string | The class name to search for      |
+Tests if any matched element has the specified class.
 
-### Returns
-`boolean` - `true` if the class exists on any of the matched elements, `false` otherwise.
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name to check |
 
-#### Standard
+#### Returns
+
+`true` if any element has the class, `false` otherwise.
+
+#### Usage
+
 ```javascript
-// Check if any paragraph has a specific class
 if ($('p').hasClass('important')) {
-    console.log('There is an important paragraph');
+  console.log('Found important paragraph');
 }
 ```
 
-#### Shadow DOM
-```javascript
-// Check if the user has admin privileges in a user-profile
-if ($$('user-profile').find('.user-role').hasClass('admin')) {
-    console.log('This user has admin privileges');
-}
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-hasclass" direction="horizontal"></PlaygroundExample>
-## css
 
-Get the value of a computed style property for the first element in the set of matched elements or set one or more CSS properties for every matched element.
+## Styles
 
-### Syntax
+### css
+
 ```javascript
-// Getter
-$('selector').css(propertyName, null, options)
-
-// Setter
-$('selector').css(propertyName, value, options)
-$('selector').css({property1: value1, property2: value2}, options)
+$('selector').css(property);
+$('selector').css(property, value);
+$('selector').css({ property: value, ... });
 ```
 
-### Parameters
-| Name         | Type   | Description                           |
-|--------------|--------|---------------------------------------|
-| propertyName | string | CSS property name                     |
-| value        | string | Value to set for the CSS property     |
-| options      | object | Additional options for getting/setting CSS |
+Gets or sets inline CSS properties.
 
-#### Options
-| Name            | Type    | Default | Description                                    |
-|-----------------|---------|---------|------------------------------------------------|
-| includeComputed | boolean | false   | Include computed styles when getting CSS value |
+#### Parameters
 
-### Returns
-- When getting: The value of the specified CSS property.
-- When setting: [Query object](/docs/api/query/basic#the-query-object) (for chaining).
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | CSS property name |
+| value | string | Value to set |
+| properties | object | Multiple properties to set |
 
-### Usage
+#### Returns
 
-#### Standard
+- **Getting**: The CSS property value
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
 ```javascript
-// Get a CSS property value
 const color = $('p').css('color');
+```
 
-// Set a CSS property
+##### Set
+
+```javascript
 $('p').css('color', 'blue');
+```
 
-// Set multiple CSS properties
+##### Set Multiple
+
+```javascript
 $('p').css({
   color: 'blue',
   fontSize: '16px'
 });
 ```
 
-#### Shadow DOM
-```javascript
-// Get the background color of the avatar in a user-profile
-const avatarBg = $$('user-profile').find('.user-avatar').css('background-color');
+#### Example
 
-// Set the font size of the user name in a user-profile
-$$('user-profile')
-  .find('.user-name')
-  .css('font-size', '18px')
-;
-
-// Style the action buttons in a user-profile
-$$('user-profile').find('.action-buttons').css({
-  display: 'flex',
-  justifyContent: 'space-between',
-  marginTop: '10px'
-});
-```
-
-### Example
 <PlaygroundExample id="query-css" direction="horizontal"></PlaygroundExample>
 
-## computedStyle
+### computedStyle
 
-Get the value of a computed style property for the first element in the set of matched elements.
-
-> **CSS Performance** This is an alias for `css` with `{ computedStyle: true }` option. In many cases you will want to get the css style as it appears in the page and not just if it has a css rule applied. This however can trigger a reflow, which means this behavior is opt-in.
-
-### Syntax
 ```javascript
-$('selector').computedStyle(propertyName)
+$('selector').computedStyle(property);
 ```
 
-### Parameters
-| Name         | Type   | Description       |
-|--------------|--------|-------------------|
-| propertyName | string | CSS property name |
+Gets the computed (rendered) value of a CSS property.
 
-### Returns
-The computed value of the specified CSS property.
+> **Alias for** `css(property, null, { includeComputed: true })`
 
-### Usage
+> **Performance** This triggers a browser reflow. Use `css()` when you only need inline styles.
 
-#### Standard
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | CSS property name |
+
+#### Returns
+
+The computed CSS value as it appears on screen.
+
+#### Usage
+
 ```javascript
-// Get the computed font size of a paragraph
-const fontSize = $('p').computedStyle('font-size');
-console.log(fontSize); // e.g., "16px"
+const fontSize = $('p').computedStyle('font-size'); // "16px"
 ```
 
-#### Shadow DOM
-```javascript
-// Get the computed width of an element in a user-profile
-const avatarWidth = $$('user-profile').find('.user-avatar').computedStyle('width');
-console.log(avatarWidth); // e.g., "50px"
-```
+#### Example
 
-### Example
 <PlaygroundExample id="query-computedstyle" direction="horizontal"></PlaygroundExample>
 
-## cssVar
+### cssVar
 
-Get or set the value of a CSS custom property (CSS variable).
-
-
-### Syntax
-
-#### Get
 ```javascript
-$('selector').cssVar(variableName)
+$('selector').cssVar(name);
+$('selector').cssVar(name, value);
 ```
 
-#### Set
+Gets or sets CSS custom properties (variables). The `--` prefix is added automatically.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| name | string | Variable name (without `--`) |
+| value | string | Value to set |
+
+#### Returns
+
+- **Getting**: The CSS variable value
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
 ```javascript
-$('selector').cssVar(variableName, value)
+const color = $(':root').cssVar('primary-color');
 ```
 
-### Parameters
-| Name         | Type   | Description                                   |
-|--------------|--------|-----------------------------------------------|
-| variableName | string | The name of the CSS variable (without '--')   |
-| value        | string | (Optional) The value to set for the variable  |
+##### Set
 
-### Returns
-- When getting: The value of the specified CSS variable.
-- When setting: [Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-
-#### Standard
 ```javascript
-// Get the value of a CSS variable
-const primaryColor = $(':root').cssVar('primary-color');
-console.log(primaryColor); // e.g., "#007bff"
-
-// Set the value of a CSS variable
 $(':root').cssVar('primary-color', '#0056b3');
 ```
 
-#### Shadow DOM
-```javascript
-// Get the value of a CSS variable in a user-profile
-const avatarSize = $$('user-profile').cssVar('avatar-size');
-console.log(avatarSize); // e.g., "50px"
+#### Example
 
-// Set the value of a CSS variable in a user-profile
-$$('user-profile').cssVar('avatar-size', '60px');
-```
-
-### Example
 <PlaygroundExample id="query-cssvar" direction="horizontal"></PlaygroundExample>

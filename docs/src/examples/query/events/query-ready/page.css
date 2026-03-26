@@ -1,5 +1,5 @@
 .status {
-  padding: var(--spacing);
+  padding: var(--padding);
   border: var(--border);
   border-radius: var(--border-radius);
   margin: var(--vertically-spaced);

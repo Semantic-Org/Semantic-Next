@@ -1,12 +1,12 @@
 /**
  * Regular expression utility functions
- * @see {@link https://next.semantic-ui.com/api/utils/regex Regular Expression Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/regex Regular Expression Utilities Documentation}
  */
 
 /**
  * Escapes special characters in a string for use in a regular expression
  * Escapes: . * + ? ^ $ { } ( ) | [ ] / \
- * @see {@link https://next.semantic-ui.com/api/utils/regex#escaperegexp escapeRegExp}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/regex#escaperegexp escapeRegExp}
  *
  * @param string - The string to escape
  * @returns The escaped string safe for use in RegExp

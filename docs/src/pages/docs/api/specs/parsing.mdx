@@ -1,0 +1,123 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: search
+title: Parsing HTML
+description: Extract semantic meaning from HTML
+package: '@semantic-ui/specs'
+methods: ['getComponentPartsFromHTML', 'getAttributesFromModifiers']
+---
+
+Methods for parsing HTML and extracting semantic component structure.
+
+## getComponentPartsFromHTML()
+
+Parses HTML and extracts semantic component structure. Returns component name, attributes, and inner content.
+
+### Syntax
+
+```javascript
+reader.getComponentPartsFromHTML(html, options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| html | string | | HTML string to parse |
+| options | Object | {} | Parse options |
+| options.dialect | string | this.dialect | HTML dialect to use |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| componentName | string | Component tag name |
+| attributes | Object | Attribute key-value pairs |
+| attributeString | string | Formatted attribute string |
+| html | string | Inner HTML content |
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const parts = reader.getComponentPartsFromHTML(
+  '<ui-button primary large>Save</ui-button>'
+);
+
+console.log(parts);
+// {
+//   componentName: 'ui-button',
+//   attributes: { primary: true, large: true },
+//   attributeString: 'primary large',
+//   html: 'Save'
+// }
+```
+
+Parse with verbose dialect:
+
+```javascript
+const parts = reader.getComponentPartsFromHTML(
+  '<ui-button emphasis="primary" size="large">Save</ui-button>',
+  { dialect: 'verbose' }
+);
+
+console.log(parts);
+// {
+//   componentName: 'ui-button',
+//   attributes: { emphasis: 'primary', size: 'large' },
+//   attributeString: 'emphasis="primary" size="large"',
+//   html: 'Save'
+// }
+```
+
+## getAttributesFromModifiers()
+
+Converts semantic modifier string into attribute object. Parses space-separated modifiers and maps them to their semantic attributes.
+
+### Syntax
+
+```javascript
+reader.getAttributesFromModifiers(modifiers)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| modifiers | string | Space-separated semantic modifiers |
+
+### Returns
+
+Object with attribute keys and values.
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const attributes = reader.getAttributesFromModifiers('primary large');
+
+console.log(attributes);
+// {
+//   emphasis: 'primary',
+//   size: 'large'
+// }
+```
+
+Boolean attributes:
+
+```javascript
+const attributes = reader.getAttributesFromModifiers('disabled loading');
+
+console.log(attributes);
+// {
+//   disabled: true,
+//   loading: true
+// }
+```

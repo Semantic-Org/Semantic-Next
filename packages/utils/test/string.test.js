@@ -1,14 +1,104 @@
-import { camelToKebab, capitalizeWords, joinWords, kebabToCamel, toTitleCase, truncate } from '@semantic-ui/utils';
+import {
+  camelToKebab,
+  capitalizeWords,
+  getArticle,
+  joinWords,
+  kebabToCamel,
+  reverseString,
+  toTitleCase,
+  truncate,
+} from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
 describe('String Utilities', () => {
-  it('should correctly convert kebab-case to camelCase', () => {
+  it('should convert kebab-case to camelCase with lossless encoding by default', () => {
     expect(kebabToCamel('test-string')).toBe('testString');
+    expect(kebabToCamel('background-color')).toBe('backgroundColor');
+    expect(kebabToCamel('grid-2x2')).toBe('grid_2x2');
+    expect(kebabToCamel('heading-1')).toBe('heading_1');
+    expect(kebabToCamel('arrow-down-a-z')).toBe('arrowDownAZ');
+    expect(kebabToCamel('a-large-small')).toBe('aLargeSmall');
   });
 
-  it('should correctly convert camelCase to kebab-case', () => {
+  it('should convert camelCase to kebab-case with lossless decoding by default', () => {
     expect(camelToKebab('testString')).toBe('test-string');
+    expect(camelToKebab('backgroundColor')).toBe('background-color');
+    expect(camelToKebab('grid_2x2')).toBe('grid-2x2');
+    expect(camelToKebab('heading_1')).toBe('heading-1');
+    expect(camelToKebab('step_1Of_3')).toBe('step-1-of-3');
+  });
+
+  it('should round-trip attr → prop → attr', () => {
+    const attrs = [
+      'arrow-down',
+      'text-cursor-input',
+      'wifi-off',
+      'background-color',
+      'grid-2x2',
+      'grid-3x3',
+      'heading-1',
+      'heading-6',
+      'volume-2',
+      'columns-3',
+      'arrow-down-a-z',
+      'a-large-small',
+      'a-arrow-up',
+      'sort-a-z',
+      'a-z',
+      'step-1-of-3',
+      'layer-2-opacity',
+      'gap-x-4',
+      'icon-arrow-up-1-0',
+      'aria-label',
+      'data-test-id',
+    ];
+    for (const attr of attrs) {
+      expect(camelToKebab(kebabToCamel(attr))).toBe(attr);
+    }
+  });
+
+  it('should round-trip prop → attr → prop', () => {
+    const props = [
+      'arrowDown',
+      'backgroundColor',
+      'textCursorInput',
+      'wifiOff',
+      'fontSize',
+      'tabIndex',
+      'isDisabled',
+      'onChange',
+      'grid_2x2',
+      'heading_1',
+      'columns_3',
+      'step_1Of_3',
+    ];
+    for (const prop of props) {
+      expect(kebabToCamel(camelToKebab(prop))).toBe(prop);
+    }
+  });
+
+  it('should support a custom separator', () => {
+    const opts = { separator: '$' };
+    expect(kebabToCamel('grid-2x2', opts)).toBe('grid$2x2');
+    expect(camelToKebab('grid$2x2', opts)).toBe('grid-2x2');
+  });
+
+  it('should handle empty segments from consecutive or trailing hyphens', () => {
+    expect(kebabToCamel('foo--bar')).toBe('fooBar');
+    expect(kebabToCamel('foo-')).toBe('foo');
+    expect(kebabToCamel('--foo')).toBe('Foo');
+    expect(kebabToCamel('')).toBe('');
+  });
+
+  it('should silently lowercase leading PascalCase by default', () => {
+    expect(camelToKebab('FooBar')).toBe('foo-bar');
+    expect(camelToKebab('BackgroundColor')).toBe('background-color');
+  });
+
+  it('should preserve leading uppercase in lossless mode for exact round-trip', () => {
+    expect(camelToKebab('FooBar', { lossless: true })).toBe('-foo-bar');
+    expect(kebabToCamel(camelToKebab('FooBar', { lossless: true }))).toBe('FooBar');
   });
 
   it('should capitalize the first letter of each word', () => {
@@ -17,6 +107,12 @@ describe('String Utilities', () => {
 
   it('should convert a string to title case', () => {
     expect(toTitleCase('a simple test')).toBe('A Simple Test');
+  });
+
+  it('should handle stopwords in title case (not capitalize stopwords except first word)', () => {
+    expect(toTitleCase('the quick brown fox')).toBe('The Quick Brown Fox');
+    expect(toTitleCase('a tale of two cities')).toBe('A Tale of Two Cities');
+    expect(toTitleCase('the lord of the rings')).toBe('The Lord of the Rings');
   });
 
   describe('joinWords', () => {
@@ -85,6 +181,42 @@ describe('String Utilities', () => {
     });
   });
 
+  describe('getArticle', () => {
+    it('should return "an" for words starting with vowels', () => {
+      expect(getArticle('apple')).toBe('an');
+      expect(getArticle('elephant')).toBe('an');
+      expect(getArticle('igloo')).toBe('an');
+      expect(getArticle('orange')).toBe('an');
+      expect(getArticle('umbrella')).toBe('an');
+    });
+
+    it('should return "a" for words starting with consonants', () => {
+      expect(getArticle('banana')).toBe('a');
+      expect(getArticle('cat')).toBe('a');
+      expect(getArticle('dog')).toBe('a');
+    });
+
+    it('should capitalize the article when capitalize option is true', () => {
+      expect(getArticle('apple', { capitalize: true })).toBe('An');
+      expect(getArticle('banana', { capitalize: true })).toBe('A');
+    });
+
+    it('should include the word when includeWord option is true', () => {
+      expect(getArticle('apple', { includeWord: true })).toBe('an apple');
+      expect(getArticle('banana', { includeWord: true })).toBe('a banana');
+    });
+
+    it('should combine capitalize and includeWord options', () => {
+      expect(getArticle('apple', { capitalize: true, includeWord: true })).toBe('An apple');
+      expect(getArticle('banana', { capitalize: true, includeWord: true })).toBe('A banana');
+    });
+
+    it('should handle uppercase words', () => {
+      expect(getArticle('APPLE')).toBe('an');
+      expect(getArticle('BANANA')).toBe('a');
+    });
+  });
+
   describe('truncate', () => {
     it('should return original text if shorter than length', () => {
       expect(truncate('short', 10)).toBe('short');
@@ -103,8 +235,15 @@ describe('String Utilities', () => {
     });
 
     it('should disable word boundary when specified', () => {
-      // Note: With a hard cut, the result is the same in this case.
-      expect(truncate('This is a very long sentence', 15, { wordBoundary: false })).toBe('This is a very…');
+      // Hard cut at the character limit, even if it falls mid-word
+      expect(truncate('Abcdefghij klmnop', 14, { wordBoundary: false })).toBe('Abcdefghij kl…');
+    });
+
+    it('should truncate at punctuation boundaries (comma, period, etc)', () => {
+      expect(truncate('Hello, world. How are you?', 15)).toBe('Hello, world.…');
+      expect(truncate('First-second-third-fourth', 15)).toBe('First-second-…');
+      expect(truncate('Test (with parentheses)', 15)).toBe('Test (with…');
+      expect(truncate('One; two: three!', 12)).toBe('One; two:…');
     });
 
     it('should use a custom suffix and trim trailing space', () => {
@@ -131,12 +270,80 @@ describe('String Utilities', () => {
     });
 
     it('should properly truncate emoji and combined graphemes', () => {
-      expect(truncate('👍👍👍👍👍', 4)).toBe('👍👍👍…'); // Doesn’t split emoji
+      expect(truncate('👍👍👍👍👍', 4)).toBe('👍👍👍…'); // Doesn't split emoji
     });
 
     it('should respect locale-aware boundaries when using Intl.Segmenter', () => {
       // Example: Japanese text (no spaces)
       expect(truncate('これはとても長い文です', 8, { locale: 'ja' })).toBe('これはとても…');
+    });
+  });
+
+  describe('reverseString', () => {
+    it('should reverse a simple string', () => {
+      expect(reverseString('hello')).toBe('olleh');
+      expect(reverseString('world')).toBe('dlrow');
+    });
+
+    it('should reverse a string with spaces', () => {
+      expect(reverseString('hello world')).toBe('dlrow olleh');
+    });
+
+    it('should handle empty strings', () => {
+      expect(reverseString('')).toBe('');
+      expect(reverseString()).toBe('');
+    });
+
+    it('should handle single character strings', () => {
+      expect(reverseString('a')).toBe('a');
+      expect(reverseString('X')).toBe('X');
+    });
+
+    it('should properly handle Unicode characters and emojis', () => {
+      expect(reverseString('Hello 👋')).toBe('👋 olleH');
+      expect(reverseString('🎉🎊🎈')).toBe('🎈🎊🎉');
+    });
+
+    it('should handle complex grapheme clusters with Intl.Segmenter', () => {
+      // Emoji with skin tone modifier
+      expect(reverseString('Hello 👋🏽')).toBe('👋🏽 olleH');
+
+      // Flag emojis (regional indicator symbols)
+      expect(reverseString('🇺🇸🇬🇧')).toBe('🇬🇧🇺🇸');
+
+      // Combined diacritics
+      expect(reverseString('café')).toBe('éfac');
+
+      // Zero-width joiner sequences (family emoji)
+      expect(reverseString('AB👨‍👩‍👧CD')).toBe('DC👨‍👩‍👧BA');
+    });
+
+    it('should handle numbers in strings', () => {
+      expect(reverseString('12345')).toBe('54321');
+      expect(reverseString('abc123')).toBe('321cba');
+    });
+
+    it('should handle special characters', () => {
+      expect(reverseString('a!b@c#')).toBe('#c@b!a');
+      expect(reverseString('test-string_123')).toBe('321_gnirts-tset');
+    });
+
+    it('should handle palindromes correctly', () => {
+      expect(reverseString('racecar')).toBe('racecar');
+      expect(reverseString('noon')).toBe('noon');
+    });
+
+    it('should handle strings with only spaces', () => {
+      expect(reverseString('   ')).toBe('   ');
+    });
+
+    it('should handle mixed case strings', () => {
+      expect(reverseString('HeLLo WoRLd')).toBe('dLRoW oLLeH');
+    });
+
+    it('should respect locale option for international text', () => {
+      // Japanese text
+      expect(reverseString('こんにちは', { locale: 'ja' })).toBe('はちにんこ');
     });
   });
 });

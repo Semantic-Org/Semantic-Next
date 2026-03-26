@@ -2,679 +2,474 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Array Utilities
+package: "@semantic-ui/utils"
+methods: [filterEmpty, first, firstMatch, findIndex, last, remove, inArray, range, sequence, moveItem, moveToFront, moveToBack, sum, unique, where, flatten, some, any, sortBy, groupBy, intersection, difference, uniqueItems]
 icon: list
 description: API reference for array manipulation functions
 ---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The Array utilities provide a set of functions for working with arrays in JavaScript. These functions help in manipulating, transforming, and querying arrays efficiently.
+Functions for working with arrays.
 
-## Functions
-
-### unique
-
-```javascript
-function unique(arr)
-```
-
-Remove duplicates from an array.
-
-#### Parameters
-
-| Name | Type  | Description |
-|------|-------|-------------|
-| arr  | array | The array to remove duplicates from |
-
-#### Returns
-
-A new array with duplicates removed.
-
-#### Example
-
-```javascript
-import { unique } from '@semantic-ui/utils';
-
-const arr = [1, 2, 2, 3, 4, 4, 5];
-console.log(unique(arr)); // [1, 2, 3, 4, 5]
-```
-
-### filterEmpty
-
-```javascript
-function filterEmpty(arr)
-```
+## filterEmpty
 
 Remove undefined values from an array.
 
-#### Parameters
+### Syntax
+```javascript
+filterEmpty(arr)
+```
 
+### Parameters
 | Name | Type  | Description |
 |------|-------|-------------|
 | arr  | array | The array to filter |
 
-#### Returns
+### Returns
+Array with undefined values removed.
 
-A new array with undefined values removed.
+### Example
+<PlaygroundExample id="utils-filterempty" direction="horizontal"></PlaygroundExample>
 
-#### Example
-
-```javascript
-import { filterEmpty } from '@semantic-ui/utils';
-
-const arr = [1, undefined, 2, null, 3, '', 4];
-console.log(filterEmpty(arr)); // [1, 2, null, 3, '', 4]
-```
-
-### last
-
-```javascript
-function last(array, number = 1)
-```
-
-Get the last element(s) from an array.
-
-#### Parameters
-
-| Name   | Type   | Description | Default |
-|--------|--------|-------------|---------|
-| array  | array  | The input array | |
-| number | number | The number of elements to return | 1 |
-
-#### Returns
-
-The last element, an array of the last n elements, or undefined if the array is empty.
-
-#### Example
-
-```javascript
-import { last } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-console.log(last(arr)); // 5
-console.log(last(arr, 2)); // [4, 5]
-```
-
-### first
-
-```javascript
-function first(array, number = 1)
-```
+## first
 
 Get the first element(s) from an array.
 
-#### Parameters
+### Syntax
+```javascript
+first(array, number = 1)
+```
 
+### Parameters
 | Name   | Type   | Description | Default |
 |--------|--------|-------------|---------|
 | array  | array  | The input array | |
 | number | number | The number of elements to return | 1 |
 
-#### Returns
-
+### Returns
 The first element, an array of the first n elements, or undefined if the array is empty.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-first" direction="horizontal"></PlaygroundExample>
 
+## firstMatch
+
+Return the first value that matches the callback or value.
+
+### Syntax
 ```javascript
-import { first } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-console.log(first(arr)); // 1
-console.log(first(arr, 2)); // [1, 2]
+firstMatch(array, callbackOrValue)
 ```
 
-### firstMatch
+### Parameters
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
-```javascript
-function firstMatch(array, callback)
-```
-
-Iterate through an array and return the first value that matches the callback condition.
-
-#### Parameters
-
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
-
-#### Returns
-
+### Returns
 The first matching element or undefined if no match is found.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-firstmatch" direction="horizontal"></PlaygroundExample>
 
+## findIndex
+
+Find the index of the first element that matches the callback or value.
+
+### Syntax
 ```javascript
-import { firstMatch } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-const result = firstMatch(arr, (value) => value > 3);
-console.log(result); // 4
+findIndex(array, callbackOrValue)
 ```
 
-### findIndex
+### Parameters
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
 
-```javascript
-function findIndex(array, callback)
-```
-
-Find the index of the first element in the array that satisfies the provided testing function.
-
-#### Parameters
-
-| Name     | Type     | Description |
-|----------|----------|-------------|
-| array    | array    | The input array |
-| callback | function | The callback function to test each element |
-
-#### Returns
-
+### Returns
 The index of the first matching element, or -1 if no match is found.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-findindex" direction="horizontal"></PlaygroundExample>
 
+## last
+
+Get the last element(s) from an array.
+
+### Syntax
 ```javascript
-import { findIndex } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-const index = findIndex(arr, (value) => value > 3);
-console.log(index); // 3
+last(array, number = 1)
 ```
 
-### remove
+### Parameters
+| Name   | Type   | Description | Default |
+|--------|--------|-------------|---------|
+| array  | array  | The input array | |
+| number | number | The number of elements to return | 1 |
 
+### Returns
+The last element, an array of the last n elements, or undefined if the array is empty.
+
+### Example
+<PlaygroundExample id="utils-last" direction="horizontal"></PlaygroundExample>
+
+## remove
+
+Remove an element from the array that matches the callback or value.
+
+### Syntax
 ```javascript
-function remove(array, callbackOrValue)
+remove(array, callbackOrValue)
 ```
 
-Remove an element from the array that matches the provided callback or value.
-
-#### Parameters
-
+### Parameters
 | Name            | Type                | Description |
 |-----------------|---------------------|-------------|
 | array           | array               | The input array |
 | callbackOrValue | function or any     | The callback function to test each element or the value to remove |
 
-#### Returns
+### Returns
+Count of removed elements.
 
-True if an element was removed, false otherwise.
+### Example
+<PlaygroundExample id="utils-remove" direction="horizontal"></PlaygroundExample>
 
-#### Example
-
-```javascript
-import { remove } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-remove(arr, 3);
-console.log(arr); // [1, 2, 4, 5]
-
-remove(arr, (value) => value > 4);
-console.log(arr); // [1, 2, 4]
-```
-
-### inArray
-
-```javascript
-function inArray(value, array = [])
-```
+## inArray
 
 Check if a value is in the array.
 
-#### Parameters
+### Syntax
+```javascript
+inArray(value, array = [])
+```
 
+### Parameters
 | Name  | Type | Description |
 |-------|------|-------------|
 | value | any  | The value to search for |
 | array | array| The array to search in |
 
-#### Returns
-
+### Returns
 True if the value is in the array, false otherwise.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-inarray" direction="horizontal"></PlaygroundExample>
 
+## range
+
+Generate an array of numbers within a specified range. The stop value is exclusive, matching Python's `range()` semantics. When called with a single argument, it generates numbers from `0` to `start` (exclusive). Integer steps use addition; fractional steps use multiplication to avoid floating-point drift.
+
+### Syntax
 ```javascript
-import { inArray } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4, 5];
-console.log(inArray(3, arr)); // true
-console.log(inArray(6, arr)); // false
+range(start, stop, step = 1)
 ```
 
-### range
-
-```javascript
-function range(start, stop, step = 1)
-```
-
-Generate an array of numbers within a specified range.
-
-#### Parameters
-
+### Parameters
 | Name  | Type   | Description | Default |
 |-------|--------|-------------|---------|
-| start | number | The start of the range (or end if stop is not provided) | |
-| stop  | number | The end of the range (optional) | |
-| step  | number | The step between numbers | 1 |
+| start | number | The start of the range, or the exclusive stop if `stop` is not provided | |
+| stop  | number | The exclusive end of the range (optional) | |
+| step  | number | The step between numbers. A step of `0` returns an empty array | 1 |
 
-#### Returns
+### Returns
+Array of numbers from `start` up to (but not including) `stop`.
 
-An array of numbers within the specified range.
+### Example
+<PlaygroundExample id="utils-range" direction="horizontal"></PlaygroundExample>
 
-#### Example
+## sequence
 
+Generate a sequence of multiples. Useful for creating evenly spaced numeric sequences starting from a given value.
+
+### Syntax
 ```javascript
-import { range } from '@semantic-ui/utils';
-
-console.log(range(5)); // [0, 1, 2, 3, 4]
-console.log(range(1, 5)); // [1, 2, 3, 4]
-console.log(range(0, 10, 2)); // [0, 2, 4, 6, 8]
+sequence(count, interval = 1, start = 1)
 ```
 
-### moveItem
+### Parameters
+| Name     | Type   | Description | Default |
+|----------|--------|-------------|---------|
+| count    | number | The number of elements to generate | |
+| interval | number | The multiplier interval between elements | 1 |
+| start    | number | The starting multiplier offset | 1 |
 
+### Returns
+Array of `count` numbers where each element is `(start + index) * interval`.
+
+## moveItem
+
+Move an item in an array to a specified index.
+
+### Syntax
 ```javascript
-function moveItem(array = [], callbackOrValue, index)
+moveItem(array = [], callbackOrValue, index)
 ```
 
-Move an item in an array to a specified index based on a callback or value match.
-
-#### Parameters
-
+### Parameters
 | Name            | Type                | Description |
 |-----------------|---------------------|-------------|
 | array           | array               | The array to modify |
 | callbackOrValue | function or any     | The callback function to test each element or the value to move |
-| index           | number or string    | The target index to move the item to. Can be a number, 'first' (equivalent to 0), or 'last' (equivalent to array length - 1) |
+| index           | number or string    | The target index. Can be a number, 'first', or 'last' |
 
-#### Returns
-
+### Returns
 The modified array.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-moveitem" direction="horizontal"></PlaygroundExample>
 
+## moveToFront
+
+Move an item to the front of an array.
+
+### Syntax
 ```javascript
-import { moveItem } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4];
-console.log(moveItem(arr, 3, 0)); // [3, 1, 2, 4]
-console.log(moveItem(arr, 2, 'last')); // [1, 3, 4, 2]
-console.log(moveItem(arr, x => x === 4, 'first')); // [4, 1, 2, 3]
-console.log(moveItem(arr, 2, 1)); // [1, 2, 3, 4]
+moveToFront(array = [], callbackOrValue)
 ```
 
-### moveToFront
-
-```javascript
-function moveToFront(array = [], callbackOrValue)
-```
-
-Move an item to the front of an array based on a callback or value match.
-Equivalent to `moveItem(array, callbackOrValue, 'first')`.
-
-#### Parameters
-
-| Name            | Type                | Description |
-|-----------------|---------------------|-------------|
-| array           | array               | The array to modify |
-| callbackOrValue | function or any     | The callback function to test each element or the value to move |
-
-#### Returns
-
-The modified array.
-
-#### Example
-
-```javascript
-import { moveToFront } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4];
-console.log(moveToFront(arr, 3)); // [3, 1, 2, 4]
-```
-
-### moveToBack
-
-```javascript
-function moveToBack(array = [], callbackOrValue)
-```
-
-Move an item to the back of an array based on a callback or value match.
-Equivalent to `moveItem(array, callbackOrValue, 'last')`.
-
-#### Parameters
-
+### Parameters
 | Name            | Type                | Description |
 |-----------------|---------------------|-------------|
 | array           | array               | The array to modify |
 | callbackOrValue | function or any     | The callback function to test each element or the value to move |
 
-#### Returns
-
+### Returns
 The modified array.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-movetofront" direction="horizontal"></PlaygroundExample>
 
+## moveToBack
+
+Move an item to the back of an array.
+
+### Syntax
 ```javascript
-import { moveToBack } from '@semantic-ui/utils';
-
-const arr = [1, 2, 3, 4];
-console.log(moveToBack(arr, 2)); // [1, 3, 4, 2]
+moveToBack(array = [], callbackOrValue)
 ```
 
+### Parameters
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The array to modify |
+| callbackOrValue | function or any     | The callback function to test each element or the value to move |
 
-### sum
+### Returns
+The modified array.
 
-```javascript
-function sum(values)
-```
+### Example
+<PlaygroundExample id="utils-movetoback" direction="horizontal"></PlaygroundExample>
+
+## sum
 
 Calculate the sum of an array of numbers.
 
-#### Parameters
+### Syntax
+```javascript
+sum(values)
+```
 
+### Parameters
 | Name   | Type  | Description |
 |--------|-------|-------------|
 | values | array | An array of numbers |
 
-#### Returns
-
+### Returns
 The sum of all numbers in the array.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-sum" direction="horizontal"></PlaygroundExample>
 
+## unique
+
+Remove duplicates from an array.
+
+### Syntax
 ```javascript
-import { sum } from '@semantic-ui/utils';
-
-const numbers = [1, 2, 3, 4, 5];
-console.log(sum(numbers)); // 15
+unique(arr)
 ```
 
-### where
+### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to remove duplicates from |
 
-```javascript
-function where(array, properties)
-```
+### Returns
+Array with duplicates removed.
+
+### Example
+<PlaygroundExample id="utils-unique" direction="horizontal"></PlaygroundExample>
+
+## where
 
 Filter an array of objects based on matching properties.
 
-#### Parameters
+### Syntax
+```javascript
+where(array, properties)
+```
 
+### Parameters
 | Name       | Type   | Description |
 |------------|--------|-------------|
 | array      | array  | The array of objects to filter |
 | properties | object | An object with properties to match |
 
-#### Returns
+### Returns
+Array of objects that match all the specified properties.
 
-An array of objects that match all the specified properties.
+### Example
+<PlaygroundExample id="utils-where" direction="horizontal"></PlaygroundExample>
 
-#### Example
-
-```javascript
-import { where } from '@semantic-ui/utils';
-
-const people = [
-  { name: 'John', age: 30 },
-  { name: 'Jane', age: 25 },
-  { name: 'Bob', age: 30 }
-];
-const result = where(people, { age: 30 });
-console.log(result); // [{ name: 'John', age: 30 }, { name: 'Bob', age: 30 }]
-```
-
-### flatten
-
-```javascript
-function flatten(arr)
-```
+## flatten
 
 Flatten a nested array structure.
 
-#### Parameters
+### Syntax
+```javascript
+flatten(arr)
+```
 
+### Parameters
 | Name | Type  | Description |
 |------|-------|-------------|
 | arr  | array | The array to flatten |
 
-#### Returns
+### Returns
+A flattened array.
 
-A new, flattened array.
+### Example
+<PlaygroundExample id="utils-flatten" direction="horizontal"></PlaygroundExample>
 
-#### Example
+## some
 
+Check if at least one element satisfies the predicate.
+
+### Syntax
 ```javascript
-import { flatten } from '@semantic-ui/utils';
-
-const nestedArray = [1, [2, [3, 4]], 5];
-console.log(flatten(nestedArray)); // [1, 2, 3, 4, 5]
+some(collection, predicate)
 ```
 
-### some
-
-```javascript
-function some(collection, predicate)
-```
-
-Check if at least one element in the collection satisfies the predicate.
-
-#### Parameters
-
+### Parameters
 | Name       | Type     | Description |
 |------------|----------|-------------|
 | collection | array    | The collection to iterate over |
 | predicate  | function | The function invoked per iteration |
 
-#### Returns
-
+### Returns
 True if any element passes the predicate check, else false.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-some" direction="horizontal"></PlaygroundExample>
 
-```javascript
-import { some } from '@semantic-ui/utils';
-
-const numbers = [1, 2, 3, 4, 5];
-const result = some(numbers, (num) => num > 3);
-console.log(result); // true
-```
-
-### any
+## any
 
 An alias for `some`.
 
-### sortBy
+### Example
+<PlaygroundExample id="utils-any" direction="horizontal"></PlaygroundExample>
 
+## sortBy
+
+Sort an array of objects by one or more keys. String values are compared using natural sort order via `Intl.Collator` (e.g. `"item2"` sorts before `"item10"`).
+
+### Syntax
 ```javascript
-function sortBy(arr, key, comparator)
+sortBy(arr, key, comparator)
 ```
 
-Sort an array of objects by one or more keys. Supports multi-key sorting by passing an array of keys, and uses proper internationalized string comparison.
-
-#### Parameters
-
+### Parameters
 | Name       | Type              | Description |
 |------------|-------------------|-------------|
 | arr        | array             | The array to sort |
 | key        | string or array   | The key to sort by, or array of keys for multi-key sorting |
-| comparator | function          | Optional custom comparison function. For multi-key sorting, receives key index as fifth parameter |
+| comparator | function          | Optional custom comparison function |
 
-##### Comparator Function
+### Returns
+A sorted array.
 
-For single-key sorting: `(a, b, objA, objB) => number`
-For multi-key sorting: `(a, b, objA, objB, keyIndex) => number`
+### Example
+<PlaygroundExample id="utils-sortby" direction="horizontal"></PlaygroundExample>
 
-#### Returns
-
-A new sorted array.
-
-#### Examples
-
-**Single Key Sorting**
-
-```javascript
-import { sortBy } from '@semantic-ui/utils';
-
-const people = [
-  { name: 'John', age: 30 },
-  { name: 'Jane', age: 25 },
-  { name: 'Bob', age: 35 }
-];
-console.log(sortBy(people, 'age'));
-// [{ name: 'Jane', age: 25 }, { name: 'John', age: 30 }, { name: 'Bob', age: 35 }]
-
-// With custom comparator (descending)
-console.log(sortBy(people, 'age', (a, b) => b - a));
-// [{ name: 'Bob', age: 35 }, { name: 'John', age: 30 }, { name: 'Jane', age: 25 }]
-```
-
-**Multi-Key Sorting**
-
-```javascript
-import { sortBy } from '@semantic-ui/utils';
-
-const employees = [
-  { name: 'John', age: 30, department: 'IT' },
-  { name: 'Jane', age: 25, department: 'HR' },
-  { name: 'Bob', age: 30, department: 'IT' },
-  { name: 'Alice', age: 25, department: 'IT' }
-];
-
-// Sort by age first, then by name
-console.log(sortBy(employees, ['age', 'name']));
-// [
-//   { name: 'Alice', age: 25, department: 'IT' },
-//   { name: 'Jane', age: 25, department: 'HR' },
-//   { name: 'Bob', age: 30, department: 'IT' },
-//   { name: 'John', age: 30, department: 'IT' }
-// ]
-
-// Sort with custom comparator for multi-key
-console.log(sortBy(employees, ['age', 'name'], (a, b, objA, objB, keyIndex) => {
-  // Reverse sort for age (first key), normal sort for name (second key)
-  return keyIndex === 0 ? b - a : String(a).localeCompare(String(b));
-}));
-```
-
-### groupBy
-
-```javascript
-function groupBy(array, property)
-```
+## groupBy
 
 Group an array of objects by a specific property.
 
-#### Parameters
+### Syntax
+```javascript
+groupBy(array, property)
+```
 
+### Parameters
 | Name     | Type   | Description |
 |----------|--------|-------------|
 | array    | array  | The array to group |
 | property | string | The property to group by |
 
-#### Returns
+### Returns
+Object where keys are distinct values of the property, and values are arrays of matching elements.
 
-An object where keys are distinct values of the specified property, and values are arrays of elements that have that property value.
+### Example
+<PlaygroundExample id="utils-groupby" direction="horizontal"></PlaygroundExample>
 
-#### Example
+## intersection
 
+Find elements common to all input arrays.
+
+### Syntax
 ```javascript
-import { groupBy } from '@semantic-ui/utils';
-
-const people = [
-  { name: 'John', age: 30 },
-  { name: 'Jane', age: 25 },
-  { name: 'Bob', age: 30 }
-];
-const grouped = groupBy(people, 'age');
-console.log(grouped);
-// {
-//   '25': [{ name: 'Jane', age: 25 }],
-//   '30': [{ name: 'John', age: 30 }, { name: 'Bob', age: 30 }]
-// }
+intersection(...arrays)
 ```
 
-### intersection
-
-```javascript
-function intersection(...arrays)
-```
-
-Find elements common to all input arrays. Automatically switches between filter and Set implementation based on total array size for optimal performance.
-
-#### Parameters
-
+### Parameters
 | Name   | Type    | Description |
 |--------|---------|-------------|
 | arrays | ...Array| Arrays to find common elements between |
 
-#### Returns
-
+### Returns
 Array containing elements present in all input arrays.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-intersection" direction="horizontal"></PlaygroundExample>
 
+## difference
+
+Find elements unique to the first array.
+
+### Syntax
 ```javascript
-import { intersection } from '@semantic-ui/utils';
-
-const arr1 = [1, 2, 3, 4];
-const arr2 = [3, 4, 5, 6];
-const arr3 = [3, 4, 6, 7];
-console.log(intersection(arr1, arr2, arr3)); // [3, 4]
+difference(...arrays)
 ```
 
-### difference
-
-```javascript
-function difference(...arrays)
-```
-
-Find elements unique to the first array. Automatically switches between filter and Set implementation based on total array size for optimal performance.
-
-#### Parameters
-
+### Parameters
 | Name   | Type    | Description |
 |--------|---------|-------------|
 | arrays | ...Array| First array is filtered against all others |
 
-#### Returns
-
+### Returns
 Array containing elements present in first array but not in any other input arrays.
 
-#### Example
+### Example
+<PlaygroundExample id="utils-difference" direction="horizontal"></PlaygroundExample>
 
+## uniqueItems
+
+Find elements that appear in exactly one input array.
+
+### Syntax
 ```javascript
-import { difference } from '@semantic-ui/utils';
-
-const arr1 = [1, 2, 3, 4];
-const arr2 = [3, 4, 5, 6];
-const arr3 = [3, 4, 6, 7];
-console.log(difference(arr1, arr2, arr3)); // [1, 2]
+uniqueItems(...arrays)
 ```
 
-### uniqueItems
-
-```javascript
-function uniqueItems(...arrays)
-```
-
-Find elements that appear in exactly one input array. Automatically switches between filter and Set implementation based on total array size for optimal performance.
-
-#### Parameters
-
+### Parameters
 | Name   | Type    | Description |
 |--------|---------|-------------|
 | arrays | ...Array| Arrays to compare |
 
-#### Returns
-
+### Returns
 Array containing elements that appear in exactly one of the input arrays.
 
-#### Example
-
-```javascript
-import { uniqueItems } from '@semantic-ui/utils';
-
-const arr1 = [1, 2, 3];
-const arr2 = [2, 3, 4];
-const arr3 = [3, 4, 5];
-console.log(uniqueItems(arr1, arr2, arr3)); // [1, 5]
-```
+### Example
+<PlaygroundExample id="utils-uniqueitems" direction="horizontal"></PlaygroundExample>

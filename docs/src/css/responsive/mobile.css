@@ -27,17 +27,17 @@
 
     topbar-menu {
       width: 0px;
-      margin: 0rem var(--compact-spacing);
+      margin: 0rem var(--margin-xs);
     }
     .logo {
-      margin-left: var(--spacing);
+      margin-left: var(--margin);
     }
     mobile-menu-toggle {
       display: inline-block;
     }
     global-search {
       max-width: none;
-      margin-left: var(--spacing);
+      margin-left: var(--margin);
     }
     topbar-menu {
       display: none;

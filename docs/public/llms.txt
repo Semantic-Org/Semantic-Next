@@ -1,0 +1,112 @@
+# Semantic UI
+
+> A reactive web component framework built on signals and web standards
+
+Base URL: https://next.semantic-ui.com
+
+## Start Here
+
+Load the mental model first — it covers the foundational concepts (defineComponent, template syntax, reactivity, Query, specs) that everything else builds on:
+
+/content/ai/essentials/mental-model.md
+
+## What Do You Need?
+
+**Using UI components in a project?**
+1. /content/specs/index.md — list of components (button, card, modal, etc.)
+2. Fetch a spec: /content/specs/{id}.json — returns JSON with attributes, variations, states, settings
+3. /content/examples/index.md — working code examples grouped by category
+4. Fetch an example: /content/examples/{id}.json — returns source files as JSON
+5. /content/ai/usage/index.md — AI-optimized guides for using components
+
+**Building custom components with the framework?**
+1. /content/ai/authoring/index.md — AI-optimized guides for authoring components
+2. /content/docs/index.md — user documentation (guides and API reference)
+3. Fetch a doc: /content/docs/{path}.md — returns markdown
+
+**Contributing to Semantic UI?**
+1. /content/ai/contributing/index.md — architecture, testing, code style, workflows
+
+**Building your own UI framework or design system?**
+1. /content/ai/research/index.md — research corpus analyzing UI primitives across React, Vue, Angular, Svelte, etc. This was the research foundation for Semantic UI's component specs.
+
+All index URLs above return markdown lists of available content. Each item includes a path you can fetch to get the full content.
+
+---
+
+## Reference: API Endpoints
+
+The rest of this file documents the full content API for tooling, scrapers, and programmatic integrations.
+
+**Manifest formats** (available for each content type):
+- `index.md` — markdown list, most token-efficient
+- `index.min.json` — JSON with slim metadata
+- `manifest.json` — JSON with full metadata
+
+### Component Specs
+
+Machine-readable component API definitions.
+
+| Format | Path |
+|--------|------|
+| Markdown | /content/specs/index.md |
+| JSON (slim) | /content/specs/index.min.json |
+| JSON (full) | /content/specs/manifest.json |
+
+Fetch spec: /content/specs/{id}.json
+
+### Examples
+
+Code examples with source files.
+
+| Format | Path |
+|--------|------|
+| Markdown | /content/examples/index.md |
+| JSON (slim) | /content/examples/index.min.json |
+| JSON (full) | /content/examples/manifest.json |
+
+Fetch example: /content/examples/{id}.json
+
+### User Documentation
+
+Guides and API reference in markdown.
+
+| Format | Path |
+|--------|------|
+| Markdown | /content/docs/index.md |
+| JSON (slim) | /content/docs/index.min.json |
+| JSON (full) | /content/docs/manifest.json |
+
+Fetch page: /content/docs/{path}.md
+
+### AI Context
+
+Documentation optimized for AI agents, organized by audience.
+
+| Format | Path |
+|--------|------|
+| Markdown (all) | /content/ai/index.md |
+| JSON (all, slim) | /content/ai/index.min.json |
+| JSON (all, full) | /content/ai/manifest.json |
+
+Per-audience indexes:
+
+| Audience | Markdown | JSON |
+|----------|----------|------|
+| usage | /content/ai/usage/index.md | /content/ai/usage/index.min.json |
+| authoring | /content/ai/authoring/index.md | /content/ai/authoring/index.min.json |
+| essentials | /content/ai/essentials/index.md | /content/ai/essentials/index.min.json |
+| contributing | /content/ai/contributing/index.md | /content/ai/contributing/index.min.json |
+| research | /content/ai/research/index.md | /content/ai/research/index.min.json |
+
+Fetch content: /content/ai/{audience}/{slug}.md
+
+### Full Manifest
+
+All content types combined. For tooling, scrapers, and indexing systems.
+
+/content/manifest.json
+
+## Links
+
+- https://github.com/Semantic-Org/Semantic-Next

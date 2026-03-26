@@ -1,0 +1,3 @@
+.circular.segment {
+  border-radius: var(--segment-circular-border-radius);
+}

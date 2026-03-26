@@ -2,24 +2,33 @@ import { sortBy } from '@semantic-ui/utils';
 import { getCollection } from 'astro:content';
 
 /* UI Component pages are generated dynamically */
-const primitives = sortBy(await getCollection('primitives'), 'slug');
+const primitives = sortBy(await getCollection('primitives'), 'id');
 export const primitivePages = primitives.map(page => ({
   name: page.data.title,
-  url: `/ui/primitives/${page.slug}`,
+  description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
+  url: `/ui/primitives/${page.id}`,
   matchSubPaths: true,
 }));
 
-const components = sortBy(await getCollection('components'), 'slug');
+const components = sortBy(await getCollection('components'), 'id');
 export const componentPages = components.map(page => ({
   name: page.data.title,
-  url: `/ui/components/${page.slug}`,
+  description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
+  url: `/ui/components/${page.id}`,
   matchSubPaths: true,
 }));
 
-const behaviors = sortBy(await getCollection('behaviors'), 'slug');
+const behaviors = sortBy(await getCollection('behaviors'), 'id');
 export const behaviorPages = behaviors.map(page => ({
   name: page.data.title,
-  url: `/ui/behaviors/${page.slug}`,
+  description: page.data.description,
+  imageSrc: page.data.imageSrc,
+  darkImageSrc: page.data.darkImageSrc,
+  url: `/ui/behaviors/${page.id}`,
   matchSubPaths: true,
 }));
 
@@ -44,6 +53,7 @@ const subCategorySortOrder = {
     'Settings',
     'Keybinding',
     'Comms',
+    'Specs',
   ],
   'UI Components': [
     'Interactive',
@@ -92,10 +102,11 @@ const subCategorySortOrder = {
     'Visibility',
     'DOM Manipulation',
     'DOM Traversal',
+    'DOM Access',
     'Events',
     'Iterators',
     'Logical Operators',
-    'Utilities',
+    'Collections',
   ],
   'Utils': [
     'Setup',
@@ -107,15 +118,17 @@ const subCategorySortOrder = {
     'Functions',
     'Colors',
     'CSS',
+    'HTML',
     'Browser',
-    'Dates',
-    'Numbers',
-    'Environment',
-    'Crypto',
-    'Equality',
     'Cloning',
-    'Errors',
+    'Crypto',
+    'Dates',
+    'Debug',
+    'Environment',
+    'Equality',
+    'Numbers',
     'Regex',
+    'Debug',
   ],
 };
 
@@ -133,11 +146,11 @@ export const standardMenuIcons = {
   'Introduction': 'zap',
   'Quick Start': 'zap',
   'Install & Setup': 'zap',
-  'Tokens': 'droplet',
-  'Styling': 'droplet',
-  'CSS Tokens': 'droplet',
-  'CSS Framework': 'droplet',
-  'CSS Theming': 'droplet',
+  'Tokens': 'theme',
+  'Styling': 'theme',
+  'CSS Tokens': 'theme',
+  'CSS Framework': 'theme',
+  'CSS Theming': 'theme',
   'Templates': 'table',
   'Framework': 'package',
   'Primitives': 'layers',
@@ -146,7 +159,7 @@ export const standardMenuIcons = {
   'UI Components': 'package',
   'Behaviors': 'cpu',
   'UI Behaviors': 'cpu',
-  'Reactivity': 'cpu',
+  'Reactivity': 'activity',
   'Query': 'mouse pointer',
   'Advanced Usage': 'server',
   'API References': 'code',
@@ -215,7 +228,7 @@ export const topbarMenu = [
   {
     _id: 'css',
     name: 'Styling',
-    icon: 'droplet',
+    icon: 'theme',
     url: '/ui/css',
   },
   {
@@ -284,9 +297,14 @@ export const sidebarMenuStart = [
   },
   {
     name: "What's New?",
-    icon: 'radio',
+    icon: 'sparkles',
     url: '/ui/start/whats-new',
     description: '0.12.0',
+  },
+  {
+    name: 'Roadmap',
+    icon: 'calendar',
+    url: '/ui/roadmap',
   },
   {
     name: 'Getting Started',
@@ -345,7 +363,7 @@ export const sidebarMenuStart = [
   {
     name: 'Philosophy',
     url: '/ui/start/philosophy',
-    icon: 'message-circle',
+    icon: 'chat',
     pages: [
       {
         name: 'Natural Language',
@@ -364,7 +382,7 @@ export const sidebarMenuCSS = [
   {
     name: 'CSS Tokens',
     url: '/ui/css/tokens',
-    icon: 'droplet',
+    icon: 'theme',
     pages: [
       {
         name: 'Colors',
@@ -450,489 +468,13 @@ export const sidebarMenuBehaviors = [
   {
     name: 'Behaviors',
     url: '/ui/behaviors',
-    icon: 'package',
+    icon: 'cpu',
     pages: behaviorPages,
   },
 ];
 
-/* Component Framework Sidebar */
-export const sidebarMenuFramework = [
-  {
-    name: 'Overview',
-    url: '/docs/guides',
-    icon: 'open book',
-  },
-  {
-    name: 'Components',
-    url: '/docs/guides/components',
-    icon: 'package',
-    pages: [
-      {
-        name: 'Creating',
-        url: '/docs/guides/components/create',
-      },
-      {
-        name: 'Functionality',
-        url: '/docs/guides/components/instances',
-      },
-      {
-        name: 'Lifecycle',
-        url: '/docs/guides/components/lifecycle',
-      },
-      {
-        name: 'Templates & Data',
-        url: '/docs/guides/components/rendering',
-      },
-      {
-        name: 'Settings',
-        url: '/docs/guides/components/settings',
-      },
-      {
-        name: 'State',
-        url: '/docs/guides/components/state',
-      },
-      {
-        name: 'Events',
-        url: '/docs/guides/components/events',
-      },
-      {
-        name: 'Reactivity',
-        url: '/docs/guides/components/reactivity',
-      },
-      {
-        name: 'DOM',
-        url: '/docs/guides/components/dom',
-      },
-      {
-        name: 'Styling',
-        url: '/docs/guides/components/styling',
-      },
-      {
-        name: 'Key Bindings',
-        url: '/docs/guides/components/keys',
-      },
-    ],
-  },
-  {
-    name: 'Templates',
-    url: '/docs/guides/templates',
-    icon: 'table',
-    pages: [
-      {
-        name: 'Expressions',
-        url: '/docs/guides/templates/expressions',
-      },
-      {
-        name: 'Conditionals',
-        url: '/docs/guides/templates/conditionals',
-      },
-      {
-        name: 'Loops',
-        url: '/docs/guides/templates/loops',
-      },
-      {
-        name: 'Async',
-        url: '/docs/guides/templates/async',
-      },
-      {
-        name: 'Slots',
-        url: '/docs/guides/templates/slots',
-      },
-      {
-        name: 'Subtemplates',
-        url: '/docs/guides/templates/subtemplates',
-      },
-      {
-        name: 'Snippets',
-        url: '/docs/guides/templates/snippets',
-      },
-      {
-        name: 'Reactivity',
-        url: '/docs/guides/templates/reactivity',
-      },
-      {
-        name: 'Helpers',
-        url: '/docs/guides/templates/helpers',
-      },
-    ],
-  },
-  {
-    name: 'Reactivity',
-    description: 'Signals',
-    url: '/docs/guides/reactivity',
-    icon: 'cpu',
-    pages: [
-      {
-        name: 'Signals',
-        description: 'Reactive state primitive',
-        url: '/docs/guides/reactivity/signals',
-      },
-      {
-        name: 'Dependent Signals',
-        description: 'Derived and computed signals',
-        url: '/docs/guides/reactivity/dependent-signals',
-      },
-      {
-        name: 'Reactions',
-        description: 'Reactive computations',
-        url: '/docs/guides/reactivity/reactions',
-      },
-      {
-        name: 'Mutations',
-        url: '/docs/guides/reactivity/mutation-helpers',
-      },
-      {
-        name: 'Flushing',
-        url: '/docs/guides/reactivity/flush',
-      },
-      {
-        name: 'Reactive Controls',
-        url: '/docs/guides/reactivity/controls',
-      },
-      {
-        name: 'Performance',
-        url: '/docs/guides/reactivity/performance',
-      },
-      {
-        name: 'Debugging',
-        url: '/docs/guides/reactivity/debugging',
-      },
-      {
-        name: 'Advanced Options',
-        description: 'Equality & Cloning',
-        url: '/docs/guides/reactivity/signal-options',
-      },
-    ],
-  },
-  {
-    name: 'Query',
-    description: 'DOM Helpers',
-    url: '/docs/guides/query',
-    icon: 'mouse-pointer',
-    pages: [
-      {
-        name: 'Basics',
-        url: '/docs/guides/query/basics',
-      },
-      {
-        name: 'Shadow DOM',
-        url: '/docs/guides/query/shadow-dom',
-      },
-      {
-        name: 'Components',
-        url: '/docs/guides/query/components',
-      },
-      {
-        name: 'Chaining',
-        url: '/docs/guides/query/chaining',
-      },
-      {
-        name: 'Plugins',
-        url: '/docs/guides/query/plugins',
-      },
-      {
-        name: 'Browser Usage',
-        url: '/docs/guides/query/browser',
-      },
-    ],
-  },
-  {
-    name: 'Advanced Usage',
-    url: '/docs/guides/advanced',
-    icon: 'server',
-    pages: [
-      {
-        name: 'Common Issues',
-        url: '/docs/guides/advanced/common-issues',
-      },
-      {
-        name: 'Server Side Rendering',
-        url: '/docs/guides/advanced/ssr',
-      },
-    ],
-  },
-];
+/* Component Framework Sidebar — re-exported from standalone file */
+export { sidebarMenuFramework } from './doc-menu-items.js';
 
-export const sidebarMenuAPI = [
-  {
-    name: 'Components',
-    url: '/docs/api/component',
-    icon: 'package',
-    pages: [
-      {
-        name: 'Define Component',
-        url: '/docs/api/component/define-component',
-      },
-      {
-        name: 'Utility Functions',
-        url: '/docs/api/component/utilities',
-      },
-      {
-        name: 'Base Class',
-        url: '/docs/api/component/web-component-base',
-      },
-    ],
-  },
-  {
-    name: 'Template Helpers',
-    url: '/docs/api/helpers',
-    icon: 'book-open',
-    pages: [
-      {
-        name: 'Arrays',
-        url: '/docs/api/helpers/arrays',
-      },
-      {
-        name: 'Comparison',
-        url: '/docs/api/helpers/comparison',
-      },
-      {
-        name: 'CSS',
-        url: '/docs/api/helpers/css',
-      },
-      {
-        name: 'Dates',
-        url: '/docs/api/helpers/dates',
-      },
-      {
-        name: 'Debug',
-        url: '/docs/api/helpers/debug',
-      },
-      {
-        name: 'Logical Operators',
-        url: '/docs/api/helpers/logical',
-      },
-      {
-        name: 'Numeric',
-        url: '/docs/api/helpers/numeric',
-      },
-      {
-        name: 'Objects',
-        url: '/docs/api/helpers/objects',
-      },
-      {
-        name: 'Reactivity',
-        url: '/docs/api/helpers/reactivity',
-      },
-      {
-        name: 'Strings',
-        url: '/docs/api/helpers/strings',
-      },
-    ],
-  },
-  {
-    name: 'Reactivity',
-    url: '/docs/api/reactivity',
-    icon: 'cpu',
-    pages: [
-      {
-        name: 'Signal',
-        url: '/docs/api/reactivity/signal',
-      },
-      {
-        name: 'Reaction',
-        url: '/docs/api/reactivity/reaction',
-      },
-      {
-        name: 'Scheduler',
-        url: '/docs/api/reactivity/scheduler',
-      },
-      {
-        name: 'Dependency',
-        url: '/docs/api/reactivity/dependency',
-      },
-      {
-        name: 'Number Helpers',
-        url: '/docs/api/reactivity/number-helpers',
-      },
-      {
-        name: 'Boolean Helpers',
-        url: '/docs/api/reactivity/boolean-helpers',
-      },
-      {
-        name: 'Array Helpers',
-        url: '/docs/api/reactivity/array-helpers',
-      },
-      {
-        name: 'Collection Helpers',
-        url: '/docs/api/reactivity/collection-helpers',
-      },
-      {
-        name: 'Date Helpers',
-        url: '/docs/api/reactivity/date-helpers',
-      },
-    ],
-  },
-  {
-    name: 'Query',
-    url: '/docs/api/query',
-    icon: 'mouse-pointer',
-    pages: [
-      {
-        name: 'Basic Usage',
-        url: '/docs/api/query/basic',
-      },
-      {
-        name: 'Attributes',
-        url: '/docs/api/query/attributes',
-      },
-      {
-        name: 'Components',
-        url: '/docs/api/query/components',
-      },
-      {
-        name: 'Content',
-        url: '/docs/api/query/content',
-      },
-      {
-        name: 'CSS',
-        url: '/docs/api/query/css',
-      },
-      {
-        name: 'Dimensions & Size',
-        url: '/docs/api/query/dimensions',
-      },
-      {
-        name: 'Display & Visibility',
-        url: '/docs/api/query/visibility',
-      },
-      {
-        name: 'DOM Manipulation',
-        url: '/docs/api/query/dom-manipulation',
-      },
-      {
-        name: 'DOM Traversal',
-        url: '/docs/api/query/dom-traversal',
-      },
-      {
-        name: 'Events',
-        url: '/docs/api/query/events',
-      },
-      {
-        name: 'Iterators',
-        url: '/docs/api/query/iterators',
-      },
-      {
-        name: 'Logical Operators',
-        url: '/docs/api/query/logical-operators',
-      },
-      {
-        name: 'Utilities',
-        url: '/docs/api/query/utilities',
-      },
-      {
-        name: 'Internal',
-        url: '/docs/api/query/internal',
-      },
-    ],
-  },
-  {
-    name: 'Utils',
-    url: '/docs/api/utils',
-    icon: 'tool',
-    pages: [
-      {
-        name: 'Arrays',
-        url: '/docs/api/utils/arrays',
-      },
-      {
-        name: 'Browser',
-        url: '/docs/api/utils/browser',
-      },
-      {
-        name: 'Cloning',
-        url: '/docs/api/utils/cloning',
-      },
-      {
-        name: 'Colors',
-        url: '/docs/api/utils/colors',
-      },
-      {
-        name: 'Crypto',
-        url: '/docs/api/utils/crypto',
-      },
-      {
-        name: 'Dates',
-        url: '/docs/api/utils/dates',
-      },
-      {
-        name: 'Environment',
-        url: '/docs/api/utils/environment',
-      },
-      {
-        name: 'Equality',
-        url: '/docs/api/utils/equality',
-      },
-      {
-        name: 'Errors',
-        url: '/docs/api/utils/errors',
-      },
-      {
-        name: 'Functions',
-        url: '/docs/api/utils/functions',
-      },
-      {
-        name: 'Looping',
-        url: '/docs/api/utils/looping',
-      },
-      {
-        name: 'Numbers',
-        url: '/docs/api/utils/numbers',
-      },
-      {
-        name: 'Objects',
-        url: '/docs/api/utils/objects',
-      },
-      {
-        name: 'Types',
-        url: '/docs/api/utils/types',
-      },
-      {
-        name: 'Regular Expressions',
-        url: '/docs/api/utils/regex',
-      },
-      {
-        name: 'Strings',
-        url: '/docs/api/utils/strings',
-      },
-    ],
-  },
-  {
-    name: 'Template Compiler',
-    url: '/docs/api/templating',
-    icon: 'table',
-    pages: [
-      {
-        name: 'Template Compiler',
-        url: '/docs/api/templating/template-compiler',
-      },
-      {
-        name: 'Abstract Syntax Tree (AST)',
-        url: '/docs/api/templating/ast',
-      },
-      {
-        name: 'Template',
-        url: '/docs/api/templating/template',
-      },
-      {
-        name: 'String Scanner',
-        url: '/docs/api/templating/string-scanner',
-      },
-    ],
-  },
-  {
-    name: 'Renderer',
-    url: '/docs/api/renderer',
-    icon: 'edit-3',
-    pages: [
-      {
-        name: 'Lit Renderer',
-        url: '/docs/api/renderer/lit-renderer',
-      },
-      {
-        name: 'Lit Directives',
-        url: '/docs/api/renderer/lit-directives',
-      },
-    ],
-  },
-];
+/* API Reference Sidebar — re-exported from standalone file */
+export { sidebarMenuAPI } from './doc-menu-items.js';

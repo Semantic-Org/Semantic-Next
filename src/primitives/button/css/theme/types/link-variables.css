@@ -1,0 +1,9 @@
+:host {
+
+  /* Link */
+  --button-link-padding: 0;
+  --button-link-text-decoration: underline;
+  --button-link-text-color: var(--link-color);
+  --button-link-text-color-hover: var(--link-hover-color);
+  --button-link-text-decoration-hover: underline;
+}

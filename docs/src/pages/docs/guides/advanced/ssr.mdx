@@ -20,8 +20,6 @@ Semantic components are built using [Lit HTML](https://www.lit.dev) as a renderi
 > Learn more about SSR with Lit in their [official guide](https://lit.dev/docs/ssr/overview/)
 
 
-
-
 ### Building Components for SSR
 
 Components provide an `isClient` and `isServer` boolean to callbacks to allow you to have separate code paths for the server and client.
@@ -35,4 +33,4 @@ Some common values that might be useful in a component but should be prevented f
 
 * Accessing `navigator.userAgent` to determine browser type
 * Accessing `window` or `document` or other DOM elements
-* Acessing `localStorage`
+* Accessing `localStorage`

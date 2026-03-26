@@ -1,0 +1,17 @@
+/*******************************
+      Light Theme - Typography
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /* -------------------
+          Links
+  -------------------- */
+
+  --link-color: oklch(0.61 0.17 250.88);
+  --link-hover-color: oklch(0.62 0.22 252.98);
+
+}

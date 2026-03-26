@@ -2,352 +2,237 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Query - DOM Manipulation
-icon: edit-3
+icon: edit
 description: API reference for Query methods related to DOM manipulation
+package: "@semantic-ui/query"
+methods: ["append", "prepend", "remove", "clone", "insertBefore", "insertAfter", "appendTo", "prependTo", "detach"]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-The DOM Manipulation methods in Query allow you to insert, remove, and modify elements in the DOM. These methods are crucial for creating dynamic and interactive user interfaces in your Semantic UI components.
+export const components = { blockquote: Blockquote };
 
-## append
+Insert, remove, and modify elements in the DOM.
 
-Insert content to the end of each element in the set of matched elements.
+## Methods
 
-### Syntax
+### append
+
 ```javascript
 $('selector').append(...content)
 ```
 
-### Parameters
-| Name    | Type                | Description                           |
-|---------|---------------------|---------------------------------------|
-| ...content | string, DOM Element, or Query object | One or more elements to insert |
+Insert content to the end of each element in the set of matched elements.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name       | Type                                   | Description                    |
+|------------|----------------------------------------|--------------------------------|
+| ...content | string, DOM Element, or Query object   | One or more elements to insert |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 ```javascript
-// Append a single element to a div
 $('div').append('<p>New content</p>');
-
-// Append multiple elements to a div
-$('div').append(
-  '<p>First paragraph</p>', 
-  '<p>Second paragraph</p>', 
-  $('<button>Click me</button>')
-);
 ```
 
-#### Shadow DOM
-```javascript
-// Append a new button to the action buttons in a user-profile
-$$('user-profile').find('.action-buttons').append('<button>Follow</button>');
-```
-
-### Example
 <PlaygroundExample id="query-append" direction="horizontal"></PlaygroundExample>
 
-## prepend
+### prepend
 
-Insert content to the beginning of each element in the set of matched elements.
-
-### Syntax
 ```javascript
 $('selector').prepend(...content)
 ```
 
-### Parameters
-| Name    | Type                | Description                           |
-|---------|---------------------|---------------------------------------|
-| ...content | string, DOM Element, or Query object | One or more elements to insert |
+Insert content to the beginning of each element in the set of matched elements.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name       | Type                                   | Description                    |
+|------------|----------------------------------------|--------------------------------|
+| ...content | string, DOM Element, or Query object   | One or more elements to insert |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 ```javascript
-// Prepend a single element to a section
 $('section').prepend('<h2>New Section Title</h2>');
-
-// Prepend multiple elements to a section
-$('section').prepend(
-  '<h2>Main Title</h2>', 
-  '<div class="subtitle">Subtitle text</div>', 
-  $('<hr>')
-);
 ```
 
-#### Shadow DOM
-```javascript
-// Prepend a notification badge to the user name in a user-profile
-$$('user-profile').find('.user-name').prepend('<span class="badge">New</span>');
-```
-
-### Example
 <PlaygroundExample id="query-prepend" direction="horizontal"></PlaygroundExample>
 
-## remove
+### remove
 
-Remove the set of matched elements from the DOM.
-
-### Syntax
 ```javascript
 $('selector').remove()
 ```
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+Remove the set of matched elements from the DOM.
 
-### Usage
+#### Returns
 
-#### Standard
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 ```javascript
-// Remove all paragraphs with a specific class
 $('p.outdated').remove();
 ```
 
-#### Shadow DOM
-```javascript
-// Remove the offline status indicator from a user-profile
-$$('user-profile').find('.status-indicator.offline').remove();
-```
-
-### Example
 <PlaygroundExample id="query-remove" direction="horizontal"></PlaygroundExample>
 
-## clone
+### clone
 
-Create a deep copy of the set of matched elements.
-
-### Syntax
 ```javascript
 $('selector').clone()
 ```
 
-### Returns
-A new [Query object](/docs/api/query/basic#the-query-object) containing cloned elements.
+Create a deep copy of the set of matched elements.
 
-### Usage
+#### Returns
 
-#### Standard
+A new [Query object](/docs/api/query/constructor#the-query-object) containing cloned elements.
+
+#### Example
+
 ```javascript
-// Clone a template and append it to a container
 const $template = $('#item-template').clone();
 $('#container').append($template);
 ```
 
-#### Shadow DOM
-```javascript
-// Clone a user badge and append it to a list in a user-profile
-const $badge = $$('user-profile').find('.user-badge').clone();
-$$('user-profile').find('.badge-list').append($badge);
-```
-
-### Example
 <PlaygroundExample id="query-clone" direction="horizontal"></PlaygroundExample>
 
-## insertBefore
+### insertBefore
 
-Insert every element in the set of matched elements before the target.
-
-### Syntax
 ```javascript
 $('selector').insertBefore(target)
 ```
 
-### Parameters
-| Name   | Type   | Description                                        |
-|--------|--------|----------------------------------------------------|
-| target | string | A selector, element, or Query object before which the content will be inserted |
+Insert every element in the set of matched elements before the target.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element before which the content will be inserted              |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 ```javascript
-// Insert a new paragraph before all existing paragraphs
 $('<p>New paragraph</p>').insertBefore('p');
 ```
 
-#### Shadow DOM
-```javascript
-// Insert a new header before the user info in a user-profile
-$$('<h3>User Details</h3>').insertBefore($$('user-profile').find('.user-info'));
-```
-
-### Example
 <PlaygroundExample id="query-insertbefore" direction="horizontal"></PlaygroundExample>
 
-## insertAfter
+### insertAfter
 
-Insert every element in the set of matched elements after the target.
-
-### Syntax
 ```javascript
 $('selector').insertAfter(target)
 ```
 
-### Parameters
-| Name   | Type   | Description                                       |
-|--------|--------|---------------------------------------------------|
-| target | string | A selector, element, or Query object after which the content will be inserted |
+Insert every element in the set of matched elements after the target.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name   | Type                                 | Description                                                   |
+|--------|--------------------------------------|---------------------------------------------------------------|
+| target | string, Element, or Query object     | Element after which the content will be inserted              |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
 ```javascript
-// Insert a new paragraph after all existing paragraphs
 $('<p>New paragraph</p>').insertAfter('p');
 ```
 
-#### Shadow DOM
-```javascript
-// Insert a new footer after the user bio in a user-profile
-$$('<footer>Last updated: Today</footer>').insertAfter($$('user-profile').find('.user-bio'));
-```
-
-### Example
 <PlaygroundExample id="query-insertafter" direction="horizontal"></PlaygroundExample>
 
-## appendTo
+### appendTo
 
-Insert every element in the set of matched elements as the last child of the target.
-
-### Syntax
 ```javascript
 $('selector').appendTo(target)
 ```
 
-### Parameters
-| Name   | Type   | Description                                        |
-|--------|--------|----------------------------------------------------|
-| target | string | A selector, element, or Query object to which the content will be appended |
+Insert every element in the set of matched elements as the last child of the target.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) of the target elements (for chaining).
+#### Parameters
 
-### Usage
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element to which the content will be appended                  |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) of the target elements (for chaining).
+
+#### Example
+
 ```javascript
-// Create a new paragraph and append it to a specific div
 $('<p>New content</p>').appendTo('#container');
-
-// Move existing elements to the end of another container
-$('.item').appendTo('.destination');
 ```
 
-#### Shadow DOM
-```javascript
-// Append a new action button to the user profile
-$$('<button>Edit Profile</button>').appendTo($$('user-profile').find('.actions'));
-```
-
-### Example
 <PlaygroundExample id="query-appendto" direction="horizontal"></PlaygroundExample>
 
-## prependTo
+### prependTo
 
-Insert every element in the set of matched elements as the first child of the target.
-
-### Syntax
 ```javascript
 $('selector').prependTo(target)
 ```
 
-### Parameters
-| Name   | Type   | Description                                        |
-|--------|--------|----------------------------------------------------|
-| target | string | A selector, element, or Query object to which the content will be prepended |
+Insert every element in the set of matched elements as the first child of the target.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) of the target elements (for chaining).
+#### Parameters
 
-### Usage
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element to which the content will be prepended                 |
 
-#### Standard
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) of the target elements (for chaining).
+
+#### Example
+
 ```javascript
-// Create a new heading and prepend it to a section
 $('<h2>Section Title</h2>').prependTo('section');
-
-// Move existing elements to the beginning of another container
-$('.priority-item').prependTo('.container');
 ```
 
-#### Shadow DOM
-```javascript
-// Prepend a status indicator to the user profile header
-$$('<span class="status online">●</span>').prependTo($$('user-profile').find('.header'));
-```
-
-### Example
 <PlaygroundExample id="query-prependto" direction="horizontal"></PlaygroundExample>
 
-> **Aliases** The `before(content)` and `after(content)` methods are available as more intuitive aliases for inserting content before and after the current selection.
+### detach
 
-## detach
-
-Remove the set of matched elements from the DOM, but keep all associated data and events.
-
-### Syntax
 ```javascript
 $('selector').detach()
 ```
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the removed elements.
+Remove the set of matched elements from the DOM, but keep all associated data and events.
 
-### Usage
+#### Returns
 
-#### Standard
+[Query object](/docs/api/query/constructor#the-query-object) containing the removed elements.
+
+#### Example
+
 ```javascript
-// Detach all list items, modify them, and reattach
 const $items = $('ul li').detach();
 $items.addClass('modified');
 $('ul').append($items);
 ```
 
-#### Shadow DOM
-```javascript
-// Detach user posts, modify them, and reattach in a user-profile
-const $posts = $$('user-profile').find('.user-posts').detach();
-$posts.addClass('updated');
-$$('user-profile').find('.posts-container').append($posts);
-```
-
-### Example
 <PlaygroundExample id="query-detach" direction="horizontal"></PlaygroundExample>
 
-## reverse
-
-Reverse the order of elements in the current set of matched elements.
-
-### Syntax
-```javascript
-$('selector').reverse()
-```
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) containing the elements in reverse order.
-
-### Usage
-```javascript
-// Reverse the order of list items
-$('ul.my-list li').reverse().each((el, index) => {
-  console.log(`Reversed order: Item ${index + 1}`);
-});
-```
-
-### Example
-<PlaygroundExample id="query-reverse" direction="horizontal"></PlaygroundExample>

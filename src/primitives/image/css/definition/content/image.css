@@ -1,0 +1,17 @@
+:host {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: auto;
+  max-width: 100%;
+  border-radius: initial;
+}
+
+.image,
+img {
+  width: inherit;
+  max-width: inherit;
+  height: inherit;
+  max-height: inherit;
+  border-radius: inherit;
+}

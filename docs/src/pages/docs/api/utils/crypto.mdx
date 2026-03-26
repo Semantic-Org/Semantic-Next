@@ -2,6 +2,8 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Crypto Utilities
+package: "@semantic-ui/utils"
+methods: [tokenize, hashCode, generateID, prettifyHash, getRandomSeed]
 icon: lock
 description: API reference for cryptographic utility functions
 ---
@@ -40,12 +42,10 @@ console.log(tokenize('A simple-test_string')); // "a-simple-test-string"
 ### hashCode
 
 ```javascript
-function hashCode(input, { prettify = false, seed = 0x12345678 } = {})
+function hashCode(input, { prettify = false, seed, fast = true } = {})
 ```
 
-Generates a hash code for the given input using an adapted UMASH algorithm.
-
-> **Collision Resistance** This is based on the [UMASH algorithm](https://github.com/backtrace-labs/umash) which provides good performance and collission resistance.
+Generates a hash code for the given input. Uses [FNV-1a](https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) by default (zero allocation). Set `fast: false` to use [UMASH](https://github.com/backtrace-labs/umash) for stronger collision resistance.
 
 #### Parameters
 
@@ -59,7 +59,8 @@ Generates a hash code for the given input using an adapted UMASH algorithm.
 | Name     | Type    | Default     | Description |
 |----------|---------|-------------|-------------|
 | prettify | boolean | false       | If true, returns a prettified string representation |
-| seed     | number  | 0x12345678  | Seed value for the hash function |
+| seed     | number  |             | Seed value for the hash function |
+| fast     | boolean | true        | Use FNV-1a (fast, zero allocation). Set to false for UMASH (stronger collision resistance) |
 
 #### Returns
 
@@ -70,9 +71,12 @@ A 32-bit integer hash code, or a prettified string if `prettify` is true.
 ```javascript
 import { hashCode } from '@semantic-ui/utils';
 
-console.log(hashCode("Hello, world!")); // 2686193689
-console.log(hashCode("Hello, world!", { prettify: true })); // "9ZX3P"
-console.log(hashCode({ a: 1, b: [2, 3] })); // 3608339170
+console.log(hashCode("Hello, world!")); // fast FNV-1a (default)
+console.log(hashCode("Hello, world!", { prettify: true }));
+console.log(hashCode({ a: 1, b: [2, 3] }));
+
+// UMASH mode for stronger collision resistance
+console.log(hashCode("Hello, world!", { fast: false }));
 ```
 
 ### generateID

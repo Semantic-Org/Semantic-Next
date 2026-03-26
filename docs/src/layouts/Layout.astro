@@ -1,6 +1,9 @@
 ---
 import '../css/layers.css';
 import '../css/fonts.css';
+import '../css/code-formatting.css';
+import '@semantic-ui/core/icon/sets/lucide.css';
+import '@semantic-ui/core/icon/sets/dev.css';
 
 import { UICard, UIIcon } from '@semantic-ui/core';
 import Body from './Body.astro';
@@ -38,7 +41,7 @@ const pageTraversal = await getPageTraversalLinks({
 
 const activeURL = Astro.url.pathname;
 ---
-<Body title={title} description={description} searchMeta={searchMeta}>
+<Body title={title} description={description} searchMeta={searchMeta} prefetch>
 	<TopBar></TopBar>
 	<layout id={id}>
 		<Sidebar><slot name="sidebar"></slot></Sidebar>

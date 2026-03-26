@@ -25,7 +25,7 @@ npm install @semantic-ui/component
 
 The minimum requirement to create a component is an html template.
 
-```javascript
+```javascript {4}
 import { defineComponent } from '@semantic-ui/component';
 
 const HelloWorld = defineComponent({
@@ -34,7 +34,7 @@ const HelloWorld = defineComponent({
 ```
 
 If you specify a `tagName` your component will be available as a web component allowing you to include it in pages in your application.
-```javascript
+```javascript {4}
 import { defineComponent } from '@semantic-ui/component';
 
 defineComponent({
@@ -54,6 +54,7 @@ Most components need additional configuration options for `defineComponent`:
 ```javascript
 // for examples of each config option see below
 defineComponent({
+  componentSpec, // optional spec for automatic property configuration
   createComponent, // function that returns component methods and props stored in DOM
   template, // component template
   css, // scoped css
@@ -78,6 +79,7 @@ defineComponent({
 * **[Settings](/docs/guides/components/settings)** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
 * **[Lifecycle Events](/docs/guides/components/lifecycle)** - Actions that should occur `onCreated`, `onRendered` and `onDestroyed` for your component
 * **[Keybindings](/docs/guides/components/keys)** - `keys` defines keyboard events associated with your component
+* **[Component Spec](/docs/guides/components/specs)** - An optional JSON specification that automatically configures component properties, enables all three HTML dialects (standard, verbose, classic), and provides machine-readable API definitions for tooling and AI assistance.
 
 > **Destructured Params** - Semantic callbacks provide a variety of parameters that are returned from functions called inside the component. For more information see [callback arguments](/docs/guides/components/lifecycle#callback-arguments)
 
@@ -110,7 +112,7 @@ The [`template`](/docs/guides/components/rendering) defines the html your compon
 
 > For more information on templating see the [dedicated subsection for templating](/docs/guides/components/rendering)
 
-```html
+```sui
 Counter is {counter}
 <ui-button class="increment">Increment</ui-button>
 <ui-button class="decrement">Decrement</ui-button>
@@ -128,12 +130,10 @@ You can use [`pageCSS`](/docs/guides/components/styling#page-css) to add additio
 
 Most components will need to listen to and react to events triggered from the browser or other components. When creating a component you can assign `events` that are bound to parts of your component and trigger functionality.
 
-
-These can be browser events like `click`, perhaps to save something when a button with class `save` is clicked.
-
 > For more information on events please see the [dedicated subsection for events](/docs/guides/components/events)
 
-```javascript
+native events can be listened to using the format `eventname selector`
+```javascript {2}
 const events = {
   'click ui-button.save'({ self }) {
     self.save();
@@ -142,7 +142,7 @@ const events = {
 ```
 
 or [custom events](/docs/guides/components/events#dispatching-custom-events) like `resizestart` dispatched from another component
-```javascript
+```javascript {2}
 const events = {
   'resizestart ui-panel'() {
     // do something
@@ -156,7 +156,7 @@ Components can also include keybindings that will be attached to the page during
 
 > For more information please see the [dedicated subsection for keybindings](/docs/guides/components/keys)
 
-```javascript
+```javascript {2-6}
 defineComponent({
   keys: {
     'up': ({ self }) => self.selectPreviousResult(),
@@ -179,7 +179,7 @@ To keep your code organized you might consider keeping your `html` and `css` as 
 ### Browser / Node
 In a browser or `node` you can import static assets using [`getText`](/docs/api/utils/browser#gettext) a helper that uses `fetch`.
 
-```javascript
+```javascript 'getText'
 import { getText } from '@semantic-ui/component';
 const template = await getText('./component.html');
 const css = await getText('./component.css');
@@ -193,7 +193,7 @@ In a project with build tools like you can use the `?raw` query parameter to imp
 * Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
 * Webpack - [Raw Loader](https://v4.webpack.js.org/loaders/raw-loader/)
 
-```javascript
+```javascript '?raw'
 import template from './component.html?raw';
 import css from './component.css?raw';
 ```

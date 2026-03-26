@@ -1,0 +1,14 @@
+/*-------------------
+       Centered
+--------------------*/
+
+.block.spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-inline: auto;
+  gap: var(--spinner-block-text-gap);
+  --spinner-size: var(--spinner-block-size);
+  --spinner-arc-thickness: var(--spinner-block-arc-thickness);
+  --spinner-speed: var(--spinner-block-speed);
+}

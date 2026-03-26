@@ -1,11 +1,11 @@
 /**
  * Environment detection utility functions
- * @see {@link https://next.semantic-ui.com/api/utils/environment Environment Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/environment Environment Utilities Documentation}
  */
 
 /**
  * Constant indicating if code is running on server-side
- * @see {@link https://next.semantic-ui.com/api/utils/environment#isserver isServer}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/environment#isserver isServer}
  *
  * @example
  * ```ts
@@ -18,7 +18,7 @@ export const isServer: boolean;
 
 /**
  * Constant indicating if code is running in browser environment
- * @see {@link https://next.semantic-ui.com/api/utils/environment#isclient isClient}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/environment#isclient isClient}
  *
  * @example
  * ```ts
@@ -31,7 +31,7 @@ export const isClient: boolean;
 
 /**
  * Constant indicating if code is running in development environment
- * @see {@link https://next.semantic-ui.com/api/utils/environment#isdevelopment isDevelopment}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/environment#isdevelopment isDevelopment}
  * @see {@link https://next.semantic-ui.com/examples/utils-isdevelopment Example}
  *
  * Returns true when any of these conditions are met:
@@ -54,7 +54,7 @@ export const isDevelopment: boolean;
 
 /**
  * Constant indicating if code is running in a CI environment
- * @see {@link https://next.semantic-ui.com/api/utils/environment#isci isCI}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/environment#isci isCI}
  * @see {@link https://next.semantic-ui.com/examples/utils-isci Example}
  *
  * Returns true when CI=true or any CI platform is detected:

@@ -1,0 +1,118 @@
+{
+  "1": {
+    "visual": "A bell with a rounded dome, flat base, and small curved clapper notch at the bottom — no badge or decoration.",
+    "usage": "notification center, alert settings, subscribe button, do-not-disturb toggle"
+  },
+  "2": {
+    "visual": "A bell with a small filled circle badge in the upper-right corner, indicating a pending or unread notification.",
+    "usage": "unread notification indicator, new alert badge, activity feed with new items, app icon badge"
+  },
+  "3": {
+    "visual": "A bell with a diagonal slash crossing through the entire icon, indicating alerts are silenced or disabled.",
+    "usage": "mute notifications, silence alerts, do-not-disturb mode, unsubscribe from alerts"
+  },
+  "4": {
+    "visual": "A bell with two short curved motion lines on either side of the upper dome, suggesting it is actively ringing.",
+    "usage": "active alarm, incoming alert, ringing notification, urgent reminder"
+  },
+  "5": {
+    "visual": "A right-pointing arrow with a curved sweeping tail — the classic forward or share symbol.",
+    "usage": "forward a message, share content, redo action, redirect"
+  },
+  "6": {
+    "visual": "An inbox tray — a shallow open-topped rectangular box with a horizontal shelf dividing upper and lower halves.",
+    "usage": "email inbox, message tray, received items, file drop zone"
+  },
+  "7": {
+    "visual": "A closed envelope with a V-shaped fold visible on the front face — the standard email icon.",
+    "usage": "compose email, email address field, mail settings, contact via email"
+  },
+  "8": {
+    "visual": "An open envelope with the flap raised upward and folded back, revealing the open interior.",
+    "usage": "read email, open message, view correspondence, mark as read"
+  },
+  "9": {
+    "visual": "A closed envelope with a small plus sign overlaid in the lower-right corner.",
+    "usage": "compose new email, add email address, create mailing list entry, new message"
+  },
+  "10": {
+    "visual": "A megaphone or bullhorn shown in side profile, with a wide flared bell on the right and a handle at the bottom.",
+    "usage": "announcements, broadcast message, marketing campaign, public alert"
+  },
+  "11": {
+    "visual": "A round speech bubble with a small pointed tail at the lower-left and a completely empty interior.",
+    "usage": "chat, comment, open conversation, messaging feature"
+  },
+  "12": {
+    "visual": "A round speech bubble with a tail at the lower-left and three horizontal dots centered inside, the typing indicator symbol.",
+    "usage": "typing indicator, active conversation, chat in progress, someone is replying"
+  },
+  "13": {
+    "visual": "A round speech bubble with a tail at the lower-left and a plus sign centered inside.",
+    "usage": "start new conversation, add a comment, create new chat, new message"
+  },
+  "14": {
+    "visual": "A rectangular speech bubble with rounded corners and a small tail at the lower-left — a boxy chat bubble with empty interior.",
+    "usage": "SMS, text message, comment box, chat bubble"
+  },
+  "15": {
+    "visual": "A rectangular speech bubble with rounded corners, a tail at the lower-left, and a small filled circle in the upper-right interior.",
+    "usage": "unread message notification, chat with new content, message badge, notification in thread"
+  },
+  "16": {
+    "visual": "A rectangular speech bubble with rounded corners containing a left-pointing curved reply arrow inside.",
+    "usage": "reply to message, respond in thread, message reply action, chat reply"
+  },
+  "17": {
+    "visual": "Two overlapping rectangular speech bubbles — one larger behind and one smaller in front — suggesting a back-and-forth conversation.",
+    "usage": "group chat, conversation thread, multi-party messaging, discussions"
+  },
+  "18": {
+    "visual": "A telephone handset silhouette — curved at both ends with earpiece upper-left and mouthpiece lower-right — the universal phone symbol.",
+    "usage": "make a call, phone number, voice call, contact support by phone"
+  },
+  "19": {
+    "visual": "A telephone handset with two concentric arc lines radiating from the upper-right side, suggesting a ringing or active call signal.",
+    "usage": "incoming call, calling in progress, VoIP active, phone ringing"
+  },
+  "20": {
+    "visual": "A telephone handset with a small X mark positioned to the upper-right of the handset.",
+    "usage": "end call, missed call, decline call, call failed"
+  },
+  "21": {
+    "visual": "A telephone handset with a diagonal slash crossing through the entire icon.",
+    "usage": "no phone service, calls disabled, phone-free zone, block calls"
+  },
+  "22": {
+    "visual": "A left-pointing arrow with a curved sweeping tail — the single reply or back arrow symbol.",
+    "usage": "reply to message, go back, undo, navigate previous"
+  },
+  "23": {
+    "visual": "Two left-pointing curved arrows overlapping and stacked, forming a double-reply or reply-all symbol.",
+    "usage": "reply all, bulk reply, respond to all recipients, rewind multiple steps"
+  },
+  "24": {
+    "visual": "A desktop monitor outline with a small arrow in the upper-right corner pointing diagonally outward.",
+    "usage": "screen share, cast to display, open in external window, share screen"
+  },
+  "25": {
+    "visual": "A desktop monitor outline with a small X mark in the upper-right corner.",
+    "usage": "stop screen share, close display connection, disconnect monitor, cancel cast"
+  },
+  "26": {
+    "visual": "A paper airplane pointing to the upper-right — the universal send message symbol.",
+    "usage": "send message, submit form, dispatch, share content"
+  },
+  "27": {
+    "visual": "A circle containing a simple smiley face with two dot eyes and a curved upward mouth.",
+    "usage": "emoji picker, reaction, rate experience, positive feedback"
+  },
+  "28": {
+    "visual": "Two solid filled circles side by side inside a rounded oblong shape — the voicemail cassette symbol.",
+    "usage": "voicemail inbox, audio messages, recorded messages, listen to voicemail"
+  },
+  "29": {
+    "visual": "The at-sign symbol — a lowercase letter 'a' enclosed in a circular arc with a curling tail on the right.",
+    "usage": "email address field, mention user, social handle, contact info"
+  }
+}

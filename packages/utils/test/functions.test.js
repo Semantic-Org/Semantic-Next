@@ -1,9 +1,11 @@
-import { debounce, memoize, noop, throttle, wrapFunction } from '@semantic-ui/utils';
+import { debounce, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('function utilities', () => {
-  it('noop should not return anything', () => {
+  it('noop should act as an identity function', () => {
+    expect(noop(42)).toBe(42);
+    expect(noop('hello')).toBe('hello');
     expect(noop()).toBeUndefined();
   });
   it('wrapFunction should return the same function if a function is passed', () => {
@@ -129,6 +131,162 @@ describe('function utilities', () => {
       const result2 = memoizedFunction(4, 5);
       expect(result2).toBe(5); // Note: This is the memoized result, not 9
       expect(originalFunction).toHaveBeenCalledTimes(1); // Should not be called again due to same hash
+    });
+  });
+
+  describe('wait', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should return a promise', () => {
+      const result = wait(100);
+      expect(result).toBeInstanceOf(Promise);
+      vi.advanceTimersByTime(100);
+    });
+
+    it('should resolve after specified milliseconds', async () => {
+      let resolved = false;
+      wait(100).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(50);
+      expect(resolved).toBe(false);
+
+      await vi.advanceTimersByTime(50);
+      expect(resolved).toBe(true);
+    });
+
+    it('should resolve immediately for wait(0)', async () => {
+      let resolved = false;
+      wait(0).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should handle negative values like setTimeout does', async () => {
+      let resolved = false;
+      wait(-100).then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should handle no arguments', async () => {
+      let resolved = false;
+      wait().then(() => {
+        resolved = true;
+      });
+
+      await vi.advanceTimersByTime(0);
+      expect(resolved).toBe(true);
+    });
+
+    it('should support multiple concurrent waits', async () => {
+      let first = false;
+      let second = false;
+
+      wait(100).then(() => {
+        first = true;
+      });
+      wait(200).then(() => {
+        second = true;
+      });
+
+      await vi.advanceTimersByTime(100);
+      expect(first).toBe(true);
+      expect(second).toBe(false);
+
+      await vi.advanceTimersByTime(100);
+      expect(second).toBe(true);
+    });
+
+    describe('AbortSignal support', () => {
+      it('should reject when signal is aborted', async () => {
+        const controller = new AbortController();
+
+        const promise = wait(5000, { abortController: controller });
+
+        await vi.advanceTimersByTime(100);
+        controller.abort();
+
+        await expect(promise).rejects.toThrow(/aborted/i);
+      });
+
+      it('should reject immediately if signal is already aborted', async () => {
+        const controller = new AbortController();
+        controller.abort();
+
+        await expect(wait(5000, { abortController: controller })).rejects.toThrow(/aborted/i);
+      });
+
+      it('should reject with custom abort reason', async () => {
+        const controller = new AbortController();
+        const reason = new Error('User cancelled');
+
+        const promise = wait(5000, { abortController: controller });
+        controller.abort(reason);
+
+        await expect(promise).rejects.toThrow('User cancelled');
+      });
+
+      it('should clear the timeout when aborted', async () => {
+        const controller = new AbortController();
+        const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+        wait(5000, { abortController: controller }).catch(() => {});
+        controller.abort();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+        clearTimeoutSpy.mockRestore();
+      });
+
+      it('should accept a bare AbortSignal', async () => {
+        const controller = new AbortController();
+
+        const promise = wait(5000, { abortController: controller.signal });
+
+        await vi.advanceTimersByTime(100);
+        controller.abort();
+
+        await expect(promise).rejects.toThrow(/aborted/i);
+      });
+
+      it('should resolve on abort when rejectOnAbort is false', async () => {
+        const controller = new AbortController();
+        let resolved = false;
+
+        wait(5000, { abortController: controller, rejectOnAbort: false }).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(100);
+        expect(resolved).toBe(false);
+
+        controller.abort();
+        await vi.advanceTimersByTime(0);
+        expect(resolved).toBe(true);
+      });
+
+      it('should work without signal option', async () => {
+        let resolved = false;
+        wait(100, {}).then(() => {
+          resolved = true;
+        });
+
+        await vi.advanceTimersByTime(100);
+        expect(resolved).toBe(true);
+      });
     });
   });
 
@@ -337,6 +495,23 @@ describe('function utilities', () => {
           debounce(() => {}, 100, { abortController: controller });
         }).toThrow('The operation was aborted');
       });
+
+      it('should still abort after a successful invocation', async () => {
+        const controller = new AbortController();
+        const func = vi.fn(() => 'result');
+        const debounced = debounce(func, 100, { abortController: controller });
+
+        // First call — let it invoke successfully
+        debounced('first');
+        vi.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(1);
+
+        // Second call — then abort before it fires
+        const promise = debounced('second');
+        controller.abort();
+
+        await expect(promise).rejects.toThrow('The operation was aborted');
+      });
     });
 
     describe('rejectSkipped option', () => {
@@ -404,20 +579,21 @@ describe('function utilities', () => {
     });
 
     describe('context preservation', () => {
-      it('should maintain this context', () => {
+      it('should maintain this context', async () => {
         const obj = {
           value: 'test',
-          method: function() {
+          method: vi.fn(function() {
             return this.value;
-          },
+          }),
         };
         const debounced = debounce(obj.method, 100);
 
-        debounced.call(obj);
+        const promise = debounced.call(obj);
         vi.advanceTimersByTime(100);
 
-        // Note: We can't easily test the return value preservation with vi.fn
-        // but the implementation handles it correctly
+        const result = await promise;
+        expect(obj.method).toHaveBeenCalledTimes(1);
+        expect(result).toBe('test');
       });
     });
 

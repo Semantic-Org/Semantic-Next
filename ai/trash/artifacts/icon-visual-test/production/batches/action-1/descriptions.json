@@ -1,0 +1,122 @@
+{
+  "1": {
+    "visual": "A storage box with a flat lid and a small rectangular slot on the front face.",
+    "usage": "archive item, store record, move to archive, inbox management"
+  },
+  "2": {
+    "visual": "A storage box with a flat lid and an upward arrow rising from its opening.",
+    "usage": "unarchive item, restore from archive, move out of storage, retrieve record"
+  },
+  "3": {
+    "visual": "A storage box with a flat lid and an X mark on the front face.",
+    "usage": "delete archive, discard item, remove from storage, reject and archive"
+  },
+  "4": {
+    "visual": "A downward arrow beside the letters A and Z stacked vertically, A on top.",
+    "usage": "sort A to Z, ascending alphabetical sort, order list by name, apply text sort"
+  },
+  "5": {
+    "visual": "An upward arrow beside the letters A and Z stacked vertically, A on top.",
+    "usage": "sort Z to A, descending alphabetical sort, reverse text order, apply reverse sort"
+  },
+  "6": {
+    "visual": "A bookmark ribbon with a V-shaped notch cut into the bottom edge, no interior symbol.",
+    "usage": "save item, bookmark page, add to saved list, mark for later"
+  },
+  "7": {
+    "visual": "A bookmark ribbon with a V-notched bottom and a checkmark inside the ribbon body.",
+    "usage": "item saved, bookmark confirmed, mark as read, confirm bookmarked state"
+  },
+  "8": {
+    "visual": "A bookmark ribbon with a V-notched bottom and a plus sign inside the ribbon body.",
+    "usage": "add bookmark, save new item, create bookmark, add to favorites"
+  },
+  "9": {
+    "visual": "A circle outline containing three small dots arranged horizontally in the center.",
+    "usage": "more options, overflow menu within a circular button, additional actions, contextual menu"
+  },
+  "10": {
+    "visual": "A circle outline containing a single horizontal minus sign in the center.",
+    "usage": "remove item, decrement value, collapse section, decrease quantity"
+  },
+  "11": {
+    "visual": "A circle outline containing a plus sign in the center.",
+    "usage": "add item, increment value, create new, expand or include"
+  },
+  "12": {
+    "visual": "A circle outline containing an X mark in the center.",
+    "usage": "close dialog, cancel action, clear field, dismiss notification"
+  },
+  "13": {
+    "visual": "A clipboard with a small rectangular clip at the top center, empty body.",
+    "usage": "clipboard, paste destination, copy content, view copied items"
+  },
+  "14": {
+    "visual": "A clipboard with a small rectangular clip at the top and a rightward arrow on the body.",
+    "usage": "paste and proceed, clipboard export, submit copied content, forward clipboard item"
+  },
+  "15": {
+    "visual": "A cloud shape with a downward arrow pointing out of its base toward a tray line.",
+    "usage": "download from cloud, save to device, cloud sync down, fetch remote file"
+  },
+  "16": {
+    "visual": "A cloud shape with an upward arrow rising from within and pointing out of the top.",
+    "usage": "upload to cloud, sync to remote, backup file, publish to cloud storage"
+  },
+  "17": {
+    "visual": "Two overlapping rounded squares, the front one offset to the lower right, both empty.",
+    "usage": "copy to clipboard, duplicate item, clone element, copy selection"
+  },
+  "18": {
+    "visual": "Two overlapping rounded squares with a checkmark inside the front square.",
+    "usage": "copy confirmed, paste success, clipboard check, duplicate verified"
+  },
+  "19": {
+    "visual": "A leftward-pointing tag shape containing an X mark, resembling a backspace key.",
+    "usage": "delete tag, backspace last character, remove label, clear search token"
+  },
+  "20": {
+    "visual": "A downward arrow descending into a tray or inbox trough at the bottom.",
+    "usage": "download file, save to device, import data, receive into inbox"
+  },
+  "21": {
+    "visual": "Three filled dots arranged in a horizontal row, no border or container.",
+    "usage": "more options, horizontal overflow menu, additional settings, action menu trigger"
+  },
+  "22": {
+    "visual": "Three filled dots arranged in a vertical column, no border or container.",
+    "usage": "more options, vertical overflow menu, contextual actions, kebab menu"
+  },
+  "23": {
+    "visual": "Four diagonal arrows pointing outward toward each corner, forming an expand pattern.",
+    "usage": "fullscreen, expand view, maximize panel, zoom out to fit"
+  },
+  "24": {
+    "visual": "An eye with a visible iris and pupil, representing the act of looking.",
+    "usage": "view item, preview content, show password, toggle visibility on"
+  },
+  "25": {
+    "visual": "An eye shape crossed out by a diagonal slash line running through it.",
+    "usage": "hide content, toggle visibility off, hide password, mark as hidden"
+  },
+  "26": {
+    "visual": "Six filled dots in a 3-row by 2-column grid, wider than tall.",
+    "usage": "drag to reorder, grid view toggle, move handle, rearrange items"
+  },
+  "27": {
+    "visual": "Six filled dots in a 3-row by 2-column grid, taller than wide with larger dots.",
+    "usage": "drag handle, reorder rows, grip for sorting, move item"
+  },
+  "28": {
+    "visual": "An open hand with four fingers raised and thumb out, palm facing forward.",
+    "usage": "grab or drag mode, pan canvas, cursor grab state, move element"
+  },
+  "29": {
+    "visual": "A heart outline with smooth curved lobes at the top and a pointed bottom tip.",
+    "usage": "like, favorite, add to wishlist, show appreciation"
+  },
+  "30": {
+    "visual": "A heart outline crossed out by a diagonal slash line running through it.",
+    "usage": "unlike, remove from favorites, dislike, clear wishlist item"
+  }
+}

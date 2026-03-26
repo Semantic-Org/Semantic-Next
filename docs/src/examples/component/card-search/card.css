@@ -28,7 +28,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
 
     .main {
       flex-grow: 1;
@@ -46,16 +46,16 @@
       font-size: 11px;
       flex-wrap: wrap;
       color: var(--standard-40);
-      margin-bottom: var(--compact-spacing);
+      margin-bottom: var(--margin-xs);
     }
   }
 
   .meta {
-    margin-top: var(--compact-spacing);
-    padding-top: var(--compact-spacing);
+    margin-top: var(--margin-xs);
+    padding-top: var(--padding-xs);
     border-top: var(--border);
     display: flex;
-    gap: var(--compact-spacing);
+    gap: var(--gap-xs);
 
     & > * {
       color: var(--standard-90);

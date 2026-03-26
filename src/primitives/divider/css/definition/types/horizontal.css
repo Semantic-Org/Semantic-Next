@@ -1,0 +1,20 @@
+/*******************************
+         Horizontal Type
+*******************************/
+
+.divider {
+  &.horizontal {
+    height: auto; /* Override basic divider height */
+    background: none; /* Remove basic divider background */
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    /* Lines on either side of content */
+    .line {
+      flex: 1;
+      height: var(--divider-width);
+      background: var(--divider-color);
+    }
+  }
+}

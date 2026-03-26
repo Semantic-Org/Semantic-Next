@@ -5,5 +5,5 @@ h4 {
 .log {
   border: var(--border);
   margin: var(--vertically-spaced);
-  padding: var(--spacing);
+  padding: var(--padding);
 }

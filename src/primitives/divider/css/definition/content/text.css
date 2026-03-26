@@ -1,0 +1,14 @@
+/*******************************
+          Text Content
+*******************************/
+
+.divider {
+  .text {
+    padding: var(--divider-text-padding);
+    font-weight: var(--divider-text-font-weight);
+    letter-spacing: var(--divider-text-letter-spacing);
+    text-transform: var(--divider-text-transform);
+    color: var(--divider-text-color);
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,17 @@
+.attached.segment {
+  position: relative;
+  display: block;
+  margin: 0;
+  border-radius: 0;
+}
+
+.top-attached.segment {
+  margin-bottom: var(--segment-attached-offset);
+  border-radius: var(--segment-attached-top);
+}
+
+.bottom-attached.segment {
+  margin-top: var(--segment-attached-offset);
+  border-radius: var(--segment-attached-bottom);
+  box-shadow: var(--segment-attached-box-shadow);
+}

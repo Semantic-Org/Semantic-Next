@@ -1,13 +1,12 @@
-<p>Find the closest ancestor matching a selector</p>
-
-<div class="container">
-  <div class="section active">
-    <div class="content">
-      <span class="target">Target element</span>
+<div class="box">
+  Outer
+  <div class="box">
+    Middle
+    <div class="box inner">
+      Inner
     </div>
   </div>
 </div>
-
-<p>Closest .section: <span class="section"></span></p>
-<p>Closest .container: <span class="container"></span></p>
-<p>Closest .active: <span class="active"></span></p>
+<br>
+<ui-button class="find">Find Closest Box</ui-button>
+<p>Found: <span class="count">0</span> box</p>

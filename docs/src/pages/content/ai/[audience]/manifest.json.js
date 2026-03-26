@@ -1,0 +1,83 @@
+import { execSync } from 'child_process';
+import matter from 'gray-matter';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const allDocs = import.meta.glob(
+    ['../../../../../../ai/**/*.md', '!../../../../../../ai/workspace/**/*.md'],
+    { query: '?raw', eager: true }
+  );
+
+  const audiences = new Set();
+  for (const [filePath, module] of Object.entries(allDocs)) {
+    const { data: frontmatter } = matter(module.default);
+    const match = filePath.match(/ai\/([^/]+)\//);
+    const audience = frontmatter.audience || (match ? match[1] : 'unknown');
+    audiences.add(audience);
+  }
+
+  return [...audiences].map(audience => ({
+    params: { audience },
+  }));
+}
+
+export async function GET({ params }) {
+  const { audience } = params;
+
+  const allDocs = import.meta.glob(
+    ['../../../../../../ai/**/*.md', '!../../../../../../ai/workspace/**/*.md'],
+    { query: '?raw', eager: true }
+  );
+
+  const pages = Object.entries(allDocs)
+    .map(([filePath, module]) => {
+      const content = module.default;
+      const { data: frontmatter } = matter(content);
+
+      const match = filePath.match(/ai\/(.+)\.md$/);
+      const relativePath = match ? match[1] : filePath;
+      const dir = relativePath.split('/')[0];
+      const docAudience = frontmatter.audience || dir;
+
+      if (docAudience !== audience) return null;
+
+      const tokens = Math.ceil(content.length / 4);
+
+      let lastModified = null;
+      try {
+        const gitPath = `ai/${relativePath}.md`;
+        lastModified = execSync(`git log -1 --format=%cI -- "${gitPath}"`, {
+          encoding: 'utf-8',
+          cwd: process.cwd().replace('/docs', ''),
+        }).trim();
+      } catch (e) {
+        // Git command failed
+      }
+
+      return {
+        path: `/content/ai/${relativePath}.md`,
+        title: frontmatter.title || relativePath.split('/').pop(),
+        description: frontmatter.description || '',
+        keywords: frontmatter.keywords || [],
+        tokens,
+        lastModified,
+      };
+    })
+    .filter(Boolean);
+
+  pages.sort((a, b) => a.title.localeCompare(b.title));
+
+  const manifest = {
+    schemaVersion: 1,
+    generated: new Date().toISOString(),
+    audience,
+    totalPages: pages.length,
+    totalTokens: pages.reduce((sum, p) => sum + p.tokens, 0),
+    pages,
+  };
+
+  return new Response(JSON.stringify(manifest, null, 2), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}

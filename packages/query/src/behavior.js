@@ -277,8 +277,8 @@ export class Behavior {
           // dataset is always stringified for atts, we want this as native values
           const elData = self.getElementData(targetElement);
           const elValue = targetElement?.value || event.target?.value || event?.detail?.value;
-          self.call(boundEvent, {
-            additionalData: {
+          return self.call(boundEvent, {
+            additionalParams: {
               event: event,
               target: targetElement,
               value: elValue,
@@ -361,6 +361,8 @@ export class Behavior {
           }
         });
 
+        const hasAdded = $added.exists();
+        const hasRemoved = $removed.exists();
         const shouldTrigger = (keyword === 'add' && hasAdded)
           || (keyword === 'remove' && hasRemoved)
           || (keyword === 'standard' && (hasAdded || hasRemoved));
@@ -467,7 +469,7 @@ export class Behavior {
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
   attachEvent(selector, eventName, eventHandler, { onSettings = {}, querySettings = { pierceShadow: true } } = {}) {
-    return this.$(selector, document, querySettings).on(eventName, eventHandler, {
+    return this.$(selector, { root: document, ...querySettings }).on(eventName, eventHandler, {
       abortController: this.controller,
       returnHandler: true,
       ...onSettings,

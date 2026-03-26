@@ -1,0 +1,102 @@
+{
+  "arrow-left": {
+    "visual": "A bold leftward-pointing arrow with a straight horizontal shaft and a wide triangular arrowhead on the left side. The arrowhead has a flat vertical termination at top and bottom, giving it a broad, blocky appearance. The stroke weight is thick throughout, making it visually prominent.",
+    "usage": "Back navigation button, previous page in pagination, undo/go back in multi-step flows, carousel previous slide."
+  },
+  "arrow-right": {
+    "visual": "A bold rightward-pointing arrow with a straight horizontal shaft and a wide triangular arrowhead on the right side. The arrowhead has a flat vertical termination at top and bottom, giving it a broad, blocky appearance. The thick stroke weight makes it visually prominent.",
+    "usage": "Forward navigation, next page in pagination, proceed to next step in a wizard, carousel next slide."
+  },
+  "arrow-up": {
+    "visual": "A bold upward-pointing arrow with a straight vertical shaft and a wide triangular arrowhead at the top. The arrowhead forms a flat horizontal base at the bottom where it meets the shaft, and comes to a point at the top. The thick stroke weight gives it strong visual presence.",
+    "usage": "Scroll to top, upload action, increase/ascending sort indicator, expand section upward."
+  },
+  "chevron-down": {
+    "visual": "A thin downward-pointing chevron drawn as two short diagonal strokes of equal length meeting at a sharp point at the bottom, forming a V shape. There is no shaft — just the open angular chevron. The stroke is lightweight and rounded at the ends.",
+    "usage": "Expand accordion or dropdown, show more content below, select/combo box open indicator, collapsible section trigger."
+  },
+  "chevron-last": {
+    "visual": "A thin rightward-pointing chevron (two diagonal strokes meeting at a rightward point) paired with a vertical bar (pipe) immediately to its right. Together they form a skip-to-end or fast-forward-to-last symbol. The chevron and vertical bar are drawn with the same lightweight stroke.",
+    "usage": "Skip to last page in pagination, fast-forward to end of media, jump to end of a list or sequence."
+  },
+  "chevron-left": {
+    "visual": "A thin single chevron pointing left, drawn as two diagonal strokes of equal length meeting at a sharp leftward point, forming a sideways V or greater-than shape opening right. There is no shaft or decorative bar — just the open angular chevron with a lightweight rounded stroke.",
+    "usage": "Previous page in pagination, collapse sidebar, go back one step, carousel previous (minimal style)."
+  },
+  "chevron-right": {
+    "visual": "A thin single chevron pointing right, drawn as two diagonal strokes of equal length meeting at a sharp rightward point, forming a sideways V or less-than shape opening left. There is no shaft or decorative bar — just the open angular chevron with a lightweight rounded stroke.",
+    "usage": "Next page in pagination, expand sidebar, go forward one step, carousel next (minimal style)."
+  },
+  "chevron-up": {
+    "visual": "A thin upward-pointing chevron drawn as two short diagonal strokes of equal length meeting at a sharp point at the top, forming an inverted V or caret shape. There is no shaft — just the open angular chevron. The stroke is lightweight and rounded at the ends.",
+    "usage": "Collapse accordion or section, scroll up indicator, close dropdown/menu, step back in vertical flow."
+  },
+  "bookmark-check": {
+    "visual": "A bookmark ribbon shape — a tall rounded-corner rectangle with a V-shaped notch cut into the bottom center, giving it the classic pointed bookmark silhouette — drawn with an outline stroke. Inside the upper portion of the ribbon, a checkmark is rendered, indicating a confirmed or active saved state.",
+    "usage": "Indicate an item is already bookmarked or saved, confirm a bookmark was successfully added, mark a reading list item as saved, show active favorite status."
+  },
+  "bookmark-plus": {
+    "visual": "A bookmark ribbon shape — a tall rounded-corner rectangle with a V-shaped notch cut into the bottom center, giving it the classic pointed bookmark silhouette — drawn with an outline stroke. Inside the upper portion of the ribbon, a plus sign is rendered, signaling the action of adding a new bookmark.",
+    "usage": "Add a new bookmark, save a page to a reading list, create a new saved item, prompt the user to bookmark the current content."
+  },
+  "copy-check": {
+    "visual": "Two overlapping rounded rectangles arranged in an offset stack — a slightly smaller foreground rectangle sits in front of and above-right of a background rectangle — drawn with outline strokes. Inside the foreground rectangle, a checkmark is rendered, indicating the copy action was completed successfully.",
+    "usage": "Confirm content was successfully copied, indicate clipboard copy confirmation, show a completed duplicate action, toggle state after a copy button is clicked."
+  },
+  "grip-vertical": {
+    "visual": "Six solid filled circles arranged in a 2-column by 3-row grid, evenly spaced. The overall arrangement is taller than it is wide, with the two columns of dots producing a vertical drag-handle appearance. The dots are bold and clearly filled.",
+    "usage": "Drag to reorder a list item, indicate a draggable handle on a card or row, vertical grip handle for sortable lists, reorder mode indicator."
+  },
+  "toggle-right": {
+    "visual": "A horizontal pill-shaped outline (wide rounded rectangle) representing a toggle switch track, with a circle positioned inside toward the right end of the pill. The circle sits flush against the right inner edge, indicating the toggle is in the on or enabled position.",
+    "usage": "Toggle switch in the on/enabled position, feature flag enabled state, notification preference turned on, settings option that is currently active."
+  },
+  "table": {
+    "visual": "A rounded-corner square border containing a 2x2 internal grid created by one horizontal line and one vertical line dividing the interior into four equal cells, with a header row across the top separated by the horizontal line. The result is a compact table with a bold outer border and clear internal grid lines.",
+    "usage": "Spreadsheet or table view selectors, data grid representations, structured layout toggles, tabular data displays."
+  },
+  "file-text": {
+    "visual": "A document outline with a folded upper-right corner — the top-right of the rectangle is cut diagonally and the folded flap is shown as a small triangular crease. Inside the document body, two or three short horizontal lines represent lines of text, centered and stacked vertically.",
+    "usage": "Text document or notes file indicator, document detail view, readme or text file badge, open document action."
+  },
+  "play": {
+    "visual": "A single right-pointing triangle with rounded corners, drawn using a thick outline stroke with no fill and no enclosing circle. The triangle has three gently curved sides and rounded vertices, giving it a soft, modern appearance. It stands alone as a large, prominent play symbol.",
+    "usage": "Play button in a media player toolbar, start video or audio playback, play icon in an icon-only control bar, trigger a preview in a media library."
+  },
+  "rewind": {
+    "visual": "Two left-pointing triangles side by side, each drawn with a thick rounded outline stroke and no fill. The triangles share a flat vertical edge between them and point leftward together, creating a double-chevron or fast-reverse symbol. The overall shape resembles two back-to-back play arrows facing left.",
+    "usage": "Rewind audio or video content, skip backward in a podcast, go to the beginning of a recording, fast-reverse through playback."
+  },
+  "volume-low": {
+    "visual": "A speaker shape consisting of a small square body on the left with a trapezoidal horn flaring to the right, drawn with a thick rounded outline stroke. A single small curved arc appears to the right of the horn, representing a minimal sound wave indicating low volume output.",
+    "usage": "Low volume indicator in a media player, volume-down state before muting, quiet audio level indicator, step in a volume slider control."
+  },
+  "volume-x": {
+    "visual": "A speaker shape consisting of a small square body on the left with a trapezoidal horn flaring to the right, drawn with a thick rounded outline stroke. To the right of the horn, an X mark (two short diagonal crossing strokes) replaces the sound wave arcs, clearly indicating muted or no audio output.",
+    "usage": "Mute button in a video or audio player, silence notifications toggle, muted state indicator in a conference call UI, disable audio output in media settings."
+  },
+  "package": {
+    "visual": "A three-dimensional box rendered with isometric perspective, showing the top face and two side faces as outline strokes. A horizontal line runs across the front face near the top, representing a sealed seam or tape line on a shipping box. The overall shape reads clearly as a closed parcel or package.",
+    "usage": "Shipment tracking, order packaging status, warehouse or fulfillment workflow, product inventory item."
+  },
+  "locate-fixed": {
+    "visual": "A circular crosshair or targeting reticle consisting of a thin outer ring with four short tick marks extending outward at the cardinal points (top, bottom, left, right), and a smaller concentric circle (ring) at the center. The inner element is a ring rather than a solid dot, creating a bullseye-within-crosshair appearance indicating an active GPS or location lock.",
+    "usage": "Active current-location indicator on a map, confirmed GPS lock state, precise drop pin action, focus or target-acquired state in navigation or tracking UIs."
+  },
+  "tablet": {
+    "visual": "A tall rounded rectangle with heavily rounded corners representing a tablet device in portrait orientation, drawn with an outline stroke. A small solid circle is centered near the bottom inside the rectangle, representing a home button. The proportions are clearly wider than a phone but narrower than a laptop screen.",
+    "usage": "Tablet device settings or previews; responsive design mode for tablet viewports; device selection in multi-device UIs; app compatibility or platform targeting."
+  },
+  "tv": {
+    "visual": "A wide rounded rectangle representing a television or monitor screen, drawn with an outline stroke. Below the screen, a short narrow horizontal bar extends downward from the center of the bottom edge, representing a minimal stand or base. The screen proportions are landscape and wider than tall.",
+    "usage": "Laptop or notebook references; device preview mode selection; hardware documentation; responsive layout breakpoint indicators."
+  },
+  "git-compare": {
+    "visual": "Two filled circles connected by an L-shaped or right-angle path — one circle sits at the upper-left and one at the lower-right, with a line that travels horizontally to the right then turns sharply downward to connect to the second circle. The path forms a clear right-angle bend rather than a smooth curve, suggesting two distinct branch points being compared.",
+    "usage": "Git branch comparison; diff between two branches; code review branch selector; pull request source and target indicator."
+  },
+  "git-merge": {
+    "visual": "Two filled circles connected by a smooth curved arc — one circle sits at the upper-left and one at the lower-right, with a single fluid curve sweeping from the upper-left circle down and across to meet the lower-right circle. The path is a smooth continuous arc with no sharp angles, evoking a branch merging gracefully into another.",
+    "usage": "Git merge action; branch merge indicator; merge request creation; combine branch into main."
+  }
+}

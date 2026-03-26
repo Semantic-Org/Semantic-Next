@@ -1,14 +1,19 @@
-.section {
+.container {
+  display: inline-flex;
+  gap: var(--8px);
+  padding: var(--12px);
+  margin: var(--vertically-spaced);
   border: var(--border);
-  padding: var(--padding);
+  border-radius: var(--border-radius);
+}
 
-  .text {
-    line-height: 1.6;
-  }
-  .note {
-    border-left: 2px solid var(--blue-10);
-    padding-left: 1em;
-    font-weight: bold;
-    color: var(--blue-text-color);
+.item {
+  padding: var(--8px) var(--12px);
+  background: var(--standard-10);
+  border-radius: var(--border-radius);
+
+  &.found {
+    background: var(--green-background);
+    color: var(--green-text-color);
   }
 }

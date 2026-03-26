@@ -9,6 +9,9 @@ export { CardComponentSpec, CardsComponentSpec, CardSpec } from '../primitives/c
 // Container
 export { ContainerComponentSpec, ContainerSpec } from '../primitives/container/specs.js';
 
+// Divider
+export { DividerComponentSpec, DividerSpec } from '../primitives/divider/specs.js';
+
 // Icon
 export { IconComponentSpec, IconsComponentSpec, IconSpec } from '../primitives/icon/specs.js';
 
@@ -29,3 +32,9 @@ export { RailComponentSpec, RailSpec } from '../primitives/rail/specs.js';
 
 // Segment
 export { SegmentComponentSpec, SegmentSpec } from '../primitives/segment/specs.js';
+
+// Spinner
+export { SpinnerComponentSpec, SpinnerSpec } from '../primitives/spinner/specs.js';
+
+// Table
+export { TableComponentSpec, TableSpec } from '../primitives/table/specs.js';

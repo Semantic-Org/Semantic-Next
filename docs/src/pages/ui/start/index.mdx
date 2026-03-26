@@ -5,34 +5,63 @@ title: Introduction
 description: An introduction to Semantic UI
 ---
 import { UICards, UICard } from '@semantic-ui/core';
-import { Tabs, TabItem } from '@astrojs/starlight/components';
-import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
 
-Semantic UI is a UI framework built with web components that can be used anywhere you write html.
+export const components = { blockquote: Blockquote };
 
-## Ways to Use Semantic UI
+## What is Semantic UI?
 
-### As a Designer / Developer
+Semantic UI is three things:
 
-Semantic gives you access to a [UI framework](/ui/start/guides/using-ui) with components like `button`, `dropdown` and `menu` for building a website.
+1. **A component library**: buttons, dropdowns, modals, menus all ready to use
+2. **An authoring framework**: for building your own components with reactive state and templating
+3. **A theming system**: CSS tokens for color, spacing, and light/dark mode that govern all components
 
-1) Choose from [primitives](/ui/primitives), [components](/ui/components), and [behaviors](/ui/behaviors) you need for your website.
-2) Include them wherever you write html as html tags like [`<ui-button>`](/ui/primitives/button).
-3) [Theme your components](/ui/start/guides/theming) using standard css and css variables.
+Components are native [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). They work in React, Vue, Svelte, or plain HTML—no adapters, no framework-specific versions.
 
-### As an Organization
+> [!tip] Why Web Components?
+> Semantic ships with **signals-based reactivity**, **AST-compiled templates**, and runs **natively in the browser** without a build step. [Learn more →](/ui/start/why-semantic)
 
-Semantic provides an [constellation of tools](/docs/guides) for authoring web components that let you use UI across multiple ecosystems like mobile devices, javascriptr frameworks like React, Vue, or Svelte, as well as anywhere else where html is written.
+## Using Components
 
-1) Create custom organization specific web components like `<order-form>` built with ui primitives like `<ui-button>`, `<ui-input>` etc.
-2) Publish your custom UI components as part of a design system for your company.
-3) Use your custom html tags wherever your company ships html.
+Pick from [primitives](/ui/primitives), [components](/ui/components), and [behaviors](/ui/behaviors). Use them as HTML tags. [Theme with CSS variables](/ui/start/guides/theming).
 
-> [Why Semantic?](/ui/start/why-semantic) - Semantic ships with modern features like **Signals based reactivity**, a custom **AST-based templating language**, and can be **run natively in the browser without a build step** unlike most other large frameworks.
+<UICards two stackable horizontal>
+  <UICard horizontal
+    header="Primitives"
+    icon="box"
+    href="/ui/primitives"
+    description="Base elements: button, icon, input, label."
+  ></UICard>
+  <UICard horizontal
+    header="Components"
+    icon="layout"
+    href="/ui/components"
+    description="Complex UI: dropdown, modal, menu, tabs."
+  ></UICard>
+  <UICard horizontal
+    header="Behaviors"
+    icon="zap"
+    href="/ui/behaviors"
+    description="Attachable logic: transitions, validation, tooltips."
+  ></UICard>
+</UICards>
 
+## Building Components
 
-## Where to Start
+Create custom components like `<order-form>` or `<user-profile>` using the same tools the library is built with. Your components inherit the theming system automatically.
 
-* [Install Semantic UI](/start/install) in your project and play around with it.
-* Check out the [TodoMVC example](/examples/todo-list) to see how to build complex stateful components.
-* Explore [API docs](/docs/guides) for standards-based baseline 2026 libraries like the shadow dom aware [Query library](/docs/guides/query)
+<UICards horizontal>
+  <UICard horizontal
+    header="Authoring Guide"
+    icon="code"
+    href="/docs/guides"
+    description="Build custom web components with reactive state, templates, and scoped styling."
+  ></UICard>
+</UICards>
+
+## Get Started
+
+- [Install Semantic UI](/ui/start/install) in your project
+- [Browse examples](/examples/counter) to see what's possible
+- Try the [interactive tutorial](/learn/selection) to learn by doing

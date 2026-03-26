@@ -3,7 +3,7 @@ import { debounce } from '@semantic-ui/utils';
 
 import css from './input-bundle.css?raw';
 import template from './input.html?raw';
-import componentSpec from './specs/input-component.js';
+import componentSpec from './specs/input.component.js';
 
 const defaultState = {
   focused: false,
@@ -69,7 +69,8 @@ const events = {
     state.focused.set(false);
     dispatchEvent('change', { value: el.value });
   },
-  'input input'({ el, self, value, settings }) {
+  'input input'({ el, event, self, value, settings }) {
+    event.stopPropagation();
     if (settings.debounced) {
       self.setValueDebounced(value);
     }

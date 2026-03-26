@@ -1,21 +1,11 @@
-<p>Filter elements using selectors or functions</p>
-
-<div class="container">
-  <div class="item active" data-type="important">Important Active Item</div>
-  <div class="item" data-type="normal">Normal Item</div>
-  <div class="item active" data-type="normal">Normal Active Item</div>
-  <div class="item" data-type="important">Important Item</div>
-  <div class="item active" data-type="urgent">Urgent Active Item</div>
-  <div class="item" data-type="urgent">Urgent Item</div>
+<div class="items">
+  <div class="item done">Buy milk ✓</div>
+  <div class="item">Walk dog</div>
+  <div class="item done">Call mom ✓</div>
+  <div class="item">Fix bike</div>
 </div>
 
-<div class="controls">
-  <button class="filter-active">Filter Active</button>
-  <button class="filter-important">Filter Important</button>
-  <button class="filter-function">Filter by Function</button>
-  <button class="reset-btn">Reset</button>
-</div>
+<ui-button class="completed">Show completed</ui-button>
+<ui-button class="all">Show all</ui-button>
 
-<div class="output">
-  Filtered items: <span class="count">6</span>
-</div>
+<p>Showing <span class="count">4</span></p>

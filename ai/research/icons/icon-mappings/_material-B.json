@@ -1,0 +1,166 @@
+{
+  "file": {
+    "value": "insert_drive_file",
+    "reason": "insert_drive_file is the standard generic file icon in Material Symbols (a page with a corner fold)."
+  },
+  "document": {
+    "value": "description",
+    "reason": "description shows a document with text lines, matching the 'text document' concept."
+  },
+  "pdf": {
+    "value": "picture_as_pdf",
+    "reason": "picture_as_pdf is the dedicated PDF icon in Material Symbols."
+  },
+  "folder": {
+    "value": "folder",
+    "reason": "Direct match."
+  },
+  "new-folder": {
+    "value": "create_new_folder",
+    "reason": "create_new_folder shows a folder with a plus sign."
+  },
+  "open-folder": {
+    "value": "folder_open",
+    "reason": "Direct match for an open folder."
+  },
+  "archive": {
+    "value": "archive",
+    "reason": "Direct match. Shows a box/archive container."
+  },
+  "zip": {
+    "value": "folder_zip",
+    "reason": "folder_zip shows a folder with a zipper, representing compressed files."
+  },
+  "attachment": {
+    "value": "attach_file",
+    "reason": "attach_file shows a paperclip for file attachment."
+  },
+  "link": {
+    "value": "link",
+    "reason": "Direct match. Shows chain links for URL/hyperlink."
+  },
+  "unlink": {
+    "value": "link_off",
+    "reason": "link_off shows broken chain links, representing unlinking."
+  },
+  "image": {
+    "value": "image",
+    "reason": "Direct match. Shows a landscape photo icon."
+  },
+  "gallery": {
+    "value": "collections",
+    "reason": "collections shows stacked images, representing a photo gallery."
+  },
+  "video": {
+    "value": "videocam",
+    "reason": "videocam shows a video camera, the standard video icon in Material Symbols."
+  },
+  "camera": {
+    "value": "photo_camera",
+    "reason": "photo_camera is the standard camera icon for photo capture."
+  },
+  "camera-off": {
+    "value": "no_photography",
+    "reason": "no_photography shows a crossed-out camera."
+  },
+  "volume": {
+    "value": "volume_up",
+    "reason": "volume_up shows a speaker with sound waves, representing volume on/high."
+  },
+  "volume-low": {
+    "value": "volume_down",
+    "reason": "volume_down shows a speaker with reduced sound waves."
+  },
+  "mute": {
+    "value": "volume_off",
+    "reason": "volume_off shows a speaker with an X, representing muted audio."
+  },
+  "music": {
+    "value": "music_note",
+    "reason": "music_note shows a single musical note."
+  },
+  "microphone": {
+    "value": "mic",
+    "reason": "mic is the standard microphone icon in Material Symbols."
+  },
+  "microphone-off": {
+    "value": "mic_off",
+    "reason": "mic_off shows a crossed-out microphone."
+  },
+  "headphones": {
+    "value": "headphones",
+    "reason": "Direct match."
+  },
+  "podcast": {
+    "value": "podcasts",
+    "reason": "podcasts shows concentric arcs representing a podcast signal."
+  },
+  "broadcast": {
+    "value": "cell_tower",
+    "reason": "cell_tower shows a broadcasting tower with signal waves, fitting the broadcast/live concept."
+  },
+  "crop": {
+    "value": "crop",
+    "reason": "Direct match. Shows crop marks for image cropping."
+  },
+  "rotate": {
+    "value": "rotate_right",
+    "reason": "rotate_right shows a circular arrow indicating rotation. Chose right over left as the default rotation direction."
+  },
+  "play": {
+    "value": "play_arrow",
+    "reason": "play_arrow is the standard play triangle in Material Symbols."
+  },
+  "pause": {
+    "value": "pause",
+    "reason": "Direct match. Shows two vertical bars."
+  },
+  "stop": {
+    "value": "stop",
+    "reason": "Direct match. Shows a filled square."
+  },
+  "skip-next": {
+    "value": "skip_next",
+    "reason": "Direct match. Shows a triangle with a vertical bar (next track)."
+  },
+  "skip-previous": {
+    "value": "skip_previous",
+    "reason": "Direct match. Shows a vertical bar with a triangle (previous track)."
+  },
+  "fast-forward": {
+    "value": "fast_forward",
+    "reason": "Direct match. Shows double right-pointing triangles."
+  },
+  "rewind": {
+    "value": "fast_rewind",
+    "reason": "fast_rewind shows double left-pointing triangles for rewind."
+  },
+  "shuffle": {
+    "value": "shuffle",
+    "reason": "Direct match. Shows crossing arrows."
+  },
+  "repeat": {
+    "value": "repeat",
+    "reason": "Direct match. Shows looping arrows."
+  },
+  "record": {
+    "value": "fiber_manual_record",
+    "reason": "fiber_manual_record is a filled circle, the universal record symbol. Material Symbols does not have a dedicated 'record' icon with a better name."
+  },
+  "brush": {
+    "value": "brush",
+    "reason": "Direct match. Shows a paint brush."
+  },
+  "pen": {
+    "value": "edit",
+    "reason": "edit shows a pencil/pen icon, which is the standard drawing/writing tool in Material Symbols. The 'draw' icon also exists but 'edit' is more recognizable as a pen."
+  },
+  "color": {
+    "value": "colorize",
+    "reason": "colorize shows an eyedropper tool for color picking."
+  },
+  "eraser": {
+    "value": null,
+    "reason": "Material Symbols does not have a dedicated eraser icon. The closest alternatives (backspace, clear, delete) represent different concepts entirely and would be misleading as an eraser tool."
+  }
+}

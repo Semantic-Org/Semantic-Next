@@ -163,6 +163,40 @@ describe('query', () => {
     });
   });
 
+  describe('wrapping Query instances', () => {
+    it('should wrap a Query and preserve its elements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const $original = $('div');
+      const $wrapped = $($original);
+      expect($wrapped.length).toBe(1);
+      expect($wrapped[0]).toBe(div);
+    });
+
+    it('should not leak pierceShadow from source Query', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      const $deep = $$('div');
+      expect($deep.options.pierceShadow).toBe(true);
+
+      const $wrapped = $($deep);
+      expect($wrapped.options.pierceShadow).toBe(false);
+    });
+
+    it('should not leak prevObject from source Query', () => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      div.appendChild(span);
+      document.body.appendChild(div);
+
+      const $chained = $('div').find('span');
+      expect($chained.prevObject).toBeTruthy();
+
+      const $wrapped = $($chained);
+      expect($wrapped.prevObject).toBeNull();
+    });
+  });
+
   describe('find', () => {
     it('find should return all nested elements inside an element', () => {
       const div = document.createElement('div');
@@ -1036,13 +1070,16 @@ describe('query', () => {
     it('should allow native removeEventListener use with handler', () => {
       const div = document.createElement('div');
       document.body.appendChild(div);
-      const callback = vi.fn();
+      let called = false;
+      const callback = () => {
+        called = true;
+      };
 
       const eventHandler = $('div').on('click', callback, { returnHandler: true });
 
       div.removeEventListener('click', callback);
       div.click();
-      expect(callback).not.toHaveBeenCalled();
+      expect(called).toBe(false);
     });
 
     it('should remove delegated events', () => {
@@ -1376,6 +1413,272 @@ describe('query', () => {
     });
   });
 
+  describe('return false / return cancel', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should call stopPropagation when handler returns false', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').on('click', () => {
+        return false;
+      });
+
+      child.click();
+      expect(parentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should not call preventDefault when handler returns false', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let defaultPrevented = false;
+      $('div').on('click', () => {
+        return false;
+      });
+      div.addEventListener('click', (e) => {
+        defaultPrevented = e.defaultPrevented;
+      }, { capture: true });
+
+      div.click();
+      expect(defaultPrevented).toBe(false);
+    });
+
+    it('should call preventDefault when handler returns cancel', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let defaultPrevented = false;
+      $('div').on('click', () => {
+        return 'cancel';
+      });
+      div.addEventListener('click', (e) => {
+        defaultPrevented = e.defaultPrevented;
+      });
+
+      div.click();
+      expect(defaultPrevented).toBe(true);
+    });
+
+    it('should not stopPropagation when handler returns cancel', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').on('click', () => {
+        return 'cancel';
+      });
+
+      child.click();
+      expect(parentCallback).toHaveBeenCalled();
+    });
+
+    it('should work with return false through one()', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const parentCallback = vi.fn();
+      $('div').on('click', parentCallback);
+      $('span').one('click', () => {
+        return false;
+      });
+
+      child.click();
+      expect(parentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should work with return false in delegated handlers', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const grandparentCallback = vi.fn();
+      document.body.addEventListener('click', grandparentCallback);
+      $('div').on('click', 'span', () => {
+        return false;
+      });
+
+      child.click();
+      expect(grandparentCallback).not.toHaveBeenCalled();
+    });
+
+    it('should not wrap handlers without return statements', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const callback = () => {};
+      const eventHandler = $('div').on('click', callback, { returnHandler: true });
+
+      // unwrapped handler preserves native reference
+      expect(eventHandler.eventListener).toBe(callback);
+    });
+  });
+
+  describe('capture and passive options', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should accept capture as a top-level option', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const order = [];
+      $('div').on('click', () => {
+        order.push('capture');
+      }, { capture: true });
+      $('span').on('click', () => {
+        order.push('bubble');
+      });
+
+      child.click();
+      expect(order).toEqual(['capture', 'bubble']);
+    });
+
+    it('should accept passive as a top-level option', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // passive listeners should not throw when attached
+      expect(() => {
+        $('div').on('click', () => {}, { passive: true });
+      }).not.toThrow();
+    });
+
+    it('should auto-set passive for scroll events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      // scroll handlers should be passive by default
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('scroll', () => {});
+
+      expect(spy).toHaveBeenCalledWith(
+        'scroll',
+        expect.any(Function),
+        expect.objectContaining({ passive: true }),
+      );
+      spy.mockRestore();
+    });
+
+    it('should auto-set passive for resize events', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('resize', () => {});
+
+      expect(spy).toHaveBeenCalledWith(
+        'resize',
+        expect.any(Function),
+        expect.objectContaining({ passive: true }),
+      );
+      spy.mockRestore();
+    });
+
+    it('should allow overriding auto-passive with passive: false', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const spy = vi.spyOn(div, 'addEventListener');
+      $('div').on('scroll', () => {}, { passive: false });
+
+      expect(spy).toHaveBeenCalledWith(
+        'scroll',
+        expect.any(Function),
+        expect.objectContaining({ passive: false }),
+      );
+      spy.mockRestore();
+    });
+  });
+
+  describe('intercept', () => {
+    beforeEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('should listen in capture phase', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const order = [];
+      $('div').intercept('click', () => {
+        order.push('intercept');
+      });
+      $('span').on('click', () => {
+        order.push('bubble');
+      });
+
+      child.click();
+      expect(order).toEqual(['intercept', 'bubble']);
+    });
+
+    it('should support return false to stop propagation to children', () => {
+      const parent = document.createElement('div');
+      const child = document.createElement('span');
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const childCallback = vi.fn();
+      $('div').intercept('click', () => {
+        return false;
+      });
+      $('span').on('click', childCallback);
+
+      child.click();
+      expect(childCallback).not.toHaveBeenCalled();
+    });
+
+    it('should support event delegation', () => {
+      const grandparent = document.createElement('div');
+      const parent = document.createElement('section');
+      const child = document.createElement('span');
+      grandparent.appendChild(parent);
+      parent.appendChild(child);
+      document.body.appendChild(grandparent);
+
+      let interceptTarget;
+      $('div').intercept('click', 'section', function() {
+        interceptTarget = this;
+      });
+
+      child.click();
+      expect(interceptTarget).toBe(parent);
+    });
+
+    it('should be removable with off()', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      let called = false;
+      const handler = () => {
+        called = true;
+        return false;
+      };
+      $('div').intercept('click', handler);
+      $('div').off('click', handler);
+
+      div.click();
+      expect(called).toBe(false);
+    });
+  });
+
   describe('remove', () => {
     it('remove should remove an element', () => {
       const div = document.createElement('div');
@@ -1452,6 +1755,41 @@ describe('query', () => {
       const $div = $('div').removeClass('test test2');
       expect($div.hasClass('test')).toBe(false);
       expect($div.hasClass('test2')).toBe(false);
+    });
+  });
+
+  describe('toggle class', () => {
+    it('should toggle a single class on', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(true);
+    });
+
+    it('should toggle a single class off', () => {
+      const div = document.createElement('div');
+      div.classList.add('active');
+      document.body.appendChild(div);
+      $('div').toggleClass('active');
+      expect(div.classList.contains('active')).toBe(false);
+    });
+
+    it('should toggle multiple classes independently', () => {
+      const div = document.createElement('div');
+      div.classList.add('foo');
+      document.body.appendChild(div);
+      $('div').toggleClass('foo bar');
+      expect(div.classList.contains('foo')).toBe(false);
+      expect(div.classList.contains('bar')).toBe(true);
+    });
+
+    it('should handle no argument gracefully', () => {
+      const div = document.createElement('div');
+      div.classList.add('test');
+      document.body.appendChild(div);
+      const $div = $('div').toggleClass();
+      expect(div.classList.contains('test')).toBe(true);
+      expect($div.length).toBe(1);
     });
   });
 
@@ -1763,6 +2101,121 @@ describe('query', () => {
       $('div').removeAttr('test');
       expect(div.getAttribute('test')).toBe(null);
       expect(div2.getAttribute('test')).toBe(null);
+    });
+  });
+
+  describe('addAttr', () => {
+    it('should add a single boolean attribute', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      $('input').addAttr('disabled');
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.disabled).toBe(true);
+    });
+
+    it('should add multiple boolean attributes from array', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      $('input').addAttr(['disabled', 'readonly', 'required']);
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.getAttribute('readonly')).toBe('');
+      expect(input.getAttribute('required')).toBe('');
+      expect(input.disabled).toBe(true);
+      expect(input.readOnly).toBe(true);
+      expect(input.required).toBe(true);
+    });
+
+    it('should add attributes to multiple elements', () => {
+      const input1 = document.createElement('input');
+      const input2 = document.createElement('input');
+      document.body.appendChild(input1);
+      document.body.appendChild(input2);
+
+      $('input').addAttr('disabled');
+
+      expect(input1.getAttribute('disabled')).toBe('');
+      expect(input2.getAttribute('disabled')).toBe('');
+      expect(input1.disabled).toBe(true);
+      expect(input2.disabled).toBe(true);
+    });
+
+    it('should add multiple attributes to multiple elements', () => {
+      const button1 = document.createElement('button');
+      const button2 = document.createElement('button');
+      document.body.appendChild(button1);
+      document.body.appendChild(button2);
+
+      $('button').addAttr(['disabled', 'aria-hidden']);
+
+      expect(button1.getAttribute('disabled')).toBe('');
+      expect(button1.getAttribute('aria-hidden')).toBe('');
+      expect(button2.getAttribute('disabled')).toBe('');
+      expect(button2.getAttribute('aria-hidden')).toBe('');
+    });
+
+    it('should return Query instance for chaining', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      const $result = $('div').addAttr('hidden');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result[0]).toBe(div);
+    });
+
+    it('should support chaining with other methods', () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+
+      $('input')
+        .addAttr('disabled')
+        .addClass('form-control')
+        .attr('placeholder', 'Enter text');
+
+      expect(input.getAttribute('disabled')).toBe('');
+      expect(input.className).toBe('form-control');
+      expect(input.getAttribute('placeholder')).toBe('Enter text');
+    });
+
+    it('should add any attribute as empty string (not just boolean)', () => {
+      const div = document.createElement('div');
+      document.body.appendChild(div);
+
+      $('div').addAttr('data-custom');
+
+      expect(div.getAttribute('data-custom')).toBe('');
+    });
+
+    it('should handle empty selection gracefully', () => {
+      const $result = $('.non-existent').addAttr('disabled');
+
+      expect($result).toBeInstanceOf(Query);
+      expect($result.length).toBe(0);
+    });
+
+    it('should work with custom elements', () => {
+      const custom = document.createElement('my-component');
+      document.body.appendChild(custom);
+
+      $('my-component').addAttr(['loading', 'active']);
+
+      expect(custom.getAttribute('loading')).toBe('');
+      expect(custom.getAttribute('active')).toBe('');
+    });
+
+    it('should be equivalent to attr(attribute, "") for single attribute', () => {
+      const input1 = document.createElement('input');
+      const input2 = document.createElement('input');
+      input1.id = 'input1';
+      input2.id = 'input2';
+      document.body.appendChild(input1);
+      document.body.appendChild(input2);
+
+      $('#input1').addAttr('disabled');
+      $('#input2').attr('disabled', '');
+
+      expect(input1.getAttribute('disabled')).toBe(input2.getAttribute('disabled'));
+      expect(input1.disabled).toBe(input2.disabled);
     });
   });
 

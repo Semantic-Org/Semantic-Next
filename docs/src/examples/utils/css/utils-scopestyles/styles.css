@@ -10,18 +10,18 @@
 
 .modal {
   background: var(--standard-5);
-  padding: var(--spacing);
+  padding: var(--padding);
   border-radius: var(--border-radius);
   box-shadow: var(--floating-shadow);
   
   .header {
     font-weight: var(--bold);
-    margin-bottom: var(--compact-spacing);
+    margin-bottom: var(--margin-xs);
   }
 }
 
 @container component (max-width: 600px) {
   .modal {
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
   }
 }

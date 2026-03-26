@@ -10,13 +10,13 @@ ui-modal.references {
     font-size: 13px;
     font-weight: bold;
     color: var(--white-50);
-    margin-bottom: var(--spacing);
+    margin-bottom: var(--margin);
   }
 
   .links {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing);
+    gap: var(--gap);
 
     a {
       display: block;

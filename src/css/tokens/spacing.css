@@ -1,0 +1,185 @@
+/*******************************
+            Spacing
+*******************************/
+
+:root {
+
+  /*******************************
+        Component Spacing (em)
+  *******************************/
+
+  /*
+   * Em-based spacing ratchets with font-size.
+   * When a component changes size (e.g. .large.button),
+   * all internal spacing scales proportionally.
+   *
+   * --padding-*, --gap-*, and --indent-* are
+   * identical values. Use the name that matches
+   * your intent.
+   */
+
+
+  /*-------------------
+       Padding
+  --------------------*/
+
+  --padding-3xs: calc(var(--size-ratio) * 0.125 * 1em);  /*  2px @ 14px */
+  --padding-2xs: calc(var(--size-ratio) * 0.25  * 1em);  /*  4px @ 14px */
+  --padding-xs:  calc(var(--size-ratio) * 0.5   * 1em);  /*  8px @ 14px */
+  --padding-s:   calc(var(--size-ratio) * 0.75  * 1em);  /* 12px @ 14px */
+  --padding-m:   calc(var(--size-ratio) * 1     * 1em);  /* 16px @ 14px */
+  --padding-l:   calc(var(--size-ratio) * 1.5   * 1em);  /* 24px @ 14px */
+  --padding-xl:  calc(var(--size-ratio) * 2     * 1em);  /* 32px @ 14px */
+  --padding-2xl: calc(var(--size-ratio) * 3     * 1em);  /* 48px @ 14px */
+  --padding-3xl: calc(var(--size-ratio) * 4     * 1em);  /* 64px @ 14px */
+
+  /* Bare default */
+  --padding: var(--padding-m);
+
+  /* Directional shorthands */
+  --top-padding:        var(--padding) 0 0 0;
+  --right-padding:      0 var(--padding) 0 0;
+  --bottom-padding:     0 0 var(--padding);
+  --left-padding:       0 0 0 var(--padding);
+  --vertical-padding:   var(--padding) 0;
+  --horizontal-padding: 0 var(--padding);
+
+
+  /*-------------------
+     Gap (alias)
+  --------------------*/
+
+  --gap-3xs: var(--padding-3xs);
+  --gap-2xs: var(--padding-2xs);
+  --gap-xs:  var(--padding-xs);
+  --gap-s:   var(--padding-s);
+  --gap-m:   var(--padding-m);
+  --gap-l:   var(--padding-l);
+  --gap-xl:  var(--padding-xl);
+  --gap-2xl: var(--padding-2xl);
+  --gap-3xl: var(--padding-3xl);
+
+  /* Bare default */
+  --gap: var(--gap-m);
+
+
+  /*-------------------
+    Indent (alias)
+  --------------------*/
+
+  --indent-3xs: var(--padding-3xs);
+  --indent-2xs: var(--padding-2xs);
+  --indent-xs:  var(--padding-xs);
+  --indent-s:   var(--padding-s);
+  --indent-m:   var(--padding-m);
+  --indent-l:   var(--padding-l);
+  --indent-xl:  var(--padding-xl);
+  --indent-2xl: var(--padding-2xl);
+  --indent-3xl: var(--padding-3xl);
+
+  /* Bare default */
+  --indent: var(--indent-m);
+
+
+  /*******************************
+       Layout Spacing (rem)
+  *******************************/
+
+  /*
+   * Rem-based spacing does not ratchet.
+   * Use for structural space between components,
+   * page margins, section gaps, and grid gutters.
+   *
+   * Because 1rem = --base-spacing px, these are
+   * simple multipliers. Raw rem values in any CSS
+   * are automatically on the same grid.
+   *
+   * Scale extends to 5xl for page-level sections
+   * and ribbon spacing. --padding-* intentionally
+   * stops at 3xl — if you need spacing this large,
+   * you're in layout territory, not component territory.
+   *
+   * --margin-* and --gutter-* are identical values.
+   * Use the name that matches your intent.
+   */
+
+
+  /*-------------------
+       Margin
+  --------------------*/
+
+  --margin-3xs: 0.125rem;  /*   2px */
+  --margin-2xs: 0.25rem;   /*   4px */
+  --margin-xs:  0.5rem;    /*   8px */
+  --margin-s:   0.75rem;   /*  12px */
+  --margin-m:   1rem;      /*  16px */
+  --margin-l:   1.5rem;    /*  24px */
+  --margin-xl:  2rem;      /*  32px */
+  --margin-2xl: 3rem;      /*  48px */
+  --margin-3xl: 4rem;      /*  64px */
+  --margin-4xl: 6rem;      /*  96px */
+  --margin-5xl: 8rem;      /* 128px */
+
+  /* Bare default */
+  --margin: var(--margin-m);
+
+  /* Directional shorthands */
+  --top-margin:        var(--margin) 0 0 0;
+  --right-margin:      0 var(--margin) 0 0;
+  --bottom-margin:     0 0 var(--margin);
+  --left-margin:       0 0 0 var(--margin);
+  --vertical-margin:   var(--margin) 0;
+  --horizontal-margin: 0 var(--margin);
+
+
+  /*-------------------
+    Spacing (alias)
+  --------------------*/
+
+  /*
+   * --spacing-* aliases --margin-* for natural language use.
+   * Designers say "spacing" when they mean the distance between
+   * components — that's margin. Do NOT use --spacing-* for
+   * padding or gap contexts; those have their own tokens.
+   */
+
+  --spacing-3xs: var(--margin-3xs);
+  --spacing-2xs: var(--margin-2xs);
+  --spacing-xs:  var(--margin-xs);
+  --spacing-s:   var(--margin-s);
+  --spacing-m:   var(--margin-m);
+  --spacing-l:   var(--margin-l);
+  --spacing-xl:  var(--margin-xl);
+  --spacing-2xl: var(--margin-2xl);
+  --spacing-3xl: var(--margin-3xl);
+  --spacing-4xl: var(--margin-4xl);
+  --spacing-5xl: var(--margin-5xl);
+
+  /* Bare default */
+  --spacing: var(--spacing-m);
+
+  /* Directional shorthands */
+  --vertically-spaced:   var(--vertical-margin);
+  --horizontally-spaced: var(--horizontal-margin);
+
+
+  /*-------------------
+    Gutter (alias)
+  --------------------*/
+
+  --gutter-3xs: var(--margin-3xs);
+  --gutter-2xs: var(--margin-2xs);
+  --gutter-xs:  var(--margin-xs);
+  --gutter-s:   var(--margin-s);
+  --gutter-m:   var(--margin-m);
+  --gutter-l:   var(--margin-l);
+  --gutter-xl:  var(--margin-xl);
+  --gutter-2xl: var(--margin-2xl);
+  --gutter-3xl: var(--margin-3xl);
+  --gutter-4xl: var(--margin-4xl);
+  --gutter-5xl: var(--margin-5xl);
+
+  /* Bare default */
+  --gutter: var(--gutter-m);
+
+}

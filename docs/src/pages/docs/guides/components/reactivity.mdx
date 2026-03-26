@@ -47,7 +47,7 @@ If you want to use or set a variable without triggering reactivity **either a va
 
 ### State Reactivity
 
-Your component's `state` is the internal store of reactivity for your component. When your component is initialized each `state` property will become a [`signal`](/docs/guides/reactivity/variables) and will trigger reactivity inside a `Reaction`.
+Each `state` property becomes a [`signal`](/docs/guides/reactivity/signals) when the component is initialized. Accessing state inside a `reaction` creates a dependency that reruns when the value changes.
 
 ```javascript
 const defaultState = {
@@ -56,23 +56,21 @@ const defaultState = {
 
 const onCreated = ({state, reaction}) => {
   reaction(() => {
-    // counter will not update when the value changes below
     console.log(`Count: ${state.counter.get()}`);
   });
-  // update value
-  state.counter.increment();
+  state.counter.increment(); // reaction reruns
 }
 ```
 
-State will also trigger reactivity in your template.
-```html
+State is also reactive in templates.
+```sui
 Counter is: {counter}
 ```
 
 
 ### Settings Reactivity
 
-Settings are **reactive inside a `reaction`**
+Settings are reactive in both reactions and templates.
 
 ```javascript
 const defaultSettings = {
@@ -81,16 +79,13 @@ const defaultSettings = {
 
 const onCreated = ({settings, reaction}) => {
   reaction(() => {
-    // counter will not update when the value changes below
     console.log(`Count: ${settings.counter}`);
   });
-  // update value
-  settings.counter++;
+  settings.counter++; // reaction reruns
 }
 ```
 
-However, **settings are reactive inside templates**, and will trigger updates when their underlying value changes.
-```html
+```sui
 Counter is: {counter}
 ```
 
@@ -99,7 +94,7 @@ Counter is: {counter}
 
 Reactive variables can be accessed from inside a template without calling its `get` or `value` helper.
 
-```html
+```sui
 <ul>
   {#each item in items}
     <li>{item}</li>
@@ -109,7 +104,7 @@ Reactive variables can be accessed from inside a template without calling its `g
 
 Expressions, loops, and conditionals are reactive contexts by default. If `items` in this example grows the results will update automatically.
 
-```html
+```sui
 <ul>
   {#if hasAny items}
     Has items
@@ -158,7 +153,7 @@ Template expressions are reactive by default but this might not always be ideal.
 
 > Learn more about controlling reactivity in the dedicated subsection for [controlling reactivity](/docs/guides/reactivity/controls)
 
-```html
+```sui
 <ul>
   {#each item in nonreactive items}
     {item}

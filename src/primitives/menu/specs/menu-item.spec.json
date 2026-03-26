@@ -1,0 +1,83 @@
+{
+  "uiType": "element",
+  "name": "Menu Item",
+  "description": "A menu item displays an individual selection in a menu",
+  "parentTag": "ui-menu",
+  "tagName": "menu-item",
+  "exportName": "UIMenuItem",
+  "content": [
+    {
+      "name": "Icon",
+      "includeAttributeClass": true,
+      "attribute": "icon",
+      "couplesWith": [
+        "ui-icon"
+      ],
+      "slot": "icon",
+      "description": "include an icon",
+      "exampleCode": "<menu-item icon=\"home\">Home</menu-item>"
+    },
+    {
+      "name": "label",
+      "type": "string",
+      "attribute": "label",
+      "description": "can specify a text label"
+    },
+    {
+      "name": "badge",
+      "type": "string",
+      "attribute": "badge",
+      "description": "can specify a badge to appear next to text"
+    }
+  ],
+  "settings": [
+    {
+      "name": "Href",
+      "type": "string",
+      "attribute": "href",
+      "description": "can specify a link"
+    },
+    {
+      "name": "Value",
+      "type": "string",
+      "attribute": "value",
+      "description": "can specify a value"
+    }
+  ],
+  "states": [
+    {
+      "name": "Hover",
+      "attribute": "hover",
+      "description": "be hovered"
+    },
+    {
+      "name": "Focus",
+      "attribute": "focus",
+      "description": "be focused by the keyboard"
+    },
+    {
+      "name": "Active",
+      "attribute": "active",
+      "description": "be activated"
+    },
+    {
+      "name": "Disabled",
+      "attribute": "disabled",
+      "includeAttributeClass": true,
+      "compoundAliases": true,
+      "description": "have interactions disabled",
+      "options": [
+        {
+          "name": "Disabled",
+          "value": "disabled",
+          "description": "disable interactions"
+        },
+        {
+          "name": "Clickable Disabled",
+          "value": "clickable",
+          "description": "allow interactions but appear disabled"
+        }
+      ]
+    }
+  ]
+}

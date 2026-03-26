@@ -7,7 +7,7 @@
 
 canvas {
   max-width: 100%;
-  margin: var(--spacing) 0;
+  margin: var(--margin) 0;
   background: var(--inverted-100);
   border: var(--border);
   border-radius: var(--border-radius);
@@ -15,8 +15,8 @@ canvas {
 
 .controls {
   display: flex;
-  gap: var(--spacing);
-  margin-top: var(--spacing);
+  gap: var(--gap);
+  margin-top: var(--margin);
 }
 
 .message {

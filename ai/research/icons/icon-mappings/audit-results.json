@@ -1,0 +1,27 @@
+{
+  "source_count": 482,
+  "mappings_count": 482,
+  "mappings_unique_keys": 481,
+  "missing_from_mappings": [],
+  "extra_in_mappings": [],
+  "lucide_value_mismatches": [],
+  "duplicate_keys": [
+    {
+      "key": "external-link",
+      "occurrence_1": {
+        "line": 197,
+        "lucide": "external-link",
+        "note": "overwritten by occurrence_2 at runtime"
+      },
+      "occurrence_2": {
+        "line": 257,
+        "lucide": "square-arrow-out-up-right",
+        "note": "wins at runtime"
+      },
+      "impact": "lucide 'external-link' is unreachable at runtime; entry shadowed by second 'external-link' key with lucide 'square-arrow-out-up-right'"
+    }
+  ],
+  "rename_verification": "all 11 renames correctly applied",
+  "status": "FAIL",
+  "failure_reason": "Duplicate key 'external-link' causes first entry (lucide: 'external-link') to be overwritten. Both lucide icons exist in source but only square-arrow-out-up-right is reachable at runtime. Recommend merging aliases and keeping one entry, or renaming the second key."
+}

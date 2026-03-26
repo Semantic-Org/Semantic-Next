@@ -7,10 +7,13 @@ description: Overview of authoring web components using Semantic UI
 import { UICards, UICard } from '@semantic-ui/core';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
 
 Semantic UI provides packages for authoring **standard W3C [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components)** using the same underlying technologies built to create the [first-party UI component framework](/framework).
 
-Web components can be used anywhere you write html, work natively in modern browsers and have first-class support with frameworks like [React](https://react.dev/), [Vue](https://vuejs.org/), and [Angular](https://angular.io/) which means you can **create your UI once and use it anywhere you ship websites**.
+Use the same UI anywhere you author websites, whether they are written in frameworks like [React](https://react.dev/), [Vue](https://vuejs.org/), and [Angular](https://angular.io/).
 
 ### Key Features
 
@@ -21,6 +24,7 @@ Web components can be used anywhere you write html, work natively in modern brow
 *   Integrated [event handling](/docs/guides/components/events) tools.
 *   Declarative [keybinding management](/docs/guides/components/keys).
 
+> [!info] Quick Tip
 > To see examples of custom components check out our [examples gallery](/examples/advanced-ball-simulation).
 
 
@@ -63,4 +67,5 @@ Semantic UI provides a set of composable libraries for creating web components:
 </UICards>
 
 
->  Each core library like [`@semantic-ui/query`](/docs/guides/query), [`@semantic-ui/reactivity`](/docs/guides/reactivity), [`@semantic-ui/templating`](/docs/guides/templates) and [`@semantic-ui/utils`](/docs/api/utils) are designed to be used as standalone packages that can be used without adoping the entire design framework.
+> [!note] Standalone Packages
+> Each core library like [`@semantic-ui/query`](/docs/guides/query), [`@semantic-ui/reactivity`](/docs/guides/reactivity), [`@semantic-ui/templating`](/docs/guides/templates) and [`@semantic-ui/utils`](/docs/api/utils) are designed to be used as standalone packages that can be used without adopting the entire design framework.

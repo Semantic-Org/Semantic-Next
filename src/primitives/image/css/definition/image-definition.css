@@ -1,0 +1,5 @@
+/* Content */
+@import url('./content/image.css') layer(image.definition.content.image);
+
+/* Types */
+@import url('./variations/aligned.css') layer(image.definition.variations.aligned);

@@ -1,0 +1,78 @@
+{
+  "merge": {
+    "visual": "Two diagonal lines converging upward into a single arrow, representing two paths joining into one.",
+    "usage": ["Git branch merging", "Combining duplicate records", "Merging pull requests", "Joining data streams"]
+  },
+  "replace": {
+    "visual": "A small square with a curved arrow moving it into a new position, with a dotted outline marking the original location.",
+    "usage": ["Drag-to-replace interactions", "Swapping a file or asset in place", "Repositioning an element", "Substituting a placeholder"]
+  },
+  "vote": {
+    "visual": "A laptop with a large checkmark displayed on its screen.",
+    "usage": ["Online voting or polling", "Survey submission confirmation", "Remote approval workflow", "E-voting platform"]
+  },
+  "chart-gantt": {
+    "visual": "Horizontal bars of varying lengths aligned to a left axis, each row shorter than the one above.",
+    "usage": ["Project timeline visualization", "Task scheduling dashboards", "Resource planning views", "Sprint planning boards"]
+  },
+  "table-cells-merge": {
+    "visual": "A grid with two equal cells in the top row and one wide cell spanning the full width of the bottom row.",
+    "usage": ["Merging table cells in a spreadsheet", "Rich text table editors", "Data grid formatting controls", "Document layout tools"]
+  },
+  "table-cells-split": {
+    "visual": "A grid with two equal cells in the top row and one wide cell spanning the full width of the bottom row.",
+    "usage": ["Splitting merged table cells", "Spreadsheet cell division", "Data grid formatting controls", "Document layout tools"]
+  },
+  "newspaper": {
+    "visual": "A document page with a smaller overlapping page in the lower-left corner and two horizontal text lines.",
+    "usage": ["News feed or article listings", "Publication or media sections", "Content digest views", "Blog or press release pages"]
+  },
+  "vault": {
+    "visual": "A rounded square containing a central circle connected by lines to each corner, resembling a crosshair or locking mechanism.",
+    "usage": ["Secure storage or credentials vault", "Password manager", "Locked data repository", "Security settings"]
+  },
+  "server-crash": {
+    "visual": "A rounded rectangle with a dashed border, a lightning bolt in the center, and two dots on either side.",
+    "usage": ["Server failure or outage alerts", "Infrastructure error states", "System crash notifications", "DevOps incident dashboards"]
+  },
+  "bring-to-front": {
+    "visual": "A smaller rounded square positioned in the upper-left overlapping a larger rounded square behind it.",
+    "usage": ["Layer ordering in design tools", "Z-index controls", "Canvas element stacking", "Slide layout editors"]
+  },
+  "send-to-back": {
+    "visual": "A large rounded square in the upper-left with a smaller rounded square overlapping it in the lower-right corner.",
+    "usage": ["Sending a layer behind others in design tools", "Z-index controls", "Canvas element stacking", "Slide layout editors"]
+  },
+  "wifi-high": {
+    "visual": "Two concentric arcs above a central dot, representing a wireless signal.",
+    "usage": ["Wi-Fi connection status", "Network signal strength indicator", "Wireless settings", "Connectivity toggles"]
+  },
+  "file-archive": {
+    "visual": "A document icon with a vertical dotted line running down its center and a small circle at the bottom, like a zipper.",
+    "usage": ["Zip or compressed file indicator", "Archive download links", "File compression actions", "Backup file listings"]
+  },
+  "banknote": {
+    "visual": "A wide rounded rectangle with a circle in the center flanked by two small dots, resembling a bill or payment card.",
+    "usage": ["Payment or billing sections", "Cash transaction records", "Currency or wallet features", "Financial dashboards"]
+  },
+  "coins": {
+    "visual": "Two circular coin icons overlapping with a curved double-headed arrow between them, suggesting exchange.",
+    "usage": ["Currency conversion", "Token or credit exchange", "Swap or trade actions", "Reward or points transfer"]
+  },
+  "picture-in-picture": {
+    "visual": "A large rectangle outline with a small filled rectangle and an inward arrow in the lower-left corner.",
+    "usage": ["Floating video player", "PiP mode toggle", "Overlay window controls", "Minimized media player"]
+  },
+  "separator-horizontal": {
+    "visual": "A horizontal line in the center with an upward chevron above it and a downward chevron below it.",
+    "usage": ["Draggable panel divider", "Resizable split-pane handle", "Section divider with expand/collapse", "Layout splitter controls"]
+  },
+  "flip-horizontal": {
+    "visual": "Two facing bracket shapes with a vertical dashed line between them, representing a mirror axis.",
+    "usage": ["Flipping an image or shape horizontally", "Mirror transform in design tools", "Canvas reflection controls", "Image editing toolbars"]
+  },
+  "sticky-note": {
+    "visual": "A plain square with a folded corner in the upper-right, like a document page or note.",
+    "usage": ["Sticky note or annotation", "Quick memo or reminder", "Inline comment marker", "Note-taking features"]
+  }
+}

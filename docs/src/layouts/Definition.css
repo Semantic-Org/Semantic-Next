@@ -19,7 +19,7 @@
 
 code-example {
   display: block;
-  margin: 2rem -1rem;
+  margin: 4rem -1rem;
   padding-left: 1rem;
   padding-right: 1rem;
   transition: box-shadow 0.3s ease;
@@ -31,8 +31,20 @@ code-example {
   &.highlight {
     box-shadow: -3px 0px 0px var(--warning-text-color);
   }
+  ui-buttons {
+    margin-bottom: 5px;
+  }
+  ui-segments ui-button,
+  ui-buttons ui-button {
+    margin-bottom: 0px;
+  }
+  ui-buttons,
   ui-button {
     margin-bottom: 5px;
+  }
+
+  &:first-of-type {
+    margin-top: 2rem;
   }
 }
 code-example::part(header) {
@@ -57,8 +69,15 @@ code-example.highlight::part(header) {
 
   .transparent.segments {
     display: inline-flex;
+    flex-direction: row;
+    width: 300px;
     border-radius: 4px;
     overflow: hidden;
+    border: var(--border);
+    background-size: 5px 5px;
+    background-image:
+    linear-gradient(to right, var(--standard-5) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--standard-5) 1px, transparent 1px);
 
     @media screen and (max-width: 767px) {
       & {
@@ -67,13 +86,14 @@ code-example.highlight::part(header) {
     }
 
     .segment {
-      padding: 2rem;
+      padding: 1rem;
+      flex-grow: 1;
     }
     .standard {
-      background-image: linear-gradient(45deg, #aaced9, #FFFFFF);
+      background-image: linear-gradient(45deg, #ffffff61, #d7f4ff);
     }
     .inverted {
-      background-image: linear-gradient(45deg, #232323, #0A0A0A);
+      background-image: linear-gradient(45deg, #000000a3, #717171);
     }
   }
 

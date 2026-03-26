@@ -20,7 +20,7 @@ export const INTERNAL_CSS_BANNER = `/**
 **/
 `;
 
-export const TARGET_BROWSERS = ['chrome80', 'edge80', 'firefox78', 'safari14', 'ios14', 'opera67'];
+export const TARGET_BROWSERS = ['chrome130', 'edge130', 'firefox130', 'safari17', 'ios17'];
 
 export const JS_BUILD_CONFIG = {
   // target browser by default for dist

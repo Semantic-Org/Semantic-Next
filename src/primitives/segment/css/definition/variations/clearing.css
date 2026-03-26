@@ -1,0 +1,5 @@
+.clearing.segment::after {
+  content: "";
+  display: block;
+  clear: both;
+}

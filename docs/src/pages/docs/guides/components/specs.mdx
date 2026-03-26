@@ -1,0 +1,433 @@
+---
+layout: '@layouts/Guide.astro'
+title: Component Specs
+icon: file-text
+description: JavaScript API definitions for components
+---
+import Blockquote from '@components/mdx/Blockquote.astro';
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+export const components = { blockquote: Blockquote };
+
+Specs are JavaScript modules that define a component's API. They enable all three HTML dialects, generate documentation automatically, and provide runtime metadata for attribute mapping.
+
+## Using Specs
+
+Specs are more opinionated version of [`settings`](/docs/guides/components/settings) particularly created to be a single source of truth for design frameworks.
+
+Specs allow additional metadata like natural text description, code examples and metadata like [`usageLevel`](#usage-levels) to be included with your components to help hint AI and other humans on how to use your components.
+
+<PlaygroundExample id="component-specs" direction="horizontal"></PlaygroundExample>
+
+Specs are used as a single source of truth to power your component and its documentation:
+- Translate between multiple supported syntaxes for using your web component
+- Generates CSS classes through the [<code>&#123;ui&#125;</code> template variable](#the-ui-css-class-string)
+- Creates documentation using [`getDefinition()`](/docs/api/specs/documentation#getdefinition)
+- Enables AI to generate valid component usage from semantic descriptions
+
+### When to Use Specs
+
+|  | Use Specs | Use Settings |
+|--|-----------|-------------|
+| **Component Type** | Design system | One-off component |
+| **Attributes** | Support shorthand | HTML attributes only |
+| **CSS Classes** | Auto-generated | Manual |
+| **Definition** | Portable JSON | JavaScript code |
+| **Documentation** | Auto-generated | Manual |
+
+> First-party components like those in [UI Primitives](/ui/primitives/button) generate their documentation programatically using [`SpecReader`](/docs/api/specs/spec-reader). The types, states, and variations you see documented are read directly from `.spec.js` files—not manually written.
+
+
+## Inside Components
+
+### Automatic Settings
+
+Specs automatically generate [`defaultSettings`](docs/guides/components/settings) for your component. These settings can be used like other settings and read inside your component or template.
+
+```javascript title='component.spec.js'
+content: [
+  {
+    name: 'Icon',
+    attribute: 'icon',
+    description: 'include an icon',
+  },
+]
+```
+
+```html title='page.html'
+<ui-button icon="save">Save</ui-button>
+```
+
+```sui title='component.html'
+{#if icon}
+  <ui-icon icon={icon}>
+{/if}
+```
+
+
+### Styling Classes
+
+Specs also create a stringified styling class in your [data context](docs/guides/components/rendering) `{ui}` for `types` and `variations` parts of your spec that are related to styling, regardless of how that data is specified.
+
+When `includeAttributeClass: true` is set on a variation, the attribute name is also included as a class. This allows styling all options of a variation together:
+
+```javascript title='component.spec.js'
+variations: [
+  {
+    name: 'Colored',
+    attribute: 'color',
+    includeAttributeClass: true,  // adds 'color' class
+    options: [
+      { name: 'Red', value: 'red' },
+      { name: 'Blue', value: 'blue' },
+    ],
+  },
+]
+```
+
+```html title='page.html'
+<ui-button icon="save" red>Save</ui-button>
+```
+
+```sui title='component.html'
+<!-- ui is 'color red' !-->
+<div class="{ui}button">
+  {#if icon}
+    <ui-icon icon={icon}>
+  {/if}
+  {text}
+</div>
+```
+
+
+## Spec Parts
+
+Every spec has these top-level fields:
+
+```javascript
+{
+  uiType: 'element',           // Always "element"
+  name: 'Button',              // Display name
+  description: 'trigger actions',  // What it does
+  tagName: 'ui-button',        // HTML tag
+  exportName: 'UIButton',      // JavaScript export
+
+  content: [],      // Slots and content areas
+  types: [],        // Mutually exclusive behaviors
+  states: [],       // Runtime state changes
+  variations: [],   // Stackable visual modifications
+  settings: [],     // Configuration properties
+  events: [],       // Custom events
+}
+```
+
+### Content
+
+Define content that can be rendered inside your component
+
+```javascript
+content: [
+  {
+    name: 'Icon',
+    attribute: 'icon',
+    slot: 'icon',
+    description: 'include an icon',
+    exampleCode: `<ui-button icon="save">Save</ui-button>`,
+  },
+],
+```
+
+### Types
+
+Define mutually exclusive ways your component can appear
+
+```javascript
+types: [
+  {
+    name: 'Emphasis',
+    attribute: 'emphasis',
+    description: 'be emphasized in a layout',
+    options: [
+      {
+        name: 'Primary',
+        value: 'primary',
+        description: 'be emphasized as the first action',
+      },
+      {
+        name: 'Secondary',
+        value: 'secondary',
+        description: 'be emphasized as a secondary option',
+      },
+    ],
+  },
+],
+```
+
+### States
+
+Define how your component varies over time
+
+```javascript
+states: [
+  {
+    name: 'Disabled',
+    attribute: 'disabled',
+    description: 'have interactions disabled',
+  },
+],
+```
+
+### Variations
+
+Define stackable visual modifications
+
+```javascript
+variations: [
+  {
+    name: 'Size',
+    attribute: 'size',
+    description: 'vary in size',
+    options: [
+      { name: 'Small', value: 'small' },
+      { name: 'Large', value: 'large' },
+    ],
+  },
+  {
+    name: 'Fluid',
+    attribute: 'fluid',
+    description: 'take the width of its container',
+  },
+],
+```
+
+### Settings
+
+Define settings that modify how your component functions
+
+```javascript
+settings: [
+  {
+    name: 'Href',
+    type: 'string',
+    attribute: 'href',
+    description: 'link to a webpage',
+  },
+  {
+    name: 'Debounced',
+    type: 'boolean',
+    attribute: 'debounced',
+    defaultValue: false,
+    description: 'debounce input value changes',
+  },
+],
+```
+
+### Events
+
+Define events dispatched by your components
+
+```javascript
+events: [
+  {
+    eventName: 'change',
+    description: 'occurs after the value changes',
+    arguments: [
+      {
+        name: 'value',
+        description: 'the updated value',
+      },
+    ],
+  },
+],
+```
+
+## Authoring Specs
+
+### Spec Helpers
+
+The [`@semantic-ui/specs`](/docs/api/specs/shared-terms) package provides reusable constants and helpers.
+
+Common shared variations like `size` or `color` can be imported using [`getVariations()`](/docs/api/specs/shared-terms#getvariations):
+
+```javascript
+import { getVariations } from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    ...getVariations(['size', 'colored', 'fluid', 'compact']),
+    // Add custom variations
+  ],
+};
+```
+
+Common states can be added with [`getStates()`](/docs/api/specs/shared-terms#getstates):
+
+```javascript
+import { getStates } from '@semantic-ui/specs';
+
+export default {
+  states: getStates(['hover', 'focus', 'active', 'disabled', 'loading']),
+};
+```
+### Writing Style
+
+#### Descriptions
+
+Use imperative mood without the component name:
+
+```javascript
+// Good
+description: 'be emphasized'
+description: 'appear small'
+description: 'have interactions disabled'
+
+// Bad
+description: 'The button can be emphasized'
+description: 'Makes the button appear small'
+```
+
+The [`formatDescription()`](/docs/api/specs/utilities#formatdescription) utility automatically prepends "A button can" or "An icon can".
+
+#### Template Literals
+
+Use template literals for HTML examples:
+
+```javascript
+// Single example
+exampleCode: `<ui-button icon="pause">Pause</ui-button>`
+
+// Multiline
+exampleCode: `
+  <ui-button primary>Confirm</ui-button>
+  <ui-button>Cancel</ui-button>
+`
+
+// Multiple examples (array)
+exampleCode: [
+  `<ui-button>Example 1</ui-button>`,
+  `<ui-button>Example 2</ui-button>`,
+]
+```
+
+#### Usage Levels
+
+Indicate feature commonality (1-5):
+
+```javascript
+{
+  name: 'Size',
+  usageLevel: 1,  // Essential
+  description: 'vary in size',
+}
+
+{
+  name: 'Animated',
+  usageLevel: 3,  // Less commonly used
+  description: 'animate to show hidden content',
+}
+```
+
+Scale: 1 = Essential, 2 = Common, 3 = Less Common, 4 = Rare, 5 = Exceptionally Rare
+
+#### Compound Aliases
+
+When two variations share option values (e.g., `size: small` and `padding: small`), use `compoundAliases: true` to enable disambiguation syntax:
+
+```javascript
+variations: [
+  {
+    name: 'Size',
+    attribute: 'size',
+    compoundAliases: true,  // enables size-small and small-size syntax
+    options: [
+      { name: 'Small', value: 'small' },
+      { name: 'Large', value: 'large' },
+    ],
+  },
+  {
+    name: 'Padding',
+    attribute: 'padding',
+    compoundAliases: true,
+    options: [
+      { name: 'Small', value: 'small' },
+      { name: 'Large', value: 'large' },
+    ],
+  },
+]
+```
+
+This allows users to disambiguate with compound attributes:
+- `<ui-foo size-small>` or `<ui-foo small-size>` → `size="small"`
+- `<ui-foo padding-small>` or `<ui-foo small-padding>` → `padding="small"`
+
+Either ordering works, similar to how English allows flexible adjective ordering.
+
+## Building Component Specs
+
+Specs include a lot of additional metadata that is unnecessary to power your component in production.
+
+Use [`SpecReader`](/docs/api/specs/spec-reader) to convert specs to component specs for `defineComponent`.
+
+### Build Time (Recommended)
+
+Convert specs during your build for tree-shaking and smaller bundles:
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const componentSpec = reader.getWebComponentSpec();
+
+// Write componentSpec to a file or use in your build
+```
+
+See [`getWebComponentSpec()`](/docs/api/specs/spec-reader#getwebcomponentspec) for details.
+
+### Runtime
+
+Convert specs when your component loads:
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const componentSpec = reader.getWebComponentSpec();
+
+defineComponent({
+  tagName: 'ui-button',
+  componentSpec,
+  template,
+  css,
+});
+```
+
+> [!warning]
+> Runtime conversion means the full spec and SpecReader are included in your bundle. Use build-time conversion for production.
+
+The component spec contains optimized runtime metadata:
+
+```javascript
+{
+  tagName: 'ui-button',
+  attributes: ['icon', 'emphasis', 'size'],
+  optionAttributes: {
+    'primary': 'emphasis',
+    'secondary': 'emphasis',
+    'large': 'size',
+  },
+  propertyTypes: {
+    'emphasis': 'string',
+    'disabled': 'boolean',
+  },
+  allowedValues: {
+    'emphasis': ['primary', 'secondary'],
+    'size': ['mini', 'tiny', 'small', 'large', 'huge', 'massive'],
+  },
+  attributeClasses: ['icon', 'disabled'],
+  defaultValues: {
+    'iconOnly': false,
+  }
+}
+```

@@ -411,10 +411,36 @@ export const getPlaygroundLink = (params, baseUrl = '/playground') => {
   return `${baseUrl}?${queryParams.toString()}`;
 };
 
-export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
+export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage = true } = {}) => {
+  let pageContent = code;
+  if (wrapPage) {
+    pageContent = `<html>
+  <head>
+    <link href="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.css" rel="stylesheet" />
+    <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.js" type="module"></script>
+    <style>
+      body { padding: 1rem; }
+    </style>
+<!-- playground-hide -->
+    <script>
+      if(localStorage.getItem('theme') == 'dark') {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+<!-- playground-hide-end -->
+  </head>
+  <body>
+  ${code}
+  </body>
+</html>
+`;
+  }
   const params = {
     files: {
-      'page.html': code,
+      'page.html': {
+        contentType: 'text/html',
+        content: pageContent,
+      },
     },
   };
   return getPlaygroundLink(params);

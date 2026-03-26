@@ -1,5 +1,31 @@
 /* Content */
 @import url('./content/segment.css') layer(segment.definition.content.segment);
 
+/* Plural */
+@import url('./plural/segments.css') layer(segment.definition.plural.segments);
+
 /* Types */
-@import url('./variations/aligned.css') layer(segment.definition.variations.aligned);
+@import url('./types/raised.css') layer(segment.definition.types.raised);
+@import url('./types/stacked.css') layer(segment.definition.types.stacked);
+@import url('./types/piled.css') layer(segment.definition.types.piled);
+@import url('./types/vertical.css') layer(segment.definition.types.vertical);
+
+/* States */
+@import url('./states/loading.css') layer(segment.definition.states.loading);
+@import url('./states/disabled.css') layer(segment.definition.states.disabled);
+
+/* Variations */
+@import url('./variations/basic.css') layer(segment.definition.variations.basic);
+@import url('./variations/padded.css') layer(segment.definition.variations.padded);
+@import url('./variations/attached.css') layer(segment.definition.variations.attached);
+@import url('./variations/emphasis.css') layer(segment.definition.variations.emphasis);
+@import url('./variations/inline.css') layer(segment.definition.variations.inline);
+@import url('./variations/compact.css') layer(segment.definition.variations.compact);
+@import url('./variations/colored.css') layer(segment.definition.variations.colored);
+@import url('./variations/circular.css') layer(segment.definition.variations.circular);
+@import url('./variations/clearing.css') layer(segment.definition.variations.clearing);
+@import url('./variations/floated.css') layer(segment.definition.variations.floated);
+@import url('./variations/text-align.css') layer(segment.definition.variations.text-align);
+
+/* Plural Types */
+@import url('./plural-types/horizontal.css') layer(segment.definition.plural-types.horizontal);

@@ -1,0 +1,7 @@
+:host {
+  --segment-piled-z-index: auto;
+  --segment-piled-margin: 3em;
+  --segment-piled-degrees: 1.2deg;
+  --segment-piled-border: var(--segment-border);
+  --segment-piled-box-shadow: '';
+}

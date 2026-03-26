@@ -1,20 +1,24 @@
-h3 {
-  margin: 20px 0 10px 0;
+.items {
+  display: inline-flex;
+  gap: var(--4px);
+  padding: var(--8px);
+  margin: var(--vertically-spaced);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  min-height: var(--32px);
 }
 
-.fruit, .vegetable {
-  display: inline-block;
-  margin: 5px;
-  padding: 5px 10px;
-  background: var(--standard-5);
+.item {
+  padding: var(--4px) var(--8px);
+  background: var(--primary-background-color);
+  color: var(--primary-text-color);
   border-radius: var(--border-radius);
 }
 
 p {
-  margin: 10px 0;
-  font-family: monospace;
-}
+  color: var(--muted-text-color);
 
-p span {
-  font-weight: bold;
+  .count {
+    font-weight: var(--bold);
+  }
 }

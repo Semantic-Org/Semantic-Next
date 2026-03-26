@@ -2,6 +2,8 @@
 layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Object Utilities
+package: "@semantic-ui/utils"
+methods: [keys, values, filterObject, mapObject, extend, assignInPlace, deepExtend, pick, arrayFromObject, get, proxyObject, onlyKeys, hasProperty, reverseKeys, weightedObjectSearch]
 icon: box
 description: API reference for object manipulation functions
 ---
@@ -151,6 +153,53 @@ const obj2 = { c: 3 };
 const obj3 = { d: 4 };
 const result = extend(obj1, obj2, obj3);
 console.log(result); // { a: 1, b: 2, c: 3, d: 4 }
+```
+
+### assignInPlace
+
+```javascript
+function assignInPlace(target, source, { preserveExistingKeys = false, returnChanged = false } = {})
+```
+
+Mutates the target object in place so its contents match the source, without replacing the object reference. Deletes keys not present in source (unless `preserveExistingKeys` is true), then assigns all source properties.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| target  | object | The object to update in place |
+| source  | object | The object whose properties to apply |
+| options | object | Optional configuration |
+
+##### Options
+
+| Name                | Type    | Default | Description |
+|---------------------|---------|---------|-------------|
+| preserveExistingKeys | boolean | false   | Keep keys in target that are not in source |
+| returnChanged        | boolean | false   | Return whether any properties changed instead of the target |
+
+#### Returns
+
+The mutated target object. If `returnChanged` is `true`, returns a boolean indicating whether any properties were added, removed, or changed.
+
+#### Example
+
+```javascript
+import { assignInPlace } from '@semantic-ui/utils';
+
+const config = { host: 'localhost', port: 3000, debug: true };
+assignInPlace(config, { host: 'production.app', port: 443 });
+console.log(config); // { host: 'production.app', port: 443 } — debug removed
+
+// Preserve existing keys
+const settings = { theme: 'light', lang: 'en' };
+assignInPlace(settings, { theme: 'dark', fontSize: 14 }, { preserveExistingKeys: true });
+console.log(settings); // { theme: 'dark', lang: 'en', fontSize: 14 }
+
+// Detect changes
+const state = { count: 5 };
+assignInPlace(state, { count: 5 }, { returnChanged: true }); // false
+assignInPlace(state, { count: 10 }, { returnChanged: true }); // true
 ```
 
 ### deepExtend
@@ -466,12 +515,12 @@ Performs a weighted search across an array of objects, with matches prioritized 
 | matchAllWords    | boolean  | true    | Require all words to match |
 | propertiesToMatch| array    | []      | Properties to search within objects |
 
-> **Understanding Matches** You can use the option `returnMatches` to return details of how each result matched alongside the result.
+> **Understanding Matches** When `returnMatches` is `true`, each result is a **spread copy** of the original object with an added `matches` array property. The original objects are never mutated. Each match has the shape `{ field, type, score, value }` where `type` is one of `'startsWith'`, `'wordStartsWith'`, `'anywhere'`, or `'anyWord'`.
 
 
 #### Returns
 
-Array of matching objects sorted by relevance.
+Array of matching objects sorted by relevance. When `returnMatches` is `true`, each result is a shallow copy with an additional `matches` property containing an array of match details.
 
 #### Example
 
@@ -483,9 +532,17 @@ const items = [
   { title: 'World News', desc: 'Current events' }
 ];
 
+// Basic search
 const results = weightedObjectSearch('world', items, {
   propertiesToMatch: ['title', 'desc']
 });
+
+// With match details (does not mutate originals)
+const detailed = weightedObjectSearch('world', items, {
+  propertiesToMatch: ['title', 'desc'],
+  returnMatches: true,
+});
+// detailed[0].matches → [{ field: 'title', type: 'startsWith', score: 1, value: 'World News' }]
 ```
 
 ### proxyObject

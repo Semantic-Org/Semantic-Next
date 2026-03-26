@@ -21,33 +21,33 @@ This is used during the Vercel deploy, and has slightly different behavior than 
 
 ## Setup dev.semantic-ui.com for Playground
 
-It is recommended to install the dummy SSL cert and modify your host files to redirect `https://dev.semantic-ui.com` for lcoal testing.
+Install the CA certificate and modify your hosts file to redirect `https://dev.semantic-ui.com` for local testing.
 
-This will allow you to use the playground with CORS and prevetn other errors from your browser not liking you using insecure connections.
+This allows the playground to work with CORS and prevents browser errors from insecure connections.
 
-### Install the SSL Certificate
+### Install the CA Certificate
 
 - **Windows:**
-  1. Double-click the certificate file (`cert.pem`) located in the project’s `cert` directory.
-  2. Click "Install Certificate," then choose "Local Machine" and click "Next."
-  3. Select "Place all certificates in the following store," choose "Trusted Root Certification Authorities," then click "Next" and "Finish."
+  1. Double-click `ca.pfx` in the `cert` directory.
+  2. Click "Install Certificate," choose "Local Machine" and click "Next."
+  3. Leave the password blank and click "Next."
+  4. Select "Place all certificates in the following store," click Browse and choose **"Trusted Root Certification Authorities"** (not "Personal"), then click "Next" and "Finish."
 
 - **macOS:**
-  1. Double-click the certificate file (`cert.pem`) from the project’s `cert` directory.
+  1. Double-click `ca.pem` from the `cert` directory.
   2. Keychain Access will open. Choose "System" from the dropdown and click "Add."
   3. Find the certificate in Keychain Access, double-click it, and set "When using this certificate" to "Always Trust."
 
 - **Linux (Ubuntu/Debian):**
-  1. Copy the certificate file (`cert.pem`) to `/usr/local/share/ca-certificates/`:
-
+  1. Install to the system CA store:
   ```bash
-  sudo cp cert/cert.pem /usr/local/share/ca-certificates/dev-semantic-ui.crt
+  sudo cp cert/ca.pem /usr/local/share/ca-certificates/semantic-ui-dev-ca.crt && sudo update-ca-certificates
   ```
 
-  2. Update the certificates:
-
+  2. Install to Chrome's certificate database:
   ```bash
-  sudo update-ca-certificates
+  sudo apt install libnss3-tools
+  certutil -d sql:$HOME/.pki/nssdb -A -t "CT,c,c" -n "Semantic UI Dev CA" -i cert/ca.pem
   ```
 
 ### Modify Hosts File

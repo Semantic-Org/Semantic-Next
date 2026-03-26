@@ -1,0 +1,19 @@
+---
+import CodeSample from '@components/CodeSample/CodeSample.js';
+
+const { spec } = Astro.props;
+
+const tagName = spec?.tagName;
+const exportName = spec?.exportName;
+if (!tagName) return;
+---
+<section class="usage-section" id="import">
+  <h2>Import</h2>
+  <h3>HTML</h3>
+  <CodeSample client:load code={`<script type="module">\n  import '@semantic-ui/core/${tagName.replace('ui-', '')}';\n</script>\n\n<${tagName}>...</${tagName}>`} language="html" client:load></CodeSample>
+
+  {exportName && (
+    <h3>JavaScript</h3>
+    <CodeSample client:load code={`import { ${exportName} } from '@semantic-ui/core';`} language="javascript" client:load></CodeSample>
+  )}
+</section>

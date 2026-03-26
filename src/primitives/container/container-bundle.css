@@ -38,6 +38,13 @@
       margin-right: auto;
     }
   }
+  @media only screen and (min-width: 1980px) {
+    :host {
+      width: 1376px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
   :host.text {
     max-width: 700px;
     line-height: 1.5;

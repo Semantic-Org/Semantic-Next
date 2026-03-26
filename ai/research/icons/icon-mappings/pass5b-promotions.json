@@ -1,0 +1,38 @@
+{
+  "promotions": [
+    {
+      "old": "dices",
+      "new": "dice",
+      "reason": "\"Dices\" is non-standard English. \"Dice\" is the correct word in modern English (both singular and plural). Tabler already uses \"dice\". No family members to rename.",
+      "family_renames": {}
+    }
+  ],
+  "no_further_promotions": [
+    "flame — \"fire\" is in aliases and Heroicons uses it, but Lucide/Phosphor/Tabler all use \"flame\"; no consensus to override",
+    "funnel — \"filter\" is the concept but collides with list-filter; \"funnel\" is the glyph and used by 3/5 libraries",
+    "paperclip — \"attach\" is the concept but \"paperclip\" is universal across icon libraries",
+    "pencil — \"edit\" is the concept (Material uses it) but \"pencil\" is the de facto standard name across all icon libraries",
+    "trash — \"delete\" is the concept but collides with Lucide's \"delete\" (backspace glyph); collision risk too high",
+    "scan-face — \"face-id\" (Tabler) is Apple-branded terminology; \"scan-face\" is more generic",
+    "sliders-horizontal — \"adjustments\" (Heroicons/Tabler) is not clearly better than the Lucide/Phosphor name",
+    "party-popper — \"celebration\" (Material) or \"confetti\" (Phosphor/Tabler) have no consensus; glyph name is fine",
+    "meh — informal but short and expressive; no better universal alternative",
+    "life-buoy — hyphenated form is consistent with Lucide naming conventions",
+    "cross — could be \"medical\" but the geometric name is valid and non-confusing",
+    "a-large-small — awkward but no better universal name; \"font-size\" is in aliases",
+    "text-cursor-input — verbose but specific enough to avoid collision",
+    "circle-dollar-sign — could be \"coin\" but would confuse with plural \"coins\" icon",
+    "monitor-smartphone — \"responsive\" is a CSS concept, not an icon concept",
+    "globe-lock — \"vpn\" is too jargon-heavy for a general icon name",
+    "check-check — slightly awkward but consistent with Lucide; \"double-check\" in aliases",
+    "badge-check — \"verified\" is the concept but badge is a 3-member family; can't promote one member",
+    "copy-check — follows the established {action}-check pattern (bookmark-check, file-check, etc.)",
+    "messages-square — follows message-square pluralization pattern; \"forum\" would break convention",
+    "radio-tower — no clearly better alternative among \"broadcast-tower\", \"antenna\", etc.",
+    "server-crash — \"server-error\" is not clearly better; \"crash\" is well-understood",
+    "droplet — used for color picking but glyph is a water drop; no clean conceptual name",
+    "sticky-note — universally understood compound name",
+    "scroll-text — descriptive and accurate",
+    "braces — precise glyph description for {}; \"code-block\" or \"json\" are too specific"
+  ]
+}

@@ -1,4 +1,14 @@
-import { difference, each, firstMatch, get, inArray, isString, kebabToCamel, unique } from '@semantic-ui/utils';
+import {
+  difference,
+  each,
+  firstMatch,
+  get,
+  inArray,
+  isFunction,
+  isString,
+  kebabToCamel,
+  unique,
+} from '@semantic-ui/utils';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -14,7 +24,7 @@ import { difference, each, firstMatch, get, inArray, isString, kebabToCamel, uni
 */
 const SPACE_REGEX = /\s+/mg;
 
-const SPECIAL_ATTRIBUTES = ['disabled', 'value'];
+const SPECIAL_PROPERTIES = ['disabled', 'value'];
 
 // allow 'arrow-down' or 'down-arrow'
 const reverseDashes = (string) => {
@@ -69,7 +79,6 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
       (currentValue) => get(componentSpec.optionAttributes, currentValue),
     );
 
-    // this attribute value does not seem to match any in spec
     if (!matchingValue) {
       return { matchingAttribute: undefined, matchingValue: undefined };
     }
@@ -82,20 +91,52 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
 
     // now we know the matching value is the correct name lets grab the attribute name
     const matchingAttribute = get(componentSpec.optionAttributes, matchingValue);
-    return { matchingAttribute: matchingAttribute, matchingValue: matchingValue };
+
+    // check if this is a compound alias (e.g. "size-small" or "small-size")
+    // extract the canonical value from the compound form
+    if (matchingValue.includes('-')) {
+      const prefix = `${matchingAttribute}-`;
+      const suffix = `-${matchingAttribute}`;
+      if (matchingValue.startsWith(prefix)) {
+        return { matchingAttribute, matchingValue: matchingValue.slice(prefix.length) };
+      }
+      if (matchingValue.endsWith(suffix)) {
+        return { matchingAttribute, matchingValue: matchingValue.slice(0, -suffix.length) };
+      }
+    }
+    return { matchingAttribute, matchingValue };
   };
 
   // this assigns the value to the DOM element
-  const setProperty = (attribute, value) => {
+  const setProperty = (attributes, value) => {
     // convert <div icon-after> to => el.iconAfter
-    const property = kebabToCamel(attribute);
+    const property = kebabToCamel(attributes);
     if (value !== undefined) {
       el[property] = value;
+      setSetting(property, value);
     }
-
-    // this appears to be necessary for special attributes like "disabled"
-    if (inArray(attribute, SPECIAL_ATTRIBUTES)) {
+    // this is necessary for special propertys like "disabled"
+    if (inArray(property, SPECIAL_PROPERTIES)) {
       el.requestUpdate();
+    }
+  };
+
+  // settings have signals that mirror the prop and need to be triggered
+  const setSetting = (property, value) => {
+    let newValue = value;
+    if (el.settings[property] !== undefined) {
+      const converter = properties?.[property]?.converter?.fromproperty;
+      if (isFunction(converter)) {
+        newValue = converter(newValue);
+      }
+      else {
+        // check if json
+        try {
+          newValue = JSON.parse(newValue);
+        }
+        catch (e) {}
+      }
+      el.settings[property] = newValue;
     }
   };
 
@@ -106,7 +147,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     el[property] = null;
 
     // this appears to be necessary for special attributes like "disabled"
-    if (inArray(attribute, SPECIAL_ATTRIBUTES)) {
+    if (inArray(attribute, SPECIAL_PROPERTIES)) {
       el.requestUpdate();
     }
   };
@@ -114,10 +155,10 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // this checks for boolean values like <ui-button disabled>
   const isBooleanValue = (attribute, attributeValue) => {
     // handles basic booleans of type Boolean in spec
-    const isBooleanType = componentSpec.propertyTypes[attribute] == Boolean;
+    const isBooleanType = componentSpec.propertyTypes[attribute] === Boolean;
 
     // handles complex booleans where one value of allowed values is a identity, i.e. disabled, clickable-disabled
-    const isIdentityBoolean = componentSpec.optionAttributes?.[attribute] == attribute;
+    const isIdentityBoolean = componentSpec.optionAttributes?.[attribute] === attribute;
 
     // this is a scenario where a grouping has a default styling like `animated`
     const isAttributeClass = inArray(attribute, componentSpec.attributeClasses);
@@ -203,7 +244,13 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
       }
     }
   }
-  else if (properties && attributeValue !== undefined && attribute.includes('-')) {
+
+  // sync shadow signals for all settings, not just spec-driven ones
+  if (!componentSpec && properties?.[attribute]) {
+    setSetting(attribute, attributeValue);
+  }
+
+  if (properties && attributeValue !== undefined && attribute.includes('-')) {
     /* This handles the case of multiword properties like `useAccordion`
        maps to <ui-menu use-accordion> or <ui-menu useaccordion>
        the kebab case is just an alias which will update the base setting
@@ -212,7 +259,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     const attributeSettings = properties[attribute];
     if (propertyName !== attribute && attributeSettings?.alias) {
       const convertFunc = attributeSettings?.converter?.fromAttribute;
-      let propertyValue = (convertFunc)
+      const propertyValue = (convertFunc)
         ? convertFunc(attributeValue)
         : attributeValue;
       if (propertyValue) {

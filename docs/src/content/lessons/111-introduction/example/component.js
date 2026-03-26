@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { each, range } from '@semantic-ui/utils';
+import { each, range, sequence } from '@semantic-ui/utils';
 
 const template = await getText('./component.html');
 const css = await getText('./component.css');
@@ -28,7 +28,7 @@ const createComponent = ({ state }) => ({
 
     let path = `M 0 ${y}`;
     const interval = 10;
-    const values = range(0, width / interval, interval);
+    const values = sequence(width / interval, interval, 0);
     each(values, (x) => {
       const newY = y + Math.sin(x * freq) * amp;
       path += ` L ${x} ${newY}`;
@@ -44,7 +44,7 @@ const createComponent = ({ state }) => ({
       const amplitude = Math.max(0, 100 - Math.abs(y - yOffset));
 
       const interval = 10;
-      const points = range(0, width / interval, interval).map(px => {
+      const points = sequence(width / interval, interval, 0).map(px => {
         const distance = Math.abs(x - px);
         const decay = Math.max(0, 1 - (distance / 200));
         const newY = yOffset + Math.sin(px * frequency) * amplitude * decay;

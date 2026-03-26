@@ -1,0 +1,11 @@
+.segment {
+  &.left-floated {
+    float: left;
+    margin-right: var(--segment-floated-distance);
+  }
+
+  &.right-floated {
+    float: right;
+    margin-left: var(--segment-floated-distance);
+  }
+}

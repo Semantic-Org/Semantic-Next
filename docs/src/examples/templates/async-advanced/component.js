@@ -30,14 +30,14 @@ const defaultState = {
   focused: false,
 };
 
-const createComponent = ({ $, state, settings, self }) => ({
+const createComponent = ({ $, state, settings, self, timeout }) => ({
   async getResults(term) {
     const SIMULATED_DELAY = 200;
     const matchResult = (result) => result.title.toLowerCase().includes(term.toLowerCase());
     return new Promise((resolve, reject) => {
       // simulate async search with occasional errors for testing
       clearTimeout(self.timer);
-      self.timer = setTimeout(() => {
+      self.timer = timeout(() => {
         const matchingResults = settings.searchItems.filter(matchResult);
         resolve(matchingResults);
       }, SIMULATED_DELAY);

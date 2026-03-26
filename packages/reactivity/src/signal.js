@@ -13,7 +13,14 @@ import {
 import { Dependency } from './dependency.js';
 import { Reaction } from './reaction.js';
 
+const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
+
 export class Signal {
+  [IS_SIGNAL] = true;
+  static [Symbol.hasInstance](instance) {
+    return !!instance?.[IS_SIGNAL];
+  }
+
   constructor(initialValue, { context, equalityFunction, allowClone = true, cloneFunction } = {}) {
     // pass in some metadata for debugging
     this.dependency = new Dependency({
@@ -113,9 +120,8 @@ export class Signal {
   }
 
   set(newValue) {
-    if (!this.equalityFunction(this.currentValue, newValue)) {
-      this.value = newValue;
-    }
+    // equality check in setter
+    this.value = newValue;
   }
 
   subscribe(callback) {
@@ -243,7 +249,7 @@ export class Signal {
       value = property;
       property = indexOrProperty;
     }
-    if(index === -1) {
+    if (index === -1) {
       return;
     }
     const newValue = this.peek().map((object, currentIndex) => {
@@ -296,7 +302,7 @@ export class Signal {
   }
   getItem(id) {
     const index = this.getItemIndex(id);
-    if(index !== -1) {
+    if (index !== -1) {
       return this.getIndex(index);
     }
   }

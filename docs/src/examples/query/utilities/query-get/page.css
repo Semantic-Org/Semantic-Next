@@ -1,19 +1,17 @@
-.color {
-  display: inline-block;
-  margin: 5px;
-  padding: 15px;
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--8px);
+  max-width: 250px;
+}
+
+input {
+  padding: var(--8px) var(--12px);
   border: var(--border);
   border-radius: var(--border-radius);
-  color: white;
-  font-weight: bold;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-}
 
-p {
-  margin: 10px 0;
-  font-family: monospace;
-}
-
-p span {
-  font-weight: bold;
+  &:focus {
+    outline: none;
+    border-color: var(--primary-border-color);
+  }
 }

@@ -1,0 +1,57 @@
+{
+  "name": "@semantic-ui/compiler",
+  "version": "0.18.0",
+  "title": "Semantic UI Compiler",
+  "description": "Template compiler and string scanner for parsing template strings into ASTs",
+  "author": "Jack Lukic",
+  "homepage": "https://next.semantic-ui.com",
+  "license": "ISC",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "browser": "./dist/bundle/index.min.js",
+      "importmap": "./dist/cdn/index.min.js"
+    }
+  },
+  "scripts": {
+    "build": "wireit",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "@semantic-ui/utils": "^0.18.0"
+  },
+  "devDependencies": {
+    "@semantic-ui/internal-scripts": "^0.18.0",
+    "@vitest/browser-playwright": "^4.0.18",
+    "vitest": "^4.0.18"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "wireit": {
+    "build": {
+      "dependencies": [
+        "build:esm",
+        "build:bundle",
+        "build:cdn"
+      ]
+    },
+    "build:esm": {
+      "command": "node ../../internal-packages/scripts/src/build-esm.js"
+    },
+    "build:bundle": {
+      "command": "node ../../internal-packages/scripts/src/build-bundle.js"
+    },
+    "build:cdn": {
+      "command": "node ../../internal-packages/scripts/src/build-cdn.js"
+    }
+  }
+}

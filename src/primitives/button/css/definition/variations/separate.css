@@ -1,0 +1,17 @@
+/*-------------------
+      Separate
+--------------------*/
+
+.separate.buttons {
+  box-shadow: none;
+
+
+  ::slotted(ui-button) {
+    --button-horizontal-margin: var(--button-separate-spacing);
+    --button-border-radius: var(--border-radius);
+  }
+
+  &.vertical {
+    --button-vertical-margin: var(--button-separate-spacing);
+  }
+}

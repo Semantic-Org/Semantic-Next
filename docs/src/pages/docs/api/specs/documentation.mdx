@@ -1,0 +1,65 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: book-open
+title: Documentation Generation
+description: Generate structured documentation from specs
+package: '@semantic-ui/specs'
+methods: ['getDefinition']
+---
+
+Methods for generating documentation definitions with code examples from specs.
+
+## getDefinition()
+
+Generates documentation definition with code examples. Returns structured object with types, states, variations, and working code examples for each.
+
+### Syntax
+
+```javascript
+reader.getDefinition(options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| plural | boolean | this.plural | Generate plural definition |
+| minUsageLevel | number | undefined | Filter by minimum usage level |
+| dialect | string | this.dialect | HTML dialect for examples |
+
+### Returns
+
+| Property | Type | Description |
+|----------|------|-------------|
+| content | Array | Content/slot examples |
+| types | Array | Type examples |
+| states | Array | State examples |
+| variations | Array | Variation examples |
+| settings | Array | Setting examples |
+
+Each array contains objects with:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| title | string | Section title |
+| description | string | Section description |
+| examples | Array | Code examples with component metadata |
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+const definition = reader.getDefinition();
+
+// Use for documentation generation
+definition.variations.forEach(variation => {
+  console.log(variation.title);
+  variation.examples.forEach(example => {
+    console.log(example.code);
+  });
+});
+```

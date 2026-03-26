@@ -1,0 +1,115 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: tool
+title: Utilities
+description: Helper methods for component metadata
+package: '@semantic-ui/specs'
+methods: ['getTagName', 'getComponentName', 'formatDescription']
+---
+
+Utility methods for accessing component metadata and formatting descriptions.
+
+## getTagName()
+
+Returns the HTML tag name for the component.
+
+### Syntax
+
+```javascript
+reader.getTagName(options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| plural | boolean | this.plural | Return plural tag name |
+| lang | string | 'html' | Output language |
+
+### Returns
+
+String containing the tag name.
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+console.log(reader.getTagName()); // 'ui-button'
+
+const pluralReader = new SpecReader(buttonSpec, { plural: true });
+console.log(pluralReader.getTagName()); // 'ui-buttons'
+```
+
+## getComponentName()
+
+Returns the JavaScript export name for the component.
+
+### Syntax
+
+```javascript
+reader.getComponentName(options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| plural | boolean | this.plural | Return plural export name |
+| lang | string | 'html' | Output language |
+
+### Returns
+
+String containing the export name.
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+console.log(reader.getComponentName()); // 'UIButton'
+
+const pluralReader = new SpecReader(buttonSpec, { plural: true });
+console.log(pluralReader.getComponentName()); // 'UIButtons'
+```
+
+## formatDescription()
+
+Formats a description with the proper article and component name. Automatically prepends "A button can" or "An icon can" based on the component name.
+
+### Syntax
+
+```javascript
+reader.formatDescription(description, options)
+```
+
+### Parameters
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| description | string | | Description text to format |
+| plural | boolean | this.plural | Use plural component name |
+
+### Returns
+
+String with formatted description.
+
+### Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+console.log(reader.formatDescription('be emphasized'));
+// 'A button can be emphasized.'
+
+const iconReader = new SpecReader(iconSpec);
+console.log(iconReader.formatDescription('indicate status'));
+// 'An icon can indicate status.'
+```

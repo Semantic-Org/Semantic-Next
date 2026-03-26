@@ -2,18 +2,17 @@
       Hover
 ---------------*/
 @media (pointer: fine) {
+  .button {
+    &.hover,
+    &:hover {
+      background-color: var(--button-hover-background-color);
+      background-image: var(--button-hover-background-image);
+      box-shadow: var(--button-hover-box-shadow);
+      color: var(--button-hover-color);
 
-  .button.hover,
-  .button:hover {
-    background-color: var(--button-hover-background-color);
-    background-image: var(--button-hover-background-image);
-    box-shadow: var(--button-hover-box-shadow);
-    color: var(--button-hover-color);
+      .icon {
+        opacity: var(--button-hover-icon-opacity);
+      }
+    }
   }
-
-  .button.hover .icon,
-  .button:hover .icon {
-    opacity: var(--button-hover-icon-opacity);
-  }
-
 }

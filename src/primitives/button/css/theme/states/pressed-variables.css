@@ -1,6 +1,6 @@
 :host {
-  --button-pressed-background-color: var(--button-background-color);
   --button-pressed-background-image: var(--button-background-image);
+  --button-pressed-background-color: var(--black-solid-5);
   --button-pressed-color: var(--black-90);
   --button-pressed-shadow-box-shadow: var(--inset-shadow);
   --button-pressed-box-shadow:

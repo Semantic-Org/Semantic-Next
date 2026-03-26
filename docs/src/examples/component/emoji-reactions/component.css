@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  font-family: var(--page-font);
+}
+
+.reactions {
+  display: flex;
+  gap: var(--gap-3xs);
+}
+
+.reaction {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3xs);
+  padding: var(--padding-3xs) var(--padding-xs);
+  border: var(--subtle-border);
+  border-radius: var(--border-radius);
+  background: var(--standard-5);
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+
+  &:hover {
+    background: var(--standard-10);
+  }
+
+  &.active {
+    border-color: var(--primary-border-color);
+    background: var(--primary-5);
+  }
+}
+
+.emoji {
+  font-size: var(--base);
+  line-height: 1;
+}
+
+.count {
+  font-size: var(--small);
+  color: var(--standard-60);
+  min-width: 1ch;
+
+  .active & {
+    color: var(--primary-color);
+    font-weight: var(--bold);
+  }
+}

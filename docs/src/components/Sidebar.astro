@@ -18,7 +18,30 @@ const showSidebarNav = (sidebarNavMenu.length > 0);
 const sidebarSubheader = sidebarHeader || (showSidebarNav) ? 'Categories' : 'Navigation';
 ---
 <script>
+import { $$ } from '@semantic-ui/query';
+import { Tooltip } from '@semantic-ui/core';
 
+const isCollapsed = () => {
+  return document.documentElement.classList.contains('sidebar-collapsed')
+    || document.querySelector('sidebar')?.classList.contains('collapsed');
+};
+
+// Add tooltips to category menu items (only show when collapsed)
+$$('sidebar ui-menu menu-item').each((el) => {
+  const $el = $$(el);
+  const label = $el.find('.label').text();
+  if (label) {
+    $el.tooltip({
+      text: label,
+      position: 'right',
+      preserve: true,
+      delay: 500,
+      topLayer: true,
+      containToScroll: false,
+      onShow: () => !!isCollapsed(),
+    });
+  }
+});
 </script>
 <sidebar transition:persist id="sidebar" popover="manual">
   <slot/>

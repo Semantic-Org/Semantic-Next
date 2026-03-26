@@ -26,6 +26,7 @@ export interface TemplateInfo {
 
 /**
  * Compiles a template string into an Abstract Syntax Tree (AST).
+ * @see {@link https://next.semantic-ui.com/docs/api/templating/template-compiler TemplateCompiler API Reference}
  */
 export class TemplateCompiler {
   /**

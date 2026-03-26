@@ -3,68 +3,108 @@ import {
   UIButton,
   UIButtons,
   UICard,
+  UICards,
   UIContainer,
+  UIDivider,
   UIIcon,
+  UIImage,
   UIInput,
   UILabel,
   UIMenu,
   MenuItem,
-  UIInput,
   UIRail,
+  UISegment,
+  UISegments,
+  UISpinner,
+  UITable,
 } from '@semantic-ui/core';
-import { $ } from '@semantic-ui/query';
+import { inArray } from '@semantic-ui/utils';
 
-const { name, attributes } = Astro.props;
+const { name, tagName, attributes } = Astro.props;
+const componentName = tagName || name;
 ---
 
-{name === 'UIButton' && (
-  <UIButton {...attributes} client:load>
+{inArray(componentName, ['ui-button', 'UIButton']) && (
+  <UIButton {...attributes} client:visible>
     <slot />
   </UIButton>
 )}
-{name === 'UIButtons' && (
-  <UIButtons {...attributes} client:load>
+{inArray(componentName, ['ui-segment', 'UISegment']) && (
+  <UISegment {...attributes} client:visible>
+    <slot />
+  </UISegment>
+)}
+{inArray(componentName, ['ui-segments', 'UISegments']) && (
+  <UISegments {...attributes} client:visible>
+    <slot />
+  </UISegments>
+)}
+{inArray(componentName, ['ui-buttons', 'UIButtons']) && (
+  <UIButtons {...attributes} client:visible>
     <slot />
   </UIButtons>
 )}
-{name === 'UICard' && (
-  <UICard {...attributes} client:load>
+{inArray(componentName, ['ui-card', 'UICard']) && (
+  <UICard {...attributes} client:visible>
     <slot />
   </UICard>
 )}
+{inArray(componentName, ['ui-cards', 'UICards']) && (
+  <UICards {...attributes} client:visible>
+    <slot />
+  </UICards>
+)}
 
-{name === 'UIContainer' && (
+{inArray(componentName, ['ui-container', 'UIContainer']) && (
   <UIContainer {...attributes}>
     <slot />
   </UIContainer>
 )}
 
-{name === 'UIIcon' && (
+{inArray(componentName, ['ui-divider', 'UIDivider']) && (
+  <UIDivider {...attributes} client:visible>
+    <slot />
+  </UIDivider>
+)}
+
+{inArray(componentName, ['ui-icon', 'UIIcon']) && (
   <UIIcon {...attributes} />
 )}
 
-{name === 'UIInput' && (
+{inArray(componentName, ['ui-image', 'UIImage']) && (
+  <UIImage {...attributes} client:visible />
+)}
+
+{inArray(componentName, ['ui-input', 'UIInput']) && (
   <UIInput {...attributes} />
 )}
 
-{name === 'UILabel' && (
-  <UILabel {...attributes} client:load>
+{inArray(componentName, ['ui-label', 'UILabel']) && (
+  <UILabel {...attributes} client:visible>
     <slot />
   </UILabel>
 )}
 
-{name === 'UIRail' && (
+{inArray(componentName, ['ui-rail', 'UIRail']) && (
   <UIRail {...attributes}>
     <slot />
   </UIRail>
 )}
-{name === 'UIMenu' && (
-  <UIMenu {...attributes} client:load>
+{inArray(componentName, ['ui-menu', 'UIMenu']) && (
+  <UIMenu {...attributes} client:visible>
     <slot />
   </UIMenu>
 )}
-{name === 'MenuItem' && (
-  <MenuItem {...attributes} client:load>
+{inArray(componentName, ['menu-item', 'MenuItem']) && (
+  <MenuItem {...attributes} client:visible>
     <slot />
   </MenuItem>
+)}
+{inArray(componentName, ['ui-spinner', 'UISpinner']) && (
+  <UISpinner {...attributes} client:visible />
+)}
+{inArray(componentName, ['ui-table', 'UITable']) && (
+  <UITable {...attributes} client:visible>
+    <slot />
+  </UITable>
 )}

@@ -1,51 +1,48 @@
-import fs from 'fs';
-import { glob } from 'glob';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/**
+ * Shared file caches - evaluated once at build time via Vite's import.meta.glob
+ * Each content directory needs its own static glob pattern
+ */
+const globCache = {
+  examples: import.meta.glob('/src/examples/**', { query: '?raw' }),
+  lessons: import.meta.glob('/src/content/lessons/**', { query: '?raw' }),
+};
 
 /**
- * Recursively search for a folder and return all files within it
- * Replaces import.meta.glob() with targeted file loading
+ * Map relative paths to their canonical glob key
  */
-export const getFolder = async (folderName, baseFolder, { depth = 3 } = {}) => {
+const getGlobKey = (basePath) => {
+  if (basePath.includes('examples')) { return 'examples'; }
+  if (basePath.includes('lessons')) { return 'lessons'; }
+  return null;
+};
+
+/**
+ * Filter shared files to only those matching a specific folder
+ */
+export const getFolder = (folderName, basePath) => {
   if (!folderName) {
     return {};
   }
 
-  // Convert to absolute path for glob search
-  const searchBase = path.resolve(__dirname, '..', baseFolder.replace('../../', ''));
-
-  // Generate search patterns dynamically based on depth
-  const globPatterns = [];
-
-  // Direct match (0 levels deep)
-  globPatterns.push(`${searchBase}/${folderName}/**/*`);
-
-  // Add patterns for each depth level
-  for (let i = 1; i <= depth; i++) {
-    const wildcards = '*/'.repeat(i);
-    globPatterns.push(`${searchBase}/${wildcards}${folderName}/**/*`);
+  const globKey = getGlobKey(basePath);
+  if (!globKey) {
+    console.warn(`[getFolder] Unknown basePath: ${basePath}`);
+    return {};
   }
 
-  const files = {};
+  const allFiles = globCache[globKey];
+  const filtered = {};
 
-  for (const pattern of globPatterns) {
-    const matchedFiles = await glob(pattern, { nodir: true });
+  // Match folder anywhere in path structure
+  const folderPattern = new RegExp(`/${folderName}/`);
 
-    for (const filePath of matchedFiles) {
-      // Convert absolute path back to the relative format that getExampleFiles expects
-      const relativePath = path.relative(path.resolve(__dirname, '..'), filePath);
-      const globStylePath = ('../../' + relativePath).replace(/\\/g, '/');
-
-      files[globStylePath] = async () => {
-        const content = fs.readFileSync(filePath, 'utf8');
-        return { default: content };
-      };
+  for (const [filePath, loader] of Object.entries(allFiles)) {
+    if (folderPattern.test(filePath)) {
+      // Convert absolute glob path back to relative path format expected by consumers
+      const relativePath = basePath + filePath.replace(/^\/src\/(examples|content\/lessons)\//, '');
+      filtered[relativePath] = loader;
     }
   }
 
-  return files;
+  return filtered;
 };

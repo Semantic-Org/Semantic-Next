@@ -1,18 +1,8 @@
 ---
-  import { readPlaygroundLink } from '@helpers/link-encoder.js';
-
-  //export const prerender = false;
-
   import Playground from '@layouts/Playground.astro';
-  import { getSandboxURL, getEmptyProjectFiles } from '@helpers/playground.js';
+  import { getSandboxURL } from '@helpers/playground.js';
   import CodePlayground from '@components/CodePlayground/CodePlayground.js';
 
-  const link = readPlaygroundLink(Astro.url.search) || {};
-  const emptyFiles = getEmptyProjectFiles({withInjections: true, withStubs: true});
-  const files = {
-    ...emptyFiles,
-    ...link?.files,
-  };
   const sandboxURL = getSandboxURL();
 ---
 <style>
@@ -21,6 +11,23 @@
   }
 </style>
 <Playground>
-  <CodePlayground client:only="lit" files={files} sandboxURL={sandboxURL}></CodePlayground>
+  <CodePlayground client:only="lit" sandboxURL={sandboxURL} id="playground"></CodePlayground>
+  <script>
+    import { $ } from '@semantic-ui/query';
+    import { readPlaygroundLink } from '@helpers/link-encoder.js';
+
+    // Read files from URL
+    const link = readPlaygroundLink(window.location.search) || {};
+    const files = link?.files || {};
+
+    $('astro-island').on('astro:hydrate', () => {
+      const $playground = $('code-playground#playground');
+      if ($playground.exists()) {
+        $playground
+          .setting('files', files)
+          .component().setFiles(files);
+      }
+    });
+  </script>
 </Playground>
 

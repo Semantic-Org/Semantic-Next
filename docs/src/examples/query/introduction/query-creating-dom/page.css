@@ -5,7 +5,7 @@
 }
 
 .created {
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   border-radius: var(--border-radius);
   margin: var(--margin);
   background-color: var(--green-5);
@@ -13,7 +13,7 @@
 
   .nested {
     margin-top: 5px;
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
     border-radius: var(--border-radius);
     background-color: var(--inverted-50);
     border: var(--border);

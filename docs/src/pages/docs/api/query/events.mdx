@@ -4,540 +4,439 @@ pageType: 'API Reference'
 title: Query - Events
 icon: zap
 description: API reference for Query methods related to event handling
+package: "@semantic-ui/query"
+methods: ["on", "off", "one", "onNext", "intercept", "trigger", "dispatchEvent", "focus", "blur", "click", "submit", "ready"]
 ---
 
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 
-The Event methods in Query provide tools for attaching event listeners, triggering custom events, removing them, and triggering events.
+Attach, remove, and trigger events on elements.
 
-## On
+## Binding Events
 
-`on` provides various methods to attach event listeners to DOM elements. It supports standard event binding, event delegation, and special handling for shadow DOM.
+### on
 
-### Syntax
-
-#### Normal Event Binding
 ```javascript
-$(target).on(eventName, handler, options)
+$('selector').on(eventName, handler, options);
 ```
+
+Attaches an event listener to matched elements.
+
+#### Parameters
 
 | Name | Type | Description |
 |------|------|-------------|
-| eventName | string | One or more space-separated event types and optional namespaces |
-| handler | function \| object | The event handler function, or additional options |
-| options | object | An object containing additional options |
+| eventName | string | Space-separated event types (e.g., `'click'`, `'mouseenter mouseleave'`) |
+| handler | function | Event handler function |
+| options | object | Optional configuration |
 
-#### Event Delegation
-
-```javascript
-$(target).on(eventName, selector, handler, options)
-```
-
-| Name | Type | Description |
-|------|------|-------------|
-| eventName | string | One or more space-separated event types and optional namespaces |
-| selector | string | A selector string to filter the descendants of the selected elements that trigger the event, or the event handler function|
-| handler | function | The event handler function, or additional options |
-| options | object | An object containing additional options |
-
-
-### Options
+##### Options
 
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
-| returnHandler | boolean | false | If true, returns the event handler object instead of the Query object |
-| abortController | AbortController | new AbortController() | Custom AbortController for the event listener |
-| capture | boolean | false | Use capture phase for event listener |
-| once | boolean | false | Remove listener after it executes once |
-| passive | boolean | false | Indicates that the function will never call preventDefault() |
+| returnHandler | boolean | false | Return handler object instead of Query |
+| abortController | AbortController | auto | Custom AbortController for removal |
+| capture | boolean | false | Use capture phase |
+| once | boolean | false | Remove after first execution |
+| passive | boolean | false | Handler won't call preventDefault(). Automatically `true` for `scroll` and `resize` events. |
 
-### Returns
+#### Returns
 
-#### Standard
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+- **Standard**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+- **returnHandler: true**: Handler object with `abort()` method ([example](/examples/query-on-abort))
 
-#### Return Handler
-
-When `returnHandler` in `options` is set to `true`, the `on` method returns an event handler object (or an array of objects for multiple elements) with the following properties:
-
-| Property | Type | Description |
-|----------|------|-------------|
-| el | Element | The DOM element the event is attached to |
-| eventName | string | The name of the event |
-| eventListener | function | The actual function attached as the event listener |
-| abortController | AbortController | The AbortController for this event listener |
-| delegated | boolean | Whether this is a delegated event listener |
-| handler | function | The original handler function provided |
-| abort | function | A function to abort (remove) this event listener |
-
-
-### Usage
-
-#### Standard Event Binding
-
-Attach a click event to all div elements:
+#### Usage
 
 ```javascript
-import { $ } from '@semantic-ui/query';
-
-$('div').on('click', function(event) {
-  console.log('Div clicked!', this);
+$('button').on('click', (e) => {
+  console.log('Clicked!', e.target);
 });
 ```
 
-#### Event Delegation
+#### Handler Return Values
 
-Attach a click event to all current and future buttons within a container
+Handlers can use return values to control event propagation:
 
-> When using event delegation, the handler is called with `this` set to the target element that matched the selector, not the element the listener was attached to.
-
-> **Event Delegation** Event delegation allow you to add or remove elements from the DOM and still have them trigger the event so long as the parent element remains in the page.
+- **`return false`** — calls `stopPropagation()`, preventing the event from reaching other handlers
+- **`return 'cancel'`** — calls `preventDefault()`, canceling the browser's default action
 
 ```javascript
-import { $ } from '@semantic-ui/query';
+// Stop the event from bubbling to parent handlers
+$('span').on('click', (e) => {
+  return false;
+});
 
-$('#container').on('click', 'button', function(event) {
-  console.log('Button clicked!', this);
+// Prevent the browser's default action (e.g., form submission)
+$('form').on('submit', (e) => {
+  if (!isValid()) {
+    return 'cancel';
+  }
 });
 ```
 
-#### Event Delegation with Shadow DOM
+#### Example
 
-When working with Shadow DOM, use the `$$` function to pierce shadow boundaries:
-
-```javascript
-import { $$ } from '@semantic-ui/query';
-
-$$('my-custom-element').on('click', 'button', function(event) {
-  console.log('Shadow DOM button clicked!', this);
-});
-```
-
-> **Composed Events**: The `on` method automatically handles delegation targets across shadow boundaries like wbe components using `event.composed` and `event.composedPath()` for events that cross shadow DOM boundaries. This allows the delegation to work correctly even when the target element is within a shadow root.
-
-#### Using Event Options
-
-You can pass additional options to the underlying `addEventListener` method:
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-$('div').on('click', {
-  capture: true,
-  once: true
-}, function(event) {
-  console.log('This will only fire once, and in the capture phase');
-});
-```
-
-#### Using Returned Handler with Abort Signal
-
-You can get a reference to the event handler, which includes an abort method:
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-const handler = $('button').on('click', function() {
-  console.log('Button clicked!');
-}, { returnHandler: true });
-
-// Later, to remove the event listener:
-handler.abort();
-```
-
-#### Listening to a Custom Event
-
-Here's an example of dispatching a custom event from one element and listening to it on another:
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-// listen to a custom event
-$('my-component').on('customEvent', function(event) {
-  console.log('Custom event fired!', event.detail);
-});
-
-// Dispatch the custom event
-$('my-component').dispatchEvent('customEvent', { detail: 'Hello from custom event!' });
-```
-
-#### Using Custom Abort Controller
-
-You can provide your own AbortController for more fine-grained control:
-
-```javascript
-import { $ } from '@semantic-ui/query';
-
-const controller = new AbortController();
-
-$('button').on('click', function() {
-  console.log('Button clicked!');
-}, { abortController: controller });
-
-// Later, to remove the event listener:
-controller.abort();
-```
-
-### Example
 <PlaygroundExample id="query-on" direction="horizontal"></PlaygroundExample>
 
-#### Event Delegation Example
-
-Example of using event delegation with dynamic content:
+### off
 
 ```javascript
-// This event handler will work for buttons added later
-$('#container').on('click', 'button', function(event) {
-  console.log('Button clicked!', this);
-});
+$('selector').off(eventName, handler);
 ```
 
-### Example
-<PlaygroundExample id="query-on-delegate" direction="horizontal"></PlaygroundExample>
+Removes event handlers attached with `on()`.
 
-#### Abort Controller Example
+#### Parameters
 
-Example of using AbortController for event management:
-
-```javascript
-const controller = new AbortController();
-
-$('button').on('click', function() {
-  console.log('Button clicked!');
-}, { abortController: controller });
-
-// Later, to remove the event listener:
-controller.abort();
-```
-
-### Example
-<PlaygroundExample id="query-on-abort" direction="horizontal"></PlaygroundExample>
-
-#### Callback Handler Example
-
-Example of using the callback handler pattern:
-
-```javascript
-const handler = $('button').on('click', function() {
-  console.log('Button clicked!');
-}, { returnHandler: true });
-
-// Later, to remove the event listener:
-handler.abort();
-```
-
-### Example
-<PlaygroundExample id="query-on-callback" direction="horizontal"></PlaygroundExample>
-
-
-## off
-
-Removes event handlers that were attached with `.on()`.
-
-### Syntax
-```javascript
-$('selector').off(eventName, handler)
-```
-
-### Parameters
-| Name      | Type     | Description                                   |
-|-----------|----------|-----------------------------------------------|
-| eventName | string   | One or more space-separated event types       |
-| handler   | function | The function to remove from the event handlers |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-function clickHandler(event) {
-  console.log('Clicked!');
-}
-
-$('button').on('click', clickHandler);
-// Later, to remove the event listener
-$('button').off('click', clickHandler);
-```
-
-### Example
-<PlaygroundExample id="query-off" direction="horizontal"></PlaygroundExample>
-
-## one
-
-Attaches a handler to an event for the elements. The handler is executed at most once per element per event type.
-
-### Syntax
-```javascript
-$('selector').one(eventName, handler)
-```
-
-### Parameters
-| Name      | Type     | Description                                   |
-|-----------|----------|-----------------------------------------------|
-| eventName | string   | One or more space-separated event types       |
-| handler   | function | The function to execute when the event occurs |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-$('button').one('click', function(event) {
-    console.log('This will only fire once!');
-});
-```
-
-### Example
-<PlaygroundExample id="query-one" direction="horizontal"></PlaygroundExample>
-
-## onNext
-
-Returns a Promise that resolves when the next occurrence of the specified event fires. This provides a modern async/await alternative to callback-based event handling.
-
-### Syntax
-
-#### Wait for Event
-```javascript
-await $('selector').onNext(eventName)
-```
-
-#### Wait for Event with Delegation
-```javascript
-await $('selector').onNext(eventName, targetSelector)
-```
-
-#### Wait for Event with Timeout
-```javascript
-await $('selector').onNext(eventName, { timeout: 5000 })
-```
-
-### Parameters
 | Name | Type | Description |
 |------|------|-------------|
-| eventName | string | One or more space-separated event types |
-| targetSelector | string | Optional CSS selector for event delegation |
-| options | object | Optional configuration object |
-| options.timeout | number | Timeout in milliseconds (throws error if event doesn't fire) |
+| eventName | string | Space-separated event types to remove |
+| handler | function | The handler function to remove |
 
-### Returns
-**Promise** - Resolves with the event object when the event fires.
+#### Returns
 
-### Usage
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
-#### Basic Event Waiting
+#### Usage
+
 ```javascript
-// Wait for a button click
-await $('.button').onNext('click');
+const handler = (e) => console.log('Clicked!');
+
+$('button').on('click', handler);
+$('button').off('click', handler);
+```
+
+#### Example
+
+<PlaygroundExample id="query-off" direction="horizontal"></PlaygroundExample>
+
+### one
+
+```javascript
+$('selector').one(eventName, handler);
+```
+
+Attaches a handler that executes at most once per element.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Space-separated event types |
+| handler | function | Event handler function |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('button').one('click', () => {
+  console.log('This fires once only');
+});
+```
+
+#### Example
+
+<PlaygroundExample id="query-one" direction="horizontal"></PlaygroundExample>
+
+### intercept
+
+```javascript
+$('selector').intercept(eventName, handler);
+$('selector').intercept(eventName, delegateSelector, handler);
+```
+
+Attaches a capture-phase event listener. Events fire top-down during capture (parent first), unlike `on()` which fires bottom-up during bubbling (child first). Use `intercept` when a parent needs to handle or block an event before children see it.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Space-separated event types |
+| delegateSelector | string | Optional CSS selector for event delegation |
+| handler | function | Event handler function |
+| options | object | Same options as `on()` (except `capture`, which is always `true`) |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+// Parent intercepts ESC before children handle it
+$('.modal').intercept('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    return false; // children never see this event
+  }
+});
+
+// With delegation
+$('.form').intercept('click', '[type="submit"]', function(e) {
+  if (!isValid()) {
+    return false; // button's own handler never fires
+  }
+});
+```
+
+#### Example
+
+<PlaygroundExample id="query-intercept" direction="horizontal"></PlaygroundExample>
+
+### onNext
+
+```javascript
+$('selector').onNext(eventName);
+$('selector').onNext(eventName, delegateSelector);
+$('selector').onNext(eventName, options);
+```
+
+Returns a Promise that resolves on the next event occurrence. Useful for async/await patterns.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Space-separated event types |
+| delegateSelector | string | Optional selector for delegation |
+| options | object | Optional configuration |
+| options.timeout | number | Timeout in ms (rejects if exceeded) |
+
+#### Returns
+
+**Promise** that resolves with the event object.
+
+#### Usage
+
+```javascript
+await $('button').onNext('click');
 console.log('Button was clicked!');
-
-// Wait for multiple possible events (first one wins)
-await $('.element').onNext('animationend, transitionend');
 ```
 
-#### Event Delegation
+## Event Delegation
+
+Event delegation attaches a handler to a parent element that fires when descendants match a selector. Works with dynamically added elements.
+
+### on (delegated)
+
 ```javascript
-// Wait for click on dynamically added elements
-await $('#container').onNext('click', '.dynamic-button');
+$('selector').on(eventName, delegateSelector, handler, options);
 ```
 
-#### With Timeout
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Space-separated event types |
+| delegateSelector | string | CSS selector to match against event target |
+| handler | function | Event handler (`this` bound to matched element) |
+| options | object | Same options as direct binding |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
 ```javascript
-try {
-  await $('.modal').onNext('modal:closed', { timeout: 5000 });
-  console.log('Modal closed within 5 seconds');
-} catch (error) {
-  console.log('Modal did not close within 5 seconds');
-}
+$('#container').on('click', 'button', (e) => {
+  console.log('Button clicked!', e.target);
+});
 ```
 
-#### Async/Await Patterns
+#### Example
+
+<PlaygroundExample id="query-on-delegate" direction="horizontal"></PlaygroundExample>
+
+## Triggering Events
+
+### trigger
+
 ```javascript
-async function animateSequence() {
-  $('.element').addClass('fade-in');
-  await $('.element').onNext('animationend');
-
-  $('.element').addClass('slide-up');
-  await $('.element').onNext('animationend');
-
-  console.log('Animation sequence complete!');
-}
+$('selector').trigger(eventName);
 ```
 
-### Notes
-- The promise resolves with the native Event object
-- Event listeners are automatically cleaned up after the event fires
-- Supports the same event delegation as `one()`
-- If timeout is specified and exceeded, the promise rejects with an error
-- For comma-separated events, resolves when the first event fires
+Executes all handlers for the given event type.
 
-## trigger
+#### Parameters
 
-Executes all handlers attached to the matched elements for the given event type.
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Event type to trigger |
 
-### Syntax
-```javascript
-$('selector').trigger(eventName)
-```
+#### Returns
 
-### Parameters
-| Name      | Type   | Description             |
-|-----------|--------|-------------------------|
-| eventName | string | The type of event to trigger |
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Usage
 
-### Usage
 ```javascript
 $('button').trigger('click');
 ```
 
-### Example
+#### Example
+
 <PlaygroundExample id="query-trigger" direction="horizontal"></PlaygroundExample>
 
-## dispatchEvent
+### dispatchEvent
 
-Creates and dispatches a custom event on the matched elements.
-
-> `dispatchEvent` is integrated into component callbacks, see [component events](/docs/guides/components/events#creating-events)
-
-#### Syntax
 ```javascript
-$('selector').dispatchEvent(eventName, eventData, eventSettings)
+$('selector').dispatchEvent(eventName, eventData, eventSettings);
 ```
 
-### Parameters
-| Name           | Type   | Description                            |
-|----------------|--------|----------------------------------------|
-| eventName      | string | The name of the custom event to create |
-| eventData      | object | Custom data to pass with the event     |
-| eventSettings  | object | Additional event settings              |
+Creates and dispatches a custom event.
 
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
+#### Parameters
 
-### Usage
+| Name | Type | Description |
+|------|------|-------------|
+| eventName | string | Custom event name |
+| eventData | object | Data passed via `event.detail` |
+| eventSettings | object | Event configuration (bubbles, cancelable, etc.) |
 
-#### Passing Custom Metadata
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+##### Dispatch
+
 ```javascript
-const eventData = {
-  delta: getResizeDelta() // pass along resize delta with event
-}
-$('.container').dispatchEvent('resize', eventData);
+$('.container').dispatchEvent('resize', { delta: 100 });
 ```
 
-### Example
-<PlaygroundExample id="query-dispatchevent" direction="horizontal"></PlaygroundExample>
-## focus
+##### Listen
 
-Gives focus to the first element in the set of matched elements.
-
-### Syntax
 ```javascript
-$('selector').focus()
-```
-
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-// Focus on an input element
-$('input.username').focus();
-```
-
-### Example
-<PlaygroundExample id="query-focus" direction="horizontal"></PlaygroundExample>
-
-## blur
-
-Removes focus from the first element in the set of matched elements.
-
-### Syntax
-```javascript
-$('selector').blur()
-```
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-// Remove focus from whatever is focused
-$(document.activeElement).blur();
-```
-
-### Example
-<PlaygroundExample id="query-blur" direction="horizontal"></PlaygroundExample>
-```
-## click
-
-Triggers click event for all elements
-
-### Syntax
-```javascript
-$('selector').click()
-```
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-// Trigger click on all buttons
-$('button').click();
-```
-
-### Example
-<PlaygroundExample id="query-click" direction="horizontal"></PlaygroundExample>
-
-## submit
-
-Triggers submit event for all elements
-
-### Syntax
-```javascript
-$('selector').submit()
-```
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-// Submit all forms
-$('form').submit();
-```
-
-### Example
-<PlaygroundExample id="query-submit" direction="horizontal"></PlaygroundExample>
-
-## ready
-
-Executes a function when the DOM is fully loaded.
-
-### Syntax
-```javascript
-$(document).ready(handler)
-```
-
-### Parameters
-| Name    | Type     | Description                              |
-|---------|----------|------------------------------------------|
-| handler | function | The function to execute when DOM is ready |
-
-### Returns
-[Query object](/docs/api/query/basic#the-query-object) (for chaining).
-
-### Usage
-```javascript
-// Execute code when DOM is ready
-$(document).ready(function() {
-  console.log('DOM is ready!');
-  // Initialize your application here
+$('.container').on('resize', (e) => {
+  console.log('Delta:', e.detail.delta);
 });
 ```
 
-### Example
+#### Example
+
+<PlaygroundExample id="query-dispatchevent" direction="horizontal"></PlaygroundExample>
+
+## Shorthand
+
+### focus
+
+```javascript
+$('selector').focus();
+```
+
+Gives focus to the first matched element.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('input.username').focus();
+```
+
+#### Example
+
+<PlaygroundExample id="query-focus" direction="horizontal"></PlaygroundExample>
+
+### blur
+
+```javascript
+$('selector').blur();
+```
+
+Removes focus from the first matched element.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$(document.activeElement).blur();
+```
+
+#### Example
+
+<PlaygroundExample id="query-blur" direction="horizontal"></PlaygroundExample>
+
+### click
+
+```javascript
+$('selector').click();
+```
+
+Triggers a click event on matched elements.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('button.submit').click();
+```
+
+#### Example
+
+<PlaygroundExample id="query-click" direction="horizontal"></PlaygroundExample>
+
+### submit
+
+```javascript
+$('selector').submit();
+```
+
+Triggers a submit event on matched form elements.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('form').submit();
+```
+
+#### Example
+
+<PlaygroundExample id="query-submit" direction="horizontal"></PlaygroundExample>
+
+### ready
+
+```javascript
+$(document).ready(handler);
+```
+
+Executes a function when the DOM is fully loaded.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| handler | function | Function to execute when DOM is ready |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$(document).ready(() => {
+  console.log('DOM ready!');
+});
+```
+
+#### Example
+
 <PlaygroundExample id="query-ready" direction="horizontal"></PlaygroundExample>

@@ -1,4 +1,4 @@
-ui-menu {
+:host(ui-menu) {
   display: block;
   margin: var(--menu-margin);
   padding: var(--menu-padding);
@@ -15,4 +15,9 @@ ui-menu {
   background: var(--menu-background);
   align-items: var(--menu-align-items);
   justify-content: var(--menu-justify-content);
+}
+
+.menu.icon-only {
+  .label { display: none; }
+  ui-icon { margin: 0 !important; }
 }

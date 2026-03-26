@@ -1,0 +1,298 @@
+{
+  "settings": {
+    "tabler": "settings",
+    "notes": "Tabler has `settings` (gear icon). Direct match."
+  },
+  "sliders": {
+    "tabler": "adjustments",
+    "notes": "Tabler `adjustments` shows vertical sliders/equalizer controls. Matches the sliders/adjustments concept well."
+  },
+  "theme": {
+    "tabler": "palette",
+    "notes": "Tabler `palette` represents colors/appearance. Good match for theme/colors."
+  },
+  "light-mode": {
+    "tabler": "sun",
+    "notes": "Tabler `sun` is the standard light mode icon."
+  },
+  "dark-mode": {
+    "tabler": "moon",
+    "notes": "Tabler `moon` is the standard dark mode icon."
+  },
+  "accessibility": {
+    "tabler": "accessible",
+    "notes": "Tabler uses `accessible` (not `accessibility`). Wheelchair/universal access symbol."
+  },
+  "plugin": {
+    "tabler": "puzzle",
+    "notes": "Tabler `puzzle` represents extensions/add-ons. Tagged with extension, add-on."
+  },
+  "webhook": {
+    "tabler": "webhook",
+    "notes": "Tabler has `webhook`. Direct match."
+  },
+  "globe": {
+    "tabler": "world",
+    "notes": "Tabler has both `globe` and `world`. `world` is more commonly used and shows a full globe with latitude/longitude lines."
+  },
+  "desktop": {
+    "tabler": "device-desktop",
+    "notes": "Tabler `device-desktop` is the monitor/computer icon."
+  },
+  "laptop": {
+    "tabler": "device-laptop",
+    "notes": "Tabler `device-laptop` is the laptop icon."
+  },
+  "mobile": {
+    "tabler": "device-mobile",
+    "notes": "Tabler `device-mobile` is the smartphone icon."
+  },
+  "tablet": {
+    "tabler": "device-tablet",
+    "notes": "Tabler `device-tablet` is the tablet icon."
+  },
+  "keyboard": {
+    "tabler": "keyboard",
+    "notes": "Tabler has `keyboard`. Direct match."
+  },
+  "cpu": {
+    "tabler": "cpu",
+    "notes": "Tabler has `cpu` in the Devices category. Direct match."
+  },
+  "storage": {
+    "tabler": "server",
+    "notes": "Tabler has no dedicated hard-drive icon. `server` is the closest match for storage/disk concept. Considered `database` but that is more data-specific."
+  },
+  "usb": {
+    "tabler": "usb",
+    "notes": "Tabler has `usb`. Direct match. Also has `device-usb` but `usb` is simpler."
+  },
+  "cast": {
+    "tabler": "cast",
+    "notes": "Tabler has `cast`. Direct match for Chromecast/Airplay streaming."
+  },
+  "terminal": {
+    "tabler": "terminal",
+    "notes": "Tabler has `terminal`. Direct match. Tagged with console, command, git, command line."
+  },
+  "database": {
+    "tabler": "database",
+    "notes": "Tabler has `database`. Direct match."
+  },
+  "server": {
+    "tabler": "server-2",
+    "notes": "Tabler has `server` and `server-2`. Using `server-2` to differentiate from `storage` mapping above which uses `server`."
+  },
+  "cloud": {
+    "tabler": "cloud",
+    "notes": "Tabler has `cloud`. Direct match."
+  },
+  "cloud-upload": {
+    "tabler": "cloud-upload",
+    "notes": "Tabler has `cloud-upload`. Direct match."
+  },
+  "cloud-download": {
+    "tabler": "cloud-download",
+    "notes": "Tabler has `cloud-download`. Direct match."
+  },
+  "bug": {
+    "tabler": "bug",
+    "notes": "Tabler has `bug`. Direct match."
+  },
+  "git": {
+    "tabler": "git-branch",
+    "notes": "Tabler has `git-branch` for version control branching. Good match for git/branch concept."
+  },
+  "network": {
+    "tabler": "network",
+    "notes": "Tabler has `network` in the Computers category. Direct match."
+  },
+  "wifi": {
+    "tabler": "wifi",
+    "notes": "Tabler has `wifi`. Direct match."
+  },
+  "bluetooth": {
+    "tabler": "bluetooth",
+    "notes": "Tabler has `bluetooth`. Direct match."
+  },
+  "power": {
+    "tabler": "power",
+    "notes": "Tabler has `power`. Direct match."
+  },
+  "battery": {
+    "tabler": "battery",
+    "notes": "Tabler has `battery`. Direct match."
+  },
+  "tool": {
+    "tabler": "tool",
+    "notes": "Tabler has `tool` (wrench icon). Direct match."
+  },
+  "tools": {
+    "tabler": "tools",
+    "notes": "Tabler has `tools`. Direct match."
+  },
+  "qr-code": {
+    "tabler": "qrcode",
+    "notes": "Tabler uses `qrcode` (no hyphen). Note the naming difference from Semantic UI `qr-code`."
+  },
+  "barcode": {
+    "tabler": "barcode",
+    "notes": "Tabler has `barcode` in the System category. Direct match."
+  },
+  "calculator": {
+    "tabler": "calculator",
+    "notes": "Tabler has `calculator`. Direct match."
+  },
+  "random": {
+    "tabler": "dice",
+    "notes": "Tabler has `dice`. Good match for random/chance concept."
+  },
+  "history": {
+    "tabler": "history",
+    "notes": "Tabler has `history`. Direct match."
+  },
+  "rain": {
+    "tabler": "cloud-rain",
+    "notes": "Tabler has `cloud-rain` in the Weather category. Good match."
+  },
+  "storm": {
+    "tabler": "storm",
+    "notes": "Tabler has `storm` (code f24c) in the Weather category. Tagged with weather, cloud, lightning, rain, wind, tornado."
+  },
+  "snow": {
+    "tabler": "snowflake",
+    "notes": "Tabler has `snowflake`. Standard snow/cold icon."
+  },
+  "wind": {
+    "tabler": "wind",
+    "notes": "Tabler has `wind` in the Weather category. Direct match."
+  },
+  "temperature": {
+    "tabler": "temperature",
+    "notes": "Tabler has `temperature` in the Weather category. Direct match."
+  },
+  "water": {
+    "tabler": "droplet",
+    "notes": "Tabler has `droplet` in the Design category. Good match for water/humidity."
+  },
+  "coffee": {
+    "tabler": "coffee",
+    "notes": "Tabler has `coffee` in the Food category. Direct match."
+  },
+  "infinity": {
+    "tabler": "infinity",
+    "notes": "Tabler has `infinity`. Direct match."
+  },
+  "eco": {
+    "tabler": "leaf",
+    "notes": "Tabler has `leaf`. Good match for eco/nature concept."
+  },
+  "hexagon": {
+    "tabler": "hexagon",
+    "notes": "Tabler has `hexagon` in the Shapes category. Direct match."
+  },
+  "triangle": {
+    "tabler": "triangle",
+    "notes": "Tabler has `triangle` in the Shapes category. Direct match."
+  },
+  "google": {
+    "tabler": "brand-google",
+    "notes": "Tabler has `brand-google`. Brand icons use the `brand-` prefix."
+  },
+  "github": {
+    "tabler": "brand-github",
+    "notes": "Tabler has `brand-github`. Direct match."
+  },
+  "apple": {
+    "tabler": "brand-apple",
+    "notes": "Tabler has `brand-apple`. Direct match."
+  },
+  "facebook": {
+    "tabler": "brand-facebook",
+    "notes": "Tabler has `brand-facebook`. Direct match."
+  },
+  "twitter": {
+    "tabler": "brand-x",
+    "notes": "Tabler has both `brand-twitter` (old bird logo) and `brand-x` (current X logo, added v2.29). Using `brand-x` as it reflects the current branding."
+  },
+  "linkedin": {
+    "tabler": "brand-linkedin",
+    "notes": "Tabler has `brand-linkedin`. Direct match."
+  },
+  "microsoft": {
+    "tabler": "brand-windows",
+    "notes": "Tabler has `brand-windows`. Best match for Microsoft/Windows."
+  },
+  "slack": {
+    "tabler": "brand-slack",
+    "notes": "Tabler has `brand-slack`. Direct match."
+  },
+  "discord": {
+    "tabler": "brand-discord",
+    "notes": "Tabler has `brand-discord`. Direct match."
+  },
+  "instagram": {
+    "tabler": "brand-instagram",
+    "notes": "Tabler has `brand-instagram`. Direct match."
+  },
+  "youtube": {
+    "tabler": "brand-youtube",
+    "notes": "Tabler has `brand-youtube`. Direct match."
+  },
+  "android": {
+    "tabler": "brand-android",
+    "notes": "Tabler has `brand-android`. Direct match."
+  },
+  "sparkles": {
+    "tabler": "sparkles",
+    "notes": "Tabler has `sparkles`. Direct match for AI/magic concept."
+  },
+  "wand": {
+    "tabler": "wand",
+    "notes": "Tabler has `wand` (added v1.5). Direct match for magic wand/auto-fix."
+  },
+  "bot": {
+    "tabler": "robot",
+    "notes": "Tabler uses `robot` (not `bot`). Same concept for robot/automation."
+  },
+  "notifications": {
+    "tabler": "bell",
+    "notes": "Tabler has `bell`. Standard notifications icon."
+  },
+  "email": {
+    "tabler": "mail",
+    "notes": "Tabler uses `mail` (not `email`). Direct match for envelope/email."
+  },
+  "inbox": {
+    "tabler": "inbox",
+    "notes": "Tabler has `inbox`. Direct match."
+  },
+  "phone": {
+    "tabler": "phone",
+    "notes": "Tabler has `phone`. Direct match."
+  },
+  "contacts": {
+    "tabler": "address-book",
+    "notes": "Tabler has `address-book` (added v1.55). Good match for contacts/address book."
+  },
+  "lock": {
+    "tabler": "lock",
+    "notes": "Tabler has `lock`. Direct match."
+  },
+  "unlock": {
+    "tabler": "lock-open",
+    "notes": "Tabler uses `lock-open` (not `unlock`). Shows an open padlock."
+  },
+  "security": {
+    "tabler": "shield",
+    "notes": "Tabler has `shield` in the System category. Tagged with safety, protect, protection."
+  },
+  "secure": {
+    "tabler": "shield-check",
+    "notes": "Tabler has `shield-check`. Shield with checkmark for verified/secure."
+  },
+  "key": {
+    "tabler": "key",
+    "notes": "Tabler has `key`. Direct match."
+  }
+}

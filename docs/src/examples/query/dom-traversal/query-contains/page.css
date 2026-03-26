@@ -1,5 +1,5 @@
 .container {
-  padding: var(--spacing);
+  padding: var(--padding);
   border: var(--border);
   margin: var(--vertically-spaced);
   
@@ -9,14 +9,14 @@
   }
   
   .target {
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
     background: var(--standard-5);
     border-radius: var(--border-radius);
   }
 }
 
 .other {
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   background: var(--standard-5);
   margin: var(--vertically-spaced);
   

@@ -1,0 +1,110 @@
+# URL Verification for Navbar / App Bar Research
+Date: 2025-11-10
+Total URLs found: 10
+
+## URLs to Research
+| Framework | URL | Status | Notes |
+|-----------|-----|--------|-------|
+| Ant Design | https://ant.design/components/layout/ | Pending | Layout.Header component |
+| Chakra UI | https://chakra-ui.com/docs/components/ | Pending | Check for navbar/header component |
+| HeroUI (NextUI) | https://www.heroui.com/docs/components/navbar | ✅ Working | Dedicated navbar component |
+| Mantine | https://mantine.dev/core/app-shell/ | ✅ Working | Header via AppShell - Comprehensive documentation |
+| Mantine | https://mantine.dev/core/nav-link/ | Pending | NavLink component |
+| MUI | https://mui.com/material-ui/react-app-bar/ | Pending | App Bar component |
+| Nuxt UI | https://ui.nuxt.com/components/navigation-menu | ✅ Working | Navigation Menu - Comprehensive documentation with horizontal/vertical support |
+| PrimeReact | https://primereact.org/menubar/ | ✅ Working | Menubar component - Research completed 2025-11-10 |
+| Radix UI | https://www.radix-ui.com/primitives/docs/components/navigation-menu | ✅ Working | Navigation Menu primitive - v1.2.14 |
+| ShadCN | https://ui.shadcn.com/docs/components/navigation-menu | ✅ Working | Navigation Menu (custom navbar) - Researched 2025-11-10 |
+| Vuetify | https://vuetifyjs.com/en/components/app-bars | Pending | v-app-bar component |
+
+## Verification Results
+[Update as you verify each URL]
+- ✅ Working: 6 (ShadCN, Radix UI, Nuxt UI, HeroUI, Mantine AppShell, PrimeReact)
+- ⚠️ Redirected: 0
+- ❌ 404/Broken: 0
+- ⏭️ Skipped (duplicate): 0
+
+## Research Completed
+
+### Radix UI - Navigation Menu
+- **URL**: https://www.radix-ui.com/primitives/docs/components/navigation-menu
+- **Status**: ✅ Working
+- **Date Verified**: 2025-11-10
+- **Report Location**: `ai/research/navbar/radix-ui/usage-patterns.md`
+- **Component Type**: Navigation Menu primitive (unstyled, accessible component collection)
+- **Built On**: React primitives
+- **Version**: 1.2.14
+- **Bundle Size**: 12.37 kB (gzipped)
+- **Key Features**:
+  - Multi-component system (Root, List, Item, Trigger, Content, Link, Indicator, Viewport, Sub)
+  - Horizontal and vertical orientation support
+  - Active state management (current page indication)
+  - Controlled and uncontrolled modes
+  - Nested submenu support via Sub component
+  - Comprehensive keyboard navigation
+  - Flexible timing controls (hover delays, skip delays)
+  - Rich animation support with data attributes and CSS variables
+  - Client-side routing integration (asChild prop)
+  - Viewport system for advanced layout control
+- **Documentation Quality**: Comprehensive - Extensive API reference, keyboard interaction tables, accessibility guidance, multiple code examples, W3C compliance notes
+
+### ShadCN - Navigation Menu
+- **URL**: https://ui.shadcn.com/docs/components/navigation-menu
+- **Status**: ✅ Working
+- **Date Verified**: 2025-11-10
+- **Report Location**: `ai/research/navbar/shadcn/usage-patterns.md`
+- **Component Type**: Navigation Menu (horizontal navigation with dropdown support)
+- **Built On**: Radix UI primitives
+- **Styling**: Tailwind CSS
+- **Key Features**:
+  - Composable architecture with 8 sub-components
+  - Grid-based dropdown layouts
+  - Next.js Link integration via asChild prop
+  - Mobile-responsive with progressive enhancement
+  - Built-in accessibility through Radix UI
+  - Flexible content patterns (simple links, mega menus, featured sections)
+- **Documentation Quality**: High - clear examples, installation instructions, comprehensive coverage
+
+### Mantine - AppShell Header
+- **URL**: https://mantine.dev/core/app-shell/
+- **Status**: ✅ Working
+- **Date Verified**: 2025-11-10
+- **Report Location**: `ai/research/navbar/mantine-appshell/usage-patterns.md`
+- **Component Type**: AppShell Layout System with Header component
+- **Built On**: Mantine Core
+- **Styling**: Mantine theme system, CSS-in-JS
+- **Key Features**:
+  - Fixed-position header with automatic offset management
+  - Responsive height configuration with breakpoints
+  - Integration with navbar, aside, and footer components
+  - Scroll-based visibility control via useHeadroom hook
+  - Two layout modes (default and alt)
+  - Independent mobile/desktop collapse states
+  - CSS variables for dynamic styling
+  - Semantic HTML elements (renders as <header>)
+  - Built-in transition customization
+  - Border and z-index control
+- **Documentation Quality**: Excellent - comprehensive code examples, clear configuration documentation, responsive patterns well-explained, advanced features like useHeadroom covered
+
+### PrimeReact - Menubar
+- **URL**: https://primereact.org/menubar/
+- **Status**: ✅ Working
+- **Date Verified**: 2025-11-10
+- **Report Location**: `ai/research/navbar/primereact/usage-patterns.md`
+- **Component Type**: Horizontal menu/navbar component
+- **Built On**: PrimeReact
+- **Styling**: PrimeReact theme system
+- **Key Features**:
+  - Data-driven menu model (JSON-like structure)
+  - Start/end slots for logo, search, user menu, actions
+  - Automatic mobile responsiveness with hamburger menu
+  - Nested submenu support (unlimited depth)
+  - Command-based navigation (callbacks + URLs)
+  - Badge support on menu items
+  - Custom item templates
+  - Disabled items and separators
+  - PassThrough API for deep customization
+  - Comprehensive keyboard navigation
+  - Full ARIA/WCAG 2.1 AA compliance
+  - Theme integration with PrimeReact themes
+- **Documentation Quality**: Good - Core functionality well documented, accessibility comprehensive, code examples present but not all fully accessible via WebFetch, API reference available

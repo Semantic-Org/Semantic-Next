@@ -47,13 +47,16 @@ const createComponent = function({ $, isServer, reaction, state, settings, self 
           return;
         }
         localStorage.setItem('theme', theme);
-        if (theme == 'light') {
-          $('html').removeClass('dark').addClass('light');
+        if (theme == 'light' && !$('html').hasClass('light')) {
+          $('html')
+            .removeClass('dark').addClass('light')
+            .attr('data-theme', 'light');
         }
-        else {
-          $('html').removeClass('light').addClass('dark');
+        else if (theme == 'dark' && !$('html').hasClass('dark')) {
+          $('html')
+            .removeClass('light').addClass('dark')
+            .attr('data-theme', 'dark');
         }
-        $('html').attr('data-theme', theme);
       });
     },
   };
