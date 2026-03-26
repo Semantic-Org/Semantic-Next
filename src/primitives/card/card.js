@@ -7,7 +7,7 @@ import componentSpec from './specs/card.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UICard = defineComponent({
+const Card = defineComponent({
   tagName: 'ui-card',
   componentSpec,
   template,
@@ -16,4 +16,4 @@ const UICard = defineComponent({
   createComponent,
 });
 
-export { UICard };
+export { Card };

@@ -1,1 +1,1 @@
-export { UIInput } from './input.js';
+export { Input } from './input.js';

@@ -66,7 +66,7 @@ const events = {
   },
 };
 
-export const UIButton = defineComponent({
+export const Button = defineComponent({
   tagName: 'ui-button',
   componentSpec,
   template,

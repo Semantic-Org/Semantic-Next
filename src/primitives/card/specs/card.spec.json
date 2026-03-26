@@ -3,7 +3,7 @@
   "name": "Card",
   "description": "A card displays segmented content in a manner similar to a playing card.",
   "tagName": "ui-card",
-  "exportName": "UICard",
+  "exportName": "Card",
   "exampleCode": "<ui-card image=\"/images/new-avatar/dima2.png\">\n  <div slot=\"header\">Dima B</div>\n  <div slot=\"subheader\">Software Engineer</div>\n  <div slot=\"description\">Dima has strong opinions about button padding and the perfect shade of blue.</div>\n</ui-card>",
   "content": [
     {
@@ -108,7 +108,7 @@
   "supportsPlural": true,
   "pluralName": "Cards",
   "pluralTagName": "ui-cards",
-  "pluralExportName": "UICards",
+  "pluralExportName": "Cards",
   "pluralDescription": "Cards can exist together as a group",
   "pluralContent": [],
   "pluralSharedTypes": [

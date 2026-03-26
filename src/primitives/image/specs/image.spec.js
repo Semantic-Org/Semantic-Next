@@ -3,7 +3,7 @@ export default {
   name: 'Image',
   description: 'An image is a graphic representation of something',
   tagName: 'ui-image',
-  exportName: 'UIImage',
+  exportName: 'Image',
   content: [
     {
       name: 'Source',

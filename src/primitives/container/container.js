@@ -7,7 +7,7 @@ import componentSpec from './specs/container.component.js';
 // no functionality
 const createComponent = ({ $ }) => ({});
 
-const UIContainer = defineComponent({
+const Container = defineComponent({
   tagName: 'ui-container',
   componentSpec,
   template,
@@ -15,4 +15,4 @@ const UIContainer = defineComponent({
   createComponent,
 });
 
-export { UIContainer };
+export { Container };

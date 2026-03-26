@@ -80,7 +80,7 @@ const events = {
   },
 };
 
-const UIInput = defineComponent({
+const Input = defineComponent({
   tagName: 'ui-input',
   delegatesFocus: true,
   componentSpec,
@@ -91,4 +91,4 @@ const UIInput = defineComponent({
   defaultState,
 });
 
-export { UIInput };
+export { Input };

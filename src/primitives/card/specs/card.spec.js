@@ -9,7 +9,7 @@ export default {
   name: 'Card',
   description: 'A card displays segmented content in a manner similar to a playing card.',
   tagName: 'ui-card',
-  exportName: 'UICard',
+  exportName: 'Card',
   exampleCode: `<ui-card image="/images/new-avatar/dima2.png">
   <div slot="header">Dima B</div>
   <div slot="subheader">Software Engineer</div>
@@ -110,7 +110,7 @@ export default {
   supportsPlural: true,
   pluralName: 'Cards',
   pluralTagName: 'ui-cards',
-  pluralExportName: 'UICards',
+  pluralExportName: 'Cards',
   pluralDescription: 'Cards can exist together as a group',
   pluralContent: [],
   pluralSharedTypes: ['link'],

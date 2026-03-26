@@ -8,7 +8,7 @@ export default {
   name: 'Input',
   description: 'A menu displays grouped navigation actions',
   tagName: 'ui-input',
-  exportName: 'UIInput',
+  exportName: 'Input',
   content: [
     {
       name: 'Placeholder',

@@ -1,1 +1,1 @@
-export { UIRail } from './rail.js';
+export { Rail } from './rail.js';

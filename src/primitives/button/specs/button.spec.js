@@ -13,7 +13,7 @@ export default {
   name: 'Button',
   description: 'A button indicates a possible user action.',
   tagName: 'ui-button',
-  exportName: 'UIButton',
+  exportName: 'Button',
   examples: {
     defaultPluralContent: `
       <ui-button>One</ui-button>
@@ -400,7 +400,7 @@ export default {
   supportsPlural: true,
   pluralName: 'Buttons',
   pluralTagName: 'ui-buttons',
-  pluralExportName: 'UIButtons',
+  pluralExportName: 'Buttons',
   pluralDescription: 'Buttons can exist together as a group',
 
   pluralContent: [

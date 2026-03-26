@@ -37,7 +37,7 @@ const events = {
   },
 };
 
-const UIModal = defineComponent({
+const Modal = defineComponent({
   tagName: 'ui-modal',
   componentSpec,
   template,
@@ -48,4 +48,4 @@ const UIModal = defineComponent({
   onRendered,
 });
 
-export { UIModal };
+export { Modal };

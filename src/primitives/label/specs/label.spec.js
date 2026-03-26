@@ -7,7 +7,7 @@ export default {
   name: 'Label',
   description: 'A label displays content classification',
   tagName: 'ui-label',
-  exportName: 'UILabel',
+  exportName: 'Label',
   content: [],
   types: [
     {

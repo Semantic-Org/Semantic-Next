@@ -7,7 +7,7 @@ export default {
   name: 'Divider',
   description: 'A divider visually segments content into groups',
   tagName: 'ui-divider',
-  exportName: 'UIDivider',
+  exportName: 'Divider',
   content: [
     {
       name: 'Text',

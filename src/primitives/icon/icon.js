@@ -43,7 +43,7 @@ const createComponent = ({ settings, data, self }) => ({
   },
 });
 
-const UIIcon = defineComponent({
+const Icon = defineComponent({
   tagName: 'ui-icon',
   componentSpec,
   template,
@@ -51,4 +51,4 @@ const UIIcon = defineComponent({
   createComponent,
 });
 
-export { UIIcon };
+export { Icon };

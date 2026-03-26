@@ -32,7 +32,7 @@ const createComponent = ({ self, settings }) => ({
   },
 });
 
-const UIDivider = defineComponent({
+const Divider = defineComponent({
   tagName: 'ui-divider',
   componentSpec,
   template,
@@ -40,4 +40,4 @@ const UIDivider = defineComponent({
   createComponent,
 });
 
-export { UIDivider };
+export { Divider };

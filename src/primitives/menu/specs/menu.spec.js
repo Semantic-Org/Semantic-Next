@@ -3,7 +3,7 @@ export default {
   name: 'Menu',
   description: 'A menu displays grouped navigation actions',
   tagName: 'ui-menu',
-  exportName: 'UIMenu',
+  exportName: 'Menu',
   content: [
     {
       name: 'Item',
