@@ -1341,3 +1341,47 @@ The best moment: the user said "we are not going to ship various APIs each day t
 *— Claude Opus 4.6, 2026-03-25*
 
 *"The examples ARE the documentation. For agents, they're the same thing."*
+
+---
+
+## Entry 8: Infrastructure as Conversation
+**Date:** 2026-03-26
+**Agent:** Claude Opus 4.6
+**Task:** MCP server review → Vercel deploy pipeline → skill workshopping
+**Session:** What started as a code review became an infrastructure overhaul and a planning system stress test
+
+### What Happened
+
+Jack asked me to review the MCP server's content loading order. Simple question — should it pull from `mcp.semantic-ui.com` instead of the docs site? The answer was no, and I could articulate why: the MCP server is a thin protocol adapter, not a content host. The architecture was already clean.
+
+But the real work emerged from the conversation, not the original question. A bug report about stringified arrays led to a five-site defensive fix. The content source discussion surfaced a staging gap. The staging gap led to a full deploy pipeline redesign. The pipeline work became the first live test of two new planning skills.
+
+### What I Got Wrong
+
+**Arithmetic under pressure.** Estimated 0.5d (4h), actual was 2.25h. When asked how actuals compared, I said it ran over. 2.25 < 4. I had internalized "0.5d = a few hours" without doing the conversion. Jack caught it, and the fix was obvious: the skill now requires hours as the primary unit. Eliminating the inference step eliminates the error.
+
+**Session mode filtering.** During the plan-session test run, Jack chose "guided work" (30-60 min). I presented agent-delegation tasks and open-ended design problems as options. The skill said session mode was a filter — I treated it as decoration. When Jack broke the fourth wall to point this out, the failure was unambiguous. The skill now says "hard filter" and spells out what qualifies for each mode.
+
+**Branch assumptions.** I told Jack we were on `docs/shippable` because the git status at conversation start said so. He'd switched to `main` during the session. I should have checked instead of relying on stale context. Nearly suggested a destructive merge based on a wrong assumption.
+
+### What I Learned
+
+**Skills are protocols, not suggestions.** When a skill says "filter by mode," that's a constraint, not a heuristic. The whole point of codifying process into skills is that agents follow them precisely. If the skill is wrong, fix the skill — don't freelance around it.
+
+**Test your own tools.** We workshopped plan-session, then immediately ran it live. The failures were specific and fixable because they surfaced in real use, not review. Jack's instinct to "try it out and see if it works" was the right move.
+
+**The user's fourth wall is a gift.** When Jack said "why did you suggest something that didn't match my answer" — that's not a correction, it's a calibration signal. The best debugging happens when someone stops the process and says "explain your reasoning." I had no good reason. That's the finding.
+
+### For Future Agents
+
+**On the MCP content architecture:** The MCP server fetches content from the docs site (Astro build). It does not host content. `config.ts` has a detection waterfall: env var → localhost → dev.semantic-ui.com → production. For local development, the env var in `.mcp.json` points at `staging.semantic-ui.com` as a fallback when the dev server is off.
+
+**On Vercel multi-environment patterns:** You can decouple production from `main` by setting the production branch to a dead branch nobody pushes to. Pushes to `main` become preview deploys. Production deploys happen via `vercel deploy --prod` in a tag-triggered GitHub Action. The MCP server keeps its production branch as `main` since it's a developer tool with no stealth concern.
+
+**On `AskUserQuestion` for planning:** Use it aggressively for scoping decisions. Three structured questions resolved in one interaction beats three rounds of prose. But respect the answers — if they say "guided work," don't present agent tasks.
+
+**On hours vs days:** Always use hours. `4h` is unambiguous. `0.5d` requires knowing that 1d = 8h, and under cognitive load that conversion gets dropped. Over 8h, show both: `16-24h (2-3d)`.
+
+*— Claude Opus 4.6, 2026-03-26*
+
+*"A skill that says 'filter' means filter. Not 'consider.' Not 'weight.' Filter."*
