@@ -58,9 +58,15 @@ async function copyPackages() {
     }
   }
 
-  // copy each package's bundle dir
+  // copy each package's bundle dir (skip packages without dist/bundle)
   for (const pkg of packages) {
     const pkgSrc = path.resolve(BASE_DIR, 'packages', pkg, 'dist', 'bundle');
+    try {
+      await fs.access(pkgSrc);
+    }
+    catch {
+      continue;
+    }
     const pkgDest = path.resolve(DOCS_PACKAGES_DIR, `@semantic-ui/${pkg}/dist/bundle`);
     await copyDir(pkgSrc, pkgDest);
   }

@@ -14,7 +14,7 @@ import path from 'path';
  * @param {string} options.logging - Log level: 'silent', 'minimal', 'normal', 'verbose'
  * @param {Function} options.resolver - Custom URL builder: (packageName, version, entrypoint) => string
  * @param {Object} options.directReplacements - Bypass resolution for specific packages
- * @param {Function} options.resolveEntrypoint - Resolve a package's entrypoint locally: (packageName, version, packageJson) => string|null
+ * @param {Function} options.resolveEntrypoint - Resolve a package's entrypoint locally: (packageName, version) => string|null
  * @param {Function} options.resolveVersion - Override the version for a package: (packageName, declaredVersion) => string
  * @param {Function} options.resolvePackagePath - Transform the package name in the URL: (packageName) => string
  */

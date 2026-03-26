@@ -79,17 +79,16 @@ const SUI_SCOPE = '@semantic-ui/';
 
 /* Resolve a package's CDN entrypoint from its local package.json */
 function resolveEntrypointFromPackageJson(packageName) {
-  // Walk up from cwd to find node_modules containing this package
-  const pkgPath = join(process.cwd(), 'node_modules', ...packageName.split('/'), 'package.json');
-  if (!existsSync(pkgPath)) {
-    // Try the monorepo root node_modules
-    const rootPkgPath = resolve(process.cwd(), '../../node_modules', ...packageName.split('/'), 'package.json');
-    if (!existsSync(rootPkgPath)) {
-      return null;
+  // Walk up from cwd looking for node_modules containing the package
+  let dir = process.cwd();
+  while (dir !== resolve(dir, '..')) {
+    const pkgPath = join(dir, 'node_modules', ...packageName.split('/'), 'package.json');
+    if (existsSync(pkgPath)) {
+      return readEntryFromPackageJson(pkgPath);
     }
-    return readEntryFromPackageJson(rootPkgPath);
+    dir = resolve(dir, '..');
   }
-  return readEntryFromPackageJson(pkgPath);
+  return null;
 }
 
 function readEntryFromPackageJson(pkgPath) {
@@ -125,11 +124,12 @@ export const CDN_CONFIG = {
   logging: 'silent',
   directReplacements: {},
 
-  // SUI packages use a clean {name}.min.js convention
+  // SUI packages use {name}.min.js convention (core → semantic-ui.min.js)
   // Third-party resolves from local package.json exports
   resolveEntrypoint(packageName) {
     if (packageName.startsWith(SUI_SCOPE)) {
       const name = packageName.slice(SUI_SCOPE.length);
+      if (name === 'core') { return 'semantic-ui.min.js'; }
       return `${name}.min.js`;
     }
     return resolveEntrypointFromPackageJson(packageName);

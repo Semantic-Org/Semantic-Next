@@ -205,51 +205,39 @@ async function uploadVendorPackages(s3) {
   }
 }
 
-// Generate and upload import maps
-async function uploadImportMaps(s3, version) {
-  console.log(`\nGenerating import maps @ ${version}`);
-
+function buildImportMap(version) {
   const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
   const imports = {};
-
   for (const name of SUI_PACKAGES) {
     imports[`${SUI_SCOPE}${name}`] = `${cdnRoot}/${name}@${version}/${getSuiEntrypoint(name)}`;
   }
-
-  const importmapJson = JSON.stringify({ imports }, null, 2);
-  const importmapJs = `(function(){var s=document.createElement('script');s.type='importmap';s.textContent=${
+  const json = JSON.stringify({ imports }, null, 2);
+  const js = `(function(){var s=document.createElement('script');s.type='importmap';s.textContent=${
     JSON.stringify(JSON.stringify({ imports }))
   };document.currentScript.after(s)})();`;
+  return { json, js };
+}
 
-  await uploadText(s3, `_meta/importmap@${version}.json`, importmapJson, 'application/json');
-  await uploadText(s3, `_meta/importmap@${version}.js`, importmapJs, 'application/javascript');
+async function uploadImportMaps(s3, version) {
+  console.log(`\nGenerating import maps @ ${version}`);
+  const { json, js } = buildImportMap(version);
+  await uploadText(s3, `_meta/importmap@${version}.json`, json, 'application/json');
+  await uploadText(s3, `_meta/importmap@${version}.js`, js, 'application/javascript');
   console.log(`  importmap@${version}.json + .js uploaded`);
 }
 
-// Update version pointers
 async function updateVersionPointer(s3, alias, version) {
   await uploadText(s3, `_versions/${alias}`, version);
   console.log(`  _versions/${alias} → ${version}`);
 
-  // Also update the import map alias
-  const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
-  const imports = {};
-  for (const name of SUI_PACKAGES) {
-    imports[`${SUI_SCOPE}${name}`] = `${cdnRoot}/${name}@${version}/${getSuiEntrypoint(name)}`;
-  }
+  const { json, js } = buildImportMap(version);
+  await uploadText(s3, `_meta/importmap@${alias}.json`, json, 'application/json');
+  await uploadText(s3, `_meta/importmap@${alias}.js`, js, 'application/javascript');
 
-  const importmapJson = JSON.stringify({ imports }, null, 2);
-  const importmapJs = `(function(){var s=document.createElement('script');s.type='importmap';s.textContent=${
-    JSON.stringify(JSON.stringify({ imports }))
-  };document.currentScript.after(s)})();`;
-
-  await uploadText(s3, `_meta/importmap@${alias}.json`, importmapJson, 'application/json');
-  await uploadText(s3, `_meta/importmap@${alias}.js`, importmapJs, 'application/javascript');
-
-  // importmap.js (no version) is always latest
+  // importmap.js (no version) always points to latest
   if (alias === 'latest') {
-    await uploadText(s3, `_meta/importmap.js`, importmapJs, 'application/javascript');
-    await uploadText(s3, `_meta/importmap.json`, importmapJson, 'application/json');
+    await uploadText(s3, `_meta/importmap.js`, js, 'application/javascript');
+    await uploadText(s3, `_meta/importmap.json`, json, 'application/json');
   }
 
   console.log(`  importmap@${alias} updated`);

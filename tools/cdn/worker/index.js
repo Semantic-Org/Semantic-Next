@@ -52,21 +52,21 @@ function getContentType(filepath) {
 //   /vendor/lit@3.3.2/directive.js          → third-party
 //   /semantic-ui@0.18.0.css                 → framework CSS
 //   /semantic-ui.css                        → CSS latest alias
-//   /importmap.js                           → import map loader
+//   /importmap.js                           → import map loader (latest)
 //   /importmap@0.18.0.js                    → versioned import map loader
 function parseRoute(pathname) {
-  // Import map loader
-  const importmapMatch = pathname.match(/^\/importmap(?:@([^.]+))?\.(js|json)$/);
+  // Import map loader — version can contain dots (semver)
+  const importmapMatch = pathname.match(/^\/importmap(?:@(.+))?\.(js|json)$/);
   if (importmapMatch) {
     return {
       type: 'importmap',
-      version: importmapMatch[1] || 'latest',
+      version: importmapMatch[1] || null,
       format: importmapMatch[2],
     };
   }
 
-  // Framework CSS
-  const cssMatch = pathname.match(/^\/semantic-ui(?:@([^.]+))?\.css$/);
+  // Framework CSS — version can contain dots (semver)
+  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+))?\.css$/);
   if (cssMatch) {
     return {
       type: 'css',
@@ -115,10 +115,11 @@ function parseRoute(pathname) {
   return { type: 'unknown' };
 }
 
-// Resolve version aliases to exact versions
+// Resolve version aliases to exact versions via 302.
+// Canary files are stored directly at the 'canary' path — no redirect needed.
 async function resolveVersion(env, version) {
-  if (version === 'latest' || version === 'canary') {
-    const pointer = await env.CDN_BUCKET.get(`_versions/${version}`);
+  if (version === 'latest') {
+    const pointer = await env.CDN_BUCKET.get('_versions/latest');
     if (pointer) {
       return await pointer.text();
     }
@@ -128,9 +129,11 @@ async function resolveVersion(env, version) {
 }
 
 function cacheHeaders(version) {
-  if (version === 'latest' || version === 'canary') {
-    // Aliases get short TTL — the 302 redirect itself is cached briefly
+  if (version === 'latest') {
     return { 'Cache-Control': 'public, max-age=300' };
+  }
+  if (version === 'canary') {
+    return { 'Cache-Control': 'public, max-age=60' };
   }
   return { 'Cache-Control': 'public, max-age=31536000, immutable' };
 }
@@ -163,8 +166,8 @@ export default {
       case 'sui': {
         const { name, version, filepath } = route;
 
-        // Redirect aliases to exact version
-        if (version === 'latest' || version === 'canary') {
+        // Redirect latest to exact version (canary serves directly)
+        if (version === 'latest') {
           const resolved = await resolveVersion(env, version);
           if (!resolved) {
             return new Response(`Version "${version}" not found`, { status: 404 });
@@ -190,7 +193,7 @@ export default {
           );
         }
 
-        // Map to R2 key: /core@0.18.0/semantic-ui.min.js → @semantic-ui/core/0.18.0/dist/cdn/semantic-ui.min.js
+        // Map to R2 key
         const r2Key = `@semantic-ui/${name}/${version}/dist/cdn/${filepath}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
@@ -207,7 +210,6 @@ export default {
       }
 
       case 'sui-alias': {
-        // /@semantic-ui/core@0.18.0/... → redirect to /core@0.18.0/...
         const { name, version, filepath } = route;
         const redirectPath = filepath
           ? `/${name}@${version}/${filepath}`
@@ -236,7 +238,7 @@ export default {
         const { version } = route;
 
         if (version === 'latest') {
-          const resolved = await resolveVersion(env, 'latest');
+          const resolved = await resolveVersion(env, version);
           if (!resolved) {
             return new Response('Latest version not found', { status: 404 });
           }
@@ -246,7 +248,8 @@ export default {
           );
         }
 
-        const r2Key = `@semantic-ui/core/${version}/dist/semantic-ui.css`;
+        // Serve minified CSS by default
+        const r2Key = `@semantic-ui/core/${version}/dist/semantic-ui.min.css`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
           return new Response(`Not found: ${r2Key}`, { status: 404 });
@@ -263,18 +266,22 @@ export default {
 
       case 'importmap': {
         const { version, format } = route;
-        const r2Key = `_meta/importmap@${version}.${format}`;
+        // Unversioned (importmap.js) serves the latest file directly
+        const r2Key = version
+          ? `_meta/importmap@${version}.${format}`
+          : `_meta/importmap.${format}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
-          return new Response(`Import map not found: ${version}`, { status: 404 });
+          return new Response(`Import map not found`, { status: 404 });
         }
 
         const contentType = format === 'js' ? 'application/javascript' : 'application/json';
+        const cache = version ? cacheHeaders(version) : { 'Cache-Control': 'public, max-age=300' };
         return new Response(object.body, {
           headers: {
             'Content-Type': contentType,
             ...corsHeaders(),
-            ...cacheHeaders(version),
+            ...cache,
           },
         });
       }
