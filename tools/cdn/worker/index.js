@@ -178,23 +178,9 @@ export default {
           return Response.redirect(new URL(redirectPath, url.origin).href, 302);
         }
 
-        // No filepath → package info stub
-        if (!filepath) {
-          const entrypoint = getSuiEntrypoint(name);
-          return new Response(
-            `${name}@${version} — entry: ${entrypoint}\n`,
-            {
-              headers: {
-                'Content-Type': 'text/plain',
-                ...corsHeaders(),
-                ...cacheHeaders(version),
-              },
-            },
-          );
-        }
-
-        // Map to R2 key
-        const r2Key = `@semantic-ui/${name}/${version}/dist/cdn/${filepath}`;
+        // No filepath → serve the entry point JS directly
+        const resolvedFilepath = filepath || getSuiEntrypoint(name);
+        const r2Key = `@semantic-ui/${name}/${version}/dist/cdn/${resolvedFilepath}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
           return new Response(`Not found: ${r2Key}`, { status: 404 });
@@ -202,7 +188,7 @@ export default {
 
         return new Response(object.body, {
           headers: {
-            'Content-Type': getContentType(filepath),
+            'Content-Type': getContentType(resolvedFilepath),
             ...corsHeaders(),
             ...cacheHeaders(version),
           },

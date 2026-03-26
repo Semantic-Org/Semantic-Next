@@ -38,7 +38,8 @@ export function resolveBareImports(options = {}) {
     const packagePath = resolvePackagePath
       ? resolvePackagePath(packageName)
       : packageName;
-    return `${cdnRoot}/${packagePath}@${cleanVersion}/${cleanEntrypoint}`;
+    const base = `${cdnRoot}/${packagePath}@${cleanVersion}`;
+    return cleanEntrypoint ? `${base}/${cleanEntrypoint}` : base;
   };
 
   const resolveUrl = resolver || defaultResolver;
@@ -134,7 +135,7 @@ export function resolveBareImports(options = {}) {
     if (resolveEntrypoint) {
       try {
         const localResult = await resolveEntrypoint(packageName, cleanVersion);
-        if (localResult) {
+        if (localResult != null) {
           log.verbose(`Local entrypoint for ${packageName}@${cleanVersion}: ${localResult}`);
           await saveEntrypointToCache(packageName, version, localResult);
           return localResult;
@@ -259,7 +260,7 @@ export function resolveBareImports(options = {}) {
 
         // Main entrypoint
         const entrypoints = await entrypointsPromise;
-        const entrypoint = entrypoints[packageName] || 'dist/index.min.js';
+        const entrypoint = entrypoints[packageName] ?? 'dist/index.min.js';
         const resolvedUrl = resolveUrl(packageName, version, entrypoint);
         log.verbose(`Resolved: ${packageName} -> ${resolvedUrl}`);
 

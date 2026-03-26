@@ -124,13 +124,11 @@ export const CDN_CONFIG = {
   logging: 'silent',
   directReplacements: {},
 
-  // SUI packages use {name}.min.js convention (core → semantic-ui.min.js)
+  // SUI packages use bare URL — Worker serves the entry point
   // Third-party resolves from local package.json exports
   resolveEntrypoint(packageName) {
     if (packageName.startsWith(SUI_SCOPE)) {
-      const name = packageName.slice(SUI_SCOPE.length);
-      if (name === 'core') { return 'semantic-ui.min.js'; }
-      return `${name}.min.js`;
+      return '';
     }
     return resolveEntrypointFromPackageJson(packageName);
   },

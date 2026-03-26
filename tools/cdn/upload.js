@@ -209,7 +209,7 @@ function buildImportMap(version) {
   const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
   const imports = {};
   for (const name of SUI_PACKAGES) {
-    imports[`${SUI_SCOPE}${name}`] = `${cdnRoot}/${name}@${version}/${getSuiEntrypoint(name)}`;
+    imports[`${SUI_SCOPE}${name}`] = `${cdnRoot}/${name}@${version}`;
   }
   const json = JSON.stringify({ imports }, null, 2);
   const js = `(function(){var s=document.createElement('script');s.type='importmap';s.textContent=${
