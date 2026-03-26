@@ -77,6 +77,22 @@ export const CSS_BUILD_CONFIG = {
 
 const SUI_SCOPE = '@semantic-ui/';
 
+/* Read the installed version of a package from node_modules */
+function getInstalledVersion(packageName) {
+  let dir = process.cwd();
+  while (dir !== resolve(dir, '..')) {
+    const pkgPath = join(dir, 'node_modules', ...packageName.split('/'), 'package.json');
+    if (existsSync(pkgPath)) {
+      try {
+        return JSON.parse(readFileSync(pkgPath, 'utf-8')).version;
+      }
+      catch { /* fall through */ }
+    }
+    dir = resolve(dir, '..');
+  }
+  return null;
+}
+
 /* Resolve a package's CDN entrypoint from its local package.json */
 function resolveEntrypointFromPackageJson(packageName) {
   // Walk up from cwd looking for node_modules containing the package
@@ -133,12 +149,16 @@ export const CDN_CONFIG = {
     return resolveEntrypointFromPackageJson(packageName);
   },
 
-  // Canary builds rewrite SUI versions to 'canary'
+  // SUI packages: use canary or declared version
+  // Vendor packages: resolve from node_modules (declared version is a range)
   resolveVersion(packageName, declaredVersion) {
-    if (process.env.CDN_CHANNEL === 'canary' && packageName.startsWith(SUI_SCOPE)) {
-      return 'canary';
+    if (packageName.startsWith(SUI_SCOPE)) {
+      if (process.env.CDN_CHANNEL === 'canary') {
+        return 'canary';
+      }
+      return declaredVersion;
     }
-    return declaredVersion;
+    return getInstalledVersion(packageName) || declaredVersion;
   },
 
   // SUI packages drop the scope, third-party gets /vendor/ prefix

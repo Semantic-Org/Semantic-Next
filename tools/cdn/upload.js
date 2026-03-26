@@ -40,6 +40,7 @@ const VENDOR_PACKAGES = [
   '@lit-labs/ssr-dom-shim',
   'tailwindcss-iso',
   'tailwindcss',
+  '@pagefind/modular-ui',
 ];
 
 const CONTENT_TYPES = {
