@@ -101,7 +101,7 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 2-3d | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 1-2d | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [CDN Site](cdn-site.md) | 3-5d | pair | Vercel deploy at `tools/cdn` for `cdn.semantic-ui.com`. Replaces jsdelivr. Partial scaffolding in `scripts/cdn/`. |
-| 12 | [Vercel Deploy Pipeline](vercel-deploy-pipeline.md) | 0.5d | agent | Decouple prod deploys from `main`. Tag-triggered releases for docs + MCP. Retire `next` branch. |
+
 
 ## Blocked (waiting on token finalization)
 
@@ -207,3 +207,5 @@ Plans in `ai/plans/deferred/`.
 ## Archive
 
 Completed or rejected plans in `ai/plans/archive/`.
+
+- **Vercel Deploy Pipeline** (0.5d est → 2.25h actual) — Decoupled prod from `main`, tag-triggered releases, staging environment, `next` branch retired.
