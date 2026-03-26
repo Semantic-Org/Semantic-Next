@@ -190,6 +190,7 @@
     "mcp": "wireit",
     "deploy:mcp": "wireit",
     "build:docs": "wireit",
+    "build:docs-packages": "wireit",
     "build:packages": "wireit",
     "watch": "wireit",
     "watch:icons": "wireit",
@@ -246,6 +247,13 @@
     },
     "build:docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
+      "dependencies": [
+        "build",
+        "build:docs-packages"
+      ]
+    },
+    "build:docs-packages": {
+      "command": "node ./internal-packages/scripts/src/copy-docs-packages.js",
       "dependencies": [
         "build"
       ]

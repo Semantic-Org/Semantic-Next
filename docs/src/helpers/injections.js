@@ -46,15 +46,17 @@ export const componentCSSBefore = ``;
 export const componentCSSAfter = ``;
 
 export const isStaticBuild = isServer && Boolean(process.env.VERCEL_URL);
+export const isProductionBuild = isServer && process.env.VERCEL_ENV === 'production';
 
-// we can use the node_modules path for imports when running in server mode
-// this will let you check examples/playground against local versions of packages
-// instead of tagged npm versions
-export const packageBase = isStaticBuild
+// Production uses a CDN for edge caching, all other environments
+// serve packages from the build artifacts for branch parity
+export const packageBase = isProductionBuild
   ? 'https://cdn.jsdelivr.net/npm'
+  : isStaticBuild
+  ? `${import.meta.env.SITE}/packages`
   : `${import.meta.env.SITE}/node_modules`;
 
-const suiBase = isStaticBuild
+const suiBase = isProductionBuild
   ? `${packageBase}/@semantic-ui/core@${PACKAGE_VERSION}`
   : `${packageBase}/@semantic-ui/core`;
 

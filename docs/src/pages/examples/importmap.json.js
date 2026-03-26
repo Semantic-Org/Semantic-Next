@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { isStaticBuild, packageBase } from '@helpers/injections.js';
+import { isProductionBuild, isStaticBuild, packageBase } from '@helpers/injections.js';
 
 export const npmPackages = [
   '@semantic-ui/core',
@@ -30,10 +30,20 @@ export const localPackages = [
   '@semantic-ui/core/packages/tailwind',
 ];
 
-// note NPM packages is no longer used for static builds
-// and instead is short circuited with CDNized links
-// this is because of how Vite handles dep injection in static builds
-const importPackages = (isStaticBuild)
+// bundle entry filenames for self-hosted packages
+const bundleNames = {
+  '@semantic-ui/core': 'semantic-ui',
+  '@semantic-ui/component': 'component',
+  '@semantic-ui/reactivity': 'reactivity',
+  '@semantic-ui/templating': 'templating',
+  '@semantic-ui/renderer': 'renderer',
+  '@semantic-ui/query': 'query',
+  '@semantic-ui/specs': 'specs',
+  '@semantic-ui/tailwind': 'tailwind',
+  '@semantic-ui/utils': 'utils',
+};
+
+const importPackages = isStaticBuild
   ? npmPackages
   : localPackages;
 
@@ -41,16 +51,20 @@ const packageImports = { imports: {} };
 
 for (const pkg of importPackages) {
   try {
-    // use jsdelivr
-    if (isStaticBuild) {
-      let url = `${packageBase}/${pkg}@${PACKAGE_VERSION}/`;
-      if (packageBase.includes('jsdelivr')) {
-        url += '+esm';
-      }
-      packageImports.imports[pkg] = url;
+    // production CDN
+    if (isProductionBuild) {
+      packageImports.imports[pkg] = `${packageBase}/${pkg}@${PACKAGE_VERSION}/+esm`;
       continue;
     }
 
+    // self-hosted from build artifacts
+    if (isStaticBuild) {
+      const name = bundleNames[pkg];
+      packageImports.imports[pkg] = `${packageBase}/${pkg}/dist/bundle/${name}.js`;
+      continue;
+    }
+
+    // local dev — resolve from node_modules via Vite
     const pkgPath = path.resolve(
       process.cwd(),
       'node_modules',
@@ -85,8 +99,8 @@ for (const pkg of importPackages) {
   }
 }
 
-// hardcode this to use dist bundle
-if (isStaticBuild) {
+// production CDN: tailwind needs the bundle (has external deps)
+if (isProductionBuild) {
   packageImports.imports['@semantic-ui/tailwind'] =
     'https://cdn.jsdelivr.net/npm/@semantic-ui/tailwind/dist/bundle/tailwind.js';
 }
