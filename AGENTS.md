@@ -6,10 +6,13 @@
 
 <codebase_orientation>
   This is a monorepo with two layers:
-  - packages/  — Core framework source (component, reactivity, templating, query, renderer, utils, specs, tailwind)
+  - packages/  — Core framework source (compiler, component, reactivity, templating, query, renderer, utils, specs, tailwind)
   - src/{primitives,components,behaviors} — First-party UI components built WITH the framework (the design system)
   - src/css/tokens - Underlying css tokens used for theming
   - docs/ — Astro documentation site
+  - tools/cdn — CDN deployment tooling (Cloudflare Worker + R2 upload)
+
+  **Adding a new package:** When a new package is added to `packages/`, update `build:packages` in the root `package.json` (wireit deps) and the `SUI_PACKAGES` set in `tools/cdn/worker/index.js`. Other scripts discover packages dynamically from `packages/*/`.
 
   Documentation content, examples, API reference, and AI context are all available via
   Semantic UI MCP tools — use those rather than reading files directly from docs/ or ai/.
@@ -138,4 +141,7 @@
   - **Determining URL** - You will need to determine the URL path using inference from the location in docs and astros url pipeline.
   ❌ https://localhost/deep/path
   ✅ https://dev.semantic-ui.com/deep/path
+  Git
+  ---
+  - **Destructive operations are denied** — `git restore`, `git reset`, `git checkout --` are blocked by permission settings. Use `git unstage <file>` to unstage files (alias for `git reset HEAD`). For other operations, ask the user to run them via `!` prefix.
 </tool_gotchas>
