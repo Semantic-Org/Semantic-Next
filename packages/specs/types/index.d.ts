@@ -169,7 +169,7 @@ export interface ComponentSpec {
   description?: string;
   /** Custom element tag name (e.g. "ui-button") */
   tagName: string;
-  /** JavaScript export name (e.g. "UIButton") */
+  /** JavaScript export name (e.g. "Button") */
   exportName?: string;
 
   /** Example configuration */
