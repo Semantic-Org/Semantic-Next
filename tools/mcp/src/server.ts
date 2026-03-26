@@ -6,6 +6,21 @@ import { TemplateCompiler } from '@semantic-ui/templating';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
 
+// LLMs sometimes stringify array parameters as JSON strings instead of passing
+// actual arrays. Detect this and parse gracefully so batch calls still work.
+function coerceArray(value: string | string[]): { value: string | string[]; wasCoerced: boolean; } {
+  if (typeof value === 'string' && value.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed) && parsed.every(v => typeof v === 'string')) {
+        return { value: parsed, wasCoerced: true };
+      }
+    }
+    catch { /* not valid JSON, use as-is */ }
+  }
+  return { value, wasCoerced: false };
+}
+
 import {
   ensureCache,
   extractMarkdownSection,
@@ -212,10 +227,17 @@ Optional params:
       query: z.union([z.string(), z.array(z.string())])
         .describe('Component name/tag or array of names (e.g., "button" or ["button", "card"])'),
     },
-    async ({ query }) => {
+    async ({ query: rawQuery }) => {
       await ensureCache();
+      const { value: query, wasCoerced } = coerceArray(rawQuery);
       const isBatch = Array.isArray(query);
       const queries = isBatch ? query : [query];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_component received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(queries.map(async (q) => {
         const result = await getComponentWithChildren(q);
@@ -563,10 +585,17 @@ Optional params:
       id: z.union([z.string(), z.array(z.string())])
         .describe('Example ID or array of IDs (e.g., "counter" or ["counter", "dropdown"])'),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_example received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(fetchSingleExample));
 
@@ -759,10 +788,17 @@ Optional params:
           'Workflow ID or array of IDs (e.g., "add-util-function" or "workflows/framework/add-util-function")',
         ),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_workflow received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(async (docId) => {
         const workflow = findWorkflow(docId);
@@ -861,10 +897,17 @@ Optional params:
           'Document path or array of paths (e.g., "framework/reactivity" or ["framework/reactivity", "ui/markup"])',
         ),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_context received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(async (docId) => {
         const doc = findContext(docId);
@@ -984,10 +1027,17 @@ Optional params:
           'Document path or array of paths (e.g., "guides/reactivity/signals" or ["api/utils/arrays", "api/utils/objects"])',
         ),
     },
-    async ({ path }) => {
+    async ({ path: rawPath }) => {
       await ensureCache();
+      const { value: path, wasCoerced } = coerceArray(rawPath);
       const isBatch = Array.isArray(path);
       const paths = isBatch ? path : [path];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_user_doc received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(paths.map(async (docPath) => {
         const doc = findDoc(docPath);
