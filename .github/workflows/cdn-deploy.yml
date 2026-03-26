@@ -46,8 +46,10 @@ jobs:
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: cd tools/cdn && node upload.js --version ${{ steps.version.outputs.version }} --latest
 
-      - name: Deploy Worker
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.R2_TOKEN_VALUE }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: cd tools/cdn && npx wrangler deploy
+      # Worker deploy disabled — token needs Workers Scripts permission.
+      # Deploy manually: cd tools/cdn && npx wrangler deploy
+      # - name: Deploy Worker
+      #   env:
+      #     CLOUDFLARE_API_TOKEN: ${{ secrets.R2_TOKEN_VALUE }}
+      #     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      #   run: cd tools/cdn && npx wrangler deploy
