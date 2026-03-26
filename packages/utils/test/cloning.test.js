@@ -1,6 +1,4 @@
-import {
-  clone,
-} from '@semantic-ui/utils';
+import { clone } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -97,9 +95,9 @@ describe('clone', () => {
     }
 
     const instance = new CustomClass(42);
-    const obj = { 
+    const obj = {
       regular: { a: 1 },
-      custom: instance 
+      custom: instance,
     };
 
     // Default behavior - should flatten custom classes to plain objects
@@ -128,9 +126,9 @@ describe('clone', () => {
     }
 
     const instance = new CustomClass(42);
-    const obj = { 
+    const obj = {
       regular: { a: 1 },
-      custom: instance 
+      custom: instance,
     };
 
     // With preserveNonCloneable: true - should preserve custom class instances
@@ -138,7 +136,7 @@ describe('clone', () => {
     expect(clonedPreserved.custom).toBe(instance); // Same reference
     expect(clonedPreserved.custom instanceof CustomClass).toBe(true);
     expect(clonedPreserved.custom.getValue()).toBe(42);
-    
+
     // Regular objects should still be cloned
     expect(clonedPreserved.regular).not.toBe(obj.regular);
     expect(clonedPreserved.regular).toEqual({ a: 1 });

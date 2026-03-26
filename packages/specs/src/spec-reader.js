@@ -1,19 +1,14 @@
 import {
-  capitalize,
-  clone,
   each,
   filterObject,
   flatten,
   get,
-  isEmpty,
   inArray,
-  isArray,
+  isEmpty,
   isString,
   mapObject,
   noop,
   reverseKeys,
-  tokenize,
-  toTitleCase,
   unique,
   values,
 } from '@semantic-ui/utils';
@@ -57,384 +52,6 @@ export class SpecReader {
       ? spec.pluralTagName
       : spec.tagName;
     return name;
-  }
-
-  /*
-    Returns a definition for a component including code samples for documentation
-    as a structured object literal
-  */
-  getDefinition({
-    plural = this.plural,
-    minUsageLevel,
-    dialect = this.dialect,
-  } = {}) {
-    let definition = {
-      content: [],
-      types: [],
-      states: [],
-      variations: [],
-      settings: [],
-    };
-
-    // user can specify only portions of definition appears of a certain usage level
-    const isMinimumUsageLevel = (part) => {
-      if (!minUsageLevel) {
-        return true;
-      }
-      return (usageLevel > (part.usageLevel || 1));
-    };
-    const spec = this.spec;
-
-    // standard example
-    const defaultContent = (plural) ? spec?.examples?.defaultPluralContent : spec?.examples?.defaultContent;
-    const defaultModifiers = values(spec?.examples?.defaultAttributes || {}).join(' ');
-    definition.types.push({
-      title: spec.name,
-      description: '',
-      examples: [
-        {
-          showCode: false,
-          code: this.getCodeFromModifiers(defaultModifiers, { html: defaultContent }),
-          components: [this.getComponentParts(defaultModifiers, { html: defaultContent })],
-        },
-      ],
-    });
-
-    // returns specs in the same sequence 'types', 'content', 'states', 'variations'
-    const parts = this.getOrderedParts();
-    each(parts, (partName) => {
-      each(spec[partName], part => {
-        if (!isMinimumUsageLevel(part)) {
-          return;
-        }
-        const examples = this.getCodeExamples(part, {
-          defaultAttributes: spec?.examples?.defaultAttributes,
-          defaultContent: defaultContent,
-        });
-        definition[partName].push(examples);
-      });
-    });
-
-    return definition;
-  }
-
-  /*
-    Returns the sequencing for a spec when displaying in a structured way
-  */
-  getOrderedParts() {
-    return ['types', 'content', 'states', 'variations', 'settings'];
-  }
-
-  /*
-    Returns an array of examples in the order specified in get ordered parts
-  */
-  getOrderedExamples({ plural = false, minUsageLevel, dialect = this.dialect } = {}) {
-    const definition = this.getDefinition({ plural, minUsageLevel, dialect });
-    return this.getOrderedParts().map((partName) => ({
-      title: toTitleCase(partName),
-      examples: definition[partName],
-    }));
-  }
-
-  /*
-    Gets the definition menu for a component for use with an inpage menu
-  */
-  getDefinitionMenu({ IDSuffix = '-example', plural = false, minUsageLevel } = {}) {
-    const orderedDefinition = this.getOrderedExamples({ plural, minUsageLevel });
-    let menu = orderedDefinition.map(part => ({
-      title: part.title,
-      items: part.examples.map((example) => ({
-        id: tokenize(`${example.title}${IDSuffix}`),
-        title: example.title,
-      })),
-    }));
-    return menu;
-  }
-
-  /*
-    Returns only top level for component with all inner content as 'html'
-    <ui-button icon="delete"><div>Hello</div></ui-button>
-    returns {
-      componentName: 'ui-button',
-      attributes: { icon: 'delete' }
-      attributeString 'icon="delete"'
-      html: '<div>Hello</div>'
-    }
-  */
-  getComponentPartsFromHTML(html, { dialect } = {}) {
-    // Remove leading and trailing whitespace from the HTML string
-    html = html.trim();
-
-    // Find the index of the first space or closing angle bracket
-    const spaceIndex = html.indexOf(' ');
-    const closingTagIndex = html.indexOf('>');
-
-    // Extract the component name
-    const componentName = html.slice(1, spaceIndex !== -1 ? spaceIndex : closingTagIndex);
-    // complex examples arent supported
-    if (componentName == 'div') {
-      return {
-        html: html,
-      };
-    }
-
-    // Extract the attribute string
-    const attributeString = spaceIndex !== -1
-      ? html.slice(spaceIndex, closingTagIndex).trim()
-      : '';
-
-    // Parse the attribute string into an object
-    const attributes = {};
-    if (attributeString) {
-      const attributePairs = attributeString.split(' ');
-      for (const pair of attributePairs) {
-        const [key, value] = pair.split('=');
-        if (value) {
-          attributes[key] = value.replace(/"/g, '');
-        }
-        else {
-          attributes[key] = true;
-        }
-      }
-    }
-    const dialectAttributeString = this.getAttributeStringFromModifiers(html, { attributes, dialect });
-
-    // Extract the inner HTML
-    const innerHTML = html.slice(closingTagIndex + 1, html.lastIndexOf('<')).trim();
-
-    return {
-      componentName: componentName,
-      attributes: attributes,
-      attributeString: dialectAttributeString,
-      html: innerHTML,
-    };
-  }
-
-  getCodeExamples(part, { defaultAttributes, defaultContent } = {}) {
-    let examples = [];
-    let attribute = this.getAttributeName(part);
-
-    // avoid duplicating the attribute present in this example
-    if (defaultAttributes) {
-      const attributes = clone(defaultAttributes);
-      delete attributes[attribute];
-      defaultAttributes = values(attributes).join(' ');
-    }
-    /*
-      Create an example for each option present
-      in the options array, i.e. colors => "red", "blue"
-    */
-    if (part.options) {
-      let examplesToJoin = [];
-      each(part.options, (option, index) => {
-        let code, componentParts;
-        if (option.exampleCode) {
-          // an example was provided in the spec for us
-          code = option.exampleCode;
-          componentParts = this.getComponentPartsFromHTML(code);
-        }
-        else {
-          // construct an example programatically
-          // using the option values
-          let modifiers;
-          if (isString(option.value)) {
-            modifiers = option.value;
-          }
-          else if (isString(option)) {
-            modifiers = option;
-          }
-          if (isArray(option.value)) {
-            modifiers = option.value.filter(val => isString(val))[0];
-          }
-          if (defaultAttributes) {
-            modifiers = `${modifiers} ${defaultAttributes}`;
-          }
-          code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
-          componentParts = this.getComponentParts(modifiers, { html: defaultContent });
-        }
-        const example = {
-          code,
-          components: [componentParts],
-        };
-        if (part.separateExamples) {
-          examples.push(example);
-        }
-        else {
-          examplesToJoin.push(example);
-        }
-      });
-      // unless the spec specifically asks for separate examples, join them into one example
-      if (!part.separateExamples) {
-        examples.push({
-          code: examplesToJoin.map(ex => ex.code).join('\n'),
-          components: flatten([...examplesToJoin.map(ex => ex.components)]),
-        });
-      }
-    }
-    else {
-      let code, componentParts;
-      let modifiers = this.getAttributeName(part);
-      if (defaultAttributes) {
-        modifiers = `${modifiers} ${defaultAttributes}`;
-      }
-      if (part.exampleCode) {
-        code = part.exampleCode;
-        componentParts = this.getComponentPartsFromHTML(code);
-      }
-      else {
-        code = this.getCodeFromModifiers(modifiers, { html: defaultContent });
-        componentParts = this.getComponentParts(modifiers, { html: defaultContent });
-      }
-      const example = {
-        code,
-        components: [componentParts],
-      };
-      examples.push(example);
-    }
-
-    return {
-      title: part.name,
-      description: part.description,
-      examples: examples,
-    };
-  }
-
-  getComponentParts(modifiers, {
-    lang = 'html',
-    plural = this.plural,
-    text,
-    html,
-    dialect = this.dialect,
-  } = {}) {
-    let componentName = (lang == 'html')
-      ? this.getTagName({ plural })
-      : this.getComponentName({ plural, lang });
-    // use the modifier as text or component name i.e. 'primary', 'emphasis' etc
-    if (text === undefined && html === undefined) {
-      const baseText = modifiers || String(componentName).replace(/^ui-/, '');
-      text = String(baseText).replace(/\-/mg, ' ');
-      html = toTitleCase(text);
-    }
-    const attributes = this.getAttributesFromModifiers(modifiers);
-    const componentParts = {
-      componentName: componentName,
-      attributes: attributes,
-      attributeString: this.getAttributeStringFromModifiers(modifiers, { attributes, dialect }),
-      html: html,
-    };
-    return componentParts;
-  }
-
-  /* Returns the html for a component with a given set of modifiers */
-  getCodeFromModifiers(modifiers, settings) {
-    const { componentName, attributeString, html } = this.getComponentParts(modifiers, settings);
-    return `<${componentName}${attributeString}>${html}</${componentName}>`;
-  }
-
-  /* Returns an object of attributes and their values from a list of modifiers */
-  getAttributesFromModifiers(modifiers = '') {
-    const componentSpec = this.getWebComponentSpec();
-    const attributes = {};
-    const modifierArray = String(modifiers).split(' ');
-    each(modifierArray, (modifier) => {
-      const parentAttribute = componentSpec.optionAttributes?.[modifier];
-      if (parentAttribute) {
-        attributes[parentAttribute] = modifier;
-      }
-      else {
-        attributes[modifier] = true;
-      }
-    });
-    return attributes;
-  }
-
-  /* Returns an attribute string for an attribute */
-  getSingleAttributeString(attribute, value, {
-    joinWith = '=',
-    quoteCharacter = ':',
-  } = {}) {
-    return (value == true || value == attribute)
-      ? `${attribute}`
-      : `${attribute}${joinWith}${quoteCharacter}${value}${quoteCharacter}`;
-  }
-
-  /*
-    Returns an attribute string from a given set of attributes
-    passed in as an object literal like { emphasis: 'primary '}
-  */
-  getAttributeString(attributes, {
-    dialect = this.dialect,
-    joinWith = '=',
-    quoteCharacter = `'`,
-  } = {}) {
-    let attributeString;
-    let modifiers = [];
-    let categoryAttributes = clone(attributes);
-    let componentSpec = this.getWebComponentSpec();
-    each(attributes, (value, key) => {
-      const parentAttribute = componentSpec.optionAttributes[value];
-      if (parentAttribute) {
-        modifiers.push(value);
-      }
-      else {
-        categoryAttributes[key] = value;
-      }
-    });
-    if (modifiers.length) {
-      const modifierString = modifierAttributes.join(' ');
-      if (dialect == SpecReader.DIALECT_TYPES.standard) {
-        // <ui-button large red>
-        attributeString += ` ${modifierString}`;
-      }
-      else if (dialect == SpecReader.DIALECT_TYPES.classic) {
-        // <ui-button class="large red">
-        return ` class="${modifierString}"`;
-      }
-    }
-    else if (dialect == SpecReader.DIALECT_TYPES.verbose || keys(categoryAttributes)) {
-      let attributeString = ' ';
-      each(attributes, (value, attribute) => {
-        const singleAttr = this.getSingleAttributeString(attribute, value, { joinWith, quoteCharacter });
-        attributeString += ` ${singleAttr}`;
-      });
-    }
-    return attributeString;
-  }
-
-  /* Returns a stringified version of attributes for a given set of modifiers
-     based off the dialect specified
-  */
-  getAttributeStringFromModifiers(modifiers, {
-    dialect = this.dialect,
-    attributes,
-    joinWith = '=',
-    quoteCharacter = `"`,
-  } = {}) {
-    if (!modifiers) {
-      return '';
-    }
-    if (dialect == SpecReader.DIALECT_TYPES.standard) {
-      // <ui-button large red>
-      return ` ${modifiers}`;
-    }
-    else if (dialect == SpecReader.DIALECT_TYPES.classic) {
-      // <ui-button class="large red">
-      return ` class="${modifiers}"`;
-    }
-    else if (dialect == SpecReader.DIALECT_TYPES.verbose) {
-      if (!attributes) {
-        attributes = this.getAttributesFromModifiers(modifiers);
-      }
-      let attributeString = ' ';
-      each(attributes, (value, attribute) => {
-        const singleAttr = this.getSingleAttributeString(attribute, value, {
-          joinWith,
-          quoteCharacter,
-        });
-        attributeString += ` ${singleAttr}`;
-      });
-      return ` ${attributeString.trim()}`;
-    }
   }
 
   /* This is a format that is consumed by defineComponent to determine valid attributes
@@ -512,7 +129,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType({spec, section, allowedValues});
+        const propertyType = this.getPropertyType({ spec, section, allowedValues });
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -550,7 +167,6 @@ export class SpecReader {
           componentSpec.attributeClasses.push(propertyName);
         }
       });
-
     };
 
     // Only process necessary parts of the spec
@@ -576,11 +192,8 @@ export class SpecReader {
       each(pluralOnlyParts, addSettingsFromPart);
     }
 
-    // avoid having to reverse array at runtime
-    let options = mapObject(componentSpec.allowedValues, (values, key) => {
-      return values = values.filter(value => isString(value));
-    });
-    componentSpec.optionAttributes = reverseKeys(options);
+    // build optionAttributes: reverse lookup from value → attribute name
+    this.buildOptionAttributes({ componentSpec, spec });
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
@@ -643,7 +256,7 @@ export class SpecReader {
         }
 
         // find native type of this property i.e. String
-        const propertyType = this.getPropertyType({spec, section, allowedValues});
+        const propertyType = this.getPropertyType({ spec, section, allowedValues });
         if (propertyType) {
           componentSpec.propertyTypes[propertyName] = propertyType;
         }
@@ -692,11 +305,8 @@ export class SpecReader {
     addSettingsFromPart('settings');
     addSettingsFromPart('events');
 
-    // avoid having to reverse array at runtime
-    let options = mapObject(componentSpec.allowedValues, (values, key) => {
-      return values = values.filter(value => isString(value));
-    });
-    componentSpec.optionAttributes = reverseKeys(options);
+    // build optionAttributes with collision detection
+    this.buildOptionAttributes({ componentSpec });
 
     // store some details for plurality if present
     componentSpec.inheritedPluralVariations = spec.pluralSharedVariations || [];
@@ -722,7 +332,7 @@ export class SpecReader {
     }
   }
 
-  getPropertyType({spec, section, allowedValues = [], withPrototype = false} = {}) {
+  getPropertyType({ spec, section, allowedValues = [], withPrototype = false } = {}) {
     let types = {
       string: 'string',
       boolean: 'boolean',
@@ -733,7 +343,7 @@ export class SpecReader {
     /*
       If we want to allow component spec to be JSON we cant store prototypes
     */
-    if(withPrototype) {
+    if (withPrototype) {
       types = {
         string: String,
         number: Number,
@@ -766,7 +376,10 @@ export class SpecReader {
     }
     else if (allowedValues.length) {
       // if they specify allowed values we can infer type from a sample
-      stringType = typeof allowedValues[0];
+      const valueTypes = unique(allowedValues.map(value => typeof value));
+      stringType = (valueTypes.length > 1)
+        ? types.string
+        : valueTypes[0];
     }
     if (stringType) {
       type = get(types, stringType);
@@ -809,5 +422,97 @@ export class SpecReader {
       return false;
     }
     return true;
+  }
+
+  /*
+    Builds the optionAttributes lookup from allowedValues.
+    Handles three cases:
+    - Bare values: unique values get direct lookup (e.g. "primary" → "emphasis")
+    - Auto-detected collisions: values appearing in multiple attributes get compound forms
+      (e.g. "subtle" in styled + positive → "subtle-styled", "subtle-positive")
+    - Manual compoundAliases: parts opt-in to compound forms for readability
+      (e.g. animated → "vertical-animated", "fade-animated")
+  */
+  buildOptionAttributes({ componentSpec, spec }) {
+    // step 1: base lookup via reverseKeys
+    let options = mapObject(componentSpec.allowedValues, (values, key) => {
+      return values = values.filter(value => isString(value));
+    });
+    componentSpec.optionAttributes = reverseKeys(options);
+
+    // step 2: detect which specific values collide across attributes
+    // skip identity values (value === attr) as they are boolean-style attributes
+    // track first attribute to register each value — it "owns" the bare form
+    const valueCounts = {};
+    const firstOwner = {};
+    each(componentSpec.allowedValues, (allowedValues, attr) => {
+      each(allowedValues, (value) => {
+        if (isString(value) && value !== attr) {
+          if (!valueCounts[value]) {
+            valueCounts[value] = [];
+            firstOwner[value] = attr;
+          }
+          valueCounts[value].push(attr);
+        }
+      });
+    });
+    const collidingValues = new Set();
+    const collidingAttributes = new Set();
+    each(valueCounts, (attrs, value) => {
+      if (attrs.length > 1) {
+        collidingValues.add(value);
+        each(attrs, (attr) => collidingAttributes.add(attr));
+      }
+    });
+
+    // step 3: generate compound entries
+    // when any value in an attribute collides, ALL sibling values get compound forms
+    // e.g. "left" and "right" collide between floated/attached
+    // → attached also generates "top-attached", "bottom-attached" for consistency
+    // colliding values lose their bare entry, non-colliding siblings keep theirs
+    each(componentSpec.allowedValues, (allowedValues, attr) => {
+      if (!collidingAttributes.has(attr)) {
+        return;
+      }
+      each(allowedValues, (value) => {
+        if (!isString(value) || value === attr) {
+          return;
+        }
+        // generate compound form for all values in a colliding attribute
+        componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+        // only remove bare entry for actually colliding values
+        if (collidingValues.has(value) && attr !== firstOwner[value]) {
+          delete componentSpec.optionAttributes[value];
+        }
+      });
+    });
+
+    // step 4: add compound aliases for parts that manually opt-in (e.g. animated)
+    // compounds all non-identity, non-colliding values on the part
+    if (spec) {
+      const partsWithOptions = [...(spec.types || []), ...(spec.states || []), ...(spec.variations || [])];
+      each(partsWithOptions, (part) => {
+        if (!part.compoundAliases) {
+          return;
+        }
+        const attr = part.attribute || part.name?.toLowerCase();
+        const allowedValues = componentSpec.allowedValues[attr];
+        if (!allowedValues) {
+          return;
+        }
+        each(allowedValues, (value) => {
+          if (!isString(value) || value === attr || collidingValues.has(value)) {
+            return;
+          }
+          if (part.prefixCompound) {
+            componentSpec.optionAttributes[`${attr}-${value}`] = attr;
+          }
+          else {
+            componentSpec.optionAttributes[`${value}-${attr}`] = attr;
+          }
+          delete componentSpec.optionAttributes[value];
+        });
+      });
+    }
   }
 }

@@ -1,0 +1,26 @@
+{
+  "1": {
+    "visual": "A Chinese character and a Latin letter A side by side, the standard symbol for language translation.",
+    "usage": "language settings, localization preferences, translation toggle, region/locale selector"
+  },
+  "2": {
+    "visual": "A crescent moon with no extra decoration, the classic symbol for night mode or do-not-disturb.",
+    "usage": "dark mode toggle, night theme, do not disturb, sleep schedule settings"
+  },
+  "3": {
+    "visual": "A gear with a hollow circle at its center and a scalloped outer edge, the universal settings symbol.",
+    "usage": "app settings, configuration panel, preferences menu, system options"
+  },
+  "4": {
+    "visual": "Three horizontal lines of different lengths, each with a small perpendicular tick acting as a draggable slider handle.",
+    "usage": "filter controls, audio or display adjustments, sort and filter panel, multi-parameter settings"
+  },
+  "5": {
+    "visual": "A crescent moon with small radiating dash marks around it, suggesting a blend of night and ambient light.",
+    "usage": "auto dark mode, sunrise/sunset scheduling, adaptive brightness, system appearance settings"
+  },
+  "6": {
+    "visual": "A wrench tool angled diagonally, the standard symbol for tools or maintenance.",
+    "usage": "developer tools, maintenance mode, repair and troubleshoot, system utilities"
+  }
+}

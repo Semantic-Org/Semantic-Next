@@ -1,6 +1,6 @@
 /**
  * Array and object iteration utilities
- * @see {@link https://next.semantic-ui.com/api/utils/looping Looping Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/looping Looping Utilities Documentation}
  */
 
 /**
@@ -23,7 +23,7 @@ export interface IterationCallback<TValue, TKey = number | string> {
 /**
  * Iterates over a collection (array, object, Set, or Map), calling the iteratee for each element.
  * Returns false from the iteratee to break the iteration early.
- * @see {@link https://next.semantic-ui.com/api/utils/looping#each each}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/looping#each each}
  *
  * @param obj - Collection to iterate over (Array, Object, Set, or Map)
  * @param func - Function to execute for each element
@@ -78,7 +78,7 @@ export function each<T extends object>(
 /**
  * Asynchronously iterates over a collection (Array, Object, Set, or Map)
  * Supports breaking early by returning false from the iteratee
- * @see {@link https://next.semantic-ui.com/api/utils/looping#asynceach asyncEach}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/looping#asynceach asyncEach}
  *
  * @param obj - Collection to iterate over (Array, Object, Set, or Map)
  * @param func - Async function to execute for each element
@@ -121,7 +121,7 @@ export function asyncEach<T extends object>(
 /**
  * Maps over a collection asynchronously, creating a new collection of mapped values.
  * Awaits each iteratee call and collects the results.
- * @see {@link https://next.semantic-ui.com/api/utils/looping#asyncmap asyncMap}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/looping#asyncmap asyncMap}
  *
  * @param obj - Collection to map over (Array, Object, Set, or Map)
  * @param func - Async mapping function for each element

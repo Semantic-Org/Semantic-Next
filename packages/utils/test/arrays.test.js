@@ -13,6 +13,7 @@ import {
   moveToFront,
   range,
   remove,
+  sequence,
   some,
   sortBy,
   unique,
@@ -20,10 +21,9 @@ import {
   where,
 } from '@semantic-ui/utils';
 
-import { describe, expect, it, } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 describe('Array Utilities', () => {
-
   describe('unique', () => {
     it('should remove duplicates', () => {
       const arr = [1, 2, 2, 3, 4, 4, 5];
@@ -75,7 +75,6 @@ describe('Array Utilities', () => {
     });
   });
 
-
   describe('flatten', () => {
     it('should flatten a nested array', () => {
       const nested = [1, [2, [3, [4]], 5]];
@@ -104,6 +103,21 @@ describe('Array Utilities', () => {
       const result = firstMatch(arr, x => x > 2);
       expect(result).toBe(3);
     });
+
+    it('should return the matching element when passed a value', () => {
+      const arr = [1, 2, 3, 4];
+      expect(firstMatch(arr, 3)).toBe(3);
+    });
+
+    it('should return undefined when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(firstMatch(arr, 5)).toBeUndefined();
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(firstMatch(arr, { id: 2 })).toEqual({ id: 2 });
+    });
   });
 
   describe('findIndex', () => {
@@ -111,6 +125,21 @@ describe('Array Utilities', () => {
       const arr = ['apple', 'banana', 'orange'];
       const index = findIndex(arr, fruit => fruit === 'banana');
       expect(index).toBe(1);
+    });
+
+    it('should return the index when passed a value', () => {
+      const arr = ['apple', 'banana', 'orange'];
+      expect(findIndex(arr, 'banana')).toBe(1);
+    });
+
+    it('should return -1 when value is not found', () => {
+      const arr = [1, 2, 3];
+      expect(findIndex(arr, 5)).toBe(-1);
+    });
+
+    it('should match objects by deep equality', () => {
+      const arr = [{ id: 1 }, { id: 2 }, { id: 3 }];
+      expect(findIndex(arr, { id: 2 })).toBe(1);
     });
   });
 
@@ -124,6 +153,85 @@ describe('Array Utilities', () => {
       remove(arr, 2);
       expect(arr).toEqual([1, 3, 4]);
     });
+
+    it('should remove ALL matching instances', () => {
+      let arr = [1, 2, 2, 3, 2, 4];
+      const count = remove(arr, 2);
+      expect(arr).toEqual([1, 3, 4]);
+      expect(count).toBe(3);
+    });
+
+    it('should return 0 when no matches found', () => {
+      let arr = [1, 2, 3];
+      const count = remove(arr, 5);
+      expect(arr).toEqual([1, 2, 3]);
+      expect(count).toBe(0);
+    });
+
+    it('should work with callback for multiple matches', () => {
+      let arr = [1, 2, 3, 4, 5, 6];
+      const count = remove(arr, x => x % 2 === 0);
+      expect(arr).toEqual([1, 3, 5]);
+      expect(count).toBe(3);
+    });
+
+    it('should handle complex objects with deep equality', () => {
+      let arr = [
+        { id: 1, name: 'John' },
+        { id: 2, name: 'Jane' },
+        { id: 1, name: 'John' },
+        { id: 3, name: 'Bob' },
+        { id: 1, name: 'John' },
+      ];
+      const count = remove(arr, { id: 1, name: 'John' });
+      expect(arr).toEqual([
+        { id: 2, name: 'Jane' },
+        { id: 3, name: 'Bob' },
+      ]);
+      expect(count).toBe(3);
+    });
+
+    it('should preserve element order', () => {
+      let arr = ['a', 'b', 'c', 'b', 'd', 'b', 'e'];
+      remove(arr, 'b');
+      expect(arr).toEqual(['a', 'c', 'd', 'e']);
+    });
+
+    it('should handle empty arrays', () => {
+      let arr = [];
+      const count = remove(arr, 1);
+      expect(arr).toEqual([]);
+      expect(count).toBe(0);
+    });
+
+    it('should remove all elements if all match', () => {
+      let arr = [2, 2, 2, 2];
+      const count = remove(arr, 2);
+      expect(arr).toEqual([]);
+      expect(count).toBe(4);
+    });
+
+    it('should work with callback that uses index', () => {
+      let arr = ['a', 'b', 'c', 'd', 'e'];
+      const count = remove(arr, (val, index) => index % 2 === 0);
+      expect(arr).toEqual(['b', 'd']);
+      expect(count).toBe(3);
+    });
+
+    it('should maintain backward compatibility with truthy/falsy return', () => {
+      let arr1 = [1, 2, 3];
+      let arr2 = [1, 2, 3];
+
+      // Should return truthy (count > 0) when items removed
+      const result1 = remove(arr1, 2);
+      expect(result1).toBeTruthy();
+      expect(result1).toBe(1);
+
+      // Should return falsy (0) when no items removed
+      const result2 = remove(arr2, 5);
+      expect(result2).toBeFalsy();
+      expect(result2).toBe(0);
+    });
   });
 
   describe('inArray', () => {
@@ -135,9 +243,29 @@ describe('Array Utilities', () => {
   });
 
   describe('range', () => {
-    it('should create an array of numbers', () => {
+    it('should create an array from start to stop (exclusive)', () => {
+      expect(range(5)).toEqual([0, 1, 2, 3, 4]);
       expect(range(1, 5)).toEqual([1, 2, 3, 4]);
-      expect(range(0, 4, 5)).toEqual([0, 5, 10, 15]);
+      expect(range(0, 10, 2)).toEqual([0, 2, 4, 6, 8]);
+      expect(range(0, 10, 3)).toEqual([0, 3, 6, 9]);
+    });
+
+    it('should avoid floating-point drift with fractional steps', () => {
+      const result = range(0, 1, 0.1);
+      expect(result).toHaveLength(10);
+      // multiplication path avoids accumulated drift
+      expect(result[3]).toBe(0.1 * 3); // not 0.30000000000000004
+    });
+  });
+
+  describe('sequence', () => {
+    it('should generate multiples', () => {
+      expect(sequence(5)).toEqual([1, 2, 3, 4, 5]);
+      expect(sequence(3, 3)).toEqual([3, 6, 9]);
+      expect(sequence(5, 10)).toEqual([10, 20, 30, 40, 50]);
+      expect(sequence(5, 3, 2)).toEqual([6, 9, 12, 15, 18]);
+      expect(sequence(4, 100, 0)).toEqual([0, 100, 200, 300]);
+      expect(sequence(8, 60, 0)).toEqual([0, 60, 120, 180, 240, 300, 360, 420]);
     });
   });
 
@@ -214,10 +342,12 @@ describe('Array Utilities', () => {
 
   describe('moveItem', () => {
     it('should move item to a specific index when using number', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, 1)).toEqual([1, 2, 3, 4]);
-      expect(moveItem(arr, 1, 3)).toEqual([2, 3, 4, 1]);
-      expect(moveItem(arr, 4, 0)).toEqual([4, 2, 3, 1]);
+      // value 2 is already at index 1, no move
+      expect(moveItem([1, 2, 3, 4], 2, 1)).toEqual([1, 2, 3, 4]);
+      // move value 1 from index 0 to index 3
+      expect(moveItem([1, 2, 3, 4], 1, 3)).toEqual([2, 3, 4, 1]);
+      // move value 4 from index 3 to index 0
+      expect(moveItem([1, 2, 3, 4], 4, 0)).toEqual([4, 1, 2, 3]);
     });
 
     it('should move item to first position when using "first"', () => {
@@ -245,9 +375,8 @@ describe('Array Utilities', () => {
     });
 
     it('should clamp target index to valid array bounds', () => {
-      const arr = [1, 2, 3, 4];
-      expect(moveItem(arr, 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
-      expect(moveItem(arr, 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
+      expect(moveItem([1, 2, 3, 4], 2, -1)).toEqual([2, 1, 3, 4]); // clamps to 0
+      expect(moveItem([1, 2, 3, 4], 2, 999)).toEqual([1, 3, 4, 2]); // clamps to length-1
     });
 
     it('should return original array if item not found', () => {
@@ -375,6 +504,13 @@ describe('Array Utilities', () => {
     it('maintains element order', () => {
       expect(difference([3, 1, 2], [2], [3])).toEqual([1]);
     });
+
+    it('uses Set optimization for large arrays (>= 58 elements)', () => {
+      const arr1 = Array.from({ length: 30 }, (_, i) => i);
+      const arr2 = Array.from({ length: 30 }, (_, i) => i + 20);
+      const result = difference(arr1, arr2);
+      expect(result).toEqual(Array.from({ length: 20 }, (_, i) => i));
+    });
   });
 
   describe('uniqueItems', () => {
@@ -392,6 +528,18 @@ describe('Array Utilities', () => {
 
     it('handles arrays with duplicates', () => {
       expect(uniqueItems([1, 1, 2], [2, 2, 3], [3, 3, 4])).toEqual([1, 4]);
+    });
+
+    it('uses Set optimization for large arrays (>= 58 elements)', () => {
+      const arr1 = Array.from({ length: 25 }, (_, i) => i);
+      const arr2 = Array.from({ length: 25 }, (_, i) => i + 20);
+      const arr3 = Array.from({ length: 10 }, (_, i) => i + 10);
+      const result = uniqueItems(arr1, arr2, arr3);
+      expect(result).toContain(0);
+      expect(result).toContain(9);
+      expect(result).toContain(25);
+      expect(result).toContain(44);
+      expect(result.length).toBe(30);
     });
   });
 
@@ -621,6 +769,4 @@ describe('Array Utilities', () => {
       expect(groupBy(array, 'city')).toEqual(expected);
     });
   });
-
-
 });

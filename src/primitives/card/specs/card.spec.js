@@ -1,0 +1,184 @@
+import {
+  FLUID_VARIATION,
+  DISABLED_STATE,
+  HOVER_STATE,
+} from '@semantic-ui/specs';
+
+export default {
+  uiType: 'element',
+  name: 'Card',
+  description: 'A card displays segmented content in a manner similar to a playing card.',
+  tagName: 'ui-card',
+  exportName: 'Card',
+  exampleCode: `<ui-card image="/images/new-avatar/dima2.png">
+  <div slot="header">Dima B</div>
+  <div slot="subheader">Software Engineer</div>
+  <div slot="description">Dima has strong opinions about button padding and the perfect shade of blue.</div>
+</ui-card>`,
+  content: [
+    {
+      name: 'Icon',
+      includeAttributeClass: true,
+      attribute: 'icon',
+      couplesWith: ['ui-icon'],
+      description: 'include an icon',
+      exampleCode: `<ui-card icon="pause"></ui-card>
+<ui-card>
+  <ui-icon pause slot="icon"></ui-icon>
+</ui-card>`,
+    },
+    {
+      name: 'Header',
+      attribute: 'header',
+      description: 'include an header',
+      exampleCode: `<ui-card header="Header"></ui-card>
+<ui-card>
+  <div class="header">Header</div>
+</ui-card>
+<ui-card>
+  <div slot="header">Header</div>
+</ui-card>`,
+    },
+    {
+      name: 'Description',
+      attribute: 'description',
+      description: 'include a description',
+      exampleCode: `<ui-card description="Description"></ui-card>
+<ui-card>
+  <div class="description">Description</div>
+</ui-card>
+<ui-card>
+  <div slot="description">Description</div>
+</ui-card>`,
+    },
+    {
+      name: 'Subheader',
+      attribute: 'subheader',
+      description: 'include an subheader',
+      exampleCode: `<ui-card header="Header" subheader="Subheader"></ui-card>
+<ui-card>
+  <div class="header">Header</div>
+  <div class="subheader">Subheader</div>
+</ui-card>
+<ui-card>
+  <div slot="header">Header</div>
+  <div slot="subheader">Subheader</div>
+</ui-card>`,
+    },
+    {
+      name: 'Image',
+      attribute: 'image',
+      couplesWith: ['ui-image'],
+      description: 'include an image',
+      exampleCode: `<ui-card image="/images/avatar/jenny.jpg">Get started with your new card.</ui-card>`,
+    },
+  ],
+  types: [],
+  states: [
+    HOVER_STATE,
+    {
+      name: 'Focus',
+      attribute: 'focused',
+      description: 'be focused by the keyboard',
+    },
+    DISABLED_STATE,
+  ],
+  variations: [
+    FLUID_VARIATION,
+    {
+      name: 'Link',
+      attribute: 'link',
+      usageLevel: 1,
+      description: 'can be formatted as if the card can be clicked',
+    },
+    {
+      name: 'Horizontal',
+      attribute: 'horizontal',
+      usageLevel: 1,
+      description: 'can have content horizontally oriented',
+      exampleCode: `<ui-card horizontal image="/images/avatar/jenny.jpg">Get started with your new card.</ui-card>`,
+    },
+  ],
+  settings: [
+    {
+      name: 'Href',
+      type: 'string',
+      attribute: 'href',
+      description: 'link to a url',
+    },
+  ],
+  supportsPlural: true,
+  pluralName: 'Cards',
+  pluralTagName: 'ui-cards',
+  pluralExportName: 'Cards',
+  pluralDescription: 'Cards can exist together as a group',
+  pluralContent: [],
+  pluralSharedTypes: ['link'],
+  pluralOnlyTypes: [],
+  pluralOnlyVariations: [
+    {
+      name: 'doubling',
+      attribute: 'doubling',
+      description: 'A group of cards can double its column width for mobile',
+      usageLevel: 3,
+    },
+    {
+      name: 'stackable',
+      attribute: 'stackable',
+      description: 'A group of cards can automatically stack rows to a single columns on mobile devices',
+      usageLevel: 3,
+    },
+    {
+      name: 'Spaced',
+      attribute: 'spaced',
+      description: 'A group of cards can adjust its spacing',
+      usageLevel: 2,
+      options: [
+        {
+          name: 'Spaced',
+          value: 'spaced',
+          description: 'A card group have increased spacing',
+        },
+        {
+          name: 'Three',
+          value: 'very-spaced',
+          description: 'A card group can have very increased spacing',
+        },
+      ],
+    },
+    {
+      name: 'Count',
+      attribute: 'count',
+      description: 'A group of cards can set how many cards should exist in a row',
+      usageLevel: 3,
+      options: [
+        {
+          name: 'Two',
+          value: 'two',
+          description: 'A card group can have two items per row',
+        },
+        {
+          name: 'Three',
+          value: 'three',
+          description: 'A card group can have three items per row',
+        },
+        {
+          name: 'Four',
+          value: 'four',
+          description: 'A card group can have four items per row',
+        },
+        {
+          name: 'Five',
+          value: 'five',
+          description: 'A card group can have five items per row',
+        },
+        {
+          name: 'Six',
+          value: 'six',
+          description: 'A card group can have six items per row',
+        },
+      ],
+    },
+  ],
+  pluralSharedVariations: [],
+};

@@ -1,0 +1,2 @@
+/* Definition layer for table component */
+@import url('./definition/table.css') layer(table.definition);

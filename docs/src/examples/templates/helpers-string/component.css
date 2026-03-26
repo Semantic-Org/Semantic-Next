@@ -16,7 +16,7 @@ b {
 
 code {
   background: var(--standard-5);
-  padding: var(--compact-spacing);
+  padding: var(--padding-xs);
   border-radius: var(--border-radius);
   font-family: monospace;
 }

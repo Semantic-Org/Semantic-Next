@@ -1,0 +1,24 @@
+<div class="password-strength">
+  <ui-input fluid type="password" icon="lock" placeholder="Enter a password..."></ui-input>
+  {#if password}
+    <div class="meter">
+      <div class="track">
+        <div class="fill {classMap getStrengthClasses}"></div>
+      </div>
+      <span class="label {classMap getStrengthClasses}">{getStrengthLabel}</span>
+    </div>
+    <div class="rules">
+      {>rule label="8+ characters" met=hasLength}
+      {>rule label="Uppercase letter" met=hasUpper}
+      {>rule label="Number" met=hasNumber}
+      {>rule label="Special character" met=hasSpecial}
+    </div>
+  {/if}
+</div>
+
+{#snippet rule}
+  <div class="rule {activeIf met}">
+    <ui-icon {#if met}check{else}empty-circle{/if}></ui-icon>
+    {label}
+  </div>
+{/snippet}

@@ -16,7 +16,7 @@
 }
 .icons .icon,
 .icon {
-  /* inherit */
+  font-size: var(--icon-medium);
 }
 .large.icons .icon,
 .large.icon {
@@ -33,4 +33,9 @@
 .massive.icons .icon,
 .massive.icon {
   font-size: var(--icon-massive);
+}
+
+/* We want to use content-visiblity: auto but it struggles with sizing */
+.icon:not(.size) {
+  content-visibility: auto;
 }

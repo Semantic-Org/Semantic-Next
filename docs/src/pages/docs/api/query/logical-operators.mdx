@@ -1,0 +1,157 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Logical Operators
+icon: filter
+description: API reference for Query logical operator methods
+package: "@semantic-ui/query"
+methods: ["is", "not", "contains", "exists"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Test conditions and check for element existence.
+
+## Methods
+
+### is
+
+```javascript
+$('selector').is(selector);
+$('selector').is(fn);
+```
+
+Tests if any element matches the selector or passes the function test.
+
+#### Parameters
+
+| Name     | Type     | Description                    |
+|----------|----------|--------------------------------|
+| selector | string   | CSS selector to test           |
+| fn       | function | Test function                  |
+
+#### Returns
+
+`true` if at least one element matches, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('p').is('.active')) {
+  console.log('At least one paragraph is active');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-is" direction="horizontal"></PlaygroundExample>
+
+### not
+
+```javascript
+$('selector').not(selector);
+$('selector').not(fn);
+```
+
+Removes elements matching the selector or passing the function test.
+
+#### Parameters
+
+| Name     | Type     | Description                            |
+|----------|----------|----------------------------------------|
+| selector | string   | CSS selector to exclude                |
+| fn       | function | Test function, return `true` to exclude |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing remaining elements.
+
+#### Usage
+
+```javascript
+$('div').not('.ignore').addClass('highlight');
+```
+
+#### Example
+
+<PlaygroundExample id="query-not" direction="horizontal"></PlaygroundExample>
+
+### contains
+
+```javascript
+$('selector').contains(target);
+```
+
+Tests if the first matched element contains the given element.
+
+#### Parameters
+
+| Name   | Type                          | Description                     |
+|--------|-------------------------------|---------------------------------|
+| target | string, Element, or Query     | Selector, element, or Query to check |
+
+#### Returns
+
+`true` if contained, `false` otherwise.
+
+#### Usage
+
+##### By Selector
+
+```javascript
+if ($('.container').contains('.highlight')) {
+  console.log('Container has highlighted elements');
+}
+```
+
+##### By Element
+
+```javascript
+const button = document.querySelector('button');
+if ($('.toolbar').contains(button)) {
+  console.log('Button is inside the toolbar');
+}
+```
+
+##### By Query Object
+
+```javascript
+const $inputs = $('input[required]');
+if ($('form').contains($inputs)) {
+  console.log('Form contains required inputs');
+}
+```
+
+##### Shadow DOM
+
+```javascript
+$$('web-component').contains('.shadow-element');
+```
+
+#### Example
+
+<PlaygroundExample id="query-contains" direction="horizontal"></PlaygroundExample>
+
+### exists
+
+```javascript
+$('selector').exists();
+```
+
+Checks if there are any elements in the Query object.
+
+#### Returns
+
+`true` if at least one element exists, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('.my-element').exists()) {
+  console.log('Element found');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-exists" direction="horizontal"></PlaygroundExample>

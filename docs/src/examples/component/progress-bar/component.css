@@ -30,7 +30,7 @@
   font-weight: var(--bold);
   text-align: center;
   margin-top: var(--label-spacing);
-  color: color: var(--text-color);
+  color: var(--text-color);
 }
 
 .fill {
@@ -105,12 +105,6 @@
 }
 .small {
   --progress-height: 8px;
-  .label {
-    font-size: 10px;
-  }
-}
-.small {
-  --progress-height: 14px;
   .label {
     font-size: 10px;
   }

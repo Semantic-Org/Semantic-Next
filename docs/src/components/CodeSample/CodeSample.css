@@ -1,3 +1,12 @@
+:host {
+  display: block;
+
+  --code-border-radius: var(--border-radius);
+  --code-background: none;
+  --code-padding: var(--padding);
+  --code-border: var(--border);
+}
+
 ui-menu {
   display: none;
 }
@@ -5,8 +14,9 @@ ui-menu {
 
 .segment {
   display: block;
-  border-radius: var(--border-radius);
-  padding: 1rem;
+  border-radius: var(--code-border-radius);
+  background: var(--code-background);
+  padding: var(--code-padding);
   border: var(--border);
 }
 .attached.segment {
@@ -25,26 +35,24 @@ ui-menu {
          Code Samples
 *******************************/
 
-ui-icon[copy] {
+copy-button {
   float: right;
-  margin: -5px;
-  padding: 5px;
-  color: var(--standard-40);
-}
-codeSample:hover {
-  ui-icon[copy] {
-    color: var(--standard-70);
-  }
+  margin: -3px;
 }
 
-ui-icon[copy]:hover {
-  color: var(--standard-100);
-}
 
 code {
   min-width: 500px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
+}
+pre, code {
+  font-family: var(--code-font);
+  line-height: var(--line-height);
+}
+
+code .line {
+  font-size: var(--code-font-size);
 }
 
 /* Code */
@@ -54,5 +62,4 @@ code pre {
   margin: 0em 0em;
   padding: 0em;
   font-size: 15px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

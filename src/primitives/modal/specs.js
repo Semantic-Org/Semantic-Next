@@ -1,4 +1,4 @@
-import ModalSpec from './specs/modal.js';
-import ModalComponentSpec from './specs/modal-component.js';
+import ModalComponentSpec from './specs/modal.component.js';
+import ModalSpec from './specs/modal.spec.json';
 
-export { ModalSpec, ModalComponentSpec };
+export { ModalComponentSpec, ModalSpec };

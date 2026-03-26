@@ -13,26 +13,26 @@
 }
 
 .preview {
-  padding: var(--spacing);
+  padding: var(--padding);
   background: var(--standard-solid-10);
   border-bottom: var(--border);
 }
 
 .buttons {
   display: flex;
-  gap: var(--spacing);
+  gap: var(--gap);
   justify-content: center;
 }
 
 .content {
-  padding: var(--spacing);
+  padding: var(--padding);
 }
 
 .presets {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--spacing);
-  margin-bottom: var(--spacing);
+  gap: var(--gap);
+  margin-bottom: var(--margin);
 }
 
 .preset {
@@ -42,7 +42,7 @@
   position: relative;
   transition: all 0.2s var(--easing);
   overflow: hidden;
-  padding: var(--spacing);
+  padding: var(--padding);
   display: flex;
   flex-direction: column;
 }
@@ -73,13 +73,13 @@
 .colors {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing);
+  gap: var(--gap);
 }
 
 .color {
   display: flex;
   flex-direction: column;
-  gap: var(--compact-spacing);
+  gap: var(--gap-xs);
 }
 
 .color label {

@@ -1,0 +1,186 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Setup
+icon: package
+description: Module exports and environment configuration for Query
+package: "@semantic-ui/query"
+methods: ["$", "$$", "exportGlobals", "restoreGlobals", "useAlias"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Query exports several functions for DOM querying and environment configuration.
+
+## Query Functions
+
+### $
+
+```javascript
+import { $ } from '@semantic-ui/query';
+```
+
+Creates a Query collection from a selector, element, or HTML string. Queries within the light DOM only.
+
+```javascript
+const $buttons = $('button');
+const $newDiv = $('<div class="card">Content</div>');
+const $element = $(document.body);
+```
+
+### $$
+
+```javascript
+import { $$ } from '@semantic-ui/query';
+```
+
+Creates a Query collection that pierces shadow DOM boundaries. Use this to query inside web components.
+
+```javascript
+const $shadowContent = $$('my-component .inner-content');
+```
+
+> **When to use $$** Use `$$` when you need to find elements inside shadow roots. For regular DOM queries, prefer `$` for better performance.
+
+## Global Configuration
+
+### exportGlobals
+
+```javascript
+function exportGlobals(options)
+```
+
+Attaches `$`, `$$`, and `Query` to the global scope for use without imports.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| options | object | Which functions to export |
+
+#### Options
+
+| Name   | Type    | Default | Description |
+|--------|---------|---------|-------------|
+| $      | boolean | true    | Export `$` to global scope |
+| $$     | boolean | true    | Export `$$` to global scope |
+| Query  | boolean | true    | Export `Query` constructor to global scope |
+
+#### Example
+
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+exportGlobals();
+
+// Now available globally
+$('div').addClass('ready');
+$$('ui-modal .content').text('Hello');
+```
+
+<PlaygroundExample id="query-exportglobals" direction="horizontal"></PlaygroundExample>
+
+### restoreGlobals
+
+```javascript
+function restoreGlobals()
+```
+
+Restores the original values of `$` and `$$` that existed before `exportGlobals()` was called.
+
+#### Returns
+
+The Query `$` function (for assignment to a custom variable).
+
+#### Example
+
+```javascript
+import { exportGlobals, restoreGlobals } from '@semantic-ui/query';
+
+exportGlobals();
+
+// Use Query globally
+$('div').addClass('processed');
+
+// Restore original $ (e.g., jQuery)
+const $q = restoreGlobals();
+
+// Continue using Query via alias
+$q('div').removeClass('processed');
+```
+
+### useAlias
+
+```javascript
+function useAlias()
+```
+
+Returns the `$` function for assignment to a custom variable. Use this to avoid conflicts with other libraries without touching global scope.
+
+#### Returns
+
+The Query `$` function.
+
+#### Example
+
+```javascript
+import { useAlias } from '@semantic-ui/query';
+
+const $q = useAlias();
+
+$q('div').addClass('selected');
+$q('.modal').css('display', 'block');
+```
+
+<PlaygroundExample id="query-alias" direction="horizontal"></PlaygroundExample>
+
+## Import Patterns
+
+### ES Modules
+
+```javascript
+import { $ } from '@semantic-ui/query';
+
+const $paragraphs = $('p');
+```
+
+```javascript
+import { $, $$, useAlias } from '@semantic-ui/query';
+
+const $domElements = $('div');
+const $shadowElements = $$('my-component .shadow-content');
+const $q = useAlias();
+```
+
+<PlaygroundExample id="query-esm-usage" direction="horizontal"></PlaygroundExample>
+
+### CommonJS
+
+```javascript
+const { $ } = require('@semantic-ui/query');
+
+const $paragraphs = $('p');
+```
+
+### CDN / Browser
+
+```html
+<script type="module">
+  import { $, $$ } from 'https://unpkg.com/@semantic-ui/query';
+
+  $('div').addClass('loaded');
+</script>
+```
+
+With global export:
+
+```javascript
+import { exportGlobals } from '@semantic-ui/query';
+
+exportGlobals();
+
+$('div').addClass('global-access');
+$$('my-component').css('color', 'red');
+```
+
+<PlaygroundExample id="query-browser-usage" direction="horizontal"></PlaygroundExample>

@@ -6,15 +6,17 @@
 .disabled.input:hover,
 .disabled.active.input {
   cursor: var(--input-disabled-cursor);
+  cursor: var(--input-disabled-cursor);
   opacity: var(--input-disabled-opacity) !important;
   color: var(--input-disabled-color);
   background-color: var(--input-disabled-background-color) !important;
   background-image: var(--input-disabled-background-image) !important;
   box-shadow: var(--input-disabled-box-shadow) !important;
-}
-ui-input[disabled] {
-  cursor: var(--input-disabled-cursor);
-  pointer-events: none !important;
+
+
+  input {
+    cursor: var(--input-disabled-cursor);
+  }
 }
 
 

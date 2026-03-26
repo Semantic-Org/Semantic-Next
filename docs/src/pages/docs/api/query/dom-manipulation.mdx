@@ -1,0 +1,238 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - DOM Manipulation
+icon: edit
+description: API reference for Query methods related to DOM manipulation
+package: "@semantic-ui/query"
+methods: ["append", "prepend", "remove", "clone", "insertBefore", "insertAfter", "appendTo", "prependTo", "detach"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+Insert, remove, and modify elements in the DOM.
+
+## Methods
+
+### append
+
+```javascript
+$('selector').append(...content)
+```
+
+Insert content to the end of each element in the set of matched elements.
+
+#### Parameters
+
+| Name       | Type                                   | Description                    |
+|------------|----------------------------------------|--------------------------------|
+| ...content | string, DOM Element, or Query object   | One or more elements to insert |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+```javascript
+$('div').append('<p>New content</p>');
+```
+
+<PlaygroundExample id="query-append" direction="horizontal"></PlaygroundExample>
+
+### prepend
+
+```javascript
+$('selector').prepend(...content)
+```
+
+Insert content to the beginning of each element in the set of matched elements.
+
+#### Parameters
+
+| Name       | Type                                   | Description                    |
+|------------|----------------------------------------|--------------------------------|
+| ...content | string, DOM Element, or Query object   | One or more elements to insert |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+```javascript
+$('section').prepend('<h2>New Section Title</h2>');
+```
+
+<PlaygroundExample id="query-prepend" direction="horizontal"></PlaygroundExample>
+
+### remove
+
+```javascript
+$('selector').remove()
+```
+
+Remove the set of matched elements from the DOM.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+```javascript
+$('p.outdated').remove();
+```
+
+<PlaygroundExample id="query-remove" direction="horizontal"></PlaygroundExample>
+
+### clone
+
+```javascript
+$('selector').clone()
+```
+
+Create a deep copy of the set of matched elements.
+
+#### Returns
+
+A new [Query object](/docs/api/query/constructor#the-query-object) containing cloned elements.
+
+#### Example
+
+```javascript
+const $template = $('#item-template').clone();
+$('#container').append($template);
+```
+
+<PlaygroundExample id="query-clone" direction="horizontal"></PlaygroundExample>
+
+### insertBefore
+
+```javascript
+$('selector').insertBefore(target)
+```
+
+Insert every element in the set of matched elements before the target.
+
+#### Parameters
+
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element before which the content will be inserted              |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+```javascript
+$('<p>New paragraph</p>').insertBefore('p');
+```
+
+<PlaygroundExample id="query-insertbefore" direction="horizontal"></PlaygroundExample>
+
+### insertAfter
+
+```javascript
+$('selector').insertAfter(target)
+```
+
+Insert every element in the set of matched elements after the target.
+
+#### Parameters
+
+| Name   | Type                                 | Description                                                   |
+|--------|--------------------------------------|---------------------------------------------------------------|
+| target | string, Element, or Query object     | Element after which the content will be inserted              |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+```javascript
+$('<p>New paragraph</p>').insertAfter('p');
+```
+
+<PlaygroundExample id="query-insertafter" direction="horizontal"></PlaygroundExample>
+
+### appendTo
+
+```javascript
+$('selector').appendTo(target)
+```
+
+Insert every element in the set of matched elements as the last child of the target.
+
+#### Parameters
+
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element to which the content will be appended                  |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) of the target elements (for chaining).
+
+#### Example
+
+```javascript
+$('<p>New content</p>').appendTo('#container');
+```
+
+<PlaygroundExample id="query-appendto" direction="horizontal"></PlaygroundExample>
+
+### prependTo
+
+```javascript
+$('selector').prependTo(target)
+```
+
+Insert every element in the set of matched elements as the first child of the target.
+
+#### Parameters
+
+| Name   | Type                                 | Description                                                    |
+|--------|--------------------------------------|----------------------------------------------------------------|
+| target | string, Element, or Query object     | Element to which the content will be prepended                 |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) of the target elements (for chaining).
+
+#### Example
+
+```javascript
+$('<h2>Section Title</h2>').prependTo('section');
+```
+
+<PlaygroundExample id="query-prependto" direction="horizontal"></PlaygroundExample>
+
+### detach
+
+```javascript
+$('selector').detach()
+```
+
+Remove the set of matched elements from the DOM, but keep all associated data and events.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing the removed elements.
+
+#### Example
+
+```javascript
+const $items = $('ul li').detach();
+$items.addClass('modified');
+$('ul').append($items);
+```
+
+<PlaygroundExample id="query-detach" direction="horizontal"></PlaygroundExample>
+

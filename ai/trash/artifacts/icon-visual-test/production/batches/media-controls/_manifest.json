@@ -1,0 +1,17 @@
+{
+  "1": "circle-pause",
+  "2": "circle-play",
+  "3": "circle-stop",
+  "4": "fast-forward",
+  "5": "pause",
+  "6": "picture-in-picture",
+  "7": "play",
+  "8": "repeat",
+  "9": "rewind",
+  "10": "shuffle",
+  "11": "skip-back",
+  "12": "skip-forward",
+  "13": "volume-high",
+  "14": "volume-low",
+  "15": "volume-x"
+}

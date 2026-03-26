@@ -3,6 +3,7 @@ import { Signal } from '@semantic-ui/reactivity';
 import {
   camelToKebab,
   each,
+  firstMatch,
   get,
   inArray,
   isClassInstance,
@@ -24,12 +25,25 @@ import { LitElement } from 'lit';
 class WebComponentBase extends LitElement {
   static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: false };
 
-  // for use with light dom rendering
-  static scopedStyleSheet = null;
+  static hydrationReady = false;
 
   constructor() {
     super();
     this.renderCallbacks = [];
+    this.ensureHydration();
+  }
+
+  // Lit checks for hydration support at module evaluation time, but module
+  // load order isn't guaranteed in production builds. Re-apply the patches
+  // here to catch cases where lit-element evaluated first.
+  ensureHydration() {
+    if (!WebComponentBase.hydrationReady) {
+      WebComponentBase.hydrationReady = true;
+      if (globalThis.litElementHydrateSupport
+        && !Object.getOwnPropertyDescriptor(LitElement, 'observedAttributes')) {
+        globalThis.litElementHydrateSupport({ LitElement });
+      }
+    }
   }
 
   updated() {
@@ -76,7 +90,14 @@ class WebComponentBase extends LitElement {
       // this handles syntax where allowed value is used as attribute
       // <ui-button primary> -> emphasis="primary"
       each(componentSpec.optionAttributes, (attributeValues, attributeName) => {
+
         const propertyName = kebabToCamel(attributeName);
+
+        // in some cases the value is the same as the category i.e. positive="positive"
+        if(properties[propertyName]) {
+          return;
+        }
+
         properties[propertyName] = { type: String, noAccessor: true, alias: true, attribute: attributeName };
       });
     }
@@ -109,13 +130,16 @@ class WebComponentBase extends LitElement {
         };
       }
     });
+
     // accessors can break certain special dom attrs
+    // DISABLED FOR NOW
     const specialAttrs = ['value', 'checked'];
     each(specialAttrs, (attr) => {
       if (properties[attr]) {
         // properties[attr].noAccessor = true;
       }
     });
+    //console.log(properties);
     return properties;
   }
 
@@ -242,13 +266,12 @@ class WebComponentBase extends LitElement {
         });
         const setting = get(settings, property);
         let signal = component.settingsVars.get(property);
-        if (signal) {
-          signal.get();
-        }
-        else {
+        if (!signal) {
           signal = new Signal(setting);
           component.settingsVars.set(property, signal);
         }
+        signal.set(setting);
+        signal.get();
         return setting;
       },
       set: (target, property, value, receiver) => {
@@ -295,9 +318,16 @@ class WebComponentBase extends LitElement {
         }
         else if (allowedValues && inArray(value, allowedValues)) {
           // this is a variation like emphasis="primary"
-          // it receives the class "primary"
-          classes.push(value);
+          // check if value requires compound form for CSS class (e.g. "subtle" → "subtle-positive")
+          const compoundForms = [`${value}-${attribute}`, `${attribute}-${value}`];
+          const compoundClass = firstMatch(compoundForms, (form) => componentSpec.optionAttributes?.[form]);
+          classes.push(compoundClass || value);
         }
+        else if (value === true && inArray(property, allowedValues)) {
+          // this is identity like positive="true"
+          classes.push(property);
+        }
+
 
         // components can opt-in to including the attribute if it has a value set
         // for instance "icon" if it has an icon set
@@ -317,7 +347,7 @@ class WebComponentBase extends LitElement {
   isDarkMode() {
     return (isServer)
       ? undefined
-      : $(this).cssVar('dark-mode') == 'true' || $('html').hasClass('dark');
+      : $('html').hasClass('dark') || $(this).cssVar('dark-mode') == 'true';
   }
 
   /*******************************

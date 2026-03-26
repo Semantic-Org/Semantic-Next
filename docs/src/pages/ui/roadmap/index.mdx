@@ -1,0 +1,43 @@
+---
+layout: '@layouts/Guide.astro'
+icon: map
+title: UI Roadmap
+description: Components and primitives in Semantic UI and planned additions
+---
+import { Cards, Card } from '@semantic-ui/core';
+
+import Blockquote from '@components/mdx/Blockquote.astro';
+export const components = { blockquote: Blockquote };
+
+# UI Component Roadmap
+
+Explore what's currently available in Semantic UI and what's on the horizon based on industry research across major UI frameworks.
+
+## Research Pages
+
+<Cards>
+  <Card
+    header="Upcoming Components"
+    description="See what components Semantic UI currently has and what's planned based on prevalence across major frameworks"
+    href="/ui/roadmap/upcoming"
+    icon="trending-up"
+  />
+  <Card
+    header="Simple List"
+    description="A quick, scannable list of all UI components found across major frameworks"
+    href="/ui/roadmap/simple"
+    icon="list"
+  />
+  <Card
+    header="Comprehensive Analysis"
+    description="Detailed breakdown with implementation counts, descriptions, and links to framework documentation"
+    href="/ui/roadmap/all"
+    icon="book-open"
+  />
+</Cards>
+
+## About This Research
+
+> [!note]
+> These component lists are based on exhaustive research across 13 major UI frameworks: ShadCN, Chakra UI, Ant Design, Semantic UI Classic, Nuxt UI, Radix UI, MUI (Material-UI), Mantine, HeroUI/NextUI, PrimeReact, Headless UI, Vuetify, Angular Material
+> Only components implemented in at least two frameworks are included, ensuring we focus on industry-standard patterns rather than framework-specific solutions.

@@ -1,0 +1,55 @@
+/*-------------------
+    Equal Width
+--------------------*/
+
+/* Base equal width - uses grid for equal distribution */
+.equal-width.buttons {
+  display: grid;
+  width: 100%;
+
+  /* Ensure buttons fill their grid cells */
+  ::slotted(ui-button) {
+    /* Make buttons fill the grid cell */
+    width: 100%;
+    --button-width: 100%;
+
+    /* Remove default margins that might interfere with grid */
+    --button-horizontal-margin: 0;
+    margin: 0;
+  }
+
+  /* Two equal width buttons */
+  &.two {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Three equal width buttons */
+  &.three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Four equal width buttons */
+  &.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Five equal width buttons */
+  &.five {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* Six equal width buttons */
+  &.six {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* Handle vertical equal width */
+  &.vertical {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+
+    ::slotted(ui-button) {
+      --button-vertical-margin: 0;
+    }
+  }
+}

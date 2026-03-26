@@ -2,22 +2,12 @@
 
 import { tokenize, getArticle, toTitleCase } from '@semantic-ui/utils';
 import { CodeExample } from '@components/CodeExample/CodeExample.js';
-import UIComponent from '@components/UIComponent.astro';
-import { getCodePlaygroundLink } from '@helpers/link-encoder.js';
+import RenderComponentTree from '@components/RenderComponentTree.astro';
 
 const { spec, plural, definition, name, componentName } = Astro.props;
 
 const sections = ['types', 'content', 'states', 'variations'];
 const article = getArticle(name, { capitalize: true });
-const getDescription = (text) => {
-  return (text)
-    ? `<em>${article} ${name.toLowerCase()} can</em> ${text}.`
-    : `${article} ${name.toLowerCase()}.`
-  ;
-};
-const getSandboxLink = function(code) {
-  return getCodePlaygroundLink(code);
-};
 ---
 {sections.map((section) => (
   definition[section]?.length > 0 && (
@@ -30,18 +20,13 @@ const getSandboxLink = function(code) {
               <>
                 <CodeExample client:load
                   title={(index == 0) ? type.title : undefined }
-                  description={getDescription(type.description)}
+                  description={type.description}
                   code={example.code}
-                  sandboxLink={getCodePlaygroundLink(example.code)}
                   showCode={example.showCode}
                   class={tokenize(type.title)}
                   id={tokenize(type.title) + '-example'}
                 >
-                  {example.components.map((component) => (
-                    (component.componentName)
-                      ? (<UIComponent name={componentName} attributes={component.attributes}><Fragment set:html={component.html} /></UIComponent>)
-                      : (<Fragment set:html={component.html} />)
-                  ))}
+                  <RenderComponentTree nodes={example.components} />
                 </CodeExample>
               </>
             ))}

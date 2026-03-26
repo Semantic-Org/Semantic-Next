@@ -7,6 +7,5 @@ import './query-tooltip.js';
 // 3. Specified in Data Attribute
 $('.box').tooltip({
   title: 'Setting Title',
-  content: 'Setting Content'
+  content: 'Setting Content',
 });
-

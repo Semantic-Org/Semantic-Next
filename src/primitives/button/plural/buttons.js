@@ -1,11 +1,10 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from '../specs/button-component.js';
-import template from './buttons.html?raw';
 import css from '../button-bundle.css?raw';
-import pageCSS from '../button-page.css?raw';
+import componentSpec from '../specs/buttons.component.js';
+import template from './buttons.html?raw';
 
-export const UIButtons = defineComponent({
+export const Buttons = defineComponent({
   tagName: 'ui-buttons',
   singularTag: 'ui-button',
   plural: true,
@@ -13,5 +12,4 @@ export const UIButtons = defineComponent({
   componentSpec,
   template,
   css,
-  pageCSS,
 });

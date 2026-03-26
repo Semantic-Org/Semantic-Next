@@ -13,7 +13,7 @@ import { WebComponentBase } from './web-component';
  * @template TComponentInstance - Type of the component instance created by createComponent
  * @template TProperties - Type of the properties for Lit components
  *
- * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+ * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
  */
 export interface EventCallParams<
   TState extends Record<string, any> = Record<string, any>,
@@ -26,8 +26,8 @@ export interface EventCallParams<
    * This gives you access to all standard event properties like preventDefault(),
    * stopPropagation(), etc.
    *
-   * @see https://next.semantic-ui.com/components/events#event-arguments
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/events#event-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   event: Event;
 
@@ -36,7 +36,7 @@ export interface EventCallParams<
    * When true, the event was triggered through deep event delegation, allowing
    * events to cross shadow DOM boundaries.
    *
-   * @see https://next.semantic-ui.com/components/events#deep-events
+   * @see https://next.semantic-ui.com/docs/guides/components/events#deep-events
    */
   isDeep: boolean;
 
@@ -47,7 +47,7 @@ export interface EventCallParams<
    * For example, with "click .button", target is the .button element, even if
    * a child span inside the button was the actudal event.target.
    *
-   * @see https://next.semantic-ui.com/components/events#event-delegation
+   * @see https://next.semantic-ui.com/docs/guides/components/events#event-delegation
    */
   target: HTMLElement;
 
@@ -56,7 +56,7 @@ export interface EventCallParams<
    * For form elements, this is typically the input value.
    * For custom events, this may come from event.detail.value.
    *
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
    */
   value: any;
 
@@ -75,8 +75,8 @@ export interface EventCallParams<
    *   }
    * }
    *
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
-   * @see https://next.semantic-ui.com/components/events#data-attributes
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/events#data-attributes
    */
   data: Record<string, any>;
 }
@@ -92,8 +92,8 @@ export interface EventCallParams<
  * @template TComponentInstance - Type of the component instance created by createComponent
  * @template TProperties - Type of the properties for Lit components
  *
- * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
- * @see https://next.semantic-ui.com/components/keys
+ * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
+ * @see https://next.semantic-ui.com/docs/guides/components/keys
  */
 export interface KeyCallParams<
   TState extends Record<string, any> = Record<string, any>,
@@ -108,8 +108,8 @@ export interface KeyCallParams<
    * You can call preventDefault() on this event to prevent the default browser action
    * for this key combination.
    *
-   * @see https://next.semantic-ui.com/components/lifecycle#callback-arguments
-   * @see https://next.semantic-ui.com/components/keys#key-event
+   * @see https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments
+   * @see https://next.semantic-ui.com/docs/guides/components/keys#key-event
    */
   event: KeyboardEvent;
 
@@ -128,7 +128,7 @@ export interface KeyCallParams<
    *   }
    * }
    *
-   * @see https://next.semantic-ui.com/components/keys#input-focus
+   * @see https://next.semantic-ui.com/docs/guides/components/keys#input-focus
    */
   inputFocused: boolean;
 
@@ -152,7 +152,7 @@ export interface KeyCallParams<
    *   }
    * }
    *
-   * @see https://next.semantic-ui.com/components/keys#repeated-keys
+   * @see https://next.semantic-ui.com/docs/guides/components/keys#repeated-keys
    */
   repeatedKey: boolean;
 }
@@ -166,12 +166,12 @@ export interface DefineComponentOptions<
   /**
    * The HTML tag name for the custom element (e.g., 'my-component').
    * Note: If you do not pass in a tag name the template instance will be returned for use as a subtemplate
-   * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#create-component Creating Components} for more details.
    */
   tagName?: string;
   /**
    * The template string to use for the component's content.
-   * See {@link https://next.semantic-ui.com/components/create#template Template} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#template Template} for more details.
    */
   template?: string;
   /**
@@ -180,13 +180,13 @@ export interface DefineComponentOptions<
   ast?: any; // Ideally, this would be the ASTNode type from your template compiler.
   /**
    * CSS styles for the component (scoped to the component's shadow DOM).
-   * See {@link https://next.semantic-ui.com/components/create#css CSS} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS} for more details.
    */
   css?: string;
   /**
    * CSS styles to be added to the *page* (not scoped to the component). This is useful for things like global styles or fonts that the component depends on.
    * These styles are only added once, when the component is defined.
-   * See {@link https://next.semantic-ui.com/components/create#css CSS} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS} for more details.
    */
   pageCSS?: string;
   /**
@@ -200,7 +200,7 @@ export interface DefineComponentOptions<
 
   /**
    * A function that creates the component's instance methods and properties.
-   * See {@link https://next.semantic-ui.com/components/create#create-component Creating Components} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#create-component Creating Components} for more details.
    */
   createComponent?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void; // Use generic type
   /**
@@ -217,8 +217,8 @@ export interface DefineComponentOptions<
    *   }
    * }
    *
-   * @see {@link https://next.semantic-ui.com/components/events Events} for more details.
-   * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
+   * @see {@link https://next.semantic-ui.com/docs/guides/components/events Events} for more details.
+   * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
   events?: Record<
     string,
@@ -244,8 +244,8 @@ export interface DefineComponentOptions<
    *   }
    * }
    *
-   * @see {@link https://next.semantic-ui.com/components/keys Keys} for more details.
-   * @see {@link https://next.semantic-ui.com/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
+   * @see {@link https://next.semantic-ui.com/docs/guides/components/keys Keys} for more details.
+   * @see {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-arguments Callback Arguments} for information on the parameters.
    */
   keys?: Record<
     string,
@@ -254,28 +254,35 @@ export interface DefineComponentOptions<
 
   /**
    * Lifecycle callback - invoked after the component is created.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#oncreated onCreated Callback} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#oncreated onCreated Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions.
    * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
    */
   onCreated?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
    * Lifecycle callback - invoked after the component is rendered.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#onrendered onRendered Callback} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onrendered onRendered Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions.
    * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
    */
   onRendered?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
+   * Lifecycle callback - invoked after the component is updated (re-rendered).
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onupdated onUpdated Callback} for more details.
+   * @param params The callback parameters including component instance, state, settings, and helper functions.
+   * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
+   */
+  onUpdated?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
+  /**
    * Lifecycle callback - invoked after the component is destroyed.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#ondestroyed onDestroyed Callback} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#ondestroyed onDestroyed Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions.
    * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
    */
   onDestroyed?: (params: CallParams<TState, TSettings, ReturnType<TCreateComponent>, TProperties>) => void;
   /**
    * Lifecycle callback - invoked after the theme changes.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#onthemechanged onThemeChanged Callback} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onthemechanged onThemeChanged Callback} for more details.
    * @param params The callback parameters including component instance, state, settings, and helper functions.
    * You can destructure this parameter to access specific properties (e.g., `{ el, self, settings }`).
    */
@@ -285,30 +292,30 @@ export interface DefineComponentOptions<
    * @param attributeName The name of the attribute that changed
    * @param oldValue The previous value
    * @param newValue The new value
-   * See {@link https://next.semantic-ui.com/components/lifecycle#onattributechanged onAttributeChanged Callback} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#onattributechanged onAttributeChanged Callback} for more details.
    */
   onAttributeChanged?: (attributeName: string, oldValue: string | null, newValue: string | null) => void;
 
   /**
    * Settings are reactive values which can be modified from outside the component.
-   * See {@link https://next.semantic-ui.com/components/rendering#settings Component Settings} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/rendering#settings Component Settings} for more details.
    */
   defaultSettings?: TSettings; // Use generic type
   /**
    * State is an internal reactive data store for your component
-   * See {@link https://next.semantic-ui.com/components/rendering#state Component State} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/rendering#state Component State} for more details.
    */
   defaultState?: TState; // Use generic type
 
   /**
    * Subtemplates are a mapping of template names to template instances that can be used in your template.
-   * See {@link https://next.semantic-ui.com/templates/subtemplates Subtemplates} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/templates/subtemplates Subtemplates} for more details.
    */
   subTemplates?: Record<string, Function>;
 
   /**
    * The rendering engine to use. Note 'lit' is the only rendering engine currently implemented.
-   * See {@link https://next.semantic-ui.com/components/rendering Rendering} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/rendering Rendering} for more details.
    */
   renderingEngine?: string;
 
@@ -340,7 +347,7 @@ export interface DefineComponentOptions<
  *
  * @param options - The options for defining the component.
  * @returns The custom element class (if `tagName` is provided) or template.
- * See {@link https://next.semantic-ui.com/components Creating Components} for more information.
+ * See {@link https://next.semantic-ui.com/docs/components Creating Components} for more information.
  */
 export function defineComponent<
   TState extends Record<string, any> = Record<string, any>,
@@ -361,17 +368,17 @@ export function defineComponent<
  * The base class for the generated web components.
  * Extends LitElement and provides common functionality.  You don't use this
  * directly; `defineComponent` generates a subclass of this.
- * See {@link https://next.semantic-ui.com/components Components} for more details.
+ * See {@link https://next.semantic-ui.com/docs/components Components} for more details.
  */
 export declare class UIWebComponent extends WebComponentBase {
   /**
    * Styles.
-   * See {@link https://next.semantic-ui.com/components/create#css CSS} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#css CSS} for more details.
    */
   static styles: CSSResult;
   /**
    * Template.
-   * See {@link https://next.semantic-ui.com/components/create#template Template} for more details.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/create#template Template} for more details.
    */
   static template: Template;
   /**
@@ -398,7 +405,7 @@ export declare class UIWebComponent extends WebComponentBase {
   settings: Record<string, any>;
   /**
    * The template.
-   * See {@link https://next.semantic-ui.com/templates Template} for more details.
+   * See {@link https://next.semantic-ui.com/docs/templates Template} for more details.
    */
   template?: Template;
   /**
@@ -415,7 +422,7 @@ export declare class UIWebComponent extends WebComponentBase {
   constructor();
   /**
    * Connected callback.
-   * See {@link https://next.semantic-ui.com/components/lifecycle Lifecycle} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
    */
   connectedCallback(): void;
   /**
@@ -424,29 +431,29 @@ export declare class UIWebComponent extends WebComponentBase {
   triggerAttributeChange(): void;
   /**
    * Will update.
-   * See {@link https://next.semantic-ui.com/components/lifecycle Lifecycle} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
    * @param _changedProperties
    */
   willUpdate(_changedProperties: PropertyValues): void;
 
   /**
    * Lit First updated callback
-   * See {@link https://next.semantic-ui.com/components/lifecycle#callback-sequence Rendering} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
    */
   firstUpdated(): void;
   /**
    * Lit Updated callback
-   * See {@link https://next.semantic-ui.com/components/lifecycle#callback-sequence Rendering} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
    */
   updated(): void;
   /**
    * Lit Disconnected callback.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#callback-sequence Rendering} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
    */
   disconnectedCallback(): void;
   /**
    * Lit Adopted callback
-   * See {@link https://next.semantic-ui.com/components/lifecycle#callback-sequence Rendering} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
    */
   adoptedCallback(): void;
   /**
@@ -454,7 +461,7 @@ export declare class UIWebComponent extends WebComponentBase {
    * @param attribute - The name of the attribute that changed.
    * @param oldValue - The previous value of the attribute.
    * @param newValue - The new value of the attribute.
-   * See {@link https://next.semantic-ui.com/components/lifecycle Lifecycle} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle Lifecycle} for more information.
    */
   attributeChangedCallback(attribute: string, oldValue: string | null, newValue: string | null): void;
   /**
@@ -477,7 +484,7 @@ export declare class UIWebComponent extends WebComponentBase {
 
   /**
    * Renders the component.
-   * See {@link https://next.semantic-ui.com/components/lifecycle#callback-sequence Rendering} for more information.
+   * See {@link https://next.semantic-ui.com/docs/guides/components/lifecycle#callback-sequence Rendering} for more information.
    * @returns {any} Returns rendered element
    */
   render(): any;

@@ -1,0 +1,120 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Components
+icon: box
+description: API reference for interacting with Semantic UI components
+package: "@semantic-ui/query"
+methods: ["component", "initialize", "settings", "setting", "dataContext"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Access and configure Semantic UI web components through Query.
+
+## Instances
+
+### component
+
+```javascript
+$('selector').component()
+```
+
+Retrieves the component instance from a web component.
+
+#### Returns
+
+Component instance, or `undefined` if not found.
+
+#### Example
+
+<PlaygroundExample id="query-component" direction="horizontal"></PlaygroundExample>
+
+### initialize
+
+```javascript
+$('selector').initialize(settings)
+```
+
+Initializes a component with settings before it renders in the DOM.
+
+#### Parameters
+
+| Name     | Type   | Description                    |
+|----------|--------|--------------------------------|
+| settings | object | Setting key-value pairs        |
+
+#### Returns
+
+Query object for chaining.
+
+#### Example
+
+<PlaygroundExample id="query-initialize" direction="horizontal"></PlaygroundExample>
+
+## Settings
+
+### settings
+
+```javascript
+$('selector').settings()
+$('selector').settings(newSettings)
+```
+
+Gets or sets component settings. Useful for passing data that cannot be stringified into attributes.
+
+#### Parameters
+
+| Name        | Type   | Description             |
+|-------------|--------|-------------------------|
+| newSettings | object | Settings to apply       |
+
+#### Returns
+
+Settings object when getting, Query object when setting.
+
+#### Example
+
+<PlaygroundExample id="query-settings" direction="horizontal"></PlaygroundExample>
+
+### setting
+
+```javascript
+$('selector').setting(name)
+$('selector').setting(name, value)
+```
+
+Gets or sets a single component setting.
+
+#### Parameters
+
+| Name  | Type   | Description             |
+|-------|--------|-------------------------|
+| name  | string | Name of the setting     |
+| value | any    | Value to set            |
+
+#### Returns
+
+Setting value when getting, Query object when setting.
+
+#### Example
+
+<PlaygroundExample id="query-setting" direction="horizontal"></PlaygroundExample>
+
+## Data
+
+### dataContext
+
+```javascript
+$('selector').dataContext()
+```
+
+Retrieves the data context associated with a component.
+
+#### Returns
+
+Data context object, or `undefined` if not found.
+
+#### Example
+
+<PlaygroundExample id="query-datacontext" direction="horizontal"></PlaygroundExample>

@@ -7,6 +7,7 @@ import type { LitElement, PropertyDeclaration, PropertyValues } from 'lit';
  * Base class for Semantic UI web components.
  * Extends LitElement with additional functionality for styling, settings, and state management.
  * You typically won't extend this class directly - use `defineComponent` instead.
+ * @see {@link https://next.semantic-ui.com/docs/api/component/web-component-base WebComponentBase API Reference}
  */
 export declare class WebComponentBase extends LitElement {
   /**

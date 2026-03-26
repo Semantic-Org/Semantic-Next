@@ -1,0 +1,36 @@
+/*******************************
+       Light Theme - Borders
+*******************************/
+
+html,
+.light.theme.theme,
+[light][light],
+[theme][theme="light"] {
+
+  /* -------------------
+       Border Colors
+  -------------------- */
+
+  /* Base border color values (hand-tuned for contrast) */
+  --black-border-lch: 0.2 0.01 279.32;
+  --white-border-lch: 0.96 0.01 279.32;
+
+  /* Theme mutable border base */
+  --standard-border-color: var(--black-border-lch);
+  --inverted-border-color: var(--white-border-lch);
+
+  /* Black borders - theme immutable */
+  --black-border-color: oklch(var(--black-border-lch) / 10%);
+  --selected-black-border-color: oklch(var(--black-border-lch) / 50%);
+
+  /* White borders - theme immutable */
+  --white-border-color: oklch(var(--white-border-lch) / 10%);
+  --selected-white-border-color: oklch(var(--white-border-lch) / 50%);
+
+  /* Solid borders */
+  --solid-internal-border-color: var(--standard-solid-5);
+  --solid-border-color: var(--standard-solid-10);
+  --solid-black-border-color: var(--black-solid-10);
+  --solid-white-border-color: var(--white-solid-10);
+
+}

@@ -1,0 +1,168 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: package
+title: Spec Helpers
+description: Reusable constants and helpers for common component patterns
+package: '@semantic-ui/specs'
+methods: ['getVariations', 'getStates', 'modifyVariation']
+---
+
+The `@semantic-ui/specs` package provides shared constants and helper functions for common component patterns. These reduce duplication when authoring specs.
+
+## Helper Functions
+
+### getVariations()
+
+Get multiple variation constants at once.
+
+#### Syntax
+
+```javascript
+getVariations(names)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| names | Array | Array of variation names |
+
+#### Returns
+
+Array of variation objects.
+
+#### Usage
+
+```javascript
+import { getVariations } from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    ...getVariations(['size', 'colored', 'fluid', 'compact']),
+    // Add custom variations
+  ],
+};
+```
+
+Available variations: `size`, `colored`, `floated`, `attached`, `compact`, `padded`, `circular`, `fluid`
+
+### getStates()
+
+Get multiple state constants at once.
+
+#### Syntax
+
+```javascript
+getStates(names)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| names | Array | Array of state names |
+
+#### Returns
+
+Array of state objects.
+
+#### Usage
+
+```javascript
+import { getStates } from '@semantic-ui/specs';
+
+export default {
+  states: getStates(['hover', 'focus', 'active', 'disabled', 'loading']),
+};
+```
+
+Available states: `hover`, `focus`, `active`, `loading`, `pressed`, `disabled`
+
+### modifyVariation()
+
+Customize a variation with overrides.
+
+#### Syntax
+
+```javascript
+modifyVariation(variation, overrides)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| variation | Object | Variation object to modify |
+| overrides | Object | Properties to override |
+
+#### Returns
+
+Modified variation object.
+
+#### Usage
+
+```javascript
+import { SIZE_VARIATION, modifyVariation } from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    modifyVariation(SIZE_VARIATION, {
+      usageLevel: 3,
+    }),
+  ],
+};
+```
+
+## Variation Constants
+
+Complete variation objects ready to use.
+
+```javascript
+import { SIZE_VARIATION, COLORED_VARIATION } from '@semantic-ui/specs';
+
+export default {
+  variations: [SIZE_VARIATION, COLORED_VARIATION],
+};
+```
+
+Available variation constants: `SIZE_VARIATION`, `COLORED_VARIATION`, `FLOATED_VARIATION`, `ATTACHED_VARIATION`, `COMPACT_VARIATION`, `PADDED_VARIATION`, `CIRCULAR_VARIATION`, `FLUID_VARIATION`
+
+## State Constants
+
+Complete state objects ready to use.
+
+```javascript
+import { DISABLED_STATE, LOADING_STATE } from '@semantic-ui/specs';
+
+export default {
+  states: [DISABLED_STATE, LOADING_STATE],
+};
+```
+
+Available state constants: `HOVER_STATE`, `FOCUS_STATE`, `ACTIVE_STATE`, `LOADING_STATE`, `PRESSED_STATE`, `DISABLED_STATE`
+
+## Options Arrays
+
+Pre-defined option arrays for custom variations.
+
+```javascript
+import { COLOR_OPTIONS, SIZE_OPTIONS } from '@semantic-ui/specs';
+
+export default {
+  variations: [
+    {
+      name: 'Tint',
+      attribute: 'tint',
+      options: COLOR_OPTIONS,
+    },
+    {
+      name: 'Size',
+      attribute: 'size',
+      options: SIZE_OPTIONS,
+    },
+  ],
+};
+```
+
+Available options arrays: `COLOR_OPTIONS`, `SIZE_OPTIONS`, `FLOATED_OPTIONS`, `ATTACHED_OPTIONS`, `COMPACT_OPTIONS`, `PADDED_OPTIONS`, `HORIZONTAL_ALIGNED_OPTIONS`, `VERTICAL_ALIGNED_OPTIONS`, `EMPHASIS_OPTIONS`

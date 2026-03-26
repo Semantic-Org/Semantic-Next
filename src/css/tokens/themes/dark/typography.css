@@ -1,0 +1,25 @@
+/*******************************
+      Dark Theme - Typography
+*******************************/
+
+html.dark,
+.dark.theme.theme,
+[dark][dark],
+[theme][theme="dark"] {
+
+  /* -------------------
+       Text Colors
+  -------------------- */
+
+  /* Hand-tuned for dark mode contrast */
+  --text-color: var(--standard-90);
+  --header-color: var(--standard-100);
+
+  /* -------------------
+          Links
+  -------------------- */
+
+  --link-color: oklch(0.74 0.15 249.95);
+  --link-hover-color: oklch(0.7 0.18 250.31);
+
+}

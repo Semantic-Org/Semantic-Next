@@ -2,14 +2,17 @@ import { html, svg } from 'lit';
 
 import { Reaction, Signal } from '@semantic-ui/reactivity';
 import {
+  assignInPlace,
   each,
   fatal,
   filterObject,
   hashCode,
+  inArray,
   isArray,
   isFunction,
   isPlainObject,
   isString,
+  keys,
   mapObject,
   wrapFunction,
 } from '@semantic-ui/utils';
@@ -29,13 +32,21 @@ export class LitRenderer {
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
 
-  static useSubtreeCache = false; // experimental
+  static useSubtreeCache = true;
 
-  static getID({ ast, data, isSVG } = {}) {
+  static getID({ ast, key, position, isSVG } = {}) {
+    if (key !== undefined) {
+      return hashCode({ ast, key });
+    }
+    if (position !== undefined) {
+      return hashCode({ ast, position });
+    }
     return hashCode({ ast });
   }
 
-  constructor({ ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true }) {
+  constructor(
+    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
+  ) {
     this.ast = ast || '';
     this.data = data;
     this.renderTrees = {}; // stores templates but garbage collectable
@@ -47,7 +58,9 @@ export class LitRenderer {
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
+    this.protectedKeys = protectedKeys; // keys scoped to this subtree (loop vars, async results) that parent updates cannot overwrite
     this.id = LitRenderer.getID({ ast, data, isSVG });
+    this.dataVersion = new Signal(0);
   }
 
   resetHTML() {
@@ -72,8 +85,20 @@ export class LitRenderer {
   cachedRender(data) {
     if (data) {
       this.updateData(data);
+      this.bumpDataVersion();
     }
     return this.litTemplate;
+  }
+
+  bumpDataVersion() {
+    this.dataVersion.increment();
+    each(this.renderTrees, (ref) => {
+      const tree = ref.deref();
+      if (tree?.inheritsData) {
+        tree.updateData(this.data, { respectProtectedKeys: true });
+        tree.bumpDataVersion();
+      }
+    });
   }
 
   readAST({ ast = this.ast, data = this.data } = {}) {
@@ -177,11 +202,11 @@ export class LitRenderer {
       }
       return value;
     };
-    
+
     // Store original expressions for debugging
     node.expressionString = node.expression;
     node.keyString = node.key;
-    
+
     let rerenderArguments = mapObject(node, directiveMap);
     return reactiveRerender(rerenderArguments);
   }
@@ -202,10 +227,12 @@ export class LitRenderer {
           return this.renderContent({
             ast: value,
             data,
+            protectedKeys: keys(asyncData),
           });
         };
       }
       if (key == 'loadingContent') {
+        if (!value.length) { return null; }
         return () => {
           return this.renderContent({
             ast: value,
@@ -214,12 +241,14 @@ export class LitRenderer {
         };
       }
       if (key == 'errorContent') {
+        if (!value.length) { return null; }
         return (errorData) => {
           // error data contains the error context
           data = { ...this.data, ...errorData };
           return this.renderContent({
             ast: value,
             data,
+            protectedKeys: keys(errorData),
           });
         };
       }
@@ -243,12 +272,14 @@ export class LitRenderer {
         };
       }
       if (key == 'content') {
-        return (eachData) => {
+        return (eachData, eachKey) => {
           // each data is (index, this, as) from curent position
           data = { ...this.data, ...eachData };
           return this.renderContent({
             ast: value,
             data,
+            key: eachKey,
+            protectedKeys: keys(eachData),
           });
         };
       }
@@ -287,7 +318,7 @@ export class LitRenderer {
   // returns a function that returns the value in the current data context
   getPackedValue = (expression, data, { reactive = false } = {}) => {
     const getValue = (expressionString) => {
-      const value = this.evaluateExpression(expressionString, data); // easier for breakpoints
+      const value = this.evaluateExpression(expressionString, data);
       return value;
     };
     return (reactive)
@@ -341,6 +372,7 @@ export class LitRenderer {
       inheritsData,
       ast: snippet.content,
       data: snippetData,
+      position: node.position,
     });
   }
 
@@ -365,13 +397,20 @@ export class LitRenderer {
       if (asDirective) {
         const dataArguments = {
           expression,
-          literalValue: () => this.lookupTokenValue(expression, this.data),
-          value: () => this.lookupExpressionValue(expression, this.data),
+          literalValue: () => {
+            this.dataVersion.get();
+            return this.lookupTokenValue(expression, this.data);
+          },
+          value: () => {
+            this.dataVersion.get();
+            return this.lookupExpressionValue(expression, this.data);
+          },
         };
         return reactiveData(dataArguments, { ifDefined, unsafeHTML });
       }
       else {
-        return this.lookupExpressionValue(expression, data);
+        this.dataVersion.get();
+        return this.lookupExpressionValue(expression, this.data);
       }
     }
     return expression;
@@ -661,31 +700,45 @@ export class LitRenderer {
   }
 
   // subtrees are rendered as separate contexts stored as weakrefs for gc
-  renderContent({ ast, data, isSVG = this.isSVG } = {}) {
-    const contentID = LitRenderer.getID({ ast, data, isSVG });
-    const treeRef = this.renderTrees[contentID];
-    const existingTree = treeRef ? treeRef.deref() : undefined;
+  renderContent({ ast, data, key, position, cache = true, isSVG = this.isSVG, protectedKeys } = {}) {
+    if (cache && LitRenderer.useSubtreeCache) {
+      const contentID = LitRenderer.getID({ ast, key, position, isSVG });
+      const treeRef = this.renderTrees[contentID];
+      const existingTree = treeRef ? treeRef.deref() : undefined;
 
-    // this is disabled globally currently as it is experimental
-    if (LitRenderer.useSubtreeCache && existingTree) {
-      return existingTree.cachedRender(data);
+      if (existingTree) {
+        return existingTree.cachedRender(data);
+      }
+
+      const tree = new LitRenderer({
+        ast,
+        data,
+        isSVG,
+        protectedKeys,
+        subTemplates: this.subTemplates,
+        snippets: this.snippets,
+        helpers: this.helpers,
+        template: this.template,
+      });
+      this.treeIDs.push(contentID);
+      this.renderTrees[contentID] = new WeakRef(tree);
+      return tree.render();
     }
 
     const tree = new LitRenderer({
       ast,
       data,
       isSVG,
+      protectedKeys,
       subTemplates: this.subTemplates,
       snippets: this.snippets,
       helpers: this.helpers,
       template: this.template,
     });
-    this.treeIDs.push(contentID);
-    this.renderTrees[contentID] = new WeakRef(tree);
     return tree.render();
   }
   cleanup() {
-    this.renderTrees = [];
+    this.renderTrees = {};
   }
 
   setData(newData) {
@@ -701,7 +754,7 @@ export class LitRenderer {
       // use deref to allow mem cleanup of subtrees
       const tree = ref.deref();
       if (tree?.inheritsData) {
-        tree.updateData(newData);
+        tree.updateData(newData, { respectProtectedKeys: true });
       }
     });
   }
@@ -710,19 +763,13 @@ export class LitRenderer {
     Note this is important to preserve the object reference vs clobbering
     const a = { foo: 'baz' }; const b = a.foo; a.foo = 'bar';
   */
-  updateData(newData, { preserveExistingData = true } = {}) {
-    // if specified remove all existing data before setting new data
-    if (!preserveExistingData) {
-      each(this.data, (value, name) => {
-        delete this.data[name];
-      });
+  updateData(newData, { preserveExistingData = true, respectProtectedKeys = false } = {}) {
+    // filter out keys scoped to this subtree (each loop vars, async results, snippet props)
+    // only during parent propagation, not direct content updates
+    if (respectProtectedKeys && this.protectedKeys) {
+      newData = filterObject(newData, (value, key) => !inArray(key, this.protectedKeys));
     }
-    // add new data
-    each(newData, (value, name) => {
-      if (this.data[name] !== value) {
-        this.data[name] = value;
-      }
-    });
+    assignInPlace(this.data, newData, { preserveExistingKeys: preserveExistingData });
   }
 
   clearTemp() {

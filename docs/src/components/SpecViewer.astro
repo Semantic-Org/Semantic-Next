@@ -1,0 +1,273 @@
+---
+const { spec } = Astro.props;
+
+const sectionKeys = ['types', 'content', 'states', 'variations', 'settings'];
+
+function getValues(item) {
+  if (item.options?.length > 0) {
+    return item.options.map(o => o.value);
+  }
+  return null;
+}
+
+function getAnnotations(item) {
+  const parts = [];
+  if (item.compoundAliases) parts.push('compound');
+  if (item.couplesWith?.length) parts.push(`→ ${item.couplesWith.join(', ')}`);
+  return parts;
+}
+---
+
+<div class="sv">
+  {/* Header */}
+  <div class="sv-line sv-header">
+    <span class="sv-kw">{spec.uiType}</span>{' '}
+    <span class="sv-name">{spec.name}</span>{' '}
+    <span class="sv-tag">{'<'}{spec.tagName}{'>'}</span>{' '}
+    <span class="sv-pn">{'{'}</span>
+  </div>
+  <div class="sv-line">
+    <span class="sv-cm">{'  '}// {spec.description}</span>
+  </div>
+  {spec.exportName && (
+    <div class="sv-line">
+      <span class="sv-cm">{'  '}// export {spec.exportName}</span>
+    </div>
+  )}
+  <div class="sv-line sv-blank"></div>
+
+  {/* Sections */}
+  {sectionKeys.map(key => {
+    const items = spec[key];
+    if (!items?.length) return null;
+
+    return (
+      <details class="sv-section" open>
+        <summary class="sv-line sv-section-head">
+          <span class="sv-i1"></span>
+          <span class="sv-kw">{key}</span>
+          <span class="sv-pn sv-open-only">{' {'}</span>
+          <span class="sv-cm sv-open-only sv-count">{' '}// {items.length}</span>
+          <span class="sv-closed-only sv-pn">{' { \u2026 }'}</span>
+        </summary>
+        <div class="sv-body">
+          {items.map(item => {
+            const values = getValues(item);
+            const annotations = getAnnotations(item);
+            const type = item.type || 'boolean';
+            const attr = item.attribute;
+            const desc = item.description;
+            const hasDefault = item.defaultValue !== undefined;
+
+            if (values) {
+              return (
+                <details class="sv-expandable">
+                  <summary class="sv-line">
+                    <span class="sv-i2"></span>
+                    <span class="sv-attr">{attr}</span>
+                    <span class="sv-pn">: </span>
+                    {values.map((v, i) => (
+                      <>{i > 0 && <span class="sv-pn"> | </span>}<span class="sv-str">"{v}"</span></>
+                    ))}
+                    {annotations.map(a => (
+                      <span class="sv-ann">{' '}[{a}]</span>
+                    ))}
+                    {desc && <span class="sv-cm">{' '}// {desc}</span>}
+                  </summary>
+                  <div class="sv-options">
+                    {item.options.map(opt => (
+                      <div class="sv-line">
+                        <span class="sv-i3"></span>
+                        <span class="sv-str sv-opt-val">"{opt.value}"</span>
+                        {opt.description && <span class="sv-cm"> — {opt.description}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              );
+            }
+
+            return (
+              <div class="sv-line">
+                <span class="sv-i2"></span>
+                <span class="sv-attr">{attr}</span>
+                <span class="sv-pn">: </span>
+                <span class="sv-ty">{type}</span>
+                {hasDefault && (
+                  <><span class="sv-pn"> = </span><span class="sv-df">{JSON.stringify(item.defaultValue)}</span></>
+                )}
+                {annotations.map(a => (
+                  <span class="sv-ann">{' '}[{a}]</span>
+                ))}
+                {desc && <span class="sv-cm">{' '}// {desc}</span>}
+              </div>
+            );
+          })}
+        </div>
+        <div class="sv-line sv-close">
+          <span class="sv-i1"></span>
+          <span class="sv-pn">{'}'}</span>
+        </div>
+      </details>
+    );
+  })}
+
+  {/* Plural */}
+  {spec.supportsPlural && (
+    <>
+      <div class="sv-line sv-blank"></div>
+      <details class="sv-section">
+        <summary class="sv-line sv-section-head">
+          <span class="sv-i1"></span>
+          <span class="sv-kw">plural</span>{' '}
+          <span class="sv-tag">{'<'}{spec.pluralTagName}{'>'}</span>
+          <span class="sv-pn sv-open-only">{' {'}</span>
+          <span class="sv-closed-only sv-pn">{' { \u2026 }'}</span>
+        </summary>
+        <div class="sv-body">
+          {(spec.pluralSharedTypes?.length > 0 || spec.pluralSharedVariations?.length > 0) && (
+            <div class="sv-line">
+              <span class="sv-i2"></span>
+              <span class="sv-kw">shares</span>
+              <span class="sv-pn">: </span>
+              <span class="sv-attr">{[...(spec.pluralSharedTypes || []), ...(spec.pluralSharedVariations || [])].join(', ')}</span>
+            </div>
+          )}
+          <div class="sv-line sv-blank"></div>
+          {spec.pluralOnlyTypes?.map(item => {
+            const values = getValues(item);
+            return (
+              <div class="sv-line">
+                <span class="sv-i2"></span>
+                <span class="sv-attr">{item.attribute}</span>
+                <span class="sv-pn">: </span>
+                {values ? (
+                  values.map((v, i) => (
+                    <>{i > 0 && <span class="sv-pn"> | </span>}<span class="sv-str">"{v}"</span></>
+                  ))
+                ) : (
+                  <span class="sv-ty">boolean</span>
+                )}
+                {item.description && <span class="sv-cm">{' '}// {item.description}</span>}
+              </div>
+            );
+          })}
+          {spec.pluralOnlyVariations?.map(item => {
+            const values = getValues(item);
+            return (
+              <div class="sv-line">
+                <span class="sv-i2"></span>
+                <span class="sv-attr">{item.attribute}</span>
+                <span class="sv-pn">: </span>
+                {values ? (
+                  values.map((v, i) => (
+                    <>{i > 0 && <span class="sv-pn"> | </span>}<span class="sv-str">"{v}"</span></>
+                  ))
+                ) : (
+                  <span class="sv-ty">boolean</span>
+                )}
+                {item.description && <span class="sv-cm">{' '}// {item.description}</span>}
+              </div>
+            );
+          })}
+          {spec.pluralContent?.map(item => (
+            <div class="sv-line">
+              <span class="sv-i2"></span>
+              <span class="sv-attr">{item.name?.toLowerCase()}</span>
+              {item.description && <span class="sv-cm">{' '}// {item.description}</span>}
+            </div>
+          ))}
+        </div>
+        <div class="sv-line sv-close">
+          <span class="sv-i1"></span>
+          <span class="sv-pn">{'}'}</span>
+        </div>
+      </details>
+    </>
+  )}
+
+  <div class="sv-line">
+    <span class="sv-pn">{'}'}</span>
+  </div>
+</div>
+
+<style>
+  .sv {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+    font-size: var(--code-font-size, 14px);
+    line-height: 1.75;
+    background: var(--code-background);
+    border: var(--border);
+    border-radius: var(--border-radius, 8px);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sv-line { white-space: nowrap; }
+  .sv-blank { height: 0.5em; }
+
+  /* Syntax tokens */
+  .sv-kw   { color: var(--code-purple); }
+  .sv-name { color: var(--code-default); font-size: 15px; font-weight: 600; }
+  .sv-tag  { color: var(--code-blue); }
+  .sv-attr { color: var(--code-default); }
+  .sv-str  { color: var(--code-orange); }
+  .sv-ty   { color: var(--code-red); }
+  .sv-pn   { color: var(--code-grey); }
+  .sv-cm   { color: var(--code-comment-color); font-style: italic; }
+  .sv-df   { color: var(--code-orange); }
+  .sv-ann  { color: var(--code-blue); font-size: 11px; }
+
+  /* Indentation */
+  .sv-i1 { display: inline-block; width: 2ch; }
+  .sv-i2 { display: inline-block; width: 4ch; }
+  .sv-i3 { display: inline-block; width: 6ch; }
+
+  /* Sections — details/summary */
+  .sv-section { margin: 0; }
+  .sv-section > summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+  .sv-section > summary::-webkit-details-marker { display: none; }
+  .sv-section > summary::marker { display: none; content: ''; }
+
+  .sv-section[open] .sv-closed-only { display: none; }
+  .sv-section:not([open]) .sv-open-only { display: none; }
+  .sv-section:not([open]) .sv-close { display: none; }
+
+  .sv-section-head:hover .sv-kw { opacity: 0.8; }
+
+  /* Expandable items */
+  .sv-expandable { margin: 0; }
+  .sv-expandable > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  .sv-expandable > summary::-webkit-details-marker { display: none; }
+  .sv-expandable > summary::marker { display: none; content: ''; }
+  .sv-expandable > summary .sv-attr {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
+  }
+  .sv-expandable > summary:hover .sv-attr {
+    text-decoration-color: color-mix(in srgb, var(--code-default) 30%, transparent);
+  }
+
+  /* Option list */
+  .sv-options {
+    border-left: 1px solid var(--code-grey);
+    margin-left: 5ch;
+  }
+  .sv-opt-val {
+    display: inline-block;
+    min-width: 16ch;
+  }
+
+  /* Count */
+  .sv-count { font-style: italic; }
+</style>

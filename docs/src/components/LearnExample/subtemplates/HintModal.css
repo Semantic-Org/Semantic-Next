@@ -14,7 +14,7 @@ ui-modal.hint {
     font-size: 13px;
     font-weight: bold;
     color: var(--primary-text-color);
-    margin-bottom: var(--spacing);
+    margin-bottom: var(--margin);
   }
   .text {
     line-height: 1.8;

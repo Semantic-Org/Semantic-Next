@@ -1,0 +1,46 @@
+{
+  "1": {
+    "visual": "A simple house outline with a rectangular door or window at the bottom center. The roof is a triangular/peaked shape merging into the walls, forming a classic home silhouette.",
+    "usage": "Home/start page navigation, returning to the main dashboard, breadcrumb root link, homepage button in a navigation bar."
+  },
+  "2": {
+    "visual": "A mask shape resembling a masquerade or theater mask with two large eye cutouts. The top has two rounded ear-like or horn-like peaks and the bottom curves inward at the center.",
+    "usage": "Privacy or incognito mode toggle, anonymous browsing indicator, theater or entertainment section, identity concealment or disguise feature."
+  },
+  "3": {
+    "visual": "A trash can or waste bin outline with a lid on top and two vertical lines inside the body representing slats or divisions on the bin.",
+    "usage": "Delete action on items or records, remove items from a list or cart, clear/empty content, move files to trash."
+  },
+  "4": {
+    "visual": "A diagonal wand or stick with small sparkle/star shapes (four-pointed crosses) scattered around its tip, suggesting a magic wand emitting sparkles.",
+    "usage": "Auto-enhance or auto-fix feature, AI-powered or magic editing tool, apply visual effects or filters, smart suggestion or auto-complete action."
+  },
+  "5": {
+    "visual": "A fingerprint pattern made of curved concentric lines and ridges, clearly depicting the unique swirl pattern of a human fingerprint.",
+    "usage": "Biometric authentication or login, identity verification, touch ID or fingerprint scanning feature, security settings related to biometric access."
+  },
+  "6": {
+    "visual": "A pie chart with one quarter-sized wedge separated or pulled out slightly from the rest of the circle. The circle is drawn as an open arc (approximately three-quarters) with the wedge in the upper-right quadrant.",
+    "usage": "Analytics or reporting dashboard, data visualization section, statistics or metrics overview, financial or budget breakdown display."
+  },
+  "7": {
+    "visual": "A four-pointed star or sparkle shape with elongated points, accompanied by a small circle with a dot at the lower-left and a small plus sign at the upper-right. The overall impression is a decorative sparkle or AI/magic symbol.",
+    "usage": "AI-powered feature or generative AI action, sparkle or highlight effect, add new magic/smart action, featured or premium content indicator."
+  },
+  "8": {
+    "visual": "A shield outline with a checkmark (tick) centered inside it. The shield has a pointed bottom and curved upper edges, representing protection or verified security.",
+    "usage": "Security verification or trust badge, verified/authenticated status indicator, protection or safety feature, secure connection or encrypted content."
+  },
+  "9": {
+    "visual": "Two curved arrows forming a circular loop, pointing in a counterclockwise direction. The arrows chase each other in a cycle, representing refresh or sync.",
+    "usage": "Refresh or reload content, sync data between devices or services, retry a failed operation, update or re-fetch information."
+  },
+  "10": {
+    "visual": "A floppy disk icon shown as a square with a notched upper-right corner and a rectangular section in the lower-right area representing the disk's label. The overall shape is the classic save/floppy disk silhouette.",
+    "usage": "Save current document or file, save changes action, download or export content, persist form data or user input."
+  },
+  "11": {
+    "visual": "An Erlenmeyer flask (conical laboratory flask) outline with a narrow neck at the top widening to a broad triangular base. It is empty and depicted as a simple line drawing.",
+    "usage": "Science or laboratory section, experimental or beta feature indicator, chemistry or research-related content, filter or funnel functionality in some contexts."
+  }
+}

@@ -1,0 +1,12 @@
+/*******************************
+      Text Content Variables
+*******************************/
+
+:host {
+  /* Text content styling */
+  --divider-text-padding: 0 var(--16px);
+  --divider-text-font-weight: 700;
+  --divider-text-letter-spacing: 0.05em;
+  --divider-text-transform: uppercase;
+  --divider-text-color: var(--text-color);
+}

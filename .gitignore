@@ -4,13 +4,13 @@ coverage/
 playwright_report/
 dev/examples/
 dev/ui/
-html/
 docs/dist/
 dist/
 tests/results/
 tests/test-case/dist
 
 # for my ai friends
+ai/artifacts/prompts
 ai/meta/agent-guestbook.md
 ai/meta/jisei.md
 

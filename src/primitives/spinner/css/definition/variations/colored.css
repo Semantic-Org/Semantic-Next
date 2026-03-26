@@ -1,0 +1,17 @@
+/*-------------------
+       Colors
+--------------------*/
+
+.red.spinner { --spinner-color: var(--red); }
+.orange.spinner { --spinner-color: var(--orange); }
+.yellow.spinner { --spinner-color: var(--yellow); }
+.olive.spinner { --spinner-color: var(--olive); }
+.green.spinner { --spinner-color: var(--green); }
+.teal.spinner { --spinner-color: var(--teal); }
+.blue.spinner { --spinner-color: var(--blue); }
+.violet.spinner { --spinner-color: var(--violet); }
+.purple.spinner { --spinner-color: var(--purple); }
+.pink.spinner { --spinner-color: var(--pink); }
+.brown.spinner { --spinner-color: var(--brown); }
+.grey.spinner { --spinner-color: var(--grey); }
+.slate.spinner { --spinner-color: var(--slate); }

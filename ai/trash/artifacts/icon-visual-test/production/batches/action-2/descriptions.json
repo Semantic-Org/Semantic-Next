@@ -1,0 +1,122 @@
+{
+  "1": {
+    "visual": "Two interlocking chain links forming a connected pair, oriented diagonally.",
+    "usage": "copy link to clipboard, insert hyperlink, share URL, linked content indicator"
+  },
+  "2": {
+    "visual": "A checklist with two rows, each showing a bold checkmark on the left and a horizontal line on the right.",
+    "usage": "task list, to-do items, completed items view, checklist management"
+  },
+  "3": {
+    "visual": "Two arrows pointing diagonally outward in opposite corners with a dashed line between them, indicating expansion.",
+    "usage": "expand to full screen, enlarge panel, zoom out view, resize element"
+  },
+  "4": {
+    "visual": "A single upward arrow whose shaft splits into two diverging branches at the top.",
+    "usage": "merge branches upward, combine inputs, git merge, consolidate paths"
+  },
+  "5": {
+    "visual": "Two arrows pointing diagonally inward toward each other from opposite corners.",
+    "usage": "compress view, collapse panel, shrink to fit, exit full screen"
+  },
+  "6": {
+    "visual": "A single short horizontal dash or minus sign with rounded ends.",
+    "usage": "remove item, collapse section, decrease quantity, subtract value"
+  },
+  "7": {
+    "visual": "A cursor pointer arrow with short radiating lines around its tip indicating a click action.",
+    "usage": "click interaction, cursor state, interactive element highlight, pointer event"
+  },
+  "8": {
+    "visual": "Four arrows pointing outward in all four cardinal directions from a shared center point.",
+    "usage": "drag and move, pan canvas, reposition element, move tool"
+  },
+  "9": {
+    "visual": "A paper clip in the classic diagonal oval orientation.",
+    "usage": "attach file, add attachment, link document, email attachment"
+  },
+  "10": {
+    "visual": "A pencil oriented diagonally with the tip pointing down-left and flat end at upper-right.",
+    "usage": "edit content, rename item, compose message, annotate"
+  },
+  "11": {
+    "visual": "A thumbtack or pushpin viewed from the front with a wide flat head and short vertical stem.",
+    "usage": "pin item, save to top, bookmark location, keep message visible"
+  },
+  "12": {
+    "visual": "A thumbtack or pushpin with a diagonal slash through it indicating the pin is disabled or off.",
+    "usage": "unpin item, remove pin, disable pinned state, unpin from top"
+  },
+  "13": {
+    "visual": "A plus sign with four equal-length arms of uniform thickness.",
+    "usage": "add new item, create record, insert element, expand list"
+  },
+  "14": {
+    "visual": "An arrow that curves to the left then bends to point right, like a forward or redo curve.",
+    "usage": "redo action, forward message, redirect, reply forward"
+  },
+  "15": {
+    "visual": "Two circular arcs forming a full rotation loop with arrowheads at each end pointing in opposite directions.",
+    "usage": "refresh content, sync data, reload page, retry action"
+  },
+  "16": {
+    "visual": "A small solid square at lower-left with a downward arrow above it and a dotted partial square at upper-right, suggesting drag-and-drop.",
+    "usage": "drag into position, drop into slot, import to canvas, place element"
+  },
+  "17": {
+    "visual": "A rocket ship pointing diagonally up-right with a rounded body, pointed nose, and flame tail.",
+    "usage": "launch product, deploy release, boost performance, start campaign"
+  },
+  "18": {
+    "visual": "A circular arrow forming nearly a full circle with the arrowhead on the left pointing counterclockwise.",
+    "usage": "undo action, revert change, go back in history, reset to previous"
+  },
+  "19": {
+    "visual": "A circular arrow forming nearly a full circle with the arrowhead on the right pointing clockwise.",
+    "usage": "redo action, refresh, rotate clockwise, restore forward state"
+  },
+  "20": {
+    "visual": "A floppy disk with a rectangular body and a notched label area on the upper portion.",
+    "usage": "save file, save document, export data, save settings"
+  },
+  "21": {
+    "visual": "Four right-angle corner brackets at each corner of an empty square frame with open space in the center.",
+    "usage": "full screen mode, focus view, frame selection, scan or capture area"
+  },
+  "22": {
+    "visual": "A pair of scissors open at an angle with two circular handle loops and two crossing blades.",
+    "usage": "cut selection, remove segment, clip content, cut to clipboard"
+  },
+  "23": {
+    "visual": "A magnifying glass with a circular lens and a handle at the lower-right.",
+    "usage": "search content, find in page, look up record, filter results"
+  },
+  "24": {
+    "visual": "An upward arrow rising out of an open-topped tray or box shape at the bottom.",
+    "usage": "share content, upload file, export item, send from device"
+  },
+  "25": {
+    "visual": "A single downward stem that forks into two arrows pointing diagonally up-left and up-right.",
+    "usage": "split options, fork into branches, distribute to multiple targets, diverge paths"
+  },
+  "26": {
+    "visual": "A hand with thumb pointing downward and fingers curled, the thumbs-down gesture.",
+    "usage": "dislike, downvote, negative feedback, reject suggestion"
+  },
+  "27": {
+    "visual": "A hand with thumb pointing upward and fingers curled, the thumbs-up gesture.",
+    "usage": "like, upvote, approve, positive feedback"
+  },
+  "28": {
+    "visual": "A trash can with a lid, a small handle tab on top, and two vertical lines on the body.",
+    "usage": "delete item, remove record, discard draft, empty trash"
+  },
+  "29": {
+    "visual": "An arrow that curves upward to the right then bends to point left, like a reply or undo curve.",
+    "usage": "undo action, reply to message, go back, revert step"
+  },
+  "30": {
+    "visual": "Two broken chain link halves separating apart with small tick marks at the break points.",
+    "usage": "unlink URL, remove hyperlink, break connection, detach relationship"
+  }
+}

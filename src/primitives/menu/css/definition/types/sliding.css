@@ -1,0 +1,33 @@
+.sliding.menu {
+  position: relative;
+  gap: var(--menu-sliding-gap);
+  padding: var(--menu-sliding-padding);
+  border-radius: var(--menu-sliding-border-radius);
+  background: var(--menu-sliding-background);
+  border: var(--menu-sliding-border);
+
+  ::slotted(*),
+  menu-item {
+    --menu-item-padding: var(--menu-sliding-item-padding);
+    --menu-item-color: var(--menu-sliding-item-color);
+    --menu-item-hover-color: var(--menu-sliding-item-hover-color);
+    --menu-item-hover-background: transparent;
+    --menu-item-active-background: transparent;
+    --menu-item-active-color: var(--menu-sliding-item-active-color);
+    --menu-item-active-font-weight: var(--bold);
+
+    position: relative;
+    z-index: 1;
+  }
+
+  .indicator {
+    position: absolute;
+    top: var(--menu-sliding-padding);
+    bottom: var(--menu-sliding-padding);
+    background: var(--menu-sliding-indicator-background);
+    border-radius: var(--menu-sliding-indicator-border-radius);
+    box-shadow: var(--menu-sliding-indicator-shadow);
+    transition: var(--menu-sliding-indicator-transition);
+    z-index: 0;
+  }
+}

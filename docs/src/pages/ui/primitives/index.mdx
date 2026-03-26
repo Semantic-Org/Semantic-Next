@@ -1,0 +1,24 @@
+---
+layout: '@layouts/Guide.astro'
+
+---
+
+import { primitivePages } from '@helpers/menus.js';
+import { Cards, Card, Image } from '@semantic-ui/core';
+
+## Primitives
+
+<Cards three>
+  {(primitivePages || []).map((page) => (
+    <Card href={page.url}>
+        <div slot="header">{page.name}</div>
+        <div class="description" slot="description">
+          {page.imageSrc && (
+          <>
+            <ui-image src={page.imageSrc} darkSrc={page.darkImageSrc} class="image"></ui-image>
+          </>
+        )}
+        </div>
+      </Card>
+  ))}
+</Cards>

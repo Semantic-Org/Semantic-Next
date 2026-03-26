@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/segment-component.js';
-import template from './segment.html?raw';
 import css from './segment-bundle.css?raw';
+import template from './segment.html?raw';
+import componentSpec from './specs/segment.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UISegment = defineComponent({
+const Segment = defineComponent({
   tagName: 'ui-segment',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UISegment = defineComponent({
   createComponent,
 });
 
-export { UISegment };
+export { Segment };

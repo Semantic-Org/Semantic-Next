@@ -12,7 +12,7 @@
   <playground-preview part="preview" project="source" html-file="page.html"> </playground-preview>
 {else if is tab 'ast'}
   <header>
-      The AST is a representation of the template content, for more information <a href="/api/templating/ast" target="_blank">see the AST docs</a>.
+      The AST is a representation of the template content, for more information <a href="/docs/api/templating/ast" target="_blank">see the AST docs</a>.
   </header>
   <pretty-json expand="4">
     {stringify ast}
@@ -21,8 +21,8 @@
 
 {#snippet links}
   <div class="links">
-    <a href="{exampleURL}" class="sandbox link">
-      <ui-icon codesandbox link></ui-icon>
+    <a href="{exampleURL}" class="sandbox link" data-text="View in Playground">
+      <ui-icon terminal link></ui-icon>
     </a>
   </div>
 {/snippet}

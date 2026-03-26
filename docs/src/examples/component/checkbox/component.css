@@ -39,7 +39,7 @@
     user-select: none;
     font-weight: var(--bold);
     transition: var(--transition);
-    margin-left: var(--compact-spacing);
+    margin-left: var(--margin-xs);
   }
 
   & input:checked {

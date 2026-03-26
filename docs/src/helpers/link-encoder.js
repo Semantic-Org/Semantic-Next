@@ -1,4 +1,6 @@
 import { each } from '@semantic-ui/utils';
+import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
+import { indentLines } from './injections.js';
 
 // encode files in base 64 for urls
 export const makeBase64UrlSafe = base64 => {
@@ -18,11 +20,14 @@ export const fromBase64UrlSafe = urlSafeBase64 => {
 // Encode an object (mapping file names to content) into a URL-safe Base64 string
 export const encodeObject = object => {
   const json = JSON.stringify(object);
-  const uint8Array = new TextEncoder().encode(json);
+  const uint8Array = strToU8(json);
+  const compressed = deflateSync(uint8Array);
+
   let binary = '';
-  each(uint8Array, byte => {
+  each(compressed, byte => {
     binary += String.fromCharCode(byte);
   });
+
   const base64 = btoa(binary);
   return makeBase64UrlSafe(base64);
 };
@@ -32,7 +37,9 @@ export const decodeObject = encodedData => {
   const base64 = fromBase64UrlSafe(encodedData);
   const binary = atob(base64);
   const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
-  const json = new TextDecoder().decode(bytes);
+  const decompressed = inflateSync(bytes);
+  const json = strFromU8(decompressed);
+
   return JSON.parse(json);
 };
 
@@ -53,12 +60,59 @@ export const getPlaygroundLink = (params, baseUrl = '/playground') => {
   return `${baseUrl}?${queryParams.toString()}`;
 };
 
-export const getCodePlaygroundLink = (code, baseUrl = '/playground') => {
+export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage = true } = {}) => {
+  let pageContent = code;
+  if (wrapPage) {
+    pageContent = `<html>
+<!-- playground-fold -->
+  <head>
+    <!-- Include Semantic UI -->
+    <link href="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.css" rel="stylesheet" />
+    <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.js" type="module"></script>
+
+    <!-- Include Default Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <!-- Playground Code -->
+    <link href="page.css" rel="stylesheet" />
+    <script src="page.js" type="module"></script>
+  </head>
+<!-- playground-fold-end -->
+
+  <body>
+${indentLines(code, 4)}
+  </body>
+</html>
+`;
+  }
+
+  const pageJS = `
+    // handle dark mode for playground
+    if(localStorage.getItem('theme') == 'dark') {
+      document.querySelector('html').classList.add('dark');
+    }
+  `;
+
+  const pageCSS = `
+body {
+  padding: 1rem;
+}
+`;
   const params = {
     files: {
+      'page.js': {
+        contentType: 'text/javascript',
+        content: pageJS,
+      },
+      'page.css': {
+        contentType: 'text/css',
+        content: pageCSS,
+      },
       'page.html': {
         contentType: 'text/html',
-        content: code,
+        content: pageContent,
       },
     },
   };
@@ -76,7 +130,6 @@ export const readPlaygroundLink = queryString => {
         result[key] = decodeObject(value);
       }
       catch (err) {
-        console.error('Error decoding files:', err);
         result[key] = null;
       }
     }

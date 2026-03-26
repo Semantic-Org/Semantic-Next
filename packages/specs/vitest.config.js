@@ -1,9 +1,17 @@
+import { playwright } from '@vitest/browser-playwright';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
     watch: false,
-    reporter: ['default'],
+    pool: 'threads', // ~20% faster than default 'forks' pool
+    reporters: ['default'],
+    coverage: {
+      enabled: false,
+      provider: 'istanbul',
+      reporter: ['text'],
+      include: ['src/**/*.js'],
+    },
     onConsoleLog(log) {
       if (log.includes('Lit is in dev mode.')) { return false; }
     },
@@ -32,7 +40,7 @@ export default defineConfig({
           testTimeout: 30000,
           browser: {
             enabled: true,
-            provider: 'playwright',
+            provider: playwright(),
             headless: true,
             screenshotFailures: false,
             instances: [

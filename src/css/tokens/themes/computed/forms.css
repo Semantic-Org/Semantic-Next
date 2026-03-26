@@ -1,0 +1,17 @@
+/*******************************
+        Computed - Forms
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+       Focus States
+  -------------------- */
+
+  --form-focused-muted-border-color: var(--blue-40);
+
+}

@@ -1,0 +1,4 @@
+.raised.segment,
+.raised.segments {
+  box-shadow: var(--segment-raised-box-shadow);
+}

@@ -1,0 +1,6 @@
+:host {
+  --segment-basic-background: none transparent;
+  --segment-basic-border: none;
+  --segment-basic-box-shadow: none;
+  --segment-basic-border-radius: 0px;
+}

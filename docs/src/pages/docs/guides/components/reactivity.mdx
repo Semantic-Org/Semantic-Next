@@ -1,0 +1,162 @@
+---
+layout: '@layouts/Guide.astro'
+title: 'Reactivity'
+description: 'How to use reactivity inside of components'
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+This guide focuses primarily on reactivity in the context of components, if you want to learn about how reactivity works generally check out the [reactivity package guide](/docs/guides/reactivity).
+
+## Sources of Reactivity
+
+### Reactive Data
+
+Reactivity occurs when a reactive value is modified inside of a reactive context. If you want a value to render reactively, you must have **both a reactive value and a reactive context**.
+
+
+#### Reactive Data Sources
+* State
+* Settings
+* Signal
+
+#### Reactive Data Contexts
+* Template Conditionals
+* Template Loops
+* Template Expressions
+* `Reaction` created inside your component
+
+### Non-Reactive Data
+
+If you want to use or set a variable without triggering reactivity **either a value or context must be non-reactive**.
+
+#### Non-Reactive Data Sources
+* DOM Elements or Properties
+* Properties set on your component
+* `$` or `$$` DOM Query Collections
+
+#### Non-Reactive Data Contexts
+* Component Methods
+* Lifecycle Callbacks
+* Event & Keyboard Handlers
+
+> **Avoiding Reactivity** You can access reactive values with `peek` to avoid reactivity, and use `Reaction.nonreactive` to control the reactivity of a function. For more information see [controlling reactivity](/docs/guides/reactivity/controls).
+
+
+## Component Reactivity
+
+### State Reactivity
+
+Each `state` property becomes a [`signal`](/docs/guides/reactivity/signals) when the component is initialized. Accessing state inside a `reaction` creates a dependency that reruns when the value changes.
+
+```javascript
+const defaultState = {
+  counter: 0
+}
+
+const onCreated = ({state, reaction}) => {
+  reaction(() => {
+    console.log(`Count: ${state.counter.get()}`);
+  });
+  state.counter.increment(); // reaction reruns
+}
+```
+
+State is also reactive in templates.
+```sui
+Counter is: {counter}
+```
+
+
+### Settings Reactivity
+
+Settings are reactive in both reactions and templates.
+
+```javascript
+const defaultSettings = {
+  counter: 0
+}
+
+const onCreated = ({settings, reaction}) => {
+  reaction(() => {
+    console.log(`Count: ${settings.counter}`);
+  });
+  settings.counter++; // reaction reruns
+}
+```
+
+```sui
+Counter is: {counter}
+```
+
+
+### Template Reactivity
+
+Reactive variables can be accessed from inside a template without calling its `get` or `value` helper.
+
+```sui
+<ul>
+  {#each item in items}
+    <li>{item}</li>
+  {/each}
+</ul>
+```
+
+Expressions, loops, and conditionals are reactive contexts by default. If `items` in this example grows the results will update automatically.
+
+```sui
+<ul>
+  {#if hasAny items}
+    Has items
+  {else}
+    No items
+  {/if}
+</ul>
+```
+
+## Advanced Use
+
+
+All [lifecycle events and callbacks](/docs/guides/components/lifecycle) will return `signal` and
+`reaction`. These can be used to create scoped reactions that will be tied to the component's lifecycle, and automatically torn down when the component is destroyed.
+
+
+### Exposing Reactivity
+
+You can expose a `signal` on your component instance to allow other components to rely on it as a source of reactivity. This can be a useful way to share reactivity across related parts of your app.
+
+> Component `state` and `settings` are not accessible outside your component unless they are exposed on your component instance.
+
+
+```javascript title="todo.js"
+const createComponent = ({ self, signal, reaction }) => {
+  return {
+    todos: signal([]),
+  };
+};
+```
+
+```javascript title="todo-item.js"
+const createComponent = ({ findParent }) => {
+  getTodos() {
+    const todoList = findParent('todoList');
+    return todoList.todos.get();
+  }
+};
+```
+
+
+
+### Reducing Reactivity
+
+Template expressions are reactive by default but this might not always be ideal. Template reactivity can be removed by using the `nonreactive` helper
+
+> Learn more about controlling reactivity in the dedicated subsection for [controlling reactivity](/docs/guides/reactivity/controls)
+
+```sui
+<ul>
+  {#each item in nonreactive items}
+    {item}
+  {/each}
+</ul>
+```

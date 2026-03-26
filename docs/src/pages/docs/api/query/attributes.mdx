@@ -1,0 +1,139 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Attributes
+icon: tag
+description: API reference for Query methods related to attribute manipulation
+package: "@semantic-ui/query"
+methods: ["attr", "removeAttr", "addAttr", "data", "removeData"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Get, set, and remove HTML attributes and data attributes on elements.
+
+## HTML Attributes
+
+### attr
+
+```javascript
+$('selector').attr(name);
+$('selector').attr(name, value);
+$('selector').attr({ name: value, ... });
+```
+
+Gets or sets attributes on elements.
+
+#### Parameters
+
+| Name  | Type           | Description                          |
+|-------|----------------|--------------------------------------|
+| name  | string         | The attribute name                   |
+| value | string         | The value to set                     |
+
+#### Returns
+
+- **Getting**: The attribute value, or array of values for multiple elements
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Example
+
+<PlaygroundExample id="query-attr" direction="horizontal"></PlaygroundExample>
+
+### removeAttr
+
+```javascript
+$('selector').removeAttr(name);
+```
+
+Removes an attribute from matched elements.
+
+> **Boolean Attributes** Use this for boolean attributes where `checked="false"` would still be truthy.
+
+#### Parameters
+
+| Name | Type   | Description                      |
+|------|--------|----------------------------------|
+| name | string | The attribute name to remove     |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+<PlaygroundExample id="query-removeattr" direction="horizontal"></PlaygroundExample>
+
+### addAttr
+
+```javascript
+$('selector').addAttr(name);
+$('selector').addAttr([name1, name2, ...]);
+```
+
+Adds boolean attributes with empty string values. Equivalent to `attr(name, '')`.
+
+#### Parameters
+
+| Name | Type               | Description                              |
+|------|--------------------|------------------------------------------|
+| name | string \| string[] | Attribute name or array of names         |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+<PlaygroundExample id="query-addattr" direction="horizontal"></PlaygroundExample>
+
+## Data Attributes
+
+### data
+
+```javascript
+$('selector').data();
+$('selector').data(key);
+$('selector').data(key, value);
+```
+
+Gets or sets `data-*` attributes. Keys use camelCase and are converted to kebab-case in the DOM.
+
+#### Parameters
+
+| Name  | Type   | Description                                   |
+|-------|--------|-----------------------------------------------|
+| key   | string | The data key (without `data-` prefix)         |
+| value | string | The value to set                              |
+
+#### Returns
+
+- **Getting all**: Object with all data attributes (or array for multiple elements)
+- **Getting key**: The value (or array for multiple elements)
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Example
+
+<PlaygroundExample id="query-data" direction="horizontal"></PlaygroundExample>
+
+### removeData
+
+```javascript
+$('selector').removeData(keys);
+```
+
+Removes data attributes from elements.
+
+#### Parameters
+
+| Name | Type               | Description                                      |
+|------|--------------------|--------------------------------------------------|
+| keys | string \| string[] | Space-separated string or array of keys to remove |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Example
+
+<PlaygroundExample id="query-removedata" direction="horizontal"></PlaygroundExample>

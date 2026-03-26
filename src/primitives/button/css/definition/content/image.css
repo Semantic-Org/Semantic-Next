@@ -1,0 +1,15 @@
+/*-------------------
+     Button Image
+--------------------*/
+
+.button {
+
+  ::slotted(img),
+  ::slotted(ui-image) {
+    display: inline-block;
+    max-height: 1.5em;
+    border-radius: 4px;
+    vertical-align: top;
+    margin: -0.25em 0.5rem -0.25em -0.25em;
+  }
+}

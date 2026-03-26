@@ -1,0 +1,475 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Array Utilities
+package: "@semantic-ui/utils"
+methods: [filterEmpty, first, firstMatch, findIndex, last, remove, inArray, range, sequence, moveItem, moveToFront, moveToBack, sum, unique, where, flatten, some, any, sortBy, groupBy, intersection, difference, uniqueItems]
+icon: list
+description: API reference for array manipulation functions
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Functions for working with arrays.
+
+## filterEmpty
+
+Remove undefined values from an array.
+
+### Syntax
+```javascript
+filterEmpty(arr)
+```
+
+### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to filter |
+
+### Returns
+Array with undefined values removed.
+
+### Example
+<PlaygroundExample id="utils-filterempty" direction="horizontal"></PlaygroundExample>
+
+## first
+
+Get the first element(s) from an array.
+
+### Syntax
+```javascript
+first(array, number = 1)
+```
+
+### Parameters
+| Name   | Type   | Description | Default |
+|--------|--------|-------------|---------|
+| array  | array  | The input array | |
+| number | number | The number of elements to return | 1 |
+
+### Returns
+The first element, an array of the first n elements, or undefined if the array is empty.
+
+### Example
+<PlaygroundExample id="utils-first" direction="horizontal"></PlaygroundExample>
+
+## firstMatch
+
+Return the first value that matches the callback or value.
+
+### Syntax
+```javascript
+firstMatch(array, callbackOrValue)
+```
+
+### Parameters
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
+
+### Returns
+The first matching element or undefined if no match is found.
+
+### Example
+<PlaygroundExample id="utils-firstmatch" direction="horizontal"></PlaygroundExample>
+
+## findIndex
+
+Find the index of the first element that matches the callback or value.
+
+### Syntax
+```javascript
+findIndex(array, callbackOrValue)
+```
+
+### Parameters
+| Name            | Type             | Description |
+|-----------------|------------------|-------------|
+| array           | array            | The input array |
+| callbackOrValue | function or any  | The callback function to test each element or the value to match |
+
+### Returns
+The index of the first matching element, or -1 if no match is found.
+
+### Example
+<PlaygroundExample id="utils-findindex" direction="horizontal"></PlaygroundExample>
+
+## last
+
+Get the last element(s) from an array.
+
+### Syntax
+```javascript
+last(array, number = 1)
+```
+
+### Parameters
+| Name   | Type   | Description | Default |
+|--------|--------|-------------|---------|
+| array  | array  | The input array | |
+| number | number | The number of elements to return | 1 |
+
+### Returns
+The last element, an array of the last n elements, or undefined if the array is empty.
+
+### Example
+<PlaygroundExample id="utils-last" direction="horizontal"></PlaygroundExample>
+
+## remove
+
+Remove an element from the array that matches the callback or value.
+
+### Syntax
+```javascript
+remove(array, callbackOrValue)
+```
+
+### Parameters
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The input array |
+| callbackOrValue | function or any     | The callback function to test each element or the value to remove |
+
+### Returns
+Count of removed elements.
+
+### Example
+<PlaygroundExample id="utils-remove" direction="horizontal"></PlaygroundExample>
+
+## inArray
+
+Check if a value is in the array.
+
+### Syntax
+```javascript
+inArray(value, array = [])
+```
+
+### Parameters
+| Name  | Type | Description |
+|-------|------|-------------|
+| value | any  | The value to search for |
+| array | array| The array to search in |
+
+### Returns
+True if the value is in the array, false otherwise.
+
+### Example
+<PlaygroundExample id="utils-inarray" direction="horizontal"></PlaygroundExample>
+
+## range
+
+Generate an array of numbers within a specified range. The stop value is exclusive, matching Python's `range()` semantics. When called with a single argument, it generates numbers from `0` to `start` (exclusive). Integer steps use addition; fractional steps use multiplication to avoid floating-point drift.
+
+### Syntax
+```javascript
+range(start, stop, step = 1)
+```
+
+### Parameters
+| Name  | Type   | Description | Default |
+|-------|--------|-------------|---------|
+| start | number | The start of the range, or the exclusive stop if `stop` is not provided | |
+| stop  | number | The exclusive end of the range (optional) | |
+| step  | number | The step between numbers. A step of `0` returns an empty array | 1 |
+
+### Returns
+Array of numbers from `start` up to (but not including) `stop`.
+
+### Example
+<PlaygroundExample id="utils-range" direction="horizontal"></PlaygroundExample>
+
+## sequence
+
+Generate a sequence of multiples. Useful for creating evenly spaced numeric sequences starting from a given value.
+
+### Syntax
+```javascript
+sequence(count, interval = 1, start = 1)
+```
+
+### Parameters
+| Name     | Type   | Description | Default |
+|----------|--------|-------------|---------|
+| count    | number | The number of elements to generate | |
+| interval | number | The multiplier interval between elements | 1 |
+| start    | number | The starting multiplier offset | 1 |
+
+### Returns
+Array of `count` numbers where each element is `(start + index) * interval`.
+
+## moveItem
+
+Move an item in an array to a specified index.
+
+### Syntax
+```javascript
+moveItem(array = [], callbackOrValue, index)
+```
+
+### Parameters
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The array to modify |
+| callbackOrValue | function or any     | The callback function to test each element or the value to move |
+| index           | number or string    | The target index. Can be a number, 'first', or 'last' |
+
+### Returns
+The modified array.
+
+### Example
+<PlaygroundExample id="utils-moveitem" direction="horizontal"></PlaygroundExample>
+
+## moveToFront
+
+Move an item to the front of an array.
+
+### Syntax
+```javascript
+moveToFront(array = [], callbackOrValue)
+```
+
+### Parameters
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The array to modify |
+| callbackOrValue | function or any     | The callback function to test each element or the value to move |
+
+### Returns
+The modified array.
+
+### Example
+<PlaygroundExample id="utils-movetofront" direction="horizontal"></PlaygroundExample>
+
+## moveToBack
+
+Move an item to the back of an array.
+
+### Syntax
+```javascript
+moveToBack(array = [], callbackOrValue)
+```
+
+### Parameters
+| Name            | Type                | Description |
+|-----------------|---------------------|-------------|
+| array           | array               | The array to modify |
+| callbackOrValue | function or any     | The callback function to test each element or the value to move |
+
+### Returns
+The modified array.
+
+### Example
+<PlaygroundExample id="utils-movetoback" direction="horizontal"></PlaygroundExample>
+
+## sum
+
+Calculate the sum of an array of numbers.
+
+### Syntax
+```javascript
+sum(values)
+```
+
+### Parameters
+| Name   | Type  | Description |
+|--------|-------|-------------|
+| values | array | An array of numbers |
+
+### Returns
+The sum of all numbers in the array.
+
+### Example
+<PlaygroundExample id="utils-sum" direction="horizontal"></PlaygroundExample>
+
+## unique
+
+Remove duplicates from an array.
+
+### Syntax
+```javascript
+unique(arr)
+```
+
+### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to remove duplicates from |
+
+### Returns
+Array with duplicates removed.
+
+### Example
+<PlaygroundExample id="utils-unique" direction="horizontal"></PlaygroundExample>
+
+## where
+
+Filter an array of objects based on matching properties.
+
+### Syntax
+```javascript
+where(array, properties)
+```
+
+### Parameters
+| Name       | Type   | Description |
+|------------|--------|-------------|
+| array      | array  | The array of objects to filter |
+| properties | object | An object with properties to match |
+
+### Returns
+Array of objects that match all the specified properties.
+
+### Example
+<PlaygroundExample id="utils-where" direction="horizontal"></PlaygroundExample>
+
+## flatten
+
+Flatten a nested array structure.
+
+### Syntax
+```javascript
+flatten(arr)
+```
+
+### Parameters
+| Name | Type  | Description |
+|------|-------|-------------|
+| arr  | array | The array to flatten |
+
+### Returns
+A flattened array.
+
+### Example
+<PlaygroundExample id="utils-flatten" direction="horizontal"></PlaygroundExample>
+
+## some
+
+Check if at least one element satisfies the predicate.
+
+### Syntax
+```javascript
+some(collection, predicate)
+```
+
+### Parameters
+| Name       | Type     | Description |
+|------------|----------|-------------|
+| collection | array    | The collection to iterate over |
+| predicate  | function | The function invoked per iteration |
+
+### Returns
+True if any element passes the predicate check, else false.
+
+### Example
+<PlaygroundExample id="utils-some" direction="horizontal"></PlaygroundExample>
+
+## any
+
+An alias for `some`.
+
+### Example
+<PlaygroundExample id="utils-any" direction="horizontal"></PlaygroundExample>
+
+## sortBy
+
+Sort an array of objects by one or more keys. String values are compared using natural sort order via `Intl.Collator` (e.g. `"item2"` sorts before `"item10"`).
+
+### Syntax
+```javascript
+sortBy(arr, key, comparator)
+```
+
+### Parameters
+| Name       | Type              | Description |
+|------------|-------------------|-------------|
+| arr        | array             | The array to sort |
+| key        | string or array   | The key to sort by, or array of keys for multi-key sorting |
+| comparator | function          | Optional custom comparison function |
+
+### Returns
+A sorted array.
+
+### Example
+<PlaygroundExample id="utils-sortby" direction="horizontal"></PlaygroundExample>
+
+## groupBy
+
+Group an array of objects by a specific property.
+
+### Syntax
+```javascript
+groupBy(array, property)
+```
+
+### Parameters
+| Name     | Type   | Description |
+|----------|--------|-------------|
+| array    | array  | The array to group |
+| property | string | The property to group by |
+
+### Returns
+Object where keys are distinct values of the property, and values are arrays of matching elements.
+
+### Example
+<PlaygroundExample id="utils-groupby" direction="horizontal"></PlaygroundExample>
+
+## intersection
+
+Find elements common to all input arrays.
+
+### Syntax
+```javascript
+intersection(...arrays)
+```
+
+### Parameters
+| Name   | Type    | Description |
+|--------|---------|-------------|
+| arrays | ...Array| Arrays to find common elements between |
+
+### Returns
+Array containing elements present in all input arrays.
+
+### Example
+<PlaygroundExample id="utils-intersection" direction="horizontal"></PlaygroundExample>
+
+## difference
+
+Find elements unique to the first array.
+
+### Syntax
+```javascript
+difference(...arrays)
+```
+
+### Parameters
+| Name   | Type    | Description |
+|--------|---------|-------------|
+| arrays | ...Array| First array is filtered against all others |
+
+### Returns
+Array containing elements present in first array but not in any other input arrays.
+
+### Example
+<PlaygroundExample id="utils-difference" direction="horizontal"></PlaygroundExample>
+
+## uniqueItems
+
+Find elements that appear in exactly one input array.
+
+### Syntax
+```javascript
+uniqueItems(...arrays)
+```
+
+### Parameters
+| Name   | Type    | Description |
+|--------|---------|-------------|
+| arrays | ...Array| Arrays to compare |
+
+### Returns
+Array containing elements that appear in exactly one of the input arrays.
+
+### Example
+<PlaygroundExample id="utils-uniqueitems" direction="horizontal"></PlaygroundExample>

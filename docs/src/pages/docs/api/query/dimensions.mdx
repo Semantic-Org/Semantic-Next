@@ -1,0 +1,176 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Dimensions
+icon: maximize
+description: API reference for Query methods related to element dimensions
+package: "@semantic-ui/query"
+methods: ["width", "height", "scrollTop", "scrollLeft", "naturalWidth", "naturalHeight", "dimensions"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Get and set element dimensions, scroll positions, and natural sizes.
+
+## Size
+
+### width
+
+```javascript
+$('selector').width()
+$('selector').width(value)
+```
+
+Gets or sets the width of elements.
+
+#### Parameters
+
+| Name  | Type         | Description                           |
+|-------|--------------|---------------------------------------|
+| value | number/string| The width to set for the element(s)   |
+
+#### Returns
+
+Width in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-width" direction="horizontal"></PlaygroundExample>
+
+### height
+
+```javascript
+$('selector').height()
+$('selector').height(value)
+```
+
+Gets or sets the height of elements.
+
+#### Parameters
+
+| Name  | Type         | Description                           |
+|-------|--------------|---------------------------------------|
+| value | number/string| The height to set for the element(s)  |
+
+#### Returns
+
+Height in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-height" direction="horizontal"></PlaygroundExample>
+
+## Scroll
+
+### scrollTop
+
+```javascript
+$('selector').scrollTop()
+$('selector').scrollTop(value)
+```
+
+Gets or sets the vertical scroll position of elements.
+
+#### Parameters
+
+| Name  | Type   | Description                                  |
+|-------|--------|----------------------------------------------|
+| value | number | The vertical scroll position to set in pixels|
+
+#### Returns
+
+Vertical scroll position in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-scrolltop" direction="horizontal"></PlaygroundExample>
+
+### scrollLeft
+
+```javascript
+$('selector').scrollLeft()
+$('selector').scrollLeft(value)
+```
+
+Gets or sets the horizontal scroll position of elements.
+
+#### Parameters
+
+| Name  | Type   | Description                                    |
+|-------|--------|------------------------------------------------|
+| value | number | The horizontal scroll position to set in pixels|
+
+#### Returns
+
+Horizontal scroll position in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-scrollleft" direction="horizontal"></PlaygroundExample>
+
+## Natural Size
+
+### naturalWidth
+
+```javascript
+$('selector').naturalWidth()
+```
+
+Gets the natural width of an element, including images and other HTML elements.
+
+> **Performance Note** Creates an off-screen clone to measure dimensions. Can cause reflow - use sparingly in performance-critical code.
+
+#### Returns
+
+Natural width in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-naturalwidth" direction="horizontal"></PlaygroundExample>
+
+### naturalHeight
+
+```javascript
+$('selector').naturalHeight()
+```
+
+Gets the natural height of an element, including images and other HTML elements.
+
+#### Returns
+
+Natural height in pixels.
+
+#### Example
+
+<PlaygroundExample id="query-naturalheight" direction="horizontal"></PlaygroundExample>
+
+## Comprehensive
+
+### dimensions
+
+```javascript
+$('selector').dimensions()
+```
+
+Gets comprehensive dimension information for elements.
+
+#### Returns
+
+Object containing position, size, and box model data:
+
+| Property | Description |
+|----------|-------------|
+| `top`, `left`, `right`, `bottom` | Viewport position |
+| `pageTop`, `pageLeft` | Document position |
+| `width`, `height` | Content dimensions |
+| `innerWidth`, `innerHeight` | Content + padding |
+| `outerWidth`, `outerHeight` | Content + padding + border |
+| `marginWidth`, `marginHeight` | Full box including margin |
+| `scrollTop`, `scrollLeft` | Scroll position |
+| `scrollHeight`, `scrollWidth` | Scrollable dimensions |
+| `box` | Box model details (padding, border, margin) |
+| `bounds` | DOMRect bounding box |
+
+#### Example
+
+<PlaygroundExample id="query-dimensions" direction="horizontal"></PlaygroundExample>

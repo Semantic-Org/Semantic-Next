@@ -3,7 +3,7 @@ import { each, noop } from '@semantic-ui/utils';
 import css from './mobile-menu.css?raw';
 import template from './mobile-menu.html?raw';
 
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 import { NavMenu } from '../nav-menu/nav-menu.js';
 
 const defaultSettings = {

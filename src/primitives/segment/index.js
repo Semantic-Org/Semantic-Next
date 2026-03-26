@@ -1,1 +1,2 @@
-export { UISegment } from './segment.js';
+export { Segment } from './segment.js';
+export { Segments } from './segments.js';

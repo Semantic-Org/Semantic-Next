@@ -1,0 +1,270 @@
+{
+  "filter": {
+    "value": "filter",
+    "reason": "Direct match for filter/funnel icon in Lucide"
+  },
+  "sort": {
+    "value": "arrow-up-down",
+    "reason": "Lucide 'arrow-up-down' is the standard sort icon showing bidirectional ordering"
+  },
+  "list": {
+    "value": "list",
+    "reason": "Direct match for list view icon in Lucide"
+  },
+  "table": {
+    "value": "table",
+    "reason": "Direct match for table/spreadsheet layout icon"
+  },
+  "grid": {
+    "value": "layout-grid",
+    "reason": "Lucide 'layout-grid' shows a 2x2 grid layout; best match for grid/card view"
+  },
+  "chart-bar": {
+    "value": "chart-bar",
+    "reason": "Direct match for bar chart icon in Lucide"
+  },
+  "chart-line": {
+    "value": "chart-line",
+    "reason": "Direct match for line chart/analytics icon in Lucide"
+  },
+  "chart-pie": {
+    "value": "chart-pie",
+    "reason": "Direct match for pie chart/statistics icon in Lucide"
+  },
+  "view": {
+    "value": "eye",
+    "reason": "Lucide 'eye' is the universal show/visible icon"
+  },
+  "hide": {
+    "value": "eye-off",
+    "reason": "Lucide 'eye-off' is the universal hide/invisible icon"
+  },
+  "search": {
+    "value": "search",
+    "reason": "Direct match for magnifying glass search icon"
+  },
+  "zoom-in": {
+    "value": "zoom-in",
+    "reason": "Direct match for zoom in (magnifying glass with plus)"
+  },
+  "zoom-out": {
+    "value": "zoom-out",
+    "reason": "Direct match for zoom out (magnifying glass with minus)"
+  },
+  "fullscreen": {
+    "value": "maximize",
+    "reason": "Lucide 'maximize' shows expanding arrows for fullscreen/maximize"
+  },
+  "exit-fullscreen": {
+    "value": "minimize",
+    "reason": "Lucide 'minimize' shows contracting arrows for exit fullscreen"
+  },
+  "board": {
+    "value": "kanban",
+    "reason": "Lucide 'kanban' represents a kanban/board view layout"
+  },
+  "activity": {
+    "value": "activity",
+    "reason": "Direct match for activity/pulse heartbeat line icon"
+  },
+  "success": {
+    "value": "circle-check",
+    "reason": "Lucide 'circle-check' is a circle with checkmark; standard success indicator"
+  },
+  "error": {
+    "value": "circle-x",
+    "reason": "Lucide 'circle-x' is a circle with X; standard error indicator"
+  },
+  "warning": {
+    "value": "triangle-alert",
+    "reason": "Lucide 'triangle-alert' is a triangle with exclamation; standard warning icon"
+  },
+  "info": {
+    "value": "info",
+    "reason": "Direct match for information circle icon"
+  },
+  "help": {
+    "value": "circle-help",
+    "reason": "Lucide 'circle-help' is a circle with question mark; standard help icon"
+  },
+  "loading": {
+    "value": "loader-2",
+    "reason": "Lucide 'loader-2' is a spinning dots loader; most recognizable loading spinner"
+  },
+  "filled-circle": {
+    "value": "circle-dot",
+    "reason": "Lucide 'circle-dot' is a circle with a dot inside; represents filled/active/selected radio state"
+  },
+  "empty-circle": {
+    "value": "circle",
+    "reason": "Lucide 'circle' is an empty circle outline; represents empty/inactive/unselected state"
+  },
+  "verified": {
+    "value": "badge-check",
+    "reason": "Lucide 'badge-check' is a badge with checkmark; standard verified/certified icon"
+  },
+  "smile": {
+    "value": "smile",
+    "reason": "Direct match for smiley/happy face icon"
+  },
+  "frown": {
+    "value": "frown",
+    "reason": "Direct match for sad/frown face icon"
+  },
+  "tip": {
+    "value": "lightbulb",
+    "reason": "Lucide 'lightbulb' is the standard tip/idea/hint icon"
+  },
+  "fire": {
+    "value": "flame",
+    "reason": "Lucide 'flame' is the fire/hot/trending icon"
+  },
+  "support": {
+    "value": "life-buoy",
+    "reason": "Lucide 'life-buoy' is the standard support/help ring icon"
+  },
+  "like": {
+    "value": "heart",
+    "reason": "Lucide 'heart' is the standard like/favorite icon"
+  },
+  "unlike": {
+    "value": "heart-off",
+    "reason": "Lucide 'heart-off' shows heart with slash; represents unlike/remove favorite"
+  },
+  "star": {
+    "value": "star",
+    "reason": "Direct match for star/favorite/rating icon"
+  },
+  "bookmark": {
+    "value": "bookmark",
+    "reason": "Direct match for bookmark/save-for-later icon"
+  },
+  "thumbs-up": {
+    "value": "thumbs-up",
+    "reason": "Direct match for thumbs up/upvote icon"
+  },
+  "thumbs-down": {
+    "value": "thumbs-down",
+    "reason": "Direct match for thumbs down/downvote icon"
+  },
+  "reply": {
+    "value": "reply",
+    "reason": "Direct match for reply arrow icon"
+  },
+  "comment": {
+    "value": "message-square",
+    "reason": "Lucide 'message-square' is the standard single comment/message bubble icon"
+  },
+  "comments": {
+    "value": "messages-square",
+    "reason": "Lucide 'messages-square' shows multiple message bubbles; standard for discussion/thread"
+  },
+  "typing": {
+    "value": "message-square-more",
+    "reason": "Lucide 'message-square-more' shows a message bubble with dots; standard typing/composing indicator"
+  },
+  "mention": {
+    "value": "at-sign",
+    "reason": "Lucide 'at-sign' is the @ symbol; standard mention/tag-user icon"
+  },
+  "block": {
+    "value": "ban",
+    "reason": "Lucide 'ban' is a circle with slash; standard block/ban/restricted icon"
+  },
+  "flag": {
+    "value": "flag",
+    "reason": "Direct match for flag/report icon"
+  },
+  "pin": {
+    "value": "pin",
+    "reason": "Direct match for pin/thumbtack icon"
+  },
+  "award": {
+    "value": "award",
+    "reason": "Direct match for award/badge/achievement icon"
+  },
+  "trophy": {
+    "value": "trophy",
+    "reason": "Direct match for trophy/winner icon"
+  },
+  "gift": {
+    "value": "gift",
+    "reason": "Direct match for gift/reward/present icon"
+  },
+  "target": {
+    "value": "target",
+    "reason": "Direct match for target/goal icon"
+  },
+  "bold": {
+    "value": "bold",
+    "reason": "Direct match for bold text formatting icon"
+  },
+  "italic": {
+    "value": "italic",
+    "reason": "Direct match for italic text formatting icon"
+  },
+  "underline": {
+    "value": "underline",
+    "reason": "Direct match for underline text formatting icon"
+  },
+  "strikethrough": {
+    "value": "strikethrough",
+    "reason": "Direct match for strikethrough text formatting icon"
+  },
+  "code": {
+    "value": "code",
+    "reason": "Direct match for code/markup brackets icon"
+  },
+  "quote": {
+    "value": "text-quote",
+    "reason": "Lucide 'text-quote' shows a blockquote with quotation marks; standard blockquote icon"
+  },
+  "heading": {
+    "value": "heading",
+    "reason": "Direct match for heading/title text icon"
+  },
+  "paragraph": {
+    "value": "pilcrow",
+    "reason": "Lucide 'pilcrow' is the paragraph mark symbol; standard paragraph formatting icon"
+  },
+  "bullet-list": {
+    "value": "list",
+    "reason": "Lucide 'list' shows a bulleted list; the standard unordered list icon"
+  },
+  "numbered-list": {
+    "value": "list-ordered",
+    "reason": "Lucide 'list-ordered' shows a numbered list; standard ordered list icon"
+  },
+  "checklist": {
+    "value": "list-checks",
+    "reason": "Lucide 'list-checks' shows a list with checkmarks; standard checklist/todo icon"
+  },
+  "indent": {
+    "value": "indent-increase",
+    "reason": "Lucide 'indent-increase' shows text being indented right; standard indent icon"
+  },
+  "outdent": {
+    "value": "indent-decrease",
+    "reason": "Lucide 'indent-decrease' shows text being moved left; standard outdent icon"
+  },
+  "align-left": {
+    "value": "align-left",
+    "reason": "Direct match for left text alignment icon"
+  },
+  "align-center": {
+    "value": "align-center",
+    "reason": "Direct match for center text alignment icon"
+  },
+  "align-right": {
+    "value": "align-right",
+    "reason": "Direct match for right text alignment icon"
+  },
+  "justify": {
+    "value": "align-justify",
+    "reason": "Lucide 'align-justify' is the standard justify/full-width text alignment icon"
+  },
+  "emoji": {
+    "value": "smile-plus",
+    "reason": "Lucide 'smile-plus' shows a smiley with a plus; represents emoji picker/add reaction"
+  }
+}

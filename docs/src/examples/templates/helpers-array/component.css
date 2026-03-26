@@ -16,10 +16,10 @@ b {
 
 .years {
   display: flex;
-  gap: var(--compact-spacing);
-  
+  gap: var(--gap-xs);
+
   .year {
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
     background: var(--standard-5);
     border-radius: var(--border-radius);
   }
@@ -28,10 +28,10 @@ b {
 .config {
   display: flex;
   flex-direction: column;
-  gap: var(--compact-spacing);
-  
+  gap: var(--gap-xs);
+
   .item {
-    padding: var(--compact-spacing);
+    padding: var(--padding-xs);
     background: var(--standard-5);
     border-radius: var(--border-radius);
   }

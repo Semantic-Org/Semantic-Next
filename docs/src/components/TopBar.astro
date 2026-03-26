@@ -41,15 +41,15 @@ import './TopBar.css';
   }
 </script>
 <topbar class={topbarClasses} transition:persist>
-  <div class="content">
+  <ui-container class="content">
     <span class="left">
       <a class="logo" href="/">
         <Image src={logoImage} alt="Logo" height="35" loading="eager" />
         <span class="name"> Semantic UI </span>
       </a>
     </span>
-    <TopbarMenu client:load menu={menu} activeURL={activeURL} />
-    <GlobalSearch client:load />
+    <TopbarMenu menu={menu} activeURL={activeURL} />
+    <GlobalSearch dark client:load />
     {
       showThemeSwitcher && (
         <ThemeSwitcher
@@ -60,5 +60,5 @@ import './TopBar.css';
       )
     }
     <MobileMenuToggle client:load />
-  </div>
+  </ui-container>
 </topbar>

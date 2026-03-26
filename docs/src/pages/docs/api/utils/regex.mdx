@@ -1,0 +1,42 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Regular Expression Utilities
+package: "@semantic-ui/utils"
+methods: [escapeRegExp]
+icon: asterisk
+description: API reference for regular expression utility functions
+---
+
+The Regular Expression utilities provide functions for working with regular expressions and string patterns in JavaScript. These functions help in creating, escaping, and applying regular expressions efficiently.
+
+## Functions
+
+### escapeRegExp
+
+```javascript
+function escapeRegExp(string)
+```
+
+Escapes special characters in a string for use in a regular expression.
+
+> This function escapes all special regex characters `[ ] { } ( ) / \ ^ $ . | ? * +` which is helpful when inserting a dynamic string into a regex like a user search query.
+
+#### Parameters
+
+| Name   | Type   | Description |
+|--------|--------|-------------|
+| string | string | The string to escape |
+
+#### Returns
+
+A new string with all regular expression special characters escaped.
+
+#### Example
+
+```javascript
+import { escapeRegExp } from '@semantic-ui/utils';
+
+const str = "How much for the (cat)?";
+console.log(escapeRegExp(str)); // "How much for the \(cat\)\?"
+```

@@ -1,0 +1,86 @@
+{
+  "1": {
+    "visual": "A blank document page with a folded corner at the top right and no interior content.",
+    "usage": "new file, empty document, file placeholder, upload prompt"
+  },
+  "2": {
+    "visual": "A document page with a folded corner and a vertical ellipsis (three dots) on its face with a small circle below.",
+    "usage": "file options menu, document actions overflow, file context menu, version history node"
+  },
+  "3": {
+    "visual": "A document page with a folded corner and a checkmark on its face.",
+    "usage": "approved document, file verified, completed task file, accepted submission"
+  },
+  "4": {
+    "visual": "A document page with a folded corner and angle brackets (less-than and greater-than signs) centered on its face.",
+    "usage": "source code file, code document, developer script file, programming file type"
+  },
+  "5": {
+    "visual": "A document page with a folded corner and a small landscape photo thumbnail (circle with mountain outline) on its face.",
+    "usage": "image file, photo attachment, media document, picture file type"
+  },
+  "6": {
+    "visual": "A document page with a folded corner and a padlock centered on its face.",
+    "usage": "locked file, restricted document, encrypted file, protected record"
+  },
+  "7": {
+    "visual": "A document page with a folded corner and a plus sign centered on its face.",
+    "usage": "add new file, create document, new attachment, upload file"
+  },
+  "8": {
+    "visual": "A document page with a folded corner and a magnifying glass centered on its face.",
+    "usage": "search within file, find in document, file preview, document lookup"
+  },
+  "9": {
+    "visual": "A document page with a folded corner and two rows of short paired horizontal dashes arranged in a grid-like list on its face.",
+    "usage": "structured data file, spreadsheet document, CSV or table file, data report"
+  },
+  "10": {
+    "visual": "A document page with a folded corner and two full-width horizontal lines of text on its face.",
+    "usage": "text document, notes file, general document, readme file"
+  },
+  "11": {
+    "visual": "A document page with a folded corner and an X mark centered on its face.",
+    "usage": "delete file, remove document, file error, rejected document"
+  },
+  "12": {
+    "visual": "Two overlapping document pages with folded corners, the front page offset to the lower-left of the back page.",
+    "usage": "copy file, duplicate document, clipboard copy, paste action"
+  },
+  "13": {
+    "visual": "A closed folder with a small raised tab at the top left and an empty interior.",
+    "usage": "directory, file folder, closed collection, navigate to folder"
+  },
+  "14": {
+    "visual": "An open folder with its front flap raised, revealing the interior, and a tab at the top left.",
+    "usage": "open directory, active folder, browse files, expanded collection"
+  },
+  "15": {
+    "visual": "A closed folder with a tab at the top left and a plus sign inside the body.",
+    "usage": "create new folder, add directory, new collection, organize files"
+  },
+  "16": {
+    "visual": "Two folders in a parent-child tree arrangement — a larger folder upper-left connected by an L-shaped line to a smaller folder lower-right.",
+    "usage": "folder tree, nested directories, file system hierarchy, project structure"
+  },
+  "17": {
+    "visual": "Two overlapping document pages where the front page shows two horizontal text lines, representing a filled document being duplicated.",
+    "usage": "duplicate document with content, copy report, document clone, file copy"
+  },
+  "18": {
+    "visual": "A notebook with spiral binding rings along the left edge and a ruled page visible on the right.",
+    "usage": "notebook, journal, planner, meeting notes"
+  },
+  "19": {
+    "visual": "A blank rectangular presentation board on a two-legged easel stand.",
+    "usage": "presentation, slideshow, pitch deck, projector screen"
+  },
+  "20": {
+    "visual": "A scroll document with the bottom-left corner curled inward and two horizontal text lines on the unrolled portion.",
+    "usage": "terms and conditions, legal document, license agreement, formal policy file"
+  },
+  "21": {
+    "visual": "A blank document page with a folded corner at the top right and noticeably rounded corners on all sides.",
+    "usage": "new file, sticky note, document card, blank page in a rounded UI"
+  }
+}

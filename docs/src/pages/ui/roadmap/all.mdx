@@ -1,0 +1,271 @@
+---
+layout: '@layouts/Guide.astro'
+icon: list
+title: Comprehensive UI Component List
+description: A consolidated list of UI components across major frameworks
+---
+import Blockquote from '@components/mdx/Blockquote.astro';
+export const components = { blockquote: Blockquote };
+
+This is a consolidated, exhaustive list of UI components found across major UI frameworks. Components are organized by category and sorted by prevalence (number of framework implementations).
+
+> [!note]
+> Implementation counts may vary as frameworks continue to evolve. This list represents components found in at least two major UI frameworks.
+
+
+> [!info] Frameworks analyzed
+> ShadCN, Chakra UI, Ant Design, Semantic UI, Nuxt UI, Radix UI, MUI (Material-UI), Mantine, HeroUI/NextUI, PrimeReact, Headless UI, Vuetify, Angular Material
+
+
+## Form Controls
+
+Components for user input and data entry.
+
+* **Button** - Used to trigger actions or events, such as submitting a form, opening a dialog, or canceling an action. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/button), [Chakra UI](https://chakra-ui.com/docs/components/button), [Ant Design](https://ant.design/components/button), [Semantic UI](https://semantic-ui.com/elements/button.html), [Nuxt UI](https://ui.nuxt.com/components/button), [Radix UI](https://www.radix-ui.com/themes/docs/components/button), [MUI](https://mui.com/material-ui/react-button/), [Mantine](https://mantine.dev/core/button/), [Headless UI](https://headlessui.com/react/button), [HeroUI](https://www.heroui.com/docs/components/button), [PrimeReact](https://primereact.org/button/), [Vuetify](https://vuetifyjs.com/en/components/buttons), [Angular Material](https://material.angular.io/components/button)
+
+* **Input** - A field used to elicit a text-based response from a user. Can be extended for specific data types like passwords, numbers, or emails. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/input), [Chakra UI](https://chakra-ui.com/docs/components/input), [Ant Design](https://ant.design/components/input), [Semantic UI](https://semantic-ui.com/elements/input.html), [Nuxt UI](https://ui.nuxt.com/components/input), [Radix UI](https://www.radix-ui.com/themes/docs/components/text-field), [MUI](https://mui.com/material-ui/react-text-field/), [Mantine](https://mantine.dev/core/text-input/), [Headless UI](https://headlessui.com/react/input), [HeroUI](https://www.heroui.com/docs/components/input), [PrimeReact](https://primereact.org/inputtext/), [Vuetify](https://vuetifyjs.com/en/components/text-fields), [Angular Material](https://material.angular.io/components/input)
+
+* **Select** - A form control that allows a user to choose one or more options from a predefined list presented in a dropdown. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/select), [Chakra UI](https://chakra-ui.com/docs/components/select), [Ant Design](https://ant.design/components/select), [Semantic UI](https://semantic-ui.com/modules/dropdown.html), [Nuxt UI](https://ui.nuxt.com/components/select), [Radix UI](https://www.radix-ui.com/primitives/docs/components/select), [MUI](https://mui.com/material-ui/react-select/), [Mantine](https://mantine.dev/core/select/), [Headless UI](https://headlessui.com/react/listbox), [HeroUI](https://www.heroui.com/docs/components/select), [PrimeReact](https://primereact.org/dropdown/), [Vuetify](https://vuetifyjs.com/en/components/select), [Angular Material](https://material.angular.io/components/select)
+
+* **Checkbox** - Allows a user to select one or more values from a set of options, often representing a binary (on/off) choice. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/checkbox), [Chakra UI](https://chakra-ui.com/docs/components/checkbox), [Ant Design](https://ant.design/components/checkbox), [Semantic UI](https://semantic-ui.com/modules/checkbox.html), [Nuxt UI](https://ui.nuxt.com/components/checkbox), [Radix UI](https://www.radix-ui.com/primitives/docs/components/checkbox), [MUI](https://mui.com/material-ui/react-checkbox/), [Mantine](https://mantine.dev/core/checkbox/), [Headless UI](https://headlessui.com/react/checkbox), [HeroUI](https://www.heroui.com/docs/components/checkbox), [PrimeReact](https://primereact.org/checkbox/), [Vuetify](https://vuetifyjs.com/en/components/checkbox), [Angular Material](https://material.angular.io/components/checkbox)
+
+* **Switch** - A control that allows the user to toggle between two states, typically "on" and "off". (10 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/switch), [Chakra UI](https://chakra-ui.com/docs/components/switch), [Ant Design](https://ant.design/components/switch), [Nuxt UI](https://ui.nuxt.com/components/switch), [Radix UI](https://www.radix-ui.com/themes/docs/components/switch), [MUI](https://mui.com/material-ui/react-switch/), [Mantine](https://mantine.dev/core/switch/), [Headless UI](https://headlessui.com/react/switch), [HeroUI](https://www.heroui.com/docs/components/switch), [PrimeReact](https://primereact.org/inputswitch/), [Vuetify](https://vuetifyjs.com/en/components/switches), [Angular Material](https://material.angular.io/components/slide-toggle)
+
+* **Radio Group** - A set of options from which a user can select only one. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/radio-group), [Chakra UI](https://chakra-ui.com/docs/components/radio), [Ant Design](https://ant.design/components/radio), [Semantic UI](https://semantic-ui.com/modules/checkbox.html), [Nuxt UI](https://ui.nuxt.com/docs/components/radio-group), [Radix UI](https://www.radix-ui.com/themes/docs/components/radio-group), [MUI](https://mui.com/material-ui/react-radio-button/), [Mantine](https://mantine.dev/core/radio/), [Headless UI](https://headlessui.com/react/radio-group), [HeroUI](https://www.heroui.com/docs/components/radio-group), [PrimeReact](https://primereact.org/radiobutton/), [Vuetify](https://vuetifyjs.com/en/components/radio-buttons), [Angular Material](https://material.angular.io/components/radio)
+
+* **Slider** - Allows users to make selections from a range of values by dragging a handle. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/slider), [Chakra UI](https://chakra-ui.com/docs/components/slider), [Ant Design](https://ant.design/components/slider), [Nuxt UI](https://ui.nuxt.com/components/slider), [Radix UI](https://www.radix-ui.com/themes/docs/components/slider), [MUI](https://mui.com/material-ui/react-slider/), [Mantine](https://mantine.dev/core/slider/), [HeroUI](https://www.heroui.com/docs/components/slider), [PrimeReact](https://primereact.org/slider/), [Vuetify](https://vuetifyjs.com/en/components/sliders), [Angular Material](https://material.angular.io/components/slider)
+
+* **Textarea** - An input field for multi-line text. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/textarea), [Chakra UI](https://chakra-ui.com/docs/components/textarea), [Ant Design](https://ant.design/components/input/#Textarea), [Nuxt UI](https://ui.nuxt.com/components/textarea), [MUI](https://mui.com/material-ui/react-text-field/#multiline), [Mantine](https://mantine.dev/core/textarea/), [Headless UI](https://headlessui.com/react/textarea), [HeroUI](https://www.heroui.com/docs/components/textarea), [PrimeReact](https://primereact.org/inputtextarea/), [Vuetify](https://vuetifyjs.com/en/components/text-fields#textarea)
+
+* **Form** - A container for grouping related input controls, often managing validation, layout, and submission logic. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/form), [Chakra UI](https://chakra-ui.com/docs/components/field), [Ant Design](https://ant.design/components/form), [Semantic UI](https://semantic-ui.com/collections/form.html), [Nuxt UI](https://ui.nuxt.com/components/form), [Radix UI](https://www.radix-ui.com/primitives/docs/components/form), [Mantine](https://mantine.dev/form/use-form/), [HeroUI](https://www.heroui.com/docs/components/form), [PrimeReact](https://primereact.org/floatlabel/), [Angular Material](https://material.angular.io/components/form-field)
+
+* **Date Picker** - A component that allows users to select a single date, multiple dates, or a date range from a calendar view. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/date-picker), [Ant Design](https://ant.design/components/date-picker), [Nuxt UI](https://ui.nuxt.com/components/calendar), [MUI](https://mui.com/x/react-date-pickers/date-picker/), [Mantine](https://mantine.dev/dates/date-picker/), [HeroUI](https://www.heroui.com/docs/components/date-picker), [PrimeReact](https://primereact.org/calendar/), [Vuetify](https://vuetifyjs.com/en/components/date-pickers), [Angular Material](https://material.angular.io/components/datepicker)
+
+* **Autocomplete / Combobox** - An input field that provides real-time suggestions from a list of options as the user types. (7 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/combobox), [Chakra UI](https://chakra-ui.com/docs/components/combobox), [Ant Design](https://ant.design/components/auto-complete), [MUI](https://mui.com/material-ui/react-autocomplete/), [Mantine](https://mantine.dev/core/combobox/), [Headless UI](https://headlessui.com/react/combobox), [HeroUI](https://www.heroui.com/docs/components/autocomplete), [PrimeReact](https://primereact.org/autocomplete/), [Vuetify](https://vuetifyjs.com/en/components/text-fields#combobox)
+
+* **Number Input** - Numeric value input with increment/decrement controls. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/number-input), [Ant Design](https://ant.design/components/input-number), [Nuxt UI](https://ui.nuxt.com/docs/components/input-number), [Mantine](https://mantine.dev/core/number-input/), [HeroUI](https://www.heroui.com/docs/components/number-input), [PrimeReact](https://primereact.org/inputnumber/)
+
+* **Rating** - Allows users to view and provide a rating, typically represented by stars or other symbols. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/rating), [Ant Design](https://ant.design/components/rate), [Semantic UI](https://semantic-ui.com/modules/rating.html), [MUI](https://mui.com/material-ui/react-rating/), [Mantine](https://mantine.dev/core/rating/), [PrimeReact](https://primereact.org/rating/)
+
+* **Color Picker** - A component that allows users to select a color from a palette or by entering a color value. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/color-picker), [Ant Design](https://ant.design/components/color-picker), [Nuxt UI](https://ui.nuxt.com/components/color-picker), [Mantine](https://mantine.dev/core/color-picker/), [PrimeReact](https://primereact.org/colorpicker/)
+
+* **Calendar** - A calendar view for displaying dates, often used within Date Picker components. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/calendar), [Ant Design](https://ant.design/components/calendar), [Nuxt UI](https://ui.nuxt.com/components/calendar), [HeroUI](https://www.heroui.com/docs/components/calendar), [PrimeReact](https://primereact.org/calendar/)
+
+* **File Upload** - A component for selecting and uploading one or more files. (4 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/field), [Chakra UI](https://chakra-ui.com/docs/components/file-upload), [Ant Design](https://ant.design/components/upload), [Nuxt UI](https://ui.nuxt.com/components/file-upload), [Mantine](https://mantine.dev/core/file-input/), [PrimeReact](https://primereact.org/fileupload/), [Angular Material](https://material.angular.io/components/input)
+
+* **Transfer List** - A dual-list component that allows users to move items between two lists. (3 implementations)
+  Used in: [Ant Design](https://ant.design/components/transfer), [MUI](https://mui.com/material-ui/react-transfer-list/), [PrimeReact](https://primereact.org/picklist/)
+
+---
+
+## Navigation
+
+Components that facilitate user movement and wayfinding within an application.
+
+* **Dropdown Menu** - Displays a list of actions or links in a temporary overlay, triggered by a button or other element. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/dropdown-menu), [Chakra UI](https://chakra-ui.com/docs/components/menu), [Ant Design](https://ant.design/components/dropdown), [Semantic UI](https://semantic-ui.com/collections/menu.html), [Nuxt UI](https://ui.nuxt.com/components/dropdown-menu), [Radix UI](https://www.radix-ui.com/themes/docs/components/dropdown-menu), [MUI](https://mui.com/material-ui/react-menu/), [Mantine](https://mantine.dev/core/menu/), [Headless UI](https://headlessui.com/react/menu), [HeroUI](https://www.heroui.com/docs/components/dropdown), [PrimeReact](https://primereact.org/menu/), [Angular Material](https://material.angular.io/components/menu)
+
+* **Tabs** - A set of layered sections of content, known as tab panels, that are displayed one at a time. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/tabs), [Chakra UI](https://chakra-ui.com/docs/components/tabs), [Ant Design](https://ant.design/components/tabs), [Semantic UI](https://semantic-ui.com/modules/tab.html), [Nuxt UI](https://ui.nuxt.com/components/tabs), [Radix UI](https://www.radix-ui.com/themes/docs/components/tabs), [MUI](https://mui.com/material-ui/react-tabs/), [Mantine](https://mantine.dev/core/tabs/), [Headless UI](https://headlessui.com/react/tabs), [HeroUI](https://www.heroui.com/docs/components/tabs), [PrimeReact](https://primereact.org/tabview/), [Angular Material](https://material.angular.io/components/tabs)
+
+* **Breadcrumb** - A navigation aid that shows the user's current location within a site's hierarchy. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/breadcrumb), [Chakra UI](https://chakra-ui.com/docs/components/breadcrumb), [Ant Design](https://ant.design/components/breadcrumb), [Semantic UI](https://semantic-ui.com/collections/breadcrumb.html), [Nuxt UI](https://ui.nuxt.com/components/breadcrumb), [MUI](https://mui.com/material-ui/react-breadcrumbs/), [Mantine](https://mantine.dev/core/breadcrumbs/), [HeroUI](https://www.heroui.com/docs/components/breadcrumbs), [PrimeReact](https://primereact.org/breadcrumb/), [Angular Material](https://material.angular.io/components/breadcrumb)
+
+* **Drawer** - A panel that slides in from the edge of the screen, typically used for navigation or displaying supplementary content. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/drawer), [Chakra UI](https://chakra-ui.com/docs/components/drawer), [Ant Design](https://ant.design/components/drawer), [Semantic UI](https://semantic-ui.com/modules/sidebar.html), [Nuxt UI](https://ui.nuxt.com/components/drawer), [MUI](https://mui.com/material-ui/react-drawer/), [Mantine](https://mantine.dev/core/drawer/), [HeroUI](https://www.heroui.com/docs/components/drawer), [PrimeReact](https://primereact.org/sidebar/), [Vuetify](https://vuetifyjs.com/en/components/navigation-drawers), [Angular Material](https://material.angular.io/components/sidenav)
+
+* **Pagination** - A set of controls to navigate through pages of content. (7 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/pagination), [Chakra UI](https://chakra-ui.com/docs/components/pagination), [Ant Design](https://ant.design/components/pagination), [Semantic UI](https://semantic-ui.com/collections/menu.html#pagination), [Nuxt UI](https://ui.nuxt.com/components/pagination), [MUI](https://mui.com/material-ui/react-pagination/), [Mantine](https://mantine.dev/core/pagination/), [HeroUI](https://www.heroui.com/docs/components/pagination), [PrimeReact](https://primereact.org/paginator/), [Angular Material](https://material.angular.io/components/paginator)
+
+* **Steps / Stepper** - A component that guides users through the steps of a task or workflow. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/stepper), [Ant Design](https://ant.design/components/steps), [Semantic UI](https://semantic-ui.com/elements/step.html), [Nuxt UI](https://ui.nuxt.com/components/stepper), [MUI](https://mui.com/material-ui/react-stepper/), [Mantine](https://mantine.dev/core/stepper/), [PrimeReact](https://primereact.org/steps/), [Angular Material](https://material.angular.io/components/stepper)
+
+* **Link** - A styled anchor tag for navigating between pages or sections. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/link), [Semantic UI](https://semantic-ui.com/elements/list.html#link), [Nuxt UI](https://ui.nuxt.com/components/link), [MUI](https://mui.com/material-ui/react-link/), [Mantine](https://mantine.dev/core/anchor/), [HeroUI](https://www.heroui.com/docs/components/link)
+
+* **Navigation Menu** - A dedicated component for displaying a list of primary navigation links. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/navigation-menu), [Nuxt UI](https://ui.nuxt.com/components/navigation-menu), [Radix UI](https://www.radix-ui.com/primitives/docs/components/navigation-menu), [MUI](https://mui.com/material-ui/react-app-bar/), [Mantine](https://mantine.dev/core/nav-link/), [HeroUI](https://www.heroui.com/docs/components/navbar)
+
+* **Sidebar** - Vertical navigation panel for application navigation. (4 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/sidebar), [Semantic UI](https://semantic-ui.com/modules/sidebar.html), [Nuxt UI](https://ui.nuxt.com/docs/components/dashboard-sidebar), [PrimeReact](https://primereact.org/sidebar/)
+
+* **Menubar** - Horizontal menu bar for application-level navigation. (3 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/menubar), [Radix UI](https://www.radix-ui.com/primitives/docs/components/menubar), [PrimeReact](https://primereact.org/menubar/)
+
+## Layout & Structure
+
+Components that define the primary structure and divisions of content on a page.
+
+* **Card** - A container for grouping related content and actions about a single subject, often with a header, body, and footer. (10 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/card), [Chakra UI](https://chakra-ui.com/docs/components/card), [Ant Design](https://ant.design/components/card), [Semantic UI](https://semantic-ui.com/views/card.html), [Nuxt UI](https://ui.nuxt.com/components/card), [Radix UI](https://www.radix-ui.com/themes/docs/components/card), [MUI](https://mui.com/material-ui/react-card/), [Mantine](https://mantine.dev/core/card/), [HeroUI](https://www.heroui.com/docs/components/card), [PrimeReact](https://primereact.org/card/), [Vuetify](https://vuetifyjs.com/en/components/cards)
+
+* **Accordion** - A vertically stacked set of interactive headings that each reveal or hide a section of content. (10 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/accordion), [Chakra UI](https://chakra-ui.com/docs/components/accordion), [Ant Design](https://ant.design/components/collapse), [Semantic UI](https://semantic-ui.com/modules/accordion.html), [Nuxt UI](https://ui.nuxt.com/components/accordion), [Radix UI](https://www.radix-ui.com/primitives/docs/components/accordion), [MUI](https://mui.com/material-ui/react-accordion/), [Mantine](https://mantine.dev/core/accordion/), [Headless UI](https://headlessui.com/react/disclosure), [HeroUI](https://www.heroui.com/docs/components/accordion), [PrimeReact](https://primereact.org/accordion/), [Vuetify](https://vuetifyjs.com/en/components/expansion-panels)
+
+* **Divider / Separator** - A thin line used to group or separate content within a layout. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/separator), [Chakra UI](https://chakra-ui.com/docs/components/divider), [Ant Design](https://ant.design/components/divider), [Semantic UI](https://semantic-ui.com/elements/divider.html), [Nuxt UI](https://ui.nuxt.com/components/separator), [Radix UI](https://www.radix-ui.com/themes/docs/components/separator), [MUI](https://mui.com/material-ui/react-divider/), [Mantine](https://mantine.dev/core/divider/), [HeroUI](https://www.heroui.com/docs/components/divider), [PrimeReact](https://primereact.org/divider/), [Vuetify](https://vuetifyjs.com/en/components/dividers)
+
+* **Grid** - Two-dimensional layout system for aligning content in rows and columns. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/grid), [Ant Design](https://ant.design/components/grid), [Semantic UI](https://semantic-ui.com/collections/grid.html), [MUI](https://mui.com/material-ui/react-grid/), [Mantine](https://mantine.dev/core/grid/), [Vuetify](https://vuetifyjs.com/en/components/grids)
+
+* **Container** - A responsive layout container that centers and constrains content width. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/container), [Semantic UI](https://semantic-ui.com/elements/container.html), [Nuxt UI](https://ui.nuxt.com/docs/components/container), [MUI](https://mui.com/material-ui/react-container/), [Mantine](https://mantine.dev/core/container/), [Vuetify](https://vuetifyjs.com/en/components/grids)
+
+* **Aspect Ratio** - Maintains content aspect ratio within a container. (4 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/aspect-ratio), [Chakra UI](https://chakra-ui.com/docs/components/aspect-ratio), [Radix UI](https://www.radix-ui.com/primitives/docs/components/aspect-ratio), [Mantine](https://mantine.dev/core/aspect-ratio/)
+
+* **Scroll Area** - A container with a customized scrollbar for areas with overflowing content. (4 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/scroll-area), [Radix UI](https://www.radix-ui.com/themes/docs/components/scroll-area), [Mantine](https://mantine.dev/core/scroll-area/), [PrimeReact](https://primereact.org/scrollpanel/)
+
+* **Stack** - One-dimensional layout helper for arranging elements vertically or horizontally. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/stack), [MUI](https://mui.com/material-ui/react-stack/), [Mantine](https://mantine.dev/core/stack/)
+
+* **Flex** - Flexible box layout component. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/flex), [Ant Design](https://ant.design/components/flex), [Mantine](https://mantine.dev/core/flex/)
+
+* **Box** - Basic layout building block. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/box), [MUI](https://mui.com/material-ui/react-box/), [Mantine](https://mantine.dev/core/box/)
+
+* **Space** - Spacing component for managing gaps between elements. (2 implementations)
+  Used in: [Ant Design](https://ant.design/components/space), [Mantine](https://mantine.dev/core/space/)
+
+* **Center** - Centers content both horizontally and vertically. (2 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/center), [Mantine](https://mantine.dev/core/center/)
+
+---
+
+## Data Display
+
+Components designed to present information to the user.
+
+* **Table** - Organizes and displays data in a grid of rows and columns. (10 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/table), [Chakra UI](https://chakra-ui.com/docs/components/table), [Ant Design](https://ant.design/components/table), [Semantic UI](https://semantic-ui.com/collections/table.html), [Nuxt UI](https://ui.nuxt.com/components/table), [Radix UI](https://www.radix-ui.com/themes/docs/components/table), [MUI](https://mui.com/material-ui/react-table/), [Mantine](https://mantine.dev/core/table/), [HeroUI](https://www.heroui.com/docs/components/table), [PrimeReact](https://primereact.org/datatable/), [Vuetify](https://vuetifyjs.com/en/components/data-tables)
+
+* **Avatar** - Represents a user, typically with a profile picture, initials, or a generic icon. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/avatar), [Chakra UI](https://chakra-ui.com/docs/components/avatar), [Ant Design](https://ant.design/components/avatar), [Semantic UI](https://semantic-ui.com/elements/image.html), [Nuxt UI](https://ui.nuxt.com/components/avatar), [Radix UI](https://www.radix-ui.com/themes/docs/components/avatar), [MUI](https://mui.com/material-ui/react-avatar/), [Mantine](https://mantine.dev/core/avatar/), [HeroUI](https://www.heroui.com/docs/components/avatar), [PrimeReact](https://primereact.org/avatar/), [Vuetify](https://vuetifyjs.com/en/components/avatars)
+
+* **Badge** - A small label or counter used to annotate other elements, often indicating a status or notification count. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/badge), [Chakra UI](https://chakra-ui.com/docs/components/badge), [Ant Design](https://ant.design/components/badge), [Nuxt UI](https://ui.nuxt.com/components/badge), [Radix UI](https://www.radix-ui.com/themes/docs/components/badge), [MUI](https://mui.com/material-ui/react-badge/), [Mantine](https://mantine.dev/core/badge/), [HeroUI](https://www.heroui.com/docs/components/badge), [PrimeReact](https://primereact.org/badge/), [Vuetify](https://vuetifyjs.com/en/components/badges)
+
+* **List** - A component for displaying a series of related items. (7 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/empty), [Chakra UI](https://chakra-ui.com/docs/components/list), [Ant Design](https://ant.design/components/list), [Semantic UI](https://semantic-ui.com/elements/list.html), [MUI](https://mui.com/material-ui/react-list/), [Mantine](https://mantine.dev/core/list/), [HeroUI](https://www.heroui.com/docs/components/listbox), [PrimeReact](https://primereact.org/listbox/), [Vuetify](https://vuetifyjs.com/en/components/lists)
+
+* **Tag / Chip** - A compact element for labeling, categorizing, or organizing items. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/tag), [Ant Design](https://ant.design/components/tag), [MUI](https://mui.com/material-ui/react-chip/), [Mantine](https://mantine.dev/core/chip/), [HeroUI](https://www.heroui.com/docs/components/chip), [PrimeReact](https://primereact.org/chip/), [Vuetify](https://vuetifyjs.com/en/components/chips)
+
+* **Image** - A component for displaying images, often with fallbacks, lazy loading, and other optimizations. (6 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/image), [Ant Design](https://ant.design/components/image), [Semantic UI](https://semantic-ui.com/elements/image.html), [MUI](https://mui.com/material-ui/react-image-list/), [Mantine](https://mantine.dev/core/image/), [HeroUI](https://www.heroui.com/docs/components/image), [PrimeReact](https://primereact.org/image/)
+
+* **Tree** - A component that displays hierarchical data in a tree-like structure. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/tree-view), [Ant Design](https://ant.design/components/tree), [Nuxt UI](https://ui.nuxt.com/components/tree), [MUI](https://mui.com/x/react-tree-view/), [Mantine](https://mantine.dev/core/tree/), [PrimeReact](https://primereact.org/tree/), [Angular Material](https://material.angular.io/components/tree)
+
+* **Timeline** - Displays a list of events in chronological order. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/timeline), [Ant Design](https://ant.design/components/timeline), [Nuxt UI](https://ui.nuxt.com/components/timeline), [MUI](https://mui.com/material-ui/react-timeline/), [Mantine](https://mantine.dev/core/timeline/), [PrimeReact](https://primereact.org/timeline/)
+
+* **Carousel** - A slideshow component for cycling through a series of elements, such as images or cards. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/carousel), [Ant Design](https://ant.design/components/carousel), [Semantic UI](https://semantic-ui.com/modules/carousel.html), [Nuxt UI](https://ui.nuxt.com/components/carousel), [Mantine](https://mantine.dev/carousel/getting-started/), [PrimeReact](https://primereact.org/galleria/), [Vuetify](https://vuetifyjs.com/en/components/carousels)
+
+* **Kbd** - Renders a keyboard key style, typically used in documentation to display shortcuts. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/kbd), [Chakra UI](https://chakra-ui.com/docs/components/kbd), [Nuxt UI](https://ui.nuxt.com/components/kbd), [Mantine](https://mantine.dev/core/kbd/), [HeroUI](https://www.heroui.com/docs/components/kbd)
+
+* **Icon** - Scalable vector graphics for visual symbols. (5 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/icon), [Ant Design](https://ant.design/components/icon), [Semantic UI](https://semantic-ui.com/elements/icon.html), [Nuxt UI](https://ui.nuxt.com/docs/components/icon), [MUI](https://mui.com/material-ui/react-icon/)
+
+* **Statistic** - A component to display a statistic, such as a number with a label. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/stat), [Ant Design](https://ant.design/components/statistic), [Semantic UI](https://semantic-ui.com/views/statistic.html)
+
+* **Code** - Inline code display component. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/code), [Mantine](https://mantine.dev/core/code/), [HeroUI](https://www.heroui.com/docs/components/code)
+
+* **Chart** - A component for data visualization, such as bar, line, or pie charts. (3 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/chart), [Mantine](https://mantine.dev/charts/getting-started/), [PrimeReact](https://primereact.org/chart/)
+
+## Feedback & Status
+
+Components used to communicate status, alerts, or progress to the user.
+
+* **Alert** - A message that draws attention to important information or status. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/alert), [Chakra UI](https://chakra-ui.com/docs/components/alert), [Ant Design](https://ant.design/components/alert), [Semantic UI](https://semantic-ui.com/collections/message.html), [Nuxt UI](https://ui.nuxt.com/components/alert), [Radix UI](https://www.radix-ui.com/themes/docs/components/callout), [MUI](https://mui.com/material-ui/react-alert/), [Mantine](https://mantine.dev/core/alert/), [HeroUI](https://www.heroui.com/docs/components/alert), [PrimeReact](https://primereact.org/messages/)
+
+* **Progress** - A visual indicator of a task's progress, typically a linear bar. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/progress), [Chakra UI](https://chakra-ui.com/docs/components/progress), [Ant Design](https://ant.design/components/progress), [Semantic UI](https://semantic-ui.com/modules/progress.html), [Nuxt UI](https://ui.nuxt.com/components/progress), [Radix UI](https://www.radix-ui.com/themes/docs/components/progress), [MUI](https://mui.com/material-ui/react-progress/), [Mantine](https://mantine.dev/core/progress/), [HeroUI](https://www.heroui.com/docs/components/progress), [PrimeReact](https://primereact.org/progressbar/)
+
+* **Skeleton** - A placeholder preview of content that is loading. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/skeleton), [Chakra UI](https://chakra-ui.com/docs/components/skeleton), [Ant Design](https://ant.design/components/skeleton), [Nuxt UI](https://ui.nuxt.com/components/skeleton), [MUI](https://mui.com/material-ui/react-skeleton/), [Mantine](https://mantine.dev/core/skeleton/), [HeroUI](https://www.heroui.com/docs/components/skeleton), [PrimeReact](https://primereact.org/skeleton/)
+
+* **Spinner / Loader** - An animated graphic that indicates a loading or processing state. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/spinner), [Chakra UI](https://chakra-ui.com/docs/components/spinner), [Ant Design](https://ant.design/components/spin), [Semantic UI](https://semantic-ui.com/elements/loader.html), [Radix UI](https://www.radix-ui.com/themes/docs/components/spinner), [MUI](https://mui.com/material-ui/react-progress/#circular), [Mantine](https://mantine.dev/core/loader/), [HeroUI](https://www.heroui.com/docs/components/spinner), [PrimeReact](https://primereact.org/progressspinner/)
+
+* **Toast / Snackbar** - A small, non-disruptive message that appears temporarily to provide feedback. (8 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/toast), [Chakra UI](https://chakra-ui.com/docs/components/toast), [Ant Design](https://ant.design/components/message), [Semantic UI](https://fomantic-ui.com/modules/toast.html), [Nuxt UI](https://ui.nuxt.com/components/toast), [Radix UI](https://www.radix-ui.com/primitives/docs/components/toast), [MUI](https://mui.com/material-ui/react-snackbar/), [Mantine](https://mantine.dev/notifications/getting-started/), [HeroUI](https://www.heroui.com/docs/components/toast), [PrimeReact](https://primereact.org/toast/)
+
+* **Empty State** - Indicates when there is no content to display. (3 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/empty), [Chakra UI](https://chakra-ui.com/docs/components/empty-state), [Ant Design](https://ant.design/components/empty)
+
+* **Message** - Static information display component. (3 implementations)
+  Used in: [Ant Design](https://ant.design/components/message), [Semantic UI](https://semantic-ui.com/collections/message.html), [PrimeReact](https://primereact.org/message/)
+
+* **Notification** - System-level notifications, typically floating. (2 implementations)
+  Used in: [Ant Design](https://ant.design/components/notification), [Mantine](https://mantine.dev/core/notification/)
+
+* **Result** - Operation result page display. (2 implementations)
+  Used in: [Ant Design](https://ant.design/components/result), [Chakra UI](https://chakra-ui.com/docs/components/empty-state)
+
+## Overlays & Modals
+
+Components that appear on top of the primary UI to display contextual information or require user interaction.
+
+* **Dialog / Modal** - A window overlaid on the primary content to require user interaction or display critical information. (11 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/dialog), [Chakra UI](https://chakra-ui.com/docs/components/modal), [Ant Design](https://ant.design/components/modal), [Semantic UI](https://semantic-ui.com/modules/modal.html), [Nuxt UI](https://ui.nuxt.com/components/modal), [Radix UI](https://www.radix-ui.com/themes/docs/components/dialog), [MUI](https://mui.com/material-ui/react-dialog/), [Mantine](https://mantine.dev/core/modal/), [Headless UI](https://headlessui.com/react/dialog), [HeroUI](https://www.heroui.com/docs/components/modal), [PrimeReact](https://primereact.org/dialog/), [Angular Material](https://material.angular.io/components/dialog)
+
+* **Popover** - A non-modal dialog that floats near a trigger element to display contextual information. (10 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/popover), [Chakra UI](https://chakra-ui.com/docs/components/popover), [Ant Design](https://ant.design/components/popover), [Semantic UI](https://semantic-ui.com/modules/popup.html), [Nuxt UI](https://ui.nuxt.com/components/popover), [Radix UI](https://www.radix-ui.com/themes/docs/components/popover), [MUI](https://mui.com/material-ui/react-popover/), [Mantine](https://mantine.dev/core/popover/), [Headless UI](https://headlessui.com/react/popover), [HeroUI](https://www.heroui.com/docs/components/popover), [PrimeReact](https://primereact.org/overlaypanel/)
+
+* **Tooltip** - A small pop-up that displays a brief message when hovering over or focusing on an element. (9 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/tooltip), [Chakra UI](https://chakra-ui.com/docs/components/tooltip), [Ant Design](https://ant.design/components/tooltip), [Semantic UI](https://semantic-ui.com/modules/popup.html), [Nuxt UI](https://ui.nuxt.com/components/tooltip), [Radix UI](https://www.radix-ui.com/themes/docs/components/tooltip), [MUI](https://mui.com/material-ui/react-tooltip/), [Mantine](https://mantine.dev/core/tooltip/), [HeroUI](https://www.heroui.com/docs/components/tooltip), [PrimeReact](https://primereact.org/tooltip/), [Angular Material](https://material.angular.io/components/tooltip)
+
+* **Context Menu** - A menu that appears upon right-clicking, providing context-sensitive actions. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/context-menu), [Nuxt UI](https://ui.nuxt.com/components/context-menu), [Radix UI](https://www.radix-ui.com/themes/docs/components/context-menu), [Mantine](https://mantine.dev/core/menu/), [PrimeReact](https://primereact.org/contextmenu/)
+
+## Typography
+
+Components for text styling and display.
+
+* **Typography** - A typography system for formatted text and semantic HTML text elements. (5 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/typography), [Chakra UI](https://chakra-ui.com/docs/components/text), [Ant Design](https://ant.design/components/typography/), [MUI](https://mui.com/material-ui/react-typography/), [Mantine](https://mantine.dev/core/text/)
+
+* **Text** - Basic text component with styling options. (3 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/text), [Mantine](https://mantine.dev/core/text/), [Radix UI](https://www.radix-ui.com/themes/docs/components/text)
+
+* **Heading** - Semantic heading elements with predefined styles. (2 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/heading), [Semantic UI](https://semantic-ui.com/elements/header.html)
+
+* **Label** - Form field labels and text labels. (3 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/label), [Semantic UI](https://semantic-ui.com/elements/label.html), [Radix UI](https://www.radix-ui.com/primitives/docs/components/label)
+
+## Advanced Components
+
+Specialized or complex components for specific use cases.
+
+* **Command Palette** - Quick action search interface for keyboard-driven navigation. (2 implementations)
+  Used in: [ShadCN](https://ui.shadcn.com/docs/components/command), [Nuxt UI](https://ui.nuxt.com/docs/components/command-palette)
+
+* **QR Code** - QR code generator component. (2 implementations)
+  Used in: [Chakra UI](https://chakra-ui.com/docs/components/qr-code), [Ant Design](https://ant.design/components/qrcode)
+

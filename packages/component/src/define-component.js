@@ -1,5 +1,5 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { adoptStylesheet, camelToKebab, each, isClient, isServer, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, camelToKebab, each, isClient, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
 import { unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
@@ -70,6 +70,8 @@ export const defineComponent = ({
     events,
     keys,
     defaultState,
+    // web components handle settings via WebComponentBase — only subtemplates need defaultSettings on Template
+    defaultSettings: tagName ? undefined : defaultSettings,
     subTemplates,
     onCreated,
     onRendered,
@@ -169,6 +171,10 @@ export const defineComponent = ({
         super.disconnectedCallback();
         if (this.template) {
           this.template.onDestroyed(); // destroy instance
+          // Clear references for gc
+          delete this.template;
+          delete this.component;
+          delete this.dataContext;
         }
         litTemplate.onDestroyed(); // destroy prototype
       }
@@ -176,7 +182,6 @@ export const defineComponent = ({
       // callback if moves doc
       adoptedCallback() {
         super.adoptedCallback();
-        this.call(onMoved);
       }
 
       attributeChangedCallback(attribute, oldValue, newValue) {

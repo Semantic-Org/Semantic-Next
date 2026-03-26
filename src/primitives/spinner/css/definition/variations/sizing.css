@@ -1,0 +1,25 @@
+/*-------------------
+        Sizing
+--------------------*/
+
+.mini.spinner {
+  --spinner-size: var(--spinner-mini-size);
+}
+.tiny.spinner {
+  --spinner-size: var(--spinner-tiny-size);
+}
+.small.spinner {
+  --spinner-size: var(--spinner-small-size);
+}
+.large.spinner {
+  --spinner-size: var(--spinner-large-size);
+}
+.big.spinner {
+  --spinner-size: var(--spinner-big-size);
+}
+.huge.spinner {
+  --spinner-size: var(--spinner-huge-size);
+}
+.massive.spinner {
+  --spinner-size: var(--spinner-massive-size);
+}

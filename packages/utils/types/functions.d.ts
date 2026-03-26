@@ -1,6 +1,6 @@
 /**
  * Function manipulation and optimization utilities
- * @see {@link https://next.semantic-ui.com/api/utils/functions Function Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions Function Utilities Documentation}
  */
 
 /**
@@ -21,8 +21,8 @@ export interface DebounceOptions {
   trailing?: boolean;
   /** Maximum time to wait before forcing execution */
   maxWait?: number;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -37,8 +37,8 @@ export interface ThrottleOptions {
   leading?: boolean;
   /** Execute once more after wait period if calls occurred (default: true) */
   trailing?: boolean;
-  /** AbortController for cancellation */
-  abortController?: AbortController;
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
 }
 
 /**
@@ -68,7 +68,7 @@ export interface ThrottledFunction<T extends (...args: any[]) => any> {
 /**
  * A no-operation function that does nothing
  * Useful to avoid function creation overhead when using multiple noop functions
- * @see {@link https://next.semantic-ui.com/api/utils/functions#noop noop}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#noop noop}
  *
  * @example
  * ```ts
@@ -79,7 +79,7 @@ export function noop(...args: any[]): void;
 
 /**
  * Wraps a value in a function if it isn't already a function
- * @see {@link https://next.semantic-ui.com/api/utils/functions#wrapfunction wrapFunction}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wrapfunction wrapFunction}
  *
  * @param x - Value or function to wrap
  * @returns A function that returns the value, or the original function
@@ -95,7 +95,7 @@ export function wrapFunction<T>(x: T | (() => T)): () => T;
 /**
  * Creates a memoized version of a function
  * Caches return values based on input arguments
- * @see {@link https://next.semantic-ui.com/api/utils/functions#memoize memoize}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#memoize memoize}
  *
  * @param fn - Function to memoize
  * @param hashFunction - Optional function to generate cache keys
@@ -117,10 +117,51 @@ export function memoize<T extends (...args: any[]) => any>(
 ): T & { cache: Map<string | number, ReturnType<T>>; };
 
 /**
+ * Options for the wait function
+ */
+export interface WaitOptions {
+  /** AbortController or AbortSignal for cancellation */
+  abortController?: AbortController | AbortSignal;
+  /** Whether to reject the promise when aborted. Defaults to `true` */
+  rejectOnAbort?: boolean;
+}
+
+/**
+ * Returns a promise that resolves after the specified number of milliseconds.
+ * Supports cancellation via `AbortController` — by default, aborting rejects
+ * the promise with an `AbortError`, matching web platform conventions.
+ * Set `rejectOnAbort: false` to resolve early instead.
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#wait wait}
+ * @see {@link https://next.semantic-ui.com/examples/utils-wait Example}
+ *
+ * @param ms - The number of milliseconds to wait
+ * @param options - Optional configuration
+ * @returns A promise that resolves after the specified delay, or rejects on abort
+ *
+ * @example
+ * ```ts
+ * // Basic usage
+ * await wait(1000);
+ *
+ * // Cancellable — rejects with AbortError
+ * const controller = new AbortController();
+ * try {
+ *   await wait(5000, { abortController: controller });
+ * } catch (e) {
+ *   // e.name === 'AbortError'
+ * }
+ *
+ * // Resolve early instead of rejecting
+ * await wait(5000, { abortController: controller, rejectOnAbort: false });
+ * ```
+ */
+export function wait(ms?: number, options?: WaitOptions): Promise<void>;
+
+/**
  * Creates a debounced version of a function that delays execution until after wait milliseconds
  * have elapsed since the last time it was called. Supports both sync and async functions with
  * comprehensive promise handling and AbortController integration.
- * @see {@link https://next.semantic-ui.com/api/utils/functions#debounce debounce}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#debounce debounce}
  * @see {@link https://next.semantic-ui.com/examples/utils-debounce Example}
  *
  * @param func - The function to debounce
@@ -171,7 +212,7 @@ export function debounce<T extends (...args: any[]) => any>(
  * Creates a throttled version of a function that only invokes the function at most once per
  * every wait milliseconds. Supports both sync and async functions with comprehensive promise
  * handling and AbortController integration.
- * @see {@link https://next.semantic-ui.com/api/utils/functions#throttle throttle}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/functions#throttle throttle}
  * @see {@link https://next.semantic-ui.com/examples/utils-throttle Example}
  *
  * @param func - The function to throttle

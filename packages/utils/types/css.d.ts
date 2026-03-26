@@ -9,7 +9,7 @@ export interface AdoptStylesheetOptions {
 }
 
 /**
- * Options for scopeStyles function  
+ * Options for scopeStyles function
  */
 export interface ScopeStylesOptions {
   /** Replace :host selectors with the scope selector instead of prepending (default: false) */
@@ -20,7 +20,7 @@ export interface ScopeStylesOptions {
 
 /**
  * Adopts a CSS stylesheet to a document or shadow root with caching support
- * @see {@link https://next.semantic-ui.com/api/utils/css#adoptstylesheet adoptStylesheet}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/css#adoptstylesheet adoptStylesheet}
  * @see {@link https://next.semantic-ui.com/examples/utils-adoptstylesheet Example}
  *
  * @param css - The CSS string to adopt
@@ -36,9 +36,9 @@ export interface ScopeStylesOptions {
  * ```
  */
 export function adoptStylesheet(
-  css: string, 
-  adoptedElement?: Document | ShadowRoot, 
-  options?: AdoptStylesheetOptions
+  css: string,
+  adoptedElement?: Document | ShadowRoot,
+  options?: AdoptStylesheetOptions,
 ): void;
 
 /**
@@ -53,7 +53,7 @@ export interface ExtractCSSOptions {
 
 /**
  * Extracts CSS rules matching a selector from various stylesheet sources
- * @see {@link https://next.semantic-ui.com/api/utils/css#extractcss extractCSS}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/css#extractcss extractCSS}
  * @see {@link https://next.semantic-ui.com/examples/utils-extractcss Example}
  *
  * @param selector - The CSS selector to match (case-insensitive)
@@ -72,13 +72,15 @@ export interface ExtractCSSOptions {
  */
 export function extractCSS(
   selector: string,
-  source?: string | Document | CSSStyleSheet | CSSStyleSheet[] | { styleSheets: StyleSheetList } | { adoptedStyleSheets: CSSStyleSheet[] },
-  options?: ExtractCSSOptions
+  source?: string | Document | CSSStyleSheet | CSSStyleSheet[] | { styleSheets: StyleSheetList; } | {
+    adoptedStyleSheets: CSSStyleSheet[];
+  },
+  options?: ExtractCSSOptions,
 ): CSSStyleSheet | string;
 
 /**
  * Scopes CSS rules by prepending a selector to all rules with configurable options
- * @see {@link https://next.semantic-ui.com/api/utils/css#scopestyles scopeStyles}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/css#scopestyles scopeStyles}
  * @see {@link https://next.semantic-ui.com/examples/utils-scopestyles Example}
  *
  * @param css - The CSS string to scope
@@ -96,5 +98,5 @@ export function extractCSS(
 export function scopeStyles(
   css: string,
   scopeSelector?: string,
-  options?: ScopeStylesOptions
+  options?: ScopeStylesOptions,
 ): string;

@@ -1,4 +1,3 @@
-export { StringScanner } from './compiler/string-scanner.js';
-export { TemplateCompiler } from './compiler/template-compiler.js';
+export { StringScanner, TemplateCompiler } from '@semantic-ui/compiler';
 export { registerHelper, registerHelpers, TemplateHelpers } from './template-helpers.js';
 export { Template } from './template.js';

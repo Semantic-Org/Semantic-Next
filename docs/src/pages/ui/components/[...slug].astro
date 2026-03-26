@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import { each, toTitleCase, inArray } from '@semantic-ui/utils';
+import Definition from '@layouts/Definition.astro';
+import SpecDefinition from '@components/SpecDefinition.astro';
+import { DocsSpecReader } from '@semantic-ui/specs';
+import * as Specs from '@semantic-ui/core/specs';
+
+const { entry, tab } = Astro.props;
+export async function getStaticPaths() {
+  const entries = await getCollection('components');
+  const paths = [];
+  each(entries, entry => {
+    paths.push({
+      params: { slug: `${entry.id}` },
+      props: { entry }
+    });
+    each(entry.data.tabs, tab => {
+      paths.push({
+        params: { slug: `${entry.id}/${tab}` },
+        props: { entry, tab }
+      });
+    });
+  });
+  return paths;
+}
+
+const data = entry.data;
+const displayedTab = tab || data.tabs[0];
+const plural = (displayedTab == 'plural');
+const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'plural']);
+
+const spec = Specs[data.specName];
+const componentSpec = new DocsSpecReader(spec, { plural });
+const componentName = componentSpec.getComponentName();
+const definition = componentSpec.getDefinition();
+
+const searchMeta = {
+  title: data.title,
+  description: data.description,
+  pageType: 'UI Components',
+  tags: data.tags,
+  tab: toTitleCase(displayedTab)
+};
+
+const menu = (data.tabs || []).map(tab => ({
+  text: toTitleCase(tab),
+  url: `/ui/${entry.id}/${tab}`,
+}));
+
+let railMenu = [];
+if(definitionDisplayed) {
+  railMenu = componentSpec.getDefinitionMenu();
+}
+---

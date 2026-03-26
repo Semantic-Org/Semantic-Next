@@ -2,12 +2,30 @@
             Groups
 *******************************/
 
+
 .buttons {
   display: inline-flex;
+  flex-wrap: nowrap;
   flex-direction: row;
   vertical-align: baseline;
+  border-radius: var(--button-border-radius);
   margin: var(--button-vertical-margin) var(--button-horizontal-margin) 0em 0em;
 }
 .buttons:not(.basic):not(.inverted) {
   box-shadow: var(--button-group-box-shadow);
+}
+
+.buttons ::slotted(ui-button) {
+  --button-border-radius: 0;
+  --button-horizontal-margin: 0;
+  margin: 0;
+}
+.buttons ::slotted(ui-button:is(:first-child)) {
+  --button-border-radius: var(--button-group-button-border-radius) 0 0 var(--button-group-button-border-radius);
+}
+.buttons ::slotted(ui-button:is(:last-child)) {
+  --button-border-radius: 0 var(--button-group-button-border-radius) var(--button-group-button-border-radius) 0;
+}
+.buttons ::slotted(ui-button:is(:only-child)) {
+  --button-border-radius: var(--button-group-button-border-radius);
 }

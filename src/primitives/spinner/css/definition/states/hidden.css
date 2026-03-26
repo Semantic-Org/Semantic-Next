@@ -1,0 +1,9 @@
+/*-------------------
+       Hidden
+--------------------*/
+
+.hidden.spinner {
+  &:not(.active) {
+    display: none;
+  }
+}

@@ -1,0 +1,131 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Cloning Utilities
+package: "@semantic-ui/utils"
+methods: [clone, extend]
+icon: copy
+description: API reference for object and array cloning functions
+---
+
+The Cloning utilities provide functions for creating copies of objects and arrays in JavaScript. These functions offer ways to create shallow or deep copies of data structures, which is crucial for avoiding unintended side effects when working with complex objects.
+
+## Functions
+
+### clone
+
+```javascript
+function clone(src, options?)
+```
+
+Creates a deep clone of the provided value.
+
+> **Handling Complex Structures** This function can clone arrays, objects, dates, regular expressions, maps, sets, and null-prototype objects. It uses a WeakMap internally to handle circular references and prevent infinite recursion.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| src  | any  | The value to clone |
+| options | object | Optional cloning options |
+
+#### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| preserveDOM | boolean | `false` | Preserve DOM nodes by reference instead of cloning them |
+| preserveNonCloneable | boolean | `false` | Preserve custom class instances by reference instead of flattening to plain objects |
+
+#### Returns
+
+A deep clone of the input value.
+
+#### Example
+
+```javascript
+import { clone } from '@semantic-ui/utils';
+
+const original = {
+  a: 1,
+  b: { c: 2 },
+  d: [1, 2, 3],
+  e: new Date(),
+  f: /test/gi
+};
+const cloned = clone(original);
+
+console.log(cloned); // { a: 1, b: { c: 2 }, d: [1, 2, 3], e: Date, f: /test/gi }
+console.log(cloned !== original); // true
+console.log(cloned.b !== original.b); // true
+console.log(cloned.d !== original.d); // true
+```
+
+#### Preserving DOM Nodes
+
+When `preserveDOM` is `true`, DOM nodes are kept by reference rather than deep cloned.
+
+```javascript
+import { clone } from '@semantic-ui/utils';
+
+const data = { el: document.querySelector('.my-element'), value: 42 };
+const cloned = clone(data, { preserveDOM: true });
+
+console.log(cloned.el === data.el); // true (same reference)
+console.log(cloned.value === data.value); // true
+console.log(cloned !== data); // true
+```
+
+#### Preserving Class Instances
+
+When `preserveNonCloneable` is `true`, custom class instances are kept by reference instead of being flattened to plain objects.
+
+```javascript
+import { clone } from '@semantic-ui/utils';
+
+class Store { value = 42; }
+const store = new Store();
+
+const data = { store, config: { a: 1 } };
+const cloned = clone(data, { preserveNonCloneable: true });
+
+console.log(cloned.store === store); // true (same reference)
+console.log(cloned.config !== data.config); // true (deep cloned)
+```
+
+### extend
+
+```javascript
+function extend(obj, ...sources)
+```
+
+Extends an object with properties from other objects, properly handling getter/setters.
+
+> **Descriptor Handling** This function uses `Object.getOwnPropertyDescriptor` and `Object.defineProperty` to ensure that getters and setters are correctly copied, preserving their behavior in the extended object.
+
+#### Parameters
+
+| Name    | Type     | Description |
+|---------|----------|-------------|
+| obj     | object   | The target object to extend |
+| sources | ...object| One or more source objects |
+
+#### Returns
+
+The extended object.
+
+#### Example
+
+```javascript
+import { extend } from '@semantic-ui/utils';
+
+const target = { a: 1 };
+const source1 = { 
+  b: 2,
+  get c() { return this.b * 2; }
+};
+const source2 = { d: 4 };
+
+const result = extend(target, source1, source2);
+console.log(result); // { a: 1, b: 2, d: 4 }
+console.log(result.c); // 4
+```

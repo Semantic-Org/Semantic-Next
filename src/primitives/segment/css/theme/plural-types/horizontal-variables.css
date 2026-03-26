@@ -1,0 +1,3 @@
+:host {
+  --segments-horizontal-divider: var(--border);
+}

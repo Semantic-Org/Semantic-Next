@@ -1,6 +1,6 @@
-import MenuSpec from './specs/menu.js';
-import MenuComponentSpec from './specs/menu-component.js';
-import MenuItemSpec from './specs/menu-item.js';
-import MenuItemComponentSpec from './specs/menu-item-component.js';
+import MenuItemComponentSpec from './specs/menu-item.component.js';
+import MenuItemSpec from './specs/menu-item.spec.json';
+import MenuComponentSpec from './specs/menu.component.js';
+import MenuSpec from './specs/menu.spec.json';
 
-export { MenuSpec, MenuComponentSpec, MenuItemSpec, MenuItemComponentSpec };
+export { MenuComponentSpec, MenuItemComponentSpec, MenuItemSpec, MenuSpec };

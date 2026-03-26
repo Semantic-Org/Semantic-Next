@@ -1,0 +1,24 @@
+:host {
+
+  /* this allows variations like color to override one variable to modify all styles */
+  --button-styled-background: var(--standard-solid-5);
+  --button-styled-text-shadow: none;
+  --button-styled-color: var(--text-color);
+  --button-styled-border-color: var(--border-color);
+  --button-styled-box-shadow: var(--button-box-shadow);
+
+  --button-styled-hover-background: var(--standard-solid-15);
+  --button-styled-hover-color: var(--standard-solid-80);
+
+  --button-styled-pressed-background: var(--standard-solid-20);
+  --button-styled-pressed-color: var(--standard-solid-90);
+
+  --button-styled-active-background: var(--standard-solid-20);
+  --button-styled-active-color: var(--standard-solid-90);
+
+  /* Outline */
+  --button-outline-border-width: 1px;
+  --button-outline-border-offset: -1px;
+  --button-outline-border-color: var(--button-styled-border-color);
+
+}

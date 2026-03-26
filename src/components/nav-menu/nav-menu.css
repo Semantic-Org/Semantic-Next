@@ -9,17 +9,17 @@
 
   --nav-menu-title-color: #FFF;
   --nav-menu-title-font-size: 14px;
-  --nav-menu-title-padding: var(--compact-spacing) 0rem;
+  --nav-menu-title-padding: var(--padding-xs) 0rem;
 
   --nav-menu-description-font-size: 12px;
   --nav-menu-description-color: var(--standard-40);
-  --nav-menu-description-distance: var(--compact-spacing);
+  --nav-menu-description-distance: var(--gap-xs);
 
   --nav-menu-title-icon-font-size: 18px;
   --nav-menu-title-icon-color: inherit;
   --nav-menu-title-icon-opacity: 0.4;
   --nav-menu-title-icon-width: 1.5rem;
-  --nav-menu-title-icon-distance: var(--compact-spacing);
+  --nav-menu-title-icon-distance: var(--gap-xs);
 
   --nav-menu-title-icon-active-opacity: 1;
 
@@ -30,9 +30,9 @@
   --nav-menu-nav-icon-icon-font-size: 12px;
 
   --nav-menu-content-indent-distance: 0.5rem;
-  --nav-menu-content-space-after: var(--compact-spacing);
+  --nav-menu-content-space-after: var(--gap-xs);
 
-  --nav-menu-content-icon-indent-distance: var(--compact-spacing);
+  --nav-menu-content-icon-indent-distance: var(--gap-xs);
 
   --nav-menu-sub-title-font-size: 13px;
   --nav-menu-sub-title-padding: 6px 0px;
@@ -50,7 +50,7 @@
   --nav-menu-item-hover-color: var(--standard-90);
   --nav-menu-item-current-color: var(--primary-20-invariant);
 
-  --nav-menu-search-margin: var(--compact-spacing) 0;
+  --nav-menu-search-margin: var(--margin-xs) 0;
 
   --nav-menu-highlight-color: var(--primary-text-color);
   --nav-menu-highlight-underline-color: var(--primary-text-color);
@@ -220,6 +220,9 @@ a {
     cursor: default;
     color: var(--primary-text-color);
 
+    .icon {
+      opacity: var(--nav-menu-title-icon-active-opacity);
+    }
     &[href] {
       cursor: pointer;
     }
@@ -290,7 +293,7 @@ a {
   padding: var(--nav-menu-item-spacing) 0;
   text-align: center;
   font-style: italic;
-  margin-bottom: var(--compact-spacing);
+  margin-bottom: var(--margin-xs);
 }
 
 .highlight {

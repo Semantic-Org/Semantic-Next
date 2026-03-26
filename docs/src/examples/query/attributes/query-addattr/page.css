@@ -1,0 +1,48 @@
+.input,
+.textarea {
+  padding: var(--8px);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  margin-right: var(--8px);
+  margin-bottom: var(--8px);
+
+  &[disabled] {
+    opacity: 0.5;
+    background: var(--standard-15);
+  }
+
+  &[required] {
+    border: var(--red-border);
+  }
+
+  &[readonly] {
+    background: var(--standard-10);
+  }
+}
+
+.textarea {
+  min-width: 200px;
+  min-height: 60px;
+  resize: vertical;
+}
+
+.controls {
+  margin: var(--16px) 0;
+  display: flex;
+  gap: var(--8px);
+}
+
+.output {
+  background: var(--standard-5);
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--12px);
+  margin-top: var(--16px);
+
+  pre {
+    margin: 0;
+    font-family: monospace;
+    font-size: var(--small);
+    color: var(--standard-70);
+  }
+}

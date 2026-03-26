@@ -86,11 +86,12 @@
       --nav-menu-content-icon-indent-distance: 7px;
       --nav-menu-sub-content-indent-distance: 0px;
       --nav-menu-menu-item-font-size: 12px;
-      --nav-menu-menu-item-spacing: 6px;
+      --nav-menu-menu-item-spacing: 5px;
       --nav-menu-sub-title-font-size: 10px;
       --nav-menu-sub-title-padding: 7px 0px 4px;
       --nav-menu-selected-vertical-padding: 0px;
       --nav-menu-selected-horizontal-padding: 6px;
+      --nav-menu-content-space-after: 1em;
 
       &::part(search) {
         margin: 0.75rem 1rem -0.25rem;
@@ -101,14 +102,29 @@
         position: sticky;
         top: -9px;
         background: var(--black);
-        padding-top: var(--spacing);
+        padding-top: var(--padding);
         z-index: 2;
       }
       &::part(content) {
-        padding-left: 9px;
-        border-left: 1px solid var(--white-10);
-        padding-top: 4px;
-        white-space: nowrap;
+        border-left: var(--internal-border);
+        margin-left: 0rem;
+        padding-left: 0.75rem;
+        margin-top: -0.35rem;
+        padding-top: 0.35rem;
+      }
+      &::part(description) {
+        color: oklch(0.75 0.11 92.17);
+        font-size: 10px;
+      }
+      &::part(menu) {
+        scrollbar-width: thin;
+        display: block;
+        padding: 0rem 1rem;
+        flex-grow: 1;
+        overflow-y: scroll;
+        border-top: var(--border);
+        margin-top: 1rem !important;
+        padding: 0.5rem 1rem;
       }
     }
 
@@ -182,61 +198,6 @@
   }
 }
 
-/* Light Theme */
-html.light {
-  --playground-page-background: #FFFFFF;
-  --topbar-background-color: #000000;
-  --button-transparent-inverted-background-color: var(--black-80);
-  --button-transparent-inverted-hover-background-color: var(--black-90);
-  --button-transparent-inverted-pressed-background-color: var(--black-80);
-
-  --ec-frm-edActTabFg: var(--black-80);
-  figcaption .header {
-    background-color: var(--angled-gradient);
-  }
-
-  learn-example,
-  ::part(playground) {
-    --playground-code-background: #F7F7F7;
-    --playground-border: var(--border);
-    --playground-button-background-color: #333333;
-
-    --playground-header-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
-    --playground-header-border: 1px solid rgba(221, 221, 221, 0.05);
-    --playground-header-color: rgba(255, 255, 255, 0.8);
-    --playground-header-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.4) inset;
-
-    --playground-code-comment-color: #AAAAAA;
-
-    --learn-panel-background: linear-gradient(rgb(229 229 229), rgb(253 253 253) 100px, oklch(0.92 0.01 0));
-
-  }
-  ::part(panel) {
-    --panel-label-background: linear-gradient(rgba(255, 255, 255, 0.04), rgb(236 236 236 / 50%));
-    --panel-label-color: var(--black-70);
-    --panel-label-box-shadow: 0px -2px 5px -3px rgba(0, 0, 0, 0.3) inset;
-
-    --panel-label-active-color: var(--black-90);
-    --panel-label-active-background: rgb(0 0 0 / 3%);
-
-    --panel-label-minimized-background: linear-gradient(rgba(0, 0, 0, 0.02), rgb(15 17 22 / 30%));
-    --panel-label-minimized-color: rgba(0, 0, 0, 0.1);
-  }
-
-  code-playground {
-    --playground-code-keyword-color: #666;
-    --code-purple: #8B1FFF;
-    --code-grey: #000;
-    --code-default: #777777;
-    --primary-text-color: #009FDA;
-    --code-blue: var(--primary-text-color);
-    --code-red: #d90f0f;
-    --code-white: #a1a1a1;
-    --playground-code-background: #080C10;
-    --playground-code-comment-color: #444444;
-    --playground-code-linenumber-color: #cfcfcf;
-  }
-}
 
 /* Tablet */
 @media only screen and (max-width: 767px) {

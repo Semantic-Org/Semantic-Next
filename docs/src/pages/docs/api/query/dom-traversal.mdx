@@ -1,0 +1,414 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - DOM Traversal
+icon: navigation
+description: API reference for Query methods related to DOM traversal
+package: "@semantic-ui/query"
+methods: ["find", "children", "parent", "closest", "closestAll", "siblings", "next", "prev", "filter", "not", "is", "contains", "end"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Navigate the DOM tree relative to matched elements. Use `$$` to pierce shadow DOM boundaries.
+
+## Descendants
+
+### find
+
+```javascript
+$('selector').find(selector);
+```
+
+Finds descendant elements matching the selector.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match descendants |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing matched elements.
+
+#### Usage
+
+```javascript
+$('div').find('p').addClass('highlight');
+```
+
+#### Example
+
+<PlaygroundExample id="query-find" direction="horizontal"></PlaygroundExample>
+
+### children
+
+```javascript
+$('selector').children();
+$('selector').children(selector);
+```
+
+Gets direct children, optionally filtered by a selector.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter children |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing child elements.
+
+#### Usage
+
+```javascript
+$('ul').children('li').css('color', 'red');
+```
+
+#### Example
+
+<PlaygroundExample id="query-children" direction="horizontal"></PlaygroundExample>
+
+## Ancestors
+
+### parent
+
+```javascript
+$('selector').parent();
+$('selector').parent(selector);
+```
+
+Gets the parent of each element, optionally filtered by a selector.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter parents |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing parent elements.
+
+#### Usage
+
+```javascript
+$('button').parent().addClass('button-group');
+```
+
+#### Example
+
+<PlaygroundExample id="query-parent" direction="horizontal"></PlaygroundExample>
+
+### closest
+
+```javascript
+$('selector').closest(selector);
+$('selector').closest(selector, { returnAll: true });
+```
+
+Finds the closest ancestor matching the selector. With `returnAll: true`, returns all matching ancestors.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match ancestors |
+| options.returnAll | boolean | Return all matches instead of closest |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing ancestor element(s).
+
+#### Usage
+
+```javascript
+$('input').closest('form').submit();
+```
+
+#### Example
+
+<PlaygroundExample id="query-closest" direction="horizontal"></PlaygroundExample>
+
+### closestAll
+
+```javascript
+$('selector').closestAll(selector);
+```
+
+Gets all ancestor elements matching the selector.
+
+> **Alias for** `closest(selector, { returnAll: true })`
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match ancestors |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing all matching ancestors (closest to farthest).
+
+#### Usage
+
+```javascript
+$('span').closestAll('.container').addClass('highlight');
+```
+
+## Siblings
+
+### siblings
+
+```javascript
+$('selector').siblings();
+$('selector').siblings(selector);
+```
+
+Gets all siblings, optionally filtered by a selector.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter siblings |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing sibling elements.
+
+#### Usage
+
+```javascript
+$('.selected').siblings().addClass('dimmed');
+```
+
+#### Example
+
+<PlaygroundExample id="query-siblings" direction="horizontal"></PlaygroundExample>
+
+### next
+
+```javascript
+$('selector').next();
+$('selector').next(selector);
+```
+
+Gets the immediately following sibling, optionally filtered.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing next sibling element(s).
+
+#### Usage
+
+```javascript
+$('h2').next().css('margin-top', '20px');
+```
+
+#### Example
+
+<PlaygroundExample id="query-next" direction="horizontal"></PlaygroundExample>
+
+### prev
+
+```javascript
+$('selector').prev();
+$('selector').prev(selector);
+```
+
+Gets the immediately preceding sibling, optionally filtered.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | Optional selector to filter |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing previous sibling element(s).
+
+#### Usage
+
+```javascript
+$('h2').prev().css('margin-bottom', '10px');
+```
+
+#### Example
+
+<PlaygroundExample id="query-prev" direction="horizontal"></PlaygroundExample>
+
+## Filtering
+
+### filter
+
+```javascript
+$('selector').filter(selector);
+$('selector').filter(fn);
+```
+
+Reduces the set to elements matching the selector or passing the function test.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to match |
+| fn | function | Test function, return `true` to include |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing filtered elements.
+
+#### Usage
+
+##### By Selector
+
+```javascript
+$('p').filter('.highlight').css('background', 'yellow');
+```
+
+##### By Function
+
+```javascript
+$('li').filter((el) => $(el).text().includes('important')).addClass('priority');
+```
+
+#### Example
+
+<PlaygroundExample id="query-filter" direction="horizontal"></PlaygroundExample>
+
+### not
+
+```javascript
+$('selector').not(selector);
+$('selector').not(fn);
+```
+
+Removes elements matching the selector or passing the function test.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to exclude |
+| fn | function | Test function, return `true` to exclude |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing remaining elements.
+
+#### Usage
+
+##### By Selector
+
+```javascript
+$('p').not('.exclude').css('color', 'blue');
+```
+
+##### By Function
+
+```javascript
+$('li').not((el) => $(el).text().trim() === '').addClass('visible');
+```
+
+#### Example
+
+<PlaygroundExample id="query-not" direction="horizontal"></PlaygroundExample>
+
+### is
+
+```javascript
+$('selector').is(selector);
+$('selector').is(fn);
+```
+
+Tests if any element matches the selector or passes the function test.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| selector | string | CSS selector to test |
+| fn | function | Test function |
+
+#### Returns
+
+`true` if at least one element matches, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('p').is('.active')) {
+  console.log('At least one paragraph is active');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-is" direction="horizontal"></PlaygroundExample>
+
+### contains
+
+```javascript
+$('selector').contains(element);
+```
+
+Tests if the first matched element contains the given element.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| element | Element | Element to check for |
+
+#### Returns
+
+`true` if contained, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('#container').contains(event.target)) {
+  console.log('Click was inside container');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-contains" direction="horizontal"></PlaygroundExample>
+
+## Chain
+
+### end
+
+```javascript
+$('selector').find('child').end();
+```
+
+Returns to the previous Query set in the chain.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) before the last traversal.
+
+#### Usage
+
+```javascript
+$('.card')
+  .find('.title').css('font-weight', 'bold').end()
+  .find('.content').html('<p>New</p>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>

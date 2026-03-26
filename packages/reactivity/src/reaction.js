@@ -3,10 +3,9 @@ import { Dependency } from './dependency.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
-
   static create(callback, options = {}) {
     const reaction = new Reaction(callback, options);
-    if(options.firstRun !== false) {
+    if (options.firstRun !== false) {
       reaction.boundRun();
     }
     return reaction;
@@ -17,7 +16,7 @@ export class Reaction {
     this.dependencies = new Set();
     this.firstRun = true;
     this.active = true;
-    if(context) {
+    if (context) {
       this.setContext(context);
     }
     this.boundRun = this.run.bind(this);
@@ -29,7 +28,7 @@ export class Reaction {
     };
     this.context = {
       ...defaultContext,
-      ...additionalContext
+      ...additionalContext,
     };
   }
 
@@ -43,10 +42,10 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
-    if(!this.context) {
+    if (!this.context) {
       this.context = {};
     }
-    for(const key in additionalContext) {
+    for (const key in additionalContext) {
       this.context[key] = additionalContext[key];
     }
   }
@@ -59,15 +58,19 @@ export class Reaction {
     // pass through metadata even though no dependencies
     // this can be used to debug first run in flush
     this.addContext({
-      firstRun: this.firstRun
+      firstRun: this.firstRun,
     });
     Scheduler.current = this;
-    this.dependencies.forEach(dep => dep.cleanUp(this));
-    this.dependencies.clear();
-    this.callback(this);
-    this.firstRun = false;
-    Scheduler.current = null;
-    Scheduler.pendingReactions.delete(this);
+    try {
+      this.dependencies.forEach(dep => dep.cleanUp(this));
+      this.dependencies.clear();
+      this.callback(this);
+      this.firstRun = false;
+    }
+    finally {
+      Scheduler.current = null;
+      Scheduler.pendingReactions.delete(this);
+    }
   }
 
   invalidate(context) {

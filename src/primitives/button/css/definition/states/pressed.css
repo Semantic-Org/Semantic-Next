@@ -3,19 +3,39 @@
 ---------------*/
 
 @media (pointer: fine) {
-  .button:active,
-  .active.button:active {
+  .button {
+    &:active,
+    &.pressed {
+      background-color: var(--button-pressed-background-color);
+      background-image: var(--button-pressed-background-image);
+      color: var(--button-pressed-color);
+      box-shadow: var(--button-pressed-box-shadow);
+    }
+
+    &.active {
+      &:active,
+      &.pressed {
+        background-color: var(--button-pressed-background-color);
+        background-image: var(--button-pressed-background-image);
+        color: var(--button-pressed-color);
+        box-shadow: var(--button-pressed-box-shadow);
+      }
+    }
+  }
+}
+
+.button {
+  &.pressed {
     background-color: var(--button-pressed-background-color);
     background-image: var(--button-pressed-background-image);
     color: var(--button-pressed-color);
     box-shadow: var(--button-pressed-box-shadow);
   }
-}
 
-.pressed.button,
-.active.pressed.button {
-  background-color: var(--button-pressed-background-color);
-  background-image: var(--button-pressed-background-image);
-  color: var(--button-pressed-color);
-  box-shadow: var(--button-pressed-box-shadow);
+  &.active.pressed {
+    background-color: var(--button-pressed-background-color);
+    background-image: var(--button-pressed-background-image);
+    color: var(--button-pressed-color);
+    box-shadow: var(--button-pressed-box-shadow);
+  }
 }

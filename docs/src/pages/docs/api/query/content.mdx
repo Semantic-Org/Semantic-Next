@@ -1,0 +1,285 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Content
+icon: file-text
+description: API reference for Query methods related to element content
+package: "@semantic-ui/query"
+methods: ["val", "text", "textNode", "html", "outerHTML", "getSlot", "setSlot"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Get and set form values, text content, and HTML content.
+
+## Form Values
+
+### val
+
+```javascript
+$('selector').val();
+$('selector').val(value);
+```
+
+Gets or sets the value of form elements.
+
+> **Alias** `value()`
+
+#### Parameters
+
+| Name  | Type | Description          |
+|-------|------|----------------------|
+| value | any  | The value to set     |
+
+#### Returns
+
+- **Getting**: The value, or array of values for multiple elements
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const inputValue = $('input').val();
+```
+
+##### Set
+
+```javascript
+$('input').val('New value');
+```
+
+#### Example
+
+<PlaygroundExample id="query-value" direction="horizontal"></PlaygroundExample>
+
+## Text Content
+
+### text
+
+```javascript
+$('selector').text();
+$('selector').text(content);
+```
+
+Gets or sets the text content of elements.
+
+#### Parameters
+
+| Name    | Type   | Description           |
+|---------|--------|-----------------------|
+| content | string | The text to set       |
+
+#### Returns
+
+- **Getting**: Combined text content of all matched elements
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const buttonText = $('button').text();
+```
+
+##### Set
+
+```javascript
+$('button').text('Click me!');
+```
+
+#### Example
+
+<PlaygroundExample id="query-text" direction="horizontal"></PlaygroundExample>
+
+### textNode
+
+```javascript
+$('selector').textNode();
+```
+
+Gets the text content of immediate text node children only. Use `text()` when you need all nested text content recursively.
+
+#### Returns
+
+Combined text content of immediate text node children.
+
+#### Usage
+
+```html title="page.html"
+<p>Hello <span>world</span></p>
+```
+
+```javascript
+$('p').text();     // "Hello world"
+$('p').textNode(); // "Hello "
+```
+
+#### Example
+
+<PlaygroundExample id="query-textnode" direction="horizontal"></PlaygroundExample>
+
+## HTML Content
+
+### html
+
+```javascript
+$('selector').html();
+$('selector').html(content);
+```
+
+Gets or sets the inner HTML of elements.
+
+#### Parameters
+
+| Name    | Type   | Description           |
+|---------|--------|-----------------------|
+| content | string | The HTML to set       |
+
+#### Returns
+
+- **Getting**: HTML content of the first matched element
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const content = $('.container').html();
+```
+
+##### Set
+
+```javascript
+$('.container').html('<p>New content</p>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-html" direction="horizontal"></PlaygroundExample>
+
+### outerHTML
+
+```javascript
+$('selector').outerHTML();
+$('selector').outerHTML(content);
+```
+
+Gets or sets the outer HTML, including the element's own tag.
+
+#### Parameters
+
+| Name    | Type   | Description               |
+|---------|--------|---------------------------|
+| content | string | The outer HTML to set     |
+
+#### Returns
+
+- **Getting**: Outer HTML of matched element(s), or array for multiple
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const markup = $('.card').outerHTML();
+```
+
+##### Set
+
+```javascript
+$('.card').outerHTML('<section class="card">New</section>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-outerhtml" direction="horizontal"></PlaygroundExample>
+
+## Slots
+
+Methods for working with slots in web components.
+
+### getSlot
+
+```javascript
+$('selector').getSlot();
+$('selector').getSlot(name);
+```
+
+Gets content assigned to slots in web components.
+
+#### Parameters
+
+| Name | Type   | Description                              |
+|------|--------|------------------------------------------|
+| name | string | Slot name (omit for default slot)        |
+
+#### Returns
+
+Combined HTML content of elements assigned to the slot.
+
+#### Usage
+
+##### Default Slot
+
+```javascript
+$(myComponent).getSlot();
+```
+
+##### Named Slot
+
+```javascript
+$(myComponent).getSlot('header');
+```
+
+##### From Slot Element
+
+```javascript
+$$(myComponent).find('slot[name="header"]').getSlot();
+```
+
+#### Example
+
+<PlaygroundExample id="query-getslot" direction="horizontal"></PlaygroundExample>
+
+### setSlot
+
+```javascript
+$('selector').setSlot(content);
+$('selector').setSlot(name, content);
+```
+
+Sets content for slots in web components.
+
+#### Parameters
+
+| Name    | Type              | Description                        |
+|---------|-------------------|------------------------------------|
+| name    | string            | Slot name (omit for default slot)  |
+| content | string \| Element | Content to assign to the slot      |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+##### Default Slot
+
+```javascript
+$(myComponent).setSlot('<p>Main content</p>');
+```
+
+##### Named Slot
+
+```javascript
+$(myComponent).setSlot('header', '<h1>Title</h1>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-setslot" direction="horizontal"></PlaygroundExample>

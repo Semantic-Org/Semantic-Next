@@ -1,0 +1,30 @@
+<div class="prompt {classMap promptClass}">
+  <div class="hint">{getHint}</div>
+  <div class="bar {classMap barClass}">
+    <input class="input" type="text" placeholder="{placeholder}" maxlength="{maxLength}" />
+    <ui-button flat class="submit" icon-only icon="send" disabled={!hasPrompt}></ui-button>
+  </div>
+  {#if cotVisible}
+    <div class="cot {classMap cotClass}">
+      <ai-loader size="28" active={isThinking}></ai-loader>
+      <span class="text {classIf isThinking 'shimmer'}">{cotText}</span>
+    </div>
+  {/if}
+  <div class="results">
+    {#if previewHTML}
+      <div class="pane">
+        <div class="label">Preview</div>
+        <div class="preview">{#html previewHTML}</div>
+      </div>
+    {/if}
+    {#if codeHTML}
+      <div class="pane">
+        <div class="label">Code</div>
+        <div class="code">{#html codeHTML}</div>
+      </div>
+    {/if}
+    {#if note}
+      <div class="note">{note}</div>
+    {/if}
+  </div>
+</div>

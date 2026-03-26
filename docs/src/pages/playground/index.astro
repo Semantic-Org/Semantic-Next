@@ -1,0 +1,33 @@
+---
+  import Playground from '@layouts/Playground.astro';
+  import { getSandboxURL } from '@helpers/playground.js';
+  import CodePlayground from '@components/CodePlayground/CodePlayground.js';
+
+  const sandboxURL = getSandboxURL();
+---
+<style>
+  :root {
+    --sidebar-width: 0px;
+  }
+</style>
+<Playground>
+  <CodePlayground client:only="lit" sandboxURL={sandboxURL} id="playground"></CodePlayground>
+  <script>
+    import { $ } from '@semantic-ui/query';
+    import { readPlaygroundLink } from '@helpers/link-encoder.js';
+
+    // Read files from URL
+    const link = readPlaygroundLink(window.location.search) || {};
+    const files = link?.files || {};
+
+    $('astro-island').on('astro:hydrate', () => {
+      const $playground = $('code-playground#playground');
+      if ($playground.exists()) {
+        $playground
+          .setting('files', files)
+          .component().setFiles(files);
+      }
+    });
+  </script>
+</Playground>
+

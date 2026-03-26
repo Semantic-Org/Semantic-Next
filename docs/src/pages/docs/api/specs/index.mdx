@@ -1,0 +1,76 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: file-text
+title: Specs
+description: JavaScript API definitions for semantic component interpretation
+---
+
+`@semantic-ui/specs` provides tools for defining and interpreting component APIs. It enables semantic HTML parsing, documentation generation, and bidirectional transformation between HTML and component metadata.
+
+## Installation
+
+Specs can be used as a standalone package or alongside Semantic UI components.
+
+```bash
+npm install @semantic-ui/specs
+```
+
+## Basic Usage
+
+```javascript
+import { SpecReader } from '@semantic-ui/specs';
+import buttonSpec from './button.spec.js';
+
+const reader = new SpecReader(buttonSpec);
+
+// Generate runtime metadata
+const componentSpec = reader.getWebComponentSpec();
+
+// Parse semantic HTML
+const parts = reader.getComponentPartsFromHTML(
+  '<ui-button primary large>Save</ui-button>'
+);
+
+// Generate HTML from modifiers
+const html = reader.getCodeFromModifiers('primary large', {
+  html: 'Save',
+});
+```
+
+## API Sections
+
+### Core
+
+* **[SpecReader](/docs/api/specs/spec-reader)** - Create spec readers and generate runtime metadata
+  - [Constructor](/docs/api/specs/spec-reader#constructor)
+  - [getWebComponentSpec()](/docs/api/specs/spec-reader#getwebcomponentspec)
+
+* **[Spec Helpers](/docs/api/specs/shared-terms)** - Reusable constants and helpers for common patterns
+  - [getVariations()](/docs/api/specs/shared-terms#getvariations) - Get multiple variations
+  - [getStates()](/docs/api/specs/shared-terms#getstates) - Get multiple states
+  - [modifyVariation()](/docs/api/specs/shared-terms#modifyvariation) - Customize variations
+  - Variation constants (SIZE_VARIATION, COLORED_VARIATION, etc.)
+  - State constants (HOVER_STATE, ACTIVE_STATE, etc.)
+  - Options arrays (SIZE_OPTIONS, COLOR_OPTIONS, etc.)
+
+### Documentation Generation
+
+* **[Documentation](/docs/api/specs/documentation)** - Generate structured documentation from specs
+  - [getDefinition()](/docs/api/specs/documentation#getdefinition)
+
+### Semantic Interpretation
+
+* **[Parsing HTML](/docs/api/specs/parsing)** - Extract semantic meaning from HTML
+  - [getComponentPartsFromHTML()](/docs/api/specs/parsing#getcomponentpartsfromhtml)
+  - [getAttributesFromModifiers()](/docs/api/specs/parsing#getattributesfrommodifiers)
+
+* **[Generating HTML](/docs/api/specs/generation)** - Create HTML from semantic attributes
+  - [getCodeFromModifiers()](/docs/api/specs/generation#getcodefrommodifiers)
+
+### Utilities
+
+* **[Utilities](/docs/api/specs/utilities)** - Helper methods for component metadata
+  - [getTagName()](/docs/api/specs/utilities#gettagname)
+  - [getComponentName()](/docs/api/specs/utilities#getcomponentname)
+  - [formatDescription()](/docs/api/specs/utilities#formatdescription)

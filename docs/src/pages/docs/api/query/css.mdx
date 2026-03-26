@@ -1,0 +1,252 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - CSS
+icon: theme
+description: API reference for Query methods related to CSS manipulation
+package: "@semantic-ui/query"
+methods: ["addClass", "removeClass", "toggleClass", "hasClass", "css", "computedStyle", "cssVar"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Add, remove, and toggle classes. Get and set inline styles and CSS variables.
+
+## Classes
+
+### addClass
+
+```javascript
+$('selector').addClass(className);
+```
+
+Adds one or more space-separated classes to matched elements.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to add |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('p').addClass('highlighted');
+```
+
+#### Example
+
+<PlaygroundExample id="query-addclass" direction="horizontal"></PlaygroundExample>
+
+### removeClass
+
+```javascript
+$('selector').removeClass(className);
+```
+
+Removes one or more space-separated classes from matched elements.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to remove |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('button').removeClass('disabled');
+```
+
+#### Example
+
+<PlaygroundExample id="query-removeclass" direction="horizontal"></PlaygroundExample>
+
+### toggleClass
+
+```javascript
+$('selector').toggleClass(className);
+```
+
+Toggles one or more space-separated classes on matched elements.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name(s) to toggle |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('li').toggleClass('active');
+```
+
+#### Example
+
+<PlaygroundExample id="query-toggleclass" direction="horizontal"></PlaygroundExample>
+
+### hasClass
+
+```javascript
+$('selector').hasClass(className);
+```
+
+Tests if any matched element has the specified class.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| className | string | Class name to check |
+
+#### Returns
+
+`true` if any element has the class, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('p').hasClass('important')) {
+  console.log('Found important paragraph');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-hasclass" direction="horizontal"></PlaygroundExample>
+
+## Styles
+
+### css
+
+```javascript
+$('selector').css(property);
+$('selector').css(property, value);
+$('selector').css({ property: value, ... });
+```
+
+Gets or sets inline CSS properties.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | CSS property name |
+| value | string | Value to set |
+| properties | object | Multiple properties to set |
+
+#### Returns
+
+- **Getting**: The CSS property value
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const color = $('p').css('color');
+```
+
+##### Set
+
+```javascript
+$('p').css('color', 'blue');
+```
+
+##### Set Multiple
+
+```javascript
+$('p').css({
+  color: 'blue',
+  fontSize: '16px'
+});
+```
+
+#### Example
+
+<PlaygroundExample id="query-css" direction="horizontal"></PlaygroundExample>
+
+### computedStyle
+
+```javascript
+$('selector').computedStyle(property);
+```
+
+Gets the computed (rendered) value of a CSS property.
+
+> **Alias for** `css(property, null, { includeComputed: true })`
+
+> **Performance** This triggers a browser reflow. Use `css()` when you only need inline styles.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| property | string | CSS property name |
+
+#### Returns
+
+The computed CSS value as it appears on screen.
+
+#### Usage
+
+```javascript
+const fontSize = $('p').computedStyle('font-size'); // "16px"
+```
+
+#### Example
+
+<PlaygroundExample id="query-computedstyle" direction="horizontal"></PlaygroundExample>
+
+### cssVar
+
+```javascript
+$('selector').cssVar(name);
+$('selector').cssVar(name, value);
+```
+
+Gets or sets CSS custom properties (variables). The `--` prefix is added automatically.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| name | string | Variable name (without `--`) |
+| value | string | Value to set |
+
+#### Returns
+
+- **Getting**: The CSS variable value
+- **Setting**: [Query object](/docs/api/query/constructor#the-query-object) (for chaining)
+
+#### Usage
+
+##### Get
+
+```javascript
+const color = $(':root').cssVar('primary-color');
+```
+
+##### Set
+
+```javascript
+$(':root').cssVar('primary-color', '#0056b3');
+```
+
+#### Example
+
+<PlaygroundExample id="query-cssvar" direction="horizontal"></PlaygroundExample>

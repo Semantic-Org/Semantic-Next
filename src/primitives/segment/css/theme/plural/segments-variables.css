@@ -1,0 +1,7 @@
+:host {
+  --segment-grouped-margin: var(--segment-margin);
+  --segment-grouped-border: var(--segment-border);
+  --segment-grouped-box-shadow: var(--segment-box-shadow);
+  --segment-grouped-border-radius: var(--border-radius);
+  --segment-grouped-segment-divider: var(--border);
+}

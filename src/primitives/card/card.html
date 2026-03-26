@@ -1,5 +1,5 @@
 {#if href}
-  <a class="{ui}card" href="{href}">
+  <a class="{ui}card" href="{href}" part="card">
     {> content}
   </a>
 {else}
@@ -12,7 +12,7 @@
   {#if horizontal}
     {>image}
     {>icon}
-    <div class="content">
+    <div class="content" part="content">
       {>header}
       {>subheader}
       {>description}
@@ -20,7 +20,7 @@
     </div>
   {else}
     {>image}
-    <div class="content">
+    <div class="content" part="content">
       {>icon}
       {>header}
       {>subheader}

@@ -1,0 +1,18 @@
+/*******************************
+            Divider
+*******************************/
+
+:host {
+  display: block;
+  margin: var(--divider-margin);
+}
+
+/*-------------------
+       Basic
+--------------------*/
+
+/* Default divider */
+.divider {
+  height: var(--divider-width);
+  background: var(--divider-color);
+}

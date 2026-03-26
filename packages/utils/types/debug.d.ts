@@ -1,6 +1,6 @@
 /**
  * Debug utilities including logging and error handling
- * @see {@link https://next.semantic-ui.com/api/utils/debug Debug Utilities Documentation}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug Debug Utilities Documentation}
  */
 
 /**
@@ -11,7 +11,7 @@ export interface FatalOptions {
   errorType?: ErrorConstructor;
   /** Additional metadata to attach to the error */
   metadata?: Record<string, any>;
-  /** Optional callback to handle the error */
+  /** Optional callback to intercept the error — when provided, prevents the error from being thrown */
   onError?: (error: Error) => void;
   /** Number of stack trace lines to remove (defaults to 1) */
   removeStackLines?: number;
@@ -50,8 +50,8 @@ export type LogFormat = 'standard' | 'json';
 export interface LogOptions {
   /** Namespace for grouping related logs (used as default title) */
   namespace?: string;
-  /** Additional data to include with the log message */
-  data?: any[];
+  /** Additional data to include with the log message — accepts arrays or single objects */
+  data?: any;
   /** Text color for the message */
   color?: string;
   /** Whether to include timestamp in the output */
@@ -74,7 +74,7 @@ export interface LogOptions {
  * Flexible logging utility with formatting, namespacing, and multiple output options.
  * Supports colored output, timestamps, structured JSON format, and configurable titles.
  *
- * @see {@link https://next.semantic-ui.com/api/utils/debug#log log}
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/debug#log log}
  * @see {@link https://next.semantic-ui.com/examples/utils-log Example}
  *
  * @param message - The message to log

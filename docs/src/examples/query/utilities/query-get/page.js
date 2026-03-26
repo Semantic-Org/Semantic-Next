@@ -1,12 +1,10 @@
 import { $ } from '@semantic-ui/query';
 
-// Get specific element at index 1 (second element)
-const secondElement = $('.color').get(1);
-$('.second').text(secondElement.textContent);
+let index = 0;
+const count = $('input').count();
 
-// Get all elements as native array
-const allElements = $('.color').get();
-$('.all').text(`${allElements.length} elements`);
-
-// Show that .get() returns native DOM elements, not Query objects
-$('.type').text(secondElement.constructor.name);
+$('.focus').on('click', () => {
+  // Query has no .focus() - need raw DOM element
+  $('input').get(index).focus();
+  index = (index + 1) % count;
+});

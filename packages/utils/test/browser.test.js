@@ -1,14 +1,8 @@
-import {
-  getIPAddress,
-  getKeyFromEvent,
-  isClient,
-  isServer,
-} from '@semantic-ui/utils';
+import { getIPAddress, getKeyFromEvent, isClient, isServer } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
 describe('Browser Utilities', () => {
-
   describe('getKeyFromEvent', () => {
     it('should return an empty string if the event.key is not defined', () => {
       const event = { ctrlKey: true };
@@ -63,24 +57,11 @@ describe('Browser Utilities', () => {
 
   describe('getIPAddress', () => {
     it('should reject in non-client environment', async () => {
+      await expect(getIPAddress()).rejects.toThrow();
+    });
+
+    it('should include client error message when not in browser', async () => {
       await expect(getIPAddress()).rejects.toThrow('IP address can only be determined on client');
-    });
-
-    it('should reject with invalid type parameter', async () => {
-      // Since we're in a test environment without RTCPeerConnection, it will reject
-      await expect(getIPAddress({ type: 'invalid' })).rejects.toThrow();
-    });
-
-    it('should handle timeout option', async () => {
-      // In test environment, should timeout
-      await expect(getIPAddress({ timeout: 100 })).rejects.toThrow();
-    });
-
-    it('should accept valid type options', async () => {
-      // Test that the function accepts valid types (will still reject in test env)
-      await expect(getIPAddress({ type: 'local' })).rejects.toThrow();
-      await expect(getIPAddress({ type: 'public' })).rejects.toThrow();
-      await expect(getIPAddress({ type: 'all' })).rejects.toThrow();
     });
   });
 

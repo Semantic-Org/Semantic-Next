@@ -1,0 +1,30 @@
+.segments {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin: var(--segment-grouped-margin);
+  border: var(--segment-grouped-border);
+  box-shadow: var(--segment-grouped-box-shadow);
+  border-radius: var(--segment-grouped-border-radius);
+
+  ::slotted(ui-segment) {
+    --segment-border-radius: 0;
+    --segment-margin: 0;
+    --segment-box-shadow: none;
+    --segment-border: none;
+    --segment-top-border: var(--segment-grouped-segment-divider);
+  }
+
+  ::slotted(ui-segment:first-child) {
+    --segment-top-border: none;
+    --segment-border-radius: var(--segment-grouped-border-radius) var(--segment-grouped-border-radius) 0 0;
+  }
+
+  ::slotted(ui-segment:last-child) {
+    --segment-border-radius: 0 0 var(--segment-grouped-border-radius) var(--segment-grouped-border-radius);
+  }
+
+  ::slotted(ui-segment:only-child) {
+    --segment-border-radius: var(--segment-grouped-border-radius);
+  }
+}

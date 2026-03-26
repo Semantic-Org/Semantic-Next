@@ -1,0 +1,20 @@
+/*******************************
+       Computed - Loader
+*******************************/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+       Loader Colors
+  -------------------- */
+
+  --loader-fill-color: rgb(var(--standard-color) / 10%);
+  --loader-line-color: var(--grey);
+  --inverted-loader-fill-color: rgb(var(--inverted-color) / 15%);
+  --inverted-loader-line-color: var(--white);
+
+}

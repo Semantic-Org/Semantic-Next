@@ -1,0 +1,103 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Position
+icon: crosshair
+description: API reference for Query methods related to element positioning and intersection
+package: "@semantic-ui/query"
+methods: ["position", "pagePosition", "intersects"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Get element positions and check spatial relationships between elements.
+
+## Position
+
+### position
+
+```javascript
+$('selector').position()
+$('selector').position(options)
+```
+
+Gets or sets element position coordinates with flexible reference systems.
+
+#### Parameters
+
+| Name       | Type                          | Description                              |
+|------------|-------------------------------|------------------------------------------|
+| relativeTo | string/Element/Query          | Element to measure relative to           |
+| top        | number                        | Top position to set                      |
+| left       | number                        | Left position to set                     |
+| precision  | `'pixel'` \| `'subpixel'`     | Rounding precision. Default: `'pixel'`   |
+| type       | `'global'` \| `'local'` \| `'relative'` | Coordinate system to return    |
+
+#### Returns
+
+Position object with `{ top, left }` coordinates. Default returns all coordinate systems: `{ global, local, relative? }`.
+
+#### Example
+
+<PlaygroundExample id="query-position" direction="horizontal"></PlaygroundExample>
+
+### pagePosition
+
+```javascript
+$('selector').pagePosition()
+$('selector').pagePosition({ precision: 'subpixel' })
+```
+
+Gets element position relative to the document (viewport position + scroll offset).
+
+#### Parameters
+
+| Name      | Type                      | Description                            |
+|-----------|---------------------------|----------------------------------------|
+| precision | `'pixel'` \| `'subpixel'` | Rounding precision. Default: `'pixel'` |
+
+#### Returns
+
+Position object with `{ top, left }` coordinates relative to document.
+
+#### Example
+
+<PlaygroundExample id="query-pageposition" direction="horizontal"></PlaygroundExample>
+
+## Intersection
+
+### intersects
+
+```javascript
+$('selector').intersects(target)
+$('selector').intersects(target, options)
+```
+
+Checks if elements intersect with a target.
+
+> **Note** Uses `outerWidth` and `outerHeight` (includes padding and border) for intersection calculations.
+
+#### Parameters
+
+| Name    | Type                 | Description       |
+|---------|----------------------|-------------------|
+| target  | string/Element/Query | Target element(s) |
+| options | object               | Options           |
+
+##### Options
+
+| Name          | Type         | Default | Description                              |
+|---------------|--------------|---------|------------------------------------------|
+| sides         | string/array | `'all'` | Sides to check: `'top'`, `'bottom'`, `'left'`, `'right'` |
+| threshold     | number       | `0`     | Minimum intersection ratio (0-1)         |
+| fully         | boolean      | `false` | Source must be fully contained           |
+| returnDetails | boolean      | `false` | Return detailed intersection data        |
+| all           | boolean      | `false` | All elements must intersect (vs any)     |
+
+#### Returns
+
+Boolean, or details object when `returnDetails: true`.
+
+#### Example
+
+<PlaygroundExample id="query-intersects" direction="horizontal"></PlaygroundExample>

@@ -1,0 +1,105 @@
+---
+import { readFileSync } from 'node:fs';
+import { getCollection, render } from 'astro:content';
+import { each, toTitleCase, inArray } from '@semantic-ui/utils';
+import Definition from '@layouts/Definition.astro';
+import SpecDefinition from '@components/SpecDefinition.astro';
+import SpecTabs from '@components/SpecTabs.astro';
+import SpecimenExplorer from '@components/SpecimenExplorer/SpecimenExplorer.js';
+import UsageImports from '@components/UsageImports.astro';
+import UsageSettings from '@components/UsageSettings.astro';
+import UsageEvents from '@components/UsageEvents.astro';
+import { DocsSpecReader } from '@semantic-ui/specs';
+import * as Specs from '@semantic-ui/core/specs';
+
+const { entry, tab } = Astro.props;
+export async function getStaticPaths() {
+  const entries = await getCollection('primitives');
+  const paths = [];
+  each(entries, entry => {
+    paths.push({
+      params: { slug: `${entry.id}` },
+      props: { entry }
+    });
+    each(entry.data.tabs, tab => {
+      paths.push({
+        params: { slug: `${entry.id}/${tab}` },
+        props: { entry, tab }
+      });
+    });
+  });
+  return paths;
+}
+
+const data = entry.data;
+const displayedTab = tab || data.tabs[0];
+const plural = (displayedTab == 'plural');
+const definitionDisplayed = inArray(displayedTab, ['singular', 'definition', 'plural']);
+const usageDisplayed = (displayedTab === 'usage');
+
+const spec = Specs[data.specName];
+const componentSpec = new DocsSpecReader(spec, { plural });
+const componentName = componentSpec.getComponentName();
+const definition = componentSpec.getDefinition();
+
+const searchMeta = {
+  title: data.title,
+  description: data.description,
+  pageType: 'UI Components',
+  tags: data.tags,
+  tab: toTitleCase(displayedTab)
+};
+
+const menu = (data.tabs || []).map(tab => ({
+  text: toTitleCase(tab),
+  url: `/ui/primitives/${entry.id}/${tab}`,
+}));
+
+let railMenu = [];
+if(definitionDisplayed) {
+  railMenu = componentSpec.getDefinitionMenu({ plural });
+}
+
+// Render MDX body for usage tab
+let Content;
+if (usageDisplayed) {
+  ({ Content } = await render(entry));
+}
+
+let specSource = '';
+if (displayedTab === 'spec') {
+  try {
+    specSource = readFileSync(`../src/primitives/${entry.id}/specs/${entry.id}.spec.js`, 'utf-8');
+  } catch {
+    specSource = '// Source not available';
+  }
+}
+---
+<Definition
+  title={data.title}
+  description={data.description}
+  searchMeta={searchMeta}
+  menu={menu}
+  railMenu={railMenu}
+  id={data.id}
+>
+  {usageDisplayed && (
+    <SpecimenExplorer client:load spec={JSON.stringify(spec)} client:only></SpecimenExplorer>
+    <UsageImports spec={spec} />
+    <Content />
+    <UsageSettings spec={spec} />
+    <UsageEvents spec={spec} />
+  )}
+  {definitionDisplayed && (
+    <SpecDefinition
+      definition={definition}
+      componentName={componentName}
+      name={data.title}
+      spec={spec}
+      plural={plural}
+    />
+  )}
+  {displayedTab === 'spec' && (
+    <SpecTabs spec={spec} specSource={specSource} />
+  )}
+</Definition>

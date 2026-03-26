@@ -236,24 +236,18 @@
     cursor: pointer;
     color: inherit;
   }
-  .link.card:hover,
-  a.card:hover {
+  :is(.link.card, a.card):hover {
     background: var(--card-link-hover-background);
     box-shadow: var(--card-link-hover-box-shadow);
     border: var(--card-link-hover-border);
   }
-  .link.card:hover ::slotted(.header),
-  .link.card:hover .header,
-  a.card:hover ::slotted(.header),
-  a.card:hover .header {
+  :is(.link.card, a.card):hover ::slotted(.header),
+  :is(.link.card, a.card):hover .header {
     color: var(--card-link-hover-header-color);
   }
-  .link.card:hover ::slotted(ui-icon),
-  .link.card:hover ::slotted(.icon),
-  .link.card:hover .icon ui-icon,
-  a.card:hover ::slotted(ui-icon),
-  a.card:hover ::slotted(.icon),
-  a.card:hover .icon ui-icon {
+  :is(.link.card, a.card):hover ::slotted(ui-icon),
+  :is(.link.card, a.card):hover ::slotted(.icon),
+  :is(.link.card, a.card):hover .icon ui-icon {
     color: var(--card-link-hover-icon-color);
   }
 }
@@ -280,7 +274,6 @@
 @layer card.definition.variations.stackable {
   .component {
     --card-stackable-comparison: max(calc(100cqi - var(--card-stackable-breakpoint)), 0px);
-    width: --card-stackable-comparison;
   }
   @container component style(--card-stackable-comparison: 0) {
     .stackable.cards {
@@ -297,8 +290,8 @@
   :host {
     --card-margin: 0px 5px 5px 0px;
     --card-text-align: center;
-    --card-padding: var(--spacing);
-    --card-reverse-padding: calc(var(--spacing) * -1);
+    --card-padding: var(--padding);
+    --card-reverse-padding: calc(var(--padding) * -1);
     --card-flex-direction: column;
     --card-border-radius: var(--border-radius);
     --card-transition: var(--transition);
@@ -355,17 +348,17 @@
   :host {
     --card-icon-font-size: var(--relative-32px);
     --card-icon-color: var(--standard-40);
-    --card-icon-margin: 0 0 var(--compact-spacing) 0;
+    --card-icon-margin: 0 0 var(--margin-xs) 0;
   }
 }
 
 /* src/primitives/card/css/theme/content/meta-variables.css */
 @layer card.theme.content.meta {
   :host {
-    --card-meta-margin: var(--compact-spacing) 0 0;
-    --card-meta-padding: var(--compact-spacing) 0 0;
+    --card-meta-margin: var(--margin-xs) 0 0;
+    --card-meta-padding: var(--padding-xs) 0 0;
     --card-meta-border: var(--border);
-    --card-meta-gap: var(--compact-spacing);
+    --card-meta-gap: var(--gap-xs);
     --card-meta-text-color: var(--standard-90);
   }
 }
@@ -373,8 +366,8 @@
 /* src/primitives/card/css/theme/plural/cards-variables.css */
 @layer card.theme.plural {
   :host {
-    --cards-gap: var(--spacing);
-    --cards-margin: var(--vertical-spacing);
+    --cards-gap: var(--gutter);
+    --cards-margin: var(--vertically-spaced);
   }
 }
 
@@ -403,7 +396,7 @@
     --card-horizontal-gap: var(--padding);
     --card-horizontal-image-max-width: 125px;
     --card-horizontal-icon-size: var(--massive);
-    --card-horizontal-icon-margin: 0 0 0 var(--spacing);
+    --card-horizontal-icon-margin: var(--left-margin);
     --card-horizontal-header-size: var(--large);
     --card-horizontal-icon-font-size: var(--massive);
   }

@@ -13,8 +13,8 @@ const defaultState = {
   fruit: 'cherry',
 };
 
-const createComponent = ({ settings, self }) => ({
-  initialize: () => setInterval(() => settings.date = new Date(), 1000),
+const createComponent = ({ settings, self, interval }) => ({
+  initialize: () => interval(() => settings.date = new Date(), 1000),
   isTrue: () => true,
   isDog: () => self.isTrue(),
   addOne(value = 0, value2 = 0) {

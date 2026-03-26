@@ -1,0 +1,84 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Color Utilities
+package: "@semantic-ui/utils"
+methods: [oklchToRgb, oklchToHex]
+icon: palette
+description: API reference for color manipulation and conversion functions.
+---
+
+The Color utilities provide functions for working with different color formats and performing conversions.
+
+## Functions
+
+### oklchToRgb
+
+```javascript
+function oklchToRgb(oklchString)
+```
+
+Converts an OKLCH color string to an RGB object. Handles potential out-of-gamut colors by clamping the final RGB values. Based on [https://bottosson.github.io/posts/oklab/](https://bottosson.github.io/posts/oklab/).
+
+#### Parameters
+
+| Name        | Type   | Description |
+|-------------|--------|-------------|
+| oklchString | string | The color string in the format "oklch(L C H)" or "oklch(L, C, H)". L: Lightness (0-1), C: Chroma (0-~0.4), H: Hue (0-360). |
+
+#### Returns
+
+An object with `r`, `g`, `b` properties (0-255), or `null` if the input string is invalid.
+
+#### Example
+
+```javascript
+import { oklchToRgb } from '@semantic-ui/utils';
+
+// Convert a specific OKLCH color (approx. red)
+const rgbRed = oklchToRgb('oklch(0.628 0.257 29.23)');
+console.log(rgbRed); // { r: 255, g: 0, b: 0 }
+
+// Convert gray
+const rgbGray = oklchToRgb('oklch(0.5, 0, 0)');
+console.log(rgbGray); // { r: 119, g: 119, b: 119 }
+
+// Handle invalid input
+const invalid = oklchToRgb('not a color');
+console.log(invalid); // null
+```
+
+### oklchToHex
+
+```javascript
+function oklchToHex(oklchString)
+```
+
+Converts an OKLCH color string to a hex color string (e.g., "#RRGGBB"). This function internally uses `oklchToRgb`.
+
+#### Parameters
+
+| Name        | Type   | Description |
+|-------------|--------|-------------|
+| oklchString | string | The color string in the format "oklch(L C H)" or "oklch(L, C, H)". |
+
+#### Returns
+
+The hex color string (e.g., "#FF0000") or `null` if the input string is invalid.
+
+#### Example
+
+```javascript
+import { oklchToHex } from '@semantic-ui/utils';
+
+// Convert a specific OKLCH color (approx. red)
+const hexRed = oklchToHex('oklch(0.628 0.257 29.23)');
+console.log(hexRed); // "#ff0000"
+
+// Convert gray
+const hexGray = oklchToHex('oklch(0.5, 0, 0)');
+console.log(hexGray); // "#777777"
+
+// Handle invalid input
+const invalidHex = oklchToHex('not a color');
+console.log(invalidHex); // null

@@ -1,0 +1,86 @@
+---
+layout: '@layouts/Guide.astro'
+icon: zap # Using 'zap' icon for performance/speed
+title: Reactive Performance
+description: Optimize reactivity by preventing unnecessary updates.
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { Signal, Reaction } from '@semantic-ui/reactivity';
+
+Complex reactive patterns can sometimes cause performance overhead from spurious updates. Semantic UI provides several utilities to control [dependency tracking](/docs/api/reactivity/dependency) and prevent unnecessary reactivity.
+
+## Reaction Performance
+
+### Guard
+
+[`Reaction.guard()`](/docs/api/reactivity/reaction#guard) creates a nested reaction that only triggers updates in the outer reaction if its *returned value* changes. '
+
+This prevents downstream updates if an intermediate calculation result remains the same despite underlying [Signal](/docs/guides/reactivity/signals) changes.
+
+> **When To Use** Use [`guard`](/docs/api/reactivity/reaction#guard) when you want a dependency to only trigger reactivity under certain conditions.
+
+<PlaygroundExample id="reactive-guard" direction="horizontal"></PlaygroundExample>
+
+
+### Nonreactive
+
+[`Reaction.nonreactive()`](/docs/api/reactivity/reaction#nonreactive) allows you access reactive values without creating reactive [dependencies](/docs/api/reactivity/dependency) inside the specified closure.
+
+> **When To Use**  Use [`nonreactive`](/docs/api/reactivity/reaction#nonreactive) when you want to prevent portions of a [Reaction](/docs/guides/reactivity/reactions) from being reactive.
+
+```javascript
+const nameSignal = new Signal('Alice');
+const statusSignal = new Signal('Online'); // Changes to this won't trigger the reaction
+
+Reaction.create(() => {
+  const name = nameSignal.get(); // Dependency created
+  const status = Reaction.nonreactive(() => statusSignal.get()); // No dependency created
+  console.log(`User ${name} is currently ${status}`);
+});
+
+nameSignal.set('Bob'); // Triggers reaction
+statusSignal.set('Offline'); // Does NOT trigger reaction
+```
+
+## Signal Performance
+
+### Peek
+
+[`peek()`](/docs/api/reactivity/signal#peek) accesses a [signal's](/docs/guides/reactivity/signals) current value without creating a reactive [dependency](/docs/api/reactivity/dependency) in the current context. This is similar to [`nonreactive`](/docs/api/reactivity/reaction#nonreactive) but scoped to a single retrieved value.
+
+> **When To Use** Use [`peek()`](/docs/api/reactivity/signal#peek) when you want to access a reactive value without reactivity.
+
+```javascript
+const counter = new Signal(0);
+const trigger = new Signal(false);
+
+Reaction.create(() => {
+  trigger.get(); // Depends only on 'trigger'
+  const currentCount = counter.peek(); // Read 'counter' non-reactively
+  console.log('Reaction triggered! Count:', currentCount);
+});
+
+counter.set(1); // Does NOT trigger reaction
+trigger.set(true); // DOES trigger reaction
+```
+
+### Subscribe
+
+[`.subscribe()`](/docs/api/reactivity/signal#subscribe) runs a callback *only* when the specific [signal](/docs/guides/reactivity/signals) it's called on changes, bypassing the broader [dependency tracking](/docs/api/reactivity/dependency) of [`Reaction.create()`](/docs/api/reactivity/reaction#create). This can be slightly more performant for side effects tied to a single signal.
+
+> **When To Use** Use [`subscribe`](/docs/api/reactivity/signal#subscribe) when you want to set up a reaction that will only rerun if a single reactivity source changes.
+
+```javascript
+const userId = new Signal(1);
+const userActivity = new Signal('idle');
+
+// Subscribe directly to userId changes
+const sub = userId.subscribe((newValue) => {
+  console.log(`User ID changed to ${newValue}. Fetching data...`);
+});
+
+userActivity.set('active'); // Does NOT trigger subscription
+userId.set(2); // DOES trigger subscription
+
+// sub.stop(); // To unsubscribe
+```

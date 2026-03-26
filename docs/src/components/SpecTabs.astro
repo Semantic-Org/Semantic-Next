@@ -1,0 +1,105 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import SpecViewer from './SpecViewer.astro';
+
+const { spec, specSource } = Astro.props;
+const specJSON = JSON.stringify(spec, null, 2);
+---
+
+<div class="spec-tabs">
+  <nav class="spec-tab-bar">
+    <button class="spec-tab active" data-view="schema">Schema</button>
+    <button class="spec-tab" data-view="source">JS</button>
+    <button class="spec-tab" data-view="json">JSON</button>
+  </nav>
+
+  <div class="spec-panel active" data-view="schema">
+    <SpecViewer spec={spec} />
+  </div>
+  <div class="spec-panel" data-view="source">
+    <Code code={specSource} lang="js" />
+  </div>
+  <div class="spec-panel" data-view="json">
+    <div class="spec-json">
+      <pretty-json expand="3">
+        {specJSON}
+      </pretty-json>
+    </div>
+  </div>
+</div>
+
+<script>
+  import './CodePlayground/lib/pretty-json.js';
+
+  document.querySelectorAll('.spec-tab-bar').forEach(bar => {
+    bar.addEventListener('click', (e) => {
+      const tab = e.target.closest('.spec-tab');
+      if (!tab) return;
+      const view = tab.dataset.view;
+      const wrapper = tab.closest('.spec-tabs');
+
+      wrapper.querySelectorAll('.spec-tab').forEach(t => t.classList.remove('active'));
+      wrapper.querySelectorAll('.spec-panel').forEach(p => p.classList.remove('active'));
+
+      tab.classList.add('active');
+      wrapper.querySelector(`.spec-panel[data-view="${view}"]`).classList.add('active');
+    });
+  });
+</script>
+
+<style>
+  .spec-tabs {
+    margin-top: 1rem;
+  }
+
+  /* Tab bar */
+  .spec-tab-bar {
+    display: inline-flex;
+    margin-bottom: 1.5rem;
+  }
+  .spec-tab {
+    background: none;
+    border: var(--border);
+    border-right-width: 0;
+    padding: 0.4rem 1.25rem;
+    font-size: 13px;
+    color: var(--standard-40);
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s, background 0.15s;
+  }
+  .spec-tab:first-child {
+    border-radius: var(--border-radius, 4px) 0 0 var(--border-radius, 4px);
+  }
+  .spec-tab:last-child {
+    border-right-width: 1px;
+    border-radius: 0 var(--border-radius, 4px) var(--border-radius, 4px) 0;
+  }
+  .spec-tab:hover {
+    color: var(--standard-60);
+    background: var(--standard-5);
+  }
+  .spec-tab.active {
+    color: var(--standard-90);
+    background: var(--standard-5);
+  }
+
+  /* Panels */
+  .spec-panel {
+    display: none;
+  }
+  .spec-panel.active {
+    display: block;
+  }
+
+  /* JSON viewer */
+  .spec-json {
+    background: var(--code-background);
+    border: var(--border);
+    border-radius: var(--border-radius, 8px);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    font-size: var(--code-font-size, 14px);
+    line-height: 1.6;
+  }
+</style>

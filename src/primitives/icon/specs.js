@@ -1,5 +1,5 @@
-import IconSpec from './specs/icon.js';
-import IconComponentSpec from './specs/icon-component.js';
-import IconsComponentSpec from './specs/icons-component.js';
+import IconComponentSpec from './specs/icon.component.js';
+import IconSpec from './specs/icon.spec.json';
+import IconsComponentSpec from './specs/icons.component.js';
 
-export { IconSpec, IconComponentSpec, IconsComponentSpec };
+export { IconComponentSpec, IconsComponentSpec, IconSpec };

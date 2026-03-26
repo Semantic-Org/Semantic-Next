@@ -11,7 +11,6 @@ const newElements = $(`<div class="created">
 </div>`);
 $('.container').append(newElements);
 
-
 // DOM Fragment
 const fragment = document.createDocumentFragment();
 

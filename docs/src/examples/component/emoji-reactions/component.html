@@ -1,0 +1,10 @@
+<div class="reactions">
+  {#each reaction, i in reactionState}
+    <button class="reaction {activeIf reaction.active}" data-index="{i}">
+      <span class="emoji">{reaction.emoji}</span>
+      {#if reaction.count}
+        <span class="count">{reaction.count}</span>
+      {/if}
+    </button>
+  {/each}
+</div>

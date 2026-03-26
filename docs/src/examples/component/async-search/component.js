@@ -5,7 +5,7 @@ const template = await getText('./component.html');
 
 const defaultSettings = {
   minChars: 1,
-  searchItems: [
+  items: [
     { id: 'apple', title: 'Apple' },
     { id: 'banana', title: 'Banana' },
     { id: 'orange', title: 'Orange' },
@@ -27,84 +27,106 @@ const defaultSettings = {
 const defaultState = {
   value: '',
   searchTerm: '',
-  searchResults: [],
-  focused: false,
-  isSearching: false,
+  menuVisible: false,
+  selectedIndex: -1,
 };
 
-const createComponent = ({ $, state, settings, self, reaction }) => ({
-  initialize() {
-    self.calculateResults();
-  },
+const createComponent = ({ $, state, settings, self, timeout }) => ({
+  results: [],
 
-  calculateResults() {
-    reaction(() => {
-      const term = state.searchTerm.get();
-      if (self.canSearch()) {
-        self.query(term);
-      }
-      else {
-        state.searchResults.set([]);
-      }
-    });
-  },
-
-  async query(term) {
-    state.isSearching.set(true);
-    try {
-      const results = await self.getResults(term);
-      state.searchResults.set(results);
-    }
-    catch (error) {
-      console.error('Search failed:', error);
-      state.searchResults.set([]);
-    }
-    finally {
-      state.isSearching.set(false);
-    }
-  },
-
-  getResults(term) {
+  async getResults(term) {
     const SIMULATED_DELAY = 200;
     const matchResult = (result) => result.title.toLowerCase().includes(term.toLowerCase());
     return new Promise((resolve) => {
-      // simulate async search
       clearTimeout(self.timer);
-      self.timer = setTimeout(() => {
-        const matchingResults = settings.searchItems.filter(matchResult);
-        resolve(matchingResults);
+      self.timer = timeout(() => {
+        const matchingResults = settings.items.filter(matchResult);
+        self.setResults(matchingResults);
+        requestAnimationFrame(() => resolve(matchingResults));
       }, SIMULATED_DELAY);
     });
   },
 
+  setResults(results) {
+    self.results = results;
+    state.selectedIndex.set(0);
+  },
+
   canSearch() {
-    return state.focused.get() && state.searchTerm.value.length >= settings.minChars;
+    return state.menuVisible.get() && state.searchTerm.get().length >= settings.minChars;
+  },
+
+  selectPrevious() {
+    const index = state.selectedIndex.get();
+    if (index > 0) {
+      state.selectedIndex.decrement();
+    }
+  },
+
+  selectNext() {
+    const index = state.selectedIndex.get();
+    if (index < self.results.length - 1) {
+      state.selectedIndex.increment();
+    }
+  },
+
+  selectCurrent() {
+    const index = state.selectedIndex.get();
+    const result = self.results[index];
+    console.log(index, result);
+    if (result) {
+      self.clearSearch();
+      self.setValue(result);
+    }
+  },
+
+  showMenu() {
+    state.menuVisible.set(true);
+  },
+
+  hideMenu() {
+    state.menuVisible.set(false);
+  },
+
+  clearSearch() {
+    self.hideMenu();
+    state.searchTerm.set('');
+    state.selectedIndex.set(-1);
   },
 
   setValue({ title, id }) {
-    // clear search
-    state.searchTerm.set('');
-
-    // set input to current value
-    $('input').val(title);
-
-    // set component value
+    state.searchTerm.set(title);
     state.value.set(id);
   },
 });
 
 const events = {
-  'input input'({ event, state, value }) {
+  'input ui-input'({ state, value = '' }) {
     state.searchTerm.set(value || '');
   },
   'mousedown .result'({ self, data }) {
     self.setValue(data);
   },
-  'focus input'({ state }) {
-    state.focused.set(true);
+  'focus, input ui-input'({ self }) {
+    self.showMenu();
   },
-  'blur input'({ state }) {
-    state.focused.set(false);
+  'blur ui-input'({ self }) {
+    self.hideMenu();
+  },
+};
+
+const keys = {
+  'up'({ self }) {
+    self.selectPrevious();
+  },
+  'down'({ self }) {
+    self.selectNext();
+  },
+  'enter'({ self }) {
+    self.selectCurrent();
+  },
+  'esc'({ self }) {
+    self.clearSearch();
   },
 };
 
@@ -112,6 +134,7 @@ defineComponent({
   tagName: 'ui-search',
   template,
   events,
+  keys,
   css,
   defaultState,
   defaultSettings,

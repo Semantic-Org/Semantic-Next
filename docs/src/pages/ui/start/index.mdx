@@ -1,0 +1,67 @@
+---
+layout: '@layouts/Guide.astro'
+icon: open book
+title: Introduction
+description: An introduction to Semantic UI
+---
+import { Cards, Card } from '@semantic-ui/core';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
+
+## What is Semantic UI?
+
+Semantic UI is three things:
+
+1. **A component library**: buttons, dropdowns, modals, menus all ready to use
+2. **An authoring framework**: for building your own components with reactive state and templating
+3. **A theming system**: CSS tokens for color, spacing, and light/dark mode that govern all components
+
+Components are native [Web Components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components). They work in React, Vue, Svelte, or plain HTML—no adapters, no framework-specific versions.
+
+> [!tip] Why Web Components?
+> Semantic ships with **signals-based reactivity**, **AST-compiled templates**, and runs **natively in the browser** without a build step. [Learn more →](/ui/start/why-semantic)
+
+## Using Components
+
+Pick from [primitives](/ui/primitives), [components](/ui/components), and [behaviors](/ui/behaviors). Use them as HTML tags. [Theme with CSS variables](/ui/start/guides/theming).
+
+<Cards two stackable horizontal>
+  <Card horizontal
+    header="Primitives"
+    icon="box"
+    href="/ui/primitives"
+    description="Base elements: button, icon, input, label."
+  ></Card>
+  <Card horizontal
+    header="Components"
+    icon="layout"
+    href="/ui/components"
+    description="Complex UI: dropdown, modal, menu, tabs."
+  ></Card>
+  <Card horizontal
+    header="Behaviors"
+    icon="zap"
+    href="/ui/behaviors"
+    description="Attachable logic: transitions, validation, tooltips."
+  ></Card>
+</Cards>
+
+## Building Components
+
+Create custom components like `<order-form>` or `<user-profile>` using the same tools the library is built with. Your components inherit the theming system automatically.
+
+<Cards horizontal>
+  <Card horizontal
+    header="Authoring Guide"
+    icon="code"
+    href="/docs/guides"
+    description="Build custom web components with reactive state, templates, and scoped styling."
+  ></Card>
+</Cards>
+
+## Get Started
+
+- [Install Semantic UI](/ui/start/install) in your project
+- [Browse examples](/examples/counter) to see what's possible
+- Try the [interactive tutorial](/learn/selection) to learn by doing

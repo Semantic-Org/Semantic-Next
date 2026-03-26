@@ -3,7 +3,7 @@
 }
 
 .counter {
-  margin-bottom: var(--spacing);
-  padding-bottom: var(--spacing);
+  margin-bottom: var(--margin);
+  padding-bottom: var(--padding);
   border-bottom: var(--border);
 }

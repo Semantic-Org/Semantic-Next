@@ -1,5 +1,5 @@
 .list {
-  margin-bottom: var(--spacing);
+  margin-bottom: var(--margin);
 
   .item {
     cursor: pointer;
@@ -29,5 +29,5 @@
   background: var(--yellow-5);
   border: var(--border);
   border-radius: var(--border-radius);
-  padding: var(--spacing);
+  padding: var(--padding);
 }

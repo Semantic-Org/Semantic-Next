@@ -3,7 +3,7 @@ import { get, inArray } from '@semantic-ui/utils';
 
 import css from './button-bundle.css?raw';
 import template from './button.html?raw';
-import componentSpec from './specs/button-component.js';
+import componentSpec from './specs/button.component.js';
 
 const createComponent = ({ el, self, settings, data, $ }) => ({
   isIconBefore() {
@@ -37,10 +37,10 @@ const createComponent = ({ el, self, settings, data, $ }) => ({
 });
 
 const events = {
-  'touchstart .button'({ event, self, $ }) {
+  'touchstart .button'() {
     $(this).addClass('pressed');
   },
-  'touchend .button'({ event, self, $ }) {
+  'touchend .button'() {
     $(this).removeClass('pressed');
   },
   'click .button'({ event, self, $ }) {
@@ -66,7 +66,7 @@ const events = {
   },
 };
 
-export const UIButton = defineComponent({
+export const Button = defineComponent({
   tagName: 'ui-button',
   componentSpec,
   template,

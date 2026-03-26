@@ -378,7 +378,7 @@ describe('Template Helpers', () => {
       {
         name: 'escapeHTML helper',
         expression: 'escapeHTML(htmlText)',
-        result: '&amp;ltdiv&amp;gtHello&amp;lt/div&amp;gt',
+        result: '&amp;lt;div&amp;gt;Hello&amp;lt;/div&amp;gt;',
         data: { htmlText: '<div>Hello</div>' },
       },
     ];

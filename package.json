@@ -67,11 +67,47 @@
       "bundled": "./dist/bundle/container.min.js",
       "default": "./src/primitives/container/index.js"
     },
+    "./divider": {
+      "import": "./src/primitives/divider/index.js",
+      "browser": "./dist/cdn/divider.min.js",
+      "bundled": "./dist/bundle/divider.min.js",
+      "default": "./src/primitives/divider/index.js"
+    },
+    "./image": {
+      "import": "./src/primitives/image/index.js",
+      "browser": "./dist/cdn/image.min.js",
+      "bundled": "./dist/bundle/image.min.js",
+      "default": "./src/primitives/image/index.js"
+    },
     "./icon": {
       "import": "./src/primitives/icon/index.js",
       "browser": "./dist/cdn/icon.min.js",
       "bundled": "./dist/bundle/icon.min.js",
       "default": "./src/primitives/icon/index.js"
+    },
+    "./icon/sets/lucide.css": {
+      "import": "./src/primitives/icon/sets/lucide/lucide.css",
+      "default": "./src/primitives/icon/sets/lucide/lucide.css"
+    },
+    "./icon/sets/phosphor.css": {
+      "import": "./src/primitives/icon/sets/phosphor/phosphor.css",
+      "default": "./src/primitives/icon/sets/phosphor/phosphor.css"
+    },
+    "./icon/sets/tabler.css": {
+      "import": "./src/primitives/icon/sets/tabler/tabler.css",
+      "default": "./src/primitives/icon/sets/tabler/tabler.css"
+    },
+    "./icon/sets/material-symbols.css": {
+      "import": "./src/primitives/icon/sets/material-symbols/material-symbols.css",
+      "default": "./src/primitives/icon/sets/material-symbols/material-symbols.css"
+    },
+    "./icon/sets/heroicons.css": {
+      "import": "./src/primitives/icon/sets/heroicons/heroicons.css",
+      "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
+    },
+    "./icon/sets/dev.css": {
+      "import": "./src/primitives/icon/sets/dev/index.css",
+      "default": "./src/primitives/icon/sets/dev/index.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -109,9 +145,33 @@
       "bundled": "./dist/bundle/segment.min.js",
       "default": "./src/primitives/segment/index.js"
     },
+    "./spinner": {
+      "import": "./src/primitives/spinner/index.js",
+      "browser": "./dist/cdn/spinner.min.js",
+      "bundled": "./dist/bundle/spinner.min.js",
+      "default": "./src/primitives/spinner/index.js"
+    },
+    "./table": {
+      "import": "./src/primitives/table/index.js",
+      "browser": "./dist/cdn/table.min.js",
+      "bundled": "./dist/bundle/table.min.js",
+      "default": "./src/primitives/table/index.js"
+    },
     "./behaviors": {
       "import": "./src/behaviors/index.js",
       "default": "./src/behaviors/index.js"
+    },
+    "./behaviors/attach": {
+      "import": "./src/behaviors/attach/attach.js",
+      "default": "./src/behaviors/attach/attach.js"
+    },
+    "./behaviors/portal": {
+      "import": "./src/behaviors/portal/portal.js",
+      "default": "./src/behaviors/portal/portal.js"
+    },
+    "./behaviors/tooltip": {
+      "import": "./src/behaviors/tooltip/tooltip.js",
+      "default": "./src/behaviors/tooltip/tooltip.js"
     },
     "./behaviors/transition": {
       "import": "./src/behaviors/transition/transition.js",
@@ -124,12 +184,16 @@
     "build:ui-deps": "wireit",
     "build:ui-components": "wireit",
     "build:specs": "wireit",
+    "build:icons": "wireit",
     "dev": "wireit",
     "dev:workspace": "node ./internal-packages/scripts/src/build-ai-workspace.js --serve",
     "mcp": "wireit",
+    "deploy:mcp": "wireit",
     "build:docs": "wireit",
+    "build:docs-packages": "wireit",
     "build:packages": "wireit",
     "watch": "wireit",
+    "watch:icons": "wireit",
     "publish": "wireit",
     "update-version": "wireit",
     "test:case": "wireit",
@@ -165,7 +229,8 @@
       "dependencies": [
         "build:ui-deps",
         "build:ui-components",
-        "build:specs"
+        "build:specs",
+        "./packages/specs:build:icons"
       ]
     },
     "build:packages": {
@@ -183,6 +248,13 @@
     "build:docs": {
       "command": "cd docs && npm install && npx link ../ && npm run build",
       "dependencies": [
+        "build",
+        "build:docs-packages"
+      ]
+    },
+    "build:docs-packages": {
+      "command": "node ./internal-packages/scripts/src/copy-docs-packages.js",
+      "dependencies": [
         "build"
       ]
     },
@@ -198,12 +270,24 @@
     "build:specs": {
       "command": "node ./internal-packages/scripts/src/build-specs.js"
     },
+    "build:icons": {
+      "dependencies": ["./packages/specs:build:icons"]
+    },
     "build:ui-framework": {
       "command": "node ./internal-packages/scripts/src/build-ui-framework.js"
     },
     "watch": {
+      "dependencies": [
+        "watch:ui",
+        "watch:icons"
+      ]
+    },
+    "watch:ui": {
       "command": "node ./internal-packages/scripts/src/watch.js",
       "service": true
+    },
+    "watch:icons": {
+      "dependencies": ["./packages/specs:watch:icons"]
     },
     "prepublishOnly": {
       "command": "node ./scripts/prepare.js",
@@ -221,39 +305,52 @@
     "mcp": {
       "command": "cd ai/mcp && node agents-server.js",
       "service": true
+    },
+    "deploy:mcp": {
+      "dependencies": [
+        "./tools/mcp:deploy"
+      ]
+    },
+    "test:case": {
+      "command": "node tests/scripts/serve-test-case.js",
+      "service": true,
+      "dependencies": [
+        "build:packages"
+      ]
     }
   },
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
-    "@semantic-ui/component": "^0.17.0",
-    "@semantic-ui/query": "^0.17.0",
-    "@semantic-ui/specs": "^0.17.0"
+    "@semantic-ui/component": "^0.18.0",
+    "@semantic-ui/query": "^0.18.0",
+    "@semantic-ui/specs": "^0.18.0"
   },
   "peerDependencies": {
     "@pagefind/modular-ui": "^1.3.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
-    "@types/node": "^24.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.40.0",
-    "@typescript-eslint/parser": "^8.40.0",
-    "@vitest/browser": "^3.2.4",
-    "@vitest/coverage-istanbul": "^3.2.4",
-    "@vitest/ui": "^3.2.4",
-    "chalk": "^5.6.0",
-    "dprint": "^0.50.1",
-    "esbuild": "^0.25.9",
-    "glob": "^11.0.3",
-    "inquirer": "^12.9.3",
-    "jsdom": "^26.1.0",
-    "playwright": "^1.54.2",
-    "semver": "^7.7.2",
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "@types/node": "^25.3.5",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "chalk": "^5.6.2",
+    "dprint": "^0.52.0",
+    "esbuild": "^0.27.3",
+    "glob": "^13.0.6",
+    "inquirer": "^13.3.0",
+    "jsdom": "^28.1.0",
+    "playwright": "^1.58.2",
+    "semver": "^7.7.4",
     "simple-git-hooks": "^2.13.1",
-    "underscore": "^1.13.7",
-    "vitest": "^3.2.4",
+    "underscore": "^1.13.8",
+    "vitest": "^4.0.18",
     "wireit": "^0.14.12",
-    "ws": "^8.18.3"
+    "ws": "^8.19.0"
   },
   "ciDependencies": {
     "axios": "^1.6.8",
@@ -265,9 +362,12 @@
     "packages/*",
     "docs/*",
     "examples/*",
-    "ai/mcp/*"
+    "tools/*"
   ],
   "simple-git-hooks": {
     "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
+  },
+  "overrides": {
+    "lit": "^3.0.0"
   }
 }

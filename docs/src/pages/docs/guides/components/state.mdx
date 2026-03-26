@@ -1,0 +1,245 @@
+---
+layout: '@layouts/Guide.astro'
+title: Internal State
+icon: database
+description: Reactive data storage for your component's internal behavior
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Overview
+
+Component state represents the dynamic, internal data managed within a component, often changing in response to user interaction or other events.
+
+Unlike [settings](/docs/guides/components/settings), which act as the external configuration API, state is private to the component instance.
+
+Semantic UI uses its [Signals reactivity system](/docs/guides/reactivity) to manage state.
+
+> For a deeper understanding of reactivity concepts, see the [Reactivity Guide](/docs/guides/reactivity).
+
+## Declaring State
+
+Default state values are provided via the `defaultState` object when [creating a component](/docs/guides/components/create) using [`defineComponent`](/create#defining-components).
+
+When a component instance is initialized, each property in the `defaultState` object is automatically converted into a reactive [Signal](/docs/guides/reactivity/signals), allowing its value to be tracked and updated.
+
+```js
+const defaultState = {
+  selectedItem: null,
+  items: []
+};
+
+defineComponent({
+  tagName: 'my-component',
+  defaultState
+});
+```
+
+
+
+## Accessing State
+
+### Accessing in Component Logic
+
+The `state` object is passed as an argument to [lifecycle callbacks](/docs/guides/components/lifecycle#callback-arguments) (like `createComponent`, `onRendered`, etc.) and handlers for [events](/docs/guides/components/events) or [key bindings](/docs/guides/components/keys). You can destructure `state` to access individual state signals within these functions.
+
+
+
+```js
+const createComponent = ({state}) => ({
+  incrementCounter() {
+    // Modify state with .value - triggers re-renders
+    state.counter.value += 1;
+  },
+  
+  getCount() {
+    // Read state using .value
+    return state.counter.value;
+    // Or using .get() method
+    // return state.counter.get();
+  }
+});
+```
+
+> **Flexible Syntax** Both `.value` and `.get()` can be used to read a signal's current value within component logic. See [Reactivity Basics](/docs/guides/reactivity/signals) for details. Note that accessing state within a [Reaction](/docs/guides/reactivity) establishes a dependency.
+
+### Accessing in Templates
+
+Within a component's [template](/docs/guides/templates), state signals can be accessed directly by their property name from the [data context](/docs/guides/components/rendering#data-context).
+
+> State values in templates can be accessed by name directly without using `.value` or `.get()`
+
+```sui
+{state.selectedItem} <!-- Wrong !-->
+{selectedItem.get} <!--- Wrong !-->
+{selectedItem} <!-- Right -->
+```
+
+For instance for the following state configuration
+```javascript
+const defaultState = {
+  isActive: false,
+  items: []
+};
+```
+
+```sui
+<p>Count: {counter}</p>
+
+{#if isActive}
+  <div class="active-content">
+    <p>Currently active!</p>
+  </div>
+{else}
+  <button class="activate">Activate</button>
+{/if}
+
+{#each items}
+  <li class="{#if selectedItem === id}selected{/if}">
+    {title}
+  </li>
+{/each}
+```
+
+## Accessing in Event Handlers & Keybindings
+
+As mentioned, the `state` object is available within declarative [event handlers](/docs/guides/components/events) and [key binding](/docs/guides/components/keys) callbacks, allowing direct state manipulation in response to user input.
+
+```js
+defineComponent({
+  // ...other component options
+  events: {
+    'click .activate'({state}) {
+      state.isActive.toggle();
+    }
+  }
+});
+```
+
+```js
+defineComponent({
+  // ...other component options
+  keys: {
+    'up'({state}) {
+      state.x.decrement(10);
+    }
+  }
+});
+```
+
+
+
+## Updating State
+
+### Basic Updates & Helpers
+
+Update a state signal's value using its `.set()` method, by assigning to its `.value` property, or by using built-in [mutation helpers](/docs/guides/reactivity/mutation-helpers) (like `.increment()`, `.toggle()`, `.now()`, etc.) where available.
+
+```js
+const onButtonClick = ({state}) => {
+  state.counter.increment(1);
+  state.lastClicked.value = new Date(); // equivalent
+  state.lastClicked.set(new Date()); // equivalent
+  state.lastClicked.now(); // helper equivalent
+};
+```
+
+### Controlling Update Timing
+
+Reactive updates are typically batched and [flushed asynchronously](/docs/guides/reactivity/flush). When multiple state changes need to occur together atomically, or you need to run code *after* the DOM has been updated based on state changes, you can use the `afterFlush` callback available in [lifecycle methods](/docs/guides/components/lifecycle#callback-arguments).
+
+```js
+const createComponent = ({$, state, afterFlush}) => ({
+  resetForm() {
+    // Make multiple state changes
+    state.username.value = '';
+    state.email.value = '';
+    state.isSubmitted.value = false;
+    state.errors.value = [];
+    
+    // Run code after all updates are processed
+    afterFlush(() => {
+      console.log('Form reset complete');
+      // Focus the first field
+      $('input[name="username"]').focus();
+    });
+  }
+});
+```
+
+## Working with Collections
+
+State signals wrapping arrays or objects provide built-in [mutation helpers](/docs/guides/reactivity/mutation-helpers) (like `.push()`, `.removeIndex()`, `.setProperty()`) that simplify common update operations while automatically handling reactivity.
+
+> See [Mutation Helpers](/docs/guides/reactivity/mutation-helpers) for details.
+
+```js
+const createComponent = ({state}) => ({
+  // Adding items to an array
+  addItem() {
+    // Using the built-in push method
+    state.items.push({ id: generateId(), text: 'New Item' });
+  },
+
+  // Removing items by index
+  removeIndex(index) {
+    state.items.removeIndex(index);
+  },
+
+  // Removing items by ID
+  removeById(id) {
+    state.items.removeItem(id);
+  },
+
+  // Updating array items
+  updateItem(index, newText) {
+    // Update item at specific index
+    state.items.setIndex(index, { ...state.items.getIndex(index), text: newText });
+    
+    // Or update a property across all items
+    state.items.setArrayProperty('isActive', false);
+    
+    // Or update a property on a specific item
+    state.items.setArrayProperty(2, 'isActive', true);
+  },
+
+  // Object property updates
+  updateProperty() {
+    state.user.setProperty('name', 'Alex');
+  }
+});
+```
+
+These helper methods automatically handle reactivity updates and trigger re-renders as needed.
+
+## Lifecycle Integration
+
+State management is often closely tied to the [component lifecycle](/docs/guides/components/lifecycle). Common patterns include:
+
+*   Initializing state based on [settings](/docs/guides/components/settings) in `createComponent` or `onCreated`.
+*   Fetching data and updating state in `onCreated` or `onRendered`.
+*   Setting up reactive effects (using `reaction`) that respond to state changes within `createComponent` or `onCreated`.
+*   Cleaning up resources (e.g., timers, subscriptions stored in state) in `onDestroyed`.
+
+> See [Reactions](/docs/guides/reactivity/reactions) for creating reactive effects.
+
+```js
+// Initialize state after component rendering
+const onRendered = ({state, settings}) => {
+  // Initialize state based on settings
+  state.items.value = settings.initialItems || [];
+  
+  // Start with first item selected if available
+  if (state.items.value.length > 0) {
+    state.selectedItem.value = state.items.value[0].id;
+  }
+};
+
+// Clean up state before component is removed
+const onDestroyed = ({state}) => {
+  // Clear any timers, subscriptions, etc.
+  if (state.updateTimer.value) {
+    clearInterval(state.updateTimer.value);
+  }
+};
+```

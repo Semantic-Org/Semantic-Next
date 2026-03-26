@@ -1,9 +1,9 @@
 import { defineComponent } from '@semantic-ui/component';
 import { debounce } from '@semantic-ui/utils';
 
-import componentSpec from './specs/input-component.js';
-import template from './input.html?raw';
 import css from './input-bundle.css?raw';
+import template from './input.html?raw';
+import componentSpec from './specs/input.component.js';
 
 const defaultState = {
   focused: false,
@@ -69,7 +69,8 @@ const events = {
     state.focused.set(false);
     dispatchEvent('change', { value: el.value });
   },
-  'input input'({ el, self, value, settings }) {
+  'input input'({ el, event, self, value, settings }) {
+    event.stopPropagation();
     if (settings.debounced) {
       self.setValueDebounced(value);
     }
@@ -79,7 +80,7 @@ const events = {
   },
 };
 
-const UIInput = defineComponent({
+const Input = defineComponent({
   tagName: 'ui-input',
   delegatesFocus: true,
   componentSpec,
@@ -90,4 +91,4 @@ const UIInput = defineComponent({
   defaultState,
 });
 
-export { UIInput };
+export { Input };

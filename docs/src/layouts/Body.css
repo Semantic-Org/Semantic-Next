@@ -16,7 +16,22 @@
     --sl-color-gray-7: #f5f6f8;
     --sl-color-black: #ffffff;
     --bullet-size: 16px;
-    --sl-font: 'Lato', serif;
+    --sl-font: var(--page-font);
+
+    --page-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+
+/*     --page-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Inter', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+*/
+    /* --page-font: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;*/
+
+ /*   --page-font: 'Public Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Public Sans', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+*/
+    /* --page-font: 'Geist', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    --header-font: 'Geist', 'Helvetica Neue', Arial, Helvetica, sans-serif; */
     --ec-uiFontSize: 14px;
 
   }
@@ -37,11 +52,11 @@
 
   :root {
     --page-background: #FEFEFF;
-    --primary-text-color: #73B9E1;
     --panel-color: var(--ui-background);
   }
-  html.dark {
+  html.dark, [dark] {
     --page-background: #000000;
+    --primary-text-color: #73B9E1;
     --text-color: rgba(255, 255, 255, 0.83);
     --panel-color: var(--ui-background);
   }
@@ -49,8 +64,7 @@
   html, body {
     margin: 0px;
     padding: 0px;
-    font-size: 14px;
-    height: 100%;
+    min-height: 100%;
     box-sizing: border-box;
   }
   body {
@@ -73,8 +87,7 @@
   h3,
   h4,
   h5 {
-    font-family: 'Lato', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-    color: #131313;
+    font-family: var(--header-font);
   }
 
   h1:first-child,
@@ -166,61 +179,54 @@
   }
 
   p code,
-  li code {
-    background-color: var(--standard-10);
-    padding: 0em 0.5em;
+  p a code,
+  li code,
+  li a code {
+    background-image: var(--subtle-angled-gradient);
+    padding: 5px 5px;
+    line-height: 1;
     font-size: 14px;
     color: var(--standard-100);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    margin: 0em 0px;
+    margin: 0em 2px;
     border-radius: var(--border-radius);
     display: inline-block;
-    border-radius: var(--circular-radius);
     font-weight: bold;
+    box-shadow: 0px 0px 0px 1px var(--internal-border-color);
   }
   p a code,
   li a code {
-    background-color: var(--standard-10);
     color: inherit;
   }
 
-  html.dark {
-  }
   html.dark {
     h1,
     h2,
     h3,
     h4,
     h5 {
-      color: #FFFFFF;
-    }
-    .shiki,
-    .shiki span {
-      color: var(--shiki-dark) !important;
-      background-color: var(--shiki-dark-bg) !important;
-      font-style: var(--shiki-dark-font-style) !important;
-      font-weight: var(--shiki-dark-font-weight) !important;
-      text-decoration: var(--shiki-dark-text-decoration) !important;
+      /*color: #FFFFFF;*/
     }
   }
 }
 
-/* Temp */
-ui-buttons ui-button::part(button) {
-  flex: 1 0 auto;
-  border-radius: 0em;
-  margin: var(--button-group-button-offset);
+/* Cross-document view transitions for navigation continuity */
+
+/*
+@view-transition {
+  navigation: auto;
 }
-ui-buttons ui-button:first-child::part(button) {
-  border-left: none;
-  margin-left: 0em;
-  border-top-left-radius: var(--button-border-radius);
-  border-bottom-left-radius: var(--button-border-radius);
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation: none;
 }
-ui-buttons ui-button:last-child::part(button) {
-  border-top-right-radius: var(--button-border-radius);
-  border-bottom-right-radius: var(--button-border-radius);
+sidebar {
+  view-transition-name: sidebar;
 }
+topbar {
+  view-transition-name: topbar;
+}
+*/
 
 /* experimental small topbar
 @layer page {

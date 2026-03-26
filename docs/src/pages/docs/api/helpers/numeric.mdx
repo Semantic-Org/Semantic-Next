@@ -1,0 +1,125 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Numeric Helpers
+icon: hash
+description: API reference for numeric template helpers
+package: '@semantic-ui/templating'
+methods: ['numberFromIndex', 'maybePlural', 'roundNumber', 'round', 'roundDecimal']
+---
+
+Numeric helpers provide utilities for working with numbers in templates.
+
+## Functions
+
+### numberFromIndex
+Returns the index plus one, useful for human-readable numbering.
+
+#### Template Syntax
+```sui
+{numberFromIndex index}
+```
+
+#### Parameters
+| Name | Type   | Description |
+|------|--------|-------------|
+| a    | number | The index value |
+
+#### Returns
+`number` - The index plus one.
+
+#### Example
+```sui
+{#each items}
+  Item {numberFromIndex index}: {this}
+{/each}
+```
+
+### maybePlural
+Adds a plural suffix if the value is not 1.
+
+#### Template Syntax
+```sui
+{maybePlural itemCount 's'}
+```
+
+#### Parameters
+| Name   | Type   | Default | Description |
+|--------|--------|---------|-------------|
+| value  | number |         | The count to check |
+| plural | string | 's'     | The plural suffix to add |
+
+#### Returns
+`string` - The plural suffix if the value is not 1, otherwise an empty string.
+
+#### Example
+```sui
+<p>You have {itemCount} item{maybePlural itemCount} in your cart.</p>
+```
+
+### roundNumber
+Rounds a number to a specified number of decimal places.
+
+#### Template Syntax
+```sui
+{roundNumber numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number.
+
+#### Example
+```sui
+<p>Average score: {roundNumber score 1}</p>
+<p>Price: ${roundNumber price 2}</p>
+```
+
+### round
+Alias for `roundNumber`. Rounds a number to a specified number of decimal places.
+
+#### Template Syntax
+```sui
+{round numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number.
+
+#### Example
+```sui
+<p>Temperature: {round temperature 1}°C</p>
+```
+
+### roundDecimal
+Rounds a number to a specified number of decimal places using decimal rounding.
+
+#### Template Syntax
+```sui
+{roundDecimal numberToRound precision}
+```
+
+#### Parameters
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| number    | number | The number to round |
+| precision | number | Number of decimal places |
+
+#### Returns
+`number` - The rounded number using decimal rounding.
+
+#### Example
+```sui
+<p>Precise measurement: {roundDecimal measurement 3}mm</p>
+```

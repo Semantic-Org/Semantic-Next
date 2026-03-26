@@ -1,0 +1,80 @@
+---
+layout: '@layouts/Guide.astro'
+icon: edit
+title: Mutation Helpers
+description: Update reactive values without the boilerplate of manual get/mutate/set patterns
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import { Cards, Card } from '@semantic-ui/core';
+
+## Helper Usage
+
+A very common pattern when dealing with [signals](/docs/guides/reactivity/signals) is to modify an existing signal value then update its underlying value triggering [reactivity](/docs/guides/reactivity).
+
+This can create a lot of boilerplate because you will need to access the value nonreactively (e.g. using [`.peek()`](/docs/api/reactivity/signal#peek)) and then update the underlying value before finally setting the value again (e.g. using [`.set()`](/docs/api/reactivity/signal#set)).
+
+```javascript title="Without Helpers"
+const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+const newNumbers = numbers.peek();
+newNumbers.push(4);
+numbers.set(newNumbers);
+```
+
+Helpers handle updating an underlying reactive value without having to retrieve and manipulate the value.
+
+```javascript title="With Helpers"
+const numbers = new Signal([1, 2, 3]); // Assuming Signal is imported
+numbers.push(4); // Uses the push helper
+```
+
+## Types of Helpers
+
+Helpers are provided for various types of signal primitives that help with the most common ways they are used.
+
+### Array Helpers
+
+[Array helpers](/docs/api/reactivity/array-helpers) make it easy to update array values with [`push`](/docs/api/reactivity/array-helpers#push), [`unshift`](/docs/api/reactivity/array-helpers#unshift) and non-standard helpers like [`removeIndex`](/docs/api/reactivity/array-helpers#removeindex), [`setIndex`](/docs/api/reactivity/array-helpers#setindex) and others.
+
+<PlaygroundExample id="reactive-set-index" direction="horizontal"></PlaygroundExample>
+
+
+### Collection Helpers
+
+[Collection helpers](/docs/api/reactivity/collection-helpers) make it easy to update specific values in an array of records by their ID. `id` will match against `_id`, `id`, `hash`, `key` fields on any object in the array. See methods like [`setProperty`](/docs/api/reactivity/collection-helpers#setproperty), [`replaceItem`](/docs/api/reactivity/collection-helpers#replaceitem), and [`removeItem`](/docs/api/reactivity/collection-helpers#removeitem).
+
+<PlaygroundExample id="reactive-set-property" direction="horizontal"></PlaygroundExample>
+
+
+### Boolean Helpers
+
+[Boolean helpers](/docs/api/reactivity/boolean-helpers) like [`toggle`](/docs/api/reactivity/boolean-helpers#toggle) make it easier to toggle boolean values.
+
+<PlaygroundExample id="reactive-toggle" direction="horizontal"></PlaygroundExample>
+
+
+### API Reference
+
+For a full list of mutation helpers please check out the API reference guides.
+
+<Cards two stackable>
+  <Card
+    header="Number Helpers"
+    href="/docs/api/reactivity/number-helpers"
+  ></Card>
+  <Card
+    header="Boolean Helpers"
+    href="/docs/api/reactivity/boolean-helpers"
+  ></Card>
+  <Card
+    header="Array Helpers"
+    href="/docs/api/reactivity/array-helpers"
+  ></Card>
+  <Card
+    header="Collection Helpers"
+    href="/docs/api/reactivity/collection-helpers"
+  ></Card>
+  <Card
+    header="Date Helpers"
+    href="/docs/api/reactivity/date-helpers"
+  ></Card>
+</Cards>

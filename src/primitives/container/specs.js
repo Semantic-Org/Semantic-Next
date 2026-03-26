@@ -1,4 +1,4 @@
-import ContainerSpec from './specs/container.js';
-import ContainerComponentSpec from './specs/container-component.js';
+import ContainerComponentSpec from './specs/container.component.js';
+import ContainerSpec from './specs/container.spec.json';
 
-export { ContainerSpec, ContainerComponentSpec };
+export { ContainerComponentSpec, ContainerSpec };

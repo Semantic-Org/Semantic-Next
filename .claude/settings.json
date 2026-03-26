@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__semantic-ui__*"
+    ]
+  },
+  "mcpServers": {
+    "semantic-ui": {
+      "command": "bash",
+      "args": ["-c", "cd tools/mcp && npm run build --silent && node dist/index.js"]
+    }
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
+  }
+}

@@ -11,7 +11,7 @@ const defaultState = {
   running: true,
 };
 
-const createComponent = ({ self, state, settings }) => ({
+const createComponent = ({ self, state, settings, interval }) => ({
   initialize() {
     self.setCounter(settings.startingNumber);
     self.startCounter();
@@ -21,7 +21,7 @@ const createComponent = ({ self, state, settings }) => ({
   },
   startCounter() {
     state.running.set(true);
-    self.interval = setInterval(() => state.counter.increment(), 1000);
+    self.interval = interval(() => state.counter.increment(), 1000);
   },
   stopCounter() {
     state.running.set(false);

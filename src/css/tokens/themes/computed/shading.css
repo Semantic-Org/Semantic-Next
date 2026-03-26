@@ -1,0 +1,57 @@
+/*******************************
+       Computed - Gradient
+*******************************/
+
+/*
+  Shading gradients for creating depth and dimension.
+  These are alpha-based lighting layers (white→black),
+  not decorative color transitions.
+*/
+
+:root,
+.theme,
+[light],
+[dark],
+[theme] {
+
+  /* -------------------
+      Vertical (Default)
+  -------------------- */
+
+  --very-subtle-gradient: linear-gradient(var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-gradient: linear-gradient(var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --gradient: linear-gradient(var(--transparent-white), var(--transparent-black));
+  --strong-gradient: linear-gradient(var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-gradient: linear-gradient(var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* -------------------
+         Inverted
+  -------------------- */
+
+  --very-subtle-inverted-gradient: linear-gradient(var(--very-subtle-transparent-black), var(--very-subtle-transparent-white));
+  --subtle-inverted-gradient: linear-gradient(var(--subtle-transparent-black), var(--subtle-transparent-white));
+  --inverted-gradient: linear-gradient(var(--transparent-black), var(--transparent-white));
+  --strong-inverted-gradient: linear-gradient(var(--strong-transparent-black), var(--strong-transparent-white));
+  --very-strong-inverted-gradient: linear-gradient(var(--very-strong-transparent-black), var(--very-strong-transparent-white));
+
+  /* -------------------
+          Angled
+  -------------------- */
+
+  --very-subtle-angled-gradient: linear-gradient(45deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-angled-gradient: linear-gradient(45deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --angled-gradient: linear-gradient(45deg, var(--transparent-white), var(--transparent-black));
+  --strong-angled-gradient: linear-gradient(45deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-angled-gradient: linear-gradient(45deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+  /* -------------------
+        Horizontal
+  -------------------- */
+
+  --very-subtle-horizontal-gradient: linear-gradient(90deg, var(--very-subtle-transparent-white), var(--very-subtle-transparent-black));
+  --subtle-horizontal-gradient: linear-gradient(90deg, var(--subtle-transparent-white), var(--subtle-transparent-black));
+  --horizontal-gradient: linear-gradient(90deg, var(--transparent-white), var(--transparent-black));
+  --strong-horizontal-gradient: linear-gradient(90deg, var(--strong-transparent-white), var(--strong-transparent-black));
+  --very-strong-horizontal-gradient: linear-gradient(90deg, var(--very-strong-transparent-white), var(--very-strong-transparent-black));
+
+}

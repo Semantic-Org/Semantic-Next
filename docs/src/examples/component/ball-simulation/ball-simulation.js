@@ -1,5 +1,5 @@
 import { defineComponent, getText } from '@semantic-ui/component';
-import { clone, each, generateID } from '@semantic-ui/utils';
+import { each, generateID } from '@semantic-ui/utils';
 
 const css = await getText('./component.css');
 const template = await getText('./component.html');
@@ -17,7 +17,7 @@ const defaultState = {
   which has a reactive reference to state.time()
 */
 
-const createComponent = ({ self, $, reaction, signal, state }) => ({
+const createComponent = ({ self, $, reaction, signal, state, timeout }) => ({
   startTime() {
     self.tick();
   },
@@ -31,7 +31,7 @@ const createComponent = ({ self, $, reaction, signal, state }) => ({
     state.time.increment();
     // schedule next tick in 1 frame (144fps)
     const frame = 1000 / 144;
-    setTimeout(self.tick, frame);
+    self.timer = timeout(self.tick, frame);
   },
 
   createBalls(count) {
@@ -110,7 +110,7 @@ const createComponent = ({ self, $, reaction, signal, state }) => ({
   },
 
   getPointerPosition(event) {
-    const canvas = this.getCanvas();
+    const canvas = self.getCanvas();
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -138,12 +138,17 @@ const events = {
   },
 };
 
+const onDestroyed = ({ self }) => {
+  clearTimeout(self.timer);
+};
+
 export const BallSimulation = defineComponent({
   tagName: 'ball-simulation',
   template,
   css,
   createComponent,
   onRendered,
+  onDestroyed,
   events,
   defaultState,
 });

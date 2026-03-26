@@ -90,7 +90,7 @@ const createComponent = ({ settings, state, self, dispatchEvent }) => ({
 
   getItemClasses(value) {
     return {
-      active: value == settings.selected,
+      active: value === settings.selected,
     };
   },
 

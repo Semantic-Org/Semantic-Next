@@ -1,0 +1,3 @@
+:host {
+  --segment-raised-box-shadow: var(--floating-shadow);
+}

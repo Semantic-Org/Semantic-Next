@@ -1,60 +1,138 @@
 import { defineComponent } from '@semantic-ui/component';
+import { findIndex } from '@semantic-ui/utils';
+import { Tooltip, Transition } from '../../behaviors/index.js';
 
-import componentSpec from './specs/menu-component.js';
-import template from './menu.html?raw';
 import css from './menu-bundle.css?raw';
 import pageCSS from './menu-page.css?raw';
+import template from './menu.html?raw';
+import componentSpec from './specs/menu.component.js';
 
-const createComponent = ({ settings, self, $, dispatchEvent }) => ({
+const defaultState = {
+  activeIndex: -1,
+};
+
+const createComponent = ({ $, settings, self, $$, el, state, dispatchEvent, isServer }) => ({
   setValue(value) {
     settings.value = value;
     dispatchEvent('change', { value });
+    self.selectValue(value);
   },
 
   getValue(item) {
     return item.value || item.href;
   },
 
-  isValueActive(activeValue, item) {
+  isCurrentValue(currentValue, item) {
     if (item.active) {
       return true;
     }
-    if (activeValue !== undefined) {
-      return activeValue == self.getValue(item);
+    if (currentValue !== undefined) {
+      return currentValue == self.getValue(item);
     }
     return false;
   },
 
+  selectValue(value) {
+    if (isServer) {
+      return;
+    }
+    const $item = self.getItemByValue(value);
+    self.selectItem($item);
+    state.activeIndex.set($item);
+  },
+
+  // reactivity will also pick this up when item changes
+  selectItem($item) {
+    const $items = self.getMenuItems();
+    if ($item?.exists()) {
+      $items.removeAttr('active');
+      $item.attr('active', '');
+    }
+  },
+
+  getIndicatorPosition(index = self.getActiveIndex()) {
+    if (isServer || self.getActiveIndex() == -1) {
+      return 'opacity: 0;';
+    }
+    const $item = self.getActiveItem();
+    if (!$item.exists()) {
+      return;
+    }
+    const position = $item.position('local');
+    const width = $item.width();
+    return `
+      left: ${position.local?.left}px;
+      width: ${width}px;
+    `;
+  },
+
   selectIndex(eq) {
-    const value = $('menu-item').eq(eq).attr('data-value');
+    const value = $$('menu-item').eq(eq).attr('value');
     if (value !== undefined) {
       self.setValue(value);
     }
+  },
+
+  getMenuItems() {
+    return $$(el).find('menu-item');
+  },
+  getItemValues() {
+    return self.getMenuItems().val();
+  },
+  getActiveIndex() {
+    return state.activeIndex.get();
+  },
+  getActiveItem() {
+    return self.getItemByValue(settings.value);
+  },
+  getItemIndex(value) {
+    return findIndex(self.getItemValues(), value);
+  },
+  getItemByValue(value) {
+    const index = findIndex(self.getItemValues(), value);
+    return self.getItemByIndex(index);
+  },
+  getItemByIndex(index) {
+    return self.getMenuItems().eq(index);
   },
 });
 
 const onCreated = ({ settings }) => {
 };
 
-const onRendered = function({ $ }) {
+const onRendered = function({ $, $$, settings, self, isClient }) {
+  if (settings.value) {
+    self.setValue(settings.value);
+  }
+  if (isClient && settings.iconOnly) {
+    $$('menu-item').each((itemEl) => {
+      const label = $$(itemEl).find('.label').first().text();
+      if (label) {
+        $(itemEl).tooltip({ text: label, ...settings.tooltipSettings });
+      }
+    });
+  }
 };
 
 const events = {
-  'click menu-item'({ self, data }) {
-    self.setValue(data.value);
+  'deep click menu-item'({ self, value }) {
+    if (value !== undefined) {
+      self.setValue(value);
+    }
   },
 };
 
-const UIMenu = defineComponent({
+const Menu = defineComponent({
   tagName: 'ui-menu',
   componentSpec,
   template,
   css,
   pageCSS,
+  defaultState,
   createComponent,
   events,
   onCreated,
   onRendered,
 });
 
-export { UIMenu };
+export { Menu };

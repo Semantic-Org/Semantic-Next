@@ -1,0 +1,72 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+icon: hash
+title: Number Helpers
+package: "@semantic-ui/reactivity"
+methods: [increment, decrement]
+description: API reference for Number Helpers in Semantic UI's reactivity system
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Number Helpers are methods available on Signal instances that contain numeric values. These helpers provide convenient ways to manipulate and update numeric signals.
+
+## increment
+
+Increases the value of the Signal by a specified amount or by 1 if no amount is provided.
+
+### Syntax
+```javascript
+signal.increment(amount?)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Number | (Optional) The amount to increment by. Defaults to 1 if not specified. |
+| max | Number | (Optional) The maximum value allowed to increment to. |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const counter = new Signal(0);
+counter.increment(); // value is now 1
+counter.increment(5); // value is now 6
+counter.increment(1, 10); // value will not exceed 10
+```
+
+### Example
+<PlaygroundExample id="reactive-increment" direction="horizontal"></PlaygroundExample>
+
+## decrement
+
+Decreases the value of the Signal by a specified amount or by 1 if no amount is provided.
+
+### Syntax
+```javascript
+signal.decrement(amount?)
+```
+
+### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| amount | Number | (Optional) The amount to decrement by. Defaults to 1 if not specified. |
+| min | Number | (Optional) The minimum value allowed to increment to. |
+
+### Usage
+
+```javascript
+import { Signal } from '@semantic-ui/reactivity';
+
+const score = new Signal(100);
+score.decrement(); // value is now 99
+score.decrement(10); // value is now 89
+score.decrement(1, 0); // value will not reduce below 0
+```
+
+### Example
+<PlaygroundExample id="reactive-decrement" direction="horizontal"></PlaygroundExample>

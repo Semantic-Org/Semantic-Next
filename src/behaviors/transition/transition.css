@@ -1,14 +1,14 @@
-
+:host,
 :root {
   /* Duration Tokens */
-  --motion-scale-factor: 1;
-  --duration-quick: calc(100ms * var(--motion-scale-factor));      /* Tooltips, micro-interactions */
-  --duration-short: calc(130ms * var(--motion-scale-factor));      /* Standard/default for most UI */
-  --duration-medium: calc(180ms * var(--motion-scale-factor));     /* Emphasis animations, modals */
-  --duration-long: calc(250ms * var(--motion-scale-factor));       /* Complex sequences */
+  --motion-speed: 1;
+  --duration-quick: calc(100ms / var(--motion-speed));      /* Tooltips, micro-interactions */
+  --duration-short: calc(130ms / var(--motion-speed));      /* Standard/default for most UI */
+  --duration-medium: calc(180ms / var(--motion-speed));     /* Emphasis animations, modals */
+  --duration-long: calc(250ms / var(--motion-speed));       /* Complex sequences */
 
   /* Easing Functions */
-  --ease-standard: cubic-bezier(0.3, 0.07, 0.3, 1);   /* Smoother out, slight overshoot */
+  --ease: cubic-bezier(0.3, 0.07, 0.3, 1);            /* Smoother out, slight overshoot */
   --ease-in: cubic-bezier(0.4, 0, 1, 1);              /* Exit animations */
   --ease-out: cubic-bezier(0, 0, 0.2, 1);             /* Enter animations */
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);        /* State changes */
@@ -26,8 +26,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :host,
   :root {
-    --motion-scale-factor: 0.1;
+    --motion-speed: 10;
   }
 }
 
@@ -155,9 +156,9 @@
     opacity: 1;
     transform: scale(1);
     transition:
-      opacity var(--duration-medium) var(--ease-standard),
-      transform var(--duration-medium) var(--ease-standard),
-      box-shadow var(--duration-medium) var(--ease-standard);
+      opacity var(--duration-medium) var(--ease),
+      transform var(--duration-medium) var(--ease),
+      box-shadow var(--duration-medium) var(--ease);
   }
   &.out {
     animation: scale-out var(--duration-short) var(--ease-in) forwards;
@@ -375,6 +376,106 @@
     transform: scale(1);
     transform-origin: left center;
   }
+}
+/*--------------
+   Pop (Tooltip)
+---------------*/
+
+.transition[class*="pop-"] {
+  opacity: 0;
+
+  &.out {
+    animation: pop-out var(--duration-quick) var(--ease-in) forwards;
+  }
+
+  /* Top side (tooltip above trigger, rises up) */
+  &.pop-top,
+  &.pop-top-left,
+  &.pop-top-right {
+    transform: translateY(4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+
+    &.in {
+      animation: pop-in-top var(--duration-short) var(--ease-out) forwards;
+    }
+  }
+
+  /* Bottom side (tooltip below trigger, drops down) */
+  &.pop-bottom,
+  &.pop-bottom-left,
+  &.pop-bottom-right {
+    transform: translateY(-4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+
+    &.in {
+      animation: pop-in-bottom var(--duration-short) var(--ease-out) forwards;
+    }
+  }
+
+  /* Left side (tooltip left of trigger, slides left) */
+  &.pop-left,
+  &.pop-left-top,
+  &.pop-left-bottom {
+    transform: translateX(4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(4px);
+    }
+
+    &.in {
+      animation: pop-in-left var(--duration-short) var(--ease-out) forwards;
+    }
+  }
+
+  /* Right side (tooltip right of trigger, slides right) */
+  &.pop-right,
+  &.pop-right-top,
+  &.pop-right-bottom {
+    transform: translateX(-4px);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateX(-4px);
+    }
+
+    &.in {
+      animation: pop-in-right var(--duration-short) var(--ease-out) forwards;
+    }
+  }
+}
+
+@keyframes pop-in-top {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in-bottom {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in-left {
+  from { opacity: 0; transform: translateX(4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pop-in-right {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pop-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 /*******************************
@@ -697,16 +798,33 @@
 *******************************/
 
 /*--------------
+    Jiggle
+---------------*/
+
+.jiggle.transition {
+  animation: jiggle 1500ms var(--ease);
+}
+@keyframes jiggle {
+  0% { transform: scale3d(1, 1, 1); }
+  30% { transform: scale3d(1.25, 0.75, 1); }
+  40% { transform: scale3d(0.75, 1.25, 1); }
+  50% { transform: scale3d(1.15, 0.85, 1); }
+  65% { transform: scale3d(.95, 1.05, 1); }
+  75% { transform: scale3d(1.05, .95, 1); }
+  100% { transform: scale3d(1, 1, 1); }
+}
+
+/*--------------
       Shake
 ---------------*/
 
 .shake.transition {
-  animation: shake var(--duration-medium) var(--ease-in-out);
+  animation: shake 750ms var(--ease);
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-  20%, 40%, 60%, 80% { transform: translateX(2px); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
 }
 
 /*--------------
@@ -720,6 +838,19 @@
   0% { background-color: rgba(230, 199, 56, 0); }
   30% { background-color: rgba(230, 199, 56, 0.5); }
   100% { background-color: rgba(230, 199, 56, 0); }
+}
+
+/*--------------
+    Confirm
+---------------*/
+
+.confirm.transition {
+  animation: confirm var(--duration-medium) var(--ease-out);
+}
+@keyframes confirm {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 

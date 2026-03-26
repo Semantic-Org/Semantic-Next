@@ -1,0 +1,9 @@
+:host {
+  --spinner-mini-size: 10px;
+  --spinner-tiny-size: 11px;
+  --spinner-small-size: 12px;
+  --spinner-large-size: 16px;
+  --spinner-big-size: 18px;
+  --spinner-huge-size: 20px;
+  --spinner-massive-size: 24px;
+}

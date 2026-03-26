@@ -6,9 +6,9 @@ const defaultState = {
   currentTime: new Date(),
 };
 
-const createComponent = ({ state }) => ({
+const createComponent = ({ state, interval }) => ({
   initialize() {
-    setInterval(() => state.currentTime.now(), 1000);
+    interval(() => state.currentTime.now(), 1000);
   },
 });
 

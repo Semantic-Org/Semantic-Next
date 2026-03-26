@@ -1,0 +1,12 @@
+:host {
+
+  --segment-loading-min-height: 0px;
+
+  --segment-loading-dimmer-color: var(--inverted-80);
+  --segment-loading-dimmer-z-index: var(--page-layer-2);
+
+  --segment-loader-size: var(--huge);
+  --segment-loader-z-index: var(--page-layer-3);
+  --segment-loader-duration: var(--loader-duration);
+  --segment-loader-margin: calc(-1 * var(--segment-loader-size) / 2) 0 0 calc(-1 * var(--segment-loader-size) / 2);
+}

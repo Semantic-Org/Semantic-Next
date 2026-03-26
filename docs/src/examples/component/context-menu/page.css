@@ -14,7 +14,7 @@ h2 {
 
 context-menu {
 
-  margin: var(--spacing);
+  margin: var(--margin);
 
   .box {
     width: 400px;

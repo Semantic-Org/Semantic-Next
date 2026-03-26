@@ -1,0 +1,29 @@
+---
+import Message from '@components/Message/Message.js';
+import { unescapeHTML } from '@semantic-ui/utils';
+
+// Get the slot content to check for [!type] pattern
+let html = await Astro.slots.render('default');
+
+// Astro 6 MDX component overrides return HTML-escaped slot content
+html = unescapeHTML(html);
+
+// Parse for [!type] optional header pattern (only on same line, not across newlines)
+const match = html.match(/^\s*<p>\[!(\w+)\](?:[ \t]+([^\n<]+))?/);
+
+let type = 'info';
+let header = null;
+let content = html;
+
+if (match) {
+  type = match[1].toLowerCase();
+  header = match[2]?.trim() || null;
+
+  // Remove the [!type] and optional header from first line
+  content = html.replace(/^\s*<p>\[!\w+\](?:[ \t]+[^\n]+)?\n?/, '<p>');
+}
+---
+
+<Message client:load type={type} header={header}>
+  <Fragment set:html={content} />
+</Message>

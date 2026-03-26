@@ -1,0 +1,283 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Collections
+icon: layers
+description: API reference for Query collection methods
+package: "@semantic-ui/query"
+methods: ["count", "index", "exists", "eq", "first", "last", "slice", "reverse", "add", "chain", "end"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Work with Query collections: count elements, select subsets, and combine sets.
+
+## Info
+
+### count
+
+```javascript
+$('selector').count();
+```
+
+Gets the number of elements in the Query object.
+
+#### Returns
+
+Number of elements.
+
+#### Usage
+
+```javascript
+const total = $('li').count();
+```
+
+#### Example
+
+<PlaygroundExample id="query-count" direction="horizontal"></PlaygroundExample>
+
+### index
+
+```javascript
+$('selector').index();
+```
+
+Gets the index of the first element relative to its siblings.
+
+#### Returns
+
+Index position, or `-1` if not found.
+
+#### Usage
+
+```javascript
+const position = $('.active').index();
+```
+
+### exists
+
+```javascript
+$('selector').exists();
+```
+
+Checks if there are any elements in the Query object.
+
+#### Returns
+
+`true` if at least one element exists, `false` otherwise.
+
+#### Usage
+
+```javascript
+if ($('.modal').exists()) {
+  console.log('Modal is in the DOM');
+}
+```
+
+#### Example
+
+<PlaygroundExample id="query-exists" direction="horizontal"></PlaygroundExample>
+
+## Subset
+
+### eq
+
+```javascript
+$('selector').eq(index);
+```
+
+Returns a new Query object containing the element at the specified index.
+
+#### Parameters
+
+| Name  | Type   | Description                                |
+|-------|--------|--------------------------------------------|
+| index | number | Index of element (negative counts from end) |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing the element.
+
+#### Usage
+
+```javascript
+$('li').eq(2).addClass('third');
+$('li').eq(-1).addClass('last');
+```
+
+#### Example
+
+<PlaygroundExample id="query-eq" direction="horizontal"></PlaygroundExample>
+
+### first
+
+```javascript
+$('selector').first();
+```
+
+Returns a new Query object containing the first element.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing the first element.
+
+#### Usage
+
+```javascript
+$('li').first().addClass('first-item');
+```
+
+#### Example
+
+<PlaygroundExample id="query-first" direction="horizontal"></PlaygroundExample>
+
+### last
+
+```javascript
+$('selector').last();
+```
+
+Returns a new Query object containing the last element.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing the last element.
+
+#### Usage
+
+```javascript
+$('li').last().addClass('last-item');
+```
+
+#### Example
+
+<PlaygroundExample id="query-last" direction="horizontal"></PlaygroundExample>
+
+### slice
+
+```javascript
+$('selector').slice(start);
+$('selector').slice(start, end);
+```
+
+Returns a Query object containing a portion of elements.
+
+#### Parameters
+
+| Name  | Type   | Description                     |
+|-------|--------|---------------------------------|
+| start | number | Beginning index                 |
+| end   | number | End index (exclusive)           |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing the sliced elements.
+
+#### Usage
+
+```javascript
+$('li').slice(1, 4).addClass('middle');
+$('li').slice(2).css('color', 'gray');
+```
+
+#### Example
+
+<PlaygroundExample id="query-slice" direction="horizontal"></PlaygroundExample>
+
+## Manipulation
+
+### reverse
+
+```javascript
+$('selector').reverse();
+```
+
+Reverses the order of elements in the collection.
+
+#### Returns
+
+New [Query object](/docs/api/query/constructor#the-query-object) with reversed elements.
+
+#### Usage
+
+```javascript
+$('li').reverse().each((el, i) => {
+  console.log(`Reversed index ${i}:`, el.textContent);
+});
+```
+
+### add
+
+```javascript
+$('selector').add(elements);
+```
+
+Creates a new Query collection combining current elements with additional elements.
+
+#### Parameters
+
+| Name     | Type                              | Description        |
+|----------|-----------------------------------|--------------------|
+| elements | string, Element, NodeList, Query  | Elements to add    |
+
+#### Returns
+
+New [Query object](/docs/api/query/constructor#the-query-object) with combined elements (duplicates removed).
+
+#### Usage
+
+```javascript
+$('.selected').add('.highlighted').css('border', '1px solid blue');
+```
+
+#### Example
+
+<PlaygroundExample id="query-add" direction="horizontal"></PlaygroundExample>
+
+### chain
+
+```javascript
+$('selector').chain(elements);
+```
+
+Creates a new Query instance containing the provided elements, preserving options from the original Query.
+
+#### Parameters
+
+| Name     | Type                              | Description                       |
+|----------|-----------------------------------|-----------------------------------|
+| elements | Element, NodeList, Array          | Elements for the new Query        |
+
+#### Returns
+
+New [Query object](/docs/api/query/constructor#the-query-object) with the provided elements.
+
+#### Usage
+
+```javascript
+const $paragraphs = $('div').chain(document.querySelectorAll('p'));
+```
+
+### end
+
+```javascript
+$('selector').find('child').end();
+```
+
+Returns to the previous Query set in the chain.
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) before the last traversal.
+
+#### Usage
+
+```javascript
+$('.card')
+  .find('.title').css('font-weight', 'bold').end()
+  .find('.content').html('<p>New</p>');
+```
+
+#### Example
+
+<PlaygroundExample id="query-end" direction="horizontal"></PlaygroundExample>

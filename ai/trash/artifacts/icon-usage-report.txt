@@ -1,0 +1,486 @@
+# Icon Usage Report
+# Corpus: /home/jack/dev/qualia/services/**/*.html
+# Files scanned: 4577
+# Total <i class="...icon"> hits: 6156
+# Unique icon names: 477 (540 raw, 63 non-icon CSS classes removed)
+# Dynamic (template-only, unresolvable): 249
+#
+# count | files | icon name
+# ------+-------+----------
+    464 |   338 | info circle
+    285 |   170 | dropdown
+    242 |   176 | check
+    217 |   154 | attention circle
+    203 |   167 | search
+    181 |   169 | close
+    166 |   119 | x
+    134 |   100 | right chevron divider
+    133 |   114 | edit
+    126 |   115 | delete
+    120 |   100 | add
+    100 |    94 | more
+     88 |    59 | settings
+     84 |    44 | lock
+     84 |    63 | plus
+     74 |    54 | minus
+     70 |    48 | dont
+     68 |    63 | right chevron
+     68 |    46 | pdf file
+     65 |    31 | undo
+     60 |    54 | user
+     56 |    46 | print
+     51 |    39 | help circle
+     50 |    37 | upload
+     47 |    38 | checkmark
+     47 |    36 | mail
+     46 |    43 | remove
+     46 |    36 | file
+     44 |    24 | warning circle
+     41 |    32 | trash
+     40 |    34 | checkmark circle
+     38 |    35 | policy
+     37 |    33 | cancel
+     35 |    32 | download
+     35 |    28 | right angle
+     35 |    27 | bank
+     34 |    23 | title
+     32 |    28 | marker
+     31 |    27 | refresh
+     31 |    24 | home like
+     30 |    28 | signed document
+     28 |    17 | safe
+     27 |    24 | bug
+     26 |    18 | add user
+     24 |    16 | document preview
+     24 |    23 | chat
+     24 |    23 | bars
+     24 |    21 | agent
+     23 |    22 | tasks
+     23 |    23 | organization
+     22 |    18 | send
+     22 |    18 | calendar
+     22 |    21 | external
+     21 |    18 | copy
+     20 |    20 | exclamation circle
+     20 |    20 | contract
+     20 |    18 | home
+     19 |    17 | deed
+     19 |    18 | right caret
+     19 |    12 | attention
+     17 |    17 | left chevron
+     17 |    16 | profile
+     17 |    16 | folder
+     16 |    15 | right arrow
+     16 |    16 | warning
+     16 |    16 | agent1
+     15 |    13 | clock
+     15 |    15 | alarm
+     15 |     5 | shop
+     14 |    11 | county
+     14 |     6 | angle right
+     14 |    14 | home legal
+     14 |    11 | notes
+     14 |    13 | audit
+     14 |    14 | attach
+     14 |    12 | feed
+     13 |    12 | document
+     13 |    10 | wait
+     13 |    10 | reports
+     13 |    12 | probate
+     13 |    13 | pencil
+     12 |    12 | warning sign
+     12 |    12 | home insurance
+     12 |    12 | home search3
+     12 |    11 | charge
+     12 |    10 | sign out
+     12 |    10 | credit debit
+     12 |     6 | check circle
+     11 |     9 | wizard
+     11 |    11 | loan
+     11 |    11 | left arrow
+     11 |    10 | phone
+     11 |     8 | research
+     11 |     7 | credit card
+     11 |     5 | exclamation
+     11 |    10 | document check
+     11 |     8 | star
+     11 |    10 | archive
+     10 |    10 | code
+     10 |    10 | agency
+     10 |     8 | info
+     10 |    10 | money
+     10 |     8 | check mark
+      9 |     9 | envelope
+      9 |     9 | close x
+      9 |     5 | loan agent
+      9 |     9 | x circle
+      9 |     9 | users
+      9 |     4 | document package
+      8 |     7 | hide
+      8 |     6 | eye
+      8 |     5 | filter
+      8 |     7 | building
+      8 |     8 | left angle
+      8 |     8 | list
+      8 |     8 | home site
+      8 |     8 | receipt
+      8 |     6 | help
+      8 |     8 | payment
+      8 |     6 | empty star
+      8 |     8 | zoom
+      7 |     7 | write
+      7 |     3 | dollar
+      7 |     4 | line chart
+      7 |     7 | keys1
+      7 |     3 | home marker2
+      7 |     7 | exchange
+      7 |     6 | caret down
+      7 |     3 | plus circle
+      7 |     7 | sidebar
+      7 |     1 | remove circle
+      6 |     4 | house balance
+      6 |     6 | history
+      6 |     5 | circle help
+      6 |     6 | circle help right
+      6 |     5 | upload document
+      6 |     4 | search user
+      6 |     5 | circle
+      6 |     6 | home search
+      6 |     5 | bank money
+      6 |     6 | email
+      6 |     6 | lock circle
+      6 |     6 | order contact
+      6 |     3 | qrcode
+      6 |     5 | caret up
+      6 |     4 | indent
+      6 |     5 | magic
+      6 |     6 | table
+      6 |     6 | pause circle
+      6 |     6 | play circle
+      6 |     6 | configure
+      5 |     5 | accounting
+      5 |     5 | down angle
+      5 |     5 | save
+      5 |     5 | house
+      5 |     2 | share
+      5 |     2 | home love
+      5 |     5 | circle warning
+      5 |     5 | disburse
+      5 |     5 | exclamation triangle
+      5 |     4 | video
+      5 |     1 | help circle right
+      5 |     4 | content
+      5 |     5 | escrow
+      5 |     4 | chevron right
+      5 |     2 | dot circle
+      5 |     4 | down chevron
+      5 |     5 | search circle
+      5 |     2 | cube
+      5 |     2 | square created
+      5 |     2 | square not-created
+      5 |     3 | camera
+      5 |     3 | redo
+      4 |     4 | sign in
+      4 |     3 | add company
+      4 |     4 | file text
+      4 |     3 | disk
+      4 |     4 | up chevron circle
+      4 |     4 | down chevron circle
+      4 |     4 | bullseye
+      4 |     4 | repeat
+      4 |     4 | dynamic document
+      4 |     4 | column delete
+      4 |     3 | hospital
+      4 |     4 | at
+      4 |     4 | ban
+      4 |     4 | safe money
+      4 |     4 | world
+      4 |     3 | left
+      4 |     4 | marketplace
+      4 |     3 | options
+      4 |     2 | right
+      4 |     3 | outdent
+      4 |     4 | ai
+      4 |     4 | attention sign
+      4 |     2 | line graph
+      4 |     3 | mobile
+      4 |     1 | cart
+      4 |     4 | cloud download
+      4 |     4 | verified user
+      4 |     3 | profile2
+      4 |     3 | comment
+      3 |     3 | maximize
+      3 |     3 | file copy
+      3 |     3 | unlock
+      3 |     3 | cloud upload
+      3 |     3 | question
+      3 |     3 | check middle aligned
+      3 |     3 | delete remove
+      3 |     3 | circle info
+      3 |     3 | primary bank
+      3 |     3 | flag
+      3 |     3 | fee
+      3 |     3 | home details
+      3 |     2 | add circle
+      3 |     3 | pin home
+      3 |     3 | return arrow
+      3 |     3 | account history
+      3 |     2 | photo
+      3 |     3 | taxes
+      3 |     3 | keys
+      3 |     3 | user profile
+      3 |     3 | up angle
+      3 |     3 | pencil alternate
+      3 |     3 | dynamic document2
+      3 |     3 | circle x
+      3 |     3 | locked document
+      3 |     3 | minimize
+      3 |     3 | house2
+      3 |     3 | folder open
+      3 |     3 | preview document
+      3 |     3 | home info
+      3 |     2 | forward mail
+      3 |     3 | info circle1
+      3 |     3 | debits credits
+      3 |     3 | good faith estimate
+      3 |     2 | up chevron
+      3 |     1 | home safe
+      3 |     3 | x right
+      3 |     2 | mark print
+      3 |     3 | padded delete
+      3 |     3 | envelope open
+      3 |     3 | microphone
+      3 |     3 | clock lender
+      3 |     3 | contract lender
+      3 |     1 | poa info circle
+      3 |     2 | sun
+      3 |     3 | message
+      2 |     1 | bomb
+      2 |     2 | document error
+      2 |     1 | file word
+      2 |     2 | word file
+      2 |     2 | font
+      2 |     1 | drag
+      2 |     2 | share document
+      2 |     2 | clone
+      2 |     2 | list layout
+      2 |     2 | email2
+      2 |     2 | close middle aligned
+      2 |     2 | remove user
+      2 |     2 | arrow up
+      2 |     2 | arrow down
+      2 |     1 | edit circle
+      2 |     2 | balancing
+      2 |     2 | time
+      2 |     1 | bank settings
+      2 |     2 | remove delete
+      2 |     2 | support
+      2 |     2 | heart
+      2 |     2 | log out
+      2 |     2 | right remove
+      2 |     2 | group
+      2 |     1 | right external
+      2 |     2 | style delete
+      2 |     1 | home document
+      2 |     2 | target
+      2 |     2 | unlink
+      2 |     2 | vertical resize
+      2 |     2 | chevron up
+      2 |     2 | chevron down
+      2 |     1 | caret right
+      2 |     2 | right star
+      2 |     2 | ordered list
+      2 |     2 | passkey
+      2 |     2 | right delete
+      2 |     2 | insurance agent
+      2 |     2 | text file
+      2 |     2 | debit credit
+      2 |     1 | file video
+      2 |     2 | add folder
+      2 |     2 | home expansion
+      2 |     2 | home security
+      2 |     2 | linkify
+      2 |     1 | insecure
+      2 |     2 | database
+      2 |     1 | newspaper
+      2 |     2 | pie chart
+      2 |     1 | chart line
+      2 |     1 | left dropdown
+      2 |     2 | document search
+      2 |     1 | key
+      2 |     2 | cogs
+      2 |     2 | bar chart
+      2 |     2 | privacy
+      2 |     2 | rocket
+      2 |     1 | blind
+      2 |     1 | radio
+      2 |     2 | upload error
+      2 |     2 | mute
+      2 |     1 | video camera
+      2 |     2 | expand
+      2 |     2 | cubes
+      2 |     2 | credit debit lender
+      2 |     1 | wizard lender
+      2 |     2 | document upload
+      2 |     2 | excel file
+      2 |     2 | add square
+      2 |     2 | power
+      2 |     2 | coffee user
+      1 |     1 | sort
+      1 |     1 | settings layout
+      1 |     1 | warning attention
+      1 |     1 | fullscreen expand
+      1 |     1 | document signed
+      1 |     1 | level up
+      1 |     1 | description
+      1 |     1 | dont middle aligned
+      1 |     1 | calculator
+      1 |     1 | blank
+      1 |     1 | allocation
+      1 |     1 | map pin
+      1 |     1 | right help
+      1 |     1 | right angle divider
+      1 |     1 | hourglass half
+      1 |     1 | trash aligned hidden
+      1 |     1 | book middle aligned
+      1 |     1 | good check
+      1 |     1 | item delete
+      1 |     1 | more dropdown
+      1 |     1 | refresh circle
+      1 |     1 | user circle
+      1 |     1 | snooze circle
+      1 |     1 | sort content ascending
+      1 |     1 | sort content descending
+      1 |     1 | profile like
+      1 |     1 | error
+      1 |     1 | angle down
+      1 |     1 | right close x
+      1 |     1 | tag
+      1 |     1 | researcher
+      1 |     1 | announcement
+      1 |     1 | student
+      1 |     1 | right chevron circle
+      1 |     1 | browser
+      1 |     1 | remove bookmark
+      1 |     1 | setting
+      1 |     1 | support2
+      1 |     1 | message circle
+      1 |     1 | truck
+      1 |     1 | question circle
+      1 |     1 | reply
+      1 |     1 | alternate unlock
+      1 |     1 | primary home
+      1 |     1 | primary agency
+      1 |     1 | up arrow
+      1 |     1 | down arrow
+      1 |     1 | documents
+      1 |     1 | qrcode file
+      1 |     1 | file excel
+      1 |     1 | close x right
+      1 |     1 | give money
+      1 |     1 | primary home legal
+      1 |     1 | primary agent
+      1 |     1 | open folder
+      1 |     1 | video file
+      1 |     1 | edit workflow
+      1 |     1 | home dashboard
+      1 |     1 | cancel dep
+      1 |     1 | order contacts
+      1 |     1 | remove failed
+      1 |     1 | signed documents
+      1 |     1 | close delete
+      1 |     1 | certificate
+      1 |     1 | primary contract legal
+      1 |     1 | eraser
+      1 |     1 | bullhorn
+      1 |     1 | user search
+      1 |     1 | agency like
+      1 |     1 | chevron left
+      1 |     1 | file paste
+      1 |     1 | chain
+      1 |     1 | sold
+      1 |     1 | checkmark circle check
+      1 |     1 | delete document
+      1 |     1 | delete search
+      1 |     1 | sort numeric ascending
+      1 |     1 | keyboard
+      1 |     1 | home search 4
+      1 |     1 | tasks 4
+      1 |     1 | spinner
+      1 |     1 | percent
+      1 |     1 | selectable lock
+      1 |     1 | summary delete
+      1 |     1 | move
+      1 |     1 | trash alternate
+      1 |     1 | map
+      1 |     1 | crosshairs
+      1 |     1 | expand arrows alternate
+      1 |     1 | file pdf
+      1 |     1 | home cost
+      1 |     1 | champagne
+      1 |     1 | smile
+      1 |     1 | order document
+      1 |     1 | home title
+      1 |     1 | info circle info
+      1 |     1 | usd
+      1 |     1 | add positive
+      1 |     1 | insurance
+      1 |     1 | tripadvisor
+      1 |     1 | cloud
+      1 |     1 | check square
+      1 |     1 | pointing right
+      1 |     1 | padded edit
+      1 |     1 | shopping cart
+      1 |     1 | home gavel
+      1 |     1 | history mark
+      1 |     1 | dollar sign
+      1 |     1 | lock circle1
+      1 |     1 | address book
+      1 |     1 | clipboard
+      1 |     1 | minus circle
+      1 |     1 | profile info
+      1 |     1 | unmute
+      1 |     1 | firefox
+      1 |     1 | safari
+      1 |     1 | internet explorer
+      1 |     1 | verified user circle
+      1 |     1 | zoom out
+      1 |     1 | zoom in
+      1 |     1 | x delete
+      1 |     1 | chrome
+      1 |     1 | triangle exclamation
+      1 |     1 | envelope open alternate
+      1 |     1 | policy lender
+      1 |     1 | home info lender
+      1 |     1 | home like lender
+      1 |     1 | help info circle
+      1 |     1 | document check lender
+      1 |     1 | refinance lender
+      1 |     1 | tasks lender
+      1 |     1 | checkmark lender
+      1 |     1 | organization lender
+      1 |     1 | reports lender
+      1 |     1 | profile lender
+      1 |     1 | archive lender
+      1 |     1 | trophy
+      1 |     1 | loan lender
+      1 |     1 | agent1 lender
+      1 |     1 | probate lender
+      1 |     1 | envelope lender
+      1 |     1 | arrow left
+      1 |     1 | cancel circle
+      1 |     1 | add user header
+      1 |     1 | ticket
+      1 |     1 | square
+      1 |     1 | code file
+      1 |     1 | circle check
+      1 |     1 | check mark circle
+      1 |     1 | file alternate
+      1 |     1 | phone circle
+      1 |     1 | divider right chevron
+      1 |     1 | chart
+      1 |     1 | jsfiddle square
+      1 |     1 | contacts
+      1 |     1 | money like
+      1 |     1 | safe user
+      1 |     1 | home menu

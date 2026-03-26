@@ -1,4 +1,4 @@
-import InputSpec from './specs/input.js';
-import InputComponentSpec from './specs/input-component.js';
+import InputComponentSpec from './specs/input.component.js';
+import InputSpec from './specs/input.spec.json';
 
-export { InputSpec, InputComponentSpec };
+export { InputComponentSpec, InputSpec };

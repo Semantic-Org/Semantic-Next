@@ -1,6 +1,6 @@
 .source {
   color: var(--standard-60);
-  margin-right: var(--compact-spacing);
+  margin-right: var(--margin-xs);
 }
 .counter {
   font-weight: bold;

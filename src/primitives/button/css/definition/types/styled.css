@@ -1,0 +1,187 @@
+
+/*-------------------
+   Styled / Subtle
+-- ------------------*/
+
+/* Styled is applied to all styled type. */
+/* All styled variations use similar styles but each level of de-emphasis removes additional styles */
+
+.styled.button {
+  background: var(--button-styled-background);
+  color: var(--button-styled-color);
+  box-shadow: var(--button-styled-box-shadow);
+  text-shadow: var(--button-styled-text-shadow);
+
+  &.hover,
+  &:hover {
+    background-color: var(--button-styled-hover-background);
+    color: var(--button-styled-hover-color);
+  }
+
+  &.pressed,
+  &:active {
+    background-color: var(--button-styled-pressed-background);
+    color: var(--button-styled-pressed-color);
+  }
+
+  .active {
+    background-color: var(--button-styled-active-background);
+    color: var(--button-styled-active-color);
+  }
+}
+
+/* Plural buttons - override CSS variables for child components */
+.styled.buttons {
+
+  &:not(.separate) ::slotted(ui-button) {
+    /* Shadow is on button group */
+    --button-box-shadow: none;
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+  }
+
+  ::slotted(ui-button) {
+
+    /* Style button */
+    --button-background: var(--button-styled-background);
+    --button-text-shadow: var(--button-styled-text-shadow);
+    --button-text-color: var(--button-styled-color);
+
+    /* Style States */
+    --button-hover-background-color: var(--button-styled-hover-background);
+    --button-hover-color: var(--button-styled-hover-color);
+    --button-pressed-background-color: var(--button-styled-pressed-background);
+    --button-pressed-color: var(--button-styled-pressed-color);
+
+    /* Remove gradient from variations */
+    --button-background-image: none;
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+  }
+}
+
+/*-------------------
+       Subtle
+--------------------*/
+
+/* Plural buttons - override CSS variables for child components */
+.subtle.buttons:not(.separate) {
+  box-shadow: var(--button-box-shadow);
+}
+
+
+/*-------------------
+       Flat
+--------------------*/
+
+.flat.button,
+.flat.buttons ::slotted(ui-button) {
+
+  /* Remove shading variables */
+  --button-group-box-shadow: var(--button-box-shadow);
+  --button-box-shadow: none;
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+
+}
+
+/* Shadow removed */
+.flat.buttons,
+.flat.button {
+  box-shadow: none;
+}
+
+/*-------------------
+      Outline
+--------------------*/
+
+.outline.button,
+.outline.buttons ::slotted(ui-button) {
+
+  /* Remove shading */
+  --button-background: none;
+  --button-hover-background-image: none;
+  --button-pressed-background-image: none;
+  --button-colored-background-image: none;
+  --button-primary-background-image: none;
+  --button-secondary-background-image: none;
+
+  /* Remove shadow */
+  --button-hover-box-shadow: none;
+  --button-pressed-box-shadow: none;
+  --button-colored-box-shadow: none;
+  --button-primary-box-shadow: none;
+  --button-secondary-box-shadow: none;
+}
+
+/* Shadow & Background removed */
+.outline.button {
+  background: none;
+  box-shadow: none;
+
+  /* Add border with outline to avoid border offset */
+  outline: var(--button-outline-border-width) solid var(--button-outline-border-color);
+  outline-offset: var(--button-outline-border-offset);
+
+}
+
+/* Plural buttons*/
+.outline.buttons {
+  background: none;
+  box-shadow: none;
+  border: var(--border);
+}
+
+/*-------------------
+       Ghost
+--------------------*/
+
+.ghost.button {
+
+  box-shadow: none;
+
+  /* Remove background but only without hover */
+  &:not(:is(:hover, .hover, :active, .pressed, .active)) {
+    background: none;
+  }
+}
+
+/* Plural */
+.ghost.buttons {
+
+  ::slotted(ui-button) {
+    /* Override internal button variables */
+    --button-box-shadow: none;
+    --button-background: none;
+    --button-text-color: var(--text-color);
+
+    /* Ghost hover states */
+    --button-background-hover: var(--button-styled-background-hover);
+    --button-hover-color: var(--button-styled-color);
+    --button-background-pressed: var(--button-styled-background-pressed);
+    --button-background-pressed-color: var(--button-styled-background-pressed-color);
+
+    --button-background-active: var(--button-styled-background-active);
+    --button-background-active-color: var(--button-styled-background-active-color);
+
+    /* Remove shading */
+    --button-background: none;
+    --button-hover-background-image: none;
+    --button-pressed-background-image: none;
+    --button-colored-background-image: none;
+    --button-primary-background-image: none;
+    --button-secondary-background-image: none;
+
+    /* Remove shadow */
+    --button-hover-box-shadow: none;
+    --button-pressed-box-shadow: none;
+    --button-colored-box-shadow: none;
+    --button-primary-box-shadow: none;
+    --button-secondary-box-shadow: none;
+
+  }
+}

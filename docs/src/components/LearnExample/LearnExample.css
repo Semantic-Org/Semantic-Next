@@ -31,7 +31,7 @@
       box-shadow: var(--subtle-shadow);
 
       .location {
-        margin-left: var(--spacing);
+        margin-left: var(--margin);
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -90,8 +90,11 @@
       }
 
       nav-menu {
-        --nav-menu-content-indent-distance: 0rem;
+        --nav-menu-content-indent-distance: 5px;
         --nav-menu-sub-title-active-color: var(--white-10);
+        --nav-menu-sub-title-font-size: 12px;
+        --nav-menu-content-space-after: 1rem;
+        --nav-menu-title-padding: 0rem 0rem 1rem;
       }
     }
 
@@ -198,7 +201,7 @@
       display: inline-block;
       font-size: 10px;
       background-color: var(--standard-10);
-      color: #FFFFFF;
+      color: var(--standard-100);
       vertical-align: text-top;
       border-radius: var(--border-radius);
       padding: 3px;
@@ -237,13 +240,13 @@
             display: block;
             font-size: 32px;
             color: var(--primary-text-color);
-            margin-bottom: var(--compact-spacing);
+            margin-bottom: var(--margin-xs);
           }
           .header {
             font-size: 18px;
             font-weight: var(--bold);
             color: var(--standard-100);
-            margin-bottom: var(--compact-spacing);
+            margin-bottom: var(--margin-xs);
           }
           .text {
             color: var(--standard-40);

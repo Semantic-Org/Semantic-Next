@@ -1,6 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { UIIcon } from '../../primitives/index.js';
-import {} from '@semantic-ui/utils';
+import { Icon } from '../../primitives/index.js';
 import css from './sidebar-toggle.css?raw';
 import template from './sidebar-toggle.html?raw';
 
@@ -12,6 +11,8 @@ const defaultSettings = {
   storeAs: 'sidebar-collapsed',
   collapseIcon: 'left chevron',
   showIcon: 'right chevron',
+  hideText: 'Collapse',
+  showText: 'Expand',
 };
 
 const defaultState = {};
@@ -64,9 +65,15 @@ const createComponent = ({ settings, self, $, isClient, dispatchEvent }) => ({
   },
 });
 
-const onRendered = ({ self, settings }) => {
+const onRendered = ({ $, isClient, self, settings }) => {
   if (self.canSaveState()) {
     settings.collapsed = self.getSavedCollapsedState();
+  }
+  if (isClient) {
+    $('.toggle').tooltip({
+      topLayer: true,
+      position: 'right',
+    });
   }
 };
 

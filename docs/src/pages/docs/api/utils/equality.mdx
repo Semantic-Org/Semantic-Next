@@ -1,0 +1,96 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Equality Utilities
+package: "@semantic-ui/utils"
+methods: [isEqual]
+icon: scale
+description: API reference for equality comparison functions
+---
+
+The Equality utilities provide functions for comparing values and objects in JavaScript. These functions offer more comprehensive equality checks than the built-in equality operators, particularly for complex data structures.
+
+## Functions
+
+### isEqual
+
+```javascript
+function isEqual(a, b, options?)
+```
+
+Performs a deep equality comparison between two values.
+
+> **Deep Comparison** This function performs a recursive comparison for objects and arrays, ensuring that nested structures are also checked for equality. It handles various edge cases, including `NaN` comparisons.
+
+#### Parameters
+
+| Name | Type | Description |
+|------|------|-------------|
+| a    | any  | The first value to compare |
+| b    | any  | The second value to compare |
+| options | object | Optional comparison options |
+
+#### Options
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| loose | boolean | `false` | Uses `==` instead of `===` for leaf value comparison |
+| ignoreKeys | string[] | `[]` | Array of property names to skip during comparison |
+| partial | boolean | `false` | Checks if `a` is a structural subset of `b` |
+
+#### Returns
+
+`boolean` - `true` if the values are deeply equal, `false` otherwise.
+
+#### Example
+
+```javascript
+import { isEqual } from '@semantic-ui/utils';
+
+console.log(isEqual({a: 1, b: {c: 2}}, {a: 1, b: {c: 2}})); // true
+console.log(isEqual([1, 2, 3], [1, 2, 3])); // true
+console.log(isEqual({a: 1, b: 2}, {b: 2, a: 1})); // true
+console.log(isEqual(NaN, NaN)); // true
+console.log(isEqual({a: 1, b: 2}, {a: 1, b: 3})); // false
+```
+
+#### Loose Comparison
+
+When `loose` is `true`, leaf values are compared with `==` instead of `===`, allowing type coercion.
+
+```javascript
+import { isEqual } from '@semantic-ui/utils';
+
+console.log(isEqual('1', 1, { loose: true })); // true
+console.log(isEqual(0, false, { loose: true })); // true
+console.log(isEqual('1', 1)); // false (strict by default)
+```
+
+#### Ignoring Keys
+
+Use `ignoreKeys` to skip specific properties during comparison.
+
+```javascript
+import { isEqual } from '@semantic-ui/utils';
+
+const a = { name: 'Alice', updatedAt: 1000 };
+const b = { name: 'Alice', updatedAt: 2000 };
+
+console.log(isEqual(a, b)); // false
+console.log(isEqual(a, b, { ignoreKeys: ['updatedAt'] })); // true
+```
+
+#### Partial Comparison
+
+When `partial` is `true`, checks if `a` is a structural subset of `b` — every key in `a` must exist and match in `b`, but `b` may have additional keys.
+
+```javascript
+import { isEqual } from '@semantic-ui/utils';
+
+const subset = { a: 1 };
+const full = { a: 1, b: 2, c: 3 };
+
+console.log(isEqual(subset, full)); // false
+console.log(isEqual(subset, full, { partial: true })); // true
+console.log(isEqual(full, subset, { partial: true })); // false (a has keys b doesn't)
+```

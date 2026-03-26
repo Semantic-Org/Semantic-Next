@@ -11,6 +11,7 @@
   --button-background: var(--button-background-color) var(--button-background-image);
 
   --button-line-height: 1em;
+  --button-width: auto;
 
   /* button same height as input globally */
   --button-vertical-padding: var(--input-vertical-padding);
@@ -23,8 +24,9 @@
   --button-font-family: var(--page-font);
   --button-font-weight: var(--bold);
   --button-text-color: var(--black-80);
-  --button-inverted-text-color: var(--white-80);
+  --button-inverted-text-color: var(--white-90);
   --button-text-shadow: none;
+  --button-text-align: center;
   --button-inverted-text-shadow: var(--button-text-shadow);
 
   /* Border */

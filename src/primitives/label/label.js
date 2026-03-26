@@ -1,12 +1,12 @@
 import { defineComponent } from '@semantic-ui/component';
 
-import componentSpec from './specs/label-component.js';
-import template from './label.html?raw';
 import css from './label-bundle.css?raw';
+import template from './label.html?raw';
+import componentSpec from './specs/label.component.js';
 
 const createComponent = ({ $ }) => ({});
 
-const UILabel = defineComponent({
+const Label = defineComponent({
   tagName: 'ui-label',
   componentSpec,
   template,
@@ -14,4 +14,4 @@ const UILabel = defineComponent({
   createComponent,
 });
 
-export { UILabel };
+export { Label };

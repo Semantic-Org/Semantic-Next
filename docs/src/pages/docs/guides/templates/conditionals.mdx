@@ -1,0 +1,108 @@
+---
+layout: '@layouts/Guide.astro'
+title: Conditionals
+description: Branching logic in templates with if, else if, and else
+---
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+## Basic Usage
+
+`{#if}`, `{else if}`, and `{else}` handle branching in templates.
+
+```sui
+{#if isEven number}
+  Even
+{else if isZero number}
+  Zero
+{else}
+  Odd
+{/if}
+```
+
+```sui title="Nested"
+{#if isLoggedIn}
+  {#if isAdmin}
+    <div class="admin-panel">Admin Controls</div>
+  {else}
+    <div class="user-panel">User Dashboard</div>
+  {/if}
+{else}
+  <div class="login">Please log in</div>
+{/if}
+```
+
+## Expression Syntax
+
+Conditionals accept both semantic (lisp-like) and JavaScript [expressions](/docs/guides/templates/expressions). Both styles can be mixed in the same template.
+
+```sui
+{#if isEqual a b}
+  A is B
+{/if}
+```
+
+```sui
+{#if a === b}
+  A is B
+{/if}
+```
+
+### Using Helpers
+
+[Template helpers](/docs/guides/templates/helpers) provide readable alternatives to JavaScript operators. See [Comparison Helpers](/docs/api/helpers/comparison) for the full list.
+
+```sui
+{#if hasAny items}
+  Has items
+{/if}
+```
+
+```sui
+{#if not isEven number}
+  Odd
+{else}
+  Even
+{/if}
+```
+
+The same logic without helpers:
+
+```sui
+{#if items.length > 0}
+  Has items
+{/if}
+```
+
+```sui
+{#if !isEven(number)}
+  Odd
+{else}
+  Even
+{/if}
+```
+
+## Conditionals in Attributes
+
+Conditional blocks and ternary [expressions](/docs/guides/templates/expressions) work inside attribute values, not just around elements.
+
+### Conditional Classes
+
+```sui
+<div class="{#if isActive}active{/if}">
+  Content
+</div>
+```
+
+```sui
+<li class="{#if selectedItem === id}selected{/if}">
+  {title}
+</li>
+```
+
+### Ternary in Attributes
+
+```sui
+<div class="{isActive ? 'active' : 'inactive'}">
+  Status
+</div>
+```

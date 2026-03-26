@@ -38,5 +38,10 @@
   --inverted-selected-text-color: var(--inverted-10);
   --inverted-disabled-text-color: var(--inverted-20);
 
+  /* -------------------
+      Text Highlighting
+  -------------------- */
+
+  --highlight-background: var(--blue-20);
 
 }

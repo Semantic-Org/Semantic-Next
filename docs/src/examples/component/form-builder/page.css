@@ -5,7 +5,7 @@
 }
 
 .form-output {
-  margin-top: var(--spacing);
+  margin-top: var(--margin);
   padding: var(--padding);
   background-color: var(--standard-5);
   border: var(--border);

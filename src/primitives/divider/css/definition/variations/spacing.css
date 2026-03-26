@@ -1,0 +1,37 @@
+/*******************************
+        Spacing Variation
+*******************************/
+
+.divider {
+  &.mini-spacing {
+    margin: var(--divider-spacing-mini) 0;
+  }
+
+  &.tiny-spacing {
+    margin: var(--divider-spacing-tiny) 0;
+  }
+
+  &.small-spacing {
+    margin: var(--divider-spacing-small) 0;
+  }
+
+  &.medium-spacing {
+    margin: var(--divider-spacing-medium) 0;
+  }
+
+  &.large-spacing {
+    margin: var(--divider-spacing-large) 0;
+  }
+
+  &.big-spacing {
+    margin: var(--divider-spacing-big) 0;
+  }
+
+  &.huge-spacing {
+    margin: var(--divider-spacing-huge) 0;
+  }
+
+  &.massive-spacing {
+    margin: var(--divider-spacing-massive) 0;
+  }
+}

@@ -27,7 +27,16 @@ export interface EventOptions {
    */
   abortController?: AbortController;
   /**
-   * Event listener options (e.g., `capture`, `passive`).
+   * Listen in capture phase (event fires top-down before bubbling).
+   */
+  capture?: boolean;
+  /**
+   * Mark listener as passive (will not call preventDefault).
+   * Automatically set to `true` for `scroll` and `resize` events.
+   */
+  passive?: boolean;
+  /**
+   * Additional event listener options passed through to addEventListener.
    */
   eventSettings?: AddEventListenerOptions;
 }
@@ -83,8 +92,54 @@ export interface DimensionOptions {
 }
 
 /**
+ * Options for naturalWidth calculations.
+ */
+export interface NaturalWidthOptions {
+  /**
+   * Preserve the element's max-width constraint during calculation. Defaults to false.
+   */
+  preserveMaxWidth?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
+}
+
+/**
+ * Options for naturalHeight calculations.
+ */
+export interface NaturalHeightOptions {
+  /**
+   * Preserve the element's max-height constraint during calculation. Defaults to false.
+   */
+  preserveMaxHeight?: boolean;
+  /**
+   * Include margin in the calculation. Defaults to false.
+   */
+  includeMargin?: boolean;
+  /**
+   * Include padding in the calculation. Defaults to false.
+   */
+  includePadding?: boolean;
+  /**
+   * Include border in the calculation. Defaults to false.
+   */
+  includeBorder?: boolean;
+}
+
+/**
  * A minimal toolkit for querying and performing modifications
  * across DOM nodes based off a selector.
+ * @see {@link https://next.semantic-ui.com/docs/api/query Query API Reference}
+ * @see {@link https://next.semantic-ui.com/docs/guides/query Query Guide}
  */
 export class Query {
   /**
@@ -140,7 +195,7 @@ export class Query {
 
   /**
    * Creates a new Query instance with the provided elements, preserving the original options.
-   * @see https://next.semantic-ui.com/api/query/internal#chain
+   * @see https://next.semantic-ui.com/docs/api/query/internal#chain
    * @param elements - The elements for the new Query instance.
    * @returns A new Query instance.
    */
@@ -148,7 +203,7 @@ export class Query {
 
   /**
    * Queries for elements deeply, traversing shadow DOM boundaries.
-   * @see https://next.semantic-ui.com/api/query/internal#queryselectoralldeep
+   * @see https://next.semantic-ui.com/docs/api/query/internal#queryselectoralldeep
    * @param root - The root element to search within.
    * @param selector - The CSS selector or DOM Element to search for.
    * @param includeRoot - Whether to include the root element in the search. Defaults to `true`.
@@ -158,7 +213,7 @@ export class Query {
 
   /**
    * Iterates over each element in the Query instance.
-   * @see https://next.semantic-ui.com/api/query/iterators#each
+   * @see https://next.semantic-ui.com/docs/api/query/iterators#each
    * @param callback - The callback function to execute for each element.
    *  The callback receives the element and its index as arguments. `this` is bound to a new
    * `Query` instance containing only the current element.
@@ -167,14 +222,8 @@ export class Query {
   each(callback: (this: Query, el: Element, index: number) => void): this;
 
   /**
-   * Removes all event handlers attached by this Query class. Resets the static `eventHandlers` array.
-   * @see https://next.semantic-ui.com/api/query/events#off
-   */
-  removeAllEvents(): void;
-
-  /**
    * Finds elements within the current set of elements.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#find
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#find
    * @param selector - The CSS selector to search for.
    * @returns A new Query instance containing the found elements.
    */
@@ -182,7 +231,7 @@ export class Query {
 
   /**
    * Gets the parent of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#parent
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#parent
    * @param selector - Optional CSS selector to filter the parents.
    * @returns A new Query instance containing the parent elements.
    */
@@ -190,7 +239,7 @@ export class Query {
 
   /**
    * Gets the children of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#children
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#children
    * @param selector - Optional CSS selector to filter the children.
    * @returns A new Query instance containing the child elements.
    */
@@ -198,7 +247,7 @@ export class Query {
 
   /**
    * Gets the siblings of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#siblings
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#siblings
    * @param selector - Optional CSS selector to filter the siblings.
    * @returns A new Query instance containing the sibling elements.
    */
@@ -207,7 +256,7 @@ export class Query {
   /**
    * Returns the index of the first element in the current set,
    * relative to its siblings (optionally filtered by a selector).
-   * @see https://next.semantic-ui.com/api/query/size-and-position#index
+   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
    * @param siblingFilter - Optional CSS selector, function or Query to filter the siblings.
    * @returns The index of the element, or -1 if not found.
    */
@@ -215,7 +264,7 @@ export class Query {
 
   /**
    * Find the index of the first element matching the filter within current Query set.
-   * @see https://next.semantic-ui.com/api/query/size-and-position#index
+   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#index
    * @param filter - Optional CSS selector, function or Query to identify element within selection.
    * @returns The index of the element, or -1 if not found.
    */
@@ -223,7 +272,7 @@ export class Query {
 
   /**
    * Filters the current set of elements based on a selector, function, or another Query instance.
-   * @see https://next.semantic-ui.com/api/query/iterators#filter
+   * @see https://next.semantic-ui.com/docs/api/query/iterators#filter
    * @param filter - A CSS selector, a filter function, or a Query instance.
    * @returns A new Query instance containing the filtered elements.
    */
@@ -231,7 +280,7 @@ export class Query {
 
   /**
    * Checks if *all* elements in the current set match a selector.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#is
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#is
    * @param selector - A CSS selector, an element, a Query instance, or 'window'/'globalThis'.
    * @returns `true` if all elements match, `false` otherwise.
    */
@@ -239,7 +288,7 @@ export class Query {
 
   /**
    * Filters the current set of elements, excluding those that match the selector.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#not
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#not
    * @param selector - A CSS selector, an element, a Query instance, or 'window'/'globalThis'.
    * @returns A new Query instance containing the filtered elements.
    */
@@ -247,7 +296,7 @@ export class Query {
 
   /**
    * Gets the closest ancestor of each element in the current set (including the element itself) that matches the selector.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#closest
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#closest
    * @param selector - A CSS selector or a DOM element.
    * @param options - Options to control the search behavior.
    * @param options.returnAll - If true, returns all matching ancestors instead of just the closest one.
@@ -257,7 +306,7 @@ export class Query {
 
   /**
    * Gets all ancestor elements that match the selector, traversing up the entire DOM tree.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#closestall
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#closestall
    * @param selector - A CSS selector or a DOM element.
    * @returns A new Query instance containing all matching ancestor elements.
    */
@@ -265,7 +314,7 @@ export class Query {
 
   /**
    * Gets the closest ancestor of the provided element (including the element itself) that matches the selector, traversing shadow DOM boundaries.
-   * @see https://next.semantic-ui.com/api/query/internal#closestdeep
+   * @see https://next.semantic-ui.com/docs/api/query/internal#closestdeep
    * @param element - The element to start searching from.
    * @param selector - A CSS selector or a DOM element.
    * @param options - Options to control the search behavior.
@@ -280,7 +329,7 @@ export class Query {
 
   /**
    * Attaches a handler to be executed when the DOM is fully loaded.
-   * @see https://next.semantic-ui.com/api/query/events#ready
+   * @see https://next.semantic-ui.com/docs/api/query/events#ready
    * @param handler - The function to be executed.
    * @returns The Query instance for chaining.
    */
@@ -288,7 +337,7 @@ export class Query {
 
   /**
    * Gets the event alias for a given event name (e.g., 'ready' -> 'DOMContentLoaded').
-   * @see https://next.semantic-ui.com/api/query/events#on
+   * @see https://next.semantic-ui.com/docs/api/query/events#on
    * @param eventName - The event name.
    * @returns The aliased event name.
    */
@@ -296,7 +345,7 @@ export class Query {
 
   /**
    * Splits a space-separated string of event names into an array, applying event aliases.
-   * @see https://next.semantic-ui.com/api/query/events#on
+   * @see https://next.semantic-ui.com/docs/api/query/events#on
    * @param eventNames - A space-separated string of event names.
    * @returns An array of event names.
    */
@@ -304,7 +353,7 @@ export class Query {
 
   /**
    * Attaches an event listener to each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#on
+   * @see https://next.semantic-ui.com/docs/api/query/events#on
    * @param eventNames - A space-separated string of event names.
    * @param handler - The event handler function.
    * @param options - Optional event listener options or EventOptions.
@@ -331,7 +380,7 @@ export class Query {
 
   /**
    * Attaches an event listener that is executed at most once to each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#one
+   * @see https://next.semantic-ui.com/docs/api/query/events#one
    * @param eventNames - A space-separated string of event names.
    * @param handler - The event handler function.
    * @param options - Optional event listener options or EventOptions.
@@ -358,7 +407,7 @@ export class Query {
 
   /**
    * Returns a Promise that resolves when the next occurrence of the specified event fires on the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @see https://next.semantic-ui.com/docs/api/query/events#onnext
    * @param eventNames - A space-separated string of event names.
    * @param options - Optional configuration including timeout.
    * @returns A Promise that resolves with the event object.
@@ -366,7 +415,7 @@ export class Query {
   onNext(eventNames: string, options?: { timeout?: number; }): Promise<Event>;
   /**
    * Returns a Promise that resolves when the next occurrence of the specified event fires on a delegated target within the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#onnext
+   * @see https://next.semantic-ui.com/docs/api/query/events#onnext
    * @param eventNames - A space-separated string of event names.
    * @param targetSelector - A CSS selector for event delegation.
    * @param options - Optional configuration including timeout.
@@ -375,8 +424,28 @@ export class Query {
   onNext(eventNames: string, targetSelector: string, options?: { timeout?: number; }): Promise<Event>;
 
   /**
+   * Attaches a capture-phase event listener that fires top-down before bubbling.
+   * Useful for intercepting events before children handle them.
+   * @see https://next.semantic-ui.com/docs/api/query/events#intercept
+   * @param eventNames - A space-separated string of event names.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, handler: EventListener, options?: EventOptions): this;
+  /**
+   * Attaches a capture-phase event listener with delegation.
+   * @param eventNames - A space-separated string of event names.
+   * @param targetSelector - A CSS selector for event delegation.
+   * @param handler - The event handler function.
+   * @param options - Optional event listener options.
+   * @returns The Query instance for chaining, or the event handler if `returnHandler` is true.
+   */
+  intercept(eventNames: string, targetSelector: string, handler: EventListener, options?: EventOptions): this;
+
+  /**
    * Removes event listeners from each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#off
+   * @see https://next.semantic-ui.com/docs/api/query/events#off
    * @param eventNames - A space-separated string of event names, or undefined to remove all events
    * @param handler - The specific event handler to remove, or undefined to remove events by type.
    * @returns The Query instance for chaining.
@@ -385,7 +454,7 @@ export class Query {
 
   /**
    * Triggers an event on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#trigger
+   * @see https://next.semantic-ui.com/docs/api/query/events#trigger
    * @param eventName - The name of the event to trigger.
    * @param eventParams - Optional parameters to be passed to the event.
    * @returns The Query instance for chaining.
@@ -394,7 +463,7 @@ export class Query {
 
   /**
    * Triggers a 'click' event on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#trigger
+   * @see https://next.semantic-ui.com/docs/api/query/events#trigger
    * @param eventParams - Optional parameters to be passed to the event.
    * @returns The Query instance for chaining.
    */
@@ -402,7 +471,7 @@ export class Query {
 
   /**
    * Dispatches a custom event on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#dispatchEvent
+   * @see https://next.semantic-ui.com/docs/api/query/events#dispatchEvent
    * @param eventName - The name of the custom event.
    * @param eventData - Optional data to be passed as `detail` in the event.
    * @param eventSettings - Optional settings for the custom event (bubbles, cancelable, composed).
@@ -412,14 +481,14 @@ export class Query {
 
   /**
    * Removes each element in the current set from the DOM.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#remove
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#remove
    * @returns The Query instance for chaining.
    */
   remove(): this;
 
   /**
    * Adds one or more classes to each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#addClass
+   * @see https://next.semantic-ui.com/docs/api/query/css#addClass
    * @param classNames - A space-separated string of class names.
    * @returns The Query instance for chaining.
    */
@@ -427,7 +496,7 @@ export class Query {
 
   /**
    * Checks if *any* element in the current set has the specified class.
-   * @see https://next.semantic-ui.com/api/query/css#hasClass
+   * @see https://next.semantic-ui.com/docs/api/query/css#hasClass
    * @param className - The class name to check.
    * @returns `true` if any element has the class, `false` otherwise.
    */
@@ -435,7 +504,7 @@ export class Query {
 
   /**
    * Removes one or more classes from each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#removeClass
+   * @see https://next.semantic-ui.com/docs/api/query/css#removeClass
    * @param classNames - A space-separated string of class names.
    * @returns The Query instance for chaining.
    */
@@ -443,7 +512,7 @@ export class Query {
 
   /**
    * Toggles one or more classes on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#toggleClass
+   * @see https://next.semantic-ui.com/docs/api/query/css#toggleClass
    * @param classNames - A space-separated string of class names.
    * @returns The Query instance for chaining.
    */
@@ -451,7 +520,7 @@ export class Query {
 
   /**
    * Gets or sets the inner HTML of the elements in the current set.
-   * @see https://next.semantic-ui.com/api/query/content#html
+   * @see https://next.semantic-ui.com/docs/api/query/content#html
    * @param newHTML - The new HTML content to set. If undefined, returns the inner HTML.
    * @returns If getting, the inner HTML of the *first* element, or an empty string.  If setting, the Query instance for chaining.
    */
@@ -459,7 +528,7 @@ export class Query {
 
   /**
    * Gets or sets the outer HTML of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/content#outerHTML
+   * @see https://next.semantic-ui.com/docs/api/query/content#outerHTML
    * @param newHTML - The new outer HTML content to set.  If undefined, returns the outerHTML.
    * @returns If getting, the outer HTML of the *first* element or joined outerHTML, if setting, the Query instance for chaining.
    */
@@ -467,7 +536,7 @@ export class Query {
 
   /**
    * Gets or sets the text content of each element in the current set.  Includes text from descendants.
-   * @see https://next.semantic-ui.com/api/query/content#text
+   * @see https://next.semantic-ui.com/docs/api/query/content#text
    * @param newText - The new text content to set. If undefined, returns the text content.
    * @returns If getting, the text content of all elements (concatenated), if setting the Query instance.
    */
@@ -475,21 +544,21 @@ export class Query {
 
   /**
    * Recursively retrieves the text content of a node and its descendants, including slotted content.
-   * @see https://next.semantic-ui.com/api/query/internal#gettextcontentrecursive
+   * @see https://next.semantic-ui.com/docs/api/query/internal#gettextcontentrecursive
    * @param nodes The list of nodes
    */
   getTextContentRecursive(nodes: NodeListOf<ChildNode> | ChildNode[]): string;
 
   /**
    * Gets the combined text content of *only* the immediate text node children of each element.
-   * @see https://next.semantic-ui.com/api/query/content#textNode
+   * @see https://next.semantic-ui.com/docs/api/query/content#textNode
    * @returns The combined text content.
    */
   textNode(): string;
 
   /**
    * Maps over the elements in the current set, similar to `Array.prototype.map`.
-   * @see https://next.semantic-ui.com/api/query/iterators#map
+   * @see https://next.semantic-ui.com/docs/api/query/iterators#map
    * @param callback - The mapping function.
    * @returns An array containing the results of the mapping function.
    */
@@ -497,7 +566,7 @@ export class Query {
 
   /**
    * Gets or sets the value of each element in the current set (for form elements).
-   * @see https://next.semantic-ui.com/api/query/content#value
+   * @see https://next.semantic-ui.com/docs/api/query/content#value
    * @param newValue - The new value to set. If undefined, returns the value.
    * @returns If getting, the value of the *first* element, or an array of values, if setting, the Query instance.
    */
@@ -511,21 +580,21 @@ export class Query {
 
   /**
    * Sets focus on the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#focus
+   * @see https://next.semantic-ui.com/docs/api/query/events#focus
    * @returns The Query instance for chaining.
    */
   focus(): this;
 
   /**
    * Removes focus from the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/events#blur
+   * @see https://next.semantic-ui.com/docs/api/query/events#blur
    * @returns The Query instance for chaining.
    */
   blur(): this;
 
   /**
    * Gets or sets CSS properties for each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#css
+   * @see https://next.semantic-ui.com/docs/api/query/css#css
    * @param property - The CSS property name (or an object of property-value pairs) or array of properties.
    * @param value - The value to set for the property (if `property` is a string).  If null, the style setting is removed.
    * @param options - Optional settings for getting styles.
@@ -541,7 +610,7 @@ export class Query {
 
   /**
    * Gets the computed style of the *first* element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#computedStyle
+   * @see https://next.semantic-ui.com/docs/api/query/css#computedStyle
    * @param property - The CSS property name.
    * @returns The computed style value, or an array of values.
    */
@@ -549,7 +618,7 @@ export class Query {
 
   /**
    * Gets or sets a CSS custom property (variable) for each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/css#cssVar
+   * @see https://next.semantic-ui.com/docs/api/query/css#cssVar
    * @param variable - The name of the CSS variable (without the `--` prefix).
    * @param value - The value to set.  If undefined, gets the value (including computed values).
    * @returns If setting, the Query instance for chaining. If getting, the value of the variable for the *first* element.
@@ -558,7 +627,7 @@ export class Query {
 
   /**
    * Gets or sets an attribute on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/attributes#attr
+   * @see https://next.semantic-ui.com/docs/api/query/attributes#attr
    * @param attribute - The attribute name (or an object of attribute-value pairs).
    * @param value - The value to set for the attribute (if `attribute` is a string).
    * @returns If setting, the Query instance for chaining.  If getting, the value of the attribute for the *first* element or an array of values.
@@ -573,22 +642,31 @@ export class Query {
 
   /**
    * Removes an attribute from each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/attributes#removeAttr
+   * @see https://next.semantic-ui.com/docs/api/query/attributes#removeAttr
    * @param attributeName - The name of the attribute to remove.
    * @returns The Query instance for chaining.
    */
   removeAttr(attributeName: string): this;
 
   /**
+   * Adds one or more attributes with empty string values to each element.
+   * Useful for boolean attributes like disabled, readonly, required, etc.
+   * @see https://next.semantic-ui.com/docs/api/query/attributes#addAttr
+   * @param attributes - A single attribute name or array of attribute names to add.
+   * @returns The Query instance for chaining.
+   */
+  addAttr(attributes: string | string[]): this;
+
+  /**
    * Returns the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/utilities#el
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#el
    * @returns The first element, or `undefined` if the set is empty.
    */
   el(): Element | undefined;
 
   /**
    * Gets the element at the specified index, or all elements if no index is provided.
-   * @see https://next.semantic-ui.com/api/query/utilities#get
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#get
    * @param index - The index of the element to retrieve.
    * @returns The element at the specified index, or an array of all elements.
    */
@@ -596,7 +674,7 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the element at the specified index.
-   * @see https://next.semantic-ui.com/api/query/utilities#eq
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#eq
    * @param index - The index of the element.
    * @returns A new Query instance containing the element at the specified index.
    */
@@ -604,27 +682,27 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/utilities#first
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#first
    * @returns A new Query instance containing the first element.
    */
   first(): Query;
 
   /**
    * Gets a new Query instance containing the last element in the current set.
-   * @see https://next.semantic-ui.com/api/query/utilities#last
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#last
    * @returns A new Query instance containing the last element.
    */
   last(): Query;
 
   /**
    * Get a property of the first element in the set.
-   * @see https://next.semantic-ui.com/api/query/utilities#prop
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#prop
    * @param name Name of the property to get.
    */
   prop(name: string): any;
   /**
    * Sets a property on each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/utilities#prop
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#prop
    * @param name - The name of the property.
    * @param value - The value to set.
    * @returns The Query object
@@ -633,7 +711,7 @@ export class Query {
 
   /**
    * Gets a new Query instance containing the next sibling of each element that matches selector, or the *first* matching sibling.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#next
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#next
    * @param selector - Optional CSS selector to filter the next siblings.
    * @returns A new Query instance containing the next sibling elements.
    */
@@ -641,7 +719,7 @@ export class Query {
 
   /**
    *  Gets a new Query instance containing the previous sibling of each element that matches selector, or the *first* matching sibling.
-   * @see https://next.semantic-ui.com/api/query/dom-traversal#prev
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#prev
    * @param selector - Optional CSS selector to filter the previous siblings.
    * @returns A new Query instance containing the previous sibling elements.
    */
@@ -649,14 +727,14 @@ export class Query {
 
   /**
    * Gets the height of the first element in the current set with optional dimension calculations.
-   * @see https://next.semantic-ui.com/api/query/dimensions#height
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#height
    * @param options - Options to control which parts of the box model to include.
    * @returns The height of the first element.
    */
   height(options: DimensionOptions): number;
   /**
    * Gets or sets the height of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#height
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#height
    * @param value - The height in pixels to set.
    * @returns If setting, the Query instance for chaining. If getting, the height of the first element.
    */
@@ -664,14 +742,14 @@ export class Query {
 
   /**
    * Gets the width of the first element in the current set with optional dimension calculations.
-   * @see https://next.semantic-ui.com/api/query/dimensions#width
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#width
    * @param options - Options to control which parts of the box model to include.
    * @returns The width of the first element.
    */
   width(options: DimensionOptions): number;
   /**
    * Gets or sets the width of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#width
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#width
    * @param value - The width in pixels to set.
    * @returns If setting, the Query instance for chaining. If getting, the width of the first element.
    */
@@ -679,7 +757,7 @@ export class Query {
 
   /**
    * Gets or sets the scrollHeight of each element in the current set.  Uses `document.documentElement` if applied to `window`.
-   * @see https://next.semantic-ui.com/api/query/dimensions#scrollHeight
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#scrollHeight
    * @param value - The scrollHeight in pixels.
    * @returns If setting, the Query instance for chaining.  If getting, the scrollHeight of the *first* element.
    */
@@ -687,7 +765,7 @@ export class Query {
 
   /**
    * Gets or sets the scrollWidth of each element in the current set. Uses `document.documentElement` if applied to `window`.
-   * @see https://next.semantic-ui.com/api/query/dimensions#scrollWidth
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#scrollWidth
    * @param value - The scrollWidth in pixels.
    * @returns If setting, the Query instance for chaining.  If getting, the scrollWidth of the *first* element.
    */
@@ -695,7 +773,7 @@ export class Query {
 
   /**
    * Gets or sets the scrollLeft position of each element in the current set. Uses `document.documentElement` if applied to `window`.
-   * @see https://next.semantic-ui.com/api/query/dimensions#scrollLeft
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#scrollLeft
    * @param value - The scrollLeft value in pixels.
    * @returns If setting, the Query instance for chaining.  If getting, the scrollLeft value of the *first* element.
    */
@@ -703,7 +781,7 @@ export class Query {
 
   /**
    * Gets or sets the scrollTop position of each element in the current set. Uses `document.documentElement` if applied to `window`.
-   * @see https://next.semantic-ui.com/api/query/dimensions#scrollTop
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#scrollTop
    * @param value - The scrollTop value in pixels.
    * @returns If setting, the Query instance for chaining.  If getting, the scrollTop value of the *first* element.
    */
@@ -711,21 +789,21 @@ export class Query {
 
   /**
    * Creates a deep clone of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#clone
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#clone
    * @returns A new Query instance containing the cloned elements.
    */
   clone(): Query;
 
   /**
    * Reverses the order of the elements in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#reverse
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#reverse
    * @returns A new Query instance containing the reversed elements.
    */
   reverse(): Query;
 
   /**
    * Returns a shallow copy of a portion of the elements into a new Query object.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#slice
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#slice
    * @param start - The beginning index of the specified portion of the collection.
    * @param end - The end index of the specified portion of the collection (exclusive).
    * @returns A new Query instance containing the sliced elements.
@@ -734,7 +812,7 @@ export class Query {
 
   /**
    * Creates a new Query collection combining the current elements with elements from the provided selector.
-   * @see https://next.semantic-ui.com/api/query/utilities#add
+   * @see https://next.semantic-ui.com/docs/api/query/utilities#add
    * @param selector - The selector, elements, or Query instance to add to the current collection.
    * @returns A new Query instance containing the combined elements with duplicates removed.
    */
@@ -742,7 +820,7 @@ export class Query {
 
   /**
    * Inserts content at a specified position relative to a target element.
-   * @see https://next.semantic-ui.com/api/query/internal#insertcontent
+   * @see https://next.semantic-ui.com/docs/api/query/internal#insertcontent
    * @param target - The target element.
    * @param content - The content to insert.
    * @param position - The position relative to the target element ('beforebegin', 'afterbegin', 'beforeend', 'afterend').
@@ -755,7 +833,7 @@ export class Query {
 
   /**
    * Prepends content to each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#prepend
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#prepend
    * @param content - The content to prepend.
    * @returns The Query instance for chaining.
    */
@@ -763,7 +841,7 @@ export class Query {
 
   /**
    * Appends content to each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#append
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#append
    * @param content - The content to append.
    * @returns The Query instance for chaining.
    */
@@ -771,7 +849,7 @@ export class Query {
 
   /**
    * Inserts each element in the current set before the specified target(s).
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#insertBefore
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#insertBefore
    * @param selector - The target element(s) or selector.
    * @returns A new query object of elements inserted.
    */
@@ -779,7 +857,7 @@ export class Query {
 
   /**
    * Inserts each element in the current set after the specified target(s).
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#insertAfter
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#insertAfter
    * @param selector - The target element(s) or selector.
    *  @returns A new query object of elements inserted.
    */
@@ -787,7 +865,7 @@ export class Query {
 
   /**
    * Appends each element in the current set as the last child of the specified target(s).
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#appendTo
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#appendTo
    * @param selector - The target element(s) or selector.
    * @returns A new query object of target elements.
    */
@@ -795,7 +873,7 @@ export class Query {
 
   /**
    * Prepends each element in the current set as the first child of the specified target(s).
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#prependTo
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#prependTo
    * @param selector - The target element(s) or selector.
    * @returns A new query object of target elements.
    */
@@ -803,7 +881,7 @@ export class Query {
 
   /**
    * Inserts content before each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#before
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#before
    * @param content - The content to insert before each element.
    * @returns The Query instance for chaining.
    */
@@ -811,7 +889,7 @@ export class Query {
 
   /**
    * Inserts content after each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#after
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#after
    * @param content - The content to insert after each element.
    * @returns The Query instance for chaining.
    */
@@ -819,28 +897,34 @@ export class Query {
 
   /**
    * Removes each element in the current set from the DOM, but keeps event handlers.
-   * @see https://next.semantic-ui.com/api/query/dom-manipulation#detach
+   * @see https://next.semantic-ui.com/docs/api/query/dom-manipulation#detach
    * @returns The Query instance for chaining.
    */
   detach(): this;
 
   /**
-   * Gets the natural width (width without applied styles) of the *first* element in the set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#naturalWidth
+   * Gets the natural width (width without applied styles) of the *first* element in the set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-width preservation (preserveMaxWidth).
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalWidth
+   * @param options - Options to control max-width preservation and box model inclusions.
    * @returns The natural width of the element.
    */
-  naturalWidth(): number | number[];
+  naturalWidth(options?: NaturalWidthOptions): number | number[];
 
   /**
-   * Gets the natural height (height without applied styles) of the *first* in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#naturalHeight
+   * Gets the natural height (height without applied styles) of the *first* element in the current set,
+   * with optional box model adjustments (includeMargin, includePadding, includeBorder)
+   * and max-height preservation (preserveMaxHeight).
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalHeight
+   * @param options - Options to control max-height preservation and box model inclusions.
    * @returns The natural height of the element.
    */
-  naturalHeight(): number | number[];
+  naturalHeight(options?: NaturalHeightOptions): number | number[];
 
   /**
    * Gets the natural display value (the display value that would be used if display: none was not applied) for elements in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#naturalDisplay
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#naturalDisplay
    * @param options - Configuration options for natural display calculation.
    * @param options.calculate - Whether to analyze stylesheets for accurate calculation. When false, uses tag-based lookup only. Defaults to true.
    * @returns For single element: the natural display value. For multiple elements: array of natural display values. Returns undefined for empty selection.
@@ -849,14 +933,14 @@ export class Query {
 
   /**
    * Gets the clipping parent (overflow container) of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#clippingparent
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#clippingparent
    * @returns A new Query instance containing the clipping parent elements.
    */
   clippingParent(): Query;
 
   /**
    * Gets the simple containing parent (offsetParent) of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/visibility#offsetparent
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#offsetparent
    * @returns A new Query instance containing the offset parent elements.
    */
   offsetParent(): Query;
@@ -864,7 +948,7 @@ export class Query {
   /**
    * Gets the positioning parent (positioning context) of each element in the current set, accurately calculating
    * it by considering transform, filter, and other modern CSS properties that create new positioning contexts.
-   * @see https://next.semantic-ui.com/api/query/visibility#positioningparent
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#positioningparent
    * @param options.calculate - Whether to calculate positioning parent taking modern CSS properties into account. Defaults to true.
    * @returns A new Query instance containing the positioning parent elements.
    */
@@ -872,7 +956,7 @@ export class Query {
 
   /**
    * Gets the scroll parent (nearest scrollable container) of each element in the current set.
-   * @see https://next.semantic-ui.com/api/query/visibility#scrollparent
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#scrollparent
    * @param options.all - Whether to return all scroll parents in the hierarchy. When false, returns only the nearest scroll parent. Defaults to false.
    * @returns A new Query instance containing the scroll parent element(s).
    */
@@ -880,21 +964,21 @@ export class Query {
 
   /**
    * Gets the number of elements in the current set.  Alias for `length`.
-   * @see https://next.semantic-ui.com/api/query/size-and-position#count
+   * @see https://next.semantic-ui.com/docs/api/query/size-and-position#count
    * @returns The number of elements.
    */
   count(): number;
 
   /**
    * Checks if the current set contains any elements.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#exists
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#exists
    * @returns `true` if the set contains elements, `false` otherwise.
    */
   exists(): boolean;
 
   /**
    * Checks if ALL elements in the current set are visible (have layout dimensions).
-   * @see https://next.semantic-ui.com/api/query/logical-operators#isvisible
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#isvisible
    * @param options - Configuration options for visibility checking.
    * @param options.includeOpacity - Whether to also check that opacity > 0. Defaults to false.
    * @param options.includeVisibility - Whether to check for visibility: hidden and content-visibility: hidden. Defaults to true.
@@ -904,21 +988,21 @@ export class Query {
 
   /**
    * Adds properties to element on DOMContentLoaded
-   * @see https://next.semantic-ui.com/api/query/components#initialize
+   * @see https://next.semantic-ui.com/docs/api/query/components#initialize
    * @param settings The properties to add.
    */
   initialize(settings: PlainObject): void;
 
   /**
    * Adds multiple properties to each element in selection.
-   * @see https://next.semantic-ui.com/api/query/components#settings
+   * @see https://next.semantic-ui.com/docs/api/query/components#settings
    * @param settings The properties to add.
    */
   settings(settings: PlainObject): void;
 
   /**
    * Add a single property to all elements in selection.
-   * @see https://next.semantic-ui.com/api/query/components#setting
+   * @see https://next.semantic-ui.com/docs/api/query/components#setting
    * @param setting The setting to add.
    * @param value The value of the setting.
    */
@@ -927,14 +1011,14 @@ export class Query {
   /**
    * Gets the associated component (if any) of the *first* element in the current set.
    * This is specific to Semantic UI components.
-   * @see https://next.semantic-ui.com/api/query/components#getComponent
+   * @see https://next.semantic-ui.com/docs/api/query/components#getComponent
    * @returns The component instance, or `undefined` if not found.
    */
   component(): any;
 
   /**
    * Gets or sets data attributes on elements in the current set.
-   * @see https://next.semantic-ui.com/api/query/data#data
+   * @see https://next.semantic-ui.com/docs/api/query/data#data
    * @param key - The data attribute key.
    * @param value - The value to set.
    * @returns If setting, the Query instance for chaining. If getting, the value(s).
@@ -954,7 +1038,7 @@ export class Query {
 
   /**
    * Removes data attributes from elements in the current set.
-   * @see https://next.semantic-ui.com/api/query/attributes#removedata
+   * @see https://next.semantic-ui.com/docs/api/query/attributes#removedata
    * @param keys - A space-separated string or array of data attribute keys to remove.
    * @returns The Query instance for chaining.
    */
@@ -962,28 +1046,28 @@ export class Query {
 
   /**
    * Gets the data context (if any) associated with the *first* element in the current set.
-   * @see https://next.semantic-ui.com/api/query/components#datacontext
+   * @see https://next.semantic-ui.com/docs/api/query/components#datacontext
    * @returns The data context, or undefined.
    */
   dataContext(): any;
 
   /**
    * Gets the inner width (content + padding) of the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#innerWidth
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#innerWidth
    * @returns The inner width of the first element.
    */
   innerWidth(): number;
 
   /**
    * Gets the inner height (content + padding) of the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#innerHeight
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#innerHeight
    * @returns The inner height of the first element.
    */
   innerHeight(): number;
 
   /**
    * Gets the outer width (content + padding + border, optionally + margin) of the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#outerWidth
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#outerWidth
    * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
    * @returns The outer width of the first element.
    */
@@ -991,7 +1075,7 @@ export class Query {
 
   /**
    * Gets the outer height (content + padding + border, optionally + margin) of the first element in the current set.
-   * @see https://next.semantic-ui.com/api/query/dimensions#outerHeight
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#outerHeight
    * @param includeMargin - Whether to include margin in the calculation. Defaults to false.
    * @returns The outer height of the first element.
    */
@@ -999,7 +1083,7 @@ export class Query {
 
   /**
    * Gets or sets the position of elements.
-   * @see https://next.semantic-ui.com/api/query/dimensions#position
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#position
    */
   // Setter overload
   position(options: { top?: number; left?: number; relativeTo?: string | Element | Query; }): this;
@@ -1034,7 +1118,7 @@ export class Query {
 
   /**
    * Gets the position relative to the document (viewport position + scroll offset).
-   * @see https://next.semantic-ui.com/api/query/dimensions#pageposition
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#pageposition
    * @param options - Configuration options.
    * @param options.precision - Whether to round to pixel values. Defaults to 'pixel'.
    * @returns Position object with top and left, array for multiple elements, or undefined for empty selection.
@@ -1046,7 +1130,7 @@ export class Query {
 
   /**
    * Gets comprehensive dimension information for elements.
-   * @see https://next.semantic-ui.com/api/query/dimensions#dimensions
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#dimensions
    * @returns Dimension object for single element, array for multiple, or undefined for empty selection.
    */
   dimensions():
@@ -1106,7 +1190,7 @@ export class Query {
 
   /**
    * Checks if elements in the collection intersect with a target element or elements.
-   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#intersects
    * @param target - The target element(s) to check intersection with. Can be a selector string, DOM element, or Query object.
    * @param options - Configuration options for intersection detection.
    * @returns Boolean indicating intersection, or detailed intersection data if returnDetails is true.
@@ -1129,7 +1213,7 @@ export class Query {
 
   /**
    * Checks if elements in the collection intersect with a target element or elements, returning detailed information.
-   * @see https://next.semantic-ui.com/api/query/dimensions#intersects
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#intersects
    * @param target - The target element(s) to check intersection with.
    * @param options - Configuration options with returnDetails set to true.
    * @returns Detailed intersection data object or array of objects.
@@ -1197,7 +1281,7 @@ export class Query {
 
   /**
    * Checks if elements in the selection are within the viewport.
-   * @see https://next.semantic-ui.com/api/query/visibility#isinview
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#isinview
    * @param options - Configuration options.
    * @param options.threshold - Minimum percentage (0-1) of element that must be visible. Defaults to 0.
    * @param options.fully - Whether element must be fully within viewport. Defaults to false.
@@ -1218,7 +1302,7 @@ export class Query {
 
   /**
    * Shows hidden elements by setting their display to the natural display value.
-   * @see https://next.semantic-ui.com/api/query/visibility#show
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#show
    * @param options - Configuration options for showing elements.
    * @param options.calculate - Whether to analyze stylesheets for accurate display calculation. When false, uses tag-based lookup only. Defaults to true.
    * @returns The Query instance for chaining.
@@ -1227,14 +1311,14 @@ export class Query {
 
   /**
    * Hides elements by setting their display to 'none'.
-   * @see https://next.semantic-ui.com/api/query/visibility#hide
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#hide
    * @returns The Query instance for chaining.
    */
   hide(): this;
 
   /**
    * Toggles the visibility of elements by checking their current display state and either showing or hiding them.
-   * @see https://next.semantic-ui.com/api/query/visibility#toggle
+   * @see https://next.semantic-ui.com/docs/api/query/visibility#toggle
    * @param options - Configuration options for toggling elements.
    * @param options.calculate - Whether to analyze stylesheets for accurate display calculation when showing elements. When false, uses tag-based lookup only. Defaults to true.
    * @returns The Query instance for chaining.
@@ -1243,25 +1327,72 @@ export class Query {
 
   /**
    * Checks if any element in the current set contains the specified target.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#contains
    * @param selector - A CSS selector string to search for within the elements.
    * @returns `true` if any element contains an element matching the selector, `false` otherwise.
    */
   contains(selector: string): boolean;
   /**
    * Checks if any element in the current set contains the specified element.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#contains
    * @param element - A DOM element to check for containment.
    * @returns `true` if any element contains the specified element, `false` otherwise.
    */
   contains(element: Element): boolean;
   /**
    * Checks if any element in the current set contains any element from the Query instance.
-   * @see https://next.semantic-ui.com/api/query/logical-operators#contains
+   * @see https://next.semantic-ui.com/docs/api/query/logical-operators#contains
    * @param query - A Query instance containing elements to check for containment.
    * @returns `true` if any element contains any element from the Query instance, `false` otherwise.
    */
   contains(query: Query): boolean;
+
+  /**
+   * Returns the bounding client rect(s) of the element(s).
+   * @see https://next.semantic-ui.com/docs/api/query/dimensions#bounds
+   * @returns A DOMRect for a single element, or an array of DOMRects for multiple elements.
+   */
+  bounds(): DOMRect | DOMRect[];
+
+  /**
+   * Restores the previous Query set before the last traversal operation.
+   * @see https://next.semantic-ui.com/docs/api/query/dom-traversal#end
+   * @returns The previous Query instance, or this if no previous set exists.
+   */
+  end(): Query;
+
+  /**
+   * Triggers a submit event on form elements.
+   * @see https://next.semantic-ui.com/docs/api/query/events#submit
+   * @returns The Query instance for chaining.
+   */
+  submit(eventSettings?: Record<string, any>): this;
+
+  /**
+   * Gets elements assigned to a named slot in a shadow DOM component.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#getslot
+   * @param name - The slot name. If omitted, gets the default slot.
+   * @returns A new Query instance containing the slot's assigned elements.
+   */
+  getSlot(name?: string): Query;
+
+  /**
+   * Sets content into a named slot.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#setslot
+   * @param nameOrHTML - Slot name (when newHTML provided) or HTML string (for default slot).
+   * @param newHTML - HTML content to set into the named slot.
+   * @returns The Query instance for chaining.
+   */
+  setSlot(nameOrHTML: string, newHTML?: string): this;
+
+  /**
+   * Checks if a container element contains a target element, piercing shadow DOM boundaries.
+   * @see https://next.semantic-ui.com/docs/api/query/shadow-dom#containsdeep
+   * @param container - The potential container element.
+   * @param target - The element to check for containment.
+   * @returns `true` if container contains target (crossing shadow boundaries), `false` otherwise.
+   */
+  containsDeep(container: Element, target: Element): boolean;
 }
 
 export default Query;

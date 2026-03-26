@@ -1,0 +1,119 @@
+/*******************************
+          Typography
+*******************************/
+
+:root {
+
+  /*-------------------
+     Font Families
+  --------------------*/
+
+  --font-name: 'Lato';
+  --page-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --header-font: var(--font-name), 'Helvetica Neue', 'Arial', 'Helvetica', sans-serif;
+  --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /*-------------------
+     Font Weights
+  --------------------*/
+
+  --normal: normal;
+  --bold: 600;
+  --header-font-weight: var(--bold);
+
+  /*-------------------
+     Line Heights
+  --------------------*/
+
+  --line-height: calc(20 / var(--reference-size));
+  --header-line-height: var(--relative-18px);
+  --paragraph-line-height: calc(26 / var(--reference-size));
+
+  /*-------------------
+     Link Styling
+  --------------------*/
+
+  --link-text-decoration: underline;
+  --link-text-thickness: 1px;
+  --link-text-offset: 0.2em;
+  --link-hover-text-decoration: var(--link-text-decoration);
+
+
+  /*******************************
+         Text Scale (em)
+  *******************************/
+
+  /*
+   * Em-based text sizing for use inside components.
+   * Ratchets with component font-size.
+   *
+   * Same pixel values as --size-* at default base,
+   * but em-based so they scale when a component
+   * changes size (e.g. .large.card).
+   *
+   * Use --size-* to set a component's base font-size.
+   * Use --text-* for text inside a component.
+   */
+
+  --text-3xs: var(--relative-10px);  /* 10px @ 14px */
+  --text-2xs: var(--relative-11px);  /* 11px @ 14px */
+  --text-xs:  var(--relative-12px);  /* 12px @ 14px */
+  --text-s:   var(--relative-13px);  /* 13px @ 14px */
+  --text-m:   var(--relative-14px);  /* 14px @ 14px */
+  --text-l:   var(--relative-16px);  /* 16px @ 14px */
+  --text-xl:  var(--relative-18px);  /* 18px @ 14px */
+  --text-2xl: var(--relative-20px);  /* 20px @ 14px */
+  --text-3xl: var(--relative-24px);  /* 24px @ 14px */
+
+
+  /*******************************
+        Title Scale (em)
+  *******************************/
+
+  /*
+   * Em-based title sizing for headings inside components.
+   * Ratchets with component font-size.
+   *
+   * Wider jumps than the text scale — designed for
+   * display type where the steps need to breathe.
+   *
+   * Use for card headers, modal titles, list headers,
+   * section titles — anywhere a component has its own
+   * heading that doesn't map to a page-level h1-h5.
+   */
+
+  --title-3xs: var(--relative-10px);  /* 10px @ 14px */
+  --title-2xs: var(--relative-12px);  /* 12px @ 14px */
+  --title-xs:  var(--relative-14px);  /* 14px @ 14px */
+  --title-s:   var(--relative-16px);  /* 16px @ 14px */
+  --title-m:   var(--relative-18px);  /* 18px @ 14px */
+  --title-l:   var(--relative-24px);  /* 24px @ 14px */
+  --title-xl:  var(--relative-32px);  /* 32px @ 14px */
+  --title-2xl: var(--relative-48px);  /* 48px @ 14px */
+  --title-3xl: var(--relative-64px);  /* 64px @ 14px */
+
+
+  /*******************************
+       Page Headings (rem)
+  *******************************/
+
+  /*
+   * Fixed rem-based sizes for document-level headings.
+   * Do not ratchet — these are page structure, not
+   * component-internal.
+   *
+   * Expressed as --Xpx tokens so they scale with
+   * --base-size when the theme changes, but stay
+   * fixed within a given page context.
+   *
+   * Theme authors override these to set the heading
+   * hierarchy for their project.
+   */
+
+  --h1: var(--28px);  /* 28px @ base 14 */
+  --h2: var(--24px);  /* 24px @ base 14 */
+  --h3: var(--18px);  /* 18px @ base 14 */
+  --h4: var(--16px);  /* 16px @ base 14 */
+  --h5: var(--14px);  /* 14px @ base 14 */
+
+}

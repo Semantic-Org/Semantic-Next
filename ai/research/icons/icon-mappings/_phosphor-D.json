@@ -1,0 +1,206 @@
+{
+  "cart": {
+    "value": "shopping-cart",
+    "reason": "Phosphor's 'shopping-cart' is a cart with wheels, the standard e-commerce cart icon. Also has 'shopping-cart-simple' but the detailed version is more recognizable."
+  },
+  "add-to-cart": {
+    "value": "shopping-cart-simple",
+    "reason": "Phosphor has no 'shopping-cart-plus' icon. 'shopping-cart-simple' is a simplified cart that pairs with 'shopping-cart' for the add-to-cart action. No perfect match exists; this is the closest distinct cart variant."
+  },
+  "remove-from-cart": {
+    "value": null,
+    "reason": "Phosphor has no cart-minus or cart-remove icon. Using a generic cart variant would be ambiguous and indistinguishable from 'cart' or 'add-to-cart'."
+  },
+  "payment": {
+    "value": "credit-card",
+    "reason": "Phosphor's 'credit-card' is the standard payment card icon for billing and checkout flows"
+  },
+  "wallet": {
+    "value": "wallet",
+    "reason": "Direct name match in Phosphor, a folding wallet icon for digital wallet or payment concepts"
+  },
+  "money": {
+    "value": "currency-dollar",
+    "reason": "Phosphor's 'currency-dollar' shows a dollar sign, the standard money/currency icon. Also has 'currency-circle-dollar' but the bare symbol is more versatile."
+  },
+  "tag": {
+    "value": "tag",
+    "reason": "Direct name match in Phosphor, a price tag icon for labels and pricing"
+  },
+  "tags": {
+    "value": "tag",
+    "reason": "Phosphor has no plural 'tags' icon showing multiple tags. Falls back to the single 'tag' icon as the closest match."
+  },
+  "discount": {
+    "value": "percent",
+    "reason": "Phosphor's 'percent' is a percentage symbol icon, the standard discount/sale indicator"
+  },
+  "coupon": {
+    "value": "ticket",
+    "reason": "Phosphor's 'ticket' is a ticket/voucher icon, the closest match for coupon or promotional codes"
+  },
+  "package": {
+    "value": "package",
+    "reason": "Direct name match in Phosphor, a shipping box icon for packages and orders"
+  },
+  "shipping": {
+    "value": "truck",
+    "reason": "Phosphor's 'truck' is a delivery truck icon, the standard shipping/logistics symbol"
+  },
+  "delivery": {
+    "value": "truck",
+    "reason": "Same as shipping -- Phosphor's 'truck' icon is the universal delivery symbol. No distinct 'express delivery' icon exists in Phosphor."
+  },
+  "return": {
+    "value": "arrow-u-up-left",
+    "reason": "Phosphor's 'arrow-u-up-left' is a U-turn arrow pointing back, conveying the return/refund concept. Candidates: 'arrows-counter-clockwise' (more like sync), 'arrow-bend-up-left' (less clear). U-turn arrow is the most intuitive return metaphor."
+  },
+  "receipt": {
+    "value": "receipt",
+    "reason": "Direct name match in Phosphor, a receipt/bill icon for transaction records"
+  },
+  "invoice": {
+    "value": "invoice",
+    "reason": "Direct name match in Phosphor, an invoice document icon for billing"
+  },
+  "store": {
+    "value": "storefront",
+    "reason": "Phosphor's 'storefront' is a shop facade with an awning, the standard store/shop icon. Confirmed on Iconify and v0.app."
+  },
+  "shopping-bag": {
+    "value": "bag",
+    "reason": "Phosphor's 'bag' is a shopping bag icon. Also has 'handbag' and 'tote' but 'bag' is the most generic shopping bag match."
+  },
+  "calendar": {
+    "value": "calendar-blank",
+    "reason": "Phosphor's 'calendar-blank' is a clean calendar icon without date numbers, suitable as a generic calendar symbol. 'calendar' in Phosphor has a specific date shown."
+  },
+  "schedule": {
+    "value": "calendar-dots",
+    "reason": "Phosphor's 'calendar-dots' shows a calendar with event dots, conveying a schedule with multiple events. Candidates: 'calendar' (shows a single date), 'calendar-blank' (too plain). Dots suggest multiple scheduled items."
+  },
+  "scheduled": {
+    "value": "calendar-check",
+    "reason": "Phosphor's 'calendar-check' shows a calendar with a checkmark, conveying a confirmed scheduled date or completed due date"
+  },
+  "overdue": {
+    "value": "calendar-x",
+    "reason": "Phosphor's 'calendar-x' shows a calendar with an X, conveying a missed or cancelled date, suitable for overdue/deadline-passed states"
+  },
+  "time": {
+    "value": "clock",
+    "reason": "Phosphor's 'clock' is the standard clock/time icon. Confirmed on v0.app."
+  },
+  "timer": {
+    "value": "timer",
+    "reason": "Direct name match in Phosphor, a stopwatch/countdown timer icon. Confirmed on v0.app."
+  },
+  "watch": {
+    "value": "watch",
+    "reason": "Direct name match in Phosphor, a wristwatch icon for smartwatch or time-on-wrist concept"
+  },
+  "layers": {
+    "value": "stack",
+    "reason": "Phosphor's 'stack' shows stacked layers, representing layered content. Candidates: 'squares-four' (grid, not layers). 'stack' is the direct layer/stack metaphor."
+  },
+  "subtask": {
+    "value": "git-merge",
+    "reason": "Phosphor has no dedicated subtask/child-task icon. 'git-merge' shows a branching structure that visually conveys a parent-child relationship. Candidates: 'tree-structure' (too hierarchical), 'flow-arrow' (too abstract). 'git-merge' is the best available branching metaphor for subtasks."
+  },
+  "tree": {
+    "value": "tree-structure",
+    "reason": "Phosphor's 'tree-structure' shows a hierarchical tree diagram, directly matching org-chart/sitemap concepts. Confirmed on v0.app."
+  },
+  "progress": {
+    "value": "hourglass",
+    "reason": "Phosphor's 'hourglass' conveys in-progress/pending state. Candidates: 'spinner' (loading, not progress), 'circle-notch' (too generic). Hourglass is a widely recognized progress metaphor. Phosphor also has 'hourglass-low' and 'hourglass-simple' variants."
+  },
+  "milestone": {
+    "value": "flag-pennant",
+    "reason": "Phosphor's 'flag-pennant' is a triangular flag/pennant, commonly used to mark milestones and checkpoints in project management. Candidates: 'diamond' (too geometric), 'flag' (too generic). Pennant specifically evokes achievement milestones."
+  },
+  "tasks": {
+    "value": "list-checks",
+    "reason": "Phosphor's 'list-checks' shows a checklist with checkmarks, the standard task list / todo icon"
+  },
+  "location": {
+    "value": "map-pin",
+    "reason": "Phosphor's 'map-pin' is a teardrop-shaped location marker, the universal map pin. Also has 'map-pin-line' with a base line, but 'map-pin' is the standard."
+  },
+  "map": {
+    "value": "map-trifold",
+    "reason": "Phosphor's 'map-trifold' shows a folded map, the standard map view icon. Preferred over 'globe' which conveys world/language."
+  },
+  "directions": {
+    "value": "signpost",
+    "reason": "Phosphor's 'signpost' shows a directional signpost, conveying route directions. Confirmed on v0.app. Candidates: 'path' (abstract line), 'navigation-arrow' (compass needle). Signpost is the clearest directions metaphor."
+  },
+  "compass": {
+    "value": "compass",
+    "reason": "Direct name match in Phosphor, a compass rose icon for navigation and exploration"
+  },
+  "current-location": {
+    "value": "crosshair",
+    "reason": "Phosphor's 'crosshair' is a targeting crosshair, the standard 'my location' icon used in maps. Also has 'crosshair-simple' for a cleaner variant."
+  },
+  "measure": {
+    "value": "ruler",
+    "reason": "Phosphor's 'ruler' is a measurement ruler icon, directly matching the measure/distance concept"
+  },
+  "trending-up": {
+    "value": "trend-up",
+    "reason": "Phosphor's 'trend-up' shows an upward trending arrow, the standard growth/increase indicator. Confirmed on icon-icons.com."
+  },
+  "trending-down": {
+    "value": "trend-down",
+    "reason": "Phosphor's 'trend-down' shows a downward trending arrow, the standard decline/decrease indicator"
+  },
+  "balance": {
+    "value": "scales",
+    "reason": "Phosphor's 'scales' is a balance/justice scales icon, directly matching the balance concept. Confirmed on v0.app."
+  },
+  "swap": {
+    "value": "arrows-left-right",
+    "reason": "Phosphor's 'arrows-left-right' shows bidirectional horizontal arrows, conveying transfer/exchange/swap. Candidates: 'arrows-counter-clockwise' (more circular, like refresh), 'shuffle' (random). Bidirectional arrows are the standard swap metaphor."
+  },
+  "savings": {
+    "value": "piggy-bank",
+    "reason": "Phosphor's 'piggy-bank' is a piggy bank icon, the universal savings metaphor. Confirmed on v0.app with multiple weight variants."
+  },
+  "vault": {
+    "value": "vault",
+    "reason": "Phosphor has a 'vault' icon representing a secure safe/vault. This is a direct name match for the safe/vault concept."
+  },
+  "docs": {
+    "value": "book",
+    "reason": "Phosphor's 'book' is a closed book icon, the standard documentation/reference symbol"
+  },
+  "book-open": {
+    "value": "book-open",
+    "reason": "Direct name match in Phosphor, an open book icon for reading or active documentation"
+  },
+  "graduation": {
+    "value": "graduation-cap",
+    "reason": "Phosphor's 'graduation-cap' is a mortarboard graduation cap, the standard education/academic icon. Confirmed on Iconbolt. Also has 'student' as an alternative."
+  },
+  "briefcase": {
+    "value": "briefcase",
+    "reason": "Direct name match in Phosphor, a briefcase icon for work/business. Confirmed on v0.app."
+  },
+  "company": {
+    "value": "buildings",
+    "reason": "Phosphor's 'buildings' shows multiple office buildings, suitable for company/office concepts. Also has 'building-office' but 'buildings' conveys a broader corporate presence."
+  },
+  "organization": {
+    "value": "buildings",
+    "reason": "Same as company -- Phosphor's 'buildings' is the closest match for organization/corporate/enterprise. No distinct org-chart-people icon exists in Phosphor; 'tree-structure' is used for the 'tree' semantic icon already."
+  },
+  "news": {
+    "value": "newspaper",
+    "reason": "Phosphor's 'newspaper' is a folded newspaper icon for news/blog content. Also has 'newspaper-clipping' for a torn-out article variant, but 'newspaper' is the standard news icon."
+  },
+  "rss": {
+    "value": "rss",
+    "reason": "Direct name match in Phosphor, the RSS feed broadcast symbol. Also has 'rss-simple' for a cleaner variant. Confirmed on v0.app."
+  }
+}

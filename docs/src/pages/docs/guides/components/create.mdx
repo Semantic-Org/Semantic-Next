@@ -1,0 +1,217 @@
+---
+layout: '@layouts/Guide.astro'
+title: Creating Components
+icon: package
+description: Creating a new component
+---
+
+Semantic UI extends [native web components](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) to support [reactive data](/docs/guides/components/reactivity), [event binding](/docs/guides/components/events), [templating](/docs/guides/components/rendering), [DOM Querying](/docs/guides/components/dom), and [keybindings](/docs/guides/components/keys). This allows you to build complex web applications purely with web components.
+
+
+## Installing Dependencies
+
+The only package necessary to create components is the `@semantic-ui/component` package.
+
+```bash
+npm install @semantic-ui/component
+```
+
+## Defining Components
+
+`defineComponent` exported from `@semantic-ui/component` can be used to create a new web component.
+
+
+### Minimal Component
+
+The minimum requirement to create a component is an html template.
+
+```javascript {4}
+import { defineComponent } from '@semantic-ui/component';
+
+const HelloWorld = defineComponent({
+  template: `<p>Hello World</p>`,
+});
+```
+
+If you specify a `tagName` your component will be available as a web component allowing you to include it in pages in your application.
+```javascript {4}
+import { defineComponent } from '@semantic-ui/component';
+
+defineComponent({
+  tagName: 'hello-world',
+  template: `<p>Hello World</p>`,
+});
+```
+
+```html
+<hello-world></hello-world>
+```
+
+### Standard Component
+
+Most components need additional configuration options for `defineComponent`:
+
+```javascript
+// for examples of each config option see below
+defineComponent({
+  componentSpec, // optional spec for automatic property configuration
+  createComponent, // function that returns component methods and props stored in DOM
+  template, // component template
+  css, // scoped css
+  pageCSS, // page css added with component
+  events, // dom events
+  keys, // keybinding events
+  defaultState, // private reactive store
+  defaultSettings, // exposed settings
+  onCreated, // after attached to dom
+  onRendered, // after shadow dom rendered
+  onDestroyed, // when removed from dom
+  onThemeChanged, // callback when component theme changes
+});
+```
+
+* **[createComponent](/docs/guides/components/instances)** - An object returned from `createComponent` defines what methods and properties are attached to the DOM element associated with the component which provide behaviors. For instance a popup might have a `show` and `hide` behavior.
+* **[Template](/docs/guides/components/rendering)** - The logic that controls how your html is rendered including [conditionals](/docs/guides/templates/conditionals), [loops](/docs/guides/templates/loops), [subtemplates](/docs/guides/templates/subtemplates), and [expressions](/docs/guides/templates/expressions). This can be passed in as a string `template` or rendered from a precompiled [`ast`](/docs/api/templating/ast).
+* **[CSS](/docs/guides/components/styling)** - The `css` scoped to this component or that should be attached once to the page with the component,
+ * **[Page CSS](/docs/guides/components/styling#page-css)** - The `pageCSS` scoped to the page that will added to the page when a component is defined.
+* **[Events](/docs/guides/components/events)** - The event listeners attached to your component, passed in as an object literal string `events`.
+* **[State](/docs/guides/components/state)** - Reactive internal `state` associated with your component and its default values
+* **[Settings](/docs/guides/components/settings)** - Reactive external `settings` exposed to users as properties or attributes on your `tagName`
+* **[Lifecycle Events](/docs/guides/components/lifecycle)** - Actions that should occur `onCreated`, `onRendered` and `onDestroyed` for your component
+* **[Keybindings](/docs/guides/components/keys)** - `keys` defines keyboard events associated with your component
+* **[Component Spec](/docs/guides/components/specs)** - An optional JSON specification that automatically configures component properties, enables all three HTML dialects (standard, verbose, classic), and provides machine-readable API definitions for tooling and AI assistance.
+
+> **Destructured Params** - Semantic callbacks provide a variety of parameters that are returned from functions called inside the component. For more information see [callback arguments](/docs/guides/components/lifecycle#callback-arguments)
+
+
+## Definition Parts
+
+
+### Create Component
+
+[`createComponent`](/docs/guides/components/instances) defines the behaviors associated with your component. These can be called from your template, other components, or using javascript in your page.
+
+Your components [`state`](/docs/guides/components/rendering#state), [`settings`](/docs/guides/components/rendering#settings), component instance `self` and other data sources are passed through to each [lifecycle arguments](/docs/guides/components/lifecycle#callback-arguments) like `createComponent`.
+
+> For more information on `createComponent` see our dedicated subsection on [defining functionality](/docs/guides/components/instances).
+
+```javascript
+const createComponent = ({ state }) => ({
+  getCounter() {
+    return state.counter.get();
+  },
+  incrementCounter() {
+    state.counter.increment();
+  },
+});
+```
+
+### Template
+
+The [`template`](/docs/guides/components/rendering) defines the html your component should render from the data present in your component.
+
+> For more information on templating see the [dedicated subsection for templating](/docs/guides/components/rendering)
+
+```sui
+Counter is {counter}
+<ui-button class="increment">Increment</ui-button>
+<ui-button class="decrement">Decrement</ui-button>
+```
+
+### CSS
+
+[`css`](/docs/guides/components/styling#component-css) defines scoped CSS that will be attached to your web component and not apply to other elements on the page. This is passed as a string and is constructed and attached to the component using [adoptedstylesheets](https://developer.mozilla.org/en-US/docs/Web/API/Document/adoptedStyleSheets).
+
+You can use [`pageCSS`](/docs/guides/components/styling#page-css) to add additional css that will be included once in the page scope when you component is created.
+
+> For more information see the [dedicated css styling section](/docs/guides/components/styling).
+
+### Events
+
+Most components will need to listen to and react to events triggered from the browser or other components. When creating a component you can assign `events` that are bound to parts of your component and trigger functionality.
+
+> For more information on events please see the [dedicated subsection for events](/docs/guides/components/events)
+
+native events can be listened to using the format `eventname selector`
+```javascript {2}
+const events = {
+  'click ui-button.save'({ self }) {
+    self.save();
+  },
+};
+```
+
+or [custom events](/docs/guides/components/events#dispatching-custom-events) like `resizestart` dispatched from another component
+```javascript {2}
+const events = {
+  'resizestart ui-panel'() {
+    // do something
+  },
+};
+```
+
+### Keys
+
+Components can also include keybindings that will be attached to the page during the lifecycle of the component.
+
+> For more information please see the [dedicated subsection for keybindings](/docs/guides/components/keys)
+
+```javascript {2-6}
+defineComponent({
+  keys: {
+    'up': ({ self }) => self.selectPreviousResult(),
+    'down': ({ self }) => pl.selectNextResult(),
+    'esc': ({ self }) => self.blurSearch(),
+  }
+});
+```
+
+### Lifecycle Events
+
+Lifecycle events let you run arbitrary code during different parts of a component's lifecycle either on the client or during server side hydration.
+
+> For more information please see the [dedicated subsection for lifecycle events](/docs/guides/components/lifecycle)
+
+## Organizing Code
+
+To keep your code organized you might consider keeping your `html` and `css` as separate files with your component.
+
+### Browser / Node
+In a browser or `node` you can import static assets using [`getText`](/docs/api/utils/browser#gettext) a helper that uses `fetch`.
+
+```javascript 'getText'
+import { getText } from '@semantic-ui/component';
+const template = await getText('./component.html');
+const css = await getText('./component.css');
+```
+
+### Build Tools
+
+In a project with build tools like you can use the `?raw` query parameter to import a plaintext file directly.
+
+#### Related Docs
+* Vite - [Import Assets as a String](https://vitejs.dev/guide/assets#importing-asset-as-string)
+* Webpack - [Raw Loader](https://v4.webpack.js.org/loaders/raw-loader/)
+
+```javascript '?raw'
+import template from './component.html?raw';
+import css from './component.css?raw';
+```
+
+#### Single File Components
+
+If you prefer single file components you can just inline your html and css.
+
+
+```javascript
+defineComponent({
+  tagName: 'ui-counter',
+  template: `<div class="counter">{counter}</div>`,
+  css: `
+    .counter {
+      color: var(--primary-text-color);
+    }
+  `
+});
+```
+

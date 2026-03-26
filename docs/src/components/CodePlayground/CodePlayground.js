@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { each, firstMatch, get, idleCallback, inArray, isFunction, moveToFront, sortBy } from '@semantic-ui/utils';
+import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } from '@semantic-ui/utils';
 
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
@@ -7,14 +7,10 @@ import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
 
 import '@semantic-ui/core/button';
 
-import { Panels, Panel } from '@semantic-ui/core';
+import { Panel, Panels } from '@semantic-ui/core';
 
 import css from './CodePlayground.css?raw';
 import template from './CodePlayground.html?raw';
-
-import { addSearch } from './lib/codemirror-search.js';
-import { addSimpleMode } from './lib/codemirror-simple.js';
-import { defineSyntax } from './lib/codemirror-syntax.js';
 
 import 'playground-elements/playground-project.js';
 import 'playground-elements/playground-file-editor.js';
@@ -38,6 +34,9 @@ const defaultSettings = {
 
   // the initial selected file
   selectedFile: '',
+
+  // whether to remove all ui besides code on left and preview on right
+  minimal: false,
 
   // whether to use tabs or panels
   useTabs: true,
@@ -296,8 +295,8 @@ const createComponent = (
   },
 
   canShowPageFiles() {
-    let pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
-    if (pageFiles.length == 0) {
+    const pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
+    if (pageFiles.length === 0) {
       return false;
     }
     if (pageFiles.every(file => file.generated)) {
@@ -310,40 +309,47 @@ const createComponent = (
   },
 
   getNaturalPanelSize(panel, { direction, minimized }) {
-    const $scrollbar = $$(panel).find('.CodeMirror-vscrollbar');
-    const $sizer = $$(panel).find('.CodeMirror-sizer');
-    if (direction == 'horizontal') {
-      const $menu = $$(panel).find('ui-menu .menu').first();
-      const extraSpacing = 5; // rounding
-      const scrollbarWidth = $scrollbar.width() ? 17 : 0;
+    const $panel = $$(panel);
+    if (direction === 'horizontal') {
+      const $menu = $panel.find('ui-menu .menu').first();
+      const $gutter = $panel.find('.cm-gutters').first();
+      const $lines = $panel.find('.cm-line');
+
+      const extraSpacing = 5; // DO NOT DECREASE from testing with inline playground to avoid scrollbars in all cases.
       const menuWidth = $menu.width() + 11 || 0;
       const minWidths = [200, menuWidth];
-      $sizer.each(sizer => {
-        const $sizer = $(sizer);
-        const sizerMargin = parseFloat($sizer.css('margin-left'));
-        const sizerWidth = parseFloat($sizer.css('min-width'));
-        minWidths.push(sizerMargin + sizerWidth + scrollbarWidth);
-      });
-      const size = Math.max(...minWidths) + extraSpacing;
+      const gutterWidth = $gutter.width();
+
+      if ($lines.count() > 0) {
+        const additionalSpace = 18; // add space so its not cramped
+        const lineWidths = $lines.naturalWidth().map(val => val + additionalSpace);
+        minWidths.push(...lineWidths);
+      }
+
+      const size = Math.max(...minWidths) + gutterWidth + extraSpacing;
       return size;
     }
     else {
-      const $label = $$(panel).find('.label').first();
-      const $menu = $$(panel).find('.menu').first();
+      // gutters gets minheight which is code height
+      const $gutter = $panel.find('.cm-gutters').first();
+
+      // label height and menu need to be added to code height
+      const $label = $panel.find('.label').first();
+      const $menu = $panel.find('.menu').first();
 
       const extraSpacing = 2; // rounding
       const labelHeight = $label.height() || 0;
       const menuHeight = $menu.height() || 0;
+      let size;
       if (minimized) {
-        return labelHeight;
+        size = labelHeight;
       }
       else {
-        const $sizer = $$(panel).find('.CodeMirror-sizer').first();
-
-        const codeHeight = parseFloat($sizer.css('min-height'));
+        const codeHeight = parseFloat($gutter.css('min-height'));
         const height = codeHeight + labelHeight + menuHeight + extraSpacing;
-        return Math.max(height, 100);
+        size = Math.max(height, 100);
       }
+      return size;
     }
   },
 
@@ -352,7 +358,7 @@ const createComponent = (
   },
   getPanelSize(file) {
     let size = get(settings.panelSizes, file.filename);
-    if (size == 'natural' && !file.content) {
+    if (size === 'natural' && !file.content) {
       size = 'grow';
     }
     return size;
@@ -363,7 +369,7 @@ const createComponent = (
       tabs: state.layout.get() == 'tabs',
     };
     // defer to preference unless its tablet
-    if (state.displayMode.value == 'tablet') {
+    if (state.displayMode.value === 'tablet') {
       classes.vertical = true;
     }
     else {
@@ -372,7 +378,7 @@ const createComponent = (
     return classes;
   },
   getTabDirection() {
-    if (state.displayMode.value == 'tablet') {
+    if (state.displayMode.value === 'tablet') {
       return 'vertical';
     }
     if (settings.inline) {
@@ -382,7 +388,7 @@ const createComponent = (
   },
   // when inline or on mobile or stacked we want only one menu
   shouldCombineMenus() {
-    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value == 'mobile';
+    return settings.inline || self.getTabDirection() === 'vertical' || state.displayMode.value === 'mobile';
   },
   getProjectFiles() {
     return self.getFileArray({ files: state.projectFiles.get() });
@@ -399,10 +405,10 @@ const createComponent = (
     // if we have only 'page' files this becomes the 'main' menu
     // and the right pane is just the iframe preview
     if (filter && self.onlyPageFiles(fileArray)) {
-      if (filter == 'main') {
+      if (filter === 'main') {
         return fileArray.filter(file => self.isPageFile(file.filename));
       }
-      else if (filter == 'page') {
+      else if (filter === 'page') {
         return [];
       }
     }
@@ -460,6 +466,11 @@ const createComponent = (
     return settings.panelGroupWidth[index];
   },
   canShowMenu() {
+    // minimal is used to hide menu for demo purposes
+    // selected file is usually the only one showed to the user
+    if (settings.minimal) {
+      return false;
+    }
     if (settings.inline && self.getFileMenuItems().length <= 1) {
       return false;
     }
@@ -583,13 +594,13 @@ const createComponent = (
     if (isServer) {
       return;
     }
-    const codeHeight = $$('.CodeMirror-sizer').first().height();
+    const codeHeight = parseFloat($$('.cm-gutters').first().css('min-height')) || 100;
     const menuHeight = $$('ui-panel .menu').first().height() || 0;
     const offset = 5; // from trial & error avoids tiny scrollbars
     let panelHeight = menuHeight + codeHeight + offset;
     panelHeight = Math.min(panelHeight, 600);
     panelHeight = Math.max(panelHeight, 50);
-    $('ui-panels').first().css('height', `${panelHeight}px`);
+    $('ui-panels').first().css('height', `${panelHeight + 15}px`);
   },
 
   updateCurrentFiles(currentFilesArray = []) {
@@ -608,10 +619,8 @@ const onCreated = ({ self, attachEvent }) => {
 };
 
 const onRendered = ({ isClient, self, state, $, settings }) => {
-  // external mods to codemirror
-  addSearch(CodeMirror);
-  addSimpleMode(CodeMirror);
-  defineSyntax(CodeMirror);
+  // TODO: CM6 Migration - these plugins need to be rewritten as CM6 extensions
+  // addSearch(CodeMirror);
 
   self.addPanelSettings();
   self.setupComponents();

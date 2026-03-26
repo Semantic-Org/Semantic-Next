@@ -1,0 +1,17 @@
+/*******************************
+            Divider
+*******************************/
+
+/* Content */
+@import url('./content/divider-variables.css') layer(divider.theme.content.divider);
+@import url('./content/text-variables.css') layer(divider.theme.content.text);
+@import url('./content/icon-variables.css') layer(divider.theme.content.icon);
+
+/* Types */
+@import url('./types/horizontal-variables.css') layer(divider.theme.types.horizontal);
+
+/* States */
+/* Example: @import url('./states/state-variables.css') layer(divider.theme.states.state); */
+
+/* Variations */
+@import url('./variations/spacing-variables.css') layer(divider.theme.variations.spacing);

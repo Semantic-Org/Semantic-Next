@@ -1,0 +1,153 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Query - Iterators
+icon: repeat
+description: API reference for Query iterator methods
+package: "@semantic-ui/query"
+methods: ["each", "map", "filter", "get"]
+---
+
+import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+
+Loop through matched elements, transform values, and access underlying DOM elements.
+
+## Methods
+
+### each
+
+```javascript
+$('selector').each(callback);
+```
+
+Executes a function for each matched element. Inside the callback, `this` refers to the current DOM element.
+
+#### Parameters
+
+| Name     | Type     | Description                                          |
+|----------|----------|------------------------------------------------------|
+| callback | function | Function called with `(element, index)` for each element |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) (for chaining).
+
+#### Usage
+
+```javascript
+$('p').each((el, index) => {
+  console.log(`Paragraph ${index}:`, el.textContent);
+});
+```
+
+#### Example
+
+<PlaygroundExample id="query-each" direction="horizontal"></PlaygroundExample>
+
+### map
+
+```javascript
+$('selector').map(callback);
+```
+
+Creates a new array with the results of calling a function on every matched element.
+
+#### Parameters
+
+| Name     | Type     | Description                                          |
+|----------|----------|------------------------------------------------------|
+| callback | function | Function called with `(element, index)`, returns a value |
+
+#### Returns
+
+Array of values returned by the callback.
+
+#### Usage
+
+```javascript
+const ids = $('button').map((el) => el.id);
+```
+
+#### Example
+
+<PlaygroundExample id="query-map" direction="horizontal"></PlaygroundExample>
+
+### filter
+
+```javascript
+$('selector').filter(selector);
+$('selector').filter(fn);
+```
+
+Reduces the set to elements matching the selector or passing the function test.
+
+> See also [filter in DOM Traversal](/docs/api/query/dom-traversal#filter) for selector-based filtering patterns.
+
+#### Parameters
+
+| Name     | Type              | Description                              |
+|----------|-------------------|------------------------------------------|
+| selector | string            | CSS selector to match                    |
+| fn       | function          | Test function, return `true` to include  |
+
+#### Returns
+
+[Query object](/docs/api/query/constructor#the-query-object) containing filtered elements.
+
+#### Usage
+
+##### By Selector
+
+```javascript
+$('p').filter('.highlight').css('background', 'yellow');
+```
+
+##### By Function
+
+```javascript
+$('div').filter((el) => $(el).css('display') !== 'none');
+```
+
+#### Example
+
+<PlaygroundExample id="query-filter" direction="horizontal"></PlaygroundExample>
+
+### get
+
+```javascript
+$('selector').get();
+$('selector').get(index);
+```
+
+Retrieves DOM elements from the Query object. Returns native DOM elements, not Query objects.
+
+#### Parameters
+
+| Name  | Type   | Description                                     |
+|-------|--------|-------------------------------------------------|
+| index | number | Index of element to retrieve (supports negative) |
+
+#### Returns
+
+- **With index**: DOM element at the index, or `undefined` if out of range
+- **Without index**: Array of all DOM elements
+
+#### Usage
+
+##### Single Element
+
+```javascript
+const first = $('p').get(0);
+const last = $('p').get(-1);
+```
+
+##### All Elements
+
+```javascript
+const elements = $('p').get();
+elements.forEach(el => console.log(el.textContent));
+```
+
+#### Example
+
+<PlaygroundExample id="query-get" direction="horizontal"></PlaygroundExample>

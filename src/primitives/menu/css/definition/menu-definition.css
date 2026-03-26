@@ -1,9 +1,12 @@
 /* Content */
 @import url('./content/menu.css') layer(menu.definition.content.menu);
-@import url('./content/item.css') layer(menu.definition.content.item);
+@import url('./content/menu-item.css') layer(menu.definition.content.menuItem);
+@import url('./content/icon.css') layer(menu.definition.content.icon);
+@import url('./content/badge.css') layer(menu.definition.content.badge);
 
 /* Types */
 @import url('./types/selection.css') layer(menu.definition.types.selection);
+@import url('./types/sliding.css') layer(menu.definition.types.sliding);
 
 
 /* Types */

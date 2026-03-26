@@ -1,0 +1,143 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Template Helpers
+icon: book-open
+description: Comprehensive index of all template helpers in Semantic UI
+---
+import { Cards, Card } from '@semantic-ui/core';
+
+## Introduction
+Template helpers are used as part of [component templating](/docs/guides/templates) and provide access to a standard set of utilities useful for manipulating template data.
+
+> **Templating Guide** To learn how to use global helpers in templates see the dedicated [user guide for template helpers](/docs/guides/templates/helpers)
+
+## Installation
+
+Template helpers are part of the [templating package](/docs/api/templating) and is a standalone package that can be used without any other dependencies.
+
+```bash
+npm install @semantic-ui/templating
+```
+
+
+## Usage
+
+Template helpers can be used directly from any template
+
+
+```sui
+{formatDate myDate 'h:mm A'}
+```
+
+## Custom Helpers
+
+You can extend the template system by registering your own helper functions.
+
+### registerHelper
+
+```javascript
+function registerHelper(name, fn)
+```
+
+Register a single template helper function.
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| name | string | The name of the helper function |
+| fn | function | The helper function to register |
+
+**Example**
+
+```javascript
+import { registerHelper } from '@semantic-ui/templating';
+
+registerHelper('formatMoney', (amount, currency = 'USD') => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency
+  }).format(amount);
+});
+```
+
+### registerHelpers
+
+```javascript
+function registerHelpers(helpers)
+```
+
+Register multiple template helper functions at once.
+
+**Parameters**
+
+| Name | Type | Description |
+|------|------|-------------|
+| helpers | object | An object containing helper functions |
+
+**Example**
+
+```javascript
+import { registerHelpers } from '@semantic-ui/templating';
+
+registerHelpers({
+  initials: (name) => name.split(' ').map(n => n[0]).join('').toUpperCase(),
+  randomId: () => Math.random().toString(36).substr(2, 9)
+});
+```
+
+## Helper Categories
+
+<Cards two horizontal stackable>
+  <Card horizontal
+    header="Array Helpers"
+    href="/docs/api/helpers/arrays"
+    description="working with arrays and lists."
+  ></Card>
+  <Card horizontal
+    header="Comparison Helpers"
+    href="/docs/api/helpers/comparison"
+    description="comparing values and making decisions."
+  ></Card>
+  <Card horizontal
+    header="CSS Helpers"
+    href="/docs/api/helpers/css"
+    description="working with CSS classes and styles."
+  ></Card>
+  <Card horizontal
+    header="Date Helpers"
+    href="/docs/api/helpers/dates"
+    description="formatting and manipulating dates."
+  ></Card>
+  <Card horizontal
+    header="Debug Helpers"
+    href="/docs/api/helpers/debug"
+    description="debugging and logging within templates."
+  ></Card>
+  <Card horizontal
+    header="Logical Helpers"
+    href="/docs/api/helpers/logical"
+    description="conditional checks and logical operations."
+  ></Card>
+  <Card horizontal
+    header="Numeric Helpers"
+    href="/docs/api/helpers/numeric"
+    description="working with numbers."
+  ></Card>
+  <Card horizontal
+    header="Object Helpers"
+    href="/docs/api/helpers/objects"
+    description="manipulating and transforming objects."
+  ></Card>
+  <Card horizontal
+    header="Reactivity Helpers"
+    href="/docs/api/helpers/reactivity"
+    description="working with reactive computations."
+  ></Card>
+  <Card horizontal
+    header="String Helpers"
+    href="/docs/api/helpers/strings"
+    description="string manipulation and formatting."
+  ></Card>
+</Cards>

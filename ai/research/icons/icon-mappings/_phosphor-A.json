@@ -1,0 +1,222 @@
+{
+  "close": {
+    "value": "x",
+    "reason": "Phosphor's 'x' icon is the standard close/dismiss glyph"
+  },
+  "back": {
+    "value": "arrow-left",
+    "reason": "Direct arrow-left icon for navigating back"
+  },
+  "next": {
+    "value": "arrow-right",
+    "reason": "Direct arrow-right icon for navigating forward"
+  },
+  "up": {
+    "value": "arrow-up",
+    "reason": "Direct arrow-up icon"
+  },
+  "down": {
+    "value": "arrow-down",
+    "reason": "Direct arrow-down icon"
+  },
+  "external-link": {
+    "value": "arrow-square-out",
+    "reason": "Phosphor uses 'arrow-square-out' for the external link concept (arrow exiting a square). Confirmed in Phosphor releases."
+  },
+  "chevron-right": {
+    "value": "caret-right",
+    "reason": "Phosphor uses 'caret-right' rather than 'chevron-right'. Confirmed in Phosphor icon set."
+  },
+  "chevron-down": {
+    "value": "caret-down",
+    "reason": "Phosphor uses 'caret-down' for the chevron-down concept"
+  },
+  "chevron-up": {
+    "value": "caret-up",
+    "reason": "Phosphor uses 'caret-up' for the chevron-up concept"
+  },
+  "chevron-left": {
+    "value": "caret-left",
+    "reason": "Phosphor uses 'caret-left' for the chevron-left concept"
+  },
+  "more": {
+    "value": "dots-three",
+    "reason": "Phosphor's 'dots-three' is a horizontal three-dot ellipsis icon for more options"
+  },
+  "more-options": {
+    "value": "dots-three-vertical",
+    "reason": "Phosphor's 'dots-three-vertical' is the vertical kebab menu icon"
+  },
+  "sidebar": {
+    "value": "sidebar-simple",
+    "reason": "Phosphor has 'sidebar-simple' for a panel/drawer toggle. Preferred over 'sidebar' which shows a more complex layout."
+  },
+  "columns": {
+    "value": "columns",
+    "reason": "Phosphor has a direct 'columns' icon for column layout views"
+  },
+  "anchor": {
+    "value": "anchor-simple",
+    "reason": "Phosphor has 'anchor-simple' which is a cleaner anchor glyph suitable for anchor links. Also has 'anchor' but 'anchor-simple' is more minimal."
+  },
+  "user": {
+    "value": "user",
+    "reason": "Direct match. Phosphor has a 'user' icon depicting a single person silhouette."
+  },
+  "avatar": {
+    "value": "user-circle",
+    "reason": "Phosphor's 'user-circle' shows a user silhouette inside a circle, matching the avatar/account concept"
+  },
+  "users": {
+    "value": "users",
+    "reason": "Direct match. Phosphor has a 'users' icon showing multiple people."
+  },
+  "add-user": {
+    "value": "user-plus",
+    "reason": "Phosphor's 'user-plus' icon shows a user with a plus sign. Confirmed in release notes."
+  },
+  "remove-user": {
+    "value": "user-minus",
+    "reason": "Phosphor's 'user-minus' icon shows a user with a minus sign. Confirmed in release notes."
+  },
+  "assigned": {
+    "value": "user-check",
+    "reason": "Phosphor's 'user-check' icon shows a user with a checkmark, suitable for verified/assigned user"
+  },
+  "admin": {
+    "value": "shield-check",
+    "reason": "Phosphor has no 'user-shield' icon. 'shield-check' conveys protected/admin status. Candidates: 'crown' (too regal), 'user-circle-gear' (too settings-like). 'shield-check' is the best available match for admin authority."
+  },
+  "user-settings": {
+    "value": "user-gear",
+    "reason": "Phosphor's 'user-gear' icon shows a user with a gear, directly matching user settings. Confirmed in release notes."
+  },
+  "anonymous": {
+    "value": "detective",
+    "reason": "Phosphor's 'detective' icon shows a figure with hat and magnifying glass, conveying incognito/anonymous. Confirmed in Phosphor set."
+  },
+  "roles": {
+    "value": "identification-badge",
+    "reason": "Phosphor's 'identification-badge' is a badge/ID card icon. Best fit for roles/permissions since Phosphor has no dedicated roles icon. Candidates: 'identification-card' (too literal for ID), 'user-list' (too many users). Badge conveys assigned identity/role."
+  },
+  "login": {
+    "value": "sign-in",
+    "reason": "Phosphor's 'sign-in' icon shows an arrow entering a boundary, directly matching the login concept"
+  },
+  "logout": {
+    "value": "sign-out",
+    "reason": "Phosphor's 'sign-out' icon shows an arrow exiting a boundary, directly matching the logout concept"
+  },
+  "fingerprint": {
+    "value": "fingerprint",
+    "reason": "Direct match. Phosphor has a 'fingerprint' icon for biometric authentication."
+  },
+  "add": {
+    "value": "plus",
+    "reason": "Phosphor's 'plus' icon is the standard add/create glyph"
+  },
+  "edit": {
+    "value": "pencil-simple",
+    "reason": "Phosphor's 'pencil-simple' is a clean pencil icon for editing. Preferred over 'pencil' which has more detail."
+  },
+  "delete": {
+    "value": "trash",
+    "reason": "Direct match. Phosphor has a 'trash' icon for delete/remove."
+  },
+  "save": {
+    "value": "floppy-disk",
+    "reason": "Phosphor's 'floppy-disk' is the standard save icon. Confirmed in release notes with front/back variants."
+  },
+  "check": {
+    "value": "check",
+    "reason": "Direct match. Phosphor has a 'check' icon for confirm/done actions."
+  },
+  "refresh": {
+    "value": "arrows-clockwise",
+    "reason": "Phosphor's 'arrows-clockwise' shows two arrows in a circular motion, ideal for refresh/sync. Candidates: 'arrow-clockwise' (single arrow, more like redo). 'arrows-clockwise' better conveys sync/refresh."
+  },
+  "undo": {
+    "value": "arrow-counter-clockwise",
+    "reason": "Phosphor's 'arrow-counter-clockwise' is a counter-clockwise curved arrow, the standard undo glyph"
+  },
+  "redo": {
+    "value": "arrow-clockwise",
+    "reason": "Phosphor's 'arrow-clockwise' is a clockwise curved arrow, the standard redo glyph"
+  },
+  "copy": {
+    "value": "copy",
+    "reason": "Direct match. Phosphor has a 'copy' icon showing overlapping documents."
+  },
+  "clipboard": {
+    "value": "clipboard",
+    "reason": "Direct match. Phosphor has a 'clipboard' icon."
+  },
+  "copied": {
+    "value": "clipboard-check",
+    "reason": "Phosphor has 'clipboard-check' showing a clipboard with a checkmark, indicating copied/confirmed state"
+  },
+  "paste": {
+    "value": "clipboard-text",
+    "reason": "Phosphor's 'clipboard-text' shows a clipboard with text content, the best match for paste. Phosphor has no dedicated 'paste' icon."
+  },
+  "cut": {
+    "value": "scissors",
+    "reason": "Direct match. Phosphor has a 'scissors' icon for the cut action."
+  },
+  "move": {
+    "value": "arrows-out-cardinal",
+    "reason": "Phosphor's 'arrows-out-cardinal' shows four arrows pointing outward in cardinal directions, conveying movement/repositioning"
+  },
+  "drag-handle": {
+    "value": "dots-six-vertical",
+    "reason": "Phosphor's 'dots-six-vertical' shows a 2x3 grid of dots, the standard drag handle/grip pattern. Confirmed in release notes as a new addition."
+  },
+  "upload": {
+    "value": "upload-simple",
+    "reason": "Phosphor's 'upload-simple' is a clean upward arrow with a line, the standard upload glyph. Preferred over 'upload' which may have a tray."
+  },
+  "download": {
+    "value": "download-simple",
+    "reason": "Phosphor's 'download-simple' is a clean downward arrow with a line, the standard download glyph. Preferred over 'download' which may have a tray."
+  },
+  "import": {
+    "value": "sign-in",
+    "reason": "Phosphor has no dedicated 'import' icon. 'sign-in' (arrow entering a boundary) conveys bringing data in. Candidates: 'arrow-line-down' (too generic), 'download-simple' (conflicts with download). 'sign-in' is the best available match for importing data."
+  },
+  "export": {
+    "value": "sign-out",
+    "reason": "Phosphor has no dedicated 'export' icon. 'sign-out' (arrow exiting a boundary) conveys sending data out. Candidates: 'arrow-line-up' (too generic), 'upload-simple' (conflicts with upload). 'sign-out' is the best available match for exporting data."
+  },
+  "print": {
+    "value": "printer",
+    "reason": "Direct match. Phosphor has a 'printer' icon."
+  },
+  "share": {
+    "value": "share-network",
+    "reason": "Phosphor's 'share-network' shows connected nodes forming a share graph, the standard share icon pattern. Phosphor also has 'share' but 'share-network' is the more recognizable share glyph."
+  },
+  "send": {
+    "value": "paper-plane-tilt",
+    "reason": "Phosphor's 'paper-plane-tilt' is a tilted paper airplane, the standard send/submit icon. Preferred over 'paper-plane' for its more dynamic appearance."
+  },
+  "zap": {
+    "value": "lightning",
+    "reason": "Phosphor's 'lightning' icon is a lightning bolt, directly matching the fast/instant action concept"
+  },
+  "checkbox": {
+    "value": "check-square",
+    "reason": "Phosphor's 'check-square' shows a square with a checkmark inside, the standard checked checkbox"
+  },
+  "checkbox-empty": {
+    "value": "square",
+    "reason": "Phosphor's 'square' is an empty square, matching the unchecked checkbox state"
+  },
+  "toggle": {
+    "value": "toggle-right",
+    "reason": "Phosphor's 'toggle-right' shows a toggle switch in the on position (knob to the right)"
+  },
+  "toggle-off": {
+    "value": "toggle-left",
+    "reason": "Phosphor's 'toggle-left' shows a toggle switch in the off position (knob to the left)"
+  }
+}

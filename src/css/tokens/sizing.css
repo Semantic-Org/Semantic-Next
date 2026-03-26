@@ -1,0 +1,41 @@
+/*******************************
+            Sizing
+*******************************/
+
+
+:root {
+
+
+  /*******************************
+          Component Sizes
+  *******************************/
+
+  /*
+  * Allows components to scale from 3xs to 3xl by modifying its own base font-size (em-size)
+  * Typographic scale in rem.
+  * Sets the em context for components.
+
+    Note: This scales with --base size, so the --px values only represent pixels for default theme
+  */
+
+  --size-3xs: var(--10px);
+  --size-2xs: var(--11px);
+  --size-xs:  var(--12px);
+  --size-s:   var(--13px);
+  --size-m:   var(--14px);
+  --size-l:   var(--16px);
+  --size-xl:  var(--18px);
+  --size-2xl: var(--20px);
+  --size-3xl: var(--24px);
+
+  /* Component Sizes */
+  --mini:    var(--size-3xs);
+  --tiny:    var(--size-2xs);
+  --small:   var(--size-xs);
+  --medium:  var(--size-m);
+  --large:   var(--size-l);
+  --big:     var(--size-xl);
+  --huge:    var(--size-2xl);
+  --massive: var(--size-3xl);
+
+}

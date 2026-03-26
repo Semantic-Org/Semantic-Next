@@ -36,7 +36,7 @@
     --topbar-menu-item-active-color: var(--white-100);
     --topbar-menu-item-font-weight: normal;
     --topbar-menu-item-active-font-weight: bold;
-    --topbar-border-bottom: 1px solid #15181a;
+    --topbar-border-bottom: 1px solid var(--standard-5);
 
   }
 
@@ -118,9 +118,8 @@
     &.floating {
 
       background-color: transparent;
+
       .content {
-        width: 1170px;
-        max-width: 100%;
         margin: 0 auto;
       }
 
@@ -130,6 +129,12 @@
       global-search {
         margin-right: 0;
         max-width: max-content;
+      }
+    }
+
+    &:not(.floating) {
+      .content {
+        width: 100%;
       }
     }
 
