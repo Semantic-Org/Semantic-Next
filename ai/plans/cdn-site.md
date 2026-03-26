@@ -36,11 +36,23 @@ cdn.semantic-ui.com/
 - `scripts/cdn/` has templates for import map generation, entry point resolution, package index pages, and a landing page
 - `resolveBareImports` esbuild plugin already supports `cdnRoot` and `resolver` params
 
+### Canary channel
+
+If the CDN deploys on every main merge (not just tagged releases), a `canary` version alias comes for free:
+
+```
+cdn.semantic-ui.com/@semantic-ui/core/canary/dist/...
+cdn.semantic-ui.com/importmap-canary.json
+```
+
+Overwritten on each main deploy. Useful for early adopters, bug verification, and integration testing without waiting for a tagged release. Tagged versions remain immutable alongside it.
+
 ### Deployment
 
 - Vercel project at `tools/cdn`
 - Publish pipeline: on tagged release, build CDN format artifacts, deploy to Vercel
-- Previous versions remain accessible (immutable deploys)
+- On main merge: deploy canary channel (overwrites previous canary, tagged versions untouched)
+- Previous tagged versions remain accessible (immutable deploys)
 
 ## Dependencies
 

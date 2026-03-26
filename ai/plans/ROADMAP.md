@@ -11,7 +11,7 @@
 | `pair` | Socratic — Jack and Claude think through it together. The conversation *is* the work. |
 | `jack` | Jack's hands and instincts. Claude may research or review. |
 
-**Days** = working days (1d = 8 hours, 0.5d = 4 hours) for the given autonomy mode. Reference: subtree caching took ~5d pair (40 hours).
+**Hours** = working hours for the given autonomy mode. Over 8h, show days too: `16-24h (2-3d)`. Reference: subtree caching took ~40h (5d) pair.
 
 **Scope maturity:**
 | Level | Meaning |
@@ -84,72 +84,72 @@ TOKEN FINALIZATION (the gate)
 
 ## Do Next (unblocked, priority order)
 
-| # | What | Days | Mode | Notes |
-|---|------|------|------|-------|
+| # | What | Hours | Mode | Notes |
+|---|------|-------|------|-------|
 | 1 | Token Finalization | open | pair | The gate. Open questions: color grades (0-100 vs 5-100), borders (semantic vs numeric), dark mode inversion, surface colors (slate). See [plan](token-finalization.md). |
-| 2 | Docs Deploy 0.18.0 | 0.5d | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
-| 3 | [Icon Mappings Fix](icon-mappings-rebuild.md) | 0.25d | agent | One duplicate-key bug to fix. Good test of agent-only workflow. |
-| 4 | State from Settings | 1d | pair | ~25 lines. API design + implement. |
+| 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
+| 3 | [Icon Mappings Fix](icon-mappings-rebuild.md) | 2h | agent | One duplicate-key bug to fix. Good test of agent-only workflow. |
+| 4 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
-| # | What | Days | Mode | Notes |
-|---|------|------|------|-------|
-| 5 | Getting Started Guides (3 pages) | 4-6d | pair | using-ui, creating-ui, theming. No blocker. |
-| 7 | Ecosystem Guides — raw WC (7 pages) | 15-20d | pair | One page per framework. Pre-wrapper versions. install/framework.mdx (335 lines) is starting material. |
-| 8 | Philosophy Pages (2 pages) | 2-3d | jack | NL thesis + about project. Jack's voice. |
-| 9 | Homepage Tour Ribbon | 2-3d | pair | 3 PlaygroundExamples for templates/specs/components. |
-| 10 | Roadmap Page Redesign | 1-2d | pair | Current version is "jank." Rethink or simplify. |
-| 11 | [CDN Site](cdn-site.md) | 3-5d | pair | Vercel deploy at `tools/cdn` for `cdn.semantic-ui.com`. Replaces jsdelivr. Partial scaffolding in `scripts/cdn/`. |
+| # | What | Hours | Mode | Notes |
+|---|------|-------|------|-------|
+| 5 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
+| 7 | Ecosystem Guides — raw WC (7 pages) | 120-160h (15-20d) | pair | One page per framework. Pre-wrapper versions. install/framework.mdx (335 lines) is starting material. |
+| 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
+| 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
+| 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
+| 11 | [CDN Site](cdn-site.md) | 24-40h (3-5d) | pair | Vercel deploy at `tools/cdn` for `cdn.semantic-ui.com`. Replaces jsdelivr. Partial scaffolding in `scripts/cdn/`. |
 
 
 ## Blocked (waiting on token finalization)
 
-| # | What | Days | Mode | Blocker | Notes |
-|---|------|------|------|---------|-------|
-| 13 | Token Migration (remaining) | 2-4d | pair/agent | Tokens locked | ~3 primitives + ~65 docs files. Not purely mechanical — spacing→padding/margin/gap needs judgment. |
-| 14 | CSS Token Extraction | 2-3d | pair | Tokens locked | `getThemingCSS` util + MCP tool. |
-| 15 | MCP Improvements (remaining) | 1-2d | agent | Token extraction | 3 tools: `get_theming_css`, `get_global_tokens`, `get_token_usage`. |
-| 16 | CSS Token & Theming Docs (12 pages) | 5-7d | pair | Tokens locked | 6 token pages + 6 styling concept pages. |
+| # | What | Hours | Mode | Blocker | Notes |
+|---|------|-------|------|---------|-------|
+| 13 | Token Migration (remaining) | 16-32h (2-4d) | pair/agent | Tokens locked | ~3 primitives + ~65 docs files. Not purely mechanical — spacing→padding/margin/gap needs judgment. |
+| 14 | CSS Token Extraction | 16-24h (2-3d) | pair | Tokens locked | `getThemingCSS` util + MCP tool. |
+| 15 | MCP Improvements (remaining) | 8-16h (1-2d) | agent | Token extraction | 3 tools: `get_theming_css`, `get_global_tokens`, `get_token_usage`. |
+| 16 | CSS Token & Theming Docs (12 pages) | 40-56h (5-7d) | pair | Tokens locked | 6 token pages + 6 styling concept pages. |
 
 ## Blocked (waiting on CDN site)
 
-| # | What | Days | Mode | Blocker | Notes |
-|---|------|------|------|---------|-------|
-| 17 | [CDN Build Fix](cdn-build-fix.md) | 1-2d | pair | CDN site (#11) | Fix `resolveBareImports` to rewrite to `cdn.semantic-ui.com`. Eliminates dep duplication in playground. |
+| # | What | Hours | Mode | Blocker | Notes |
+|---|------|-------|------|---------|-------|
+| 17 | [CDN Build Fix](cdn-build-fix.md) | 8-16h (1-2d) | pair | CDN site (#11) | Fix `resolveBareImports` to rewrite to `cdn.semantic-ui.com`. Eliminates dep duplication in playground. |
 
 ## Architecture Decisions (gate the primitive build-out)
 
 These are design decisions that must be resolved before building components at velocity. Each is a `pair` session. They sit between token finalization and the actual build-out.
 
-| # | Plan | Days | Mode | Scope | Blocker | Notes |
-|---|------|------|------|-------|---------|-------|
-| 18 | [Value Schema](value-schema.md) | 2-3d | pair | initial | — | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and wrapper story. |
-| 19 | [Light DOM Styling](light-dom-styling.md) | 2-3d | pair | initial | — | How table, header, and other slotted-content components handle styles that need to pierce shadow DOM. Solve once as a framework pattern. |
-| 20 | [Component Wrapping Behavior](component-wrapping-behavior.md) | 2-3d | pair | initial | Naming conventions | How `<ui-popup>` wraps the `tooltip` behavior. Pattern recurs for accordion, dropdown, tabs. |
-| 21 | [Naming Conventions](naming-conventions.md) | 1-2d | pair | initial | — | tooltip vs popup vs popover — all one concept in SUI. Lock the naming philosophy for ~80 components. Names are permanent. |
-| 22 | [Primitive Completions](primitive-completions.md) | 5-10d | jack/pair | initial | Tokens + light DOM | Finish table, dropdown, header, segment, divider before building new. |
+| # | Plan | Hours | Mode | Scope | Blocker | Notes |
+|---|------|-------|------|-------|---------|-------|
+| 18 | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | — | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and wrapper story. |
+| 19 | [Light DOM Styling](light-dom-styling.md) | 16-24h (2-3d) | pair | initial | — | How table, header, and other slotted-content components handle styles that need to pierce shadow DOM. Solve once as a framework pattern. |
+| 20 | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Naming conventions | How `<ui-popup>` wraps the `tooltip` behavior. Pattern recurs for accordion, dropdown, tabs. |
+| 21 | [Naming Conventions](naming-conventions.md) | 8-16h (1-2d) | pair | initial | — | tooltip vs popup vs popover — all one concept in SUI. Lock the naming philosophy for ~80 components. Names are permanent. |
+| 22 | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | jack/pair | initial | Tokens + light DOM | Finish table, dropdown, header, segment, divider before building new. |
 
 ## Blocked (waiting on architecture decisions + primitives)
 
-| # | What | Days | Mode | Blocker | Notes |
-|---|------|------|------|---------|-------|
-| 23 | Tier 1 Primitives | 2-5d each | jack | Arch decisions resolved | dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion (~8 components, ~20-40d total) |
-| 24 | Behavior Docs (4 behaviors) | 5-8d | pair | Needs more primitives to show real usage | attach, transition, escape, tooltip |
-| 25 | Primitive Usage Guides | 7-10d | pair | Needs more primitives | Specimen Explorer done. CSS tab, authored MDX remaining. |
-| 26 | [Wrapper Architecture](wrapper-architecture.md) | 5-7d | pair | Value schema | Generation pipeline for React/Vue/Svelte wrappers. |
-| 27 | Tier 2 Primitives | 2-5d each | jack | Tier 1 done | popover, slider, textarea, toast, drawer, breadcrumb, pagination (~8 components) |
-| 28 | Wrapper Packages (3-4 frameworks) | 12-20d | pair | Wrapper arch + enough primitives | `@semantic-ui/react`, `/vue`, `/svelte` |
-| 29 | Ecosystem Guides — final (7 pages) | 7-14d | pair | Wrapper packages | Rewrite raw WC guides to use wrapper packages. |
-| 30 | Tier 3 Primitives (~45) | 2-5d each | jack | Tiers 1-2 done | The long tail. ~100-225d total. |
-| 31 | Learn Courses 3xx-5xx | 10-15d | pair | Components exist to teach | 3 courses, ~8-12 lessons each. |
-| 32 | Component Docs (9 app-level) | 9-18d | pair | Components exist | global-search, panels, nav-menu, etc. |
+| # | What | Hours | Mode | Blocker | Notes |
+|---|------|-------|------|---------|-------|
+| 23 | Tier 1 Primitives | 16-40h each (2-5d) | jack | Arch decisions resolved | dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion (~8 components, ~160-320h total) |
+| 24 | Behavior Docs (4 behaviors) | 40-64h (5-8d) | pair | Needs more primitives to show real usage | attach, transition, escape, tooltip |
+| 25 | Primitive Usage Guides | 56-80h (7-10d) | pair | Needs more primitives | Specimen Explorer done. CSS tab, authored MDX remaining. |
+| 26 | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | Value schema | Generation pipeline for React/Vue/Svelte wrappers. |
+| 27 | Tier 2 Primitives | 16-40h each (2-5d) | jack | Tier 1 done | popover, slider, textarea, toast, drawer, breadcrumb, pagination (~8 components) |
+| 28 | Wrapper Packages (3-4 frameworks) | 96-160h (12-20d) | pair | Wrapper arch + enough primitives | `@semantic-ui/react`, `/vue`, `/svelte` |
+| 29 | Ecosystem Guides — final (7 pages) | 56-112h (7-14d) | pair | Wrapper packages | Rewrite raw WC guides to use wrapper packages. |
+| 30 | Tier 3 Primitives (~45) | 16-40h each (2-5d) | jack | Tiers 1-2 done | The long tail. ~800-1800h total. |
+| 31 | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | Components exist to teach | 3 courses, ~8-12 lessons each. |
+| 32 | Component Docs (9 app-level) | 72-144h (9-18d) | pair | Components exist | global-search, panels, nav-menu, etc. |
 
 ## Last
 
-| # | What | Days | Mode | Blocker | Notes |
-|---|------|------|------|---------|-------|
-| 33 | Homepage — final pass | 1-2d | jack | Everything above | Polish + content finalization. |
+| # | What | Hours | Mode | Blocker | Notes |
+|---|------|-------|------|---------|-------|
+| 33 | Homepage — final pass | 8-16h (1-2d) | jack | Everything above | Polish + content finalization. |
 
 ---
 

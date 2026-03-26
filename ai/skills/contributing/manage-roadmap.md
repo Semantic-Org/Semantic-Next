@@ -45,7 +45,7 @@ Most plans in this project are `pair` — the framework authors have deep expert
 
 ### Effort Estimates
 
-Use concrete working days, not t-shirt sizes. Reference point: subtree caching took ~5 days pair (40 hours). Be honest about estimates — a plan that's "open-ended design" should say so rather than pretending it's 2 days.
+Use hours as the primary unit. Days require a conversion step (1d = 8h) that introduces errors. For estimates over 8 hours, show both: `16-24h (2-3d)`. Under 8 hours, just hours: `4h`. Reference point: subtree caching took ~40h (5d) pair. Be honest about estimates — a plan that's "open-ended design" should say so rather than pretending it's 16 hours.
 
 ### ROADMAP.md Sections
 
