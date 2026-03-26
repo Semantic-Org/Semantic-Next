@@ -100,7 +100,7 @@ decodeSvgDataUri(val) {
 Add `defaultState` and `onRendered` to the definition:
 
 ```js
-const UIIcon = defineComponent({
+const Icon = defineComponent({
   tagName: 'ui-icon',
   componentSpec,
   template,

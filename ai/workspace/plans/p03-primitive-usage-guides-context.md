@@ -122,7 +122,7 @@ The barrel file `button-theme.css` is a complete index — each `@import url(...
 | `docs/src/components/SpecViewer.astro` | Spec tab renderer — custom syntax-highlighted spec viewer with collapsible sections |
 | `docs/src/layouts/Definition.astro` | Thin wrapper around Layout.astro, passes through props |
 | `docs/src/layouts/Layout.astro` | Main page layout — TopBar, Sidebar, DocsMasthead (tab menu), DocsRail (jump nav), slot |
-| `docs/src/components/DocsMasthead.astro` | Renders title, description, and tab menu (UIMenu with active tab detection) |
+| `docs/src/components/DocsMasthead.astro` | Renders title, description, and tab menu (Menu with active tab detection) |
 | `docs/src/components/DocsRail.astro` | Right sidebar jump menu |
 | `docs/src/content/primitives/*.mdx` | Content entries — frontmatter defines tabs/specName/etc, body is currently empty |
 | `docs/src/content.config.js` | Content collection config — defines schema for primitives/components/behaviors |

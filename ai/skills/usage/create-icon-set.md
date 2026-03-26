@@ -33,7 +33,7 @@ The component is imported from `@semantic-ui/core`. Your CSS provides the icon d
 **1. Import the icon component:**
 
 ```js
-import { UIIcon } from '@semantic-ui/core';
+import { Icon } from '@semantic-ui/core';
 ```
 
 **2. Write a CSS file with your icons:**
@@ -263,7 +263,7 @@ A real-world example combining monochrome UI icons with a colored logo:
 ```
 
 ```js
-import { UIIcon } from '@semantic-ui/core';
+import { Icon } from '@semantic-ui/core';
 import '@semantic-ui/core/icon/sets/feather.css';  // standard icons
 import './app-icons.css';                           // app-specific icons
 ```

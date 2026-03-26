@@ -231,7 +231,7 @@ Key details:
 
 ### 3. Import / Setup
 - HTML: just use the tag, no import needed
-- ES module: `import { UIButton } from '@semantic-ui/core'`
+- ES module: `import { Button } from '@semantic-ui/core'`
 - React/Vue/Angular: framework-specific wrapper patterns
 - Source: spec `tagName`, `exportName`
 
