@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 import css from './mobile-menu-toggle.css?raw';
 import template from './mobile-menu-toggle.html?raw';
 

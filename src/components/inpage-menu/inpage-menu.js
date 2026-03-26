@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { any, each, first, flatten, inArray, isServer, last, noop } from '@semantic-ui/utils';
 
-import { UIIcon } from '../../primitives/index.js';
+import { Icon } from '../../primitives/index.js';
 
 import { Reaction } from '@semantic-ui/reactivity';
 import css from './inpage-menu.css?raw';

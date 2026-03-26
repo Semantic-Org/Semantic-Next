@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { UIIcon, UIInput, UIModal } from '../../primitives/index.js';
+import { Icon, Input, Modal } from '../../primitives/index.js';
 
 import css from './global-search.css?raw';
 import template from './global-search.html?raw';
