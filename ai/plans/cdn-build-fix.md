@@ -23,34 +23,50 @@ The plugin already supports `cdnRoot` and a custom `resolver` function, but:
 
 ### Target state
 
+SUI packages use clean paths (scope dropped, `dist/cdn/` flattened). Third-party goes under `/vendor/`.
+
 ```js
-import { Signal } from "https://cdn.semantic-ui.com/@semantic-ui/reactivity/0.18.0/dist/cdn/reactivity.min.js"
+// SUI package
+import { Signal } from "@semantic-ui/reactivity"
+// becomes
+import { Signal } from "https://cdn.semantic-ui.com/reactivity@0.18.0/reactivity.min.js"
+
+// Third-party
+import { unsafeCSS } from "lit"
+// becomes
+import { unsafeCSS } from "https://cdn.semantic-ui.com/vendor/lit@3.3.2/lit.js"
+
+// Third-party sub-path
+import { repeat } from "lit/directives/repeat.js"
+// becomes
+import { repeat } from "https://cdn.semantic-ui.com/vendor/lit@3.3.2/directives/repeat.js"
+
+// Canary build — SUI uses canary, external stays pinned
+import { Signal } from "https://cdn.semantic-ui.com/reactivity@canary/reactivity.min.js"
+import { unsafeCSS } from "https://cdn.semantic-ui.com/vendor/lit@3.3.2/lit.js"
 ```
 
-Changes needed:
-1. Set `cdnRoot` to `https://cdn.semantic-ui.com`
-2. URL pattern: `{pkg}/{version}/{entrypoint}` (no `@` before version)
-3. Entry point resolution from local `package.json` exports (no jsdelivr API calls) — use the `cdn` or `jsdelivr` export condition
-4. Handle third-party deps (lit, tailwindcss-iso) — either bundle them or add direct replacements
+### Changes needed
 
-### Third-party dependency handling
+1. **Custom resolver** — replace the default jsdelivr resolver with one that:
+   - Drops `@semantic-ui/` scope for SUI packages → `{name}@{version}/{name}.min.js`
+   - Prefixes `/vendor/` for third-party packages → `vendor/{pkg}@{version}/{entrypoint}`
+   - Resolves entry points from local `package.json` exports (no jsdelivr API calls)
+   - Accepts a `channel` param (`canary` or a version string) for SUI packages
+2. **Entry point resolution** — use the `cdn`/`jsdelivr` export condition from package.json, or the naming convention (`{name}.min.js` for SUI packages). Third-party needs the manifest.
+3. **All third-party deps hosted** — no bundling at any level. `lit`, `lit-html`, `@lit/reactive-element`, `@lit-labs/ssr-dom-shim`, `tailwindcss-iso`, `tailwindcss` all get rewritten to `/vendor/` URLs. The full transitive tree is resolved and rewritten.
 
-For SUI packages, the CDN format rewrites cross-package imports. For third-party deps:
-- **Option A**: Use `directReplacements` to point at bundled versions on the CDN
-- **Option B**: Bundle third-party deps inline (like the bundle format does for tailwind)
-- **Option C**: Serve third-party packages on the CDN too
+### What stays the same
 
-Tailwind's `tailwindcss-iso` dependency is the main case. Lit is the other.
+- The esbuild plugin architecture — `onResolve` handler marking imports as external with rewritten paths
+- The caching system for entry point resolution
+- The `directReplacements` mechanism (useful for edge cases)
+- The three build formats (ESM, bundle, CDN) all continue to be produced
 
 ## Dependencies
 
-- [CDN Site](cdn-site.md) — needs a target to rewrite URLs to
-
-## Open Questions
-
-- Should the CDN format be buildable with a configurable base URL, or always target `cdn.semantic-ui.com`?
-- How to handle the lit dependency chain (lit has many sub-path exports like `lit/directive.js`)
+- [CDN Site](cdn-site.md) — needs the R2 bucket and Worker to exist so the URLs resolve
 
 ## Status
 
-Not started. Plugin infrastructure exists, needs configuration and testing.
+Not started. Plugin infrastructure exists, needs custom resolver and testing.
