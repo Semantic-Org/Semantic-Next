@@ -160,8 +160,8 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
 }
 
 // Upload vendor packages from pre-built dist/vendor-cdn/
-async function uploadVendorPackages(s3) {
-  console.log('\nUploading vendor packages');
+async function uploadVendorPackages(s3, { force = false } = {}) {
+  console.log('\nUploading vendor packages' + (force ? ' (force)' : ''));
 
   const vendorDir = join(ROOT, 'dist', 'vendor-cdn');
   if (!existsSync(vendorDir)) {
@@ -180,16 +180,16 @@ async function uploadVendorPackages(s3) {
       for (const subEntry of readdirSync(scopeDir, { withFileTypes: true })) {
         if (!subEntry.isDirectory()) { continue; }
         const packageName = `${scopeOrName}/${subEntry.name}`;
-        await uploadVendorPackage(s3, vendorDir, packageName);
+        await uploadVendorPackage(s3, vendorDir, packageName, force);
       }
     }
     else {
-      await uploadVendorPackage(s3, vendorDir, scopeOrName);
+      await uploadVendorPackage(s3, vendorDir, scopeOrName, force);
     }
   }
 }
 
-async function uploadVendorPackage(s3, vendorDir, packageName) {
+async function uploadVendorPackage(s3, vendorDir, packageName, force = false) {
   const pkgDir = join(vendorDir, ...packageName.split('/'));
   // Version is the directory name inside the package dir
   for (const versionEntry of readdirSync(pkgDir, { withFileTypes: true })) {
@@ -201,11 +201,13 @@ async function uploadVendorPackage(s3, vendorDir, packageName) {
     const files = collectFiles(versionDir);
     if (files.length === 0) { continue; }
 
-    // Check if already uploaded
-    const firstKey = `${r2Prefix}/${files[0].key}`;
-    if (await objectExists(s3, firstKey)) {
-      console.log(`  ${packageName}@${version} — already exists, skipping`);
-      continue;
+    // Check if already uploaded (skip unless forced)
+    if (!force) {
+      const firstKey = `${r2Prefix}/${files[0].key}`;
+      if (await objectExists(s3, firstKey)) {
+        console.log(`  ${packageName}@${version} — already exists, skipping`);
+        continue;
+      }
     }
 
     for (const file of files) {
@@ -259,6 +261,7 @@ async function main() {
     options: {
       version: { type: 'string' },
       latest: { type: 'boolean', default: false },
+      'force-vendor': { type: 'boolean', default: false },
     },
   });
 
@@ -274,7 +277,7 @@ async function main() {
   const suiVersion = isCanary ? 'canary' : version;
 
   await uploadSuiPackages(s3, suiVersion, { force: isCanary });
-  await uploadVendorPackages(s3);
+  await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
 
   if (isCanary) {
