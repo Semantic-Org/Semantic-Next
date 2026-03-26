@@ -4,17 +4,17 @@ icon: cpu
 ---
 
 import { behaviorPages } from '@helpers/menus.js';
-import { UICards, UICard } from '@semantic-ui/core';
+import { Cards, Card } from '@semantic-ui/core';
 
 
 ## Behaviors
 
-<UICards three>
+<Cards three>
   {(behaviorPages || []).map((page) => (
-    <UICard
+    <Card
         header={page.name}
         href={page.url}
         description={page.description}
-      ></UICard>
+      ></Card>
   ))}
-</UICards>
+</Cards>

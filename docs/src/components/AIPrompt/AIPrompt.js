@@ -4,7 +4,7 @@ import { asyncEach, getJSON, wait } from '@semantic-ui/utils';
 
 // web components
 import { AILoader } from '@components/AILoader/AILoader.js';
-import { UIButton } from '@semantic-ui/core';
+import { Button } from '@semantic-ui/core';
 
 import css from './AIPrompt.css?raw';
 import template from './AIPrompt.html?raw';

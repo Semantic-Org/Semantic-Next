@@ -348,7 +348,7 @@ export const getSidebarNavMenu = (activeSection, currentPath) => {
   }
 
   if (activeSection._id) {
-    // Single sections don't need the UIMenu
+    // Single sections don't need the Menu
     return [];
   }
 

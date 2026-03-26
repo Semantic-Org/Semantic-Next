@@ -10,7 +10,7 @@ import { NavMenu } from '@semantic-ui/core';
 import { CodePlayground } from '../CodePlayground/CodePlayground.js';
 
 /* UI */
-import { UIButton } from '@semantic-ui/core';
+import { Button } from '@semantic-ui/core';
 
 import css from './LearnExample.css?raw';
 import template from './LearnExample.html?raw';

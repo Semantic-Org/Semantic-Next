@@ -4,7 +4,7 @@ icon: open book
 title: Introduction
 description: An introduction to Semantic UI
 ---
-import { UICards, UICard } from '@semantic-ui/core';
+import { Cards, Card } from '@semantic-ui/core';
 import Blockquote from '@components/mdx/Blockquote.astro';
 
 export const components = { blockquote: Blockquote };
@@ -26,39 +26,39 @@ Components are native [Web Components](https://developer.mozilla.org/en-US/docs/
 
 Pick from [primitives](/ui/primitives), [components](/ui/components), and [behaviors](/ui/behaviors). Use them as HTML tags. [Theme with CSS variables](/ui/start/guides/theming).
 
-<UICards two stackable horizontal>
-  <UICard horizontal
+<Cards two stackable horizontal>
+  <Card horizontal
     header="Primitives"
     icon="box"
     href="/ui/primitives"
     description="Base elements: button, icon, input, label."
-  ></UICard>
-  <UICard horizontal
+  ></Card>
+  <Card horizontal
     header="Components"
     icon="layout"
     href="/ui/components"
     description="Complex UI: dropdown, modal, menu, tabs."
-  ></UICard>
-  <UICard horizontal
+  ></Card>
+  <Card horizontal
     header="Behaviors"
     icon="zap"
     href="/ui/behaviors"
     description="Attachable logic: transitions, validation, tooltips."
-  ></UICard>
-</UICards>
+  ></Card>
+</Cards>
 
 ## Building Components
 
 Create custom components like `<order-form>` or `<user-profile>` using the same tools the library is built with. Your components inherit the theming system automatically.
 
-<UICards horizontal>
-  <UICard horizontal
+<Cards horizontal>
+  <Card horizontal
     header="Authoring Guide"
     icon="code"
     href="/docs/guides"
     description="Build custom web components with reactive state, templates, and scoped styling."
-  ></UICard>
-</UICards>
+  ></Card>
+</Cards>
 
 ## Get Started
 

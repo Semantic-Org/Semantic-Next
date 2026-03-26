@@ -1,7 +1,7 @@
 ---
 import Homepage from '../layouts/Homepage.astro';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
-import { UIButton, UIContainer, UICards, UIMenu, MenuItem } from '@semantic-ui/core'
+import { Button, Container, Cards, Card, Menu, Icon, MenuItem } from '@semantic-ui/core'
 import { AIPrompt } from '@components/AIPrompt/AIPrompt.js';
 import { demoSteps } from '../data/homepage.js';
 
@@ -10,20 +10,20 @@ import { demoSteps } from '../data/homepage.js';
   <aboveFold>
     <canvas id="plasma"></canvas>
     <content>
-      <UIContainer>
+      <Container>
         <div class="text">
           <h1>The UI Framework for the AI Era</h1>
           <p>Agents write it. Browsers run it. Humans read it.</p>
           <p>A web component framework with signals, expressive templates,  and an off-the-shelf UI kit. No build step from generation to execution.</p>
-          <UIButton secondary href="/ui/start">View Docs</UIButton>
-          <UIButton primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</UIButton>
+          <Button secondary href="/ui/start">View Docs</Button>
+          <Button primary icon-after icon="right-chevron" href="/learn/selection">Try In 5 Minutes</Button>
         </div>
         <div class="visual">
           <div class="sticky">
             <AIPrompt steps={demoSteps} dark client:load></AIPrompt>
           </div>
         </div>
-      </UIContainer>
+      </Container>
     </content>
   </aboveFold>
   <script>
@@ -31,7 +31,7 @@ import { demoSteps } from '../data/homepage.js';
   </script>
   <ribbons>
     <ribbon class="tour">
-      <UIContainer>
+      <Container>
         <div class="content">
           <div class="copy" data-section="templates">
             <h4 class="sub header">Component Authoring</h4>
@@ -39,15 +39,15 @@ import { demoSteps } from '../data/homepage.js';
             <p>Write templates with full JavaScript expressions or natural language-style Lisp syntax. Signals surgically update only what changed — no virtual DOM diffing.</p>
             <ul class="feature-list">
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 Full JavaScript in templates — ternaries, method calls, destructuring
               </li>
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 NL-style Lisp syntax for cleaner AI generation and human readability
               </li>
             </ul>
-            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</UIButton>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/templates">Templating Guide</Button>
           </div>
           <div class="copy" data-section="specs">
             <h4 class="sub header">Designed for Agents</h4>
@@ -55,15 +55,15 @@ import { demoSteps } from '../data/homepage.js';
             <p>Every component ships with a machine-readable spec. Agents know what's valid, how things compose, and what's contextually appropriate — no hallucination.</p>
             <ul class="feature-list">
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 Types, variations, and states with natural language descriptions
               </li>
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 <code>usageLevel</code> tells agents what's common vs. niche
               </li>
             </ul>
-            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/specs">Component Specs</UIButton>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/specs">Component Specs</Button>
           </div>
           <div class="copy" data-section="components">
             <h4 class="sub header">No Build Required</h4>
@@ -71,15 +71,15 @@ import { demoSteps } from '../data/homepage.js';
             <p>Define reactive web components with signals, Shadow DOM, and lifecycle hooks. Templates compile in the browser in under a millisecond — no bundler needed.</p>
             <ul class="feature-list">
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 Signals with built-in helpers — <code>toggle()</code>, <code>increment()</code>, <code>push()</code>
               </li>
               <li>
-                <ui-icon check></ui-icon>
+                <Icon check></Icon>
                 Standard ESM — works in any agent sandbox, CDN, or import map
               </li>
             </ul>
-            <UIButton subtle icon-after icon="right-chevron" href="/docs/guides/components">Component Guide</UIButton>
+            <Button subtle icon-after icon="right-chevron" href="/docs/guides/components">Component Guide</Button>
           </div>
         </div>
         <div class="visual">
@@ -87,59 +87,59 @@ import { demoSteps } from '../data/homepage.js';
             <div class="example active" data-section="templates">
               <!-- TODO: PlaygroundExample for templates -->
               <div class="placeholder">
-                <ui-icon code></ui-icon>
+                <Icon code></Icon>
                 <span>Templates Example</span>
               </div>
             </div>
             <div class="example" data-section="specs">
               <!-- TODO: PlaygroundExample for specs -->
               <div class="placeholder">
-                <ui-icon file-json></ui-icon>
+                <Icon file-json></Icon>
                 <span>Specs Example</span>
               </div>
             </div>
             <div class="example" data-section="components">
               <!-- TODO: PlaygroundExample for components -->
               <div class="placeholder">
-                <ui-icon box></ui-icon>
+                <Icon box></Icon>
                 <span>Components Example</span>
               </div>
             </div>
           </div>
         </div>
-      </UIContainer>
+      </Container>
     </ribbon>
     <ribbon class="proof">
-      <UIContainer>
-        <UICards three spaced stackable>
-          <ui-card>
-            <ui-icon sparkles></ui-icon>
+      <Container>
+        <Cards three spaced stackable>
+          <Card>
+            <Icon sparkles></Icon>
             <div class="header">Designed for Agents</div>
             <div class="description">Machine-readable specs translate natural language to valid, composable UI code.</div>
-          </ui-card>
-          <ui-card>
-            <ui-icon zap></ui-icon>
+          </Card>
+          <Card>
+            <Icon zap></Icon>
             <div class="header">No Build Necessary</div>
             <div class="description">Signals, expression evaluation, and modern ESM running directly in the browser.</div>
-          </ui-card>
-          <ui-card>
-            <ui-icon layers></ui-icon>
+          </Card>
+          <Card>
+            <Icon layers></Icon>
             <div class="header">Complete UI Library</div>
             <div class="description">A full component library with composable primitives and JIT Tailwind in Shadow DOM.</div>
-          </ui-card>
-        </UICards>
-      </UIContainer>
+          </Card>
+        </Cards>
+      </Container>
     </ribbon>
     <ribbon class="showcase">
-      <UIContainer>
+      <Container>
         <div class="header">
           <h3 class="ui header">See It In Action</h3>
-          <UIMenu client:load selection inset class="menu" value="card-search">
+          <Menu client:load selection inset class="menu" value="card-search">
             <MenuItem client:load value="card-search">Card Search</MenuItem>
             <MenuItem client:load value="temperature-converter">Temperature Converer</MenuItem>
             <MenuItem client:load value="advanced-ball-simulation">Ball Simulation</MenuItem>
             <MenuItem client:load value="spectrum-analyzer">Spectrum Analyzer</MenuItem>
-          </UIMenu>
+          </Menu>
         </div>
         <div class="examples">
           <div class="example active" data-example="card-search">
@@ -155,14 +155,14 @@ import { demoSteps } from '../data/homepage.js';
             <PlaygroundExample height="800" id="spectrum-analyzer"></PlaygroundExample>
           </div>
         </div>
-      </UIContainer>
+      </Container>
     </ribbon>
   </ribbons>
   <footer>
-    <UIContainer>
+    <Container>
       <div class="columns">
         <div class="column">
-          <h4><ui-icon zap></ui-icon> Get Started</h4>
+          <h4><Icon zap></Icon> Get Started</h4>
           <a href="/ui/start">Introduction</a>
           <a href="/ui/start/install">Installation</a>
           <a href="/ui/start/why-semantic">Why Semantic?</a>
@@ -170,7 +170,7 @@ import { demoSteps } from '../data/homepage.js';
           <a href="/ui/roadmap">Roadmap</a>
         </div>
         <div class="column">
-          <h4><ui-icon layers></ui-icon> UI Framework</h4>
+          <h4><Icon layers></Icon> UI Framework</h4>
           <a href="/ui/primitives">Primitives</a>
           <a href="/ui/components">Components</a>
           <a href="/ui/behaviors">Behaviors</a>
@@ -178,14 +178,14 @@ import { demoSteps } from '../data/homepage.js';
           <a href="/ui/css/concepts">Styling Guide</a>
         </div>
         <div class="column">
-          <h4><ui-icon book-open></ui-icon> Guides</h4>
+          <h4><Icon book-open></Icon> Guides</h4>
           <a href="/docs/guides/components">Components</a>
           <a href="/docs/guides/templates">Templates</a>
           <a href="/docs/guides/reactivity">Reactivity</a>
           <a href="/docs/guides/query">Query</a>
         </div>
         <div class="column">
-          <h4><ui-icon code></ui-icon> API Reference</h4>
+          <h4><Icon code></Icon> API Reference</h4>
           <a href="/docs/api/component">Components</a>
           <a href="/docs/api/specs">Specs</a>
           <a href="/docs/api/reactivity">Reactivity</a>
@@ -193,7 +193,7 @@ import { demoSteps } from '../data/homepage.js';
           <a href="/docs/api/utils">Utils</a>
         </div>
         <div class="column">
-          <h4><ui-icon compass></ui-icon> Resources</h4>
+          <h4><Icon compass></Icon> Resources</h4>
           <a href="/examples/counter">Examples</a>
           <a href="/learn/selection">Learn</a>
           <a href="https://github.com/Semantic-Org/Semantic-Next" target="_blank" rel="noopener">GitHub</a>
@@ -202,9 +202,9 @@ import { demoSteps } from '../data/homepage.js';
       <div class="bottom">
         <span class="copyright">&copy; {new Date().getFullYear()} Semantic UI &middot; <a href="https://github.com/Semantic-Org/Semantic-Next/blob/main/LICENSE" target="_blank" rel="noopener">ISC License</a></span>
         <a href="https://github.com/Semantic-Org/Semantic-Next" target="_blank" rel="noopener" class="social">
-          <ui-icon github></ui-icon>
+          <Icon github></Icon>
         </a>
       </div>
-    </UIContainer>
+    </Container>
   </footer>
 </Homepage>

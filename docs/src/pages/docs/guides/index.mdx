@@ -4,7 +4,7 @@ icon: open book
 title: Authoring Guide
 description: Overview of authoring web components using Semantic UI
 ---
-import { UICards, UICard } from '@semantic-ui/core';
+import { Cards, Card } from '@semantic-ui/core';
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
 import Blockquote from '@components/mdx/Blockquote.astro';
@@ -33,38 +33,38 @@ Use the same UI anywhere you author websites, whether they are written in framew
 
 Semantic UI provides a set of composable libraries for creating web components:
 
-<UICards two stackable horizontal>
- <UICard horizontal
+<Cards two stackable horizontal>
+ <Card horizontal
    header="@semantic-ui/component"
    icon="package"
    href="/docs/guides/components"
    description="Core library for defining and managing Web Component lifecycle, state, and behavior."
- ></UICard>
- <UICard horizontal
+ ></Card>
+ <Card horizontal
    header="@semantic-ui/templating"
    icon="table"
    href="/docs/guides/templates"
    description="Template language with AST compilation for rendering component views."
- ></UICard>
- <UICard horizontal
+ ></Card>
+ <Card horizontal
    header="@semantic-ui/reactivity"
    icon="cpu"
    href="/docs/guides/reactivity"
    description="Signals-based reactivity library for managing component state."
- ></UICard>
- <UICard horizontal
+ ></Card>
+ <Card horizontal
    header="@semantic-ui/query"
    icon="mouse-pointer"
    href="/docs/guides/query"
    description="Chainable DOM querying API adapted for Shadow DOM encapsulation."
- ></UICard>
- <UICard horizontal
+ ></Card>
+ <Card horizontal
    header="@semantic-ui/utils"
    icon="tool"
    href="/docs/api/utils"
    description="General-purpose JavaScript functions focused on readability."
- ></UICard>
-</UICards>
+ ></Card>
+</Cards>
 
 
 > [!note] Standalone Packages

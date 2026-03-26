@@ -1,6 +1,6 @@
 import { getCodePlaygroundLink } from '@helpers/link-encoder.js';
 import { defineComponent } from '@semantic-ui/component';
-import { UIIcon } from '@semantic-ui/core';
+import { Icon } from '@semantic-ui/core';
 import { openLink } from '@semantic-ui/utils';
 
 import css from './CodeExample.css?raw';

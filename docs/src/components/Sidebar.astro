@@ -3,7 +3,7 @@ const { sidebarMenu, sidebarHeader, expandAll } = Astro.props;
 import './Sidebar.css';
 import { NavMenu, SidebarToggle } from '@semantic-ui/core';
 import { getSidebarMenu, getActiveSidebarSection, getSidebarNavMenu } from '@helpers/navigation.js';
-import { UIMenu } from '@semantic-ui/core';
+import { Menu } from '@semantic-ui/core';
 
 const menu = sidebarMenu || await getSidebarMenu({url: Astro.url.pathname});
 
@@ -49,7 +49,7 @@ $$('sidebar ui-menu menu-item').each((el) => {
   <div class="subheader">{sidebarSubheader}</div>
   {
     showSidebarNav && (
-      <UIMenu
+      <Menu
         items={sidebarNavMenu}
         vertical
         selection

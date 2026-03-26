@@ -5,7 +5,7 @@ import '../css/code-formatting.css';
 import '@semantic-ui/core/icon/sets/lucide.css';
 import '@semantic-ui/core/icon/sets/dev.css';
 
-import { UICard, UIIcon } from '@semantic-ui/core';
+import { Card, Icon } from '@semantic-ui/core';
 import Body from './Body.astro';
 import Sidebar from '@components/Sidebar.astro';
 import DocsMasthead from '@components/DocsMasthead.astro';
@@ -61,7 +61,7 @@ const activeURL = Astro.url.pathname;
 					<pageContent>
 						{inlineHeader == 'true' && header && (
 							<h1 id="page-title">
-								{headerIcon !== undefined && (<UIIcon icon={headerIcon}></UIIcon>)} <span class="text">{header}</span>
+								{headerIcon !== undefined && (<Icon icon={headerIcon}></Icon>)} <span class="text">{header}</span>
 							</h1>
 						)}
 						<slot />
@@ -71,7 +71,7 @@ const activeURL = Astro.url.pathname;
 					<div class="traversal">
 						<ui-container>
 							{pageTraversal.previous && (
-								<UICard fluid href={pageTraversal.previous.url} previous>
+								<Card fluid href={pageTraversal.previous.url} previous>
 		              <div class="label">
 		                <ui-icon icon="left chevron"></ui-icon>
 		                Previous
@@ -79,10 +79,10 @@ const activeURL = Astro.url.pathname;
 		              <div class="header">
 		                {pageTraversal.previous.name}
 		              </div>
-								</UICard>
+								</Card>
 							)}
 							{pageTraversal.next && (
-								<UICard fluid href={pageTraversal.next.url} next>
+								<Card fluid href={pageTraversal.next.url} next>
 		              <div class="label">
 		                Next
 		                <ui-icon icon="right chevron"></ui-icon>
@@ -90,7 +90,7 @@ const activeURL = Astro.url.pathname;
 		              <div class="header">
 		                {pageTraversal.next.name}
 		              </div>
-								</UICard>
+								</Card>
 							)}
 						</ui-container>
 					</div>
