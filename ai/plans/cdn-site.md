@@ -102,9 +102,9 @@ The loader is **synchronous** — it embeds the import map data directly, no fet
   script.type = 'importmap';
   script.textContent = JSON.stringify({
     "imports": {
-      "@semantic-ui/core": "https://cdn.semantic-ui.com/core@0.18.0/semantic-ui.min.js",
-      "@semantic-ui/component": "https://cdn.semantic-ui.com/component@0.18.0/component.min.js"
-      // ... all SUI packages, no third-party (resolved internally)
+      "@semantic-ui/core": "https://cdn.semantic-ui.com/core@0.18.0",
+      "@semantic-ui/component": "https://cdn.semantic-ui.com/component@0.18.0"
+      // ... all SUI packages, bare URLs — Worker resolves entry points
     }
   });
   document.currentScript.after(script);
@@ -229,6 +229,34 @@ Two GitHub Actions:
 
 - **Root** (`cdn.semantic-ui.com/`) — landing page: quick start, import map examples, package grid. Rewrite from scratch (current GH Pages version is 1+ years stale).
 - **Package index** (`cdn.semantic-ui.com/component@0.18.0`) — entry point URL, import snippet, link to docs. Served by Worker when request has no file extension.
+
+### CDN Index Pages (separate scope — frontend agent)
+
+The CDN needs two HTML pages served by the Worker. These should be designed by a frontend agent using the `frontend-design` skill.
+
+**Root landing page** (`cdn.semantic-ui.com/`)
+- Quick start: CSS link + importmap loader + one import line
+- Package grid with all SUI packages and their descriptions
+- Import methods: loader script vs static import map vs direct URL
+- Links to docs, GitHub
+
+**Package info page** (`cdn.semantic-ui.com/component@0.18.0`)
+- Currently the Worker serves JS when no filepath is given (for import map resolution)
+- For browser navigation (human visiting the URL), serve an HTML info page instead
+- Use content negotiation: `Accept: text/html` → info page, otherwise → JS entry point
+- Show: package name, version, entry point URL, copy-paste import map snippet, link to docs
+
+**Files to create/modify:**
+- `tools/cdn/templates/index.html` — root landing page template (new)
+- `tools/cdn/templates/package.html` — package info page template (new)
+- `tools/cdn/worker/index.js` — add content negotiation to the SUI route's no-filepath case, serve root page from `_meta/index.html` in R2
+- `tools/cdn/upload.js` — add step to generate and upload landing page HTML (with current version/package data baked in)
+
+**Constraints:**
+- Pages must work as static HTML (no client-side rendering framework)
+- Should match the Semantic UI visual language
+- Landing page needs to be updated on each release (version numbers in examples)
+- Existing `scripts/cdn/gh-pages/index.html` is 1+ years stale but can be used as structural reference (not design reference)
 
 ### Repo structure
 
