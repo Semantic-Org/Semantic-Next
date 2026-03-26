@@ -143,5 +143,9 @@
   ✅ https://dev.semantic-ui.com/deep/path
   Git
   ---
-  - **Destructive operations are denied** — `git restore`, `git reset`, `git checkout --` are blocked by permission settings. Use `git unstage <file>` to unstage files (alias for `git reset HEAD`). For other operations, ask the user to run them via `!` prefix.
+  - **Destructive operations are denied** — `git restore`, `git reset`, `git checkout --` are blocked by permission settings. Use these safe aliases instead:
+    - `git unstage <file>` — unstage files (alias for `git reset HEAD --`)
+    - `git undo` — undo last commit, keeping changes (alias for `git reset HEAD~1`)
+    - `git new` — show staged diff (alias for `git diff --cached`)
+  - For other destructive operations, ask the user to run them via `!` prefix.
 </tool_gotchas>
