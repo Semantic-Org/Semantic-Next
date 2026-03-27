@@ -50,8 +50,10 @@ function getContentType(filepath) {
 //   /core@0.18.0/semantic-ui.min.js        → SUI package
 //   /@semantic-ui/core@0.18.0/...           → SUI alias (redirects to clean path)
 //   /vendor/lit@3.3.2/directive.js          → third-party
-//   /semantic-ui@0.18.0.css                 → framework CSS
-//   /semantic-ui.css                        → CSS latest alias
+//   /css                                    → framework CSS (latest)
+//   /css@0.18.0                             → framework CSS (versioned)
+//   /semantic-ui@0.18.0.css                 → framework CSS (legacy alias)
+//   /semantic-ui.css                        → framework CSS (legacy alias)
 //   /importmap.js                           → import map loader (latest)
 //   /importmap@0.18.0.js                    → versioned import map loader
 function parseRoute(pathname) {
@@ -65,7 +67,14 @@ function parseRoute(pathname) {
     };
   }
 
-  // Framework CSS — version can contain dots (semver)
+  // Framework CSS — /css, /css@0.18.0, /semantic-ui.css, /semantic-ui@0.18.0.css
+  const cssShortMatch = pathname.match(/^\/css(?:@(.+))?$/);
+  if (cssShortMatch) {
+    return {
+      type: 'css',
+      version: cssShortMatch[1] || 'latest',
+    };
+  }
   const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+))?\.css$/);
   if (cssMatch) {
     return {
