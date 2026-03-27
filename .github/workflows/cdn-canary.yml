@@ -47,7 +47,7 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-        run: cd tools/cdn && node upload.js --version canary --force-vendor
+        run: cd tools/cdn && node upload.js --version canary
 
       # Worker deploy disabled — token needs Workers Scripts permission.
       # Deploy manually: cd tools/cdn && npx wrangler deploy
