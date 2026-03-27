@@ -9,7 +9,7 @@ export default {
   description: 'A menu displays grouped navigation actions',
   tagName: 'ui-input',
   exportName: 'Input',
-  bundle: ['standard', 'form'],
+  bundle: 'standard',
   content: [
     {
       name: 'Placeholder',

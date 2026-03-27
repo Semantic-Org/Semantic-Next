@@ -4,10 +4,7 @@
   "description": "A card displays segmented content in a manner similar to a playing card.",
   "tagName": "ui-card",
   "exportName": "Card",
-  "bundle": [
-    "standard",
-    "layout"
-  ],
+  "bundle": "standard",
   "exampleCode": "<ui-card image=\"/images/new-avatar/dima2.png\">\n  <div slot=\"header\">Dima B</div>\n  <div slot=\"subheader\">Software Engineer</div>\n  <div slot=\"description\">Dima has strong opinions about button padding and the perfect shade of blue.</div>\n</ui-card>",
   "content": [
     {

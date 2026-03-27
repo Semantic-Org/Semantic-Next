@@ -185,22 +185,24 @@ Additionally, the build aggregates `bundle` fields across all specs into `dist/p
 
 ### Bundle Field (CDN Presets)
 
-The `bundle` field declares which CDN combo endpoint presets include this component. It can be a string or array:
+The `bundle` field declares which CDN combo endpoint tier includes this component. It's a string — one of three cumulative tiers:
 
 ```javascript
-bundle: 'standard',                    // single preset
-bundle: ['standard', 'form'],          // multiple presets
-bundle: ['standard', 'layout'],        // standard + layout
+bundle: 'standard',    // in standard, extended, and full
+bundle: 'extended',    // in extended and full
+bundle: 'full',        // only in full
 ```
+
+Tiers are cumulative: `standard` ⊂ `extended` ⊂ `full`. The value is the **lowest** tier the component appears in.
 
 At build time, these are aggregated into `dist/presets.json` which the CDN upload script reads and publishes to R2. The CDN Worker uses presets to resolve URLs like `/core@canary/standard` into the correct set of component imports.
 
-Current presets:
-- **`standard`** — Components an agent or developer would typically need for general-purpose UI
-- **`form`** — Form-related components
-- **`layout`** — Page structure components
+Tiers:
+- **`standard`** (~40-50 components) — General-purpose UI for building typical apps. The "don't think about it" default.
+- **`extended`** — Standard + specialized components (rich form inputs, data viz, niche patterns).
+- **`full`** — Every user-facing component.
 
-Not every component needs a `bundle` field. Components that are docs-internal or highly specialized may not belong in any preset.
+Components without a `bundle` field are not in any preset (docs-internal components).
 
 ---
 

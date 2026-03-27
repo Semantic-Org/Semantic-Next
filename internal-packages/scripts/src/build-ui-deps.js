@@ -1,6 +1,6 @@
 import { callback as callbackPlugin } from '@semantic-ui/esbuild-callback';
 import { SpecReader } from '@semantic-ui/specs';
-import { asyncEach, isArray } from '@semantic-ui/utils';
+import { asyncEach } from '@semantic-ui/utils';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import glob from 'tiny-glob';
@@ -77,8 +77,9 @@ export const buildUIDeps = async ({
   const specJsFiles = await glob('src/primitives/**/specs/*.spec.js');
   const entryPoints = specJsFiles;
 
-  // Collected during createComponentSpecs, written by generatePresetManifest
-  const bundles = {};
+  // Collected during createComponentSpecs, written by generatePresetManifest.
+  // Components are assigned to a tier: standard ⊂ extended ⊂ full.
+  const tiers = { standard: [], extended: [], full: [] };
 
   const createComponentSpecs = async () => {
     await asyncEach(entryPoints, async (entryPath) => {
@@ -108,16 +109,10 @@ export const buildUIDeps = async ({
           writeFileSync(pluralJSPath, pluralComponentSpecJS);
         }
 
-        // Collect bundle assignments for CDN preset manifest
+        // Collect bundle tier for CDN preset manifest
         if (spec.bundle) {
           const componentName = spec.tagName.replace('ui-', '');
-          const bundleNames = isArray(spec.bundle) ? spec.bundle : [spec.bundle];
-          for (const name of bundleNames) {
-            if (!bundles[name]) {
-              bundles[name] = [];
-            }
-            bundles[name].push(componentName);
-          }
+          tiers[spec.bundle]?.push(componentName);
         }
       }
       catch (e) {
@@ -128,18 +123,22 @@ export const buildUIDeps = async ({
   };
 
   /*
-    Write CDN preset manifest from bundle fields collected during spec generation.
-    Aggregates into { presetName: [componentName, ...] } at dist/presets.json.
+    Write CDN preset manifest from bundle tiers collected during spec generation.
+    Tiers are cumulative: standard ⊂ extended ⊂ full.
   */
   const generatePresetManifest = async () => {
-    if (Object.keys(bundles).length > 0) {
+    const standard = tiers.standard.sort();
+    const extended = [...tiers.standard, ...tiers.extended].sort();
+    const full = [...tiers.standard, ...tiers.extended, ...tiers.full].sort();
+
+    if (full.length > 0) {
       const distDir = resolve('dist');
       if (!existsSync(distDir)) {
         mkdirSync(distDir, { recursive: true });
       }
       writeFileSync(
         resolve(distDir, 'presets.json'),
-        JSON.stringify(bundles, null, 2) + '\n',
+        JSON.stringify({ standard, extended, full }, null, 2) + '\n',
       );
     }
   };

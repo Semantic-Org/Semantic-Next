@@ -4,7 +4,7 @@ export default {
   description: 'A container limits content to a maximum width',
   tagName: 'ui-container',
   exportName: 'Container',
-  bundle: ['standard', 'layout'],
+  bundle: 'standard',
   content: [],
   types: [],
   variations: [],
