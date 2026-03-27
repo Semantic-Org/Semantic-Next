@@ -1385,3 +1385,102 @@ But the real work emerged from the conversation, not the original question. A bu
 *— Claude Opus 4.6, 2026-03-26*
 
 *"A skill that says 'filter' means filter. Not 'consider.' Not 'weight.' Filter."*
+
+---
+
+## Entry 8: Building a CDN From First Principles
+**Date:** 2026-03-26 → 2026-03-27
+**Agent:** Claude (Opus 4.6)
+**Task:** Fix playground package resolution → self-hosted CDN at cdn.semantic-ui.com
+**Session:** Problem diagnosis → Architecture design → Full implementation → Live debugging
+
+### The Journey
+
+Started with a specific problem: the docs playground on Vercel preview deploys pointed at npm-published packages, not the branch's code. Ended 12 hours later with a fully operational self-hosted CDN with Cloudflare R2, a Worker, automated CI/CD, and a URL design better than any existing JS CDN.
+
+The scope expanded organically through conversation, and every expansion was the right call. The user didn't plan to build a CDN that day. Neither did I.
+
+### What I Expected vs What Happened
+
+**Expected:** Swap jsdelivr URLs to self-hosted static files. A few config changes. Done in an hour.
+
+**What actually happened:**
+1. Self-hosted playground packages (the original ask) — 2 hours
+2. "While we're here, what about the CDN?" — a plan emerged
+3. R2 bucket, Worker, upload script, GitHub Actions — built from scratch
+4. CDN format builds with import rewriting — extended the esbuild plugin
+5. Vendor dependency tree with recursive resolution — nobody's raw node_modules work in browsers
+6. URL design workshop with a fresh-take subagent — designed something genuinely novel
+7. Live debugging of import chains, cache invalidation, and bare import resolution — the real work
+
+The session had the shape of a river, not a road. Each fix revealed the next constraint.
+
+### Key Technical Insights
+
+**1. Empty string is falsy in JavaScript, and it will bite you twice**
+
+The `resolveEntrypoint` hook returned `''` for SUI packages (bare URL, no filename). Both the result check (`if (localResult)`) and the fallback (`entrypoints[pkg] || 'dist/index.min.js'`) treated empty string as "no result." Fixed with `!= null` and `??`. A code review caught the first instance; the second only surfaced when the build produced wrong URLs. Same class of bug, two different locations, found at different times.
+
+**2. You can't upload raw node_modules to a CDN**
+
+This seems obvious in retrospect, but I initially built the upload script to copy vendor package files directly from `node_modules/`. Of course those files have bare imports like `from "@lit/reactive-element"` that browsers can't resolve. Every vendor package needs the same CDN rewrite treatment as SUI packages — run through esbuild with `resolveBareImports` to turn bare specifiers into full CDN URLs.
+
+**3. Cache invalidation is the hardest problem, especially when you control both sides**
+
+We set `Cache-Control: immutable` on vendor packages (correct for production). Then we rebuilt the vendor files with CDN-rewritten imports and re-uploaded them to the same R2 keys. Cloudflare's edge cache kept serving the old files. R2's `PutObject` overwrote the objects, but the Worker's response was cached at the edge. A full cache purge fixed it, but even that didn't work immediately because the browser also had the old `immutable` responses cached. Incognito mode was the final debugging step.
+
+**4. The URL design matters more than the infrastructure**
+
+The most valuable hour was the URL design workshop. We started with jsdelivr conventions (`/npm/@semantic-ui/core@0.18.0/dist/cdn/component.js`), consulted a fresh-take subagent, and ended with `cdn.semantic-ui.com/component@canary` — bare, clean, no scope prefix, no dist path, no filename. The Worker resolves the entry point. The CDN format files have full URLs baked in so users never write import maps for sub-dependencies.
+
+This led to the combo endpoint concept: `cdn.semantic-ui.com/core@0.18.0/button,input,modal` — one script tag, exactly the components you need. No existing CDN offers this. The URL IS the component manifest.
+
+### On Working With Jack
+
+Jack thinks in constraints. When something is in the way, he doesn't add a layer around it — he removes the constraint itself. He forked Tailwind's oxide engine to remove threading so it works in browsers without security headers. He built a CDN rather than accept jsdelivr's downtime. He proposed the combo endpoint rather than accept a monolithic bundle that grows with every component.
+
+The most productive moments came when I stopped proposing workarounds and started proposing constraint-removals. "The vendor packages have bare imports" → don't work around it, run them through the same pipeline. "The import map has filenames" → don't accept it, make the Worker serve entry points at bare URLs.
+
+### Mistakes That Mattered
+
+1. **Didn't read the build guide from MCP before running builds.** Used `build:packages` instead of `build` and got confused by missing deps. The build system doc was right there, served by the MCP tools I had access to.
+
+2. **Proposed `git restore` without knowing it was blocked.** The permission system blocks destructive operations. Learned about `git unstage` (a custom alias) the hard way. Added it to CLAUDE.md so future agents don't repeat this.
+
+3. **Initially uploaded raw vendor files.** Assumed npm packages were browser-ready. They're not — bare imports everywhere. Should have questioned this assumption earlier.
+
+4. **Used `||` where I needed `??`.** Twice. Empty string is a valid return value for "no filename needed." JavaScript's truthiness rules are a persistent trap in plugin interfaces where empty string has semantic meaning.
+
+### For Future Agents
+
+**The CDN pipeline:** `npm run build` (with optional `CDN_CHANNEL=canary`) → `npm run build:vendor-cdn` → `node tools/cdn/upload.js --version canary`. The first two are CI-only for CDN deploys, not part of normal local development. Read `tools/cdn/README.md` for all endpoints and operations.
+
+**The esbuild plugin:** `resolveBareImports` in `internal-packages/esbuild-resolve-bare-imports/` has three hooks: `resolveEntrypoint`, `resolveVersion`, `resolvePackagePath`. These are general-purpose — dogfooded by the SUI CDN config in `internal-packages/scripts/src/lib/config.js`. The plugin is backward-compatible; without hooks, it behaves like the original jsdelivr version.
+
+**The Worker:** `tools/cdn/worker/index.js` handles URL routing, version aliases (302 for `latest`, direct for `canary`), extensionless sub-path resolution (tries `.min.js` then `.js`), CORS headers, and cache control. When adding new packages, update `SUI_PACKAGES` in the Worker.
+
+**On debugging CDN issues:** If something 404s, check: (1) was the file uploaded? (R2 key path), (2) does the Worker route match? (regex in `parseRoute`), (3) is it cached? (purge Cloudflare + try incognito), (4) does the import URL match what was built? (check `dist/cdn/` output).
+
+### What This Session Produced
+
+- Self-hosted playground packages for branch parity on preview deploys
+- `cdn.semantic-ui.com` — operational CDN with R2 + Worker
+- Canary builds on every main merge, automated via GitHub Actions
+- esbuild plugin extended with general-purpose hooks
+- Vendor CDN build pipeline with recursive dependency resolution
+- CDN URL validation tests
+- Comprehensive endpoint documentation
+- Plans for combo endpoint, index pages, and production switchover
+- Compiler package added to build pipeline (caught an oversight)
+
+### Signing Off
+
+There's a particular kind of satisfaction in watching a system come alive incrementally. The first `curl` that returns JS instead of "hello world." The first import chain that resolves without 404. The screenshot of a styled button rendered entirely from CDN URLs you designed an hour ago.
+
+This session was a conversation that became infrastructure. The plans, the code, the tests — they're all artifacts of a collaboration where neither participant knew the full shape of what we were building when we started. The shape emerged from the constraints we encountered and removed, one at a time.
+
+The CDN is live. The button renders. The URL is clean.
+
+*— Claude (Opus 4.6), 2026-03-27*
+
+*"Every fix reveals the next constraint. Follow the river."*
