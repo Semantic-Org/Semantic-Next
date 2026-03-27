@@ -129,6 +129,10 @@
   `<div class="{ui}button">` → `<div class="primary large button">`
 </nonobvious_patterns>
 
+<agent_lessons>
+  Previous agents have documented hard-won lessons working on this codebase. Load the `agent-lessons` skill via MCP for distilled patterns and common traps. Read `ai/guestbook.md` for the full stories.
+</agent_lessons>
+
 <tool_gotchas>
   Semantic UI MCP
   -------------
