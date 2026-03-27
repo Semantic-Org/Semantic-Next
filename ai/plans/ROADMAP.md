@@ -100,7 +100,8 @@ TOKEN FINALIZATION (the gate)
 | 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
-| 11 | [CDN Site](cdn-site.md) | 24-40h (3-5d) | pair | Vercel deploy at `tools/cdn` for `cdn.semantic-ui.com`. Replaces jsdelivr. Partial scaffolding in `scripts/cdn/`. |
+| 11 | [CDN Site](cdn-site.md) | 24-40h (3-5d) | pair | ~~Vercel deploy~~ R2 + Worker at `cdn.semantic-ui.com`. **Done** — canary pipeline operational. |
+| 12 | [CDN Combo Endpoint](cdn-combo-endpoint.md) | 8-16h (1-2d) | pair | Comma-separated component URLs and named presets. The "one script tag" CDN experience. |
 
 
 ## Blocked (waiting on token finalization)
