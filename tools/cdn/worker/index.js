@@ -20,10 +20,42 @@ const SUI_PACKAGES = new Set([
   'utils',
 ]);
 
+// Combo endpoint presets — loaded from R2 at runtime.
+// Source of truth: `bundle` field in each component's .spec.js file,
+// aggregated at build time into dist/presets.json and uploaded to _meta/presets.json.
+let cachedPresets = null;
+let presetsExpiry = 0;
+
+async function getPresets(env) {
+  const now = Date.now();
+  if (cachedPresets && now < presetsExpiry) {
+    return cachedPresets;
+  }
+  const object = await env.CDN_BUCKET.get('_meta/presets.json');
+  if (object) {
+    cachedPresets = JSON.parse(await object.text());
+    presetsExpiry = now + 60_000;
+  }
+  return cachedPresets || {};
+}
+
 // Entry point follows the convention {name}.min.js, with core as the exception
 function getSuiEntrypoint(name) {
   if (name === 'core') { return 'semantic-ui.min.js'; }
   return `${name}.min.js`;
+}
+
+// Detect combo requests: comma-separated names or preset name.
+// Returns array of component names, or null if not a combo request.
+async function resolveCombo(filepath, env) {
+  if (filepath.includes(',')) {
+    return filepath.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  const presets = await getPresets(env);
+  if (presets[filepath]) {
+    return presets[filepath];
+  }
+  return null;
 }
 
 const CONTENT_TYPES = {
@@ -185,6 +217,24 @@ export default {
             ? `/${name}@${resolved}/${filepath}`
             : `/${name}@${resolved}`;
           return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        // Combo endpoint — comma-separated components or preset name (core only)
+        if (name === 'core' && filepath) {
+          const comboComponents = await resolveCombo(filepath, env);
+          if (comboComponents) {
+            const origin = url.origin;
+            const lines = comboComponents.map(
+              c => `export * from "${origin}/core@${version}/${c}.min.js";`,
+            );
+            return new Response(lines.join('\n') + '\n', {
+              headers: {
+                'Content-Type': 'application/javascript',
+                ...corsHeaders(),
+                ...cacheHeaders(version),
+              },
+            });
+          }
         }
 
         // No filepath → serve the entry point JS directly

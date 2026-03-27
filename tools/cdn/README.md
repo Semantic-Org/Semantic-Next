@@ -85,6 +85,34 @@ https://cdn.semantic-ui.com/vendor/tailwindcss@4.1.12/dist/lib.mjs
 https://cdn.semantic-ui.com/vendor/@pagefind/modular-ui@1.3.0/npm_dist/mjs/modular-core.mjs
 ```
 
+### Combo Endpoint
+
+Load specific components or named presets with a single `<script>` tag. Core package only — no import map needed.
+
+**Comma-separated components:**
+
+| URL | Behavior |
+|---|---|
+| `https://cdn.semantic-ui.com/core@0.18.0/button,input,modal` | Generates shim importing each component |
+| `https://cdn.semantic-ui.com/core@canary/button,menu` | Canary channel, 60s TTL |
+
+**Named presets:**
+
+| URL | Components |
+|---|---|
+| `https://cdn.semantic-ui.com/core@0.18.0/standard` | button, input, label, icon, image, menu, segment, container, divider, card, table, spinner, modal |
+| `https://cdn.semantic-ui.com/core@0.18.0/form` | input |
+| `https://cdn.semantic-ui.com/core@0.18.0/layout` | container, segment, rail, divider, card, table |
+
+The Worker generates a tiny JS module that re-exports each component's CDN format file. The browser follows the import chain and deduplicates shared deps by URL identity.
+
+```js
+// Generated for /core@0.18.0/button,input,modal
+export * from "https://cdn.semantic-ui.com/core@0.18.0/button.min.js";
+export * from "https://cdn.semantic-ui.com/core@0.18.0/input.min.js";
+export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
+```
+
 ### Version Aliases
 
 | Alias | Behavior | Cache |
@@ -95,19 +123,26 @@ https://cdn.semantic-ui.com/vendor/@pagefind/modular-ui@1.3.0/npm_dist/mjs/modul
 
 `latest` is updated on tagged release. `canary` is overwritten on every main merge. Vendor packages are always exact versions — no aliases.
 
-### Proposed: Combo Endpoint (not yet implemented)
-
-```
-https://cdn.semantic-ui.com/core@0.18.0/button,input,modal  → custom component set
-https://cdn.semantic-ui.com/core@0.18.0/standard             → preset (~15 common components)
-https://cdn.semantic-ui.com/core@0.18.0/form                 → preset (form components)
-```
-
-See [cdn-combo-endpoint.md](../../ai/plans/cdn-combo-endpoint.md) for details.
-
 ## Usage Examples
 
-### Using pre-built UI components (import map)
+### Combo endpoint (simplest)
+
+```html
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
+<ui-button primary>Click Me</ui-button>
+<ui-input placeholder="Type here"></ui-input>
+```
+
+### Specific components
+
+```html
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input,modal"></script>
+<ui-button primary>Click Me</ui-button>
+```
+
+### Import map (full control)
 
 ```html
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
@@ -140,14 +175,6 @@ See [cdn-combo-endpoint.md](../../ai/plans/cdn-combo-endpoint.md) for details.
   });
 </script>
 <my-counter></my-counter>
-```
-
-### Proposed: Combo endpoint (not yet implemented)
-
-```html
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
-<script type="module" src="https://cdn.semantic-ui.com/core@0.18.0/button,input,modal"></script>
-<ui-button primary>Click Me</ui-button>
 ```
 
 ## Operations
