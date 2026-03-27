@@ -149,6 +149,26 @@ function getInstalledVersion(packageName) {
   return null;
 }
 
+function getVendorEntrypoint(packageName) {
+  const pkgPath = join(ROOT, 'node_modules', ...packageName.split('/'), 'package.json');
+  if (!existsSync(pkgPath)) { return null; }
+  try {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    const mainExport = pkg.exports?.['.'];
+    if (mainExport && typeof mainExport === 'object') {
+      let source = mainExport.browser || mainExport.import || mainExport.module || mainExport.default;
+      if (typeof source === 'object') {
+        source = source.default || source.development || source.production;
+      }
+      if (typeof source === 'string') { return source.replace(/^\.\//, ''); }
+    }
+    const entry = pkg.module || pkg.main;
+    if (entry) { return entry.replace(/^\.\//, ''); }
+  }
+  catch { /* fall through */ }
+  return null;
+}
+
 async function buildVendorCDN() {
   const entries = getVendorEntries();
   const allDeps = getAllVendorDeps();
@@ -189,7 +209,7 @@ async function buildVendorCDN() {
               if (packageName.startsWith(SUI_SCOPE)) {
                 return '';
               }
-              return null;
+              return getVendorEntrypoint(packageName);
             },
             resolveVersion(packageName, declaredVersion) {
               if (packageName.startsWith(SUI_SCOPE)) {
