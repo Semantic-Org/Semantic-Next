@@ -1,49 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CDN Test</title>
+  <title>CDN Combo Endpoint Test</title>
   <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
   <style>
     body { padding: 2rem; font-family: sans-serif; }
     section { margin-bottom: 2rem; }
-    h2 { margin-top: 2rem; }
-    #status { margin-top: 1rem; color: gray; }
+    h2 { margin-top: 2rem; color: #333; }
+    .test-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    #status { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 4px; }
+    .pass { background: #e6f4ea; color: #1e7e34; }
+    .fail { background: #fde8e8; color: #c0392b; }
+    .loading { background: #f0f0f0; color: #666; }
   </style>
 </head>
 <body>
   <h1>CDN Combo Endpoint Test</h1>
+  <div id="status" class="loading">Loading standard preset...</div>
 
   <section>
-    <h2>Preset: standard</h2>
-    <ui-button primary>Button</ui-button>
-    <ui-input placeholder="Input"></ui-input>
-    <ui-label>Label</ui-label>
-    <ui-icon icon="star"></ui-icon>
-    <ui-spinner></ui-spinner>
+    <h2>Interactive</h2>
+    <div class="test-row">
+      <ui-button primary>Primary</ui-button>
+      <ui-button secondary>Secondary</ui-button>
+      <ui-button icon="star">Favorite</ui-button>
+      <ui-input placeholder="Type something..."></ui-input>
+    </div>
+  </section>
+
+  <section>
+    <h2>Display</h2>
+    <div class="test-row">
+      <ui-label>Default Label</ui-label>
+      <ui-label primary>Primary</ui-label>
+      <ui-icon icon="check"></ui-icon>
+      <ui-icon icon="star"></ui-icon>
+      <ui-icon icon="heart"></ui-icon>
+      <ui-spinner></ui-spinner>
+    </div>
   </section>
 
   <section>
     <h2>Layout</h2>
     <ui-container>
-      <ui-segment>Segment inside container</ui-segment>
+      <ui-segment>
+        Segment with content inside a container
+      </ui-segment>
       <ui-divider></ui-divider>
-      <ui-card>
-        <div slot="content">Card content</div>
-      </ui-card>
+      <div class="test-row">
+        <ui-card>
+          <div slot="header">Card Title</div>
+          <div slot="content">Card content goes here</div>
+        </ui-card>
+        <ui-card>
+          <div slot="header">Another Card</div>
+          <div slot="content">More content</div>
+        </ui-card>
+      </div>
     </ui-container>
   </section>
 
-  <div id="status">Loading...</div>
+  <section>
+    <h2>Data</h2>
+    <ui-table>
+      <table>
+        <thead>
+          <tr><th>Component</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Button</td><td><ui-label positive>Loaded</ui-label></td></tr>
+          <tr><td>Input</td><td><ui-label positive>Loaded</ui-label></td></tr>
+          <tr><td>Modal</td><td><ui-label positive>Loaded</ui-label></td></tr>
+        </tbody>
+      </table>
+    </ui-table>
+  </section>
+
+  <section>
+    <h2>Modal</h2>
+    <ui-button onclick="document.querySelector('ui-modal').show()">Open Modal</ui-button>
+    <ui-modal>
+      <div slot="header">Test Modal</div>
+      <div slot="content">This modal was loaded via the combo endpoint.</div>
+      <div slot="actions">
+        <ui-button onclick="document.querySelector('ui-modal').hide()">Close</ui-button>
+      </div>
+    </ui-modal>
+  </section>
 
   <script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
   <script type="module">
-    // Wait for components to register
-    customElements.whenDefined('ui-button').then(() => {
-      document.getElementById('status').textContent = 'Components loaded via combo endpoint!';
-    }).catch(e => {
-      document.getElementById('status').textContent = 'Error: ' + e.message;
-      console.error(e);
-    });
+    const status = document.getElementById('status');
+    const components = [
+      'ui-button', 'ui-input', 'ui-label', 'ui-icon',
+      'ui-spinner', 'ui-segment', 'ui-container', 'ui-divider',
+      'ui-card', 'ui-table', 'ui-modal', 'ui-image', 'ui-menu',
+    ];
+    Promise.all(components.map(c => customElements.whenDefined(c)))
+      .then(() => {
+        status.textContent = `All ${components.length} components loaded via standard preset`;
+        status.className = 'pass';
+      })
+      .catch(e => {
+        status.textContent = 'Error: ' + e.message;
+        status.className = 'fail';
+        console.error(e);
+      });
   </script>
 </body>
 </html>
