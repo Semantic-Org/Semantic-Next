@@ -13,6 +13,7 @@ export default {
   name: 'Segment',
   description: 'A segment is used to create a grouping of related content',
   tagName: 'ui-segment',
+  bundle: ['standard', 'layout'],
   exportName: 'Segment',
 
   content: [],

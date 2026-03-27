@@ -4,6 +4,7 @@ export default {
   description: 'A table displays a collections of data grouped into rows',
   tagName: 'ui-table',
   exportName: 'Table',
+  bundle: ['standard', 'layout'],
   content: [],
   types: [],
   states: [],

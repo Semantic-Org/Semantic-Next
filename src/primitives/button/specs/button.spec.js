@@ -14,6 +14,7 @@ export default {
   description: 'A button indicates a possible user action.',
   tagName: 'ui-button',
   exportName: 'Button',
+  bundle: 'standard',
   examples: {
     defaultPluralContent: `
       <ui-button>One</ui-button>

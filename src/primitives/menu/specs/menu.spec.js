@@ -4,6 +4,7 @@ export default {
   description: 'A menu displays grouped navigation actions',
   tagName: 'ui-menu',
   exportName: 'Menu',
+  bundle: 'standard',
   content: [
     {
       name: 'Item',

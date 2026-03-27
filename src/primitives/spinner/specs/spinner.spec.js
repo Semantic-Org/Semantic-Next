@@ -8,6 +8,7 @@ export default {
   description: 'A spinner indicates indeterminate activity',
   tagName: 'ui-spinner',
   exportName: 'Spinner',
+  bundle: 'standard',
 
   content: [
     {

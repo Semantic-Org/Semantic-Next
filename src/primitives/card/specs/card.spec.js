@@ -10,6 +10,7 @@ export default {
   description: 'A card displays segmented content in a manner similar to a playing card.',
   tagName: 'ui-card',
   exportName: 'Card',
+  bundle: ['standard', 'layout'],
   exampleCode: `<ui-card image="/images/new-avatar/dima2.png">
   <div slot="header">Dima B</div>
   <div slot="subheader">Software Engineer</div>

@@ -13,6 +13,7 @@ export default {
   name: 'Icon',
   description: 'An icon is a glyph used to represent something else',
   tagName: 'ui-icon',
+  bundle: 'standard',
   exportName: 'Icon',
   content: [
     {
