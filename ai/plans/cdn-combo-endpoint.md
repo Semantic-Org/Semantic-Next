@@ -66,17 +66,11 @@ Named presets expand to component lists. Defined in the Worker or a manifest in 
 
 Presets evolve as more components are built. The `standard` preset is the default recommendation for getting started.
 
-### Bundle Endpoint (separate, simpler)
+### Bundle Endpoint (lower priority, separate scope)
 
-The combo endpoint uses CDN format files (deduplicated, multi-request). A separate `/bundle/` path serves self-contained single-file bundles for cases where zero import chain is preferred:
+A `/bundle/` path serving self-contained single-file bundles (all deps inlined) is a separate feature. The combo endpoint is the priority — it covers the primary use case (multiple components, deduplicated) and scales better.
 
-```
-cdn.semantic-ui.com/core@0.18.0/bundle/button.min.js     → single file, all deps inlined
-cdn.semantic-ui.com/core@0.18.0/bundle/semantic-ui.min.js → full framework bundle
-cdn.semantic-ui.com/component@0.18.0/bundle               → bare URL → component.min.js
-```
-
-The bundle endpoint is simpler but fatter — each file includes all deps. Best for single-component use cases. The combo endpoint is better for 2+ components.
+The combo endpoint is scoped exclusively for `@semantic-ui/core` (the UI components). Framework packages like `component`, `reactivity`, etc. are served individually via the existing CDN format bare URLs.
 
 ### Cache Strategy
 
