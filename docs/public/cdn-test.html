@@ -5,107 +5,132 @@
   <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
   <style>
     body { padding: 2rem; font-family: sans-serif; }
-    section { margin-bottom: 2rem; }
-    h2 { margin-top: 2rem; color: #333; }
+    section { margin-bottom: 2rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px; }
+    h2 { margin-top: 0; }
     .test-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-    #status { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 4px; }
-    .pass { background: #e6f4ea; color: #1e7e34; }
-    .fail { background: #fde8e8; color: #c0392b; }
-    .loading { background: #f0f0f0; color: #666; }
+    #log { margin-top: 1rem; white-space: pre-wrap; font-family: monospace; font-size: 13px; }
+    .error { color: red; }
+    .ok { color: green; }
+    .info { color: #666; }
   </style>
 </head>
 <body>
   <h1>CDN Combo Endpoint Test</h1>
-  <div id="status" class="loading">Loading standard preset...</div>
+  <div id="log"></div>
 
-  <section>
-    <h2>Interactive</h2>
+  <!-- Test 1: Comma-separated (button, input) -->
+  <section id="test-combo">
+    <h2>1. Comma-separated: button,input</h2>
     <div class="test-row">
-      <ui-button primary>Primary</ui-button>
+      <ui-button primary>Primary Button</ui-button>
       <ui-button secondary>Secondary</ui-button>
-      <ui-button icon="star">Favorite</ui-button>
-      <ui-input placeholder="Type something..."></ui-input>
+      <ui-input placeholder="Type here..."></ui-input>
     </div>
   </section>
 
-  <section>
-    <h2>Display</h2>
+  <!-- Test 2: Individual components (icon, label, spinner) -->
+  <section id="test-individual">
+    <h2>2. Comma-separated: icon,label,spinner</h2>
     <div class="test-row">
-      <ui-label>Default Label</ui-label>
-      <ui-label primary>Primary</ui-label>
-      <ui-icon icon="check"></ui-icon>
       <ui-icon icon="star"></ui-icon>
       <ui-icon icon="heart"></ui-icon>
+      <ui-icon icon="check"></ui-icon>
+      <ui-label>Default</ui-label>
+      <ui-label primary>Primary</ui-label>
       <ui-spinner></ui-spinner>
     </div>
   </section>
 
-  <section>
-    <h2>Layout</h2>
+  <!-- Test 3: Layout components (container, segment, divider, card) -->
+  <section id="test-layout">
+    <h2>3. Comma-separated: container,segment,divider,card</h2>
     <ui-container>
-      <ui-segment>
-        Segment with content inside a container
-      </ui-segment>
+      <ui-segment>Segment inside container</ui-segment>
       <ui-divider></ui-divider>
       <div class="test-row">
         <ui-card>
-          <div slot="header">Card Title</div>
-          <div slot="content">Card content goes here</div>
+          <div slot="header">Card A</div>
+          <div slot="content">Content</div>
         </ui-card>
         <ui-card>
-          <div slot="header">Another Card</div>
-          <div slot="content">More content</div>
+          <div slot="header">Card B</div>
+          <div slot="content">Content</div>
         </ui-card>
       </div>
     </ui-container>
   </section>
 
-  <section>
-    <h2>Data</h2>
+  <!-- Test 4: Data (table, menu) -->
+  <section id="test-data">
+    <h2>4. Comma-separated: table,menu</h2>
     <ui-table>
       <table>
-        <thead>
-          <tr><th>Component</th><th>Status</th></tr>
-        </thead>
+        <thead><tr><th>Name</th><th>Status</th></tr></thead>
         <tbody>
-          <tr><td>Button</td><td><ui-label positive>Loaded</ui-label></td></tr>
-          <tr><td>Input</td><td><ui-label positive>Loaded</ui-label></td></tr>
-          <tr><td>Modal</td><td><ui-label positive>Loaded</ui-label></td></tr>
+          <tr><td>Combo endpoint</td><td>Live</td></tr>
+          <tr><td>Presets</td><td>Live</td></tr>
         </tbody>
       </table>
     </ui-table>
   </section>
 
-  <section>
-    <h2>Modal</h2>
-    <ui-button onclick="document.querySelector('ui-modal').show()">Open Modal</ui-button>
+  <!-- Test 5: Modal + Image (interactive) -->
+  <section id="test-modal">
+    <h2>5. Comma-separated: modal,image</h2>
+    <ui-button onclick="document.querySelector('ui-modal').component.show()">Open Modal</ui-button>
+    <ui-image src="https://placehold.co/150x100" small></ui-image>
     <ui-modal>
       <div slot="header">Test Modal</div>
-      <div slot="content">This modal was loaded via the combo endpoint.</div>
+      <div slot="content">Loaded via combo endpoint.</div>
       <div slot="actions">
-        <ui-button onclick="document.querySelector('ui-modal').hide()">Close</ui-button>
+        <ui-button onclick="document.querySelector('ui-modal').component.hide()">Close</ui-button>
       </div>
     </ui-modal>
   </section>
 
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
+  <!-- Test 6: Standard preset -->
+  <section id="test-preset">
+    <h2>6. Preset: standard</h2>
+    <p>All components above should still work — standard includes everything.</p>
+  </section>
+
+  <script>
+    const log = document.getElementById('log');
+    function msg(text, type) {
+      const line = document.createElement('div');
+      line.className = type || 'info';
+      line.textContent = text;
+      log.appendChild(line);
+    }
+    window.addEventListener('error', e => msg('Error: ' + e.message, 'error'));
+    window.addEventListener('unhandledrejection', e => msg('Rejected: ' + e.reason, 'error'));
+  </script>
+
+  <!-- Load each group separately to isolate failures -->
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon,label,spinner"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/container,segment,divider,card"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/table,menu"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/modal,image"></script>
+
   <script type="module">
-    const status = document.getElementById('status');
-    const components = [
-      'ui-button', 'ui-input', 'ui-label', 'ui-icon',
-      'ui-spinner', 'ui-segment', 'ui-container', 'ui-divider',
-      'ui-card', 'ui-table', 'ui-modal', 'ui-image', 'ui-menu',
-    ];
-    Promise.all(components.map(c => customElements.whenDefined(c)))
-      .then(() => {
-        status.textContent = `All ${components.length} components loaded via standard preset`;
-        status.className = 'pass';
-      })
-      .catch(e => {
-        status.textContent = 'Error: ' + e.message;
-        status.className = 'fail';
-        console.error(e);
-      });
+    const groups = {
+      'button,input': ['ui-button', 'ui-input'],
+      'icon,label,spinner': ['ui-icon', 'ui-label', 'ui-spinner'],
+      'container,segment,divider,card': ['ui-container', 'ui-segment', 'ui-divider', 'ui-card'],
+      'table,menu': ['ui-table', 'ui-menu'],
+      'modal,image': ['ui-modal', 'ui-image'],
+    };
+
+    for (const [group, tags] of Object.entries(groups)) {
+      try {
+        await Promise.all(tags.map(t => customElements.whenDefined(t)));
+        msg(`${group}: all defined`, 'ok');
+      } catch(e) {
+        msg(`${group}: FAILED — ${e.message}`, 'error');
+      }
+    }
+    msg('Done.', 'info');
   </script>
 </body>
 </html>
