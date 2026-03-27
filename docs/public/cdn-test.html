@@ -1,32 +1,49 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <!-- Add Semantic UI -->
-    <script type="importmap">
-{
-  "imports": {
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/@semantic-ui/component/0.10.0/src/index.js"
-  }
-}
-    </script>
+<head>
+  <title>CDN Test</title>
+  <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; font-family: sans-serif; }
+    section { margin-bottom: 2rem; }
+    h2 { margin-top: 2rem; }
+    #status { margin-top: 1rem; color: gray; }
+  </style>
+</head>
+<body>
+  <h1>CDN Combo Endpoint Test</h1>
 
-    <!-- Confirm modules loading -->
-    <script type="module">
-      import { defineComponent } from '@semantic-ui/component';
+  <section>
+    <h2>Preset: standard</h2>
+    <ui-button primary>Button</ui-button>
+    <ui-input placeholder="Input"></ui-input>
+    <ui-label>Label</ui-label>
+    <ui-icon icon="star"></ui-icon>
+    <ui-spinner></ui-spinner>
+  </section>
 
-      defineComponent({
-        tagName: 'current-time',
-        template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
-        css: 'b { color: var(--primary-text-color); }',
-        defaultState: { time: new Date() },
-        onCreated({state}) {
-          setInterval(() => state.time.now(), 1000);
-        }
-      });
-    </script>
-  </head>
-  <body class="dark">
-    <current-time></current-time>
-    <script type="module">
-    </script>
-  </body>
+  <section>
+    <h2>Layout</h2>
+    <ui-container>
+      <ui-segment>Segment inside container</ui-segment>
+      <ui-divider></ui-divider>
+      <ui-card>
+        <div slot="content">Card content</div>
+      </ui-card>
+    </ui-container>
+  </section>
+
+  <div id="status">Loading...</div>
+
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
+  <script type="module">
+    // Wait for components to register
+    customElements.whenDefined('ui-button').then(() => {
+      document.getElementById('status').textContent = 'Components loaded via combo endpoint!';
+    }).catch(e => {
+      document.getElementById('status').textContent = 'Error: ' + e.message;
+      console.error(e);
+    });
+  </script>
+</body>
 </html>

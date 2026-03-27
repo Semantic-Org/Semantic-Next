@@ -136,6 +136,7 @@ export default {
   description: 'A button indicates a possible user action',
   tagName: 'ui-button',           // HTML tag name
   exportName: 'Button',            // JavaScript export name
+  bundle: 'standard',             // CDN combo endpoint preset(s)
 
   // Plural (collection) support
   supportsPlural: true,
@@ -178,7 +179,28 @@ The build system generates two files from each `.spec.js`:
 1. **`{component}.spec.json`** - Machine-readable snapshot for LLMs and tooling
 2. **`{component}.component.js`** - Optimized runtime spec for `defineComponent()`
 
+Additionally, the build aggregates `bundle` fields across all specs into `dist/presets.json` — a manifest mapping preset names to component lists for the CDN combo endpoint.
+
 **Important**: Never edit generated files directly. Always edit the source `.spec.js` files.
+
+### Bundle Field (CDN Presets)
+
+The `bundle` field declares which CDN combo endpoint presets include this component. It can be a string or array:
+
+```javascript
+bundle: 'standard',                    // single preset
+bundle: ['standard', 'form'],          // multiple presets
+bundle: ['standard', 'layout'],        // standard + layout
+```
+
+At build time, these are aggregated into `dist/presets.json` which the CDN upload script reads and publishes to R2. The CDN Worker uses presets to resolve URLs like `/core@canary/standard` into the correct set of component imports.
+
+Current presets:
+- **`standard`** — Components an agent or developer would typically need for general-purpose UI
+- **`form`** — Form-related components
+- **`layout`** — Page structure components
+
+Not every component needs a `bundle` field. Components that are docs-internal or highly specialized may not belong in any preset.
 
 ---
 
