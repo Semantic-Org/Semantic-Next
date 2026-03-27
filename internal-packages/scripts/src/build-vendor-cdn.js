@@ -79,12 +79,15 @@ function getVendorEntries() {
 
     // Walk exports to find all JS entry points
     for (const [exportPath, conditions] of Object.entries(exports)) {
+      // Skip server-only export paths
+      if (exportPath.includes('server') || exportPath.includes('node')) { continue; }
+
       let source;
       if (typeof conditions === 'string') {
         source = conditions;
       }
       else if (typeof conditions === 'object') {
-        // Skip server-only exports
+        // Skip exports that only have node/default (no browser entry)
         if (conditions.node && !conditions.browser && !conditions.import) { continue; }
         // Prefer browser-compatible entry
         source = conditions.browser || conditions.import || conditions.module || conditions.default;
