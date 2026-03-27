@@ -154,13 +154,11 @@ See [cdn-combo-endpoint.md](../../ai/plans/cdn-combo-endpoint.md) for details.
 
 ### Deploy Worker
 
-Deployed manually (CI token doesn't have Workers permissions yet):
-
 ```bash
 cd tools/cdn && npx wrangler deploy
 ```
 
-Deploy after changing `worker/index.js`. Not needed for upload-only changes.
+Deploy after changing `worker/index.js`. Not needed for upload-only changes. CI deploys the Worker automatically on each main merge and tag push.
 
 ### Upload Files
 
@@ -172,9 +170,19 @@ cd tools/cdn && node upload.js --version canary
 
 # Tagged release
 cd tools/cdn && node upload.js --version 0.18.0 --latest
+```
 
-# Force overwrite vendor packages (one-time migration)
-cd tools/cdn && node upload.js --version canary --force-vendor
+### Rebuilding Vendor Packages
+
+Vendor packages (lit, tailwindcss-iso, etc.) are built through the CDN rewrite pipeline (`build-vendor-cdn.js`) and uploaded to R2. They're immutable by version — once `lit@3.3.2` is uploaded, subsequent uploads skip it.
+
+**If vendor packages need to be rebuilt** (e.g., the build pipeline changed, entrypoints were wrong, or bare imports weren't rewritten correctly):
+
+1. Rebuild locally: `npm run build:vendor-cdn`
+2. Force re-upload: `cd tools/cdn && node upload.js --version canary --force-vendor`
+3. Purge Cloudflare cache: dashboard → `semantic-ui.com` zone → Caching → Purge Everything
+
+The `--force-vendor` flag skips the `objectExists` check and overwrites all vendor files in R2. Without it, existing versions are skipped. In CI, add `--force-vendor` to the upload command in `.github/workflows/cdn-canary.yml` temporarily, then remove it after the deploy.
 ```
 
 Requires `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET_NAME` env vars.
