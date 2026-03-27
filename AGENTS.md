@@ -10,9 +10,11 @@
   - src/{primitives,components,behaviors} — First-party UI components built WITH the framework (the design system)
   - src/css/tokens - Underlying css tokens used for theming
   - docs/ — Astro documentation site
-  - tools/cdn — CDN deployment tooling (Cloudflare Worker + R2 upload)
+  - tools/cdn — CDN deployment tooling (Cloudflare Worker + R2 upload). See `tools/cdn/README.md` for all endpoints and operations.
 
   **Adding a new package:** When a new package is added to `packages/`, update `build:packages` in the root `package.json` (wireit deps) and the `SUI_PACKAGES` set in `tools/cdn/worker/index.js`. Other scripts discover packages dynamically from `packages/*/`.
+
+  **CDN builds:** The CDN format (`dist/cdn/`) rewrites bare imports to `cdn.semantic-ui.com` URLs. Configured in `internal-packages/scripts/src/lib/config.js` (`CDN_CONFIG`). Set `CDN_CHANNEL=canary` env var during build to rewrite SUI package versions to `canary` instead of the `package.json` version. Vendor packages are built separately via `npm run build:vendor-cdn` (`internal-packages/scripts/src/build-vendor-cdn.js`) — this is CI-only, not part of the standard `npm run build`.
 
   Documentation content, examples, API reference, and AI context are all available via
   Semantic UI MCP tools — use those rather than reading files directly from docs/ or ai/.
