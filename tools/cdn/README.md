@@ -6,71 +6,94 @@ Cloudflare Worker + R2 upload for `cdn.semantic-ui.com`.
 
 ### CSS
 
-```
-https://cdn.semantic-ui.com/css                          → latest (302 redirect)
-https://cdn.semantic-ui.com/css@0.18.0                   → versioned (immutable)
-https://cdn.semantic-ui.com/css@canary                   → canary (60s TTL)
-https://cdn.semantic-ui.com/semantic-ui.css              → latest (legacy alias)
-https://cdn.semantic-ui.com/semantic-ui@0.18.0.css       → versioned (legacy alias)
-```
+| URL | Behavior |
+|---|---|
+| `https://cdn.semantic-ui.com/css` | 302 → latest versioned CSS |
+| `https://cdn.semantic-ui.com/css@0.18.0` | Versioned, immutable |
+| `https://cdn.semantic-ui.com/css@canary` | Canary, 60s TTL |
+| `https://cdn.semantic-ui.com/css@latest` | 302 → exact version |
+| `https://cdn.semantic-ui.com/semantic-ui.css` | Alias → same as `/css` |
+| `https://cdn.semantic-ui.com/semantic-ui@0.18.0.css` | Alias → same as `/css@0.18.0` |
+| `https://cdn.semantic-ui.com/semantic-ui@canary.css` | Alias → same as `/css@canary` |
+
+Serves `semantic-ui.min.css` by default (minified).
 
 ### Import Map
 
-```
-https://cdn.semantic-ui.com/importmap.js                 → latest loader (synchronous, inline)
-https://cdn.semantic-ui.com/importmap@0.18.0.js          → versioned loader (immutable)
-https://cdn.semantic-ui.com/importmap@canary.js           → canary loader
-https://cdn.semantic-ui.com/importmap@0.18.0.json        → raw JSON
-```
+| URL | Behavior |
+|---|---|
+| `https://cdn.semantic-ui.com/importmap.js` | Latest loader — synchronous, inline import map |
+| `https://cdn.semantic-ui.com/importmap@0.18.0.js` | Versioned loader, immutable |
+| `https://cdn.semantic-ui.com/importmap@canary.js` | Canary loader |
+| `https://cdn.semantic-ui.com/importmap.json` | Latest raw JSON |
+| `https://cdn.semantic-ui.com/importmap@0.18.0.json` | Versioned raw JSON |
+| `https://cdn.semantic-ui.com/importmap@canary.json` | Canary raw JSON |
 
-### SUI Packages (CDN format — bare imports rewritten to full URLs)
+The `.js` loader is a synchronous script that injects a `<script type="importmap">` — no fetch, no race condition with `<script type="module">`.
 
-```
-https://cdn.semantic-ui.com/core@0.18.0                  → framework entry point (JS)
-https://cdn.semantic-ui.com/component@0.18.0             → defineComponent entry point (JS)
-https://cdn.semantic-ui.com/reactivity@0.18.0            → signals/reactions (JS)
-https://cdn.semantic-ui.com/query@0.18.0                 → DOM query (JS)
-https://cdn.semantic-ui.com/templating@0.18.0            → template engine (JS)
-https://cdn.semantic-ui.com/renderer@0.18.0              → lit renderer (JS)
-https://cdn.semantic-ui.com/compiler@0.18.0              → template compiler (JS)
-https://cdn.semantic-ui.com/utils@0.18.0                 → utilities (JS)
-https://cdn.semantic-ui.com/specs@0.18.0                 → component specs (JS)
-https://cdn.semantic-ui.com/tailwind@0.18.0              → tailwind plugin (JS)
-```
+### SUI Packages
 
-Sub-path exports:
-```
-https://cdn.semantic-ui.com/core@0.18.0/button.min.js    → individual component
-https://cdn.semantic-ui.com/specs@0.18.0/icons/meta      → sub-path (extensionless OK)
-```
+CDN format — all bare imports rewritten to full `cdn.semantic-ui.com` URLs. Deps resolved by the browser via URL identity, no import map needed for sub-dependencies.
 
-Full npm path alias (301 redirect to clean path):
-```
-https://cdn.semantic-ui.com/@semantic-ui/core@0.18.0     → redirects to /core@0.18.0
-```
+**Bare URL (no filename) → serves the package entry point JS:**
 
-### Vendor Packages (third-party, CDN-rewritten)
+| URL | Entry point served |
+|---|---|
+| `https://cdn.semantic-ui.com/core@0.18.0` | `semantic-ui.min.js` |
+| `https://cdn.semantic-ui.com/component@0.18.0` | `component.min.js` |
+| `https://cdn.semantic-ui.com/reactivity@0.18.0` | `reactivity.min.js` |
+| `https://cdn.semantic-ui.com/query@0.18.0` | `query.min.js` |
+| `https://cdn.semantic-ui.com/templating@0.18.0` | `templating.min.js` |
+| `https://cdn.semantic-ui.com/renderer@0.18.0` | `renderer.min.js` |
+| `https://cdn.semantic-ui.com/compiler@0.18.0` | `compiler.min.js` |
+| `https://cdn.semantic-ui.com/utils@0.18.0` | `utils.min.js` |
+| `https://cdn.semantic-ui.com/specs@0.18.0` | `specs.min.js` |
+| `https://cdn.semantic-ui.com/tailwind@0.18.0` | `tailwind.min.js` |
+
+**With filename — serves the exact file:**
+
+| URL | Behavior |
+|---|---|
+| `https://cdn.semantic-ui.com/core@0.18.0/button.min.js` | Individual component |
+| `https://cdn.semantic-ui.com/core@0.18.0/button.js` | Unminified |
+| `https://cdn.semantic-ui.com/specs@0.18.0/icons/meta` | Sub-path, extensionless — tries `.min.js` then `.js` |
+
+**npm path alias — 301 redirect to clean path:**
+
+| URL | Redirects to |
+|---|---|
+| `https://cdn.semantic-ui.com/@semantic-ui/core@0.18.0` | `/core@0.18.0` |
+| `https://cdn.semantic-ui.com/@semantic-ui/component@0.18.0/foo.js` | `/component@0.18.0/foo.js` |
+
+### Vendor Packages
+
+Third-party dependencies with bare imports rewritten to CDN URLs. Always pinned to exact versions from the lockfile — no `latest`/`canary`.
 
 ```
 https://cdn.semantic-ui.com/vendor/lit@3.3.2/index.js
 https://cdn.semantic-ui.com/vendor/lit@3.3.2/directive.js
 https://cdn.semantic-ui.com/vendor/lit@3.3.2/directives/repeat.js
+https://cdn.semantic-ui.com/vendor/lit@3.3.2/async-directive.js
+https://cdn.semantic-ui.com/vendor/lit@3.3.2/directives/if-defined.js
+https://cdn.semantic-ui.com/vendor/lit@3.3.2/directives/unsafe-html.js
 https://cdn.semantic-ui.com/vendor/lit-element@4.2.1/lit-element.js
 https://cdn.semantic-ui.com/vendor/lit-html@3.3.2/lit-html.js
 https://cdn.semantic-ui.com/vendor/@lit/reactive-element@2.1.1/reactive-element.js
 https://cdn.semantic-ui.com/vendor/@lit-labs/ssr-dom-shim@1.4.0/index.js
 https://cdn.semantic-ui.com/vendor/tailwindcss-iso@1.0.6/src/browser/index.js
 https://cdn.semantic-ui.com/vendor/tailwindcss@4.1.12/dist/lib.mjs
+https://cdn.semantic-ui.com/vendor/@pagefind/modular-ui@1.3.0/npm_dist/mjs/modular-core.mjs
 ```
 
 ### Version Aliases
 
-```
-https://cdn.semantic-ui.com/core@latest                  → 302 to exact version
-https://cdn.semantic-ui.com/core@canary                  → served directly (60s TTL)
-```
+| Alias | Behavior | Cache |
+|---|---|---|
+| `@latest` | 302 redirect to current stable release | 5 min TTL on redirect |
+| `@canary` | Served directly (files at canary path in R2) | 60s TTL |
+| `@0.18.0` (exact) | Served directly | Immutable (`max-age=31536000`) |
 
-`latest` updates on tagged release. `canary` updates on every main merge. Vendor packages are always pinned — no `latest`/`canary`.
+`latest` is updated on tagged release. `canary` is overwritten on every main merge. Vendor packages are always exact versions — no aliases.
 
 ### Proposed: Combo Endpoint (not yet implemented)
 
