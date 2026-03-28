@@ -1,8 +1,11 @@
 # CDN Combo Endpoint
 
-## Status
+## Completion
 
-Implemented. Deployed to `cdn.semantic-ui.com`.
+- **Estimated:** 8-16h (1-2d) pair
+- **Actual:** ~3.25h pair
+- **Completed:** 2026-03-27
+- **Delta notes:** Under estimate. Included preset system, spec-driven bundle field, pre/post-deploy testing, CI pipeline, cache purge, behavior CDN files, and README overhaul.
 
 ## What Was Built
 

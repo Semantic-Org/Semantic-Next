@@ -321,3 +321,10 @@ tools/cdn/
 ## Status
 
 Not started. Partial scaffolding exists in `scripts/cdn/`. Fresh-take evaluation at `ai/workspace/tmp/cdn-url-design-evaluation.md`.
+
+## Completion
+
+- **Estimated:** 24-40h (3-5d) pair
+- **Actual:** ~6h pair
+- **Completed:** 2026-03-27
+- **Delta notes:** Came in well under estimate. Cloudflare R2 + Worker was straightforward. CDN build fix (bare import rewriting) done in parallel.

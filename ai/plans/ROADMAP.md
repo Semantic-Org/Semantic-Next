@@ -29,7 +29,7 @@
 
 **Components (10):** copy-button, global-search, inpage-menu, mobile-menu, mobile-menu-toggle, nav-menu, panels, sidebar-toggle, theme-switcher, topbar-menu
 
-**Behaviors (4):** attach, escape, tooltip, transition
+**Behaviors (4):** attach, escape, tooltip, transition — all have standalone CDN files
 
 **Remaining to build:** ~66 components from the master list
 
@@ -61,7 +61,7 @@ TOKEN FINALIZATION (the gate)
 │   │  Everything else (~45 components)
 │   │
 │   ├─→ Primitive/Component Docs (authored MDX per component)
-│   ├─→ Behavior Docs (attach, transition, escape, tooltip)
+│   ├─→ Behavior Docs (attach, transition, escape, popover)
 │   ├─→ Learn Courses 3xx-5xx
 │   └─→ Value Schema → Wrapper Architecture → Wrapper Packages
 │        └─→ Ecosystem Guides (final, post-wrapper)
@@ -89,6 +89,7 @@ TOKEN FINALIZATION (the gate)
 | 1 | Token Finalization | open | pair | The gate. Open questions: color grades (0-100 vs 5-100), borders (semantic vs numeric), dark mode inversion, surface colors (slate). See [plan](token-finalization.md). |
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
 | 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
+| 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
@@ -99,8 +100,6 @@ TOKEN FINALIZATION (the gate)
 | 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
-| 11 | [CDN Site](cdn-site.md) | 24-40h (3-5d) | pair | ~~Vercel deploy~~ R2 + Worker at `cdn.semantic-ui.com`. **Done** — canary pipeline operational. |
-| 12 | [CDN Combo Endpoint](cdn-combo-endpoint.md) | 8-16h (1-2d) | pair | Comma-separated component URLs and named presets. The "one script tag" CDN experience. |
 
 
 ## Blocked (waiting on token finalization)
@@ -111,12 +110,6 @@ TOKEN FINALIZATION (the gate)
 | 14 | CSS Token Extraction | 16-24h (2-3d) | pair | Tokens locked | `getThemingCSS` util + MCP tool. |
 | 15 | MCP Improvements (remaining) | 8-16h (1-2d) | agent | Token extraction | 3 tools: `get_theming_css`, `get_global_tokens`, `get_token_usage`. |
 | 16 | CSS Token & Theming Docs (12 pages) | 40-56h (5-7d) | pair | Tokens locked | 6 token pages + 6 styling concept pages. |
-
-## Blocked (waiting on CDN site)
-
-| # | What | Hours | Mode | Blocker | Notes |
-|---|------|-------|------|---------|-------|
-| 17 | [CDN Build Fix](cdn-build-fix.md) | 8-16h (1-2d) | pair | CDN site (#11) | Fix `resolveBareImports` to rewrite to `cdn.semantic-ui.com`. Eliminates dep duplication in playground. |
 
 ## Architecture Decisions (gate the primitive build-out)
 
@@ -135,7 +128,7 @@ These are design decisions that must be resolved before building components at v
 | # | What | Hours | Mode | Blocker | Notes |
 |---|------|-------|------|---------|-------|
 | 23 | Tier 1 Primitives | 16-40h each (2-5d) | jack | Arch decisions resolved | dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion (~8 components, ~160-320h total) |
-| 24 | Behavior Docs (4 behaviors) | 40-64h (5-8d) | pair | Needs more primitives to show real usage | attach, transition, escape, tooltip |
+| 24 | Behavior Docs (4 behaviors) | 40-64h (5-8d) | pair | Needs more primitives to show real usage | attach, transition, escape, popover |
 | 25 | Primitive Usage Guides | 56-80h (7-10d) | pair | Needs more primitives | Specimen Explorer done. CSS tab, authored MDX remaining. |
 | 26 | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | Value schema | Generation pipeline for React/Vue/Svelte wrappers. |
 | 27 | Tier 2 Primitives | 16-40h each (2-5d) | jack | Tier 1 done | popover, slider, textarea, toast, drawer, breadcrumb, pagination (~8 components) |
@@ -209,3 +202,6 @@ Completed or rejected plans in `ai/plans/archive/`.
 
 - **Icon Mappings Rebuild** — 482 Lucide icons mapped across 5 libraries with aliases. Complete.
 - **Vercel Deploy Pipeline** (0.5d est → 2.25h actual) — Decoupled prod from `main`, tag-triggered releases, staging environment, `next` branch retired.
+- **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
+- **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
+- **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.

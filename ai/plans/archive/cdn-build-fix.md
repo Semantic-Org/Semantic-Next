@@ -67,6 +67,9 @@ import { unsafeCSS } from "https://cdn.semantic-ui.com/vendor/lit@3.3.2/lit.js"
 
 - [CDN Site](cdn-site.md) — needs the R2 bucket and Worker to exist so the URLs resolve
 
-## Status
+## Completion
 
-Not started. Plugin infrastructure exists, needs custom resolver and testing.
+- **Estimated:** 8-16h (1-2d) pair
+- **Actual:** Completed as part of CDN site (~6h total)
+- **Completed:** 2026-03-27
+- **Delta notes:** Plugin already had the hooks. Included in CDN site estimate.
