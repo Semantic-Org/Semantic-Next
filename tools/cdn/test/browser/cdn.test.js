@@ -187,6 +187,55 @@ describe('CDN Presets', () => {
   });
 });
 
+describe('CDN Combo Response', () => {
+  it('shim contains correct export lines', async () => {
+    const res = await fetch(`${CDN}/core@${VERSION}/button,input`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('javascript');
+
+    const body = await res.text();
+    expect(body).toContain(`export * from "${CDN}/core@${VERSION}/button.min.js"`);
+    expect(body).toContain(`export * from "${CDN}/core@${VERSION}/input.min.js"`);
+    // Exactly 2 export lines
+    const exports = body.trim().split('\n');
+    expect(exports.length).toBe(2);
+  });
+
+  it('preset resolves to multiple components', async () => {
+    const res = await fetch(`${CDN}/core@${VERSION}/standard`);
+    expect(res.ok).toBe(true);
+
+    const body = await res.text();
+    const exports = body.trim().split('\n');
+    expect(exports.length).toBeGreaterThan(5);
+    expect(body).toContain('button.min.js');
+    expect(body).toContain('input.min.js');
+  });
+});
+
+describe('CDN Vendor Chain', () => {
+  it('vendor lit package loads without bare imports', async () => {
+    const res = await fetch(`${CDN}/vendor/lit@3.3.2/index.js`);
+    expect(res.ok).toBe(true);
+
+    const body = await res.text();
+    // All imports should be rewritten to full CDN URLs
+    const imports = [...body.matchAll(/(?:import|from)\s*["']([^"']+)["']/g)];
+    for (const match of imports) {
+      const specifier = match[1];
+      // Skip comments (license blocks)
+      if (match.index > 0 && body[match.index - 1] === '*') { continue; }
+      expect(specifier, `bare import found: ${specifier}`).toMatch(/^https:\/\//);
+    }
+  });
+
+  it('reactive-element loads correctly', async () => {
+    const res = await fetch(`${CDN}/vendor/@lit/reactive-element@2.1.1/reactive-element.js`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('javascript');
+  });
+});
+
 describe('CDN Endpoints (non-combo)', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
