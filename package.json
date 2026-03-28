@@ -207,7 +207,8 @@
     "ci:coverage": "vitest --c tests/configs/vitest/ci-coverage.config.js",
     "ci:test": "vitest --c tests/configs/vitest/ci-test-all.config.js",
     "ci:test:unit": "vitest --c tests/configs/vitest/ci-test-unit.config.js",
-    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js"
+    "ci:test:browser": "vitest --c tests/configs/vitest/ci-test-browser.config.js",
+    "test:cdn": "cd tools/cdn && npx vitest run --config vitest.config.js"
   },
   "wireit": {
     "dev": {

@@ -60,3 +60,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: cd tools/cdn && npx wrangler deploy
+
+      - name: Purge Cloudflare cache
+        run: |
+          curl -s -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"purge_everything":true}'
