@@ -257,9 +257,15 @@ export default {
           return new Response(`Not found: ${baseKey}`, { status: 404 });
         }
 
+        // SourceMap header so browsers resolve maps correctly for bare URLs
+        const sourceMapHeader = servedPath.endsWith('.js')
+          ? { 'SourceMap': `/${name}@${version}/${servedPath}.map` }
+          : {};
+
         return new Response(object.body, {
           headers: {
             'Content-Type': getContentType(servedPath),
+            ...sourceMapHeader,
             ...corsHeaders(),
             ...cacheHeaders(version),
           },
