@@ -50,12 +50,15 @@ CDN format — all bare imports rewritten to full `cdn.semantic-ui.com` URLs. De
 | `https://cdn.semantic-ui.com/specs@0.18.0` | `specs.min.js` |
 | `https://cdn.semantic-ui.com/tailwind@0.18.0` | `tailwind.min.js` |
 
-**With filename — serves the exact file:**
+**Individual files — primitives, components, and behaviors:**
 
-| URL | Behavior |
+| URL | What it loads |
 |---|---|
-| `https://cdn.semantic-ui.com/core@0.18.0/button.min.js` | Individual component |
-| `https://cdn.semantic-ui.com/core@0.18.0/button.js` | Unminified |
+| `https://cdn.semantic-ui.com/core@0.18.0/button.min.js` | Primitive (individual component) |
+| `https://cdn.semantic-ui.com/core@0.18.0/button.js` | Unminified variant |
+| `https://cdn.semantic-ui.com/core@0.18.0/copy-button.min.js` | Component (composed from primitives) |
+| `https://cdn.semantic-ui.com/core@0.18.0/tooltip.min.js` | Behavior (registers on Query prototype) |
+| `https://cdn.semantic-ui.com/core@0.18.0/transition.min.js` | Behavior |
 | `https://cdn.semantic-ui.com/specs@0.18.0/icons/meta` | Sub-path, extensionless — tries `.min.js` then `.js` |
 
 **npm path alias — 301 redirect to clean path:**
@@ -87,22 +90,25 @@ https://cdn.semantic-ui.com/vendor/@pagefind/modular-ui@1.3.0/npm_dist/mjs/modul
 
 ### Combo Endpoint
 
-Load specific components or named presets with a single `<script>` tag. Core package only — no import map needed.
+Load specific primitives, components, and behaviors with a single `<script>` tag. Core package only — no import map needed.
 
-**Comma-separated components:**
+**Comma-separated (mix any category):**
 
 | URL | Behavior |
 |---|---|
-| `https://cdn.semantic-ui.com/core@0.18.0/button,input,modal` | Generates shim importing each component |
-| `https://cdn.semantic-ui.com/core@canary/button,menu` | Canary channel, 60s TTL |
+| `https://cdn.semantic-ui.com/core@0.18.0/button,input,modal` | Primitives |
+| `https://cdn.semantic-ui.com/core@canary/button,tooltip` | Primitive + behavior |
+| `https://cdn.semantic-ui.com/core@canary/button,panels,tooltip` | Primitive + component + behavior |
 
-**Named presets:**
+**Named presets (cumulative tiers):**
 
-| URL | Components |
+| URL | Description |
 |---|---|
-| `https://cdn.semantic-ui.com/core@0.18.0/standard` | button, input, label, icon, image, menu, segment, container, divider, card, table, spinner, modal |
-| `https://cdn.semantic-ui.com/core@0.18.0/form` | input |
-| `https://cdn.semantic-ui.com/core@0.18.0/layout` | container, segment, rail, divider, card, table |
+| `https://cdn.semantic-ui.com/core@0.18.0/standard` | General-purpose primitives (~40-50 at 1.0) |
+| `https://cdn.semantic-ui.com/core@0.18.0/extended` | Standard + specialized components |
+| `https://cdn.semantic-ui.com/core@0.18.0/full` | Every user-facing component |
+
+Presets are sourced from the `bundle` field in each component's `.spec.js` file, aggregated at build time into `dist/presets.json`, and uploaded to R2. The Worker loads presets from R2 with 60s caching.
 
 The Worker generates a tiny JS module that re-exports each component's CDN format file. The browser follows the import chain and deduplicates shared deps by URL identity.
 
@@ -134,12 +140,16 @@ export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
 <ui-input placeholder="Type here"></ui-input>
 ```
 
-### Specific components
+### Specific components + behavior
 
 ```html
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
-<script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input,modal"></script>
-<ui-button primary>Click Me</ui-button>
+<script type="module" src="https://cdn.semantic-ui.com/core@canary/button,tooltip"></script>
+<script type="module">
+  import { $ } from 'https://cdn.semantic-ui.com/query@canary';
+  $('ui-button').tooltip();
+</script>
+<ui-button data-text="Hello!">Hover me</ui-button>
 ```
 
 ### Import map (full control)
@@ -185,7 +195,7 @@ export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
 cd tools/cdn && npx wrangler deploy
 ```
 
-Deploy after changing `worker/index.js`. Not needed for upload-only changes. CI deploys the Worker automatically on each main merge and tag push.
+Deploy after changing `worker/index.js`. CI deploys the Worker automatically on each main merge and tag push.
 
 ### Upload Files
 
@@ -199,17 +209,29 @@ cd tools/cdn && node upload.js --version canary
 cd tools/cdn && node upload.js --version 0.18.0 --latest
 ```
 
+### Pre-Deploy Check
+
+```bash
+node tools/cdn/check-bare-imports.js
+```
+
+Scans `dist/cdn/` and `dist/vendor-cdn/` for bare module specifiers that would break without an import map. Runs automatically in CI before upload.
+
+### Post-Deploy Tests
+
+```bash
+npm run test:cdn
+```
+
+28 Vitest browser tests against the live CDN — verifies combo endpoints, presets, individual files, package imports, and cross-category loading. Runs automatically in CI after deploy.
+
 ### Rebuilding Vendor Packages
 
-Vendor packages (lit, tailwindcss-iso, etc.) are built through the CDN rewrite pipeline (`build-vendor-cdn.js`) and uploaded to R2. They're immutable by version — once `lit@3.3.2` is uploaded, subsequent uploads skip it.
+Vendor packages (lit, tailwindcss-iso, etc.) are built through the CDN rewrite pipeline (`build-vendor-cdn.js`) and uploaded to R2. Currently `--force-vendor` is enabled in CI to ensure vendor files stay in sync with the build pipeline.
 
-**If vendor packages need to be rebuilt** (e.g., the build pipeline changed, entrypoints were wrong, or bare imports weren't rewritten correctly):
+To rebuild manually:
 
 1. Rebuild locally: `npm run build:vendor-cdn`
 2. Force re-upload: `cd tools/cdn && node upload.js --version canary --force-vendor`
-3. Purge Cloudflare cache: dashboard → `semantic-ui.com` zone → Caching → Purge Everything
-
-The `--force-vendor` flag skips the `objectExists` check and overwrites all vendor files in R2. Without it, existing versions are skipped. In CI, add `--force-vendor` to the upload command in `.github/workflows/cdn-canary.yml` temporarily, then remove it after the deploy.
-```
 
 Requires `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_ENDPOINT`, `R2_BUCKET_NAME` env vars.
