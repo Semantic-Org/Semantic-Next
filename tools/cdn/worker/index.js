@@ -185,7 +185,10 @@ function cacheHeaders(version) {
 }
 
 function corsHeaders() {
-  return { 'Access-Control-Allow-Origin': '*' };
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Expose-Headers': 'SourceMap',
+  };
 }
 
 export default {
