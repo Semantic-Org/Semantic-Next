@@ -88,8 +88,7 @@ TOKEN FINALIZATION (the gate)
 |---|------|-------|------|-------|
 | 1 | Token Finalization | open | pair | The gate. Open questions: color grades (0-100 vs 5-100), borders (semantic vs numeric), dark mode inversion, surface colors (slate). See [plan](token-finalization.md). |
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
-| 3 | [Icon Mappings Fix](icon-mappings-rebuild.md) | 2h | agent | One duplicate-key bug to fix. Good test of agent-only workflow. |
-| 4 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
+| 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
@@ -200,7 +199,6 @@ Plans in `ai/plans/deferred/`.
 
 - **Vanilla Renderer** — 30-50d pair. Ship 1.0 on Lit. Revisit for 2.0 if dependency becomes a real problem.
 - Icon stroke width — power-user feature, post-1.0
-- Icon mappings rebuild — one bug, 15-minute fix
 - Subtree caching status doc — tracking doc
 
 ---
@@ -209,4 +207,5 @@ Plans in `ai/plans/deferred/`.
 
 Completed or rejected plans in `ai/plans/archive/`.
 
+- **Icon Mappings Rebuild** — 482 Lucide icons mapped across 5 libraries with aliases. Complete.
 - **Vercel Deploy Pipeline** (0.5d est → 2.25h actual) — Decoupled prod from `main`, tag-triggered releases, staging environment, `next` branch retired.
