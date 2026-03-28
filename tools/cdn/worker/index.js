@@ -84,7 +84,9 @@ function getContentType(filepath) {
 //   /vendor/lit@3.3.2/directive.js          → third-party
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
+//   /css@0.18.0.map                         → framework CSS sourcemap
 //   /semantic-ui@0.18.0.css                 → framework CSS (legacy alias)
+//   /semantic-ui@0.18.0.css.map             → framework CSS sourcemap (legacy alias)
 //   /semantic-ui.css                        → framework CSS (legacy alias)
 //   /importmap.js                           → import map loader (latest)
 //   /importmap@0.18.0.js                    → versioned import map loader
@@ -100,18 +102,21 @@ function parseRoute(pathname) {
   }
 
   // Framework CSS — /css, /css@0.18.0, /semantic-ui.css, /semantic-ui@0.18.0.css
-  const cssShortMatch = pathname.match(/^\/css(?:@(.+))?$/);
+  // Also matches sourcemap variants: /css@0.18.0.map, /semantic-ui@0.18.0.css.map
+  const cssShortMatch = pathname.match(/^\/css(?:@(.+?))?(\.map)?$/);
   if (cssShortMatch) {
     return {
       type: 'css',
       version: cssShortMatch[1] || 'latest',
+      map: !!cssShortMatch[2],
     };
   }
-  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+))?\.css$/);
+  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?\.css(\.map)?$/);
   if (cssMatch) {
     return {
       type: 'css',
       version: cssMatch[1] || 'latest',
+      map: !!cssMatch[2],
     };
   }
 
@@ -298,29 +303,35 @@ export default {
       }
 
       case 'css': {
-        const { version } = route;
+        const { version, map } = route;
 
         if (version === 'latest') {
           const resolved = await resolveVersion(env, version);
           if (!resolved) {
             return new Response('Latest version not found', { status: 404 });
           }
+          const suffix = map ? '.css.map' : '.css';
           return Response.redirect(
-            new URL(`/semantic-ui@${resolved}.css`, url.origin).href,
+            new URL(`/semantic-ui@${resolved}${suffix}`, url.origin).href,
             302,
           );
         }
 
-        // Serve minified CSS by default
-        const r2Key = `@semantic-ui/core/${version}/dist/semantic-ui.min.css`;
+        // Serve minified CSS (or its sourcemap) from dist/
+        const filename = map ? 'semantic-ui.min.css.map' : 'semantic-ui.min.css';
+        const r2Key = `@semantic-ui/core/${version}/dist/${filename}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
           return new Response(`Not found: ${r2Key}`, { status: 404 });
         }
 
+        const contentType = map ? 'application/json' : 'text/css';
+        const sourceMapHeader = map ? {} : { 'SourceMap': `/semantic-ui@${version}.css.map` };
+
         return new Response(object.body, {
           headers: {
-            'Content-Type': 'text/css',
+            'Content-Type': contentType,
+            ...sourceMapHeader,
             ...corsHeaders(),
             ...cacheHeaders(version),
           },
