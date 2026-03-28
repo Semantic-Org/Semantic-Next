@@ -12,9 +12,9 @@
     "@aws-sdk/client-s3": "^3.700.0"
   },
   "devDependencies": {
-    "@vitest/browser": "^3.1.0",
-    "@vitest/browser-playwright": "^0.1.0",
-    "vitest": "^3.1.0",
+    "@vitest/browser": "^4.0.18",
+    "@vitest/browser-playwright": "^4.0.18",
+    "vitest": "^4.0.18",
     "wrangler": "^4.0.0"
   }
 }
