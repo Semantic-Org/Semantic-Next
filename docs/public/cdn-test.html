@@ -1,104 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>CDN Combo Endpoint Test</title>
+  <title>CDN Test</title>
   <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
   <style>
     body { padding: 2rem; font-family: sans-serif; }
     section { margin-bottom: 2rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px; }
     h2 { margin-top: 0; }
     .test-row { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
-    #log { margin-top: 1rem; white-space: pre-wrap; font-family: monospace; font-size: 13px; }
+    #log { white-space: pre-wrap; font-family: monospace; font-size: 13px; }
     .error { color: red; }
     .ok { color: green; }
-    .info { color: #666; }
   </style>
 </head>
 <body>
-  <h1>CDN Combo Endpoint Test</h1>
+  <h1>CDN Test</h1>
   <div id="log"></div>
 
-  <!-- Test 1: Comma-separated (button, input) -->
-  <section id="test-combo">
-    <h2>1. Comma-separated: button,input</h2>
+  <!-- Test 1: Combo endpoint — primitives -->
+  <section>
+    <h2>1. Combo: button,input</h2>
     <div class="test-row">
-      <ui-button primary>Primary Button</ui-button>
-      <ui-button secondary>Secondary</ui-button>
+      <ui-button primary>Button</ui-button>
       <ui-input placeholder="Type here..."></ui-input>
     </div>
   </section>
 
-  <!-- Test 2: Individual components (icon, label, spinner) -->
-  <section id="test-individual">
-    <h2>2. Comma-separated: icon,label,spinner</h2>
+  <!-- Test 2: Combo endpoint — primitive + component -->
+  <section>
+    <h2>2. Combo: button,panels</h2>
     <div class="test-row">
-      <ui-icon icon="star"></ui-icon>
-      <ui-icon icon="heart"></ui-icon>
-      <ui-icon icon="check"></ui-icon>
-      <ui-label>Default</ui-label>
-      <ui-label primary>Primary</ui-label>
-      <ui-spinner></ui-spinner>
+      <ui-panels>
+        <div>Panel A</div>
+        <div>Panel B</div>
+      </ui-panels>
     </div>
   </section>
 
-  <!-- Test 3: Layout components (container, segment, divider, card) -->
-  <section id="test-layout">
-    <h2>3. Comma-separated: container,segment,divider,card</h2>
-    <ui-container>
-      <ui-segment>Segment inside container</ui-segment>
-      <ui-divider></ui-divider>
-      <div class="test-row">
-        <ui-card>
-          <div slot="header">Card A</div>
-          <div slot="content">Content</div>
-        </ui-card>
-        <ui-card>
-          <div slot="header">Card B</div>
-          <div slot="content">Content</div>
-        </ui-card>
-      </div>
-    </ui-container>
-  </section>
-
-  <!-- Test 4: Data (table, menu) -->
-  <section id="test-data">
-    <h2>4. Comma-separated: table,menu</h2>
-    <ui-table>
-      <table>
-        <thead><tr><th>Name</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr><td>Combo endpoint</td><td>Live</td></tr>
-          <tr><td>Presets</td><td>Live</td></tr>
-        </tbody>
-      </table>
-    </ui-table>
-  </section>
-
-  <!-- Test 5: Modal + Image (interactive) -->
-  <section id="test-modal">
-    <h2>5. Comma-separated: modal,image</h2>
-    <ui-button onclick="document.querySelector('ui-modal').component.show()">Open Modal</ui-button>
-    <ui-image src="https://placehold.co/150x100" small></ui-image>
-    <ui-modal>
-      <div slot="header">Test Modal</div>
-      <div slot="content">Loaded via combo endpoint.</div>
-      <div slot="actions">
-        <ui-button onclick="document.querySelector('ui-modal').component.hide()">Close</ui-button>
-      </div>
-    </ui-modal>
-  </section>
-
-  <!-- Test 6: Standard preset -->
-  <section id="test-preset">
-    <h2>6. Preset: standard</h2>
-    <p>All components above should still work — standard includes everything.</p>
+  <!-- Test 3: Behavior via import map -->
+  <section>
+    <h2>3. Behavior: tooltip (import map)</h2>
+    <div class="test-row">
+      <ui-button class="tooltip-test" data-text="Hello from CDN!">Hover for tooltip</ui-button>
+      <ui-button class="tooltip-test" data-header="Tip" data-text="With header" data-position="bottom">Bottom tooltip</ui-button>
+    </div>
   </section>
 
   <script>
     const log = document.getElementById('log');
     function msg(text, type) {
       const line = document.createElement('div');
-      line.className = type || 'info';
+      line.className = type || '';
       line.textContent = text;
       log.appendChild(line);
     }
@@ -106,31 +58,29 @@
     window.addEventListener('unhandledrejection', e => msg('Rejected: ' + e.reason, 'error'));
   </script>
 
-  <!-- Load each group separately to isolate failures -->
+  <!-- Combo loads (no import map needed) -->
   <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input"></script>
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon,label,spinner"></script>
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/container,segment,divider,card"></script>
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/table,menu"></script>
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/modal,image"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/panels"></script>
 
+  <!-- Behavior needs import map — behaviors aren't standalone CDN files -->
+  <script src="https://cdn.semantic-ui.com/importmap@canary.js"></script>
   <script type="module">
-    const groups = {
-      'button,input': ['ui-button', 'ui-input'],
-      'icon,label,spinner': ['ui-icon', 'ui-label', 'ui-spinner'],
-      'container,segment,divider,card': ['ui-container', 'ui-segment', 'ui-divider', 'ui-card'],
-      'table,menu': ['ui-table', 'ui-menu'],
-      'modal,image': ['ui-modal', 'ui-image'],
-    };
+    import { Tooltip } from '@semantic-ui/core';
+    import { $ } from '@semantic-ui/query';
 
-    for (const [group, tags] of Object.entries(groups)) {
-      try {
-        await Promise.all(tags.map(t => customElements.whenDefined(t)));
-        msg(`${group}: all defined`, 'ok');
-      } catch(e) {
-        msg(`${group}: FAILED — ${e.message}`, 'error');
-      }
-    }
-    msg('Done.', 'info');
+    // Wait for button to be defined first
+    await customElements.whenDefined('ui-button');
+    msg('ui-button: defined', 'ok');
+
+    await customElements.whenDefined('ui-input');
+    msg('ui-input: defined', 'ok');
+
+    await customElements.whenDefined('ui-panels');
+    msg('ui-panels: defined', 'ok');
+
+    // Initialize tooltips
+    $('.tooltip-test').tooltip();
+    msg('tooltip: initialized', 'ok');
   </script>
 </body>
 </html>

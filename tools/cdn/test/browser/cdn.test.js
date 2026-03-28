@@ -116,6 +116,27 @@ describe('CDN Combo Endpoint', () => {
   });
 });
 
+describe('CDN Cross-Category Combo', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+  });
+
+  it('primitive + component in one combo', async () => {
+    document.body.innerHTML = `
+      <ui-button primary>Click</ui-button>
+      <ui-panels><div>A</div><div>B</div></ui-panels>
+    `;
+    await loadComponents('button,panels', ['ui-button', 'ui-panels']);
+
+    const button = document.querySelector('ui-button');
+    expect(button.shadowRoot).toBeTruthy();
+
+    const panels = document.querySelector('ui-panels');
+    expect(panels.shadowRoot).toBeTruthy();
+  });
+});
+
 describe('CDN Presets', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
