@@ -606,7 +606,7 @@ export const iconAliasGroups = [
   ['unlink', 'link-break', 'remove-link', 'disconnect-link', 'link-off', 'chain-break'],
   ['upload', 'publish', 'export-file', 'arrow-up-tray', 'upload-file'],
   ['vote', 'ballot', 'poll', 'election', 'how-to-vote', 'cast-vote'],
-  ['x', 'close', 'remove-mark', 'x-mark'],
+  ['x', 'close', 'remove', 'delete'],
   ['zoom-in', 'magnify', 'zoom-plus', 'magnifying-glass-plus', 'scale-up'],
   ['badge-alert', 'badge-warning', 'seal-warning', 'badge-exclamation', 'verified-warning'],
   ['badge-check', 'verified', 'certified', 'seal-check', 'badge-verified', 'rosette'],

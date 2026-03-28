@@ -68,3 +68,9 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"purge_everything":true}'
+
+      - name: Install Playwright
+        run: cd tools/cdn && npx playwright install chromium
+
+      - name: Post-deploy CDN smoke tests
+        run: cd tools/cdn && npx vitest run --config vitest.config.js

@@ -1082,7 +1082,7 @@ export const iconMappings = {
   },
   'x': {
     category: 'action',
-    aliases: ['close', 'remove-mark', 'x-mark'],
+    aliases: ['close', 'remove', 'delete'],
     description: 'Close or dismiss',
     visual: 'An X mark formed by two diagonal lines crossing at the center.',
     usage: 'close dialog, dismiss notification, remove tag, cancel action',
