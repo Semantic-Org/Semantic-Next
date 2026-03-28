@@ -236,6 +236,65 @@ describe('CDN Vendor Chain', () => {
   });
 });
 
+describe('CDN Sourcemaps', () => {
+  it('JS entry point — SourceMap header points to valid map', async () => {
+    const res = await fetch(`${CDN}/component@${VERSION}`);
+    expect(res.ok).toBe(true);
+
+    const sourceMap = res.headers.get('SourceMap');
+    expect(sourceMap, 'missing SourceMap header').toBeTruthy();
+    expect(sourceMap).toContain(`component@${VERSION}/`);
+    expect(sourceMap).toMatch(/\.js\.map$/);
+
+    // Follow the header URL — map must be accessible
+    const mapRes = await fetch(new URL(sourceMap, CDN).href);
+    expect(mapRes.ok, `map 404: ${sourceMap}`).toBe(true);
+    expect(mapRes.headers.get('content-type')).toContain('json');
+  });
+
+  it('JS sub-path file — map file accessible via relative path', async () => {
+    const mapRes = await fetch(`${CDN}/core@${VERSION}/button.min.js.map`);
+    expect(mapRes.ok).toBe(true);
+    expect(mapRes.headers.get('content-type')).toContain('json');
+  });
+
+  it('CSS endpoint — SourceMap header points to valid map', async () => {
+    const res = await fetch(`${CDN}/css@${VERSION}`);
+    expect(res.ok).toBe(true);
+
+    const sourceMap = res.headers.get('SourceMap');
+    expect(sourceMap, 'missing SourceMap header').toBeTruthy();
+    expect(sourceMap).toMatch(/\.css\.map$/);
+
+    // Follow the header URL — map must be accessible
+    const mapRes = await fetch(new URL(sourceMap, CDN).href);
+    expect(mapRes.ok, `map 404: ${sourceMap}`).toBe(true);
+    expect(mapRes.headers.get('content-type')).toContain('json');
+  });
+
+  it('CSS legacy alias — SourceMap header points to valid map', async () => {
+    const res = await fetch(`${CDN}/semantic-ui@${VERSION}.css`);
+    expect(res.ok).toBe(true);
+
+    const sourceMap = res.headers.get('SourceMap');
+    expect(sourceMap, 'missing SourceMap header').toBeTruthy();
+
+    const mapRes = await fetch(new URL(sourceMap, CDN).href);
+    expect(mapRes.ok, `map 404: ${sourceMap}`).toBe(true);
+  });
+
+  it('sourcemap responses contain valid JSON with sourcesContent', async () => {
+    const mapRes = await fetch(`${CDN}/component@${VERSION}/component.min.js.map`);
+    expect(mapRes.ok).toBe(true);
+
+    const map = await mapRes.json();
+    expect(map.version).toBe(3);
+    expect(map.sources).toBeInstanceOf(Array);
+    expect(map.sourcesContent).toBeInstanceOf(Array);
+    expect(map.sourcesContent.length).toBe(map.sources.length);
+  });
+});
+
 describe('CDN Endpoints (non-combo)', () => {
   beforeEach(() => {
     document.head.innerHTML = '';
