@@ -188,6 +188,7 @@ function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Expose-Headers': 'SourceMap',
+    'X-Content-Type-Options': 'nosniff',
   };
 }
 
