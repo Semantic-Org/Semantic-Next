@@ -56,7 +56,9 @@ export const buildUIFramework = async ({
 
   /*
     Exports CSS Bundle
-    (note these are identical but included in each location for uniformity)
+    CSS has no bare module imports so CDN format is identical to the others.
+    Only ESM (dist/) and Bundle (dist/bundle/) are built — the CDN Worker
+    serves CSS from dist/ directly.
   */
 
   // entry points are auto discovered from package.json
@@ -83,16 +85,6 @@ export const buildUIFramework = async ({
         ...cssConfig,
         outdir: 'dist/bundle',
         log: { header: 'Framework CSS', text: 'Build Bundle' },
-      }),
-    );
-  }
-
-  if (includeCDN) {
-    tasks.push(
-      buildCDN({
-        ...cssConfig,
-        outdir: 'dist/cdn',
-        log: { header: 'Framework CSS', text: 'Build CDN' },
       }),
     );
   }
