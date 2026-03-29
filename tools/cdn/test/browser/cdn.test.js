@@ -283,6 +283,13 @@ describe('CDN Sourcemaps', () => {
     expect(mapRes.ok, `map 404: ${sourceMap}`).toBe(true);
   });
 
+  it('CSS inline sourceMappingURL is rewritten to versioned path', async () => {
+    const res = await fetch(`${CDN}/css@${VERSION}`);
+    const body = await res.text();
+    expect(body).toContain(`sourceMappingURL=/semantic-ui@${VERSION}.css.map`);
+    expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
+  });
+
   it('sourcemap responses contain valid JSON with sourcesContent', async () => {
     const mapRes = await fetch(`${CDN}/component@${VERSION}/component.min.js.map`);
     expect(mapRes.ok).toBe(true);

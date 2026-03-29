@@ -90,7 +90,7 @@ function getContentType(filepath) {
 //   /semantic-ui.css                        → framework CSS (legacy alias)
 //   /importmap.js                           → import map loader (latest)
 //   /importmap@0.18.0.js                    → versioned import map loader
-function parseRoute(pathname) {
+export function parseRoute(pathname) {
   // Import map loader — version can contain dots (semver)
   const importmapMatch = pathname.match(/^\/importmap(?:@(.+))?\.(js|json)$/);
   if (importmapMatch) {

@@ -6,6 +6,7 @@
     "upload": "node upload.js",
     "deploy-worker": "wrangler deploy",
     "test": "vitest run --config vitest.config.js",
+    "test:unit": "vitest run --config vitest.unit.config.js",
     "test:check": "node check-bare-imports.js && node check-sourcemaps.js"
   },
   "dependencies": {

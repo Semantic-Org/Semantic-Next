@@ -47,6 +47,9 @@ jobs:
       - name: Install CDN tools
         run: cd tools/cdn && npm ci
 
+      - name: Worker unit tests
+        run: cd tools/cdn && npm run test:unit
+
       - name: Upload canary to R2
         env:
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
