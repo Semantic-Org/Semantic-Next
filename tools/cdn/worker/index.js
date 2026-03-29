@@ -102,7 +102,7 @@ function parseRoute(pathname) {
   }
 
   // Framework CSS — /css, /css@0.18.0, /semantic-ui.css, /semantic-ui@0.18.0.css
-  // Also matches sourcemap variants: /css@0.18.0.map, /semantic-ui@0.18.0.css.map
+  // Also matches .min and sourcemap variants: /semantic-ui.min.css.map, /css@0.18.0.map
   const cssShortMatch = pathname.match(/^\/css(?:@(.+?))?(\.map)?$/);
   if (cssShortMatch) {
     return {
@@ -111,7 +111,7 @@ function parseRoute(pathname) {
       map: !!cssShortMatch[2],
     };
   }
-  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?\.css(\.map)?$/);
+  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?(?:\.min)?\.css(\.map)?$/);
   if (cssMatch) {
     return {
       type: 'css',
