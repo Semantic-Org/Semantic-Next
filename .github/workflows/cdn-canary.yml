@@ -69,6 +69,12 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"purge_everything":true}'
 
+      - name: Cache Playwright
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.cache/ms-playwright
+
       - name: Install Playwright
         run: cd tools/cdn && npx playwright install chromium
 
