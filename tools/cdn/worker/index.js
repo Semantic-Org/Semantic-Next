@@ -330,9 +330,22 @@ export default {
         }
 
         const contentType = map ? 'application/json' : 'text/css';
-        const sourceMapHeader = map ? {} : { 'SourceMap': `/semantic-ui@${version}.css.map` };
+        const sourceMapUrl = `/semantic-ui@${version}.css.map`;
+        const sourceMapHeader = map ? {} : { 'SourceMap': sourceMapUrl };
 
-        return new Response(object.body, {
+        // Rewrite the inline sourceMappingURL to an absolute versioned path
+        // so browsers resolve the map correctly (Chrome uses the inline comment
+        // for CSS, not the SourceMap HTTP header)
+        let body = object.body;
+        if (!map) {
+          const css = await object.text();
+          body = css.replace(
+            /\/\*# sourceMappingURL=.+?\s*\*\/\s*$/,
+            `/*# sourceMappingURL=${sourceMapUrl} */`,
+          );
+        }
+
+        return new Response(body, {
           headers: {
             'Content-Type': contentType,
             ...sourceMapHeader,
