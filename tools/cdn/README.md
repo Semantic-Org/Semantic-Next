@@ -2,6 +2,17 @@
 
 Cloudflare Worker + R2 upload for `cdn.semantic-ui.com`.
 
+## Sourcemaps
+
+All JS and CSS responses include a `SourceMap` HTTP header pointing to the correct `.map` URL. Sourcemap files are accessible alongside their source files:
+
+| Source URL | Sourcemap URL |
+|---|---|
+| `https://cdn.semantic-ui.com/component@0.18.0` | `SourceMap` header → `/component@0.18.0/component.min.js.map` |
+| `https://cdn.semantic-ui.com/core@0.18.0/button.min.js` | `/core@0.18.0/button.min.js.map` |
+| `https://cdn.semantic-ui.com/css@0.18.0` | `SourceMap` header → `/semantic-ui@0.18.0.css.map` |
+| `https://cdn.semantic-ui.com/semantic-ui@0.18.0.css` | `/semantic-ui@0.18.0.css.map` |
+
 ## Endpoints
 
 ### CSS
