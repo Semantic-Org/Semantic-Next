@@ -4,11 +4,9 @@ export class DynamicRegion {
     this.referenceNode = referenceNode;
     this.ownedNodes = [];
     this.childScopes = [];
-    // Persistent anchor — always stays in the DOM as a positional marker
     this.anchor = document.createTextNode('');
   }
 
-  // Place the anchor in the DOM
   placeAnchor() {
     if (this.referenceNode) {
       this.referenceNode.after(this.anchor);
@@ -29,7 +27,6 @@ export class DynamicRegion {
     this.clear();
     this.ownedNodes = [...fragment.childNodes];
     if (scope) { this.childScopes.push(scope); }
-    // Insert after the persistent anchor
     this.anchor.after(fragment);
   }
 
