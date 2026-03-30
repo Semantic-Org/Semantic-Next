@@ -16,7 +16,8 @@
       {/if}
       {#if canShowButtons}
         <div class="buttons">
-          {#if allowLayoutSwap}
+          <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode"></ui-menu>
+          {#if both allowLayoutSwap (isMode 'split')}
             <ui-button transparent class="tabs">
               {#if is layout 'tabs'}
                 Use Panels
@@ -25,10 +26,6 @@
               {/if}
             </ui-button>
           {/if}
-          <!-- <ui-button transparent small compact inverted class="fork">
-            <ui-icon copy></ui-icon>
-            Fork
-          </ui-button> -->
         </div>
       {/if}
     </div>
