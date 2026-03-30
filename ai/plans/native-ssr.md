@@ -244,7 +244,7 @@ The entries array is the shared contract. Server and client produce identical en
 
 1. **Async blocks during SSR** — if the expression returns a promise, should the server wait for it (adds latency) or render the loading state? Lit SSR renders loading state. Waiting for all promises enables full SSR but adds complexity (streaming, timeouts).
 
-2. **Marker format stability** — the comment marker format (`<!--sui:N-->`) becomes a serialization contract between server and client. Changes to `buildHTMLString` could break hydration of server-rendered pages. Need versioning or stable marker format.
+2. **Marker format stability** — the comment marker format (`<!--sui:N-->`) becomes a serialization contract between server and client. Changes to `buildHTMLString` could break hydration of server-rendered pages. Add a version prefix to markers (`<!--sui:v1:0-->`) so the client can detect mismatches between server and client builds. On mismatch, fall back to full client render instead of corrupting the DOM with incompatible marker IDs.
 
 3. **Streaming** — can the server render stream HTML chunks as components resolve? This requires the DSD template to be emitted after all child content, which conflicts with streaming. May need a two-pass approach (components → collected HTML → DSD wrapping → stream).
 
