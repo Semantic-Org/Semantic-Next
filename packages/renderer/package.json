@@ -13,7 +13,8 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
-    }
+    },
+    "./lit": "./src/engines/lit/renderer.js"
   },
   "scripts": {
     "build": "wireit",

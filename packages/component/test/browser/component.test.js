@@ -1,13 +1,9 @@
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  defineComponent,
-  LitWebComponentBase,
-  registerHelper,
-  registerHelpers,
-  WebComponentBase,
-} from '../../src/index.js';
+import { LitWebComponentBase } from '../../src/engines/lit/base.js';
+import { WebComponentBase } from '../../src/engines/native/base.js';
+import { defineComponent, registerHelper, registerHelpers } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {

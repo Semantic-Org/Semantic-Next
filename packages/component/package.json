@@ -5,7 +5,10 @@
   "author": "Jack Lukic",
   "license": "ISC",
   "version": "0.18.0",
-  "sideEffects": false,
+  "sideEffects": [
+    "./src/index.js",
+    "./src/engines/*/register.js"
+  ],
   "main": "src/index.js",
   "module": "src/index.js",
   "types": "types/index.d.ts",
@@ -15,7 +18,8 @@
       "import": "./src/index.js",
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
-    }
+    },
+    "./bare": "./src/bare.js"
   },
   "scripts": {
     "build": "wireit",

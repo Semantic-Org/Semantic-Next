@@ -7,7 +7,7 @@ import {
 } from '@semantic-ui/utils';
 import { LitElement, noChange } from 'lit';
 
-import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
+import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -16,7 +16,7 @@ import {
   getUIClasses,
   isDarkMode,
   setDefaultSettings,
-} from './component-helpers.js';
+} from '../../component-helpers.js';
 
 /*
   Lit-backed web component base class.

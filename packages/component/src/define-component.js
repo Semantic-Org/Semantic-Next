@@ -1,9 +1,8 @@
+import { getEngine } from '@semantic-ui/renderer';
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { adoptStylesheet, each, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, each, fatal, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
-import { createComponent } from './create-component.js';
-import { createLitComponent } from './create-lit-component.js';
 
 export const defineComponent = ({
   template = '',
@@ -37,7 +36,15 @@ export const defineComponent = ({
   singularTag,
 } = {}) => {
 
-  const isLit = renderingEngine === 'lit';
+  // Resolve engine: accepts an engine object or a string name from the registry
+  const engine = typeof renderingEngine === 'object'
+    ? renderingEngine
+    : getEngine(renderingEngine);
+
+  if (!engine) {
+    fatal(`Rendering engine "${renderingEngine}" not registered.`
+      + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`);
+  }
 
   if (!ast) {
     const compiler = new TemplateCompiler(template);
@@ -80,7 +87,7 @@ export const defineComponent = ({
       defaultSettings,
     });
 
-    const factory = isLit ? createLitComponent : createComponent;
+    const factory = engine.factory;
     webComponent = factory({
       prototypeTemplate, resolvedProperties, css, delegatesFocus,
       componentSpec, defaultSettings, plural,

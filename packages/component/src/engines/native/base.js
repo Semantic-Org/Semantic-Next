@@ -5,7 +5,7 @@ import {
   kebabToCamel,
 } from '@semantic-ui/utils';
 
-import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
+import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -14,7 +14,7 @@ import {
   getUIClasses,
   isDarkMode,
   setDefaultSettings,
-} from './component-helpers.js';
+} from '../../component-helpers.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.

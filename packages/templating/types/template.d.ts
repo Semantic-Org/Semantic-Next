@@ -1,6 +1,6 @@
 import { Query, QueryOptions } from '@semantic-ui/query';
 import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { Renderer } from '@semantic-ui/renderer';
 import { ASTNode } from './compiler/template-compiler';
 import { TemplateHelpers } from './template-helpers';
 
@@ -588,10 +588,10 @@ export class Template {
   reactions: Reaction[];
   /** The root element where the template is rendered (ShadowRoot or HTMLElement). */
   renderRoot?: ShadowRoot | HTMLElement;
-  /** The rendering engine used ('lit' or a custom engine name). */
-  renderingEngine: 'lit' | string; // Currently only 'lit' is supported.
-  /** The LitRenderer instance used for rendering. */
-  renderer: LitRenderer;
+  /** The rendering engine — 'native' (default), 'lit', or an engine object. */
+  renderingEngine: string | object;
+  /** The renderer instance used for rendering. */
+  renderer: Renderer;
   /** Optional start marker node for insertion. */
   startNode?: Node;
   /** Optional end marker node for insertion.. */
