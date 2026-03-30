@@ -16,12 +16,12 @@ import {
 } from '@semantic-ui/utils';
 
 /*******************************
-         Lit Properties
+      Property Configuration
 *******************************/
 
 /*
   Builds property configuration from component spec and default settings.
-  Used by both WebComponentBase (standard) and LitWebComponentBase (Lit compat).
+  Used by both WebComponentBase and LitWebComponentBase.
 */
 export function getProperties({ properties = {}, defaultSettings, componentSpec }) {
   if (keys(properties).length) {
@@ -271,7 +271,7 @@ export function getUIClasses(el, { componentSpec, properties }) {
         classes.push(property);
       }
 
-      if ((componentSpec.attributeClasses || []).includes(attribute)) {
+      if (inArray(attribute, componentSpec.attributeClasses || [])) {
         classes.push(attribute);
       }
     }
