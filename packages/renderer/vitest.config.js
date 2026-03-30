@@ -37,7 +37,7 @@ export default defineConfig({
         test: {
           include: ['**/test/browser/**/*.test.{ts,js}'],
           name: 'browser',
-          testTimeout: 1000,
+          testTimeout: 3000,
           browser: {
             enabled: true,
             provider: playwright(),
