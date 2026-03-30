@@ -61,8 +61,9 @@ export class Renderer {
 
   // Evaluate an expression with dataVersion tracking for subtree propagation
   eval(expression, data) {
-    this.dataVersion.get();
-    return this.evaluator.lookupExpressionValue(expression, data);
+    const version = this.dataVersion.get();
+    const result = this.evaluator.lookupExpressionValue(expression, data);
+    return result;
   }
 
   render() {
@@ -802,6 +803,10 @@ export class Renderer {
         return;
       }
 
+      // Track parent dataVersion so this Reaction re-fires when
+      // the parent's data context is updated via setData/bumpDataVersion
+      this.dataVersion.get();
+
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
 
@@ -850,29 +855,11 @@ export class Renderer {
         if (this.template) { currentInstance.setParent(this.template); }
       }
       else {
-        // Same template — update data and re-render content in place
-        if (currentInstance) {
-          currentInstance.onDestroyed();
-        }
-        currentInstance = template.clone({
-          templateName,
-          subTemplates: this.subTemplates,
-          data: templateData,
-          parentTemplate: this.template,
-          renderingEngine: 'native',
-        });
-        currentInstance.initialize();
-        const templateFragment = currentInstance.render();
-        region.setContent(templateFragment);
-
-        const renderRoot = this.template?.element?.renderRoot;
-        if (renderRoot) {
-          currentInstance.setElement(this.template.element);
-          currentInstance.attach(renderRoot, {
-            parentNode: region.parentNode,
-          });
-        }
-        if (this.template) { currentInstance.setParent(this.template); }
+        // Same template — update data context, Reactions handle DOM updates.
+        // rerender: false keeps rendered=true so Template.render() bumps
+        // dataVersion instead of re-creating DOM from scratch.
+        currentInstance.setDataContext(templateData, { rerender: false });
+        currentInstance.render(templateData);
       }
     }));
 
