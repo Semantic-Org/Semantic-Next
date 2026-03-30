@@ -155,23 +155,30 @@ Use `pageCSS` with descendant selectors and `::slotted()` in parent shadow DOM f
 
 ```
 packages/renderer/src/
-├── expression-evaluator.js  ← shared (server + client)
-├── build-html-string.js     ← NEW: extracted from renderer.js, shared
-├── index.js                 ← exports
-├── native/
-│   ├── renderer.js          ← client renderer (imports build-html-string)
-│   ├── server.js            ← NEW: JS renderToString
-│   ├── dynamic-region.js    ← client only
-│   └── reaction-scope.js    ← client only
-└── wasm/                    ← Phase 2
-    ├── renderer.rs          ← Rust renderToString
-    ├── Cargo.toml
-    └── build.js             ← wasm-pack integration
+├── expression-evaluator.js    ← shared across all engines
+├── build-html-string.js       ← NEW: extracted from renderer.js, shared by client + server
+├── engine-registry.js         ← engine registration (from tree-shakeable-lit plan)
+├── index.js                   ← exports
+├── engines/
+│   ├── native/
+│   │   ├── renderer.js        ← client renderer (TreeWalker + Reactions)
+│   │   ├── server.js          ← NEW: JS renderToString (string eval, no DOM)
+│   │   ├── dynamic-region.js  ← client only
+│   │   └── reaction-scope.js  ← client only
+│   ├── lit/
+│   │   ├── renderer.js        ← LitRenderer (tree-shakeable, registered on import)
+│   │   └── directives/        ← 6 AsyncDirectives
+│   └── rust/                  ← Phase 2
+│       ├── src/               ← Rust source
+│       ├── Cargo.toml
+│       ├── build.js           ← wasm-pack integration
+│       ├── renderer.wasm      ← compiled output
+│       └── index.js           ← thin JS wrapper, same renderToString interface
 ```
 
 `server.js` imports only `ExpressionEvaluator` and `buildHTMLString`. No DOM dependencies. Can run in Node, Deno, Bun, Cloudflare Workers.
 
-The WASM renderer (Phase 2) replaces the string generation in `server.js` while keeping the JS expression evaluation layer. The interface is identical — `renderToString(ast, data, css)` → HTML string.
+The Rust engine (Phase 2) replaces the server path with WASM — same `renderToString` interface, same `buildHTMLString` contract. `server.js` falls back to the JS implementation when WASM is unavailable.
 
 ## Key Design Constraint
 
