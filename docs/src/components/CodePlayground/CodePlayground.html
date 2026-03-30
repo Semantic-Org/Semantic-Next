@@ -66,6 +66,7 @@
     <ui-panel
       size="60"
       class="files"
+      hidden={isMode 'preview'}
       exportparts="panel, handle"
     >
       {#if canShowMenu}
@@ -90,6 +91,7 @@
     <ui-panel
       size=40
       class="preview"
+      hidden={isRightPaneHidden}
       exportparts="panel, handle"
     >
       {#if canShowPageFiles}
@@ -110,12 +112,14 @@
           {>CodePlaygroundPanel
             panel=getPagePanel
             size='natural'
+            panelHidden=isPreviewMode
             lineNumbers=!minimal
             lineWrapping=minimal
             maxSize='50%'
           }
           {>CodePlaygroundPanel
             panel={type: 'preview'}
+            panelHidden=isCodeMode
             size='grow'
           }
         </ui-panels>
