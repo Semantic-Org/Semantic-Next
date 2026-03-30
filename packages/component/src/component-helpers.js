@@ -205,16 +205,12 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
   Creates a proxy object which returns the current setting.
   We need this over a getter/setter because settings are
   destructured in function arguments which locks their value in time.
-  Call as: createSettingsProxy(el, { componentSpec, properties })
 */
-export function createSettingsProxy(el, { componentSpec, properties }) {
+export function createSettingsProxy(el) {
   el.settingsVars = new Map();
   return new Proxy({}, {
     get: (target, property) => {
-      const settings = el.getSettings({
-        componentSpec,
-        properties,
-      });
+      const settings = el.getSettings();
       const setting = get(settings, property);
       let signal = el.settingsVars.get(property);
       if (!signal) {
