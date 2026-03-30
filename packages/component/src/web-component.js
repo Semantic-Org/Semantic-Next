@@ -1,8 +1,11 @@
 import { $ } from '@semantic-ui/query';
 import {
   isFunction,
+  isServer,
+  kebabToCamel,
 } from '@semantic-ui/utils';
 
+import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -16,6 +19,10 @@ import {
 /*
   Standard web component base class — extends HTMLElement directly.
   No framework dependencies. Shared logic lives in component-helpers.js.
+
+  Component-specific config is stored as static _config on the generated
+  subclass by the factory in create-component.js. Methods here read from
+  _config so factories don't need to define inline methods.
 */
 
 class WebComponentBase extends HTMLElement {
@@ -23,6 +30,20 @@ class WebComponentBase extends HTMLElement {
   constructor() {
     super();
     this.renderCallbacks = [];
+
+    const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor._config || {};
+    this.css = css;
+    this.componentSpec = componentSpec;
+    if (resolvedProperties) {
+      this.settings = this.createSettingsProxy({ componentSpec, properties: resolvedProperties });
+    }
+    if (defaultSettings) {
+      this.setDefaultSettings({ defaultSettings, componentSpec });
+    }
+    else {
+      this.defaultSettings = {};
+    }
+    this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
   }
 
   connectedCallback() {
@@ -71,13 +92,35 @@ class WebComponentBase extends HTMLElement {
       delete this.component;
       delete this.dataContext;
     }
-    // Destroy prototype
     this.constructor.template?.onDestroyed();
   }
 
   attributeChangedCallback(attribute, oldValue, newValue) {
-    // Type conversion handled by property accessors set up in defineComponent.
-    // Subclass overrides this to call adjustPropertyFromAttribute + onAttributeChanged.
+    const { resolvedProperties, componentSpec, onAttributeChanged } = this.constructor._config || {};
+    if (!resolvedProperties) {
+      return;
+    }
+
+    const propName = kebabToCamel(attribute);
+    const config = resolvedProperties[propName];
+    if (config?.converter?.fromAttribute) {
+      newValue = config.converter.fromAttribute(newValue, config.type);
+    }
+    if (config && !config.noAccessor) {
+      this[propName] = newValue;
+    }
+
+    adjustPropertyFromAttribute({
+      el: this,
+      attribute,
+      attributeValue: newValue,
+      properties: resolvedProperties,
+      oldValue,
+      componentSpec,
+    });
+    if (onAttributeChanged) {
+      this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
+    }
   }
 
   requestUpdate() {
@@ -96,7 +139,37 @@ class WebComponentBase extends HTMLElement {
   }
 
   /*******************************
-           Properties
+      Settings / Template Data
+  *******************************/
+
+  getSettings() {
+    const { componentSpec, resolvedProperties } = this.constructor._config || {};
+    return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
+  }
+
+  setSetting(name, value) {
+    this[name] = value;
+  }
+
+  getData() {
+    const { componentSpec, resolvedProperties, plural } = this.constructor._config || {};
+    let data = {
+      ...this.getSettings(),
+    };
+    if (!isServer) {
+      data.darkMode = this.isDarkMode();
+    }
+    if (componentSpec) {
+      data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+    }
+    if (plural) {
+      data.plural = true;
+    }
+    return data;
+  }
+
+  /*******************************
+           Static Helpers
   *******************************/
 
   static getProperties(options) {
@@ -108,7 +181,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   /*******************************
-      Settings / Template Data
+      Instance Helpers
   *******************************/
 
   setDefaultSettings(options) {
