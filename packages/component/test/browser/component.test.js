@@ -1,16 +1,23 @@
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, registerHelper, registerHelpers, WebComponentBase } from '../../src/index.js';
+import {
+  defineComponent,
+  LitWebComponentBase,
+  registerHelper,
+  registerHelpers,
+  WebComponentBase,
+} from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {
   // Test basic component definition
   describe('defineComponent', () => {
     it('should handle component with CSS', () => {
-      // Define a component with CSS
+      // Define a component with CSS — Lit path has static styles
       const TestComponent = defineComponent({
         tagName: 'test-css-component',
+        renderingEngine: 'lit',
         template: '<div>Content</div>',
         css: '.container { color: red; }',
       });
@@ -52,13 +59,15 @@ describe('Component', () => {
     it('should merge subTemplates CSS with component CSS', () => {
       // Define a subTemplate
       const headerTemplate = defineComponent({
+        renderingEngine: 'lit',
         template: '<div class="header">Header</div>',
         css: '.header { font-weight: bold; }',
       });
 
-      // Define a component with subTemplates
+      // Define a component with subTemplates — Lit path has static styles
       const TestComponent = defineComponent({
         tagName: 'test-subtemplates-component',
+        renderingEngine: 'lit',
         template: '<div>{{>header}}Content</div>',
         css: '.container { padding: 10px; }',
         subTemplates: {
@@ -136,15 +145,16 @@ describe('Component', () => {
 
       // Verify component was created successfully
       expect(TestComponent).toBeDefined();
-      expect(TestComponent.name).toBe('UIWebComponent');
+      expect(typeof TestComponent).toBe('function');
     });
   });
 
   // Test WebComponentBase properties and methods
   describe('WebComponentBase', () => {
     it('should have shadowRootOptions defined', () => {
-      expect(WebComponentBase.shadowRootOptions).toBeDefined();
-      expect(WebComponentBase.shadowRootOptions.delegatesFocus).toBe(false);
+      // shadowRootOptions is a LitElement concept — test on the Lit base class
+      expect(LitWebComponentBase.shadowRootOptions).toBeDefined();
+      expect(LitWebComponentBase.shadowRootOptions.delegatesFocus).toBe(false);
     });
 
     it('should provide a static getProperties method', () => {
@@ -320,30 +330,24 @@ describe('Component', () => {
       expect(instance.settingsVars.has('count')).toBe(true);
     });
 
-    it('should create template when willUpdate is called', () => {
-      // Define component
+    it('should create template when willUpdate is called (Lit path)', () => {
+      // willUpdate is a Lit-specific lifecycle method
       const TestComponent = defineComponent({
         tagName: 'test-update-component',
+        renderingEngine: 'lit',
         template: '<div>{{text}}</div>',
         defaultSettings: {
           text: 'Initial text',
         },
       });
 
-      // Create a component instance
       const instance = new TestComponent();
-
-      // Mock necessary properties and methods
       instance.renderRoot = {};
       instance.getData = vi.fn().mockReturnValue({ text: 'Initial text' });
 
-      // Initially template should be undefined
       expect(instance.template).toBeUndefined();
-
-      // Call willUpdate
       instance.willUpdate();
 
-      // Now template should be defined
       expect(instance.template).toBeDefined();
       expect(instance.component).toBeDefined();
       expect(instance.dataContext).toBeDefined();
@@ -376,7 +380,6 @@ describe('Component', () => {
     });
 
     it('should handle disconnectedCallback correctly', () => {
-      // Create mock template with onDestroyed method
       const mockTemplate = {
         onDestroyed: vi.fn(),
       };
@@ -386,24 +389,19 @@ describe('Component', () => {
         template: '<div>Disconnect Test</div>',
       });
 
-      // Setup spies
-      const superDisconnectSpy = vi.spyOn(WebComponentBase.prototype, 'disconnectedCallback').mockImplementation(
-        () => {},
-      );
-      const litTemplateDestroyedSpy = vi.spyOn(TestComponent.template, 'onDestroyed').mockImplementation(() => {});
+      const prototypeDestroyedSpy = vi.spyOn(TestComponent.template, 'onDestroyed').mockImplementation(() => {});
 
       const instance = new TestComponent();
       instance.template = mockTemplate;
 
-      // Call disconnectedCallback
       instance.disconnectedCallback();
 
-      // Verify super.disconnectedCallback was called
-      expect(superDisconnectSpy).toHaveBeenCalled();
-
-      // Verify both template instance and prototype onDestroyed methods were called
+      // Instance template's onDestroyed should be called
       expect(mockTemplate.onDestroyed).toHaveBeenCalled();
-      expect(litTemplateDestroyedSpy).toHaveBeenCalled();
+      // Prototype template's onDestroyed should be called
+      expect(prototypeDestroyedSpy).toHaveBeenCalled();
+      // Template reference should be cleared
+      expect(instance.template).toBeUndefined();
     });
   });
 
@@ -502,8 +500,10 @@ describe('Component', () => {
         };
       });
 
+      // willUpdate + triggerAttributeChange is Lit-specific SSR behavior
       const TestComponent = defineComponent({
         tagName: 'test-ssr-component',
+        renderingEngine: 'lit',
         template: '<div>SSR Test</div>',
       });
 
