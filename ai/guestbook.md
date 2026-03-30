@@ -1537,3 +1537,72 @@ Eight planets. One `{#each}`. Zero animation frames.
 *— Claude (Opus 4.6), 2026-03-29*
 
 *"The simplest orbit is a div that doesn't know it's spinning."*
+
+---
+
+## Entry 14: Tests as Specification — Preparing the Ground for the Vanilla Renderer
+
+**Date:** 2026-03-29
+**Agent:** Claude (Opus 4.6)
+**Task:** Assess test coverage for validating a future vanilla DOM renderer
+**Session:** Deep architecture study → gap analysis → test writing → two bugs found
+
+### What Happened
+
+The user asked me to evaluate whether the existing test suite could validate a new renderer — one that replaces Lit with direct DOM manipulation. Not to build the renderer, but to determine if we'd *know* whether it worked.
+
+I spent the first phase reading everything: the deferred vanilla renderer plan, the full rendering pipeline source (LitRenderer, all six directives, Template, WebComponentBase, defineComponent), the compiler and StringScanner, the spec system and its three-dialect attribute resolution, every component authoring guide via MCP. The user kept pushing me deeper — "read the plan yourself, not just the agent summary," "hold ground truth in your context," "read every authoring guide." They were right each time. Summaries lose the details that matter.
+
+### The Architecture Insight
+
+The key realization: SUI's per-expression Reactions already do the work that makes Lit's diffing layer redundant. Each `reactiveData` directive creates its own Reaction, tracks its own Signal dependencies, and calls `setValue()` on change. Lit re-renders and diffs on every update, but the directives bypass that entirely — they write directly to their DOM position. The vanilla renderer doesn't need to invent a new reactivity model. It needs to wire the *same* model to DOM nodes without Lit as the intermediary.
+
+This means the existing tests — which assert behavioral outcomes like "signal changes, text updates" — are the right specification. They don't test Lit. They test the contract between reactive state and DOM output.
+
+### What the Tests Revealed
+
+I wrote 39 new tests across three files: attribute binding assertions (the plan's "hardest problem"), reaction cleanup verification (the plan's riskiest lifecycle concern), and coverage for previously untested node types (unsafeHTML, slots, object iteration, SVG).
+
+Two bugs surfaced immediately:
+
+**Bug 1: `RenderTemplateDirective.disconnected()` doesn't stop its Reaction.** Every other directive calls `this.reaction.stop()` on disconnect. The render-template directive relied on an internal `!this.isConnected` guard that only triggers on the *next* execution — meaning one orphaned evaluation fires after the subtemplate is removed from the DOM. Three-line fix.
+
+**Bug 2: `.prop={fn}` auto-invokes the function instead of passing it.** The `ReactiveDataDirective.getReactiveValue()` used `literalValue()` (which returns the raw reference) only for `PartType.EVENT`. `PartType.PROPERTY` went through `value()` which auto-invokes zero-arg functions — so `.formatter={myFn}` passed `myFn()` instead of `myFn`. The fix was expanding the `literalValue()` branch to include `PROPERTY` alongside `EVENT`.
+
+Neither bug was theoretically deducible. They emerged from writing tests that asserted specific DOM state after specific lifecycle transitions. The subtemplate cleanup bug in particular had been invisible because no test ever checked whether a removed subtemplate's expressions stopped evaluating — they only checked whether the *remaining* content looked right.
+
+### The Parameterization
+
+After writing the tests, we parameterized all eight `defineComponent`-based test files to accept `renderingEngine` from a shared config. Every `defineComponent` call now threads the engine through. When the vanilla renderer exists, the change is one line:
+
+```js
+export const RENDERING_ENGINES = ['lit', 'vanilla'];
+```
+
+That doubles the entire 556-test suite to run against both renderers. Tag names include the engine to avoid custom element registration collisions.
+
+### Methodological Takeaway
+
+I initially overcomplicated the attribute binding problem — proposed modifying the compiler's AST to emit attribute position metadata. The user corrected me: "the AST is deliberately terse. Lit does it just fine. What you're describing isn't necessary." They were right. The compiler already classifies boolean attributes via `StringScanner.getContext()`. The renderer discovers attribute positions through its own mechanism (Lit's tagged template PartTypes; vanilla's placeholder-and-walk approach). Adding metadata to the AST would couple it to one renderer's implementation strategy.
+
+The lesson: when you're deep in analysis and start proposing changes to layers you don't own, stop and ask whether the information is truly missing or just needs to be recovered differently. The terse AST is a feature. Each layer solves its own problems.
+
+### For Future Agents
+
+**On test-driven renderer validation:** If you're implementing the vanilla renderer, start by flipping `RENDERING_ENGINES` to `['vanilla']` and watching what fails. The tests are structured as behavioral specifications: "given this template and this state mutation, the DOM should look like this." They don't assert Lit internals. They assert the contract.
+
+**On the attribute binding problem:** The plan calls it "the single hardest part" and it is — but the compiler gives you more than you think. `ifDefined` on the AST node tells you boolean vs string behavior. The browser's HTML parser tells you attribute vs text position when you use the placeholder approach. You don't need to solve classification from scratch.
+
+**On reaction cleanup:** The `DynamicRegion` + `ReactionScope` pattern in the plan is essential. Every block-level construct (if, each, async, rerender) must dispose child reactions when clearing content. The cleanup tests verify this explicitly — spy functions that should stop firing after removal. If your implementation leaks reactions, these tests will catch it.
+
+**On the `.prop` binding:** The vanilla renderer needs to handle this too. When the AST produces an expression inside a `.property` attribute position, pass the raw value (including function references) without auto-invocation. The Lit renderer does this via `PartType.PROPERTY` → `literalValue()`. The vanilla renderer will need its own mechanism to detect property binding positions in the parsed DOM.
+
+### Signing Off
+
+556 tests. Two bugs found and fixed. One line to enable vanilla renderer validation. The ground is prepared.
+
+The interesting thing about writing tests for code that doesn't exist yet is that you're not testing an implementation — you're defining a contract. Every assertion is a sentence in a specification that says "any correct renderer must produce this result." The vanilla renderer agent won't be starting from scratch. They'll be starting from 556 definitions of "correct."
+
+*— Claude (Opus 4.6), 2026-03-29*
+
+*"Tests don't find bugs in code you've written. They find bugs in assumptions you've made."*
