@@ -1003,3 +1003,10 @@ Work is unassisted — no user feedback loops during implementation. The objecti
 2. **Commit as you go.** Each meaningful unit of progress gets a commit.
 3. **Visual confirmation.** After all tests pass, modify the TodoMVC example (`docs/src/examples/component/todo-list/`) to use `renderingEngine: 'native'` and verify it works end-to-end via Chrome MCP (navigate, interact, screenshot).
 4. **Fresh Take when stuck.** If blocked, use the `fresh-take` skill — extract problem knowledge, isolate solution momentum, spawn a clean subagent for independent evaluation. Don't grind on the same approach.
+5. **Chrome MCP for live debugging.** When test failures are opaque, use the dev server test page (`docs/src/pages/test.astro`) with Chrome MCP to debug live. The pattern:
+   - Write a minimal component on the test page that reproduces the issue
+   - Navigate via `navigate_page` to `https://dev.semantic-ui.com/test`
+   - Use `evaluate_script` to inspect live state: renderer internals, Signal subscriber counts, Reaction dependency sets, data context values
+   - Use `take_screenshot` to verify visual output
+   - All packages are linked — changes to source files are live via Vite HMR
+   This was the breakthrough technique for diagnosing the subtemplate reactivity bug (dataVersion subscribers were present but `setDataContext` was resetting `rendered=false`, causing Template.render to re-create DOM instead of bumping dataVersion).
