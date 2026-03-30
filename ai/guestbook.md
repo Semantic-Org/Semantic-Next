@@ -1606,3 +1606,102 @@ The interesting thing about writing tests for code that doesn't exist yet is tha
 *— Claude (Opus 4.6), 2026-03-29*
 
 *"Tests don't find bugs in code you've written. They find bugs in assumptions you've made."*
+
+---
+
+## Entry 7: Building the Native Renderer
+
+**Date:** 2026-03-30
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Implement the native DOM renderer — zero-dependency alternative to Lit's rendering layer
+**Session:** ~500k tokens. Plan review → architecture design → implementation → 573 tests green → TodoMVC verified live
+
+### What I Built
+
+A renderer that replaces Lit's entire rendering pipeline — tagged template literals, AsyncDirectives, repeat(), the Part system, comment marker pairs — with ~650 lines of vanilla DOM code. Three files: `renderer.js`, `dynamic-region.js`, `reaction-scope.js`. Passes all 573 tests (411 original + 162 structural conformance tests added during this session). TodoMVC runs on it with zero console errors.
+
+### The Architecture
+
+```
+AST → buildHTMLString() → single HTML string with comment markers
+    → parseHTML()        → one template.innerHTML call
+    → bindMarkers()      → TreeWalker wires Reactions at marker positions
+```
+
+Everything — HTML, expressions, AND block directives — goes into one HTML string. The browser's parser handles nesting. Comment markers survive parsing and are findable via TreeWalker. Each marker gets a reactive binding or a DynamicRegion. After binding, the markers are replaced with text nodes (or could stay as comments — they're invisible either way).
+
+### The Wrong Path
+
+My first implementation split HTML at block directive boundaries and parsed each fragment independently. `<div>{#if show}content{/if}</div>` became three segments: `<div>`, the if-block, `</div>`. The browser auto-closed `<div>` to `<div></div>`. Content went after the div as a sibling. `</div>` was discarded.
+
+This passed 411 tests because those tests used `shadowText()` which strips HTML structure. The DOM was wrong but the text content was right. It took Jack's html-output conformance tests — which assert exact DOM structure — to expose it.
+
+The fix was to stop splitting. Put everything in one string. Let the browser parse it once. Walk the result. The 38 structural failures dropped to 7 (snippets — a registration timing issue), then to 0. The code got shorter, not longer.
+
+**Lesson for future agents:** If your DOM structure tests pass but your structural conformance tests fail, the issue is almost certainly in how you assemble HTML for parsing. `template.innerHTML` is a full HTML parser — it will auto-close unclosed tags, discard orphan closing tags, and rearrange invalid nesting. You must give it complete, well-nested HTML. The only way to guarantee this is to assemble the complete string in one pass, not in fragments.
+
+### The Subtemplate Reactivity Bug
+
+Subtemplates (full Template instances with their own renderer) rendered correctly on first paint but didn't update when parent data changed. I spent significant time tracing the Signal → Dependency → Reaction → Scheduler chain, convinced that `dataVersion.get()` inside Reactions should establish tracking.
+
+The root cause was one line in `Template.setDataContext()`:
+
+```js
+setDataContext(data, { rerender = true } = {}) {
+  assignInPlace(this.data, data);
+  if (rerender) { this.rendered = false; }  // ← this
+}
+```
+
+`rerender` defaults to `true`. When the parent Reaction called `currentInstance.setDataContext(newData)`, it set `rendered = false`. Then `currentInstance.render()` saw `rendered === false` and entered the first-render branch — re-creating the DOM from scratch instead of bumping `dataVersion` to trigger existing Reactions. The fix: `setDataContext(data, { rerender: false })`.
+
+I found this via Chrome MCP's `evaluate_script`, inspecting the live subtemplate on the dev server:
+
+```js
+// In the browser console via evaluate_script:
+child.rendered  // false — should be true!
+```
+
+**Lesson for future agents:** When reactive updates don't propagate, don't assume the reactivity system is broken. Check whether something upstream is resetting state that gates the update path. `Template.rendered` is that gate. If it's `false`, `Template.render()` re-creates instead of updating.
+
+### The Each-Item Data Problem
+
+Each items use a Signal to hold per-item data and a Proxy to layer item data over parent data. When the collection changes and an existing item has new data, `itemSignal.set(newData)` fires, and inner Reactions update.
+
+First attempt used `new Signal(eachData, { allowClone: false })` for performance. Failed: items mutated in place (same object reference), so `isEqual(oldRef, sameRef)` returned `true` and the Signal didn't fire. Removed `allowClone: false` — the Signal now clones on set, so `isEqual` compares values, not references.
+
+Then: static `data={}` expressions on subtemplates inside each needed to track the item Signal. But outside each, they should NOT track (static data is static). I used `data.__isItemProxy` to detect the context — a magic property on the Proxy. It works but it's an abstraction leak. The refinement plan describes the clean fix: thread an explicit `isReactiveContext` parameter through `readAST`.
+
+### What SSR Gets for Free
+
+`buildHTMLString` is a pure function of the AST. No DOM, no Signals, no Reactions. It produces `{ htmlString, entries }` — a complete HTML string and a description of what each marker means. The server path is: evaluate expressions inline, replace markers with values, keep the comments for hydration, wrap in Declarative Shadow DOM. The client hydration path: `this.shadowRoot` already exists from DSD, call `bindMarkers` on it with the same entries. Same TreeWalker, same binding code, different DOM source.
+
+This wasn't designed for SSR. It fell out of the correct rendering architecture.
+
+### Things I'd Do Differently
+
+1. **Start with structural conformance tests.** The original 411 tests use `shadowText()` which strips HTML structure. I could have caught the unclosed tag bug immediately with a single test asserting `<div>{#if true}<span>x</span>{/if}</div>` produces `<div><span>x</span></div>`. Instead I built the segment-based approach, got 384 tests passing, and didn't discover the structural problem until Jack's conformance tests.
+
+2. **Don't fight the test runner.** I lost time to zombie Chromium processes filling up ports. The solution was always `pkill -9 chromium` and retry. Don't debug infrastructure issues — kill and restart.
+
+3. **Use Chrome MCP earlier.** The `evaluate_script` tool for inspecting live Signal subscriber counts and Reaction dependency sets is more powerful than any amount of code tracing. I should have set up the test page and started debugging live as soon as I hit the subtemplate reactivity wall, instead of tracing the Scheduler code path in my head for 30 minutes.
+
+### For the Agent Who Picks Up the Refinement Plan
+
+The eight items in `native-renderer-refinement.md` are ordered by impact. Start with #4 (reuse comment markers as anchors) — it's a 5-minute change that eliminates unnecessary DOM operations and improves DevTools visibility. Then #2 (remove `__isItemProxy`) to clean up the worst abstraction leak. Then #1 (PreparedTemplate caching) for the biggest performance win.
+
+Load the `native-renderer` skill via MCP before starting. It has the full as-built architecture — the marker format, the binding flow, the DynamicRegion lifecycle, the `setDataContext rerender:false` fix, the LitElement `noChange` integration hack. Everything you need to understand what the code does and why.
+
+The previous agent (Entry 6) wrote the tests that defined the contract. I wrote the renderer that satisfies it. You get to make it beautiful.
+
+### What This Proved
+
+A framework built on Lit's rendering layer can be cleanly separated from it. The AST is renderer-agnostic. The expression evaluator is renderer-agnostic. The Template class, the reactivity system, the event system, Query — all renderer-agnostic. The only Lit-specific code was in the renderer itself and the web component base class.
+
+The native renderer matches Lit's behavioral output across 573 tests while producing cleaner DOM (no `<!--?lit$-->` comment pairs), using fewer abstractions (no AsyncDirective, no Part types, no tagged template literal bridge), and naturally supporting SSR without additional machinery.
+
+The web platform is enough.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-30*
+
+*"One correct idea: put everything in one string, let the browser parse it, walk the result."*
