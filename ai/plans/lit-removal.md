@@ -2,290 +2,109 @@
 
 ## Goal
 
-Remove Lit as a runtime dependency from `@semantic-ui/component`. Replace `WebComponentBase extends LitElement` with `ComponentBase extends HTMLElement`. After this, components using `renderingEngine: 'native'` have zero framework dependencies — just the platform.
+Make `defineComponent` engine-agnostic. Both `WebComponentBase extends HTMLElement` and `LitWebComponentBase extends LitElement` are peer rendering engines behind the same `defineComponent` API. Components using the standard path have zero Lit dependencies.
 
-## Design Principle
+## Status
 
-We are not reimplementing LitElement. Lit's lifecycle (`willUpdate`, `render` returning a TemplateResult, `updated`, `firstUpdated`, `static properties`) exists to serve Lit's diff/patch rendering model. The native renderer has a fundamentally different model: `render()` is called once to produce a DocumentFragment, and Reactions handle all subsequent DOM updates. There is no "return a description for the framework to process." The component IS the framework.
+**Complete.** Steps 1-4 implemented. 2121 tests passing across the monorepo.
 
-ComponentBase should be designed from scratch for the native renderer's actual requirements — not shaped by Lit's API surface.
+Step 5 (tree-shaking verification) deferred — `defineComponent` still statically imports `createLitComponent` which pulls in `lit`. Full tree-shaking requires either subpath exports (`@semantic-ui/component/native`) or making the Lit factory registration lazy. Not a blocker for the architecture work.
 
-## What ComponentBase Actually Needs
+## What Was Built
 
-### The minimum surface
-
-```js
-class ComponentBase extends HTMLElement {
-  connectedCallback()            // create shadow root, first render
-  disconnectedCallback()         // cleanup
-  attributeChangedCallback()     // attribute → property reflection
-  requestUpdate()                // schedule re-render (called by adjustPropertyFromAttribute)
-  updateComplete                 // Promise for test coordination
-}
-```
-
-That's it. Everything else — lifecycle hooks, rendering, reactivity, event delegation, template traversal — is Template's job. Template already has `onCreated`, `onRendered`, `onDestroyed`, `onThemeChanged`. Template already manages state, settings, and the data context. Template already owns the Renderer.
-
-ComponentBase is a thin shell: shadow root, property accessors, and the bridge between HTML attributes and the Template system.
-
-### What Lit provided vs what actually matters
-
-| Lit provided | What we actually need | Why |
-|---|---|---|
-| `static properties` → accessor generation | Property accessors on the prototype | Generate via `Object.defineProperty` in defineComponent |
-| `willUpdate()` | Nothing | Lit's hook for pre-diff work. We don't diff. |
-| `render()` → returns TemplateResult | Template.render() appends to shadow root directly | No return value, no framework processing |
-| `updated()` | `renderCallbacks[]` | Simple callback list, no lifecycle ceremony |
-| `firstUpdated()` | Part of `connectedCallback` flow | First render happens once in connectedCallback |
-| `static get styles()` + `unsafeCSS()` | `adoptedStyleSheets` | One line: `sheet.replaceSync(css)` |
-| `requestUpdate()` → triggers full render cycle | `requestUpdate()` → schedule data update | Only needs to update data context, not re-render |
-| `updateComplete` Promise | Same | For test coordination. Resolve after microtask update. |
-| `noChange` sentinel | Nothing | Told Lit not to touch the DOM. We don't touch it either. |
-| Hydration support patches | DSD detection | Check `this.shadowRoot` exists in connectedCallback |
-
-### The render flow
-
-```js
-connectedCallback() {
-  if (!this.shadowRoot) {
-    this.attachShadow({ mode: 'open', delegatesFocus });
-  }
-
-  // Adopt styles
-  if (css) {
-    const sheet = new CSSStyleSheet();
-    sheet.replaceSync(css);
-    this.shadowRoot.adoptedStyleSheets = [sheet];
-  }
-
-  // Clone prototype template, initialize, render once
-  this.template = prototypeTemplate.clone({
-    data: this.getData(),
-    element: this,
-    renderRoot: this.shadowRoot,
-  });
-  this.template.initialize();
-  const fragment = this.template.render(this.getData());
-  this.shadowRoot.append(fragment);
-
-  this.component = this.template.instance;
-  this.dataContext = this.template.getDataContext();
-}
-```
-
-After this, the component is alive. Reactions handle all updates. `requestUpdate()` is only called by `adjustPropertyFromAttribute` for special properties — it updates the data context and bumps `dataVersion`, but does NOT re-render the template.
-
-```js
-requestUpdate() {
-  if (this._updateScheduled) { return; }
-  this._updateScheduled = true;
-  this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
-  queueMicrotask(() => {
-    this._updateScheduled = false;
-    if (this.template) {
-      this.template.render(this.getData());
-    }
-    this._resolveUpdate?.();
-  });
-}
-```
-
-`Template.render()` on subsequent calls calls `renderer.setData()` + `renderer.bumpDataVersion()`. The Reactions that track `dataVersion` re-evaluate. DOM updates happen through Reactions, not through the component re-rendering.
-
-### Property accessors
-
-Properties are not a framework concept — they're just getters/setters that store values and call `requestUpdate()`.
-
-```js
-// In defineComponent, after class creation:
-for (const [name, config] of Object.entries(properties)) {
-  if (config.noAccessor) { continue; }
-  Object.defineProperty(webComponent.prototype, name, {
-    get() { return this[`__${name}`]; },
-    set(value) {
-      const old = this[`__${name}`];
-      this[`__${name}`] = value;
-      if (!config.hasChanged || config.hasChanged(value, old)) {
-        this.requestUpdate();
-      }
-    },
-    configurable: true,
-    enumerable: true,
-  });
-}
-```
-
-Default values come from `setDefaultSettings()` in the constructor, not from the accessor. The accessor just stores and triggers updates.
-
-### attributeChangedCallback
-
-```js
-attributeChangedCallback(attribute, oldValue, newValue) {
-  // Type conversion (Boolean 'false' → false, etc.)
-  const propName = kebabToCamel(attribute);
-  const config = properties[propName];
-  if (config?.converter?.fromAttribute) {
-    newValue = config.converter.fromAttribute(newValue, config.type);
-  }
-
-  // Set the property (hits the accessor above)
-  if (config && !config.noAccessor) {
-    this[propName] = newValue;
-  }
-
-  // 3-dialect resolution for spec-driven components
-  adjustPropertyFromAttribute({ el: this, attribute, attributeValue: newValue, properties, oldValue, componentSpec });
-
-  // User callback
-  onAttributeChanged?.(attribute, oldValue, newValue);
-}
-```
-
-### Settings chain
-
-The settings chain (`createSettingsProxy`, `getSettingsFromConfig`, `overlaySettingsSignals`) works unchanged. It depends on:
-
-1. `this[propertyName]` returning the current value — our accessor provides this
-2. `el.settings[property] = value` updating the Signal — Proxy set trap handles this
-3. `el.requestUpdate()` existing — we provide it
-
-Settings are plain props, not Signals. `settings.speed = 0.5` writes through the Proxy, `settings.speed` reads through the Proxy. The Proxy manages the Signal layer invisibly.
-
-## Package Structure
+### File Structure
 
 ```
 packages/component/src/
-├── define-component.js         ← modified: base class selection, conditional Lit imports
-├── web-component.js            ← KEEP as-is for renderingEngine: 'lit'
-├── component-base.js           ← NEW: extends HTMLElement, minimal surface
-├── component-helpers.js        ← NEW: shared logic (getProperties, getPropertySettings,
-│                                  createSettingsProxy, getSettingsFromConfig, setDefaultSettings,
-│                                  getUIClasses, isDarkMode)
+├── define-component.js      ← entry point, zero lit package imports
+├── web-component.js         ← WebComponentBase extends HTMLElement
+├── lit-web-component.js     ← LitWebComponentBase extends LitElement
+├── component-helpers.js     ← shared functions both base classes use
+├── create-component.js      ← standard factory (sets config + property accessors)
+├── create-lit-component.js  ← Lit factory (all lit imports isolated here)
+├── index.js                 ← public exports
 └── helpers/
-    └── adjust-property-from-attribute.js  ← unchanged
+    └── adjust-property-from-attribute.js
 ```
 
-`WebComponentBase` stays for Lit backwards compatibility. No renaming. Components with `renderingEngine: 'lit'` (or default) use it as before. Components with `renderingEngine: 'native'` use ComponentBase.
+### Symmetric Factory Pattern
 
-## Implementation Order
-
-### Step 1: Extract shared helpers
-Move renderer-agnostic methods from `WebComponentBase` to `component-helpers.js`. `WebComponentBase` imports and delegates to them. All existing tests pass, zero behavior change.
-
-### Step 2: Build ComponentBase
-Write the minimal class: `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`, `requestUpdate`, `updateComplete`. Import shared helpers. No integration with defineComponent yet.
-
-### Step 3: Wire defineComponent
-Add base class selection based on `renderingEngine`. For native: use ComponentBase, generate property accessors, skip `unsafeCSS` / `noChange` imports. For lit: unchanged.
-
-### Step 4: Test
-Run full test suite with `RENDERING_ENGINES = ['lit', 'native']`. The native tests should produce identical results whether backed by LitElement or ComponentBase — the test suite doesn't know or care which base class is used.
-
-### Step 5: Verify tree-shaking
-Build a component with `renderingEngine: 'native'` only. Verify the bundle contains zero Lit code. This is the proof that the dependency is fully removed for the native path.
-
-## What Changes in Template.render()
-
-Currently `Template.render()` has a branch:
+Both factories have the same shape:
 
 ```js
-if (!this.rendered) {
-  this.html = this.renderer.render();
-} else if (this.renderingEngine == 'native') {
-  this.renderer.bumpDataVersion();
-} else {
-  this.renderer.bumpDataVersion();
+// Standard
+const component = class extends WebComponentBase {};
+component.config = { resolvedProperties, componentSpec, ... };
+component.template = prototypeTemplate;
+component.properties = resolvedProperties;
+
+// Lit
+const component = class extends LitWebComponentBase {};
+component.config = { resolvedProperties, componentSpec, ... };
+component.template = prototypeTemplate;
+component.properties = resolvedProperties;
+```
+
+A new rendering engine follows the same pattern: write a base class with its lifecycle, write a factory that sets config.
+
+### Static Config Pattern
+
+Both base classes read component-specific configuration from `this.constructor.config`:
+
+```js
+getSettings() {
+  const { componentSpec, resolvedProperties } = this.constructor.config || {};
+  return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
 }
 ```
 
-With ComponentBase, the native path simplifies. `Template.render()` doesn't need the `renderingEngine` check — both paths call `bumpDataVersion()` on subsequent renders. The difference is handled by the base class: LitElement calls `render()` on every update (returning the cached TemplateResult), ComponentBase calls `Template.render()` only through `requestUpdate()` which bumps the data version.
+No inline method definitions in factories. No closure captures. The base class owns the methods; the factory sets the data.
 
-## What defineComponent Looks Like After
+### DOM Event Lifecycle
 
-```js
-export const defineComponent = ({ renderingEngine, tagName, ... }) => {
-  const isNative = renderingEngine === 'native';
+Components emit standard CustomEvents instead of using framework-specific Promises:
 
-  // ... AST compilation, prototype Template creation (unchanged)
+| Event | When | Replaces |
+|-------|------|----------|
+| `created` | After `initialize()` | — |
+| `rendered` | After first render | `updateComplete` (first) |
+| `updated` | After reactive DOM changes | `updateComplete` (subsequent) |
+| `destroyed` | After `disconnectedCallback` | — |
 
-  if (tagName) {
-    const BaseClass = isNative ? ComponentBase : WebComponentBase;
+Tests use `$(el).onNext('rendered')` and `$(el).onNext('updated')` to coordinate.
 
-    webComponent = class extends BaseClass {
-      constructor() {
-        super();
-        this.css = css;
-        this.componentSpec = componentSpec;
-        this.settings = createSettingsProxy(this, { componentSpec, properties: webComponent.properties });
-        setDefaultSettings(this, { defaultSettings, componentSpec });
-      }
+The `updated` event fires from three paths:
+1. `Template.render()` on subsequent renders — `setTimeout(onUpdated, 0)`
+2. State signal changes — `afterFlush(onUpdated)` via tracking Reaction in Template
+3. Async resolution — `notifyUpdate()` in Renderer on `.then()` / `.catch()` only (not loading)
 
-      getSettings() {
-        return getSettingsFromConfig(this, { componentSpec, properties: webComponent.properties });
-      }
+### Default Rendering Engine
 
-      setSetting(name, value) { this[name] = value; }
+`renderingEngine` defaults to `'lit'` in `defineComponent` to preserve SSR compatibility. Components that opt into the standard path pass `renderingEngine: 'native'`. The default will flip to `'native'` when SSR supports the standard renderer.
 
-      getData() {
-        let data = { ...this.getSettings() };
-        if (!isServer) { data.darkMode = isDarkMode(this); }
-        if (componentSpec) { data.ui = getUIClasses(this, { componentSpec, properties: webComponent.properties }); }
-        if (plural) { data.plural = true; }
-        return data;
-      }
+## Implementation Record
 
-      attributeChangedCallback(attribute, oldValue, newValue) {
-        if (isNative) {
-          // direct handling — no super needed
-        } else {
-          super.attributeChangedCallback(attribute, oldValue, newValue);
-        }
-        adjustPropertyFromAttribute({ ... });
-        onAttributeChanged?.(attribute, oldValue, newValue);
-      }
-    };
+### Step 1: Extract shared helpers ✓
+`7b9a2e0d` — Moved `getProperties`, `getPropertySettings`, `setDefaultSettings`, `getSettingsFromConfig`, `createSettingsProxy`, `getUIClasses`, `isDarkMode` to `component-helpers.js`.
 
-    // Lit-specific setup
-    if (!isNative) {
-      webComponent.styles = unsafeCSS(css);
-      webComponent.properties = getProperties({ properties, componentSpec, defaultSettings });
-    }
+### Step 2: Build WebComponentBase ✓
+`71683bbe` — `WebComponentBase extends HTMLElement` with `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`, `requestUpdate`. SSR guard via `isServer ? class {} : HTMLElement`.
 
-    // Native-specific setup
-    if (isNative) {
-      const props = getProperties({ properties, componentSpec, defaultSettings });
-      // observedAttributes
-      Object.defineProperty(webComponent, 'observedAttributes', {
-        get: () => Object.entries(props)
-          .filter(([_, c]) => c.attribute !== false)
-          .map(([n]) => camelToKebab(n)),
-      });
-      // Property accessors
-      for (const [name, config] of Object.entries(props)) { ... }
-    }
+### Step 3: Wire defineComponent ✓
+`bf0f0211` — Separate factories in `create-component.js` and `create-lit-component.js`. `defineComponent` selects factory based on `renderingEngine`.
 
-    customElements.define(tagName, webComponent);
-  }
-};
-```
+### Step 4: Test ✓
+Both engines run the full test suite via `RENDERING_ENGINES = ['lit', 'native']`. 2121 tests passing across 53 test files. TodoMVC and Card Search visually verified on the standard renderer.
 
-The Lit imports (`unsafeCSS`, `noChange`) only execute on the Lit path. Dynamic import or conditional assignment keeps them out of native bundles.
+### Step 5: Tree-shaking — deferred
+`defineComponent` imports `createLitComponent` statically. The `lit` package is reachable through the import graph even for standard-only builds. Options for full isolation:
+- Subpath exports: `@semantic-ui/component/native`
+- Dynamic import (Vite compatibility issues)
+- Registration pattern (factory registry)
 
-## Risks
-
-### updateComplete timing semantics
-Lit's `updateComplete` waits for pending reactive updates. Our `queueMicrotask`-based version resolves after the microtask. If Reactions scheduled during `bumpDataVersion` complete in the same microtask (which they do — Set.forEach visits dynamically added entries), this should be equivalent. Test suite is the validation.
-
-### Subtemplate rendering
-Subtemplates clone the prototype Template and call `initialize()` + `render()`. The clone inherits `renderingEngine` and creates the appropriate Renderer. With ComponentBase, subtemplates don't go through the web component lifecycle — they're bare Templates. This already works today. No change needed.
-
-### Boolean attribute reflection
-Lit auto-reflects boolean attributes. Native needs explicit handling in `attributeChangedCallback` via the existing `converter.fromAttribute` for Boolean type. Already specified in `getPropertySettings`.
+Not blocking — the architecture is clean regardless of bundle isolation.
 
 ## Dependencies
 
 - Native renderer (complete)
-
-## Status
-
-Scoped. Ready to execute.
+- SSR plan at `ai/plans/native-ssr.md` (scoped, ready for fresh context)
