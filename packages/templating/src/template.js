@@ -22,7 +22,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { LitRenderer, Renderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
@@ -244,12 +244,13 @@ export const Template = class Template {
       });
     }
     else if (this.renderingEngine == 'native') {
-      // Stub — returns empty fragment. Implementation in Phase 1.
-      this.renderer = {
-        render: () => document.createDocumentFragment(),
-        setData: () => {},
-        bumpDataVersion: () => {},
-      };
+      this.renderer = new Renderer({
+        ast: this.ast,
+        data: this.overlaySettingsSignals(this.getDataContext()),
+        template: this,
+        subTemplates: this.subTemplates,
+        helpers: TemplateHelpers,
+      });
     }
     else {
       fatal('Unknown renderer specified', this.renderingEngine);
@@ -693,6 +694,11 @@ export const Template = class Template {
     if (!this.rendered) {
       this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
+    }
+    else if (this.renderingEngine == 'native') {
+      // Native renderer: Reactions handle DOM updates directly.
+      // Update data context and bump version to propagate to subtrees.
+      this.renderer.bumpDataVersion();
     }
     else {
       // data changed but template structure is the same — trigger reactive

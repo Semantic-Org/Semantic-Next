@@ -1,6 +1,6 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
 import { adoptStylesheet, camelToKebab, each, isClient, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
-import { unsafeCSS } from 'lit';
+import { noChange, unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import { WebComponentBase } from './web-component.js';
@@ -230,7 +230,16 @@ export const defineComponent = ({
           ...this.getData(),
           ...this.tpl,
         };
+        // Native renderer: after first render, Reactions handle all DOM updates.
+        // Return noChange so Lit leaves the DOM alone.
+        if (renderingEngine === 'native' && this._nativeRendered) {
+          this.template.render(data);
+          return noChange;
+        }
         const html = this.template.render(data);
+        if (renderingEngine === 'native') {
+          this._nativeRendered = true;
+        }
         return html;
       }
     };
