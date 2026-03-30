@@ -17,3 +17,23 @@ ui-menu {
   left: var(--margin);
   margin: 0;
 }
+
+.hints {
+  position: fixed;
+  bottom: var(--margin);
+  right: var(--margin);
+  display: flex;
+  gap: var(--gap-s);
+  color: var(--white-50);
+  font-size: var(--text-xs);
+  font-family: var(--page-font);
+}
+.hints kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--white-20);
+  border-radius: var(--border-radius-xs);
+  font-size: var(--text-3xs);
+  font-family: inherit;
+  vertical-align: 1px;
+}

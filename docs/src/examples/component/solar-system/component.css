@@ -84,7 +84,7 @@
 
 .label {
   position: absolute;
-  bottom: 10px;
+  bottom: var(--margin);
   left: 0;
   right: 0;
   text-align: center;
@@ -100,7 +100,7 @@
 
 @keyframes twinkle {
   0%, 100% { opacity: var(--opacity); }
-  50% { opacity: calc(var(--opacity) * 0.3); }
+  50% { opacity: calc(var(--opacity) * 0.6); }
 }
 
 @keyframes pulse {

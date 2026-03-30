@@ -6,6 +6,8 @@ uniform vec2 u_resolution;
 uniform float u_visible[8];
 uniform float u_showOrbits;
 uniform float u_coolSun;
+uniform float u_wallTime;
+uniform vec2 u_pointer;
 
 // ── Sun tuning ──
 const float SUN_RADIUS = 1.8;
@@ -49,9 +51,11 @@ float hash(vec2 p) {
 void main() {
   vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / u_resolution.y;
 
-  // Slowly orbiting camera
-  float camAngle = u_time * 0.06;
-  vec3 ro = vec3(sin(camAngle) * 20.0, 18.0, cos(camAngle) * 20.0);
+  // Camera orbit with pointer interaction
+  // One full camera orbit per Earth year
+  float camAngle = 6.28318 * u_time / 365.25 + u_pointer.x;
+  float camHeight = 18.0 + u_pointer.y * 8.0;
+  vec3 ro = vec3(sin(camAngle) * 20.0, camHeight, cos(camAngle) * 20.0);
   vec3 ta = vec3(0.0, -3.8, 0.0);
   vec3 fwd = normalize(ta - ro);
   vec3 right = normalize(cross(fwd, vec3(0.0, 1.0, 0.0)));
@@ -62,9 +66,12 @@ void main() {
   float closest = 1000.0;
 
   // Stars
-  float starVal = hash(floor(uv * 250.0));
+  vec2 starCell = floor(uv * 250.0);
+  float starVal = hash(starCell);
   if (starVal > 0.993) {
-    float twinkle = 0.5 + 0.5 * sin(u_time * 2.0 + starVal * 80.0);
+    float phase = hash(starCell + 100.0) * 6.28318;
+    float rate = 1.0 + hash(starCell + 200.0) * 3.0;
+    float twinkle = 0.7 + 0.3 * sin(u_wallTime * rate + phase);
     col = vec3((starVal - 0.993) / 0.007 * twinkle * 0.3);
   }
 
@@ -149,20 +156,21 @@ void main() {
   // Planets
   for (int i = 0; i < 8; i++) {
     if (u_visible[i] > 0.5) {
-      float orbitR, planetR, speed, offset;
+      float orbitR, planetR, period, meanLon;
       vec3 pColor;
       bool rings = false;
 
-      if (i == 0) { orbitR=2.5; planetR=0.15; speed=1.6; offset=0.0; pColor=vec3(0.71,0.71,0.71); }
-      else if (i == 1) { orbitR=3.5; planetR=0.18; speed=1.1; offset=2.1; pColor=vec3(0.91,0.80,0.64); }
-      else if (i == 2) { orbitR=4.5; planetR=0.19; speed=0.8; offset=4.2; pColor=vec3(0.30,0.62,0.88); }
-      else if (i == 3) { orbitR=5.8; planetR=0.16; speed=0.6; offset=1.5; pColor=vec3(0.88,0.36,0.23); }
-      else if (i == 4) { orbitR=7.8; planetR=0.40; speed=0.35; offset=3.0; pColor=vec3(0.83,0.65,0.45); }
-      else if (i == 5) { orbitR=10.0; planetR=0.34; speed=0.25; offset=5.5; pColor=vec3(0.91,0.84,0.64); rings=true; }
-      else if (i == 6) { orbitR=12.0; planetR=0.24; speed=0.18; offset=0.8; pColor=vec3(0.50,0.78,0.89); }
-      else { orbitR=13.8; planetR=0.22; speed=0.12; offset=2.5; pColor=vec3(0.25,0.37,0.81); }
+      // orbitR: visual spacing, period: real orbital period in days, meanLon: J2000 mean longitude (radians)
+      if (i == 0) { orbitR=2.5; planetR=0.15; period=87.97;   meanLon=4.40; pColor=vec3(0.71,0.71,0.71); }
+      else if (i == 1) { orbitR=3.5; planetR=0.18; period=224.7;   meanLon=3.18; pColor=vec3(0.91,0.80,0.64); }
+      else if (i == 2) { orbitR=4.5; planetR=0.19; period=365.25;  meanLon=1.75; pColor=vec3(0.30,0.62,0.88); }
+      else if (i == 3) { orbitR=5.8; planetR=0.16; period=687.0;   meanLon=6.20; pColor=vec3(0.88,0.36,0.23); }
+      else if (i == 4) { orbitR=7.8; planetR=0.40; period=4332.6;  meanLon=0.60; pColor=vec3(0.83,0.65,0.45); }
+      else if (i == 5) { orbitR=10.0; planetR=0.34; period=10759.0; meanLon=0.87; pColor=vec3(0.91,0.84,0.64); rings=true; }
+      else if (i == 6) { orbitR=12.0; planetR=0.24; period=30687.0; meanLon=5.47; pColor=vec3(0.50,0.78,0.89); }
+      else { orbitR=13.8; planetR=0.22; period=60190.0; meanLon=5.32; pColor=vec3(0.25,0.37,0.81); }
 
-      float angle = u_time * speed + offset;
+      float angle = 6.28318 * u_time / period + meanLon;
       vec3 center = vec3(cos(angle) * orbitR, 0.0, sin(angle) * orbitR);
 
       // Saturn rings

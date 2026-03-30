@@ -4,6 +4,7 @@
 }
 
 .scene {
+  position: relative;
   width: 100%;
   height: 100%;
   border-radius: var(--border-radius);
@@ -14,4 +15,18 @@ canvas {
   width: 100%;
   height: 100%;
   display: block;
+  cursor: grab;
+}
+canvas:active {
+  cursor: grabbing;
+}
+
+.date {
+  position: absolute;
+  bottom: var(--margin);
+  left: var(--margin);
+  color: var(--white-60);
+  font-size: var(--text-s);
+  font-family: var(--page-font);
+  pointer-events: none;
 }
