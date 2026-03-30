@@ -1,0 +1,25 @@
+<div class="solar-system">
+  {#if showStars}
+    {#each star in stars}
+      <div class="star" style="left: {star.x}%; top: {star.y}%; --size: {star.size}px; --opacity: {star.opacity}; --duration: {star.duration}s;"></div>
+    {/each}
+  {/if}
+  <div class="sun"></div>
+  {#each planet in planets}
+    <div class="ring" style="--radius: {planet.radius}px;"></div>
+    <div class="orbit" style="--period: {planet.period}s; --delay: {planet.delay}s;">
+      <div
+        class="{classIf planet.rings 'ringed'} planet"
+        style="--size: {planet.size}px; --color: {planet.color}; --radius: {planet.radius}px;"
+      >
+        {#if planet.rings}
+          <div class="saturn-ring"></div>
+        {/if}
+      </div>
+    </div>
+  {/each}
+
+  {#if showDate}
+    <div class="label">{formatDate time 'h:mm:ss a'}</div>
+  {/if}
+</div>
