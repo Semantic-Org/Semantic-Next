@@ -29,7 +29,7 @@ export const defineComponent = ({
 
   subTemplates = {},
 
-  renderingEngine,
+  renderingEngine = 'native',
   properties,
 
   componentSpec = false,
@@ -38,9 +38,6 @@ export const defineComponent = ({
 } = {}) => {
 
   const isLit = renderingEngine === 'lit';
-  if (!renderingEngine) {
-    renderingEngine = isLit ? 'lit' : 'native';
-  }
 
   if (!ast) {
     const compiler = new TemplateCompiler(template);

@@ -20,9 +20,9 @@ import {
   Standard web component base class — extends HTMLElement directly.
   No framework dependencies. Shared logic lives in component-helpers.js.
 
-  Component-specific config is stored as static _config on the generated
-  subclass by the factory in create-component.js. Methods here read from
-  _config so factories don't need to define inline methods.
+  Component-specific config is stored as static `config` on the generated
+  subclass by the factory. Methods here read from config so factories
+  don't need to define inline methods.
 */
 
 class WebComponentBase extends HTMLElement {
@@ -30,8 +30,9 @@ class WebComponentBase extends HTMLElement {
   constructor() {
     super();
     this.renderCallbacks = [];
+    this.propertyStore = new Map();
 
-    const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor._config || {};
+    const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
     this.componentSpec = componentSpec;
     if (resolvedProperties) {
@@ -43,7 +44,7 @@ class WebComponentBase extends HTMLElement {
     else {
       this.defaultSettings = {};
     }
-    this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
+    this.updateComplete = new Promise(r => { this.resolveUpdate = r; });
   }
 
   connectedCallback() {
@@ -54,19 +55,17 @@ class WebComponentBase extends HTMLElement {
     if (!this.shadowRoot) {
       this.attachShadow({
         mode: 'open',
-        delegatesFocus: this.constructor._delegatesFocus || false,
+        delegatesFocus: this.constructor.delegatesFocus || false,
       });
     }
     this.renderRoot = this.shadowRoot;
 
-    // Adopt styles
     if (this.css) {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(this.css);
       this.shadowRoot.adoptedStyleSheets = [sheet];
     }
 
-    // Clone prototype template, initialize, render once
     const prototypeTemplate = this.constructor.template;
     this.template = prototypeTemplate.clone({
       data: this.getData(),
@@ -82,7 +81,7 @@ class WebComponentBase extends HTMLElement {
     const fragment = this.template.render(this.getData());
     this.shadowRoot.append(fragment);
 
-    this._resolveUpdate?.();
+    this.resolveUpdate?.();
   }
 
   disconnectedCallback() {
@@ -96,7 +95,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   attributeChangedCallback(attribute, oldValue, newValue) {
-    const { resolvedProperties, componentSpec, onAttributeChanged } = this.constructor._config || {};
+    const { resolvedProperties, componentSpec, onAttributeChanged } = this.constructor.config || {};
     if (!resolvedProperties) {
       return;
     }
@@ -124,17 +123,17 @@ class WebComponentBase extends HTMLElement {
   }
 
   requestUpdate() {
-    if (this._updateScheduled) {
+    if (this.updateScheduled) {
       return;
     }
-    this._updateScheduled = true;
-    this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
+    this.updateScheduled = true;
+    this.updateComplete = new Promise(r => { this.resolveUpdate = r; });
     queueMicrotask(() => {
-      this._updateScheduled = false;
+      this.updateScheduled = false;
       if (this.template) {
         this.template.render(this.getData());
       }
-      this._resolveUpdate?.();
+      this.resolveUpdate?.();
     });
   }
 
@@ -143,7 +142,7 @@ class WebComponentBase extends HTMLElement {
   *******************************/
 
   getSettings() {
-    const { componentSpec, resolvedProperties } = this.constructor._config || {};
+    const { componentSpec, resolvedProperties } = this.constructor.config || {};
     return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
   }
 
@@ -152,7 +151,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   getData() {
-    const { componentSpec, resolvedProperties, plural } = this.constructor._config || {};
+    const { componentSpec, resolvedProperties, plural } = this.constructor.config || {};
     let data = {
       ...this.getSettings(),
     };
@@ -169,7 +168,7 @@ class WebComponentBase extends HTMLElement {
   }
 
   /*******************************
-           Static Helpers
+      Property Configuration
   *******************************/
 
   static getProperties(options) {

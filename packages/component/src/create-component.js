@@ -3,8 +3,8 @@ import { WebComponentBase } from './web-component.js';
 
 /*
   Factory that creates a web component class for the standard rendering path.
-  The returned class extends WebComponentBase (HTMLElement) with per-component
-  static config, property accessors, and observedAttributes.
+  Same shape as createLitComponent — sets static config on the generated class.
+  All lifecycle logic lives on WebComponentBase.
 */
 
 export function createComponent({
@@ -14,10 +14,9 @@ export function createComponent({
 }) {
   const component = class extends WebComponentBase {};
 
-  // Static config — read by WebComponentBase methods
   component.template = prototypeTemplate;
-  component._delegatesFocus = delegatesFocus;
-  component._config = {
+  component.delegatesFocus = delegatesFocus;
+  component.config = {
     resolvedProperties,
     componentSpec,
     defaultSettings,
@@ -51,14 +50,13 @@ export function createComponent({
     if (config.noAccessor) {
       return;
     }
-    const privateProp = `__${propName}`;
     Object.defineProperty(component.prototype, propName, {
       get() {
-        return this[privateProp];
+        return this.propertyStore.get(propName);
       },
       set(value) {
-        const old = this[privateProp];
-        this[privateProp] = value;
+        const old = this.propertyStore.get(propName);
+        this.propertyStore.set(propName, value);
         if (!config.hasChanged || config.hasChanged(value, old)) {
           this.requestUpdate();
         }

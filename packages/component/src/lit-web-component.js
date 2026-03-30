@@ -1,10 +1,13 @@
 import { $ } from '@semantic-ui/query';
 import {
+  camelToKebab,
   each,
   isFunction,
+  isServer,
 } from '@semantic-ui/utils';
-import { LitElement } from 'lit';
+import { LitElement, noChange } from 'lit';
 
+import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -17,8 +20,9 @@ import {
 
 /*
   Lit-backed web component base class.
-  Used when renderingEngine is 'lit' (the default for backwards compatibility).
-  Shared logic lives in component-helpers.js.
+  Reads component-specific config from static `config`, same contract
+  as WebComponentBase. Lit-specific lifecycle (willUpdate, render
+  returning TemplateResult) lives here.
 */
 
 class LitWebComponentBase extends LitElement {
@@ -30,11 +34,21 @@ class LitWebComponentBase extends LitElement {
     super();
     this.renderCallbacks = [];
     this.ensureHydration();
+
+    const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
+    this.css = css;
+    this.componentSpec = componentSpec;
+    if (resolvedProperties) {
+      this.settings = this.createSettingsProxy({ componentSpec, properties: resolvedProperties });
+    }
+    if (defaultSettings) {
+      this.setDefaultSettings({ defaultSettings, componentSpec });
+    }
+    else {
+      this.defaultSettings = {};
+    }
   }
 
-  // Lit checks for hydration support at module evaluation time, but module
-  // load order isn't guaranteed in production builds. Re-apply the patches
-  // here to catch cases where lit-element evaluated first.
   ensureHydration() {
     if (!LitWebComponentBase.hydrationReady) {
       LitWebComponentBase.hydrationReady = true;
@@ -45,13 +59,135 @@ class LitWebComponentBase extends LitElement {
     }
   }
 
+  /*******************************
+        Lit Lifecycle
+  *******************************/
+
+  connectedCallback() {
+    super.connectedCallback();
+  }
+
+  willUpdate() {
+    if (isServer) {
+      this.triggerAttributeChange();
+    }
+    if (!this.template) {
+      const prototypeTemplate = this.constructor.template;
+      this.template = prototypeTemplate.clone({
+        data: this.getData(),
+        element: this,
+        renderRoot: this.renderRoot,
+      });
+      if (!this.template.initialized) {
+        this.template.initialize();
+      }
+      this.component = this.template.instance;
+      this.dataContext = this.template.getDataContext();
+    }
+    super.willUpdate();
+  }
+
   updated() {
     super.updated();
     each(this.renderCallbacks, (callback) => callback());
   }
 
-  addRenderCallback(callback) {
-    this.renderCallbacks.push(callback);
+  render() {
+    const { renderingEngine } = this.constructor.config || {};
+    const data = {
+      ...this.getData(),
+      ...this.tpl,
+    };
+    if (renderingEngine === 'native' && this.nativeRendered) {
+      this.template.render(data);
+      return noChange;
+    }
+    const html = this.template.render(data);
+    if (renderingEngine === 'native') {
+      this.nativeRendered = true;
+    }
+    return html;
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.template) {
+      this.template.onDestroyed();
+      delete this.template;
+      delete this.component;
+      delete this.dataContext;
+    }
+    this.constructor.template?.onDestroyed();
+  }
+
+  /*******************************
+      Settings / Template Data
+  *******************************/
+
+  getSettings() {
+    const { componentSpec, resolvedProperties } = this.constructor.config || {};
+    return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
+  }
+
+  setSetting(name, value) {
+    this[name] = value;
+  }
+
+  getData() {
+    const { componentSpec, resolvedProperties, plural } = this.constructor.config || {};
+    let data = {
+      ...this.getSettings(),
+    };
+    if (!isServer) {
+      data.darkMode = this.isDarkMode();
+    }
+    if (componentSpec) {
+      data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+    }
+    if (plural) {
+      data.plural = true;
+    }
+    return data;
+  }
+
+  attributeChangedCallback(attribute, oldValue, newValue) {
+    super.attributeChangedCallback(attribute, oldValue, newValue);
+    const { resolvedProperties, componentSpec, onAttributeChanged } = this.constructor.config || {};
+    if (!resolvedProperties) {
+      return;
+    }
+    adjustPropertyFromAttribute({
+      el: this,
+      attribute,
+      attributeValue: newValue,
+      properties: resolvedProperties,
+      oldValue,
+      componentSpec,
+    });
+    if (onAttributeChanged) {
+      this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
+    }
+  }
+
+  triggerAttributeChange() {
+    const { resolvedProperties, componentSpec } = this.constructor.config || {};
+    if (!resolvedProperties) {
+      return;
+    }
+    each(resolvedProperties, (propSettings, property) => {
+      const attribute = camelToKebab(property);
+      let newValue = this[property];
+      if (!propSettings.alias && attribute && newValue === true) {
+        this.setAttribute(attribute, '');
+      }
+      adjustPropertyFromAttribute({
+        el: this,
+        attribute,
+        properties: resolvedProperties,
+        attributeValue: newValue,
+        componentSpec,
+      });
+    });
   }
 
   /*******************************
@@ -67,8 +203,12 @@ class LitWebComponentBase extends LitElement {
   }
 
   /*******************************
-      Settings / Template Data
+      Instance Helpers
   *******************************/
+
+  addRenderCallback(callback) {
+    this.renderCallbacks.push(callback);
+  }
 
   setDefaultSettings(options) {
     setDefaultSettings(this, options);
@@ -94,7 +234,6 @@ class LitWebComponentBase extends LitElement {
             DOM Helpers
   *******************************/
 
-  // Rendered DOM (either shadow or regular)
   $(selector, { root = this?.renderRoot || this.shadowRoot } = {}) {
     if (!root) {
       console.error('Cannot query DOM until element has rendered.');
@@ -102,12 +241,10 @@ class LitWebComponentBase extends LitElement {
     return $(selector, { root });
   }
 
-  // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $(selector, { root: this.originalDOM.content });
   }
 
-  // calls callback if defined with consistent params and this context
   call(
     func,
     { firstArg, additionalArgs, args = [this.component, this.$.bind(this)] } = {},
@@ -125,6 +262,4 @@ class LitWebComponentBase extends LitElement {
 }
 
 export { LitWebComponentBase };
-
-// Re-export as WebComponentBase for backwards compatibility
 export { LitWebComponentBase as WebComponentBase };
