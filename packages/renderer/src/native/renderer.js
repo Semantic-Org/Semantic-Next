@@ -59,6 +59,12 @@ export class Renderer {
     });
   }
 
+  // Evaluate an expression with dataVersion tracking for subtree propagation
+  eval(expression, data) {
+    this.dataVersion.get();
+    return this.evaluator.lookupExpressionValue(expression, data);
+  }
+
   render() {
     return this.readAST({
       ast: this.ast,
@@ -354,7 +360,7 @@ export class Renderer {
               comp.stop();
               return;
             }
-            const value = this.evaluator.lookupExpressionValue(singleExpr.node.value, data);
+            const value = this.eval(singleExpr.node.value, data);
 
             if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
               element.removeAttribute(attrName);
@@ -386,7 +392,7 @@ export class Renderer {
                 value += part.static;
               }
               else {
-                value += this.evaluator.lookupExpressionValue(
+                value += this.eval(
                   expressions[part.markerID].node.value,
                   data,
                 ) ?? '';
@@ -424,7 +430,7 @@ export class Renderer {
           }
           for (const n of ownedNodes) { n.remove(); }
           ownedNodes.length = 0;
-          const value = this.evaluator.lookupExpressionValue(exprNode.value, data);
+          const value = this.eval(exprNode.value, data);
           if (value != null && value !== '') {
             const parsed = this.parseHTML(String(value));
             const nodes = [...parsed.childNodes];
@@ -441,7 +447,7 @@ export class Renderer {
             comp.stop();
             return;
           }
-          const value = this.evaluator.lookupExpressionValue(exprNode.value, data);
+          const value = this.eval(exprNode.value, data);
           textNode.data = value ?? '';
         }));
       }
@@ -493,7 +499,7 @@ export class Renderer {
   }
 
   getBranch(node, data) {
-    const condition = this.evaluator.lookupExpressionValue(node.condition, data);
+    const condition = this.eval(node.condition, data);
     if (condition) {
       return { matchIndex: 1000, contentAST: node.content };
     }
@@ -501,7 +507,7 @@ export class Renderer {
       for (let i = 0; i < node.branches.length; i++) {
         const branch = node.branches[i];
         if (branch.type === 'elseif') {
-          if (this.evaluator.lookupExpressionValue(branch.condition, data)) {
+          if (this.eval(branch.condition, data)) {
             return { matchIndex: i, contentAST: branch.content };
           }
         }
@@ -532,7 +538,7 @@ export class Renderer {
         return;
       }
 
-      const rawItems = this.evaluator.lookupExpressionValue(node.over, data) || [];
+      const rawItems = this.eval(node.over, data) || [];
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
 
@@ -688,7 +694,7 @@ export class Renderer {
         return;
       }
 
-      const result = this.evaluator.lookupExpressionValue(node.expression, data);
+      const result = this.eval(node.expression, data);
       const currentGen = ++generation;
 
       if (isPromise(result)) {
@@ -761,7 +767,7 @@ export class Renderer {
         Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
       }
       if (node.expression) {
-        this.evaluator.lookupExpressionValue(node.expression, data);
+        this.eval(node.expression, data);
       }
 
       if (!comp.firstRun) {
@@ -822,6 +828,7 @@ export class Renderer {
           subTemplates: this.subTemplates,
           data: templateData,
           parentTemplate: this.template,
+          renderingEngine: 'native',
         });
         currentInstance.initialize();
         const templateFragment = currentInstance.render();
@@ -837,8 +844,29 @@ export class Renderer {
         if (this.template) { currentInstance.setParent(this.template); }
       }
       else {
-        currentInstance.setDataContext(templateData);
-        currentInstance.render(templateData);
+        // Same template — update data and re-render content in place
+        if (currentInstance) {
+          currentInstance.onDestroyed();
+        }
+        currentInstance = template.clone({
+          templateName,
+          subTemplates: this.subTemplates,
+          data: templateData,
+          parentTemplate: this.template,
+          renderingEngine: 'native',
+        });
+        currentInstance.initialize();
+        const templateFragment = currentInstance.render();
+        region.setContent(templateFragment);
+
+        const renderRoot = this.template?.element?.renderRoot;
+        if (renderRoot) {
+          currentInstance.setElement(this.template.element);
+          currentInstance.attach(renderRoot, {
+            parentNode: region.parentNode,
+          });
+        }
+        if (this.template) { currentInstance.setParent(this.template); }
       }
     }));
 
@@ -860,39 +888,53 @@ export class Renderer {
       fatal(`Snippet "${templateName}" not found`);
     }
 
-    const snippetData = this.getSnippetData(node, data);
+    // Snippets inherit parent data and overlay passed props via a Proxy.
+    // Overlay props are stored as lazy getters so they re-evaluate reactively.
+    const evaluator = this.evaluator;
+    const staticGetters = {};
+    const reactiveGetters = {};
+
+    if (node.data) {
+      if (isString(node.data)) {
+        const evaluated = evaluator.lookupExpressionValue(node.data, data);
+        if (isPlainObject(evaluated)) {
+          each(evaluated, (val, key) => {
+            staticGetters[key] = () => val;
+          });
+        }
+      }
+      else if (isPlainObject(node.data)) {
+        each(node.data, (expr, key) => {
+          staticGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+        });
+      }
+    }
+    if (node.reactiveData) {
+      each(node.reactiveData, (expr, key) => {
+        reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
+      });
+    }
+
+    const allGetters = { ...staticGetters, ...reactiveGetters };
+
+    // Create a proxy that layers snippet props over parent data
+    const snippetData = new Proxy(data, {
+      get(target, prop) {
+        if (typeof prop === 'symbol') { return target[prop]; }
+        if (prop in allGetters) { return allGetters[prop](); }
+        return target[prop];
+      },
+      has(target, prop) {
+        return (prop in allGetters) || (prop in target);
+      },
+    });
+
     const snippetFragment = this.readAST({
       ast: snippet.content,
       data: snippetData,
       scope,
     });
     fragment.append(snippetFragment);
-  }
-
-  getSnippetData(node, data) {
-    let snippetData = { ...data };
-
-    if (node.data) {
-      if (isString(node.data)) {
-        const evaluated = this.evaluator.lookupExpressionValue(node.data, data);
-        if (isPlainObject(evaluated)) {
-          snippetData = { ...snippetData, ...evaluated };
-        }
-      }
-      else if (isPlainObject(node.data)) {
-        each(node.data, (expr, key) => {
-          snippetData[key] = this.evaluator.lookupExpressionValue(expr, data);
-        });
-      }
-    }
-
-    if (node.reactiveData) {
-      each(node.reactiveData, (expr, key) => {
-        snippetData[key] = this.evaluator.lookupExpressionValue(expr, data);
-      });
-    }
-
-    return snippetData;
   }
 
   /*******************************
