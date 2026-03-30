@@ -1,5 +1,5 @@
 import { camelToKebab, each, inArray } from '@semantic-ui/utils';
-import { WebComponentBase } from './web-component.js';
+import { WebComponentBase } from './base.js';
 
 /*
   Factory that creates a web component class for the standard rendering path.

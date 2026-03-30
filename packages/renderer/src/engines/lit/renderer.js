@@ -17,7 +17,7 @@ import {
   wrapFunction,
 } from '@semantic-ui/utils';
 
-import { ExpressionEvaluator } from '../expression-evaluator.js';
+import { ExpressionEvaluator } from '../../expression-evaluator.js';
 
 import { reactiveAsync } from './directives/reactive-async.js';
 import { reactiveConditional } from './directives/reactive-conditional.js';

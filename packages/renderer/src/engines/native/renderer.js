@@ -20,7 +20,7 @@ import {
 
 import { Template } from '@semantic-ui/templating';
 
-import { ExpressionEvaluator } from '../expression-evaluator.js';
+import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
 

@@ -1,5 +1,5 @@
 import { unsafeCSS } from 'lit';
-import { LitWebComponentBase } from './lit-web-component.js';
+import { LitWebComponentBase } from './base.js';
 
 /*
   Factory that creates a web component class for the Lit rendering path.

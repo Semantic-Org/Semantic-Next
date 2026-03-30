@@ -22,7 +22,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { LitRenderer, Renderer } from '@semantic-ui/renderer';
+import { getEngine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
@@ -246,27 +246,24 @@ export const Template = class Template {
       }));
     }
 
-    if (this.renderingEngine == 'lit') {
-      this.renderer = new LitRenderer({
-        ast: this.ast,
-        data: this.overlaySettingsSignals(this.getDataContext()),
-        template: this,
-        subTemplates: this.subTemplates,
-        helpers: TemplateHelpers,
-      });
+    // Resolve renderer class from engine object or registry
+    const engine = typeof this.renderingEngine === 'object'
+      ? this.renderingEngine
+      : getEngine(this.renderingEngine);
+    if (!engine) {
+      fatal(
+        `Renderer "${this.renderingEngine}" not registered.`
+          + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
+      );
     }
-    else if (this.renderingEngine == 'native') {
-      this.renderer = new Renderer({
-        ast: this.ast,
-        data: this.overlaySettingsSignals(this.getDataContext()),
-        template: this,
-        subTemplates: this.subTemplates,
-        helpers: TemplateHelpers,
-      });
-    }
-    else {
-      fatal('Unknown renderer specified', this.renderingEngine);
-    }
+
+    this.renderer = new engine.renderer({
+      ast: this.ast,
+      data: this.overlaySettingsSignals(this.getDataContext()),
+      template: this,
+      subTemplates: this.subTemplates,
+      helpers: TemplateHelpers,
+    });
 
     // Cache the base params object for call() — these are all stable references
     // that don't change between calls. additionalData is spread on top per-call.

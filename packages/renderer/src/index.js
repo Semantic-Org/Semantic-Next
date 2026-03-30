@@ -1,13 +1,12 @@
 // shared
 export { ExpressionEvaluator } from './expression-evaluator.js';
 
-// native renderer
-export { Renderer } from './native/renderer.js';
+// engine registry
+export { getEngine, registerEngine } from './engine-registry.js';
 
-// lit renderer
-export { ReactiveConditionalDirective } from './lit/directives/reactive-conditional.js';
-export { ReactiveDataDirective } from './lit/directives/reactive-data.js';
-export { ReactiveEachDirective } from './lit/directives/reactive-each.js';
-export { reactiveRerender, ReactiveRerenderDirective } from './lit/directives/reactive-rerender.js';
-export { RenderTemplateDirective } from './lit/directives/render-template.js';
-export { LitRenderer } from './lit/renderer.js';
+// native renderer
+export { Renderer } from './engines/native/renderer.js';
+
+// Lit renderer exports are NOT in this barrel — they're tree-shaking poison.
+// Import LitRenderer via @semantic-ui/component (which triggers engine registration)
+// or directly from ./engines/lit/renderer.js for internal use.
