@@ -63,10 +63,7 @@ const searchMeta = {
 
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page data-pagefind-body>
-    <Sidebar
-      expandAll=true
-    >
-    </Sidebar>
+    <Sidebar expandAll=true></Sidebar>
     <CodePlayground client:only="lit"
       files={files}
       title={example.title}
@@ -82,3 +79,9 @@ const searchMeta = {
       ></CodePlayground>
   </page>
 </Playground>
+
+<script is:inline>
+  if (new URLSearchParams(window.location.search).get('view') === 'preview') {
+    document.documentElement.style.setProperty('--sidebar-width', '0px');
+  }
+</script>
