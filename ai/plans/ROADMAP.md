@@ -100,6 +100,7 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
+| 12 | [Native Renderer](vanilla-renderer.md) | 80-120h (10-15d) | pair | `scoped` — Zero-dependency DOM renderer. Phases: ExpressionEvaluator extraction → PreparedTemplate + bindings → ComponentBase → integration. |
 
 
 ## Blocked (waiting on token finalization)
@@ -190,7 +191,7 @@ All items below are commented out in menus/pages, not deleted. Uncomment when co
 
 Plans in `ai/plans/deferred/`.
 
-- **Vanilla Renderer** — 30-50d pair. Ship 1.0 on Lit. Revisit for 2.0 if dependency becomes a real problem.
+- ~~Native Renderer~~ — moved to [active plan](vanilla-renderer.md), Up Next.
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 

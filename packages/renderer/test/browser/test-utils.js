@@ -1,5 +1,5 @@
 /*
   Shared test configuration for renderer tests.
-  Add 'vanilla' to this array when the vanilla renderer is ready.
+  Both engines run the same behavioral test suite.
 */
-export const RENDERING_ENGINES = ['lit'];
+export const RENDERING_ENGINES = ['lit', 'native'];

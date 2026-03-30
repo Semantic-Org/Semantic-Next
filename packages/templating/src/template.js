@@ -243,6 +243,14 @@ export const Template = class Template {
         helpers: TemplateHelpers,
       });
     }
+    else if (this.renderingEngine == 'native') {
+      // Stub — returns empty fragment. Implementation in Phase 1.
+      this.renderer = {
+        render: () => document.createDocumentFragment(),
+        setData: () => {},
+        bumpDataVersion: () => {},
+      };
+    }
     else {
       fatal('Unknown renderer specified', this.renderingEngine);
     }
