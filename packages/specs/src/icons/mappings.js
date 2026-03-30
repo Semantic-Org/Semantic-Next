@@ -550,7 +550,7 @@ export const iconMappings = {
   },
   'backspace': {
     category: 'action',
-    aliases: ['delete', 'back-delete', 'erase-back', 'remove-character'],
+    aliases: ['back-delete', 'erase-back', 'remove-character'],
     description: 'Delete or backspace',
     visual: 'A leftward-pointing tag shape containing an X mark, resembling a backspace key.',
     usage: 'delete tag, backspace last character, remove label, clear search token',
@@ -755,7 +755,7 @@ export const iconMappings = {
   },
   'minus': {
     category: 'action',
-    aliases: ['subtract', 'remove', 'dash'],
+    aliases: ['subtract', 'dash'],
     description: 'Remove or subtract',
     visual: 'A single short horizontal dash or minus sign with rounded ends.',
     usage: 'remove item, collapse section, decrease quantity, subtract value',
@@ -1022,7 +1022,7 @@ export const iconMappings = {
   },
   'trash': {
     category: 'action',
-    aliases: ['bin', 'garbage', 'discard'],
+    aliases: ['delete', 'bin', 'garbage', 'discard'],
     description: 'Delete or remove item',
     visual: 'A trash can with a lid, a small handle tab on top, and two vertical lines on the body.',
     usage: 'delete item, remove record, discard draft, empty trash',
@@ -1082,7 +1082,7 @@ export const iconMappings = {
   },
   'x': {
     category: 'action',
-    aliases: ['close', 'remove', 'delete'],
+    aliases: ['close', 'remove'],
     description: 'Close or dismiss',
     visual: 'An X mark formed by two diagonal lines crossing at the center.',
     usage: 'close dialog, dismiss notification, remove tag, cancel action',

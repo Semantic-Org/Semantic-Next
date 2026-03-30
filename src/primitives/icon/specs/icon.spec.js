@@ -1,5 +1,5 @@
 import {
-  ICON_NAMES,
+  ICON_OPTIONS,
   SIZE_VARIATION,
   COLORED_VARIATION,
   COLOR_OPTIONS,
@@ -21,7 +21,7 @@ export default {
       attribute: 'icon',
       description: 'specify what icon should appear',
       usageLevel: 1,
-      options: ICON_NAMES,
+      options: ICON_OPTIONS,
     },
   ],
   states: getStates(['disabled', 'loading']).map(state => withUsageLevel(state, 1)),
