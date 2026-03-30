@@ -29,7 +29,7 @@ export const defineComponent = ({
 
   subTemplates = {},
 
-  renderingEngine = 'native',
+  renderingEngine = 'lit',
   properties,
 
   componentSpec = false,
