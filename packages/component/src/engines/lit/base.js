@@ -1,13 +1,7 @@
 import { $ } from '@semantic-ui/query';
-import {
-  camelToKebab,
-  each,
-  isFunction,
-  isServer,
-} from '@semantic-ui/utils';
+import { camelToKebab, each, isFunction, isServer } from '@semantic-ui/utils';
 import { LitElement, noChange } from 'lit';
 
-import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -17,6 +11,7 @@ import {
   isDarkMode,
   setDefaultSettings,
 } from '../../component-helpers.js';
+import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 
 /*
   Lit-backed web component base class.
@@ -52,8 +47,10 @@ class LitWebComponentBase extends LitElement {
   ensureHydration() {
     if (!LitWebComponentBase.hydrationReady) {
       LitWebComponentBase.hydrationReady = true;
-      if (globalThis.litElementHydrateSupport
-        && !Object.getOwnPropertyDescriptor(LitElement, 'observedAttributes')) {
+      if (
+        globalThis.litElementHydrateSupport
+        && !Object.getOwnPropertyDescriptor(LitElement, 'observedAttributes')
+      ) {
         globalThis.litElementHydrateSupport({ LitElement });
       }
     }

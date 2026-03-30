@@ -1,11 +1,6 @@
 import { $ } from '@semantic-ui/query';
-import {
-  isFunction,
-  isServer,
-  kebabToCamel,
-} from '@semantic-ui/utils';
+import { isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
-import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 import {
   createSettingsProxy,
   getProperties,
@@ -15,6 +10,7 @@ import {
   isDarkMode,
   setDefaultSettings,
 } from '../../component-helpers.js';
+import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.
@@ -28,7 +24,6 @@ import {
 const HTMLElementBase = isServer ? class {} : HTMLElement;
 
 class WebComponentBase extends HTMLElementBase {
-
   constructor() {
     super();
     this.renderCallbacks = [];
