@@ -389,47 +389,7 @@
     }
 
     &.view-preview {
-      ui-panel.files {
-        flex: 0 0 0px !important;
-        overflow: hidden;
-        min-width: 0;
-        min-height: 0;
-      }
-      ui-panel.preview:not(.iframe) {
-        flex: 1 1 100% !important;
-      }
       ui-panel.preview:not(.iframe) > .menu { display: none; }
-      ui-panel.code {
-        flex: 0 0 0px !important;
-        overflow: hidden;
-        min-width: 0;
-        min-height: 0;
-      }
-      ui-panel.iframe {
-        flex: 1 1 100% !important;
-      }
-      ui-panel::part(handle) { display: none; }
-    }
-
-    &.view-code {
-      ui-panel.iframe {
-        flex: 0 0 0px !important;
-        overflow: hidden;
-        min-width: 0;
-        min-height: 0;
-      }
-      ui-panel.iframe::part(handle) { display: none; }
-      ui-panel.code {
-        flex: 1 1 100% !important;
-      }
-      ui-panel.preview:not(.iframe):not(:has(ui-panels)) {
-        flex: 0 0 0px !important;
-        overflow: hidden;
-        min-width: 0;
-        min-height: 0;
-      }
-      ui-panel.preview:not(.iframe)::part(handle) { display: none; }
-      playground-preview { display: none; }
     }
 
 

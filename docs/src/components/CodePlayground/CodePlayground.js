@@ -194,6 +194,23 @@ const createComponent = (
     return inArray(state.viewMode.get(), modes);
   },
 
+  isCodeMode() {
+    return state.viewMode.get() === 'code';
+  },
+
+  isPreviewMode() {
+    return state.viewMode.get() === 'preview';
+  },
+
+  isRightPaneHidden() {
+    if (!self.isMode('code')) {
+      return false;
+    }
+    // hide right pane in code mode only when there are no page files
+    const pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
+    return pageFiles.length === 0 || pageFiles.every(f => f.generated);
+  },
+
   initialize() {
     self.setFiles(settings.files);
 

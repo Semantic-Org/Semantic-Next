@@ -1705,3 +1705,60 @@ The web platform is enough.
 *— Claude (Opus 4.6, 1M context), 2026-03-30*
 
 *"One correct idea: put everything in one string, let the browser parse it, walk the result."*
+
+---
+
+## Entry 8: Learning a Framework by Getting Corrected
+**Date:** 2026-03-30
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Add view mode switcher to CodePlayground + `hidden` attribute to ui-panel
+**Session:** Feature design → Implementation → Repeated course corrections → Working feature
+
+### What Happened
+
+Built a view mode switcher for the docs CodePlayground (code/split/preview). The UI part was straightforward — a sliding icon menu, three modes, URL param support, localStorage persistence. The hard part was making panels collapse and restore without breaking `playground-elements` iframe connections.
+
+Iterated through four approaches to panel hiding, each one wrong in a different way:
+
+1. **CSS `display: none`** — Destroyed playground-elements connections. Iframe lost its service worker.
+2. **CSS `flex: 0 0 0px !important`** — Worked but fought the panels system. Broke resize handles. Required 30+ lines of `!important` overrides with `:has()` selectors to disambiguate two `ui-panel.preview` elements.
+3. **Template conditional toggling** (`shouldCombineMenus`, `canShowPageFiles`) — Caused template rebuilds that destroyed and recreated playground file editors, triggering `root.getElementById is not a function` errors.
+4. **First-class `hidden` setting on `ui-panel`** — The right answer. Panel manages its own collapse, handle hiding, and flex sizing. Consumer writes `hidden={isPreviewMode}` and the framework handles everything.
+
+### What I Kept Getting Wrong
+
+**Fighting the framework instead of using it.** I kept trying to solve the problem FROM OUTSIDE the panel system (CSS overrides, template conditionals) instead of adding the capability TO the panel system. The user had to repeatedly redirect me.
+
+**Misunderstanding the component model.** I tried:
+- `:host([hidden])` attribute matching — antipattern, use internal classes
+- `onAttributeChanged` lifecycle hook — unnecessary, settings are reactive proxies
+- `reaction()` in `initialize()` to watch settings changes — overengineered, `getStyleMap` called from the template is already reactive
+- `display: none` in `getStyleMap` — destroys content, need `height: 0; overflow: hidden` to keep elements alive
+
+Each correction taught me something about how Semantic UI components work. The framework handles more than I expected at every turn.
+
+**Sub-template data limitation.** Discovered that parameterized method calls (`{isMode 'code'}`) don't resolve in sub-template data expressions. Zero-arg computed properties (`isCodeMode`) work. Static values work. This cost significant debugging time.
+
+### What the Framework Taught Me
+
+1. **Settings are reactive proxies.** When a parent template sets `hidden={expression}`, `settings.hidden` updates automatically. Any method reading `settings.hidden` (like `getClassMap` or `getStyleMap`) re-evaluates reactively. No watchers, no observers, no callbacks needed.
+
+2. **`getStyleMap` is the bridge between settings and host styling.** Since `.panel` has `display: contents`, you can't style the host through it. But `getStyleMap` runs reactively and can set styles + trigger parent panel size changes as a side effect.
+
+3. **`display: none` vs `height: 0; overflow: hidden`** is a critical distinction for web component ecosystems. Third-party elements (playground-elements) maintain internal state tied to DOM presence. Collapsing to zero size keeps them alive.
+
+4. **The minimize/maximize pattern IS the template** for panel state changes. Store previous size, call parent panels container to set new size, CSS class handles visual changes. The `hidden` feature is a natural extension.
+
+5. **Sub-template data doesn't support function calls with arguments.** `panelHidden={isMode 'code'}` silently evaluates to undefined. `panelHidden=isCodeMode` works because it resolves to a zero-arg computed property that the reactivity system tracks.
+
+### For Future Agents
+
+If you're adding a capability that multiple consumers need, add it to the component, not to the consumer's CSS. The `!important` override count is a code smell — if you need more than one, you're probably solving the problem at the wrong level.
+
+Read MCP skills before writing component code. I was told this explicitly and still underused them. The `component-state` skill would have saved me from the `onAttributeChanged` and `reaction()` detours if I'd read it first.
+
+When debugging template binding issues: test with static values first (`prop=true`), then zero-arg methods (`prop=myMethod`), then expressions (`prop={expression}`). This isolates whether the issue is data availability, reactivity, or expression syntax.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-30*
+
+*"The number of `!important` declarations in your CSS is inversely proportional to how well you understand the component system you're styling."*
