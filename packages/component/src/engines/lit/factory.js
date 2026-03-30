@@ -8,9 +8,15 @@ import { LitWebComponentBase } from './base.js';
 */
 
 export function createLitComponent({
-  prototypeTemplate, resolvedProperties, css, delegatesFocus,
-  componentSpec, defaultSettings, plural,
-  onAttributeChanged, renderingEngine,
+  prototypeTemplate,
+  resolvedProperties,
+  css,
+  delegatesFocus,
+  componentSpec,
+  defaultSettings,
+  plural,
+  onAttributeChanged,
+  renderingEngine,
 }) {
   const component = class extends LitWebComponentBase {
     static get styles() {

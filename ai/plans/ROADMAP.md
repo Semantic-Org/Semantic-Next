@@ -103,6 +103,14 @@ TOKEN FINALIZATION (the gate)
 | 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
 | 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `scoped` — JS reference impl + Rust/WASM Phase 2. buildHTMLString split point. DSD wrapping. Client hydration via bindMarkers. |
 
+## Template Language Enhancements (unblocked, independent track)
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 37 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Test verbose first. Smallest scope. |
+| 35 | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}` / `{is}` / `{else}` — value-based branching. Cleanest of the four, no reactivity concerns. |
+| 36 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Caller context. |
+| 34 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Computed signal per binding. Build last, validate need from other three. |
 
 ## Blocked (waiting on token finalization)
 

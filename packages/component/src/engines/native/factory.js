@@ -8,8 +8,13 @@ import { WebComponentBase } from './base.js';
 */
 
 export function createComponent({
-  prototypeTemplate, resolvedProperties, css, delegatesFocus,
-  componentSpec, defaultSettings, plural,
+  prototypeTemplate,
+  resolvedProperties,
+  css,
+  delegatesFocus,
+  componentSpec,
+  defaultSettings,
+  plural,
   onAttributeChanged,
 }) {
   const component = class extends WebComponentBase {};
