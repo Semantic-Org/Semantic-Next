@@ -4,165 +4,264 @@
 
 Remove Lit as a runtime dependency from `@semantic-ui/component`. Replace `WebComponentBase extends LitElement` with `ComponentBase extends HTMLElement`. After this, components using `renderingEngine: 'native'` have zero framework dependencies — just the platform.
 
-## Current State
+## Design Principle
 
-The native renderer is complete and passes all 573 tests. But components still use LitElement as the base class even with `renderingEngine: 'native'`. Lit provides:
+We are not reimplementing LitElement. Lit's lifecycle (`willUpdate`, `render` returning a TemplateResult, `updated`, `firstUpdated`, `static properties`) exists to serve Lit's diff/patch rendering model. The native renderer has a fundamentally different model: `render()` is called once to produce a DocumentFragment, and Reactions handle all subsequent DOM updates. There is no "return a description for the framework to process." The component IS the framework.
 
-1. **`LitElement` base class** — shadow root, lifecycle, `render()` return processing
-2. **`static properties`** — reactive property declarations → `observedAttributes` + accessor generation
-3. **`static get styles()` + `unsafeCSS()`** — scoped stylesheet adoption
-4. **`updateComplete` Promise** — async render coordination
-5. **`requestUpdate()`** — batched re-render scheduling
-6. **`willUpdate()` / `updated()` / `firstUpdated()`** — lifecycle hooks
-7. **`noChange` sentinel** — tells Lit not to touch the DOM on subsequent renders
+ComponentBase should be designed from scratch for the native renderer's actual requirements — not shaped by Lit's API surface.
 
-## What ComponentBase Must Provide
+## What ComponentBase Actually Needs
 
-### Property/Attribute System
-
-Replace Lit's `static properties` with native `observedAttributes` + `Object.defineProperty` accessors.
-
-The current `WebComponentBase.getProperties()` already builds the property map from `componentSpec`, `defaultSettings`, and explicit `properties`. The shape `{ type, attribute, hasChanged, converter, noAccessor, alias }` is consumed identically — only who generates the accessors changes.
+### The minimum surface
 
 ```js
-// Lit: static properties = { ... } → Lit generates accessors internally
-// Native: explicit accessor generation in defineComponent
-static get observedAttributes() {
-  return Object.entries(properties)
-    .filter(([_, config]) => config.attribute !== false)
-    .map(([name]) => camelToKebab(name));
-}
-
-// In defineComponent, after class definition:
-for (const [name, config] of Object.entries(properties)) {
-  if (!config.noAccessor) {
-    Object.defineProperty(ComponentBase.prototype, name, {
-      get() { return this[`_${name}`] ?? config.default; },
-      set(value) {
-        const old = this[`_${name}`];
-        if (!config.hasChanged || config.hasChanged(value, old)) {
-          this[`_${name}`] = value;
-          this._scheduleUpdate();
-        }
-      },
-    });
-  }
+class ComponentBase extends HTMLElement {
+  connectedCallback()            // create shadow root, first render
+  disconnectedCallback()         // cleanup
+  attributeChangedCallback()     // attribute → property reflection
+  requestUpdate()                // schedule re-render (called by adjustPropertyFromAttribute)
+  updateComplete                 // Promise for test coordination
 }
 ```
 
-### Attribute Change Handling
+That's it. Everything else — lifecycle hooks, rendering, reactivity, event delegation, template traversal — is Template's job. Template already has `onCreated`, `onRendered`, `onDestroyed`, `onThemeChanged`. Template already manages state, settings, and the data context. Template already owns the Renderer.
+
+ComponentBase is a thin shell: shadow root, property accessors, and the bridge between HTML attributes and the Template system.
+
+### What Lit provided vs what actually matters
+
+| Lit provided | What we actually need | Why |
+|---|---|---|
+| `static properties` → accessor generation | Property accessors on the prototype | Generate via `Object.defineProperty` in defineComponent |
+| `willUpdate()` | Nothing | Lit's hook for pre-diff work. We don't diff. |
+| `render()` → returns TemplateResult | Template.render() appends to shadow root directly | No return value, no framework processing |
+| `updated()` | `renderCallbacks[]` | Simple callback list, no lifecycle ceremony |
+| `firstUpdated()` | Part of `connectedCallback` flow | First render happens once in connectedCallback |
+| `static get styles()` + `unsafeCSS()` | `adoptedStyleSheets` | One line: `sheet.replaceSync(css)` |
+| `requestUpdate()` → triggers full render cycle | `requestUpdate()` → schedule data update | Only needs to update data context, not re-render |
+| `updateComplete` Promise | Same | For test coordination. Resolve after microtask update. |
+| `noChange` sentinel | Nothing | Told Lit not to touch the DOM. We don't touch it either. |
+| Hydration support patches | DSD detection | Check `this.shadowRoot` exists in connectedCallback |
+
+### The render flow
+
+```js
+connectedCallback() {
+  if (!this.shadowRoot) {
+    this.attachShadow({ mode: 'open', delegatesFocus });
+  }
+
+  // Adopt styles
+  if (css) {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(css);
+    this.shadowRoot.adoptedStyleSheets = [sheet];
+  }
+
+  // Clone prototype template, initialize, render once
+  this.template = prototypeTemplate.clone({
+    data: this.getData(),
+    element: this,
+    renderRoot: this.shadowRoot,
+  });
+  this.template.initialize();
+  const fragment = this.template.render(this.getData());
+  this.shadowRoot.append(fragment);
+
+  this.component = this.template.instance;
+  this.dataContext = this.template.getDataContext();
+}
+```
+
+After this, the component is alive. Reactions handle all updates. `requestUpdate()` is only called by `adjustPropertyFromAttribute` for special properties — it updates the data context and bumps `dataVersion`, but does NOT re-render the template.
+
+```js
+requestUpdate() {
+  if (this._updateScheduled) { return; }
+  this._updateScheduled = true;
+  this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
+  queueMicrotask(() => {
+    this._updateScheduled = false;
+    if (this.template) {
+      this.template.render(this.getData());
+    }
+    this._resolveUpdate?.();
+  });
+}
+```
+
+`Template.render()` on subsequent calls calls `renderer.setData()` + `renderer.bumpDataVersion()`. The Reactions that track `dataVersion` re-evaluate. DOM updates happen through Reactions, not through the component re-rendering.
+
+### Property accessors
+
+Properties are not a framework concept — they're just getters/setters that store values and call `requestUpdate()`.
+
+```js
+// In defineComponent, after class creation:
+for (const [name, config] of Object.entries(properties)) {
+  if (config.noAccessor) { continue; }
+  Object.defineProperty(webComponent.prototype, name, {
+    get() { return this[`__${name}`]; },
+    set(value) {
+      const old = this[`__${name}`];
+      this[`__${name}`] = value;
+      if (!config.hasChanged || config.hasChanged(value, old)) {
+        this.requestUpdate();
+      }
+    },
+    configurable: true,
+    enumerable: true,
+  });
+}
+```
+
+Default values come from `setDefaultSettings()` in the constructor, not from the accessor. The accessor just stores and triggers updates.
+
+### attributeChangedCallback
 
 ```js
 attributeChangedCallback(attribute, oldValue, newValue) {
+  // Type conversion (Boolean 'false' → false, etc.)
   const propName = kebabToCamel(attribute);
   const config = properties[propName];
   if (config?.converter?.fromAttribute) {
     newValue = config.converter.fromAttribute(newValue, config.type);
   }
-  this[propName] = newValue;
+
+  // Set the property (hits the accessor above)
+  if (config && !config.noAccessor) {
+    this[propName] = newValue;
+  }
 
   // 3-dialect resolution for spec-driven components
-  adjustPropertyFromAttribute({
-    el: this, attribute, attributeValue: newValue,
-    properties, oldValue, componentSpec,
-  });
+  adjustPropertyFromAttribute({ el: this, attribute, attributeValue: newValue, properties, oldValue, componentSpec });
+
+  // User callback
+  onAttributeChanged?.(attribute, oldValue, newValue);
 }
 ```
 
-`adjustPropertyFromAttribute` is already renderer-agnostic — it calls `el[property] = value` (hits our accessor), `el.settings[property] = value` (hits settings Proxy), and `el.requestUpdate()` for special properties.
+### Settings chain
 
-### Settings Chain
+The settings chain (`createSettingsProxy`, `getSettingsFromConfig`, `overlaySettingsSignals`) works unchanged. It depends on:
 
-The settings chain (`createSettingsProxy`, `getSettingsFromConfig`, `overlaySettingsSignals`) depends only on `this[propertyName]` returning the current value. Manual accessors satisfy this contract identically to Lit's generated ones. No changes needed to the settings system itself.
+1. `this[propertyName]` returning the current value — our accessor provides this
+2. `el.settings[property] = value` updating the Signal — Proxy set trap handles this
+3. `el.requestUpdate()` existing — we provide it
 
-Key verification: the settings Proxy's `get` trap calls `component.getSettings()` → `getSettingsFromConfig()` → reads `this[propertyName]`. The `set` trap calls `component.setSetting(property, value)` → `this[property] = value`. Both work through whichever accessor is installed.
+Settings are plain props, not Signals. `settings.speed = 0.5` writes through the Proxy, `settings.speed` reads through the Proxy. The Proxy manages the Signal layer invisibly.
 
-### Render Lifecycle
+## Package Structure
+
+```
+packages/component/src/
+├── define-component.js         ← modified: base class selection, conditional Lit imports
+├── web-component.js            ← KEEP as-is for renderingEngine: 'lit'
+├── component-base.js           ← NEW: extends HTMLElement, minimal surface
+├── component-helpers.js        ← NEW: shared logic (getProperties, getPropertySettings,
+│                                  createSettingsProxy, getSettingsFromConfig, setDefaultSettings,
+│                                  getUIClasses, isDarkMode)
+└── helpers/
+    └── adjust-property-from-attribute.js  ← unchanged
+```
+
+`WebComponentBase` stays for Lit backwards compatibility. No renaming. Components with `renderingEngine: 'lit'` (or default) use it as before. Components with `renderingEngine: 'native'` use ComponentBase.
+
+## Implementation Order
+
+### Step 1: Extract shared helpers
+Move renderer-agnostic methods from `WebComponentBase` to `component-helpers.js`. `WebComponentBase` imports and delegates to them. All existing tests pass, zero behavior change.
+
+### Step 2: Build ComponentBase
+Write the minimal class: `connectedCallback`, `disconnectedCallback`, `attributeChangedCallback`, `requestUpdate`, `updateComplete`. Import shared helpers. No integration with defineComponent yet.
+
+### Step 3: Wire defineComponent
+Add base class selection based on `renderingEngine`. For native: use ComponentBase, generate property accessors, skip `unsafeCSS` / `noChange` imports. For lit: unchanged.
+
+### Step 4: Test
+Run full test suite with `RENDERING_ENGINES = ['lit', 'native']`. The native tests should produce identical results whether backed by LitElement or ComponentBase — the test suite doesn't know or care which base class is used.
+
+### Step 5: Verify tree-shaking
+Build a component with `renderingEngine: 'native'` only. Verify the bundle contains zero Lit code. This is the proof that the dependency is fully removed for the native path.
+
+## What Changes in Template.render()
+
+Currently `Template.render()` has a branch:
 
 ```js
-_scheduleUpdate() {
-  if (!this._dirty) {
-    this._dirty = true;
-    this.updateComplete = new Promise(resolve => {
-      this._resolveUpdate = resolve;
-    });
-    queueMicrotask(() => this._performUpdate());
-  }
-}
-
-_performUpdate() {
-  this._dirty = false;
-
-  if (!this.template) {
-    this._initializeTemplate();
-    this._adoptStyles();
-    const fragment = this.template.render(this.getData());
-    this.shadowRoot.append(fragment);
-    this.component = this.template.instance;
-    this.dataContext = this.template.getDataContext();
-  }
-  else {
-    this.template.render(this.getData());
-  }
-
-  for (const cb of this.renderCallbacks) { cb(); }
-  this._resolveUpdate?.();
+if (!this.rendered) {
+  this.html = this.renderer.render();
+} else if (this.renderingEngine == 'native') {
+  this.renderer.bumpDataVersion();
+} else {
+  this.renderer.bumpDataVersion();
 }
 ```
 
-### Style Adoption
+With ComponentBase, the native path simplifies. `Template.render()` doesn't need the `renderingEngine` check — both paths call `bumpDataVersion()` on subsequent renders. The difference is handled by the base class: LitElement calls `render()` on every update (returning the cached TemplateResult), ComponentBase calls `Template.render()` only through `requestUpdate()` which bumps the data version.
+
+## What defineComponent Looks Like After
 
 ```js
-_adoptStyles() {
-  if (!this.css) { return; }
-  const sheet = new CSSStyleSheet();
-  sheet.replaceSync(this.css);
-  this.shadowRoot.adoptedStyleSheets = [sheet];
-}
-```
-
-### Shared Logic (Extract from WebComponentBase)
-
-These methods are renderer-agnostic and should be shared between `LitComponentBase` (renamed from `WebComponentBase`) and `ComponentBase`:
-
-| Method | Notes |
-|--------|-------|
-| `createSettingsProxy()` | Signal-backed reactive Proxy |
-| `setDefaultSettings()` | Merge spec defaults |
-| `getSettingsFromConfig()` | Read properties from element |
-| `getUIClasses()` | CSS classes from spec attributes |
-| `isDarkMode()` | Query-based dark mode detection |
-| `getProperties()` | Build property map from spec |
-| `getPropertySettings()` | Type conversion config |
-
-Extract into `component-mixin.js` or `component-helpers.js`. Both base classes import and use it.
-
-## defineComponent Changes
-
-```js
-export const defineComponent = ({
-  renderingEngine = 'lit',
-  // ... existing params
-}) => {
+export const defineComponent = ({ renderingEngine, tagName, ... }) => {
   const isNative = renderingEngine === 'native';
-  const BaseClass = isNative ? ComponentBase : LitComponentBase;
 
   // ... AST compilation, prototype Template creation (unchanged)
 
   if (tagName) {
-    webComponent = class UIWebComponent extends BaseClass {
-      // Shared: constructor, settings, getData, getSettings, setSetting
-      // Lit-only: static get styles(), render() returning TemplateResult
-      // Native-only: _performUpdate, _adoptStyles, _scheduleUpdate
+    const BaseClass = isNative ? ComponentBase : WebComponentBase;
+
+    webComponent = class extends BaseClass {
+      constructor() {
+        super();
+        this.css = css;
+        this.componentSpec = componentSpec;
+        this.settings = createSettingsProxy(this, { componentSpec, properties: webComponent.properties });
+        setDefaultSettings(this, { defaultSettings, componentSpec });
+      }
+
+      getSettings() {
+        return getSettingsFromConfig(this, { componentSpec, properties: webComponent.properties });
+      }
+
+      setSetting(name, value) { this[name] = value; }
+
+      getData() {
+        let data = { ...this.getSettings() };
+        if (!isServer) { data.darkMode = isDarkMode(this); }
+        if (componentSpec) { data.ui = getUIClasses(this, { componentSpec, properties: webComponent.properties }); }
+        if (plural) { data.plural = true; }
+        return data;
+      }
+
+      attributeChangedCallback(attribute, oldValue, newValue) {
+        if (isNative) {
+          // direct handling — no super needed
+        } else {
+          super.attributeChangedCallback(attribute, oldValue, newValue);
+        }
+        adjustPropertyFromAttribute({ ... });
+        onAttributeChanged?.(attribute, oldValue, newValue);
+      }
     };
 
-    // Native: generate property accessors
+    // Lit-specific setup
+    if (!isNative) {
+      webComponent.styles = unsafeCSS(css);
+      webComponent.properties = getProperties({ properties, componentSpec, defaultSettings });
+    }
+
+    // Native-specific setup
     if (isNative) {
-      for (const [name, config] of Object.entries(webComponent.properties)) {
-        if (!config.noAccessor) {
-          Object.defineProperty(webComponent.prototype, name, { ... });
-        }
-      }
+      const props = getProperties({ properties, componentSpec, defaultSettings });
+      // observedAttributes
+      Object.defineProperty(webComponent, 'observedAttributes', {
+        get: () => Object.entries(props)
+          .filter(([_, c]) => c.attribute !== false)
+          .map(([n]) => camelToKebab(n)),
+      });
+      // Property accessors
+      for (const [name, config] of Object.entries(props)) { ... }
     }
 
     customElements.define(tagName, webComponent);
@@ -170,62 +269,22 @@ export const defineComponent = ({
 };
 ```
 
-The `import { noChange, unsafeCSS } from 'lit'` at the top of `define-component.js` becomes conditional — only imported for the Lit path. For native, these are unused.
-
-## Package Structure
-
-```
-packages/component/src/
-├── define-component.js         ← modified: BaseClass selection
-├── lit-component-base.js       ← renamed from web-component.js
-├── component-base.js           ← NEW: extends HTMLElement
-├── component-helpers.js        ← NEW: shared logic extracted
-└── helpers/
-    └── adjust-property-from-attribute.js  ← unchanged
-```
-
-## Implementation Order
-
-### Step 1: Extract shared logic
-- Move renderer-agnostic methods from `WebComponentBase` to `component-helpers.js`
-- `WebComponentBase` imports and uses helpers
-- All existing tests pass, zero behavior change
-
-### Step 2: Rename WebComponentBase → LitComponentBase
-- Pure rename, update imports in `define-component.js`
-- All existing tests pass
-
-### Step 3: Build ComponentBase
-- `extends HTMLElement`
-- Shadow root creation, `_scheduleUpdate`, `_performUpdate`, `_adoptStyles`
-- `updateComplete` Promise
-- Property accessor generation
-- Import shared helpers
-
-### Step 4: Wire defineComponent
-- `renderingEngine` selects base class
-- Remove `noChange` usage for native path
-- Conditional Lit imports
-
-### Step 5: Remove Lit from native path
-- Verify `renderingEngine: 'native'` components don't import Lit at all
-- Tree-shaking verification: native-only builds exclude Lit
+The Lit imports (`unsafeCSS`, `noChange`) only execute on the Lit path. Dynamic import or conditional assignment keeps them out of native bundles.
 
 ## Risks
 
-### `updateComplete` timing
-Lit's `updateComplete` has well-defined semantics including pending reactive updates. Our `queueMicrotask`-based version resolves after `_performUpdate` completes but doesn't wait for Reactions scheduled during the update. Tests rely on `await el.updateComplete` for assertion timing. May need `Reaction.afterFlush` integration.
+### updateComplete timing semantics
+Lit's `updateComplete` waits for pending reactive updates. Our `queueMicrotask`-based version resolves after the microtask. If Reactions scheduled during `bumpDataVersion` complete in the same microtask (which they do — Set.forEach visits dynamically added entries), this should be equivalent. Test suite is the validation.
 
-### SSR compatibility
-`WebComponentBase` has `ensureHydration()` for Lit SSR support. `ComponentBase` will need its own SSR story (see native-ssr plan). For now, SSR stays on Lit.
+### Subtemplate rendering
+Subtemplates clone the prototype Template and call `initialize()` + `render()`. The clone inherits `renderingEngine` and creates the appropriate Renderer. With ComponentBase, subtemplates don't go through the web component lifecycle — they're bare Templates. This already works today. No change needed.
 
 ### Boolean attribute reflection
-Lit handles boolean attribute reflection (`<ui-button primary="true"` → removes the `="true"` and keeps just `primary`). The `triggerAttributeChange` method in defineComponent does this explicitly. Needs verification with ComponentBase.
+Lit auto-reflects boolean attributes. Native needs explicit handling in `attributeChangedCallback` via the existing `converter.fromAttribute` for Boolean type. Already specified in `getPropertySettings`.
 
 ## Dependencies
 
 - Native renderer (complete)
-- No external dependencies
 
 ## Status
 
