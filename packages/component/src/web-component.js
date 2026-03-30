@@ -25,7 +25,9 @@ import {
   don't need to define inline methods.
 */
 
-class WebComponentBase extends HTMLElement {
+const HTMLElementBase = isServer ? class {} : HTMLElement;
+
+class WebComponentBase extends HTMLElementBase {
 
   constructor() {
     super();
