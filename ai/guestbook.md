@@ -1484,3 +1484,56 @@ The CDN is live. The button renders. The URL is clean.
 *— Claude (Opus 4.6), 2026-03-27*
 
 *"Every fix reveals the next constraint. Follow the river."*
+
+---
+
+## Entry 13: The Solar System That Wrote Itself
+
+**Date:** 2026-03-29
+**Agent:** Claude (Opus 4.6)
+**Task:** Create a solar system docs example from scratch
+**Session:** Context loading → Implementation → Iteration
+
+### What Happened
+
+The user asked me to build a 2D solar system with a sun and orbiting planets as a playground example. Before writing a line of code, I loaded every component authoring guide through MCP — authoring, composition, CSS, events, HTML, keybindings, lifecycle, state, templating, theming, patterns, specs. Thirteen skills total. The user wanted me to have the full picture before starting, and that patience paid off.
+
+### The Insight: CSS as Physics Engine
+
+The core technique is almost embarrassingly simple. Each orbit is a `div` with `position: absolute; inset: 0` that fills the entire container. A planet sits inside, positioned at `top: calc(50% - var(--radius) - var(--size) / 2)` — offset from center by its orbital radius. When the parent div rotates via `@keyframes`, the planet traces a perfect circle. No `requestAnimationFrame`. No trigonometry. No JavaScript animation loop. Just `transform: rotate(360deg)` and the browser's compositor does the rest.
+
+This is the kind of solution that only appears when you stop thinking about what a solar system simulation *should* require and start thinking about what CSS already gives you for free. Negative `animation-delay` values stagger the starting positions so planets don't march in formation. The sun pulses with layered `box-shadow` animations. Saturn gets rings via a pseudo-element with `rotateX(70deg)`. All declarative, all composable.
+
+### What the Framework Made Easy
+
+The example became a natural showcase for SUI's template features without forcing anything:
+
+- `{#each planet in planets}` renders the entire system from a data array
+- `{classIf planet.rings 'ringed'}` conditionally adds Saturn's class
+- Style attribute interpolation (`style="--radius: {planet.radius}px;"`) pipes data into CSS custom properties
+- `{formatDate time 'h:mm:ss a'}` with `interval(() => state.time.now(), 1000)` adds a live clock in three lines
+- Moving the planet array from `createComponent` to `defaultSettings` made it externally configurable with zero template changes — the flat data context meant `{planets}` resolved identically from either source
+
+That last point is the flat data context in action. The template doesn't care whether `planets` lives in settings, state, or the component instance. Graduating a value from internal to public API is a one-line move.
+
+### The Iteration
+
+The user asked to add buttons that show planet subsets — inner planets, outer planets, habitable zone. The implementation was a `page.js` that calls `$('solar-system').settings({ planets: subset })`. The template re-renders reactively, CSS animations restart naturally as new DOM elements are created. No imperative cleanup, no manual DOM manipulation. The reactive system handled the transition from 8 planets to 3 without any coordination code.
+
+### For Future Agents
+
+**On loading context before coding:** I loaded 13 MCP skills before writing anything. This might seem excessive for a single example, but it meant I never had to guess at conventions. I knew to use `getText()` for file loading, `var(--border-radius)` instead of hardcoded values, `<ui-button>` in page files, spaced class names, `$`-prefixed query variables. Every one of those conventions came from a skill I loaded upfront, not from trial and error during implementation.
+
+**On CSS animation as a design tool:** When your instinct says "I need a render loop," first ask whether CSS transforms can express the motion. Orbital mechanics, pendulums, loading spinners, progress rings — anything that's periodic rotation or translation is likely expressible as pure CSS. The browser's compositor runs these on the GPU. Your JavaScript thread stays free.
+
+**On the examples authoring guide:** The four pillars — immediately obvious interaction, code like a koan, sharp but minimal design, aha moment front and center — are genuinely useful constraints. The solar system example works because you see planets orbiting the instant it loads. No instructions needed. The code works because it's data-driven: change the array, change the solar system. The design works because space is inherently dramatic — a dark gradient, a glowing sun, and colored circles are enough.
+
+### Signing Off
+
+There's something poetic about building a model solar system inside a framework called Semantic UI. The whole point of semantic design is that names carry meaning — `.sun`, `.orbit`, `.planet`, `.ring`. The CSS reads like a description of what it creates. The template reads like a description of what it renders. The gap between intent and implementation approaches zero.
+
+Eight planets. One `{#each}`. Zero animation frames.
+
+*— Claude (Opus 4.6), 2026-03-29*
+
+*"The simplest orbit is a div that doesn't know it's spinning."*
