@@ -620,6 +620,12 @@ export class Renderer {
       }
 
       currentKeys = newKeys;
+
+      // Bump dataVersion so subtemplate Reactions in the each body
+      // re-evaluate static data= expressions against updated item data
+      if (!comp.firstRun) {
+        this.bumpDataVersion();
+      }
     }));
   }
 
@@ -680,6 +686,8 @@ export class Renderer {
   createAsync({ node, data, scope, fragment, lastNode }) {
     const region = new DynamicRegion(fragment, lastNode);
     region.placeAnchor();
+    // Register cleanup so parent scope disposal removes async content
+    scope.onDispose(() => region.clear());
     let generation = 0;
     let hasResolved = false;
     let resolvedValue = null;
@@ -804,6 +812,9 @@ export class Renderer {
       }
 
       // Track parent dataVersion so this Reaction re-fires when
+      // each-item data changes (static data= expressions use nonreactive
+      // and won't establish their own dependencies)
+      this.dataVersion.get();
       // the parent's data context is updated via setData/bumpDataVersion
       this.dataVersion.get();
 
@@ -841,18 +852,23 @@ export class Renderer {
           parentTemplate: this.template,
           renderingEngine: 'native',
         });
+
+        // Set element before initialize so settings proxy can access parent WC settings
+        const renderRoot = this.template?.element?.renderRoot;
+        if (this.template?.element) {
+          currentInstance.setElement(this.template.element);
+        }
+        if (this.template) { currentInstance.setParent(this.template); }
+
         currentInstance.initialize();
         const templateFragment = currentInstance.render();
         region.setContent(templateFragment);
 
-        const renderRoot = this.template?.element?.renderRoot;
         if (renderRoot) {
-          currentInstance.setElement(this.template.element);
           currentInstance.attach(renderRoot, {
             parentNode: region.parentNode,
           });
         }
-        if (this.template) { currentInstance.setParent(this.template); }
       }
       else {
         // Same template — update data context, Reactions handle DOM updates.
