@@ -34,6 +34,9 @@ const COMMENT_MARKER = 'sui:';
 // Marker for block-level directive positions
 const BLOCK_MARKER = 'sui-block:';
 
+// PreparedTemplate cache — parse once, cloneNode per instance
+const templateCache = new Map();
+
 export class Renderer {
   constructor(
     { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
@@ -217,18 +220,25 @@ export class Renderer {
   *******************************/
 
   parseHTML(htmlString, isSVG = false) {
-    if (isSVG) {
-      const wrapper = document.createElement('template');
-      wrapper.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg">${htmlString}</svg>`;
-      const svgEl = wrapper.content.firstChild;
-      const frag = document.createDocumentFragment();
-      while (svgEl.firstChild) { frag.append(svgEl.firstChild); }
-      return frag;
+    const cacheKey = isSVG ? `svg:${htmlString}` : htmlString;
+    let cached = templateCache.get(cacheKey);
+
+    if (!cached) {
+      if (isSVG) {
+        const wrapper = document.createElement('template');
+        wrapper.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg">${htmlString}</svg>`;
+        cached = document.createElement('template');
+        const svgEl = wrapper.content.firstChild;
+        while (svgEl.firstChild) { cached.content.append(svgEl.firstChild); }
+      }
+      else {
+        cached = document.createElement('template');
+        cached.innerHTML = htmlString;
+      }
+      templateCache.set(cacheKey, cached);
     }
 
-    const template = document.createElement('template');
-    template.innerHTML = htmlString;
-    return template.content;
+    return cached.content.cloneNode(true);
   }
 
   /*******************************
