@@ -24,15 +24,10 @@ if (isMonorepo) {
 let baseUrl = PRODUCTION_URL;
 let initPromise: Promise<void> | null = null;
 
-// Initialize with explicit env var or default
-if (process.env.SEMANTIC_UI_DOCS_URL) {
-  baseUrl = process.env.SEMANTIC_UI_DOCS_URL.replace(/\/$/, '');
-}
-
 async function tryFetch(url: string): Promise<boolean> {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 500);
 
     const testUrl = `${url}/content/ai/manifest.json`;
     const response = await fetch(testUrl, { signal: controller.signal });
@@ -46,12 +41,6 @@ async function tryFetch(url: string): Promise<boolean> {
 }
 
 async function detectServer(): Promise<void> {
-  // Skip if explicit URL provided
-  if (process.env.SEMANTIC_UI_DOCS_URL) {
-    console.error('[semantic-ui-mcp] Using env URL', baseUrl);
-    return;
-  }
-
   // Only try local servers if running from monorepo
   if (isMonorepo) {
     if (await tryFetch(LOCALHOST_URL)) {
@@ -66,7 +55,14 @@ async function detectServer(): Promise<void> {
     }
   }
 
-  // Use production (default for end users, fallback for contributors)
+  // Env override for fallback (e.g., staging for monorepo contributors)
+  if (process.env.SEMANTIC_UI_DOCS_URL) {
+    baseUrl = process.env.SEMANTIC_UI_DOCS_URL.replace(/\/$/, '');
+    console.error('[semantic-ui-mcp] Using env URL', baseUrl);
+    return;
+  }
+
+  // Use production (default for end users)
   console.error('[semantic-ui-mcp] Using production', PRODUCTION_URL);
 }
 
