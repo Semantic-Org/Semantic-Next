@@ -39,7 +39,7 @@ class LitWebComponentBase extends LitElement {
     this.css = css;
     this.componentSpec = componentSpec;
     if (resolvedProperties) {
-      this.settings = this.createSettingsProxy({ componentSpec, properties: resolvedProperties });
+      this.settings = this.createSettingsProxy();
     }
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
@@ -218,8 +218,8 @@ class LitWebComponentBase extends LitElement {
     return getSettingsFromConfig(this, options);
   }
 
-  createSettingsProxy(options) {
-    return createSettingsProxy(this, options);
+  createSettingsProxy() {
+    return createSettingsProxy(this);
   }
 
   getUIClasses(options) {
