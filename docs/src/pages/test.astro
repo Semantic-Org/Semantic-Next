@@ -2,10 +2,73 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
-import { SubtreeCachingTest } from '@components/SubtreeCachingTest/SubtreeCachingTest.js';
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
-  <SubtreeCachingTest client:load />
+  <div id="mount"></div>
+  <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
 </div>
+<script>
+  import { defineComponent } from '@semantic-ui/component';
+  import { $ } from '@semantic-ui/query';
+
+  defineComponent({
+    tagName: 'async-test',
+    renderingEngine: 'native',
+    template: `
+      <div class="result">
+        {#async fetchData as data}
+          <p class="resolved">Result: {data}</p>
+        {loading}
+          <p class="loading">Loading...</p>
+        {/async}
+      </div>
+    `,
+    defaultState: { version: 0 },
+    createComponent: ({ state }) => ({
+      async fetchData(v = state.version.get()) {
+        await new Promise(r => setTimeout(r, 500));
+        return 'v' + v;
+      },
+      refetch() {
+        state.version.increment();
+      },
+    }),
+  });
+
+  const log = (msg) => {
+    document.getElementById('log').textContent += msg + '\n';
+    console.log(msg);
+  };
+
+  const el = document.createElement('async-test');
+  el.addEventListener('created', () => log('EVENT: created'));
+  el.addEventListener('rendered', () => log('EVENT: rendered'));
+  el.addEventListener('updated', (e) => log('EVENT: updated'));
+
+  document.getElementById('mount').appendChild(el);
+
+  $(el).onNext('rendered').then(async () => {
+    log('--- rendered resolved ---');
+    log('Content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
+
+    log('Waiting for onNext(updated) #1 (initial async resolve)...');
+    const u1 = $(el).onNext('updated');
+    await u1;
+    log('GOT updated #1 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
+
+    log('Triggering refetch via state.version.increment()...');
+    const u2 = $(el).onNext('updated');
+    el.component.refetch();
+    await u2;
+    log('GOT updated #2 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
+
+    log('Waiting for onNext(updated) #3 (re-fetch resolve)...');
+    const u3 = $(el).onNext('updated');
+    await u3;
+    log('GOT updated #3 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
+
+    log('--- ALL PASSED ---');
+  });
+</script>
 </Body>
