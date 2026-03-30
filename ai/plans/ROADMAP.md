@@ -100,8 +100,8 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
-| 12 | [Lit Removal](lit-removal.md) | 16-24h (2-3d) | pair | `scoped` — Replace LitElement base class with ComponentBase extends HTMLElement. Extract shared helpers. |
-| 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `initial` — Server render via buildHTMLString + inline evaluation. DSD wrapping. Client hydration via bindMarkers on existing shadow root. |
+| 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
+| 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `scoped` — JS reference impl + Rust/WASM Phase 2. buildHTMLString split point. DSD wrapping. Client hydration via bindMarkers. |
 
 
 ## Blocked (waiting on token finalization)
@@ -192,7 +192,8 @@ All items below are commented out in menus/pages, not deleted. Uncomment when co
 
 Plans in `ai/plans/deferred/`.
 
-- ~~Native Renderer~~ — completed, archived. Follow-ups: Lit Removal (#12), Native SSR (#13b).
+- ~~Native Renderer~~ — completed, archived. Follow-up: Native SSR (#13b).
+- ~~Lit Removal~~ — completed, archived. Follow-up: Tree-Shakeable Lit (#12).
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 
@@ -207,4 +208,5 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
 - **Native Renderer** — Zero-dependency DOM renderer. Single-pass HTML assembly, comment markers, TreeWalker binding. 573/573 tests. TodoMVC verified.
+- **Lit Removal** — Engine-agnostic `defineComponent`. `WebComponentBase extends HTMLElement` + `LitWebComponentBase extends LitElement` as peer engines. Symmetric factory pattern, static config, DOM lifecycle events. 2121 tests.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
