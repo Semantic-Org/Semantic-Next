@@ -1,9 +1,7 @@
 import { $ } from '@semantic-ui/query';
 import {
-  each,
   isFunction,
 } from '@semantic-ui/utils';
-import { LitElement } from 'lit';
 
 import {
   createSettingsProxy,
@@ -16,46 +14,89 @@ import {
 } from './component-helpers.js';
 
 /*
-  Lit-backed web component base class.
-  Used when renderingEngine is 'lit' (the default for backwards compatibility).
-  Shared logic lives in component-helpers.js.
+  Standard web component base class — extends HTMLElement directly.
+  No framework dependencies. Shared logic lives in component-helpers.js.
 */
 
-class WebComponentBase extends LitElement {
-  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: false };
-
-  static hydrationReady = false;
+class WebComponentBase extends HTMLElement {
 
   constructor() {
     super();
     this.renderCallbacks = [];
-    this.ensureHydration();
   }
 
-  // Lit checks for hydration support at module evaluation time, but module
-  // load order isn't guaranteed in production builds. Re-apply the patches
-  // here to catch cases where lit-element evaluated first.
-  ensureHydration() {
-    if (!WebComponentBase.hydrationReady) {
-      WebComponentBase.hydrationReady = true;
-      if (globalThis.litElementHydrateSupport
-        && !Object.getOwnPropertyDescriptor(LitElement, 'observedAttributes')) {
-        globalThis.litElementHydrateSupport({ LitElement });
-      }
+  connectedCallback() {
+    if (this.template) {
+      return;
     }
+
+    if (!this.shadowRoot) {
+      this.attachShadow({
+        mode: 'open',
+        delegatesFocus: this.constructor._delegatesFocus || false,
+      });
+    }
+    this.renderRoot = this.shadowRoot;
+
+    // Adopt styles
+    if (this.css) {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(this.css);
+      this.shadowRoot.adoptedStyleSheets = [sheet];
+    }
+
+    // Clone prototype template, initialize, render once
+    const prototypeTemplate = this.constructor.template;
+    this.template = prototypeTemplate.clone({
+      data: this.getData(),
+      element: this,
+      renderRoot: this.renderRoot,
+    });
+    if (!this.template.initialized) {
+      this.template.initialize();
+    }
+    this.component = this.template.instance;
+    this.dataContext = this.template.getDataContext();
+
+    const fragment = this.template.render(this.getData());
+    this.shadowRoot.append(fragment);
+
+    this._resolveUpdate?.();
   }
 
-  updated() {
-    super.updated();
-    each(this.renderCallbacks, (callback) => callback());
+  disconnectedCallback() {
+    if (this.template) {
+      this.template.onDestroyed();
+      delete this.template;
+      delete this.component;
+      delete this.dataContext;
+    }
+    // Destroy prototype
+    this.constructor.template?.onDestroyed();
   }
 
-  addRenderCallback(callback) {
-    this.renderCallbacks.push(callback);
+  attributeChangedCallback(attribute, oldValue, newValue) {
+    // Type conversion handled by property accessors set up in defineComponent.
+    // Subclass overrides this to call adjustPropertyFromAttribute + onAttributeChanged.
+  }
+
+  requestUpdate() {
+    if (this._updateScheduled) {
+      return;
+    }
+    this._updateScheduled = true;
+    this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
+    queueMicrotask(() => {
+      this._updateScheduled = false;
+      if (this.template) {
+        this.template.render(this.getData());
+      }
+      this._resolveUpdate?.();
+    });
   }
 
   /*******************************
-           Lit Properties
+           Properties
   *******************************/
 
   static getProperties(options) {
@@ -94,20 +135,17 @@ class WebComponentBase extends LitElement {
             DOM Helpers
   *******************************/
 
-  // Rendered DOM (either shadow or regular)
-  $(selector, { root = this?.renderRoot || this.shadowRoot } = {}) {
+  $(selector, { root = this.renderRoot || this.shadowRoot } = {}) {
     if (!root) {
       console.error('Cannot query DOM until element has rendered.');
     }
     return $(selector, { root });
   }
 
-  // Original DOM (used for pulling slotted text)
   $$(selector) {
     return $(selector, { root: this.originalDOM.content });
   }
 
-  // calls callback if defined with consistent params and this context
   call(
     func,
     { firstArg, additionalArgs, args = [this.component, this.$.bind(this)] } = {},

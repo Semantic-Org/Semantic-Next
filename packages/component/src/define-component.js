@@ -1,9 +1,11 @@
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { adoptStylesheet, camelToKebab, each, isClient, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
+import { adoptStylesheet, camelToKebab, each, inArray, isClient, isEqual, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
 import { noChange, unsafeCSS } from 'lit';
 
 import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
+import { getProperties } from './component-helpers.js';
 import { WebComponentBase } from './web-component.js';
+import { LitWebComponentBase } from './lit-web-component.js';
 
 export const defineComponent = ({
   template = '',
@@ -37,6 +39,14 @@ export const defineComponent = ({
   plural = false,
   singularTag,
 } = {}) => {
+
+  const isLit = renderingEngine === 'lit';
+
+  // Default rendering engine: standard path uses native, Lit path uses lit
+  if (!renderingEngine) {
+    renderingEngine = isLit ? 'lit' : 'native';
+  }
+
   // AST shared across instances
   if (!ast) {
     const compiler = new TemplateCompiler(template);
@@ -61,7 +71,7 @@ export const defineComponent = ({
     Templates are created as a prototype that can be cloned when instantiated
   */
 
-  let litTemplate = new Template({
+  let prototypeTemplate = new Template({
     templateName: templateName,
     isPrototype: true,
     renderingEngine,
@@ -70,7 +80,7 @@ export const defineComponent = ({
     events,
     keys,
     defaultState,
-    // web components handle settings via WebComponentBase — only subtemplates need defaultSettings on Template
+    // web components handle settings via base class — only subtemplates need defaultSettings on Template
     defaultSettings: tagName ? undefined : defaultSettings,
     subTemplates,
     onCreated,
@@ -82,171 +92,312 @@ export const defineComponent = ({
   let webComponent;
 
   if (tagName) {
-    /*
-      Web Component Base is the static portion of the web component which
-      doesnt change based off component configuration
-    */
-    webComponent = class UIWebComponent extends WebComponentBase {
-      static get styles() {
-        return unsafeCSS(css);
-      }
 
-      static template = litTemplate;
+    const resolvedProperties = getProperties({
+      properties,
+      componentSpec,
+      defaultSettings,
+    });
 
-      static properties = WebComponentBase.getProperties({
-        properties,
-        componentSpec,
-        defaultSettings,
+    if (isLit) {
+      webComponent = createLitComponent({
+        prototypeTemplate, resolvedProperties, css, delegatesFocus,
+        componentSpec, defaultSettings, plural,
+        onAttributeChanged, renderingEngine,
       });
+    }
+    else {
+      webComponent = createStandardComponent({
+        prototypeTemplate, resolvedProperties, css, delegatesFocus,
+        componentSpec, defaultSettings, plural,
+        onAttributeChanged,
+      });
+    }
 
-      static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
-
-      defaultSettings = {};
-
-      constructor() {
-        super();
-        this.css = css;
-        this.componentSpec = componentSpec;
-        this.settings = this.createSettingsProxy({ componentSpec, properties: webComponent.properties });
-        this.setDefaultSettings({ defaultSettings, componentSpec });
-      }
-
-      // callback when added to dom
-      connectedCallback() {
-        super.connectedCallback();
-      }
-
-      triggerAttributeChange() {
-        each(webComponent.properties, (propSettings, property) => {
-          const attribute = camelToKebab(property);
-
-          let newValue = this[property];
-          // this is necessary to handle how lit handles boolean attributes
-          // otherwise you get <ui-button primary="true">
-          if (!propSettings.alias && attribute && newValue === true) {
-            this.setAttribute(attribute, '');
-          }
-          adjustPropertyFromAttribute({
-            el: this,
-            attribute,
-            properties: webComponent.properties,
-            attributeValue: newValue,
-            componentSpec,
-          });
-        });
-      }
-
-      willUpdate() {
-        if (isServer) {
-          // property change callbacks wont call on SSR
-          // we need this to get proper settings for server render
-          this.triggerAttributeChange();
-        }
-        if (!this.template) {
-          this.template = litTemplate.clone({
-            data: this.getData(),
-            element: this,
-            renderRoot: this.renderRoot,
-          });
-          if (!this.template.initialized) {
-            this.template.initialize();
-          }
-          // make this easier to access in dom
-          this.component = this.template.instance;
-          this.dataContext = this.template.getDataContext();
-        }
-        super.willUpdate();
-      }
-
-      firstUpdated() {
-        super.firstUpdated();
-      }
-
-      updated() {
-        super.updated();
-      }
-
-      // callback if removed from dom
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        if (this.template) {
-          this.template.onDestroyed(); // destroy instance
-          // Clear references for gc
-          delete this.template;
-          delete this.component;
-          delete this.dataContext;
-        }
-        litTemplate.onDestroyed(); // destroy prototype
-      }
-
-      // callback if moves doc
-      adoptedCallback() {
-        super.adoptedCallback();
-      }
-
-      attributeChangedCallback(attribute, oldValue, newValue) {
-        super.attributeChangedCallback(attribute, oldValue, newValue);
-        adjustPropertyFromAttribute({
-          el: this,
-          attribute,
-          attributeValue: newValue,
-          properties: webComponent.properties,
-          oldValue,
-          componentSpec,
-        });
-        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
-      }
-
-      /*******************************
-                  Settings
-      *******************************/
-
-      getSettings() {
-        return this.getSettingsFromConfig({ componentSpec, properties: webComponent.properties });
-      }
-      setSetting(name, value) {
-        this[name] = value;
-      }
-
-      getData() {
-        let settings = this.getSettings();
-        let data = {
-          ...settings,
-        };
-        if (!isServer) {
-          data.darkMode = this.isDarkMode();
-        }
-        if (componentSpec) {
-          data.ui = this.getUIClasses({ componentSpec, properties: webComponent.properties });
-        }
-        if (plural === true) {
-          data.plural = true;
-        }
-        return data;
-      }
-
-      render() {
-        const data = {
-          ...this.getData(),
-          ...this.tpl,
-        };
-        // Native renderer: after first render, Reactions handle all DOM updates.
-        // Return noChange so Lit leaves the DOM alone.
-        if (renderingEngine === 'native' && this._nativeRendered) {
-          this.template.render(data);
-          return noChange;
-        }
-        const html = this.template.render(data);
-        if (renderingEngine === 'native') {
-          this._nativeRendered = true;
-        }
-        return html;
-      }
-    };
     if (isClient && customElements.get(tagName)) {
       return webComponent;
     }
     customElements.define(tagName, webComponent);
   }
-  return tagName ? webComponent : litTemplate;
+  return tagName ? webComponent : prototypeTemplate;
 };
+
+/*******************************
+      Standard Component
+      (extends HTMLElement)
+*******************************/
+
+function createStandardComponent({
+  prototypeTemplate, resolvedProperties, css, delegatesFocus,
+  componentSpec, defaultSettings, plural,
+  onAttributeChanged: onAttributeChangedCallback,
+}) {
+
+  const component = class extends WebComponentBase {
+    static template = prototypeTemplate;
+    static _delegatesFocus = delegatesFocus;
+
+    defaultSettings = {};
+
+    constructor() {
+      super();
+      this.css = css;
+      this.componentSpec = componentSpec;
+      this.settings = this.createSettingsProxy({ componentSpec, properties: resolvedProperties });
+      this.setDefaultSettings({ defaultSettings, componentSpec });
+
+      // Initialize updateComplete for pre-connect awaits
+      this.updateComplete = new Promise(r => { this._resolveUpdate = r; });
+    }
+
+    attributeChangedCallback(attribute, oldValue, newValue) {
+      // Convert via property accessor (which calls requestUpdate)
+      const propName = kebabToCamel(attribute);
+      const config = resolvedProperties[propName];
+      if (config?.converter?.fromAttribute) {
+        newValue = config.converter.fromAttribute(newValue, config.type);
+      }
+      if (config && !config.noAccessor) {
+        this[propName] = newValue;
+      }
+
+      adjustPropertyFromAttribute({
+        el: this,
+        attribute,
+        attributeValue: newValue,
+        properties: resolvedProperties,
+        oldValue,
+        componentSpec,
+      });
+      this.call(onAttributeChangedCallback, { args: [attribute, oldValue, newValue] });
+    }
+
+    getSettings() {
+      return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
+    }
+
+    setSetting(name, value) {
+      this[name] = value;
+    }
+
+    getData() {
+      let data = {
+        ...this.getSettings(),
+      };
+      if (!isServer) {
+        data.darkMode = this.isDarkMode();
+      }
+      if (componentSpec) {
+        data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+      }
+      if (plural === true) {
+        data.plural = true;
+      }
+      return data;
+    }
+  };
+
+  // observedAttributes — must be set before customElements.define()
+  const observedAttrs = [];
+  each(resolvedProperties, (config, propName) => {
+    if (config.attribute !== false && !config.alias) {
+      observedAttrs.push(camelToKebab(propName));
+    }
+  });
+  // Include alias attributes (kebab versions of camelCase names)
+  each(resolvedProperties, (config, propName) => {
+    if (config.alias) {
+      const attr = config.attribute || camelToKebab(propName);
+      if (!inArray(attr, observedAttrs)) {
+        observedAttrs.push(attr);
+      }
+    }
+  });
+  Object.defineProperty(component, 'observedAttributes', {
+    get: () => observedAttrs,
+  });
+
+  // Property accessors — must be set before customElements.define()
+  each(resolvedProperties, (config, propName) => {
+    if (config.noAccessor) {
+      return;
+    }
+    const privateProp = `__${propName}`;
+    Object.defineProperty(component.prototype, propName, {
+      get() {
+        return this[privateProp];
+      },
+      set(value) {
+        const old = this[privateProp];
+        this[privateProp] = value;
+        if (!config.hasChanged || config.hasChanged(value, old)) {
+          this.requestUpdate();
+        }
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  });
+
+  // Store properties for external access
+  component.properties = resolvedProperties;
+
+  return component;
+}
+
+/*******************************
+      Lit Component
+      (extends LitElement)
+*******************************/
+
+function createLitComponent({
+  prototypeTemplate, resolvedProperties, css, delegatesFocus,
+  componentSpec, defaultSettings, plural,
+  onAttributeChanged: onAttributeChangedCallback,
+  renderingEngine,
+}) {
+  const BaseClass = LitWebComponentBase;
+
+  const component = class extends BaseClass {
+    static get styles() {
+      return unsafeCSS(css);
+    }
+
+    static template = prototypeTemplate;
+
+    static properties = resolvedProperties;
+
+    static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
+
+    defaultSettings = {};
+
+    constructor() {
+      super();
+      this.css = css;
+      this.componentSpec = componentSpec;
+      this.settings = this.createSettingsProxy({ componentSpec, properties: resolvedProperties });
+      this.setDefaultSettings({ defaultSettings, componentSpec });
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+    }
+
+    triggerAttributeChange() {
+      each(resolvedProperties, (propSettings, property) => {
+        const attribute = camelToKebab(property);
+        let newValue = this[property];
+        if (!propSettings.alias && attribute && newValue === true) {
+          this.setAttribute(attribute, '');
+        }
+        adjustPropertyFromAttribute({
+          el: this,
+          attribute,
+          properties: resolvedProperties,
+          attributeValue: newValue,
+          componentSpec,
+        });
+      });
+    }
+
+    willUpdate() {
+      if (isServer) {
+        this.triggerAttributeChange();
+      }
+      if (!this.template) {
+        this.template = prototypeTemplate.clone({
+          data: this.getData(),
+          element: this,
+          renderRoot: this.renderRoot,
+        });
+        if (!this.template.initialized) {
+          this.template.initialize();
+        }
+        this.component = this.template.instance;
+        this.dataContext = this.template.getDataContext();
+      }
+      super.willUpdate();
+    }
+
+    firstUpdated() {
+      super.firstUpdated();
+    }
+
+    updated() {
+      super.updated();
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      if (this.template) {
+        this.template.onDestroyed();
+        delete this.template;
+        delete this.component;
+        delete this.dataContext;
+      }
+      prototypeTemplate.onDestroyed();
+    }
+
+    adoptedCallback() {
+      super.adoptedCallback();
+    }
+
+    attributeChangedCallback(attribute, oldValue, newValue) {
+      super.attributeChangedCallback(attribute, oldValue, newValue);
+      adjustPropertyFromAttribute({
+        el: this,
+        attribute,
+        attributeValue: newValue,
+        properties: resolvedProperties,
+        oldValue,
+        componentSpec,
+      });
+      this.call(onAttributeChangedCallback, { args: [attribute, oldValue, newValue] });
+    }
+
+    getSettings() {
+      return this.getSettingsFromConfig({ componentSpec, properties: resolvedProperties });
+    }
+
+    setSetting(name, value) {
+      this[name] = value;
+    }
+
+    getData() {
+      let data = {
+        ...this.getSettings(),
+      };
+      if (!isServer) {
+        data.darkMode = this.isDarkMode();
+      }
+      if (componentSpec) {
+        data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+      }
+      if (plural === true) {
+        data.plural = true;
+      }
+      return data;
+    }
+
+    render() {
+      const data = {
+        ...this.getData(),
+        ...this.tpl,
+      };
+      // Native renderer: after first render, Reactions handle all DOM updates.
+      // Return noChange so Lit leaves the DOM alone.
+      if (renderingEngine === 'native' && this._nativeRendered) {
+        this.template.render(data);
+        return noChange;
+      }
+      const html = this.template.render(data);
+      if (renderingEngine === 'native') {
+        this._nativeRendered = true;
+      }
+      return html;
+    }
+  };
+
+  component.properties = resolvedProperties;
+  return component;
+}
