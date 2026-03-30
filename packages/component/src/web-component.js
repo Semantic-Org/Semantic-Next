@@ -46,7 +46,6 @@ class WebComponentBase extends HTMLElementBase {
     else {
       this.defaultSettings = {};
     }
-    this.updateComplete = new Promise(r => { this.resolveUpdate = r; });
   }
 
   connectedCallback() {
@@ -82,8 +81,6 @@ class WebComponentBase extends HTMLElementBase {
 
     const fragment = this.template.render(this.getData());
     this.shadowRoot.append(fragment);
-
-    this.resolveUpdate?.();
   }
 
   disconnectedCallback() {
@@ -129,13 +126,11 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
     this.updateScheduled = true;
-    this.updateComplete = new Promise(r => { this.resolveUpdate = r; });
     queueMicrotask(() => {
       this.updateScheduled = false;
       if (this.template) {
         this.template.render(this.getData());
       }
-      this.resolveUpdate?.();
     });
   }
 

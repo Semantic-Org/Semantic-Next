@@ -59,6 +59,18 @@ export class Renderer {
       helpers: this.helpers,
       dataVersion: this.dataVersion,
     });
+
+    // Debounced DOM change notification — multiple mutations in the same
+    // microtask produce one onUpdated event after settling
+    this.updateNotified = false;
+    this.notifyUpdate = () => {
+      if (this.updateNotified) { return; }
+      this.updateNotified = true;
+      setTimeout(() => {
+        this.updateNotified = false;
+        this.template?.onUpdated?.();
+      }, 0);
+    };
   }
 
   // Evaluate an expression with dataVersion tracking for subtree propagation
@@ -698,6 +710,7 @@ export class Renderer {
         scope: stateScope,
       });
       region.setContent(stateFragment, stateScope);
+      this.notifyUpdate();
     };
 
     scope.track(Reaction.create((comp) => {
@@ -981,5 +994,6 @@ export class Renderer {
 
   bumpDataVersion() {
     this.dataVersion.increment();
+    this.notifyUpdate();
   }
 }

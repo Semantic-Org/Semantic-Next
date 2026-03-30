@@ -234,6 +234,18 @@ export const Template = class Template {
 
     this.initialized = true;
 
+    // Emit 'updated' after any reactive flush that touches this template's state.
+    // Reads all state signals to establish dependencies — when any change,
+    // afterFlush schedules onUpdated after the flush completes.
+    if (this.element) {
+      this.reactions.push(Reaction.create(() => {
+        each(this.state, (signal) => signal.get());
+        if (this.rendered && !this.destroyed) {
+          Reaction.afterFlush(this.onUpdated);
+        }
+      }));
+    }
+
     if (this.renderingEngine == 'lit') {
       this.renderer = new LitRenderer({
         ast: this.ast,
@@ -739,14 +751,8 @@ export const Template = class Template {
       this.html = this.renderer.render();
       setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
     }
-    else if (this.renderingEngine == 'native') {
-      // Native renderer: Reactions handle DOM updates directly.
-      // Update data context and bump version to propagate to subtrees.
-      this.renderer.bumpDataVersion();
-    }
     else {
-      // data changed but template structure is the same — trigger reactive
-      // updates in place without recreating DOM (preserves focus, state, etc.)
+      // Reactions handle DOM updates — bump version to propagate changes
       this.renderer.bumpDataVersion();
     }
     this.rendered = true;
