@@ -121,20 +121,26 @@ export class Renderer {
             fragment.append(slot);
             break;
           }
-          case 'svg': {
-            const svgContent = this.readAST({ ast: node.content, data, scope, isSVG: true });
-            fragment.append(svgContent);
-            break;
-          }
+            // svg is handled inline in segment collection, not as a block node
         }
         i++;
         continue;
       }
 
-      // Collect a contiguous segment of html + expression nodes
+      // Collect a contiguous segment of html + expression + svg nodes
       const segment = [];
       while (i < ast.length && !this.isBlockNode(ast[i])) {
-        segment.push(ast[i]);
+        const current = ast[i];
+        if (current.type === 'svg') {
+          // Flatten SVG content into the segment — the outer <svg> tag
+          // is already in a preceding html node, SVG content goes inside it
+          for (const svgNode of current.content) {
+            segment.push(svgNode);
+          }
+        }
+        else {
+          segment.push(current);
+        }
         i++;
       }
 
@@ -147,7 +153,7 @@ export class Renderer {
   }
 
   isBlockNode(node) {
-    return inArray(node.type, ['if', 'each', 'async', 'rerender', 'template', 'snippet', 'slot', 'svg']);
+    return inArray(node.type, ['if', 'each', 'async', 'rerender', 'template', 'snippet', 'slot']);
   }
 
   /*******************************
@@ -597,7 +603,7 @@ export class Renderer {
         }
         else {
           const itemScope = scope.child();
-          const itemSignal = new Signal(eachData, { allowClone: false });
+          const itemSignal = new Signal(eachData);
           const itemProxy = this.createItemDataProxy(data, itemSignal);
 
           const itemFragment = this.readAST({
