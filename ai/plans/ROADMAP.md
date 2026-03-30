@@ -100,7 +100,8 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
-| 12 | [Native Renderer](vanilla-renderer.md) | 80-120h (10-15d) | pair | `scoped` — Zero-dependency DOM renderer. Phases: ExpressionEvaluator extraction → PreparedTemplate + bindings → ComponentBase → integration. |
+| 12 | [Lit Removal](lit-removal.md) | 16-24h (2-3d) | pair | `scoped` — Replace LitElement base class with ComponentBase extends HTMLElement. Extract shared helpers. |
+| 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `initial` — Server render via buildHTMLString + inline evaluation. DSD wrapping. Client hydration via bindMarkers on existing shadow root. |
 
 
 ## Blocked (waiting on token finalization)
@@ -191,7 +192,7 @@ All items below are commented out in menus/pages, not deleted. Uncomment when co
 
 Plans in `ai/plans/deferred/`.
 
-- ~~Native Renderer~~ — moved to [active plan](vanilla-renderer.md), Up Next.
+- ~~Native Renderer~~ — completed, archived. Follow-ups: Lit Removal (#12), Native SSR (#13b).
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 
@@ -205,4 +206,5 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **Vercel Deploy Pipeline** (0.5d est → 2.25h actual) — Decoupled prod from `main`, tag-triggered releases, staging environment, `next` branch retired.
 - **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
+- **Native Renderer** — Zero-dependency DOM renderer. Single-pass HTML assembly, comment markers, TreeWalker binding. 573/573 tests. TodoMVC verified.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
