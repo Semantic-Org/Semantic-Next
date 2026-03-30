@@ -69,9 +69,9 @@ export class ReactiveDataDirective extends AsyncDirective {
   }
 
   getReactiveValue() {
-    // if we are binding to an event we need the func handler
-    // and not the value returned
-    let reactiveValue = (this.partInfo.type == PartType.EVENT)
+    // events and properties need the raw value (e.g. a function reference)
+    // rather than the auto-invoked result
+    let reactiveValue = inArray(this.partInfo.type, [PartType.EVENT, PartType.PROPERTY])
       ? this.expression.literalValue()
       : this.expression.value();
 

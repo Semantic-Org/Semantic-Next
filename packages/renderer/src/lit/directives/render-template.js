@@ -155,6 +155,10 @@ export class RenderTemplateDirective extends AsyncDirective {
   }
 
   disconnected() {
+    if (this.reaction) {
+      this.reaction.stop();
+      this.reaction = null;
+    }
     if (this.template) {
       this.template.onDestroyed();
     }
