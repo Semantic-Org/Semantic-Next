@@ -55,7 +55,7 @@ class LitWebComponentBase extends LitElement {
   }
 
   /*******************************
-           Lit Properties
+      Property Configuration
   *******************************/
 
   static getProperties(options) {

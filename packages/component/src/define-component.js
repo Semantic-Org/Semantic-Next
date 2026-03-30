@@ -14,7 +14,7 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  createComponent: createComponentFn = function() {},
+  createComponent: createComponentFn = noop,
   events = {},
   keys = {},
 
