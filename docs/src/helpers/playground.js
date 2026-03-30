@@ -15,6 +15,30 @@ import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
 import { decodeObject, encodeObject, fromBase64UrlSafe, makeBase64UrlSafe } from './link-encoder.js';
 
+const contentTypes = {
+  html: 'text/html',
+  css: 'text/css',
+  js: 'text/javascript',
+  ts: 'text/typescript',
+  json: 'application/json',
+  svg: 'image/svg+xml',
+  xml: 'application/xml',
+  md: 'text/markdown',
+  txt: 'text/plain',
+  csv: 'text/csv',
+  yaml: 'text/yaml',
+  yml: 'text/yaml',
+  // shaders
+  glsl: 'text/plain',
+  vert: 'text/plain',
+  frag: 'text/plain',
+  wgsl: 'text/plain',
+  // 3d models
+  obj: 'text/plain',
+  mtl: 'text/plain',
+  gltf: 'model/gltf+json',
+};
+
 /*
   Helper to add code folding for import export statements
 */
@@ -75,12 +99,7 @@ export const getExampleFiles = async ({
 
       const getContentType = (filename) => {
         const extension = filename.split('.').pop();
-        const contentTypes = {
-          html: 'text/html',
-          css: 'text/css',
-          js: 'text/javascript',
-        };
-        return get(contentTypes, extension) || 'text/html';
+        return get(contentTypes, extension) || 'text/plain';
       };
 
       if (inArray(fileName, ['page.html'])) {

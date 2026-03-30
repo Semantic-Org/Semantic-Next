@@ -485,6 +485,21 @@ let PlaygroundProject = class PlaygroundProject extends LitElement {
       return;
     }
     const cdnBaseUrl = this._getEffectiveCdnBaseUrl();
+    // Pass through files the TS worker won't compile (shaders, data, etc.)
+    const compilableExts = new Set(['js', 'ts', 'jsx', 'tsx', 'html', 'css', 'json']);
+    for (const file of (_b = this._files) !== null && _b !== void 0 ? _b : []) {
+      const ext = file.name.split('.').pop();
+      if (!compilableExts.has(ext)) {
+        build.onOutput({
+          kind: 'file',
+          file: {
+            name: file.name,
+            content: file.content,
+            contentType: file.contentType || 'text/plain',
+          },
+        });
+      }
+    }
     workerApi.compileProject((_b = this._files) !== null && _b !== void 0 ? _b : [], {
       importMap: this._importMap,
       cdnBaseUrl,
