@@ -24,16 +24,15 @@ import { ExpressionEvaluator } from '../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
 
-// DOM properties that diverge from HTML attributes after user interaction
-const BOOLEAN_SYNCED_ATTRS = ['checked', 'selected'];
-const STRING_SYNCED_ATTRS = ['value'];
-
-// Marker for expression placeholders — must survive innerHTML parsing
-// Text positions use comment markers: <!--sui:0-->
-// Attribute positions use a unique string: __sui0__
-const COMMENT_MARKER = 'sui:';
+// Marker for expression placeholders in attribute values
 const ATTR_MARKER_PREFIX = '__sui';
 const ATTR_MARKER_SUFFIX = '__';
+
+// Marker for text-position expressions (comment nodes)
+const COMMENT_MARKER = 'sui:';
+
+// Marker for block-level directive positions
+const BLOCK_MARKER = 'sui-block:';
 
 export class Renderer {
   constructor(
@@ -61,9 +60,8 @@ export class Renderer {
 
   // Evaluate an expression with dataVersion tracking for subtree propagation
   eval(expression, data) {
-    const version = this.dataVersion.get();
-    const result = this.evaluator.lookupExpressionValue(expression, data);
-    return result;
+    this.dataVersion.get();
+    return this.evaluator.lookupExpressionValue(expression, data);
   }
 
   render() {
@@ -76,131 +74,147 @@ export class Renderer {
 
   /*******************************
         AST → DOM
+
+  The key insight: the entire AST (HTML + expressions + block directives)
+  is assembled into a single HTML string with markers for ALL dynamic
+  positions. This string is parsed ONCE via template.innerHTML, producing
+  a correct DOM tree where block markers are positioned inside their
+  containing elements. Then a TreeWalker pass wires reactive bindings
+  and replaces block markers with live DynamicRegions.
   *******************************/
 
   readAST({ ast, data, scope, isSVG = this.isSVG }) {
-    const fragment = document.createDocumentFragment();
+    // Phase 1: Build a single HTML string with markers for everything
+    const { htmlString, entries } = this.buildHTMLString(ast);
 
-    // Process the AST in segments — each segment is a run of html+expression
-    // nodes (inline content), separated by block-level directives.
-    let i = 0;
-    while (i < ast.length) {
-      const node = ast[i];
-
-      // Block-level nodes get their own handling
-      if (this.isBlockNode(node)) {
-        const lastNode = this.getLastNode(fragment);
-        switch (node.type) {
-          case 'if':
-            this.createConditional({ node, data, scope, fragment, lastNode });
-            break;
-          case 'each':
-            this.createEach({ node, data, scope, fragment, lastNode });
-            break;
-          case 'async':
-            this.createAsync({ node, data, scope, fragment, lastNode });
-            break;
-          case 'rerender':
-            this.createRerender({ node, data, scope, fragment, lastNode });
-            break;
-          case 'template': {
-            const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-            if (this.snippets[templateName]) {
-              this.createSnippet({ node, data, scope, fragment, lastNode, templateName });
-            }
-            else {
-              this.createSubtemplate({ node, data, scope, fragment, lastNode });
-            }
-            break;
-          }
-          case 'snippet':
-            this.snippets[node.name] = node;
-            break;
-          case 'slot': {
-            const slot = document.createElement('slot');
-            if (node.name) { slot.setAttribute('name', node.name); }
-            fragment.append(slot);
-            break;
-          }
-            // svg is handled inline in segment collection, not as a block node
-        }
-        i++;
-        continue;
-      }
-
-      // Collect a contiguous segment of html + expression + svg nodes
-      const segment = [];
-      while (i < ast.length && !this.isBlockNode(ast[i])) {
-        const current = ast[i];
-        if (current.type === 'svg') {
-          // Flatten SVG content into the segment — the outer <svg> tag
-          // is already in a preceding html node, SVG content goes inside it
-          for (const svgNode of current.content) {
-            segment.push(svgNode);
-          }
-        }
-        else {
-          segment.push(current);
-        }
-        i++;
-      }
-
-      if (segment.length > 0) {
-        this.renderSegment({ segment, data, scope, fragment, isSVG });
-      }
+    if (!htmlString && entries.length === 0) {
+      return document.createDocumentFragment();
     }
+
+    // Phase 2: Parse the HTML string into a DOM tree
+    const fragment = this.parseHTML(htmlString, isSVG);
+
+    // Phase 3: Walk the DOM tree, find markers, wire bindings
+    this.bindMarkers(fragment, entries, data, scope, ast);
 
     return fragment;
   }
 
-  isBlockNode(node) {
-    return inArray(node.type, ['if', 'each', 'async', 'rerender', 'template', 'snippet', 'slot']);
+  /*******************************
+      Phase 1: HTML String Assembly
+  *******************************/
+
+  buildHTMLString(ast) {
+    let htmlString = '';
+    const entries = []; // { id, type, node, classification }
+    let htmlBuffer = ''; // accumulated HTML for binding classification
+
+    const processNodes = (nodes) => {
+      for (const node of nodes) {
+        switch (node.type) {
+          case 'html':
+            htmlString += node.html;
+            htmlBuffer += node.html;
+            break;
+
+          case 'expression': {
+            const id = entries.length;
+            const classification = this.analyzePosition(htmlBuffer);
+
+            if (classification.insideTag) {
+              // Attribute position — string token
+              htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
+            }
+            else {
+              // Text position — comment marker
+              htmlString += `<!--${COMMENT_MARKER}${id}-->`;
+            }
+            entries.push({ id, type: 'expression', node, classification });
+            break;
+          }
+
+          case 'svg': {
+            // Flatten SVG content inline — the outer <svg> tag is in a preceding html node
+            processNodes(node.content);
+            break;
+          }
+
+          case 'snippet':
+            // Register snippet immediately so it's available for later {>name} references
+            this.snippets[node.name] = node;
+            break;
+
+          case 'slot': {
+            if (node.name) {
+              htmlString += `<slot name="${node.name}"></slot>`;
+            }
+            else {
+              htmlString += '<slot></slot>';
+            }
+            break;
+          }
+
+          default: {
+            // Block-level directives: if, each, async, rerender, template
+            // Insert a comment marker at the current position in the HTML
+            const id = entries.length;
+            htmlString += `<!--${BLOCK_MARKER}${id}-->`;
+            entries.push({ id, type: node.type, node });
+            break;
+          }
+        }
+      }
+    };
+
+    processNodes(ast);
+    return { htmlString, entries };
   }
 
   /*******************************
-      Segment Rendering
-      (HTML + Expression batches)
+      Binding Classification
   *******************************/
 
-  renderSegment({ segment, data, scope, fragment, isSVG }) {
-    // First pass: classify each expression as text or attribute
-    const classifications = this.classifyBindings(segment);
+  analyzePosition(html) {
+    let lastOpen = html.lastIndexOf('<');
+    let lastClose = html.lastIndexOf('>');
 
-    // Build HTML string with appropriate markers
-    let htmlString = '';
-    const expressions = [];
-    let exprIndex = 0;
-
-    for (const node of segment) {
-      if (node.type === 'html') {
-        htmlString += node.html;
-      }
-      else if (node.type === 'expression') {
-        const id = expressions.length;
-        const classification = classifications[exprIndex++];
-
-        if (classification.insideTag) {
-          // Attribute position — use string token (survives in attribute values)
-          htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
-        }
-        else {
-          // Text position — use comment marker
-          htmlString += `<!--${COMMENT_MARKER}${id}-->`;
-        }
-        expressions.push({ node, classification });
-      }
+    if (lastOpen <= lastClose) {
+      return { type: 'text', insideTag: false, attribute: '', quoted: false };
     }
 
-    if (!htmlString && expressions.length === 0) { return; }
+    const tagFragment = html.slice(lastOpen);
 
-    // Parse the HTML
-    const parsed = this.parseHTML(htmlString, isSVG);
+    // Check for .prop= or @event= prefixed attributes
+    const specialMatch = tagFragment.match(/\s([.@])([\w-]+)\s*=\s*(['"]?)$/);
+    if (specialMatch) {
+      const prefix = specialMatch[1];
+      const name = specialMatch[2];
+      return {
+        type: prefix === '.' ? 'property' : 'event',
+        insideTag: true,
+        attribute: name,
+        quoted: specialMatch[3] === '"' || specialMatch[3] === "'",
+      };
+    }
 
-    // Bind all markers
-    this.bindAllMarkers(parsed, expressions, data, scope);
+    const attrMatch = tagFragment.match(/\s([\w-]+)\s*=\s*(['"]?)$/);
+    if (attrMatch) {
+      const name = attrMatch[1];
+      const quoted = attrMatch[2] === '"' || attrMatch[2] === "'";
+      return {
+        type: quoted ? 'attribute' : 'boolean',
+        insideTag: true,
+        attribute: name,
+        quoted,
+      };
+    }
 
-    fragment.append(parsed);
+    return { type: 'attribute', insideTag: true, attribute: '', quoted: false };
   }
+
+  /*******************************
+      Phase 2: HTML Parsing
+  *******************************/
 
   parseHTML(htmlString, isSVG = false) {
     if (isSVG) {
@@ -218,95 +232,29 @@ export class Renderer {
   }
 
   /*******************************
-       Binding Classification
+      Phase 3: Marker Binding
   *******************************/
 
-  classifyBindings(ast) {
-    let htmlBuffer = '';
-    const classifications = [];
+  bindMarkers(root, entries, data, scope, ast) {
+    if (entries.length === 0) { return; }
 
-    for (const node of ast) {
-      if (node.type === 'html') {
-        htmlBuffer += node.html;
-      }
-      else if (node.type === 'expression') {
-        const ctx = this.analyzePosition(htmlBuffer);
-        classifications.push(ctx);
-      }
-    }
-    return classifications;
-  }
-
-  analyzePosition(html) {
-    // Find the last unmatched < to determine if we're inside a tag
-    let lastOpen = html.lastIndexOf('<');
-    let lastClose = html.lastIndexOf('>');
-
-    if (lastOpen <= lastClose) {
-      return { type: 'text', insideTag: false, attribute: '', quoted: false };
-    }
-
-    // We are inside a tag — extract context
-    const tagFragment = html.slice(lastOpen);
-
-    // Check for .prop= or @event= prefixed attributes
-    const specialMatch = tagFragment.match(/\s([.@])([\w-]+)\s*=\s*(['"]?)$/);
-    if (specialMatch) {
-      const prefix = specialMatch[1];
-      const name = specialMatch[2];
-      return {
-        type: prefix === '.' ? 'property' : 'event',
-        insideTag: true,
-        attribute: name,
-        quoted: specialMatch[3] === '"' || specialMatch[3] === "'",
-      };
-    }
-
-    // Check for regular attribute
-    const attrMatch = tagFragment.match(/\s([\w-]+)\s*=\s*(['"]?)$/);
-    if (attrMatch) {
-      const name = attrMatch[1];
-      const quoted = attrMatch[2] === '"' || attrMatch[2] === "'";
-      return {
-        type: quoted ? 'attribute' : 'boolean',
-        insideTag: true,
-        attribute: name,
-        quoted,
-      };
-    }
-
-    return { type: 'attribute', insideTag: true, attribute: '', quoted: false };
-  }
-
-  /*******************************
-      Marker Binding
-  *******************************/
-
-  bindAllMarkers(root, expressions, data, scope) {
-    if (expressions.length === 0) { return; }
-
-    // Use this.data for top-level renders so Reactions see updates via setData/assignInPlace.
-    // For subtree renders (each items, snippets), data is a different object (proxy/overlay)
-    // and the Reaction should use that directly.
     const attrMarkerRegex = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
 
-    // Pass 1: Find and bind attribute markers on elements
+    // Pass 1: Bind attribute markers on elements
     const processedAttrIDs = new Set();
     const elementWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
     let el;
     while ((el = elementWalker.nextNode())) {
+      const element = el;
       const attrsToProcess = [];
-      for (let i = 0; i < el.attributes.length; i++) {
-        const attr = el.attributes[i];
+      for (let i = 0; i < element.attributes.length; i++) {
+        const attr = element.attributes[i];
         if (attr.value.includes(ATTR_MARKER_PREFIX)) {
           attrsToProcess.push({ name: attr.name, value: attr.value });
         }
       }
 
-      // Capture element reference per-iteration for closures
-      const element = el;
       for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        // Parse the attribute value into parts (static + expression markers)
         const parts = [];
         let lastIndex = 0;
         let match;
@@ -324,14 +272,12 @@ export class Renderer {
           parts.push({ static: attrValue.slice(lastIndex) });
         }
 
-        // Determine the actual attribute name (strip . or @ prefixes parsed by browser)
-        let realAttrName = attrName;
-        const { classification } = expressions[parts.find(p => p.markerID !== undefined)?.markerID] || {};
+        const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
         const bindingType = classification?.type;
 
         if (bindingType === 'property') {
-          realAttrName = classification.attribute;
-          const expr = expressions[parts[0].markerID];
+          const realAttrName = classification.attribute;
+          const expr = entries[parts[0].markerID];
           scope.track(Reaction.create((comp) => {
             if (!comp.firstRun && !element.isConnected) {
               comp.stop();
@@ -345,8 +291,8 @@ export class Renderer {
         }
 
         if (bindingType === 'event') {
-          realAttrName = classification.attribute;
-          const expr = expressions[parts[0].markerID];
+          const realAttrName = classification.attribute;
+          const expr = entries[parts[0].markerID];
           const handler = (...args) => {
             const value = this.evaluator.lookupTokenValue(expr.node.value, data);
             if (isFunction(value)) { value(...args); }
@@ -358,8 +304,8 @@ export class Renderer {
         }
 
         const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
-        const singleExpr = isSingleExpr ? expressions[parts[0].markerID] : null;
-        const isIfDefined = singleExpr?.node.ifDefined || singleExpr?.classification.type === 'boolean';
+        const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
+        const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
 
         if (isSingleExpr) {
           scope.track(Reaction.create((comp) => {
@@ -367,7 +313,7 @@ export class Renderer {
               comp.stop();
               return;
             }
-            const value = this.eval(singleExpr.node.value, data);
+            const value = this.eval(singleEntry.node.value, data);
 
             if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
               element.removeAttribute(attrName);
@@ -378,10 +324,10 @@ export class Renderer {
                 : String(value ?? '');
               element.setAttribute(attrName, strValue);
             }
-            if (inArray(attrName, BOOLEAN_SYNCED_ATTRS)) {
+            if (inArray(attrName, ['checked', 'selected'])) {
               element[attrName] = Boolean(value);
             }
-            if (inArray(attrName, STRING_SYNCED_ATTRS)) {
+            if (inArray(attrName, ['value'])) {
               element[attrName] = value ?? '';
             }
           }));
@@ -399,10 +345,7 @@ export class Renderer {
                 value += part.static;
               }
               else {
-                value += this.eval(
-                  expressions[part.markerID].node.value,
-                  data,
-                ) ?? '';
+                value += this.eval(entries[part.markerID].node.value, data) ?? '';
               }
             }
             element.setAttribute(attrName, value);
@@ -411,80 +354,131 @@ export class Renderer {
       }
     }
 
-    // Pass 2: Find and bind comment markers for text positions
+    // Pass 2: Walk comment nodes for text and block markers
     const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
-    const commentsToReplace = [];
+    const commentsToProcess = [];
     let comment;
     while ((comment = commentWalker.nextNode())) {
-      if (comment.data.startsWith(COMMENT_MARKER)) {
-        const markerID = parseInt(comment.data.slice(COMMENT_MARKER.length));
+      const text = comment.data;
+      if (text.startsWith(COMMENT_MARKER)) {
+        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
         if (!isNaN(markerID) && !processedAttrIDs.has(markerID)) {
-          commentsToReplace.push({ comment, markerID });
+          commentsToProcess.push({ comment, markerID, type: 'expression' });
+        }
+      }
+      else if (text.startsWith(BLOCK_MARKER)) {
+        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+        if (!isNaN(markerID)) {
+          commentsToProcess.push({ comment, markerID, type: 'block' });
         }
       }
     }
 
-    for (const { comment, markerID } of commentsToReplace) {
-      const { node: exprNode } = expressions[markerID];
-      const parent = comment.parentNode;
+    for (const { comment, markerID, type } of commentsToProcess) {
+      const entry = entries[markerID];
 
-      if (exprNode.unsafeHTML) {
-        const ownedNodes = [];
-        scope.track(Reaction.create((comp) => {
-          if (!comp.firstRun && !comment.isConnected) {
-            comp.stop();
-            return;
-          }
-          for (const n of ownedNodes) { n.remove(); }
-          ownedNodes.length = 0;
-          const value = this.eval(exprNode.value, data);
-          if (value != null && value !== '') {
-            const parsed = this.parseHTML(String(value));
-            const nodes = [...parsed.childNodes];
-            comment.after(parsed);
-            ownedNodes.push(...nodes);
-          }
-        }));
+      if (type === 'expression') {
+        this.bindTextExpression(comment, entry, data, scope);
       }
-      else {
-        const textNode = document.createTextNode('');
-        parent.replaceChild(textNode, comment);
-        scope.track(Reaction.create((comp) => {
-          if (!comp.firstRun && !textNode.isConnected) {
-            comp.stop();
-            return;
-          }
-          const value = this.eval(exprNode.value, data);
-          textNode.data = value ?? '';
-        }));
+      else if (type === 'block') {
+        this.bindBlockDirective(comment, entry, data, scope);
       }
     }
   }
 
   /*******************************
-        Helpers
+        Text Bindings
   *******************************/
 
-  getLastNode(fragment) {
-    for (let i = fragment.childNodes.length - 1; i >= 0; i--) {
-      return fragment.childNodes[i];
+  bindTextExpression(comment, entry, data, scope) {
+    const exprNode = entry.node;
+    const parent = comment.parentNode;
+
+    if (exprNode.unsafeHTML) {
+      const ownedNodes = [];
+      scope.track(Reaction.create((comp) => {
+        if (!comp.firstRun && !comment.isConnected) {
+          comp.stop();
+          return;
+        }
+        for (const n of ownedNodes) { n.remove(); }
+        ownedNodes.length = 0;
+        const value = this.eval(exprNode.value, data);
+        if (value != null && value !== '') {
+          const parsed = this.parseHTML(String(value));
+          const nodes = [...parsed.childNodes];
+          comment.after(parsed);
+          ownedNodes.push(...nodes);
+        }
+      }));
     }
-    return null;
+    else {
+      const textNode = document.createTextNode('');
+      parent.replaceChild(textNode, comment);
+      scope.track(Reaction.create((comp) => {
+        if (!comp.firstRun && !textNode.isConnected) {
+          comp.stop();
+          return;
+        }
+        const value = this.eval(exprNode.value, data);
+        textNode.data = value ?? '';
+      }));
+    }
+  }
+
+  /*******************************
+        Block Directive Binding
+  *******************************/
+
+  bindBlockDirective(comment, entry, data, scope) {
+    const { node } = entry;
+    // The comment sits exactly where the block directive should render.
+    // Its parentNode is the correct containing element.
+    const parentNode = comment.parentNode;
+
+    switch (node.type) {
+      case 'if':
+        this.createConditional({ node, data, scope, parentNode, marker: comment });
+        break;
+      case 'each':
+        this.createEach({ node, data, scope, parentNode, marker: comment });
+        break;
+      case 'async':
+        this.createAsync({ node, data, scope, parentNode, marker: comment });
+        break;
+      case 'rerender':
+        this.createRerender({ node, data, scope, parentNode, marker: comment });
+        break;
+      case 'template': {
+        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+        if (this.snippets[templateName]) {
+          this.createSnippet({ node, data, scope, parentNode, marker: comment, templateName });
+        }
+        else {
+          this.createSubtemplate({ node, data, scope, parentNode, marker: comment });
+        }
+        break;
+      }
+      case 'snippet':
+        this.snippets[node.name] = node;
+        break;
+    }
   }
 
   /*******************************
         Conditional Rendering
   *******************************/
 
-  createConditional({ node, data, scope, fragment, lastNode }) {
-    const region = new DynamicRegion(fragment, lastNode);
-    region.placeAnchor();
+  createConditional({ node, data, scope, parentNode, marker }) {
+    // Use the comment marker as the anchor — replace with a persistent text node
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    marker.replaceWith(region.anchor);
 
     let currentBranchIndex = -1;
 
     scope.track(Reaction.create((comp) => {
-      const anchor = region.anchor || region.getLastNode();
-      if (!comp.firstRun && anchor && !anchor.isConnected) {
+      if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
         return;
       }
@@ -530,17 +524,17 @@ export class Renderer {
         List Rendering
   *******************************/
 
-  createEach({ node, data, scope, fragment, lastNode }) {
-    const region = new DynamicRegion(fragment, lastNode);
-    region.placeAnchor();
+  createEach({ node, data, scope, parentNode, marker }) {
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    marker.replaceWith(region.anchor);
 
     const itemMap = new Map();
     let currentKeys = [];
     let showingElse = false;
 
     scope.track(Reaction.create((comp) => {
-      const anchor = region.anchor || region.getLastNode();
-      if (!comp.firstRun && anchor && !anchor.isConnected) {
+      if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
         return;
       }
@@ -549,7 +543,6 @@ export class Renderer {
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
 
-      // Handle empty → else
       if (isEmpty(items) && node.elseContent) {
         this.clearAllItems(itemMap);
         currentKeys = [];
@@ -569,7 +562,6 @@ export class Renderer {
 
       const newKeys = items.map((item, i) => this.getItemID(item, i, collectionType));
 
-      // Remove items no longer present
       for (const key of currentKeys) {
         if (!newKeys.includes(key)) {
           const entry = itemMap.get(key);
@@ -579,8 +571,7 @@ export class Renderer {
         }
       }
 
-      // Build/update items
-      let insertAfter = region.anchor || lastNode;
+      let insertAfter = region.anchor;
 
       for (let i = 0; i < newKeys.length; i++) {
         const key = newKeys[i];
@@ -624,7 +615,7 @@ export class Renderer {
   }
 
   createItemDataProxy(parentData, itemSignal) {
-    const proxy = new Proxy(parentData, {
+    return new Proxy(parentData, {
       get(target, prop) {
         if (prop === '__isItemProxy') { return true; }
         if (typeof prop === 'symbol') { return target[prop]; }
@@ -638,7 +629,6 @@ export class Renderer {
         return (prop in itemData) || (prop in target);
       },
     });
-    return proxy;
   }
 
   getCollectionType(items) {
@@ -680,11 +670,12 @@ export class Renderer {
         Async Rendering
   *******************************/
 
-  createAsync({ node, data, scope, fragment, lastNode }) {
-    const region = new DynamicRegion(fragment, lastNode);
-    region.placeAnchor();
-    // Register cleanup so parent scope disposal removes async content
+  createAsync({ node, data, scope, parentNode, marker }) {
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    marker.replaceWith(region.anchor);
     scope.onDispose(() => region.clear());
+
     let generation = 0;
     let hasResolved = false;
     let resolvedValue = null;
@@ -700,8 +691,7 @@ export class Renderer {
     };
 
     scope.track(Reaction.create((comp) => {
-      const anchor = region.anchor || region.getLastNode();
-      if (!comp.firstRun && anchor && !anchor.isConnected) {
+      if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
         return;
       }
@@ -759,9 +749,10 @@ export class Renderer {
         Rerender/Guard
   *******************************/
 
-  createRerender({ node, data, scope, fragment, lastNode }) {
-    const region = new DynamicRegion(fragment, lastNode);
-    region.placeAnchor();
+  createRerender({ node, data, scope, parentNode, marker }) {
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    marker.replaceWith(region.anchor);
 
     // Initial render
     const initialScope = scope.child();
@@ -769,8 +760,7 @@ export class Renderer {
     region.setContent(initialFragment, initialScope);
 
     scope.track(Reaction.create((comp) => {
-      const anchor = region.getLastNode();
-      if (!comp.firstRun && anchor && !anchor.isConnected) {
+      if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
         return;
       }
@@ -794,27 +784,21 @@ export class Renderer {
         Subtemplates
   *******************************/
 
-  createSubtemplate({ node, data, scope, fragment, lastNode }) {
-    const region = new DynamicRegion(fragment, lastNode);
-    region.placeAnchor();
+  createSubtemplate({ node, data, scope, parentNode, marker }) {
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    marker.replaceWith(region.anchor);
 
     let currentTemplateID = null;
     let currentInstance = null;
 
     scope.track(Reaction.create((comp) => {
-      const anchor = region.anchor || region.getLastNode();
-      if (!comp.firstRun && anchor && !anchor.isConnected) {
+      if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
         return;
       }
 
-      // Track parent dataVersion so this Reaction re-fires when
-      // each-item data changes (static data= expressions use nonreactive
-      // and won't establish their own dependencies)
       this.dataVersion.get();
-      // the parent's data context is updated via setData/bumpDataVersion
-      this.dataVersion.get();
-
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
 
@@ -850,8 +834,6 @@ export class Renderer {
           renderingEngine: 'native',
         });
 
-        // Set element before initialize so settings proxy can access parent WC settings
-        const renderRoot = this.template?.element?.renderRoot;
         if (this.template?.element) {
           currentInstance.setElement(this.template.element);
         }
@@ -861,6 +843,7 @@ export class Renderer {
         const templateFragment = currentInstance.render();
         region.setContent(templateFragment);
 
+        const renderRoot = this.template?.element?.renderRoot;
         if (renderRoot) {
           currentInstance.attach(renderRoot, {
             parentNode: region.parentNode,
@@ -868,9 +851,6 @@ export class Renderer {
         }
       }
       else {
-        // Same template — update data context, Reactions handle DOM updates.
-        // rerender: false keeps rendered=true so Template.render() bumps
-        // dataVersion instead of re-creating DOM from scratch.
         currentInstance.setDataContext(templateData, { rerender: false });
         currentInstance.render(templateData);
       }
@@ -888,14 +868,12 @@ export class Renderer {
         Snippets
   *******************************/
 
-  createSnippet({ node, data, scope, fragment, lastNode, templateName }) {
+  createSnippet({ node, data, scope, parentNode, marker, templateName }) {
     const snippet = this.snippets[templateName];
     if (!snippet) {
       fatal(`Snippet "${templateName}" not found`);
     }
 
-    // Snippets inherit parent data and overlay passed props via a Proxy.
-    // Overlay props are stored as lazy getters so they re-evaluate reactively.
     const evaluator = this.evaluator;
     const staticGetters = {};
     const reactiveGetters = {};
@@ -922,8 +900,6 @@ export class Renderer {
     }
 
     const allGetters = { ...staticGetters, ...reactiveGetters };
-
-    // Create a proxy that layers snippet props over parent data
     const snippetData = new Proxy(data, {
       get(target, prop) {
         if (typeof prop === 'symbol') { return target[prop]; }
@@ -940,7 +916,9 @@ export class Renderer {
       data: snippetData,
       scope,
     });
-    fragment.append(snippetFragment);
+
+    // Replace marker with snippet content
+    marker.replaceWith(snippetFragment);
   }
 
   /*******************************
@@ -959,9 +937,6 @@ export class Renderer {
       }
       else if (isPlainObject(node.data)) {
         each(node.data, (expr, key) => {
-          // Static data: use nonreactive to prevent tracking outside each.
-          // Inside each, data is an item proxy — skip nonreactive so the
-          // subtemplate Reaction tracks the item Signal for updates.
           templateData[key] = data.__isItemProxy
             ? this.evaluator.lookupExpressionValue(expr, data)
             : Reaction.nonreactive(() => this.evaluator.lookupExpressionValue(expr, data));
