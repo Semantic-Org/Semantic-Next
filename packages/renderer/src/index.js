@@ -1,6 +1,9 @@
 // shared
 export { ExpressionEvaluator } from './expression-evaluator.js';
 
+// native renderer
+export { Renderer } from './native/renderer.js';
+
 // lit renderer
 export { ReactiveConditionalDirective } from './lit/directives/reactive-conditional.js';
 export { ReactiveDataDirective } from './lit/directives/reactive-data.js';
