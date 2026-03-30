@@ -749,15 +749,15 @@ export const Template = class Template {
     // render will rerender the AST creating new lit html
     if (!this.rendered) {
       this.html = this.renderer.render();
-      setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
+      setTimeout(this.onRendered, 0);
     }
     else {
       // Reactions handle DOM updates — bump version to propagate changes
       this.renderer.bumpDataVersion();
+      setTimeout(this.onUpdated, 0);
     }
     this.rendered = true;
     this.destroyed = false;
-    setTimeout(this.onUpdated, 0);
     return this.html;
   }
 

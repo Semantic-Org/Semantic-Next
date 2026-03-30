@@ -706,9 +706,6 @@ export class Renderer {
         scope: stateScope,
       });
       region.setContent(stateFragment, stateScope);
-      if (this.template?.rendered) {
-        this.notifyUpdate();
-      }
     };
 
     scope.track(Reaction.create((comp) => {
@@ -733,11 +730,13 @@ export class Renderer {
           resolvedValue = value;
           hasResolved = true;
           renderState(node.content, this.createSuccessDataContext(node, value));
+          this.notifyUpdate();
         }).catch(error => {
           if (currentGen < generation) { return; }
           if (node.errorContent?.length) {
             const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
             renderState(node.errorContent, errorData);
+            this.notifyUpdate();
           }
         });
       }
