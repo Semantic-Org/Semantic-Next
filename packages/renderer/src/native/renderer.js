@@ -60,14 +60,10 @@ export class Renderer {
       dataVersion: this.dataVersion,
     });
 
-    // Debounced DOM change notification — multiple mutations in the same
-    // microtask produce one onUpdated event after settling
-    this.updateNotified = false;
+    // DOM change notification — schedule onUpdated after the current
+    // synchronous work completes
     this.notifyUpdate = () => {
-      if (this.updateNotified) { return; }
-      this.updateNotified = true;
       setTimeout(() => {
-        this.updateNotified = false;
         this.template?.onUpdated?.();
       }, 0);
     };
@@ -710,7 +706,9 @@ export class Renderer {
         scope: stateScope,
       });
       region.setContent(stateFragment, stateScope);
-      this.notifyUpdate();
+      if (this.template?.rendered) {
+        this.notifyUpdate();
+      }
     };
 
     scope.track(Reaction.create((comp) => {
