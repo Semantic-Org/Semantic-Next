@@ -620,28 +620,25 @@ export class Renderer {
       }
 
       currentKeys = newKeys;
-
-      // Bump dataVersion so subtemplate Reactions in the each body
-      // re-evaluate static data= expressions against updated item data
-      if (!comp.firstRun) {
-        this.bumpDataVersion();
-      }
     }));
   }
 
   createItemDataProxy(parentData, itemSignal) {
-    return new Proxy(parentData, {
+    const proxy = new Proxy(parentData, {
       get(target, prop) {
+        if (prop === '__isItemProxy') { return true; }
         if (typeof prop === 'symbol') { return target[prop]; }
         const itemData = itemSignal.value;
         if (prop in itemData) { return itemData[prop]; }
         return target[prop];
       },
       has(target, prop) {
+        if (prop === '__isItemProxy') { return true; }
         const itemData = itemSignal.peek();
         return (prop in itemData) || (prop in target);
       },
     });
+    return proxy;
   }
 
   getCollectionType(items) {
@@ -962,7 +959,12 @@ export class Renderer {
       }
       else if (isPlainObject(node.data)) {
         each(node.data, (expr, key) => {
-          templateData[key] = Reaction.nonreactive(() => this.evaluator.lookupExpressionValue(expr, data));
+          // Static data: use nonreactive to prevent tracking outside each.
+          // Inside each, data is an item proxy — skip nonreactive so the
+          // subtemplate Reaction tracks the item Signal for updates.
+          templateData[key] = data.__isItemProxy
+            ? this.evaluator.lookupExpressionValue(expr, data)
+            : Reaction.nonreactive(() => this.evaluator.lookupExpressionValue(expr, data));
         });
       }
     }
