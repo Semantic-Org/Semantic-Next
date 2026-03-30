@@ -256,6 +256,50 @@ export const Template = class Template {
       fatal('Unknown renderer specified', this.renderingEngine);
     }
 
+    // Cache the base params object for call() — these are all stable references
+    // that don't change between calls. additionalData is spread on top per-call.
+    const element = this.element;
+    this._callParams = {
+      el: element,
+      tpl: this.instance,
+      self: this.instance,
+      component: this.instance,
+      $: this.$.bind(this),
+      $$: this.$$.bind(this),
+      reaction: this.reaction.bind(this),
+      signal: this.signal.bind(this),
+      interval: this.createInterval.bind(this),
+      timeout: this.createTimeout.bind(this),
+      abortSignal: this.abortSignal,
+      afterFlush: Reaction.afterFlush,
+      nonreactive: Reaction.nonreactive,
+      flush: Reaction.flush,
+      data: this.data,
+      settings: this.settings || element?.settings,
+      state: this.state,
+      isRendered: () => this.rendered,
+      isServer: Template.isServer,
+      isClient: !Template.isServer,
+      rerender: () => element.requestUpdate(),
+      dispatchEvent: this.dispatchEvent.bind(this),
+      attachEvent: this.attachEvent.bind(this),
+      bindKey: this.bindKey.bind(this),
+      unbindKey: this.unbindKey.bind(this),
+      abortController: this.eventController,
+      helpers: TemplateHelpers,
+      template: this,
+      templateName: this.templateName,
+      templates: Template.renderedTemplates,
+      findTemplate: this.findTemplate,
+      findParent: this.findParent.bind(this),
+      findChild: this.findChild.bind(this),
+      findChildren: this.findChildren.bind(this),
+      content: this.instance.content,
+      get darkMode() {
+        return element.isDarkMode();
+      },
+    };
+
     this.onCreated();
   }
 
@@ -739,77 +783,72 @@ export const Template = class Template {
   }
 
   // calls callback if defined with consistent params and this context
-  call(func, { params, additionalData = {}, firstArg, additionalArgs, thisContext } = {}) {
-    const args = [];
-    if (this.isPrototype) {
+  call(func, { params, additionalData, firstArg, additionalArgs, thisContext } = {}) {
+    if (this.isPrototype || !isFunction(func)) {
       return;
     }
     if (!params) {
-      const element = this.element;
-      params = {
-        el: this.element,
-
-        // provide 3 options for referring to self
-        tpl: this.instance,
-        self: this.instance,
-        component: this.instance,
-
-        $: this.$.bind(this),
-        $$: this.$$.bind(this),
-
-        reaction: this.reaction.bind(this),
-        signal: this.signal.bind(this),
-        interval: this.createInterval.bind(this),
-        timeout: this.createTimeout.bind(this),
-        abortSignal: this.abortSignal,
-        afterFlush: Reaction.afterFlush,
-        nonreactive: Reaction.nonreactive,
-        flush: Reaction.flush,
-
-        data: this.data,
-        settings: this.settings || this.element?.settings,
-        state: this.state,
-
-        isRendered: () => this.rendered,
-        isServer: Template.isServer,
-        isClient: !Template.isServer,
-        rerender: () => this.element.requestUpdate(),
-
-        dispatchEvent: this.dispatchEvent.bind(this),
-        attachEvent: this.attachEvent.bind(this),
-        bindKey: this.bindKey.bind(this),
-        unbindKey: this.unbindKey.bind(this),
-        abortController: this.eventController,
-        helpers: TemplateHelpers,
-
-        template: this,
-        templateName: this.templateName,
-        templates: Template.renderedTemplates,
-
-        findTemplate: this.findTemplate,
-        findParent: this.findParent.bind(this),
-        findChild: this.findChild.bind(this),
-        findChildren: this.findChildren.bind(this),
-
-        // not yet implemented
-        content: this.instance.content,
-
-        // on demand since forces recalculateStyle on body
-        get darkMode() {
-          return element.isDarkMode();
-        },
-
-        ...additionalData,
-      };
-      args.push(params);
+      if (this._callParams) {
+        params = additionalData
+          ? { ...this._callParams, ...additionalData }
+          : this._callParams;
+      }
+      else {
+        // During initialize(), before _callParams is built
+        params = this._buildCallParams(additionalData);
+      }
     }
+    const args = [params];
     if (additionalArgs) {
       args.push(...additionalArgs);
     }
-    if (isFunction(func)) {
-      const context = thisContext !== undefined ? thisContext : this.element;
-      return func.apply(context, args);
-    }
+    const context = thisContext !== undefined ? thisContext : this.element;
+    return func.apply(context, args);
+  }
+
+  _buildCallParams(additionalData = {}) {
+    const element = this.element;
+    return {
+      el: element,
+      tpl: this.instance,
+      self: this.instance,
+      component: this.instance,
+      $: this.$.bind(this),
+      $$: this.$$.bind(this),
+      reaction: this.reaction.bind(this),
+      signal: this.signal.bind(this),
+      interval: this.createInterval.bind(this),
+      timeout: this.createTimeout.bind(this),
+      abortSignal: this.abortSignal,
+      afterFlush: Reaction.afterFlush,
+      nonreactive: Reaction.nonreactive,
+      flush: Reaction.flush,
+      data: this.data,
+      settings: this.settings || element?.settings,
+      state: this.state,
+      isRendered: () => this.rendered,
+      isServer: Template.isServer,
+      isClient: !Template.isServer,
+      rerender: () => element.requestUpdate(),
+      dispatchEvent: this.dispatchEvent.bind(this),
+      attachEvent: this.attachEvent.bind(this),
+      bindKey: this.bindKey.bind(this),
+      unbindKey: this.unbindKey.bind(this),
+      abortController: this.eventController,
+      helpers: TemplateHelpers,
+      template: this,
+      templateName: this.templateName,
+      templates: Template.renderedTemplates,
+      findTemplate: this.findTemplate,
+      findParent: this.findParent.bind(this),
+      findChild: this.findChild.bind(this),
+      findChildren: this.findChildren.bind(this),
+      content: this.instance.content,
+      get darkMode() {
+        return element.isDarkMode();
+      },
+      ...additionalData,
+    };
   }
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
