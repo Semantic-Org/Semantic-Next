@@ -923,3 +923,296 @@ describe('SSR hydration — post-hydration list mutations', () => {
     expect(shadowHTML(el)).toBe('<p>empty</p>');
   });
 });
+
+/*******************************
+     Spec-driven components
+     (patterns used by real SUI primitives)
+*******************************/
+
+describe('SSR hydration — spec-driven components', () => {
+  // Real SUI primitives use componentSpec compiled by SpecReader.
+  // This minimal spec matches the real shape (flat attributes array,
+  // propertyTypes map, optionAttributes map).
+
+  const buttonSpec = {
+    tagName: 'test-button',
+    content: [],
+    contentAttributes: [],
+    types: ['emphasis'],
+    variations: ['size', 'compact'],
+    states: ['active', 'disabled'],
+    settings: ['href'],
+    attributes: ['emphasis', 'size', 'compact', 'active', 'disabled', 'href'],
+    propertyTypes: {
+      emphasis: 'string',
+      size: 'string',
+      compact: 'boolean',
+      active: 'boolean',
+      disabled: 'boolean',
+      href: 'string',
+    },
+    optionAttributes: {
+      primary: 'emphasis',
+      secondary: 'emphasis',
+      tiny: 'size',
+      small: 'size',
+      large: 'size',
+      huge: 'size',
+    },
+    allowedValues: {
+      emphasis: ['primary', 'secondary'],
+      size: ['tiny', 'small', 'large', 'huge'],
+    },
+    defaultValues: { href: '' },
+  };
+
+  it('{ui} class string computed from spec attributes', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div class="{ui}button" part="button">{>slot}</div>',
+      componentSpec: buttonSpec,
+    }, { emphasis: 'primary', size: 'large' });
+
+    const div = el.shadowRoot.querySelector('[part="button"]');
+    expect(div).toBeTruthy();
+    const cls = div.getAttribute('class');
+    expect(cls).toContain('primary');
+    expect(cls).toContain('large');
+    expect(cls).toContain('button');
+  });
+
+  it('boolean spec attributes produce correct classes', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div class="{ui}button">{>slot}</div>',
+      componentSpec: buttonSpec,
+    }, { active: true, compact: true });
+
+    const cls = el.shadowRoot.querySelector('div').getAttribute('class');
+    expect(cls).toContain('active');
+    expect(cls).toContain('compact');
+  });
+
+  it('conditional wrapper based on setting (href pattern)', async () => {
+    const el = await ssrAndHydrate({
+      template:
+        '{#if href}<a class="{ui}button" href="{href}">{>slot}</a>{else}<div class="{ui}button">{>slot}</div>{/if}',
+      componentSpec: buttonSpec,
+      defaultSettings: { href: '' },
+    }, { href: '/page' });
+
+    expect(el.shadowRoot.querySelector('a')).toBeTruthy();
+    expect(el.shadowRoot.querySelector('a').getAttribute('href')).toBe('/page');
+    expect(el.shadowRoot.querySelector('div')).toBeFalsy();
+  });
+
+  it('conditional wrapper without href renders div', async () => {
+    const el = await ssrAndHydrate({
+      template:
+        '{#if href}<a class="{ui}button" href="{href}">{>slot}</a>{else}<div class="{ui}button">{>slot}</div>{/if}',
+      componentSpec: buttonSpec,
+      defaultSettings: { href: '' },
+    });
+
+    expect(el.shadowRoot.querySelector('div')).toBeTruthy();
+    expect(el.shadowRoot.querySelector('a')).toBeFalsy();
+  });
+});
+
+/*******************************
+     Event delegation after hydration
+*******************************/
+
+describe('SSR hydration — events after hydration', () => {
+  it('click event fires after hydration', async () => {
+    let clicked = false;
+    const el = await ssrAndHydrate({
+      template: '<div class="target">Click me</div>',
+      events: {
+        'click .target'({ self }) {
+          self.handleClick();
+        },
+      },
+      createComponent: () => ({
+        handleClick() {
+          clicked = true;
+        },
+      }),
+    });
+
+    el.shadowRoot.querySelector('.target').click();
+    await new Promise(r => setTimeout(r, 10));
+    expect(clicked).toBe(true);
+  });
+
+  it('event handler accesses reactive state', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div><button class="btn">+</button><span>{count}</span></div>',
+      defaultState: { count: 0 },
+      events: {
+        'click .btn'({ state }) {
+          state.count.increment();
+        },
+      },
+      createComponent: ({ state }) => ({
+        getCount() {
+          return state.count.get();
+        },
+      }),
+    });
+
+    expect(shadowHTML(el)).toContain('0');
+
+    el.shadowRoot.querySelector('.btn').click();
+    const updated = $(el).onNext('updated');
+    await updated;
+
+    expect(shadowHTML(el)).toContain('1');
+  });
+});
+
+/*******************************
+     createComponent lifecycle
+*******************************/
+
+describe('SSR hydration — createComponent lifecycle', () => {
+  it('initialize() runs during hydration', async () => {
+    let initRan = false;
+    const el = await ssrAndHydrate({
+      template: '<div>{msg}</div>',
+      createComponent: () => ({
+        msg: 'initialized',
+        initialize() {
+          initRan = true;
+        },
+      }),
+    });
+
+    expect(initRan).toBe(true);
+    expect(shadowHTML(el)).toBe('<div>initialized</div>');
+  });
+
+  it('onCreated fires during hydration', async () => {
+    let createdRan = false;
+    const el = await ssrAndHydrate({
+      template: '<div>test</div>',
+      onCreated: () => {
+        createdRan = true;
+      },
+    });
+
+    expect(createdRan).toBe(true);
+  });
+
+  it('onRendered fires after hydration', async () => {
+    let renderedRan = false;
+    const el = await ssrAndHydrate({
+      template: '<div>test</div>',
+      onRendered: ({ isClient }) => {
+        if (isClient) { renderedRan = true; }
+      },
+    });
+
+    expect(renderedRan).toBe(true);
+  });
+
+  // TODO: _isHydrating flag not propagated through callback params during hydration init
+  it.todo('isHydrating is true during initialize');
+
+  it('isHydrating is false after hydration completes', async () => {
+    let hydrating = null;
+    const el = await ssrAndHydrate({
+      template: '<div>test</div>',
+      onRendered: ({ isHydrating }) => {
+        hydrating = isHydrating;
+      },
+    });
+
+    expect(hydrating).toBe(false);
+  });
+
+  it('reaction created in initialize tracks signals after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div>{derived}</div>',
+      defaultState: { count: 1 },
+      createComponent: ({ self, state, reaction, signal }) => ({
+        derived: signal(''),
+        initialize() {
+          reaction(() => {
+            self.derived.set('count is ' + state.count.get());
+          });
+        },
+      }),
+    });
+
+    expect(shadowHTML(el)).toBe('<div>count is 1</div>');
+
+    const updated = $(el).onNext('updated');
+    el.template.state.count.set(5);
+    await updated;
+
+    expect(shadowHTML(el)).toBe('<div>count is 5</div>');
+  });
+});
+
+/*******************************
+     CSS scoping
+*******************************/
+
+describe('SSR hydration — CSS', () => {
+  it('adoptedStyleSheets are applied after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div class="styled">text</div>',
+      css: '.styled { color: rgb(255, 0, 0); }',
+    });
+
+    expect(el.shadowRoot.adoptedStyleSheets.length).toBeGreaterThan(0);
+    const div = el.shadowRoot.querySelector('.styled');
+    const color = getComputedStyle(div).color;
+    expect(color).toBe('rgb(255, 0, 0)');
+  });
+
+  it('server style tag removed during hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div>text</div>',
+      css: '.a { color: red; }',
+    });
+
+    const styleTags = el.shadowRoot.querySelectorAll('style');
+    expect(styleTags.length).toBe(0);
+  });
+});
+
+/*******************************
+     Server/client data divergence
+*******************************/
+
+describe('SSR hydration — data divergence', () => {
+  it('onCreated state mutation updates DOM after hydration', async () => {
+    // Server renders with count=0, client onCreated sets count=42.
+    // Hydration should reflect the client's mutated state.
+    const el = await ssrAndHydrate({
+      template: '<span>{count}</span>',
+      defaultState: { count: 0 },
+      onCreated: ({ state, isClient }) => {
+        if (isClient) {
+          state.count.set(42);
+        }
+      },
+    });
+
+    await new Promise(r => setTimeout(r, 50));
+    await waitForUpdate(el);
+    expect(shadowHTML(el)).toBe('<span>42</span>');
+  });
+
+  it('computed value from createComponent matches after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div>{getStatus}</div>',
+      defaultState: { ready: true },
+      createComponent: ({ state }) => ({
+        getStatus: () => state.ready.get() ? 'Ready' : 'Loading',
+      }),
+    });
+
+    expect(shadowHTML(el)).toBe('<div>Ready</div>');
+  });
+});
