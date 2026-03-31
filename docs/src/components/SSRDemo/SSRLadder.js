@@ -288,3 +288,43 @@ export const Step31 = defineComponent({
   css: css + ' .val { font-weight: bold; }',
   defaultSettings: { color: 'red' },
 });
+
+// Step 35: Deferred settings — array received after mount (nav-menu pattern)
+// Server renders with items passed as props. Client hydrates with default [],
+// then JS sets items via .settings() after mount.
+export const Step35 = defineComponent({
+  tagName: 'ssr-step-35',
+  renderingEngine: 'native',
+  template: '<div class="box"><ul>{#each item in getItems}<li>{item.label}</li>{/each}</ul></div>',
+  css: css + ' ul { list-style: none; padding: 0; margin: 0; }',
+  defaultSettings: {
+    items: [],
+  },
+  createComponent: ({ settings }) => ({
+    getItems() {
+      return settings.items || [];
+    },
+  }),
+});
+
+// Step 36: Nested shadow DOMs — primitive inside primitive
+export const Step36 = defineComponent({
+  tagName: 'ssr-step-36',
+  renderingEngine: 'native',
+  template: '<div class="box"><ui-button emphasis="primary"><slot></slot></ui-button></div>',
+  css,
+});
+
+// Step 37: Subtemplate with nested primitive
+const innerCard = defineComponent({
+  renderingEngine: 'native',
+  template: '<div class="card"><ui-label><slot></slot></ui-label></div>',
+  css: '.card { padding: 8px; border: 1px solid #555; }',
+});
+export const Step37 = defineComponent({
+  tagName: 'ssr-step-37',
+  renderingEngine: 'native',
+  template: '<div class="box">{>card}</div>',
+  css,
+  subTemplates: { card: innerCard },
+});

@@ -9,6 +9,7 @@ import {
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18, Step19,
   Step27, Step28, Step29, Step30, Step31,
+  Step35, Step36, Step37,
 } from '@components/SSRDemo/SSRLadder.js';
 import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 
@@ -47,6 +48,10 @@ const steps = [
   { component: Step29, label: '32. Post-hydration toggle' },
   { component: Step30, label: '33. Post-hydration list update' },
   { component: Step31, label: '34. Settings change', attrs: { color: 'blue' } },
+  // Server renders with items, client hydrates with default [], then .settings() sets items
+  { component: Step35, label: '35. Deferred settings (nav-menu pattern)', attrs: { items: [{ label: 'Home' }, { label: 'About' }, { label: 'Contact' }] } },
+  { component: Step36, label: '36. Nested shadow DOM (button in wrapper)', children: 'Nested' },
+  { component: Step37, label: '37. Subtemplate with nested primitive', children: 'Card Label' },
 ];
 
 const rendered = steps.map((s, i) => ({
@@ -91,6 +96,9 @@ const expected = {
   32: 'ON',
   33: 'ABC',
   34: 'blue',
+  35: 'HomeAboutContact',
+  36: '',
+  37: '',
 };
 ---
 <Body class="dark">
@@ -117,6 +125,7 @@ const expected = {
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18, Step19,
     Step27, Step28, Step29, Step30, Step31,
+    Step35, Step36, Step37,
   } from '@components/SSRDemo/SSRLadder.js';
   import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 
@@ -124,6 +133,14 @@ const expected = {
   const log = (msg) => {
     document.getElementById('log').textContent += msg + '\n';
   };
+
+  // Step 35: Deferred settings — simulate the nav-menu pattern.
+  // After hydration, set the items via .settings() like Astro layouts do.
+  setTimeout(() => {
+    $('ssr-step-35').settings({
+      items: [{ label: 'Home' }, { label: 'About' }, { label: 'Contact' }],
+    });
+  }, 100);
 
   setTimeout(() => {
     const stepCount = Object.keys(expected).length;
