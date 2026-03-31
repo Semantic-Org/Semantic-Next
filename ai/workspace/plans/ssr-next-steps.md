@@ -150,7 +150,9 @@ Four test routes under `/test-ssr/`:
 | **component** | `/test-ssr/component` | Astro `renderToStaticMarkup` — no client directive, pure SSR |
 | **hydrated** | `/test-ssr/hydrated` | Astro `renderToStaticMarkup` + `client:load` — SSR + hydration |
 
-The **ladder** is the regression safety net — run it after any change to confirm nothing broke. It tests 44 patterns from static HTML through deep nesting (if > each > snippet > component), post-hydration reactivity, deferred settings, and spec-driven primitives. All steps should show green. If a step goes red, the step name tells you exactly which pattern regressed.
+The **ladder** is the visual regression safety net — run it after any change to confirm nothing broke. It tests 44 patterns from static HTML through deep nesting (if > each > snippet > component), post-hydration reactivity, deferred settings, and spec-driven primitives. All steps should show green. If a step goes red, the step name tells you exactly which pattern regressed.
+
+There is also an **automated hydration test suite** at `packages/renderer/test/browser/ssr-hydration.test.js` (68 tests). Run with `cd packages/renderer && npx vitest run`. This tests the ServerRenderer → DSD → hydration round-trip programmatically, without a browser. The full renderer suite is 721 tests across 14 files — run it after any renderer change.
 
 ### Progression: vanilla → component → hydrated
 
