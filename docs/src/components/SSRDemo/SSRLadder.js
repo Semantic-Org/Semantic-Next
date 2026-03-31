@@ -1,4 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
+import { SpecReader } from '@semantic-ui/specs';
 
 const css = '.box { padding: 8px; border: 1px solid #555; color: white; margin: 4px 0; }';
 
@@ -187,4 +188,36 @@ export const Step18 = defineComponent({
   createComponent: () => ({
     colors: { red: '#e74c3c', green: '#2ecc71', blue: '#3498db' },
   }),
+});
+
+// Step 19: Spec-driven component with {ui} classes
+const widgetSpec = new SpecReader({
+  uiType: 'element',
+  name: 'SSRWidget',
+  tagName: 'ssr-step-19',
+  types: [],
+  states: [],
+  variations: [
+    {
+      name: 'Size',
+      attribute: 'size',
+      options: [{ name: 'Small', value: 'small' }, { name: 'Large', value: 'large' }],
+    },
+    {
+      name: 'Emphasis',
+      attribute: 'emphasis',
+      includeAttributeClass: true,
+      options: [{ name: 'Primary', value: 'primary' }, { name: 'Secondary', value: 'secondary' }],
+    },
+  ],
+  settings: [],
+  events: [],
+}).getWebComponentSpec();
+
+export const Step19 = defineComponent({
+  tagName: 'ssr-step-19',
+  renderingEngine: 'native',
+  componentSpec: widgetSpec,
+  template: '<span class="{ui}widget"><slot></slot></span>',
+  css: css + ' .widget { display: inline-block; } .primary { color: #3498db; } .large { font-size: 20px; }',
 });

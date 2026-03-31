@@ -29,9 +29,16 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
 
   const css = ComponentClass.config?.css || '';
   const defaultSettings = ComponentClass.config?.defaultSettings || {};
+  const componentSpec = ComponentClass.config?.componentSpec;
+  const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties;
 
   // Merge attributes with defaults
   const data = { ...defaultSettings, ...attrs };
+
+  // Compute {ui} class string for spec-driven components
+  if (componentSpec) {
+    data.ui = getUIClasses(data, { componentSpec, properties: resolvedProperties });
+  }
 
   // Clone prototype template with the data context
   const template = proto.clone({ data });
