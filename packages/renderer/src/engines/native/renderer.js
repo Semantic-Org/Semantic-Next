@@ -854,12 +854,24 @@ export class Renderer {
       this.hydrateAttributes(root, entries, data, scope);
     }
 
-    // Pass 2: Walk comments for text and block markers
+    // Pass 2: Walk comments for text and block markers — top level only.
+    // Inner markers (inside block pairs) are handled recursively by block handlers.
     const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
     const commentsToProcess = [];
     let comment;
+    let blockDepth = 0;
     while ((comment = commentWalker.nextNode())) {
       const text = comment.data;
+
+      // Track block nesting — skip inner markers
+      if (text.startsWith('/sui-block:')) {
+        blockDepth--;
+        continue;
+      }
+      if (blockDepth > 0) {
+        continue;
+      }
+
       if (text.startsWith(COMMENT_MARKER)) {
         const markerID = parseInt(text.slice(COMMENT_MARKER.length));
         if (!isNaN(markerID)) {
@@ -870,6 +882,7 @@ export class Renderer {
         const markerID = parseInt(text.slice(BLOCK_MARKER.length));
         if (!isNaN(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'block' });
+          blockDepth++;
         }
       }
     }
@@ -1086,6 +1099,19 @@ export class Renderer {
     comment.replaceWith(region.anchor);
     region.ownedNodes = ownedNodes;
 
+    // Determine which content AST the server rendered, hydrate its inner markers
+    const contentAST = this.getServerRenderedAST(node, data);
+    if (contentAST && ownedNodes.length > 0) {
+      const innerScope = scope.child();
+      region.childScopes.push(innerScope);
+      this.hydrateInnerContent(ownedNodes, contentAST, data, innerScope);
+      // Re-insert hydrated nodes after the anchor
+      const frag = document.createDocumentFragment();
+      for (const n of ownedNodes) { frag.appendChild(n); }
+      region.anchor.after(frag);
+      region.ownedNodes = [...ownedNodes];
+    }
+
     switch (node.type) {
       case 'if':
         this.hydrateConditional({ node, data, scope, region });
@@ -1102,7 +1128,6 @@ export class Renderer {
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
-          // Snippets are inlined — already in ownedNodes, just need reactive updates
           this.hydrateRerender({
             node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
             data,
@@ -1115,6 +1140,57 @@ export class Renderer {
         }
         break;
       }
+    }
+  }
+
+  getServerRenderedAST(node, data) {
+    switch (node.type) {
+      case 'if': {
+        const condition = this.eval(node.condition, data);
+        if (condition) { return node.content; }
+        if (node.branches) {
+          for (const branch of node.branches) {
+            if (branch.type === 'elseif' && this.eval(branch.condition, data)) {
+              return branch.content;
+            }
+            if (branch.type === 'else') { return branch.content; }
+          }
+        }
+        return null;
+      }
+      case 'async':
+        return node.loadingContent;
+      case 'rerender':
+        return node.content;
+      case 'template': {
+        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+        if (this.snippets[templateName]) {
+          return this.snippets[templateName].content;
+        }
+        return null; // subtemplates handled separately
+      }
+      default:
+        return null; // each handled separately (per-item data)
+    }
+  }
+
+  hydrateInnerContent(ownedNodes, contentAST, data, scope) {
+    const { entries } = buildHTMLStringPure(contentAST, this.snippets);
+    if (entries.length === 0) { return; }
+
+    // Wrap ownedNodes in a temporary container for TreeWalker traversal
+    const container = document.createDocumentFragment();
+    for (const n of [...ownedNodes]) {
+      container.appendChild(n);
+    }
+
+    // Recursively hydrate inner markers with the sub-AST's entries
+    this.hydrateMarkers(container, entries, data, scope);
+
+    // Update ownedNodes with the hydrated content (comments may have been removed)
+    ownedNodes.length = 0;
+    for (const n of [...container.childNodes]) {
+      ownedNodes.push(n);
     }
   }
 
