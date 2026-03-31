@@ -1,5 +1,39 @@
 # Native Renderer SSR
 
+## Before You Start
+
+Read these in order. Don't write code until you've completed the curriculum.
+
+### MCP Skills (load via `use_skill`)
+1. `mental-model` — foundational concepts, especially the Template/WebComponent relationship and the formalization gradient
+2. `render-pipeline` — the four-stage pipeline from template string to DOM. Understand `buildHTMLString`, the tagged template literal bridge, and directive-level reactivity
+3. `internals` — package dependency graph, Template.call() params, the AST pipeline, how `onCreated`/`onRendered`/`onDestroyed` work
+4. `component-ssr` — existing Lit SSR integration, `isServer`/`isClient` guards, hydration patterns. This is what you're replacing
+5. `component-lifecycle` — lifecycle hook ordering, what fires when, SSR guards
+6. `component-templating` — every block type (if, each, async, snippet, subtemplate, slot, rerender, guard) — you need to handle all of them in `renderToString`
+7. `testing` — test environments, `RENDERING_ENGINES` loop pattern, `onNext` event coordination
+
+### Source Code (read directly)
+1. `packages/renderer/src/engines/native/renderer.js` — the client renderer. Read `buildHTMLString`, `bindMarkers`, `createAsync`, `createConditional`, `createEach`. This is what you're splitting into client + server paths
+2. `packages/renderer/src/expression-evaluator.js` — shared between client and server. Understand `lookupExpressionValue`, `lookupTokenValue`, the `new Function` + `with` bridge
+3. `packages/renderer/src/engine-registry.js` — how engines register. Your server engine slots into this
+4. `packages/component/src/engines/native/base.js` — `WebComponentBase`. Read `connectedCallback` — hydration detection goes here
+5. `packages/component/src/define-component.js` — how `defineComponent` creates the prototype Template and selects the factory
+6. `packages/templating/src/template.js` — `render()`, `initialize()`, `clone()`, `onCreated`/`onRendered`/`onDestroyed`. Focus on what happens during `render()` for the native engine path
+
+### Examples (load via `get_example`)
+1. `todo-list` — the most complex example. Uses `renderingEngine: 'native'`, subtemplates, async (via localStorage), conditionals, each loops, snippets, events, key bindings. If your SSR can render this, it can render anything
+2. `template-async` — async blocks with loading/error states. Tests your async → loading content path
+3. `card-search` — subtemplates inside each loops with reactive search. Tests subtemplate rendering
+4. `accordion` — each with conditional at end of item. Tests the closing-tag pattern that broke the vanilla renderer
+
+### Tests (read directly)
+1. `packages/renderer/test/browser/html-output.test.js` — the conformance suite. Server-rendered HTML should produce identical `shadowHTML()` output after hydration
+2. `packages/renderer/test/browser/component-contract.test.js` — lifecycle events, `el.component`, `el.dataContext`, `el.settings`. Hydrated components must satisfy this contract
+
+### Guestbook
+Read `ai/guestbook.md` entries 7 (The Off-Ramp Instinct) and 13 (The Renderer Conformance Suite). Entry 13 covers the `test.astro` + Chrome MCP debugging pattern — use it when things don't work instead of reasoning about timing in your head.
+
 ## Goal
 
 Server-side rendering for components using the native renderer. Server produces complete HTML with Declarative Shadow DOM. Client hydrates by wiring reactive bindings to the existing DOM without re-rendering.
