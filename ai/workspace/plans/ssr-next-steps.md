@@ -141,13 +141,16 @@ Alternatively, the user can keep two browser windows — one with JS disabled pe
 
 ## Process for Iterating
 
-Three test routes, each isolating a different layer of the SSR stack:
+Four test routes under `/test-ssr/`:
 
 | Route | Path | What it tests |
 |-------|------|--------------|
+| **ladder** | `/test-ssr/ladder` | 44 automated steps covering every SSR pattern — regression suite |
 | **vanilla** | `/test-ssr/vanilla` | `renderToString` directly — ServerRenderer in isolation, no Astro |
 | **component** | `/test-ssr/component` | Astro `renderToStaticMarkup` — no client directive, pure SSR |
 | **hydrated** | `/test-ssr/hydrated` | Astro `renderToStaticMarkup` + `client:load` — SSR + hydration |
+
+The **ladder** is the regression safety net — run it after any change to confirm nothing broke. It tests 44 patterns from static HTML through deep nesting (if > each > snippet > component), post-hydration reactivity, deferred settings, and spec-driven primitives. All steps should show green. If a step goes red, the step name tells you exactly which pattern regressed.
 
 ### Progression: vanilla → component → hydrated
 
