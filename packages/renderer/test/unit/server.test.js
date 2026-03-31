@@ -1,10 +1,26 @@
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler, TemplateHelpers } from '@semantic-ui/templating';
 import { describe, expect, it } from 'vitest';
 
-import { renderToString } from '../../src/engines/native/server.js';
+import { ServerRenderer } from '../../src/engines/native/server.js';
 
 function compile(template) {
   return new TemplateCompiler(template).compile();
+}
+
+function renderToString({ ast, data = {}, css = '', subTemplates = {}, helpers = {} }) {
+  const renderer = new ServerRenderer({
+    ast,
+    data,
+    subTemplates,
+    helpers: { ...TemplateHelpers, ...helpers },
+  });
+  const content = renderer.render();
+  let result = '';
+  if (css) {
+    result += `<style>${css}</style>`;
+  }
+  result += content;
+  return `<template shadowrootmode="open">${result}</template>`;
 }
 
 // Strip hydration markers and whitespace for clean comparison

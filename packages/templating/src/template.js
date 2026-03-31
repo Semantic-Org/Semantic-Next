@@ -257,7 +257,10 @@ export const Template = class Template {
       );
     }
 
-    this.renderer = new engine.renderer({
+    const RendererClass = (Template.isServer && engine.serverRenderer)
+      ? engine.serverRenderer
+      : engine.renderer;
+    this.renderer = new RendererClass({
       ast: this.ast,
       data: this.overlaySettingsSignals(this.getDataContext()),
       template: this,
