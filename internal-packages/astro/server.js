@@ -5,7 +5,7 @@
   then calls renderToString to produce Declarative Shadow DOM HTML.
 */
 
-import { renderToString } from '@semantic-ui/renderer';
+import { ServerRenderer } from '@semantic-ui/renderer';
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { camelToKebab, each, isFunction } from '@semantic-ui/utils';
 
@@ -19,7 +19,7 @@ export default {
   renderToStaticMarkup(Component, props, slotted) {
     const protoTemplate = Component.template;
     const config = Component.config || {};
-    const tagName = Component.tagName;
+    const tagName = Component.componentTagName || Component.tagName;
 
     // Build data context from props + defaults
     const defaultSettings = config.defaultSettings || {};
@@ -104,14 +104,16 @@ export default {
       Object.assign(data, instance);
     }
 
-    // Render to DSD HTML
-    const dsd = renderToString({
+    // Render to DSD HTML via ServerRenderer
+    const css = config.css || protoTemplate.css || '';
+    const renderer = new ServerRenderer({
       ast: protoTemplate.ast,
       data,
-      css: config.css || protoTemplate.css || '',
       subTemplates: protoTemplate.subTemplates || {},
       helpers: TemplateHelpers,
     });
+    const renderedHTML = renderer.render();
+    const dsd = `<template shadowrootmode="open">${css ? `<style>${css}</style>` : ''}${renderedHTML}</template>`;
 
     // Build the full element HTML with attributes
     const attrs = serializeAttributes(props, config);

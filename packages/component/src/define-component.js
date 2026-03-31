@@ -28,7 +28,7 @@ export const defineComponent = ({
 
   subTemplates = {},
 
-  renderingEngine = 'lit',
+  renderingEngine = 'native',
   properties,
 
   componentSpec = false,
