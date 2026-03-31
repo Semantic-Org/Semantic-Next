@@ -337,3 +337,52 @@ export const Step37 = defineComponent({
   css,
   subTemplates: { card: innerCard },
 });
+
+// Step 39: Each loop with ternary in snippet (nav-menu exact pattern)
+export const Step39 = defineComponent({
+  tagName: 'ssr-step-39',
+  renderingEngine: 'native',
+  template: `
+    {#snippet row}<span class="{active ? 'on' : 'off'}">{name}</span>{/snippet}
+    <div class="box">{#each item in items}{>row name=item.name active=item.active} {/each}</div>
+  `,
+  css: css + ' .on { color: #2ecc71; } .off { color: #e74c3c; }',
+  createComponent: () => ({
+    items: [
+      { name: 'Alpha', active: true },
+      { name: 'Beta', active: false },
+      { name: 'Gamma', active: true },
+    ],
+  }),
+});
+
+// Step 40: Component with isServer guard in initialize
+export const Step40 = defineComponent({
+  tagName: 'ssr-step-40',
+  renderingEngine: 'native',
+  template: '<div class="box">{label}</div>',
+  css,
+  defaultState: { label: 'server' },
+  createComponent: ({ state, isClient }) => ({
+    initialize() {
+      if (isClient) {
+        state.label.set('client');
+      }
+    },
+  }),
+});
+
+// Step 41: Nested component in each loop (menu items with icons)
+export const Step41 = defineComponent({
+  tagName: 'ssr-step-41',
+  renderingEngine: 'native',
+  template:
+    '<div class="box">{#each item in items}<div><ui-icon icon={item.icon}></ui-icon> {item.label}</div>{/each}</div>',
+  css,
+  createComponent: () => ({
+    items: [
+      { label: 'Home', icon: 'house' },
+      { label: 'Settings', icon: 'settings' },
+    ],
+  }),
+});
