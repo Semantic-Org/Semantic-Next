@@ -386,3 +386,49 @@ export const Step41 = defineComponent({
     ],
   }),
 });
+
+// Step 42: Multiple slots with named and default
+export const Step42 = defineComponent({
+  tagName: 'ssr-step-42',
+  renderingEngine: 'native',
+  template: `
+    <div class="box">
+      <header>{>slot header}</header>
+      <main>{>slot}</main>
+      <footer>{>slot footer}</footer>
+    </div>
+  `,
+  css: css + ' header { color: #f39c12; } footer { color: #888; }',
+});
+
+// Step 43: Snippet producing components (copy-button pattern)
+export const Step43 = defineComponent({
+  tagName: 'ssr-step-43',
+  renderingEngine: 'native',
+  template: `
+    {#snippet item}<div class="item"><ui-button>{label}</ui-button></div>{/snippet}
+    <div class="box">{>item label="First"}{>item label="Second"}</div>
+  `,
+  css: css + ' .item { display: inline-block; margin: 2px; }',
+});
+
+// Step 44: Deep nesting — if > each > snippet > component
+export const Step44 = defineComponent({
+  tagName: 'ssr-step-44',
+  renderingEngine: 'native',
+  template: `
+    {#snippet badge}<ui-label>{text}</ui-label>{/snippet}
+    <div class="box">
+      {#if showItems}
+        {#each item in items}
+          {>badge text=item}
+        {/each}
+      {/if}
+    </div>
+  `,
+  css,
+  defaultState: { showItems: true },
+  createComponent: () => ({
+    items: ['Tag1', 'Tag2', 'Tag3'],
+  }),
+});
