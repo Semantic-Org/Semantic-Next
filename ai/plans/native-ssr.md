@@ -9,16 +9,16 @@ Server-side rendering for components using the native renderer. Server produces 
 The native renderer's `buildHTMLString(ast)` is the natural split point:
 
 ```
-buildHTMLString(ast)  →  entries[]  +  htmlString
+buildHTMLString(ast)  →  { htmlString, entries, snippets }
                               ↓              ↓
                     [shared structure]   [diverges here]
 
 Client render:   parseHTML(htmlString) → bindMarkers(fragment, entries) → append to shadow root
 Server render:   evaluateInline(htmlString, entries) → serialize with DSD → return HTML string
-Client hydrate:  shadowRoot exists → bindMarkers(shadowRoot, entries) → wire Reactions
+Client hydrate:  shadowRoot exists → hydrateMarkers(shadowRoot, entries) → wire Reactions
 ```
 
-`buildHTMLString` is pure computation — no DOM, no Reactions, no `document`. It runs identically on server and client.
+`buildHTMLString` is pure computation — no DOM, no Reactions, no `document`. It runs identically on server and client. Currently it's a method on the Renderer class with coupling to `this.snippets` and `this.evaluator` — extracting it as a standalone function is the first and hardest step (see Step 1 below).
 
 ## Two-Phase SSR Strategy
 
@@ -51,15 +51,15 @@ An AST, a data context (settings, state defaults), and CSS.
 
 ### Process
 
-1. **`buildHTMLString(ast)`** — produces HTML string with markers and entries array (same as client)
+1. **`buildHTMLString(ast, snippets)`** — produces HTML string with markers, entries array, and populated snippets map. All dependencies passed in, no instance mutation.
 
 2. **Evaluate markers inline** — walk the entries, evaluate each expression once:
-   - Text markers (`<!--sui:N-->`) → replace with evaluated value, keep the comment for hydration: `<!--sui:0-->Alice`
+   - Text markers (`<!--sui:v1:N-->`) → replace with evaluated value, keep the comment for hydration: `<!--sui:v1:0-->Alice`
    - Attribute markers (`__suiN__`) → replace with evaluated value in the attribute string, add `data-sui-bind="attrName:N"` for hydration
-   - Block markers (`<!--sui-block:N-->`) → evaluate the block directive:
-     - `{#if condition}` → evaluate condition, render the matching branch inline, wrap in `<!--sui-block:N-->...<!--/sui-block:N-->`
+   - Block markers (`<!--sui-block:v1:N-->`) → evaluate the block directive:
+     - `{#if condition}` → evaluate condition, render the matching branch inline, wrap in `<!--sui-block:v1:N-->...<!--/sui-block:v1:N-->`
      - `{#each items}` → evaluate collection, render each item inline
-     - `{#async}` → evaluate expression; if synchronous value, render success content; if promise, render loading content (or empty)
+     - `{#async}` → render loading content (never await — see Decisions below)
      - `{#rerender}` → render content once
      - `{> template}` → evaluate subtemplate, render its content inline
 
@@ -68,11 +68,11 @@ An AST, a data context (settings, state defaults), and CSS.
    <my-component attribute="value">
      <template shadowrootmode="open">
        <style>/* component CSS */</style>
-       <!--sui:0-->Alice
+       <!--sui:v1:0-->Alice
        <div class="container">
-         <!--sui-block:1-->
+         <!--sui-block:v1:1-->
          <span>content from if-branch</span>
-         <!--/sui-block:1-->
+         <!--/sui-block:v1:1-->
        </div>
      </template>
    </my-component>
@@ -83,10 +83,26 @@ An AST, a data context (settings, state defaults), and CSS.
 ### Output
 Pure HTML string. No DOM shim needed — this is string concatenation with expression evaluation.
 
+### Server Import Path Constraint
+
+`defineComponent` triggers engine registration which imports the Renderer, which uses `document.createElement('template')`. The server module path must avoid triggering client-only code during module evaluation. Options:
+- Lazy `document` access (guarded by `isServer`)
+- Separate server entry point that imports only `ExpressionEvaluator`, `buildHTMLString`, and the Template/compiler — no Renderer class
+- The engine registry already uses lazy registration (side-effect on import) — the server just doesn't import the client engine
+
+### Expression Evaluator Constraint
+
+`ExpressionEvaluator` uses `new Function('ctx', 'with (ctx) { ... }')`. This has restrictions:
+- **Cloudflare Workers:** requires `unsafe-eval` in `content_security_policy`
+- **Deno:** requires `--allow-eval` flag
+- **Node/Bun:** no restrictions
+
+This doesn't block SSR but the "runs everywhere" claim has an asterisk. Document it. If this becomes a real blocker, a restricted expression evaluator that only handles property access and function calls (no arbitrary JS) could be built for constrained environments.
+
 ## Client Hydration Path
 
 ### Detection
-In `connectedCallback`, check if `this.shadowRoot` already exists:
+In `connectedCallback` (in `engines/native/base.js`), check if `this.shadowRoot` already exists:
 
 ```js
 connectedCallback() {
@@ -106,6 +122,25 @@ connectedCallback() {
 }
 ```
 
+### Marker Version Check
+
+Before hydrating, verify marker versions match:
+
+```js
+hydrate() {
+  const firstComment = this.findFirstMarker(this.shadowRoot);
+  if (firstComment && !firstComment.data.startsWith('sui:v1:')) {
+    // Version mismatch — fall back to full client render
+    this.shadowRoot.innerHTML = '';
+    this.fullRender();
+    return;
+  }
+  // ... proceed with hydration
+}
+```
+
+This prevents silent DOM corruption if server and client are on different builds with incompatible marker formats.
+
 ### Hydration
 
 ```js
@@ -117,52 +152,66 @@ hydrate() {
     data: this.getData(),
     element: this,
     renderRoot: this.renderRoot,
+    isHydrating: true,  // passed to createComponent callbacks
   });
   this.template.initialize();
   this.component = this.template.instance;
   this.dataContext = this.template.getDataContext();
 
   // buildHTMLString produces the entries array — same marker IDs as server
-  const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
+  const { entries } = buildHTMLString(this.template.ast);
 
-  // Walk the existing shadow root, find markers, wire reactive bindings
-  // Same bindMarkers code as initial render, operating on pre-existing DOM
-  this.template.renderer.bindMarkers(
+  // Hydrate: walk existing DOM, adopt nodes, wire reactive bindings
+  this.template.renderer.hydrateMarkers(
     this.shadowRoot, entries,
     this.template.getDataContext(),
     this.template.renderer.scope,
-    this.template.ast,
   );
-
-  this.resolveUpdate?.();
 }
 ```
 
-The comment markers (`<!--sui:0-->`, `<!--sui-block:0-->`) survive HTML serialization and are findable via TreeWalker. `bindMarkers` replaces them with reactive text nodes and DynamicRegions — the same code path as initial render, but operating on the pre-existing DOM instead of a freshly parsed fragment.
+### Hydration vs Bind: Two Distinct Operations
 
-## What Doesn't Work During SSR
+`bindMarkers` (client render) and `hydrateMarkers` (hydration) are different operations on the same marker positions:
 
-### Parent-child coordination via `findParent()` / `findChildren()`
-Components render in isolation on the server. `findParent('ui-buttons')` requires a live DOM tree. Components must render correctly without it — `findParent` is a client-side enhancement that activates after hydration.
+**Text markers** — `bindMarkers` replaces the comment with a new text node. `hydrateMarkers` finds the comment, locates the adjacent text node (the server-rendered value), and binds the Reaction to the EXISTING text node. Does not create a new node. Without this, you get "AliceAlice" — the server-rendered text plus the hydration-created text.
 
-### CSS custom properties that depend on runtime computation
-CSS custom properties declared in component CSS cascade correctly through DSD without JS. Properties that depend on computed values (from `createComponent`) aren't available until hydration.
+**Attribute markers** — `bindMarkers` finds `__suiN__` in attribute values. `hydrateMarkers` finds `data-sui-bind="attrName:N"` attributes (added by server) since the server replaced `__suiN__` with real values. Removes `data-sui-bind` after wiring.
 
-### The pragmatic workaround
-Use `pageCSS` with descendant selectors and `::slotted()` in parent shadow DOM for parent-child styling. These are declarative and survive SSR. Accept that some coordination (like `findParent`-driven behavior) only activates after hydration.
+**Block markers** — `bindMarkers` replaces the comment with a DynamicRegion anchor. `hydrateMarkers` finds the paired `<!--sui-block:v1:N-->...<!--/sui-block:v1:N-->` markers, adopts the nodes between them as the DynamicRegion's `ownedNodes`, and wires the appropriate Reaction (conditional, each, etc.) with the existing content as the initial state.
+
+### createComponent During Hydration
+
+`createComponent` runs during hydration — it must, because the component needs its methods and computed values to be available. But `initialize()` inside `createComponent` may have side effects: fetching data, setting up timers, attaching global event listeners. These would fire redundantly since the server already produced the initial state.
+
+Mitigation: `isHydrating` is passed in the callback params (via `Template.call()`). Component authors guard side effects:
+
+```js
+createComponent: ({ isHydrating, self, reaction }) => ({
+  initialize() {
+    if (isHydrating) {
+      return; // Server already produced the initial state
+    }
+    self.loadData();
+    self.startPolling();
+  },
+})
+```
+
+This is the same pattern as `isServer` — an environment flag that lets components adapt their behavior. `isHydrating` is `true` only during the hydration `initialize()` call, not during subsequent reactive updates.
 
 ## Server Module Structure
 
 ```
 packages/renderer/src/
 ├── expression-evaluator.js    ← shared across all engines
-├── build-html-string.js       ← NEW: extracted from renderer.js, shared by client + server
-├── engine-registry.js         ← engine registration (from tree-shakeable-lit plan)
+├── build-html-string.js       ← extracted from renderer.js, shared by client + server
+├── engine-registry.js         ← engine registration
 ├── index.js                   ← exports
 ├── engines/
 │   ├── native/
-│   │   ├── renderer.js        ← client renderer (TreeWalker + Reactions)
-│   │   ├── server.js          ← NEW: JS renderToString (string eval, no DOM)
+│   │   ├── renderer.js        ← client renderer (imports build-html-string)
+│   │   ├── server.js          ← JS renderToString (string eval, no DOM)
 │   │   ├── dynamic-region.js  ← client only
 │   │   └── reaction-scope.js  ← client only
 │   ├── lit/
@@ -176,13 +225,17 @@ packages/renderer/src/
 │       └── index.js           ← thin JS wrapper, same renderToString interface
 ```
 
-`server.js` imports only `ExpressionEvaluator` and `buildHTMLString`. No DOM dependencies. Can run in Node, Deno, Bun, Cloudflare Workers.
-
-The Rust engine (Phase 2) replaces the server path with WASM — same `renderToString` interface, same `buildHTMLString` contract. `server.js` falls back to the JS implementation when WASM is unavailable.
+`server.js` imports only `ExpressionEvaluator` and `buildHTMLString`. No DOM dependencies. Runs in Node, Deno (with `--allow-eval`), Bun, Cloudflare Workers (with `unsafe-eval`).
 
 ## Key Design Constraint
 
-`buildHTMLString` must remain a pure function of the AST — no DOM, no side effects. This is already true in the current implementation. The server module calls it to get the HTML string and entries, then does string manipulation to evaluate markers inline. The client module calls it to get the same structure, then parses and binds.
+`buildHTMLString` must be a pure function — all dependencies passed in, no instance mutation. Current coupling to extract:
+
+| Currently on `this` | Extraction approach |
+|---|---|
+| `this.snippets` — mutated during walk (`this.snippets[node.name] = node`) | Return as part of output: `{ htmlString, entries, snippets }` |
+| `this.evaluator` — used only for `analyzePosition` in expression classification | `analyzePosition` is already a method that takes only HTML string — extract as standalone function |
+| `this.isSVG` — tracks SVG context | Pass as parameter |
 
 The entries array is the shared contract. Server and client produce identical entries from the same AST. The marker IDs in the server HTML correspond to the entry indices. Hydration works because the TreeWalker finds markers with the same IDs that `buildHTMLString` would produce.
 
@@ -209,56 +262,72 @@ The entries array is the shared contract. Server and client produce identical en
 
 ## Implementation Order
 
-### Step 1: Extract `buildHTMLString` for reuse
-- Move `buildHTMLString` and `analyzePosition` to a shared module
-- Both client renderer and server module import them
+### Step 1: Extract `buildHTMLString` as pure function
+This is the hardest step. Currently a method on the Renderer class with coupling to `this.snippets`, `this.evaluator`, and `this.isSVG`.
+
+- Extract `buildHTMLString(ast, options)` and `analyzePosition(html)` to `build-html-string.js`
+- All dependencies passed as parameters, no instance access
+- Returns `{ htmlString, entries, snippets }` — snippets as output, not mutation
+- Client renderer imports and delegates to the extracted function
 - No behavior change, all tests pass
 
-### Step 2: JS `renderToString` (reference implementation)
+### Step 2: Versioned markers
+- Change marker format: `<!--sui:N-->` → `<!--sui:v1:N-->`, `<!--sui-block:N-->` → `<!--sui-block:v1:N-->`
+- Update `bindMarkers` to handle versioned format
+- All tests pass with new format
+
+### Step 3: JS `renderToString` (reference implementation)
 - `renderToString(ast, data, css)` → HTML string with DSD
 - Pure string manipulation, no DOM
 - Handles: html, expression, if, each, slot, snippet, subtemplate
+- Async blocks render loading content (never await)
+- Adds `data-sui-bind` attributes for attribute marker hydration
 - Test with Node.js unit tests (not browser tests)
 
-### Step 3: Hydration in WebComponentBase
-- Detect existing shadow root in `connectedCallback`
-- Call `buildHTMLString` + `bindMarkers` on existing DOM
-- Verify: hydrated component is behaviorally identical to client-rendered component
+### Step 4: `hydrateMarkers` in native renderer
+- New method parallel to `bindMarkers`, operates on pre-existing DOM
+- Text markers: adopt adjacent text node, don't create new
+- Attribute markers: find `data-sui-bind`, wire binding, remove helper attribute
+- Block markers: adopt nodes between paired markers as DynamicRegion ownedNodes
+- Test: hydrated component is behaviorally identical to client-rendered component
 
-### Step 4: Integration testing
-- Render component on server → parse HTML in browser → verify hydration produces working component
-- Test: reactive updates after hydration work correctly
-- Test: events bind after hydration
-- Test: subtemplates hydrate correctly
+### Step 5: Hydration in WebComponentBase
+- Detect existing shadow root in `connectedCallback` (`engines/native/base.js`)
+- Marker version check — fall back to full render on mismatch
+- Pass `isHydrating: true` through Template to `createComponent` callbacks
+- Integration test: server render → parse in browser → hydrate → verify reactivity + events
 
-### Step 5: pageCSS collection
+### Step 6: pageCSS collection
 - Server render collects `pageCSS` from all components encountered during render
 - Returns collected CSS alongside the HTML string
 - Framework integration (Astro, etc.) includes it in `<head>`
 
-### Step 6: Rust/WASM renderer
+### Step 7: Rust/WASM renderer
 - Implement `renderToString` in Rust matching the JS reference implementation
 - Validate against JS implementation — same AST + same data must produce identical HTML
 - Benchmark against docs site workload (100+ components per page)
 - `server.js` uses WASM when available, JS as fallback
 
-## Dependencies
+## Decisions (resolved)
 
-- Native renderer (complete)
-- Lit removal (in progress — hydration logic goes in WebComponentBase)
+1. **Async blocks during SSR** — render loading content, never await. Industry standard (Lit SSR, Next.js Suspense, Nuxt). Avoids timeout/streaming complexity. The loading content is already in the template.
+
+2. **Marker versioning** — implement from day one. `<!--sui:v1:0-->` costs nothing extra. Client checks version on hydration, falls back to full render on mismatch. Prevents silent corruption.
 
 ## Open Questions
 
-1. **Async blocks during SSR** — if the expression returns a promise, should the server wait for it (adds latency) or render the loading state? Lit SSR renders loading state. Waiting for all promises enables full SSR but adds complexity (streaming, timeouts).
+1. **Streaming** — can the server render stream HTML chunks as components resolve? DSD requires the `<template>` wrapper to be emitted after all child content, which conflicts with streaming. May need a two-pass approach.
 
-2. **Marker format stability** — the comment marker format (`<!--sui:N-->`) becomes a serialization contract between server and client. Changes to `buildHTMLString` could break hydration of server-rendered pages. Add a version prefix to markers (`<!--sui:v1:0-->`) so the client can detect mismatches between server and client builds. On mismatch, fall back to full client render instead of corrupting the DOM with incompatible marker IDs.
+2. **WASM bundle size** — the Rust renderer needs to ship as part of the server deployment. wasm-pack output for string manipulation should be small (tens of KB), but needs measurement.
 
-3. **Streaming** — can the server render stream HTML chunks as components resolve? This requires the DSD template to be emitted after all child content, which conflicts with streaming. May need a two-pass approach (components → collected HTML → DSD wrapping → stream).
+3. **AST caching in WASM** — the same component's AST is reused across instances. Rust could parse and cache the AST structure once in WASM memory, then accept only flat values per render.
 
-4. **WASM bundle size** — the Rust renderer needs to ship as part of the server deployment. wasm-pack output for string manipulation should be small (tens of KB), but needs measurement.
+## Dependencies
 
-5. **AST caching in WASM** — the same component's AST is reused across instances. Rust could parse and cache the AST structure once in WASM memory, then accept only flat values per render. This avoids re-serializing the AST for each instance.
+- Native renderer (complete)
+- Lit removal (complete, archived)
+- Tree-shakeable Lit (complete — engine registry pattern used by SSR engine registration)
 
 ## Status
 
-Initial scope. Phase 1 (JS reference implementation) ready to execute. Phase 2 (Rust/WASM) scoped pending Phase 1 completion.
+Scoped. Phase 1 (JS reference implementation) ready to execute. Phase 2 (Rust/WASM) scoped pending Phase 1 completion.
