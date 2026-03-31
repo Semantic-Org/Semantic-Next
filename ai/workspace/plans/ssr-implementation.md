@@ -1,59 +1,90 @@
-# SSR Implementation — Working Plan
+# SSR Implementation Plan
 
-## The Insight
+> Reference implementation for native SSR. Will eventually be rewritten in Rust/WASM.
+> Priority: correct abstractions over performance. Code no one ever has to open again.
 
-The engine registry already swaps renderers based on environment:
-```js
-const NativeEngine = {
-  renderer: isServer ? ServerRenderer : Renderer,
-  factory: createComponent,
-};
-```
+## Architecture (5 pieces)
 
-`Template.initialize()` does `new engine.renderer(...)`. It doesn't care which class. `ServerRenderer.render()` returns a string. `Renderer.render()` returns a DocumentFragment. Same contract.
+### 1. Component Registry
+Module-level `Map<tagName, ComponentClass>` in `packages/component/src/component-registry.js`.
+Populated by `defineComponent` unconditionally (mirrors engine registry pattern).
+Read only by `renderToString` during recursive expansion.
+Client never queries it — `customElements` is the client-side truth.
 
-## What I'm Building
+Files:
+- Create: `packages/component/src/component-registry.js`
+- Modify: `packages/component/src/define-component.js` (one line: `registerComponent`)
+- Modify: `packages/component/src/index.js` (export for SSR consumers)
 
-### 1. ServerRenderer
-Same constructor shape as Renderer. Five-method contract:
-- `constructor({ ast, data, template, subTemplates, helpers })`
-- `render()` → HTML string with hydration markers
-- `setData(data)` → update data context
-- `bumpDataVersion()` → no-op
-- `this.snippets` → snippet storage for Template to read
+### 2. Type-Driven Property Converters
+Extend `getPropertySettings` in `component-helpers.js` with standard converters per type.
+Framework provides sensible defaults. Users override via config objects in `defaultSettings`.
 
-The render logic: `buildHTMLString(ast)` → walk entries → evaluate each expression/block inline → return HTML string. No DOM, no Reactions, no TreeWalker.
+| Type | toAttribute | fromAttribute |
+|------|------------|---------------|
+| String | identity | identity |
+| Number | `String(v)` | `Number(v)` |
+| Boolean | loose check (existing) | loose check (existing) |
+| Object | `JSON.stringify` | `JSON.parse` |
+| Array | `JSON.stringify` | `JSON.parse` |
+| Function | skip (`attribute: false`) | skip |
+| Class instance | skip (`attribute: false`) | skip |
 
-### 2. Engine Registration
-Modify the native engine registration to swap renderer based on `isServer`:
-```js
-import { isServer } from '@semantic-ui/utils';
-const NativeEngine = {
-  renderer: isServer ? ServerRenderer : Renderer,
-  factory: createComponent,
-};
-```
+Also fix bug in `getProperties` (line 72): passes `defaultSettings` instead of `defaultValue`
+for expert config objects.
 
-### 3. Astro Integration Helper
-A function that takes a component class + attributes, clones the prototype template, renders via ServerRenderer, wraps in DSD:
-```js
-renderComponent(tagName, ComponentClass, attrs) → full DSD HTML string
-```
+Files:
+- Modify: `packages/component/src/component-helpers.js` (`getPropertySettings`)
 
-### 4. Hydration
-Already partially built. `WebComponentBase.connectedCallback()` detects `this.shadowRoot` exists → hydrate instead of render. The `isHydrating` callback param is already in place.
+### 3. Attribute Escaping Fix
+ServerRenderer `renderExpression` does `JSON.stringify` in attribute positions without
+HTML-escaping. Fix: escape `"` → `&quot;` and `&` → `&amp;` in the `insideTag` path.
 
-Hydration calls `buildHTMLString` to get entries, then `bindMarkers` on the existing shadow root DOM. Same code as client render, different DOM source.
+Files:
+- Modify: `packages/renderer/src/engines/native/server.js` (`renderExpression`)
 
-## Order of Work
+### 4. Converge SSR Pipelines
+Enhance `renderToString` with complex prop serialization and slot handling.
+Rewrite Astro `server.js` as thin adapter (~20-30 lines) that calls `renderToString`.
+Delete the hand-rolled lifecycle simulation, fake params, and simplified computeUIClasses.
 
-1. Write `ServerRenderer` — the core
-2. Wire into engine registration with `isServer` swap
-3. Write `renderComponent` helper for Astro
-4. Test: server render → DSD output → browser parse → hydration → reactive updates work
-5. Fix the test-ssr.astro page to use real component definitions (one definition, shared)
+Files:
+- Modify: `packages/component/src/render-to-string.js`
+- Rewrite: `internal-packages/astro/server.js`
 
-## What's NOT in scope
-- Rust/WASM (Phase 2 — needs the JS reference working first)
-- pageCSS collection (can add later)
-- Streaming (needs DSD to be emitted after content, conflicts with streaming)
+### 5. Recursive Nested Component Rendering
+Two-phase approach inside `renderToString`:
+1. ServerRenderer produces complete HTML string (expressions resolved, markers placed)
+2. `expandCustomElements` scans the string for hyphenated tags, looks up registry,
+   parses attributes, recursively calls `renderToString` for each nested component
+
+Each nested component produces independent DSD with independent hydration markers.
+Depth-capped to prevent infinite recursion from circular compositions.
+
+Files:
+- Modify: `packages/component/src/render-to-string.js` (add expansion phase)
+- Create: `packages/component/src/expand-custom-elements.js` (HTML scanner + recursive expansion)
+
+## Implementation Order
+
+1. Component Registry (foundation)
+2. Property converters + defaultSettings bug fix
+3. Attribute escaping fix
+4. Converge SSR pipelines
+5. Recursive nested rendering
+
+## Testing
+
+- Existing: `packages/renderer/test/browser/ssr-hydration.test.js` (68 tests)
+- Existing: full renderer suite (721 tests across 14 files)
+- Test routes: `/test-ssr/vanilla`, `/test-ssr/component`, `/test-ssr/hydrated`, `/test-ssr/ladder`
+- Progression: vanilla → component → hydrated (each narrows scope of what could be wrong)
+
+## Chrome MCP Tab Map
+
+| Tab | Route | JS | Purpose |
+|-----|-------|----|---------|
+| 1 | vanilla | on | SSR via renderToString |
+| 2 | component | on | SSR via Astro renderToStaticMarkup |
+| 3 | hydrated | **off** | Pure SSR output |
+| 5 | hydrated | on | SSR + hydration |
