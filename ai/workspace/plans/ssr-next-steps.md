@@ -1,203 +1,161 @@
-# SSR Next Steps — Recursive Nested Component Rendering
+# SSR — Nested Component Rendering
+
+## Problem Statement
+
+Web components rendered inside another component's shadow DOM during SSR produce raw HTML tags with no Declarative Shadow DOM. The inner component's template is never rendered on the server.
+
+**Observable symptom:** With JS disabled, `<ui-icon>` elements inside nav-menu's shadow DOM are empty. With JS enabled, they render correctly after hydration.
+
+**Verification routes:**
+- `/test-ssr/component` — NavMenu rendered via Astro SSR, no client directive (pure SSR output)
+- `/test-ssr/hydrated` — Same NavMenu with `client:load` (SSR + hydration)
+
+Open both side-by-side. The delta between them is the work to be done.
 
 ## How the Astro Plugin Pipeline Works
 
-### The Lit Integration (reference — `@semantic-ui/astro-lit` in node_modules)
+### The Integration Points (5 files in `@semantic-ui/astro-lit`)
 
-Five files, each with a distinct role:
+The Lit-based Astro integration is the reference for how this was solved before. It lives in `docs/node_modules/@semantic-ui/astro-lit/` and has 5 files:
 
-1. **`server-shim.js`** — Runs before anything else on the server. Sets up `@lit-labs/ssr-dom-shim` which provides a server-side `customElements` registry and `HTMLElement` shim. Patches `customElements.define` to store `tagName` on the class via `Symbol.for('tagName')`. This is how `LitElementRenderer` finds the class for a tag name.
+| File | Role | When it runs |
+|------|------|-------------|
+| `server-shim.js` | Server-side `customElements` registry + `HTMLElement` shim | Before SSR |
+| `server.js` | SSR renderer — `renderToStaticMarkup` using `LitElementRenderer` | During SSR |
+| `client-shim.js` | DSD polyfill for older browsers | Injected in `<head>` |
+| `hydration-support.js` | Patches LitElement to reuse existing shadow DOM | Before hydration |
+| `client.js` | Sets complex props as JS properties, removes `defer-hydration` | During island hydration |
 
-2. **`server.js`** — The SSR renderer. Uses `LitElementRenderer` from `@lit-labs/ssr`. The critical call: `instance.renderShadow({ elementRenderers: [LitElementRenderer] })`. The `elementRenderers` array tells the streaming renderer: "when you encounter a custom element tag in the output, use this renderer for it." This is how recursive nested rendering happens — it's built into the rendering architecture, not bolted on.
+The native integration lives in `internal-packages/astro/` and currently has `server.js` and `index.js`. It's missing capabilities that the Lit integration provides.
 
-3. **`client-shim.js`** — Injected into `<head>` inline. Polyfill for DSD (`<template shadowrootmode>`) in browsers that don't support it.
+### How `client:load` Flows
 
-4. **`hydration-support.js`** — Runs `before-hydration`. Patches LitElement to reuse existing shadow DOM instead of re-rendering from scratch.
+1. Astro calls the registered renderer's `renderToStaticMarkup(Component, props, slotted)`
+2. Astro wraps the output in `<astro-island>` with metadata (`component-url`, `opts`, etc.)
+3. If the renderer has a working `clientEntrypoint`, Astro serializes props into the island and sets `renderer-url`
+4. On the client, Astro imports the component module, then calls the client entrypoint with the deserialized props
 
-5. **`client.js`** — The `clientEntrypoint`. Called by Astro's island runtime with `(element, Component, props, slots)`. Sets complex props as JS properties (`component[name] = value`), removes `defer-hydration`.
-
-### How `client:load` Works
-
-When a component has `client:load` in an Astro template:
-- **Server**: Astro calls `renderToStaticMarkup(Component, props, slots)` from the registered renderer
-- **Server**: Astro wraps the output in `<astro-island>` with metadata:
-  - `component-url` — JS module to import on the client
-  - `props` — serialized props (ONLY if `clientEntrypoint` exists and Astro can resolve it)
-  - `renderer-url` — client entrypoint URL (ONLY if resolvable)
-  - `opts` — component name/export
-- **Client**: Astro imports the component module
-- **Client**: If `renderer-url` exists, Astro calls the client entrypoint with the deserialized props
-- **Client**: If NO `renderer-url`, Astro just imports the module — the element upgrades via `customElements.define` with no prop transfer
+**Current state:** The native integration's `clientEntrypoint` is not resolvable by Astro (the `renderer-url` attribute is null on all islands). Astro treats the components as generic custom elements — it imports the module but doesn't transfer props. A `<script data-ssr-props>` workaround in the DSD handles prop transfer instead.
 
 ### Without `client:load`
 
-Components like `<TopbarMenu menu={menu}>` or `<Menu items={items}>` have NO client directive:
-- **Server**: Astro still calls `renderToStaticMarkup` (because `check()` returns true)
-- **Server**: Output is placed directly in HTML — no `<astro-island>` wrapper
-- **Client**: No module import, no hydration island. The DSD is the final output
-- **Client**: BUT the element's module may load anyway (another `client:load` component imports the same package), causing `customElements.define` → upgrade → `connectedCallback`
+Components placed in Astro templates without a client directive are SSR-only. Astro calls `renderToStaticMarkup` but creates no island. No JS hydration occurs. The DSD output is final. This is where correct nested rendering matters most.
 
-### Current Native Integration Gaps
+## Architecture Facts
 
-1. **No recursive rendering** — `ServerRenderer.render()` outputs nested custom elements as raw HTML tags. The Lit integration's `elementRenderers` pattern provides recursive rendering built into the render loop.
+### How the ServerRenderer produces HTML
 
-2. **No prop serialization on islands** — The `astro-island` has NO `props` attribute because our `clientEntrypoint` isn't resolvable by Astro. The `renderer-url` is null. Our workaround (`<script data-ssr-props>`) fills this gap but is non-standard.
+`packages/renderer/src/engines/native/server.js`
 
-3. **No server-side `customElements` shim** — The Lit integration provides a server `customElements` that maps tagNames to classes. Our ServerRenderer has no way to look up a component class from a tag name encountered in HTML.
+The ServerRenderer walks the compiled AST and produces an HTML string. Custom element tags appear as `{ type: 'html', html: '<ui-icon ...' }` nodes — they're just strings by the time the renderer sees them. The renderer has no mechanism to recognize them as components.
 
-## The Problem
+### How the Lit SSR solved recursive rendering
 
-When a component's template contains another custom element (e.g., nav-menu renders `<ui-icon>`), the ServerRenderer outputs the inner element as a raw HTML tag with no shadow DOM. The inner component's DSD is never generated.
+`docs/node_modules/@semantic-ui/astro-lit/server.js` — line 67:
 
-## Testing Workflow — Two-Tab Comparison
-
-### Setup
-- **Page 1 (left):** JS disabled — shows pure SSR output
-- **Page 5 (right):** JS enabled — shows hydrated result
-- Navigate both to the same URL, take screenshots, diff
-
-### Dedicated Test Routes
-
-Create focused test routes that isolate specific rendering scenarios. Each route renders ONE component pattern via `renderToString` with minimal surrounding markup.
-
-**Route: `/test-ssr`** — The existing ladder (44 steps, controlled components)
-
-**Route: `/test-ssr-nav`** — Nav-menu in isolation
-```astro
----
-import { renderToString } from '@semantic-ui/component';
-import { NavMenu } from '@semantic-ui/core';
-
-const menu = [
-  { name: 'Introduction', url: '/intro', icon: 'book' },
-  { name: 'Getting Started', url: '/start', icon: 'zap', pages: [
-    { name: 'Installation', url: '/install' },
-    { name: 'Quick Start', url: '/quick' },
-  ]},
-];
----
-<Fragment set:html={renderToString(NavMenu, { menu, expandAll: true, dark: true })} />
-```
-
-This route shows nav-menu SSR output WITHOUT Astro islands, WITHOUT client:load. Pure server HTML. In the left tab (JS off), we see exactly what the server produced. In the right tab (JS on), we see what hydration does. Comparing them reveals:
-- Which nested components (`<ui-icon>`, `<ui-input>`) lack DSD
-- Whether text content matches
-- Whether classes/attributes are correct
-
-### Alternative: client:load Comparison
-
-Instead of JS disabled, use two routes:
-- `/test-ssr-nav-static` — renders NavMenu WITHOUT client:load (server only, never hydrates)
-- `/test-ssr-nav-hydrated` — renders NavMenu WITH client:load (server + hydration)
-
-This is less brittle than disabling JS because the static route is permanently non-interactive — no risk of accidentally enabling JS.
-
-## The Fix — Recursive Component Rendering
-
-### Where to Implement
-
-The fix belongs in the **ServerRenderer**, not the Astro integration. The ServerRenderer already walks the AST and produces HTML. It needs to recognize custom element tags in its output and recursively render their shadow DOM.
-
-### The Challenge
-
-Custom element tags appear as `{ type: 'html', html: '<ui-icon ...' }` nodes in the AST. By the time the renderer processes them, they're just strings. The tag's attributes may span multiple AST nodes (HTML + expression + HTML).
-
-### Approach: Post-Process in `render()`
-
-After `renderNodes()` produces the full HTML string, scan it for custom element tags and inject their DSD.
-
-```
-render() → renderNodes(ast) → htmlString
-         → resolveNestedComponents(htmlString) → finalHTML
-```
-
-`resolveNestedComponents` would:
-1. Find custom element tags using a regex: `<([\w]+-[\w-]+)([^>]*)>(.*?)</\1>` (with proper handling for self-closing, nesting, etc.)
-2. For each match, look up the component by tag name
-3. Parse the attributes from the tag
-4. Call `renderToString(ComponentClass, parsedAttrs, innerHTML)`
-5. Replace the original tag with the renderToString output
-
-### Component Lookup
-
-The renderer needs access to component definitions. The registry should NOT live in `defineComponent` — that's the user-facing API and shouldn't have SSR concerns. Component authors reading that code don't want to think about SSR.
-
-**Approach: Registry lives in the SSR layer**
-
-Components already expose everything needed via static properties: `ComponentClass.template`, `ComponentClass.config`, `ComponentClass.componentTagName`. The registry is built where SSR actually happens.
-
-**Option A: Pass registry to ServerRenderer as a constructor option**
 ```javascript
-// In renderToString or Astro server.js:
-const registry = new Map();
-// Populated from whatever components have been imported in this module
-registry.set('ui-icon', Icon);
-registry.set('ui-button', Button);
-// etc.
-
-const renderer = new ServerRenderer({
-  ast, data, subTemplates, helpers,
-  componentRegistry: registry,
+const shadowContents = instance.renderShadow({
+  elementRenderers: [LitElementRenderer],
+  ...
 });
 ```
 
-Whoever calls the renderer is responsible for providing the registry. This is explicit and scoped.
+The `elementRenderers` array tells the Lit streaming renderer: when you encounter a custom element tag in the output, use this renderer for it. Recursive rendering is built into the render loop — the renderer intercepts custom element tags as they're produced, not as a post-processing step.
 
-**Option B: Build registry from customElements (Astro server shim)**
-On the server, `customElements.define` is shimmed (or could be). The shim maintains a map. The ServerRenderer reads from it. This is how `@lit-labs/ssr` works — it has a server-side `customElements` implementation.
+### How component definitions are available
 
-**Option C: Build registry automatically from module imports**
-A separate SSR utility module (e.g., `@semantic-ui/component/ssr`) exports a `getComponentRegistry()` that scans loaded modules. This keeps SSR code out of the core component path entirely.
+- On the client: `customElements.define(tagName, class)` registers globally
+- On the Lit server: `server-shim.js` provides a server-side `customElements` that stores `tagName → class` via a patched `.define()`
+- On the native server: no equivalent exists. `defineComponent` creates the class but doesn't register it anywhere server-accessible
 
-**Recommendation: Option A** — Most explicit, easiest to reason about, no magic. The Astro integration already imports all the components it needs. `renderToString` callers already have the component class. The registry is just a Map passed down.
+Every component class already has `ComponentClass.componentTagName`, `ComponentClass.template` (prototype Template with AST), and `ComponentClass.config` (css, spec, settings, properties).
 
-### Attribute Parsing
+### How `renderToString` works
 
-When the post-processor finds `<ui-icon icon="book" class="icon">`, it needs to parse those attributes into a props object: `{ icon: 'book', class: 'icon' }`. A simple regex parser works for HTML attributes.
+`packages/component/src/render-to-string.js`
 
-### Recursion Depth
+Takes a component class + attrs + children. Clones the prototype template, forces native engine, initializes, renders, wraps in DSD. This is the single-component SSR path. It does NOT handle nested components in the output.
 
-Nested components can contain OTHER nested components. The post-processor should recurse, but with a depth limit (e.g., 10) to prevent infinite loops from circular component references.
+### How the Astro `server.js` works
 
-### Slot Content
+`internal-packages/astro/server.js`
 
-`<ui-button>Click Me</ui-button>` — the text between the tags is slot content. `renderToString` already handles the `children` parameter for this.
+Creates a `ServerRenderer` directly (not through Template.clone). Runs `createComponent` with a manually-built params object. Renders, wraps in DSD. Also does NOT handle nested components.
 
-## Implementation Order
+## Constraints
 
-### Phase 1: Test Infrastructure
-1. Create `/test-ssr-nav` route with nav-menu in isolation
-2. Verify the two-tab workflow shows the gap (icons missing in SSR)
-3. Add ladder steps for nested component SSR expectations
+1. `defineComponent` is the user-facing API. It runs on both client and server. SSR infrastructure should not be added there — component authors shouldn't think about SSR when reading that code.
 
-### Phase 2: ServerRenderer Registry Option
-1. Add optional `componentRegistry` param to ServerRenderer constructor
-2. Pass it through from `renderToString` and Astro `server.js`
-3. Build the registry at the call site from imported components
+2. The native `ServerRenderer` is a pure string-producing function. It has no DOM, no element instances, no `customElements`.
 
-### Phase 3: Post-Process in ServerRenderer
-1. Add `resolveNestedComponents(html)` method to ServerRenderer
-2. Call it at the end of `render()`
-3. Use regex to find custom element tags
-4. Look up each tag in the registry
-5. Call `renderToString` for each, inject the DSD
-6. Handle recursion with depth limit
+3. Nested custom element tags can have dynamic attributes from the parent's template expressions (e.g., `<ui-icon icon={title.icon}>`). By render time, these are resolved to concrete values in the HTML string.
 
-### Phase 4: Astro Integration
-1. Verify the Astro `server.js` path also benefits (it creates ServerRenderer directly)
-2. The registry is auto-populated by imports, so it should "just work"
-3. Test with the two-tab comparison on real doc pages
+4. Components import their dependencies at module level (e.g., nav-menu imports Icon). These imports cause `defineComponent` to run for the dependency, making the class available in the module scope.
 
-### Phase 5: Validation
-1. Two-tab comparison on `/test-ssr-nav` — icons should appear in SSR
-2. Two-tab comparison on `/ui/start` — full page should match
-3. Run the full ladder (44 steps should still pass)
-4. Run renderer tests (721 should still pass)
-5. Check 20 doc pages for zero errors
+5. The Astro integration receives the top-level component class but not its dependency tree. It doesn't know what nested components the template will produce.
 
-## Risks
+## Source Files to Read
 
-- **Regex HTML parsing** is fragile. Edge cases: attributes with `>` characters, nested same-tag components, self-closing tags. May need a simple state-machine parser instead.
-- **Performance**: recursive rendering adds server-side render time. Each nested component is a full `renderToString` call. For pages with many icons, this could add up.
-- **Circular references**: Component A renders Component B which renders Component A. The depth limit prevents infinite recursion but the output would be truncated.
-- **Attribute type conversion**: HTML attributes are strings. The nested component needs the same type conversion that `attributeChangedCallback` would do on the client. Boolean attributes (`disabled`, `expandAll`) need special handling.
+### Native SSR (current implementation)
+- `internal-packages/astro/server.js` — Astro integration SSR renderer
+- `internal-packages/astro/index.js` — Astro plugin registration
+- `packages/renderer/src/engines/native/server.js` — ServerRenderer
+- `packages/component/src/render-to-string.js` — renderToString
+- `packages/component/src/define-component.js` — defineComponent
+
+### Lit SSR (reference implementation — read ALL of these)
+- `docs/node_modules/@semantic-ui/astro-lit/server-shim.js` — Server customElements shim
+- `docs/node_modules/@semantic-ui/astro-lit/server.js` — Lit SSR renderer with recursive rendering
+- `docs/node_modules/@semantic-ui/astro-lit/client-shim.js` — DSD polyfill
+- `docs/node_modules/@semantic-ui/astro-lit/hydration-support.js` — Hydration patches
+- `docs/node_modules/@semantic-ui/astro-lit/dist/client.js` — Client entrypoint
+- `docs/node_modules/@semantic-ui/astro-lit/dist/index.js` — Plugin registration with all hooks
+
+### Test infrastructure
+- `docs/src/pages/test-ssr/component.astro` — Pure SSR route (no client directive)
+- `docs/src/pages/test-ssr/hydrated.astro` — SSR + client:load route
+- `docs/src/pages/test-ssr.astro` — 44-step hydration ladder
+
+### Component under test
+- `src/components/nav-menu/nav-menu.js` — Component JS
+- `src/components/nav-menu/nav-menu.html` — Template (renders `<ui-icon>`, `<ui-input>`)
+
+## Process for Iterating
+
+### Step 1: Observe the gap
+
+Navigate to `/test-ssr/component` and `/test-ssr/hydrated`. Screenshot both. The visual delta is the specification.
+
+### Step 2: Inspect the SSR output
+
+```bash
+curl -s https://dev.semantic-ui.com/test-ssr/component | # extract DSD content
+```
+
+Find the `<ui-icon>` tags in the output. Confirm they have no `<template shadowrootmode>` inside them. This is the concrete artifact to fix.
+
+### Step 3: Make a change
+
+Implement a candidate approach.
+
+### Step 4: Verify
+
+Reload `/test-ssr/component`. Screenshot. Compare with `/test-ssr/hydrated`. Did the gap narrow? Are there new problems?
+
+### Step 5: Expand the test
+
+Swap the component in the test routes to another pattern (e.g., TopbarMenu, a button with icon). Verify the fix generalizes.
+
+### Step 6: Check real pages
+
+Navigate to `/ui/start` and compare the SSR output with the hydrated version. The fix should improve real page rendering.
+
+## Questions for Independent Evaluation
+
+1. Where in the rendering pipeline is the right interception point for nested custom elements — and what are the tradeoffs of each location?
+
+2. How do other SSR systems for web components (not just Lit) solve this? What patterns exist beyond `elementRenderers`?
+
+3. What information does the ServerRenderer need about nested components, and where can it get that information without polluting the component authoring API?
+
+4. Is the `clientEntrypoint` gap (Astro not serializing props) a separate problem or connected to recursive rendering? Should they be solved together?
