@@ -112,8 +112,6 @@ An AST, a data context (settings, state defaults), and CSS.
    </my-component>
    ```
 
-4. **Collect pageCSS** — gather all `pageCSS` from defined components, deduplicate, include in `<head>` of the HTML document.
-
 ### Output
 Pure HTML string. No DOM shim needed — this is string concatenation with expression evaluation.
 
@@ -331,12 +329,7 @@ This is the hardest step. Currently a method on the Renderer class with coupling
 - Pass `isHydrating: true` through Template to `createComponent` callbacks
 - Integration test: server render → parse in browser → hydrate → verify reactivity + events
 
-### Step 6: pageCSS collection
-- Server render collects `pageCSS` from all components encountered during render
-- Returns collected CSS alongside the HTML string
-- Framework integration (Astro, etc.) includes it in `<head>`
-
-### Step 7: Rust/WASM renderer
+### Step 6: Rust/WASM renderer
 - Implement `renderToString` in Rust matching the JS reference implementation
 - Validate against JS implementation — same AST + same data must produce identical HTML
 - Benchmark against docs site workload (100+ components per page)
