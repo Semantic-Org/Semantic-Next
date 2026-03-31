@@ -184,27 +184,32 @@ export class ServerRenderer {
   renderConditional(node, data, scope) {
     const id = scope.entryId++;
     let html = `<!--${BLOCK_MARKER}${id}-->`;
+    let branchIndex = -1;
 
     const condition = this.evaluator.lookupExpressionValue(node.condition, data);
     if (condition && node.content) {
+      branchIndex = 1000;
       html += this.renderNodes(node.content, data);
     }
     else if (node.branches) {
-      for (const branch of node.branches) {
+      for (let i = 0; i < node.branches.length; i++) {
+        const branch = node.branches[i];
         if (branch.type === 'elseif') {
           if (this.evaluator.lookupExpressionValue(branch.condition, data)) {
+            branchIndex = i;
             html += this.renderNodes(branch.content, data);
             break;
           }
         }
         else if (branch.type === 'else') {
+          branchIndex = i;
           html += this.renderNodes(branch.content, data);
           break;
         }
       }
     }
 
-    html += `<!--/sui-block:v1:${id}-->`;
+    html += `<!--/sui-block:v1:${id}:b${branchIndex}-->`;
     return html;
   }
 

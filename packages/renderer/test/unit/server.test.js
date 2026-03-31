@@ -180,7 +180,7 @@ describe('renderToString', () => {
       const result = renderToString({ ast, data: { show: true } });
       const content = dsdContent(result);
       expect(content).toContain('<!--sui-block:v1:0-->');
-      expect(content).toContain('<!--/sui-block:v1:0-->');
+      expect(content).toContain('<!--/sui-block:v1:0:b1000-->');
     });
   });
 

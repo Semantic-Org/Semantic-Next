@@ -1084,9 +1084,17 @@ export class Renderer {
     // Collect all nodes between opening and closing block markers
     const ownedNodes = [];
     let next = comment.nextSibling;
-    const closingMarker = `/sui-block:v1:${markerID}`;
+    const closingPrefix = `/sui-block:v1:${markerID}`;
+    let serverMeta = {};
     while (next) {
-      if (next.nodeType === Node.COMMENT_NODE && next.data === closingMarker) {
+      if (next.nodeType === Node.COMMENT_NODE && next.data.startsWith(closingPrefix)) {
+        // Parse metadata from closing marker (e.g. <!--/sui-block:v1:3:b1000-->)
+        const metaParts = next.data.slice(closingPrefix.length + 1).split(':');
+        for (const part of metaParts) {
+          if (part.startsWith('b')) {
+            serverMeta.branchIndex = parseInt(part.slice(1));
+          }
+        }
         next.remove();
         break;
       }
@@ -1116,19 +1124,19 @@ export class Renderer {
 
     switch (node.type) {
       case 'if': {
-        // Check for hydration mismatch — client may evaluate a different branch
+        // Check for hydration mismatch using the branch index from the server's closing marker
         const clientBranch = this.getBranch(node, data);
-        const serverHadContent = ownedNodes.length > 0;
-        const clientWantsContent = clientBranch.contentAST !== null;
+        const serverBranchIndex = serverMeta.branchIndex;
+        const hasMismatch = serverBranchIndex !== undefined
+          && serverBranchIndex !== clientBranch.matchIndex;
 
-        if (
-          serverHadContent !== clientWantsContent
-          || (serverHadContent && contentAST !== clientBranch.contentAST)
-        ) {
-          if (isDevelopment) {
+        if (hasMismatch) {
+          const isEnvironmentGuard = node.condition === 'isClient' || node.condition === 'isServer';
+          if (isDevelopment && !isEnvironmentGuard) {
             console.warn(
               `[SUI] Hydration mismatch in {#if ${node.condition}}: `
-                + `server and client evaluated different branches. `
+                + `server rendered branch ${serverBranchIndex}, `
+                + `client expects branch ${clientBranch.matchIndex}. `
                 + `Client will re-render this block.`,
             );
           }
