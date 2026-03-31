@@ -9,7 +9,7 @@ import {
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18, Step19,
 } from '@components/SSRDemo/SSRLadder.js';
-import { Button } from '@semantic-ui/core';
+import { Button, Icon, Label, Divider, Spinner, Container } from '@semantic-ui/core';
 
 const steps = [
   { component: Step1, label: '1. Static HTML' },
@@ -33,6 +33,11 @@ const steps = [
   { component: Step19, label: '19. Spec-driven ({ui} classes)', attrs: { emphasis: 'primary', size: 'large' }, children: 'Large Primary' },
   { component: Button, label: '20. ui-button primary', attrs: { emphasis: 'primary' }, children: 'Click Me' },
   { component: Button, label: '21. ui-button with href', attrs: { emphasis: 'secondary', href: 'https://example.com' }, children: 'Visit' },
+  { component: Icon, label: '22. ui-icon', attrs: { icon: 'star' } },
+  { component: Label, label: '23. ui-label', children: 'Status' },
+  { component: Divider, label: '24. ui-divider', attrs: { text: 'OR' } },
+  { component: Spinner, label: '25. ui-spinner', attrs: { text: 'Loading' } },
+  { component: Container, label: '26. ui-container', children: 'Contained' },
 ];
 
 const rendered = steps.map((s, i) => ({
@@ -64,6 +69,11 @@ const expected = {
   19: '',
   20: '',
   21: '',
+  22: '',
+  23: '',
+  24: '',
+  25: '',
+  26: '',
 };
 ---
 <Body class="dark">
@@ -90,7 +100,7 @@ const expected = {
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18, Step19,
   } from '@components/SSRDemo/SSRLadder.js';
-  import { Button } from '@semantic-ui/core';
+  import { Button, Icon, Label, Divider, Spinner, Container } from '@semantic-ui/core';
 
   const expected = window.__ssrExpected;
   const log = (msg) => {

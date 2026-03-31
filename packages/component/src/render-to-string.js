@@ -43,6 +43,11 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
   // Clone prototype template with the data context.
   // Force native engine — ServerRenderer handles string output.
   const template = proto.clone({ data, renderingEngine: 'native' });
+
+  // Provide settings for createComponent — no web component element in SSR,
+  // so the Template won't have settings from an element or subtemplate proxy.
+  template.settings = data;
+
   template.initialize();
   const html = template.render();
 
