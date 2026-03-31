@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { any, clone, isArray, isFunction, openLink } from '@semantic-ui/utils';
+import { any, clone, isArray, isFunction, isString, openLink } from '@semantic-ui/utils';
 import { Icon } from '../../primitives/index.js';
 import css from './nav-menu.css?raw';
 import template from './nav-menu.html?raw';
@@ -34,7 +34,16 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
   },
 
   getMenu() {
-    let menu = clone(settings.menu);
+    let menu = settings.menu;
+    if (isString(menu)) {
+      try {
+        menu = JSON.parse(menu);
+      }
+      catch {
+        menu = [];
+      }
+    }
+    menu = clone(menu) || [];
     menu = self.filterVisibleSections(menu);
     if (self.isSearching()) {
       menu = self.filterBySearchTerm(menu);
