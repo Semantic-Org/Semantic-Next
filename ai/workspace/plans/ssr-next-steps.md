@@ -1,5 +1,38 @@
 # SSR — Nested Component Rendering
 
+## Curriculum — Read Before Starting
+
+### 1. Understand how the Lit SSR integration works (the reference)
+Read ALL five files in order. This is the solved version of the problem — understand it before writing code.
+- `docs/node_modules/@semantic-ui/astro-lit/server-shim.js` — server customElements shim
+- `docs/node_modules/@semantic-ui/astro-lit/server.js` — recursive SSR renderer (study `renderShadow` + `elementRenderers`)
+- `docs/node_modules/@semantic-ui/astro-lit/client-shim.js` — DSD polyfill
+- `docs/node_modules/@semantic-ui/astro-lit/hydration-support.js` — hydration patches
+- `docs/node_modules/@semantic-ui/astro-lit/dist/client.js` — client entrypoint (prop transfer)
+- `docs/node_modules/@semantic-ui/astro-lit/dist/index.js` — plugin registration (all hooks)
+
+### 2. Understand the native SSR integration (what needs work)
+- `internal-packages/astro/server.js` — current Astro SSR renderer
+- `internal-packages/astro/index.js` — plugin registration
+- `packages/renderer/src/engines/native/server.js` — ServerRenderer
+- `packages/component/src/render-to-string.js` — renderToString
+
+### 3. Load essential MCP context
+- `use_skill mental-model` — how the framework thinks
+- `use_skill native-renderer` — how the native DOM renderer works (contributing audience)
+- `use_skill component-ssr` — SSR patterns and guards
+- `use_skill render-pipeline` — template string → DOM pipeline
+
+### 4. Understand the component under test
+- `src/components/nav-menu/nav-menu.js` — createComponent, settings, events
+- `src/components/nav-menu/nav-menu.html` — template (renders `<ui-icon>`, `<ui-input>`)
+
+### 5. Read the hydration test suite
+- `packages/renderer/test/browser/ssr-hydration.test.js` — 68 tests, shows expected SSR → hydration behavior
+
+### 6. Read the guestbook entry from this session
+- `ai/guestbook.md` — Entry 9 documents the marker matching bug, Proxy trap, and methodology lessons
+
 ## Problem Statement
 
 Web components rendered inside another component's shadow DOM during SSR produce raw HTML tags with no Declarative Shadow DOM. The inner component's template is never rendered on the server.
