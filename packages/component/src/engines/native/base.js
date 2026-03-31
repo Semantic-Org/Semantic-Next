@@ -60,12 +60,6 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
-    // Restore complex props (arrays, objects) serialized as JSON by the Astro SSR
-    // integration. HTML attributes only carry primitives — this bridges the gap.
-    if (hasServerContent) {
-      this._restoreSSRProps();
-    }
-
     if (this.css) {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(this.css);
@@ -84,21 +78,6 @@ class WebComponentBase extends HTMLElementBase {
       }
       this.fullRender(prototypeTemplate);
     }
-  }
-
-  _restoreSSRProps() {
-    const script = this.shadowRoot.querySelector('script[data-ssr-props]');
-    if (!script) { return; }
-    try {
-      const props = JSON.parse(script.textContent);
-      for (const [key, value] of Object.entries(props)) {
-        this[key] = value;
-      }
-    }
-    catch (e) {
-      // Ignore malformed JSON
-    }
-    script.remove();
   }
 
   canHydrate() {

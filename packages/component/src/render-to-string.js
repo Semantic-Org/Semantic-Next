@@ -57,11 +57,6 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
 
   template.initialize();
 
-  // Suppress deferred lifecycle callbacks —
-  // render() schedules onRendered via setTimeout, which is wasteful on the server.
-  template.onRenderedCallback = null;
-  template.onDestroyedCallback = null;
-
   let html = template.render();
 
   // Phase 2: expand nested custom elements recursively
