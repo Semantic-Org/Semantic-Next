@@ -1,7 +1,7 @@
 ---
 title: What's Novel in Semantic UI
 description: Design departures from mainstream frameworks that an agent would miss without being told. Read before reviewing examples or writing code — calibrates attention toward the non-obvious decisions.
-keywords: [novel, departures, design, lisp, flat context, expressions, natural language, signals, async, template language, what to notice, runtime, no compile, proxy, reactivity granularity]
+keywords: [novel, departures, design, lisp, flat context, expressions, natural language, signals, async, template language, what to notice, runtime, no compile, proxy, reactivity granularity, mutation helpers]
 audience: essentials
 skill: novel-patterns
 type: skill
@@ -37,7 +37,7 @@ Ordered by how much they'd surprise you. The first few are things no other frame
 
 ### 2. Dual Expression Syntax — Lisp and JS in the Same Expression
 
-**No other template language does this.** Expressions support Lisp-style (space-separated) and JavaScript-style (parens and commas) simultaneously, including mixed forms:
+**No mainstream web framework does this.** Expressions support Lisp-style (space-separated) and JavaScript-style (parens and commas) simultaneously, including mixed forms:
 
 ```html
 {titleCase concat firstName ' ' lastName}              <!-- Lisp: zero parens -->
@@ -54,7 +54,7 @@ Ordered by how much they'd surprise you. The first few are things no other frame
 
 **What to notice:** Authors pick whichever form is natural for the specific expression. Lisp-style chains right-to-left without nesting parentheses. JS-style handles complex predicates and inline logic. The framework doesn't impose a paradigm.
 
-**Why it matters:** For both humans and agents, the Lisp style has fewer tokens carrying zero information. The Lisp form reads like a sentence describing intent. The JS form reads like a mechanical instruction. Having both means you always have the natural representation available.
+**Why it matters:** The Lisp style eliminates parentheses that carry no information — `{titleCase concat firstName ' ' lastName}` is zero parens while the JS equivalent nests three pairs. Having both styles means the natural representation is always available without forcing expressions into a single calling convention.
 
 ### 3. Per-Expression Reactivity — Not Per-Component
 
@@ -98,23 +98,15 @@ Async blocks handle promises declaratively with automatic re-firing when signals
 {/async}
 ```
 
-```js
-// ❌ React equivalent (~15 lines):
-const [results, setResults] = useState(null);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(null);
-useEffect(() => {
-  setLoading(true);
-  getResults(searchTerm)
-    .then(r => { setResults(r); setLoading(false); })
-    .catch(e => { setError(e); setLoading(false); });
-}, [searchTerm]);
-// + three conditional renders in JSX
+```
+❌ React: ~15 lines of useState/useEffect/try-catch + three conditional JSX branches
+❌ Svelte: {#await} provides similar declarative syntax, but re-execution requires manual invalidation
+✅ SUI: declarative block + automatic re-execution when signal dependencies change
 ```
 
-**What to notice:** `searchTerm` is a signal. When it changes, the async block re-executes the promise automatically. Loading, error, and success states are template-level constructs, not imperative state management.
+**What to notice:** `searchTerm` is a signal. When it changes, the async block re-executes the promise automatically. Svelte's `{#await}` provides similar declarative loading/error states, but the reactive re-execution — changing a signal re-fires the promise without manual invalidation — is the specific differentiator.
 
-**Why it matters:** The template declares *what* happens for each async state. The framework handles *when* to re-fetch. This is a meaningful compression — fewer lines means fewer places to introduce bugs, and the reactive dependency is implicit rather than declared in a dependency array.
+**Why it matters:** The template declares *what* happens for each async state. The framework handles *when* to re-fetch. The reactive dependency is implicit rather than declared in a dependency array or manually triggered.
 
 ### 6. Quoted vs Unquoted Attributes — Bug Prevention at Syntax Level
 
@@ -127,7 +119,32 @@ useEffect(() => {
 
 **Why it matters:** When generating HTML with dynamic boolean attributes, always use the unquoted form. The framework handles the semantics correctly — no need for conditional attribute rendering logic.
 
-### 7. Zero-Arg Auto-Invocation
+### 7. Signal Mutation Helpers — No Get-Mutate-Set
+
+Signals expose type-appropriate mutation methods directly — including collection operations with query semantics. There is no get-mutate-set round-trip:
+
+```js
+// ❌ Every other reactive framework (array update by id):
+const arr = state.todos.get();
+const index = arr.findIndex(t => t.id === id);
+arr[index] = { ...arr[index], title: newTitle };
+state.todos.set([...arr]);
+
+// ✅ SUI — collection helpers on the signal itself:
+state.todos.setProperty(id, 'title', newTitle);        // update one item's field by id
+state.todos.replaceItem(id, { ...todo, completed: true }); // replace entire item by id
+state.todos.setArrayProperty('completed', false);      // set a field on ALL items
+state.todos.removeItem(id);                            // remove by id
+state.todos.filter(t => !t.completed);                 // filter in place
+state.todos.push({ id, title, completed: false });     // append
+state.todos.getItem(id);                               // query by id
+```
+
+**What to notice:** Array signals aren't just reactive wrappers — they're reactive data stores with query semantics. `setProperty(id, field, value)` finds an item by id and updates one field. `setArrayProperty` sets a field across every item. `filter()` mutates in place. These are collection operations, not array manipulation.
+
+**Why it matters:** The TodoMVC example implements all CRUD operations without a single get-mutate-set cycle. Compare the SUI version to any other framework's TodoMVC — the state mutation code is dramatically shorter because the signal API matches the intent directly. This is one of the features agents consistently find most natural when reviewing SUI code.
+
+### 8. Zero-Arg Auto-Invocation
 
 Functions with no required arguments auto-invoke when they're the terminal token:
 
@@ -137,19 +154,6 @@ Functions with no required arguments auto-invoke when they're the terminal token
 ```
 
 **What to notice:** The template doesn't distinguish between a value and a zero-arg function. You can refactor from a static prop to a computed method (or vice versa) without changing the template. Same philosophy as the flat data context — the template describes *what* it wants, not *how* to get it.
-
----
-
-## What's Coming
-
-Four template language enhancements are scoped and ready to implement:
-
-| Feature | Syntax | What it replaces |
-|---------|--------|-----------------|
-| **Match blocks** | `{#match status}{is 'loading'}...{/match}` | Verbose if/else chains that repeat the same variable |
-| **Content projection** | `{>card}content{/card}` with `{>content}` inside | Inverted snippets, duplicated wrapper DOM |
-| **Let bindings** | `{#let total = price * qty}...{/let}` | Repeated expressions in loops, trivial one-liner methods |
-| **Spread syntax** | `{>card ...friend}` | Manual property-by-property data passing to subtemplates |
 
 ---
 
@@ -164,6 +168,7 @@ Four template language enhancements are scoped and ready to implement:
 | State access uses namespaces (`state.x`, `props.x`) | Flat data context. Just `{x}`. |
 | Async state requires imperative management | `{#async}` block with declarative loading/error states |
 | Boolean attributes need conditional rendering | Unquoted `attr={expr}` removes attribute when falsy |
+| State mutation requires get-mutate-set | Signals have type-aware helpers: `.push()`, `.toggle()`, `.increment()` |
 | Functions need `()` to be called | Zero-arg functions auto-invoke in templates |
 
 ---
