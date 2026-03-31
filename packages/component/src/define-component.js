@@ -3,6 +3,7 @@ import { Template, TemplateCompiler } from '@semantic-ui/templating';
 import { adoptStylesheet, each, fatal, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
+import { registerComponent } from './component-registry.js';
 
 export const defineComponent = ({
   template = '',
@@ -96,6 +97,7 @@ export const defineComponent = ({
 
     // Store tagName on the class for SSR renderToString
     webComponent.componentTagName = tagName;
+    registerComponent(tagName, webComponent);
 
     if (isClient && customElements.get(tagName)) {
       return webComponent;

@@ -70,7 +70,7 @@ export function getProperties({ properties = {}, defaultSettings, componentSpec 
       // i.e. { foo: 'baz' } // basic
       // or { foo: { type: String, defaultValue: 'baz' } // expert
       properties[propertyName] = (defaultValue?.type)
-        ? defaultSettings
+        ? defaultValue
         : getPropertySettings({
           name: propertyName,
           type: defaultValue?.constructor,
@@ -136,7 +136,7 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
   }
   else if (type == Boolean) {
     property.converter = {
-      fromAttribute: (value, type) => {
+      fromAttribute: (value) => {
         if (inArray(value, ['false', '0', 'null', 'undefined'])) {
           return false;
         }
@@ -145,8 +145,33 @@ export function getPropertySettings({ name, type = String, propertyOnly = false 
         }
         return Boolean(value);
       },
-      toAttribute: (value, type) => {
+      toAttribute: (value) => {
         return String(value);
+      },
+    };
+  }
+  else if (type == Number) {
+    property.converter = {
+      fromAttribute: (value) => {
+        return value === null ? null : Number(value);
+      },
+      toAttribute: (value) => {
+        return value == null ? null : String(value);
+      },
+    };
+  }
+  else if (type == Object || type == Array) {
+    property.converter = {
+      fromAttribute: (value) => {
+        try {
+          return JSON.parse(value);
+        }
+        catch {
+          return null;
+        }
+      },
+      toAttribute: (value) => {
+        return value == null ? null : JSON.stringify(value);
       },
     };
   }

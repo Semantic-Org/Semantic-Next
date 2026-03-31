@@ -159,9 +159,25 @@ export class ServerRenderer {
         return REMOVE_ATTR;
       }
 
-      const strValue = (isArray(value) || isPlainObject(value))
+      let strValue = (isArray(value) || isPlainObject(value))
         ? JSON.stringify(value)
         : String(value ?? '');
+      strValue = strValue.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+
+      // Check if we're inside a quoted attribute value by counting quotes
+      // in the current tag fragment. Odd count = inside quotes, even = unquoted.
+      const tagStart = scope.htmlBuffer.lastIndexOf('<');
+      const tagFragment = scope.htmlBuffer.slice(tagStart);
+      const doubleQuotes = (tagFragment.match(/"/g) || []).length;
+      const insideQuotes = doubleQuotes % 2 === 1;
+
+      // Unquoted attribute (e.g. style={expr}) — wrap in quotes so the
+      // value survives HTML parsing when it contains spaces or newlines
+      if (!insideQuotes) {
+        scope.htmlBuffer += `"${strValue}"`;
+        return `"${strValue}"`;
+      }
+
       scope.htmlBuffer += strValue;
       return strValue;
     }

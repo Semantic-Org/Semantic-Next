@@ -1,5 +1,6 @@
-import { camelToKebab, each, isServer } from '@semantic-ui/utils';
+import { camelToKebab, each, isFunction, kebabToCamel } from '@semantic-ui/utils';
 import { getUIClasses } from './component-helpers.js';
+import { expandCustomElements } from './expand-custom-elements.js';
 
 /*
   Server-side render a component to a DSD HTML string.
@@ -9,14 +10,14 @@ import { getUIClasses } from './component-helpers.js';
 
     const MyCard = defineComponent({ tagName: 'my-card', template, css, ... });
     const html = renderToString(MyCard, { title: 'Hello' });
-    // → <my-card><template shadowrootmode="open"><style>...</style>...</template></my-card>
+    // → <my-card title="Hello"><template shadowrootmode="open"><style>...</style>...</template></my-card>
 
   The component definition is shared between server and client.
   On the client, the browser parses the DSD, creates the shadow root,
   and connectedCallback hydrates it with reactive bindings.
 */
 
-export function renderToString(ComponentClass, attrs = {}, children = '') {
+export function renderToString(ComponentClass, attrs = {}, { slots = null, depth = 0 } = {}) {
   const tagName = ComponentClass.componentTagName;
   if (!tagName) {
     throw new Error('renderToString requires a component with a tagName');
@@ -30,10 +31,16 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
   const css = ComponentClass.config?.css || '';
   const defaultSettings = ComponentClass.config?.defaultSettings || {};
   const componentSpec = ComponentClass.config?.componentSpec;
-  const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties;
+  const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties || {};
+
+  // Normalize kebab-case attribute names to camelCase property names
+  const normalizedAttrs = {};
+  each(attrs, (value, key) => {
+    normalizedAttrs[kebabToCamel(key)] = value;
+  });
 
   // Merge attributes with defaults
-  const data = { ...defaultSettings, ...attrs };
+  const data = { ...defaultSettings, ...normalizedAttrs };
 
   // Compute {ui} class string for spec-driven components
   if (componentSpec) {
@@ -50,43 +57,99 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
 
   template.initialize();
 
-  // Suppress deferred lifecycle callbacks before render() —
-  // render() schedules onRendered via setTimeout, which would crash
-  // because there's no DOM element in string rendering.
+  // Suppress deferred lifecycle callbacks —
+  // render() schedules onRendered via setTimeout, which is wasteful on the server.
   template.onRenderedCallback = null;
   template.onDestroyedCallback = null;
 
-  const html = template.render();
+  let html = template.render();
 
-  // Build attribute string for the outer element
-  const attrString = serializeAttrs(attrs);
+  // Phase 2: expand nested custom elements recursively
+  html = expandCustomElements(html, { depth, renderFn: renderToString });
 
-  // Wrap in DSD — slotted content goes in the light DOM after the template
+  // Build attribute string from props using property converters
+  const attrString = serializeAttrs(normalizedAttrs, resolvedProperties);
+
+  // Build slot HTML for light DOM
+  const slotHTML = serializeSlots(slots);
+
+  // Wrap in DSD
   return `<${tagName}${attrString}>`
     + `<template shadowrootmode="open">`
     + (css ? `<style>${css}</style>` : '')
     + html
     + `</template>`
-    + children
+    + slotHTML
     + `</${tagName}>`;
 }
 
-function serializeAttrs(attrs) {
-  let result = '';
+/*
+  Serialize attributes using the property type system.
+  Uses toAttribute converters when available, falls back to sensible defaults.
+*/
+function serializeAttrs(attrs, resolvedProperties) {
+  const parts = [];
+
   each(attrs, (value, key) => {
-    // Only serialize primitive values as HTML attributes
-    if (typeof value === 'string') {
-      result += ` ${camelToKebab(key)}="${escapeAttr(value)}"`;
+    if (value === undefined || value === null) { return; }
+    if (isFunction(value)) { return; }
+
+    const propConfig = resolvedProperties[key];
+
+    // Skip property-only values (attribute: false)
+    if (propConfig?.attribute === false) { return; }
+
+    // Use property converter if available
+    const toAttribute = propConfig?.converter?.toAttribute;
+    if (toAttribute) {
+      const attrValue = toAttribute(value);
+      if (attrValue === null || attrValue === undefined) { return; }
+      const attrName = camelToKebab(key);
+      if (attrValue === '') {
+        parts.push(attrName);
+      }
+      else {
+        parts.push(`${attrName}="${escapeAttr(String(attrValue))}"`);
+      }
+      return;
+    }
+
+    // Default serialization for types without explicit converters
+    const attrName = camelToKebab(key);
+    if (typeof value === 'boolean') {
+      if (value) { parts.push(attrName); }
+    }
+    else if (typeof value === 'string') {
+      parts.push(`${attrName}="${escapeAttr(value)}"`);
     }
     else if (typeof value === 'number') {
-      result += ` ${camelToKebab(key)}="${value}"`;
+      parts.push(`${attrName}="${value}"`);
     }
-    else if (value === true) {
-      result += ` ${camelToKebab(key)}`;
+    else if (typeof value === 'object') {
+      parts.push(`${attrName}="${escapeAttr(JSON.stringify(value))}"`);
     }
-    // Skip false, null, undefined, objects, functions
   });
-  return result;
+
+  return parts.length > 0 ? ' ' + parts.join(' ') : '';
+}
+
+/*
+  Serialize slotted content for light DOM.
+  Named slots get a wrapper element with the slot attribute.
+*/
+function serializeSlots(slots) {
+  if (!slots) { return ''; }
+  let html = '';
+  each(slots, (content, name) => {
+    if (!content) { return; }
+    if (name === 'default') {
+      html += content;
+    }
+    else {
+      html += `<span slot="${name}">${content}</span>`;
+    }
+  });
+  return html;
 }
 
 function escapeAttr(str) {
