@@ -4,57 +4,82 @@ import '../css/layers.css';
 import '../css/fonts.css';
 
 import { renderToString } from '@semantic-ui/component';
-import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
-import { Button } from '@semantic-ui/core';
+import { Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8 } from '@components/SSRDemo/SSRLadder.js';
 
-// Server render components to DSD strings
-const dsd = renderToString(SSRDemo, { title: 'SSR Demo' });
-const buttonPrimary = renderToString(Button, { emphasis: 'primary' }, 'Primary');
-const buttonDisabled = renderToString(Button, { disabled: true }, 'Disabled');
-const buttonLink = renderToString(Button, { href: '/about' }, 'Link Button');
+const steps = [
+  { component: Step1, label: '1. Static HTML' },
+  { component: Step2, label: '2. Text expressions + settings override', attrs: { greeting: 'Howdy', name: 'Partner' } },
+  { component: Step3, label: '3. Attribute expressions' },
+  { component: Step4, label: '4. Conditional' },
+  { component: Step5, label: '5. Each loop' },
+  { component: Step6, label: '6. Snippet' },
+  { component: Step7, label: '7. Subtemplate' },
+  { component: Step8, label: '8. Nested blocks' },
+];
+
+const rendered = steps.map(s => ({
+  ...s,
+  html: renderToString(s.component, s.attrs || {}),
+}));
 ---
 <Body class="dark">
-<div style="padding: 24px; max-width: 600px;">
+<div style="padding: 24px; max-width: 800px; font-family: sans-serif;">
+  <h1 style="color: white;">SSR Hydration Ladder</h1>
 
-  <h1 style="color: white; font-family: sans-serif;">Native SSR Round-Trip Test</h1>
-
-  <h2 style="color: white; font-family: sans-serif;">Primitives</h2>
-  <div style="display: flex; gap: 12px; margin-bottom: 24px;">
-    <Fragment set:html={buttonPrimary} />
-    <Fragment set:html={buttonDisabled} />
-    <Fragment set:html={buttonLink} />
-  </div>
-
-  <h2 style="color: white; font-family: sans-serif;">Custom Component</h2>
-  <!-- Server-rendered component with DSD -->
-  <Fragment set:html={dsd} />
+  {rendered.map(step => (
+    <div style="margin-bottom: 16px;">
+      <h3 style="color: #888; margin: 4px 0;">{step.label}</h3>
+      <Fragment set:html={step.html} />
+    </div>
+  ))}
 
   <details style="margin-top: 20px;">
-    <summary style="color: #888; cursor: pointer;">Server HTML</summary>
-    <pre style="color: #0f0; font-size: 12px; overflow: auto; max-height: 300px;">{dsd}</pre>
+    <summary style="color: #888; cursor: pointer;">Raw Server HTML</summary>
+    {rendered.map(step => (
+      <div>
+        <h4 style="color: #888;">{step.label}</h4>
+        <pre style="color: #0f0; font-size: 11px; overflow: auto; max-height: 100px;">{step.html}</pre>
+      </div>
+    ))}
   </details>
-
   <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
 </div>
 
 <script>
-  // Import components on the client — same definitions, registers custom elements,
-  // connectedCallback detects existing shadow roots from DSD and hydrates
-  import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
-  import { Button } from '@semantic-ui/core';
-  import { $ } from '@semantic-ui/query';
+  // Import all steps on client — triggers hydration
+  import { Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8 } from '@components/SSRDemo/SSRLadder.js';
 
-  // Wait for hydration
-  const el = document.querySelector('ssr-demo');
-  $(el).onNext('rendered').then(() => {
-    const log = (msg) => {
-      document.getElementById('log').textContent += msg + '\n';
-    };
+  const log = (msg) => {
+    document.getElementById('log').textContent += msg + '\n';
+  };
 
-    log('Shadow root exists: ' + !!el.shadowRoot);
-    log('Hydrated: ' + !!el.template);
-    log('Items: ' + JSON.stringify(el.template?.state?.items?.get?.()));
-    log('Content: ' + el.shadowRoot?.querySelector('.container')?.textContent?.trim().replace(/\s+/g, ' '));
-  });
+  // Check each step
+  const tags = [
+    'ssr-step-1', 'ssr-step-2', 'ssr-step-3', 'ssr-step-4',
+    'ssr-step-5', 'ssr-step-6', 'ssr-step-7', 'ssr-step-8',
+  ];
+
+  // Wait a tick for hydration to complete
+  setTimeout(() => {
+    tags.forEach((tag, i) => {
+      const el = document.querySelector(tag);
+      if (!el) { log(`Step ${i+1}: MISSING`); return; }
+
+      const hasTemplate = !!el.template;
+      const shadowRoot = el.shadowRoot;
+      const comments = [];
+      if (shadowRoot) {
+        const walker = document.createTreeWalker(shadowRoot, NodeFilter.SHOW_COMMENT);
+        let node;
+        while ((node = walker.nextNode())) comments.push(node.data);
+      }
+
+      const status = hasTemplate ? 'HYDRATED' : 'NOT HYDRATED';
+      const commentStatus = comments.length === 0 ? 'clean' : `${comments.length} comments`;
+      const content = shadowRoot?.textContent?.trim().replace(/\s+/g, ' ').slice(0, 50) || 'empty';
+
+      log(`Step ${i+1}: ${status} | ${commentStatus} | "${content}"`);
+    });
+  }, 200);
 </script>
 </Body>

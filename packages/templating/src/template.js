@@ -295,7 +295,7 @@ export const Template = class Template {
       get isHydrating() {
         return template._isHydrating || false;
       },
-      rerender: () => element.requestUpdate(),
+      rerender: () => element?.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
@@ -311,7 +311,7 @@ export const Template = class Template {
       findChildren: this.findChildren.bind(this),
       content: this.instance.content,
       get darkMode() {
-        return element.isDarkMode();
+        return element?.isDarkMode?.();
       },
     };
 
@@ -842,7 +842,7 @@ export const Template = class Template {
       get isHydrating() {
         return templateRef._isHydrating || false;
       },
-      rerender: () => element.requestUpdate(),
+      rerender: () => element?.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
@@ -858,7 +858,7 @@ export const Template = class Template {
       findChildren: this.findChildren.bind(this),
       content: this.instance.content,
       get darkMode() {
-        return element.isDarkMode();
+        return element?.isDarkMode?.();
       },
       ...additionalData,
     };

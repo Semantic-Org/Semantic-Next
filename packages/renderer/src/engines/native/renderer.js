@@ -1055,9 +1055,25 @@ export class Renderer {
       }));
     }
     else {
-      // Adopt the server-rendered text node adjacent to the comment
-      let textNode = comment.nextSibling;
-      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+      // The server output is: <!--sui:v1:0-->VALUE + static text...
+      // The browser merges VALUE with any following static text into one text node.
+      // We need to split: adopt VALUE portion as a reactive text node, preserve the rest.
+      const nextNode = comment.nextSibling;
+
+      let textNode;
+      if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
+        const serverValue = String(this.eval(exprNode.value, data) ?? '');
+        const fullText = nextNode.data;
+
+        if (fullText.length > serverValue.length && fullText.startsWith(serverValue)) {
+          // Split at the boundary between value and static text
+          // splitText returns the NEW node (remainder), original keeps the first part
+          nextNode.splitText(serverValue.length);
+          textNode = nextNode; // first part = the value
+        }
+        else {
+          textNode = nextNode;
+        }
         comment.remove();
       }
       else {
