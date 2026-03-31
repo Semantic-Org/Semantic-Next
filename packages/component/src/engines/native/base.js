@@ -135,19 +135,21 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   removeMarkers() {
-    const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_COMMENT);
-    const toRemove = [];
-    let node;
-    while ((node = walker.nextNode())) {
-      if (node.data.startsWith('sui')) {
-        toRemove.push(node);
-        console.log('match', node.data);
+    // Collect ALL comments first, then filter and remove.
+    // Using querySelectorAll-style approach since TreeWalker may miss
+    // comments inside elements that were rearranged during hydration.
+    const removeComments = (root) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+      const toRemove = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.data.startsWith('sui') || node.data.startsWith('/sui')) {
+          toRemove.push(node);
+        }
       }
-      else {
-        console.log('not match', node.data);
-      }
-    }
-    for (const node of toRemove) { node.remove(); }
+      for (const node of toRemove) { node.remove(); }
+    };
+    removeComments(this.shadowRoot);
   }
 
   fullRender(prototypeTemplate) {

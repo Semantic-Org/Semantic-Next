@@ -38,9 +38,10 @@ const buttonLink = renderToString(Button, { href: '/about' }, 'Link Button');
 </div>
 
 <script>
-  // Import the component on the client — same definition, registers the custom element,
-  // connectedCallback detects existing shadow root from DSD and hydrates
+  // Import components on the client — same definitions, registers custom elements,
+  // connectedCallback detects existing shadow roots from DSD and hydrates
   import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
+  import { Button } from '@semantic-ui/core';
   import { $ } from '@semantic-ui/query';
 
   // Wait for hydration
