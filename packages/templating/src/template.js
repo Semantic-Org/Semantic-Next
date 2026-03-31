@@ -289,6 +289,9 @@ export const Template = class Template {
       isRendered: () => this.rendered,
       isServer: Template.isServer,
       isClient: !Template.isServer,
+      get isHydrating() {
+        return template._isHydrating || false;
+      },
       rerender: () => element.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
@@ -811,6 +814,7 @@ export const Template = class Template {
 
   _buildCallParams(additionalData = {}) {
     const element = this.element;
+    const templateRef = this;
     return {
       el: element,
       tpl: this.instance,
@@ -832,6 +836,9 @@ export const Template = class Template {
       isRendered: () => this.rendered,
       isServer: Template.isServer,
       isClient: !Template.isServer,
+      get isHydrating() {
+        return templateRef._isHydrating || false;
+      },
       rerender: () => element.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
       attachEvent: this.attachEvent.bind(this),
