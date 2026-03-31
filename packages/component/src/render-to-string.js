@@ -40,8 +40,9 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
     data.ui = getUIClasses(data, { componentSpec, properties: resolvedProperties });
   }
 
-  // Clone prototype template with the data context
-  const template = proto.clone({ data });
+  // Clone prototype template with the data context.
+  // Force native engine — ServerRenderer handles string output.
+  const template = proto.clone({ data, renderingEngine: 'native' });
   template.initialize();
   const html = template.render();
 

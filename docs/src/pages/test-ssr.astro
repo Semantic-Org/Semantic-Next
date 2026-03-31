@@ -9,6 +9,7 @@ import {
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18, Step19,
 } from '@components/SSRDemo/SSRLadder.js';
+import { Button } from '@semantic-ui/core';
 
 const steps = [
   { component: Step1, label: '1. Static HTML' },
@@ -30,6 +31,7 @@ const steps = [
   { component: Step17, label: '17. Multi-branch (if/else-if/else)' },
   { component: Step18, label: '18. Object iteration' },
   { component: Step19, label: '19. Spec-driven ({ui} classes)', attrs: { emphasis: 'primary', size: 'large' }, children: 'Large Primary' },
+  { component: Button, label: '20. ui-button', attrs: { emphasis: 'primary' }, children: 'Click Me' },
 ];
 
 const rendered = steps.map(s => ({
@@ -57,6 +59,7 @@ const expected = {
   17: 'Mode B',
   18: 'red green blue',
   19: '',  // slot: textContent empty in shadow root, projected content in light DOM
+  20: '',  // ui-button: slot-based, check visually
 };
 ---
 <Body class="dark">
@@ -82,6 +85,7 @@ const expected = {
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18, Step19,
   } from '@components/SSRDemo/SSRLadder.js';
+  import { Button } from '@semantic-ui/core';
 
   const expected = window.__ssrExpected;
   const log = (msg) => {
