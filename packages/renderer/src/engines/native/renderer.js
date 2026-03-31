@@ -965,7 +965,7 @@ export class Renderer {
         Hydration
   *******************************/
 
-  hydrateMarkers(root, entries, data, scope) {
+  hydrateMarkers(root, entries, data, scope, { ast } = {}) {
     if (entries.length === 0) { return; }
 
     // Classify entries
@@ -978,7 +978,7 @@ export class Renderer {
 
     // Pass 1: Hydrate attribute bindings via reference DOM matching
     if (attrEntries.length > 0) {
-      this.hydrateAttributes(root, entries, data, scope);
+      this.hydrateAttributes(root, entries, data, scope, ast);
     }
 
     // Pass 2: Walk comments for text and block markers — top level only.
@@ -1027,9 +1027,10 @@ export class Renderer {
     }
   }
 
-  hydrateAttributes(root, entries, data, scope) {
-    // Build a reference DOM from the marker htmlString to find attribute positions
-    const { htmlString } = buildHTMLStringPure(this.ast, this.snippets);
+  hydrateAttributes(root, entries, data, scope, ast) {
+    // Build a reference DOM from the marker htmlString to find attribute positions.
+    // Use the provided AST (from inner content hydration) or fall back to the top-level AST.
+    const { htmlString } = buildHTMLStringPure(ast || this.ast, this.snippets);
     const refTemplate = document.createElement('template');
     refTemplate.innerHTML = htmlString;
     const refRoot = refTemplate.content;
@@ -1380,8 +1381,10 @@ export class Renderer {
       container.appendChild(n);
     }
 
-    // Recursively hydrate inner markers with the sub-AST's entries
-    this.hydrateMarkers(container, entries, data, scope);
+    // Recursively hydrate inner markers with the sub-AST's entries.
+    // Pass contentAST so attribute hydration builds the reference DOM
+    // from the correct AST (not the top-level component AST).
+    this.hydrateMarkers(container, entries, data, scope, { ast: contentAST });
 
     // Update ownedNodes with the hydrated content (comments may have been removed)
     ownedNodes.length = 0;

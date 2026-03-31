@@ -221,3 +221,70 @@ export const Step19 = defineComponent({
   template: '<span class="{ui}widget"><slot></slot></span>',
   css: css + ' .widget { display: inline-block; } .primary { color: #3498db; } .large { font-size: 20px; }',
 });
+
+// Step 27: Post-hydration click event
+export const Step27 = defineComponent({
+  tagName: 'ssr-step-27',
+  renderingEngine: 'native',
+  template: '<div class="box"><button class="btn">{label}</button></div>',
+  css: css + ' .btn { cursor: pointer; color: inherit; background: #444; border: 1px solid #777; padding: 4px 12px; }',
+  defaultState: { label: 'Click me' },
+  events: {
+    'click .btn'({ state }) {
+      state.label.set('Clicked!');
+    },
+  },
+});
+
+// Step 28: Post-hydration input reactivity
+export const Step28 = defineComponent({
+  tagName: 'ssr-step-28',
+  renderingEngine: 'native',
+  template: '<div class="box"><input class="inp" value={query} placeholder="Type..."> <span>{query}</span></div>',
+  css: css + ' .inp { background: #333; color: white; border: 1px solid #777; padding: 4px; }',
+  defaultState: { query: 'hello' },
+  events: {
+    'input .inp'({ state, value }) {
+      state.query.set(value);
+    },
+  },
+});
+
+// Step 29: Post-hydration conditional toggle
+export const Step29 = defineComponent({
+  tagName: 'ssr-step-29',
+  renderingEngine: 'native',
+  template: '<div class="box"><button class="btn">{#if on}ON{else}OFF{/if}</button></div>',
+  css: css + ' .btn { cursor: pointer; color: inherit; background: #444; border: 1px solid #777; padding: 4px 12px; }',
+  defaultState: { on: true },
+  events: {
+    'click .btn'({ state }) {
+      state.on.toggle();
+    },
+  },
+});
+
+// Step 30: Post-hydration each list update
+export const Step30 = defineComponent({
+  tagName: 'ssr-step-30',
+  renderingEngine: 'native',
+  template:
+    '<div class="box"><ul>{#each item in items}<li>{item}</li>{/each}</ul><button class="btn">Add</button></div>',
+  css: css
+    + ' ul { list-style: none; padding: 0; margin: 0; } .btn { cursor: pointer; color: inherit; background: #444; border: 1px solid #777; padding: 4px 12px; }',
+  defaultState: { items: ['A', 'B', 'C'] },
+  events: {
+    'click .btn'({ state }) {
+      state.items.push('New');
+    },
+  },
+});
+
+// Step 31: Settings change after hydration
+export const Step31 = defineComponent({
+  tagName: 'ssr-step-31',
+  renderingEngine: 'native',
+  template: '<div class="box"><span class="val">{color}</span></div>',
+  css: css + ' .val { font-weight: bold; }',
+  defaultSettings: { color: 'red' },
+});

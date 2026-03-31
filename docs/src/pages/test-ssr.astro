@@ -8,8 +8,9 @@ import {
   Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18, Step19,
+  Step27, Step28, Step29, Step30, Step31,
 } from '@components/SSRDemo/SSRLadder.js';
-import { Button, Icon, Label, Divider, Spinner, Container } from '@semantic-ui/core';
+import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 
 const steps = [
   { component: Step1, label: '1. Static HTML' },
@@ -38,6 +39,14 @@ const steps = [
   { component: Divider, label: '24. ui-divider', attrs: { text: 'OR' } },
   { component: Spinner, label: '25. ui-spinner', attrs: { text: 'Loading' } },
   { component: Container, label: '26. ui-container', children: 'Contained' },
+  { component: Button, label: '27. ui-button disabled', attrs: { emphasis: 'primary', disabled: 'disabled' }, children: 'Disabled' },
+  { component: Button, label: '28. ui-button with icon', attrs: { icon: 'pause', emphasis: 'primary' }, children: 'Pause' },
+  { component: Input, label: '29. ui-input', attrs: { placeholder: 'Search...', icon: 'search' } },
+  { component: Step27, label: '30. Post-hydration click' },
+  { component: Step28, label: '31. Post-hydration input' },
+  { component: Step29, label: '32. Post-hydration toggle' },
+  { component: Step30, label: '33. Post-hydration list update' },
+  { component: Step31, label: '34. Settings change', attrs: { color: 'blue' } },
 ];
 
 const rendered = steps.map((s, i) => ({
@@ -74,6 +83,14 @@ const expected = {
   24: '',
   25: '',
   26: '',
+  27: '',
+  28: '',
+  29: '',
+  30: 'Click me',
+  31: 'hello',
+  32: 'ON',
+  33: 'ABC',
+  34: 'blue',
 };
 ---
 <Body class="dark">
@@ -99,8 +116,9 @@ const expected = {
     Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18, Step19,
+    Step27, Step28, Step29, Step30, Step31,
   } from '@components/SSRDemo/SSRLadder.js';
-  import { Button, Icon, Label, Divider, Spinner, Container } from '@semantic-ui/core';
+  import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 
   const expected = window.__ssrExpected;
   const log = (msg) => {
