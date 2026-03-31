@@ -113,7 +113,18 @@ export default {
       helpers: TemplateHelpers,
     });
     const renderedHTML = renderer.render();
-    const dsd = `<template shadowrootmode="open">${css ? `<style>${css}</style>` : ''}${renderedHTML}</template>`;
+
+    // Serialize complex props (arrays, objects) as JSON inside the DSD.
+    // The component reads this during hydration so settings are available
+    // before initialization — HTML attributes can only carry primitives.
+    const complexProps = serializeComplexProps(props);
+    const propsScript = complexProps
+      ? `<script type="application/json" data-ssr-props>${complexProps}</script>`
+      : '';
+
+    const dsd = `<template shadowrootmode="open">${
+      css ? `<style>${css}</style>` : ''
+    }${propsScript}${renderedHTML}</template>`;
 
     // Build the full element HTML with attributes
     const attrs = serializeAttributes(props, config);
@@ -156,6 +167,21 @@ function serializeSlots(slotted) {
     }
   });
   return html;
+}
+
+function serializeComplexProps(props) {
+  const complex = {};
+  let hasComplex = false;
+  each(props, (value, key) => {
+    if (value === undefined || value === null) { return; }
+    if (isFunction(value)) { return; }
+    if (typeof value === 'object') {
+      complex[key] = value;
+      hasComplex = true;
+    }
+  });
+  if (!hasComplex) { return null; }
+  return JSON.stringify(complex).replace(/<\/script/gi, '<\\/script');
 }
 
 function computeUIClasses(Component, config, data) {

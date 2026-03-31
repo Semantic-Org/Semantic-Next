@@ -2,8 +2,8 @@
   Astro integration for Semantic UI native SSR.
 
   Registers a renderer that server-renders SUI components using
-  Declarative Shadow DOM. The browser parses DSD natively —
-  no hydration scripts or polyfills needed.
+  Declarative Shadow DOM. Complex props (arrays, objects) are serialized
+  as JSON inside the DSD template and restored during hydration.
 */
 
 export default function semanticUI() {
