@@ -9,7 +9,7 @@ import {
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18, Step19,
   Step27, Step28, Step29, Step30, Step31,
-  Step35, Step36, Step37,
+  Step35, Step36, Step37, Step38,
 } from '@components/SSRDemo/SSRLadder.js';
 import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 
@@ -52,6 +52,7 @@ const steps = [
   { component: Step35, label: '35. Deferred settings (nav-menu pattern)', attrs: { items: [{ label: 'Home' }, { label: 'About' }, { label: 'Contact' }] } },
   { component: Step36, label: '36. Nested shadow DOM (button in wrapper)', children: 'Nested' },
   { component: Step37, label: '37. Subtemplate with nested primitive', children: 'Card Label' },
+  { component: Step38, label: '38. Ternary in snippet data' },
 ];
 
 const rendered = steps.map((s, i) => ({
@@ -99,6 +100,7 @@ const expected = {
   35: 'HomeAboutContact',
   36: '',
   37: '',
+  38: 'no',
 };
 ---
 <Body class="dark">
@@ -125,7 +127,7 @@ const expected = {
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18, Step19,
     Step27, Step28, Step29, Step30, Step31,
-    Step35, Step36, Step37,
+    Step35, Step36, Step37, Step38,
   } from '@components/SSRDemo/SSRLadder.js';
   import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
 

@@ -315,6 +315,15 @@ export const Step36 = defineComponent({
   css,
 });
 
+// Step 38: Ternary expression in snippet data (nav-menu titlefalse bug)
+export const Step38 = defineComponent({
+  tagName: 'ssr-step-38',
+  renderingEngine: 'native',
+  template:
+    "{>tag isItem=false}{#snippet tag}<div class=\"box a{isItem ? ' b' : ''}\">{isItem ? 'yes' : 'no'}</div>{/snippet}",
+  css,
+});
+
 // Step 37: Subtemplate with nested primitive
 const innerCard = defineComponent({
   renderingEngine: 'native',
