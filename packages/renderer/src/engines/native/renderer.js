@@ -778,6 +778,132 @@ export class Renderer {
     });
   }
 
+  hydrateSubtemplate({ node, data, scope, region, ownedNodes }) {
+    const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
+    const templateData = this.unpackNodeData(node, data);
+
+    let template, templateName;
+    if (isString(templateOrName)) {
+      templateName = templateOrName;
+      template = this.subTemplates?.[templateName];
+    }
+    else if (templateOrName instanceof Template) {
+      template = templateOrName;
+      templateName = template.templateName;
+    }
+
+    if (!template) { return; }
+
+    let currentTemplateID = template.id;
+    let currentInstance = template.clone({
+      templateName,
+      subTemplates: this.subTemplates,
+      data: templateData,
+      parentTemplate: this.template,
+      renderingEngine: 'native',
+    });
+
+    if (this.template?.element) {
+      currentInstance.setElement(this.template.element);
+    }
+    if (this.template) { currentInstance.setParent(this.template); }
+
+    currentInstance.initialize();
+
+    // Hydrate inner markers on the server-rendered DOM instead of rendering fresh
+    if (ownedNodes.length > 0) {
+      const { entries } = currentInstance.renderer.buildHTMLString(currentInstance.ast);
+      if (entries.length > 0) {
+        const container = document.createDocumentFragment();
+        for (const n of [...ownedNodes]) { container.appendChild(n); }
+        currentInstance.renderer.hydrateMarkers(
+          container,
+          entries,
+          currentInstance.renderer.data,
+          currentInstance.renderer.scope,
+        );
+        // Put nodes back
+        const frag = document.createDocumentFragment();
+        for (const n of [...container.childNodes]) { frag.appendChild(n); }
+        region.anchor.after(frag);
+        region.ownedNodes = [...frag.childNodes.length ? [] : ownedNodes];
+        // If frag was consumed, recollect from DOM
+        const collected = [];
+        let sibling = region.anchor.nextSibling;
+        while (sibling) {
+          collected.push(sibling);
+          sibling = sibling.nextSibling;
+        }
+        region.ownedNodes = collected;
+      }
+    }
+
+    currentInstance.rendered = true;
+    const renderRoot = this.template?.element?.renderRoot;
+    if (renderRoot) {
+      currentInstance.attach(renderRoot, { parentNode: region.parentNode });
+    }
+
+    // Wire the same Reaction as createSubtemplate for future data updates
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !region.anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+
+      this.dataVersion.get();
+      const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
+      const templateData = this.unpackNodeData(node, data);
+
+      let template;
+      if (isString(templateOrName)) {
+        template = this.subTemplates?.[templateOrName];
+      }
+      else if (templateOrName instanceof Template) {
+        template = templateOrName;
+      }
+
+      if (!template) {
+        if (currentInstance) {
+          currentInstance.onDestroyed();
+          currentInstance = null;
+          currentTemplateID = null;
+          region.clear();
+        }
+        return;
+      }
+
+      if (template.id !== currentTemplateID) {
+        if (currentInstance) { currentInstance.onDestroyed(); }
+        currentTemplateID = template.id;
+        currentInstance = template.clone({
+          templateName: template.templateName,
+          subTemplates: this.subTemplates,
+          data: templateData,
+          parentTemplate: this.template,
+          renderingEngine: 'native',
+        });
+        if (this.template?.element) { currentInstance.setElement(this.template.element); }
+        if (this.template) { currentInstance.setParent(this.template); }
+        currentInstance.initialize();
+        const templateFragment = currentInstance.render();
+        region.setContent(templateFragment);
+        if (renderRoot) { currentInstance.attach(renderRoot, { parentNode: region.parentNode }); }
+      }
+      else if (!comp.firstRun) {
+        currentInstance.setDataContext(templateData, { rerender: false });
+        currentInstance.render(templateData);
+      }
+    }));
+
+    scope.onDispose(() => {
+      if (currentInstance) {
+        currentInstance.onDestroyed();
+        currentInstance = null;
+      }
+    });
+  }
+
   /*******************************
         Snippets
   *******************************/
@@ -1193,7 +1319,9 @@ export class Renderer {
           });
         }
         else {
-          this.createSubtemplate({ node, data, scope, parentNode: region.anchor.parentNode, marker: region.anchor });
+          // Hydrate: adopt server DOM, clone template, wire Reaction for future updates.
+          // The server already rendered the subtemplate content — don't render again.
+          this.hydrateSubtemplate({ node, data, scope, region, ownedNodes });
         }
         break;
       }
