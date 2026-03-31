@@ -1042,6 +1042,8 @@ export class Renderer {
 
     let refEl, realEl;
     while ((refEl = refWalker.nextNode()) && (realEl = realWalker.nextNode())) {
+      // Capture element per-iteration for Reaction closures
+      const element = realEl;
       const attrsToProcess = [];
       for (let i = 0; i < refEl.attributes.length; i++) {
         const attr = refEl.attributes[i];
@@ -1073,14 +1075,14 @@ export class Renderer {
           const realAttrName = classification.attribute;
           const expr = entries[parts[0].markerID];
           scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !realEl.isConnected) {
+            if (!comp.firstRun && !element.isConnected) {
               comp.stop();
               return;
             }
             const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-            realEl[realAttrName] = value;
+            element[realAttrName] = value;
           }));
-          realEl.removeAttribute(attrName);
+          element.removeAttribute(attrName);
           continue;
         }
 
@@ -1091,9 +1093,9 @@ export class Renderer {
             const value = this.evaluator.lookupTokenValue(expr.node.value, data);
             if (isFunction(value)) { value(...args); }
           };
-          realEl.addEventListener(realAttrName, handler);
-          scope.onDispose(() => realEl.removeEventListener(realAttrName, handler));
-          realEl.removeAttribute(attrName);
+          element.addEventListener(realAttrName, handler);
+          scope.onDispose(() => element.removeEventListener(realAttrName, handler));
+          element.removeAttribute(attrName);
           continue;
         }
 
@@ -1103,31 +1105,31 @@ export class Renderer {
 
         if (isSingleExpr) {
           scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !realEl.isConnected) {
+            if (!comp.firstRun && !element.isConnected) {
               comp.stop();
               return;
             }
             const value = this.eval(singleEntry.node.value, data);
             if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
-              realEl.removeAttribute(attrName);
+              element.removeAttribute(attrName);
             }
             else {
               const strValue = (isArray(value) || isPlainObject(value))
                 ? JSON.stringify(value)
                 : String(value ?? '');
-              realEl.setAttribute(attrName, strValue);
+              element.setAttribute(attrName, strValue);
             }
             if (inArray(attrName, ['checked', 'selected'])) {
-              realEl[attrName] = Boolean(value);
+              element[attrName] = Boolean(value);
             }
             if (inArray(attrName, ['value'])) {
-              realEl[attrName] = value ?? '';
+              element[attrName] = value ?? '';
             }
           }));
         }
         else {
           scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !realEl.isConnected) {
+            if (!comp.firstRun && !element.isConnected) {
               comp.stop();
               return;
             }
@@ -1140,7 +1142,7 @@ export class Renderer {
                 value += this.eval(entries[part.markerID].node.value, data) ?? '';
               }
             }
-            realEl.setAttribute(attrName, value);
+            element.setAttribute(attrName, value);
           }));
         }
       }
