@@ -437,10 +437,10 @@ const createBehavior = ({ $, el, $el, self, settings, classNames, templates, dis
 const onDestroyed = ({ self }) => {
   self.clearTimers();
   if (self.$tooltip) {
-    self.$tooltip = null;
     if (self.createdTooltip) {
       self.$tooltip.remove();
     }
+    self.$tooltip = null;
   }
 };
 
