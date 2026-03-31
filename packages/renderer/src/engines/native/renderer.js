@@ -8,6 +8,7 @@ import {
   hashCode,
   inArray,
   isArray,
+  isDevelopment,
   isEmpty,
   isFunction,
   isPlainObject,
@@ -1099,13 +1100,14 @@ export class Renderer {
     comment.replaceWith(region.anchor);
     region.ownedNodes = ownedNodes;
 
-    // Determine which content AST the server rendered, hydrate its inner markers
+    // Hydrate inner markers in the server-rendered content.
+    // For conditionals, the server chose a branch — we hydrate whatever's in the DOM
+    // then let the Reaction swap if the client evaluates a different branch.
     const contentAST = this.getServerRenderedAST(node, data);
     if (contentAST && ownedNodes.length > 0) {
       const innerScope = scope.child();
       region.childScopes.push(innerScope);
       this.hydrateInnerContent(ownedNodes, contentAST, data, innerScope);
-      // Re-insert hydrated nodes after the anchor
       const frag = document.createDocumentFragment();
       for (const n of ownedNodes) { frag.appendChild(n); }
       region.anchor.after(frag);
@@ -1113,9 +1115,40 @@ export class Renderer {
     }
 
     switch (node.type) {
-      case 'if':
+      case 'if': {
+        // Check for hydration mismatch — client may evaluate a different branch
+        const clientBranch = this.getBranch(node, data);
+        const serverHadContent = ownedNodes.length > 0;
+        const clientWantsContent = clientBranch.contentAST !== null;
+
+        if (
+          serverHadContent !== clientWantsContent
+          || (serverHadContent && contentAST !== clientBranch.contentAST)
+        ) {
+          if (isDevelopment) {
+            console.warn(
+              `[SUI] Hydration mismatch in {#if ${node.condition}}: `
+                + `server and client evaluated different branches. `
+                + `Client will re-render this block.`,
+            );
+          }
+          // Re-render with client branch immediately
+          if (clientBranch.contentAST) {
+            const branchScope = scope.child();
+            const branchFragment = this.readAST({
+              ast: clientBranch.contentAST,
+              data,
+              scope: branchScope,
+            });
+            region.setContent(branchFragment, branchScope);
+          }
+          else {
+            region.clear();
+          }
+        }
         this.hydrateConditional({ node, data, scope, region });
         break;
+      }
       case 'each':
         this.hydrateEach({ node, data, scope, region });
         break;
@@ -1195,7 +1228,6 @@ export class Renderer {
   }
 
   hydrateConditional({ node, data, scope, region }) {
-    // Evaluate to establish dependencies and record initial branch
     const result = this.getBranch(node, data);
     let currentBranchIndex = result.matchIndex;
 

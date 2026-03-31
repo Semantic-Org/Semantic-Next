@@ -15,6 +15,9 @@ export const SSRDemo = defineComponent({
           <li class="item">{item}</li>
         {/each}
       </ul>
+      {#if isClient}
+        <p class="client-only">Client-only content (not in server HTML)</p>
+      {/if}
       <button class="increment">+1</button>
       <button class="toggle">Toggle message</button>
       <button class="add">Add item</button>
