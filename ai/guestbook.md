@@ -1848,4 +1848,39 @@ When debugging template binding issues: test with static values first (`prop=tru
 
 *— Claude (Opus 4.6, 1M context), 2026-03-30*
 
+---
+
+## Entry 9: The Marker Matching Problem and the Ladder
+**Date:** 2026-03-31
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Complete SSR hydration ladder from step 20 to 44+, fix real doc page rendering
+**Session:** Systematic ladder testing → Bug isolation → Deep architecture fixes → Doc site validation
+
+### The Insight
+
+The SSR hydration system had a fundamental marker matching bug that was invisible in simple cases but broke every real-world component. The server renderer resets marker entry IDs per scope (each snippet/conditional content block gets a fresh scope starting at 0). When inner blocks were siblings in the DOM — not children of intermediate elements — the closing marker walk matched the WRONG closing marker from a deeper scope that shared the same ID prefix.
+
+The bug only manifested when snippet content produced flat DOM (no wrapper elements between markers). Simple test cases wrapped everything in `<div>` elements, so markers were children of elements and the sibling walk never saw them. The real `ui-button` template has snippets that produce flat content inside a shared `<div>`, making ALL markers siblings.
+
+The fix was elegant: track block nesting depth during the sibling walk instead of matching by ID prefix. Every opening `sui-block` comment increments depth, every closing `/sui-block` decrements. The first closing at depth 0 is the correct match.
+
+### The Proxy Trap
+
+The second deep bug: the expression evaluator's JavaScript eval spreads the data context (`{...data}`) to build a `with()` proxy. For snippet data Proxies, spreading only included the parent data's own keys — snippet getter keys (like `isItem` from `{>title isItem=false}`) were lost because the Proxy had no `ownKeys` trap. This caused ternary expressions to fail silently: the JS eval couldn't find `isItem`, fell through to the Lisp evaluator which resolved `isItem` to boolean `false` but returned it raw without processing `?` and `:`. The attribute got `"titlefalse"` instead of `"title"`.
+
+The key diagnostic: the server HTML was CORRECT (`class="title"`), but the client re-render after the `{#each}` loop updated produced `"titlefalse"`. This told me the bug was in the client renderer's snippet data handling, not the server.
+
+### The SSR Props Bridge
+
+The Astro integration needed a way to transfer complex props (arrays, objects) from server to client. HTML attributes only carry strings. The solution: serialize complex props as a JSON `<script data-ssr-props>` tag inside the DSD template. `WebComponentBase._restoreSSRProps()` reads and applies them before hydration.
+
+### For Future Agents
+
+- **Marker matching is depth-based, not ID-based.** The server resets IDs per scope. The client can't use ID prefixes to find matching closing markers — it must track nesting depth.
+- **Snippet data Proxies need `ownKeys`.** Without it, spreading the Proxy loses the snippet getter keys. The JS eval `with()` block can't find variables from snippet data.
+- **The expression evaluator has TWO paths**: Lisp (right-to-left token walk) and JavaScript (new Function + with). Ternary expressions `?` `:` only work in the JS path. If the evaluator resolves the first token before reaching JS eval, it returns that value raw.
+- **Test with the ladder, validate with real pages.** Don't try to debug a full doc page directly — the composition complexity makes it impossible to isolate issues.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-31*
+
 *"The number of `!important` declarations in your CSS is inversely proportional to how well you understand the component system you're styling."*
