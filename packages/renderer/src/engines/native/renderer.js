@@ -20,19 +20,16 @@ import {
 
 import { Template } from '@semantic-ui/templating';
 
+import {
+  ATTR_MARKER_PREFIX,
+  ATTR_MARKER_SUFFIX,
+  BLOCK_MARKER,
+  buildHTMLString as buildHTMLStringPure,
+  COMMENT_MARKER,
+} from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
-
-// Marker for expression placeholders in attribute values
-const ATTR_MARKER_PREFIX = '__sui';
-const ATTR_MARKER_SUFFIX = '__';
-
-// Marker for text-position expressions (comment nodes)
-const COMMENT_MARKER = 'sui:';
-
-// Marker for block-level directive positions
-const BLOCK_MARKER = 'sui-block:';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
 const templateCache = new Map();
@@ -116,111 +113,7 @@ export class Renderer {
   *******************************/
 
   buildHTMLString(ast) {
-    let htmlString = '';
-    const entries = []; // { id, type, node, classification }
-    let htmlBuffer = ''; // accumulated HTML for binding classification
-
-    const processNodes = (nodes) => {
-      for (const node of nodes) {
-        switch (node.type) {
-          case 'html':
-            htmlString += node.html;
-            htmlBuffer += node.html;
-            break;
-
-          case 'expression': {
-            const id = entries.length;
-            const classification = this.analyzePosition(htmlBuffer);
-
-            if (classification.insideTag) {
-              // Attribute position — string token
-              htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
-            }
-            else {
-              // Text position — comment marker
-              htmlString += `<!--${COMMENT_MARKER}${id}-->`;
-            }
-            entries.push({ id, type: 'expression', node, classification });
-            break;
-          }
-
-          case 'svg': {
-            // Flatten SVG content inline — the outer <svg> tag is in a preceding html node
-            processNodes(node.content);
-            break;
-          }
-
-          case 'snippet':
-            // Register snippet immediately so it's available for later {>name} references
-            this.snippets[node.name] = node;
-            break;
-
-          case 'slot': {
-            if (node.name) {
-              htmlString += `<slot name="${node.name}"></slot>`;
-            }
-            else {
-              htmlString += '<slot></slot>';
-            }
-            break;
-          }
-
-          default: {
-            // Block-level directives: if, each, async, rerender, template
-            // Insert a comment marker at the current position in the HTML
-            const id = entries.length;
-            htmlString += `<!--${BLOCK_MARKER}${id}-->`;
-            entries.push({ id, type: node.type, node });
-            break;
-          }
-        }
-      }
-    };
-
-    processNodes(ast);
-    return { htmlString, entries };
-  }
-
-  /*******************************
-      Binding Classification
-  *******************************/
-
-  analyzePosition(html) {
-    let lastOpen = html.lastIndexOf('<');
-    let lastClose = html.lastIndexOf('>');
-
-    if (lastOpen <= lastClose) {
-      return { type: 'text', insideTag: false, attribute: '', quoted: false };
-    }
-
-    const tagFragment = html.slice(lastOpen);
-
-    // Check for .prop= or @event= prefixed attributes
-    const specialMatch = tagFragment.match(/\s([.@])([\w-]+)\s*=\s*(['"]?)$/);
-    if (specialMatch) {
-      const prefix = specialMatch[1];
-      const name = specialMatch[2];
-      return {
-        type: prefix === '.' ? 'property' : 'event',
-        insideTag: true,
-        attribute: name,
-        quoted: specialMatch[3] === '"' || specialMatch[3] === "'",
-      };
-    }
-
-    const attrMatch = tagFragment.match(/\s([\w-]+)\s*=\s*(['"]?)$/);
-    if (attrMatch) {
-      const name = attrMatch[1];
-      const quoted = attrMatch[2] === '"' || attrMatch[2] === "'";
-      return {
-        type: quoted ? 'attribute' : 'boolean',
-        insideTag: true,
-        attribute: name,
-        quoted,
-      };
-    }
-
-    return { type: 'attribute', insideTag: true, attribute: '', quoted: false };
+    return buildHTMLStringPure(ast, this.snippets);
   }
 
   /*******************************
@@ -939,6 +832,434 @@ export class Renderer {
 
     // Replace marker with snippet content
     marker.replaceWith(snippetFragment);
+  }
+
+  /*******************************
+        Hydration
+  *******************************/
+
+  hydrateMarkers(root, entries, data, scope) {
+    if (entries.length === 0) { return; }
+
+    // Classify entries
+    const attrEntries = [];
+    for (const entry of entries) {
+      if (entry.type === 'expression' && entry.classification?.insideTag) {
+        attrEntries.push(entry);
+      }
+    }
+
+    // Pass 1: Hydrate attribute bindings via reference DOM matching
+    if (attrEntries.length > 0) {
+      this.hydrateAttributes(root, entries, data, scope);
+    }
+
+    // Pass 2: Walk comments for text and block markers
+    const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    const commentsToProcess = [];
+    let comment;
+    while ((comment = commentWalker.nextNode())) {
+      const text = comment.data;
+      if (text.startsWith(COMMENT_MARKER)) {
+        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+        if (!isNaN(markerID)) {
+          commentsToProcess.push({ comment, markerID, type: 'expression' });
+        }
+      }
+      else if (text.startsWith(BLOCK_MARKER)) {
+        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+        if (!isNaN(markerID)) {
+          commentsToProcess.push({ comment, markerID, type: 'block' });
+        }
+      }
+    }
+
+    for (const { comment, markerID, type } of commentsToProcess) {
+      const entry = entries[markerID];
+      if (!entry) { continue; }
+
+      if (type === 'expression') {
+        this.hydrateTextExpression(comment, entry, data, scope);
+      }
+      else if (type === 'block') {
+        this.hydrateBlockDirective(comment, entry, data, scope);
+      }
+    }
+  }
+
+  hydrateAttributes(root, entries, data, scope) {
+    // Build a reference DOM from the marker htmlString to find attribute positions
+    const { htmlString } = buildHTMLStringPure(this.ast, this.snippets);
+    const refTemplate = document.createElement('template');
+    refTemplate.innerHTML = htmlString;
+    const refRoot = refTemplate.content;
+
+    const attrMarkerRegex = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
+
+    // Walk both trees in parallel (element-only)
+    const refWalker = document.createTreeWalker(refRoot, NodeFilter.SHOW_ELEMENT);
+    const realWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+
+    let refEl, realEl;
+    while ((refEl = refWalker.nextNode()) && (realEl = realWalker.nextNode())) {
+      const attrsToProcess = [];
+      for (let i = 0; i < refEl.attributes.length; i++) {
+        const attr = refEl.attributes[i];
+        if (attr.value.includes(ATTR_MARKER_PREFIX)) {
+          attrsToProcess.push({ name: attr.name, value: attr.value });
+        }
+      }
+
+      for (const { name: attrName, value: attrValue } of attrsToProcess) {
+        const parts = [];
+        let lastIndex = 0;
+        let match;
+        attrMarkerRegex.lastIndex = 0;
+        while ((match = attrMarkerRegex.exec(attrValue)) !== null) {
+          if (match.index > lastIndex) {
+            parts.push({ static: attrValue.slice(lastIndex, match.index) });
+          }
+          parts.push({ markerID: parseInt(match[1]) });
+          lastIndex = attrMarkerRegex.lastIndex;
+        }
+        if (lastIndex < attrValue.length) {
+          parts.push({ static: attrValue.slice(lastIndex) });
+        }
+
+        const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
+        const bindingType = classification?.type;
+
+        if (bindingType === 'property') {
+          const realAttrName = classification.attribute;
+          const expr = entries[parts[0].markerID];
+          scope.track(Reaction.create((comp) => {
+            if (!comp.firstRun && !realEl.isConnected) {
+              comp.stop();
+              return;
+            }
+            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
+            realEl[realAttrName] = value;
+          }));
+          realEl.removeAttribute(attrName);
+          continue;
+        }
+
+        if (bindingType === 'event') {
+          const realAttrName = classification.attribute;
+          const expr = entries[parts[0].markerID];
+          const handler = (...args) => {
+            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
+            if (isFunction(value)) { value(...args); }
+          };
+          realEl.addEventListener(realAttrName, handler);
+          scope.onDispose(() => realEl.removeEventListener(realAttrName, handler));
+          realEl.removeAttribute(attrName);
+          continue;
+        }
+
+        const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
+        const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
+        const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
+
+        if (isSingleExpr) {
+          scope.track(Reaction.create((comp) => {
+            if (!comp.firstRun && !realEl.isConnected) {
+              comp.stop();
+              return;
+            }
+            const value = this.eval(singleEntry.node.value, data);
+            if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
+              realEl.removeAttribute(attrName);
+            }
+            else {
+              const strValue = (isArray(value) || isPlainObject(value))
+                ? JSON.stringify(value)
+                : String(value ?? '');
+              realEl.setAttribute(attrName, strValue);
+            }
+            if (inArray(attrName, ['checked', 'selected'])) {
+              realEl[attrName] = Boolean(value);
+            }
+            if (inArray(attrName, ['value'])) {
+              realEl[attrName] = value ?? '';
+            }
+          }));
+        }
+        else {
+          scope.track(Reaction.create((comp) => {
+            if (!comp.firstRun && !realEl.isConnected) {
+              comp.stop();
+              return;
+            }
+            let value = '';
+            for (const part of parts) {
+              if (part.static !== undefined) {
+                value += part.static;
+              }
+              else {
+                value += this.eval(entries[part.markerID].node.value, data) ?? '';
+              }
+            }
+            realEl.setAttribute(attrName, value);
+          }));
+        }
+      }
+    }
+  }
+
+  hydrateTextExpression(comment, entry, data, scope) {
+    const exprNode = entry.node;
+
+    if (exprNode.unsafeHTML) {
+      // Collect server-rendered nodes after the comment until next marker
+      const ownedNodes = [];
+      let next = comment.nextSibling;
+      while (
+        next && !(next.nodeType === Node.COMMENT_NODE
+          && (next.data.startsWith(COMMENT_MARKER) || next.data.startsWith(BLOCK_MARKER)
+            || next.data.startsWith('/sui-block')))
+      ) {
+        ownedNodes.push(next);
+        next = next.nextSibling;
+      }
+
+      scope.track(Reaction.create((comp) => {
+        if (!comp.firstRun && !comment.isConnected) {
+          comp.stop();
+          return;
+        }
+        if (comp.firstRun) { return; } // server content is correct
+        for (const n of ownedNodes) { n.remove(); }
+        ownedNodes.length = 0;
+        const value = this.eval(exprNode.value, data);
+        if (value != null && value !== '') {
+          const parsed = this.parseHTML(String(value));
+          const nodes = [...parsed.childNodes];
+          comment.after(parsed);
+          ownedNodes.push(...nodes);
+        }
+      }));
+    }
+    else {
+      // Adopt the server-rendered text node adjacent to the comment
+      let textNode = comment.nextSibling;
+      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+        comment.remove();
+      }
+      else {
+        textNode = document.createTextNode('');
+        comment.replaceWith(textNode);
+      }
+
+      scope.track(Reaction.create((comp) => {
+        if (!comp.firstRun && !textNode.isConnected) {
+          comp.stop();
+          return;
+        }
+        const value = this.eval(exprNode.value, data);
+        textNode.data = value ?? '';
+      }));
+    }
+  }
+
+  hydrateBlockDirective(comment, entry, data, scope) {
+    const { node } = entry;
+    const parentNode = comment.parentNode;
+    const markerID = entry.id;
+
+    // Collect all nodes between opening and closing block markers
+    const ownedNodes = [];
+    let next = comment.nextSibling;
+    const closingMarker = `/sui-block:v1:${markerID}`;
+    while (next) {
+      if (next.nodeType === Node.COMMENT_NODE && next.data === closingMarker) {
+        next.remove();
+        break;
+      }
+      ownedNodes.push(next);
+      next = next.nextSibling;
+    }
+
+    // Create DynamicRegion with server-rendered content
+    const region = new DynamicRegion(parentNode, null);
+    region.anchor = document.createTextNode('');
+    comment.replaceWith(region.anchor);
+    region.ownedNodes = ownedNodes;
+
+    switch (node.type) {
+      case 'if':
+        this.hydrateConditional({ node, data, scope, region });
+        break;
+      case 'each':
+        this.hydrateEach({ node, data, scope, region });
+        break;
+      case 'async':
+        this.hydrateAsync({ node, data, scope, region });
+        break;
+      case 'rerender':
+        this.hydrateRerender({ node, data, scope, region });
+        break;
+      case 'template': {
+        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+        if (this.snippets[templateName]) {
+          // Snippets are inlined — already in ownedNodes, just need reactive updates
+          this.hydrateRerender({
+            node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
+            data,
+            scope,
+            region,
+          });
+        }
+        else {
+          this.createSubtemplate({ node, data, scope, parentNode: region.anchor.parentNode, marker: region.anchor });
+        }
+        break;
+      }
+    }
+  }
+
+  hydrateConditional({ node, data, scope, region }) {
+    // Evaluate to establish dependencies and record initial branch
+    const result = this.getBranch(node, data);
+    let currentBranchIndex = result.matchIndex;
+
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !region.anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+
+      const result = this.getBranch(node, data);
+      if (result.matchIndex !== currentBranchIndex) {
+        currentBranchIndex = result.matchIndex;
+        if (result.contentAST) {
+          const branchScope = scope.child();
+          const branchFragment = this.readAST({ ast: result.contentAST, data, scope: branchScope });
+          region.setContent(branchFragment, branchScope);
+        }
+        else {
+          region.clear();
+        }
+      }
+    }));
+  }
+
+  hydrateEach({ node, data, scope, region }) {
+    // On first run: evaluate to establish dependencies, skip rendering.
+    // On subsequent runs: full re-render of the entire list.
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !region.anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+
+      const rawItems = this.eval(node.over, data) || [];
+      const collectionType = this.getCollectionType(rawItems);
+      const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
+
+      if (comp.firstRun) {
+        return; // server content is correct
+      }
+
+      if (isEmpty(items) && node.elseContent) {
+        const elseScope = scope.child();
+        const elseFragment = this.readAST({ ast: node.elseContent, data, scope: elseScope });
+        region.setContent(elseFragment, elseScope);
+      }
+      else {
+        const fragment = document.createDocumentFragment();
+        const listScope = scope.child();
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const eachData = this.getEachData(item, i, collectionType, node);
+          const itemSignal = new Signal(eachData);
+          const itemProxy = this.createItemDataProxy(data, itemSignal);
+          const itemScope = listScope.child();
+          const itemFragment = this.readAST({ ast: node.content, data: itemProxy, scope: itemScope });
+          fragment.append(itemFragment);
+        }
+        region.setContent(fragment, listScope);
+      }
+    }));
+  }
+
+  hydrateAsync({ node, data, scope, region }) {
+    scope.onDispose(() => region.clear());
+
+    let generation = 0;
+    let hasResolved = false;
+    let resolvedValue = null;
+
+    const renderState = (ast, extraData = {}) => {
+      const stateScope = scope.child();
+      const stateFragment = this.readAST({
+        ast,
+        data: { ...data, ...extraData },
+        scope: stateScope,
+      });
+      region.setContent(stateFragment, stateScope);
+    };
+
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !region.anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+
+      const result = this.eval(node.expression, data);
+      const currentGen = ++generation;
+
+      if (isPromise(result)) {
+        // On first run, keep server loading content (don't re-render loading)
+        if (!comp.firstRun && node.loadingContent?.length) {
+          renderState(node.loadingContent);
+        }
+
+        result.then(value => {
+          if (currentGen < generation) { return; }
+          resolvedValue = value;
+          hasResolved = true;
+          renderState(node.content, this.createSuccessDataContext(node, value));
+          this.notifyUpdate();
+        }).catch(error => {
+          if (currentGen < generation) { return; }
+          if (node.errorContent?.length) {
+            const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
+            renderState(node.errorContent, errorData);
+            this.notifyUpdate();
+          }
+        });
+      }
+      else {
+        resolvedValue = result;
+        hasResolved = true;
+        if (!comp.firstRun) {
+          renderState(node.content, this.createSuccessDataContext(node, result));
+        }
+      }
+    }));
+  }
+
+  hydrateRerender({ node, data, scope, region }) {
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !region.anchor.isConnected) {
+        comp.stop();
+        return;
+      }
+
+      if (node.key) {
+        Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
+      }
+      if (node.expression) {
+        this.eval(node.expression, data);
+      }
+
+      if (!comp.firstRun) {
+        const newScope = scope.child();
+        const newFragment = this.readAST({ ast: node.content, data, scope: newScope });
+        region.setContent(newFragment, newScope);
+      }
+    }));
   }
 
   /*******************************
