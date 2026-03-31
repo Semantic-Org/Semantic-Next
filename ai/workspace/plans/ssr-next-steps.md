@@ -213,6 +213,12 @@ After the test routes look correct, navigate to `/ui/start` and compare. The fix
 ### Hydration performance
 The client-side hydration locks the browser for several seconds on pages with many components. Flame charts show it re-running every calculation and hitting clone logic — suggesting the hydration path is doing full re-computation rather than adopting server DOM and wiring bindings. This defeats the purpose of SSR. The hydration path in `WebComponentBase.hydrate()` and the renderer's `hydrateMarkers` should be audited for unnecessary work — the server already computed the values, the client should trust that output and only wire reactivity.
 
+## When You're Stuck
+
+If you've been iterating and the screenshots aren't converging, use the `fresh-take` skill (load via `use_skill fresh-take` from MCP, audience: contributing). It guides you through extracting problem knowledge from your current context, stripping solution momentum, and delegating to a fresh subagent for independent evaluation. The fresh agent sees the problem without your trajectory and may identify approaches you've been orbiting past.
+
+Key: separate what you've LEARNED about the problem (constraints, architecture facts) from what you've TRIED (specific approaches, hypotheses). Transfer the former, isolate the latter. See the skill for the full methodology.
+
 ## Questions for Independent Evaluation
 
 1. Where in the rendering pipeline is the right interception point for nested custom elements — and what are the tradeoffs of each location?
