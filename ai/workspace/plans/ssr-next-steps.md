@@ -120,6 +120,25 @@ Creates a `ServerRenderer` directly (not through Template.clone). Runs `createCo
 - `src/components/nav-menu/nav-menu.js` — Component JS
 - `src/components/nav-menu/nav-menu.html` — Template (renders `<ui-icon>`, `<ui-input>`)
 
+## Testing SSR-Only Output
+
+There are two ways to see pure SSR output without JS hydration:
+
+### Method 1: Use the `/test-ssr/component` route (preferred)
+This route renders the component without `client:load`, so no hydration island is created. The DSD output is final — no JS needed. However, other components on the page that share the same module may still trigger `customElements.define`, causing the element to upgrade.
+
+### Method 2: Disable JavaScript in Chrome DevTools
+For the `/test-ssr/vanilla` and `/test-ssr/hydrated` routes, disabling JS shows the pure server output before any client code runs. This is the most accurate view of what the server produced.
+
+**Chrome MCP cannot disable JS programmatically** — the `emulate` tool has no JS toggle. To use this workflow:
+1. Ask the user to open Chrome DevTools on the target tab
+2. Ask them to disable JavaScript (Settings > Debugger > Disable JavaScript, or Cmd+Shift+P > "Disable JavaScript")
+3. Reload the page
+4. Take screenshots via Chrome MCP as normal
+5. Ask the user to re-enable JS when done
+
+Alternatively, the user can keep two browser windows — one with JS disabled permanently — and the agent navigates both to the same URL for side-by-side comparison.
+
 ## Process for Iterating
 
 ### Step 1: Observe the gap
