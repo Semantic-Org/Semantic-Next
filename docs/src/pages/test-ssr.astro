@@ -3,46 +3,11 @@ import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
 
-import { renderToString } from '@semantic-ui/renderer';
-import { TemplateCompiler, TemplateHelpers } from '@semantic-ui/templating';
+import { renderToString } from '@semantic-ui/component';
+import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
 
-// Compile the template on the server
-const template = `
-  <div class="container">
-    <h2>{title}</h2>
-    <p>Count: {count}</p>
-    {#if showMessage}
-      <p class="message">{message}</p>
-    {/if}
-    <ul>
-      {#each item in items}
-        <li class="item">{item}</li>
-      {/each}
-    </ul>
-  </div>
-`;
-
-const css = `
-  .container { padding: 16px; font-family: sans-serif; }
-  .message { color: green; font-weight: bold; }
-  .item { padding: 4px 0; }
-`;
-
-const ast = new TemplateCompiler(template).compile();
-
-// Server render with initial data
-const dsd = renderToString({
-  ast,
-  data: {
-    title: 'SSR Test Component',
-    count: 0,
-    showMessage: true,
-    message: 'Server-rendered!',
-    items: ['Alpha', 'Beta', 'Gamma'],
-  },
-  css,
-  helpers: TemplateHelpers,
-});
+// Server render to DSD string
+const dsd = renderToString(SSRDemo, { title: 'SSR Demo' });
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
@@ -50,102 +15,33 @@ const dsd = renderToString({
   <h1 style="color: white; font-family: sans-serif;">Native SSR Round-Trip Test</h1>
 
   <!-- Server-rendered component with DSD -->
-  <ssr-demo set:html={dsd}></ssr-demo>
+  <Fragment set:html={dsd} />
+
+  <details style="margin-top: 20px;">
+    <summary style="color: #888; cursor: pointer;">Server HTML</summary>
+    <pre style="color: #0f0; font-size: 12px; overflow: auto; max-height: 300px;">{dsd}</pre>
+  </details>
 
   <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
 </div>
 
 <script>
-  import { defineComponent } from '@semantic-ui/component';
+  // Import the component on the client — same definition, registers the custom element,
+  // connectedCallback detects existing shadow root from DSD and hydrates
+  import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
   import { $ } from '@semantic-ui/query';
 
-  const template = `
-    <div class="container">
-      <h2>{title}</h2>
-      <p>Count: {count}</p>
-      {#if showMessage}
-        <p class="message">{message}</p>
-      {/if}
-      <ul>
-        {#each item in items}
-          <li class="item">{item}</li>
-        {/each}
-      </ul>
-    </div>
-  `;
-
-  const css = `
-    .container { padding: 16px; font-family: sans-serif; }
-    .message { color: green; font-weight: bold; }
-    .item { padding: 4px 0; }
-  `;
-
-  defineComponent({
-    tagName: 'ssr-demo',
-    renderingEngine: 'native',
-    template,
-    css,
-    defaultSettings: {
-      title: 'SSR Test Component',
-      message: 'Server-rendered!',
-    },
-    defaultState: {
-      count: 0,
-      showMessage: true,
-      items: ['Alpha', 'Beta', 'Gamma'],
-    },
-    createComponent: ({ self, state }) => ({
-      increment() {
-        state.count.increment();
-      },
-      toggleMessage() {
-        state.showMessage.toggle();
-      },
-      addItem() {
-        state.items.push('Item ' + (state.items.get().length + 1));
-      },
-    }),
-  });
-
-  const log = (msg) => {
-    document.getElementById('log').textContent += msg + '\n';
-  };
-
+  // Wait for hydration
   const el = document.querySelector('ssr-demo');
+  $(el).onNext('rendered').then(() => {
+    const log = (msg) => {
+      document.getElementById('log').textContent += msg + '\n';
+    };
 
-  // Check if DSD created the shadow root
-  log('Shadow root exists: ' + !!el.shadowRoot);
-  log('Shadow root mode: ' + el.shadowRoot?.mode);
-  log('Initial content: ' + el.shadowRoot?.querySelector('.container')?.textContent?.trim().replace(/\s+/g, ' '));
-
-  // Listen for hydration events
-  el.addEventListener('created', () => log('EVENT: created'));
-  el.addEventListener('rendered', () => {
-    log('EVENT: rendered (hydrated)');
-    log('Post-hydration content: ' + el.shadowRoot?.querySelector('.container')?.textContent?.trim().replace(/\s+/g, ' '));
-
-    // Test reactivity after hydration
-    log('--- Testing reactivity ---');
-
-    const u1 = $(el).onNext('updated');
-    el.component.increment();
-    u1.then(() => {
-      log('After increment: count = ' + el.shadowRoot?.querySelector('.container p')?.textContent);
-
-      const u2 = $(el).onNext('updated');
-      el.component.toggleMessage();
-      u2.then(() => {
-        log('After toggle: message visible = ' + !!el.shadowRoot?.querySelector('.message'));
-
-        const u3 = $(el).onNext('updated');
-        el.component.addItem();
-        u3.then(() => {
-          const items = el.shadowRoot?.querySelectorAll('.item');
-          log('After addItem: item count = ' + items?.length);
-          log('--- ALL PASSED ---');
-        });
-      });
-    });
+    log('Shadow root exists: ' + !!el.shadowRoot);
+    log('Hydrated: ' + !!el.template);
+    log('Items: ' + JSON.stringify(el.template?.state?.items?.get?.()));
+    log('Content: ' + el.shadowRoot?.querySelector('.container')?.textContent?.trim().replace(/\s+/g, ' '));
   });
 </script>
 </Body>

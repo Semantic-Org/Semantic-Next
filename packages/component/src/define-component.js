@@ -94,10 +94,15 @@ export const defineComponent = ({
       onAttributeChanged, renderingEngine,
     });
 
+    // Store tagName on the class for SSR renderToString
+    webComponent.componentTagName = tagName;
+
     if (isClient && customElements.get(tagName)) {
       return webComponent;
     }
-    customElements.define(tagName, webComponent);
+    if (isClient) {
+      customElements.define(tagName, webComponent);
+    }
   }
   return tagName ? webComponent : prototypeTemplate;
 };

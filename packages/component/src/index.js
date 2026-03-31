@@ -7,3 +7,4 @@ export { defineComponent } from './define-component.js';
 export { LitRenderer } from './engines/lit/register.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeRenderer } from './engines/native/register.js';
+export { renderToString } from './render-to-string.js';
