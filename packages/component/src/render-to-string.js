@@ -15,7 +15,7 @@ import { camelToKebab, each } from '@semantic-ui/utils';
   and connectedCallback hydrates it with reactive bindings.
 */
 
-export function renderToString(ComponentClass, attrs = {}) {
+export function renderToString(ComponentClass, attrs = {}, children = '') {
   const tagName = ComponentClass.componentTagName;
   if (!tagName) {
     throw new Error('renderToString requires a component with a tagName');
@@ -40,12 +40,13 @@ export function renderToString(ComponentClass, attrs = {}) {
   // Build attribute string for the outer element
   const attrString = serializeAttrs(attrs);
 
-  // Wrap in DSD
+  // Wrap in DSD — slotted content goes in the light DOM after the template
   return `<${tagName}${attrString}>`
     + `<template shadowrootmode="open">`
     + (css ? `<style>${css}</style>` : '')
     + html
     + `</template>`
+    + children
     + `</${tagName}>`;
 }
 

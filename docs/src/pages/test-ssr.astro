@@ -5,15 +5,27 @@ import '../css/fonts.css';
 
 import { renderToString } from '@semantic-ui/component';
 import { SSRDemo } from '@components/SSRDemo/SSRDemo.js';
+import { Button } from '@semantic-ui/core';
 
-// Server render to DSD string
+// Server render components to DSD strings
 const dsd = renderToString(SSRDemo, { title: 'SSR Demo' });
+const buttonPrimary = renderToString(Button, { emphasis: 'primary' }, 'Primary');
+const buttonDisabled = renderToString(Button, { disabled: true }, 'Disabled');
+const buttonLink = renderToString(Button, { href: '/about' }, 'Link Button');
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
 
   <h1 style="color: white; font-family: sans-serif;">Native SSR Round-Trip Test</h1>
 
+  <h2 style="color: white; font-family: sans-serif;">Primitives</h2>
+  <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+    <Fragment set:html={buttonPrimary} />
+    <Fragment set:html={buttonDisabled} />
+    <Fragment set:html={buttonLink} />
+  </div>
+
+  <h2 style="color: white; font-family: sans-serif;">Custom Component</h2>
   <!-- Server-rendered component with DSD -->
   <Fragment set:html={dsd} />
 

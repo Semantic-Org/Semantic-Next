@@ -127,7 +127,27 @@ class WebComponentBase extends HTMLElementBase {
 
     this.template._isHydrating = false;
     this.template.rendered = true;
+
+    // Remove all hydration markers — clean DevTools, zero comment noise
+    this.removeMarkers();
+
     setTimeout(() => this.template.onRendered(), 0);
+  }
+
+  removeMarkers() {
+    const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_COMMENT);
+    const toRemove = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.data.startsWith('sui')) {
+        toRemove.push(node);
+        console.log('match', node.data);
+      }
+      else {
+        console.log('not match', node.data);
+      }
+    }
+    for (const node of toRemove) { node.remove(); }
   }
 
   fullRender(prototypeTemplate) {
