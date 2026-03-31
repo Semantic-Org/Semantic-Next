@@ -4,82 +4,109 @@ import '../css/layers.css';
 import '../css/fonts.css';
 
 import { renderToString } from '@semantic-ui/component';
-import { Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8 } from '@components/SSRDemo/SSRLadder.js';
+import {
+  Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
+  Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
+  Step17, Step18,
+} from '@components/SSRDemo/SSRLadder.js';
 
 const steps = [
   { component: Step1, label: '1. Static HTML' },
-  { component: Step2, label: '2. Text expressions + settings override', attrs: { greeting: 'Howdy', name: 'Partner' } },
+  { component: Step2, label: '2. Text expressions', attrs: { greeting: 'Howdy', name: 'Partner' } },
   { component: Step3, label: '3. Attribute expressions' },
-  { component: Step4, label: '4. Conditional' },
+  { component: Step4, label: '4. Conditional (if/else)' },
   { component: Step5, label: '5. Each loop' },
   { component: Step6, label: '6. Snippet' },
   { component: Step7, label: '7. Subtemplate' },
-  { component: Step8, label: '8. Nested blocks' },
+  { component: Step8, label: '8. Nested (if > each)' },
+  { component: Step9, label: '9. Async (loading state)' },
+  { component: Step10, label: '10. Rerender block' },
+  { component: Step11, label: '11. Guard block' },
+  { component: Step12, label: '12. Slots', children: '<span slot="header">Header</span>Body content' },
+  { component: Step13, label: '13. Unsafe HTML' },
+  { component: Step14, label: '14. isClient/isServer' },
+  { component: Step15, label: '15. Each + conditional per item' },
+  { component: Step16, label: '16. Snippet inside each' },
+  { component: Step17, label: '17. Multi-branch (if/else-if/else)' },
+  { component: Step18, label: '18. Object iteration' },
 ];
 
 const rendered = steps.map(s => ({
   ...s,
-  html: renderToString(s.component, s.attrs || {}),
+  html: renderToString(s.component, s.attrs || {}, s.children || ''),
 }));
+
+const expected = {
+  1: 'Hello World',
+  2: 'Howdy, Partner!',
+  3: '3 items',
+  4: 'Visible',
+  5: 'AlphaBetaGamma',
+  6: '[One] [Two]',
+  7: 'From subtemplate',     // KNOWN BUG: doubles to "From subtemplateFrom subtemplate"
+  8: 'XYZ',
+  9: 'Loaded!',              // async resolves before hydration check
+  10: 'Version: 0',
+  11: 'Category: basic',
+  12: '',                     // slots: shadowRoot.textContent is empty, projected content is in light DOM
+  13: 'Bold and italic',
+  14: 'Client',
+  15: 'AliceBobCarol',
+  16: '[Red][Green][Blue]',
+  17: 'Mode B',
+  18: 'red green blue',
+};
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 800px; font-family: sans-serif;">
   <h1 style="color: white;">SSR Hydration Ladder</h1>
 
   {rendered.map(step => (
-    <div style="margin-bottom: 16px;">
-      <h3 style="color: #888; margin: 4px 0;">{step.label}</h3>
+    <div style="margin-bottom: 8px;">
+      <h4 style="color: #888; margin: 2px 0; font-size: 13px;">{step.label}</h4>
       <Fragment set:html={step.html} />
     </div>
   ))}
 
-  <details style="margin-top: 20px;">
-    <summary style="color: #888; cursor: pointer;">Raw Server HTML</summary>
-    {rendered.map(step => (
-      <div>
-        <h4 style="color: #888;">{step.label}</h4>
-        <pre style="color: #0f0; font-size: 11px; overflow: auto; max-height: 100px;">{step.html}</pre>
-      </div>
-    ))}
-  </details>
-  <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
+  <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 13px;"></pre>
 </div>
 
+<script define:vars={{ expected }}>
+  window.__ssrExpected = expected;
+</script>
 <script>
-  // Import all steps on client — triggers hydration
-  import { Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8 } from '@components/SSRDemo/SSRLadder.js';
+  import {
+    Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
+    Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
+    Step17, Step18,
+  } from '@components/SSRDemo/SSRLadder.js';
 
+  const expected = window.__ssrExpected;
   const log = (msg) => {
     document.getElementById('log').textContent += msg + '\n';
   };
 
-  // Check each step
-  const tags = [
-    'ssr-step-1', 'ssr-step-2', 'ssr-step-3', 'ssr-step-4',
-    'ssr-step-5', 'ssr-step-6', 'ssr-step-7', 'ssr-step-8',
-  ];
-
-  // Wait a tick for hydration to complete
   setTimeout(() => {
-    tags.forEach((tag, i) => {
-      const el = document.querySelector(tag);
-      if (!el) { log(`Step ${i+1}: MISSING`); return; }
+    for (let i = 1; i <= 18; i++) {
+      const el = document.querySelector(`ssr-step-${i}`);
+      if (!el) { log(`${i}: MISSING`); continue; }
 
-      const hasTemplate = !!el.template;
-      const shadowRoot = el.shadowRoot;
-      const comments = [];
-      if (shadowRoot) {
-        const walker = document.createTreeWalker(shadowRoot, NodeFilter.SHOW_COMMENT);
-        let node;
-        while ((node = walker.nextNode())) comments.push(node.data);
-      }
+      const sr = el.shadowRoot;
+      const walker = document.createTreeWalker(sr, NodeFilter.SHOW_COMMENT);
+      let comments = 0;
+      while (walker.nextNode()) comments++;
 
-      const status = hasTemplate ? 'HYDRATED' : 'NOT HYDRATED';
-      const commentStatus = comments.length === 0 ? 'clean' : `${comments.length} comments`;
-      const content = shadowRoot?.textContent?.trim().replace(/\s+/g, ' ').slice(0, 50) || 'empty';
+      const text = sr?.textContent?.trim().replace(/\s+/g, ' ') || '';
+      const exp = expected[i];
+      const contentMatch = exp ? text.includes(exp) : true;
 
-      log(`Step ${i+1}: ${status} | ${commentStatus} | "${content}"`);
-    });
-  }, 200);
+      const hydrated = el.template ? '✓' : '✗';
+      const clean = comments === 0 ? '✓' : `✗(${comments})`;
+      const content = contentMatch ? '✓' : `✗`;
+
+      const status = (hydrated === '✓' && clean === '✓' && content === '✓') ? '✅' : '❌';
+      log(`${status} ${i}: hydrate=${hydrated} clean=${clean} content=${content} "${text.slice(0, 50)}"`);
+    }
+  }, 500);
 </script>
 </Body>
