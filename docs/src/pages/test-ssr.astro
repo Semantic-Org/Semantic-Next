@@ -31,14 +31,17 @@ const steps = [
   { component: Step17, label: '17. Multi-branch (if/else-if/else)' },
   { component: Step18, label: '18. Object iteration' },
   { component: Step19, label: '19. Spec-driven ({ui} classes)', attrs: { emphasis: 'primary', size: 'large' }, children: 'Large Primary' },
-  { component: Button, label: '20. ui-button', attrs: { emphasis: 'primary' }, children: 'Click Me' },
+  { component: Button, label: '20. ui-button primary', attrs: { emphasis: 'primary' }, children: 'Click Me' },
+  { component: Button, label: '21. ui-button with href', attrs: { emphasis: 'secondary', href: 'https://example.com' }, children: 'Visit' },
 ];
 
-const rendered = steps.map(s => ({
+const rendered = steps.map((s, i) => ({
   ...s,
+  step: i + 1,
   html: renderToString(s.component, s.attrs || {}, s.children || ''),
 }));
 
+// Expected textContent for each step (empty string = slot-based, check visually)
 const expected = {
   1: 'Hello World',
   2: 'Howdy, Partner!',
@@ -46,40 +49,42 @@ const expected = {
   4: 'Visible',
   5: 'AlphaBetaGamma',
   6: '[One] [Two]',
-  7: 'From subtemplate',     // KNOWN BUG: doubles to "From subtemplateFrom subtemplate"
+  7: 'From subtemplate',
   8: 'XYZ',
-  9: 'Loaded!',              // async resolves before hydration check
+  9: 'Loaded!',
   10: 'Version: 0',
   11: 'Category: basic',
-  12: '',                     // slots: shadowRoot.textContent is empty, projected content is in light DOM
+  12: '',
   13: 'Bold and italic',
   14: 'Client',
   15: 'AliceBobCarol',
   16: '[Red][Green][Blue]',
   17: 'Mode B',
   18: 'red green blue',
-  19: '',  // slot: textContent empty in shadow root, projected content in light DOM
-  20: '',  // ui-button: slot-based, check visually
+  19: '',
+  20: '',
+  21: '',
 };
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 800px; font-family: sans-serif;">
   <h1 style="color: white;">SSR Hydration Ladder</h1>
 
-  {rendered.map(step => (
-    <div style="margin-bottom: 8px;">
+  <pre id="log" style="color: #0f0; margin-bottom: 20px; font-size: 13px;"></pre>
+
+  {rendered.toReversed().map(step => (
+    <div data-step={step.step} style="margin-bottom: 8px;">
       <h4 style="color: #888; margin: 2px 0; font-size: 13px;">{step.label}</h4>
       <Fragment set:html={step.html} />
     </div>
   ))}
-
-  <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 13px;"></pre>
 </div>
 
 <script define:vars={{ expected }}>
   window.__ssrExpected = expected;
 </script>
 <script>
+  import { $ } from '@semantic-ui/query';
   import {
     Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
@@ -95,25 +100,32 @@ const expected = {
   setTimeout(() => {
     const stepCount = Object.keys(expected).length;
     for (let i = 1; i <= stepCount; i++) {
-      const el = document.querySelector(`ssr-step-${i}`);
-      if (!el) { log(`${i}: MISSING`); continue; }
+      const wrapper = document.querySelector(`[data-step="${i}"]`);
+      if (!wrapper) { log(`${i}: WRAPPER MISSING`); continue; }
+
+      // Find the component element (first custom element child)
+      const el = wrapper.querySelector(':scope > *:not(h4)');
+      if (!el || !el.tagName.includes('-')) { log(`${i}: ELEMENT MISSING`); continue; }
 
       const sr = el.shadowRoot;
+      if (!sr) { log(`❌ ${i}: NO SHADOW ROOT`); continue; }
+
+      // Count comments
       const walker = document.createTreeWalker(sr, NodeFilter.SHOW_COMMENT);
       let comments = 0;
       while (walker.nextNode()) comments++;
 
-      const text = sr?.textContent?.trim().replace(/\s+/g, ' ') || '';
+      const text = sr.textContent?.trim().replace(/\s+/g, ' ') || '';
       const exp = expected[i];
       const contentMatch = exp ? text.includes(exp) : true;
 
       const hydrated = el.template ? '✓' : '✗';
       const clean = comments === 0 ? '✓' : `✗(${comments})`;
-      const content = contentMatch ? '✓' : `✗`;
+      const content = contentMatch ? '✓' : '✗';
 
       const status = (hydrated === '✓' && clean === '✓' && content === '✓') ? '✅' : '❌';
-      log(`${status} ${i}: hydrate=${hydrated} clean=${clean} content=${content} "${text.slice(0, 50)}"`);
+      log(`${status} ${i}: hydrate=${hydrated} clean=${clean} content=${content} "${text.slice(0, 60)}"`);
     }
-  }, 500);
+  }, 800);
 </script>
 </Body>

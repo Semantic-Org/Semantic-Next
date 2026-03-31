@@ -1225,22 +1225,31 @@ export class Renderer {
     const parentNode = comment.parentNode;
     const markerID = entry.id;
 
-    // Collect all nodes between opening and closing block markers
+    // Collect all nodes between opening and closing block markers.
+    // Track depth because inner blocks (from nested snippets/conditionals)
+    // can share marker IDs when scopes reset — match by nesting depth, not ID.
     const ownedNodes = [];
     let next = comment.nextSibling;
-    const closingPrefix = `/sui-block:v1:${markerID}`;
     let serverMeta = {};
+    let blockDepth = 1;
     while (next) {
-      if (next.nodeType === Node.COMMENT_NODE && next.data.startsWith(closingPrefix)) {
-        // Parse metadata from closing marker (e.g. <!--/sui-block:v1:3:b1000-->)
-        const metaParts = next.data.slice(closingPrefix.length + 1).split(':');
-        for (const part of metaParts) {
-          if (part.startsWith('b')) {
-            serverMeta.branchIndex = parseInt(part.slice(1));
+      if (next.nodeType === Node.COMMENT_NODE) {
+        if (next.data.startsWith(BLOCK_MARKER)) {
+          blockDepth++;
+        }
+        else if (next.data.startsWith('/sui-block:')) {
+          blockDepth--;
+          if (blockDepth === 0) {
+            // Parse metadata from closing marker (e.g. <!--/sui-block:v1:3:b1000-->)
+            for (const part of next.data.split(':')) {
+              if (part.startsWith('b')) {
+                serverMeta.branchIndex = parseInt(part.slice(1));
+              }
+            }
+            next.remove();
+            break;
           }
         }
-        next.remove();
-        break;
       }
       ownedNodes.push(next);
       next = next.nextSibling;
