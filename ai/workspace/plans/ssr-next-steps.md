@@ -75,46 +75,36 @@ render() → renderNodes(ast) → htmlString
 
 ### Component Lookup
 
-The renderer needs access to component definitions. Options:
+The renderer needs access to component definitions. The registry should NOT live in `defineComponent` — that's the user-facing API and shouldn't have SSR concerns. Component authors reading that code don't want to think about SSR.
 
-**Option A: Pass a registry to ServerRenderer**
+**Approach: Registry lives in the SSR layer**
+
+Components already expose everything needed via static properties: `ComponentClass.template`, `ComponentClass.config`, `ComponentClass.componentTagName`. The registry is built where SSR actually happens.
+
+**Option A: Pass registry to ServerRenderer as a constructor option**
 ```javascript
+// In renderToString or Astro server.js:
+const registry = new Map();
+// Populated from whatever components have been imported in this module
+registry.set('ui-icon', Icon);
+registry.set('ui-button', Button);
+// etc.
+
 const renderer = new ServerRenderer({
   ast, data, subTemplates, helpers,
-  componentRegistry, // Map<tagName, ComponentClass>
+  componentRegistry: registry,
 });
 ```
 
-The registry is built by whoever creates the renderer:
-- In `renderToString`: pass the registry from the module's imported components
-- In Astro `server.js`: build from all components imported by the page
+Whoever calls the renderer is responsible for providing the registry. This is explicit and scoped.
 
-**Option B: Import-time auto-registration**
-Components register themselves in a global server-side map when their module is imported. This happens naturally because `defineComponent` runs at import time.
+**Option B: Build registry from customElements (Astro server shim)**
+On the server, `customElements.define` is shimmed (or could be). The shim maintains a map. The ServerRenderer reads from it. This is how `@lit-labs/ssr` works — it has a server-side `customElements` implementation.
 
-```javascript
-// In define-component.js, server-only:
-import { isServer } from '@semantic-ui/utils';
+**Option C: Build registry automatically from module imports**
+A separate SSR utility module (e.g., `@semantic-ui/component/ssr`) exports a `getComponentRegistry()` that scans loaded modules. This keeps SSR code out of the core component path entirely.
 
-const serverRegistry = isServer ? new Map() : null;
-
-// Inside defineComponent, after creating webComponent:
-if (isServer && tagName) {
-  serverRegistry.set(tagName, webComponent);
-}
-
-export { serverRegistry };
-```
-
-The ServerRenderer reads from this registry. No explicit passing needed.
-
-**Recommendation: Option B** — It's automatic and doesn't require threading a registry through every call site. The `isServer` guard ensures zero client impact. The concern about "defineComponent runs on both client and server" is addressed by the guard — the Map only exists on the server.
-
-The previous attempt at this was stopped because the guard was being added mid-stream without care. The implementation should:
-1. Add the registry as a separate export from define-component.js
-2. Guard with `isServer` so the Map is never created on the client
-3. Use `serverRegistry?.set()` so the set call is also guarded
-4. Document why it exists
+**Recommendation: Option A** — Most explicit, easiest to reason about, no magic. The Astro integration already imports all the components it needs. `renderToString` callers already have the component class. The registry is just a Map passed down.
 
 ### Attribute Parsing
 
@@ -135,10 +125,10 @@ Nested components can contain OTHER nested components. The post-processor should
 2. Verify the two-tab workflow shows the gap (icons missing in SSR)
 3. Add ladder steps for nested component SSR expectations
 
-### Phase 2: Server Registry
-1. Add `isServer`-guarded registry to define-component.js
-2. Export it from @semantic-ui/component
-3. Verify it populates when component modules are imported on the server
+### Phase 2: ServerRenderer Registry Option
+1. Add optional `componentRegistry` param to ServerRenderer constructor
+2. Pass it through from `renderToString` and Astro `server.js`
+3. Build the registry at the call site from imported components
 
 ### Phase 3: Post-Process in ServerRenderer
 1. Add `resolveNestedComponents(html)` method to ServerRenderer
