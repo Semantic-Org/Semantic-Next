@@ -1091,6 +1091,7 @@ export class Renderer {
               return;
             }
             const value = this.evaluator.lookupTokenValue(expr.node.value, data);
+            if (comp.firstRun) { return; }
             element[realAttrName] = value;
           }));
           element.removeAttribute(attrName);
@@ -1121,6 +1122,7 @@ export class Renderer {
               return;
             }
             const value = this.eval(singleEntry.node.value, data);
+            if (comp.firstRun) { return; }
             if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
               element.removeAttribute(attrName);
             }
@@ -1142,6 +1144,16 @@ export class Renderer {
           scope.track(Reaction.create((comp) => {
             if (!comp.firstRun && !element.isConnected) {
               comp.stop();
+              return;
+            }
+            if (comp.firstRun) {
+              // Evaluate all expressions to register Signal dependencies,
+              // but skip the DOM write — server content is trusted
+              for (const part of parts) {
+                if (part.markerID !== undefined) {
+                  this.eval(entries[part.markerID].node.value, data);
+                }
+              }
               return;
             }
             let value = '';
@@ -1226,6 +1238,7 @@ export class Renderer {
           return;
         }
         const value = this.eval(exprNode.value, data);
+        if (comp.firstRun) { return; }
         textNode.data = value ?? '';
       }));
     }

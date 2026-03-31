@@ -197,7 +197,9 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (!this._isHydrating) {
+        this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+      }
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
@@ -207,7 +209,9 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
-      this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (!this._isHydrating) {
+        this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+      }
     };
     this.onUpdated = () => {
       this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
