@@ -7,6 +7,7 @@
 import Body from '../../layouts/Body.astro';
 import '../../css/layers.css';
 import '../../css/fonts.css';
+import '@semantic-ui/core/icon/sets/lucide.css';
 
 import { renderToString } from '@semantic-ui/component';
 import { NavMenu } from '@semantic-ui/core';
@@ -32,8 +33,18 @@ const html = renderToString(NavMenu, {
 }, '');
 ---
 <Body class="dark">
-<div style="padding: 24px; max-width: 400px; font-family: sans-serif;">
-  <h2 style="color: white; margin-bottom: 16px;">SSR Component Test</h2>
+<style>
+  .test-wrapper {
+    padding: 24px;
+    max-width: 400px;
+  }
+  .test-wrapper h2 {
+    color: white;
+    margin-bottom: 16px;
+  }
+</style>
+<div class="test-wrapper">
+  <h2>SSR Component Test</h2>
   <Fragment set:html={html} />
 </div>
 </Body>
