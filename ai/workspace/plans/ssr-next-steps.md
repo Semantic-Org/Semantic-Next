@@ -141,33 +141,64 @@ Alternatively, the user can keep two browser windows — one with JS disabled pe
 
 ## Process for Iterating
 
-### Step 1: Observe the gap
+Three test routes, each isolating a different layer of the SSR stack:
 
-Navigate to `/test-ssr/component` and `/test-ssr/hydrated`. Screenshot both. The visual delta is the specification.
+| Route | Path | What it tests |
+|-------|------|--------------|
+| **vanilla** | `/test-ssr/vanilla` | `renderToString` directly — ServerRenderer in isolation, no Astro |
+| **component** | `/test-ssr/component` | Astro `renderToStaticMarkup` — no client directive, pure SSR |
+| **hydrated** | `/test-ssr/hydrated` | Astro `renderToStaticMarkup` + `client:load` — SSR + hydration |
 
-### Step 2: Inspect the SSR output
+### Progression: vanilla → component → hydrated
 
-```bash
-curl -s https://dev.semantic-ui.com/test-ssr/component | # extract DSD content
-```
+Work through these in order. Each step narrows the scope of what could be wrong.
 
-Find the `<ui-icon>` tags in the output. Confirm they have no `<template shadowrootmode>` inside them. This is the concrete artifact to fix.
+**Step 1: Get vanilla right.**
+This is the simplest path — `renderToString` with no Astro layer. If the HTML is wrong here, it'll be wrong everywhere. Fix ServerRenderer issues at this level.
 
-### Step 3: Make a change
+*Success criteria:* The screenshot matches what the hydrated version shows, minus interactivity. Same text, same structure, same nesting. Icons should render (nested component DSD). Expanded sections should show pages.
 
-Implement a candidate approach.
+**Step 2: Get component to match vanilla.**
+Same component, but now through the Astro `renderToStaticMarkup` path. If vanilla looks right but component doesn't, the gap is in the Astro integration (`internal-packages/astro/server.js`) — prop handling, attribute serialization, or how the renderer is configured.
 
-### Step 4: Verify
+*Success criteria:* Identical to vanilla.
 
-Reload `/test-ssr/component`. Screenshot. Compare with `/test-ssr/hydrated`. Did the gap narrow? Are there new problems?
+**Step 3: Get hydrated to match component.**
+Same as component but with `client:load`. If component looks right but hydrated introduces problems (duplication, flashing, layout shifts, locked browser), the gap is in the hydration/client path — marker matching, prop restoration, or unnecessary re-computation.
 
-### Step 5: Expand the test
+*Success criteria:* Identical to component, plus interactivity works (clicking, accordion, search).
 
-Swap the component in the test routes to another pattern (e.g., TopbarMenu, a button with icon). Verify the fix generalizes.
+### Diagnosing by where a bug appears
 
-### Step 6: Check real pages
+| Visible in | Root cause is in |
+|-----------|-----------------|
+| All three | ServerRenderer (`packages/renderer/src/engines/native/server.js`) |
+| component + hydrated only | Astro integration (`internal-packages/astro/server.js`) |
+| hydrated only | Client hydration (`packages/component/src/engines/native/base.js`, `renderer.js` hydrate methods) |
+| vanilla only | `renderToString` setup (`packages/component/src/render-to-string.js`) |
 
-Navigate to `/ui/start` and compare the SSR output with the hydrated version. The fix should improve real page rendering.
+### Current state (as of 2026-03-31)
+
+| Route | What renders | What's missing |
+|-------|-------------|---------------|
+| vanilla | Full menu tree, pages expanded, active state highlighted | No icons (nested `<ui-icon>` has no DSD) |
+| component | Section titles only | Pages not expanded, no icons. Astro path renders less than vanilla — `expandAll` or menu data may not be reaching the renderer correctly |
+| hydrated | Full menu tree (but 3x duplicated from mobile-menu) | No icons in SSR output (JS adds them). Mobile-menu duplication |
+
+Note: vanilla currently renders MORE than component. This means the Astro `server.js` path has a gap vs `renderToString` — investigate prop/settings handling differences between the two paths.
+
+### Expanding to other components
+
+Once NavMenu renders correctly across all three routes, swap the component in the test routes to other patterns:
+- TopbarMenu (topbar with tabs)
+- A simple button with icon (nested ui-icon)
+- GlobalSearch (modal-like, conditional visibility)
+
+Each exercises different SSR patterns. The same vanilla → component → hydrated progression applies.
+
+### Checking real pages
+
+After the test routes look correct, navigate to `/ui/start` and compare. The fix should flow through to real doc pages automatically since they use the same Astro integration path.
 
 ## Known Issues Beyond Nested Rendering
 
