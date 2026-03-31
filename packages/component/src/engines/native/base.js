@@ -60,6 +60,12 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
+    // Suppress requestUpdate during hydration — property setters fire from
+    // attribute parsing but the DOM is already correct
+    if (hasServerContent) {
+      this._hydrating = true;
+    }
+
     if (this.css) {
       const sheet = new CSSStyleSheet();
       sheet.replaceSync(this.css);
@@ -127,6 +133,7 @@ class WebComponentBase extends HTMLElementBase {
 
     this.template._isHydrating = false;
     this.template.rendered = true;
+    this._hydrating = false;
 
     // Remove all hydration markers — clean DevTools, zero comment noise
     this.removeMarkers();
@@ -207,7 +214,9 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   requestUpdate() {
-    if (this.updateScheduled) {
+    // During hydration, property setters fire from attribute parsing but
+    // the DOM is already correct — suppress the reactive render cascade
+    if (this._hydrating || this.updateScheduled) {
       return;
     }
     this.updateScheduled = true;
