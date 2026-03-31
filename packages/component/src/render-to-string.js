@@ -49,13 +49,14 @@ export function renderToString(ComponentClass, attrs = {}, children = '') {
   template.settings = data;
 
   template.initialize();
-  const html = template.render();
 
-  // Suppress deferred lifecycle callbacks (onRendered, etc.) —
-  // they expect a DOM element which doesn't exist in string rendering.
-  // The render is complete; no further callbacks should fire.
-  template.onRendered = () => {};
-  template.onDestroyed = () => {};
+  // Suppress deferred lifecycle callbacks before render() —
+  // render() schedules onRendered via setTimeout, which would crash
+  // because there's no DOM element in string rendering.
+  template.onRenderedCallback = null;
+  template.onDestroyedCallback = null;
+
+  const html = template.render();
 
   // Build attribute string for the outer element
   const attrString = serializeAttrs(attrs);
