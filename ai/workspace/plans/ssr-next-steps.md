@@ -1,5 +1,50 @@
 # SSR Next Steps — Recursive Nested Component Rendering
 
+## How the Astro Plugin Pipeline Works
+
+### The Lit Integration (reference — `@semantic-ui/astro-lit` in node_modules)
+
+Five files, each with a distinct role:
+
+1. **`server-shim.js`** — Runs before anything else on the server. Sets up `@lit-labs/ssr-dom-shim` which provides a server-side `customElements` registry and `HTMLElement` shim. Patches `customElements.define` to store `tagName` on the class via `Symbol.for('tagName')`. This is how `LitElementRenderer` finds the class for a tag name.
+
+2. **`server.js`** — The SSR renderer. Uses `LitElementRenderer` from `@lit-labs/ssr`. The critical call: `instance.renderShadow({ elementRenderers: [LitElementRenderer] })`. The `elementRenderers` array tells the streaming renderer: "when you encounter a custom element tag in the output, use this renderer for it." This is how recursive nested rendering happens — it's built into the rendering architecture, not bolted on.
+
+3. **`client-shim.js`** — Injected into `<head>` inline. Polyfill for DSD (`<template shadowrootmode>`) in browsers that don't support it.
+
+4. **`hydration-support.js`** — Runs `before-hydration`. Patches LitElement to reuse existing shadow DOM instead of re-rendering from scratch.
+
+5. **`client.js`** — The `clientEntrypoint`. Called by Astro's island runtime with `(element, Component, props, slots)`. Sets complex props as JS properties (`component[name] = value`), removes `defer-hydration`.
+
+### How `client:load` Works
+
+When a component has `client:load` in an Astro template:
+- **Server**: Astro calls `renderToStaticMarkup(Component, props, slots)` from the registered renderer
+- **Server**: Astro wraps the output in `<astro-island>` with metadata:
+  - `component-url` — JS module to import on the client
+  - `props` — serialized props (ONLY if `clientEntrypoint` exists and Astro can resolve it)
+  - `renderer-url` — client entrypoint URL (ONLY if resolvable)
+  - `opts` — component name/export
+- **Client**: Astro imports the component module
+- **Client**: If `renderer-url` exists, Astro calls the client entrypoint with the deserialized props
+- **Client**: If NO `renderer-url`, Astro just imports the module — the element upgrades via `customElements.define` with no prop transfer
+
+### Without `client:load`
+
+Components like `<TopbarMenu menu={menu}>` or `<Menu items={items}>` have NO client directive:
+- **Server**: Astro still calls `renderToStaticMarkup` (because `check()` returns true)
+- **Server**: Output is placed directly in HTML — no `<astro-island>` wrapper
+- **Client**: No module import, no hydration island. The DSD is the final output
+- **Client**: BUT the element's module may load anyway (another `client:load` component imports the same package), causing `customElements.define` → upgrade → `connectedCallback`
+
+### Current Native Integration Gaps
+
+1. **No recursive rendering** — `ServerRenderer.render()` outputs nested custom elements as raw HTML tags. The Lit integration's `elementRenderers` pattern provides recursive rendering built into the render loop.
+
+2. **No prop serialization on islands** — The `astro-island` has NO `props` attribute because our `clientEntrypoint` isn't resolvable by Astro. The `renderer-url` is null. Our workaround (`<script data-ssr-props>`) fills this gap but is non-standard.
+
+3. **No server-side `customElements` shim** — The Lit integration provides a server `customElements` that maps tagNames to classes. Our ServerRenderer has no way to look up a component class from a tag name encountered in HTML.
+
 ## The Problem
 
 When a component's template contains another custom element (e.g., nav-menu renders `<ui-icon>`), the ServerRenderer outputs the inner element as a raw HTML tag with no shadow DOM. The inner component's DSD is never generated.
