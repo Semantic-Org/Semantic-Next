@@ -1,4 +1,5 @@
-import { camelToKebab, each } from '@semantic-ui/utils';
+import { camelToKebab, each, isServer } from '@semantic-ui/utils';
+import { getUIClasses } from './component-helpers.js';
 
 /*
   Server-side render a component to a DSD HTML string.

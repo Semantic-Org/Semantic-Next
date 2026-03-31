@@ -5,70 +5,89 @@ import '../css/fonts.css';
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
-  <div id="mount"></div>
+  <h2 style="color: white; font-family: sans-serif;">Native Renderer — Spec-Driven Component</h2>
+
+  <div style="display: flex; gap: 12px; margin: 16px 0;">
+    <ui-widget>Default</ui-widget>
+    <ui-widget primary>Primary</ui-widget>
+    <ui-widget large>Large</ui-widget>
+    <ui-widget large primary>Large Primary</ui-widget>
+    <ui-widget size="small">Small</ui-widget>
+    <ui-widget emphasis="secondary">Secondary</ui-widget>
+    <ui-widget class="large primary">Class Syntax</ui-widget>
+  </div>
+
   <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
 </div>
+
 <script>
   import { defineComponent } from '@semantic-ui/component';
-  import { $ } from '@semantic-ui/query';
+  import { SpecReader } from '@semantic-ui/specs';
+
+  const widgetSpec = {
+    uiType: 'element',
+    name: 'Widget',
+    tagName: 'ui-widget',
+    types: [],
+    states: [],
+    variations: [
+      {
+        name: 'Size',
+        attribute: 'size',
+        options: [
+          { name: 'Small', value: 'small' },
+          { name: 'Large', value: 'large' },
+        ],
+      },
+      {
+        name: 'Emphasis',
+        attribute: 'emphasis',
+        includeAttributeClass: true,
+        options: [
+          { name: 'Primary', value: 'primary' },
+          { name: 'Secondary', value: 'secondary' },
+        ],
+      },
+    ],
+    settings: [],
+    events: [],
+  };
+
+  const reader = new SpecReader(widgetSpec);
+  const componentSpec = reader.getWebComponentSpec();
 
   defineComponent({
-    tagName: 'async-test',
+    tagName: 'ui-widget',
     renderingEngine: 'native',
-    template: `
-      <div class="result">
-        {#async fetchData as data}
-          <p class="resolved">Result: {data}</p>
-        {loading}
-          <p class="loading">Loading...</p>
-        {/async}
-      </div>
+    componentSpec,
+    template: '<span class="{ui}widget"><slot></slot></span>',
+    css: `
+      .widget {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        background: #555;
+        color: white;
+        font-family: sans-serif;
+      }
+      .primary { background: #3498db; }
+      .secondary { background: #9b59b6; }
+      .small { font-size: 12px; }
+      .large { font-size: 20px; }
     `,
-    defaultState: { version: 0 },
-    createComponent: ({ state }) => ({
-      async fetchData(v = state.version.get()) {
-        await new Promise(r => setTimeout(r, 500));
-        return 'v' + v;
-      },
-      refetch() {
-        state.version.increment();
-      },
-    }),
   });
 
   const log = (msg) => {
     document.getElementById('log').textContent += msg + '\n';
-    console.log(msg);
   };
 
-  const el = document.createElement('async-test');
-  el.addEventListener('created', () => log('EVENT: created'));
-  el.addEventListener('rendered', () => log('EVENT: rendered'));
-  el.addEventListener('updated', (e) => log('EVENT: updated'));
-
-  document.getElementById('mount').appendChild(el);
-
-  $(el).onNext('rendered').then(async () => {
-    log('--- rendered resolved ---');
-    log('Content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
-
-    log('Waiting for onNext(updated) #1 (initial async resolve)...');
-    const u1 = $(el).onNext('updated');
-    await u1;
-    log('GOT updated #1 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
-
-    log('Triggering refetch via state.version.increment()...');
-    const u2 = $(el).onNext('updated');
-    el.component.refetch();
-    await u2;
-    log('GOT updated #2 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
-
-    log('Waiting for onNext(updated) #3 (re-fetch resolve)...');
-    const u3 = $(el).onNext('updated');
-    await u3;
-    log('GOT updated #3 — content: ' + el.shadowRoot?.querySelector('.result')?.textContent?.trim());
-
-    log('--- ALL PASSED ---');
-  });
+  setTimeout(() => {
+    const widgets = document.querySelectorAll('ui-widget');
+    widgets.forEach((el, i) => {
+      const span = el.shadowRoot?.querySelector('span');
+      const cls = span?.className || 'no span';
+      log(`Widget ${i}: class="${cls}" text="${el.textContent.trim()}"`);
+    });
+  }, 200);
 </script>
 </Body>

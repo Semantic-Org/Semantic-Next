@@ -9,6 +9,7 @@ import {
   Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
   Step17, Step18,
 } from '@components/SSRDemo/SSRLadder.js';
+import { Button } from '@semantic-ui/core';
 
 const steps = [
   { component: Step1, label: '1. Static HTML' },
@@ -29,6 +30,7 @@ const steps = [
   { component: Step16, label: '16. Snippet inside each' },
   { component: Step17, label: '17. Multi-branch (if/else-if/else)' },
   { component: Step18, label: '18. Object iteration' },
+  { component: Button, label: '19. ui-button (spec-driven)', attrs: { emphasis: 'primary' }, children: 'Click Me' },
 ];
 
 const rendered = steps.map(s => ({
@@ -55,6 +57,7 @@ const expected = {
   16: '[Red][Green][Blue]',
   17: 'Mode B',
   18: 'red green blue',
+  19: 'Click Me',
 };
 ---
 <Body class="dark">
@@ -80,6 +83,7 @@ const expected = {
     Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
     Step17, Step18,
   } from '@components/SSRDemo/SSRLadder.js';
+  import { Button } from '@semantic-ui/core';
 
   const expected = window.__ssrExpected;
   const log = (msg) => {
@@ -87,7 +91,7 @@ const expected = {
   };
 
   setTimeout(() => {
-    for (let i = 1; i <= 18; i++) {
+    for (let i = 1; i <= 19; i++) {
       const el = document.querySelector(`ssr-step-${i}`);
       if (!el) { log(`${i}: MISSING`); continue; }
 
