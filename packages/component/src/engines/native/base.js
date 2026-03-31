@@ -1,6 +1,6 @@
 import { $ } from '@semantic-ui/query';
 const MARKER_VERSION = 'v1';
-import { isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
+import { adoptStylesheet, isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
   createSettingsProxy,
@@ -12,6 +12,7 @@ import {
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
+import { trace } from '../../trace.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.
@@ -29,6 +30,13 @@ class WebComponentBase extends HTMLElementBase {
     super();
     this.renderCallbacks = [];
     this.propertyStore = new Map();
+
+    // If the element has a declarative shadow root (created by DSD parsing),
+    // suppress requestUpdate until hydration completes — attribute parsing
+    // fires before connectedCallback and would schedule a render cascade
+    if (this.shadowRoot) {
+      this._hydrating = true;
+    }
 
     const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
     this.css = css;
@@ -49,6 +57,8 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
 
+    const tagName = this.constructor.componentTagName || this.tagName.toLowerCase();
+
     // DSD creates the shadow root before connectedCallback fires
     const hasServerContent = this.shadowRoot && this.shadowRoot.childNodes.length > 0;
 
@@ -60,29 +70,21 @@ class WebComponentBase extends HTMLElementBase {
     }
     this.renderRoot = this.shadowRoot;
 
-    // Suppress requestUpdate during hydration — property setters fire from
-    // attribute parsing but the DOM is already correct
-    if (hasServerContent) {
-      this._hydrating = true;
-    }
-
     if (this.css) {
-      const sheet = new CSSStyleSheet();
-      sheet.replaceSync(this.css);
-      this.shadowRoot.adoptedStyleSheets = [sheet];
+      adoptStylesheet(this.css, this.shadowRoot);
     }
 
     const prototypeTemplate = this.constructor.template;
 
     if (hasServerContent && this.canHydrate()) {
-      this.hydrate(prototypeTemplate);
+      trace(() => this.hydrate(prototypeTemplate), `hydrate:${tagName}`);
     }
     else {
       if (hasServerContent) {
         // Version mismatch — discard server content
         this.shadowRoot.innerHTML = '';
       }
-      this.fullRender(prototypeTemplate);
+      trace(() => this.fullRender(prototypeTemplate), `fullRender:${tagName}`);
     }
   }
 
@@ -101,35 +103,44 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   hydrate(prototypeTemplate) {
+    const tagName = this.constructor.componentTagName || this.tagName.toLowerCase();
+
     // Remove server <style> — CSS is handled via adoptedStyleSheets
     const serverStyle = this.shadowRoot.querySelector('style');
     if (serverStyle) {
       serverStyle.remove();
     }
 
-    this.template = prototypeTemplate.clone({
-      data: this.getData(),
-      element: this,
-      renderRoot: this.renderRoot,
-    });
+    const data = trace(() => this.getData(), `getData:${tagName}`);
+
+    this.template = trace(() =>
+      prototypeTemplate.clone({
+        data,
+        element: this,
+        renderRoot: this.renderRoot,
+      }), `clone:${tagName}`);
 
     this.template._isHydrating = true;
-    if (!this.template.initialized) {
-      this.template.initialize();
-    }
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
 
-    // Build entries for hydration (same marker IDs the server produced)
-    const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
+    // Build entries for hydration (same marker IDs the server produced).
+    // Cache on the prototype — entries depend only on AST structure, not data.
+    if (!prototypeTemplate._hydrationEntries) {
+      prototypeTemplate._hydrationEntries = trace(() => {
+        const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
+        return entries;
+      }, `buildEntries:${tagName}`);
+    }
+    const entries = prototypeTemplate._hydrationEntries;
 
-    // Wire reactive bindings to existing server-rendered DOM
-    this.template.renderer.hydrateMarkers(
-      this.shadowRoot,
-      entries,
-      this.template.renderer.data,
-      this.template.renderer.scope,
-    );
+    trace(() =>
+      this.template.renderer.hydrateMarkers(
+        this.shadowRoot,
+        entries,
+        this.template.renderer.data,
+        this.template.renderer.scope,
+      ), `hydrateMarkers:${tagName}`);
 
     this.template._isHydrating = false;
     this.template.rendered = true;
@@ -142,9 +153,6 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   removeMarkers() {
-    // Collect ALL comments first, then filter and remove.
-    // Using querySelectorAll-style approach since TreeWalker may miss
-    // comments inside elements that were rearranged during hydration.
     const removeComments = (root) => {
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
       const toRemove = [];
