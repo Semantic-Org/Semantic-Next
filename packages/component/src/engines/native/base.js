@@ -1,4 +1,5 @@
 import { $ } from '@semantic-ui/query';
+const MARKER_VERSION = 'v1';
 import { isFunction, isServer, kebabToCamel } from '@semantic-ui/utils';
 
 import {
@@ -48,6 +49,9 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
 
+    // DSD creates the shadow root before connectedCallback fires
+    const hasServerContent = this.shadowRoot && this.shadowRoot.childNodes.length > 0;
+
     if (!this.shadowRoot) {
       this.attachShadow({
         mode: 'open',
@@ -63,6 +67,70 @@ class WebComponentBase extends HTMLElementBase {
     }
 
     const prototypeTemplate = this.constructor.template;
+
+    if (hasServerContent && this.canHydrate()) {
+      this.hydrate(prototypeTemplate);
+    }
+    else {
+      if (hasServerContent) {
+        // Version mismatch — discard server content
+        this.shadowRoot.innerHTML = '';
+      }
+      this.fullRender(prototypeTemplate);
+    }
+  }
+
+  canHydrate() {
+    // Walk comments looking for a versioned marker
+    const walker = document.createTreeWalker(this.shadowRoot, NodeFilter.SHOW_COMMENT);
+    let comment;
+    while ((comment = walker.nextNode())) {
+      const text = comment.data;
+      if (text.startsWith('sui:') || text.startsWith('sui-block:')) {
+        return text.includes(`:${MARKER_VERSION}:`);
+      }
+    }
+    // No markers — static content, safe to hydrate (nothing to wire)
+    return true;
+  }
+
+  hydrate(prototypeTemplate) {
+    // Remove server <style> — CSS is handled via adoptedStyleSheets
+    const serverStyle = this.shadowRoot.querySelector('style');
+    if (serverStyle) {
+      serverStyle.remove();
+    }
+
+    this.template = prototypeTemplate.clone({
+      data: this.getData(),
+      element: this,
+      renderRoot: this.renderRoot,
+    });
+
+    this.template._isHydrating = true;
+    if (!this.template.initialized) {
+      this.template.initialize();
+    }
+    this.component = this.template.instance;
+    this.dataContext = this.template.getDataContext();
+
+    // Build entries for hydration (same marker IDs the server produced)
+    const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
+
+    // Wire reactive bindings to existing server-rendered DOM
+    this.template.renderer.hydrateMarkers(
+      this.shadowRoot,
+      entries,
+      this.template.renderer.data,
+      this.template.renderer.scope,
+    );
+
+    this.template._isHydrating = false;
+    this.template.rendered = true;
+    setTimeout(() => this.template.onRendered(), 0);
+  }
+
+  fullRender(prototypeTemplate) {
     this.template = prototypeTemplate.clone({
       data: this.getData(),
       element: this,
