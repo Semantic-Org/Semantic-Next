@@ -1,0 +1,15 @@
+{
+  "name": "@semantic-ui/astro",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./server": "./server.js"
+  },
+  "dependencies": {
+    "@semantic-ui/renderer": "workspace:*",
+    "@semantic-ui/templating": "workspace:*",
+    "@semantic-ui/utils": "workspace:*"
+  }
+}
