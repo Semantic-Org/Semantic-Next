@@ -150,6 +150,14 @@ Swap the component in the test routes to another pattern (e.g., TopbarMenu, a bu
 
 Navigate to `/ui/start` and compare the SSR output with the hydrated version. The fix should improve real page rendering.
 
+## Known Issues Beyond Nested Rendering
+
+### Attribute serialization for complex values
+`JSON.stringify()` is the standard approach for serializing arrays/objects as HTML attributes. The `[object Object]` bug was a missing stringify call in `serializeAttributes`. Non-serializables (functions) should be skipped. This is largely fixed but needs verification.
+
+### Hydration performance
+The client-side hydration locks the browser for several seconds on pages with many components. Flame charts show it re-running every calculation and hitting clone logic — suggesting the hydration path is doing full re-computation rather than adopting server DOM and wiring bindings. This defeats the purpose of SSR. The hydration path in `WebComponentBase.hydrate()` and the renderer's `hydrateMarkers` should be audited for unnecessary work — the server already computed the values, the client should trust that output and only wire reactivity.
+
 ## Questions for Independent Evaluation
 
 1. Where in the rendering pipeline is the right interception point for nested custom elements — and what are the tradeoffs of each location?
@@ -159,3 +167,5 @@ Navigate to `/ui/start` and compare the SSR output with the hydrated version. Th
 3. What information does the ServerRenderer need about nested components, and where can it get that information without polluting the component authoring API?
 
 4. Is the `clientEntrypoint` gap (Astro not serializing props) a separate problem or connected to recursive rendering? Should they be solved together?
+
+5. Why is hydration re-running computations and hitting clone logic? What work is the hydration path doing that it shouldn't be, and where is the boundary between "adopt server DOM" and "re-compute"?
