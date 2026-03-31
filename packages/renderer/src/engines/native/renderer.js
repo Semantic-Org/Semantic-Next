@@ -940,6 +940,7 @@ export class Renderer {
     }
 
     const allGetters = { ...staticGetters, ...reactiveGetters };
+    const getterKeys = keys(allGetters);
     const snippetData = new Proxy(data, {
       get(target, prop) {
         if (typeof prop === 'symbol') { return target[prop]; }
@@ -948,6 +949,15 @@ export class Renderer {
       },
       has(target, prop) {
         return (prop in allGetters) || (prop in target);
+      },
+      ownKeys(target) {
+        return [...new Set([...getterKeys, ...Reflect.ownKeys(target)])];
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        if (prop in allGetters) {
+          return { configurable: true, enumerable: true, get: allGetters[prop] };
+        }
+        return Object.getOwnPropertyDescriptor(target, prop);
       },
     });
 
