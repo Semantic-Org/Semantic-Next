@@ -143,11 +143,26 @@ function serializeAttributes(props, config) {
   each(props, (value, key) => {
     if (value === undefined || value === null) { return; }
     if (isFunction(value)) { return; }
+
+    // Use property converter if available (mirrors Lit's toAttribute pattern)
+    const propConfig = resolvedProperties[key];
+    const toAttribute = propConfig?.converter?.toAttribute;
+    if (toAttribute) {
+      const attrValue = toAttribute(value);
+      if (attrValue !== null && attrValue !== undefined) {
+        parts.push(`${camelToKebab(key)}="${String(attrValue).replace(/"/g, '&quot;')}"`);
+      }
+      return;
+    }
+
+    // Non-serializable values (arrays, objects) go via JSON script tag
+    if (typeof value === 'object') { return; }
+
     const attrName = camelToKebab(key);
     if (typeof value === 'boolean') {
       if (value) { parts.push(attrName); }
     }
-    else {
+    else if (typeof value === 'string' || typeof value === 'number') {
       parts.push(`${attrName}="${String(value).replace(/"/g, '&quot;')}"`);
     }
   });
