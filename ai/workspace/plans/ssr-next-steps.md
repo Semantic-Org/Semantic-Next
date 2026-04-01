@@ -1,265 +1,171 @@
-# SSR — Nested Component Rendering
+# SSR — Each-Loop Hydration & Remaining Issues
 
 ## Curriculum — Read Before Starting
 
-### 1. Understand how the Lit SSR integration works (the reference)
-Read ALL five files in order. This is the solved version of the problem — understand it before writing code.
-- `docs/node_modules/@semantic-ui/astro-lit/server-shim.js` — server customElements shim
-- `docs/node_modules/@semantic-ui/astro-lit/server.js` — recursive SSR renderer (study `renderShadow` + `elementRenderers`)
-- `docs/node_modules/@semantic-ui/astro-lit/client-shim.js` — DSD polyfill
-- `docs/node_modules/@semantic-ui/astro-lit/hydration-support.js` — hydration patches
-- `docs/node_modules/@semantic-ui/astro-lit/dist/client.js` — client entrypoint (prop transfer)
-- `docs/node_modules/@semantic-ui/astro-lit/dist/index.js` — plugin registration (all hooks)
+### 1. Essential principles (read FIRST)
+- `use_skill ssr-principles` — **MANDATORY**. Trust-then-wire, shared helpers, mismatch prevention. This governs all SSR/hydration decisions.
+- `use_skill mental-model` — How the framework thinks
+- `use_skill native-renderer` — How the native DOM renderer works (contributing audience)
 
-### 2. Understand the native SSR integration (what needs work)
-- `internal-packages/astro/server.js` — current Astro SSR renderer
-- `internal-packages/astro/index.js` — plugin registration
-- `packages/renderer/src/engines/native/server.js` — ServerRenderer
-- `packages/component/src/render-to-string.js` — renderToString
+### 2. Understand the hydration architecture
+- `packages/component/src/engines/native/base.js` — `WebComponentBase`: constructor, `connectedCallback`, `hydrate()`, `fullRender()`, `attributeChangedCallback`, `requestUpdate`
+- `packages/renderer/src/engines/native/renderer.js` — Client renderer: `hydrateMarkers`, `hydrateBlockDirective`, `hydrateEach`, `hydrateConditional`, `hydrateInnerContent`, `hydrateTextExpression`, `hydrateAttributes`, `createEach` (for comparison)
+- `packages/renderer/src/engines/native/dynamic-region.js` — `DynamicRegion`: anchor, ownedNodes, childScopes, setContent, clear
+- `packages/renderer/src/engines/native/reaction-scope.js` — Hierarchical Reaction cleanup
 
-### 3. Load essential MCP context
-- `use_skill mental-model` — how the framework thinks
-- `use_skill native-renderer` — how the native DOM renderer works (contributing audience)
+### 3. Understand the server renderer
+- `packages/renderer/src/engines/native/server.js` — `ServerRenderer`: AST → HTML string with comment markers
+- `packages/component/src/render-to-string.js` — `renderToString`: DSD wrapper, `expandCustomElements`, `resolveOptionAttributes`, `{ui}` computation
+- `packages/component/src/expand-custom-elements.js` — Post-render expansion of nested custom element tags
+- `packages/component/src/component-helpers.js` — Shared helpers: `resolveOptionAttributes`, `getUIClasses`, `createSettingsProxy`
+
+### 4. Understand how Lit handled this (the reference that worked)
+- `packages/component/src/engines/lit/base.js` — Lit base class: `willUpdate` → clone → initialize, then `render` → template.render → Lit processes TemplateResult
+- `packages/renderer/src/engines/lit/directives/reactive-data.js` — Lit directive with firstRun skip + Reaction
+- Key insight: Lit's `requestUpdate()` isn't suppressed during hydration. When `initialize()` mutates settings, the Lit reactive property triggers a second render pass that reconciles.
+
+### 5. Understand the component under test
+- `src/components/nav-menu/nav-menu.js` — `getMenu()`, `filterBySearchTerm()`, `configureSearch()`, events
+- `src/components/nav-menu/nav-menu.html` — Template: nested each loops, snippets, conditionals, `<ui-icon>`, `<ui-input>`
+
+### 6. Load additional MCP context as needed
 - `use_skill component-ssr` — SSR patterns and guards
-- `use_skill render-pipeline` — template string → DOM pipeline
+- `use_skill render-pipeline` — Template string → DOM pipeline
+- `use_skill component-lifecycle` — Hook execution order
 
-### 4. Understand the component under test
-- `src/components/nav-menu/nav-menu.js` — createComponent, settings, events
-- `src/components/nav-menu/nav-menu.html` — template (renders `<ui-icon>`, `<ui-input>`)
+### 7. Read the agent analyses from the previous session
+These are in `ai/workspace/tmp/` — read ALL of them for context:
+- `duplication-neutral-analysis.md` — Exhaustive trace of each-loop hydration flow
+- `duplication-challenge-analysis.md` — Structural critique of `hydrateEach`
+- `state-divergence-neutral-analysis.md` — Timing gap analysis, text-split bug
+- `state-divergence-challenge-analysis.md` — Why firstRun skip should be removed for text/attrs
+- `icon-neutral-analysis.md` — Root cause: stale data + overlaySettingsSignals filter
+- `icon-challenge-analysis.md` — Trust-then-wire structural critique
 
-### 5. Read the hydration test suite
-- `packages/renderer/test/browser/ssr-hydration.test.js` — 68 tests, shows expected SSR → hydration behavior
+## What Was Fixed (prior session)
 
-### 6. Read the guestbook entry from this session
-- `ai/guestbook.md` — Entry 9 documents the marker matching bug, Proxy trap, and methodology lessons
+### SSR rendering bugs (server produces wrong HTML)
+- **Option attribute resolution** — `tiny=""` on `<ui-input>` wasn't mapping to `size="tiny"`. Added `resolveOptionAttributes()` shared helper in `component-helpers.js`, used from both `renderToString` and `deserializeAttrs`.
+- **`{ui}` computed too early** — `renderToString` computed `{ui}` classes before `initialize()` ran. Moved computation to after `initialize()` so settings mutations (like `icon = 'search'`) are reflected.
+- **Ladder slot passing** — `renderToString` was receiving children as a raw string instead of `{ slots: { default: ... } }`.
 
-## Problem Statement
+### Hydration bugs (client destroys correct server DOM)
+- **`overlaySettingsSignals` filter** — Only overlaid settings Signals for keys in `defaultSettings`. Spec attributes without default values (like `icon`) were excluded, making them invisible to hydration. Removed the filter — all `settingsVars` Signals are overlaid.
+- **`attributeChangedCallback` during hydration** — The `_hydrating` flag was suppressing `requestUpdate()` entirely. This blocked legitimate state changes from `initialize()`. Moved the guard to `attributeChangedCallback` instead — attribute parsing is silenced (DOM already reflects attributes), but `requestUpdate()` flows freely for `initialize()` mutations.
+- **unsafeHTML dependency registration** — `hydrateTextExpression` for unsafeHTML skipped `eval()` on firstRun, meaning no Signal dependencies were registered.
 
-Web components rendered inside another component's shadow DOM during SSR produce raw HTML tags with no Declarative Shadow DOM. The inner component's template is never rendered on the server.
+### Infrastructure
+- Test routes use `@css` and `@layouts` aliases
+- New `/test-ssr/client` route — pure client render baseline (no SSR)
 
-**Observable symptom:** With JS disabled, `<ui-icon>` elements inside nav-menu's shadow DOM are empty. With JS enabled, they render correctly after hydration.
+## Remaining Bugs
 
-**Verification routes:**
-- `/test-ssr/component` — NavMenu rendered via Astro SSR, no client directive (pure SSR output)
-- `/test-ssr/hydrated` — Same NavMenu with `client:load` (SSR + hydration)
+### Bug 1: Each-loop 3x duplication (HIGH PRIORITY)
 
-Open both side-by-side. The delta between them is the work to be done.
+**Symptom:** On `/test-ssr/hydrated`, typing 'g' into the search input produces "Getting Started" section THREE times instead of once.
 
-## How the Astro Plugin Pipeline Works
+**Works correctly on:** `/test-ssr/client` (pure client render — one copy)
 
-### The Integration Points (5 files in `@semantic-ui/astro-lit`)
+**What the agent analyses found:**
+1. `getServerRenderedAST()` returns `null` for each blocks (line ~1394 of renderer.js). This means `hydrateInnerContent` is NEVER called for each-loop content — inner expressions are left as static, un-hydrated text.
+2. `hydrateEach` creates a Reaction that skips on firstRun (registers deps only). On subsequent runs, it does a FULL teardown-and-rebuild via `readAST` + `region.setContent`.
+3. Neither agent could statically trace the exact 3x mechanism. Top hypotheses:
+   - `region.clear()` fails to remove server DOM because node references became stale during the parent if-block's `hydrateInnerContent` fragment-move process
+   - Signal write cascading from `filterBySearchTerm`'s synchronous `state.selectedIndex.set()` and `state.maxIndex.set()` during `getMenu()` evaluation causes the Reaction to fire multiple times
+   - Overlapping node ownership between the if-block's DynamicRegion and the each-block's DynamicRegion
+4. Both agents agreed `hydrateEach` is structurally underengineered — no per-item hydration, no keyed reconciliation. Every other framework (Lit, Svelte, Solid) hydrates each items individually.
 
-The Lit-based Astro integration is the reference for how this was solved before. It lives in `docs/node_modules/@semantic-ui/astro-lit/` and has 5 files:
+**Empirical verification needed:**
+- Add `console.log` in `hydrateEach`'s Reaction to count fires per search input
+- Check whether `region.ownedNodes` nodes are still `isConnected` at the time `clear()` runs
+- Compare against `createEach` behavior (the non-hydration path that works correctly)
 
-| File | Role | When it runs |
-|------|------|-------------|
-| `server-shim.js` | Server-side `customElements` registry + `HTMLElement` shim | Before SSR |
-| `server.js` | SSR renderer — `renderToStaticMarkup` using `LitElementRenderer` | During SSR |
-| `client-shim.js` | DSD polyfill for older browsers | Injected in `<head>` |
-| `hydration-support.js` | Patches LitElement to reuse existing shadow DOM | Before hydration |
-| `client.js` | Sets complex props as JS properties, removes `defer-hydration` | During island hydration |
+### Bug 2: Step 40 ladder failure (state divergence)
 
-The native integration lives in `internal-packages/astro/` and currently has `server.js` and `index.js`. It's missing capabilities that the Lit integration provides.
+**Symptom:** Component with `defaultState: { label: 'server' }` and `initialize()` that sets `label` to `'client'` on the client. After hydration, DOM shows "server" instead of "client".
 
-### How `client:load` Flows
+**Root cause:** The firstRun skip in `hydrateTextExpression` prevents writing the current value to the DOM, even though the Signal already holds 'client'. The Signal change from `initialize()` happened before the Reaction was wired, so no subsequent notification fires.
 
-1. Astro calls the registered renderer's `renderToStaticMarkup(Component, props, slotted)`
-2. Astro wraps the output in `<astro-island>` with metadata (`component-url`, `opts`, etc.)
-3. If the renderer has a working `clientEntrypoint`, Astro serializes props into the island and sets `renderer-url`
-4. On the client, Astro imports the component module, then calls the client entrypoint with the deserialized props
+**The `attributeChangedCallback` fix (committed) partially addresses this** — `requestUpdate()` is no longer suppressed during hydration, so `initialize()` mutations can trigger a render pass. However, that render pass calls `template.render()` → `bumpDataVersion()`, which fires ALL Reactions' non-firstRun paths — including `hydrateEach` which does full teardown.
 
-**Current state:** The native integration's `clientEntrypoint` is not resolvable by Astro (the `renderer-url` attribute is null on all islands). Astro treats the components as generic custom elements — it imports the module but doesn't transfer props. A `<script data-ssr-props>` workaround in the DSD handles prop transfer instead.
+**Fix direction (from agent analyses):**
+- For text and attribute hydration Reactions: remove the `firstRun` skip. The expression is already evaluated for dependency registration. `textNode.data = sameValue` and `setAttribute(name, sameValue)` are browser no-ops. No perf cost.
+- Keep `firstRun` skip for `hydrateEach` (prevents structural teardown) and unsafeHTML (prevents expensive reparse)
+- This requires the each-loop bug to be fixed FIRST, because `bumpDataVersion` from `requestUpdate` would trigger `hydrateEach`'s non-firstRun path
 
-### Without `client:load`
+**Alternatively:** Fix `hydrateEach` to use keyed reconciliation (matching `createEach`), then a reconciliation `bumpDataVersion` after hydration handles all divergence cases naturally.
 
-Components placed in Astro templates without a client directive are SSR-only. Astro calls `renderToStaticMarkup` but creates no island. No JS hydration occurs. The DSD output is final. This is where correct nested rendering matters most.
+### Bug 3: Text node splitting uses client state (pre-existing)
 
-## Architecture Facts
+**Found by:** State divergence neutral agent
 
-### How the ServerRenderer produces HTML
+**Location:** `renderer.js` ~line 1217 in `hydrateTextExpression`
 
-`packages/renderer/src/engines/native/server.js`
+The text node splitting logic evaluates the expression with current client data to determine the split boundary between the expression value and adjacent static text. If client state differs from server state, the split happens at the wrong position, corrupting text nodes.
 
-The ServerRenderer walks the compiled AST and produces an HTML string. Custom element tags appear as `{ type: 'html', html: '<ui-icon ...' }` nodes — they're just strings by the time the renderer sees them. The renderer has no mechanism to recognize them as components.
+## Testing
 
-### How the Lit SSR solved recursive rendering
-
-`docs/node_modules/@semantic-ui/astro-lit/server.js` — line 67:
-
-```javascript
-const shadowContents = instance.renderShadow({
-  elementRenderers: [LitElementRenderer],
-  ...
-});
-```
-
-The `elementRenderers` array tells the Lit streaming renderer: when you encounter a custom element tag in the output, use this renderer for it. Recursive rendering is built into the render loop — the renderer intercepts custom element tags as they're produced, not as a post-processing step.
-
-### How component definitions are available
-
-- On the client: `customElements.define(tagName, class)` registers globally
-- On the Lit server: `server-shim.js` provides a server-side `customElements` that stores `tagName → class` via a patched `.define()`
-- On the native server: no equivalent exists. `defineComponent` creates the class but doesn't register it anywhere server-accessible
-
-Every component class already has `ComponentClass.componentTagName`, `ComponentClass.template` (prototype Template with AST), and `ComponentClass.config` (css, spec, settings, properties).
-
-### How `renderToString` works
-
-`packages/component/src/render-to-string.js`
-
-Takes a component class + attrs + children. Clones the prototype template, forces native engine, initializes, renders, wraps in DSD. This is the single-component SSR path. It does NOT handle nested components in the output.
-
-### How the Astro `server.js` works
-
-`internal-packages/astro/server.js`
-
-Creates a `ServerRenderer` directly (not through Template.clone). Runs `createComponent` with a manually-built params object. Renders, wraps in DSD. Also does NOT handle nested components.
-
-## Constraints
-
-1. `defineComponent` is the user-facing API. It runs on both client and server. SSR infrastructure should not be added there — component authors shouldn't think about SSR when reading that code.
-
-2. The native `ServerRenderer` is a pure string-producing function. It has no DOM, no element instances, no `customElements`.
-
-3. Nested custom element tags can have dynamic attributes from the parent's template expressions (e.g., `<ui-icon icon={title.icon}>`). By render time, these are resolved to concrete values in the HTML string.
-
-4. Components import their dependencies at module level (e.g., nav-menu imports Icon). These imports cause `defineComponent` to run for the dependency, making the class available in the module scope.
-
-5. The Astro integration receives the top-level component class but not its dependency tree. It doesn't know what nested components the template will produce.
-
-## Source Files to Read
-
-### Native SSR (current implementation)
-- `internal-packages/astro/server.js` — Astro integration SSR renderer
-- `internal-packages/astro/index.js` — Astro plugin registration
-- `packages/renderer/src/engines/native/server.js` — ServerRenderer
-- `packages/component/src/render-to-string.js` — renderToString
-- `packages/component/src/define-component.js` — defineComponent
-
-### Lit SSR (reference implementation — read ALL of these)
-- `docs/node_modules/@semantic-ui/astro-lit/server-shim.js` — Server customElements shim
-- `docs/node_modules/@semantic-ui/astro-lit/server.js` — Lit SSR renderer with recursive rendering
-- `docs/node_modules/@semantic-ui/astro-lit/client-shim.js` — DSD polyfill
-- `docs/node_modules/@semantic-ui/astro-lit/hydration-support.js` — Hydration patches
-- `docs/node_modules/@semantic-ui/astro-lit/dist/client.js` — Client entrypoint
-- `docs/node_modules/@semantic-ui/astro-lit/dist/index.js` — Plugin registration with all hooks
-
-### Test infrastructure
-- `docs/src/pages/test-ssr/component.astro` — Pure SSR route (no client directive)
-- `docs/src/pages/test-ssr/hydrated.astro` — SSR + client:load route
-- `docs/src/pages/test-ssr.astro` — 44-step hydration ladder
-
-### Component under test
-- `src/components/nav-menu/nav-menu.js` — Component JS
-- `src/components/nav-menu/nav-menu.html` — Template (renders `<ui-icon>`, `<ui-input>`)
-
-## Testing SSR-Only Output
-
-There are two ways to see pure SSR output without JS hydration:
-
-### Method 1: Use the `/test-ssr/component` route (preferred)
-This route renders the component without `client:load`, so no hydration island is created. The DSD output is final — no JS needed. However, other components on the page that share the same module may still trigger `customElements.define`, causing the element to upgrade.
-
-### Method 2: Disable JavaScript in Chrome DevTools
-For the `/test-ssr/vanilla` and `/test-ssr/hydrated` routes, disabling JS shows the pure server output before any client code runs. This is the most accurate view of what the server produced.
-
-**Chrome MCP cannot disable JS programmatically** — the `emulate` tool has no JS toggle. To use this workflow:
-1. Ask the user to open Chrome DevTools on the target tab
-2. Ask them to disable JavaScript (Settings > Debugger > Disable JavaScript, or Cmd+Shift+P > "Disable JavaScript")
-3. Reload the page
-4. Take screenshots via Chrome MCP as normal
-5. Ask the user to re-enable JS when done
-
-Alternatively, the user can keep two browser windows — one with JS disabled permanently — and the agent navigates both to the same URL for side-by-side comparison.
-
-## Process for Iterating
-
-Four test routes under `/test-ssr/`:
+### Visual routes (Chrome MCP)
 
 | Route | Path | What it tests |
 |-------|------|--------------|
-| **ladder** | `/test-ssr/ladder` | 44 automated steps covering every SSR pattern — regression suite |
-| **vanilla** | `/test-ssr/vanilla` | `renderToString` directly — ServerRenderer in isolation, no Astro |
-| **component** | `/test-ssr/component` | Astro `renderToStaticMarkup` — no client directive, pure SSR |
-| **hydrated** | `/test-ssr/hydrated` | Astro `renderToStaticMarkup` + `client:load` — SSR + hydration |
+| **client** | `/test-ssr/client` | Pure client render — the "known correct" baseline |
+| **component** | `/test-ssr/component` | Pure SSR — no hydration |
+| **hydrated** | `/test-ssr/hydrated` | SSR + hydration — compare against client and component |
+| **ladder** | `/test-ssr/ladder` | 44-step automated regression suite |
 
-The **ladder** is the visual regression safety net — run it after any change to confirm nothing broke. It tests 44 patterns from static HTML through deep nesting (if > each > snippet > component), post-hydration reactivity, deferred settings, and spec-driven primitives. All steps should show green. If a step goes red, the step name tells you exactly which pattern regressed.
+**Progression:** Fix bugs so hydrated matches client. Use component to verify SSR output. Ladder catches regressions.
 
-There is also an **automated hydration test suite** at `packages/renderer/test/browser/ssr-hydration.test.js` (68 tests). Run with `cd packages/renderer && npx vitest run`. This tests the ServerRenderer → DSD → hydration round-trip programmatically, without a browser. The full renderer suite is 721 tests across 14 files — run it after any renderer change.
+### Automated tests
 
-### Progression: vanilla → component → hydrated
+```bash
+cd packages/renderer && npx vitest run  # 721 tests, 14 files
+```
 
-Work through these in order. Each step narrows the scope of what could be wrong.
-
-**Step 1: Get vanilla right.**
-This is the simplest path — `renderToString` with no Astro layer. If the HTML is wrong here, it'll be wrong everywhere. Fix ServerRenderer issues at this level.
-
-*Success criteria:* The screenshot matches what the hydrated version shows, minus interactivity. Same text, same structure, same nesting. Icons should render (nested component DSD). Expanded sections should show pages.
-
-**Step 2: Get component to match vanilla.**
-Same component, but now through the Astro `renderToStaticMarkup` path. If vanilla looks right but component doesn't, the gap is in the Astro integration (`internal-packages/astro/server.js`) — prop handling, attribute serialization, or how the renderer is configured.
-
-*Success criteria:* Identical to vanilla.
-
-**Step 3: Get hydrated to match component.**
-Same as component but with `client:load`. If component looks right but hydrated introduces problems (duplication, flashing, layout shifts, locked browser), the gap is in the hydration/client path — marker matching, prop restoration, or unnecessary re-computation.
-
-*Success criteria:* Identical to component, plus interactivity works (clicking, accordion, search).
-
-### Diagnosing by where a bug appears
+### Diagnosing by route
 
 | Visible in | Root cause is in |
 |-----------|-----------------|
-| All three | ServerRenderer (`packages/renderer/src/engines/native/server.js`) |
-| component + hydrated only | Astro integration (`internal-packages/astro/server.js`) |
-| hydrated only | Client hydration (`packages/component/src/engines/native/base.js`, `renderer.js` hydrate methods) |
-| vanilla only | `renderToString` setup (`packages/component/src/render-to-string.js`) |
+| All three | ServerRenderer (`server.js`) |
+| component + hydrated | Astro integration or `renderToString` |
+| hydrated only | Client hydration (`base.js`, renderer hydrate methods) |
 
-### Current state (as of 2026-03-31)
+## Architecture Notes
 
-| Route | What renders | What's missing |
-|-------|-------------|---------------|
-| vanilla | Full menu tree, pages expanded, active state highlighted | No icons (nested `<ui-icon>` has no DSD) |
-| component | Section titles only | Pages not expanded, no icons. Astro path renders less than vanilla — `expandAll` or menu data may not be reaching the renderer correctly |
-| hydrated | Full menu tree (but 3x duplicated from mobile-menu) | No icons in SSR output (JS adds them). Mobile-menu duplication |
+### The hydration flow (native base.js)
+```
+connectedCallback()
+  → DSD detected → _hydrating = true
+  → rAF → hydrate(prototypeTemplate)
+    → getData() — reads element properties
+    → prototypeTemplate.clone({ data, element, renderRoot })
+      → Template constructor → initialize()
+        → createComponent() + user's initialize()
+        → Renderer created with overlaySettingsSignals(getDataContext())
+    → _isHydrating = true
+    → buildHTMLString(ast) → get entries (marker descriptions)
+    → hydrateMarkers(shadowRoot, entries, data, scope)
+      → Pass 1: attribute bindings (reference DOM matching)
+      → Pass 2: comment markers (text expressions + block directives)
+    → _isHydrating = false
+    → rendered = true, _hydrating = false
+    → removeMarkers()
+    → setTimeout(onRendered, 0)
+```
 
-Note: vanilla currently renders MORE than component. This means the Astro `server.js` path has a gap vs `renderToString` — investigate prop/settings handling differences between the two paths.
+### Key difference from Lit path
+In the Lit base class (`willUpdate` → `render`), `requestUpdate()` is never suppressed. When `initialize()` mutates a reactive property, Lit schedules a second render pass that reconciles any divergence. The native path now allows `requestUpdate()` during hydration (as of the `attributeChangedCallback` fix), but `hydrateEach`'s destructive non-firstRun behavior makes the reconciliation pass unsafe.
 
-### Expanding to other components
+### The `createEach` vs `hydrateEach` gap
+`createEach` (normal render path, ~line 540) uses keyed reconciliation with per-item Signals and a `Map<key, { nodes, itemSignal, scope }>`. Items are updated in place via `itemSignal.set(newData)`. New items get fresh renders. Removed items get `scope.dispose()` + node removal.
 
-Once NavMenu renders correctly across all three routes, swap the component in the test routes to other patterns:
-- TopbarMenu (topbar with tabs)
-- A simple button with icon (nested ui-icon)
-- GlobalSearch (modal-like, conditional visibility)
+`hydrateEach` (hydration path, ~line 1445) has none of this. First run: evaluate list to register deps, skip. Subsequent runs: full teardown via `region.setContent()` and rebuild via `readAST`. No per-item tracking, no keyed reconciliation, no incremental updates.
 
-Each exercises different SSR patterns. The same vanilla → component → hydrated progression applies.
+## Recommended Approach
 
-### Checking real pages
-
-After the test routes look correct, navigate to `/ui/start` and compare. The fix should flow through to real doc pages automatically since they use the same Astro integration path.
-
-## Known Issues Beyond Nested Rendering
-
-### Attribute serialization for complex values
-`JSON.stringify()` is the standard approach for serializing arrays/objects as HTML attributes. The `[object Object]` bug was a missing stringify call in `serializeAttributes`. Non-serializables (functions) should be skipped. This is largely fixed but needs verification.
-
-### Hydration performance
-The client-side hydration locks the browser for several seconds on pages with many components. Flame charts show it re-running every calculation and hitting clone logic — suggesting the hydration path is doing full re-computation rather than adopting server DOM and wiring bindings. This defeats the purpose of SSR. The hydration path in `WebComponentBase.hydrate()` and the renderer's `hydrateMarkers` should be audited for unnecessary work — the server already computed the values, the client should trust that output and only wire reactivity.
-
-## When You're Stuck
-
-If you've been iterating and the screenshots aren't converging, use the `fresh-take` skill (load via `use_skill fresh-take` from MCP, audience: contributing). It guides you through extracting problem knowledge from your current context, stripping solution momentum, and delegating to a fresh subagent for independent evaluation. The fresh agent sees the problem without your trajectory and may identify approaches you've been orbiting past.
-
-Key: separate what you've LEARNED about the problem (constraints, architecture facts) from what you've TRIED (specific approaches, hypotheses). Transfer the former, isolate the latter. See the skill for the full methodology.
-
-## Questions for Independent Evaluation
-
-1. Where in the rendering pipeline is the right interception point for nested custom elements — and what are the tradeoffs of each location?
-
-2. How do other SSR systems for web components (not just Lit) solve this? What patterns exist beyond `elementRenderers`?
-
-3. What information does the ServerRenderer need about nested components, and where can it get that information without polluting the component authoring API?
-
-4. Is the `clientEntrypoint` gap (Astro not serializing props) a separate problem or connected to recursive rendering? Should they be solved together?
-
-5. Why is hydration re-running computations and hitting clone logic? What work is the hydration path doing that it shouldn't be, and where is the boundary between "adopt server DOM" and "re-compute"?
+1. **Instrument `hydrateEach`** to understand the 3x: count Reaction fires, check node connectivity, log region state
+2. **Fix the 3x duplication** — either fix the specific mechanism or refactor `hydrateEach` to wire per-item Reactions
+3. **Remove firstRun skip for text/attribute hydration** — safe once each-loop doesn't do destructive full-rebuild
+4. **Verify step 40 passes** — should work naturally once text expressions write on firstRun
+5. **Run full test suite** — `cd packages/renderer && npx vitest run`
+6. **Test real doc pages** — `/ui/start`, `/ui/components/button`
