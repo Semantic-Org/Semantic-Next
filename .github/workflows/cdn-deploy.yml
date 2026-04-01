@@ -37,6 +37,9 @@ jobs:
       - name: Build vendor CDN
         run: npm run build:vendor-cdn
 
+      - name: Build CDN assets
+        run: npm run build:cdn-assets
+
       - name: Check for bare imports
         run: node tools/cdn/check-bare-imports.js
 

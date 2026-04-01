@@ -145,9 +145,8 @@ export function parseRoute(pathname) {
   }
 
   // Asset sets: /icons@version/name or /fonts@version/name/asset
-  const ASSET_SET_TYPES = new Set(['icons', 'fonts']);
   const assetSetMatch = pathname.match(/^\/(icons|fonts)(?:@([^/]+))?(?:\/(.+))?$/);
-  if (assetSetMatch && ASSET_SET_TYPES.has(assetSetMatch[1])) {
+  if (assetSetMatch) {
     const setType = assetSetMatch[1];
     const version = assetSetMatch[2] || 'latest';
     const filepath = assetSetMatch[3] || null;
