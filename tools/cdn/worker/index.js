@@ -66,6 +66,8 @@ const CONTENT_TYPES = {
   '.html': 'text/html',
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
 };
 
 function getContentType(filepath) {
@@ -139,6 +141,21 @@ export function parseRoute(pathname) {
       name: vendorMatch[1],
       version: vendorMatch[2],
       filepath: vendorMatch[3],
+    };
+  }
+
+  // Asset sets: /icons@version/name or /fonts@version/name/asset
+  const ASSET_SET_TYPES = new Set(['icons', 'fonts']);
+  const assetSetMatch = pathname.match(/^\/(icons|fonts)(?:@([^/]+))?(?:\/(.+))?$/);
+  if (assetSetMatch && ASSET_SET_TYPES.has(assetSetMatch[1])) {
+    const setType = assetSetMatch[1];
+    const version = assetSetMatch[2] || 'latest';
+    const filepath = assetSetMatch[3] || null;
+    return {
+      type: 'asset-set',
+      setType,
+      version,
+      filepath,
     };
   }
 
@@ -373,6 +390,43 @@ export default {
             'Content-Type': contentType,
             ...corsHeaders(),
             ...cache,
+          },
+        });
+      }
+
+      case 'asset-set': {
+        const { setType, version, filepath } = route;
+
+        // Redirect latest to exact version
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response(`Version "${version}" not found`, { status: 404 });
+          }
+          const redirectPath = filepath
+            ? `/${setType}@${resolved}/${filepath}`
+            : `/${setType}@${resolved}`;
+          return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        if (!filepath) {
+          return new Response('Not found: missing set name', { status: 404 });
+        }
+
+        // Bare name (no extension, no slash) → serve the set's CSS file
+        const isBareName = !filepath.includes('/') && !filepath.includes('.');
+        const r2Path = isBareName ? `${filepath}.css` : filepath;
+        const r2Key = `${setType}/${version}/${r2Path}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(r2Path),
+            ...corsHeaders(),
+            ...cacheHeaders(version),
           },
         });
       }
