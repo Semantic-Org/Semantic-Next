@@ -3,6 +3,9 @@
 <head>
   <title>CDN Test</title>
   <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/fonts@canary/lato" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/icons@canary/lucide" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/icons@canary/brands" rel="stylesheet" />
   <style>
     body { padding: 2rem; font-family: sans-serif; }
     section { margin-bottom: 2rem; border: 1px solid #eee; padding: 1rem; border-radius: 8px; }
@@ -46,6 +49,55 @@
     </div>
   </section>
 
+  <!-- Test 4: Icon set CSS (extensionless) + SVG resolution -->
+  <section>
+    <h2>4. Icons: Lucide from CDN</h2>
+    <div class="test-row">
+      <ui-icon home></ui-icon>
+      <ui-icon settings></ui-icon>
+      <ui-icon search></ui-icon>
+      <ui-icon heart></ui-icon>
+      <ui-icon save></ui-icon>
+      <ui-icon warning></ui-icon>
+      <ui-icon mail></ui-icon>
+      <ui-icon calendar></ui-icon>
+    </div>
+  </section>
+
+  <!-- Test 5: Brand icons (multicolor, set attribute) -->
+  <section>
+    <h2>5. Icons: Brands (multicolor)</h2>
+    <div class="test-row">
+      <ui-icon icon="react" set="brands"></ui-icon>
+      <ui-icon icon="vue" set="brands"></ui-icon>
+      <ui-icon icon="svelte" set="brands"></ui-icon>
+      <ui-icon icon="angular" set="brands"></ui-icon>
+      <ui-icon icon="astro" set="brands"></ui-icon>
+      <ui-icon icon="nextjs" set="brands"></ui-icon>
+    </div>
+  </section>
+
+  <!-- Test 6: Self-hosted font -->
+  <section>
+    <h2>6. Font: Lato from CDN</h2>
+    <div class="test-row" style="font-family: 'Lato', sans-serif;">
+      <span style="font-weight: 400;">Regular 400</span>
+      <span style="font-weight: 400; font-style: italic;">Italic 400</span>
+      <span style="font-weight: 600;">Semibold 600</span>
+      <span style="font-weight: 700;">Bold 700</span>
+    </div>
+  </section>
+
+  <!-- Test 7: Icon inside button (combined) -->
+  <section>
+    <h2>7. Combined: Button + Icon</h2>
+    <div class="test-row">
+      <ui-button primary><ui-icon home></ui-icon> Home</ui-button>
+      <ui-button><ui-icon settings></ui-icon> Settings</ui-button>
+      <ui-button positive><ui-icon save></ui-icon> Save</ui-button>
+    </div>
+  </section>
+
   <script>
     const log = document.getElementById('log');
     function msg(text, type) {
@@ -59,7 +111,7 @@
   </script>
 
   <!-- Combo loads (no import map needed) -->
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input,icon"></script>
   <script type="module" src="https://cdn.semantic-ui.com/core@canary/panels"></script>
 
   <!-- Behavior needs import map — behaviors aren't standalone CDN files -->
@@ -77,6 +129,18 @@
 
     await customElements.whenDefined('ui-panels');
     msg('ui-panels: defined', 'ok');
+
+    await customElements.whenDefined('ui-icon');
+    msg('ui-icon: defined', 'ok');
+
+    // Verify icon CSS loaded (check a custom property from lucide set)
+    const iconVar = getComputedStyle(document.documentElement).getPropertyValue('--icon-home');
+    msg('--icon-home: ' + (iconVar ? 'resolved' : 'MISSING'), iconVar ? 'ok' : 'error');
+
+    // Verify font loaded
+    const fontsReady = await document.fonts.ready;
+    const latoLoaded = [...fontsReady].some(f => f.family === 'Lato' && f.status === 'loaded');
+    msg('Lato font: ' + (latoLoaded ? 'loaded' : 'not loaded'), latoLoaded ? 'ok' : 'error');
 
     // Initialize tooltips
     $('.tooltip-test').tooltip();
