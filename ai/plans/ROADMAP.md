@@ -102,6 +102,7 @@ TOKEN FINALIZATION (the gate)
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
 | 12 | [MCP Playground Rendering](mcp-playground-rendering.md) | 8-16h (1-2d) | pair | Phase 1 done (hash URLs). Phase 2: MCP `render_component` tool. Phase 3: Vercel KV short URLs. |
+| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Root landing, package indexes, icons/fonts listings. Extracted from archived CDN Site plan. |
 
 
 ## Blocked (waiting on token finalization)
