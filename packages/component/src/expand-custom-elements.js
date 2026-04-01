@@ -1,3 +1,4 @@
+import { resolveOptionAttributes } from './component-helpers.js';
 import { getComponent } from './component-registry.js';
 
 const MAX_DEPTH = 10;
@@ -245,6 +246,9 @@ function deserializeAttrs(rawAttrs, ComponentClass) {
       attrs[propName] = rawValue;
     }
   }
+
+  // Resolve option attributes (e.g. tiny → size="tiny")
+  resolveOptionAttributes(attrs, ComponentClass.config?.componentSpec);
 
   return attrs;
 }

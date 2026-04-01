@@ -262,6 +262,23 @@ export function createSettingsProxy(el) {
 }
 
 /*
+  Resolve option attributes (e.g. tiny → size="tiny") in a props object.
+  Mutates and returns the same object. Shared by renderToString and
+  deserializeAttrs so SSR and client agree on attribute resolution.
+*/
+export function resolveOptionAttributes(attrs, componentSpec) {
+  if (!componentSpec?.optionAttributes) { return attrs; }
+  each(componentSpec.optionAttributes, (targetProp, optionAttr) => {
+    const camel = kebabToCamel(optionAttr);
+    if (camel in attrs) {
+      attrs[targetProp] = optionAttr;
+      delete attrs[camel];
+    }
+  });
+  return attrs;
+}
+
+/*
   Returns styling classes for the template data context based on
   component spec attributes.
   Call as: getUIClasses(el, { componentSpec, properties })

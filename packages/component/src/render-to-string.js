@@ -1,5 +1,5 @@
 import { camelToKebab, each, isFunction, kebabToCamel } from '@semantic-ui/utils';
-import { getUIClasses } from './component-helpers.js';
+import { getUIClasses, resolveOptionAttributes } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
 
 /*
@@ -33,19 +33,19 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   const componentSpec = ComponentClass.config?.componentSpec;
   const resolvedProperties = ComponentClass.config?.resolvedProperties || ComponentClass.properties || {};
 
-  // Normalize kebab-case attribute names to camelCase property names
+  // Normalize kebab-case attribute names to camelCase property names.
+  // fromAttribute converters are already applied by deserializeAttrs (expandCustomElements path)
+  // or not needed (direct Astro path where attrs arrive pre-typed).
   const normalizedAttrs = {};
   each(attrs, (value, key) => {
     normalizedAttrs[kebabToCamel(key)] = value;
   });
 
+  // Resolve option attributes (e.g. tiny → size="tiny")
+  resolveOptionAttributes(normalizedAttrs, componentSpec);
+
   // Merge attributes with defaults
   const data = { ...defaultSettings, ...normalizedAttrs };
-
-  // Compute {ui} class string for spec-driven components
-  if (componentSpec) {
-    data.ui = getUIClasses(data, { componentSpec, properties: resolvedProperties });
-  }
 
   // Clone prototype template with the data context.
   // Force native engine — ServerRenderer handles string output.
@@ -56,6 +56,12 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   template.settings = data;
 
   template.initialize();
+
+  // Compute {ui} class string AFTER initialize() — createComponent can modify
+  // settings (e.g. input's configureSearch sets icon) which affect {ui} classes
+  if (componentSpec) {
+    data.ui = getUIClasses(data, { componentSpec, properties: resolvedProperties });
+  }
 
   let html = template.render();
 
