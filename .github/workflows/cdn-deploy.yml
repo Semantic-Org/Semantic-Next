@@ -68,8 +68,9 @@ jobs:
         run: cd tools/cdn && npx wrangler deploy
 
       - name: Purge Cloudflare cache
+        continue-on-error: true
         run: |
-          curl -s -X POST \
+          curl -sf -X POST \
             "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}" \
             -H "Content-Type: application/json" \
