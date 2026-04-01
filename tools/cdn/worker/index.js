@@ -68,6 +68,9 @@ const CONTENT_TYPES = {
   '.map': 'application/json',
   '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
@@ -84,6 +87,10 @@ function getContentType(filepath) {
 //   /core@0.18.0/semantic-ui.min.js        → SUI package
 //   /@semantic-ui/core@0.18.0/...           → SUI alias (redirects to clean path)
 //   /vendor/lit@3.3.2/directive.js          → third-party
+//   /icons@0.18.0/lucide                    → icon set CSS (extensionless)
+//   /icons@0.18.0/lucide/house.svg          → icon asset
+//   /fonts@0.18.0/lato                      → font set CSS (extensionless)
+//   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
 //   /css@0.18.0.map                         → framework CSS sourcemap

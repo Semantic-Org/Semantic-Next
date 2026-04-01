@@ -71,7 +71,7 @@ function discoverFontSets() {
 
     if (!cssFile) { continue; }
 
-    // Find font files (.woff2, .woff, .ttf)
+    // Find font files (.woff2, .woff, .ttf, .otf)
     const fontFiles = readdirSync(dir)
       .filter(f => /\.(woff2?|ttf|otf)$/.test(f));
 

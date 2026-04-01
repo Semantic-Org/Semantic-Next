@@ -18,6 +18,11 @@ import { parseArgs } from 'util';
 const ROOT = resolve(import.meta.dirname, '../..');
 
 const SUI_SCOPE = '@semantic-ui/';
+
+// Asset set directories live inside dist/cdn/ but are uploaded under their own
+// top-level R2 prefix (icons/, fonts/) — exclude from core package upload.
+const ASSET_SET_DIRS = ['icons', 'fonts'];
+
 // Discover SUI packages from packages/*, plus core (root package)
 const SUI_PACKAGES = [
   'core',
@@ -43,6 +48,9 @@ const CONTENT_TYPES = {
   '.map': 'application/json',
   '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
@@ -101,10 +109,12 @@ async function uploadText(s3, key, text, contentType = 'text/plain') {
 }
 
 // Recursively collect all files in a directory
-function collectFiles(dir, prefix = '') {
+// skipDirs: top-level directory names to exclude (e.g., 'icons', 'fonts')
+function collectFiles(dir, prefix = '', skipDirs = []) {
   const files = [];
   if (!existsSync(dir)) { return files; }
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!prefix && skipDirs.includes(entry.name)) { continue; }
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       files.push(...collectFiles(join(dir, entry.name), rel));
@@ -131,7 +141,8 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
     }
 
     const r2Prefix = `@semantic-ui/${name}/${version}/dist/cdn`;
-    const files = collectFiles(cdnDir);
+    const skipDirs = name === 'core' ? ASSET_SET_DIRS : [];
+    const files = collectFiles(cdnDir, '', skipDirs);
 
     // Check if this version already exists (skip immutable versions)
     if (!force && version !== 'canary') {
@@ -273,9 +284,7 @@ async function updateVersionPointer(s3, alias, version) {
 
 // Upload CDN asset sets (icons + fonts) — top-level R2 prefixes
 async function uploadAssetSets(s3, version, { force = false } = {}) {
-  const ASSET_TYPES = ['icons', 'fonts'];
-
-  for (const assetType of ASSET_TYPES) {
+  for (const assetType of ASSET_SET_DIRS) {
     const assetDir = join(ROOT, 'dist', 'cdn', assetType);
     if (!existsSync(assetDir)) {
       continue;
