@@ -105,9 +105,9 @@
       "import": "./src/primitives/icon/sets/heroicons/heroicons.css",
       "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
-    "./icon/sets/dev.css": {
-      "import": "./src/primitives/icon/sets/dev/index.css",
-      "default": "./src/primitives/icon/sets/dev/index.css"
+    "./icon/sets/brands.css": {
+      "import": "./src/primitives/icon/sets/brands/index.css",
+      "default": "./src/primitives/icon/sets/brands/index.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
