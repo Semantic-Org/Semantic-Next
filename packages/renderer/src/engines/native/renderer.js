@@ -1193,7 +1193,8 @@ export class Renderer {
           comp.stop();
           return;
         }
-        if (comp.firstRun) { return; } // server content is correct
+        this.eval(exprNode.value, data); // register deps (even on firstRun)
+        if (comp.firstRun) { return; } // skip expensive reparse — server DOM is trusted
         for (const n of ownedNodes) { n.remove(); }
         ownedNodes.length = 0;
         const value = this.eval(exprNode.value, data);
