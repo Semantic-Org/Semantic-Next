@@ -269,6 +269,42 @@ async function updateVersionPointer(s3, alias, version) {
   console.log(`  importmap@${alias} updated`);
 }
 
+// Upload CDN asset sets (icons + fonts) — top-level R2 prefixes
+async function uploadAssetSets(s3, version, { force = false } = {}) {
+  const ASSET_TYPES = ['icons', 'fonts'];
+
+  for (const assetType of ASSET_TYPES) {
+    const assetDir = join(ROOT, 'dist', 'cdn', assetType);
+    if (!existsSync(assetDir)) {
+      continue;
+    }
+
+    console.log(`\nUploading ${assetType} @ ${version}`);
+    const r2Prefix = `${assetType}/${version}`;
+    const files = collectFiles(assetDir);
+
+    if (files.length === 0) {
+      console.log(`  No ${assetType} files found`);
+      continue;
+    }
+
+    // Check if this version already exists (skip immutable versions)
+    if (!force && version !== 'canary') {
+      const firstKey = `${r2Prefix}/${files[0].key}`;
+      if (await objectExists(s3, firstKey)) {
+        console.log(`  ${assetType}@${version} — already exists, skipping`);
+        continue;
+      }
+    }
+
+    for (const file of files) {
+      const key = `${r2Prefix}/${file.key}`;
+      await uploadFile(s3, key, readFileSync(file.path), getContentType(file.key));
+    }
+    console.log(`  ${assetType}@${version} — ${files.length} files`);
+  }
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -290,6 +326,7 @@ async function main() {
   const suiVersion = isCanary ? 'canary' : version;
 
   await uploadSuiPackages(s3, suiVersion, { force: isCanary });
+  await uploadAssetSets(s3, suiVersion, { force: isCanary });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
   await uploadPresets(s3);
