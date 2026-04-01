@@ -371,14 +371,15 @@ describe('asset set fetch', () => {
     expect(res.status).toBe(404);
   });
 
-  it('returns 404 when no filepath provided', async () => {
+  it('redirects to default set when no filepath provided', async () => {
     const env = {
       CDN_BUCKET: mockR2Bucket({}),
     };
     const req = new Request('https://cdn.semantic-ui.com/icons@canary');
     const res = await worker.fetch(req, env);
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
   });
 
   it('sets immutable cache for versioned assets', async () => {
@@ -432,6 +433,39 @@ describe('asset set fetch', () => {
     const res = await worker.fetch(req, env);
 
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('redirects bare /icons@version to default set (lucide)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
+  });
+
+  it('redirects bare /fonts@version to default set (lato)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/fonts@canary/lato');
+  });
+
+  it('serves deeply nested asset paths', async () => {
+    const svg = '<svg></svg>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide/outline/house.svg': svg,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide/outline/house.svg');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/svg+xml');
+    expect(await res.text()).toBe(svg);
   });
 
   it('asset-set routes take precedence over SUI packages with same name', () => {

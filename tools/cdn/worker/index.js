@@ -409,8 +409,13 @@ export default {
           return Response.redirect(new URL(redirectPath, url.origin).href, 302);
         }
 
+        // Bare type with no set name → redirect to default set
         if (!filepath) {
-          return new Response('Not found: missing set name', { status: 404 });
+          const defaultSet = setType === 'icons' ? 'lucide' : 'lato';
+          return Response.redirect(
+            new URL(`/${setType}@${version}/${defaultSet}`, url.origin).href,
+            302,
+          );
         }
 
         // Bare name (no extension, no slash) → serve the set's CSS file
