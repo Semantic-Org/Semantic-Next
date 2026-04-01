@@ -105,6 +105,89 @@ describe('parseRoute — SUI alias', () => {
   });
 });
 
+describe('parseRoute — asset sets (icons & fonts)', () => {
+  it('/icons@0.18.0/lucide → versioned icon set', () => {
+    expect(parseRoute('/icons@0.18.0/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: '0.18.0',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons@canary/lucide → canary', () => {
+    expect(parseRoute('/icons@canary/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'canary',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons/lucide → latest (no version)', () => {
+    expect(parseRoute('/icons/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons@0.18.0/lucide/house.svg → individual SVG', () => {
+    expect(parseRoute('/icons@0.18.0/lucide/house.svg')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: '0.18.0',
+      filepath: 'lucide/house.svg',
+    });
+  });
+
+  it('/fonts@0.18.0/lato → versioned font set', () => {
+    expect(parseRoute('/fonts@0.18.0/lato')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: '0.18.0',
+      filepath: 'lato',
+    });
+  });
+
+  it('/fonts/lato → latest (no version)', () => {
+    expect(parseRoute('/fonts/lato')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: 'latest',
+      filepath: 'lato',
+    });
+  });
+
+  it('/fonts@0.18.0/lato/LatoLatin-Regular.woff2 → individual font file', () => {
+    expect(parseRoute('/fonts@0.18.0/lato/LatoLatin-Regular.woff2')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: '0.18.0',
+      filepath: 'lato/LatoLatin-Regular.woff2',
+    });
+  });
+
+  it('/icons → no filepath, latest version', () => {
+    expect(parseRoute('/icons')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: null,
+    });
+  });
+
+  it('/icons@latest/lucide → latest alias', () => {
+    expect(parseRoute('/icons@latest/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: 'lucide',
+    });
+  });
+});
+
 describe('parseRoute — import map', () => {
   it('/importmap.js → latest', () => {
     expect(parseRoute('/importmap.js')).toEqual({ type: 'importmap', version: null, format: 'js' });
@@ -202,5 +285,193 @@ describe('JS SourceMap header', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get('SourceMap')).toBeNull();
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Asset sets (icons & fonts)
+----------------------------------------------*/
+
+describe('asset set fetch', () => {
+  it('serves extensionless icon set as CSS', async () => {
+    const css = ':root { --icon-home: url(./lucide/house.svg); }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(await res.text()).toBe(css);
+  });
+
+  it('serves individual SVG with correct content type', async () => {
+    const svg = '<svg viewBox="0 0 24 24"><path d="M3 12l2-2"/></svg>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide/house.svg': svg,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide/house.svg');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/svg+xml');
+  });
+
+  it('serves font woff2 with correct content type', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato/LatoLatin-Regular.woff2': 'fakewoff2data',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('font/woff2');
+  });
+
+  it('redirects latest to exact version', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@latest/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@0.19.0/lucide');
+  });
+
+  it('redirects unversioned to exact version', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@0.19.0/lucide');
+  });
+
+  it('returns 404 for missing set', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({}),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/nonexistent');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+  });
+
+  it('redirects to default set when no filepath provided', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({}),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
+  });
+
+  it('sets immutable cache for versioned assets', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/0.18.0/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@0.18.0/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=31536000, immutable');
+  });
+
+  it('sets short cache for canary assets', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=60');
+  });
+
+  it('includes CORS headers', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato');
+    const res = await worker.fetch(req, env);
+
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('includes CORS on font binary files (browsers enforce this)', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato/LatoLatin-Regular.woff2': 'fakewoff2data',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2');
+    const res = await worker.fetch(req, env);
+
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('redirects bare /icons@version to default set (lucide)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
+  });
+
+  it('redirects bare /fonts@version to default set (lato)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/fonts@canary/lato');
+  });
+
+  it('serves deeply nested asset paths', async () => {
+    const svg = '<svg></svg>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide/outline/house.svg': svg,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide/outline/house.svg');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/svg+xml');
+    expect(await res.text()).toBe(svg);
+  });
+
+  it('asset-set routes take precedence over SUI packages with same name', () => {
+    // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
+    // route must still match first — this is by design, not an accident
+    expect(parseRoute('/icons@0.18.0/lucide').type).toBe('asset-set');
+    expect(parseRoute('/fonts@0.18.0/lato').type).toBe('asset-set');
   });
 });

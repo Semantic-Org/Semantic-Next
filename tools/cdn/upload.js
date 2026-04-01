@@ -18,6 +18,11 @@ import { parseArgs } from 'util';
 const ROOT = resolve(import.meta.dirname, '../..');
 
 const SUI_SCOPE = '@semantic-ui/';
+
+// Asset set directories live inside dist/cdn/ but are uploaded under their own
+// top-level R2 prefix (icons/, fonts/) — exclude from core package upload.
+const ASSET_SET_DIRS = ['icons', 'fonts'];
+
 // Discover SUI packages from packages/*, plus core (root package)
 const SUI_PACKAGES = [
   'core',
@@ -41,6 +46,11 @@ const CONTENT_TYPES = {
   '.html': 'text/html',
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
@@ -99,10 +109,12 @@ async function uploadText(s3, key, text, contentType = 'text/plain') {
 }
 
 // Recursively collect all files in a directory
-function collectFiles(dir, prefix = '') {
+// skipDirs: top-level directory names to exclude (e.g., 'icons', 'fonts')
+function collectFiles(dir, prefix = '', skipDirs = []) {
   const files = [];
   if (!existsSync(dir)) { return files; }
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!prefix && skipDirs.includes(entry.name)) { continue; }
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       files.push(...collectFiles(join(dir, entry.name), rel));
@@ -129,7 +141,8 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
     }
 
     const r2Prefix = `@semantic-ui/${name}/${version}/dist/cdn`;
-    const files = collectFiles(cdnDir);
+    const skipDirs = name === 'core' ? ASSET_SET_DIRS : [];
+    const files = collectFiles(cdnDir, '', skipDirs);
 
     // Check if this version already exists (skip immutable versions)
     if (!force && version !== 'canary') {
@@ -269,6 +282,40 @@ async function updateVersionPointer(s3, alias, version) {
   console.log(`  importmap@${alias} updated`);
 }
 
+// Upload CDN asset sets (icons + fonts) — top-level R2 prefixes
+async function uploadAssetSets(s3, version, { force = false } = {}) {
+  for (const assetType of ASSET_SET_DIRS) {
+    const assetDir = join(ROOT, 'dist', 'cdn', assetType);
+    if (!existsSync(assetDir)) {
+      continue;
+    }
+
+    console.log(`\nUploading ${assetType} @ ${version}`);
+    const r2Prefix = `${assetType}/${version}`;
+    const files = collectFiles(assetDir);
+
+    if (files.length === 0) {
+      console.log(`  No ${assetType} files found`);
+      continue;
+    }
+
+    // Check if this version already exists (skip immutable versions)
+    if (!force && version !== 'canary') {
+      const firstKey = `${r2Prefix}/${files[0].key}`;
+      if (await objectExists(s3, firstKey)) {
+        console.log(`  ${assetType}@${version} — already exists, skipping`);
+        continue;
+      }
+    }
+
+    for (const file of files) {
+      const key = `${r2Prefix}/${file.key}`;
+      await uploadFile(s3, key, readFileSync(file.path), getContentType(file.key));
+    }
+    console.log(`  ${assetType}@${version} — ${files.length} files`);
+  }
+}
+
 async function main() {
   const { values } = parseArgs({
     options: {
@@ -290,6 +337,7 @@ async function main() {
   const suiVersion = isCanary ? 'canary' : version;
 
   await uploadSuiPackages(s3, suiVersion, { force: isCanary });
+  await uploadAssetSets(s3, suiVersion, { force: isCanary });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
   await uploadPresets(s3);

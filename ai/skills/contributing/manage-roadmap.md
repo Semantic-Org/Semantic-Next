@@ -184,13 +184,15 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 ### During implementation
 
 3. **Commit as you go** — small, logical commits using the repo's `Category: Description` format. One-line messages only, no body content, no co-author trailers.
-4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests.
+4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests. **Present all findings to the user** — don't silently triage which edge cases matter. The user decides what to fix, what to defer, and what to accept as a known constraint.
 
 ### Completing work
 
-5. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
-6. **Self-review the PR** using the `/code-review` skill against the opened PR. Fix any issues found before the user reviews.
-7. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
+5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
+6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
+7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
+8. **Self-review the PR** using the `contributing/code-review` skill. Run 5 parallel Opus agents, fix findings, rerun until clean. See the skill for the full process — it covers agent lenses, scoring rubric, iterative loop, and what counts as a false positive.
+9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 
 ### When to branch vs. commit to main
 

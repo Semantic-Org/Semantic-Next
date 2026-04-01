@@ -213,12 +213,12 @@ If a canonical name already matches your native name (e.g., both use `home`), no
 Multiple icon sets coexist on the same page. They all define properties on `:root` so there's no conflict as long as names don't collide:
 
 ```js
-import '@semantic-ui/core/icon/sets/feather.css';  // standard UI icons
+import '@semantic-ui/core/icon/sets/lucide.css';  // standard UI icons
 import './my-brand-icons.css';                      // your custom brand icons
 ```
 
 ```html
-<!-- From feather -->
+<!-- From lucide -->
 <ui-icon close></ui-icon>
 
 <!-- From your custom set -->
@@ -264,12 +264,12 @@ A real-world example combining monochrome UI icons with a colored logo:
 
 ```js
 import { Icon } from '@semantic-ui/core';
-import '@semantic-ui/core/icon/sets/feather.css';  // standard icons
+import '@semantic-ui/core/icon/sets/lucide.css';  // standard icons
 import './app-icons.css';                           // app-specific icons
 ```
 
 ```html
-<!-- Standard icon from feather -->
+<!-- Standard icon from lucide -->
 <ui-icon settings></ui-icon>
 
 <!-- Custom app icons -->

@@ -99,6 +99,46 @@ https://cdn.semantic-ui.com/vendor/tailwindcss@4.1.12/dist/lib.mjs
 https://cdn.semantic-ui.com/vendor/@pagefind/modular-ui@1.3.0/npm_dist/mjs/modular-core.mjs
 ```
 
+### Asset Sets (Icons & Fonts)
+
+Self-hosted icons and fonts, versioned with SUI releases. Extensionless CSS paths serve the set stylesheet; asset files keep their extensions. Browsers only fetch assets that are actually used (CSS custom properties and `@font-face` are lazy).
+
+**Icons:**
+
+| URL | What it loads |
+|---|---|
+| `https://cdn.semantic-ui.com/icons@0.18.0/lucide` | Lucide icon CSS (text/css, extensionless) |
+| `https://cdn.semantic-ui.com/icons@0.18.0/phosphor` | Phosphor icon CSS |
+| `https://cdn.semantic-ui.com/icons@0.18.0/tabler` | Tabler icon CSS |
+| `https://cdn.semantic-ui.com/icons@0.18.0/material-symbols` | Material Symbols icon CSS |
+| `https://cdn.semantic-ui.com/icons@0.18.0/heroicons` | Heroicons icon CSS |
+| `https://cdn.semantic-ui.com/icons@0.18.0/brands` | Brand/framework logos (multi-color) |
+| `https://cdn.semantic-ui.com/icons@0.18.0/lucide/house.svg` | Individual SVG (resolved by CSS) |
+
+**Fonts:**
+
+| URL | What it loads |
+|---|---|
+| `https://cdn.semantic-ui.com/fonts@0.18.0/lato` | Lato @font-face CSS (text/css, extensionless) |
+| `https://cdn.semantic-ui.com/fonts@0.18.0/lato/LatoLatin-Regular.woff2` | Font file (resolved by CSS) |
+
+**Version aliases** follow the same pattern as all other endpoints:
+
+| URL | Behavior |
+|---|---|
+| `https://cdn.semantic-ui.com/icons/lucide` | 302 → latest versioned |
+| `https://cdn.semantic-ui.com/icons@latest/lucide` | 302 → exact version |
+| `https://cdn.semantic-ui.com/icons@canary/lucide` | Canary, 60s TTL |
+| `https://cdn.semantic-ui.com/icons@0.18.0/lucide` | Immutable (1 year) |
+
+When preloading font files directly, the `crossorigin` attribute is required:
+
+```html
+<link rel="preload"
+      href="https://cdn.semantic-ui.com/fonts@0.18.0/lato/LatoLatin-Regular.woff2"
+      as="font" type="font/woff2" crossorigin>
+```
+
 ### Combo Endpoint
 
 Load specific primitives, components, and behaviors with a single `<script>` tag. Core package only — no import map needed.
@@ -146,8 +186,11 @@ export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
 
 ```html
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts/lato">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/icons/lucide">
 <script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
 <ui-button primary>Click Me</ui-button>
+<ui-icon home></ui-icon>
 <ui-input placeholder="Type here"></ui-input>
 ```
 

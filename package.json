@@ -105,9 +105,9 @@
       "import": "./src/primitives/icon/sets/heroicons/heroicons.css",
       "default": "./src/primitives/icon/sets/heroicons/heroicons.css"
     },
-    "./icon/sets/dev.css": {
-      "import": "./src/primitives/icon/sets/dev/index.css",
-      "default": "./src/primitives/icon/sets/dev/index.css"
+    "./icon/sets/brands.css": {
+      "import": "./src/primitives/icon/sets/brands/index.css",
+      "default": "./src/primitives/icon/sets/brands/index.css"
     },
     "./input": {
       "import": "./src/primitives/input/index.js",
@@ -193,6 +193,7 @@
     "build:docs-packages": "wireit",
     "build:packages": "wireit",
     "build:vendor-cdn": "wireit",
+    "build:cdn-assets": "wireit",
     "watch": "wireit",
     "watch:icons": "wireit",
     "publish": "wireit",
@@ -265,6 +266,12 @@
       "command": "node ./internal-packages/scripts/src/build-vendor-cdn.js",
       "dependencies": [
         "build:packages"
+      ]
+    },
+    "build:cdn-assets": {
+      "command": "node ./internal-packages/scripts/src/build-cdn-assets.js",
+      "dependencies": [
+        "build:icons"
       ]
     },
     "build:clean-directory": {

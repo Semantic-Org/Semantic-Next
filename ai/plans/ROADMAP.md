@@ -89,19 +89,20 @@ TOKEN FINALIZATION (the gate)
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
 | 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 | 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
+| 5 | [CDN Asset Sets](cdn-asset-sets.md) | 8-16h (1-2d) | pair | Top-level `/icons` and `/fonts` CDN routes. Self-hosted Lato, all 5 icon libraries. Extensionless CSS, hosted SVGs. Active. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
 | # | What | Hours | Mode | Notes |
 |---|------|-------|------|-------|
-| 5 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
+| 6 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
 | 7 | Ecosystem Guides — raw WC (7 pages) | 120-160h (15-20d) | pair | One page per framework. Pre-wrapper versions. install/framework.mdx (335 lines) is starting material. |
 | 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
 | 12 | [MCP Playground Rendering](mcp-playground-rendering.md) | 8-16h (1-2d) | pair | Phase 1 done (hash URLs). Phase 2: MCP `render_component` tool. Phase 3: Vercel KV short URLs. |
-| 13 | [CDN Asset Sets](cdn-asset-sets.md) | 8-16h (1-2d) | pair | Top-level `/icons` and `/fonts` CDN routes. Self-hosted Lato, all 5 icon libraries. Extensionless CSS, hosted SVGs. |
+| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Root landing, package indexes, icons/fonts listings. Extracted from archived CDN Site plan. |
 
 
 ## Blocked (waiting on token finalization)

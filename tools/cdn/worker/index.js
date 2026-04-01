@@ -66,6 +66,11 @@ const CONTENT_TYPES = {
   '.html': 'text/html',
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
@@ -82,6 +87,10 @@ function getContentType(filepath) {
 //   /core@0.18.0/semantic-ui.min.js        → SUI package
 //   /@semantic-ui/core@0.18.0/...           → SUI alias (redirects to clean path)
 //   /vendor/lit@3.3.2/directive.js          → third-party
+//   /icons@0.18.0/lucide                    → icon set CSS (extensionless)
+//   /icons@0.18.0/lucide/house.svg          → icon asset
+//   /fonts@0.18.0/lato                      → font set CSS (extensionless)
+//   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
 //   /css@0.18.0.map                         → framework CSS sourcemap
@@ -139,6 +148,20 @@ export function parseRoute(pathname) {
       name: vendorMatch[1],
       version: vendorMatch[2],
       filepath: vendorMatch[3],
+    };
+  }
+
+  // Asset sets: /icons@version/name or /fonts@version/name/asset
+  const assetSetMatch = pathname.match(/^\/(icons|fonts)(?:@([^/]+))?(?:\/(.+))?$/);
+  if (assetSetMatch) {
+    const setType = assetSetMatch[1];
+    const version = assetSetMatch[2] || 'latest';
+    const filepath = assetSetMatch[3] || null;
+    return {
+      type: 'asset-set',
+      setType,
+      version,
+      filepath,
     };
   }
 
@@ -373,6 +396,48 @@ export default {
             'Content-Type': contentType,
             ...corsHeaders(),
             ...cache,
+          },
+        });
+      }
+
+      case 'asset-set': {
+        const { setType, version, filepath } = route;
+
+        // Redirect latest to exact version
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response(`Version "${version}" not found`, { status: 404 });
+          }
+          const redirectPath = filepath
+            ? `/${setType}@${resolved}/${filepath}`
+            : `/${setType}@${resolved}`;
+          return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        // Bare type with no set name → redirect to default set
+        if (!filepath) {
+          const defaultSet = setType === 'icons' ? 'lucide' : 'lato';
+          return Response.redirect(
+            new URL(`/${setType}@${version}/${defaultSet}`, url.origin).href,
+            302,
+          );
+        }
+
+        // Bare name (no extension, no slash) → serve the set's CSS file
+        const isBareName = !filepath.includes('/') && !filepath.includes('.');
+        const r2Path = isBareName ? `${filepath}.css` : filepath;
+        const r2Key = `${setType}/${version}/${r2Path}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(r2Path),
+            ...corsHeaders(),
+            ...cacheHeaders(version),
           },
         });
       }
