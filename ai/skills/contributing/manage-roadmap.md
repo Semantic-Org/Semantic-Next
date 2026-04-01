@@ -184,7 +184,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 ### During implementation
 
 3. **Commit as you go** — small, logical commits using the repo's `Category: Description` format. One-line messages only, no body content, no co-author trailers.
-4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests.
+4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests. **Present all findings to the user** — don't silently triage which edge cases matter. The user decides what to fix, what to defer, and what to accept as a known constraint.
 
 ### Completing work
 
