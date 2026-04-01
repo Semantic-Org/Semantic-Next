@@ -1,7 +1,7 @@
 ---
-import Body from '../layouts/Body.astro';
-import '../css/layers.css';
-import '../css/fonts.css';
+import Body from '@layouts/Body.astro';
+import '@css/layers.css';
+import '@css/fonts.css';
 
 import { renderToString } from '@semantic-ui/component';
 import {
@@ -65,7 +65,7 @@ const steps = [
 const rendered = steps.map((s, i) => ({
   ...s,
   step: i + 1,
-  html: renderToString(s.component, s.attrs || {}, s.children || ''),
+  html: renderToString(s.component, s.attrs || {}, { slots: s.children ? { default: s.children } : null }),
 }));
 
 // Expected textContent for each step (empty string = slot-based, check visually)
