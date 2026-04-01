@@ -22,9 +22,9 @@
 </codebase_orientation>
 
 <context_discovery>
-  You have access to Semantic UI MCP which has tools available to provide Skills, AI Context, API Reference, and User Guides. Use list_skills and use_skill before writing code — skills contain framework-specific patterns and conventions that can't be inferred from reading source code alone (e.g., how the template compiler works, how reactivity integrates with rendering). Pass audience: 'contributing' to list_context to discover workflow guides and architecture docs that aren't shown by default — these contain step-by-step procedures for common contributor tasks like adding a new component, porting a primitive, or extending the spec system.
+  **Golden Rule: Prefer MCP over raw exploration.** When in doubt, `list_context` and `list_skills` first, `Grep` and `Read` second.
 
-  **Prefer MCP over raw exploration.** When in doubt, `list_context` and `list_skills` first, `Grep` and `Read` second.
+  You have access to Semantic UI MCP which has tools available to provide Skills, AI Context, API Reference, and User Guides. Use list_skills and use_skill before writing code — skills contain framework-specific patterns and conventions that can't be inferred from reading source code alone (e.g., how the template compiler works, how reactivity integrates with rendering). Pass audience: 'contributing' to list_context to discover workflow guides and architecture docs that aren't shown by default — these contain step-by-step procedures for common contributor tasks like adding a new component, porting a primitive, or extending the spec system.
 </context_discovery>
 
 <code_formatting>
