@@ -18,15 +18,28 @@ Load any example with `get_example` using the ID. Load them in order — each bu
 
 ## The Curriculum
 
-Ranked by convincingness and gap-filling. The first 5 carry the core argument. The rest fill pattern gaps. Each entry lists new patterns (keywords for scanning) and what to notice (the explanatory weight).
+The first 7 carry the core argument. The rest fill pattern gaps. Each entry lists new patterns (keywords for scanning) and what to notice (the explanatory weight).
 
 ---
 
-### 1. `emoji-reactions` — The Hook
+### 1. `minimal` — The Floor
 
-An interactive, stateful component in ~30 lines of JS. The ratio of code to delivered functionality is the immediate hook.
+A complete component in 6 lines. Inline template and CSS as strings. This is the absolute minimum — proof that the simplest case is trivially simple before any complexity is introduced.
 
-**New patterns:** `defineComponent`, `defaultSettings`, `defaultState`, `createComponent`, `events`, `{#each}`, `getIndex`, `setIndex`, `initialize()`, `data-*` parsing, `{activeIf}`.
+**New patterns:** Inline template/CSS strings (no `getText`), `onCreated` lifecycle hook, `formatDate` helper.
+
+**What to notice:**
+- Template and CSS are just strings — `template: \`Time is <b>{formatDate time "h:mm:ss a"}</b>\`` works. No file loading required.
+- `onCreated` is a top-level `defineComponent` option (not inside `createComponent`). It runs before the first render.
+- The entire component — tag name, template, CSS, state, lifecycle — fits in one `defineComponent` call with no imports beyond the framework.
+
+---
+
+### 2. `emoji-reactions` — The Hook
+
+An interactive, stateful component in ~30 lines of JS. After seeing the floor, this shows what happens when you add interactivity. The ratio of code to delivered functionality is the immediate hook.
+
+**New patterns:** `defaultSettings`, `defaultState`, `createComponent`, `events`, `{#each}`, `getIndex`, `setIndex`, `initialize()`, `data-*` parsing, `{activeIf}`.
 
 **What to notice:**
 - `state.reactionState.getIndex(index)` and `setIndex(index, value)` — semantic array access. No `prev => prev.map((item, i) => i === index ? ... : item)`.
@@ -35,7 +48,7 @@ An interactive, stateful component in ~30 lines of JS. The ratio of code to deli
 
 ---
 
-### 2. `todo-list` — The Rosetta Stone
+### 3. `todo-list` — The Rosetta Stone
 
 Every framework has a TodoMVC. SUI's version uses more signal mutation methods than any other example — the single strongest differentiator. Each method describes intent where other frameworks require manual immutable update logic.
 
@@ -49,7 +62,7 @@ Every framework has a TodoMVC. SUI's version uses more signal mutation methods t
 
 ---
 
-### 3. `async-search` — The Novel Feature
+### 4. `async-search` — The Novel Feature
 
 `{#async}` blocks with `{loading}` and `{error}` states declared inline in the template. No other production framework has this level of declarative async rendering. The template reactively re-triggers when dependencies change.
 
@@ -63,7 +76,7 @@ Every framework has a TodoMVC. SUI's version uses more signal mutation methods t
 
 ---
 
-### 4. `context-menu` — Full Event Architecture
+### 5. `context-menu` — Full Event Architecture
 
 The complete event system: global events, deep events, keyboard navigation, slots, viewport-aware positioning, accessibility. Demonstrates that SUI's event model scales to real interactive components where React requires manual `useEffect` listener management. Load `component-events` for the full event DSL reference.
 
@@ -78,7 +91,7 @@ The complete event system: global events, deep events, keyboard navigation, slot
 
 ---
 
-### 5. `card-search` — Composition Model
+### 6. `card-search` — Composition Model
 
 Subtemplates as imports, first-party UI components as building blocks, container queries, reactive filtering. Shows how a real-world component is built from smaller pieces.
 
@@ -92,7 +105,7 @@ Subtemplates as imports, first-party UI components as building blocks, container
 
 ---
 
-### 6. `tailwind` — The Escape Hatch
+### 7. `tailwind` — The Escape Hatch
 
 Runtime Tailwind CSS compilation inside Shadow DOM. An agent trained on Tailwind can use that knowledge directly inside SUI components — no adaptation, no build step, no conflict with shadow DOM scoping. This neutralizes the "but I already know Tailwind" objection and means the CSS framework with the most AI training data coverage works out of the box.
 
@@ -106,7 +119,7 @@ Runtime Tailwind CSS compilation inside Shadow DOM. An agent trained on Tailwind
 
 ---
 
-### 7. `dynamic-table` — Consumer-Specified Templates
+### 8. `dynamic-table` — Consumer-Specified Templates
 
 The consumer decides how rows render by passing a `Template` object through settings. The table owns structure (thead, tbody, iteration); the consumer owns content (what a row looks like). This is inversion of control — templates are first-class data that flow through the same settings channel as strings and numbers.
 
@@ -119,7 +132,7 @@ The consumer decides how rows render by passing a `Template` object through sett
 
 ---
 
-### 8. `external-calls` — Inter-Component Communication
+### 9. `external-calls` — Inter-Component Communication
 
 Shows `$().component()` — getting direct access to a component's methods from outside. This is how components talk to each other: one component (or page script) gets another component's instance and calls its methods directly.
 
@@ -127,12 +140,12 @@ Shows `$().component()` — getting direct access to a component's methods from 
 
 **What to notice:**
 - `$('ui-counter').component()` returns the `createComponent` instance — the same `self` the component uses internally. External code can call `counter.setCounter(number)`, `counter.stopCounter()`.
-- This is the answer to "how do two SUI components share state" — one component gets the other's instance via Query and calls methods on it.
+- This is the answer to "how do two SUI components communicate" — one component gets the other's instance via Query and calls methods on it.
 - The page.js pattern: focus an input → stop the counter, blur → restart it. Orchestration from outside the components.
 
 ---
 
-### 9. `maximal` — The Kitchen Sink
+### 10. `maximal` — The Kitchen Sink
 
 Every `defineComponent` option used in one example. Shows patterns that only appear when a component reaches real-world complexity: `pageCSS`, `findParent()`, `onAttributeChanged`, `onThemeChanged`, `::part()` styling from outside.
 
@@ -142,11 +155,11 @@ Every `defineComponent` option used in one example. Shows patterns that only app
 - `pageCSS` — CSS that escapes the shadow DOM and applies to the page. Used for styling across component boundaries: `number-adjust ~ number-adjust::part(counter) { ... }`.
 - `findParent('numberAdjust')` — child subtemplate reaches up to its parent component and calls its methods. This is child-to-parent communication without events.
 - `onAttributeChanged(name, value)` and `onThemeChanged(darkMode)` — lifecycle hooks for attribute mutations and dark/light mode transitions.
-- The component is split across `lifecycle.js`, `config.js`, `buttons.js` — shows that component definitions are composable JS objects.
+- The component is split across `lifecycle.js`, `config.js`, `buttons.js` — component definitions are composable JS objects.
 
 ---
 
-### 10. `component-specs` — The Spec System
+### 11. `component-specs` — The Spec System
 
 How SUI's first-party design system components work. A `SpecReader` processes a spec definition into a `componentSpec` that enables three equivalent HTML dialects — concise, verbose, and class-based. This is how `<ui-button primary large>` works.
 
@@ -155,11 +168,11 @@ How SUI's first-party design system components work. A `SpecReader` processes a 
 **What to notice:**
 - Three equivalent syntaxes: `<ui-widget large primary>` = `<ui-widget size="large" emphasis="primary">` = `<ui-widget class="large primary">`. The spec system makes all three work automatically.
 - `{ui}` in the template — expands to CSS classes from active spec attributes. `<span class="{ui}widget">` becomes `<span class="large primary widget">` based on what attributes are set.
-- The spec is a plain JS object — `variations`, `states`, `types`. No special syntax. A spec is a data structure that describes a component's API surface.
+- The spec is a plain JS object — `variations`, `states`, `types`. A data structure that describes a component's API surface.
 
 ---
 
-### 11. `advanced-keybinding` — Dynamic Keybinding
+### 12. `advanced-keybinding` — Dynamic Keybinding
 
 Static keybindings via the `keys` object plus dynamic keybinding via `bindKey`/`unbindKey` at runtime. Shows modifier key syntax and using `reaction()` to conditionally bind/unbind keys based on state.
 
@@ -167,12 +180,12 @@ Static keybindings via the `keys` object plus dynamic keybinding via `bindKey`/`
 
 **What to notice:**
 - `bindKey('enter', () => self.selectResult())` / `unbindKey('enter')` — add and remove keybindings at runtime. Used inside a `reaction()` so the Enter key only works when there's a selected index.
-- `'ctrl + f'` — modifier key syntax in the `keys` object. Also supports `shift`, `alt`, `meta`.
-- Static keys (`up`, `down`, `esc`) coexist with dynamic keys (`enter` bound conditionally). The `keys` object handles static; `bindKey`/`unbindKey` handle dynamic.
+- `'ctrl + f'` — modifier key syntax. Also supports `shift`, `alt`, `meta`.
+- Static keys (`up`, `down`, `esc`) coexist with dynamic keys (`enter` bound conditionally).
 
 ---
 
-### 12. `rating-slider` — Global Interaction Patterns
+### 13. `rating-slider` — Global Interaction Patterns
 
 The drag interaction pattern: start on element, track on body, end on body. In React this requires `useEffect` with document-level listeners and cleanup. In SUI it's a string prefix.
 
@@ -185,7 +198,7 @@ The drag interaction pattern: start on element, track on body, end on body. In R
 
 ---
 
-### 13. `advanced-ball-simulation` — Reactivity at Scale
+### 14. `advanced-ball-simulation` — Reactivity at Scale
 
 Proves SUI's reactivity works at animation speed — a `reaction()` drives `requestAnimationFrame` at 60fps. Not a pattern most projects need, but proves the model is general-purpose.
 
@@ -198,19 +211,6 @@ Proves SUI's reactivity works at animation speed — a `reaction()` drives `requ
 
 ---
 
-### 14. `minimal` — The Absolute Minimum
-
-A complete component in 6 lines. Inline template and CSS as strings. Shows `onCreated` as an alternative to `initialize()`.
-
-**New patterns:** Inline template/CSS strings (no `getText`), `onCreated` lifecycle hook.
-
-**What to notice:**
-- Template and CSS are just strings — `template: \`Time is <b>{formatDate time "h:mm:ss a"}</b>\`` works. No file loading required.
-- `onCreated` is a top-level `defineComponent` option (not inside `createComponent`). It runs before the first render, unlike `onRendered`.
-- The entire component — tag name, template, CSS, state, lifecycle — fits in one `defineComponent` call with no imports beyond the framework.
-
----
-
 ### 15. `event-data` — Dynamic Signal Access
 
 Uses `data-*` attributes to dynamically select which signal and which mutation method to call. A single event handler handles all cases via bracket notation.
@@ -219,35 +219,11 @@ Uses `data-*` attributes to dynamically select which signal and which mutation m
 
 **What to notice:**
 - `state[dimension][helper](settings.delta)` — `dimension` and `helper` come from `data-dimension` and `data-helper` attributes on the button. One handler, many behaviors.
-- This pattern eliminates repetitive event handlers. Instead of `'click .increase-width'`, `'click .decrease-width'`, etc., one `'click ui-button'` handler reads the button's data attributes to determine what to do.
+- This pattern eliminates repetitive event handlers. Instead of separate handlers for each action, one handler reads data attributes to determine what to do.
 
 ---
 
-### 16. `basic-keybinding` — Mutation Constraints
-
-Shows that signal mutation methods accept constraint parameters.
-
-**New patterns:** `state.height.decrement(10, 0)` with minimum bound.
-
-**What to notice:**
-- `state.height.decrement(10, 0)` — the second argument is a floor. The value won't go below 0. Similarly `increment` can take a ceiling.
-- The `keys` object here is the simplest possible form — arrow keys directly calling mutation methods. No `createComponent` needed for simple keybinding.
-
----
-
-### 17. `temperature-converter` — Standard Benchmark
-
-The 7GUIs Temperature Converter. Not a differentiator — the Svelte equivalent is equally short — but demonstrates the explicit-method-call pattern for bidirectional data flow.
-
-**New patterns:** Bidirectional state without binding directives, event `value` destructuring.
-
-**What to notice:**
-- No `v-model`, no `bind:value`. Bidirectional flow is explicit method calls, not magic syntax.
-- `value` in event destructuring — SUI extracts the value from the event target automatically.
-
----
-
-### 18. `dropdown` — Real-World Form Component
+### 16. `dropdown` — Real-World Form Component
 
 Form integration with hidden inputs, click-away dismissal, JSON arrays as HTML attributes.
 
@@ -260,7 +236,7 @@ Form integration with hidden inputs, click-away dismissal, JSON arrays as HTML a
 
 ---
 
-### 19. `setting-types` — Setting Type Coercion
+### 17. `setting-types` — Setting Type Coercion
 
 Shows every setting type (string, number, boolean, array, object, function) and how they're passed via HTML attributes vs Query.
 
@@ -269,27 +245,15 @@ Shows every setting type (string, number, boolean, array, object, function) and 
 **What to notice:**
 - `getName: () => 'Sam'` — functions can be settings. Passed via `.settings()`, not via HTML attributes.
 - `married="false"` — SUI coerces string `"false"` to boolean `false` when the default setting is boolean.
-- `el.getName = () => 'Sam'` — settings are accessible as properties on the DOM element. No Query needed. Standard DOM property access works.
+- `el.getName = () => 'Sam'` — settings are accessible as properties on the DOM element. Standard DOM property access works without Query.
 
 ---
 
-### 20. `theme-preview` — Programmatic Theming
-
-Setting CSS custom properties at runtime via Query. Shows how themes work with SUI's design token system.
-
-**New patterns:** `$(el).cssVar('primary-color', value)`, `oklchToHex`, `onRendered` for initial setup.
-
-**What to notice:**
-- `$(el).cssVar('primary-color', theme.primary)` — set CSS variables on the host element programmatically. Child components that use `var(--primary-color)` update immediately.
-- The component reads preset themes and applies them by setting two CSS variables. The buttons inside (`<ui-button emphasis="primary">`) respond automatically because they read from the same tokens.
-
----
-
-### 21. `progress-bar` — Parameterized Snippets
+### 18. `progress-bar` — Parameterized Snippets
 
 Template fragments that accept arguments.
 
-**New patterns:** Snippet parameters (`{>label canComplete=true}`), `{#if both x y}`, dynamic class names.
+**New patterns:** Snippet parameters (`{>label canComplete=true}`), `{#if both x y}`, `part`, dynamic class names.
 
 **What to notice:**
 - `{>label canComplete=true}` — snippet called with a parameter. Same snippet without the parameter renders differently.
@@ -297,19 +261,7 @@ Template fragments that accept arguments.
 
 ---
 
-### 22. `checkbox` — The Floor
-
-The simplest possible component. No `createComponent`, no `events`, no state. Shows what's optional in `defineComponent`.
-
-**New patterns:** Zero-logic components, `{>slot}` fallback pattern, boolean attribute handling.
-
-**What to notice:**
-- `checked={checked}` — boolean attributes auto-remove when falsy.
-- `{#if label} {label} {else} {>slot} {/if}` — setting as fallback for slotted content.
-
----
-
-### 23. `clock` — SVG and Timers
+### 19. `clock` — SVG and Timers
 
 SVG rendering and the `interval` helper with automatic lifecycle cleanup.
 
@@ -322,39 +274,14 @@ SVG rendering and the `interval` helper with automatic lifecycle cleanup.
 
 ---
 
-### 24. `dynamic-breakpoints` — CSS Variable Breakpoints
-
-Container style queries using CSS custom properties for responsive breakpoints in shadow DOM. An advanced CSS technique unique to SUI's architecture.
-
-**New patterns:** `@container style(--flag: 0)`, `@property` declarations via `pageCSS`, `cqi` units, CSS variable breakpoints.
-
-**What to notice:**
-- `--two-column-flag: max(calc(100cqi - var(--two-column-breakpoint)), 0px)` — a CSS-only computation that turns a flag to `0` when the container is below the breakpoint.
-- `@container container style(--two-column-flag: 0)` — style queries match when the flag flips. No JavaScript needed for responsive behavior.
-- `pageCSS` declares `@property` rules that must live outside shadow DOM. The component uses both `pageCSS` (for property declarations) and `css` (for scoped styles).
-
----
-
-### 25. `star-rating` — Hover Patterns
-
-Hover-preview interaction with `classMap`. Overlaps with earlier examples — included as the cleanest isolated demonstration of dynamic class composition.
-
-**New patterns:** `state.hoveredIndex.clear()`, `Array(n).fill(0)` for count-driven rendering.
-
-**What to notice:**
-- `state.hoveredIndex.clear()` — resets to default value from `defaultState`.
-- `getStarClasses(index)` returns `{ hovered: ..., filled: ... }` — `classMap` adds keys as classes when truthy.
-
----
-
 ## Pattern Coverage
 
 | Pattern | First seen in |
 |---------|--------------|
+| Inline template/CSS strings | `minimal` |
+| `onCreated` lifecycle | `minimal` |
 | `defineComponent` structure | `emoji-reactions` |
 | Signal mutations (`push`, `removeItem`, `setProperty`, etc.) | `todo-list` |
-| Mutation constraints (min/max bounds) | `basic-keybinding` |
-| Dynamic signal access (bracket notation) | `event-data` |
 | `{#each}` with index | `emoji-reactions` |
 | `{#if}` / `{else}` | `emoji-reactions` |
 | `{else if}` | `async-search` |
@@ -373,9 +300,8 @@ Hover-preview interaction with `classMap`. Overlaps with earlier examples — in
 | `reaction()` for side effects | `todo-list` |
 | `peek()` for non-reactive reads | `context-menu` |
 | `dispatchEvent` (→ `event.detail`) | `context-menu` |
-| `interval` / `timeout` helpers | `async-search` / `clock` |
+| `interval` / `timeout` helpers | `minimal` / `clock` |
 | `initialize()` | `emoji-reactions` |
-| `onCreated` lifecycle | `minimal` |
 | `onRendered` lifecycle | `advanced-ball-simulation` |
 | `onAttributeChanged` / `onThemeChanged` | `maximal` |
 | `pageCSS` (outside shadow DOM) | `maximal` |
@@ -387,24 +313,20 @@ Hover-preview interaction with `classMap`. Overlaps with earlier examples — in
 | Function settings | `setting-types` |
 | Vanilla JS property access (`el.prop`) | `setting-types` |
 | `$()` Query from outside | `context-menu` |
-| `$(el).cssVar()` programmatic theming | `theme-preview` |
 | Container queries | `card-search` |
-| Container style queries (`@container style()`) | `dynamic-breakpoints` |
-| Boolean attributes | `checkbox` |
 | SVG templates | `clock` |
 | Canvas integration | `advanced-ball-simulation` |
 | Templates as consumer-specified data | `dynamic-table` |
 | Lisp-style expressions | `async-search` |
 | JS-style expressions | `card-search` |
 | `afterFlush` | `todo-list` |
-| `state.*.clear()` | `star-rating` |
 | JSON in HTML attributes | `dropdown` |
 | Form integration (hidden input) | `dropdown` |
 | `{#each ... else}` | `card-search` |
 | `range()` helper | `rating-slider` |
 | `{both x y}` compound conditional | `progress-bar` |
 | `state` vs `self` (reactive vs non-reactive) | `advanced-ball-simulation` |
-| Inline template/CSS strings | `minimal` |
+| Dynamic signal access (bracket notation) | `event-data` |
 | Spec system (`SpecReader`, `{ui}`, dialects) | `component-specs` |
 | TailwindPlugin (runtime Tailwind in shadow DOM) | `tailwind` |
 
