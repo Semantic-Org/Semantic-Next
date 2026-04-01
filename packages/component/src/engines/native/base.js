@@ -202,6 +202,14 @@ class WebComponentBase extends HTMLElementBase {
       this[propName] = newValue;
     }
 
+    // During hydration, attribute parsing fires for every server-rendered
+    // attribute. Properties are set above (needed for getData), but skip
+    // the spec resolution cascade — the DOM already reflects the correct
+    // state and adjustPropertyFromAttribute triggers requestUpdate.
+    if (this._hydrating) {
+      return;
+    }
+
     adjustPropertyFromAttribute({
       el: this,
       attribute,
@@ -216,9 +224,7 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   requestUpdate() {
-    // During hydration, property setters fire from attribute parsing but
-    // the DOM is already correct — suppress the reactive render cascade
-    if (this._hydrating || this.updateScheduled) {
+    if (this.updateScheduled) {
       return;
     }
     this.updateScheduled = true;
