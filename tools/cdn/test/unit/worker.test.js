@@ -421,4 +421,23 @@ describe('asset set fetch', () => {
 
     expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
   });
+
+  it('includes CORS on font binary files (browsers enforce this)', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato/LatoLatin-Regular.woff2': 'fakewoff2data',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2');
+    const res = await worker.fetch(req, env);
+
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('asset-set routes take precedence over SUI packages with same name', () => {
+    // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
+    // route must still match first — this is by design, not an accident
+    expect(parseRoute('/icons@0.18.0/lucide').type).toBe('asset-set');
+    expect(parseRoute('/fonts@0.18.0/lato').type).toBe('asset-set');
+  });
 });
