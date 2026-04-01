@@ -238,16 +238,16 @@ export const Template = class Template {
 
     this.initialized = true;
 
-    // Emit 'updated' after any reactive flush that touches this template's state.
-    // Reads all state signals to establish dependencies — when any change,
-    // afterFlush schedules onUpdated after the flush completes.
     if (this.element) {
-      this.reactions.push(Reaction.create(() => {
-        each(this.state, (signal) => signal.get({ clone: false }));
+      const stateReaction = Reaction.create(() => {
+        // bind to any signal changing
+        each(this.state, (signal) => signal.dependency.depend());
+        // run onUpdated callback
         if (this.rendered && !this.destroyed) {
           Reaction.afterFlush(this.onUpdated);
         }
-      }));
+      });
+      this.reactions.push(stateReaction);
     }
 
     // Resolve renderer class from engine object or registry
