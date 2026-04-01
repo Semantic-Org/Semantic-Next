@@ -30,7 +30,15 @@ The source of truth for project standards is `ai/` (skills, context docs), not C
 
 Launch all 5 in parallel. Always use **Opus** — never Sonnet or Haiku for review agents.
 
-Each agent runs `gh pr diff {number}` and examines the changes through its lens:
+Each agent runs `gh pr diff {number}` and examines the changes through its lens.
+
+**Agent output format:** Each agent must return a structured list of findings. For each issue:
+- **File path and line number(s)**
+- **What's wrong** — one sentence
+- **Why it matters** — impact, what breaks, or which standard it violates
+- **Confidence** — score from the 0-100 rubric below
+
+If an agent finds no issues, it returns "No issues found" with a brief summary of what it verified was clean.
 
 ### Agent 1 — Standards Compliance
 Audit changes against project standards in CLAUDE.md and `ai/skills/`. Check code formatting, commit format conventions, non-obvious patterns, and documented conventions.
