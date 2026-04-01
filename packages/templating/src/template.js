@@ -364,24 +364,24 @@ export const Template = class Template {
           this.settings[name]; // ensure shadow signal exists
         });
         this.settingsVars.forEach((signal, name) => {
-          if (name in this.defaultSettings) {
-            context[name] = signal;
-          }
+          context[name] = signal;
         });
       }
       return context;
     }
-    // web component — overlay element settingsVars
+    // web component — overlay all settingsVars as Signals.
+    // Signals are created when settings are accessed or mutated (including
+    // by initialize()), so settingsVars is the authoritative set.
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
-    if (settingsVars && defaultSettings) {
-      each(defaultSettings, (_, name) => {
-        this.element.settings[name]; // ensure shadow signal exists
-      });
+    if (settingsVars) {
+      if (defaultSettings) {
+        each(defaultSettings, (_, name) => {
+          this.element.settings[name]; // ensure shadow signal exists
+        });
+      }
       settingsVars.forEach((signal, name) => {
-        if (name in defaultSettings) {
-          context[name] = signal;
-        }
+        context[name] = signal;
       });
     }
     return context;
