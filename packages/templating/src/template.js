@@ -243,7 +243,7 @@ export const Template = class Template {
     // afterFlush schedules onUpdated after the flush completes.
     if (this.element) {
       this.reactions.push(Reaction.create(() => {
-        each(this.state, (signal) => signal.get());
+        each(this.state, (signal) => signal.get({ clone: false }));
         if (this.rendered && !this.destroyed) {
           Reaction.afterFlush(this.onUpdated);
         }

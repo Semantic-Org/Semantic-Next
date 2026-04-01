@@ -115,7 +115,11 @@ export class Signal {
     }
   }
 
-  get() {
+  get({ clone = true } = {}) {
+    if (!clone) {
+      this.dependency.depend();
+      return this.currentValue;
+    }
     return this.value;
   }
 
