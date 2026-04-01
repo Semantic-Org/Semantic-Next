@@ -1,0 +1,15 @@
+body {
+  padding: 1rem;
+  font-family: 'Lato', sans-serif;
+}
+.monochrome {
+  display: flex;
+  gap: 1rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.colored {
+  display: flex;
+  gap: 1rem;
+  font-size: 1.5rem;
+}

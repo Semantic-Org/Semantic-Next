@@ -3,19 +3,8 @@
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/css@canary" />
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts@canary/lato" />
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/lucide" />
-    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/phosphor" />
-    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/tabler" />
-    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/material-symbols" />
-    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/heroicons" />
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/brands" />
-    <style>
-      body { padding: 1rem; font-family: 'Lato', sans-serif; }
-      .grid { display: grid; grid-template-columns: 100px repeat(5, 1fr); gap: 0.75rem; align-items: center; }
-      .header { font-weight: 700; font-size: 0.85rem; color: var(--text-secondary-color); }
-      .label { font-size: 0.85rem; }
-      ui-icon { font-size: 1.25rem; }
-      .brands { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
-    </style>
+    <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon"></script>
 <!-- playground-hide -->
     <script>
       if(localStorage.getItem('theme') == 'dark') {
@@ -25,51 +14,17 @@
 <!-- playground-hide-end -->
   </head>
   <body>
-    <div class="grid">
-      <div class="header"></div>
-      <div class="header">home</div>
-      <div class="header">settings</div>
-      <div class="header">search</div>
-      <div class="header">heart</div>
-      <div class="header">warning</div>
-
-      <div class="label">Lucide</div>
-      <ui-icon home set="lucide"></ui-icon>
-      <ui-icon settings set="lucide"></ui-icon>
-      <ui-icon search set="lucide"></ui-icon>
-      <ui-icon heart set="lucide"></ui-icon>
-      <ui-icon warning set="lucide"></ui-icon>
-
-      <div class="label">Phosphor</div>
-      <ui-icon home set="phosphor"></ui-icon>
-      <ui-icon settings set="phosphor"></ui-icon>
-      <ui-icon search set="phosphor"></ui-icon>
-      <ui-icon heart set="phosphor"></ui-icon>
-      <ui-icon warning set="phosphor"></ui-icon>
-
-      <div class="label">Tabler</div>
-      <ui-icon home set="tabler"></ui-icon>
-      <ui-icon settings set="tabler"></ui-icon>
-      <ui-icon search set="tabler"></ui-icon>
-      <ui-icon heart set="tabler"></ui-icon>
-      <ui-icon warning set="tabler"></ui-icon>
-
-      <div class="label">Material</div>
-      <ui-icon home set="material-symbols"></ui-icon>
-      <ui-icon settings set="material-symbols"></ui-icon>
-      <ui-icon search set="material-symbols"></ui-icon>
-      <ui-icon heart set="material-symbols"></ui-icon>
-      <ui-icon warning set="material-symbols"></ui-icon>
-
-      <div class="label">Heroicons</div>
-      <ui-icon home set="heroicons"></ui-icon>
-      <ui-icon settings set="heroicons"></ui-icon>
-      <ui-icon search set="heroicons"></ui-icon>
-      <ui-icon heart set="heroicons"></ui-icon>
-      <ui-icon warning set="heroicons"></ui-icon>
+    <div class="monochrome">
+      <ui-icon home></ui-icon>
+      <ui-icon settings></ui-icon>
+      <ui-icon search></ui-icon>
+      <ui-icon heart></ui-icon>
+      <ui-icon warning></ui-icon>
+      <ui-icon save></ui-icon>
+      <ui-icon mail></ui-icon>
+      <ui-icon calendar></ui-icon>
     </div>
-
-    <div class="brands">
+    <div class="colored">
       <ui-icon icon="react" set="brands"></ui-icon>
       <ui-icon icon="vue" set="brands"></ui-icon>
       <ui-icon icon="svelte" set="brands"></ui-icon>
@@ -77,7 +32,5 @@
       <ui-icon icon="astro" set="brands"></ui-icon>
       <ui-icon icon="nextjs" set="brands"></ui-icon>
     </div>
-
-    <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon"></script>
   </body>
 </html>
