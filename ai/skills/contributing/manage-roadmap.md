@@ -191,7 +191,7 @@ Work happens on a feature branch, committed incrementally, merged via PR.
 5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
 6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
 7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
-8. **Self-review the PR** using the `/code-review` skill against the opened PR, but skip the eligibility and summary steps (you authored it — you already know what it does). The source of truth for compliance is `ai/` (skills, context), not CLAUDE.md (which is a symlink to AGENTS.md). Fix any issues found before the user reviews.
+8. **Self-review the PR** using the `/code-review` skill against the opened PR, but skip the eligibility and summary steps (you authored it — you already know what it does). The source of truth for compliance is `ai/` (skills, context), not CLAUDE.md (which is a symlink to AGENTS.md). Always use Opus for review agents, not Sonnet. Fix any issues found before the user reviews.
 9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
 
 ### When to branch vs. commit to main
