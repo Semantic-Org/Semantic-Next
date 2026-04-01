@@ -172,6 +172,33 @@ If the new work creates a new blocker category (e.g., "Blocked on Wrapper Archit
 
 ---
 
+## Step 2.5: Executing a Plan
+
+Work happens on a feature branch, committed incrementally, merged via PR.
+
+### Starting work
+
+1. **Check current branch.** If not on `main`, discuss merging strategy with the user before creating a new branch — there may be in-progress work to resolve first.
+2. **Create a feature branch** from `main`: `feat/{plan-name}` (e.g., `feat/cdn-asset-sets`).
+
+### During implementation
+
+3. **Commit as you go** — small, logical commits using the repo's `Category: Description` format. One-line messages only, no body content, no co-author trailers.
+4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests.
+
+### Completing work
+
+5. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
+6. **Self-review the PR** using the `/code-review` skill against the opened PR. Fix any issues found before the user reviews.
+7. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
+
+### When to branch vs. commit to main
+
+- **Branch** (`feat/`): multi-commit work, new features, anything that touches routing/build/deploy
+- **Direct to main**: single-commit fixes, doc typos, plan file updates
+
+---
+
 ## Step 3: Updating a Plan's Status
 
 When progress is made on a plan:
