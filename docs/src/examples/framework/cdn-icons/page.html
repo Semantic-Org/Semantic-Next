@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts@canary/lato" />
     <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/lucide" />
     <style>
-      body { padding: 1rem; }
+      body { padding: 1rem; display: flex; gap: 0.5rem; align-items: center; }
     </style>
 <!-- playground-hide -->
     <script>
@@ -15,9 +15,9 @@
 <!-- playground-hide-end -->
   </head>
   <body>
-    <ui-button primary>Button</ui-button>
-    <ui-input search></ui-input>
-    <script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
+    <ui-button primary><ui-icon home></ui-icon> Home</ui-button>
+    <ui-button><ui-icon settings></ui-icon> Settings</ui-button>
+    <ui-button positive><ui-icon save></ui-icon> Save</ui-button>
+    <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,icon"></script>
   </body>
 </html>
-
