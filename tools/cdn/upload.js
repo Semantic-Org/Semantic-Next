@@ -10,9 +10,10 @@
  *   R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, R2_BUCKET_NAME
  */
 
-import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { extname, join, resolve } from 'path';
+import { gt, valid } from 'semver';
 import { parseArgs } from 'util';
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -266,6 +267,19 @@ async function uploadImportMaps(s3, version) {
 }
 
 async function updateVersionPointer(s3, alias, version) {
+  // Prevent accidental downgrade of the latest pointer
+  if (alias === 'latest' && valid(version)) {
+    try {
+      const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: '_versions/latest' }));
+      const current = (await res.Body.transformToString()).trim();
+      if (valid(current) && gt(current, version)) {
+        console.error(`  Refusing to downgrade latest from ${current} to ${version}`);
+        process.exit(1);
+      }
+    }
+    catch { /* no existing pointer — first release */ }
+  }
+
   await uploadText(s3, `_versions/${alias}`, version);
   console.log(`  _versions/${alias} → ${version}`);
 
