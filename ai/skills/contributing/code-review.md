@@ -94,29 +94,6 @@ After fixing issues from a round:
 
 A round is "clean" when both the agents and the user agree there are no remaining issues worth fixing.
 
-## Posting the Result
+## Completion
 
-After the final clean round, comment on the PR using `gh pr comment`:
-
-```
-### Code review
-
-No issues found. Checked for bugs and CLAUDE.md compliance.
-
-[If issues were found and fixed in earlier rounds, summarize what was fixed]
-```
-
-If issues remain after review (score >= 80, user chose not to fix):
-
-```
-### Code review
-
-Found N issues:
-
-1. <brief description> (<reason>)
-   <link to file and line with full sha1>
-
-2. ...
-```
-
-Use full git SHA in file links (not `HEAD` or branch refs). Format: `https://github.com/{owner}/{repo}/blob/{full-sha}/{path}#L{start}-L{end}`
+After the final clean round, report the result to the user in conversation. No need to post a comment on the PR.
