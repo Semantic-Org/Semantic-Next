@@ -12,7 +12,6 @@ import {
   setDefaultSettings,
 } from '../../component-helpers.js';
 import { adjustPropertyFromAttribute } from '../../helpers/adjust-property-from-attribute.js';
-import { trace } from '../../trace.js';
 
 /*
   Standard web component base class — extends HTMLElement directly.
@@ -57,8 +56,6 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
 
-    const tagName = this.constructor.componentTagName || this.tagName.toLowerCase();
-
     // DSD creates the shadow root before connectedCallback fires
     const hasServerContent = this.shadowRoot && this.shadowRoot.childNodes.length > 0;
 
@@ -77,14 +74,14 @@ class WebComponentBase extends HTMLElementBase {
     const prototypeTemplate = this.constructor.template;
 
     if (hasServerContent && this.canHydrate()) {
-      trace(() => this.hydrate(prototypeTemplate), `hydrate:${tagName}`);
+      this.hydrate(prototypeTemplate);
     }
     else {
       if (hasServerContent) {
         // Version mismatch — discard server content
         this.shadowRoot.innerHTML = '';
       }
-      trace(() => this.fullRender(prototypeTemplate), `fullRender:${tagName}`);
+      this.fullRender(prototypeTemplate);
     }
   }
 
@@ -103,22 +100,19 @@ class WebComponentBase extends HTMLElementBase {
   }
 
   hydrate(prototypeTemplate) {
-    const tagName = this.constructor.componentTagName || this.tagName.toLowerCase();
-
     // Remove server <style> — CSS is handled via adoptedStyleSheets
     const serverStyle = this.shadowRoot.querySelector('style');
     if (serverStyle) {
       serverStyle.remove();
     }
 
-    const data = trace(() => this.getData(), `getData:${tagName}`);
+    const data = this.getData();
 
-    this.template = trace(() =>
-      prototypeTemplate.clone({
-        data,
-        element: this,
-        renderRoot: this.renderRoot,
-      }), `clone:${tagName}`);
+    this.template = prototypeTemplate.clone({
+      data,
+      element: this,
+      renderRoot: this.renderRoot,
+    });
 
     this.template._isHydrating = true;
     this.component = this.template.instance;
@@ -127,20 +121,18 @@ class WebComponentBase extends HTMLElementBase {
     // Build entries for hydration (same marker IDs the server produced).
     // Cache on the prototype — entries depend only on AST structure, not data.
     if (!prototypeTemplate._hydrationEntries) {
-      prototypeTemplate._hydrationEntries = trace(() => {
-        const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
-        return entries;
-      }, `buildEntries:${tagName}`);
+      const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
+      prototypeTemplate._hydrationEntries = entries;
     }
     const entries = prototypeTemplate._hydrationEntries;
 
-    trace(() =>
-      this.template.renderer.hydrateMarkers(
-        this.shadowRoot,
-        entries,
-        this.template.renderer.data,
-        this.template.renderer.scope,
-      ), `hydrateMarkers:${tagName}`);
+    // Wire reactive bindings to existing server-rendered DOM
+    this.template.renderer.hydrateMarkers(
+      this.shadowRoot,
+      entries,
+      this.template.renderer.data,
+      this.template.renderer.scope,
+    );
 
     this.template._isHydrating = false;
     this.template.rendered = true;
