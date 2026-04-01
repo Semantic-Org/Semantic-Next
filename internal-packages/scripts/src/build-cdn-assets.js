@@ -4,20 +4,23 @@ import { join } from 'path';
 /*
   Builds CDN-ready icon and font asset sets.
 
-  Icons: reads CSS from src/primitives/icon/sets/{lib}/, rewrites url() paths,
-  copies SVGs flat alongside the CSS.
+  Icons: reads CSS from src/primitives/icon/sets/{lib}/, rewrites url() paths
+  to absolute CDN URLs, copies SVGs flat alongside the CSS.
 
-  Fonts: reads CSS from src/fonts/{name}/, rewrites url() paths,
-  copies font files alongside the CSS.
+  Fonts: reads CSS from src/fonts/{name}/, rewrites url() paths
+  to absolute CDN URLs, copies font files alongside the CSS.
 
   Output:
-    dist/cdn/icons/{lib}.css       — CSS with url('./{lib}/name.svg')
+    dist/cdn/icons/{lib}.css       — CSS with absolute CDN urls
     dist/cdn/icons/{lib}/*.svg     — flat SVG files
-    dist/cdn/fonts/{name}.css      — @font-face CSS with url('./{name}/file.woff2')
+    dist/cdn/fonts/{name}.css      — @font-face CSS with absolute CDN urls
     dist/cdn/fonts/{name}/*.woff2  — font files
 */
 
 const ROOT = process.env.BASE_DIR || process.cwd();
+const PKG = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8'));
+const CDN_ROOT = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
+const VERSION = process.env.CDN_CHANNEL === 'canary' ? 'canary' : PKG.version;
 const ICON_SETS_DIR = join(ROOT, 'src', 'primitives', 'icon', 'sets');
 const FONTS_DIR = join(ROOT, 'src', 'fonts');
 const ICONS_OUT = join(ROOT, 'dist', 'cdn', 'icons');
@@ -80,12 +83,14 @@ function discoverFontSets() {
   return sets;
 }
 
-// Rewrite relative url() paths in CSS to point to the CDN asset folder
-// e.g., url('./svg/house.svg') → url('./lucide/house.svg')
-//       url('./react.svg')     → url('./brands/react.svg')
-function rewriteUrls(css, setName) {
+// Rewrite relative url() paths to absolute CDN URLs
+// CSS custom properties don't resolve url() relative to the declaring stylesheet,
+// so we must use fully qualified URLs for cross-origin usage.
+// e.g., url('./svg/house.svg') → url('https://cdn.semantic-ui.com/icons@0.18.0/lucide/house.svg')
+function rewriteUrls(css, assetType, setName) {
+  const base = `${CDN_ROOT}/${assetType}@${VERSION}/${setName}`;
   return css.replace(/url\(['"]?\.\/(?:svg\/)?([^'")\s]+)['"]?\)/g, (_match, filename) => {
-    return `url('./${setName}/${filename}')`;
+    return `url('${base}/${filename}')`;
   });
 }
 
@@ -101,7 +106,7 @@ function buildIconSets() {
   for (const set of sets) {
     // Read and rewrite CSS
     const css = readFileSync(join(set.dir, set.cssFile), 'utf-8');
-    const rewritten = rewriteUrls(css, set.name);
+    const rewritten = rewriteUrls(css, 'icons', set.name);
     writeFileSync(join(ICONS_OUT, `${set.name}.css`), rewritten);
 
     // Copy SVGs flat
@@ -127,7 +132,7 @@ function buildFontSets() {
   for (const set of sets) {
     // Read and rewrite CSS
     const css = readFileSync(join(set.dir, set.cssFile), 'utf-8');
-    const rewritten = rewriteUrls(css, set.name);
+    const rewritten = rewriteUrls(css, 'fonts', set.name);
     writeFileSync(join(FONTS_OUT, `${set.name}.css`), rewritten);
 
     // Copy font files

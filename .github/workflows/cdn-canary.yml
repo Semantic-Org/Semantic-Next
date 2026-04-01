@@ -42,6 +42,8 @@ jobs:
         run: npm run build:vendor-cdn
 
       - name: Build CDN assets
+        env:
+          CDN_CHANNEL: canary
         run: npm run build:cdn-assets
 
       - name: Check for bare imports
