@@ -74,12 +74,10 @@ const CONTENT_TYPES = {
 };
 
 function getContentType(filepath) {
-  for (const [ext, type] of Object.entries(CONTENT_TYPES)) {
-    if (filepath.endsWith(ext)) {
-      return type;
-    }
-  }
-  return 'application/octet-stream';
+  const lastDot = filepath.lastIndexOf('.');
+  if (lastDot === -1) { return 'application/octet-stream'; }
+  const ext = filepath.slice(lastDot);
+  return CONTENT_TYPES[ext] || 'application/octet-stream';
 }
 
 // Parse URL into route info
@@ -377,7 +375,7 @@ export default {
         if (!map) {
           const css = await object.text();
           body = css.replace(
-            /\/\*# sourceMappingURL=.+?\s*\*\/\s*$/,
+            /\/\*#\s*sourceMappingURL=\S+\s*\*\//,
             `/*# sourceMappingURL=${sourceMapUrl} */`,
           );
         }
