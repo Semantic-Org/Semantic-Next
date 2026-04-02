@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Tests</title>
+  <style>
+    body { padding: 2rem; font-family: system-ui, sans-serif; max-width: 600px; }
+    h1 { margin-bottom: 0.5rem; }
+    h3 { margin: 1.5rem 0 0.5rem; color: #666; }
+    a { display: block; padding: 0.4rem 0; color: #0066cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>CDN Tests</h1>
+  <p>Isolated test pages — one feature per file.</p>
+
+  <h3>Explicit Setup (link + script)</h3>
+  <a href="combo.html">Combo endpoint — button,input,icon</a>
+  <a href="tooltip.html">Tooltip behavior via import map</a>
+  <a href="icons.html">Icon sets — Lucide + Brands</a>
+  <a href="fonts.html">Font — Lato weights</a>
+
+  <h3>Loader Endpoint (/load)</h3>
+  <a href="loader-components.html">components="button,icon" — auto-inject</a>
+  <a href="loader-standard.html">components="standard" — preset</a>
+  <a href="loader-authoring.html">authoring — custom component</a>
+  <a href="loader-reactivity.html">reactivity — bare package attr</a>
+  <a href="loader-importmap-merge.html">Import map merge — esm.sh + SUI</a>
+  <a href="loader-css-layers.html">CSS sub-layer — tokens only</a>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Reactivity</title>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" reactivity></script>
+  <style>body { padding: 2rem; font-family: sans-serif; }</style>
+</head>
+<body>
+  <h2>Loader: reactivity</h2>
+  <p>Bare attribute loads @semantic-ui/reactivity. No CSS injected.</p>
+  <div id="output">Waiting...</div>
+  <script type="module">
+    import { Signal, Reaction } from '@semantic-ui/reactivity';
+    const count = Signal(0);
+    const el = document.getElementById('output');
+    Reaction(() => { el.textContent = 'Signal value: ' + count.value; });
+    setInterval(() => count.increment(), 1000);
+  </script>
+</body>
+</html>
