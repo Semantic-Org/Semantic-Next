@@ -2,20 +2,25 @@
 
 ## Goal
 
-Replace the current `importmap.js` / `importmap.json` endpoints with a unified `/load` endpoint that serves as the single entry point for using Semantic UI from the CDN. The loader injects an import map and optionally loads packages, CSS (tokens only or full page styles), icon sets, and fonts — collapsing up to four separate tags into one.
+Replace the current `importmap.js` / `importmap.json` endpoints with a unified `/load` endpoint that serves as the single entry point for using Semantic UI from the CDN. The loader injects an import map and handles component loading, CSS token injection, page-level styles, icon sets, and fonts — collapsing the entire setup into a single tag.
 
 The endpoint should embody SUI's natural language philosophy: every attribute reads as a declarative instruction, not a technical configuration.
 
 ## Target Snippet
 
 ```html
-<!-- Full page setup (own the page) -->
-<script src="https://cdn.semantic-ui.com/load" packages="core" css="all" icons="lucide" fonts="lato"></script>
-<ui-button primary>Click Me</ui-button>
+<!-- Most common: just works — tokens, Lato, Lucide all auto-injected -->
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal"></script>
+<ui-button primary><ui-icon home></ui-icon> Home</ui-button>
 
-<!-- Embedding into an existing page (tokens only, no global styles) -->
-<script src="https://cdn.semantic-ui.com/load" packages="core" css icons="lucide"></script>
-<ui-button primary>Click Me</ui-button>
+<!-- Full page ownership: add page-level styles (reset + base) -->
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal" css></script>
+
+<!-- Override defaults: different icon set, suppress font -->
+<script src="https://cdn.semantic-ui.com/load" components="button" icons="phosphor" fonts="none"></script>
+
+<!-- Embedding: suppress all auto-injection, manage CSS yourself -->
+<script src="https://cdn.semantic-ui.com/load" components="button" css="none" icons="none" fonts="none"></script>
 ```
 
 One line of setup. One line of markup.
@@ -26,54 +31,105 @@ One line of setup. One line of markup.
 
 **Decision:** The endpoint is `/load`.
 
-**Rationale:** Read the tag as a sentence — "script source: CDN load packages core, css, icons lucide, fonts lato." `load` is a verb that forms a grammatical sentence with the attributes that follow it. `loader` is a noun next to other nouns (`loader packages core` doesn't parse as English). `importmap` describes the mechanism, not the intent.
+**Rationale:** Read the tag as a sentence — "script source: CDN load components button, input, modal, icons, fonts." `load` is a verb that forms a grammatical sentence with the attributes that follow it. `loader` is a noun next to other nouns (`loader components button` doesn't parse as English). `importmap` describes the mechanism, not the intent.
 
 **Ecosystem context:** The term "loader" has deep lineage (SystemJS, RequireJS, the original ES Module Loader spec, Node's `--loader` flag). But the endpoint name should describe what the user is *doing*, not what the infrastructure *is*. The user is loading packages, not configuring a loader.
 
-### Attribute naming: `packages` not `load`
+### Attribute naming: bare attributes as capabilities
 
-**Decision:** The attribute for selecting JS packages is `packages="core"` (or `packages="core,query,reactivity"`).
+**Decision:** Every SUI package name is a valid bare attribute on the loader tag. Each reads as a single word describing what you need.
 
-**Rationale:** Originally considered `load="core"` but the endpoint is already named `/load` — `load` + `load` overloads the word. `packages` describes the *what*, not the *action*. It reads naturally: "load packages core." For combo sub-selection within a package: `packages="core/button,modal"`.
-
-### CSS attribute: `css` not `tokens`, with two tiers
-
-**Decision:** The attribute is `css` (not `tokens`). It supports two tiers:
+**`components`** — the primary path. Cherry-pick or use presets. Auto-injects tokens, Lato, Lucide.
 
 ```html
-css              → tokens only (pure custom properties, zero side effects)
-css="all"        → tokens + reset (normalize) + base (page-level styling)
+<!-- Cherry-pick -->
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal"></script>
+
+<!-- Named preset -->
+<script src="https://cdn.semantic-ui.com/load" components="standard"></script>
 ```
 
-**Why `css` not `tokens`:** `tokens` is technically more accurate (the bare attribute serves a stylesheet of pure CSS custom properties), but the person writing this tag doesn't know what tokens are yet. Their mental model is "I need CSS for this to look right." When they forget the attribute and components look broken, `css` leads to "oh, I forgot the CSS" while `tokens` leads to "what are tokens?" — a documentation detour.
+Presets (standard, extended, full) are sourced from the `bundle` field in each component's `.spec.js` and resolve through the existing combo endpoint. No new code needed.
 
-**Why bare `css` is safe to recommend unconditionally:** The token stylesheet (`tokens.css`) is pure custom property declarations. It doesn't style any elements. It can't conflict with anything. The variables sit inert until a component's Shadow DOM references them. Someone dropping a `<ui-button>` into an existing WordPress page or React app gets working components with zero visual side effects on their existing styles.
-
-**Why components don't need the reset or base:** Shadow DOM boundaries prevent external selectors from reaching inside components. The reset (normalize.css) targets specific elements (`h1`, `button`, `input`, etc.) — none of these selectors match elements inside a shadow root. The only things that cross the boundary are inherited properties on `html`/`body` (`line-height: 1.15`, `-webkit-text-size-adjust: 100%`), both of which SUI components override internally via their own scoped CSS and token references.
-
-**Why `css="all"` is opt-in:** The base stylesheet sets `body` background, font family, text color, heading sizes, link styles, scrollbar appearance, smooth scrolling, `text-wrap: pretty`, `field-sizing: content`, and `interpolate-size: allow-keywords`. These are modern best practices that designers would turn on by default in a fresh project, but they change existing behavior in pages that already have their own styles. The distinction isn't "safe vs dangerous" — it's "components only" vs "components + page."
-
-**Vocabulary consistency:** `css` matches the explicit endpoint (`/css`), so the word stays the same between the one-tag and multi-tag setups:
+**`authoring`** — for building custom components. Injects import map + tokens (custom component CSS needs them). No SUI components, fonts, or icons loaded.
 
 ```html
-<!-- one tag, tokens only -->
-<script src="https://cdn.semantic-ui.com/load" packages="core" css></script>
-
-<!-- one tag, full page -->
-<script src="https://cdn.semantic-ui.com/load" packages="core" css="all"></script>
-
-<!-- explicit, tokens only -->
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css@0.18.0/tokens">
-
-<!-- explicit, full page -->
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<script src="https://cdn.semantic-ui.com/load" authoring></script>
+<script type="module">
+  import { defineComponent } from '@semantic-ui/component';
+</script>
 ```
 
-**Middle tier (`css="reset"`) considered and deferred:** A third tier (tokens + reset, no base) is logically coherent but unlikely to be used. The person who wants that level of control is also the person who writes explicit `<link>` tags. The explicit endpoints (`/css/tokens`, `/css/reset`, `/css/base`) support à la carte selection; the loader attribute keeps it simple with two tiers.
+**`reactivity`, `query`, `utils`, `templating`, `renderer`, `compiler`, `specs`** — bare attributes that eagerly load the named package. Import map always injected. No CSS auto-injection.
+
+```html
+<script src="https://cdn.semantic-ui.com/load" reactivity></script>
+<script type="module">
+  import { Signal, Reaction } from '@semantic-ui/reactivity';
+</script>
+```
+
+```html
+<script src="https://cdn.semantic-ui.com/load" query></script>
+<script type="module">
+  import { $ } from '@semantic-ui/query';
+</script>
+```
+
+```html
+<script src="https://cdn.semantic-ui.com/load" utils></script>
+<script type="module">
+  import { capitalize, unique } from '@semantic-ui/utils';
+</script>
+```
+
+**Combining attributes:** Bare attributes compose naturally:
+
+```html
+<!-- Use SUI components + build custom ones -->
+<script src="https://cdn.semantic-ui.com/load" components="button" authoring></script>
+
+<!-- Reactivity + utils without UI -->
+<script src="https://cdn.semantic-ui.com/load" reactivity utils></script>
+
+<!-- Just the import map, nothing loaded -->
+<script src="https://cdn.semantic-ui.com/load"></script>
+```
+
+**Why bare attributes over `packages="reactivity"`:** The SUI pattern is bare attributes as words. `<ui-button primary>` not `<ui-button variant="primary">`. The loader follows the same philosophy — `<script load reactivity>` reads as English. `packages` as an attribute is retired.
+
+### CSS attribute: inferred tokens, opt-in page styles
+
+**Decision:** `components` auto-injects everything needed for a complete UI: tokens, default font (Lato), and default icon set (Lucide). The `css` attribute opts into page-level styles. `="none"` overrides any auto-injection.
+
+| Attribute | With `components` | With `packages` |
+|---|---|---|
+| *(none)* | Tokens + Lato + Lucide auto-injected | Nothing injected |
+| `css` | Above + reset + base (page styles) | Tokens + reset + base |
+| `css="none"` | Nothing CSS-related injected | Nothing injected |
+| `icons="none"` | Suppress icon auto-injection | — |
+| `fonts="none"` | Suppress font auto-injection | — |
+
+**Why everything is inferred with `components`:** The natural language context drives it. "Load components button" is a complete instruction — the user expects working components. Tokens, fonts, and icons are all component dependencies:
+- **Tokens:** Shadow DOM CSS references `var(--primary-color)`, `var(--text-color)`, etc. Without them, components have broken styling. No valid use case for components without tokens.
+- **Fonts:** Components reference `var(--page-font)` which resolves to `'Lato', ...`. Without Lato loaded, text renders in Arial — subtly wrong spacing and weight. An LLM generating UI can't diagnose this; the human sees "looks off" but can't identify why.
+- **Icons:** Button's most common pattern is `<ui-button><ui-icon home></ui-icon> Save</ui-button>`. Without icon CSS, the icon renders as an empty box. The icon CSS is ~6KB gzipped with lazy SVG loading — no wasted bandwidth for unused icons.
+
+This means `<script src="/load" components="button"></script>` just works. Zero failure modes. The minimum viable tag produces a complete, correct UI.
+
+**Why `="none"` overrides exist:** For users embedding into existing pages who have their own font, token layer, or icon system. These are power users making deliberate choices — the escape hatch is for them, not the common case.
+
+**Why `css` (bare) means page styles:** With tokens/fonts/icons inferred, `css` becomes explicitly about page-level styling — the reset (normalize) and base stylesheet (body font, heading sizes, link styles, scrollbar appearance, `text-wrap: pretty`, `field-sizing: content`, etc.). This is genuinely opt-in because it affects elements outside your components. The distinction is "components only" vs "components + page."
+
+**Why nothing is inferred with `packages`:** The `packages` path is for users who know what they're doing — loading standalone libraries like `reactivity` or `utils` that have no CSS dependency. Even `packages="core"` doesn't auto-inject because the user has explicitly chosen the lower-level API; they're responsible for their own setup.
+
+**Token safety:** The token stylesheet is pure custom property declarations. It doesn't style any elements. It can't conflict with anything. The variables sit inert until a component's Shadow DOM references them. Auto-injection is safe for any page — WordPress, React, an existing design system.
+
+**Shadow DOM isolation:** Components don't need the reset or base because Shadow DOM boundaries prevent external selectors from reaching inside. The reset (normalize.css) targets specific elements (`h1`, `button`, `input`, etc.) — none of these match inside a shadow root.
 
 ### Non-standard attributes: intentional spec deviation
 
-**Decision:** Use bare attributes (`css`, `packages`, `icons`, `fonts`) directly on the `<script>` tag, not `data-` prefixed.
+**Decision:** Use bare attributes (`css`, `packages`, `components`, `icons`, `fonts`) directly on the `<script>` tag, not `data-` prefixed.
 
 **Rationale:** The HTML parser doesn't care — non-standard attributes on `<script>` are parsed, stored on the element, and accessible via `getAttribute()`. The browser doesn't throw or warn. The only cost is HTML validator complaints.
 
@@ -93,9 +149,9 @@ The benefit is readability and brand consistency. SUI already uses non-standard 
 **Rationale:** Import maps have been baseline across all browsers since 2023. Teaching people a proprietary combo URL convention when there's a web standard that does the same job is backwards. The import map approach also produces portable code — if someone later moves to a bundler, their `import '@semantic-ui/core'` statements don't change.
 
 **The three approaches, in recommended order:**
-1. **Import map (happy path):** `/load` with `packages` — bare specifiers, standard imports, portable code.
-2. **Direct URL imports (no setup):** `<script type="module" src="https://cdn.semantic-ui.com/core@0.18.0">` — good for single-file experiments, CodePens. Tradeoff: CDN-coupled imports.
-3. **Combo endpoint (optimization):** `core@0.18.0/button,input,modal` — cherry-pick components in a single request. Performance tool, not a starting point.
+1. **Components (happy path):** `/load` with `components` — cherry-pick what you need, tokens auto-injected, import map available for subsequent imports.
+2. **Packages (full control):** `/load` with `packages` — load full package entry points, manage CSS yourself. For standalone libraries or advanced use.
+3. **Direct URL imports (no loader):** `<script type="module" src="https://cdn.semantic-ui.com/core@0.18.0">` — good for single-file experiments, CodePens. Tradeoff: CDN-coupled imports, manual CSS.
 
 ### The loader is a classic script (not a module)
 
@@ -137,15 +193,17 @@ The `blocking="render"` attribute on `<link>` elements tells the browser to bloc
 The explicit multi-tag setup remains documented as the "full control" approach and works in all browsers today:
 
 ```html
-<!-- Full page (equivalent to css="all") -->
+<!-- Full page (equivalent to components + css + icons + fonts) -->
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons/lucide">
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts/lato">
-<script src="https://cdn.semantic-ui.com/load" packages="core"></script>
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal"></script>
 
-<!-- Embedding (equivalent to bare css) -->
+<!-- Embedding (equivalent to components + icons + fonts — tokens only) -->
 <link rel="stylesheet" href="https://cdn.semantic-ui.com/css@0.18.0/tokens">
-<script src="https://cdn.semantic-ui.com/load" packages="core"></script>
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/icons/lucide">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts/lato">
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal" css="none"></script>
 ```
 
 If `blocking="render"` support is incomplete at 1.0 launch, the loader can detect support and warn in the console, or the docs can note the browser requirement for the single-tag CSS attributes.
@@ -170,18 +228,46 @@ The raw import map JSON remains available for manual use:
 
 ## Attribute Reference
 
-| Attribute | Type | Example | Behavior |
-|---|---|---|---|
-| `packages` | Comma-separated or bare | `packages="core"`, `packages="core,query"`, `packages` | Injects import map, then dynamically imports listed packages. Bare attribute defaults to `core` with console warning. |
-| `components` | Comma-separated | `components="button,modal,tooltip"` | Cherry-picks specific components via combo endpoint. Use with `packages` for import map resolution. |
-| `css` | Boolean or keyword | `css` (bare) | Injects token stylesheet only (`/css/tokens@{version}`) with `blocking="render"` |
-| `css` | | `css="all"` | Injects tokens + reset + base (`/css@{version}`) with `blocking="render"` |
-| `icons` | Value | `icons="lucide"`, `icons="lucide,phosphor"` | Injects icon stylesheet(s) with `blocking="render"` |
-| `fonts` | Value | `fonts="lato"` | Injects font stylesheet(s) with `blocking="render"` |
+### JS loading (bare attributes)
 
-Without `packages`, the loader only injects the import map (resolution without loading). This is useful when the consumer's own `<script type="module">` handles imports.
+| Attribute | Behavior |
+|---|---|
+| `components="button,input"` | Cherry-pick components via combo endpoint. Auto-injects tokens, Lato, Lucide. |
+| `components="standard"` | Named preset (standard, extended, full). Same auto-injection. |
+| `authoring` | Loads `@semantic-ui/component`. Auto-injects tokens only. |
+| `reactivity` | Loads `@semantic-ui/reactivity`. No auto-injection. |
+| `query` | Loads `@semantic-ui/query`. No auto-injection. |
+| `utils` | Loads `@semantic-ui/utils`. No auto-injection. |
+| `templating` | Loads `@semantic-ui/templating`. No auto-injection. |
+| `renderer` | Loads `@semantic-ui/renderer`. No auto-injection. |
+| `compiler` | Loads `@semantic-ui/compiler`. No auto-injection. |
+| `specs` | Loads `@semantic-ui/specs`. No auto-injection. |
+| `tailwind` | Loads `@semantic-ui/tailwind`. No auto-injection. |
+| *(none)* | Import map only — resolution without loading. |
 
-Without any CSS/icons/fonts attributes, the loader only handles JS — no stylesheets injected.
+### CSS & assets (override defaults)
+
+| Attribute | Behavior |
+|---|---|
+| `css` | Injects full page styles: tokens + reset + base |
+| `css="none"` | Suppresses all CSS auto-injection |
+| `icons` (bare) | Lucide (same as default with `components`) |
+| `icons="phosphor"` | Override default icon set |
+| `icons="lucide,brands"` | Multiple sets |
+| `icons="none"` | Suppress icon auto-injection |
+| `fonts` (bare) | Lato (same as default with `components`) |
+| `fonts="lato"` | Explicit font set |
+| `fonts="none"` | Suppress font auto-injection |
+
+### Injection logic
+
+**With `components`:** Full component experience — tokens, Lato, Lucide auto-injected. `css` adds page styles. `="none"` suppresses any individual resource.
+
+**With `authoring`:** Tokens auto-injected (custom component CSS needs them). No fonts, icons, or SUI components.
+
+**With package attributes (`reactivity`, `query`, `utils`, etc.):** Nothing auto-injected. `css`, `icons`, `fonts` opt in explicitly.
+
+**Bare `/load`:** Import map only.
 
 ### CSS sub-endpoints (explicit `<link>` usage)
 
@@ -189,8 +275,8 @@ For fine-grained control, the CSS layers are available as individual endpoints:
 
 | URL | Content |
 |---|---|
-| `/css` | Everything (tokens + reset + base) — same as `css="all"` |
-| `/css@0.18.0/tokens` | Pure custom properties only — same as bare `css` |
+| `/css` | Everything (tokens + reset + base) — same as `css` attribute |
+| `/css@0.18.0/tokens` | Pure custom properties only — auto-injected by `components` |
 | `/css@0.18.0/reset` | Normalize (depends on tokens) |
 | `/css@0.18.0/base` | Page-level styling (depends on tokens + reset) |
 
@@ -212,42 +298,63 @@ The loader script (served as a classic script):
     document.head.appendChild(map);
   }
 
-  // 2. Inject CSS resources (if requested)
   var base = 'https://cdn.semantic-ui.com';
   var v = /* version, baked in at build time */;
+  var hasComponents = s.hasAttribute('components');
+  var hasAuthoring = s.hasAttribute('authoring');
+  var cssNone = s.getAttribute('css') === 'none';
 
-  if (s.hasAttribute('css')) {
-    var cssValue = s.getAttribute('css');
-    if (cssValue === 'all') {
-      // Full page: tokens + reset + base
+  // 2. Inject CSS resources
+  if (!cssNone) {
+    if (s.hasAttribute('css')) {
       injectCSS(base + '/css@' + v);
-    } else {
-      // Bare attribute or css="tokens": tokens only
+    } else if (hasComponents || hasAuthoring) {
       injectCSS(base + '/css@' + v + '/tokens');
     }
   }
 
-  var icons = s.getAttribute('icons');
-  if (icons) {
-    icons.split(',').forEach(function(set) {
-      injectCSS(base + '/icons@' + v + '/' + set.trim());
-    });
+  // 3. Icons — auto-inject lucide with components
+  var iconsAttr = s.getAttribute('icons');
+  if (iconsAttr !== 'none') {
+    var icons = iconsAttr || (hasComponents ? 'lucide' : null);
+    if (icons) {
+      icons.split(',').forEach(function(set) {
+        injectCSS(base + '/icons@' + v + '/' + set.trim());
+      });
+    }
   }
 
-  var fonts = s.getAttribute('fonts');
-  if (fonts) {
-    fonts.split(',').forEach(function(set) {
-      injectCSS(base + '/fonts@' + v + '/' + set.trim());
-    });
+  // 4. Fonts — auto-inject lato with components
+  var fontsAttr = s.getAttribute('fonts');
+  if (fontsAttr !== 'none') {
+    var fonts = fontsAttr || (hasComponents ? 'lato' : null);
+    if (fonts) {
+      fonts.split(',').forEach(function(set) {
+        injectCSS(base + '/fonts@' + v + '/' + set.trim());
+      });
+    }
   }
 
-  // 3. Load packages (if requested)
-  var pkgs = s.getAttribute('packages');
-  if (pkgs) {
-    pkgs.split(',').forEach(function(pkg) {
-      import(base + '/' + pkg.trim() + '@' + v);
-    });
+  // 5. Load components (via combo endpoint)
+  var components = s.getAttribute('components');
+  if (components) {
+    import(base + '/core@' + v + '/' + components);
   }
+
+  // 6. Load authoring lib
+  if (hasAuthoring) {
+    import(base + '/component@' + v);
+  }
+
+  // 7. Load bare package attributes
+  var pkgs = ['reactivity','query','utils','templating','renderer','compiler','specs','tailwind'];
+  // Note: 'component' is handled by 'authoring' above — not in this list
+  // because `<script load component>` reads ambiguously
+  pkgs.forEach(function(pkg) {
+    if (s.hasAttribute(pkg)) {
+      import(base + '/' + pkg + '@' + v);
+    }
+  });
 
   function injectCSS(href) {
     var link = document.createElement('link');
@@ -271,9 +378,9 @@ The loader script (served as a classic script):
 
 | Entry file | Output | R2 key pattern |
 |---|---|---|
-| `src/definitions/tokens.css` | `tokens.min.css` + `.map` | `@semantic-ui/core/{version}/dist/tokens.min.css` |
-| `src/definitions/global/reset.css` | `reset.min.css` + `.map` | `@semantic-ui/core/{version}/dist/reset.min.css` |
-| `src/definitions/global/base.css` | `base.min.css` + `.map` | `@semantic-ui/core/{version}/dist/base.min.css` |
+| `src/css/tokens.css` | `tokens.min.css` + `.map` | `@semantic-ui/core/{version}/dist/tokens.min.css` |
+| `src/css/global/reset.css` | `reset.min.css` + `.map` | `@semantic-ui/core/{version}/dist/reset.min.css` |
+| `src/css/global/base.css` | `base.min.css` + `.map` | `@semantic-ui/core/{version}/dist/base.min.css` |
 
 Each uses esbuild's CSS loader (which follows `@import`). Tokens has ~30 sub-imports to resolve into one flat file. Reset and base are essentially flat already. This is adding entry points to the existing pipeline, not a structural change.
 
@@ -369,28 +476,25 @@ describe('CDN Loader', () => {
 
 ## Resolved Questions
 
-1. **Import map scope:** Include all SUI packages, not just those listed in `packages`. Mappings are inert if unused, data is small, and having everything available means any subsequent `<script type="module">` just works.
+1. **Import map scope:** Include all SUI packages. Mappings are inert if unused, data is small, and having everything available means any subsequent `<script type="module">` just works.
 
-2. **Bare `packages` (no value):** Defaults to `core` but logs a console warning: "Tip: use packages=\"core\" for clarity." Honors intent without being pedantic — but nudges toward explicit.
+2. **`packages` attribute retired.** Replaced by bare package attributes (`reactivity`, `query`, `utils`, etc.) following SUI's bare-attribute pattern. `<script load reactivity>` reads as English.
 
-3. **Component sub-selection:** Moved to a separate `components` attribute instead of overloading `packages` with slash syntax. `components="button,modal"` triggers the combo endpoint for cherry-picking. `packages` stays clean for package-level resolution.
+3. **Component sub-selection:** Separate `components` attribute (not overloaded on `packages`). `components="button,modal"` triggers the combo endpoint. Named presets (`components="standard"`) also supported.
 
-Updated attribute reference:
+4. **Auto-injection with `components`:** Tokens, Lato font, and Lucide icons are all auto-injected — they are component dependencies, not separate resources. An LLM generating UI gets a complete, correct result from `components="button"` alone. `css="none"`, `icons="none"`, `fonts="none"` override individually.
 
-| Attribute | Example | Behavior |
-|---|---|---|
-| `components` | `components="button,modal,tooltip"` | Loads specific components via combo endpoint |
+5. **Auto-injection with `authoring`:** Tokens auto-injected (custom component CSS needs them). No fonts or icons — the authoring user manages their own. `tailwind` alongside `authoring` doesn't change this; Tailwind users who also want tokens get them via `authoring`. Those who don't add `css="none"`.
 
-Full tag example:
-```html
-<script src="https://cdn.semantic-ui.com/load" packages="core" components="button,modal" css="all" icons="lucide" fonts="lato"></script>
-```
+6. **`css` attribute semantics:** Bare `css` means full page styles (tokens + reset + base). `css="all"` eliminated — redundant. The default depends on context: `components` auto-injects tokens, `authoring` auto-injects tokens, bare package attributes inject nothing. `css` and `css="none"` are explicit overrides.
+
+7. **`tailwind` as bare attribute:** Loads `@semantic-ui/tailwind` (browser-native Oxide fork for shadow DOM). No auto-injection of its own — training data for LLMs using Tailwind doesn't know about SUI tokens, so mixing them by default would confuse generated code.
 
 ## Dependencies
 
-- [CDN Dir Pages](cdn-dir-pages.md) — the load endpoint's behavior and attributes need to be documented on the root dir page and package index pages. Content dependency, not a technical blocker.
+- [CDN Directory Pages](cdn-dir-pages.md) — the load endpoint's behavior and attributes need to be documented on the root dir page and package index pages. Content dependency, not a technical blocker.
 - `blocking="render"` browser support — the CSS injection feature depends on this reaching baseline. As of April 2026, 91% global coverage (Chrome, Edge, Safari). Firefox is the sole holdout, committed via Interop 2026. If it slips, the fallback is explicit `<link>` tags with the loader handling only JS.
 
 ## Status
 
-Scoped. Design decisions settled, open questions resolved (2026-04-02). Implementation not started.
+Scoped. Design decisions settled, open questions resolved from pair session (2026-04-02). Implementation not started.
