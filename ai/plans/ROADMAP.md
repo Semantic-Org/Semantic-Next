@@ -89,7 +89,6 @@ TOKEN FINALIZATION (the gate)
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
 | 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 | 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
-| 5 | [CDN Asset Sets](cdn-asset-sets.md) | 8-16h (1-2d) | pair | Top-level `/icons` and `/fonts` CDN routes. Self-hosted Lato, all 5 icon libraries. Extensionless CSS, hosted SVGs. Active. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
@@ -102,7 +101,7 @@ TOKEN FINALIZATION (the gate)
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
 | 12 | [MCP Playground Rendering](mcp-playground-rendering.md) | 8-16h (1-2d) | pair | Phase 1 done (hash URLs). Phase 2: MCP `render_component` tool. Phase 3: Vercel KV short URLs. |
-| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Root landing, package indexes, icons/fonts listings. Extracted from archived CDN Site plan. |
+| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
 
 
 ## Blocked (waiting on token finalization)
@@ -208,3 +207,4 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
+- **CDN Asset Sets** (1-2d est → ~6h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.
