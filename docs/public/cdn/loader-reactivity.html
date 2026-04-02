@@ -3,18 +3,35 @@
 <head>
   <title>CDN Test: Loader — Reactivity</title>
   <script src="https://cdn.semantic-ui.com/load" version="canary" reactivity></script>
-  <style>body { padding: 2rem; font-family: sans-serif; }</style>
+  <style>body { padding: 2rem; font-family: sans-serif; } pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; }</style>
 </head>
 <body>
   <h2>Loader: reactivity</h2>
   <p>Bare attribute loads @semantic-ui/reactivity. No CSS injected.</p>
-  <div id="output">Waiting...</div>
+  <pre id="output"></pre>
   <script type="module">
-    import { Signal, Reaction } from '@semantic-ui/reactivity';
-    const count = Signal(0);
-    const el = document.getElementById('output');
-    Reaction(() => { el.textContent = 'Signal value: ' + count.value; });
-    setInterval(() => count.increment(), 1000);
+    import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+    const out = document.getElementById('output');
+    function log(text) { out.textContent += text + '\n'; }
+
+    // Create signals
+    const firstName = new Signal('John');
+    const lastName = new Signal('Doe');
+
+    // Create a reaction that combines the signals
+    Reaction.create(() => {
+      const full = `${firstName.get()} ${lastName.get()}`;
+      log('Full name: ' + full);
+    });
+
+    // Update signals - reaction runs automatically
+    firstName.set('Jane');
+    Reaction.flush();
+
+    // Update another signal
+    lastName.set('Smith');
+    Reaction.flush();
   </script>
 </body>
 </html>

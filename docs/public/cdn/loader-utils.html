@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Utils</title>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" utils></script>
+  <style>body { padding: 2rem; font-family: sans-serif; } pre { background: #f5f5f5; padding: 1rem; border-radius: 4px; }</style>
+</head>
+<body>
+  <h2>Loader: utils</h2>
+  <p>Bare attribute loads @semantic-ui/utils. No CSS injected.</p>
+  <pre id="output"></pre>
+  <script type="module">
+    import { capitalize, unique } from '@semantic-ui/utils';
+
+    const out = document.getElementById('output');
+    function log(text) { out.textContent += text + '\n'; }
+
+    log(capitalize('hello world'));
+    log(capitalize('javascript'));
+
+    const arr = [1, 2, 2, 3, 4, 4, 5];
+    log(JSON.stringify(unique(arr)));
+  </script>
+</body>
+</html>
