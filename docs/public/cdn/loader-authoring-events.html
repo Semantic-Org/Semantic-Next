@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Authoring (Events)</title>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" authoring></script>
+  <style>body { padding: 2rem; font-family: sans-serif; }</style>
+</head>
+<body>
+  <h2>Loader: authoring (events)</h2>
+  <p>Custom component with @click event binding.</p>
+  <my-counter></my-counter>
+  <script type="module">
+    import { defineComponent } from '@semantic-ui/component';
+
+    defineComponent({
+      tagName: 'my-counter',
+      template: '<button @click={increment}>Count: {count}</button>',
+      css: 'button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; background: var(--primary-color, blue); color: white; border: none; border-radius: var(--border-radius, 4px); }',
+      defaultState: { count: 0 },
+      createComponent: ({ state }) => ({
+        increment() { state.count.increment(); }
+      }),
+    });
+  </script>
+</body>
+</html>
