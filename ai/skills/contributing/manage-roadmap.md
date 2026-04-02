@@ -240,6 +240,8 @@ Then:
 
 Example output: "~6.5h wall clock (14:09–20:32 ET), ~4h active across 3 bursts. Gaps: 45min CI wait, 30min design discussion."
 
+Present the analysis to the user and ask if it sounds right before recording. They may know about breaks or context that commits don't capture.
+
 2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`
 3. **Remove from active sections** in ROADMAP.md.
 4. **Add a line to the Archive section** at the bottom of ROADMAP.md.
