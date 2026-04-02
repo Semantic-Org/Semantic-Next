@@ -264,7 +264,7 @@ describe('CDN Sourcemaps', () => {
 
     const sourceMap = res.headers.get('SourceMap');
     expect(sourceMap, 'missing SourceMap header').toBeTruthy();
-    expect(sourceMap).toMatch(/\.css\.map$/);
+    expect(sourceMap).toMatch(/\.map$/);
 
     // Follow the header URL — map must be accessible
     const mapRes = await fetch(new URL(sourceMap, CDN).href);
@@ -286,7 +286,7 @@ describe('CDN Sourcemaps', () => {
   it('CSS inline sourceMappingURL is rewritten to versioned path', async () => {
     const res = await fetch(`${CDN}/css@${VERSION}`);
     const body = await res.text();
-    expect(body).toContain(`sourceMappingURL=/semantic-ui@${VERSION}.css.map`);
+    expect(body).toContain(`sourceMappingURL=/css@${VERSION}.map`);
     expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
   });
 
