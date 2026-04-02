@@ -116,24 +116,12 @@ describe('parseRoute — vendor', () => {
 });
 
 describe('parseRoute — load endpoint', () => {
-  it('/load → latest loader', () => {
-    expect(parseRoute('/load')).toEqual({ type: 'load', version: null, format: 'js' });
+  it('/load → loader', () => {
+    expect(parseRoute('/load')).toEqual({ type: 'load' });
   });
 
-  it('/load@0.18.0 → versioned loader', () => {
-    expect(parseRoute('/load@0.18.0')).toEqual({ type: 'load', version: '0.18.0', format: 'js' });
-  });
-
-  it('/load@canary → canary loader', () => {
-    expect(parseRoute('/load@canary')).toEqual({ type: 'load', version: 'canary', format: 'js' });
-  });
-
-  it('/load@0.18.0.json → versioned raw JSON', () => {
-    expect(parseRoute('/load@0.18.0.json')).toEqual({ type: 'load', version: '0.18.0', format: 'json' });
-  });
-
-  it('/load.json → latest raw JSON', () => {
-    expect(parseRoute('/load.json')).toEqual({ type: 'load', version: null, format: 'json' });
+  it('/load.js → loader', () => {
+    expect(parseRoute('/load.js')).toEqual({ type: 'load' });
   });
 });
 
@@ -522,38 +510,8 @@ describe('asset set fetch', () => {
 ----------------------------------------------*/
 
 describe('load endpoint fetch', () => {
-  it('serves loader script', async () => {
+  it('serves loader script with short cache', async () => {
     const loaderJs = '(function(){ /* loader */ })();';
-    const env = {
-      CDN_BUCKET: mockR2Bucket({
-        '_meta/load@canary.js': loaderJs,
-      }),
-    };
-    const req = new Request('https://cdn.semantic-ui.com/load@canary');
-    const res = await worker.fetch(req, env);
-
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Content-Type')).toBe('application/javascript');
-    expect(await res.text()).toBe(loaderJs);
-  });
-
-  it('serves raw JSON import map', async () => {
-    const mapJson = '{"imports":{}}';
-    const env = {
-      CDN_BUCKET: mockR2Bucket({
-        '_meta/load@canary.json': mapJson,
-      }),
-    };
-    const req = new Request('https://cdn.semantic-ui.com/load@canary.json');
-    const res = await worker.fetch(req, env);
-
-    expect(res.status).toBe(200);
-    expect(res.headers.get('Content-Type')).toBe('application/json');
-    expect(await res.text()).toBe(mapJson);
-  });
-
-  it('serves unversioned loader from latest', async () => {
-    const loaderJs = '(function(){ /* latest */ })();';
     const env = {
       CDN_BUCKET: mockR2Bucket({
         '_meta/load.js': loaderJs,
@@ -564,6 +522,8 @@ describe('load endpoint fetch', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=300');
+    expect(await res.text()).toBe(loaderJs);
   });
 });
 

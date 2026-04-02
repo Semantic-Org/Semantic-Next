@@ -275,25 +275,38 @@ function buildImportMap(version) {
   return { json, js };
 }
 
-function buildLoader(version) {
+// Build the version-agnostic loader script.
+// The loader reads `version` from its own script tag attribute at runtime.
+// Package names are baked in from SUI_PACKAGES — the only build-time dependency.
+function buildLoader() {
   const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
-  const imports = {};
-  for (const name of SUI_PACKAGES) {
-    imports[`${SUI_SCOPE}${name}`] = `${cdnRoot}/${name}@${version}`;
-  }
-  const importMapJson = JSON.stringify({ imports });
 
-  // The loader IIFE — classic script that injects import map + resources
+  // Package names baked into the loader (derived from SUI_PACKAGES)
+  const pkgNames = JSON.stringify(SUI_PACKAGES);
+
+  // Bare package attributes the loader checks (everything except 'core' which is loaded via components)
+  const bareAttrs = JSON.stringify(
+    SUI_PACKAGES.filter(n => n !== 'core'),
+  );
+
   const js = `(function(){
   var s=document.currentScript;
-  var sui=${JSON.stringify(importMapJson)};
+  var b=${JSON.stringify(cdnRoot)};
+  var v=s.getAttribute('version')||'latest';
+  var scope='@semantic-ui/';
 
-  // Merge with existing import map or create new one
+  // Build import map from package list + version
+  var pkgs=${pkgNames};
+  var imports={};
+  pkgs.forEach(function(n){imports[scope+n]=b+'/'+n+'@'+v});
+  var mapJson=JSON.stringify({imports:imports});
+
+  // Merge with existing import map (user entries win) or create new one
   var existing=document.querySelector('script[type="importmap"]');
   if(existing){
     try{
       var prev=JSON.parse(existing.textContent);
-      var merged=Object.assign({},prev.imports,JSON.parse(sui).imports);
+      var merged=Object.assign({},imports,prev.imports);
       existing.textContent=JSON.stringify({imports:merged});
     }catch(e){}
   }else{
@@ -302,47 +315,58 @@ function buildLoader(version) {
     }
     var m=document.createElement('script');
     m.type='importmap';
-    m.textContent=sui;
+    m.textContent=mapJson;
     document.head.appendChild(m);
   }
 
-  var b=${JSON.stringify(cdnRoot)},v=${JSON.stringify(version)};
   var hc=s.hasAttribute('components'),ha=s.hasAttribute('authoring');
-  var cn=s.getAttribute('css')==='none';
-  if(!cn){
-    if(s.hasAttribute('css'))inject(b+'/css@'+v);
+
+  // CSS injection — css="none" suppresses, css="tokens"|"reset"|"base" selects layer, bare css = full page
+  var cv=s.getAttribute('css');
+  if(cv!=='none'){
+    if(cv==='tokens'||cv==='reset'||cv==='base')inject(b+'/css@'+v+'/'+cv);
+    else if(s.hasAttribute('css'))inject(b+'/css@'+v);
     else if(hc||ha)inject(b+'/css@'+v+'/tokens');
   }
+
+  // Icons — auto-inject lucide with components
   var ia=s.getAttribute('icons');
   if(ia!=='none'){
     var ic=ia||(hc?'lucide':null);
     if(ic)ic.split(',').forEach(function(x){inject(b+'/icons@'+v+'/'+x.trim())});
   }
+
+  // Fonts — auto-inject lato with components
   var fa=s.getAttribute('fonts');
   if(fa!=='none'){
     var fc=fa||(hc?'lato':null);
     if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
   }
+
+  // Components — bare = standard preset
   var co=s.getAttribute('components')||'';
   if(hc&&!co)co='standard';
   if(co)import(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
+
+  // Authoring lib
   if(ha)import(b+'/component@'+v);
-  ['reactivity','query','utils','templating','renderer','compiler','specs','tailwind'].forEach(function(p){
+
+  // Bare package attributes
+  ${bareAttrs}.forEach(function(p){
     if(s.hasAttribute(p))import(b+'/'+p+'@'+v);
   });
+
   function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
 })();`;
 
-  const json = JSON.stringify({ imports }, null, 2);
-  return { json, js };
+  return { js };
 }
 
-async function uploadLoader(s3, version) {
-  console.log(`\nGenerating loader @ ${version}`);
-  const { json, js } = buildLoader(version);
-  await uploadText(s3, `_meta/load@${version}.json`, json, 'application/json');
-  await uploadText(s3, `_meta/load@${version}.js`, js, 'application/javascript');
-  console.log(`  load@${version}.json + .js uploaded`);
+async function uploadLoader(s3) {
+  console.log('\nGenerating loader');
+  const { js } = buildLoader();
+  await uploadText(s3, '_meta/load.js', js, 'application/javascript');
+  console.log('  _meta/load.js uploaded');
 }
 
 async function uploadImportMaps(s3, version) {
@@ -374,19 +398,13 @@ async function updateVersionPointer(s3, alias, version) {
   await uploadText(s3, `_meta/importmap@${alias}.json`, mapJson, 'application/json');
   await uploadText(s3, `_meta/importmap@${alias}.js`, mapJs, 'application/javascript');
 
-  const { json: loadJson, js: loadJs } = buildLoader(version);
-  await uploadText(s3, `_meta/load@${alias}.json`, loadJson, 'application/json');
-  await uploadText(s3, `_meta/load@${alias}.js`, loadJs, 'application/javascript');
-
   // Unversioned endpoints always point to latest
   if (alias === 'latest') {
     await uploadText(s3, `_meta/importmap.js`, mapJs, 'application/javascript');
     await uploadText(s3, `_meta/importmap.json`, mapJson, 'application/json');
-    await uploadText(s3, `_meta/load.js`, loadJs, 'application/javascript');
-    await uploadText(s3, `_meta/load.json`, loadJson, 'application/json');
   }
 
-  console.log(`  importmap@${alias} + load@${alias} updated`);
+  console.log(`  importmap@${alias} updated`);
 }
 
 // Upload CDN asset sets (icons + fonts) — top-level R2 prefixes
@@ -449,7 +467,7 @@ async function main() {
   await uploadAssetSets(s3, suiVersion, { force: values['force-assets'] });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
-  await uploadLoader(s3, suiVersion);
+  await uploadLoader(s3);
   await uploadPresets(s3);
 
   if (isCanary) {

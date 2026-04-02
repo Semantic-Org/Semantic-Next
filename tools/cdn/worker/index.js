@@ -106,14 +106,9 @@ function getContentType(filepath) {
 //   /importmap.js                           → import map (legacy, use /load)
 //   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
-  // Loader endpoint — /load, /load@0.18.0, /load@0.18.0.json
-  const loadMatch = pathname.match(/^\/load(?:@(.+))?\.(js|json)$/);
-  if (loadMatch) {
-    return { type: 'load', version: loadMatch[1] || null, format: loadMatch[2] };
-  }
-  const loadBareMatch = pathname.match(/^\/load(?:@(.+))?$/);
-  if (loadBareMatch) {
-    return { type: 'load', version: loadBareMatch[1] || null, format: 'js' };
+  // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
+  if (pathname === '/load' || pathname === '/load.js') {
+    return { type: 'load' };
   }
 
   // Import map loader (legacy) — version can contain dots (semver)
@@ -422,22 +417,16 @@ export default {
       }
 
       case 'load': {
-        const { version, format } = route;
-        const r2Key = version
-          ? `_meta/load@${version}.${format}`
-          : `_meta/load.${format}`;
-        const object = await env.CDN_BUCKET.get(r2Key);
+        const object = await env.CDN_BUCKET.get('_meta/load.js');
         if (!object) {
-          return new Response(`Loader not found`, { status: 404 });
+          return new Response('Loader not found', { status: 404 });
         }
 
-        const contentType = format === 'js' ? 'application/javascript' : 'application/json';
-        const cache = version ? cacheHeaders(version) : { 'Cache-Control': 'public, max-age=300' };
         return new Response(object.body, {
           headers: {
-            'Content-Type': contentType,
+            'Content-Type': 'application/javascript',
             ...corsHeaders(),
-            ...cache,
+            'Cache-Control': 'public, max-age=300',
           },
         });
       }
