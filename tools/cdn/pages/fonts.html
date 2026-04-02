@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fonts — Semantic UI CDN</title>
+<script src="https://cdn.semantic-ui.com/load" version="canary" components="button,icon,label,segment,container,divider" css></script>
+<style>
+  body { background: var(--page-background); }
+  .page { max-width: 880px; margin: 0 auto; padding: var(--margin-l); }
+  h1 { font-size: var(--h2); font-weight: 900; letter-spacing: -0.01em; margin: 0; }
+  .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--margin-3xs); }
+  .breadcrumb {
+    font-size: var(--text-xs); color: var(--light-text-color); margin-bottom: var(--margin-m);
+    & a { color: var(--muted-text-color); text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+  }
+  .desc { color: var(--muted-text-color); font-size: var(--text-m); margin-bottom: var(--margin-m); line-height: var(--paragraph-line-height); }
+  .code-block {
+    background: var(--standard-5); border: var(--border); border-radius: var(--border-radius);
+    margin-bottom: var(--margin-m); overflow: hidden;
+    & pre {
+      margin: 0; padding: var(--padding-s) var(--padding-m); font-family: var(--code-font);
+      font-size: var(--text-xs); line-height: 1.8; color: var(--text-color); overflow-x: auto;
+    }
+    & .label {
+      padding: var(--padding-3xs) var(--padding-s); font-size: var(--text-2xs); font-weight: var(--bold);
+      color: var(--muted-text-color); border-bottom: var(--border); text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+  .hl {
+    display: inline-block; width: calc(100% + 2.2rem); margin-left: -1.1rem;
+    padding-left: calc(1.1rem - 3px); border-left: 3px solid var(--primary-color);
+    background: var(--primary-background-color);
+  }
+  .kw { color: var(--red-text-color); }
+  .st { color: var(--blue-text-color); }
+  .at { color: var(--primary-text-color); }
+  .tg { color: var(--green-text-color); }
+  .cm { color: var(--light-text-color); }
+  .el { color: var(--orange-text-color); }
+  h2 { font-size: var(--h4); font-weight: 900; margin: var(--margin-l) 0 var(--margin-xs); }
+  p {
+    margin-bottom: var(--margin-xs); color: var(--muted-text-color); font-size: var(--text-m);
+    & code {
+      background: var(--standard-5); border: var(--subtle-border); padding: 0.1em 0.35em;
+      border-radius: var(--border-radius-xs); font-size: var(--text-xs); color: var(--text-color);
+    }
+  }
+  .font-card {
+    padding: var(--padding-m); background: var(--standard-5); border: var(--subtle-border);
+    border-radius: var(--border-radius); margin: var(--margin-xs) 0 var(--margin-m);
+  }
+  .font-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--margin-s); }
+  .font-name { font-size: var(--h3); font-weight: 900; color: var(--header-color); }
+  .font-url { font-family: var(--code-font); font-size: var(--text-xs); color: var(--light-text-color); }
+  .font-preview { font-size: var(--h2); color: var(--text-color); margin-bottom: var(--margin-m); line-height: 1.4; }
+  .weight-grid { display: flex; flex-wrap: wrap; gap: var(--gap-xs); }
+  .weight-chip {
+    padding: var(--padding-3xs) var(--padding-s); background: var(--standard-10);
+    border: var(--subtle-border); border-radius: var(--border-radius);
+    font-size: var(--text-xs); color: var(--muted-text-color);
+    & strong { color: var(--text-color); }
+  }
+  .footer {
+    margin-top: var(--margin-l); padding-top: var(--margin-m); border-top: var(--subtle-border);
+    color: var(--light-text-color); font-size: var(--text-xs); display: flex; gap: var(--gap-m);
+    & a { color: var(--muted-text-color); text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="breadcrumb"><a href="/">cdn.semantic-ui.com</a> / fonts</div>
+<div class="header">
+  <h1>Font Sets</h1>
+  <ui-label basic size="small" style="--label-color: var(--primary-text-color); --label-border-color: var(--primary-border-color);">canary</ui-label>
+</div>
+<p class="desc">Self-hosted web fonts served as CSS with woff2 references. Lato is loaded by default when using <code>components</code>. Suppress with <code>fonts="none"</code>.</p>
+
+<h2>Available Fonts</h2>
+<div class="font-card">
+  <div class="font-header">
+    <div class="font-name">Lato</div>
+    <div class="font-url">/fonts/lato</div>
+  </div>
+  <div class="font-preview">
+    The quick brown fox jumps over the lazy dog.
+  </div>
+  <div class="weight-grid">
+    <div class="weight-chip"><strong>400</strong> Regular</div>
+    <div class="weight-chip"><strong>400i</strong> Italic</div>
+    <div class="weight-chip"><strong>600</strong> Semi Bold</div>
+    <div class="weight-chip"><strong>600i</strong> Semi Bold Italic</div>
+    <div class="weight-chip"><strong>700</strong> Bold</div>
+    <div class="weight-chip"><strong>700i</strong> Bold Italic</div>
+  </div>
+</div>
+
+<h2>Usage</h2>
+<div class="code-block">
+  <div class="label">Via loader (automatic)</div>
+<pre><span class="cm">&lt;!-- Lato is auto-included with components --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- Suppress font loading --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>
+<span class="hl">  <span class="at">fonts</span>=<span class="st">"none"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+</div>
+<div class="code-block">
+  <div class="label">Direct link</div>
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts/lato"</span><span class="tg">&gt;</span></pre>
+</div>
+<div class="code-block">
+  <div class="label">Preload (optional)</div>
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"preload"</span> <span class="at">as</span>=<span class="st">"font"</span> <span class="at">type</span>=<span class="st">"font/woff2"</span> <span class="at">crossorigin</span>
+<span class="hl">  <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2"</span></span>
+<span class="tg">&gt;</span></pre>
+</div>
+<p>The <code>crossorigin</code> attribute is required when preloading font files directly.</p>
+
+<div class="footer">
+  <a href="/">CDN Home</a>
+  <a href="/icons/">Icons</a>
+  <a href="https://semantic-ui.com/docs">Documentation</a>
+  <a href="https://github.com/semantic-ui/semantic-ui">GitHub</a>
+</div>
+
+</div>
+</body>
+</html>

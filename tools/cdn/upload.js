@@ -393,7 +393,9 @@ async function uploadDirPages(s3) {
   }
   console.log(`\nUploading ${names.length} directory pages`);
   for (const [name, html] of Object.entries(pages)) {
-    await uploadText(s3, `_meta/dir/${name}.html`, html, 'text/html');
+    // index.html serves at / (root), all others at /{name}/ (trailing-slash dirs)
+    const r2Key = name === 'index' ? '_meta/index.html' : `_meta/dir/${name}.html`;
+    await uploadText(s3, r2Key, html, 'text/html');
   }
   console.log(`  ${names.join(', ')} uploaded`);
 }

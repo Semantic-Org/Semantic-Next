@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Icons — Semantic UI CDN</title>
+<script src="https://cdn.semantic-ui.com/load" version="canary" components="button,icon,label,segment,container,divider" css></script>
+<style>
+  body { background: var(--page-background); }
+  .page { max-width: 880px; margin: 0 auto; padding: var(--margin-l); }
+  h1 { font-size: var(--h2); font-weight: 900; letter-spacing: -0.01em; margin: 0; }
+  .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--margin-3xs); }
+  .breadcrumb {
+    font-size: var(--text-xs); color: var(--light-text-color); margin-bottom: var(--margin-m);
+    & a { color: var(--muted-text-color); text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+  }
+  .desc { color: var(--muted-text-color); font-size: var(--text-m); margin-bottom: var(--margin-m); line-height: var(--paragraph-line-height); }
+  .code-block {
+    background: var(--standard-5); border: var(--border); border-radius: var(--border-radius);
+    margin-bottom: var(--margin-m); overflow: hidden;
+    & pre {
+      margin: 0; padding: var(--padding-s) var(--padding-m); font-family: var(--code-font);
+      font-size: var(--text-xs); line-height: 1.8; color: var(--text-color); overflow-x: auto;
+    }
+    & .label {
+      padding: var(--padding-3xs) var(--padding-s); font-size: var(--text-2xs); font-weight: var(--bold);
+      color: var(--muted-text-color); border-bottom: var(--border); text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+  .hl {
+    display: inline-block; width: calc(100% + 2.2rem); margin-left: -1.1rem;
+    padding-left: calc(1.1rem - 3px); border-left: 3px solid var(--primary-color);
+    background: var(--primary-background-color);
+  }
+  .kw { color: var(--red-text-color); }
+  .st { color: var(--blue-text-color); }
+  .at { color: var(--primary-text-color); }
+  .tg { color: var(--green-text-color); }
+  .cm { color: var(--light-text-color); }
+  .el { color: var(--orange-text-color); }
+  h2 { font-size: var(--h4); font-weight: 900; margin: var(--margin-l) 0 var(--margin-xs); }
+  p {
+    margin-bottom: var(--margin-xs); color: var(--muted-text-color); font-size: var(--text-m);
+    & code {
+      background: var(--standard-5); border: var(--subtle-border); padding: 0.1em 0.35em;
+      border-radius: var(--border-radius-xs); font-size: var(--text-xs); color: var(--text-color);
+    }
+  }
+  .set-list { display: grid; gap: var(--gap-xs); margin: var(--margin-xs) 0 var(--margin-m); }
+  .set-card {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--padding-s) var(--padding-m); background: var(--standard-5);
+    border: var(--subtle-border); border-radius: var(--border-radius); transition: var(--transition);
+    &:hover { border-color: var(--primary-border-color); }
+  }
+  .set-info { display: flex; align-items: center; gap: var(--gap-s); }
+  .set-name { font-size: var(--text-m); font-weight: var(--bold); color: var(--text-color); }
+  .set-desc { font-size: var(--text-xs); color: var(--muted-text-color); }
+  .set-url { font-family: var(--code-font); font-size: var(--text-xs); color: var(--light-text-color); }
+  .note {
+    padding: var(--padding-s) var(--padding-m); background: var(--primary-background-color);
+    border: 1px solid var(--primary-border-color); border-radius: var(--border-radius);
+    font-size: var(--text-s); color: var(--muted-text-color); margin: var(--margin-m) 0;
+    & strong { color: var(--primary-text-color); }
+  }
+  .footer {
+    margin-top: var(--margin-l); padding-top: var(--margin-m); border-top: var(--subtle-border);
+    color: var(--light-text-color); font-size: var(--text-xs); display: flex; gap: var(--gap-m);
+    & a { color: var(--muted-text-color); text-decoration: none;
+      &:hover { color: var(--primary-text-color); }
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="breadcrumb"><a href="/">cdn.semantic-ui.com</a> / icons</div>
+<div class="header">
+  <h1>Icon Sets</h1>
+  <ui-label basic size="small" style="--label-color: var(--primary-text-color); --label-border-color: var(--primary-border-color);">canary</ui-label>
+</div>
+<p class="desc">Self-hosted icon libraries served as CSS with SVG references. Lucide is loaded by default when using <code>components</code>. Switch sets via the loader or link directly.</p>
+
+<h2>Available Sets</h2>
+<div class="set-list">
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon smile></ui-icon>
+      <div><div class="set-name">lucide</div><div class="set-desc">Clean, consistent stroke icons. Default set.</div></div>
+    </div>
+    <div class="set-url">/icons/lucide</div>
+  </div>
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon hexagon></ui-icon>
+      <div><div class="set-name">phosphor</div><div class="set-desc">Flexible icons in multiple weights.</div></div>
+    </div>
+    <div class="set-url">/icons/phosphor</div>
+  </div>
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon pen-tool></ui-icon>
+      <div><div class="set-name">tabler</div><div class="set-desc">Over 5000 free MIT-licensed icons.</div></div>
+    </div>
+    <div class="set-url">/icons/tabler</div>
+  </div>
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon circle></ui-icon>
+      <div><div class="set-name">material-symbols</div><div class="set-desc">Google's Material Design icon set.</div></div>
+    </div>
+    <div class="set-url">/icons/material-symbols</div>
+  </div>
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon shield></ui-icon>
+      <div><div class="set-name">heroicons</div><div class="set-desc">Hand-crafted icons by the Tailwind team.</div></div>
+    </div>
+    <div class="set-url">/icons/heroicons</div>
+  </div>
+  <div class="set-card">
+    <div class="set-info">
+      <ui-icon globe></ui-icon>
+      <div><div class="set-name">brands</div><div class="set-desc">Brand logos and framework icons. Multi-color.</div></div>
+    </div>
+    <div class="set-url">/icons/brands</div>
+  </div>
+</div>
+
+<h2>Usage</h2>
+<div class="code-block">
+  <div class="label">Via loader (recommended)</div>
+<pre><span class="cm">&lt;!-- Default: Lucide is auto-included with components --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>=<span class="st">"icon"</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- Override to a different set --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>=<span class="st">"icon"</span>
+<span class="hl">  <span class="at">icons</span>=<span class="st">"phosphor"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="cm">&lt;!-- Combine multiple sets --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>=<span class="st">"icon"</span>
+<span class="hl">  <span class="at">icons</span>=<span class="st">"lucide,brands"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+</div>
+<div class="code-block">
+  <div class="label">Direct link</div>
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/icons/lucide"</span><span class="tg">&gt;</span></pre>
+</div>
+
+<div class="note">
+  <strong>Canonical names:</strong> All icon sets use Semantic UI's canonical naming. The same name (e.g. <code>home</code>) resolves across all sets, so you can switch sets without changing markup.
+</div>
+
+<div class="footer">
+  <a href="/">CDN Home</a>
+  <a href="/fonts/">Fonts</a>
+  <a href="https://semantic-ui.com/docs">Documentation</a>
+  <a href="https://github.com/semantic-ui/semantic-ui">GitHub</a>
+</div>
+
+</div>
+</body>
+</html>
