@@ -226,7 +226,19 @@ When a plan is done:
 - **Delta notes:** Took longer than estimated because [reason]. / Came in under estimate because [reason].
 ```
 
-**Tracking time:** Check the clock (`date`) when starting work on a plan and when completing it. At completion, report the wall-clock span and ask the user if it was roughly continuous or if there were breaks. One question gives you actual effort without overhead mid-session.
+**Tracking time:** Use git commit timestamps to calculate actual duration. At completion, run:
+
+```bash
+git log --oneline --format="%ai %s" {first-commit-sha}^..HEAD --reverse
+```
+
+Then:
+1. Note the first and last commit timestamps for total wall-clock span
+2. Look for gaps > 30 minutes between consecutive commits — these indicate breaks, CI waits, or context switches
+3. Calculate active time by summing the "burst" ranges (consecutive commits < 30min apart)
+4. Report both wall-clock span and estimated active time
+
+Example output: "~6.5h wall clock (14:09–20:32 ET), ~4h active across 3 bursts. Gaps: 45min CI wait, 30min design discussion."
 
 2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`
 3. **Remove from active sections** in ROADMAP.md.
