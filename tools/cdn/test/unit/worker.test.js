@@ -9,19 +9,40 @@ import worker from '../../worker/index.js';
 
 describe('parseRoute — CSS', () => {
   it('/css → latest', () => {
-    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/css@canary → canary', () => {
-    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/css@0.18.0 → versioned', () => {
-    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', map: false });
+    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', layer: null, map: false });
   });
 
   it('/css@canary.map → canary sourcemap', () => {
-    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', layer: null, map: true });
+  });
+
+  it('/css@0.18.0/tokens → tokens layer', () => {
+    expect(parseRoute('/css@0.18.0/tokens')).toEqual({ type: 'css', version: '0.18.0', layer: 'tokens', map: false });
+  });
+
+  it('/css@canary/reset → reset layer', () => {
+    expect(parseRoute('/css@canary/reset')).toEqual({ type: 'css', version: 'canary', layer: 'reset', map: false });
+  });
+
+  it('/css/tokens → latest tokens', () => {
+    expect(parseRoute('/css/tokens')).toEqual({ type: 'css', version: 'latest', layer: 'tokens', map: false });
+  });
+
+  it('/css@0.18.0/tokens.map → tokens sourcemap', () => {
+    expect(parseRoute('/css@0.18.0/tokens.map')).toEqual({
+      type: 'css',
+      version: '0.18.0',
+      layer: 'tokens',
+      map: true,
+    });
   });
 
   it('/semantic-ui.css → latest', () => {
@@ -238,7 +259,7 @@ describe('CSS sourceMappingURL rewrite', () => {
 
     expect(res.status).toBe(200);
     const body = await res.text();
-    expect(body).toContain('sourceMappingURL=/semantic-ui@canary.css.map');
+    expect(body).toContain('sourceMappingURL=/css@canary.map');
     expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
   });
 
