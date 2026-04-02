@@ -286,12 +286,26 @@ function buildLoader(version) {
   // The loader IIFE — classic script that injects import map + resources
   const js = `(function(){
   var s=document.currentScript;
-  if(!document.querySelector('script[type="importmap"]')){
+  var sui=${JSON.stringify(importMapJson)};
+
+  // Merge with existing import map or create new one
+  var existing=document.querySelector('script[type="importmap"]');
+  if(existing){
+    try{
+      var prev=JSON.parse(existing.textContent);
+      var merged=Object.assign({},prev.imports,JSON.parse(sui).imports);
+      existing.textContent=JSON.stringify({imports:merged});
+    }catch(e){}
+  }else{
+    if(document.querySelector('script[type="module"]')){
+      console.warn('SUI: Place <script src="/load"> before any <script type="module"> for import map resolution.');
+    }
     var m=document.createElement('script');
     m.type='importmap';
-    m.textContent=${JSON.stringify(importMapJson)};
+    m.textContent=sui;
     document.head.appendChild(m);
   }
+
   var b=${JSON.stringify(cdnRoot)},v=${JSON.stringify(version)};
   var hc=s.hasAttribute('components'),ha=s.hasAttribute('authoring');
   var cn=s.getAttribute('css')==='none';
@@ -309,8 +323,9 @@ function buildLoader(version) {
     var fc=fa||(hc?'lato':null);
     if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
   }
-  var co=s.getAttribute('components');
-  if(co)import(b+'/core@'+v+'/'+co);
+  var co=s.getAttribute('components')||'';
+  if(hc&&!co)co='standard';
+  if(co)import(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
   if(ha)import(b+'/component@'+v);
   ['reactivity','query','utils','templating','renderer','compiler','specs','tailwind'].forEach(function(p){
     if(s.hasAttribute(p))import(b+'/'+p+'@'+v);
