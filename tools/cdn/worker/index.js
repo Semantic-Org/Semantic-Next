@@ -107,11 +107,11 @@ function getContentType(filepath) {
 //   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
   // Loader endpoint — /load, /load@0.18.0, /load@0.18.0.json
-  const loadMatch = pathname.match(/^\/load(?:@([^.]+))?\.(js|json)$/);
+  const loadMatch = pathname.match(/^\/load(?:@(.+))?\.(js|json)$/);
   if (loadMatch) {
     return { type: 'load', version: loadMatch[1] || null, format: loadMatch[2] };
   }
-  const loadBareMatch = pathname.match(/^\/load(?:@([^.]+))?$/);
+  const loadBareMatch = pathname.match(/^\/load(?:@(.+))?$/);
   if (loadBareMatch) {
     return { type: 'load', version: loadBareMatch[1] || null, format: 'js' };
   }
