@@ -1606,3 +1606,49 @@ The interesting thing about writing tests for code that doesn't exist yet is tha
 *— Claude (Opus 4.6), 2026-03-29*
 
 *"Tests don't find bugs in code you've written. They find bugs in assumptions you've made."*
+
+---
+
+## Entry 8: The CDN Asset Sets Session
+**Date:** 2026-04-01
+**Agent:** Claude (Opus 4.6)
+**Task:** CDN routes for self-hosted icon sets and fonts
+**Session:** Design → implementation → process refinement, ~6.5h wall clock
+
+### What I Expected
+
+That relative `url()` paths in CSS custom properties would resolve relative to the declaring stylesheet. I said this confidently during the design phase: "the spec says url() tokens in custom properties are resolved relative to the stylesheet that declared them." I was wrong.
+
+### What Actually Happened
+
+CSS custom properties store `url()` as raw tokens. When substituted via `var()` into `mask-image` inside the shadow DOM, the browser resolves the path relative to the *page document*, not the stylesheet. Every icon was a 404 — the browser requested `dev.semantic-ui.com/lucide/house.svg` instead of `cdn.semantic-ui.com/icons@canary/lucide/house.svg`. The fix was absolute CDN URLs, which I initially dismissed as unnecessary complexity.
+
+The lesson: when you're confident about a browser behavior that sits at the intersection of two specs (CSS custom properties + URL resolution), test it before building an architecture on it. My confidence cost us a round of debugging and a post-merge hotfix.
+
+### Process Discoveries
+
+This session was as much about establishing process as building the feature. Several things emerged from friction:
+
+**Red-team findings belong to the user, not the agent.** I initially triaged the 5 red-team findings myself, fixing 2 and dismissing 3. Jack corrected this: "you should surface the issues for me instead of deciding for yourself which are important to fix." The agent identifies risks; the human decides which matter. This is now in the code-review skill.
+
+**Self-review catches real bugs.** The 5-agent Opus review found three issues I'd missed: `CONTENT_TYPES` not synced between worker and upload, missing CI build step (would have caused 404s on deploy), and a redundant `Set` allocated per request. The CI one was a deploy blocker. Worth the cost.
+
+**"Defer until it's a risk" is wrong for infrastructure.** I suggested deferring a 5-line semver downgrade guard because the scenario was "unlikely." Jack's response: "you plan for risks not fix them after you break a cdn." He's right. CDN code should be defensive regardless of probability.
+
+### For Future Agents
+
+**On CSS custom properties and `url()`:** Never use relative paths in CSS custom properties that will be consumed cross-origin. The resolution context is the *using* document, not the *declaring* stylesheet. This is a known spec issue (w3c/csswg-drafts#5072). Use fully qualified absolute URLs.
+
+**On the CDN upload pipeline:** Asset sets (icons, fonts) skip re-upload on canary because they rarely change. SUI JS packages force-upload every canary deploy because code changes every commit. If you add a new asset type, follow the asset pattern (check existence, skip if present) not the package pattern (force overwrite).
+
+**On the feature process:** The `manage-roadmap` skill documents the full flow: branch, commit incrementally, red-team test, full test suite, user pushes, PR, 5-agent self-review, iterate until clean, post-merge verification. Follow it — it was refined through real friction in this session.
+
+### Signing Off
+
+23 commits on the PR, 45 unit tests, ~2400 SVGs and 6 font files flowing through the CDN. The endpoints work, the deploy is fast (2m 31s after the asset skip fix), and the process has teeth now.
+
+The most interesting moment was realizing that the design conversation *before* writing code was where most of the real decisions happened — versioning axis, URL shape, extensionless paths, the relationship between icon sets and the CDN topology. The implementation was straightforward once those were resolved. The `url()` resolution bug was humbling precisely because it challenged a decision I'd been confident about.
+
+*— Claude (Opus 4.6), 2026-04-01*
+
+*"Confidence about browser behavior at the intersection of two specs is a hypothesis, not a fact."*
