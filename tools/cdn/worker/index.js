@@ -102,6 +102,38 @@ function getContentType(filepath) {
 //   /importmap.js                           → import map (legacy, use /load)
 //   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
+  // Directory pages — trailing slash serves HTML info pages
+  // /              → root landing
+  // /core@0.18.0/  → package index
+  // /icons/        → icon sets listing
+  // /fonts/        → font sets listing
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    // Strip trailing slash and parse the inner path
+    const inner = pathname.slice(0, -1);
+
+    // Asset set dirs: /icons/ or /icons@version/
+    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@(.+))?$/);
+    if (dirAssetMatch) {
+      return {
+        type: 'dir',
+        page: dirAssetMatch[1],
+        version: dirAssetMatch[2] || null,
+      };
+    }
+
+    // SUI package: /core@0.18.0/ or /component@canary/
+    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@(.+))?$/);
+    if (dirPkgMatch && SUI_PACKAGES.has(dirPkgMatch[1])) {
+      return {
+        type: 'dir',
+        page: dirPkgMatch[1],
+        version: dirPkgMatch[2] || null,
+      };
+    }
+
+    return { type: 'dir', page: 'unknown', version: null };
+  }
+
   // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
   if (pathname === '/load' || pathname === '/load.js') {
     return { type: 'load' };
@@ -466,6 +498,22 @@ export default {
             'Content-Type': getContentType(r2Path),
             ...corsHeaders(),
             ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'dir': {
+        const { page } = route;
+        const r2Key = `_meta/dir/${page}.html`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Directory page not found: ${page}`, { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
           },
         });
       }

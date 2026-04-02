@@ -370,6 +370,34 @@ function buildLoader() {
   return { js };
 }
 
+// Directory pages — static HTML served for trailing-slash URLs.
+// Templates live in tools/cdn/pages/{name}.html and are uploaded to _meta/dir/{name}.html.
+function buildDirPages() {
+  const pagesDir = join(import.meta.dirname, 'pages');
+  if (!existsSync(pagesDir)) { return {}; }
+  const pages = {};
+  for (const file of readdirSync(pagesDir)) {
+    if (!file.endsWith('.html')) { continue; }
+    const name = file.replace('.html', '');
+    pages[name] = readFileSync(join(pagesDir, file), 'utf-8');
+  }
+  return pages;
+}
+
+async function uploadDirPages(s3) {
+  const pages = buildDirPages();
+  const names = Object.keys(pages);
+  if (names.length === 0) {
+    console.log('\n  No directory pages found');
+    return;
+  }
+  console.log(`\nUploading ${names.length} directory pages`);
+  for (const [name, html] of Object.entries(pages)) {
+    await uploadText(s3, `_meta/dir/${name}.html`, html, 'text/html');
+  }
+  console.log(`  ${names.join(', ')} uploaded`);
+}
+
 async function uploadLoader(s3) {
   console.log('\nGenerating loader');
   const { js } = buildLoader();
@@ -476,6 +504,7 @@ async function main() {
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
   await uploadLoader(s3);
+  await uploadDirPages(s3);
   await uploadPresets(s3);
 
   if (isCanary) {
