@@ -74,12 +74,10 @@ const CONTENT_TYPES = {
 };
 
 function getContentType(filepath) {
-  for (const [ext, type] of Object.entries(CONTENT_TYPES)) {
-    if (filepath.endsWith(ext)) {
-      return type;
-    }
-  }
-  return 'application/octet-stream';
+  const lastDot = filepath.lastIndexOf('.');
+  if (lastDot === -1) { return 'application/octet-stream'; }
+  const ext = filepath.slice(lastDot);
+  return CONTENT_TYPES[ext] || 'application/octet-stream';
 }
 
 // Parse URL into route info
@@ -91,16 +89,25 @@ function getContentType(filepath) {
 //   /icons@0.18.0/lucide/house.svg          → icon asset
 //   /fonts@0.18.0/lato                      → font set CSS (extensionless)
 //   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
+//   /load                                   → loader script (version-agnostic, reads version= attr)
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
+//   /css@0.18.0/tokens                      → tokens only
+//   /css@0.18.0/reset                       → reset only
+//   /css@0.18.0/base                        → base only
 //   /css@0.18.0.map                         → framework CSS sourcemap
 //   /semantic-ui@0.18.0.css                 → framework CSS (legacy alias)
 //   /semantic-ui@0.18.0.css.map             → framework CSS sourcemap (legacy alias)
 //   /semantic-ui.css                        → framework CSS (legacy alias)
-//   /importmap.js                           → import map loader (latest)
-//   /importmap@0.18.0.js                    → versioned import map loader
+//   /importmap.js                           → import map (legacy, use /load)
+//   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
-  // Import map loader — version can contain dots (semver)
+  // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
+  if (pathname === '/load' || pathname === '/load.js') {
+    return { type: 'load' };
+  }
+
+  // Import map loader (legacy) — version can contain dots (semver)
   const importmapMatch = pathname.match(/^\/importmap(?:@(.+))?\.(js|json)$/);
   if (importmapMatch) {
     return {
@@ -110,14 +117,16 @@ export function parseRoute(pathname) {
     };
   }
 
-  // Framework CSS — /css, /css@0.18.0, /semantic-ui.css, /semantic-ui@0.18.0.css
-  // Also matches .min and sourcemap variants: /semantic-ui.min.css.map, /css@0.18.0.map
-  const cssShortMatch = pathname.match(/^\/css(?:@(.+?))?(\.map)?$/);
+  // Framework CSS — /css, /css@0.18.0, /css@0.18.0/tokens, /semantic-ui.css
+  // Sub-layers: /css@0.18.0/tokens, /css@0.18.0/reset, /css@0.18.0/base
+  // Also matches sourcemap variants: /css@0.18.0.map, /css@0.18.0/tokens.map
+  const cssShortMatch = pathname.match(/^\/css(?:@([^/]+?))?(?:\/(tokens|reset|base))?(\.map)?$/);
   if (cssShortMatch) {
     return {
       type: 'css',
       version: cssShortMatch[1] || 'latest',
-      map: !!cssShortMatch[2],
+      layer: cssShortMatch[2] || null,
+      map: !!cssShortMatch[3],
     };
   }
   const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?(?:\.min)?\.css(\.map)?$/);
@@ -125,6 +134,7 @@ export function parseRoute(pathname) {
     return {
       type: 'css',
       version: cssMatch[1] || 'latest',
+      layer: null,
       map: !!cssMatch[2],
     };
   }
@@ -330,22 +340,24 @@ export default {
       }
 
       case 'css': {
-        const { version, map } = route;
+        const { version, layer, map } = route;
 
         if (version === 'latest') {
           const resolved = await resolveVersion(env, version);
           if (!resolved) {
             return new Response('Latest version not found', { status: 404 });
           }
-          const suffix = map ? '.css.map' : '.css';
+          const layerPath = layer ? `/${layer}` : '';
+          const suffix = map ? '.map' : '';
           return Response.redirect(
-            new URL(`/semantic-ui@${resolved}${suffix}`, url.origin).href,
+            new URL(`/css@${resolved}${layerPath}${suffix}`, url.origin).href,
             302,
           );
         }
 
-        // Serve minified CSS (or its sourcemap) from dist/
-        const filename = map ? 'semantic-ui.min.css.map' : 'semantic-ui.min.css';
+        // Map layer to filename: tokens → tokens.min.css, null → semantic-ui.min.css
+        const baseName = layer || 'semantic-ui';
+        const filename = map ? `${baseName}.min.css.map` : `${baseName}.min.css`;
         const r2Key = `@semantic-ui/core/${version}/dist/${filename}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
@@ -353,7 +365,8 @@ export default {
         }
 
         const contentType = map ? 'application/json' : 'text/css';
-        const sourceMapUrl = `/semantic-ui@${version}.css.map`;
+        const layerPath = layer ? `/${layer}` : '';
+        const sourceMapUrl = `/css@${version}${layerPath}.map`;
         const sourceMapHeader = map ? {} : { 'SourceMap': sourceMapUrl };
 
         // Rewrite the inline sourceMappingURL to an absolute versioned path
@@ -363,7 +376,7 @@ export default {
         if (!map) {
           const css = await object.text();
           body = css.replace(
-            /\/\*# sourceMappingURL=.+?\s*\*\/\s*$/,
+            /\/\*#\s*sourceMappingURL=\S+\s*\*\//,
             `/*# sourceMappingURL=${sourceMapUrl} */`,
           );
         }
@@ -396,6 +409,21 @@ export default {
             'Content-Type': contentType,
             ...corsHeaders(),
             ...cache,
+          },
+        });
+      }
+
+      case 'load': {
+        const object = await env.CDN_BUCKET.get('_meta/load.js');
+        if (!object) {
+          return new Response('Loader not found', { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'application/javascript',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
           },
         });
       }

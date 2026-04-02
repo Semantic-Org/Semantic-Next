@@ -27,20 +27,60 @@ All JS and CSS responses include a `SourceMap` HTTP header pointing to the corre
 | `https://cdn.semantic-ui.com/semantic-ui@0.18.0.css` | Alias → same as `/css@0.18.0` |
 | `https://cdn.semantic-ui.com/semantic-ui@canary.css` | Alias → same as `/css@canary` |
 
-Serves `semantic-ui.min.css` by default (minified).
+Serves `semantic-ui.min.css` by default (minified). Individual CSS layers are available as sub-paths:
 
-### Import Map
+| URL | Content |
+|---|---|
+| `https://cdn.semantic-ui.com/css@0.18.0/tokens` | Pure custom properties only |
+| `https://cdn.semantic-ui.com/css@0.18.0/reset` | Normalize/reset stylesheet |
+| `https://cdn.semantic-ui.com/css@0.18.0/base` | Page-level styling (body, headings, links) |
+
+### Loader
+
+Single entry point for using Semantic UI from the CDN. Reads bare attributes from its `<script>` tag and injects import maps, CSS, icons, fonts, and loads components.
+
+```html
+<script src="https://cdn.semantic-ui.com/load" components="button,input,modal"></script>
+```
+
+The loader is version-agnostic — use the `version` attribute to pin:
+
+```html
+<script src="https://cdn.semantic-ui.com/load" version="0.18.0" components="standard"></script>
+```
+
+**Attributes:**
+
+| Attribute | Behavior |
+|---|---|
+| `components="button,input"` | Load specific components. Auto-injects tokens, Lato, Lucide. |
+| `components="standard"` | Load named preset (standard, extended, full). |
+| `components` (bare) | Defaults to `standard` preset. |
+| `authoring` | Load `@semantic-ui/component` for building custom components. Auto-injects tokens. |
+| `reactivity` | Load `@semantic-ui/reactivity`. |
+| `query` | Load `@semantic-ui/query`. |
+| `utils` | Load `@semantic-ui/utils`. |
+| `tailwind` | Load `@semantic-ui/tailwind`. |
+| `css` | Inject full page styles (tokens + reset + base). |
+| `css="tokens"` | Inject tokens only. |
+| `css="none"` | Suppress CSS auto-injection. |
+| `icons="phosphor"` | Override default icon set. |
+| `icons="none"` | Suppress icon auto-injection. |
+| `fonts="none"` | Suppress font auto-injection. |
+| `version="0.18.0"` | Pin all resources to a specific version. Default: `latest`. |
+
+The loader is a classic (non-module) synchronous script. Place it in `<head>` before any `<script type="module">` for import map resolution.
+
+### Import Map (legacy)
 
 | URL | Behavior |
 |---|---|
-| `https://cdn.semantic-ui.com/importmap.js` | Latest loader — synchronous, inline import map |
-| `https://cdn.semantic-ui.com/importmap@0.18.0.js` | Versioned loader, immutable |
-| `https://cdn.semantic-ui.com/importmap@canary.js` | Canary loader |
+| `https://cdn.semantic-ui.com/importmap.js` | Latest — synchronous, inline import map |
+| `https://cdn.semantic-ui.com/importmap@0.18.0.js` | Versioned, immutable |
+| `https://cdn.semantic-ui.com/importmap@canary.js` | Canary |
 | `https://cdn.semantic-ui.com/importmap.json` | Latest raw JSON |
-| `https://cdn.semantic-ui.com/importmap@0.18.0.json` | Versioned raw JSON |
-| `https://cdn.semantic-ui.com/importmap@canary.json` | Canary raw JSON |
 
-The `.js` loader is a synchronous script that injects a `<script type="importmap">` — no fetch, no race condition with `<script type="module">`.
+The import map endpoint is superseded by `/load` but continues to work for backward compatibility.
 
 ### SUI Packages
 
@@ -182,51 +222,29 @@ export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
 
 ## Usage Examples
 
-### Combo endpoint (simplest)
+### One-tag setup (recommended)
 
 ```html
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts/lato">
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/icons/lucide">
-<script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
-<ui-button primary>Click Me</ui-button>
-<ui-icon home></ui-icon>
+<script src="https://cdn.semantic-ui.com/load" components="button,input,icon"></script>
+<ui-button primary><ui-icon home></ui-icon> Home</ui-button>
 <ui-input placeholder="Type here"></ui-input>
 ```
 
-### Specific components + behavior
+Tokens, Lato font, and Lucide icons are auto-injected. One tag, everything works.
+
+### Full page ownership
 
 ```html
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
-<script type="module" src="https://cdn.semantic-ui.com/core@canary/button,tooltip"></script>
-<script type="module">
-  import { $ } from 'https://cdn.semantic-ui.com/query@canary';
-  $('ui-button').tooltip();
-</script>
-<ui-button data-text="Hello!">Hover me</ui-button>
-```
-
-### Import map (full control)
-
-```html
-<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
-<script src="https://cdn.semantic-ui.com/importmap.js"></script>
-<script type="module">
-  import '@semantic-ui/core';
-</script>
+<script src="https://cdn.semantic-ui.com/load" components="standard" css></script>
 <ui-button primary>Click Me</ui-button>
 ```
+
+`css` adds page-level styles (reset + base) on top of auto-injected tokens.
 
 ### Building custom components
 
 ```html
-<script type="importmap">
-{
-  "imports": {
-    "@semantic-ui/component": "https://cdn.semantic-ui.com/component@0.18.0"
-  }
-}
-</script>
+<script src="https://cdn.semantic-ui.com/load" authoring></script>
 <script type="module">
   import { defineComponent } from '@semantic-ui/component';
   defineComponent({
@@ -239,6 +257,33 @@ export * from "https://cdn.semantic-ui.com/core@0.18.0/modal.min.js";
   });
 </script>
 <my-counter></my-counter>
+```
+
+### Standalone packages
+
+```html
+<script src="https://cdn.semantic-ui.com/load" reactivity></script>
+<script type="module">
+  import { Signal, Reaction } from '@semantic-ui/reactivity';
+  const count = Signal(0);
+  Reaction(() => document.body.textContent = count.value);
+  setInterval(() => count.increment(), 1000);
+</script>
+```
+
+### Explicit setup (full control)
+
+```html
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts/lato">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/icons/lucide">
+<script src="https://cdn.semantic-ui.com/load" components="button,input"></script>
+```
+
+### Pinned version
+
+```html
+<script src="https://cdn.semantic-ui.com/load" version="0.18.0" components="standard"></script>
 ```
 
 ## Operations

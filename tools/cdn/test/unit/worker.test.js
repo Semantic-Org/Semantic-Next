@@ -9,39 +9,65 @@ import worker from '../../worker/index.js';
 
 describe('parseRoute — CSS', () => {
   it('/css → latest', () => {
-    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/css@canary → canary', () => {
-    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/css@0.18.0 → versioned', () => {
-    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', map: false });
+    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', layer: null, map: false });
   });
 
   it('/css@canary.map → canary sourcemap', () => {
-    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', layer: null, map: true });
+  });
+
+  it('/css@0.18.0/tokens → tokens layer', () => {
+    expect(parseRoute('/css@0.18.0/tokens')).toEqual({ type: 'css', version: '0.18.0', layer: 'tokens', map: false });
+  });
+
+  it('/css@canary/reset → reset layer', () => {
+    expect(parseRoute('/css@canary/reset')).toEqual({ type: 'css', version: 'canary', layer: 'reset', map: false });
+  });
+
+  it('/css/tokens → latest tokens', () => {
+    expect(parseRoute('/css/tokens')).toEqual({ type: 'css', version: 'latest', layer: 'tokens', map: false });
+  });
+
+  it('/css@0.18.0/tokens.map → tokens sourcemap', () => {
+    expect(parseRoute('/css@0.18.0/tokens.map')).toEqual({
+      type: 'css',
+      version: '0.18.0',
+      layer: 'tokens',
+      map: true,
+    });
   });
 
   it('/semantic-ui.css → latest', () => {
-    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css → canary', () => {
-    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css.map → canary sourcemap', () => {
-    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({
+      type: 'css',
+      version: 'canary',
+      layer: null,
+      map: true,
+    });
   });
 
   it('/semantic-ui.min.css.map → latest sourcemap (inline URL)', () => {
-    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', map: true });
+    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', layer: null, map: true });
   });
 
   it('/semantic-ui.min.css → latest', () => {
-    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 });
 
@@ -91,6 +117,16 @@ describe('parseRoute — vendor', () => {
       version: '2.1.1',
       filepath: 'reactive-element.js',
     });
+  });
+});
+
+describe('parseRoute — load endpoint', () => {
+  it('/load → loader', () => {
+    expect(parseRoute('/load')).toEqual({ type: 'load' });
+  });
+
+  it('/load.js → loader', () => {
+    expect(parseRoute('/load.js')).toEqual({ type: 'load' });
   });
 });
 
@@ -238,7 +274,7 @@ describe('CSS sourceMappingURL rewrite', () => {
 
     expect(res.status).toBe(200);
     const body = await res.text();
-    expect(body).toContain('sourceMappingURL=/semantic-ui@canary.css.map');
+    expect(body).toContain('sourceMappingURL=/css@canary.map');
     expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
   });
 
@@ -468,10 +504,130 @@ describe('asset set fetch', () => {
     expect(await res.text()).toBe(svg);
   });
 
+  // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
+  // route must still match first — this is by design, not an accident
   it('asset-set routes take precedence over SUI packages with same name', () => {
-    // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
-    // route must still match first — this is by design, not an accident
     expect(parseRoute('/icons@0.18.0/lucide').type).toBe('asset-set');
     expect(parseRoute('/fonts@0.18.0/lato').type).toBe('asset-set');
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Load endpoint
+----------------------------------------------*/
+
+describe('load endpoint fetch', () => {
+  it('serves loader script with short cache', async () => {
+    const loaderJs = '(function(){ /* loader */ })();';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/load.js': loaderJs,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/load');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=300');
+    expect(await res.text()).toBe(loaderJs);
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — CSS sub-layers
+----------------------------------------------*/
+
+describe('CSS sub-layer fetch', () => {
+  it('serves tokens CSS', async () => {
+    const tokens = ':root { --primary: blue; }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/tokens.min.css': tokens,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css@canary/tokens');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(res.headers.get('SourceMap')).toBe('/css@canary/tokens.map');
+  });
+
+  it('redirects latest CSS sub-layer to versioned', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css/tokens');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/css@0.19.0/tokens');
+  });
+
+  it('serves full CSS when no layer specified', async () => {
+    const fullCss = ':root {} body {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/semantic-ui.min.css': fullCss,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('SourceMap')).toBe('/css@canary.map');
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Combo endpoint
+----------------------------------------------*/
+
+describe('combo endpoint fetch', () => {
+  it('serves comma-separated components as re-exports', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button,input');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    const body = await res.text();
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/button.min.js"');
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/input.min.js"');
+  });
+
+  it('serves preset name as re-exports', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/presets.json': JSON.stringify({
+          standard: ['button', 'input', 'icon'],
+        }),
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/standard');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toContain('button.min.js');
+    expect(body).toContain('input.min.js');
+    expect(body).toContain('icon.min.js');
+  });
+
+  it('falls through to file serving for non-combo paths', async () => {
+    const jsContent = 'export const Button = {};';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/cdn/button.min.js': jsContent,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button.min.js');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(jsContent);
   });
 });

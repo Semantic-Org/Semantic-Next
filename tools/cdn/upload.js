@@ -161,8 +161,25 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
     console.log(`  ${name}@${version} — ${files.length} files`);
   }
 
-  // Also upload core CSS
-  const cssFiles = ['semantic-ui.css', 'semantic-ui.css.map', 'semantic-ui.min.css', 'semantic-ui.min.css.map'];
+  // Also upload core CSS (full bundle + sub-layers)
+  const cssFiles = [
+    'semantic-ui.css',
+    'semantic-ui.css.map',
+    'semantic-ui.min.css',
+    'semantic-ui.min.css.map',
+    'tokens.css',
+    'tokens.css.map',
+    'tokens.min.css',
+    'tokens.min.css.map',
+    'reset.css',
+    'reset.css.map',
+    'reset.min.css',
+    'reset.min.css.map',
+    'base.css',
+    'base.css.map',
+    'base.min.css',
+    'base.min.css.map',
+  ];
   for (const cssFile of cssFiles) {
     const cssPath = join(ROOT, 'dist', cssFile);
     if (existsSync(cssPath)) {
@@ -258,6 +275,104 @@ function buildImportMap(version) {
   return { json, js };
 }
 
+// Build the version-agnostic loader script.
+// The loader reads `version` from its own script tag attribute at runtime.
+// Package names are baked in from SUI_PACKAGES — the only build-time dependency.
+function buildLoader() {
+  const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
+
+  // Package names baked into the loader (derived from SUI_PACKAGES)
+  const pkgNames = JSON.stringify(SUI_PACKAGES);
+
+  // Bare package attributes the loader checks
+  // 'core' is loaded via components, 'component' is loaded via authoring
+  const bareAttrs = JSON.stringify(
+    SUI_PACKAGES.filter(n => n !== 'core' && n !== 'component'),
+  );
+
+  const js = `(function(){
+  var s=document.currentScript;
+  var b=${JSON.stringify(cdnRoot)};
+  var v=s.getAttribute('version')||'latest';
+  var scope='@semantic-ui/';
+
+  // Build import map from package list + version
+  var pkgs=${pkgNames};
+  var imports={};
+  pkgs.forEach(function(n){imports[scope+n]=b+'/'+n+'@'+v});
+  var mapJson=JSON.stringify({imports:imports});
+
+  // Inject import map (browsers support multiple, later entries win for collisions)
+  if(document.querySelector('script[type="module"]')){
+    console.warn('SUI: <script src="/load"> must appear before any <script type="module"> for import map resolution.');
+  }
+  if(s.parentElement&&s.parentElement!==document.head&&s.closest('body')){
+    console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
+  }
+  var m=document.createElement('script');
+  m.type='importmap';
+  m.textContent=mapJson;
+  document.head.appendChild(m);
+
+  var hc=s.hasAttribute('components'),ha=s.hasAttribute('authoring');
+
+  // CSS injection — css="none" suppresses, css="tokens"|"reset"|"base" selects layer, bare css = full page
+  var cv=s.getAttribute('css');
+  if(cv!=='none'){
+    if(cv==='tokens'||cv==='reset'||cv==='base')inject(b+'/css@'+v+'/'+cv);
+    else if(s.hasAttribute('css'))inject(b+'/css@'+v);
+    else if(hc||ha)inject(b+'/css@'+v+'/tokens');
+  }
+
+  // Icons — auto-inject lucide with components, bare icons attr defaults to lucide
+  var ia=s.getAttribute('icons');
+  if(ia!=='none'){
+    var ic=ia||(s.hasAttribute('icons')||hc?'lucide':null);
+    if(ic)ic.split(',').forEach(function(x){inject(b+'/icons@'+v+'/'+x.trim())});
+  }
+
+  // Fonts — auto-inject lato with components, bare fonts attr defaults to lato
+  var fa=s.getAttribute('fonts');
+  if(fa!=='none'){
+    var fc=fa||(s.hasAttribute('fonts')||hc?'lato':null);
+    if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
+  }
+
+  // Components — bare = standard preset
+  var co=s.getAttribute('components')||'';
+  if(hc&&!co)co='standard';
+  if(co)load(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
+
+  // Authoring lib
+  if(ha)load(b+'/component@'+v);
+
+  // Bare package attributes
+  ${bareAttrs}.forEach(function(p){
+    if(s.hasAttribute(p))load(b+'/'+p+'@'+v);
+  });
+
+  function load(u){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)})}
+  function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
+})();`;
+
+  // Validate the generated script is syntactically valid
+  try {
+    new Function(js);
+  }
+  catch (e) {
+    throw new Error(`Generated loader has syntax error: ${e.message}`);
+  }
+
+  return { js };
+}
+
+async function uploadLoader(s3) {
+  console.log('\nGenerating loader');
+  const { js } = buildLoader();
+  await uploadText(s3, '_meta/load.js', js, 'application/javascript');
+  console.log('  _meta/load.js uploaded');
+}
+
 async function uploadImportMaps(s3, version) {
   console.log(`\nGenerating import maps @ ${version}`);
   const { json, js } = buildImportMap(version);
@@ -283,14 +398,14 @@ async function updateVersionPointer(s3, alias, version) {
   await uploadText(s3, `_versions/${alias}`, version);
   console.log(`  _versions/${alias} → ${version}`);
 
-  const { json, js } = buildImportMap(version);
-  await uploadText(s3, `_meta/importmap@${alias}.json`, json, 'application/json');
-  await uploadText(s3, `_meta/importmap@${alias}.js`, js, 'application/javascript');
+  const { json: mapJson, js: mapJs } = buildImportMap(version);
+  await uploadText(s3, `_meta/importmap@${alias}.json`, mapJson, 'application/json');
+  await uploadText(s3, `_meta/importmap@${alias}.js`, mapJs, 'application/javascript');
 
-  // importmap.js (no version) always points to latest
+  // Unversioned endpoints always point to latest
   if (alias === 'latest') {
-    await uploadText(s3, `_meta/importmap.js`, js, 'application/javascript');
-    await uploadText(s3, `_meta/importmap.json`, json, 'application/json');
+    await uploadText(s3, `_meta/importmap.js`, mapJs, 'application/javascript');
+    await uploadText(s3, `_meta/importmap.json`, mapJson, 'application/json');
   }
 
   console.log(`  importmap@${alias} updated`);
@@ -356,6 +471,7 @@ async function main() {
   await uploadAssetSets(s3, suiVersion, { force: values['force-assets'] });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
+  await uploadLoader(s3);
   await uploadPresets(s3);
 
   if (isCanary) {

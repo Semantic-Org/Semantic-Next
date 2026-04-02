@@ -89,6 +89,7 @@ TOKEN FINALIZATION (the gate)
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
 | 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 | 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
+| 5 | [CDN Load Endpoint](cdn-load-endpoint.md) | 8-16h (1-2d) | pair | Unified `/load` script — import map + CSS + icons + fonts in one tag. CSS layer splitting, loader generation. Active. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
