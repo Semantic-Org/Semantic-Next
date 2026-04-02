@@ -311,7 +311,10 @@ function buildLoader() {
     }catch(e){}
   }else{
     if(document.querySelector('script[type="module"]')){
-      console.warn('SUI: Place <script src="/load"> before any <script type="module"> for import map resolution.');
+      console.warn('SUI: <script src="/load"> must appear before any <script type="module"> for import map resolution.');
+    }
+    if(s.parentElement&&s.parentElement!==document.head&&s.closest('body')){
+      console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
     }
     var m=document.createElement('script');
     m.type='importmap';
@@ -346,16 +349,17 @@ function buildLoader() {
   // Components — bare = standard preset
   var co=s.getAttribute('components')||'';
   if(hc&&!co)co='standard';
-  if(co)import(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
+  if(co)load(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
 
   // Authoring lib
-  if(ha)import(b+'/component@'+v);
+  if(ha)load(b+'/component@'+v);
 
   // Bare package attributes
   ${bareAttrs}.forEach(function(p){
-    if(s.hasAttribute(p))import(b+'/'+p+'@'+v);
+    if(s.hasAttribute(p))load(b+'/'+p+'@'+v);
   });
 
+  function load(u){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)})}
   function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
 })();`;
 

@@ -91,9 +91,7 @@ function getContentType(filepath) {
 //   /icons@0.18.0/lucide/house.svg          → icon asset
 //   /fonts@0.18.0/lato                      → font set CSS (extensionless)
 //   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
-//   /load                                   → loader script (latest)
-//   /load@0.18.0                            → versioned loader
-//   /load@0.18.0.json                       → raw import map JSON
+//   /load                                   → loader script (version-agnostic, reads version= attr)
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
 //   /css@0.18.0/tokens                      → tokens only
