@@ -172,7 +172,8 @@ The raw import map JSON remains available for manual use:
 
 | Attribute | Type | Example | Behavior |
 |---|---|---|---|
-| `packages` | Comma-separated | `packages="core"`, `packages="core,query,reactivity"` | Injects import map, then dynamically imports the listed packages |
+| `packages` | Comma-separated or bare | `packages="core"`, `packages="core,query"`, `packages` | Injects import map, then dynamically imports listed packages. Bare attribute defaults to `core` with console warning. |
+| `components` | Comma-separated | `components="button,modal,tooltip"` | Cherry-picks specific components via combo endpoint. Use with `packages` for import map resolution. |
 | `css` | Boolean or keyword | `css` (bare) | Injects token stylesheet only (`/css/tokens@{version}`) with `blocking="render"` |
 | `css` | | `css="all"` | Injects tokens + reset + base (`/css@{version}`) with `blocking="render"` |
 | `icons` | Value | `icons="lucide"`, `icons="lucide,phosphor"` | Injects icon stylesheet(s) with `blocking="render"` |
@@ -366,19 +367,30 @@ describe('CDN Loader', () => {
 });
 ```
 
-## Open Questions
+## Resolved Questions
 
-1. **Should the import map include all SUI packages or only the ones listed in `packages`?** Currently the import map resolves all SUI packages. Unused mappings are inert (the browser ignores them), but it means loading `packages="reactivity"` also injects mappings for `core`, `query`, etc. This is probably fine — the import map data is small and having all mappings available means subsequent `<script type="module">` blocks can import any SUI package without additional setup. Confirm this is acceptable.
+1. **Import map scope:** Include all SUI packages, not just those listed in `packages`. Mappings are inert if unused, data is small, and having everything available means any subsequent `<script type="module">` just works.
 
-2. **Should `packages` without a value (bare boolean) load a default set?** e.g., `<script src="/load" packages css>` could default to `packages="core"`. This is even more concise but might be too magical. Leaning toward requiring an explicit value.
+2. **Bare `packages` (no value):** Defaults to `core` but logs a console warning: "Tip: use packages=\"core\" for clarity." Honors intent without being pedantic — but nudges toward explicit.
 
-3. **Combo sub-selection syntax in `packages`.** Is `packages="core/button,modal"` supported? This would trigger the combo endpoint under the hood. Needs design for how this interacts with the import map (the import map resolves bare specifiers, but combo loads are URL-based).
+3. **Component sub-selection:** Moved to a separate `components` attribute instead of overloading `packages` with slash syntax. `components="button,modal"` triggers the combo endpoint for cherry-picking. `packages` stays clean for package-level resolution.
+
+Updated attribute reference:
+
+| Attribute | Example | Behavior |
+|---|---|---|
+| `components` | `components="button,modal,tooltip"` | Loads specific components via combo endpoint |
+
+Full tag example:
+```html
+<script src="https://cdn.semantic-ui.com/load" packages="core" components="button,modal" css="all" icons="lucide" fonts="lato"></script>
+```
 
 ## Dependencies
 
-- [CDN Directory Pages](cdn-directory-pages.md) — the load endpoint's behavior and attributes need to be documented on the root dir page and package index pages. Content dependency, not a technical blocker.
+- [CDN Dir Pages](cdn-dir-pages.md) — the load endpoint's behavior and attributes need to be documented on the root dir page and package index pages. Content dependency, not a technical blocker.
 - `blocking="render"` browser support — the CSS injection feature depends on this reaching baseline. As of April 2026, 91% global coverage (Chrome, Edge, Safari). Firefox is the sole holdout, committed via Interop 2026. If it slips, the fallback is explicit `<link>` tags with the loader handling only JS.
 
 ## Status
 
-Initial scope. Design decisions are settled from a pair session (2026-04-02). Implementation not started. Needs a follow-up session to resolve open questions and finalize the Worker routing changes.
+Scoped. Design decisions settled, open questions resolved (2026-04-02). Implementation not started.
