@@ -1,3 +1,7 @@
+# Screenshots dropped in root
+/*.jpg
+/*.png
+
 node_modules/
 test/coverage/
 coverage/
