@@ -310,10 +310,9 @@ function buildLoader() {
     console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
   }
   var m=document.createElement('script');
-    m.type='importmap';
-    m.textContent=mapJson;
-    document.head.appendChild(m);
-  }
+  m.type='importmap';
+  m.textContent=mapJson;
+  document.head.appendChild(m);
 
   var hc=s.hasAttribute('components'),ha=s.hasAttribute('authoring');
 
@@ -355,6 +354,14 @@ function buildLoader() {
   function load(u){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)})}
   function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
 })();`;
+
+  // Validate the generated script is syntactically valid
+  try {
+    new Function(js);
+  }
+  catch (e) {
+    throw new Error(`Generated loader has syntax error: ${e.message}`);
+  }
 
   return { js };
 }
