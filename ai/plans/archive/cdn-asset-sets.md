@@ -92,6 +92,6 @@ None — unblocked, independent of token finalization and component work.
 ## Completion
 
 - **Estimated:** 8-16h (1-2d) pair
-- **Actual:** ~6h pair across one session
+- **Actual:** ~6.5h wall clock (14:09–20:32 ET), one session. Includes CI wait time, design discussion, and process work (code-review skill, feature process refinements).
 - **Completed:** 2026-04-01
 - **Delta notes:** Came in under estimate. Major course correction mid-session: relative `url()` in CSS custom properties doesn't resolve relative to the declaring stylesheet — switched to absolute CDN URLs. Also added: semver downgrade guard on latest pointer, `--force-assets` flag, canary upload skip optimization, `dev` → `brands` rename, interactive icon library switcher example, code-review skill, feature process refinements.
