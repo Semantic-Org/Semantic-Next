@@ -628,7 +628,7 @@ Optional params:
     'list_skills',
     'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" skills.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -734,7 +734,7 @@ Optional params:
     'list_workflows',
     'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" workflows.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -843,7 +843,7 @@ Optional params:
     'list_context',
     'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" docs.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -1160,7 +1160,7 @@ Optional params:
       query: z.string().describe('Search query'),
       type: z.enum(['spec', 'example', 'context', 'workflow', 'doc']).optional()
         .describe('Limit search to specific content type'),
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter context docs by audience'),
       limit: z.number().optional().describe('Max results (default: 20)'),
     },
