@@ -294,6 +294,10 @@ function buildLoader() {
   var s=document.currentScript;
   var b=${JSON.stringify(cdnRoot)};
   var v=s.getAttribute('version')||'latest';
+  if(v!=='latest'&&v!=='canary'&&!/^\d+\.\d+\.\d+/.test(v)){
+    console.error('SUI: Invalid version "'+v+'". Use a semver version (e.g. "0.18.0"), "canary", or omit for latest.');
+    return;
+  }
   var scope='@semantic-ui/';
 
   // Build import map from package list + version
