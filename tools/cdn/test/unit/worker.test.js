@@ -504,6 +504,8 @@ describe('asset set fetch', () => {
     expect(await res.text()).toBe(svg);
   });
 
+  // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
+  // route must still match first — this is by design, not an accident
   it('asset-set routes take precedence over SUI packages with same name', () => {
     expect(parseRoute('/icons@0.18.0/lucide').type).toBe('asset-set');
     expect(parseRoute('/fonts@0.18.0/lato').type).toBe('asset-set');

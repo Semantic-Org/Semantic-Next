@@ -284,9 +284,10 @@ function buildLoader() {
   // Package names baked into the loader (derived from SUI_PACKAGES)
   const pkgNames = JSON.stringify(SUI_PACKAGES);
 
-  // Bare package attributes the loader checks (everything except 'core' which is loaded via components)
+  // Bare package attributes the loader checks
+  // 'core' is loaded via components, 'component' is loaded via authoring
   const bareAttrs = JSON.stringify(
-    SUI_PACKAGES.filter(n => n !== 'core'),
+    SUI_PACKAGES.filter(n => n !== 'core' && n !== 'component'),
   );
 
   const js = `(function(){
@@ -301,22 +302,14 @@ function buildLoader() {
   pkgs.forEach(function(n){imports[scope+n]=b+'/'+n+'@'+v});
   var mapJson=JSON.stringify({imports:imports});
 
-  // Merge with existing import map (user entries win) or create new one
-  var existing=document.querySelector('script[type="importmap"]');
-  if(existing){
-    try{
-      var prev=JSON.parse(existing.textContent);
-      var merged=Object.assign({},imports,prev.imports);
-      existing.textContent=JSON.stringify({imports:merged});
-    }catch(e){}
-  }else{
-    if(document.querySelector('script[type="module"]')){
-      console.warn('SUI: <script src="/load"> must appear before any <script type="module"> for import map resolution.');
-    }
-    if(s.parentElement&&s.parentElement!==document.head&&s.closest('body')){
-      console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
-    }
-    var m=document.createElement('script');
+  // Inject import map (browsers support multiple, later entries win for collisions)
+  if(document.querySelector('script[type="module"]')){
+    console.warn('SUI: <script src="/load"> must appear before any <script type="module"> for import map resolution.');
+  }
+  if(s.parentElement&&s.parentElement!==document.head&&s.closest('body')){
+    console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
+  }
+  var m=document.createElement('script');
     m.type='importmap';
     m.textContent=mapJson;
     document.head.appendChild(m);
@@ -332,17 +325,17 @@ function buildLoader() {
     else if(hc||ha)inject(b+'/css@'+v+'/tokens');
   }
 
-  // Icons — auto-inject lucide with components
+  // Icons — auto-inject lucide with components, bare icons attr defaults to lucide
   var ia=s.getAttribute('icons');
   if(ia!=='none'){
-    var ic=ia||(hc?'lucide':null);
+    var ic=ia||(s.hasAttribute('icons')||hc?'lucide':null);
     if(ic)ic.split(',').forEach(function(x){inject(b+'/icons@'+v+'/'+x.trim())});
   }
 
-  // Fonts — auto-inject lato with components
+  // Fonts — auto-inject lato with components, bare fonts attr defaults to lato
   var fa=s.getAttribute('fonts');
   if(fa!=='none'){
-    var fc=fa||(hc?'lato':null);
+    var fc=fa||(s.hasAttribute('fonts')||hc?'lato':null);
     if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
   }
 
