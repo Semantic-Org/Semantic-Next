@@ -5,6 +5,7 @@ import { iconAliases } from '@semantic-ui/specs/icons/meta';
 import { TemplateCompiler } from '@semantic-ui/templating';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
+import { isContributor } from './config.js';
 
 // LLMs sometimes stringify array parameters as JSON strings instead of passing
 // actual arrays. Detect this and parse gracefully so batch calls still work.
@@ -119,8 +120,12 @@ Write classes you know. The sophisticated theming system is there when needed, n
 - \`search\` - Find anything: components, examples, docs. Start here when unsure.
 - \`list_components\` - See all UI components (button, card, modal, etc.)
 - \`list_examples\` - Browse working code examples by category
-- \`list_skills\` - See available deep-dive guides
-- \`list_workflows\` - See step-by-step procedures (pass audience: "contributing" or "docs" to see more)
+- \`list_skills\` - See available deep-dive guides${
+    isContributor() ? '' : ' (pass audience: "contributing" or "docs" to see more)'
+  }
+- \`list_workflows\` - See step-by-step procedures${
+    isContributor() ? '' : ' (pass audience: "contributing" or "docs" to see more)'
+  }
 - \`list_user_docs\` - Browse user documentation (guides, API reference)
 
 ### Get Content
@@ -626,7 +631,9 @@ Optional params:
 
   server.tool(
     'list_skills',
-    'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" skills.',
+    isContributor()
+      ? 'List available skills that can be loaded with use_skill. Skills are comprehensive guides organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics like components, templating, and reactivity.',
     {
       audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
@@ -732,7 +739,9 @@ Optional params:
 
   server.tool(
     'list_workflows',
-    'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" workflows.',
+    isContributor()
+      ? 'List available step-by-step workflows organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available step-by-step workflows for common tasks like adding components, writing templates, and configuring themes.',
     {
       audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
@@ -841,7 +850,9 @@ Optional params:
 
   server.tool(
     'list_context',
-    'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" docs.',
+    isContributor()
+      ? 'List available AI context documents organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available AI context documents covering component APIs, framework internals, and usage patterns.',
     {
       audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
