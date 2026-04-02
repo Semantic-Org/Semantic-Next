@@ -574,3 +574,53 @@ describe('CSS sub-layer fetch', () => {
     expect(res.headers.get('SourceMap')).toBe('/css@canary.map');
   });
 });
+
+/*----------------------------------------------
+  Worker fetch — Combo endpoint
+----------------------------------------------*/
+
+describe('combo endpoint fetch', () => {
+  it('serves comma-separated components as re-exports', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button,input');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    const body = await res.text();
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/button.min.js"');
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/input.min.js"');
+  });
+
+  it('serves preset name as re-exports', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/presets.json': JSON.stringify({
+          standard: ['button', 'input', 'icon'],
+        }),
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/standard');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toContain('button.min.js');
+    expect(body).toContain('input.min.js');
+    expect(body).toContain('icon.min.js');
+  });
+
+  it('falls through to file serving for non-combo paths', async () => {
+    const jsContent = 'export const Button = {};';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/cdn/button.min.js': jsContent,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button.min.js');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(jsContent);
+  });
+});
