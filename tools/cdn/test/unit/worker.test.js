@@ -46,23 +46,28 @@ describe('parseRoute — CSS', () => {
   });
 
   it('/semantic-ui.css → latest', () => {
-    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css → canary', () => {
-    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css.map → canary sourcemap', () => {
-    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({
+      type: 'css',
+      version: 'canary',
+      layer: null,
+      map: true,
+    });
   });
 
   it('/semantic-ui.min.css.map → latest sourcemap (inline URL)', () => {
-    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', map: true });
+    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', layer: null, map: true });
   });
 
   it('/semantic-ui.min.css → latest', () => {
-    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 });
 

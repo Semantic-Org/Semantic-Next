@@ -134,6 +134,7 @@ export function parseRoute(pathname) {
     return {
       type: 'css',
       version: cssMatch[1] || 'latest',
+      layer: null,
       map: !!cssMatch[2],
     };
   }
