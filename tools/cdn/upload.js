@@ -313,8 +313,9 @@ async function uploadAssetSets(s3, version, { force = false } = {}) {
       continue;
     }
 
-    // Check if this version already exists (skip immutable versions)
-    if (!force && version !== 'canary') {
+    // Asset sets rarely change — skip if already uploaded (even canary).
+    // Use --force-assets when icons or fonts source changes.
+    if (!force) {
       const firstKey = `${r2Prefix}/${files[0].key}`;
       if (await objectExists(s3, firstKey)) {
         console.log(`  ${assetType}@${version} — already exists, skipping`);
@@ -336,6 +337,7 @@ async function main() {
       version: { type: 'string' },
       latest: { type: 'boolean', default: false },
       'force-vendor': { type: 'boolean', default: false },
+      'force-assets': { type: 'boolean', default: false },
     },
   });
 
@@ -351,7 +353,7 @@ async function main() {
   const suiVersion = isCanary ? 'canary' : version;
 
   await uploadSuiPackages(s3, suiVersion, { force: isCanary });
-  await uploadAssetSets(s3, suiVersion, { force: isCanary });
+  await uploadAssetSets(s3, suiVersion, { force: values['force-assets'] });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
   await uploadPresets(s3);
