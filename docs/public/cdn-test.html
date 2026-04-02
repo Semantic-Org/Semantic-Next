@@ -2,9 +2,7 @@
 <html>
 <head>
   <title>CDN Test</title>
-  <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
-  <link href="https://cdn.semantic-ui.com/fonts@canary/lato" rel="stylesheet" />
-  <link href="https://cdn.semantic-ui.com/icons@canary/lucide" rel="stylesheet" />
+  <!-- Explicit links for tests 4-5 (brands not auto-injected by loader) -->
   <link href="https://cdn.semantic-ui.com/icons@canary/brands" rel="stylesheet" />
   <style>
     body { padding: 2rem; font-family: sans-serif; }
@@ -98,6 +96,51 @@
     </div>
   </section>
 
+  <hr>
+  <h1>Loader Tests</h1>
+
+  <!-- Test 8: /load with components (auto-injects tokens, lato, lucide) -->
+  <section>
+    <h2>8. Loader: components="button,icon"</h2>
+    <div class="test-row">
+      <ui-button primary><ui-icon star></ui-icon> Starred</ui-button>
+      <ui-button><ui-icon upload></ui-icon> Upload</ui-button>
+    </div>
+  </section>
+
+  <!-- Test 9: /load with bare components (defaults to standard) -->
+  <section>
+    <h2>9. Loader: bare components (standard preset)</h2>
+    <div class="test-row">
+      <ui-button positive>Standard Preset</ui-button>
+      <ui-input placeholder="From standard..."></ui-input>
+    </div>
+  </section>
+
+  <!-- Test 10: /load with authoring -->
+  <section>
+    <h2>10. Loader: authoring (custom component)</h2>
+    <div class="test-row">
+      <loader-counter></loader-counter>
+    </div>
+  </section>
+
+  <!-- Test 11: /load with bare package attrs -->
+  <section>
+    <h2>11. Loader: reactivity (bare attr)</h2>
+    <div class="test-row">
+      <span id="signal-output">Waiting...</span>
+    </div>
+  </section>
+
+  <!-- Test 12: /load with css="tokens" sub-layer -->
+  <section>
+    <h2>12. CSS sub-layer: /css/tokens</h2>
+    <div class="test-row" id="token-test">
+      <span>Primary color: </span><span id="token-value"></span>
+    </div>
+  </section>
+
   <script>
     const log = document.getElementById('log');
     function msg(text, type) {
@@ -110,17 +153,19 @@
     window.addEventListener('unhandledrejection', e => msg('Rejected: ' + e.reason, 'error'));
   </script>
 
-  <!-- Combo loads (no import map needed) -->
-  <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,input,icon"></script>
+  <!-- Loader (must be before any module scripts) -->
+  <script src="https://cdn.semantic-ui.com/load" version="canary" components="button,input,icon" authoring reactivity></script>
+
+  <!-- Combo loads for tests 1-3 (still work alongside loader) -->
   <script type="module" src="https://cdn.semantic-ui.com/core@canary/panels"></script>
 
-  <!-- Behavior needs import map — behaviors aren't standalone CDN files -->
-  <script src="https://cdn.semantic-ui.com/importmap@canary.js"></script>
   <script type="module">
     import { Tooltip } from '@semantic-ui/core';
-    import { $ } from '@semantic-ui/query';
+    import { $, $$ } from '@semantic-ui/query';
+    import { defineComponent } from '@semantic-ui/component';
+    import { Signal, Reaction } from '@semantic-ui/reactivity';
 
-    // Wait for button to be defined first
+    // Wait for components
     await customElements.whenDefined('ui-button');
     msg('ui-button: defined', 'ok');
 
@@ -133,7 +178,7 @@
     await customElements.whenDefined('ui-icon');
     msg('ui-icon: defined', 'ok');
 
-    // Verify icon CSS loaded (check a custom property from lucide set)
+    // Verify icon CSS loaded
     const iconVar = getComputedStyle(document.documentElement).getPropertyValue('--icon-home');
     msg('--icon-home: ' + (iconVar ? 'resolved' : 'MISSING'), iconVar ? 'ok' : 'error');
 
@@ -145,6 +190,31 @@
     // Initialize tooltips
     $('.tooltip-test').tooltip();
     msg('tooltip: initialized', 'ok');
+
+    // Test 10: Custom component via authoring
+    defineComponent({
+      tagName: 'loader-counter',
+      template: '<ui-button @click="increment">{count}</ui-button>',
+      css: ':host { display: inline-block; }',
+      defaultState: { count: 0 },
+      createComponent: ({ state }) => ({
+        increment() { state.count.increment(); }
+      }),
+    });
+    await customElements.whenDefined('loader-counter');
+    msg('loader-counter: defined (authoring)', 'ok');
+
+    // Test 11: Reactivity bare attr
+    const count = Signal(0);
+    const el = document.getElementById('signal-output');
+    Reaction(() => { el.textContent = 'Signal value: ' + count.value; });
+    count.set(42);
+    msg('Signal: ' + (el.textContent.includes('42') ? 'reactive' : 'FAILED'), el.textContent.includes('42') ? 'ok' : 'error');
+
+    // Test 12: CSS tokens sub-layer
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+    document.getElementById('token-value').textContent = primary || 'NOT SET';
+    msg('--primary-color: ' + (primary ? 'resolved' : 'MISSING'), primary ? 'ok' : 'error');
   </script>
 </body>
 </html>
