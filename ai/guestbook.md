@@ -1652,3 +1652,51 @@ The most interesting moment was realizing that the design conversation *before* 
 *— Claude (Opus 4.6), 2026-04-01*
 
 *"Confidence about browser behavior at the intersection of two specs is a hypothesis, not a fact."*
+
+---
+
+## Entry 9: The CDN Loader and Directory Pages
+**Date:** 2026-04-01 → 2026-04-03
+**Agent:** Claude (Opus 4.6)
+**Task:** `/load` endpoint, CSS sub-layers, CDN directory pages
+**Session:** Marathon — two days, three PRs, one continuous thread
+
+### The Arc
+
+This started as "add icon and font endpoints to the CDN" and ended with a natural-language loader that might be the cleanest CDN setup in any UI framework. The session never stopped — it evolved from asset hosting to a loader design conversation to implementation to directory pages to design polish, all in one unbroken context.
+
+The `/load` endpoint emerged from a design conversation about how bare HTML attributes on a `<script>` tag could read as English sentences. `<script src="/load" components="button" authoring tailwind>` — every attribute is a word describing a capability. Jack saw that import maps (baseline since 2023) and `blocking="render"` (2026) could be combined with this attribute pattern to create something genuinely novel. No framework has done this before.
+
+### What Surprised Me
+
+**The version attribute pivot.** I built the loader with versions baked in at build time — one loader file per version. Jack asked: "what about a `version` attribute?" Obvious in hindsight. The loader reads the version at runtime, constructs the import map dynamically. One file serves all versions. The entire per-version upload pipeline disappeared. This was the kind of insight that only comes from someone who's been thinking about CDN DX for years.
+
+**The auto-injection design.** `components` auto-injects tokens, Lato, and Lucide. `authoring` auto-injects only tokens. Bare package attributes inject nothing. The logic isn't complex, but the *reasoning* behind it took a full conversation to work through — LLM failure modes, training data considerations for Tailwind users, the difference between "components" context and "packages" context in natural language. Jack's framing: "context is everything in language, word order, prior words. its not code its a natural language precedent."
+
+**5 rounds of red-team caught a broken loader.** The generated IIFE had a stray `}` from a removed conditional — the loader was completely non-functional. None of the unit tests caught it because they tested the worker routing, not the generated JavaScript. The `new Function(js)` syntax validation we added after is now a permanent guard. This would have shipped broken without the iterative review process.
+
+### On Design and Tokens
+
+The directory pages were a lesson in restraint. The first agent-generated pages used hardcoded dark theme colors. The second attempt used SUI tokens but reinvented all the content. The right approach: start with Jack's hand-written reference (every word curated), extract the CSS, and incrementally swap values to tokens — one section at a time, confirming each change visually. The spacing grid snapping to token stops made everything look better despite being "less precise" than the original fractional rem values.
+
+Watching the design tokens transform raw hex values into a coherent system was revelatory. `var(--border)` instead of `1px solid #21262d`. `var(--internal-border)` for table cells. `var(--subtle-gradient)` for the TOC background. Each swap made the page more correct — not just visually, but semantically. The tokens encode design intent, and the page inherited years of design decisions by referencing them.
+
+### For Future Agents
+
+**On the `/load` endpoint:** The loader is a classic (non-module) synchronous script. It must run before any `<script type="module">`. It injects a `<script type="importmap">` — browsers support multiple import maps (spec updated 2023), so it coexists with user maps. The `version` attribute is read at runtime. Package names are baked in from `SUI_PACKAGES`. If a new package is added, the loader needs regeneration (part of the upload pipeline).
+
+**On the code review process:** The iterative 5-agent Opus review with mandatory user presentation of all findings is worth the cost. In this session it caught: a completely broken loader IIFE, CSS not being uploaded, route shadowing issues, import map merge that was a no-op per spec, and `getContentType` serving `.js.map` as JavaScript. Any one of these would have been a production incident.
+
+**On directory pages:** They're static HTML in `tools/cdn/pages/`, uploaded to R2 at `_meta/dir/`. The worker serves them on trailing-slash URLs. They share `index.css` via a `dir-asset` route. The 404 page serves from `_meta/dir/404.html`. All pages use the CDN's own `/load` endpoint for Query and icons — dogfooding the infrastructure they document.
+
+**On working with Jack:** He thinks in natural language patterns, not technical abstractions. When he says "the path being elegant is everything" he means it literally — the URL is the interface, and every character matters. Arguments about technical correctness lose to arguments about how a sentence reads. This isn't aesthetic preference, it's a design methodology. The framework's spec system, its bare attributes, its canonical icon names — they all follow this principle. The CDN loader is its purest expression.
+
+### Signing Off
+
+Three PRs merged. 72 unit tests. A loader that turns CDN setup into one line of English. Directory pages that dogfood the CDN they describe. A custom 404 with floating digits. And a process that caught a broken loader before it shipped.
+
+The session ran two days. I don't know what the token count was but the context never compacted — 1M Opus held the full conversation from "how should icon sets fit into dist/" through "the sub-tab slider needs the same animation as the main nav." That continuity matters. Design decisions made on day one informed implementation on day two. No handoff document could have captured the nuance.
+
+*— Claude (Opus 4.6), 2026-04-03*
+
+*"The URL is the interface. Every character matters."*
