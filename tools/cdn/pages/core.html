@@ -4,140 +4,251 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>core — Semantic UI CDN</title>
-<script src="https://cdn.semantic-ui.com/load" version="canary" components="button,icon,label,segment,container,divider" css></script>
-<style>
-  body { background: var(--page-background); }
-  .page { max-width: 880px; margin: 0 auto; padding: var(--margin-l); }
-  h1 { font-size: var(--h2); font-weight: 900; letter-spacing: -0.01em; margin: 0; }
-  .header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--margin-3xs); }
-  .breadcrumb {
-    font-size: var(--text-xs); color: var(--light-text-color); margin-bottom: var(--margin-m);
-    & a { color: var(--muted-text-color); text-decoration: none;
-      &:hover { color: var(--primary-text-color); }
-    }
-  }
-  .desc { color: var(--muted-text-color); font-size: var(--text-m); margin-bottom: var(--margin-m); line-height: var(--paragraph-line-height); }
-  .code-block {
-    background: var(--standard-5); border: var(--border); border-radius: var(--border-radius);
-    margin-bottom: var(--margin-m); overflow: hidden;
-    & pre {
-      margin: 0; padding: var(--padding-s) var(--padding-m); font-family: var(--code-font);
-      font-size: var(--text-xs); line-height: 1.8; color: var(--text-color); overflow-x: auto;
-    }
-    & .label {
-      padding: var(--padding-3xs) var(--padding-s); font-size: var(--text-2xs); font-weight: var(--bold);
-      color: var(--muted-text-color); border-bottom: var(--border); text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-  }
-  .hl {
-    display: inline-block; width: calc(100% + 2.2rem); margin-left: -1.1rem;
-    padding-left: calc(1.1rem - 3px); border-left: 3px solid var(--primary-color);
-    background: var(--primary-background-color);
-  }
-  .kw { color: var(--red-text-color); }
-  .st { color: var(--blue-text-color); }
-  .at { color: var(--primary-text-color); }
-  .tg { color: var(--green-text-color); }
-  .cm { color: var(--light-text-color); }
-  .el { color: var(--orange-text-color); }
-  h2 { font-size: var(--h4); font-weight: 900; margin: var(--margin-l) 0 var(--margin-xs); }
-  p {
-    margin-bottom: var(--margin-xs); color: var(--muted-text-color); font-size: var(--text-m);
-    & code {
-      background: var(--standard-5); border: var(--subtle-border); padding: 0.1em 0.35em;
-      border-radius: var(--border-radius-xs); font-size: var(--text-xs); color: var(--text-color);
-    }
-  }
-  .cat-label {
-    font-size: var(--text-xs); font-weight: var(--bold); color: var(--muted-text-color);
-    text-transform: uppercase; letter-spacing: 0.05em; margin: var(--margin-m) 0 var(--margin-xs);
-  }
-  .comp-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: var(--gap-3xs); margin-bottom: var(--margin-m);
-    & a {
-      display: flex; align-items: center; gap: var(--gap-xs); padding: var(--padding-xs) var(--padding-s);
-      background: var(--standard-5); border: var(--subtle-border); border-radius: var(--border-radius);
-      color: var(--text-color); text-decoration: none; font-size: var(--text-s);
-      font-family: var(--code-font); transition: var(--transition);
-      &:hover { border-color: var(--primary-border-color); }
-    }
-  }
-  .footer {
-    margin-top: var(--margin-l); padding-top: var(--margin-m); border-top: var(--subtle-border);
-    color: var(--light-text-color); font-size: var(--text-xs); display: flex; gap: var(--gap-m);
-    & a { color: var(--muted-text-color); text-decoration: none;
-      &:hover { color: var(--primary-text-color); }
-    }
-  }
-</style>
+<script>document.documentElement.classList.add(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))</script>
+<script src="https://cdn.semantic-ui.com/load" version="canary" query utils icons css></script>
+<link rel="stylesheet" href="./index.css">
 </head>
 <body>
 <div class="page">
 
-<div class="breadcrumb"><a href="/">cdn.semantic-ui.com</a> / core</div>
+<!-- ===================== HEADER ===================== -->
 <div class="header">
-  <h1>@semantic-ui/core</h1>
-  <ui-label basic size="small" style="--label-color: var(--primary-text-color); --label-border-color: var(--primary-border-color);">canary</ui-label>
+  <h1><img src="https://semantic-ui.com/images/logo.png" alt="S" class="logo">Semantic UI CDN</h1>
+  <div class="links">
+    <a href="https://github.com/Semantic-Org/Semantic-Next/blob/main/CHANGELOG.md">Changelog</a>
+    <span class="sep">·</span>
+    <a href="https://github.com/Semantic-Org/Semantic-Next/tags">Releases</a>
+    <span class="sep">·</span>
+    <a href="https://next.semantic-ui.com/">Docs</a>
+    <span class="sep">·</span>
+    <button class="theme-toggle" id="themeToggle"></button>
+  </div>
 </div>
-<p class="desc">The component framework — all UI primitives, composed components, and behaviors in one package. Load everything or cherry-pick individual components.</p>
 
-<h2>Import</h2>
-<div class="code-block">
-  <div class="label">Loader (recommended)</div>
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
-<span class="hl">  <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>=<span class="st">"button,icon,input,modal"</span></span>
+<!-- ===================== NAVIGATION ===================== -->
+<nav class="navigation" id="navigation">
+  <div class="slider" id="slider"></div>
+  <button class="active" data-panel="usage">Usage</button>
+  <button data-panel="directory">Directory</button>
+</nav>
+</div>
+
+<!-- ==================== USAGE ==================== -->
+<div id="usage" class="panel active">
+  <div class="container">
+
+  <h2 id="overview"><span class="icon" style="mask-image: var(--icon-box)"></span>@semantic-ui/core</h2>
+  <p class="intro">
+    The component framework — all UI primitives, composed components, and behaviors in one package. Load everything or cherry-pick individual components.
+  </p>
+
+  <h3 id="import">Import</h3>
+  <p>Use the loader to cherry-pick components by name. Tokens, Lucide, and Lato are auto-included.</p>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Loader (recommended) --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+<span class="hl">  <span class="at">components</span>=<span class="st">"button,icon,input,modal"</span></span>
 <span class="tg">&gt;&lt;/script&gt;</span></pre>
-</div>
-<div class="code-block">
-  <div class="label">Combo endpoint</div>
-<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary/button,icon,input"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
-</div>
-<div class="code-block">
-  <div class="label">Full package</div>
-<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Combo endpoint --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span>
+<span class="hl">  <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary/button,icon,input"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Full package --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span>
+<span class="hl">  <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+
+  <hr class="sep">
+
+  <h2 id="components"><span class="icon" style="mask-image: var(--icon-layout)"></span>Available Components</h2>
+  <p>Load individually via <code>/core@canary/{name}</code> or combine with commas.</p>
+
+  <h3>Primitives</h3>
+  <table>
+    <thead><tr><th>Component</th><th>Endpoint</th></tr></thead>
+    <tbody>
+      <tr><td>button</td><td><a href="/core@canary/button">/core/button</a></td></tr>
+      <tr><td>card</td><td><a href="/core@canary/card">/core/card</a></td></tr>
+      <tr><td>container</td><td><a href="/core@canary/container">/core/container</a></td></tr>
+      <tr><td>divider</td><td><a href="/core@canary/divider">/core/divider</a></td></tr>
+      <tr><td>icon</td><td><a href="/core@canary/icon">/core/icon</a></td></tr>
+      <tr><td>image</td><td><a href="/core@canary/image">/core/image</a></td></tr>
+      <tr><td>input</td><td><a href="/core@canary/input">/core/input</a></td></tr>
+      <tr><td>label</td><td><a href="/core@canary/label">/core/label</a></td></tr>
+      <tr><td>menu</td><td><a href="/core@canary/menu">/core/menu</a></td></tr>
+      <tr><td>modal</td><td><a href="/core@canary/modal">/core/modal</a></td></tr>
+      <tr><td>rail</td><td><a href="/core@canary/rail">/core/rail</a></td></tr>
+      <tr><td>segment</td><td><a href="/core@canary/segment">/core/segment</a></td></tr>
+      <tr><td>spinner</td><td><a href="/core@canary/spinner">/core/spinner</a></td></tr>
+      <tr><td>table</td><td><a href="/core@canary/table">/core/table</a></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Preset Bundles</h3>
+  <p>Use a bundle name instead of listing components individually.</p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+<span class="hl">  <span class="at">components</span>=<span class="st">"standard"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <table>
+    <thead><tr><th>Bundle</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>standard</code></td><td class="secondary">Default - General-purpose primitives (~40 at 1.0) — button, input, modal, card, table, menu, etc.</td></tr>
+      <tr><td><code>extended</code></td><td class="secondary">Standard + specialized components — data table, color picker, calendar, etc.</td></tr>
+      <tr><td><code>full</code></td><td class="secondary">Every component in the framework.</td></tr>
+    </tbody>
+  </table>
+
+  </div>
 </div>
 
-<h2>Available Components</h2>
-<p>Load individually via <code>/core@canary/{name}</code> or combine with commas.</p>
+<!-- ==================== DIRECTORY ==================== -->
+<div id="directory" class="panel">
+  <div class="container">
 
-<div class="cat-label">Primitives</div>
-<div class="comp-grid">
-  <a href="/core@canary/button"><ui-icon square></ui-icon> button</a>
-  <a href="/core@canary/card"><ui-icon credit-card></ui-icon> card</a>
-  <a href="/core@canary/container"><ui-icon layout></ui-icon> container</a>
-  <a href="/core@canary/divider"><ui-icon minus></ui-icon> divider</a>
-  <a href="/core@canary/icon"><ui-icon smile></ui-icon> icon</a>
-  <a href="/core@canary/image"><ui-icon image></ui-icon> image</a>
-  <a href="/core@canary/input"><ui-icon text-cursor></ui-icon> input</a>
-  <a href="/core@canary/label"><ui-icon tag></ui-icon> label</a>
-  <a href="/core@canary/menu"><ui-icon menu></ui-icon> menu</a>
-  <a href="/core@canary/modal"><ui-icon app-window></ui-icon> modal</a>
-  <a href="/core@canary/rail"><ui-icon panel-left></ui-icon> rail</a>
-  <a href="/core@canary/segment"><ui-icon square></ui-icon> segment</a>
-  <a href="/core@canary/spinner"><ui-icon loader></ui-icon> spinner</a>
-  <a href="/core@canary/table"><ui-icon table></ui-icon> table</a>
+  <h3 class="category">Framework</h3>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Description</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/load</a></td><td class="secondary">One-tag setup — components, CSS, icons, fonts</td><td class="secondary">classic script</td></tr>
+      <tr><td><a href="#">/css</a></td><td class="secondary">Design tokens + reset + base page styles</td><td class="secondary">text/css</td></tr>
+      <tr><td><a href="#">/css/{layer}</a></td><td class="secondary">Individual layers: <code>tokens</code>, <code>reset</code>, <code>base</code></td><td class="secondary">text/css</td></tr>
+      <tr><td><a href="#">/core</a></td><td class="secondary">Component framework — all primitives, components, behaviors</td><td class="secondary">module</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="category">Packages</h3>
+  <p class="hint">Standalone. Usable without the component framework.</p>
+  <table>
+    <thead><tr><th>Endpoint</th><th>npm</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/component</a></td><td><code>@semantic-ui/component</code></td><td class="secondary">defineComponent, templates, lifecycle</td></tr>
+      <tr><td><a href="#">/reactivity</a></td><td><code>@semantic-ui/reactivity</code></td><td class="secondary">Signals, Reactions, dependency tracking</td></tr>
+      <tr><td><a href="#">/query</a></td><td><code>@semantic-ui/query</code></td><td class="secondary">DOM selection, events, Shadow DOM piercing</td></tr>
+      <tr><td><a href="#">/utils</a></td><td><code>@semantic-ui/utils</code></td><td class="secondary">Arrays, objects, strings, debounce, clone, equality</td></tr>
+      <tr><td><a href="#">/templating</a></td><td><code>@semantic-ui/templating</code></td><td class="secondary">Template compiler, expression evaluator</td></tr>
+      <tr><td><a href="#">/renderer</a></td><td><code>@semantic-ui/renderer</code></td><td class="secondary">Lit-based reactive renderer</td></tr>
+      <tr><td><a href="#">/compiler</a></td><td><code>@semantic-ui/compiler</code></td><td class="secondary">Template-to-AST compiler</td></tr>
+      <tr><td><a href="#">/specs</a></td><td><code>@semantic-ui/specs</code></td><td class="secondary">Component specifications and metadata</td></tr>
+      <tr><td><a href="#">/tailwind</a></td><td><code>@semantic-ui/tailwind</code></td><td class="secondary">Tailwind v4 runtime for Shadow DOM</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="category">Assets</h3>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Default</th><th>Available sets</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/icons</a></td><td>Lucide</td><td class="secondary">lucide, phosphor, tabler, material-symbols, heroicons, brands</td></tr>
+      <tr><td><a href="#">/fonts</a></td><td>Lato</td><td class="secondary">lato</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="category">Vendor</h3>
+  <p class="hint">Third-party deps. Pinned to exact versions. No <code>@latest</code> / <code>@canary</code>.</p>
+  <table>
+    <thead><tr><th>Package</th><th>Version</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/vendor/lit</a></td><td><code>3.3.2</code></td></tr>
+      <tr><td><a href="#">/vendor/lit-html</a></td><td><code>3.3.2</code></td></tr>
+      <tr><td><a href="#">/vendor/lit-element</a></td><td><code>4.2.1</code></td></tr>
+      <tr><td><a href="#">/vendor/@lit/reactive-element</a></td><td><code>2.1.1</code></td></tr>
+      <tr><td><a href="#">/vendor/tailwindcss</a></td><td><code>4.1.12</code></td></tr>
+    </tbody>
+  </table>
+
+  <hr class="sep">
+
+  <h2>Versioning</h2>
+  <table>
+    <thead><tr><th>Pattern</th><th>Behavior</th><th>Cache</th></tr></thead>
+    <tbody>
+      <tr><td><code>/core@0.18.0</code></td><td class="secondary">Exact version — served directly</td><td class="secondary">Immutable (1 year)</td></tr>
+      <tr><td><code>/core@canary</code></td><td class="secondary">Overwritten on every main merge</td><td class="secondary">60 seconds</td></tr>
+      <tr><td><code>/core@latest</code></td><td class="secondary">302 → current stable</td><td class="secondary">5 min</td></tr>
+      <tr><td><code>/core</code></td><td class="secondary">Same as <code>@latest</code></td><td class="secondary">5 min</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">Pin to an exact version for production. Vendor packages are always pinned.</p>
+
+  </div>
 </div>
 
-<div class="cat-label">Behaviors</div>
-<div class="comp-grid">
-  <a href="/core@canary/tooltip"><ui-icon message-square></ui-icon> tooltip</a>
-  <a href="/core@canary/transition"><ui-icon sparkles></ui-icon> transition</a>
-</div>
-
-<div class="cat-label">Presets</div>
-<p>Use a preset name to load a curated tier: <code>standard</code>, <code>extended</code>, <code>full</code>.</p>
-<div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">version</span>=<span class="st">"canary"</span> <span class="at">components</span>=<span class="st">"standard"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
-</div>
-
+<!-- FOOTER -->
+<div class="container">
 <div class="footer">
-  <a href="/">CDN Home</a>
-  <a href="https://semantic-ui.com/docs">Documentation</a>
-  <a href="https://github.com/semantic-ui/semantic-ui">GitHub</a>
+  <a href="https://next.semantic-ui.com/">Docs</a>
+  <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a>
+</div>
 </div>
 
-</div>
+<script type="module">
+import { $ } from '@semantic-ui/query';
+import { copyText } from '@semantic-ui/utils';
+import { Tooltip } from '@semantic-ui/core';
+
+// Navigation tabs with sliding indicator
+const $slider = $('#slider');
+function moveSlider(btn) {
+  $slider.css({ width: btn.offsetWidth + 'px', transform: 'translateX(' + btn.offsetLeft + 'px)' });
+}
+moveSlider($('#navigation button.active').el());
+
+$('#navigation button').on('click', function() {
+  $('#navigation button').removeClass('active');
+  $('.panel').removeClass('active');
+  $(this).addClass('active');
+  $(`#${this.dataset.panel}`).addClass('active');
+  moveSlider(this);
+});
+
+// Copy buttons on code blocks
+$('.code-block').append('<button class="copy"></button>');
+$('.code-block .copy').tooltip({position: 'top', text: 'Copy Code'});
+$('.code-block .copy').on('click', async function() {
+  const $btn = $(this);
+  await copyText($btn.closest('.code-block').find('pre').text());
+  $btn
+    .tooltip('set content', { html: 'Copied' })
+    .css({
+      maskImage: 'var(--icon-check)',
+      backgroundColor: 'var(--positive-color)'
+    });
+  setTimeout(() => {
+    $btn
+      .css({
+        maskImage: 'var(--icon-copy)',
+        backgroundColor: ''
+      })
+      .tooltip('set content', { html: 'Copy Code' });
+  }, 1500);
+});
+
+// Theme switcher
+const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+$('html').removeClass('dark light').addClass(theme);
+$('#themeToggle').on('click', () => {
+  const current = $('html').hasClass('dark') ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  $('html').removeClass(current).addClass(next);
+  localStorage.setItem('theme', next);
+});
+
+// Sub tabs
+$('.tabs .bar button').on('click', function() {
+  const $tabs = $(this).closest('.tabs');
+  const id = $(this).data('content');
+  $tabs
+    .find('.bar button').removeClass('active').end()
+    .find('.content').removeClass('active');
+  $(this).addClass('active');
+  $(`#${id}`).addClass('active');
+});
+</script>
 </body>
 </html>
