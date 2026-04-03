@@ -43,29 +43,39 @@
   </p>
 
   <h3 id="import">Import</h3>
-  <p>Use the loader to cherry-pick components by name. Tokens, Lucide, and Lato are auto-included.</p>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Loader (recommended) --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
-<span class="hl">  <span class="at">components</span>=<span class="st">"button,icon,input,modal"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
-  </div>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Combo endpoint --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span>
-<span class="hl">  <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary/button,icon,input"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
-  </div>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Full package --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span>
-<span class="hl">  <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
+
+  <div class="tabs">
+    <div class="bar">
+      <button class="tab active" data-content="import-loader">Loader</button>
+      <button class="tab" data-content="import-combo">Combo</button>
+      <button class="tab" data-content="import-direct">Direct</button>
+    </div>
+
+    <div id="import-loader" class="content active">
+      <p>Use the load endpoint to autoimport importmaps and assets so you can use components immediately in your page.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span>=<span class="st">"button,icon,input,modal"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="import-combo" class="content">
+      <p>Load specific components via the combo endpoint. You manage CSS separately.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary/button,icon,input"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="import-direct" class="content">
+      <p>Load the full package. All components registered.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@canary"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
   </div>
 
   <hr class="sep">
 
-  <h2 id="components"><span class="icon" style="mask-image: var(--icon-layout)"></span>Available Components</h2>
+  <h2 id="components"><span class="icon" style="mask-image: var(--icon-component)"></span>Available Components</h2>
   <p>Load individually via <code>/core@canary/{name}</code> or combine with commas.</p>
 
   <h3>Primitives</h3>

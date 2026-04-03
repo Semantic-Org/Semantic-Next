@@ -37,12 +37,77 @@
 <div id="usage" class="panel active">
   <div class="container">
 
-  <h2 id="overview"><span class="icon" style="mask-image: var(--icon-smile)"></span>Icon Sets</h2>
-  <p class="intro">
-    Self-hosted icon libraries served as CSS with SVG mask references. Lucide is loaded by default with <code>components</code>. Switch sets via the loader or link directly.
-  </p>
+  <h2 id="quick-start"><span class="icon" style="mask-image: var(--icon-rocket)"></span>Quick Start</h2>
 
-  <h3 id="available-sets">Available Sets</h3>
+  <div class="tabs">
+    <div class="bar">
+      <button class="tab active" data-content="icons-loader">Loader</button>
+      <button class="tab" data-content="icons-override">Override</button>
+      <button class="tab" data-content="icons-direct">Direct Link</button>
+    </div>
+
+    <div id="icons-loader" class="content active">
+      <p>Lucide is auto-included with <code>components</code>. Icons are immediately available.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="icons-override" class="content">
+      <p>Use <code>icons</code> to switch sets or combine multiple.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span> <span class="at">icons</span>=<span class="st">"phosphor"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="icons-direct" class="content">
+      <p>Link the icon set CSS directly. No loader required.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/icons/lucide"</span><span class="tg">&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <h2 id="usage-section"><span class="icon" style="mask-image: var(--icon-code)"></span>Usage</h2>
+
+  <div class="tabs">
+    <div class="bar">
+      <button class="tab active" data-content="usage-component">Component</button>
+      <button class="tab" data-content="usage-css">CSS Variable</button>
+    </div>
+
+    <div id="usage-component" class="content active">
+      <p>Load the icon component and use icons by canonical name.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span>=<span class="st">"icon"</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="el">&lt;ui-icon</span> <span class="at">home</span><span class="el">&gt;&lt;/ui-icon&gt;</span>
+<span class="el">&lt;ui-icon</span> <span class="at">search</span><span class="el">&gt;&lt;/ui-icon&gt;</span>
+<span class="el">&lt;ui-icon</span> <span class="at">star</span><span class="el">&gt;&lt;/ui-icon&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="usage-css" class="content">
+      <p>Use <code>mask-image</code> to display icons without any web components.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/icons/lucide"</span><span class="tg">&gt;</span>
+
+<span class="tg">&lt;span</span> <span class="at">style</span>=<span class="st">"</span>
+  <span class="at">display</span>: <span class="st">inline-block</span>;
+  <span class="at">width</span>: <span class="st">24px</span>; <span class="at">height</span>: <span class="st">24px</span>;
+  <span class="at">background</span>: <span class="st">currentColor</span>;
+  <span class="at">mask-image</span>: <span class="fn">var</span>(<span class="st">--icon-home</span>);
+  <span class="at">mask-size</span>: <span class="st">contain</span>;
+<span class="st">"</span><span class="tg">&gt;&lt;/span&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <h2 id="available-sets"><span class="icon" style="mask-image: var(--icon-palette)"></span>Available Sets</h2>
   <table>
     <thead><tr><th>Set</th><th>Endpoint</th><th>Description</th></tr></thead>
     <tbody>
@@ -55,35 +120,7 @@
     </tbody>
   </table>
 
-  <hr class="sep">
-
-  <h2 id="usage-section"><span class="icon" style="mask-image: var(--icon-code)"></span>Usage</h2>
-
-  <h3 id="loader">Via Loader</h3>
-  <p>Lucide is auto-included with <code>components</code>. Override with the <code>icons</code> attribute.</p>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Default: Lucide is auto-included --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span>
-
-<span class="cm">&lt;!-- Override to a different set --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span>
-<span class="hl">  <span class="at">icons</span>=<span class="st">"phosphor"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
-  </div>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Combine multiple sets --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span>
-<span class="hl">  <span class="at">icons</span>=<span class="st">"lucide,brands"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
-  </div>
-
-  <h3 id="direct-link">Direct Link</h3>
-  <p>Link the CSS directly without the loader.</p>
-  <div class="code-block">
-<pre><span class="hl"><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/icons/lucide"</span><span class="tg">&gt;</span></span></pre>
-  </div>
-
-  <p class="hint"><strong>Canonical names:</strong> All icon sets use Semantic UI's canonical naming. The same name (e.g. <code>home</code>) resolves across all sets, so you can switch sets without changing markup.</p>
+  <p class="hint"><strong>Canonical names:</strong> All icon sets share the same naming. <code>home</code>, <code>search</code>, <code>warning</code> resolve across all sets — swap one <code>&lt;link&gt;</code> to change the style.</p>
 
   </div>
 </div>

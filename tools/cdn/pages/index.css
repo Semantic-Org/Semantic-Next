@@ -116,7 +116,7 @@ html.dark {
   }
 }
 
-html.light .theme-toggle { mask-image: var(--icon-sun); }
+html.light .header .links .theme-toggle { mask-image: var(--icon-sun); }
 
 /*******************************
         Navigation
