@@ -510,7 +510,18 @@ $('#themeToggle').on('click', () => {
   localStorage.setItem('theme', next);
 });
 
-// Sub tabs
+// Sub tabs — inject slider + animate
+$('.tabs .bar').each((bar) => {
+  const slider = document.createElement('div');
+  slider.className = 'tab-slider';
+  bar.appendChild(slider);
+  const active = bar.querySelector('button.active');
+  if (active) {
+    slider.style.width = active.offsetWidth + 'px';
+    slider.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+  }
+});
+
 $('.tabs .bar button').on('click', function() {
   const $tabs = $(this).closest('.tabs');
   const id = $(this).data('content');
@@ -519,6 +530,9 @@ $('.tabs .bar button').on('click', function() {
     .find('.content').removeClass('active');
   $(this).addClass('active');
   $(`#${id}`).addClass('active');
+  const slider = $tabs.find('.tab-slider').el();
+  slider.style.width = this.offsetWidth + 'px';
+  slider.style.transform = 'translateX(' + this.offsetLeft + 'px)';
 });
 </script>
 </body>

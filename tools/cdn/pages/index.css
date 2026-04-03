@@ -3,6 +3,9 @@
 *******************************/
 
 :root {
+
+  --page-width: 900px;
+
   --code-bg: var(--ui-background-emphasis);
   --code-purple: #6F42C1;
   --code-default: #54595E;
@@ -34,20 +37,19 @@ html.dark {
             Base
 *******************************/
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
 
 /*******************************
            Layout
 *******************************/
 
 .page {
-  max-width: 880px;
+  max-width: var(--page-width);
   margin: 0 auto;
   padding: var(--gutter-l) var(--gutter-l) var(--gutter-xl);
 }
 
 .container {
-  max-width: 880px;
+  max-width: var(--page-width);
   margin: 0 auto;
   padding: 0 var(--gutter-l);
 }
@@ -55,6 +57,7 @@ html.dark {
 .panel > .container {
   padding-top: var(--margin-l);
   padding-bottom: var(--margin-l);
+  font-size: var(--text-l);
 }
 
 /*******************************
@@ -130,13 +133,13 @@ html.light .header .links .theme-toggle { mask-image: var(--icon-sun); }
   border-radius: var(--border-radius-xl);
   padding: var(--padding-3xs);
   margin: var(--vertically-spaced);
-  gap: 2px;
+  gap: var(--gap-xs);
 
   .slider {
     position: absolute;
     top: 3px;
     left: 0;
-    width: 85px;
+    width: 65px; /* Hardcode default width for 'Usage' */
     transform: translateX(3px);
     height: calc(100% - 6px);
     background: var(--blue-10);
@@ -148,7 +151,7 @@ html.light .header .links .theme-toggle { mask-image: var(--icon-sun); }
   button {
     position: relative;
     z-index: 1;
-    padding: 0.45rem 1.4rem;
+    padding: var(--padding-s) var(--padding);
     font-family: var(--page-font);
     font-size: var(--text-s);
     font-weight: var(--bold);
@@ -198,30 +201,29 @@ h3 .icon {
 *******************************/
 
 h2 {
-  margin: var(--margin-l) 0 var(--margin-xs);
-
+  margin: var(--gap-xl) 0 var(--gap);
+  border-bottom: var(--border);
+  padding-bottom: var(--padding-3xs);
   &:first-child { margin-top: 0; }
 }
 
 h3 {
-  margin: var(--gap-xl) 0 var(--margin-xs);
+  margin: var(--gap-xl) 0 var(--gap-2xs);
   padding-top: 0.5rem;
 }
 
-p {
-  margin-bottom: var(--margin-xs);
+h3 + p {
+  margin-top: 0;
 }
 
 .intro {
   color: var(--muted-text-color);
-  font-size: var(--text-m);
   line-height: 1.65;
   margin-bottom: var(--margin);
 }
 
 .hint {
   color: var(--light-text-color);
-  font-size: var(--text-s);
 
   a {
     color: var(--primary-text-color);
@@ -322,7 +324,7 @@ p {
     background: none;
     border: none;
     border-radius: var(--border-radius);
-    padding: var(--padding-s) var(--padding);
+    padding: var(--padding) var(--padding-l);
     font-family: var(--code-font);
     font-size: var(--text-s);
     line-height: 1.8;
@@ -333,9 +335,9 @@ p {
 
 .hl {
   display: inline-block;
-  width: calc(100% + var(--padding) * 2);
-  margin-left: calc(var(--padding) * -1);
-  padding-left: calc(var(--padding) - 3px);
+  width: calc(100% + var(--padding-l) * 2);
+  margin-left: calc(var(--padding-l) * -1);
+  padding-left: calc(var(--padding-l) - 3px);
   border-left: 3px solid var(--yellow);
   background: var(--standard-5);
 }
@@ -369,40 +371,47 @@ p, li {
 *******************************/
 
 .tabs {
-  margin: var(--margin-xs) 0;
 
   .bar {
     display: flex;
+    margin: var(--margin-xl) 0 0;
     gap: 0;
-    border-bottom: var(--border);
-    margin-bottom: var(--margin);
+    position: relative;
+    border-bottom: 3px solid var(--standard-10);
+
+    .tab-slider {
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      height: 2px;
+
+      background: var(--primary-color);
+      border-radius: 1px;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
   }
 
   button {
-    padding: 0.4rem 1rem;
-    font-size: var(--text-l);
+    padding: var(--padding-s) var(--padding) var(--padding-xs);
     font-family: var(--page-font);
     font-weight: var(--bold);
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
     cursor: pointer;
     color: var(--light-text-color);
-    margin-bottom: -1px;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s;
 
     &:hover { color: var(--muted-text-color); }
 
     &.active {
       color: var(--header-color);
-      border-bottom-color: var(--tab-active-border);
     }
   }
 
-  .content { display: none; padding: var(--padding-s) 0 var(--padding-3xs); }
-  .content.active { display: block; }
-  .content .code-block { margin-bottom: 0.5rem; }
-  .content p:last-child { margin-bottom: 0; }
+  > .content { display: none; padding: var(--padding-s) 0 var(--padding-3xs); }
+  > .content.active { display: block; }
+  > .content .code-block { margin-bottom: 0.5rem; }
+  > .content p:last-child { margin-bottom: 0; }
 }
 
 /*******************************

@@ -377,9 +377,10 @@ function buildDirPages() {
   if (!existsSync(pagesDir)) { return {}; }
   const pages = {};
   for (const file of readdirSync(pagesDir)) {
-    if (!file.endsWith('.html')) { continue; }
-    const name = file.replace('.html', '');
-    pages[name] = readFileSync(join(pagesDir, file), 'utf-8');
+    if (!file.endsWith('.html') && !file.endsWith('.css')) { continue; }
+    const name = file.replace(/\.(html|css)$/, '');
+    const ext = file.endsWith('.css') ? 'css' : 'html';
+    pages[`${name}.${ext}`] = readFileSync(join(pagesDir, file), 'utf-8');
   }
   return pages;
 }
@@ -391,11 +392,12 @@ async function uploadDirPages(s3) {
     console.log('\n  No directory pages found');
     return;
   }
-  console.log(`\nUploading ${names.length} directory pages`);
-  for (const [name, html] of Object.entries(pages)) {
-    // index.html serves at / (root), all others at /{name}/ (trailing-slash dirs)
-    const r2Key = name === 'index' ? '_meta/index.html' : `_meta/dir/${name}.html`;
-    await uploadText(s3, r2Key, html, 'text/html');
+  console.log(`\nUploading ${names.length} directory page files`);
+  for (const [filename, content] of Object.entries(pages)) {
+    const contentType = filename.endsWith('.css') ? 'text/css' : 'text/html';
+    // index.html serves at / (root), CSS goes to _meta/dir/, everything else to _meta/dir/
+    const r2Key = filename === 'index.html' ? '_meta/index.html' : `_meta/dir/${filename}`;
+    await uploadText(s3, r2Key, content, contentType);
   }
   console.log(`  ${names.join(', ')} uploaded`);
 }

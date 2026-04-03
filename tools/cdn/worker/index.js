@@ -107,6 +107,11 @@ export function parseRoute(pathname) {
   // /core@0.18.0/  → package index
   // /icons/        → icon sets listing
   // /fonts/        → font sets listing
+  // Dir page static assets (CSS shared across all dir pages)
+  if (pathname.endsWith('/index.css') || pathname === '/index.css') {
+    return { type: 'dir-asset', file: 'index.css' };
+  }
+
   if (pathname !== '/' && pathname.endsWith('/')) {
     // Strip trailing slash and parse the inner path
     const inner = pathname.slice(0, -1);
@@ -131,7 +136,7 @@ export function parseRoute(pathname) {
       };
     }
 
-    return { type: 'dir', page: 'unknown', version: null };
+    return { type: 'unknown' };
   }
 
   // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
@@ -502,12 +507,27 @@ export default {
         });
       }
 
+      case 'dir-asset': {
+        const { file } = route;
+        const object = await env.CDN_BUCKET.get(`_meta/dir/${file}`);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(file),
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
       case 'dir': {
         const { page } = route;
         const r2Key = `_meta/dir/${page}.html`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
-          return new Response(`Directory page not found: ${page}`, { status: 404 });
+          return new Response('Not found', { status: 404 });
         }
         return new Response(object.body, {
           headers: {
@@ -534,8 +554,16 @@ export default {
         });
       }
 
-      default:
+      default: {
+        const notFound = await env.CDN_BUCKET.get('_meta/dir/404.html');
+        if (notFound) {
+          return new Response(notFound.body, {
+            status: 404,
+            headers: { 'Content-Type': 'text/html', ...corsHeaders() },
+          });
+        }
         return new Response('Not found', { status: 404 });
+      }
     }
   },
 };
