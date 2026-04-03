@@ -103,9 +103,8 @@ Extracted from the archived [CDN Site plan](archive/cdn-site.md) (lines 233-259,
 
 ## Dependencies
 
-- `/load` endpoint plan (scoped, not implemented)
-- CDN Asset Sets (complete)
+None — `/load` endpoint and CDN Asset Sets both complete.
 
 ## Status
 
-Root page wireframe complete. Sub-pages not started. Build integration not started.
+Core implementation complete (2026-04-03). All 4 pages live (index, core, icons, fonts) + custom 404. Trailing-slash routing, CSS serving, upload pipeline all working. Remaining: build-time version injection, package file browser (future scope).

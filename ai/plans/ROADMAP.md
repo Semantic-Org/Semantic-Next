@@ -89,7 +89,6 @@ TOKEN FINALIZATION (the gate)
 | 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
 | 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
 | 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
-| 5 | [CDN Load Endpoint](cdn-load-endpoint.md) | 8-16h (1-2d) | pair | Unified `/load` script — import map + CSS + icons + fonts in one tag. CSS layer splitting, loader generation. Active. |
 
 ## Up Next (unblocked after "Do Next" or independent)
 
@@ -208,4 +207,5 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
+- **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
 - **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.

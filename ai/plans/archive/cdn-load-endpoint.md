@@ -495,6 +495,9 @@ describe('CDN Loader', () => {
 - [CDN Directory Pages](cdn-dir-pages.md) — the load endpoint's behavior and attributes need to be documented on the root dir page and package index pages. Content dependency, not a technical blocker.
 - `blocking="render"` browser support — the CSS injection feature depends on this reaching baseline. As of April 2026, 91% global coverage (Chrome, Edge, Safari). Firefox is the sole holdout, committed via Interop 2026. If it slips, the fallback is explicit `<link>` tags with the loader handling only JS.
 
-## Status
+## Completion
 
-Scoped. Design decisions settled, open questions resolved from pair session (2026-04-02). Implementation not started.
+- **Estimated:** 8-16h (1-2d) pair
+- **Actual:** ~2h implementation (13:41–15:48 ET), plus ~4h design conversation embedded in the asset sets session. Total ~6h active across 2026-04-01 to 2026-04-02.
+- **Completed:** 2026-04-02
+- **Delta notes:** Came in under estimate. The design conversation during the asset sets session resolved all major decisions before implementation started. The version-agnostic loader (runtime `version` attribute) eliminated the per-version build pipeline — a significant simplification that emerged from pair discussion. 5 rounds of red-team caught a broken IIFE (`}` remnant) that would have shipped non-functional.
