@@ -1,0 +1,43 @@
+name: "CLA Assistant"
+
+# Disabled until PAT is configured and workflow is reviewed
+# on:
+#   issue_comment:
+#     types: [created]
+#   pull_request_target:
+#     types: [opened, closed, synchronize]
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  cla:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event.comment.body == 'I agree to the CLA' || github.event.comment.body == 'I agree to the cla')
+      || github.event_name == 'pull_request_target'
+    steps:
+      - name: "CLA Assistant"
+        uses: contributor-assistant/github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.CLA_ASSISTANT_PAT }}
+        with:
+          path-to-signatures: "signatures/cla.json"
+          path-to-document: "https://github.com/${{ github.repository }}/blob/main/CLA.md"
+          branch: "main"
+          allowlist: jlukic,dependabot[bot],semantic-ui-bot
+          custom-notsigned-prcomment: |
+            Thanks for your contribution! Before we can merge this, you'll need to sign our [Contributor License Agreement](https://github.com/${{ github.repository }}/blob/main/CLA.md).
+
+            **To sign, reply with a comment that says:**
+
+            > I agree to the CLA
+
+            You only need to do this once. All future contributions will be covered automatically.
+          custom-pr-sign-comment: "I agree to the CLA"
