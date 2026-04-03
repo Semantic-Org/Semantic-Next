@@ -342,6 +342,9 @@ function buildLoader() {
     if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
   }
 
+  // Loading mode — blocking by default, lazy opts into async
+  var lazy=s.hasAttribute('lazy');
+
   // Components — bare = standard preset
   var co=s.getAttribute('components')||'';
   if(hc&&!co)co='standard';
@@ -355,7 +358,10 @@ function buildLoader() {
     if(s.hasAttribute(p))load(b+'/'+p+'@'+v);
   });
 
-  function load(u){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)})}
+  function load(u){
+    if(lazy){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)});return}
+    var sc=document.createElement('script');sc.type='module';sc.setAttribute('blocking','render');sc.crossOrigin='anonymous';sc.src=u;sc.onerror=function(){console.error('SUI: Failed to load '+u)};document.head.appendChild(sc);
+  }
   function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
 })();`;
 
