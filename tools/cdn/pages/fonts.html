@@ -37,53 +37,58 @@
 <div id="usage" class="panel active">
   <div class="container">
 
-  <h2 id="overview"><span class="icon" style="mask-image: var(--icon-type)"></span>Font Sets</h2>
-  <p class="intro">
-    Self-hosted web fonts served as CSS with woff2 references. Lato is loaded by default with <code>components</code>. Suppress with <code>fonts="none"</code>.
-  </p>
+  <h2 id="quick-start"><span class="icon" style="mask-image: var(--icon-rocket)"></span>Quick Start</h2>
 
-  <h3 id="lato">Lato</h3>
-  <p>The default font. Auto-included when using <code>components</code>.</p>
-  <table>
-    <thead><tr><th>Weight</th><th>Style</th><th>Endpoint</th></tr></thead>
-    <tbody>
-      <tr><td><code>400</code></td><td class="secondary">Regular</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-      <tr><td><code>400i</code></td><td class="secondary">Italic</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-      <tr><td><code>600</code></td><td class="secondary">Semi Bold</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-      <tr><td><code>600i</code></td><td class="secondary">Semi Bold Italic</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-      <tr><td><code>700</code></td><td class="secondary">Bold</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-      <tr><td><code>700i</code></td><td class="secondary">Bold Italic</td><td><a href="/fonts/lato">/fonts/lato</a></td></tr>
-    </tbody>
-  </table>
+  <div class="tabs">
+    <div class="bar">
+      <button class="tab active" data-content="fonts-loader">Loader</button>
+      <button class="tab" data-content="fonts-suppress">Suppress</button>
+      <button class="tab" data-content="fonts-direct">Direct Link</button>
+    </div>
+
+    <div id="fonts-loader" class="content active">
+      <p>Lato is auto-included with <code>components</code>. No extra setup needed.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="fonts-suppress" class="content">
+      <p>Use <code>fonts="none"</code> to suppress auto-loading when embedding into pages with their own font.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span> <span class="at">fonts</span>=<span class="st">"none"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="fonts-direct" class="content">
+      <p>Link the font CSS directly. No loader required.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts/lato"</span><span class="tg">&gt;</span></pre>
+      </div>
+    </div>
+  </div>
 
   <hr class="sep">
 
-  <h2 id="usage-section"><span class="icon" style="mask-image: var(--icon-code)"></span>Usage</h2>
-
-  <h3 id="loader">Via Loader</h3>
-  <p>Lato is auto-included with <code>components</code>. Suppress with <code>fonts="none"</code>.</p>
-  <div class="code-block">
-<pre><span class="cm">&lt;!-- Lato is auto-included with components --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span>
-
-<span class="cm">&lt;!-- Suppress font loading --&gt;</span>
-<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span>
-<span class="hl">  <span class="at">fonts</span>=<span class="st">"none"</span></span>
-<span class="tg">&gt;&lt;/script&gt;</span></pre>
-  </div>
-
-  <h3 id="direct-link">Direct Link</h3>
-  <p>Link the font CSS directly without the loader.</p>
-  <div class="code-block">
-<pre><span class="hl"><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts/lato"</span><span class="tg">&gt;</span></span></pre>
-  </div>
+  <h2 id="lato"><span class="icon" style="mask-image: var(--icon-type)"></span>Lato</h2>
+  <p>The default Semantic UI font. Latin subset, WOFF2 format.</p>
+  <table>
+    <thead><tr><th>Weight</th><th>Style</th></tr></thead>
+    <tbody>
+      <tr><td><code>400</code></td><td class="secondary">Regular</td></tr>
+      <tr><td><code>400</code></td><td class="secondary">Italic</td></tr>
+      <tr><td><code>600</code></td><td class="secondary">Semibold</td></tr>
+      <tr><td><code>600</code></td><td class="secondary">Semibold Italic</td></tr>
+      <tr><td><code>700</code></td><td class="secondary">Bold</td></tr>
+      <tr><td><code>700</code></td><td class="secondary">Bold Italic</td></tr>
+    </tbody>
+  </table>
 
   <h3 id="preload">Preload</h3>
-  <p>Preload the font file for faster rendering. The <code>crossorigin</code> attribute is required.</p>
+  <p>Preload font files for faster rendering. The <code>crossorigin</code> attribute is required for cross-origin fonts.</p>
   <div class="code-block">
 <pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"preload"</span> <span class="at">as</span>=<span class="st">"font"</span> <span class="at">type</span>=<span class="st">"font/woff2"</span> <span class="at">crossorigin</span>
-<span class="hl">  <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2"</span></span>
-<span class="tg">&gt;</span></pre>
+  <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2"</span><span class="tg">&gt;</span></pre>
   </div>
 
   </div>
