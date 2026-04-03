@@ -102,6 +102,37 @@ function getContentType(filepath) {
 //   /importmap.js                           → import map (legacy, use /load)
 //   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
+  // Directory pages — trailing slash serves HTML info pages
+  // /              → root landing
+  // /core@0.18.0/  → package index
+  // /icons/        → icon sets listing
+  // /fonts/        → font sets listing
+  // Dir page static assets (CSS shared across all dir pages)
+  // Only match bare prefix paths (no @version) to avoid shadowing package files
+  const dirAssetMatch = pathname.match(/^\/(?:[^@/]+\/)?index\.css$/);
+  if (dirAssetMatch) {
+    return { type: 'dir-asset', file: 'index.css' };
+  }
+
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    // Strip trailing slash and parse the inner path
+    const inner = pathname.slice(0, -1);
+
+    // Asset set dirs: /icons/ or /icons@version/
+    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@[^/]+)?$/);
+    if (dirAssetMatch) {
+      return { type: 'dir', page: dirAssetMatch[1] };
+    }
+
+    // SUI package: /core/ or /core@0.18.0/
+    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@[^/]+)?$/);
+    if (dirPkgMatch && SUI_PACKAGES.has(dirPkgMatch[1])) {
+      return { type: 'dir', page: dirPkgMatch[1] };
+    }
+
+    return { type: 'unknown' };
+  }
+
   // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
   if (pathname === '/load' || pathname === '/load.js') {
     return { type: 'load' };
@@ -470,6 +501,37 @@ export default {
         });
       }
 
+      case 'dir-asset': {
+        const { file } = route;
+        const object = await env.CDN_BUCKET.get(`_meta/dir/${file}`);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(file),
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'dir': {
+        const { page } = route;
+        const r2Key = `_meta/dir/${page}.html`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
       case 'root': {
         const object = await env.CDN_BUCKET.get('_meta/index.html');
         if (!object) {
@@ -486,8 +548,16 @@ export default {
         });
       }
 
-      default:
+      default: {
+        const notFound = await env.CDN_BUCKET.get('_meta/dir/404.html');
+        if (notFound) {
+          return new Response(notFound.body, {
+            status: 404,
+            headers: { 'Content-Type': 'text/html', ...corsHeaders() },
+          });
+        }
         return new Response('Not found', { status: 404 });
+      }
     }
   },
 };

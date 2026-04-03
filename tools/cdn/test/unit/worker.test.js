@@ -631,3 +631,111 @@ describe('combo endpoint fetch', () => {
     expect(await res.text()).toBe(jsContent);
   });
 });
+
+/*----------------------------------------------
+  Route parsing — Directory pages
+----------------------------------------------*/
+
+describe('parseRoute — dir pages', () => {
+  it('/core/ → dir page', () => {
+    expect(parseRoute('/core/')).toEqual({ type: 'dir', page: 'core' });
+  });
+
+  it('/core@0.18.0/ → versioned dir page', () => {
+    expect(parseRoute('/core@0.18.0/')).toEqual({ type: 'dir', page: 'core' });
+  });
+
+  it('/icons/ → dir page', () => {
+    expect(parseRoute('/icons/')).toEqual({ type: 'dir', page: 'icons' });
+  });
+
+  it('/fonts@canary/ → versioned dir page', () => {
+    expect(parseRoute('/fonts@canary/')).toEqual({ type: 'dir', page: 'fonts' });
+  });
+
+  it('/ does NOT match dir (stays root)', () => {
+    expect(parseRoute('/')).toEqual({ type: 'root' });
+  });
+
+  it('/nonsense/ → unknown', () => {
+    expect(parseRoute('/nonsense/')).toEqual({ type: 'unknown' });
+  });
+
+  it('/vendor/ → unknown', () => {
+    expect(parseRoute('/vendor/')).toEqual({ type: 'unknown' });
+  });
+});
+
+describe('parseRoute — dir assets', () => {
+  it('/index.css → dir-asset', () => {
+    expect(parseRoute('/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+
+  it('/core/index.css → dir-asset', () => {
+    expect(parseRoute('/core/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+
+  it('/icons/index.css → dir-asset', () => {
+    expect(parseRoute('/icons/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Directory pages + 404
+----------------------------------------------*/
+
+describe('dir page fetch', () => {
+  it('serves dir page HTML for trailing-slash', async () => {
+    const html = '<html>core page</html>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/core.html': html,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core/');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/html');
+    expect(await res.text()).toBe(html);
+  });
+
+  it('serves dir-asset CSS', async () => {
+    const css = 'body { color: red; }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/index.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core/index.css');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(await res.text()).toBe(css);
+  });
+
+  it('serves custom 404 page for unknown routes', async () => {
+    const html404 = '<html>404 page</html>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/404.html': html404,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/totally-bogus');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+    expect(res.headers.get('Content-Type')).toBe('text/html');
+    expect(await res.text()).toBe(html404);
+  });
+
+  it('falls back to plain text 404 when no custom page', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/totally-bogus');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('Not found');
+  });
+});
