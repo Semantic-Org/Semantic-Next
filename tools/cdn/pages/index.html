@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>cdn.semantic-ui.com</title>
-<script src="https://cdn.semantic-ui.com/load" version="canary" query icons css></script>
+<script>document.documentElement.classList.add(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))</script>
+<script src="https://cdn.semantic-ui.com/load" version="canary" query utils icons css></script>
 <link rel="stylesheet" href="./index.css">
 </head>
 <body>
@@ -12,13 +13,15 @@
 
 <!-- ===================== HEADER ===================== -->
 <div class="header">
-  <h1>Semantic UI CDN</h1>
+  <h1><img src="https://semantic-ui.com/images/logo.png" alt="S" class="logo">Semantic UI CDN</h1>
   <div class="links">
-    <a href="#">Changelog</a>
+    <a href="https://github.com/Semantic-Org/Semantic-Next/blob/main/CHANGELOG.md">Changelog</a>
     <span class="sep">·</span>
-    <a href="#">Releases</a>
+    <a href="https://github.com/Semantic-Org/Semantic-Next/tags">Releases</a>
     <span class="sep">·</span>
-    <a href="#">Documentation</a>
+    <a href="https://next.semantic-ui.com/">Docs</a>
+    <span class="sep">·</span>
+    <button class="theme-toggle" id="themeToggle"></button>
   </div>
 </div>
 
@@ -38,7 +41,7 @@
   <!-- ---- Quick Start ---- -->
   <h2 id="quick-start"><span class="icon" style="mask-image: var(--icon-rocket)"></span>Quick Start</h2>
   <p class="intro">
-    Use the loader to import components, CSS, icons, and fonts in a single tag.
+    Semantic UI provides a consolidated endpoint to import components, CSS, icons, and fonts in a single tag.
   </p>
 
   <div class="tabs">
@@ -54,7 +57,7 @@
     <div id="qs-using" class="content active">
       <p>Use <code>components</code> to load UI elements. Tokens, Lucide, and Lato included automatically.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 
 <span class="el">&lt;ui-button</span> <span class="at">primary</span><span class="el">&gt;</span>
   <span class="el">&lt;ui-icon</span> <span class="at">home</span><span class="el">&gt;&lt;/ui-icon&gt;</span>
@@ -66,14 +69,14 @@
     <div id="qs-authoring" class="content">
       <p>Use <code>authoring</code> to build custom components. Tokens auto-injected.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 
 <span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
   <span class="kw">import</span> { defineComponent } <span class="kw">from</span> <span class="st">'@semantic-ui/component'</span>;
 
   <span class="fn">defineComponent</span>({
-<span class="hl">    tagName: <span class="st">'my-counter'</span>,</span>
-<span class="hl">    template: <span class="st">'Count: {count}'</span>,</span>
+    tagName: <span class="st">'my-counter'</span>,
+    template: <span class="st">'Count: {count}'</span>,
     defaultState: { count: 0 },
     onCreated({ state }) {
       setInterval(() => state.count.<span class="fn">increment</span>(), 1000);
@@ -88,7 +91,7 @@
     <div id="qs-tailwind" class="content">
       <p>Use <code>tailwind</code> to style components with utility classes — even inside Shadow DOM.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span> <span class="at">tailwind</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span> <span class="at">tailwind</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 
 <span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
   <span class="kw">import</span> { defineComponent } <span class="kw">from</span> <span class="st">'@semantic-ui/component'</span>;
@@ -98,7 +101,7 @@
     tagName: <span class="st">'my-card'</span>,
     template: <span class="st">'&lt;div class="p-4 rounded-lg shadow-md"&gt;{>slot}&lt;/div&gt;'</span>,
   };
-<span class="hl">  definition = <span class="kw">await</span> <span class="fn">TailwindPlugin</span>(definition);</span>
+  definition = <span class="kw">await</span> <span class="fn">TailwindPlugin</span>(definition);
   <span class="fn">defineComponent</span>(definition);
 <span class="tg">&lt;/script&gt;</span>
 
@@ -109,12 +112,12 @@
     <div id="qs-reactivity" class="content">
       <p>Use <code>reactivity</code> for signals with automatic dependency tracking and mutation helpers.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">reactivity</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">reactivity</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 <span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
   <span class="kw">import</span> { Signal } <span class="kw">from</span> <span class="st">'@semantic-ui/reactivity'</span>;
 
   <span class="kw">const</span> items = <span class="kw">new</span> <span class="fn">Signal</span>([<span class="st">'a'</span>, <span class="st">'b'</span>]);
-<span class="hl">  <span class="kw">const</span> count = items.<span class="fn">derive</span>(arr => arr.length);</span>
+  <span class="kw">const</span> count = items.<span class="fn">derive</span>(arr => arr.length);
 
   items.<span class="fn">push</span>(<span class="st">'c'</span>);       <span class="cm">// no .get()/.set() — just .push()</span>
   count.<span class="fn">get</span>();          <span class="cm">// 3 — auto-updated</span>
@@ -125,12 +128,12 @@
     <div id="qs-query" class="content">
       <p>Use <code>query</code> for DOM selection. <code>$$</code> pierces Shadow DOM. Events return promises.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">query</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">query</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 <span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
   <span class="kw">import</span> { $, $$ } <span class="kw">from</span> <span class="st">'@semantic-ui/query'</span>;
 
   $(<span class="st">'ui-dropdown .item'</span>).length;    <span class="cm">// 0 — blocked by Shadow DOM</span>
-<span class="hl">  $$(<span class="st">'ui-dropdown .item'</span>).length;   <span class="cm">// 5 — pierces through</span></span>
+  $$(<span class="st">'ui-dropdown .item'</span>).length;   <span class="cm">// 5 — pierces through</span>
 
   <span class="kw">await</span> $(<span class="st">'ui-modal'</span>).<span class="fn">onNext</span>(<span class="st">'hide'</span>); <span class="cm">// promise-based events</span>
 <span class="tg">&lt;/script&gt;</span></pre>
@@ -140,11 +143,11 @@
     <div id="qs-utils" class="content">
       <p>Use <code>utils</code> for iteration, cloning, search, and 200+ functions you'd write from scratch.</p>
       <div class="code-block">
-<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">utils</span><span class="tg">&gt;&lt;/script&gt;</span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">utils</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 <span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
   <span class="kw">import</span> { each, clone, weightedObjectSearch } <span class="kw">from</span> <span class="st">'@semantic-ui/utils'</span>;
 
-<span class="hl">  <span class="fn">each</span>(<span class="kw">new</span> <span class="fn">Map</span>([[<span class="st">'a'</span>, 1]]), (val, key) => {});  <span class="cm">// handles Array, Object, Map, Set, iterables</span></span>
+  <span class="fn">each</span>(<span class="kw">new</span> <span class="fn">Map</span>([[<span class="st">'a'</span>, 1]]), (val, key) => {});  <span class="cm">// handles Array, Object, Map, Set, iterables</span>
   <span class="fn">clone</span>(obj, { preserveDOM: <span class="kw">true</span> }); <span class="cm">// handles DOM, Map, Set, Date, classes</span>
   <span class="fn">weightedObjectSearch</span>(<span class="st">'sema'</span>, items, { fields: { name: 3, tags: 1 } });
 <span class="tg">&lt;/script&gt;</span></pre>
@@ -279,7 +282,7 @@
 
   <h3 id="direct-esm">Direct ESM</h3>
   <p>
-    Use full CDN URLs to skip the loader. You manage CSS, versioning, and caching.
+    ESM Imports are available for use with custom build tools or custom import maps.
   </p>
   <div class="code-block">
 <pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/css"</span><span class="tg">&gt;</span>
@@ -290,7 +293,7 @@
 
   <h3 id="embedding">Embedding</h3>
   <p>
-    Use <code>="none"</code> to suppress auto-injection when embedding into existing pages.
+    Use <code>none</code> for <code>css</code> <code>icons</code> or <code>fonts</code> to suppress auto-injection when embedding into existing pages.
   </p>
   <div class="code-block">
 <pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
@@ -320,7 +323,6 @@
   <span class="kw">import</span> { z } <span class="kw">from</span> <span class="st">'zod'</span>;
 <span class="tg">&lt;/script&gt;</span></pre>
   </div>
-  <p class="hint">No loader needed. Bare specifiers resolve through your import map. You manage all dependencies.</p>
 
   <h3 id="bundles">Component Bundles</h3>
   <p>
@@ -329,12 +331,11 @@
   <table>
     <thead><tr><th>Bundle</th><th>Description</th></tr></thead>
     <tbody>
-      <tr><td><code>standard</code></td><td class="secondary">General-purpose primitives (~40 at 1.0) — button, input, modal, card, table, menu, etc.</td></tr>
+      <tr><td><code>standard</code></td><td class="secondary">Default - General-purpose primitives (~40 at 1.0) — button, input, modal, card, table, menu, etc.</td></tr>
       <tr><td><code>extended</code></td><td class="secondary">Standard + specialized components — data table, color picker, calendar, etc.</td></tr>
       <tr><td><code>full</code></td><td class="secondary">Every component in the framework.</td></tr>
     </tbody>
   </table>
-  <p class="hint">Bare <code>components</code> defaults to <code>standard</code>.</p>
 
   <hr class="sep">
 
@@ -452,14 +453,15 @@
 <!-- FOOTER -->
 <div class="container">
 <div class="footer">
-  <a href="#">Docs</a>
-  <a href="#">GitHub</a>
-  <a href="#">semantic-ui.com</a>
+  <a href="https://next.semantic-ui.com/">Docs</a>
+  <a href="https://github.com/Semantic-Org/Semantic-Next">GitHub</a>
 </div>
 </div>
 
 <script type="module">
 import { $ } from '@semantic-ui/query';
+import { copyText } from '@semantic-ui/utils';
+import { Tooltip } from '@semantic-ui/core';
 
 // Navigation tabs with sliding indicator
 const $slider = $('#slider');
@@ -476,13 +478,47 @@ $('#navigation button').on('click', function() {
   moveSlider(this);
 });
 
+// Copy buttons on code blocks
+$('.code-block').append('<button class="copy"></button>');
+$('.code-block .copy').tooltip({position: 'top', text: 'Copy Code'});
+$('.code-block .copy').on('click', async function() {
+  const $btn = $(this);
+  await copyText($btn.closest('.code-block').find('pre').text());
+  $btn
+    .tooltip('set content', { html: 'Copied' })
+    .css({
+      maskImage: 'var(--icon-check)',
+      backgroundColor: 'var(--positive-color)'
+    });
+  setTimeout(() => {
+    $btn
+      .css({
+        maskImage: 'var(--icon-copy)',
+        backgroundColor: ''
+      })
+      .tooltip('set content', { html: 'Copy Code' });
+  }, 1500);
+});
+
+// Theme switcher
+const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+$('html').removeClass('dark light').addClass(theme);
+$('#themeToggle').on('click', () => {
+  const current = $('html').hasClass('dark') ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  $('html').removeClass(current).addClass(next);
+  localStorage.setItem('theme', next);
+});
+
 // Sub tabs
 $('.tabs .bar button').on('click', function() {
   const $tabs = $(this).closest('.tabs');
-  $tabs.find('.bar button').removeClass('active');
-  $tabs.find('.content').removeClass('active');
+  const id = $(this).data('content');
+  $tabs
+    .find('.bar button').removeClass('active').end()
+    .find('.content').removeClass('active');
   $(this).addClass('active');
-  $(`#${this.dataset.content}`).addClass('active');
+  $(`#${id}`).addClass('active');
 });
 </script>
 </body>

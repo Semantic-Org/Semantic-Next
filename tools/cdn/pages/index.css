@@ -3,15 +3,6 @@
 *******************************/
 
 :root {
-  --bg: var(--page-background);
-  --surface: var(--standard-5);
-  --fg: var(--text-color);
-  --fg-strong: var(--header-color);
-  --fg-secondary: var(--muted-text-color);
-  --muted: var(--light-text-color);
-  --line-color: var(--border-color);
-  --accent: var(--primary-text-color);
-  --accent-subtle: var(--standard-5);
   --code-bg: var(--ui-background-emphasis);
   --code-purple: #6F42C1;
   --code-default: #54595E;
@@ -77,30 +68,55 @@ html.dark {
   margin-bottom: var(--margin-3xs);
 
   h1 {
-    font-size: var(--h1);
-    font-weight: 900;
+    img {
+      display: inline-block;
+      margin-right: var(--gap-s);
+      height: 35px;
+      vertical-align: middle;
+    }
     letter-spacing: -0.01em;
-    color: var(--fg-strong);
+    color: var(--header-color);
     margin: 0;
   }
 
   .links {
-    font-size: var(--text-xs);
-    color: var(--muted);
+    font-size: var(--text-s);
+    color: var(--light-text-color);
     display: flex;
     gap: var(--gap-xs);
 
     a {
-      color: var(--fg-secondary);
+      color: var(--muted-text-color);
       text-decoration: none;
       transition: color 0.12s;
 
-      &:hover { color: var(--accent); }
+      &:hover { color: var(--primary-text-color); }
     }
 
-    .sep { color: var(--line-color); }
+    .sep {
+      margin: 0;
+      border: none;
+      color: var(--border-color);
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+      background-color: var(--muted-text-color);
+      mask-image: var(--icon-moon);
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      transition: background-color 0.15s;
+
+      &:hover { background-color: var(--header-color); }
+    }
   }
 }
+
+html.light .theme-toggle { mask-image: var(--icon-sun); }
 
 /*******************************
         Navigation
@@ -109,11 +125,11 @@ html.dark {
 .navigation {
   display: inline-flex;
   position: relative;
-  background: var(--surface);
   border: var(--border);
-  border-radius: 10px;
-  padding: 3px;
-  margin-bottom: var(--margin);
+  box-shadow: var(--raised-shadow);
+  border-radius: var(--border-radius-xl);
+  padding: var(--padding-3xs);
+  margin: var(--vertically-spaced);
   gap: 2px;
 
   .slider {
@@ -123,7 +139,7 @@ html.dark {
     width: 85px;
     transform: translateX(3px);
     height: calc(100% - 6px);
-    background: var(--blue);
+    background: var(--blue-10);
     border-radius: 8px;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 0;
@@ -135,17 +151,17 @@ html.dark {
     padding: 0.45rem 1.4rem;
     font-family: var(--page-font);
     font-size: var(--text-s);
-    font-weight: 700;
+    font-weight: var(--bold);
     background: none;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    color: var(--muted);
+    color: var(--standard-20);
     transition: color 0.2s;
     white-space: nowrap;
 
-    &:hover { color: var(--fg-secondary); }
-    &.active { color: #fff; }
+    &:hover { color: var(--standard-80); }
+    &.active { color: var(--standard-100) }
   }
 }
 
@@ -160,6 +176,13 @@ html.dark {
            Icons
 *******************************/
 
+h1 .icon,
+h2 .icon,
+h3 .icon {
+  opacity: 0.4;
+  margin-right: var(--gap-xs);
+}
+
 .icon {
   display: inline-block;
   width: 1em;
@@ -168,7 +191,6 @@ html.dark {
   background: currentColor;
   mask-size: contain;
   mask-repeat: no-repeat;
-  margin-right: 0.35em;
 }
 
 /*******************************
@@ -183,6 +205,7 @@ h2 {
 
 h3 {
   margin: var(--gap-xl) 0 var(--margin-xs);
+  padding-top: 0.5rem;
 }
 
 p {
@@ -190,18 +213,18 @@ p {
 }
 
 .intro {
-  color: var(--fg-secondary);
+  color: var(--muted-text-color);
   font-size: var(--text-m);
   line-height: 1.65;
   margin-bottom: var(--margin);
 }
 
 .hint {
-  color: var(--muted);
+  color: var(--light-text-color);
   font-size: var(--text-s);
 
   a {
-    color: var(--accent);
+    color: var(--primary-text-color);
     text-decoration: none;
 
     &:hover { text-decoration: underline; }
@@ -212,8 +235,8 @@ p {
 
 .category {
   font-size: var(--text-2xs);
-  font-weight: 700;
-  color: var(--fg-secondary);
+  font-weight: var(--bold);
+  color: var(--muted-text-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: var(--margin-l) 0 var(--margin-xs);
@@ -226,10 +249,10 @@ p {
 *******************************/
 
 .toc-wrap {
+  margin: var(--margin-3xl) 0;
   padding: var(--padding-xl) 0;
   background-image: var(--very-subtle-gradient);
   border-top: var(--internal-border);
-  border-bottom: var(--internal-border);
 
   h4 {
     margin-bottom: var(--margin);
@@ -241,18 +264,26 @@ p {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0 var(--gutter-l);
   font-size: var(--text-s);
-  color: var(--muted);
+  color: var(--light-text-color);
   line-height: 1.7;
 
   a {
-    color: var(--fg-secondary);
+    color: var(--standard-40);
     text-decoration: none;
     transition: color 0.12s;
 
-    &:hover { color: var(--fg); }
+    &:hover { color: var(--standard-80); }
   }
 
-  .section { font-weight: 600; color: var(--fg); margin-bottom: 2px; }
+  .section a {
+    font-weight: var(--bold);
+    color: var(--standard-100);
+    margin-bottom: 5px;
+
+    &:hover {
+      color: var(--primary-text-color);
+    }
+  }
 }
 
 /*******************************
@@ -260,18 +291,38 @@ p {
 *******************************/
 
 .code-block {
+  position: relative;
   background: var(--code-bg);
   border: var(--border);
-  border-radius: var(--border-radius-s);
+  border-radius: var(--border-radius);
   margin: var(--vertically-spaced);
-  overflow: hidden;
+
+  .copy {
+    position: absolute;
+    top: var(--gap-s);
+    right: var(--gap-s);
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+    width: 16px;
+    height: 16px;
+    background-color: var(--standard-50);
+    mask-image: var(--icon-copy);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+  }
+
+  &:hover .copy { opacity: 0.6; }
+  .copy:hover { background-color: var(--standard-80); opacity: 1; }
 
   pre {
     margin: 0;
     background: none;
     border: none;
-    border-radius: 0;
-    padding: var(--padding) var(--padding-l);
+    border-radius: var(--border-radius);
+    padding: var(--padding-s) var(--padding);
     font-family: var(--code-font);
     font-size: var(--text-s);
     line-height: 1.8;
@@ -282,22 +333,26 @@ p {
 
 .hl {
   display: inline-block;
-  width: calc(100% + 2.2rem);
-  margin-left: -1.1rem;
-  padding-left: calc(1.1rem - 3px);
-  border-left: 3px solid var(--highlight-border);
-  background: var(--highlight-bg);
+  width: calc(100% + var(--padding) * 2);
+  margin-left: calc(var(--padding) * -1);
+  padding-left: calc(var(--padding) - 3px);
+  border-left: 3px solid var(--yellow);
+  background: var(--standard-5);
 }
 
 code { font-family: var(--code-font); font-size: var(--text-s); }
 
-p code, td code, li code {
-  background: var(--inline-code-bg);
-  border: var(--internal-border);
-  padding: 2px 4px;
-  border-radius: var(--border-radius-xs);
-  color: var(--fg-strong);
-  font-size: var(--text-xs);
+p, li {
+
+  code {
+    background: var(--subtle-angled-gradient);
+    padding: 5px 4px;
+    margin: -3px 2px;
+    border: var(--subtle-border);
+    border-radius: var(--border-radius);
+    color: var(--standard-90);
+    font-size: var(--text-s);
+  }
 }
 
 /* Syntax */
@@ -325,21 +380,21 @@ p code, td code, li code {
 
   button {
     padding: 0.4rem 1rem;
-    font-size: var(--text-xs);
+    font-size: var(--text-l);
     font-family: var(--page-font);
-    font-weight: 700;
+    font-weight: var(--bold);
     background: none;
     border: none;
     border-bottom: 2px solid transparent;
     cursor: pointer;
-    color: var(--muted);
+    color: var(--light-text-color);
     margin-bottom: -1px;
     transition: color 0.15s, border-color 0.15s;
 
-    &:hover { color: var(--fg-secondary); }
+    &:hover { color: var(--muted-text-color); }
 
     &.active {
-      color: var(--fg-strong);
+      color: var(--header-color);
       border-bottom-color: var(--tab-active-border);
     }
   }
@@ -355,18 +410,17 @@ p code, td code, li code {
 *******************************/
 
 table {
+  margin: var(--margin-l) 0 var(--margin);
   width: 100%;
   border-collapse: collapse;
-  margin: var(--margin-3xs) 0 var(--margin-s);
-  font-size: var(--text-s);
 
   th {
     text-align: left;
-    font-weight: 700;
-    font-size: var(--text-2xs);
+    font-weight: var(--bold);
+    font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--muted);
+    color: var(--blue-80);
     padding: var(--padding-xs) var(--padding-xs);
     border-bottom: var(--internal-border);
   }
@@ -377,15 +431,14 @@ table {
     vertical-align: top;
 
     a {
-      color: var(--accent);
+      color: var(--primary-text-color);
       text-decoration: none;
       font-family: var(--code-font);
-      font-size: var(--text-xs);
 
       &:hover { text-decoration: underline; }
     }
 
-    &.secondary { color: var(--fg-secondary); }
+    &.secondary { color: var(--muted-text-color); }
   }
 
   tr:hover td { background: var(--table-hover); }
@@ -399,16 +452,16 @@ table {
   margin: var(--margin-xl) 0 var(--margin-2xl);
   padding-top: var(--margin-s);
   border-top: var(--border);
-  color: var(--muted);
+  color: var(--light-text-color);
   font-size: var(--text-xs);
   display: flex;
   gap: var(--gap-s);
 
   a {
-    color: var(--fg-secondary);
+    color: var(--muted-text-color);
     text-decoration: none;
 
-    &:hover { color: var(--accent); }
+    &:hover { color: var(--primary-text-color); }
   }
 }
 
