@@ -108,7 +108,9 @@ export function parseRoute(pathname) {
   // /icons/        → icon sets listing
   // /fonts/        → font sets listing
   // Dir page static assets (CSS shared across all dir pages)
-  if (pathname.endsWith('/index.css') || pathname === '/index.css') {
+  // Only match bare prefix paths (no @version) to avoid shadowing package files
+  const dirAssetMatch = pathname.match(/^\/(?:[^@/]+\/)?index\.css$/);
+  if (dirAssetMatch) {
     return { type: 'dir-asset', file: 'index.css' };
   }
 
@@ -117,23 +119,15 @@ export function parseRoute(pathname) {
     const inner = pathname.slice(0, -1);
 
     // Asset set dirs: /icons/ or /icons@version/
-    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@(.+))?$/);
+    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@[^/]+)?$/);
     if (dirAssetMatch) {
-      return {
-        type: 'dir',
-        page: dirAssetMatch[1],
-        version: dirAssetMatch[2] || null,
-      };
+      return { type: 'dir', page: dirAssetMatch[1] };
     }
 
-    // SUI package: /core@0.18.0/ or /component@canary/
-    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@(.+))?$/);
+    // SUI package: /core/ or /core@0.18.0/
+    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@[^/]+)?$/);
     if (dirPkgMatch && SUI_PACKAGES.has(dirPkgMatch[1])) {
-      return {
-        type: 'dir',
-        page: dirPkgMatch[1],
-        version: dirPkgMatch[2] || null,
-      };
+      return { type: 'dir', page: dirPkgMatch[1] };
     }
 
     return { type: 'unknown' };

@@ -638,19 +638,19 @@ describe('combo endpoint fetch', () => {
 
 describe('parseRoute — dir pages', () => {
   it('/core/ → dir page', () => {
-    expect(parseRoute('/core/')).toEqual({ type: 'dir', page: 'core', version: null });
+    expect(parseRoute('/core/')).toEqual({ type: 'dir', page: 'core' });
   });
 
   it('/core@0.18.0/ → versioned dir page', () => {
-    expect(parseRoute('/core@0.18.0/')).toEqual({ type: 'dir', page: 'core', version: '0.18.0' });
+    expect(parseRoute('/core@0.18.0/')).toEqual({ type: 'dir', page: 'core' });
   });
 
   it('/icons/ → dir page', () => {
-    expect(parseRoute('/icons/')).toEqual({ type: 'dir', page: 'icons', version: null });
+    expect(parseRoute('/icons/')).toEqual({ type: 'dir', page: 'icons' });
   });
 
   it('/fonts@canary/ → versioned dir page', () => {
-    expect(parseRoute('/fonts@canary/')).toEqual({ type: 'dir', page: 'fonts', version: 'canary' });
+    expect(parseRoute('/fonts@canary/')).toEqual({ type: 'dir', page: 'fonts' });
   });
 
   it('/ does NOT match dir (stays root)', () => {
