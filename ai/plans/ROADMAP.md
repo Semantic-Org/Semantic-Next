@@ -74,7 +74,8 @@ TOKEN FINALIZATION (the gate)
 │   ├─ Philosophy Pages — natural-language, about project (jack, 2-3d)
 │   ├─ Ecosystem Guides — raw WC version, pre-wrapper (pair, 15-20d)
 │   ├─ Roadmap page redesign (pair, 1-2d)
-│   └─ Homepage Tour Ribbon — 3 PlaygroundExamples (pair, 2-3d)
+│   ├─ Homepage Tour Ribbon — 3 PlaygroundExamples (pair, 2-3d)
+│   └─ LSP & Type Intelligence (pair, 20-30d across 4 phases)
 │
 └─→ HOMEPAGE (last — final content pass after everything converges)
 ```
@@ -102,6 +103,7 @@ TOKEN FINALIZATION (the gate)
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
 | 12 | [MCP Playground Rendering](mcp-playground-rendering.md) | 8-16h (1-2d) | pair | Phase 1 done (hash URLs). Phase 2: MCP `render_component` tool. Phase 3: Vercel KV short URLs. |
 | 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
+| 14 | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | VS Code extension: tmLanguage + template LSP + TS plugin. Types validated (settings/state/self in events via tsc, self in createComponent via plugin). Phase 0 (.d.ts + tmLanguage) shippable in ~1d. [TDD](lsp-and-type-intelligence-tdd.md). |
 
 
 ## Blocked (waiting on token finalization)
