@@ -8,7 +8,8 @@
     ".": "./src/server.js",
     "./component-analyzer": "./src/component-analyzer.js",
     "./spec-registry": "./src/spec-registry.js",
-    "./helper-registry": "./src/helper-registry.js"
+    "./helper-registry": "./src/helper-registry.js",
+    "./server-helpers": "./src/server-helpers.js"
   },
   "bin": {
     "sui-lsp": "bin/sui-lsp.js"

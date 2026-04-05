@@ -4,7 +4,7 @@ import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 let client;
 
 export function activate() {
-  const serverModule = resolve(import.meta.dirname, '../../../src/server.js');
+  const serverModule = resolve(import.meta.dirname, '../server/server.js');
 
   const serverOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
