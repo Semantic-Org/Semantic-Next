@@ -1,17 +1,77 @@
+import * as acorn from 'acorn';
 import { readFileSync } from 'fs';
 import { dirname, resolve } from 'path';
-import ts from 'typescript';
 
 /*
   Analyzes a Semantic UI component .js file to extract the ComponentModel.
-  Uses TypeScript's parser for AST analysis — no type checking, just structure.
+  Uses acorn for AST parsing — lightweight (~200KB vs ~20MB for typescript).
 */
 
 export function analyzeComponent(filePath) {
   const source = readFileSync(filePath, 'utf8');
-  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true);
+  let ast;
+  try {
+    ast = acorn.parse(source, {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      allowAwaitOutsideFunction: true,
+    });
+  }
+  catch {
+    return emptyModel(filePath);
+  }
 
-  const model = {
+  const model = emptyModel(filePath);
+
+  const imports = extractImports(ast, filePath);
+  model.templatePath = imports.template;
+  model.specPath = imports.spec;
+
+  const varDecls = buildVarDeclMap(ast);
+  const defineCall = findDefineComponentCall(ast);
+  if (!defineCall) {
+    return model;
+  }
+
+  const options = defineCall.arguments[0];
+  if (!options || options.type !== 'ObjectExpression') {
+    return model;
+  }
+
+  for (const prop of options.properties) {
+    const name = getPropertyName(prop);
+    if (!name) { continue; }
+
+    const resolved = resolvePropertyValue(prop, varDecls);
+
+    switch (name) {
+      case 'tagName':
+        model.tagName = getStringValue(prop)
+          || (resolved?.type === 'Literal' && typeof resolved.value === 'string' ? resolved.value : null);
+        break;
+      case 'createComponent':
+        model.instance = extractCreateComponentMethods(resolved, source);
+        break;
+      case 'defaultState':
+        model.state = extractObjectFields(resolved);
+        break;
+      case 'defaultSettings':
+        model.settings = extractObjectFields(resolved);
+        break;
+      case 'events':
+        model.events = extractEventKeys(resolved);
+        break;
+      case 'subTemplates':
+        model.subTemplates = extractSubTemplateNames(resolved);
+        break;
+    }
+  }
+
+  return model;
+}
+
+function emptyModel(filePath) {
+  return {
     filePath,
     tagName: null,
     templatePath: null,
@@ -22,97 +82,61 @@ export function analyzeComponent(filePath) {
     events: [],
     subTemplates: {},
   };
-
-  // Resolve imports to find template, css, spec paths
-  const imports = extractImports(sourceFile, filePath);
-  model.templatePath = imports.template;
-  model.specPath = imports.spec;
-
-  // Build a lookup of top-level variable declarations for resolving shorthand refs
-  const varDecls = buildVarDeclMap(sourceFile);
-
-  // Find defineComponent call and extract its options
-  const defineCall = findDefineComponentCall(sourceFile);
-  if (!defineCall) {
-    return model;
-  }
-
-  const options = defineCall.arguments[0];
-  if (!options || !ts.isObjectLiteralExpression(options)) {
-    return model;
-  }
-
-  for (const prop of options.properties) {
-    const name = getPropertyName(prop);
-    if (!name) { continue; }
-
-    // Resolve the actual value — either inline or from a shorthand variable reference
-    const resolved = resolvePropertyValue(prop, varDecls);
-
-    switch (name) {
-      case 'tagName':
-        model.tagName = getStringValue(prop) || (resolved && ts.isStringLiteral(resolved) ? resolved.text : null);
-        break;
-
-      case 'createComponent':
-        model.instance = extractCreateComponentMethods(resolved, source);
-        break;
-
-      case 'defaultState':
-        model.state = extractObjectFields(resolved);
-        break;
-
-      case 'defaultSettings':
-        model.settings = extractObjectFields(resolved);
-        break;
-
-      case 'events':
-        model.events = extractEventKeys(resolved);
-        break;
-
-      case 'subTemplates':
-        model.subTemplates = extractSubTemplateNames(resolved);
-        break;
-    }
-  }
-
-  return model;
 }
 
 /*
-  Finds the defineComponent({...}) call expression in the source file.
-  Handles both `defineComponent({...})` and `export const X = defineComponent({...})`.
+  Walks the AST to find defineComponent({...}).
 */
-function findDefineComponentCall(sourceFile) {
+function findDefineComponentCall(ast) {
   let result = null;
 
   function visit(node) {
     if (result) { return; }
-    if (ts.isCallExpression(node)) {
-      const callee = node.expression;
-      if (ts.isIdentifier(callee) && callee.text === 'defineComponent') {
-        result = node;
-        return;
+    if (
+      node.type === 'CallExpression'
+      && node.callee.type === 'Identifier'
+      && node.callee.name === 'defineComponent'
+    ) {
+      result = node;
+      return;
+    }
+    for (const key of Object.keys(node)) {
+      const child = node[key];
+      if (child && typeof child === 'object') {
+        if (Array.isArray(child)) {
+          for (const item of child) {
+            if (item && item.type) { visit(item); }
+          }
+        }
+        else if (child.type) {
+          visit(child);
+        }
       }
     }
-    ts.forEachChild(node, visit);
   }
 
-  visit(sourceFile);
+  visit(ast);
   return result;
 }
 
 /*
-  Builds a map of variable name → initializer node for top-level const/let/var declarations.
-  Used to resolve shorthand property references like `defineComponent({ createComponent })`.
+  Builds a map of variable name → initializer node for top-level declarations.
 */
-function buildVarDeclMap(sourceFile) {
+function buildVarDeclMap(ast) {
   const map = new Map();
-  for (const stmt of sourceFile.statements) {
-    if (ts.isVariableStatement(stmt)) {
-      for (const decl of stmt.declarationList.declarations) {
-        if (ts.isIdentifier(decl.name) && decl.initializer) {
-          map.set(decl.name.text, decl.initializer);
+  for (const stmt of ast.body) {
+    if (stmt.type === 'VariableDeclaration') {
+      for (const decl of stmt.declarations) {
+        if (decl.id.type === 'Identifier' && decl.init) {
+          map.set(decl.id.name, decl.init);
+        }
+      }
+    }
+    // export const X = ...
+    if (stmt.type === 'ExportNamedDeclaration' && stmt.declaration?.type === 'VariableDeclaration') {
+      for (const decl of stmt.declaration.declarations) {
+        if (decl.id.type === 'Identifier' && decl.init) {
+          map.set(decl.id.name, decl.init);
         }
       }
     }
@@ -122,49 +146,41 @@ function buildVarDeclMap(sourceFile) {
 
 /*
   Resolves the value of a property in defineComponent's options.
-  Handles both inline `createComponent: ({...}) => ({...})` and
-  shorthand `createComponent` (references a top-level variable).
 */
 function resolvePropertyValue(prop, varDecls) {
-  if (ts.isPropertyAssignment(prop)) {
-    return prop.initializer;
-  }
-  if (ts.isMethodDeclaration(prop)) {
-    return prop;
-  }
-  if (ts.isShorthandPropertyAssignment(prop)) {
-    const name = prop.name.text;
-    return varDecls.get(name) || null;
+  if (prop.type === 'Property') {
+    if (prop.shorthand) {
+      return varDecls.get(prop.key.name) || null;
+    }
+    return prop.value;
   }
   return null;
 }
 
 /*
   Extracts method names and parameter info from createComponent's return value.
-  Accepts the resolved function node (arrow function, function expression, or method).
 */
 function extractCreateComponentMethods(funcBody, source) {
   const methods = [];
   if (!funcBody) { return methods; }
 
-  // Unwrap arrow function or function expression
   let returnExpr = null;
-  if (ts.isArrowFunction(funcBody) || ts.isFunctionExpression(funcBody)) {
-    if (ts.isParenthesizedExpression(funcBody.body)) {
-      returnExpr = funcBody.body.expression;
-    }
-    else if (ts.isObjectLiteralExpression(funcBody.body)) {
+
+  // Arrow function: () => ({...}) or () => { return {...} }
+  if (funcBody.type === 'ArrowFunctionExpression') {
+    if (funcBody.body.type === 'ObjectExpression') {
       returnExpr = funcBody.body;
     }
-    else if (ts.isBlock(funcBody.body)) {
+    else if (funcBody.body.type === 'BlockStatement') {
       returnExpr = findReturnExpression(funcBody.body);
     }
   }
-  else if (ts.isMethodDeclaration(funcBody) && funcBody.body) {
+  // Function expression: function() { return {...} }
+  else if (funcBody.type === 'FunctionExpression' && funcBody.body) {
     returnExpr = findReturnExpression(funcBody.body);
   }
 
-  if (!returnExpr || !ts.isObjectLiteralExpression(returnExpr)) {
+  if (!returnExpr || returnExpr.type !== 'ObjectExpression') {
     return methods;
   }
 
@@ -172,43 +188,23 @@ function extractCreateComponentMethods(funcBody, source) {
     const methodName = getPropertyName(member);
     if (!methodName) { continue; }
 
-    if (ts.isMethodDeclaration(member) || ts.isShorthandPropertyAssignment(member)) {
-      const params = ts.isMethodDeclaration(member)
-        ? member.parameters.map(p => ({
-          name: p.name.getText(),
-          type: p.type ? p.type.getText() : undefined,
-        }))
-        : [];
+    const value = member.value || member;
+
+    // Method shorthand: foo() {...} or property with function value
+    if (value.type === 'FunctionExpression' || value.type === 'ArrowFunctionExpression') {
+      const params = (value.params || []).map(p => ({
+        name: getParamName(p),
+        type: undefined,
+      }));
       methods.push({
         name: methodName,
         params,
-        line: ts.getLineAndCharacterOfPosition(
-          ts.createSourceFile('', source, ts.ScriptTarget.Latest),
-          member.getStart(),
-        ).line + 1,
+        line: lineFromOffset(source, member.start),
       });
     }
-    else if (ts.isPropertyAssignment(member)) {
-      // Could be an arrow function property: setValue: (value) => {...}
-      const init = member.initializer;
-      if (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) {
-        const params = init.parameters.map(p => ({
-          name: p.name.getText(),
-          type: p.type ? p.type.getText() : undefined,
-        }));
-        methods.push({
-          name: methodName,
-          params,
-          line: ts.getLineAndCharacterOfPosition(
-            ts.createSourceFile('', source, ts.ScriptTarget.Latest),
-            member.getStart(),
-          ).line + 1,
-        });
-      }
-      else {
-        // Non-function property (e.g., a constant)
-        methods.push({ name: methodName, params: [], line: 0 });
-      }
+    // Non-function property
+    else {
+      methods.push({ name: methodName, params: [], line: lineFromOffset(source, member.start) });
     }
   }
 
@@ -216,87 +212,74 @@ function extractCreateComponentMethods(funcBody, source) {
 }
 
 /*
-  Finds the first return statement's expression in a block.
+  Finds the return statement's expression in a block.
 */
 function findReturnExpression(block) {
-  for (const stmt of block.statements) {
-    if (ts.isReturnStatement(stmt) && stmt.expression) {
-      // Unwrap parenthesized: return ({...})
-      if (ts.isParenthesizedExpression(stmt.expression)) {
-        return stmt.expression.expression;
-      }
-      return stmt.expression;
+  for (const stmt of block.body) {
+    if (stmt.type === 'ReturnStatement' && stmt.argument) {
+      return stmt.argument;
     }
   }
   return null;
 }
 
 /*
-  Extracts keys and inferred types from a resolved object literal node.
-  Used for defaultSettings and defaultState.
+  Extracts keys and inferred types from an object literal node.
 */
 function extractObjectFields(node) {
   const fields = [];
-  if (!node || !ts.isObjectLiteralExpression(node)) { return fields; }
+  if (!node || node.type !== 'ObjectExpression') { return fields; }
 
-  for (const member of node.properties) {
-    if (!ts.isPropertyAssignment(member)) { continue; }
-    const name = getPropertyName(member);
+  for (const prop of node.properties) {
+    if (prop.type !== 'Property') { continue; }
+    const name = getPropertyName(prop);
     if (!name) { continue; }
 
     fields.push({
       name,
-      inferredType: inferTypeFromValue(member.initializer),
-      defaultValue: getLiteralValue(member.initializer),
+      inferredType: inferTypeFromValue(prop.value),
+      defaultValue: getLiteralValue(prop.value),
     });
   }
 
   return fields;
 }
 
-/*
-  Extracts event DSL string keys from a resolved object literal node.
-*/
 function extractEventKeys(node) {
   const keys = [];
-  if (!node || !ts.isObjectLiteralExpression(node)) { return keys; }
+  if (!node || node.type !== 'ObjectExpression') { return keys; }
 
-  for (const member of node.properties) {
-    const name = getPropertyName(member);
+  for (const prop of node.properties) {
+    const name = getPropertyName(prop);
     if (name) { keys.push(name); }
   }
-
   return keys;
 }
 
-/*
-  Extracts subTemplate registration names from a resolved object literal node.
-*/
 function extractSubTemplateNames(node) {
   const names = {};
-  if (!node || !ts.isObjectLiteralExpression(node)) { return names; }
+  if (!node || node.type !== 'ObjectExpression') { return names; }
 
-  for (const member of node.properties) {
-    const name = getPropertyName(member);
+  for (const prop of node.properties) {
+    const name = getPropertyName(prop);
     if (name) { names[name] = true; }
   }
-
   return names;
 }
 
 /*
-  Resolves imports to find template, spec, and CSS file paths.
-  Handles both `import x from './file?raw'` and `getText('./file')`.
+  Resolves imports for template, spec, and CSS file paths.
 */
-function extractImports(sourceFile, filePath) {
+function extractImports(ast, filePath) {
   const dir = dirname(filePath);
   const result = { template: null, spec: null, css: null };
 
-  for (const stmt of sourceFile.statements) {
+  for (const stmt of ast.body) {
     // import template from './button.html?raw'
-    if (ts.isImportDeclaration(stmt) && stmt.moduleSpecifier) {
-      const specifier = stmt.moduleSpecifier.text || '';
-      const importName = stmt.importClause?.name?.text || '';
+    if (stmt.type === 'ImportDeclaration') {
+      const specifier = stmt.source.value || '';
+      const defaultImport = stmt.specifiers?.find(s => s.type === 'ImportDefaultSpecifier');
+      const importName = defaultImport?.local?.name || '';
 
       if (specifier.endsWith('?raw')) {
         const cleanPath = specifier.replace('?raw', '');
@@ -313,28 +296,28 @@ function extractImports(sourceFile, filePath) {
     }
 
     // const template = await getText('./component.html')
-    if (ts.isVariableStatement(stmt)) {
-      for (const decl of stmt.declarationList.declarations) {
-        if (!decl.initializer) { continue; }
-        const name = decl.name.getText();
-        const init = decl.initializer;
+    if (stmt.type === 'VariableDeclaration') {
+      for (const decl of stmt.declarations) {
+        if (!decl.init || decl.id.type !== 'Identifier') { continue; }
+        const name = decl.id.name;
 
-        // await getText('...')
-        let callExpr = init;
-        if (ts.isAwaitExpression(init)) {
-          callExpr = init.expression;
+        let callExpr = decl.init;
+        if (callExpr.type === 'AwaitExpression') {
+          callExpr = callExpr.argument;
         }
-        if (ts.isCallExpression(callExpr)) {
-          const callee = callExpr.expression;
-          if (ts.isIdentifier(callee) && callee.text === 'getText' && callExpr.arguments.length > 0) {
-            const arg = callExpr.arguments[0];
-            if (ts.isStringLiteral(arg)) {
-              if (name === 'template' || arg.text.endsWith('.html')) {
-                result.template = arg.text; // relative to serve root, not resolvable here
-              }
-              else if (name === 'css' || arg.text.endsWith('.css')) {
-                result.css = arg.text;
-              }
+        if (
+          callExpr.type === 'CallExpression'
+          && callExpr.callee.type === 'Identifier'
+          && callExpr.callee.name === 'getText'
+          && callExpr.arguments.length > 0
+        ) {
+          const arg = callExpr.arguments[0];
+          if (arg.type === 'Literal' && typeof arg.value === 'string') {
+            if (name === 'template' || arg.value.endsWith('.html')) {
+              result.template = arg.value;
+            }
+            else if (name === 'css' || arg.value.endsWith('.css')) {
+              result.css = arg.value;
             }
           }
         }
@@ -350,50 +333,62 @@ function extractImports(sourceFile, filePath) {
 */
 
 function getPropertyName(prop) {
-  if (ts.isPropertyAssignment(prop) || ts.isMethodDeclaration(prop) || ts.isGetAccessorDeclaration(prop)) {
-    const name = prop.name;
-    if (ts.isIdentifier(name)) { return name.text; }
-    if (ts.isStringLiteral(name)) { return name.text; }
-    if (ts.isComputedPropertyName(name)) { return undefined; }
-  }
-  if (ts.isShorthandPropertyAssignment(prop)) {
-    return prop.name.text;
+  if (prop.type === 'Property') {
+    if (prop.key.type === 'Identifier') { return prop.key.name; }
+    if (prop.key.type === 'Literal') { return String(prop.key.value); }
   }
   return undefined;
 }
 
 function getStringValue(prop) {
-  if (ts.isPropertyAssignment(prop) && ts.isStringLiteral(prop.initializer)) {
-    return prop.initializer.text;
+  if (prop.type === 'Property' && prop.value?.type === 'Literal' && typeof prop.value.value === 'string') {
+    return prop.value.value;
   }
   return null;
 }
 
+function getParamName(param) {
+  if (param.type === 'Identifier') { return param.name; }
+  if (param.type === 'AssignmentPattern' && param.left.type === 'Identifier') { return param.left.name; }
+  if (param.type === 'ObjectPattern') { return '{...}'; }
+  if (param.type === 'RestElement') { return '...' + getParamName(param.argument); }
+  return '?';
+}
+
+function lineFromOffset(source, offset) {
+  let line = 1;
+  for (let i = 0; i < offset && i < source.length; i++) {
+    if (source[i] === '\n') { line++; }
+  }
+  return line;
+}
+
 function isNegativeNumeric(node) {
-  return ts.isPrefixUnaryExpression(node)
-    && node.operator === ts.SyntaxKind.MinusToken
-    && ts.isNumericLiteral(node.operand);
+  return node.type === 'UnaryExpression'
+    && node.operator === '-'
+    && node.argument.type === 'Literal'
+    && typeof node.argument.value === 'number';
 }
 
 function inferTypeFromValue(node) {
-  if (ts.isNumericLiteral(node) || isNegativeNumeric(node)) { return 'number'; }
-  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) { return 'string'; }
-  if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword) { return 'boolean'; }
-  if (node.kind === ts.SyntaxKind.NullKeyword) { return 'null'; }
-  if (ts.isArrayLiteralExpression(node)) { return 'array'; }
-  if (ts.isObjectLiteralExpression(node)) { return 'object'; }
-  if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) { return 'function'; }
-  if (ts.isAsExpression(node)) { return node.type.getText(); }
+  if (!node) { return 'any'; }
+  if (node.type === 'Literal') {
+    if (typeof node.value === 'number') { return 'number'; }
+    if (typeof node.value === 'string') { return 'string'; }
+    if (typeof node.value === 'boolean') { return 'boolean'; }
+    if (node.value === null) { return 'null'; }
+  }
+  if (isNegativeNumeric(node)) { return 'number'; }
+  if (node.type === 'ArrayExpression') { return 'array'; }
+  if (node.type === 'ObjectExpression') { return 'object'; }
+  if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') { return 'function'; }
   return 'any';
 }
 
 function getLiteralValue(node) {
-  if (ts.isNumericLiteral(node)) { return Number(node.text); }
-  if (isNegativeNumeric(node)) { return -Number(node.operand.text); }
-  if (ts.isStringLiteral(node)) { return node.text; }
-  if (node.kind === ts.SyntaxKind.TrueKeyword) { return true; }
-  if (node.kind === ts.SyntaxKind.FalseKeyword) { return false; }
-  if (node.kind === ts.SyntaxKind.NullKeyword) { return null; }
-  if (ts.isArrayLiteralExpression(node) && node.elements.length === 0) { return []; }
+  if (!node) { return undefined; }
+  if (node.type === 'Literal') { return node.value; }
+  if (isNegativeNumeric(node)) { return -node.argument.value; }
+  if (node.type === 'ArrayExpression' && node.elements.length === 0) { return []; }
   return undefined;
 }
