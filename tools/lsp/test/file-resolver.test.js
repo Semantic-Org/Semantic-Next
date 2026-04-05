@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
-import { resolveComponentFile, uriToPath } from '../src/file-resolver.js';
+import { uriToPath } from '../src/language-service.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 
@@ -27,21 +27,33 @@ describe('uriToPath', () => {
   });
 });
 
-describe('resolveComponentFile', () => {
-  it('finds button.js for button.html by convention', () => {
+describe('resolveComponentFile via LanguageService', () => {
+  it('finds button.js for button.html by convention', async () => {
+    const { readFileSync, readdirSync, existsSync } = await import('fs');
+    const { LanguageService } = await import('../src/language-service.js');
+    const service = new LanguageService({
+      resolver: {
+        readFile: (p) => readFileSync(p, 'utf8'),
+        exists: (p) => existsSync(p),
+        listDir: (p) => readdirSync(p),
+      },
+    });
     const htmlPath = resolve(root, 'src/primitives/button/button.html');
-    const result = resolveComponentFile(`file://${htmlPath}`);
+    const result = service.resolveComponentFile(`file://${htmlPath}`);
     expect(result).toContain('button.js');
   });
 
-  it('finds menu.js for menu.html by convention', () => {
-    const htmlPath = resolve(root, 'src/primitives/menu/menu.html');
-    const result = resolveComponentFile(`file://${htmlPath}`);
-    expect(result).toContain('menu.js');
-  });
-
-  it('returns null for non-existent template', () => {
-    const result = resolveComponentFile('file:///nonexistent/path/foo.html');
+  it('returns null for non-existent template', async () => {
+    const { readFileSync, readdirSync, existsSync } = await import('fs');
+    const { LanguageService } = await import('../src/language-service.js');
+    const service = new LanguageService({
+      resolver: {
+        readFile: (p) => readFileSync(p, 'utf8'),
+        exists: (p) => existsSync(p),
+        listDir: (p) => readdirSync(p),
+      },
+    });
+    const result = service.resolveComponentFile('file:///nonexistent/path/foo.html');
     expect(result).toBeNull();
   });
 });

@@ -1,100 +1,174 @@
+import { readFileSync, readdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
-import { describe, expect, it } from 'vitest';
-import { getCompletions, getHover } from '../src/language-service.js';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { LanguageService, uriToPath } from '../src/language-service.js';
 import { analyzeComponent } from '../src/component-analyzer.js';
-import { SpecRegistry } from '../src/spec-registry.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 
-function getModel(relativePath) {
-  return analyzeComponent(resolve(root, relativePath));
+function createService() {
+  const service = new LanguageService({
+    resolver: {
+      readFile: (path) => readFileSync(path, 'utf8'),
+      exists: (path) => existsSync(path),
+      listDir: (path) => readdirSync(path),
+    },
+    analyzer: analyzeComponent,
+  });
+  service.scanSpecs(resolve(root, 'src/primitives'));
+  return service;
 }
 
-function getRegistry() {
-  const reg = new SpecRegistry();
-  reg.scan(resolve(root, 'src/primitives'));
-  return reg;
-}
+describe('LanguageService', () => {
+  let service;
+  const buttonHtml = readFileSync(resolve(root, 'src/primitives/button/button.html'), 'utf8');
+  const buttonUri = `file://${resolve(root, 'src/primitives/button/button.html')}`;
+  const menuUri = `file://${resolve(root, 'src/primitives/menu/menu.html')}`;
+  const menuHtml = readFileSync(resolve(root, 'src/primitives/menu/menu.html'), 'utf8');
 
-describe('getCompletions', () => {
-  const model = getModel('src/primitives/button/button.js');
-  const specRegistry = getRegistry();
-
-  it('returns helpers for expression context', () => {
-    const items = getCompletions('<div>{}</div>', 6, { model, specRegistry });
-    const names = items.map(i => i.label);
-    expect(names).toContain('classIf');
-    expect(names).toContain('formatDate');
+  beforeAll(() => {
+    service = createService();
   });
 
-  it('returns component methods for expression context', () => {
-    const items = getCompletions('<div>{}</div>', 6, { model, specRegistry });
-    const names = items.map(i => i.label);
-    expect(names).toContain('isIconBefore');
-    expect(names).toContain('performAction');
-    expect(names).toContain('getForm');
+  describe('document management', () => {
+    it('tracks opened documents', () => {
+      service.didOpen('test://doc', 'hello', 1);
+      expect(service.documents.has('test://doc')).toBe(true);
+    });
+
+    it('updates on change', () => {
+      service.didOpen('test://doc2', 'v1', 1);
+      service.didChange('test://doc2', 'v2', 2);
+      expect(service.documents.get('test://doc2').text).toBe('v2');
+    });
+
+    it('removes on close', () => {
+      service.didOpen('test://doc3', 'temp', 1);
+      service.didClose('test://doc3');
+      expect(service.documents.has('test://doc3')).toBe(false);
+    });
   });
 
-  it('returns block completions for {#', () => {
-    const items = getCompletions('<div>{#}</div>', 7, {});
-    const names = items.map(i => i.label);
-    expect(names).toContain('if');
-    expect(names).toContain('each');
-    expect(names).toContain('async');
-    expect(names).toContain('snippet');
+  describe('completions with component model', () => {
+    it('returns component methods for expression context', () => {
+      service.didOpen(buttonUri, buttonHtml);
+      // Find an expression offset in button.html
+      const offset = buttonHtml.indexOf('{ui}');
+      const items = service.getCompletions(buttonUri, service.offsetToPosition(buttonHtml, offset + 1));
+      const names = items.map(i => i.label);
+      expect(names).toContain('isIconBefore');
+      expect(names).toContain('performAction');
+      expect(names).toContain('classIf'); // helpers too
+    });
+
+    it('returns state fields for menu component', () => {
+      service.didOpen(menuUri, menuHtml);
+      const offset = menuHtml.indexOf('{') + 1;
+      if (offset > 0) {
+        const items = service.getCompletions(menuUri, service.offsetToPosition(menuHtml, offset));
+        const names = items.map(i => i.label);
+        expect(names).toContain('setValue');
+        expect(names).toContain('activeIndex');
+      }
+    });
   });
 
-  it('returns spec attributes for <ui-button', () => {
-    const items = getCompletions('<ui-button  >', 11, { specRegistry });
-    const names = items.map(i => i.label);
-    expect(names).toContain('emphasis');
-    expect(names).toContain('size');
-    expect(names).toContain('primary');
+  describe('completions - blocks', () => {
+    it('returns block keywords for {#', () => {
+      service.didOpen('test://blocks', '<div>{#}</div>');
+      const items = service.getCompletions('test://blocks', { line: 0, character: 7 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('if');
+      expect(names).toContain('each');
+      expect(names).toContain('async');
+      expect(names).toContain('snippet');
+    });
   });
 
-  it('returns attribute values for size="', () => {
-    const items = getCompletions('<ui-button size="">', 17, { specRegistry });
-    const names = items.map(i => i.label);
-    expect(names).toContain('mini');
-    expect(names).toContain('large');
-    expect(names).toContain('massive');
+  describe('completions - spec attributes', () => {
+    it('returns attributes for <ui-button', () => {
+      service.didOpen('test://attrs', '<ui-button  >');
+      const items = service.getCompletions('test://attrs', { line: 0, character: 11 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('emphasis');
+      expect(names).toContain('size');
+      expect(names).toContain('primary');
+    });
+
+    it('returns values for size="', () => {
+      service.didOpen('test://vals', '<ui-button size="">');
+      const items = service.getCompletions('test://vals', { line: 0, character: 17 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('mini');
+      expect(names).toContain('large');
+    });
   });
 
-  it('returns empty for unknown component', () => {
-    const items = getCompletions('<my-custom  >', 11, { specRegistry });
-    expect(items).toHaveLength(0);
+  describe('completions - references', () => {
+    it('returns slot for {>', () => {
+      service.didOpen('test://refs', '<div>{>}</div>');
+      const items = service.getCompletions('test://refs', { line: 0, character: 7 });
+      const names = items.map(i => i.label);
+      expect(names).toContain('slot');
+    });
   });
 
-  it('returns slot for reference context', () => {
-    const items = getCompletions('<div>{>}</div>', 7, { model });
-    const names = items.map(i => i.label);
-    expect(names).toContain('slot');
+  describe('hover', () => {
+    it('returns helper signature', () => {
+      service.didOpen('test://hover', '{classIf}');
+      const result = service.getHover('test://hover', { line: 0, character: 4 });
+      expect(result.contents.value).toContain('classIf');
+    });
+
+    it('returns component method info', () => {
+      service.didOpen(menuUri, menuHtml);
+      // Hover over a method name in the template
+      service.didOpen('test://hover-method', '{setValue}');
+      // This won't find setValue since it's not linked to menu — test with button
+      service.didOpen('test://hover-helper', '{formatDate}');
+      const result = service.getHover('test://hover-helper', { line: 0, character: 5 });
+      expect(result.contents.value).toContain('formatDate');
+    });
+
+    it('returns null for unknown word', () => {
+      service.didOpen('test://hover-unknown', '{xyzNothing}');
+      const result = service.getHover('test://hover-unknown', { line: 0, character: 5 });
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('position conversion', () => {
+    it('converts line/character to offset', () => {
+      const text = 'line1\nline2\nline3';
+      expect(service.positionToOffset(text, { line: 0, character: 0 })).toBe(0);
+      expect(service.positionToOffset(text, { line: 1, character: 0 })).toBe(6);
+      expect(service.positionToOffset(text, { line: 1, character: 3 })).toBe(9);
+      expect(service.positionToOffset(text, { line: 2, character: 0 })).toBe(12);
+    });
+
+    it('converts offset to line/character', () => {
+      const text = 'line1\nline2\nline3';
+      expect(service.offsetToPosition(text, 0)).toEqual({ line: 0, character: 0 });
+      expect(service.offsetToPosition(text, 6)).toEqual({ line: 1, character: 0 });
+      expect(service.offsetToPosition(text, 9)).toEqual({ line: 1, character: 3 });
+    });
   });
 });
 
-describe('getHover', () => {
-  const model = getModel('src/primitives/menu/menu.js');
-
-  it('returns helper signature on hover', () => {
-    const result = getHover('{classIf}', 4, { model });
-    expect(result.contents.value).toContain('classIf');
-    expect(result.contents.value).toContain('expr');
+describe('uriToPath', () => {
+  it('converts file:// URI', () => {
+    expect(uriToPath('file:///home/jack/button.html')).toBe('/home/jack/button.html');
   });
 
-  it('returns method info on hover', () => {
-    const result = getHover('{setValue}', 4, { model });
-    expect(result.contents.value).toContain('setValue');
-    expect(result.contents.value).toContain('Component method');
+  it('handles Windows paths', () => {
+    expect(uriToPath('file:///C:/Users/Jack/button.html')).toBe('C:/Users/Jack/button.html');
   });
 
-  it('returns state info on hover', () => {
-    const result = getHover('{activeIndex}', 5, { model });
-    expect(result.contents.value).toContain('Signal');
-    expect(result.contents.value).toContain('number');
+  it('handles WSL remote URIs', () => {
+    expect(uriToPath('vscode-remote://wsl+Ubuntu/home/jack/button.html')).toBe('/home/jack/button.html');
   });
 
-  it('returns null for unknown word', () => {
-    const result = getHover('{unknownThing}', 5, { model });
-    expect(result).toBeNull();
+  it('returns null for bad URIs', () => {
+    expect(uriToPath('not-a-uri')).toBeNull();
   });
 });

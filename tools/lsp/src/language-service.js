@@ -1,31 +1,200 @@
 import { getCompletionContext, getWordAtOffset, formatAttributeDoc } from './server-helpers.js';
 import { formatHelperSignature, getHelper, helpers } from './helper-registry.js';
+import { SpecRegistry } from './spec-registry.js';
 
 /*
-  Pure language service — zero transport dependencies.
-  All functions take data in, return LSP-shaped response objects out.
-  No connection, no documents, no fs.
+  Stateful language service — the generic LSP backend.
+  Any transport (Node stdio, Worker postMessage, WebSocket) instantiates this
+  and feeds document events + requests. Zero transport dependencies.
 */
 
-// LSP CompletionItemKind values (avoid importing from vscode-languageserver)
+// LSP enum values inlined to avoid vscode-languageserver dependency
 const Kind = {
   Method: 2,
+  Function: 3,
   Property: 10,
   Keyword: 14,
-  Function: 3,
   Reference: 18,
   EnumMember: 20,
   Event: 23,
 };
-
-const SnippetFormat = 2; // InsertTextFormat.Snippet
+const SnippetFormat = 2;
 const Markdown = 'markdown';
+const Severity = { Error: 1, Warning: 2, Info: 3, Hint: 4 };
+
+export class LanguageService {
+
+  /*
+    resolver: { readFile(path) → string, exists(path) → bool, listDir(path) → string[], glob(pattern, root) → string[] }
+    analyzer: function(filePath) → ComponentModel (injected to avoid circular dep)
+  */
+  constructor({ resolver, analyzer } = {}) {
+    this.resolver = resolver || null;
+    this.analyzer = analyzer || null;
+    this.specRegistry = new SpecRegistry();
+    this.documents = new Map();     // uri → { text, version }
+    this.models = new Map();        // uri → ComponentModel
+  }
+
+  /*******************************
+      Document Management
+  *******************************/
+
+  didOpen(uri, text, version = 0) {
+    this.documents.set(uri, { text, version });
+    this.models.delete(uri); // invalidate stale model
+  }
+
+  didChange(uri, text, version = 0) {
+    this.documents.set(uri, { text, version });
+    this.models.delete(uri);
+  }
+
+  didClose(uri) {
+    this.documents.delete(uri);
+    this.models.delete(uri);
+  }
+
+  scanSpecs(root) {
+    this.specRegistry.scan(root);
+  }
+
+  /*******************************
+      LSP Requests
+  *******************************/
+
+  getCompletions(uri, position) {
+    const doc = this.documents.get(uri);
+    if (!doc) { return []; }
+    const offset = this.positionToOffset(doc.text, position);
+    const model = this.getModel(uri);
+    return computeCompletions(doc.text, offset, model, this.specRegistry);
+  }
+
+  getHover(uri, position) {
+    const doc = this.documents.get(uri);
+    if (!doc) { return null; }
+    const offset = this.positionToOffset(doc.text, position);
+    const model = this.getModel(uri);
+    return computeHover(doc.text, offset, model, this.specRegistry);
+  }
+
+  async getDiagnostics(uri) {
+    const doc = this.documents.get(uri);
+    if (!doc) { return []; }
+    return computeDiagnostics(doc.text);
+  }
+
+  /*******************************
+      Component Model Resolution
+  *******************************/
+
+  getModel(uri) {
+    if (this.models.has(uri)) {
+      return this.models.get(uri);
+    }
+    if (!this.analyzer || !this.resolver) { return null; }
+
+    const jsFile = this.resolveComponentFile(uri);
+    if (!jsFile) { return null; }
+
+    try {
+      const model = this.analyzer(jsFile);
+      this.models.set(uri, model);
+      return model;
+    }
+    catch { return null; }
+  }
+
+  resolveComponentFile(templateUri) {
+    const templatePath = uriToPath(templateUri);
+    if (!templatePath || !this.resolver) { return null; }
+
+    const dir = pathDirname(templatePath);
+    const base = pathBasename(templatePath, '.html');
+
+    // Convention: button.html → button.js
+    const conventionPath = pathJoin(dir, `${base}.js`);
+    if (this.resolver.exists(conventionPath)) {
+      return conventionPath;
+    }
+
+    // Fallback: scan sibling .js files for a reference to the template filename
+    try {
+      const htmlFile = pathBasename(templatePath);
+      for (const file of this.resolver.listDir(dir)) {
+        if (!file.endsWith('.js') || file.endsWith('.spec.js') || file.endsWith('.component.js')) {
+          continue;
+        }
+        const jsPath = pathJoin(dir, file);
+        try {
+          if (this.resolver.readFile(jsPath).includes(htmlFile)) {
+            return jsPath;
+          }
+        }
+        catch { /* skip */ }
+      }
+    }
+    catch { /* dir not readable */ }
+
+    return null;
+  }
+
+  /*******************************
+      Position Utilities
+  *******************************/
+
+  positionToOffset(text, position) {
+    let offset = 0;
+    let line = 0;
+    while (line < position.line && offset < text.length) {
+      if (text[offset] === '\n') { line++; }
+      offset++;
+    }
+    return offset + (position.character || 0);
+  }
+
+  offsetToPosition(text, offset) {
+    let line = 0;
+    let lastNewline = -1;
+    for (let i = 0; i < offset && i < text.length; i++) {
+      if (text[i] === '\n') { line++; lastNewline = i; }
+    }
+    return { line, character: offset - lastNewline - 1 };
+  }
+}
 
 /*******************************
-        Completions
+    URI / Path Helpers
 *******************************/
 
-export function getCompletions(text, offset, { model, specRegistry } = {}) {
+export function uriToPath(uri) {
+  try {
+    const parsed = new URL(uri);
+    if (parsed.protocol === 'file:') {
+      let p = decodeURIComponent(parsed.pathname);
+      if (/^\/[A-Z]:/i.test(p)) { p = p.slice(1); }
+      return p;
+    }
+    // VSCode Remote WSL
+    if (parsed.protocol === 'vscode-remote:' && parsed.hostname?.startsWith('wsl+')) {
+      return decodeURIComponent(parsed.pathname);
+    }
+  }
+  catch { /* unparseable */ }
+  return null;
+}
+
+// Minimal path ops — no 'path' import needed
+function pathDirname(p) { const i = p.lastIndexOf('/'); return i > 0 ? p.substring(0, i) : '/'; }
+function pathBasename(p, ext) { const b = p.substring(p.lastIndexOf('/') + 1); return ext && b.endsWith(ext) ? b.slice(0, -ext.length) : b; }
+function pathJoin(dir, file) { return dir.endsWith('/') ? dir + file : dir + '/' + file; }
+
+/*******************************
+    Pure Completion Logic
+*******************************/
+
+function computeCompletions(text, offset, model, specRegistry) {
   const context = getCompletionContext(text, offset);
 
   switch (context.type) {
@@ -48,7 +217,6 @@ export function getCompletions(text, offset, { model, specRegistry } = {}) {
 
 function getExpressionCompletions(model) {
   const items = [];
-
   if (model) {
     for (const method of model.instance) {
       items.push({
@@ -75,7 +243,6 @@ function getExpressionCompletions(model) {
       });
     }
   }
-
   for (const name of Object.keys(helpers)) {
     items.push({
       label: name,
@@ -84,7 +251,6 @@ function getExpressionCompletions(model) {
       sortText: '2' + name,
     });
   }
-
   return items;
 }
 
@@ -101,9 +267,7 @@ function getBlockCompletions() {
 }
 
 function getReferenceCompletions(model) {
-  const items = [
-    { label: 'slot', kind: Kind.Keyword, detail: 'Content projection slot' },
-  ];
+  const items = [{ label: 'slot', kind: Kind.Keyword, detail: 'Content projection slot' }];
   if (model) {
     for (const name of Object.keys(model.subTemplates)) {
       items.push({ label: name, kind: Kind.Reference, detail: 'Subtemplate' });
@@ -115,7 +279,6 @@ function getReferenceCompletions(model) {
 function getAttributeCompletions(tagName, specRegistry) {
   const spec = specRegistry?.get(tagName);
   if (!spec) { return []; }
-
   const items = [];
   for (const attr of spec.attributes) {
     const meta = spec.attributeInfo.get(attr);
@@ -162,38 +325,30 @@ function getEventBindingCompletions() {
 }
 
 /*******************************
-          Hover
+    Pure Hover Logic
 *******************************/
 
-export function getHover(text, offset, { model, specRegistry } = {}) {
+function computeHover(text, offset, model) {
   const word = getWordAtOffset(text, offset);
   if (!word) { return null; }
 
   const helper = getHelper(word);
   if (helper) {
-    return {
-      contents: { kind: Markdown, value: `**${formatHelperSignature(word)}**\n\n${helper.description}` },
-    };
+    return { contents: { kind: Markdown, value: `**${formatHelperSignature(word)}**\n\n${helper.description}` } };
   }
 
   if (model) {
     const method = model.instance.find(m => m.name === word);
     if (method) {
-      return {
-        contents: { kind: Markdown, value: `**${word}**(${method.params.map(p => p.name).join(', ')})\n\nComponent method` },
-      };
+      return { contents: { kind: Markdown, value: `**${word}**(${method.params.map(p => p.name).join(', ')})\n\nComponent method` } };
     }
     const stateField = model.state.find(s => s.name === word);
     if (stateField) {
-      return {
-        contents: { kind: Markdown, value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState (default: ${JSON.stringify(stateField.defaultValue)})` },
-      };
+      return { contents: { kind: Markdown, value: `**${word}**: Signal\\<${stateField.inferredType}\\>\n\nState (default: ${JSON.stringify(stateField.defaultValue)})` } };
     }
     const settingField = model.settings.find(s => s.name === word);
     if (settingField) {
-      return {
-        contents: { kind: Markdown, value: `**${word}**: ${settingField.inferredType}\n\nSetting (default: ${JSON.stringify(settingField.defaultValue)})` },
-      };
+      return { contents: { kind: Markdown, value: `**${word}**: ${settingField.inferredType}\n\nSetting (default: ${JSON.stringify(settingField.defaultValue)})` } };
     }
   }
 
@@ -201,10 +356,10 @@ export function getHover(text, offset, { model, specRegistry } = {}) {
 }
 
 /*******************************
-        Diagnostics
+    Pure Diagnostics
 *******************************/
 
-export async function getDiagnostics(text) {
+async function computeDiagnostics(text) {
   const diagnostics = [];
   try {
     const { TemplateCompiler } = await import('@semantic-ui/templating');
@@ -213,7 +368,7 @@ export async function getDiagnostics(text) {
   }
   catch (e) {
     diagnostics.push({
-      severity: 1, // DiagnosticSeverity.Error
+      severity: Severity.Error,
       range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
       message: e.message || 'Template compile error',
       source: 'sui',
