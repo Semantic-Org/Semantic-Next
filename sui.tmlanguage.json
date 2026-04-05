@@ -174,8 +174,8 @@
 
     "inline-objects": {
       "name": "meta.object.sui",
-      "begin": "\\{",
-      "end": "\\}",
+      "begin": "\\{(?=\\s*\\w+\\s*:)",
+      "end": "(?=\\}\\}|\\}(?!\\}))",
       "patterns": [
         {
           "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)",

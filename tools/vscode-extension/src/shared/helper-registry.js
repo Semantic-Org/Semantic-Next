@@ -1,7 +1,7 @@
 /*
   Static registry of built-in template helpers.
-  Maps helper name → signature info for completions and hover.
-  Generated from packages/templating/src/template-helpers.js.
+  Maps helper name to signature info for completions and hover.
+  Mirrors the helpers in packages/templating/src/template-helpers.js.
 */
 
 export const helpers = {

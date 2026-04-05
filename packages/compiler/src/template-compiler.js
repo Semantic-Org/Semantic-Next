@@ -90,19 +90,23 @@ class TemplateCompiler {
     from a template string
   */
   compile(templateString = this.templateString, { includePositions = false, recoverable = false } = {}) {
-    templateString = TemplateCompiler.preprocessTemplate(templateString);
-    const scanner = new StringScanner(templateString);
     this.includePositions = includePositions;
     this.recoverable = recoverable;
-    this.errors = [];
+    if (!this.errors) {
+      this.errors = [];
+    }
 
     if (!isString(templateString)) {
       if (recoverable) {
         this.errors.push({ message: 'Template is not a string', pos: 0 });
         return [];
       }
+      const scanner = new StringScanner('');
       scanner.fatal('Template is not a string', templateString);
     }
+
+    templateString = TemplateCompiler.preprocessTemplate(templateString);
+    const scanner = new StringScanner(templateString);
 
     // compile regexp globally once
     const { htmlRegExp } = TemplateCompiler;
@@ -540,7 +544,13 @@ class TemplateCompiler {
           case 'SVG_OPEN': {
             // AST inside <svg> open tag is not included
             addToAST({ type: 'html', html: '<svg ' });
+            // Save errors before recursive compile (it resets this.errors)
+            const outerErrors = this.errors;
             addToAST(...this.compile(tag.content, { includePositions, recoverable }));
+            // Merge inner errors back and restore outer accumulator
+            const innerErrors = this.errors;
+            this.errors = outerErrors;
+            this.errors.push(...innerErrors);
             addToAST({ type: 'html', html: '>' });
             newNode = {
               type: 'svg',

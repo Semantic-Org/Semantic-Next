@@ -76,7 +76,9 @@ export class SpecRegistry {
     Reads and parses a .component.js file (JSON-like ES module default export).
   */
   readComponentSpec(filePath) {
-    const source = readFileSync(filePath, 'utf8');
+    let source = readFileSync(filePath, 'utf8');
+    // Strip leading comments before the export
+    source = source.replace(/^\/\/[^\n]*\n/gm, '');
     // .component.js files are `export default { ... }` with JSON-compatible content
     const match = source.match(/export\s+default\s+({[\s\S]*})\s*;?\s*$/);
     if (!match) { return null; }

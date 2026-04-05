@@ -247,7 +247,7 @@ export interface CallParams<
    * @returns The return value of the function
    *
    * @example
-   * const value = nonreactive(() => state.get.count());
+   * const value = nonreactive(() => state.count.get());
    *
    * @see https://next.semantic-ui.com/docs/guides/reactivity#nonreactive
    */
@@ -259,7 +259,7 @@ export interface CallParams<
    * Normally updates are batched for performance, but this triggers them immediately.
    *
    * @example
-   * state.count(state.count() + 1);
+   * state.count.set(state.count.get() + 1);
    * flush();
    * someFunc(); // dom is updated before someFunc
    *

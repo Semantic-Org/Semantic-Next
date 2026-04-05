@@ -23,7 +23,12 @@ let projectRoot = '';
 const componentModels = new Map();
 
 connection.onInitialize((params) => {
-  projectRoot = params.rootUri?.replace('file://', '') || params.rootPath || '';
+  if (params.rootUri) {
+    projectRoot = new URL(params.rootUri).pathname;
+  }
+  else {
+    projectRoot = params.rootPath || '';
+  }
 
   specRegistry = new SpecRegistry();
   specRegistry.scan(projectRoot);
@@ -33,7 +38,6 @@ connection.onInitialize((params) => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       completionProvider: {
         triggerCharacters: ['{', '>', '<', '@', '"', "'", ' ', '.'],
-        resolveProvider: true,
       },
       hoverProvider: true,
     },
@@ -122,12 +126,8 @@ connection.onCompletion((params) => {
   Determines what kind of completion context the cursor is in.
 */
 function getCompletionContext(text, offset) {
-  // Walk backwards from cursor to find context
-  let i = offset - 1;
-
-  // Check if inside {expression}
   let braceDepth = 0;
-  let j = i;
+  let j = offset - 1;
   while (j >= 0) {
     if (text[j] === '}') { braceDepth++; }
     if (text[j] === '{') {
