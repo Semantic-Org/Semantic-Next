@@ -16,7 +16,7 @@
     "grammars": [
       {
         "scopeName": "source.sui",
-        "path": "../../sui.tmlanguage.json",
+        "path": "../../../../sui.tmlanguage.json",
         "injectTo": ["text.html.basic"]
       }
     ]
