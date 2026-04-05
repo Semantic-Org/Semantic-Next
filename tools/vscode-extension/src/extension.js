@@ -4,8 +4,7 @@ import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
 let client;
 
 export function activate() {
-  // The LSP server lives in packages/lsp — editor-agnostic
-  const serverModule = resolve(import.meta.dirname, '../../../packages/lsp/src/server.js');
+  const serverModule = resolve(import.meta.dirname, '../../lsp/src/server.js');
 
   const serverOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
