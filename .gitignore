@@ -53,3 +53,8 @@ nbproject
 /playwright/.cache/
 .wireit
 .vercel
+
+# LSP build artifacts
+tools/lsp/editors/vscode/*.vsix
+tools/lsp/editors/vscode/server/
+tools/lsp/editors/vscode/test-grammar/
