@@ -1,0 +1,29 @@
+{
+  "name": "@semantic-ui/lsp",
+  "version": "0.1.0",
+  "description": "Language Server Protocol implementation for Semantic UI templates and components",
+  "type": "module",
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js",
+    "./component-analyzer": "./src/component-analyzer.js",
+    "./spec-registry": "./src/spec-registry.js",
+    "./helper-registry": "./src/helper-registry.js"
+  },
+  "bin": {
+    "sui-lsp": "bin/sui-lsp.js"
+  },
+  "dependencies": {
+    "glob": "^10.0.0",
+    "typescript": "^5.0.0",
+    "vscode-languageserver": "^9.0.0",
+    "vscode-languageserver-textdocument": "^1.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0"
+  }
+}

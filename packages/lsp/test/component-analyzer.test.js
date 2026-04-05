@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
-import { analyzeComponent } from '../src/shared/component-analyzer.js';
+import { analyzeComponent } from '../src/component-analyzer.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatHelperSignature, getHelper, getHelperNames, helpers } from '../src/shared/helper-registry.js';
+import { formatHelperSignature, getHelper, getHelperNames, helpers } from '../src/helper-registry.js';
 
 describe('HelperRegistry', () => {
   it('contains all major helpers', () => {

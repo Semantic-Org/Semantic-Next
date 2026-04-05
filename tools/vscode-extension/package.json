@@ -1,7 +1,7 @@
 {
   "name": "semantic-ui-vscode",
   "displayName": "Semantic UI",
-  "description": "Language support for Semantic UI templates and components",
+  "description": "VS Code extension for Semantic UI — syntax highlighting and LSP client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,7 @@
   },
   "main": "./src/extension.js",
   "activationEvents": [
-    "onLanguage:html",
-    "onLanguage:javascript"
+    "onLanguage:html"
   ],
   "contributes": {
     "grammars": [
@@ -20,26 +19,9 @@
         "path": "../../sui.tmlanguage.json",
         "injectTo": ["text.html.basic"]
       }
-    ],
-    "languages": [
-      {
-        "id": "html",
-        "extensions": [".html"]
-      }
     ]
   },
   "dependencies": {
-    "glob": "^10.0.0",
-    "typescript": "^5.0.0",
-    "vscode-languageclient": "^9.0.0",
-    "vscode-languageserver": "^9.0.0",
-    "vscode-languageserver-textdocument": "^1.0.0"
-  },
-  "scripts": {
-    "test": "vitest",
-    "test:watch": "vitest --watch"
-  },
-  "devDependencies": {
-    "vitest": "^4.0.0"
+    "vscode-languageclient": "^9.0.0"
   }
 }

@@ -1,6 +1,6 @@
 import { resolve } from 'path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { SpecRegistry } from '../src/shared/spec-registry.js';
+import { SpecRegistry } from '../src/spec-registry.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 

@@ -9,9 +9,9 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node.js';
 
-import { analyzeComponent } from '../shared/component-analyzer.js';
-import { formatHelperSignature, getHelper, helpers } from '../shared/helper-registry.js';
-import { SpecRegistry } from '../shared/spec-registry.js';
+import { analyzeComponent } from './component-analyzer.js';
+import { formatHelperSignature, getHelper, helpers } from './helper-registry.js';
+import { SpecRegistry } from './spec-registry.js';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);

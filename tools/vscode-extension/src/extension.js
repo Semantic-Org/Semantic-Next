@@ -1,13 +1,11 @@
 import { resolve } from 'path';
-import { fileURLToPath } from 'url';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node.js';
-
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 let client;
 
-export function activate(context) {
-  const serverModule = resolve(__dirname, 'server', 'server.js');
+export function activate() {
+  // The LSP server lives in packages/lsp — editor-agnostic
+  const serverModule = resolve(import.meta.dirname, '../../../packages/lsp/src/server.js');
 
   const serverOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
