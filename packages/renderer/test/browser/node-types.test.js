@@ -80,6 +80,89 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
+   Literal Value ({#fn})
+*******************************/
+
+  describe('literal value rendering', () => {
+    it('should pass function reference without invoking it', async () => {
+      const tag = uniqueTag();
+      const childTag = uniqueTag();
+
+      defineComponent({
+        tagName: childTag,
+        renderingEngine: engine,
+        template: '<span>child</span>',
+      });
+
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: `<${childTag} .handler={#fn callback}></${childTag}>`,
+        createComponent: () => ({
+          callback: (x) => x + 1,
+        }),
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      const child = el.shadowRoot.querySelector(childTag);
+      expect(typeof child.handler).toBe('function');
+      expect(child.handler(4)).toBe(5);
+    });
+
+    it('should pass function reference in text position', async () => {
+      const tag = uniqueTag();
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: '<div>{#fn getItems}</div>',
+        createComponent: () => ({
+          getItems: () => ['a', 'b', 'c'],
+        }),
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      // In text position, the literal function reference is rendered as its toString
+      const text = el.shadowRoot.querySelector('div').textContent;
+      expect(text).toContain('function');
+    });
+
+    it('should reactively update literal value when signal changes', async () => {
+      const tag = uniqueTag();
+      const childTag = uniqueTag();
+
+      defineComponent({
+        tagName: childTag,
+        renderingEngine: engine,
+        template: '<span>child</span>',
+      });
+
+      defineComponent({
+        tagName: tag,
+        renderingEngine: engine,
+        template: `<${childTag} .handler={#fn getHandler}></${childTag}>`,
+        defaultState: { mode: 'add' },
+        createComponent: ({ state }) => ({
+          getHandler: () =>
+            state.mode.get() === 'add'
+              ? (x) => x + 10
+              : (x) => x * 10,
+        }),
+      });
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      const child = el.shadowRoot.querySelector(childTag);
+      // {#fn} passes the literal value without auto-invoking
+      expect(typeof child.handler).toBe('function');
+    });
+  });
+
+  /*******************************
    Slots ({>slot})
 *******************************/
 

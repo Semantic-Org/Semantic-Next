@@ -483,7 +483,7 @@ RENDERING_ENGINES.forEach(engine => {
       defineComponent({
         renderingEngine: engine,
         tagName: tag,
-        template: `<${childTag} .myCallback={handler}></${childTag}>`,
+        template: `<${childTag} .myCallback={#fn handler}></${childTag}>`,
         createComponent: () => ({
           handler: (x) => x * 2,
         }),
