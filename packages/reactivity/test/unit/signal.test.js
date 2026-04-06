@@ -810,4 +810,24 @@ describe.concurrent('Signal', () => {
       expect(derived._derivedReaction).toBeDefined();
     });
   });
+
+  /*******************************
+      Symbol.hasInstance (instanceof)
+  *******************************/
+
+  describe.concurrent('instanceof Signal', () => {
+    it('should return true for Signal instances', () => {
+      expect(new Signal(0) instanceof Signal).toBe(true);
+    });
+
+    it('should return false for non-Signal objects', () => {
+      expect({} instanceof Signal).toBe(false);
+      expect(null instanceof Signal).toBe(false);
+    });
+
+    it('should return true for objects created via Object.create(Signal.prototype)', () => {
+      const fake = Object.create(Signal.prototype);
+      expect(fake instanceof Signal).toBe(true);
+    });
+  });
 });
