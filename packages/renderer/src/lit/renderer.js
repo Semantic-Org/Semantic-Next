@@ -465,8 +465,8 @@ export class LitRenderer {
       };
       // only allow valid javascript variable names
       context = filterObject(context, (value, name) => {
-        const reservedWords = ['debugger'];
-        return !reservedWords.includes(name) && LitRenderer.VAR_NAME_REGEXP.test(name);
+        const reservedWords = ['debugger', 'function'];
+        return !inArray(name, reservedWords) && LitRenderer.VAR_NAME_REGEXP.test(name);
       });
     }
     try {
