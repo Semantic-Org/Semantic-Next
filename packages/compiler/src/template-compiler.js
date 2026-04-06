@@ -29,6 +29,7 @@ class TemplateCompiler {
     SLOT: '^{OPEN}>\\s*slot\\s*',
     TEMPLATE: '^{OPEN}>\\s*',
     HTML_EXPRESSION: '^{OPEN}\\s*#html\\s*',
+    FN_EXPRESSION: '^{OPEN}\\s*#fn\\s*',
     EXPRESSION: '^{OPEN}\\s*',
   };
 
@@ -386,6 +387,18 @@ class TemplateCompiler {
               ...newNode,
               type: 'expression',
               unsafeHTML: true,
+              value: tag.content,
+            };
+            addToAST(newNode);
+            scanner.consume('}'); // got an extra }
+            break;
+          }
+
+          case 'FN_EXPRESSION': {
+            newNode = {
+              ...newNode,
+              type: 'expression',
+              literalValue: true,
               value: tag.content,
             };
             addToAST(newNode);
