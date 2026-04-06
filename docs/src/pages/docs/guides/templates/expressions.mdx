@@ -122,6 +122,16 @@ will output as
 <a data-number="0"></a>
 ```
 
+### Properties
+
+You can use `.` syntax to pass a value as a property instead of an attribute. This can be useful for content it is unserializable like function, or for modifying raw DOM properties directly.
+
+```sui
+<ui-chart .data={getComplexData}
+```
+
+> See [raw functions](#raw-functions) for how to pass functions into properties
+
 ### Boolean Attribute
 
 If an attribute expression **omits quotes** the entire attribute will be removed if the expression is falsey
@@ -144,6 +154,34 @@ and if `isChecked == false` it will omit the attribute altogether
 ```html
 <input type="checkbox" />
 ```
+
+## Expression Modifiers
+
+### Raw HTML
+
+The `{#html}` modifier renders the expression result as raw HTML instead of escaped text.
+
+```sui
+{#html sanitizedContent}
+```
+
+### Raw Functions
+
+Expressions that return functions are normally auto-invoked to produce their result.
+
+For instance the following code snippet returns the value from getCode, not the getCode function itself.
+
+```sui
+{getCode string}
+```
+
+To pass the literal function back, which may be necessary when binding to a property use `{#fn}`
+
+```sui
+<ui-dropdown .onChange={#fn updateUsers}>
+</ui-dropdown>
+```
+
 
 ## Reactivity
 

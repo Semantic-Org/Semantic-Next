@@ -11,12 +11,23 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Templates
+* **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
+
 ### Renderer
+* **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references
 * **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed
 * **Bug** - Fixed `{#async}` blocks showing stale data when reactive dependencies changed rapidly before a previous request resolved
 
+### Reactivity
+* **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.
+
+### Templates
+* **Bug** - Fixed `instanceof` brand check on `Template` to use prototype getter instead of class field — same fix as Signal and Query.
+
 ### Query
+* **Bug** - Fixed `instanceof` checks failing for `Query.wrap()` instances — brand property was a class field (set only in constructor) but `wrap()` uses `Object.create()`. Moved to prototype getter so all prototype-chain objects pass the check regardless of construction path.
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
