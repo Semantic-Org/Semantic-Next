@@ -62,17 +62,11 @@ describe('getCompletionContext', () => {
       expect(getCompletionContext(text, offset)).toEqual({ type: 'block' });
     });
 
-    it('detects #each block', () => {
-      // Real pattern: {#each item in items}
-      const text = '{#each }';
-      const offset = 7;
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'block' });
-    });
-
-    it('detects #snippet block', () => {
-      const text = '{#snippet }';
-      const offset = 10;
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'block' });
+    it('returns expression context for block argument area', () => {
+      // After the keyword + space, cursor is in the argument area
+      // where expression completions (variables, helpers) are appropriate
+      expect(getCompletionContext('{#each }', 7)).toEqual({ type: 'expression' });
+      expect(getCompletionContext('{#snippet }', 10)).toEqual({ type: 'expression' });
     });
   });
 
@@ -105,11 +99,12 @@ describe('getCompletionContext', () => {
       expect(getCompletionContext(text, offset)).toEqual({ type: 'reference' });
     });
 
-    it('detects subtemplate with params', () => {
-      // {>highlight text=title match=titleHighlight} — real pattern from global-search
+    it('returns expression context for reference argument area', () => {
+      // After the reference name + space, cursor is in the data-binding area
+      // where expression completions are appropriate, not reference completions
       const text = '{>highlight text=title match=titleHighlight}';
       const offset = 12; // after ">highlight "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'reference' });
+      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
     });
   });
 
@@ -246,11 +241,11 @@ describe('getCompletionContext', () => {
       expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
     });
 
-    it('handles expression in each loop', () => {
-      // {#each item in items} — cursor on "items"
+    it('handles argument area in each loop as expression', () => {
+      // {#each item in items} — cursor on "items" is past the keyword
       const text = '{#each item in items}';
-      const offset = 19; // inside expression, after "items"
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'block' });
+      const offset = 19;
+      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
     });
 
     it('handles expression with helper call and arguments', () => {

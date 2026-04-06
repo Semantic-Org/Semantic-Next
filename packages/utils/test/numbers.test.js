@@ -77,3 +77,15 @@ describe('Number Utilities', () => {
     });
   });
 });
+
+describe('roundNumber — zero input', () => {
+  it('should return 0 for zero input', () => {
+    expect(roundNumber(0)).toBe(0);
+    expect(roundNumber(0, 3)).toBe(0);
+  });
+
+  it('should return 0 for roundDecimal(0)', () => {
+    expect(roundDecimal(0)).toBe(0);
+    expect(roundDecimal(0, 5)).toBe(0);
+  });
+});

@@ -30,12 +30,14 @@ describe('uriToPath', () => {
 describe('resolveComponentFile via LanguageService', () => {
   it('finds button.js for button.html by convention', async () => {
     const { readFileSync, readdirSync, existsSync } = await import('fs');
+    const { globSync } = await import('glob');
     const { LanguageService } = await import('../src/language-service.js');
     const service = new LanguageService({
       resolver: {
         readFile: (p) => readFileSync(p, 'utf8'),
         exists: (p) => existsSync(p),
         listDir: (p) => readdirSync(p),
+        glob: (pattern, cwd) => globSync(pattern, { cwd, absolute: true, ignore: ['**/node_modules/**'] }),
       },
     });
     const htmlPath = resolve(root, 'src/primitives/button/button.html');
@@ -45,12 +47,14 @@ describe('resolveComponentFile via LanguageService', () => {
 
   it('returns null for non-existent template', async () => {
     const { readFileSync, readdirSync, existsSync } = await import('fs');
+    const { globSync } = await import('glob');
     const { LanguageService } = await import('../src/language-service.js');
     const service = new LanguageService({
       resolver: {
         readFile: (p) => readFileSync(p, 'utf8'),
         exists: (p) => existsSync(p),
         listDir: (p) => readdirSync(p),
+        glob: (pattern, cwd) => globSync(pattern, { cwd, absolute: true, ignore: ['**/node_modules/**'] }),
       },
     });
     const result = service.resolveComponentFile('file:///nonexistent/path/foo.html');

@@ -886,3 +886,46 @@ describe('function utilities', () => {
     });
   });
 });
+
+describe('debounce — options object overload', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('should accept options object as second argument', async () => {
+    const func = vi.fn(() => 'result');
+    const debounced = debounce(func, { wait: 100 });
+
+    const promise = debounced('arg');
+    vi.advanceTimersByTime(100);
+
+    const result = await promise;
+    expect(func).toHaveBeenCalledWith('arg');
+    expect(result).toBe('result');
+  });
+});
+
+describe('throttle — options object overload', () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.restoreAllMocks(); });
+
+  it('should accept options object as second argument', () => {
+    const func = vi.fn(() => 'result');
+    const throttled = throttle(func, { wait: 100 });
+
+    const result = throttled('arg');
+    expect(func).toHaveBeenCalledWith('arg');
+    expect(result).toBe('result');
+  });
+});
+
+describe('debounce/throttle — leading+trailing validation', () => {
+  it('debounce should throw when both leading and trailing are false', () => {
+    expect(() => debounce(() => {}, 100, { leading: false, trailing: false }))
+      .toThrow('At least one of leading or trailing must be true');
+  });
+
+  it('throttle should throw when both leading and trailing are false', () => {
+    expect(() => throttle(() => {}, 100, { leading: false, trailing: false }))
+      .toThrow('At least one of leading or trailing must be true');
+  });
+});

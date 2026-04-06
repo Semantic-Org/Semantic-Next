@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
+import { globSync } from 'glob';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { LanguageService, uriToPath } from '../src/language-service.js';
 import { analyzeComponent } from '../src/component-analyzer.js';
@@ -12,8 +13,9 @@ function createService() {
       readFile: (path) => readFileSync(path, 'utf8'),
       exists: (path) => existsSync(path),
       listDir: (path) => readdirSync(path),
+      glob: (pattern, cwd) => globSync(pattern, { cwd, absolute: true, ignore: ['**/node_modules/**'] }),
     },
-    analyzer: analyzeComponent,
+    analyzer: (source, filePath) => analyzeComponent(source, filePath),
   });
   service.scanSpecs(resolve(root, 'src/primitives'));
   return service;

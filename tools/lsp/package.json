@@ -6,6 +6,10 @@
   "main": "src/server.js",
   "exports": {
     ".": "./src/server.js",
+    "./node": "./src/node.js",
+    "./browser": "./src/browser.js",
+    "./language-service": "./src/language-service.js",
+    "./worker": "./src/worker.js",
     "./component-analyzer": "./src/component-analyzer.js",
     "./spec-registry": "./src/spec-registry.js",
     "./helper-registry": "./src/helper-registry.js",
@@ -21,10 +25,7 @@
     "vscode-languageserver-textdocument": "^1.0.0"
   },
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "devDependencies": {
-    "vitest": "^4.0.0"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   }
 }

@@ -246,3 +246,38 @@ describe('Date Utilities', () => {
     });
   });
 });
+
+describe('formatDate — ordinal suffixes', () => {
+  it('should format 1st, 2nd, 3rd correctly', () => {
+    expect(formatDate(new Date('2023-01-01T00:00:00Z'), 'Do')).toBe('1st');
+    expect(formatDate(new Date('2023-01-02T00:00:00Z'), 'Do')).toBe('2nd');
+    expect(formatDate(new Date('2023-01-03T00:00:00Z'), 'Do')).toBe('3rd');
+  });
+
+  it('should format 11th, 12th, 13th (special cases)', () => {
+    expect(formatDate(new Date('2023-01-11T00:00:00Z'), 'Do')).toBe('11th');
+    expect(formatDate(new Date('2023-01-12T00:00:00Z'), 'Do')).toBe('12th');
+    expect(formatDate(new Date('2023-01-13T00:00:00Z'), 'Do')).toBe('13th');
+  });
+
+  it('should format 21st, 22nd, 23rd correctly', () => {
+    expect(formatDate(new Date('2023-01-21T00:00:00Z'), 'Do')).toBe('21st');
+    expect(formatDate(new Date('2023-01-22T00:00:00Z'), 'Do')).toBe('22nd');
+    expect(formatDate(new Date('2023-01-23T00:00:00Z'), 'Do')).toBe('23rd');
+  });
+
+  it('should handle escaped text in format strings', () => {
+    const date = new Date('2023-05-18T00:00:00Z');
+    expect(formatDate(date, '[Day:] D [of] MMMM')).toBe('Day: 18 of May');
+  });
+});
+
+describe('formatDate — invalid input', () => {
+  it('should return "Invalid Date" for null', () => {
+    expect(formatDate(null)).toBe('Invalid Date');
+  });
+
+  it('should return "Invalid Date" for undefined', () => {
+    expect(formatDate(undefined)).toBe('Invalid Date');
+  });
+});
