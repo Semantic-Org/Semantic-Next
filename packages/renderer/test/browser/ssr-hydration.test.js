@@ -1216,3 +1216,82 @@ describe('SSR hydration — data divergence', () => {
     expect(shadowHTML(el)).toBe('<div>Ready</div>');
   });
 });
+
+/*******************************
+     Snippet reactivity
+*******************************/
+
+describe('SSR hydration — snippet reactivity', () => {
+  it('snippet attribute expressions are reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet item}<span class="{cls}">{label}</span>{/snippet}<div>{>item}</div>',
+      defaultState: { cls: 'before', label: 'Hello' },
+      createComponent: ({ state }) => ({
+        update() {
+          state.cls.set('after');
+          state.label.set('Updated');
+        },
+      }),
+    });
+
+    const span = el.shadowRoot.querySelector('span');
+    expect(span.getAttribute('class')).toBe('before');
+    expect(span.textContent).toBe('Hello');
+
+    const updated = $(el).onNext('updated');
+    el.component.update();
+    await updated;
+
+    expect(span.getAttribute('class')).toBe('after');
+    expect(span.textContent).toBe('Updated');
+  });
+
+  it('snippet inside conditional has reactive attributes after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet content}<i class="{icon}-icon" style={getStyle}></i>{/snippet}'
+        + '{#if showLink}<a>{>content}</a>{else}{>content}{/if}',
+      defaultState: { icon: 'home', showLink: false },
+      createComponent: ({ state }) => ({
+        getStyle: () => `--icon: var(--icon-${state.icon.get()})`,
+        setIcon(name) {
+          state.icon.set(name);
+        },
+      }),
+    });
+
+    const i = el.shadowRoot.querySelector('i');
+    expect(i.getAttribute('class')).toBe('home-icon');
+    expect(i.getAttribute('style')).toContain('--icon-home');
+
+    const updated = $(el).onNext('updated');
+    el.component.setIcon('star');
+    await updated;
+
+    expect(i.getAttribute('class')).toBe('star-icon');
+    expect(i.getAttribute('style')).toContain('--icon-star');
+  });
+
+  it('snippet with computed function is reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="{getClass}">{getText}</span>{/snippet}<div>{>badge}</div>',
+      defaultState: { active: false },
+      createComponent: ({ state }) => ({
+        getClass: () => state.active.get() ? 'active' : 'inactive',
+        getText: () => state.active.get() ? 'ON' : 'OFF',
+        toggle() {
+          state.active.set(!state.active.get());
+        },
+      }),
+    });
+
+    expect(el.shadowRoot.querySelector('span').getAttribute('class')).toBe('inactive');
+    expect(el.shadowRoot.querySelector('span').textContent).toBe('OFF');
+
+    const updated = $(el).onNext('updated');
+    el.component.toggle();
+    await updated;
+
+    expect(el.shadowRoot.querySelector('span').getAttribute('class')).toBe('active');
+    expect(el.shadowRoot.querySelector('span').textContent).toBe('ON');
+  });
+});
