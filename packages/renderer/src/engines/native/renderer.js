@@ -1006,6 +1006,10 @@ export class Renderer {
         continue;
       }
       if (blockDepth > 0) {
+        // Track nested opening markers so closing markers stay balanced
+        if (text.startsWith(BLOCK_MARKER)) {
+          blockDepth++;
+        }
         continue;
       }
 
