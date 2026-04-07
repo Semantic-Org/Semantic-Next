@@ -1,3 +1,4 @@
+import { $ } from '@semantic-ui/query';
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -612,7 +613,7 @@ describe('Component', () => {
       document.body.appendChild(parentElement);
 
       // Wait for lifecycle events to fire
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await $(parentElement).onNext('rendered');
 
       // Verify each component's lifecycle callbacks fired exactly once
       expect(parentCreated).toHaveBeenCalledTimes(1);
@@ -753,15 +754,13 @@ describe('Component', () => {
         cleanupElements.push(parentElement);
 
         // Wait for components to be rendered and initialized
-        await parentElement.updateComplete;
+        await $(parentElement).onNext('rendered');
 
         // Wait for child components to also be rendered
-        const childElement = parentElement.querySelector('nav-test-find-child');
+        const childElement = parentElement.shadowRoot?.querySelector('nav-test-find-child');
         if (childElement) {
-          await childElement.updateComplete;
+          await $(childElement).onNext('rendered');
         }
-
-        await new Promise(resolve => setTimeout(resolve, 300));
 
         // Test that parent can find child
         const parentComponent = parentElement.component;
@@ -789,7 +788,7 @@ describe('Component', () => {
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await $(parentElement).onNext('rendered');
 
         const parentComponent = parentElement.component;
         const result = parentComponent.findNonExistentChild();
@@ -830,7 +829,7 @@ describe('Component', () => {
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(parentElement).onNext('rendered');
 
         const parentComponent = parentElement.component;
 
@@ -880,7 +879,7 @@ describe('Component', () => {
         document.body.appendChild(listElement);
         cleanupElements.push(listElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(listElement).onNext('rendered');
 
         const listComponent = listElement.component;
         const items = listComponent.getAllItems();
@@ -908,7 +907,7 @@ describe('Component', () => {
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await $(parentElement).onNext('rendered');
 
         const parentComponent = parentElement.component;
         const result = parentComponent.findNonExistentChildren();
@@ -952,7 +951,7 @@ describe('Component', () => {
         document.body.appendChild(formElement);
         cleanupElements.push(formElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(formElement).onNext('rendered');
 
         const formComponent = formElement.component;
         const allChildren = formComponent.getAllChildren();
@@ -994,8 +993,8 @@ describe('Component', () => {
         cleanupElements.push(parentElement);
 
         // Wait for parent component to render
-        await parentElement.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(parentElement).onNext('rendered');
+        await $(parentElement).onNext('rendered');
 
         // Get the child component through shadow DOM
         const childElement = parentElement.shadowRoot?.querySelector('test-parent-finder-child');
@@ -1003,7 +1002,7 @@ describe('Component', () => {
 
         // Wait for child component to render
         if (childElement) {
-          await childElement.updateComplete;
+          await $(childElement).onNext('rendered');
         }
 
         const childComponent = childElement.component;
@@ -1048,8 +1047,8 @@ describe('Component', () => {
         cleanupElements.push(topElement);
 
         // Wait for top level component to render
-        await topElement.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await $(topElement).onNext('rendered');
+        await $(topElement).onNext('rendered');
 
         // Navigate to the deeply nested child through shadow DOM
         const middleElement = topElement.shadowRoot?.querySelector('test-middle-component');
@@ -1057,7 +1056,7 @@ describe('Component', () => {
 
         // Wait for middle component to render
         if (middleElement) {
-          await middleElement.updateComplete;
+          await $(middleElement).onNext('rendered');
         }
 
         const deepChildElement = middleElement?.shadowRoot?.querySelector('test-deep-child');
@@ -1065,7 +1064,7 @@ describe('Component', () => {
 
         // Wait for deep child component to render
         if (deepChildElement) {
-          await deepChildElement.updateComplete;
+          await $(deepChildElement).onNext('rendered');
         }
 
         const deepChildComponent = deepChildElement.component;
@@ -1095,7 +1094,7 @@ describe('Component', () => {
         document.body.appendChild(orphanElement);
         cleanupElements.push(orphanElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await $(orphanElement).onNext('rendered');
 
         const orphanComponent = orphanElement.component;
         const result = orphanComponent.lookForNonExistentParent();
@@ -1136,8 +1135,8 @@ describe('Component', () => {
         cleanupElements.push(elementA, elementB);
 
         // Wait for both components to render
-        await elementA.updateComplete;
-        await elementB.updateComplete;
+        await $(elementA).onNext('rendered');
+        await $(elementB).onNext('rendered');
         await new Promise(resolve => setTimeout(resolve, 150));
 
         // Component B should be able to find Component A via findTemplate
@@ -1166,7 +1165,7 @@ describe('Component', () => {
         document.body.appendChild(searcherElement);
         cleanupElements.push(searcherElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await $(searcherElement).onNext('rendered');
 
         const searcherComponent = searcherElement.component;
         const result = searcherComponent.findNonExistentTemplate();
@@ -1214,8 +1213,8 @@ describe('Component', () => {
         cleanupElements.push(siblingElement, containerElement);
 
         // Wait for both components to render
-        await siblingElement.updateComplete;
-        await containerElement.updateComplete;
+        await $(siblingElement).onNext('rendered');
+        await $(containerElement).onNext('rendered');
         await new Promise(resolve => setTimeout(resolve, 150));
 
         // The nested component should be able to find the sibling component (in shadow DOM)
@@ -1224,7 +1223,7 @@ describe('Component', () => {
 
         // Wait for nested component to render
         if (nestedElement) {
-          await nestedElement.updateComplete;
+          await $(nestedElement).onNext('rendered');
         }
 
         const nestedComponent = nestedElement.component;
@@ -1279,7 +1278,7 @@ describe('Component', () => {
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(parentElement).onNext('rendered');
 
         const parentComponent = parentElement.component;
 
@@ -1349,7 +1348,7 @@ describe('Component', () => {
         document.body.appendChild(containerElement);
         cleanupElements.push(containerElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(containerElement).onNext('rendered');
 
         // Access the deeply nested child through template traversal
         // This would be complex to test directly, but we can verify the structure exists
@@ -1415,7 +1414,7 @@ describe('Component', () => {
         document.body.appendChild(mixedElement);
         cleanupElements.push(mixedElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await $(mixedElement).onNext('rendered');
 
         const mixedComponent = mixedElement.component;
 
@@ -1461,7 +1460,7 @@ describe('Component', () => {
         document.body.appendChild(unnamedElement);
         cleanupElements.push(unnamedElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await $(unnamedElement).onNext('rendered');
 
         const unnamedComponent = unnamedElement.component;
         expect(unnamedComponent).toBeDefined();
@@ -1546,7 +1545,7 @@ describe('interval and timeout lifecycle cleanup', () => {
     });
     const el = document.createElement(tag);
     document.body.appendChild(el);
-    await el.updateComplete;
+    await $(el).onNext('rendered');
 
     // Let it tick a few times
     await new Promise(r => setTimeout(r, 160));
@@ -1578,7 +1577,7 @@ describe('interval and timeout lifecycle cleanup', () => {
     });
     const el = document.createElement(tag);
     document.body.appendChild(el);
-    await el.updateComplete;
+    await $(el).onNext('rendered');
 
     // Remove before timeout fires
     document.body.removeChild(el);
@@ -1605,7 +1604,7 @@ describe('interval and timeout lifecycle cleanup', () => {
     });
     const el = document.createElement(tag);
     document.body.appendChild(el);
-    await el.updateComplete;
+    await $(el).onNext('rendered');
 
     // Wait for timeout to fire
     await new Promise(r => setTimeout(r, 100));
