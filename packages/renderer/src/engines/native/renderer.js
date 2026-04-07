@@ -126,7 +126,7 @@ export class Renderer {
   *******************************/
 
   buildHTMLString(ast, isSVG) {
-    return buildHTMLStringPure(ast, this.snippets, { isSVG });
+    return buildHTMLStringPure(ast, { snippets: this.snippets, isSVG });
   }
 
   /*******************************
@@ -1173,7 +1173,7 @@ export class Renderer {
   hydrateAttributes(root, entries, data, scope, ast) {
     // Build a reference DOM from the marker htmlString to find attribute positions.
     // Use the provided AST (from inner content hydration) or fall back to the top-level AST.
-    const { htmlString } = buildHTMLStringPure(ast || this.ast, this.snippets);
+    const { htmlString } = buildHTMLStringPure(ast || this.ast, { snippets: this.snippets });
     const refTemplate = document.createElement('template');
     refTemplate.innerHTML = htmlString;
     const refRoot = refTemplate.content;
@@ -1561,7 +1561,7 @@ export class Renderer {
   }
 
   hydrateInnerContent(ownedNodes, contentAST, data, scope) {
-    const { entries } = buildHTMLStringPure(contentAST, this.snippets);
+    const { entries } = buildHTMLStringPure(contentAST, { snippets: this.snippets });
     if (entries.length === 0) { return; }
 
     // Wrap ownedNodes in a temporary container for TreeWalker traversal

@@ -73,7 +73,7 @@ export function analyzePosition(html) {
     HTML String Assembly
 *******************************/
 
-export function buildHTMLString(ast, snippets = {}, { isSVG: initialSVG = false } = {}) {
+export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false } = {}) {
   let htmlString = '';
   const entries = []; // { id, type, node, classification }
   let htmlBuffer = ''; // accumulated HTML for binding classification
