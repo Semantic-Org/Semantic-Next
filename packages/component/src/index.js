@@ -5,7 +5,6 @@ export { adoptStylesheet, extractCSS, getJSON, getText, scopeStyles } from '@sem
 
 export { getComponent, hasComponent, registerComponent } from './component-registry.js';
 export { defineComponent } from './define-component.js';
-export { LitRenderer } from './engines/lit/register.js';
 export { WebComponentBase } from './engines/native/base.js';
 export { NativeRenderer } from './engines/native/register.js';
 export { renderToString } from './render-to-string.js';

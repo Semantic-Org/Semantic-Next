@@ -1,6 +1,7 @@
 import { $ } from '@semantic-ui/query';
 import { describe, expect, it } from 'vitest';
-import { defineComponent, LitRenderer, NativeRenderer } from '../../src/index.js';
+import { LitRenderer } from '../../src/engines/lit/register.js';
+import { defineComponent, NativeRenderer } from '../../src/index.js';
 
 /*
   Engine selection tests — verifies that renderingEngine accepts

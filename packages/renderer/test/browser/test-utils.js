@@ -3,6 +3,7 @@
   Both engines run the same behavioral test suite.
   Importing LitRenderer triggers side-effect registration of the Lit engine.
 */
-import { LitRenderer } from '@semantic-ui/component';
+// Side-effect import: register Lit engine so both engines are available in tests
+import '../../../../packages/component/src/engines/lit/register.js';
 
 export const RENDERING_ENGINES = ['lit', 'native'];

@@ -2,6 +2,7 @@ import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LitWebComponentBase } from '../../src/engines/lit/base.js';
+import '../../src/engines/lit/register.js';
 import { WebComponentBase } from '../../src/engines/native/base.js';
 import { defineComponent, registerHelper, registerHelpers } from '../../src/index.js';
 
