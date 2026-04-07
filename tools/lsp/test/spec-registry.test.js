@@ -102,7 +102,7 @@ describe('full project scan', () => {
 
   beforeAll(() => {
     registry = new SpecRegistry();
-    registry.scan(root, testResolver);
+    registry.scan(resolve(root, 'src'), testResolver);
   });
 
   it('discovers all primitive component specs', () => {
