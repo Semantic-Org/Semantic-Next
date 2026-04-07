@@ -1,0 +1,15 @@
+---
+import Body from '../layouts/Body.astro';
+import { Clock } from '../components/Clock/Clock.js';
+---
+<Body class="dark">
+  <h4>SVG Clock (Client Only)</h4>
+  <div style="width: 400px; height: 400px;">
+    <ui-clock></ui-clock>
+  </div>
+
+  <h4>SVG Clock (Hydrated)</h4>
+  <div style="width: 400px; height: 400px;">
+    <Clock client:load/>
+  </div>
+</Body>
