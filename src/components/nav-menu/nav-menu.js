@@ -27,6 +27,7 @@ const defaultState = {
 
 const createComponent = ({ $, el, self, settings, state, reaction, isRendered }) => ({
   initialize() {
+    console.log('url is', settings.activeURL, el);
     reaction(self.calculateURL); // track current url
   },
   calculateURL() {
@@ -145,7 +146,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     // then adding indexes to all items after
     let selectedIndex = -1;
     let firstMatch = false;
-    const searchTermChanged = self._lastSearchTerm !== searchTerm;
+    const searchTermChanged = self.lastSearchTerm !== searchTerm;
     const addSelectedIndex = (item) => {
       if (item?.url) {
         selectedIndex++;
@@ -167,7 +168,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
       });
       return currentMenu;
     });
-    self._lastSearchTerm = searchTerm;
+    self.lastSearchTerm = searchTerm;
     state.maxIndex.set(selectedIndex);
     return menu;
   },
@@ -241,14 +242,17 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     return true;
   },
 
-  isSameURL(url1 = '', url2 = '', startsWith = false) {
-    if (startsWith) {
-      return url2.startsWith(url1);
-    }
-    if (!url1 || !url2) {
+  isSameURL(testUrl = '', baseUrl = null, startsWith = false) {
+    if (baseUrl === null) {
       return false;
     }
-    return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
+    if (startsWith) {
+      return baseUrl.startsWith(testUrl);
+    }
+    if (!testUrl || !baseUrl) {
+      return false;
+    }
+    return self.addTrailingSlash(testUrl) == self.addTrailingSlash(baseUrl);
   },
   isCurrentItem(item) {
     return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
