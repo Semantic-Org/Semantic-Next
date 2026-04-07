@@ -20,6 +20,13 @@ export const COMMENT_MARKER = `sui:${MARKER_VERSION}:`;
 // Marker for block-level directive positions
 export const BLOCK_MARKER = `sui-block:${MARKER_VERSION}:`;
 
+// Marker for raw text element content (script, style, textarea, title)
+export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
+
+// HTML raw text elements — browser treats content as text, not markup
+const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
+const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
+
 /*******************************
     Binding Classification
 *******************************/
@@ -71,15 +78,63 @@ export function buildHTMLString(ast, snippets = {}) {
   const entries = []; // { id, type, node, classification }
   let htmlBuffer = ''; // accumulated HTML for binding classification
 
+  // Raw text element tracking — inside <script>, <style>, etc.
+  // the browser treats content as text, not markup, so comment
+  // markers would become literal text instead of DOM nodes.
+  let insideRawText = false;
+  let rawTextNodes = null; // collected AST nodes for the raw text content
+
+  // Check if buffer has entered/exited a raw text element after html node
+  const updateRawTextState = (html) => {
+    if (!insideRawText) {
+      // Check if we just entered a raw text element (the > that closes its opening tag)
+      const openMatch = html.match(RAW_TEXT_OPEN);
+      if (openMatch) {
+        // Confirm the tag has been closed with >
+        const tagStart = html.lastIndexOf('<' + openMatch[1]);
+        if (tagStart !== -1 && html.indexOf('>', tagStart) !== -1) {
+          insideRawText = true;
+          rawTextNodes = [];
+        }
+      }
+    }
+    else {
+      // Check if we just exited
+      if (RAW_TEXT_CLOSE.test(html)) {
+        // Emit the raw text marker AFTER the closing tag
+        const id = entries.length;
+        htmlString += `<!--${RAW_TEXT_MARKER}${id}-->`;
+        entries.push({ id, type: 'rawText', nodes: rawTextNodes });
+        insideRawText = false;
+        rawTextNodes = null;
+      }
+    }
+  };
+
   const processNodes = (nodes) => {
     for (const node of nodes) {
       switch (node.type) {
         case 'html':
           htmlString += node.html;
           htmlBuffer += node.html;
+          updateRawTextState(htmlBuffer);
           break;
 
         case 'expression': {
+          if (insideRawText) {
+            const classification = analyzePosition(htmlBuffer);
+            if (classification.insideTag) {
+              // Attribute on the raw text element itself — handle normally
+              const id = entries.length;
+              htmlString += `${ATTR_MARKER_PREFIX}${id}${ATTR_MARKER_SUFFIX}`;
+              entries.push({ id, type: 'expression', node, classification });
+            }
+            else {
+              // Content inside raw text — collect, don't emit marker
+              rawTextNodes.push(node);
+            }
+            break;
+          }
           const id = entries.length;
           const classification = analyzePosition(htmlBuffer);
 
@@ -117,6 +172,11 @@ export function buildHTMLString(ast, snippets = {}) {
         }
 
         default: {
+          if (insideRawText) {
+            // Block inside raw text — collect, don't emit marker
+            rawTextNodes.push(node);
+            break;
+          }
           // Block-level directives: if, each, async, rerender, template
           const id = entries.length;
           htmlString += `<!--${BLOCK_MARKER}${id}-->`;

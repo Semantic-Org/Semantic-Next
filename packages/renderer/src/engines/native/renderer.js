@@ -27,6 +27,7 @@ import {
   BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
   COMMENT_MARKER,
+  RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
@@ -277,7 +278,7 @@ export class Renderer {
       }
     }
 
-    // Pass 2: Walk comment nodes for text and block markers
+    // Pass 2: Walk comment nodes for text, block, and raw text markers
     const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
     const commentsToProcess = [];
     let comment;
@@ -287,6 +288,12 @@ export class Renderer {
         const markerID = parseInt(text.slice(COMMENT_MARKER.length));
         if (!isNaN(markerID) && !processedAttrIDs.has(markerID)) {
           commentsToProcess.push({ comment, markerID, type: 'expression' });
+        }
+      }
+      else if (text.startsWith(RAW_TEXT_MARKER)) {
+        const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
+        if (!isNaN(markerID)) {
+          commentsToProcess.push({ comment, markerID, type: 'rawText' });
         }
       }
       else if (text.startsWith(BLOCK_MARKER)) {
@@ -303,10 +310,106 @@ export class Renderer {
       if (type === 'expression') {
         this.bindTextExpression(comment, entry, data, scope);
       }
+      else if (type === 'rawText') {
+        this.bindRawTextContent(comment, entry, data, scope);
+      }
       else if (type === 'block') {
         this.bindBlockDirective(comment, entry, data, scope);
       }
     }
+  }
+
+  /*******************************
+      Raw Text Element Bindings
+  *******************************/
+
+  // Bind reactive content for raw text elements (script, style, textarea, title).
+  // The browser treats their content as text, not markup, so we can't use
+  // comment markers inside them. Instead, the entire content is evaluated
+  // as a string from the collected AST nodes and set via textContent.
+  bindRawTextContent(comment, entry, data, scope) {
+    // Walk backwards past whitespace text nodes to find the raw text element
+    let element = comment.previousSibling;
+    while (element && element.nodeType === Node.TEXT_NODE) {
+      element = element.previousSibling;
+    }
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+      comment.remove();
+      return;
+    }
+
+    comment.remove();
+
+    scope.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !element.isConnected) {
+        comp.stop();
+        return;
+      }
+      element.textContent = this.evaluateRawTextNodes(entry.nodes, data);
+    }));
+  }
+
+  // Evaluate AST nodes into a plain text string — used for content inside
+  // raw text elements where DOM nodes can't exist. Mirrors the ServerRenderer's
+  // evaluation logic but uses the reactive expression evaluator so Signal
+  // dependencies are tracked inside Reactions.
+  evaluateRawTextNodes(nodes, data) {
+    let result = '';
+    for (const node of nodes) {
+      switch (node.type) {
+        case 'html':
+          result += node.html;
+          break;
+        case 'expression':
+          if (node.unsafeHTML) {
+            result += String(this.eval(node.value, data) ?? '');
+          }
+          else {
+            result += String(this.eval(node.value, data) ?? '');
+          }
+          break;
+        case 'if': {
+          const condition = this.eval(node.condition, data);
+          if (condition && node.content) {
+            result += this.evaluateRawTextNodes(node.content, data);
+          }
+          else if (node.branches) {
+            for (const branch of node.branches) {
+              if (branch.type === 'elseif' && this.eval(branch.condition, data)) {
+                result += this.evaluateRawTextNodes(branch.content, data);
+                break;
+              }
+              if (branch.type === 'else') {
+                result += this.evaluateRawTextNodes(branch.content, data);
+                break;
+              }
+            }
+          }
+          break;
+        }
+        case 'each': {
+          const items = this.eval(node.over, data) || [];
+          const list = isArray(items) ? items : arrayFromObject(items);
+          for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            const eachData = node.as
+              ? { ...data, [node.as]: item, [node.indexAs || 'index']: i }
+              : { ...data, ...item, this: item, [node.indexAs || 'index']: i };
+            result += this.evaluateRawTextNodes(node.content, eachData);
+          }
+          break;
+        }
+        case 'template': {
+          const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+          const snippet = this.snippets[templateName];
+          if (snippet) {
+            result += this.evaluateRawTextNodes(snippet.content, data);
+          }
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   /*******************************
