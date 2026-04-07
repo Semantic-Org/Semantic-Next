@@ -875,6 +875,8 @@ export class Renderer {
         if (renderRoot) {
           currentInstance.attach(renderRoot, {
             parentNode: region.parentNode,
+            startNode: region.ownedNodes[0],
+            endNode: region.getLastNode(),
           });
         }
       }
@@ -955,7 +957,11 @@ export class Renderer {
     currentInstance.rendered = true;
     const renderRoot = this.template?.element?.renderRoot;
     if (renderRoot) {
-      currentInstance.attach(renderRoot, { parentNode: region.parentNode });
+      currentInstance.attach(renderRoot, {
+        parentNode: region.parentNode,
+        startNode: region.ownedNodes[0],
+        endNode: region.getLastNode(),
+      });
     }
 
     // Wire the same Reaction as createSubtemplate for future data updates
@@ -1002,7 +1008,13 @@ export class Renderer {
         currentInstance.initialize();
         const templateFragment = currentInstance.render();
         region.setContent(templateFragment);
-        if (renderRoot) { currentInstance.attach(renderRoot, { parentNode: region.parentNode }); }
+        if (renderRoot) {
+          currentInstance.attach(renderRoot, {
+            parentNode: region.parentNode,
+            startNode: region.ownedNodes[0],
+            endNode: region.getLastNode(),
+          });
+        }
       }
       else if (!comp.firstRun) {
         currentInstance.setDataContext(templateData, { rerender: false });
