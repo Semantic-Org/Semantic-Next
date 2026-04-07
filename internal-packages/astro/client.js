@@ -1,11 +1,13 @@
 /*
   Astro client entrypoint for Semantic UI native SSR.
 
-  SUI components self-hydrate — connectedCallback detects DSD content
-  and wires reactive bindings automatically when the element upgrades.
-  This entrypoint handles two things Astro controls:
-  1. client:only — full client render when no server HTML exists
-  2. Forwarding complex props that can't round-trip through HTML attributes
+  Components rendered with a client directive (client:load, client:only)
+  are rendered without the `ssr` attribute so they self-hydrate normally.
+  Server-only components get `ssr` and stay inert.
+
+  This entrypoint handles:
+  1. client:only — full client render (no server HTML)
+  2. client:load — forward complex props after self-hydration
 */
 
 export default (element) => async (Component, props, { default: defaultChildren, ...slotted }, { client }) => {
@@ -40,8 +42,7 @@ export default (element) => async (Component, props, { default: defaultChildren,
 
   // Forward complex props as JS properties — Astro deserializes them
   // from the island, but the component only got string attributes from HTML.
-  // For client:only this already ran above (before connection); for
-  // hydrated components this is the first time props are forwarded.
+  // For client:only this already ran above (before connection).
   if (client !== 'only') {
     for (const [name, value] of Object.entries(props)) {
       component[name] = value;

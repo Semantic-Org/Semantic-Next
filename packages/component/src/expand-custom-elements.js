@@ -15,7 +15,7 @@ const MAX_DEPTH = 10;
   Only tags registered in the component registry are expanded.
   The `renderFn` parameter breaks the circular dependency with renderToString.
 */
-export function expandCustomElements(html, { depth = 0, renderFn } = {}) {
+export function expandCustomElements(html, { depth = 0, hydrate = true, renderFn } = {}) {
   if (depth >= MAX_DEPTH) { return html; }
 
   let result = '';
@@ -80,6 +80,7 @@ export function expandCustomElements(html, { depth = 0, renderFn } = {}) {
     const rendered = renderFn(ComponentClass, attrs, {
       slots: children ? { default: children } : null,
       depth: depth + 1,
+      hydrate,
     });
 
     result += rendered;

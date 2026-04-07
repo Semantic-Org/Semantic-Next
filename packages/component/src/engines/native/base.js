@@ -56,6 +56,13 @@ class WebComponentBase extends HTMLElementBase {
       return;
     }
 
+    // SSR'd components are marked with `ssr` — they should not self-hydrate
+    // when the browser auto-upgrades them. The client integration
+    // removes this attribute and calls connectedCallback explicitly.
+    if (this.hasAttribute('ssr')) {
+      return;
+    }
+
     // DSD creates the shadow root before connectedCallback fires
     const hasServerContent = this.shadowRoot && this.shadowRoot.childNodes.length > 0;
 

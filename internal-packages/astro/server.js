@@ -38,7 +38,7 @@ export default {
     }
     const html = renderToString(Component, props, {
       slots: slotted,
-      hydrate: metadata?.hydrate,
+      hydrate: !!metadata?.hydrate,
     });
     return { html };
   },

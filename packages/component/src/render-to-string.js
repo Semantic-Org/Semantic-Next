@@ -17,7 +17,7 @@ import { expandCustomElements } from './expand-custom-elements.js';
   and connectedCallback hydrates it with reactive bindings.
 */
 
-export function renderToString(ComponentClass, attrs = {}, { slots = null, depth = 0 } = {}) {
+export function renderToString(ComponentClass, attrs = {}, { slots = null, depth = 0, hydrate = true } = {}) {
   const tagName = ComponentClass.componentTagName;
   if (!tagName) {
     throw new Error('renderToString requires a component with a tagName');
@@ -67,7 +67,7 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   let html = template.render();
 
   // Phase 2: expand nested custom elements recursively
-  html = expandCustomElements(html, { depth, renderFn: renderToString });
+  html = expandCustomElements(html, { depth, hydrate, renderFn: renderToString });
 
   // Build attribute string from props using property converters
   const attrString = serializeAttrs(normalizedAttrs, resolvedProperties);
@@ -75,11 +75,13 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   // Build slot HTML for light DOM, expanding any nested custom elements
   let slotHTML = serializeSlots(slots);
   if (slotHTML) {
-    slotHTML = expandCustomElements(slotHTML, { depth: depth + 1, renderFn: renderToString });
+    slotHTML = expandCustomElements(slotHTML, { depth: depth + 1, hydrate, renderFn: renderToString });
   }
 
-  // Wrap in DSD
-  return `<${tagName}${attrString}>`
+  // Wrap in DSD — when hydrate is false, mark as `ssr` so the component
+  // doesn't self-hydrate when another instance loads the JS on the page.
+  const ssrAttr = hydrate ? '' : ' ssr';
+  return `<${tagName}${ssrAttr}${attrString}>`
     + `<template shadowrootmode="open">`
     + (css ? `<style>${css}</style>` : '')
     + html
