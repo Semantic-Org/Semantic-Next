@@ -21,15 +21,10 @@ export default {
   supportsAstroStaticSlot: true,
 
   check(Component) {
-    // Component reference — e.g. <Icon>
-    if (Component?.template?.ast !== undefined) {
-      return true;
-    }
-    // Custom element tag name — e.g. <ui-icon>
-    if (isCustomElementTag(Component)) {
-      return !!getComponent(Component);
-    }
-    return false;
+    // Only claim component class references (e.g. <Icon>) — not raw
+    // custom element tag names (e.g. <ui-icon>). Raw tags should pass
+    // through as plain HTML and self-initialize on the client.
+    return Component?.template?.ast !== undefined;
   },
 
   renderToStaticMarkup(Component, props, slotted, metadata) {
