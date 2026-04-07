@@ -1177,9 +1177,41 @@ export class Renderer {
 
     const attrMarkerRegex = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
 
-    // Walk both trees in parallel (element-only)
+    // Build a set of real DOM elements owned by block regions so we can skip
+    // them during the parallel walk. Block directives (each, if, etc.) are
+    // single comments in the reference DOM but expand to N elements in the
+    // real DOM — skipping them keeps the walkers aligned.
+    const blockOwnedElements = new Set();
+    const blockWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    let blockComment;
+    while ((blockComment = blockWalker.nextNode())) {
+      if (!blockComment.data.startsWith(BLOCK_MARKER)) { continue; }
+      let next = blockComment.nextSibling;
+      let depth = 1;
+      while (next && depth > 0) {
+        if (next.nodeType === Node.COMMENT_NODE) {
+          if (next.data.startsWith(BLOCK_MARKER)) { depth++; }
+          else if (next.data.startsWith('/sui-block:')) { depth--; }
+        }
+        if (depth > 0 && next.nodeType === Node.ELEMENT_NODE) {
+          // Mark this element and all its descendants
+          const innerWalker = document.createTreeWalker(next, NodeFilter.SHOW_ELEMENT);
+          blockOwnedElements.add(next);
+          let inner;
+          while ((inner = innerWalker.nextNode())) { blockOwnedElements.add(inner); }
+        }
+        next = next.nextSibling;
+      }
+    }
+
+    // Walk both trees in parallel (element-only), skipping block-owned real elements
     const refWalker = document.createTreeWalker(refRoot, NodeFilter.SHOW_ELEMENT);
-    const realWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+    const realWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (node) =>
+        blockOwnedElements.has(node)
+          ? NodeFilter.FILTER_SKIP
+          : NodeFilter.FILTER_ACCEPT,
+    });
 
     let refEl, realEl;
     while ((refEl = refWalker.nextNode()) && (realEl = realWalker.nextNode())) {
