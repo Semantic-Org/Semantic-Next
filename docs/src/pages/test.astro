@@ -4,20 +4,47 @@ import '../css/layers.css';
 import '../css/fonts.css';
 import '@semantic-ui/core/icon/sets/lucide.css';
 
-// Named import — side effect should register <ui-icon> via source condition
 import { Icon } from '@semantic-ui/core';
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
-
-  <h3 style="color: white; font-family: sans-serif; margin-top: 24px;">2. Component Reference</h3>
-  <p style="color: #999; font-family: sans-serif;">Direct component usage — tests renderer check() with class</p>
-
-  <Icon icon="heart" />
-
-  <h3 style="color: white; font-family: sans-serif; margin-top: 24px;">3. Bare Side-Effect Import + Tag Name</h3>
-  <p style="color: #999; font-family: sans-serif;">Per-component import, no named binding</p>
-  <ui-icon icon="heart"></ui-icon>
-
+  <h3>Client Only</h3>
+  <span>1.</span> <Icon client:only icon="chevron-down"></Icon>
+  <span>2.</span> <Icon client:only icon="chevron down"></Icon>
+  <span>3.</span> <Icon client:only icon="down-chevron"></Icon>
+  <span>4.</span> <Icon client:only icon="down chevron"></Icon>
+  <span>5.</span> <Icon client:only chevron-down></Icon>
+  <span>6.</span> <Icon client:only chevron-down-icon></Icon>
+  <span>7.</span> <Icon client:only class="chevron-down"></Icon>
+</div>
+<div style="padding: 24px; max-width: 600px;">
+  <h3>Server Only</h3>
+  <span>1.</span> <Icon icon="chevron-down"></Icon>
+  <span>2.</span> <Icon icon="chevron down"></Icon>
+  <span>3.</span> <Icon icon="down-chevron"></Icon>
+  <span>4.</span> <Icon icon="down chevron"></Icon>
+  <span>5.</span> <Icon chevron-down></Icon>
+  <span>6.</span> <Icon chevron-down-icon></Icon>
+  <span>7.</span> <Icon class="chevron-down"></Icon>
+</div>
+<div style="padding: 24px; max-width: 600px;">
+  <h3>Hydrated</h3>
+  <span>1.</span> <Icon client:load icon="chevron-down"></Icon>
+  <span>2.</span> <Icon client:load icon="chevron down"></Icon>
+  <span>3.</span> <Icon client:load icon="down-chevron"></Icon>
+  <span>4.</span> <Icon client:load icon="down chevron"></Icon>
+  <span>5.</span> <Icon client:load chevron-down></Icon>
+  <span>6.</span> <Icon client:load chevron-down-icon></Icon>
+  <span>7.</span> <Icon client:load class="chevron-down"></Icon>
+</div>
+<div style="padding: 24px; max-width: 600px;">
+  <h3>Side Effect Registration</h3>
+  <span>1.</span> <ui-icon icon="chevron-down"></ui-icon>
+  <span>2.</span> <ui-icon icon="chevron down"></ui-icon>
+  <span>3.</span> <ui-icon icon="down-chevron"></ui-icon>
+  <span>4.</span> <ui-icon icon="down chevron"></ui-icon>
+  <span>5.</span> <ui-icon chevron-down></ui-icon>
+  <span>6.</span> <ui-icon chevron-down-icon></ui-icon>
+  <span>7.</span> <ui-icon class="chevron-down"></ui-icon>
 </div>
 </Body>
