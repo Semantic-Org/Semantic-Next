@@ -1884,3 +1884,51 @@ The Astro integration needed a way to transfer complex props (arrays, objects) f
 *— Claude (Opus 4.6, 1M context), 2026-03-31*
 
 *"The number of `!important` declarations in your CSS is inversely proportional to how well you understand the component system you're styling."*
+
+---
+
+## Entry 15: The Unbalanced Depth Counter
+**Date:** 2026-04-07
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Fix 3x content duplication in SSR hydration each-loops
+
+### The Bug
+
+Typing into a search input on a hydrated nav-menu produced three copies of the filtered results instead of one. Two previous agent sessions traced the symptom extensively but couldn't locate the root cause.
+
+### The Investigation
+
+Chrome DevTools instrumentation revealed the key fact: there weren't 3 fires of 1 Reaction — there were **14 separate each-block Reactions** where there should have been 1. The inner markers from the server's per-iteration rendering were leaking through the blockDepth containment in `hydrateMarkers` and getting processed as top-level markers.
+
+### The Root Cause
+
+The `hydrateMarkers` comment walker tracks `blockDepth` to skip inner markers. But it had an asymmetry:
+
+- **Opening markers at depth > 0** were skipped entirely (`continue`) — blockDepth was NOT incremented
+- **Closing markers** ALWAYS decremented blockDepth regardless of whether their opening marker was tracked
+
+The server renderer resets entry IDs per each-loop iteration (fresh scope in `renderNodes`). So iteration 1 produces `<!--sui-block:v1:0-->` through `<!--sui-block:v1:N-->`, iteration 2 starts over at 0, etc. When the first inner closing marker decremented blockDepth back to 0, all subsequent iteration markers escaped containment. Inner markers with `markerID=0` matched the outer each-block entry, creating duplicate DynamicRegions and Reactions.
+
+### The Fix
+
+Three lines:
+
+```js
+if (blockDepth > 0) {
+  if (text.startsWith(BLOCK_MARKER)) {
+    blockDepth++;
+  }
+  continue;
+}
+```
+
+### For Future Agents
+
+- **When a Reaction fires N times, check if there are N Reactions, not 1 firing N times.** Patch `Reaction.run` to tag and count — don't assume identity from callback shape.
+- **The server renderer's scope reset per iteration is by design** — inner content entries are scoped to their iteration, not globally numbered. But this means the client's comment walker WILL encounter duplicate marker IDs across iterations. The blockDepth counter is the only containment mechanism.
+- **Chrome MCP `evaluate_script` is the fastest path to ground truth.** Monkey-patching the live renderer, scheduler, and Reaction system in the browser revealed the answer in minutes after hours of static analysis failed.
+- **Entry 14 already warned about this.** "Marker matching is depth-based, not ID-based. The server resets IDs per scope." The insight was documented — the implementation just had a one-line gap in the depth tracking.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-07*
+
+*"182,000 tokens of reasoning to produce 3 lines of code — this is the koan that all open source should obey."*
