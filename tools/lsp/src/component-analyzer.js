@@ -1,14 +1,13 @@
 import * as acorn from 'acorn';
-import { readFileSync } from 'fs';
-import { dirname, resolve } from 'path';
 
 /*
   Analyzes a Semantic UI component .js file to extract the ComponentModel.
   Uses acorn for AST parsing — lightweight (~200KB vs ~20MB for typescript).
+
+  Takes source text directly — no filesystem access needed.
 */
 
-export function analyzeComponent(filePath) {
-  const source = readFileSync(filePath, 'utf8');
+export function analyzeComponent(source, filePath) {
   let ast;
   try {
     ast = acorn.parse(source, {
@@ -271,7 +270,7 @@ function extractSubTemplateNames(node) {
   Resolves imports for template, spec, and CSS file paths.
 */
 function extractImports(ast, filePath) {
-  const dir = dirname(filePath);
+  const dir = filePath ? pathDirname(filePath) : '';
   const result = { template: null, spec: null, css: null };
 
   for (const stmt of ast.body) {
@@ -284,14 +283,14 @@ function extractImports(ast, filePath) {
       if (specifier.endsWith('?raw')) {
         const cleanPath = specifier.replace('?raw', '');
         if (importName === 'template' || cleanPath.endsWith('.html')) {
-          result.template = resolve(dir, cleanPath);
+          result.template = dir ? pathJoin(dir, cleanPath) : cleanPath;
         }
         else if (importName === 'css' || cleanPath.endsWith('.css')) {
-          result.css = resolve(dir, cleanPath);
+          result.css = dir ? pathJoin(dir, cleanPath) : cleanPath;
         }
       }
       if (importName === 'componentSpec' || specifier.includes('.component')) {
-        result.spec = resolve(dir, specifier);
+        result.spec = dir ? pathJoin(dir, specifier) : specifier;
       }
     }
 
@@ -326,6 +325,18 @@ function extractImports(ast, filePath) {
   }
 
   return result;
+}
+
+// Minimal path ops — no 'path' import needed
+function pathDirname(p) {
+  const i = p.lastIndexOf('/');
+  return i > 0 ? p.substring(0, i) : (i === 0 ? '/' : '');
+}
+
+function pathJoin(dir, file) {
+  // Normalize ./relative paths
+  const cleanFile = file.startsWith('./') ? file.slice(2) : file;
+  return dir.endsWith('/') ? dir + cleanFile : dir + '/' + cleanFile;
 }
 
 /*

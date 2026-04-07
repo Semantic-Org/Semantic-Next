@@ -1,10 +1,8 @@
-import { existsSync, readFileSync } from 'fs';
-import { globSync } from 'glob';
-import { basename, dirname, resolve } from 'path';
-
 /*
   Indexes all Semantic UI component specs for HTML attribute completions.
   Reads both .component.js (structural) and .spec.json (semantic metadata).
+
+  Isomorphic — all file I/O goes through an injected resolver.
 */
 
 export class SpecRegistry {
@@ -14,17 +12,17 @@ export class SpecRegistry {
 
   /*
     Scans a project root for spec files and indexes them by tag name.
+    resolver: { glob(pattern, root), readFile(path), exists(path) }
   */
-  scan(projectRoot) {
-    const componentFiles = globSync('**/specs/*.component.js', {
-      cwd: projectRoot,
-      absolute: true,
-      ignore: ['**/node_modules/**'],
-    });
+  scan(projectRoot, resolver) {
+    if (!resolver) { return; }
+
+    const componentFiles = resolver.glob('**/specs/*.component.js', projectRoot);
 
     for (const componentFile of componentFiles) {
       try {
-        this.indexSpec(componentFile);
+        const source = resolver.readFile(componentFile);
+        this.indexSpec(source, componentFile, resolver);
       }
       catch (e) {
         // Skip malformed spec files
@@ -34,16 +32,22 @@ export class SpecRegistry {
 
   /*
     Indexes a single .component.js file and its corresponding .spec.json.
+    Takes source text and file path. Resolver is used to look up companion .spec.json.
   */
-  indexSpec(componentFilePath) {
-    const compiled = this.readComponentSpec(componentFilePath);
+  indexSpec(componentSource, componentFilePath, resolver) {
+    const compiled = this.readComponentSpec(componentSource);
     if (!compiled?.tagName) { return; }
 
     // Look for corresponding .spec.json
-    const dir = dirname(componentFilePath);
-    const prefix = basename(componentFilePath).replace('.component.js', '');
-    const specJsonPath = resolve(dir, `${prefix}.spec.json`);
-    const sourceSpec = existsSync(specJsonPath) ? this.readSpecJson(specJsonPath) : null;
+    let sourceSpec = null;
+    if (resolver) {
+      const dir = pathDirname(componentFilePath);
+      const prefix = pathBasename(componentFilePath).replace('.component.js', '');
+      const specJsonPath = pathJoin(dir, `${prefix}.spec.json`);
+      if (resolver.exists(specJsonPath)) {
+        sourceSpec = this.readSpecJson(resolver.readFile(specJsonPath));
+      }
+    }
 
     const info = {
       tagName: compiled.tagName,
@@ -73,10 +77,9 @@ export class SpecRegistry {
   }
 
   /*
-    Reads and parses a .component.js file (JSON-like ES module default export).
+    Parses a .component.js source string (JSON-like ES module default export).
   */
-  readComponentSpec(filePath) {
-    let source = readFileSync(filePath, 'utf8');
+  readComponentSpec(source) {
     // Strip leading comments before the export
     source = source.replace(/^\/\/[^\n]*\n/gm, '');
     // .component.js files are `export default { ... }` with JSON-compatible content
@@ -91,11 +94,11 @@ export class SpecRegistry {
   }
 
   /*
-    Reads and parses a .spec.json file.
+    Parses a .spec.json source string.
   */
-  readSpecJson(filePath) {
+  readSpecJson(source) {
     try {
-      return JSON.parse(readFileSync(filePath, 'utf8'));
+      return JSON.parse(source);
     }
     catch {
       return null;
@@ -160,3 +163,8 @@ export class SpecRegistry {
     return [...this.specs.keys()];
   }
 }
+
+// Minimal path ops — no 'path' import needed
+function pathDirname(p) { const i = p.lastIndexOf('/'); return i > 0 ? p.substring(0, i) : '/'; }
+function pathBasename(p) { return p.substring(p.lastIndexOf('/') + 1); }
+function pathJoin(dir, file) { return dir.endsWith('/') ? dir + file : dir + '/' + file; }

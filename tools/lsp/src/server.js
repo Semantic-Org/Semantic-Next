@@ -1,4 +1,3 @@
-import { readFileSync, readdirSync, existsSync } from 'fs';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   createConnection,
@@ -9,6 +8,7 @@ import {
 
 import { LanguageService } from './language-service.js';
 import { analyzeComponent } from './component-analyzer.js';
+import { createNodeResolver } from './node.js';
 
 /*
   VS Code LSP transport — wires LanguageService to the LSP connection.
@@ -19,12 +19,8 @@ const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
 
 const service = new LanguageService({
-  resolver: {
-    readFile: (path) => readFileSync(path, 'utf8'),
-    exists: (path) => existsSync(path),
-    listDir: (path) => readdirSync(path),
-  },
-  analyzer: analyzeComponent,
+  resolver: createNodeResolver(),
+  analyzer: (source, filePath) => analyzeComponent(source, filePath),
 });
 
 connection.onInitialize((params) => {
