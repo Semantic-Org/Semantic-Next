@@ -4,7 +4,7 @@ import '@css/layers.css';
 import '@css/fonts.css';
 import '@semantic-ui/core/icon/sets/lucide.css';
 
-import { Menu } from '@semantic-ui/core';
+import { Icon } from '@semantic-ui/core';
 
 const categoryMenu = [
   { label: 'Guide', href: '/docs/guides', icon: 'book', active: true },
@@ -12,24 +12,5 @@ const categoryMenu = [
 ];
 ---
 <Body class="dark">
-<style>
-  .test-wrapper {
-    padding: 24px;
-    max-width: 400px;
-  }
-  .test-wrapper h2 {
-    color: white;
-    margin-bottom: 16px;
-  }
-</style>
-<div class="test-wrapper">
-  <h2>SSR Hydration Test</h2>
-  <Menu
-    client:load
-    items={categoryMenu}
-    vertical
-    selection
-    dark
-  />
-</div>
+  <Icon icon="left chevron" client:load></Icon>
 </Body>
