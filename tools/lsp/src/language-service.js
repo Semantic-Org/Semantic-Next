@@ -18,7 +18,6 @@ const Kind = {
   EnumMember: 20,
   Event: 23,
 };
-const SnippetFormat = 2;
 const Markdown = 'markdown';
 const Severity = { Error: 1, Warning: 2, Info: 3, Hint: 4 };
 
@@ -225,6 +224,8 @@ function computeCompletions(text, offset, model, specRegistry) {
       return getExpressionCompletions(model, context.prefix);
     case 'block':
       return getBlockCompletions();
+    case 'block-joiner':
+      return context.joiners.map(j => ({ label: j, kind: Kind.Keyword, detail: `${context.keyword} ... ${j}` }));
     case 'reference':
       return getReferenceCompletions(text, model);
     case 'html-attribute':
@@ -287,13 +288,13 @@ function getExpressionCompletions(model, prefix = '') {
 
 function getBlockCompletions() {
   return [
-    { label: 'if', kind: Kind.Keyword, insertText: 'if ${1:condition}}$0{/if}', insertTextFormat: SnippetFormat, detail: 'Conditional block' },
-    { label: 'each', kind: Kind.Keyword, insertText: 'each ${1:item} in ${2:items}}$0{/each}', insertTextFormat: SnippetFormat, detail: 'Loop block' },
-    { label: 'async', kind: Kind.Keyword, insertText: 'async ${1:promise} as ${2:result}}$0{/async}', insertTextFormat: SnippetFormat, detail: 'Async block' },
-    { label: 'snippet', kind: Kind.Keyword, insertText: 'snippet ${1:name}}$0{/snippet}', insertTextFormat: SnippetFormat, detail: 'Reusable template section' },
-    { label: 'rerender', kind: Kind.Keyword, insertText: 'rerender ${1:key}}$0{/rerender}', insertTextFormat: SnippetFormat, detail: 'Force re-render on key change' },
-    { label: 'guard', kind: Kind.Keyword, insertText: 'guard ${1:expression}}$0{/guard}', insertTextFormat: SnippetFormat, detail: 'Re-render only when value changes' },
-    { label: 'html', kind: Kind.Keyword, insertText: 'html ${1:content}}', insertTextFormat: SnippetFormat, detail: 'Raw HTML output' },
+    { label: 'if', kind: Kind.Keyword, detail: 'Conditional block' },
+    { label: 'each', kind: Kind.Keyword, detail: 'Loop block' },
+    { label: 'async', kind: Kind.Keyword, detail: 'Async block' },
+    { label: 'snippet', kind: Kind.Keyword, detail: 'Reusable template section' },
+    { label: 'rerender', kind: Kind.Keyword, detail: 'Force re-render on key change' },
+    { label: 'guard', kind: Kind.Keyword, detail: 'Re-render only when value changes' },
+    { label: 'html', kind: Kind.Keyword, detail: 'Raw HTML output' },
   ];
 }
 

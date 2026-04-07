@@ -4,6 +4,11 @@
   and documentation formatting — no LSP connection dependencies.
 */
 
+const blockJoiners = {
+  each: ['in', 'as'],
+  async: ['as'],
+};
+
 /*
   Determines what kind of completion context the cursor is in.
 */
@@ -28,8 +33,25 @@ export function getCompletionContext(text, offset) {
             // Still typing the keyword: {# or {#if (no space yet)
             return { type: 'block' };
           }
-          // Past the keyword — show expressions for the argument
+          // Past the keyword — check for block-specific joining keywords
           const blockPrefix = afterKeyword.match(/(\w*)$/)?.[1] || '';
+          const joiners = blockJoiners[keyword];
+          if (joiners) {
+            const args = afterKeyword.trimStart();
+            // Check if a joiner keyword has already been typed
+            const hasJoiner = joiners.some(j => new RegExp(`\\b${j}\\b`).test(args));
+            if (!hasJoiner) {
+              // {#each item | or {#each item, i | → suggest joiners
+              // But not right after comma: {#each item,| → naming index variable
+              const endsWithComma = /,\s*$/.test(args.substring(0, args.length - blockPrefix.length));
+              if (!endsWithComma) {
+                const tokens = args.split(/[\s,]+/).filter(Boolean);
+                if (tokens.length >= 1) {
+                  return { type: 'block-joiner', keyword, joiners, prefix: blockPrefix };
+                }
+              }
+            }
+          }
           return { type: 'expression', prefix: blockPrefix };
         }
         if (afterBrace.startsWith('>')) {

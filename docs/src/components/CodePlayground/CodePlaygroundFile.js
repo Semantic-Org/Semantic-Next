@@ -4,8 +4,16 @@ import css from './CodePlaygroundFile.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import codeMirrorCSS from './lib/codemirror.css?raw';
 
+import { acceptCompletion } from '@codemirror/autocomplete';
+import { Prec } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
+
 import { templateLang } from './lang/template-lang.js';
 import { getClient } from './lib/lsp-client.js';
+
+// Highest precedence so it fires before playground-elements' indent handler.
+// acceptCompletion returns false when no completion is active, falling through to indent.
+const tabCompletion = Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }]));
 
 const defaultSettings = {
   lineNumbers: true,
@@ -34,7 +42,7 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
       self.extensionCache[filename] = [];
       return [];
     }
-    const extension = getClient().plugin(filename);
+    const extension = [getClient().plugin(filename), tabCompletion];
     self.extensionCache[filename] = extension;
     return extension;
   },
