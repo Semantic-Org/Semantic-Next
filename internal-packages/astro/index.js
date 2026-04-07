@@ -25,6 +25,14 @@ export default function semanticUI() {
         });
         updateConfig({
           vite: {
+            ssr: {
+              noExternal: [
+                '@semantic-ui/component',
+                '@semantic-ui/renderer',
+                '@semantic-ui/templating',
+                '@semantic-ui/utils',
+              ],
+            },
             optimizeDeps: {
               include: ['@semantic-ui/astro/client'],
               exclude: ['@semantic-ui/astro/server'],
