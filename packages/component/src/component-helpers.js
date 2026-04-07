@@ -14,6 +14,7 @@ import {
   keys,
   unique,
 } from '@semantic-ui/utils';
+import { resolveAllowedValue } from './helpers/resolve-attribute.js';
 
 /*******************************
       Property Configuration
@@ -262,19 +263,59 @@ export function createSettingsProxy(el) {
 }
 
 /*
-  Resolve option attributes (e.g. tiny → size="tiny") in a props object.
+  Resolve option attributes in a props object using the full fuzzing pipeline.
+  Handles all three dialects:
+    - Bare attributes: chevron-down → icon="chevron-down"
+    - Value fuzzing: icon="down chevron" → icon="chevron-down"
+    - Class splitting: class="chevron-down primary" → icon="chevron-down", emphasis="primary"
   Mutates and returns the same object. Shared by renderToString and
   deserializeAttrs so SSR and client agree on attribute resolution.
 */
 export function resolveOptionAttributes(attrs, componentSpec) {
   if (!componentSpec?.optionAttributes) { return attrs; }
+
+  // class splitting — resolve each class token as a bare attribute
+  if (isString(attrs.class)) {
+    each(attrs.class.split(/\s+/), (className) => {
+      const { matchingAttribute, matchingValue } = resolveAllowedValue({
+        optionValue: className,
+        componentSpec,
+      });
+      if (matchingAttribute && matchingValue) {
+        attrs[matchingAttribute] = matchingValue;
+      }
+    });
+    delete attrs.class;
+  }
+
+  // bare attributes — resolve option values used as attribute names
   each(componentSpec.optionAttributes, (targetProp, optionAttr) => {
     const camel = kebabToCamel(optionAttr);
     if (camel in attrs) {
-      attrs[targetProp] = optionAttr;
+      const { matchingAttribute, matchingValue } = resolveAllowedValue({
+        optionValue: optionAttr,
+        componentSpec,
+      });
+      if (matchingAttribute && matchingValue) {
+        attrs[matchingAttribute] = matchingValue;
+      }
       delete attrs[camel];
     }
   });
+
+  // value fuzzing — resolve values on known spec attributes
+  each(componentSpec.attributes, (attribute) => {
+    if (!(attribute in attrs) || !isString(attrs[attribute])) { return; }
+    const { matchingValue } = resolveAllowedValue({
+      attribute,
+      optionValue: attrs[attribute],
+      componentSpec,
+    });
+    if (matchingValue) {
+      attrs[attribute] = matchingValue;
+    }
+  });
+
   return attrs;
 }
 
