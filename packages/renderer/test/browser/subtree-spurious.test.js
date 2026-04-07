@@ -448,5 +448,67 @@ RENDERING_ENGINES.forEach(engine => {
         expect(spyCount).toBe(countAfterRender);
       });
     });
+    /*******************************
+  8. Verbose data=expression
+     Should Re-evaluate ALL
+     Subtemplate Expressions
+*******************************/
+
+    describe('verbose data=expression re-evaluates all expressions', () => {
+      it('changing one field in data blob should re-evaluate all subtemplate expressions', async () => {
+        let labelEvalCount = 0;
+        let statusEvalCount = 0;
+        const tag = uniqueTag();
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{markLabel}{label}</span><span>{markStatus}{status}</span>',
+          createComponent: () => ({
+            markLabel: () => {
+              labelEvalCount++;
+              return '';
+            },
+            markStatus: () => {
+              statusEvalCount++;
+              return '';
+            },
+          }),
+        });
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: "{> template name='child' data=getRow}",
+          subTemplates: { child },
+          createComponent: ({ signal }) => {
+            const row = signal({ label: 'hello', status: 'active' });
+            return {
+              getRow: () => row.get(),
+              updateLabel: (val) => row.set({ ...row.get(), label: val }),
+            };
+          },
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(shadowText(el)).toContain('hello');
+        expect(shadowText(el)).toContain('active');
+        const labelCountAfterRender = labelEvalCount;
+        const statusCountAfterRender = statusEvalCount;
+
+        // change only label — both expressions should re-evaluate
+        // because data=expression is a blob (coarse reactivity)
+        const updated = $(el).onNext('updated');
+        el.component.updateLabel('changed');
+        await updated;
+
+        expect(shadowText(el)).toContain('changed');
+        expect(shadowText(el)).toContain('active');
+        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
+        expect(statusEvalCount).toBeGreaterThan(statusCountAfterRender);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

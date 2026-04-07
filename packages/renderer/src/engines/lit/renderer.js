@@ -333,14 +333,11 @@ export class LitRenderer {
   getPackedNodeData(node, data, { inheritsData = false } = {}) {
     const getPackedData = (unpackedData, options = {}) => {
       let packedData = {};
-      // this is a data object like {> someTemplate data=getData }
-      // we need to get the data first before we can wrap it
+      // this is a data expression like {> someTemplate data=getData }
+      // returns a callable that re-evaluates the expression on each unpack
       if (isString(unpackedData)) {
-        // note this is currently not reactive on the 'getData' expression
-        // so it will be locked in when evaluated
-        const expression = unpackedData; // this is an expression like data=getData
-        unpackedData = this.evaluateExpression(expression, data, options);
-        packedData = mapObject(unpackedData, wrapFunction);
+        const expression = unpackedData;
+        packedData = () => this.evaluateExpression(expression, data, options);
       }
       else if (isPlainObject(unpackedData)) {
         // this is a data object like {> someTemplate data={one: someExpr, two: someExpr } }
@@ -350,6 +347,11 @@ export class LitRenderer {
     };
     const packedStaticData = getPackedData(node.data);
     const packedReactiveData = getPackedData(node.reactiveData, { reactive: true });
+
+    // data expression returns a callable — use it as the entire packed context
+    if (isFunction(packedStaticData) || isFunction(packedReactiveData)) {
+      return isFunction(packedReactiveData) ? packedReactiveData : packedStaticData;
+    }
 
     // only inherit parent data context if specified
     data = {
