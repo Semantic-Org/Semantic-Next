@@ -24,6 +24,13 @@ export default (element) => async (Component, props, { default: defaultChildren,
       })
       .join('');
     component.innerHTML = `${defaultChildren ?? ''}${slotHTML}`;
+
+    // Forward props BEFORE connecting to DOM — connectedCallback triggers
+    // fullRender synchronously, so settings must be populated first
+    for (const [name, value] of Object.entries(props)) {
+      component[name] = value;
+    }
+
     element.appendChild(component);
   }
 
@@ -32,9 +39,13 @@ export default (element) => async (Component, props, { default: defaultChildren,
   }
 
   // Forward complex props as JS properties — Astro deserializes them
-  // from the island, but the component only got string attributes from HTML
-  for (const [name, value] of Object.entries(props)) {
-    component[name] = value;
+  // from the island, but the component only got string attributes from HTML.
+  // For client:only this already ran above (before connection); for
+  // hydrated components this is the first time props are forwarded.
+  if (client !== 'only') {
+    for (const [name, value] of Object.entries(props)) {
+      component[name] = value;
+    }
   }
 
   // Cleanup during View Transitions page swaps
