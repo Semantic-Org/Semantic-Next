@@ -8,6 +8,7 @@
     ".": "./src/server.js",
     "./node": "./src/node.js",
     "./browser": "./src/browser.js",
+    "./browser-client": "./src/browser-client.js",
     "./language-service": "./src/language-service.js",
     "./worker": "./src/worker.js",
     "./component-analyzer": "./src/component-analyzer.js",
@@ -19,6 +20,10 @@
     "sui-lsp": "bin/sui-lsp.js"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.1",
+    "@codemirror/lsp-client": "^6.2.2",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.41.0",
     "acorn": "^8.0.0",
     "glob": "^10.0.0",
     "vscode-languageserver": "^9.0.0",

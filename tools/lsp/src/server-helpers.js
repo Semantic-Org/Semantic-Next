@@ -19,12 +19,39 @@ export function getCompletionContext(text, offset) {
         const afterBrace = text.substring(j + 1, offset).trimStart();
 
         if (afterBrace.startsWith('#')) {
-          return { type: 'block' };
+          // {# or {#partial → show block names
+          // {#if condition → past the keyword, show expressions
+          const blockMatch = afterBrace.match(/^#(\w*)/);
+          const keyword = blockMatch?.[1] || '';
+          const afterKeyword = afterBrace.substring(1 + keyword.length);
+          if (!afterKeyword.match(/\s/)) {
+            // Still typing the keyword: {# or {#if (no space yet)
+            return { type: 'block' };
+          }
+          // Past the keyword — show expressions for the argument
+          const blockPrefix = afterKeyword.match(/(\w*)$/)?.[1] || '';
+          return { type: 'expression', prefix: blockPrefix };
         }
         if (afterBrace.startsWith('>')) {
-          return { type: 'reference' };
+          const refMatch = afterBrace.match(/^>\s*(\w*)/);
+          const refName = refMatch?.[1] || '';
+          const afterRef = afterBrace.substring(1 + (refMatch?.[0].length - 1 || 0));
+          if (!afterRef.match(/\s/)) {
+            // Still typing the name: {> or {>slo
+            return { type: 'reference' };
+          }
+          // Past the name — context depends on what was referenced
+          if (refName === 'slot') {
+            // {>slot name} — no key=value syntax, just an optional slot name
+            return { type: 'none' };
+          }
+          // {>templateName key=value} or {>template name='x'}
+          const refPrefix = afterRef.match(/(\w*)$/)?.[1] || '';
+          return { type: 'expression', prefix: refPrefix };
         }
-        return { type: 'expression' };
+        // Extract the current word being typed for filtering
+        const prefix = afterBrace.match(/(\w*)$/)?.[1] || '';
+        return { type: 'expression', prefix };
       }
     }
     j--;

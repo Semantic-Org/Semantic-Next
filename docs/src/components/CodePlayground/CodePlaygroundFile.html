@@ -1,8 +1,14 @@
 <playground-file-editor
-  class={classMap getClassMap}
   part="file"
   line-numbers
+  no-completions={hasLSP filename}
   project="source"
   filename="{filename}"
+  .extensions={getExtensions filename}
 >
 </playground-file-editor>
+{#if initialized}
+  {#rerender filename}
+    {setSyntax filename}
+  {/rerender}
+{/if}

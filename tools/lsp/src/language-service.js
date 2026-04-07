@@ -25,15 +25,19 @@ const Severity = { Error: 1, Warning: 2, Info: 3, Hint: 4 };
 export class LanguageService {
 
   /*
-    resolver: { readFile(path) → string, exists(path) → bool, listDir(path) → string[], glob(pattern, root) → string[] }
-    analyzer: function(filePath) → ComponentModel (injected to avoid circular dep)
+    resolver: { readFile, exists, listDir, glob }
+    analyzer: function(source, filePath) → ComponentModel
+    compiler: TemplateCompiler class (optional — falls back to dynamic import)
+    warn: function(message) — called when fallback is used or compiler unavailable
   */
-  constructor({ resolver, analyzer } = {}) {
+  constructor({ resolver, analyzer, compiler, warn } = {}) {
     this.resolver = resolver || null;
     this.analyzer = analyzer || null;
+    this._compiler = compiler || null;
+    this._warn = warn || (() => {});
     this.specRegistry = new SpecRegistry();
-    this.documents = new Map();     // uri → { text, version }
-    this.models = new Map();        // uri → ComponentModel
+    this.documents = new Map();
+    this.models = new Map();
   }
 
   /*******************************
@@ -56,7 +60,9 @@ export class LanguageService {
   }
 
   scanSpecs(root) {
-    this.specRegistry.scan(root);
+    if (this.resolver) {
+      this.specRegistry.scan(root, this.resolver);
+    }
   }
 
   /*******************************
@@ -82,7 +88,23 @@ export class LanguageService {
   async getDiagnostics(uri) {
     const doc = this.documents.get(uri);
     if (!doc) { return []; }
-    return computeDiagnostics(doc.text);
+    const Compiler = await this.getCompiler();
+    if (!Compiler) { return []; }
+    return computeDiagnostics(doc.text, Compiler);
+  }
+
+  async getCompiler() {
+    if (this._compiler) { return this._compiler; }
+    try {
+      const mod = await import('@semantic-ui/templating');
+      this._compiler = mod.TemplateCompiler;
+      this._warn('TemplateCompiler resolved via dynamic import (no injected compiler)');
+      return this._compiler;
+    }
+    catch {
+      this._warn('TemplateCompiler unavailable — diagnostics disabled');
+      return null;
+    }
   }
 
   /*******************************
@@ -99,7 +121,8 @@ export class LanguageService {
     if (!jsFile) { return null; }
 
     try {
-      const model = this.analyzer(jsFile);
+      const source = this.resolver.readFile(jsFile);
+      const model = this.analyzer(source, jsFile);
       this.models.set(uri, model);
       return model;
     }
@@ -199,11 +222,11 @@ function computeCompletions(text, offset, model, specRegistry) {
 
   switch (context.type) {
     case 'expression':
-      return getExpressionCompletions(model);
+      return getExpressionCompletions(model, context.prefix);
     case 'block':
       return getBlockCompletions();
     case 'reference':
-      return getReferenceCompletions(model);
+      return getReferenceCompletions(text, model);
     case 'html-attribute':
       return getAttributeCompletions(context.tagName, specRegistry);
     case 'attribute-value':
@@ -215,7 +238,7 @@ function computeCompletions(text, offset, model, specRegistry) {
   }
 }
 
-function getExpressionCompletions(model) {
+function getExpressionCompletions(model, prefix = '') {
   const items = [];
   if (model) {
     for (const method of model.instance) {
@@ -227,29 +250,35 @@ function getExpressionCompletions(model) {
       });
     }
     for (const field of model.state) {
+      const def = field.defaultValue != null ? ` = ${JSON.stringify(field.defaultValue)}` : '';
       items.push({
         label: field.name,
         kind: Kind.Property,
-        detail: `state: ${field.inferredType}`,
+        detail: `state: ${field.inferredType}${def}`,
         sortText: '1' + field.name,
       });
     }
     for (const field of model.settings) {
+      const def = field.defaultValue != null ? ` = ${JSON.stringify(field.defaultValue)}` : '';
       items.push({
         label: field.name,
         kind: Kind.Property,
-        detail: `setting: ${field.inferredType}`,
+        detail: `setting: ${field.inferredType}${def}`,
         sortText: '1' + field.name,
       });
     }
   }
-  for (const name of Object.keys(helpers)) {
-    items.push({
-      label: name,
-      kind: Kind.Function,
-      detail: formatHelperSignature(name),
-      sortText: '2' + name,
-    });
+  // Only show helpers once the user has started typing — avoids flooding
+  // the list with 50+ global helpers when opening a fresh expression
+  if (prefix.length > 0) {
+    for (const name of Object.keys(helpers)) {
+      items.push({
+        label: name,
+        kind: Kind.Function,
+        detail: formatHelperSignature(name),
+        sortText: '2' + name,
+      });
+    }
   }
   return items;
 }
@@ -266,13 +295,26 @@ function getBlockCompletions() {
   ];
 }
 
-function getReferenceCompletions(model) {
-  const items = [{ label: 'slot', kind: Kind.Keyword, detail: 'Content projection slot' }];
+function getReferenceCompletions(text, model) {
+  const items = [
+    { label: 'template', kind: Kind.Keyword, detail: 'Verbose subtemplate ({>template name=\'x\' data={...}})' },
+    { label: 'slot', kind: Kind.Keyword, detail: 'Content projection slot' },
+  ];
+
+  // Snippet names defined in the current template
+  const snippetPattern = /\{#snippet\s+(\w+)\}/g;
+  let match;
+  while ((match = snippetPattern.exec(text)) !== null) {
+    items.push({ label: match[1], kind: Kind.Reference, detail: 'Snippet' });
+  }
+
+  // Subtemplate names from component model
   if (model) {
     for (const name of Object.keys(model.subTemplates)) {
       items.push({ label: name, kind: Kind.Reference, detail: 'Subtemplate' });
     }
   }
+
   return items;
 }
 
@@ -359,10 +401,9 @@ function computeHover(text, offset, model) {
     Pure Diagnostics
 *******************************/
 
-async function computeDiagnostics(text) {
+function computeDiagnostics(text, TemplateCompiler) {
   const diagnostics = [];
   try {
-    const { TemplateCompiler } = await import('@semantic-ui/templating');
     const compiler = new TemplateCompiler(text);
     compiler.compile();
   }

@@ -33,7 +33,7 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
+      dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element', '@codemirror/state', '@codemirror/view', '@codemirror/language', '@codemirror/autocomplete'],
     },
     define: {
       PACKAGE_VERSION: JSON.stringify(packageVersion),

@@ -4,6 +4,7 @@ import { each, firstMatch, get, idleCallback, inArray, moveToFront, sortBy } fro
 import { CodePlaygroundFile } from './CodePlaygroundFile.js';
 import { CodePlaygroundPanel } from './CodePlaygroundPanel.js';
 import { CodePlaygroundPreview } from './CodePlaygroundPreview.js';
+import { getClient } from './lib/lsp-client.js';
 
 import '@semantic-ui/core/button';
 
@@ -197,6 +198,9 @@ const createComponent = (
 
     // current files tracks file modifications
     state.currentFiles.set(files);
+
+    // send files to LSP worker for component analysis
+    getClient().setFiles(files);
 
     // select first file for left tabs
     const initialFile = self.getFirstFile({
