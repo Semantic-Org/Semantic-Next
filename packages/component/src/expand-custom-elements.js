@@ -66,6 +66,14 @@ export function expandCustomElements(html, { depth = 0, renderFn } = {}) {
       afterElement = close.end;
     }
 
+    // Skip elements that already have a DSD — Astro pre-renders child
+    // components before passing them as slot content to parents
+    if (children.trimStart().startsWith('<template shadowrootmode')) {
+      result += html.slice(tagStart, afterElement);
+      pos = afterElement;
+      continue;
+    }
+
     // Convert parsed attributes to a props object using the component's property types
     const attrs = deserializeAttrs(openTag.attrs, ComponentClass);
 
