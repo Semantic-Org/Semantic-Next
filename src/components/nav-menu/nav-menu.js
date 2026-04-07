@@ -27,7 +27,6 @@ const defaultState = {
 
 const createComponent = ({ $, el, self, settings, state, reaction, isRendered }) => ({
   initialize() {
-    console.log('url is', settings.activeURL, el);
     reaction(self.calculateURL); // track current url
   },
   calculateURL() {
