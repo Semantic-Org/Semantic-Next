@@ -22,7 +22,7 @@ export const tokenizeSpaces = (string) => {
   Pure resolution: given an option value and optional attribute context,
   find the matching canonical attribute and value from the component spec.
 
-  Used by adjustPropertyFromAttribute (client) and resolveOptionAttributes (SSR).
+  Used by adjustPropertyFromAttribute (client) and resolveAttributeAliases (SSR/getData).
 */
 export const resolveAllowedValue = ({ attribute, optionValue, componentSpec }) => {
   if (!componentSpec?.optionAttributes) {

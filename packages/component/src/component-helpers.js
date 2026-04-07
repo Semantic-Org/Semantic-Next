@@ -263,15 +263,20 @@ export function createSettingsProxy(el) {
 }
 
 /*
-  Resolve option attributes in a props object using the full fuzzing pipeline.
-  Handles all three dialects:
-    - Bare attributes: chevron-down → icon="chevron-down"
-    - Value fuzzing: icon="down chevron" → icon="chevron-down"
-    - Class splitting: class="chevron-down primary" → icon="chevron-down", emphasis="primary"
-  Mutates and returns the same object. Shared by renderToString and
-  deserializeAttrs so SSR and client agree on attribute resolution.
+  Resolve attribute aliases — the fuzzy matching that lets users write attributes
+  in any of SUI's supported forms and have them resolve to canonical spec values.
+
+  "Alias" here means any non-canonical form that maps to a spec attribute:
+    - Value fuzzing: icon="down chevron" → icon="chevron-down" (spaces, reversed segments)
+    - Bare attributes: <ui-icon chevron-down> → icon="chevron-down" (optionAttributes lookup)
+    - Compound aliases: <ui-icon chevron-down-icon> → icon="chevron-down" (suffix extraction)
+    - Class dialect: class="chevron-down primary" → icon="chevron-down", emphasis="primary"
+
+  Mutates and returns the same object. Shared across SSR (renderToString),
+  client hydration (expandCustomElements), and reactive rendering (getData)
+  so all paths agree on attribute resolution.
 */
-export function resolveOptionAttributes(attrs, componentSpec) {
+export function resolveAttributeAliases(attrs, componentSpec) {
   if (!componentSpec?.optionAttributes) { return attrs; }
 
   // class splitting — resolve each class token as a bare attribute

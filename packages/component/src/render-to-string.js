@@ -1,5 +1,5 @@
 import { camelToKebab, each, isFunction, kebabToCamel } from '@semantic-ui/utils';
-import { getUIClasses, resolveOptionAttributes } from './component-helpers.js';
+import { getUIClasses, resolveAttributeAliases } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
 
 /*
@@ -41,8 +41,8 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
     normalizedAttrs[kebabToCamel(key)] = value;
   });
 
-  // Resolve option attributes (e.g. tiny → size="tiny")
-  resolveOptionAttributes(normalizedAttrs, componentSpec);
+  // Resolve attribute aliases (value fuzzing, bare attrs, class splitting)
+  resolveAttributeAliases(normalizedAttrs, componentSpec);
 
   // Merge spec defaults, component defaults, and attributes
   const specDefaults = componentSpec?.defaultValues || {};
