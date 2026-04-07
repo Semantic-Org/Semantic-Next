@@ -16,7 +16,6 @@
       {/if}
       {#if canShowButtons}
         <div class="buttons">
-          <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode"></ui-menu>
           {#if both allowLayoutSwap (isMode 'split')}
             <ui-button transparent class="tabs">
               {#if is layout 'tabs'}
@@ -26,6 +25,7 @@
               {/if}
             </ui-button>
           {/if}
+          <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode"></ui-menu>
         </div>
       {/if}
     </div>

@@ -4,8 +4,12 @@ import '@css/layers.css';
 import '@css/fonts.css';
 import '@semantic-ui/core/icon/sets/lucide.css';
 
-// Import components to test here
-// import { NavMenu, Menu } from '@semantic-ui/core';
+import { Menu } from '@semantic-ui/core';
+
+const categoryMenu = [
+  { label: 'Guide', href: '/docs/guides', icon: 'book', active: true },
+  { label: 'API Reference', href: '/docs/api', icon: 'code' },
+];
 ---
 <Body class="dark">
 <style>
@@ -20,6 +24,11 @@ import '@semantic-ui/core/icon/sets/lucide.css';
 </style>
 <div class="test-wrapper">
   <h2>SSR Server Test</h2>
-  <!-- Place test component here (no client:load — pure SSR) -->
+  <Menu
+    items={categoryMenu}
+    vertical
+    selection
+    dark
+  />
 </div>
 </Body>
