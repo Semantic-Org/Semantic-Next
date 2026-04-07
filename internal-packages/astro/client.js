@@ -40,12 +40,15 @@ export default (element) => async (Component, props, { default: defaultChildren,
     return;
   }
 
-  // Forward complex props as JS properties — Astro deserializes them
-  // from the island, but the component only got string attributes from HTML.
-  // For client:only this already ran above (before connection).
+  // Forward complex props that can't round-trip through HTML attributes.
+  // String/boolean/number props are already correct from server-rendered
+  // attributes and alias resolution — overwriting them would clobber
+  // fuzzed values (e.g. "chevron down" overwriting "chevron-down").
   if (client !== 'only') {
     for (const [name, value] of Object.entries(props)) {
-      component[name] = value;
+      if (typeof value === 'object' || typeof value === 'function') {
+        component[name] = value;
+      }
     }
   }
 
