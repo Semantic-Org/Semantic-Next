@@ -195,11 +195,11 @@ class WebComponentBase extends HTMLElementBase {
 
     const propName = kebabToCamel(attribute);
     const config = resolvedProperties[propName];
-    if (config?.converter?.fromAttribute) {
-      newValue = config.converter.fromAttribute(newValue, config.type);
-    }
+    const convertedValue = config?.converter?.fromAttribute
+      ? config.converter.fromAttribute(newValue, config.type)
+      : newValue;
     if (config && !config.noAccessor) {
-      this[propName] = newValue;
+      this[propName] = convertedValue;
     }
 
     // During hydration, attribute parsing fires for every server-rendered
