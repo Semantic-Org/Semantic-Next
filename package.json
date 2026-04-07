@@ -16,6 +16,7 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
+      "source": "./src/index.js",
       "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",

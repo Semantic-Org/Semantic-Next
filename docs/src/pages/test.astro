@@ -2,92 +2,22 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
+import '@semantic-ui/core/icon/sets/lucide.css';
+
+// Named import — side effect should register <ui-icon> via source condition
+import { Icon } from '@semantic-ui/core';
 ---
 <Body class="dark">
 <div style="padding: 24px; max-width: 600px;">
-  <h2 style="color: white; font-family: sans-serif;">Native Renderer — Spec-Driven Component</h2>
 
-  <div style="display: flex; gap: 12px; margin: 16px 0;">
-    <ui-widget>Default</ui-widget>
-    <ui-widget primary>Primary</ui-widget>
-    <ui-widget large>Large</ui-widget>
-    <ui-widget large primary>Large Primary</ui-widget>
-    <ui-widget size="small">Small</ui-widget>
-    <ui-widget emphasis="secondary">Secondary</ui-widget>
-    <ui-widget class="large primary">Class Syntax</ui-widget>
-  </div>
+  <h3 style="color: white; font-family: sans-serif; margin-top: 24px;">2. Component Reference</h3>
+  <p style="color: #999; font-family: sans-serif;">Direct component usage — tests renderer check() with class</p>
 
-  <pre id="log" style="color: #0f0; margin-top: 20px; font-size: 14px;"></pre>
+  <Icon icon="heart" />
+
+  <h3 style="color: white; font-family: sans-serif; margin-top: 24px;">3. Bare Side-Effect Import + Tag Name</h3>
+  <p style="color: #999; font-family: sans-serif;">Per-component import, no named binding</p>
+  <ui-icon icon="heart"></ui-icon>
+
 </div>
-
-<script>
-  import { defineComponent } from '@semantic-ui/component';
-  import { SpecReader } from '@semantic-ui/specs';
-
-  const widgetSpec = {
-    uiType: 'element',
-    name: 'Widget',
-    tagName: 'ui-widget',
-    types: [],
-    states: [],
-    variations: [
-      {
-        name: 'Size',
-        attribute: 'size',
-        options: [
-          { name: 'Small', value: 'small' },
-          { name: 'Large', value: 'large' },
-        ],
-      },
-      {
-        name: 'Emphasis',
-        attribute: 'emphasis',
-        includeAttributeClass: true,
-        options: [
-          { name: 'Primary', value: 'primary' },
-          { name: 'Secondary', value: 'secondary' },
-        ],
-      },
-    ],
-    settings: [],
-    events: [],
-  };
-
-  const reader = new SpecReader(widgetSpec);
-  const componentSpec = reader.getWebComponentSpec();
-
-  defineComponent({
-    tagName: 'ui-widget',
-    renderingEngine: 'native',
-    componentSpec,
-    template: '<span class="{ui}widget"><slot></slot></span>',
-    css: `
-      .widget {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 4px;
-        background: #555;
-        color: white;
-        font-family: sans-serif;
-      }
-      .primary { background: #3498db; }
-      .secondary { background: #9b59b6; }
-      .small { font-size: 12px; }
-      .large { font-size: 20px; }
-    `,
-  });
-
-  const log = (msg) => {
-    document.getElementById('log').textContent += msg + '\n';
-  };
-
-  setTimeout(() => {
-    const widgets = document.querySelectorAll('ui-widget');
-    widgets.forEach((el, i) => {
-      const span = el.shadowRoot?.querySelector('span');
-      const cls = span?.className || 'no span';
-      log(`Widget ${i}: class="${cls}" text="${el.textContent.trim()}"`);
-    });
-  }, 200);
-</script>
 </Body>

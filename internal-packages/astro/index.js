@@ -25,12 +25,12 @@ export default function semanticUI() {
         });
         updateConfig({
           vite: {
+            resolve: {
+              conditions: ['source'],
+            },
             ssr: {
               noExternal: [
-                '@semantic-ui/component',
-                '@semantic-ui/renderer',
-                '@semantic-ui/templating',
-                '@semantic-ui/utils',
+                /^@semantic-ui\//,
               ],
             },
             optimizeDeps: {
