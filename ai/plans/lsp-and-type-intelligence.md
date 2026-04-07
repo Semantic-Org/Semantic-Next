@@ -156,7 +156,8 @@ Historical data: completed plans came in 2-5x under estimate for mechanical work
 - Playground integration: reactive extensions, syntax highlighting, file sync
 - Context-aware completions: expressions (with helper filtering), blocks, references, attributes, event bindings
 - Hover for helpers, settings, state, instance methods with default values
-- Diagnostics from template compiler
+- Diagnostics from template compiler (single-error-at-{0,0} — per-error positioned diagnostics pending `recoverable` mode in published compiler)
+- Tag name completions from spec registry (`<ui-` → all registered component tags)
 - Node server (`server.js`): vscode-languageserver/node.js transport
 - VS Code extension scaffolding
 

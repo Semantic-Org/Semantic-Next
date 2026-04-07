@@ -231,6 +231,8 @@ function computeCompletions(text, offset, model, specRegistry) {
       return getAttributeCompletions(context.tagName, specRegistry);
     case 'attribute-value':
       return getAttributeValueCompletions(context.tagName, context.attributeName, specRegistry);
+    case 'html-tag':
+      return getTagNameCompletions(specRegistry);
     case 'event-binding':
       return getEventBindingCompletions();
     default:
@@ -364,6 +366,19 @@ function getEventBindingCompletions() {
     'keydown', 'keyup', 'keypress', 'input', 'change', 'focus', 'blur', 'submit',
     'touchstart', 'touchend', 'touchmove', 'scroll', 'wheel', 'contextmenu'];
   return events.map(e => ({ label: e, kind: Kind.Event, detail: `@${e} event binding` }));
+}
+
+function getTagNameCompletions(specRegistry) {
+  if (!specRegistry) { return []; }
+  return specRegistry.getTagNames().map(tag => {
+    const spec = specRegistry.get(tag);
+    return {
+      label: tag,
+      kind: Kind.Property,
+      detail: spec?.description || '',
+      sortText: tag,
+    };
+  });
 }
 
 /*******************************
