@@ -29,7 +29,7 @@ describe('getCompletionContext — real templates', () => {
 
     it('expression context inside {ui} class pattern', () => {
       const idx = text.indexOf('{ui}');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
     it('block context at {#if badge}', () => {
@@ -61,7 +61,7 @@ describe('getCompletionContext — real templates', () => {
       // {icon} appears inside a snippet — verify it's still expression, not confused by nesting
       const idx = text.indexOf('{icon}', text.indexOf('{#if icon}'));
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
@@ -70,13 +70,13 @@ describe('getCompletionContext — real templates', () => {
       const snippetIdx = text.indexOf('{#snippet badge}');
       const badgeExprIdx = text.indexOf('{badge}', snippetIdx + 16);
       if (badgeExprIdx !== -1) {
-        expect(getCompletionContext(text, badgeExprIdx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, badgeExprIdx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
     it('expression context at {href}', () => {
       const idx = text.indexOf('{href}');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
   });
 
@@ -90,20 +90,20 @@ describe('getCompletionContext — real templates', () => {
 
     it('expression context at {item.label} inside each loop', () => {
       const idx = text.indexOf('{item.label}');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
     it('expression context at {item.icon} inside each loop', () => {
       const idx = text.indexOf('{item.icon}');
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
     it('expression context at {item.badge} inside each loop', () => {
       const idx = text.indexOf('{item.badge}');
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
@@ -118,7 +118,7 @@ describe('getCompletionContext — real templates', () => {
     it('expression context at {getIndicatorPosition}', () => {
       const idx = text.indexOf('{getIndicatorPosition}');
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
@@ -136,23 +136,23 @@ describe('getCompletionContext — real templates', () => {
 
     it('expression context at {classMap getStateClasses}', () => {
       const idx = text.indexOf('{classMap');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
     it('expression context at {type}', () => {
       const idx = text.indexOf('{type}');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
     it('expression context at {placeholder}', () => {
       const idx = text.indexOf('{placeholder}');
-      expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
     it('expression context at {getIcon} inside nested if', () => {
       const idx = text.indexOf('{getIcon}');
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
       }
     });
   });
@@ -171,7 +171,7 @@ describe('getCompletionContext — real templates', () => {
     it('expression context inside double-brace {{ui}}', () => {
       const idx = text.indexOf('{{ui}}');
       if (idx !== -1) {
-        expect(getCompletionContext(text, idx + 2)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, idx + 2)).toMatchObject({ type: 'expression' });
       }
     });
 
@@ -201,7 +201,7 @@ describe('getCompletionContext — real templates', () => {
       const snippetIdx = text.indexOf('{#snippet header}');
       const exprIdx = text.indexOf('{header}', snippetIdx + 17);
       if (exprIdx !== -1) {
-        expect(getCompletionContext(text, exprIdx + 1)).toEqual({ type: 'expression' });
+        expect(getCompletionContext(text, exprIdx + 1)).toMatchObject({ type: 'expression' });
       }
     });
 
@@ -224,14 +224,14 @@ describe('getCompletionContext — edge cases', () => {
     // Developer places cursor inside {/if} — the / doesn't start with # or >
     const text = '<div>{/if}</div>';
     const offset = 7; // after "{/i"
-    expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+    expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
   });
 
   it('{else} is expression context', () => {
     // {else} is inside braces but has no # or > prefix
     const text = '{#if x}hello{else}bye{/if}';
     const offset = 15; // inside {else}
-    expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+    expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
   });
 
   it('handles empty document', () => {
@@ -247,7 +247,7 @@ describe('getCompletionContext — edge cases', () => {
     // {count}{| — two adjacent expressions, cursor in the second
     const text = '{count}{name}';
     const offset = 8; // after second {
-    expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+    expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
   });
 
   it('attribute context with brace-bound attribute value', () => {

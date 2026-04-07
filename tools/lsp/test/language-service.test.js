@@ -60,7 +60,8 @@ describe('LanguageService', () => {
       const names = items.map(i => i.label);
       expect(names).toContain('isIconBefore');
       expect(names).toContain('performAction');
-      expect(names).toContain('classIf'); // helpers too
+      // helpers excluded on empty prefix (by design — reduces noise)
+      expect(names).not.toContain('classIf');
     });
 
     it('returns state fields for menu component', () => {

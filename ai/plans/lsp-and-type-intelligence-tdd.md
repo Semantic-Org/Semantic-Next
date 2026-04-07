@@ -449,59 +449,100 @@ Bidirectional: given a `.html` file, find the `.js` file that imports it (for Co
 ## Package Structure
 
 ```
-tools/vscode-extension/
-├── package.json                 ← VS Code extension manifest
-├── sui.tmlanguage.json          ← TextMate grammar (syntax highlighting)
-├── language-configuration.json  ← bracket matching, auto-close for SUI blocks
+tools/lsp/                              ← @semantic-ui/lsp — transport-agnostic core
 ├── src/
-│   ├── extension.ts             ← extension activation, starts LSP client + TS plugin
-│   ├── server/
-│   │   ├── server.ts            ← LSP server entry point
-│   │   ├── template-service.ts  ← completions, hover, diagnostics for .html
-│   │   ├── spec-registry.ts     ← indexes *.component.js files
-│   │   └── helper-registry.ts   ← static helper map
-│   ├── ts-plugin/
-│   │   ├── index.ts             ← TS plugin entry (PluginModule)
-│   │   └── host-proxy.ts        ← LanguageServiceHost interception
-│   └── shared/
-│       ├── component-analyzer.ts ← parses .js → ComponentModel
-│       └── types.ts              ← ComponentModel, MethodInfo, etc.
-└── test/
+│   ├── language-service.js             ← stateful LanguageService class (zero transport deps)
+│   │                                      owns: documents, models, specs, position conversion
+│   │                                      takes: injected resolver + analyzer
+│   ├── component-analyzer.js           ← pure: source text → ComponentModel (acorn-based)
+│   ├── helper-registry.js              ← pure: static helper signatures (~50 helpers)
+│   ├── spec-registry.js                ← pure: spec indexing (resolver-backed)
+│   ├── server-helpers.js               ← pure: context detection, word extraction, doc formatting
+│   │
+│   ├── server.js                       ← Node transport: vscode-languageserver/node.js
+│   ├── node.js                         ← Node service factory: fs-backed resolver
+│   ├── browser.js                      ← Browser service factory: in-memory resolver
+│   ├── browser-client.js               ← Browser CM6 client: Worker + @codemirror/lsp-client
+│   └── worker.js                       ← Browser Worker: JSON-RPC/postMessage → LanguageService
+│
+├── editors/vscode/                     ← VS Code extension
+│   ├── package.json                    ← extension manifest
+│   ├── sui.tmlanguage.json             ← TextMate grammar
+│   ├── src/extension.js                ← language client activation
+│   └── server/server.js                ← thin: imports from tools/lsp/src
+│
+├── test/                               ← Vitest suites (node environment, no VS Code needed)
+└── package.json                        ← workspace package, exports per-module
 ```
 
-Lives in `tools/` because it's developer tooling, not a published package consumed by end users. Uses `@semantic-ui/compiler` as a dependency for template parsing.
+**Design principle:** The five core modules (`language-service`, `component-analyzer`, `helper-registry`, `spec-registry`, `server-helpers`) have zero Node, browser, or editor dependencies. All I/O is through an injected `resolver` interface. This enables:
+- Node server (editor extensions): fs-backed resolver
+- Browser Worker (playground): in-memory resolver backed by `sui/setFiles` notification
+- Future Rust/WASM: same interface, different implementation
+
+**Playground integration** (`docs/src/components/CodePlayground/`):
+- `lib/lsp-client.js` — singleton wrapper over `createClient()` from `browser-client.js`
+- `CodePlayground.js` — calls `getClient().setFiles(files)` on load
+- `CodePlaygroundFile.js` — sets `.extensions={getExtensions filename}` and `no-completions={hasLSP filename}` on `<playground-file-editor>`
+- `CodePlaygroundFile.html` — reactive syntax setup via `{#rerender filename}{setSyntax filename}{/rerender}` guarded by `{#if initialized}`
 
 ## Phasing
 
-### Phase 0 — Ship types + tmLanguage (~1d pair)
-- Ship `.d.ts` generic fixes: settings, state, self (events/lifecycle), ThisType escape hatch
-- Extend `sui.tmlanguage.json` with missing syntax
-- Immediate value, zero tooling dependency
+### Phase 0 — Ship types + tmLanguage (~1d) ✅ COMPLETE
+- `.d.ts` generic fixes: settings, state, self (events/lifecycle), ThisType escape hatch
+- `sui.tmlanguage.json` extended with async, snippet, guard, rerender, html, slot, event syntax
 
-### Phase 1 — ComponentAnalyzer + TS plugin (~4-6d pair)
-- ComponentAnalyzer: parse .js files -> ComponentModel (using TS compiler API)
-- TS LanguageServiceHost plugin for typed `self` in createComponent
+### Phase 0.5 — Template LSP + playground integration (~3d) ✅ COMPLETE
+- Transport-agnostic `LanguageService` class with injected resolver
+- `ComponentAnalyzer`: acorn-based (replaced TypeScript parser — 28MB → 2MB heap)
+- `HelperRegistry` + `SpecRegistry`: pure, resolver-backed
+- Node server: `vscode-languageserver/node.js` transport
+- Browser Worker: JSON-RPC over postMessage
+- Browser client: `@codemirror/lsp-client` + Worker transport + `toURI` normalization
+- Playground integration validated:
+  - `.extensions` property for CM6 extension injection (replaces, not accumulates)
+  - Language compartment duck-typing for syntax highlighting (playground-elements internal)
+  - `requestAnimationFrame` deferral for post-setState timing
+  - `no-completions` to prevent duplicate autocompletion plugins
+  - Vite `resolve.dedupe` for CM6 singleton guarantee
+  - `sui/setFiles` for in-memory ComponentModel resolution
+  - Helper filtering: excluded on empty prefix, included on 1+ chars
+- Context-aware completions: expressions, blocks, references (`template` + `slot` + snippets + subtemplates), attributes, values, event bindings
+- Hover for helpers, settings (with defaults), state (with defaults), instance methods
+- Diagnostics from template compiler
+
+### Phase 1 — JS intelligence + playground dogfooding (~4-6d)
+
+JS completions for `self.`, `settings.`, `state.` inside component files. **The playground is the primary testbed** — validate in-browser before shipping to editors.
+
+**Scope:**
+- Extend `LanguageService.getCompletions`/`getHover` for JS contexts (createComponent, events, lifecycle callbacks)
+- Use `ComponentAnalyzer` model to provide contextual completions (not raw TS global dump)
+- TS LanguageServiceHost plugin for typed `self` in createComponent (VS Code only)
 - Virtual type module generation per component
 - Go-to-definition from `self.method()` to createComponent return
 - Event DSL string validation
-- This is the exploratory phase -- shared core that everything builds on
 
-### Phase 2 — Template LSP foundation (~2-3d pair)
-- LSP server scaffolding (vscode-languageserver)
-- Compiler: add `includePositions` and `recoverable` to `compile()`
-- Diagnostics from compiler (recoverable mode)
-- SpecRegistry + HTML attribute/value/optionAttribute completions
-- Helper completions with signatures
-- Block completions and auto-close
-- Snippet/subtemplate name completions
+**Playground integration:**
+- Same Worker + `browser-client.js` path as templates — no new plumbing
+- Set `no-completions` on JS files too (replaces playground-elements' low-quality TS completions)
+- `ComponentAnalyzer` already receives JS files via `sui/setFiles`
+- Test against playground examples first (counter, todo-list, product-card)
 
-### Phase 3 — Cross-file template intelligence (~4-6d pair)
-- Template data context completions (settings + state + instance, flat)
-- Scope chain for each/async/snippet variables
-- Go-to-definition (template -> JS)
+**Dogfooding principle:** If it doesn't work in the browser Worker, it won't work in Rust/WASM either. The playground enforces the abstraction.
+
+### Phase 2 — Cross-file template intelligence (~4-6d)
+- Scope chain (each/async/snippet variables)
+- Go-to-definition (template → JS)
 - Hover for data context names + spec descriptions from .spec.json
+- Snippet parameter completions from call sites
 
-**Total: ~11-16d** (calibrated from historical actuals -- completed plans came in 2-5x under estimate for mechanical work, ~1x for exploratory)
+### Phase 3 — Native binary + distribution (future)
+- Rewrite core in Rust → native binary (editor LSP) + WASM (browser Worker)
+- Single codebase, two compile targets
+- The TDD is the spec — JS and Rust are parallel outputs from it
+
+**Total: ~12-16d** (calibrated). Phases 0 + 0.5 complete.
 
 ## Testing
 
@@ -682,20 +723,20 @@ SUITE: TS plugin — state typing
 All LSP tests are **node** environment (no DOM, no browser). The ComponentAnalyzer, template completions, and spec registry are pure logic — they parse source files and return data structures. No VS Code or running LSP server needed.
 
 Tests follow the monorepo's Vitest conventions:
-- `test/*.test.js` in the `tools/vscode-extension/` package → node environment
+- `test/*.test.js` in `tools/lsp/` → node environment
 - Import from package names where possible
 - Use `describe` / `it` / `expect` from vitest
 - TS plugin tests instantiate `ts.createLanguageService` with the plugin applied
 
 ```bash
 # Run all LSP tests
-cd tools/vscode-extension && npm test
+cd tools/lsp && npm test
 
 # Run a specific suite
-cd tools/vscode-extension && npx vitest run test/template-completions.test.js
+cd tools/lsp && npx vitest run test/template-completions.test.js
 
 # Watch mode during development
-cd tools/vscode-extension && npm run test:watch
+cd tools/lsp && npm run test:watch
 ```
 
 ### Fixture design

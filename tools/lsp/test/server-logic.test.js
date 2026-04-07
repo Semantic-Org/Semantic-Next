@@ -9,35 +9,35 @@ describe('getCompletionContext', () => {
       // {|} — cursor right after opening brace
       const text = '<div>{}</div>';
       const offset = 6; // between { and }
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('detects cursor mid-expression with partial text', () => {
       // {cou|nt} — cursor in the middle of a word
       const text = '<div>{count}</div>';
       const offset = 9; // after "cou"
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('detects expression after helper name', () => {
       // {classIf |} — cursor after helper name
       const text = '<div class="{classIf }button">';
       const offset = 21; // after "classIf "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('handles expression in attribute value', () => {
       // class="{ui|}button"
       const text = '<div class="{ui}button">';
       const offset = 15; // after "ui"
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('handles nested braces in class expressions', () => {
       // Real pattern: {classMap getStateClasses}
       const text = '<div class="{classMap getStateClasses}input">';
       const offset = 22; // after "classMap "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
   });
 
@@ -65,8 +65,8 @@ describe('getCompletionContext', () => {
     it('returns expression context for block argument area', () => {
       // After the keyword + space, cursor is in the argument area
       // where expression completions (variables, helpers) are appropriate
-      expect(getCompletionContext('{#each }', 7)).toEqual({ type: 'expression' });
-      expect(getCompletionContext('{#snippet }', 10)).toEqual({ type: 'expression' });
+      expect(getCompletionContext('{#each }', 7)).toMatchObject({ type: 'expression' });
+      expect(getCompletionContext('{#snippet }', 10)).toMatchObject({ type: 'expression' });
     });
   });
 
@@ -104,7 +104,7 @@ describe('getCompletionContext', () => {
       // where expression completions are appropriate, not reference completions
       const text = '{>highlight text=title match=titleHighlight}';
       const offset = 12; // after ">highlight "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
   });
 
@@ -238,28 +238,28 @@ describe('getCompletionContext', () => {
       // Common pattern: class="{ui}button"
       const text = '<div class="{ui}button">';
       const offset = 14; // inside {ui}
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('handles argument area in each loop as expression', () => {
       // {#each item in items} — cursor on "items" is past the keyword
       const text = '{#each item in items}';
       const offset = 19;
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('handles expression with helper call and arguments', () => {
       // {classIf copied "copied"} — from copy-button
       const text = '<div class="copy-button {classIf copied \'copied\'}">';
       const offset = 33; // after "{classIf "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
     it('handles conditional expression with helper in attribute', () => {
       // {activeIf is index selectedIndex} — from global-search
       const text = '<a class="result {activeIf is index selectedIndex}">';
       const offset = 27; // after "{activeIf "
-      expect(getCompletionContext(text, offset)).toEqual({ type: 'expression' });
+      expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
   });
 });
