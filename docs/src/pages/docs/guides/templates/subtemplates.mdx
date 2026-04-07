@@ -4,6 +4,9 @@ title: Subtemplates
 description: Using subtemplate syntax from inside templates
 ---
 import PlaygroundExample from '@components/PlaygroundExample/PlaygroundExample.astro';
+import Blockquote from '@components/mdx/Blockquote.astro';
+
+export const components = { blockquote: Blockquote };
 
 Sub templates let you render components from inside another component. This lets you scale your architecture for complex apps.
 
@@ -21,7 +24,7 @@ The simplest way to specify a subtemplate is to include the template name and it
 
 ### Shorthand with Data Object
 
-If you would like to return the data context as an object [from an expression](/docs/guides/templates/expressions) you can do that using the `data` property.
+If you would like to return the data context as an object [from an expression](/docs/guides/templates/expressions) you can use the `data` property. The returned object becomes the subtemplate's data context, and the expression is re-evaluated reactively when dependencies change.
 
 ```javascript title='component.js'
 const createInstance = ({ self }) => ({
@@ -42,7 +45,7 @@ const createInstance = ({ self }) => ({
 
 Verbose syntax uses the syntax `{> template name=templateName data=someData}` and allows you to more explicitly define the name and data for a subtemplate. When using verbose expressions you can use an inline object for data or an expression.
 
-> **Name Syntax** Be sure to use `'` to enclose template names that are strings when using the name syntax, otherwise it will look for an expression called `userProfile` to evaluate
+> **Expression Evaluation** - Remember expressions are evaluated in templates, adding `'userID'` will pass in the text `userID`, while `userID` will pass in the value for `userID`
 
 ```sui
 {> template
@@ -89,9 +92,53 @@ You can see an [example of this in action below](#advanced-example).
 
 ## Data Reactivity
 
-### Reactive vs Nonreactive Data
+### Default Behavior
 
-By default all data passed into subtemplates is not automatically reactive. Reactivity is `opt in` and only supported in the verbose syntax. You can use the `reactiveData` syntax for data which you would like to be rendered in a reactive context
+Data passed into subtemplates is **reactive by default**. When the underlying data changes, the subtemplate updates automatically.
+
+```sui
+{> userProfile name=user.name age=user.age}
+```
+
+If `user.name` changes, the subtemplate re-renders with the new value. This is true for both shorthand props and shorthand `data=` expressions.
+
+> **Reactive doesn't mean re-rendered** - When data changes, only the specific expressions that reference that data are updated — the rest of the subtemplate's DOM is left untouched. Focus, scroll position, and input state are all preserved.
+
+
+
+### Surgical vs Coarse Updates
+
+How you pass data determines how granularly the subtemplate responds to changes.
+
+**Individual props** give you surgical updates — each value is tracked independently. Changing `name` won't cause `age` to re-evaluate.
+
+```sui
+{> todoItem title=todo.title completed=todo.completed}
+```
+
+**A data expression** treats the returned object as a single unit. If any part of the object changes, all expressions in the subtemplate re-evaluate.
+
+```sui
+{> todoItem data=(getTodo id)}
+```
+
+Use individual props when the subtemplate is rendered many times (like items in a list) and performance matters. Use a data expression when convenience matters more than granularity.
+
+### Static Data in Verbose Syntax
+
+In verbose syntax, inline data objects using `data={...}` are **static** — they are evaluated once and do not update reactively.
+
+```sui
+{> template
+  name='userProfile'
+  data={
+    name: getFullname(user.id),
+    age: user.age
+  }
+}
+```
+
+To make individual values in a verbose object reactive, use `reactiveData`:
 
 ```sui
 {> template
@@ -104,7 +151,17 @@ By default all data passed into subtemplates is not automatically reactive. Reac
     age: user.age
   }
 }
+```
 
+Here `isLoggedIn` will update when the signal changes, while `name` and `age` remain fixed at their initial values.
+
+Verbose syntax also supports reactive data expressions, which behave the same as the shorthand `data=` form — the entire object re-evaluates as a unit:
+
+```sui
+{> template
+  name='userProfile'
+  data=getUserData
+}
 ```
 
 ## Examples
@@ -128,12 +185,12 @@ data = {
 <PlaygroundExample id="subtemplates" height="800" direction="vertical"></PlaygroundExample>
 
 
-This could also have been written with a helper that returns the data context `getRowData`
+This could also have been written with a helper that returns the data context. This form is reactive — when the data changes, the subtemplate updates.
 ```sui title="Data Helper Syntax"
 {>row data=getRowData}
 ```
 
-Or using a verbose syntax that specifies the template name explicitly
+Or using verbose syntax that specifies the template name explicitly. Note that verbose `data={...}` with an inline object is static — see [Data Reactivity](#data-reactivity) for details.
 ```sui title="Verbose Syntax"
 {> template
   name='row'
