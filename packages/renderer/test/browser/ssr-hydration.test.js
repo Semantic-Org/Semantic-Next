@@ -1114,9 +1114,6 @@ describe('SSR hydration — createComponent lifecycle', () => {
     expect(renderedRan).toBe(true);
   });
 
-  // TODO: _isHydrating flag not propagated through callback params during hydration init
-  it.todo('isHydrating is true during initialize');
-
   it('isHydrating is false after hydration completes', async () => {
     let hydrating = null;
     const el = await ssrAndHydrate({

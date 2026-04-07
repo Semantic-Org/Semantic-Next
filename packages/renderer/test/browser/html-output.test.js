@@ -1621,9 +1621,7 @@ RENDERING_ENGINES.forEach(engine => {
        Subtemplate event scoping
     *******************************/
 
-    // Native renderer uses DOM range boundaries for event scoping;
-    // Lit renderer uses a different mechanism — skip for Lit.
-    (engine === 'native' ? describe : describe.skip)('subtemplate event delegation boundaries', () => {
+    describe('subtemplate event delegation boundaries', () => {
       it('subtemplate event handler fires for clicks inside its own DOM', async () => {
         let childClicks = 0;
 
