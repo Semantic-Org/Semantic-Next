@@ -513,6 +513,101 @@ describe('Attribute Alias Resolution', () => {
   });
 
   /*******************************
+     Reactive Attribute Updates
+  *******************************/
+
+  describe('reactive attribute updates', () => {
+    it('should fuzz verbose value on setAttribute after initial render', async () => {
+      const tag = uniqueTag();
+      const componentSpec = createIconLikeSpec();
+      defineComponent({
+        tagName: tag,
+        template: '<i class="{icon}"></i>',
+        componentSpec,
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('icon', 'chevron-down');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-down');
+
+      el.setAttribute('icon', 'up chevron');
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-up');
+    });
+
+    it('should fuzz reversed value on setAttribute after initial render', async () => {
+      const tag = uniqueTag();
+      const componentSpec = createIconLikeSpec();
+      defineComponent({
+        tagName: tag,
+        template: '<i class="{icon}"></i>',
+        componentSpec,
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('icon', 'chevron-down');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-down');
+
+      el.setAttribute('icon', 'up-chevron');
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-up');
+    });
+
+    it('should swap concise bare attributes reactively', async () => {
+      const tag = uniqueTag();
+      const componentSpec = createIconLikeSpec();
+      defineComponent({
+        tagName: tag,
+        template: '<i class="{icon}"></i>',
+        componentSpec,
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('chevron-down', '');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-down');
+
+      el.removeAttribute('chevron-down');
+      el.setAttribute('chevron-up', '');
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-up');
+    });
+
+    it('should swap class attribute reactively', async () => {
+      const tag = uniqueTag();
+      const componentSpec = createIconLikeSpec();
+      defineComponent({
+        tagName: tag,
+        template: '<i class="{icon}"></i>',
+        componentSpec,
+      });
+
+      const el = document.createElement(tag);
+      el.setAttribute('class', 'chevron-down');
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-down');
+
+      el.setAttribute('class', 'chevron-up');
+      await el.updateComplete;
+
+      expect(el.settings.icon).toBe('chevron-up');
+    });
+  });
+
+  /*******************************
      Template as Setting
   *******************************/
 
