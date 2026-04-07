@@ -71,8 +71,11 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   // Build attribute string from props using property converters
   const attrString = serializeAttrs(normalizedAttrs, resolvedProperties);
 
-  // Build slot HTML for light DOM
-  const slotHTML = serializeSlots(slots);
+  // Build slot HTML for light DOM, expanding any nested custom elements
+  let slotHTML = serializeSlots(slots);
+  if (slotHTML) {
+    slotHTML = expandCustomElements(slotHTML, { depth: depth + 1, renderFn: renderToString });
+  }
 
   // Wrap in DSD
   return `<${tagName}${attrString}>`
