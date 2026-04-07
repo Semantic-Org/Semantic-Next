@@ -122,15 +122,9 @@ class WebComponentBase extends HTMLElementBase {
 
     // Build entries for hydration (same marker IDs the server produced).
     // Cache on the prototype — entries depend only on AST structure, not data.
-    // buildHTMLString also populates renderer.snippets as a side-effect,
-    // so cache those too and apply to each instance's renderer.
     if (!prototypeTemplate._hydrationEntries) {
-      const { entries, snippets } = this.template.renderer.buildHTMLString(this.template.ast);
+      const { entries } = this.template.renderer.buildHTMLString(this.template.ast);
       prototypeTemplate._hydrationEntries = entries;
-      prototypeTemplate._hydrationSnippets = snippets;
-    }
-    else {
-      Object.assign(this.template.renderer.snippets, prototypeTemplate._hydrationSnippets);
     }
     const entries = prototypeTemplate._hydrationEntries;
 

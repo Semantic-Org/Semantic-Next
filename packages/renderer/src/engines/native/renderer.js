@@ -44,6 +44,7 @@ export class Renderer {
     this.template = template;
     this.subTemplates = subTemplates;
     this.snippets = snippets || {};
+    this.collectSnippets(this.ast);
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.inheritsData = inheritsData;
@@ -65,6 +66,16 @@ export class Renderer {
         this.template?.onUpdated?.();
       }, 0);
     };
+  }
+
+  // Register snippet definitions from the AST. The compiler hoists
+  // snippets to the front, so a top-level scan is sufficient.
+  collectSnippets(ast) {
+    for (const node of ast) {
+      if (node.type === 'snippet') {
+        this.snippets[node.name] = node;
+      }
+    }
   }
 
   // Evaluate an expression with dataVersion tracking for subtree propagation

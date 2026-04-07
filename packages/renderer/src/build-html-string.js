@@ -102,8 +102,8 @@ export function buildHTMLString(ast, snippets = {}) {
         }
 
         case 'snippet':
-          // Register snippet immediately so it's available for later {>name} references
-          snippets[node.name] = node;
+          // Snippet definitions don't produce HTML — the renderer
+          // collects them from the AST during construction.
           break;
 
         case 'slot': {
