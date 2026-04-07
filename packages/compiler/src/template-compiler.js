@@ -93,9 +93,7 @@ class TemplateCompiler {
   compile(templateString = this.templateString, { includePositions = false, recoverable = false } = {}) {
     this.includePositions = includePositions;
     this.recoverable = recoverable;
-    if (!this.errors) {
-      this.errors = [];
-    }
+    this.errors = [];
 
     if (!isString(templateString)) {
       if (recoverable) {
