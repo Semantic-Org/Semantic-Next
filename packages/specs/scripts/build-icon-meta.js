@@ -16,11 +16,15 @@ for (const [name, mapping] of Object.entries(iconMappings)) {
   }
 }
 
+const singleQuoteJSON = (value, indent) => {
+  return JSON.stringify(value, null, indent).replace(/"/g, "'");
+};
+
 const out = [
   '// Auto-generated — do not edit',
-  `export const iconNames = ${JSON.stringify(names, null, 2)};`,
+  `export const iconNames = ${singleQuoteJSON(names, 2)};`,
   '',
-  `export const iconAliasGroups = ${JSON.stringify(aliasGroups)};`,
+  `export const iconAliasGroups = ${singleQuoteJSON(aliasGroups)};`,
   '// Grouped format reduces bundle size ~40% vs flat object — expanded once at module load',
   'function expandAliases(groups) {',
   '  const aliases = {};',
