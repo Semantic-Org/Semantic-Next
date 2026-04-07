@@ -44,8 +44,9 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
   // Resolve option attributes (e.g. tiny → size="tiny")
   resolveOptionAttributes(normalizedAttrs, componentSpec);
 
-  // Merge attributes with defaults
-  const data = { ...defaultSettings, ...normalizedAttrs };
+  // Merge spec defaults, component defaults, and attributes
+  const specDefaults = componentSpec?.defaultValues || {};
+  const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
 
   // Clone prototype template with the data context.
   // Force native engine — ServerRenderer handles string output.
