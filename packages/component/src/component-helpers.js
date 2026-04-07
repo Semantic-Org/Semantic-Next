@@ -281,6 +281,7 @@ export function resolveAttributeAliases(attrs, componentSpec) {
 
   // class splitting — resolve each class token as a bare attribute
   if (isString(attrs.class)) {
+    const unresolved = [];
     each(attrs.class.split(/\s+/), (className) => {
       const { matchingAttribute, matchingValue } = resolveAllowedValue({
         optionValue: className,
@@ -289,8 +290,16 @@ export function resolveAttributeAliases(attrs, componentSpec) {
       if (matchingAttribute && matchingValue) {
         attrs[matchingAttribute] = matchingValue;
       }
+      else {
+        unresolved.push(className);
+      }
     });
-    delete attrs.class;
+    if (unresolved.length) {
+      attrs.class = unresolved.join(' ');
+    }
+    else {
+      delete attrs.class;
+    }
   }
 
   // bare attributes — resolve option values used as attribute names
