@@ -1295,3 +1295,67 @@ describe('SSR hydration — snippet reactivity', () => {
     expect(el.shadowRoot.querySelector('span').textContent).toBe('ON');
   });
 });
+
+/*******************************
+     Attribute alignment
+     across block directives
+*******************************/
+
+describe('SSR hydration — attribute alignment across blocks', () => {
+  it('should bind attributes after {#each} to the correct elements', async () => {
+    const el = await ssrAndHydrate({
+      template: [
+        '<div>',
+        '{#each item in items}<span class="item">{item}</span>{/each}',
+        '<span class="after" data-value="{label}">after</span>',
+        '</div>',
+      ].join(''),
+      createComponent: () => ({
+        items: ['a', 'b', 'c'],
+        label: 'correct',
+      }),
+    });
+
+    // The expression after the each should bind to .after, not to an each item
+    const afterEl = el.shadowRoot.querySelector('.after');
+    expect(afterEl.getAttribute('data-value')).toBe('correct');
+
+    // Each items should not have data-value
+    const items = el.shadowRoot.querySelectorAll('.item');
+    expect(items.length).toBe(3);
+    expect(items[0].hasAttribute('data-value')).toBe(false);
+  });
+
+  it('should bind attributes after nested {#each} to correct elements', async () => {
+    const el = await ssrAndHydrate({
+      template: [
+        '<svg viewBox="0 0 100 100">',
+        '{#each major in majors}',
+        '<line class="major" transform="{getRotation major}"></line>',
+        '{#each minor in minors}',
+        '<line class="minor" transform="{getMinorRotation major minor}"></line>',
+        '{/each}',
+        '{/each}',
+        '<line class="hand" transform="{handTransform}"></line>',
+        '</svg>',
+      ].join(''),
+      createComponent: () => ({
+        majors: [0, 1, 2],
+        minors: [1, 2],
+        getRotation: (m) => `rotate(${m * 120})`,
+        getMinorRotation: (m, offset) => `rotate(${m * 120 + offset * 30})`,
+        handTransform: 'rotate(90)',
+      }),
+    });
+
+    // The hand element after nested each loops should have its own transform
+    const hand = el.shadowRoot.querySelector('.hand');
+    expect(hand.getAttribute('transform')).toBe('rotate(90)');
+
+    // Verify markers got their own transforms, not the hand's
+    const majors = el.shadowRoot.querySelectorAll('.major');
+    expect(majors[0].getAttribute('transform')).toBe('rotate(0)');
+    expect(majors[1].getAttribute('transform')).toBe('rotate(120)');
+    expect(majors[2].getAttribute('transform')).toBe('rotate(240)');
+  });
+});
