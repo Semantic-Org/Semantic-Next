@@ -106,7 +106,7 @@ export class Renderer {
 
   readAST({ ast, data, scope, isSVG = this.isSVG }) {
     // Phase 1: Build a single HTML string with markers for everything
-    const { htmlString, entries } = this.buildHTMLString(ast);
+    const { htmlString, entries } = this.buildHTMLString(ast, isSVG);
 
     if (!htmlString && entries.length === 0) {
       return document.createDocumentFragment();
@@ -125,8 +125,8 @@ export class Renderer {
       Phase 1: HTML String Assembly
   *******************************/
 
-  buildHTMLString(ast) {
-    return buildHTMLStringPure(ast, this.snippets);
+  buildHTMLString(ast, isSVG) {
+    return buildHTMLStringPure(ast, this.snippets, { isSVG });
   }
 
   /*******************************
@@ -457,31 +457,31 @@ export class Renderer {
   *******************************/
 
   bindBlockDirective(comment, entry, data, scope) {
-    const { node } = entry;
+    const { node, isSVG } = entry;
     // The comment sits exactly where the block directive should render.
     // Its parentNode is the correct containing element.
     const parentNode = comment.parentNode;
 
     switch (node.type) {
       case 'if':
-        this.createConditional({ node, data, scope, parentNode, marker: comment });
+        this.createConditional({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'each':
-        this.createEach({ node, data, scope, parentNode, marker: comment });
+        this.createEach({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'async':
-        this.createAsync({ node, data, scope, parentNode, marker: comment });
+        this.createAsync({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'rerender':
-        this.createRerender({ node, data, scope, parentNode, marker: comment });
+        this.createRerender({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
-          this.createSnippet({ node, data, scope, parentNode, marker: comment, templateName });
+          this.createSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
         }
         else {
-          this.createSubtemplate({ node, data, scope, parentNode, marker: comment });
+          this.createSubtemplate({ node, data, scope, parentNode, marker: comment, isSVG });
         }
         break;
       }
@@ -495,7 +495,7 @@ export class Renderer {
         Conditional Rendering
   *******************************/
 
-  createConditional({ node, data, scope, parentNode, marker }) {
+  createConditional({ node, data, scope, parentNode, marker, isSVG }) {
     // Use the comment marker as the anchor — replace with a persistent text node
     const region = new DynamicRegion(parentNode, null);
     region.anchor = document.createTextNode('');
@@ -515,7 +515,7 @@ export class Renderer {
         currentBranchIndex = result.matchIndex;
         if (result.contentAST) {
           const branchScope = scope.child();
-          const branchFragment = this.readAST({ ast: result.contentAST, data, scope: branchScope });
+          const branchFragment = this.readAST({ ast: result.contentAST, data, scope: branchScope, isSVG });
           region.setContent(branchFragment, branchScope);
         }
         else {
@@ -550,7 +550,7 @@ export class Renderer {
         List Rendering
   *******************************/
 
-  createEach({ node, data, scope, parentNode, marker }) {
+  createEach({ node, data, scope, parentNode, marker, isSVG }) {
     const region = new DynamicRegion(parentNode, null);
     region.anchor = document.createTextNode('');
     marker.replaceWith(region.anchor);
@@ -574,7 +574,7 @@ export class Renderer {
         currentKeys = [];
         if (!showingElse) {
           const elseScope = scope.child();
-          const elseFragment = this.readAST({ ast: node.elseContent, data, scope: elseScope });
+          const elseFragment = this.readAST({ ast: node.elseContent, data, scope: elseScope, isSVG });
           region.setContent(elseFragment, elseScope);
           showingElse = true;
         }
@@ -628,6 +628,7 @@ export class Renderer {
             ast: node.content,
             data: itemProxy,
             scope: itemScope,
+            isSVG,
           });
           const nodes = [...itemFragment.childNodes];
           insertAfter.after(itemFragment);
@@ -696,7 +697,7 @@ export class Renderer {
         Async Rendering
   *******************************/
 
-  createAsync({ node, data, scope, parentNode, marker }) {
+  createAsync({ node, data, scope, parentNode, marker, isSVG }) {
     const region = new DynamicRegion(parentNode, null);
     region.anchor = document.createTextNode('');
     marker.replaceWith(region.anchor);
@@ -712,6 +713,7 @@ export class Renderer {
         ast,
         data: { ...data, ...extraData },
         scope: stateScope,
+        isSVG,
       });
       region.setContent(stateFragment, stateScope);
     };
@@ -777,14 +779,14 @@ export class Renderer {
         Rerender/Guard
   *******************************/
 
-  createRerender({ node, data, scope, parentNode, marker }) {
+  createRerender({ node, data, scope, parentNode, marker, isSVG }) {
     const region = new DynamicRegion(parentNode, null);
     region.anchor = document.createTextNode('');
     marker.replaceWith(region.anchor);
 
     // Initial render
     const initialScope = scope.child();
-    const initialFragment = this.readAST({ ast: node.content, data, scope: initialScope });
+    const initialFragment = this.readAST({ ast: node.content, data, scope: initialScope, isSVG });
     region.setContent(initialFragment, initialScope);
 
     scope.track(Reaction.create((comp) => {
@@ -802,7 +804,7 @@ export class Renderer {
 
       if (!comp.firstRun) {
         const newScope = scope.child();
-        const newFragment = this.readAST({ ast: node.content, data, scope: newScope });
+        const newFragment = this.readAST({ ast: node.content, data, scope: newScope, isSVG });
         region.setContent(newFragment, newScope);
       }
     }));
@@ -812,7 +814,7 @@ export class Renderer {
         Subtemplates
   *******************************/
 
-  createSubtemplate({ node, data, scope, parentNode, marker }) {
+  createSubtemplate({ node, data, scope, parentNode, marker, isSVG }) {
     const region = new DynamicRegion(parentNode, null);
     region.anchor = document.createTextNode('');
     marker.replaceWith(region.anchor);
@@ -1034,7 +1036,7 @@ export class Renderer {
         Snippets
   *******************************/
 
-  createSnippet({ node, data, scope, parentNode, marker, templateName }) {
+  createSnippet({ node, data, scope, parentNode, marker, templateName, isSVG }) {
     const snippet = this.snippets[templateName];
     if (!snippet) {
       fatal(`Snippet "${templateName}" not found`);
@@ -1091,6 +1093,7 @@ export class Renderer {
       ast: snippet.content,
       data: snippetData,
       scope,
+      isSVG,
     });
 
     // Replace marker with snippet content

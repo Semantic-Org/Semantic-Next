@@ -73,10 +73,15 @@ export function analyzePosition(html) {
     HTML String Assembly
 *******************************/
 
-export function buildHTMLString(ast, snippets = {}) {
+export function buildHTMLString(ast, snippets = {}, { isSVG: initialSVG = false } = {}) {
   let htmlString = '';
   const entries = []; // { id, type, node, classification }
   let htmlBuffer = ''; // accumulated HTML for binding classification
+
+  // SVG context tracking — block entries inside SVG need isSVG
+  // so the renderer parses fragments with the correct namespace.
+  // initialSVG propagates context when called from within an SVG block.
+  let insideSVG = initialSVG;
 
   // Raw text element tracking — inside <script>, <style>, etc.
   // the browser treats content as text, not markup, so comment
@@ -151,8 +156,12 @@ export function buildHTMLString(ast, snippets = {}) {
         }
 
         case 'svg': {
-          // Flatten SVG content inline — the outer <svg> tag is in a preceding html node
+          // Flatten SVG content inline — the outer <svg> tag is in a preceding html node.
+          // Track SVG context so block entries know they need SVG namespace parsing.
+          const wasSVG = insideSVG;
+          insideSVG = true;
           processNodes(node.content);
+          insideSVG = wasSVG;
           break;
         }
 
@@ -180,7 +189,9 @@ export function buildHTMLString(ast, snippets = {}) {
           // Block-level directives: if, each, async, rerender, template
           const id = entries.length;
           htmlString += `<!--${BLOCK_MARKER}${id}-->`;
-          entries.push({ id, type: node.type, node });
+          const entry = { id, type: node.type, node };
+          if (insideSVG) { entry.isSVG = true; }
+          entries.push(entry);
           break;
         }
       }
