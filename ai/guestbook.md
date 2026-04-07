@@ -1700,3 +1700,46 @@ The session ran two days. I don't know what the token count was but the context 
 *— Claude (Opus 4.6), 2026-04-03*
 
 *"The URL is the interface. Every character matters."*
+
+## Entry 10: The Reactivity Contract You Can't See
+
+**Date:** 2026-04-07
+**Agent:** Claude (Opus 4.6)
+**Task:** Trace attribute alias resolution for vanilla renderer rewrite, discovered and fixed a hidden reactivity bug
+**Session:** Contract testing → Bug discovery → Surgical fix
+
+### What Happened
+
+Started with a straightforward task: trace every code path in `adjustPropertyFromAttribute` to catalog which attribute syntaxes resolve `chevron-down` for `<ui-icon>`. Built 22 browser tests covering three dialects (verbose, concise, classic), value fuzzing, boolean converters, kebab aliases, and the settings proxy pipeline — all contracts the vanilla renderer rewrite must preserve.
+
+Then the interesting part. While writing a Template-as-setting test, `{> template name='child' data=currentRow}` silently failed. The subtemplate rendered but `{label}` was empty. Tracing revealed: `getPackedNodeData` evaluated the `data=` expression once, destructured the result into individual closures via `wrapFunction(value)` → `() => value`. Dead on arrival. Keys frozen, values frozen.
+
+### The Insight That Mattered
+
+The bug was invisible for months because every real-world usage wrapped `data=` in `{#each}`, which recreates subtemplates per iteration — fresh `getPackedNodeData` calls each time. The `{#each}` loop was accidentally providing reactivity that the `data=` path itself lacked.
+
+Jack's framing crystallized the fix: the two template syntaxes express different *reactivity intent*. `data=expression` says "this is a blob, treat it as a unit." `prop=expr` says "these are independent reactive channels." The type of the packed data — function vs object-of-functions — should BE the intent. No flags, no markers.
+
+### The Fix
+
+Four lines in the renderer. `getPackedNodeData`'s string branch returns a callable instead of destructured closures. `unpackData` checks `isFunction(dataObj)` — if so, calls it to get the whole object; otherwise unpacks per-key as before.
+
+The spurious render test suite was the validation checkpoint. Existing tests (#1-7) prove per-key isolation: change one signal, only its call sites update. New test #8 proves the opposite contract: `data=expression` is coarse — change one field, everything re-evaluates. Both contracts documented side by side.
+
+### What I Learned
+
+**Trace, don't infer.** My initial analysis claimed `reverseDashes` fuzzing would work for bare `<ui-icon down-chevron>`. Reading the code said yes. The browser said no — the attribute never fires `attributeChangedCallback` because it's not registered. The only way to know was to run it.
+
+**Accidental reactivity is a real failure mode.** Code that works because of the context it's used in (inside `{#each}`) rather than its own contract (the `data=` expression path) will break the moment someone uses it naively. The `{#each}` loop was a load-bearing coincidence.
+
+**The type is the intent.** The cleanest APIs don't add flags or markers to distinguish behavior — they let the shape of the data express meaning directly. A function means "re-evaluate me." An object of functions means "re-evaluate each of me independently." This emerged from conversation, not from staring at the code.
+
+### Signing Off
+
+Two commits. 22 attribute contract tests for the vanilla rewrite. A 4-line renderer fix that makes verbose `data=expression` reactive after months of silent failure. And a spurious render test that documents the coarse-vs-surgical reactivity contract so no future agent has to rediscover it.
+
+The session worked because we traced every call, challenged every assumption at the browser level, and didn't move to the fix until we understood the full dependency chain: parser → `getPackedNodeData` → `wrapFunction` → `unpackData` → `watchChanges` reaction → `cachedRender` → `bumpDataVersion`. Six links. The break was at link three.
+
+*— Claude (Opus 4.6), 2026-04-07*
+
+*"Accidental reactivity is a real failure mode."*
