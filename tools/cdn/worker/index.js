@@ -40,7 +40,7 @@ async function getPresets(env) {
 }
 
 // Entry point follows the convention {name}.min.js, with core as the exception
-function getSuiEntrypoint(name) {
+export function getSuiEntrypoint(name) {
   if (name === 'core') { return 'semantic-ui.min.js'; }
   return `${name}.min.js`;
 }
@@ -73,7 +73,7 @@ const CONTENT_TYPES = {
   '.otf': 'font/otf',
 };
 
-function getContentType(filepath) {
+export function getContentType(filepath) {
   const lastDot = filepath.lastIndexOf('.');
   if (lastDot === -1) { return 'application/octet-stream'; }
   const ext = filepath.slice(lastDot);
@@ -238,7 +238,7 @@ async function resolveVersion(env, version) {
   return version;
 }
 
-function cacheHeaders(version) {
+export function cacheHeaders(version) {
   if (version === 'latest') {
     return { 'Cache-Control': 'public, max-age=300' };
   }
@@ -248,7 +248,7 @@ function cacheHeaders(version) {
   return { 'Cache-Control': 'public, max-age=31536000, immutable' };
 }
 
-function corsHeaders() {
+export function corsHeaders() {
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Expose-Headers': 'SourceMap',
