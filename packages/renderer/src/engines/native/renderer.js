@@ -875,8 +875,8 @@ export class Renderer {
         if (renderRoot) {
           currentInstance.attach(renderRoot, {
             parentNode: region.parentNode,
-            startNode: region.ownedNodes[0],
-            endNode: region.getLastNode(),
+            startNode: region.anchor,
+            endNode: region.endAnchor || region.getLastNode(),
           });
         }
       }
@@ -1011,8 +1011,8 @@ export class Renderer {
         if (renderRoot) {
           currentInstance.attach(renderRoot, {
             parentNode: region.parentNode,
-            startNode: region.ownedNodes[0],
-            endNode: region.getLastNode(),
+            startNode: region.anchor,
+            endNode: region.endAnchor || region.getLastNode(),
           });
         }
       }

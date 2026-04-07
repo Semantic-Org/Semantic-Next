@@ -28,6 +28,16 @@ export class DynamicRegion {
     this.ownedNodes = [...fragment.childNodes];
     if (scope) { this.childScopes.push(scope); }
     this.anchor.after(fragment);
+    // Place end sentinel after content for template boundary detection.
+    // isNodeInTemplate uses strict "between" comparisons, so a trailing
+    // sentinel ensures the last content node is included in the range.
+    if (!this.endAnchor) {
+      this.endAnchor = document.createTextNode('');
+    }
+    const lastNode = this.ownedNodes[this.ownedNodes.length - 1];
+    if (lastNode) {
+      lastNode.after(this.endAnchor);
+    }
   }
 
   getLastNode() {

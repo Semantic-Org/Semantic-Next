@@ -1616,5 +1616,103 @@ RENDERING_ENGINES.forEach(engine => {
         expect(script.textContent).toBe('no');
       });
     });
+
+    /*******************************
+       Subtemplate event scoping
+    *******************************/
+
+    // Native renderer uses DOM range boundaries for event scoping;
+    // Lit renderer uses a different mechanism — skip for Lit.
+    (engine === 'native' ? describe : describe.skip)('subtemplate event delegation boundaries', () => {
+      it('subtemplate event handler fires for clicks inside its own DOM', async () => {
+        let childClicks = 0;
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<button class="btn">Child</button>',
+          events: {
+            'click .btn'() {
+              childClicks++;
+            },
+          },
+        });
+
+        const el = await renderComponent({
+          template: '<div>{>child}</div>',
+          subTemplates: { child },
+        });
+
+        el.shadowRoot.querySelector('.btn').click();
+        await new Promise(r => setTimeout(r, 10));
+
+        expect(childClicks).toBe(1);
+      });
+
+      it('sibling subtemplates do not leak events to each other', async () => {
+        let aClicks = 0;
+        let bClicks = 0;
+
+        const childA = defineComponent({
+          renderingEngine: engine,
+          template: '<button class="a">A</button>',
+          events: {
+            'click .a'() {
+              aClicks++;
+            },
+          },
+        });
+
+        const childB = defineComponent({
+          renderingEngine: engine,
+          template: '<button class="b">B</button>',
+          events: {
+            'click .b'() {
+              bClicks++;
+            },
+          },
+        });
+
+        const el = await renderComponent({
+          template: '<div>{>childA}{>childB}</div>',
+          subTemplates: { childA, childB },
+        });
+
+        el.shadowRoot.querySelector('.a').click();
+        await new Promise(r => setTimeout(r, 10));
+
+        expect(aClicks).toBe(1);
+        expect(bClicks).toBe(0);
+
+        el.shadowRoot.querySelector('.b').click();
+        await new Promise(r => setTimeout(r, 10));
+
+        expect(aClicks).toBe(1);
+        expect(bClicks).toBe(1);
+      });
+
+      it('parent event handler fires for clicks in parent DOM', async () => {
+        let parentClicks = 0;
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span class="child-content">child</span>',
+        });
+
+        const el = await renderComponent({
+          template: '<div><button class="btn">Parent</button>{>child}</div>',
+          subTemplates: { child },
+          events: {
+            'click .btn'() {
+              parentClicks++;
+            },
+          },
+        });
+
+        el.shadowRoot.querySelector('.btn').click();
+        await new Promise(r => setTimeout(r, 10));
+
+        expect(parentClicks).toBe(1);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach
