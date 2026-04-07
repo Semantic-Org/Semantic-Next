@@ -128,6 +128,14 @@ async function handleNotification(method, params) {
       service.models.clear();
       break;
     }
+
+    // Custom: receive component specs from main thread
+    case 'sui/setSpecs': {
+      for (const spec of params.specs) {
+        service.specRegistry.indexParsedSpec(spec);
+      }
+      break;
+    }
   }
 }
 

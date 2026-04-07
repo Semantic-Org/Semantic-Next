@@ -75,6 +75,18 @@ export function createClient({ timeout = 10000 } = {}) {
       }));
     },
 
+    /*
+      Send component specs to the Worker for tag/attribute completions.
+      specs: array of compiled spec objects (each has tagName, attributes, etc.)
+    */
+    setSpecs(specs) {
+      worker.postMessage(JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'sui/setSpecs',
+        params: { specs },
+      }));
+    },
+
     // Expose the underlying LSPClient for advanced use
     lspClient,
     worker,

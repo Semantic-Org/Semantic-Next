@@ -420,9 +420,22 @@ function computeDiagnostics(text, TemplateCompiler) {
   const diagnostics = [];
   try {
     const compiler = new TemplateCompiler(text);
-    compiler.compile();
+    compiler.compile(undefined, { recoverable: true });
+    for (const error of compiler.errors || []) {
+      const pos = offsetToPos(text, error.pos ?? 0);
+      diagnostics.push({
+        severity: Severity.Error,
+        range: {
+          start: pos,
+          end: { line: pos.line, character: pos.character + 10 },
+        },
+        message: error.message || 'Template error',
+        source: 'sui',
+      });
+    }
   }
   catch (e) {
+    // Compiler threw even in recoverable mode — fallback to single diagnostic
     diagnostics.push({
       severity: Severity.Error,
       range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } },
@@ -431,4 +444,13 @@ function computeDiagnostics(text, TemplateCompiler) {
     });
   }
   return diagnostics;
+}
+
+function offsetToPos(text, offset) {
+  let line = 0;
+  let lastNewline = -1;
+  for (let i = 0; i < offset && i < text.length; i++) {
+    if (text[i] === '\n') { line++; lastNewline = i; }
+  }
+  return { line, character: offset - lastNewline - 1 };
 }

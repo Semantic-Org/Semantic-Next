@@ -150,6 +150,35 @@ export class SpecRegistry {
   }
 
   /*
+    Indexes a pre-parsed component spec object directly.
+    Use when the spec is already a JS object (e.g., imported from @semantic-ui/core).
+    Optional sourceSpec provides rich metadata (descriptions, examples).
+  */
+  indexParsedSpec(compiled, sourceSpec = null) {
+    if (!compiled?.tagName) { return; }
+    const info = {
+      tagName: compiled.tagName,
+      filePath: null,
+      attributes: compiled.attributes || [],
+      allowedValues: compiled.allowedValues || {},
+      optionAttributes: compiled.optionAttributes || {},
+      propertyTypes: compiled.propertyTypes || {},
+      defaultValues: compiled.defaultValues || {},
+      content: compiled.content || [],
+      types: compiled.types || [],
+      variations: compiled.variations || [],
+      states: compiled.states || [],
+      settings: compiled.settings || [],
+      attributeClasses: compiled.attributeClasses || [],
+      name: sourceSpec?.name || null,
+      description: sourceSpec?.description || null,
+      uiType: sourceSpec?.uiType || null,
+      attributeInfo: sourceSpec ? this.buildAttributeInfo(sourceSpec) : new Map(),
+    };
+    this.specs.set(compiled.tagName, info);
+  }
+
+  /*
     Returns spec info for a tag name, or null if not found.
   */
   get(tagName) {
