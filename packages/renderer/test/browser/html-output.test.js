@@ -1527,5 +1527,94 @@ RENDERING_ENGINES.forEach(engine => {
         expect(details[1].querySelector('.name').parentElement).toBe(details[1]);
       });
     });
+    /*******************************
+       Raw text elements
+       (script, style, textarea)
+    *******************************/
+
+    describe('raw text elements', () => {
+      it('expression inside script produces text content', async () => {
+        const el = await renderComponent({
+          template: '<script type="sample/js">{code}</script>',
+          createComponent: () => ({ code: 'console.log("hello")' }),
+        });
+
+        const script = el.shadowRoot.querySelector('script');
+        expect(script.textContent).toBe('console.log("hello")');
+      });
+
+      it('conditional inside script evaluates to text', async () => {
+        const el = await renderComponent({
+          template: '<script type="sample/js">{#if useStrict}"use strict";{/if}{code}</script>',
+          createComponent: () => ({ useStrict: true, code: 'run()' }),
+        });
+
+        const script = el.shadowRoot.querySelector('script');
+        expect(script.textContent).toBe('"use strict";run()');
+      });
+
+      it('script content updates reactively', async () => {
+        const el = await renderComponent({
+          template: '<script type="sample/js">{code}</script>',
+          defaultState: { code: 'before()' },
+          createComponent: ({ state }) => ({
+            update() {
+              state.code.set('after()');
+            },
+          }),
+        });
+
+        const script = el.shadowRoot.querySelector('script');
+        expect(script.textContent).toBe('before()');
+
+        el.component.update();
+        await waitForUpdate(el);
+
+        expect(script.textContent).toBe('after()');
+      });
+
+      it('script attributes bind normally alongside raw text content', async () => {
+        const el = await renderComponent({
+          template: '<script type="{stype}" filename="{fname}">{code}</script>',
+          createComponent: () => ({ stype: 'sample/css', fname: 'style.css', code: 'body { color: red }' }),
+        });
+
+        const script = el.shadowRoot.querySelector('script');
+        expect(script.getAttribute('type')).toBe('sample/css');
+        expect(script.getAttribute('filename')).toBe('style.css');
+        expect(script.textContent).toBe('body { color: red }');
+      });
+
+      it('each loop producing script elements', async () => {
+        const el = await renderComponent({
+          template:
+            '{#each file in files}<script type="{file.type}" filename="{file.name}">{file.content}</script>{/each}',
+          createComponent: () => ({
+            files: [
+              { type: 'sample/js', name: 'a.js', content: 'let a = 1;' },
+              { type: 'sample/css', name: 'b.css', content: '.b {}' },
+            ],
+          }),
+        });
+
+        const scripts = el.shadowRoot.querySelectorAll('script');
+        expect(scripts.length).toBe(2);
+        expect(scripts[0].getAttribute('filename')).toBe('a.js');
+        expect(scripts[0].textContent).toBe('let a = 1;');
+        expect(scripts[1].getAttribute('filename')).toBe('b.css');
+        expect(scripts[1].textContent).toBe('.b {}');
+      });
+
+      it('no comment markers leak into script text', async () => {
+        const el = await renderComponent({
+          template: '<script type="sample/js">{#if cond}{a}{else}{b}{/if}</script>',
+          createComponent: () => ({ cond: false, a: 'yes', b: 'no' }),
+        });
+
+        const script = el.shadowRoot.querySelector('script');
+        expect(script.textContent).not.toContain('sui');
+        expect(script.textContent).toBe('no');
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach
