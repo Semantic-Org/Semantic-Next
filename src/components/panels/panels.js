@@ -75,7 +75,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let $panels = $allPanels.not($childPanelGroupPanels);
     self.panels = $panels.get();
     each(self.panels, (panel) => {
-      panel.settings.direction = settings.direction;
+      panel.direction = settings.direction;
     });
   },
 
