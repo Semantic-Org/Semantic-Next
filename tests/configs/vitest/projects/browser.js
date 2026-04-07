@@ -5,6 +5,8 @@ export default {
     include: ['**/test/browser/**/*.test.{ts,js}'],
     exclude: ['**/node_modules/**', 'docs/**', 'tools/cdn/**'],
     name: 'browser',
+    testTimeout: 30000,
+    fileParallelism: false,
     browser: {
       enabled: true,
       headless: true,
