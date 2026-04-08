@@ -254,7 +254,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     return self.addTrailingSlash(testUrl) == self.addTrailingSlash(baseUrl);
   },
   isCurrentItem(item) {
-    return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
+    return self.isSameURL(item?.url, state.url.get(), item?.matchSubPaths);
   },
   isActiveItem(item) {
     if (settings.expandAll) {
