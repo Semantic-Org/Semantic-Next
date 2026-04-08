@@ -275,7 +275,7 @@ export const Template = class Template {
     // Cache the base params object for call() — these are all stable references
     // that don't change between calls. additionalData is spread on top per-call.
     const element = this.element;
-    this._callParams = {
+    this.callParams = {
       el: element,
       tpl: this.instance,
       self: this.instance,
@@ -805,14 +805,14 @@ export const Template = class Template {
       return;
     }
     if (!params) {
-      if (this._callParams) {
+      if (this.callParams) {
         params = additionalData
-          ? { ...this._callParams, ...additionalData }
-          : this._callParams;
+          ? { ...this.callParams, ...additionalData }
+          : this.callParams;
       }
       else {
         // During initialize(), before _callParams is built
-        params = this._buildCallParams(additionalData);
+        params = this.buildCallParams(additionalData);
       }
     }
     const args = [params];
@@ -823,7 +823,7 @@ export const Template = class Template {
     return func.apply(context, args);
   }
 
-  _buildCallParams(additionalData = {}) {
+  buildCallParams(additionalData = {}) {
     const element = this.element;
     const templateRef = this;
     return {
