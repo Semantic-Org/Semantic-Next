@@ -347,11 +347,7 @@ export const Template = class Template {
   }
 
   getDataContext() {
-    return {
-      ...this.data,
-      ...this.state,
-      ...this.instance,
-    };
+    return extend({}, this.data, this.state, this.instance);
   }
 
   // Overlay settings shadow signals so the renderer tracks settings reactively.
@@ -743,10 +739,7 @@ export const Template = class Template {
     if (!this.initialized) {
       this.initialize();
     }
-    const dataContext = {
-      ...this.getDataContext(),
-      ...additionalData,
-    };
+    const dataContext = extend({}, this.getDataContext(), additionalData);
     this.setDataContext(dataContext, { rerender: false });
     this.updateSubtemplateSettings(dataContext);
 

@@ -136,7 +136,14 @@ class LitWebComponentBase extends LitElement {
       ...this.getSettings(),
     };
     if (!isServer) {
-      data.darkMode = this.isDarkMode();
+      const el = this;
+      Object.defineProperty(data, 'darkMode', {
+        get() {
+          return el.isDarkMode();
+        },
+        enumerable: true,
+        configurable: true,
+      });
     }
     if (componentSpec) {
       data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
