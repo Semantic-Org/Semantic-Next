@@ -251,13 +251,21 @@ export class Renderer {
               const strValue = (isArray(value) || isPlainObject(value))
                 ? JSON.stringify(value)
                 : String(value ?? '');
-              element.setAttribute(attrName, strValue);
+              if (element.getAttribute(attrName) !== strValue) {
+                element.setAttribute(attrName, strValue);
+              }
             }
             if (inArray(attrName, ['checked', 'selected'])) {
-              element[attrName] = Boolean(value);
+              const boolValue = Boolean(value);
+              if (element[attrName] !== boolValue) {
+                element[attrName] = boolValue;
+              }
             }
             if (inArray(attrName, ['value'])) {
-              element[attrName] = value ?? '';
+              const newValue = value ?? '';
+              if (element[attrName] !== newValue) {
+                element[attrName] = newValue;
+              }
             }
           }));
         }
@@ -426,9 +434,11 @@ export class Renderer {
     const parent = comment.parentNode;
 
     if (exprNode.unsafeHTML) {
+      const anchor = document.createTextNode('');
+      comment.replaceWith(anchor);
       const ownedNodes = [];
       scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !comment.isConnected) {
+        if (!comp.firstRun && !anchor.isConnected) {
           comp.stop();
           return;
         }
@@ -438,7 +448,7 @@ export class Renderer {
         if (value != null && value !== '') {
           const parsed = this.parseHTML(String(value));
           const nodes = [...parsed.childNodes];
-          comment.after(parsed);
+          anchor.after(parsed);
           ownedNodes.push(...nodes);
         }
       }));
@@ -1315,13 +1325,21 @@ export class Renderer {
               const strValue = (isArray(value) || isPlainObject(value))
                 ? JSON.stringify(value)
                 : String(value ?? '');
-              element.setAttribute(attrName, strValue);
+              if (element.getAttribute(attrName) !== strValue) {
+                element.setAttribute(attrName, strValue);
+              }
             }
             if (inArray(attrName, ['checked', 'selected'])) {
-              element[attrName] = Boolean(value);
+              const boolValue = Boolean(value);
+              if (element[attrName] !== boolValue) {
+                element[attrName] = boolValue;
+              }
             }
             if (inArray(attrName, ['value'])) {
-              element[attrName] = value ?? '';
+              const newValue = value ?? '';
+              if (element[attrName] !== newValue) {
+                element[attrName] = newValue;
+              }
             }
           }));
         }
@@ -1373,8 +1391,12 @@ export class Renderer {
         next = next.nextSibling;
       }
 
+      // Replace comment with text node anchor so removeMarkers() doesn't orphan it
+      const anchor = document.createTextNode('');
+      comment.replaceWith(anchor);
+
       scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !comment.isConnected) {
+        if (!comp.firstRun && !anchor.isConnected) {
           comp.stop();
           return;
         }
@@ -1386,7 +1408,7 @@ export class Renderer {
         if (value != null && value !== '') {
           const parsed = this.parseHTML(String(value));
           const nodes = [...parsed.childNodes];
-          comment.after(parsed);
+          anchor.after(parsed);
           ownedNodes.push(...nodes);
         }
       }));
