@@ -304,7 +304,7 @@ export const Template = class Template {
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
       unbindKey: this.unbindKey.bind(this),
-      abortController: this.eventController,
+      abortController: this.abortController,
       helpers: TemplateHelpers,
       template: this,
       templateName: this.templateName,
@@ -510,6 +510,14 @@ export const Template = class Template {
     // this is to cancel event bindings when template tears down
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
+
+    // Cascade: if the template lifetime ends, abort events too.
+    // The { signal } option auto-removes this listener when the event
+    // controller is aborted (during removeEvents/reattach), preventing
+    // listener accumulation across reattach cycles.
+    this.abortSignal.addEventListener('abort', () => {
+      this.eventController.abort();
+    }, { signal: this.eventController.signal });
 
     if (!Template.isServer && this.onThemeChangedCallback !== noop) {
       // when the dark class is added or removed from <html>
@@ -848,7 +856,7 @@ export const Template = class Template {
       attachEvent: this.attachEvent.bind(this),
       bindKey: this.bindKey.bind(this),
       unbindKey: this.unbindKey.bind(this),
-      abortController: this.eventController,
+      abortController: this.abortController,
       helpers: TemplateHelpers,
       template: this,
       templateName: this.templateName,

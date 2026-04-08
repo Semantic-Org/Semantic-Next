@@ -381,16 +381,26 @@ export interface CallParams<
   unbindKey: Template['unbindKey'];
 
   /**
-   * AbortController for managing asynchronous operations.
+   * AbortController tied to the template's lifetime.
    *
-   * Automatically aborts any pending operations when the component is destroyed.
+   * Aborts when the component is destroyed. Use to programmatically
+   * cancel operations or pass `abortController.signal` to APIs.
+   */
+  abortController: AbortController;
+
+  /**
+   * Abort signal tied to the template's lifetime.
+   *
+   * Fires when the component is destroyed. Pass to `fetch`, `addEventListener`,
+   * or any API that accepts an AbortSignal to automatically clean up when the
+   * component is removed.
    *
    * @example
-   * fetch('/api/data', { signal: abortController.signal })
+   * fetch('/api/data', { signal: abortSignal })
    *   .then(response => response.json())
    *   .then(data => state.data(data));
    */
-  abortController: AbortController;
+  abortSignal: AbortSignal;
 
   /**
    * Template helper functions for common operations.

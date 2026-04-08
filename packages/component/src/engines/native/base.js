@@ -117,12 +117,14 @@ class WebComponentBase extends HTMLElementBase {
 
     const data = this.getData();
 
+    // Don't pass renderRoot — avoids triggering attach() from the constructor.
+    // Matches the subtemplate pattern: explicit initialize() → work → attach().
     this.template = prototypeTemplate.clone({
       data,
       element: this,
-      renderRoot: this.renderRoot,
     });
 
+    this.template.initialize();
     this.template._isHydrating = true;
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
@@ -149,6 +151,9 @@ class WebComponentBase extends HTMLElementBase {
 
     // Remove all hydration markers — clean DevTools, zero comment noise
     this.removeMarkers();
+
+    // Attach events after hydration completes
+    this.template.attach(this.renderRoot);
 
     setTimeout(() => this.template?.onRendered(), 0);
   }
