@@ -101,14 +101,7 @@ export class ExpressionEvaluator {
     return result;
   }
 
-  lookupExpressionValue(expression = '', data = {}, visited) {
-    // Pool visited Set on instance to avoid allocation per call
-    const isTopLevel = !visited;
-    if (isTopLevel) {
-      visited = this.visited ??= new Set();
-      visited.clear();
-    }
-
+  lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
     if (visited.has(expression)) {
       return undefined;
     }
