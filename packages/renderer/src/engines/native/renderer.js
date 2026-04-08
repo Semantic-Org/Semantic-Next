@@ -50,8 +50,13 @@ export class Renderer {
     this.isSVG = isSVG;
     this.inheritsData = inheritsData;
     this.protectedKeys = protectedKeys;
-    this.id = hashCode({ ast, data, isSVG });
-    this.dataVersion = new Signal(0);
+    // Lit uses hashCode({ ast, data, isSVG }) for subtree caching here.
+    // Native renderer doesn't cache subtrees yet, and fnv1a over the full
+    // AST + data context costs ~1.4ms per construction — visible in hydration
+    // flamecharts. Use a cheap sequential ID for debugging until subtree
+    // caching is implemented.
+    this.id = ++Renderer.nextId;
+    this.dataVersion = new Signal(0, { allowClone: false, equalityFunction: () => false });
     this.scope = new ReactionScope();
 
     this.evaluator = new ExpressionEvaluator({
@@ -587,9 +592,10 @@ export class Renderer {
       }
 
       const newKeys = items.map((item, i) => this.getItemID(item, i, collectionType));
+      const newKeySet = new Set(newKeys);
 
       for (const key of currentKeys) {
-        if (!newKeys.includes(key)) {
+        if (!newKeySet.has(key)) {
           const entry = itemMap.get(key);
           entry.scope.dispose();
           for (const n of entry.nodes) { n.remove(); }
@@ -602,11 +608,24 @@ export class Renderer {
       for (let i = 0; i < newKeys.length; i++) {
         const key = newKeys[i];
         const item = items[i];
-        const eachData = this.getEachData(item, i, collectionType, node);
 
         if (itemMap.has(key)) {
           const entry = itemMap.get(key);
-          entry.itemSignal.set(eachData);
+
+          if (entry.item !== item || entry.index !== i) {
+            // Different reference or position — set() with deep equality
+            // so unchanged cloned items don't trigger spurious re-renders
+            const eachData = this.getEachData(item, i, collectionType, node);
+            entry.itemSignal.set(eachData);
+            entry.item = item;
+            entry.index = i;
+          }
+          else if (typeof item === 'object') {
+            // Same reference at same position — properties may have been
+            // mutated in place. Deep equality can't detect this (a === b
+            // short-circuits), so force-notify dependents.
+            entry.itemSignal.dependency.changed();
+          }
 
           const firstItemNode = entry.nodes[0];
           if (firstItemNode && firstItemNode.previousSibling !== insertAfter) {
@@ -620,8 +639,9 @@ export class Renderer {
           }
         }
         else {
+          const eachData = this.getEachData(item, i, collectionType, node);
           const itemScope = scope.child();
-          const itemSignal = new Signal(eachData);
+          const itemSignal = new Signal(eachData, { allowClone: false });
           const itemProxy = this.createItemDataProxy(data, itemSignal);
 
           const itemFragment = this.readAST({
@@ -633,7 +653,7 @@ export class Renderer {
           const nodes = [...itemFragment.childNodes];
           insertAfter.after(itemFragment);
           insertAfter = nodes[nodes.length - 1] || insertAfter;
-          itemMap.set(key, { nodes, itemSignal, scope: itemScope });
+          itemMap.set(key, { nodes, itemSignal, scope: itemScope, item, index: i });
         }
       }
 
@@ -1403,8 +1423,11 @@ export class Renderer {
           comp.stop();
           return;
         }
+        if (comp.firstRun) {
+          this.eval(exprNode.value, data);
+          return;
+        }
         const value = this.eval(exprNode.value, data);
-        if (comp.firstRun) { return; }
         textNode.data = value ?? '';
       }));
     }
@@ -1635,7 +1658,7 @@ export class Renderer {
         for (let i = 0; i < items.length; i++) {
           const item = items[i];
           const eachData = this.getEachData(item, i, collectionType, node);
-          const itemSignal = new Signal(eachData);
+          const itemSignal = new Signal(eachData, { allowClone: false });
           const itemProxy = this.createItemDataProxy(data, itemSignal);
           const itemScope = listScope.child();
           const itemFragment = this.readAST({ ast: node.content, data: itemProxy, scope: itemScope });
