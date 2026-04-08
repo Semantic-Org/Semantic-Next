@@ -14,6 +14,7 @@ import {
   isString,
   keys,
   mapObject,
+  noop,
   wrapFunction,
 } from '@semantic-ui/utils';
 
@@ -57,7 +58,7 @@ export class LitRenderer {
     this.inheritsData = inheritsData; // for subtrees lets us know if this needs to have data updates downstream
     this.protectedKeys = protectedKeys; // keys scoped to this subtree (loop vars, async results) that parent updates cannot overwrite
     this.id = LitRenderer.getID({ ast, data, isSVG });
-    this.dataVersion = new Signal(0);
+    this.dataVersion = new Signal(0, { allowClone: false, isEqual: noop });
 
     // Delegate expression evaluation
     this.evaluator = new ExpressionEvaluator({
