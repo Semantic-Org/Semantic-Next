@@ -1,4 +1,4 @@
-import { camelToKebab, each, inArray } from '@semantic-ui/utils';
+import { camelToKebab, each } from '@semantic-ui/utils';
 import { WebComponentBase } from './base.js';
 
 /*
@@ -32,22 +32,17 @@ export function createComponent({
   component.properties = resolvedProperties;
 
   // observedAttributes — must be set before customElements.define()
-  const observedAttrs = [];
-  each(resolvedProperties, (config, propName) => {
-    if (config.attribute !== false && !config.alias) {
-      observedAttrs.push(camelToKebab(propName));
-    }
-  });
+  const observedAttrs = new Set();
   each(resolvedProperties, (config, propName) => {
     if (config.alias) {
-      const attr = config.attribute || camelToKebab(propName);
-      if (!inArray(attr, observedAttrs)) {
-        observedAttrs.push(attr);
-      }
+      observedAttrs.add(config.attribute || camelToKebab(propName));
+    }
+    else if (config.attribute !== false) {
+      observedAttrs.add(camelToKebab(propName));
     }
   });
   Object.defineProperty(component, 'observedAttributes', {
-    get: () => observedAttrs,
+    get: () => [...observedAttrs],
   });
 
   // Property accessors — must be set before customElements.define()
