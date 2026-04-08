@@ -10,13 +10,6 @@ const jsProxyHandler = {
     if (value instanceof Signal) {
       return value.get();
     }
-    if (isFunction(value)) {
-      return new Proxy(value, {
-        apply(targetFn, thisArg, args) {
-          return targetFn.apply(thisArg, args);
-        },
-      });
-    }
     return value;
   },
 };
@@ -91,7 +84,7 @@ export class ExpressionEvaluator {
         ...this.helpers,
         ...context,
       };
-      context.debugger = undefined;
+      delete context['debugger'];
     }
     try {
       const proxiedContext = new Proxy(context, jsProxyHandler);
