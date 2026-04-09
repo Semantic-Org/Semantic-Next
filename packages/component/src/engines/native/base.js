@@ -81,9 +81,10 @@ class WebComponentBase extends HTMLElementBase {
     const prototypeTemplate = this.constructor.template;
 
     if (hasServerContent && this.canHydrate()) {
-      // DSD means the visual is already correct — defer the expensive
-      // hydration wiring so the browser can paint and respond to input
-      requestAnimationFrame(() => this.hydrate(prototypeTemplate));
+      // DSD means the visual is already correct — defer hydration wiring
+      // to avoid blocking the parser, but use microtask to close the gap
+      // where events would be lost (rAF leaves a full frame unbound)
+      queueMicrotask(() => this.hydrate(prototypeTemplate));
     }
     else {
       if (hasServerContent) {
