@@ -32,28 +32,19 @@ import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
 
-// PreparedTemplate cache — parse once, cloneNode per instance.
-// Generational: active fills up → becomes backup → new active.
-// Hits check both; backup is discarded on next swap.
+// PreparedTemplate cache — parse once, cloneNode per instance
 const TEMPLATE_CACHE_MAX = 1000;
-let templateCacheActive = new Map();
-let templateCacheBackup = new Map();
+const templateCache = new Map();
 
 function templateCacheGet(key) {
-  if (templateCacheActive.has(key)) { return templateCacheActive.get(key); }
-  if (templateCacheBackup.has(key)) {
-    const val = templateCacheBackup.get(key);
-    templateCacheActive.set(key, val);
-    return val;
-  }
+  return templateCache.get(key);
 }
 
 function templateCacheSet(key, val) {
-  if (templateCacheActive.size >= TEMPLATE_CACHE_MAX) {
-    templateCacheBackup = templateCacheActive;
-    templateCacheActive = new Map();
+  if (templateCache.size >= TEMPLATE_CACHE_MAX) {
+    templateCache.clear();
   }
-  templateCacheActive.set(key, val);
+  templateCache.set(key, val);
 }
 
 // Regex for finding attribute markers — compiled once since prefix/suffix are constants

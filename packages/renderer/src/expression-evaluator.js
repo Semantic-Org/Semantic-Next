@@ -23,6 +23,7 @@ export class ExpressionEvaluator {
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
   static fnCache = new Map();
+  static FN_CACHE_MAX = 5000;
 
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
@@ -91,7 +92,7 @@ export class ExpressionEvaluator {
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
         fn = new Function('ctx', `with(ctx){return ${code}}`);
-        if (ExpressionEvaluator.fnCache.size > 10000) {
+        if (ExpressionEvaluator.fnCache.size >= ExpressionEvaluator.FN_CACHE_MAX) {
           ExpressionEvaluator.fnCache.clear();
         }
         ExpressionEvaluator.fnCache.set(code, fn);
