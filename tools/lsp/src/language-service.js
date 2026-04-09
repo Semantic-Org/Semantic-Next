@@ -44,8 +44,12 @@ export class LanguageService {
   *******************************/
 
   didOpen(uri, text, version = 0) {
+    const existing = this.documents.get(uri);
+    if (existing?.text === text && existing?.version === version) {
+      return;
+    }
     this.documents.set(uri, { text, version });
-    this.models.delete(uri); // invalidate stale model
+    this.models.delete(uri);
   }
 
   didChange(uri, text, version = 0) {
