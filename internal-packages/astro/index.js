@@ -25,9 +25,6 @@ export default function semanticUI() {
         });
         updateConfig({
           vite: {
-            resolve: {
-              conditions: ['source'],
-            },
             ssr: {
               noExternal: [
                 /^@semantic-ui\//,
