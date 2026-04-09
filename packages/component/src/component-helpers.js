@@ -302,19 +302,22 @@ export function resolveAttributeAliases(attrs, componentSpec) {
   }
 
   // bare attributes — resolve option values used as attribute names
-  each(componentSpec.optionAttributes, (targetProp, optionAttr) => {
-    const camel = kebabToCamel(optionAttr);
-    if (camel in attrs) {
-      const { matchingAttribute, matchingValue } = resolveAllowedValue({
-        optionValue: optionAttr,
-        componentSpec,
-      });
-      if (matchingAttribute && matchingValue) {
-        attrs[matchingAttribute] = matchingValue;
-      }
-      delete attrs[camel];
+  // Iterate attrs (typically 1-5) and look up in optionAttributes (O(1))
+  // instead of iterating all optionAttributes (potentially thousands)
+  const attrKeys = keys(attrs);
+  for (let i = 0; i < attrKeys.length; i++) {
+    const camel = attrKeys[i];
+    const kebab = camelToKebab(camel);
+    if (!(kebab in componentSpec.optionAttributes)) { continue; }
+    const { matchingAttribute, matchingValue } = resolveAllowedValue({
+      optionValue: kebab,
+      componentSpec,
+    });
+    if (matchingAttribute && matchingValue) {
+      attrs[matchingAttribute] = matchingValue;
     }
-  });
+    delete attrs[camel];
+  }
 
   // value fuzzing — resolve values on known spec attributes
   each(componentSpec.attributes, (attribute) => {
