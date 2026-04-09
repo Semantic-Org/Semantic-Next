@@ -4,7 +4,7 @@ pageType: 'API Reference'
 icon: box
 title: Signal
 package: "@semantic-ui/reactivity"
-methods: [Constructor, Get, Set, Subscribe, Peek, Clear, Mutate, Derive, Signal.computed]
+methods: [Constructor, Get, Set, Subscribe, Depend, Notify, hasDependents, Peek, Clear, Mutate, Derive, Signal.computed]
 description: API reference for Signal in Semantic UI's reactivity system
 ---
 
@@ -167,6 +167,92 @@ const subscription = counter.subscribe((newValue) => {
 
 counter.set(1); // Console: "Counter changed: 1"
 subscription.stop(); // Stops the subscription
+```
+
+## `Depend`
+
+Registers this signal as a dependency in the current reactive context without reading or returning the value. This is useful when you want a reaction to re-run when a signal changes, but you don't need the value itself.
+
+### Syntax
+```javascript
+someValue.depend();
+```
+
+### Usage
+
+#### Subscribing Without Reading
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const theme = new Signal({ mode: 'dark', colors: { /* ... */ } });
+
+// Re-run when theme changes, but use a different source for rendering
+Reaction.create(() => {
+  theme.depend();
+  console.log('Theme changed, re-rendering...');
+});
+
+theme.set({ mode: 'light', colors: { /* ... */ } });
+```
+
+## `Notify`
+
+Force-triggers all subscribers without changing the signal's value. This bypasses the equality check, making it useful when external code has mutated something and you need to notify dependents.
+
+### Syntax
+```javascript
+someValue.notify();
+```
+
+### Usage
+
+#### Force-Triggering After External Mutation
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const canvas = new Signal(document.createElement('canvas'), { allowClone: false });
+
+Reaction.create(() => {
+  const el = canvas.get();
+  console.log('Canvas updated');
+});
+
+// External code draws on the canvas — the reference hasn't changed
+// but dependents need to know about it
+canvas.peek().getContext('2d').fillRect(0, 0, 100, 100);
+canvas.notify();
+```
+
+## `hasDependents`
+
+Returns whether any reactive contexts are currently subscribed to this signal.
+
+### Syntax
+```javascript
+someValue.hasDependents();
+```
+
+### Returns
+
+`boolean` - `true` if at least one reaction depends on this signal.
+
+### Usage
+
+```javascript
+import { Reaction, Signal } from '@semantic-ui/reactivity';
+
+const data = new Signal(null);
+console.log(data.hasDependents()); // false
+
+const reaction = Reaction.create(() => {
+  data.get();
+});
+console.log(data.hasDependents()); // true
+
+reaction.stop();
+console.log(data.hasDependents()); // false
 ```
 
 ## `Peek`
