@@ -1242,7 +1242,7 @@ export class Renderer {
     const realWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
       acceptNode: (node) =>
         blockOwnedElements.has(node)
-          ? NodeFilter.FILTER_SKIP
+          ? NodeFilter.FILTER_REJECT
           : NodeFilter.FILTER_ACCEPT,
     });
 
