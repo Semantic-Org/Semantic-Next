@@ -6,7 +6,7 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node.js';
 
-import { LanguageService } from './language-service.js';
+import { LanguageService, uriToPath } from './language-service.js';
 import { analyzeComponent } from './component-analyzer.js';
 import { createNodeResolver } from './node.js';
 
@@ -26,8 +26,7 @@ const service = new LanguageService({
 connection.onInitialize((params) => {
   let root = params.rootPath || '';
   if (params.rootUri) {
-    try { root = new URL(params.rootUri).pathname; }
-    catch { /* keep rootPath */ }
+    root = uriToPath(params.rootUri) || root;
   }
   service.scanSpecs(root);
 
