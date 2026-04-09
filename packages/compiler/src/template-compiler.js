@@ -195,9 +195,9 @@ class TemplateCompiler {
     let conditionStack = [];
 
     // helper for recoverable errors — collects instead of throwing
-    const emitError = (message) => {
+    const emitError = (message, pos) => {
       if (recoverable) {
-        this.errors.push({ message, pos: scanner.pos });
+        this.errors.push({ message, pos: pos ?? scanner.pos });
         return true;
       }
       return false;
@@ -304,7 +304,7 @@ class TemplateCompiler {
               content: [],
             };
             if (!currentCondition) {
-              if (emitError('{elseif} encountered without matching if condition')) {
+              if (emitError('{elseif} encountered without matching if condition', nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.ELSEIF);
@@ -322,7 +322,7 @@ class TemplateCompiler {
               content: [],
             };
             if (!currentCondition) {
-              if (emitError('{else} encountered without matching if or each condition')) {
+              if (emitError('{else} encountered without matching if or each condition', nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.ELSE);
@@ -340,7 +340,7 @@ class TemplateCompiler {
               setContentTarget('elseContent');
             }
             else {
-              if (emitError('{else} encountered with unknown condition type: ' + currentCondition.type)) {
+              if (emitError('{else} encountered with unknown condition type: ' + currentCondition.type, nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.ELSE);
@@ -351,7 +351,7 @@ class TemplateCompiler {
 
           case 'CLOSE_IF': {
             if (conditionStack.length == 0) {
-              if (emitError('{/if} close tag found without open if tag')) {
+              if (emitError('{/if} close tag found without open if tag', nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.CLOSE_IF);
@@ -494,7 +494,7 @@ class TemplateCompiler {
 
           case 'ASYNC_LOADING': {
             if (currentContentNode?.type !== 'async') {
-              if (emitError('{before} encountered without matching {async} condition')) {
+              if (emitError('{before} encountered without matching {async} condition', nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.ASYNC_LOADING);
@@ -507,7 +507,7 @@ class TemplateCompiler {
 
           case 'ASYNC_ERROR': {
             if (currentContentNode?.type !== 'async') {
-              if (emitError(`{error} encountered without matching {async} condition`)) {
+              if (emitError(`{error} encountered without matching {async} condition`, nodeStart)) {
                 break;
               }
               scanner.returnTo(tagRegExp.ASYNC_ERROR);
