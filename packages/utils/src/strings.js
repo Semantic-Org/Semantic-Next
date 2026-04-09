@@ -39,12 +39,21 @@ export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
 };
 
 const UNDERSCORE_DIGIT_REGEX = /_(?=[0-9])/g;
+const digitSepRegexCache = new Map();
 
 export const camelToKebab = (str = '', { lossless = false, separator = '_' } = {}) => {
   const normalized = lossless ? str : (str[0]?.toLowerCase() + str.slice(1));
-  const digitSepRegex = separator === '_'
-    ? UNDERSCORE_DIGIT_REGEX
-    : new RegExp(`\\${separator}(?=[0-9])`, 'g');
+  let digitSepRegex;
+  if (separator === '_') {
+    digitSepRegex = UNDERSCORE_DIGIT_REGEX;
+  }
+  else {
+    digitSepRegex = digitSepRegexCache.get(separator);
+    if (!digitSepRegex) {
+      digitSepRegex = new RegExp(`\\${separator}(?=[0-9])`, 'g');
+      digitSepRegexCache.set(separator, digitSepRegex);
+    }
+  }
   return normalized
     .replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
     .replace(digitSepRegex, '-');
@@ -132,10 +141,11 @@ export const joinWords = (words, {
   return result + lastSeparator + lastWord;
 };
 
+const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+
 export const getArticle = (word, settings = {}) => {
-  const vowels = ['a', 'e', 'i', 'o', 'u'];
   const firstLetter = word.toLowerCase()[0];
-  const article = vowels.includes(firstLetter)
+  const article = vowels.has(firstLetter)
     ? 'an'
     : 'a';
   const finalArticle = (settings.capitalize)

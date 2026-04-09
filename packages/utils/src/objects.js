@@ -58,56 +58,65 @@ export const extend = (obj, ...sources) => {
   return obj;
 };
 
+const deepExtendDefaults = { preserveNonCloneable: true, preserveDOM: true };
+
 export const deepExtend = (target, ...args) => {
   if (!isObject(target)) {
     return target;
   }
 
-  // Check if last argument is options object
+  // Detect options in the last argument once at the entry point
   const lastArg = args[args.length - 1];
-  const defaultOptions = { preserveNonCloneable: true, preserveDOM: true };
-  const hasOptions = keys(defaultOptions).some(key => lastArg?.[key] !== undefined);
-  const options = hasOptions ? { ...defaultOptions, ...lastArg } : defaultOptions;
+  const hasOptions = lastArg?.preserveNonCloneable !== undefined || lastArg?.preserveDOM !== undefined;
+  const options = hasOptions ? { ...deepExtendDefaults, ...lastArg } : deepExtendDefaults;
   const sources = hasOptions ? args.slice(0, -1) : args;
 
-  each(sources, (source) => {
-    // Skip if source is not a plain object
-    if (!isPlainObject(source)) {
-      return;
+  for (let i = 0; i < sources.length; i++) {
+    deepMerge(target, sources[i], options);
+  }
+  return target;
+};
+
+const deepMerge = (target, source, options) => {
+  if (!isPlainObject(source)) {
+    return;
+  }
+
+  const sourceKeys = Object.keys(source);
+  for (let i = 0; i < sourceKeys.length; i++) {
+    const key = sourceKeys[i];
+
+    // Skip __proto__ for security
+    if (key === '__proto__') {
+      continue;
     }
 
-    each(source, (val, key) => {
-      // Skip __proto__ for security
-      if (key === '__proto__') {
-        return;
-      }
+    const val = source[key];
+    const src = target[key];
 
-      const src = target[key];
+    // Recursion prevention
+    if (val === target) {
+      continue;
+    }
 
-      // Recursion prevention
-      if (val === target) {
-        return;
-      }
+    // If new value isn't a plain object, clone and assign
+    if (!isPlainObject(val)) {
+      target[key] = clone(val, options);
+      continue;
+    }
 
-      // If new value isn't a plain object, clone and assign
-      if (!isPlainObject(val)) {
-        target[key] = clone(val, options);
-        return;
-      }
+    // If target property doesn't exist or isn't a plain object,
+    // create new object and deep extend
+    if (!isPlainObject(src)) {
+      const newObj = {};
+      deepMerge(newObj, val, options);
+      target[key] = newObj;
+      continue;
+    }
 
-      // If target property doesn't exist or isn't a plain object,
-      // create new object and deep extend
-      if (!isPlainObject(src)) {
-        target[key] = deepExtend({}, val, options);
-        return;
-      }
-
-      // Both are plain objects, extend recursively
-      deepExtend(src, val, options);
-    });
-  });
-
-  return target;
+    // Both are plain objects, extend recursively
+    deepMerge(src, val, options);
+  }
 };
 
 export const assignInPlace = (target, source, { preserveExistingKeys = false, returnChanged = false } = {}) => {
@@ -156,6 +165,13 @@ export const arrayFromObject = (obj) => {
 /*
   Access a nested object field from a string, like 'a.b.c'
 */
+const extractBracketAccess = (part) => {
+  const bracketIndex = part.indexOf('[');
+  const key = part.substring(0, bracketIndex);
+  const index = parseInt(part.substring(bracketIndex + 1, part.indexOf(']')), 10);
+  return { key, index };
+};
+
 export const get = function(obj, path = '') {
   if (typeof path !== 'string') {
     return undefined;
@@ -166,29 +182,13 @@ export const get = function(obj, path = '') {
     return (obj !== null && isObject(obj)) ? obj[path] : undefined;
   }
 
-  function extractArrayLikeAccess(part) {
-    const key = part.substring(0, part.indexOf('['));
-    const index = parseInt(part.substring(part.indexOf('[') + 1, part.indexOf(']')), 10);
-    return { key, index };
-  }
-
-  function getCombinedKey(path) {
-    const dotIndex = path.indexOf('.');
-    if (dotIndex !== -1) {
-      const nextDotIndex = path.indexOf('.', dotIndex + 1);
-      if (nextDotIndex !== -1) {
-        return path.slice(0, nextDotIndex);
-      }
-    }
-    return path;
-  }
-
   if (obj === null || !isObject(obj)) {
     return undefined;
   }
 
   const parts = path.split('.');
   let currentObject = obj;
+  let pathOffset = 0;
 
   for (let i = 0; i < parts.length; i++) {
     if (currentObject === null || !isObject(currentObject)) {
@@ -198,7 +198,7 @@ export const get = function(obj, path = '') {
     let part = parts[i];
 
     if (part.includes('[')) {
-      const { key, index } = extractArrayLikeAccess(part);
+      const { key, index } = extractBracketAccess(part);
 
       if (key in currentObject && isArray(currentObject[key]) && index < currentObject[key].length) {
         currentObject = currentObject[key][index];
@@ -212,23 +212,26 @@ export const get = function(obj, path = '') {
         currentObject = currentObject[part];
       }
       else {
-        const remainingPath = parts.slice(i).join('.');
+        // Try remaining path as a single dotted key (e.g., obj['a.b.c'])
+        const remainingPath = path.substring(pathOffset);
         if (remainingPath in currentObject) {
           currentObject = currentObject[remainingPath];
           break;
         }
+
+        // Try combining current + next part as a dotted key (e.g., obj['a.b'])
+        const combinedKey = `${part}.${parts[i + 1]}`;
+        if (combinedKey in currentObject) {
+          currentObject = currentObject[combinedKey];
+          i++;
+        }
         else {
-          const combinedKey = getCombinedKey(`${part}.${parts[i + 1]}`);
-          if (combinedKey in currentObject) {
-            currentObject = currentObject[combinedKey];
-            i++;
-          }
-          else {
-            return undefined;
-          }
+          return undefined;
         }
       }
     }
+
+    pathOffset += part.length + 1;
   }
 
   return currentObject;
