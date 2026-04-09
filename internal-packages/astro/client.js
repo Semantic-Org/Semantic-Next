@@ -46,7 +46,7 @@ export default (element) => async (Component, props, { default: defaultChildren,
   // fuzzed values (e.g. "chevron down" overwriting "chevron-down").
   if (client !== 'only') {
     for (const [name, value] of Object.entries(props)) {
-      if (typeof value === 'object' || typeof value === 'function') {
+      if (value != null && (typeof value === 'object' || typeof value === 'function')) {
         component[name] = value;
       }
     }
