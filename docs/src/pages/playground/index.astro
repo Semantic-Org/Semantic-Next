@@ -17,7 +17,7 @@
     import { readPlaygroundLink } from '@helpers/link-encoder.js';
 
     // Read files from URL
-    const link = readPlaygroundLink(window.location.search) || {};
+    const link = readPlaygroundLink(window.location.hash) || {};
     const files = link?.files || {};
 
     $('astro-island').on('astro:hydrate', () => {

@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUI Light DOM Pre-render Pipeline</title>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER ORDER DECLARATION
+     Matches SUI: @layer global, theme; from global.css
+     We add sui-prerender as the last named layer.
+     Everything unlayered (consumer styles) beats all layers.
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+  @layer global.reset, global.base, tokens, sui-prerender;
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER: global.reset
+     Subset of SUI's reset.css (normalize + box-sizing)
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+  @layer global.reset {
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+    html {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+    }
+    h1 {
+      font-size: 2em;
+      margin: 0.67em 0;
+    }
+    h2 {
+      margin: 0.5em 0;
+    }
+    button, input, optgroup, select, textarea {
+      font-family: inherit;
+      font-size: 100%;
+      line-height: 1.15;
+      margin: 0;
+    }
+    img {
+      border-style: none;
+    }
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER: global.base
+     Subset of SUI's base.css — the globals that shadow DOM drops
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+  @layer global.base {
+    html {
+      min-height: 100%;
+      margin: 0;
+      padding: 0;
+      font-size: var(--em-size);
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-optical-sizing: auto;
+      overflow-wrap: break-word;
+      -webkit-font-smoothing: antialiased;
+      font-size: var(--page-size);
+      background: var(--page-background);
+      font-family: var(--page-font);
+      line-height: var(--line-height);
+      color: var(--text-color);
+    }
+    *, *::before, *::after {
+      box-sizing: var(--box-sizing);
+    }
+    h1, h2, h3, h4, h5 {
+      font-family: var(--header-font);
+      color: var(--header-color);
+      text-wrap: balance;
+    }
+    h1 { font-size: var(--h1); }
+    h2 { font-size: var(--h2); }
+    h3 { font-size: var(--h3); }
+    p {
+      text-wrap: pretty;
+      margin: 0;
+    }
+    a {
+      color: var(--link-color);
+      text-decoration: var(--link-text-decoration);
+      text-decoration-skip-ink: auto;
+      text-underline-offset: 0.2em;
+      text-decoration-thickness: 1px;
+    }
+    a:hover {
+      color: var(--link-hover-color);
+      text-decoration: var(--link-hover-text-decoration);
+    }
+    img, video, svg {
+      max-width: 100%;
+      height: auto;
+    }
+    * {
+      scrollbar-color: var(--thumb-background) var(--track-background);
+      scrollbar-width: var(--scrollbar-width);
+    }
+  }
+</style>
+
+<!-- ═══════════════════════════════════════════════════════════
+     LAYER: tokens
+     Simulated subset of SUI's design token system.
+     In production these come from tokens/*.css
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+  @layer tokens {
+    :root {
+      /* Base */
+      --em-size: 16px;
+      --page-size: 14px;
+      --box-sizing: border-box;
+      --line-height: 1.5;
+      --page-font: system-ui, -apple-system, sans-serif;
+      --header-font: var(--page-font);
+      --page-background: #0f172a;
+      --page-min-width: 320px;
+
+      /* Typography sizing */
+      --h1: 2rem;
+      --h2: 1.5rem;
+      --h3: 1.25rem;
+      --medium: 14px;
+      --small: 12px;
+      --large: 16px;
+
+      /* Colors */
+      --text-color: #e2e8f0;
+      --header-color: #f1f5f9;
+      --link-color: #60a5fa;
+      --link-hover-color: #93bbfd;
+      --link-text-decoration: none;
+      --link-hover-text-decoration: underline;
+      --primary-color: #3b82f6;
+      --primary-text-color: #ffffff;
+
+      /* Neutral scale (auto-inverts in dark mode in real SUI) */
+      --standard-5: rgba(255, 255, 255, 0.05);
+      --standard-10: rgba(255, 255, 255, 0.10);
+      --standard-15: rgba(255, 255, 255, 0.15);
+      --standard-30: rgba(255, 255, 255, 0.30);
+      --standard-60: rgba(255, 255, 255, 0.60);
+      --standard-80: rgba(255, 255, 255, 0.80);
+      --standard-90: rgba(255, 255, 255, 0.90);
+
+      /* Spacing */
+      --spacing: 16px;
+      --compact-spacing: 8px;
+      --8px: 8px;
+      --12px: 12px;
+      --16px: 16px;
+      --4px: 4px;
+
+      /* Borders */
+      --border-color: var(--standard-15);
+      --border-radius: 8px;
+      --border-radius-sm: 4px;
+      --border-radius-lg: 12px;
+      --border-radius-pill: 100px;
+
+      /* Typography weight */
+      --bold: 700;
+      --semibold: 600;
+      --normal: 400;
+
+      /* Transitions */
+      --transition: 150ms ease;
+
+      /* Shadows */
+      --subtle-shadow: 0 1px 3px rgba(0,0,0,0.3);
+
+      /* Scrollbar */
+      --scrollbar-width: thin;
+      --thumb-background: rgba(255,255,255,0.15);
+      --track-background: transparent;
+
+      /* Color scales */
+      --purple-bg: rgba(124, 58, 237, 0.15);
+      --purple-text: #c4b5fd;
+      --purple-solid: #7c3aed;
+      --green-bg: rgba(34, 197, 94, 0.15);
+      --green-text: #86efac;
+      --amber-border: #f59e0b;
+      --amber-text: #fbbf24;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONSUMER MARKUP
+     This is what a user/agent writes. No component JS loaded.
+     Mix of slots, attributes, nesting, and global-styled elements.
+     ═══════════════════════════════════════════════════════════ -->
+
+<div style="max-width: 640px; margin: 0 auto;">
+
+  <sui-card>
+    <h2 slot="header">Getting Started</h2>
+    <p>This card has an <code>h2</code> in the header slot — a tag that
+       <a href="#">global resets</a> style with margins and font sizing.
+       Those globals should be neutralized during pre-render and absent
+       after shadow DOM upgrade.</p>
+    <p>Here's a nested badge: <sui-badge>New</sui-badge> and some
+       <a href="#">linked text</a> that uses global link styles.</p>
+  </sui-card>
+
+  <sui-card accent="amber">
+    <h2 slot="header">Interactive Card</h2>
+    <sui-button>
+      <span class="emoji">🚀</span> Launch App
+    </sui-button>
+    <sui-button variant="outline">
+      Learn More
+    </sui-button>
+    <p>Buttons and badges should maintain their styling through the
+       upgrade without any visual shift.</p>
+    <p>
+      <sui-badge variant="success">Online</sui-badge>
+      <sui-badge>3 updates</sui-badge>
+    </p>
+  </sui-card>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CONTROLS + LOG
+     ═══════════════════════════════════════════════════════════ -->
+
+<div style="max-width: 640px; margin: 24px auto 0;">
+  <div id="log" style="padding:16px;background:#000;border-radius:8px;font-family:monospace;font-size:12px;line-height:1.8;max-height:460px;overflow-y:auto"></div>
+
+  <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+    <button onclick="stepPrerender()" style="padding:6px 14px;border-radius:6px;border:none;background:#f59e0b;color:#000;cursor:pointer;font-weight:600;font-size:13px">1. Pre-render</button>
+    <button onclick="stepSnapshot()" style="padding:6px 14px;border-radius:6px;border:none;background:#8b5cf6;color:#fff;cursor:pointer;font-weight:600;font-size:13px">2. Snapshot</button>
+    <button onclick="stepUpgrade()" style="padding:6px 14px;border-radius:6px;border:none;background:#22c55e;color:#000;cursor:pointer;font-weight:600;font-size:13px">3. Upgrade</button>
+    <button onclick="stepCompare()" style="padding:6px 14px;border-radius:6px;border:none;background:#06b6d4;color:#000;cursor:pointer;font-weight:600;font-size:13px">4. Compare</button>
+    <button onclick="runAll()" style="padding:6px 14px;border-radius:6px;border:none;background:#ec4899;color:#fff;cursor:pointer;font-weight:600;font-size:13px">Run All</button>
+    <button onclick="location.reload()" style="padding:6px 14px;border-radius:6px;border:none;background:#333;color:#eee;cursor:pointer;font-size:13px">Reset</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// LOGGING
+// ═══════════════════════════════════════════════════════════════
+const logEl = document.getElementById('log');
+function logOk(t, d)   { logEl.innerHTML += `<div style="color:#4ade80">✅ <b>${t}</b> — ${d}</div>`; }
+function logFail(t, d)  { logEl.innerHTML += `<div style="color:#f87171">❌ <b>${t}</b> — ${d}</div>`; }
+function logInfo(t)     { logEl.innerHTML += `<div style="color:#555;margin-top:6px">── ${t} ──</div>`; }
+function logTest(name, pass, detail) { pass ? logOk(name, detail) : logFail(name, detail); }
+const cs = (el, p) => getComputedStyle(el)[p];
+
+
+// ═══════════════════════════════════════════════════════════════
+// COMPONENT DEFINITIONS
+//
+// Realistic shadow-DOM CSS using SUI design tokens.
+// Templates use <slot> as projection markers.
+// ═══════════════════════════════════════════════════════════════
+
+const components = {
+
+  'sui-card': {
+    template: `
+      <div class="card">
+        <div class="header"><slot name="header"></slot></div>
+        <div class="body"><slot></slot></div>
+      </div>`,
+    css: `
+      :host {
+        display: block;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius-lg);
+        margin-bottom: var(--spacing);
+        overflow: hidden;
+        background: var(--standard-5);
+      }
+      :host([accent="amber"]) {
+        border-color: var(--amber-border);
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+      }
+      .header {
+        padding: var(--12px) var(--16px);
+        font-weight: var(--bold);
+        font-size: var(--large);
+        color: var(--header-color);
+        border-bottom: 1px solid var(--border-color);
+      }
+      :host([accent="amber"]) .header {
+        color: var(--amber-text);
+        border-bottom-color: var(--amber-border);
+      }
+      .body {
+        padding: var(--16px);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        gap: var(--compact-spacing);
+      }
+      .body a {
+        color: var(--link-color);
+        text-decoration: var(--link-text-decoration);
+        text-underline-offset: 0.2em;
+      }
+      .body a:hover {
+        color: var(--link-hover-color);
+        text-decoration: var(--link-hover-text-decoration);
+      }`,
+  },
+
+  'sui-button': {
+    template: `
+      <div class="button">
+        <span class="label"><slot></slot></span>
+      </div>`,
+    css: `
+      :host {
+        display: inline-flex;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--compact-spacing);
+        padding: var(--8px) var(--16px);
+        background: var(--primary-color);
+        color: var(--primary-text-color);
+        border-radius: var(--border-radius);
+        font-weight: var(--semibold);
+        font-size: var(--medium);
+        cursor: pointer;
+        transition: opacity var(--transition);
+        border: 1px solid transparent;
+      }
+      :host([variant="outline"]) .button {
+        background: transparent;
+        border-color: var(--border-color);
+        color: var(--text-color);
+      }
+      .label {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--4px);
+      }`,
+  },
+
+  'sui-badge': {
+    template: `<span class="badge"><slot></slot></span>`,
+    css: `
+      :host {
+        display: inline-flex;
+        vertical-align: middle;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px var(--8px);
+        background: var(--purple-solid);
+        color: #fff;
+        border-radius: var(--border-radius-pill);
+        font-size: var(--small);
+        font-weight: var(--semibold);
+        line-height: 1.5;
+      }
+      :host([variant="success"]) .badge {
+        background: #16a34a;
+      }`,
+  },
+};
+
+
+// ═══════════════════════════════════════════════════════════════
+// FORWARD RESET
+// Globals that shadow DOM silently drops. Injected into every
+// component's shadow CSS so behavior matches light DOM mode.
+// ═══════════════════════════════════════════════════════════════
+
+const FORWARD_RESET = `
+/* === SUI Shadow Reset === */
+*, *::before, *::after {
+  box-sizing: var(--box-sizing);
+  scrollbar-color: var(--thumb-background) var(--track-background);
+  scrollbar-width: var(--scrollbar-width);
+}
+a {
+  color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
+  text-decoration-skip-ink: auto;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--link-hover-color);
+  text-decoration: var(--link-hover-text-decoration);
+}
+img, video, svg {
+  max-width: 100%;
+  height: auto;
+}
+`;
+
+
+// ═══════════════════════════════════════════════════════════════
+// REVERSE RESET
+//
+// Key insight: slotted content stays in light DOM after upgrade,
+// so globals SHOULD apply to it in both phases. Only template
+// internals move into shadow DOM and lose globals.
+//
+// Template internals are almost always classed divs/spans —
+// they rarely use semantic tags that globals target. So the
+// reverse reset is narrow: only neutralize globals on semantic
+// tags that appear as TEMPLATE structure (not slotted content).
+//
+// We exclude slotcontent descendants since those are consumer-
+// provided and should keep their global styles.
+// ═══════════════════════════════════════════════════════════════
+
+const REVERSE_RESET = `
+  /* Neutralize globals only on template-owned elements, not slotted content */
+  h1:not(slotcontent *),
+  h2:not(slotcontent *),
+  h3:not(slotcontent *),
+  h4:not(slotcontent *),
+  h5:not(slotcontent *) {
+    margin: 0;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
+  }
+  a:not(slotcontent *) {
+    color: var(--link-color);
+    text-decoration: var(--link-text-decoration);
+  }
+  img:not(slotcontent *), video:not(slotcontent *), svg:not(slotcontent *) {
+    max-width: 100%;
+    height: auto;
+  }
+`;
+
+
+// ═══════════════════════════════════════════════════════════════
+// CSS REWRITER
+//
+// Transform shadow DOM CSS → @scope CSS for light DOM pre-render.
+//   :host            → :scope
+//   :host([attr])    → :scope[attr]
+//   :host(.cls)      → :scope.cls
+//   Wrap in @layer sui-prerender { @scope (tag) to (:not(:defined)) }
+//   Inject reverse reset
+// ═══════════════════════════════════════════════════════════════
+
+function rewriteCSS(tagName, shadowCSS) {
+  let rewritten = shadowCSS
+    .replace(/:host\((\[[^\]]*\])\)/g, ':scope$1')
+    .replace(/:host\((\.[\w-]+)\)/g, ':scope$1')
+    .replace(/:host\b/g, ':scope');
+
+  return `@layer sui-prerender {
+  @scope (${tagName}) to (:not(:defined)) {
+    ${REVERSE_RESET}
+    ${rewritten}
+  }
+}`;
+}
+
+function prepareShadowCSS(componentCSS) {
+  return FORWARD_RESET + componentCSS;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// SCOPE SHEET REGISTRY
+// ═══════════════════════════════════════════════════════════════
+
+const scopeSheets = new Map();
+// Also track the slotcontent sheet separately
+let slotWrapperSheet = null;
+
+function registerScopeCSS(tagName, cssText) {
+  const sheet = new CSSStyleSheet();
+  sheet.replaceSync(cssText);
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+  scopeSheets.set(tagName, sheet);
+}
+
+function removeScopeCSS(tagName) {
+  const sheet = scopeSheets.get(tagName);
+  if (!sheet) return;
+  document.adoptedStyleSheets = document.adoptedStyleSheets.filter(s => s !== sheet);
+  scopeSheets.delete(tagName);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// LIGHT DOM RENDERER + SLOT PROJECTION
+// ═══════════════════════════════════════════════════════════════
+
+function prerenderElement(el, def) {
+  // Stash consumer children keyed by slot name
+  const stashed = { default: [] };
+  for (const child of Array.from(el.childNodes)) {
+    if (child.nodeType === 1) {
+      const slotName = child.getAttribute('slot') || 'default';
+      if (!stashed[slotName]) stashed[slotName] = [];
+      stashed[slotName].push(child);
+    } else if (child.nodeType === 3 && child.textContent.trim()) {
+      stashed.default.push(child);
+    }
+  }
+  el.__stashedChildren = stashed;
+
+  // Parse template
+  const tpl = document.createElement('template');
+  tpl.innerHTML = def.template.trim();
+  const fragment = tpl.content.cloneNode(true);
+
+  // Replace <slot> markers with stashed content
+  for (const slot of fragment.querySelectorAll('slot')) {
+    const name = slot.getAttribute('name') || 'default';
+    const children = stashed[name] || [];
+
+    const wrapper = document.createElement('slotcontent');
+    wrapper.setAttribute('data-slot', name);
+
+    for (const child of children) {
+      if (child.nodeType === 1 && child.hasAttribute('slot')) {
+        child.removeAttribute('slot');
+        child.__originalSlot = name;
+      }
+      wrapper.appendChild(child);
+    }
+    slot.replaceWith(wrapper);
+  }
+
+  el.appendChild(fragment);
+}
+
+function getDepth(el) {
+  let d = 0, n = el;
+  while (n.parentElement) { d++; n = n.parentElement; }
+  return d;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// UPGRADE ORCHESTRATOR
+// ═══════════════════════════════════════════════════════════════
+
+function upgradeComponent(tagName, def) {
+  const shadowCSS = prepareShadowCSS(def.css);
+
+  customElements.define(tagName, class extends HTMLElement {
+    connectedCallback() {
+      if (this.shadowRoot) return;
+
+      // Restore consumer children for slot projection
+      if (this.__stashedChildren) {
+        this.innerHTML = '';
+        for (const [slotName, children] of Object.entries(this.__stashedChildren)) {
+          for (const child of children) {
+            if (child.__originalSlot && child.__originalSlot !== 'default') {
+              child.setAttribute('slot', child.__originalSlot);
+              delete child.__originalSlot;
+            }
+            this.appendChild(child);
+          }
+        }
+        delete this.__stashedChildren;
+      }
+
+      // Create shadow DOM with forward reset
+      const shadow = this.attachShadow({ mode: 'open' });
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(shadowCSS);
+      shadow.adoptedStyleSheets = [sheet];
+      shadow.innerHTML = def.template.trim();
+    }
+  });
+
+  removeScopeCSS(tagName);
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// STYLE SNAPSHOT + COMPARISON
+// ═══════════════════════════════════════════════════════════════
+
+let preUpgradeSnapshot = null;
+
+const PROPS = [
+  'display', 'color', 'backgroundColor', 'borderColor',
+  'padding', 'margin', 'fontSize', 'fontWeight',
+  'borderRadius', 'gap', 'flexDirection', 'lineHeight',
+  'textDecoration', 'verticalAlign', 'overflow', 'cursor',
+];
+
+function captureSnapshot() {
+  const snap = {};
+  for (const el of document.querySelectorAll('[data-m]')) {
+    const id = el.getAttribute('data-m');
+    snap[id] = {};
+    for (const p of PROPS) snap[id][p] = cs(el, p);
+  }
+  return snap;
+}
+
+function addMeasurePoints() {
+  document.querySelectorAll('sui-card').forEach((el, i) => {
+    el.setAttribute('data-m', `card-${i}`);
+    const h = el.querySelector('.header');
+    if (h) h.setAttribute('data-m', `card-${i}-header`);
+    const b = el.querySelector('.body');
+    if (b) b.setAttribute('data-m', `card-${i}-body`);
+    // Measure an h2 inside the header to verify reverse reset
+    const h2 = el.querySelector('h2');
+    if (h2) h2.setAttribute('data-m', `card-${i}-h2`);
+    // Measure a link to verify link styles
+    const a = el.querySelector('a');
+    if (a) a.setAttribute('data-m', `card-${i}-link`);
+  });
+  document.querySelectorAll('sui-button').forEach((el, i) => {
+    el.setAttribute('data-m', `btn-${i}`);
+    const inner = el.querySelector('.button');
+    if (inner) inner.setAttribute('data-m', `btn-${i}-inner`);
+  });
+  document.querySelectorAll('sui-badge').forEach((el, i) => {
+    el.setAttribute('data-m', `badge-${i}`);
+    const inner = el.querySelector('.badge');
+    if (inner) inner.setAttribute('data-m', `badge-${i}-inner`);
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// PIPELINE STEPS
+// ═══════════════════════════════════════════════════════════════
+
+function stepPrerender() {
+  logInfo('Phase 1: Pre-render to light DOM');
+
+  // Transparent slot wrapper
+  slotWrapperSheet = new CSSStyleSheet();
+  slotWrapperSheet.replaceSync('slotcontent { display: contents; }');
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, slotWrapperSheet];
+
+  // Rewrite + register CSS per component
+  for (const [tag, def] of Object.entries(components)) {
+    const scopeCSS = rewriteCSS(tag, def.css);
+    registerScopeCSS(tag, scopeCSS);
+  }
+
+  // Pre-render bottom-up (deepest first)
+  const allEls = [];
+  for (const tag of Object.keys(components)) {
+    for (const el of document.querySelectorAll(tag)) allEls.push(el);
+  }
+  allEls.sort((a, b) => getDepth(b) - getDepth(a));
+  for (const el of allEls) {
+    prerenderElement(el, components[el.tagName.toLowerCase()]);
+  }
+
+  // Tests
+  const card0 = document.querySelector('sui-card');
+  logTest('Card has .card wrapper', !!card0.querySelector('.card'), 'found');
+
+  logTest('Header has slotted h2',
+    card0.querySelector('.header h2')?.textContent === 'Getting Started',
+    `"${card0.querySelector('.header h2')?.textContent}"`);
+
+  // Slotted content keeps global styles — they apply in both phases.
+  // h2 gets margin from global.reset and font-size from global.base.
+  // This is correct: after upgrade, slotted h2 stays in light DOM.
+  const h2 = card0.querySelector('.header h2');
+  logTest('h2 keeps global margin (slotted, stays in light DOM)',
+    cs(h2, 'margin') !== '0px',
+    `margin: ${cs(h2, 'margin')} (from global.reset — correct)`);
+
+  logTest('h2 keeps global font-size (slotted, stays in light DOM)',
+    cs(h2, 'fontSize') === '24px',
+    `h2: ${cs(h2, 'fontSize')} (var(--h2) from global.base — correct)`);
+
+  // Card host styling
+  logTest('Card border-radius uses token',
+    cs(card0, 'borderRadius') === '12px',
+    `got ${cs(card0, 'borderRadius')}`);
+
+  logTest('Card bg uses --standard-5',
+    cs(card0, 'backgroundColor') !== 'rgba(0, 0, 0, 0)',
+    `bg: ${cs(card0, 'backgroundColor')}`);
+
+  // Accent variant
+  const card1 = document.querySelectorAll('sui-card')[1];
+  logTest('Accent card has amber border',
+    cs(card1, 'borderColor').includes('245, 158, 11'),
+    `border: ${cs(card1, 'borderColor')}`);
+
+  // Badge isolation
+  const badge = document.querySelector('sui-badge');
+  const badgeInner = badge?.querySelector('.badge');
+  logTest('Badge has purple bg (not leaked from card)',
+    badgeInner && cs(badgeInner, 'backgroundColor').includes('124, 58, 237'),
+    `bg: ${badgeInner ? cs(badgeInner, 'backgroundColor') : 'n/a'}`);
+
+  // Button
+  const btn = document.querySelector('sui-button');
+  const btnInner = btn?.querySelector('.button');
+  logTest('Button bg uses --primary-color',
+    btnInner && cs(btnInner, 'backgroundColor').includes('59, 130, 246'),
+    `bg: ${btnInner ? cs(btnInner, 'backgroundColor') : 'n/a'}`);
+
+  // Outline variant
+  const btnOutline = document.querySelectorAll('sui-button')[1];
+  const btnOutlineInner = btnOutline?.querySelector('.button');
+  logTest('Outline button has transparent bg',
+    btnOutlineInner && cs(btnOutlineInner, 'backgroundColor') === 'rgba(0, 0, 0, 0)',
+    `bg: ${btnOutlineInner ? cs(btnOutlineInner, 'backgroundColor') : 'n/a'}`);
+
+  // Link inside card body
+  const link = card0.querySelector('.body a');
+  logTest('Link color uses --link-color',
+    link && cs(link, 'color').includes('96, 165, 250'),
+    `color: ${link ? cs(link, 'color') : 'n/a'}`);
+
+  logTest(`${scopeSheets.size} scope sheets registered`, scopeSheets.size === 3, `got ${scopeSheets.size}`);
+}
+
+
+function stepSnapshot() {
+  logInfo('Phase 2: Snapshot pre-upgrade styles');
+  addMeasurePoints();
+  preUpgradeSnapshot = captureSnapshot();
+  const count = Object.keys(preUpgradeSnapshot).length;
+  logTest('Snapshot captured', count > 0, `${count} measurement points`);
+}
+
+
+function stepUpgrade() {
+  logInfo('Phase 3: Upgrade to shadow DOM');
+
+  const order = ['sui-badge', 'sui-button', 'sui-card'];
+  for (const tag of order) {
+    if (!customElements.get(tag)) {
+      upgradeComponent(tag, components[tag]);
+      logOk(`Upgraded ${tag}`, `${scopeSheets.size} scope sheets remaining`);
+    }
+  }
+
+  requestAnimationFrame(() => {
+    const card0 = document.querySelector('sui-card');
+
+    logTest('Card has shadow DOM', !!card0.shadowRoot, card0.shadowRoot ? 'yes' : 'no');
+
+    // Slot projection
+    const headerSlot = card0.shadowRoot?.querySelector('slot[name="header"]');
+    const assigned = headerSlot?.assignedNodes() || [];
+    logTest('Header slot projects h2',
+      assigned.some(n => n.tagName === 'H2'),
+      `assigned: ${assigned.map(n => n.tagName || '#text').join(', ')}`);
+
+    const defaultSlot = card0.shadowRoot?.querySelector('slot:not([name])');
+    const defaultAssigned = defaultSlot?.assignedNodes({ flatten: true }) || [];
+    logTest('Default slot projects body content',
+      defaultAssigned.length > 0,
+      `${defaultAssigned.length} nodes assigned`);
+
+    // Badge inside card should have its own shadow DOM
+    const badge = document.querySelector('sui-badge');
+    logTest('Nested badge has shadow DOM', !!badge?.shadowRoot, badge?.shadowRoot ? 'yes' : 'no');
+
+    // h2 inside slotted content — now in light DOM (slot projected)
+    // Should NOT have global reset margins because it's in the card's shadow context
+    // Actually, slotted elements inherit from the shadow host context,
+    // but are styled by the outer document. So global h2 rules apply.
+    const h2 = card0.querySelector('h2');
+    logTest('h2 still in light DOM (slotted)',
+      !!h2 && !card0.shadowRoot.contains(h2),
+      h2 ? 'yes, in light DOM' : 'not found');
+
+    logTest('All scope sheets removed', scopeSheets.size === 0, `${scopeSheets.size} remaining`);
+  });
+}
+
+
+function stepCompare() {
+  logInfo('Phase 4: Visual diff');
+
+  if (!preUpgradeSnapshot) {
+    logFail('No snapshot', 'Run step 2 first');
+    return;
+  }
+
+  const postSnapshot = {};
+  for (const id of Object.keys(preUpgradeSnapshot)) {
+    // Try light DOM first
+    let el = document.querySelector(`[data-m="${id}"]`);
+
+    // If not found, search shadow roots
+    if (!el) {
+      const parts = id.split('-');
+      // Find host: "card-0-header" → "card-0", role "header"
+      // "btn-0-inner" → "btn-0", role "inner"
+      // "badge-0-inner" → "badge-0", role "inner"
+      for (let split = parts.length - 1; split >= 2; split--) {
+        const hostId = parts.slice(0, split).join('-');
+        const role = parts.slice(split).join('-');
+        const host = document.querySelector(`[data-m="${hostId}"]`);
+        if (host?.shadowRoot) {
+          // Map role to selector
+          const selectors = {
+            'header': '.header',
+            'body': '.body',
+            'inner': '.button, .badge',
+          };
+          el = host.shadowRoot.querySelector(selectors[role] || `.${role}`);
+          if (el) break;
+        }
+      }
+    }
+
+    if (!el) {
+      // Special case: h2 and link stay in light DOM (slotted content)
+      // but their data-m attribute is still there
+      logFail(`  ${id}`, 'not found in light DOM or shadow DOM');
+      continue;
+    }
+
+    postSnapshot[id] = {};
+    for (const p of PROPS) postSnapshot[id][p] = cs(el, p);
+  }
+
+  let matches = 0, mismatches = 0;
+  for (const id of Object.keys(preUpgradeSnapshot)) {
+    if (!postSnapshot[id]) continue;
+    const pre = preUpgradeSnapshot[id];
+    const post = postSnapshot[id];
+    for (const p of PROPS) {
+      if (pre[p] === post[p]) {
+        matches++;
+      } else {
+        mismatches++;
+        logFail(`  ${id}.${p}`, `"${pre[p]}" → "${post[p]}"`);
+      }
+    }
+  }
+
+  if (mismatches === 0) {
+    logOk('Visual diff', `${matches}/${matches} properties match — zero visual shift`);
+  } else {
+    logFail('Visual diff', `${matches} match, ${mismatches} changed`);
+  }
+}
+
+
+async function runAll() {
+  logEl.innerHTML = '';
+  stepPrerender();
+  await new Promise(r => requestAnimationFrame(r));
+  stepSnapshot();
+  await new Promise(r => requestAnimationFrame(r));
+  stepUpgrade();
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  stepCompare();
+}
+</script>
+</body>
+</html>

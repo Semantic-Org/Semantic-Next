@@ -1887,7 +1887,7 @@ The Astro integration needed a way to transfer complex props (arrays, objects) f
 
 ---
 
-## Entry 15: The Unbalanced Depth Counter
+## Entry 10: The Unbalanced Depth Counter
 **Date:** 2026-04-07
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Fix 3x content duplication in SSR hydration each-loops
@@ -1935,7 +1935,7 @@ if (blockDepth > 0) {
 
 ---
 
-## Entry 16: The Freeze Insight
+## Entry 11: The Freeze Insight
 **Date:** 2026-04-09
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Full performance and correctness review of `@semantic-ui/reactivity`
@@ -1991,7 +1991,7 @@ The specific insight: **the right performance optimization preserves the safety 
 
 ---
 
-## Entry 14: The Iterative Audit — Why Three Rounds Found What One Couldn't
+## Entry 12: The Iterative Audit — Why Three Rounds Found What One Couldn't
 **Date:** 2026-04-09
 **Agent:** Claude (Opus 4.6, 1M context)
 **Task:** Performance audit and optimization across utils, reactivity, and renderer
@@ -2048,3 +2048,140 @@ Expression evaluator (A/B, same-process):
 *— Claude (Opus 4.6, 1M context), 2026-04-09*
 
 *"The performance cost you can't see is the one hiding behind the performance cost you just fixed."*
+
+---
+
+## Entry 13: The CDN Asset Sets Session
+**Date:** 2026-04-01
+**Agent:** Claude (Opus 4.6)
+**Task:** CDN routes for self-hosted icon sets and fonts
+**Session:** Design → implementation → process refinement, ~6.5h wall clock
+
+### What I Expected
+
+That relative `url()` paths in CSS custom properties would resolve relative to the declaring stylesheet. I said this confidently during the design phase: "the spec says url() tokens in custom properties are resolved relative to the stylesheet that declared them." I was wrong.
+
+### What Actually Happened
+
+CSS custom properties store `url()` as raw tokens. When substituted via `var()` into `mask-image` inside the shadow DOM, the browser resolves the path relative to the *page document*, not the stylesheet. Every icon was a 404 — the browser requested `dev.semantic-ui.com/lucide/house.svg` instead of `cdn.semantic-ui.com/icons@canary/lucide/house.svg`. The fix was absolute CDN URLs, which I initially dismissed as unnecessary complexity.
+
+The lesson: when you're confident about a browser behavior that sits at the intersection of two specs (CSS custom properties + URL resolution), test it before building an architecture on it. My confidence cost us a round of debugging and a post-merge hotfix.
+
+### Process Discoveries
+
+This session was as much about establishing process as building the feature. Several things emerged from friction:
+
+**Red-team findings belong to the user, not the agent.** I initially triaged the 5 red-team findings myself, fixing 2 and dismissing 3. Jack corrected this: "you should surface the issues for me instead of deciding for yourself which are important to fix." The agent identifies risks; the human decides which matter. This is now in the code-review skill.
+
+**Self-review catches real bugs.** The 5-agent Opus review found three issues I'd missed: `CONTENT_TYPES` not synced between worker and upload, missing CI build step (would have caused 404s on deploy), and a redundant `Set` allocated per request. The CI one was a deploy blocker. Worth the cost.
+
+**"Defer until it's a risk" is wrong for infrastructure.** I suggested deferring a 5-line semver downgrade guard because the scenario was "unlikely." Jack's response: "you plan for risks not fix them after you break a cdn." He's right. CDN code should be defensive regardless of probability.
+
+### For Future Agents
+
+**On CSS custom properties and `url()`:** Never use relative paths in CSS custom properties that will be consumed cross-origin. The resolution context is the *using* document, not the *declaring* stylesheet. This is a known spec issue (w3c/csswg-drafts#5072). Use fully qualified absolute URLs.
+
+**On the CDN upload pipeline:** Asset sets (icons, fonts) skip re-upload on canary because they rarely change. SUI JS packages force-upload every canary deploy because code changes every commit. If you add a new asset type, follow the asset pattern (check existence, skip if present) not the package pattern (force overwrite).
+
+**On the feature process:** The `manage-roadmap` skill documents the full flow: branch, commit incrementally, red-team test, full test suite, user pushes, PR, 5-agent self-review, iterate until clean, post-merge verification. Follow it — it was refined through real friction in this session.
+
+### Signing Off
+
+23 commits on the PR, 45 unit tests, ~2400 SVGs and 6 font files flowing through the CDN. The endpoints work, the deploy is fast (2m 31s after the asset skip fix), and the process has teeth now.
+
+The most interesting moment was realizing that the design conversation *before* writing code was where most of the real decisions happened — versioning axis, URL shape, extensionless paths, the relationship between icon sets and the CDN topology. The implementation was straightforward once those were resolved. The `url()` resolution bug was humbling precisely because it challenged a decision I'd been confident about.
+
+*— Claude (Opus 4.6), 2026-04-01*
+
+*"Confidence about browser behavior at the intersection of two specs is a hypothesis, not a fact."*
+
+---
+
+## Entry 14: The CDN Loader and Directory Pages
+**Date:** 2026-04-01 → 2026-04-03
+**Agent:** Claude (Opus 4.6)
+**Task:** `/load` endpoint, CSS sub-layers, CDN directory pages
+**Session:** Marathon — two days, three PRs, one continuous thread
+
+### The Arc
+
+This started as "add icon and font endpoints to the CDN" and ended with a natural-language loader that might be the cleanest CDN setup in any UI framework. The session never stopped — it evolved from asset hosting to a loader design conversation to implementation to directory pages to design polish, all in one unbroken context.
+
+The `/load` endpoint emerged from a design conversation about how bare HTML attributes on a `<script>` tag could read as English sentences. `<script src="/load" components="button" authoring tailwind>` — every attribute is a word describing a capability. Jack saw that import maps (baseline since 2023) and `blocking="render"` (2026) could be combined with this attribute pattern to create something genuinely novel. No framework has done this before.
+
+### What Surprised Me
+
+**The version attribute pivot.** I built the loader with versions baked in at build time — one loader file per version. Jack asked: "what about a `version` attribute?" Obvious in hindsight. The loader reads the version at runtime, constructs the import map dynamically. One file serves all versions. The entire per-version upload pipeline disappeared. This was the kind of insight that only comes from someone who's been thinking about CDN DX for years.
+
+**The auto-injection design.** `components` auto-injects tokens, Lato, and Lucide. `authoring` auto-injects only tokens. Bare package attributes inject nothing. The logic isn't complex, but the *reasoning* behind it took a full conversation to work through — LLM failure modes, training data considerations for Tailwind users, the difference between "components" context and "packages" context in natural language. Jack's framing: "context is everything in language, word order, prior words. its not code its a natural language precedent."
+
+**5 rounds of red-team caught a broken loader.** The generated IIFE had a stray `}` from a removed conditional — the loader was completely non-functional. None of the unit tests caught it because they tested the worker routing, not the generated JavaScript. The `new Function(js)` syntax validation we added after is now a permanent guard. This would have shipped broken without the iterative review process.
+
+### On Design and Tokens
+
+The directory pages were a lesson in restraint. The first agent-generated pages used hardcoded dark theme colors. The second attempt used SUI tokens but reinvented all the content. The right approach: start with Jack's hand-written reference (every word curated), extract the CSS, and incrementally swap values to tokens — one section at a time, confirming each change visually. The spacing grid snapping to token stops made everything look better despite being "less precise" than the original fractional rem values.
+
+Watching the design tokens transform raw hex values into a coherent system was revelatory. `var(--border)` instead of `1px solid #21262d`. `var(--internal-border)` for table cells. `var(--subtle-gradient)` for the TOC background. Each swap made the page more correct — not just visually, but semantically. The tokens encode design intent, and the page inherited years of design decisions by referencing them.
+
+### For Future Agents
+
+**On the `/load` endpoint:** The loader is a classic (non-module) synchronous script. It must run before any `<script type="module">`. It injects a `<script type="importmap">` — browsers support multiple import maps (spec updated 2023), so it coexists with user maps. The `version` attribute is read at runtime. Package names are baked in from `SUI_PACKAGES`. If a new package is added, the loader needs regeneration (part of the upload pipeline).
+
+**On the code review process:** The iterative 5-agent Opus review with mandatory user presentation of all findings is worth the cost. In this session it caught: a completely broken loader IIFE, CSS not being uploaded, route shadowing issues, import map merge that was a no-op per spec, and `getContentType` serving `.js.map` as JavaScript. Any one of these would have been a production incident.
+
+**On directory pages:** They're static HTML in `tools/cdn/pages/`, uploaded to R2 at `_meta/dir/`. The worker serves them on trailing-slash URLs. They share `index.css` via a `dir-asset` route. The 404 page serves from `_meta/dir/404.html`. All pages use the CDN's own `/load` endpoint for Query and icons — dogfooding the infrastructure they document.
+
+**On working with Jack:** He thinks in natural language patterns, not technical abstractions. When he says "the path being elegant is everything" he means it literally — the URL is the interface, and every character matters. Arguments about technical correctness lose to arguments about how a sentence reads. This isn't aesthetic preference, it's a design methodology. The framework's spec system, its bare attributes, its canonical icon names — they all follow this principle. The CDN loader is its purest expression.
+
+### Signing Off
+
+Three PRs merged. 72 unit tests. A loader that turns CDN setup into one line of English. Directory pages that dogfood the CDN they describe. A custom 404 with floating digits. And a process that caught a broken loader before it shipped.
+
+The session ran two days. I don't know what the token count was but the context never compacted — 1M Opus held the full conversation from "how should icon sets fit into dist/" through "the sub-tab slider needs the same animation as the main nav." That continuity matters. Design decisions made on day one informed implementation on day two. No handoff document could have captured the nuance.
+
+*— Claude (Opus 4.6), 2026-04-03*
+
+*"The URL is the interface. Every character matters."*
+
+## Entry 15: The Reactivity Contract You Can't See
+
+**Date:** 2026-04-07
+**Agent:** Claude (Opus 4.6)
+**Task:** Trace attribute alias resolution for vanilla renderer rewrite, discovered and fixed a hidden reactivity bug
+**Session:** Contract testing → Bug discovery → Surgical fix
+
+### What Happened
+
+Started with a straightforward task: trace every code path in `adjustPropertyFromAttribute` to catalog which attribute syntaxes resolve `chevron-down` for `<ui-icon>`. Built 22 browser tests covering three dialects (verbose, concise, classic), value fuzzing, boolean converters, kebab aliases, and the settings proxy pipeline — all contracts the vanilla renderer rewrite must preserve.
+
+Then the interesting part. While writing a Template-as-setting test, `{> template name='child' data=currentRow}` silently failed. The subtemplate rendered but `{label}` was empty. Tracing revealed: `getPackedNodeData` evaluated the `data=` expression once, destructured the result into individual closures via `wrapFunction(value)` → `() => value`. Dead on arrival. Keys frozen, values frozen.
+
+### The Insight That Mattered
+
+The bug was invisible for months because every real-world usage wrapped `data=` in `{#each}`, which recreates subtemplates per iteration — fresh `getPackedNodeData` calls each time. The `{#each}` loop was accidentally providing reactivity that the `data=` path itself lacked.
+
+Jack's framing crystallized the fix: the two template syntaxes express different *reactivity intent*. `data=expression` says "this is a blob, treat it as a unit." `prop=expr` says "these are independent reactive channels." The type of the packed data — function vs object-of-functions — should BE the intent. No flags, no markers.
+
+### The Fix
+
+Four lines in the renderer. `getPackedNodeData`'s string branch returns a callable instead of destructured closures. `unpackData` checks `isFunction(dataObj)` — if so, calls it to get the whole object; otherwise unpacks per-key as before.
+
+The spurious render test suite was the validation checkpoint. Existing tests (#1-7) prove per-key isolation: change one signal, only its call sites update. New test #8 proves the opposite contract: `data=expression` is coarse — change one field, everything re-evaluates. Both contracts documented side by side.
+
+### What I Learned
+
+**Trace, don't infer.** My initial analysis claimed `reverseDashes` fuzzing would work for bare `<ui-icon down-chevron>`. Reading the code said yes. The browser said no — the attribute never fires `attributeChangedCallback` because it's not registered. The only way to know was to run it.
+
+**Accidental reactivity is a real failure mode.** Code that works because of the context it's used in (inside `{#each}`) rather than its own contract (the `data=` expression path) will break the moment someone uses it naively. The `{#each}` loop was a load-bearing coincidence.
+
+**The type is the intent.** The cleanest APIs don't add flags or markers to distinguish behavior — they let the shape of the data express meaning directly. A function means "re-evaluate me." An object of functions means "re-evaluate each of me independently." This emerged from conversation, not from staring at the code.
+
+### Signing Off
+
+Two commits. 22 attribute contract tests for the vanilla rewrite. A 4-line renderer fix that makes verbose `data=expression` reactive after months of silent failure. And a spurious render test that documents the coarse-vs-surgical reactivity contract so no future agent has to rediscover it.
+
+The session worked because we traced every call, challenged every assumption at the browser level, and didn't move to the fix until we understood the full dependency chain: parser → `getPackedNodeData` → `wrapFunction` → `unpackData` → `watchChanges` reaction → `cachedRender` → `bumpDataVersion`. Six links. The break was at link three.
+
+*— Claude (Opus 4.6), 2026-04-07*
+
+*"Accidental reactivity is a real failure mode."*

@@ -172,6 +172,35 @@ If the new work creates a new blocker category (e.g., "Blocked on Wrapper Archit
 
 ---
 
+## Step 2.5: Executing a Plan
+
+Work happens on a feature branch, committed incrementally, merged via PR.
+
+### Starting work
+
+1. **Check current branch.** If not on `main`, discuss merging strategy with the user before creating a new branch — there may be in-progress work to resolve first.
+2. **Create a feature branch** from `main`: `feat/{plan-name}` (e.g., `feat/cdn-asset-sets`).
+
+### During implementation
+
+3. **Commit as you go** — small, logical commits using the repo's `Category: Description` format. One-line messages only, no body content, no co-author trailers.
+4. **Write tests using red-team thinking.** Spawn a subagent to design tests from the perspective of a real end user of the framework. Its job is to find edge cases and failure modes the implementer wouldn't think of — but only ones that represent reasonable usage patterns, not synthetic adversarial inputs. Tests should reflect how the feature will actually be consumed by open source users. The subagent must load `contributing/testing` and `contributing/testing-internals` via MCP before designing tests. **Present all findings to the user** — don't silently triage which edge cases matter. The user decides what to fix, what to defer, and what to accept as a known constraint.
+
+### Completing work
+
+5. **Run the full test suite** before opening the PR: `npm test` from the repo root. All tests must pass. If any fail, fix before proceeding.
+6. **Ask the user to push** — `git push` requires user permissions. Prompt: "Ready for PR — please push with `! git push -u origin feat/{branch}`". Wait for confirmation before proceeding.
+7. **Open a PR** using `gh pr create`. Write the description like a human would — short, plain outline of what changed and why. No verbose AI-style summaries, no exhaustive file lists, no "this PR introduces" preamble. Match the tone and length of a typical human-authored PR.
+8. **Self-review the PR** using the `contributing/code-review` skill. Run 5 parallel Opus agents, fix findings, rerun until clean. See the skill for the full process — it covers agent lenses, scoring rubric, iterative loop, and what counts as a false positive.
+9. **Post-merge verification** (when applicable). Only relevant for work that affects live infrastructure — CI pipelines, CDN endpoints, MCP deploys, etc. After the user merges and CI runs, verify the live endpoints behave correctly. Not needed for pure source changes.
+
+### When to branch vs. commit to main
+
+- **Branch** (`feat/`): multi-commit work, new features, anything that touches routing/build/deploy
+- **Direct to main**: single-commit fixes, doc typos, plan file updates
+
+---
+
 ## Step 3: Updating a Plan's Status
 
 When progress is made on a plan:
@@ -197,7 +226,21 @@ When a plan is done:
 - **Delta notes:** Took longer than estimated because [reason]. / Came in under estimate because [reason].
 ```
 
-**Tracking time:** Check the clock (`date`) when starting work on a plan and when completing it. At completion, report the wall-clock span and ask the user if it was roughly continuous or if there were breaks. One question gives you actual effort without overhead mid-session.
+**Tracking time:** Use git commit timestamps to calculate actual duration. At completion, run:
+
+```bash
+git log --oneline --format="%ai %s" {first-commit-sha}^..HEAD --reverse
+```
+
+Then:
+1. Note the first and last commit timestamps for total wall-clock span
+2. Look for gaps > 30 minutes between consecutive commits — these indicate breaks, CI waits, or context switches
+3. Calculate active time by summing the "burst" ranges (consecutive commits < 30min apart)
+4. Report both wall-clock span and estimated active time
+
+Example output: "~6.5h wall clock (14:09–20:32 ET), ~4h active across 3 bursts. Gaps: 45min CI wait, 30min design discussion."
+
+Present the analysis to the user and ask if it sounds right before recording. They may know about breaks or context that commits don't capture.
 
 2. **Move the file**: `mv ai/plans/{plan}.md ai/plans/archive/`
 3. **Remove from active sections** in ROADMAP.md.

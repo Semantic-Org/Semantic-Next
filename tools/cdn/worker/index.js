@@ -66,15 +66,18 @@ const CONTENT_TYPES = {
   '.html': 'text/html',
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
-  for (const [ext, type] of Object.entries(CONTENT_TYPES)) {
-    if (filepath.endsWith(ext)) {
-      return type;
-    }
-  }
-  return 'application/octet-stream';
+  const lastDot = filepath.lastIndexOf('.');
+  if (lastDot === -1) { return 'application/octet-stream'; }
+  const ext = filepath.slice(lastDot);
+  return CONTENT_TYPES[ext] || 'application/octet-stream';
 }
 
 // Parse URL into route info
@@ -82,16 +85,60 @@ function getContentType(filepath) {
 //   /core@0.18.0/semantic-ui.min.js        → SUI package
 //   /@semantic-ui/core@0.18.0/...           → SUI alias (redirects to clean path)
 //   /vendor/lit@3.3.2/directive.js          → third-party
+//   /icons@0.18.0/lucide                    → icon set CSS (extensionless)
+//   /icons@0.18.0/lucide/house.svg          → icon asset
+//   /fonts@0.18.0/lato                      → font set CSS (extensionless)
+//   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
+//   /load                                   → loader script (version-agnostic, reads version= attr)
 //   /css                                    → framework CSS (latest)
 //   /css@0.18.0                             → framework CSS (versioned)
+//   /css@0.18.0/tokens                      → tokens only
+//   /css@0.18.0/reset                       → reset only
+//   /css@0.18.0/base                        → base only
 //   /css@0.18.0.map                         → framework CSS sourcemap
 //   /semantic-ui@0.18.0.css                 → framework CSS (legacy alias)
 //   /semantic-ui@0.18.0.css.map             → framework CSS sourcemap (legacy alias)
 //   /semantic-ui.css                        → framework CSS (legacy alias)
-//   /importmap.js                           → import map loader (latest)
-//   /importmap@0.18.0.js                    → versioned import map loader
+//   /importmap.js                           → import map (legacy, use /load)
+//   /importmap@0.18.0.js                    → versioned import map (legacy)
 export function parseRoute(pathname) {
-  // Import map loader — version can contain dots (semver)
+  // Directory pages — trailing slash serves HTML info pages
+  // /              → root landing
+  // /core@0.18.0/  → package index
+  // /icons/        → icon sets listing
+  // /fonts/        → font sets listing
+  // Dir page static assets (CSS shared across all dir pages)
+  // Only match bare prefix paths (no @version) to avoid shadowing package files
+  const dirAssetMatch = pathname.match(/^\/(?:[^@/]+\/)?index\.css$/);
+  if (dirAssetMatch) {
+    return { type: 'dir-asset', file: 'index.css' };
+  }
+
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    // Strip trailing slash and parse the inner path
+    const inner = pathname.slice(0, -1);
+
+    // Asset set dirs: /icons/ or /icons@version/
+    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@[^/]+)?$/);
+    if (dirAssetMatch) {
+      return { type: 'dir', page: dirAssetMatch[1] };
+    }
+
+    // SUI package: /core/ or /core@0.18.0/
+    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@[^/]+)?$/);
+    if (dirPkgMatch && SUI_PACKAGES.has(dirPkgMatch[1])) {
+      return { type: 'dir', page: dirPkgMatch[1] };
+    }
+
+    return { type: 'unknown' };
+  }
+
+  // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
+  if (pathname === '/load' || pathname === '/load.js') {
+    return { type: 'load' };
+  }
+
+  // Import map loader (legacy) — version can contain dots (semver)
   const importmapMatch = pathname.match(/^\/importmap(?:@(.+))?\.(js|json)$/);
   if (importmapMatch) {
     return {
@@ -101,14 +148,16 @@ export function parseRoute(pathname) {
     };
   }
 
-  // Framework CSS — /css, /css@0.18.0, /semantic-ui.css, /semantic-ui@0.18.0.css
-  // Also matches .min and sourcemap variants: /semantic-ui.min.css.map, /css@0.18.0.map
-  const cssShortMatch = pathname.match(/^\/css(?:@(.+?))?(\.map)?$/);
+  // Framework CSS — /css, /css@0.18.0, /css@0.18.0/tokens, /semantic-ui.css
+  // Sub-layers: /css@0.18.0/tokens, /css@0.18.0/reset, /css@0.18.0/base
+  // Also matches sourcemap variants: /css@0.18.0.map, /css@0.18.0/tokens.map
+  const cssShortMatch = pathname.match(/^\/css(?:@([^/]+?))?(?:\/(tokens|reset|base))?(\.map)?$/);
   if (cssShortMatch) {
     return {
       type: 'css',
       version: cssShortMatch[1] || 'latest',
-      map: !!cssShortMatch[2],
+      layer: cssShortMatch[2] || null,
+      map: !!cssShortMatch[3],
     };
   }
   const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?(?:\.min)?\.css(\.map)?$/);
@@ -116,6 +165,7 @@ export function parseRoute(pathname) {
     return {
       type: 'css',
       version: cssMatch[1] || 'latest',
+      layer: null,
       map: !!cssMatch[2],
     };
   }
@@ -139,6 +189,20 @@ export function parseRoute(pathname) {
       name: vendorMatch[1],
       version: vendorMatch[2],
       filepath: vendorMatch[3],
+    };
+  }
+
+  // Asset sets: /icons@version/name or /fonts@version/name/asset
+  const assetSetMatch = pathname.match(/^\/(icons|fonts)(?:@([^/]+))?(?:\/(.+))?$/);
+  if (assetSetMatch) {
+    const setType = assetSetMatch[1];
+    const version = assetSetMatch[2] || 'latest';
+    const filepath = assetSetMatch[3] || null;
+    return {
+      type: 'asset-set',
+      setType,
+      version,
+      filepath,
     };
   }
 
@@ -307,22 +371,24 @@ export default {
       }
 
       case 'css': {
-        const { version, map } = route;
+        const { version, layer, map } = route;
 
         if (version === 'latest') {
           const resolved = await resolveVersion(env, version);
           if (!resolved) {
             return new Response('Latest version not found', { status: 404 });
           }
-          const suffix = map ? '.css.map' : '.css';
+          const layerPath = layer ? `/${layer}` : '';
+          const suffix = map ? '.map' : '';
           return Response.redirect(
-            new URL(`/semantic-ui@${resolved}${suffix}`, url.origin).href,
+            new URL(`/css@${resolved}${layerPath}${suffix}`, url.origin).href,
             302,
           );
         }
 
-        // Serve minified CSS (or its sourcemap) from dist/
-        const filename = map ? 'semantic-ui.min.css.map' : 'semantic-ui.min.css';
+        // Map layer to filename: tokens → tokens.min.css, null → semantic-ui.min.css
+        const baseName = layer || 'semantic-ui';
+        const filename = map ? `${baseName}.min.css.map` : `${baseName}.min.css`;
         const r2Key = `@semantic-ui/core/${version}/dist/${filename}`;
         const object = await env.CDN_BUCKET.get(r2Key);
         if (!object) {
@@ -330,7 +396,8 @@ export default {
         }
 
         const contentType = map ? 'application/json' : 'text/css';
-        const sourceMapUrl = `/semantic-ui@${version}.css.map`;
+        const layerPath = layer ? `/${layer}` : '';
+        const sourceMapUrl = `/css@${version}${layerPath}.map`;
         const sourceMapHeader = map ? {} : { 'SourceMap': sourceMapUrl };
 
         // Rewrite the inline sourceMappingURL to an absolute versioned path
@@ -340,7 +407,7 @@ export default {
         if (!map) {
           const css = await object.text();
           body = css.replace(
-            /\/\*# sourceMappingURL=.+?\s*\*\/\s*$/,
+            /\/\*#\s*sourceMappingURL=\S+\s*\*\//,
             `/*# sourceMappingURL=${sourceMapUrl} */`,
           );
         }
@@ -377,6 +444,94 @@ export default {
         });
       }
 
+      case 'load': {
+        const object = await env.CDN_BUCKET.get('_meta/load.js');
+        if (!object) {
+          return new Response('Loader not found', { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'application/javascript',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'asset-set': {
+        const { setType, version, filepath } = route;
+
+        // Redirect latest to exact version
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response(`Version "${version}" not found`, { status: 404 });
+          }
+          const redirectPath = filepath
+            ? `/${setType}@${resolved}/${filepath}`
+            : `/${setType}@${resolved}`;
+          return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        // Bare type with no set name → redirect to default set
+        if (!filepath) {
+          const defaultSet = setType === 'icons' ? 'lucide' : 'lato';
+          return Response.redirect(
+            new URL(`/${setType}@${version}/${defaultSet}`, url.origin).href,
+            302,
+          );
+        }
+
+        // Bare name (no extension, no slash) → serve the set's CSS file
+        const isBareName = !filepath.includes('/') && !filepath.includes('.');
+        const r2Path = isBareName ? `${filepath}.css` : filepath;
+        const r2Key = `${setType}/${version}/${r2Path}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(r2Path),
+            ...corsHeaders(),
+            ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'dir-asset': {
+        const { file } = route;
+        const object = await env.CDN_BUCKET.get(`_meta/dir/${file}`);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(file),
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'dir': {
+        const { page } = route;
+        const r2Key = `_meta/dir/${page}.html`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
       case 'root': {
         const object = await env.CDN_BUCKET.get('_meta/index.html');
         if (!object) {
@@ -393,8 +548,16 @@ export default {
         });
       }
 
-      default:
+      default: {
+        const notFound = await env.CDN_BUCKET.get('_meta/dir/404.html');
+        if (notFound) {
+          return new Response(notFound.body, {
+            status: 404,
+            headers: { 'Content-Type': 'text/html', ...corsHeaders() },
+          });
+        }
         return new Response('Not found', { status: 404 });
+      }
     }
   },
 };

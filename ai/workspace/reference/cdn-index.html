@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cdn.semantic-ui.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1116;
+    --surface: #161a21;
+    --fg: #c9d1d9;
+    --fg-strong: #e6edf3;
+    --fg-secondary: #8b949e;
+    --muted: #545d68;
+    --border: #21262d;
+    --accent: #58a6ff;
+    --accent-subtle: #161b22;
+    --code-bg: #12151a;
+    --code-border: #1c2028;
+    --highlight-bg: rgba(56, 139, 253, 0.08);
+    --highlight-border: #1f6feb;
+    --tab-active-border: #58a6ff;
+    --table-hover: rgba(56, 139, 253, 0.06);
+    --badge-bg: #1f3148;
+    --badge-fg: #79c0ff;
+    --inline-code-bg: #1c2028;
+    --inline-code-border: #2a3140;
+    --font: "Lato", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "Menlo", monospace;
+    --radius: 8px;
+    --syn-keyword: #ff7b72;
+    --syn-string: #a5d6ff;
+    --syn-attr: #79c0ff;
+    --syn-tag: #7ee787;
+    --syn-func: #d2a8ff;
+    --syn-comment: #545d68;
+    --syn-text: #c9d1d9;
+    --syn-el: #ffa657;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    font-size: 14.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 1.75rem 2rem 3rem;
+  }
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .top-panel > .container {
+    padding-top: 0.5rem;
+    padding-bottom: 2rem;
+  }
+
+  /* ---- Header ---- */
+  .header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--fg-strong);
+    margin: 0;
+  }
+  .header-links {
+    font-size: 12.5px;
+    color: var(--muted);
+    display: flex;
+    gap: 0.75rem;
+  }
+  .header-links a {
+    color: var(--fg-secondary);
+    text-decoration: none;
+    transition: color 0.12s;
+  }
+  .header-links a:hover { color: var(--accent); }
+  .header-links .sep { color: var(--border); }
+
+  /* ---- Top tabs (sliding underlay) ---- */
+  .top-tabs {
+    display: inline-flex;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 1rem;
+    gap: 2px;
+  }
+  .top-tabs-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    height: calc(100% - 6px);
+    background: var(--accent);
+    border-radius: 8px;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 0;
+  }
+  .top-tab {
+    position: relative;
+    z-index: 1;
+    padding: 0.45rem 1.4rem;
+    font-family: var(--font);
+    font-size: 13.5px;
+    font-weight: 700;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .top-tab:hover { color: var(--fg-secondary); }
+  .top-tab.active { color: #fff; }
+  .top-panel { display: none; }
+  .top-panel.active { display: block; }
+
+  /* ---- Sections ---- */
+  h2 {
+    font-size: 1.05rem;
+    font-weight: 900;
+    margin: 2.25rem 0 0.6rem;
+    letter-spacing: -0.005em;
+    color: var(--fg-strong);
+  }
+  h2:first-child { margin-top: 0; }
+
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--fg-strong);
+    margin: 1.5rem 0 0.4rem;
+  }
+
+  /* Directory category headers */
+  .dir-cat {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--fg-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 1.75rem 0 0.5rem;
+  }
+  .dir-cat:first-child { margin-top: 0; }
+
+  p { margin-bottom: 0.6rem; }
+  p.hint { color: var(--muted); font-size: 13px; }
+  p.hint a { color: var(--accent); text-decoration: none; }
+  p.hint a:hover { text-decoration: underline; }
+  .toc-wrap {
+    padding: 1.1rem 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.015) 100%);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .toc {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0 2rem;
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .toc-header { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; opacity: 0.6; }
+  .toc a { color: var(--secondary); text-decoration: none; transition: color 0.12s; }
+  .toc a:hover { color: var(--fg); }
+  .toc-col {}
+  .toc-h2 { font-weight: 600; color: var(--fg); margin-bottom: 2px; }
+  .toc-h3 {}
+
+  /* ---- Intro line ---- */
+  .intro {
+    color: var(--fg-secondary);
+    font-size: 14.5px;
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ---- Code blocks ---- */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+  }
+  .code-block pre {
+    margin: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0.85rem 1.1rem;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--syn-text);
+    overflow-x: hidden;
+  }
+
+  .hl {
+    display: inline-block;
+    width: calc(100% + 2.2rem);
+    margin-left: -1.1rem;
+    padding-left: calc(1.1rem - 3px);
+    border-left: 3px solid var(--highlight-border);
+    background: var(--highlight-bg);
+  }
+
+  code { font-family: var(--mono); font-size: 12px; }
+  p code, td code, li code {
+    background: var(--inline-code-bg);
+    border: 1px solid var(--inline-code-border);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: var(--fg-strong);
+    font-size: 12px;
+  }
+
+  .kw { color: var(--syn-keyword); }
+  .st { color: var(--syn-string); }
+  .at { color: var(--syn-attr); }
+  .tg { color: var(--syn-tag); }
+  .fn { color: var(--syn-func); }
+  .cm { color: var(--syn-comment); }
+  .el { color: var(--syn-el); }
+
+  /* ---- Sub tabs ---- */
+  .tabs { margin: 0.5rem 0 0.75rem; }
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    padding: 0.4rem 1rem;
+    font-size: 12.5px;
+    font-family: var(--font);
+    font-weight: 700;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    color: var(--muted);
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--fg-secondary); }
+  .tab-btn.active {
+    color: var(--fg-strong);
+    border-bottom-color: var(--tab-active-border);
+  }
+  .tab-panel { display: none; padding: 0.9rem 0 0.25rem; }
+  .tab-panel.active { display: block; }
+  .tab-panel .code-block { margin-bottom: 0.5rem; }
+  .tab-panel p:last-child { margin-bottom: 0; }
+
+  /* ---- Tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.4rem 0 1.25rem;
+    font-size: 13.5px;
+  }
+  th {
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:hover td { background: var(--table-hover); }
+  td a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12.5px;
+  }
+  td a:hover { text-decoration: underline; }
+  td.sec { color: var(--fg-secondary); }
+
+  /* ---- Footer ---- */
+  .footer {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12.5px;
+    display: flex;
+    gap: 1.25rem;
+  }
+  .footer a { color: var(--fg-secondary); text-decoration: none; }
+  .footer a:hover { color: var(--accent); }
+
+  .sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ===================== HEADER ===================== -->
+<div class="header">
+  <h1>Semantic UI CDN</h1>
+  <div class="header-links">
+    <a href="#">Changelog</a>
+    <span class="sep">·</span>
+    <a href="#">Releases</a>
+    <span class="sep">·</span>
+    <a href="#">Documentation</a>
+  </div>
+</div>
+
+<!-- ===================== TOP TABS ===================== -->
+<nav class="top-tabs" id="topTabs">
+  <div class="top-tabs-slider" id="topSlider"></div>
+  <button class="top-tab active" data-panel="panel-usage">Usage</button>
+  <button class="top-tab" data-panel="panel-directory">Directory</button>
+</nav>
+</div>
+
+<!-- ==================== USAGE ==================== -->
+<div id="panel-usage" class="top-panel active">
+
+  <div class="container">
+
+  <!-- ---- Quick Start ---- -->
+  <h2 id="quick-start">Quick Start</h2>
+  <p class="intro">
+    Use the loader to import components, CSS, icons, and fonts in a single tag.
+  </p>
+
+  <div class="tabs">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab(event, 'qs-using')">Components</button>
+      <button class="tab-btn" onclick="switchTab(event, 'qs-authoring')">Authoring</button>
+      <button class="tab-btn" onclick="switchTab(event, 'qs-tailwind')">Tailwind</button>
+      <button class="tab-btn" onclick="switchTab(event, 'qs-reactivity')">Reactivity</button>
+      <button class="tab-btn" onclick="switchTab(event, 'qs-query')">Query</button>
+      <button class="tab-btn" onclick="switchTab(event, 'qs-utils')">Utils</button>
+    </div>
+
+    <div id="qs-using" class="tab-panel active">
+      <p>Use <code>components</code> to load UI elements. Tokens, Lucide, and Lato included automatically.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="el">&lt;ui-button</span> <span class="at">primary</span><span class="el">&gt;</span>
+  <span class="el">&lt;ui-icon</span> <span class="at">home</span><span class="el">&gt;&lt;/ui-icon&gt;</span>
+  Home
+<span class="el">&lt;/ui-button&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="qs-authoring" class="tab-panel">
+      <p>Use <code>authoring</code> to build custom components. Tokens auto-injected.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { defineComponent } <span class="kw">from</span> <span class="st">'@semantic-ui/component'</span>;
+
+  <span class="fn">defineComponent</span>({
+<span class="hl">    tagName: <span class="st">'my-counter'</span>,</span>
+<span class="hl">    template: <span class="st">'Count: {count}'</span>,</span>
+    defaultState: { count: 0 },
+    onCreated({ state }) {
+      setInterval(() => state.count.<span class="fn">increment</span>(), 1000);
+    },
+  });
+<span class="tg">&lt;/script&gt;</span>
+
+<span class="el">&lt;my-counter&gt;&lt;/my-counter&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="qs-tailwind" class="tab-panel">
+      <p>Use <code>tailwind</code> to style components with utility classes — even inside Shadow DOM.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">authoring</span> <span class="at">tailwind</span><span class="tg">&gt;&lt;/script&gt;</span>
+
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { defineComponent } <span class="kw">from</span> <span class="st">'@semantic-ui/component'</span>;
+  <span class="kw">import</span> { TailwindPlugin } <span class="kw">from</span> <span class="st">'@semantic-ui/tailwind'</span>;
+
+  <span class="kw">let</span> definition = {
+    tagName: <span class="st">'my-card'</span>,
+    template: <span class="st">'&lt;div class="p-4 rounded-lg shadow-md"&gt;{>slot}&lt;/div&gt;'</span>,
+  };
+<span class="hl">  definition = <span class="kw">await</span> <span class="fn">TailwindPlugin</span>(definition);</span>
+  <span class="fn">defineComponent</span>(definition);
+<span class="tg">&lt;/script&gt;</span>
+
+<span class="el">&lt;my-card&gt;</span>Hello<span class="el">&lt;/my-card&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="qs-reactivity" class="tab-panel">
+      <p>Use <code>reactivity</code> for signals with automatic dependency tracking and mutation helpers.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">reactivity</span><span class="tg">&gt;&lt;/script&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { Signal } <span class="kw">from</span> <span class="st">'@semantic-ui/reactivity'</span>;
+
+  <span class="kw">const</span> items = <span class="kw">new</span> <span class="fn">Signal</span>([<span class="st">'a'</span>, <span class="st">'b'</span>]);
+<span class="hl">  <span class="kw">const</span> count = items.<span class="fn">derive</span>(arr => arr.length);</span>
+
+  items.<span class="fn">push</span>(<span class="st">'c'</span>);       <span class="cm">// no .get()/.set() — just .push()</span>
+  count.<span class="fn">get</span>();          <span class="cm">// 3 — auto-updated</span>
+<span class="tg">&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="qs-query" class="tab-panel">
+      <p>Use <code>query</code> for DOM selection. <code>$$</code> pierces Shadow DOM. Events return promises.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">query</span><span class="tg">&gt;&lt;/script&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { $, $$ } <span class="kw">from</span> <span class="st">'@semantic-ui/query'</span>;
+
+  $(<span class="st">'ui-dropdown .item'</span>).length;    <span class="cm">// 0 — blocked by Shadow DOM</span>
+<span class="hl">  $$(<span class="st">'ui-dropdown .item'</span>).length;   <span class="cm">// 5 — pierces through</span></span>
+
+  <span class="kw">await</span> $(<span class="st">'ui-modal'</span>).<span class="fn">onNext</span>(<span class="st">'hide'</span>); <span class="cm">// promise-based events</span>
+<span class="tg">&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <div id="qs-utils" class="tab-panel">
+      <p>Use <code>utils</code> for iteration, cloning, search, and 200+ functions you'd write from scratch.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">utils</span><span class="tg">&gt;&lt;/script&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { each, clone, weightedObjectSearch } <span class="kw">from</span> <span class="st">'@semantic-ui/utils'</span>;
+
+<span class="hl">  <span class="fn">each</span>(<span class="kw">new</span> <span class="fn">Map</span>([[<span class="st">'a'</span>, 1]]), (val, key) => {});  <span class="cm">// handles Array, Object, Map, Set, iterables</span></span>
+  <span class="fn">clone</span>(obj, { preserveDOM: <span class="kw">true</span> }); <span class="cm">// handles DOM, Map, Set, Date, classes</span>
+  <span class="fn">weightedObjectSearch</span>(<span class="st">'sema'</span>, items, { fields: { name: 3, tags: 1 } });
+<span class="tg">&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="toc-wrap">
+    <div class="container">
+      <div class="toc-header">Jump To</div>
+      <div class="toc">
+        <div class="toc-col">
+          <div class="toc-h2"><a href="#customization">Customization</a></div>
+          <div class="toc-h3"><a href="#components">Components</a></div>
+          <div class="toc-h3"><a href="#component-bundles">Bundles</a></div>
+          <div class="toc-h3"><a href="#packages">Packages</a></div>
+          <div class="toc-h3"><a href="#versions">Versions</a></div>
+          <div class="toc-h3"><a href="#css">CSS</a></div>
+          <div class="toc-h3"><a href="#fonts">Fonts</a></div>
+          <div class="toc-h3"><a href="#icons">Icons</a></div>
+        </div>
+        <div class="toc-col">
+          <div class="toc-h2"><a href="#advanced">Advanced</a></div>
+          <div class="toc-h3"><a href="#direct-esm">Direct ESM</a></div>
+          <div class="toc-h3"><a href="#embedding">Embedding</a></div>
+          <div class="toc-h3"><a href="#custom-importmaps">Import Maps</a></div>
+          <div class="toc-h3"><a href="#bundles">Bundle Reference</a></div>
+        </div>
+        <div class="toc-col">
+          <div class="toc-h2"><a href="#reference">Reference</a></div>
+          <div class="toc-h3"><a href="#js-loading">JS Loading</a></div>
+          <div class="toc-h3"><a href="#css-assets">CSS &amp; Assets</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+  <!-- ---- Customization ---- -->
+  <h2 id="customization">Customization</h2>
+
+  <h3 id="components">Components</h3>
+  <p>
+    Use <code>components</code> to cherry-pick by name.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+<span class="hl">  <span class="at">components</span>=<span class="st">"button,input,modal,tooltip"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+
+  <h3 id="component-bundles">Component Bundles</h3>
+  <p>
+    Use a bundle name to load a curated set. Bare <code>components</code> defaults to <code>standard</code>.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+<span class="hl">  <span class="at">components</span>=<span class="st">"extended"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Bundles: <code>standard</code>, <code>extended</code>, <code>full</code>. <a href="#bundles">What's in each bundle →</a></p>
+
+  <h3 id="packages">Packages</h3>
+  <p>
+    Use bare attributes to load standalone packages. No CSS auto-injection. Combine freely.
+  </p>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Signals + utilities, no UI --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+<span class="hl">  <span class="at">reactivity</span> <span class="at">utils</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Available: <code>reactivity</code>, <code>query</code>, <code>utils</code>, <code>templating</code>, <code>renderer</code>, <code>compiler</code>, <code>specs</code>, <code>tailwind</code>.</p>
+
+  <h3 id="versions">Versions</h3>
+  <p>
+    Use <code>version</code> to pin to a specific release. Default is <code>latest</code>.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+  <span class="at">components</span>
+<span class="hl">  <span class="at">version</span>=<span class="st">"0.18.0"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Values: semver (<code>"0.18.0"</code>), <code>"canary"</code> (latest push to main), <code>"latest"</code> (default).</p>
+
+  <h3 id="css">CSS</h3>
+  <p>
+    Use <code>css</code> to add page-level styles — reset, typography, scrollbars. Tokens are injected automatically with <code>components</code>. Suppress with <code>css="none"</code>.
+  </p>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Add page styles (reset + base) --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+  <span class="at">components</span>=<span class="st">"button,input"</span>
+<span class="hl">  <span class="at">css</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Values: bare (page styles), <code>"none"</code> (suppress all CSS). Tokens are custom properties — zero side effects, safe on any page.</p>
+
+  <h3 id="fonts">Fonts</h3>
+  <p>
+    Use <code>fonts</code> to override the default. Lato loads automatically with <code>components</code>. Suppress with <code>fonts="none"</code>.
+  </p>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Suppress default font --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+  <span class="at">components</span>=<span class="st">"button"</span>
+<span class="hl">  <span class="at">fonts</span>=<span class="st">"none"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Available: <code>lato</code> (default). More fonts planned.</p>
+
+  <h3 id="icons">Icons</h3>
+  <p>
+    Use <code>icons</code> to choose a different set. Lucide loads automatically with <code>components</code>. Suppress with <code>icons="none"</code>.
+  </p>
+  <div class="code-block">
+<pre><span class="cm">&lt;!-- Use Phosphor instead of Lucide --&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+  <span class="at">components</span>=<span class="st">"button,icon"</span>
+<span class="hl">  <span class="at">icons</span>=<span class="st">"phosphor"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">Available: <code>lucide</code> (default), <code>phosphor</code>, <code>tabler</code>, <code>material-symbols</code>, <code>heroicons</code>, <code>brands</code>. Combine: <code>icons="lucide,brands"</code>.</p>
+
+  <hr class="sep">
+
+  <!-- ---- Advanced ---- -->
+  <h2 id="advanced">Advanced</h2>
+
+  <h3 id="direct-esm">Direct ESM</h3>
+  <p>
+    Use full CDN URLs to skip the loader. You manage CSS, versioning, and caching.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/css"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/icons/lucide"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;link</span> <span class="at">rel</span>=<span class="st">"stylesheet"</span> <span class="at">href</span>=<span class="st">"https://cdn.semantic-ui.com/fonts/lato"</span><span class="tg">&gt;</span>
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="bcdfd3ced9fc8c928d84928c">[email&#160;protected]</a>"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+
+  <h3 id="embedding">Embedding</h3>
+  <p>
+    Use <code>="none"</code> to suppress auto-injection when embedding into existing pages.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
+  <span class="at">components</span>=<span class="st">"button"</span>
+<span class="hl">  <span class="at">css</span>=<span class="st">"none"</span> <span class="at">icons</span>=<span class="st">"none"</span> <span class="at">fonts</span>=<span class="st">"none"</span></span>
+<span class="tg">&gt;&lt;/script&gt;</span></pre>
+  </div>
+
+  <h3 id="custom-importmaps">Custom Import Maps</h3>
+  <p>
+    Use your own import map to mix versions or add packages the loader doesn't cover.
+  </p>
+  <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"importmap"</span><span class="tg">&gt;</span>
+{
+  <span class="st">"imports"</span>: {
+<span class="hl">    <span class="st">"@semantic-ui/core"</span>: <span class="st">"https://cdn.semantic-ui.com/core@0.18.0"</span>,</span>
+<span class="hl">    <span class="st">"@semantic-ui/reactivity"</span>: <span class="st">"https://cdn.semantic-ui.com/reactivity@0.17.0"</span>,</span>
+    <span class="st">"@semantic-ui/utils"</span>: <span class="st">"https://cdn.semantic-ui.com/utils@0.18.0"</span>,
+    <span class="st">"zod"</span>: <span class="st">"https://esm.sh/zod@3.24"</span>
+  }
+}
+<span class="tg">&lt;/script&gt;</span>
+
+<span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span><span class="tg">&gt;</span>
+  <span class="kw">import</span> { Signal } <span class="kw">from</span> <span class="st">'@semantic-ui/reactivity'</span>;
+  <span class="kw">import</span> { z } <span class="kw">from</span> <span class="st">'zod'</span>;
+<span class="tg">&lt;/script&gt;</span></pre>
+  </div>
+  <p class="hint">No loader needed. Bare specifiers resolve through your import map. You manage all dependencies.</p>
+
+  <h3 id="bundles">Component Bundles</h3>
+  <p>
+    Use bundles to load curated component sets. Sourced from component specs at build time.
+  </p>
+  <table>
+    <thead><tr><th>Bundle</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>standard</code></td><td class="sec">General-purpose primitives (~40 at 1.0) — button, input, modal, card, table, menu, etc.</td></tr>
+      <tr><td><code>extended</code></td><td class="sec">Standard + specialized components — data table, color picker, calendar, etc.</td></tr>
+      <tr><td><code>full</code></td><td class="sec">Every component in the framework.</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">Bare <code>components</code> defaults to <code>standard</code>.</p>
+
+  <hr class="sep">
+
+  <!-- ---- Reference ---- -->
+  <h2 id="reference">Reference</h2>
+
+  <h3 id="js-loading">JS Loading</h3>
+  <table>
+    <thead><tr><th>Attribute</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>components="button,input"</code></td><td class="sec">Cherry-pick components. Auto-injects tokens, Lato, Lucide.</td></tr>
+      <tr><td><code>components="standard"</code></td><td class="sec">Named preset. Same auto-injection.</td></tr>
+      <tr><td><code>authoring</code></td><td class="sec">Loads <code>@semantic-ui/component</code>. Tokens auto-injected.</td></tr>
+      <tr><td><code>reactivity</code></td><td class="sec">Loads <code>@semantic-ui/reactivity</code>. No auto-injection.</td></tr>
+      <tr><td><code>query</code></td><td class="sec">Loads <code>@semantic-ui/query</code>. No auto-injection.</td></tr>
+      <tr><td><code>utils</code></td><td class="sec">Loads <code>@semantic-ui/utils</code>. No auto-injection.</td></tr>
+      <tr><td><code>templating</code></td><td class="sec">Loads <code>@semantic-ui/templating</code>. No auto-injection.</td></tr>
+      <tr><td><code>renderer</code></td><td class="sec">Loads <code>@semantic-ui/renderer</code>. No auto-injection.</td></tr>
+      <tr><td><code>compiler</code></td><td class="sec">Loads <code>@semantic-ui/compiler</code>. No auto-injection.</td></tr>
+      <tr><td><code>specs</code></td><td class="sec">Loads <code>@semantic-ui/specs</code>. No auto-injection.</td></tr>
+      <tr><td><code>tailwind</code></td><td class="sec">Loads <code>@semantic-ui/tailwind</code>. No auto-injection.</td></tr>
+      <tr><td><em>(none)</em></td><td class="sec">Import map only — resolution without loading.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="css-assets">CSS &amp; Assets</h3>
+  <table>
+    <thead><tr><th>Attribute</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>css</code></td><td class="sec">Full page styles: tokens + reset + base.</td></tr>
+      <tr><td><code>css="none"</code></td><td class="sec">Suppress all CSS auto-injection.</td></tr>
+      <tr><td><code>icons</code></td><td class="sec">Lucide (same as default with <code>components</code>).</td></tr>
+      <tr><td><code>icons="phosphor"</code></td><td class="sec">Override default icon set.</td></tr>
+      <tr><td><code>icons="lucide,brands"</code></td><td class="sec">Multiple sets.</td></tr>
+      <tr><td><code>icons="none"</code></td><td class="sec">Suppress icon auto-injection.</td></tr>
+      <tr><td><code>fonts</code></td><td class="sec">Lato (same as default with <code>components</code>).</td></tr>
+      <tr><td><code>fonts="none"</code></td><td class="sec">Suppress font auto-injection.</td></tr>
+    </tbody>
+  </table>
+
+  </div>
+</div>
+
+<!-- ==================== DIRECTORY ==================== -->
+<div id="panel-directory" class="top-panel">
+  <div class="container">
+
+  <h3 class="dir-cat">Framework</h3>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Description</th><th>Type</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/load</a></td><td class="sec">One-tag setup — components, CSS, icons, fonts</td><td class="sec">classic script</td></tr>
+      <tr><td><a href="#">/css</a></td><td class="sec">Design tokens + reset + base page styles</td><td class="sec">text/css</td></tr>
+      <tr><td><a href="#">/css/{layer}</a></td><td class="sec">Individual layers: <code>tokens</code>, <code>reset</code>, <code>base</code></td><td class="sec">text/css</td></tr>
+      <tr><td><a href="#">/core</a></td><td class="sec">Component framework — all primitives, components, behaviors</td><td class="sec">module</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="dir-cat">Packages</h3>
+  <p class="hint">Standalone. Usable without the component framework.</p>
+  <table>
+    <thead><tr><th>Endpoint</th><th>npm</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/component</a></td><td><code>@semantic-ui/component</code></td><td class="sec">defineComponent, templates, lifecycle</td></tr>
+      <tr><td><a href="#">/reactivity</a></td><td><code>@semantic-ui/reactivity</code></td><td class="sec">Signals, Reactions, dependency tracking</td></tr>
+      <tr><td><a href="#">/query</a></td><td><code>@semantic-ui/query</code></td><td class="sec">DOM selection, events, Shadow DOM piercing</td></tr>
+      <tr><td><a href="#">/utils</a></td><td><code>@semantic-ui/utils</code></td><td class="sec">Arrays, objects, strings, debounce, clone, equality</td></tr>
+      <tr><td><a href="#">/templating</a></td><td><code>@semantic-ui/templating</code></td><td class="sec">Template compiler, expression evaluator</td></tr>
+      <tr><td><a href="#">/renderer</a></td><td><code>@semantic-ui/renderer</code></td><td class="sec">Lit-based reactive renderer</td></tr>
+      <tr><td><a href="#">/compiler</a></td><td><code>@semantic-ui/compiler</code></td><td class="sec">Template-to-AST compiler</td></tr>
+      <tr><td><a href="#">/specs</a></td><td><code>@semantic-ui/specs</code></td><td class="sec">Component specifications and metadata</td></tr>
+      <tr><td><a href="#">/tailwind</a></td><td><code>@semantic-ui/tailwind</code></td><td class="sec">Tailwind v4 runtime for Shadow DOM</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="dir-cat">Assets</h3>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Default</th><th>Available sets</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/icons</a></td><td>Lucide</td><td class="sec">lucide, phosphor, tabler, material-symbols, heroicons, brands</td></tr>
+      <tr><td><a href="#">/fonts</a></td><td>Lato</td><td class="sec">lato</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="dir-cat">Vendor</h3>
+  <p class="hint">Third-party deps. Pinned to exact versions. No <code>@latest</code> / <code>@canary</code>.</p>
+  <table>
+    <thead><tr><th>Package</th><th>Version</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#">/vendor/lit</a></td><td><code>3.3.2</code></td></tr>
+      <tr><td><a href="#">/vendor/lit-html</a></td><td><code>3.3.2</code></td></tr>
+      <tr><td><a href="#">/vendor/lit-element</a></td><td><code>4.2.1</code></td></tr>
+      <tr><td><a href="#">/vendor/@lit/reactive-element</a></td><td><code>2.1.1</code></td></tr>
+      <tr><td><a href="#">/vendor/tailwindcss</a></td><td><code>4.1.12</code></td></tr>
+    </tbody>
+  </table>
+
+  <hr class="sep">
+
+  <h2>Versioning</h2>
+  <table>
+    <thead><tr><th>Pattern</th><th>Behavior</th><th>Cache</th></tr></thead>
+    <tbody>
+      <tr><td><code>/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3c5f534e597c0c120d04120c">[email&#160;protected]</a></code></td><td class="sec">Exact version — served directly</td><td class="sec">Immutable (1 year)</td></tr>
+      <tr><td><code>/core@canary</code></td><td class="sec">Overwritten on every main merge</td><td class="sec">60 seconds</td></tr>
+      <tr><td><code>/core@latest</code></td><td class="sec">302 → current stable</td><td class="sec">5 min</td></tr>
+      <tr><td><code>/core</code></td><td class="sec">Same as <code>@latest</code></td><td class="sec">5 min</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">Pin to an exact version for production. Vendor packages are always pinned.</p>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="container">
+<div class="footer">
+  <a href="#">Docs</a>
+  <a href="#">GitHub</a>
+  <a href="#">semantic-ui.com</a>
+</div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Top tabs with sliding underlay
+(function() {
+  const tabs = document.getElementById('topTabs');
+  const slider = document.getElementById('topSlider');
+  const buttons = tabs.querySelectorAll('.top-tab');
+
+  function moveSlider(btn) {
+    slider.style.width = btn.offsetWidth + 'px';
+    slider.style.transform = 'translateX(' + (btn.offsetLeft - 3) + 'px)';
+  }
+
+  // Init slider position
+  moveSlider(tabs.querySelector('.top-tab.active'));
+
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      buttons.forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.top-panel').forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.panel).classList.add('active');
+      moveSlider(btn);
+    });
+  });
+})();
+
+function switchTab(e, id) {
+  var tabs = e.target.closest('.tabs');
+  tabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  tabs.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>

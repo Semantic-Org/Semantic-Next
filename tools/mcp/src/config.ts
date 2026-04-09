@@ -80,3 +80,7 @@ export function getDocsBaseUrl(): string {
 export function isDevMode(): boolean {
   return baseUrl.includes('dev.semantic-ui.com') || baseUrl.includes('localhost');
 }
+
+export function isContributor(): boolean {
+  return isMonorepo;
+}

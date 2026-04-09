@@ -264,7 +264,7 @@ describe('CDN Sourcemaps', () => {
 
     const sourceMap = res.headers.get('SourceMap');
     expect(sourceMap, 'missing SourceMap header').toBeTruthy();
-    expect(sourceMap).toMatch(/\.css\.map$/);
+    expect(sourceMap).toMatch(/\.map$/);
 
     // Follow the header URL — map must be accessible
     const mapRes = await fetch(new URL(sourceMap, CDN).href);
@@ -286,7 +286,7 @@ describe('CDN Sourcemaps', () => {
   it('CSS inline sourceMappingURL is rewritten to versioned path', async () => {
     const res = await fetch(`${CDN}/css@${VERSION}`);
     const body = await res.text();
-    expect(body).toContain(`sourceMappingURL=/semantic-ui@${VERSION}.css.map`);
+    expect(body).toContain(`sourceMappingURL=/css@${VERSION}.map`);
     expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
   });
 
@@ -341,5 +341,190 @@ describe('CDN Endpoints (non-combo)', () => {
     const res = await fetch(`${CDN}/importmap@${VERSION}.js`);
     expect(res.ok).toBe(true);
     expect(res.headers.get('content-type')).toContain('javascript');
+  });
+});
+
+/*----------------------------------------------
+  Loader endpoint (/load)
+----------------------------------------------*/
+
+/**
+ * Inject the loader script and wait for it to execute.
+ * Returns the import map and injected link elements for verification.
+ */
+async function injectLoader(attrs) {
+  const script = document.createElement('script');
+  script.src = `${CDN}/load`;
+  for (const [key, value] of Object.entries(attrs)) {
+    if (value === true) {
+      script.setAttribute(key, '');
+    }
+    else {
+      script.setAttribute(key, value);
+    }
+  }
+
+  return new Promise((resolve) => {
+    script.onload = () => {
+      // Give the loader a tick to inject elements
+      setTimeout(() => {
+        const importMap = document.querySelector('script[type="importmap"]');
+        const links = [...document.querySelectorAll('link[rel="stylesheet"]')];
+        resolve({ importMap, links });
+      }, 50);
+    };
+    document.head.appendChild(script);
+  });
+}
+
+describe('CDN Loader', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+  });
+
+  it('/load serves valid JavaScript', async () => {
+    const res = await fetch(`${CDN}/load`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('javascript');
+  });
+
+  it('components="button" — auto-injects tokens, icons, fonts', async () => {
+    document.body.innerHTML = '<ui-button primary>Test</ui-button>';
+    const { importMap, links } = await injectLoader({ version: VERSION, components: 'button' });
+
+    expect(importMap, 'import map injected').toBeTruthy();
+
+    const hrefs = links.map(l => l.href);
+    expect(hrefs.some(h => h.includes('/css@')), 'tokens CSS').toBe(true);
+    expect(hrefs.some(h => h.includes('/icons@')), 'icons CSS').toBe(true);
+    expect(hrefs.some(h => h.includes('/fonts@')), 'fonts CSS').toBe(true);
+
+    await customElements.whenDefined('ui-button');
+    const button = document.querySelector('ui-button');
+    expect(button.shadowRoot).toBeTruthy();
+  });
+
+  it('components="standard" — preset loads components', async () => {
+    document.body.innerHTML = '<ui-button>Test</ui-button><ui-input></ui-input>';
+    await injectLoader({ version: VERSION, components: 'standard' });
+
+    await customElements.whenDefined('ui-button');
+    await customElements.whenDefined('ui-input');
+
+    const button = document.querySelector('ui-button');
+    expect(button.shadowRoot).toBeTruthy();
+  });
+
+  it('authoring — injects tokens, no icons or fonts', async () => {
+    const { links } = await injectLoader({ version: VERSION, authoring: true });
+
+    const hrefs = links.map(l => l.href);
+    expect(hrefs.some(h => h.includes('/css@') && h.includes('/tokens')), 'tokens CSS').toBe(true);
+    expect(hrefs.some(h => h.includes('/icons@')), 'no icons').toBe(false);
+    expect(hrefs.some(h => h.includes('/fonts@')), 'no fonts').toBe(false);
+  });
+
+  it('reactivity — no CSS injected', async () => {
+    const { links } = await injectLoader({ version: VERSION, reactivity: true });
+    expect(links.length, 'no CSS links').toBe(0);
+  });
+
+  it('css (bare) — injects full page styles', async () => {
+    const { links } = await injectLoader({ version: VERSION, components: 'button', css: true });
+
+    const hrefs = links.map(l => l.href);
+    // Full CSS (not tokens sub-layer)
+    const cssLink = hrefs.find(h =>
+      h.includes('/css@') && !h.includes('/tokens') && !h.includes('/icons') && !h.includes('/fonts')
+    );
+    expect(cssLink, 'full CSS').toBeTruthy();
+  });
+
+  it('css="tokens" — injects tokens only', async () => {
+    const { links } = await injectLoader({ version: VERSION, components: 'button', css: 'tokens' });
+
+    const hrefs = links.map(l => l.href);
+    expect(hrefs.some(h => h.includes('/tokens')), 'tokens sub-layer').toBe(true);
+  });
+
+  it('css="none" — suppresses all CSS', async () => {
+    const { links } = await injectLoader({ version: VERSION, components: 'button', css: 'none' });
+
+    const hrefs = links.map(l => l.href);
+    expect(hrefs.some(h => h.includes('/css@')), 'no CSS').toBe(false);
+  });
+
+  it('icons="none" — suppresses icon injection', async () => {
+    const { links } = await injectLoader({ version: VERSION, components: 'button', icons: 'none' });
+
+    const hrefs = links.map(l => l.href);
+    expect(hrefs.some(h => h.includes('/icons@')), 'no icons').toBe(false);
+  });
+
+  it('import map merge — existing map preserved', async () => {
+    // Add a user import map first
+    const userMap = document.createElement('script');
+    userMap.type = 'importmap';
+    userMap.textContent = JSON.stringify({ imports: { 'my-lib': 'https://example.com/my-lib.js' } });
+    document.head.appendChild(userMap);
+
+    const { importMap } = await injectLoader({ version: VERSION, reactivity: true });
+
+    // SUI map is a separate element (browsers merge natively)
+    const maps = document.querySelectorAll('script[type="importmap"]');
+    expect(maps.length).toBe(2);
+
+    const suiMap = JSON.parse(maps[1].textContent);
+    expect(suiMap.imports['@semantic-ui/reactivity']).toContain('reactivity@');
+  });
+});
+
+describe('CDN Loader — Version Validation', () => {
+  beforeEach(() => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+  });
+
+  it('version="bogus" — logs error, no resources injected', async () => {
+    const errors = [];
+    const origError = console.error;
+    console.error = (...args) => errors.push(args.join(' '));
+
+    await injectLoader({ version: 'bogus', components: 'button' });
+
+    console.error = origError;
+
+    expect(errors.some(e => e.includes('Invalid version')), 'error logged').toBe(true);
+
+    // No import map or CSS should be injected
+    const maps = document.querySelectorAll('script[type="importmap"]');
+    expect(maps.length).toBe(0);
+
+    const links = document.querySelectorAll('link[rel="stylesheet"]');
+    expect(links.length).toBe(0);
+  });
+});
+
+describe('CDN CSS Sub-Layers', () => {
+  it('/css@canary/tokens — serves CSS', async () => {
+    const res = await fetch(`${CDN}/css@${VERSION}/tokens`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('text/css');
+
+    const body = await res.text();
+    expect(body).toContain('--primary-color');
+  });
+
+  it('/css@canary/reset — serves CSS', async () => {
+    const res = await fetch(`${CDN}/css@${VERSION}/reset`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('text/css');
+  });
+
+  it('/css@canary/base — serves CSS', async () => {
+    const res = await fetch(`${CDN}/css@${VERSION}/base`);
+    expect(res.ok).toBe(true);
+    expect(res.headers.get('content-type')).toContain('text/css');
   });
 });

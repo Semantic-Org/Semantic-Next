@@ -10,14 +10,20 @@
  *   R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_ENDPOINT, R2_BUCKET_NAME
  */
 
-import { HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { extname, join, resolve } from 'path';
+import { gt, valid } from 'semver';
 import { parseArgs } from 'util';
 
 const ROOT = resolve(import.meta.dirname, '../..');
 
 const SUI_SCOPE = '@semantic-ui/';
+
+// Asset set directories live inside dist/cdn/ but are uploaded under their own
+// top-level R2 prefix (icons/, fonts/) — exclude from core package upload.
+const ASSET_SET_DIRS = ['icons', 'fonts'];
+
 // Discover SUI packages from packages/*, plus core (root package)
 const SUI_PACKAGES = [
   'core',
@@ -41,6 +47,11 @@ const CONTENT_TYPES = {
   '.html': 'text/html',
   '.wasm': 'application/wasm',
   '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
 };
 
 function getContentType(filepath) {
@@ -99,10 +110,12 @@ async function uploadText(s3, key, text, contentType = 'text/plain') {
 }
 
 // Recursively collect all files in a directory
-function collectFiles(dir, prefix = '') {
+// skipDirs: top-level directory names to exclude (e.g., 'icons', 'fonts')
+function collectFiles(dir, prefix = '', skipDirs = []) {
   const files = [];
   if (!existsSync(dir)) { return files; }
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    if (!prefix && skipDirs.includes(entry.name)) { continue; }
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       files.push(...collectFiles(join(dir, entry.name), rel));
@@ -129,7 +142,8 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
     }
 
     const r2Prefix = `@semantic-ui/${name}/${version}/dist/cdn`;
-    const files = collectFiles(cdnDir);
+    const skipDirs = name === 'core' ? ASSET_SET_DIRS : [];
+    const files = collectFiles(cdnDir, '', skipDirs);
 
     // Check if this version already exists (skip immutable versions)
     if (!force && version !== 'canary') {
@@ -147,8 +161,25 @@ async function uploadSuiPackages(s3, version, { force = false } = {}) {
     console.log(`  ${name}@${version} — ${files.length} files`);
   }
 
-  // Also upload core CSS
-  const cssFiles = ['semantic-ui.css', 'semantic-ui.css.map', 'semantic-ui.min.css', 'semantic-ui.min.css.map'];
+  // Also upload core CSS (full bundle + sub-layers)
+  const cssFiles = [
+    'semantic-ui.css',
+    'semantic-ui.css.map',
+    'semantic-ui.min.css',
+    'semantic-ui.min.css.map',
+    'tokens.css',
+    'tokens.css.map',
+    'tokens.min.css',
+    'tokens.min.css.map',
+    'reset.css',
+    'reset.css.map',
+    'reset.min.css',
+    'reset.min.css.map',
+    'base.css',
+    'base.css.map',
+    'base.min.css',
+    'base.min.css.map',
+  ];
   for (const cssFile of cssFiles) {
     const cssPath = join(ROOT, 'dist', cssFile);
     if (existsSync(cssPath)) {
@@ -244,6 +275,146 @@ function buildImportMap(version) {
   return { json, js };
 }
 
+// Build the version-agnostic loader script.
+// The loader reads `version` from its own script tag attribute at runtime.
+// Package names are baked in from SUI_PACKAGES — the only build-time dependency.
+function buildLoader() {
+  const cdnRoot = process.env.CDN_ROOT || 'https://cdn.semantic-ui.com';
+
+  // Package names baked into the loader (derived from SUI_PACKAGES)
+  const pkgNames = JSON.stringify(SUI_PACKAGES);
+
+  // Bare package attributes the loader checks
+  // 'core' is loaded via components, 'component' is loaded via authoring
+  const bareAttrs = JSON.stringify(
+    SUI_PACKAGES.filter(n => n !== 'core' && n !== 'component'),
+  );
+
+  const js = `(function(){
+  var s=document.currentScript;
+  var b=${JSON.stringify(cdnRoot)};
+  var v=s.getAttribute('version')||'latest';
+  if(v!=='latest'&&v!=='canary'&&!/^\d+\.\d+\.\d+/.test(v)){
+    console.error('SUI: Invalid version "'+v+'". Use a semver version (e.g. "0.18.0"), "canary", or omit for latest.');
+    return;
+  }
+  var scope='@semantic-ui/';
+
+  // Build import map from package list + version
+  var pkgs=${pkgNames};
+  var imports={};
+  pkgs.forEach(function(n){imports[scope+n]=b+'/'+n+'@'+v});
+  var mapJson=JSON.stringify({imports:imports});
+
+  // Inject import map (browsers support multiple, later entries win for collisions)
+  if(document.querySelector('script[type="module"]')){
+    console.warn('SUI: <script src="/load"> must appear before any <script type="module"> for import map resolution.');
+  }
+  if(s.parentElement&&s.parentElement!==document.head&&s.closest('body')){
+    console.warn('SUI: Place <script src="/load"> in <head> for reliable import map registration.');
+  }
+  var m=document.createElement('script');
+  m.type='importmap';
+  m.textContent=mapJson;
+  document.head.appendChild(m);
+
+  var hc=s.hasAttribute('components'),ha=s.hasAttribute('authoring');
+
+  // CSS injection — css="none" suppresses, css="tokens"|"reset"|"base" selects layer, bare css = full page
+  var cv=s.getAttribute('css');
+  if(cv!=='none'){
+    if(cv==='tokens'||cv==='reset'||cv==='base')inject(b+'/css@'+v+'/'+cv);
+    else if(s.hasAttribute('css'))inject(b+'/css@'+v);
+    else if(hc||ha)inject(b+'/css@'+v+'/tokens');
+  }
+
+  // Icons — auto-inject lucide with components, bare icons attr defaults to lucide
+  var ia=s.getAttribute('icons');
+  if(ia!=='none'){
+    var ic=ia||(s.hasAttribute('icons')||hc?'lucide':null);
+    if(ic)ic.split(',').forEach(function(x){inject(b+'/icons@'+v+'/'+x.trim())});
+  }
+
+  // Fonts — auto-inject lato with components, bare fonts attr defaults to lato
+  var fa=s.getAttribute('fonts');
+  if(fa!=='none'){
+    var fc=fa||(s.hasAttribute('fonts')||hc?'lato':null);
+    if(fc)fc.split(',').forEach(function(x){inject(b+'/fonts@'+v+'/'+x.trim())});
+  }
+
+  // Loading mode — blocking by default, lazy opts into async
+  var lazy=s.hasAttribute('lazy');
+
+  // Components — bare = standard preset
+  var co=s.getAttribute('components')||'';
+  if(hc&&!co)co='standard';
+  if(co)load(b+'/core@'+v+'/'+co.split(',').map(function(x){return x.trim()}).join(','));
+
+  // Authoring lib
+  if(ha)load(b+'/component@'+v);
+
+  // Bare package attributes
+  ${bareAttrs}.forEach(function(p){
+    if(s.hasAttribute(p))load(b+'/'+p+'@'+v);
+  });
+
+  function load(u){
+    if(lazy){import(u).catch(function(e){console.error('SUI: Failed to load '+u,e)});return}
+    var sc=document.createElement('script');sc.type='module';sc.setAttribute('blocking','render');sc.crossOrigin='anonymous';sc.src=u;sc.onerror=function(){console.error('SUI: Failed to load '+u)};document.head.appendChild(sc);
+  }
+  function inject(h){var l=document.createElement('link');l.rel='stylesheet';l.href=h;l.setAttribute('blocking','render');document.head.appendChild(l)}
+})();`;
+
+  // Validate the generated script is syntactically valid
+  try {
+    new Function(js);
+  }
+  catch (e) {
+    throw new Error(`Generated loader has syntax error: ${e.message}`);
+  }
+
+  return { js };
+}
+
+// Directory pages — static HTML served for trailing-slash URLs.
+// Templates live in tools/cdn/pages/{name}.html and are uploaded to _meta/dir/{name}.html.
+function buildDirPages() {
+  const pagesDir = join(import.meta.dirname, 'pages');
+  if (!existsSync(pagesDir)) { return {}; }
+  const pages = {};
+  for (const file of readdirSync(pagesDir)) {
+    if (!file.endsWith('.html') && !file.endsWith('.css')) { continue; }
+    const name = file.replace(/\.(html|css)$/, '');
+    const ext = file.endsWith('.css') ? 'css' : 'html';
+    pages[`${name}.${ext}`] = readFileSync(join(pagesDir, file), 'utf-8');
+  }
+  return pages;
+}
+
+async function uploadDirPages(s3) {
+  const pages = buildDirPages();
+  const names = Object.keys(pages);
+  if (names.length === 0) {
+    console.log('\n  No directory pages found');
+    return;
+  }
+  console.log(`\nUploading ${names.length} directory page files`);
+  for (const [filename, content] of Object.entries(pages)) {
+    const contentType = filename.endsWith('.css') ? 'text/css' : 'text/html';
+    // index.html serves at / (root), CSS goes to _meta/dir/, everything else to _meta/dir/
+    const r2Key = filename === 'index.html' ? '_meta/index.html' : `_meta/dir/${filename}`;
+    await uploadText(s3, r2Key, content, contentType);
+  }
+  console.log(`  ${names.join(', ')} uploaded`);
+}
+
+async function uploadLoader(s3) {
+  console.log('\nGenerating loader');
+  const { js } = buildLoader();
+  await uploadText(s3, '_meta/load.js', js, 'application/javascript');
+  console.log('  _meta/load.js uploaded');
+}
+
 async function uploadImportMaps(s3, version) {
   console.log(`\nGenerating import maps @ ${version}`);
   const { json, js } = buildImportMap(version);
@@ -253,20 +424,68 @@ async function uploadImportMaps(s3, version) {
 }
 
 async function updateVersionPointer(s3, alias, version) {
+  // Prevent accidental downgrade of the latest pointer
+  if (alias === 'latest' && valid(version)) {
+    try {
+      const res = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: '_versions/latest' }));
+      const current = (await res.Body.transformToString()).trim();
+      if (valid(current) && gt(current, version)) {
+        console.error(`  Refusing to downgrade latest from ${current} to ${version}`);
+        process.exit(1);
+      }
+    }
+    catch { /* no existing pointer — first release */ }
+  }
+
   await uploadText(s3, `_versions/${alias}`, version);
   console.log(`  _versions/${alias} → ${version}`);
 
-  const { json, js } = buildImportMap(version);
-  await uploadText(s3, `_meta/importmap@${alias}.json`, json, 'application/json');
-  await uploadText(s3, `_meta/importmap@${alias}.js`, js, 'application/javascript');
+  const { json: mapJson, js: mapJs } = buildImportMap(version);
+  await uploadText(s3, `_meta/importmap@${alias}.json`, mapJson, 'application/json');
+  await uploadText(s3, `_meta/importmap@${alias}.js`, mapJs, 'application/javascript');
 
-  // importmap.js (no version) always points to latest
+  // Unversioned endpoints always point to latest
   if (alias === 'latest') {
-    await uploadText(s3, `_meta/importmap.js`, js, 'application/javascript');
-    await uploadText(s3, `_meta/importmap.json`, json, 'application/json');
+    await uploadText(s3, `_meta/importmap.js`, mapJs, 'application/javascript');
+    await uploadText(s3, `_meta/importmap.json`, mapJson, 'application/json');
   }
 
   console.log(`  importmap@${alias} updated`);
+}
+
+// Upload CDN asset sets (icons + fonts) — top-level R2 prefixes
+async function uploadAssetSets(s3, version, { force = false } = {}) {
+  for (const assetType of ASSET_SET_DIRS) {
+    const assetDir = join(ROOT, 'dist', 'cdn', assetType);
+    if (!existsSync(assetDir)) {
+      continue;
+    }
+
+    console.log(`\nUploading ${assetType} @ ${version}`);
+    const r2Prefix = `${assetType}/${version}`;
+    const files = collectFiles(assetDir);
+
+    if (files.length === 0) {
+      console.log(`  No ${assetType} files found`);
+      continue;
+    }
+
+    // Asset sets rarely change — skip if already uploaded (even canary).
+    // Use --force-assets when icons or fonts source changes.
+    if (!force) {
+      const firstKey = `${r2Prefix}/${files[0].key}`;
+      if (await objectExists(s3, firstKey)) {
+        console.log(`  ${assetType}@${version} — already exists, skipping`);
+        continue;
+      }
+    }
+
+    for (const file of files) {
+      const key = `${r2Prefix}/${file.key}`;
+      await uploadFile(s3, key, readFileSync(file.path), getContentType(file.key));
+    }
+    console.log(`  ${assetType}@${version} — ${files.length} files`);
+  }
 }
 
 async function main() {
@@ -275,6 +494,7 @@ async function main() {
       version: { type: 'string' },
       latest: { type: 'boolean', default: false },
       'force-vendor': { type: 'boolean', default: false },
+      'force-assets': { type: 'boolean', default: false },
     },
   });
 
@@ -290,8 +510,11 @@ async function main() {
   const suiVersion = isCanary ? 'canary' : version;
 
   await uploadSuiPackages(s3, suiVersion, { force: isCanary });
+  await uploadAssetSets(s3, suiVersion, { force: values['force-assets'] });
   await uploadVendorPackages(s3, { force: values['force-vendor'] });
   await uploadImportMaps(s3, suiVersion);
+  await uploadLoader(s3);
+  await uploadDirPages(s3);
   await uploadPresets(s3);
 
   if (isCanary) {

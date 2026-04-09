@@ -94,7 +94,7 @@ TOKEN FINALIZATION (the gate)
 
 | # | What | Hours | Mode | Notes |
 |---|------|-------|------|-------|
-| 5 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
+| 6 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
 | 7 | Ecosystem Guides — raw WC (7 pages) | 120-160h (15-20d) | pair | One page per framework. Pre-wrapper versions. install/framework.mdx (335 lines) is starting material. |
 | 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
@@ -102,7 +102,7 @@ TOKEN FINALIZATION (the gate)
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
 | 11b | [Signal Performance](signal-performance.md) | 4-5h | pair | `scoped` — Freeze-on-set replaces clone-on-read (15-71x faster). Flush error boundary. Benchmarked. |
 | 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
-| 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `scoped` — JS reference impl + Rust/WASM Phase 2. buildHTMLString split point. DSD wrapping. Client hydration via bindMarkers. |
+| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
 
 ## Template Language Enhancements (unblocked, independent track)
 
@@ -220,3 +220,5 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **Native Renderer** — Zero-dependency DOM renderer. Single-pass HTML assembly, comment markers, TreeWalker binding. 573/573 tests. TodoMVC verified.
 - **Lit Removal** — Engine-agnostic `defineComponent`. `WebComponentBase extends HTMLElement` + `LitWebComponentBase extends LitElement` as peer engines. Symmetric factory pattern, static config, DOM lifecycle events. 2121 tests.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
+- **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
+- **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.

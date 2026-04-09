@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/css@canary" />
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts@canary/lato" />
+    <link id="icon-set" rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/lucide" />
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/brands" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon"></script>
+    <script type="module" src="./page.js"></script>
+<!-- playground-hide -->
+    <script>
+      if(localStorage.getItem('theme') == 'dark') {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+<!-- playground-hide-end -->
+  </head>
+  <body>
+    <select id="library">
+      <option value="lucide">Lucide</option>
+      <option value="phosphor">Phosphor</option>
+      <option value="tabler">Tabler</option>
+      <option value="material-symbols">Material Symbols</option>
+      <option value="heroicons">Heroicons</option>
+    </select>
+    <h3>SVG</h3>
+
+    <div class="icons">
+      <ui-icon home></ui-icon>
+      <ui-icon star></ui-icon>
+      <ui-icon search></ui-icon>
+      <ui-icon heart></ui-icon>
+      <ui-icon warning></ui-icon>
+      <ui-icon save></ui-icon>
+      <ui-icon mail></ui-icon>
+      <ui-icon calendar></ui-icon>
+      <ui-icon upload></ui-icon>
+      <ui-icon trash></ui-icon>
+      <ui-icon edit></ui-icon>
+      <ui-icon copy></ui-icon>
+    </div>
+
+    <h3>Image</h3>
+    <div class="icons brands">
+      <ui-icon icon="react" set="brands"></ui-icon>
+      <ui-icon icon="vue" set="brands"></ui-icon>
+      <ui-icon icon="svelte" set="brands"></ui-icon>
+      <ui-icon icon="angular" set="brands"></ui-icon>
+      <ui-icon icon="astro" set="brands"></ui-icon>
+      <ui-icon icon="nextjs" set="brands"></ui-icon>
+    </div>
+  </body>
+</html>

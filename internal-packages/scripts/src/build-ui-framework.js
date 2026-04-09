@@ -69,6 +69,13 @@ export const buildUIFramework = async ({
     entryNames: 'semantic-ui',
   };
 
+  // CSS sub-layers for /css/tokens, /css/reset, /css/base endpoints
+  const cssLayerConfigs = [
+    { entryPoints: ['src/css/tokens.css'], entryNames: 'tokens' },
+    { entryPoints: ['src/css/global/reset.css'], entryNames: 'reset' },
+    { entryPoints: ['src/css/global/base.css'], entryNames: 'base' },
+  ];
+
   if (includeESM) {
     tasks.push(
       buildESM({
@@ -76,6 +83,15 @@ export const buildUIFramework = async ({
         outdir: 'dist',
         log: { header: 'Framework CSS', text: 'Build ESM' },
       }),
+      ...cssLayerConfigs.map(layer =>
+        buildESM({
+          watch,
+          type: 'css',
+          ...layer,
+          outdir: 'dist',
+          log: { header: 'CSS Layer', text: `Build ${layer.entryNames}` },
+        })
+      ),
     );
   }
 
@@ -86,6 +102,15 @@ export const buildUIFramework = async ({
         outdir: 'dist/bundle',
         log: { header: 'Framework CSS', text: 'Build Bundle' },
       }),
+      ...cssLayerConfigs.map(layer =>
+        buildBundle({
+          watch,
+          type: 'css',
+          ...layer,
+          outdir: 'dist/bundle',
+          log: { header: 'CSS Layer', text: `Build ${layer.entryNames}` },
+        })
+      ),
     );
   }
 

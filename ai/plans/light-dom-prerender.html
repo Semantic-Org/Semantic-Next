@@ -1,0 +1,542 @@
+# Light DOM Pre-render Pipeline — Execution Plan
+
+> **Scope:** Full pipeline including template pre-render
+> **Key insight:** Not a new renderer. Same renderer, non-reactive mode, light DOM output target.
+> **Last Updated:** 2026-04-03
+
+### Rendering Paths (user opt-in)
+
+| Path | Sequence | Use case |
+|------|----------|----------|
+| **1 → 2 → 3** | ServerRenderer → LightRenderer → ClientRenderer | Full progressive: SSR, pre-render, then interactive |
+| **2 → 3** | LightRenderer → ClientRenderer | CDN/agent: pre-render on client, then interactive |
+| **3** | ClientRenderer only | Status quo: no pre-render |
+
+All three renderers share the same expression evaluator, AST, and `createComponent` output. `Reaction.nonreactive()` gates the dependency tracking — same code, different wiring cost.
+
+---
+
+## Phase 0: CSS Utilities
+
+**Goal:** Ship `prerenderCSS()` and `removeStylesheet()` in `@semantic-ui/utils`. No framework integration — just string transforms and stylesheet lifecycle.
+
+### 0.1 — Extract `:host` rewriting from `scopeStyles()`
+
+`scopeStyles()` already has the regex patterns. Extract into a shared helper:
+
+```js
+export const rewriteHostSelectors = (css, replacement = ':scope') => { ... }
+```
+
+Both `scopeStyles()` and the new `prerenderCSS()` delegate to this.
+
+**Validation:** existing `scopeStyles` tests pass unchanged.
+
+### 0.2 — `prerenderCSS(css, tagName, options)`
+
+New export. Rewrites `:host` → `:scope`, wraps in `@scope` with `:not(:defined)` boundary, wraps in `@layer`:
+
+```js
+export const prerenderCSS = (css, tagName, { layer = 'prerender' } = {}) => {
+  const rewritten = rewriteHostSelectors(css, ':scope');
+  const scoped = `@scope (${tagName}) to (:not(:defined)) {\n${REVERSE_RESET}\n${rewritten}\n}`;
+  return layer ? `@layer ${layer} { ${scoped} }` : scoped;
+};
+```
+
+**Test cases:**
+
+- Bare `:host` → `:scope`
+- `:host([attr])` → `:scope[attr]`
+- `:host(.class)` → `:scope.class`
+- `:host` inside `@media` and `@container` blocks
+- Output wrapped in `@layer prerender` and `@scope` with correct boundary
+- Reverse reset injected inside `@scope` block
+- TodoMVC `component.css` through it — manual inspection
+
+### 0.3 — `removeStylesheet(hash, adoptedElement)`
+
+New export. Counterpart to existing `adoptStylesheet()`:
+
+```js
+export const removeStylesheet = (hash, adoptedElement = document) => {
+  if (!adoptedElement?.adoptedStyleSheets) return;
+  adoptedElement.adoptedStyleSheets =
+    adoptedElement.adoptedStyleSheets.filter(s => s.id !== hash);
+  if (adoptedElement.cssHashes) {
+    adoptedElement.cssHashes = adoptedElement.cssHashes.filter(h => h !== hash);
+  }
+};
+```
+
+### 0.4 — `SHADOW_RESET_CSS` constant
+
+The forward reset string. Exported so `defineComponent` or the component base can prepend it to shadow CSS.
+
+### 0.5 — Layer declaration
+
+Add `prerender` to the existing layer order in `global.css`:
+
+```css
+@layer global, theme, prerender;
+```
+
+**Deliverable:** Three new exports, one refactored helper, one CSS line. No changes to framework behavior.
+
+---
+
+## Phase 1: Non-Reactive Rendering Mode
+
+**Goal:** The existing renderer can run in a mode where expressions evaluate once without creating Signals or Reactions. Same tree-walk, same expression evaluator, same data context — just skipping reactive wiring.
+
+### 1.1 — Rendering mode flag
+
+The renderer (Lit or Vanilla) needs a mode where each expression takes the `getReactiveValue()` path (one-shot evaluation) instead of `watchChanges()` (Reaction creation).
+
+The SSR path already does this via `isServer`. The pre-render mode is a third context:
+
+```js
+// In ReactiveDataDirective.render() or VanillaRenderer equivalent
+if (this.renderMode === 'prerender' || isServer) {
+  value = this.getReactiveValue();  // one-shot, no Reaction
+} else {
+  value = this.watchChanges();      // Reaction.create + subscribe
+}
+```
+
+The mode flag flows from `defineComponent` → `Template` → Renderer → each directive/binding.
+
+### 1.2 — `createComponent` in nonreactive closure
+
+`createComponent` must run to provide the data context (methods like `addOne()`, `isTrue()`). `Reaction.nonreactive()` wraps the entire pre-render pass — real Signals initialized from `defaultState`, real expression evaluation, zero dependency tracking:
+
+```js
+function prerenderInstance(def) {
+  return Reaction.nonreactive(() => {
+    // Real signals from defaultState — reads work, no tracking
+    const state = {};
+    for (const [k, v] of Object.entries(def.defaultState || {})) {
+      state[k] = signal(v);
+    }
+
+    const settings = { ...def.defaultSettings };
+
+    // Real createComponent — only side-effectful params need stubbing
+    const instance = def.createComponent({
+      state, settings, signal, self: null,
+      reaction: () => {},      // stub: don't register ongoing work
+      interval: () => {},      // stub: don't start timers
+      timeout: () => {},       // stub: don't schedule
+      attachEvent: () => {},   // stub: don't bind events
+      bindKey: () => {},       // stub: don't bind keys
+      dispatchEvent: () => {}, // stub: don't emit
+      findParent: () => null,  // stub: no DOM tree yet
+      findChild: () => null,
+      findChildren: () => [],
+      isClient: true, isServer: false,
+      isRendered: () => false,
+      $: () => emptyQuery, $$: () => emptyQuery,
+      el: null,
+    });
+    instance.self = instance;
+    // DON'T call initialize() — it contains side effects
+
+    return { state, settings, instance };
+  });
+}
+```
+
+`state.items.get()` returns `[1,2,3]`. `instance.addOne(1)` returns `2`. All pure computation works with real values. Only side-effectful params (`reaction`, `interval`, `timeout`, `attachEvent`, `bindKey`) are stubbed because they register ongoing work that shouldn't exist during pre-render.
+
+**Test cases:**
+
+- Component with methods referencing `self` — circular ref patched correctly
+- Component with methods calling `state.x.get()` — returns real initial value
+- Component with methods calling `settings.x` — returns default setting
+- TodoMVC `createComponent` — all methods return sensible values
+- Verify zero Reactions created during the nonreactive closure
+
+### 1.3 — Light DOM output target
+
+The renderer's output attaches to the element itself (light DOM children) instead of a shadow root:
+
+```js
+// Pre-render: output to light DOM
+const fragment = renderer.render({ ast, data });
+element.appendChild(fragment);
+
+// Full render: output to shadow root
+const shadow = element.attachShadow({ mode: 'open' });
+shadow.appendChild(renderer.render({ ast, data }));
+// or for Lit: shadow returns TemplateResult
+```
+
+The tree-walk DOM construction is identical. Only the attachment point differs.
+
+**Validation:**
+
+- Same AST produces structurally identical DOM in both modes
+- Expressions evaluate to same values in nonreactive vs reactive mode (for pure functions)
+- Pre-rendered DOM matches full-render DOM minus reactive subscriptions
+
+---
+
+## Phase 2: Slot Projection
+
+**Goal:** Consumer-provided children appear at correct positions in pre-rendered template, reversible on upgrade.
+
+### 2.1 — Stash consumer children
+
+Before template render, collect element's children keyed by slot name:
+
+```js
+function stashChildren(el) {
+  const stashed = { default: [] };
+  for (const child of Array.from(el.childNodes)) {
+    if (child.nodeType === 3 && !child.textContent.trim()) continue; // skip whitespace
+    const slotName = (child.nodeType === 1 && child.getAttribute('slot')) || 'default';
+    if (!stashed[slotName]) stashed[slotName] = [];
+    stashed[slotName].push(child);
+    if (child.nodeType === 1 && child.hasAttribute('slot')) {
+      child.__originalSlot = slotName;
+      child.removeAttribute('slot');
+    }
+  }
+  el.__suiPrerender = { children: stashed };
+  return stashed;
+}
+```
+
+### 2.2 — Slot replacement in rendered fragment
+
+When the renderer encounters a `slot` AST node during pre-render:
+
+1. Create `<slotcontent data-slot="name">` wrapper (NOT hyphenated — see TDD)
+2. Move matching stashed children into it
+3. Insert where `<slot>` would be
+
+`slotcontent { display: contents }` adopted globally once.
+
+### 2.3 — Restore on upgrade
+
+```js
+if (this.__suiPrerender) {
+  const { children } = this.__suiPrerender;
+  this.innerHTML = '';
+  for (const [name, nodes] of Object.entries(children)) {
+    for (const node of nodes) {
+      if (node.__originalSlot && node.__originalSlot !== 'default') {
+        node.setAttribute('slot', node.__originalSlot);
+        delete node.__originalSlot;
+      }
+      this.appendChild(node);
+    }
+  }
+  delete this.__suiPrerender;
+}
+```
+
+**Validation:**
+
+- Named + default slots placed correctly in pre-render
+- Consumer children restored as direct children with `slot` attributes after upgrade
+- Shadow DOM slot projection works correctly after restoration
+- `slotcontent` wrappers removed by `innerHTML = ''`
+- Nested components: inner pre-rendered before outer (bottom-up ordering)
+
+---
+
+## Phase 3: Upgrade Detection in `defineComponent`
+
+**Goal:** `defineComponent` detects pre-rendered light DOM and upgrades seamlessly.
+
+### 3.1 — Detection
+
+Pre-render marks elements: `el.__suiPrerender = { children }`. The component base checks for this in `connectedCallback`:
+
+```js
+connectedCallback() {
+  const wasPrerendered = !!this.__suiPrerender;
+
+  if (wasPrerendered) {
+    // Restore consumer children for slot projection (Phase 2.3)
+  }
+
+  // Normal path: create shadow DOM, render template, wire reactivity
+  this.attachShadow({ mode: 'open' });
+  // ... full reactive render
+}
+```
+
+### 3.2 — Scope sheet lifecycle
+
+Each component definition tracks its prerender scope sheet hash. Remove the scope sheet when all instances have upgraded:
+
+```js
+// After customElements.define() fires, check if any remain
+if (!document.querySelector(`${tagName}:not(:defined)`)) {
+  removeStylesheet(prerenderHash, document);
+}
+```
+
+### 3.3 — Forward reset injection
+
+`defineComponent` prepends `SHADOW_RESET_CSS` to shadow CSS for all components (not just pre-rendered):
+
+```js
+const finalCSS = SHADOW_RESET_CSS + componentCSS;
+```
+
+This is a standalone improvement — fixes the existing inconsistency where global base styles vanish inside shadow DOM.
+
+**Validation:**
+
+- Pre-rendered component upgrades to shadow DOM correctly
+- Non-pre-rendered component (normal path) unaffected
+- Scope sheet removed after all instances upgrade
+- Mixed scenario: some pre-rendered, some dynamically created after upgrade
+
+---
+
+## Phase 4: Pre-render Entry Point + CDN Loader
+
+**Goal:** `<script src="/load" prerender components="standard">` triggers the pipeline.
+
+### 4.1 — `prerender()` function
+
+```js
+export async function prerender(root = document, componentModules) {
+  // Register slotcontent stylesheet (once)
+  adoptStylesheet('slotcontent { display: contents; }', document);
+
+  // For each component: rewrite CSS, adopt scope sheet
+  for (const [tagName, mod] of Object.entries(componentModules)) {
+    const scopeCSS = prerenderCSS(mod.css, tagName);
+    adoptStylesheet(scopeCSS, document);
+  }
+
+  // Find all matching elements, sort deepest-first
+  const elements = [];
+  for (const tagName of Object.keys(componentModules)) {
+    for (const el of root.querySelectorAll(tagName)) {
+      elements.push(el);
+    }
+  }
+  elements.sort((a, b) => depth(b) - depth(a));
+
+  // Pre-render each instance in nonreactive closure
+  Reaction.nonreactive(() => {
+    for (const el of elements) {
+      const tag = el.tagName.toLowerCase();
+      const mod = componentModules[tag];
+
+      // Build data context with real signals, no tracking
+      const { state, settings, instance } = prerenderInstance(mod);
+
+      // Compile AST (or use cached), evaluate + render to fragment
+      const ast = TemplateCompiler.compile(mod.template);
+      const dataContext = { ...settings, ...getStateValues(state), ...instance };
+      const fragment = renderNonReactive(ast, dataContext);
+
+      // Slot projection
+      stashChildren(el);
+      projectSlots(fragment, el.__suiPrerender.children);
+      el.appendChild(fragment);
+    }
+  });
+}
+```
+
+### 4.2 — Loader changes (~5 lines)
+
+```js
+if (s.hasAttribute('prerender') && co) {
+  var pr = document.createElement('script');
+  pr.type = 'module';
+  pr.setAttribute('blocking', 'render');
+  pr.textContent =
+    'import{prerender}from"' + b + '/component@' + v + '";\n' +
+    'import * as defs from"' + b + '/core@' + v + '/' + co + '";\n' +
+    'prerender(document, defs);';
+  document.head.appendChild(pr);
+}
+```
+
+Same component modules. Same imports. The `prerender()` function consumes the definition data (template, css, defaultSettings, defaultState, createComponent) without calling `defineComponent`. The existing async `import()` then loads the same modules — ESM caching means they're already evaluated — and `defineComponent` runs the full upgrade path.
+
+### 4.3 — Module export shape
+
+Each component module needs to export its definition data alongside the defineComponent result:
+
+```js
+import template from './button.html?raw';
+import css from './button.css?raw';
+
+// Definition data — consumed by prerender()
+export { template, css };
+export const defaultSettings = { emphasis: '', size: '' };
+export const defaultState = {};
+export { createComponent };
+
+// Full component — consumed by normal import
+export default defineComponent({ tagName: 'ui-button', template, css, ... });
+```
+
+Or `defineComponent` stores the definition on the returned class and the prerender reads it:
+
+```js
+const Button = defineComponent({ ... });
+// Button.definition.template, Button.definition.css, etc.
+```
+
+This avoids changing every component file. `defineComponent` already receives all the data — it just needs to store it.
+
+**Validation:**
+
+- End-to-end: page with `prerender` attribute shows styled content before reactive JS
+- Pre-render + upgrade produces zero visual diff
+- `prerender` attribute absent — normal behavior, no regression
+- Nested components render correctly (bottom-up)
+
+---
+
+## Phase Dependency Graph
+
+```
+Phase 0 (CSS Utilities)           ← can start immediately
+  ├── 0.1 Extract :host regex     ── no deps
+  ├── 0.2 prerenderCSS()          ── depends on 0.1
+  ├── 0.3 removeStylesheet()      ── no deps
+  ├── 0.4 SHADOW_RESET_CSS        ── no deps
+  └── 0.5 Layer declaration       ── no deps
+
+Phase 1 (Non-reactive mode)       ← core rendering work
+  ├── 1.1 Mode flag               ── no deps
+  ├── 1.2 Inert stubs             ── no deps
+  └── 1.3 Light DOM output        ── depends on 1.1
+
+Phase 2 (Slot projection)         ← depends on Phase 1
+  ├── 2.1 Stash children          ── no deps
+  ├── 2.2 Slot replacement        ── depends on 1.3
+  └── 2.3 Restore on upgrade      ── no deps
+
+Phase 3 (Upgrade detection)       ← depends on Phase 0 + 2
+  ├── 3.1 Detection               ── depends on 2.3
+  ├── 3.2 Scope sheet lifecycle   ── depends on 0.2, 0.3
+  └── 3.3 Forward reset           ── depends on 0.4 (standalone, can ship early)
+
+Phase 4 (Entry point + loader)    ← integration, depends on all above
+  ├── 4.1 prerender() function    ── depends on 1.2, 1.3, 2.1, 2.2
+  ├── 4.2 Loader changes          ── ~5 lines
+  └── 4.3 Module export shape     ── minor refactor to defineComponent
+```
+
+Phase 0 and 3.3 (forward reset) can ship independently as improvements to the existing system.
+
+---
+
+## CDN Integration
+
+The `/load` endpoint already handles component loading, CSS injection, and import maps. Pre-render extends this with one additional asset: a pre-compiled scope CSS bundle.
+
+### Build Pipeline
+
+At build time (`build-cdn-assets.js` or a new `build-prerender-css.js`):
+
+1. For each component in `src/primitives/` and `src/components/`:
+   - Read its `-bundle.css` (the flattened shadow CSS)
+   - Run `prerenderCSS(css, tagName)` to rewrite `:host` → `:scope`, wrap in `@scope`/`@layer`
+2. Concatenate all rewritten CSS into `dist/cdn/prerender.css`
+3. Upload to R2 at `prerender/{version}/prerender.css`
+
+The scope CSS is ~the same size as the component CSS (it's the same rules, rewritten). Gzips well due to repetitive `@scope` wrappers.
+
+### Loader Changes
+
+When `prerender` attribute is present, the loader injects the scope CSS before components load:
+
+```js
+if (s.hasAttribute('prerender')) {
+  inject(b + '/prerender@' + v);  // scope CSS, blocking="render"
+}
+```
+
+This gives the browser the pre-render styles synchronously. Components render correctly in light DOM from first paint. When the JS arrives and `defineComponent` runs, shadow DOM takes over and the scope CSS stops applying (`:not(:defined)` boundary breaks).
+
+### Asset Set Pattern
+
+The prerender CSS follows the same pattern as icons and fonts:
+- Top-level R2 prefix: `prerender/{version}/prerender.css`
+- Worker route: `/prerender@0.18.0` serves CSS
+- Extensionless: `/prerender` (like `/css`, `/icons/lucide`, `/fonts/lato`)
+- Version aliases: `@canary`, `@latest`, `@0.18.0`
+
+### What the User Writes
+
+```html
+<!-- Zero FOUC — components styled from first paint -->
+<script src="https://cdn.semantic-ui.com/load" components="standard" prerender></script>
+<ui-button primary>Click Me</ui-button>
+```
+
+One attribute. The loader handles everything: tokens, fonts, icons, import map, scope CSS, component JS. The scope CSS arrives before first paint (blocking). The JS arrives after first paint (async). The user sees styled components immediately.
+
+### Without the Loader
+
+```html
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/css">
+<link rel="stylesheet" href="https://cdn.semantic-ui.com/prerender" blocking="render">
+<script type="module" src="https://cdn.semantic-ui.com/core@canary/standard"></script>
+```
+
+The explicit approach for users who manage their own setup. Same result, more tags.
+
+### Selective Pre-render
+
+The scope CSS bundle includes all components. But `@scope (ui-button) to (:not(:defined))` only applies to elements actually in the DOM — unused component scopes have zero cost. No need for per-component scope CSS files.
+
+### Interaction with Template Pre-render (Phase 4)
+
+The scope CSS alone handles the *styling* half of pre-render — components display correctly but don't have template content. Phase 4 adds template pre-render (evaluating the template in nonreactive mode and rendering to light DOM), which fills in the structural content.
+
+The two are independent:
+- **Scope CSS only** (this section): Components render with correct host styles (display, border, background, etc.) but no internal template structure. Slotted content is visible. Good enough for most FOUC elimination.
+- **Scope CSS + template pre-render** (Phase 4): Full structural pre-render. Components show their complete internal layout. The gold standard.
+
+Scope CSS alone is a CDN-only build step with zero framework changes. Template pre-render requires the Phase 1-3 framework work. Ship scope CSS first.
+
+---
+
+## Risk Areas
+
+### 1. `@scope` Browser Support
+
+Safari does not support `@scope` as of early 2025. Fallback: standard FOUC behavior (no regression). Feature detection: `CSS.supports('@scope (div) { }')`.
+
+### 2. `createComponent` Side Effects
+
+Components that perform side effects in the function body (not in `initialize()`) will execute those during pre-render. SUI's authoring guidelines already say "side effects go in `initialize()`" — this is an existing anti-pattern. The pre-render pipeline enforces it.
+
+### 3. `blocking="render"` on Inline Module Scripts
+
+The pipeline relies on `<script type="module" blocking="render">` holding first paint until execution completes (including dynamic imports via top-level await). Verify behavior across browsers, particularly with ESM module graph resolution.
+
+### 4. Expression Evaluation Edge Cases
+
+Expressions that depend on DOM state (`$('.element').height()`), browser APIs (`window.location`), or async data will return stubs/defaults during pre-render. The visual may be incomplete (empty values, missing conditional branches). On upgrade, reactive evaluation fills in real values. The visual contract is "complete-enough scaffold → full interactive component."
+
+### 5. Scope Sheet Removal Timing
+
+Removing the scope sheet while disconnected instances exist leaves them unstyled. Acceptable edge case — disconnected elements in DocumentFragments aren't visible. The `querySelector(':not(:defined)')` check handles connected instances correctly.
+
+---
+
+## Success Criteria
+
+1. Pre-rendered page shows styled, content-visible components on first paint — before reactive wiring
+2. Visual diff between pre-rendered and upgraded states is zero (within sub-property tolerance)
+3. Pre-render adds <50ms to first paint (CSS rewrite + template eval + DOM write, no reactive overhead)
+4. Full reactive wiring cost (~400ms on large pages) occurs after first paint, non-blocking
+5. Components function identically after upgrade — no behavioral regressions
+6. SSR hydration mismatch bugs eliminated — both pre-render and upgrade use same tree-walk path
+7. Pipeline gracefully handles missing `@scope` support — falls back to standard behavior

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Semantic UI CDN</title>
+<script>document.documentElement.classList.add(localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))</script>
+<script src="https://cdn.semantic-ui.com/load" version="canary" icons css></script>
+<style>
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+  }
+
+  .container {
+    max-width: 440px;
+  }
+
+  .code {
+    font-size: 120px;
+    font-weight: 900;
+    letter-spacing: -4px;
+    line-height: 1;
+    color: var(--header-color);
+    margin-bottom: var(--margin-xs);
+    position: relative;
+  }
+
+  .code span {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+  .code span:nth-child(1) { animation-delay: 0s; }
+  .code span:nth-child(2) { animation-delay: 0.15s; }
+  .code span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  h1 {
+    color: var(--muted-text-color);
+    font-weight: 400;
+    margin-bottom: var(--margin);
+  }
+
+  p {
+    color: var(--light-text-color);
+    margin-bottom: var(--margin-l);
+    line-height: 1.6;
+  }
+
+  .home {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary-text-color);
+    text-decoration: none;
+    font-weight: var(--bold);
+    transition: opacity 0.15s;
+  }
+  .home:hover { opacity: 0.8; }
+
+  .icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+  }
+
+  .tried {
+    margin-top: var(--margin-2xl);
+    color: var(--light-text-color);
+    font-size: var(--text-xs);
+    font-family: var(--code-font);
+    word-break: break-all;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="code"><span>4</span><span>0</span><span>4</span></div>
+    <h1>This isn't the endpoint you're looking for.</h1>
+    <p>The resource doesn't exist, was never uploaded, or you've invented a URL that's ahead of its time.</p>
+    <a href="/" class="home"><span class="icon" style="mask-image: var(--icon-home)"></span>Back to CDN</a>
+    <div class="tried" id="tried"></div>
+  </div>
+  <script>document.getElementById('tried').textContent = location.pathname;</script>
+</body>
+</html>

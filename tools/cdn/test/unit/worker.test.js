@@ -9,39 +9,65 @@ import worker from '../../worker/index.js';
 
 describe('parseRoute — CSS', () => {
   it('/css → latest', () => {
-    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/css@canary → canary', () => {
-    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/css@canary')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/css@0.18.0 → versioned', () => {
-    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', map: false });
+    expect(parseRoute('/css@0.18.0')).toEqual({ type: 'css', version: '0.18.0', layer: null, map: false });
   });
 
   it('/css@canary.map → canary sourcemap', () => {
-    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/css@canary.map')).toEqual({ type: 'css', version: 'canary', layer: null, map: true });
+  });
+
+  it('/css@0.18.0/tokens → tokens layer', () => {
+    expect(parseRoute('/css@0.18.0/tokens')).toEqual({ type: 'css', version: '0.18.0', layer: 'tokens', map: false });
+  });
+
+  it('/css@canary/reset → reset layer', () => {
+    expect(parseRoute('/css@canary/reset')).toEqual({ type: 'css', version: 'canary', layer: 'reset', map: false });
+  });
+
+  it('/css/tokens → latest tokens', () => {
+    expect(parseRoute('/css/tokens')).toEqual({ type: 'css', version: 'latest', layer: 'tokens', map: false });
+  });
+
+  it('/css@0.18.0/tokens.map → tokens sourcemap', () => {
+    expect(parseRoute('/css@0.18.0/tokens.map')).toEqual({
+      type: 'css',
+      version: '0.18.0',
+      layer: 'tokens',
+      map: true,
+    });
   });
 
   it('/semantic-ui.css → latest', () => {
-    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css → canary', () => {
-    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', map: false });
+    expect(parseRoute('/semantic-ui@canary.css')).toEqual({ type: 'css', version: 'canary', layer: null, map: false });
   });
 
   it('/semantic-ui@canary.css.map → canary sourcemap', () => {
-    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({ type: 'css', version: 'canary', map: true });
+    expect(parseRoute('/semantic-ui@canary.css.map')).toEqual({
+      type: 'css',
+      version: 'canary',
+      layer: null,
+      map: true,
+    });
   });
 
   it('/semantic-ui.min.css.map → latest sourcemap (inline URL)', () => {
-    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', map: true });
+    expect(parseRoute('/semantic-ui.min.css.map')).toEqual({ type: 'css', version: 'latest', layer: null, map: true });
   });
 
   it('/semantic-ui.min.css → latest', () => {
-    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', map: false });
+    expect(parseRoute('/semantic-ui.min.css')).toEqual({ type: 'css', version: 'latest', layer: null, map: false });
   });
 });
 
@@ -94,6 +120,16 @@ describe('parseRoute — vendor', () => {
   });
 });
 
+describe('parseRoute — load endpoint', () => {
+  it('/load → loader', () => {
+    expect(parseRoute('/load')).toEqual({ type: 'load' });
+  });
+
+  it('/load.js → loader', () => {
+    expect(parseRoute('/load.js')).toEqual({ type: 'load' });
+  });
+});
+
 describe('parseRoute — SUI alias', () => {
   it('/@semantic-ui/core@0.18.0 → redirect', () => {
     expect(parseRoute('/@semantic-ui/core@0.18.0')).toEqual({
@@ -101,6 +137,89 @@ describe('parseRoute — SUI alias', () => {
       name: 'core',
       version: '0.18.0',
       filepath: null,
+    });
+  });
+});
+
+describe('parseRoute — asset sets (icons & fonts)', () => {
+  it('/icons@0.18.0/lucide → versioned icon set', () => {
+    expect(parseRoute('/icons@0.18.0/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: '0.18.0',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons@canary/lucide → canary', () => {
+    expect(parseRoute('/icons@canary/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'canary',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons/lucide → latest (no version)', () => {
+    expect(parseRoute('/icons/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: 'lucide',
+    });
+  });
+
+  it('/icons@0.18.0/lucide/house.svg → individual SVG', () => {
+    expect(parseRoute('/icons@0.18.0/lucide/house.svg')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: '0.18.0',
+      filepath: 'lucide/house.svg',
+    });
+  });
+
+  it('/fonts@0.18.0/lato → versioned font set', () => {
+    expect(parseRoute('/fonts@0.18.0/lato')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: '0.18.0',
+      filepath: 'lato',
+    });
+  });
+
+  it('/fonts/lato → latest (no version)', () => {
+    expect(parseRoute('/fonts/lato')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: 'latest',
+      filepath: 'lato',
+    });
+  });
+
+  it('/fonts@0.18.0/lato/LatoLatin-Regular.woff2 → individual font file', () => {
+    expect(parseRoute('/fonts@0.18.0/lato/LatoLatin-Regular.woff2')).toEqual({
+      type: 'asset-set',
+      setType: 'fonts',
+      version: '0.18.0',
+      filepath: 'lato/LatoLatin-Regular.woff2',
+    });
+  });
+
+  it('/icons → no filepath, latest version', () => {
+    expect(parseRoute('/icons')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: null,
+    });
+  });
+
+  it('/icons@latest/lucide → latest alias', () => {
+    expect(parseRoute('/icons@latest/lucide')).toEqual({
+      type: 'asset-set',
+      setType: 'icons',
+      version: 'latest',
+      filepath: 'lucide',
     });
   });
 });
@@ -155,7 +274,7 @@ describe('CSS sourceMappingURL rewrite', () => {
 
     expect(res.status).toBe(200);
     const body = await res.text();
-    expect(body).toContain('sourceMappingURL=/semantic-ui@canary.css.map');
+    expect(body).toContain('sourceMappingURL=/css@canary.map');
     expect(body).not.toContain('sourceMappingURL=semantic-ui.min.css.map');
   });
 
@@ -202,5 +321,421 @@ describe('JS SourceMap header', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get('SourceMap')).toBeNull();
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Asset sets (icons & fonts)
+----------------------------------------------*/
+
+describe('asset set fetch', () => {
+  it('serves extensionless icon set as CSS', async () => {
+    const css = ':root { --icon-home: url(./lucide/house.svg); }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(await res.text()).toBe(css);
+  });
+
+  it('serves individual SVG with correct content type', async () => {
+    const svg = '<svg viewBox="0 0 24 24"><path d="M3 12l2-2"/></svg>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide/house.svg': svg,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide/house.svg');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/svg+xml');
+  });
+
+  it('serves font woff2 with correct content type', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato/LatoLatin-Regular.woff2': 'fakewoff2data',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('font/woff2');
+  });
+
+  it('redirects latest to exact version', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@latest/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@0.19.0/lucide');
+  });
+
+  it('redirects unversioned to exact version', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@0.19.0/lucide');
+  });
+
+  it('returns 404 for missing set', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({}),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/nonexistent');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+  });
+
+  it('redirects to default set when no filepath provided', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({}),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
+  });
+
+  it('sets immutable cache for versioned assets', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/0.18.0/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@0.18.0/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=31536000, immutable');
+  });
+
+  it('sets short cache for canary assets', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=60');
+  });
+
+  it('includes CORS headers', async () => {
+    const css = ':root {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato');
+    const res = await worker.fetch(req, env);
+
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('includes CORS on font binary files (browsers enforce this)', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'fonts/canary/lato/LatoLatin-Regular.woff2': 'fakewoff2data',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary/lato/LatoLatin-Regular.woff2');
+    const res = await worker.fetch(req, env);
+
+    expect(res.headers.get('Access-Control-Allow-Origin')).toBe('*');
+  });
+
+  it('redirects bare /icons@version to default set (lucide)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/icons@canary/lucide');
+  });
+
+  it('redirects bare /fonts@version to default set (lato)', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/fonts@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/fonts@canary/lato');
+  });
+
+  it('serves deeply nested asset paths', async () => {
+    const svg = '<svg></svg>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        'icons/canary/lucide/outline/house.svg': svg,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/icons@canary/lucide/outline/house.svg');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('image/svg+xml');
+    expect(await res.text()).toBe(svg);
+  });
+
+  // If 'icons' or 'fonts' were ever added to SUI_PACKAGES, the asset-set
+  // route must still match first — this is by design, not an accident
+  it('asset-set routes take precedence over SUI packages with same name', () => {
+    expect(parseRoute('/icons@0.18.0/lucide').type).toBe('asset-set');
+    expect(parseRoute('/fonts@0.18.0/lato').type).toBe('asset-set');
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Load endpoint
+----------------------------------------------*/
+
+describe('load endpoint fetch', () => {
+  it('serves loader script with short cache', async () => {
+    const loaderJs = '(function(){ /* loader */ })();';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/load.js': loaderJs,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/load');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    expect(res.headers.get('Cache-Control')).toBe('public, max-age=300');
+    expect(await res.text()).toBe(loaderJs);
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — CSS sub-layers
+----------------------------------------------*/
+
+describe('CSS sub-layer fetch', () => {
+  it('serves tokens CSS', async () => {
+    const tokens = ':root { --primary: blue; }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/tokens.min.css': tokens,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css@canary/tokens');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(res.headers.get('SourceMap')).toBe('/css@canary/tokens.map');
+  });
+
+  it('redirects latest CSS sub-layer to versioned', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_versions/latest': '0.19.0',
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css/tokens');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toBe('https://cdn.semantic-ui.com/css@0.19.0/tokens');
+  });
+
+  it('serves full CSS when no layer specified', async () => {
+    const fullCss = ':root {} body {}';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/semantic-ui.min.css': fullCss,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/css@canary');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('SourceMap')).toBe('/css@canary.map');
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Combo endpoint
+----------------------------------------------*/
+
+describe('combo endpoint fetch', () => {
+  it('serves comma-separated components as re-exports', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button,input');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('application/javascript');
+    const body = await res.text();
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/button.min.js"');
+    expect(body).toContain('export * from "https://cdn.semantic-ui.com/core@canary/input.min.js"');
+  });
+
+  it('serves preset name as re-exports', async () => {
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/presets.json': JSON.stringify({
+          standard: ['button', 'input', 'icon'],
+        }),
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/standard');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    const body = await res.text();
+    expect(body).toContain('button.min.js');
+    expect(body).toContain('input.min.js');
+    expect(body).toContain('icon.min.js');
+  });
+
+  it('falls through to file serving for non-combo paths', async () => {
+    const jsContent = 'export const Button = {};';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '@semantic-ui/core/canary/dist/cdn/button.min.js': jsContent,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core@canary/button.min.js');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).toBe(jsContent);
+  });
+});
+
+/*----------------------------------------------
+  Route parsing — Directory pages
+----------------------------------------------*/
+
+describe('parseRoute — dir pages', () => {
+  it('/core/ → dir page', () => {
+    expect(parseRoute('/core/')).toEqual({ type: 'dir', page: 'core' });
+  });
+
+  it('/core@0.18.0/ → versioned dir page', () => {
+    expect(parseRoute('/core@0.18.0/')).toEqual({ type: 'dir', page: 'core' });
+  });
+
+  it('/icons/ → dir page', () => {
+    expect(parseRoute('/icons/')).toEqual({ type: 'dir', page: 'icons' });
+  });
+
+  it('/fonts@canary/ → versioned dir page', () => {
+    expect(parseRoute('/fonts@canary/')).toEqual({ type: 'dir', page: 'fonts' });
+  });
+
+  it('/ does NOT match dir (stays root)', () => {
+    expect(parseRoute('/')).toEqual({ type: 'root' });
+  });
+
+  it('/nonsense/ → unknown', () => {
+    expect(parseRoute('/nonsense/')).toEqual({ type: 'unknown' });
+  });
+
+  it('/vendor/ → unknown', () => {
+    expect(parseRoute('/vendor/')).toEqual({ type: 'unknown' });
+  });
+});
+
+describe('parseRoute — dir assets', () => {
+  it('/index.css → dir-asset', () => {
+    expect(parseRoute('/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+
+  it('/core/index.css → dir-asset', () => {
+    expect(parseRoute('/core/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+
+  it('/icons/index.css → dir-asset', () => {
+    expect(parseRoute('/icons/index.css')).toEqual({ type: 'dir-asset', file: 'index.css' });
+  });
+});
+
+/*----------------------------------------------
+  Worker fetch — Directory pages + 404
+----------------------------------------------*/
+
+describe('dir page fetch', () => {
+  it('serves dir page HTML for trailing-slash', async () => {
+    const html = '<html>core page</html>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/core.html': html,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core/');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/html');
+    expect(await res.text()).toBe(html);
+  });
+
+  it('serves dir-asset CSS', async () => {
+    const css = 'body { color: red; }';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/index.css': css,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/core/index.css');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toBe('text/css');
+    expect(await res.text()).toBe(css);
+  });
+
+  it('serves custom 404 page for unknown routes', async () => {
+    const html404 = '<html>404 page</html>';
+    const env = {
+      CDN_BUCKET: mockR2Bucket({
+        '_meta/dir/404.html': html404,
+      }),
+    };
+    const req = new Request('https://cdn.semantic-ui.com/totally-bogus');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+    expect(res.headers.get('Content-Type')).toBe('text/html');
+    expect(await res.text()).toBe(html404);
+  });
+
+  it('falls back to plain text 404 when no custom page', async () => {
+    const env = { CDN_BUCKET: mockR2Bucket({}) };
+    const req = new Request('https://cdn.semantic-ui.com/totally-bogus');
+    const res = await worker.fetch(req, env);
+
+    expect(res.status).toBe(404);
+    expect(await res.text()).toBe('Not found');
   });
 });
