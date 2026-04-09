@@ -13,6 +13,7 @@
     "@astrojs/starlight": "^0.38.1",
     "@astrojs/vercel": "^10.0.1",
     "@codemirror/language": "^6.12.2",
+    "@codemirror/lsp-client": "^6.2.2",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.40.0",
     "@pagefind/modular-ui": "^1.4.0",
