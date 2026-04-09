@@ -34,7 +34,7 @@ class WebComponentBase extends HTMLElementBase {
     // suppress requestUpdate until hydration completes — attribute parsing
     // fires before connectedCallback and would schedule a render cascade
     if (this.shadowRoot) {
-      this._hydrating = true;
+      this.isHydrating = true;
     }
 
     const { css, componentSpec, defaultSettings, resolvedProperties } = this.constructor.config || {};
@@ -148,7 +148,7 @@ class WebComponentBase extends HTMLElementBase {
 
     this.template._isHydrating = false;
     this.template.rendered = true;
-    this._hydrating = false;
+    this.isHydrating = false;
 
     // Remove all hydration markers — clean DevTools, zero comment noise
     this.removeMarkers();
@@ -218,7 +218,7 @@ class WebComponentBase extends HTMLElementBase {
     // attribute. Properties are set above (needed for getData), but skip
     // the spec resolution cascade — the DOM already reflects the correct
     // state and adjustPropertyFromAttribute triggers requestUpdate.
-    if (this._hydrating) {
+    if (this.isHydrating) {
       return;
     }
 
