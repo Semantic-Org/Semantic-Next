@@ -437,5 +437,111 @@ RENDERING_ENGINES.forEach(engine => {
         expect(el.settings.active).toBe(true);
       });
     });
+    /*******************************
+       Updated Event — no double fire
+    *******************************/
+
+    describe(`[${engine}] component contract — updated event count`, () => {
+      it('state change should fire updated event exactly once', async () => {
+        const el = await renderComponent({
+          template: '<span>{count}</span>',
+          defaultState: { count: 0 },
+          createComponent: ({ state }) => ({
+            increment() {
+              state.count.increment();
+            },
+          }),
+        });
+
+        let fireCount = 0;
+        $(el).on('updated', () => fireCount++);
+
+        el.component.increment();
+        Reaction.flush();
+
+        // Wait long enough for any stray setTimeout to fire
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(fireCount).toBe(1);
+      });
+
+      it('setting change should fire updated event exactly once', async () => {
+        const el = await renderComponent({
+          template: '<span>{color}</span>',
+          defaultSettings: { color: 'blue' },
+          createComponent: ({ settings }) => ({
+            setColor(c) {
+              settings.color = c;
+            },
+          }),
+        });
+
+        let fireCount = 0;
+        $(el).on('updated', () => fireCount++);
+
+        el.component.setColor('red');
+        Reaction.flush();
+
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(fireCount).toBe(1);
+      });
+    });
+
+    /*******************************
+       bumpDataVersion — call count
+    *******************************/
+
+    describe(`[${engine}] component contract — bumpDataVersion count`, () => {
+      it('state change should not call bumpDataVersion — uses fine-grained reactivity', async () => {
+        const el = await renderComponent({
+          template: '<span>{count}</span>',
+          defaultState: { count: 0 },
+          createComponent: ({ state }) => ({
+            increment() {
+              state.count.increment();
+            },
+          }),
+        });
+
+        let bumpCount = 0;
+        const origBump = el.template.renderer.bumpDataVersion.bind(el.template.renderer);
+        el.template.renderer.bumpDataVersion = () => {
+          bumpCount++;
+          origBump();
+        };
+
+        el.component.increment();
+        Reaction.flush();
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(bumpCount).toBe(0);
+      });
+
+      it('setting change should call bumpDataVersion exactly once', async () => {
+        const el = await renderComponent({
+          template: '<span>{color}</span>',
+          defaultSettings: { color: 'blue' },
+          createComponent: ({ settings }) => ({
+            setColor(c) {
+              settings.color = c;
+            },
+          }),
+        });
+
+        let bumpCount = 0;
+        const origBump = el.template.renderer.bumpDataVersion.bind(el.template.renderer);
+        el.template.renderer.bumpDataVersion = () => {
+          bumpCount++;
+          origBump();
+        };
+
+        el.component.setColor('red');
+        Reaction.flush();
+        await new Promise(r => setTimeout(r, 100));
+
+        expect(bumpCount).toBe(1);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach

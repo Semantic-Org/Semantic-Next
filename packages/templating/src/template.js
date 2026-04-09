@@ -214,7 +214,12 @@ export const Template = class Template {
       }
     };
     this.onUpdated = () => {
-      this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (this.updateScheduled) { return; }
+      this.updateScheduled = true;
+      queueMicrotask(() => {
+        this.updateScheduled = false;
+        this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+      });
     };
 
     // onThemeChange can call both from mutation observers and dispatched events
@@ -764,9 +769,6 @@ export const Template = class Template {
     else {
       // Reactions handle DOM updates — bump version to propagate changes
       this.renderer.bumpDataVersion();
-      if (!isServer) {
-        setTimeout(this.onUpdated, 0);
-      }
     }
     this.rendered = true;
     this.destroyed = false;

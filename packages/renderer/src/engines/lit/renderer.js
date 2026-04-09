@@ -103,6 +103,9 @@ export class LitRenderer {
         tree.bumpDataVersion();
       }
     });
+    setTimeout(() => {
+      this.template?.onUpdated?.();
+    }, 0);
   }
 
   readAST({ ast = this.ast, data = this.data } = {}) {
