@@ -3,8 +3,10 @@ import { playwright } from '@vitest/browser-playwright';
 export default {
   test: {
     include: ['**/test/browser/**/*.test.{ts,js}'],
-    exclude: ['tools/cdn/**'],
+    exclude: ['**/node_modules/**', 'docs/**', 'tools/cdn/**'],
     name: 'browser',
+    testTimeout: 30000,
+    fileParallelism: false,
     browser: {
       enabled: true,
       headless: true,

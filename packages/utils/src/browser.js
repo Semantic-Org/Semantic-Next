@@ -59,6 +59,10 @@ export const idleCallback = (callback) => {
   }
 };
 
+export const microtask = typeof queueMicrotask === 'function'
+  ? (fn) => queueMicrotask(fn)
+  : (fn) => Promise.resolve().then(fn);
+
 const DEFAULT_STUN_SERVER = 'stun:stun.l.google.com:19302';
 const ICE_SERVERS = [{ urls: DEFAULT_STUN_SERVER }];
 const IP_REGEX = /\s([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[A-Fa-f0-9]*:[A-Fa-f0-9:]+)\s/;

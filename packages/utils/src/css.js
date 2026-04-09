@@ -1,4 +1,3 @@
-import { inArray } from './arrays.js';
 import { hashCode } from './crypto.js';
 import { isServer } from './environment.js';
 import { each } from './loops.js';
@@ -31,9 +30,14 @@ for (const rule of prefixRules) {
 
 const propNames = prefixRules.map(r => r.prop.replace(/-/g, '\\-'));
 const propPattern = new RegExp(`^(\\s*)(${propNames.join('|')})\\s*:(.*)$`);
+const propQuickTest = new RegExp(`(${propNames.join('|')})\\s*:`);
 
 export const prefixCSS = (css) => {
   if (!css) {
+    return css;
+  }
+  // skip split/join when CSS has no prefixable properties
+  if (!propQuickTest.test(css)) {
     return css;
   }
   const lines = css.split('\n');
@@ -59,12 +63,13 @@ export const prefixCSS = (css) => {
 --------------------*/
 
 export const adoptStylesheet = (css, adoptedElement, {
-  hash = hashCode(css),
+  hash,
   cacheStylesheet = true,
 } = {}) => {
   if (isServer) {
     return;
   }
+  hash = hash ?? hashCode(css);
   if (!adoptedElement) {
     adoptedElement = document;
   }
@@ -75,14 +80,14 @@ export const adoptStylesheet = (css, adoptedElement, {
   }
 
   if (!adoptedElement.cssHashes) {
-    adoptedElement.cssHashes = [];
+    adoptedElement.cssHashes = new Set();
   }
   // already added
-  if (adoptedElement.cssHashes.includes(hash)) {
+  if (adoptedElement.cssHashes.has(hash)) {
     return;
   }
 
-  adoptedElement.cssHashes.push(hash);
+  adoptedElement.cssHashes.add(hash);
 
   let stylesheet;
 
@@ -106,10 +111,7 @@ export const adoptStylesheet = (css, adoptedElement, {
   }
 
   // adopt this stylesheet after others
-  adoptedElement.adoptedStyleSheets = [
-    ...adoptedElement.adoptedStyleSheets,
-    stylesheet,
-  ];
+  adoptedElement.adoptedStyleSheets.push(stylesheet);
 };
 
 export const extractCSS = (selector, source = document, { returnText = false, exactMatch = false } = {}) => {
@@ -152,7 +154,8 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
     styleSheets = document.styleSheets;
   }
 
-  const extractFromRules = (rules, wrappers = []) => {
+  const wrappers = [];
+  const extractFromRules = (rules) => {
     each(rules, (rule) => {
       if (matchesSelector(rule.selectorText)) {
         let cssText = rule.cssText;
@@ -164,10 +167,13 @@ export const extractCSS = (selector, source = document, { returnText = false, ex
       if (rule.cssRules?.length) {
         // Only at-rules need wrapping — nested style rules already have resolved selectors
         const isAtRule = !rule.selectorText;
-        const nextWrappers = isAtRule
-          ? [...wrappers, rule.cssText.substring(0, rule.cssText.indexOf('{')).trim()]
-          : wrappers;
-        extractFromRules(rule.cssRules, nextWrappers);
+        if (isAtRule) {
+          wrappers.push(rule.cssText.substring(0, rule.cssText.indexOf('{')).trim());
+        }
+        extractFromRules(rule.cssRules);
+        if (isAtRule) {
+          wrappers.pop();
+        }
       }
     });
   };
@@ -202,7 +208,8 @@ export const scopeStyles = (css, scopeSelector = '', { replaceHost = false, appe
       }
 
       // Handle html/body - append scope instead of prepend
-      if (appendToRootElements && inArray(selectorText.toLowerCase(), ['html', 'body'])) {
+      const lower = selectorText.toLowerCase();
+      if (appendToRootElements && (lower === 'html' || lower === 'body')) {
         return `${selectorText} ${scopeSelector} { ${rule.style.cssText} }`;
       }
 

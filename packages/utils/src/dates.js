@@ -45,6 +45,11 @@ const presetFormats = {
 const tokenRegExp = /\[([^\]]*)]|YYYY|YY|MMMM|MMM|MM|M|Do|DD|D|dddd|ddd|HH|hh|h|mm|ss|a/g;
 const needsNumericMonth = /\bMM?\b/;
 const formatterCache = new Map();
+const monthFormatterCache = new Map();
+
+const ordinalSuffix = ['th', 'st', 'nd', 'rd'];
+const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
+const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
 export const formatDate = (date, format = 'LLL', {
   locale = 'default',
@@ -59,7 +64,9 @@ export const formatDate = (date, format = 'LLL', {
   const resolvedLocale = locale === 'default' ? undefined : locale;
 
   // Cached Intl.DateTimeFormat — construction is ~100x more expensive than formatToParts
-  const cacheKey = locale + '|' + (resolvedTimezone || '') + '|' + JSON.stringify(additionalOptions);
+  const optionKeys = Object.keys(additionalOptions);
+  const optionString = optionKeys.length === 0 ? '' : JSON.stringify(additionalOptions);
+  const cacheKey = locale + '|' + (resolvedTimezone || '') + '|' + optionString;
   let formatter = formatterCache.get(cacheKey);
   if (!formatter) {
     formatter = new Intl.DateTimeFormat(resolvedLocale, {
@@ -87,10 +94,15 @@ export const formatDate = (date, format = 'LLL', {
   // Numeric month — only create a second formatter when format uses MM or M tokens
   let numericMonth = 0;
   if (needsNumericMonth.test(formatString)) {
-    const monthFormatter = new Intl.DateTimeFormat(resolvedLocale, {
-      timeZone: resolvedTimezone,
-      month: 'numeric',
-    });
+    const monthKey = locale + '|' + (resolvedTimezone || '');
+    let monthFormatter = monthFormatterCache.get(monthKey);
+    if (!monthFormatter) {
+      monthFormatter = new Intl.DateTimeFormat(resolvedLocale, {
+        timeZone: resolvedTimezone,
+        month: 'numeric',
+      });
+      monthFormatterCache.set(monthKey, monthFormatter);
+    }
     const monthParts = monthFormatter.formatToParts(date);
     for (let i = 0; i < monthParts.length; i++) {
       if (monthParts[i].type === 'month') {
@@ -101,12 +113,9 @@ export const formatDate = (date, format = 'LLL', {
   }
 
   // Derived values for token resolution
-  const pad2 = (n) => (n < 10 ? '0' + n : '' + n);
   const hour24Value = hour === '24' ? 0 : (parseInt(hour, 10) || 0);
   const hour12Value = hour24Value % 12 || 12;
   const dayNumber = parseInt(day, 10) || 0;
-  const ordinalSuffix = ['th', 'st', 'nd', 'rd'];
-  const getOrdinal = (d) => d + ((d >= 11 && d <= 13) ? 'th' : (ordinalSuffix[d % 10] || 'th'));
 
   const tokens = {
     YYYY: year,

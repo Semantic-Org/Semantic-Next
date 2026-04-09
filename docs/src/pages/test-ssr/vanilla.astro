@@ -1,0 +1,51 @@
+---
+/*
+  Vanilla SSR Test — No Astro integration.
+  Uses renderToString directly to produce DSD HTML.
+  Tests the ServerRenderer + hydration path in isolation.
+*/
+import Body from '@layouts/Body.astro';
+import '@css/layers.css';
+import '@css/fonts.css';
+import '@semantic-ui/core/icon/sets/lucide.css';
+
+import { renderToString } from '@semantic-ui/component';
+import { NavMenu } from '@semantic-ui/core';
+
+const menu = [
+  { name: 'Introduction', url: '/intro', icon: 'book' },
+  { name: 'Getting Started', url: '/start', icon: 'zap', pages: [
+    { name: 'Installation', url: '/install' },
+    { name: 'Quick Start', url: '/quick' },
+  ]},
+  { name: 'Components', url: '/components', icon: 'puzzle', pages: [
+    { name: 'Button', url: '/button' },
+    { name: 'Icon', url: '/icon' },
+    { name: 'Input', url: '/input' },
+  ]},
+];
+
+const html = renderToString(NavMenu, {
+  menu,
+  expandAll: true,
+  dark: true,
+  searchable: true,
+  activeURL: '/install',
+}, '');
+---
+<Body class="dark">
+<style>
+  .test-wrapper {
+    padding: 24px;
+    max-width: 400px;
+  }
+  .test-wrapper h2 {
+    color: white;
+    margin-bottom: 16px;
+  }
+</style>
+<div class="test-wrapper">
+  <h2>SSR Component Test</h2>
+  <Fragment set:html={html} />
+</div>
+</Body>

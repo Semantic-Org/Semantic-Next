@@ -100,9 +100,18 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
-| 12 | [MCP Playground Rendering](mcp-playground-rendering.md) | 8-16h (1-2d) | pair | Phase 1 done (hash URLs). Phase 2: MCP `render_component` tool. Phase 3: Vercel KV short URLs. |
+| 11b | [Signal Performance](signal-performance.md) | 4-5h | pair | `scoped` — Freeze-on-set replaces clone-on-read (15-71x faster). Flush error boundary. Benchmarked. |
+| 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
 | 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
 
+## Template Language Enhancements (unblocked, independent track)
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 37 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Test verbose first. Smallest scope. |
+| 35 | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}` / `{is}` / `{else}` — value-based branching. Cleanest of the four, no reactivity concerns. |
+| 36 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Caller context. |
+| 34 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Computed signal per binding. Build last, validate need from other three. |
 
 ## Blocked (waiting on token finalization)
 
@@ -192,7 +201,9 @@ All items below are commented out in menus/pages, not deleted. Uncomment when co
 
 Plans in `ai/plans/deferred/`.
 
-- **Vanilla Renderer** — 30-50d pair. Ship 1.0 on Lit. Revisit for 2.0 if dependency becomes a real problem.
+- ~~Native Renderer~~ — completed, archived. Follow-up: Native SSR (#13b).
+- ~~Lit Removal~~ — completed, archived. Follow-up: Tree-Shakeable Lit (#12).
+- [Signals TC39 Integration](deferred/signals-tc39-integration.md) — Adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. `safety` preset system designed to make this transition zero-API-change. Lazy vs eager computed split along settings/state line. Blocked on TC39 Stage 3+.
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 
@@ -206,6 +217,8 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **Vercel Deploy Pipeline** (0.5d est → 2.25h actual) — Decoupled prod from `main`, tag-triggered releases, staging environment, `next` branch retired.
 - **CDN Site** (3-5d est → ~6h actual) — R2 + Worker at `cdn.semantic-ui.com`. Canary/release pipelines, import maps, vendor packages.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
+- **Native Renderer** — Zero-dependency DOM renderer. Single-pass HTML assembly, comment markers, TreeWalker binding. 573/573 tests. TodoMVC verified.
+- **Lit Removal** — Engine-agnostic `defineComponent`. `WebComponentBase extends HTMLElement` + `LitWebComponentBase extends LitElement` as peer engines. Symmetric factory pattern, static config, DOM lifecycle events. 2121 tests.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
 - **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
 - **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.

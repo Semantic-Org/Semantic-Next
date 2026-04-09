@@ -11,6 +11,11 @@ description: Latest updates and changes in Semantic UI
 
 xx.xx.xxxx
 
+### Reactivity
+* **Feature** - Added `depend()` to register a signal as a dependency without reading the value
+* **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
+* **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
+
 ### Renderer
 * **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state
 * **Bug** - Fixed `{#async}` blocks without `{loading}` or `{error}` sections briefly clearing visible content when reactive dependencies changed

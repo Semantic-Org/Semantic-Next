@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attribute Alias Test — Naive Web Component</title>
+  <!-- load icons and css tokens -->
+  <link href="/@fs/home/jack/dev/semantic/next/dist/bundle/semantic-ui.css" rel="stylesheet" />
+  <link href="/@fs/home/jack/dev/semantic/next/dist/bundle/icon.css" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/icons@canary/lucide" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; font-family: sans-serif; background: #111; color: #ddd; }
+    h3 { margin-top: 2rem; }
+    ui-icon { margin-right: 0.5rem; }
+    span { color: #999; }
+  </style>
+</head>
+<body>
+  <h2>Naive Web Component — No Framework</h2>
+  <p>Raw <code>&lt;ui-icon&gt;</code> tags parsed by the browser. No Astro, no SSR, no property assignment.</p>
+
+  <h3>Verbose (icon="value")</h3>
+  <span>1.</span> <ui-icon icon="chevron-down"></ui-icon>
+  <span>2.</span> <ui-icon icon="chevron down"></ui-icon>
+  <span>3.</span> <ui-icon icon="down-chevron"></ui-icon>
+  <span>4.</span> <ui-icon icon="down chevron"></ui-icon>
+
+  <h3>Concise (bare attribute)</h3>
+  <span>5.</span> <ui-icon chevron-down></ui-icon>
+  <span>6.</span> <ui-icon chevron-down-icon></ui-icon>
+
+  <h3>Classic (class)</h3>
+  <span>7.</span> <ui-icon class="chevron-down"></ui-icon>
+
+  <h3>Reactive Update</h3>
+  <button id="toggle">Toggle chevron-down → chevron-up</button>
+
+  <script type="module" src="/@fs/home/jack/dev/semantic/next/dist/bundle/semantic-ui.js"></script>
+  <script>
+    let isDown = true;
+    document.getElementById('toggle').addEventListener('click', () => {
+      isDown = !isDown;
+      const down = isDown ? 'down' : 'up';
+      const up = isDown ? 'up' : 'down';
+
+      const icons = document.querySelectorAll('ui-icon');
+      // 1: verbose exact
+      icons[0].setAttribute('icon', `chevron-${down}`);
+      // 2: verbose spaces
+      icons[1].setAttribute('icon', `chevron ${down}`);
+      // 3: verbose reversed
+      icons[2].setAttribute('icon', `${down}-chevron`);
+      // 4: verbose reversed spaces
+      icons[3].setAttribute('icon', `${down} chevron`);
+      // 5: concise — remove old, add new
+      icons[4].removeAttribute(`chevron-${up}`);
+      icons[4].setAttribute(`chevron-${down}`, '');
+      // 6: compound — remove old, add new
+      icons[5].removeAttribute(`chevron-${up}-icon`);
+      icons[5].setAttribute(`chevron-${down}-icon`, '');
+      // 7: class
+      icons[6].setAttribute('class', `chevron-${down}`);
+    });
+  </script>
+</body>
+</html>

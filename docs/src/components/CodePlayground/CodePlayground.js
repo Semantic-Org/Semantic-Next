@@ -50,6 +50,9 @@ const defaultSettings = {
   // prefix local storage values with this
   saveID: 'sandbox',
 
+  // initial view mode from url param (code, split, preview)
+  viewMode: '',
+
   // title to appear on top of example
   title: '',
 
@@ -165,6 +168,9 @@ const defaultState = {
   // whether to use panels or tabs
   layout: 'tabs',
 
+  // current view mode (code, split, preview)
+  viewMode: 'split',
+
   currentFiles: [],
 
   projectFiles: [],
@@ -178,8 +184,43 @@ const createComponent = (
     { label: settings.previewText, value: 'preview' },
   ],
 
+  viewModeItems: [
+    { icon: 'eye', value: 'preview' },
+    { icon: 'columns-2', value: 'split' },
+    { icon: 'code', value: 'code' },
+  ],
+
+  isMode(...modes) {
+    return inArray(state.viewMode.get(), modes);
+  },
+
+  isCodeMode() {
+    return state.viewMode.get() === 'code';
+  },
+
+  isPreviewMode() {
+    return state.viewMode.get() === 'preview';
+  },
+
+  isRightPaneHidden() {
+    if (!self.isMode('code')) {
+      return false;
+    }
+    // hide right pane in code mode only when there are no page files
+    const pageFiles = nonreactive(() => self.getFileArray({ filter: 'page' }));
+    return pageFiles.length === 0 || pageFiles.every(f => f.generated);
+  },
+
   initialize() {
     self.setFiles(settings.files);
+
+    // set view mode: URL param > setting > localStorage > default
+    const urlView = new URLSearchParams(window.location.search).get('view');
+    const savedView = localStorage.getItem('codeplayground-view');
+    const initialView = urlView || settings.viewMode || savedView;
+    if (initialView) {
+      state.viewMode.set(initialView);
+    }
 
     // only allow layout swap on pages that panels would work
     if (settings.allowLayoutSwap) {
@@ -229,7 +270,7 @@ const createComponent = (
       : 'panels';
     // force tabs for small screens or inline examples
     const displayMode = state.displayMode.get();
-    if (inArray(displayMode, ['tablet', 'mobile']) || settings.inline) {
+    if (inArray(displayMode, ['tablet', 'mobile']) || settings.inline || state.viewMode.get() !== 'split') {
       layout = 'tabs';
     }
     self.setLayout(layout);
@@ -266,9 +307,11 @@ const createComponent = (
   },
 
   getClassMap() {
+    const viewMode = state.viewMode.get();
     const classMap = {
       inline: settings.inline,
       resizing: state.resizing.get(),
+      [`view-${viewMode}`]: true,
     };
     const mobileView = state.mobileView.get();
     const displayMode = state.displayMode.get();
@@ -656,6 +699,10 @@ const events = {
   },
   'change ui-menu.page.files'({ state, data }) {
     state.activePageFile.set(data.value);
+  },
+  'change ui-menu.view-mode'({ state, data }) {
+    state.viewMode.set(data.value);
+    localStorage.setItem('codeplayground-view', data.value);
   },
   'change ui-menu.mobile'({ self, data }) {
     self.setMobileView(data.value);

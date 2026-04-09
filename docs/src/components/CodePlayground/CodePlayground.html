@@ -16,7 +16,7 @@
       {/if}
       {#if canShowButtons}
         <div class="buttons">
-          {#if allowLayoutSwap}
+          {#if both allowLayoutSwap (isMode 'split')}
             <ui-button transparent class="tabs">
               {#if is layout 'tabs'}
                 Use Panels
@@ -25,10 +25,7 @@
               {/if}
             </ui-button>
           {/if}
-          <!-- <ui-button transparent small compact inverted class="fork">
-            <ui-icon copy></ui-icon>
-            Fork
-          </ui-button> -->
+          <ui-menu sliding fitted icon-only items={viewModeItems} value={viewMode} class="view-mode"></ui-menu>
         </div>
       {/if}
     </div>
@@ -69,6 +66,7 @@
     <ui-panel
       size="60"
       class="files"
+      hidden={isMode 'preview'}
       exportparts="panel, handle"
     >
       {#if canShowMenu}
@@ -93,6 +91,7 @@
     <ui-panel
       size=40
       class="preview"
+      hidden={isRightPaneHidden}
       exportparts="panel, handle"
     >
       {#if canShowPageFiles}
@@ -113,12 +112,14 @@
           {>CodePlaygroundPanel
             panel=getPagePanel
             size='natural'
+            panelHidden=isPreviewMode
             lineNumbers=!minimal
             lineWrapping=minimal
             maxSize='50%'
           }
           {>CodePlaygroundPanel
             panel={type: 'preview'}
+            panelHidden=isCodeMode
             size='grow'
           }
         </ui-panels>

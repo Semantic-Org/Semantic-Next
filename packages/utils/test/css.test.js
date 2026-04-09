@@ -1,4 +1,4 @@
-import { prefixCSS } from '@semantic-ui/utils';
+import { adoptStylesheet, prefixCSS } from '@semantic-ui/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('prefixCSS', () => {
@@ -59,5 +59,24 @@ describe('prefixCSS', () => {
     expect(prefixCSS('')).toBe('');
     expect(prefixCSS(null)).toBe(null);
     expect(prefixCSS(undefined)).toBe(undefined);
+  });
+});
+
+describe('adoptStylesheet', () => {
+  it('should early-return on server without side effects', () => {
+    // In Node environment, isServer is true so adoptStylesheet should bail early
+    const result = adoptStylesheet('.test { color: red; }');
+    expect(result).toBeUndefined();
+  });
+
+  it('should early-return on server even with options', () => {
+    expect(() => {
+      adoptStylesheet('.test { color: red; }', null, { cacheStylesheet: false });
+    }).not.toThrow();
+  });
+
+  it('should early-return on server with custom hash', () => {
+    const result = adoptStylesheet('.test { color: red; }', null, { hash: 'custom' });
+    expect(result).toBeUndefined();
   });
 });

@@ -4,6 +4,24 @@ import { isString } from './types.js';
         HTML
 --------------------*/
 
+// Void elements that don't have closing tags
+const VOID_ELEMENTS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
+
 export const indentLines = (text, spaces = 2) => {
   if (!isString(text)) {
     return '';
@@ -11,6 +29,8 @@ export const indentLines = (text, spaces = 2) => {
   const indent = ' '.repeat(spaces);
   return text.split('\n').map(line => `${indent}${line}`).join('\n');
 };
+
+const OPENING_TAG_RE = /<(\w+)/;
 
 export const indentHTML = (html, options = {}) => {
   const {
@@ -22,24 +42,6 @@ export const indentHTML = (html, options = {}) => {
   if (!isString(html)) {
     return '';
   }
-
-  // Void elements that don't have closing tags
-  const voidElements = new Set([
-    'area',
-    'base',
-    'br',
-    'col',
-    'embed',
-    'hr',
-    'img',
-    'input',
-    'link',
-    'meta',
-    'param',
-    'source',
-    'track',
-    'wbr',
-  ]);
 
   let depth = startLevel;
   const lines = html
@@ -59,9 +61,9 @@ export const indentHTML = (html, options = {}) => {
       // Handle opening tags - increase depth after indenting
       if (line.startsWith('<') && !line.startsWith('</') && !line.startsWith('<!--')) {
         const isSelfClosing = line.endsWith('/>');
-        const tagMatch = line.match(/<(\w+)/);
+        const tagMatch = line.match(OPENING_TAG_RE);
         const tag = tagMatch?.[1];
-        const isVoid = tag && voidElements.has(tag);
+        const isVoid = tag && VOID_ELEMENTS.has(tag);
         const hasClosingTag = tag && line.includes(`</${tag}>`);
 
         if (!isSelfClosing && !isVoid && !hasClosingTag) {

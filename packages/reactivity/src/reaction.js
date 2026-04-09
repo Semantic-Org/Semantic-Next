@@ -1,4 +1,4 @@
-import { clone, isEqual } from '@semantic-ui/utils';
+import { clone, isDevelopment, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 import { Scheduler } from './scheduler.js';
 
@@ -23,6 +23,9 @@ export class Reaction {
   }
 
   setContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     const defaultContext = {
       firstRun: this.firstRun,
     };
@@ -33,6 +36,9 @@ export class Reaction {
   }
 
   setTrace() {
+    if (!isDevelopment) {
+      return;
+    }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this.context, this.setTrace);
     }
@@ -42,6 +48,9 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     if (!this.context) {
       this.context = {};
     }
@@ -55,21 +64,22 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    // pass through metadata even though no dependencies
-    // this can be used to debug first run in flush
-    this.addContext({
-      firstRun: this.firstRun,
-    });
+    if (isDevelopment) {
+      this.addContext({
+        firstRun: this.firstRun,
+      });
+    }
     Scheduler.current = this;
     try {
-      this.dependencies.forEach(dep => dep.cleanUp(this));
+      for (const dep of this.dependencies) {
+        dep.cleanUp(this);
+      }
       this.dependencies.clear();
       this.callback(this);
       this.firstRun = false;
     }
     finally {
       Scheduler.current = null;
-      Scheduler.pendingReactions.delete(this);
     }
   }
 

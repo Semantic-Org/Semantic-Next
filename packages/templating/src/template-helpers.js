@@ -6,7 +6,9 @@ import {
   escapeHTML,
   first,
   formatDate,
+  isClient,
   isEmpty,
+  isServer,
   joinWords,
   last,
   range,
@@ -202,6 +204,10 @@ export const TemplateHelpers = {
   numberFromIndex(a) {
     return a + 1;
   },
+
+  // Environment
+  isClient,
+  isServer,
 
   // Global
   log(...args) {

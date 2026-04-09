@@ -1,4 +1,3 @@
-import { each } from './loops.js';
 import { isArray, isDate, isFunction, isMap, isRegExp, isSet } from './types.js';
 
 /*-------------------
@@ -13,21 +12,22 @@ const objectToString = Object.prototype.toString;
 /*
   Deep structural equality comparison
 */
-export const isEqual = (a, b, { loose = false, ignoreKeys, partial = false } = {}) => {
+export const isEqual = (a, b, options) => {
   if (a === b) { return true; }
   if (a !== a && b !== b) { return true; }
   if (a == null || b == null) { return false; }
   if (typeof a !== 'object' && typeof b !== 'object') {
-    return loose ? a == b : false;
+    return options?.loose ? a == b : false;
   }
   if (typeof a !== 'object' || typeof b !== 'object') { return false; }
 
-  // Normalize ignoreKeys to Set once, pass primitives through recursion
+  // Destructure only when we need deep comparison
+  const { loose = false, ignoreKeys, deepIgnore = false, partial = false } = options || {};
   const ignored = ignoreKeys?.length > 0 ? new Set(ignoreKeys) : null;
-  return deepEqual(a, b, loose, ignored, partial);
+  return deepEqual(a, b, loose, ignored, deepIgnore, partial);
 };
 
-const deepEqual = (a, b, loose, ignored, partial) => {
+const deepEqual = (a, b, loose, ignored, deepIgnore, partial) => {
   if (a === b) { return true; }
   if (a !== a && b !== b) { return true; }
   if (a == null || b == null) { return false; }
@@ -40,43 +40,34 @@ const deepEqual = (a, b, loose, ignored, partial) => {
   // Prototype comparison — safer than constructor for Object.create(null)
   if (getProto(a) !== getProto(b)) { return false; }
 
-  // Arrays — most common compound type in frontend code
+  // Only propagate ignored keys into children when deepIgnore is on
+  const childIgnored = deepIgnore ? ignored : null;
+
+  // Arrays — direct loop, no closure allocation
   if (isArray(a)) {
     if (partial ? a.length > b.length : a.length !== b.length) { return false; }
-    let equal = true;
-    each(a, (val, i) => {
-      if (!deepEqual(val, b[i], loose, ignored, partial)) {
-        equal = false;
-        return false;
-      }
-    });
-    return equal;
+    for (let i = 0; i < a.length; i++) {
+      if (!deepEqual(a[i], b[i], loose, childIgnored, deepIgnore, partial)) { return false; }
+    }
+    return true;
   }
 
   // Maps
   if (isMap(a)) {
     if (partial ? a.size > b.size : a.size !== b.size) { return false; }
-    let equal = true;
-    each(a, (val, key) => {
-      if (!b.has(key) || !deepEqual(val, b.get(key), loose, ignored, partial)) {
-        equal = false;
-        return false;
-      }
-    });
-    return equal;
+    for (const [key, val] of a) {
+      if (!b.has(key) || !deepEqual(val, b.get(key), loose, childIgnored, deepIgnore, partial)) { return false; }
+    }
+    return true;
   }
 
   // Sets — reference equality for members
   if (isSet(a)) {
     if (partial ? a.size > b.size : a.size !== b.size) { return false; }
-    let equal = true;
-    each(a, (val) => {
-      if (!b.has(val)) {
-        equal = false;
-        return false;
-      }
-    });
-    return equal;
+    for (const val of a) {
+      if (!b.has(val)) { return false; }
+    }
+    return true;
   }
 
   // Dates
@@ -102,27 +93,29 @@ const deepEqual = (a, b, loose, ignored, partial) => {
     return a.toString() === b.toString();
   }
 
-  // Plain objects — count keys during iteration, no Object.keys allocation for b
+  // Plain objects — inline iteration, no closure allocation
+  const aKeys = Object.keys(a);
   let aCount = 0;
-  let equal = true;
-
-  each(a, (val, key) => {
-    if (ignored?.has(key)) { return; }
+  for (let i = 0; i < aKeys.length; i++) {
+    const key = aKeys[i];
+    if (ignored?.has(key)) { continue; }
     aCount++;
-    if (!hasOwn.call(b, key) || !deepEqual(val, b[key], loose, ignored, partial)) {
-      equal = false;
+    if (!hasOwn.call(b, key) || !deepEqual(a[key], b[key], loose, childIgnored, deepIgnore, partial)) {
       return false;
     }
-  });
-  if (!equal) { return false; }
+  }
   if (partial) { return true; }
 
-  // Only count b's keys if we need to verify same size
-  let bCount = 0;
-  each(b, (_, key) => {
-    if (ignored?.has(key)) { return; }
-    bCount++;
-  });
+  // Fast path: no ignored keys — just compare key counts
+  if (!ignored) {
+    return aCount === Object.keys(b).length;
+  }
 
+  // Slow path: count b's non-ignored keys
+  const bKeys = Object.keys(b);
+  let bCount = 0;
+  for (let i = 0; i < bKeys.length; i++) {
+    if (!ignored.has(bKeys[i])) { bCount++; }
+  }
   return aCount === bCount;
 };

@@ -1,0 +1,192 @@
+---
+import Body from '@layouts/Body.astro';
+import '@css/layers.css';
+import '@css/fonts.css';
+
+import { renderToString } from '@semantic-ui/component';
+import {
+  Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
+  Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
+  Step17, Step18, Step19,
+  Step27, Step28, Step29, Step30, Step31,
+  Step35, Step36, Step37, Step38, Step39, Step40, Step41,
+  Step42, Step43, Step44,
+} from '@components/SSRDemo/SSRLadder.js';
+import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
+
+const steps = [
+  { component: Step1, label: '1. Static HTML' },
+  { component: Step2, label: '2. Text expressions', attrs: { greeting: 'Howdy', name: 'Partner' } },
+  { component: Step3, label: '3. Attribute expressions' },
+  { component: Step4, label: '4. Conditional (if/else)' },
+  { component: Step5, label: '5. Each loop' },
+  { component: Step6, label: '6. Snippet' },
+  { component: Step7, label: '7. Subtemplate' },
+  { component: Step8, label: '8. Nested (if > each)' },
+  { component: Step9, label: '9. Async (loading state)' },
+  { component: Step10, label: '10. Rerender block' },
+  { component: Step11, label: '11. Guard block' },
+  { component: Step12, label: '12. Slots', children: '<span slot="header">Header</span>Body content' },
+  { component: Step13, label: '13. Unsafe HTML' },
+  { component: Step14, label: '14. isClient/isServer' },
+  { component: Step15, label: '15. Each + conditional per item' },
+  { component: Step16, label: '16. Snippet inside each' },
+  { component: Step17, label: '17. Multi-branch (if/else-if/else)' },
+  { component: Step18, label: '18. Object iteration' },
+  { component: Step19, label: '19. Spec-driven ({ui} classes)', attrs: { emphasis: 'primary', size: 'large' }, children: 'Large Primary' },
+  { component: Button, label: '20. ui-button primary', attrs: { emphasis: 'primary' }, children: 'Click Me' },
+  { component: Button, label: '21. ui-button with href', attrs: { emphasis: 'secondary', href: 'https://example.com' }, children: 'Visit' },
+  { component: Icon, label: '22. ui-icon', attrs: { icon: 'star' } },
+  { component: Label, label: '23. ui-label', children: 'Status' },
+  { component: Divider, label: '24. ui-divider', attrs: { text: 'OR' } },
+  { component: Spinner, label: '25. ui-spinner', attrs: { text: 'Loading' } },
+  { component: Container, label: '26. ui-container', children: 'Contained' },
+  { component: Button, label: '27. ui-button disabled', attrs: { emphasis: 'primary', disabled: 'disabled' }, children: 'Disabled' },
+  { component: Button, label: '28. ui-button with icon', attrs: { icon: 'pause', emphasis: 'primary' }, children: 'Pause' },
+  { component: Input, label: '29. ui-input', attrs: { placeholder: 'Search...', icon: 'search' } },
+  { component: Step27, label: '30. Post-hydration click' },
+  { component: Step28, label: '31. Post-hydration input' },
+  { component: Step29, label: '32. Post-hydration toggle' },
+  { component: Step30, label: '33. Post-hydration list update' },
+  { component: Step31, label: '34. Settings change', attrs: { color: 'blue' } },
+  // Server renders with items, client hydrates with default [], then .settings() sets items
+  { component: Step35, label: '35. Deferred settings (nav-menu pattern)', attrs: { items: [{ label: 'Home' }, { label: 'About' }, { label: 'Contact' }] } },
+  { component: Step36, label: '36. Nested shadow DOM (button in wrapper)', children: 'Nested' },
+  { component: Step37, label: '37. Subtemplate with nested primitive', children: 'Card Label' },
+  { component: Step38, label: '38. Ternary in snippet data' },
+  { component: Step39, label: '39. Each + snippet ternary (nav-menu pattern)' },
+  { component: Step40, label: '40. isServer guard in initialize' },
+  { component: Step41, label: '41. Nested component in each loop' },
+  { component: Step42, label: '42. Multiple named slots', children: '<span slot="header">Title</span>Body<span slot="footer">End</span>' },
+  { component: Step43, label: '43. Snippet producing components' },
+  { component: Step44, label: '44. Deep nesting (if>each>snippet>component)' },
+];
+
+const rendered = steps.map((s, i) => ({
+  ...s,
+  step: i + 1,
+  html: renderToString(s.component, s.attrs || {}, { slots: s.children ? { default: s.children } : null }),
+}));
+
+// Expected textContent for each step (empty string = slot-based, check visually)
+const expected = {
+  1: 'Hello World',
+  2: 'Howdy, Partner!',
+  3: '3 items',
+  4: 'Visible',
+  5: 'AlphaBetaGamma',
+  6: '[One] [Two]',
+  7: 'From subtemplate',
+  8: 'XYZ',
+  9: 'Loaded!',
+  10: 'Version: 0',
+  11: 'Category: basic',
+  12: '',
+  13: 'Bold and italic',
+  14: 'Client',
+  15: 'AliceBobCarol',
+  16: '[Red][Green][Blue]',
+  17: 'Mode B',
+  18: 'red green blue',
+  19: '',
+  20: '',
+  21: '',
+  22: '',
+  23: '',
+  24: '',
+  25: '',
+  26: '',
+  27: '',
+  28: '',
+  29: '',
+  30: 'Click me',
+  31: 'hello',
+  32: 'ON',
+  33: 'ABC',
+  34: 'blue',
+  35: 'HomeAboutContact',
+  36: '',
+  37: '',
+  38: 'no',
+  39: 'Alpha Beta Gamma',
+  40: 'client',
+  41: 'Home Settings',
+  42: '',
+  43: '',
+  44: '',
+};
+---
+<Body class="dark">
+<div style="padding: 24px; max-width: 800px; font-family: sans-serif;">
+  <h1 style="color: white;">SSR Hydration Ladder</h1>
+
+  <pre id="log" style="color: #0f0; margin-bottom: 20px; font-size: 13px;"></pre>
+
+  {rendered.toReversed().map(step => (
+    <div data-step={step.step} style="margin-bottom: 8px;">
+      <h4 style="color: #888; margin: 2px 0; font-size: 13px;">{step.label}</h4>
+      <Fragment set:html={step.html} />
+    </div>
+  ))}
+</div>
+
+<script define:vars={{ expected }}>
+  window.__ssrExpected = expected;
+</script>
+<script>
+  import { $ } from '@semantic-ui/query';
+  import {
+    Step1, Step2, Step3, Step4, Step5, Step6, Step7, Step8,
+    Step9, Step10, Step11, Step12, Step13, Step14, Step15, Step16,
+    Step17, Step18, Step19,
+    Step27, Step28, Step29, Step30, Step31,
+    Step35, Step36, Step37, Step38, Step39, Step40, Step41,
+    Step42, Step43, Step44,
+  } from '@components/SSRDemo/SSRLadder.js';
+  import { Button, Icon, Label, Divider, Spinner, Container, Input } from '@semantic-ui/core';
+
+  const expected = window.__ssrExpected;
+  const log = (msg) => {
+    document.getElementById('log').textContent += msg + '\n';
+  };
+
+  // Step 35: Deferred settings — simulate the nav-menu pattern.
+  // After hydration, set the items via .settings() like Astro layouts do.
+  setTimeout(() => {
+    $('ssr-step-35').settings({
+      items: [{ label: 'Home' }, { label: 'About' }, { label: 'Contact' }],
+    });
+  }, 100);
+
+  setTimeout(() => {
+    const stepCount = Object.keys(expected).length;
+    for (let i = 1; i <= stepCount; i++) {
+      const wrapper = document.querySelector(`[data-step="${i}"]`);
+      if (!wrapper) { log(`${i}: WRAPPER MISSING`); continue; }
+
+      // Find the component element (first custom element child)
+      const el = wrapper.querySelector(':scope > *:not(h4)');
+      if (!el || !el.tagName.includes('-')) { log(`${i}: ELEMENT MISSING`); continue; }
+
+      const sr = el.shadowRoot;
+      if (!sr) { log(`❌ ${i}: NO SHADOW ROOT`); continue; }
+
+      // Count comments
+      const walker = document.createTreeWalker(sr, NodeFilter.SHOW_COMMENT);
+      let comments = 0;
+      while (walker.nextNode()) comments++;
+
+      const text = sr.textContent?.trim().replace(/\s+/g, ' ') || '';
+      const exp = expected[i];
+      const contentMatch = exp ? text.includes(exp) : true;
+
+      const hydrated = el.template ? '✓' : '✗';
+      const clean = comments === 0 ? '✓' : `✗(${comments})`;
+      const content = contentMatch ? '✓' : '✗';
+
+      const status = (hydrated === '✓' && clean === '✓' && content === '✓') ? '✅' : '❌';
+      log(`${status} ${i}: hydrate=${hydrated} clean=${clean} content=${content} "${text.slice(0, 60)}"`);
+    }
+  }, 800);
+</script>
+</Body>
