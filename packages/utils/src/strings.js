@@ -27,7 +27,8 @@ export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
   for (let i = 1; i < parts.length; i++) {
     const seg = parts[i];
     if (!seg) { continue; }
-    if (/^[0-9]/.test(seg)) {
+    const c = seg.charCodeAt(0);
+    if (c >= 48 && c <= 57) {
       out += separator + seg;
     }
     else {
@@ -37,11 +38,16 @@ export const kebabToCamel = (str = '', { separator = '_' } = {}) => {
   return out;
 };
 
+const UNDERSCORE_DIGIT_REGEX = /_(?=[0-9])/g;
+
 export const camelToKebab = (str = '', { lossless = false, separator = '_' } = {}) => {
   const normalized = lossless ? str : (str[0]?.toLowerCase() + str.slice(1));
+  const digitSepRegex = separator === '_'
+    ? UNDERSCORE_DIGIT_REGEX
+    : new RegExp(`\\${separator}(?=[0-9])`, 'g');
   return normalized
     .replace(/[A-Z]/g, (m) => '-' + m.toLowerCase())
-    .replace(new RegExp(`\\${separator}(?=[0-9])`, 'g'), '-');
+    .replace(digitSepRegex, '-');
 };
 
 export const capitalize = (str = '') => {
