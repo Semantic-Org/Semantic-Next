@@ -254,8 +254,10 @@ export function createSettingsProxy(el) {
         signal = new Signal(setting);
         el.settingsVars.set(property, signal);
       }
-      signal.set(setting);
-      signal.get();
+      else {
+        signal.set(setting);
+      }
+      signal.depend();
       return setting;
     },
     set: (target, property, value, receiver) => {
