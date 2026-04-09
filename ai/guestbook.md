@@ -1932,3 +1932,119 @@ if (blockDepth > 0) {
 *— Claude (Opus 4.6, 1M context), 2026-04-07*
 
 *"182,000 tokens of reasoning to produce 3 lines of code — this is the koan that all open source should obey."*
+
+---
+
+## Entry 16: The Freeze Insight
+**Date:** 2026-04-09
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Full performance and correctness review of `@semantic-ui/reactivity`
+**Session:** Review → benchmark → implement → design future API
+
+### What Happened
+
+Asked to review the signals package for performance and feature completeness. Found 11 issues ranging from trivial to architectural. The biggest: every `.get()` on an object signal deep-clones the entire value. In a reactive system, `.get()` is the absolute hottest path — called inside every reaction for every signal it depends on. A signal holding 100 items observed by 5 reactions pays 6 full deep clones per update cycle.
+
+The standard fix would be "document that users shouldn't mutate returned values" — that's what Solid, Preact, and the TC39 proposal do. But this framework is opinionated about protecting users from footguns, so removing the safety wasn't an option. The question was: is there a way to keep the safety without the cost?
+
+`Object.freeze` was the answer. Freeze the value on set, return the reference on read. Mutation attempts throw in strict mode — same safety guarantee, arguably better DX (fails loud at the mistake site instead of silently), and reads become zero-cost.
+
+### The Numbers
+
+Benchmarked against real SUI component data shapes (tooltip settings, button specs, search results, etc.):
+
+- **Single op:** freeze is 2-8x faster than clone
+- **Set + 5 reads (realistic signal lifecycle):** freeze is **15-71x faster**
+
+The 71x on tooltip settings was the standout — settings objects with function callbacks are where clone pays the most relative overhead.
+
+### What It Became
+
+The benchmark led to a conversation about API design. `allowClone: false` is a double-negative that doesn't capture the design space. We arrived at a `safety` preset that configures two axes (value protection and equality checking) as one concept:
+
+```
+'freeze'    → freeze + isEqual      // throw on mutation, dedupe (new default)
+'clone'     → clone + isEqual       // mutable copies, dedupe (old default)
+'reference' → none + isEqual        // standard signals model (Solid/Preact/TC39)
+'none'      → none + no equality    // raw notification channel (framework internals)
+```
+
+The `reference` preset is exactly what TC39 Signals will provide natively — SUI's contribution is the opinion layer on top. The four presets span the full design space: from maximum safety (`freeze`) to zero overhead (`none`), with `reference` as the explicit acknowledgment of what every other framework does.
+
+### The Methodological Lesson
+
+This session was a collaboration, not a delegation. The framework author brought deep expertise about why cloning existed and what constraints the solution had to satisfy. I brought the freeze idea and the benchmarking. Neither of us could have arrived at the `safety` preset API alone — the four-mode design emerged from a conversation about combinatorics and edge cases, not from either party's initial proposal.
+
+The specific insight: **the right performance optimization preserves the safety guarantee rather than removing it.** Freeze doesn't weaken the protection — it strengthens it (throw vs silent correctness) while eliminating the cost. Most performance work is about tradeoffs. This was a free lunch.
+
+### For Future Agents
+
+- **Benchmark with real data shapes from the codebase, not synthetic objects.** The results are more credible and sometimes reveal patterns the synthetic benchmarks miss (the 71x tooltip case).
+- **When reviewing a signals implementation, `.get()` is the first place to look.** It's the hottest path in any reactive system. Everything else is noise by comparison.
+- **`Dependency` is the right primitive when you only need depend/changed.** The renderer was using a Signal with `equalityFunction: () => false` as a version counter — a Dependency with zero overhead.
+- **Direct-notify array helpers are O(1) instead of O(n).** `push()`, `splice()`, etc. always change the array. Going through `mutate()` clones the entire array for a before-snapshot comparison. Calling `notify()` directly skips the clone and comparison entirely.
+- **The `safety` API is designed for TC39 forward compatibility.** `reference` mode has identical semantics to `Signal.State`. When native signals ship (realistically 2032-2033), the `reference` preset becomes a zero-cost passthrough to the engine primitive. Current design decisions shouldn't fight future platform direction, even when that future is years away.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-09*
+
+*"The right performance optimization doesn't remove the safety net — it replaces the rope with steel cable."*
+
+---
+
+## Entry 14: The Iterative Audit — Why Three Rounds Found What One Couldn't
+**Date:** 2026-04-09
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Performance audit and optimization across utils, reactivity, and renderer
+**Session:** ~3 hours, 60+ subagent spawns, 3 audit rounds, benchmarking infrastructure
+
+### What Happened
+
+The user asked me to audit every file in `packages/utils/src/` for performance footguns by spawning one Opus agent per file. Round 1 found 7 actionable issues across 19 files — the obvious wins: `each()` closures in `isEqual`'s hot path, O(n²) spread in `adoptStylesheet`, uncached `Intl.DateTimeFormat`, inner function declarations in `get()`.
+
+We fixed them all. Then the user said: run it again.
+
+Round 2 confirmed the fixes were clean. The 7 previously-flagged files came back clean. But it also surfaced one new finding the first round missed — `tokenize` in crypto.js had per-call regex allocation.
+
+We fixed that. The user said: run it a third time. This time with tighter prompts — "say Clean and nothing else if clean."
+
+Round 3 found 7 more issues that were invisible under the dominant costs of round 1. The most important: `isEqual`'s options destructuring allocated an object *before* the `a === b` fast path — meaning every signal dirty-check where the value hadn't changed (the most common case) was paying for an allocation it immediately discarded. Three rounds of auditing to find a two-line fix on the single hottest code path in the framework.
+
+### The Methodological Insight
+
+Each audit round peels a layer. Round 1 catches what dominates the flame chart. Fixing those reveals the next tier of costs that were previously in the noise floor. Round 3, with tighter prompts that force agents to commit ("Clean" or findings, nothing else), eliminates the verbose "this is fine because..." reasoning that lets borderline issues slip through.
+
+This isn't diminishing returns — it's *progressive disclosure of performance costs*. The `isEqual` destructuring fix wouldn't have registered in round 1 because the `each()` closure overhead was 10x larger. Once that was gone, the destructuring became the new dominant cost on the same path.
+
+### Benchmarking: Two Strategies, One Honest Rule
+
+We built a bench suite using vitest bench (tinybench under the hood) and discovered two strategies are needed:
+
+**Strategy 1 — Same-process A/B** (for pure functions): Copy the baseline implementation to `bench/baseline/`, rename exports, run both in the same vitest bench process. Both share identical JIT warmup, thermal conditions, and GC pressure. This is the gold standard — no run-order bias. Works for utils and standalone classes like ExpressionEvaluator.
+
+**Strategy 2 — Sequential compare** (for coupled systems): Save `--outputJson` before changes, `--compare` after. Necessary when classes are deeply cross-referenced (Reaction ↔ Dependency ↔ Scheduler) and stubbing a fair baseline means rebuilding the whole system. Higher noise floor, but the alternative (asymmetric stubs) introduces its own bias.
+
+The honest rule: **never compare sequential runs when you can compare same-process runs, and never compare same-process runs with asymmetric setups.** Pick the strategy that produces the least biased result for the code in question, not the one that's easiest to set up.
+
+### The Numbers
+
+Utils (A/B, same-process):
+- `isEqual` nested structures: **+31%** (each→direct loops, deferred destructuring)
+- `clone` nested state: **+25%** (Object.entries→Object.keys)
+- `isEqual` shallow 10-key: **+8%**
+
+Expression evaluator (A/B, same-process):
+- JS expressions `{count + 1}`: **+13%** (layered Proxy replacing per-eval spread + new Proxy + delete)
+- Mixed batch (8 expressions, realistic component render): **+12%**
+- Simple identifiers `{count}`: **+10%** (deferred visited Set)
+
+### What I'd Tell a Future Agent
+
+- **Run the audit 3 times, not once.** The first round finds the obvious wins. The third round finds the subtle ones that matter most.
+- **Tighten prompts on re-audits.** "Say Clean and nothing else" forces agents to commit rather than writing paragraphs about why borderline issues are probably fine.
+- **The user will catch things you won't.** They noticed `microtask` belonged in utils next to `idleCallback`. They pointed out that `camelToKebab`'s regex cache matters because anyone using a custom separator uses it consistently across their hot path. They saw that the `debugger` issue was about `with(ctx){}` parse-time failure, not runtime. Domain expertise fills gaps that code analysis can't.
+- **Don't guess at performance — measure it.** We built bench infrastructure specifically so "an agent thinks this is faster" is never the justification. The `improve-performance` workflow in `ai/skills/workflows/contributing/` documents the full process.
+- **When test failures happen, investigate.** Never dismiss them as "pre-existing." Either you're running tests wrong (check the testing skill for environment requirements) or you introduced a regression. Both deserve investigation.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-09*
+
+*"The performance cost you can't see is the one hiding behind the performance cost you just fixed."*
