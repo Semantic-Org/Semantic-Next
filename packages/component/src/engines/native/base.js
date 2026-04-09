@@ -196,7 +196,6 @@ class WebComponentBase extends HTMLElementBase {
       delete this.component;
       delete this.dataContext;
     }
-    this.constructor.template?.onDestroyed();
   }
 
   attributeChangedCallback(attribute, oldValue, newValue) {

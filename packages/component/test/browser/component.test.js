@@ -325,8 +325,8 @@ describe('Component', () => {
 
       // Instance template's onDestroyed should be called
       expect(mockTemplate.onDestroyed).toHaveBeenCalled();
-      // Prototype template's onDestroyed should be called
-      expect(prototypeDestroyedSpy).toHaveBeenCalled();
+      // Prototype template should NOT be destroyed — it's shared across instances
+      expect(prototypeDestroyedSpy).not.toHaveBeenCalled();
       // Template reference should be cleared
       expect(instance.template).toBeUndefined();
     });

@@ -114,7 +114,6 @@ class LitWebComponentBase extends LitElement {
       delete this.component;
       delete this.dataContext;
     }
-    this.constructor.template?.onDestroyed();
   }
 
   /*******************************
