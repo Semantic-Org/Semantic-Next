@@ -236,8 +236,7 @@ export function createSettingsProxy(el) {
   el.settingsVars = new Map();
   return new Proxy({}, {
     get: (target, property) => {
-      const settings = el.getSettings();
-      const setting = get(settings, property);
+      const setting = el[property] ?? el.defaultSettings[property];
       let signal = el.settingsVars.get(property);
       if (!signal) {
         signal = new Signal(setting);
