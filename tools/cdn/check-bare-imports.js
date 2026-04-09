@@ -5,8 +5,8 @@
  * but break when loaded directly via the combo endpoint. All imports in
  * CDN format files must be rewritten to full cdn.semantic-ui.com URLs.
  *
- * Only checks the import block at the top of each file — ES module
- * imports must appear before any other statements.
+ * Scans each file for import/export statements anchored to statement
+ * boundaries (^ or ;), ignoring string literals in minified code.
  *
  * Usage: node check-bare-imports.js
  * Runs automatically in CI before upload.
@@ -41,32 +41,20 @@ async function checkDir(dir, label) {
 
   let checked = 0;
   for (const file of files) {
-    const content = readFileSync(resolve(ROOT, file), 'utf-8');
-    const lines = content.split('\n');
+    const raw = readFileSync(resolve(ROOT, file), 'utf-8');
 
-    for (const line of lines) {
-      const trimmed = line.trimStart();
+    // Strip banner comment so regex anchors start at real code
+    const code = raw.replace(/^\/\*\*[\s\S]*?\*\/\s*/, '');
 
-      // Skip empty lines, comments, and banners at the top
-      if (trimmed === '' || trimmed.startsWith('//') || trimmed.startsWith('/*') || trimmed.startsWith('*')) {
-        continue;
-      }
+    // Match import/export-from and side-effect imports anchored to statement boundaries
+    const fromStatements = code.matchAll(/(?:^|;)\s*(?:import|export)\b[^;]*?\bfrom\s*["']([^"']+)["']/g);
+    const sideEffects = code.matchAll(/(?:^|;)\s*import\s*["']([^"']+)["']/g);
 
-      // Stop at first line that isn't an import/export-from statement
-      if (!trimmed.startsWith('import') && !trimmed.startsWith('export')) {
-        break;
-      }
-
-      // Extract specifiers from this line
-      const matches = trimmed.matchAll(/\bfrom\s*["']([^"']+)["']/g);
-      const sideEffects = trimmed.matchAll(/\bimport\s*["']([^"']+)["']/g);
-
-      for (const match of [...matches, ...sideEffects]) {
-        if (isBare(match[1])) {
-          console.error(`  BARE IMPORT in ${file}`);
-          console.error(`    ${match[1]}`);
-          errors++;
-        }
+    for (const match of [...fromStatements, ...sideEffects]) {
+      if (isBare(match[1])) {
+        console.error(`  BARE IMPORT in ${file}`);
+        console.error(`    ${match[1]}`);
+        errors++;
       }
     }
     checked++;
