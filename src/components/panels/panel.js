@@ -200,8 +200,8 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
   getStyleMap() {
     if (settings.hidden) {
       const panels = self.getPanels();
-      if (panels && !self._wasHidden) {
-        self._wasHidden = true;
+      if (panels && !self.wasHidden) {
+        self.wasHidden = true;
         const currentSize = parseFloat(el.style.flexGrow) || 0;
         if (currentSize > 0) {
           self.lastHiddenSize = currentSize;
@@ -211,8 +211,8 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
       }
       return 'display: block; height: 0; width: 0; overflow: hidden;';
     }
-    if (self._wasHidden) {
-      self._wasHidden = false;
+    if (self.wasHidden) {
+      self.wasHidden = false;
       const panels = self.getPanels();
       if (panels) {
         const index = panels.getPanelIndex(el);

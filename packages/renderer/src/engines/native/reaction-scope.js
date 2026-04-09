@@ -15,6 +15,7 @@ export class ReactionScope {
 
   child() {
     const childScope = new ReactionScope();
+    childScope.parent = this;
     this.children.push(childScope);
     return childScope;
   }
@@ -26,5 +27,11 @@ export class ReactionScope {
     this.reactions = [];
     for (const fn of this.disposers) { fn(); }
     this.disposers = [];
+    // Remove from parent to prevent accumulation across branch switches
+    if (this.parent) {
+      const idx = this.parent.children.indexOf(this);
+      if (idx !== -1) { this.parent.children.splice(idx, 1); }
+      this.parent = null;
+    }
   }
 }
