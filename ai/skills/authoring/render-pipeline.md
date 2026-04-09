@@ -1,55 +1,125 @@
 ---
-title: Render Pipeline — Template String to DOM
-description: How a template string becomes pixels. Covers the four-stage pipeline from TemplateCompiler through defineComponent, the Template class, and LitRenderer — including expression evaluation, the tagged template literal bridge, and directive-level reactivity.
-keywords: [render pipeline, template compiler, AST, LitRenderer, defineComponent, expression evaluation, lit directives, tagged template literals, StringScanner, reactivity, signals]
+title: Render Pipeline — Template String to Live DOM
+description: How a template string becomes reactive DOM. Covers the engine-agnostic pipeline from TemplateCompiler through defineComponent and Template to the swappable rendering engine — including the AST format, expression evaluation, and per-expression reactivity. Load before working on rendering, engine internals, or component authoring.
+keywords: [render pipeline, template compiler, AST, rendering engine, defineComponent, expression evaluation, reactivity, signals, native renderer, lit renderer]
 audience: authoring
 skill: render-pipeline
 type: skill
 ---
 
-# Render Pipeline — Template String to DOM
+# Render Pipeline — Template String to Live DOM
 
 > **Skill:** `render-pipeline`
-> **Purpose:** How a template string becomes DOM. The four-stage pipeline from source text to reactive UI, for agents working on framework internals.
+> **Purpose:** How a template string becomes reactive DOM. The engine-agnostic pipeline from source text to interactive UI, for agents working on framework internals or component authoring.
 
 ---
 
 ## The Pipeline
 
-A template string passes through four stages before reaching the DOM. Each stage has a single owner.
+A template string passes through four stages before reaching the DOM. Each stage has a single owner. The first three stages are engine-agnostic — the rendering engine only enters at stage 4.
 
 ```
 Template String
-     │
-     ▼
-┌─────────────────┐
-│ TemplateCompiler │  packages/templating/src/compiler/
-│                  │  string → AST (array of node objects)
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ defineComponent  │  packages/component/src/define-component.js
-│                  │  compiles AST once, creates prototype Template
-│                  │  optionally registers custom element
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│    Template      │  packages/templating/src/template.js
-│                  │  per-instance clone, lifecycle, state, events
-│                  │  creates LitRenderer on initialize()
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   LitRenderer    │  packages/renderer/src/lit/
-│                  │  walks AST → builds Lit tagged template literal
-│                  │  expression evaluation, directive-level reactivity
-└─────────────────┘
+     |
+     v
++-----------------+
+| TemplateCompiler |  packages/templating/src/compiler/
+|                  |  string -> AST (array of node objects)
++-----------------+
+         |
+         v
++-----------------+
+| defineComponent  |  packages/component/src/define-component.js
+|                  |  compiles AST once, resolves engine, creates prototype Template
+|                  |  optionally registers custom element
++-----------------+
+         |
+         v
++-----------------+
+|    Template      |  packages/templating/src/template.js
+|                  |  per-instance clone, lifecycle, state, events
+|                  |  resolves engine -> creates Renderer on initialize()
++-----------------+
+         |
+         v
++-----------------+
+| Rendering Engine |  packages/renderer/src/engines/{native,lit}/
+|                  |  walks AST -> produces DOM (or HTML string on server)
+|                  |  expression evaluation, per-expression reactivity
++-----------------+
 ```
 
-**Key invariant:** The AST is compiled once and shared. Per-instance work happens at the Template and Renderer layers, not the compiler.
+**Key invariants:**
+- The AST is compiled once and shared across all instances of a component
+- The AST is engine-agnostic — a plain data structure any renderer can consume
+- The rendering engine is selected at definition time and swappable per-component
+
+---
+
+## The Engine Abstraction
+
+The framework supports multiple rendering engines through a simple registry. Each engine provides three things:
+
+```js
+// packages/renderer/src/engine-registry.js
+const engines = new Map();
+export const registerEngine = (name, engine) => engines.set(name, engine);
+export const getEngine = (name) => engines.get(name);
+```
+
+An engine object has:
+
+| Property | Purpose |
+|----------|---------|
+| `renderer` | Client-side renderer class (AST -> DOM + reactive bindings) |
+| `serverRenderer` | Server-side renderer class (AST -> HTML string), optional |
+| `factory` | Creates a web component class for `customElements.define` |
+
+```js
+// packages/component/src/engines/native/register.js
+const NativeEngine = { renderer: Renderer, serverRenderer: ServerRenderer, factory: createComponent };
+registerEngine('native', NativeEngine);
+```
+
+### Engine Selection
+
+`defineComponent` takes a `renderingEngine` parameter (default: `'native'`):
+
+```js
+defineComponent({
+  tagName: 'my-counter',
+  renderingEngine: 'native',  // default — extends HTMLElement directly
+  // renderingEngine: 'lit',  // Lit engine — extends LitElement
+  template, css, createComponent, ...
+});
+```
+
+The engine is resolved once at definition time. `Template.initialize()` then picks the renderer class from the engine — `engine.renderer` for client, `engine.serverRenderer` for server:
+
+```js
+// template.js — inside initialize()
+const engine = getEngine(this.renderingEngine);
+const RendererClass = (Template.isServer && engine.serverRenderer)
+  ? engine.serverRenderer
+  : engine.renderer;
+this.renderer = new RendererClass({ ast, data, template: this, ... });
+```
+
+### Available Engines
+
+**Native** (default) — `packages/component/src/engines/native/` + `packages/renderer/src/engines/native/`
+- `WebComponentBase` extends `HTMLElement` directly — zero framework dependencies
+- `Renderer` uses a 3-phase pipeline: HTML string assembly -> DOM parsing -> marker binding
+- `ServerRenderer` renders AST to HTML string with hydration markers
+- Imported automatically when you `import { defineComponent } from '@semantic-ui/component'`
+
+**Lit** — `packages/component/src/engines/lit/` + `packages/renderer/src/engines/lit/`
+- `LitWebComponentBase` extends `LitElement`
+- `LitRenderer` bridges AST to Lit's tagged template literal API using 6 custom `AsyncDirective` subclasses
+- No server renderer (Lit SSR is a separate ecosystem)
+- Must be imported explicitly: `import '@semantic-ui/component/engines/lit/register.js'`
+
+The engines are hot-swappable — two components on the same page can use different engines. The AST and Template layers are identical; only the final rendering step differs. Future engines could target other platforms (Canvas, native mobile, terminal) by implementing the same three-part interface.
 
 ---
 
@@ -61,7 +131,7 @@ The compiler transforms a template string into an AST — a flat array of node o
 
 ### How It Works
 
-1. **Preprocess** — expand self-closing web component tags (`<ui-icon />` → `<ui-icon></ui-icon>`)
+1. **Preprocess** — expand self-closing web component tags (`<ui-icon />` -> `<ui-icon></ui-icon>`)
 2. **Detect syntax** — check whether the template uses `{}` or `{{}}` brackets (one syntax per template, first expression wins)
 3. **Scan** — `StringScanner` walks the string character-by-character, advancing to the next expression or SVG tag
 4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, `#fn`, and finally plain `expression`
@@ -70,15 +140,13 @@ The compiler transforms a template string into an AST — a flat array of node o
    - `conditionStack` — tracks nodes that support branching (`if`, `each`, `async`)
 6. **Optimize** — join adjacent HTML nodes, hoist snippets to the front
 
-### AST Node Shapes
+### The AST Format
 
-These are the exact shapes the compiler produces. Use `validate_template` with `includeAST: true` via MCP to inspect any template.
+The AST is intentionally lean and human-legible — a flat array of plain objects you can scan at a glance. There is no positional metadata, source maps, or engine-specific annotations in the base AST. Positional data (like binding classification for attributes vs. text) is computed downstream by engines that need it, keeping the AST itself a clean, engine-agnostic intermediate representation.
 
-**html** — static markup between expressions
-```json
-{ "type": "html", "html": "<div class=\"container\">" }
-```
+Use `validate_template` with `includeAST: true` via MCP to compile any template and inspect the resulting AST.
 
+<<<<<<< HEAD
 **expression** — dynamic value: `{user.name}`, `{formatDate date 'h:mm a'}`
 ```json
 { "type": "expression", "value": "formatDate date 'h:mm a'" }
@@ -149,17 +217,93 @@ Notable patterns in real AST output:
 ### Nested Expression Handling
 
 The compiler manually counts brace depth to handle expressions containing inline objects or nested sub-expressions:
+=======
+Here is a representative template and its compiled AST:
+>>>>>>> main
 
 ```html
-{formatDate date 'h:mm a' { timezone: timezone }}
-{concat 'hi ' (isNew ? 'new' : 'old')}
+{#snippet badge}<span class="badge {color}">{label}</span>{/snippet}
+<div class="card">
+  {#async fetchUser as user}
+    <h2>{user.name}</h2>
+    {#each tag in user.tags}
+      {>badge label=tag.name color=tag.color}
+    {/each}
+  {loading}
+    <div class="skeleton"></div>
+  {error as err}
+    <p class="error">{err.message}</p>
+  {/async}
+  {#rerender selectedId}
+    <div class="detail">{getDetail selectedId}</div>
+  {/rerender}
+  {>slot}
+</div>
 ```
 
-The `getTagContent` function steps character-by-character tracking `openTags` count, only closing when it returns to zero.
+```json
+[
+  { "type": "snippet", "name": "badge", "content": [
+    { "type": "html", "html": "<span class=\"badge " },
+    { "type": "expression", "value": "color" },
+    { "type": "html", "html": "\">" },
+    { "type": "expression", "value": "label" },
+    { "type": "html", "html": "</span>" }
+  ]},
+  { "type": "html", "html": "\n<div class=\"card\">\n  " },
+  { "type": "async", "expression": "fetchUser", "as": "user",
+    "content": [
+      { "type": "html", "html": "\n    <h2>" },
+      { "type": "expression", "value": "user.name" },
+      { "type": "html", "html": "</h2>\n    " },
+      { "type": "each", "over": "user.tags", "as": "tag", "content": [
+        { "type": "html", "html": "\n      " },
+        { "type": "template", "name": "'badge'", "reactiveData": { "label": "tag.name", "color": "tag.color" } },
+        { "type": "html", "html": "\n    " }
+      ]},
+      { "type": "html", "html": "\n  " }
+    ],
+    "loadingContent": [ { "type": "html", "html": "\n    <div class=\"skeleton\"></div>\n  " } ],
+    "errorContent": [
+      { "type": "html", "html": "\n    <p class=\"error\">" },
+      { "type": "expression", "value": "err.message" },
+      { "type": "html", "html": "</p>\n  " }
+    ],
+    "errorAs": "err"
+  },
+  { "type": "html", "html": "\n  " },
+  { "type": "rerender", "expression": "selectedId", "key": null, "content": [
+    { "type": "html", "html": "\n    <div class=\"detail\">" },
+    { "type": "expression", "value": "getDetail selectedId" },
+    { "type": "html", "html": "</div>\n  " }
+  ]},
+  { "type": "html", "html": "\n  " },
+  { "type": "slot" },
+  { "type": "html", "html": "\n</div>" }
+]
+```
 
-### Boolean Attribute Detection
+Notable patterns in the AST output:
+- **Snippets are hoisted** to the front regardless of position in the template
+- **Template names are quoted expression strings** — `{>badge}` compiles to `"name": "'badge'"` because the name is an expression evaluated at render time (supporting dynamic template selection)
+- **`rerender` and `guard` share a node type** — `{#rerender expr}` sets `expression` with `key: null`; `{#guard expr}` sets `key` with `expression: null`
+- **Adjacent HTML nodes are merged** by the optimizer — you won't see consecutive `html` nodes
+- **No positional data** — the AST stores content and structure only; binding classification (attribute vs. text position) is computed by each engine during rendering
 
-`StringScanner.getContext()` looks backward from the current position to determine if an expression is inside an HTML attribute. If the attribute is a known boolean attribute (like `disabled`, `checked`) or appears without quotes (`<div hidden={isHidden}>`), the compiler sets `booleanAttribute: true` on the AST node. This flows through to the renderer's `ifDefined` directive.
+### AST Node Types
+
+| Type | Template Syntax | Key Fields |
+|------|----------------|------------|
+| `html` | Static markup between expressions | `html` |
+| `expression` | `{value}`, `{formatDate date}` | `value`, `unsafeHTML?`, `ifDefined?`, `booleanAttribute?` |
+| `if` | `{#if cond}...{else if}...{else}...{/if}` | `condition`, `content`, `branches` |
+| `each` | `{#each item in items}...{else}...{/each}` | `over`, `as`, `indexAs?`, `content`, `elseContent?` |
+| `async` | `{#async expr as data}{loading}{error as e}{/async}` | `expression`, `as`, `content`, `loadingContent`, `errorContent`, `errorAs` |
+| `rerender` | `{#rerender expr}` / `{#guard fn}` | `expression`, `key`, `content` |
+| `template` | `{>name data=expr}` | `name`, `data?`, `reactiveData?` |
+| `snippet` | `{#snippet name}...{/snippet}` | `name`, `content` |
+| `slot` | `{>slot}`, `{>slot named}` | `name?` |
+| `svg` | `<svg>...</svg>` | `content` (AST rendered in SVG mode) |
 
 ---
 
@@ -167,9 +311,9 @@ The `getTagContent` function steps character-by-character tracking `openTags` co
 
 `packages/component/src/define-component.js`
 
-This is the single entry point. What it returns depends on whether `tagName` is provided:
+The single entry point for creating components and subtemplates. What it returns depends on whether `tagName` is provided:
 
-- **With `tagName`** — registers a custom element via `customElements.define()`, returns the web component class
+- **With `tagName`** — resolves the engine, creates a web component class via `engine.factory()`, registers via `customElements.define()`, returns the class
 - **Without `tagName`** — returns a prototype Template directly, used as a subtemplate via `{>name}`
 
 Either way, it does three things:
@@ -183,17 +327,15 @@ if (!ast) {
 }
 ```
 
-The AST is compiled at definition time, not per-instance. If you pass a pre-compiled `ast`, the compiler is skipped entirely (used for SSR precompilation).
+The AST is compiled at definition time, not per-instance. If you pass a pre-compiled `ast`, the compiler is skipped entirely (used for SSR precompilation and CDN builds).
 
 ### 2. Create Prototype Template
 
 ```js
-let litTemplate = new Template({
-  templateName,
-  isPrototype: true,
+let prototypeTemplate = new Template({
+  templateName, isPrototype: true, renderingEngine,
   ast, css, events, keys, defaultState,
-  subTemplates, createComponent,
-  onCreated, onRendered, onDestroyed, onThemeChanged,
+  subTemplates, createComponent, onCreated, onRendered, onDestroyed, ...
 });
 ```
 
@@ -201,20 +343,18 @@ The prototype is a Template that never renders. It holds the shared configuratio
 
 ### 3. Optionally Register Custom Element
 
-If `tagName` is provided, `defineComponent` creates a class extending `WebComponentBase` (which extends `LitElement`) and calls `customElements.define()`. The web component class:
+If `tagName` is provided, `defineComponent` calls `engine.factory()` to create a class. The factory is engine-specific:
 
-- Sets `static template = litTemplate` (the prototype)
-- Derives `static properties` from the component spec, default settings, or explicit property config
-- On `willUpdate()`, clones the prototype into a per-instance Template
-- On `disconnectedCallback()`, destroys both the instance template and the prototype (cleaning up reactions, events via AbortController, mutation observers)
+- **Native factory** — creates a class extending `WebComponentBase` (extends `HTMLElement`), defines property accessors and `observedAttributes` via `Object.defineProperty`
+- **Lit factory** — creates a class extending `LitWebComponentBase` (extends `LitElement`), uses Lit's static `properties` and `styles`
 
-The final line is the fork:
+Both factories store `prototypeTemplate` as `static template` and configuration as `static config` on the class.
 
 ```js
-return tagName ? webComponent : litTemplate;
+return tagName ? webComponent : prototypeTemplate;
 ```
 
-With `tagName`: you get a registered custom element class (web component). Without: you get the prototype Template itself, used as a subtemplate via `{>name}` in other templates. This is why the mental model says *"a web component is just a Template that has been given a tag name."*
+This fork is why the mental model says *"a web component is just a Template that has been given a tag name."*
 
 ---
 
@@ -222,26 +362,28 @@ With `tagName`: you get a registered custom element class (web component). Witho
 
 `packages/templating/src/template.js`
 
-The Template class is the lifecycle owner. It manages state, events, rendering, and the component tree. Each DOM instance gets its own Template via `clone()`.
+The Template class is the lifecycle owner. It manages state, events, rendering, and the component tree. Each DOM instance gets its own Template via `clone()`. The Template is engine-agnostic — it delegates all rendering to whatever engine was selected.
 
 ### Instance Creation Flow
 
-When a web component's `willUpdate()` fires for the first time:
+When a web component's `connectedCallback()` fires for the first time:
 
 ```
-litTemplate.clone({ data, element, renderRoot })
-    │
-    ▼
+prototypeTemplate.clone({ data, element, renderRoot })
+    |
+    v
 new Template(settings)          // constructor
-    ├── createReactiveState()   // defaultState → Signal instances
-    │
-    ▼
+    +-- createReactiveState()   // defaultState -> Signal instances
+    |
+    v
 template.initialize()
-    ├── createComponent()       // user's factory function, returns instance methods
-    ├── extend(instance, ...)   // merge returned methods onto template.instance
-    ├── instance.initialize()   // call user's initialize if defined
-    ├── new LitRenderer(...)    // create renderer with AST + data context
-    └── onCreated()             // lifecycle hook
+    +-- createComponent()       // user's factory function, returns instance methods
+    +-- extend(instance, ...)   // merge returned methods onto template.instance
+    +-- instance.initialize()   // call user's initialize if defined
+    +-- resolve engine          // getEngine(renderingEngine)
+    +-- new RendererClass(...)  // create renderer with AST + data context
+    +-- cache _callParams       // build params object for call()
+    +-- onCreated()             // lifecycle hook
 ```
 
 ### The Data Context
@@ -258,7 +400,7 @@ getDataContext() {
 }
 ```
 
-This is the flat namespace the template sees. `{count}` resolves here, not `{state.count}`. On name collision, instance wins over state wins over data. This is intentional — it lets you refactor a value from a plain instance property to a reactive Signal to a mutable setting without changing any template code.
+This is the flat namespace the template sees. `{count}` resolves here, not `{state.count}`. On name collision, instance wins over state wins over data. This is intentional — it lets you refactor a value from a plain instance property to a reactive Signal to a setting without changing any template code.
 
 ### The `call()` Method
 
@@ -270,13 +412,15 @@ params = {
   $, $$,                        // scoped Query functions
   reaction, signal, afterFlush, // reactivity primitives
   data, settings, state,        // data context layers
+  isServer, isClient,           // environment detection
+  isHydrating,                  // true during hydration wiring
   dispatchEvent, findParent,    // communication
-  isClient, isServer, darkMode, // environment
+  darkMode,                     // current theme
   // ...more
 };
 ```
 
-This is why every callback in the framework receives the same consistent shape — `call()` builds it fresh each time.
+The params object is cached in `this.callParams` during `initialize()` — `call()` uses the cached version and only spreads `additionalData` when extra context is needed.
 
 ### Rendering
 
@@ -284,34 +428,157 @@ This is why every callback in the framework receives the same consistent shape �
 render(additionalData = {}) {
   this.renderer.setData(dataContext);
   if (!this.rendered) {
-    this.html = this.renderer.render();  // walk AST → Lit TemplateResult
+    this.html = this.renderer.render();  // walk AST -> DOM (or HTML string on server)
     setTimeout(this.onRendered, 0);
+  } else {
+    this.renderer.bumpDataVersion();     // signal Reactions to re-evaluate
+    setTimeout(this.onUpdated, 0);
   }
   this.rendered = true;
   return this.html;
 }
 ```
 
-The AST is walked once. After that, `this.html` (a Lit `TemplateResult`) is returned directly, and all updates flow through directive-level Reactions — the renderer's `render()` is not called again unless the template is explicitly invalidated.
+The AST is walked once on first render. After that, all updates flow through per-expression Reactions — the renderer's `render()` is not called again unless the template is explicitly invalidated (e.g., `this.rendered = false`).
 
 ---
 
-## Stage 4: LitRenderer
+## Stage 4: Rendering Engine
 
-`packages/renderer/src/lit/renderer.js`
+The engine's job: walk the AST, produce DOM, and wire up reactive bindings. Both engines share the same `ExpressionEvaluator` for expression resolution.
 
-The renderer's job: walk an AST, build a Lit tagged template literal, and wire up reactive directives.
+### Expression Evaluation (Shared)
 
-### The Tagged Template Literal Bridge
+`packages/renderer/src/expression-evaluator.js`
 
-This is the most unconventional part of the pipeline. Lit's `html` function expects tagged template literal syntax:
+Extracted into a shared module used by all renderers. The evaluator handles Lisp-style, JavaScript-style, and mixed expressions in a single cascade.
 
-```js
-html`<div>${value}</div>`
-// Lit receives: html(['<div>', '</div>'], value)
+#### The Lookup Cascade in `lookupTokenValue`
+
+For a single token (no spaces, no operators):
+
+```
+1. Literal?        '42', 'hello', true, false  -> return literal value
+2. Data context?   user.name, count             -> deep property access, auto-unwrap Signals
+3. JavaScript?     value + 2, isTrue ? 'a' : 'b'  -> new Function + with(Proxy) eval
+4. Helper?         formatDate, capitalize       -> return helper function
 ```
 
-But the AST is a runtime data structure, not source code. The renderer bridges this by building the arrays manually:
+Each tier is tried lazily. The JS eval uses `new Function('ctx', 'with (ctx) { return ... }')` with a `Proxy` that auto-unwraps Signals on property access. This isn't a workaround — the `with` + `Proxy` approach is what makes the flat data context work: Signals unwrap transparently, functions resolve, and the boundary between settings, state, and instance methods dissolves.
+
+#### Lisp-Style Resolution in `lookupExpressionValue`
+
+For multi-token expressions like `{formatDate date 'h:mm a'}`:
+
+1. **Try single-token first** — if the entire expression resolves as one token, return immediately (handles simple `{count}` or `{user.name}`)
+2. **Auto-paren sub-expressions** — `addParensToExpression` wraps inline `[...]` array and `{...}` object literals in parentheses so the tokenizer treats them as grouped sub-expressions rather than individual tokens. This is the bridge that makes `{helper data {key: value}}` work — the object literal becomes `(` `{key: value}` `)` which recurses into JS eval.
+3. **Parse into expression array** via `getExpressionArray`: `['formatDate', 'date', "'h:mm a'"]`. Parenthesized groups become nested arrays.
+4. **Walk right-to-left**, accumulating arguments
+5. Each token is resolved via `lookupTokenValue` (the cascade above). Nested arrays recurse into `lookupExpressionValue`.
+6. If a token resolves to a **function**, call it with accumulated arguments
+
+```
+{formatDate date 'h:mm a' { timezone: timezone }}
+
+After auto-paren:
+  formatDate date 'h:mm a' ({timezone: timezone})
+
+Evaluation order (right to left):
+  ({timezone: timezone}) -> nested group -> JS eval -> object
+  'h:mm a'               -> string literal
+  date                   -> data context lookup -> Date object
+  formatDate             -> helper function -> call with (date, 'h:mm a', { timezone })
+```
+
+Mixed syntax works because Lisp-style tokenization handles the outer structure, explicit parens and auto-parened literals fall through to JS eval, and the right-to-left walk handles argument accumulation:
+
+```html
+{concat 'my ' (isDog ? 'simon' : 'pookie')}
+```
+
+### Native Renderer (Default Engine)
+
+`packages/renderer/src/engines/native/renderer.js`
+
+The native renderer uses a 3-phase pipeline:
+
+```
+AST -> buildHTMLString() -> { htmlString, entries }
+                                |           |
+                          parseHTML()    bindMarkers()
+                                |           |
+                          DocumentFragment with markers
+                                |
+                          TreeWalker finds markers
+                                |
+                          Wire reactive bindings + DynamicRegions
+                                |
+                          Return fragment -> append to shadow root
+```
+
+**Phase 1: buildHTMLString** (`packages/renderer/src/build-html-string.js`)
+The entire AST — HTML, expressions, and block directives — is assembled into one HTML string with markers for all dynamic positions. This is a pure function shared between client and server.
+
+Three marker types:
+
+| Position | Marker format | Example |
+|---|---|---|
+| Text content | HTML comment | `<!--sui:v1:0-->` |
+| Attribute value | String token | `__sui0__` |
+| Block directive | HTML comment | `<!--sui-block:v1:0-->` |
+
+Each marker has a numeric ID indexing into an `entries` array that describes what the marker represents — expression node + binding classification, or block directive node.
+
+Binding classification (attribute vs. text position, boolean vs. quoted, property vs. event) is computed here by `analyzePosition()`, which scans backward from the expression to the last `<` or `>`.
+
+**Phase 2: parseHTML**
+```js
+const template = document.createElement('template');
+template.innerHTML = htmlString;
+return template.content.cloneNode(true);
+```
+
+One `innerHTML` call. The browser parses the full string including markers, producing correct nesting. Parsed templates are cached by HTML string and cloned per instance.
+
+**Phase 3: bindMarkers**
+Two TreeWalker passes over the parsed DOM:
+- **Element walker** — finds `__suiN__` tokens in attributes, creates Reactions for attribute bindings (string, boolean, property, event, multi-expression)
+- **Comment walker** — finds `<!--sui:v1:N-->` and `<!--sui-block:v1:N-->`, creates text bindings and block directive handlers
+
+### Per-Expression Reactivity
+
+Each dynamic binding gets its own `Reaction`. The Reaction evaluates the expression (which reads Signals and registers dependencies), then updates just that DOM position when a dependency changes:
+
+```
+{count}  ->  Reaction
+               +-- evaluates expression (reads count Signal -> registers dependency)
+               +-- on Signal change: textNode.data = newValue
+```
+
+The AST is **never re-walked** for reactive updates. Each binding is an independent reactive scope. When `count` changes, only the Reaction watching that expression re-evaluates — the rest of the DOM is untouched. This is per-expression reactivity (closer to Solid than React) — no diffing, no virtual DOM, no component-level re-render.
+
+### Block Directives and DynamicRegion
+
+Block directives (`{#if}`, `{#each}`, `{#async}`, `{#rerender}`) use `DynamicRegion` — a lightweight DOM region that manages a persistent anchor node, owned child nodes, and hierarchical `ReactionScope` cleanup:
+
+```js
+class DynamicRegion {
+  anchor        // persistent text node — stays in DOM, content inserted after it
+  ownedNodes[]  // DOM nodes owned by this region
+  childScopes[] // ReactionScopes for cleanup
+
+  clear()                      // dispose scopes, remove owned nodes
+  setContent(fragment, scope)  // clear old content, insert new after anchor
+}
+```
+
+When a conditional branch swaps or a list item is removed, `DynamicRegion.clear()` disposes all child `ReactionScope`s (which stops Reactions, disposes children recursively, and runs dispose callbacks), then removes the owned DOM nodes. The anchor stays in place so new content can be inserted at the same position.
+
+### Lit Renderer (Alternative Engine)
+
+`packages/renderer/src/engines/lit/renderer.js`
+
+The Lit renderer bridges the AST to Lit's tagged template literal API. This is the most unconventional part of the pipeline — Lit expects `html\`<div>${value}</div>\`` but the AST is a runtime data structure:
 
 ```js
 render() {
@@ -324,109 +591,10 @@ render() {
 ```
 
 - `this.html[]` accumulates static HTML strings (with `.raw` for Lit's escaping)
-- `this.expressions[]` accumulates dynamic values (directives)
-- `addValue()` inserts empty string spacers before and after each expression — Lit requires alternating string/expression slots in its tagged template format
+- `this.expressions[]` accumulates directive instances (reactive bindings)
+- The final `html.apply(...)` call reverse-engineers what tagged template literal syntax would have produced
 
-The final `html.apply(this, [this.html, ...this.expressions])` call reverse-engineers what the tagged template literal syntax would have produced. This is not a standard Lit pattern — it's a novel bridge between AST-based compilation and Lit's tagged template API.
-
-### AST Walk
-
-`readAST()` iterates the AST array and dispatches by node type:
-
-| Node Type | Handler | Produces |
-|-----------|---------|----------|
-| `html` | `addHTML()` | Static string appended to `html[]` |
-| `expression` | `evaluateExpression()` → `reactiveData` directive | Reactive binding |
-| `if` | `evaluateConditional()` → `reactiveConditional` directive | Reactive branch |
-| `each` | `evaluateEach()` → `reactiveEach` directive (uses Lit `repeat()`) | Reactive list |
-| `async` | `evaluateAsync()` → `reactiveAsync` directive | Promise handler with loading/error states |
-| `rerender` | `evaluateRerender()` → `reactiveRerender` directive | Guard/rerender block |
-| `template` | `evaluateTemplate()` → `renderTemplate` directive or inline snippet | Subtemplate |
-| `snippet` | Stored in `this.snippets` map | (rendered when referenced via `{>name}`) |
-| `slot` | `addHTML('<slot>')` | Native slot element |
-| `svg` | `renderContent()` with `isSVG: true` | SVG-mode subtree |
-
-### Expression Evaluation
-
-This is the novel core of the renderer. The evaluator handles Lisp-style, JavaScript-style, and mixed expressions in a single cascade.
-
-#### The Lookup Cascade in `lookupTokenValue`
-
-For a single token (no spaces, no operators):
-
-```
-1. Literal?        '42', 'hello', true, false  → return literal value
-2. Data context?   user.name, count             → deep property access, auto-unwrap Signals
-3. JavaScript?     value + 2, isTrue ? 'a' : 'b'  → new Function + with(Proxy) eval
-4. Helper?         formatDate, capitalize       → return helper function
-```
-
-Each tier is tried lazily. If tier 2 returns `undefined`, tier 3 fires. The JS eval uses `new Function('ctx', 'with (ctx) { return ${code}; }')` with a `Proxy` that auto-unwraps Signals on property access. The `with` statement works because `new Function` creates a sloppy-mode context regardless of the calling module's strict mode.
-
-This isn't a workaround — it's the philosophical core. The framework prizes runtime dynamism over static verification (see the Types skill: *"types are a service to consumers, not a development methodology"*). The `with` + `Proxy` approach is what makes the flat data context work: Signals unwrap transparently, functions resolve without call syntax, and the boundary between settings, state, and instance methods dissolves. The same design principle that makes `{count}` work instead of `{state.count.get()}` also makes the expression evaluator use `with` instead of explicit variable binding.
-
-#### Lisp-Style Resolution in `lookupExpressionValue`
-
-For multi-token expressions like `{formatDate date 'h:mm a'}`:
-
-1. Parse into expression array: `['formatDate', 'date', "'h:mm a'"]`
-2. Walk **right-to-left**, accumulating arguments
-3. Each token is resolved via `lookupTokenValue` (the cascade above)
-4. If a token resolves to a **function**, call it with accumulated arguments
-5. Nested parens `(expr)` recurse into `lookupExpressionValue`
-
-```
-{formatDate date 'h:mm a' { timezone: timezone }}
-
-Evaluation order (right to left):
-  { timezone: timezone }  → resolve inline object via JS eval
-  'h:mm a'                → string literal
-  date                    → data context lookup → Date object
-  formatDate              → helper function → call with (date, 'h:mm a', { timezone })
-```
-
-This is why mixed syntax works — Lisp-style tokenization handles the outer structure, and parenthesized sub-expressions or inline objects fall through to JS eval:
-
-```html
-{concat 'my ' (isDog ? 'simon' : 'pookie')}
-```
-
-Here `(isDog ? 'simon' : 'pookie')` is extracted as a parenthetical group, evaluated as JS (with Signal auto-unwrap), and the result becomes an argument to `concat`.
-
-### Directive-Level Reactivity
-
-Each dynamic node type gets its own Lit `AsyncDirective`. The directive creates a `Reaction` that:
-
-1. Evaluates the expression (accessing Signals, which registers dependencies)
-2. On first run, returns the value for the initial render
-3. On subsequent runs (when a Signal changes), calls `this.setValue()` — Lit's API for updating just that DOM position
-
-```
-{count}  →  reactiveData directive
-              └── Reaction
-                    ├── reads count Signal (registers dependency)
-                    └── on change: this.setValue(newValue)
-```
-
-This means the AST is never re-walked for reactive updates. Each directive is an independent reactive scope. When `count` changes, only the `reactiveData` directive watching that specific expression re-evaluates — the rest of the DOM is untouched.
-
-Directives clean up via `disconnected()` which stops the Reaction. This pairs with Template's `onDestroyed()` which calls `removeEvents()` (triggers the AbortController), `clearReactions()`, `removeObservers()`, and `removeParent()`.
-
-### Subtree Rendering
-
-Conditional content, loop bodies, and snippets create new `LitRenderer` instances via `renderContent()`:
-
-```js
-renderContent({ ast, data, isSVG }) {
-  const tree = new LitRenderer({ ast, data, isSVG, subTemplates, snippets, helpers, template });
-  this.renderTrees[contentID] = new WeakRef(tree);
-  return tree.render();
-}
-```
-
-Each subtree gets its own AST walk and `html[]`/`expressions[]` arrays. Subtrees inherit helpers, snippets, and subTemplates from the parent. Data updates propagate downward via `setData()` → `updateSubtreeData()`.
-
-There is experimental `WeakRef`-based caching (`useSubtreeCache`) for reusing subtree renderers across renders, but it is currently disabled while edge cases with `{#each}` + subtemplates with distinct data contexts are resolved.
+Each expression type maps to a Lit `AsyncDirective`: `reactiveData`, `reactiveConditional`, `reactiveEach`, `reactiveAsync`, `reactiveRerender`, `renderTemplate`. Each directive creates an internal `Reaction` and calls `this.setValue()` on change — Lit's API for updating a specific DOM position.
 
 ---
 
@@ -435,11 +603,21 @@ There is experimental `WeakRef`-based caching (`useSubtreeCache`) for reusing su
 ### Pipeline stages
 
 ```
-Template String → TemplateCompiler.compile() → AST
-AST → defineComponent() → prototype Template (shared, isPrototype: true)
-prototype → Template.clone() → per-instance Template
-Template.initialize() → new LitRenderer({ ast, data })
-LitRenderer.render() → html(strings[], ...expressions[]) → Lit TemplateResult
+Template String -> TemplateCompiler.compile() -> AST
+AST -> defineComponent() -> prototype Template (shared, isPrototype: true)
+prototype -> Template.clone() -> per-instance Template
+Template.initialize() -> new RendererClass({ ast, data })
+Renderer.render() -> DOM fragment (native) or Lit TemplateResult (lit)
+```
+
+### Engine interface
+
+```js
+{
+  renderer: ClientRendererClass,      // AST -> DOM + reactive bindings
+  serverRenderer: ServerRendererClass, // AST -> HTML string (optional)
+  factory: createComponentFn,          // creates web component class
+}
 ```
 
 ### Expression evaluation order
@@ -452,28 +630,37 @@ lookupTokenValue (single token):
   4. Helper function lookup
 
 lookupExpressionValue (multi-token):
-  1. Try single-token resolution first
-  2. Parse to expression array (handle parens, quotes)
-  3. Walk right-to-left, resolve each token
-  4. If token is function, call with accumulated args
+  1. Try single-token resolution first (short-circuit for {count}, {user.name})
+  2. Auto-paren: wrap [...] and {...} literals in () so they group as sub-expressions
+  3. Parse to expression array (handle parens, quotes, nested groups)
+  4. Walk right-to-left, resolve each token (nested arrays recurse)
+  5. If token is function, call with accumulated args
 ```
 
 ### Key files
 
 ```
-packages/templating/src/compiler/string-scanner.js     StringScanner (char-by-char parsing)
-packages/templating/src/compiler/template-compiler.js   TemplateCompiler (string → AST)
-packages/templating/src/template.js                     Template (lifecycle, state, events)
-packages/templating/src/template-helpers.js             Built-in template helpers
-packages/component/src/define-component.js              defineComponent (entry point)
-packages/component/src/web-component.js                 WebComponentBase (extends LitElement)
-packages/renderer/src/lit/renderer.js                   LitRenderer (AST → Lit)
-packages/renderer/src/lit/directives/reactive-data.js   {expression} binding
-packages/renderer/src/lit/directives/reactive-conditional.js  {#if} branching
-packages/renderer/src/lit/directives/reactive-each.js   {#each} iteration
-packages/renderer/src/lit/directives/reactive-async.js  {#async} promise handling
-packages/renderer/src/lit/directives/reactive-rerender.js    {#rerender}/{#guard}
-packages/renderer/src/lit/directives/render-template.js {>template} subtemplates
+packages/templating/src/compiler/string-scanner.js        StringScanner (char-by-char parsing)
+packages/templating/src/compiler/template-compiler.js      TemplateCompiler (string -> AST)
+packages/templating/src/template.js                        Template (lifecycle, state, events)
+packages/templating/src/template-helpers.js                Built-in template helpers
+
+packages/component/src/define-component.js                 defineComponent (entry point)
+packages/component/src/component-helpers.js                Shared helpers (properties, settings, dark mode)
+packages/component/src/engines/native/base.js              WebComponentBase (extends HTMLElement)
+packages/component/src/engines/native/factory.js           Native component factory
+packages/component/src/engines/lit/base.js                 LitWebComponentBase (extends LitElement)
+packages/component/src/engines/lit/factory.js              Lit component factory
+
+packages/renderer/src/expression-evaluator.js              ExpressionEvaluator (shared across all engines)
+packages/renderer/src/build-html-string.js                 buildHTMLString (shared HTML assembly)
+packages/renderer/src/engine-registry.js                   Engine registry (registerEngine/getEngine)
+packages/renderer/src/engines/native/renderer.js           Native Renderer (AST -> DOM)
+packages/renderer/src/engines/native/server.js             ServerRenderer (AST -> HTML string)
+packages/renderer/src/engines/native/dynamic-region.js     DynamicRegion (positional DOM management)
+packages/renderer/src/engines/native/reaction-scope.js     ReactionScope (hierarchical cleanup)
+packages/renderer/src/engines/lit/renderer.js              LitRenderer (AST -> Lit tagged template)
+packages/renderer/src/engines/lit/directives/              6 Lit AsyncDirectives
 ```
 
 ---
@@ -482,8 +669,10 @@ packages/renderer/src/lit/directives/render-template.js {>template} subtemplates
 
 | Skill | Use when... |
 |-------|-------------|
+| **SSR & Hydration Pipeline** (`ssr-hydration`) | How server rendering, DSD, and hydration work end-to-end |
+| **SSR & Hydration Principles** (`ssr-principles`) | The governing constraints that prevent mismatch bugs |
 | **Component Templating** (`component-templating`) | Template syntax usage — what expressions to write, not how they evaluate |
-| **Reactive State** (`reactive-state`) | Signals, Reactions, and the reactivity system that powers directive updates |
+| **Reactive State** (`reactive-state`) | Signals, Reactions, and the reactivity system that powers per-expression updates |
 | **Component Authoring** (`component-authoring`) | How to use `defineComponent` — the user-facing API |
-| **Framework Internals** (`internals`) | Package architecture and dependency flow across the monorepo |
-| **Component Lifecycle** (`component-lifecycle`) | Lifecycle hooks and their ordering |
+| **Mental Model** (`mental-model`) | Framework architecture, formalization gradient, and design decisions |
+| **Native Renderer** (`native-renderer`) | Deep dive into the native renderer's internals (contributing audience) |

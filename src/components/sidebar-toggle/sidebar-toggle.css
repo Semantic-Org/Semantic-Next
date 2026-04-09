@@ -12,6 +12,7 @@
 .toggle {
   cursor: pointer;
   position: relative;
+  display: inline-block;
   padding: var(--hitbox-size);
 
   /* Default State */

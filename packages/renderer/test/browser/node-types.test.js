@@ -3,9 +3,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
+
   /*******************************
-         Test Helpers
-*******************************/
+           Test Helpers
+  *******************************/
 
   let tagCounter = 0;
   function uniqueTag() {
@@ -27,8 +28,8 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
-   Unsafe HTML ({#html})
-*******************************/
+     Unsafe HTML ({#html})
+  *******************************/
 
   describe('unsafe HTML rendering', () => {
     it('should render raw HTML, not escaped text', async () => {
@@ -80,8 +81,8 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
-   Literal Value ({#fn})
-*******************************/
+     Literal Value ({#fn})
+  *******************************/
 
   describe('literal value rendering', () => {
     it('should pass function reference without invoking it', async () => {
@@ -127,7 +128,7 @@ RENDERING_ENGINES.forEach(engine => {
 
       // In text position, the literal function reference is rendered as its toString
       const text = el.shadowRoot.querySelector('div').textContent;
-      expect(text).toContain('function');
+      expect(text).toContain('()');
     });
 
     it('should reactively update literal value when signal changes', async () => {
@@ -144,7 +145,7 @@ RENDERING_ENGINES.forEach(engine => {
         tagName: tag,
         renderingEngine: engine,
         template: `<${childTag} .handler={#fn getHandler}></${childTag}>`,
-        defaultState: { mode: 'add' },
+        defaulktState: { mode: 'add' },
         createComponent: ({ state }) => ({
           getHandler: () =>
             state.mode.get() === 'add'
@@ -163,8 +164,8 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
-   Slots ({>slot})
-*******************************/
+     Slots ({>slot})
+  *******************************/
 
   describe('slot rendering', () => {
     it('should render a default slot element', async () => {
@@ -222,8 +223,8 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
-   Object Iteration
-*******************************/
+     Object Iteration
+  *******************************/
 
   describe('each with object iteration', () => {
     it('should iterate over object keys and values', async () => {
@@ -280,8 +281,8 @@ RENDERING_ENGINES.forEach(engine => {
   });
 
   /*******************************
-   SVG Rendering
-*******************************/
+     SVG Rendering
+  *******************************/
 
   describe('SVG rendering', () => {
     it('should create SVG elements in the correct namespace', async () => {

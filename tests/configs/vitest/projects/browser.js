@@ -4,7 +4,7 @@ import { configDefaults } from 'vitest/config';
 export default {
   test: {
     include: ['**/test/browser/**/*.test.{ts,js}'],
-    exclude: [...configDefaults.exclude, 'tools/cdn/**'],
+    exclude: [...configDefaults.exclude, 'docs/**', 'tools/cdn/**'],
     name: 'browser',
     testTimeout: 30000,
     fileParallelism: false,

@@ -43,6 +43,7 @@
     "docs/public",
     "README.md",
     "**/*component.js",
+    "**/icons.meta.js",
     "src/**/specs/*.js",
     "**/*.html",
     "**/*.json",

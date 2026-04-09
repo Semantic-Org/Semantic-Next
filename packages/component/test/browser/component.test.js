@@ -1,26 +1,14 @@
+import { $ } from '@semantic-ui/query';
 import { TemplateHelpers } from '@semantic-ui/templating';
 import { adoptStylesheet } from '@semantic-ui/utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineComponent, registerHelper, registerHelpers, WebComponentBase } from '../../src/index.js';
+import { WebComponentBase } from '../../src/engines/native/base.js';
+import { defineComponent, registerHelper, registerHelpers } from '../../src/index.js';
 
 // Basic component tests that don't require a real DOM
 describe('Component', () => {
   // Test basic component definition
   describe('defineComponent', () => {
-    it('should handle component with CSS', () => {
-      // Define a component with CSS
-      const TestComponent = defineComponent({
-        tagName: 'test-css-component',
-        template: '<div>Content</div>',
-        css: '.container { color: red; }',
-      });
-
-      // Test that the component class is returned with styles
-      expect(TestComponent).toBeDefined();
-      expect(TestComponent.styles).toBeDefined();
-      expect(TestComponent.styles.toString()).toContain('.container { color: red; }');
-    });
-
     it('should handle component with default settings', () => {
       // Define a component with default settings
       const defaultSettings = {
@@ -47,29 +35,6 @@ describe('Component', () => {
       // Test constructor sets defaultSettings properly
       const instance = new TestComponent();
       expect(instance.defaultSettings).toEqual(defaultSettings);
-    });
-
-    it('should merge subTemplates CSS with component CSS', () => {
-      // Define a subTemplate
-      const headerTemplate = defineComponent({
-        template: '<div class="header">Header</div>',
-        css: '.header { font-weight: bold; }',
-      });
-
-      // Define a component with subTemplates
-      const TestComponent = defineComponent({
-        tagName: 'test-subtemplates-component',
-        template: '<div>{{>header}}Content</div>',
-        css: '.container { padding: 10px; }',
-        subTemplates: {
-          header: headerTemplate,
-        },
-      });
-
-      // We should see both the component CSS and the subTemplate CSS in the final styles
-      const stylesStr = TestComponent.styles.toString();
-      expect(stylesStr).toContain('.container { padding: 10px; }');
-      expect(stylesStr).toContain('.header { font-weight: bold; }');
     });
 
     it('should properly handle lifecycle callbacks', () => {
@@ -136,17 +101,12 @@ describe('Component', () => {
 
       // Verify component was created successfully
       expect(TestComponent).toBeDefined();
-      expect(TestComponent.name).toBe('UIWebComponent');
+      expect(typeof TestComponent).toBe('function');
     });
   });
 
   // Test WebComponentBase properties and methods
   describe('WebComponentBase', () => {
-    it('should have shadowRootOptions defined', () => {
-      expect(WebComponentBase.shadowRootOptions).toBeDefined();
-      expect(WebComponentBase.shadowRootOptions.delegatesFocus).toBe(false);
-    });
-
     it('should provide a static getProperties method', () => {
       expect(WebComponentBase.getProperties).toBeDefined();
       expect(typeof WebComponentBase.getProperties).toBe('function');
@@ -320,35 +280,6 @@ describe('Component', () => {
       expect(instance.settingsVars.has('count')).toBe(true);
     });
 
-    it('should create template when willUpdate is called', () => {
-      // Define component
-      const TestComponent = defineComponent({
-        tagName: 'test-update-component',
-        template: '<div>{{text}}</div>',
-        defaultSettings: {
-          text: 'Initial text',
-        },
-      });
-
-      // Create a component instance
-      const instance = new TestComponent();
-
-      // Mock necessary properties and methods
-      instance.renderRoot = {};
-      instance.getData = vi.fn().mockReturnValue({ text: 'Initial text' });
-
-      // Initially template should be undefined
-      expect(instance.template).toBeUndefined();
-
-      // Call willUpdate
-      instance.willUpdate();
-
-      // Now template should be defined
-      expect(instance.template).toBeDefined();
-      expect(instance.component).toBeDefined();
-      expect(instance.dataContext).toBeDefined();
-    });
-
     it('should properly handle settings proxy set operations', () => {
       const defaultSettings = {
         count: 0,
@@ -376,7 +307,6 @@ describe('Component', () => {
     });
 
     it('should handle disconnectedCallback correctly', () => {
-      // Create mock template with onDestroyed method
       const mockTemplate = {
         onDestroyed: vi.fn(),
       };
@@ -386,24 +316,19 @@ describe('Component', () => {
         template: '<div>Disconnect Test</div>',
       });
 
-      // Setup spies
-      const superDisconnectSpy = vi.spyOn(WebComponentBase.prototype, 'disconnectedCallback').mockImplementation(
-        () => {},
-      );
-      const litTemplateDestroyedSpy = vi.spyOn(TestComponent.template, 'onDestroyed').mockImplementation(() => {});
+      const prototypeDestroyedSpy = vi.spyOn(TestComponent.template, 'onDestroyed').mockImplementation(() => {});
 
       const instance = new TestComponent();
       instance.template = mockTemplate;
 
-      // Call disconnectedCallback
       instance.disconnectedCallback();
 
-      // Verify super.disconnectedCallback was called
-      expect(superDisconnectSpy).toHaveBeenCalled();
-
-      // Verify both template instance and prototype onDestroyed methods were called
+      // Instance template's onDestroyed should be called
       expect(mockTemplate.onDestroyed).toHaveBeenCalled();
-      expect(litTemplateDestroyedSpy).toHaveBeenCalled();
+      // Prototype template should NOT be destroyed — it's shared across instances
+      expect(prototypeDestroyedSpy).not.toHaveBeenCalled();
+      // Template reference should be cleared
+      expect(instance.template).toBeUndefined();
     });
   });
 
@@ -487,34 +412,6 @@ describe('Component', () => {
       expect(TestComponent.properties).toBeDefined();
       expect(TestComponent.properties.color).toBeDefined();
       expect(TestComponent.properties.color.type).toBe(String);
-    });
-  });
-
-  // Test server-side rendering (SSR) behavior
-  describe('Server-Side Rendering', () => {
-    it('should handle SSR scenario in willUpdate', () => {
-      // Mock isServer to be true
-      vi.mock('@semantic-ui/utils', async () => {
-        const actual = await vi.importActual('@semantic-ui/utils');
-        return {
-          ...actual,
-          isServer: true,
-        };
-      });
-
-      const TestComponent = defineComponent({
-        tagName: 'test-ssr-component',
-        template: '<div>SSR Test</div>',
-      });
-
-      const instance = new TestComponent();
-      instance.triggerAttributeChange = vi.fn();
-
-      // Call willUpdate in "SSR" mode
-      instance.willUpdate();
-
-      // In SSR mode, triggerAttributeChange should be called
-      expect(instance.triggerAttributeChange).toHaveBeenCalled();
     });
   });
 
@@ -615,7 +512,7 @@ describe('Component', () => {
       document.body.appendChild(parentElement);
 
       // Wait for lifecycle events to fire
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await $(parentElement).onNext('rendered');
 
       // Verify each component's lifecycle callbacks fired exactly once
       expect(parentCreated).toHaveBeenCalledTimes(1);
@@ -750,21 +647,17 @@ describe('Component', () => {
           }),
         });
 
-        // Create parent element and add to DOM
+        // Create parent element, attach listener BEFORE connecting to DOM
         const parentElement = document.createElement('nav-test-find-parent');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
         // Wait for components to be rendered and initialized
-        await parentElement.updateComplete;
+        await rendered;
 
-        // Wait for child components to also be rendered
-        const childElement = parentElement.querySelector('nav-test-find-child');
-        if (childElement) {
-          await childElement.updateComplete;
-        }
-
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Child renders synchronously as part of parent render
+        const childElement = parentElement.shadowRoot?.querySelector('nav-test-find-child');
 
         // Test that parent can find child
         const parentComponent = parentElement.component;
@@ -789,10 +682,11 @@ describe('Component', () => {
         });
 
         const parentElement = document.createElement('test-no-child-parent');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await rendered;
 
         const parentComponent = parentElement.component;
         const result = parentComponent.findNonExistentChild();
@@ -830,10 +724,11 @@ describe('Component', () => {
         });
 
         const parentElement = document.createElement('test-shadow-parent');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         const parentComponent = parentElement.component;
 
@@ -880,10 +775,11 @@ describe('Component', () => {
         });
 
         const listElement = document.createElement('test-item-list');
+        const rendered = $(listElement).onNext('rendered');
         document.body.appendChild(listElement);
         cleanupElements.push(listElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         const listComponent = listElement.component;
         const items = listComponent.getAllItems();
@@ -908,10 +804,11 @@ describe('Component', () => {
         });
 
         const parentElement = document.createElement('test-empty-parent');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await rendered;
 
         const parentComponent = parentElement.component;
         const result = parentComponent.findNonExistentChildren();
@@ -952,10 +849,11 @@ describe('Component', () => {
         });
 
         const formElement = document.createElement('test-mixed-form');
+        const rendered = $(formElement).onNext('rendered');
         document.body.appendChild(formElement);
         cleanupElements.push(formElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         const formComponent = formElement.component;
         const allChildren = formComponent.getAllChildren();
@@ -993,21 +891,16 @@ describe('Component', () => {
         });
 
         const parentElement = document.createElement('test-parent-finder-parent');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
         // Wait for parent component to render
-        await parentElement.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         // Get the child component through shadow DOM
         const childElement = parentElement.shadowRoot?.querySelector('test-parent-finder-child');
         expect(childElement).toBeDefined();
-
-        // Wait for child component to render
-        if (childElement) {
-          await childElement.updateComplete;
-        }
 
         const childComponent = childElement.component;
         expect(childComponent).toBeDefined();
@@ -1047,29 +940,19 @@ describe('Component', () => {
         });
 
         const topElement = document.createElement('test-top-level');
+        const rendered = $(topElement).onNext('rendered');
         document.body.appendChild(topElement);
         cleanupElements.push(topElement);
 
         // Wait for top level component to render
-        await topElement.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await rendered;
 
         // Navigate to the deeply nested child through shadow DOM
         const middleElement = topElement.shadowRoot?.querySelector('test-middle-component');
         expect(middleElement).toBeDefined();
 
-        // Wait for middle component to render
-        if (middleElement) {
-          await middleElement.updateComplete;
-        }
-
         const deepChildElement = middleElement?.shadowRoot?.querySelector('test-deep-child');
         expect(deepChildElement).toBeDefined();
-
-        // Wait for deep child component to render
-        if (deepChildElement) {
-          await deepChildElement.updateComplete;
-        }
 
         const deepChildComponent = deepChildElement.component;
         expect(deepChildComponent).toBeDefined();
@@ -1095,10 +978,11 @@ describe('Component', () => {
         });
 
         const orphanElement = document.createElement('test-orphan-component');
+        const rendered = $(orphanElement).onNext('rendered');
         document.body.appendChild(orphanElement);
         cleanupElements.push(orphanElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await rendered;
 
         const orphanComponent = orphanElement.component;
         const result = orphanComponent.lookForNonExistentParent();
@@ -1134,14 +1018,15 @@ describe('Component', () => {
         const elementA = document.createElement('test-template-a');
         const elementB = document.createElement('test-template-b');
 
+        const renderedA = $(elementA).onNext('rendered');
+        const renderedB = $(elementB).onNext('rendered');
         document.body.appendChild(elementA);
         document.body.appendChild(elementB);
         cleanupElements.push(elementA, elementB);
 
         // Wait for both components to render
-        await elementA.updateComplete;
-        await elementB.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await renderedA;
+        await renderedB;
 
         // Component B should be able to find Component A via findTemplate
         const componentB = elementB.component;
@@ -1166,10 +1051,11 @@ describe('Component', () => {
         });
 
         const searcherElement = document.createElement('test-template-searcher');
+        const rendered = $(searcherElement).onNext('rendered');
         document.body.appendChild(searcherElement);
         cleanupElements.push(searcherElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await rendered;
 
         const searcherComponent = searcherElement.component;
         const result = searcherComponent.findNonExistentTemplate();
@@ -1212,23 +1098,19 @@ describe('Component', () => {
         const siblingElement = document.createElement('test-sibling-component');
         const containerElement = document.createElement('test-container-component');
 
+        const renderedSibling = $(siblingElement).onNext('rendered');
+        const renderedContainer = $(containerElement).onNext('rendered');
         document.body.appendChild(siblingElement);
         document.body.appendChild(containerElement);
         cleanupElements.push(siblingElement, containerElement);
 
         // Wait for both components to render
-        await siblingElement.updateComplete;
-        await containerElement.updateComplete;
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await renderedSibling;
+        await renderedContainer;
 
         // The nested component should be able to find the sibling component (in shadow DOM)
         const nestedElement = containerElement.shadowRoot?.querySelector('test-nested-finder');
         expect(nestedElement).toBeDefined();
-
-        // Wait for nested component to render
-        if (nestedElement) {
-          await nestedElement.updateComplete;
-        }
 
         const nestedComponent = nestedElement.component;
         expect(nestedComponent).toBeDefined();
@@ -1279,10 +1161,11 @@ describe('Component', () => {
         });
 
         const parentElement = document.createElement('test-parent-with-subs');
+        const rendered = $(parentElement).onNext('rendered');
         document.body.appendChild(parentElement);
         cleanupElements.push(parentElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         const parentComponent = parentElement.component;
 
@@ -1349,10 +1232,11 @@ describe('Component', () => {
         });
 
         const containerElement = document.createElement('test-subtemplate-container');
+        const rendered = $(containerElement).onNext('rendered');
         document.body.appendChild(containerElement);
         cleanupElements.push(containerElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         // Access the deeply nested child through template traversal
         // This would be complex to test directly, but we can verify the structure exists
@@ -1415,10 +1299,11 @@ describe('Component', () => {
         });
 
         const mixedElement = document.createElement('test-mixed-parent');
+        const rendered = $(mixedElement).onNext('rendered');
         document.body.appendChild(mixedElement);
         cleanupElements.push(mixedElement);
 
-        await new Promise(resolve => setTimeout(resolve, 150));
+        await rendered;
 
         const mixedComponent = mixedElement.component;
 
@@ -1461,10 +1346,11 @@ describe('Component', () => {
         });
 
         const unnamedElement = document.createElement('test-unnamed-component');
+        const rendered = $(unnamedElement).onNext('rendered');
         document.body.appendChild(unnamedElement);
         cleanupElements.push(unnamedElement);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await rendered;
 
         const unnamedComponent = unnamedElement.component;
         expect(unnamedComponent).toBeDefined();
@@ -1548,8 +1434,9 @@ describe('interval and timeout lifecycle cleanup', () => {
       }),
     });
     const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
     document.body.appendChild(el);
-    await el.updateComplete;
+    await rendered;
 
     // Let it tick a few times
     await new Promise(r => setTimeout(r, 160));
@@ -1580,8 +1467,9 @@ describe('interval and timeout lifecycle cleanup', () => {
       }),
     });
     const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
     document.body.appendChild(el);
-    await el.updateComplete;
+    await rendered;
 
     // Remove before timeout fires
     document.body.removeChild(el);
@@ -1607,8 +1495,9 @@ describe('interval and timeout lifecycle cleanup', () => {
       }),
     });
     const el = document.createElement(tag);
+    const rendered = $(el).onNext('rendered');
     document.body.appendChild(el);
-    await el.updateComplete;
+    await rendered;
 
     // Wait for timeout to fire
     await new Promise(r => setTimeout(r, 100));

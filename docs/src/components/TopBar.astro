@@ -5,7 +5,7 @@ import { Image } from 'astro:assets';
 
 import logoImage from '@images/logo.png';
 
-import { MobileMenuToggle, GlobalSearch, TopbarMenu, ThemeSwitcher } from '@semantic-ui/core';
+import { Container, MobileMenuToggle, GlobalSearch, TopbarMenu, ThemeSwitcher } from '@semantic-ui/core';
 
 import { getTopbarDisplayMenu, removeTrailingSlash } from '@helpers/navigation.js';
 
@@ -41,7 +41,7 @@ import './TopBar.css';
   }
 </script>
 <topbar class={topbarClasses} transition:persist>
-  <ui-container class="content">
+  <Container class="content">
     <span class="left">
       <a class="logo" href="/">
         <Image src={logoImage} alt="Logo" height="35" loading="eager" />
@@ -60,5 +60,5 @@ import './TopBar.css';
       )
     }
     <MobileMenuToggle client:load />
-  </ui-container>
+  </Container>
 </topbar>

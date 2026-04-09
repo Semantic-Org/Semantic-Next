@@ -261,6 +261,42 @@ describe('Object Utilities', () => {
       const obj = { a: { b: [1, 2, 3] } };
       expect(get(obj, 'a.c.1')).toBeUndefined();
     });
+
+    it('should support bracket notation for array access', () => {
+      const obj = { items: ['a', 'b', 'c'] };
+      expect(get(obj, 'items[1]')).toBe('b');
+    });
+
+    it('should support bracket notation with nested access', () => {
+      const obj = { data: [{ name: 'first' }, { name: 'second' }] };
+      expect(get(obj, 'data[1].name')).toBe('second');
+    });
+
+    it('should return undefined for bracket access on missing key', () => {
+      const obj = { items: ['a'] };
+      expect(get(obj, 'missing[0]')).toBeUndefined();
+    });
+
+    it('should handle simple property access without dots', () => {
+      const obj = { name: 'test' };
+      expect(get(obj, 'name')).toBe('test');
+    });
+
+    it('should return undefined for non-string path', () => {
+      expect(get({ a: 1 }, 123)).toBeUndefined();
+      expect(get({ a: 1 }, null)).toBeUndefined();
+    });
+
+    it('should return undefined for null or non-object input', () => {
+      expect(get(null, 'a')).toBeUndefined();
+      expect(get(42, 'a')).toBeUndefined();
+      expect(get('string', 'a')).toBeUndefined();
+    });
+
+    it('should handle combined dotted keys with further nesting', () => {
+      const obj = { 'a.b': { c: 42 } };
+      expect(get(obj, 'a.b.c')).toBe(42);
+    });
   });
 
   describe('hasProperty', () => {

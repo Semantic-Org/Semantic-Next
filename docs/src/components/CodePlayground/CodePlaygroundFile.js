@@ -125,6 +125,9 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
   },
 
   setupFolds(view = self.editorView) {
+    if (!view.contentDOM) {
+      return;
+    }
     const $widgets = $$(view.contentDOM).find('.cm-foldMarker');
     $widgets.each(function() {
       const $widget = $(this);

@@ -1,6 +1,6 @@
 import { Query, QueryOptions } from '@semantic-ui/query';
 import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { Renderer } from '@semantic-ui/renderer';
 import { ASTNode } from './compiler/template-compiler';
 import { TemplateHelpers } from './template-helpers';
 
@@ -412,16 +412,26 @@ export interface CallParams<
   unbindKey: Template['unbindKey'];
 
   /**
-   * AbortController for managing asynchronous operations.
+   * AbortController tied to the template's lifetime.
    *
-   * Automatically aborts any pending operations when the component is destroyed.
+   * Aborts when the component is destroyed. Use to programmatically
+   * cancel operations or pass `abortController.signal` to APIs.
+   */
+  abortController: AbortController;
+
+  /**
+   * Abort signal tied to the template's lifetime.
+   *
+   * Fires when the component is destroyed. Pass to `fetch`, `addEventListener`,
+   * or any API that accepts an AbortSignal to automatically clean up when the
+   * component is removed.
    *
    * @example
-   * fetch('/api/data', { signal: abortController.signal })
+   * fetch('/api/data', { signal: abortSignal })
    *   .then(response => response.json())
    *   .then(data => state.data(data));
    */
-  abortController: AbortController;
+  abortSignal: AbortSignal;
 
   /**
    * Template helper functions for common operations.
@@ -619,10 +629,10 @@ export class Template {
   reactions: Reaction[];
   /** The root element where the template is rendered (ShadowRoot or HTMLElement). */
   renderRoot?: ShadowRoot | HTMLElement;
-  /** The rendering engine used ('lit' or a custom engine name). */
-  renderingEngine: 'lit' | string; // Currently only 'lit' is supported.
-  /** The LitRenderer instance used for rendering. */
-  renderer: LitRenderer;
+  /** The rendering engine — 'native' (default), 'lit', or an engine object. */
+  renderingEngine: string | object;
+  /** The renderer instance used for rendering. */
+  renderer: Renderer;
   /** Optional start marker node for insertion. */
   startNode?: Node;
   /** Optional end marker node for insertion.. */

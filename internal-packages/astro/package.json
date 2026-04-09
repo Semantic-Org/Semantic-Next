@@ -1,0 +1,19 @@
+{
+  "name": "@semantic-ui/astro",
+  "version": "0.1.0",
+  "description": "Astro integration for Semantic UI native SSR",
+  "private": true,
+  "type": "module",
+  "keywords": ["astro-integration"],
+  "exports": {
+    ".": "./index.js",
+    "./server": "./server.js",
+    "./client": "./client.js"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "*",
+    "@semantic-ui/renderer": "*",
+    "@semantic-ui/templating": "*",
+    "@semantic-ui/utils": "*"
+  }
+}

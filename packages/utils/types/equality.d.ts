@@ -11,6 +11,8 @@ export interface IsEqualOptions {
   loose?: boolean;
   /** Array of property names to skip during comparison */
   ignoreKeys?: string[];
+  /** Apply ignoreKeys at all nesting depths, not just the top level (default: false) */
+  deepIgnore?: boolean;
   /** Check if a is a structural subset of b (default: false) */
   partial?: boolean;
 }

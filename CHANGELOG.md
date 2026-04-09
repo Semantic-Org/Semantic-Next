@@ -14,6 +14,11 @@ xx.xx.xxxx
 ### Templates
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 
+### Reactivity
+* **Feature** - Added `depend()` to register a signal as a dependency without reading the value
+* **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
+* **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
+
 ### Renderer
 * **Bug** - Fixed property bindings (`.prop={expr}`) incorrectly defaulting to literal mode — properties now evaluate expressions like other bindings, use `{#fn expr}` to pass function references
 * **Bug** - Fixed `checked` and `selected` attributes not syncing DOM properties after user interaction — programmatic updates via reactivity (e.g. toggle-all) now correctly update checkbox/select state

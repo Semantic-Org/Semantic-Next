@@ -20,12 +20,6 @@ const createComponent = ({ $, dispatchEvent }) => ({
   },
 });
 
-const onCreated = ({}) => {
-};
-
-const onRendered = function({}) {
-};
-
 const events = {
   'click ui-icon.close'({ event, self }) {
     self.hide();
@@ -44,8 +38,6 @@ const Modal = defineComponent({
   css,
   createComponent,
   events,
-  onCreated,
-  onRendered,
 });
 
 export { Modal };

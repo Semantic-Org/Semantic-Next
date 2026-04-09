@@ -1,9 +1,9 @@
+import { getEngine } from '@semantic-ui/renderer';
 import { Template, TemplateCompiler } from '@semantic-ui/templating';
-import { adoptStylesheet, camelToKebab, each, isClient, isServer, isFunction, kebabToCamel, noop } from '@semantic-ui/utils';
-import { unsafeCSS } from 'lit';
+import { adoptStylesheet, each, fatal, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
-import { adjustPropertyFromAttribute } from './helpers/adjust-property-from-attribute.js';
-import { WebComponentBase } from './web-component.js';
+import { getProperties } from './component-helpers.js';
+import { registerComponent } from './component-registry.js';
 
 export const defineComponent = ({
   template = '',
@@ -14,9 +14,9 @@ export const defineComponent = ({
   delegatesFocus = false,
   templateName = kebabToCamel(tagName),
 
-  createComponent = function() {},
-  events = {}, // event bindings
-  keys = {}, // key bindings
+  createComponent: createComponentFn = noop,
+  events = {},
+  keys = {},
 
   onCreated = noop,
   onRendered = noop,
@@ -29,40 +29,41 @@ export const defineComponent = ({
 
   subTemplates = {},
 
-  renderingEngine,
-  properties, // allow overriding web component properties
+  renderingEngine = 'native',
+  properties,
 
-  // only used by components that provide a spec
   componentSpec = false,
   plural = false,
   singularTag,
 } = {}) => {
-  // AST shared across instances
+
+  // Resolve engine: accepts an engine object or a string name from the registry
+  const engine = typeof renderingEngine === 'object'
+    ? renderingEngine
+    : getEngine(renderingEngine);
+
+  if (!engine) {
+    fatal(`Rendering engine "${renderingEngine}" not registered.`
+      + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`);
+  }
+
   if (!ast) {
     const compiler = new TemplateCompiler(template);
     ast = compiler.compile();
   }
 
-  // to support SSR we need to include all subtemplate css in base template
   each(subTemplates, (template) => {
     if (template.css) {
       css += template.css;
     }
   });
 
-  // allow component to assign page css associated with the component
-  // this will only be added once when the component is defined
   if (pageCSS) {
     adoptStylesheet(pageCSS);
   }
 
-  /*
-    Create Component Returns Either a Template or WebComponent
-    Templates are created as a prototype that can be cloned when instantiated
-  */
-
-  let litTemplate = new Template({
-    templateName: templateName,
+  let prototypeTemplate = new Template({
+    templateName,
     isPrototype: true,
     renderingEngine,
     ast,
@@ -70,174 +71,40 @@ export const defineComponent = ({
     events,
     keys,
     defaultState,
-    // web components handle settings via WebComponentBase — only subtemplates need defaultSettings on Template
     defaultSettings: tagName ? undefined : defaultSettings,
     subTemplates,
     onCreated,
     onRendered,
     onDestroyed,
     onThemeChanged,
-    createComponent,
+    createComponent: createComponentFn,
   });
   let webComponent;
 
   if (tagName) {
-    /*
-      Web Component Base is the static portion of the web component which
-      doesnt change based off component configuration
-    */
-    webComponent = class UIWebComponent extends WebComponentBase {
-      static get styles() {
-        return unsafeCSS(css);
-      }
+    const resolvedProperties = getProperties({
+      properties,
+      componentSpec,
+      defaultSettings,
+    });
 
-      static template = litTemplate;
+    const factory = engine.factory;
+    webComponent = factory({
+      prototypeTemplate, resolvedProperties, css, delegatesFocus,
+      componentSpec, defaultSettings, plural,
+      onAttributeChanged, renderingEngine,
+    });
 
-      static properties = WebComponentBase.getProperties({
-        properties,
-        componentSpec,
-        defaultSettings,
-      });
+    // Store tagName on the class for SSR renderToString
+    webComponent.componentTagName = tagName;
+    registerComponent(tagName, webComponent);
 
-      static shadowRootOptions = { ...this.shadowRootOptions, delegatesFocus };
-
-      defaultSettings = {};
-
-      constructor() {
-        super();
-        this.css = css;
-        this.componentSpec = componentSpec;
-        this.settings = this.createSettingsProxy({ componentSpec, properties: webComponent.properties });
-        this.setDefaultSettings({ defaultSettings, componentSpec });
-      }
-
-      // callback when added to dom
-      connectedCallback() {
-        super.connectedCallback();
-      }
-
-      triggerAttributeChange() {
-        each(webComponent.properties, (propSettings, property) => {
-          const attribute = camelToKebab(property);
-
-          let newValue = this[property];
-          // this is necessary to handle how lit handles boolean attributes
-          // otherwise you get <ui-button primary="true">
-          if (!propSettings.alias && attribute && newValue === true) {
-            this.setAttribute(attribute, '');
-          }
-          adjustPropertyFromAttribute({
-            el: this,
-            attribute,
-            properties: webComponent.properties,
-            attributeValue: newValue,
-            componentSpec,
-          });
-        });
-      }
-
-      willUpdate() {
-        if (isServer) {
-          // property change callbacks wont call on SSR
-          // we need this to get proper settings for server render
-          this.triggerAttributeChange();
-        }
-        if (!this.template) {
-          this.template = litTemplate.clone({
-            data: this.getData(),
-            element: this,
-            renderRoot: this.renderRoot,
-          });
-          if (!this.template.initialized) {
-            this.template.initialize();
-          }
-          // make this easier to access in dom
-          this.component = this.template.instance;
-          this.dataContext = this.template.getDataContext();
-        }
-        super.willUpdate();
-      }
-
-      firstUpdated() {
-        super.firstUpdated();
-      }
-
-      updated() {
-        super.updated();
-      }
-
-      // callback if removed from dom
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        if (this.template) {
-          this.template.onDestroyed(); // destroy instance
-          // Clear references for gc
-          delete this.template;
-          delete this.component;
-          delete this.dataContext;
-        }
-        litTemplate.onDestroyed(); // destroy prototype
-      }
-
-      // callback if moves doc
-      adoptedCallback() {
-        super.adoptedCallback();
-      }
-
-      attributeChangedCallback(attribute, oldValue, newValue) {
-        super.attributeChangedCallback(attribute, oldValue, newValue);
-        adjustPropertyFromAttribute({
-          el: this,
-          attribute,
-          attributeValue: newValue,
-          properties: webComponent.properties,
-          oldValue,
-          componentSpec,
-        });
-        this.call(onAttributeChanged, { args: [attribute, oldValue, newValue] });
-      }
-
-      /*******************************
-                  Settings
-      *******************************/
-
-      getSettings() {
-        return this.getSettingsFromConfig({ componentSpec, properties: webComponent.properties });
-      }
-      setSetting(name, value) {
-        this[name] = value;
-      }
-
-      getData() {
-        let settings = this.getSettings();
-        let data = {
-          ...settings,
-        };
-        if (!isServer) {
-          data.darkMode = this.isDarkMode();
-        }
-        if (componentSpec) {
-          data.ui = this.getUIClasses({ componentSpec, properties: webComponent.properties });
-        }
-        if (plural === true) {
-          data.plural = true;
-        }
-        return data;
-      }
-
-      render() {
-        const data = {
-          ...this.getData(),
-          ...this.tpl,
-        };
-        const html = this.template.render(data);
-        return html;
-      }
-    };
     if (isClient && customElements.get(tagName)) {
       return webComponent;
     }
-    customElements.define(tagName, webComponent);
+    if (isClient) {
+      customElements.define(tagName, webComponent);
+    }
   }
-  return tagName ? webComponent : litTemplate;
+  return tagName ? webComponent : prototypeTemplate;
 };

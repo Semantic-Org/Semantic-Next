@@ -16,6 +16,7 @@
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
+      "source": "./src/index.js",
       "import": "./dist/semantic-ui.js",
       "browser": "./dist/cdn/semantic-ui.min.js",
       "bundled": "./dist/semantic-ui.min.js",
@@ -380,10 +381,12 @@
     "examples/*",
     "tools/mcp",
     "tools/devtools",
-    "tools/lsp"
+    "tools/lsp",
+    "tools/benchmark"
   ],
   "simple-git-hooks": {
-    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add"
+    "pre-commit": "STAGED=$(git diff --cached --name-only --diff-filter=ACM); npx dprint fmt --staged && echo \"$STAGED\" | xargs -r git add",
+    "commit-msg": "if grep -qi 'Co-Authored-By:' \"$1\"; then echo 'Error: Commit messages must not contain Co-Authored-By lines.'; exit 1; fi"
   },
   "overrides": {
     "lit": "^3.0.0"

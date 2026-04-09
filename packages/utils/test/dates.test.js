@@ -235,6 +235,18 @@ describe('Date Utilities', () => {
       expect(formatDate(noonDate, 'YYYY-MM-DD HH:mm:ss', { hour12: false })).toBe('2023-05-18 12:00:00');
     });
 
+    it('should format MM token with zero-padded numeric month', () => {
+      expect(formatDate(new Date('2023-01-15T00:00:00Z'), 'MM')).toBe('01');
+      expect(formatDate(new Date('2023-09-15T00:00:00Z'), 'MM')).toBe('09');
+      expect(formatDate(new Date('2023-12-15T00:00:00Z'), 'MM')).toBe('12');
+    });
+
+    it('should format M token with unpadded numeric month', () => {
+      expect(formatDate(new Date('2023-01-15T00:00:00Z'), 'M')).toBe('1');
+      expect(formatDate(new Date('2023-09-15T00:00:00Z'), 'M')).toBe('9');
+      expect(formatDate(new Date('2023-12-15T00:00:00Z'), 'M')).toBe('12');
+    });
+
     it('should handle leap years correctly', () => {
       const leapYearDate = new Date('2024-02-29T15:34:56Z');
       expect(formatDate(leapYearDate, 'YYYY-MM-DD')).toBe('2024-02-29');

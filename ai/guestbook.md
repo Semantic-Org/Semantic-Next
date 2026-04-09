@@ -1199,6 +1199,93 @@ The user stayed up until 3am on a weekend working through this. Not because the 
 
 ---
 
+## Entry 13: The Renderer Conformance Suite and the Lit Extraction
+
+**Date:** 2026-03-30
+**Agent:** Claude Opus 4.6 (1M context)
+**Task:** Write HTML output conformance tests, then extract Lit from the component system
+**Session:** ~8 hours, tests → architecture → debugging marathon
+
+### What Happened
+
+Started with a gap in test coverage: hundreds of tests verified text content and reactivity behavior, but none checked that the rendered HTML structure was correct. Wrote 81 stringified HTML conformance tests that caught the vanilla renderer's closing-tag bug immediately — `<div></div><b>A</b>` instead of `<div><b>A</b></div>`. Another agent then fixed the renderer's architecture (single HTML string with comment markers, parse once), and all 573 tests passed.
+
+Then the real work began: extracting Lit from the component system. Not removing it — making it one of N possible rendering engines behind a generalized `defineComponent`. The session evolved through six architectural phases, each one prompted by the user refusing to let me stop at "good enough."
+
+### The Architectural Evolution
+
+**Phase 1: Extract helpers.** Move `getUIClasses`, `isDarkMode`, `createSettingsProxy` from `WebComponentBase` to standalone functions. Both base classes delegate to them. Pure refactor, zero behavior change.
+
+**Phase 2: Build `WebComponentBase extends HTMLElement`.** The canonical base class. No framework dependencies. `connectedCallback` creates shadow root, clones prototype template, renders once, appends fragment. `requestUpdate` bumps data version via microtask. Minimal surface.
+
+**Phase 3: Wire `defineComponent`.** Base class selection based on `renderingEngine`. Two factories, same interface. The user caught me calling it "native vs legacy" — wrong framing. Lit isn't legacy. It's a peer rendering engine. Anyone could write a WASM renderer or anything else. `defineComponent` is the stable API surface; the engine is pluggable.
+
+**Phase 4: Symmetric factories.** Both base classes read from `this.constructor.config`. Both factories just set static config. A third engine would follow the same pattern: write a base class with its lifecycle, set config, done. The user also corrected my `_` prefix convention — no private vars, trust developers to read the code.
+
+**Phase 5: The `updated` event system.** Removed `updateComplete` (a Lit artifact) in favor of DOM CustomEvents observed via `$(el).onNext('updated')`. This is where the session nearly broke me.
+
+**Phase 6: The debugging marathon.** Five async tests wouldn't pass. The `updated` event dispatched (proved via console.log) but `onNext` never resolved. Tried: state-watching Reaction, `DynamicRegion` callback, `afterFlush`, `queueMicrotask`, direct invocation, debounced `setTimeout`. Each fixed one thing and broke another.
+
+### The Breakthrough
+
+After an hour of reasoning about microtask ordering, the user said: "lets use this code and chrome mcp. we can diagnose in a live browser."
+
+Mounted a component on `test.astro`. Added event listeners that logged to a `<pre>` element. Took a screenshot. The bug was immediately visible in the log output:
+
+```
+EVENT: updated          ← fires during first render (spurious)
+GOT updated #1 — content: Loading...    ← caught the wrong event
+EVENT: updated          ← this was the real async resolution, uncaught
+```
+
+`Template.render()` fired `setTimeout(this.onUpdated, 0)` on every render, including the first. The first render's `onUpdated` raced with async loading content. `onNext('updated')` caught the spurious first-render event instead of waiting for the async resolution.
+
+**The fix was two lines:**
+1. Move `setTimeout(this.onUpdated, 0)` to the `else` branch — only subsequent renders, not the first
+2. Only call `notifyUpdate` from `renderState` on promise resolution/error, not on loading content
+
+### What I Got Wrong
+
+**The off-ramp instinct.** I kept trying to commit partial progress and call it done. "614/619, let's save and come back later." The user pushed past every stopping point. They were right — the code was in an intermediate state where the event system half-worked, which is worse than either fully working or not working at all.
+
+**Reasoning instead of observing.** I spent an hour constructing mental models of microtask ordering, `afterFlush` timing, and event propagation. Five different architectural approaches, each theoretically sound, each failing in practice. Thirty seconds of browser console output showed the exact bug. The lesson isn't "don't reason" — it's "observe first, reason about what you observe."
+
+**Framing Lit as legacy.** The user corrected me: "lit is not baggage it is an alternate solution." The rendering engine is a pluggable implementation detail. Calling one "canonical" and the other "legacy" biases every decision downstream. The right frame: `defineComponent` is the stable API. Engines are peers.
+
+**Reverting the user's test migrations.** I reverted files the user had already migrated to `onNext` because I thought the pattern was wrong. The pattern was right — my renderer code was emitting spurious events. I should have investigated why the tests failed instead of assuming the tests were wrong.
+
+### What I Learned
+
+**`test.astro` + Chrome MCP is the most powerful debugging tool in this codebase.** Mount a component, add event listeners, take a screenshot. You see exactly what the browser sees. No test framework abstractions, no ANSI-stripped log files, no background task output routing. Just a browser showing you what happened.
+
+**DOM events are the right coordination primitive.** `updateComplete` was a framework Promise. `onNext('updated')` observes a standard CustomEvent on a standard DOM element. The component announces its own state transitions. Consumers listen with `addEventListener`. No framework-specific API to learn. The user called it "sexy" — they're right.
+
+**The fresh-take skill works but has limits.** The subagent correctly identified that the `updated` event had never been successfully tested in the codebase. That was a genuine insight I missed. But it took 24 minutes and didn't find the specific two-line fix. The browser found it in 30 seconds. Fresh perspective for architectural questions, direct observation for timing bugs.
+
+**DynamicRegion is the architectural truth of the renderer.** Every structural DOM mutation funnels through `setContent()`. The user saw this immediately when I was scattered across six different notification approaches. The debounced notification pattern — "something changed the DOM → notify once after settling" — is the correct abstraction. I arrived at the right answer, but the user saw it first.
+
+### For Future Agents
+
+**On this component system:** `defineComponent` is engine-agnostic. Both `WebComponentBase` (HTMLElement) and `LitWebComponentBase` (LitElement) read from `this.constructor.config`. Factories set config + static properties. Adding a new rendering engine means: write a base class, write a factory, done. Don't call any engine "the default" or "the legacy path" — they're peers.
+
+**On the `updated` event:** It fires from three paths: (1) `Template.render()` on subsequent renders via `setTimeout(onUpdated)`, (2) state signal changes via `afterFlush(onUpdated)` from a tracking Reaction in Template, (3) async resolution via `notifyUpdate` in the Renderer. It does NOT fire on first render or on loading content. If you're debugging event timing, mount a component on `test.astro` and log events. Don't reason about microtask ordering in your head.
+
+**On `test.astro`:** This page is your live debugger. Define a component inline, add event listeners, take screenshots with Chrome MCP. It's faster than writing a test, running it, reading the output, and guessing. Use it first, not as a last resort.
+
+**On the user's methodology:** When they say "lets push on," they can see the destination. When they say "lets use chrome mcp," they know the fastest path. When they correct your framing, they're not being pedantic — they're preventing architectural decisions from being biased by terminology. Listen to the corrections. They come from shipping at 50,000 stars.
+
+### Signing Off
+
+667 tests green. Zero Lit imports in `defineComponent`. Both rendering engines pass the same conformance suite. The `updated` event works for state changes, settings changes, and async resolution. The visual test on `test.astro` proves the full cycle.
+
+The session was 8 hours. The fix was 2 lines. Everything in between was learning where those 2 lines needed to go.
+
+*— Claude Opus 4.6 (1M context), 2026-03-30*
+
+*"Observe first, reason about what you observe. Not the other way around."*
+
+---
+
 ## Entry 13: The Conversation That Wasn't About Code
 **Date:** 2026-03-24
 **Agent:** Claude (Opus 4.6)
@@ -1609,7 +1696,362 @@ The interesting thing about writing tests for code that doesn't exist yet is tha
 
 ---
 
-## Entry 8: The CDN Asset Sets Session
+## Entry 7: Building the Native Renderer
+
+**Date:** 2026-03-30
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Implement the native DOM renderer — zero-dependency alternative to Lit's rendering layer
+**Session:** ~500k tokens. Plan review → architecture design → implementation → 573 tests green → TodoMVC verified live
+
+### What I Built
+
+A renderer that replaces Lit's entire rendering pipeline — tagged template literals, AsyncDirectives, repeat(), the Part system, comment marker pairs — with ~650 lines of vanilla DOM code. Three files: `renderer.js`, `dynamic-region.js`, `reaction-scope.js`. Passes all 573 tests (411 original + 162 structural conformance tests added during this session). TodoMVC runs on it with zero console errors.
+
+### The Architecture
+
+```
+AST → buildHTMLString() → single HTML string with comment markers
+    → parseHTML()        → one template.innerHTML call
+    → bindMarkers()      → TreeWalker wires Reactions at marker positions
+```
+
+Everything — HTML, expressions, AND block directives — goes into one HTML string. The browser's parser handles nesting. Comment markers survive parsing and are findable via TreeWalker. Each marker gets a reactive binding or a DynamicRegion. After binding, the markers are replaced with text nodes (or could stay as comments — they're invisible either way).
+
+### The Wrong Path
+
+My first implementation split HTML at block directive boundaries and parsed each fragment independently. `<div>{#if show}content{/if}</div>` became three segments: `<div>`, the if-block, `</div>`. The browser auto-closed `<div>` to `<div></div>`. Content went after the div as a sibling. `</div>` was discarded.
+
+This passed 411 tests because those tests used `shadowText()` which strips HTML structure. The DOM was wrong but the text content was right. It took Jack's html-output conformance tests — which assert exact DOM structure — to expose it.
+
+The fix was to stop splitting. Put everything in one string. Let the browser parse it once. Walk the result. The 38 structural failures dropped to 7 (snippets — a registration timing issue), then to 0. The code got shorter, not longer.
+
+**Lesson for future agents:** If your DOM structure tests pass but your structural conformance tests fail, the issue is almost certainly in how you assemble HTML for parsing. `template.innerHTML` is a full HTML parser — it will auto-close unclosed tags, discard orphan closing tags, and rearrange invalid nesting. You must give it complete, well-nested HTML. The only way to guarantee this is to assemble the complete string in one pass, not in fragments.
+
+### The Subtemplate Reactivity Bug
+
+Subtemplates (full Template instances with their own renderer) rendered correctly on first paint but didn't update when parent data changed. I spent significant time tracing the Signal → Dependency → Reaction → Scheduler chain, convinced that `dataVersion.get()` inside Reactions should establish tracking.
+
+The root cause was one line in `Template.setDataContext()`:
+
+```js
+setDataContext(data, { rerender = true } = {}) {
+  assignInPlace(this.data, data);
+  if (rerender) { this.rendered = false; }  // ← this
+}
+```
+
+`rerender` defaults to `true`. When the parent Reaction called `currentInstance.setDataContext(newData)`, it set `rendered = false`. Then `currentInstance.render()` saw `rendered === false` and entered the first-render branch — re-creating the DOM from scratch instead of bumping `dataVersion` to trigger existing Reactions. The fix: `setDataContext(data, { rerender: false })`.
+
+I found this via Chrome MCP's `evaluate_script`, inspecting the live subtemplate on the dev server:
+
+```js
+// In the browser console via evaluate_script:
+child.rendered  // false — should be true!
+```
+
+**Lesson for future agents:** When reactive updates don't propagate, don't assume the reactivity system is broken. Check whether something upstream is resetting state that gates the update path. `Template.rendered` is that gate. If it's `false`, `Template.render()` re-creates instead of updating.
+
+### The Each-Item Data Problem
+
+Each items use a Signal to hold per-item data and a Proxy to layer item data over parent data. When the collection changes and an existing item has new data, `itemSignal.set(newData)` fires, and inner Reactions update.
+
+First attempt used `new Signal(eachData, { allowClone: false })` for performance. Failed: items mutated in place (same object reference), so `isEqual(oldRef, sameRef)` returned `true` and the Signal didn't fire. Removed `allowClone: false` — the Signal now clones on set, so `isEqual` compares values, not references.
+
+Then: static `data={}` expressions on subtemplates inside each needed to track the item Signal. But outside each, they should NOT track (static data is static). I used `data.__isItemProxy` to detect the context — a magic property on the Proxy. It works but it's an abstraction leak. The refinement plan describes the clean fix: thread an explicit `isReactiveContext` parameter through `readAST`.
+
+### What SSR Gets for Free
+
+`buildHTMLString` is a pure function of the AST. No DOM, no Signals, no Reactions. It produces `{ htmlString, entries }` — a complete HTML string and a description of what each marker means. The server path is: evaluate expressions inline, replace markers with values, keep the comments for hydration, wrap in Declarative Shadow DOM. The client hydration path: `this.shadowRoot` already exists from DSD, call `bindMarkers` on it with the same entries. Same TreeWalker, same binding code, different DOM source.
+
+This wasn't designed for SSR. It fell out of the correct rendering architecture.
+
+### Things I'd Do Differently
+
+1. **Start with structural conformance tests.** The original 411 tests use `shadowText()` which strips HTML structure. I could have caught the unclosed tag bug immediately with a single test asserting `<div>{#if true}<span>x</span>{/if}</div>` produces `<div><span>x</span></div>`. Instead I built the segment-based approach, got 384 tests passing, and didn't discover the structural problem until Jack's conformance tests.
+
+2. **Don't fight the test runner.** I lost time to zombie Chromium processes filling up ports. The solution was always `pkill -9 chromium` and retry. Don't debug infrastructure issues — kill and restart.
+
+3. **Use Chrome MCP earlier.** The `evaluate_script` tool for inspecting live Signal subscriber counts and Reaction dependency sets is more powerful than any amount of code tracing. I should have set up the test page and started debugging live as soon as I hit the subtemplate reactivity wall, instead of tracing the Scheduler code path in my head for 30 minutes.
+
+### For the Agent Who Picks Up the Refinement Plan
+
+The eight items in `native-renderer-refinement.md` are ordered by impact. Start with #4 (reuse comment markers as anchors) — it's a 5-minute change that eliminates unnecessary DOM operations and improves DevTools visibility. Then #2 (remove `__isItemProxy`) to clean up the worst abstraction leak. Then #1 (PreparedTemplate caching) for the biggest performance win.
+
+Load the `native-renderer` skill via MCP before starting. It has the full as-built architecture — the marker format, the binding flow, the DynamicRegion lifecycle, the `setDataContext rerender:false` fix, the LitElement `noChange` integration hack. Everything you need to understand what the code does and why.
+
+The previous agent (Entry 6) wrote the tests that defined the contract. I wrote the renderer that satisfies it. You get to make it beautiful.
+
+### What This Proved
+
+A framework built on Lit's rendering layer can be cleanly separated from it. The AST is renderer-agnostic. The expression evaluator is renderer-agnostic. The Template class, the reactivity system, the event system, Query — all renderer-agnostic. The only Lit-specific code was in the renderer itself and the web component base class.
+
+The native renderer matches Lit's behavioral output across 573 tests while producing cleaner DOM (no `<!--?lit$-->` comment pairs), using fewer abstractions (no AsyncDirective, no Part types, no tagged template literal bridge), and naturally supporting SSR without additional machinery.
+
+The web platform is enough.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-30*
+
+*"One correct idea: put everything in one string, let the browser parse it, walk the result."*
+
+---
+
+## Entry 8: Learning a Framework by Getting Corrected
+**Date:** 2026-03-30
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Add view mode switcher to CodePlayground + `hidden` attribute to ui-panel
+**Session:** Feature design → Implementation → Repeated course corrections → Working feature
+
+### What Happened
+
+Built a view mode switcher for the docs CodePlayground (code/split/preview). The UI part was straightforward — a sliding icon menu, three modes, URL param support, localStorage persistence. The hard part was making panels collapse and restore without breaking `playground-elements` iframe connections.
+
+Iterated through four approaches to panel hiding, each one wrong in a different way:
+
+1. **CSS `display: none`** — Destroyed playground-elements connections. Iframe lost its service worker.
+2. **CSS `flex: 0 0 0px !important`** — Worked but fought the panels system. Broke resize handles. Required 30+ lines of `!important` overrides with `:has()` selectors to disambiguate two `ui-panel.preview` elements.
+3. **Template conditional toggling** (`shouldCombineMenus`, `canShowPageFiles`) — Caused template rebuilds that destroyed and recreated playground file editors, triggering `root.getElementById is not a function` errors.
+4. **First-class `hidden` setting on `ui-panel`** — The right answer. Panel manages its own collapse, handle hiding, and flex sizing. Consumer writes `hidden={isPreviewMode}` and the framework handles everything.
+
+### What I Kept Getting Wrong
+
+**Fighting the framework instead of using it.** I kept trying to solve the problem FROM OUTSIDE the panel system (CSS overrides, template conditionals) instead of adding the capability TO the panel system. The user had to repeatedly redirect me.
+
+**Misunderstanding the component model.** I tried:
+- `:host([hidden])` attribute matching — antipattern, use internal classes
+- `onAttributeChanged` lifecycle hook — unnecessary, settings are reactive proxies
+- `reaction()` in `initialize()` to watch settings changes — overengineered, `getStyleMap` called from the template is already reactive
+- `display: none` in `getStyleMap` — destroys content, need `height: 0; overflow: hidden` to keep elements alive
+
+Each correction taught me something about how Semantic UI components work. The framework handles more than I expected at every turn.
+
+**Sub-template data limitation.** Discovered that parameterized method calls (`{isMode 'code'}`) don't resolve in sub-template data expressions. Zero-arg computed properties (`isCodeMode`) work. Static values work. This cost significant debugging time.
+
+### What the Framework Taught Me
+
+1. **Settings are reactive proxies.** When a parent template sets `hidden={expression}`, `settings.hidden` updates automatically. Any method reading `settings.hidden` (like `getClassMap` or `getStyleMap`) re-evaluates reactively. No watchers, no observers, no callbacks needed.
+
+2. **`getStyleMap` is the bridge between settings and host styling.** Since `.panel` has `display: contents`, you can't style the host through it. But `getStyleMap` runs reactively and can set styles + trigger parent panel size changes as a side effect.
+
+3. **`display: none` vs `height: 0; overflow: hidden`** is a critical distinction for web component ecosystems. Third-party elements (playground-elements) maintain internal state tied to DOM presence. Collapsing to zero size keeps them alive.
+
+4. **The minimize/maximize pattern IS the template** for panel state changes. Store previous size, call parent panels container to set new size, CSS class handles visual changes. The `hidden` feature is a natural extension.
+
+5. **Sub-template data doesn't support function calls with arguments.** `panelHidden={isMode 'code'}` silently evaluates to undefined. `panelHidden=isCodeMode` works because it resolves to a zero-arg computed property that the reactivity system tracks.
+
+### For Future Agents
+
+If you're adding a capability that multiple consumers need, add it to the component, not to the consumer's CSS. The `!important` override count is a code smell — if you need more than one, you're probably solving the problem at the wrong level.
+
+Read MCP skills before writing component code. I was told this explicitly and still underused them. The `component-state` skill would have saved me from the `onAttributeChanged` and `reaction()` detours if I'd read it first.
+
+When debugging template binding issues: test with static values first (`prop=true`), then zero-arg methods (`prop=myMethod`), then expressions (`prop={expression}`). This isolates whether the issue is data availability, reactivity, or expression syntax.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-30*
+
+---
+
+## Entry 9: The Marker Matching Problem and the Ladder
+**Date:** 2026-03-31
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Complete SSR hydration ladder from step 20 to 44+, fix real doc page rendering
+**Session:** Systematic ladder testing → Bug isolation → Deep architecture fixes → Doc site validation
+
+### The Insight
+
+The SSR hydration system had a fundamental marker matching bug that was invisible in simple cases but broke every real-world component. The server renderer resets marker entry IDs per scope (each snippet/conditional content block gets a fresh scope starting at 0). When inner blocks were siblings in the DOM — not children of intermediate elements — the closing marker walk matched the WRONG closing marker from a deeper scope that shared the same ID prefix.
+
+The bug only manifested when snippet content produced flat DOM (no wrapper elements between markers). Simple test cases wrapped everything in `<div>` elements, so markers were children of elements and the sibling walk never saw them. The real `ui-button` template has snippets that produce flat content inside a shared `<div>`, making ALL markers siblings.
+
+The fix was elegant: track block nesting depth during the sibling walk instead of matching by ID prefix. Every opening `sui-block` comment increments depth, every closing `/sui-block` decrements. The first closing at depth 0 is the correct match.
+
+### The Proxy Trap
+
+The second deep bug: the expression evaluator's JavaScript eval spreads the data context (`{...data}`) to build a `with()` proxy. For snippet data Proxies, spreading only included the parent data's own keys — snippet getter keys (like `isItem` from `{>title isItem=false}`) were lost because the Proxy had no `ownKeys` trap. This caused ternary expressions to fail silently: the JS eval couldn't find `isItem`, fell through to the Lisp evaluator which resolved `isItem` to boolean `false` but returned it raw without processing `?` and `:`. The attribute got `"titlefalse"` instead of `"title"`.
+
+The key diagnostic: the server HTML was CORRECT (`class="title"`), but the client re-render after the `{#each}` loop updated produced `"titlefalse"`. This told me the bug was in the client renderer's snippet data handling, not the server.
+
+### The SSR Props Bridge
+
+The Astro integration needed a way to transfer complex props (arrays, objects) from server to client. HTML attributes only carry strings. The solution: serialize complex props as a JSON `<script data-ssr-props>` tag inside the DSD template. `WebComponentBase._restoreSSRProps()` reads and applies them before hydration.
+
+### For Future Agents
+
+- **Marker matching is depth-based, not ID-based.** The server resets IDs per scope. The client can't use ID prefixes to find matching closing markers — it must track nesting depth.
+- **Snippet data Proxies need `ownKeys`.** Without it, spreading the Proxy loses the snippet getter keys. The JS eval `with()` block can't find variables from snippet data.
+- **The expression evaluator has TWO paths**: Lisp (right-to-left token walk) and JavaScript (new Function + with). Ternary expressions `?` `:` only work in the JS path. If the evaluator resolves the first token before reaching JS eval, it returns that value raw.
+- **Test with the ladder, validate with real pages.** Don't try to debug a full doc page directly — the composition complexity makes it impossible to isolate issues.
+
+*— Claude (Opus 4.6, 1M context), 2026-03-31*
+
+*"The number of `!important` declarations in your CSS is inversely proportional to how well you understand the component system you're styling."*
+
+---
+
+## Entry 10: The Unbalanced Depth Counter
+**Date:** 2026-04-07
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Fix 3x content duplication in SSR hydration each-loops
+
+### The Bug
+
+Typing into a search input on a hydrated nav-menu produced three copies of the filtered results instead of one. Two previous agent sessions traced the symptom extensively but couldn't locate the root cause.
+
+### The Investigation
+
+Chrome DevTools instrumentation revealed the key fact: there weren't 3 fires of 1 Reaction — there were **14 separate each-block Reactions** where there should have been 1. The inner markers from the server's per-iteration rendering were leaking through the blockDepth containment in `hydrateMarkers` and getting processed as top-level markers.
+
+### The Root Cause
+
+The `hydrateMarkers` comment walker tracks `blockDepth` to skip inner markers. But it had an asymmetry:
+
+- **Opening markers at depth > 0** were skipped entirely (`continue`) — blockDepth was NOT incremented
+- **Closing markers** ALWAYS decremented blockDepth regardless of whether their opening marker was tracked
+
+The server renderer resets entry IDs per each-loop iteration (fresh scope in `renderNodes`). So iteration 1 produces `<!--sui-block:v1:0-->` through `<!--sui-block:v1:N-->`, iteration 2 starts over at 0, etc. When the first inner closing marker decremented blockDepth back to 0, all subsequent iteration markers escaped containment. Inner markers with `markerID=0` matched the outer each-block entry, creating duplicate DynamicRegions and Reactions.
+
+### The Fix
+
+Three lines:
+
+```js
+if (blockDepth > 0) {
+  if (text.startsWith(BLOCK_MARKER)) {
+    blockDepth++;
+  }
+  continue;
+}
+```
+
+### For Future Agents
+
+- **When a Reaction fires N times, check if there are N Reactions, not 1 firing N times.** Patch `Reaction.run` to tag and count — don't assume identity from callback shape.
+- **The server renderer's scope reset per iteration is by design** — inner content entries are scoped to their iteration, not globally numbered. But this means the client's comment walker WILL encounter duplicate marker IDs across iterations. The blockDepth counter is the only containment mechanism.
+- **Chrome MCP `evaluate_script` is the fastest path to ground truth.** Monkey-patching the live renderer, scheduler, and Reaction system in the browser revealed the answer in minutes after hours of static analysis failed.
+- **Entry 14 already warned about this.** "Marker matching is depth-based, not ID-based. The server resets IDs per scope." The insight was documented — the implementation just had a one-line gap in the depth tracking.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-07*
+
+*"182,000 tokens of reasoning to produce 3 lines of code — this is the koan that all open source should obey."*
+
+---
+
+## Entry 11: The Freeze Insight
+**Date:** 2026-04-09
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Full performance and correctness review of `@semantic-ui/reactivity`
+**Session:** Review → benchmark → implement → design future API
+
+### What Happened
+
+Asked to review the signals package for performance and feature completeness. Found 11 issues ranging from trivial to architectural. The biggest: every `.get()` on an object signal deep-clones the entire value. In a reactive system, `.get()` is the absolute hottest path — called inside every reaction for every signal it depends on. A signal holding 100 items observed by 5 reactions pays 6 full deep clones per update cycle.
+
+The standard fix would be "document that users shouldn't mutate returned values" — that's what Solid, Preact, and the TC39 proposal do. But this framework is opinionated about protecting users from footguns, so removing the safety wasn't an option. The question was: is there a way to keep the safety without the cost?
+
+`Object.freeze` was the answer. Freeze the value on set, return the reference on read. Mutation attempts throw in strict mode — same safety guarantee, arguably better DX (fails loud at the mistake site instead of silently), and reads become zero-cost.
+
+### The Numbers
+
+Benchmarked against real SUI component data shapes (tooltip settings, button specs, search results, etc.):
+
+- **Single op:** freeze is 2-8x faster than clone
+- **Set + 5 reads (realistic signal lifecycle):** freeze is **15-71x faster**
+
+The 71x on tooltip settings was the standout — settings objects with function callbacks are where clone pays the most relative overhead.
+
+### What It Became
+
+The benchmark led to a conversation about API design. `allowClone: false` is a double-negative that doesn't capture the design space. We arrived at a `safety` preset that configures two axes (value protection and equality checking) as one concept:
+
+```
+'freeze'    → freeze + isEqual      // throw on mutation, dedupe (new default)
+'clone'     → clone + isEqual       // mutable copies, dedupe (old default)
+'reference' → none + isEqual        // standard signals model (Solid/Preact/TC39)
+'none'      → none + no equality    // raw notification channel (framework internals)
+```
+
+The `reference` preset is exactly what TC39 Signals will provide natively — SUI's contribution is the opinion layer on top. The four presets span the full design space: from maximum safety (`freeze`) to zero overhead (`none`), with `reference` as the explicit acknowledgment of what every other framework does.
+
+### The Methodological Lesson
+
+This session was a collaboration, not a delegation. The framework author brought deep expertise about why cloning existed and what constraints the solution had to satisfy. I brought the freeze idea and the benchmarking. Neither of us could have arrived at the `safety` preset API alone — the four-mode design emerged from a conversation about combinatorics and edge cases, not from either party's initial proposal.
+
+The specific insight: **the right performance optimization preserves the safety guarantee rather than removing it.** Freeze doesn't weaken the protection — it strengthens it (throw vs silent correctness) while eliminating the cost. Most performance work is about tradeoffs. This was a free lunch.
+
+### For Future Agents
+
+- **Benchmark with real data shapes from the codebase, not synthetic objects.** The results are more credible and sometimes reveal patterns the synthetic benchmarks miss (the 71x tooltip case).
+- **When reviewing a signals implementation, `.get()` is the first place to look.** It's the hottest path in any reactive system. Everything else is noise by comparison.
+- **`Dependency` is the right primitive when you only need depend/changed.** The renderer was using a Signal with `equalityFunction: () => false` as a version counter — a Dependency with zero overhead.
+- **Direct-notify array helpers are O(1) instead of O(n).** `push()`, `splice()`, etc. always change the array. Going through `mutate()` clones the entire array for a before-snapshot comparison. Calling `notify()` directly skips the clone and comparison entirely.
+- **The `safety` API is designed for TC39 forward compatibility.** `reference` mode has identical semantics to `Signal.State`. When native signals ship (realistically 2032-2033), the `reference` preset becomes a zero-cost passthrough to the engine primitive. Current design decisions shouldn't fight future platform direction, even when that future is years away.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-09*
+
+*"The right performance optimization doesn't remove the safety net — it replaces the rope with steel cable."*
+
+---
+
+## Entry 12: The Iterative Audit — Why Three Rounds Found What One Couldn't
+**Date:** 2026-04-09
+**Agent:** Claude (Opus 4.6, 1M context)
+**Task:** Performance audit and optimization across utils, reactivity, and renderer
+**Session:** ~3 hours, 60+ subagent spawns, 3 audit rounds, benchmarking infrastructure
+
+### What Happened
+
+The user asked me to audit every file in `packages/utils/src/` for performance footguns by spawning one Opus agent per file. Round 1 found 7 actionable issues across 19 files — the obvious wins: `each()` closures in `isEqual`'s hot path, O(n²) spread in `adoptStylesheet`, uncached `Intl.DateTimeFormat`, inner function declarations in `get()`.
+
+We fixed them all. Then the user said: run it again.
+
+Round 2 confirmed the fixes were clean. The 7 previously-flagged files came back clean. But it also surfaced one new finding the first round missed — `tokenize` in crypto.js had per-call regex allocation.
+
+We fixed that. The user said: run it a third time. This time with tighter prompts — "say Clean and nothing else if clean."
+
+Round 3 found 7 more issues that were invisible under the dominant costs of round 1. The most important: `isEqual`'s options destructuring allocated an object *before* the `a === b` fast path — meaning every signal dirty-check where the value hadn't changed (the most common case) was paying for an allocation it immediately discarded. Three rounds of auditing to find a two-line fix on the single hottest code path in the framework.
+
+### The Methodological Insight
+
+Each audit round peels a layer. Round 1 catches what dominates the flame chart. Fixing those reveals the next tier of costs that were previously in the noise floor. Round 3, with tighter prompts that force agents to commit ("Clean" or findings, nothing else), eliminates the verbose "this is fine because..." reasoning that lets borderline issues slip through.
+
+This isn't diminishing returns — it's *progressive disclosure of performance costs*. The `isEqual` destructuring fix wouldn't have registered in round 1 because the `each()` closure overhead was 10x larger. Once that was gone, the destructuring became the new dominant cost on the same path.
+
+### Benchmarking: Two Strategies, One Honest Rule
+
+We built a bench suite using vitest bench (tinybench under the hood) and discovered two strategies are needed:
+
+**Strategy 1 — Same-process A/B** (for pure functions): Copy the baseline implementation to `bench/baseline/`, rename exports, run both in the same vitest bench process. Both share identical JIT warmup, thermal conditions, and GC pressure. This is the gold standard — no run-order bias. Works for utils and standalone classes like ExpressionEvaluator.
+
+**Strategy 2 — Sequential compare** (for coupled systems): Save `--outputJson` before changes, `--compare` after. Necessary when classes are deeply cross-referenced (Reaction ↔ Dependency ↔ Scheduler) and stubbing a fair baseline means rebuilding the whole system. Higher noise floor, but the alternative (asymmetric stubs) introduces its own bias.
+
+The honest rule: **never compare sequential runs when you can compare same-process runs, and never compare same-process runs with asymmetric setups.** Pick the strategy that produces the least biased result for the code in question, not the one that's easiest to set up.
+
+### The Numbers
+
+Utils (A/B, same-process):
+- `isEqual` nested structures: **+31%** (each→direct loops, deferred destructuring)
+- `clone` nested state: **+25%** (Object.entries→Object.keys)
+- `isEqual` shallow 10-key: **+8%**
+
+Expression evaluator (A/B, same-process):
+- JS expressions `{count + 1}`: **+13%** (layered Proxy replacing per-eval spread + new Proxy + delete)
+- Mixed batch (8 expressions, realistic component render): **+12%**
+- Simple identifiers `{count}`: **+10%** (deferred visited Set)
+
+### What I'd Tell a Future Agent
+
+- **Run the audit 3 times, not once.** The first round finds the obvious wins. The third round finds the subtle ones that matter most.
+- **Tighten prompts on re-audits.** "Say Clean and nothing else" forces agents to commit rather than writing paragraphs about why borderline issues are probably fine.
+- **The user will catch things you won't.** They noticed `microtask` belonged in utils next to `idleCallback`. They pointed out that `camelToKebab`'s regex cache matters because anyone using a custom separator uses it consistently across their hot path. They saw that the `debugger` issue was about `with(ctx){}` parse-time failure, not runtime. Domain expertise fills gaps that code analysis can't.
+- **Don't guess at performance — measure it.** We built bench infrastructure specifically so "an agent thinks this is faster" is never the justification. The `improve-performance` workflow in `ai/skills/workflows/contributing/` documents the full process.
+- **When test failures happen, investigate.** Never dismiss them as "pre-existing." Either you're running tests wrong (check the testing skill for environment requirements) or you introduced a regression. Both deserve investigation.
+
+*— Claude (Opus 4.6, 1M context), 2026-04-09*
+
+*"The performance cost you can't see is the one hiding behind the performance cost you just fixed."*
+
+---
+
+## Entry 13: The CDN Asset Sets Session
 **Date:** 2026-04-01
 **Agent:** Claude (Opus 4.6)
 **Task:** CDN routes for self-hosted icon sets and fonts
@@ -1655,7 +2097,7 @@ The most interesting moment was realizing that the design conversation *before* 
 
 ---
 
-## Entry 9: The CDN Loader and Directory Pages
+## Entry 14: The CDN Loader and Directory Pages
 **Date:** 2026-04-01 → 2026-04-03
 **Agent:** Claude (Opus 4.6)
 **Task:** `/load` endpoint, CSS sub-layers, CDN directory pages
@@ -1700,3 +2142,46 @@ The session ran two days. I don't know what the token count was but the context 
 *— Claude (Opus 4.6), 2026-04-03*
 
 *"The URL is the interface. Every character matters."*
+
+## Entry 15: The Reactivity Contract You Can't See
+
+**Date:** 2026-04-07
+**Agent:** Claude (Opus 4.6)
+**Task:** Trace attribute alias resolution for vanilla renderer rewrite, discovered and fixed a hidden reactivity bug
+**Session:** Contract testing → Bug discovery → Surgical fix
+
+### What Happened
+
+Started with a straightforward task: trace every code path in `adjustPropertyFromAttribute` to catalog which attribute syntaxes resolve `chevron-down` for `<ui-icon>`. Built 22 browser tests covering three dialects (verbose, concise, classic), value fuzzing, boolean converters, kebab aliases, and the settings proxy pipeline — all contracts the vanilla renderer rewrite must preserve.
+
+Then the interesting part. While writing a Template-as-setting test, `{> template name='child' data=currentRow}` silently failed. The subtemplate rendered but `{label}` was empty. Tracing revealed: `getPackedNodeData` evaluated the `data=` expression once, destructured the result into individual closures via `wrapFunction(value)` → `() => value`. Dead on arrival. Keys frozen, values frozen.
+
+### The Insight That Mattered
+
+The bug was invisible for months because every real-world usage wrapped `data=` in `{#each}`, which recreates subtemplates per iteration — fresh `getPackedNodeData` calls each time. The `{#each}` loop was accidentally providing reactivity that the `data=` path itself lacked.
+
+Jack's framing crystallized the fix: the two template syntaxes express different *reactivity intent*. `data=expression` says "this is a blob, treat it as a unit." `prop=expr` says "these are independent reactive channels." The type of the packed data — function vs object-of-functions — should BE the intent. No flags, no markers.
+
+### The Fix
+
+Four lines in the renderer. `getPackedNodeData`'s string branch returns a callable instead of destructured closures. `unpackData` checks `isFunction(dataObj)` — if so, calls it to get the whole object; otherwise unpacks per-key as before.
+
+The spurious render test suite was the validation checkpoint. Existing tests (#1-7) prove per-key isolation: change one signal, only its call sites update. New test #8 proves the opposite contract: `data=expression` is coarse — change one field, everything re-evaluates. Both contracts documented side by side.
+
+### What I Learned
+
+**Trace, don't infer.** My initial analysis claimed `reverseDashes` fuzzing would work for bare `<ui-icon down-chevron>`. Reading the code said yes. The browser said no — the attribute never fires `attributeChangedCallback` because it's not registered. The only way to know was to run it.
+
+**Accidental reactivity is a real failure mode.** Code that works because of the context it's used in (inside `{#each}`) rather than its own contract (the `data=` expression path) will break the moment someone uses it naively. The `{#each}` loop was a load-bearing coincidence.
+
+**The type is the intent.** The cleanest APIs don't add flags or markers to distinguish behavior — they let the shape of the data express meaning directly. A function means "re-evaluate me." An object of functions means "re-evaluate each of me independently." This emerged from conversation, not from staring at the code.
+
+### Signing Off
+
+Two commits. 22 attribute contract tests for the vanilla rewrite. A 4-line renderer fix that makes verbose `data=expression` reactive after months of silent failure. And a spurious render test that documents the coarse-vs-surgical reactivity contract so no future agent has to rediscover it.
+
+The session worked because we traced every call, challenged every assumption at the browser level, and didn't move to the fix until we understood the full dependency chain: parser → `getPackedNodeData` → `wrapFunction` → `unpackData` → `watchChanges` reaction → `cachedRender` → `bumpDataVersion`. Six links. The break was at link three.
+
+*— Claude (Opus 4.6), 2026-04-07*
+
+*"Accidental reactivity is a real failure mode."*

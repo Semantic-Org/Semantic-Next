@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { any, clone, isArray, isFunction, openLink } from '@semantic-ui/utils';
+import { any, clone, isArray, isFunction, isString, openLink } from '@semantic-ui/utils';
 import { Icon } from '../../primitives/index.js';
 import css from './nav-menu.css?raw';
 import template from './nav-menu.html?raw';
@@ -34,7 +34,16 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
   },
 
   getMenu() {
-    let menu = clone(settings.menu);
+    let menu = settings.menu;
+    if (isString(menu)) {
+      try {
+        menu = JSON.parse(menu);
+      }
+      catch {
+        menu = [];
+      }
+    }
+    menu = clone(menu) || [];
     menu = self.filterVisibleSections(menu);
     if (self.isSearching()) {
       menu = self.filterBySearchTerm(menu);
@@ -136,7 +145,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     // then adding indexes to all items after
     let selectedIndex = -1;
     let firstMatch = false;
-    const searchTermChanged = self._lastSearchTerm !== searchTerm;
+    const searchTermChanged = self.lastSearchTerm !== searchTerm;
     const addSelectedIndex = (item) => {
       if (item?.url) {
         selectedIndex++;
@@ -158,7 +167,7 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
       });
       return currentMenu;
     });
-    self._lastSearchTerm = searchTerm;
+    self.lastSearchTerm = searchTerm;
     state.maxIndex.set(selectedIndex);
     return menu;
   },
@@ -232,17 +241,20 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     return true;
   },
 
-  isSameURL(url1 = '', url2 = '', startsWith = false) {
-    if (startsWith) {
-      return url2.startsWith(url1);
-    }
-    if (!url1 || !url2) {
+  isSameURL(testUrl = '', baseUrl = null, startsWith = false) {
+    if (baseUrl === null) {
       return false;
     }
-    return self.addTrailingSlash(url1) == self.addTrailingSlash(url2);
+    if (startsWith) {
+      return baseUrl.startsWith(testUrl);
+    }
+    if (!testUrl || !baseUrl) {
+      return false;
+    }
+    return self.addTrailingSlash(testUrl) == self.addTrailingSlash(baseUrl);
   },
   isCurrentItem(item) {
-    return self.isSameURL(item?.url, state.url.get(), item.matchSubPaths);
+    return self.isSameURL(item?.url, state.url.get(), item?.matchSubPaths);
   },
   isActiveItem(item) {
     if (settings.expandAll) {

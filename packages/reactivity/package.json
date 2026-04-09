@@ -21,7 +21,8 @@
     "build": "wireit",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "bench": "vitest bench --config vitest.bench.config.js"
   },
   "dependencies": {
     "@semantic-ui/utils": "^0.18.0"

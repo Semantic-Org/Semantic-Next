@@ -55,6 +55,25 @@ packages/
 └── utils/test/browser/             ← Browser (CSS, browser-specific utils)
 ```
 
+Other directories with their own test configs (not part of the global `packages/` test suite):
+
+```
+tools/cdn/
+├── test/unit/worker.test.js        ← Node: parseRoute, worker fetch with mocked R2
+├── test/browser/cdn.test.js        ← Browser: live smoke tests (combo, presets, sourcemaps)
+├── test/browser/packages.test.js   ← Browser: live smoke tests (import map, individual packages)
+├── vitest.config.js                ← Browser tests only
+└── vitest.unit.config.js           ← Unit tests only
+```
+
+CDN test commands:
+
+| Command | What it runs |
+|---------|-------------|
+| `cd tools/cdn && npm test` | Browser smoke tests (hits live cdn.semantic-ui.com) |
+| `cd tools/cdn && npm run test:unit` | Worker unit tests (parseRoute, fetch handler) |
+| `cd tools/cdn && npm run test:check` | Lint checks (bare imports + sourcemaps in build output) |
+
 Global test infrastructure lives at the project root:
 
 ```
@@ -73,22 +92,79 @@ tests/
 
 ## Running Tests
 
-### Scope to the package you're working on
+Every package has its own `vitest.config.js` with all three project environments (node, jsdom, browser) defined inline. **Always `cd` into the directory with the `vitest.config.js` first** — this is the fastest and most reliable way to run tests.
+
+> **Not just `packages/`** — some directories outside `packages/` have their own test configs (e.g. `tools/cdn/`). The same pattern applies: `cd` into the directory and run `npm test`.
+
+**Default command — run all tests in a package:**
 
 ```bash
-# PREFERRED — run only the package you're changing
-cd packages/reactivity && npm test
+cd packages/<name> && npm test
+```
 
-# Filter by filename from root
-npx vitest --c tests/configs/vitest/vitest.config.js arrays
+This runs `vitest` which executes all three environments (node, jsdom, browser) for that package and exits. Use this when told to "run tests", "run all tests", or "verify changes" for a package. The sections below show how to narrow scope when you only need a subset.
 
-# Watch mode
-npm run test:watch
+### Run only one environment (node, jsdom, or browser)
+
+Use `--project` to select the environment. The project names are `node`, `jsdom`, and `browser`.
+
+```bash
+# Unit tests only (node environment)
+cd packages/reactivity && npx vitest --run --project node
+
+# DOM tests only (jsdom environment)
+cd packages/query && npx vitest --run --project jsdom
+
+# Browser tests only (Chromium via Playwright)
+cd packages/component && npx vitest --run --project browser
 ```
 
 ```
-❌ npm test (from root with no filter) — runs all packages, slow
-✅ cd packages/utils && npm test — fast, focused
+❌ cd packages/query && npx vitest --run test/dom/     — path filter doesn't work like this
+❌ npx vitest --run --environment jsdom                — not a valid flag for project selection
+✅ cd packages/query && npx vitest --run --project jsdom
+```
+
+### Run a single test file
+
+Pass the file path after `--run`:
+
+```bash
+cd packages/utils && npx vitest --run test/equality.test.js
+cd packages/utils && npx vitest --run test/dom/cloning.test.js
+cd packages/query && npx vitest --run test/browser/query.test.js
+```
+
+Vitest auto-selects the correct project (node/jsdom/browser) based on the file's directory.
+
+### Run tests matching a name pattern
+
+Use `-t` to filter by test name (matches against `describe` and `it` strings):
+
+```bash
+cd packages/reactivity && npx vitest --run -t "should track"
+cd packages/reactivity && npx vitest --run --project node -t "should track"
+```
+
+### Run from the repo root (cross-package)
+
+Use `--c` to point at the global config, then filter by filename keyword:
+
+```bash
+# All tests in files matching "equality" across all packages
+npx vitest --c tests/configs/vitest/vitest.config.js --run equality
+
+# Only node tests matching "equality"
+npx vitest --c tests/configs/vitest/vitest.config.js --run --project node equality
+```
+
+### Watch mode
+
+Package configs set `watch: false`, so `npx vitest` runs and exits. Use `--watch` to override:
+
+```bash
+cd packages/reactivity && npx vitest --watch
+cd packages/reactivity && npx vitest --watch --project node
 ```
 
 ### Coverage
@@ -122,6 +198,18 @@ CI coverage thresholds (from `ci-coverage.config.js`):
 | `npm run ci:test` | All tests for CI | CI pipeline |
 | `npm run ci:test:unit` | Non-browser tests for CI (node + jsdom) | CI pipeline |
 | `npm run ci:test:browser` | Browser tests only for CI | CI pipeline |
+
+### Quick command reference
+
+| Goal | Command (from package dir) |
+|------|---------------------------|
+| All tests | `npx vitest --run` |
+| Unit only | `npx vitest --run --project node` |
+| DOM only | `npx vitest --run --project jsdom` |
+| Browser only | `npx vitest --run --project browser` |
+| One file | `npx vitest --run test/unit/signal.test.js` |
+| By name | `npx vitest --run -t "test name"` |
+| Combine | `npx vitest --run --project node -t "test name"` |
 
 ---
 
