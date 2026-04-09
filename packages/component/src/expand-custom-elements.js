@@ -1,3 +1,4 @@
+import { unescapeHTML } from '@semantic-ui/utils';
 import { resolveAttributeAliases } from './component-helpers.js';
 import { getComponent } from './component-registry.js';
 
@@ -175,14 +176,14 @@ function parseOpenTag(html, pos) {
       i++; // skip opening quote
       const valueStart = i;
       while (i < html.length && html[i] !== quote) { i++; }
-      attrs[attrName] = unescapeAttr(html.slice(valueStart, i));
+      attrs[attrName] = unescapeHTML(html.slice(valueStart, i));
       i++; // skip closing quote
     }
     else {
       // Unquoted value
       const valueStart = i;
       while (i < html.length && !/[\s>]/.test(html[i])) { i++; }
-      attrs[attrName] = unescapeAttr(html.slice(valueStart, i));
+      attrs[attrName] = unescapeHTML(html.slice(valueStart, i));
     }
   }
 
@@ -267,15 +268,4 @@ function deserializeAttrs(rawAttrs, ComponentClass) {
   resolveAttributeAliases(attrs, ComponentClass.config?.componentSpec);
 
   return attrs;
-}
-
-/*
-  Unescape HTML attribute entities.
-*/
-function unescapeAttr(str) {
-  return str
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&amp;/g, '&');
 }

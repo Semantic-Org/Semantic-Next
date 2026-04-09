@@ -12,6 +12,7 @@ import {
   arrayFromObject,
   assignInPlace,
   each,
+  escapeHTML,
   filterObject,
   inArray,
   isArray,
@@ -26,14 +27,6 @@ import { ExpressionEvaluator } from '../../expression-evaluator.js';
 
 const REMOVE_ATTR = '__SUI_REMOVE__';
 const REMOVE_ATTR_REGEX = /\s+[\w.@-]+\s*=\s*["']?__SUI_REMOVE__["']?/g;
-
-function escapeHTML(str) {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 export class ServerRenderer {
   constructor(

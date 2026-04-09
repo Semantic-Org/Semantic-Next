@@ -1,4 +1,4 @@
-import { camelToKebab, each, isFunction, kebabToCamel } from '@semantic-ui/utils';
+import { camelToKebab, each, escapeHTML, isFunction, kebabToCamel } from '@semantic-ui/utils';
 import { getUIClasses, resolveAttributeAliases } from './component-helpers.js';
 import { expandCustomElements } from './expand-custom-elements.js';
 
@@ -116,7 +116,7 @@ function serializeAttrs(attrs, resolvedProperties) {
         parts.push(attrName);
       }
       else {
-        parts.push(`${attrName}="${escapeAttr(String(attrValue))}"`);
+        parts.push(`${attrName}="${escapeHTML(String(attrValue))}"`);
       }
       return;
     }
@@ -127,13 +127,13 @@ function serializeAttrs(attrs, resolvedProperties) {
       if (value) { parts.push(attrName); }
     }
     else if (typeof value === 'string') {
-      parts.push(`${attrName}="${escapeAttr(value)}"`);
+      parts.push(`${attrName}="${escapeHTML(value)}"`);
     }
     else if (typeof value === 'number') {
       parts.push(`${attrName}="${value}"`);
     }
     else if (typeof value === 'object') {
-      parts.push(`${attrName}="${escapeAttr(JSON.stringify(value))}"`);
+      parts.push(`${attrName}="${escapeHTML(JSON.stringify(value))}"`);
     }
   });
 
@@ -157,8 +157,4 @@ function serializeSlots(slots) {
     }
   });
   return html;
-}
-
-function escapeAttr(str) {
-  return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 }
