@@ -71,14 +71,15 @@ export class Reaction {
     }
     Scheduler.current = this;
     try {
-      this.dependencies.forEach(dep => dep.cleanUp(this));
+      for (const dep of this.dependencies) {
+        dep.cleanUp(this);
+      }
       this.dependencies.clear();
       this.callback(this);
       this.firstRun = false;
     }
     finally {
       Scheduler.current = null;
-      Scheduler.pendingReactions.delete(this);
     }
   }
 

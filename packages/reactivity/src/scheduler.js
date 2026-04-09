@@ -1,3 +1,7 @@
+import { microtask } from '@semantic-ui/utils';
+
+const flushTask = () => Scheduler.flush();
+
 export class Scheduler {
   static current = null;
   static pendingReactions = new Set();
@@ -12,12 +16,7 @@ export class Scheduler {
   static scheduleFlush() {
     if (!Scheduler.isFlushScheduled) {
       Scheduler.isFlushScheduled = true;
-      if (typeof queueMicrotask === 'function') {
-        queueMicrotask(() => Scheduler.flush());
-      }
-      else {
-        Promise.resolve().then(() => Scheduler.flush());
-      }
+      microtask(flushTask);
     }
   }
 

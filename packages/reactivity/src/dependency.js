@@ -4,7 +4,9 @@ import { Scheduler } from './scheduler.js';
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    this.setContext(metadata);
+    if (isDevelopment) {
+      this.setContext(metadata);
+    }
   }
 
   depend() {
@@ -15,9 +17,12 @@ export class Dependency {
   }
 
   // allows metadata to be passed with dependency for debugging
-  setContext(context = {}) {
+  setContext(context) {
     if (!isDevelopment) {
       return;
+    }
+    if (!context) {
+      context = {};
     }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(context, this.setContext);
@@ -29,13 +34,18 @@ export class Dependency {
   }
 
   changed(context) {
-    if (context) {
-      this.context = context;
+    if (isDevelopment) {
+      if (context) {
+        this.context = context;
+      }
+      else {
+        this.setContext();
+      }
     }
-    else {
-      this.setContext();
+    const ctx = this.context;
+    for (const subscriber of this.subscribers) {
+      subscriber.invalidate(ctx);
     }
-    this.subscribers.forEach(subscriber => subscriber.invalidate(this.context));
   }
 
   // called after flush

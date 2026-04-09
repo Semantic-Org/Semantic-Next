@@ -1,7 +1,8 @@
 import { Signal } from '@semantic-ui/reactivity';
 import { isArray, isFunction, isString } from '@semantic-ui/utils';
 
-const jsProxyHandler = {
+// Fallback handler for the rare includeHelpers: false path
+const jsNoHelpersHandler = {
   has(target, key) {
     return key in target;
   },
@@ -29,6 +30,29 @@ export class ExpressionEvaluator {
     this.data = data;
     this.helpers = helpers || {};
     this.dataVersion = dataVersion;
+
+    // Reusable Proxy for JS expression evaluation — avoids per-eval spread + new Proxy
+    this.jsContext = null;
+    this.jsProxy = new Proxy(
+      // Dummy target — the handler reads from jsContext/helpers directly
+      Object.create(null),
+      {
+        has: (_, key) => {
+          // Filter 'debugger' to prevent reserved word conflict inside with(ctx){}
+          if (key === 'debugger') { return false; }
+          return (this.jsContext !== null && key in this.jsContext) || key in this.helpers;
+        },
+        get: (_, prop) => {
+          const value = (this.jsContext !== null && prop in this.jsContext)
+            ? this.jsContext[prop]
+            : this.helpers[prop];
+          if (value instanceof Signal) {
+            return value.get();
+          }
+          return value;
+        },
+      },
+    );
   }
 
   setData(data) {
@@ -78,17 +102,14 @@ export class ExpressionEvaluator {
     return parse(tokens);
   }
 
-  evaluateJavascript(code, context = {}, { includeHelpers = true } = {}) {
+  evaluateJavascript(code, context, { includeHelpers = true } = {}) {
     let result;
-    if (includeHelpers) {
-      context = {
-        ...this.helpers,
-        ...context,
-      };
-      delete context['debugger'];
-    }
     try {
-      const proxiedContext = new Proxy(context, jsProxyHandler);
+      // Reuse the cached Proxy — just swap which context object it reads from
+      if (includeHelpers) {
+        this.jsContext = context || null;
+      }
+      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, jsNoHelpersHandler);
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
         fn = new Function('ctx', `with(ctx){return ${code}}`);
@@ -97,19 +118,24 @@ export class ExpressionEvaluator {
         }
         ExpressionEvaluator.fnCache.set(code, fn);
       }
-      result = fn(proxiedContext);
+      result = fn(proxy);
     }
     catch (e) {
       // this token is not valid javascript
     }
+    finally {
+      this.jsContext = null;
+    }
     return result;
   }
 
-  lookupExpressionValue(expression = '', data = {}, visited = new Set()) {
-    if (visited.has(expression)) {
-      return undefined;
+  lookupExpressionValue(expression = '', data = {}, visited) {
+    if (visited) {
+      if (visited.has(expression)) {
+        return undefined;
+      }
+      visited.add(expression);
     }
-    visited.add(expression);
 
     if (isString(expression)) {
       // Multi-token Lisp-style expressions (no JS operators outside quotes)
@@ -126,9 +152,11 @@ export class ExpressionEvaluator {
         const value = this.lookupTokenValue(expression, data);
 
         if (value !== undefined) {
-          visited.delete(expression);
-          if (visited.size > 0) {
-            return value;
+          if (visited) {
+            visited.delete(expression);
+            if (visited.size > 0) {
+              return value;
+            }
           }
           return isFunction(value) ? value() : value;
         }
@@ -142,6 +170,12 @@ export class ExpressionEvaluator {
     }
     else {
       expressionArray = expression;
+    }
+
+    // Create visited Set lazily — only needed when recursing into sub-expressions
+    if (!visited) {
+      visited = new Set();
+      visited.add(expression);
     }
 
     let funcArguments = [];
