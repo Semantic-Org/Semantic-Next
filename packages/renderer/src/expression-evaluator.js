@@ -91,6 +91,9 @@ export class ExpressionEvaluator {
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
         fn = new Function('ctx', `with(ctx){return ${code}}`);
+        if (ExpressionEvaluator.fnCache.size > 10000) {
+          ExpressionEvaluator.fnCache.clear();
+        }
         ExpressionEvaluator.fnCache.set(code, fn);
       }
       result = fn(proxiedContext);

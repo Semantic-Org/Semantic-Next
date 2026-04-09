@@ -5,7 +5,6 @@ import {
   each,
   fatal,
   filterObject,
-  hashCode,
   inArray,
   isArray,
   isDevelopment,
@@ -37,6 +36,7 @@ import { ReactionScope } from './reaction-scope.js';
 const templateCache = new Map();
 
 export class Renderer {
+  static nextId = 0;
   constructor(
     { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
   ) {
