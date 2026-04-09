@@ -1,4 +1,4 @@
-import { clone, isEqual } from '@semantic-ui/utils';
+import { clone, isDevelopment, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
 import { Scheduler } from './scheduler.js';
 
@@ -23,6 +23,9 @@ export class Reaction {
   }
 
   setContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     const defaultContext = {
       firstRun: this.firstRun,
     };
@@ -33,6 +36,9 @@ export class Reaction {
   }
 
   setTrace() {
+    if (!isDevelopment) {
+      return;
+    }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this.context, this.setTrace);
     }
@@ -42,6 +48,9 @@ export class Reaction {
   }
 
   addContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     if (!this.context) {
       this.context = {};
     }

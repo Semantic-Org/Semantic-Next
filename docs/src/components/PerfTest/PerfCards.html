@@ -1,0 +1,33 @@
+<div class="search-bar">
+  <input type="text" placeholder="Filter cards..." value="{search}" />
+  <span class="result-count">{filteredItems.length} / {items.length}</span>
+</div>
+<div class="card-grid">
+  {#each item in filteredItems}
+    <div class="card {item.status ? 'has-status' : ''}" data-id="{item.id}" data-category="{lowercase item.category}">
+      <div class="header">
+        <span class="name" title="{concat item.name ' — ' item.category}">{item.name}</span>
+        {#if item.status}
+          <span class="status {item.status}">{capitalize item.status}</span>
+        {/if}
+      </div>
+      <div class="meta">
+        {item.category} &middot; {item.date}
+        &middot; {item.tags.length} {item.tags.length === 1 ? 'tag' : 'tags'}
+      </div>
+      {#if item.description}
+        <div class="description">{truncate item.description 40}</div>
+      {/if}
+      <div class="tags">
+        {#each entry in item.tags}
+          {>tag label=(uppercase entry.label) type=entry.type}
+        {/each}
+      </div>
+    </div>
+  {/each}
+</div>
+
+{#snippet tag}
+  <span class="tag {type}">{label}</span>
+{/snippet}
+

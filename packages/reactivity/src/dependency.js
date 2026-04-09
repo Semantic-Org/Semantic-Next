@@ -1,3 +1,4 @@
+import { isDevelopment } from '@semantic-ui/utils';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
@@ -15,9 +16,13 @@ export class Dependency {
 
   // allows metadata to be passed with dependency for debugging
   setContext(context = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(context, this.setContext);
-    } else {
+    }
+    else {
       context.stack = new Error().stack;
     }
     this.context = context;

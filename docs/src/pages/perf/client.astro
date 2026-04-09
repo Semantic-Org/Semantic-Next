@@ -1,0 +1,74 @@
+---
+import { PerfCards } from '@components/PerfTest/PerfCards.js';
+---
+<html>
+<body style="background-color:#000000">
+<style>
+  .perf-header {
+    padding: 16px;
+    font-family: monospace;
+    color: #0f0;
+    background: #111;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .perf-header h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #fff;
+  }
+  .perf-metric {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 13px;
+  }
+  .perf-metric .label {
+    color: #888;
+  }
+  .perf-metric .value {
+    color: #0f0;
+    font-weight: bold;
+  }
+</style>
+
+<div class="perf-header">
+  <h2>Client Only (client:only, no SSR)</h2>
+  <span class="perf-metric" id="render-time">
+    <span class="label">render: </span>
+    <span class="value">measuring...</span>
+  </span>
+  <span class="perf-metric" id="paint-time">
+    <span class="label">first paint: </span>
+    <span class="value">measuring...</span>
+  </span>
+</div>
+
+<PerfCards client:only />
+
+<script>
+  performance.mark('client-page-start');
+
+  const check = () => {
+    const el = document.querySelector('perf-cards');
+    if (el?.template) {
+      performance.mark('client-rendered');
+      performance.measure('client-render', 'client-page-start', 'client-rendered');
+      const measure = performance.getEntriesByName('client-render')[0];
+      document.querySelector('#render-time .value').textContent = measure.duration.toFixed(2) + 'ms';
+
+      requestAnimationFrame(() => {
+        performance.mark('client-painted');
+        performance.measure('client-paint', 'client-page-start', 'client-painted');
+        const paintMeasure = performance.getEntriesByName('client-paint')[0];
+        document.querySelector('#paint-time .value').textContent = paintMeasure.duration.toFixed(2) + 'ms';
+      });
+    } else {
+      requestAnimationFrame(check);
+    }
+  };
+  requestAnimationFrame(check);
+</script>
+</body>
+</html>

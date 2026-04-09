@@ -465,6 +465,26 @@ describe('SSR hydration — unsafe HTML', () => {
 
     expect(shadowHTML(el)).toBe('<div><b>Bold</b> and <i>italic</i></div>');
   });
+
+  it('unsafe HTML is reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '<div>{#html content}</div>',
+      defaultState: { content: '<b>Before</b>' },
+      createComponent: ({ state }) => ({
+        swap() {
+          state.content.set('<em>After</em>');
+        },
+      }),
+    });
+
+    expect(shadowHTML(el)).toBe('<div><b>Before</b></div>');
+
+    const updated = $(el).onNext('updated');
+    el.component.swap();
+    await updated;
+
+    expect(shadowHTML(el)).toBe('<div><em>After</em></div>');
+  });
 });
 
 /*******************************

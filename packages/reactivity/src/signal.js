@@ -3,6 +3,7 @@ import {
   findIndex,
   isArray,
   isClassInstance,
+  isDevelopment,
   isEqual,
   isNumber,
   isObject,
@@ -49,6 +50,9 @@ export class Signal {
 
   // set debugging context for signal removing any present context
   setContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     const defaultContext = {
       value: this.currentValue,
     };
@@ -60,6 +64,9 @@ export class Signal {
 
   // add context to signal
   addContext(additionalContext = {}) {
+    if (!isDevelopment) {
+      return;
+    }
     if (!this.context) {
       this.context = {};
     }
@@ -70,6 +77,9 @@ export class Signal {
 
   // set debugging stack trace for signal
   setTrace() {
+    if (!isDevelopment) {
+      return;
+    }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this.context, this.setTrace);
     }

@@ -1,11 +1,28 @@
 import { Signal } from '@semantic-ui/reactivity';
-import { filterObject, isArray, isFunction, isString, wrapFunction } from '@semantic-ui/utils';
+import { isArray, isFunction, isString } from '@semantic-ui/utils';
+
+const jsProxyHandler = {
+  has(target, key) {
+    return key in target;
+  },
+  get(target, prop) {
+    const value = target[prop];
+    if (value instanceof Signal) {
+      return value.get();
+    }
+    return value;
+  },
+};
 
 export class ExpressionEvaluator {
   static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
   static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
   static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
+  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
+  static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
+  static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  static fnCache = new Map();
 
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
@@ -67,44 +84,19 @@ export class ExpressionEvaluator {
         ...this.helpers,
         ...context,
       };
-      context = filterObject(context, (value, name) => {
-        const reservedWords = ['debugger'];
-        return !reservedWords.includes(name) && ExpressionEvaluator.VAR_NAME_REGEXP.test(name);
-      });
+      delete context['debugger'];
     }
     try {
-      const proxyHandler = {
-        has(target, key) {
-          if (key in target) {
-            return true;
-          }
-          return false;
-        },
-        get(target, prop) {
-          const value = target[prop];
-          if (value instanceof Signal) {
-            return value.get();
-          }
-          if (isFunction(value)) {
-            return new Proxy(value, {
-              apply(targetFn, thisArg, args) {
-                return targetFn.apply(thisArg, args);
-              },
-            });
-          }
-          return value;
-        },
-      };
-
-      const proxiedContext = new Proxy({ ...context }, proxyHandler);
-      result = new Function(
-        'ctx',
-        `
-        with (ctx) {
-          return ${code};
+      const proxiedContext = new Proxy(context, jsProxyHandler);
+      let fn = ExpressionEvaluator.fnCache.get(code);
+      if (!fn) {
+        fn = new Function('ctx', `with(ctx){return ${code}}`);
+        if (ExpressionEvaluator.fnCache.size > 10000) {
+          ExpressionEvaluator.fnCache.clear();
         }
-      `,
-      )(proxiedContext);
+        ExpressionEvaluator.fnCache.set(code, fn);
+      }
+      result = fn(proxiedContext);
     }
     catch (e) {
       // this token is not valid javascript
@@ -119,14 +111,26 @@ export class ExpressionEvaluator {
     visited.add(expression);
 
     if (isString(expression)) {
-      const value = this.lookupTokenValue(expression, data);
+      // Multi-token Lisp-style expressions (no JS operators outside quotes)
+      // resolve via array parsing below — skip the single-token lookup
+      // that wastes time in evaluateJavascript for non-JS expressions
+      const hasQuotes = expression.includes("'") || expression.includes('"');
+      const stripped = hasQuotes
+        ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
+        : expression;
+      const isMultiTokenLisp = stripped.includes(' ')
+        && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
 
-      if (value !== undefined) {
-        visited.delete(expression);
-        if (visited.size > 0) {
-          return value;
+      if (!isMultiTokenLisp) {
+        const value = this.lookupTokenValue(expression, data);
+
+        if (value !== undefined) {
+          visited.delete(expression);
+          if (visited.size > 0) {
+            return value;
+          }
+          return isFunction(value) ? value() : value;
         }
-        return wrapFunction(value)();
       }
     }
 
@@ -171,46 +175,81 @@ export class ExpressionEvaluator {
       return literalValue;
     }
 
-    let dataValue = this.getDeepDataValue(data, token);
-    let value = this.accessTokenValue(dataValue, token, data);
-    if (value !== undefined) {
-      return value;
+    // Fast path: simple identifier — skip getDeepDataValue + accessTokenValue overhead
+    if (!token.includes('.')) {
+      let value = data[token];
+      if (value instanceof Signal) {
+        return value.value;
+      }
+      if (value !== undefined) {
+        return value;
+      }
     }
-
-    const jsValue = this.evaluateJavascript(token, data);
-    if (jsValue !== undefined) {
-      return this.accessTokenValue(jsValue, token, data);
+    else {
+      let dataValue = this.getDeepDataValue(data, token);
+      let value = this.accessTokenValue(dataValue, token, data);
+      if (value !== undefined) {
+        return value;
+      }
     }
 
     const helper = this.helpers[token];
     if (isFunction(helper)) {
       return helper;
     }
+
+    // Simple identifiers and dotted paths are fully resolved by
+    // data lookup and helper check above — skip expensive JS eval
+    if (ExpressionEvaluator.SIMPLE_PATH_REGEXP.test(token)) {
+      return;
+    }
+
+    const jsValue = this.evaluateJavascript(token, data);
+    if (jsValue !== undefined) {
+      return this.accessTokenValue(jsValue, token, data);
+    }
   }
 
   getDeepDataValue(obj, path) {
-    return path.split('.').reduce((acc, part) => {
-      if (acc === undefined) {
+    let dot = path.indexOf('.');
+
+    // Fast path: simple identifier (no dots)
+    if (dot === -1) {
+      const value = obj[path];
+      if (value instanceof Signal) {
+        return value.get();
+      }
+      return value;
+    }
+
+    // Walk segments via indexOf to avoid split() array allocation on hot path
+    let current = obj;
+    let start = 0;
+    let end = dot;
+    while (start < path.length) {
+      if (current instanceof Signal) {
+        current = current.get();
+      }
+      else if (typeof current === 'function') {
+        current = current();
+      }
+      if (current == null) {
         return undefined;
       }
-      const current = (acc instanceof Signal)
-        ? acc.get()
-        : wrapFunction(acc)();
-      if (current == undefined) {
-        return undefined;
+      current = current[path.substring(start, end)];
+      start = end + 1;
+      end = path.indexOf('.', start);
+      if (end === -1) {
+        end = path.length;
       }
-      return current[part];
-    }, obj);
+    }
+    return current;
   }
 
   accessTokenValue(tokenValue, token, data) {
-    const getThisContext = (token, data) => {
-      const path = token.split('.').slice(0, -1).join('.');
-      return this.getDeepDataValue(data, path);
-    };
-
-    if (isFunction(tokenValue) && token.search('.') !== -1) {
-      const thisContext = getThisContext(token, data);
+    if (isFunction(tokenValue) && token.includes('.')) {
+      const lastDot = token.lastIndexOf('.');
+      const thisContext = this.getDeepDataValue(data, token.substring(0, lastDot));
       tokenValue = tokenValue.bind(thisContext);
     }
 
@@ -233,13 +272,16 @@ export class ExpressionEvaluator {
       return token.slice(1, -1).replace(/\\(['"])/g, '$1');
     }
 
-    const boolString = { true: true, false: false };
-    if (boolString[token] !== undefined) {
-      return boolString[token];
-    }
+    if (token === 'true') { return true; }
+    if (token === 'false') { return false; }
 
-    if (Number.isFinite(+token)) {
-      return Number(token);
+    // Quick charCode guard to skip +token coercion for identifiers
+    const c = token.charCodeAt(0);
+    if ((c >= 48 && c <= 57) || c === 45 || c === 46 || c === 43) {
+      const num = +token;
+      if (Number.isFinite(num)) {
+        return num;
+      }
     }
   }
 }

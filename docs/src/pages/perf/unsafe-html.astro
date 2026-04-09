@@ -1,0 +1,134 @@
+---
+import { UnsafeHtmlTest } from '@components/PerfTest/UnsafeHtmlTest.js';
+---
+<html>
+<body style="background-color:#000000">
+<style>
+  .perf-header {
+    padding: 16px;
+    font-family: monospace;
+    color: #0f0;
+    background: #111;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .perf-header h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #fff;
+  }
+  .perf-metric {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 13px;
+  }
+  .perf-metric .label {
+    color: #888;
+  }
+  .perf-metric .value {
+    color: #0f0;
+    font-weight: bold;
+  }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; }
+</style>
+
+<div class="perf-header">
+  <h2>unsafeHTML Hydration — Anchor Survival Test</h2>
+  <div>
+    <span class="perf-metric" id="hydrate-status">
+      <span class="label">hydration: </span>
+      <span class="value">waiting...</span>
+    </span>
+    <span class="perf-metric" id="anchor-status">
+      <span class="label">comment anchors: </span>
+      <span class="value">checking...</span>
+    </span>
+    <span class="perf-metric" id="reactivity-status">
+      <span class="label">reactivity: </span>
+      <span class="value">untested</span>
+    </span>
+  </div>
+  <div id="details" style="margin-top: 8px; font-size: 12px; color: #888;"></div>
+</div>
+
+<UnsafeHtmlTest client:only />
+
+<script>
+  import { $ } from '@semantic-ui/query';
+
+  const log = (lines) => {
+    document.getElementById('details').innerHTML = lines
+      .map(l => `<div style="font-family:monospace">${l}</div>`)
+      .join('');
+  };
+
+  const check = () => {
+    const el = document.querySelector('unsafe-html-test');
+    if (!el?.template) {
+      requestAnimationFrame(check);
+      return;
+    }
+
+    // Hydration happened
+    $('#hydrate-status .value').text('complete').addClass('pass');
+
+    // Count comment nodes in the shadow root
+    const walker = document.createTreeWalker(
+      el.shadowRoot,
+      NodeFilter.SHOW_COMMENT
+    );
+    const comments = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      comments.push(node.data);
+    }
+
+    const suiComments = comments.filter(c => c.startsWith('sui') || c.startsWith('/sui'));
+    const anchorEl = $('#anchor-status .value');
+    if (suiComments.length > 0) {
+      anchorEl.text(`${suiComments.length} remaining`).addClass('fail');
+    } else {
+      anchorEl.text('0 (all cleaned)').addClass('pass');
+    }
+
+    const lines = [
+      `Total comments in shadow root: ${comments.length}`,
+      `SUI marker comments: ${suiComments.length}`,
+      ...suiComments.map(c => `  &mdash; "${c.slice(0, 60)}${c.length > 60 ? '...' : ''}"`)
+    ];
+
+    // Test reactivity: click toggle, check if unsafeHTML expressions update
+    const initialBadge = el.shadowRoot.querySelector('.results .result-row:nth-child(2) .value')?.innerHTML;
+    lines.push(`Initial reactive badge HTML: ${initialBadge?.slice(0, 80)}`);
+
+    // Programmatically toggle state
+    el.component.state?.status?.set('error');
+
+    // Check after a tick
+    setTimeout(() => {
+      const updatedBadge = el.shadowRoot.querySelector('.results .result-row:nth-child(2) .value')?.innerHTML;
+      lines.push(`After toggle badge HTML: ${updatedBadge?.slice(0, 80)}`);
+
+      const reactEl = $('#reactivity-status .value');
+      if (updatedBadge && updatedBadge !== initialBadge) {
+        reactEl.text('working').addClass('pass');
+        lines.push('<span class="pass">Reactivity: PASS — unsafeHTML updated after state change</span>');
+      } else {
+        reactEl.text('BROKEN').addClass('fail');
+        lines.push('<span class="fail">Reactivity: FAIL — unsafeHTML did NOT update after state change</span>');
+      }
+
+      // Reset state back
+      el.component.state?.status?.set('success');
+
+      log(lines);
+    }, 100);
+  };
+
+  requestAnimationFrame(check);
+</script>
+</body>
+</html>
