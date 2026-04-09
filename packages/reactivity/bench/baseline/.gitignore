@@ -1,0 +1,3 @@
+# Baseline implementations are ephemeral — populated during perf passes, deleted after
+*
+!.gitignore
