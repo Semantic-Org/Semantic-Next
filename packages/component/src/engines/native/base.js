@@ -156,7 +156,7 @@ class WebComponentBase extends HTMLElementBase {
     // Attach events after hydration completes
     this.template.attach(this.renderRoot);
 
-    setTimeout(() => this.template?.onRendered(), 0);
+    queueMicrotask(() => this.template?.onRendered());
   }
 
   removeMarkers() {
