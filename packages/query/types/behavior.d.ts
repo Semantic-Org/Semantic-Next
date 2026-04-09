@@ -55,7 +55,7 @@ export class Behavior {
   $element: Query;
   $elements: Query;
   element: Element;
-  _settings: Record<string, any>;
+  settings: Record<string, any>;
   namespace: string;
   customInvocation: Function;
   onCreated: Function;
