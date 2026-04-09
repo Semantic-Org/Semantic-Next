@@ -1,0 +1,37 @@
+{
+  "name": "semantic-ui-vscode",
+  "displayName": "Semantic UI",
+  "description": "VS Code extension for Semantic UI — syntax highlighting and LSP client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onLanguage:html"
+  ],
+  "contributes": {
+    "grammars": [
+      {
+        "scopeName": "source.sui.template",
+        "path": "./sui.tmlanguage.json",
+        "injectTo": ["text.html.derivative"]
+      }
+    ]
+  },
+  "scripts": {
+    "prepackage": "rm -rf server && mkdir -p server && cp ../../src/*.js server/",
+    "package": "npx @vscode/vsce package --allow-missing-repository"
+  },
+  "dependencies": {
+    "@semantic-ui/templating": "^0.17.0",
+    "@semantic-ui/utils": "^0.17.0",
+    "acorn": "^8.16.0",
+    "glob": "^13.0.6",
+    "vscode-languageclient": "^9.0.0",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  }
+}

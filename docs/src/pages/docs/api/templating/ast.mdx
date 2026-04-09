@@ -47,6 +47,19 @@ Represents a dynamic expression to be evaluated.
 }
 ```
 
+The `unsafeHTML` flag is set when using `{#html expr}` — the expression result is rendered as raw HTML.
+
+The `literalValue` flag is set when using `{#fn expr}` — the expression value is passed as-is without auto-invoking functions.
+
+#### Example (literal value)
+```javascript
+{
+  type: 'expression',
+  value: 'handleChange',
+  literalValue: true
+}
+```
+
 ### If Conditional
 
 Represents an if/else if/else control structure.

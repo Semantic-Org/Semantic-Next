@@ -53,6 +53,25 @@ describe('TemplateCompiler', () => {
       expect(ast).toEqual(expectedAST);
     });
 
+    it('should compile {#fn} expressions with literalValue flag', () => {
+      const compiler = new TemplateCompiler();
+      const template = `
+        <div>
+          <p>{#fn handleChange}</p>
+          <p>{#fn myCallback}</p>
+        </div>
+      `;
+      const ast = compiler.compile(template);
+      const expectedAST = [
+        { type: 'html', html: '<div>\n          <p>' },
+        { type: 'expression', literalValue: true, value: 'handleChange' },
+        { type: 'html', html: '</p>\n          <p>' },
+        { type: 'expression', literalValue: true, value: 'myCallback' },
+        { type: 'html', html: '</p>\n        </div>' },
+      ];
+      expect(ast).toEqual(expectedAST);
+    });
+
     it('should preserve boolean values', () => {
       const compiler = new TemplateCompiler();
       const template = `

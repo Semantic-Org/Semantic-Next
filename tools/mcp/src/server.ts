@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as reactivity from '@semantic-ui/reactivity';
 import { ICON_CATEGORIES, iconMappings } from '@semantic-ui/specs';
 import { iconAliases } from '@semantic-ui/specs/icons/meta';
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
 import { isContributor } from './config.js';

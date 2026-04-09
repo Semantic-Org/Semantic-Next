@@ -266,3 +266,80 @@ describe('isEqual', () => {
     });
   });
 });
+
+describe('isEqual — loose mode', () => {
+  it('should treat "5" and 5 as equal when loose is true', () => {
+    expect(isEqual('5', 5, { loose: true })).toBe(true);
+  });
+
+  it('should treat "0" and 0 as equal when loose is true', () => {
+    expect(isEqual('0', 0, { loose: true })).toBe(true);
+  });
+
+  it('should still require structural match for objects in loose mode', () => {
+    expect(isEqual({ a: '1' }, { a: 1 }, { loose: true })).toBe(true);
+  });
+
+  it('should not treat null and undefined as equal in strict mode', () => {
+    expect(isEqual(null, undefined)).toBe(false);
+  });
+});
+
+describe('isEqual — partial mode', () => {
+  it('should match when a is a subset of b', () => {
+    expect(isEqual({ a: 1 }, { a: 1, b: 2 }, { partial: true })).toBe(true);
+  });
+
+  it('should not match when a has keys b does not', () => {
+    expect(isEqual({ a: 1, b: 2 }, { a: 1 }, { partial: true })).toBe(false);
+  });
+
+  it('should work with nested objects in partial mode', () => {
+    expect(isEqual(
+      { user: { name: 'Jack' } },
+      { user: { name: 'Jack', age: 30 }, extra: true },
+      { partial: true },
+    )).toBe(true);
+  });
+
+  it('should work with arrays in partial mode (prefix match)', () => {
+    expect(isEqual([1, 2], [1, 2, 3], { partial: true })).toBe(true);
+    expect(isEqual([1, 2, 3], [1, 2], { partial: true })).toBe(false);
+  });
+});
+
+describe('isEqual — ignoreKeys', () => {
+  it('should ignore specified keys during comparison', () => {
+    expect(isEqual(
+      { a: 1, meta: 'x' },
+      { a: 1, meta: 'y' },
+      { ignoreKeys: ['meta'] },
+    )).toBe(true);
+  });
+
+  it('should ignore multiple keys', () => {
+    expect(isEqual(
+      { a: 1, _id: 'abc', _rev: 1 },
+      { a: 1, _id: 'def', _rev: 2 },
+      { ignoreKeys: ['_id', '_rev'] },
+    )).toBe(true);
+  });
+
+  it('should still fail if non-ignored keys differ', () => {
+    expect(isEqual(
+      { a: 1, meta: 'x' },
+      { a: 2, meta: 'y' },
+      { ignoreKeys: ['meta'] },
+    )).toBe(false);
+  });
+});
+
+describe('isEqual — NaN', () => {
+  it('should treat NaN as equal to NaN', () => {
+    expect(isEqual(NaN, NaN)).toBe(true);
+  });
+
+  it('should treat NaN in arrays as equal', () => {
+    expect(isEqual([NaN, 1], [NaN, 1])).toBe(true);
+  });
+});

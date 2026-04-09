@@ -28,7 +28,7 @@ import { TemplateHelpers } from './template-helpers.js';
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
 
 export const Template = class Template {
-  [IS_TEMPLATE] = true;
+  get [IS_TEMPLATE]() { return true; }
   // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_TEMPLATE];

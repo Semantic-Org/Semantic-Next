@@ -536,3 +536,23 @@ describe('iterators', () => {
     });
   });
 });
+
+describe('each — context binding', () => {
+  it('should bind callback to provided context', () => {
+    const context = { multiplier: 10 };
+    const results = [];
+    each([1, 2, 3], function(val) {
+      results.push(val * this.multiplier);
+    }, context);
+    expect(results).toEqual([10, 20, 30]);
+  });
+
+  it('should bind context for object iteration', () => {
+    const context = { prefix: 'key:' };
+    const results = [];
+    each({ a: 1, b: 2 }, function(val, key) {
+      results.push(this.prefix + key);
+    }, context);
+    expect(results).toEqual(['key:a', 'key:b']);
+  });
+});

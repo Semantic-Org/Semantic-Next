@@ -4,25 +4,66 @@ import css from './CodePlaygroundFile.css?raw';
 import template from './CodePlaygroundFile.html?raw';
 import codeMirrorCSS from './lib/codemirror.css?raw';
 
+import { acceptCompletion } from '@codemirror/autocomplete';
+import { Prec } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
+
 import { templateLang } from './lang/template-lang.js';
+import { getClient } from './lib/lsp-client.js';
+
+// Highest precedence so it fires before playground-elements' indent handler.
+// acceptCompletion returns false when no completion is active, falling through to indent.
+const tabCompletion = Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }]));
 
 const defaultSettings = {
   lineNumbers: true,
 };
 
 const defaultState = {
-  initialized: false, // avoid the flash when mode is set from changing file types
+  initialized: false,
 };
 
 const createComponent = ({ self, settings, state, data, $, $$ }) => ({
-  getClassMap() {
-    return {
-      initialized: state.initialized.get(),
-    };
+
+  hasLSP(filename) {
+    return (filename || '').includes('.html');
+  },
+
+  getExtensions(filename) {
+    // cache the full array per filename to avoid duplicate registrations
+    if (!self.extensionCache) {
+      self.extensionCache = {};
+    }
+    if (self.extensionCache[filename]) {
+      return self.extensionCache[filename];
+    }
+    const isHTML = (filename || '').includes('.html');
+    if (!isHTML) {
+      self.extensionCache[filename] = [];
+      return [];
+    }
+    const extension = [getClient().plugin(filename), tabCompletion];
+    self.extensionCache[filename] = extension;
+    return extension;
+  },
+
+  setSyntax(filename) {
+    // Defer to run after playground-elements finishes its setState() on file switch
+    requestAnimationFrame(() => {
+      self.setEditorInstance();
+      const isHTML = (filename || '').includes('.html');
+      if (self.editorView && isHTML) {
+        self.setLanguage(templateLang);
+        const contentEl = self.editorView.contentDOM;
+        if (contentEl) {
+          contentEl.setAttribute('data-language', 'html');
+        }
+      }
+    });
+    return '';
   },
 
   setEditorInstance() {
-    // CM6 editor instance
     const editorEl = $$('playground-code-editor').get(0);
     const view = editorEl?._editorView;
 
@@ -30,47 +71,8 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
       return;
     }
 
-    // retrieve classes from instance
-    const EditorView = view.constructor;
-    const EditorState = view.state.constructor;
-    const Transaction = view.state.update({}).constructor;
-
-    const compartment = [...view.state.config.compartments.keys()][0];
-    const Compartment = compartment.constructor;
-    const StateEffect = compartment.reconfigure([]).constructor;
-
-    const ViewPlugin = view.plugins[0]?.spec?.plugin?.constructor;
-    // Duck-type StateField by its create/update methods
-    const StateField = view.state.config.base.find(x =>
-      typeof x?.create === 'function' && typeof x?.update === 'function'
-    )?.constructor;
-    // Duck-type RangeSet by its iter method and size property
-    const RangeSet = view.state.values.find(v => typeof v?.iter === 'function' && typeof v?.size === 'number')
-      ?.constructor;
-    const Facet = EditorView.updateListener.constructor;
-
-    // store playground code editor el
     self.editorEl = editorEl;
-
-    // store code mirror view
     self.editorView = view;
-
-    // store base classes
-    self.cm = {
-      EditorView,
-      EditorState,
-      Transaction,
-      Compartment,
-      StateEffect,
-      StateField,
-      ViewPlugin,
-      RangeSet,
-      Facet,
-      // Shortcuts
-      updateListener: EditorView.updateListener,
-      appendConfig: StateEffect.appendConfig,
-      userEvent: Transaction.userEvent,
-    };
 
     // Find the language compartment by duck-typing LanguageSupport shape
     const compartmentEntries = [...view.state.config.compartments.entries()];
@@ -78,13 +80,21 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
       value?.language && value?.support && value?.extension
     )?.[0];
 
-    // safety check for race conditions -- try again
     if (!languageCompartment && !self.retried) {
       self.retried = true;
       requestIdleCallback(() => self.setEditorInstance());
     }
 
-    self.cm.languageCompartment = languageCompartment;
+    self.languageCompartment = languageCompartment;
+  },
+
+  setLanguage(lang) {
+    if (!self.languageCompartment) {
+      return;
+    }
+    self.editorView.dispatch({
+      effects: self.languageCompartment.reconfigure(lang),
+    });
   },
 
   configureCodeEditors() {
@@ -95,46 +105,18 @@ const createComponent = ({ self, settings, state, data, $, $$ }) => ({
 
     const $editor = $('playground-file-editor');
 
-    // disable line numbers if requested
     if (data.lineNumbers) {
       $editor.addAttr('line-numbers');
     }
     else {
       $editor.removeAttr('line-numbers');
     }
-    // disable line numbers if requested
     if (data.lineWrapping) {
       $editor.addAttr('line-wrapping');
     }
     else {
       $editor.removeAttr('line-wrapping');
     }
-
-    // handle custom syntax
-    const isHTML = (data?.filename || '').search('.html') !== -1;
-    if (self.editorView && isHTML) {
-      requestIdleCallback(() => {
-        self.setLanguage(templateLang);
-        // Set data-language for CSS scoping
-        const contentEl = self.editorView.contentDOM;
-        if (contentEl) {
-          contentEl.setAttribute('data-language', 'html');
-        }
-        state.initialized.set(true);
-      });
-    }
-    else {
-      state.initialized.set(true);
-    }
-  },
-
-  setLanguage(lang) {
-    if (!self.cm.languageCompartment) {
-      return;
-    }
-    self.editorView.dispatch({
-      effects: self.cm.languageCompartment.reconfigure(lang),
-    });
   },
 
   setCodeSize({ width = null, height = null } = {}) {
@@ -179,11 +161,12 @@ const events = {
   },
 };
 
-const onRendered = ({ self, data }) => {
+const onRendered = ({ self, state }) => {
   requestIdleCallback(() => {
     self.setEditorInstance();
     self.configureCodeEditors();
     self.setupFolds();
+    state.initialized.set(true);
   });
 };
 

@@ -474,7 +474,9 @@ export class Renderer {
           comp.stop();
           return;
         }
-        const value = this.eval(exprNode.value, data);
+        const value = exprNode.literalValue
+          ? this.evaluator.lookupTokenValue(exprNode.value, data)
+          : this.eval(exprNode.value, data);
         textNode.data = value ?? '';
       }));
     }

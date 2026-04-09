@@ -134,7 +134,7 @@ The compiler transforms a template string into an AST — a flat array of node o
 1. **Preprocess** — expand self-closing web component tags (`<ui-icon />` -> `<ui-icon></ui-icon>`)
 2. **Detect syntax** — check whether the template uses `{}` or `{{}}` brackets (one syntax per template, first expression wins)
 3. **Scan** — `StringScanner` walks the string character-by-character, advancing to the next expression or SVG tag
-4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, and finally plain `expression`
+4. **Parse tags** — for each `{expression}`, the compiler matches against regex patterns in priority order: `#if`, `#each`, `#async`, `#snippet`, `#rerender`, `#guard`, `>slot`, `>template`, `#html`, `#fn`, and finally plain `expression`
 5. **Build AST** — two stacks drive nesting:
    - `contentStack` — tracks which node receives child AST nodes (push on open, pop on close)
    - `conditionStack` — tracks nodes that support branching (`if`, `each`, `async`)
@@ -146,7 +146,80 @@ The AST is intentionally lean and human-legible — a flat array of plain object
 
 Use `validate_template` with `includeAST: true` via MCP to compile any template and inspect the resulting AST.
 
+<<<<<<< HEAD
+**expression** — dynamic value: `{user.name}`, `{formatDate date 'h:mm a'}`
+```json
+{ "type": "expression", "value": "formatDate date 'h:mm a'" }
+{ "type": "expression", "value": "content", "unsafeHTML": true }
+{ "type": "expression", "value": "handleChange", "literalValue": true }
+{ "type": "expression", "value": "isHidden", "ifDefined": true }
+```
+
+**if** — conditional: `{#if condition}...{else if other}...{else}...{/if}`
+```json
+{ "type": "if", "condition": "isActive", "content": [/*AST*/], "branches": [
+    { "type": "elseif", "condition": "isPending", "content": [/*AST*/] },
+    { "type": "else", "content": [/*AST*/] }
+]}
+```
+
+**each** — loop: `{#each item in items}...{else}...{/each}`
+```json
+{ "type": "each", "over": "items", "as": "item", "indexAs": "i", "content": [/*AST*/] }
+{ "type": "each", "over": "items", "as": "item", "content": [/*AST*/], "elseContent": [/*AST*/] }
+```
+
+**async** — promise: `{#async fetchData as data}{loading}...{error as err}...{/async}`
+```json
+{ "type": "async", "expression": "fetchData", "as": "data",
+  "content": [/*AST*/], "loadingContent": [/*AST*/], "errorContent": [/*AST*/], "errorAs": "err" }
+```
+
+**rerender / guard** — both produce the same node type with different fields populated
+```json
+{ "type": "rerender", "expression": "userId", "key": null, "content": [/*AST*/] }
+{ "type": "rerender", "expression": null, "key": "getStatus", "content": [/*AST*/] }
+```
+
+**template** — subtemplate: `{>itemTemplate data=item}`
+```json
+{ "type": "template", "name": "'itemTemplate'", "reactiveData": { "data": "item" } }
+```
+
+**snippet** — reusable section: `{#snippet footer}...{/snippet}`
+```json
+{ "type": "snippet", "name": "footer", "content": [/*AST*/] }
+```
+
+**slot** — content projection: `{>slot}`, `{>slot named}`
+```json
+{ "type": "slot" }
+{ "type": "slot", "name": "named" }
+```
+
+**svg** — SVG context: `<svg>...</svg>`
+```json
+{ "type": "svg", "content": [/*AST rendered in SVG mode*/] }
+```
+
+### Debugging: Inspecting the AST
+
+Use the MCP tool `validate_template` with `includeAST: true` to compile any template and inspect the resulting AST without running a component. This is the fastest way to verify what the compiler produces.
+
+Notable patterns in real AST output:
+
+- **Snippets are hoisted** — snippet nodes appear at the front of the AST regardless of position in the template
+- **Template names are quoted expression strings** — `{>itemTemplate}` compiles to `"name": "'itemTemplate'"` because the name is an expression that gets evaluated at render time (supporting dynamic templates)
+- **`rerender` and `guard` share a node type** — both produce `type: 'rerender'`. A `{#rerender expr}` sets `expression` with `key: null`. A `{#guard expr}` sets `key` with `expression: null`
+- **`slot` without a name** has no `name` property (not `undefined` — absent entirely)
+- **Adjacent HTML is merged** by the optimizer — you won't see consecutive `html` nodes in the output
+
+### Nested Expression Handling
+
+The compiler manually counts brace depth to handle expressions containing inline objects or nested sub-expressions:
+=======
 Here is a representative template and its compiled AST:
+>>>>>>> main
 
 ```html
 {#snippet badge}<span class="badge {color}">{label}</span>{/snippet}

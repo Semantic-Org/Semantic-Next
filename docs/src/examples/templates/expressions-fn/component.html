@@ -1,0 +1,16 @@
+<div class="controls">
+  {#each filterFn, filterName in filters}
+    <ui-button
+      small
+      primary={filter == filterName}
+      data-filter={filterName}>
+      {titleCase filterName}
+    </ui-button>
+  {/each}
+</div>
+
+<p>If you are returning a function from a function, go ahead and skip using {#fn}</p>
+<filter-list .filter={getFilterFn} />
+
+<p>If you want the function to not evaluate and be passed directly use #fn</p>
+<filter-list .filter={#fn figFilter} />

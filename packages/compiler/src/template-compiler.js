@@ -29,6 +29,7 @@ class TemplateCompiler {
     SLOT: '^{OPEN}>\\s*slot\\s*',
     TEMPLATE: '^{OPEN}>\\s*',
     HTML_EXPRESSION: '^{OPEN}\\s*#html\\s*',
+    FN_EXPRESSION: '^{OPEN}\\s*#fn\\s*',
     EXPRESSION: '^{OPEN}\\s*',
   };
 
@@ -89,13 +90,22 @@ class TemplateCompiler {
     Creates an AST representation of a template
     from a template string
   */
-  compile(templateString = this.templateString) {
-    templateString = TemplateCompiler.preprocessTemplate(templateString);
-    const scanner = new StringScanner(templateString);
+  compile(templateString = this.templateString, { includePositions = false, recoverable = false } = {}) {
+    this.includePositions = includePositions;
+    this.recoverable = recoverable;
+    this.errors = [];
 
     if (!isString(templateString)) {
+      if (recoverable) {
+        this.errors.push({ message: 'Template is not a string', pos: 0 });
+        return [];
+      }
+      const scanner = new StringScanner('');
       scanner.fatal('Template is not a string', templateString);
     }
+
+    templateString = TemplateCompiler.preprocessTemplate(templateString);
+    const scanner = new StringScanner(templateString);
 
     // compile regexp globally once
     const { htmlRegExp } = TemplateCompiler;
@@ -184,9 +194,22 @@ class TemplateCompiler {
     // a stack containing nodes that support elseif/else. this includes if but also each and async
     let conditionStack = [];
 
+    // helper for recoverable errors — collects instead of throwing
+    const emitError = (message, pos) => {
+      if (recoverable) {
+        this.errors.push({ message, pos: pos ?? scanner.pos });
+        return true;
+      }
+      return false;
+    };
+
     while (!scanner.isEOF()) {
+      // track position for LSP
+      const nodeStart = scanner.pos;
+
       // extract details from inside {tag}
       const tag = parseTag(scanner);
+      const nodeEnd = scanner.pos;
 
       // the node which receive this content in its subtree
       const currentContent = last(contentStack);
@@ -255,6 +278,10 @@ class TemplateCompiler {
         let newNode = {
           type: tag.type.toLowerCase(),
         };
+        if (includePositions) {
+          newNode.start = nodeStart;
+          newNode.end = nodeEnd;
+        }
 
         switch (tag.type) {
           case 'IF': {
@@ -277,10 +304,11 @@ class TemplateCompiler {
               content: [],
             };
             if (!currentCondition) {
+              if (emitError('{elseif} encountered without matching if condition', nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.ELSEIF);
-              scanner.fatal(
-                '{elseif} encountered without matching if condition',
-              );
+              scanner.fatal('{elseif} encountered without matching if condition');
             }
             returnToLastContent();
             setCurrentContent(newNode);
@@ -294,35 +322,38 @@ class TemplateCompiler {
               content: [],
             };
             if (!currentCondition) {
+              if (emitError('{else} encountered without matching if or each condition', nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.ELSE);
-              scanner.fatal(
-                '{else} encountered without matching if or each condition',
-              );
+              scanner.fatal('{else} encountered without matching if or each condition');
               break;
             }
 
             if (currentCondition.type === 'if') {
-              // Handling for if/else pushes to branches: []
               returnToLastContent();
               setCurrentContent(newNode);
               currentCondition.branches.push(newNode);
             }
             else if (currentCondition?.type == 'each') {
-              // some conditions might have elseContent like #each instead of branches array
               returnToLastContent();
               setContentTarget('elseContent');
             }
             else {
+              if (emitError('{else} encountered with unknown condition type: ' + currentCondition.type, nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.ELSE);
-              scanner.fatal(
-                '{else} encountered with unknown condition type: ' + currentCondition.type,
-              );
+              scanner.fatal('{else} encountered with unknown condition type: ' + currentCondition.type);
             }
             break;
           }
 
           case 'CLOSE_IF': {
             if (conditionStack.length == 0) {
+              if (emitError('{/if} close tag found without open if tag', nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.CLOSE_IF);
               scanner.fatal('{/if} close tag found without open if tag');
             }
@@ -354,6 +385,18 @@ class TemplateCompiler {
               ...newNode,
               type: 'expression',
               unsafeHTML: true,
+              value: tag.content,
+            };
+            addToAST(newNode);
+            scanner.consume('}'); // got an extra }
+            break;
+          }
+
+          case 'FN_EXPRESSION': {
+            newNode = {
+              ...newNode,
+              type: 'expression',
+              literalValue: true,
               value: tag.content,
             };
             addToAST(newNode);
@@ -451,10 +494,11 @@ class TemplateCompiler {
 
           case 'ASYNC_LOADING': {
             if (currentContentNode?.type !== 'async') {
+              if (emitError('{before} encountered without matching {async} condition', nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.ASYNC_LOADING);
-              scanner.fatal(
-                '{before} encountered without matching {async} condition',
-              );
+              scanner.fatal('{before} encountered without matching {async} condition');
             }
             returnToLastContent();
             setContentTarget('loadingContent');
@@ -463,10 +507,11 @@ class TemplateCompiler {
 
           case 'ASYNC_ERROR': {
             if (currentContentNode?.type !== 'async') {
+              if (emitError(`{error} encountered without matching {async} condition`, nodeStart)) {
+                break;
+              }
               scanner.returnTo(tagRegExp.ASYNC_ERROR);
-              scanner.fatal(
-                `{error} encountered without matching {async} condition in "${currentContent}"`,
-              );
+              scanner.fatal(`{error} encountered without matching {async} condition`);
             }
             const { as } = TemplateCompiler.parseAsyncString(tag.content);
             currentContentNode.errorAs = as;
@@ -510,7 +555,13 @@ class TemplateCompiler {
           case 'SVG_OPEN': {
             // AST inside <svg> open tag is not included
             addToAST({ type: 'html', html: '<svg ' });
-            addToAST(...this.compile(tag.content));
+            // Save errors before recursive compile (it resets this.errors)
+            const outerErrors = this.errors;
+            addToAST(...this.compile(tag.content, { includePositions, recoverable }));
+            // Merge inner errors back and restore outer accumulator
+            const innerErrors = this.errors;
+            this.errors = outerErrors;
+            this.errors.push(...innerErrors);
             addToAST({ type: 'html', html: '>' });
             newNode = {
               type: 'svg',
@@ -534,11 +585,16 @@ class TemplateCompiler {
       }
       else {
         // advances to next expression
+        const htmlStart = scanner.pos;
         const html = scanner.consumeUntil(parserRegExp.NEXT_TAG);
 
         // if we consumed any html add it as an html node
         if (html) {
           const htmlNode = { type: 'html', html };
+          if (includePositions) {
+            htmlNode.start = htmlStart;
+            htmlNode.end = scanner.pos;
+          }
           addToAST(htmlNode);
         }
       }
@@ -778,6 +834,10 @@ class TemplateCompiler {
       if (node.type === 'html') {
         if (currentHtmlNode) {
           currentHtmlNode.html += node.html;
+          // preserve end position of last merged node
+          if (node.end !== undefined) {
+            currentHtmlNode.end = node.end;
+          }
         }
         else {
           currentHtmlNode = { ...node };

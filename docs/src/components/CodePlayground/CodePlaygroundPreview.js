@@ -1,5 +1,5 @@
 import { defineComponent } from '@semantic-ui/component';
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import css from './CodePlaygroundPreview.css?raw';
 import template from './CodePlaygroundPreview.html?raw';
 import './lib/pretty-json.js';

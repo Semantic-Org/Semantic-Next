@@ -1,0 +1,22 @@
+h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--standard-60);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.empty {
+  color: var(--standard-40);
+  font-style: italic;
+}

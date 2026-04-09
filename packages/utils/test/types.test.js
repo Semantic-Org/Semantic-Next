@@ -2,14 +2,19 @@ import {
   isArguments,
   isArray,
   isBinary,
+  isBoolean,
   isClassInstance,
+  isDate,
   isEmpty,
   isFunction,
+  isIterable,
   isMap,
+  isNode,
   isNumber,
   isObject,
   isPlainObject,
   isPromise,
+  isRegExp,
   isSet,
   isString,
 } from '@semantic-ui/utils';
@@ -242,5 +247,58 @@ describe('Type Checking Utilities', () => {
       expect(isMap(objectWithMapMethods)).toBe(false);
       expect(isMap(new Map())).toBe(true);
     });
+  });
+});
+
+describe('isEmpty edge cases', () => {
+  it('should return true for empty string', () => {
+    expect(isEmpty('')).toBe(true);
+  });
+
+  it('should return false for non-empty string', () => {
+    expect(isEmpty('hello')).toBe(false);
+  });
+
+  it('should return true for object with only null values', () => {
+    expect(isEmpty({ a: null, b: null })).toBe(true);
+  });
+
+  it('should return false for object with zero value', () => {
+    expect(isEmpty({ a: 0 })).toBe(false);
+  });
+});
+
+describe('type checkers — additional coverage', () => {
+  it('isBoolean should correctly identify booleans', () => {
+    expect(isBoolean(true)).toBe(true);
+    expect(isBoolean(false)).toBe(true);
+    expect(isBoolean(0)).toBe(false);
+    expect(isBoolean('true')).toBe(false);
+  });
+
+  it('isDate should identify Date objects', () => {
+    expect(isDate(new Date())).toBe(true);
+    expect(isDate('2024-01-01')).toBe(false);
+  });
+
+  it('isRegExp should identify RegExp objects', () => {
+    expect(isRegExp(/test/)).toBe(true);
+    expect(isRegExp(new RegExp('test'))).toBe(true);
+    expect(isRegExp('test')).toBe(false);
+  });
+
+  it('isNode should check nodeType', () => {
+    expect(isNode({ nodeType: 1 })).toBe(true);
+    expect(isNode({})).toBe(false);
+    expect(isNode(null)).toBe(false);
+  });
+
+  it('isIterable should check Symbol.iterator', () => {
+    expect(isIterable([1, 2, 3])).toBe(true);
+    expect(isIterable('hello')).toBe(true);
+    expect(isIterable(new Set())).toBe(true);
+    expect(isIterable(new Map())).toBe(true);
+    expect(isIterable(42)).toBe(false);
+    expect(isIterable(null)).toBe(false);
   });
 });

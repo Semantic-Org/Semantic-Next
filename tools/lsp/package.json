@@ -1,0 +1,44 @@
+{
+  "name": "@semantic-ui/lsp",
+  "version": "0.1.0",
+  "description": "Language Server Protocol implementation for Semantic UI templates and components",
+  "type": "module",
+  "main": "src/server.js",
+  "exports": {
+    ".": "./src/server.js",
+    "./node": "./src/node.js",
+    "./browser": "./src/browser.js",
+    "./browser-client": "./src/browser-client.js",
+    "./language-service": "./src/language-service.js",
+    "./worker": "./src/worker.js",
+    "./component-analyzer": "./src/component-analyzer.js",
+    "./spec-registry": "./src/spec-registry.js",
+    "./helper-registry": "./src/helper-registry.js",
+    "./server-helpers": "./src/server-helpers.js"
+  },
+  "bin": {
+    "sui-lsp": "bin/sui-lsp.js"
+  },
+  "dependencies": {
+    "acorn": "^8.0.0",
+    "glob": "^10.0.0",
+    "vscode-languageserver": "^9.0.0",
+    "vscode-languageserver-textdocument": "^1.0.0"
+  },
+  "peerDependencies": {
+    "@codemirror/autocomplete": "^6.0.0",
+    "@codemirror/lsp-client": "^6.0.0",
+    "@codemirror/state": "^6.0.0",
+    "@codemirror/view": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@codemirror/autocomplete": { "optional": true },
+    "@codemirror/lsp-client": { "optional": true },
+    "@codemirror/state": { "optional": true },
+    "@codemirror/view": { "optional": true }
+  },
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  }
+}

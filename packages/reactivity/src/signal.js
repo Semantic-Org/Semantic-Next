@@ -17,7 +17,7 @@ import { Reaction } from './reaction.js';
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 
 export class Signal {
-  [IS_SIGNAL] = true;
+  get [IS_SIGNAL]() { return true; }
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }

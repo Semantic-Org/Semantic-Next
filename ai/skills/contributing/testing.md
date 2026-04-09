@@ -221,7 +221,7 @@ Most test files import from the published package name:
 import { unique, filterEmpty } from '@semantic-ui/utils';
 import { $, $$ } from '@semantic-ui/query';
 import { Reaction, Signal } from '@semantic-ui/reactivity';
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import { LitRenderer } from '@semantic-ui/renderer';
 ```
 
