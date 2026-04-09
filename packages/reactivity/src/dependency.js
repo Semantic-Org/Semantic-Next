@@ -29,7 +29,12 @@ export class Dependency {
   }
 
   changed(context) {
-    this.setContext(context);
+    if (context) {
+      this.context = context;
+    }
+    else {
+      this.setContext();
+    }
     this.subscribers.forEach(subscriber => subscriber.invalidate(this.context));
   }
 

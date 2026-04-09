@@ -93,7 +93,7 @@ export class Signal {
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
-    this.dependency.depend();
+    this.depend();
     const value = this.currentValue;
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
@@ -111,7 +111,7 @@ export class Signal {
       return value;
     }
     if (isArray(value)) {
-      return value = value.map(value => this.maybeClone(value));
+      return value.map(value => this.maybeClone(value));
     }
     return this.clone(value);
   }
@@ -119,15 +119,13 @@ export class Signal {
   set value(newValue) {
     if (!this.equalityFunction(this.currentValue, newValue)) {
       this.currentValue = this.maybeClone(newValue);
-      this.addContext({ value: newValue });
-      this.setTrace();
-      this.dependency.changed(this.context);
+      this.notify();
     }
   }
 
   get({ clone = true } = {}) {
     if (!clone) {
-      this.dependency.depend();
+      this.depend();
       return this.currentValue;
     }
     return this.value;
@@ -186,6 +184,20 @@ export class Signal {
     return computedSignal;
   }
 
+  depend() {
+    this.dependency.depend();
+  }
+
+  notify() {
+    this.setContext();
+    this.setTrace();
+    this.dependency.changed(this.context);
+  }
+
+  hasDependents() {
+    return this.dependency.subscribers.size > 0;
+  }
+
   peek() {
     return this.maybeClone(this.currentValue);
   }
@@ -208,9 +220,7 @@ export class Signal {
       // if no value returned check if the value changed from side effects
       // in this case we want to trigger reactivity
       if (!this.equalityFunction(beforeClone, this.currentValue)) {
-        this.setContext();
-        this.setTrace();
-        this.dependency.changed(this.context);
+        this.notify();
       }
     }
   }

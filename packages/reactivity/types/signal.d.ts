@@ -105,6 +105,29 @@ export class Signal<T> {
   ): void;
 
   /**
+   * Registers this signal as a dependency in the current reactive context
+   * without reading or returning the value. Useful when you need to subscribe
+   * to changes without accessing the value.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#depend depend}
+   */
+  depend(): void;
+
+  /**
+   * Force-triggers all subscribers without changing the value. Bypasses the
+   * equality check, useful when external code has mutated something and you
+   * need to notify dependents.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#notify notify}
+   */
+  notify(): void;
+
+  /**
+   * Returns whether any reactive contexts are currently subscribed to this signal.
+   * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#hasdependents hasDependents}
+   * @returns `true` if at least one reaction depends on this signal
+   */
+  hasDependents(): boolean;
+
+  /**
    * Returns the current value without establishing a reactive dependency.
    * Accessing the value with `peek()` will not cause any reactive context to depend on this Signal.
    * @see {@link https://next.semantic-ui.com/docs/api/reactivity/signal#peek peek}
