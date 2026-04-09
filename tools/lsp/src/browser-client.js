@@ -20,15 +20,22 @@ export function createClient({ timeout = 10000 } = {}) {
   const worker = new Worker(workerURL, { type: 'module' });
   worker.onerror = (e) => console.error('[LSP] Worker error:', e);
 
+  const listeners = new WeakMap();
   const transport = {
     send(message) {
       worker.postMessage(message);
     },
     subscribe(handler) {
-      worker.addEventListener('message', (e) => handler(e.data));
+      const wrapper = (e) => handler(e.data);
+      listeners.set(handler, wrapper);
+      worker.addEventListener('message', wrapper);
     },
     unsubscribe(handler) {
-      worker.removeEventListener('message', handler);
+      const wrapper = listeners.get(handler);
+      if (wrapper) {
+        worker.removeEventListener('message', wrapper);
+        listeners.delete(handler);
+      }
     },
   };
 
