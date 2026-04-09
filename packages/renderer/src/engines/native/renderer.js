@@ -32,8 +32,32 @@ import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
 
-// PreparedTemplate cache — parse once, cloneNode per instance
-const templateCache = new Map();
+// PreparedTemplate cache — parse once, cloneNode per instance.
+// Generational: active fills up → becomes backup → new active.
+// Hits check both; backup is discarded on next swap.
+const TEMPLATE_CACHE_MAX = 1000;
+let templateCacheActive = new Map();
+let templateCacheBackup = new Map();
+
+function templateCacheGet(key) {
+  if (templateCacheActive.has(key)) { return templateCacheActive.get(key); }
+  if (templateCacheBackup.has(key)) {
+    const val = templateCacheBackup.get(key);
+    templateCacheActive.set(key, val);
+    return val;
+  }
+}
+
+function templateCacheSet(key, val) {
+  if (templateCacheActive.size >= TEMPLATE_CACHE_MAX) {
+    templateCacheBackup = templateCacheActive;
+    templateCacheActive = new Map();
+  }
+  templateCacheActive.set(key, val);
+}
+
+// Regex for finding attribute markers — compiled once since prefix/suffix are constants
+const ATTR_MARKER_REGEX = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
 
 export class Renderer {
   static nextId = 0;
@@ -140,7 +164,7 @@ export class Renderer {
 
   parseHTML(htmlString, isSVG = false) {
     const cacheKey = isSVG ? `svg:${htmlString}` : htmlString;
-    let cached = templateCache.get(cacheKey);
+    let cached = templateCacheGet(cacheKey);
 
     if (!cached) {
       if (isSVG) {
@@ -154,7 +178,7 @@ export class Renderer {
         cached = document.createElement('template');
         cached.innerHTML = htmlString;
       }
-      templateCache.set(cacheKey, cached);
+      templateCacheSet(cacheKey, cached);
     }
 
     return cached.content.cloneNode(true);
@@ -166,8 +190,6 @@ export class Renderer {
 
   bindMarkers(root, entries, data, scope, ast) {
     if (entries.length === 0) { return; }
-
-    const attrMarkerRegex = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
 
     // Pass 1: Bind attribute markers on elements
     const processedAttrIDs = new Set();
@@ -187,15 +209,15 @@ export class Renderer {
         const parts = [];
         let lastIndex = 0;
         let match;
-        attrMarkerRegex.lastIndex = 0;
-        while ((match = attrMarkerRegex.exec(attrValue)) !== null) {
+        ATTR_MARKER_REGEX.lastIndex = 0;
+        while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
           if (match.index > lastIndex) {
             parts.push({ static: attrValue.slice(lastIndex, match.index) });
           }
           const markerID = parseInt(match[1]);
           parts.push({ markerID });
           processedAttrIDs.add(markerID);
-          lastIndex = attrMarkerRegex.lastIndex;
+          lastIndex = ATTR_MARKER_REGEX.lastIndex;
         }
         if (lastIndex < attrValue.length) {
           parts.push({ static: attrValue.slice(lastIndex) });
@@ -697,7 +719,7 @@ export class Renderer {
       const key = (collectionType === 'object') ? indexOrKey : undefined;
       return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
-    if (isString(item)) { return item; }
+    if (isString(item)) { return item + ':' + indexOrKey; }
     return indexOrKey;
   }
 
@@ -974,8 +996,7 @@ export class Renderer {
         const frag = document.createDocumentFragment();
         for (const n of [...container.childNodes]) { frag.appendChild(n); }
         region.anchor.after(frag);
-        region.ownedNodes = [...frag.childNodes.length ? [] : ownedNodes];
-        // If frag was consumed, recollect from DOM
+        // Recollect from DOM — frag is consumed after insertion
         const collected = [];
         let sibling = region.anchor.nextSibling;
         while (sibling) {
@@ -1208,8 +1229,6 @@ export class Renderer {
     refTemplate.innerHTML = htmlString;
     const refRoot = refTemplate.content;
 
-    const attrMarkerRegex = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
-
     // Build a set of real DOM elements owned by block regions so we can skip
     // them during the parallel walk. Block directives (each, if, etc.) are
     // single comments in the reference DOM but expand to N elements in the
@@ -1262,13 +1281,13 @@ export class Renderer {
         const parts = [];
         let lastIndex = 0;
         let match;
-        attrMarkerRegex.lastIndex = 0;
-        while ((match = attrMarkerRegex.exec(attrValue)) !== null) {
+        ATTR_MARKER_REGEX.lastIndex = 0;
+        while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
           if (match.index > lastIndex) {
             parts.push({ static: attrValue.slice(lastIndex, match.index) });
           }
           parts.push({ markerID: parseInt(match[1]) });
-          lastIndex = attrMarkerRegex.lastIndex;
+          lastIndex = ATTR_MARKER_REGEX.lastIndex;
         }
         if (lastIndex < attrValue.length) {
           parts.push({ static: attrValue.slice(lastIndex) });
