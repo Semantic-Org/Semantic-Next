@@ -207,12 +207,24 @@ export function setDefaultSettings(el, { defaultSettings = {}, componentSpec }) 
   as specified in the spec for the component. Extends from default settings.
   Call as: getSettingsFromConfig(el, { componentSpec, properties })
 */
+// Cache of non-alias property names per properties object, built on first access
+const settingsKeysCache = new WeakMap();
+
 export function getSettingsFromConfig(el, { componentSpec, properties }) {
+  let settingsKeys = settingsKeysCache.get(properties);
+  if (!settingsKeys) {
+    settingsKeys = [];
+    each(properties, (propSettings, propertyName) => {
+      if (propSettings.alias !== true) {
+        settingsKeys.push(propertyName);
+      }
+    });
+    settingsKeysCache.set(properties, settingsKeys);
+  }
+
   let settings = {};
-  each(properties, (propSettings, propertyName) => {
-    if (propSettings.alias === true) {
-      return;
-    }
+  for (let i = 0; i < settingsKeys.length; i++) {
+    const propertyName = settingsKeys[i];
     const elementProp = el[propertyName];
     const setting = elementProp
       ?? el.defaultSettings[propertyName]
@@ -223,7 +235,7 @@ export function getSettingsFromConfig(el, { componentSpec, properties }) {
     if (componentSpec && settings[elementProp] !== undefined) {
       settings[propertyName] = true;
     }
-  });
+  }
   return settings;
 }
 
