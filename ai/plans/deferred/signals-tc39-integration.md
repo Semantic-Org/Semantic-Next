@@ -66,7 +66,7 @@ No public API changes. No breaking changes. Users don't know the engine switched
 
 ## Open Questions
 
-- **Timing** — TC39 Signals has been Stage 1 since 2024 with minimal activity. Estimated 2028-2029 at earliest for engine shipping (research: 2-3 years from current state). This plan exists to ensure current design decisions don't fight the future direction. No implementation work until Stage 3+.
+- **Timing** — TC39 Signals has been Stage 1 since April 2024 with no advancement in two years. Zero browser implementation activity — no V8, SpiderMonkey, or JSC tracking bugs, intents, or prototypes. Champions' own strategy requires extensive framework integration before seeking Stage 2. Realistic timeline: Stage 3 around 2028-2029, Baseline Widely Available 2032-2033. This plan exists to ensure current design decisions don't fight the future direction. No implementation work until Stage 3+.
 - **Polyfill strategy** — signal-polyfill exists. Worth adopting early for the topological sort / glitch-free guarantee? Or wait for native? The polyfill adds bundle size that SUI's current push-based system doesn't need.
 - **Lazy computed API** — `Signal.computed()` vs `Signal.lazy()` vs `Signal.computed(fn, { lazy: true })`. Naming TBD when the feature is concrete.
 - **`Reaction` survival** — Does `Reaction.create()` (autorun/effect pattern) still exist alongside native computed? Probably yes — it's the imperative escape hatch that computed can't replace (side effects, DOM writes, cleanup logic).
