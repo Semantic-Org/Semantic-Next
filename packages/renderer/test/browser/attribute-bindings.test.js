@@ -503,6 +503,38 @@ RENDERING_ENGINES.forEach(engine => {
       expect(child.hasAttribute('mycallback')).toBe(false);
       expect(child.hasAttribute('.myCallback')).toBe(false);
     });
+
+    it('should pass a filter function via {#fn} that the child can invoke', async () => {
+      const tag = uniqueTag();
+      const childTag = uniqueTag();
+
+      defineComponent({
+        renderingEngine: engine,
+        tagName: childTag,
+        template: '<span>{getFiltered}</span>',
+        defaultSettings: { filter: () => true },
+        createComponent: ({ settings }) => ({
+          getFiltered: () => ['Apple', 'Fig', 'Kiwi'].filter(settings.filter).join(', '),
+        }),
+      });
+
+      defineComponent({
+        renderingEngine: engine,
+        tagName: tag,
+        template: `<${childTag} .filter={#fn shortOnly}></${childTag}>`,
+        createComponent: () => ({
+          shortOnly: (item) => item.length <= 3,
+        }),
+      });
+
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      await el.updateComplete;
+
+      const child = el.shadowRoot.querySelector(childTag);
+      await child.updateComplete;
+      expect(child.shadowRoot.querySelector('span').textContent).toBe('Fig');
+    });
   });
 
   /*******************************
