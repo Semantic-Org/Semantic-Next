@@ -100,6 +100,7 @@ TOKEN FINALIZATION (the gate)
 | 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
 | 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
 | 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
+| 11b | [Signal Performance](signal-performance.md) | 4-5h | pair | `scoped` — Freeze-on-set replaces clone-on-read (15-71x faster). Flush error boundary. Benchmarked. |
 | 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
 | 13b | [Native SSR](native-ssr.md) | 24-40h (3-5d) | pair | `scoped` — JS reference impl + Rust/WASM Phase 2. buildHTMLString split point. DSD wrapping. Client hydration via bindMarkers. |
 
@@ -202,6 +203,7 @@ Plans in `ai/plans/deferred/`.
 
 - ~~Native Renderer~~ — completed, archived. Follow-up: Native SSR (#13b).
 - ~~Lit Removal~~ — completed, archived. Follow-up: Tree-Shakeable Lit (#12).
+- [Signals TC39 Integration](deferred/signals-tc39-integration.md) — Adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. `safety` preset system designed to make this transition zero-API-change. Lazy vs eager computed split along settings/state line. Blocked on TC39 Stage 3+.
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 
