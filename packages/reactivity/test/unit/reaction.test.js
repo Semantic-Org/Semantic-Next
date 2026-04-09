@@ -279,6 +279,52 @@ describe('Reaction', () => {
     });
   });
 
+  describe('Cycle Detection', () => {
+    it('should detect and break infinite reactive cycles', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const a = new Signal(0);
+      const b = new Signal(0);
+
+      // A writes B, B writes A — infinite cycle
+      Reaction.create(() => {
+        b.set(a.get() + 1);
+      });
+      Reaction.create(() => {
+        a.set(b.get() + 1);
+      });
+
+      // Should not hang — flush should break the cycle
+      Reaction.flush();
+
+      expect(errorSpy).toHaveBeenCalledTimes(1);
+      expect(errorSpy.mock.calls[0][0]).toMatch(/cycle detected/i);
+      errorSpy.mockRestore();
+    });
+
+    it('should allow legitimate multi-pass convergence', () => {
+      const a = new Signal(1);
+      const b = new Signal(0);
+      const c = new Signal(0);
+
+      // Chain: a -> b -> c (converges in 2 passes)
+      Reaction.create(() => {
+        b.set(a.get() * 2);
+      });
+      Reaction.create(() => {
+        c.set(b.get() + 10);
+      });
+
+      Reaction.flush();
+      expect(b.peek()).toBe(2);
+      expect(c.peek()).toBe(12);
+
+      a.set(5);
+      Reaction.flush();
+      expect(b.peek()).toBe(10);
+      expect(c.peek()).toBe(20);
+    });
+  });
+
   describe('Debugging', () => {
     it('Reaction should track current context for debugging', () => {
       const callback = vi.fn();

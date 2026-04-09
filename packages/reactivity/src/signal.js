@@ -97,7 +97,7 @@ export class Signal {
     const value = this.currentValue;
 
     // otherwise previous value would be modified if the returned value is mutated negating the equality
-    return (Array.isArray(value) || typeof value == 'object')
+    return (value !== null && typeof value == 'object')
       ? this.maybeClone(value)
       : value;
   }
@@ -189,8 +189,10 @@ export class Signal {
   }
 
   notify() {
-    this.setContext();
-    this.setTrace();
+    if (isDevelopment) {
+      this.setContext();
+      this.setTrace();
+    }
     this.dependency.changed(this.context);
   }
 
@@ -213,6 +215,11 @@ export class Signal {
     const result = mutationFn(this.currentValue);
 
     if (result !== undefined) {
+      if (isDevelopment && result === this.currentValue) {
+        console.warn(
+          'Signal.mutate: returning the same reference that was mutated in place will bypass change detection. Either mutate without returning, or return a new value.',
+        );
+      }
       // if the mutation returned a value just set it
       this.value = result;
     }
@@ -225,41 +232,38 @@ export class Signal {
     }
   }
 
-  // array helpers
+  // array helpers — these always change the value, skip clone+compare
   push(...args) {
-    return this.mutate(arr => {
-      arr.push(...args);
-    });
+    this.currentValue.push(...args);
+    this.notify();
   }
   unshift(...args) {
-    return this.mutate(arr => {
-      arr.unshift(...args);
-    });
+    this.currentValue.unshift(...args);
+    this.notify();
   }
   splice(...args) {
-    return this.mutate(arr => {
-      arr.splice(...args);
-    });
+    this.currentValue.splice(...args);
+    this.notify();
   }
   map(mapFunction) {
-    return this.mutate(arr => Array.prototype.map.call(arr, mapFunction));
+    this.currentValue = Array.prototype.map.call(this.currentValue, mapFunction);
+    this.notify();
   }
   filter(filterFunction) {
-    return this.mutate(arr => Array.prototype.filter.call(arr, filterFunction));
+    this.currentValue = Array.prototype.filter.call(this.currentValue, filterFunction);
+    this.notify();
   }
 
   getIndex(index) {
     return this.get()[index];
   }
   setIndex(index, value) {
-    return this.mutate(arr => {
-      arr[index] = value;
-    });
+    this.currentValue[index] = value;
+    this.notify();
   }
   removeIndex(index) {
-    return this.mutate(arr => {
-      arr.splice(index, 1);
-    });
+    this.currentValue.splice(index, 1);
+    this.notify();
   }
 
   // sets
@@ -334,7 +338,7 @@ export class Signal {
     return findIndex(this.currentValue, item => this.hasID(item, id));
   }
   setProperty(idOrProperty, property, value) {
-    if (arguments.length == 3) {
+    if (isArray(this.currentValue)) {
       const id = idOrProperty;
       const index = this.getItemIndex(id);
       return this.setArrayProperty(index, property, value);

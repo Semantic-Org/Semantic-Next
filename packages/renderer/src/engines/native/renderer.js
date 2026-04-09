@@ -1,4 +1,4 @@
-import { Reaction, Signal } from '@semantic-ui/reactivity';
+import { Dependency, Reaction, Signal } from '@semantic-ui/reactivity';
 import {
   arrayFromObject,
   assignInPlace,
@@ -71,13 +71,13 @@ export class Renderer {
     // flamecharts. Use a cheap sequential ID for debugging until subtree
     // caching is implemented.
     this.id = ++Renderer.nextId;
-    this.dataVersion = new Signal(0, { allowClone: false, equalityFunction: () => false });
+    this.dataDep = new Dependency();
     this.scope = new ReactionScope();
 
     this.evaluator = new ExpressionEvaluator({
       data: this.data,
       helpers: this.helpers,
-      dataVersion: this.dataVersion,
+      dataVersion: this.dataDep,
     });
 
     // DOM change notification — schedule onUpdated after the current
@@ -99,9 +99,9 @@ export class Renderer {
     }
   }
 
-  // Evaluate an expression with dataVersion tracking for subtree propagation
+  // Evaluate an expression with data dependency tracking for subtree propagation
   eval(expression, data) {
-    this.dataVersion.get();
+    this.dataDep.depend();
     return this.evaluator.lookupExpressionValue(expression, data);
   }
 
@@ -647,7 +647,7 @@ export class Renderer {
             // Same reference at same position — properties may have been
             // mutated in place. Deep equality can't detect this (a === b
             // short-circuits), so force-notify dependents.
-            entry.itemSignal.dependency.changed();
+            entry.itemSignal.notify();
           }
 
           const firstItemNode = entry.nodes[0];
@@ -871,7 +871,7 @@ export class Renderer {
         return;
       }
 
-      this.dataVersion.get();
+      this.dataDep.depend();
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
 
@@ -1015,7 +1015,7 @@ export class Renderer {
         return;
       }
 
-      this.dataVersion.get();
+      this.dataDep.depend();
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
 
@@ -1829,7 +1829,7 @@ export class Renderer {
   }
 
   bumpDataVersion() {
-    this.dataVersion.increment();
+    this.dataDep.changed();
     this.notifyUpdate();
   }
 }

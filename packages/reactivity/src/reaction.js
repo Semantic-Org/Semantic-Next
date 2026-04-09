@@ -64,11 +64,11 @@ export class Reaction {
     if (!this.active) {
       return;
     }
-    // pass through metadata even though no dependencies
-    // this can be used to debug first run in flush
-    this.addContext({
-      firstRun: this.firstRun,
-    });
+    if (isDevelopment) {
+      this.addContext({
+        firstRun: this.firstRun,
+      });
+    }
     Scheduler.current = this;
     try {
       this.dependencies.forEach(dep => dep.cleanUp(this));

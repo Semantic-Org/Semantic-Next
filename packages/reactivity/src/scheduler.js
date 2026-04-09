@@ -21,13 +21,29 @@ export class Scheduler {
     }
   }
 
+  static maxFlushIterations = 100;
+
   static flush() {
     Scheduler.isFlushScheduled = false;
-    Scheduler.pendingReactions.forEach(reaction => reaction.run());
-    Scheduler.pendingReactions.clear();
+    let iterations = 0;
+    while (Scheduler.pendingReactions.size > 0) {
+      if (++iterations > Scheduler.maxFlushIterations) {
+        console.error('Reactive cycle detected: flush exceeded maximum iterations');
+        Scheduler.pendingReactions.clear();
+        break;
+      }
+      const reactions = [...Scheduler.pendingReactions];
+      Scheduler.pendingReactions.clear();
+      for (let i = 0; i < reactions.length; i++) {
+        reactions[i].run();
+      }
+    }
 
-    Scheduler.afterFlushCallbacks.forEach(callback => callback());
+    const callbacks = Scheduler.afterFlushCallbacks;
     Scheduler.afterFlushCallbacks = [];
+    for (let i = 0; i < callbacks.length; i++) {
+      callbacks[i]();
+    }
   }
 
   static afterFlush(callback) {

@@ -863,6 +863,65 @@ describe.concurrent('Signal', () => {
       expect(total.get()).toBeCloseTo(40.608, 2);
     });
 
+    /*******************************
+           Null / Undefined
+    *******************************/
+
+    it('should handle null values without cloning', () => {
+      const signal = new Signal(null);
+      expect(signal.get()).toBe(null);
+
+      signal.set(null);
+      expect(signal.get()).toBe(null);
+      expect(signal.peek()).toBe(null);
+    });
+
+    it('should transition between null and object values', () => {
+      const callback = vi.fn();
+      const signal = new Signal(null);
+      signal.subscribe(callback);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      signal.set({ name: 'Alice' });
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(2);
+
+      signal.set(null);
+      Reaction.flush();
+      expect(callback).toHaveBeenCalledTimes(3);
+      expect(signal.get()).toBe(null);
+    });
+
+    /*******************************
+         Mutate Dev Warning
+    *******************************/
+
+    it('should warn in dev when mutate returns the same reference', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const signal = new Signal([1, 2, 3]);
+
+      signal.mutate(arr => {
+        arr.push(4);
+        return arr;
+      });
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy.mock.calls[0][0]).toMatch(/same reference/);
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn when mutate returns a new value', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const signal = new Signal([1, 2, 3]);
+
+      signal.mutate(() => [4, 5, 6]);
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      expect(signal.get()).toEqual([4, 5, 6]);
+      warnSpy.mockRestore();
+    });
+
     // Test WeakRef cleanup behavior
     it('should handle WeakRef cleanup gracefully', () => {
       let source = new Signal(10);

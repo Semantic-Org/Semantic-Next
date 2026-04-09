@@ -38,7 +38,7 @@ export class ExpressionEvaluator {
   evaluate(expression, data = this.data) {
     if (typeof expression === 'string') {
       if (this.dataVersion) {
-        this.dataVersion.get();
+        this.dataVersion.depend();
       }
       return this.lookupExpressionValue(expression, data);
     }
