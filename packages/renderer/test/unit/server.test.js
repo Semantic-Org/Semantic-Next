@@ -1,4 +1,5 @@
-import { TemplateCompiler, TemplateHelpers } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
+import { TemplateHelpers } from '@semantic-ui/templating';
 import { describe, expect, it } from 'vitest';
 
 import { ServerRenderer } from '../../src/engines/native/server.js';

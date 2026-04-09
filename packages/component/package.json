@@ -39,6 +39,7 @@
     "lit": "^3.0.0"
   },
   "dependencies": {
+    "@semantic-ui/compiler": "^0.18.0",
     "@semantic-ui/query": "^0.18.0",
     "@semantic-ui/reactivity": "^0.18.0",
     "@semantic-ui/renderer": "^0.18.0",

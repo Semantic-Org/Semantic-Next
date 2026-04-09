@@ -67,7 +67,8 @@ const template = new Template({
 
 #### Initialization with AST
 ```javascript
-import { Template, TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
+import { Template } from '@semantic-ui/templating';
 
 const compiler = new TemplateCompiler('Welcome <b>{name}</b>');
 const ast = compiler.compile();
