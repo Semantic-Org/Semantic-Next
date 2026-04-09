@@ -1,6 +1,7 @@
 import { getEngine } from '@semantic-ui/renderer';
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { Template } from '@semantic-ui/templating';
+// direct import avoids circular chunk dependency between component ↔ templating
+import { Template } from '@semantic-ui/templating/template';
 import { adoptStylesheet, each, fatal, isClient, kebabToCamel, noop } from '@semantic-ui/utils';
 
 import { getProperties } from './component-helpers.js';
