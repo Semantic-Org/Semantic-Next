@@ -200,6 +200,13 @@ function findClosingTag(html, start, tagName) {
   const closePattern = `</${tagName}`;
 
   while (pos < html.length && depth > 0) {
+    // Skip HTML comments — they may contain tag-like content
+    if (html.startsWith('<!--', pos)) {
+      const commentEnd = html.indexOf('-->', pos + 4);
+      pos = commentEnd === -1 ? html.length : commentEnd + 3;
+      continue;
+    }
+
     const nextOpen = html.indexOf(openPattern, pos);
     const nextClose = html.indexOf(closePattern, pos);
 
@@ -267,6 +274,8 @@ function deserializeAttrs(rawAttrs, ComponentClass) {
 */
 function unescapeAttr(str) {
   return str
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, '&');
 }
