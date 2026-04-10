@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install matching chromedriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
+          npm install chromedriver@${CHROME_VERSION} --no-save
+
       # Build current branch (PR) benchmark bundle
       - name: Build current
         run: node packages/renderer/bench/tachometer/build-ci.js current
