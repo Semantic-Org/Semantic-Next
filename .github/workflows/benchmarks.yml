@@ -1,0 +1,71 @@
+name: Benchmarks
+
+on:
+  pull_request:
+    paths:
+      - 'packages/renderer/**'
+      - 'packages/reactivity/**'
+      - 'packages/templating/**'
+      - 'packages/component/**'
+      - 'packages/utils/**'
+      - 'packages/query/**'
+      - 'packages/compiler/**'
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    # Skip forks — secrets aren't available for posting comments
+    if: github.repository == 'Semantic-Org/Semantic-Next'
+    name: benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build current branch (PR) benchmark bundle
+      - name: Build current
+        run: node packages/renderer/bench/tachometer/build-ci.js current
+
+      # Checkout base branch source and build baseline bundle
+      - name: Build baseline
+        run: |
+          # Save current bench files (they may differ from base)
+          cp -r packages/renderer/bench/tachometer /tmp/tach-bench
+
+          # Checkout base branch source for all packages
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          git checkout FETCH_HEAD -- packages/
+
+          # Build baseline bundle from base branch source
+          node /tmp/tach-bench/build-ci.js baseline
+
+          # Restore PR branch files
+          git checkout HEAD -- packages/
+
+      # Discover and run all tachometer CI configs
+      - name: Run benchmarks
+        run: |
+          mkdir -p results
+          for config in $(find packages -name 'tachometer-ci.json' -path '*/bench/tachometer/*'); do
+            pkg=$(echo "$config" | sed 's|packages/\([^/]*\)/.*|\1|')
+            echo "::group::Benchmark $pkg"
+            npx tachometer --config "$config" --json-file "results/${pkg}.json"
+            echo "::endgroup::"
+          done
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results
+          path: results/*.json

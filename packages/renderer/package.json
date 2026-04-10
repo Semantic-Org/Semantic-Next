@@ -22,8 +22,7 @@
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "bench": "vitest bench --config vitest.bench.config.js",
-    "bench:build": "node bench/tachometer/build.js",
-    "bench:component": "node bench/tachometer/build.js && tachometer --config bench/tachometer/tachometer.json"
+    "bench:component": "tachometer --config bench/tachometer/tachometer.json"
   },
   "files": [
     "src",

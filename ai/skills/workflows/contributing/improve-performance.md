@@ -1,7 +1,7 @@
 ---
 title: Improve Performance
-description: Workflow for auditing, profiling, optimizing, and validating performance improvements across any package using vitest bench, V8 profiling, and two benchmarking strategies.
-keywords: [performance, optimization, benchmarks, profiling, vitest bench, V8, node --prof, audit, A/B testing, trace]
+description: Workflow for auditing, profiling, optimizing, and validating performance improvements. Uses tachometer as the committed measurement standard, vitest bench and V8 profiling for iteration.
+keywords: [performance, optimization, benchmarks, profiling, tachometer, vitest bench, V8, node --prof, audit]
 audience: contributing
 type: workflow
 workflow: improve-performance
@@ -42,86 +42,117 @@ When prioritizing expression evaluator performance, weight efforts by this distr
 
 ---
 
-## Two Benchmarking Strategies
+## Tools
 
-Choose the strategy that fits the code being optimized. Using the wrong one produces misleading results.
+Three tools serve different purposes. Using the wrong one for the job produces misleading results.
 
-### Strategy 1: Sequential compare (default)
+| | **tachometer** | **vitest bench** | **profile.js** |
+|---|---|---|---|
+| **Role** | Source of truth | Iteration feedback | Tracing |
+| **Question** | "How fast, with what confidence?" | "Did this change help?" (quick check) | "Where is time spent?" |
+| **Runs in** | Real Chrome (headless) | Node via vitest workers | Node directly |
+| **Statistics** | 50+ samples, 95% CI, auto-sampling | Thousands of ops, rme% | Single trial |
+| **Output** | JSON for CI aggregation | Terminal table | V8 tick log text |
+| **Use for** | Committed measurements, CI gates | Fast iteration during a perf pass | Identifying hot functions, regex costs |
+| **Do NOT use for** | — | Final committed numbers | A/B comparison |
 
-Save benchmark results before changes, compare after. This is the **common case** — use it for any code where stubbing a fair baseline is complex.
+**Tachometer is the committed standard.** All performance claims in commits and PRs must be validated by tachometer benchmarks. vitest bench and profile.js are iteration tools — useful during development but not authoritative.
 
-```bash
-# Before changes — save numbers
-npm run bench -- --outputJson bench/.baseline.json
+### Why tachometer
 
-# Make changes, run tests
+- Runs in real Chrome — measures the actual browser rendering pipeline, not a Node.js approximation
+- Statistical rigor — repeated sampling with confidence intervals, auto-samples until significance
+- JSON output — CI can aggregate reports across commits to detect regressions
+- Same-session comparison — round-robins between variants to eliminate thermal/GC/JIT bias
+- Import maps — resolves monorepo bare specifiers natively in the browser, no build step
 
-# After — compare against saved run
-npm run bench -- --compare bench/.baseline.json
+### Tachometer in monorepos
+
+Tachometer's `koa-node-resolve` can't follow transitive bare imports through npm workspace symlinks. Use **browser-native import maps** instead:
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/component": "/packages/component/src/index.js",
+    "@semantic-ui/renderer": "/packages/renderer/src/index.js",
+    "@semantic-ui/reactivity": "/packages/reactivity/src/index.js",
+    "@semantic-ui/templating": "/packages/templating/src/index.js",
+    "@semantic-ui/templating/template": "/packages/templating/src/template.js",
+    "@semantic-ui/utils": "/packages/utils/src/index.js",
+    "@semantic-ui/query": "/packages/query/src/index.js",
+    "@semantic-ui/compiler": "/packages/compiler/src/index.js"
+  }
+}
+</script>
 ```
 
-| | |
-|---|---|
-| **Use when** | Classes are coupled (reactivity, renderer, component), or the function depends on shared module state |
-| **Strength** | No stub maintenance, measures the real integrated system |
-| **Weakness** | Sequential runs have thermal/GC/JIT noise between them |
-| **Minimum delta** | **10%** — below this, noise dominates and the result is not trustworthy |
+Config must set `"resolveBareModules": false` so tachometer doesn't interfere with the import map. `root` points to the monorepo root for serving source files.
 
-### Strategy 2: Same-process A/B (when stubs are simple)
+### Tachometer bench pattern
 
-Copy the pre-change implementation to `bench/baseline/`, rename exports, run both in the same bench process. Both implementations share identical JIT warmup, thermal conditions, and GC pressure.
+Follow the pattern from [lit's benchmarks](https://github.com/nicolo-ribaudo/nicolo-ribaudo.github.io/tree/HEAD/nicolo-ribaudo.github.io/src/assets):
+
+1. **One HTML file** — import map + `<script type="module" src="./bench.js">`
+2. **One JS file** — imports, setup, all benchmark operations in sequence
+3. **`performance.mark()` / `performance.measure()`** — each operation emits a named measure
+4. **`requestAnimationFrame`** — wait for render completion between operations
+5. **Config** — `"mode": "performance"` with `"entryName"` for each measure
 
 ```js
-import { isEqual } from '../src/equality.js';
-import { isEqualBaseline } from './baseline/equality.js';
+// bench.js
+import { defineComponent } from '@semantic-ui/component';
 
-describe('shallow equal — 10-key settings', () => {
-  bench('baseline', () => { isEqualBaseline(settingsA, settingsB); });
-  bench('optimized', () => { isEqual(settingsA, settingsB); });
-});
+// ... setup ...
+
+performance.mark('create-1k-start');
+el.component.create(1000);
+await new Promise(r => requestAnimationFrame(r));
+performance.measure('create-1k', 'create-1k-start');
 ```
 
-| | |
-|---|---|
-| **Use when** | Pure/isolated functions (utils, expression evaluator) where copying the baseline is a simple rename with no dependency rewiring |
-| **Strength** | Same JIT/thermal/GC conditions — eliminates run-order bias |
-| **Weakness** | Stub fidelity — if the baseline setup differs from the optimized setup, results are poisoned |
-| **Minimum delta** | **5%** — same-process comparison has a lower noise floor |
+```json
+{
+  "root": "../../../..",
+  "resolveBareModules": false,
+  "benchmarks": [{
+    "url": "index.html",
+    "browser": { "name": "chrome", "headless": true },
+    "measurement": [
+      { "mode": "performance", "entryName": "create-1k" }
+    ]
+  }]
+}
+```
 
-### How to tell which to use
+### Gotchas
 
-Ask: **can I copy the function into `bench/baseline/`, rename the export, and have it work with zero dependency changes?**
+**Stale Chrome/chromedriver processes.** Tachometer launches chromedriver and Chrome headless. If a run is killed mid-flight, these processes persist and block the next run. Kill them before retrying:
+```bash
+pkill -9 chrome; pkill -9 -f chromedriver
+```
 
-- **Yes** → Strategy 2 (A/B). Utils functions, standalone helpers, pure transforms.
-- **No** → Strategy 1 (compare). Classes with cross-references, code that depends on shared singletons (Scheduler.current), code that imports from its own package.
+**`performance` measurement mode is config-only.** The `--measure` CLI flag only accepts `callback`, `fcp`, or `global`. To use `performance.mark()`/`performance.measure()`, you must use a config file with `"mode": "performance"`.
 
-**`packages/utils` always uses Strategy 2.** Every function is a pure export with no shared mutable state — copying to `bench/baseline/` with a renamed export is trivial. The A/B approach gives the tightest measurements here because utils functions are fast (500k+ ops/sec) where sequential noise would dominate.
+**`el.component` availability.** After `document.body.appendChild(el)`, the component's `connectedCallback` fires synchronously and runs `fullRender()`. `el.component` is available after one `requestAnimationFrame`. Use this pattern:
+```js
+const el = document.createElement('my-component');
+document.body.appendChild(el);
+await new Promise(r => requestAnimationFrame(r));
+el.component.someMethod(); // now safe
+```
+
+**CLI flags can't override config.** `--sample-size`, `--timeout` etc. are rejected when `--config` is used. Set everything in the JSON config file.
+
+**Chrome version must match chromedriver.** Tachometer auto-installs chromedriver on first run. If you upgrade Chrome, delete the cached chromedriver (`node_modules/tachometer/node_modules/chromedriver/`) and let tachometer reinstall it.
 
 ---
 
-## Two Tools, Two Jobs
-
-Each tool answers a different question. Using the wrong one produces misleading results.
-
-| | **vitest bench** | **profile.js** |
-|---|---|---|
-| **Question** | "How fast?" (ops/sec) | "Where is time spent?" (tick breakdown) |
-| **Use for** | Measuring throughput, comparing before/after | Identifying hot functions, regex costs, allocation patterns |
-| **Strength** | Thousands of samples, statistical rme%, handles variance | Clean V8 data with no framework noise |
-| **Weakness** | Can't tell you *why* something is slow | Single-trial — unsuitable for A/B measurement |
-| **Minimum delta** | 5-10% depending on strategy | Not applicable — not a measurement tool |
-
-**Do not use profile.js for A/B comparisons.** It runs a single trial — variance between runs is ±5-10%, which swallows small changes. Use it only for tracing (with `node --prof`) and for quick sanity checks during iteration.
-
-**Do not use vitest bench for profiling.** It runs inside vite's worker pool. V8 tick data is buried in framework overhead.
-
 ## Profiling: Where Time Is Spent
 
-Vitest bench measures throughput but can't tell you *which functions or operations* dominate the cost. For that, you need V8 profiling via a standalone script.
+Benchmarks measure throughput but can't tell you *which functions or operations* dominate the cost. For that, use V8 profiling via a standalone script.
 
-**Why not profile through vitest?** Vitest bench runs inside vite's transform pipeline in worker isolates. The profile data is buried in framework overhead — vite module transforms, sourcemap codec, worker IPC — and the actual hot functions don't even register above the noise floor.
-
-Each package has a standalone `bench/profile.js` that imports the module directly and runs tight loops with no harness overhead. Run it under `node --prof` and process the tick log into agent-readable text.
+**Why not profile through vitest or tachometer?** Vitest runs inside vite's transform pipeline in worker isolates. Tachometer runs in Chrome where V8's tick profiler isn't easily accessible. Both bury the actual hot functions in framework overhead. A standalone `profile.js` runs under `node --prof` with no harness noise.
 
 ### Profile workflow
 
@@ -131,64 +162,12 @@ cd packages/<pkg>
 # 1. Run under V8 profiler (filter to slow groups)
 node --prof bench/profile.js "inline object"
 
-# 2. Process the tick log — single isolate, no workers
-node --prof-process isolate-*.log > bench/.profile.txt
+# 2. Process the tick log
+node --prof-process isolate-*.log 2>/dev/null | head -80
 
-# 3. Read the output — top functions by tick count
-head -80 bench/.profile.txt
-
-# 4. Clean up
-rm isolate-*.log bench/.profile.txt
+# 3. Clean up
+rm isolate-*.log
 ```
-
-The `[JavaScript]` section of `--prof-process` output lists every function and regex by tick count. For the expression evaluator, this revealed that six different regex operations account for more time than the actual evaluation logic — something invisible from benchmark numbers alone.
-
-### Profile script pattern
-
-Profile scripts mirror the same data/helpers as the bench file but run a simple timed loop. They support an optional CLI filter to narrow to specific expression groups.
-
-```js
-import { TargetModule } from '../src/target.js';
-
-const ITERATIONS = 500_000;
-
-// Same realistic data as bench file
-const data = { /* ... */ };
-
-const groups = {
-  'fast path':  [/* inputs that exercise the fast path */],
-  'slow path':  [/* inputs that exercise the slow path */],
-};
-
-const filter = process.argv[2]?.toLowerCase();
-const instance = new TargetModule(data);
-
-// Warm up — let V8 optimize before profiling
-for (const [, inputs] of Object.entries(groups)) {
-  for (const input of inputs) {
-    for (let i = 0; i < 1000; i++) instance.run(input);
-  }
-}
-
-for (const [name, inputs] of Object.entries(groups)) {
-  if (filter && !name.toLowerCase().includes(filter)) continue;
-  const start = performance.now();
-  for (let i = 0; i < ITERATIONS; i++) {
-    for (let j = 0; j < inputs.length; j++) {
-      instance.run(inputs[j]);
-    }
-  }
-  const ms = (performance.now() - start).toFixed(1);
-  const total = ITERATIONS * inputs.length;
-  const opsPerSec = ((total / (ms / 1000)) / 1000).toFixed(0);
-  console.log(`${name.padEnd(22)} ${ms.padStart(8)}ms  ${opsPerSec.padStart(8)}K ops/s`);
-}
-```
-
-Key details:
-- **Warm-up loop** runs each input 1000 times before the timed section so V8 has JIT-compiled the hot functions. Without this, the profile is dominated by `CompileLazy`.
-- **Groups with filter** let you zoom into one category (`node --prof bench/profile.js "inline"`) so the tick log isn't diluted across fast and slow paths.
-- **No test framework imports.** The script must be runnable with plain `node` — any import that pulls in vite/vitest contaminates the profile.
 
 ### Reading profile output
 
@@ -206,42 +185,9 @@ The `[JavaScript]` section is sorted by tick count. Focus on:
 
 ---
 
-## Step 1: Scaffold
+## Workflow Steps
 
-If the package doesn't have bench infrastructure yet:
-
-```bash
-mkdir -p packages/<pkg>/bench/baseline
-```
-
-Create `bench/baseline/.gitignore`:
-```
-*
-!.gitignore
-!README.md
-```
-
-Create `vitest.bench.config.js`:
-```js
-import { defineConfig } from 'vitest/config';
-
-export default defineConfig({
-  test: {
-    benchmark: {
-      include: ['bench/**/*.bench.js'],
-    },
-  },
-});
-```
-
-Add to `package.json` scripts:
-```json
-"bench": "vitest bench --config vitest.bench.config.js"
-```
-
-Create `bench/profile.js` following the profile script pattern above. This is the standalone profiling entry point — it should import the module directly, define the same realistic data as the bench file, and run timed loops with group filtering.
-
-## Step 2: Audit
+### Step 1: Audit
 
 Spawn one agent per source file. Each agent reads the file and reports performance footguns on the happy path — unnecessary allocations, repeated work, O(n²) complexity, closure captures in hot loops, patterns that defeat V8 optimizations.
 
@@ -253,33 +199,7 @@ Agents should NOT flag:
 
 Compile results into a table: file, function, issue, severity (high/medium/low).
 
-### Audit prompt template
-
-```
-Read `/path/to/file.js` in full.
-
-[Brief description of what this file does and why it's hot.]
-
-Audit for performance footguns on the happy path — things that would show up
-in flame charts during common usage.
-
-Focus on:
-- Unnecessary allocations in hot paths
-- Repeated work that could be cached/memoized
-- O(n²) or worse algorithmic complexity
-- Expensive operations done eagerly when lazy would suffice
-- Closure captures that prevent GC or cause megamorphic call sites
-- Patterns that defeat V8 optimizations
-
-Do NOT flag:
-- Unusual/edge-case code paths with exotic settings
-- Micro-optimizations below flame chart threshold
-- Style or readability concerns
-
-Report: function name, lines, issue, severity, suggestion. Under 300 words.
-```
-
-## Step 3: Prioritize
+### Step 2: Prioritize
 
 Rank findings by impact. Discuss with the user before implementing — some findings may be intentional tradeoffs.
 
@@ -289,155 +209,90 @@ General priority order:
 3. **Frequently called utilities** — type checks, iteration, string conversions
 4. **Batch operations** — search, formatting, date parsing
 
-## Step 4: Choose and Declare Measurement Strategy
-
-Before capturing a baseline, explicitly state which benchmarking strategy you are using and why it is the right choice for this code. This prevents wasting iteration cycles on unreliable comparisons.
-
-State: **"Using Strategy [1/2] because [reason]."**
-
-Decision checklist:
-- Can the function be copied to `bench/baseline/` with zero dependency rewiring? → **Strategy 2**
-- Does it depend on shared state, cross-references, or package internals? → **Strategy 1**
-- Is the expected improvement <10%? → **Strategy 2** (lower noise floor) or skip (below measurable threshold)
-
-**Do not use profile.js timing output for A/B comparisons.** It runs a single trial — variance swallows changes under 10%. Profile scripts are for tracing (identifying *where* time goes), not measuring *how much* faster.
-
-**Strategy 1:** Save benchmark output before making changes:
-```bash
-cd packages/<pkg> && npm run bench -- --outputJson bench/.baseline.json
-```
-
-**Strategy 2:** Copy implementations to `bench/baseline/`, rename exports. The `bench/baseline/` directory is gitignored.
-
-## Step 5: Add Test Coverage
-
-Before optimizing, verify test coverage for the functions being changed. Add tests for any untested behavior. Run tests against the current code to confirm they pass:
-
-```bash
-cd packages/<pkg> && npm test
-```
-
-All tests must pass across all environments. If any test fails, investigate — never dismiss failures.
-
-## Step 6: Write Benchmarks
-
-Create bench files with realistic data shapes declared outside the bench callback (prevents constant-folding by V8). Each bench file covers one source module.
-
-For Strategy 2, include both baseline and optimized in the same `describe` block. For Strategy 1, just bench the current code — comparison happens via `--compare`.
-
-## Step 7: Trace
+### Step 3: Trace
 
 Before optimizing, profile the slow groups to identify the dominant cost. This prevents wasted effort — without tracing, you're guessing which part of a function to optimize.
 
-```bash
-cd packages/<pkg>
-
-# Run with profiling, filtered to the slow group
-node --prof bench/profile.js "slow group name"
-
-# Process into readable text
-node --prof-process isolate-*.log 2>/dev/null | head -80
-
-# Clean up tick logs
-rm isolate-*.log
-```
-
-Read the `[JavaScript]` section and identify:
-1. **The top 3-5 functions by tick count** — these are the optimization targets
-2. **Regex entries** — each regex that appears is a separate cost; multiple regexes on the hot path compound
-3. **Builtin entries** — `ArrayPrototypeShift`, `SetConstructor`, `CompileLazy` etc. point to specific code patterns to eliminate
-
 If a single function dominates (>30% of JS ticks), optimize that function. If ticks are spread across many small operations (regex, builtins, property access), the optimization is structural — caching, fewer passes, or a different algorithm.
 
-**Re-trace after each optimization round.** The dominant cost shifts as you fix things. What was #3 before may become #1 after fixing #1 and #2.
+**Re-trace after each optimization round.** The dominant cost shifts as you fix things.
 
-## Step 8: Implement and Measure
+### Step 4: Add Test Coverage
 
-Make the optimization. Run benchmarks:
+Before optimizing, verify test coverage for the functions being changed. Add tests for any untested behavior. All tests must pass after every change.
+
+### Step 5: Implement and Iterate
+
+The cycle per round:
+1. **Trace** — `node --prof bench/profile.js "group"` → identify dominant cost
+2. **Implement** — target that cost
+3. **Quick check** — `npm run bench` (vitest) for fast feedback during iteration
+4. **Test** — `npm run test` to confirm correctness
+5. **Repeat** until diminishing returns (expect 2-3 rounds)
+
+Use vitest bench for fast iteration feedback. Do not treat vitest bench numbers as final — they are directional, not authoritative.
+
+### Step 6: Validate with Tachometer
+
+Once the optimization is stable and tests pass, validate with tachometer:
 
 ```bash
-# Strategy 1
-cd packages/<pkg> && npm run bench -- --compare bench/.baseline.json
-
-# Strategy 2
-cd packages/<pkg> && npm run bench
+npm run bench:component
 ```
 
-Run the full test suite after every change:
-```bash
-cd packages/<pkg> && npm test
-```
+This produces the authoritative measurement with statistical confidence intervals. Only commit performance claims backed by tachometer results.
 
-## Step 9: Iterate
+For before/after comparison, run tachometer with two benchmark URLs in the same session — it round-robins to eliminate run-order bias.
 
-After fixing obvious issues, **re-trace and re-audit**. The dominant cost shifts after each round — what was buried at 0.3% of ticks may become the new #1 after fixing the top offender.
+### Step 7: Clean Up
 
-The cycle per round is:
-1. **Trace** — `node --prof bench/profile.js "group"` → process → read top functions
-2. **Optimize** — target the dominant cost identified by the trace
-3. **Bench** — confirm measurable improvement in ops/sec
-4. **Test** — confirm correctness
+1. Delete any leftover `isolate-*.log` files
+2. Delete `bench/.baseline.json` if present
+3. Delete `bench/baseline/` contents if Strategy 2 was used during iteration
+4. Run the full test suite to confirm green
+5. Commit with `Perf:` prefix per repository conventions
 
-Spawn fresh audit agents on modified files. Expect 2-3 rounds before convergence.
+---
 
-## Step 10: Clean Up
+## Quick Reference
 
-After all optimizations are confirmed:
-
-1. Delete `bench/baseline/` contents (the `.gitignore` and `README.md` stay)
-2. If Strategy 2 was used, restore bench files to their non-A/B form
-3. Delete `bench/.baseline.json` if present
-4. Delete any leftover `isolate-*.log` files
-5. Run the bench suite one final time to establish new absolute numbers
-6. Run the full test suite to confirm green
-7. Commit with `Perf:` prefix per repository conventions
-
-## Running Benchmarks
+### vitest bench (iteration)
 
 ```bash
 cd packages/<pkg>
 
-# Run all benchmarks
-npm run bench
-
-# Run a specific bench file
-npx vitest bench --config vitest.bench.config.js bench/signal.bench.js
-
-# Save baseline for sequential compare
-npm run bench -- --outputJson bench/.baseline.json
-
-# Compare against saved baseline
-npm run bench -- --compare bench/.baseline.json
+npm run bench                                    # Run all micro-benchmarks
+npm run bench -- --outputJson bench/.baseline.json  # Save for comparison
+npm run bench -- --compare bench/.baseline.json     # Compare after changes
 ```
 
-## Running Profiles
+### profile.js (tracing)
 
 ```bash
 cd packages/<pkg>
 
-# Run all groups (prints timing summary)
-node bench/profile.js
-
-# Filter to specific group
-node bench/profile.js "inline object"
-
-# Profile with V8 tick log
-node --prof bench/profile.js "inline object"
-
-# Process tick log into text (redirect stderr to hide warnings)
+node bench/profile.js                    # Run all groups
+node bench/profile.js "inline object"    # Filter to group
+node --prof bench/profile.js "group"     # V8 tick profiling
 node --prof-process isolate-*.log 2>/dev/null | head -80
-
-# Clean up
 rm isolate-*.log
+```
+
+### tachometer (committed measurement)
+
+```bash
+cd packages/renderer
+
+npm run bench:component    # Run all component operations via tachometer config
 ```
 
 ## Packages with Bench Infrastructure
 
-| Package | Bench dir | Profile | Notes |
-|---------|-----------|---------|-------|
-| `packages/utils` | `bench/` | — | 6 bench files covering equality, objects, cloning, strings, types, crypto |
-| `packages/reactivity` | `bench/` | — | Reaction, Dependency, Scheduler benchmarks |
-| `packages/renderer` | `bench/` | `bench/profile.js` | Expression evaluator benchmarks + standalone profiling |
+| Package | vitest bench | profile.js | tachometer | Notes |
+|---------|-------------|------------|------------|-------|
+| `packages/utils` | `bench/` | — | — | 6 bench files covering equality, objects, cloning, strings, types, crypto |
+| `packages/reactivity` | `bench/` | — | — | Reaction, Dependency, Scheduler benchmarks |
+| `packages/renderer` | `bench/` | `bench/profile.js` | `bench/tachometer/` | Expression evaluator, V8 profiling, component-level benchmarks |
 
 ## Related Workflows
 

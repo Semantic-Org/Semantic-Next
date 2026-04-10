@@ -1,0 +1,48 @@
+name: Report Benchmark Results
+
+on:
+  workflow_run:
+    workflows: [Benchmarks]
+    branches: ['**']
+    types:
+      - completed
+      - requested
+
+permissions:
+  contents: read
+
+jobs:
+  report_running:
+    name: Report benchmarks in-progress
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    if: ${{ github.event.action == 'requested' }}
+    steps:
+      - name: Report Tachometer Running
+        uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          initialize: true
+
+  report_results:
+    name: Report benchmark results
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    if: ${{ github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: ${{ github.event.workflow.id }}
+          run_id: ${{ github.event.workflow_run.id }}
+          name: results
+          path: results
+
+      - name: Report Tachometer Results
+        uses: andrewiggins/tachometer-reporter-action@v2
+        with:
+          path: results/*.json
+          pr-bench-name: this-change
+          base-bench-name: tip-of-tree

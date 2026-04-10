@@ -2,12 +2,26 @@
   "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
   "root": "../../../..",
   "sampleSize": 50,
-  "timeout": 3,
+  "timeout": 5,
   "autoSampleConditions": ["0%", "10%"],
-  "resolveBareModules": false,
   "benchmarks": [
     {
-      "url": "index.html",
+      "name": "this-change",
+      "url": "packages/renderer/bench/tachometer/ci-current.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "create-1k" },
+        { "mode": "performance", "entryName": "create-10k" },
+        { "mode": "performance", "entryName": "append-1k" },
+        { "mode": "performance", "entryName": "update-10th" },
+        { "mode": "performance", "entryName": "select" },
+        { "mode": "performance", "entryName": "swap-rows" },
+        { "mode": "performance", "entryName": "clear" }
+      ]
+    },
+    {
+      "name": "tip-of-tree",
+      "url": "packages/renderer/bench/tachometer/ci-baseline.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
