@@ -9,6 +9,19 @@ const SUI_PACKAGES = readdirSync(join(ROOT, 'packages'), { withFileTypes: true }
   .filter(d => d.isDirectory())
   .map(d => d.name);
 
+// Collect declared subpath exports (e.g. "./template") from each package
+function getSubpathExports(packageName) {
+  const pkgPath = join(ROOT, 'packages', packageName, 'package.json');
+  if (!existsSync(pkgPath)) { return new Set(); }
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+  if (!pkg.exports) { return new Set(); }
+  return new Set(
+    Object.keys(pkg.exports)
+      .filter(k => k !== '.')
+      .map(k => k.replace(/^\.\//, '')),
+  );
+}
+
 function getCdnImports(filePath) {
   const content = readFileSync(filePath, 'utf-8');
   const imports = [];
@@ -49,7 +62,7 @@ describe.skipIf(!hasBuilt)('CDN format URL validation', () => {
     }
   });
 
-  it('SUI imports use bare URLs without filenames', () => {
+  it('SUI imports use bare URLs or declared subpath exports', () => {
     for (const pkg of SUI_PACKAGES) {
       const cdnFile = join(ROOT, 'packages', pkg, 'dist', 'cdn', `${pkg}.js`);
       if (!existsSync(cdnFile)) { continue; }
@@ -58,8 +71,13 @@ describe.skipIf(!hasBuilt)('CDN format URL validation', () => {
       for (const url of imports) {
         const parsed = parseCdnUrl(url);
         if (!parsed.isVendor) {
-          expect(parsed.file, `${pkg}: SUI import should be bare URL, got "${url}"`)
-            .toBe('');
+          const subpaths = getSubpathExports(parsed.name);
+          if (parsed.file) {
+            expect(
+              subpaths.has(parsed.file),
+              `${pkg}: SUI import has unexpected file path "${parsed.file}" in "${url}" — not a declared subpath export of ${parsed.name}`,
+            ).toBe(true);
+          }
           expect(url, `${pkg}: SUI import should not contain @semantic-ui/`)
             .not.toContain('@semantic-ui/');
         }
