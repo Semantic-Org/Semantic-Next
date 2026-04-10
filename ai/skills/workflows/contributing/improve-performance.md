@@ -1,7 +1,7 @@
 ---
 title: Improve Performance
-description: Workflow for auditing, optimizing, and validating performance improvements across any package using vitest bench with two benchmarking strategies.
-keywords: [performance, optimization, benchmarks, vitest bench, V8, flame chart, audit, A/B testing]
+description: Workflow for auditing, profiling, optimizing, and validating performance improvements across any package using vitest bench, V8 profiling, and two benchmarking strategies.
+keywords: [performance, optimization, benchmarks, profiling, vitest bench, V8, node --prof, audit, A/B testing, trace]
 audience: contributing
 type: workflow
 workflow: improve-performance
@@ -16,8 +16,9 @@ This workflow produces measurable performance improvements validated by benchmar
 ## Design Principles
 
 - **Measure, don't guess.** Every optimization must be benchmarked against the pre-change baseline. "An agent thinks this is faster" is not evidence.
+- **Trace before you optimize.** Benchmarks tell you *what's slow*; profiling tells you *why*. Always trace to identify the dominant cost before writing code.
 - **Realistic data shapes.** Benchmark inputs should mirror real component settings, state objects, and attribute names — not `{a:1}` toy objects. V8 optimizes differently for different object shapes.
-- **Hot paths first.** Focus on functions that appear in flame charts during component rendering, signal dirty-checking, and SSR. Formatting utilities and error paths are low priority.
+- **Hot paths first.** Focus on functions that appear in profiles during component rendering, signal dirty-checking, and SSR. Formatting utilities and error paths are low priority.
 - **Algorithmic wins over micro-optimizations.** Cache expensive constructors, eliminate O(n²), remove per-call allocations. Skip changes that save nanoseconds but cost readability.
 - **Iterate.** Re-audit after fixing the first round of issues. Deeper optimizations become visible only after the dominant cost is removed — it often takes 2-3 rounds to converge.
 
@@ -80,6 +81,97 @@ Ask: **can I copy the function into `bench/baseline/`, rename the export, and ha
 
 ---
 
+## Profiling: Where Time Is Spent
+
+Benchmarks measure throughput (ops/sec) but can't tell you *which functions or operations* dominate the cost. For that, you need V8 profiling.
+
+**Why not profile through vitest?** Vitest bench runs inside vite's transform pipeline in worker isolates. The profile data is buried in framework overhead — vite module transforms, sourcemap codec, worker IPC — and the actual hot functions don't even register above the noise floor.
+
+Instead, each package has a standalone `bench/profile.js` that imports the module directly and runs tight loops with no harness overhead. Run it under `node --prof` and process the tick log into agent-readable text.
+
+### Profile workflow
+
+```bash
+cd packages/<pkg>
+
+# 1. Run under V8 profiler (filter to slow groups)
+node --prof bench/profile.js "inline object"
+
+# 2. Process the tick log — single isolate, no workers
+node --prof-process isolate-*.log > bench/.profile.txt
+
+# 3. Read the output — top functions by tick count
+head -80 bench/.profile.txt
+
+# 4. Clean up
+rm isolate-*.log bench/.profile.txt
+```
+
+The `[JavaScript]` section of `--prof-process` output lists every function and regex by tick count. For the expression evaluator, this revealed that six different regex operations account for more time than the actual evaluation logic — something invisible from benchmark numbers alone.
+
+### Profile script pattern
+
+Profile scripts mirror the same data/helpers as the bench file but run a simple timed loop. They support an optional CLI filter to narrow to specific expression groups.
+
+```js
+import { TargetModule } from '../src/target.js';
+
+const ITERATIONS = 500_000;
+
+// Same realistic data as bench file
+const data = { /* ... */ };
+
+const groups = {
+  'fast path':  [/* inputs that exercise the fast path */],
+  'slow path':  [/* inputs that exercise the slow path */],
+};
+
+const filter = process.argv[2]?.toLowerCase();
+const instance = new TargetModule(data);
+
+// Warm up — let V8 optimize before profiling
+for (const [, inputs] of Object.entries(groups)) {
+  for (const input of inputs) {
+    for (let i = 0; i < 1000; i++) instance.run(input);
+  }
+}
+
+for (const [name, inputs] of Object.entries(groups)) {
+  if (filter && !name.toLowerCase().includes(filter)) continue;
+  const start = performance.now();
+  for (let i = 0; i < ITERATIONS; i++) {
+    for (let j = 0; j < inputs.length; j++) {
+      instance.run(inputs[j]);
+    }
+  }
+  const ms = (performance.now() - start).toFixed(1);
+  const total = ITERATIONS * inputs.length;
+  const opsPerSec = ((total / (ms / 1000)) / 1000).toFixed(0);
+  console.log(`${name.padEnd(22)} ${ms.padStart(8)}ms  ${opsPerSec.padStart(8)}K ops/s`);
+}
+```
+
+Key details:
+- **Warm-up loop** runs each input 1000 times before the timed section so V8 has JIT-compiled the hot functions. Without this, the profile is dominated by `CompileLazy`.
+- **Groups with filter** let you zoom into one category (`node --prof bench/profile.js "inline"`) so the tick log isn't diluted across fast and slow paths.
+- **No test framework imports.** The script must be runnable with plain `node` — any import that pulls in vite/vitest contaminates the profile.
+
+### Reading profile output
+
+The `[JavaScript]` section is sorted by tick count. Focus on:
+
+| What to look for | What it means |
+|---|---|
+| `JS: *functionName file:///path:line` | Optimized JS function — `*` means V8 compiled it. High ticks = hot function |
+| `RegExp: <pattern>` | Time spent in regex execution. Multiple regex entries = death by a thousand cuts |
+| `Builtin: CompileLazy` | V8 compiling functions on the fly — warm-up loop may be too short |
+| `Builtin: KeyedLoadIC_Megamorphic` | Polymorphic property access — object shapes are inconsistent |
+| `Builtin: ArrayPrototypeShift` | `shift()` in a loop — O(n) per call, consider index-based iteration |
+| `Builtin: SetConstructor/Add/Delete` | Set overhead — consider whether the Set is needed per-call |
+| High `unaccounted` ticks | Profiling interval too coarse for the workload — increase iterations |
+
+---
+
 ## Step 1: Scaffold
 
 If the package doesn't have bench infrastructure yet:
@@ -92,6 +184,7 @@ Create `bench/baseline/.gitignore`:
 ```
 *
 !.gitignore
+!README.md
 ```
 
 Create `vitest.bench.config.js`:
@@ -111,6 +204,8 @@ Add to `package.json` scripts:
 ```json
 "bench": "vitest bench --config vitest.bench.config.js"
 ```
+
+Create `bench/profile.js` following the profile script pattern above. This is the standalone profiling entry point — it should import the module directly, define the same realistic data as the bench file, and run timed loops with group filtering.
 
 ## Step 2: Audit
 
@@ -185,7 +280,33 @@ Create bench files with realistic data shapes declared outside the bench callbac
 
 For Strategy 2, include both baseline and optimized in the same `describe` block. For Strategy 1, just bench the current code — comparison happens via `--compare`.
 
-## Step 7: Implement and Measure
+## Step 7: Trace
+
+Before optimizing, profile the slow groups to identify the dominant cost. This prevents wasted effort — without tracing, you're guessing which part of a function to optimize.
+
+```bash
+cd packages/<pkg>
+
+# Run with profiling, filtered to the slow group
+node --prof bench/profile.js "slow group name"
+
+# Process into readable text
+node --prof-process isolate-*.log 2>/dev/null | head -80
+
+# Clean up tick logs
+rm isolate-*.log
+```
+
+Read the `[JavaScript]` section and identify:
+1. **The top 3-5 functions by tick count** — these are the optimization targets
+2. **Regex entries** — each regex that appears is a separate cost; multiple regexes on the hot path compound
+3. **Builtin entries** — `ArrayPrototypeShift`, `SetConstructor`, `CompileLazy` etc. point to specific code patterns to eliminate
+
+If a single function dominates (>30% of JS ticks), optimize that function. If ticks are spread across many small operations (regex, builtins, property access), the optimization is structural — caching, fewer passes, or a different algorithm.
+
+**Re-trace after each optimization round.** The dominant cost shifts as you fix things. What was #3 before may become #1 after fixing #1 and #2.
+
+## Step 8: Implement and Measure
 
 Make the optimization. Run benchmarks:
 
@@ -202,20 +323,29 @@ Run the full test suite after every change:
 cd packages/<pkg> && npm test
 ```
 
-## Step 8: Iterate
+## Step 9: Iterate
 
-After fixing obvious issues, **re-audit**. Spawn fresh agents on the modified files. Deeper optimizations often become visible only after the dominant cost is removed. Expect 2-3 rounds before convergence.
+After fixing obvious issues, **re-trace and re-audit**. The dominant cost shifts after each round — what was buried at 0.3% of ticks may become the new #1 after fixing the top offender.
 
-## Step 9: Clean Up
+The cycle per round is:
+1. **Trace** — `node --prof bench/profile.js "group"` → process → read top functions
+2. **Optimize** — target the dominant cost identified by the trace
+3. **Bench** — confirm measurable improvement in ops/sec
+4. **Test** — confirm correctness
+
+Spawn fresh audit agents on modified files. Expect 2-3 rounds before convergence.
+
+## Step 10: Clean Up
 
 After all optimizations are confirmed:
 
-1. Delete `bench/baseline/` contents (the `.gitignore` stays)
+1. Delete `bench/baseline/` contents (the `.gitignore` and `README.md` stay)
 2. If Strategy 2 was used, restore bench files to their non-A/B form
 3. Delete `bench/.baseline.json` if present
-4. Run the bench suite one final time to establish new absolute numbers
-5. Run the full test suite to confirm green
-6. Commit with `Perf:` prefix per repository conventions
+4. Delete any leftover `isolate-*.log` files
+5. Run the bench suite one final time to establish new absolute numbers
+6. Run the full test suite to confirm green
+7. Commit with `Perf:` prefix per repository conventions
 
 ## Running Benchmarks
 
@@ -235,12 +365,34 @@ npm run bench -- --outputJson bench/.baseline.json
 npm run bench -- --compare bench/.baseline.json
 ```
 
+## Running Profiles
+
+```bash
+cd packages/<pkg>
+
+# Run all groups (prints timing summary)
+node bench/profile.js
+
+# Filter to specific group
+node bench/profile.js "inline object"
+
+# Profile with V8 tick log
+node --prof bench/profile.js "inline object"
+
+# Process tick log into text (redirect stderr to hide warnings)
+node --prof-process isolate-*.log 2>/dev/null | head -80
+
+# Clean up
+rm isolate-*.log
+```
+
 ## Packages with Bench Infrastructure
 
-| Package | Bench dir | Notes |
-|---------|-----------|-------|
-| `packages/utils` | `bench/` | 6 bench files covering equality, objects, cloning, strings, types, crypto |
-| `packages/reactivity` | `bench/` | Reaction, Dependency, Scheduler benchmarks |
+| Package | Bench dir | Profile | Notes |
+|---------|-----------|---------|-------|
+| `packages/utils` | `bench/` | — | 6 bench files covering equality, objects, cloning, strings, types, crypto |
+| `packages/reactivity` | `bench/` | — | Reaction, Dependency, Scheduler benchmarks |
+| `packages/renderer` | `bench/` | `bench/profile.js` | Expression evaluator benchmarks + standalone profiling |
 
 ## Related Workflows
 
