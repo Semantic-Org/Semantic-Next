@@ -533,6 +533,8 @@ export class Renderer {
 
     let currentBranchIndex = -1;
 
+    scope.onDispose(() => region.clear());
+
     scope.track(Reaction.create((comp) => {
       if (!comp.firstRun && !region.anchor.isConnected) {
         comp.stop();
@@ -588,6 +590,11 @@ export class Renderer {
     const itemMap = new Map();
     let currentKeys = [];
     let showingElse = false;
+
+    scope.onDispose(() => {
+      this.clearAllItems(itemMap);
+      region.clear();
+    });
 
     scope.track(Reaction.create((comp) => {
       if (!comp.firstRun && !region.anchor.isConnected) {
