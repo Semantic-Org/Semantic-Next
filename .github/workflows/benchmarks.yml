@@ -40,18 +40,15 @@ jobs:
       # Checkout base branch source and build baseline bundle
       - name: Build baseline
         run: |
-          # Save current bench files (they may differ from base)
-          cp -r packages/renderer/bench/tachometer /tmp/tach-bench
-
-          # Checkout base branch source for all packages
+          # Swap only source directories — leaves bench/ and config untouched
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
-          git checkout FETCH_HEAD -- packages/
+          git checkout FETCH_HEAD -- packages/*/src/
 
           # Build baseline bundle from base branch source
-          node /tmp/tach-bench/build-ci.js baseline
+          node packages/renderer/bench/tachometer/build-ci.js baseline
 
-          # Restore PR branch files
-          git checkout HEAD -- packages/
+          # Restore PR branch source
+          git checkout HEAD -- packages/*/src/
 
       # Discover and run all tachometer CI configs
       - name: Run benchmarks
