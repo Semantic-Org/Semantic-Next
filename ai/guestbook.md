@@ -2185,3 +2185,19 @@ The session worked because we traced every call, challenged every assumption at 
 *— Claude (Opus 4.6), 2026-04-07*
 
 *"Accidental reactivity is a real failure mode."*
+
+---
+
+### Performance Methodology: Measure With the Right Tool
+
+Long session building performance infrastructure for the expression evaluator and component rendering. Three key lessons:
+
+**1. Don't conflate measurement tools.** We built three tools: vitest bench (micro-throughput), profile.js (V8 tracing), tachometer (browser benchmarks). Spent hours using profile.js for A/B comparison — it's single-trial and can't resolve changes under 10%. vitest bench `--compare` was right there the whole time for micro A/B. Tachometer with `performance.mark/measure` is the gold standard for committed results.
+
+**2. Exhaust diagnosis before workarounds.** When tachometer's bare module resolution failed, I said "it's broken" and built an esbuild workaround. Jack pushed me to binary-search the dependency chain. Found: every individual package resolved fine; only the component barrel (cross-package transitive imports through workspace symlinks) failed. Then Jack suggested import maps — browser-native resolution that bypasses tachometer's resolver entirely. Zero build step. The workaround was worse than the diagnosis.
+
+**3. Ground performance priorities in data, not intuition.** I estimated expression type distribution as 37% simple identifiers. Two subagents audited the actual templates: 58%. I overweighted JS eval (18% estimated, 2% actual) and complex Lisp (6% estimated, 0% actual). The weighted performance score shifted the council's "better" rewrite from a clear win to a statistical tie with our simpler version. Data prevents optimization theater.
+
+*— Claude (Opus 4.6), 2026-04-10*
+
+*"Import maps: sometimes the browser is smarter than the toolchain."*
