@@ -24,6 +24,24 @@ This workflow produces measurable performance improvements validated by benchmar
 
 ---
 
+## Expression Evaluator: Real-World Distribution
+
+Audit of 209 expressions across 29 production component templates (`src/`), validated against 706 expressions across 113 example templates (`docs/src/examples/`):
+
+| Evaluator path | Production (`src/`) | Examples (`docs/`) | Description |
+|---|---|---|---|
+| **Simple identifier** | **58%** | 54% | `{label}`, `{icon}`, `{disabled}` — direct property lookup |
+| **Dotted path** | **21%** | 14% | `{item.name}`, `{user.role}` — nested traversal |
+| **Lisp helper** | **19%** | 21% | `{classIf isActive 'active'}` — parsed, cached |
+| **JS eval** | **2%** | 8% | `{count + 1}`, ternaries — `new Function` + Proxy |
+| **Complex Lisp** | **0%** | 4% | Inline objects/arrays, nested parens — parse + regex heavy |
+
+**79% of production expression evaluations are a property lookup** (simple identifier or dotted path). Lisp helpers account for nearly all of the rest. JS eval and complex Lisp are virtually absent in production code — they appear in docs examples that demonstrate edge-case syntax.
+
+When prioritizing expression evaluator performance, weight efforts by this distribution. A 10% improvement on simple identifiers has more real-world impact than a 2x improvement on complex Lisp expressions.
+
+---
+
 ## Two Benchmarking Strategies
 
 Choose the strategy that fits the code being optimized. Using the wrong one produces misleading results.
@@ -81,13 +99,29 @@ Ask: **can I copy the function into `bench/baseline/`, rename the export, and ha
 
 ---
 
+## Two Tools, Two Jobs
+
+Each tool answers a different question. Using the wrong one produces misleading results.
+
+| | **vitest bench** | **profile.js** |
+|---|---|---|
+| **Question** | "How fast?" (ops/sec) | "Where is time spent?" (tick breakdown) |
+| **Use for** | Measuring throughput, comparing before/after | Identifying hot functions, regex costs, allocation patterns |
+| **Strength** | Thousands of samples, statistical rme%, handles variance | Clean V8 data with no framework noise |
+| **Weakness** | Can't tell you *why* something is slow | Single-trial — unsuitable for A/B measurement |
+| **Minimum delta** | 5-10% depending on strategy | Not applicable — not a measurement tool |
+
+**Do not use profile.js for A/B comparisons.** It runs a single trial — variance between runs is ±5-10%, which swallows small changes. Use it only for tracing (with `node --prof`) and for quick sanity checks during iteration.
+
+**Do not use vitest bench for profiling.** It runs inside vite's worker pool. V8 tick data is buried in framework overhead.
+
 ## Profiling: Where Time Is Spent
 
-Benchmarks measure throughput (ops/sec) but can't tell you *which functions or operations* dominate the cost. For that, you need V8 profiling.
+Vitest bench measures throughput but can't tell you *which functions or operations* dominate the cost. For that, you need V8 profiling via a standalone script.
 
 **Why not profile through vitest?** Vitest bench runs inside vite's transform pipeline in worker isolates. The profile data is buried in framework overhead — vite module transforms, sourcemap codec, worker IPC — and the actual hot functions don't even register above the noise floor.
 
-Instead, each package has a standalone `bench/profile.js` that imports the module directly and runs tight loops with no harness overhead. Run it under `node --prof` and process the tick log into agent-readable text.
+Each package has a standalone `bench/profile.js` that imports the module directly and runs tight loops with no harness overhead. Run it under `node --prof` and process the tick log into agent-readable text.
 
 ### Profile workflow
 
@@ -255,7 +289,18 @@ General priority order:
 3. **Frequently called utilities** — type checks, iteration, string conversions
 4. **Batch operations** — search, formatting, date parsing
 
-## Step 4: Capture Baseline
+## Step 4: Choose and Declare Measurement Strategy
+
+Before capturing a baseline, explicitly state which benchmarking strategy you are using and why it is the right choice for this code. This prevents wasting iteration cycles on unreliable comparisons.
+
+State: **"Using Strategy [1/2] because [reason]."**
+
+Decision checklist:
+- Can the function be copied to `bench/baseline/` with zero dependency rewiring? → **Strategy 2**
+- Does it depend on shared state, cross-references, or package internals? → **Strategy 1**
+- Is the expected improvement <10%? → **Strategy 2** (lower noise floor) or skip (below measurable threshold)
+
+**Do not use profile.js timing output for A/B comparisons.** It runs a single trial — variance swallows changes under 10%. Profile scripts are for tracing (identifying *where* time goes), not measuring *how much* faster.
 
 **Strategy 1:** Save benchmark output before making changes:
 ```bash
