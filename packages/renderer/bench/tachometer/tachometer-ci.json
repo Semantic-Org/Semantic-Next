@@ -7,7 +7,7 @@
   "benchmarks": [
     {
       "name": "this-change",
-      "url": "packages/renderer/bench/tachometer/ci-current.html",
+      "url": "ci-current.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
@@ -21,7 +21,7 @@
     },
     {
       "name": "tip-of-tree",
-      "url": "packages/renderer/bench/tachometer/ci-baseline.html",
+      "url": "ci-baseline.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
         { "mode": "performance", "entryName": "create-1k" },
