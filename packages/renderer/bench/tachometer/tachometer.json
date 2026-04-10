@@ -1,0 +1,78 @@
+{
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["0%", "10%"],
+  "benchmarks": [
+    {
+      "url": "packages/renderer/bench/tachometer/create-1k.html?engine=native",
+      "name": "create-1k (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/create-1k.html?engine=lit",
+      "name": "create-1k (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/create-10k.html?engine=native",
+      "name": "create-10k (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/create-10k.html?engine=lit",
+      "name": "create-10k (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/append-1k.html?engine=native",
+      "name": "append-1k (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/append-1k.html?engine=lit",
+      "name": "append-1k (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/update-10th.html?engine=native",
+      "name": "update-10th (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/update-10th.html?engine=lit",
+      "name": "update-10th (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/select.html?engine=native",
+      "name": "select (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/select.html?engine=lit",
+      "name": "select (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/swap-rows.html?engine=native",
+      "name": "swap-rows (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/swap-rows.html?engine=lit",
+      "name": "swap-rows (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/clear.html?engine=native",
+      "name": "clear (native)",
+      "browser": { "name": "chrome", "headless": true }
+    },
+    {
+      "url": "packages/renderer/bench/tachometer/clear.html?engine=lit",
+      "name": "clear (lit)",
+      "browser": { "name": "chrome", "headless": true }
+    }
+  ]
+}

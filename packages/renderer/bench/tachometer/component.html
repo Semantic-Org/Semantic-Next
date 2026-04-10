@@ -1,0 +1,13 @@
+<table>
+  <tbody>
+    {#each item in items}
+      <tr class="{classIf (is item.id selected) 'selected'}">
+        <td class="id">{item.id}</td>
+        <td class="label">{item.label}</td>
+        <td class="category">{item.category}</td>
+        <td class="status">{classIf item.active 'active' 'inactive'}</td>
+        <td class="actions"><a data-id="{item.id}" class="remove">x</a></td>
+      </tr>
+    {/each}
+  </tbody>
+</table>
