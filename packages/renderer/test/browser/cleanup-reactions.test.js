@@ -442,5 +442,114 @@ RENDERING_ENGINES.forEach(engine => {
         expect(delta).toBeLessThanOrEqual(2);
       });
     });
+
+    /*******************************
+     DOM Node Cleanup
+*******************************/
+
+    describe('DOM node cleanup', () => {
+      it('should remove each items added after initial render when condition flips', async () => {
+        // The nav-menu bug: each items added reactively (not in initial fragment)
+        // are not tracked in the conditional's ownedNodes. When the condition
+        // flips, scope disposal must clean up the each's dynamic items.
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template:
+            '{#if hasNoResults}<span class="message">no results</span>{else}{#each item in getItems}<span class="item">{item.name}</span>{/each}{/if}',
+          defaultState: { search: '' },
+          createComponent: ({ self, state }) => ({
+            hasNoResults() {
+              const term = state.search.get();
+              return term.length > 0 && self.getItems().length === 0;
+            },
+            getItems() {
+              const term = state.search.get();
+              const all = [{ name: 'Alpha' }, { name: 'Beta' }, { name: 'Gamma' }];
+              return term ? all.filter(i => i.name.toLowerCase().includes(term.toLowerCase())) : all;
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(el.shadowRoot.querySelectorAll('.item').length).toBe(3);
+        expect(el.shadowRoot.querySelectorAll('.message').length).toBe(0);
+
+        // Search with no matches — flips to the if branch
+        el.template.state.search.set('zzz');
+        await flush(el);
+
+        expect(el.shadowRoot.querySelectorAll('.message').length).toBe(1);
+        expect(el.shadowRoot.querySelectorAll('.item').length).toBe(0);
+      });
+
+      it('should not accumulate orphaned each items across search cycles', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template:
+            '{#if hasNoResults}<span class="message">no results</span>{else}{#each item in getItems}<span class="item">{item.name}</span>{/each}{/if}',
+          defaultState: { search: '' },
+          createComponent: ({ self, state }) => ({
+            hasNoResults() {
+              const term = state.search.get();
+              return term.length > 0 && self.getItems().length === 0;
+            },
+            getItems() {
+              const term = state.search.get();
+              const all = [{ name: 'One' }, { name: 'Two' }];
+              return term ? all.filter(i => i.name.toLowerCase().includes(term.toLowerCase())) : all;
+            },
+          }),
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        // Cycle: show items → no results → show items, repeatedly
+        for (let i = 0; i < 5; i++) {
+          el.template.state.search.set('zzz');
+          await flush(el);
+          el.template.state.search.set('');
+          await flush(el);
+        }
+
+        // Should have exactly 2 items, not orphaned duplicates
+        expect(el.shadowRoot.querySelectorAll('.item').length).toBe(2);
+        expect(el.shadowRoot.querySelectorAll('.message').length).toBe(0);
+      });
+
+      it('should clean up nested conditional content when parent if switches', async () => {
+        const tag = uniqueTag();
+        defineComponent({
+          tagName: tag,
+          renderingEngine: engine,
+          template:
+            '{#if outer}{#if inner}<span class="a">a</span>{else}<span class="b">b</span>{/if}{else}<span class="off">off</span>{/if}',
+          defaultState: { outer: true, inner: true },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(el.shadowRoot.querySelectorAll('.a').length).toBe(1);
+
+        // Flip inner to show .b, then remove outer entirely
+        el.template.state.inner.set(false);
+        await flush(el);
+        expect(el.shadowRoot.querySelectorAll('.b').length).toBe(1);
+
+        el.template.state.outer.set(false);
+        await flush(el);
+
+        expect(el.shadowRoot.querySelectorAll('.off').length).toBe(1);
+        expect(el.shadowRoot.querySelectorAll('.a').length).toBe(0);
+        expect(el.shadowRoot.querySelectorAll('.b').length).toBe(0);
+      });
+    });
   }); // describe(engine)
 }); // RENDERING_ENGINES.forEach
