@@ -28,7 +28,7 @@ class WebComponentBase extends HTMLElementBase {
   constructor() {
     super();
     this.renderCallbacks = [];
-    this.propertyStore = new Map();
+    this.properties = new Map();
 
     // If the element has a declarative shadow root (created by DSD parsing),
     // suppress requestUpdate until hydration completes — attribute parsing
@@ -126,7 +126,7 @@ class WebComponentBase extends HTMLElementBase {
     });
 
     this.template.initialize();
-    this.template._isHydrating = true;
+    this.template.isHydrating = true;
     this.component = this.template.instance;
     this.dataContext = this.template.getDataContext();
 
@@ -146,7 +146,7 @@ class WebComponentBase extends HTMLElementBase {
       this.template.renderer.scope,
     );
 
-    this.template._isHydrating = false;
+    this.template.isHydrating = false;
     this.template.rendered = true;
     this.isHydrating = false;
 
@@ -319,6 +319,23 @@ class WebComponentBase extends HTMLElementBase {
 
   isDarkMode() {
     return isDarkMode(this);
+  }
+
+  /*******************************
+      Lifecycle Promises
+  *******************************/
+
+  get created() {
+    return this.template?.lifecyclePromise('created');
+  }
+  get rendered() {
+    return this.template?.lifecyclePromise('rendered');
+  }
+  get updated() {
+    return this.template?.lifecyclePromise('updated');
+  }
+  get destroyed() {
+    return this.template?.lifecyclePromise('destroyed');
   }
 
   /*******************************

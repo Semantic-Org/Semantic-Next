@@ -52,11 +52,11 @@ export function createComponent({
     }
     Object.defineProperty(component.prototype, propName, {
       get() {
-        return this.propertyStore.get(propName);
+        return this.properties.get(propName);
       },
       set(value) {
-        const old = this.propertyStore.get(propName);
-        this.propertyStore.set(propName, value);
+        const old = this.properties.get(propName);
+        this.properties.set(propName, value);
         if (!config.hasChanged || config.hasChanged(value, old)) {
           this.requestUpdate();
         }

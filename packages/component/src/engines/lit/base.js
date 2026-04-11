@@ -234,6 +234,20 @@ class LitWebComponentBase extends LitElement {
   }
 
   /*******************************
+      Lifecycle Promises
+  *******************************/
+
+  get created() {
+    return this.template?.lifecyclePromise('created');
+  }
+  get rendered() {
+    return this.template?.lifecyclePromise('rendered');
+  }
+  get destroyed() {
+    return this.template?.lifecyclePromise('destroyed');
+  }
+
+  /*******************************
             DOM Helpers
   *******************************/
 

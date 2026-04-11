@@ -28,7 +28,9 @@ import { TemplateHelpers } from './template-helpers.js';
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
 
 export const Template = class Template {
-  get [IS_TEMPLATE]() { return true; }
+  get [IS_TEMPLATE]() {
+    return true;
+  }
   // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_TEMPLATE];
@@ -40,6 +42,8 @@ export const Template = class Template {
 
   rendered = false;
   destroyed = false;
+  lifecycleResolvers = {};
+  lifecyclePromises = {};
 
   constructor({
     templateName,
@@ -197,7 +201,7 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      if (!this._isHydrating) {
+      if (!this.isHydrating) {
         this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
     };
@@ -209,7 +213,7 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
-      if (!this._isHydrating) {
+      if (!this.isHydrating) {
         this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
       }
     };
@@ -277,52 +281,7 @@ export const Template = class Template {
       helpers: TemplateHelpers,
     });
 
-    // Cache the base params object for call() — these are all stable references
-    // that don't change between calls. additionalData is spread on top per-call.
-    const element = this.element;
-    this.callParams = {
-      el: element,
-      tpl: this.instance,
-      self: this.instance,
-      component: this.instance,
-      $: this.$.bind(this),
-      $$: this.$$.bind(this),
-      reaction: this.reaction.bind(this),
-      signal: this.signal.bind(this),
-      interval: this.createInterval.bind(this),
-      timeout: this.createTimeout.bind(this),
-      abortSignal: this.abortSignal,
-      afterFlush: Reaction.afterFlush,
-      nonreactive: Reaction.nonreactive,
-      flush: Reaction.flush,
-      data: this.data,
-      settings: this.settings || element?.settings,
-      state: this.state,
-      isRendered: () => this.rendered,
-      isServer: Template.isServer,
-      isClient: !Template.isServer,
-      get isHydrating() {
-        return template._isHydrating || false;
-      },
-      rerender: () => element?.requestUpdate(),
-      dispatchEvent: this.dispatchEvent.bind(this),
-      attachEvent: this.attachEvent.bind(this),
-      bindKey: this.bindKey.bind(this),
-      unbindKey: this.unbindKey.bind(this),
-      abortController: this.abortController,
-      helpers: TemplateHelpers,
-      template: this,
-      templateName: this.templateName,
-      templates: Template.renderedTemplates,
-      findTemplate: this.findTemplate,
-      findParent: this.findParent.bind(this),
-      findChild: this.findChild.bind(this),
-      findChildren: this.findChildren.bind(this),
-      content: this.instance.content,
-      get darkMode() {
-        return element?.isDarkMode?.();
-      },
-    };
+    this.callParams = this.buildCallParams();
 
     this.onCreated();
   }
@@ -828,7 +787,7 @@ export const Template = class Template {
 
   buildCallParams(additionalData = {}) {
     const element = this.element;
-    const templateRef = this;
+    const template = this;
     return {
       el: element,
       tpl: this.instance,
@@ -851,7 +810,7 @@ export const Template = class Template {
       isServer: Template.isServer,
       isClient: !Template.isServer,
       get isHydrating() {
-        return templateRef._isHydrating || false;
+        return template.isHydrating || false;
       },
       rerender: () => element?.requestUpdate(),
       dispatchEvent: this.dispatchEvent.bind(this),
@@ -884,6 +843,30 @@ export const Template = class Template {
     });
   }
 
+  // Returns a promise that resolves after the named lifecycle event fires.
+  // One-shot events (created, rendered, destroyed) cache the resolved promise.
+  // Recurring events (updated) return a fresh promise each call.
+  lifecyclePromise(name) {
+    if (!this.lifecyclePromises[name]) {
+      this.lifecyclePromises[name] = new Promise(resolve => {
+        this.lifecycleResolvers[name] = resolve;
+      });
+    }
+    return this.lifecyclePromises[name];
+  }
+
+  resolveLifecyclePromise(eventName) {
+    const resolve = this.lifecycleResolvers[eventName];
+    if (resolve) {
+      resolve();
+      delete this.lifecycleResolvers[eventName];
+      // recurring events get a fresh promise on next access
+      if (eventName === 'updated') {
+        delete this.lifecyclePromises[eventName];
+      }
+    }
+  }
+
   // dispatches an event from this template
   dispatchEvent(eventName, eventData, eventSettings, { triggerCallback = true } = {}) {
     if (Template.isServer) {
@@ -895,6 +878,9 @@ export const Template = class Template {
       const callback = this.element[callbackName];
       wrapFunction(callback).call(this.element, eventData);
     }
+
+    // resolve lifecycle promise before DOM event dispatch
+    this.resolveLifecyclePromise(eventName);
 
     // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);
