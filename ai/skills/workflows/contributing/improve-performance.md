@@ -185,7 +185,80 @@ The `[JavaScript]` section is sorted by tick count. Focus on:
 
 ---
 
+## Adding a Tachometer Benchmark to a Package
+
+Follow this recipe when adding component-level benchmarks to a new package.
+
+### Files to create
+
+```
+packages/<pkg>/bench/tachometer/
+  index.html          ← import map + <script type="module" src="./bench.js">
+  bench.js            ← component setup + performance.mark/measure operations
+  tachometer.json     ← local config (resolveBareModules: false)
+  tachometer-ci.json  ← CI config (same measurements, two benchmarks: this-change + tip-of-tree)
+  ci-current.html     ← loads ./dist/current/bench.js (esbuild bundle)
+  ci-baseline.html    ← loads ./dist/baseline/bench.js (esbuild bundle)
+  build-ci.js         ← esbuild bundler for CI
+  dist/.gitignore     ← * !.gitignore
+```
+
+### Import map
+
+The import map in `index.html` must list every `@semantic-ui/*` package your bench.js imports (directly or transitively):
+
+```html
+<script type="importmap">
+{
+  "imports": {
+    "@semantic-ui/component": "/packages/component/src/index.js",
+    "@semantic-ui/renderer": "/packages/renderer/src/index.js",
+    "@semantic-ui/reactivity": "/packages/reactivity/src/index.js",
+    "@semantic-ui/templating": "/packages/templating/src/index.js",
+    "@semantic-ui/templating/template": "/packages/templating/src/template.js",
+    "@semantic-ui/utils": "/packages/utils/src/index.js",
+    "@semantic-ui/query": "/packages/query/src/index.js",
+    "@semantic-ui/compiler": "/packages/compiler/src/index.js"
+  }
+}
+</script>
+```
+
+### Adding a new operation
+
+When adding a `performance.measure()` to `bench.js`, add a matching `entryName` to **both** `tachometer.json` and `tachometer-ci.json`. If you forget, the measurement runs but tachometer doesn't report it.
+
+### Component method access
+
+`createComponent` return values live on `el.component`, not on the element itself. After mounting, wait one `requestAnimationFrame` before accessing:
+
+```js
+const el = document.createElement('my-component');
+document.body.appendChild(el);
+await new Promise(r => requestAnimationFrame(r));
+el.component.create(1000); // ✅
+el.create(1000);           // ❌ TypeError
+```
+
+### CI auto-discovery
+
+The benchmarks workflow auto-discovers `tachometer-ci.json` configs. No workflow edits needed when adding a new package — just create the files.
+
+---
+
 ## Workflow Steps
+
+### Step 0: Declare Strategy
+
+Before measuring anything, state your approach:
+
+> "Iterating with vitest bench for fast feedback on [target]. Will validate final results with tachometer."
+
+Or for component-level work:
+
+> "Using tachometer directly for [target] since it involves DOM rendering."
+
+This prevents wasting cycles on the wrong tool — profile.js numbers that look conclusive but aren't, or vitest bench numbers that get committed without tachometer validation.
 
 ### Step 1: Audit
 
