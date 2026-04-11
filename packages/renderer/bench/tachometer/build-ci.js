@@ -1,10 +1,10 @@
 /*
-  Builds bench.js into a self-contained bundle for CI comparison.
+  Builds bench files into self-contained bundles for CI comparison.
   Used by the benchmarks workflow to create current/baseline bundles
   from different git refs.
 
   Usage: node build-ci.js <outdir>
-    outdir: 'current' or 'baseline' — writes to dist/<outdir>/bench.js
+    outdir: 'current' or 'baseline' — writes to dist/<outdir>/
 */
 import * as esbuild from 'esbuild';
 import { dirname, join } from 'node:path';
@@ -12,13 +12,18 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const outdir = process.argv[2] || 'current';
+const outBase = join(__dirname, 'dist', outdir);
 
-await esbuild.build({
-  entryPoints: [join(__dirname, 'bench.js')],
-  bundle: true,
-  outfile: join(__dirname, 'dist', outdir, 'bench.js'),
-  format: 'esm',
-  loader: { '.html': 'text' },
-});
+const benchFiles = ['bench.js', 'bench-todo.js'];
 
-console.log(`Built bench → dist/${outdir}/bench.js`);
+await Promise.all(benchFiles.map(file =>
+  esbuild.build({
+    entryPoints: [join(__dirname, file)],
+    bundle: true,
+    outfile: join(outBase, file),
+    format: 'esm',
+    loader: { '.html': 'text' },
+  })
+));
+
+console.log(`Built ${benchFiles.join(', ')} → dist/${outdir}/`);
