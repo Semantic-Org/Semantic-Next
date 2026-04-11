@@ -106,6 +106,12 @@ TOKEN FINALIZATION (the gate)
 | 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
 | 14 | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | VS Code extension: tmLanguage + template LSP + TS plugin. Types validated (settings/state/self in events via tsc, self in createComponent via plugin). Phase 0 (.d.ts + tmLanguage) shippable in ~1d. [TDD](lsp-and-type-intelligence-tdd.md). |
 
+## Renderer Architecture (unblocked, independent track)
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 38 | [Native Renderer Directives](native-renderer-directives.md) | 8-12h (1-1.5d) | pair | initial | `defineBranch` pattern — decompose 1700-line monolith into lifecycle-based directive modules. Hydration collapses into render path. |
+
 ## Template Language Enhancements (unblocked, independent track)
 
 | # | Plan | Hours | Mode | Scope | Notes |
