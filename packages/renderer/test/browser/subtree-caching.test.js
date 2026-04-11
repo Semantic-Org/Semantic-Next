@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { RENDERING_ENGINES } from './test-utils.js';
+import { RENDERING_ENGINES, waitForUpdate } from './test-utils.js';
 
 /*******************************
          Test Helpers
