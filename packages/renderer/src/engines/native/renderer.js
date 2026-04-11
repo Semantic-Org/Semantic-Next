@@ -202,6 +202,120 @@ export class Renderer {
       Phase 3: Marker Binding
   *******************************/
 
+  // Parse an attribute value containing marker tokens into static/dynamic parts.
+  parseAttributeParts(attrValue) {
+    const parts = [];
+    const markerIDs = [];
+    let lastIndex = 0;
+    let match;
+    ATTR_MARKER_REGEX.lastIndex = 0;
+    while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push({ static: attrValue.slice(lastIndex, match.index) });
+      }
+      const markerID = parseInt(match[1]);
+      parts.push({ markerID });
+      markerIDs.push(markerID);
+      lastIndex = ATTR_MARKER_REGEX.lastIndex;
+    }
+    if (lastIndex < attrValue.length) {
+      parts.push({ static: attrValue.slice(lastIndex) });
+    }
+    return { parts, markerIDs };
+  }
+
+  // Wire reactive bindings for a single attribute expression.
+  // `skipFirstWrite` defers DOM writes on firstRun (used during hydration
+  // where server content is trusted).
+  bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
+    const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
+    const bindingType = classification?.type;
+
+    if (bindingType === 'property') {
+      const realAttrName = classification.attribute;
+      const expr = entries[parts[0].markerID];
+      scope.reaction(element, (comp) => {
+        const value = this.evaluator.lookupTokenValue(expr.node.value, data);
+        if (skipFirstWrite && comp.firstRun) { return; }
+        element[realAttrName] = value;
+      });
+      element.removeAttribute(attrName);
+      return;
+    }
+
+    if (bindingType === 'event') {
+      const realAttrName = classification.attribute;
+      const expr = entries[parts[0].markerID];
+      const handler = (...args) => {
+        const value = this.evaluator.lookupTokenValue(expr.node.value, data);
+        if (isFunction(value)) { value(...args); }
+      };
+      element.addEventListener(realAttrName, handler);
+      scope.onDispose(() => element.removeEventListener(realAttrName, handler));
+      element.removeAttribute(attrName);
+      return;
+    }
+
+    const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
+    const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
+    const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
+
+    if (isSingleExpr) {
+      scope.reaction(element, (comp) => {
+        const value = this.eval(singleEntry.node.value, data);
+        if (skipFirstWrite && comp.firstRun) { return; }
+
+        if (isIfDefined && !value) {
+          element.removeAttribute(attrName);
+        }
+        else {
+          const strValue = (isArray(value) || isPlainObject(value))
+            ? JSON.stringify(value)
+            : String(value ?? '');
+          if (element.getAttribute(attrName) !== strValue) {
+            element.setAttribute(attrName, strValue);
+          }
+        }
+        if (attrName === 'checked' || attrName === 'selected') {
+          const boolValue = Boolean(value);
+          if (element[attrName] !== boolValue) {
+            element[attrName] = boolValue;
+          }
+        }
+        else if (attrName === 'value') {
+          const newValue = value ?? '';
+          if (element[attrName] !== newValue) {
+            element[attrName] = newValue;
+          }
+        }
+      });
+    }
+    else {
+      scope.reaction(element, (comp) => {
+        if (skipFirstWrite && comp.firstRun) {
+          // Evaluate all expressions to register Signal dependencies,
+          // but skip the DOM write — server content is trusted
+          for (const part of parts) {
+            if (part.markerID !== undefined) {
+              this.eval(entries[part.markerID].node.value, data);
+            }
+          }
+          return;
+        }
+        let value = '';
+        for (const part of parts) {
+          if (part.static !== undefined) {
+            value += part.static;
+          }
+          else {
+            value += this.eval(entries[part.markerID].node.value, data) ?? '';
+          }
+        }
+        element.setAttribute(attrName, value);
+      });
+    }
+  }
+
   bindMarkers(root, entries, data, scope, ast) {
     if (entries.length === 0) { return; }
 
@@ -220,110 +334,9 @@ export class Renderer {
       }
 
       for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-        ATTR_MARKER_REGEX.lastIndex = 0;
-        while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
-          if (match.index > lastIndex) {
-            parts.push({ static: attrValue.slice(lastIndex, match.index) });
-          }
-          const markerID = parseInt(match[1]);
-          parts.push({ markerID });
-          processedAttrIDs.add(markerID);
-          lastIndex = ATTR_MARKER_REGEX.lastIndex;
-        }
-        if (lastIndex < attrValue.length) {
-          parts.push({ static: attrValue.slice(lastIndex) });
-        }
-
-        const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
-        const bindingType = classification?.type;
-
-        if (bindingType === 'property') {
-          const realAttrName = classification.attribute;
-          const expr = entries[parts[0].markerID];
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-            element[realAttrName] = value;
-          }));
-          element.removeAttribute(attrName);
-          continue;
-        }
-
-        if (bindingType === 'event') {
-          const realAttrName = classification.attribute;
-          const expr = entries[parts[0].markerID];
-          const handler = (...args) => {
-            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-            if (isFunction(value)) { value(...args); }
-          };
-          element.addEventListener(realAttrName, handler);
-          scope.onDispose(() => element.removeEventListener(realAttrName, handler));
-          element.removeAttribute(attrName);
-          continue;
-        }
-
-        const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
-        const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
-        const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
-
-        if (isSingleExpr) {
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            const value = this.eval(singleEntry.node.value, data);
-
-            if (isIfDefined && !value) {
-              element.removeAttribute(attrName);
-            }
-            else {
-              const strValue = (isArray(value) || isPlainObject(value))
-                ? JSON.stringify(value)
-                : String(value ?? '');
-              if (element.getAttribute(attrName) !== strValue) {
-                element.setAttribute(attrName, strValue);
-              }
-            }
-            if (attrName === 'checked' || attrName === 'selected') {
-              const boolValue = Boolean(value);
-              if (element[attrName] !== boolValue) {
-                element[attrName] = boolValue;
-              }
-            }
-            else if (attrName === 'value') {
-              const newValue = value ?? '';
-              if (element[attrName] !== newValue) {
-                element[attrName] = newValue;
-              }
-            }
-          }));
-        }
-        else {
-          // Multi-expression attribute
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            let value = '';
-            for (const part of parts) {
-              if (part.static !== undefined) {
-                value += part.static;
-              }
-              else {
-                value += this.eval(entries[part.markerID].node.value, data) ?? '';
-              }
-            }
-            element.setAttribute(attrName, value);
-          }));
-        }
+        const { parts, markerIDs } = this.parseAttributeParts(attrValue);
+        for (const id of markerIDs) { processedAttrIDs.add(id); }
+        this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
       }
     }
 
@@ -389,13 +402,9 @@ export class Renderer {
 
     comment.remove();
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !element.isConnected) {
-        comp.stop();
-        return;
-      }
+    scope.reaction(element, () => {
       element.textContent = this.evaluateRawTextNodes(entry.nodes, data);
-    }));
+    });
   }
 
   // Evaluate AST nodes into a plain text string — used for content inside
@@ -479,11 +488,7 @@ export class Renderer {
       const anchor = document.createTextNode('');
       comment.replaceWith(anchor);
       const ownedNodes = [];
-      scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !anchor.isConnected) {
-          comp.stop();
-          return;
-        }
+      scope.reaction(anchor, () => {
         for (const n of ownedNodes) { n.remove(); }
         ownedNodes.length = 0;
         const value = this.eval(exprNode.value, data);
@@ -493,7 +498,7 @@ export class Renderer {
           anchor.after(parsed);
           ownedNodes.push(...nodes);
         }
-      }));
+      });
     }
     else if (exprNode.literalValue) {
       const value = this.evaluator.lookupTokenValue(exprNode.value, data);
@@ -503,14 +508,10 @@ export class Renderer {
     else {
       const textNode = document.createTextNode('');
       parent.replaceChild(textNode, comment);
-      scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !textNode.isConnected) {
-          comp.stop();
-          return;
-        }
+      scope.reaction(textNode, () => {
         const value = this.eval(exprNode.value, data);
         textNode.data = value ?? '';
-      }));
+      });
     }
   }
 
@@ -559,20 +560,13 @@ export class Renderer {
 
   createConditional({ node, data, scope, parentNode, marker, isSVG }) {
     // Use the comment marker as the anchor — replace with a persistent text node
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    marker.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, marker);
 
     let currentBranchIndex = -1;
 
     scope.onDispose(() => region.clear());
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const result = this.getBranch(node, data);
 
       if (result.matchIndex !== currentBranchIndex) {
@@ -586,7 +580,7 @@ export class Renderer {
           region.clear();
         }
       }
-    }));
+    });
   }
 
   getBranch(node, data) {
@@ -615,9 +609,7 @@ export class Renderer {
   *******************************/
 
   createEach({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    marker.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, marker);
 
     const itemMap = new Map();
     let currentKeys = [];
@@ -628,12 +620,7 @@ export class Renderer {
       region.clear();
     });
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const rawItems = this.eval(node.over, data) || [];
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
@@ -722,7 +709,7 @@ export class Renderer {
       }
 
       currentKeys = newKeys;
-    }));
+    });
   }
 
   createItemDataProxy(parentData, itemSignal) {
@@ -782,9 +769,7 @@ export class Renderer {
   *******************************/
 
   createAsync({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    marker.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, marker);
     scope.onDispose(() => region.clear());
 
     let generation = 0;
@@ -802,12 +787,7 @@ export class Renderer {
       region.setContent(stateFragment, stateScope);
     };
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const result = this.eval(node.expression, data);
       const currentGen = ++generation;
 
@@ -839,7 +819,7 @@ export class Renderer {
         hasResolved = true;
         renderState(node.content, this.createSuccessDataContext(node, result));
       }
-    }));
+    });
   }
 
   createSuccessDataContext(node, value) {
@@ -864,21 +844,14 @@ export class Renderer {
   *******************************/
 
   createRerender({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    marker.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, marker);
 
     // Initial render
     const initialScope = scope.child();
     const initialFragment = this.readAST({ ast: node.content, data, scope: initialScope, isSVG });
     region.setContent(initialFragment, initialScope);
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       if (node.key) {
         Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
       }
@@ -891,7 +864,7 @@ export class Renderer {
         const newFragment = this.readAST({ ast: node.content, data, scope: newScope, isSVG });
         region.setContent(newFragment, newScope);
       }
-    }));
+    });
   }
 
   /*******************************
@@ -899,19 +872,12 @@ export class Renderer {
   *******************************/
 
   createSubtemplate({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    marker.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, marker);
 
     let currentTemplateID = null;
     let currentInstance = null;
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       this.dataDep.depend();
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
@@ -970,7 +936,7 @@ export class Renderer {
         currentInstance.setDataContext(templateData, { rerender: false });
         currentInstance.render(templateData);
       }
-    }));
+    });
 
     scope.onDispose(() => {
       if (currentInstance) {
@@ -1050,12 +1016,7 @@ export class Renderer {
     }
 
     // Wire the same Reaction as createSubtemplate for future data updates
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       this.dataDep.depend();
       const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
       const templateData = this.unpackNodeData(node, data);
@@ -1105,7 +1066,7 @@ export class Renderer {
         currentInstance.setDataContext(templateData, { rerender: false });
         currentInstance.render(templateData);
       }
-    }));
+    });
 
     scope.onDispose(() => {
       if (currentInstance) {
@@ -1299,7 +1260,6 @@ export class Renderer {
 
     let refEl, realEl;
     while ((refEl = refWalker.nextNode()) && (realEl = realWalker.nextNode())) {
-      // Capture element per-iteration for Reaction closures
       const element = realEl;
       const attrsToProcess = [];
       for (let i = 0; i < refEl.attributes.length; i++) {
@@ -1310,118 +1270,8 @@ export class Renderer {
       }
 
       for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        const parts = [];
-        let lastIndex = 0;
-        let match;
-        ATTR_MARKER_REGEX.lastIndex = 0;
-        while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
-          if (match.index > lastIndex) {
-            parts.push({ static: attrValue.slice(lastIndex, match.index) });
-          }
-          parts.push({ markerID: parseInt(match[1]) });
-          lastIndex = ATTR_MARKER_REGEX.lastIndex;
-        }
-        if (lastIndex < attrValue.length) {
-          parts.push({ static: attrValue.slice(lastIndex) });
-        }
-
-        const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
-        const bindingType = classification?.type;
-
-        if (bindingType === 'property') {
-          const realAttrName = classification.attribute;
-          const expr = entries[parts[0].markerID];
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-            if (comp.firstRun) { return; }
-            element[realAttrName] = value;
-          }));
-          element.removeAttribute(attrName);
-          continue;
-        }
-
-        if (bindingType === 'event') {
-          const realAttrName = classification.attribute;
-          const expr = entries[parts[0].markerID];
-          const handler = (...args) => {
-            const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-            if (isFunction(value)) { value(...args); }
-          };
-          element.addEventListener(realAttrName, handler);
-          scope.onDispose(() => element.removeEventListener(realAttrName, handler));
-          element.removeAttribute(attrName);
-          continue;
-        }
-
-        const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
-        const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
-        const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
-
-        if (isSingleExpr) {
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            const value = this.eval(singleEntry.node.value, data);
-            if (comp.firstRun) { return; }
-            if (isIfDefined && !value) {
-              element.removeAttribute(attrName);
-            }
-            else {
-              const strValue = (isArray(value) || isPlainObject(value))
-                ? JSON.stringify(value)
-                : String(value ?? '');
-              if (element.getAttribute(attrName) !== strValue) {
-                element.setAttribute(attrName, strValue);
-              }
-            }
-            if (attrName === 'checked' || attrName === 'selected') {
-              const boolValue = Boolean(value);
-              if (element[attrName] !== boolValue) {
-                element[attrName] = boolValue;
-              }
-            }
-            else if (attrName === 'value') {
-              const newValue = value ?? '';
-              if (element[attrName] !== newValue) {
-                element[attrName] = newValue;
-              }
-            }
-          }));
-        }
-        else {
-          scope.track(Reaction.create((comp) => {
-            if (!comp.firstRun && !element.isConnected) {
-              comp.stop();
-              return;
-            }
-            if (comp.firstRun) {
-              // Evaluate all expressions to register Signal dependencies,
-              // but skip the DOM write — server content is trusted
-              for (const part of parts) {
-                if (part.markerID !== undefined) {
-                  this.eval(entries[part.markerID].node.value, data);
-                }
-              }
-              return;
-            }
-            let value = '';
-            for (const part of parts) {
-              if (part.static !== undefined) {
-                value += part.static;
-              }
-              else {
-                value += this.eval(entries[part.markerID].node.value, data) ?? '';
-              }
-            }
-            element.setAttribute(attrName, value);
-          }));
-        }
+        const { parts } = this.parseAttributeParts(attrValue);
+        this.bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
   }
@@ -1446,11 +1296,7 @@ export class Renderer {
       const anchor = document.createTextNode('');
       comment.replaceWith(anchor);
 
-      scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !anchor.isConnected) {
-          comp.stop();
-          return;
-        }
+      scope.reaction(anchor, (comp) => {
         this.eval(exprNode.value, data); // register deps (even on firstRun)
         if (comp.firstRun) { return; } // skip expensive reparse — server DOM is trusted
         for (const n of ownedNodes) { n.remove(); }
@@ -1462,7 +1308,7 @@ export class Renderer {
           anchor.after(parsed);
           ownedNodes.push(...nodes);
         }
-      }));
+      });
     }
     else {
       // The server output is: <!--sui:v1:0-->VALUE + static text...
@@ -1491,18 +1337,14 @@ export class Renderer {
         comment.replaceWith(textNode);
       }
 
-      scope.track(Reaction.create((comp) => {
-        if (!comp.firstRun && !textNode.isConnected) {
-          comp.stop();
-          return;
-        }
+      scope.reaction(textNode, (comp) => {
         if (comp.firstRun) {
           this.eval(exprNode.value, data);
           return;
         }
         const value = this.eval(exprNode.value, data);
         textNode.data = value ?? '';
-      }));
+      });
     }
   }
 
@@ -1542,9 +1384,7 @@ export class Renderer {
     }
 
     // Create DynamicRegion with server-rendered content
-    const region = new DynamicRegion(parentNode, null);
-    region.anchor = document.createTextNode('');
-    comment.replaceWith(region.anchor);
+    const region = new DynamicRegion(parentNode, comment);
     region.ownedNodes = ownedNodes;
 
     // Hydrate inner markers in the server-rendered content.
@@ -1682,12 +1522,7 @@ export class Renderer {
     const result = this.getBranch(node, data);
     let currentBranchIndex = result.matchIndex;
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const result = this.getBranch(node, data);
       if (result.matchIndex !== currentBranchIndex) {
         currentBranchIndex = result.matchIndex;
@@ -1700,18 +1535,13 @@ export class Renderer {
           region.clear();
         }
       }
-    }));
+    });
   }
 
   hydrateEach({ node, data, scope, region }) {
     // On first run: evaluate to establish dependencies, skip rendering.
     // On subsequent runs: full re-render of the entire list.
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const rawItems = this.eval(node.over, data) || [];
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
@@ -1739,7 +1569,7 @@ export class Renderer {
         }
         region.setContent(fragment, listScope);
       }
-    }));
+    });
   }
 
   hydrateAsync({ node, data, scope, region }) {
@@ -1759,12 +1589,7 @@ export class Renderer {
       region.setContent(stateFragment, stateScope);
     };
 
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       const result = this.eval(node.expression, data);
       const currentGen = ++generation;
 
@@ -1796,16 +1621,11 @@ export class Renderer {
           renderState(node.content, this.createSuccessDataContext(node, result));
         }
       }
-    }));
+    });
   }
 
   hydrateRerender({ node, data, scope, region }) {
-    scope.track(Reaction.create((comp) => {
-      if (!comp.firstRun && !region.anchor.isConnected) {
-        comp.stop();
-        return;
-      }
-
+    scope.reaction(region.anchor, (comp) => {
       if (node.key) {
         Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
       }
@@ -1818,7 +1638,7 @@ export class Renderer {
         const newFragment = this.readAST({ ast: node.content, data, scope: newScope });
         region.setContent(newFragment, newScope);
       }
-    }));
+    });
   }
 
   /*******************************
