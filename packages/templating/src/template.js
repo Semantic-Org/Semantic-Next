@@ -279,6 +279,7 @@ export const Template = class Template {
       template: this,
       subTemplates: this.subTemplates,
       helpers: TemplateHelpers,
+      receivesData: this.isSubtemplate(),
     });
 
     this.callParams = this.buildCallParams();
