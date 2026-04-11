@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { TemplateCompiler } from '@semantic-ui/compiler';
 
 describe('TemplateCompiler - Extended Coverage', () => {
-
   /*-----------------------------------------
     detectSyntax
   -----------------------------------------*/
@@ -694,14 +693,14 @@ describe('TemplateCompiler - Extended Coverage', () => {
   describe('expressions inside attribute values', () => {
     it('should compile expressions interpolated in class attribute', () => {
       const compiler = new TemplateCompiler();
-      const ast = compiler.compile('<div class="{ui}card">content</div>');
+      const ast = compiler.compile('<div class="{uiClasses}card">content</div>');
 
       expect(ast[0].type).toBe('html');
       expect(ast[0].html).toBe('<div class="');
 
       const expr = ast.find(n => n.type === 'expression');
       expect(expr).toBeDefined();
-      expect(expr.value).toBe('ui');
+      expect(expr.value).toBe('uiClasses');
     });
 
     it('should compile multiple expressions in a single attribute', () => {
@@ -912,11 +911,11 @@ describe('TemplateCompiler - Extended Coverage', () => {
       const compiler = new TemplateCompiler();
       const template = `
         {#if href}
-          <a class="{ui}card" href="{href}">
+          <a class="{uiClasses}card" href="{href}">
             {> content}
           </a>
         {else}
-          <div class="{ui}card">
+          <div class="{uiClasses}card">
             {> content}
           </div>
         {/if}

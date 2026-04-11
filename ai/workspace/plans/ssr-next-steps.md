@@ -15,7 +15,7 @@
 
 ### 3. Understand the server renderer
 - `packages/renderer/src/engines/native/server.js` — `ServerRenderer`: AST → HTML string with comment markers
-- `packages/component/src/render-to-string.js` — `renderToString`: DSD wrapper, `expandCustomElements`, `resolveOptionAttributes`, `{ui}` computation
+- `packages/component/src/render-to-string.js` — `renderToString`: DSD wrapper, `expandCustomElements`, `resolveOptionAttributes`, `{uiClasses}` computation
 - `packages/component/src/expand-custom-elements.js` — Post-render expansion of nested custom element tags
 - `packages/component/src/component-helpers.js` — Shared helpers: `resolveOptionAttributes`, `getUIClasses`, `createSettingsProxy`
 
@@ -46,7 +46,7 @@ These are in `ai/workspace/tmp/` — read ALL of them for context:
 
 ### SSR rendering bugs (server produces wrong HTML)
 - **Option attribute resolution** — `tiny=""` on `<ui-input>` wasn't mapping to `size="tiny"`. Added `resolveOptionAttributes()` shared helper in `component-helpers.js`, used from both `renderToString` and `deserializeAttrs`.
-- **`{ui}` computed too early** — `renderToString` computed `{ui}` classes before `initialize()` ran. Moved computation to after `initialize()` so settings mutations (like `icon = 'search'`) are reflected.
+- **`{uiClasses}` computed too early** — `renderToString` computed `{uiClasses}` classes before `initialize()` ran. Moved computation to after `initialize()` so settings mutations (like `icon = 'search'`) are reflected.
 - **Ladder slot passing** — `renderToString` was receiving children as a raw string instead of `{ slots: { default: ... } }`.
 
 ### Hydration bugs (client destroys correct server DOM)

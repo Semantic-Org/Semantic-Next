@@ -132,7 +132,7 @@ class LitWebComponentBase extends LitElement {
       });
     }
     if (componentSpec) {
-      data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+      data.uiClasses = this.getUIClasses({ componentSpec, properties: resolvedProperties });
     }
     if (plural) {
       data.plural = true;

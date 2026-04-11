@@ -67,7 +67,7 @@ content: [
 
 ### Styling Classes
 
-Specs also create a stringified styling class in your [data context](docs/guides/components/rendering) `{ui}` for `types` and `variations` parts of your spec that are related to styling, regardless of how that data is specified.
+Specs also create a stringified styling class in your [data context](docs/guides/components/rendering) `{uiClasses}` for `types` and `variations` parts of your spec that are related to styling, regardless of how that data is specified.
 
 When `includeAttributeClass: true` is set on a variation, the attribute name is also included as a class. This allows styling all options of a variation together:
 
@@ -91,7 +91,7 @@ variations: [
 
 ```sui title='component.html'
 <!-- ui is 'color red' !-->
-<div class="{ui}button">
+<div class="{uiClasses}button">
   {#if icon}
     <ui-icon icon={icon}>
   {/if}

@@ -142,9 +142,9 @@ What the LSP *can* do -- and what the design correctly identifies -- is:
 
 These three checks catch the vast majority of real template errors. Looking at actual templates:
 
-`input.html`: `{ui}`, `{classMap getStateClasses}`, `{type}`, `{placeholder}`, `{disabled}`, `{name}`, `{value}`, `{icon}`, `{isClearable}`, `{getIcon}`, `{label}`. Every expression is a simple name lookup. Zero arithmetic, zero complex expressions.
+`input.html`: `{uiClasses}`, `{classMap getStateClasses}`, `{type}`, `{placeholder}`, `{disabled}`, `{name}`, `{value}`, `{icon}`, `{isClearable}`, `{getIcon}`, `{label}`. Every expression is a simple name lookup. Zero arithmetic, zero complex expressions.
 
-`button.html`: `{badge}`, `{ui}`, `{href}`, `{icon}`, `{iconAfter}`, `{iconOnly}`, `{animated}`. Same pattern -- all simple lookups. The `{not iconAfter}` pattern is a helper call, which can be validated by checking that `not` exists in the HelperRegistry and `iconAfter` exists in the data context.
+`button.html`: `{badge}`, `{uiClasses}`, `{href}`, `{icon}`, `{iconAfter}`, `{iconOnly}`, `{animated}`. Same pattern -- all simple lookups. The `{not iconAfter}` pattern is a helper call, which can be validated by checking that `not` exists in the HelperRegistry and `iconAfter` exists in the data context.
 
 Users won't feel the gap because real template expressions are almost exclusively simple name lookups and helper calls. The rare complex expression (like `{count + 1}` or `{isNew ? 'new' : 'old'}`) is still validated at the name level (does `count` exist? does `isNew` exist?).
 
@@ -242,6 +242,6 @@ The design says "Populated at build time -- generated from the source file." But
 
 Option 3 is what will actually happen, and it means ~50 helper entries that must be kept in sync with the source. This is maintainable but should be acknowledged as ongoing cost. Adding JSDoc to `template-helpers.js` would both improve the source documentation and enable auto-generation.
 
-### The plan doesn't address the `{ui}` magic variable
+### The plan doesn't address the `{uiClasses}` magic variable
 
-Looking at `button.html`: `<div class="{ui}button">`. The `{ui}` expression is a computed class string from active spec attributes. It's not a variable in the data context -- it's synthesized by the component framework from the spec. The LSP needs to know about this special name; otherwise it will flag `{ui}` as "unknown identifier" in every single template file. This should be documented as a known special case in the HelperRegistry or ComponentModel.
+Looking at `button.html`: `<div class="{uiClasses}button">`. The `{uiClasses}` expression is a computed class string from active spec attributes. It's not a variable in the data context -- it's synthesized by the component framework from the spec. The LSP needs to know about this special name; otherwise it will flag `{uiClasses}` as "unknown identifier" in every single template file. This should be documented as a known special case in the HelperRegistry or ComponentModel.

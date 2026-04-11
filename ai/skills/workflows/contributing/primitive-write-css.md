@@ -67,13 +67,13 @@ src/primitives/button/css/
 
 Definition files reference variables. Theme files define them. This separation lets themes change values without touching rules.
 
-### The {ui} Pattern
+### The {uiClasses} Pattern
 
-Templates use `{ui}` as a placeholder that the component system fills with classes from spec attributes:
+Templates use `{uiClasses}` as a placeholder that the component system fills with classes from spec attributes:
 
 ```html
 <!-- Template -->
-<div class="{ui}button">...</div>
+<div class="{uiClasses}button">...</div>
 
 <!-- <ui-button primary large> renders as: -->
 <div class="primary large button">...</div>

@@ -288,7 +288,7 @@ class WebComponentBase extends HTMLElementBase {
       });
     }
     if (this.uiClasses) {
-      data.ui = this.uiClasses;
+      data.uiClasses = this.uiClasses;
     }
     if (plural) {
       data.plural = true;

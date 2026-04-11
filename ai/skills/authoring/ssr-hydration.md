@@ -95,7 +95,7 @@ const data = { ...specDefaults, ...defaultSettings, ...normalizedAttrs };
 
 **4. Clone and initialize** — The prototype template is cloned with the data context, forcing the native engine (ServerRenderer handles string output). `template.initialize()` runs `createComponent()` — the same function that runs on the client. The `isServer` param is `true`, so components can guard client-only logic.
 
-**5. Compute `{ui}` classes** — After `initialize()`, because `createComponent` can modify settings that affect spec resolution (e.g., input's `configureSearch` sets `icon`).
+**5. Compute `{uiClasses}` classes** — After `initialize()`, because `createComponent` can modify settings that affect spec resolution (e.g., input's `configureSearch` sets `icon`).
 
 **6. Render** — `template.render()` delegates to `ServerRenderer.render()`, which walks the AST and produces an HTML string with hydration comment markers.
 

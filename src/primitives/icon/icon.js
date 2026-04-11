@@ -20,9 +20,9 @@ const createComponent = ({ settings, data, self }) => ({
   },
   maybeCustomIcon() {
     // if this icon is not in standard set include it additionally
-    if (data.ui.search(settings.icon) == -1) {
-      return ' ' + settings.icon;
-    }
+    // if (data.ui.search(settings.icon) == -1) {
+    //   return ' ' + settings.icon;
+    // }
   },
   getIconStyle() {
     const { icon, set } = self.getIconParts();

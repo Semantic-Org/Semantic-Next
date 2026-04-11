@@ -163,11 +163,11 @@ Every `defineComponent` option used in one example. Shows patterns that only app
 
 How SUI's first-party design system components work. A `SpecReader` processes a spec definition into a `componentSpec` that enables three equivalent HTML dialects — concise, verbose, and class-based. This is how `<ui-button primary large>` works.
 
-**New patterns:** `SpecReader`, `componentSpec`, `{ui}` class expansion, three HTML attribute dialects, `variations`, `states`.
+**New patterns:** `SpecReader`, `componentSpec`, `{uiClasses}` class expansion, three HTML attribute dialects, `variations`, `states`.
 
 **What to notice:**
 - Three equivalent syntaxes: `<ui-widget large primary>` = `<ui-widget size="large" emphasis="primary">` = `<ui-widget class="large primary">`. The spec system makes all three work automatically.
-- `{ui}` in the template — expands to CSS classes from active spec attributes. `<span class="{ui}widget">` becomes `<span class="large primary widget">` based on what attributes are set.
+- `{uiClasses}` in the template — expands to CSS classes from active spec attributes. `<span class="{uiClasses}widget">` becomes `<span class="large primary widget">` based on what attributes are set.
 - The spec is a plain JS object — `variations`, `states`, `types`. A data structure that describes a component's API surface.
 
 ---
@@ -327,7 +327,7 @@ SVG rendering and the `interval` helper with automatic lifecycle cleanup.
 | `{both x y}` compound conditional | `progress-bar` |
 | `state` vs `self` (reactive vs non-reactive) | `advanced-ball-simulation` |
 | Dynamic signal access (bracket notation) | `event-data` |
-| Spec system (`SpecReader`, `{ui}`, dialects) | `component-specs` |
+| Spec system (`SpecReader`, `{uiClasses}`, dialects) | `component-specs` |
 | TailwindPlugin (runtime Tailwind in shadow DOM) | `tailwind` |
 
 ---

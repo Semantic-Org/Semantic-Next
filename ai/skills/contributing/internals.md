@@ -260,11 +260,11 @@ button.spec.js → SpecReader.getWebComponentSpec() → button.component.js
 - Spec `properties` → Lit properties without HTML attributes (functions, classes)
 - Spec `optionAttributes` → alias properties (`primary` → `emphasis="primary"`)
 
-**The `{ui}` class computation** (`web-component.js:getUIClasses()`):
+**The `{uiClasses}` class computation** (`web-component.js:getUIClasses()`):
 - Iterates all spec attributes on the element
 - Boolean attributes (`active=true`) → class name (`"active"`)
 - Value attributes (`emphasis="primary"`) → value as class (`"primary"`)
-- Concatenated with a trailing space for template use: `class="{ui}button"`
+- Concatenated with a trailing space for template use: `class="{uiClasses}button"`
 
 ### Spec ↔ CSS Layer Correspondence
 
@@ -366,7 +366,7 @@ Extends `LitElement` with Semantic UI-specific functionality:
 
 - **`getProperties()`** — generates Lit `static properties` from a componentSpec
 - **`createSettingsProxy()`** — creates a reactive Proxy over element properties. Reading a setting returns the current property value; the proxy enables `settings.foo` syntax in callbacks
-- **`getUIClasses()`** — computes the `{ui}` CSS class string from active spec attributes
+- **`getUIClasses()`** — computes the `{uiClasses}` CSS class string from active spec attributes
 - **`isDarkMode()`** — detects dark mode via Query on closest ancestor
 - **`$$(selector)`** — queries original (slotted) DOM
 

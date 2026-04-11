@@ -94,12 +94,12 @@ export class Renderer {
 
     // DOM change notification — coalesced so multiple async resolutions
     // or data bumps in the same tick fire onUpdated only once
-    this._updateScheduled = false;
+    this.updateScheduled = false;
     this.notifyUpdate = () => {
-      if (this._updateScheduled) { return; }
-      this._updateScheduled = true;
+      if (this.updateScheduled) { return; }
+      this.updateScheduled = true;
       queueMicrotask(() => {
-        this._updateScheduled = false;
+        this.updateScheduled = false;
         this.template?.onUpdated?.();
       });
     };

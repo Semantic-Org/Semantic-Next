@@ -65,7 +65,7 @@ Unlike React/Vue where composition is straightforward, web components face uniqu
 
 Some components use multiple approaches simultaneously (like menu offering both `items` configuration and slotted composition).
 
-**Semantic UI's unique feature:** Primitives support three dialects—`<ui-divider vertical>` (attribute), `divider.direction = "vertical"` (property), and `<ui-divider class="vertical">` (class)—all mapping to the same styling via the `{ui}` template variable. This is why components use class-based CSS (`.vertical.divider`) rather than `:host([vertical])`.
+**Semantic UI's unique feature:** Primitives support three dialects—`<ui-divider vertical>` (attribute), `divider.direction = "vertical"` (property), and `<ui-divider class="vertical">` (class)—all mapping to the same styling via the `{uiClasses}` template variable. This is why components use class-based CSS (`.vertical.divider`) rather than `:host([vertical])`.
 
 ---
 
@@ -345,7 +345,7 @@ const createComponent = ({ settings }) => ({
 
 ```html
 <!-- menu.html -->
-<div class="{ui}menu" part="menu">
+<div class="{uiClasses}menu" part="menu">
   {#each item in items}
     <menu-item
       active={isValueActive value item}
@@ -415,7 +415,7 @@ Parent and children both use Shadow DOM. Coordination via CSS custom properties 
 **The Hybrid Pattern:**
 ```html
 <!-- menu.html - Support both modes -->
-<div class="{ui}menu" part="menu">
+<div class="{uiClasses}menu" part="menu">
   {#each item in items}
     <!-- Configuration mode: parent renders -->
     <menu-item {...item.props}>
@@ -849,7 +849,7 @@ const defaultSettings = {
 
 // Pattern 3: Composition
 const template = `
-  <div class="{ui}menu">
+  <div class="{uiClasses}menu">
     {#each item in items}
       <menu-item {...item}>  <!-- Configuration renders -->
     {else}
@@ -1229,10 +1229,10 @@ const Button = defineComponent({
 settings.orientation = 'vertical';  // Parent controls structure
 ```
 
-Or use the standard `{ui}` class pattern:
+Or use the standard `{uiClasses}` class pattern:
 ```html
-<!-- Template: {ui} populated from spec attributes -->
-<div class="{ui}divider">
+<!-- Template: {uiClasses} populated from spec attributes -->
+<div class="{uiClasses}divider">
   <!-- vertical class added automatically -->
 </div>
 ```
@@ -1244,7 +1244,7 @@ Or use the standard `{ui}` class pattern:
 }
 ```
 
-**Note:** Semantic UI primitives support three dialects (attribute, property, class) which all map to the same class via the `{ui}` template variable. This is why you target classes like `.vertical.divider`, not `:host([vertical])`.
+**Note:** Semantic UI primitives support three dialects (attribute, property, class) which all map to the same class via the `{uiClasses}` template variable. This is why you target classes like `.vertical.divider`, not `:host([vertical])`.
 
 ---
 

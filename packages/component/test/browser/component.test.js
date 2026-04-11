@@ -363,7 +363,7 @@ describe('Component', () => {
 
       const TestComponent = defineComponent({
         tagName: 'test-spec-component',
-        template: '<div class="{{ui}}">Component with Spec</div>',
+        template: '<div class="{{uiClasses}}">Component with Spec</div>',
         componentSpec,
       });
 

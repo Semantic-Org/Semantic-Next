@@ -6,9 +6,9 @@ Complete the SSR hydration ladder from step 20 to step 50, covering every edge c
 
 ## Current State
 
-Steps 1-19 pass: static HTML, text/attribute expressions, conditionals, each, snippets, subtemplates, nested blocks, async, rerender, guard, slots, unsafe HTML, isClient/isServer, each+conditional, snippet in each, multi-branch, object iteration, spec-driven {ui} classes.
+Steps 1-19 pass: static HTML, text/attribute expressions, conditionals, each, snippets, subtemplates, nested blocks, async, rerender, guard, slots, unsafe HTML, isClient/isServer, each+conditional, snippet in each, multi-branch, object iteration, spec-driven {uiClasses} classes.
 
-Step 20 (ui-button) renders with correct {ui} classes but has two known bugs:
+Step 20 (ui-button) renders with correct {uiClasses} classes but has two known bugs:
 1. Doubled snippet content during hydration — `hydrateBlockDirective` for snippet-type template nodes renders fresh content instead of adopting server DOM
 2. False hydration mismatch warning for `{#if animated}` — server `renderConditional` closing marker records wrong branch index
 
@@ -71,7 +71,7 @@ Use `docs/src/pages/test.astro` for client-only debugging (no SSR). Use Chrome M
 
 | Step | Name | What it tests |
 |------|------|---------------|
-| 20 | `ui-button primary` | Spec-driven primitive with snippets, {ui} classes, slot. FIX: doubled snippet content during hydration, branch index mismatch |
+| 20 | `ui-button primary` | Spec-driven primitive with snippets, {uiClasses} classes, slot. FIX: doubled snippet content during hydration, branch index mismatch |
 | 21 | `ui-button with href` | Same component, `<a>` variant via `{#if href}`. Tests conditional snippet branching |
 
 ### Tier 2: Simple Primitives (Steps 22-26)

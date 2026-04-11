@@ -343,10 +343,18 @@ export const Template = class Template {
     // by initialize()), so settingsVars is the authoritative set.
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
+    const componentSpec = this.element?.componentSpec;
     if (settingsVars) {
       if (defaultSettings) {
         each(defaultSettings, (_, name) => {
           this.element.settings[name]; // ensure shadow signal exists
+        });
+      }
+      // Also read spec attributes through the proxy so their Signals
+      // are updated with current property values (e.g. active, size)
+      if (componentSpec?.attributes) {
+        each(componentSpec.attributes, (attribute) => {
+          this.element.settings[attribute];
         });
       }
       settingsVars.forEach((signal, name) => {

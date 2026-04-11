@@ -1,9 +1,9 @@
-import { readFileSync, readdirSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { globSync } from 'glob';
+import { resolve } from 'path';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { LanguageService, uriToPath } from '../src/language-service.js';
 import { analyzeComponent } from '../src/component-analyzer.js';
+import { LanguageService, uriToPath } from '../src/language-service.js';
 
 const root = resolve(import.meta.dirname, '../../..');
 
@@ -55,7 +55,7 @@ describe('LanguageService', () => {
     it('returns component methods for expression context', () => {
       service.didOpen(buttonUri, buttonHtml);
       // Find an expression offset in button.html
-      const offset = buttonHtml.indexOf('{ui}');
+      const offset = buttonHtml.indexOf('{uiClasses}');
       const items = service.getCompletions(buttonUri, service.offsetToPosition(buttonHtml, offset + 1));
       const names = items.map(i => i.label);
       expect(names).toContain('isIconBefore');

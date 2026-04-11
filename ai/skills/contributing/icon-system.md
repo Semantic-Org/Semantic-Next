@@ -227,7 +227,7 @@ Moving resolution to a single JS module (`icons.meta.js`) eliminated this redund
 | File | Purpose |
 |------|---------|
 | `icon.js` | Component logic — `getIconParts()`, `getIconStyle()`, alias resolution |
-| `icon.html` | Template — renders `<i class="{ui}icon" style={getIconStyle}>` |
+| `icon.html` | Template — renders `<i class="{uiClasses}icon" style={getIconStyle}>` |
 | `icon-bundle.css` | Bundled CSS — definition + theme layers for the shadow DOM |
 | `specs/icon.spec.js` | Spec definition — declares content, variations, states, settings |
 | `specs/icon.component.js` | Auto-generated from spec — the flat attribute map with `optionAttributes` |

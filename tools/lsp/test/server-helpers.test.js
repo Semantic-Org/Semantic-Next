@@ -23,12 +23,11 @@ function readTemplate(relativePath) {
 *******************************/
 
 describe('getCompletionContext — real templates', () => {
-
   describe('button.html', () => {
     const text = readTemplate('src/primitives/button/button.html');
 
-    it('expression context inside {ui} class pattern', () => {
-      const idx = text.indexOf('{ui}');
+    it('expression context inside {uiClasses} class pattern', () => {
+      const idx = text.indexOf('{uiClasses}');
       expect(getCompletionContext(text, idx + 1)).toMatchObject({ type: 'expression' });
     });
 
@@ -168,8 +167,8 @@ describe('getCompletionContext — real templates', () => {
       }
     });
 
-    it('expression context inside double-brace {{ui}}', () => {
-      const idx = text.indexOf('{{ui}}');
+    it('expression context inside double-brace {{uiClasses}}', () => {
+      const idx = text.indexOf('{{uiClasses}}');
       if (idx !== -1) {
         expect(getCompletionContext(text, idx + 2)).toMatchObject({ type: 'expression' });
       }
@@ -219,7 +218,6 @@ describe('getCompletionContext — real templates', () => {
 *******************************/
 
 describe('getCompletionContext — edge cases', () => {
-
   it('closing block {/if} is expression context (not block)', () => {
     // Developer places cursor inside {/if} — the / doesn't start with # or >
     const text = '<div>{/if}</div>';
@@ -319,7 +317,8 @@ describe('formatAttributeDoc — with real button spec data', () => {
     const meta = {
       name: 'Emphasis',
       description: 'be emphasized in a layout',
-      exampleCode: '\n            <ui-button primary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          ',
+      exampleCode:
+        '\n            <ui-button primary>Confirm</ui-button>\n            <ui-button>Cancel</ui-button>\n          ',
     };
     const spec = {
       propertyTypes: { emphasis: 'string' },

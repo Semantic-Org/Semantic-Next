@@ -13,7 +13,7 @@ const createComponent = ({ self, settings }) => ({
     return {
       'horizontal': self.hasContent(),
       // Additional computed classes based on content or logic
-      // (spec attributes like vertical, hidden are handled by {ui})
+      // (spec attributes like vertical, hidden are handled by {uiClasses})
     };
   },
 
