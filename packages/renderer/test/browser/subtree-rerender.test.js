@@ -16,9 +16,7 @@ RENDERING_ENGINES.forEach(engine => {
       return el.shadowRoot.innerHTML.replace(/<!--[\s\S]*?-->/g, '').trim();
     }
     async function waitForUpdate(el) {
-      await el.updateComplete;
-      await new Promise(r => setTimeout(r, 0));
-      await el.updateComplete;
+      await el.updated;
     }
 
     beforeEach(() => {
@@ -40,7 +38,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alice');
 
@@ -72,7 +70,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('first');
 
@@ -106,7 +104,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         // Wait for initial async resolution
         await new Promise(r => setTimeout(r, 100));
@@ -143,7 +141,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         await new Promise(r => setTimeout(r, 100));
         await waitForUpdate(el);
@@ -176,7 +174,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('ON:status');
 
@@ -203,7 +201,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('VISIBLE:v0');
 
@@ -238,7 +236,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Red');
         expect(shadowText(el)).toContain('Green');
@@ -273,7 +271,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('A:1');
         expect(shadowText(el)).toContain('B:2');

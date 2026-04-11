@@ -18,9 +18,7 @@ RENDERING_ENGINES.forEach(engine => {
     }
 
     async function waitForUpdate(el) {
-      await el.updateComplete;
-      await new Promise(r => setTimeout(r, 0));
-      await el.updateComplete;
+      await el.updated;
     }
 
     beforeEach(() => {
@@ -50,7 +48,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alpha');
         expect(shadowText(el)).toContain('Beta');
@@ -76,7 +74,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('One');
         expect(shadowText(el)).toContain('Two');
@@ -118,7 +116,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         // Wait for async to resolve
         await new Promise(r => setTimeout(r, 100));
@@ -154,7 +152,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         await new Promise(r => setTimeout(r, 100));
         await waitForUpdate(el);
@@ -187,7 +185,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('ON');
         expect(shadowText(el)).not.toContain('OFF');
@@ -216,7 +214,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Y:first');
 
@@ -253,7 +251,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('A');
         expect(shadowText(el)).toContain('B');
@@ -287,7 +285,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('[alpha]');
         expect(shadowText(el)).toContain('[beta]');
@@ -320,7 +318,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('hello');
 
@@ -348,7 +346,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('count:0');
 
@@ -383,7 +381,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('msg:hi');
 
@@ -413,7 +411,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alice');
         expect(shadowText(el)).toContain('active');
@@ -446,7 +444,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Items');
         expect(shadowText(el)).toContain('42');
@@ -470,7 +468,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         const initial = shadowText(el);
         expect(initial).toContain('v0');
@@ -510,7 +508,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('View A');
 
@@ -544,7 +542,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Card: hello!');
 
@@ -587,7 +585,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('v0');
 
@@ -617,7 +615,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('v0|v0');
 
@@ -655,7 +653,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alpha');
 
@@ -687,7 +685,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alpha|pending');
 
@@ -722,7 +720,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Alpha');
 

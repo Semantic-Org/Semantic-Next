@@ -18,9 +18,7 @@ RENDERING_ENGINES.forEach(engine => {
     }
 
     async function waitForUpdate(el) {
-      await el.updateComplete;
-      await new Promise(r => setTimeout(r, 0));
-      await el.updateComplete;
+      await el.updated;
     }
 
     beforeEach(() => {
@@ -45,7 +43,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('A:old');
         expect(shadowText(el)).toContain('B:old');
@@ -77,7 +75,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('A:pending');
         expect(shadowText(el)).toContain('B:waiting');
@@ -109,7 +107,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('X:summary');
         expect(shadowText(el)).toContain('Y:summary');
@@ -142,7 +140,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('OFF:A');
         expect(shadowText(el)).toContain('ON:B');
@@ -174,7 +172,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('Card1:v1');
         expect(shadowText(el)).toContain('Card2:v1');
@@ -207,7 +205,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('[alpha]');
         expect(shadowText(el)).toContain('[beta]');
@@ -244,7 +242,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         // Wait for async resolution
         await new Promise(r => setTimeout(r, 100));
@@ -287,7 +285,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         await new Promise(r => setTimeout(r, 100));
         await waitForUpdate(el);
@@ -326,7 +324,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('a:light');
         expect(shadowText(el)).toContain('b:light');
@@ -366,7 +364,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('G1:x');
         expect(shadowText(el)).toContain('G1:y');
@@ -402,7 +400,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('R1:0');
         expect(shadowText(el)).toContain('R2:0');
@@ -435,7 +433,7 @@ RENDERING_ENGINES.forEach(engine => {
         });
         const el = document.createElement(tag);
         document.body.appendChild(el);
-        await el.updateComplete;
+        await el.rendered;
 
         expect(shadowText(el)).toContain('P:red');
         expect(shadowText(el)).toContain('Q:green');
