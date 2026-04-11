@@ -43,6 +43,9 @@ class WebComponentBase extends HTMLElementBase {
     if (resolvedProperties) {
       this.settings = this.createSettingsProxy();
     }
+    if (componentSpec) {
+      this.uiClasses = () => this.getUIClasses({ componentSpec, properties: resolvedProperties });
+    }
     if (defaultSettings) {
       this.setDefaultSettings({ defaultSettings, componentSpec });
     }
@@ -235,13 +238,21 @@ class WebComponentBase extends HTMLElementBase {
     }
   }
 
+  get updateComplete() {
+    if (!this.updateScheduled) {
+      return Promise.resolve();
+    }
+    return new Promise(resolve => setTimeout(resolve, 0));
+  }
+
   requestUpdate() {
-    if (this.updateScheduled) {
+    this.updateScheduled = true;
+    if (this._pendingRender) {
       return;
     }
-    this.updateScheduled = true;
+    this._pendingRender = true;
     queueMicrotask(() => {
-      this.updateScheduled = false;
+      this._pendingRender = false;
       if (this.template) {
         this.template.render(this.getData());
       }
@@ -276,8 +287,8 @@ class WebComponentBase extends HTMLElementBase {
         configurable: true,
       });
     }
-    if (componentSpec) {
-      data.ui = this.getUIClasses({ componentSpec, properties: resolvedProperties });
+    if (this.uiClasses) {
+      data.ui = this.uiClasses;
     }
     if (plural) {
       data.plural = true;
@@ -332,6 +343,9 @@ class WebComponentBase extends HTMLElementBase {
     return this.template?.lifecyclePromise('rendered');
   }
   get updated() {
+    if (!this.updateScheduled) {
+      return Promise.resolve();
+    }
     return this.template?.lifecyclePromise('updated');
   }
   get destroyed() {
