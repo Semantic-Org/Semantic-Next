@@ -71,7 +71,7 @@ describe('CSS Utilities', () => {
         adoptStylesheet(css, shadowRoot); // Same CSS, should not be added again
 
         expect(shadowRoot.adoptedStyleSheets.length).toBe(1);
-        expect(shadowRoot.cssHashes.length).toBe(1);
+        expect(shadowRoot.cssHashes.size).toBe(1);
       });
 
       it('should allow different CSS with different hashes', () => {
@@ -83,7 +83,7 @@ describe('CSS Utilities', () => {
         adoptStylesheet(css2, shadowRoot);
 
         expect(shadowRoot.adoptedStyleSheets.length).toBe(2);
-        expect(shadowRoot.cssHashes.length).toBe(2);
+        expect(shadowRoot.cssHashes.size).toBe(2);
       });
     });
 

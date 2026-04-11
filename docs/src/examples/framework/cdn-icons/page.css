@@ -1,0 +1,6 @@
+body {
+  padding: var(--padding);
+  display: flex;
+  gap: var(--gap-xs);
+  align-items: center;
+}

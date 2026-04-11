@@ -1,3 +1,7 @@
+# Screenshots dropped in root
+/*.jpg
+/*.png
+
 node_modules/
 test/coverage/
 coverage/
@@ -5,14 +9,15 @@ playwright_report/
 dev/examples/
 dev/ui/
 docs/dist/
+examples/package-lock.json
 dist/
 tests/results/
 tests/test-case/dist
 
 # for my ai friends
-ai/artifacts/prompts
 ai/meta/agent-guestbook.md
 ai/meta/jisei.md
+ai/trash
 
 # Numerous always-ignore extensions
 *.diff
@@ -49,3 +54,8 @@ nbproject
 /playwright/.cache/
 .wireit
 .vercel
+
+# LSP build artifacts
+tools/lsp/editors/vscode/*.vsix
+tools/lsp/editors/vscode/server/
+tools/lsp/editors/vscode/test-grammar/

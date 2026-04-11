@@ -15,6 +15,7 @@ const defaultSettings = {
   label: '',
   canMinimize: true,
   minimized: false,
+  hidden: false,
   getNaturalSize: (panel, { direction, minimized }) => {
     return panel?.component.getNaturalSize(panel, { direction, minimized });
   },
@@ -32,6 +33,7 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
     return {
       resizing: self.resizing.get(),
       minimized: settings.minimized,
+      hidden: settings.hidden,
       initialized: self.isSafari() || self.initialized.get(),
     };
   },
@@ -49,6 +51,9 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
   },
 
   getNaturalSize(panel, { direction, minimized }) {
+    if (settings.hidden) {
+      return 0;
+    }
     if (settings.naturalSize) {
       const panels = self.getPanels();
       return panels.getPixelSettingSize(settings.naturalSize);
@@ -86,7 +91,17 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
     return $(el).index();
   },
   isResizable() {
-    return settings.resizable && self.getIndex() > 0;
+    if (!settings.resizable || self.getIndex() <= 0) {
+      return false;
+    }
+    if (settings.hidden) {
+      return false;
+    }
+    const panels = self.getPanels();
+    if (panels?.isHidden(self.getIndex() - 1)) {
+      return false;
+    }
+    return true;
   },
   getPanels() {
     const panels = findParent('uiPanels');
@@ -181,6 +196,31 @@ const createComponent = ({ el, self, state, isServer, signal, findParent, settin
     const index = panels.getPanelIndex(el);
     panels.setPanelMaximized(index, self.lastPanelSize);
   },
+
+  getStyleMap() {
+    if (settings.hidden) {
+      const panels = self.getPanels();
+      if (panels && !self.wasHidden) {
+        self.wasHidden = true;
+        const currentSize = parseFloat(el.style.flexGrow) || 0;
+        if (currentSize > 0) {
+          self.lastHiddenSize = currentSize;
+        }
+        const index = panels.getPanelIndex(el);
+        panels.setPanelSize(index, 0);
+      }
+      return 'display: block; height: 0; width: 0; overflow: hidden;';
+    }
+    if (self.wasHidden) {
+      self.wasHidden = false;
+      const panels = self.getPanels();
+      if (panels) {
+        const index = panels.getPanelIndex(el);
+        panels.setPanelSize(index, self.lastHiddenSize || 50);
+      }
+    }
+    return '';
+  },
 });
 
 const events = {
@@ -202,6 +242,7 @@ const events = {
 const Panel = defineComponent({
   tagName: 'ui-panel',
   plural: true,
+  renderingEngine: 'native',
   template,
   css,
   createComponent,

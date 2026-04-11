@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Import Map Merge</title>
+  <script type="importmap">
+  {
+    "imports": {
+      "confetti": "https://esm.sh/canvas-confetti@1.9.3"
+    }
+  }
+  </script>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" components="button,icon"></script>
+  <style>body { padding: 2rem; font-family: sans-serif; } .row { display: flex; gap: 1rem; margin-top: 1rem; }</style>
+</head>
+<body>
+  <h2>Loader: Import Map Merge</h2>
+  <p>User import map has <code>confetti</code> from esm.sh. SUI loader adds its own. Both resolve.</p>
+  <div class="row">
+    <ui-button primary class="fire"><ui-icon star></ui-icon> Confetti</ui-button>
+  </div>
+  <script type="module">
+    import confetti from 'confetti';
+    import { $ } from '@semantic-ui/query';
+    await customElements.whenDefined('ui-button');
+    $('.fire').on('click', () => confetti());
+  </script>
+</body>
+</html>

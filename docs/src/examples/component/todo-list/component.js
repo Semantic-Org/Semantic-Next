@@ -171,6 +171,7 @@ const keys = {
 
 defineComponent({
   tagName: 'todo-app',
+  renderingEngine: 'native',
   template,
   css,
   defaultState,

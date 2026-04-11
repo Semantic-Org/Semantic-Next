@@ -166,21 +166,21 @@ Because icons are CSS masks filled with `currentColor`, they automatically respo
 
 ### Multi-color icons (image technique)
 
-The `dev` set uses `background-image` instead of masks to preserve native SVG colors:
+The `brands` set uses `background-image` instead of masks to preserve native SVG colors:
 
 ```css
-/* dev/index.css */
---icon-dev-img: none;        /* set-level default */
+/* brands/index.css */
+--icon-brands-img: none;        /* set-level default */
 --icon-react-mark-img: url('./react-mark.svg');
 ```
 
 The component generates a fallback chain when `set` is specified:
 
 ```css
-/* For <ui-icon icon="react-mark" set="dev"> */
+/* For <ui-icon icon="react-mark" set="brands"> */
 style="
-  --icon-mask: var(--icon-react-mark, var(--icon-dev));
-  --icon-bg-image: var(--icon-react-mark-img, var(--icon-dev-img));
+  --icon-mask: var(--icon-react-mark, var(--icon-brands));
+  --icon-bg-image: var(--icon-react-mark-img, var(--icon-brands-img));
 "
 ```
 
@@ -318,21 +318,21 @@ To add a seventh icon library:
 
 ---
 
-## The `dev` Set (Special Case)
+## The `brands` Set (Special Case)
 
-The `dev` set is hand-maintained, not generated. It contains ~13 framework logos (React, Vue, Svelte, Angular, Astro, Next.js) in both full and mark variants.
+The `brands` set is hand-maintained, not generated. It contains ~13 framework logos (React, Vue, Svelte, Angular, Astro, Next.js) in both full and mark variants.
 
-**Location:** `src/primitives/icon/sets/dev/`
+**Location:** `src/primitives/icon/sets/brands/`
 
 Unlike the five monochrome sets:
 - Icons are full-color SVGs, not monochrome outlines
 - Uses `background-image` instead of `mask-image`
-- Doesn't define canonical names — icons are accessed via `icon` attribute + `set="dev"`
+- Doesn't define canonical names — icons are accessed via `icon` attribute + `set="brands"`
 - Not affected by color variations
 
 ```html
-<ui-icon icon="react-mark" set="dev"></ui-icon>
-<ui-icon icon="vue" set="dev"></ui-icon>
+<ui-icon icon="react-mark" set="brands"></ui-icon>
+<ui-icon icon="vue" set="brands"></ui-icon>
 ```
 
 ---

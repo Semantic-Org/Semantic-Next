@@ -1,9 +1,12 @@
+import { isDevelopment } from '@semantic-ui/utils';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    this.setContext(metadata);
+    if (isDevelopment) {
+      this.setContext(metadata);
+    }
   }
 
   depend() {
@@ -14,18 +17,35 @@ export class Dependency {
   }
 
   // allows metadata to be passed with dependency for debugging
-  setContext(context = {}) {
+  setContext(context) {
+    if (!isDevelopment) {
+      return;
+    }
+    if (!context) {
+      context = {};
+    }
     if (Error.captureStackTrace) {
       Error.captureStackTrace(context, this.setContext);
-    } else {
+    }
+    else {
       context.stack = new Error().stack;
     }
     this.context = context;
   }
 
   changed(context) {
-    this.setContext(context);
-    this.subscribers.forEach(subscriber => subscriber.invalidate(this.context));
+    if (isDevelopment) {
+      if (context) {
+        this.context = context;
+      }
+      else {
+        this.setContext();
+      }
+    }
+    const ctx = this.context;
+    for (const subscriber of this.subscribers) {
+      subscriber.invalidate(ctx);
+    }
   }
 
   // called after flush

@@ -261,6 +261,42 @@ describe('Object Utilities', () => {
       const obj = { a: { b: [1, 2, 3] } };
       expect(get(obj, 'a.c.1')).toBeUndefined();
     });
+
+    it('should support bracket notation for array access', () => {
+      const obj = { items: ['a', 'b', 'c'] };
+      expect(get(obj, 'items[1]')).toBe('b');
+    });
+
+    it('should support bracket notation with nested access', () => {
+      const obj = { data: [{ name: 'first' }, { name: 'second' }] };
+      expect(get(obj, 'data[1].name')).toBe('second');
+    });
+
+    it('should return undefined for bracket access on missing key', () => {
+      const obj = { items: ['a'] };
+      expect(get(obj, 'missing[0]')).toBeUndefined();
+    });
+
+    it('should handle simple property access without dots', () => {
+      const obj = { name: 'test' };
+      expect(get(obj, 'name')).toBe('test');
+    });
+
+    it('should return undefined for non-string path', () => {
+      expect(get({ a: 1 }, 123)).toBeUndefined();
+      expect(get({ a: 1 }, null)).toBeUndefined();
+    });
+
+    it('should return undefined for null or non-object input', () => {
+      expect(get(null, 'a')).toBeUndefined();
+      expect(get(42, 'a')).toBeUndefined();
+      expect(get('string', 'a')).toBeUndefined();
+    });
+
+    it('should handle combined dotted keys with further nesting', () => {
+      const obj = { 'a.b': { c: 42 } };
+      expect(get(obj, 'a.b.c')).toBe(42);
+    });
   });
 
   describe('hasProperty', () => {
@@ -721,5 +757,88 @@ describe('Object Utilities', () => {
         },
       });
     });
+  });
+});
+
+describe('get — bracket notation', () => {
+  it('should access array elements with bracket notation', () => {
+    const obj = { items: ['zero', 'one', 'two'] };
+    expect(get(obj, 'items[1]')).toBe('one');
+  });
+
+  it('should access nested properties after bracket notation', () => {
+    const obj = { users: [{ name: 'Alice' }, { name: 'Bob' }] };
+    expect(get(obj, 'users[0].name')).toBe('Alice');
+  });
+
+  it('should return undefined for out-of-bounds bracket index', () => {
+    const obj = { arr: [1, 2] };
+    expect(get(obj, 'arr[5]')).toBeUndefined();
+  });
+
+  it('should return undefined for non-object inputs', () => {
+    expect(get(null, 'a')).toBeUndefined();
+    expect(get(undefined, 'a')).toBeUndefined();
+    expect(get(42, 'a')).toBeUndefined();
+  });
+
+  it('should handle simple property access (no dots)', () => {
+    expect(get({ name: 'test' }, 'name')).toBe('test');
+  });
+
+  it('should return undefined for non-string paths', () => {
+    expect(get({ a: 1 }, 42)).toBeUndefined();
+    expect(get({ a: 1 }, null)).toBeUndefined();
+  });
+});
+
+describe('assignInPlace — returnChanged', () => {
+  it('should return true when changes were made', () => {
+    const target = { a: 1 };
+    const source = { a: 2 };
+    const changed = assignInPlace(target, source, { returnChanged: true });
+    expect(changed).toBe(true);
+  });
+
+  it('should return false when no changes were made', () => {
+    const target = { a: 1 };
+    const source = { a: 1 };
+    const changed = assignInPlace(target, source, { returnChanged: true });
+    expect(changed).toBe(false);
+  });
+
+  it('should detect deletion as a change', () => {
+    const target = { a: 1, b: 2 };
+    const source = { a: 1 };
+    const changed = assignInPlace(target, source, { returnChanged: true });
+    expect(changed).toBe(true);
+    expect(target).toEqual({ a: 1 });
+  });
+
+  it('should detect addition as a change', () => {
+    const target = { a: 1 };
+    const source = { a: 1, b: 2 };
+    const changed = assignInPlace(target, source, { returnChanged: true });
+    expect(changed).toBe(true);
+    expect(target).toEqual({ a: 1, b: 2 });
+  });
+});
+
+describe('deepExtend — preserveNonCloneable option', () => {
+  it('should accept preserveDOM and preserveNonCloneable as last arg', () => {
+    class Custom { constructor(v) { this.v = v; } }
+    const inst = new Custom(1);
+    const target = {};
+    deepExtend(target, { custom: inst }, { preserveNonCloneable: true });
+    expect(target.custom).toBe(inst);
+  });
+
+  it('should clone class instances when preserveNonCloneable is false', () => {
+    class Custom { constructor(v) { this.v = v; } }
+    const inst = new Custom(1);
+    const target = {};
+    deepExtend(target, { custom: inst }, { preserveNonCloneable: false });
+    expect(target.custom).not.toBe(inst);
+    expect(target.custom.v).toBe(1);
   });
 });

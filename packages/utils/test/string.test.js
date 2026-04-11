@@ -1,12 +1,15 @@
 import {
   camelToKebab,
+  capitalize,
   capitalizeWords,
+  escapeHTML,
   getArticle,
   joinWords,
   kebabToCamel,
   reverseString,
   toTitleCase,
   truncate,
+  unescapeHTML,
 } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
@@ -345,5 +348,53 @@ describe('String Utilities', () => {
       // Japanese text
       expect(reverseString('こんにちは', { locale: 'ja' })).toBe('はちにんこ');
     });
+  });
+});
+
+describe('capitalize', () => {
+  it('should capitalize the first letter', () => {
+    expect(capitalize('hello')).toBe('Hello');
+  });
+
+  it('should leave already-capitalized strings unchanged', () => {
+    expect(capitalize('Hello')).toBe('Hello');
+  });
+
+  it('should handle empty string', () => {
+    expect(capitalize('')).toBe('');
+  });
+
+  it('should handle single character', () => {
+    expect(capitalize('a')).toBe('A');
+  });
+});
+
+describe('toTitleCase — edge cases', () => {
+  it('should return undefined for non-string input', () => {
+    expect(toTitleCase(42)).toBeUndefined();
+    expect(toTitleCase(null)).toBeUndefined();
+  });
+
+  it('should handle single word', () => {
+    expect(toTitleCase('hello')).toBe('Hello');
+  });
+
+  it('should capitalize last word even if stopword', () => {
+    expect(toTitleCase('living in the')).toBe('Living in The');
+  });
+});
+
+describe('escapeHTML / unescapeHTML', () => {
+  it('should escape single quotes (apostrophes)', () => {
+    expect(escapeHTML("it's")).toBe("it&#39;s");
+  });
+
+  it('should escape ampersands', () => {
+    expect(escapeHTML('rock & roll')).toBe('rock &amp; roll');
+  });
+
+  it('should round-trip all special characters', () => {
+    const original = '<div class="test">&\'value\'</div>';
+    expect(unescapeHTML(escapeHTML(original))).toBe(original);
   });
 });

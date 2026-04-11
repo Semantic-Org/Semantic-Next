@@ -1,6 +1,7 @@
 {#if is panel.type 'preview'}
   <ui-panel
-    class="preview"
+    class="iframe preview"
+    hidden={panelHidden}
     size="grow"
     exportparts="panel, handle"
   >
@@ -9,6 +10,7 @@
 {else if is panel.type 'file'}
   <ui-panel
     class="{classIf minimized 'minimized' ''}code"
+    hidden={panelHidden}
     size="{size}"
     max-size="{maxSize}"
     label="{panel.label}"

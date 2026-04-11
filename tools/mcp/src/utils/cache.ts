@@ -1,7 +1,7 @@
 import { each, weightedObjectSearch } from '@semantic-ui/utils';
-import { ensureConfigReady, getDocsBaseUrl } from '../config.js';
+import { ensureConfigReady, getDocsBaseUrl, isContributor } from '../config.js';
 
-export type Audience = 'usage' | 'authoring' | 'essentials' | 'contributing' | 'docs' | 'research';
+export type Audience = 'usage' | 'authoring' | 'essentials' | 'contributing' | 'docs' | 'research' | 'all';
 
 // Content item interfaces
 export interface SpecItem {
@@ -220,15 +220,20 @@ export function listExamples(category?: string): ExampleItem[] {
   return cache.examples;
 }
 
-const DEFAULT_AUDIENCES = ['usage', 'authoring', 'essentials'];
+const ALL_AUDIENCES: Audience[] = ['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research'];
+const EXTERNAL_AUDIENCES: Audience[] = ['usage', 'authoring', 'essentials'];
+const DEFAULT_AUDIENCES = isContributor() ? ALL_AUDIENCES : EXTERNAL_AUDIENCES;
 
 export function listContext(
   audience?: Audience,
 ): ContextItem[] {
+  if (audience === 'all') {
+    return cache.context;
+  }
   if (audience) {
     return cache.context.filter(c => c.audience === audience);
   }
-  // Default: exclude contributing and research
+  // Contributors see all audiences, external users see usage/authoring/essentials
   return cache.context.filter(c => DEFAULT_AUDIENCES.includes(c.audience));
 }
 
@@ -240,6 +245,9 @@ export function listDocs(): DocItem[] {
 export function listWorkflows(
   audience?: Audience,
 ): WorkflowItem[] {
+  if (audience === 'all') {
+    return cache.workflows;
+  }
   if (audience) {
     return cache.workflows.filter(w => w.audience === audience);
   }
@@ -262,10 +270,13 @@ export function findWorkflow(query: string): WorkflowItem | undefined {
 export function listSkills(
   audience?: Audience,
 ): ContextItem[] {
+  if (audience === 'all') {
+    return cache.context.filter(c => c.skill);
+  }
   if (audience) {
     return cache.context.filter(c => c.skill && c.audience === audience);
   }
-  // Default: exclude contributing and research
+  // Contributors see all audiences, external users see usage/authoring/essentials
   return cache.context.filter(c => c.skill && DEFAULT_AUDIENCES.includes(c.audience));
 }
 
@@ -282,7 +293,8 @@ export interface SearchOptions {
 }
 
 export function search(query: string, options: SearchOptions = {}): ContentItem[] {
-  const { type, audience, category, limit = 20 } = options;
+  const { type, category, limit = 20 } = options;
+  const audience = options.audience === 'all' ? undefined : options.audience;
 
   // Build the search pool
   let pool: ContentItem[] = [];

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@semantic-ui/core@0.18.0 — Semantic UI CDN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1116;
+    --surface: #161a21;
+    --fg: #c9d1d9;
+    --fg-strong: #e6edf3;
+    --fg-secondary: #8b949e;
+    --muted: #545d68;
+    --border: #21262d;
+    --accent: #58a6ff;
+    --accent-subtle: #161b22;
+    --code-bg: #12151a;
+    --code-border: #1c2028;
+    --highlight-bg: rgba(56, 139, 253, 0.08);
+    --highlight-border: #1f6feb;
+    --table-hover: rgba(56, 139, 253, 0.06);
+    --badge-bg: #1f3148;
+    --badge-fg: #79c0ff;
+    --inline-code-bg: #1c2028;
+    --inline-code-border: #2a3140;
+    --font: "Lato", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "Menlo", monospace;
+    --radius: 8px;
+    --syn-keyword: #ff7b72;
+    --syn-string: #a5d6ff;
+    --syn-attr: #79c0ff;
+    --syn-tag: #7ee787;
+    --syn-func: #d2a8ff;
+    --syn-comment: #545d68;
+    --syn-text: #c9d1d9;
+    --syn-el: #ffa657;
+
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    font-size: 14.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 1.75rem 2rem 3rem;
+  }
+
+  /* ---- Breadcrumb ---- */
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .breadcrumb a { color: var(--accent); text-decoration: none; }
+  .breadcrumb a:hover { text-decoration: underline; }
+  .breadcrumb .sep { margin: 0 0.35rem; }
+
+  /* ---- Package header ---- */
+  .pkg-header { margin-bottom: 1.5rem; }
+  .pkg-title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+  }
+  .pkg-title h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: var(--fg-strong);
+  }
+  .version-badge {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    font-weight: 500;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .pkg-desc {
+    color: var(--fg-secondary);
+    font-size: 14.5px;
+    margin-bottom: 0.6rem;
+  }
+  .pkg-links {
+    display: flex;
+    gap: 0.75rem;
+    font-size: 12.5px;
+  }
+  .pkg-links a { color: var(--fg-secondary); text-decoration: none; }
+  .pkg-links a:hover { color: var(--accent); }
+  .pkg-links .sep { color: var(--border); }
+
+  /* ---- Meta sidebar ---- */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .meta-sidebar {
+    font-size: 13px;
+    border-left: 1px solid var(--border);
+    padding-left: 1.5rem;
+  }
+  .meta-group { margin-bottom: 1rem; }
+  .meta-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+  }
+  .meta-value { color: var(--fg); }
+  .meta-value a { color: var(--accent); text-decoration: none; }
+  .meta-value a:hover { text-decoration: underline; }
+
+  /* ---- Section headers ---- */
+  h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--fg-strong);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  h2:first-child { margin-top: 0; }
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--fg-strong);
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  p { margin-bottom: 0.6rem; }
+  hr.sep {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* ---- Code blocks ---- */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--code-border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    overflow-x: auto;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--syn-text);
+  }
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--inline-code-bg);
+    border: 1px solid var(--inline-code-border);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .kw { color: var(--syn-keyword); }
+  .st { color: var(--syn-string); }
+  .at { color: var(--syn-attr); }
+  .tg { color: var(--syn-tag); }
+  .fn { color: var(--syn-func); }
+  .cm { color: var(--syn-comment); }
+  .el { color: var(--syn-el); }
+  pre .hl {
+    display: inline-block;
+    width: calc(100% + 2.5rem);
+    margin-left: -1.25rem;
+    padding-left: calc(1.25rem - 3px);
+    border-left: 3px solid var(--highlight-border);
+    background: var(--highlight-bg);
+  }
+  p.hint { color: var(--muted); font-size: 13px; }
+
+  /* ---- Tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-bottom: 0.75rem;
+  }
+  th {
+    text-align: left;
+    font-weight: 700;
+    color: var(--fg-secondary);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.45rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  td.sec { color: var(--fg-secondary); }
+  tr:hover td { background: var(--table-hover); }
+
+  /* ---- Component cards ---- */
+  .component-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .component-row {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .component-row:hover { background: var(--table-hover); }
+  .component-row:first-child { border-top: 1px solid var(--border); }
+  .comp-name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .comp-desc { color: var(--fg-secondary); }
+  .comp-bundle {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .bundle-standard { background: rgba(63, 185, 80, 0.12); color: var(--green); }
+  .bundle-extended { background: rgba(210, 153, 34, 0.12); color: var(--yellow); }
+  .bundle-full { background: rgba(139, 148, 158, 0.12); color: var(--fg-secondary); }
+
+  /* ---- Expanded component detail ---- */
+  .comp-detail {
+    padding: 0.75rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: none;
+  }
+  .comp-detail.open { display: block; }
+  .comp-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 2rem;
+    font-size: 13px;
+  }
+  .comp-detail-section { margin-bottom: 0.5rem; }
+  .comp-detail-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.2rem;
+  }
+  .comp-detail-list {
+    color: var(--fg-secondary);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+  .comp-detail-link {
+    margin-top: 0.5rem;
+    font-size: 12.5px;
+  }
+  .comp-detail-link a { color: var(--accent); text-decoration: none; }
+  .comp-detail-link a:hover { text-decoration: underline; }
+
+  /* ---- Category headers ---- */
+  .cat-header {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding: 1rem 0.75rem 0.35rem;
+  }
+  .cat-header:first-child { padding-top: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ---- Breadcrumb ---- -->
+  <div class="breadcrumb">
+    <a href="/">cdn.semantic-ui.com</a>
+    <span class="sep">/</span>
+    core@0.18.0
+  </div>
+
+  <!-- ---- Package header ---- -->
+  <div class="pkg-header">
+    <div class="pkg-title">
+      <h1>@semantic-ui/core</h1>
+      <span class="version-badge">0.18.0</span>
+    </div>
+    <p class="pkg-desc">Component framework — all primitives, components, and behaviors.</p>
+    <div class="pkg-links">
+      <a href="#">Documentation</a>
+      <span class="sep">·</span>
+      <a href="#">npm</a>
+      <span class="sep">·</span>
+      <a href="#">GitHub</a>
+      <span class="sep">·</span>
+      <a href="#">Changelog</a>
+    </div>
+  </div>
+
+  <!-- ---- Layout: main + sidebar ---- -->
+  <div class="layout">
+    <div class="main">
+
+      <!-- ---- Usage ---- -->
+      <h2>Usage</h2>
+      <p>Use the loader to include all standard components.</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+      <p class="hint">Or import directly as an ES module:</p>
+      <div class="code-block">
+<pre><span class="tg">&lt;script</span> <span class="at">type</span>=<span class="st">"module"</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/core@0.18.0"</span><span class="tg">&gt;&lt;/script&gt;</span></pre>
+      </div>
+
+      <hr class="sep">
+
+      <!--
+        ============================================================
+        COMPONENT LISTING — GENERATED FROM SPECS AT BUILD TIME
+
+        Data source: Each component has a spec file (e.g. button.yaml,
+        modal.yaml) with structured metadata. The build system reads
+        all specs and generates this section.
+
+        Per-component spec fields used:
+          - tagName        → display name (e.g. "ui-button")
+          - description    → one-line summary
+          - bundle         → "standard" | "extended" | "full"
+          - category       → grouping key (e.g. "Input", "Layout", "Feedback")
+          - settings       → array of { name, type, default, description }
+          - events         → array of { name, description }
+          - slots          → array of { name, description }
+          - cssProperties  → array of { name, description }
+          - docsUrl        → link to full docs page
+
+        Generation logic:
+          1. Read all spec files from packages/specs/components/
+          2. Group by category, sort categories alphabetically
+          3. Within each category, sort by tagName
+          4. Render category header + component rows
+          5. For each component, render expandable detail panel with:
+             - Settings table (name, type, default)
+             - Events list
+             - Slots list
+             - CSS custom properties list
+             - Link to full docs
+          6. Bundle badge color derived from bundle field:
+             standard → green, extended → yellow, full → gray
+
+        The HTML below is DUMMY DATA showing the intended layout.
+        Replace with build-time template output.
+        ============================================================
+      -->
+
+      <h2>Components</h2>
+      <p>38 components in this release. Grouped by category.</p>
+
+      <div class="component-grid">
+
+        <!-- ---- Category: Action ---- -->
+        <div class="cat-header">Action</div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-button&gt;</span>
+          <span class="comp-desc">Clickable actions with variants, icons, loading states.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                primary: boolean = false<br>
+                secondary: boolean = false<br>
+                disabled: boolean = false<br>
+                loading: boolean = false<br>
+                icon: string<br>
+                href: string<br>
+                size: "small" | "medium" | "large"
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                click<br>
+                focus<br>
+                blur
+              </div>
+              <div class="comp-detail-label" style="margin-top: 0.6rem">Slots</div>
+              <div class="comp-detail-list">
+                (default) — button content<br>
+                icon — leading icon
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-icon&gt;</span>
+          <span class="comp-desc">SVG icon from the active icon set. Lazy-loaded.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                name: string<br>
+                size: string<br>
+                set: string = "lucide"
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">CSS Properties</div>
+              <div class="comp-detail-list">
+                --icon-size<br>
+                --icon-color<br>
+                --icon-stroke-width
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <!-- ---- Category: Feedback ---- -->
+        <div class="cat-header">Feedback</div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-modal&gt;</span>
+          <span class="comp-desc">Overlay dialog with backdrop, focus trapping, animations.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                open: boolean = false<br>
+                closable: boolean = true<br>
+                size: "small" | "medium" | "large" | "fullscreen"<br>
+                transition: string = "scale"
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                show<br>
+                hide<br>
+                approve<br>
+                deny
+              </div>
+              <div class="comp-detail-label" style="margin-top: 0.6rem">Slots</div>
+              <div class="comp-detail-list">
+                header<br>
+                (default) — body content<br>
+                actions
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-toast&gt;</span>
+          <span class="comp-desc">Non-modal notification. Auto-dismisses.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                type: "info" | "success" | "warning" | "error"<br>
+                duration: number = 4000<br>
+                position: string = "top-right"<br>
+                dismissable: boolean = true
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                show<br>
+                dismiss
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-tooltip&gt;</span>
+          <span class="comp-desc">Floating label anchored to a trigger element.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                content: string<br>
+                position: "top" | "bottom" | "left" | "right"<br>
+                delay: number = 200<br>
+                trigger: "hover" | "click" | "focus"
+              </div>
+            </div>
+            <div></div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <!-- ---- Category: Input ---- -->
+        <div class="cat-header">Input</div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-input&gt;</span>
+          <span class="comp-desc">Text field with validation, icons, clear button.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                value: string<br>
+                placeholder: string<br>
+                type: string = "text"<br>
+                disabled: boolean = false<br>
+                error: boolean = false<br>
+                icon: string<br>
+                clearable: boolean = false
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                input<br>
+                change<br>
+                clear<br>
+                focus<br>
+                blur
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-dropdown&gt;</span>
+          <span class="comp-desc">Selection menu with search, multi-select, remote data.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                value: string | string[]<br>
+                placeholder: string<br>
+                multiple: boolean = false<br>
+                search: boolean = false<br>
+                clearable: boolean = false
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                change<br>
+                open<br>
+                close<br>
+                search
+              </div>
+              <div class="comp-detail-label" style="margin-top: 0.6rem">Slots</div>
+              <div class="comp-detail-list">
+                (default) — option items<br>
+                trigger — custom trigger
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-checkbox&gt;</span>
+          <span class="comp-desc">Toggle with label. Supports indeterminate state.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                checked: boolean = false<br>
+                indeterminate: boolean = false<br>
+                disabled: boolean = false<br>
+                label: string
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                change<br>
+                check<br>
+                uncheck
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <!-- ---- Category: Layout ---- -->
+        <div class="cat-header">Layout</div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-card&gt;</span>
+          <span class="comp-desc">Contained surface with header, body, footer slots.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                raised: boolean = false<br>
+                interactive: boolean = false<br>
+                href: string
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Slots</div>
+              <div class="comp-detail-list">
+                image<br>
+                header<br>
+                (default) — body<br>
+                footer
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-table&gt;</span>
+          <span class="comp-desc">Data table with sorting, selection, sticky headers.</span>
+          <span class="comp-bundle bundle-standard">standard</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                columns: array<br>
+                data: array<br>
+                sortable: boolean = false<br>
+                selectable: boolean = false<br>
+                striped: boolean = false
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                sort<br>
+                select<br>
+                row-click
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <!-- ---- Extended tier examples ---- -->
+        <div class="cat-header">Data</div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-data-table&gt;</span>
+          <span class="comp-desc">Full-featured data grid with pagination, filtering, column resize.</span>
+          <span class="comp-bundle bundle-extended">extended</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                columns: array<br>
+                data: array<br>
+                pageSize: number = 25<br>
+                filterable: boolean = true<br>
+                resizable: boolean = true<br>
+                virtualScroll: boolean = false
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                page-change<br>
+                filter<br>
+                sort<br>
+                column-resize<br>
+                row-select
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-calendar&gt;</span>
+          <span class="comp-desc">Date picker with range selection, min/max, locale support.</span>
+          <span class="comp-bundle bundle-extended">extended</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                value: string | Date<br>
+                type: "date" | "month" | "year"<br>
+                range: boolean = false<br>
+                min: Date<br>
+                max: Date<br>
+                locale: string = "en"
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                change<br>
+                navigate
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+        <div class="component-row" onclick="toggleDetail(this)">
+          <span class="comp-name">&lt;ui-color-picker&gt;</span>
+          <span class="comp-desc">HSL/RGB/Hex color selection with swatches and alpha.</span>
+          <span class="comp-bundle bundle-extended">extended</span>
+        </div>
+        <div class="comp-detail">
+          <div class="comp-detail-grid">
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Settings</div>
+              <div class="comp-detail-list">
+                value: string = "#000000"<br>
+                format: "hex" | "rgb" | "hsl"<br>
+                alpha: boolean = false<br>
+                swatches: string[]
+              </div>
+            </div>
+            <div class="comp-detail-section">
+              <div class="comp-detail-label">Events</div>
+              <div class="comp-detail-list">
+                change<br>
+                input
+              </div>
+            </div>
+          </div>
+          <div class="comp-detail-link"><a href="#">View full documentation →</a></div>
+        </div>
+
+      </div><!-- /component-grid -->
+
+    </div><!-- /main -->
+
+    <!--
+      ============================================================
+      SIDEBAR METADATA — GENERATED FROM PACKAGE.JSON + BUILD DATA
+
+      Data source: package.json for the @semantic-ui/core package,
+      plus build-time stats (file size, dependency count).
+
+      Fields:
+        - version       → from package.json
+        - license       → from package.json
+        - fileSize      → gzipped size of the built entry point
+        - dependencies  → count of direct deps
+        - components    → count from spec enumeration
+        - lastPublished → from npm registry or git tag date
+        - repository    → from package.json
+
+      The values below are DUMMY DATA.
+      ============================================================
+    -->
+    <aside class="meta-sidebar">
+      <div class="meta-group">
+        <div class="meta-label">Version</div>
+        <div class="meta-value">0.18.0</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Published</div>
+        <div class="meta-value">3 days ago</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Size (gzip)</div>
+        <div class="meta-value">42.6 KB</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Components</div>
+        <div class="meta-value">38</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Bundle</div>
+        <div class="meta-value">standard: 38 · extended: 12 · full: 4</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">License</div>
+        <div class="meta-value">MIT</div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Dependencies</div>
+        <div class="meta-value">
+          <a href="/component@0.18.0/">@semantic-ui/component</a><br>
+          <a href="/reactivity@0.18.0/">@semantic-ui/reactivity</a><br>
+          <a href="/templating@0.18.0/">@semantic-ui/templating</a><br>
+          <a href="/query@0.18.0/">@semantic-ui/query</a><br>
+          <a href="/utils@0.18.0/">@semantic-ui/utils</a>
+        </div>
+      </div>
+      <div class="meta-group">
+        <div class="meta-label">Links</div>
+        <div class="meta-value">
+          <a href="#">npm</a><br>
+          <a href="#">GitHub</a><br>
+          <a href="#">Documentation</a>
+        </div>
+      </div>
+    </aside>
+
+  </div><!-- /layout -->
+
+</div><!-- /page -->
+
+<script>
+function toggleDetail(row) {
+  var detail = row.nextElementSibling;
+  if (detail && detail.classList.contains('comp-detail')) {
+    detail.classList.toggle('open');
+  }
+}
+</script>
+</body>
+</html>

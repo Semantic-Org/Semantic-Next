@@ -24,7 +24,8 @@
       "@helpers/*": ["src/helpers/*"],
       "@javascript/*": ["src/javascript/*"],
       "@images/*": ["src/images/*"],
-      "@data/*": ["src/data/*"]
+      "@data/*": ["src/data/*"],
+      "@css/*": ["src/css/*"]
     }
   }
 }

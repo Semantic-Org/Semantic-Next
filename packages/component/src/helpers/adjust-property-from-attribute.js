@@ -1,14 +1,5 @@
-import {
-  difference,
-  each,
-  firstMatch,
-  get,
-  inArray,
-  isFunction,
-  isString,
-  kebabToCamel,
-  unique,
-} from '@semantic-ui/utils';
+import { difference, each, inArray, isFunction, isString, kebabToCamel } from '@semantic-ui/utils';
+import { resolveAllowedValue, reverseDashes, tokenizeSpaces } from './resolve-attribute.js';
 
 /*
   Semantic UI supports 3 dialects to support this we
@@ -22,25 +13,7 @@ import {
   icon="right arrow" icon="arrow-right" icon="right-arrow"
 
 */
-const SPACE_REGEX = /\s+/mg;
-
 const SPECIAL_PROPERTIES = ['disabled', 'value'];
-
-// allow 'arrow-down' or 'down-arrow'
-const reverseDashes = (string) => {
-  if (isString(string)) {
-    return string.split('-').reverse().join('-');
-  }
-  return string;
-};
-
-// allow 'down arrow' or 'down-arrow' to be used
-const tokenizeSpaces = (string) => {
-  if (isString(string)) {
-    return string.replaceAll(SPACE_REGEX, '-');
-  }
-  return string;
-};
 
 /* This handles adjusting the underlying properties to match when
   an attribute changes. This handles 3 primary cases
@@ -57,54 +30,11 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
   // i.e <ui-button left-attached="somevalue">
 
   const checkSpecForAllowedValue = ({ attribute, optionValue, optionAttributeValue }) => {
-    // "arrow down" -> arrow-down
-    optionValue = tokenizeSpaces(optionValue);
-
-    let optionsToCheck = [optionValue];
-
-    // <div attached="left" or <div left-attached>
-    if (attribute && optionValue) {
-      optionsToCheck.push(`${attribute}-${attributeValue}`);
-      optionsToCheck.push(`${attributeValue}-${attribute}`);
-    }
-
-    //  "arrow-down" or "down-arrow"
-    optionsToCheck.push(reverseDashes(optionValue));
-
-    optionsToCheck = unique(optionsToCheck);
-
-    // check each potential value to see if any match a known option
-    const matchingValue = firstMatch(
-      optionsToCheck,
-      (currentValue) => get(componentSpec.optionAttributes, currentValue),
-    );
-
-    if (!matchingValue) {
-      return { matchingAttribute: undefined, matchingValue: undefined };
-    }
-
-    // this attribute doesn't seem to match the schema for the attribute
-    // perhaps this is an overlap in naming between an option and something else
+    // guard against non-string attribute values (objects, arrays, functions)
     if (inArray(attributeValue?.constructor, [Object, Array, Function])) {
-      return { matchingAttribute: undefined, matchingValue: undefined };
+      return {};
     }
-
-    // now we know the matching value is the correct name lets grab the attribute name
-    const matchingAttribute = get(componentSpec.optionAttributes, matchingValue);
-
-    // check if this is a compound alias (e.g. "size-small" or "small-size")
-    // extract the canonical value from the compound form
-    if (matchingValue.includes('-')) {
-      const prefix = `${matchingAttribute}-`;
-      const suffix = `-${matchingAttribute}`;
-      if (matchingValue.startsWith(prefix)) {
-        return { matchingAttribute, matchingValue: matchingValue.slice(prefix.length) };
-      }
-      if (matchingValue.endsWith(suffix)) {
-        return { matchingAttribute, matchingValue: matchingValue.slice(0, -suffix.length) };
-      }
-    }
-    return { matchingAttribute, matchingValue };
+    return resolveAllowedValue({ attribute, optionValue, componentSpec });
   };
 
   // this assigns the value to the DOM element

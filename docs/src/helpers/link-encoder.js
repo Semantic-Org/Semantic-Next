@@ -47,28 +47,28 @@ export const decodeObject = encodedData => {
 // If a key is 'files', its value is encoded using encodeObject.
 // Other values are handled by URLSearchParams, which takes care of URL encoding.
 export const getPlaygroundLink = (params, baseUrl = '/playground') => {
-  const queryParams = new URLSearchParams();
+  const hashParams = new URLSearchParams();
   each(params, (value, key) => {
     if (key === 'files') {
-      queryParams.set(key, encodeObject(value));
+      hashParams.set(key, encodeObject(value));
     }
     else {
-      // URLSearchParams encodes the value automatically
-      queryParams.set(key, String(value));
+      hashParams.set(key, String(value));
     }
   });
-  return `${baseUrl}?${queryParams.toString()}`;
+  return `${baseUrl}#${hashParams.toString()}`;
 };
 
 export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage = true } = {}) => {
+  const cdnChannel = window.location.hostname === 'next.semantic-ui.com' ? 'latest' : 'canary';
   let pageContent = code;
   if (wrapPage) {
     pageContent = `<html>
 <!-- playground-fold -->
   <head>
     <!-- Include Semantic UI -->
-    <link href="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.css" rel="stylesheet" />
-    <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.js" type="module"></script>
+    <link href="https://cdn.semantic-ui.com/css@${cdnChannel}" rel="stylesheet" />
+    <script src="https://cdn.semantic-ui.com/core@${cdnChannel}" type="module"></script>
 
     <!-- Include Default Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,8 +121,10 @@ body {
 
 // Read the query string and return the decoded parameters.
 // The 'files' parameter is decoded using decodeObject.
-export const readPlaygroundLink = queryString => {
-  const params = new URLSearchParams(queryString);
+export const readPlaygroundLink = (hash) => {
+  // strip leading # if present
+  const hashString = hash?.startsWith('#') ? hash.slice(1) : hash;
+  const params = new URLSearchParams(hashString);
   const result = {};
   for (const [key, value] of params.entries()) {
     if (key === 'files') {

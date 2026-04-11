@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Tooltip Behavior</title>
+  <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
+  <script src="https://cdn.semantic-ui.com/importmap@canary.js"></script>
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/button"></script>
+  <style>body { padding: 2rem; font-family: sans-serif; } .row { display: flex; gap: 1rem; margin-top: 1rem; }</style>
+</head>
+<body>
+  <h2>Behavior: Tooltip (import map)</h2>
+  <div class="row">
+    <ui-button class="tip" data-text="Hello from CDN!">Hover for tooltip</ui-button>
+    <ui-button class="tip" data-header="Tip" data-text="With header" data-position="bottom">Bottom tooltip</ui-button>
+  </div>
+  <script type="module">
+    import { Tooltip } from '@semantic-ui/core';
+    import { $ } from '@semantic-ui/query';
+    await customElements.whenDefined('ui-button');
+    $('.tip').tooltip();
+  </script>
+</body>
+</html>

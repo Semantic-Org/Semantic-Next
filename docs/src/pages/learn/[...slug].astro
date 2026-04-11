@@ -74,7 +74,6 @@ const previousLesson = getPreviousLesson(lesson);
 const nextLesson = getNextLesson(lesson);
 
 const { files, solutionFiles, panelIndexes } = Astro.props;
-
 const searchMeta = {
   ...entry.data,
   pageType: 'Tutorial',
@@ -91,7 +90,7 @@ const playgroundConfig = {
 
 <Playground searchMeta={searchMeta} showSidebar=true>
   <page data-pagefind-body class="text-content">
-    <LearnExample client:only="lit"
+    <LearnExample client:only
       lesson={lesson}
       previousLesson={previousLesson}
       nextLesson={nextLesson}

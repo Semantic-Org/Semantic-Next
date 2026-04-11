@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@scope + :not(:defined) — full lifecycle</title>
+</head>
+<body>
+<style>
+  * { margin: 0; box-sizing: border-box; }
+  body { font-family: system-ui; padding: 24px; background: #111; color: #eee; }
+</style>
+
+<outer-card>
+  <div class="label">Outer Card Title</div>
+  <div class="body">
+    Outer body text.
+    <inner-widget>
+      <div class="label">Inner Widget Title</div>
+      <div class="body">
+        Inner body text.
+        <deep-item>
+          <div class="label">Deep Item Label</div>
+        </deep-item>
+      </div>
+    </inner-widget>
+  </div>
+</outer-card>
+
+<outer-card>
+  <div class="label">Second Card</div>
+  <div class="body">
+    <inner-widget>
+      <div class="label">Another Inner</div>
+      <div class="body">Independent instance.</div>
+    </inner-widget>
+  </div>
+</outer-card>
+
+<div id="log" style="margin-top:24px;padding:16px;background:#0a0a0a;border-radius:8px;font-family:monospace;font-size:13px;line-height:1.8"></div>
+
+<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+  <button onclick="upgradeInner()" style="padding:8px 16px;border-radius:6px;border:none;background:#f59e0b;color:#000;cursor:pointer;font-weight:600">Upgrade inner-widget</button>
+  <button onclick="upgradeDeep()" style="padding:8px 16px;border-radius:6px;border:none;background:#a78bfa;color:#000;cursor:pointer;font-weight:600">Upgrade deep-item</button>
+  <button onclick="upgradeOuter()" style="padding:8px 16px;border-radius:6px;border:none;background:#3b82f6;color:#fff;cursor:pointer;font-weight:600">Upgrade outer-card</button>
+  <button onclick="upgradeAll()" style="padding:8px 16px;border-radius:6px;border:none;background:#22c55e;color:#000;cursor:pointer;font-weight:600">Upgrade all</button>
+  <button onclick="location.reload()" style="padding:8px 16px;border-radius:6px;border:none;background:#333;color:#eee;cursor:pointer">Reset</button>
+</div>
+
+<script>
+const log = document.getElementById('log');
+const rgb = (r,g,b) => `rgb(${r}, ${g}, ${b})`;
+const cs = (el,p) => getComputedStyle(el)[p];
+
+function logResult(test, pass, detail) {
+  log.innerHTML += `<div style="color:${pass?'#4ade80':'#f87171'}">${pass?'✅':'❌'} <strong>${test}</strong> — ${detail}</div>`;
+}
+function logHeader(t) {
+  log.innerHTML += `<div style="color:#666;margin-top:8px;margin-bottom:4px">── ${t} ──</div>`;
+}
+
+// Scope sheet registry
+const scopeSheets = new Map();
+
+function registerScopeCSS(tag, css) {
+  const s = new CSSStyleSheet();
+  s.replaceSync(css);
+  document.adoptedStyleSheets = [...document.adoptedStyleSheets, s];
+  scopeSheets.set(tag, s);
+}
+
+function removeScopeCSS(tag) {
+  const s = scopeSheets.get(tag);
+  if (!s) return;
+  document.adoptedStyleSheets = document.adoptedStyleSheets.filter(x => x !== s);
+  scopeSheets.delete(tag);
+}
+
+// Register pre-render scope styles
+registerScopeCSS('outer-card', `@scope (outer-card) to (:not(:defined)) {
+  :scope { display:block; border:2px solid #3b82f6; border-radius:8px; padding:16px; margin-bottom:16px; background:#1e293b; }
+  .label { font-weight:bold; color:#60a5fa; font-size:18px; }
+  .body { margin-top:8px; color:#94a3b8; }
+}`);
+
+registerScopeCSS('inner-widget', `@scope (inner-widget) to (:not(:defined)) {
+  :scope { display:block; border:2px solid #f59e0b; border-radius:8px; padding:12px; margin-top:12px; background:#1c1917; }
+  .label { font-weight:bold; color:#fbbf24; font-size:14px; }
+  .body { color:#a8a29e; margin-top:4px; }
+}`);
+
+registerScopeCSS('deep-item', `@scope (deep-item) to (:not(:defined)) {
+  :scope { display:block; border:1px solid #a78bfa; border-radius:4px; padding:8px; margin-top:8px; background:#1e1b2e; }
+  .label { color:#c4b5fd; font-weight:600; font-size:12px; }
+}`);
+
+// T0 tests
+function runInitialTests() {
+  logHeader('T0: All :not(:defined) — light DOM + @scope');
+
+  const outerLabel = document.querySelector('outer-card > .label');
+  const innerLabel = document.querySelector('inner-widget > .label');
+  const deepLabel = document.querySelector('deep-item > .label');
+
+  logResult('Outer .label blue', cs(outerLabel,'color')===rgb(96,165,250), `got ${cs(outerLabel,'color')}`);
+  logResult('Inner .label yellow (not leaked)', cs(innerLabel,'color')===rgb(251,191,36), `got ${cs(innerLabel,'color')}`);
+  logResult('Deep .label purple (own scope)', cs(deepLabel,'color')===rgb(196,181,253), `got ${cs(deepLabel,'color')}`);
+  logResult('Outer blue border', cs(document.querySelector('outer-card'),'borderColor').includes('59, 130, 246'), `got ${cs(document.querySelector('outer-card'),'borderColor')}`);
+  logResult('Inner amber border', cs(document.querySelector('inner-widget'),'borderColor').includes('245, 158, 11'), `got ${cs(document.querySelector('inner-widget'),'borderColor')}`);
+  logResult('3 scope sheets', document.adoptedStyleSheets.length===3, `got ${document.adoptedStyleSheets.length}`);
+}
+
+function upgradeInner() {
+  if (customElements.get('inner-widget')) return;
+  logHeader('Upgrade inner-widget + remove @scope');
+
+  customElements.define('inner-widget', class extends HTMLElement {
+    connectedCallback() {
+      if (this.shadowRoot) return;
+      const s = this.attachShadow({mode:'open'});
+      s.innerHTML = `<style>:host{display:block;border:2px solid #22c55e;border-radius:8px;padding:12px;margin-top:12px;background:#052e16}.label{color:#4ade80;font-weight:bold;font-size:14px}.body{color:#86efac;margin-top:4px}</style><div class="label">SHADOW: Inner Widget</div><div class="body"><slot></slot></div>`;
+    }
+  });
+  removeScopeCSS('inner-widget');
+
+  requestAnimationFrame(() => {
+    const el = document.querySelector('inner-widget');
+    logResult('Host border → green', cs(el,'borderColor').includes('34, 197, 94'), `got ${cs(el,'borderColor')}`);
+    logResult('Host bg → dark green', cs(el,'backgroundColor').includes('5, 46, 22'), `got ${cs(el,'backgroundColor')}`);
+    logResult('Shadow .label green', cs(el.shadowRoot.querySelector('.label'),'color')===rgb(74,222,128), `got ${cs(el.shadowRoot.querySelector('.label'),'color')}`);
+    logResult('Outer .label still blue', cs(document.querySelector('outer-card > .label'),'color')===rgb(96,165,250), `got ${cs(document.querySelector('outer-card > .label'),'color')}`);
+    logResult('Deep .label still purple', cs(document.querySelector('deep-item > .label'),'color')===rgb(196,181,253), `got ${cs(document.querySelector('deep-item > .label'),'color')}`);
+    logResult('2 scope sheets remain', document.adoptedStyleSheets.length===2, `got ${document.adoptedStyleSheets.length}`);
+  });
+}
+
+function upgradeDeep() {
+  if (customElements.get('deep-item')) return;
+  logHeader('Upgrade deep-item + remove @scope');
+
+  customElements.define('deep-item', class extends HTMLElement {
+    connectedCallback() {
+      if (this.shadowRoot) return;
+      const s = this.attachShadow({mode:'open'});
+      s.innerHTML = `<style>:host{display:block;border:1px solid #ec4899;border-radius:4px;padding:8px;margin-top:8px;background:#2d0a1e}.label{color:#f472b6;font-weight:600;font-size:12px}</style><div class="label">SHADOW: Deep Item</div><slot></slot>`;
+    }
+  });
+  removeScopeCSS('deep-item');
+
+  requestAnimationFrame(() => {
+    const el = document.querySelector('deep-item');
+    logResult('Host border → pink', cs(el,'borderColor').includes('236, 72, 153'), `got ${cs(el,'borderColor')}`);
+    logResult('Shadow .label pink', cs(el.shadowRoot.querySelector('.label'),'color')===rgb(244,114,182), `got ${cs(el.shadowRoot.querySelector('.label'),'color')}`);
+    logResult('Scope sheets decreased', document.adoptedStyleSheets.length < 3, `got ${document.adoptedStyleSheets.length}`);
+  });
+}
+
+function upgradeOuter() {
+  if (customElements.get('outer-card')) return;
+  logHeader('Upgrade outer-card + remove @scope');
+
+  customElements.define('outer-card', class extends HTMLElement {
+    connectedCallback() {
+      if (this.shadowRoot) return;
+      const s = this.attachShadow({mode:'open'});
+      s.innerHTML = `<style>:host{display:block;border:2px solid #06b6d4;border-radius:8px;padding:16px;margin-bottom:16px;background:#082f49}.label{color:#22d3ee;font-weight:bold;font-size:18px}.body{margin-top:8px;color:#67e8f9}</style><div class="label">SHADOW: Outer Card</div><div class="body"><slot></slot></div>`;
+    }
+  });
+  removeScopeCSS('outer-card');
+
+  requestAnimationFrame(() => {
+    const el = document.querySelector('outer-card');
+    logResult('Host border → cyan', cs(el,'borderColor').includes('6, 182, 212'), `got ${cs(el,'borderColor')}`);
+    logResult('Host bg → dark cyan', cs(el,'backgroundColor').includes('8, 47, 73'), `got ${cs(el,'backgroundColor')}`);
+    logResult('Shadow .label cyan', cs(el.shadowRoot.querySelector('.label'),'color')===rgb(34,211,238), `got ${cs(el.shadowRoot.querySelector('.label'),'color')}`);
+    logResult('All scope sheets removed', document.adoptedStyleSheets.length===0, `got ${document.adoptedStyleSheets.length}`);
+  });
+}
+
+async function upgradeAll() {
+  upgradeInner();
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  upgradeDeep();
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  upgradeOuter();
+}
+
+requestAnimationFrame(() => runInitialTests());
+</script>
+</body>
+</html>

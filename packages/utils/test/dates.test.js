@@ -235,6 +235,18 @@ describe('Date Utilities', () => {
       expect(formatDate(noonDate, 'YYYY-MM-DD HH:mm:ss', { hour12: false })).toBe('2023-05-18 12:00:00');
     });
 
+    it('should format MM token with zero-padded numeric month', () => {
+      expect(formatDate(new Date('2023-01-15T00:00:00Z'), 'MM')).toBe('01');
+      expect(formatDate(new Date('2023-09-15T00:00:00Z'), 'MM')).toBe('09');
+      expect(formatDate(new Date('2023-12-15T00:00:00Z'), 'MM')).toBe('12');
+    });
+
+    it('should format M token with unpadded numeric month', () => {
+      expect(formatDate(new Date('2023-01-15T00:00:00Z'), 'M')).toBe('1');
+      expect(formatDate(new Date('2023-09-15T00:00:00Z'), 'M')).toBe('9');
+      expect(formatDate(new Date('2023-12-15T00:00:00Z'), 'M')).toBe('12');
+    });
+
     it('should handle leap years correctly', () => {
       const leapYearDate = new Date('2024-02-29T15:34:56Z');
       expect(formatDate(leapYearDate, 'YYYY-MM-DD')).toBe('2024-02-29');
@@ -244,5 +256,40 @@ describe('Date Utilities', () => {
       const invalidDate = new Date('invalid');
       expect(formatDate(invalidDate, 'YYYY-MM-DD')).toBe('Invalid Date');
     });
+  });
+});
+
+describe('formatDate — ordinal suffixes', () => {
+  it('should format 1st, 2nd, 3rd correctly', () => {
+    expect(formatDate(new Date('2023-01-01T00:00:00Z'), 'Do')).toBe('1st');
+    expect(formatDate(new Date('2023-01-02T00:00:00Z'), 'Do')).toBe('2nd');
+    expect(formatDate(new Date('2023-01-03T00:00:00Z'), 'Do')).toBe('3rd');
+  });
+
+  it('should format 11th, 12th, 13th (special cases)', () => {
+    expect(formatDate(new Date('2023-01-11T00:00:00Z'), 'Do')).toBe('11th');
+    expect(formatDate(new Date('2023-01-12T00:00:00Z'), 'Do')).toBe('12th');
+    expect(formatDate(new Date('2023-01-13T00:00:00Z'), 'Do')).toBe('13th');
+  });
+
+  it('should format 21st, 22nd, 23rd correctly', () => {
+    expect(formatDate(new Date('2023-01-21T00:00:00Z'), 'Do')).toBe('21st');
+    expect(formatDate(new Date('2023-01-22T00:00:00Z'), 'Do')).toBe('22nd');
+    expect(formatDate(new Date('2023-01-23T00:00:00Z'), 'Do')).toBe('23rd');
+  });
+
+  it('should handle escaped text in format strings', () => {
+    const date = new Date('2023-05-18T00:00:00Z');
+    expect(formatDate(date, '[Day:] D [of] MMMM')).toBe('Day: 18 of May');
+  });
+});
+
+describe('formatDate — invalid input', () => {
+  it('should return "Invalid Date" for null', () => {
+    expect(formatDate(null)).toBe('Invalid Date');
+  });
+
+  it('should return "Invalid Date" for undefined', () => {
+    expect(formatDate(undefined)).toBe('Invalid Date');
   });
 });

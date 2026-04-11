@@ -1,0 +1,563 @@
+/**
+ * Cloudflare Worker for cdn.semantic-ui.com
+ *
+ * Routes clean public URLs to R2 object keys, handles version
+ * aliases (latest/canary) via 302 redirects, and sets cache headers.
+ */
+
+// SUI package names — the Worker needs to distinguish SUI from vendor routes.
+// Updated when new packages are added (e.g., react wrapper).
+const SUI_PACKAGES = new Set([
+  'compiler',
+  'component',
+  'core',
+  'query',
+  'reactivity',
+  'renderer',
+  'specs',
+  'tailwind',
+  'templating',
+  'utils',
+]);
+
+// Combo endpoint presets — loaded from R2 at runtime.
+// Source of truth: `bundle` field in each component's .spec.js file,
+// aggregated at build time into dist/presets.json and uploaded to _meta/presets.json.
+let cachedPresets = null;
+let presetsExpiry = 0;
+
+async function getPresets(env) {
+  const now = Date.now();
+  if (cachedPresets && now < presetsExpiry) {
+    return cachedPresets;
+  }
+  const object = await env.CDN_BUCKET.get('_meta/presets.json');
+  if (object) {
+    cachedPresets = JSON.parse(await object.text());
+    presetsExpiry = now + 60_000;
+  }
+  return cachedPresets || {};
+}
+
+// Entry point follows the convention {name}.min.js, with core as the exception
+export function getSuiEntrypoint(name) {
+  if (name === 'core') { return 'semantic-ui.min.js'; }
+  return `${name}.min.js`;
+}
+
+// Detect combo requests: comma-separated names or preset name.
+// Returns array of component names, or null if not a combo request.
+async function resolveCombo(filepath, env) {
+  if (filepath.includes(',')) {
+    return filepath.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  const presets = await getPresets(env);
+  if (presets[filepath]) {
+    return presets[filepath];
+  }
+  return null;
+}
+
+const CONTENT_TYPES = {
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.html': 'text/html',
+  '.wasm': 'application/wasm',
+  '.map': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/otf',
+};
+
+export function getContentType(filepath) {
+  const lastDot = filepath.lastIndexOf('.');
+  if (lastDot === -1) { return 'application/octet-stream'; }
+  const ext = filepath.slice(lastDot);
+  return CONTENT_TYPES[ext] || 'application/octet-stream';
+}
+
+// Parse URL into route info
+// Supports:
+//   /core@0.18.0/semantic-ui.min.js        → SUI package
+//   /@semantic-ui/core@0.18.0/...           → SUI alias (redirects to clean path)
+//   /vendor/lit@3.3.2/directive.js          → third-party
+//   /icons@0.18.0/lucide                    → icon set CSS (extensionless)
+//   /icons@0.18.0/lucide/house.svg          → icon asset
+//   /fonts@0.18.0/lato                      → font set CSS (extensionless)
+//   /fonts@0.18.0/lato/LatoLatin-Regular.woff2 → font asset
+//   /load                                   → loader script (version-agnostic, reads version= attr)
+//   /css                                    → framework CSS (latest)
+//   /css@0.18.0                             → framework CSS (versioned)
+//   /css@0.18.0/tokens                      → tokens only
+//   /css@0.18.0/reset                       → reset only
+//   /css@0.18.0/base                        → base only
+//   /css@0.18.0.map                         → framework CSS sourcemap
+//   /semantic-ui@0.18.0.css                 → framework CSS (legacy alias)
+//   /semantic-ui@0.18.0.css.map             → framework CSS sourcemap (legacy alias)
+//   /semantic-ui.css                        → framework CSS (legacy alias)
+//   /importmap.js                           → import map (legacy, use /load)
+//   /importmap@0.18.0.js                    → versioned import map (legacy)
+export function parseRoute(pathname) {
+  // Directory pages — trailing slash serves HTML info pages
+  // /              → root landing
+  // /core@0.18.0/  → package index
+  // /icons/        → icon sets listing
+  // /fonts/        → font sets listing
+  // Dir page static assets (CSS shared across all dir pages)
+  // Only match bare prefix paths (no @version) to avoid shadowing package files
+  const dirAssetMatch = pathname.match(/^\/(?:[^@/]+\/)?index\.css$/);
+  if (dirAssetMatch) {
+    return { type: 'dir-asset', file: 'index.css' };
+  }
+
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    // Strip trailing slash and parse the inner path
+    const inner = pathname.slice(0, -1);
+
+    // Asset set dirs: /icons/ or /icons@version/
+    const dirAssetMatch = inner.match(/^\/(icons|fonts)(?:@[^/]+)?$/);
+    if (dirAssetMatch) {
+      return { type: 'dir', page: dirAssetMatch[1] };
+    }
+
+    // SUI package: /core/ or /core@0.18.0/
+    const dirPkgMatch = inner.match(/^\/([^@/]+)(?:@[^/]+)?$/);
+    if (dirPkgMatch && SUI_PACKAGES.has(dirPkgMatch[1])) {
+      return { type: 'dir', page: dirPkgMatch[1] };
+    }
+
+    return { type: 'unknown' };
+  }
+
+  // Loader endpoint — /load (version-agnostic, reads version from attribute at runtime)
+  if (pathname === '/load' || pathname === '/load.js') {
+    return { type: 'load' };
+  }
+
+  // Import map loader (legacy) — version can contain dots (semver)
+  const importmapMatch = pathname.match(/^\/importmap(?:@(.+))?\.(js|json)$/);
+  if (importmapMatch) {
+    return {
+      type: 'importmap',
+      version: importmapMatch[1] || null,
+      format: importmapMatch[2],
+    };
+  }
+
+  // Framework CSS — /css, /css@0.18.0, /css@0.18.0/tokens, /semantic-ui.css
+  // Sub-layers: /css@0.18.0/tokens, /css@0.18.0/reset, /css@0.18.0/base
+  // Also matches sourcemap variants: /css@0.18.0.map, /css@0.18.0/tokens.map
+  const cssShortMatch = pathname.match(/^\/css(?:@([^/]+?))?(?:\/(tokens|reset|base))?(\.map)?$/);
+  if (cssShortMatch) {
+    return {
+      type: 'css',
+      version: cssShortMatch[1] || 'latest',
+      layer: cssShortMatch[2] || null,
+      map: !!cssShortMatch[3],
+    };
+  }
+  const cssMatch = pathname.match(/^\/semantic-ui(?:@(.+?))?(?:\.min)?\.css(\.map)?$/);
+  if (cssMatch) {
+    return {
+      type: 'css',
+      version: cssMatch[1] || 'latest',
+      layer: null,
+      map: !!cssMatch[2],
+    };
+  }
+
+  // SUI alias: /@semantic-ui/name@version/...
+  const suiAliasMatch = pathname.match(/^\/@semantic-ui\/([^@]+)@([^/]+)(?:\/(.*))?$/);
+  if (suiAliasMatch) {
+    return {
+      type: 'sui-alias',
+      name: suiAliasMatch[1],
+      version: suiAliasMatch[2],
+      filepath: suiAliasMatch[3] || null,
+    };
+  }
+
+  // Vendor: /vendor/name@version/filepath or /vendor/@scope/name@version/filepath
+  const vendorMatch = pathname.match(/^\/vendor\/((?:@[^/]+\/)?[^@]+)@([^/]+)\/(.+)$/);
+  if (vendorMatch) {
+    return {
+      type: 'vendor',
+      name: vendorMatch[1],
+      version: vendorMatch[2],
+      filepath: vendorMatch[3],
+    };
+  }
+
+  // Asset sets: /icons@version/name or /fonts@version/name/asset
+  const assetSetMatch = pathname.match(/^\/(icons|fonts)(?:@([^/]+))?(?:\/(.+))?$/);
+  if (assetSetMatch) {
+    const setType = assetSetMatch[1];
+    const version = assetSetMatch[2] || 'latest';
+    const filepath = assetSetMatch[3] || null;
+    return {
+      type: 'asset-set',
+      setType,
+      version,
+      filepath,
+    };
+  }
+
+  // SUI package: /name@version/filepath
+  const suiMatch = pathname.match(/^\/([^@/]+)@([^/]+)(?:\/(.*))?$/);
+  if (suiMatch && SUI_PACKAGES.has(suiMatch[1])) {
+    return {
+      type: 'sui',
+      name: suiMatch[1],
+      version: suiMatch[2],
+      filepath: suiMatch[3] || null,
+    };
+  }
+
+  // Root
+  if (pathname === '/' || pathname === '') {
+    return { type: 'root' };
+  }
+
+  return { type: 'unknown' };
+}
+
+// Resolve version aliases to exact versions via 302.
+// Canary files are stored directly at the 'canary' path — no redirect needed.
+async function resolveVersion(env, version) {
+  if (version === 'latest') {
+    const pointer = await env.CDN_BUCKET.get('_versions/latest');
+    if (pointer) {
+      return await pointer.text();
+    }
+    return null;
+  }
+  return version;
+}
+
+export function cacheHeaders(version) {
+  if (version === 'latest') {
+    return { 'Cache-Control': 'public, max-age=300' };
+  }
+  if (version === 'canary') {
+    return { 'Cache-Control': 'public, max-age=60' };
+  }
+  return { 'Cache-Control': 'public, max-age=31536000, immutable' };
+}
+
+export function corsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Expose-Headers': 'SourceMap',
+    'X-Content-Type-Options': 'nosniff',
+  };
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const route = parseRoute(url.pathname);
+
+    // CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          ...corsHeaders(),
+          'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+          'Access-Control-Allow-Headers': '*',
+        },
+      });
+    }
+
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return new Response('Method not allowed', { status: 405 });
+    }
+
+    switch (route.type) {
+      case 'sui': {
+        const { name, version, filepath } = route;
+
+        // Redirect latest to exact version (canary serves directly)
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response(`Version "${version}" not found`, { status: 404 });
+          }
+          const redirectPath = filepath
+            ? `/${name}@${resolved}/${filepath}`
+            : `/${name}@${resolved}`;
+          return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        // Combo endpoint — comma-separated components or preset name (core only)
+        if (name === 'core' && filepath) {
+          const comboComponents = await resolveCombo(filepath, env);
+          if (comboComponents) {
+            const origin = url.origin;
+            const lines = comboComponents.map(
+              c => `export * from "${origin}/core@${version}/${c}.min.js";`,
+            );
+            return new Response(lines.join('\n') + '\n', {
+              headers: {
+                'Content-Type': 'application/javascript',
+                ...corsHeaders(),
+                ...cacheHeaders(version),
+              },
+            });
+          }
+        }
+
+        // No filepath → serve the entry point JS directly
+        const resolvedFilepath = filepath || getSuiEntrypoint(name);
+        const baseKey = `@semantic-ui/${name}/${version}/dist/cdn/${resolvedFilepath}`;
+
+        // Try exact path first, then with .min.js and .js extensions
+        let object = await env.CDN_BUCKET.get(baseKey);
+        let servedPath = resolvedFilepath;
+        if (!object && !resolvedFilepath.endsWith('.js')) {
+          object = await env.CDN_BUCKET.get(`${baseKey}.min.js`);
+          servedPath = `${resolvedFilepath}.min.js`;
+          if (!object) {
+            object = await env.CDN_BUCKET.get(`${baseKey}.js`);
+            servedPath = `${resolvedFilepath}.js`;
+          }
+        }
+
+        if (!object) {
+          return new Response(`Not found: ${baseKey}`, { status: 404 });
+        }
+
+        // SourceMap header so browsers resolve maps correctly for bare URLs
+        const sourceMapHeader = servedPath.endsWith('.js')
+          ? { 'SourceMap': `/${name}@${version}/${servedPath}.map` }
+          : {};
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(servedPath),
+            ...sourceMapHeader,
+            ...corsHeaders(),
+            ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'sui-alias': {
+        const { name, version, filepath } = route;
+        const redirectPath = filepath
+          ? `/${name}@${version}/${filepath}`
+          : `/${name}@${version}`;
+        return Response.redirect(new URL(redirectPath, url.origin).href, 301);
+      }
+
+      case 'vendor': {
+        const { name, version, filepath } = route;
+        const r2Key = `vendor/${name}/${version}/${filepath}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(filepath),
+            ...corsHeaders(),
+            ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'css': {
+        const { version, layer, map } = route;
+
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response('Latest version not found', { status: 404 });
+          }
+          const layerPath = layer ? `/${layer}` : '';
+          const suffix = map ? '.map' : '';
+          return Response.redirect(
+            new URL(`/css@${resolved}${layerPath}${suffix}`, url.origin).href,
+            302,
+          );
+        }
+
+        // Map layer to filename: tokens → tokens.min.css, null → semantic-ui.min.css
+        const baseName = layer || 'semantic-ui';
+        const filename = map ? `${baseName}.min.css.map` : `${baseName}.min.css`;
+        const r2Key = `@semantic-ui/core/${version}/dist/${filename}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        const contentType = map ? 'application/json' : 'text/css';
+        const layerPath = layer ? `/${layer}` : '';
+        const sourceMapUrl = `/css@${version}${layerPath}.map`;
+        const sourceMapHeader = map ? {} : { 'SourceMap': sourceMapUrl };
+
+        // Rewrite the inline sourceMappingURL to an absolute versioned path
+        // so browsers resolve the map correctly (Chrome uses the inline comment
+        // for CSS, not the SourceMap HTTP header)
+        let body = object.body;
+        if (!map) {
+          const css = await object.text();
+          body = css.replace(
+            /\/\*#\s*sourceMappingURL=\S+\s*\*\//,
+            `/*# sourceMappingURL=${sourceMapUrl} */`,
+          );
+        }
+
+        return new Response(body, {
+          headers: {
+            'Content-Type': contentType,
+            ...sourceMapHeader,
+            ...corsHeaders(),
+            ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'importmap': {
+        const { version, format } = route;
+        // Unversioned (importmap.js) serves the latest file directly
+        const r2Key = version
+          ? `_meta/importmap@${version}.${format}`
+          : `_meta/importmap.${format}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Import map not found`, { status: 404 });
+        }
+
+        const contentType = format === 'js' ? 'application/javascript' : 'application/json';
+        const cache = version ? cacheHeaders(version) : { 'Cache-Control': 'public, max-age=300' };
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': contentType,
+            ...corsHeaders(),
+            ...cache,
+          },
+        });
+      }
+
+      case 'load': {
+        const object = await env.CDN_BUCKET.get('_meta/load.js');
+        if (!object) {
+          return new Response('Loader not found', { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'application/javascript',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'asset-set': {
+        const { setType, version, filepath } = route;
+
+        // Redirect latest to exact version
+        if (version === 'latest') {
+          const resolved = await resolveVersion(env, version);
+          if (!resolved) {
+            return new Response(`Version "${version}" not found`, { status: 404 });
+          }
+          const redirectPath = filepath
+            ? `/${setType}@${resolved}/${filepath}`
+            : `/${setType}@${resolved}`;
+          return Response.redirect(new URL(redirectPath, url.origin).href, 302);
+        }
+
+        // Bare type with no set name → redirect to default set
+        if (!filepath) {
+          const defaultSet = setType === 'icons' ? 'lucide' : 'lato';
+          return Response.redirect(
+            new URL(`/${setType}@${version}/${defaultSet}`, url.origin).href,
+            302,
+          );
+        }
+
+        // Bare name (no extension, no slash) → serve the set's CSS file
+        const isBareName = !filepath.includes('/') && !filepath.includes('.');
+        const r2Path = isBareName ? `${filepath}.css` : filepath;
+        const r2Key = `${setType}/${version}/${r2Path}`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response(`Not found: ${r2Key}`, { status: 404 });
+        }
+
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(r2Path),
+            ...corsHeaders(),
+            ...cacheHeaders(version),
+          },
+        });
+      }
+
+      case 'dir-asset': {
+        const { file } = route;
+        const object = await env.CDN_BUCKET.get(`_meta/dir/${file}`);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': getContentType(file),
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'dir': {
+        const { page } = route;
+        const r2Key = `_meta/dir/${page}.html`;
+        const object = await env.CDN_BUCKET.get(r2Key);
+        if (!object) {
+          return new Response('Not found', { status: 404 });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=300',
+          },
+        });
+      }
+
+      case 'root': {
+        const object = await env.CDN_BUCKET.get('_meta/index.html');
+        if (!object) {
+          return new Response('Semantic UI CDN', {
+            headers: { 'Content-Type': 'text/plain' },
+          });
+        }
+        return new Response(object.body, {
+          headers: {
+            'Content-Type': 'text/html',
+            ...corsHeaders(),
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+      }
+
+      default: {
+        const notFound = await env.CDN_BUCKET.get('_meta/dir/404.html');
+        if (notFound) {
+          return new Response(notFound.body, {
+            status: 404,
+            headers: { 'Content-Type': 'text/html', ...corsHeaders() },
+          });
+        }
+        return new Response('Not found', { status: 404 });
+      }
+    }
+  },
+};

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Query</title>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" query></script>
+  <style>
+    body { padding: 2rem; font-family: sans-serif; }
+    .item {
+      padding: 0.5rem;
+      background: #f5f5f5;
+      border: 1px solid #ddd;
+      margin: 0.5rem 0;
+    }
+    .item.bordered {
+      border: 3px solid #4488cc;
+      border-radius: 4px;
+    }
+    .item.padded {
+      padding: 1rem;
+      background-color: #e8f0fe;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h2>Loader: query</h2>
+  <p>Bare attribute loads @semantic-ui/query. No CSS injected.</p>
+  <div class="item">Original Text</div>
+  <script type="module">
+    import { $ } from '@semantic-ui/query';
+
+    // perform 3 actions all on '.item'
+    $('.item')
+      .addClass('bordered')
+      .addClass('padded')
+      .text('Chained!');
+  </script>
+</body>
+</html>

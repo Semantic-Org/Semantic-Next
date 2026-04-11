@@ -22,13 +22,15 @@ import {
 } from '@semantic-ui/utils';
 
 import { TemplateCompiler } from '@semantic-ui/compiler';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { getEngine } from '@semantic-ui/renderer';
 import { TemplateHelpers } from './template-helpers.js';
 
 const IS_TEMPLATE = Symbol.for('semantic-ui/Template');
 
 export const Template = class Template {
-  [IS_TEMPLATE] = true;
+  get [IS_TEMPLATE]() {
+    return true;
+  }
   // fixes instanceof when multiple copies loaded
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_TEMPLATE];
@@ -40,6 +42,8 @@ export const Template = class Template {
 
   rendered = false;
   destroyed = false;
+  lifecycleResolvers = {};
+  lifecyclePromises = {};
 
   constructor({
     templateName,
@@ -197,7 +201,9 @@ export const Template = class Template {
     this.onCreated = () => {
       this.call(this.onCreatedCallback);
       Template.addTemplate(this);
-      this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (!this.isHydrating) {
+        this.dispatchEvent('created', { component: this.instance }, eventSettings, { triggerCallback: false });
+      }
     };
     this.onRendered = () => {
       this.call(this.onRenderedCallback);
@@ -207,10 +213,17 @@ export const Template = class Template {
         this.onRenderOnce();
         delete this.onRenderOnce;
       }
-      this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (!this.isHydrating) {
+        this.dispatchEvent('rendered', { component: this.instance }, eventSettings, { triggerCallback: false });
+      }
     };
     this.onUpdated = () => {
-      this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+      if (this.updateScheduled) { return; }
+      this.updateScheduled = true;
+      queueMicrotask(() => {
+        this.updateScheduled = false;
+        this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
+      });
     };
 
     // onThemeChange can call both from mutation observers and dispatched events
@@ -234,18 +247,41 @@ export const Template = class Template {
 
     this.initialized = true;
 
-    if (this.renderingEngine == 'lit') {
-      this.renderer = new LitRenderer({
-        ast: this.ast,
-        data: this.overlaySettingsSignals(this.getDataContext()),
-        template: this,
-        subTemplates: this.subTemplates,
-        helpers: TemplateHelpers,
+    if (this.element) {
+      const stateReaction = Reaction.create(() => {
+        // bind to any signal changing
+        each(this.state, (signal) => signal.dependency.depend());
+        // run onUpdated callback
+        if (this.rendered && !this.destroyed) {
+          Reaction.afterFlush(this.onUpdated);
+        }
       });
+      this.reactions.push(stateReaction);
     }
-    else {
-      fatal('Unknown renderer specified', this.renderingEngine);
+
+    // Resolve renderer class from engine object or registry
+    const engine = typeof this.renderingEngine === 'object'
+      ? this.renderingEngine
+      : getEngine(this.renderingEngine);
+    if (!engine) {
+      fatal(
+        `Renderer "${this.renderingEngine}" not registered.`
+          + ` Import from '@semantic-ui/component' (registers native) or add the engine manually.`,
+      );
     }
+
+    const RendererClass = (Template.isServer && engine.serverRenderer)
+      ? engine.serverRenderer
+      : engine.renderer;
+    this.renderer = new RendererClass({
+      ast: this.ast,
+      data: this.overlaySettingsSignals(this.getDataContext()),
+      template: this,
+      subTemplates: this.subTemplates,
+      helpers: TemplateHelpers,
+    });
+
+    this.callParams = this.buildCallParams();
 
     this.onCreated();
   }
@@ -275,11 +311,7 @@ export const Template = class Template {
   }
 
   getDataContext() {
-    return {
-      ...this.data,
-      ...this.state,
-      ...this.instance,
-    };
+    return extend({}, this.data, this.state, this.instance);
   }
 
   // Overlay settings shadow signals so the renderer tracks settings reactively.
@@ -292,24 +324,24 @@ export const Template = class Template {
           this.settings[name]; // ensure shadow signal exists
         });
         this.settingsVars.forEach((signal, name) => {
-          if (name in this.defaultSettings) {
-            context[name] = signal;
-          }
+          context[name] = signal;
         });
       }
       return context;
     }
-    // web component — overlay element settingsVars
+    // web component — overlay all settingsVars as Signals.
+    // Signals are created when settings are accessed or mutated (including
+    // by initialize()), so settingsVars is the authoritative set.
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
-    if (settingsVars && defaultSettings) {
-      each(defaultSettings, (_, name) => {
-        this.element.settings[name]; // ensure shadow signal exists
-      });
+    if (settingsVars) {
+      if (defaultSettings) {
+        each(defaultSettings, (_, name) => {
+          this.element.settings[name]; // ensure shadow signal exists
+        });
+      }
       settingsVars.forEach((signal, name) => {
-        if (name in defaultSettings) {
-          context[name] = signal;
-        }
+        context[name] = signal;
       });
     }
     return context;
@@ -442,6 +474,14 @@ export const Template = class Template {
     // this is to cancel event bindings when template tears down
     // <https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal>
     this.eventController = new AbortController();
+
+    // Cascade: if the template lifetime ends, abort events too.
+    // The { signal } option auto-removes this listener when the event
+    // controller is aborted (during removeEvents/reattach), preventing
+    // listener accumulation across reattach cycles.
+    this.abortSignal.addEventListener('abort', () => {
+      this.eventController.abort();
+    }, { signal: this.eventController.signal });
 
     if (!Template.isServer && this.onThemeChangedCallback !== noop) {
       // when the dark class is added or removed from <html>
@@ -671,10 +711,7 @@ export const Template = class Template {
     if (!this.initialized) {
       this.initialize();
     }
-    const dataContext = {
-      ...this.getDataContext(),
-      ...additionalData,
-    };
+    const dataContext = extend({}, this.getDataContext(), additionalData);
     this.setDataContext(dataContext, { rerender: false });
     this.updateSubtemplateSettings(dataContext);
 
@@ -684,16 +721,16 @@ export const Template = class Template {
     // render will rerender the AST creating new lit html
     if (!this.rendered) {
       this.html = this.renderer.render();
-      setTimeout(this.onRendered, 0); // actual render occurs after html is parsed
+      if (!isServer) {
+        setTimeout(this.onRendered, 0);
+      }
     }
     else {
-      // data changed but template structure is the same — trigger reactive
-      // updates in place without recreating DOM (preserves focus, state, etc.)
+      // Reactions handle DOM updates — bump version to propagate changes
       this.renderer.bumpDataVersion();
     }
     this.rendered = true;
     this.destroyed = false;
-    setTimeout(this.onUpdated, 0);
     return this.html;
   }
 
@@ -725,77 +762,76 @@ export const Template = class Template {
   }
 
   // calls callback if defined with consistent params and this context
-  call(func, { params, additionalData = {}, firstArg, additionalArgs, thisContext } = {}) {
-    const args = [];
-    if (this.isPrototype) {
+  call(func, { params, additionalData, firstArg, additionalArgs, thisContext } = {}) {
+    if (this.isPrototype || !isFunction(func)) {
       return;
     }
     if (!params) {
-      const element = this.element;
-      params = {
-        el: this.element,
-
-        // provide 3 options for referring to self
-        tpl: this.instance,
-        self: this.instance,
-        component: this.instance,
-
-        $: this.$.bind(this),
-        $$: this.$$.bind(this),
-
-        reaction: this.reaction.bind(this),
-        signal: this.signal.bind(this),
-        interval: this.createInterval.bind(this),
-        timeout: this.createTimeout.bind(this),
-        abortSignal: this.abortSignal,
-        afterFlush: Reaction.afterFlush,
-        nonreactive: Reaction.nonreactive,
-        flush: Reaction.flush,
-
-        data: this.data,
-        settings: this.settings || this.element?.settings,
-        state: this.state,
-
-        isRendered: () => this.rendered,
-        isServer: Template.isServer,
-        isClient: !Template.isServer,
-        rerender: () => this.element.requestUpdate(),
-
-        dispatchEvent: this.dispatchEvent.bind(this),
-        attachEvent: this.attachEvent.bind(this),
-        bindKey: this.bindKey.bind(this),
-        unbindKey: this.unbindKey.bind(this),
-        abortController: this.eventController,
-        helpers: TemplateHelpers,
-
-        template: this,
-        templateName: this.templateName,
-        templates: Template.renderedTemplates,
-
-        findTemplate: this.findTemplate,
-        findParent: this.findParent.bind(this),
-        findChild: this.findChild.bind(this),
-        findChildren: this.findChildren.bind(this),
-
-        // not yet implemented
-        content: this.instance.content,
-
-        // on demand since forces recalculateStyle on body
-        get darkMode() {
-          return element.isDarkMode();
-        },
-
-        ...additionalData,
-      };
-      args.push(params);
+      if (this.callParams) {
+        params = additionalData
+          ? { ...this.callParams, ...additionalData }
+          : this.callParams;
+      }
+      else {
+        // During initialize(), before _callParams is built
+        params = this.buildCallParams(additionalData);
+      }
     }
+    const args = [params];
     if (additionalArgs) {
       args.push(...additionalArgs);
     }
-    if (isFunction(func)) {
-      const context = thisContext !== undefined ? thisContext : this.element;
-      return func.apply(context, args);
-    }
+    const context = thisContext !== undefined ? thisContext : this.element;
+    return func.apply(context, args);
+  }
+
+  buildCallParams(additionalData = {}) {
+    const element = this.element;
+    const template = this;
+    return {
+      el: element,
+      tpl: this.instance,
+      self: this.instance,
+      component: this.instance,
+      $: this.$.bind(this),
+      $$: this.$$.bind(this),
+      reaction: this.reaction.bind(this),
+      signal: this.signal.bind(this),
+      interval: this.createInterval.bind(this),
+      timeout: this.createTimeout.bind(this),
+      abortSignal: this.abortSignal,
+      afterFlush: Reaction.afterFlush,
+      nonreactive: Reaction.nonreactive,
+      flush: Reaction.flush,
+      data: this.data,
+      settings: this.settings || element?.settings,
+      state: this.state,
+      isRendered: () => this.rendered,
+      isServer: Template.isServer,
+      isClient: !Template.isServer,
+      get isHydrating() {
+        return template.isHydrating || false;
+      },
+      rerender: () => element?.requestUpdate(),
+      dispatchEvent: this.dispatchEvent.bind(this),
+      attachEvent: this.attachEvent.bind(this),
+      bindKey: this.bindKey.bind(this),
+      unbindKey: this.unbindKey.bind(this),
+      abortController: this.abortController,
+      helpers: TemplateHelpers,
+      template: this,
+      templateName: this.templateName,
+      templates: Template.renderedTemplates,
+      findTemplate: this.findTemplate,
+      findParent: this.findParent.bind(this),
+      findChild: this.findChild.bind(this),
+      findChildren: this.findChildren.bind(this),
+      content: this.instance.content,
+      get darkMode() {
+        return element?.isDarkMode?.();
+      },
+      ...additionalData,
+    };
   }
 
   // attaches an external event handler making sure to remove the event when the component is destroyed
@@ -805,6 +841,30 @@ export const Template = class Template {
       returnHandler: true,
       ...eventSettings,
     });
+  }
+
+  // Returns a promise that resolves after the named lifecycle event fires.
+  // One-shot events (created, rendered, destroyed) cache the resolved promise.
+  // Recurring events (updated) return a fresh promise each call.
+  lifecyclePromise(name) {
+    if (!this.lifecyclePromises[name]) {
+      this.lifecyclePromises[name] = new Promise(resolve => {
+        this.lifecycleResolvers[name] = resolve;
+      });
+    }
+    return this.lifecyclePromises[name];
+  }
+
+  resolveLifecyclePromise(eventName) {
+    const resolve = this.lifecycleResolvers[eventName];
+    if (resolve) {
+      resolve();
+      delete this.lifecycleResolvers[eventName];
+      // recurring events get a fresh promise on next access
+      if (eventName === 'updated') {
+        delete this.lifecyclePromises[eventName];
+      }
+    }
   }
 
   // dispatches an event from this template
@@ -818,6 +878,9 @@ export const Template = class Template {
       const callback = this.element[callbackName];
       wrapFunction(callback).call(this.element, eventData);
     }
+
+    // resolve lifecycle promise before DOM event dispatch
+    this.resolveLifecyclePromise(eventName);
 
     // trigger DOM event
     return $(this.element).dispatchEvent(eventName, eventData, eventSettings);

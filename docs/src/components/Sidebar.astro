@@ -20,6 +20,7 @@ const sidebarSubheader = sidebarHeader || (showSidebarNav) ? 'Categories' : 'Nav
 <script>
 import { $$ } from '@semantic-ui/query';
 import { Tooltip } from '@semantic-ui/core';
+import { idleCallback } from '@semantic-ui/utils';
 
 const isCollapsed = () => {
   return document.documentElement.classList.contains('sidebar-collapsed')
@@ -27,20 +28,22 @@ const isCollapsed = () => {
 };
 
 // Add tooltips to category menu items (only show when collapsed)
-$$('sidebar ui-menu menu-item').each((el) => {
-  const $el = $$(el);
-  const label = $el.find('.label').text();
-  if (label) {
-    $el.tooltip({
-      text: label,
-      position: 'right',
-      preserve: true,
-      delay: 500,
-      topLayer: true,
-      containToScroll: false,
-      onShow: () => !!isCollapsed(),
-    });
-  }
+idleCallback(() => {
+  $$('sidebar ui-menu menu-item').each((el) => {
+    const $el = $(el);
+    const label = $el.find('.label').text();
+    if (label) {
+      $el.tooltip({
+        text: label,
+        position: 'right',
+        preserve: true,
+        delay: 500,
+        topLayer: true,
+        containToScroll: false,
+        onShow: () => !!isCollapsed(),
+      });
+    }
+  });
 });
 </script>
 <sidebar transition:persist id="sidebar" popover="manual">
@@ -62,7 +65,7 @@ $$('sidebar ui-menu menu-item').each((el) => {
     menu={menu}
     expand-all={expandAll || canExpand}
     use-accordion=false
-    activeurl={Astro.url.pathname}
+    activeURL={Astro.url.pathname}
     searchable
     aligned
     dark

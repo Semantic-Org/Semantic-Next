@@ -133,9 +133,18 @@ export class TemplateCompiler {
   /**
    * Compiles the template string into an Abstract Syntax Tree (AST).
    * @param templateString The template string to compile. Defaults to the instance's `templateString`.
+   * @param options Compilation options.
    * @returns The compiled AST.
    */
-  compile(templateString?: string): ASTNode[];
+  compile(templateString?: string, options?: {
+    /** Add start/end byte offsets to each AST node. */
+    includePositions?: boolean;
+    /** Collect errors instead of throwing, return partial AST. */
+    recoverable?: boolean;
+  }): ASTNode[];
+
+  /** Errors collected during recoverable compilation. */
+  errors: { message: string; pos: number }[];
 
   /**
    * Extracts value

@@ -1,0 +1,28 @@
+{
+  "name": "@semantic-ui/benchmark",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "js-framework-benchmark": {
+    "frameworkVersionFromPackage": "@semantic-ui/component",
+    "frameworkHomeURL": "https://next.semantic-ui.com/",
+    "useShadowRoot": true,
+    "language": "JavaScript"
+  },
+  "scripts": {
+    "dev": "node serve.js",
+    "build": "node build.js",
+    "build-prod": "node build.js"
+  },
+  "dependencies": {
+    "@semantic-ui/component": "*",
+    "@semantic-ui/templating": "*",
+    "@semantic-ui/renderer": "*",
+    "@semantic-ui/reactivity": "*",
+    "@semantic-ui/utils": "*",
+    "@semantic-ui/compiler": "*"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

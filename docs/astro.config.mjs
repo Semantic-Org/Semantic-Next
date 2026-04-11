@@ -4,6 +4,7 @@ import lit from '@semantic-ui/astro-lit';
 import astroExpressiveCode from 'astro-expressive-code';
 import { defineConfig } from 'astro/config';
 import fs from 'fs';
+import semanticUI from '../internal-packages/astro/index.js';
 
 // Load the package version from parent package.json
 const packageJson = JSON.parse(fs.readFileSync('../package.json', 'utf-8'));
@@ -33,7 +34,17 @@ export default defineConfig({
 
   vite: {
     resolve: {
-      dedupe: ['lit', 'lit-html', 'lit-element', '@lit/reactive-element'],
+      dedupe: [
+        'lit',
+        'lit-html',
+        'lit-element',
+        '@lit/reactive-element',
+        '@codemirror/state',
+        '@codemirror/view',
+        '@codemirror/language',
+        '@codemirror/autocomplete',
+        '@codemirror/lsp-client',
+      ],
     },
     define: {
       PACKAGE_VERSION: JSON.stringify(packageVersion),
@@ -78,7 +89,7 @@ export default defineConfig({
   },
 
   integrations: [
-    lit(),
+    semanticUI(),
     astroExpressiveCode(),
     mdx({}),
     starlight({

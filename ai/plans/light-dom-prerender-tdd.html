@@ -1,0 +1,365 @@
+# Light DOM Pre-render Pipeline — Technical Design Document
+
+> **Status:** Draft
+> **Author:** Jack Lukic, with architectural exploration via Claude
+> **Last Updated:** 2026-04-03
+> **Scope:** Semantic UI component framework — new rendering mode
+
+---
+
+## Problem
+
+Web components are invisible until their JavaScript loads and executes. But the cost isn't just the network fetch — it's the reactive wiring. Every `{expression}` in a template creates a `Signal.computed` + `Reaction.create` + `subscribe`. Each Reaction evaluates the expression through a Proxy, walks every Signal read, registers each as a dependency, and stores the computation for future invalidation. On a page with many components, this is hundreds of milliseconds of main-thread blocking before the first pixel appears.
+
+The SUI docs site: ~400ms of thread blocking across all component instantiations. That's not network latency — that's the cost of building a reactive dependency graph.
+
+The pre-render pipeline decouples the static visual from the reactive wiring: render components to light DOM using the same renderer in a non-reactive mode, show styled content immediately, then wire reactivity asynchronously after first paint.
+
+### The Rendering Cost Breakdown
+
+| Work | Pre-render | Full upgrade |
+|------|-----------|--------------|
+| Parse template to AST | ✅ once per definition, <1ms | shared (cached) |
+| Run `createComponent()` | ✅ with inert stubs | ✅ with real signals |
+| Evaluate expressions | ✅ one-shot function calls | Signal.computed per expression |
+| Create Signals | 0 | N per state property |
+| Create Reactions | 0 | N per expression |
+| Subscribe to Signals | 0 | N per Reaction |
+| Dependency tracking | 0 | automatic per read |
+| DOM writes | direct assignment | through reactive pipeline |
+
+The pre-render does the same work the server renderer does — evaluate expressions once, write values to DOM — but on the client, outputting to light DOM instead of a streaming text response.
+
+---
+
+## Core Insight
+
+### Same Renderer, Non-Reactive Mode
+
+The existing Lit renderer's `ReactiveDataDirective` already has the exact branch:
+
+```js
+if (isClient) {
+  value = this.watchChanges();     // Reaction.create() + dependency tracking
+} else {
+  value = this.getReactiveValue(); // one-shot evaluation, no Reaction
+}
+```
+
+The SSR path (`getReactiveValue()`) evaluates expressions without reactive wiring. The pre-render is literally "run the server path on the client, output to light DOM instead of streaming text." Same renderer, same expression evaluator, same data context resolution — just skipping `Reaction.create()`.
+
+This unifies three rendering modes under one renderer:
+
+| Mode | Reactive? | Output target | Wiring cost |
+|------|-----------|---------------|-------------|
+| **ServerRenderer** | No | Streaming text | 0 |
+| **LightRenderer** | No | Light DOM (DocumentFragment) | 0 |
+| **ClientRenderer** | Yes | Shadow DOM | ~400ms on large pages |
+
+The LightRenderer and ClientRenderer use the same tree-walk DOM construction — only the output target and reactivity differ. This eliminates the SSR hydration mismatch problem (see below).
+
+### User Opt-In Paths
+
+Users choose their rendering pipeline:
+
+| Path | Sequence | Use case |
+|------|----------|----------|
+| **1 → 2 → 3** | Server → Light DOM → Shadow DOM | Full progressive: SSR, pre-render, then interactive |
+| **2 → 3** | Light DOM → Shadow DOM | CDN/agent: pre-render on client, then interactive |
+| **3** | Shadow DOM only | Status quo: no pre-render overhead |
+
+### `createComponent` Runs — Reactivity Doesn't
+
+The pre-render needs the full data context. Expressions call component methods (`{addOne value}`, `{isTrue ? 'yes' : 'no'}`), read state (`{fruit}`), and access settings (`{value}`). You can't skip `createComponent`.
+
+`Reaction.nonreactive()` makes this simple. Wrap the entire pre-render pass in a nonreactive closure — real Signals initialized from `defaultState`, real `createComponent` execution, real expression evaluation. Signal reads return values but register zero dependencies:
+
+```js
+Reaction.nonreactive(() => {
+  // Real signals from defaultState — reads work, no tracking
+  const state = {};
+  for (const [k, v] of Object.entries(defaultState)) {
+    state[k] = signal(v);
+  }
+
+  const settings = { ...defaultSettings };
+
+  // Real createComponent — methods work, self works
+  const instance = createComponent({
+    state, settings, signal, self: null,
+    reaction: () => {},      // stub: don't register ongoing work
+    interval: () => {},      // stub: don't start timers
+    timeout: () => {},       // stub: don't schedule
+    attachEvent: () => {},   // stub: don't bind events
+    bindKey: () => {},       // stub: don't bind keys
+    dispatchEvent: () => {}, // stub: don't emit
+    // ... only side-effectful params need stubbing
+  });
+  instance.self = instance;
+  // DON'T call initialize() — it contains side effects (reactions, timers, data fetching)
+
+  // Expression evaluation — all Signal reads are real but non-tracking
+  renderToLightDOM(ast, { ...settings, ...stateValues, ...instance });
+});
+```
+
+`instance.addOne(1)` returns `2`. `instance.isTrue()` returns `true`. `state.fruit.get()` returns `'cherry'`. All pure computation works. Zero Reactions created, zero subscriptions, zero dependency tracking.
+
+The bundle is identical — same component modules, same imports. The cost savings is entirely computational, not payload.
+
+---
+
+## CSS Scoping: `@scope` to `:not(:defined)`
+
+### Mechanism
+
+Shadow DOM CSS is rewritten for light DOM at runtime via string manipulation:
+
+```css
+/* Original (shadow DOM) */
+:host { display: inline-flex; padding: var(--8px) var(--16px); }
+:host([disabled]) { opacity: 0.5; }
+.label { font-weight: var(--bold); }
+
+/* Rewritten (light DOM) */
+@layer prerender {
+  @scope (ui-button) to (:not(:defined)) {
+    :scope { display: inline-flex; padding: var(--8px) var(--16px); }
+    :scope[disabled] { opacity: 0.5; }
+    .label { font-weight: var(--bold); }
+  }
+}
+```
+
+### Why `:not(:defined)` as the Lower Boundary
+
+`@scope (ui-button) to (:not(:defined))` means "scope styles from `ui-button` down to any unregistered custom element." This provides:
+
+- **Universal scoping** — no build-time registry of tag names needed. The browser's own concept of "unregistered custom element" IS the boundary.
+- **Live boundary** — re-evaluates as elements upgrade. When a nested component becomes `:defined`, the parent's scope boundary updates. But shadow DOM takes over as the isolation mechanism at that point.
+- **Self-healing** — if a component fails to load, its `@scope` rules stay active indefinitely. The pre-rendered light DOM remains styled. Graceful degradation for free.
+
+**Validated empirically:** boundary re-evaluates reactively on element upgrade. Tested in Chrome stable, sandbox environment.
+
+### CSS Layer Integration
+
+SUI's existing layer architecture with the new `prerender` layer:
+
+```
+@layer global, theme, prerender;
+
+global.reset    — normalize, box-sizing
+global.base     — body, headings, links, scrollbars, img
+theme           — design tokens, light/dark themes
+prerender       — @scope rules for pre-render (NEW)
+(unlayered)     — consumer styles
+```
+
+The `prerender` layer sits after `global` and `theme`, so component `:scope` styles override token defaults where needed. All named layers lose to unlayered consumer styles — matching `:host` cascade behavior exactly.
+
+Without `@layer`, `@scope :scope` and `:host` have different cascade positions: `*` selector in page CSS beats `:host` (outer author context wins) but not `:scope` at the same specificity. The layer eliminates this mismatch.
+
+### CSS Rewriting — Runtime, Not Build-Time
+
+The `:host` → `:scope` rewrite is regex replacements and two string wraps. Sub-millisecond. Consistent with SUI's philosophy: template AST compilation is runtime and <1ms, expression evaluation is runtime via Proxy, Tailwind compilation is runtime via WASM. No build step needed.
+
+`@semantic-ui/utils` already has `scopeStyles()` with `:host` rewriting regex patterns, `adoptStylesheet()` with hash-based caching and dedup, and `extractCSS()` with CSSOM walking. The pre-render pipeline is a thin layer on top of existing infrastructure.
+
+---
+
+## Forward and Reverse Resets
+
+### Forward Reset (Shadow → Globals)
+
+Global styles from `global.base` that shadow DOM silently drops. Prepended to every component's shadow CSS so shadow DOM behavior matches light DOM:
+
+```css
+*, *::before, *::after {
+  box-sizing: var(--box-sizing);
+  scrollbar-color: var(--thumb-background) var(--track-background);
+  scrollbar-width: var(--scrollbar-width);
+}
+a {
+  color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
+  text-underline-offset: 0.2em;
+}
+img, video, svg { max-width: 100%; height: auto; }
+```
+
+This is a standalone improvement independent of the pre-render pipeline — every shadow DOM component benefits.
+
+### Reverse Reset (Globals → Shadow)
+
+Neutralizes global styles on **template-internal** semantic tags during pre-render that wouldn't exist inside shadow DOM after upgrade.
+
+**Critical distinction:** only applies to template internals, never to slotted consumer content.
+
+| Content type | Pre-render | Post-upgrade | Globals? |
+|---|---|---|---|
+| Template internals (`.card`, `.header`) | Light DOM | Shadow DOM | Pre-render: yes, Post-upgrade: no |
+| Slotted content (`h2`, `p`, `a` from consumer) | Light DOM | Light DOM (projected) | Always yes |
+
+Slotted content stays in light DOM after upgrade. Neutralizing globals on it during pre-render would *cause* a visual shift, not prevent one.
+
+In practice, template internals are almost always classed `div`s and `span`s. The reverse reset is narrow and uses `slotcontent` wrapper exclusion:
+
+```css
+h1:not(slotcontent *), h2:not(slotcontent *) {
+  margin: 0; font-size: inherit;
+}
+```
+
+---
+
+## Slot Projection in Light DOM
+
+### The `slotcontent` Element
+
+**Must NOT have a hyphen in the name.** Hyphenated names are valid custom element names → unregistered → `:not(:defined)` → triggers the `@scope` lower boundary → prevents styles from reaching slotted content.
+
+`slotcontent` (no hyphen) is an unknown HTML element, always `:defined`, invisible to the boundary. Styled with `display: contents`.
+
+### Pre-render Flow
+
+1. **Stash** consumer children keyed by slot name
+2. Parse template, **replace** `<slot>` elements with `<slotcontent>` wrappers containing matching stashed children
+3. Append as light DOM
+
+### Upgrade Flow
+
+1. `innerHTML = ''` — clear pre-rendered light DOM
+2. **Restore** stashed children as direct children, re-add `slot` attributes
+3. `attachShadow()` + render template — browser slot projection activates
+
+---
+
+## Upgrade Lifecycle
+
+### T0: Consumer Markup
+
+```html
+<sui-card accent="amber">
+  <h2 slot="header">Title</h2>
+  <p>Body content</p>
+</sui-card>
+```
+
+### T1: After Pre-render (light DOM, non-reactive, @scope CSS)
+
+```html
+<sui-card accent="amber" data-prerendered>
+  <div class="card">
+    <div class="header">
+      <slotcontent data-slot="header"><h2>Title</h2></slotcontent>
+    </div>
+    <div class="body">
+      <slotcontent data-slot="default"><p>Body content</p></slotcontent>
+    </div>
+  </div>
+</sui-card>
+```
+
+### T2: After Upgrade (shadow DOM, reactive, slot projection)
+
+```html
+<sui-card accent="amber">
+  #shadow-root (open)
+    <div class="card">
+      <div class="header"><slot name="header"></slot></div>
+      <div class="body"><slot></slot></div>
+    </div>
+  <h2 slot="header">Title</h2>
+  <p>Body content</p>
+</sui-card>
+```
+
+Scope stylesheet removed. Shadow CSS adopted. Visually identical — same pixels, different DOM backing.
+
+---
+
+## CDN Loader Integration
+
+The existing loader gains a `prerender` attribute:
+
+```html
+<script src="https://cdn.semantic-ui.com/load"
+        version="canary" components="standard" prerender></script>
+```
+
+When `prerender` is set, the loader injects a render-blocking module script that imports the same component modules but runs the renderer in non-reactive mode. The existing async `import()` loads the same modules again — ESM caching means definitions are already in memory. `defineComponent` detects pre-rendered light DOM and upgrades.
+
+No separate prerender bundle. No `?prerender` query parameter. Same modules, different execution mode.
+
+### Agent VM Shortcut
+
+In agentic environments, the agent can serve as the pre-renderer — emitting light DOM template output directly in the markup. The loader injects render-blocking `@scope` CSS only. No client-side template rendering needed before first paint.
+
+---
+
+## SSR Unification
+
+The pre-render mode eliminates the SSR hydration mismatch problem. Currently:
+
+- **SSR:** streaming text parser → HTML string → browser parses to DOM
+- **Client:** tree-walk renderer → DOM nodes directly
+
+These two paths produce subtly different DOM for edge cases in the AST (whitespace handling, attribute ordering, self-closing tags). Hydration must reconcile the differences.
+
+With the pre-render mode:
+
+- **Pre-render:** tree-walk renderer (non-reactive) → DOM nodes → light DOM
+- **Client upgrade:** tree-walk renderer (reactive) → DOM nodes → shadow DOM
+
+Both paths use the same tree-walk DOM construction. The upgrade replaces identical DOM structure, not approximately-equivalent DOM parsed from an HTML string. Hydration mismatches go away.
+
+---
+
+## Constraints
+
+### Browser Support
+
+- `@scope` — Chrome 118+, Firefox 128+. Safari status TBD.
+- `:not(:defined)` — all modern browsers.
+- Constructed stylesheets — all modern browsers.
+- `blocking="render"` on module scripts — Chrome, Firefox. Safari TBD.
+
+Safari `@scope` is the primary gap. Fallback: standard FOUC behavior (no regression).
+
+### Cascade Asymmetry
+
+Resolved by `@layer prerender`. Without it, `:scope` and `:host` have different cascade positions for `*` selector interactions. With the layer, both lose to unlayered consumer styles identically.
+
+### Slotted Content Styling
+
+Component CSS targeting semantic tags inside slot positions (e.g., `.body a`) reaches slotted content during `@scope` pre-render but not through shadow DOM `<slot>`. Impact is minimal — typically sub-property differences on invisible decorations. Validated: 303/304 properties matched in full pipeline test.
+
+---
+
+## Existing Infrastructure
+
+| Module | What exists | Role in pre-render |
+|--------|-------------|-------------------|
+| `scopeStyles()` | `:host` rewriting regex, CSSOM rule walking | Basis for CSS rewriter |
+| `adoptStylesheet()` | Hash-based dedup, constructed stylesheet caching | Scope sheet registration |
+| `hashCode()` | String hashing for sheet identity | Sheet removal key |
+| `ExpressionEvaluator` | Renderer-agnostic expression resolution | Expression evaluation in both modes |
+| `ReactiveDataDirective` | `isServer` branch already does non-reactive eval | Pattern for pre-render mode |
+| `TemplateCompiler` | AST generation, shared across instances | Same AST for pre-render and full render |
+| CDN loader | Render-blocking CSS injection, combo endpoints | `prerender` attribute injection |
+
+---
+
+## Test Results
+
+Full pipeline prototype validated in Chrome stable (sandbox environment):
+
+- **@scope isolation:** 5/5 — nested undefined components correctly isolated
+- **Boundary reactivity:** verified — `:not(:defined)` updates as elements upgrade
+- **Layer cascade:** verified — `@layer prerender` matches `:host` cascade behavior
+- **Slot projection:** verified — consumer children correctly project through slots after upgrade
+- **Visual diff:** 303/304 properties match (1 diff: invisible `text-decoration-thickness` sub-property)
+- **Forward reset:** verified — shadow DOM internals get global base styles
+- **Reverse reset:** validated constraint — only applies to template internals, not slotted content
+- **`slotcontent` naming:** verified — non-hyphenated avoids `:not(:defined)` boundary
+- **Sheet cleanup:** verified — `adoptedStyleSheets` filtering removes scope sheets, `:host` takes over

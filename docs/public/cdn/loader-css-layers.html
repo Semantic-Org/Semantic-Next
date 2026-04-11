@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: CSS Sub-Layers</title>
+  <link href="https://cdn.semantic-ui.com/css@canary/tokens" rel="stylesheet" />
+  <style>
+    body { padding: 2rem; font-family: sans-serif; }
+    .swatch { display: inline-block; width: 80px; height: 40px; border-radius: 4px; margin: 0.25rem; }
+    .label { font-size: 0.85rem; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h2>CSS Sub-Layer: /css/tokens</h2>
+  <p>Only tokens loaded — no reset, no base. Page uses default browser styles.</p>
+  <div>
+    <div class="swatch" style="background: var(--primary-color);"></div>
+    <div class="swatch" style="background: var(--positive-color);"></div>
+    <div class="swatch" style="background: var(--negative-color);"></div>
+    <div class="swatch" style="background: var(--warning-color);"></div>
+    <div class="swatch" style="background: var(--info-color);"></div>
+  </div>
+  <div class="label">primary / positive / negative / warning / info</div>
+</body>
+</html>

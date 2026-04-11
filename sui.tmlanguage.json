@@ -4,22 +4,29 @@
   "fileTypes": ["sui", "html"],
 
   "patterns": [
-    {
-      "include": "#html"
-    },
-    {
-      "include": "#sui-expressions"
-    },
-    {
-      "include": "#control-structures"
-    }
+    { "include": "#html" },
+    { "include": "#event-attributes" },
+    { "include": "#sui-expressions" },
+    { "include": "#control-structures" }
   ],
 
   "repository": {
     "html": {
       "patterns": [
+        { "include": "text.html.basic" }
+      ]
+    },
+
+    "event-attributes": {
+      "patterns": [
         {
-          "include": "text.html.basic"
+          "name": "meta.attribute.event.sui",
+          "match": "(@)(\\w[\\w-]*)\\s*(=)",
+          "captures": {
+            "1": { "name": "punctuation.definition.event.sui" },
+            "2": { "name": "entity.other.attribute-name.event.sui" },
+            "3": { "name": "keyword.operator.assignment.sui" }
+          }
         }
       ]
     },
@@ -30,20 +37,14 @@
           "name": "meta.template.expression.sui",
           "begin": "(\\{\\{|\\{(?!\\{))",
           "beginCaptures": {
-            "0": {
-              "name": "punctuation.definition.template-expression.begin.sui"
-            }
+            "0": { "name": "punctuation.definition.template-expression.begin.sui" }
           },
           "end": "(\\}\\}|\\}(?!\\}))",
           "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.template-expression.end.sui"
-            }
+            "0": { "name": "punctuation.definition.template-expression.end.sui" }
           },
           "patterns": [
-            {
-              "include": "#expression-content"
-            }
+            { "include": "#expression-content" }
           ]
         }
       ]
@@ -52,12 +53,13 @@
     "expression-content": {
       "patterns": [
         { "include": "#keywords" },
+        { "include": "#template-reference" },
         { "include": "#operators" },
         { "include": "#strings" },
         { "include": "#numbers" },
         { "include": "#booleans" },
+        { "include": "#inline-objects" },
         { "include": "#variables-and-functions" },
-        { "include": "#objects" },
         { "include": "#parentheses" }
       ]
     },
@@ -65,8 +67,24 @@
     "keywords": {
       "patterns": [
         {
-          "name": "keyword.control.sui",
-          "match": "(#[a-zA-Z_][a-zA-Z0-9_]*)|(\\/[a-zA-Z_][a-zA-Z0-9_]*)|\\b(if|else|else\\s+if|each|in|as|snippet|template|slot)\\b"
+          "name": "keyword.control.block.sui",
+          "match": "#(if|each|async|snippet|rerender|guard|html)\\b"
+        },
+        {
+          "name": "keyword.control.close.sui",
+          "match": "\\/(if|each|async|snippet|rerender|guard)\\b"
+        },
+        {
+          "name": "keyword.control.branch.sui",
+          "match": "\\b(else\\s+if|else)\\b"
+        },
+        {
+          "name": "keyword.control.async-section.sui",
+          "match": "\\b(loading|before|error|catch)\\b"
+        },
+        {
+          "name": "keyword.control.iterator.sui",
+          "match": "\\b(in|as)\\b"
         },
         {
           "name": "keyword.operator.logical.sui",
@@ -79,15 +97,35 @@
       ]
     },
 
+    "template-reference": {
+      "patterns": [
+        {
+          "name": "keyword.control.reference.sui",
+          "match": ">(\\s*)(slot|template|snippet)\\b",
+          "captures": {
+            "0": { "name": "keyword.control.reference.sui" }
+          }
+        },
+        {
+          "name": "keyword.control.reference.sui",
+          "match": ">\\s*(?=[a-zA-Z_])"
+        }
+      ]
+    },
+
     "operators": {
       "patterns": [
         {
           "name": "keyword.operator.comparison.sui",
-          "match": "(==|!=|<|>|<=|>=)"
+          "match": "(===|!==|==|!=|<=|>=|<|>)"
         },
         {
           "name": "keyword.operator.arithmetic.sui",
           "match": "(\\+|-|\\*|/|%)"
+        },
+        {
+          "name": "keyword.operator.ternary.sui",
+          "match": "[?:]"
         }
       ]
     },
@@ -130,20 +168,20 @@
     },
 
     "variables-and-functions": {
-      "match": "\\b(@?[a-zA-Z_][a-zA-Z0-9_]*)(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\\b",
+      "match": "\\b([a-zA-Z_$][a-zA-Z0-9_$]*)(\\.[a-zA-Z_$][a-zA-Z0-9_$]*)*\\b",
       "name": "variable.parameter.sui"
     },
 
-    "objects": {
+    "inline-objects": {
       "name": "meta.object.sui",
-      "begin": "\\bobject\\b",
+      "begin": "\\{(?=\\s*\\w+\\s*:)",
       "end": "(?=\\}\\}|\\}(?!\\}))",
       "patterns": [
         {
-          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)",
           "captures": {
             "1": { "name": "variable.other.property.sui" },
-            "2": { "name": "keyword.operator.assignment.sui" }
+            "2": { "name": "punctuation.separator.key-value.sui" }
           }
         },
         { "include": "#expression-content" }
@@ -195,6 +233,85 @@
           ]
         },
         {
+          "name": "meta.control.async.sui",
+          "begin": "(\\{\\s*(#async)\\s+)",
+          "beginCaptures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.async.sui" }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
+          "patterns": [
+            {
+              "match": "\\b(as)\\b",
+              "name": "keyword.control.as.sui"
+            },
+            { "include": "#expression-content" }
+          ]
+        },
+        {
+          "name": "meta.control.snippet.sui",
+          "begin": "(\\{\\s*(#snippet)\\s+)",
+          "beginCaptures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.snippet.sui" }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
+          "patterns": [
+            { "include": "#expression-content" }
+          ]
+        },
+        {
+          "name": "meta.control.rerender.sui",
+          "begin": "(\\{\\s*(#rerender)\\s+)",
+          "beginCaptures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.rerender.sui" }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
+          "patterns": [
+            { "include": "#expression-content" }
+          ]
+        },
+        {
+          "name": "meta.control.guard.sui",
+          "begin": "(\\{\\s*(#guard)\\s+)",
+          "beginCaptures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.guard.sui" }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
+          "patterns": [
+            { "include": "#expression-content" }
+          ]
+        },
+        {
+          "name": "meta.control.html.sui",
+          "begin": "(\\{\\s*(#html)\\s+)",
+          "beginCaptures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.html.sui" }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": { "name": "meta.brace.curly.sui" }
+          },
+          "patterns": [
+            { "include": "#expression-content" }
+          ]
+        },
+        {
           "name": "meta.control.else-if.sui",
           "begin": "(\\{\\s*(else\\s+if)\\s+)",
           "beginCaptures": {
@@ -215,6 +332,23 @@
           "captures": {
             "1": { "name": "meta.brace.curly.sui" },
             "2": { "name": "keyword.control.else.sui" }
+          }
+        },
+        {
+          "name": "meta.control.async-section.sui",
+          "match": "(\\{\\s*(loading|before|error|catch)(\\s+as\\s+\\w+)?\\s*\\})",
+          "captures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.async-section.sui" },
+            "3": { "name": "keyword.control.as.sui" }
+          }
+        },
+        {
+          "name": "meta.control.close.sui",
+          "match": "(\\{\\s*(\\/(?:if|each|async|snippet|rerender|guard))\\s*\\})",
+          "captures": {
+            "1": { "name": "meta.brace.curly.sui" },
+            "2": { "name": "keyword.control.close.sui" }
           }
         }
       ]

@@ -1,3 +1,0 @@
-// Redirect to the latest version
-// This file is designed to work with import maps
-export * from './${VERSION}/index.js';

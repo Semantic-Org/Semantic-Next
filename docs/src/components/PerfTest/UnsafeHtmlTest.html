@@ -1,0 +1,27 @@
+<div class="test-panel">
+  <h3>unsafeHTML Hydration Test</h3>
+
+  <div class="control">
+    <button class="toggle">Toggle Status</button>
+    <span class="current">Current: {status}</span>
+  </div>
+
+  <div class="results">
+    <div class="result-row">
+      <span class="label">Static HTML:</span>
+      <span class="value">{#html staticBadge}</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Reactive HTML:</span>
+      <span class="value">{#html getStatusBadge}</span>
+    </div>
+    <div class="result-row">
+      <span class="label">Reactive SVG:</span>
+      <span class="value">{#html getIcon}</span>
+    </div>
+  </div>
+
+  <div class="anchor-check" id="anchor-info">
+    Checking anchors after hydration...
+  </div>
+</div>

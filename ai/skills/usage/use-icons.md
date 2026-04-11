@@ -90,7 +90,7 @@ An icon set is a CSS file that defines `--icon-*` custom properties on `:root`. 
 | Tabler | `@semantic-ui/core/icon/sets/tabler.css` | Monochrome (mask) |
 | Material Symbols | `@semantic-ui/core/icon/sets/material-symbols.css` | Monochrome (mask) |
 | Heroicons | `@semantic-ui/core/icon/sets/heroicons.css` | Monochrome (mask) |
-| Dev | `@semantic-ui/core/icon/sets/dev.css` | Multi-color (image) |
+| Brands | `@semantic-ui/core/icon/sets/brands.css` | Multi-color (image) |
 
 The five monochrome sets all define the same 481 canonical names, so you can swap between them by changing one import — no markup changes needed:
 
@@ -105,30 +105,30 @@ Multiple sets coexist on the same page:
 
 ```js
 import '@semantic-ui/core/icon/sets/lucide.css';  // standard UI icons
-import '@semantic-ui/core/icon/sets/dev.css';      // colored framework logos
+import '@semantic-ui/core/icon/sets/brands.css';   // colored framework logos
 ```
 
 ```html
 <!-- From lucide -->
 <ui-icon home></ui-icon>
 
-<!-- From dev (multi-color, needs set attribute) -->
-<ui-icon icon="react-mark" set="dev"></ui-icon>
+<!-- From brands (multi-color, needs set attribute) -->
+<ui-icon icon="react-mark" set="brands"></ui-icon>
 ```
 
 ### The `set` Attribute
 
-Use `set` to select a specific icon set — this matters for sets like `dev` that use a different rendering technique:
+Use `set` to select a specific icon set — this matters for sets like `brands` that use a different rendering technique:
 
 ```html
 <!-- Attribute syntax -->
-<ui-icon icon="svelte-mark" set="dev"></ui-icon>
+<ui-icon icon="svelte-mark" set="brands"></ui-icon>
 
 <!-- Colon syntax (equivalent) -->
-<ui-icon icon="svelte-mark:dev"></ui-icon>
+<ui-icon icon="svelte-mark:brands"></ui-icon>
 ```
 
-When `set` is specified, the component creates a CSS fallback chain: if the icon doesn't define a property, the set-level default applies. This is how the `dev` set switches all its icons to the multi-color image technique automatically.
+When `set` is specified, the component creates a CSS fallback chain: if the icon doesn't define a property, the set-level default applies. This is how the `brands` set switches all its icons to the multi-color image technique automatically.
 
 ---
 
@@ -229,7 +229,7 @@ Monochrome icons (the default mask technique) inherit `currentColor`. Set a colo
 
 Available colors: `red`, `orange`, `yellow`, `olive`, `green`, `teal`, `blue`, `violet`, `purple`, `pink`, `brown`, `grey`, `slate`.
 
-Multi-color icons (like the `dev` set) do **not** respond to color variations — they render their native colors.
+Multi-color icons (like the `brands` set) do **not** respond to color variations — they render their native colors.
 
 ---
 
@@ -306,8 +306,8 @@ The `icon` attribute value follows the same naming rules — use canonical names
 <ui-icon icon="close"></ui-icon>
 
 <!-- With set -->
-<ui-icon icon="react-mark" set="dev"></ui-icon>
-<ui-icon icon="react-mark:dev"></ui-icon>
+<ui-icon icon="react-mark" set="brands"></ui-icon>
+<ui-icon icon="react-mark:brands"></ui-icon>
 
 <!-- Sizing -->
 <ui-icon small home></ui-icon>
@@ -344,7 +344,7 @@ import '@semantic-ui/core/icon/sets/phosphor.css';
 import '@semantic-ui/core/icon/sets/tabler.css';
 import '@semantic-ui/core/icon/sets/material-symbols.css';
 import '@semantic-ui/core/icon/sets/heroicons.css';
-import '@semantic-ui/core/icon/sets/dev.css';
+import '@semantic-ui/core/icon/sets/brands.css';
 ```
 
 ---

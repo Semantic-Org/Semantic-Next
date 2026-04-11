@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Icons</title>
+  <link href="https://cdn.semantic-ui.com/css@canary" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/icons@canary/lucide" rel="stylesheet" />
+  <link href="https://cdn.semantic-ui.com/icons@canary/brands" rel="stylesheet" />
+  <script type="module" src="https://cdn.semantic-ui.com/core@canary/icon"></script>
+  <style>body { padding: 2rem; font-family: sans-serif; } .row { display: flex; gap: 1rem; font-size: 1.5rem; margin-top: 1rem; } h3 { margin: 1.5rem 0 0; }</style>
+</head>
+<body>
+  <h2>Icons: Lucide + Brands</h2>
+  <h3>Lucide (monochrome)</h3>
+  <div class="row">
+    <ui-icon home></ui-icon>
+    <ui-icon star></ui-icon>
+    <ui-icon search></ui-icon>
+    <ui-icon heart></ui-icon>
+    <ui-icon warning></ui-icon>
+    <ui-icon save></ui-icon>
+    <ui-icon mail></ui-icon>
+    <ui-icon calendar></ui-icon>
+  </div>
+  <h3>Brands (multicolor)</h3>
+  <div class="row" style="font-size: 2rem;">
+    <ui-icon icon="react" set="brands"></ui-icon>
+    <ui-icon icon="vue" set="brands"></ui-icon>
+    <ui-icon icon="svelte" set="brands"></ui-icon>
+    <ui-icon icon="angular" set="brands"></ui-icon>
+    <ui-icon icon="astro" set="brands"></ui-icon>
+    <ui-icon icon="nextjs" set="brands"></ui-icon>
+  </div>
+</body>
+</html>

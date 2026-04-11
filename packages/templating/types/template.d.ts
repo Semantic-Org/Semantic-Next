@@ -1,6 +1,6 @@
 import { Query, QueryOptions } from '@semantic-ui/query';
 import { Reaction, Signal, SignalOptions } from '@semantic-ui/reactivity';
-import { LitRenderer } from '@semantic-ui/renderer';
+import { Renderer } from '@semantic-ui/renderer';
 import { ASTNode } from './compiler/template-compiler';
 import { TemplateHelpers } from './template-helpers';
 
@@ -57,7 +57,38 @@ export interface RenderedTemplate {
   [key: string]: any; // Allows any other properties since it merges instance and data.
 }
 
-// We don't need this helper anymore as we want to preserve Signal methods for autocomplete
+/**
+ * Maps raw state types to their Signal-wrapped equivalents.
+ * Allows `defaultState: { count: 0 }` to produce `state.count: Signal<number>`.
+ */
+export type ReactiveState<T extends Record<string, any>> = {
+  [K in keyof T]: Signal<T[K]>;
+};
+
+/**
+ * Parameters available inside createComponent's factory function.
+ * Identical to CallParams except self/tpl/component are untyped (`Record<string, any>`)
+ * to avoid circular inference — M cannot appear in both the parameter and return type.
+ *
+ * Inside the returned object, use `this` for typed self-reference via ThisType<M>.
+ * In events and lifecycle hooks, `self` is fully typed.
+ *
+ * @template TState - Raw state types (before Signal wrapping)
+ * @template TSettings - Component settings types
+ * @template TProperties - Additional Lit property types
+ */
+export type FactoryParams<
+  TState extends Record<string, any> = Record<string, any>,
+  TSettings extends Record<string, any> = Record<string, any>,
+  TProperties extends Record<string, any> = Record<string, any>,
+> = Omit<CallParams<TState, TSettings, Record<string, any>, TProperties>, 'self' | 'tpl' | 'component'> & {
+  /** Available but untyped in createComponent — use `this` for typed self-reference */
+  self: Record<string, any>;
+  /** Available but untyped in createComponent — use `this` for typed self-reference */
+  tpl: Record<string, any>;
+  /** Available but untyped in createComponent — use `this` for typed self-reference */
+  component: Record<string, any>;
+};
 
 /**
  * Standard parameters provided to lifecycle callbacks and event handlers in Semantic UI components.
@@ -69,13 +100,13 @@ export interface RenderedTemplate {
  * @see https://next.semantic-ui.com/docs/guides#standard-arguments
  * @see https://next.semantic-ui.com/docs/guides/components/lifecycle
  *
- * @template TState - Type of the component's reactive state variables
+ * @template TState - Raw state types (before Signal wrapping)
  * @template TSettings - Type of the component's configuration settings
  * @template TComponentInstance - Type of the component instance created by createComponent
  * @template TProperties - Type of the properties for Lit components
  */
 export interface CallParams<
-  TState extends Record<string, Signal<any>> = Record<string, Signal<any>>,
+  TState extends Record<string, any> = Record<string, any>,
   TSettings extends Record<string, any> = Record<string, any>,
   TComponentInstance extends Record<string, any> = Record<string, any>,
   TProperties extends Record<string, any> = Record<string, any>,
@@ -216,7 +247,7 @@ export interface CallParams<
    * @returns The return value of the function
    *
    * @example
-   * const value = nonreactive(() => state.get.count());
+   * const value = nonreactive(() => state.count.get());
    *
    * @see https://next.semantic-ui.com/docs/guides/reactivity#nonreactive
    */
@@ -228,7 +259,7 @@ export interface CallParams<
    * Normally updates are batched for performance, but this triggers them immediately.
    *
    * @example
-   * state.count(state.count() + 1);
+   * state.count.set(state.count.get() + 1);
    * flush();
    * someFunc(); // dom is updated before someFunc
    *
@@ -268,13 +299,13 @@ export interface CallParams<
    *
    * @example
    * // Get state value
-   * const count = state.count();
+   * const count = state.count.get();
    * // Update state value
-   * state.count(count + 1);
+   * state.count.set(count + 1);
    *
    * @see https://next.semantic-ui.com/docs/guides/components/state
    */
-  state: TState;
+  state: ReactiveState<TState>;
 
   /**
    * Checks if the component is rendered in the DOM.
@@ -381,16 +412,26 @@ export interface CallParams<
   unbindKey: Template['unbindKey'];
 
   /**
-   * AbortController for managing asynchronous operations.
+   * AbortController tied to the template's lifetime.
    *
-   * Automatically aborts any pending operations when the component is destroyed.
+   * Aborts when the component is destroyed. Use to programmatically
+   * cancel operations or pass `abortController.signal` to APIs.
+   */
+  abortController: AbortController;
+
+  /**
+   * Abort signal tied to the template's lifetime.
+   *
+   * Fires when the component is destroyed. Pass to `fetch`, `addEventListener`,
+   * or any API that accepts an AbortSignal to automatically clean up when the
+   * component is removed.
    *
    * @example
-   * fetch('/api/data', { signal: abortController.signal })
+   * fetch('/api/data', { signal: abortSignal })
    *   .then(response => response.json())
    *   .then(data => state.data(data));
    */
-  abortController: AbortController;
+  abortSignal: AbortSignal;
 
   /**
    * Template helper functions for common operations.
@@ -588,10 +629,10 @@ export class Template {
   reactions: Reaction[];
   /** The root element where the template is rendered (ShadowRoot or HTMLElement). */
   renderRoot?: ShadowRoot | HTMLElement;
-  /** The rendering engine used ('lit' or a custom engine name). */
-  renderingEngine: 'lit' | string; // Currently only 'lit' is supported.
-  /** The LitRenderer instance used for rendering. */
-  renderer: LitRenderer;
+  /** The rendering engine — 'native' (default), 'lit', or an engine object. */
+  renderingEngine: string | object;
+  /** The renderer instance used for rendering. */
+  renderer: Renderer;
   /** Optional start marker node for insertion. */
   startNode?: Node;
   /** Optional end marker node for insertion.. */

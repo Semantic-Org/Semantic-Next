@@ -2,6 +2,7 @@ import {
   difference,
   filterEmpty,
   findIndex,
+  first,
   firstMatch,
   flatten,
   groupBy,
@@ -16,6 +17,7 @@ import {
   sequence,
   some,
   sortBy,
+  sum,
   unique,
   uniqueItems,
   where,
@@ -768,5 +770,93 @@ describe('Array Utilities', () => {
       const expected = {};
       expect(groupBy(array, 'city')).toEqual(expected);
     });
+  });
+});
+
+describe('first', () => {
+  it('should return the first element', () => {
+    expect(first([10, 20, 30])).toBe(10);
+  });
+
+  it('should return the first N elements as an array', () => {
+    expect(first([10, 20, 30], 2)).toEqual([10, 20]);
+  });
+
+  it('should return undefined for empty arrays', () => {
+    expect(first([])).toBeUndefined();
+  });
+
+  it('should handle requesting more elements than available', () => {
+    expect(first([1, 2], 5)).toEqual([1, 2]);
+  });
+});
+
+describe('sum', () => {
+  it('should sum an array of numbers', () => {
+    expect(sum([1, 2, 3, 4])).toBe(10);
+  });
+
+  it('should return 0 for an empty array', () => {
+    expect(sum([])).toBe(0);
+  });
+
+  it('should return 0 for undefined', () => {
+    expect(sum()).toBe(0);
+  });
+
+  it('should handle negative numbers', () => {
+    expect(sum([-1, 2, -3, 4])).toBe(2);
+  });
+
+  it('should handle floats', () => {
+    expect(sum([0.1, 0.2, 0.3])).toBeCloseTo(0.6);
+  });
+});
+
+describe('filterEmpty — falsy value handling', () => {
+  it('should remove null and undefined', () => {
+    expect(filterEmpty([1, null, 2, undefined, 3])).toEqual([1, 2, 3]);
+  });
+
+  it('should also remove 0 and empty string (uses truthy check)', () => {
+    expect(filterEmpty([0, 1, '', 2, false, 3])).toEqual([1, 2, 3]);
+  });
+});
+
+describe('range — edge cases', () => {
+  it('should return empty array for step of 0', () => {
+    expect(range(0, 10, 0)).toEqual([]);
+  });
+
+  it('should return empty array for negative range', () => {
+    expect(range(0)).toEqual([]);
+  });
+
+  it('should handle negative step correctly', () => {
+    expect(range(10, 0, -2)).toEqual([10, 8, 6, 4, 2]);
+  });
+
+  it('should handle single-element range', () => {
+    expect(range(1)).toEqual([0]);
+  });
+});
+
+describe('flatten', () => {
+  it('should return empty array for empty input', () => {
+    expect(flatten([])).toEqual([]);
+  });
+
+  it('should return empty array for non-array input', () => {
+    expect(flatten(null)).toEqual([]);
+    expect(flatten(undefined)).toEqual([]);
+    expect(flatten('string')).toEqual([]);
+  });
+
+  it('should handle deeply nested single element', () => {
+    expect(flatten([[[[42]]]])).toEqual([42]);
+  });
+
+  it('should handle mixed nested and flat elements', () => {
+    expect(flatten([1, [2, 3], [4, [5, 6]], 7])).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 });

@@ -2,7 +2,7 @@
 import { render } from 'lit-html';
 import { describe, expect, it } from 'vitest';
 
-import { LitRenderer } from '@semantic-ui/renderer';
+import { LitRenderer } from '@semantic-ui/renderer/lit';
 import { TemplateHelpers } from '@semantic-ui/templating';
 
 /**
@@ -21,7 +21,6 @@ function renderASTtoText({ ast, data, snippets }) {
   // Use lit's `render()` into a temporary container to get final html
   const container = document.createElement('div');
   render(result, container);
-
 
   let html = container.innerHTML;
   // remove lit comments from html

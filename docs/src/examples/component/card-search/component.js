@@ -56,6 +56,7 @@ const events = {
 defineComponent({
   tagName: 'friend-directory',
   template,
+  renderingEngine: 'native',
   css,
   defaultState,
   events,

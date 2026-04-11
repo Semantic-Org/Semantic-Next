@@ -40,7 +40,7 @@ This example binds `mouseup` and `mouseleave` to `.selector`
 
 ```javascript
 const events = {
-  'mouseup, mouseleave .selector'({state}) => {
+  'mouseup, mouseleave .selector'({ state }) {
     state.active.set(false);
   }
 };
@@ -54,7 +54,7 @@ This example binds `click` to `.selector1` and `.selector2`
 
 ```javascript
 const events = {
-  'click .selector1, click .selector2' () => {
+  'click .selector1, click .selector2'() {
     // do something
   }
 };
@@ -67,10 +67,10 @@ For example if you have a component called `ui-button` this would fire when the 
 
 ```javascript
 const events = {
-  'mouseover'({state}) => {
+  'mouseover'({ state }) {
     state.hovered.set(true);
   },
-  'mouseout'({state}) => {
+  'mouseout'({ state }) {
     state.hovered.set(false);
   }
 };
@@ -101,7 +101,7 @@ For instance this can be used with global events like `scroll` or `hashchange`
 
 ```javascript
 const events = {
-  'global scroll window'() => {
+  'global scroll window'() {
     // page scrolled
   }
 };
@@ -124,7 +124,7 @@ You can use the `deep` keyword to attach events to nested web components or slot
 
 ```javascript
 const events = {
-  'deep ui-button .icon'() => {
+  'deep ui-button .icon'() {
     // the icon is part of `ui-button` shadow DOM
   }
 };
@@ -142,7 +142,7 @@ This is helpful to allow the events to continue to fire even if an element is ad
 
 ```javascript
 const events = {
-  'bind customevent some-component'() => {
+  'bind customevent some-component'() {
     // customevent fired on some-component
   }
 };

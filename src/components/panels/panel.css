@@ -7,6 +7,7 @@
   container: panel / inline-size;
 }
 
+
 ::slotted(*) {
   flex-shrink: 1;
 }
@@ -85,6 +86,10 @@
       background: var(--panel-label-minimized-background);
       color: var(--panel-label-minimized-color);
     }
+  }
+
+  &.hidden + .handle {
+    display: none;
   }
 }
 

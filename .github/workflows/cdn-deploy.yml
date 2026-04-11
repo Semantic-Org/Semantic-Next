@@ -1,48 +1,23 @@
-
-#  CDN Deployment Workflow Summary:
-#  Workflow triggered on tag push (v*)
-#
-# 1. Creates CDN directory structure for current version
-#    - Create bare CDN directories
-#    - Copy over scripts to be processed
-# 2. Processes Core package
-#    - Creates versioned directory and redirects
-#    - Copies package files to CDN structure
-# 3. Processes each @semantic-ui/* package
-#    - Creates versioned directories with package contents
-#    - Sets up redirects at multiple levels:
-#      * /package/latest/ -> redirects to latest tagged version directory listing
-#      * /package/version/ -> directory listing (HTML)
-#      * /package/version/index.js -> exports entrypoint
-#      * /package/index.js -> exports latest version entrypoint
-#      * /package/ -> redirects to latest tagged version directory listing
-# 4. Generates importmaps for regular and development use
-# 5. Creates index files and supporting documentation
-# 6. Deploys to gh-pages branch with clean=false to preserve previous versions
-
 name: Deploy CDN
 
 on:
   push:
     tags:
-      - 'v*'  # Push events to tags matching v*, i.e. v1.0, v20.15.10
+      - 'v*'
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
-# Allow only one concurrent deployment
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  group: cdn-deploy
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,273 +25,65 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org/'
+          node-version-file: '.node-version'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build project
+      - name: Build
         run: npm run build
 
-      - name: Setup CDN structure
+      - name: Build vendor CDN
+        run: npm run build:vendor-cdn
+
+      - name: Build CDN assets
+        run: npm run build:cdn-assets
+
+      - name: Check for bare imports
+        run: node tools/cdn/check-bare-imports.js
+
+      - name: Install CDN tools
+        run: cd tools/cdn && npm ci
+
+      - name: Worker unit tests
+        run: cd tools/cdn && npm run test:unit
+
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Upload to R2
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: cd tools/cdn && node upload.js --version ${{ steps.version.outputs.version }} --latest --force-vendor
+
+      - name: Deploy Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: cd tools/cdn && npx wrangler deploy
+
+      - name: Purge Cloudflare cache
+        continue-on-error: true
         run: |
-          # Extract version from the tag (remove the 'v' prefix)
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "Preparing CDN for version $VERSION"
+          curl -sf -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_WORKERS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"purge_everything":true}'
 
-
-          ###----------------------------------------###
-          ###        Copy Scripts and Prepare        ###
-          ###----------------------------------------###
-          
-          # Create CDN directory structure
-          mkdir -p cdn
-          
-          # Create images directory and copy logo
-          mkdir -p cdn/images
-          cp $GITHUB_WORKSPACE/scripts/cdn/images/logo.png cdn/images/
-          
-          # Get the main package name from package.json
-          MAIN_PACKAGE=$(node -p "require('./package.json').name.replace('@', '').replace('/', '-')")
-          echo "Main package name: $MAIN_PACKAGE"
-
-          # Get the core package version from package.json
-          CORE_VERSION=$(node -p "require('./package.json').version")
-          echo "Core package version from package.json: $CORE_VERSION"
-
-          # Create scripts/helpers directory for script templates
-          mkdir -p scripts/helpers
-
-          # generate the importmap
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/generate-importmap.js.template scripts/helpers/generate-importmap.js
-
-          # create importmap-loaders
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/importmap-loader.js.template scripts/helpers/importmap-loader.js
-
-          # redirects /latest to tagged folder
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/latest-redirect.html.template scripts/helpers/latest-redirect.html.template
-
-          # gets package files to copy
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/get-package-files.js.template scripts/helpers/get-package-files.js
-
-          ## get entrypoint from package.json based on conditions
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-package-entry.js.template scripts/helpers/resolve-package-entry.js
-          ## actual helper that gets entrypoint
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/resolve-entry.js.template scripts/helpers/resolve-entry.js
-
-          ###----------------------------------------###
-          ###    Create CDN Copy of Core Package     ###
-          ###----------------------------------------###
-
-          # Create core package directories
-          mkdir -p cdn/@semantic-ui/core/$CORE_VERSION
-          mkdir -p cdn/@semantic-ui/core/latest
-
-          # Get core entry point using resolution script
-          core_entry=$(node scripts/helpers/resolve-package-entry.js)
-          echo "Core entry resolved to: $core_entry"
-
-          # Get files to publish for the core package
-          core_files_array=$(node scripts/helpers/get-package-files.js)
-
-          # Copy specified directories/files, preserving the exact directory structure
-          for file_entry in $core_files_array; do
-            if [ -e "$file_entry" ]; then
-              # Create target directory
-              target_dir="cdn/@semantic-ui/core/$CORE_VERSION/$(dirname "$file_entry")"
-              mkdir -p "$target_dir"
-              
-              # Copy the file or directory
-              if [ -d "$file_entry" ]; then
-                cp -R "$file_entry" "$target_dir"/
-              else
-                cp "$file_entry" "$target_dir"/
-              fi
-              echo "Copied $file_entry for core package"
-            else
-              echo "Warning: $file_entry specified in package.json for core package but not found"
-            fi
-          done
-
-          # Copy the actual package.json file
-          cp package.json cdn/@semantic-ui/core/$CORE_VERSION/package.json
-
-          # Create index.js and index.html files for the core package using templates
-          cp $GITHUB_WORKSPACE/scripts/cdn/templates/core-index.js.template cdn/@semantic-ui/core/$CORE_VERSION/index.js
-
-          # Use perl instead of sed for better handling of special characters
-          perl -i -pe "s|CORE_ENTRY|$core_entry|g" cdn/@semantic-ui/core/$CORE_VERSION/index.js
-
-          # Create core index.html with proper escaping
-          awk -v version="$CORE_VERSION" -v entry="$core_entry" '{
-            gsub(/CORE_VERSION/, version);
-            gsub(/CORE_ENTRY/, entry);
-            print
-          }' $GITHUB_WORKSPACE/scripts/cdn/templates/core-index.html.template > cdn/@semantic-ui/core/$CORE_VERSION/index.html
-
-          # Create latest redirect for core with proper escaping
-          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\${VERSION}/, version);
-            gsub(/\${PACKAGE_NAME}/, pkgname);
-            print
-          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/latest/index.html
-
-          ###------------------------------------###
-          ###    Create CDN Copy of Packages     ###
-          ###------------------------------------###
-
-          # Process each package in packages directory
-          cd packages
-          for package in */; do
-            # Remove trailing slash
-            package_name=${package%/}
-
-            # Read version from package.json
-            pkg_version=$(node -p "require('./$package_name/package.json').version")
-
-            echo "Processing @semantic-ui/$package_name v$pkg_version"
-
-            # Create directory in CDN structure including latest
-            mkdir -p "../cdn/@semantic-ui/$package_name/$pkg_version"
-            mkdir -p "../cdn/@semantic-ui/$package_name/latest"
-
-            # Copy entire package directory
-            cp -R "./$package_name/"* "../cdn/@semantic-ui/$package_name/$pkg_version/"
-
-            # Get entry point using resolution script
-            pkg_entry=$(node ../scripts/helpers/resolve-package-entry.js "./$package_name")
-            echo "$package_name entry resolved to: $pkg_entry"
-
-            # Create index.js and index.html files using templates
-            cp $GITHUB_WORKSPACE/scripts/cdn/templates/package-index.js.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
-            # Use perl instead of sed for better handling of special characters
-            perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.js"
-
-            cp $GITHUB_WORKSPACE/scripts/cdn/templates/package-index.html.template "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            perl -i -pe "s|PACKAGE_NAME|$package_name|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            perl -i -pe "s|PACKAGE_VERSION|$pkg_version|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-            perl -i -pe "s|PACKAGE_ENTRY|$pkg_entry|g" "../cdn/@semantic-ui/$package_name/$pkg_version/index.html"
-
-            # Create latest redirect with proper escaping
-            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
-              gsub(/\${VERSION}/, version);
-              gsub(/\${PACKAGE_NAME}/, pkgname);
-              print
-            }' ../scripts/helpers/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/latest/index.html"
-
-          done
-          cd ..
-
-          ###------------------------------------###
-          ###     Create Import Maps & Loader    ###
-          ###------------------------------------###
-
-          # Generate production importmap
-          echo "Generating importmaps for version $VERSION"
-
-          # Set environment variables for importmap generation
-          export CDN_URL="https://cdn.semantic-ui.com"
-          export VERSION=$VERSION
-          export CORE_VERSION=$CORE_VERSION
-          export CORE_ENTRY=$core_entry
-
-          # Run the importmap generation script
-          node scripts/helpers/generate-importmap.js
-
-          # Copy the enhanced importmap loader to CDN root
-          cp scripts/helpers/importmap-loader.js cdn/importmap.js
-
-          ###------------------------------------###
-          ###     Add Redirects for latest       ###
-          ###------------------------------------###
-
-          # Create redirects for core package
-          mkdir -p cdn/@semantic-ui/core
-
-          # Use latest-redirect template instead of core-redirect to point to JS file
-          awk -v version="$CORE_VERSION" -v pkgname="@semantic-ui/core" '{
-            gsub(/\${VERSION}/, version);
-            gsub(/\${PACKAGE_NAME}/, pkgname);
-            print
-          }' scripts/helpers/latest-redirect.html.template > cdn/@semantic-ui/core/index.html
-
-          # Create JavaScript redirect file for importmap compatibility
-          awk -v version="$CORE_VERSION" '{
-            gsub(/\${VERSION}/, version);
-            print
-          }' $GITHUB_WORKSPACE/scripts/cdn/templates/package-root-js.template > cdn/@semantic-ui/core/index.js
-
-          # Create redirects for each package
-          cd packages
-          for package in */; do
-            package_name=${package%/}
-            pkg_version=$(node -p "require('./$package_name/package.json').version")
-
-            echo "Creating redirect for @semantic-ui/$package_name to version $pkg_version"
-
-            mkdir -p "../cdn/@semantic-ui/$package_name"
-            # Create package redirect with proper escaping - using the same template as latest to point to JS file
-            awk -v version="$pkg_version" -v pkgname="@semantic-ui/$package_name" '{
-              gsub(/\${VERSION}/, version);
-              gsub(/\${PACKAGE_NAME}/, pkgname);
-              print
-            }' $GITHUB_WORKSPACE/scripts/cdn/templates/latest-redirect.html.template > "../cdn/@semantic-ui/$package_name/index.html"
-
-            # Create JavaScript redirect file for importmap compatibility
-            awk -v version="$pkg_version" '{
-              gsub(/\${VERSION}/, version);
-              print
-            }' $GITHUB_WORKSPACE/scripts/cdn/templates/package-root-js.template > "../cdn/@semantic-ui/$package_name/index.js"
-          done
-          cd ..
-
-          ###------------------------------------###
-          ###        Add Readme and CNAME        ###
-          ###------------------------------------###
-
-          # Create CNAME file for GitHub Pages
-          echo "cdn.semantic-ui.com" > cdn/CNAME
-
-          # Create README.md for the CDN using the gh-pages README
-          cp $GITHUB_WORKSPACE/scripts/cdn/gh-pages/README.md cdn/README.md
-          # Update the version references in the README
-          sed -i "s/\${VERSION}/$CORE_VERSION/g" cdn/README.md
-
-          # Create index file for the CDN root
-          cp $GITHUB_WORKSPACE/scripts/cdn/gh-pages/index.html cdn/index.html
-          # Update version references
-          sed -i "s/\${VERSION}/$CORE_VERSION/g" cdn/index.html
-          # Fix the CDN link reference
-          sed -i 's|<li><a href="/cdn/">CDN for packages</a></li>|<li><a href="/">CDN for packages</a></li>|' cdn/index.html
-          sed -i 's|<a href="/cdn/" class="btn">Explore the CDN</a>|<a href="/" class="btn">Explore the CDN</a>|' cdn/index.html
-
-          # Clean up scripts directory
-          rm -rf scripts/helpers
-
-      # Verify deployment structure is ready
-      - name: Verify deployment structure
-        run: |
-          # Debug what's being deployed
-          echo "Content of cdn directory (root):"
-          ls -la cdn/
-
-          # Verify CNAME file exists
-          if [ ! -f "cdn/CNAME" ]; then
-            echo "CNAME file missing, creating it"
-            echo "cdn.semantic-ui.com" > cdn/CNAME
-          fi
-
-          if [ -d "cdn/@semantic-ui" ]; then
-            echo "Content of cdn/@semantic-ui:"
-            ls -la cdn/@semantic-ui/ | head -n 10
-          fi
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Cache Playwright
+        uses: actions/cache@v4
         with:
-          folder: cdn
-          branch: gh-pages
-          clean: false # when cdn deploys should preserve other tagged versions
-          commit-message: "Deploy CDN for version"
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          path: ~/.cache/ms-playwright
+
+      - name: Install Playwright
+        run: cd tools/cdn && npx playwright install chromium
+
+      - name: Post-deploy CDN smoke tests
+        run: cd tools/cdn && npx vitest run --config vitest.config.js

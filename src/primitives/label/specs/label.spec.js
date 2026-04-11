@@ -8,6 +8,7 @@ export default {
   description: 'A label displays content classification',
   tagName: 'ui-label',
   exportName: 'Label',
+  bundle: 'standard',
   content: [],
   types: [
     {

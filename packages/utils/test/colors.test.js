@@ -126,3 +126,9 @@ describe('Color Utilities', () => {
     });
   });
 });
+
+describe('oklchToRgb — no arguments', () => {
+  it('should return null for no arguments', () => {
+    expect(oklchToRgb()).toBeNull();
+  });
+});

@@ -391,6 +391,18 @@ Render unescaped HTML. Only use with trusted/sanitized content:
 
 ---
 
+## Literal Value
+
+Pass a value as-is without auto-invoking functions. Useful for passing callbacks through property bindings:
+
+```html
+<my-child .onSelect={#fn handleSelect}></my-child>
+```
+
+Without `{#fn}`, the expression would be auto-invoked and the return value passed. With `{#fn}`, the function reference itself is passed through.
+
+---
+
 ## SVG
 
 Use standard `<svg>` tags directly — the compiler auto-detects them and creates an SVG rendering context. Expressions inside `<svg>` work normally. No special block syntax needed.
@@ -530,6 +542,9 @@ SLOTS
 
 RAW HTML
   {#html content}
+
+LITERAL VALUE
+  {#fn handler}                        pass value without auto-invoking
 
 REACTIVITY
   {#rerender key}...{/rerender}        force re-eval on key change

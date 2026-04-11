@@ -4,6 +4,7 @@ export default {
   description: 'An image is a graphic representation of something',
   tagName: 'ui-image',
   exportName: 'Image',
+  bundle: 'standard',
   content: [
     {
       name: 'Source',

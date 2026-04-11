@@ -56,8 +56,10 @@ const cloneValue = (src, preserveDOM, preserveNonCloneable, seen) => {
       ? Object.create(null)
       : {};
     seen.set(src, copy);
-    for (const [k, v] of Object.entries(src)) {
-      copy[k] = cloneValue(v, preserveDOM, preserveNonCloneable, seen);
+    const keys = Object.keys(src);
+    for (let i = 0; i < keys.length; i++) {
+      const k = keys[i];
+      copy[k] = cloneValue(src[k], preserveDOM, preserveNonCloneable, seen);
     }
   }
 

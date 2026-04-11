@@ -1,0 +1,65 @@
+.test-panel {
+  padding: 20px;
+  font-family: monospace;
+  color: #eee;
+  max-width: 500px;
+}
+h3 {
+  color: #fff;
+  margin: 0 0 16px;
+}
+.control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.toggle {
+  padding: 6px 14px;
+  background: #2a2a4e;
+  border: 1px solid #555;
+  color: #0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: monospace;
+}
+.toggle:hover {
+  background: #3a3a6e;
+}
+.current {
+  color: #888;
+  font-size: 13px;
+}
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: #1a1a2e;
+  border: 1px solid #333;
+  border-radius: 4px;
+}
+.label {
+  color: #888;
+  font-size: 12px;
+  white-space: nowrap;
+  min-width: 120px;
+}
+.value {
+  color: #eee;
+  font-size: 13px;
+}
+.anchor-check {
+  padding: 10px 12px;
+  font-size: 12px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 4px;
+  color: #888;
+}

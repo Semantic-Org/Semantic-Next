@@ -34,6 +34,6 @@ This runs `scripts/generate-icon-css.js`, which reads the mappings and writes ou
 | `tabler/` | [Tabler Icons](https://tabler.io/icons) | SVG mask |
 | `material-symbols/` | [Material Symbols](https://fonts.google.com/icons) | SVG mask |
 | `heroicons/` | [Heroicons](https://heroicons.com) | SVG mask |
-| `dev/` | Framework logos | SVG image (multicolor) |
+| `brands/` | Framework logos | SVG image (multicolor) |
 
-All five icon libraries use the mask technique (monochrome SVGs that inherit `currentColor`). The `dev` set is a separate hand-maintained set of colored framework logos using the image technique.
+All five icon libraries use the mask technique (monochrome SVGs that inherit `currentColor`). The `brands` set is a separate hand-maintained set of colored framework logos using the image technique.

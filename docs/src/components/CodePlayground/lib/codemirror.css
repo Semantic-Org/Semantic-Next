@@ -7,29 +7,207 @@
 
 
 
-/* Autocomplete - CM6 uses .cm-tooltip-autocomplete */
-.cm-tooltip-autocomplete.cm-tooltip {
-  box-shadow: 1px 2px 10px #000;
-  background: #090c10 var(--subtle-angled-gradient);
-  font-size: var(--playground-code-font-size, 14px);
-  font-family: 'Lato';
-  max-height: 20em;
-  width: 600px;
-  max-width: -webkit-fill-available;
-  margin-right: 1rem;
-  border-radius: var(--border-radius);
-  border: var(--border);
 
-  ul li {
-    line-height: 24px;
-    border-radius: var(--border-radius);
-  }
-   ul li[aria-selected="true"] {
-    background: #152d37;
-    filter: none;
+/* Tooltips */
+.cm-tooltip.cm-tooltip {
+  border: var(--border);
+  border-radius: var(--border-radius);
+  padding: var(--padding-2xs) var(--padding-xs);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  box-shadow: var(--raised-shadow);
+  background: var(--black) var(--subtle-angled-gradient);
+
+&.cm-tooltip-autocomplete.cm-tooltip {
+  min-width: 340px;
+  max-width: 500px;
+  border-radius: 6px;
+  padding: 4px 0;
+  z-index: 10;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+
+  & > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+
+    & > li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 8px;
+      cursor: default;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 24px;
+      color: var(--ac-fg);
+      min-width: 0;
+
+      &:hover {
+        background: var(--black-10);
+      }
+
+      &[aria-selected="true"] {
+        background: #152d37;
+      }
+
+      .cm-completionIcon {
+        flex-shrink: 0;
+        border-radius: 4px;
+        width: 20px;
+        height: 20px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        font-style: normal;
+        opacity: 1;
+        padding: 0;
+        margin: 0;
+
+        &::after {
+          display: block;
+          text-align: center;
+        }
+
+        &.cm-completionIcon-function {
+          background: #f9e2af18;
+          display: flex;
+          color: #f9e2af;
+          &::after { content: "f"; }
+        }
+
+        &.cm-completionIcon-method {
+          background: #f9e2af18;
+
+          display: flex;
+          color: #f9e2af;
+          &::after { content: "m"; }
+        }
+
+        &.cm-completionIcon-keyword {
+          background: #cba6f718;
+          display: flex;
+          color: #cba6f7;
+          &::after { content: "k"; }
+        }
+
+        &.cm-completionIcon-variable {
+          background: #89b4fa18;
+          display: flex;
+          color: #89b4fa;
+          &::after { content: "v"; }
+        }
+
+        &.cm-completionIcon-property {
+          background: #89b4fa18;
+          display: flex;
+          color: #89b4fa;
+          &::after { content: "p"; }
+        }
+
+        &.cm-completionIcon-type {
+          background: #94e2d518;
+          display: flex;
+          color: #94e2d5;
+          &::after { content: "t"; }
+        }
+
+        &.cm-completionIcon-class {
+          background: #94e2d518;
+          display: flex;
+          color: #94e2d5;
+          &::after { content: "c"; }
+        }
+
+        &.cm-completionIcon-interface {
+          background: #94e2d518;
+          display: flex;
+          color: #94e2d5;
+          &::after { content: "i"; }
+        }
+
+        &.cm-completionIcon-enum {
+          background: #cba6f718;
+          display: flex;          color: #cba6f7;
+          &::after { content: "e"; }
+        }
+
+        &.cm-completionIcon-struct {
+          background: #cba6f718;
+          display: flex;
+          color: #cba6f7;
+          &::after { content: "s"; }
+        }
+
+        &.cm-completionIcon-constant {
+          background: #f38ba818;
+          display: flex;
+          color: #f38ba8;
+          &::after { content: "c"; }
+        }
+
+        &.cm-completionIcon-namespace {
+          background: #94e2d518;
+          display: flex;
+          color: #94e2d5;
+          &::after { content: "n"; }
+        }
+
+        &.cm-completionIcon-module {
+          background: #94e2d518;
+          display: flex;
+          color: #94e2d5;
+          &::after { content: "m"; }
+        }
+      }
+
+      .cm-completionLabel {
+        flex-shrink: 0;
+        max-width: 240px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .cm-completionDetail {
+        flex: 1 1 0;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: right;
+        color: var(--ac-fg-dim);
+        font-size: 12px;
+        font-style: normal;
+        margin-left: auto;
+        padding-left: 12px;
+      }
+    }
   }
 }
 
+}
+
+
+/* Autocomplete - CM6 uses .cm-tooltip-autocomplete */
 
 /* Fold Markers - CM6 uses .cm-foldMarker */
 .cm-foldMarker {

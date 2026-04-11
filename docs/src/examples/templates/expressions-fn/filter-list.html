@@ -1,0 +1,8 @@
+<h4>Filtered Items</h4>
+<ul>
+  {#each item in getFiltered}
+    <li>{item}</li>
+  {else}
+    <li class="empty">No matches</li>
+  {/each}
+</ul>

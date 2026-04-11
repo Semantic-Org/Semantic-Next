@@ -1,0 +1,65 @@
+# Deploy docs site and MCP server to production on tagged releases.
+# Preview deploys happen automatically on push to main (via Vercel Git integration).
+# Requires: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_DOCS_PROJECT_ID, VERCEL_MCP_PROJECT_ID
+
+name: Release Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: release-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-docs:
+    name: Deploy Docs to Production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy docs to production
+        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_DOCS_PROJECT_ID }}
+
+  deploy-mcp:
+    name: Deploy MCP to Production
+    needs: deploy-docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.node-version'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build MCP server
+        run: npm run build:vercel
+        working-directory: tools/mcp
+
+      - name: Deploy MCP to production
+        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: tools/mcp
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_MCP_PROJECT_ID }}

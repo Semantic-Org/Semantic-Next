@@ -135,6 +135,9 @@
       }
       .buttons {
         margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
       .tip {
         background: var(--standard-5);
@@ -383,6 +386,10 @@
 
     &.resizing playground-preview {
       pointer-events: none;
+    }
+
+    &.view-preview {
+      ui-panel.preview:not(.iframe) > .menu { display: none; }
     }
 
 

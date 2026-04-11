@@ -1,7 +1,7 @@
 import { callback as callbackPlugin } from '@semantic-ui/esbuild-callback';
 import { SpecReader } from '@semantic-ui/specs';
 import { asyncEach } from '@semantic-ui/utils';
-import { writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { dirname, resolve } from 'path';
 import glob from 'tiny-glob';
 import { pathToFileURL } from 'url';
@@ -77,6 +77,10 @@ export const buildUIDeps = async ({
   const specJsFiles = await glob('src/primitives/**/specs/*.spec.js');
   const entryPoints = specJsFiles;
 
+  // Collected during createComponentSpecs, written by generatePresetManifest.
+  // Components are assigned to a tier: standard ⊂ extended ⊂ full.
+  const tiers = { standard: [], extended: [], full: [] };
+
   const createComponentSpecs = async () => {
     await asyncEach(entryPoints, async (entryPath) => {
       try {
@@ -104,12 +108,39 @@ export const buildUIDeps = async ({
           const pluralJSPath = resolve(dirname(entryPath), `${pluralName}.component.js`);
           writeFileSync(pluralJSPath, pluralComponentSpecJS);
         }
+
+        // Collect bundle tier for CDN preset manifest
+        if (spec.bundle) {
+          const componentName = spec.tagName.replace('ui-', '');
+          tiers[spec.bundle]?.push(componentName);
+        }
       }
       catch (e) {
         console.error(`Error processing ${entryPath}:`, e.message);
         throw e; // Don't silently skip errors in new system
       }
     });
+  };
+
+  /*
+    Write CDN preset manifest from bundle tiers collected during spec generation.
+    Tiers are cumulative: standard ⊂ extended ⊂ full.
+  */
+  const generatePresetManifest = async () => {
+    const standard = tiers.standard.sort();
+    const extended = [...tiers.standard, ...tiers.extended].sort();
+    const full = [...tiers.standard, ...tiers.extended, ...tiers.full].sort();
+
+    if (full.length > 0) {
+      const distDir = resolve('dist');
+      if (!existsSync(distDir)) {
+        mkdirSync(distDir, { recursive: true });
+      }
+      writeFileSync(
+        resolve(distDir, 'presets.json'),
+        JSON.stringify({ standard, extended, full }, null, 2) + '\n',
+      );
+    }
   };
 
   // Set up a separate esbuild watcher for spec files
@@ -143,11 +174,14 @@ export const buildUIDeps = async ({
     }
   }
 
-  return await Promise.all([
+  // Preset manifest depends on data collected during spec generation
+  await Promise.all([
     cssComponentBundle,
     createComponentSpecs(),
     specWatcher,
   ].filter(Boolean));
+
+  return await generatePresetManifest();
 };
 
 // Handle direct execution of this script

@@ -2,9 +2,25 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import * as reactivity from '@semantic-ui/reactivity';
 import { ICON_CATEGORIES, iconMappings } from '@semantic-ui/specs';
 import { iconAliases } from '@semantic-ui/specs/icons/meta';
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import * as utils from '@semantic-ui/utils';
 import { z } from 'zod';
+import { isContributor } from './config.js';
+
+// LLMs sometimes stringify array parameters as JSON strings instead of passing
+// actual arrays. Detect this and parse gracefully so batch calls still work.
+function coerceArray(value: string | string[]): { value: string | string[]; wasCoerced: boolean; } {
+  if (typeof value === 'string' && value.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed) && parsed.every(v => typeof v === 'string')) {
+        return { value: parsed, wasCoerced: true };
+      }
+    }
+    catch { /* not valid JSON, use as-is */ }
+  }
+  return { value, wasCoerced: false };
+}
 
 import {
   ensureCache,
@@ -104,8 +120,12 @@ Write classes you know. The sophisticated theming system is there when needed, n
 - \`search\` - Find anything: components, examples, docs. Start here when unsure.
 - \`list_components\` - See all UI components (button, card, modal, etc.)
 - \`list_examples\` - Browse working code examples by category
-- \`list_skills\` - See available deep-dive guides
-- \`list_workflows\` - See step-by-step procedures (pass audience: "contributing" or "docs" to see more)
+- \`list_skills\` - See available deep-dive guides${
+    isContributor() ? '' : ' (pass audience: "contributing" or "docs" to see more)'
+  }
+- \`list_workflows\` - See step-by-step procedures${
+    isContributor() ? '' : ' (pass audience: "contributing" or "docs" to see more)'
+  }
 - \`list_user_docs\` - Browse user documentation (guides, API reference)
 
 ### Get Content
@@ -212,10 +232,17 @@ Optional params:
       query: z.union([z.string(), z.array(z.string())])
         .describe('Component name/tag or array of names (e.g., "button" or ["button", "card"])'),
     },
-    async ({ query }) => {
+    async ({ query: rawQuery }) => {
       await ensureCache();
+      const { value: query, wasCoerced } = coerceArray(rawQuery);
       const isBatch = Array.isArray(query);
       const queries = isBatch ? query : [query];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_component received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(queries.map(async (q) => {
         const result = await getComponentWithChildren(q);
@@ -563,10 +590,17 @@ Optional params:
       id: z.union([z.string(), z.array(z.string())])
         .describe('Example ID or array of IDs (e.g., "counter" or ["counter", "dropdown"])'),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_example received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(fetchSingleExample));
 
@@ -597,9 +631,11 @@ Optional params:
 
   server.tool(
     'list_skills',
-    'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" skills.',
+    isContributor()
+      ? 'List available skills that can be loaded with use_skill. Skills are comprehensive guides organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available skills that can be loaded with use_skill. Skills are comprehensive guides for specific topics like components, templating, and reactivity.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -703,9 +739,11 @@ Optional params:
 
   server.tool(
     'list_workflows',
-    'List available step-by-step workflows. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" workflows.',
+    isContributor()
+      ? 'List available step-by-step workflows organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available step-by-step workflows for common tasks like adding components, writing templates, and configuring themes.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -759,10 +797,17 @@ Optional params:
           'Workflow ID or array of IDs (e.g., "add-util-function" or "workflows/framework/add-util-function")',
         ),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_workflow received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(async (docId) => {
         const workflow = findWorkflow(docId);
@@ -805,9 +850,11 @@ Optional params:
 
   server.tool(
     'list_context',
-    'List available AI context documents. Defaults to usage, authoring, and essentials. Pass audience to include "contributing", "docs", or "research" docs.',
+    isContributor()
+      ? 'List available AI context documents organized by audience: usage, authoring, essentials, contributing, docs, and research. Pass audience to filter.'
+      : 'List available AI context documents covering component APIs, framework internals, and usage patterns.',
     {
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter by audience'),
       json: z.boolean().optional().describe('Return JSON instead of markdown'),
     },
@@ -861,10 +908,17 @@ Optional params:
           'Document path or array of paths (e.g., "framework/reactivity" or ["framework/reactivity", "ui/markup"])',
         ),
     },
-    async ({ id }) => {
+    async ({ id: rawId }) => {
       await ensureCache();
+      const { value: id, wasCoerced } = coerceArray(rawId);
       const isBatch = Array.isArray(id);
       const ids = isBatch ? id : [id];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_context received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(ids.map(async (docId) => {
         const doc = findContext(docId);
@@ -984,10 +1038,17 @@ Optional params:
           'Document path or array of paths (e.g., "guides/reactivity/signals" or ["api/utils/arrays", "api/utils/objects"])',
         ),
     },
-    async ({ path }) => {
+    async ({ path: rawPath }) => {
       await ensureCache();
+      const { value: path, wasCoerced } = coerceArray(rawPath);
       const isBatch = Array.isArray(path);
       const paths = isBatch ? path : [path];
+
+      if (wasCoerced) {
+        console.error(
+          `[semantic-ui-mcp] Note: get_user_doc received a stringified array — pass a native array instead of JSON-encoding it.`,
+        );
+      }
 
       const results = await Promise.all(paths.map(async (docPath) => {
         const doc = findDoc(docPath);
@@ -1110,7 +1171,7 @@ Optional params:
       query: z.string().describe('Search query'),
       type: z.enum(['spec', 'example', 'context', 'workflow', 'doc']).optional()
         .describe('Limit search to specific content type'),
-      audience: z.enum(['usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
+      audience: z.enum(['all', 'usage', 'authoring', 'essentials', 'contributing', 'docs', 'research']).optional()
         .describe('Filter context docs by audience'),
       limit: z.number().optional().describe('Max results (default: 20)'),
     },

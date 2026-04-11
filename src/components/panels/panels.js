@@ -75,7 +75,7 @@ const createComponent = ({ self, el, settings, $ }) => ({
     let $panels = $allPanels.not($childPanelGroupPanels);
     self.panels = $panels.get();
     each(self.panels, (panel) => {
-      panel.settings.direction = settings.direction;
+      panel.direction = settings.direction;
     });
   },
 
@@ -153,6 +153,14 @@ const createComponent = ({ self, el, settings, $ }) => ({
     }
   },
   setPanelCalculatedSizes() {
+    // hidden panels get zero size and are excluded from calculations
+    each(self.panels, (panel, index) => {
+      if (panel.settings.hidden) {
+        self.setPanelSize(index, 0);
+        self.setPanelInitialized(panel);
+      }
+    });
+
     let exactPanels = self.getExactPanels();
     let growPanels = self.getGrowingPanels();
 
@@ -268,6 +276,10 @@ const createComponent = ({ self, el, settings, $ }) => ({
     return self.getPanelSetting(index, 'minimized');
   },
 
+  isHidden(index) {
+    return self.getPanelSetting(index, 'hidden');
+  },
+
   // get available width for elements set to 'grow'
   getAvailableGrowWidth() {
     let availableWidth = 100;
@@ -281,10 +293,14 @@ const createComponent = ({ self, el, settings, $ }) => ({
   },
 
   getGrowingPanels() {
-    return self.panels.filter(panel => !self.isPanelInitialized(panel) && panel.settings.size == 'grow');
+    return self.panels.filter(panel =>
+      !self.isPanelInitialized(panel) && !panel.settings.hidden && panel.settings.size == 'grow'
+    );
   },
   getExactPanels() {
-    return self.panels.filter(panel => !self.isPanelInitialized(panel) && panel.settings.size !== 'grow');
+    return self.panels.filter(panel =>
+      !self.isPanelInitialized(panel) && !panel.settings.hidden && panel.settings.size !== 'grow'
+    );
   },
 
   getRelativeSettingSize(size, index) {
@@ -489,6 +505,9 @@ const createComponent = ({ self, el, settings, $ }) => ({
         return panelSize;
       },
       cannotResize = (resizeIndex) => {
+        if (self.isHidden(resizeIndex)) {
+          return true;
+        }
         let result;
         if (resizeIndex == index && manualResize) {
           result = hasMinimized;
@@ -774,6 +793,7 @@ const events = {
 const Panels = defineComponent({
   tagName: 'ui-panels',
   plural: true,
+  renderingEngine: 'native',
   template,
   css,
   createComponent,

@@ -1,0 +1,91 @@
+---
+import { PerfCards } from '@components/PerfTest/PerfCards.js';
+---
+<html>
+<body style="background-color:#000000">
+<style>
+  .perf-header {
+    padding: 16px;
+    font-family: monospace;
+    color: #0f0;
+    background: #111;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .perf-header h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #fff;
+  }
+  .perf-metric {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 13px;
+  }
+  .perf-metric .label {
+    color: #888;
+  }
+  .perf-metric .value {
+    color: #0f0;
+    font-weight: bold;
+  }
+</style>
+
+<div class="perf-header">
+  <h2>SSR + Hydration (client:load)</h2>
+  <div>
+    <span class="perf-metric" id="hydrate-time">
+      <span class="label">hydration: </span>
+      <span class="value">measuring...</span>
+    </span>
+    <span class="perf-metric" id="total-time">
+      <span class="label">total to interactive: </span>
+      <span class="value">measuring...</span>
+    </span>
+  </div>
+  <div id="perf-breakdown" style="margin-top: 8px; font-size: 12px; color: #888;"></div>
+</div>
+
+<PerfCards count={100} client:load />
+
+<script>
+  import { $ } from '@semantic-ui/query';
+
+  performance.mark('hydrated-page-start');
+
+  // Wait for the component to hydrate
+  const check = () => {
+    const el = document.querySelector('perf-cards');
+    if (el?.template) {
+      performance.mark('hydrated-complete');
+      performance.measure('hydration-total', 'hydrated-page-start', 'hydrated-complete');
+      const measure = performance.getEntriesByName('hydration-total')[0];
+
+      $('#hydrate-time .value').text(measure.duration.toFixed(2) + 'ms');
+      $('#total-time .value').text(measure.duration.toFixed(2) + 'ms');
+
+      // Show breakdown from instrumentation
+      const p = globalThis.__hydPerf;
+      if (p) {
+        const lines = [
+          `eval() total: ${p.evalCount} calls, ${p.evalTime.toFixed(2)}ms`,
+          `  firstRun evals (dep registration only): ${p.evalFirstRun} calls, ${p.evalFirstRunTime.toFixed(2)}ms`,
+          `  text split evals (outside Reaction): ${p.textSplitTime.toFixed(2)}ms`,
+          `buildHTMLString (reference DOM): ${p.buildHTMLTime.toFixed(2)}ms`,
+          `comment walker: ${p.walkerTime.toFixed(2)}ms`,
+        ];
+        document.getElementById('perf-breakdown').innerHTML = lines
+          .map(l => `<div style="font-family:monospace;${l.startsWith(' ') ? 'color:#666' : 'color:#0f0'}">${l}</div>`)
+          .join('');
+        console.table(p);
+      }
+    } else {
+      requestAnimationFrame(check);
+    }
+  };
+  requestAnimationFrame(check);
+</script>
+</body>
+</html>

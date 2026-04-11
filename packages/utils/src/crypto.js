@@ -2,10 +2,14 @@
       Identity
 --------------------*/
 
+const WHITESPACE_RE = /\s+/g;
+const NON_WORD_RE = /[^\w-]+/g;
+const UNDERSCORE_RE = /_/g;
+
 export const tokenize = (str = '') => {
-  return (str || '').replace(/\s+/g, '-')
-    .replace(/[^\w-]+/g, '')
-    .replace(/_/g, '-')
+  return (str || '').replace(WHITESPACE_RE, '-')
+    .replace(NON_WORD_RE, '')
+    .replace(UNDERSCORE_RE, '-')
     .toLowerCase();
 };
 

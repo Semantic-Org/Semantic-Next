@@ -1,5 +1,3 @@
-import { each } from './loops.js';
-
 /*-------------------
         Types
 --------------------*/
@@ -80,15 +78,12 @@ export const isEmpty = (x) => {
   if (isArray(x) || isString(x)) {
     return x.length === 0;
   }
-  let result = true;
-  each(x, (value) => {
-    // and again nullish is empty
-    if (value != null) {
-      result = false;
+  for (const key in x) {
+    if (Object.hasOwn(x, key) && x[key] != null) {
       return false;
     }
-  });
-  return result;
+  }
+  return true;
 };
 
 export const isIterable = x => {

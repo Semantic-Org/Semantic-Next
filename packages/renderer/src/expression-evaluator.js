@@ -1,0 +1,390 @@
+import { Signal } from '@semantic-ui/reactivity';
+
+// Fallback handler for the rare includeHelpers: false path
+const jsNoHelpersHandler = {
+  has(target, key) {
+    return key in target;
+  },
+  get(target, prop) {
+    const value = target[prop];
+    if (value instanceof Signal) {
+      return value.get();
+    }
+    return value;
+  },
+};
+
+export class ExpressionEvaluator {
+  static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
+  static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
+  static WRAPPED_EXPRESSION = /(\s|^)([\[{].*?[\]}])(\s|$)/g;
+  static VAR_NAME_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/;
+  static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
+  static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
+  static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
+  static fnCache = new Map();
+  static FN_CACHE_MAX = 5000;
+
+  // Expression classification cache — shared across all instances since
+  // classification depends only on the expression string, not data context
+  static classifyCache = new Map();
+  static CLASSIFY_CACHE_MAX = 5000;
+
+  // Parsed expression array cache — the result of addParensToExpression +
+  // getExpressionArray is deterministic for a given expression string
+  static parseCache = new Map();
+  static PARSE_CACHE_MAX = 5000;
+
+  constructor({ data, helpers, dataVersion } = {}) {
+    this.data = data;
+    this.helpers = helpers || {};
+    this.dataVersion = dataVersion;
+
+    // Reusable Proxy for JS expression evaluation — avoids per-eval spread + new Proxy
+    this.jsContext = null;
+    this.jsProxy = new Proxy(
+      // Dummy target — the handler reads from jsContext/helpers directly
+      Object.create(null),
+      {
+        has: (_, key) => {
+          // Filter 'debugger' to prevent reserved word conflict inside with(ctx){}
+          if (key === 'debugger') { return false; }
+          return (this.jsContext !== null && key in this.jsContext) || key in this.helpers;
+        },
+        get: (_, prop) => {
+          const value = (this.jsContext !== null && prop in this.jsContext)
+            ? this.jsContext[prop]
+            : this.helpers[prop];
+          if (value instanceof Signal) {
+            return value.get();
+          }
+          return value;
+        },
+      },
+    );
+  }
+
+  setData(data) {
+    this.data = data;
+  }
+
+  evaluate(expression, data = this.data) {
+    if (typeof expression === 'string') {
+      if (this.dataVersion) {
+        this.dataVersion.depend();
+      }
+      return this.lookupExpressionValue(expression, data);
+    }
+    return expression;
+  }
+
+  // Classifies an expression string to determine if it's a multi-token
+  // Lisp-style expression (no JS operators outside quotes). Result is
+  // cached since it depends only on the expression string.
+  classifyExpression(expression) {
+    let result = ExpressionEvaluator.classifyCache.get(expression);
+    if (result !== undefined) {
+      return result;
+    }
+
+    const hasQuotes = expression.includes("'") || expression.includes('"');
+    const stripped = hasQuotes
+      ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
+      : expression;
+    result = stripped.includes(' ')
+      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
+
+    if (ExpressionEvaluator.classifyCache.size >= ExpressionEvaluator.CLASSIFY_CACHE_MAX) {
+      ExpressionEvaluator.classifyCache.clear();
+    }
+    ExpressionEvaluator.classifyCache.set(expression, result);
+    return result;
+  }
+
+  // Returns a cached parsed expression array. The result of
+  // addParensToExpression + getExpressionArray is deterministic for a
+  // given expression string — no need to re-parse on every render.
+  getParsedExpression(expression) {
+    let parsed = ExpressionEvaluator.parseCache.get(expression);
+    if (parsed !== undefined) {
+      return parsed;
+    }
+
+    const wrapped = this.addParensToExpression(expression);
+    parsed = this.getExpressionArray(wrapped);
+
+    if (ExpressionEvaluator.parseCache.size >= ExpressionEvaluator.PARSE_CACHE_MAX) {
+      ExpressionEvaluator.parseCache.clear();
+    }
+    ExpressionEvaluator.parseCache.set(expression, parsed);
+    return parsed;
+  }
+
+  // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
+  getExpressionArray(expr) {
+    const groups = [];
+    const processedExpr = expr.replace(ExpressionEvaluator.PARENS_REGEXP, match => {
+      const placeholder = `__GROUP${groups.length}__`;
+      groups.push(match.slice(1, -1));
+      return placeholder;
+    });
+
+    const tokens = processedExpr.match(ExpressionEvaluator.TOKEN_REGEXP) || [];
+    const getValue = (token) => {
+      const match = token.match(/__GROUP(\d+)__/);
+      return match ? groups[parseInt(match[1], 10)] : token;
+    };
+
+    // Index-based iteration avoids O(n) shift() per token
+    let pos = 0;
+    const parse = () => {
+      const result = [];
+      while (pos < tokens.length) {
+        const token = tokens[pos++];
+        if (token === '(') {
+          result.push(parse());
+        }
+        else if (token === ')') {
+          return result;
+        }
+        else {
+          result.push(getValue(token));
+        }
+      }
+      return result;
+    };
+    return parse();
+  }
+
+  evaluateJavascript(code, context, { includeHelpers = true } = {}) {
+    let result;
+    try {
+      // Reuse the cached Proxy — just swap which context object it reads from
+      if (includeHelpers) {
+        this.jsContext = context || null;
+      }
+      const proxy = includeHelpers ? this.jsProxy : new Proxy(context || {}, jsNoHelpersHandler);
+      let fn = ExpressionEvaluator.fnCache.get(code);
+      if (!fn) {
+        fn = new Function('ctx', `with(ctx){return ${code}}`);
+        if (ExpressionEvaluator.fnCache.size >= ExpressionEvaluator.FN_CACHE_MAX) {
+          ExpressionEvaluator.fnCache.clear();
+        }
+        ExpressionEvaluator.fnCache.set(code, fn);
+      }
+      result = fn(proxy);
+    }
+    catch (e) {
+      // this token is not valid javascript
+    }
+    finally {
+      this.jsContext = null;
+    }
+    return result;
+  }
+
+  lookupExpressionValue(expression = '', data = {}, visited) {
+    if (visited) {
+      if (visited.has(expression)) {
+        return undefined;
+      }
+      visited.add(expression);
+    }
+
+    if (typeof expression === 'string') {
+      // No space = single token (identifier, dotted path, or JS call).
+      // Skip classify cache — Lisp-style needs at least one space.
+      const isMultiTokenLisp = expression.includes(' ')
+        && this.classifyExpression(expression);
+
+      if (!isMultiTokenLisp) {
+        const value = this.lookupTokenValue(expression, data);
+
+        if (value !== undefined) {
+          if (visited) {
+            visited.delete(expression);
+            if (visited.size > 0) {
+              return value;
+            }
+          }
+          return typeof value === 'function' ? value() : value;
+        }
+      }
+    }
+
+    let expressionArray;
+    if (!Array.isArray(expression)) {
+      expressionArray = this.getParsedExpression(expression);
+    }
+    else {
+      expressionArray = expression;
+    }
+
+    // Create visited Set lazily — only needed when recursing into sub-expressions
+    if (!visited) {
+      visited = new Set();
+      visited.add(expression);
+    }
+
+    const len = expressionArray.length;
+    // Pre-allocate results array at the right size instead of per-iteration unshift
+    const results = new Array(len);
+
+    let index = len;
+    while (index--) {
+      const token = expressionArray[index];
+      let result;
+      if (Array.isArray(token)) {
+        result = this.lookupExpressionValue(token.join(' '), data, visited);
+      }
+      else {
+        const tokenValue = this.lookupExpressionValue(token, data, visited);
+        if (typeof tokenValue === 'function') {
+          // Collect arguments from the already-resolved tokens to the right
+          let argCount = len - index - 1;
+          if (argCount > 0) {
+            const args = new Array(argCount);
+            for (let a = 0; a < argCount; a++) {
+              args[a] = results[index + 1 + a];
+            }
+            result = tokenValue(...args);
+          }
+          else {
+            result = tokenValue();
+          }
+        }
+        else {
+          result = tokenValue;
+        }
+      }
+      results[index] = result;
+    }
+    visited.delete(expression);
+    return results[0];
+  }
+
+  lookupTokenValue(token = '', data) {
+    if (Array.isArray(token)) {
+      return this.lookupExpressionValue(token, data);
+    }
+
+    // Eager path — cheaper than any cache lookup, resolves the 90% case
+    const literalValue = this.getLiteralValue(token);
+    if (literalValue !== undefined) {
+      return literalValue;
+    }
+
+    if (!token.includes('.')) {
+      let value = data[token];
+      if (value instanceof Signal) {
+        return value.value;
+      }
+      if (value !== undefined) {
+        return value;
+      }
+    }
+    else {
+      let dataValue = this.getDeepDataValue(data, token);
+      let value = this.accessTokenValue(dataValue, token, data);
+      if (value !== undefined) {
+        return value;
+      }
+    }
+
+    const helper = this.helpers[token];
+    if (typeof helper === 'function') {
+      return helper;
+    }
+
+    // Simple identifiers and dotted paths are fully resolved by
+    // data lookup and helper check above — skip expensive JS eval
+    if (ExpressionEvaluator.SIMPLE_PATH_REGEXP.test(token)) {
+      return;
+    }
+
+    const jsValue = this.evaluateJavascript(token, data);
+    if (jsValue !== undefined) {
+      return this.accessTokenValue(jsValue, token, data);
+    }
+  }
+
+  getDeepDataValue(obj, path) {
+    let dot = path.indexOf('.');
+
+    // Fast path: simple identifier (no dots)
+    if (dot === -1) {
+      const value = obj[path];
+      if (value instanceof Signal) {
+        return value.get();
+      }
+      return value;
+    }
+
+    // Walk segments via indexOf to avoid split() array allocation on hot path
+    let current = obj;
+    let start = 0;
+    let end = dot;
+    while (start < path.length) {
+      if (current instanceof Signal) {
+        current = current.get();
+      }
+      else if (typeof current === 'function') {
+        current = current();
+      }
+      if (current == null) {
+        return undefined;
+      }
+      current = current[path.substring(start, end)];
+      start = end + 1;
+      end = path.indexOf('.', start);
+      if (end === -1) {
+        end = path.length;
+      }
+    }
+    return current;
+  }
+
+  accessTokenValue(tokenValue, token, data) {
+    if (typeof tokenValue === 'function' && token.includes('.')) {
+      const lastDot = token.lastIndexOf('.');
+      const thisContext = this.getDeepDataValue(data, token.substring(0, lastDot));
+      tokenValue = tokenValue.bind(thisContext);
+    }
+
+    if (tokenValue !== undefined) {
+      return (tokenValue instanceof Signal)
+        ? tokenValue.value
+        : tokenValue;
+    }
+    return undefined;
+  }
+
+  addParensToExpression(expression = '') {
+    if (!expression) { return ''; }
+    if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
+      return expression;
+    }
+    return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
+      return `${before}(${brackets})${after}`;
+    });
+  }
+
+  getLiteralValue(token) {
+    if (token.length > 1 && (token[0] === "'" || token[0] === '"') && token[0] === token[token.length - 1]) {
+      return token.slice(1, -1).replace(/\\(['"])/g, '$1');
+    }
+
+    if (token === 'true') { return true; }
+    if (token === 'false') { return false; }
+    if (token === 'null') { return null; }
+
+    // Quick charCode guard to skip +token coercion for identifiers
+    const c = token.charCodeAt(0);
+    if ((c >= 48 && c <= 57) || c === 45 || c === 46 || c === 43) {
+      const num = +token;
+      if (Number.isFinite(num)) {
+        return num;
+      }
+    }
+  }
+}

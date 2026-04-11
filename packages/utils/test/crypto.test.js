@@ -256,3 +256,45 @@ describe('ID/Hashing Functions', () => {
     });
   });
 });
+
+describe('hashCode — UMASH mode', () => {
+  it('should hash objects consistently in slow mode', () => {
+    const obj = { a: 1, b: 'hello' };
+    const hash1 = hashCode(obj, { fast: false });
+    const hash2 = hashCode(obj, { fast: false });
+    expect(hash1).toBe(hash2);
+  });
+
+  it('should differentiate objects in slow mode', () => {
+    const a = { x: 1 };
+    const b = { x: 2 };
+    expect(hashCode(a, { fast: false })).not.toBe(hashCode(b, { fast: false }));
+  });
+
+  it('should handle null/undefined in both modes', () => {
+    expect(typeof hashCode(null)).toBe('number');
+    expect(typeof hashCode(undefined)).toBe('number');
+    expect(typeof hashCode(null, { fast: false })).toBe('number');
+    expect(typeof hashCode(undefined, { fast: false })).toBe('number');
+  });
+});
+
+describe('tokenize — edge cases', () => {
+  it('should handle null/undefined input gracefully', () => {
+    expect(tokenize(null)).toBe('');
+    expect(tokenize(undefined)).toBe('');
+    expect(tokenize('')).toBe('');
+  });
+
+  it('should strip special characters', () => {
+    expect(tokenize('Hello! @World #2024')).toBe('hello-world-2024');
+  });
+
+  it('should collapse multiple spaces into a single hyphen', () => {
+    expect(tokenize('hello   world')).toBe('hello-world');
+  });
+
+  it('should convert underscores to hyphens', () => {
+    expect(tokenize('some_thing')).toBe('some-thing');
+  });
+});

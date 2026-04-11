@@ -6,6 +6,7 @@ import {
   errorJS,
   foldMarkerEnd,
   foldMarkerStart,
+  isProductionBuild,
   isStaticBuild,
   logCSS,
   logJS,
@@ -14,6 +15,30 @@ import {
 import { importMapJSON } from '../pages/examples/importmap.json.js';
 import { packageJSON } from '../pages/examples/package.json.js';
 import { decodeObject, encodeObject, fromBase64UrlSafe, makeBase64UrlSafe } from './link-encoder.js';
+
+const contentTypes = {
+  html: 'text/html',
+  css: 'text/css',
+  js: 'text/javascript',
+  ts: 'text/typescript',
+  json: 'application/json',
+  svg: 'image/svg+xml',
+  xml: 'application/xml',
+  md: 'text/markdown',
+  txt: 'text/plain',
+  csv: 'text/csv',
+  yaml: 'text/yaml',
+  yml: 'text/yaml',
+  // shaders
+  glsl: 'text/plain',
+  vert: 'text/plain',
+  frag: 'text/plain',
+  wgsl: 'text/plain',
+  // 3d models
+  obj: 'text/plain',
+  mtl: 'text/plain',
+  gltf: 'model/gltf+json',
+};
 
 /*
   Helper to add code folding for import export statements
@@ -75,12 +100,7 @@ export const getExampleFiles = async ({
 
       const getContentType = (filename) => {
         const extension = filename.split('.').pop();
-        const contentTypes = {
-          html: 'text/html',
-          css: 'text/css',
-          js: 'text/javascript',
-        };
-        return get(contentTypes, extension) || 'text/html';
+        return get(contentTypes, extension) || 'text/plain';
       };
 
       if (inArray(fileName, ['page.html'])) {
@@ -398,17 +418,16 @@ export const getImportMap = () => {
 // If a key is 'files', its value is encoded using encodeObject.
 // Other values are handled by URLSearchParams, which takes care of URL encoding.
 export const getPlaygroundLink = (params, baseUrl = '/playground') => {
-  const queryParams = new URLSearchParams();
+  const hashParams = new URLSearchParams();
   each(params, (value, key) => {
     if (key === 'files') {
-      queryParams.set(key, encodeObject(value));
+      hashParams.set(key, encodeObject(value));
     }
     else {
-      // URLSearchParams encodes the value automatically
-      queryParams.set(key, String(value));
+      hashParams.set(key, String(value));
     }
   });
-  return `${baseUrl}?${queryParams.toString()}`;
+  return `${baseUrl}#${hashParams.toString()}`;
 };
 
 export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage = true } = {}) => {
@@ -416,8 +435,8 @@ export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage 
   if (wrapPage) {
     pageContent = `<html>
   <head>
-    <link href="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.css" rel="stylesheet" />
-    <script src="https://cdn.semantic-ui.com/@semantic-ui/core/0.11.2/dist/bundle/semantic-ui.min.js" type="module"></script>
+    <link href="https://cdn.semantic-ui.com/css@${isProductionBuild ? 'latest' : 'canary'}" rel="stylesheet" />
+    <script src="https://cdn.semantic-ui.com/core@${isProductionBuild ? 'latest' : 'canary'}" type="module"></script>
     <style>
       body { padding: 1rem; }
     </style>
@@ -446,10 +465,9 @@ export const getCodePlaygroundLink = (code, baseUrl = '/playground', { wrapPage 
   return getPlaygroundLink(params);
 };
 
-// Read the query string and return the decoded parameters.
-// The 'files' parameter is decoded using decodeFiles.
-export const readPlaygroundLink = queryString => {
-  const params = new URLSearchParams(queryString);
+export const readPlaygroundLink = (hash) => {
+  const hashString = hash?.startsWith('#') ? hash.slice(1) : hash;
+  const params = new URLSearchParams(hashString);
   const result = {};
   for (const [key, value] of params.entries()) {
     if (key === 'files') {

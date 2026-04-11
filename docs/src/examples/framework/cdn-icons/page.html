@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/css@canary" />
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/fonts@canary/lato" />
+    <link rel="stylesheet" href="https://cdn.semantic-ui.com/icons@canary/lucide" />
+    <link rel="stylesheet" href="./page.css" />
+    <script type="module" src="https://cdn.semantic-ui.com/core@canary/button,icon"></script>
+<!-- playground-hide -->
+    <script>
+      if(localStorage.getItem('theme') == 'dark') {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+<!-- playground-hide-end -->
+  </head>
+  <body>
+    <ui-button primary><ui-icon home></ui-icon> Home</ui-button>
+    <ui-button><ui-icon upload></ui-icon> Upload</ui-button>
+    <ui-button positive><ui-icon save></ui-icon> Save</ui-button>
+  </body>
+</html>

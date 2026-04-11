@@ -1,5 +1,3 @@
-// Re-export useful types from dependencies
-import type { DefineComponentOptions } from '@semantic-ui/component';
 import type { GenerateTailwindCSSOptions } from 'tailwindcss-iso';
 
 /**
@@ -18,10 +16,9 @@ export interface ExtractedContent {
 
 /**
  * Semantic UI component definition that can be processed by TailwindPlugin.
- * This is a subset of DefineComponentOptions that includes the properties
- * that TailwindPlugin scans for Tailwind classes.
+ * Includes the properties that TailwindPlugin scans for Tailwind classes.
  */
-export interface ComponentDefinition extends Partial<DefineComponentOptions<any, any, any, any>> {
+export interface ComponentDefinition {
   /** HTML template string */
   template?: string;
   /** CSS styles string */
@@ -48,27 +45,27 @@ export interface ComponentDefinition extends Partial<DefineComponentOptions<any,
 /**
  * Scans a Semantic UI component definition and extracts all content
  * that may contain Tailwind classes for processing.
- * 
+ *
  * This function comprehensively scans:
  * - Template HTML strings
- * - Component CSS styles  
+ * - Component CSS styles
  * - JavaScript function bodies (converted to strings)
  * - Sub-template content recursively
- * 
+ *
  * @param definition - The component definition to scan
  * @returns Object containing extracted HTML, JS, CSS, and combined content
- * 
+ *
  * @example
  * ```javascript
  * import { extractDefinitionContent } from '@semantic-ui/tailwind';
- * 
+ *
  * const definition = {
  *   tagName: 'my-button',
  *   template: '<button class="px-4 py-2 bg-blue-500">Click me</button>',
  *   css: '@theme { --color-blue-500: #3b82f6; }',
  *   createComponent: () => ({ click() { console.log('clicked'); } })
  * };
- * 
+ *
  * const { content, css } = extractDefinitionContent(definition);
  * // content includes all scannable text
  * // css includes the component CSS
@@ -79,42 +76,42 @@ export function extractDefinitionContent(definition: ComponentDefinition): Extra
 /**
  * Transforms a Semantic UI component definition by scanning it for Tailwind classes
  * and generating the corresponding CSS to replace the component's existing CSS.
- * 
+ *
  * This plugin:
  * 1. Scans all component content for Tailwind class usage
  * 2. Generates optimized CSS using the appropriate engine (WASM in browser, native in Node.js)
  * 3. Replaces the component's CSS with the generated Tailwind CSS
  * 4. Preserves all other component definition properties
- * 
+ *
  * The generated CSS is optimized for shadow DOM and includes:
  * - Tailwind utilities for detected classes
  * - Component-specific @theme customizations
  * - Custom @utility definitions
  * - Existing component CSS integrated with Tailwind
- * 
+ *
  * @param definition - The component definition to transform
  * @param options - Optional Tailwind generation options
  * @returns Promise that resolves to the transformed component definition
- * 
+ *
  * @example
  * ```javascript
  * import { defineComponent, getText } from '@semantic-ui/component';
  * import { TailwindPlugin } from '@semantic-ui/tailwind';
- * 
+ *
  * let definition = {
  *   tagName: 'my-button',
  *   template: '<button class="px-4 py-2 bg-blue-500 hover:bg-blue-600">Click me</button>',
  *   css: '@theme { --color-blue-500: #3b82f6; --color-blue-600: #2563eb; }',
  *   defaultSettings: { variant: 'primary' }
  * };
- * 
+ *
  * // Transform the definition
  * definition = await TailwindPlugin(definition);
- * 
+ *
  * // CSS is now generated Tailwind utilities
  * export const MyButton = defineComponent(definition);
  * ```
- * 
+ *
  * @example
  * ```javascript
  * // With multiple plugins
@@ -125,5 +122,5 @@ export function extractDefinitionContent(definition: ComponentDefinition): Extra
  */
 export function TailwindPlugin(
   definition: ComponentDefinition,
-  options?: Partial<GenerateTailwindCSSOptions>
+  options?: Partial<GenerateTailwindCSSOptions>,
 ): Promise<ComponentDefinition>;

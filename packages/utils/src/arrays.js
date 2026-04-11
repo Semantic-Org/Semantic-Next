@@ -184,7 +184,8 @@ export const sum = (values = []) => {
   Filter array by matching property values
 */
 export const where = (array = [], properties) => {
-  return array.filter((obj) => Object.keys(properties).every((key) => obj[key] === properties[key]));
+  const keys = Object.keys(properties);
+  return array.filter((obj) => keys.every((key) => obj[key] === properties[key]));
 };
 
 /*

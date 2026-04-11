@@ -24,7 +24,7 @@ new TemplateCompiler(templateString)
 
 ### Usage
 ```javascript
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 
 const compiler = new TemplateCompiler('<div>{{name}}</div>');
 ```
@@ -150,7 +150,7 @@ You can precompile your templates on the serve then load them on the client usin
 On the server we want to render our templates to an AST.
 
 ```javascript
-import { TemplateCompiler } from '@semantic-ui/templating';
+import { TemplateCompiler } from '@semantic-ui/compiler';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';

@@ -1,6 +1,6 @@
 ---
 title: Semantic UI Mental Model
-description: How the framework thinks — the architectural decisions, abstraction layers, and internal mechanics that let you make good design decisions. Assumes basic orientation from overview.
+description: How the framework thinks — the architectural decisions, abstraction layers, and internal mechanics that let you make good design decisions. Load before writing component or framework code, debugging reactivity or rendering, choosing between snippets/subtemplates/components, or working with the data context or expression system.
 keywords: [mental model, architecture, template abstraction, formalization gradient, reactivity, rendering, data context, event DSL, behaviors, specs, CSS layers]
 audience: essentials
 skill: mental-model
@@ -95,23 +95,24 @@ Understanding the render pipeline lets you predict performance characteristics a
 Template String → TemplateCompiler → AST (flat array of node objects)
 AST → defineComponent → prototype Template (compiled once, shared)
 prototype → Template.clone() → per-instance Template (state, events, lifecycle)
-Template → LitRenderer → Lit TemplateResult (reactive DOM)
+Template → Renderer → DocumentFragment (reactive DOM)
 ```
+
+The default rendering engine is `native` — it builds a single HTML string with markers, parses it once via `<template>.innerHTML`, caches the result, and clones it per instance. A TreeWalker pass then wires a `Reaction` to each marker. Rendering engines are swappable via `renderingEngine` in `defineComponent`.
 
 **Key invariant:** the AST is compiled once per component definition and shared across all instances. Per-instance work happens at the Template and Renderer layers. The `Proxy` overhead replaces work other frameworks do at build time — it's relocated overhead, not additional overhead.
 
 ### Per-Expression Reactivity
 
-This is the most important rendering concept. Each `{expression}` in a template becomes its own Lit `AsyncDirective` with its own `Reaction`:
+This is the most important rendering concept. Each `{expression}` in a template gets its own `Reaction`:
 
 ```
-{count}  →  reactiveData directive
-              └── Reaction
-                    ├── evaluates expression (reads count Signal → registers dependency)
-                    └── on Signal change: this.setValue(newValue) — updates just this DOM position
+{count}  →  Reaction
+              ├── evaluates expression (reads count Signal → registers dependency)
+              └── on Signal change: updates just this DOM position (textNode.data, setAttribute, etc.)
 ```
 
-The AST is **never re-walked** for reactive updates. Each directive is an independent reactive scope. When `count` changes, only the directive watching that specific expression re-evaluates — the rest of the DOM is untouched.
+The AST is **never re-walked** for reactive updates. Each Reaction is an independent reactive scope. When `count` changes, only the Reaction watching that specific expression re-evaluates — the rest of the DOM is untouched.
 
 This is why reactivity is per-expression, not per-component (closer to Solid than React). There's no diffing, no virtual DOM, no component-level re-render. A template with 50 expressions has 50 independent reactive scopes.
 
@@ -122,9 +123,9 @@ Each expression is resolved through a cascade:
 ```
 Single token (e.g., {count}, {user.name}):
   1. Literal?       '42', true, false       → return literal
-  2. Data context?  count, user.name        → deep property access, auto-unwrap Signals via Proxy
-  3. JavaScript?    value + 2, x ? 'a' : 'b' → new Function() + with(Proxy) eval
-  4. Helper?        formatDate, capitalize   → return helper function
+  2. Data context?  count, user.name        → deep property access, auto-unwrap Signals
+  3. Helper?        formatDate, capitalize   → return helper function
+  4. JavaScript?    value + 2, x ? 'a' : 'b' → new Function() + with(Proxy) eval
 
 Multi-token / Lisp-style (e.g., {formatDate date 'h:mm a'}):
   1. Parse to token array
@@ -236,6 +237,7 @@ defineComponent({
   keys,               // keyboard bindings
   defaultSettings,    // public API (external props)
   defaultState,       // internal reactive state
+  renderingEngine,    // 'native' (default), 'lit', or custom — swappable
   subTemplates,       // { name: Template }
   onCreated,          // before DOM — setup, timers, data fetching
   onRendered,         // after render — DOM available

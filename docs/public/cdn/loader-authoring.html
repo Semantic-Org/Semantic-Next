@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CDN Test: Loader — Authoring</title>
+  <script src="https://cdn.semantic-ui.com/load" version="canary" authoring></script>
+  <style>body { padding: 2rem; font-family: sans-serif; }</style>
+</head>
+<body>
+  <h2>Loader: authoring</h2>
+  <p>Tokens auto-injected. No SUI components, fonts, or icons.</p>
+  <current-time></current-time>
+  <script type="module">
+    import { defineComponent } from '@semantic-ui/component';
+
+    defineComponent({
+      tagName: 'current-time',
+      template: `Time is <b>{formatDate time "h:mm:ss a"}</b>`,
+      css: 'b { color: var(--primary-text-color); }',
+      defaultState: { time: new Date() },
+      onCreated({ state, interval }) {
+        interval(() => state.time.now(), 1000);
+      },
+    });
+  </script>
+</body>
+</html>

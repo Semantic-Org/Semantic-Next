@@ -1,0 +1,37 @@
+/* Lato — default Semantic UI font */
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-Italic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 400;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-Semibold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-SemiboldItalic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 600;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-Bold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: 'Lato';
+  src: url('./LatoLatin-BoldItalic.woff2') format('woff2');
+  font-style: italic;
+  font-weight: 700;
+}
