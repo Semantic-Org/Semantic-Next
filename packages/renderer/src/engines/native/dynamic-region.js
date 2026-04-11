@@ -1,18 +1,11 @@
 export class DynamicRegion {
-  constructor(parentNode, referenceNode) {
+  constructor(parentNode, marker) {
     this.parentNode = parentNode;
-    this.referenceNode = referenceNode;
     this.ownedNodes = [];
     this.childScopes = [];
     this.anchor = document.createTextNode('');
-  }
-
-  placeAnchor() {
-    if (this.referenceNode) {
-      this.referenceNode.after(this.anchor);
-    }
-    else {
-      this.parentNode.appendChild(this.anchor);
+    if (marker) {
+      marker.replaceWith(this.anchor);
     }
   }
 

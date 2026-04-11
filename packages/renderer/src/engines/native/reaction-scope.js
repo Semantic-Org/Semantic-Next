@@ -1,3 +1,5 @@
+import { Reaction } from '@semantic-ui/reactivity';
+
 export class ReactionScope {
   constructor() {
     this.reactions = [];
@@ -7,6 +9,18 @@ export class ReactionScope {
 
   track(reaction) {
     this.reactions.push(reaction);
+  }
+
+  // Create a Reaction that auto-stops when `node` is disconnected from the DOM.
+  // Combines the track + isConnected guard that every renderer binding uses.
+  reaction(node, callback) {
+    this.track(Reaction.create((comp) => {
+      if (!comp.firstRun && !node.isConnected) {
+        comp.stop();
+        return;
+      }
+      callback(comp);
+    }));
   }
 
   onDispose(fn) {
