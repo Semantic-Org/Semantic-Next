@@ -134,12 +134,22 @@ pkill -9 chrome; pkill -9 -f chromedriver
 
 **`performance` measurement mode is config-only.** The `--measure` CLI flag only accepts `callback`, `fcp`, or `global`. To use `performance.mark()`/`performance.measure()`, you must use a config file with `"mode": "performance"`.
 
-**`el.component` availability.** After `document.body.appendChild(el)`, the component's `connectedCallback` fires synchronously and runs `fullRender()`. `el.component` is available after one `requestAnimationFrame`. Use this pattern:
+**Component element API.** After `appendChild` + one `requestAnimationFrame`, these are available:
+
+| Property | What it is |
+|---|---|
+| `el.component` | `createComponent` return value — your methods and computed values |
+| `el.template` | Template instance — `el.template.state` for direct state access |
+| `el.shadowRoot` | Shadow DOM root — for querying rendered output |
+
 ```js
 const el = document.createElement('my-component');
 document.body.appendChild(el);
 await new Promise(r => requestAnimationFrame(r));
-el.component.someMethod(); // now safe
+
+el.component.create(1000);              // ✅ call component methods
+el.template.state.items.peek();         // ✅ read state directly
+el.create(1000);                        // ❌ methods live on el.component, not el
 ```
 
 **CLI flags can't override config.** `--sample-size`, `--timeout` etc. are rejected when `--config` is used. Set everything in the JSON config file.
