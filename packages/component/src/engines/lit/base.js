@@ -1,6 +1,6 @@
 import { $ } from '@semantic-ui/query';
 import { camelToKebab, each, isFunction, isServer } from '@semantic-ui/utils';
-import { LitElement, noChange } from 'lit';
+import { LitElement } from 'lit';
 
 import {
   createSettingsProxy,
@@ -90,20 +90,7 @@ class LitWebComponentBase extends LitElement {
   }
 
   render() {
-    const { renderingEngine } = this.constructor.config || {};
-    const data = {
-      ...this.getData(),
-      ...this.tpl,
-    };
-    if (renderingEngine === 'native' && this.nativeRendered) {
-      this.template.render(data);
-      return noChange;
-    }
-    const html = this.template.render(data);
-    if (renderingEngine === 'native') {
-      this.nativeRendered = true;
-    }
-    return html;
+    return this.template.render(this.getData());
   }
 
   disconnectedCallback() {

@@ -19,7 +19,8 @@
       "browser": "./dist/bundle/index.min.js",
       "importmap": "./dist/cdn/index.min.js"
     },
-    "./bare": "./src/bare.js"
+    "./bare": "./src/bare.js",
+    "./lit": "./src/engines/lit/register.js"
   },
   "scripts": {
     "build": "wireit",
