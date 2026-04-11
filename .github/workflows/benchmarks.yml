@@ -59,10 +59,11 @@ jobs:
       - name: Run benchmarks
         run: |
           mkdir -p results
-          for config in $(find packages -name 'tachometer-ci.json' -path '*/bench/tachometer/*'); do
+          for config in $(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' | sort); do
+            name=$(basename "$config" .json)
             pkg=$(echo "$config" | sed 's|packages/\([^/]*\)/.*|\1|')
-            echo "::group::Benchmark $pkg"
-            npx tachometer --config "$config" --json-file "results/${pkg}.json"
+            echo "::group::Benchmark $pkg/$name"
+            npx tachometer --config "$config" --json-file "results/${pkg}-${name}.json"
             echo "::endgroup::"
           done
 
