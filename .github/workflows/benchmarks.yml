@@ -3,22 +3,64 @@ name: Benchmarks
 on:
   pull_request:
     paths:
-      - 'packages/renderer/**'
-      - 'packages/reactivity/**'
-      - 'packages/templating/**'
-      - 'packages/component/**'
-      - 'packages/utils/**'
-      - 'packages/query/**'
-      - 'packages/compiler/**'
+      - 'packages/**'
 
 permissions:
   contents: read
 
 jobs:
+  # Discover which packages changed AND have tachometer benchmarks
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.result }}
+      has-benchmarks: ${{ steps.matrix.outputs.has-benchmarks }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build matrix
+        id: matrix
+        run: |
+          # Get changed packages
+          changed=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD \
+            | grep '^packages/' \
+            | cut -d/ -f2 \
+            | sort -u)
+
+          # Find packages with tachometer CI configs
+          benchmarked=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
+            | cut -d/ -f2 \
+            | sort -u)
+
+          # Intersection — only run benchmarks for packages that changed
+          matrix="["
+          first=true
+          for pkg in $changed; do
+            if echo "$benchmarked" | grep -qx "$pkg"; then
+              if [ "$first" = false ]; then matrix+=","; fi
+              matrix+="\"$pkg\""
+              first=false
+            fi
+          done
+          matrix+="]"
+
+          echo "result=$matrix" >> "$GITHUB_OUTPUT"
+          if [ "$matrix" = "[]" ]; then
+            echo "has-benchmarks=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-benchmarks=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Benchmark matrix: $matrix"
+
   benchmarks:
-    # Skip forks — secrets aren't available for posting comments
-    if: github.repository == 'Semantic-Org/Semantic-Next'
-    name: benchmarks
+    needs: discover
+    if: needs.discover.outputs.has-benchmarks == 'true'
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.discover.outputs.matrix) }}
+    name: bench-${{ matrix.package }}
     runs-on: ubuntu-latest
 
     steps:
@@ -38,37 +80,31 @@ jobs:
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+' | head -1)
           npm install chromedriver@${CHROME_VERSION} --no-save
 
-      # Build current branch (PR) benchmark bundle
+      # Build current branch benchmark bundles
       - name: Build current
-        run: node packages/renderer/bench/tachometer/build-ci.js current
+        run: node packages/${{ matrix.package }}/bench/tachometer/build-ci.js current
 
-      # Checkout base branch source and build baseline bundle
+      # Swap source to base branch and build baseline bundles
       - name: Build baseline
         run: |
-          # Swap only source directories — leaves bench/ and config untouched
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
           git checkout FETCH_HEAD -- packages/*/src/
-
-          # Build baseline bundle from base branch source
-          node packages/renderer/bench/tachometer/build-ci.js baseline
-
-          # Restore PR branch source
+          node packages/${{ matrix.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
 
-      # Discover and run all tachometer CI configs
+      # Run all tachometer CI configs for this package
       - name: Run benchmarks
         run: |
           mkdir -p results
-          for config in $(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' | sort); do
+          for config in $(find packages/${{ matrix.package }} -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' | sort); do
             name=$(basename "$config" .json)
-            pkg=$(echo "$config" | sed 's|packages/\([^/]*\)/.*|\1|')
-            echo "::group::Benchmark $pkg/$name"
-            npx tachometer --config "$config" --json-file "results/${pkg}-${name}.json"
+            echo "::group::$name"
+            npx tachometer --config "$config" --json-file "results/${{ matrix.package }}-${name}.json"
             echo "::endgroup::"
           done
 
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: results
+          name: results-${{ matrix.package }}
           path: results/*.json

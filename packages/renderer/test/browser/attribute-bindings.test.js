@@ -13,9 +13,7 @@ RENDERING_ENGINES.forEach(engine => {
   }
 
   async function waitForUpdate(el) {
-    await el.updateComplete;
-    await new Promise(r => setTimeout(r, 0));
-    await el.updateComplete;
+    await el.updated;
   }
 
   beforeEach(() => {
@@ -40,7 +38,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('class')).toBe('theme-light');
@@ -61,7 +59,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('data-status')).toBe('idle');
@@ -86,7 +84,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       const cls = div.getAttribute('class');
@@ -118,7 +116,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const btn = el.shadowRoot.querySelector('button');
       expect(btn.hasAttribute('disabled')).toBe(true);
@@ -141,7 +139,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.hasAttribute('hidden')).toBe(false);
@@ -167,7 +165,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const input = el.shadowRoot.querySelector('input');
       expect(input.checked).toBe(false);
@@ -199,7 +197,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('data-info')).toBe('hello');
@@ -221,7 +219,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('data-info')).toBe('hello');
@@ -243,7 +241,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('data-info')).toBe('hello');
@@ -264,7 +262,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('data-info')).toBe('initial');
@@ -299,7 +297,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const spans = el.shadowRoot.querySelectorAll('span');
       expect(spans[0].getAttribute('class')).toBe('active');
@@ -325,7 +323,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       let divs = el.shadowRoot.querySelectorAll('div');
       expect(divs[0].getAttribute('class')).toBe('draft');
@@ -351,7 +349,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       let div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('class')).toBe('ok');
@@ -379,7 +377,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const divBefore = el.shadowRoot.querySelector('div');
       expect(divBefore.getAttribute('class')).toBe('light');
@@ -418,7 +416,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('class')).toContain('base');
@@ -450,7 +448,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('class').trim()).toContain('item');
@@ -491,7 +489,7 @@ RENDERING_ENGINES.forEach(engine => {
 
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const child = el.shadowRoot.querySelector(childTag);
 
@@ -529,10 +527,10 @@ RENDERING_ENGINES.forEach(engine => {
 
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const child = el.shadowRoot.querySelector(childTag);
-      await child.updateComplete;
+      await child.rendered;
       expect(child.shadowRoot.querySelector('span').textContent).toBe('Fig');
     });
   });
@@ -557,7 +555,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const btn = el.shadowRoot.querySelector('button');
       btn.click();
@@ -588,7 +586,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const div = el.shadowRoot.querySelector('div');
       expect(div.getAttribute('class')).toContain('widget');
@@ -612,7 +610,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const span = el.shadowRoot.querySelector('span');
       expect(span.getAttribute('data-label')).toBe('initial');

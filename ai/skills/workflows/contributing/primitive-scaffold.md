@@ -115,12 +115,12 @@ export default {
 Create `/src/primitives/[primitive-name]/[primitive-name].html`:
 
 ```html
-<div class="{ui}[primitive-name]">
+<div class="{uiClasses}[primitive-name]">
   <slot></slot>
 </div>
 ```
 
-**Critical**: No space between `{ui}` and primitive name
+**Critical**: No space between `{uiClasses}` and primitive name
 
 ### Step 3: Create JavaScript Primitive
 
@@ -403,12 +403,12 @@ src/primitives/[primitive-name]/
 Create `/src/primitives/[primitive-name]/plural/[plural-name].html`:
 
 ```html
-<div class="{{ui}} [plural-name]">
+<div class="{{uiClasses}} [plural-name]">
   {{>slot}}
 </div>
 ```
 
-**Critical**: Plural templates use `{{ui}}` with double curly braces and spaces
+**Critical**: Plural templates use `{{uiClasses}}` with double curly braces and spaces
 
 ### Step 4: Create Plural Component
 
@@ -529,7 +529,7 @@ settings: [
 ## Common Mistakes to Avoid
 
 1. **Importing spec JSON directly** - Always import from generated `.component.js`
-2. **Space in template class** - Must be `{ui}component` not `{ui} component`
+2. **Space in template class** - Must be `{uiClasses}component` not `{uiClasses} component`
 3. **Missing createComponent** - Even if empty, it's required
 4. **Wrong export syntax** - Use `export { UIComponent }` not `export default`
 5. **Forgetting barrel updates** - Must update all export points

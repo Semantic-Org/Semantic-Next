@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { getCompletionContext, getWordAtOffset, formatAttributeDoc } from '../src/server-helpers.js';
-
+import { formatAttributeDoc, getCompletionContext, getWordAtOffset } from '../src/server-helpers.js';
 
 describe('getCompletionContext', () => {
-
   describe('expression context', () => {
     it('detects cursor inside an expression brace', () => {
       // {|} — cursor right after opening brace
@@ -28,7 +26,7 @@ describe('getCompletionContext', () => {
 
     it('handles expression in attribute value', () => {
       // class="{ui|}button"
-      const text = '<div class="{ui}button">';
+      const text = '<div class="{uiClasses}button">';
       const offset = 15; // after "ui"
       expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
@@ -234,10 +232,10 @@ describe('getCompletionContext', () => {
       expect(getCompletionContext(text, offset)).toEqual({ type: 'block' });
     });
 
-    it('handles {ui} class pattern', () => {
-      // Common pattern: class="{ui}button"
-      const text = '<div class="{ui}button">';
-      const offset = 14; // inside {ui}
+    it('handles {uiClasses} class pattern', () => {
+      // Common pattern: class="{uiClasses}button"
+      const text = '<div class="{uiClasses}button">';
+      const offset = 14; // inside {uiClasses}
       expect(getCompletionContext(text, offset)).toMatchObject({ type: 'expression' });
     });
 
@@ -263,7 +261,6 @@ describe('getCompletionContext', () => {
     });
   });
 });
-
 
 describe('getWordAtOffset', () => {
   it('extracts a simple word', () => {
@@ -313,7 +310,7 @@ describe('getWordAtOffset', () => {
 
   it('extracts helper name from template expression', () => {
     // {classIf copied 'copied'} — hovering over classIf
-    const text = '{classIf copied \'copied\'}';
+    const text = "{classIf copied 'copied'}";
     expect(getWordAtOffset(text, 4)).toBe('classIf');
   });
 
@@ -322,9 +319,9 @@ describe('getWordAtOffset', () => {
     expect(getWordAtOffset(text, 3)).toBe('count');
   });
 
-  it('handles real template: {ui} pattern', () => {
-    const text = '<div class="{ui}button">';
-    expect(getWordAtOffset(text, 14)).toBe('ui');
+  it('handles real template: {uiClasses} pattern', () => {
+    const text = '<div class="{uiClasses}button">';
+    expect(getWordAtOffset(text, 14)).toBe('uiClasses');
   });
 
   it('handles helper with arguments', () => {
@@ -335,7 +332,6 @@ describe('getWordAtOffset', () => {
     expect(getWordAtOffset(text, 25)).toBe('selectedIndex');
   });
 });
-
 
 describe('formatAttributeDoc', () => {
   it('formats basic attribute with name and description', () => {

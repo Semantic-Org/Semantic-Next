@@ -30,7 +30,7 @@ The template just needs `{#html svgMarkup}` inside the existing `<i>`, gated by 
 
 ```html
 {#snippet content}
-  <i class="{ui}icon{maybeCustomIcon}" style={getIconStyle} part="icon">
+  <i class="{uiClasses}icon{maybeCustomIcon}" style={getIconStyle} part="icon">
     {#if resolved}
       {#html svgMarkup}
     {/if}

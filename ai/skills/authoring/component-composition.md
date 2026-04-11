@@ -56,7 +56,7 @@ The core is a single `{#each}...{else}...{/each}` block:
 
 ```html
 <!-- menu.html -->
-<div class="{ui}menu" part="menu">
+<div class="{uiClasses}menu" part="menu">
   {#each item in items}
     <menu-item
       active={isValueActive value item}

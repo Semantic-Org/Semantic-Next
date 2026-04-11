@@ -91,9 +91,9 @@ A template file must use **one** bracket style consistently. Single `{name}` is 
 
 Boolean attributes that auto-remove when falsy: `allowfullscreen`, `async`, `autofocus`, `autoplay`, `checked`, `controls`, `default`, `defer`, `disabled`, `formnovalidate`, `inert`, `ismap`, `itemscope`, `loop`, `multiple`, `muted`, `nomodule`, `novalidate`, `open`, `playsinline`, `readonly`, `required`, `reversed`, `selected`.
 
-### The `{ui}` Prefix
+### The `{uiClasses}` Prefix
 
-In primitives, `{ui}` is a data-context value (not special syntax) that expands to CSS classes from active spec attributes: `<div class="{ui}button">` renders as `class="primary large button"`.
+In primitives, `{uiClasses}` is a data-context value (not special syntax) that expands to CSS classes from active spec attributes: `<div class="{uiClasses}button">` renders as `class="primary large button"`.
 
 ### Template Event Binding
 
@@ -138,9 +138,9 @@ Conditions accept any expression style:
 
 ```html
 {#if href}
-  <a class="{ui}card" href="{href}" part="card">{> content}</a>
+  <a class="{uiClasses}card" href="{href}" part="card">{> content}</a>
 {else}
-  <div class="{ui}card" part="card">{> content}</div>
+  <div class="{uiClasses}card" part="card">{> content}</div>
 {/if}
 ```
 

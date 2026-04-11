@@ -986,9 +986,9 @@ describe('SSR hydration — spec-driven components', () => {
     defaultValues: { href: '' },
   };
 
-  it('{ui} class string computed from spec attributes', async () => {
+  it('{uiClasses} class string computed from spec attributes', async () => {
     const el = await ssrAndHydrate({
-      template: '<div class="{ui}button" part="button">{>slot}</div>',
+      template: '<div class="{uiClasses}button" part="button">{>slot}</div>',
       componentSpec: buttonSpec,
     }, { emphasis: 'primary', size: 'large' });
 
@@ -1002,7 +1002,7 @@ describe('SSR hydration — spec-driven components', () => {
 
   it('boolean spec attributes produce correct classes', async () => {
     const el = await ssrAndHydrate({
-      template: '<div class="{ui}button">{>slot}</div>',
+      template: '<div class="{uiClasses}button">{>slot}</div>',
       componentSpec: buttonSpec,
     }, { active: true, compact: true });
 
@@ -1014,7 +1014,7 @@ describe('SSR hydration — spec-driven components', () => {
   it('conditional wrapper based on setting (href pattern)', async () => {
     const el = await ssrAndHydrate({
       template:
-        '{#if href}<a class="{ui}button" href="{href}">{>slot}</a>{else}<div class="{ui}button">{>slot}</div>{/if}',
+        '{#if href}<a class="{uiClasses}button" href="{href}">{>slot}</a>{else}<div class="{uiClasses}button">{>slot}</div>{/if}',
       componentSpec: buttonSpec,
       defaultSettings: { href: '' },
     }, { href: '/page' });
@@ -1027,7 +1027,7 @@ describe('SSR hydration — spec-driven components', () => {
   it('conditional wrapper without href renders div', async () => {
     const el = await ssrAndHydrate({
       template:
-        '{#if href}<a class="{ui}button" href="{href}">{>slot}</a>{else}<div class="{ui}button">{>slot}</div>{/if}',
+        '{#if href}<a class="{uiClasses}button" href="{href}">{>slot}</a>{else}<div class="{uiClasses}button">{>slot}</div>{/if}',
       componentSpec: buttonSpec,
       defaultSettings: { href: '' },
     });

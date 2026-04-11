@@ -26,11 +26,11 @@
 
 {#snippet button}
   {#if href}
-    <a class="{ui}button" href="{href}" part="button">
+    <a class="{uiClasses}button" href="{href}" part="button">
       {> content}
     </a>
   {else}
-    <div class="{ui}button" tabindex="0" part="button">
+    <div class="{uiClasses}button" tabindex="0" part="button">
       {> content}
     </div>
   {/if}

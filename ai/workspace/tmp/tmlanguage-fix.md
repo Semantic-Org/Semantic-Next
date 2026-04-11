@@ -54,7 +54,7 @@ However, the real issue is simpler: **the `sui-expressions` pattern's `begin`/`e
 "end": "(\\}\\}|\\}(?!\\}))"
 ```
 
-This will attempt to match `{` inside HTML attribute values like `class="{ui} button"`, `style="width: {w}px"`, etc. Since TextMate is a line-oriented regex engine, a `begin` pattern that matches a bare `{` will interfere with the HTML grammar's own attribute parsing. When the injection fires inside an attribute string scope, the `end` pattern `\}` can consume the closing `}` before the HTML grammar gets to parse the closing quote, corrupting the entire tokenization from that point forward. VS Code's TextMate engine handles this by **silently falling back** to the non-injected grammar when the injection produces degenerate results.
+This will attempt to match `{` inside HTML attribute values like `class="{uiClasses} button"`, `style="width: {w}px"`, etc. Since TextMate is a line-oriented regex engine, a `begin` pattern that matches a bare `{` will interfere with the HTML grammar's own attribute parsing. When the injection fires inside an attribute string scope, the `end` pattern `\}` can consume the closing `}` before the HTML grammar gets to parse the closing quote, corrupting the entire tokenization from that point forward. VS Code's TextMate engine handles this by **silently falling back** to the non-injected grammar when the injection produces degenerate results.
 
 But there's an even more fundamental issue: **in the plain text content between HTML tags, there is no special scope assigned** -- the text sits at the root `text.html.derivative` scope. The injection patterns *should* match here. The fact that they don't produce visible changes means the **scope names being assigned don't map to any theme colors**.
 
@@ -183,7 +183,7 @@ Replace non-standard scope names with ones that themes already colorize:
 
 ### Step 4: Exclude attribute-value contexts from expression matching
 
-The `sui-expressions` pattern must NOT fire inside HTML attribute string scopes (e.g., `class="{ui}"`), because the HTML grammar already owns those regions. Add exclusions to the injection selector or restructure the patterns.
+The `sui-expressions` pattern must NOT fire inside HTML attribute string scopes (e.g., `class="{uiClasses}"`), because the HTML grammar already owns those regions. Add exclusions to the injection selector or restructure the patterns.
 
 Angular solves this by having its injection selector exclude `-meta.tag`, which prevents injection inside HTML tag definitions entirely. For SUI, where expressions appear in attribute values, this is a problem -- we'd need a separate approach for attribute contexts.
 
@@ -193,7 +193,7 @@ Angular solves this by having its injection selector exclude `-meta.tag`, which 
 "injectionSelector": "L:text.html -comment -source.css -source.js -meta.tag"
 ```
 
-This means SUI expressions in attributes (e.g., `class="{ui} button"`) won't be highlighted by this injection grammar. That's acceptable for v1. Attribute-value highlighting requires a separate, more targeted injection grammar (like Angular's separate `expression.ng` grammar).
+This means SUI expressions in attributes (e.g., `class="{uiClasses} button"`) won't be highlighted by this injection grammar. That's acceptable for v1. Attribute-value highlighting requires a separate, more targeted injection grammar (like Angular's separate `expression.ng` grammar).
 
 ## Revised Grammar Files
 

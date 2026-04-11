@@ -33,16 +33,19 @@ jobs:
       pull-requests: write
     if: ${{ github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success' }}
     steps:
+      # Download all results-* artifacts from the triggering workflow
       - uses: dawidd6/action-download-artifact@v2
         with:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
-          name: results
+          name_is_regexp: true
+          name: results-.*
           path: results
 
       - name: Report Tachometer Results
         uses: andrewiggins/tachometer-reporter-action@v2
         with:
-          path: results/*.json
+          path: results/**/*.json
           pr-bench-name: this-change
           base-bench-name: tip-of-tree
+          default-open: false

@@ -53,7 +53,18 @@ const ATTR_MARKER_REGEX = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_S
 export class Renderer {
   static nextId = 0;
   constructor(
-    { ast, data, template, subTemplates, snippets, helpers, isSVG = false, inheritsData = true, protectedKeys } = {},
+    {
+      ast,
+      data,
+      template,
+      subTemplates,
+      snippets,
+      helpers,
+      isSVG = false,
+      inheritsData = true,
+      receivesData = false,
+      protectedKeys,
+    } = {},
   ) {
     this.ast = ast || [];
     this.data = data;
@@ -64,6 +75,7 @@ export class Renderer {
     this.helpers = helpers || {};
     this.isSVG = isSVG;
     this.inheritsData = inheritsData;
+    this.receivesData = receivesData;
     this.protectedKeys = protectedKeys;
     // Lit uses hashCode({ ast, data, isSVG }) for subtree caching here.
     // Native renderer doesn't cache subtrees yet, and fnv1a over the full
@@ -82,12 +94,12 @@ export class Renderer {
 
     // DOM change notification — coalesced so multiple async resolutions
     // or data bumps in the same tick fire onUpdated only once
-    this._updateScheduled = false;
+    this.updateScheduled = false;
     this.notifyUpdate = () => {
-      if (this._updateScheduled) { return; }
-      this._updateScheduled = true;
+      if (this.updateScheduled) { return; }
+      this.updateScheduled = true;
       queueMicrotask(() => {
-        this._updateScheduled = false;
+        this.updateScheduled = false;
         this.template?.onUpdated?.();
       });
     };
@@ -103,9 +115,13 @@ export class Renderer {
     }
   }
 
-  // Evaluate an expression with data dependency tracking for subtree propagation
+  // Evaluate an expression — only track dataDep for renderers that receive
+  // data from a parent (subtemplates). Top-level component renderers use
+  // fine-grained Signal tracking and don't need coarse invalidation.
   eval(expression, data) {
-    this.dataDep.depend();
+    if (this.receivesData) {
+      this.dataDep.depend();
+    }
     return this.evaluator.lookupExpressionValue(expression, data);
   }
 

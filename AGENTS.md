@@ -91,8 +91,8 @@
   ❌ `const arr = state.items.get(); arr.push(x); state.items.set(arr);`
   ✅ `state.items.push(x)` `state.active.toggle()` `state.count.increment()`
 
-  **`{ui}` is a computed class string.** In spec-driven primitives, `{ui}` expands to CSS classes from active spec attributes. It is not a variable.
-  `<div class="{ui}button">` → `<div class="primary large button">`
+  **`{uiClasses}` is a computed class string.** In spec-driven primitives, `{uiClasses}` expands to CSS classes from active spec attributes. It is not a variable.
+  `<div class="{uiClasses}button">` → `<div class="primary large button">`
 </nonobvious_patterns>
 
 <code_formatting>

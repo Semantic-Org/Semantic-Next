@@ -1,7 +1,7 @@
 import { defineComponent } from '@semantic-ui/component';
 import { Reaction } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { RENDERING_ENGINES } from './test-utils.js';
+import { RENDERING_ENGINES, waitForUpdate } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
   describe(engine, () => {
@@ -23,12 +23,6 @@ RENDERING_ENGINES.forEach(engine => {
         .trim();
     }
 
-    async function waitForUpdate(el) {
-      await el.updateComplete;
-      await new Promise(r => setTimeout(r, 0));
-      await el.updateComplete;
-    }
-
     // Creates a component, appends it, and waits for first render
     async function renderComponent(opts) {
       const tag = uniqueTag();
@@ -36,7 +30,7 @@ RENDERING_ENGINES.forEach(engine => {
       defineComponent(componentDef);
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
       return el;
     }
 
@@ -777,7 +771,8 @@ RENDERING_ENGINES.forEach(engine => {
         const expectedEven = '<ul><li>a</li><li>b</li></ul>';
         const expectedOdd = '<ul><li>x</li><li>y</li><li>z</li></ul>';
 
-        for (let v = 0; v <= 6; v++) {
+        expect(shadowHTML(el)).toBe(expectedEven);
+        for (let v = 1; v <= 6; v++) {
           el.template.state.v.set(v);
           await waitForUpdate(el);
           expect(shadowHTML(el)).toBe(v % 2 === 0 ? expectedEven : expectedOdd);

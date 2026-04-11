@@ -361,7 +361,8 @@ export function getUIClasses(el, { componentSpec, properties }) {
   const classes = [];
   each(componentSpec.attributes, (attribute) => {
     const property = kebabToCamel(attribute);
-    const value = el[property] || el[attribute];
+    // Read through settings proxy on client to register Signal dependencies
+    const value = el.settings ? el.settings[property] : (el[property] || el[attribute]);
     if (value) {
       const allowedValues = componentSpec.allowedValues?.[attribute];
       const propertyType = componentSpec.propertyTypes?.[attribute];

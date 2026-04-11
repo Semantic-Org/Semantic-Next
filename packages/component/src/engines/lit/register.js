@@ -5,4 +5,4 @@ import { createLitComponent } from './factory.js';
 const LitEngine = { renderer: LitRenderer, factory: createLitComponent };
 registerEngine('lit', LitEngine);
 
-export { LitEngine as LitRenderer };
+export { LitEngine };

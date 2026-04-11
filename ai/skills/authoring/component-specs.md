@@ -635,8 +635,8 @@ The spec enables this through:
 The spec drives the `ui` class string generation:
 
 ```javascript
-// In template, {ui} is automatically populated:
-template: `<button class="{ui} button">...</button>`
+// In template, {uiClasses} is automatically populated:
+template: `<button class="{uiClasses} button">...</button>`
 
 // Given current attributes:
 <ui-button primary large fluid>

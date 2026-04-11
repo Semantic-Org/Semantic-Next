@@ -792,8 +792,8 @@ Risk: **Degrade gracefully.** For known shorthand calls with literal data, provi
 
 ### Low risk (known work)
 
-**The `{ui}` special variable.**
-`{ui}` is a computed class string synthesized by `WebComponentBase.getUIClasses()` from active spec attributes. It's not in defaultSettings, state, or createComponent return. Every spec-driven component template uses it (`<div class="{ui}button">`). The LSP must either:
+**The `{uiClasses}` special variable.**
+`{uiClasses}` is a computed class string synthesized by `WebComponentBase.getUIClasses()` from active spec attributes. It's not in defaultSettings, state, or createComponent return. Every spec-driven component template uses it (`<div class="{uiClasses}button">`). The LSP must either:
 - Add `ui` to the data context for spec-driven components (preferred — it IS in the data context at runtime)
 - Hardcode it in the ComponentModel when a componentSpec is present
 

@@ -191,9 +191,9 @@ Behaviors store their instance on the element (`el.transition`). Calling `$el.tr
 
 Specs are the formal schema for design system primitives. Understanding how they flow through the system helps you work with (or build) spec-driven components.
 
-### From Spec to `{ui}` Classes
+### From Spec to `{uiClasses}` Classes
 
-The `{ui}` computed class string is built by `WebComponentBase.getUIClasses()`:
+The `{uiClasses}` computed class string is built by `WebComponentBase.getUIClasses()`:
 
 1. Read the component's spec
 2. For each active spec attribute (types, variations, states), look up the current value
@@ -202,7 +202,7 @@ The `{ui}` computed class string is built by `WebComponentBase.getUIClasses()`:
 
 ```html
 <!-- If emphasis="primary" and size="large" are active: -->
-<div class="{ui}button">  <!-- renders as class="primary large button" -->
+<div class="{uiClasses}button">  <!-- renders as class="primary large button" -->
 ```
 
 ### From Spec to CSS Architecture

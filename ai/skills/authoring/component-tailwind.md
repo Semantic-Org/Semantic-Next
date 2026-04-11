@@ -196,12 +196,12 @@ Semantic UI ships a design token system (`--standard-*`, `--primary-color`, `--s
 | Approach | When |
 |----------|------|
 | **Tailwind only** | You prefer utility-class CSS. Use SUI's component framework (`defineComponent`, reactivity, Shadow DOM) with Tailwind for all styling. |
-| **Design tokens only** | You want the SUI theme system with semantic tokens, auto-adapting light/dark mode, and the `{ui}` class pattern. |
+| **Design tokens only** | You want the SUI theme system with semantic tokens, auto-adapting light/dark mode, and the `{uiClasses}` class pattern. |
 | **Mixed** | Use design tokens for theme-aware values (colors, borders) and Tailwind for layout utilities (flex, grid, spacing). |
 
 ### Building SUI Primitives
 
-The first-party primitives (`ui-button`, `ui-menu`, etc.) use design tokens internally because they participate in the spec system and the `{ui}` class pattern. If you're contributing to the first-party library, use design tokens. If you're building your own components with SUI's framework, use whichever styling approach you prefer.
+The first-party primitives (`ui-button`, `ui-menu`, etc.) use design tokens internally because they participate in the spec system and the `{uiClasses}` class pattern. If you're contributing to the first-party library, use design tokens. If you're building your own components with SUI's framework, use whichever styling approach you prefer.
 
 ### Mixing Both
 

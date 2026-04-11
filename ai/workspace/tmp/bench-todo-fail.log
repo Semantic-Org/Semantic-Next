@@ -1,0 +1,29 @@
+
+> @semantic-ui/renderer@0.18.0 bench:todo
+> tachometer --config bench/tachometer/tachometer-todo.json
+
+Running benchmarks
+
+
+
+Failed 1/3 times to get measurement(s) /packages/renderer/bench/tachometer/todo.html [toggle-first, toggle-last, toggle-middle, toggle-10, toggle-all, remove-first, remove-middle, remove-last, remove-5-front, remove-5-middle, remove-5-back, clear-completed, filter-active, filter-completed, filter-all, edit-start, edit-save] in chrome from http://127.0.0.1:8080/packages/renderer/bench/tachometer/todo.html. Retrying.
+
+
+Failed 2/3 times to get measurement(s) /packages/renderer/bench/tachometer/todo.html [toggle-first, toggle-last, toggle-middle, toggle-10, toggle-all, remove-first, remove-middle, remove-last, remove-5-front, remove-5-middle, remove-5-back, clear-completed, filter-active, filter-completed, filter-all, edit-start, edit-save] in chrome from http://127.0.0.1:8080/packages/renderer/bench/tachometer/todo.html. Retrying.
+
+Error: 
+
+Failed 3/3 times to get measurement(s) /packages/renderer/bench/tachometer/todo.html [toggle-first, toggle-last, toggle-middle, toggle-10, toggle-all, remove-first, remove-middle, remove-last, remove-5-front, remove-5-middle, remove-5-back, clear-completed, filter-active, filter-completed, filter-all, edit-start, edit-save] in chrome from http://127.0.0.1:8080/packages/renderer/bench/tachometer/todo.html
+    at Runner.takeSamples (file:///home/jack/semantic/next/node_modules/tachometer/src/runner.ts:347:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Runner.warmup (file:///home/jack/semantic/next/node_modules/tachometer/src/runner.ts:148:7)
+    at Runner.run (file:///home/jack/semantic/next/node_modules/tachometer/src/runner.ts:96:5)
+    at realMain (file:///home/jack/semantic/next/node_modules/tachometer/src/cli.ts:179:14)
+    at main (file:///home/jack/semantic/next/node_modules/tachometer/src/cli.ts:45:15)
+npm error Lifecycle script `bench:todo` failed with error:
+npm error code 1
+npm error path /home/jack/semantic/next/packages/renderer
+npm error workspace @semantic-ui/renderer@0.18.0
+npm error location /home/jack/semantic/next/packages/renderer
+npm error command failed
+npm error command sh -c tachometer --config bench/tachometer/tachometer-todo.json

@@ -58,10 +58,10 @@ export function renderToString(ComponentClass, attrs = {}, { slots = null, depth
 
   template.initialize();
 
-  // Compute {ui} class string AFTER initialize() — createComponent can modify
-  // settings (e.g. input's configureSearch sets icon) which affect {ui} classes
+  // Compute {uiClasses} class string AFTER initialize() — createComponent can modify
+  // settings (e.g. input's configureSearch sets icon) which affect {uiClasses} classes
   if (componentSpec) {
-    data.ui = getUIClasses(data, { componentSpec, properties: resolvedProperties });
+    data.uiClasses = getUIClasses(data, { componentSpec, properties: resolvedProperties });
   }
 
   let html = template.render();

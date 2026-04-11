@@ -59,9 +59,9 @@ state.count.increment()  // correct
 ```
 `.set(value)` is correct for direct replacement (`state.loading.set(true)`). The anti-pattern is reading, mutating externally, then setting back.
 
-**`{ui}` is a computed class string.** In spec-driven components, `{ui}` expands to CSS classes from active spec attributes. It is not a variable you define.
+**`{uiClasses}` is a computed class string.** In spec-driven components, `{uiClasses}` expands to CSS classes from active spec attributes. It is not a variable you define.
 ```html
-<div class="{ui}button">  <!-- outputs: <div class="primary large button"> -->
+<div class="{uiClasses}button">  <!-- outputs: <div class="primary large button"> -->
 ```
 
 **Shadow DOM is the default.** Every component's CSS is scoped. External selectors cannot reach inside. Use CSS variables or `::part()` to customize from outside.
@@ -262,7 +262,7 @@ Specs also enable the three attribute dialects on first-party primitives:
 
 These dialects exist because the spec defines the `optionAttributes` mapping that makes them possible. Ad-hoc components don't have specs and don't support this — they use standard HTML attributes.
 
-Specs also power auto-generated documentation, the `{ui}` computed class string in templates, and the `usageLevel` hints that tell agents which features are common (1) versus rare (5).
+Specs also power auto-generated documentation, the `{uiClasses}` computed class string in templates, and the `usageLevel` hints that tell agents which features are common (1) versus rare (5).
 
 ---
 

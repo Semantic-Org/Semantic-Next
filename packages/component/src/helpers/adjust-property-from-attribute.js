@@ -75,6 +75,7 @@ export const adjustPropertyFromAttribute = ({ el, attribute, attributeValue, pro
     // convert <div icon-after> to => el.iconAfter
     const property = kebabToCamel(attribute);
     el[property] = null;
+    setSetting(property, null);
 
     // this appears to be necessary for special attributes like "disabled"
     if (inArray(attribute, SPECIAL_PROPERTIES)) {

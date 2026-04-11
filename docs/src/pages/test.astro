@@ -2,31 +2,17 @@
 import Body from '../layouts/Body.astro';
 import '../css/layers.css';
 import '../css/fonts.css';
-import '@semantic-ui/core/icon/sets/lucide.css';
 
-import { SidebarToggle, Icon } from '@semantic-ui/core';
+import { Menu } from '@semantic-ui/core';
+import { LitRenderer } from '@semantic-ui/renderer/lit';
 ---
-<Body class="dark">
-
-<!--
+<Body>
 <div style="padding: 24px; max-width: 600px;">
-  <h3>Server Only</h3>
-  <span>1.</span> <Icon icon="chevron-down"></Icon>
-  <span>2.</span> <Icon icon="chevron down"></Icon>
-  <span>3.</span> <Icon icon="down-chevron"></Icon>
-  <span>4.</span> <Icon icon="down chevron"></Icon>
-  <span>5.</span> <Icon chevron-down></Icon>
-  <span>6.</span> <Icon chevron-down-icon></Icon>
-  <span>7.</span> <Icon class="chevron-down"></Icon>
-</div> -->
-<div style="padding: 24px; max-width: 600px;">
-  <h3>Hydrated</h3>
-  <span>1.</span> <Icon client:load icon="chevron-down"></Icon>
-  <span>2.</span> <Icon client:load icon="chevron down"></Icon>
-  <span>3.</span> <Icon client:load icon="down-chevron"></Icon>
-  <span>4.</span> <Icon client:load icon="down chevron"></Icon>
-  <span>5.</span> <Icon client:load chevron-down></Icon>
-  <span>6.</span> <Icon client:load chevron-down-icon></Icon>
-  <span>7.</span> <Icon client:load class="chevron-down"></Icon>
+  <h3>Menu Test</h3>
+  <Menu client:load value="one" items={[
+    { label: 'One', value: 'one' },
+    { label: 'Two', value: 'two' },
+    { label: 'Three', value: 'three' },
+  ]} />
 </div>
 </Body>

@@ -90,7 +90,7 @@ The settings Proxy's getter reads from `el.getSettings()`, creates/updates a Sig
 
 1. After hydration of `ui-input`, the `ui-icon` element is completely absent from the shadow root DOM. The server HTML correctly contains it, but it disappears after the client hydration process completes.
 
-2. The `ui-input` element's inner div class is correct (`"icon search fluid tiny input"`) after hydration, suggesting the `{ui}` class expression resolved correctly. But the `{#if icon}` conditional block's content (the `ui-icon`) is gone.
+2. The `ui-input` element's inner div class is correct (`"icon search fluid tiny input"`) after hydration, suggesting the `{uiClasses}` class expression resolved correctly. But the `{#if icon}` conditional block's content (the `ui-icon`) is gone.
 
 3. On the SSR-only route (no JavaScript, no hydration), the `ui-icon` is present and renders correctly.
 

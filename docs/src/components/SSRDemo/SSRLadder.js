@@ -190,7 +190,7 @@ export const Step18 = defineComponent({
   }),
 });
 
-// Step 19: Spec-driven component with {ui} classes
+// Step 19: Spec-driven component with {uiClasses}
 const widgetSpec = new SpecReader({
   uiType: 'element',
   name: 'SSRWidget',
@@ -218,7 +218,7 @@ export const Step19 = defineComponent({
   tagName: 'ssr-step-19',
   renderingEngine: 'native',
   componentSpec: widgetSpec,
-  template: '<span class="{ui}widget"><slot></slot></span>',
+  template: '<span class="{uiClasses}widget"><slot></slot></span>',
   css: css + ' .widget { display: inline-block; } .primary { color: #3498db; } .large { font-size: 20px; }',
 });
 

@@ -60,7 +60,7 @@ export const Template = class Template {
     subTemplates,
     createComponent,
     parentTemplate, // the parent template when nested
-    renderingEngine = 'lit',
+    renderingEngine = 'native',
     isPrototype = false,
     attachStyles = false, // whether to construct css stylesheet and attach to renderRoot
     onCreated = noop,
@@ -136,7 +136,10 @@ export const Template = class Template {
   }
 
   setDataContext(data, { rerender = true } = {}) {
-    assignInPlace(this.data, data);
+    const changed = assignInPlace(this.data, data, { returnChanged: true });
+    if (changed) {
+      this.dataReplaced = true;
+    }
     if (rerender) {
       this.rendered = false;
     }
@@ -222,6 +225,9 @@ export const Template = class Template {
       this.updateScheduled = true;
       queueMicrotask(() => {
         this.updateScheduled = false;
+        if (this.element) {
+          this.element.updateScheduled = false;
+        }
         this.dispatchEvent('updated', { component: this.instance }, eventSettings, { triggerCallback: false });
       });
     };
@@ -248,11 +254,13 @@ export const Template = class Template {
     this.initialized = true;
 
     if (this.element) {
+      const el = this.element;
       const stateReaction = Reaction.create(() => {
         // bind to any signal changing
         each(this.state, (signal) => signal.dependency.depend());
         // run onUpdated callback
         if (this.rendered && !this.destroyed) {
+          el.updateScheduled = true;
           Reaction.afterFlush(this.onUpdated);
         }
       });
@@ -335,10 +343,18 @@ export const Template = class Template {
     // by initialize()), so settingsVars is the authoritative set.
     const settingsVars = this.element?.settingsVars;
     const defaultSettings = this.element?.defaultSettings;
+    const componentSpec = this.element?.componentSpec;
     if (settingsVars) {
       if (defaultSettings) {
         each(defaultSettings, (_, name) => {
           this.element.settings[name]; // ensure shadow signal exists
+        });
+      }
+      // Also read spec attributes through the proxy so their Signals
+      // are updated with current property values (e.g. active, size)
+      if (componentSpec?.attributes) {
+        each(componentSpec.attributes, (attribute) => {
+          this.element.settings[attribute];
         });
       }
       settingsVars.forEach((signal, name) => {
@@ -726,8 +742,10 @@ export const Template = class Template {
         setTimeout(this.onRendered, 0);
       }
     }
-    else {
-      // Reactions handle DOM updates — bump version to propagate changes
+    else if (this.dataReplaced) {
+      // Data context was replaced — bump version to propagate changes.
+      // Skip when only Signals changed (they notify Reactions directly).
+      this.dataReplaced = false;
       this.renderer.bumpDataVersion();
     }
     this.rendered = true;

@@ -1,7 +1,7 @@
 import { $ } from '@semantic-ui/query';
 import { describe, expect, it } from 'vitest';
-import { LitRenderer } from '../../src/engines/lit/register.js';
-import { defineComponent, NativeRenderer } from '../../src/index.js';
+import { LitEngine } from '../../src/engines/lit/register.js';
+import { defineComponent, NativeEngine } from '../../src/index.js';
 
 /*
   Engine selection tests — verifies that renderingEngine accepts
@@ -37,11 +37,11 @@ describe('Engine Selection', () => {
     expect(el.shadowRoot.querySelector('.content').textContent).toBe('lit-string');
   });
 
-  it('should render with renderingEngine: NativeRenderer (object)', async () => {
+  it('should render with renderingEngine: NativeEngine (object)', async () => {
     const tag = uniqueTag();
     defineComponent({
       tagName: tag,
-      renderingEngine: NativeRenderer,
+      renderingEngine: NativeEngine,
       template: '<div class="content">native-object</div>',
     });
     const el = document.createElement(tag);
@@ -50,11 +50,11 @@ describe('Engine Selection', () => {
     expect(el.shadowRoot.querySelector('.content').textContent).toBe('native-object');
   });
 
-  it('should render with renderingEngine: LitRenderer (object)', async () => {
+  it('should render with renderingEngine: LitEngine (object)', async () => {
     const tag = uniqueTag();
     defineComponent({
       tagName: tag,
-      renderingEngine: LitRenderer,
+      renderingEngine: LitEngine,
       template: '<div class="content">lit-object</div>',
     });
     const el = document.createElement(tag);

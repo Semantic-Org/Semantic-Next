@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { RENDERING_ENGINES } from './test-utils.js';
 
 RENDERING_ENGINES.forEach(engine => {
-
   /*******************************
            Test Helpers
   *******************************/
@@ -18,9 +17,7 @@ RENDERING_ENGINES.forEach(engine => {
   }
 
   async function waitForUpdate(el) {
-    await el.updateComplete;
-    await new Promise(r => setTimeout(r, 0));
-    await el.updateComplete;
+    await el.updated;
   }
 
   beforeEach(() => {
@@ -44,7 +41,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const strong = el.shadowRoot.querySelector('strong');
       expect(strong).not.toBeNull();
@@ -67,7 +64,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       expect(el.shadowRoot.querySelector('em')).not.toBeNull();
       expect(el.shadowRoot.querySelector('b')).toBeNull();
@@ -105,7 +102,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const child = el.shadowRoot.querySelector(childTag);
       expect(typeof child.handler).toBe('function');
@@ -124,7 +121,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       // In text position, the literal function reference is rendered as its toString
       const text = el.shadowRoot.querySelector('div').textContent;
@@ -155,7 +152,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const child = el.shadowRoot.querySelector(childTag);
       // {#fn} passes the literal value without auto-invoking
@@ -178,7 +175,7 @@ RENDERING_ENGINES.forEach(engine => {
       const el = document.createElement(tag);
       el.innerHTML = '<span>slotted content</span>';
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const slot = el.shadowRoot.querySelector('slot');
       expect(slot).not.toBeNull();
@@ -195,7 +192,7 @@ RENDERING_ENGINES.forEach(engine => {
       const el = document.createElement(tag);
       el.innerHTML = '<h1 slot="header">Title</h1><p>Body</p>';
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const namedSlot = el.shadowRoot.querySelector('slot[name="header"]');
       const defaultSlot = el.shadowRoot.querySelector('slot:not([name])');
@@ -213,7 +210,7 @@ RENDERING_ENGINES.forEach(engine => {
       const el = document.createElement(tag);
       el.innerHTML = '<span class="child">projected</span>';
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const slot = el.shadowRoot.querySelector('slot');
       const assigned = slot.assignedElements();
@@ -239,7 +236,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const text = shadowText(el);
       expect(text).toContain('red:#f00');
@@ -263,7 +260,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       let divs = el.shadowRoot.querySelectorAll('div');
       expect(divs.length).toBe(2);
@@ -297,7 +294,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const svg = el.shadowRoot.querySelector('svg');
       expect(svg).not.toBeNull();
@@ -318,7 +315,7 @@ RENDERING_ENGINES.forEach(engine => {
       });
       const el = document.createElement(tag);
       document.body.appendChild(el);
-      await el.updateComplete;
+      await el.rendered;
 
       const rect = el.shadowRoot.querySelector('rect');
       expect(rect.getAttribute('width')).toBe('10');

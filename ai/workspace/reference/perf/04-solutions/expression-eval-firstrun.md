@@ -192,7 +192,7 @@ From the test suite and typical SUI component templates:
 | `{greeting}` | Yes | Very common |
 | `{item.name}` | Yes | Very common (each loops) |
 | `{count}` | Yes | Common |
-| `{ui}` | Yes | Every spec-driven component |
+| `{uiClasses}` | Yes | Every spec-driven component |
 | `{cls}` | Yes | Common |
 | `{item.active}` | Yes | Common |
 | `{is mode "a"}` | No (helper call) | Moderate |
