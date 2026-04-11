@@ -144,7 +144,7 @@ export class TemplateCompiler {
   }): ASTNode[];
 
   /** Errors collected during recoverable compilation. */
-  errors: { message: string; pos: number }[];
+  errors: { message: string; pos: number; }[];
 
   /**
    * Extracts value

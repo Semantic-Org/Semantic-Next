@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/nicolo-ribaudo.github.io/HEAD/nicolo-ribaudo.github.io/src/assets/tachometer.schema.json",
+  "root": "../../../..",
+  "sampleSize": 50,
+  "timeout": 5,
+  "autoSampleConditions": ["0%", "10%"],
+  "resolveBareModules": false,
+  "benchmarks": [
+    {
+      "url": "todo.html",
+      "browser": { "name": "chrome", "headless": true },
+      "measurement": [
+        { "mode": "performance", "entryName": "bulk-add-50" },
+        { "mode": "performance", "entryName": "bulk-add-200" },
+        { "mode": "performance", "entryName": "add-20" },
+        { "mode": "performance", "entryName": "toggle-10" },
+        { "mode": "performance", "entryName": "toggle-all" },
+        { "mode": "performance", "entryName": "remove-5-front" },
+        { "mode": "performance", "entryName": "remove-5-middle" },
+        { "mode": "performance", "entryName": "remove-5-back" },
+        { "mode": "performance", "entryName": "clear-completed" }
+      ]
+    }
+  ]
+}
