@@ -21,6 +21,10 @@ export class DynamicRegion {
     this.childScopes = [];
     for (const node of this.ownedNodes) { node.remove(); }
     this.ownedNodes = [];
+    if (this.endAnchor) {
+      this.endAnchor.remove();
+      this.endAnchor = null;
+    }
   }
 
   setContent(fragment, scope) {

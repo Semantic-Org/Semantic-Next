@@ -1,3 +1,4 @@
+import { Signal } from '@semantic-ui/reactivity';
 import { existsSync } from 'node:fs';
 import { bench, describe } from 'vitest';
 import { ExpressionEvaluator } from '../src/expression-evaluator.js';
@@ -92,7 +93,32 @@ const data = {
   classes: 'ui primary button',
 };
 
+// Same shape as data but with Signals wrapping state values — mirrors real components
+// where state is always signals and settings are plain values
+const signalData = {
+  // Settings (plain)
+  type: 'button',
+  variant: 'primary',
+  size: 'medium',
+  disabled: false,
+  icon: 'check',
+  label: 'Submit',
+  // State (signals)
+  count: new Signal(42),
+  value: new Signal(1),
+  isOpen: new Signal(false),
+  isTrue: new Signal(true),
+  isDog: new Signal(true),
+  fruit: new Signal('cherry'),
+  items: new Signal(['one', 'two', 'three']),
+  user: { name: new Signal('Jack'), role: 'admin', settings: { theme: 'dark' } },
+  // Computed
+  isActive: new Signal(true),
+  classes: 'ui primary button',
+};
+
 const current = new ExpressionEvaluator({ data, helpers });
+const currentSignal = new ExpressionEvaluator({ data: signalData, helpers });
 const baseline = hasBaseline ? new ExpressionEvaluatorBaseline({ data, helpers }) : null;
 
 /*******************************
@@ -334,6 +360,54 @@ describe('Lisp data arg — {addOne value}', () => {
 });
 
 /*******************************
+     Signal unwrapping
+*******************************/
+
+describe('signal identifier — {count} (Signal)', () => {
+  bench('current', () => {
+    currentSignal.evaluate('count', signalData);
+  });
+  if (baseline) {
+    bench('baseline', () => {
+      baseline.evaluate('count', signalData);
+    });
+  }
+});
+
+describe('signal dotted path — {user.name} (Signal)', () => {
+  bench('current', () => {
+    currentSignal.evaluate('user.name', signalData);
+  });
+  if (baseline) {
+    bench('baseline', () => {
+      baseline.evaluate('user.name', signalData);
+    });
+  }
+});
+
+describe('signal vs plain — {label} (plain in mixed context)', () => {
+  bench('current', () => {
+    currentSignal.evaluate('label', signalData);
+  });
+  if (baseline) {
+    bench('baseline', () => {
+      baseline.evaluate('label', signalData);
+    });
+  }
+});
+
+describe('signal ternary — {isOpen ? "open" : "closed"} (Signal)', () => {
+  bench('current', () => {
+    currentSignal.evaluate('isOpen ? "open" : "closed"', signalData);
+  });
+  if (baseline) {
+    bench('baseline', () => {
+      baseline.evaluate('isOpen ? "open" : "closed"', signalData);
+    });
+  }
+});
+
+/*******************************
      Mixed batch (realistic component render)
 *******************************/
 
@@ -363,6 +437,37 @@ describe('mixed batch — 12 expressions (simulating a component render)', () =>
     bench('baseline', () => {
       for (let i = 0; i < expressions.length; i++) {
         baseline.evaluate(expressions[i], data);
+      }
+    });
+  }
+});
+
+describe('mixed batch — 12 expressions (Signal context)', () => {
+  const expressions = [
+    'label',
+    'icon',
+    'classes',
+    'user.name',
+    'count + 1',
+    "classIf isActive 'active'",
+    'isOpen ? "open" : "closed"',
+    "maybe disabled 'off' 'on'",
+    "concat 'my ' 'friend ' (isDog ? 'simon' : 'pookie')",
+    'addOne(value + 1)',
+    "getValue {one: 'two'} 'one'",
+    "fruit == 'cherry' ? 'yum' : 'yuck'",
+  ];
+
+  bench('current', () => {
+    for (let i = 0; i < expressions.length; i++) {
+      currentSignal.evaluate(expressions[i], signalData);
+    }
+  });
+
+  if (baseline) {
+    bench('baseline', () => {
+      for (let i = 0; i < expressions.length; i++) {
+        baseline.evaluate(expressions[i], signalData);
       }
     });
   }

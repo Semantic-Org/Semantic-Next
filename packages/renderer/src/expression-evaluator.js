@@ -1,5 +1,4 @@
 import { Signal } from '@semantic-ui/reactivity';
-import { isArray, isFunction, isString } from '@semantic-ui/utils';
 
 // Fallback handler for the rare includeHelpers: false path
 const jsNoHelpersHandler = {
@@ -25,6 +24,16 @@ export class ExpressionEvaluator {
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
   static fnCache = new Map();
   static FN_CACHE_MAX = 5000;
+
+  // Expression classification cache — shared across all instances since
+  // classification depends only on the expression string, not data context
+  static classifyCache = new Map();
+  static CLASSIFY_CACHE_MAX = 5000;
+
+  // Parsed expression array cache — the result of addParensToExpression +
+  // getExpressionArray is deterministic for a given expression string
+  static parseCache = new Map();
+  static PARSE_CACHE_MAX = 5000;
 
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
@@ -69,6 +78,48 @@ export class ExpressionEvaluator {
     return expression;
   }
 
+  // Classifies an expression string to determine if it's a multi-token
+  // Lisp-style expression (no JS operators outside quotes). Result is
+  // cached since it depends only on the expression string.
+  classifyExpression(expression) {
+    let result = ExpressionEvaluator.classifyCache.get(expression);
+    if (result !== undefined) {
+      return result;
+    }
+
+    const hasQuotes = expression.includes("'") || expression.includes('"');
+    const stripped = hasQuotes
+      ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
+      : expression;
+    result = stripped.includes(' ')
+      && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
+
+    if (ExpressionEvaluator.classifyCache.size >= ExpressionEvaluator.CLASSIFY_CACHE_MAX) {
+      ExpressionEvaluator.classifyCache.clear();
+    }
+    ExpressionEvaluator.classifyCache.set(expression, result);
+    return result;
+  }
+
+  // Returns a cached parsed expression array. The result of
+  // addParensToExpression + getExpressionArray is deterministic for a
+  // given expression string — no need to re-parse on every render.
+  getParsedExpression(expression) {
+    let parsed = ExpressionEvaluator.parseCache.get(expression);
+    if (parsed !== undefined) {
+      return parsed;
+    }
+
+    const wrapped = this.addParensToExpression(expression);
+    parsed = this.getExpressionArray(wrapped);
+
+    if (ExpressionEvaluator.parseCache.size >= ExpressionEvaluator.PARSE_CACHE_MAX) {
+      ExpressionEvaluator.parseCache.clear();
+    }
+    ExpressionEvaluator.parseCache.set(expression, parsed);
+    return parsed;
+  }
+
   // parses an expression like 'maybe (isEven number)' to ['maybe, ['isEven', 'number']]
   getExpressionArray(expr) {
     const groups = [];
@@ -83,12 +134,15 @@ export class ExpressionEvaluator {
       const match = token.match(/__GROUP(\d+)__/);
       return match ? groups[parseInt(match[1], 10)] : token;
     };
-    const parse = (tokens) => {
+
+    // Index-based iteration avoids O(n) shift() per token
+    let pos = 0;
+    const parse = () => {
       const result = [];
-      while (tokens.length > 0) {
-        const token = tokens.shift();
+      while (pos < tokens.length) {
+        const token = tokens[pos++];
         if (token === '(') {
-          result.push(parse(tokens));
+          result.push(parse());
         }
         else if (token === ')') {
           return result;
@@ -99,7 +153,7 @@ export class ExpressionEvaluator {
       }
       return result;
     };
-    return parse(tokens);
+    return parse();
   }
 
   evaluateJavascript(code, context, { includeHelpers = true } = {}) {
@@ -137,16 +191,11 @@ export class ExpressionEvaluator {
       visited.add(expression);
     }
 
-    if (isString(expression)) {
-      // Multi-token Lisp-style expressions (no JS operators outside quotes)
-      // resolve via array parsing below — skip the single-token lookup
-      // that wastes time in evaluateJavascript for non-JS expressions
-      const hasQuotes = expression.includes("'") || expression.includes('"');
-      const stripped = hasQuotes
-        ? expression.replace(ExpressionEvaluator.QUOTED_STRING_REGEXP, '')
-        : expression;
-      const isMultiTokenLisp = stripped.includes(' ')
-        && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
+    if (typeof expression === 'string') {
+      // No space = single token (identifier, dotted path, or JS call).
+      // Skip classify cache — Lisp-style needs at least one space.
+      const isMultiTokenLisp = expression.includes(' ')
+        && this.classifyExpression(expression);
 
       if (!isMultiTokenLisp) {
         const value = this.lookupTokenValue(expression, data);
@@ -158,15 +207,14 @@ export class ExpressionEvaluator {
               return value;
             }
           }
-          return isFunction(value) ? value() : value;
+          return typeof value === 'function' ? value() : value;
         }
       }
     }
 
     let expressionArray;
-    if (!isArray(expression)) {
-      expression = this.addParensToExpression(expression);
-      expressionArray = this.getExpressionArray(expression);
+    if (!Array.isArray(expression)) {
+      expressionArray = this.getParsedExpression(expression);
     }
     else {
       expressionArray = expression;
@@ -178,39 +226,54 @@ export class ExpressionEvaluator {
       visited.add(expression);
     }
 
-    let funcArguments = [];
-    let result;
+    const len = expressionArray.length;
+    // Pre-allocate results array at the right size instead of per-iteration unshift
+    const results = new Array(len);
 
-    let index = expressionArray.length;
+    let index = len;
     while (index--) {
       const token = expressionArray[index];
-      if (isArray(token)) {
+      let result;
+      if (Array.isArray(token)) {
         result = this.lookupExpressionValue(token.join(' '), data, visited);
-        funcArguments.unshift(result);
       }
       else {
         const tokenValue = this.lookupExpressionValue(token, data, visited);
-        result = isFunction(tokenValue)
-          ? tokenValue(...funcArguments)
-          : tokenValue;
-        funcArguments.unshift(result);
+        if (typeof tokenValue === 'function') {
+          // Collect arguments from the already-resolved tokens to the right
+          let argCount = len - index - 1;
+          if (argCount > 0) {
+            const args = new Array(argCount);
+            for (let a = 0; a < argCount; a++) {
+              args[a] = results[index + 1 + a];
+            }
+            result = tokenValue(...args);
+          }
+          else {
+            result = tokenValue();
+          }
+        }
+        else {
+          result = tokenValue;
+        }
       }
+      results[index] = result;
     }
     visited.delete(expression);
-    return result;
+    return results[0];
   }
 
   lookupTokenValue(token = '', data) {
-    if (isArray(token)) {
+    if (Array.isArray(token)) {
       return this.lookupExpressionValue(token, data);
     }
 
+    // Eager path — cheaper than any cache lookup, resolves the 90% case
     const literalValue = this.getLiteralValue(token);
     if (literalValue !== undefined) {
       return literalValue;
     }
 
-    // Fast path: simple identifier — skip getDeepDataValue + accessTokenValue overhead
     if (!token.includes('.')) {
       let value = data[token];
       if (value instanceof Signal) {
@@ -229,7 +292,7 @@ export class ExpressionEvaluator {
     }
 
     const helper = this.helpers[token];
-    if (isFunction(helper)) {
+    if (typeof helper === 'function') {
       return helper;
     }
 
@@ -282,7 +345,7 @@ export class ExpressionEvaluator {
   }
 
   accessTokenValue(tokenValue, token, data) {
-    if (isFunction(tokenValue) && token.includes('.')) {
+    if (typeof tokenValue === 'function' && token.includes('.')) {
       const lastDot = token.lastIndexOf('.');
       const thisContext = this.getDeepDataValue(data, token.substring(0, lastDot));
       tokenValue = tokenValue.bind(thisContext);
@@ -297,6 +360,10 @@ export class ExpressionEvaluator {
   }
 
   addParensToExpression(expression = '') {
+    if (!expression) { return ''; }
+    if (expression.indexOf('[') === -1 && expression.indexOf('{') === -1) {
+      return expression;
+    }
     return String(expression).replace(ExpressionEvaluator.WRAPPED_EXPRESSION, (match, before, brackets, after) => {
       return `${before}(${brackets})${after}`;
     });
@@ -309,6 +376,7 @@ export class ExpressionEvaluator {
 
     if (token === 'true') { return true; }
     if (token === 'false') { return false; }
+    if (token === 'null') { return null; }
 
     // Quick charCode guard to skip +token coercion for identifiers
     const c = token.charCodeAt(0);

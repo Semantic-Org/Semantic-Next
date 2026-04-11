@@ -80,12 +80,16 @@ export class Renderer {
       dataVersion: this.dataDep,
     });
 
-    // DOM change notification — schedule onUpdated after the current
-    // synchronous work completes
+    // DOM change notification — coalesced so multiple async resolutions
+    // or data bumps in the same tick fire onUpdated only once
+    this._updateScheduled = false;
     this.notifyUpdate = () => {
-      setTimeout(() => {
+      if (this._updateScheduled) { return; }
+      this._updateScheduled = true;
+      queueMicrotask(() => {
+        this._updateScheduled = false;
         this.template?.onUpdated?.();
-      }, 0);
+      });
     };
   }
 
@@ -115,6 +119,8 @@ export class Renderer {
 
   /*******************************
         AST → DOM
+  *******************************/
+  /*
 
   The key insight: the entire AST (HTML + expressions + block directives)
   is assembled into a single HTML string with markers for ALL dynamic
@@ -122,7 +128,8 @@ export class Renderer {
   a correct DOM tree where block markers are positioned inside their
   containing elements. Then a TreeWalker pass wires reactive bindings
   and replaces block markers with live DynamicRegions.
-  *******************************/
+
+  */
 
   readAST({ ast, data, scope, isSVG = this.isSVG }) {
     // Phase 1: Build a single HTML string with markers for everything
@@ -257,7 +264,7 @@ export class Renderer {
             }
             const value = this.eval(singleEntry.node.value, data);
 
-            if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
+            if (isIfDefined && !value) {
               element.removeAttribute(attrName);
             }
             else {
@@ -268,13 +275,13 @@ export class Renderer {
                 element.setAttribute(attrName, strValue);
               }
             }
-            if (inArray(attrName, ['checked', 'selected'])) {
+            if (attrName === 'checked' || attrName === 'selected') {
               const boolValue = Boolean(value);
               if (element[attrName] !== boolValue) {
                 element[attrName] = boolValue;
               }
             }
-            if (inArray(attrName, ['value'])) {
+            else if (attrName === 'value') {
               const newValue = value ?? '';
               if (element[attrName] !== newValue) {
                 element[attrName] = newValue;
@@ -418,9 +425,15 @@ export class Renderer {
           const list = isArray(items) ? items : arrayFromObject(items);
           for (let i = 0; i < list.length; i++) {
             const item = list[i];
-            const eachData = node.as
-              ? { ...data, [node.as]: item, [node.indexAs || 'index']: i }
-              : { ...data, ...item, this: item, [node.indexAs || 'index']: i };
+            const eachData = Object.create(data);
+            if (node.as) {
+              eachData[node.as] = item;
+            }
+            else {
+              Object.assign(eachData, item);
+              eachData.this = item;
+            }
+            eachData[node.indexAs || 'index'] = i;
             result += this.evaluateRawTextNodes(node.content, eachData);
           }
           break;
@@ -466,6 +479,11 @@ export class Renderer {
         }
       }));
     }
+    else if (exprNode.literalValue) {
+      const value = this.evaluator.lookupTokenValue(exprNode.value, data);
+      const textNode = document.createTextNode(value ?? '');
+      parent.replaceChild(textNode, comment);
+    }
     else {
       const textNode = document.createTextNode('');
       parent.replaceChild(textNode, comment);
@@ -474,9 +492,7 @@ export class Renderer {
           comp.stop();
           return;
         }
-        const value = exprNode.literalValue
-          ? this.evaluator.lookupTokenValue(exprNode.value, data)
-          : this.eval(exprNode.value, data);
+        const value = this.eval(exprNode.value, data);
         textNode.data = value ?? '';
       }));
     }
@@ -1337,7 +1353,7 @@ export class Renderer {
             }
             const value = this.eval(singleEntry.node.value, data);
             if (comp.firstRun) { return; }
-            if (isIfDefined && inArray(value, ['', undefined, null, false, 0])) {
+            if (isIfDefined && !value) {
               element.removeAttribute(attrName);
             }
             else {
@@ -1348,13 +1364,13 @@ export class Renderer {
                 element.setAttribute(attrName, strValue);
               }
             }
-            if (inArray(attrName, ['checked', 'selected'])) {
+            if (attrName === 'checked' || attrName === 'selected') {
               const boolValue = Boolean(value);
               if (element[attrName] !== boolValue) {
                 element[attrName] = boolValue;
               }
             }
-            if (inArray(attrName, ['value'])) {
+            else if (attrName === 'value') {
               const newValue = value ?? '';
               if (element[attrName] !== newValue) {
                 element[attrName] = newValue;
