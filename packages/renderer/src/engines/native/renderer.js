@@ -420,12 +420,15 @@ export class Renderer {
         this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'template': {
+        // Snippet vs subtemplate fork lives on the renderer — snippets
+        // inline into the parent scope (no region, no reaction) while
+        // subtemplates go through the template block's full lifecycle.
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
-          this.createSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
+          this.inlineSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
         }
         else {
-          this.createSubtemplate({ node, data, scope, parentNode, marker: comment, isSVG });
+          this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         }
         break;
       }
@@ -472,216 +475,15 @@ export class Renderer {
         Subtemplates
   *******************************/
 
-  createSubtemplate({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, marker);
-
-    let currentTemplateID = null;
-    let currentInstance = null;
-
-    scope.reaction(region.anchor, (comp) => {
-      this.dataDep.depend();
-      const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
-      const templateData = this.unpackNodeData(node, data);
-
-      let template, templateName;
-      if (isString(templateOrName)) {
-        templateName = templateOrName;
-        template = this.subTemplates?.[templateName];
-      }
-      else if (templateOrName instanceof Template) {
-        template = templateOrName;
-        templateName = template.templateName;
-      }
-
-      if (!template) {
-        if (currentInstance) {
-          currentInstance.onDestroyed();
-          currentInstance = null;
-          currentTemplateID = null;
-          region.clear();
-        }
-        return;
-      }
-
-      if (template.id !== currentTemplateID) {
-        if (currentInstance) { currentInstance.onDestroyed(); }
-
-        currentTemplateID = template.id;
-        currentInstance = template.clone({
-          templateName,
-          subTemplates: this.subTemplates,
-          data: templateData,
-          parentTemplate: this.template,
-          renderingEngine: 'native',
-        });
-
-        if (this.template?.element) {
-          currentInstance.setElement(this.template.element);
-        }
-        if (this.template) { currentInstance.setParent(this.template); }
-
-        currentInstance.initialize();
-        const templateFragment = currentInstance.render();
-        region.setContent(templateFragment);
-
-        const renderRoot = this.template?.element?.renderRoot;
-        if (renderRoot) {
-          currentInstance.attach(renderRoot, {
-            parentNode: region.parentNode,
-            startNode: region.anchor,
-            endNode: region.endAnchor || region.getLastNode(),
-          });
-        }
-      }
-      else {
-        currentInstance.setDataContext(templateData, { rerender: false });
-        currentInstance.render(templateData);
-      }
-    });
-
-    scope.onDispose(() => {
-      if (currentInstance) {
-        currentInstance.onDestroyed();
-        currentInstance = null;
-      }
-    });
-  }
-
-  hydrateSubtemplate({ node, data, scope, region, ownedNodes }) {
-    const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
-    const templateData = this.unpackNodeData(node, data);
-
-    let template, templateName;
-    if (isString(templateOrName)) {
-      templateName = templateOrName;
-      template = this.subTemplates?.[templateName];
-    }
-    else if (templateOrName instanceof Template) {
-      template = templateOrName;
-      templateName = template.templateName;
-    }
-
-    if (!template) { return; }
-
-    let currentTemplateID = template.id;
-    let currentInstance = template.clone({
-      templateName,
-      subTemplates: this.subTemplates,
-      data: templateData,
-      parentTemplate: this.template,
-      renderingEngine: 'native',
-    });
-
-    if (this.template?.element) {
-      currentInstance.setElement(this.template.element);
-    }
-    if (this.template) { currentInstance.setParent(this.template); }
-
-    currentInstance.initialize();
-
-    // Hydrate inner markers on the server-rendered DOM instead of rendering fresh
-    if (ownedNodes.length > 0) {
-      const { entries } = currentInstance.renderer.buildHTMLString(currentInstance.ast);
-      if (entries.length > 0) {
-        const container = document.createDocumentFragment();
-        for (const n of [...ownedNodes]) { container.appendChild(n); }
-        currentInstance.renderer.hydrateMarkers(
-          container,
-          entries,
-          currentInstance.renderer.data,
-          currentInstance.renderer.scope,
-        );
-        // Put nodes back
-        const frag = document.createDocumentFragment();
-        for (const n of [...container.childNodes]) { frag.appendChild(n); }
-        region.anchor.after(frag);
-        // Recollect from DOM — frag is consumed after insertion
-        const collected = [];
-        let sibling = region.anchor.nextSibling;
-        while (sibling) {
-          collected.push(sibling);
-          sibling = sibling.nextSibling;
-        }
-        region.ownedNodes = collected;
-      }
-    }
-
-    currentInstance.rendered = true;
-    const renderRoot = this.template?.element?.renderRoot;
-    if (renderRoot) {
-      currentInstance.attach(renderRoot, {
-        parentNode: region.parentNode,
-        startNode: region.ownedNodes[0],
-        endNode: region.getLastNode(),
-      });
-    }
-
-    // Wire the same Reaction as createSubtemplate for future data updates
-    scope.reaction(region.anchor, (comp) => {
-      this.dataDep.depend();
-      const templateOrName = this.evaluator.lookupExpressionValue(node.name, data);
-      const templateData = this.unpackNodeData(node, data);
-
-      let template;
-      if (isString(templateOrName)) {
-        template = this.subTemplates?.[templateOrName];
-      }
-      else if (templateOrName instanceof Template) {
-        template = templateOrName;
-      }
-
-      if (!template) {
-        if (currentInstance) {
-          currentInstance.onDestroyed();
-          currentInstance = null;
-          currentTemplateID = null;
-          region.clear();
-        }
-        return;
-      }
-
-      if (template.id !== currentTemplateID) {
-        if (currentInstance) { currentInstance.onDestroyed(); }
-        currentTemplateID = template.id;
-        currentInstance = template.clone({
-          templateName: template.templateName,
-          subTemplates: this.subTemplates,
-          data: templateData,
-          parentTemplate: this.template,
-          renderingEngine: 'native',
-        });
-        if (this.template?.element) { currentInstance.setElement(this.template.element); }
-        if (this.template) { currentInstance.setParent(this.template); }
-        currentInstance.initialize();
-        const templateFragment = currentInstance.render();
-        region.setContent(templateFragment);
-        if (renderRoot) {
-          currentInstance.attach(renderRoot, {
-            parentNode: region.parentNode,
-            startNode: region.anchor,
-            endNode: region.endAnchor || region.getLastNode(),
-          });
-        }
-      }
-      else if (!comp.firstRun) {
-        currentInstance.setDataContext(templateData, { rerender: false });
-        currentInstance.render(templateData);
-      }
-    });
-
-    scope.onDispose(() => {
-      if (currentInstance) {
-        currentInstance.onDestroyed();
-        currentInstance = null;
-      }
-    });
-  }
-
   /*******************************
         Snippets
   *******************************/
 
-  createSnippet({ node, data, scope, parentNode, marker, templateName, isSVG }) {
+  // Inlines a snippet invocation directly into the parent's scope.
+  // Unlike subtemplates, snippets have no DynamicRegion, no reaction,
+  // no instance — they're a data-proxy overlay + a readAST call that
+  // replaces the block marker with the rendered fragment.
+  inlineSnippet({ node, data, scope, parentNode, marker, templateName, isSVG }) {
     const snippet = this.snippets[templateName];
     if (!snippet) {
       fatal(`Snippet "${templateName}" not found`);
@@ -921,52 +723,32 @@ export class Renderer {
     const region = new DynamicRegion(parentNode, comment);
     region.ownedNodes = ownedNodes;
 
-    // Converted blocks own their hydration — the block's hydrate hook walks
-    // region.ownedNodes, recurses into nested markers, and moves nodes into
-    // the region. Legacy blocks (each, async, non-snippet template) still
-    // rely on the renderer pre-processing the region before dispatch.
+    // Snippet invocations hydrate through the rerender block with the
+    // snippet's content (snippets have no own lifecycle — rerender's
+    // shape covers the reactive-re-render behavior).
+    if (node.type === 'template') {
+      const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+      if (this.snippets[templateName]) {
+        const rerenderBlock = getBlock('rerender');
+        rerenderBlock({
+          node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
+          data,
+          scope,
+          region,
+          renderer: this,
+          isSVG: entry.isSVG,
+          serverMeta,
+          hydrating: true,
+        });
+        return;
+      }
+    }
+
+    // All remaining block types dispatch through the registry — each
+    // block's hydrate hook owns its subtree walk.
     const block = getBlock(node.type);
     if (block) {
       block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
-      return;
-    }
-
-    // Legacy path: hydrate inner markers then move nodes into region.
-    // This path goes away in step 8 once every block type is converted.
-    const contentAST = this.getServerRenderedAST(node, data);
-    if (contentAST && ownedNodes.length > 0) {
-      const innerScope = scope.child();
-      region.childScopes.push(innerScope);
-      this.hydrateInnerContent(ownedNodes, contentAST, data, innerScope);
-      const frag = document.createDocumentFragment();
-      for (const n of ownedNodes) { frag.appendChild(n); }
-      region.anchor.after(frag);
-      region.ownedNodes = [...ownedNodes];
-    }
-
-    switch (node.type) {
-      case 'template': {
-        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-        if (this.snippets[templateName]) {
-          // Snippet invocation — hydrate through the rerender block with
-          // the snippet's content. Step 7 consolidates this.
-          const rerenderBlock = getBlock('rerender');
-          rerenderBlock({
-            node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
-            data,
-            scope,
-            region,
-            renderer: this,
-            isSVG: entry.isSVG,
-            serverMeta,
-            hydrating: true,
-          });
-        }
-        else {
-          this.hydrateSubtemplate({ node, data, scope, region, ownedNodes });
-        }
-        break;
-      }
     }
   }
 
@@ -1021,42 +803,6 @@ export class Renderer {
     for (const n of [...container.childNodes]) {
       ownedNodes.push(n);
     }
-  }
-
-  /*******************************
-        Subtemplate Data
-  *******************************/
-
-  unpackNodeData(node, data) {
-    let templateData = {};
-
-    if (node.data) {
-      if (isString(node.data)) {
-        const evaluated = this.evaluator.lookupExpressionValue(node.data, data);
-        if (isPlainObject(evaluated)) {
-          templateData = { ...templateData, ...evaluated };
-        }
-      }
-      else if (isPlainObject(node.data)) {
-        // Inside {#each}, each item's data proxy is tracked by isItemContext
-        // — read reactively so item-signal mutations propagate. Outside each,
-        // static data={} remains non-reactive per existing semantics.
-        const inItemContext = isItemContext(data);
-        each(node.data, (expr, key) => {
-          templateData[key] = inItemContext
-            ? this.evaluator.lookupExpressionValue(expr, data)
-            : Reaction.nonreactive(() => this.evaluator.lookupExpressionValue(expr, data));
-        });
-      }
-    }
-
-    if (node.reactiveData) {
-      each(node.reactiveData, (expr, key) => {
-        templateData[key] = this.evaluator.lookupExpressionValue(expr, data);
-      });
-    }
-
-    return templateData;
   }
 
   /*******************************
