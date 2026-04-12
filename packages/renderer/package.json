@@ -23,7 +23,8 @@
     "test:coverage": "vitest --coverage",
     "bench": "vitest bench --config vitest.bench.config.js",
     "bench:component": "tachometer --config bench/tachometer/tachometer.json",
-    "bench:todo": "tachometer --config bench/tachometer/tachometer-todo.json"
+    "bench:todo": "tachometer --config bench/tachometer/tachometer-todo.json",
+    "bench:signature": "tachometer --config bench/tachometer/tachometer-signature.json"
   },
   "files": [
     "src",
