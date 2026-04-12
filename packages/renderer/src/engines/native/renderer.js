@@ -29,8 +29,11 @@ import {
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
+// Side-effect import: every block module self-registers into the block registry.
+import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
 const TEMPLATE_CACHE_MAX = 1000;
@@ -538,7 +541,7 @@ export class Renderer {
         this.createAsync({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'rerender':
-        this.createRerender({ node, data, scope, parentNode, marker: comment, isSVG });
+        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
@@ -845,28 +848,21 @@ export class Renderer {
         Rerender/Guard
   *******************************/
 
-  createRerender({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, marker);
+  // Dispatches to a registered block via the registry. Used for block types
+  // that have been extracted to packages/renderer/src/engines/native/blocks/.
+  // As each type migrates from the inline createX/hydrateX pattern, its
+  // bindBlockDirective case routes here.
+  bindBlockViaRegistry({ node, data, scope, comment, isSVG }) {
+    const block = getBlock(node.type);
+    if (!block) { return; }
+    const region = new DynamicRegion(comment.parentNode, comment);
+    block({ node, data, scope, region, renderer: this, isSVG, hydrating: false });
+  }
 
-    // Initial render
-    const initialScope = scope.child();
-    const initialFragment = this.readAST({ ast: node.content, data, scope: initialScope, isSVG });
-    region.setContent(initialFragment, initialScope);
-
-    scope.reaction(region.anchor, (comp) => {
-      if (node.key) {
-        Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
-      }
-      if (node.expression) {
-        this.lookupExpression(node.expression, data);
-      }
-
-      if (!comp.firstRun) {
-        const newScope = scope.child();
-        const newFragment = this.readAST({ ast: node.content, data, scope: newScope, isSVG });
-        region.setContent(newFragment, newScope);
-      }
-    });
+  hydrateBlockViaRegistry({ node, entry, data, scope, region, serverMeta }) {
+    const block = getBlock(node.type);
+    if (!block) { return; }
+    block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
   }
 
   /*******************************
@@ -1445,7 +1441,7 @@ export class Renderer {
         this.hydrateAsync({ node, data, scope, region });
         break;
       case 'rerender':
-        this.hydrateRerender({ node, data, scope, region });
+        this.hydrateBlockViaRegistry({ node, entry, data, scope, region, serverMeta });
         break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
@@ -1622,23 +1618,6 @@ export class Renderer {
         if (!comp.firstRun) {
           renderState(node.content, this.createSuccessDataContext(node, result));
         }
-      }
-    });
-  }
-
-  hydrateRerender({ node, data, scope, region }) {
-    scope.reaction(region.anchor, (comp) => {
-      if (node.key) {
-        Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
-      }
-      if (node.expression) {
-        this.lookupExpression(node.expression, data);
-      }
-
-      if (!comp.firstRun) {
-        const newScope = scope.child();
-        const newFragment = this.readAST({ ast: node.content, data, scope: newScope });
-        region.setContent(newFragment, newScope);
       }
     });
   }
