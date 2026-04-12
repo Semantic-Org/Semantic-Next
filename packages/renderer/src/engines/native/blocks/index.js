@@ -10,3 +10,4 @@
 */
 
 import './rerender.js';
+import './conditional.js';

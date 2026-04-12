@@ -532,7 +532,7 @@ export class Renderer {
 
     switch (node.type) {
       case 'if':
-        this.createConditional({ node, data, scope, parentNode, marker: comment, isSVG });
+        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'each':
         this.createEach({ node, data, scope, parentNode, marker: comment, isSVG });
@@ -562,52 +562,6 @@ export class Renderer {
   /*******************************
         Conditional Rendering
   *******************************/
-
-  createConditional({ node, data, scope, parentNode, marker, isSVG }) {
-    // Use the comment marker as the anchor — replace with a persistent text node
-    const region = new DynamicRegion(parentNode, marker);
-
-    let currentBranchIndex = -1;
-
-    scope.onDispose(() => region.clear());
-
-    scope.reaction(region.anchor, (comp) => {
-      const result = this.getBranch(node, data);
-
-      if (result.matchIndex !== currentBranchIndex) {
-        currentBranchIndex = result.matchIndex;
-        if (result.contentAST) {
-          const branchScope = scope.child();
-          const branchFragment = this.readAST({ ast: result.contentAST, data, scope: branchScope, isSVG });
-          region.setContent(branchFragment, branchScope);
-        }
-        else {
-          region.clear();
-        }
-      }
-    });
-  }
-
-  getBranch(node, data) {
-    const condition = this.lookupExpression(node.condition, data);
-    if (condition) {
-      return { matchIndex: 1000, contentAST: node.content };
-    }
-    if (node.branches?.length) {
-      for (let i = 0; i < node.branches.length; i++) {
-        const branch = node.branches[i];
-        if (branch.type === 'elseif') {
-          if (this.lookupExpression(branch.condition, data)) {
-            return { matchIndex: i, contentAST: branch.content };
-          }
-        }
-        else if (branch.type === 'else') {
-          return { matchIndex: i, contentAST: branch.content };
-        }
-      }
-    }
-    return { matchIndex: -1, contentAST: null };
-  }
 
   /*******************************
         List Rendering
@@ -1385,9 +1339,18 @@ export class Renderer {
     const region = new DynamicRegion(parentNode, comment);
     region.ownedNodes = ownedNodes;
 
-    // Hydrate inner markers in the server-rendered content.
-    // For conditionals, the server chose a branch — we hydrate whatever's in the DOM
-    // then let the Reaction swap if the client evaluates a different branch.
+    // Converted blocks own their hydration — the block's hydrate hook walks
+    // region.ownedNodes, recurses into nested markers, and moves nodes into
+    // the region. Legacy blocks (each, async, non-snippet template) still
+    // rely on the renderer pre-processing the region before dispatch.
+    const block = getBlock(node.type);
+    if (block) {
+      block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
+      return;
+    }
+
+    // Legacy path: hydrate inner markers then move nodes into region.
+    // This path goes away in step 8 once every block type is converted.
     const contentAST = this.getServerRenderedAST(node, data);
     if (contentAST && ownedNodes.length > 0) {
       const innerScope = scope.child();
@@ -1400,62 +1363,30 @@ export class Renderer {
     }
 
     switch (node.type) {
-      case 'if': {
-        // Check for hydration mismatch using the branch index from the server's closing marker
-        const clientBranch = this.getBranch(node, data);
-        const serverBranchIndex = serverMeta.branchIndex;
-        const hasMismatch = serverBranchIndex !== undefined
-          && serverBranchIndex !== clientBranch.matchIndex;
-
-        if (hasMismatch) {
-          const isEnvironmentGuard = node.condition === 'isClient' || node.condition === 'isServer';
-          if (isDevelopment && !isEnvironmentGuard) {
-            console.warn(
-              `[SUI] Hydration mismatch in {#if ${node.condition}}: `
-                + `server rendered branch ${serverBranchIndex}, `
-                + `client expects branch ${clientBranch.matchIndex}. `
-                + `Client will re-render this block.`,
-            );
-          }
-          // Re-render with client branch immediately
-          if (clientBranch.contentAST) {
-            const branchScope = scope.child();
-            const branchFragment = this.readAST({
-              ast: clientBranch.contentAST,
-              data,
-              scope: branchScope,
-            });
-            region.setContent(branchFragment, branchScope);
-          }
-          else {
-            region.clear();
-          }
-        }
-        this.hydrateConditional({ node, data, scope, region });
-        break;
-      }
       case 'each':
         this.hydrateEach({ node, data, scope, region });
         break;
       case 'async':
         this.hydrateAsync({ node, data, scope, region });
         break;
-      case 'rerender':
-        this.hydrateBlockViaRegistry({ node, entry, data, scope, region, serverMeta });
-        break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
-          this.hydrateRerender({
+          // Snippet invocation — hydrate through the rerender block with
+          // the snippet's content. Step 7 consolidates this.
+          const rerenderBlock = getBlock('rerender');
+          rerenderBlock({
             node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
             data,
             scope,
             region,
+            renderer: this,
+            isSVG: entry.isSVG,
+            serverMeta,
+            hydrating: true,
           });
         }
         else {
-          // Hydrate: adopt server DOM, clone template, wire Reaction for future updates.
-          // The server already rendered the subtemplate content — don't render again.
           this.hydrateSubtemplate({ node, data, scope, region, ownedNodes });
         }
         break;
@@ -1514,26 +1445,6 @@ export class Renderer {
     for (const n of [...container.childNodes]) {
       ownedNodes.push(n);
     }
-  }
-
-  hydrateConditional({ node, data, scope, region }) {
-    const result = this.getBranch(node, data);
-    let currentBranchIndex = result.matchIndex;
-
-    scope.reaction(region.anchor, (comp) => {
-      const result = this.getBranch(node, data);
-      if (result.matchIndex !== currentBranchIndex) {
-        currentBranchIndex = result.matchIndex;
-        if (result.contentAST) {
-          const branchScope = scope.child();
-          const branchFragment = this.readAST({ ast: result.contentAST, data, scope: branchScope });
-          region.setContent(branchFragment, branchScope);
-        }
-        else {
-          region.clear();
-        }
-      }
-    });
   }
 
   hydrateEach({ node, data, scope, region }) {

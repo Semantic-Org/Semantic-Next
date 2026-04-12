@@ -115,10 +115,11 @@ export function defineBlock(config) {
       self = {};
     }
 
-    // Closures for the 9-key author bag. Data is captured at dispatch time;
+    // Closures for the author bag. Data is captured at dispatch time;
     // renderAST accepts overrides for scope/data/isSVG but falls through to
     // the captured values — covers the common case where a block renders
-    // branch content with the parent data context.
+    // branch content with the parent data context. hydrateInnerContent is
+    // scoped to hydrate hooks but always present for consistency.
     const lookupExpression = (expression) => renderer.lookupExpression(expression, data);
     const renderAST = ({
       ast,
@@ -126,9 +127,26 @@ export function defineBlock(config) {
       data: childData = data,
       isSVG: childIsSVG = isSVG,
     } = {}) => renderer.readAST({ ast, scope: childScope, data: childData, isSVG: childIsSVG });
+    const hydrateInnerContent = ({
+      ownedNodes,
+      innerAST,
+      data: innerData = data,
+      scope: innerScope = scope,
+    } = {}) => renderer.hydrateInnerContent(ownedNodes, innerAST, innerData, innerScope);
 
     const buildBag = (extra) => {
-      const bag = { node, data, scope, region, isSVG, serverMeta, self, lookupExpression, renderAST };
+      const bag = {
+        node,
+        data,
+        scope,
+        region,
+        isSVG,
+        serverMeta,
+        self,
+        lookupExpression,
+        renderAST,
+        hydrateInnerContent,
+      };
       return extra ? Object.assign(bag, extra) : bag;
     };
 

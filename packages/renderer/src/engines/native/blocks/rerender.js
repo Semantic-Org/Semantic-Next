@@ -44,15 +44,26 @@ const rerender = defineBlock({
     region.setContent(fragment, childScope);
   },
 
-  hydrate({ node, data, lookupExpression, self }) {
-    // Server DOM is already in region.ownedNodes, and inner markers have
-    // been hydrated by the renderer's hydrateBlockDirective preprocessing.
-    // Register deps so key/expression changes trigger update().
+  hydrate({ node, data, scope, region, lookupExpression, hydrateInnerContent, self }) {
     if (node.key) {
       Reaction.guard(() => self.evaluator.lookupTokenValue(node.key, data));
     }
     if (node.expression) {
       lookupExpression(node.expression);
+    }
+
+    // Adopt server DOM: hydrate inner markers against node.content, then move
+    // nodes into the region so setContent can replace them on updates.
+    // hydrateInnerContent rebuilds region.ownedNodes in-place with the
+    // hydrated references; the subsequent fragment insertion moves those
+    // same nodes into the DOM after the region's anchor.
+    if (region.ownedNodes.length > 0 && node.content) {
+      const innerScope = scope.child();
+      region.childScopes.push(innerScope);
+      hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST: node.content, data, scope: innerScope });
+      const frag = document.createDocumentFragment();
+      for (const n of region.ownedNodes) { frag.appendChild(n); }
+      region.anchor.after(frag);
     }
   },
 
