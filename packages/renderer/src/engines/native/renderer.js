@@ -32,6 +32,12 @@ import { ExpressionEvaluator } from '../../expression-evaluator.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
+import {
+  bindAttribute,
+  bindRawTextContent as bindRawTextContentFn,
+  bindTextExpression as bindTextExpressionFn,
+  hydrateTextExpression as hydrateTextExpressionFn,
+} from './reactive-data.js';
 // Side-effect import: every block module self-registers into the block registry.
 import './blocks/index.js';
 
@@ -229,96 +235,12 @@ export class Renderer {
     return { parts, markerIDs };
   }
 
-  // Wire reactive bindings for a single attribute expression.
-  // `skipFirstWrite` defers DOM writes on firstRun (used during hydration
-  // where server content is trusted).
+  // Attribute binding — delegates to reactive-data.js. See that module for
+  // the dispatch on entry.classification.type (property / event / boolean
+  // / ifDefined / interpolated / single-expression). `skipFirstWrite` is
+  // passed through by hydrateAttributes.
   bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite = false } = {}) {
-    const { classification } = entries[parts.find(p => p.markerID !== undefined)?.markerID] || {};
-    const bindingType = classification?.type;
-
-    if (bindingType === 'property') {
-      const realAttrName = classification.attribute;
-      const expr = entries[parts[0].markerID];
-      scope.reaction(element, (comp) => {
-        const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-        if (skipFirstWrite && comp.firstRun) { return; }
-        element[realAttrName] = value;
-      });
-      element.removeAttribute(attrName);
-      return;
-    }
-
-    if (bindingType === 'event') {
-      const realAttrName = classification.attribute;
-      const expr = entries[parts[0].markerID];
-      const handler = (...args) => {
-        const value = this.evaluator.lookupTokenValue(expr.node.value, data);
-        if (isFunction(value)) { value(...args); }
-      };
-      element.addEventListener(realAttrName, handler);
-      scope.onDispose(() => element.removeEventListener(realAttrName, handler));
-      element.removeAttribute(attrName);
-      return;
-    }
-
-    const isSingleExpr = parts.length === 1 && parts[0].markerID !== undefined;
-    const singleEntry = isSingleExpr ? entries[parts[0].markerID] : null;
-    const isIfDefined = singleEntry?.node.ifDefined || singleEntry?.classification.type === 'boolean';
-
-    if (isSingleExpr) {
-      scope.reaction(element, (comp) => {
-        const value = this.lookupExpression(singleEntry.node.value, data);
-        if (skipFirstWrite && comp.firstRun) { return; }
-
-        if (isIfDefined && !value) {
-          element.removeAttribute(attrName);
-        }
-        else {
-          const strValue = (isArray(value) || isPlainObject(value))
-            ? JSON.stringify(value)
-            : String(value ?? '');
-          if (element.getAttribute(attrName) !== strValue) {
-            element.setAttribute(attrName, strValue);
-          }
-        }
-        if (attrName === 'checked' || attrName === 'selected') {
-          const boolValue = Boolean(value);
-          if (element[attrName] !== boolValue) {
-            element[attrName] = boolValue;
-          }
-        }
-        else if (attrName === 'value') {
-          const newValue = value ?? '';
-          if (element[attrName] !== newValue) {
-            element[attrName] = newValue;
-          }
-        }
-      });
-    }
-    else {
-      scope.reaction(element, (comp) => {
-        if (skipFirstWrite && comp.firstRun) {
-          // Evaluate all expressions to register Signal dependencies,
-          // but skip the DOM write — server content is trusted
-          for (const part of parts) {
-            if (part.markerID !== undefined) {
-              this.lookupExpression(entries[part.markerID].node.value, data);
-            }
-          }
-          return;
-        }
-        let value = '';
-        for (const part of parts) {
-          if (part.static !== undefined) {
-            value += part.static;
-          }
-          else {
-            value += this.lookupExpression(entries[part.markerID].node.value, data) ?? '';
-          }
-        }
-        element.setAttribute(attrName, value);
-      });
-    }
+    bindAttribute({ element, attrName, parts, entries, data, scope, renderer: this, skipFirstWrite });
   }
 
   bindMarkers(root, entries, data, scope, ast) {
@@ -390,26 +312,9 @@ export class Renderer {
       Raw Text Element Bindings
   *******************************/
 
-  // Bind reactive content for raw text elements (script, style, textarea, title).
-  // The browser treats their content as text, not markup, so we can't use
-  // comment markers inside them. Instead, the entire content is evaluated
-  // as a string from the collected AST nodes and set via textContent.
+  // Raw-text element binding — delegates to reactive-data.js.
   bindRawTextContent(comment, entry, data, scope) {
-    // Walk backwards past whitespace text nodes to find the raw text element
-    let element = comment.previousSibling;
-    while (element && element.nodeType === Node.TEXT_NODE) {
-      element = element.previousSibling;
-    }
-    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
-      comment.remove();
-      return;
-    }
-
-    comment.remove();
-
-    scope.reaction(element, () => {
-      element.textContent = this.evaluateRawTextNodes(entry.nodes, data);
-    });
+    bindRawTextContentFn({ comment, entry, data, scope, renderer: this });
   }
 
   // Evaluate AST nodes into a plain text string — used for content inside
@@ -485,39 +390,9 @@ export class Renderer {
         Text Bindings
   *******************************/
 
+  // Text-expression binding — delegates to reactive-data.js.
   bindTextExpression(comment, entry, data, scope) {
-    const exprNode = entry.node;
-    const parent = comment.parentNode;
-
-    if (exprNode.unsafeHTML) {
-      const anchor = document.createTextNode('');
-      comment.replaceWith(anchor);
-      const ownedNodes = [];
-      scope.reaction(anchor, () => {
-        for (const n of ownedNodes) { n.remove(); }
-        ownedNodes.length = 0;
-        const value = this.lookupExpression(exprNode.value, data);
-        if (value != null && value !== '') {
-          const parsed = this.parseHTML(String(value));
-          const nodes = [...parsed.childNodes];
-          anchor.after(parsed);
-          ownedNodes.push(...nodes);
-        }
-      });
-    }
-    else if (exprNode.literalValue) {
-      const value = this.evaluator.lookupTokenValue(exprNode.value, data);
-      const textNode = document.createTextNode(value ?? '');
-      parent.replaceChild(textNode, comment);
-    }
-    else {
-      const textNode = document.createTextNode('');
-      parent.replaceChild(textNode, comment);
-      scope.reaction(textNode, () => {
-        const value = this.lookupExpression(exprNode.value, data);
-        textNode.data = value ?? '';
-      });
-    }
+    bindTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
 
   /*******************************
@@ -1157,76 +1032,9 @@ export class Renderer {
     }
   }
 
+  // Hydrating text-expression binding — delegates to reactive-data.js.
   hydrateTextExpression(comment, entry, data, scope) {
-    const exprNode = entry.node;
-
-    if (exprNode.unsafeHTML) {
-      // Collect server-rendered nodes after the comment until next marker
-      const ownedNodes = [];
-      let next = comment.nextSibling;
-      while (
-        next && !(next.nodeType === Node.COMMENT_NODE
-          && (next.data.startsWith(COMMENT_MARKER) || next.data.startsWith(BLOCK_MARKER)
-            || next.data.startsWith('/sui-block')))
-      ) {
-        ownedNodes.push(next);
-        next = next.nextSibling;
-      }
-
-      // Replace comment with text node anchor so removeMarkers() doesn't orphan it
-      const anchor = document.createTextNode('');
-      comment.replaceWith(anchor);
-
-      scope.reaction(anchor, (comp) => {
-        this.lookupExpression(exprNode.value, data); // register deps (even on firstRun)
-        if (comp.firstRun) { return; } // skip expensive reparse — server DOM is trusted
-        for (const n of ownedNodes) { n.remove(); }
-        ownedNodes.length = 0;
-        const value = this.lookupExpression(exprNode.value, data);
-        if (value != null && value !== '') {
-          const parsed = this.parseHTML(String(value));
-          const nodes = [...parsed.childNodes];
-          anchor.after(parsed);
-          ownedNodes.push(...nodes);
-        }
-      });
-    }
-    else {
-      // The server output is: <!--sui:v1:0-->VALUE + static text...
-      // The browser merges VALUE with any following static text into one text node.
-      // We need to split: adopt VALUE portion as a reactive text node, preserve the rest.
-      const nextNode = comment.nextSibling;
-
-      let textNode;
-      if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
-        const serverValue = String(this.lookupExpression(exprNode.value, data) ?? '');
-        const fullText = nextNode.data;
-
-        if (fullText.length > serverValue.length && fullText.startsWith(serverValue)) {
-          // Split at the boundary between value and static text
-          // splitText returns the NEW node (remainder), original keeps the first part
-          nextNode.splitText(serverValue.length);
-          textNode = nextNode; // first part = the value
-        }
-        else {
-          textNode = nextNode;
-        }
-        comment.remove();
-      }
-      else {
-        textNode = document.createTextNode('');
-        comment.replaceWith(textNode);
-      }
-
-      scope.reaction(textNode, (comp) => {
-        if (comp.firstRun) {
-          this.lookupExpression(exprNode.value, data);
-          return;
-        }
-        const value = this.lookupExpression(exprNode.value, data);
-        textNode.data = value ?? '';
-      });
-    }
+    hydrateTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
 
   hydrateBlockDirective(comment, entry, data, scope) {
