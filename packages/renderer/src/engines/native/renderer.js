@@ -29,6 +29,7 @@ import {
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
+import { isItemContext } from './blocks/each.js';
 import { getBlock } from './blocks/registry.js';
 import { DynamicRegion } from './dynamic-region.js';
 import { ReactionScope } from './reaction-scope.js';
@@ -410,7 +411,7 @@ export class Renderer {
         this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'each':
-        this.createEach({ node, data, scope, parentNode, marker: comment, isSVG });
+        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'async':
         this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
@@ -441,162 +442,6 @@ export class Renderer {
   /*******************************
         List Rendering
   *******************************/
-
-  createEach({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, marker);
-
-    const itemMap = new Map();
-    let currentKeys = [];
-    let showingElse = false;
-
-    scope.onDispose(() => {
-      this.clearAllItems(itemMap);
-      region.clear();
-    });
-
-    scope.reaction(region.anchor, (comp) => {
-      const rawItems = this.lookupExpression(node.over, data) || [];
-      const collectionType = this.getCollectionType(rawItems);
-      const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
-
-      if (isEmpty(items) && node.elseContent) {
-        this.clearAllItems(itemMap);
-        currentKeys = [];
-        if (!showingElse) {
-          const elseScope = scope.child();
-          const elseFragment = this.readAST({ ast: node.elseContent, data, scope: elseScope, isSVG });
-          region.setContent(elseFragment, elseScope);
-          showingElse = true;
-        }
-        return;
-      }
-
-      if (showingElse) {
-        region.clear();
-        showingElse = false;
-      }
-
-      const newKeys = items.map((item, i) => this.getItemID(item, i, collectionType));
-      const newKeySet = new Set(newKeys);
-
-      for (const key of currentKeys) {
-        if (!newKeySet.has(key)) {
-          const entry = itemMap.get(key);
-          entry.scope.dispose();
-          for (const n of entry.nodes) { n.remove(); }
-          itemMap.delete(key);
-        }
-      }
-
-      let insertAfter = region.anchor;
-
-      for (let i = 0; i < newKeys.length; i++) {
-        const key = newKeys[i];
-        const item = items[i];
-
-        if (itemMap.has(key)) {
-          const entry = itemMap.get(key);
-
-          if (entry.item !== item || entry.index !== i) {
-            // Different reference or position — set() with deep equality
-            // so unchanged cloned items don't trigger spurious re-renders
-            const eachData = this.getEachData(item, i, collectionType, node);
-            entry.itemSignal.set(eachData);
-            entry.item = item;
-            entry.index = i;
-          }
-          else if (typeof item === 'object') {
-            // Same reference at same position — properties may have been
-            // mutated in place. Deep equality can't detect this (a === b
-            // short-circuits), so force-notify dependents.
-            entry.itemSignal.notify();
-          }
-
-          const firstItemNode = entry.nodes[0];
-          if (firstItemNode && firstItemNode.previousSibling !== insertAfter) {
-            for (const n of entry.nodes) {
-              insertAfter.after(n);
-              insertAfter = n;
-            }
-          }
-          else {
-            insertAfter = entry.nodes[entry.nodes.length - 1] || insertAfter;
-          }
-        }
-        else {
-          const eachData = this.getEachData(item, i, collectionType, node);
-          const itemScope = scope.child();
-          const itemSignal = new Signal(eachData, { allowClone: false });
-          const itemProxy = this.createItemDataProxy(data, itemSignal);
-
-          const itemFragment = this.readAST({
-            ast: node.content,
-            data: itemProxy,
-            scope: itemScope,
-            isSVG,
-          });
-          const nodes = [...itemFragment.childNodes];
-          insertAfter.after(itemFragment);
-          insertAfter = nodes[nodes.length - 1] || insertAfter;
-          itemMap.set(key, { nodes, itemSignal, scope: itemScope, item, index: i });
-        }
-      }
-
-      currentKeys = newKeys;
-    });
-  }
-
-  createItemDataProxy(parentData, itemSignal) {
-    return new Proxy(parentData, {
-      get(target, prop) {
-        if (prop === '__isItemProxy') { return true; }
-        if (typeof prop === 'symbol') { return target[prop]; }
-        const itemData = itemSignal.value;
-        if (prop in itemData) { return itemData[prop]; }
-        return target[prop];
-      },
-      has(target, prop) {
-        if (prop === '__isItemProxy') { return true; }
-        const itemData = itemSignal.peek();
-        return (prop in itemData) || (prop in target);
-      },
-    });
-  }
-
-  getCollectionType(items) {
-    return isArray(items) ? 'array' : 'object';
-  }
-
-  getItemID(item, indexOrKey, collectionType) {
-    if (isPlainObject(item)) {
-      const key = (collectionType === 'object') ? indexOrKey : undefined;
-      return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
-    }
-    if (isString(item)) { return item + ':' + indexOrKey; }
-    return indexOrKey;
-  }
-
-  getEachData(item, indexOrKey, collectionType, node) {
-    let { as, indexAs } = node;
-    if (!indexAs) {
-      indexAs = (collectionType === 'array') ? 'index' : 'key';
-    }
-    if (collectionType === 'object') {
-      indexOrKey = item.key;
-      item = item.value;
-    }
-    return as
-      ? { [as]: item, [indexAs]: indexOrKey }
-      : { ...item, this: item, [indexAs]: indexOrKey };
-  }
-
-  clearAllItems(itemMap) {
-    for (const entry of itemMap.values()) {
-      entry.scope.dispose();
-      for (const n of entry.nodes) { n.remove(); }
-    }
-    itemMap.clear();
-  }
 
   /*******************************
         Async Rendering
@@ -1100,9 +945,6 @@ export class Renderer {
     }
 
     switch (node.type) {
-      case 'each':
-        this.hydrateEach({ node, data, scope, region });
-        break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
@@ -1181,40 +1023,6 @@ export class Renderer {
     }
   }
 
-  hydrateEach({ node, data, scope, region }) {
-    // On first run: evaluate to establish dependencies, skip rendering.
-    // On subsequent runs: full re-render of the entire list.
-    scope.reaction(region.anchor, (comp) => {
-      const rawItems = this.lookupExpression(node.over, data) || [];
-      const collectionType = this.getCollectionType(rawItems);
-      const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
-
-      if (comp.firstRun) {
-        return; // server content is correct
-      }
-
-      if (isEmpty(items) && node.elseContent) {
-        const elseScope = scope.child();
-        const elseFragment = this.readAST({ ast: node.elseContent, data, scope: elseScope });
-        region.setContent(elseFragment, elseScope);
-      }
-      else {
-        const fragment = document.createDocumentFragment();
-        const listScope = scope.child();
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const eachData = this.getEachData(item, i, collectionType, node);
-          const itemSignal = new Signal(eachData, { allowClone: false });
-          const itemProxy = this.createItemDataProxy(data, itemSignal);
-          const itemScope = listScope.child();
-          const itemFragment = this.readAST({ ast: node.content, data: itemProxy, scope: itemScope });
-          fragment.append(itemFragment);
-        }
-        region.setContent(fragment, listScope);
-      }
-    });
-  }
-
   /*******************************
         Subtemplate Data
   *******************************/
@@ -1230,8 +1038,12 @@ export class Renderer {
         }
       }
       else if (isPlainObject(node.data)) {
+        // Inside {#each}, each item's data proxy is tracked by isItemContext
+        // — read reactively so item-signal mutations propagate. Outside each,
+        // static data={} remains non-reactive per existing semantics.
+        const inItemContext = isItemContext(data);
         each(node.data, (expr, key) => {
-          templateData[key] = data.__isItemProxy
+          templateData[key] = inItemContext
             ? this.evaluator.lookupExpressionValue(expr, data)
             : Reaction.nonreactive(() => this.evaluator.lookupExpressionValue(expr, data));
         });
