@@ -234,13 +234,19 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
+      // Per-item boundary markers let the client claim each item's DOM
+      // slice into its own ItemRecord instead of nuking the whole list
+      // on first data change. Versioned token (v1) matches the broader
+      // sui:v1: / sui-block:v1: scheme from ssr-principles.
       for (let i = 0; i < items.length; i++) {
         const eachData = this.getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
         const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
         const savedEvaluator = this.evaluator;
         this.evaluator = itemEvaluator;
+        html += `<!--sui-each-item:v1:${i}-->`;
         html += this.renderNodes(node.content, itemData);
+        html += `<!--/sui-each-item:v1:${i}-->`;
         this.evaluator = savedEvaluator;
       }
     }

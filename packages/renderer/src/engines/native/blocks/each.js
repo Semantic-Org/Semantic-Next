@@ -37,6 +37,51 @@ export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
 }
 
+const EACH_ITEM_OPEN = 'sui-each-item:v1:';
+const EACH_ITEM_CLOSE = '/sui-each-item:v1:';
+
+// Walk a flat nodes list looking for <!--sui-each-item:v1:N-->...
+// <!--/sui-each-item:v1:N--> pairs. Returns one slice per opening marker
+// (inner nodes only; marker comments are collected separately and removed
+// from the DOM). Handles nested block markers by depth-tracking so a
+// nested {#each} doesn't confuse the walker.
+function extractItemSlices(ownedNodes) {
+  const slices = [];
+  const markersToRemove = [];
+  let currentSlice = null;
+  let depth = 0;
+
+  for (const node of ownedNodes) {
+    if (node.nodeType === Node.COMMENT_NODE) {
+      const data = node.data;
+      if (data.startsWith(EACH_ITEM_OPEN)) {
+        if (depth === 0) {
+          currentSlice = [];
+          markersToRemove.push(node);
+          depth = 1;
+          continue;
+        }
+        depth++;
+      }
+      else if (data.startsWith(EACH_ITEM_CLOSE)) {
+        depth--;
+        if (depth === 0) {
+          slices.push(currentSlice);
+          currentSlice = null;
+          markersToRemove.push(node);
+          continue;
+        }
+      }
+    }
+    if (currentSlice) {
+      currentSlice.push(node);
+    }
+  }
+
+  for (const m of markersToRemove) { m.remove(); }
+  return slices;
+}
+
 function getCollectionType(items) {
   return isArray(items) ? 'array' : 'object';
 }
@@ -242,12 +287,116 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, lookupExpression, self }) {
-    // Preserve server-rendered DOM until a data change triggers update.
-    // Per step 6 plan: nuke-and-rerender on first data change. Per-item
-    // server markers and claim-based hydration land in step 9.
-    lookupExpression(node.over);
-    self.hasHydrated = true;
+  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
+    const { items, collectionType } = resolveItems(node, lookupExpression);
+
+    // Empty + else-content: server rendered elseContent as a single block.
+    // Claim it as a singleton else record.
+    if (isEmpty(items) && node.elseContent) {
+      if (region.ownedNodes.length > 0) {
+        const elseScope = scope.child();
+        region.childScopes.push(elseScope);
+        hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST: node.elseContent, data, scope: elseScope });
+        const frag = document.createDocumentFragment();
+        for (const n of region.ownedNodes) { frag.appendChild(n); }
+        region.anchor.after(frag);
+        self.records.push({
+          key: null,
+          item: null,
+          index: -1,
+          itemSignal: null,
+          nodes: [...region.ownedNodes],
+          scope: elseScope,
+          isElse: true,
+        });
+      }
+      return;
+    }
+
+    // Normal case: parse per-item markers and claim each slice.
+    const itemSlices = extractItemSlices(region.ownedNodes);
+
+    // Legacy-server fallback: no per-item markers present (pre-step-9 server
+    // output). Preserve the pre-existing "nuke-and-rerender on first data
+    // change" semantics by deferring to update().
+    if (itemSlices.length === 0 && items.length > 0) {
+      self.hasHydrated = true;
+      return;
+    }
+
+    // Positional 1-to-1 claim: each client item gets the slice at the same
+    // index. Count mismatches (items.length !== itemSlices.length) are
+    // handled defensively — extras on either side get a fresh render or
+    // dispose after the claimed prefix. See plan §ServerRenderer's note
+    // on mismatch recovery.
+    const claimCount = Math.min(items.length, itemSlices.length);
+    const outerFrag = document.createDocumentFragment();
+
+    for (let i = 0; i < claimCount; i++) {
+      const itemNodes = itemSlices[i];
+      const item = items[i];
+      const key = getItemID(item, i, collectionType);
+      const eachData = getEachData(item, i, collectionType, node);
+      const itemScope = scope.child();
+      const itemSignal = new Signal(eachData, { allowClone: false });
+      const itemProxy = createItemDataProxy(data, itemSignal);
+
+      hydrateInnerContent({ ownedNodes: itemNodes, innerAST: node.content, data: itemProxy, scope: itemScope });
+      for (const n of itemNodes) { outerFrag.appendChild(n); }
+
+      self.records.push({
+        key,
+        item,
+        index: i,
+        itemSignal,
+        nodes: itemNodes,
+        scope: itemScope,
+        isElse: false,
+      });
+    }
+
+    // Dispose any excess slices — server rendered more items than the
+    // client sees. The slices' content is orphaned in hydrateInnerContent's
+    // containers via an earlier call or never claimed; explicitly remove
+    // any leftover DOM.
+    for (let i = claimCount; i < itemSlices.length; i++) {
+      for (const n of itemSlices[i]) {
+        if (n.parentNode) { n.remove(); }
+      }
+    }
+
+    region.anchor.after(outerFrag);
+
+    // Fresh-render any items the server didn't emit — client has more
+    // items than slices. Append after the last claimed item's nodes.
+    if (items.length > itemSlices.length) {
+      let insertAfter = self.records.length > 0
+        ? self.records[self.records.length - 1].nodes.at(-1) || region.anchor
+        : region.anchor;
+      for (let i = itemSlices.length; i < items.length; i++) {
+        const item = items[i];
+        const key = getItemID(item, i, collectionType);
+        const eachData = getEachData(item, i, collectionType, node);
+        const itemScope = scope.child();
+        const itemSignal = new Signal(eachData, { allowClone: false });
+        const itemProxy = createItemDataProxy(data, itemSignal);
+
+        const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
+        const nodes = [...fragment.childNodes];
+        insertAfter.after(fragment);
+        if (nodes.length > 0) { insertAfter = nodes[nodes.length - 1]; }
+
+        self.records.push({
+          key,
+          item,
+          index: i,
+          itemSignal,
+          nodes,
+          scope: itemScope,
+          isElse: false,
+        });
+      }
+    }
   },
 
   update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
