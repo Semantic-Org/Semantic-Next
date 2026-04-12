@@ -35,173 +35,154 @@
 
 ---
 
-## Dependency Graph
+## Strategic Sequence
+
+The ordering below builds the factory before producing at scale. Each phase resolves a class of risk that would compound if deferred — foundations first, then contracts, then production velocity.
 
 ```
-TOKEN FINALIZATION (the gate)
+PHASE 0: RENDERER ARCHITECTURE (make the foundation elegant)
 │
-├─→ Token Migration (agent, mechanical)
-├─→ CSS Token Extraction → MCP Improvements (remaining 3 tools)
-├─→ CSS Token & Theming Docs (12 pages)
+├─→ PHASE 1: SSR + LIGHT DOM (unlock the full component design space)
+│     ├─ SSR data binding markers (clean hydration on clean directives)
+│     └─ Light DOM pre-render pipeline (shadow DOM becomes optional)
 │
-├─→ PRIMITIVE BUILD-OUT (critical path components first)
-│   │
-│   │  Tier 1 — Unblock ecosystem guides & getting started
-│   │  ─────────────────────────────────────────────────────
-│   │  dropdown/select, checkbox, radio, switch, form,
-│   │  form-field, tabs, accordion
-│   │
-│   │  Tier 2 — Unblock behavior docs & advanced guides
-│   │  ─────────────────────────────────────────────────────
-│   │  popover, tooltip (primitive, not behavior), slider,
-│   │  textarea, toast, drawer, breadcrumb, pagination
-│   │
-│   │  Tier 3 — Complete the library
-│   │  ─────────────────────────────────────────────────────
-│   │  Everything else (~45 components)
-│   │
-│   ├─→ Primitive/Component Docs (authored MDX per component)
-│   ├─→ Behavior Docs (attach, transition, escape, popover)
-│   ├─→ Learn Courses 3xx-5xx
-│   └─→ Value Schema → Wrapper Architecture → Wrapper Packages
-│        └─→ Ecosystem Guides (final, post-wrapper)
+├─→ PHASE 2: PERFORMANCE + API CONTRACTS (lock what agents will target)
+│     ├─ Signal Performance (foundational behavioral change)
+│     ├─ Value Schema (contract for ~20-30 form components)
+│     ├─ State from Settings (attribute-to-state promotion)
+│     ├─ Subtemplate Settings (data shape for tagless subtemplates)
+│     └─ Template Match Blocks (agent-relevant template construct)
 │
-├─→ PARALLEL (unblocked now)
-│   ├─ Docs Deploy 0.18.0 (agent, 0.5d)
-│   ├─ Subtemplate Settings (pair, active)
-│   ├─ State from Settings (pair, 1d)
-│   ├─ Getting Started Guides — using-ui, creating-ui, theming (pair, 4-6d)
-│   ├─ Philosophy Pages — natural-language, about project (jack, 2-3d)
-│   ├─ Ecosystem Guides — raw WC version, pre-wrapper (pair, 15-20d)
-│   ├─ Roadmap page redesign (pair, 1-2d)
-│   ├─ Homepage Tour Ribbon — 3 PlaygroundExamples (pair, 2-3d)
-│   └─ LSP & Type Intelligence (pair, 20-30d across 4 phases)
+├─→ PHASE 3: NAMING + TOKENS (lock the vocabulary)
+│     ├─ Naming Conventions (tag names for ~80 components)
+│     └─ Token Finalization (informed by real primitive usage)
 │
-└─→ HOMEPAGE (last — final content pass after everything converges)
+├─→ PHASE 4: AGENT PIPELINE (the factory)
+│     ├─ Managed Agents pipeline (Anthropic infrastructure)
+│     ├─ Auto-research pattern (component research → spec → implementation → validation)
+│     └─ Tier 1 → Tier 2 → Tier 3 primitives (built via pipeline)
+│
+└─→ PHASE 5: DOCUMENTATION + ECOSYSTEM (post-pipeline)
+      ├─ Docs deploy, getting started guides, philosophy pages
+      ├─ Primitive/component docs, behavior docs
+      ├─ Wrapper architecture + packages (React/Vue/Svelte)
+      ├─ Ecosystem guides, learn courses
+      ├─ LSP & type intelligence
+      └─ Homepage (last)
 ```
 
 ---
 
-## Do Next (unblocked, priority order)
+## Phase 0 — Renderer Architecture
 
-| # | What | Hours | Mode | Notes |
-|---|------|-------|------|-------|
-| 1 | Token Finalization | open | pair | The gate. Open questions: color grades (0-100 vs 5-100), borders (semantic vs numeric), dark mode inversion, surface colors (slate). See [plan](token-finalization.md). |
-| 2 | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. |
-| 3 | State from Settings | 8h | pair | ~25 lines. API design + implement. |
-| 4 | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | Mechanical rename across ~40 files. Partially resolves #21 (naming conventions). |
+The native renderer is 1700 lines of correct but repeated logic. Each block directive (conditional, each, async, rerender, subtemplate, snippet) hand-inlines the same ceremony: create region, wire reaction, branch on hydration vs render, handle updates, handle cleanup. The `defineBranch` refactor extracts this into the same destructured-callback pattern that `defineComponent` uses. This must land before SSR and light DOM work because both modify the render/hydrate lifecycle — surgical edits to individual directive files vs modifications to a monolith.
 
-## Up Next (unblocked after "Do Next" or independent)
-
-| # | What | Hours | Mode | Notes |
-|---|------|-------|------|-------|
-| 6 | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. No blocker. |
-| 7 | Ecosystem Guides — raw WC (7 pages) | 120-160h (15-20d) | pair | One page per framework. Pre-wrapper versions. install/framework.mdx (335 lines) is starting material. |
-| 8 | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
-| 9 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
-| 10 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." Rethink or simplify. |
-| 11 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval + reconciliation. |
-| 11b | [Signal Performance](signal-performance.md) | 4-5h | pair | `scoped` — Freeze-on-set replaces clone-on-read (15-71x faster). Flush error boundary. Benchmarked. |
-| 12 | [Tree-Shakeable Lit](tree-shakeable-lit.md) | 4h | agent | `scoped` — Make LitRenderer a named export consumers opt into. No Lit in bundle unless imported. |
-| 13 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Trailing-slash HTML pages (jsdelivr pattern). Root landing, package indexes, icons/fonts listings. |
-| 14 | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | VS Code extension: tmLanguage + template LSP + TS plugin. Types validated (settings/state/self in events via tsc, self in createComponent via plugin). Phase 0 (.d.ts + tmLanguage) shippable in ~1d. [TDD](lsp-and-type-intelligence-tdd.md). |
-
-## Renderer Architecture (unblocked, independent track)
-
-| # | Plan | Hours | Mode | Scope | Notes |
+| # | What | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 38 | [Native Renderer Directives](native-renderer-directives.md) | 8-12h (1-1.5d) | pair | initial | `defineBranch` pattern — decompose 1700-line monolith into lifecycle-based directive modules. Hydration collapses into render path. |
-
-## Template Language Enhancements (unblocked, independent track)
-
-| # | Plan | Hours | Mode | Scope | Notes |
-|---|------|-------|------|-------|-------|
-| 37 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. Test verbose first. Smallest scope. |
-| 35 | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}` / `{is}` / `{else}` — value-based branching. Cleanest of the four, no reactivity concerns. |
-| 36 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. Caller context. |
-| 34 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Computed signal per binding. Build last, validate need from other three. |
-
-## Blocked (waiting on token finalization)
-
-| # | What | Hours | Mode | Blocker | Notes |
-|---|------|-------|------|---------|-------|
-| 13 | Token Migration (remaining) | 16-32h (2-4d) | pair/agent | Tokens locked | ~3 primitives + ~65 docs files. Not purely mechanical — spacing→padding/margin/gap needs judgment. |
-| 14 | CSS Token Extraction | 16-24h (2-3d) | pair | Tokens locked | `getThemingCSS` util + MCP tool. |
-| 15 | MCP Improvements (remaining) | 8-16h (1-2d) | agent | Token extraction | 3 tools: `get_theming_css`, `get_global_tokens`, `get_token_usage`. |
-| 16 | CSS Token & Theming Docs (12 pages) | 40-56h (5-7d) | pair | Tokens locked | 6 token pages + 6 styling concept pages. |
-
-## Architecture Decisions (gate the primitive build-out)
-
-These are design decisions that must be resolved before building components at velocity. Each is a `pair` session. They sit between token finalization and the actual build-out.
-
-| # | Plan | Hours | Mode | Scope | Blocker | Notes |
-|---|------|-------|------|-------|---------|-------|
-| 18 | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | — | Contract for ~20-30 form components. `value` setting + schema + `change` event. Gates form/form-field and wrapper story. |
-| 19 | [Light DOM Styling](light-dom-styling.md) | 16-24h (2-3d) | pair | initial | — | How table, header, and other slotted-content components handle styles that need to pierce shadow DOM. Solve once as a framework pattern. |
-| 20 | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Naming conventions | How `<ui-popup>` wraps the `tooltip` behavior. Pattern recurs for accordion, dropdown, tabs. |
-| 21 | [Naming Conventions](naming-conventions.md) | 8-16h (1-2d) | pair | initial | — | tooltip vs popup vs popover — all one concept in SUI. Lock the naming philosophy for ~80 components. Names are permanent. |
-| 22 | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | jack/pair | initial | Tokens + light DOM | Finish table, dropdown, header, segment, divider before building new. |
-
-## Blocked (waiting on architecture decisions + primitives)
-
-| # | What | Hours | Mode | Blocker | Notes |
-|---|------|-------|------|---------|-------|
-| 23 | Tier 1 Primitives | 16-40h each (2-5d) | jack | Arch decisions resolved | dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion (~8 components, ~160-320h total) |
-| 24 | Behavior Docs (4 behaviors) | 40-64h (5-8d) | pair | Needs more primitives to show real usage | attach, transition, escape, popover |
-| 25 | Primitive Usage Guides | 56-80h (7-10d) | pair | Needs more primitives | Specimen Explorer done. CSS tab, authored MDX remaining. |
-| 26 | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | Value schema | Generation pipeline for React/Vue/Svelte wrappers. |
-| 27 | Tier 2 Primitives | 16-40h each (2-5d) | jack | Tier 1 done | popover, slider, textarea, toast, drawer, breadcrumb, pagination (~8 components) |
-| 28 | Wrapper Packages (3-4 frameworks) | 96-160h (12-20d) | pair | Wrapper arch + enough primitives | `@semantic-ui/react`, `/vue`, `/svelte` |
-| 29 | Ecosystem Guides — final (7 pages) | 56-112h (7-14d) | pair | Wrapper packages | Rewrite raw WC guides to use wrapper packages. |
-| 30 | Tier 3 Primitives (~45) | 16-40h each (2-5d) | jack | Tiers 1-2 done | The long tail. ~800-1800h total. |
-| 31 | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | Components exist to teach | 3 courses, ~8-12 lessons each. |
-| 32 | Component Docs (9 app-level) | 72-144h (9-18d) | pair | Components exist | global-search, panels, nav-menu, etc. |
-
-## Last
-
-| # | What | Hours | Mode | Blocker | Notes |
-|---|------|-------|------|---------|-------|
-| 33 | Homepage — final pass | 8-16h (1-2d) | jack | Everything above | Polish + content finalization. |
+| 0 | [Native Renderer Directives](native-renderer-directives.md) | 8-12h (1-1.5d) | pair | initial | `defineBranch` pattern. Renderer drops to ~400 lines of orchestration. Each directive becomes its own file with `create`/`render`/`hydrate`/`update`/`destroy` lifecycle. Hydration collapses from separate methods into an initialization mode within the same directive. |
 
 ---
 
-## Hidden Content Inventory (commented out on `docs/shippable`)
+## Phase 1 — SSR + Light DOM
 
-All items below are commented out in menus/pages, not deleted. Uncomment when content is ready.
+SSR markers first because the light DOM pipeline reuses the same renderer infrastructure — same AST, same expression evaluator, same directives, different output target. Fix the foundation before building a new mode on it.
 
-### menus.js — topbar
-- ~~CSS/Styling tab~~ → blocked on CSS token docs (#16)
-- ~~Components tab~~ → blocked on component docs (#32)
-- ~~Behaviors tab~~ → blocked on behavior docs (#24)
+Light DOM second because it determines which components are architecturally possible. `@scope` with `:not(:defined)` boundary makes shadow DOM optional per-component. Table, accordion panels, tabs content, description lists, data grids — none buildable without this. Also eliminates FOUC for all components via the CDN pre-render path.
 
-### menus.js — start sidebar
-- ~~Roadmap~~ → needs redesign (#10)
-- ~~Getting Started (3 sub-pages)~~ → write content (#6)
-- ~~Ecosystems (7 sub-pages)~~ → write content (#7)
-- ~~Philosophy (2 sub-pages)~~ → write content (#8)
+| # | What | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 1a | SSR Data Binding Markers | TBD | pair | initial | Clean hydration on clean directive architecture. Versioned markers, mismatch detection, text node splitting. |
+| 1b | [Light DOM Pre-render Pipeline](light-dom-prerender.html) | TBD | pair | scoped | Phase 0: CSS utilities (`prerenderCSS`, `@scope` rewriting). Phase 1: Non-reactive render mode (`Reaction.nonreactive()`). Phase 2: Slot projection. Phase 3: Upgrade detection in `defineComponent`. Phase 4: Entry point + CDN loader integration. |
 
-### index.astro — homepage
-- ~~Tour ribbon~~ → create 3 PlaygroundExamples (#9)
-- ~~Footer: Roadmap link~~ → after redesign (#10)
-- ~~Footer: Components, Behaviors, CSS Tokens, Styling Guide~~ → after respective docs
+---
 
-### start/index.mdx
-- ~~Components card~~ → after component docs
-- ~~Behaviors card~~ → after behavior docs
+## Phase 2 — Performance + API Contracts
 
-### learn selection
-- ~~Advanced Guide (311)~~ → after learn course 3xx (#31)
-- ~~UI Framework (411)~~ → after learn course 4xx (#31)
-- ~~Open Source Guide (511)~~ → after learn course 5xx (#31)
+These are the foundational behavioral changes and API contracts that agents will target. Every decision made here gets learned by agents and repeated across 60+ components. Get them right before scaling.
 
-### Stub pages (frontmatter only, need authored content)
-- 13 primitive content MDX files → per-component docs (#25)
-- 9 component content MDX files → component docs (#32)
-- 2 behavior content MDX files → behavior docs (#24)
-- 4 getting started guide pages → (#6)
-- 7 ecosystem guide pages → (#7)
-- 3 philosophy pages → (#8)
-- 1 CSS index page → (#16)
+| # | What | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 2a | [Signal Performance](signal-performance.md) | 4-5h | pair | scoped | Freeze-on-set replaces clone-on-read (15-71x faster). `safety` preset system (`'freeze'`/`'clone'`/`'reference'`/`'none'`). Flush error boundary (3 lines). Benchmarked. 8 fixes already shipped. |
+| 2b | [Value Schema](value-schema.md) | 16-24h (2-3d) | pair | initial | Contract for ~20-30 form components. `value` setting + schema + `change` event. Key question: is value just a setting, or does it need dedicated machinery beyond the settings proxy? Gates form/form-field and wrapper story. |
+| 2c | [State from Settings](state-from-settings.md) | 8h | pair | scoped | ~25 lines across 3 files. `{ default: 'all', from: 'setting' }` in `defaultState`. Eliminates manual shadowing pattern for components that accept initial values from attributes but own them as state. |
+| 2d | Subtemplate Settings | TBD | pair | initial | Subtemplates have data context but no settings (tagless, no attributes). Need a way to define their data shape — data contracts for tagless template units. |
+| 2e | [Template Match Blocks](template-match-blocks.md) | 8-16h (1-2d) | pair | scoped | `{#match}`/`{is}`/`{else}` — value-based branching. Replaces verbose `{#if is x 'a'}...{else if is x 'b'}` chains. Agent-generated templates frequently need status/mode/view-type branching. |
+| 2f | Expression Error Surfacing | 4h | pair | initial | `evaluateJavascript` silently returns `undefined` on all errors. Surface the expression string, available data keys, and error message in development mode. Critical for agent-generated components where broken output looks intentionally empty. |
+| 2g | [CSP-Compatible Expressions](csp-compatible-expressions.md) | 12-24h | pair | initial | Opt-in three-level flag on `defineComponent` — default / no-runtime-eval / lisp-only. Lets SUI run under strict CSP, Workers, MV3, Deno without `--allow-eval`. Tree-shakeable hand-rolled parser (~200-300 LOC, zero-cost when unused), no third-party deps, no build step. Framing is platform compatibility, not safety theatre. |
+
+---
+
+## Phase 3 — Naming + Tokens
+
+Naming must be locked before the agent pipeline starts producing components — names become tag names, import paths, spec files, and mental models. Tokens should be informed by real primitive usage rather than resolved in isolation.
+
+| # | What | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 3a | [Rename Tooltip → Popover](rename-tooltip-to-popover.md) | 4h | agent | scoped | Mechanical rename across ~40 files. Independent, can ship anytime. Standardizes before more components reference the behavior. |
+| 3b | [Naming Conventions](naming-conventions.md) | 8-16h (1-2d) | pair | initial | Lock tag names for all ~80 components. 76 components researched across 8-14 frameworks. Names are permanent. |
+| 3c | Token Finalization | open | pair | initial | Open questions: color grades, borders (semantic vs numeric), dark mode inversion, surface colors. See [plan](token-finalization.md). The core tension: decisions are interconnected and the cost of shipping wrong is permanent. Informed by Tier 1 primitive usage. |
+| 3d | Token Migration (remaining) | 16-32h (2-4d) | pair/agent | scoped | ~3 primitives + ~65 docs files. Not purely mechanical — spacing→padding/margin/gap needs judgment. |
+
+---
+
+## Phase 4 — Agent Pipeline
+
+The factory. Component research (76 analyses across 8-14 frameworks) becomes training data. Component specs become validation contracts. The MCP server becomes the agent's interface to the framework. Managed Agents + auto-research pattern: agent researches component → synthesizes consensus patterns → generates spec → generates component → validates against spec → runs tests → iterates on failures → human reviews output.
+
+| # | What | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| 4a | Agent Pipeline Architecture | TBD | pair | initial | Anthropic Managed Agents infrastructure. Karpathy-style auto-research. Define the research → spec → implementation → validation → review loop. |
+| 4b | [Component Wrapping Behavior](component-wrapping-behavior.md) | 16-24h (2-3d) | pair | initial | Canonical pattern for components wrapping behaviors (popup wrapping popover behavior, accordion, dropdown, tabs). Resolve during early pipeline usage when the first wrapping component is built. |
+| 4c | Tier 1 Primitives | 16-40h each (2-5d) | pipeline | — | dropdown/select, checkbox, radio, switch, form, form-field, tabs, accordion (~8 components). Built via agent pipeline with human review. |
+| 4d | Tier 2 Primitives | 16-40h each (2-5d) | pipeline | — | popover, slider, textarea, toast, drawer, breadcrumb, pagination (~8 components). |
+| 4e | Tier 3 Primitives (~45) | 16-40h each (2-5d) | pipeline | — | The long tail. |
+| 4f | [Primitive Completions](primitive-completions.md) | 40-80h (5-10d) | jack/pair | initial | Finish table (blocked on light DOM), dropdown, header, segment, divider. Table and header need light DOM. Segment and divider can be completed earlier if needed but not urgent — use normal HTML/CSS for docs until light DOM lands. |
+
+---
+
+## Phase 5 — Documentation + Ecosystem
+
+Post-pipeline. Write docs when there's something to document. Build wrappers when the core is stable. Ship the homepage when everything converges.
+
+| # | What | Hours | Mode | Notes |
+|---|------|-------|------|-------|
+| 5a | Docs Deploy 0.18.0 | 4h | agent | Build + smoke test. Menu trimming done on `docs/shippable`. Can ship anytime as minimum viable web presence. |
+| 5b | Getting Started Guides (3 pages) | 32-48h (4-6d) | pair | using-ui, creating-ui, theming. |
+| 5c | Philosophy Pages (2 pages) | 16-24h (2-3d) | jack | NL thesis + about project. Jack's voice. |
+| 5d | Primitive/Component Docs | 56-80h (7-10d) | pair | Authored MDX per component. Specimen Explorer done. CSS tab remaining. |
+| 5e | Behavior Docs (4 behaviors) | 40-64h (5-8d) | pair | attach, transition, escape, popover. |
+| 5f | CSS Token & Theming Docs (12 pages) | 40-56h (5-7d) | pair | 6 token pages + 6 styling concept pages. Blocked on token finalization. |
+| 5g | [Wrapper Architecture](wrapper-architecture.md) | 40-56h (5-7d) | pair | Generation pipeline for React/Vue/Svelte wrappers. Blocked on value schema + framework stabilization. |
+| 5h | Wrapper Packages (3-4 frameworks) | 96-160h (12-20d) | pair | `@semantic-ui/react`, `/vue`, `/svelte`. Blocked on wrapper arch + enough primitives. |
+| 5i | Ecosystem Guides (7 pages) | 56-112h (7-14d) | pair | One page per framework. Raw WC version first, rewrite post-wrapper. |
+| 5j | [LSP & Type Intelligence](lsp-and-type-intelligence.md) | 88-128h (11-16d) | pair | VS Code extension: tmLanguage + template LSP + TS plugin. 4 phases. Phase 0 (.d.ts + tmLanguage) shippable in ~1d. |
+| 5k | Learn Courses 3xx-5xx | 80-120h (10-15d) | pair | 3 courses, ~8-12 lessons each. Blocked on components existing to teach. |
+| 5l | Homepage — final pass | 8-16h (1-2d) | jack | Last. Polish + content finalization after everything converges. |
+
+---
+
+## Parallel (slot in wherever there's a gap)
+
+| # | What | Hours | Mode | Notes |
+|---|------|-------|------|-------|
+| P1 | [Icon Alias Audit](icon-alias-audit.md) | 4-8h | agent | Trim ~1960 aliases to ~400-600. Automated pre-filter + parallel subagent eval. |
+| P2 | [CDN Dir Pages](cdn-dir-pages.md) | 8-16h (1-2d) | pair | Cosmetic. Trailing-slash HTML pages for package indexes. |
+| P3 | Roadmap Page Redesign | 8-16h (1-2d) | pair | Current version is "jank." |
+| P4 | Homepage Tour Ribbon | 16-24h (2-3d) | pair | 3 PlaygroundExamples for templates/specs/components. |
+| P5 | CSS Token Extraction | 16-24h (2-3d) | pair | `getThemingCSS` util + MCP tool. Blocked on token finalization. |
+| P6 | MCP Improvements (remaining 3 tools) | 8-16h (1-2d) | agent | `get_theming_css`, `get_global_tokens`, `get_token_usage`. Blocked on token extraction. |
+
+---
+
+## Template Language Enhancements (post-match-blocks, as needed)
+
+Match blocks are prioritized in Phase 2. The remaining three ship when real component templates demonstrate clear need.
+
+| # | Plan | Hours | Mode | Scope | Notes |
+|---|------|-------|------|-------|-------|
+| T1 | [Template Spread Syntax](template-spread-syntax.md) | 4-8h | pair | scoped | `{>card ...friend}` — object spread in data passing. |
+| T2 | [Template Content Projection](template-wrapper-snippets.md) | 12-16h (1.5-2d) | pair | scoped | `{>content}` — content projection for snippets + subtemplates. |
+| T3 | [Template Let Bindings](template-let-bindings.md) | 10-14h (1-2d) | pair | scoped | `{#let}...{/let}` — snippet-for-vars. Build last, validate need from others. |
 
 ---
 
@@ -209,9 +190,7 @@ All items below are commented out in menus/pages, not deleted. Uncomment when co
 
 Plans in `ai/plans/deferred/`.
 
-- ~~Native Renderer~~ — completed, archived. Follow-up: Native SSR (#13b).
-- ~~Lit Removal~~ — completed, archived. Follow-up: Tree-Shakeable Lit (#12).
-- [Signals TC39 Integration](deferred/signals-tc39-integration.md) — Adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. `safety` preset system designed to make this transition zero-API-change. Lazy vs eager computed split along settings/state line. Blocked on TC39 Stage 3+.
+- [Signals TC39 Integration](deferred/signals-tc39-integration.md) — Adopt native `Signal.State`/`Signal.Computed` as backing primitives when TC39 ships. `safety` preset system designed to make this transition zero-API-change. Blocked on TC39 Stage 3+.
 - Icon stroke width — power-user feature, post-1.0
 - Subtree caching status doc — tracking doc
 
@@ -227,6 +206,47 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Build Fix** (1-2d est → included in CDN site) — `resolveBareImports` rewriting to `cdn.semantic-ui.com` URLs.
 - **Native Renderer** — Zero-dependency DOM renderer. Single-pass HTML assembly, comment markers, TreeWalker binding. 573/573 tests. TodoMVC verified.
 - **Lit Removal** — Engine-agnostic `defineComponent`. `WebComponentBase extends HTMLElement` + `LitWebComponentBase extends LitElement` as peer engines. Symmetric factory pattern, static config, DOM lifecycle events. 2121 tests.
+- **Tree-Shakeable Lit** — LitRenderer as named export consumers opt into. No Lit in bundle unless imported. Complete.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
 - **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
 - **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.
+
+---
+
+## Hidden Content Inventory (commented out on `docs/shippable`)
+
+All items below are commented out in menus/pages, not deleted. Uncomment when content is ready.
+
+### menus.js — topbar
+- ~~CSS/Styling tab~~ → blocked on CSS token docs (5f)
+- ~~Components tab~~ → blocked on component docs (5d)
+- ~~Behaviors tab~~ → blocked on behavior docs (5e)
+
+### menus.js — start sidebar
+- ~~Roadmap~~ → needs redesign (P3)
+- ~~Getting Started (3 sub-pages)~~ → write content (5b)
+- ~~Ecosystems (7 sub-pages)~~ → write content (5i)
+- ~~Philosophy (2 sub-pages)~~ → write content (5c)
+
+### index.astro — homepage
+- ~~Tour ribbon~~ → create 3 PlaygroundExamples (P4)
+- ~~Footer: Roadmap link~~ → after redesign (P3)
+- ~~Footer: Components, Behaviors, CSS Tokens, Styling Guide~~ → after respective docs
+
+### start/index.mdx
+- ~~Components card~~ → after component docs
+- ~~Behaviors card~~ → after behavior docs
+
+### learn selection
+- ~~Advanced Guide (311)~~ → after learn course 3xx (5k)
+- ~~UI Framework (411)~~ → after learn course 4xx (5k)
+- ~~Open Source Guide (511)~~ → after learn course 5xx (5k)
+
+### Stub pages (frontmatter only, need authored content)
+- 13 primitive content MDX files → per-component docs (5d)
+- 9 component content MDX files → component docs (5d)
+- 2 behavior content MDX files → behavior docs (5e)
+- 4 getting started guide pages → (5b)
+- 7 ecosystem guide pages → (5i)
+- 3 philosophy pages → (5c)
+- 1 CSS index page → (5f)

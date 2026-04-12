@@ -14,6 +14,13 @@ const jsNoHelpersHandler = {
   },
 };
 
+// Rough expression distribution (2026-04-12) — weight optimizations by hot paths:
+//
+//   ~60%  simple identifier   — direct property lookup
+//   ~20%  dotted path         — nested traversal
+//   ~20%  Lisp helper         — parsed, cached
+//    ~2%  JS eval             — new Function + Proxy
+//    <1%  complex Lisp        — inline objects/arrays
 export class ExpressionEvaluator {
   static PARENS_REGEXP = /\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\)/g;
   static TOKEN_REGEXP = /('[^']*'|"[^"]*"|\(|\)|[^\s()]+)/g;
