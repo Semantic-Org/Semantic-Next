@@ -11,3 +11,4 @@
 
 import './rerender.js';
 import './conditional.js';
+import './async.js';

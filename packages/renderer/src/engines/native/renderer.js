@@ -538,7 +538,7 @@ export class Renderer {
         this.createEach({ node, data, scope, parentNode, marker: comment, isSVG });
         break;
       case 'async':
-        this.createAsync({ node, data, scope, parentNode, marker: comment, isSVG });
+        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
         break;
       case 'rerender':
         this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
@@ -726,77 +726,6 @@ export class Renderer {
   /*******************************
         Async Rendering
   *******************************/
-
-  createAsync({ node, data, scope, parentNode, marker, isSVG }) {
-    const region = new DynamicRegion(parentNode, marker);
-    scope.onDispose(() => region.clear());
-
-    let generation = 0;
-    let hasResolved = false;
-    let resolvedValue = null;
-
-    const renderState = (ast, extraData = {}) => {
-      const stateScope = scope.child();
-      const stateFragment = this.readAST({
-        ast,
-        data: { ...data, ...extraData },
-        scope: stateScope,
-        isSVG,
-      });
-      region.setContent(stateFragment, stateScope);
-    };
-
-    scope.reaction(region.anchor, (comp) => {
-      const result = this.lookupExpression(node.expression, data);
-      const currentGen = ++generation;
-
-      if (isPromise(result)) {
-        if (node.loadingContent?.length) {
-          renderState(node.loadingContent);
-        }
-        else if (hasResolved && node.content?.length) {
-          renderState(node.content, this.createSuccessDataContext(node, resolvedValue));
-        }
-
-        result.then(value => {
-          if (currentGen < generation) { return; }
-          resolvedValue = value;
-          hasResolved = true;
-          renderState(node.content, this.createSuccessDataContext(node, value));
-          this.notifyUpdate();
-        }).catch(error => {
-          if (currentGen < generation) { return; }
-          if (node.errorContent?.length) {
-            const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
-            renderState(node.errorContent, errorData);
-            this.notifyUpdate();
-          }
-        });
-      }
-      else {
-        resolvedValue = result;
-        hasResolved = true;
-        renderState(node.content, this.createSuccessDataContext(node, result));
-      }
-    });
-  }
-
-  createSuccessDataContext(node, value) {
-    if (node.as) { return { [node.as]: value }; }
-    if (node.parts && isPlainObject(value)) {
-      const data = {};
-      each(node.parts, (prop) => {
-        if (prop in value) { data[prop] = value[prop]; }
-      });
-      if (node.rest) {
-        const restObj = { ...value };
-        each(node.parts, (prop) => delete restObj[prop]);
-        data[node.rest] = restObj;
-      }
-      return data;
-    }
-    return { this: value };
-  }
 
   /*******************************
         Rerender/Guard
@@ -1366,9 +1295,6 @@ export class Renderer {
       case 'each':
         this.hydrateEach({ node, data, scope, region });
         break;
-      case 'async':
-        this.hydrateAsync({ node, data, scope, region });
-        break;
       case 'template': {
         const templateName = this.evaluator.lookupExpressionValue(node.name, data);
         if (this.snippets[templateName]) {
@@ -1477,58 +1403,6 @@ export class Renderer {
           fragment.append(itemFragment);
         }
         region.setContent(fragment, listScope);
-      }
-    });
-  }
-
-  hydrateAsync({ node, data, scope, region }) {
-    scope.onDispose(() => region.clear());
-
-    let generation = 0;
-    let hasResolved = false;
-    let resolvedValue = null;
-
-    const renderState = (ast, extraData = {}) => {
-      const stateScope = scope.child();
-      const stateFragment = this.readAST({
-        ast,
-        data: { ...data, ...extraData },
-        scope: stateScope,
-      });
-      region.setContent(stateFragment, stateScope);
-    };
-
-    scope.reaction(region.anchor, (comp) => {
-      const result = this.lookupExpression(node.expression, data);
-      const currentGen = ++generation;
-
-      if (isPromise(result)) {
-        // On first run, keep server loading content (don't re-render loading)
-        if (!comp.firstRun && node.loadingContent?.length) {
-          renderState(node.loadingContent);
-        }
-
-        result.then(value => {
-          if (currentGen < generation) { return; }
-          resolvedValue = value;
-          hasResolved = true;
-          renderState(node.content, this.createSuccessDataContext(node, value));
-          this.notifyUpdate();
-        }).catch(error => {
-          if (currentGen < generation) { return; }
-          if (node.errorContent?.length) {
-            const errorData = node.errorAs ? { [node.errorAs]: error } : { this: error };
-            renderState(node.errorContent, errorData);
-            this.notifyUpdate();
-          }
-        });
-      }
-      else {
-        resolvedValue = result;
-        hasResolved = true;
-        if (!comp.firstRun) {
-          renderState(node.content, this.createSuccessDataContext(node, result));
-        }
       }
     });
   }
