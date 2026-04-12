@@ -115,10 +115,12 @@ export class Renderer {
     }
   }
 
-  // Evaluate an expression — only track dataDep for renderers that receive
+  // Look up an expression value — only track dataDep for renderers that receive
   // data from a parent (subtemplates). Top-level component renderers use
   // fine-grained Signal tracking and don't need coarse invalidation.
-  eval(expression, data) {
+  // Named to mirror ExpressionEvaluator.lookupExpressionValue; 2-arg positional
+  // because it's in hot reactive loops (per-expression, potentially 100× per render).
+  lookupExpression(expression, data) {
     if (this.receivesData) {
       this.dataDep.depend();
     }
@@ -262,7 +264,7 @@ export class Renderer {
 
     if (isSingleExpr) {
       scope.reaction(element, (comp) => {
-        const value = this.eval(singleEntry.node.value, data);
+        const value = this.lookupExpression(singleEntry.node.value, data);
         if (skipFirstWrite && comp.firstRun) { return; }
 
         if (isIfDefined && !value) {
@@ -297,7 +299,7 @@ export class Renderer {
           // but skip the DOM write — server content is trusted
           for (const part of parts) {
             if (part.markerID !== undefined) {
-              this.eval(entries[part.markerID].node.value, data);
+              this.lookupExpression(entries[part.markerID].node.value, data);
             }
           }
           return;
@@ -308,7 +310,7 @@ export class Renderer {
             value += part.static;
           }
           else {
-            value += this.eval(entries[part.markerID].node.value, data) ?? '';
+            value += this.lookupExpression(entries[part.markerID].node.value, data) ?? '';
           }
         }
         element.setAttribute(attrName, value);
@@ -420,20 +422,20 @@ export class Renderer {
           break;
         case 'expression':
           if (node.unsafeHTML) {
-            result += String(this.eval(node.value, data) ?? '');
+            result += String(this.lookupExpression(node.value, data) ?? '');
           }
           else {
-            result += String(this.eval(node.value, data) ?? '');
+            result += String(this.lookupExpression(node.value, data) ?? '');
           }
           break;
         case 'if': {
-          const condition = this.eval(node.condition, data);
+          const condition = this.lookupExpression(node.condition, data);
           if (condition && node.content) {
             result += this.evaluateRawTextNodes(node.content, data);
           }
           else if (node.branches) {
             for (const branch of node.branches) {
-              if (branch.type === 'elseif' && this.eval(branch.condition, data)) {
+              if (branch.type === 'elseif' && this.lookupExpression(branch.condition, data)) {
                 result += this.evaluateRawTextNodes(branch.content, data);
                 break;
               }
@@ -446,7 +448,7 @@ export class Renderer {
           break;
         }
         case 'each': {
-          const items = this.eval(node.over, data) || [];
+          const items = this.lookupExpression(node.over, data) || [];
           const list = isArray(items) ? items : arrayFromObject(items);
           for (let i = 0; i < list.length; i++) {
             const item = list[i];
@@ -491,7 +493,7 @@ export class Renderer {
       scope.reaction(anchor, () => {
         for (const n of ownedNodes) { n.remove(); }
         ownedNodes.length = 0;
-        const value = this.eval(exprNode.value, data);
+        const value = this.lookupExpression(exprNode.value, data);
         if (value != null && value !== '') {
           const parsed = this.parseHTML(String(value));
           const nodes = [...parsed.childNodes];
@@ -509,7 +511,7 @@ export class Renderer {
       const textNode = document.createTextNode('');
       parent.replaceChild(textNode, comment);
       scope.reaction(textNode, () => {
-        const value = this.eval(exprNode.value, data);
+        const value = this.lookupExpression(exprNode.value, data);
         textNode.data = value ?? '';
       });
     }
@@ -584,7 +586,7 @@ export class Renderer {
   }
 
   getBranch(node, data) {
-    const condition = this.eval(node.condition, data);
+    const condition = this.lookupExpression(node.condition, data);
     if (condition) {
       return { matchIndex: 1000, contentAST: node.content };
     }
@@ -592,7 +594,7 @@ export class Renderer {
       for (let i = 0; i < node.branches.length; i++) {
         const branch = node.branches[i];
         if (branch.type === 'elseif') {
-          if (this.eval(branch.condition, data)) {
+          if (this.lookupExpression(branch.condition, data)) {
             return { matchIndex: i, contentAST: branch.content };
           }
         }
@@ -621,7 +623,7 @@ export class Renderer {
     });
 
     scope.reaction(region.anchor, (comp) => {
-      const rawItems = this.eval(node.over, data) || [];
+      const rawItems = this.lookupExpression(node.over, data) || [];
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
 
@@ -788,7 +790,7 @@ export class Renderer {
     };
 
     scope.reaction(region.anchor, (comp) => {
-      const result = this.eval(node.expression, data);
+      const result = this.lookupExpression(node.expression, data);
       const currentGen = ++generation;
 
       if (isPromise(result)) {
@@ -856,7 +858,7 @@ export class Renderer {
         Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
       }
       if (node.expression) {
-        this.eval(node.expression, data);
+        this.lookupExpression(node.expression, data);
       }
 
       if (!comp.firstRun) {
@@ -1297,11 +1299,11 @@ export class Renderer {
       comment.replaceWith(anchor);
 
       scope.reaction(anchor, (comp) => {
-        this.eval(exprNode.value, data); // register deps (even on firstRun)
+        this.lookupExpression(exprNode.value, data); // register deps (even on firstRun)
         if (comp.firstRun) { return; } // skip expensive reparse — server DOM is trusted
         for (const n of ownedNodes) { n.remove(); }
         ownedNodes.length = 0;
-        const value = this.eval(exprNode.value, data);
+        const value = this.lookupExpression(exprNode.value, data);
         if (value != null && value !== '') {
           const parsed = this.parseHTML(String(value));
           const nodes = [...parsed.childNodes];
@@ -1318,7 +1320,7 @@ export class Renderer {
 
       let textNode;
       if (nextNode && nextNode.nodeType === Node.TEXT_NODE) {
-        const serverValue = String(this.eval(exprNode.value, data) ?? '');
+        const serverValue = String(this.lookupExpression(exprNode.value, data) ?? '');
         const fullText = nextNode.data;
 
         if (fullText.length > serverValue.length && fullText.startsWith(serverValue)) {
@@ -1339,10 +1341,10 @@ export class Renderer {
 
       scope.reaction(textNode, (comp) => {
         if (comp.firstRun) {
-          this.eval(exprNode.value, data);
+          this.lookupExpression(exprNode.value, data);
           return;
         }
-        const value = this.eval(exprNode.value, data);
+        const value = this.lookupExpression(exprNode.value, data);
         textNode.data = value ?? '';
       });
     }
@@ -1468,11 +1470,11 @@ export class Renderer {
   getServerRenderedAST(node, data) {
     switch (node.type) {
       case 'if': {
-        const condition = this.eval(node.condition, data);
+        const condition = this.lookupExpression(node.condition, data);
         if (condition) { return node.content; }
         if (node.branches) {
           for (const branch of node.branches) {
-            if (branch.type === 'elseif' && this.eval(branch.condition, data)) {
+            if (branch.type === 'elseif' && this.lookupExpression(branch.condition, data)) {
               return branch.content;
             }
             if (branch.type === 'else') { return branch.content; }
@@ -1542,7 +1544,7 @@ export class Renderer {
     // On first run: evaluate to establish dependencies, skip rendering.
     // On subsequent runs: full re-render of the entire list.
     scope.reaction(region.anchor, (comp) => {
-      const rawItems = this.eval(node.over, data) || [];
+      const rawItems = this.lookupExpression(node.over, data) || [];
       const collectionType = this.getCollectionType(rawItems);
       const items = (collectionType === 'object') ? arrayFromObject(rawItems) : rawItems;
 
@@ -1590,7 +1592,7 @@ export class Renderer {
     };
 
     scope.reaction(region.anchor, (comp) => {
-      const result = this.eval(node.expression, data);
+      const result = this.lookupExpression(node.expression, data);
       const currentGen = ++generation;
 
       if (isPromise(result)) {
@@ -1630,7 +1632,7 @@ export class Renderer {
         Reaction.guard(() => this.evaluator.lookupTokenValue(node.key, data));
       }
       if (node.expression) {
-        this.eval(node.expression, data);
+        this.lookupExpression(node.expression, data);
       }
 
       if (!comp.firstRun) {

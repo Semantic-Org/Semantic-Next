@@ -13,14 +13,15 @@ export class ReactionScope {
 
   // Create a Reaction that auto-stops when `node` is disconnected from the DOM.
   // Combines the track + isConnected guard that every renderer binding uses.
-  reaction(node, callback) {
+  // Optional `context` is forwarded to Reaction for dev-mode tracing.
+  reaction(node, callback, context) {
     this.track(Reaction.create((comp) => {
       if (!comp.firstRun && !node.isConnected) {
         comp.stop();
         return;
       }
       callback(comp);
-    }));
+    }, context ? { context } : undefined));
   }
 
   onDispose(fn) {
