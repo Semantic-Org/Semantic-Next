@@ -322,66 +322,25 @@ export class Renderer {
   // raw text elements where DOM nodes can't exist. Mirrors the ServerRenderer's
   // evaluation logic but uses the reactive expression evaluator so Signal
   // dependencies are tracked inside Reactions.
+  // Raw-text walker — dispatches html/expression nodes directly and
+  // delegates block-shaped children (if/each/template) to their block's
+  // evaluateText static. Blocks not legal in raw-text contexts (async,
+  // rerender, snippet) silently no-op via the registry lookup returning
+  // a block without the static.
   evaluateRawTextNodes(nodes, data) {
     let result = '';
     for (const node of nodes) {
-      switch (node.type) {
-        case 'html':
-          result += node.html;
-          break;
-        case 'expression':
-          if (node.unsafeHTML) {
-            result += String(this.lookupExpression(node.value, data) ?? '');
-          }
-          else {
-            result += String(this.lookupExpression(node.value, data) ?? '');
-          }
-          break;
-        case 'if': {
-          const condition = this.lookupExpression(node.condition, data);
-          if (condition && node.content) {
-            result += this.evaluateRawTextNodes(node.content, data);
-          }
-          else if (node.branches) {
-            for (const branch of node.branches) {
-              if (branch.type === 'elseif' && this.lookupExpression(branch.condition, data)) {
-                result += this.evaluateRawTextNodes(branch.content, data);
-                break;
-              }
-              if (branch.type === 'else') {
-                result += this.evaluateRawTextNodes(branch.content, data);
-                break;
-              }
-            }
-          }
-          break;
-        }
-        case 'each': {
-          const items = this.lookupExpression(node.over, data) || [];
-          const list = isArray(items) ? items : arrayFromObject(items);
-          for (let i = 0; i < list.length; i++) {
-            const item = list[i];
-            const eachData = Object.create(data);
-            if (node.as) {
-              eachData[node.as] = item;
-            }
-            else {
-              Object.assign(eachData, item);
-              eachData.this = item;
-            }
-            eachData[node.indexAs || 'index'] = i;
-            result += this.evaluateRawTextNodes(node.content, eachData);
-          }
-          break;
-        }
-        case 'template': {
-          const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-          const snippet = this.snippets[templateName];
-          if (snippet) {
-            result += this.evaluateRawTextNodes(snippet.content, data);
-          }
-          break;
-        }
+      if (node.type === 'html') {
+        result += node.html;
+        continue;
+      }
+      if (node.type === 'expression') {
+        result += String(this.lookupExpression(node.value, data) ?? '');
+        continue;
+      }
+      const block = getBlock(node.type);
+      if (block?.evaluateText) {
+        result += block.evaluateText({ node, data, renderer: this });
       }
     }
     return result;
@@ -402,40 +361,24 @@ export class Renderer {
 
   bindBlockDirective(comment, entry, data, scope) {
     const { node, isSVG } = entry;
-    // The comment sits exactly where the block directive should render.
-    // Its parentNode is the correct containing element.
     const parentNode = comment.parentNode;
 
-    switch (node.type) {
-      case 'if':
-        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-        break;
-      case 'each':
-        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-        break;
-      case 'async':
-        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-        break;
-      case 'rerender':
-        this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-        break;
-      case 'template': {
-        // Snippet vs subtemplate fork lives on the renderer — snippets
-        // inline into the parent scope (no region, no reaction) while
-        // subtemplates go through the template block's full lifecycle.
-        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-        if (this.snippets[templateName]) {
-          this.inlineSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
-        }
-        else {
-          this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-        }
-        break;
+    // Snippet invocations inline into the parent scope (no region, no
+    // reaction) rather than going through the template block's lifecycle.
+    if (node.type === 'template') {
+      const templateName = this.evaluator.lookupExpressionValue(node.name, data);
+      if (this.snippets[templateName]) {
+        this.inlineSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
+        return;
       }
-      case 'snippet':
-        this.snippets[node.name] = node;
-        break;
     }
+
+    // {#snippet} definitions are hoisted by the compiler and registered
+    // via collectSnippets() in the constructor — the marker in-place is
+    // a no-op at render time.
+    if (node.type === 'snippet') { return; }
+
+    this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
   }
 
   /*******************************
@@ -749,37 +692,6 @@ export class Renderer {
     const block = getBlock(node.type);
     if (block) {
       block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
-    }
-  }
-
-  getServerRenderedAST(node, data) {
-    switch (node.type) {
-      case 'if': {
-        const condition = this.lookupExpression(node.condition, data);
-        if (condition) { return node.content; }
-        if (node.branches) {
-          for (const branch of node.branches) {
-            if (branch.type === 'elseif' && this.lookupExpression(branch.condition, data)) {
-              return branch.content;
-            }
-            if (branch.type === 'else') { return branch.content; }
-          }
-        }
-        return null;
-      }
-      case 'async':
-        return node.loadingContent;
-      case 'rerender':
-        return node.content;
-      case 'template': {
-        const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-        if (this.snippets[templateName]) {
-          return this.snippets[templateName].content;
-        }
-        return null; // subtemplates handled separately
-      }
-      default:
-        return null; // each handled separately (per-item data)
     }
   }
 
