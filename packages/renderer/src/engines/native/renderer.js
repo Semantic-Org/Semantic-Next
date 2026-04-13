@@ -381,22 +381,6 @@ export class Renderer {
     this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
   }
 
-  /*******************************
-        Conditional Rendering
-  *******************************/
-
-  /*******************************
-        List Rendering
-  *******************************/
-
-  /*******************************
-        Async Rendering
-  *******************************/
-
-  /*******************************
-        Rerender/Guard
-  *******************************/
-
   // Dispatches to a registered block via the registry. Used for block types
   // that have been extracted to packages/renderer/src/engines/native/blocks/.
   // As each type migrates from the inline createX/hydrateX pattern, its
