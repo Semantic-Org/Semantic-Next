@@ -1,4 +1,5 @@
 import { Signal } from '@semantic-ui/reactivity';
+import { createCache } from '@semantic-ui/utils';
 
 // Fallback handler for the rare includeHelpers: false path
 const jsNoHelpersHandler = {
@@ -29,18 +30,15 @@ export class ExpressionEvaluator {
   static SIMPLE_PATH_REGEXP = /^[a-zA-Z_$][0-9a-zA-Z_$]*(\.[a-zA-Z_$][0-9a-zA-Z_$]*)*$/;
   static JS_OPERATOR_REGEXP = /[+\-*/%=<>!&|?:~^`()[\]]/;
   static QUOTED_STRING_REGEXP = /('[^']*'|"[^"]*")/g;
-  static fnCache = new Map();
-  static FN_CACHE_MAX = 5000;
+  static fnCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Expression classification cache — shared across all instances since
   // classification depends only on the expression string, not data context
-  static classifyCache = new Map();
-  static CLASSIFY_CACHE_MAX = 5000;
+  static classifyCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   // Parsed expression array cache — the result of addParensToExpression +
   // getExpressionArray is deterministic for a given expression string
-  static parseCache = new Map();
-  static PARSE_CACHE_MAX = 5000;
+  static parseCache = createCache({ maxSize: 5000, eviction: 'flush' });
 
   constructor({ data, helpers, dataVersion } = {}) {
     this.data = data;
@@ -101,9 +99,6 @@ export class ExpressionEvaluator {
     result = stripped.includes(' ')
       && !ExpressionEvaluator.JS_OPERATOR_REGEXP.test(stripped);
 
-    if (ExpressionEvaluator.classifyCache.size >= ExpressionEvaluator.CLASSIFY_CACHE_MAX) {
-      ExpressionEvaluator.classifyCache.clear();
-    }
     ExpressionEvaluator.classifyCache.set(expression, result);
     return result;
   }
@@ -120,9 +115,6 @@ export class ExpressionEvaluator {
     const wrapped = this.addParensToExpression(expression);
     parsed = this.getExpressionArray(wrapped);
 
-    if (ExpressionEvaluator.parseCache.size >= ExpressionEvaluator.PARSE_CACHE_MAX) {
-      ExpressionEvaluator.parseCache.clear();
-    }
     ExpressionEvaluator.parseCache.set(expression, parsed);
     return parsed;
   }
@@ -174,9 +166,6 @@ export class ExpressionEvaluator {
       let fn = ExpressionEvaluator.fnCache.get(code);
       if (!fn) {
         fn = new Function('ctx', `with(ctx){return ${code}}`);
-        if (ExpressionEvaluator.fnCache.size >= ExpressionEvaluator.FN_CACHE_MAX) {
-          ExpressionEvaluator.fnCache.clear();
-        }
         ExpressionEvaluator.fnCache.set(code, fn);
       }
       result = fn(proxy);

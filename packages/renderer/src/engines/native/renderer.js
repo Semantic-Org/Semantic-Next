@@ -1,5 +1,5 @@
 import { Dependency } from '@semantic-ui/reactivity';
-import { assignInPlace, filterObject, inArray } from '@semantic-ui/utils';
+import { assignInPlace, createCache, filterObject, inArray } from '@semantic-ui/utils';
 
 import {
   ATTR_MARKER_PREFIX,
@@ -23,19 +23,7 @@ import {
 import './blocks/index.js';
 
 // PreparedTemplate cache — parse once, cloneNode per instance
-const TEMPLATE_CACHE_MAX = 1000;
-const templateCache = new Map();
-
-function templateCacheGet(key) {
-  return templateCache.get(key);
-}
-
-function templateCacheSet(key, val) {
-  if (templateCache.size >= TEMPLATE_CACHE_MAX) {
-    templateCache.clear();
-  }
-  templateCache.set(key, val);
-}
+const templateCache = createCache({ maxSize: 1000, eviction: 'flush' });
 
 // Regex for finding attribute markers — compiled once since prefix/suffix are constants
 const ATTR_MARKER_REGEX = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
@@ -170,7 +158,7 @@ export class Renderer {
 
   parseHTML(htmlString, isSVG = false) {
     const cacheKey = isSVG ? `svg:${htmlString}` : htmlString;
-    let cached = templateCacheGet(cacheKey);
+    let cached = templateCache.get(cacheKey);
 
     if (!cached) {
       if (isSVG) {
@@ -184,7 +172,7 @@ export class Renderer {
         cached = document.createElement('template');
         cached.innerHTML = htmlString;
       }
-      templateCacheSet(cacheKey, cached);
+      templateCache.set(cacheKey, cached);
     }
 
     return cached.content.cloneNode(true);
