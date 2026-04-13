@@ -23,6 +23,44 @@ export const BLOCK_MARKER = `sui-block:${MARKER_VERSION}:`;
 // Marker for raw text element content (script, style, textarea, title)
 export const RAW_TEXT_MARKER = `sui-rawtext:${MARKER_VERSION}:`;
 
+// Attribute stamped by the server on elements with dynamic bindings so the
+// client can wire Reactions without reconstructing a reference DOM from the
+// AST (eliminates the parallel-TreeWalker dance in hydrateAttributes).
+// Encoding: `attr=N[,attr=N]*` where N is the first-entry ID for that
+// attribute. Name prefixes: `.prop` property, `@event` event, `?attr`
+// boolean. Entries[N].attributeBinding carries full parts + classification,
+// so the data-sui-bind string stays minimal and all static/multi-expression
+// metadata lives on the prototype-cached entries array.
+export const DATA_SUI_BIND = 'data-sui-bind';
+
+// Compiled once — `lastIndex` is reset manually per use so the regex can
+// be reused across parse calls without cross-talk.
+const ATTR_MARKER_RE = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
+
+// Split an attribute value like `card __sui0__` or `foo __sui1__ bar __sui2__`
+// into static/dynamic parts. Used by both render-path binding and hydrate
+// lookup via entries[id].attributeBinding.
+export function parseAttributeParts(attrValue) {
+  const parts = [];
+  const markerIDs = [];
+  let lastIndex = 0;
+  let match;
+  ATTR_MARKER_RE.lastIndex = 0;
+  while ((match = ATTR_MARKER_RE.exec(attrValue)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ static: attrValue.slice(lastIndex, match.index) });
+    }
+    const markerID = parseInt(match[1]);
+    parts.push({ markerID });
+    markerIDs.push(markerID);
+    lastIndex = ATTR_MARKER_RE.lastIndex;
+  }
+  if (lastIndex < attrValue.length) {
+    parts.push({ static: attrValue.slice(lastIndex) });
+  }
+  return { parts, markerIDs };
+}
+
 // HTML raw text elements — browser treats content as text, not markup
 const RAW_TEXT_OPEN = /\<(script|style|textarea|title)[\s>]/i;
 const RAW_TEXT_CLOSE = /\<\/(script|style|textarea|title)\s*\>/i;
@@ -199,5 +237,45 @@ export function buildHTMLString(ast, { snippets = {}, isSVG: initialSVG = false 
   };
 
   processNodes(ast);
+  populateAttributeBindings(htmlString, entries);
   return { htmlString, entries, snippets };
+}
+
+// After the AST walk completes, scan the emitted htmlString for every
+// attribute value that contains one or more `__sui{id}__` markers and
+// attach an `attributeBinding` record to the FIRST entry in that
+// attribute's marker set.
+//
+// attributeBinding = { rawAttrName, parts, markerIDs }
+//   rawAttrName: attribute as written in the template, with optional
+//                `.` / `@` prefix for property/event bindings. Boolean
+//                and regular attributes share the plain name — callers
+//                disambiguate via `entries[id].classification.type`.
+//   parts:       output of parseAttributeParts; alternating
+//                `{static}` and `{markerID}` entries covering the whole
+//                attribute value (including statics between/around
+//                multiple markers).
+//   markerIDs:   entry IDs for every expression inside this attribute,
+//                in document order. First ID is the "representative"
+//                that `data-sui-bind` on the server references.
+//
+// Subsequent entries in markerIDs (the non-first ones for a
+// multi-expression attribute) are reachable via the first entry's
+// attributeBinding. The hydration path processes each attribute once
+// via the first entry; bindAttribute handles the multi-expression
+// reaction internally using the full parts array.
+const ATTR_WITH_MARKER_RE = /\s([.@]?[\w:-]+)\s*=\s*(?:"([^"]*__sui\d+__[^"]*)"|([^\s"'>]*__sui\d+__[^\s"'>]*))/g;
+
+function populateAttributeBindings(htmlString, entries) {
+  ATTR_WITH_MARKER_RE.lastIndex = 0;
+  let match;
+  while ((match = ATTR_WITH_MARKER_RE.exec(htmlString)) !== null) {
+    const rawAttrName = match[1];
+    const attrValue = match[2] !== undefined ? match[2] : match[3];
+    const { parts, markerIDs } = parseAttributeParts(attrValue);
+    if (markerIDs.length === 0) { continue; }
+    const entry = entries[markerIDs[0]];
+    if (!entry) { continue; }
+    entry.attributeBinding = { rawAttrName, parts, markerIDs };
+  }
 }

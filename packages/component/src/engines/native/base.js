@@ -174,7 +174,14 @@ class WebComponentBase extends HTMLElementBase {
       }
       for (const node of toRemove) { node.remove(); }
     };
+    const removeDataSuiBind = (root) => {
+      // Strip the Plan-04 hydration hint. Element selector is cheap and
+      // shadow-scoped; the attribute served its purpose at hydrate time.
+      const bound = root.querySelectorAll('[data-sui-bind]');
+      for (const el of bound) { el.removeAttribute('data-sui-bind'); }
+    };
     removeComments(this.shadowRoot);
+    removeDataSuiBind(this.shadowRoot);
   }
 
   fullRender(prototypeTemplate) {
