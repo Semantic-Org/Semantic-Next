@@ -25,8 +25,21 @@ import './blocks/index.js';
 // PreparedTemplate cache — parse once, cloneNode per instance
 const templateCache = createCache({ maxSize: 1000, eviction: 'flush' });
 
-// Regex for finding attribute markers — compiled once since prefix/suffix are constants
-const ATTR_MARKER_REGEX = new RegExp(`${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`, 'g');
+// Source pattern for attribute markers — fresh regex per use (`/g` regexes
+// carry mutable lastIndex; sharing one across calls is a footgun).
+const ATTR_MARKER_PATTERN = `${ATTR_MARKER_PREFIX}(\\d+)${ATTR_MARKER_SUFFIX}`;
+
+// Parse trailing metadata from a closing block marker into serverMeta.
+// Reserved suffixes (after the version segment):
+//   bN  → branchIndex (which branch the {#if}/{:elseif}/{:else} server picked)
+// Unknown segments are ignored. Mutates target in place.
+function parseServerMeta(commentData, target) {
+  for (const part of commentData.split(':')) {
+    if (part.startsWith('b')) {
+      target.branchIndex = parseInt(part.slice(1));
+    }
+  }
+}
 
 export class Renderer {
   static nextId = 0;
@@ -188,15 +201,15 @@ export class Renderer {
     const markerIDs = [];
     let lastIndex = 0;
     let match;
-    ATTR_MARKER_REGEX.lastIndex = 0;
-    while ((match = ATTR_MARKER_REGEX.exec(attrValue)) !== null) {
+    const re = new RegExp(ATTR_MARKER_PATTERN, 'g');
+    while ((match = re.exec(attrValue)) !== null) {
       if (match.index > lastIndex) {
         parts.push({ static: attrValue.slice(lastIndex, match.index) });
       }
       const markerID = parseInt(match[1]);
       parts.push({ markerID });
       markerIDs.push(markerID);
-      lastIndex = ATTR_MARKER_REGEX.lastIndex;
+      lastIndex = re.lastIndex;
     }
     if (lastIndex < attrValue.length) {
       parts.push({ static: attrValue.slice(lastIndex) });
@@ -492,12 +505,7 @@ export class Renderer {
         else if (next.data.startsWith('/sui-block:')) {
           blockDepth--;
           if (blockDepth === 0) {
-            // Parse metadata from closing marker (e.g. <!--/sui-block:v1:3:b1000-->)
-            for (const part of next.data.split(':')) {
-              if (part.startsWith('b')) {
-                serverMeta.branchIndex = parseInt(part.slice(1));
-              }
-            }
+            parseServerMeta(next.data, serverMeta);
             next.remove();
             break;
           }

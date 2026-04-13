@@ -180,11 +180,10 @@ export function hydrateTextExpression({ comment, entry, data, scope, renderer })
     comment.replaceWith(anchor);
 
     scope.reaction(anchor, (comp) => {
-      renderer.lookupExpression(exprNode.value, data); // register deps (even on firstRun)
+      const value = renderer.lookupExpression(exprNode.value, data);
       if (comp.firstRun) { return; } // skip expensive reparse — server DOM is trusted
       for (const n of ownedNodes) { n.remove(); }
       ownedNodes.length = 0;
-      const value = renderer.lookupExpression(exprNode.value, data);
       if (value != null && value !== '') {
         const parsed = renderer.parseHTML(String(value));
         const nodes = [...parsed.childNodes];

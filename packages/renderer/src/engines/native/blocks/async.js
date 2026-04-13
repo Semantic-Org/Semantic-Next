@@ -66,6 +66,8 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
         renderState(node.loadingContent);
       }
       else if (self.hasResolved && node.content?.length) {
+        // Re-show last resolved value while a new promise is in flight.
+        // Better than flashing empty when the template has no loadingContent.
         renderState(node.content, createSuccessDataContext(node, self.resolvedValue));
       }
     }
@@ -121,9 +123,10 @@ const asyncBlock = defineBlock({
   },
 
   hydrate(ctx) {
-    // Server rendered the current state; preserve it if the expression is
-    // still a promise. Sync values re-render with success (server used
-    // loadingContent).
+    // skipLoadingRender splits behavior by branch: pending promise
+    // preserves server's loadingContent (no flash); sync value still
+    // re-renders success because server emitted loadingContent that
+    // doesn't match the resolved value.
     evaluateAndRender(ctx, { skipLoadingRender: true });
   },
 
