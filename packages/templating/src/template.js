@@ -735,7 +735,7 @@ export const Template = class Template {
     this.overlaySettingsSignals(dataContext);
     this.renderer.setData(dataContext);
 
-    // render will rerender the AST creating new lit html
+    // render will rerender the AST creating new html
     if (!this.rendered) {
       this.html = this.renderer.render();
       if (!isServer) {
@@ -748,9 +748,17 @@ export const Template = class Template {
       this.dataReplaced = false;
       this.renderer.bumpDataVersion();
     }
+    this.markRendered();
+    return this.html;
+  }
+
+  // Engine-facing: report that this template instance has been rendered to
+  // its backing representation (DOM, string, etc.). Hydration paths and
+  // future engines call this when they've taken render() into their own
+  // hands rather than going through Template.render().
+  markRendered() {
     this.rendered = true;
     this.destroyed = false;
-    return this.html;
   }
 
   /*******************************

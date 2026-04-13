@@ -271,7 +271,7 @@ const templateBlock = defineBlock({
       }
     }
 
-    self.currentInstance.rendered = true;
+    self.currentInstance.markRendered();
     if (region.ownedNodes.length > 0) {
       attachToRenderRoot(self.currentInstance, region, self, { startNode: region.ownedNodes[0] });
     }

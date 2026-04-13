@@ -150,7 +150,7 @@ class WebComponentBase extends HTMLElementBase {
     );
 
     this.template.isHydrating = false;
-    this.template.rendered = true;
+    this.template.markRendered();
     this.isHydrating = false;
 
     // Remove all hydration markers — clean DevTools, zero comment noise
