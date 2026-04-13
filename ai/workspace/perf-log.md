@@ -37,9 +37,11 @@ Measured against the `perf/native` deploy on Vercel preview, 1000-card PerfCards
 | Baseline (post-revert, pre-Plan-04) | 172.2 (cold), 65, 90.9, 90.9, 102.9 | ~91 |
 | **After Plans 04 + 02 + 08 + 09** | 326.8 (cold), 92.4, 45.6, 64 | **~64** |
 
-~30% improvement on Vercel prod at the 1000-card payload. The originally-captured "~40 ms on main" measurement used the same `/perf/hydrated` URL, but the earlier findings doc described it as "100 cards" — the page has always rendered 1000 items from `data.js` (the `count={100}` prop on `<PerfCards />` is unused). Treat the ~40 ms main reference as the apples-to-apples target for 1000 cards, in which case branch is now ~60% slower than main on the same shape but ~30% faster than the post-revert baseline.
+~30% improvement on Vercel prod at the 1000-card payload. The originally-captured "~40 ms on main" measurement used the same `/perf/hydrated` URL, but the earlier findings doc described it as "100 cards" — the page has always rendered 1000 items from `data.js` (the `count={100}` prop on `<PerfCards />` is unused).
 
-Honest framing: the decomposition PR's total perf regression vs main has been cut from ~150% (pre-plans) to ~60% (post-plans) on Vercel prod. Remaining gap to main likely comes from cost classes none of these plans target (expression-evaluator fast-path for simple identifier lookups, hash/clone hot paths, Signal constructor overhead per item) — all of which are already in the `07-complete/` corpus and would need separate follow-up plans.
+**Re-measured main on the same 1000-card payload (staging.semantic-ui.com):** 43.2, 73.9, 61.4 → median ~61 ms. Branch post-plans: 92.4, 45.6, 64 → median ~64 ms. **Within measurement noise of main.** The perf regression the decomposition PR carried has been closed on this benchmark.
+
+Remaining gap (if any) likely sits in cost classes none of these plans target (expression-evaluator fast-path for simple identifier lookups, hash/clone hot paths, Signal constructor overhead per item) — all already in the `07-complete/` corpus if a future page pushes the budget. Tachometer on PR #137 will confirm the statistical picture.
 
 ## Plan milestones — target trajectory
 
