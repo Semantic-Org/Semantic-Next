@@ -58,19 +58,17 @@ export function reportBlockError(blockName, node, hook, err) {
 
 export { nodeSyntax };
 
-// Always-on breadcrumb. Fires once per (block, component) pair so a
-// visibly broken region in a 1000-item list doesn't spam 1000 logs —
-// dedup is the whole point. Component identity uses element.localName
-// so cross-instance breadcrumbs collapse.
-const announcedErrors = new Set();
+// Always-on breadcrumb. Dedupes on last-error message so a 1000-item
+// loop doesn't spam, and so HMR re-saves of the same bug don't refire.
+// New error message → fires; same as last → suppressed.
+let lastErrorMessage = null;
 
 function announceBlockError(blockName, componentName, node, hookName, err) {
-  const key = `${blockName}:${componentName || '?'}`;
-  if (announcedErrors.has(key)) { return; }
-  announcedErrors.add(key);
+  const msg = err?.message ?? String(err);
+  if (msg === lastErrorMessage) { return; }
+  lastErrorMessage = msg;
   const syntax = nodeSyntax(node);
   const where = componentName ? `<${componentName}>` : 'render tree';
-  const msg = err?.message ?? String(err);
   console.error(
     `[sui] ${syntax} threw in ${where} (${hookName}): ${msg}. `
       + `Call setTracing(true) for full context.`,
