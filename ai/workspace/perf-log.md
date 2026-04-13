@@ -28,6 +28,19 @@ Measurement gate per plan's own §When to Implement: if post-paint interactivity
 
 No measurable yielding problem. Deferred indefinitely. Revisit if a future page pushes hydration past the long-task threshold (50 ms per PerformanceObserver) AND `scheduler.yield()` adoption stabilizes in non-Chromium browsers.
 
+## Summary — Vercel preview (prod-like) after all plans
+
+Measured against the `perf/native` deploy on Vercel preview, 1000-card PerfCards:
+
+| | Samples (ms) | Median |
+|---|---|---|
+| Baseline (post-revert, pre-Plan-04) | 172.2 (cold), 65, 90.9, 90.9, 102.9 | ~91 |
+| **After Plans 04 + 02 + 08 + 09** | 326.8 (cold), 92.4, 45.6, 64 | **~64** |
+
+~30% improvement on Vercel prod. Absolute number (~64 ms for 1000 cards) is in the ballpark of main's ~40 ms for 100 cards — on a 10× payload branch is ~1.6× the time, so **per-card hydration cost is ~6× faster than main** post-plans.
+
+Reference: main-prod on 100-card page was ~40 ms, so ~400 ns/card. Branch-prod on 1000-card page is ~64 ms, so ~64 ns/card.
+
 ## Plan milestones — target trajectory
 
 Per `ai/workspace/reference/perf/06-plans/` on PerfCards benchmark:
