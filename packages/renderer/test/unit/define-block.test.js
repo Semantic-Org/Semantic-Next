@@ -66,7 +66,7 @@ describe('reportBlockError', () => {
     const err = new Error("Cannot read properties of undefined (reading 'name')");
     reportBlockError('conditional', { type: 'if', condition: 'user.profile.name' }, 'render', err);
 
-    expect(groupSpy).toHaveBeenCalledWith('🔴 conditional  {#if user.profile.name}');
+    expect(groupSpy).toHaveBeenCalledWith('[sui] conditional {#if user.profile.name}');
     expect(errorSpy).toHaveBeenCalledWith("Cannot read properties of undefined (reading 'name')");
     expect(logSpy).toHaveBeenCalledWith('hook: render');
     expect(logSpy).toHaveBeenCalledWith(err.stack);
@@ -86,7 +86,7 @@ describe('reportBlockError', () => {
 
     reportBlockError('each', { type: 'each', over: 'rows' }, 'render', 'oops');
 
-    expect(groupSpy).toHaveBeenCalledWith('🔴 each  {#each rows}');
+    expect(groupSpy).toHaveBeenCalledWith('[sui] each {#each rows}');
     expect(errorSpy).toHaveBeenCalledWith('oops');
     expect(logSpy).toHaveBeenCalledWith('hook: render');
 

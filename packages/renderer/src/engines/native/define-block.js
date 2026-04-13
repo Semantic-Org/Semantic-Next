@@ -1,7 +1,5 @@
 import { isRecovery, isTracing } from '../../helpers.js';
 
-const EMOJI = '🔴';
-
 // Best-effort template-syntax reconstruction for the error-log header.
 // Forgiving — produces what it can rather than throwing on missing fields.
 function nodeSyntax(node) {
@@ -41,7 +39,7 @@ function nodeSyntax(node) {
 export function reportBlockError(blockName, node, hook, err) {
   if (!isTracing()) { return; }
   const syntax = nodeSyntax(node);
-  const header = `${EMOJI} ${blockName}  ${syntax}`;
+  const header = `[sui] ${blockName} ${syntax}`;
   const message = err?.message ?? String(err);
   if (typeof console.groupCollapsed === 'function') {
     console.groupCollapsed(header);
@@ -58,15 +56,24 @@ export function reportBlockError(blockName, node, hook, err) {
 
 export { nodeSyntax };
 
-// Always-on breadcrumb. Dedupes on last-error message so a 1000-item
-// loop doesn't spam, and so HMR re-saves of the same bug don't refire.
-// New error message → fires; same as last → suppressed.
-let lastErrorMessage = null;
+// Always-on breadcrumb. Per-tick dedup via microtask reset — bounds the
+// suppression window to the current synchronous burst so HMR re-saves
+// (any HMR, not just vite) and reactive re-renders surface the bug each
+// tick instead of going silent after the first throw.
+const currentErrors = new Set();
+let resetScheduled = false;
 
 function announceBlockError(blockName, componentName, node, hookName, err) {
   const msg = err?.message ?? String(err);
-  if (msg === lastErrorMessage) { return; }
-  lastErrorMessage = msg;
+  if (currentErrors.has(msg)) { return; }
+  currentErrors.add(msg);
+  if (!resetScheduled) {
+    resetScheduled = true;
+    queueMicrotask(() => {
+      currentErrors.clear();
+      resetScheduled = false;
+    });
+  }
   const syntax = nodeSyntax(node);
   const where = componentName ? `<${componentName}>` : 'render tree';
   console.error(
