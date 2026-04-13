@@ -37,9 +37,9 @@ Measured against the `perf/native` deploy on Vercel preview, 1000-card PerfCards
 | Baseline (post-revert, pre-Plan-04) | 172.2 (cold), 65, 90.9, 90.9, 102.9 | ~91 |
 | **After Plans 04 + 02 + 08 + 09** | 326.8 (cold), 92.4, 45.6, 64 | **~64** |
 
-~30% improvement on Vercel prod. Absolute number (~64 ms for 1000 cards) is in the ballpark of main's ~40 ms for 100 cards — on a 10× payload branch is ~1.6× the time, so **per-card hydration cost is ~6× faster than main** post-plans.
+~30% improvement on Vercel prod at the 1000-card payload. The originally-captured "~40 ms on main" measurement used the same `/perf/hydrated` URL, but the earlier findings doc described it as "100 cards" — the page has always rendered 1000 items from `data.js` (the `count={100}` prop on `<PerfCards />` is unused). Treat the ~40 ms main reference as the apples-to-apples target for 1000 cards, in which case branch is now ~60% slower than main on the same shape but ~30% faster than the post-revert baseline.
 
-Reference: main-prod on 100-card page was ~40 ms, so ~400 ns/card. Branch-prod on 1000-card page is ~64 ms, so ~64 ns/card.
+Honest framing: the decomposition PR's total perf regression vs main has been cut from ~150% (pre-plans) to ~60% (post-plans) on Vercel prod. Remaining gap to main likely comes from cost classes none of these plans target (expression-evaluator fast-path for simple identifier lookups, hash/clone hot paths, Signal constructor overhead per item) — all of which are already in the `07-complete/` corpus and would need separate follow-up plans.
 
 ## Plan milestones — target trajectory
 
