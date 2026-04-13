@@ -56,7 +56,7 @@ export function reportBlockError(blockName, node, hook, err) {
   }
 }
 
-export { nodeSyntax as _nodeSyntax };
+export { nodeSyntax };
 
 export function defineBlock(config) {
   const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText } = config;

@@ -244,10 +244,14 @@ export class ServerRenderer {
         const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
         const savedEvaluator = this.evaluator;
         this.evaluator = itemEvaluator;
-        html += `<!--sui-each-item:v1:${i}-->`;
-        html += this.renderNodes(node.content, itemData);
-        html += `<!--/sui-each-item:v1:${i}-->`;
-        this.evaluator = savedEvaluator;
+        try {
+          html += `<!--sui-each-item:v1:${i}-->`;
+          html += this.renderNodes(node.content, itemData);
+          html += `<!--/sui-each-item:v1:${i}-->`;
+        }
+        finally {
+          this.evaluator = savedEvaluator;
+        }
       }
     }
 
@@ -295,8 +299,12 @@ export class ServerRenderer {
       const snippetData = this.resolveNodeData(node, data);
       const savedEvaluator = this.evaluator;
       this.evaluator = new ExpressionEvaluator({ data: snippetData, helpers: this.helpers });
-      html += this.renderNodes(snippet.content, snippetData);
-      this.evaluator = savedEvaluator;
+      try {
+        html += this.renderNodes(snippet.content, snippetData);
+      }
+      finally {
+        this.evaluator = savedEvaluator;
+      }
     }
     else {
       let template;

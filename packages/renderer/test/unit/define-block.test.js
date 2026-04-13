@@ -1,55 +1,55 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { _nodeSyntax, defineBlock, reportBlockError } from '../../src/engines/native/define-block.js';
+import { defineBlock, nodeSyntax, reportBlockError } from '../../src/engines/native/define-block.js';
 import { setTracing } from '../../src/helpers.js';
 
 describe('nodeSyntax', () => {
   it('produces {#if} header for if nodes', () => {
-    expect(_nodeSyntax({ type: 'if', condition: 'user.name' })).toBe('{#if user.name}');
+    expect(nodeSyntax({ type: 'if', condition: 'user.name' })).toBe('{#if user.name}');
   });
 
   it('produces {#each ... as ...} header for each nodes with alias', () => {
-    expect(_nodeSyntax({ type: 'each', over: 'items', as: 'item' })).toBe('{#each items as item}');
+    expect(nodeSyntax({ type: 'each', over: 'items', as: 'item' })).toBe('{#each items as item}');
   });
 
   it('produces {#each ...} header for each nodes without alias', () => {
-    expect(_nodeSyntax({ type: 'each', over: 'items' })).toBe('{#each items}');
+    expect(nodeSyntax({ type: 'each', over: 'items' })).toBe('{#each items}');
   });
 
   it('produces {#async ...} header for async nodes', () => {
-    expect(_nodeSyntax({ type: 'async', expression: 'fetchUser()' })).toBe('{#async fetchUser()}');
+    expect(nodeSyntax({ type: 'async', expression: 'fetchUser()' })).toBe('{#async fetchUser()}');
   });
 
   it('produces {#rerender} header for bare rerender nodes', () => {
-    expect(_nodeSyntax({ type: 'rerender' })).toBe('{#rerender}');
+    expect(nodeSyntax({ type: 'rerender' })).toBe('{#rerender}');
   });
 
   it('produces {#rerender ...} header for keyed rerender nodes', () => {
-    expect(_nodeSyntax({ type: 'rerender', expression: 'key' })).toBe('{#rerender key}');
+    expect(nodeSyntax({ type: 'rerender', expression: 'key' })).toBe('{#rerender key}');
   });
 
   it('produces {> name} header for template nodes', () => {
-    expect(_nodeSyntax({ type: 'template', name: 'row' })).toBe('{> row}');
+    expect(nodeSyntax({ type: 'template', name: 'row' })).toBe('{> row}');
   });
 
   it('produces {#snippet name} header for snippet nodes', () => {
-    expect(_nodeSyntax({ type: 'snippet', name: 'badge' })).toBe('{#snippet badge}');
+    expect(nodeSyntax({ type: 'snippet', name: 'badge' })).toBe('{#snippet badge}');
   });
 
   it('produces {#type} fallback for unknown node types', () => {
-    expect(_nodeSyntax({ type: 'mystery' })).toBe('{#mystery}');
+    expect(nodeSyntax({ type: 'mystery' })).toBe('{#mystery}');
   });
 
   it('tolerates object-shaped expression values', () => {
-    expect(_nodeSyntax({ type: 'if', condition: { value: 'isActive' } })).toBe('{#if isActive}');
+    expect(nodeSyntax({ type: 'if', condition: { value: 'isActive' } })).toBe('{#if isActive}');
   });
 
   it('tolerates token-array expression values', () => {
-    expect(_nodeSyntax({ type: 'each', over: { tokens: [{ value: 'users' }] } }))
+    expect(nodeSyntax({ type: 'each', over: { tokens: [{ value: 'users' }] } }))
       .toBe('{#each users}');
   });
 
   it('returns empty string for null node', () => {
-    expect(_nodeSyntax(null)).toBe('');
+    expect(nodeSyntax(null)).toBe('');
   });
 });
 

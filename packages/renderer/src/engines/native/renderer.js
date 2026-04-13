@@ -329,24 +329,10 @@ export class Renderer {
 
   bindBlockDirective(comment, entry, data, scope) {
     const { node, isSVG } = entry;
-    this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
-  }
-
-  // Dispatches to a registered block via the registry. Used for block types
-  // that have been extracted to packages/renderer/src/engines/native/blocks/.
-  // As each type migrates from the inline createX/hydrateX pattern, its
-  // bindBlockDirective case routes here.
-  bindBlockViaRegistry({ node, data, scope, comment, isSVG }) {
     const block = getBlock(node.type);
     if (!block) { return; }
     const region = new DynamicRegion(comment.parentNode, comment);
     block({ node, data, scope, region, renderer: this, isSVG, hydrating: false });
-  }
-
-  hydrateBlockViaRegistry({ node, entry, data, scope, region, serverMeta }) {
-    const block = getBlock(node.type);
-    if (!block) { return; }
-    block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
   }
 
   /*******************************
