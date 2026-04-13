@@ -58,6 +58,25 @@ export function reportBlockError(blockName, node, hook, err) {
 
 export { nodeSyntax };
 
+// Always-on breadcrumb. Fires once per (block, component) pair so a
+// visibly broken region in a 1000-item list doesn't spam 1000 logs —
+// dedup is the whole point. Component identity uses element.localName
+// so cross-instance breadcrumbs collapse.
+const announcedErrors = new Set();
+
+function announceBlockError(blockName, componentName, node, hookName, err) {
+  const key = `${blockName}:${componentName || '?'}`;
+  if (announcedErrors.has(key)) { return; }
+  announcedErrors.add(key);
+  const syntax = nodeSyntax(node);
+  const where = componentName ? `<${componentName}>` : 'render tree';
+  const msg = err?.message ?? String(err);
+  console.error(
+    `[sui] ${syntax} threw in ${where} (${hookName}): ${msg}. `
+      + `Call setTracing(true) for full context.`,
+  );
+}
+
 export function defineBlock(config) {
   const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText } = config;
 
@@ -132,6 +151,8 @@ export function defineBlock(config) {
     // propagate so failures are loud. With recovery + errorHook: hook
     // decides what to render. With recovery alone (global flag, no hook):
     // default-isolate via region.clear() + reaction stop.
+    const componentName = renderer.template?.element?.localName;
+
     const safeRun = wantsRecovery
       ? (hookName, fn, comp) => {
         try {
@@ -161,9 +182,15 @@ export function defineBlock(config) {
           }
         }
       }
-      : (_, fn) => {
-        fn();
-        onSuccess();
+      : (hookName, fn) => {
+        try {
+          fn();
+          onSuccess();
+        }
+        catch (err) {
+          announceBlockError(name, componentName, node, hookName, err);
+          throw err;
+        }
       };
 
     const reactionAnchor = region.anchor;
