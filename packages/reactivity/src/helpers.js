@@ -1,8 +1,7 @@
 import { isDevelopment } from '@semantic-ui/utils';
 
-// Cheap path: context naming, firstRun marker, addContext metadata.
-// Default on in dev — escape-analysis-friendly object writes, no captures.
-let tracing = isDevelopment;
+// whether to provide tracing context with signals
+let tracing = false;
 
 // Expensive path: Error.captureStackTrace per Signal.notify and per
 // Reaction context update. Default off everywhere — opt-in for deep debug.
