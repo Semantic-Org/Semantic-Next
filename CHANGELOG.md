@@ -36,6 +36,7 @@ xx.xx.xxxx
 * **Feature** - Added `includeMargin`, `includePadding`, and `includeBorder` options to `naturalWidth()` and `naturalHeight()` — allows measuring unconstrained intrinsic dimensions while preserving the element's box model.
 
 ### Utils
+* **Feature** - Added [`createCache`](https://next.semantic-ui.com/docs/api/utils/cache) — a bounded, Map-like cache factory with pluggable eviction (`lru` default, `fifo`, `flush`) and an `onEvict` hook. Collapses ad-hoc `new Map()` + size-check patterns behind one named primitive.
 * **Feature** - Added `assignInPlace()` for syncing an object's contents to match a source without replacing the reference — supports `preserveExistingKeys` to skip deletion and `returnChanged` to detect modifications
 * **Breaking** - `kebabToCamel` and `camelToKebab` now use lossless encoding — digit-leading segments are preserved with `_` (e.g. `grid-2x2` → `grid_2x2`), and every uppercase letter gets its own hyphen (e.g. `arrowDownAZ` → `arrow-down-a-z`). Both accept a `separator` option to customize the digit-boundary character. `camelToKebab` now normalizes leading uppercase by default for DOM-safe output (e.g. `FooBar` → `foo-bar`); pass `{ lossless: true }` to preserve it for exact round-trips.
 * **Enhancement** - `hashCode` now defaults to zero-allocation FNV-1a for better performance. Use `{ fast: false }` for the previous UMASH algorithm with stronger collision resistance.

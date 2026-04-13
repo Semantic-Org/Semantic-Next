@@ -406,6 +406,36 @@ const expensive = memoize((a, b) => {
 const cached = memoize(fetchData, (args) => args[0].id);
 ```
 
+### Bounded Cache
+```javascript
+import { createCache } from '@semantic-ui/utils';
+
+// Map-like API with an upper bound. Reach for this instead of `new Map()`
+// + manual size checks whenever you want memoization-style storage
+// but need to guard against unbounded memory growth.
+
+// LRU (default) — reads and re-sets refresh recency
+const lru = createCache({ maxSize: 500 });
+lru.set(key, value);
+lru.get(key);
+lru.has(key);
+
+// FIFO — insertion order, reads do not matter
+const fifo = createCache({ maxSize: 100, eviction: 'fifo' });
+
+// Flush — clears the whole cache on overflow. Cheapest per-write;
+// use when entries are quick to rebuild and bulk invalidation is fine.
+const templates = createCache({
+  maxSize: 5000,
+  eviction: 'flush',
+  onEvict: (key, value) => debug('evicted', key),
+});
+
+// Iteration mirrors Map
+for (const [key, value] of lru) { ... }
+lru.forEach((value, key, cache) => { ... });
+```
+
 ### Debounce
 ```javascript
 import { debounce } from '@semantic-ui/utils';
@@ -793,6 +823,11 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `wait` | `(ms, opts?)` | Promise |
 | `debounce` | `(fn, ms, opts?)` | Debounced fn with `.cancel()/.flush()/.pending()` |
 | `throttle` | `(fn, ms, opts?)` | Throttled fn with `.cancel()/.flush()/.pending()` |
+
+### Cache (cache.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `createCache` | `({ maxSize, eviction='lru', onEvict? })` | Bounded Map-like cache. Eviction: `'lru'` \| `'fifo'` \| `'flush'` |
 
 ---
 
