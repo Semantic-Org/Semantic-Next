@@ -28,14 +28,20 @@ import { registerBlock } from './registry.js';
         isElse: true, rendered once when items is empty
     (6) Proxy preservation — unchanged; the parent-data-fallthrough +
         item-signal-reactivity pattern is load-bearing
-  Hydrate trusts server DOM and registers a dep on the collection. The
-  first data change invalidates the block; `update` then clears the region
-  and rebuilds via `reconcile`. Per-item DOM reuse across that boundary is
-  out of scope here — see ai/workspace/reference/perf/06-plans/
-  09-each-hydration-dom-reuse.md (Strategy D+E) for the plan that pairs
-  SSR per-item markers with a DOM-reusing first-mutation path.
+  Hydrate trusts server DOM and registers a dep on the collection — O(1)
+  per-item cost. On the first data change, `update` tries to adopt the
+  server-rendered per-item DOM (guided by `<!--sui-item:v1:KEY-->` markers
+  the ServerRenderer emitted) instead of nuking the region and rebuilding
+  from scratch. Keys that match receive a fresh itemSignal + Proxy and
+  their inner bindings are wired against the existing DOM via
+  hydrateInnerContent; keys that don't match fall through to a fresh
+  createRecord render. Subsequent mutations use the normal keyed reconcile
+  path. See ai/workspace/reference/perf/06-plans/09-each-hydration-dom-
+  reuse.md (Strategy D+E).
 
 */
+
+const SUI_ITEM_MARKER = 'sui-item:v1:';
 
 // Proxies created by this module go into the WeakSet; template.js checks
 // membership to decide when expression reads should register deps directly
@@ -367,6 +373,170 @@ function resolveItems(node, lookupExpression) {
   return { items, collectionType };
 }
 
+// Walk `region.ownedNodes` (server-rendered content between the each block's
+// open/close markers) and group nodes by their preceding
+// `<!--sui-item:v1:KEY-->` marker. Returns one entry per item:
+// { key, startComment, nodes: Node[] }. Nodes exclude the startComment
+// itself — they're the item's rendered DOM content.
+//
+// Nested each blocks inside items emit their own sui-block markers + their
+// own sui-item markers inside; depth tracking ensures we only pick up
+// outer-level item boundaries.
+function extractServerItemGroups(ownedNodes) {
+  const groups = [];
+  let current = null;
+  let blockDepth = 0;
+
+  for (const n of ownedNodes) {
+    if (n.nodeType === Node.COMMENT_NODE) {
+      const data = n.data;
+      if (data.startsWith('sui-block:v1:')) {
+        blockDepth++;
+        if (current) { current.nodes.push(n); }
+        continue;
+      }
+      if (data.startsWith('/sui-block:')) {
+        blockDepth--;
+        if (current) { current.nodes.push(n); }
+        continue;
+      }
+      if (blockDepth === 0 && data.startsWith(SUI_ITEM_MARKER)) {
+        if (current) { groups.push(current); }
+        const rawKey = data.slice(SUI_ITEM_MARKER.length);
+        let key;
+        try {
+          key = decodeURIComponent(rawKey);
+        }
+        catch {
+          key = rawKey;
+        }
+        current = { key, startComment: n, nodes: [] };
+        continue;
+      }
+    }
+    if (current) { current.nodes.push(n); }
+  }
+  if (current) { groups.push(current); }
+  return groups;
+}
+
+// First-data-change adoption path (Plan 09 Strategy D). Tries to reuse
+// server-rendered per-item DOM by matching item keys, wiring per-item
+// reactivity against the existing nodes via hydrateInnerContent. Returns
+// true on success, false if no server markers are present (legacy SSR
+// output — caller should fall through to nuke-and-rebuild).
+function adoptServerItems({
+  self,
+  items,
+  collectionType,
+  node,
+  data,
+  scope,
+  region,
+  renderAST,
+  hydrateInnerContent,
+  isSVG,
+}) {
+  const serverGroups = extractServerItemGroups(region.ownedNodes);
+  if (serverGroups.length === 0) { return false; }
+
+  const serverByKey = new Map();
+  for (const g of serverGroups) { serverByKey.set(g.key, g); }
+
+  const newRecords = [];
+  const usedKeys = new Set();
+  let insertAfter = region.anchor;
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const key = getItemID(item, i, collectionType);
+    const serverGroup = !usedKeys.has(key) ? serverByKey.get(key) : null;
+
+    if (serverGroup) {
+      usedKeys.add(key);
+      const eachData = getEachData(item, i, collectionType, node);
+      const itemScope = scope.child();
+      const itemSignal = new Signal(eachData, { allowClone: false });
+      const itemProxy = createItemDataProxy(data, itemSignal);
+
+      // Wire per-item reactivity on the existing DOM. hydrateInnerContent
+      // moves the nodes into a temporary fragment, walks with
+      // hydrateMarkers (which honors Plan 04's data-sui-bind fast path
+      // against the block's inner entries), and leaves the hydrated
+      // nodes in `mutableNodes`.
+      const mutableNodes = [...serverGroup.nodes];
+      hydrateInnerContent({
+        ownedNodes: mutableNodes,
+        innerAST: node.content,
+        data: itemProxy,
+        scope: itemScope,
+      });
+
+      // Rewrite the per-item comment marker into the stable empty-text
+      // startMarker this block uses at runtime, and add a sibling
+      // endMarker after the item content. Both are invisible positional
+      // anchors; inner blocks never touch them.
+      const startMarker = document.createTextNode('');
+      const endMarker = document.createTextNode('');
+      if (serverGroup.startComment.parentNode) {
+        serverGroup.startComment.replaceWith(startMarker);
+      }
+
+      // Move [startMarker, ...mutableNodes, endMarker] into position
+      // after `insertAfter`. Server order generally matches client
+      // order so the contiguous range is already close to correct — we
+      // still reassemble via a fragment to guarantee endMarker lands
+      // right after the last item node regardless of intervening nodes.
+      const frag = document.createDocumentFragment();
+      frag.appendChild(startMarker);
+      for (const n of mutableNodes) { frag.appendChild(n); }
+      frag.appendChild(endMarker);
+      insertAfter.after(frag);
+      insertAfter = endMarker;
+
+      newRecords.push({
+        key,
+        item,
+        index: i,
+        itemSignal,
+        startMarker,
+        endMarker,
+        scope: itemScope,
+        isElse: false,
+      });
+    }
+    else {
+      const record = createRecord({
+        key,
+        item,
+        index: i,
+        collectionType,
+        node,
+        data,
+        scope,
+        renderAST,
+        isSVG,
+      });
+      insertAfter.after(record.fragment);
+      record.fragment = null;
+      insertAfter = record.endMarker;
+      newRecords.push(record);
+    }
+  }
+
+  // Dispose unused server items — their DOM is no longer in the list.
+  for (const g of serverGroups) {
+    if (usedKeys.has(g.key)) { continue; }
+    if (g.startComment.parentNode) { g.startComment.remove(); }
+    for (const n of g.nodes) {
+      if (n.parentNode) { n.remove(); }
+    }
+  }
+
+  self.records = newRecords;
+  return true;
+}
+
 const eachBlock = defineBlock({
   name: 'each',
 
@@ -404,15 +574,35 @@ const eachBlock = defineBlock({
     self.hasHydrated = true;
   },
 
-  update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
+  update({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
     const { items, collectionType } = resolveItems(node, lookupExpression);
 
     if (self.hasHydrated) {
-      // First data change after hydration — server DOM is now stale.
-      // Clear the region and let reconciliation rebuild from scratch.
+      self.hasHydrated = false;
+      if (items.length > 0) {
+        // Plan 09 — try to adopt server-rendered per-item DOM. If the
+        // server emitted sui-item:v1:KEY markers (Plan 09 SSR output),
+        // items whose keys match reuse their DOM; others render fresh.
+        // Subsequent mutations flow through the standard reconcile path
+        // below with a populated records array.
+        const adopted = adoptServerItems({
+          self,
+          items,
+          collectionType,
+          node,
+          data,
+          scope,
+          region,
+          renderAST,
+          hydrateInnerContent,
+          isSVG,
+        });
+        if (adopted) { return; }
+      }
+      // No per-item markers (legacy SSR output) or empty items — fall
+      // back to nuke-and-rebuild via the reconcile path below.
       region.clear();
       self.records.length = 0;
-      self.hasHydrated = false;
     }
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;

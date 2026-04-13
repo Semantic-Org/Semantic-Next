@@ -62,6 +62,16 @@ function attrNameFromBuffer(buffer) {
   const match = ATTR_NAME_AT_OPEN.exec(buffer);
   return match ? match[1] : null;
 }
+
+// HTML comment contents cannot contain `--` or `>` (WHATWG spec). User-
+// supplied keys may; encode them defensively. URL-encoding covers both
+// classes plus `%` itself. The client-side parser decodes with
+// `decodeURIComponent`. Keys are typically IDs (`x1`, `user-42`) that
+// don't need encoding, so the overhead is negligible in practice.
+function encodeItemKey(key) {
+  const str = String(key ?? '');
+  return encodeURIComponent(str);
+}
 function scanHtmlChunk(chunk, scope) {
   if (!scope.insideTag && chunk.indexOf('<') === -1) {
     scope.htmlBuffer += chunk;
@@ -397,19 +407,21 @@ export class ServerRenderer {
       html += this.renderNodes(node.elseContent, data);
     }
     else {
-      // Per-item boundary markers (<!--sui-each-item:v1:N-->...<!--/sui-each-item:v1:N-->)
-      // are intentionally omitted here. They belong to the SSR-side half of the
-      // pending per-item hydration work — see ai/workspace/reference/perf/06-plans/
-      // 09-each-hydration-dom-reuse.md (Strategy D+E). Current hydrate behavior
-      // trusts server DOM and rebuilds the list on first data change, matching
-      // the pre-decomposition baseline.
+      // Plan 09 — emit `<!--sui-item:v1:KEY-->` before each item's content
+      // so the client can adopt per-item DOM on first data change instead
+      // of nuking the whole list and re-rendering. The key is computed
+      // from the item via the same `getItemID` heuristic the client uses
+      // (`_id`/`id`/`key`/`hash`/`_hash`/`value`/index fallback), so
+      // server and client agree on identity.
       for (let i = 0; i < items.length; i++) {
         const eachData = this.getEachData(items[i], i, collectionType, node);
         const itemData = { ...data, ...eachData };
         const itemEvaluator = new ExpressionEvaluator({ data: itemData, helpers: this.helpers });
         const savedEvaluator = this.evaluator;
         this.evaluator = itemEvaluator;
+        const key = this.getItemID(items[i], i, collectionType);
         try {
+          html += `<!--sui-item:v1:${encodeItemKey(key)}-->`;
           html += this.renderNodes(node.content, itemData);
         }
         finally {
@@ -517,6 +529,19 @@ export class ServerRenderer {
   /*******************************
       Data Helpers
   *******************************/
+
+  // Mirrors the client-side heuristic in blocks/each.js — prefer
+  // user-supplied identity fields, fall back to the positional index.
+  // Kept in sync manually; see ai/workspace/reference/perf/06-plans/
+  // 09-each-hydration-dom-reuse.md §Server.
+  getItemID(item, indexOrKey, collectionType) {
+    if (isPlainObject(item)) {
+      const key = (collectionType === 'object') ? indexOrKey : undefined;
+      return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+    }
+    if (isString(item)) { return item + ':' + indexOrKey; }
+    return indexOrKey;
+  }
 
   getEachData(item, indexOrKey, collectionType, node) {
     let { as, indexAs } = node;

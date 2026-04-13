@@ -1,4 +1,10 @@
-# Perf Log — `/perf/hydrated` (100-card PerfCards)
+# Perf Log — `/perf/hydrated` (1000-card PerfCards)
+
+> Page renders all items from `docs/src/components/PerfTest/data.js`
+> (1000 items). The `count={100}` prop on `<PerfCards />` is not
+> consumed by the component. Earlier findings doc referenced "100 cards"
+> but measurements have always been against the full 1000-card payload.
+
 
 Measurement protocol: `performance.getEntriesByName('hydration-total')[0].duration` via Chrome MCP. 3+ samples per build, hard-reload between each (`ignoreCache: true`). Discard first (cold) sample; report median of remaining.
 
@@ -10,7 +16,8 @@ Measurement protocol: `performance.getEntriesByName('hydration-total')[0].durati
 | Branch post-revert | Vercel preview (perf-native alias) | 172.2, 65, 90.9, 90.9, 102.9 | **~91** | ba8da85d9 (smoke) | Cold first; variance high; ~50ms gap to main prod |
 | + Plan 04 (data-sui-bind) | dev.semantic-ui.com | 91.7, 94.3, 98.4 | **~94** | 5bb6ae3af | Dev variance masks prod gains; refRoot now lazy |
 | + Plan 02 (defer removeMarkers) | dev.semantic-ui.com | 96.1, 85.1, 87.3 | **~87** | 631253aa4 | ~7 ms off critical path; cleanup runs in next rAF |
-| + Plan 08 (single-pass walker + fast-path depth fix) | dev.semantic-ui.com | 95.6, 79.3, 67.6 | **~80** | (pending) | bindMarkers merges SHOW_ELEMENT + SHOW_COMMENT; hydrate fast path respects block depth |
+| + Plan 08 (single-pass walker + fast-path depth fix) | dev.semantic-ui.com | 95.6, 79.3, 67.6 | **~80** | d82e2828a | bindMarkers merges SHOW_ELEMENT + SHOW_COMMENT; hydrate fast path respects block depth |
+| + Plan 09 (per-item markers + DOM-reusing first mutation) | dev.semantic-ui.com | 83.3, 83.8, 95.6 | **~84** | (pending) | Hydrate cost unchanged (O(1) per item preserved). First-mutation filter 1000→114 cards ~70 ms (down from estimated ~150-200 ms nuke-and-rebuild). |
 
 ## Plan milestones — target trajectory
 
