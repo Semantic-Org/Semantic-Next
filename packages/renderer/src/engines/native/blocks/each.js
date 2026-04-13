@@ -412,10 +412,24 @@ const eachBlock = defineBlock({
 
     const showingElse = self.records.length === 1 && self.records[0].isElse;
 
-    if (isEmpty(items) && node.elseContent) {
-      if (!showingElse) {
-        renderElse({ records: self.records, node, data, scope, region, renderAST, isSVG });
+    // Fast-path: empty items. Skip reconcile (no keyIndex Map allocation,
+    // no backward-splice loop) — just tear down records directly. The
+    // krausest "clear" benchmark hits this path with 1000 records to
+    // dispose; matters more here than the algorithmic shape inside
+    // reconcile.
+    if (items.length === 0) {
+      if (node.elseContent) {
+        if (!showingElse) {
+          renderElse({ records: self.records, node, data, scope, region, renderAST, isSVG });
+        }
+        return;
       }
+      for (const record of self.records) {
+        if (record.isElse) { continue; }
+        record.scope.dispose();
+        for (const n of record.nodes) { n.remove(); }
+      }
+      self.records.length = 0;
       return;
     }
 
