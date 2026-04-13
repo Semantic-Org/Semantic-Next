@@ -1,10 +1,10 @@
-import { isDevelopment } from '@semantic-ui/utils';
+import { isTracing } from './dev-tracing.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    if (isDevelopment) {
+    if (isTracing()) {
       this.setContext(metadata);
     }
   }
@@ -18,7 +18,7 @@ export class Dependency {
 
   // allows metadata to be passed with dependency for debugging
   setContext(context) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     if (!context) {
@@ -34,7 +34,7 @@ export class Dependency {
   }
 
   changed(context) {
-    if (isDevelopment) {
+    if (isTracing()) {
       if (context) {
         this.context = context;
       }

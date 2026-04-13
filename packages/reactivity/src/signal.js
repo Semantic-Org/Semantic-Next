@@ -12,12 +12,15 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
+import { isTracing } from './dev-tracing.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 
 export class Signal {
-  get [IS_SIGNAL]() { return true; }
+  get [IS_SIGNAL]() {
+    return true;
+  }
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }
@@ -50,7 +53,7 @@ export class Signal {
 
   // set debugging context for signal removing any present context
   setContext(additionalContext = {}) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     const defaultContext = {
@@ -64,7 +67,7 @@ export class Signal {
 
   // add context to signal
   addContext(additionalContext = {}) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     if (!this.context) {
@@ -77,7 +80,7 @@ export class Signal {
 
   // set debugging stack trace for signal
   setTrace() {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     if (Error.captureStackTrace) {
@@ -189,7 +192,7 @@ export class Signal {
   }
 
   notify() {
-    if (isDevelopment) {
+    if (isTracing()) {
       this.setContext();
       this.setTrace();
     }
