@@ -90,8 +90,27 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
   }
 }
 
+function renderErrorState(ctx, err) {
+  const { node, data, scope, region, renderAST, isSVG } = ctx;
+  if (!node.errorContent?.length) { return; }
+  const stateScope = scope.child();
+  const errorData = node.errorAs ? { [node.errorAs]: err } : { this: err };
+  const fragment = renderAST({
+    ast: node.errorContent,
+    data: { ...data, ...errorData },
+    scope: stateScope,
+    isSVG,
+  });
+  region.setContent(fragment, stateScope);
+}
+
 const asyncBlock = defineBlock({
   name: 'async',
+
+  // Recovery only when the template includes an error branch. No errorContent
+  // means there's nothing useful to render on a sync expression throw — let
+  // it propagate.
+  shouldRecover: (node) => Boolean(node.errorContent?.length),
 
   create() {
     return { generation: 0, hasResolved: false, resolvedValue: null };
@@ -110,6 +129,13 @@ const asyncBlock = defineBlock({
 
   update(ctx) {
     evaluateAndRender(ctx);
+  },
+
+  // Sync throws in expression evaluation route here; promise rejections are
+  // handled inside evaluateAndRender's .catch. Both end up rendering the
+  // same errorContent path.
+  error({ err, ...ctx }) {
+    renderErrorState(ctx, err);
   },
 });
 

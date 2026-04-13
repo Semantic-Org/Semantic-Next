@@ -1,4 +1,4 @@
-import { isTracing } from '../../helpers.js';
+import { isRecovery, isTracing } from '../../helpers.js';
 
 const EMOJI = '🔴';
 
@@ -59,16 +59,21 @@ export function reportBlockError(blockName, node, hook, err) {
 export { nodeSyntax as _nodeSyntax };
 
 export function defineBlock(config) {
-  const { name, create, render, hydrate, update, destroy, error: errorHook, evaluateText } = config;
+  const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText } = config;
 
   const dispatch = function(ctx) {
     const { node, data, scope, region, isSVG, serverMeta, hydrating, renderer } = ctx;
 
-    // create runs outside any reaction; without an error hook a throw
-    // propagates so the bug is loud at mount.
+    // Recovery is on when the global flag forces it OR when the block has
+    // an error hook and (optionally) shouldRecover(node) returns true. The
+    // shouldRecover gate lets blocks skip wrapping for AST shapes that
+    // can't usefully recover (e.g., async with no errorContent).
+    const wantsRecovery = isRecovery()
+      || (errorHook && (!shouldRecover || shouldRecover(node)));
+
     let self;
     if (create) {
-      if (errorHook) {
+      if (wantsRecovery) {
         try {
           self = create(ctx) || {};
         }
@@ -121,22 +126,30 @@ export function defineBlock(config) {
       }
     };
 
-    // Recovery is per-block. Blocks with an error hook get try/catch
-    // wrapping; blocks without let throws propagate so failures are loud.
-    const safeRun = errorHook
-      ? (hookName, fn) => {
+    // Recovery wraps each hook in try/catch. Without recovery, throws
+    // propagate so failures are loud. With recovery + errorHook: hook
+    // decides what to render. With recovery alone (global flag, no hook):
+    // default-isolate via region.clear() + reaction stop.
+    const safeRun = wantsRecovery
+      ? (hookName, fn, comp) => {
         try {
           fn();
           onSuccess();
         }
         catch (err) {
           reportBlockError(name, node, hookName, err);
-          try {
-            errorHook(buildBag({ hook: hookName, err }));
+          if (errorHook) {
+            try {
+              errorHook(buildBag({ hook: hookName, err }));
+            }
+            catch (errorErr) {
+              reportBlockError(name, node, 'error', errorErr);
+              throw errorErr;
+            }
           }
-          catch (errorErr) {
-            reportBlockError(name, node, 'error', errorErr);
-            throw errorErr;
+          else {
+            region.clear();
+            comp?.stop();
           }
         }
       }
@@ -153,10 +166,10 @@ export function defineBlock(config) {
         safeRun(isHydrating ? 'hydrate' : 'render', () => {
           if (isHydrating) { hydrate(buildBag()); }
           else { render(buildBag()); }
-        });
+        }, comp);
       }
       else if (update) {
-        safeRun('update', () => update(buildBag()));
+        safeRun('update', () => update(buildBag()), comp);
       }
     }, {
       message: `${name}:${node.type}`,
