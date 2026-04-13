@@ -153,13 +153,21 @@ class WebComponentBase extends HTMLElementBase {
     this.template.markRendered();
     this.isHydrating = false;
 
-    // Remove all hydration markers — clean DevTools, zero comment noise
-    this.removeMarkers();
-
     // Attach events after hydration completes
     this.template.attach(this.renderRoot);
 
     queueMicrotask(() => this.template?.onRendered());
+
+    // Plan 02 — defer marker cleanup to the post-paint rAF. Markers are
+    // invisible (comment nodes + data-sui-bind attribute inside shadow
+    // root); keeping them in the DOM for one frame has no user-visible
+    // effect but moves ~1-6ms of TreeWalker + removeAttribute work off
+    // the synchronous hydration path. The `isConnected` guard handles
+    // the edge case where the element is torn down between hydration
+    // and the rAF firing.
+    requestAnimationFrame(() => {
+      if (this.isConnected) { this.removeMarkers(); }
+    });
   }
 
   removeMarkers() {
