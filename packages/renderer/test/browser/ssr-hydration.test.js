@@ -1311,6 +1311,179 @@ describe('SSR hydration — snippet reactivity', () => {
     expect(el.shadowRoot.querySelector('span').getAttribute('class')).toBe('active');
     expect(el.shadowRoot.querySelector('span').textContent).toBe('ON');
   });
+
+  // Bug: hydrate path passes parent `data` to inner-marker hydration without
+  // building the snippet-args data proxy that fresh-render's inlineSnippet
+  // creates. Inside the hydrated snippet body, {label} reads from parent
+  // data (where it doesn't exist), not from the named arg.
+  it('snippet with named args is reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="b">[{label}]</span>{/snippet}<div>{>badge label=greeting}</div>',
+      defaultState: { greeting: 'Hello' },
+      createComponent: ({ state }) => ({
+        update() {
+          state.greeting.set('Updated');
+        },
+      }),
+    });
+
+    const span = el.shadowRoot.querySelector('span.b');
+    expect(span.textContent).toBe('[Hello]');
+
+    const updated = $(el).onNext('updated');
+    el.component.update();
+    await updated;
+
+    expect(span.textContent).toBe('[Updated]');
+  });
+
+  it('snippet with named args inside each is reactive after hydration', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="b">[{label}]</span>{/snippet}'
+        + '{#each item in items}<div>{>badge label=item.name}</div>{/each}',
+      defaultState: { items: [{ name: 'Red' }, { name: 'Blue' }] },
+      createComponent: ({ state }) => ({
+        renameFirst() {
+          const items = state.items.peek();
+          items[0] = { ...items[0], name: 'Crimson' };
+          state.items.set([...items]);
+        },
+      }),
+    });
+
+    const spans = el.shadowRoot.querySelectorAll('span.b');
+    expect(spans[0].textContent).toBe('[Red]');
+    expect(spans[1].textContent).toBe('[Blue]');
+
+    const updated = $(el).onNext('updated');
+    el.component.renameFirst();
+    await updated;
+
+    const spansAfter = el.shadowRoot.querySelectorAll('span.b');
+    expect(spansAfter[0].textContent).toBe('[Crimson]');
+    expect(spansAfter[1].textContent).toBe('[Blue]');
+  });
+
+  it('snippet named arg with literal value resolves on hydrate', async () => {
+    // Confirms server-rendered initial values come through correctly even
+    // for the named-arg case (no mutation — pure static check).
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="b">[{label}]</span>{/snippet}'
+        + '<div>{>badge label="One"} {>badge label="Two"}</div>',
+    });
+
+    const spans = el.shadowRoot.querySelectorAll('span.b');
+    expect(spans[0].textContent).toBe('[One]');
+    expect(spans[1].textContent).toBe('[Two]');
+  });
+
+  // Diagnostic: probes whether the snippet body actually resolves the
+  // arg name to the source signal, vs. just preserving server-rendered
+  // text. The arg name doesn't exist in parent data — if the snippet
+  // body reads from parent data (the hypothesized bug), mutation of the
+  // source signal wouldn't update the DOM because no reaction would
+  // track it. If the body resolves through the arg-getter proxy
+  // (correct), the new value flows through.
+  it('snippet named arg where arg name does not exist in parent', async () => {
+    const el = await ssrAndHydrate({
+      template: '{#snippet probe}<span class="probe">[{somethingNotInParent}]</span>{/snippet}'
+        + '<div>{>probe somethingNotInParent=greeting}</div>',
+      defaultState: { greeting: 'Hello' },
+      createComponent: ({ state }) => ({
+        update() {
+          state.greeting.set('Updated');
+        },
+      }),
+    });
+
+    const span = el.shadowRoot.querySelector('span.probe');
+    expect(span.textContent).toBe('[Hello]');
+
+    const updated = $(el).onNext('updated');
+    el.component.update();
+    await updated;
+
+    expect(span.textContent).toBe('[Updated]');
+  });
+
+  // Spurious-render check: instrument the snippet body's expression with
+  // a counter. If the rerender wrapping did a full subtree re-render on
+  // any data change (the suspected wasteful pattern), unrelated signal
+  // mutations would tick the counter. Correct behavior: the body's
+  // reaction tracks only the signals it actually reads, and unrelated
+  // mutations leave it untouched.
+  it('hydrated snippet body does not re-evaluate on unrelated signal change', async () => {
+    let spyCount = 0;
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="b">{spyExpr}</span>{/snippet}'
+        + '<div>{>badge}</div>'
+        + '<div class="other">{otherText}</div>',
+      defaultState: { other: 'initial', sentinel: 'x' },
+      createComponent: ({ state }) => ({
+        otherText: () => state.other.get(),
+        spyExpr: () => {
+          spyCount++;
+          return 'static';
+        },
+        bumpOther() {
+          state.other.set(`changed-${Date.now()}`);
+        },
+        bumpSentinel() {
+          state.sentinel.set(`s-${Date.now()}`);
+        },
+      }),
+    });
+
+    expect(el.shadowRoot.querySelector('span.b').textContent).toBe('static');
+    const baseline = spyCount;
+
+    // Mutate a signal the snippet doesn't read.
+    let updated = $(el).onNext('updated');
+    el.component.bumpOther();
+    await updated;
+
+    expect(spyCount).toBe(baseline);
+    expect(el.shadowRoot.querySelector('.other').textContent).toContain('changed-');
+
+    // Mutate a signal nothing reads — still no spurious fire.
+    updated = $(el).onNext('updated');
+    el.component.bumpSentinel();
+    await updated;
+
+    expect(spyCount).toBe(baseline);
+  });
+
+  // Spurious-render check: when the arg's source signal IS mutated, the
+  // body's reaction should fire exactly once per mutation, not multiple
+  // times from layered subscribers.
+  it('hydrated snippet body fires body reaction exactly once per arg mutation', async () => {
+    let spyCount = 0;
+    const el = await ssrAndHydrate({
+      template: '{#snippet badge}<span class="b">{spyExpr}</span>{/snippet}'
+        + '<div>{>badge label=greeting}</div>',
+      defaultState: { greeting: 'Hello' },
+      createComponent: ({ state }) => ({
+        spyExpr: () => {
+          spyCount++;
+          return state.greeting.get();
+        },
+        update() {
+          state.greeting.set('Updated');
+        },
+      }),
+    });
+
+    const span = el.shadowRoot.querySelector('span.b');
+    expect(span.textContent).toBe('Hello');
+    const baseline = spyCount;
+
+    const updated = $(el).onNext('updated');
+    el.component.update();
+    await updated;
+
+    expect(span.textContent).toBe('Updated');
+    expect(spyCount - baseline).toBe(1);
+  });
 });
 
 /*******************************
