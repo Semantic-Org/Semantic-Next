@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { _nodeSyntax, defineBlock, reportBlockError } from '../../src/engines/native/define-block.js';
+import { setTracing } from '../../src/helpers.js';
 
 describe('nodeSyntax', () => {
   it('produces {#if} header for if nodes', () => {
@@ -53,6 +54,9 @@ describe('nodeSyntax', () => {
 });
 
 describe('reportBlockError', () => {
+  beforeEach(() => setTracing(true));
+  afterEach(() => setTracing(false));
+
   it('emits a collapsed group with block header, message, hook, and stack', () => {
     const groupSpy = vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

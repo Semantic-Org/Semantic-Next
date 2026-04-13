@@ -1,37 +1,9 @@
-import { isDevelopment } from '@semantic-ui/utils';
-
-/*
-
-  defineBlock — infrastructure for per-block lifecycle modules.
-
-  Mirrors defineComponent's shape: a single factory call with a config object
-  and named lifecycle hooks (create, render, hydrate, update, destroy, error).
-  Each hook receives the same destructured 9-key author bag — take what you
-  need.
-
-  The infrastructure owns:
-    • Reaction wiring with auto-context for dev tracing
-    • first-run dispatch to render() or hydrate() based on the dispatch-level
-      `hydrating` flag
-    • try/catch wrapping every hook, structured error emission on throw
-    • hydrate-throw fallthrough to render() (server DOM untrustworthy)
-    • render/update throw → reaction disposal (no silent retry-loop on ticks)
-    • create-throw → skip mount entirely (no self means render would loop)
-    • destroy-throw → swallow (scope is disposing regardless)
-    • error-hook-throw → re-throw in dev, swallow in prod
-    • onUpdated microtask notification after every successful DOM-writing hook
-
-  The block author never touches scope.reaction, DynamicRegion, comp.firstRun,
-  Reaction.setContext, try/catch, or onUpdated scheduling.
-
-*/
+import { isTracing } from '../../helpers.js';
 
 const EMOJI = '🔴';
 
 // Best-effort template-syntax reconstruction for the error-log header.
-// Nodes are AST structures; field shapes vary by block type. Forgiving — if a
-// field is missing or shaped unexpectedly, produces what it can rather than
-// throwing.
+// Forgiving — produces what it can rather than throwing on missing fields.
 function nodeSyntax(node) {
   if (!node) { return ''; }
   const expr = (val) => {
@@ -65,12 +37,9 @@ function nodeSyntax(node) {
   }
 }
 
-// Structured error log — the agentic feedback loop that turns opaque throws
-// into parseable records. V2 extensions (resolution trail, report() facade,
-// dedup) extend this one function rather than introducing parallel pipelines.
-// Dev-only — tree-shakes in prod.
+// Structured error log — opt-in via setTracing(true). Tree-shakes when off.
 export function reportBlockError(blockName, node, hook, err) {
-  if (!isDevelopment) { return; }
+  if (!isTracing()) { return; }
   const syntax = nodeSyntax(node);
   const header = `${EMOJI} ${blockName}  ${syntax}`;
   const message = err?.message ?? String(err);
@@ -87,7 +56,6 @@ export function reportBlockError(blockName, node, hook, err) {
   }
 }
 
-// Exposed for testing — not part of the public block-author surface.
 export { nodeSyntax as _nodeSyntax };
 
 export function defineBlock(config) {
@@ -96,30 +64,27 @@ export function defineBlock(config) {
   const dispatch = function(ctx) {
     const { node, data, scope, region, isSVG, serverMeta, hydrating, renderer } = ctx;
 
-    // create() runs once, outside any reaction, with the dispatch-level
-    // 8-key context. The seam for blocks that need renderer internals (e.g.,
-    // TemplateBlock stashes renderer.subTemplates into self). A throw skips
-    // mount entirely — without self, render() would throw immediately and
-    // loop. The structured log is the terminal state.
+    // create runs outside any reaction; without an error hook a throw
+    // propagates so the bug is loud at mount.
     let self;
     if (create) {
-      try {
-        self = create(ctx) || {};
+      if (errorHook) {
+        try {
+          self = create(ctx) || {};
+        }
+        catch (err) {
+          reportBlockError(name, node, 'create', err);
+          return;
+        }
       }
-      catch (err) {
-        reportBlockError(name, node, 'create', err);
-        return;
+      else {
+        self = create(ctx) || {};
       }
     }
     else {
       self = {};
     }
 
-    // Closures for the author bag. Data is captured at dispatch time;
-    // renderAST accepts overrides for scope/data/isSVG but falls through to
-    // the captured values — covers the common case where a block renders
-    // branch content with the parent data context. hydrateInnerContent is
-    // scoped to hydrate hooks but always present for consistency.
     const lookupExpression = (expression) => renderer.lookupExpression(expression, data);
     const renderAST = ({
       ast,
@@ -150,80 +115,48 @@ export function defineBlock(config) {
       return extra ? Object.assign(bag, extra) : bag;
     };
 
-    // Signal DOM change to the template's onUpdated lifecycle. Coalesced
-    // via renderer.notifyUpdate's microtask gate — multiple hook runs in
-    // the same tick fire onUpdated once.
     const onSuccess = () => {
       if (typeof renderer.notifyUpdate === 'function') {
         renderer.notifyUpdate();
       }
     };
 
-    const handleThrow = (hookName, err, extra) => {
-      reportBlockError(name, node, hookName, err);
-      if (errorHook) {
+    // Recovery is per-block. Blocks with an error hook get try/catch
+    // wrapping; blocks without let throws propagate so failures are loud.
+    const safeRun = errorHook
+      ? (hookName, fn) => {
         try {
-          errorHook(buildBag({ hook: hookName, err, ...extra }));
+          fn();
+          onSuccess();
         }
-        catch (errorErr) {
-          reportBlockError(name, node, 'error', errorErr);
-          if (isDevelopment) { throw errorErr; }
+        catch (err) {
+          reportBlockError(name, node, hookName, err);
+          try {
+            errorHook(buildBag({ hook: hookName, err }));
+          }
+          catch (errorErr) {
+            reportBlockError(name, node, 'error', errorErr);
+            throw errorErr;
+          }
         }
       }
-      else {
-        region.clear();
-      }
-    };
+      : (_, fn) => {
+        fn();
+        onSuccess();
+      };
 
-    // The region's anchor text node is stable across content swaps and
-    // hydration — safe to use as the isConnected guard target.
     const reactionAnchor = region.anchor;
 
     scope.reaction(reactionAnchor, (comp) => {
       if (comp.firstRun) {
-        const firstHook = hydrating && hydrate ? 'hydrate' : 'render';
-        try {
-          if (firstHook === 'hydrate') { hydrate(buildBag()); }
+        const isHydrating = hydrating && hydrate;
+        safeRun(isHydrating ? 'hydrate' : 'render', () => {
+          if (isHydrating) { hydrate(buildBag()); }
           else { render(buildBag()); }
-          onSuccess();
-        }
-        catch (err) {
-          if (firstHook === 'hydrate') {
-            // Hydrate-throw fallthrough: server DOM is untrustworthy, clear
-            // the region and try render() within the same reaction. Whatever
-            // render() does then governs the reaction's fate — success
-            // continues normally, throw disposes below.
-            reportBlockError(name, node, 'hydrate', err);
-            region.clear();
-            try {
-              render(buildBag());
-              onSuccess();
-            }
-            catch (renderErr) {
-              handleThrow('render', renderErr);
-              comp.stop();
-            }
-          }
-          else {
-            handleThrow('render', err);
-            comp.stop();
-          }
-        }
+        });
       }
-      else {
-        // Subsequent runs — update only. No silent fallback to render: authors
-        // must write update() explicitly so the fresh-mount-vs-subsequent-run
-        // asymmetry is visible. Blocks where they happen to coincide (e.g.,
-        // rerender) alias update = render in their config.
-        if (!update) { return; }
-        try {
-          update(buildBag());
-          onSuccess();
-        }
-        catch (err) {
-          handleThrow('update', err);
-          comp.stop();
-        }
+      else if (update) {
+        safeRun('update', () => update(buildBag()));
       }
     }, {
       message: `${name}:${node.type}`,
@@ -233,23 +166,19 @@ export function defineBlock(config) {
 
     scope.onDispose(() => {
       if (destroy) {
+        // Destroy is always isolated — a throw here would strand sibling
+        // cleanup. Loud console.error keeps it visible without tracing.
         try {
           destroy(buildBag());
         }
         catch (err) {
-          reportBlockError(name, node, 'destroy', err);
-          // Swallow — scope is disposing regardless; re-throwing would
-          // strand sibling blocks mid-teardown.
+          console.error(`destroy threw in ${name} block:`, err);
         }
       }
       region.clear();
     });
   };
 
-  // Static — evaluateText is called outside the reaction/region/self
-  // lifecycle, from the raw-text walker. Receives dispatch-level context
-  // only. Blocks not legal in raw-text contexts (async, rerender) omit it;
-  // the walker errors if it encounters a block type without the static.
   if (evaluateText) {
     dispatch.evaluateText = evaluateText;
   }

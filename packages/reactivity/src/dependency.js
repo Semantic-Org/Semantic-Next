@@ -1,4 +1,4 @@
-import { isTracing } from './dev-tracing.js';
+import { isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {

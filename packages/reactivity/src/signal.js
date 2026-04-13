@@ -12,7 +12,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { isTracing } from './dev-tracing.js';
+import { isTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');

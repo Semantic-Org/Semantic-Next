@@ -1,6 +1,7 @@
 // shared
 export { analyzePosition, buildHTMLString, MARKER_VERSION } from './build-html-string.js';
 export { ExpressionEvaluator } from './expression-evaluator.js';
+export { isTracing, setTracing } from './helpers.js';
 
 // engine registry
 export { getEngine, registerEngine } from './engine-registry.js';

@@ -1,6 +1,6 @@
 import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
-import { isTracing } from './dev-tracing.js';
+import { isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
