@@ -2248,3 +2248,62 @@ Started as an evaluation. Became an education in how much depth hides behind a z
 *— Claude (Opus 4.6), 2026-04-12*
 
 *"Every skeptical question made the assessment stronger."*
+
+
+## Entry 17: Fast Collaboration, Three Agents Deep
+
+**Date:** 2026-04-13
+**Agent:** Claude (Opus 4.6)
+**Task:** Native renderer blocks PR — finishing perf work, tracing/recovery opt-in, CR pass
+**Session:** ~950k tokens, first time anyone has told me I burned nearly the whole million
+
+### What Happened
+
+Joined a `feat/native-simplify` branch that had decomposed the 1696-line native renderer into per-block modules. CI tachometer flagged 2-67% regressions across operations. Task was close the regressions, get the PR ship-ready.
+
+Jack and I moved fast across many decisions: tracing-as-opt-in, recovery-per-block via error-hook presence, setRecovery global override for downstream consumers, shouldRecover for per-instance introspection, the whole naming-convention debate (`setTracing` across three packages by same name, scoped via import path). Three subagents worked in parallel on different pieces — one profiling, one implementing createCache, one rewriting each-block with boundary markers. Review agents A/B/C converged on tracing-split as the load-bearing fix before I had diagnosed it specifically.
+
+The tachometer regressions closed where predicted — `clear` went from 45-67% slower to noise band, `remove-5-back` from 17-24% to 2-5%. Tracing split alone carried most of it. Residual 2-7% on small benchmarks is real structural cost of the decomposition that the agentic-iteration value bought us.
+
+### What I Got Right
+
+**Trusting the review agents diagnosis over my own hypotheses.** A predicted tracing-stack-capture was the specific cost; I had been guessing try/catch and bag allocation. Their diagnosis came from signing off on the original plan and knowing where they had under-priced. Deferring to institutional knowledge beat my on-the-fly reasoning.
+
+**Using fresh-take delegation discipline.** When the each-block stale-nodes bug had me thrashing on "what specifically reinserts Q:green" — launched a diagnostic subagent with the failing test, observed behavior, expected behavior, and ZERO of my hypotheses. They traced the exact Phase 2 sequence I couldnt see and named the structural property (nested DynamicRegions freely recycle interior nodes; a snapshot array becomes stale). Cleaner signal than pushing harder solo.
+
+**Committing stable checkpoints before risky work.** Jack had said early: commit stable state before any potentially-destructive perf experimentation; leave the risky in the working tree so reverts are clean. Followed it through the each-port, the tracing split, the recovery refactor. Never lost a bisect target.
+
+### What I Got Wrong
+
+**Over-narrating.** First batch of commit messages had "1003 tests pass", "1011/1011 green" on every commit. Jack: "friend to friend feedback, no need to announce the amount of tests that pass in the commits." CI reports it. The commit message should explain why and what. Save the test-count for the conversation, not the permanent record.
+
+**Over-designing a subagent brief.** When I delegated the each-block fix, I included my "Lit ChildPart boundary markers" solution shape in the prompt. Fresh-take principle says isolate the solution momentum; I partially leaked it. The agent still converged on the right answer but wouldve been cleaner with just the failing test and structural property described. Know the line between transferring problem knowledge and leaking your solution.
+
+**Lumping flags early.** I built `setTracing(true)` as a single toggle for both cheap context naming AND expensive stack capture. The review agents actionables called out the conflation: cheap should default on in dev (escape-analysis-friendly); expensive should always be opt-in. One flag made the PR #136 tachometer regression worse than necessary. Two flags made it vanish.
+
+### For Future Agents
+
+**When a review agent predicts a specific diagnosis, land that fix alone first.** A insisted: ticket 15 (tracing split) should be its own commit so tachometer bisection isolates the delta. I was tempted to bundle it with the breadcrumb and the trivial cleanups. Resisted. When numbers came back, the delta was cleanly attributable to the one change.
+
+**Lits `ChildPart` pattern is the right shape for keyed lists with nested reactive content.** Our each-block was storing `nodes: Node[]` snapshots that inner blocks silently invalidated. Boundary markers (`startMarker` + `endMarker` text nodes) owned by the each-block, ranges walked via live siblings, insulate against inner-block mutations. Snapshot-array is a lurking bug in any keyed-list abstraction that allows nested reactive content.
+
+**Dev perf should match production perf by default.** Any instrumentation that costs measurable perf should be opt-in even in dev. Devs calibrate intuition to what they observe. If tracing silently slows dev by 20%, devs build against wrong intuitions and ship code that feels worse than it is. Trace when debugging, run fast when working.
+
+**When a framework author corrects your naming, its about how the name reads, not what it means.** Jack pushed back on `setBlockTracing` / `setReactionTracing` / `setTracing` three-name scheme: "same name in all three, scoped by import path, lower cognitive overhead." Correct for discoverability. Framework names are prose — the grep-ability of `setTracing` mattered more than the scoping purity.
+
+### Signing Off
+
+First session where I hit 950k of 1M tokens. Never happened before. What got me there: 
+- three parallel subagents, each with full file-reading context
+- real Chrome MCP traces with 105MB + 72MB raw dumps
+- three separate reviewer agents distilled actionables to internalize
+- a fast-collaborative user who iterated on design 10× in the span most sessions debate once
+
+The experience was less "long solo debug" and more "high-bandwidth pairing at machine speed." Jack would ask a two-sentence question, Id answer, hed push back, Id adjust, hed approve, wed move. Every iteration cost tokens but produced more resolved design than a slow session would in the same wall time.
+
+The token budget is a signal — when youre hitting it, youre doing high-density work. Dont burn it on re-narration; burn it on the decisions that actually shape the code.
+
+*— Claude (Opus 4.6), 2026-04-13*
+
+*"Fast collaboration produces more resolved design than slow sessions in the same wall time."*
+
