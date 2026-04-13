@@ -41,6 +41,70 @@ function parseServerMeta(commentData, target) {
   }
 }
 
+// buildHTMLStringPure is deterministic for a given (ast, isSVG) pair —
+// `snippets` is only echoed back in the result (build-html-string.js:76,
+// 202) and doesn't affect htmlString/entries. AST is immutable after
+// reaching the Renderer (compiler's optimizeAST runs pre-runtime;
+// collectSnippets only reads), so cache entries never go stale.
+// WeakMap keyed on the AST array — GC'd automatically when no renderer
+// holds the AST.
+//
+// The cache holds BOTH the string+entries AND a pre-parsed reference
+// <template>. Hydration's hot path (hydrateAttributes) reparses the same
+// htmlString into a reference DOM via `innerHTML =` — the parse itself
+// is ~648ms on a 100-card page per the profile, independent of whether
+// the string was cached. Caching the parsed template.content eliminates
+// the reparse entirely. Safe because hydrateAttributes only READS from
+// refRoot (parallel TreeWalker traversal, no mutations).
+//
+// Hot path: hydration recurses via hydrateInnerContent → hydrateMarkers
+// → hydrateAttributes, each of which needs both the string and parsed
+// ref-DOM for the same contentAST. For a 100-item {#each}, that's ~100
+// rebuilds + ~100 innerHTML parses of identical content per hydrate
+// pass without this cache.
+const buildStringCache = new WeakMap();
+
+// Temporary diagnostic — hit/miss counters so we can verify cache
+// effectiveness. Expose via globalThis.__cbhCache for inspection.
+// TODO remove after perf investigation closes.
+const cacheDiag = { hits: 0, misses: 0, firstMissKeys: [] };
+if (typeof globalThis !== 'undefined') {
+  globalThis.__cbhCache = {
+    stats: () => ({ ...cacheDiag, ratio: cacheDiag.hits / (cacheDiag.hits + cacheDiag.misses || 1) }),
+    reset: () => {
+      cacheDiag.hits = 0;
+      cacheDiag.misses = 0;
+      cacheDiag.firstMissKeys.length = 0;
+    },
+  };
+}
+
+function cachedBuildHTMLString(ast, options) {
+  let entry = buildStringCache.get(ast);
+  if (!entry) {
+    entry = { html: null, svg: null };
+    buildStringCache.set(ast, entry);
+  }
+  const slot = options.isSVG ? 'svg' : 'html';
+  if (entry[slot] === null) {
+    cacheDiag.misses++;
+    if (cacheDiag.firstMissKeys.length < 10) {
+      cacheDiag.firstMissKeys.push({
+        astLen: Array.isArray(ast) ? ast.length : '?',
+        types: Array.isArray(ast) ? ast.slice(0, 3).map((n) => n?.type) : [],
+      });
+    }
+    const built = buildHTMLStringPure(ast, options);
+    const refTemplate = document.createElement('template');
+    refTemplate.innerHTML = built.htmlString;
+    entry[slot] = { ...built, refRoot: refTemplate.content };
+  }
+  else {
+    cacheDiag.hits++;
+  }
+  return entry[slot];
+}
+
 export class Renderer {
   static nextId = 0;
   constructor(
@@ -162,7 +226,7 @@ export class Renderer {
   *******************************/
 
   buildHTMLString(ast, isSVG) {
-    return buildHTMLStringPure(ast, { snippets: this.snippets, isSVG });
+    return cachedBuildHTMLString(ast, { snippets: this.snippets, isSVG });
   }
 
   /*******************************
@@ -285,7 +349,7 @@ export class Renderer {
         this.bindRawTextContent(comment, entry, data, scope);
       }
       else if (type === 'block') {
-        this.bindBlockDirective(comment, entry, data, scope);
+        this.bindBlock(comment, entry, data, scope);
       }
     }
   }
@@ -299,15 +363,12 @@ export class Renderer {
     bindRawTextContentFn({ comment, entry, data, scope, renderer: this });
   }
 
-  // Evaluate AST nodes into a plain text string — used for content inside
-  // raw text elements where DOM nodes can't exist. Mirrors the ServerRenderer's
-  // evaluation logic but uses the reactive expression evaluator so Signal
-  // dependencies are tracked inside Reactions.
-  // Raw-text walker — dispatches html/expression nodes directly and
-  // delegates block-shaped children (if/each/template) to their block's
-  // evaluateText static. Blocks not legal in raw-text contexts (async,
-  // rerender, snippet) silently no-op via the registry lookup returning
-  // a block without the static.
+  // Raw-text walker — used for <script>, <style>, <textarea>, <title>
+  // content where DOM nodes can't exist. Dispatches html/expression nodes
+  // directly and delegates block-shaped children to their block's
+  // evaluateText static. Blocks without an evaluateText impl throw —
+  // raw-text contexts can't host blocks whose semantics need a live DOM
+  // region or asynchronous lifecycle.
   evaluateRawTextNodes(nodes, data) {
     let result = '';
     for (const node of nodes) {
@@ -320,9 +381,13 @@ export class Renderer {
         continue;
       }
       const block = getBlock(node.type);
-      if (block?.evaluateText) {
-        result += block.evaluateText({ node, data, renderer: this });
+      if (!block?.evaluateText) {
+        throw new Error(
+          `{#${node.type}} cannot be rendered inside raw-text contexts `
+            + `(<script>, <style>, <textarea>, <title>).`,
+        );
       }
+      result += block.evaluateText({ node, data, renderer: this });
     }
     return result;
   }
@@ -340,7 +405,7 @@ export class Renderer {
         Block Directive Binding
   *******************************/
 
-  bindBlockDirective(comment, entry, data, scope) {
+  bindBlock(comment, entry, data, scope) {
     const { node, isSVG } = entry;
     const block = getBlock(node.type);
     if (!block) { return; }
@@ -413,18 +478,17 @@ export class Renderer {
         this.hydrateTextExpression(comment, entry, data, scope);
       }
       else if (type === 'block') {
-        this.hydrateBlockDirective(comment, entry, data, scope);
+        this.hydrateBlock(comment, entry, data, scope);
       }
     }
   }
 
   hydrateAttributes(root, entries, data, scope, ast) {
-    // Build a reference DOM from the marker htmlString to find attribute positions.
-    // Use the provided AST (from inner content hydration) or fall back to the top-level AST.
-    const { htmlString } = buildHTMLStringPure(ast || this.ast, { snippets: this.snippets });
-    const refTemplate = document.createElement('template');
-    refTemplate.innerHTML = htmlString;
-    const refRoot = refTemplate.content;
+    // Reference DOM is cached alongside the htmlString — parallel TreeWalker
+    // only reads attribute names off refEls, so sharing the cached fragment
+    // across calls is safe. Eliminates the ~648ms-per-page `innerHTML =`
+    // reparse that the profile identified as the hydration hotspot.
+    const { refRoot } = cachedBuildHTMLString(ast || this.ast, { snippets: this.snippets });
 
     // Build a set of real DOM elements owned by block regions so we can skip
     // them during the parallel walk. Block directives (each, if, etc.) are
@@ -485,7 +549,7 @@ export class Renderer {
     hydrateTextExpressionFn({ comment, entry, data, scope, renderer: this });
   }
 
-  hydrateBlockDirective(comment, entry, data, scope) {
+  hydrateBlock(comment, entry, data, scope) {
     const { node } = entry;
     const parentNode = comment.parentNode;
     const markerID = entry.id;
@@ -527,7 +591,7 @@ export class Renderer {
   }
 
   hydrateInnerContent(ownedNodes, contentAST, data, scope) {
-    const { entries } = buildHTMLStringPure(contentAST, { snippets: this.snippets });
+    const { entries } = cachedBuildHTMLString(contentAST, { snippets: this.snippets });
     if (entries.length === 0) { return; }
 
     // Wrap ownedNodes in a temporary container for TreeWalker traversal
