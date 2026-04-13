@@ -6,9 +6,14 @@ import { registerBlock } from './registry.js';
 /*
 
   {#each items as item} — keyed list reconciliation with per-item reactive
-  data channels. Each item renders into its own DynamicRegion-independent
-  ownedNodes slice; a Signal carries the item's data context so mutations
-  flow into the item's inner Reactions without re-rendering the list.
+  data channels. Each item owns a pair of empty text-node markers
+  (startMarker / endMarker) that bracket its DOM; everything rendered for
+  the item lives strictly between them. Markers are stable positional
+  anchors — inner blocks (rerender, if, nested each, ...) swap only the
+  nodes they themselves own, never touching our markers. That lets
+  reconcile identify, move, and remove items by walking marker-to-marker
+  over *live* DOM, instead of dereferencing a stale childNodes snapshot
+  taken at item-creation time.
 
   Six plan fixes (ai/plans/native-renderer-blocks.md §EachBlock):
     (1) dual update path — one set(), always a fresh wrapper object so
@@ -41,14 +46,14 @@ const EACH_ITEM_OPEN = 'sui-each-item:v1:';
 const EACH_ITEM_CLOSE = '/sui-each-item:v1:';
 
 // Walk a flat nodes list looking for <!--sui-each-item:v1:N-->...
-// <!--/sui-each-item:v1:N--> pairs. Returns one slice per opening marker
-// (inner nodes only; marker comments are collected separately and removed
-// from the DOM). Handles nested block markers by depth-tracking so a
-// nested {#each} doesn't confuse the walker.
+// <!--/sui-each-item:v1:N--> pairs. Returns one entry per item containing
+// { openComment, closeComment, innerNodes }. hydrate() rewrites each
+// comment pair to the stable empty-text markers the block uses at
+// runtime. Nested block markers are depth-tracked so a nested {#each}
+// doesn't confuse the walker.
 function extractItemSlices(ownedNodes) {
   const slices = [];
-  const markersToRemove = [];
-  let currentSlice = null;
+  let current = null;
   let depth = 0;
 
   for (const node of ownedNodes) {
@@ -56,8 +61,7 @@ function extractItemSlices(ownedNodes) {
       const data = node.data;
       if (data.startsWith(EACH_ITEM_OPEN)) {
         if (depth === 0) {
-          currentSlice = [];
-          markersToRemove.push(node);
+          current = { openComment: node, closeComment: null, innerNodes: [] };
           depth = 1;
           continue;
         }
@@ -66,19 +70,17 @@ function extractItemSlices(ownedNodes) {
       else if (data.startsWith(EACH_ITEM_CLOSE)) {
         depth--;
         if (depth === 0) {
-          slices.push(currentSlice);
-          currentSlice = null;
-          markersToRemove.push(node);
+          current.closeComment = node;
+          slices.push(current);
+          current = null;
           continue;
         }
       }
     }
-    if (currentSlice) {
-      currentSlice.push(node);
+    if (current) {
+      current.innerNodes.push(node);
     }
   }
-
-  for (const m of markersToRemove) { m.remove(); }
   return slices;
 }
 
@@ -130,110 +132,254 @@ function createItemDataProxy(parentData, itemSignal) {
   return proxy;
 }
 
+// Remove every node in the half-open range (start, end] — i.e. from
+// start.nextSibling through end inclusive. Used by both move (to drain an
+// item's content into a fragment for re-insertion) and remove (to tear
+// the live item DOM out wholesale). Walking live siblings is what lets
+// this handle nested-block mutations correctly: any node between the
+// markers right now IS the item's current DOM, regardless of what was
+// there at createRecord time.
+function removeRangeContent(startMarker, endMarker) {
+  let n = startMarker.nextSibling;
+  while (n && n !== endMarker) {
+    const next = n.nextSibling;
+    n.remove();
+    n = next;
+  }
+}
+
+// Move a record's markers + everything between them into `fragment`.
+// The record's DOM identity is preserved exactly; no childNodes snapshot
+// is used. Captures the first between-marker sibling *before* detaching
+// startMarker — once startMarker is in the fragment, its .nextSibling
+// would point into the fragment, not the source. After this call, both
+// markers and all inner content are in the fragment in original order.
+function extractRangeToFragment(startMarker, endMarker, fragment) {
+  let n = startMarker.nextSibling;
+  fragment.appendChild(startMarker);
+  while (n && n !== endMarker) {
+    const next = n.nextSibling;
+    fragment.appendChild(n);
+    n = next;
+  }
+  fragment.appendChild(endMarker);
+}
+
 function clearRecords(records) {
   for (const record of records) {
     record.scope.dispose();
-    for (const n of record.nodes) { n.remove(); }
+    disposeRecordDOM(record);
   }
   records.length = 0;
 }
 
-// Build a key → record index map for O(1) lookup during reconciliation.
-// Rebuilt every run — cheap because records is the source of truth.
-function buildKeyIndex(records) {
-  const idx = new Map();
-  for (const record of records) {
-    if (!record.isElse) { idx.set(record.key, record); }
+// Remove all DOM belonging to a record — both markers and everything
+// between them. Walk live siblings so any DOM that inner blocks have
+// swapped in since createRecord is still correctly torn down.
+function disposeRecordDOM(record) {
+  if (record.isElse) {
+    // Else records pre-date the marker scheme; they live in region.ownedNodes
+    // and are cleared via region.clear() at the call sites that transition
+    // out of the else state. Nothing to do here.
+    return;
   }
-  return idx;
+  const { startMarker, endMarker } = record;
+  if (startMarker && startMarker.parentNode) {
+    removeRangeContent(startMarker, endMarker);
+    startMarker.remove();
+  }
+  if (endMarker && endMarker.parentNode) {
+    endMarker.remove();
+  }
 }
 
-// Reconcile records against new items. Mutates records in place.
+function createRecord({ key, item, index, collectionType, node, data, scope, renderAST, isSVG }) {
+  const eachData = getEachData(item, index, collectionType, node);
+  const itemScope = scope.child();
+  const itemSignal = new Signal(eachData, { allowClone: false });
+  const itemProxy = createItemDataProxy(data, itemSignal);
+  const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
+  // Marker-bounded item range: startMarker ... [item content] ... endMarker.
+  // These two empty text nodes are the record's only positional identity.
+  // Inner blocks never touch them — each nested DynamicRegion owns its own
+  // anchor + endAnchor and swaps only the nodes it created.
+  const startMarker = document.createTextNode('');
+  const endMarker = document.createTextNode('');
+  fragment.insertBefore(startMarker, fragment.firstChild);
+  fragment.appendChild(endMarker);
+  return {
+    key,
+    item,
+    index,
+    itemSignal,
+    startMarker,
+    endMarker,
+    fragment,
+    scope: itemScope,
+    isElse: false,
+  };
+}
+
+function disposeRecord(record) {
+  record.scope.dispose();
+  disposeRecordDOM(record);
+}
+
+// Lit-style head/tail keyed reconcile (lit-html's repeat directive).
+// Walks both ends inward; lazily builds key→index maps only when forced
+// by non-contiguous changes. Common cases (head/tail unchanged, single
+// move, full reverse, sequential add/remove) skip the map entirely.
+//
+// Phase 1: walk produces newRecords[] order + removes dropped records.
+// Phase 2: linearize DOM order in one pass, using each record's
+//          startMarker/endMarker as stable positional anchors. Movement
+//          extracts the [startMarker..endMarker] range into a fragment,
+//          then reinserts it — correct regardless of what inner blocks
+//          have done to content between the markers.
+// Phase 3: itemSignal updates for records whose item/index changed.
 function reconcile({ records, items, collectionType, node, data, scope, region, renderAST, isSVG }) {
-  const keyIndex = buildKeyIndex(records);
+  const oldRecords = records.slice();
+  const oldKeys = oldRecords.map((r) => r.key);
   const newKeys = items.map((item, i) => getItemID(item, i, collectionType));
-  const newKeySet = new Set(newKeys);
+  const newRecords = new Array(items.length);
 
-  // Drop records whose keys are no longer present.
-  for (let i = records.length - 1; i >= 0; i--) {
-    const record = records[i];
-    if (record.isElse || !newKeySet.has(record.key)) {
-      record.scope.dispose();
-      for (const n of record.nodes) { n.remove(); }
-      records.splice(i, 1);
+  let oldHead = 0;
+  let oldTail = oldRecords.length - 1;
+  let newHead = 0;
+  let newTail = items.length - 1;
+  let oldKeyToIdx;
+  let newKeySet;
+
+  while (oldHead <= oldTail && newHead <= newTail) {
+    if (oldRecords[oldHead] === null) {
+      oldHead++;
+      continue;
     }
-  }
-
-  // Rebuild index after deletions.
-  keyIndex.clear();
-  for (const r of records) { keyIndex.set(r.key, r); }
-
-  let insertAfter = region.anchor;
-  const reordered = [];
-
-  for (let i = 0; i < newKeys.length; i++) {
-    const key = newKeys[i];
-    const item = items[i];
-    const existing = keyIndex.get(key);
-
-    if (existing) {
-      const eachData = getEachData(item, i, collectionType, node);
-      const prevItem = existing.item;
-      const prevIndex = existing.index;
-
-      if (prevItem !== item || prevIndex !== i) {
-        existing.itemSignal.set(eachData);
-      }
-      else if (typeof item === 'object') {
-        // Same ref at same position — isEqual short-circuits on a === b,
-        // so explicit notify is the only way in-place mutations propagate.
-        existing.itemSignal.notify();
-      }
-
-      existing.item = item;
-      existing.index = i;
-
-      // Move DOM if position changed.
-      const firstNode = existing.nodes[0];
-      if (firstNode && firstNode.previousSibling !== insertAfter) {
-        for (const n of existing.nodes) {
-          insertAfter.after(n);
-          insertAfter = n;
-        }
-      }
-      else if (existing.nodes.length > 0) {
-        insertAfter = existing.nodes[existing.nodes.length - 1];
-      }
-
-      reordered.push(existing);
+    if (oldRecords[oldTail] === null) {
+      oldTail--;
+      continue;
+    }
+    if (oldKeys[oldHead] === newKeys[newHead]) {
+      newRecords[newHead++] = oldRecords[oldHead++];
+    }
+    else if (oldKeys[oldTail] === newKeys[newTail]) {
+      newRecords[newTail--] = oldRecords[oldTail--];
+    }
+    else if (oldKeys[oldHead] === newKeys[newTail]) {
+      newRecords[newTail--] = oldRecords[oldHead++];
+    }
+    else if (oldKeys[oldTail] === newKeys[newHead]) {
+      newRecords[newHead++] = oldRecords[oldTail--];
     }
     else {
-      const eachData = getEachData(item, i, collectionType, node);
-      const itemScope = scope.child();
-      const itemSignal = new Signal(eachData, { allowClone: false });
-      const itemProxy = createItemDataProxy(data, itemSignal);
-
-      const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
-      const nodes = [...fragment.childNodes];
-      insertAfter.after(fragment);
-      if (nodes.length > 0) {
-        insertAfter = nodes[nodes.length - 1];
+      if (!oldKeyToIdx) {
+        oldKeyToIdx = new Map();
+        for (let i = oldHead; i <= oldTail; i++) { oldKeyToIdx.set(oldKeys[i], i); }
+        newKeySet = new Set();
+        for (let i = newHead; i <= newTail; i++) { newKeySet.add(newKeys[i]); }
       }
+      if (!newKeySet.has(oldKeys[oldHead])) {
+        disposeRecord(oldRecords[oldHead]);
+        oldHead++;
+      }
+      else if (!newKeySet.has(oldKeys[oldTail])) {
+        disposeRecord(oldRecords[oldTail]);
+        oldTail--;
+      }
+      else {
+        const oldIdx = oldKeyToIdx.get(newKeys[newHead]);
+        const oldRec = oldIdx !== undefined ? oldRecords[oldIdx] : null;
+        if (oldRec === null) {
+          newRecords[newHead] = createRecord({
+            key: newKeys[newHead],
+            item: items[newHead],
+            index: newHead,
+            collectionType,
+            node,
+            data,
+            scope,
+            renderAST,
+            isSVG,
+          });
+        }
+        else {
+          newRecords[newHead] = oldRec;
+          oldRecords[oldIdx] = null;
+        }
+        newHead++;
+      }
+    }
+  }
 
-      reordered.push({
-        key,
-        item,
-        index: i,
-        itemSignal,
-        nodes,
-        scope: itemScope,
-        isElse: false,
-      });
+  while (newHead <= newTail) {
+    newRecords[newHead] = createRecord({
+      key: newKeys[newHead],
+      item: items[newHead],
+      index: newHead,
+      collectionType,
+      node,
+      data,
+      scope,
+      renderAST,
+      isSVG,
+    });
+    newHead++;
+  }
+
+  while (oldHead <= oldTail) {
+    const r = oldRecords[oldHead++];
+    if (r !== null) { disposeRecord(r); }
+  }
+
+  // Phase 2: linearize DOM order using markers.
+  //
+  // `cursor` is always a currently-attached node that we know the next
+  // item's startMarker should follow. It starts as region.anchor and
+  // advances to each placed record's endMarker. Markers are stable — they
+  // are the invariant that survives inner-block mutations.
+  //
+  // For each record:
+  //   - If the record's startMarker is already the cursor's nextSibling,
+  //     the record is already in the right place; skip insertion.
+  //   - Otherwise, extract its [startMarker .. content .. endMarker]
+  //     range into a fragment, then insert the fragment after the cursor.
+  //     Fresh records start with their content already in the fragment
+  //     we built in createRecord — insert it directly.
+  let cursor = region.anchor;
+  for (const rec of newRecords) {
+    if (!rec) { continue; }
+    if (rec.fragment) {
+      // Freshly created record — content and markers are in the fragment.
+      cursor.after(rec.fragment);
+      rec.fragment = null;
+    }
+    else if (rec.startMarker.previousSibling !== cursor) {
+      // Existing record in the wrong position — extract and reinsert.
+      const frag = document.createDocumentFragment();
+      extractRangeToFragment(rec.startMarker, rec.endMarker, frag);
+      cursor.after(frag);
+    }
+    cursor = rec.endMarker;
+  }
+
+  // Phase 3: update item signals where item ref or index changed.
+  // Same-ref same-index objects fall into notify() because Signal.isEqual
+  // short-circuits on a === b and won't see in-place mutations.
+  for (let i = 0; i < newRecords.length; i++) {
+    const rec = newRecords[i];
+    const item = items[i];
+    if (rec.item !== item || rec.index !== i) {
+      rec.itemSignal.set(getEachData(item, i, collectionType, node));
+      rec.item = item;
+      rec.index = i;
+    }
+    else if (typeof item === 'object') {
+      rec.itemSignal.notify();
     }
   }
 
   records.length = 0;
-  records.push(...reordered);
+  for (const r of newRecords) { records.push(r); }
 }
 
 function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
@@ -246,7 +392,8 @@ function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
     item: null,
     index: -1,
     itemSignal: null,
-    nodes: [...region.ownedNodes],
+    startMarker: null,
+    endMarker: null,
     scope: elseScope,
     isElse: true,
   });
@@ -305,7 +452,8 @@ const eachBlock = defineBlock({
           item: null,
           index: -1,
           itemSignal: null,
-          nodes: [...region.ownedNodes],
+          startMarker: null,
+          endMarker: null,
           scope: elseScope,
           isElse: true,
         });
@@ -333,7 +481,7 @@ const eachBlock = defineBlock({
     const outerFrag = document.createDocumentFragment();
 
     for (let i = 0; i < claimCount; i++) {
-      const itemNodes = itemSlices[i];
+      const { openComment, closeComment, innerNodes } = itemSlices[i];
       const item = items[i];
       const key = getItemID(item, i, collectionType);
       const eachData = getEachData(item, i, collectionType, node);
@@ -341,60 +489,68 @@ const eachBlock = defineBlock({
       const itemSignal = new Signal(eachData, { allowClone: false });
       const itemProxy = createItemDataProxy(data, itemSignal);
 
-      hydrateInnerContent({ ownedNodes: itemNodes, innerAST: node.content, data: itemProxy, scope: itemScope });
-      for (const n of itemNodes) { outerFrag.appendChild(n); }
+      hydrateInnerContent({ ownedNodes: innerNodes, innerAST: node.content, data: itemProxy, scope: itemScope });
+
+      // Rewrite the per-item comment markers into the empty-text markers
+      // the block uses at runtime. Same position, same identity semantics,
+      // but now invisible and part of the record.
+      const startMarker = document.createTextNode('');
+      const endMarker = document.createTextNode('');
+      openComment.replaceWith(startMarker);
+      closeComment.replaceWith(endMarker);
+      outerFrag.appendChild(startMarker);
+      for (const n of innerNodes) { outerFrag.appendChild(n); }
+      outerFrag.appendChild(endMarker);
 
       self.records.push({
         key,
         item,
         index: i,
         itemSignal,
-        nodes: itemNodes,
+        startMarker,
+        endMarker,
         scope: itemScope,
         isElse: false,
       });
     }
 
     // Dispose any excess slices — server rendered more items than the
-    // client sees. The slices' content is orphaned in hydrateInnerContent's
-    // containers via an earlier call or never claimed; explicitly remove
-    // any leftover DOM.
+    // client sees. Drop the entire marker-bounded range.
     for (let i = claimCount; i < itemSlices.length; i++) {
-      for (const n of itemSlices[i]) {
+      const { openComment, closeComment, innerNodes } = itemSlices[i];
+      if (openComment.parentNode) { openComment.remove(); }
+      for (const n of innerNodes) {
         if (n.parentNode) { n.remove(); }
       }
+      if (closeComment.parentNode) { closeComment.remove(); }
     }
 
     region.anchor.after(outerFrag);
 
     // Fresh-render any items the server didn't emit — client has more
-    // items than slices. Append after the last claimed item's nodes.
+    // items than slices. Append after the last claimed item's endMarker.
     if (items.length > itemSlices.length) {
       let insertAfter = self.records.length > 0
-        ? self.records[self.records.length - 1].nodes.at(-1) || region.anchor
+        ? self.records[self.records.length - 1].endMarker || region.anchor
         : region.anchor;
       for (let i = itemSlices.length; i < items.length; i++) {
         const item = items[i];
         const key = getItemID(item, i, collectionType);
-        const eachData = getEachData(item, i, collectionType, node);
-        const itemScope = scope.child();
-        const itemSignal = new Signal(eachData, { allowClone: false });
-        const itemProxy = createItemDataProxy(data, itemSignal);
-
-        const fragment = renderAST({ ast: node.content, data: itemProxy, scope: itemScope, isSVG });
-        const nodes = [...fragment.childNodes];
-        insertAfter.after(fragment);
-        if (nodes.length > 0) { insertAfter = nodes[nodes.length - 1]; }
-
-        self.records.push({
+        const record = createRecord({
           key,
           item,
           index: i,
-          itemSignal,
-          nodes,
-          scope: itemScope,
-          isElse: false,
+          collectionType,
+          node,
+          data,
+          scope,
+          renderAST,
+          isSVG,
         });
+        insertAfter.after(record.fragment);
+        record.fragment = null;
+        insertAfter = record.endMarker;
+        self.records.push(record);
       }
     }
   },
@@ -427,7 +583,7 @@ const eachBlock = defineBlock({
       for (const record of self.records) {
         if (record.isElse) { continue; }
         record.scope.dispose();
-        for (const n of record.nodes) { n.remove(); }
+        disposeRecordDOM(record);
       }
       self.records.length = 0;
       return;
