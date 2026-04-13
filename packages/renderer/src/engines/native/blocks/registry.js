@@ -5,9 +5,8 @@
   packages/renderer/src/engines/native/blocks/*.js).
 
   The renderer uses this in a single dispatch path for both bind-time and
-  hydrate-time flows, collapsing what today is a six-way switch across
-  bindBlockDirective, hydrateBlockDirective, the raw-text switch, and the
-  ServerRenderer's getServerRenderedAST.
+  hydrate-time flows (Renderer.bindBlock / Renderer.hydrateBlock), and the
+  raw-text walker dispatches via getBlock(type)?.evaluateText.
 
 */
 
