@@ -58,6 +58,10 @@ const rerender = defineBlock({
     trackDeps(ctx);
     renderContent(ctx);
   },
+
+  evaluateText({ node, data, renderer }) {
+    return renderer.evaluateRawTextNodes(node.content, data);
+  },
 });
 
 registerBlock('rerender', rerender);
