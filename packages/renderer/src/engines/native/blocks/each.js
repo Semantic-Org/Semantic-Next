@@ -28,9 +28,12 @@ import { registerBlock } from './registry.js';
         isElse: true, rendered once when items is empty
     (6) Proxy preservation — unchanged; the parent-data-fallthrough +
         item-signal-reactivity pattern is load-bearing
-  Fix (4) — hydration-bypass / per-item server markers — lands in step 9.
-  Step-6 hydrate registers deps and preserves server DOM until the first
-  data change, which clears region and re-renders from scratch.
+  Hydrate trusts server DOM and registers a dep on the collection. The
+  first data change invalidates the block; `update` then clears the region
+  and rebuilds via `reconcile`. Per-item DOM reuse across that boundary is
+  out of scope here — see ai/workspace/reference/perf/06-plans/
+  09-each-hydration-dom-reuse.md (Strategy D+E) for the plan that pairs
+  SSR per-item markers with a DOM-reusing first-mutation path.
 
 */
 
@@ -40,48 +43,6 @@ import { registerBlock } from './registry.js';
 const itemContextProxies = new WeakSet();
 export function isItemContext(data) {
   return data != null && itemContextProxies.has(data);
-}
-
-const EACH_ITEM_OPEN = 'sui-each-item:v1:';
-const EACH_ITEM_CLOSE = '/sui-each-item:v1:';
-
-// Walk a flat nodes list looking for <!--sui-each-item:v1:N-->...
-// <!--/sui-each-item:v1:N--> pairs. Returns one entry per item containing
-// { openComment, closeComment, innerNodes }. hydrate() rewrites each
-// comment pair to the stable empty-text markers the block uses at
-// runtime. Nested block markers are depth-tracked so a nested {#each}
-// doesn't confuse the walker.
-function extractItemSlices(ownedNodes) {
-  const slices = [];
-  let current = null;
-  let depth = 0;
-
-  for (const node of ownedNodes) {
-    if (node.nodeType === Node.COMMENT_NODE) {
-      const data = node.data;
-      if (data.startsWith(EACH_ITEM_OPEN)) {
-        if (depth === 0) {
-          current = { openComment: node, closeComment: null, innerNodes: [] };
-          depth = 1;
-          continue;
-        }
-        depth++;
-      }
-      else if (data.startsWith(EACH_ITEM_CLOSE)) {
-        depth--;
-        if (depth === 0) {
-          current.closeComment = node;
-          slices.push(current);
-          current = null;
-          continue;
-        }
-      }
-    }
-    if (current) {
-      current.innerNodes.push(node);
-    }
-  }
-  return slices;
 }
 
 function getCollectionType(items) {
@@ -434,125 +395,13 @@ const eachBlock = defineBlock({
     });
   },
 
-  hydrate({ node, data, scope, region, renderAST, lookupExpression, hydrateInnerContent, self, isSVG }) {
-    const { items, collectionType } = resolveItems(node, lookupExpression);
-
-    // Empty + else-content: server rendered elseContent as a single block.
-    // Claim it as a singleton else record.
-    if (isEmpty(items) && node.elseContent) {
-      if (region.ownedNodes.length > 0) {
-        const elseScope = scope.child();
-        region.childScopes.push(elseScope);
-        hydrateInnerContent({ ownedNodes: region.ownedNodes, innerAST: node.elseContent, data, scope: elseScope });
-        const frag = document.createDocumentFragment();
-        for (const n of region.ownedNodes) { frag.appendChild(n); }
-        region.anchor.after(frag);
-        self.records.push({
-          key: null,
-          item: null,
-          index: -1,
-          itemSignal: null,
-          startMarker: null,
-          endMarker: null,
-          scope: elseScope,
-          isElse: true,
-        });
-      }
-      return;
-    }
-
-    // Normal case: parse per-item markers and claim each slice.
-    const itemSlices = extractItemSlices(region.ownedNodes);
-
-    // Legacy-server fallback: no per-item markers present (pre-step-9 server
-    // output). Preserve the pre-existing "nuke-and-rerender on first data
-    // change" semantics by deferring to update().
-    if (itemSlices.length === 0 && items.length > 0) {
-      self.hasHydrated = true;
-      return;
-    }
-
-    // Positional 1-to-1 claim: each client item gets the slice at the same
-    // index. Count mismatches (items.length !== itemSlices.length) are
-    // handled defensively — extras on either side get a fresh render or
-    // dispose after the claimed prefix. See plan §ServerRenderer's note
-    // on mismatch recovery.
-    const claimCount = Math.min(items.length, itemSlices.length);
-    const outerFrag = document.createDocumentFragment();
-
-    for (let i = 0; i < claimCount; i++) {
-      const { openComment, closeComment, innerNodes } = itemSlices[i];
-      const item = items[i];
-      const key = getItemID(item, i, collectionType);
-      const eachData = getEachData(item, i, collectionType, node);
-      const itemScope = scope.child();
-      const itemSignal = new Signal(eachData, { allowClone: false });
-      const itemProxy = createItemDataProxy(data, itemSignal);
-
-      hydrateInnerContent({ ownedNodes: innerNodes, innerAST: node.content, data: itemProxy, scope: itemScope });
-
-      // Rewrite the per-item comment markers into the empty-text markers
-      // the block uses at runtime. Same position, same identity semantics,
-      // but now invisible and part of the record.
-      const startMarker = document.createTextNode('');
-      const endMarker = document.createTextNode('');
-      openComment.replaceWith(startMarker);
-      closeComment.replaceWith(endMarker);
-      outerFrag.appendChild(startMarker);
-      for (const n of innerNodes) { outerFrag.appendChild(n); }
-      outerFrag.appendChild(endMarker);
-
-      self.records.push({
-        key,
-        item,
-        index: i,
-        itemSignal,
-        startMarker,
-        endMarker,
-        scope: itemScope,
-        isElse: false,
-      });
-    }
-
-    // Dispose any excess slices — server rendered more items than the
-    // client sees. Drop the entire marker-bounded range.
-    for (let i = claimCount; i < itemSlices.length; i++) {
-      const { openComment, closeComment, innerNodes } = itemSlices[i];
-      if (openComment.parentNode) { openComment.remove(); }
-      for (const n of innerNodes) {
-        if (n.parentNode) { n.remove(); }
-      }
-      if (closeComment.parentNode) { closeComment.remove(); }
-    }
-
-    region.anchor.after(outerFrag);
-
-    // Fresh-render any items the server didn't emit — client has more
-    // items than slices. Append after the last claimed item's endMarker.
-    if (items.length > itemSlices.length) {
-      let insertAfter = self.records.length > 0
-        ? self.records[self.records.length - 1].endMarker || region.anchor
-        : region.anchor;
-      for (let i = itemSlices.length; i < items.length; i++) {
-        const item = items[i];
-        const key = getItemID(item, i, collectionType);
-        const record = createRecord({
-          key,
-          item,
-          index: i,
-          collectionType,
-          node,
-          data,
-          scope,
-          renderAST,
-          isSVG,
-        });
-        insertAfter.after(record.fragment);
-        record.fragment = null;
-        insertAfter = record.endMarker;
-        self.records.push(record);
-      }
-    }
+  hydrate({ node, lookupExpression, self }) {
+    // Trust server DOM. Register a dep on the collection so the first data
+    // change invalidates the block — `update` then clears the region and
+    // rebuilds via reconcile. Per-item reactivity (text/attr Reactions
+    // inside item content) is established at that rebuild, not on hydrate.
+    lookupExpression(node.over);
+    self.hasHydrated = true;
   },
 
   update({ node, data, scope, region, renderAST, lookupExpression, self, isSVG }) {
