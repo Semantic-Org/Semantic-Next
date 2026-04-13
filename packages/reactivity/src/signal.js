@@ -12,7 +12,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { isTracing } from './helpers.js';
+import { isTracing, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
@@ -93,6 +93,8 @@ export class Signal {
 
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static setTracing = setTracing;
+  static isTracing = isTracing;
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
