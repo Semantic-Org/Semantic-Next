@@ -104,20 +104,22 @@ export function defineBlock(config) {
       scope: innerScope = scope,
     } = {}) => renderer.hydrateInnerContent(ownedNodes, innerAST, innerData, innerScope);
 
-    const buildBag = (extra) => {
-      const bag = {
-        node,
-        data,
-        scope,
-        region,
-        isSVG,
-        serverMeta,
-        self,
-        lookupExpression,
-        renderAST,
-        hydrateInnerContent,
-      };
-      return extra ? Object.assign(bag, extra) : bag;
+    // Interned per-instance bag — same hidden-class shape across all hook
+    // calls. hook/err keys are present from construction so the error-hook
+    // extension is just two field writes, not an Object.assign.
+    const bag = {
+      node,
+      data,
+      scope,
+      region,
+      isSVG,
+      serverMeta,
+      self,
+      lookupExpression,
+      renderAST,
+      hydrateInnerContent,
+      hook: null,
+      err: null,
     };
 
     const onSuccess = () => {
@@ -139,12 +141,18 @@ export function defineBlock(config) {
         catch (err) {
           reportBlockError(name, node, hookName, err);
           if (errorHook) {
+            bag.hook = hookName;
+            bag.err = err;
             try {
-              errorHook(buildBag({ hook: hookName, err }));
+              errorHook(bag);
             }
             catch (errorErr) {
               reportBlockError(name, node, 'error', errorErr);
               throw errorErr;
+            }
+            finally {
+              bag.hook = null;
+              bag.err = null;
             }
           }
           else {
@@ -164,12 +172,12 @@ export function defineBlock(config) {
       if (comp.firstRun) {
         const isHydrating = hydrating && hydrate;
         safeRun(isHydrating ? 'hydrate' : 'render', () => {
-          if (isHydrating) { hydrate(buildBag()); }
-          else { render(buildBag()); }
+          if (isHydrating) { hydrate(bag); }
+          else { render(bag); }
         }, comp);
       }
       else if (update) {
-        safeRun('update', () => update(buildBag()), comp);
+        safeRun('update', () => update(bag), comp);
       }
     }, {
       message: `${name}:${node.type}`,
@@ -178,16 +186,9 @@ export function defineBlock(config) {
     });
 
     scope.onDispose(() => {
-      if (destroy) {
-        // Destroy is always isolated — a throw here would strand sibling
-        // cleanup. Loud console.error keeps it visible without tracing.
-        try {
-          destroy(buildBag());
-        }
-        catch (err) {
-          console.error(`destroy threw in ${name} block:`, err);
-        }
-      }
+      // Destroy throws propagate. Stranding sibling cleanup is the trade-
+      // off — silent recovery hides destroy bugs harder than DOM leaks do.
+      if (destroy) { destroy(bag); }
       region.clear();
     });
   };
