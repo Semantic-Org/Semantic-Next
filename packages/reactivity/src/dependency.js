@@ -1,4 +1,4 @@
-import { isTracing } from './helpers.js';
+import { isStackCapture, isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
@@ -16,7 +16,7 @@ export class Dependency {
     }
   }
 
-  // allows metadata to be passed with dependency for debugging
+  // Cheap context naming on isTracing; stack capture only on isStackCapture.
   setContext(context) {
     if (!isTracing()) {
       return;
@@ -24,11 +24,13 @@ export class Dependency {
     if (!context) {
       context = {};
     }
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(context, this.setContext);
-    }
-    else {
-      context.stack = new Error().stack;
+    if (isStackCapture()) {
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(context, this.setContext);
+      }
+      else {
+        context.stack = new Error().stack;
+      }
     }
     this.context = context;
   }

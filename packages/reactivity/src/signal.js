@@ -12,7 +12,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { isTracing, setTracing } from './helpers.js';
+import { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
@@ -78,9 +78,11 @@ export class Signal {
     }
   }
 
-  // set debugging stack trace for signal
+  // Stack trace capture is gated separately because Error.captureStackTrace
+  // costs ~10-100× a context spread, paid per Signal.notify in tracing-on
+  // dev. Default off; opt in via setStackCapture(true).
   setTrace() {
-    if (!isTracing()) {
+    if (!isStackCapture()) {
       return;
     }
     if (Error.captureStackTrace) {
@@ -95,6 +97,8 @@ export class Signal {
   static cloneFunction = clone;
   static setTracing = setTracing;
   static isTracing = isTracing;
+  static setStackCapture = setStackCapture;
+  static isStackCapture = isStackCapture;
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
@@ -194,10 +198,10 @@ export class Signal {
   }
 
   notify() {
-    if (isTracing()) {
-      this.setContext();
-      this.setTrace();
-    }
+    // Each gate handles itself — setContext on isTracing, setTrace on
+    // isStackCapture. Hot path: both early-return when their flag is off.
+    this.setContext();
+    this.setTrace();
     this.dependency.changed(this.context);
   }
 

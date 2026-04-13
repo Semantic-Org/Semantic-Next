@@ -1,6 +1,6 @@
 import { clone, isEqual } from '@semantic-ui/utils';
 import { Dependency } from './dependency.js';
-import { isTracing, setTracing } from './helpers.js';
+import { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Reaction {
@@ -37,7 +37,7 @@ export class Reaction {
   }
 
   setTrace() {
-    if (!isTracing()) {
+    if (!isStackCapture()) {
       return;
     }
     if (Error.captureStackTrace) {
@@ -117,6 +117,8 @@ export class Reaction {
   static getSource = Scheduler.getSource;
   static setTracing = setTracing;
   static isTracing = isTracing;
+  static setStackCapture = setStackCapture;
+  static isStackCapture = isStackCapture;
 
   static nonreactive(func) {
     const previousReaction = Scheduler.current;
