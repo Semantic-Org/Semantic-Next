@@ -296,54 +296,66 @@ export class Renderer {
   bindMarkers(root, entries, data, scope, ast) {
     if (entries.length === 0) { return; }
 
-    // Pass 1: Bind attribute markers on elements
+    // Plan 08 — single-pass walker over SHOW_ELEMENT | SHOW_COMMENT. Each
+    // node.nextSibling/firstChild in the walker does one DOM traversal
+    // instead of two, cutting the per-render walk cost roughly in half
+    // for large fragments (1000-row table, etc.). Attribute processing is
+    // safe inline (only touches the element's own attributes); comment
+    // processing is deferred because it mutates the tree structure
+    // (replace/remove) and would invalidate the live walker.
     const processedAttrIDs = new Set();
-    const elementWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-    let el;
-    while ((el = elementWalker.nextNode())) {
-      const element = el;
-      const attrsToProcess = [];
-      for (let i = 0; i < element.attributes.length; i++) {
-        const attr = element.attributes[i];
-        if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-          attrsToProcess.push({ name: attr.name, value: attr.value });
-        }
-      }
-
-      for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        const { parts, markerIDs } = this.parseAttributeParts(attrValue);
-        for (const id of markerIDs) { processedAttrIDs.add(id); }
-        this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
-      }
-    }
-
-    // Pass 2: Walk comment nodes for text, block, and raw text markers
-    const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
     const commentsToProcess = [];
-    let comment;
-    while ((comment = commentWalker.nextNode())) {
-      const text = comment.data;
-      if (text.startsWith(COMMENT_MARKER)) {
-        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
-        if (!isNaN(markerID) && !processedAttrIDs.has(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'expression' });
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+    );
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node;
+        const attrsToProcess = [];
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes[i];
+          if (attr.value.includes(ATTR_MARKER_PREFIX)) {
+            attrsToProcess.push({ name: attr.name, value: attr.value });
+          }
+        }
+        for (const { name: attrName, value: attrValue } of attrsToProcess) {
+          const { parts, markerIDs } = this.parseAttributeParts(attrValue);
+          for (const id of markerIDs) { processedAttrIDs.add(id); }
+          this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
       }
-      else if (text.startsWith(RAW_TEXT_MARKER)) {
-        const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'rawText' });
+      else {
+        const text = node.data;
+        if (text.startsWith(COMMENT_MARKER)) {
+          const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+          if (!isNaN(markerID)) {
+            // processedAttrIDs is finalized only *after* the walk completes,
+            // so defer the attr-ID filter to the processing loop below. In
+            // fresh-render shape (client:load), attribute markers and their
+            // owning elements are discovered in document order — the element
+            // is visited before any comment that would have shared an ID.
+            commentsToProcess.push({ comment: node, markerID, type: 'expression' });
+          }
         }
-      }
-      else if (text.startsWith(BLOCK_MARKER)) {
-        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'block' });
+        else if (text.startsWith(RAW_TEXT_MARKER)) {
+          const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
+          if (!isNaN(markerID)) {
+            commentsToProcess.push({ comment: node, markerID, type: 'rawText' });
+          }
+        }
+        else if (text.startsWith(BLOCK_MARKER)) {
+          const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+          if (!isNaN(markerID)) {
+            commentsToProcess.push({ comment: node, markerID, type: 'block' });
+          }
         }
       }
     }
 
     for (const { comment, markerID, type } of commentsToProcess) {
+      if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
       const entry = entries[markerID];
 
       if (type === 'expression') {
@@ -561,21 +573,37 @@ export class Renderer {
     }
   }
 
-  // Plan 04 fast path — walk SHOW_ELEMENT once, for each element with
-  // data-sui-bind, look up entries[id].attributeBinding for parts +
-  // classification (populated at buildHTMLString time). Per-binding work
-  // is identical to the legacy walker; the savings come from eliminating
-  // the reference-DOM innerHTML parse and the parallel-walker
-  // block-owned-element accounting.
+  // Plan 04 fast path — walk SHOW_ELEMENT | SHOW_COMMENT once, process
+  // `data-sui-bind` on elements at block-depth 0 and let block hydrate
+  // hooks recursively handle their own contents via hydrateInnerContent
+  // (which re-enters this method with the block's sub-AST entries). This
+  // matches the blockOwnedElements skip the legacy parallel walker
+  // performed, but without building a reference DOM or a separate Set —
+  // depth is tracked inline from the block markers we encounter.
   //
   // The data-sui-bind attribute itself is left on the element until the
-  // post-hydration cleanup pass (base.js removeMarkers) strips it along
-  // with comment markers — same invariant as the comment-marker cleanup.
+  // post-hydration cleanup pass (base.js removeMarkers, deferred to rAF
+  // per Plan 02) strips it along with comment markers.
   hydrateAttributesViaDataBind(root, entries, data, scope) {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-    let el;
-    while ((el = walker.nextNode())) {
-      const bindStr = el.getAttribute(DATA_SUI_BIND);
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+    );
+    let node;
+    let blockDepth = 0;
+    while ((node = walker.nextNode())) {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        const text = node.data;
+        if (text.startsWith(BLOCK_MARKER)) {
+          blockDepth++;
+        }
+        else if (text.startsWith('/sui-block:')) {
+          blockDepth--;
+        }
+        continue;
+      }
+      if (blockDepth > 0) { continue; }
+      const bindStr = node.getAttribute(DATA_SUI_BIND);
       if (!bindStr) { continue; }
       for (const binding of bindStr.split(',')) {
         const eqIdx = binding.lastIndexOf('=');
@@ -594,7 +622,7 @@ export class Renderer {
         const domAttrName = (rawAttrName.charAt(0) === '.' || rawAttrName.charAt(0) === '@')
           ? rawAttrName.slice(1)
           : rawAttrName;
-        this.bindAttributeExpression(el, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
+        this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
   }

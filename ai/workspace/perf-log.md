@@ -9,7 +9,8 @@ Measurement protocol: `performance.getEntriesByName('hydration-total')[0].durati
 | Branch post-revert (step 9 reverted) | dev.semantic-ui.com | 142.8, 113.0, 82.6 | **~98** | 56554b43c | Cold first; ~68ms dev overhead per findings doc |
 | Branch post-revert | Vercel preview (perf-native alias) | 172.2, 65, 90.9, 90.9, 102.9 | **~91** | ba8da85d9 (smoke) | Cold first; variance high; ~50ms gap to main prod |
 | + Plan 04 (data-sui-bind) | dev.semantic-ui.com | 91.7, 94.3, 98.4 | **~94** | 5bb6ae3af | Dev variance masks prod gains; refRoot now lazy |
-| + Plan 02 (defer removeMarkers) | dev.semantic-ui.com | 96.1, 85.1, 87.3 | **~87** | (pending) | ~7 ms off critical path; cleanup runs in next rAF |
+| + Plan 02 (defer removeMarkers) | dev.semantic-ui.com | 96.1, 85.1, 87.3 | **~87** | 631253aa4 | ~7 ms off critical path; cleanup runs in next rAF |
+| + Plan 08 (single-pass walker + fast-path depth fix) | dev.semantic-ui.com | 95.6, 79.3, 67.6 | **~80** | (pending) | bindMarkers merges SHOW_ELEMENT + SHOW_COMMENT; hydrate fast path respects block depth |
 
 ## Plan milestones — target trajectory
 
