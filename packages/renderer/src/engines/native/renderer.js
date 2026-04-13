@@ -1,24 +1,5 @@
-import { Dependency, Reaction, Signal } from '@semantic-ui/reactivity';
-import {
-  arrayFromObject,
-  assignInPlace,
-  each,
-  fatal,
-  filterObject,
-  inArray,
-  isArray,
-  isDevelopment,
-  isEmpty,
-  isFunction,
-  isPlainObject,
-  isPromise,
-  isString,
-  keys,
-  mapObject,
-  wrapFunction,
-} from '@semantic-ui/utils';
-
-import { Template } from '@semantic-ui/templating';
+import { Dependency } from '@semantic-ui/reactivity';
+import { assignInPlace, filterObject, inArray } from '@semantic-ui/utils';
 
 import {
   ATTR_MARKER_PREFIX,
@@ -361,23 +342,6 @@ export class Renderer {
 
   bindBlockDirective(comment, entry, data, scope) {
     const { node, isSVG } = entry;
-    const parentNode = comment.parentNode;
-
-    // Snippet invocations inline into the parent scope (no region, no
-    // reaction) rather than going through the template block's lifecycle.
-    if (node.type === 'template') {
-      const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-      if (this.snippets[templateName]) {
-        this.inlineSnippet({ node, data, scope, parentNode, marker: comment, templateName, isSVG });
-        return;
-      }
-    }
-
-    // {#snippet} definitions are hoisted by the compiler and registered
-    // via collectSnippets() in the constructor — the marker in-place is
-    // a no-op at render time.
-    if (node.type === 'snippet') { return; }
-
     this.bindBlockViaRegistry({ node, data, scope, comment, isSVG });
   }
 
@@ -396,82 +360,6 @@ export class Renderer {
     const block = getBlock(node.type);
     if (!block) { return; }
     block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
-  }
-
-  /*******************************
-        Subtemplates
-  *******************************/
-
-  /*******************************
-        Snippets
-  *******************************/
-
-  // Inlines a snippet invocation directly into the parent's scope.
-  // Unlike subtemplates, snippets have no DynamicRegion, no reaction,
-  // no instance — they're a data-proxy overlay + a readAST call that
-  // replaces the block marker with the rendered fragment.
-  inlineSnippet({ node, data, scope, parentNode, marker, templateName, isSVG }) {
-    const snippet = this.snippets[templateName];
-    if (!snippet) {
-      fatal(`Snippet "${templateName}" not found`);
-    }
-
-    const evaluator = this.evaluator;
-    const staticGetters = {};
-    const reactiveGetters = {};
-
-    if (node.data) {
-      if (isString(node.data)) {
-        const evaluated = evaluator.lookupExpressionValue(node.data, data);
-        if (isPlainObject(evaluated)) {
-          each(evaluated, (val, key) => {
-            staticGetters[key] = () => val;
-          });
-        }
-      }
-      else if (isPlainObject(node.data)) {
-        each(node.data, (expr, key) => {
-          staticGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
-        });
-      }
-    }
-    if (node.reactiveData) {
-      each(node.reactiveData, (expr, key) => {
-        reactiveGetters[key] = () => evaluator.lookupExpressionValue(expr, data);
-      });
-    }
-
-    const allGetters = { ...staticGetters, ...reactiveGetters };
-    const getterKeys = keys(allGetters);
-    const snippetData = new Proxy(data, {
-      get(target, prop) {
-        if (typeof prop === 'symbol') { return target[prop]; }
-        if (prop in allGetters) { return allGetters[prop](); }
-        return target[prop];
-      },
-      has(target, prop) {
-        return (prop in allGetters) || (prop in target);
-      },
-      ownKeys(target) {
-        return [...new Set([...getterKeys, ...Reflect.ownKeys(target)])];
-      },
-      getOwnPropertyDescriptor(target, prop) {
-        if (prop in allGetters) {
-          return { configurable: true, enumerable: true, get: allGetters[prop] };
-        }
-        return Object.getOwnPropertyDescriptor(target, prop);
-      },
-    });
-
-    const snippetFragment = this.readAST({
-      ast: snippet.content,
-      data: snippetData,
-      scope,
-      isSVG,
-    });
-
-    // Replace marker with snippet content
-    marker.replaceWith(snippetFragment);
   }
 
   /*******************************
@@ -646,33 +534,11 @@ export class Renderer {
       next = next.nextSibling;
     }
 
-    // Create DynamicRegion with server-rendered content
+    // Create DynamicRegion with server-rendered content. Each registered
+    // block's hydrate hook owns its subtree walk — including snippets,
+    // which the template block dispatches via its own snippet branch.
     const region = new DynamicRegion(parentNode, comment);
     region.ownedNodes = ownedNodes;
-
-    // Snippet invocations hydrate through the rerender block with the
-    // snippet's content (snippets have no own lifecycle — rerender's
-    // shape covers the reactive-re-render behavior).
-    if (node.type === 'template') {
-      const templateName = this.evaluator.lookupExpressionValue(node.name, data);
-      if (this.snippets[templateName]) {
-        const rerenderBlock = getBlock('rerender');
-        rerenderBlock({
-          node: { ...node, content: this.snippets[templateName].content, expression: null, key: null },
-          data,
-          scope,
-          region,
-          renderer: this,
-          isSVG: entry.isSVG,
-          serverMeta,
-          hydrating: true,
-        });
-        return;
-      }
-    }
-
-    // All remaining block types dispatch through the registry — each
-    // block's hydrate hook owns its subtree walk.
     const block = getBlock(node.type);
     if (block) {
       block({ node, data, scope, region, renderer: this, isSVG: entry.isSVG, serverMeta, hydrating: true });
