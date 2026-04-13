@@ -1,57 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { defineBlock, nodeSyntax, reportBlockError } from '../../src/engines/native/define-block.js';
+import { defineBlock, reportBlockError } from '../../src/engines/native/define-block.js';
 import { setTracing } from '../../src/helpers.js';
-
-describe('nodeSyntax', () => {
-  it('produces {#if} header for if nodes', () => {
-    expect(nodeSyntax({ type: 'if', condition: 'user.name' })).toBe('{#if user.name}');
-  });
-
-  it('produces {#each ... as ...} header for each nodes with alias', () => {
-    expect(nodeSyntax({ type: 'each', over: 'items', as: 'item' })).toBe('{#each items as item}');
-  });
-
-  it('produces {#each ...} header for each nodes without alias', () => {
-    expect(nodeSyntax({ type: 'each', over: 'items' })).toBe('{#each items}');
-  });
-
-  it('produces {#async ...} header for async nodes', () => {
-    expect(nodeSyntax({ type: 'async', expression: 'fetchUser()' })).toBe('{#async fetchUser()}');
-  });
-
-  it('produces {#rerender} header for bare rerender nodes', () => {
-    expect(nodeSyntax({ type: 'rerender' })).toBe('{#rerender}');
-  });
-
-  it('produces {#rerender ...} header for keyed rerender nodes', () => {
-    expect(nodeSyntax({ type: 'rerender', expression: 'key' })).toBe('{#rerender key}');
-  });
-
-  it('produces {> name} header for template nodes', () => {
-    expect(nodeSyntax({ type: 'template', name: 'row' })).toBe('{> row}');
-  });
-
-  it('produces {#snippet name} header for snippet nodes', () => {
-    expect(nodeSyntax({ type: 'snippet', name: 'badge' })).toBe('{#snippet badge}');
-  });
-
-  it('produces {#type} fallback for unknown node types', () => {
-    expect(nodeSyntax({ type: 'mystery' })).toBe('{#mystery}');
-  });
-
-  it('tolerates object-shaped expression values', () => {
-    expect(nodeSyntax({ type: 'if', condition: { value: 'isActive' } })).toBe('{#if isActive}');
-  });
-
-  it('tolerates token-array expression values', () => {
-    expect(nodeSyntax({ type: 'each', over: { tokens: [{ value: 'users' }] } }))
-      .toBe('{#each users}');
-  });
-
-  it('returns empty string for null node', () => {
-    expect(nodeSyntax(null)).toBe('');
-  });
-});
 
 describe('reportBlockError', () => {
   beforeEach(() => setTracing(true));
@@ -64,7 +13,7 @@ describe('reportBlockError', () => {
     const endSpy = vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
 
     const err = new Error("Cannot read properties of undefined (reading 'name')");
-    reportBlockError('conditional', { type: 'if', condition: 'user.profile.name' }, 'render', err);
+    reportBlockError({ name: 'conditional', syntax: '{#if user.profile.name}', hook: 'render', err });
 
     expect(groupSpy).toHaveBeenCalledWith('[sui] conditional {#if user.profile.name}');
     expect(errorSpy).toHaveBeenCalledWith("Cannot read properties of undefined (reading 'name')");
@@ -78,15 +27,15 @@ describe('reportBlockError', () => {
     endSpy.mockRestore();
   });
 
-  it('handles non-Error throws (strings, objects)', () => {
+  it('omits the syntax suffix when no syntax fn is provided', () => {
     const groupSpy = vi.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const endSpy = vi.spyOn(console, 'groupEnd').mockImplementation(() => {});
 
-    reportBlockError('each', { type: 'each', over: 'rows' }, 'render', 'oops');
+    reportBlockError({ name: 'each', hook: 'render', err: 'oops' });
 
-    expect(groupSpy).toHaveBeenCalledWith('[sui] each {#each rows}');
+    expect(groupSpy).toHaveBeenCalledWith('[sui] each');
     expect(errorSpy).toHaveBeenCalledWith('oops');
     expect(logSpy).toHaveBeenCalledWith('hook: render');
 

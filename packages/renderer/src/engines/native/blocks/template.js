@@ -178,6 +178,7 @@ function clearInstance(self, region) {
 
 const templateBlock = defineBlock({
   name: 'template',
+  syntax: (node) => `{> ${node.name}}`,
 
   create({ renderer }) {
     return {

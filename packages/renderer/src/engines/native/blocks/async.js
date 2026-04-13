@@ -92,18 +92,6 @@ function evaluateAndRender(ctx, { skipLoadingRender = false } = {}) {
   }
 }
 
-const warnedAsyncContexts = new Set();
-function warnAsyncInRawText(node) {
-  const expr = String(node.expression || '');
-  if (warnedAsyncContexts.has(expr)) { return; }
-  warnedAsyncContexts.add(expr);
-  console.warn(
-    `[sui] {#async ${expr}} cannot appear inside <script>, <style>, <textarea>, `
-      + `or <title> — promise lifecycle requires per-invocation state and DOM `
-      + `region tracking that raw-text contexts don't support.`,
-  );
-}
-
 function renderErrorState(ctx, err) {
   const { node, data, scope, region, renderAST, isSVG } = ctx;
   if (!node.errorContent?.length) { return; }
@@ -120,6 +108,7 @@ function renderErrorState(ctx, err) {
 
 const asyncBlock = defineBlock({
   name: 'async',
+  syntax: (node) => `{#async ${node.expression}}`,
 
   // Recovery only when the template includes an error branch. No errorContent
   // means there's nothing useful to render on a sync expression throw — let
@@ -152,15 +141,10 @@ const asyncBlock = defineBlock({
   error({ err, ...ctx }) {
     renderErrorState(ctx, err);
   },
-
-  // Raw-text contexts (<script>, <style>, <textarea>, <title>) can't host
-  // async — promise lifecycle needs per-invocation state and a way to
-  // re-fire the wrapping reaction asynchronously, which the stateless
-  // text walker doesn't provide. Warn once per expression, return empty.
-  evaluateText({ node }) {
-    warnAsyncInRawText(node);
-    return '';
-  },
+  // No evaluateText: async cannot operate in raw-text contexts (promise
+  // lifecycle needs per-invocation state and DOM region tracking the text
+  // walker doesn't provide). The walker throws when it encounters a block
+  // without evaluateText — see renderer.js evaluateRawTextNodes.
 });
 
 registerBlock('async', asyncBlock);

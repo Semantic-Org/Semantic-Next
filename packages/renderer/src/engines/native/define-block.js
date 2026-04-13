@@ -1,45 +1,11 @@
 import { isRecovery, isTracing } from '../../helpers.js';
 
-// Best-effort template-syntax reconstruction for the error-log header.
-// Forgiving — produces what it can rather than throwing on missing fields.
-function nodeSyntax(node) {
-  if (!node) { return ''; }
-  const expr = (val) => {
-    if (val == null) { return ''; }
-    if (typeof val === 'string') { return val; }
-    if (typeof val === 'object') {
-      if (val.value != null) { return String(val.value); }
-      if (Array.isArray(val.tokens)) { return val.tokens.map((t) => t.value ?? t).join(' '); }
-    }
-    return String(val);
-  };
-  switch (node.type) {
-    case 'if':
-      return `{#if ${expr(node.condition)}}`;
-    case 'elseif':
-      return `{:elseif ${expr(node.condition)}}`;
-    case 'each': {
-      const as = node.as ? ` as ${node.as}` : '';
-      return `{#each ${expr(node.over)}${as}}`;
-    }
-    case 'async':
-      return `{#async ${expr(node.expression)}}`;
-    case 'rerender':
-      return `{#rerender${node.expression ? ' ' + expr(node.expression) : ''}}`;
-    case 'template':
-      return `{> ${expr(node.name)}}`;
-    case 'snippet':
-      return `{#snippet ${node.name || ''}}`;
-    default:
-      return `{#${node.type}}`;
-  }
-}
-
 // Structured error log — opt-in via setTracing(true). Tree-shakes when off.
-export function reportBlockError(blockName, node, hook, err) {
+// `syntax` is the block's own template-syntax representation (each block
+// owns its formatting via the `syntax` config hook).
+export function reportBlockError({ name, syntax, hook, err }) {
   if (!isTracing()) { return; }
-  const syntax = nodeSyntax(node);
-  const header = `[sui] ${blockName} ${syntax}`;
+  const header = syntax ? `[sui] ${name} ${syntax}` : `[sui] ${name}`;
   const message = err?.message ?? String(err);
   if (typeof console.groupCollapsed === 'function') {
     console.groupCollapsed(header);
@@ -54,36 +20,9 @@ export function reportBlockError(blockName, node, hook, err) {
   }
 }
 
-export { nodeSyntax };
-
-// Always-on breadcrumb. Per-tick dedup via microtask reset — bounds the
-// suppression window to the current synchronous burst so HMR re-saves
-// (any HMR, not just vite) and reactive re-renders surface the bug each
-// tick instead of going silent after the first throw.
-const currentErrors = new Set();
-let resetScheduled = false;
-
-function announceBlockError(blockName, componentName, node, hookName, err) {
-  const msg = err?.message ?? String(err);
-  if (currentErrors.has(msg)) { return; }
-  currentErrors.add(msg);
-  if (!resetScheduled) {
-    resetScheduled = true;
-    queueMicrotask(() => {
-      currentErrors.clear();
-      resetScheduled = false;
-    });
-  }
-  const syntax = nodeSyntax(node);
-  const where = componentName ? `<${componentName}>` : 'render tree';
-  console.error(
-    `[sui] ${syntax} threw in ${where} (${hookName}): ${msg}. `
-      + `Call setTracing(true) for full context.`,
-  );
-}
-
 export function defineBlock(config) {
-  const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText } = config;
+  const { name, create, render, hydrate, update, destroy, error: errorHook, shouldRecover, evaluateText, syntax } =
+    config;
 
   const dispatch = function(ctx) {
     const { node, data, scope, region, isSVG, serverMeta, hydrating, renderer } = ctx;
@@ -102,7 +41,7 @@ export function defineBlock(config) {
           self = create(ctx) || {};
         }
         catch (err) {
-          reportBlockError(name, node, 'create', err);
+          reportBlockError({ name, syntax: syntax?.(node), hook: 'create', err });
           return;
         }
       }
@@ -153,11 +92,10 @@ export function defineBlock(config) {
     };
 
     // Recovery wraps each hook in try/catch. Without recovery, throws
-    // propagate so failures are loud. With recovery + errorHook: hook
-    // decides what to render. With recovery alone (global flag, no hook):
-    // default-isolate via region.clear() + reaction stop.
-    const componentName = renderer.template?.element?.localName;
-
+    // propagate so failures are loud — the browser logs uncaught errors
+    // with full stack, no extra wrapping needed. With recovery + errorHook:
+    // hook decides what to render. With recovery alone (global flag, no
+    // hook): default-isolate via region.clear() + reaction stop.
     const safeRun = wantsRecovery
       ? (hookName, fn, comp) => {
         try {
@@ -165,7 +103,7 @@ export function defineBlock(config) {
           onSuccess();
         }
         catch (err) {
-          reportBlockError(name, node, hookName, err);
+          reportBlockError({ name, syntax: syntax?.(node), hook: hookName, err });
           if (errorHook) {
             bag.hook = hookName;
             bag.err = err;
@@ -173,7 +111,7 @@ export function defineBlock(config) {
               errorHook(bag);
             }
             catch (errorErr) {
-              reportBlockError(name, node, 'error', errorErr);
+              reportBlockError({ name, syntax: syntax?.(node), hook: 'error', err: errorErr });
               throw errorErr;
             }
             finally {
@@ -187,15 +125,9 @@ export function defineBlock(config) {
           }
         }
       }
-      : (hookName, fn) => {
-        try {
-          fn();
-          onSuccess();
-        }
-        catch (err) {
-          announceBlockError(name, componentName, node, hookName, err);
-          throw err;
-        }
+      : (_hookName, fn) => {
+        fn();
+        onSuccess();
       };
 
     const reactionAnchor = region.anchor;

@@ -49,6 +49,7 @@ function branchASTByIndex(node, matchIndex) {
 
 const conditional = defineBlock({
   name: 'conditional',
+  syntax: (node) => `{#if ${node.condition}}`,
 
   create() {
     return { currentBranchIndex: -1 };

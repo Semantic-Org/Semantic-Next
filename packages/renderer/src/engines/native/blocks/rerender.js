@@ -28,6 +28,12 @@ function renderContent({ node, scope, region, renderAST }) {
 
 const rerender = defineBlock({
   name: 'rerender',
+  syntax: (node) =>
+    node.expression
+      ? `{#rerender ${node.expression}}`
+      : node.key
+      ? `{#guard ${node.key}}`
+      : '{#rerender}',
 
   create({ renderer }) {
     // Capture evaluator so hooks can call lookupTokenValue for the single-
