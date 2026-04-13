@@ -75,11 +75,11 @@ PHASE 0: RENDERER ARCHITECTURE (make the foundation elegant)
 
 ## Phase 0 — Renderer Architecture
 
-The native renderer is 1700 lines of correct but repeated logic. Each block directive (conditional, each, async, rerender, subtemplate, snippet) hand-inlines the same ceremony: create region, wire reaction, branch on hydration vs render, handle updates, handle cleanup. The `defineBranch` refactor extracts this into the same destructured-callback pattern that `defineComponent` uses. This must land before SSR and light DOM work because both modify the render/hydrate lifecycle — surgical edits to individual directive files vs modifications to a monolith.
+The native renderer is 1700 lines of correct but repeated logic. Each block (conditional, each, async, rerender, subtemplate, snippet) hand-inlines the same ceremony: create region, wire reaction, branch on hydration vs render, handle updates, handle cleanup. The `defineBlock` refactor extracts this into the same destructured-callback pattern that `defineComponent` uses. This must land before SSR and light DOM work because both modify the render/hydrate lifecycle — surgical edits to individual block files vs modifications to a monolith.
 
 | # | What | Hours | Mode | Scope | Notes |
 |---|------|-------|------|-------|-------|
-| 0 | [Native Renderer Directives](native-renderer-directives.md) | 8-12h (1-1.5d) | pair | initial | `defineBranch` pattern. Renderer drops to ~400 lines of orchestration. Each directive becomes its own file with `create`/`render`/`hydrate`/`update`/`destroy` lifecycle. Hydration collapses from separate methods into an initialization mode within the same directive. |
+| 0 | [Native Renderer Blocks](native-renderer-blocks.md) | TBD | pair | initial | `defineBlock` pattern. Each block (`{#if}`, `{#each}`, `{#async}`, etc.) becomes its own file with `create`/`render`/`hydrate`/`update`/`destroy`/`error` lifecycle. Baked-in reactivity tracing + agent-readable runtime error output. Reference shape: lit renderer's hand-authored ~500-line core. |
 
 ---
 
