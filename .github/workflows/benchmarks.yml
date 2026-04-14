@@ -4,12 +4,20 @@ on:
   pull_request:
     paths:
       - 'packages/**'
+      - '.github/workflows/benchmarks.yml'
+      - '.github/workflows/benchmarks-report.yml'
+
+concurrency:
+  group: bench-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  # Discover which packages changed AND have tachometer benchmarks
+  # Discover which tachometer configs are in changed packages.
+  # Emits one matrix entry per tachometer-ci*.json so each runs in its own
+  # parallel job with its own PR check.
   discover:
     runs-on: ubuntu-latest
     outputs:
@@ -23,45 +31,61 @@ jobs:
       - name: Build matrix
         id: matrix
         run: |
-          # Get changed packages
-          changed=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD \
-            | grep '^packages/' \
-            | cut -d/ -f2 \
-            | sort -u)
+          base=origin/${{ github.event.pull_request.base.ref }}
 
-          # Find packages with tachometer CI configs
-          benchmarked=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
-            | cut -d/ -f2 \
-            | sort -u)
+          # If a benchmark workflow or bench harness changed, we need to
+          # validate CI itself — run against every benchmarked package.
+          ci_changed=$(git diff --name-only "$base"...HEAD \
+            | grep -E '^(\.github/workflows/benchmarks.*\.yml|packages/[^/]+/bench/tachometer/)' \
+            | head -1)
 
-          # Intersection — only run benchmarks for packages that changed
-          matrix="["
-          first=true
+          if [ -n "$ci_changed" ]; then
+            changed=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
+              | cut -d/ -f2 \
+              | sort -u)
+          else
+            changed=$(git diff --name-only "$base"...HEAD \
+              | grep '^packages/' \
+              | cut -d/ -f2 \
+              | sort -u)
+          fi
+
+          # For each changed package, emit one entry per tachometer-ci*.json
+          entries=()
           for pkg in $changed; do
-            if echo "$benchmarked" | grep -qx "$pkg"; then
-              if [ "$first" = false ]; then matrix+=","; fi
-              matrix+="\"$pkg\""
-              first=false
-            fi
+            while IFS= read -r config; do
+              [ -z "$config" ] && continue
+              name=$(basename "$config" .json)
+              entries+=("{\"config\":\"$config\",\"name\":\"$name\",\"package\":\"$pkg\"}")
+            done < <(find "packages/$pkg" -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' 2>/dev/null | sort)
           done
-          matrix+="]"
+
+          if [ ${#entries[@]} -eq 0 ]; then
+            matrix="[]"
+            has=false
+          else
+            matrix="[$(IFS=,; echo "${entries[*]}")]"
+            has=true
+          fi
 
           echo "result=$matrix" >> "$GITHUB_OUTPUT"
-          if [ "$matrix" = "[]" ]; then
-            echo "has-benchmarks=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "has-benchmarks=true" >> "$GITHUB_OUTPUT"
-          fi
+          echo "has-benchmarks=$has" >> "$GITHUB_OUTPUT"
           echo "Benchmark matrix: $matrix"
 
   benchmarks:
     needs: discover
     if: needs.discover.outputs.has-benchmarks == 'true'
     strategy:
+      fail-fast: false
       matrix:
-        package: ${{ fromJson(needs.discover.outputs.matrix) }}
-    name: bench-${{ matrix.package }}
+        entry: ${{ fromJson(needs.discover.outputs.matrix) }}
+    name: bench-${{ matrix.entry.name }}
     runs-on: ubuntu-latest
+    # Old suite at sampleSize: 50 and timeout: 5 runs ~10-11 min per config
+    # including setup. 15-min cap gives safety margin without letting any
+    # single cell run forever. PR B's knob tuning (["2%"], 2-min auto-sample
+    # cap) will bring real times to ~5-7 min.
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -82,29 +106,29 @@ jobs:
 
       # Build current branch benchmark bundles
       - name: Build current
-        run: node packages/${{ matrix.package }}/bench/tachometer/build-ci.js current
+        run: node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js current
 
       # Swap source to base branch and build baseline bundles
       - name: Build baseline
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
           git checkout FETCH_HEAD -- packages/*/src/
-          node packages/${{ matrix.package }}/bench/tachometer/build-ci.js baseline
+          node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
 
-      # Run all tachometer CI configs for this package
-      - name: Run benchmarks
+      # Run just this matrix cell's single config.
+      # Per-cell auto-sample tail is governed by the config's own `timeout`
+      # (tachometer rejects --timeout alongside --config). Hard runaway
+      # protection is `timeout-minutes: 10` at the job level above.
+      - name: Run benchmark
         run: |
           mkdir -p results
-          for config in $(find packages/${{ matrix.package }} -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' | sort); do
-            name=$(basename "$config" .json)
-            echo "::group::$name"
-            npx tachometer --config "$config" --json-file "results/${{ matrix.package }}-${name}.json"
-            echo "::endgroup::"
-          done
+          npx tachometer \
+            --config "${{ matrix.entry.config }}" \
+            --json-file "results/${{ matrix.entry.package }}-${{ matrix.entry.name }}.json"
 
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
-          name: results-${{ matrix.package }}
+          name: results-${{ matrix.entry.name }}
           path: results/*.json
