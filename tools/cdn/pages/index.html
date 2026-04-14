@@ -55,9 +55,9 @@
     </div>
 
     <div id="qs-using" class="content active">
-      <p>Use <code>components</code> to load UI elements. Tokens, Lucide, and Lato included automatically.</p>
+      <p>Use <code>components</code> to load UI elements. Tokens, Lucide, and Lato included automatically. Add <code>css</code> to also include baseline reset and page styles.</p>
       <div class="code-block">
-<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span><span class="tg">&gt;&lt;/script&gt;</span></span>
+<pre><span class="hl"><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span> <span class="at">components</span> <span class="at">css</span><span class="tg">&gt;&lt;/script&gt;</span></span>
 
 <span class="el">&lt;ui-button</span> <span class="at">primary</span><span class="el">&gt;</span>
   <span class="el">&lt;ui-icon</span> <span class="at">home</span><span class="el">&gt;&lt;/ui-icon&gt;</span>
@@ -238,7 +238,7 @@
 
   <h3 id="css">CSS</h3>
   <p>
-    Use <code>css</code> to add page-level styles — reset, typography, scrollbars. Tokens are injected automatically with <code>components</code>. Suppress with <code>css="none"</code>.
+    Default with <code>components</code>: tokens only. Add <code>css</code> for reset + typography + scrollbars.
   </p>
   <div class="code-block">
 <pre><span class="cm">&lt;!-- Add page styles (reset + base) --&gt;</span>
@@ -247,7 +247,7 @@
 <span class="hl">  <span class="at">css</span></span>
 <span class="tg">&gt;&lt;/script&gt;</span></pre>
   </div>
-  <p class="hint">Values: bare (page styles), <code>"none"</code> (suppress all CSS). Tokens are custom properties — zero side effects, safe on any page.</p>
+  <p class="hint">Values: bare (tokens + reset + base), <code>"tokens"</code> / <code>"reset"</code> / <code>"base"</code> (single layer), <code>"none"</code> (suppress all, including tokens). Tokens are custom properties — zero side effects, safe on any page.</p>
 
   <h3 id="fonts">Fonts</h3>
   <p>
@@ -293,12 +293,12 @@
 
   <h3 id="embedding">Embedding</h3>
   <p>
-    Use <code>none</code> for <code>css</code> <code>icons</code> or <code>fonts</code> to suppress auto-injection when embedding into existing pages.
+    Use <code>none</code> for <code>css</code>, <code>icons</code>, or <code>fonts</code> to suppress auto-injection when embedding into existing pages. Keep <code>css="tokens"</code> (default) so components still receive their design-token variables — use <code>css="none"</code> only when the host page already provides them.
   </p>
   <div class="code-block">
 <pre><span class="tg">&lt;script</span> <span class="at">src</span>=<span class="st">"https://cdn.semantic-ui.com/load"</span>
   <span class="at">components</span>=<span class="st">"button"</span>
-<span class="hl">  <span class="at">css</span>=<span class="st">"none"</span> <span class="at">icons</span>=<span class="st">"none"</span> <span class="at">fonts</span>=<span class="st">"none"</span></span>
+<span class="hl">  <span class="at">icons</span>=<span class="st">"none"</span> <span class="at">fonts</span>=<span class="st">"none"</span></span>
 <span class="tg">&gt;&lt;/script&gt;</span></pre>
   </div>
 
@@ -366,7 +366,10 @@
     <thead><tr><th>Attribute</th><th>Behavior</th></tr></thead>
     <tbody>
       <tr><td><code>css</code></td><td class="secondary">Full page styles: tokens + reset + base.</td></tr>
-      <tr><td><code>css="none"</code></td><td class="secondary">Suppress all CSS auto-injection.</td></tr>
+      <tr><td><code>css="tokens"</code></td><td class="secondary">Tokens only (same as default with <code>components</code>).</td></tr>
+      <tr><td><code>css="reset"</code></td><td class="secondary">Reset stylesheet only.</td></tr>
+      <tr><td><code>css="base"</code></td><td class="secondary">Base page styles only (typography, scrollbars).</td></tr>
+      <tr><td><code>css="none"</code></td><td class="secondary">Suppress all CSS — including tokens. Use only when host page provides them.</td></tr>
       <tr><td><code>icons</code></td><td class="secondary">Lucide (same as default with <code>components</code>).</td></tr>
       <tr><td><code>icons="phosphor"</code></td><td class="secondary">Override default icon set.</td></tr>
       <tr><td><code>icons="lucide,brands"</code></td><td class="secondary">Multiple sets.</td></tr>

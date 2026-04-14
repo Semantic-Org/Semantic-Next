@@ -1,4 +1,4 @@
-import { $ } from 'https://cdn.semantic-ui.com/query@canary';
+import { $ } from '@semantic-ui/query';
 
 $('#library').on('change', (e) => {
   const library = e.target.value;

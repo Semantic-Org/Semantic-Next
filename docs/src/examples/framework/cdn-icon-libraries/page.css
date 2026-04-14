@@ -1,12 +1,8 @@
 body {
   padding: var(--padding);
-  font-family: var(--page-font);
 
   h3 {
     margin: 0 0 var(--margin-s);
-    font-size: var(--title-m);
-    font-weight: var(--bold);
-    color: var(--header-color);
   }
 
   select {

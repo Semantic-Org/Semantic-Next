@@ -1,0 +1,15 @@
+/* Pretend host-page styles — unrelated to Semantic UI. */
+body {
+  padding: 2rem;
+  font-family: Georgia, serif;
+  background: #f5efe4;
+  color: #332b1f;
+  max-width: 40rem;
+}
+
+h2 {
+  font-family: inherit;
+  margin-top: 0;
+}
+
+ui-input { margin-right: 0.5rem; }

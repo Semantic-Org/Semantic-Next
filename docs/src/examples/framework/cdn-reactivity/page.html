@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <script src="https://cdn.semantic-ui.com/load" version="canary" reactivity css></script>
+    <script type="module">
+      import { Signal, Reaction } from '@semantic-ui/reactivity';
+
+      const count = new Signal(0);
+      const doubled = count.derive(n => n * 2);
+
+      Reaction.create(() => {
+        document.querySelector('#count').textContent = count.value;
+        document.querySelector('#doubled').textContent = doubled.value;
+      });
+
+      setInterval(() => count.increment(), 1000);
+    </script>
+<!-- playground-hide -->
+    <script>
+      if(localStorage.getItem('theme') == 'dark') {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+<!-- playground-hide-end -->
+  </head>
+  <body>
+    <p>Count: <span id="count">0</span></p>
+    <p>Doubled: <span id="doubled">0</span></p>
+  </body>
+</html>

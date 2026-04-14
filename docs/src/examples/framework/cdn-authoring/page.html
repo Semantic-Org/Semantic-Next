@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <script src="https://cdn.semantic-ui.com/load" version="canary" authoring css></script>
+    <script type="module">
+      import { defineComponent } from '@semantic-ui/component';
+
+      defineComponent({
+        tagName: 'my-counter',
+        template: `
+          <button class="tick">Tick</button>
+          <span>Count: {count}</span>
+        `,
+        css: `
+          :host { display: inline-flex; gap: var(--gap-s); align-items: center; }
+          button { padding: var(--padding-xs) var(--padding); border: var(--border); border-radius: var(--border-radius); background: var(--page-background); color: var(--text-color); cursor: pointer; }
+          button:hover { background: var(--hover-background); }
+        `,
+        defaultState: { count: 0 },
+        events: {
+          'click .tick'({ state }) { state.count.increment(); },
+        },
+      });
+    </script>
+<!-- playground-hide -->
+    <script>
+      if(localStorage.getItem('theme') == 'dark') {
+        document.querySelector('html').classList.add('dark');
+      }
+    </script>
+<!-- playground-hide-end -->
+  </head>
+  <body>
+    <my-counter></my-counter>
+  </body>
+</html>
