@@ -17,7 +17,7 @@ Measurement protocol: `performance.getEntriesByName('hydration-total')[0].durati
 | + Plan 04 (data-sui-bind) | dev.semantic-ui.com | 91.7, 94.3, 98.4 | **~94** | 5bb6ae3af | Dev variance masks prod gains; refRoot now lazy |
 | + Plan 02 (defer removeMarkers) | dev.semantic-ui.com | 96.1, 85.1, 87.3 | **~87** | 631253aa4 | ~7 ms off critical path; cleanup runs in next rAF |
 | + Plan 08 (single-pass walker + fast-path depth fix) | dev.semantic-ui.com | 95.6, 79.3, 67.6 | **~80** | d82e2828a | bindMarkers merges SHOW_ELEMENT + SHOW_COMMENT; hydrate fast path respects block depth |
-| + Plan 09 (per-item markers + DOM-reusing first mutation) | dev.semantic-ui.com | 83.3, 83.8, 95.6 | **~84** | 907188416 | Hydrate cost unchanged (O(1) per item preserved). First-mutation filter 1000→114 cards ~70 ms (down from estimated ~150-200 ms nuke-and-rebuild). |
+| + Plan 09 (per-item markers + DOM-reusing first mutation) | dev.semantic-ui.com | 83.3, 83.8, 95.6 | **~84** | 907188416 | Hydrate cost unchanged (O(1) per item preserved). First-mutation filter 1000→114 cards ~70 ms initially (silent-fallback bug). Fixed in follow-up commit: key stringification — adoption now verified via Node-identity test (`preNode === postNode` for matching items), first-mutation 1000→114 cards drops to **~23 ms**. |
 
 ### Plan 12 — evaluated, skipped
 

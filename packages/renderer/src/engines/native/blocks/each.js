@@ -56,12 +56,24 @@ function getCollectionType(items) {
 }
 
 function getItemID(item, indexOrKey, collectionType) {
+  // Always stringify — the server emits keys as text inside
+  // `<!--sui-item:v1:KEY-->` comments, and Map / === compare by value
+  // identity. Without stringification, numeric item IDs on the client
+  // miss string keys on the server at adoption time (and records keyed
+  // as numbers from a fresh render would miss string keys on the next
+  // reconcile after adoption).
+  let raw;
   if (isPlainObject(item)) {
     const key = (collectionType === 'object') ? indexOrKey : undefined;
-    return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+    raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
   }
-  if (isString(item)) { return item + ':' + indexOrKey; }
-  return indexOrKey;
+  else if (isString(item)) {
+    raw = item + ':' + indexOrKey;
+  }
+  else {
+    raw = indexOrKey;
+  }
+  return String(raw);
 }
 
 function getEachData(item, indexOrKey, collectionType, node) {

@@ -532,15 +532,23 @@ export class ServerRenderer {
 
   // Mirrors the client-side heuristic in blocks/each.js — prefer
   // user-supplied identity fields, fall back to the positional index.
+  // Always stringified so server-emitted keys match the string-keyed
+  // Map the client builds from the `<!--sui-item:v1:KEY-->` extraction.
   // Kept in sync manually; see ai/workspace/reference/perf/06-plans/
   // 09-each-hydration-dom-reuse.md §Server.
   getItemID(item, indexOrKey, collectionType) {
+    let raw;
     if (isPlainObject(item)) {
       const key = (collectionType === 'object') ? indexOrKey : undefined;
-      return key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
+      raw = key || item._id || item.id || item.key || item.hash || item._hash || item.value || indexOrKey;
     }
-    if (isString(item)) { return item + ':' + indexOrKey; }
-    return indexOrKey;
+    else if (isString(item)) {
+      raw = item + ':' + indexOrKey;
+    }
+    else {
+      raw = indexOrKey;
+    }
+    return String(raw);
   }
 
   getEachData(item, indexOrKey, collectionType, node) {
