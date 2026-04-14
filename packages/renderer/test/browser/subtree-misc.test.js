@@ -559,6 +559,60 @@ RENDERING_ENGINES.forEach(engine => {
         expect(shadowText(el)).toContain('Row: world!');
         expect(shadowText(el)).not.toContain('Card');
       });
+
+      // Locks the dynamic-table production pattern at
+      // docs/src/examples/component/dynamic-table/component.html:
+      //   {> template name=rowTemplate data=row}
+      // — both name and data are bare-identifier expressions resolving
+      // to runtime values (function ref / item ref). data= here is the
+      // string-lookup form (vs data={key: expr} object form).
+      it('should support dynamic name and dynamic data both as bare-identifier expressions', async () => {
+        const tag = uniqueTag();
+        const profile = defineComponent({
+          renderingEngine: engine,
+          template: '<div class="profile">[{firstName} {lastName}]</div>',
+        });
+        const summary = defineComponent({
+          renderingEngine: engine,
+          template: '<div class="summary">[{firstName}]</div>',
+        });
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: '{>template name=getView data=getData}',
+          defaultState: { mode: 'profile', firstName: 'Ada', lastName: 'Lovelace' },
+          createComponent: ({ state }) => ({
+            getView: () => state.mode.get(),
+            getData: () => ({
+              firstName: state.firstName.get(),
+              lastName: state.lastName.get(),
+            }),
+          }),
+          subTemplates: { profile, summary },
+        });
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.rendered;
+
+        expect(shadowText(el)).toContain('[Ada Lovelace]');
+
+        // Mutate data only — same template instance, fresh data
+        el.template.state.firstName.set('Grace');
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('[Grace Lovelace]');
+
+        // Swap template only — different shape, current data
+        el.template.state.mode.set('summary');
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('[Grace]');
+        expect(shadowText(el)).not.toContain('Lovelace');
+
+        // Swap back and mutate together
+        el.template.state.mode.set('profile');
+        el.template.state.lastName.set('Hopper');
+        await waitForUpdate(el);
+        expect(shadowText(el)).toContain('[Grace Hopper]');
+      });
     });
 
     /*******************************

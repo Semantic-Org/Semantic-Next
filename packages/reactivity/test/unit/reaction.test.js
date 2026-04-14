@@ -1,4 +1,4 @@
-import { Reaction, Scheduler, Signal } from '@semantic-ui/reactivity';
+import { Reaction, Scheduler, setTracing, Signal } from '@semantic-ui/reactivity';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Reaction', () => {
@@ -327,18 +327,24 @@ describe('Reaction', () => {
 
   describe('Debugging', () => {
     it('Reaction should track current context for debugging', () => {
-      const callback = vi.fn();
-      let signal = new Signal(1);
-      Reaction.create((comp) => {
-        signal.get();
-        if (comp.firstRun) {
-          return;
-        }
-        callback(Reaction.current.context.value);
-      });
-      signal.set(2);
-      Reaction.flush();
-      expect(callback).toHaveBeenCalledWith(2);
+      setTracing(true);
+      try {
+        const callback = vi.fn();
+        let signal = new Signal(1);
+        Reaction.create((comp) => {
+          signal.get();
+          if (comp.firstRun) {
+            return;
+          }
+          callback(Reaction.current.context.value);
+        });
+        signal.set(2);
+        Reaction.flush();
+        expect(callback).toHaveBeenCalledWith(2);
+      }
+      finally {
+        setTracing(false);
+      }
     });
 
     /* This clutters the logs -- Lets remove even though it passes

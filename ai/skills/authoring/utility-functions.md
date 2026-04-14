@@ -406,6 +406,36 @@ const expensive = memoize((a, b) => {
 const cached = memoize(fetchData, (args) => args[0].id);
 ```
 
+### Bounded Cache
+```javascript
+import { createCache } from '@semantic-ui/utils';
+
+// Map-like API with an upper bound. Reach for this instead of `new Map()`
+// + manual size checks whenever you want memoization-style storage
+// but need to guard against unbounded memory growth.
+
+// LRU (default) — reads and re-sets refresh recency
+const lru = createCache({ maxSize: 500 });
+lru.set(key, value);
+lru.get(key);
+lru.has(key);
+
+// FIFO — insertion order, reads do not matter
+const fifo = createCache({ maxSize: 100, eviction: 'fifo' });
+
+// Flush — clears the whole cache on overflow. Cheapest per-write;
+// use when entries are quick to rebuild and bulk invalidation is fine.
+const templates = createCache({
+  maxSize: 5000,
+  eviction: 'flush',
+  onEvict: (key, value) => debug('evicted', key),
+});
+
+// Iteration mirrors Map
+for (const [key, value] of lru) { ... }
+lru.forEach((value, key, cache) => { ... });
+```
+
 ### Debounce
 ```javascript
 import { debounce } from '@semantic-ui/utils';
@@ -618,7 +648,7 @@ tokenize('Hello World!');                           // 'hello-world'
 ## Equality and Cloning (equality.js, cloning.js)
 
 ```javascript
-import { isEqual, clone } from '@semantic-ui/utils';
+import { isEqual, clone, deepFreeze } from '@semantic-ui/utils';
 
 // Deep equality (handles arrays, objects, Maps, Sets, RegExp, Date, TypedArrays)
 isEqual({ a: [1, 2] }, { a: [1, 2] });             // true
@@ -641,6 +671,15 @@ isEqual(
 const cloned = clone(obj);
 clone(obj, { preserveDOM: true });                  // keep DOM node references
 clone(obj, { preserveNonCloneable: true });         // keep class instance references
+
+// Deep freeze in place — returns same reference, recursively frozen
+// Only walks arrays and plain objects; Date/Map/Set/RegExp/DOM/class instances
+// are skipped so their internal slots keep working. Cycle-safe via WeakSet.
+const state = deepFreeze({ user: { name: 'Alice' }, createdAt: new Date() });
+Object.isFrozen(state.user);        // true
+Object.isFrozen(state.createdAt);   // false — Date is left alone
+state.createdAt.setFullYear(2030);  // still works
+state.user.name = 'Bob';            // TypeError in strict mode
 ```
 
 ---
@@ -783,6 +822,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 |----------|-----------|---------|
 | `isEqual` | `(a, b, opts?)` | Boolean — opts: `{ loose, ignoreKeys, partial }` |
 | `clone` | `(obj, opts?)` | Deep clone — opts: `{ preserveDOM, preserveNonCloneable }` |
+| `deepFreeze` | `(value)` | Same reference, recursively frozen — skips Date/Map/Set/RegExp/DOM/class instances |
 
 ### Functions (functions.js)
 | Function | Signature | Returns |
@@ -793,6 +833,11 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 | `wait` | `(ms, opts?)` | Promise |
 | `debounce` | `(fn, ms, opts?)` | Debounced fn with `.cancel()/.flush()/.pending()` |
 | `throttle` | `(fn, ms, opts?)` | Throttled fn with `.cancel()/.flush()/.pending()` |
+
+### Cache (cache.js)
+| Function | Signature | Returns |
+|----------|-----------|---------|
+| `createCache` | `({ maxSize, eviction='lru', onEvict? })` | Bounded Map-like cache. Eviction: `'lru'` \| `'fifo'` \| `'flush'` |
 
 ---
 

@@ -1,5 +1,6 @@
 export * from './arrays';
 export * from './browser';
+export * from './cache';
 export * from './cloning';
 export * from './colors';
 export * from './crypto';

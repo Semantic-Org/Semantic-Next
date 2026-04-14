@@ -1,0 +1,94 @@
+---
+layout: '@layouts/Guide.astro'
+pageType: 'API Reference'
+title: Cache Utility
+package: "@semantic-ui/utils"
+methods: [createCache]
+icon: database
+description: API reference for the bounded Map-like cache utility
+---
+
+The `createCache` utility produces a bounded, Map-like cache with pluggable eviction. It mirrors the ES `Map` API and automatically removes entries when the configured `maxSize` is reached, using the eviction strategy you pick at creation time.
+
+Reach for `createCache` when you want memoization-style storage but need an upper bound on memory — typical uses include caching compiled templates, parsed AST nodes, and hot function results.
+
+## createCache
+
+```javascript
+createCache({ maxSize, eviction = 'lru', onEvict })
+```
+
+Creates a new bounded cache.
+
+#### Parameters
+
+| Name    | Type   | Description |
+|---------|--------|-------------|
+| options | object | Required options bag |
+
+##### Options
+
+| Name     | Type     | Default | Description |
+|----------|----------|---------|-------------|
+| maxSize  | number   |         | Required. Non-negative integer. Maximum entries the cache holds before eviction. A `maxSize` of `0` accepts nothing. |
+| eviction | string   | `'lru'` | Eviction strategy: `'lru'`, `'fifo'`, or `'flush'`. |
+| onEvict  | function |         | Callback invoked as `(key, value)` for every evicted entry. Not fired on in-place updates to existing keys. |
+
+#### Eviction Strategies
+
+| Strategy | Behavior |
+|----------|----------|
+| `'lru'`  | Evicts the least recently used entry. `get()` refreshes recency; so does re-`set()` on an existing key. |
+| `'fifo'` | Evicts the oldest inserted entry. Reads do not affect order. Updating an existing key does not change its position. |
+| `'flush'`| Clears the entire cache when full, then stores the new entry. Cheapest per-write; best when entries are quick to rebuild and bulk invalidation is acceptable. |
+
+#### Methods
+
+| Method               | Returns           | Description |
+|----------------------|-------------------|-------------|
+| `get(key)`           | value \| undefined| Retrieves a value. For LRU caches, refreshes recency. |
+| `set(key, value)`    | cache             | Stores a value. Evicts per strategy if full. Chainable. |
+| `has(key)`           | boolean           | Checks for key presence without affecting recency. |
+| `delete(key)`        | boolean           | Removes an entry. Returns `true` if present. |
+| `clear()`            | void              | Removes every entry. Fires `onEvict` for each. |
+| `evict()`            | void              | Manually evict one entry per strategy. |
+| `keys()`             | iterator          | Keys in insertion order. |
+| `values()`           | iterator          | Values in insertion order. |
+| `entries()`          | iterator          | `[key, value]` pairs in insertion order. |
+| `forEach(fn, thisArg?)` | void           | Invokes `fn(value, key, cache)` for each entry. |
+| `[Symbol.iterator]()`| iterator          | Enables `for..of` and spread. |
+
+#### Properties
+
+| Name      | Type   | Description |
+|-----------|--------|-------------|
+| `size`    | number | Current entry count. |
+| `maxSize` | number | Configured limit. |
+| `eviction`| string | Configured strategy. |
+| `onEvict` | function \| undefined | Configured callback. |
+
+#### Example
+
+```javascript
+import { createCache } from '@semantic-ui/utils';
+
+// LRU (default) — reads protect entries from eviction
+const lru = createCache({ maxSize: 500 });
+lru.set('user:1', { name: 'Alice' });
+lru.get('user:1'); // refreshes recency
+
+// FIFO — insertion order, reads do not matter
+const fifo = createCache({ maxSize: 100, eviction: 'fifo' });
+
+// Flush — clear everything when full (fast bulk invalidation)
+const templates = createCache({
+  maxSize: 5000,
+  eviction: 'flush',
+  onEvict: (key) => console.debug('evicted', key),
+});
+
+// Map-like iteration
+for (const [key, value] of lru) {
+  console.log(key, value);
+}
+```

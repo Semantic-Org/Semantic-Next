@@ -1,4 +1,4 @@
-import { clone } from '@semantic-ui/utils';
+import { clone, deepFreeze } from '@semantic-ui/utils';
 
 import { describe, expect, it } from 'vitest';
 
@@ -140,5 +140,204 @@ describe('clone', () => {
     // Regular objects should still be cloned
     expect(clonedPreserved.regular).not.toBe(obj.regular);
     expect(clonedPreserved.regular).toEqual({ a: 1 });
+  });
+});
+
+describe('deepFreeze', () => {
+  it('should return primitives unchanged', () => {
+    expect(deepFreeze(123)).toBe(123);
+    expect(deepFreeze('hello')).toBe('hello');
+    expect(deepFreeze(true)).toBe(true);
+    expect(deepFreeze(false)).toBe(false);
+    expect(deepFreeze(null)).toBe(null);
+    expect(deepFreeze(undefined)).toBe(undefined);
+    expect(deepFreeze(0)).toBe(0);
+    expect(deepFreeze('')).toBe('');
+  });
+
+  it('should return the same reference, not a copy', () => {
+    const obj = { a: 1 };
+    const frozen = deepFreeze(obj);
+    expect(frozen).toBe(obj);
+  });
+
+  it('should freeze plain objects', () => {
+    const obj = { a: 1, b: 2 };
+    deepFreeze(obj);
+    expect(Object.isFrozen(obj)).toBe(true);
+    expect(() => {
+      obj.a = 99;
+    }).toThrow();
+    expect(obj.a).toBe(1);
+  });
+
+  it('should freeze nested plain objects', () => {
+    const obj = { a: { b: { c: 1 } } };
+    deepFreeze(obj);
+    expect(Object.isFrozen(obj)).toBe(true);
+    expect(Object.isFrozen(obj.a)).toBe(true);
+    expect(Object.isFrozen(obj.a.b)).toBe(true);
+    expect(() => {
+      obj.a.b.c = 99;
+    }).toThrow();
+  });
+
+  it('should freeze arrays', () => {
+    const arr = [1, 2, 3];
+    deepFreeze(arr);
+    expect(Object.isFrozen(arr)).toBe(true);
+    expect(() => {
+      arr.push(4);
+    }).toThrow();
+    expect(() => {
+      arr[0] = 99;
+    }).toThrow();
+  });
+
+  it('should freeze nested arrays', () => {
+    const arr = [[1, 2], [3, 4]];
+    deepFreeze(arr);
+    expect(Object.isFrozen(arr)).toBe(true);
+    expect(Object.isFrozen(arr[0])).toBe(true);
+    expect(Object.isFrozen(arr[1])).toBe(true);
+  });
+
+  it('should freeze mixed nested structures', () => {
+    const data = {
+      users: [
+        { name: 'Alice', tags: ['admin', 'editor'] },
+        { name: 'Bob', tags: ['user'] },
+      ],
+      config: { theme: { mode: 'dark' } },
+    };
+    deepFreeze(data);
+    expect(Object.isFrozen(data)).toBe(true);
+    expect(Object.isFrozen(data.users)).toBe(true);
+    expect(Object.isFrozen(data.users[0])).toBe(true);
+    expect(Object.isFrozen(data.users[0].tags)).toBe(true);
+    expect(Object.isFrozen(data.config)).toBe(true);
+    expect(Object.isFrozen(data.config.theme)).toBe(true);
+  });
+
+  it('should not freeze Date instances and leave them usable', () => {
+    const date = new Date(2025, 0, 1);
+    const wrapper = { when: date };
+    deepFreeze(wrapper);
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(date)).toBe(false);
+    // Date internal slots must still work
+    expect(date.getTime()).toBe(new Date(2025, 0, 1).getTime());
+    date.setFullYear(2030);
+    expect(date.getFullYear()).toBe(2030);
+  });
+
+  it('should not freeze Map instances', () => {
+    const map = new Map([['a', 1]]);
+    const wrapper = { data: map };
+    deepFreeze(wrapper);
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(map)).toBe(false);
+    // Map must still be usable
+    map.set('b', 2);
+    expect(map.get('b')).toBe(2);
+  });
+
+  it('should not freeze Set instances', () => {
+    const set = new Set([1, 2, 3]);
+    const wrapper = { items: set };
+    deepFreeze(wrapper);
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(set)).toBe(false);
+    set.add(4);
+    expect(set.has(4)).toBe(true);
+  });
+
+  it('should not freeze RegExp instances', () => {
+    const re = /pattern/gi;
+    const wrapper = { matcher: re };
+    deepFreeze(wrapper);
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(re)).toBe(false);
+  });
+
+  it('should not freeze custom class instances', () => {
+    class Store {
+      constructor(value) {
+        this.value = value;
+      }
+      increment() {
+        this.value++;
+      }
+    }
+    const store = new Store(5);
+    const wrapper = { store };
+    deepFreeze(wrapper);
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(store)).toBe(false);
+    store.increment();
+    expect(store.value).toBe(6);
+  });
+
+  it('should handle circular references without infinite recursion', () => {
+    const obj = { a: 1 };
+    obj.self = obj;
+    const frozen = deepFreeze(obj);
+    expect(frozen).toBe(obj);
+    expect(Object.isFrozen(obj)).toBe(true);
+    expect(obj.self).toBe(obj);
+  });
+
+  it('should handle cross-referenced objects', () => {
+    const a = { name: 'a' };
+    const b = { name: 'b', a };
+    a.b = b;
+    deepFreeze(a);
+    expect(Object.isFrozen(a)).toBe(true);
+    expect(Object.isFrozen(b)).toBe(true);
+  });
+
+  it('should be a fast-path no-op on already frozen input', () => {
+    const inner = Object.freeze({ x: 1 });
+    const obj = { inner };
+    Object.freeze(obj);
+    // Should not throw and should return same reference
+    expect(deepFreeze(obj)).toBe(obj);
+    expect(Object.isFrozen(obj)).toBe(true);
+    expect(Object.isFrozen(inner)).toBe(true);
+  });
+
+  it('should not throw on an object with nodeType (DOM-like)', () => {
+    // Mock DOM node — has nodeType and a non-Object prototype via class
+    class MockNode {
+      constructor() {
+        this.nodeType = 1;
+        this.tagName = 'DIV';
+      }
+    }
+    const node = new MockNode();
+    const wrapper = { element: node };
+    expect(() => deepFreeze(wrapper)).not.toThrow();
+    expect(Object.isFrozen(wrapper)).toBe(true);
+    expect(Object.isFrozen(node)).toBe(false);
+    // Still mutable
+    node.tagName = 'SPAN';
+    expect(node.tagName).toBe('SPAN');
+  });
+
+  it('should freeze null-prototype objects', () => {
+    const obj = Object.create(null);
+    obj.a = 1;
+    deepFreeze(obj);
+    expect(Object.isFrozen(obj)).toBe(true);
+  });
+
+  it('should preserve reference identity of non-frozen nested class instances', () => {
+    const date = new Date();
+    const arr = [date, date];
+    deepFreeze(arr);
+    expect(arr[0]).toBe(date);
+    expect(arr[1]).toBe(date);
+    expect(Object.isFrozen(arr)).toBe(true);
+    expect(Object.isFrozen(date)).toBe(false);
   });
 });

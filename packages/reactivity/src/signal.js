@@ -12,12 +12,15 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
+import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 
 export class Signal {
-  get [IS_SIGNAL]() { return true; }
+  get [IS_SIGNAL]() {
+    return true;
+  }
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }
@@ -50,7 +53,7 @@ export class Signal {
 
   // set debugging context for signal removing any present context
   setContext(additionalContext = {}) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     const defaultContext = {
@@ -64,7 +67,7 @@ export class Signal {
 
   // add context to signal
   addContext(additionalContext = {}) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
     if (!this.context) {
@@ -75,21 +78,19 @@ export class Signal {
     }
   }
 
-  // set debugging stack trace for signal
+  // Stack trace capture is gated separately because Error.captureStackTrace
+  // costs ~10-100× a context spread, paid per Signal.notify in tracing-on
+  // dev. Default off; opt in via setStackCapture(true).
   setTrace() {
-    if (!isDevelopment) {
-      return;
-    }
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this.context, this.setTrace);
-    }
-    else {
-      this.context.stack = new Error().stack;
-    }
+    captureStack(this, this.setTrace);
   }
 
   static equalityFunction = isEqual;
   static cloneFunction = clone;
+  static setTracing = setTracing;
+  static isTracing = isTracing;
+  static setStackCapture = setStackCapture;
+  static isStackCapture = isStackCapture;
 
   get value() {
     // Record this Signal as a dependency if inside a Reaction computation
@@ -189,10 +190,10 @@ export class Signal {
   }
 
   notify() {
-    if (isDevelopment) {
-      this.setContext();
-      this.setTrace();
-    }
+    // Each gate handles itself — setContext on isTracing, setTrace on
+    // isStackCapture. Hot path: both early-return when their flag is off.
+    this.setContext();
+    this.setTrace();
     this.dependency.changed(this.context);
   }
 

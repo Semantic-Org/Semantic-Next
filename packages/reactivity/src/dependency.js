@@ -1,10 +1,10 @@
-import { isDevelopment } from '@semantic-ui/utils';
+import { captureStack, isTracing } from './helpers.js';
 import { Scheduler } from './scheduler.js';
 
 export class Dependency {
   constructor(...metadata) {
     this.subscribers = new Set();
-    if (isDevelopment) {
+    if (isTracing()) {
       this.setContext(metadata);
     }
   }
@@ -16,25 +16,17 @@ export class Dependency {
     }
   }
 
-  // allows metadata to be passed with dependency for debugging
+  // Cheap context naming on tracing; stack capture only on stack mode.
   setContext(context) {
-    if (!isDevelopment) {
+    if (!isTracing()) {
       return;
     }
-    if (!context) {
-      context = {};
-    }
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(context, this.setContext);
-    }
-    else {
-      context.stack = new Error().stack;
-    }
-    this.context = context;
+    this.context = context || {};
+    captureStack(this, this.setContext);
   }
 
   changed(context) {
-    if (isDevelopment) {
+    if (isTracing()) {
       if (context) {
         this.context = context;
       }

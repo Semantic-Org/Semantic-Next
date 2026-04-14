@@ -183,4 +183,29 @@ export class Reaction {
     callback: () => T,
     equalityCheck?: (oldValue: T, newValue: T) => boolean,
   ): T;
+
+  /**
+   * Enables or disables tracing — cheap debug context attached to signals,
+   * reactions, and dependencies. Off by default.
+   * @param enabled - Whether to enable tracing
+   */
+  static setTracing(enabled: boolean): void;
+
+  /**
+   * Returns whether tracing is currently enabled.
+   */
+  static isTracing(): boolean;
+
+  /**
+   * Enables or disables stack capture — adds stack traces to tracing
+   * context via Error.captureStackTrace. Expensive; opt-in on top of tracing.
+   * Off by default.
+   * @param enabled - Whether to enable stack capture
+   */
+  static setStackCapture(enabled: boolean): void;
+
+  /**
+   * Returns whether stack capture is currently enabled.
+   */
+  static isStackCapture(): boolean;
 }
