@@ -113,14 +113,14 @@ jobs:
           git checkout HEAD -- packages/*/src/
 
       # Run just this matrix cell's single config.
-      # --timeout=3 caps the auto-sample tail regardless of JSON default;
-      # keeps any individual cell bounded even under pathological runner noise.
+      # Per-cell auto-sample tail is governed by the config's own `timeout`
+      # (tachometer rejects --timeout alongside --config). Hard runaway
+      # protection is `timeout-minutes: 10` at the job level above.
       - name: Run benchmark
         run: |
           mkdir -p results
           npx tachometer \
             --config "${{ matrix.entry.config }}" \
-            --timeout=3 \
             --json-file "results/${{ matrix.entry.package }}-${{ matrix.entry.name }}.json"
 
       - name: Upload results
