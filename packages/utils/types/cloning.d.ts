@@ -40,3 +40,26 @@ export interface CloneOptions {
  * ```
  */
 export function clone<T>(src: T, options?: CloneOptions): T;
+
+/**
+ * Recursively freezes a value in place and returns the same reference
+ * Walks arrays and plain objects only — Dates, Maps, Sets, RegExps, DOM nodes,
+ * and custom class instances are left untouched so their internal slots keep working
+ * Cycle-safe via an internal WeakSet; already-frozen inputs are a fast-path no-op
+ * @see {@link https://next.semantic-ui.com/docs/api/utils/cloning#deepfreeze deepFreeze}
+ * @see {@link https://next.semantic-ui.com/examples/utils-deepfreeze Example}
+ *
+ * @param value - Value to freeze
+ * @returns The same reference, recursively frozen
+ *
+ * @example
+ * ```ts
+ * const state = deepFreeze({ user: { name: 'Alice', tags: ['admin'] } });
+ * // state.user.name = 'Bob'; // throws in strict mode
+ *
+ * // Non-plain objects are skipped — a wrapped Date remains usable
+ * const data = deepFreeze({ createdAt: new Date() });
+ * data.createdAt.setFullYear(2030); // still works
+ * ```
+ */
+export function deepFreeze<T>(value: T): T;

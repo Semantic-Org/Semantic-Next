@@ -18,6 +18,7 @@ tests/test-case/dist
 ai/meta/agent-guestbook.md
 ai/meta/jisei.md
 ai/trash
+.claude/worktrees/
 
 # Numerous always-ignore extensions
 *.diff

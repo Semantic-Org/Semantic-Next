@@ -7,6 +7,8 @@ import {
   BLOCK_MARKER,
   buildHTMLString as buildHTMLStringPure,
   COMMENT_MARKER,
+  DATA_SUI_BIND,
+  parseAttributeParts as parseAttributePartsFn,
   RAW_TEXT_MARKER,
 } from '../../build-html-string.js';
 import { ExpressionEvaluator } from '../../expression-evaluator.js';
@@ -95,9 +97,25 @@ function cachedBuildHTMLString(ast, options) {
       });
     }
     const built = buildHTMLStringPure(ast, options);
-    const refTemplate = document.createElement('template');
-    refTemplate.innerHTML = built.htmlString;
-    entry[slot] = { ...built, refRoot: refTemplate.content };
+    // refRoot is a lazy getter — the Plan-04 fast path in hydrateAttributes
+    // never reads it, and paying the `template.innerHTML = htmlString`
+    // parse per instance is the hydration hotspot we're trying to
+    // eliminate. Touch it only when the legacy reference-DOM fallback
+    // runs (older SSR output, or templates without data-sui-bind).
+    let refRoot = null;
+    entry[slot] = {
+      htmlString: built.htmlString,
+      entries: built.entries,
+      snippets: built.snippets,
+      get refRoot() {
+        if (refRoot === null) {
+          const refTemplate = document.createElement('template');
+          refTemplate.innerHTML = built.htmlString;
+          refRoot = refTemplate.content;
+        }
+        return refRoot;
+      },
+    };
   }
   else {
     cacheDiag.hits++;
@@ -260,25 +278,11 @@ export class Renderer {
   *******************************/
 
   // Parse an attribute value containing marker tokens into static/dynamic parts.
+  // Thin wrapper around the shared helper in build-html-string.js — preserved
+  // as an instance method so existing call sites (bindMarkers / ref-DOM
+  // fallback in hydrateAttributes) keep the same shape.
   parseAttributeParts(attrValue) {
-    const parts = [];
-    const markerIDs = [];
-    let lastIndex = 0;
-    let match;
-    const re = new RegExp(ATTR_MARKER_PATTERN, 'g');
-    while ((match = re.exec(attrValue)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({ static: attrValue.slice(lastIndex, match.index) });
-      }
-      const markerID = parseInt(match[1]);
-      parts.push({ markerID });
-      markerIDs.push(markerID);
-      lastIndex = re.lastIndex;
-    }
-    if (lastIndex < attrValue.length) {
-      parts.push({ static: attrValue.slice(lastIndex) });
-    }
-    return { parts, markerIDs };
+    return parseAttributePartsFn(attrValue);
   }
 
   // Attribute binding — delegates to reactive-data.js. See that module for
@@ -292,54 +296,66 @@ export class Renderer {
   bindMarkers(root, entries, data, scope, ast) {
     if (entries.length === 0) { return; }
 
-    // Pass 1: Bind attribute markers on elements
+    // Plan 08 — single-pass walker over SHOW_ELEMENT | SHOW_COMMENT. Each
+    // node.nextSibling/firstChild in the walker does one DOM traversal
+    // instead of two, cutting the per-render walk cost roughly in half
+    // for large fragments (1000-row table, etc.). Attribute processing is
+    // safe inline (only touches the element's own attributes); comment
+    // processing is deferred because it mutates the tree structure
+    // (replace/remove) and would invalidate the live walker.
     const processedAttrIDs = new Set();
-    const elementWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
-    let el;
-    while ((el = elementWalker.nextNode())) {
-      const element = el;
-      const attrsToProcess = [];
-      for (let i = 0; i < element.attributes.length; i++) {
-        const attr = element.attributes[i];
-        if (attr.value.includes(ATTR_MARKER_PREFIX)) {
-          attrsToProcess.push({ name: attr.name, value: attr.value });
-        }
-      }
-
-      for (const { name: attrName, value: attrValue } of attrsToProcess) {
-        const { parts, markerIDs } = this.parseAttributeParts(attrValue);
-        for (const id of markerIDs) { processedAttrIDs.add(id); }
-        this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
-      }
-    }
-
-    // Pass 2: Walk comment nodes for text, block, and raw text markers
-    const commentWalker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
     const commentsToProcess = [];
-    let comment;
-    while ((comment = commentWalker.nextNode())) {
-      const text = comment.data;
-      if (text.startsWith(COMMENT_MARKER)) {
-        const markerID = parseInt(text.slice(COMMENT_MARKER.length));
-        if (!isNaN(markerID) && !processedAttrIDs.has(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'expression' });
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+    );
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node;
+        const attrsToProcess = [];
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes[i];
+          if (attr.value.includes(ATTR_MARKER_PREFIX)) {
+            attrsToProcess.push({ name: attr.name, value: attr.value });
+          }
+        }
+        for (const { name: attrName, value: attrValue } of attrsToProcess) {
+          const { parts, markerIDs } = this.parseAttributeParts(attrValue);
+          for (const id of markerIDs) { processedAttrIDs.add(id); }
+          this.bindAttributeExpression(element, attrName, parts, entries, data, scope);
         }
       }
-      else if (text.startsWith(RAW_TEXT_MARKER)) {
-        const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'rawText' });
+      else {
+        const text = node.data;
+        if (text.startsWith(COMMENT_MARKER)) {
+          const markerID = parseInt(text.slice(COMMENT_MARKER.length));
+          if (!isNaN(markerID)) {
+            // processedAttrIDs is finalized only *after* the walk completes,
+            // so defer the attr-ID filter to the processing loop below. In
+            // fresh-render shape (client:load), attribute markers and their
+            // owning elements are discovered in document order — the element
+            // is visited before any comment that would have shared an ID.
+            commentsToProcess.push({ comment: node, markerID, type: 'expression' });
+          }
         }
-      }
-      else if (text.startsWith(BLOCK_MARKER)) {
-        const markerID = parseInt(text.slice(BLOCK_MARKER.length));
-        if (!isNaN(markerID)) {
-          commentsToProcess.push({ comment, markerID, type: 'block' });
+        else if (text.startsWith(RAW_TEXT_MARKER)) {
+          const markerID = parseInt(text.slice(RAW_TEXT_MARKER.length));
+          if (!isNaN(markerID)) {
+            commentsToProcess.push({ comment: node, markerID, type: 'rawText' });
+          }
+        }
+        else if (text.startsWith(BLOCK_MARKER)) {
+          const markerID = parseInt(text.slice(BLOCK_MARKER.length));
+          if (!isNaN(markerID)) {
+            commentsToProcess.push({ comment: node, markerID, type: 'block' });
+          }
         }
       }
     }
 
     for (const { comment, markerID, type } of commentsToProcess) {
+      if (type === 'expression' && processedAttrIDs.has(markerID)) { continue; }
       const entry = entries[markerID];
 
       if (type === 'expression') {
@@ -484,6 +500,19 @@ export class Renderer {
   }
 
   hydrateAttributes(root, entries, data, scope, ast) {
+    // Fast path — server stamped data-sui-bind on every element with
+    // dynamic bindings (Plan 04). Presence of the attribute anywhere in
+    // the tree tells us the server is Plan-04-aware; walk elements once,
+    // look up entries[id].attributeBinding for parts + classification,
+    // wire Reactions directly. No reference DOM, no parallel walker, no
+    // block-owned-element discovery pass.
+    if (root.querySelector && root.querySelector(`[${DATA_SUI_BIND}]`)) {
+      this.hydrateAttributesViaDataBind(root, entries, data, scope);
+      return;
+    }
+
+    // Legacy fallback — reference DOM parallel walk. Keeps older cached
+    // SSR content hydrating correctly during a rolling upgrade.
     // Reference DOM is cached alongside the htmlString — parallel TreeWalker
     // only reads attribute names off refEls, so sharing the cached fragment
     // across calls is safe. Eliminates the ~648ms-per-page `innerHTML =`
@@ -540,6 +569,60 @@ export class Renderer {
       for (const { name: attrName, value: attrValue } of attrsToProcess) {
         const { parts } = this.parseAttributeParts(attrValue);
         this.bindAttributeExpression(element, attrName, parts, entries, data, scope, { skipFirstWrite: true });
+      }
+    }
+  }
+
+  // Plan 04 fast path — walk SHOW_ELEMENT | SHOW_COMMENT once, process
+  // `data-sui-bind` on elements at block-depth 0 and let block hydrate
+  // hooks recursively handle their own contents via hydrateInnerContent
+  // (which re-enters this method with the block's sub-AST entries). This
+  // matches the blockOwnedElements skip the legacy parallel walker
+  // performed, but without building a reference DOM or a separate Set —
+  // depth is tracked inline from the block markers we encounter.
+  //
+  // The data-sui-bind attribute itself is left on the element until the
+  // post-hydration cleanup pass (base.js removeMarkers, deferred to rAF
+  // per Plan 02) strips it along with comment markers.
+  hydrateAttributesViaDataBind(root, entries, data, scope) {
+    const walker = document.createTreeWalker(
+      root,
+      NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT,
+    );
+    let node;
+    let blockDepth = 0;
+    while ((node = walker.nextNode())) {
+      if (node.nodeType === Node.COMMENT_NODE) {
+        const text = node.data;
+        if (text.startsWith(BLOCK_MARKER)) {
+          blockDepth++;
+        }
+        else if (text.startsWith('/sui-block:')) {
+          blockDepth--;
+        }
+        continue;
+      }
+      if (blockDepth > 0) { continue; }
+      const bindStr = node.getAttribute(DATA_SUI_BIND);
+      if (!bindStr) { continue; }
+      for (const binding of bindStr.split(',')) {
+        const eqIdx = binding.lastIndexOf('=');
+        if (eqIdx === -1) { continue; }
+        const rawAttrName = binding.slice(0, eqIdx);
+        const entryId = parseInt(binding.slice(eqIdx + 1));
+        if (isNaN(entryId)) { continue; }
+        const entry = entries[entryId];
+        if (!entry || !entry.attributeBinding) { continue; }
+        const { parts } = entry.attributeBinding;
+        // Strip `.` / `@` prefix for the DOM attribute name. bindAttribute
+        // uses `classification.type` / `classification.attribute` for the
+        // real dispatch; the name passed here is only used for the
+        // `setAttribute` / `removeAttribute` path of regular-attribute
+        // bindings (booleans, interpolated, single-expression strings).
+        const domAttrName = (rawAttrName.charAt(0) === '.' || rawAttrName.charAt(0) === '@')
+          ? rawAttrName.slice(1)
+          : rawAttrName;
+        this.bindAttributeExpression(node, domAttrName, parts, entries, data, scope, { skipFirstWrite: true });
       }
     }
   }

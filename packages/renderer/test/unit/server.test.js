@@ -24,10 +24,13 @@ function renderToString({ ast, data = {}, css = '', subTemplates = {}, helpers =
   return `<template shadowrootmode="open">${result}</template>`;
 }
 
-// Strip hydration markers and whitespace for clean comparison
+// Strip hydration markers and whitespace for clean comparison. Also strips
+// the Plan-04 data-sui-bind attribute (server-stamped hydration hint) so
+// tests can assert against clean post-hydration structure.
 function stripMarkers(html) {
   return html
     .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\s+data-sui-bind="[^"]*"/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 }

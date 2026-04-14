@@ -3,7 +3,7 @@ layout: '@layouts/Guide.astro'
 pageType: 'API Reference'
 title: Cloning Utilities
 package: "@semantic-ui/utils"
-methods: [clone, extend]
+methods: [clone, deepFreeze, extend]
 icon: copy
 description: API reference for object and array cloning functions
 ---
@@ -90,6 +90,48 @@ const cloned = clone(data, { preserveNonCloneable: true });
 
 console.log(cloned.store === store); // true (same reference)
 console.log(cloned.config !== data.config); // true (deep cloned)
+```
+
+### deepFreeze
+
+```javascript
+function deepFreeze(value)
+```
+
+Recursively freezes a value in place and returns the same reference. Only arrays and plain objects are walked and frozen — `Date`, `Map`, `Set`, `RegExp`, DOM nodes, and any custom class instance are left untouched so their internal slots keep working.
+
+> **Loud vs silent protection** Unlike `clone`, which silently produces a copy, `deepFreeze` mutates in place and throws on write in strict mode. This is the intended ergonomic — accidental writes surface as errors instead of being absorbed into a throwaway copy.
+
+#### Parameters
+
+| Name  | Type | Description |
+|-------|------|-------------|
+| value | any  | The value to freeze. Primitives, `null`, and `undefined` are returned unchanged. |
+
+#### Returns
+
+The same reference passed in, recursively frozen. Cycles are safe (threaded `WeakSet`), and already-frozen inputs take a fast-path no-op.
+
+#### Example
+
+```javascript
+import { deepFreeze } from '@semantic-ui/utils';
+
+const state = deepFreeze({
+  user: { name: 'Alice', tags: ['admin'] },
+  createdAt: new Date(),
+});
+
+console.log(Object.isFrozen(state));           // true
+console.log(Object.isFrozen(state.user));      // true
+console.log(Object.isFrozen(state.user.tags)); // true
+
+// Date/Map/Set/RegExp/DOM/class-instance values are NOT frozen
+console.log(Object.isFrozen(state.createdAt)); // false
+state.createdAt.setFullYear(2030);             // still works
+
+// Writes throw in strict mode
+state.user.name = 'Bob'; // TypeError: Cannot assign to read only property
 ```
 
 ### extend

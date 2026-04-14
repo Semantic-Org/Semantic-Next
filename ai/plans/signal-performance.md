@@ -79,6 +79,14 @@ new Signal(data, { safety: 'none', equalityFunction: isEqual })        // no pro
 
 - **`mutate()` under freeze** — The general `mutate()` API needs to internally thaw (clone) → run mutation fn → freeze result. Array helpers already notify directly (fix #4). Is the general `mutate()` used enough in userland to justify the thaw path, or should it just require returning a new value?
 
+- **Migration audit (gates the default flip to `'freeze'`)** — Before the preset default changes, grep all `.get()` call sites across `packages/*/src`, `src/`, `docs/src`, `docs/src/examples` for get-mutate-set patterns that would silently throw under freeze:
+  - `const x = sig.get(); x.push(...); sig.set(x);`
+  - `sig.get().sort()` / `sig.get().splice(...)` followed by dependent reads
+  - `Object.assign(sig.get(), newFields); sig.notify()`
+  - `const arr = sig.get(); arr[i] = v; sig.set(arr);`
+
+  Each hit becomes either a `sig.push(...)` / `sig.mutate(...)` / `sig.setIndex(i, v)` migration, or an explicit `{ safety: 'reference' }` opt-out at the signal's construction site with a comment explaining why. The audit is the gating work, not the 4-5h Signal internals migration. Author audit with an agent-parallel scan; review hits manually; land migrations as preparatory commits before flipping the default.
+
 ## Dependencies
 
 None — all items are independent of the broader roadmap.

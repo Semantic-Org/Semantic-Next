@@ -419,9 +419,19 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       rec.itemSignal.set(getEachData(item, i, collectionType, node));
       rec.item = item;
       rec.index = i;
-      // Capture the new item's shape so a future in-place mutation is
-      // detectable. Only allocation-site for the snapshot object.
-      rec.propsSnapshot = createSnapshot(item);
+      // Refresh the snapshot for the next reconcile's comparison. Reuse
+      // the existing snap object if we already have one (no allocation
+      // on filter-* / shift-index hot paths where item refs churn
+      // across reconciles); otherwise allocate once.
+      if (
+        rec.propsSnapshot !== null && typeof rec.propsSnapshot === 'object'
+        && item !== null && typeof item === 'object'
+      ) {
+        refreshSnapshotAndDetect(rec.propsSnapshot, item);
+      }
+      else {
+        rec.propsSnapshot = createSnapshot(item);
+      }
     }
     else if (typeof item === 'object' && item !== null) {
       if (rec.propsSnapshot === null) {

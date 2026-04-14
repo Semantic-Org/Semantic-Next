@@ -94,49 +94,6 @@ function getEachData(item, indexOrKey, collectionType, node) {
     : { ...item, this: item, [indexAs]: indexOrKey };
 }
 
-// Allocate once per record at first reconcile (createSnapshot). On
-// subsequent reconciles, refreshSnapshotAndDetect both diffs the item
-// against the cached snap AND updates snap in place — one pass, zero
-// allocation. The common case on update-10th (900 unchanged items) pays
-// only a cache-friendly `snap.k === item.k` check per prop per item.
-function createSnapshot(item) {
-  if (item === null || typeof item !== 'object') { return item; }
-  const snap = {};
-  for (const k in item) {
-    if (Object.prototype.hasOwnProperty.call(item, k)) {
-      snap[k] = item[k];
-    }
-  }
-  return snap;
-}
-
-// Returns true if any top-level prop of `item` differs from `snap`, and
-// updates `snap` to match `item`. Added keys register as a change on the
-// iteration that introduces them; removed keys slip past (we don't scan
-// snap's keys — the common case has a stable prop set, and the alternative
-// would pessimize the hot path for a never-observed contract). If the
-// prop set is unstable, the user can always call itemSignal.notify()
-// manually.
-function refreshSnapshotAndDetect(snap, item) {
-  if (snap === null || typeof snap !== 'object') { return snap !== item; }
-  if (item === null || typeof item !== 'object') { return true; }
-  let changed = false;
-  for (const k in item) {
-    if (!Object.prototype.hasOwnProperty.call(item, k)) { continue; }
-    if (snap[k] !== item[k]) {
-      changed = true;
-      snap[k] = item[k];
-    }
-    else if (!(k in snap)) {
-      // New key arrived with same value (e.g. undefined). Rare — record
-      // it and flag changed so the binding re-evaluates `k in item`.
-      changed = true;
-      snap[k] = item[k];
-    }
-  }
-  return changed;
-}
-
 function createItemDataProxy(parentData, itemSignal) {
   const proxy = new Proxy(parentData, {
     get(target, prop) {
@@ -239,13 +196,15 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     fragment,
     scope: itemScope,
     isElse: false,
-    // Populated on the first reconcile pass (phase 3). Null marker means
-    // "no prior snapshot → record is fresh, no subscribers to wake up,
-    // skip notify". Cleared to a shallow-clone of the item's top-level
-    // props once the record has seen one reconcile; subsequent passes
-    // compare against this snapshot to detect in-place mutations without
-    // firing notify() on untouched items.
-    propsSnapshot: null,
+    // Cleared by reconcile phase 3 after one pass. Distinguishes records
+    // that were just created (their Signal is fresh — no subscribers had a
+    // chance to see a stale value) from records that were retained across
+    // a reconcile (whose item object may have been mutated in place and
+    // needs a notify()). Without this, every newly-rendered item fires
+    // notify() on first render, scheduling every per-item binding to
+    // re-evaluate in the next microtask — an N×M cost that shows up as a
+    // ~60ms phantom scheduler flushTask on 1000-card pages.
+    fresh: true,
   };
 }
 
@@ -391,27 +350,21 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
     cursor = rec.endMarker;
   }
 
-  // Phase 3: update item signals where item ref or index changed, OR
-  // where a retained same-ref item has mutated in place.
+  // Phase 3: update item signals where item ref or index changed.
+  // Same-ref same-index objects fall into notify() because Signal.isEqual
+  // short-circuits on a === b and won't see in-place mutations — BUT only
+  // for records that existed across reconciles. A freshly-created record
+  // (rec.fresh) has just wired its bindings against a Signal whose value
+  // matches the current item; notifying here would schedule every binding
+  // to re-run once in the next microtask (the ~60ms phantom flushTask).
   //
-  // Same-ref same-index objects bypass Signal.set's equality gate because
-  // the wrapper's `[as]: item` binding is reference-equal across calls
-  // and `isEqual` stops at ===. That's what forces the else-if notify()
-  // branch — but notify() unconditionally wakes every per-item binding,
-  // which for update-10th means the 900 untouched records pay the cost
-  // of the 100 genuinely-mutated ones. Instead, snapshot each item's
-  // top-level prop values at reconcile end; on the next reconcile,
-  // shallow-compare. Only notify when a prop actually changed.
-  //
-  // Preserves the subtree-caching §8 contract ("should update conditional
-  // branches when item data changes") — that test mutates
-  // `items[i].active` which is a top-level prop, so shallow-compare sees
-  // the change and we still notify. Nested-object mutations (items[i].nested.x)
-  // would slip past the shallow check, but no tests or documented contracts
-  // rely on that — same observable behavior as before for mutations that
-  // touch enumerable own props. The fresh-record skip is still gated by
-  // rec.propsSnapshot === null (created by createRecord with no snapshot;
-  // first phase-3 pass records one, subsequent passes compare).
+  // The notify is the legitimate path for the "items[i].foo = x; external
+  // signal bumped" pattern — see subtree-caching.test.js §8 "should update
+  // conditional branches when item data changes" for the guaranteed
+  // contract. Becomes dead code once signal-performance lands with
+  // safety: 'freeze' (in-place mutation impossible), and can be deleted
+  // at that point. Until then the cost is real but required for
+  // correctness.
   for (let i = 0; i < newRecords.length; i++) {
     const rec = newRecords[i];
     const item = items[i];
@@ -419,25 +372,11 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       rec.itemSignal.set(getEachData(item, i, collectionType, node));
       rec.item = item;
       rec.index = i;
-      // Capture the new item's shape so a future in-place mutation is
-      // detectable. Only allocation-site for the snapshot object.
-      rec.propsSnapshot = createSnapshot(item);
     }
-    else if (typeof item === 'object' && item !== null) {
-      if (rec.propsSnapshot === null) {
-        // Fresh record (first reconcile after createRecord). Bindings
-        // were wired synchronously against the signal's value; there's
-        // no stale subscriber to wake. Record the snapshot for the next
-        // reconcile's comparison.
-        rec.propsSnapshot = createSnapshot(item);
-      }
-      else if (refreshSnapshotAndDetect(rec.propsSnapshot, item)) {
-        // Mutation observed — propagate to per-item bindings. The
-        // snapshot was updated in place by refreshSnapshotAndDetect,
-        // no new allocation.
-        rec.itemSignal.notify();
-      }
+    else if (typeof item === 'object' && !rec.fresh) {
+      rec.itemSignal.notify();
     }
+    rec.fresh = false;
   }
 
   records.length = 0;
@@ -458,7 +397,6 @@ function renderElse({ records, node, data, scope, region, renderAST, isSVG }) {
     endMarker: null,
     scope: elseScope,
     isElse: true,
-    propsSnapshot: null,
   });
 }
 
@@ -599,7 +537,6 @@ function adoptServerItems({
         endMarker,
         scope: itemScope,
         isElse: false,
-        propsSnapshot: null,
       });
     }
     else {
