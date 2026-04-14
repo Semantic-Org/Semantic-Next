@@ -116,8 +116,9 @@ jobs:
       - name: Build baseline
         run: |
           BASELINE_REF=087308428
-          git fetch origin "$BASELINE_REF" --depth=1
-          git checkout FETCH_HEAD -- packages/*/src/
+          # Deepen main's history so the pinned SHA is reachable locally.
+          git fetch origin main --depth=50
+          git checkout $BASELINE_REF -- packages/*/src/
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
 
