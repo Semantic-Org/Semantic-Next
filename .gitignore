@@ -60,3 +60,6 @@ nbproject
 tools/lsp/editors/vscode/*.vsix
 tools/lsp/editors/vscode/server/
 tools/lsp/editors/vscode/test-grammar/
+
+# Ephemeral agent scratch
+ai/workspace/tmp/
