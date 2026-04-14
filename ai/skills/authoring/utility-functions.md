@@ -648,7 +648,7 @@ tokenize('Hello World!');                           // 'hello-world'
 ## Equality and Cloning (equality.js, cloning.js)
 
 ```javascript
-import { isEqual, clone } from '@semantic-ui/utils';
+import { isEqual, clone, deepFreeze } from '@semantic-ui/utils';
 
 // Deep equality (handles arrays, objects, Maps, Sets, RegExp, Date, TypedArrays)
 isEqual({ a: [1, 2] }, { a: [1, 2] });             // true
@@ -671,6 +671,15 @@ isEqual(
 const cloned = clone(obj);
 clone(obj, { preserveDOM: true });                  // keep DOM node references
 clone(obj, { preserveNonCloneable: true });         // keep class instance references
+
+// Deep freeze in place — returns same reference, recursively frozen
+// Only walks arrays and plain objects; Date/Map/Set/RegExp/DOM/class instances
+// are skipped so their internal slots keep working. Cycle-safe via WeakSet.
+const state = deepFreeze({ user: { name: 'Alice' }, createdAt: new Date() });
+Object.isFrozen(state.user);        // true
+Object.isFrozen(state.createdAt);   // false — Date is left alone
+state.createdAt.setFullYear(2030);  // still works
+state.user.name = 'Bob';            // TypeError in strict mode
 ```
 
 ---
@@ -813,6 +822,7 @@ const pattern = new RegExp(escapeRegExp('price ($5.00)'), 'i');
 |----------|-----------|---------|
 | `isEqual` | `(a, b, opts?)` | Boolean — opts: `{ loose, ignoreKeys, partial }` |
 | `clone` | `(obj, opts?)` | Deep clone — opts: `{ preserveDOM, preserveNonCloneable }` |
+| `deepFreeze` | `(value)` | Same reference, recursively frozen — skips Date/Map/Set/RegExp/DOM/class instances |
 
 ### Functions (functions.js)
 | Function | Signature | Returns |
