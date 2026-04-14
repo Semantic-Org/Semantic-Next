@@ -109,9 +109,14 @@ jobs:
         run: node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js current
 
       # Swap source to base branch and build baseline bundles
+      # VALIDATION RUN: baseline pinned to 087308428 (pre-perf/native merge)
+      # so we measure against a real multi-magnitude delta (true-zero deltas
+      # can't validate ["2%"] + timeout:3 meaningfully). REVERT this block
+      # before merging — this is a throwaway PR for knob tuning evidence.
       - name: Build baseline
         run: |
-          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          BASELINE_REF=087308428
+          git fetch origin "$BASELINE_REF" --depth=1
           git checkout FETCH_HEAD -- packages/*/src/
           node packages/${{ matrix.entry.package }}/bench/tachometer/build-ci.js baseline
           git checkout HEAD -- packages/*/src/
