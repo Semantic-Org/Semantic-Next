@@ -81,7 +81,11 @@ jobs:
         entry: ${{ fromJson(needs.discover.outputs.matrix) }}
     name: bench-${{ matrix.entry.name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Old suite at sampleSize: 50 and timeout: 5 runs ~10-11 min per config
+    # including setup. 15-min cap gives safety margin without letting any
+    # single cell run forever. PR B's knob tuning (["2%"], 2-min auto-sample
+    # cap) will bring real times to ~5-7 min.
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
