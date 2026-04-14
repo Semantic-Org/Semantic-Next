@@ -454,6 +454,57 @@ RENDERING_ENGINES.forEach(engine => {
      Subtemplate Expressions
 *******************************/
 
+    describe('snippet args per-key granularity', () => {
+      it('changing one snippet arg should not re-evaluate inner expressions that read a different arg', async () => {
+        let labelEvalCount = 0;
+        let statusEvalCount = 0;
+        const tag = uniqueTag();
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: [
+            '{#snippet card}',
+            '  <span>{markLabel}{label}</span>',
+            '  <span>{markStatus}{status}</span>',
+            '{/snippet}',
+            '{>card label=getLabel status=getStatus}',
+          ].join(''),
+          defaultState: { labelVal: 'hello', statusVal: 'active' },
+          createComponent: ({ state }) => ({
+            getLabel: () => state.labelVal.get(),
+            getStatus: () => state.statusVal.get(),
+            markLabel: () => {
+              labelEvalCount++;
+              return '';
+            },
+            markStatus: () => {
+              statusEvalCount++;
+              return '';
+            },
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(shadowText(el)).toContain('hello');
+        expect(shadowText(el)).toContain('active');
+        const labelCountAfterRender = labelEvalCount;
+        const statusCountAfterRender = statusEvalCount;
+
+        const updated = $(el).onNext('updated');
+        el.template.state.labelVal.set('changed');
+        await updated;
+
+        expect(shadowText(el)).toContain('changed');
+        expect(shadowText(el)).toContain('active');
+        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
+        expect(statusEvalCount).toBe(statusCountAfterRender);
+      });
+    });
+
     describe('reactiveData per-key granularity', () => {
       // Documents an intended-but-unimplemented guarantee: changing one
       // reactiveData field should not invalidate child subtemplate
