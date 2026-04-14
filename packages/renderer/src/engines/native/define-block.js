@@ -1,5 +1,7 @@
 import { isRecovery, isTracing } from '../../helpers.js';
 
+const NOOP = () => {};
+
 // Structured error log — opt-in via setTracing(true). Tree-shakes when off.
 // `syntax` is the block's own template-syntax representation (each block
 // owns its formatting via the `syntax` config hook).
@@ -85,22 +87,31 @@ export function defineBlock(config) {
       err: null,
     };
 
-    const onSuccess = () => {
-      if (typeof renderer.notifyUpdate === 'function') {
-        renderer.notifyUpdate();
-      }
-    };
+    // Hoisted once per block instance — the per-reaction hot path can't
+    // afford a `typeof` hop, and `renderer.notifyUpdate` is a stable
+    // bound arrow on Renderer, safe to call directly. Fallback is the
+    // no-op case (some test renderers omit it).
+    const notifyUpdate = renderer.notifyUpdate || NOOP;
 
-    // Recovery wraps each hook in try/catch. Without recovery, throws
-    // propagate so failures are loud — the browser logs uncaught errors
-    // with full stack, no extra wrapping needed. With recovery + errorHook:
-    // hook decides what to render. With recovery alone (global flag, no
-    // hook): default-isolate via region.clear() + reaction stop.
-    const safeRun = wantsRecovery
-      ? (hookName, fn, comp) => {
+    const isHydrating = hydrating && Boolean(hydrate);
+    const reactionAnchor = region.anchor;
+    const reactionContext = { message: `${name}:${node.type}`, block: name, node };
+
+    // Two reaction-callback shapes, chosen at block-construction time.
+    // The wantsRecovery branch keeps the try/catch + error-hook ceremony;
+    // the no-recovery branch runs hooks directly and inlines onSuccess,
+    // avoiding the ~N×M closure allocation per reaction invocation that
+    // safeRun forced via `() => update(bag)` in the common case (visible
+    // as ~10-15 ms of GC + indirection on update-10th / toggle-last).
+    // Hook exceptions in the fast path propagate directly to
+    // reaction.run's try/finally — same observable behavior as the
+    // pre-decomposition renderer.
+    let reactionCallback;
+    if (wantsRecovery) {
+      const safeRun = (hookName, fn, comp) => {
         try {
           fn();
-          onSuccess();
+          notifyUpdate();
         }
         catch (err) {
           reportBlockError({ name, syntax: syntax?.(node), hook: hookName, err });
@@ -124,30 +135,34 @@ export function defineBlock(config) {
             comp?.stop();
           }
         }
-      }
-      : (_hookName, fn) => {
-        fn();
-        onSuccess();
       };
-
-    const reactionAnchor = region.anchor;
-
-    scope.reaction(reactionAnchor, (comp) => {
-      if (comp.firstRun) {
-        const isHydrating = hydrating && hydrate;
-        safeRun(isHydrating ? 'hydrate' : 'render', () => {
+      reactionCallback = (comp) => {
+        if (comp.firstRun) {
+          safeRun(isHydrating ? 'hydrate' : 'render', () => {
+            if (isHydrating) { hydrate(bag); }
+            else if (render) { render(bag); }
+          }, comp);
+        }
+        else if (update) {
+          safeRun('update', () => update(bag), comp);
+        }
+      };
+    }
+    else {
+      reactionCallback = (comp) => {
+        if (comp.firstRun) {
           if (isHydrating) { hydrate(bag); }
-          else { render(bag); }
-        }, comp);
-      }
-      else if (update) {
-        safeRun('update', () => update(bag), comp);
-      }
-    }, {
-      message: `${name}:${node.type}`,
-      block: name,
-      node,
-    });
+          else if (render) { render(bag); }
+          notifyUpdate();
+        }
+        else if (update) {
+          update(bag);
+          notifyUpdate();
+        }
+      };
+    }
+
+    scope.reaction(reactionAnchor, reactionCallback, reactionContext);
 
     scope.onDispose(() => {
       // Destroy throws propagate. Stranding sibling cleanup is the trade-
