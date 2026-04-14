@@ -210,6 +210,7 @@ Completed or rejected plans in `ai/plans/archive/`.
 - **CDN Combo Endpoint** (1-2d est → ~3.25h actual) — Comma-separated URLs, preset tiers (standard/extended/full), spec-driven `bundle` field, pre/post-deploy testing, behavior CDN files.
 - **CDN Load Endpoint** (1-2d est → ~6h actual) — `/load` with natural language attributes. Version-agnostic loader, CSS sub-layers, auto-injection, bare package attrs. 5 rounds of red-team.
 - **CDN Asset Sets** (1-2d est → ~6.5h actual) — Top-level `/icons` and `/fonts` routes. Absolute CDN URLs in CSS (custom property `url()` gotcha). Self-hosted Lato, 6 icon libraries, `dev` → `brands` rename, semver downgrade guard, interactive library switcher example.
+- **[Hydration Perf Pass](archive/hydration-perf-pass.md)** (~3-4h active → 5h45m wall clock) — Closed the `perf/native` decomposition branch's ~425 ms hydration regression on `/perf/hydrated` (1000-card PerfCards). Reverted step-9's per-item hydrate claim; landed plans 04 (`data-sui-bind`), 02 (defer `removeMarkers`), 08 (single-pass walker + fast-path depth fix), 09 (per-item markers + DOM-reusing first-mutation adoption); evaluated & deferred plan 12 (yielding); fixed the phantom-`flushTask` bug (spurious `itemSignal.notify()` on every fresh record during initial render). Tachometer: decomposition regressions from ~−60% on `select` recovered to +38% faster than main; most other client-render regressions within noise. Dev hydration 98 → ~80 ms; branch at parity-or-better with main on hydrated path.
 
 ---
 
