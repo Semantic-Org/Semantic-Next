@@ -200,7 +200,7 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     // that were just created (their Signal is fresh — no subscribers had a
     // chance to see a stale value) from records that were retained across
     // a reconcile (whose item object may have been mutated in place and
-    // needs a notify(). Without this, every newly-rendered item fires
+    // needs a notify()). Without this, every newly-rendered item fires
     // notify() on first render, scheduling every per-item binding to
     // re-evaluate in the next microtask — an N×M cost that shows up as a
     // ~60ms phantom scheduler flushTask on 1000-card pages.
@@ -357,6 +357,14 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
   // (rec.fresh) has just wired its bindings against a Signal whose value
   // matches the current item; notifying here would schedule every binding
   // to re-run once in the next microtask (the ~60ms phantom flushTask).
+  //
+  // The notify is the legitimate path for the "items[i].foo = x; external
+  // signal bumped" pattern — see subtree-caching.test.js §8 "should update
+  // conditional branches when item data changes" for the guaranteed
+  // contract. Becomes dead code once signal-performance lands with
+  // safety: 'freeze' (in-place mutation impossible), and can be deleted
+  // at that point. Until then the cost is real but required for
+  // correctness.
   for (let i = 0; i < newRecords.length; i++) {
     const rec = newRecords[i];
     const item = items[i];
