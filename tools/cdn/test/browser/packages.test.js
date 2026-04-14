@@ -1,32 +1,15 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 const CDN = 'https://cdn.semantic-ui.com';
 const VERSION = 'canary';
 
-/**
- * Test individual SUI packages loaded from the CDN via import map.
- * Mirrors real user usage: import map script + bare specifier imports.
- */
-
-// Load the CDN import map once before all tests
-beforeAll(async () => {
-  const script = document.createElement('script');
-  script.src = `${CDN}/importmap@${VERSION}.js`;
-  document.head.appendChild(script);
-
-  // Wait for import map to be injected
-  await new Promise(resolve => {
-    const check = () => {
-      if (document.querySelector('script[type="importmap"]')) { resolve(); }
-      else { setTimeout(check, 10); }
-    };
-    check();
-  });
-});
+// /* @vite-ignore */ keeps Vite from trying to resolve these at transform time —
+// the browser fetches the absolute URL directly, matching how the CDN is actually consumed.
+const cdnImport = (pkg) => import(/* @vite-ignore */ `${CDN}/${pkg}@${VERSION}`);
 
 describe('CDN Package: @semantic-ui/reactivity', () => {
   it('Signal — create, get, set, subscribe', async () => {
-    const { Signal } = await import('@semantic-ui/reactivity');
+    const { Signal } = await cdnImport('reactivity');
 
     const count = new Signal(0);
     expect(count.get()).toBe(0);
@@ -42,7 +25,7 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
   });
 
   it('Signal — array helpers', async () => {
-    const { Signal } = await import('@semantic-ui/reactivity');
+    const { Signal } = await cdnImport('reactivity');
 
     const items = new Signal(['a', 'b']);
     items.push('c');
@@ -50,7 +33,7 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
   });
 
   it('Signal — toggle boolean', async () => {
-    const { Signal } = await import('@semantic-ui/reactivity');
+    const { Signal } = await cdnImport('reactivity');
 
     const flag = new Signal(false);
     flag.toggle();
@@ -58,7 +41,7 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
   });
 
   it('Reaction — tracks signal dependencies', async () => {
-    const { Signal, Reaction } = await import('@semantic-ui/reactivity');
+    const { Signal, Reaction } = await cdnImport('reactivity');
 
     const name = new Signal('Alice');
     let tracked;
@@ -75,7 +58,7 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
   });
 
   it('Signal.computed — derives from multiple signals', async () => {
-    const { Signal, Reaction } = await import('@semantic-ui/reactivity');
+    const { Signal, Reaction } = await cdnImport('reactivity');
 
     const a = new Signal(3);
     const b = new Signal(4);
@@ -91,7 +74,7 @@ describe('CDN Package: @semantic-ui/reactivity', () => {
 
 describe('CDN Package: @semantic-ui/utils', () => {
   it('array utilities — unique, flatten, range', async () => {
-    const { unique, flatten, range } = await import('@semantic-ui/utils');
+    const { unique, flatten, range } = await cdnImport('utils');
 
     expect(unique([1, 2, 2, 3])).toEqual([1, 2, 3]);
     expect(flatten([[1, 2], [3, [4]]])).toEqual([1, 2, 3, 4]);
@@ -99,7 +82,7 @@ describe('CDN Package: @semantic-ui/utils', () => {
   });
 
   it('object utilities — get, keys, pick', async () => {
-    const { get, keys, pick } = await import('@semantic-ui/utils');
+    const { get, keys, pick } = await cdnImport('utils');
 
     const obj = { user: { name: 'Alice', age: 30 } };
     expect(get(obj, 'user.name')).toBe('Alice');
@@ -108,7 +91,7 @@ describe('CDN Package: @semantic-ui/utils', () => {
   });
 
   it('type checking — isArray, isString, isPlainObject', async () => {
-    const { isArray, isString, isPlainObject } = await import('@semantic-ui/utils');
+    const { isArray, isString, isPlainObject } = await cdnImport('utils');
 
     expect(isArray([1, 2])).toBe(true);
     expect(isString('hello')).toBe(true);
@@ -117,14 +100,14 @@ describe('CDN Package: @semantic-ui/utils', () => {
   });
 
   it('string utilities — kebabToCamel, capitalize', async () => {
-    const { kebabToCamel, capitalize } = await import('@semantic-ui/utils');
+    const { kebabToCamel, capitalize } = await cdnImport('utils');
 
     expect(kebabToCamel('my-component-name')).toBe('myComponentName');
     expect(capitalize('hello world')).toBe('Hello world');
   });
 
   it('deep equality and cloning', async () => {
-    const { isEqual, clone } = await import('@semantic-ui/utils');
+    const { isEqual, clone } = await cdnImport('utils');
 
     expect(isEqual({ a: [1, 2] }, { a: [1, 2] })).toBe(true);
     expect(isEqual({ a: 1 }, { a: 2 })).toBe(false);
@@ -138,7 +121,7 @@ describe('CDN Package: @semantic-ui/utils', () => {
 
 describe('CDN Package: @semantic-ui/query', () => {
   it('$ — select and manipulate DOM', async () => {
-    const { $ } = await import('@semantic-ui/query');
+    const { $ } = await cdnImport('query');
 
     document.body.innerHTML = '<div class="test">Hello</div>';
     const el = $('.test');
@@ -154,7 +137,7 @@ describe('CDN Package: @semantic-ui/query', () => {
   });
 
   it('$ — create elements from HTML', async () => {
-    const { $ } = await import('@semantic-ui/query');
+    const { $ } = await cdnImport('query');
 
     const el = $('<div class="created">New Element</div>');
     expect(el.text()).toBe('New Element');
@@ -162,7 +145,7 @@ describe('CDN Package: @semantic-ui/query', () => {
   });
 
   it('$ — traversal methods', async () => {
-    const { $ } = await import('@semantic-ui/query');
+    const { $ } = await cdnImport('query');
 
     document.body.innerHTML = `
       <div class="parent">
@@ -179,7 +162,7 @@ describe('CDN Package: @semantic-ui/query', () => {
 
 describe('CDN Package: @semantic-ui/component', () => {
   it('defineComponent — custom element with template and state', async () => {
-    const { defineComponent } = await import('@semantic-ui/component');
+    const { defineComponent } = await cdnImport('component');
 
     defineComponent({
       tagName: 'cdn-test-counter',
@@ -202,7 +185,7 @@ describe('CDN Package: @semantic-ui/component', () => {
   });
 
   it('defineComponent — reactive template updates', async () => {
-    const { defineComponent } = await import('@semantic-ui/component');
+    const { defineComponent } = await cdnImport('component');
 
     defineComponent({
       tagName: 'cdn-test-greeter',
