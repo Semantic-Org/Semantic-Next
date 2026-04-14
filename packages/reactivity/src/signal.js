@@ -12,7 +12,7 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import { captureStack, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
@@ -82,15 +82,7 @@ export class Signal {
   // costs ~10-100× a context spread, paid per Signal.notify in tracing-on
   // dev. Default off; opt in via setStackCapture(true).
   setTrace() {
-    if (!isStackCapture()) {
-      return;
-    }
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this.context, this.setTrace);
-    }
-    else {
-      this.context.stack = new Error().stack;
-    }
+    captureStack(this, this.setTrace);
   }
 
   static equalityFunction = isEqual;
