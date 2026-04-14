@@ -454,6 +454,72 @@ RENDERING_ENGINES.forEach(engine => {
      Subtemplate Expressions
 *******************************/
 
+    describe('reactiveData per-key granularity', () => {
+      // Documents an intended-but-unimplemented guarantee: changing one
+      // reactiveData field should not invalidate child subtemplate
+      // expressions that read a different field. Current implementation
+      // of `unpackNodeData` (packages/renderer/src/engines/native/blocks/
+      // template.js) flattens all reactiveData into a plain object and
+      // pushes it into the subtemplate via setDataContext, which bumps
+      // the whole subtemplate's dataDep — every child expression
+      // re-evaluates. Fine-grained per-key deps would require a Proxy
+      // similar to each's itemProxy, with per-property Dependency
+      // tracking. Enable when that lands. (See also the each-item
+      // flat-reactivity discussion in ai/workspace/perf-log.md.)
+      it.skip('changing one reactiveData field should not re-evaluate subtemplate expressions that read a different field', async () => {
+        let labelEvalCount = 0;
+        let statusEvalCount = 0;
+        const tag = uniqueTag();
+
+        const child = defineComponent({
+          renderingEngine: engine,
+          template: '<span>{markLabel}{label}</span><span>{markStatus}{status}</span>',
+          createComponent: () => ({
+            markLabel: () => {
+              labelEvalCount++;
+              return '';
+            },
+            markStatus: () => {
+              statusEvalCount++;
+              return '';
+            },
+          }),
+        });
+
+        defineComponent({
+          renderingEngine: engine,
+          tagName: tag,
+          template: "{> template name='child' reactiveData={label: getLabel, status: getStatus}}",
+          subTemplates: { child },
+          defaultState: { labelVal: 'hello', statusVal: 'active' },
+          createComponent: ({ state }) => ({
+            getLabel: () => state.labelVal.get(),
+            getStatus: () => state.statusVal.get(),
+          }),
+        });
+
+        const el = document.createElement(tag);
+        document.body.appendChild(el);
+        await el.updateComplete;
+
+        expect(shadowText(el)).toContain('hello');
+        expect(shadowText(el)).toContain('active');
+        const labelCountAfterRender = labelEvalCount;
+        const statusCountAfterRender = statusEvalCount;
+
+        // Only labelVal changes. The expectation under fine-grained
+        // reactiveData would be: label re-evaluates, status does NOT.
+        const updated = $(el).onNext('updated');
+        el.template.state.labelVal.set('changed');
+        await updated;
+
+        expect(shadowText(el)).toContain('changed');
+        expect(shadowText(el)).toContain('active');
+        expect(labelEvalCount).toBeGreaterThan(labelCountAfterRender);
+        expect(statusEvalCount).toBe(statusCountAfterRender); // the claim under test
+      });
+    });
+
     describe('verbose data=expression re-evaluates all expressions', () => {
       it('changing one field in data blob should re-evaluate all subtemplate expressions', async () => {
         let labelEvalCount = 0;
