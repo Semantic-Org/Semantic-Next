@@ -196,6 +196,15 @@ function createRecord({ key, item, index, collectionType, node, data, scope, ren
     fragment,
     scope: itemScope,
     isElse: false,
+    // Cleared by reconcile phase 3 after one pass. Distinguishes records
+    // that were just created (their Signal is fresh — no subscribers had a
+    // chance to see a stale value) from records that were retained across
+    // a reconcile (whose item object may have been mutated in place and
+    // needs a notify(). Without this, every newly-rendered item fires
+    // notify() on first render, scheduling every per-item binding to
+    // re-evaluate in the next microtask — an N×M cost that shows up as a
+    // ~60ms phantom scheduler flushTask on 1000-card pages.
+    fresh: true,
   };
 }
 
@@ -343,7 +352,11 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
 
   // Phase 3: update item signals where item ref or index changed.
   // Same-ref same-index objects fall into notify() because Signal.isEqual
-  // short-circuits on a === b and won't see in-place mutations.
+  // short-circuits on a === b and won't see in-place mutations — BUT only
+  // for records that existed across reconciles. A freshly-created record
+  // (rec.fresh) has just wired its bindings against a Signal whose value
+  // matches the current item; notifying here would schedule every binding
+  // to re-run once in the next microtask (the ~60ms phantom flushTask).
   for (let i = 0; i < newRecords.length; i++) {
     const rec = newRecords[i];
     const item = items[i];
@@ -352,9 +365,10 @@ function reconcile({ records, items, collectionType, node, data, scope, region, 
       rec.item = item;
       rec.index = i;
     }
-    else if (typeof item === 'object') {
+    else if (typeof item === 'object' && !rec.fresh) {
       rec.itemSignal.notify();
     }
+    rec.fresh = false;
   }
 
   records.length = 0;
