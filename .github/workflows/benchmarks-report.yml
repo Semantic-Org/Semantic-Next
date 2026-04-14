@@ -6,35 +6,32 @@ on:
     branches: ['**']
     types:
       - completed
-      - requested
 
 permissions:
   contents: read
 
 jobs:
-  report_running:
-    name: Report benchmarks in-progress
+  report:
+    name: Post bench report
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
-    if: ${{ github.event.action == 'requested' }}
+    # Only act on successful bench runs. Failure states are visible in the
+    # Checks panel; posting a "failed" comment adds noise.
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Report Tachometer Running
-        uses: andrewiggins/tachometer-reporter-action@v2
+      # Need the reporter script — check out the same SHA the bench ran on.
+      - uses: actions/checkout@v4
         with:
-          initialize: true
+          ref: ${{ github.event.workflow_run.head_sha }}
 
-  report_results:
-    name: Report benchmark results
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
-    if: ${{ github.event.action == 'completed' && github.event.workflow_run.conclusion == 'success' }}
-    steps:
-      # Download all results-* artifacts from the triggering workflow
-      - uses: dawidd6/action-download-artifact@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Download bench artifacts
+        uses: dawidd6/action-download-artifact@v2
         with:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
@@ -42,10 +39,50 @@ jobs:
           name: results-.*
           path: results
 
-      - name: Report Tachometer Results
-        uses: andrewiggins/tachometer-reporter-action@v2
+      - name: Resolve PR number
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # workflow_run payload populates pull_requests for same-repo PRs.
+          # For forks (and anything where it's missing) fall back to a
+          # head-branch lookup.
+          NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
+          if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
+            HEAD='${{ github.event.workflow_run.head_branch }}'
+            NUMBER=$(gh pr list --repo '${{ github.repository }}' \
+              --head "$HEAD" --state open --json number --jq '.[0].number // ""')
+          fi
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+          echo "Resolved PR number: $NUMBER"
+
+      - name: Generate report
+        run: |
+          node tools/bench-reporter/reporter.js \
+            --results results \
+            --sha '${{ github.event.workflow_run.head_sha }}' \
+            --msg '${{ github.event.workflow_run.display_title }}' \
+            --run-url '${{ github.event.workflow_run.html_url }}' \
+            --base-ref 'main' \
+            --out bench-report
+
+      - name: Upload bench-report.json adjunct
+        uses: actions/upload-artifact@v4
         with:
-          path: results/**/*.json
-          pr-bench-name: this-change
-          base-bench-name: tip-of-tree
-          default-open: false
+          name: bench-report
+          path: bench-report/bench-report.json
+
+      - name: Post or update PR comment
+        if: steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ steps.pr.outputs.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Try to edit our previous comment in place; fall back to posting
+          # a new one on first run of the reporter for this PR.
+          if ! gh pr comment "$PR" --repo "$REPO" --edit-last \
+                --body-file bench-report/comment.md 2>/dev/null; then
+            gh pr comment "$PR" --repo "$REPO" \
+              --body-file bench-report/comment.md
+          fi
