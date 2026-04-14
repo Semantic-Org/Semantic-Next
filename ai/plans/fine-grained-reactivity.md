@@ -223,9 +223,8 @@ Re-run the `/perf/hydrated` filter-keystroke scenario via Chrome DevTools. Befor
 
 ## Dependencies
 
-- **Snippet zero-reactivity investigation** (question 1) above — blocks the snippet-site adoption but not the each-site or subtemplate-site.
-
-Not blocked on anything else. Specifically NOT blocked on `signal-performance` (per-session call — this plan lands first under current clone-on-read cost, signal-performance later upgrades the per-key Signals to freeze-on-set). Internal `Signal`s in this plan use `safety: 'none'` (matches current `allowClone: false` idiom), so the signal-performance migration is a one-line change across three files when it lands.
+- **[Signal Performance](signal-performance.md)** — lands first. The `safety` preset system this plan uses (`safety: 'none'` for internal per-key Signals) arrives with signal-performance. The migration-audit gating work that plan describes is orthogonal to this one, but the preset API needs to be in place before `ReactiveDataContext` is written against it.
+- **Snippet zero-reactivity investigation** (open question 1) — blocks session 3 (snippet-site adoption) but not session 1 (each-site) or session 2 (subtemplate-site).
 
 ## Sessions (estimated)
 
