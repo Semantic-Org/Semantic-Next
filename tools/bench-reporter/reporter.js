@@ -16,11 +16,12 @@
       --repo <owner/name>     GitHub repo slug (falls back to $GITHUB_REPOSITORY)
       --repo-root <dir>       filesystem root for resolving bench sources (default: cwd)
       --wall-clock <seconds>  total bench run duration — footer metadata
+      --history <path>        bench-history.json path (default: <repo-root>/bench-history.json)
       --out <dir>             output directory (default: ./bench-report)
 
-  MVP scope: current-vs-baseline only. Cross-run taxonomy (WIN / REOPENED /
-  UNEXPLORED / peak attribution / commit impact) is a follow-up once
-  `bench-history.json` is populated.
+  Cross-run taxonomy (WIN / TIED-PEAK / REOPENED) engages automatically once
+  bench-history.json has entries. Empty or missing history file → reporter
+  falls back to current-vs-baseline only (no peak attribution rendered).
 */
 
 import fs from 'node:fs';
@@ -40,6 +41,7 @@ const baseSha = args['base-sha'] ?? '';
 const repo = args.repo ?? process.env.GITHUB_REPOSITORY ?? '';
 const repoRoot = args['repo-root'] ?? process.cwd();
 const wallClockSec = args['wall-clock'] ? Number(args['wall-clock']) : null;
+const historyPath = args.history ?? path.join(repoRoot, 'bench-history.json');
 const outDir = args.out ?? './bench-report';
 
 const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
@@ -69,6 +71,11 @@ const SEVERITY_EXTREME = 75;
 const AUTO_EXPAND_MAX = 15;
 const TEASER_ROWS = 5;
 
+// Bisect candidates in the markdown "Regressions from peak" table are
+// capped at this count (nearest-to-peak bias); the full list is always
+// present in the JSON adjunct for agent use.
+const BISECT_MARKDOWN_MAX = 3;
+
 /**
  * Expected percent-change CI width for an unresolved CI given the bench's
  * absolute duration. Derived from the standard-error-of-the-difference of
@@ -81,6 +88,7 @@ function expectedNoisePp(meanMs) {
 }
 
 const benchDirs = findBenchDirs(repoRoot);
+const history = loadHistory(historyPath);
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
 const markdown = renderMarkdown(report);
@@ -158,6 +166,7 @@ function buildReport(metrics) {
     const expectedPp = expectedNoisePp(meanMs);
     const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
     const source = resolveMetricSource(m.name, benchDirs, repoRoot);
+    const historyStatus = computeHistoryStatus(m, history);
     return {
       ...m,
       meanMs,
@@ -165,11 +174,13 @@ function buildReport(metrics) {
       expectedPp,
       ratio,
       source,
+      historyStatus,
       status: classify(m.percentDelta, ratio),
     };
   });
   const summary = { faster: 0, slower: 0, 'within-noise': 0, unsure: 0, 'noise-floor-limited': 0 };
   for (const m of classified) { summary[m.status]++; }
+  const historySummary = historyStatusCounts(classified);
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
     base: { sha: baseSha, ref: baseRef },
@@ -180,8 +191,26 @@ function buildReport(metrics) {
     sigma_abs_ms: SIGMA_ABS_MS,
     noise_ratio_tolerance: NOISE_RATIO_TOLERANCE,
     summary,
+    history_summary: historySummary,
+    history_available: history !== null && history.commits.length > 0,
     metrics: classified.map(toJsonMetric),
   };
+}
+
+/**
+ * Count metrics by cross-run status. Returns null keys only when the
+ * history file is empty/missing; otherwise three counters always present.
+ */
+function historyStatusCounts(classified) {
+  const out = { WIN: 0, 'TIED-PEAK': 0, REOPENED: 0, 'no-history': 0 };
+  for (const m of classified) {
+    if (!m.historyStatus) {
+      out['no-history']++;
+      continue;
+    }
+    out[m.historyStatus.status]++;
+  }
+  return out;
 }
 
 function classify([low, high], ratio) {
@@ -192,7 +221,7 @@ function classify([low, high], ratio) {
 }
 
 function toJsonMetric(m) {
-  return {
+  const out = {
     name: m.name,
     status: m.status,
     percent_change_ci: round2(m.percentDelta),
@@ -204,6 +233,15 @@ function toJsonMetric(m) {
     observed_noise_ratio: Number(m.ratio.toFixed(2)),
     source: m.source,
   };
+  // Cross-run fields only populated when history has data for this metric.
+  // Agents can detect absence vs "no peak" via missing key, not null.
+  if (m.historyStatus) {
+    out.history_status = m.historyStatus.status;
+    out.peak = m.historyStatus.peak;
+    out.delta_from_peak_pct = m.historyStatus.delta_from_peak_pct;
+    out.bisect_candidates = m.historyStatus.bisect_candidates;
+  }
+  return out;
 }
 
 /**
@@ -264,10 +302,18 @@ function renderMarkdown(report) {
 
   // ─── Results count line ──────────────────────────────────────────────
   const unsureTotal = inconclusive.length + tooFast.length;
-  lines.push(
-    `✅ ${faster.length} faster · ❌ ${slower.length} slower `
-      + `· 🔍 ${unsureTotal} unsure · ⚪ ${noChange.length} no change`,
-  );
+  const resultsParts = [
+    `✅ ${faster.length} faster`,
+    `❌ ${slower.length} slower`,
+    `🔍 ${unsureTotal} unsure`,
+    `⚪ ${noChange.length} no change`,
+  ];
+  // Surface REOPENED count in the headline when history has flagged any.
+  const reopenedCount = report.history_summary?.REOPENED ?? 0;
+  if (reopenedCount > 0) {
+    resultsParts.push(`📜 ${reopenedCount} reopened`);
+  }
+  lines.push(resultsParts.join(' · '));
   lines.push('');
   lines.push('---');
   lines.push('');
@@ -281,6 +327,12 @@ function renderMarkdown(report) {
   if (slower.length > 0) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
+
+  // ─── Regressions from peak (cross-run; auto-expanded when present) ───
+  // Load-bearing signal — a metric better on a prior commit is always a
+  // cherry-pick candidate. Sits alongside Faster/Slower, not hidden in a
+  // collapsible, because a reviewer should never miss this.
+  renderRegressionsFromPeak(lines, report);
 
   // ─── No Change (always collapsed) ────────────────────────────────────
   if (noChange.length > 0) {
@@ -362,6 +414,51 @@ function renderMarkdown(report) {
   lines.push(`<sub>${footerParts.join(' · ')}</sub>`);
 
   return lines.join('\n');
+}
+
+/**
+ * Append a "Regressions from peak" section when one or more metrics are
+ * REOPENED (current CI dominated by a prior commit's CI). Actionable signal:
+ * the metric was once better and this PR — or a commit before it — gave
+ * that improvement back. Skipped entirely when history is empty or no
+ * REOPENED metrics exist.
+ */
+function renderRegressionsFromPeak(lines, report) {
+  const reopened = report.metrics.filter((m) => m.history_status === 'REOPENED');
+  if (reopened.length === 0) { return; }
+
+  // Sort by severity — largest delta-from-peak first.
+  const sorted = [...reopened].sort((a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0));
+
+  lines.push(`#### 📜 Regressions from peak (${reopened.length})`);
+  lines.push('');
+  lines.push(
+    `These metrics were better on a prior commit than they are now. The peak CI dominates current CI — not attributable to per-sample noise. Bisect candidates are the commits between the peak and HEAD; nearest-to-peak is usually the best bet.`,
+  );
+  lines.push('');
+  lines.push('| metric | current | peak | vs peak | bisect candidates |');
+  lines.push('|---|---|---|---|---|');
+  for (const m of sorted) {
+    const currentMid = (m.mean_ms ?? ((m.this_change_ms_ci[0] + m.this_change_ms_ci[1]) / 2));
+    const peakMid = m.peak.mean_ms;
+    const deltaStr = m.delta_from_peak_pct > 0
+      ? `+${m.delta_from_peak_pct.toFixed(0)}%`
+      : `${m.delta_from_peak_pct.toFixed(0)}%`;
+    const peakLink = commitOrPrLink(m.peak, report.repo);
+    const bisectMd = (m.bisect_candidates ?? [])
+      .slice(0, BISECT_MARKDOWN_MAX)
+      .map((c) => commitOrPrLink(c, report.repo))
+      .join(', ');
+    const bisectCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
+      ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
+      : bisectMd || '—';
+    lines.push(
+      `| ${metricLink(m, report)} | ${currentMid.toFixed(1)}ms | ${
+        peakMid.toFixed(1)
+      }ms @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
+    );
+  }
+  lines.push('');
 }
 
 /**
@@ -486,6 +583,23 @@ function metricLink(m, report) {
 }
 
 /**
+ * Link a history entry to its PR (preferred) or commit. Label is the
+ * short SHA; the PR URL just takes you to the conversation page where
+ * the bench comment from that run was posted — which is where a
+ * reviewer actually wants to go when investigating a REOPENED regression.
+ * Falls back to commit URL when the commit wasn't a squash-merge (no
+ * `(#N)` in message) and plain text when no repo is configured.
+ */
+function commitOrPrLink(entry, repo) {
+  const shortSha = entry.sha.slice(0, 7);
+  if (!repo) { return `\`${shortSha}\``; }
+  const url = entry.pr
+    ? `https://github.com/${repo}/pull/${entry.pr}`
+    : `https://github.com/${repo}/commit/${entry.sha}`;
+  return `[\`${shortSha}\`](${url})`;
+}
+
+/**
  * Base link. Prefers the specific commit SHA when known (stable permalink);
  * falls back to the branch tree view when only the ref is available. Always
  * a hyperlink when repo is present — the ref is obvious but linking keeps
@@ -554,6 +668,88 @@ function formatWallClock(sec) {
   const m = Math.floor(sec / 60);
   const s = Math.round(sec % 60);
   return m > 0 ? `${m}m${s.toString().padStart(2, '0')}s` : `${s}s`;
+}
+
+/**
+ * Load bench-history.json. Returns null if missing/empty/invalid — the
+ * reporter's D3b features all gracefully degrade on a null history.
+ */
+function loadHistory(filePath) {
+  if (!filePath || !fs.existsSync(filePath)) { return null; }
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    if (parsed.schema_version !== 1 || !Array.isArray(parsed.commits)) { return null; }
+    return parsed;
+  }
+  catch {
+    return null;
+  }
+}
+
+/**
+ * Compute per-metric cross-run status against the history file.
+ *
+ * Peak = the commit whose CI upper bound is lowest (smallest time = best
+ * perf). On exact ties, prefer the most recent entry (history is ordered
+ * chronologically by append order).
+ *
+ * Status taxonomy (current CI = this-change absolute ms):
+ *   WIN        — current CI dominates peak (current high < peak low)
+ *   REOPENED   — peak CI dominates current (peak high < current low)
+ *   TIED-PEAK  — CIs overlap (no dominance either way)
+ *
+ * Returns null when history is null/empty OR this metric has no prior
+ * entries (new bench). The reporter's caller distinguishes these cases
+ * via the `history_available` summary flag and per-metric presence.
+ */
+function computeHistoryStatus(metric, hist) {
+  if (!hist || hist.commits.length === 0) { return null; }
+  const entries = hist.commits.filter((c) => c.metrics && metric.name in c.metrics);
+  if (entries.length === 0) { return null; }
+
+  // Pick peak. Tie-break: newer commit wins (commits array is chronological).
+  let peakIdx = 0;
+  for (let i = 1; i < entries.length; i++) {
+    const candHigh = entries[i].metrics[metric.name].ci[1];
+    const peakHigh = entries[peakIdx].metrics[metric.name].ci[1];
+    if (candHigh < peakHigh) { peakIdx = i; }
+    else if (candHigh === peakHigh) { peakIdx = i; }
+  }
+  const peakEntry = entries[peakIdx];
+  const peakMetric = peakEntry.metrics[metric.name];
+  const currentCi = metric.thisChangeMs;
+  const peakCi = peakMetric.ci;
+
+  let status;
+  if (currentCi[1] < peakCi[0]) { status = 'WIN'; }
+  else if (peakCi[1] < currentCi[0]) { status = 'REOPENED'; }
+  else { status = 'TIED-PEAK'; }
+
+  // Bisect candidates: commits between peak and HEAD of history that
+  // contain this metric. Oldest-to-newest so the reviewer/agent sees
+  // the timeline in causal order.
+  const peakHistIdx = hist.commits.findIndex((c) => c.sha === peakEntry.sha);
+  const bisectCandidates = hist.commits
+    .slice(peakHistIdx + 1)
+    .filter((c) => c.metrics && metric.name in c.metrics)
+    .map((c) => ({ sha: c.sha, msg: c.msg, pr: c.pr ?? null }));
+
+  const currentMid = (currentCi[0] + currentCi[1]) / 2;
+  const peakMid = (peakCi[0] + peakCi[1]) / 2;
+  const deltaFromPeakPct = peakMid > 0 ? ((currentMid - peakMid) / peakMid) * 100 : 0;
+
+  return {
+    status,
+    peak: {
+      sha: peakEntry.sha,
+      msg: peakEntry.msg,
+      pr: peakEntry.pr ?? null,
+      ci: peakCi,
+      mean_ms: peakMetric.mean_ms,
+    },
+    delta_from_peak_pct: Number(deltaFromPeakPct.toFixed(2)),
+    bisect_candidates: bisectCandidates,
+  };
 }
 
 // ---------- utilities ----------

@@ -113,6 +113,29 @@ test('records parent_sha when provided', () => {
   assert.equal(result.commits[0].parent_sha, 'parent');
 });
 
+test('extracts pr number from squash-merge commit titles', () => {
+  const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
+  const historyPath = path.join(tmp, 'bench-history.json');
+  // GitHub squash merges end the subject line with ` (#NNN)`.
+  const result = runAppend({
+    sha: 'abc',
+    msg: 'Build: Reporter polish — reorder sections (#143)',
+    historyPath,
+  });
+  assert.equal(result.commits[0].pr, 143);
+});
+
+test('pr is null when commit message has no PR reference', () => {
+  const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
+  const historyPath = path.join(tmp, 'bench-history.json');
+  const result = runAppend({
+    sha: 'abc',
+    msg: 'Chore: direct-to-main commit',
+    historyPath,
+  });
+  assert.equal(result.commits[0].pr, null);
+});
+
 test('rejects an unsupported schema version', () => {
   const tmp = fs.mkdtempSync('/tmp/bench-hist-test-');
   const historyPath = path.join(tmp, 'bench-history.json');

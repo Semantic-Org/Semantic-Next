@@ -18,12 +18,23 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPORTER = path.join(__dirname, 'reporter.js');
 
-function runReporter({ fixture, sha, msg, baseSha, baseRef = 'main', runUrl = '', repo = '', wallClock = '' }) {
+function runReporter({
+  fixture,
+  sha,
+  msg,
+  baseSha,
+  baseRef = 'main',
+  runUrl = '',
+  repo = '',
+  wallClock = '',
+  history = '',
+  resultsDir = null,
+}) {
   const tmp = fs.mkdtempSync(path.join('/tmp', 'bench-report-test-'));
   const argv = [
     REPORTER,
     '--results',
-    path.join(__dirname, 'fixtures', fixture),
+    resultsDir ?? path.join(__dirname, 'fixtures', fixture),
     '--sha',
     sha,
     '--msg',
@@ -39,12 +50,44 @@ function runReporter({ fixture, sha, msg, baseSha, baseRef = 'main', runUrl = ''
   ];
   if (repo) { argv.push('--repo', repo); }
   if (wallClock) { argv.push('--wall-clock', wallClock); }
+  // Point history at a known fixture path OR a deliberate non-existent
+  // path to exercise the graceful-degrade branch. Default (no --history)
+  // resolves to <cwd>/bench-history.json which will typically exist on a
+  // D3a-landed checkout; tests opt in to a specific fixture.
+  if (history) { argv.push('--history', history); }
   // Run from repo root so resolveMetricSource can find packages/.../bench/tachometer
   const cwd = path.resolve(__dirname, '..', '..');
   execFileSync('node', argv, { stdio: ['ignore', 'pipe', 'inherit'], cwd });
   const report = JSON.parse(fs.readFileSync(path.join(tmp, 'bench-report.json'), 'utf8'));
   const markdown = fs.readFileSync(path.join(tmp, 'comment.md'), 'utf8');
   return { report, markdown };
+}
+
+/**
+ * Build a tiny tachometer JSON fixture with one metric whose this-change
+ * mean CI is the caller-specified range. Used to force specific cross-run
+ * outcomes against fixtures/history-sample.json.
+ */
+function writeHandcraftedResults(metricName, thisChangeCi, tipOfTreeCi = [10, 11]) {
+  const dir = fs.mkdtempSync('/tmp/bench-reporter-handcraft-');
+  const data = {
+    benchmarks: [
+      {
+        name: `this-change [${metricName}]`,
+        measurement: { name: metricName, mode: 'performance', entryName: metricName },
+        mean: { low: thisChangeCi[0], high: thisChangeCi[1] },
+        differences: [null, { absolute: { low: -1, high: 1 }, percentChange: { low: -5, high: 5 } }],
+      },
+      {
+        name: `tip-of-tree [${metricName}]`,
+        measurement: { name: metricName, mode: 'performance', entryName: metricName },
+        mean: { low: tipOfTreeCi[0], high: tipOfTreeCi[1] },
+        differences: [{ absolute: { low: -1, high: 1 }, percentChange: { low: -5, high: 5 } }, null],
+      },
+    ],
+  };
+  fs.writeFileSync(path.join(dir, 'handcrafted.json'), JSON.stringify(data));
+  return dir;
 }
 
 test('real-delta fixture — summary counts and key verdicts', () => {
@@ -260,6 +303,123 @@ test('severity emoji suffix placement', () => {
   assert.ok(/\+18% \(3ms\) ❗/.test(markdown), 'significant slower → ❗ trailing');
   // Sub-15% rows get no emoji suffix (but still render in the table)
   assert.ok(/-10% \(8ms\) \|/.test(markdown), 'sub-15% faster has no suffix');
+});
+
+const HISTORY_FIXTURE = path.join(__dirname, 'fixtures', 'history-sample.json');
+
+test('cross-run: WIN when current CI dominates historical peak', () => {
+  // history-sample.json has update-10th peak CI [6.0, 7.0] at bbbb...
+  // Current CI [4.5, 5.5] is entirely below → WIN
+  const dir = writeHandcraftedResults('update-10th', [4.5, 5.5]);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'feedbeef',
+    msg: 'x',
+    baseSha: 'aaaa11',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'WIN');
+  assert.equal(m.peak.sha, 'bbbb222222222222', 'peak commit is the best prior entry');
+  assert.ok(m.delta_from_peak_pct < 0, 'delta is negative when current is faster than peak');
+  assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section when no REOPENED');
+});
+
+test('cross-run: peak links to PR conversation when PR number is known', () => {
+  // Peak has pr: 102 in the fixture → peak SHA in markdown should link
+  // to /pull/102, not /commit/<sha>. Takes reviewers directly to the
+  // bench comment from that PR (which is where the peak value came from).
+  const dir = writeHandcraftedResults('update-10th', [20.0, 21.0]);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'feed',
+    msg: 'x',
+    baseSha: 'aaaa11',
+    repo: 'Semantic-Org/Semantic-Next',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.peak.pr, 102, 'peak entry carries pr number from history');
+  assert.ok(
+    markdown.includes('[`bbbb222`](https://github.com/Semantic-Org/Semantic-Next/pull/102)'),
+    'peak SHA links to PR conversation, not commit',
+  );
+  // Bisect candidates also link to PRs.
+  assert.ok(markdown.includes('](https://github.com/Semantic-Org/Semantic-Next/pull/103)'));
+  assert.ok(markdown.includes('](https://github.com/Semantic-Org/Semantic-Next/pull/104)'));
+});
+
+test('cross-run: REOPENED when a prior commit dominates current', () => {
+  // history-sample.json peak for update-10th = CI [6.0, 7.0]
+  // Current CI [20.0, 21.0] is entirely above → REOPENED
+  const dir = writeHandcraftedResults('update-10th', [20.0, 21.0]);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'eeee55',
+    msg: 'x',
+    baseSha: 'aaaa11',
+    repo: 'Semantic-Org/Semantic-Next',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'REOPENED');
+  assert.equal(m.peak.sha, 'bbbb222222222222');
+  assert.ok(m.delta_from_peak_pct > 50, `delta should be large positive when reopened (got ${m.delta_from_peak_pct})`);
+
+  // Bisect candidates = commits after peak (cccc, dddd)
+  const bisectShas = m.bisect_candidates.map((c) => c.sha);
+  assert.deepEqual(bisectShas, ['cccc333333333333', 'dddd444444444444']);
+
+  // Markdown renders the REOPENED section when REOPENED metrics exist
+  assert.ok(markdown.includes('📜 Regressions from peak (1)'), 'reopened section with count');
+  assert.ok(markdown.includes('`bbbb222`'), 'peak SHA linked');
+  assert.ok(markdown.includes('📜 1 reopened'), 'headline count includes reopened');
+});
+
+test('cross-run: TIED-PEAK when CIs overlap', () => {
+  // history peak for update-10th = [6.0, 7.0]
+  // Current CI [6.5, 7.5] overlaps → TIED-PEAK
+  const dir = writeHandcraftedResults('update-10th', [6.5, 7.5]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'aaaa',
+    msg: 'x',
+    baseSha: 'bbbb22',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.history_status, 'TIED-PEAK');
+});
+
+test('cross-run: graceful degrade when history file is missing', () => {
+  const dir = writeHandcraftedResults('update-10th', [10, 11]);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    history: '/tmp/does-not-exist-bench-history.json',
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(report.history_available, false);
+  assert.ok(!('history_status' in m), 'no cross-run fields when history missing');
+  assert.ok(!('peak' in m));
+  assert.ok(!markdown.includes('Regressions from peak'));
+  assert.ok(!markdown.includes('reopened'));
+});
+
+test('cross-run: graceful degrade for a brand-new metric not in history', () => {
+  const dir = writeHandcraftedResults('unknown-metric', [5, 6]);
+  const { report } = runReporter({
+    resultsDir: dir,
+    sha: 'abc',
+    msg: 'x',
+    baseSha: 'def',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'unknown-metric');
+  assert.equal(report.history_available, true, 'history file loaded');
+  assert.ok(!('history_status' in m), 'metric absent from history → no cross-run fields');
 });
 
 test('classify boundary behavior', async () => {

@@ -31,6 +31,15 @@ jobs:
         with:
           node-version: 24
 
+      # Overlay main's bench-history.json onto the PR checkout so the
+      # reporter's peak-attribution runs against the freshest history,
+      # not whatever version was on the PR's branch point. `|| true` keeps
+      # the step non-fatal if main has no file yet (first run after D3a).
+      - name: Fetch latest bench-history.json from main
+        run: |
+          git fetch origin main --depth=1
+          git show origin/main:bench-history.json > bench-history.json 2>/dev/null || true
+
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
