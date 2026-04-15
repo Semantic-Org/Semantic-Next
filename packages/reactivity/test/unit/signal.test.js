@@ -894,32 +894,35 @@ describe.concurrent('Signal', () => {
     });
 
     /*******************************
-         Mutate Dev Warning
+         Mutate Safety Behavior
     *******************************/
 
-    it('should warn in dev when mutate returns the same reference', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('throws under freeze when mutate tries to mutate in place', () => {
       const signal = new Signal([1, 2, 3]);
+
+      expect(() => {
+        signal.mutate(arr => {
+          arr.push(4);
+        });
+      }).toThrow(TypeError);
+    });
+
+    it('allows in-place mutate under reference safety', () => {
+      const signal = new Signal([1, 2, 3], { safety: 'reference' });
 
       signal.mutate(arr => {
         arr.push(4);
-        return arr;
       });
 
-      expect(warnSpy).toHaveBeenCalledTimes(1);
-      expect(warnSpy.mock.calls[0][0]).toMatch(/same reference/);
-      warnSpy.mockRestore();
+      expect(signal.get()).toEqual([1, 2, 3, 4]);
     });
 
-    it('should not warn when mutate returns a new value', () => {
-      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    it('accepts a returned new value under freeze', () => {
       const signal = new Signal([1, 2, 3]);
 
       signal.mutate(() => [4, 5, 6]);
 
-      expect(warnSpy).not.toHaveBeenCalled();
       expect(signal.get()).toEqual([4, 5, 6]);
-      warnSpy.mockRestore();
     });
 
     // Test WeakRef cleanup behavior
