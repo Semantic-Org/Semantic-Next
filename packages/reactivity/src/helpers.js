@@ -27,6 +27,21 @@ export const setStackCapture = (enabled) => {
 export const isTracing = () => mode !== 'off';
 export const isStackCapture = () => mode === 'stack';
 
+// Safety preset controls value protection on set.
+//   'freeze'    — deepFreeze; downstream mutations throw
+//   'reference' — no protection; dedupe via isEqual
+//   'none'      — no protection, no dedupe (event-stream semantics)
+let defaultSafety = 'freeze';
+const VALID_SAFETY = new Set(['freeze', 'reference', 'none']);
+
+export const getDefaultSafety = () => defaultSafety;
+export const setDefaultSafety = (preset) => {
+  if (!VALID_SAFETY.has(preset)) {
+    throw new Error(`Invalid Signal.safety: ${preset}. Must be one of: ${[...VALID_SAFETY].join(', ')}`);
+  }
+  defaultSafety = preset;
+};
+
 // Capture a stack trace into target.context. Passes `caller` to
 // Error.captureStackTrace so the framework frame is trimmed from the trace.
 export const captureStack = (target, caller) => {
