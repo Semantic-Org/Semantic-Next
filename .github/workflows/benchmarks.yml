@@ -48,43 +48,22 @@ jobs:
       - name: Build matrix
         id: matrix
         run: |
-          # Push to main: archive every benchmarkable package — we need the
-          # full absolute-CI snapshot for bench-history regardless of what
-          # changed in this commit.
-          if [ '${{ github.event_name }}' = 'push' ]; then
-            changed=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
-              | cut -d/ -f2 \
-              | sort -u)
-          else
-            base=origin/${{ github.event.pull_request.base.ref }}
-
-            # If a benchmark workflow or bench harness changed, we need to
-            # validate CI itself — run against every benchmarked package.
-            ci_changed=$(git diff --name-only "$base"...HEAD \
-              | grep -E '^(\.github/workflows/benchmarks.*\.yml|packages/[^/]+/bench/tachometer/)' \
-              | head -1)
-
-            if [ -n "$ci_changed" ]; then
-              changed=$(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' \
-                | cut -d/ -f2 \
-                | sort -u)
-            else
-              changed=$(git diff --name-only "$base"...HEAD \
-                | grep '^packages/' \
-                | cut -d/ -f2 \
-                | sort -u)
-            fi
-          fi
-
-          # For each changed package, emit one entry per tachometer-ci*.json
+          # Any trigger that reaches this workflow — push to main, or a
+          # pull_request whose diff matched our path filter — runs every
+          # benchmarkable package's configs. Tachometer configs only live
+          # under `packages/renderer/` today, but a change in any other
+          # package (reactivity, templating, etc.) can absolutely move
+          # renderer's bench numbers via workspace imports. Per-package
+          # scoping of the matrix was premature: the benches are end-to-end
+          # measurements that pull the whole framework through; treat the
+          # set of benchmarkable packages as a single target suite.
           entries=()
-          for pkg in $changed; do
-            while IFS= read -r config; do
-              [ -z "$config" ] && continue
-              name=$(basename "$config" .json)
-              entries+=("{\"config\":\"$config\",\"name\":\"$name\",\"package\":\"$pkg\"}")
-            done < <(find "packages/$pkg" -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' 2>/dev/null | sort)
-          done
+          while IFS= read -r config; do
+            [ -z "$config" ] && continue
+            pkg=$(echo "$config" | cut -d/ -f2)
+            name=$(basename "$config" .json)
+            entries+=("{\"config\":\"$config\",\"name\":\"$name\",\"package\":\"$pkg\"}")
+          done < <(find packages -name 'tachometer-ci*.json' -path '*/bench/tachometer/*' 2>/dev/null | sort)
 
           if [ ${#entries[@]} -eq 0 ]; then
             matrix="[]"
