@@ -147,25 +147,30 @@ const createComponent = ({ $, el, self, settings, state, reaction, isRendered })
     let firstMatch = false;
     const searchTermChanged = self.lastSearchTerm !== searchTerm;
     const addSelectedIndex = (item) => {
-      if (item?.url) {
-        selectedIndex++;
-        item.selectedIndex = selectedIndex;
+      if (!item?.url) {
+        return item;
       }
+      selectedIndex++;
       // reset selected index only when search term changes
-      if (searchTermChanged && !firstMatch && item.highlight && item?.url) {
+      if (searchTermChanged && !firstMatch && item.highlight) {
         state.selectedIndex.set(selectedIndex);
         firstMatch = true;
       }
-      return item;
+      return { ...item, selectedIndex };
     };
     // add selected index for each menu, pages and subpages (3 deep max)
     menu = menu.map(currentMenu => {
-      currentMenu = addSelectedIndex(currentMenu);
-      (currentMenu?.pages || []).map(page => {
-        page = addSelectedIndex(page);
-        (page?.pages || []).map(subPage => addSelectedIndex(subPage));
+      const withIndex = addSelectedIndex(currentMenu);
+      if (!withIndex?.pages) { return withIndex; }
+      const pages = withIndex.pages.map(page => {
+        const pageWithIndex = addSelectedIndex(page);
+        if (!pageWithIndex?.pages) { return pageWithIndex; }
+        return {
+          ...pageWithIndex,
+          pages: pageWithIndex.pages.map(subPage => addSelectedIndex(subPage)),
+        };
       });
-      return currentMenu;
+      return { ...withIndex, pages };
     });
     self.lastSearchTerm = searchTerm;
     state.maxIndex.set(selectedIndex);
