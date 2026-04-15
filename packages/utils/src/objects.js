@@ -51,8 +51,8 @@ export const extend = (obj, ...sources) => {
           Object.defineProperty(obj, prop, srcDesc);
           continue;
         }
-        // Frozen / non-writable data source — install a fresh writable
-        // descriptor so the target stays mutable.
+        // Non-writable data source (frozen/sealed) — install a fresh writable
+        // descriptor. Source's lifecycle state shouldn't bleed into the merge.
         if (srcDesc && !srcDesc.writable) {
           Object.defineProperty(obj, prop, {
             value: source[prop],
@@ -62,8 +62,9 @@ export const extend = (obj, ...sources) => {
           });
           continue;
         }
-        // Normal writable data (or inherited). Fast path unless target
-        // already has an accessor descriptor blocking plain assignment.
+        // Target already has an accessor — plain assignment would fail on
+        // getter-only or throw in strict mode. Install a fresh writable data
+        // descriptor so the "later source wins" ordering holds.
         tgtDesc = Object.getOwnPropertyDescriptor(obj, prop);
         if (tgtDesc && (tgtDesc.get || tgtDesc.set)) {
           Object.defineProperty(obj, prop, {
@@ -72,10 +73,10 @@ export const extend = (obj, ...sources) => {
             enumerable: true,
             configurable: true,
           });
+          continue;
         }
-        else {
-          obj[prop] = source[prop];
-        }
+        // Common case: normal data merge — plain assignment is the fast path.
+        obj[prop] = source[prop];
       }
     }
   });
