@@ -1,4 +1,4 @@
-import { noop } from './functions.js';
+import { identity } from './functions.js';
 import { isArray, isFunction, isString } from './types.js';
 
 /*-------------------
@@ -109,7 +109,7 @@ export const joinWords = (words, {
   lastSeparator = ' and ',
   oxford = true,
   quotes = false,
-  transform = noop,
+  transform = identity,
 } = {}) => {
   if (!isArray(words) || words.length === 0) {
     return '';

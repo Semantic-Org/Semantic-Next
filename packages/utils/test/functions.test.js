@@ -1,12 +1,20 @@
-import { debounce, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
+import { debounce, identity, memoize, noop, throttle, wait, wrapFunction } from '@semantic-ui/utils';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('function utilities', () => {
-  it('noop should act as an identity function', () => {
-    expect(noop(42)).toBe(42);
-    expect(noop('hello')).toBe('hello');
+  it('noop returns undefined and swallows arguments', () => {
     expect(noop()).toBeUndefined();
+    expect(noop(42)).toBeUndefined();
+    expect(noop('hello', 'world')).toBeUndefined();
+  });
+
+  it('identity returns its first argument unchanged', () => {
+    expect(identity(42)).toBe(42);
+    expect(identity('hello')).toBe('hello');
+    const obj = { a: 1 };
+    expect(identity(obj)).toBe(obj);
+    expect(identity()).toBeUndefined();
   });
   it('wrapFunction should return the same function if a function is passed', () => {
     const func = () => 'test';
@@ -888,8 +896,12 @@ describe('function utilities', () => {
 });
 
 describe('debounce — options object overload', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.restoreAllMocks(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('should accept options object as second argument', async () => {
     const func = vi.fn(() => 'result');
@@ -905,8 +917,12 @@ describe('debounce — options object overload', () => {
 });
 
 describe('throttle — options object overload', () => {
-  beforeEach(() => { vi.useFakeTimers(); });
-  afterEach(() => { vi.restoreAllMocks(); });
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('should accept options object as second argument', () => {
     const func = vi.fn(() => 'result');

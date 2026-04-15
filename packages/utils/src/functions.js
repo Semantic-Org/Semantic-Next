@@ -6,9 +6,14 @@ import { isFunction, isPlainObject, isPromise } from './types.js';
 --------------------*/
 
 /*
-  Efficient no operation func
+  No operation — swallows arguments, returns undefined
 */
-export const noop = (v) => v;
+export const noop = () => {};
+
+/*
+  Identity — returns its first argument unchanged
+*/
+export const identity = (v) => v;
 
 /*
   Call function even if its not defined

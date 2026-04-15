@@ -15,6 +15,12 @@ xx.xx.xxxx
 * **Feature** - Added `{#fn expression}` directive to pass values as-is without auto-invoking functions — mirrors `{#html}` pattern, useful for passing callbacks through property bindings
 
 ### Reactivity
+* **BREAKING** - Signals now default to `safety: 'freeze'` (deep-freeze on set) instead of clone-on-read. Mutations of a signal value throw `TypeError` at the call site instead of being silently swallowed. Reads return the frozen reference — no more per-read clone. Three presets: `'freeze'` (default), `'reference'` (no protection; framework/perf opt-out), `'none'` (no protection, no dedupe; event-stream semantics).
+* **BREAKING** - Removed the `allowClone` constructor option. Use `safety: 'reference'` for the equivalent "no protection" behavior. Signals that previously relied on clone-on-read for mutation isolation need to switch to `safety: 'reference'` or rewrite callers to avoid mutating peeked references.
+* **BREAKING** - Removed function-form static tracing helpers (`Signal.setTracing`, `Signal.isTracing`, `Signal.setStackCapture`, `Signal.isStackCapture`). Use the accessor form: `Signal.tracing = true`, `Signal.stackCapture = true`.
+* **Feature** - Added `signal.clone()` — tracked read that returns a deep copy. Use when handing signal data to libraries that mutate in place.
+* **Feature** - Added static accessor properties for configuring defaults — `Signal.safety`, `Signal.tracing`, `Signal.stackCapture`, `Signal.equalityFunction`, `Signal.cloneFunction`. Assignment validates (function accessors throw `TypeError` on non-function). Bulk setup via `Signal.configure({...})`; inspect current state via `Signal.defaults`.
+* **Feature** - In-place array helpers (`push`, `unshift`, `splice`, `setIndex`, `removeIndex`, `setArrayProperty`, `setProperty`) branch on safety — `'reference'` / `'none'` retain O(1) in-place mutation; `'freeze'` builds new arrays/objects immutably.
 * **Feature** - Added `depend()` to register a signal as a dependency without reading the value
 * **Feature** - Added `notify()` to force-trigger subscribers bypassing the equality check
 * **Feature** - Added `hasDependents()` to check if any reactions are subscribed to a signal
@@ -27,6 +33,10 @@ xx.xx.xxxx
 
 ### Reactivity
 * **Bug** - Fixed `instanceof` brand check on `Signal` to use prototype getter instead of class field — ensures cross-realm and prototype-created instances pass `instanceof` reliably.
+
+### Utils
+* **BREAKING** - `noop` now returns `undefined` (truly no-op). Previously it returned its first argument (identity). Use the new `identity` export if you need the old behavior.
+* **Feature** - Added `identity` export — returns its first argument unchanged.
 
 ### Templates
 * **Bug** - Fixed `instanceof` brand check on `Template` to use prototype getter instead of class field — same fix as Signal and Query.
