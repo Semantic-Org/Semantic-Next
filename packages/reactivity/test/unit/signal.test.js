@@ -530,7 +530,7 @@ describe.concurrent('Signal', () => {
   describe.concurrent('Cloning Behavior with Signals', () => {
     it('should maintain reactivity when using a Signal inside another Signal', () => {
       const innerCallback = vi.fn();
-      const innerVar = new Signal(1, { allowClone: true });
+      const innerVar = new Signal(1);
 
       const outerCallback = vi.fn();
       const outerVar = new Signal(innerVar);
@@ -555,8 +555,8 @@ describe.concurrent('Signal', () => {
       const data1 = { id: 1, text: 'test object' };
       const data2 = { id: 2, text: 'test object 2' };
 
-      const innerVar1 = new Signal(data1, { allowClone: true });
-      const innerVar2 = new Signal(data2, { allowClone: true });
+      const innerVar1 = new Signal(data1);
+      const innerVar2 = new Signal(data2);
 
       innerVar1.subscribe(innerCallback1);
       innerVar2.subscribe(innerCallback2);
@@ -787,7 +787,7 @@ describe.concurrent('Signal', () => {
         obj => ({ doubled: obj.count * 2 }),
         {
           equalityFunction: (a, b) => a?.doubled === b?.doubled,
-          allowClone: false,
+          safety: 'reference',
         },
       );
 

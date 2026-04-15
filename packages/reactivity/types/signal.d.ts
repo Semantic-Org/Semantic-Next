@@ -10,13 +10,15 @@ export interface SignalOptions<T> {
   equalityFunction?: (oldValue: T, newValue: T) => boolean;
 
   /**
-   * Whether to allow cloning of values. If false, values are stored by reference
-   * @default true
+   * Safety preset controlling how the signal protects its value
+   *  - 'freeze' (default) — deepFreeze on set; mutations throw
+   *  - 'reference' — no protection; dedupe via isEqual
+   *  - 'none' — no protection, no dedupe (event-stream semantics)
    */
-  allowClone?: boolean;
+  safety?: 'freeze' | 'reference' | 'none';
 
   /**
-   * Custom function to clone values when storing or retrieving from the signal
+   * Custom function to clone values (used by signal.clone())
    * @param value - The value to clone
    */
   cloneFunction?: <V>(value: V) => V;

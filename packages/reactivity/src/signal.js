@@ -11,30 +11,114 @@ import {
 } from '@semantic-ui/utils';
 
 import { Dependency } from './dependency.js';
-import { captureStack, getDefaultSafety, isStackCapture, isTracing, setStackCapture, setTracing } from './helpers.js';
+import {
+  captureStack,
+  getDefaultSafety,
+  isStackCapture,
+  isTracing,
+  setDefaultSafety,
+  setStackCapture,
+  setTracing,
+} from './helpers.js';
 import { Reaction } from './reaction.js';
 
 const IS_SIGNAL = Symbol.for('semantic-ui/Signal');
 const NO_EQUALITY = () => false;
 
 export class Signal {
-  get [IS_SIGNAL]() {
-    return true;
-  }
   static [Symbol.hasInstance](instance) {
     return !!instance?.[IS_SIGNAL];
   }
 
+  // Private backing for equalityFunction / cloneFunction so the public
+  // accessors below can validate assignments.
+  static #equalityFunction = isEqual;
+  static #cloneFunction = clone;
+
+  static get equalityFunction() {
+    return Signal.#equalityFunction;
+  }
+  static set equalityFunction(fn) {
+    if (typeof fn !== 'function') {
+      throw new TypeError('Signal.equalityFunction must be a function');
+    }
+    Signal.#equalityFunction = fn;
+  }
+
+  static get cloneFunction() {
+    return Signal.#cloneFunction;
+  }
+  static set cloneFunction(fn) {
+    if (typeof fn !== 'function') {
+      throw new TypeError('Signal.cloneFunction must be a function');
+    }
+    Signal.#cloneFunction = fn;
+  }
+
+  static get safety() {
+    return getDefaultSafety();
+  }
+  static set safety(preset) {
+    setDefaultSafety(preset);
+  }
+
+  static get tracing() {
+    return isTracing();
+  }
+  static set tracing(enabled) {
+    setTracing(enabled);
+  }
+
+  static get stackCapture() {
+    return isStackCapture();
+  }
+  static set stackCapture(enabled) {
+    setStackCapture(enabled);
+  }
+
+  // Bulk config — forwards each key through its accessor so validation runs.
+  static configure({ safety, tracing, stackCapture, equalityFunction, cloneFunction } = {}) {
+    if (safety !== undefined) { Signal.safety = safety; }
+    if (tracing !== undefined) { Signal.tracing = tracing; }
+    if (stackCapture !== undefined) { Signal.stackCapture = stackCapture; }
+    if (equalityFunction !== undefined) { Signal.equalityFunction = equalityFunction; }
+    if (cloneFunction !== undefined) { Signal.cloneFunction = cloneFunction; }
+  }
+
+  // Snapshot of current defaults — discoverable via console.log(Signal.defaults).
+  static get defaults() {
+    return {
+      safety: getDefaultSafety(),
+      tracing: isTracing(),
+      stackCapture: isStackCapture(),
+      equalityFunction: Signal.#equalityFunction,
+      cloneFunction: Signal.#cloneFunction,
+    };
+  }
+
+  static computed(computeFn, options = {}) {
+    const computedSignal = new Signal(undefined, options);
+    const reaction = Reaction.create(() => {
+      const result = computeFn();
+      computedSignal.set(result);
+    });
+    computedSignal._computedReaction = reaction;
+    return computedSignal;
+  }
+
+  get [IS_SIGNAL]() {
+    return true;
+  }
+
   constructor(initialValue, options = {}) {
-    const { context, safety, equalityFunction, cloneFunction, allowClone } = options;
+    const { context, safety, equalityFunction, cloneFunction } = options;
 
     this.dependency = new Dependency({
       firstRun: true,
       value: initialValue,
     });
 
-    // legacy `allowClone: false` maps to 'reference' for back-compat
-    this.safety = safety ?? (allowClone === false ? 'reference' : getDefaultSafety());
+    this.safety = safety ?? getDefaultSafety();
 
     this.equalityFunction = equalityFunction
       ? wrapFunction(equalityFunction)
@@ -73,13 +157,6 @@ export class Signal {
   setTrace() {
     captureStack(this, this.setTrace);
   }
-
-  static equalityFunction = isEqual;
-  static cloneFunction = clone;
-  static setTracing = setTracing;
-  static isTracing = isTracing;
-  static setStackCapture = setStackCapture;
-  static isStackCapture = isStackCapture;
 
   protect(value) {
     if (value === null || typeof value !== 'object') { return value; }
@@ -143,19 +220,6 @@ export class Signal {
     derivedSignal._derivedReaction = reaction;
 
     return derivedSignal;
-  }
-
-  static computed(computeFn, options = {}) {
-    const computedSignal = new Signal(undefined, options);
-
-    const reaction = Reaction.create(() => {
-      const result = computeFn();
-      computedSignal.set(result);
-    });
-
-    computedSignal._computedReaction = reaction;
-
-    return computedSignal;
   }
 
   depend() {
