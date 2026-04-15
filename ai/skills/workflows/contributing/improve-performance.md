@@ -66,6 +66,10 @@ Three tools serve different purposes. Using the wrong one for the job produces m
 - Same-session comparison — round-robins between variants to eliminate thermal/GC/JIT bias
 - Import maps — resolves monorepo bare specifiers natively in the browser, no build step
 
+### How tachometer output reaches a reviewer
+
+Tachometer emits JSON. In this repo, CI hands that JSON to an in-house reporter (`tools/bench-reporter/`) that renders a PR comment with per-metric verdicts (faster/slower/no change/unsure) and uploads a structured `bench-report.json` artifact for agent consumption. The reporter is the human-readable surface; the JSON adjunct is the agent-readable one. Both derive from the same tachometer output — no parallel data paths.
+
 ### Tachometer in monorepos
 
 Tachometer's `koa-node-resolve` can't follow transitive bare imports through npm workspace symlinks. Use **browser-native import maps** instead:
@@ -115,6 +119,9 @@ performance.measure('create-1k', 'create-1k-start');
 {
   "root": "../../../..",
   "resolveBareModules": false,
+  "sampleSize": 50,
+  "timeout": 3,
+  "autoSampleConditions": ["2%"],
   "benchmarks": [{
     "url": "index.html",
     "browser": { "name": "chrome", "headless": true },
@@ -124,6 +131,34 @@ performance.measure('create-1k', 'create-1k-start');
   }]
 }
 ```
+
+### Tuning knobs
+
+Three config-level knobs shape the confidence/time tradeoff. Pick with intent — defaults baked into tachometer lean toward "resolve everything, even zero-delta noise," which is wall-clock-expensive and produces many unsure verdicts.
+
+- **`sampleSize`** — the mandatory floor of samples tachometer collects before auto-sampling kicks in. Smaller floors are faster but produce wider CIs. 50 is a reasonable default; going below ~30 produces unreliable CIs.
+- **`autoSampleConditions`** — the resolution granularity tachometer chases. `["0%"]` asks it to resolve zero-delta metrics to below zero, which cannot converge when the true delta actually is zero — the run then burns its timeout. Choose a threshold slightly above the host's noise floor (a couple of percentage points works as a starting point). This is a **resolution** choice, not an **accuracy** choice — the 95% CI itself is not being relaxed.
+- **`timeout`** — per-config wall-clock cap. Lower values cap worst case at the cost of leaving some metrics unresolved; higher values converge more metrics at the cost of CI time. Tune against realistic-delta runs, not zero-delta runs.
+
+Config-tuning decisions interact: sample size floors how narrow a CI can get; `autoSampleConditions` controls whether tachometer keeps sampling once the floor is reached. Raising one without the other often wastes time.
+
+### Expected noise scales with bench duration
+
+A methodology fact worth internalizing: per-sample timing noise on a given host is roughly constant in absolute terms (OS scheduling, GC, JIT jitter — typically sub-millisecond). Relative noise scales *inversely with benchmark duration*.
+
+A 2ms bench and a 50ms bench both absorb roughly the same absolute jitter, but the relative noise looks very different:
+
+| bench duration | expected relative noise floor |
+|---|---|
+| ~2ms | ±10-20% |
+| ~10ms | ±2-5% |
+| ~50ms+ | ±1% or tighter |
+
+Consequences:
+
+- **Short benches can't resolve small deltas.** A 2ms bench will never confirm a 3% change at the confidence level because the per-sample noise swamps it. This isn't a tachometer bug; it's physics of the measurement.
+- **Don't tune thresholds to what you wish you could detect.** Tune to what the measurement actually supports. Asking for ±1% resolution on a 2ms bench means the metric is permanently "unsure" regardless of sampling time.
+- **The in-house reporter exposes this as a per-metric `Expected Noise`** column. When a metric shows Unsure with CI width similar to the expected-noise estimate, the bench is running at its physical floor — more samples don't help. When the CI width is wider than the estimate, the metric is genuinely variable beyond its duration's predicted floor and more samples may resolve it.
 
 ### Gotchas
 
@@ -381,6 +416,7 @@ npm run bench:component    # Run all component operations via tachometer config
 
 | Workflow | Command | Use when... |
 |---------|---------|-------------|
+| **Autoresearch Perf Regressions** | `autoresearch-perf` | Running an autonomous hypothesis-test-measure loop on a regression set whose root cause isn't obvious. The autonomous variant of this workflow. |
 | **Design Util Function** | `design-util-function` | Creating a new utility from scratch |
 | **Add Util Function** | `add-util-function` | Adding tests, types, docs for a new utility |
 | **Testing** | `testing` | Understanding test environments and conventions |
