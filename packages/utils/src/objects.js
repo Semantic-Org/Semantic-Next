@@ -46,11 +46,20 @@ export const extend = (obj, ...sources) => {
     if (source) {
       for (prop in source) {
         descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if (descriptor === undefined) {
-          obj[prop] = source[prop];
+        if (descriptor && (descriptor.get || descriptor.set)) {
+          // Accessor — preserve the getter/setter on target.
+          Object.defineProperty(obj, prop, descriptor);
         }
         else {
-          Object.defineProperty(obj, prop, descriptor);
+          // Data property — always install a fresh writable descriptor. This
+          // prevents frozen sources from propagating non-writable descriptors
+          // and lets later sources override earlier accessor-only properties.
+          Object.defineProperty(obj, prop, {
+            value: source[prop],
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
         }
       }
     }

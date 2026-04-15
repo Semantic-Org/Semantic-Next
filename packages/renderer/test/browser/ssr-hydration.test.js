@@ -1344,9 +1344,9 @@ describe('SSR hydration — snippet reactivity', () => {
       defaultState: { items: [{ name: 'Red' }, { name: 'Blue' }] },
       createComponent: ({ state }) => ({
         renameFirst() {
-          const items = state.items.peek();
+          const items = [...state.items.peek()];
           items[0] = { ...items[0], name: 'Crimson' };
-          state.items.set([...items]);
+          state.items.set(items);
         },
       }),
     });
