@@ -328,6 +328,12 @@ function renderMarkdown(report) {
     renderFasterSlowerSection(lines, slower, 'slower', report);
   }
 
+  // ─── Regressions from peak (cross-run; auto-expanded when present) ───
+  // Load-bearing signal — a metric better on a prior commit is always a
+  // cherry-pick candidate. Sits alongside Faster/Slower, not hidden in a
+  // collapsible, because a reviewer should never miss this.
+  renderRegressionsFromPeak(lines, report);
+
   // ─── No Change (always collapsed) ────────────────────────────────────
   if (noChange.length > 0) {
     lines.push('<details>');
@@ -395,9 +401,6 @@ function renderMarkdown(report) {
     lines.push('');
   }
 
-  // ─── Regressions from peak (cross-run; only when REOPENED exists) ────
-  renderRegressionsFromPeak(lines, report);
-
   // ─── Footer ──────────────────────────────────────────────────────────
   lines.push('---');
   const footerParts = [
@@ -427,8 +430,7 @@ function renderRegressionsFromPeak(lines, report) {
   // Sort by severity — largest delta-from-peak first.
   const sorted = [...reopened].sort((a, b) => (b.delta_from_peak_pct ?? 0) - (a.delta_from_peak_pct ?? 0));
 
-  lines.push('<details>');
-  lines.push(`<summary>📜 Regressions from peak (${reopened.length})</summary>`);
+  lines.push(`#### 📜 Regressions from peak (${reopened.length})`);
   lines.push('');
   lines.push(
     `These metrics were better on a prior commit than they are now. The peak CI dominates current CI — not attributable to per-sample noise. Bisect candidates are the commits between the peak and HEAD; nearest-to-peak is usually the best bet.`,
@@ -442,18 +444,10 @@ function renderRegressionsFromPeak(lines, report) {
     const deltaStr = m.delta_from_peak_pct > 0
       ? `+${m.delta_from_peak_pct.toFixed(0)}%`
       : `${m.delta_from_peak_pct.toFixed(0)}%`;
-    const peakShortSha = m.peak.sha.slice(0, 7);
-    const peakLink = report.repo
-      ? `[\`${peakShortSha}\`](https://github.com/${report.repo}/commit/${m.peak.sha})`
-      : `\`${peakShortSha}\``;
+    const peakLink = commitOrPrLink(m.peak, report.repo);
     const bisectMd = (m.bisect_candidates ?? [])
       .slice(0, BISECT_MARKDOWN_MAX)
-      .map((c) => {
-        const shortSha = c.sha.slice(0, 7);
-        return report.repo
-          ? `[\`${shortSha}\`](https://github.com/${report.repo}/commit/${c.sha})`
-          : `\`${shortSha}\``;
-      })
+      .map((c) => commitOrPrLink(c, report.repo))
       .join(', ');
     const bisectCell = m.bisect_candidates && m.bisect_candidates.length > BISECT_MARKDOWN_MAX
       ? `${bisectMd} +${m.bisect_candidates.length - BISECT_MARKDOWN_MAX} more`
@@ -464,8 +458,6 @@ function renderRegressionsFromPeak(lines, report) {
       }ms @ ${peakLink} | ${deltaStr} | ${bisectCell} |`,
     );
   }
-  lines.push('');
-  lines.push('</details>');
   lines.push('');
 }
 
@@ -588,6 +580,23 @@ function metricLink(m, report) {
   if (!report.repo || !m.source) { return label; }
   const hashPart = m.source.line ? `#L${m.source.line}` : '';
   return `[${label}](https://github.com/${report.repo}/blob/${report.head.sha}/${m.source.path}${hashPart})`;
+}
+
+/**
+ * Link a history entry to its PR (preferred) or commit. Label is the
+ * short SHA; the PR URL just takes you to the conversation page where
+ * the bench comment from that run was posted — which is where a
+ * reviewer actually wants to go when investigating a REOPENED regression.
+ * Falls back to commit URL when the commit wasn't a squash-merge (no
+ * `(#N)` in message) and plain text when no repo is configured.
+ */
+function commitOrPrLink(entry, repo) {
+  const shortSha = entry.sha.slice(0, 7);
+  if (!repo) { return `\`${shortSha}\``; }
+  const url = entry.pr
+    ? `https://github.com/${repo}/pull/${entry.pr}`
+    : `https://github.com/${repo}/commit/${entry.sha}`;
+  return `[\`${shortSha}\`](${url})`;
 }
 
 /**
@@ -723,7 +732,7 @@ function computeHistoryStatus(metric, hist) {
   const bisectCandidates = hist.commits
     .slice(peakHistIdx + 1)
     .filter((c) => c.metrics && metric.name in c.metrics)
-    .map((c) => ({ sha: c.sha, msg: c.msg }));
+    .map((c) => ({ sha: c.sha, msg: c.msg, pr: c.pr ?? null }));
 
   const currentMid = (currentCi[0] + currentCi[1]) / 2;
   const peakMid = (peakCi[0] + peakCi[1]) / 2;
@@ -734,6 +743,7 @@ function computeHistoryStatus(metric, hist) {
     peak: {
       sha: peakEntry.sha,
       msg: peakEntry.msg,
+      pr: peakEntry.pr ?? null,
       ci: peakCi,
       mean_ms: peakMetric.mean_ms,
     },

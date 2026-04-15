@@ -33,7 +33,12 @@ const timestamp = args.timestamp ?? new Date().toISOString();
 const historyPath = args.history ?? './bench-history.json';
 
 const metrics = loadMetrics(resultsDir);
-const entry = { sha, msg, parent_sha: parentSha, timestamp, metrics };
+// Squash-merge commit titles end with ` (#N)` — the PR the commit came from.
+// Capturing it here lets the reporter link peak SHAs straight to the PR page
+// (where the bench comment lives) instead of just to the commit view.
+const prMatch = /\(#(\d+)\)\s*$/.exec(msg);
+const pr = prMatch ? Number(prMatch[1]) : null;
+const entry = { sha, msg, parent_sha: parentSha, timestamp, pr, metrics };
 
 const history = readOrSeedHistory(historyPath);
 const existingIdx = history.commits.findIndex((c) => c.sha === sha);

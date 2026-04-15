@@ -325,6 +325,30 @@ test('cross-run: WIN when current CI dominates historical peak', () => {
   assert.ok(!markdown.includes('Regressions from peak'), 'no reopened section when no REOPENED');
 });
 
+test('cross-run: peak links to PR conversation when PR number is known', () => {
+  // Peak has pr: 102 in the fixture → peak SHA in markdown should link
+  // to /pull/102, not /commit/<sha>. Takes reviewers directly to the
+  // bench comment from that PR (which is where the peak value came from).
+  const dir = writeHandcraftedResults('update-10th', [20.0, 21.0]);
+  const { report, markdown } = runReporter({
+    resultsDir: dir,
+    sha: 'feed',
+    msg: 'x',
+    baseSha: 'aaaa11',
+    repo: 'Semantic-Org/Semantic-Next',
+    history: HISTORY_FIXTURE,
+  });
+  const m = report.metrics.find((x) => x.name === 'update-10th');
+  assert.equal(m.peak.pr, 102, 'peak entry carries pr number from history');
+  assert.ok(
+    markdown.includes('[`bbbb222`](https://github.com/Semantic-Org/Semantic-Next/pull/102)'),
+    'peak SHA links to PR conversation, not commit',
+  );
+  // Bisect candidates also link to PRs.
+  assert.ok(markdown.includes('](https://github.com/Semantic-Org/Semantic-Next/pull/103)'));
+  assert.ok(markdown.includes('](https://github.com/Semantic-Org/Semantic-Next/pull/104)'));
+});
+
 test('cross-run: REOPENED when a prior commit dominates current', () => {
   // history-sample.json peak for update-10th = CI [6.0, 7.0]
   // Current CI [20.0, 21.0] is entirely above → REOPENED
