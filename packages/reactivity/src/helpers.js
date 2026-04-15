@@ -31,7 +31,7 @@ export const isStackCapture = () => mode === 'stack';
 //   'freeze'    — deepFreeze; downstream mutations throw
 //   'reference' — no protection; dedupe via isEqual
 //   'none'      — no protection, no dedupe (event-stream semantics)
-let defaultSafety = 'freeze';
+let defaultSafety = 'reference';
 const VALID_SAFETY = new Set(['freeze', 'reference', 'none']);
 
 export const getDefaultSafety = () => defaultSafety;

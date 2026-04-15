@@ -898,7 +898,7 @@ describe.concurrent('Signal', () => {
     *******************************/
 
     it('throws under freeze when mutate tries to mutate in place', () => {
-      const signal = new Signal([1, 2, 3]);
+      const signal = new Signal([1, 2, 3], { safety: 'freeze' });
 
       expect(() => {
         signal.mutate(arr => {
@@ -918,7 +918,7 @@ describe.concurrent('Signal', () => {
     });
 
     it('accepts a returned new value under freeze', () => {
-      const signal = new Signal([1, 2, 3]);
+      const signal = new Signal([1, 2, 3], { safety: 'freeze' });
 
       signal.mutate(() => [4, 5, 6]);
 
