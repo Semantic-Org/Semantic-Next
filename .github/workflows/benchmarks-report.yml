@@ -23,6 +23,17 @@ jobs:
       github.event.workflow_run.conclusion == 'success'
       && github.event.workflow_run.event == 'pull_request'
     steps:
+      # Generate an installation access token for the Semantic Performance
+      # Bot GitHub App. Comments post under the bot's identity + avatar
+      # rather than the generic `github-actions[bot]`. Same permissions
+      # surface as GITHUB_TOKEN; branded, not widened.
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
@@ -43,6 +54,7 @@ jobs:
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
@@ -52,7 +64,7 @@ jobs:
       - name: Resolve PR number
         id: pr
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: |
           NUMBER='${{ github.event.workflow_run.pull_requests[0].number }}'
           if [ -z "$NUMBER" ] || [ "$NUMBER" = "null" ]; then
@@ -89,10 +101,13 @@ jobs:
       - name: Post or update PR comment
         if: steps.pr.outputs.number != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.bot-token.outputs.token }}
           PR: ${{ steps.pr.outputs.number }}
           REPO: ${{ github.repository }}
         run: |
+          # --edit-last finds the most recent comment from the authenticated
+          # user; with the bot token, that targets the bot's previous bench
+          # comment (not github-actions[bot]'s earlier artifacts).
           if ! gh pr comment "$PR" --repo "$REPO" --edit-last \
                 --body-file bench-report/comment.md 2>/dev/null; then
             gh pr comment "$PR" --repo "$REPO" \
@@ -115,6 +130,15 @@ jobs:
       group: bench-history-append
       cancel-in-progress: false
     steps:
+      # Bot token for the archival commit — shows up on main as authored
+      # by Semantic Performance Bot rather than github-actions[bot].
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}
+          private-key: ${{ secrets.SEMANTIC_PERF_BOT_PRIVATE_KEY }}
+
       # Check out main's tip for the commit target. We push back to main,
       # so we need the most recent state — not the bench's head_sha (which
       # may have been superseded by a later merge during the ~10-min bench).
@@ -122,7 +146,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 2  # need HEAD~1 for parent_sha lookup
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.bot-token.outputs.token }}
 
       - uses: actions/setup-node@v4
         with:
@@ -131,6 +155,7 @@ jobs:
       - name: Download bench artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{ steps.bot-token.outputs.token }}
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
           name_is_regexp: true
@@ -155,9 +180,16 @@ jobs:
             --history bench-history.json
 
       - name: Commit + push
+        env:
+          # The checkout step's token persists as the git remote's credential
+          # helper, so the push below authenticates as the bot automatically.
+          BOT_APP_SLUG: semantic-performance-bot
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # Use the bot's noreply email format. The exact local-part is the
+          # app's numeric user id; GitHub renders the commit as authored by
+          # the app regardless, as long as the name matches the app slug.
+          git config user.name 'semantic-performance-bot[bot]'
+          git config user.email '${{ secrets.SEMANTIC_PERF_BOT_APP_ID }}+semantic-performance-bot[bot]@users.noreply.github.com'
           # If nothing changed (e.g. a re-run for a SHA already archived with
           # identical numbers), skip rather than making an empty commit.
           if git diff --quiet bench-history.json; then

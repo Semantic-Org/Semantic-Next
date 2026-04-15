@@ -3,9 +3,18 @@ name: Benchmarks
 on:
   pull_request:
     paths:
+      # perf-sensitive code — the measurement target
       - 'packages/**'
+      # bench workflow itself — changes here take effect on this PR's own
+      # run (pull_request uses PR-head YAML), so self-test
       - '.github/workflows/benchmarks.yml'
-      - '.github/workflows/benchmarks-report.yml'
+      # reporter scripts — runs from PR-head via the report workflow's
+      # checkout step, so a PR that only changes reporter.js still gets
+      # its output rendered on its own bench comment. Note: we deliberately
+      # DON'T include `.github/workflows/benchmarks-report.yml` here — that
+      # file runs from main's copy (workflow_run constraint), so modifying
+      # it on a PR doesn't exercise the change until after merge.
+      - 'tools/bench-reporter/**'
   # Bench every merge commit on main so bench-history.json accumulates
   # absolute CIs per commit. These runs aren't gated against anything —
   # the report workflow branches on event type and appends history instead
