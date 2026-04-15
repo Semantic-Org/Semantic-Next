@@ -55,7 +55,10 @@ test('real-delta fixture — summary counts and key verdicts', () => {
   assert.equal(report.summary.faster, 10);
   assert.equal(report.summary.slower, 5);
   assert.equal(report.summary['within-noise'], 3);
-  assert.equal(report.summary.unsure, 3);
+  // Boundary straddlers under real deltas fit the duration-derived floor
+  // comfortably → all 3 land in noise-floor-limited, not unsure.
+  assert.equal(report.summary.unsure, 0);
+  assert.equal(report.summary['noise-floor-limited'], 3);
 
   // Spot-check a clearly-faster metric
   const updateTenth = report.metrics.find((m) => m.name === 'update-10th');
@@ -67,9 +70,17 @@ test('real-delta fixture — summary counts and key verdicts', () => {
   assert.equal(editStart.status, 'slower');
   assert.ok(editStart.percent_change_ci[0] > 2, 'edit-start CI should be well above +2%');
 
-  // Spot-check a boundary-unsure metric
+  // Spot-check a boundary metric — bulk-add-50's CI straddles ±2% but is
+  // consistent with the expected noise floor for its duration.
   const bulkAdd = report.metrics.find((m) => m.name === 'bulk-add-50');
-  assert.equal(bulkAdd.status, 'unsure');
+  assert.equal(bulkAdd.status, 'noise-floor-limited');
+  assert.ok(bulkAdd.observed_noise_ratio <= 2, 'bulk-add-50 should be at/under tolerance');
+
+  // JSON adjunct exposes the diagnostic fields
+  assert.ok('expected_noise_pp' in bulkAdd);
+  assert.ok('observed_noise_ratio' in bulkAdd);
+  assert.equal(report.sigma_abs_ms, 2);
+  assert.equal(report.noise_ratio_tolerance, 2);
 });
 
 test('real-delta fixture — markdown structure', () => {
@@ -86,7 +97,7 @@ test('real-delta fixture — markdown structure', () => {
   assert.ok(markdown.includes('`0873084` (main)'), 'base SHA + ref rendered');
   assert.ok(markdown.includes('[run ↗](https://example.test/run/42)'), 'run URL linked');
   assert.ok(markdown.includes('### Significant changes'), 'significant section present');
-  assert.ok(markdown.includes('### Unsure'), 'unsure section present');
+  assert.ok(markdown.includes('### Noise-floor-limited'), 'noise-floor section present');
   assert.ok(markdown.includes('<details>'), 'within-noise present as <details>');
   assert.ok(!markdown.includes('<details open>'), 'within-noise collapsed when significant changes exist');
 
@@ -100,9 +111,9 @@ test('real-delta fixture — markdown structure', () => {
   const noiseIdx = markdown.indexOf('<details>');
   assert.ok(sigIdx < noiseIdx, 'significant before within-noise');
 
-  // Unsure section should come AFTER within-noise
-  const unsureIdx = markdown.indexOf('### Unsure');
-  assert.ok(noiseIdx < unsureIdx, 'within-noise before unsure');
+  // Noise-floor-limited section should come AFTER within-noise
+  const nflIdx = markdown.indexOf('### Noise-floor-limited');
+  assert.ok(noiseIdx < nflIdx, 'within-noise before noise-floor-limited');
 });
 
 test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => {
@@ -119,20 +130,26 @@ test('zero-delta fixture — 0 faster, 0 slower, correct categorisation', () => 
     + report.summary.slower
     + report.summary['within-noise']
     + report.summary.unsure
-    + report.summary['high-variance'];
+    + report.summary['noise-floor-limited'];
   assert.equal(total, 21, 'all 21 metrics classified');
 
-  // Known high-variance metrics land in their own bucket, not `unsure`
-  assert.equal(report.summary['high-variance'], 3, 'clear/remove-last/select bucketed');
-  const clear = report.metrics.find((m) => m.name === 'clear');
-  assert.equal(clear.status, 'high-variance');
+  // Most short benches land in noise-floor-limited; long benches with
+  // unexpectedly wide CI (create-1k, append-1k at ~2.7× expected) are
+  // the genuine 'unsure' entries.
+  assert.equal(report.summary['noise-floor-limited'], 12);
+  assert.equal(report.summary.unsure, 2);
+
+  // create-1k and append-1k are long benches (>100ms) whose CI widths
+  // exceed the duration-derived floor by more than 2× — surface them.
+  const unsureNames = report.metrics.filter((m) => m.status === 'unsure').map((m) => m.name);
+  assert.deepEqual(unsureNames.sort(), ['append-1k', 'create-1k']);
 
   // With 0 significant changes, the Significant Changes section should be absent
   assert.ok(!markdown.includes('### Significant changes'));
   // Within-noise <details> should be open-by-default when there are no significant changes
   assert.ok(markdown.includes('<details open>'), 'within-noise expanded on zero-delta');
-  // High-variance section rendered
-  assert.ok(markdown.includes('### Known high-variance'), 'high-variance section present');
+  // Noise-floor-limited section rendered
+  assert.ok(markdown.includes('### Noise-floor-limited'), 'noise-floor section present');
 });
 
 test('base header — shows only ref when no base-sha passed', () => {

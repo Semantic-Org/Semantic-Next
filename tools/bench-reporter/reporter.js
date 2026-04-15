@@ -33,12 +33,29 @@ const outDir = args.out ?? './bench-report';
 
 const NOISE_FLOOR = 2; // percent — matches autoSampleConditions
 
-// Metrics whose per-sample variance exceeds ±2% even at true delta 0.
-// These DO resolve under real perf changes (CI widens but the delta is
-// larger than the CI), so keeping ["2%"] globally is correct. Flagged
-// here so reviewers/agents don't read their "unsure" verdict on
-// zero-delta PRs as a regression.
-const KNOWN_HIGH_VARIANCE = new Set(['clear', 'remove-last', 'select']);
+// Per-sample timing jitter on shared GHA runners. OS scheduling, GC, and
+// JIT contribute an ~absolute-constant noise floor that becomes wide in
+// relative terms for short benches. Calibrated empirically: zero-delta
+// observed CI widths fit a σ≈2ms model well for most benches; the handful
+// that exceed it (create-1k, append-1k) show 2.5-3× expected, which is
+// the diagnostic signal — unusually noisy for duration, worth a second look.
+const SIGMA_ABS_MS = 2;
+
+// Classification tolerance. Observed / expected ratio below this counts as
+// "explained by duration-based noise floor" → noise-floor-limited bucket.
+// Above → genuine "unsure, more samples or investigation needed" bucket.
+const NOISE_RATIO_TOLERANCE = 2;
+
+/**
+ * Expected percent-change CI width for an unresolved CI given the bench's
+ * absolute duration. Derived from the standard-error-of-the-difference of
+ * two means at sampleSize=50, σ=SIGMA_ABS_MS per sample, z=1.96:
+ *   abs_CI_width ≈ 2 * 1.96 * sqrt(2) * σ / sqrt(50) ≈ 0.784 * σ
+ *   pct_width = abs_CI_width / mean * 100
+ */
+function expectedNoisePp(meanMs) {
+  return (0.784 * SIGMA_ABS_MS) / meanMs * 100;
+}
 
 const metrics = loadAllMetrics(resultsDir);
 const report = buildReport(metrics);
@@ -50,9 +67,9 @@ fs.writeFileSync(path.join(outDir, 'comment.md'), markdown);
 
 console.log(`Wrote ${outDir}/bench-report.json and ${outDir}/comment.md`);
 console.log(
-  `Summary: ${report.summary.faster} faster, ${report.summary.slower} slower, ${
-    report.summary['within-noise']
-  } within noise, ${report.summary.unsure} unsure`,
+  `Summary: ${report.summary.faster} faster, ${report.summary.slower} slower, `
+    + `${report.summary['within-noise']} within noise, ${report.summary.unsure} unsure, `
+    + `${report.summary['noise-floor-limited']} noise-floor-limited`,
 );
 
 /**
@@ -98,31 +115,52 @@ function loadAllMetrics(dir) {
 
 /**
  * Classify + summarize. Status rule (NOISE_FLOOR = 2%):
- *   faster         — CI entirely below -2% (this-change consistently shorter)
- *   slower         — CI entirely above +2%
- *   within-noise   — CI entirely inside [-2%, +2%]
- *   high-variance  — CI straddles ±2% AND metric is on the known-high-variance list
- *   unsure         — CI straddles ±2% for any other reason (boundary case)
+ *   faster               — CI entirely below -2%
+ *   slower               — CI entirely above +2%
+ *   within-noise         — CI entirely inside [-2%, +2%]
+ *   noise-floor-limited  — CI straddles ±2% AND width ≤ NOISE_RATIO_TOLERANCE ×
+ *                          expected duration-derived noise floor (not a signal;
+ *                          the bench's resolution ceiling is below ±2% given its
+ *                          duration on this runner)
+ *   unsure               — CI straddles ±2% AND width exceeds the duration-derived
+ *                          floor by more than the tolerance (genuine boundary case;
+ *                          more samples may help, or bench is noisier than duration
+ *                          predicts → worth inspecting)
  */
 function buildReport(metrics) {
-  const classified = metrics.map((m) => ({ ...m, status: classify(m.percentDelta, m.name) }));
-  const summary = { faster: 0, slower: 0, 'within-noise': 0, unsure: 0, 'high-variance': 0 };
+  const classified = metrics.map((m) => {
+    const meanMs = (m.thisChangeMs[0] + m.thisChangeMs[1]) / 2;
+    const widthPp = m.percentDelta[1] - m.percentDelta[0];
+    const expectedPp = expectedNoisePp(meanMs);
+    const ratio = expectedPp > 0 ? widthPp / expectedPp : Infinity;
+    return {
+      ...m,
+      meanMs,
+      widthPp,
+      expectedPp,
+      ratio,
+      status: classify(m.percentDelta, ratio),
+    };
+  });
+  const summary = { faster: 0, slower: 0, 'within-noise': 0, unsure: 0, 'noise-floor-limited': 0 };
   for (const m of classified) { summary[m.status]++; }
   return {
     head: { sha, msg, ref: process.env.GITHUB_HEAD_REF || '' },
     base: { sha: baseSha, ref: baseRef },
     run: { url: runUrl },
     noise_floor_percent: NOISE_FLOOR,
+    sigma_abs_ms: SIGMA_ABS_MS,
+    noise_ratio_tolerance: NOISE_RATIO_TOLERANCE,
     summary,
     metrics: classified.map(toJsonMetric),
   };
 }
 
-function classify([low, high], name) {
+function classify([low, high], ratio) {
   if (high < -NOISE_FLOOR) { return 'faster'; }
   if (low > NOISE_FLOOR) { return 'slower'; }
   if (low > -NOISE_FLOOR && high < NOISE_FLOOR) { return 'within-noise'; }
-  return KNOWN_HIGH_VARIANCE.has(name) ? 'high-variance' : 'unsure';
+  return ratio <= NOISE_RATIO_TOLERANCE ? 'noise-floor-limited' : 'unsure';
 }
 
 function toJsonMetric(m) {
@@ -133,6 +171,8 @@ function toJsonMetric(m) {
     absolute_ms_ci: round4(m.absoluteMsDelta),
     this_change_ms_ci: round4(m.thisChangeMs),
     tip_of_tree_ms_ci: round4(m.tipOfTreeMs),
+    expected_noise_pp: Number(m.expectedPp.toFixed(2)),
+    observed_noise_ratio: Number(m.ratio.toFixed(2)),
   };
 }
 
@@ -168,8 +208,8 @@ function renderMarkdown(report) {
     `${report.summary['within-noise']} within ±${NOISE_FLOOR}%`,
     `${report.summary.unsure} unsure`,
   ];
-  if (report.summary['high-variance'] > 0) {
-    summaryParts.push(`${report.summary['high-variance']} high-variance`);
+  if (report.summary['noise-floor-limited'] > 0) {
+    summaryParts.push(`${report.summary['noise-floor-limited']} noise-floor-limited`);
   }
   lines.push(summaryParts.join(' · '));
   lines.push('');
@@ -178,7 +218,7 @@ function renderMarkdown(report) {
   const slower = report.metrics.filter((m) => m.status === 'slower');
   const noise = report.metrics.filter((m) => m.status === 'within-noise');
   const unsure = report.metrics.filter((m) => m.status === 'unsure');
-  const highVar = report.metrics.filter((m) => m.status === 'high-variance');
+  const noiseFloor = report.metrics.filter((m) => m.status === 'noise-floor-limited');
 
   // Significant changes, sorted by |Δ| descending — headline when present
   const significant = [...faster, ...slower].sort(
@@ -222,38 +262,46 @@ function renderMarkdown(report) {
   }
 
   if (unsure.length > 0) {
-    lines.push(`### Unsure (CI straddles ±${NOISE_FLOOR}%)`);
+    lines.push(`### Unsure (CI wider than duration predicts)`);
     lines.push('');
     lines.push(
-      `True delta is likely near the ±${NOISE_FLOOR}% noise floor; the CI straddles the threshold. Not indicative of a problem.`,
+      `These metrics straddle ±${NOISE_FLOOR}% AND their CI is more than ${NOISE_RATIO_TOLERANCE}× the expected noise floor for the bench's duration. Either more samples would resolve, or the bench is noisier than its duration predicts — worth a second look.`,
     );
     lines.push('');
-    lines.push('| metric | Δ% CI | Δms CI |');
-    lines.push('|---|---|---|');
+    lines.push('| metric | Δ% CI | Δms CI | mean | observed/expected |');
+    lines.push('|---|---|---|---|---|');
     for (const m of unsure) {
-      lines.push(`| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} | ${fmtMsRange(m.absolute_ms_ci)} |`);
+      const meanMs = (m.this_change_ms_ci[0] + m.this_change_ms_ci[1]) / 2;
+      lines.push(
+        `| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} | ${fmtMsRange(m.absolute_ms_ci)} | ${
+          meanMs.toFixed(1)
+        }ms | ${m.observed_noise_ratio}× |`,
+      );
     }
     lines.push('');
   }
 
-  if (highVar.length > 0) {
-    lines.push('### Known high-variance');
+  if (noiseFloor.length > 0) {
+    lines.push('### Noise-floor-limited');
     lines.push('');
     lines.push(
-      `Per-sample variance on these metrics exceeds ±${NOISE_FLOOR}%. They resolve under real perf changes (large deltas clear the noise) but will show unsure on zero-delta PRs. Not a signal.`,
+      `CI straddles ±${NOISE_FLOOR}% but is consistent with the ~±${SIGMA_ABS_MS}ms per-sample jitter floor on shared CI runners. Short benches can't narrow below this in ${NOISE_FLOOR}%-relative terms regardless of samples. Real perf changes still resolve (delta clears the noise); zero-delta shows unsure by physics. Not a signal.`,
     );
     lines.push('');
-    lines.push('| metric | Δ% CI | Δms CI |');
-    lines.push('|---|---|---|');
-    for (const m of highVar) {
-      lines.push(`| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} | ${fmtMsRange(m.absolute_ms_ci)} |`);
+    lines.push('| metric | Δ% CI | mean | observed/expected |');
+    lines.push('|---|---|---|---|');
+    for (const m of noiseFloor) {
+      const meanMs = (m.this_change_ms_ci[0] + m.this_change_ms_ci[1]) / 2;
+      lines.push(
+        `| \`${m.name}\` | ${fmtPctRange(m.percent_change_ci)} | ${meanMs.toFixed(1)}ms | ${m.observed_noise_ratio}× |`,
+      );
     }
     lines.push('');
   }
 
   lines.push('---');
   lines.push(
-    `<sub>Structured: \`bench-report.json\` uploaded as workflow artifact. Noise floor: ±${NOISE_FLOOR}% (matches \`autoSampleConditions\`).</sub>`,
+    `<sub>Structured: \`bench-report.json\` uploaded as workflow artifact. Noise floor: ±${NOISE_FLOOR}% (matches \`autoSampleConditions\`). Duration-derived expected noise uses σ≈${SIGMA_ABS_MS}ms per-sample jitter.</sub>`,
   );
 
   return lines.join('\n');
