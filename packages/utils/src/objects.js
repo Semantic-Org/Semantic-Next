@@ -42,24 +42,39 @@ export const mapObject = (obj, callback) => {
 */
 export const extend = (obj, ...sources) => {
   sources.forEach((source) => {
-    let descriptor, prop;
+    let srcDesc, tgtDesc, prop;
     if (source) {
       for (prop in source) {
-        descriptor = Object.getOwnPropertyDescriptor(source, prop);
-        if (descriptor && (descriptor.get || descriptor.set)) {
-          // Accessor — preserve the getter/setter on target.
-          Object.defineProperty(obj, prop, descriptor);
+        srcDesc = Object.getOwnPropertyDescriptor(source, prop);
+        // Accessor source — preserve the getter/setter on target.
+        if (srcDesc && (srcDesc.get || srcDesc.set)) {
+          Object.defineProperty(obj, prop, srcDesc);
+          continue;
         }
-        else {
-          // Data property — always install a fresh writable descriptor. This
-          // prevents frozen sources from propagating non-writable descriptors
-          // and lets later sources override earlier accessor-only properties.
+        // Frozen / non-writable data source — install a fresh writable
+        // descriptor so the target stays mutable.
+        if (srcDesc && !srcDesc.writable) {
           Object.defineProperty(obj, prop, {
             value: source[prop],
             writable: true,
             enumerable: true,
             configurable: true,
           });
+          continue;
+        }
+        // Normal writable data (or inherited). Fast path unless target
+        // already has an accessor descriptor blocking plain assignment.
+        tgtDesc = Object.getOwnPropertyDescriptor(obj, prop);
+        if (tgtDesc && (tgtDesc.get || tgtDesc.set)) {
+          Object.defineProperty(obj, prop, {
+            value: source[prop],
+            writable: true,
+            enumerable: true,
+            configurable: true,
+          });
+        }
+        else {
+          obj[prop] = source[prop];
         }
       }
     }
