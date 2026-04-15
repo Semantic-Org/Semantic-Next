@@ -10,7 +10,9 @@
       "url": "ci-current-todo.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
+        { "mode": "performance", "entryName": "toggle-first" },
         { "mode": "performance", "entryName": "toggle-middle" },
+        { "mode": "performance", "entryName": "toggle-last" },
         { "mode": "performance", "entryName": "remove-first" },
         { "mode": "performance", "entryName": "remove-middle" },
         { "mode": "performance", "entryName": "remove-last" },
@@ -24,7 +26,9 @@
       "url": "ci-baseline-todo.html",
       "browser": { "name": "chrome", "headless": true },
       "measurement": [
+        { "mode": "performance", "entryName": "toggle-first" },
         { "mode": "performance", "entryName": "toggle-middle" },
+        { "mode": "performance", "entryName": "toggle-last" },
         { "mode": "performance", "entryName": "remove-first" },
         { "mode": "performance", "entryName": "remove-middle" },
         { "mode": "performance", "entryName": "remove-last" },

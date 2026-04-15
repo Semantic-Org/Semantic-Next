@@ -57,13 +57,21 @@ jobs:
           echo "Resolved PR number: $NUMBER"
 
       - name: Generate report
+        env:
+          STARTED: ${{ github.event.workflow_run.created_at }}
+          ENDED: ${{ github.event.workflow_run.updated_at }}
         run: |
+          # Compute wall-clock in seconds for the bench run.
+          WALL_CLOCK=$(( $(date -d "$ENDED" +%s) - $(date -d "$STARTED" +%s) ))
           node tools/bench-reporter/reporter.js \
             --results results \
             --sha '${{ github.event.workflow_run.head_sha }}' \
             --msg '${{ github.event.workflow_run.display_title }}' \
             --run-url '${{ github.event.workflow_run.html_url }}' \
+            --run-id '${{ github.event.workflow_run.id }}' \
             --base-ref 'main' \
+            --repo '${{ github.repository }}' \
+            --wall-clock "$WALL_CLOCK" \
             --out bench-report
 
       - name: Upload bench-report.json adjunct
